@@ -1,0 +1,178 @@
+#include "fft/attack.h"
+#include "fft/battle.h"
+#include "fft/battle_gfx.h"
+#include "fft/main_gfx.h"
+#include "fft/main_heap.h"
+#include "fft/menu.h"
+#include "fft/menu_types.h"
+#include "fft/thread.h"
+#include "psx/gpu.h"
+#include "psx/types.h"
+
+struct menu_number_entry;
+struct menu_number_position;
+
+void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
+    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
+
+/* Thread task 0x3b: numeric editor panel; twin of equip_editor_run_numeric_thread.
+ * The primitive block is status_panel_numeric_buffer_t, double buffered at
+ * g_attack_editor_numeric_state; the thread parameter block is
+ * status_panel_frame_config_t. */
+
+void attack_editor_run_numeric_thread(void) {
+    status_panel_frame_config_t* thread;
+    status_panel_numeric_buffer_t* buffer;
+    status_panel_numeric_buffer_t* buffers;
+    u8* text_pixels;
+    u8* entries;
+    u8* upload_a;
+    u8* upload_b;
+    u8* upload_c;
+    u8* descriptor;
+    s32 i;
+    s32 frame;
+    s32 field_y;
+    s32 use_offset;
+
+    battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
+    thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
+    g_attack_input_controller = battle_script_get_controller_input_pointer(0) + 1;
+    if (g_battle_current_thread_id == 12) {
+        buffer = (status_panel_numeric_buffer_t*)g_attack_editor_numeric_state;
+        buffers = buffer;
+        text_pixels = g_attack_editor_numeric_text_a;
+        upload_a = g_attack_editor_numeric_entries_a;
+        upload_b = g_attack_editor_numeric_entries_b;
+        upload_c = g_attack_editor_numeric_entries_c;
+        entries = g_attack_editor_numeric_descriptor_a;
+    } else {
+        buffer = (status_panel_numeric_buffer_t*)g_attack_editor_numeric_state;
+        buffers = buffer;
+        text_pixels = g_attack_editor_numeric_text_b;
+        upload_a = g_attack_editor_numeric_entries_d;
+        upload_b = g_attack_editor_numeric_entries_e;
+        upload_c = g_attack_editor_numeric_entries_f;
+        entries = g_attack_editor_numeric_descriptor_b;
+    }
+    battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], 0);
+    battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], 2);
+    battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], 1);
+    battle_menu_init_numeric_display_frame_primitives((RECT*)g_attack_editor_numeric_table, &buffer->numeric_frame);
+    attack_gfx_init_scaled_draw_area_packets(&buffer->portrait);
+    i = 0;
+    descriptor = g_attack_editor_numeric_texture;
+    for (; i < 18; i++) {
+        battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
+        battle_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i],
+            (const battle_image_location_t*)g_attack_editor_numeric_geometry,
+            (const battle_image_location_t*)g_attack_editor_numeric_table,
+            (const world_gfx_image_load_parameters_t*)descriptor);
+        descriptor += 0xC;
+    }
+    if (g_battle_current_thread_id != 12) {
+        buffer->sprites[14].v0 += 0x4C;
+        buffer->sprites[15].v0 += 0x4C;
+        buffer->sprites[16].v0 += 0x4C;
+    }
+    buffer->sprites[10].clut = 0x7D7C;
+    battle_copy_bytes(&buffer[1], buffer, sizeof(status_panel_numeric_buffer_t));
+
+    for (frame = 0;; frame++) {
+        buffer = &buffers[frame & 1];
+        if (frame == 0 || thread->redraw_request != 0) {
+            battle_clear_menu_render_buffer(text_pixels, 0x918);
+            g_menu_text_state.stride = 0x14;
+            battle_menu_set_text_origin(0, 0);
+            if (g_battle_current_thread_id != 12) {
+                attack_text_render_signed_decimal_entries((s32)text_pixels, (status_panel_gauge_entry_t*)entries,
+                    (status_panel_text_position_t*)&g_menu_text_state.origin_x, 3);
+            } else {
+                battle_menu_draw_numeric_display_entries((s32)text_pixels, (struct menu_number_entry*)entries,
+                    (struct menu_number_position*)&g_menu_text_state.origin_x, 3);
+            }
+            g_menu_text_state.stride = 0x40;
+            battle_menu_set_text_origin(0, 0);
+            if (g_battle_current_thread_id != 12) {
+                attack_text_render_signed_decimal_entries((s32)(text_pixels + 0x168),
+                    (status_panel_gauge_entry_t*)(entries + 0x24),
+                    (status_panel_text_position_t*)&g_menu_text_state.origin_x, 4);
+            } else {
+                battle_menu_draw_numeric_display_entries((s32)(text_pixels + 0x168),
+                    (struct menu_number_entry*)(entries + 0x24),
+                    (struct menu_number_position*)&g_menu_text_state.origin_x, 4);
+            }
+            g_menu_text_state.stride = 0x64;
+            battle_menu_set_text_origin(0, 0);
+            if (g_battle_current_thread_id != 12) {
+                attack_text_render_signed_decimal_entries((s32)(text_pixels + 0x468),
+                    (status_panel_gauge_entry_t*)(entries + 0x54),
+                    (status_panel_text_position_t*)&g_menu_text_state.origin_x, 8);
+            } else {
+                battle_menu_draw_numeric_display_entries((s32)(text_pixels + 0x468),
+                    (struct menu_number_entry*)(entries + 0x54),
+                    (struct menu_number_position*)&g_menu_text_state.origin_x, 8);
+            }
+            LoadImage((RECT*)upload_a, (u32*)text_pixels);
+            LoadImage((RECT*)upload_b, (u32*)(text_pixels + 0x168));
+            LoadImage((RECT*)upload_c, (u32*)(text_pixels + 0x468));
+        }
+        field_y = g_main_gfx_screen_polarity * 0xF0;
+        use_offset = field_y != 0xF0;
+        g_attack_gfx_draw_offset_y = -use_offset & 0xF0;
+        attack_gfx_build_scaled_draw_area_packets(
+            &buffer->portrait, &g_attack_editor_numeric_table[8], frame, field_y, (s16*)thread);
+        buffer->draw_offsets[0].x = thread->origin_x - 0x80;
+        buffer->draw_offsets[0].y = thread->origin_y + g_attack_gfx_draw_offset_y;
+        SetDrawOffset(&buffer->draw_offsets[0], &buffer->draw_offsets[0].x);
+        buffer->draw_offsets[1].x = -0x80;
+        buffer->draw_offsets[1].y = g_attack_gfx_draw_offset_y;
+        SetDrawOffset(&buffer->draw_offsets[1], &buffer->draw_offsets[1].x);
+        if (thread->style == 1 || g_event_mode == 1) {
+            for (i = 17; i >= 0; i--) {
+                buffer->sprites[i].clut = 0x7D3C;
+            }
+            buffer->sprites[10].clut = 0x7EBC;
+            buffer->sprites[14].clut = 0x7F7D;
+            buffer->sprites[15].clut = 0x7F7D;
+            buffer->sprites[16].clut = 0x7F7D;
+        } else {
+            for (i = 17; i >= 0; i--) {
+                buffer->sprites[i].clut = 0x7C3C;
+            }
+            buffer->sprites[10].clut = 0x7D7C;
+            buffer->sprites[14].clut = 0x7FFC;
+            buffer->sprites[15].clut = 0x7FFC;
+            buffer->sprites[16].clut = 0x7FFC;
+        }
+        attack_gfx_apply_menu_palette_for_mode((s32)&buffer->numeric_frame, (s32*)thread);
+        if (frame < 13) {
+            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait.areas[1]);
+        }
+        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[1]);
+        for (i = 0; i < 14; i++) {
+            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[i]);
+        }
+        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[17]);
+        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[0]);
+        for (; i < 17; i++) {
+            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[i]);
+        }
+        if (g_battle_current_thread_id == 12) {
+            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[1]);
+        } else {
+            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[2]);
+        }
+        battle_menu_submit_numeric_display_frame_primitives((u8*)&buffer->numeric_frame);
+        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[0]);
+        if (frame < 13) {
+            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait);
+        }
+        battle_thread_yield();
+        if (battle_thread_get_current_parameter_3() != 0) {
+            break;
+        }
+    }
+    battle_thread_yield();
+    battle_thread_exit_current();
+}

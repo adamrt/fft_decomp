@@ -1,0 +1,84 @@
+name: check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: image
+        run: echo "name=$(make --no-print-directory image-name)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Loaded under the Makefile's image tag, so no target rebuilds it. This
+      # job alone exports the layer cache the validate shards import.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ${{ steps.image.outputs.name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - uses: actions/cache@v4
+        with:
+          path: build/cache
+          key: metadata-${{ hashFiles('Dockerfile', 'tools/**') }}-${{ github.sha }}
+          restore-keys: |
+            metadata-${{ hashFiles('Dockerfile', 'tools/**') }}-
+            metadata-
+
+      # Cheapest first, so a failure stops the job early.
+      - run: make fmt-check
+      - run: make check-config
+      - run: make test
+
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - { name: battle, modules: battle }
+          - { name: world, modules: world }
+          - { name: wldcore-main-event, modules: wldcore main event }
+          - { name: opening-effect, modules: opening effect }
+    name: validate (${{ matrix.shard.name }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: image
+        run: echo "name=$(make --no-print-directory image-name)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ${{ steps.image.outputs.name }}
+          cache-from: type=gha
+
+      # Keyed by commit so every run saves the compile cache it extended.
+      - uses: actions/cache@v4
+        with:
+          path: build/cache
+          key: validate-${{ matrix.shard.name }}-${{ hashFiles('Dockerfile', 'tools/**') }}-${{ github.sha }}
+          restore-keys: |
+            validate-${{ matrix.shard.name }}-${{ hashFiles('Dockerfile', 'tools/**') }}-
+            validate-${{ matrix.shard.name }}-
+
+      - run: make validate MODULE="${{ matrix.shard.modules }}"

@@ -1,0 +1,294 @@
+# OPEN/OPEN.BIN: the opening and title sequence; it calls WORLD text and
+# menu routines.
+module: opening
+file: OPEN/OPEN.BIN
+lba: 86000
+size: 222832
+sha256: 0b4c6568edfc40dfd42e73b2bfd327318f8e4ac1409f72196c5e17d4857c389d
+load: 0x80067000
+source_dir: src/open
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [world]
+
+libraries:
+  - {id: libpress, addr: 0x8007348c, end: 0x80073edc, kind: psyq, library: LIBPRESS}
+
+functions:
+  - {addr: 0x800670f0, size: 284, name: open_system_run_main_loop, hash: 1b6e181d0ae942f3}
+  - {addr: 0x8006720c, size: 276, name: open_system_run_ending_cutscene, hash: 8adfe0f21b2d14df}
+  - {addr: 0x80067320, size: 356, name: open_movie_start_stream, hash: 46a47ddfcafcaf06}
+  - {addr: 0x80067484, size: 312, name: open_movie_update_stream_frame, hash: d4c1277fea3cb7f7, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800675bc, size: 100, name: open_movie_stop_stream, hash: 52aa88826dc56983}
+  - {addr: 0x80067620, size: 108, name: open_movie_pause_cd_audio, hash: 34529f6c1b026dbf}
+  - {addr: 0x8006768c, size: 108, name: open_movie_init_mdec_stream_state, hash: 3ffb51bb6eccacb5}
+  - {addr: 0x800676f8, size: 212, name: open_movie_init_stream, hash: 3c453e23030e95a6}
+  - {addr: 0x800677cc, size: 352, name: open_movie_handle_mdec_output_slice, hash: 6d63915526985abb, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006792c, size: 116, name: open_movie_decode_next_frame, hash: 73568910087a3609}
+  - {addr: 0x800679a0, size: 408, name: open_movie_acquire_next_frame, hash: 7fc290a0401086a3, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x80067b38, size: 152, name: open_movie_wait_for_mdec_output, hash: 6ff3dc5f70e0bfa1}
+  - {addr: 0x80067bd0, size: 76, name: open_movie_start_cd_stream_read, hash: c64a5247a99178b8}
+  - {addr: 0x80067c1c, size: 360, name: open_movie_present_frame, hash: 78623003303c6f16}
+  - {addr: 0x80067d84, size: 228, name: open_input_update_buttons_and_check_game_reset, hash: f473a15292edf5e0}
+  - {addr: 0x80067e68, size: 40, name: open_gfx_start_overlay_fade_out, hash: a5ea42b5526a77a5}
+  - {addr: 0x80067e90, size: 40, name: open_gfx_start_overlay_fade_in, hash: b9b1c837a334afc9}
+  - {addr: 0x80067eb8, size: 872, name: open_gfx_update_fade_overlay, hash: d85fa9508eb94e58, profile: gcc-2.7.2_O2_aspsx-2.21_divcheck}
+  - {addr: 0x80068220, size: 72, name: open_input_init_directional_state, hash: e10b9650f2587d8a}
+  - {addr: 0x80068268, size: 284, name: open_input_check_repeating_directional, hash: a82e23c2bd0cb926}
+  - {addr: 0x80068384, size: 156, name: open_title_init_new_game_party, hash: 3b01ce90b00a6557}
+  - {addr: 0x80068420, size: 300, name: open_birthday_convert_to_zodiac_position, hash: 9aaa68be5ea32880, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006854c, size: 160, name: open_menu_update_world_formation, hash: b27c035b144dee4f}
+  - {addr: 0x800685ec, size: 76, name: open_birthday_calculate_day_index, hash: e796a8582427e794, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80068638, size: 76, name: open_sound_set_type_and_volume, hash: 3fcd975cc8b2da0c}
+  - {addr: 0x80068684, size: 88, name: open_movie_init_and_stream_opening, hash: 7f2fe3e68306a213}
+  - {addr: 0x800686dc, size: 132, name: open_movie_init_and_play_end, hash: c5005cd2d64378db}
+  - {addr: 0x80068760, size: 76, name: open_gfx_backup_frame_vram_page, hash: 74303d09981cd6c2}
+  - {addr: 0x800687ac, size: 832, name: open_gfx_init_screen_environments, hash: 00685f629e5f306d, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80068aec, size: 136, name: open_system_init_runtime_state, hash: 1795eb2597584b2e}
+  - {addr: 0x80068b74, size: 60, name: open_gfx_clear_and_draw_current_frame, hash: 22d70e319b6161e8}
+  - {addr: 0x80068bb0, size: 224, name: open_gfx_init_render_buffers, hash: 39decc2065a64d27, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80068c90, size: 64, name: open_gfx_clear_current_otag, hash: 7dbb971d4cb43ee9}
+  - {addr: 0x80068cd0, size: 176, name: open_gfx_draw_render_record_pointer_list, hash: a3a591bbfb26047c}
+  - {addr: 0x80068d80, size: 1164, name: open_gfx_draw_render_record_36, hash: d2445b3917e77445, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006920c, size: 1212, name: open_gfx_draw_render_record_56, hash: 6c7b3dae23c3f006, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800696c8, size: 232, name: open_gfx_append_render_record_36, hash: a3135d544f819f6f, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800697b0, size: 272, name: open_gfx_append_render_record_56, hash: 6a95dfcd435c9a47, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800698c0, size: 276, name: open_gfx_calculate_scaled_rectangle, hash: 9676150bdf1ed31c, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x800699d4, size: 96, name: open_file_wait_then_build_header, hash: b839cd0a4c5eb016}
+  - {addr: 0x80069a34, size: 92, name: open_file_wait_for_pending, hash: 5e8c5303cf510992}
+  - {addr: 0x80069a90, size: 220, name: open_file_load_main_menu_graphics, hash: c9dcd99baa6edbc0}
+  - {addr: 0x80069b6c, size: 204, name: open_file_load_end_movie_graphics, hash: 7f816e64bff3ea9a}
+  - {addr: 0x80069c38, size: 144, name: open_file_load_sound_menu_textures, hash: 2e359e04e3a564a1}
+  - {addr: 0x80069cc8, size: 112, name: open_file_build_openbk_header, hash: 2fab328389970f4a, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80069d38, size: 68, name: open_file_get_cd_sync_state_delta, hash: 1656986d7649ae48}
+  - {addr: 0x80069d7c, size: 228, name: open_gfx_load_opntex_into_frame_buffer, hash: 590cf49a34430f90}
+  - {addr: 0x80069e60, size: 84, name: open_movie_start_fftst_or_alternate_controller, hash: e0be4a8551206743}
+  - {addr: 0x80069eb4, size: 112, name: open_controller_dispatch_current, hash: 56c28d63abc90fb7, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80069f24, size: 180, name: open_movie_stream_fftst_and_push_controller, hash: 3466a0da8fc6b302, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80069fd8, size: 156, name: open_movie_finish_stream_controller_if_ready_or_skipped, hash: e736c342c3869071}
+  - {addr: 0x8006a074, size: 108, name: open_movie_stream_and_push_controller_1, hash: 1636df55b15cecbb, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006a0e0, size: 148, name: open_movie_finish_controller_1_if_ready_or_skipped, hash: 5190c9b35c57fef9}
+  - {addr: 0x8006a174, size: 1028, name: open_title_push_menu_controller, hash: 28b9116834e90955, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006a578, size: 248, name: open_gfx_hide_four_render_records, hash: 778fee05b7f00a4b, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006a670, size: 248, name: open_gfx_show_four_render_records, hash: d7c265230ad7b5f5, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006a768, size: 1936, name: open_title_update_menu, hash: 5c0ec430bc6c2047, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006aef8, size: 428, name: open_menu_push_sound_type_controller, hash: 4cba2d76c26467a9, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006b0a4, size: 692, name: open_menu_handle_sound_type_input, hash: 0e5b70f17f26fa47, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006b358, size: 200, name: open_title_start_new_game_transition, hash: 7f1ea25f2f2e4ddc, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006b420, size: 540, name: open_title_step_new_game_start, hash: 88dab4035996c1ea}
+  - {addr: 0x8006b63c, size: 852, name: open_birthday_push_date_controller, hash: 0e45678d3fb3cbd5, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006b990, size: 484, name: open_birthday_build_menu_text, hash: acb5e3a1a8e68d6e, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006bb74, size: 296, name: open_restore_birthday_date_menu, hash: 620158889f7f74a3, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006bc9c, size: 324, name: open_birthday_build_confirmation_menu, hash: bb0bedfc73251381, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006bde0, size: 752, name: open_birthday_handle_menu_input, hash: 4fcabd119932ad53, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006c0d0, size: 916, name: open_birthday_push_confirmation_controller, hash: 16fd129a48959bf2, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006c464, size: 748, name: open_birthday_handle_confirmation_input, hash: f574d10bdce9561d, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006c750, size: 344, name: open_gfx_init_window_frame_record, hash: 9fddadbd2cffc53b, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006c8a8, size: 196, name: open_birthday_load_window_image, hash: bdab620f029fd3c1, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006c96c, size: 88, name: open_birthday_draw_menu_text_entry, hash: 5dccdaeb10297930, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006c9c4, size: 104, name: open_text_measure_menu_image, hash: 1dee4681dccf0eb6}
+  - {addr: 0x8006ca2c, size: 212, name: open_text_init_menu_render_record, hash: 5f2251260b376d41, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006cb00, size: 248, name: open_menu_init_render_record_fields, hash: e55c249f3c899201, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006cbf8, size: 444, name: open_menu_start_music_test_list_thread, hash: a1bb85931a6abb8e}
+  - {addr: 0x8006cdb4, size: 316, name: open_menu_start_music_test_controller, hash: 45eaf45a7a3b75ee, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006cef0, size: 876, name: open_menu_update_music_test, hash: c7076123a75c7032, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006d25c, size: 260, name: open_controller_start_text_message, hash: ef898de4d115f54e, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006d360, size: 108, name: open_controller_wait_text_message, hash: e623f7328948a829, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006d3cc, size: 180, name: open_movie_stream_other_str_and_push_controller_11, hash: 29c7eb100bdbc02b, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006d480, size: 164, name: open_movie_start_fftst_or_skip_controller, hash: 4e72507cef1a9abd}
+  - {addr: 0x8006d524, size: 308, name: open_title_start_new_game_or_clear_file_buffer, hash: efa74633bab45d83, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006d658, size: 340, name: open_title_update_exit_transition, hash: 7c3ab8fe1d7d5d9c, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006d7ac, size: 64, name: open_gfx_init_transition_request, hash: d59678a277450164}
+  - {addr: 0x8006d7ec, size: 8, name: open_noop_8006d7ec, hash: 6d64edf91449c1b1}
+  - {addr: 0x8006d7f4, size: 912, name: open_gfx_update_transition_sequence, hash: 7bbe865958bd3a67, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006db84, size: 1252, name: open_gfx_draw_transition_line_strips, hash: 44f9ccd8cbccd92c, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006e068, size: 212, name: open_gfx_copy_file_image_to_210x180_buffer, hash: 5e7217187c9c4567, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006e13c, size: 436, name: open_gfx_step_image_crossfade, hash: 2470d3b4a852e44e, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006e2f0, size: 1264, name: open_script_init_state, hash: c000e380ea2213d8, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006e7e0, size: 200, name: open_script_init_and_dispatch_entries, hash: 06563bf022b02028}
+  - {addr: 0x8006e8a8, size: 8, name: open_script_add_pointer_offset, hash: 6e3d0af1356c7afe}
+  - {addr: 0x8006e8b0, size: 748, name: open_script_draw_text_records, hash: a86705083fc5f375, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006eb9c, size: 1432, name: open_script_build_text_record, hash: 54e7999ae4054929, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006f134, size: 244, name: open_script_update_timing_and_record_values, hash: 096ef43fc404123c}
+  - {addr: 0x8006f228, size: 880, name: open_script_update_xa_audio, hash: 599e7ab9df95ebf3, profile: gcc-2.6.3_O2_aspsx-2.21, rodata: [{addr: 0x80067000, size: 68, hash: 91f5360ae3d8597d}]}
+  - {addr: 0x8006f598, size: 60, name: open_text_decode_hex_digit, hash: f70eb008c32149d3}
+  - {addr: 0x8006f5d4, size: 456, name: open_script_update_screen_fade, hash: 727ec04746704c86, profile: gcc-2.7.2_O2_aspsx-2.21_divcheck}
+  - {addr: 0x8006f79c, size: 324, name: open_gfx_update_opntex_sequence, hash: 8019a32e358ad507}
+  - {addr: 0x8006f8e0, size: 60, name: open_movie_play_end, hash: 56b496abe3a69a19}
+  - {addr: 0x8006f91c, size: 108, name: open_movie_stream_fftend, hash: 4d67e3d1325ae88c, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006f988, size: 136, name: open_movie_finish_fftend_controller_if_ready_or_skipped, hash: df1c60f300df0a2c}
+  - {addr: 0x8006fa10, size: 144, name: open_script_push_controller, hash: d38b74485501d567, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006faa0, size: 88, name: open_script_update_controller, hash: c31c968e8b96aab5}
+  - {addr: 0x8006faf8, size: 72, name: open_opcode_toggle_control, hash: 5abc662795697b2e}
+  - {addr: 0x8006fb40, size: 548, name: open_opcode_create_positioned_text_record, hash: 79ffee469a0e46ff, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x8006fd64, size: 56, name: open_opcode_set_timing_step, hash: 022baf84860eb042}
+  - {addr: 0x8006fd9c, size: 68, name: open_opcode_start_overlay_fade_out, hash: 8b4cecdc94072c05, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006fde0, size: 68, name: open_opcode_start_overlay_fade_in, hash: 6c979a6c306bfedc, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8006fe24, size: 144, name: open_opcode_wait_counted, hash: 8db29caed7e75f80}
+  - {addr: 0x8006feb4, size: 128, name: open_opcode_wait_for_external_counter, hash: 970c9c390ea7fcc4}
+  - {addr: 0x8006ff34, size: 176, name: open_opcode_start_xa_audio, hash: aeffca5ff068f70b}
+  - {addr: 0x8006ffe4, size: 60, name: open_opcode_start_sound_fade_in, hash: 721878b86ef21ca2, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x80070020, size: 60, name: open_opcode_start_sound_fade_out, hash: 814bce2be3c9e22d, profile: gcc-2.7.2_O2_aspsx-2.21}
+  - {addr: 0x8007005c, size: 164, name: open_opcode_stop_xa_audio, hash: 0c8b8bcfc224018a}
+  - {addr: 0x80070100, size: 96, name: open_opcode_load_opntex_frame, hash: 5841d3ac770689b8}
+  - {addr: 0x80070160, size: 76, name: open_opcode_start_fade_intensity_increase, hash: f38fc77944fcfc9e}
+  - {addr: 0x800701ac, size: 80, name: open_opcode_start_fade_intensity_decrease, hash: 5eb2d91a96a89dc9}
+  - {addr: 0x800701fc, size: 68, name: open_opcode_wait_for_xa_audio_idle, hash: 62a970bd0a049ed2}
+  - {addr: 0x80070240, size: 104, name: open_opcode_start_opntex_sequence, hash: d633de2c09194393, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x800702a8, size: 16, name: open_card_set_slot, hash: 1f22427930c61f2c}
+  - {addr: 0x800702b8, size: 40, name: open_card_consume_all_events, hash: 8f5b83a6cd3ad9da}
+  - {addr: 0x800702e0, size: 192, name: open_card_poll_bios_event, hash: 5d6b60fd071709b7}
+  - {addr: 0x800703a0, size: 72, name: open_card_wait_for_bios_event, hash: 0556139c9eb1bc66}
+  - {addr: 0x800703e8, size: 88, name: open_card_consume_bios_events, hash: bd2def49b8e92c22}
+  - {addr: 0x80070440, size: 192, name: open_card_poll_hardware_event, hash: c96ae6060b0e6c36}
+  - {addr: 0x80070500, size: 72, name: open_card_wait_for_hardware_event, hash: d2aebf9256a22720}
+  - {addr: 0x80070548, size: 88, name: open_card_consume_hardware_events, hash: 0ab881784cfa1d2d}
+  - {addr: 0x800705a0, size: 140, name: open_card_get_info_with_retries, hash: ba3559c7e03836a0}
+  - {addr: 0x8007062c, size: 188, name: open_card_poll_info_result, hash: f6ce5450918332a3}
+  - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6}
+  - {addr: 0x8007077c, size: 124, name: open_card_check_slots, hash: b46039f85ab0f00d}
+  - {addr: 0x8007348c, size: 56, name: open_bin_decdctreset, hash: da48c5dced171502}
+  - {addr: 0x800734c4, size: 140, name: open_bin_decdctgetenv, hash: f9ac0843b00c34ec}
+  - {addr: 0x80073550, size: 156, name: open_bin_decdctputenv, hash: 110217b2c66870d3}
+  - {addr: 0x800735ec, size: 12, name: open_bin_decdctbufsize, hash: 6e858a1dcb7a2a22}
+  - {addr: 0x800735f8, size: 124, name: open_bin_decdctin, hash: b0929bd48e0b1873}
+  - {addr: 0x80073674, size: 32, name: open_bin_decdctout, hash: 69752e650a86d37c}
+  - {addr: 0x80073694, size: 32, name: open_bin_decdctinsync, hash: c6aebfdbc7b4a7ae}
+  - {addr: 0x800736b4, size: 32, name: open_bin_decdctoutsync, hash: 48c13c5409710abe}
+  - {addr: 0x800736d4, size: 36, name: open_bin_decdctincallback, hash: 9c14c3b6cc46cf39}
+  - {addr: 0x800736f8, size: 36, name: open_bin_decdctoutcallback, hash: 37c93bc1746717c5}
+  - {addr: 0x8007371c, size: 252, name: open_mdec_reset, hash: d1743d9f91162388, profile: gcc-2.6.3_O2_aspsx-2.21}
+  - {addr: 0x80073818, size: 148, name: open_bin_mdec_in, hash: 01a4c9128818c744}
+  - {addr: 0x800738ac, size: 144, name: open_bin_mdec_out, hash: d931fbf5397a3806}
+  - {addr: 0x8007393c, size: 152, name: open_bin_mdec_in_sync, hash: 855ba4b219e3e4ae}
+  - {addr: 0x800739d4, size: 152, name: open_bin_mdec_out_sync, hash: 3ba7c2e453a1ded1}
+  - {addr: 0x80073a6c, size: 304, name: open_bin_libpress_timeout, hash: 7a6be33875e51769}
+
+data:
+  - {addr: 0x80067044, name: g_open_text_mdec_reset_bad_option_format}
+  - {addr: 0x80067060, name: g_open_text_mdec_in_sync_tag}
+  - {addr: 0x80067070, name: g_open_text_mdec_out_sync_tag}
+  - {addr: 0x80067080, name: g_open_text_mdec_timeout_dma_format}
+  - {addr: 0x800670a8, name: g_open_text_mdec_timeout_fifo_format}
+  - {addr: 0x800670e0, name: g_open_text_mdec_timeout_format}
+  - {addr: 0x800707f8, name: g_open_gfx_record_36_animations}
+  - {addr: 0x800707fc, name: g_open_gfx_record_36_sprites}
+  - {addr: 0x80070cb4, name: g_open_new_game_transition_entries}
+  - {addr: 0x80070d84, name: g_open_script_font_metrics}
+  - {addr: 0x80070d88, name: g_open_script_initial_data_base}
+  - {addr: 0x80073bd0, name: DecDCTvlc}
+  - {addr: 0x80073f34, name: g_open_birthday_month_lengths}
+  - {addr: 0x80073f40, name: g_open_birthday_zodiac_months}
+  - {addr: 0x80073f41, name: g_open_birthday_zodiac_days}
+  - {addr: 0x80073f58, name: g_open_file_openbk_start_sector_offsets}
+  - {addr: 0x80073f5c, name: g_open_file_openbk_end_sector_offsets}
+  - {addr: 0x80073f78, name: g_open_controller_handlers}
+  - {addr: 0x80073fb4, name: g_open_music_test_row_actions}
+  - {addr: 0x80073fd4, name: g_open_music_test_music_ids}
+  - {addr: 0x80074034, name: g_open_opcode_handlers}
+  - {addr: 0x80074074, name: g_open_card_slot}
+  - {addr: 0x80074075, name: g_open_card_info_pending}
+  - {addr: 0x80074078, name: g_open_mdec_quant_table_command}
+  - {addr: 0x8007407c, name: g_open_mdec_luma_quant_table}
+  - {addr: 0x800740bc, name: g_open_mdec_chroma_quant_table}
+  - {addr: 0x800740fc, name: g_open_mdec_scale_table_command}
+  - {addr: 0x80074100, name: g_open_mdec_scale_table}
+  - {addr: 0x80074180, name: g_open_dma_mdec_in_madr}
+  - {addr: 0x80074184, name: g_open_dma_mdec_in_bcr}
+  - {addr: 0x80074188, name: g_open_dma_mdec_in_chcr}
+  - {addr: 0x8007418c, name: g_open_dma_mdec_out_madr}
+  - {addr: 0x80074190, name: g_open_dma_mdec_out_bcr}
+  - {addr: 0x80074194, name: g_open_dma_mdec_out_chcr}
+  - {addr: 0x800741b0, name: g_open_mdec_command_reg}
+  - {addr: 0x800741b4, name: g_open_mdec_status_reg}
+  - {addr: 0x800741b8, name: g_open_dma_dpcr}
+  - {addr: 0x800851bc, name: g_open_input_current_buttons}
+  - {addr: 0x800851c0, name: g_open_gfx_screen_environments}
+  - {addr: 0x800852a0, name: g_open_gfx_next_render_record_36}
+  - {addr: 0x800852a4, name: g_open_gfx_opntex_data}
+  - {addr: 0x800852a8, name: g_open_gfx_next_render_record_56}
+  - {addr: 0x800852a8, name: g_open_gfx_render_record_56_count}
+  - {addr: 0x800852ac, name: g_open_input_previous_buttons}
+  - {addr: 0x800852b0, name: g_open_movie_mdec_stream_state}
+  - {addr: 0x800852c0, name: g_open_controller_records}
+  - {addr: 0x800852c0, name: g_open_controller_states}
+  - {addr: 0x800852e8, name: g_open_music_test_list_params}
+  - {addr: 0x80085324, name: g_open_controller_stream_start}
+  - {addr: 0x80085324, name: g_open_title_menu_states}
+  - {addr: 0x80085328, name: g_open_controller_stream_length}
+  - {addr: 0x80085340, name: g_open_controller_flags}
+  - {addr: 0x80085344, name: g_open_controller_birthdays}
+  - {addr: 0x800854b4, name: g_open_gfx_image_copy_row_flags}
+  - {addr: 0x800854b5, name: g_open_gfx_image_copy_progress}
+  - {addr: 0x8008556c, name: g_open_gfx_image_copy_source_buffer}
+  - {addr: 0x80085570, name: g_open_gfx_image_copy_destination_buffer}
+  - {addr: 0x80085574, name: g_open_gfx_image_copy_file_pixels}
+  - {addr: 0x80085578, name: g_open_music_test_list_state}
+  - {addr: 0x800855a4, name: g_open_input_new_button_presses}
+  - {addr: 0x800855a8, name: g_open_file_destination}
+  - {addr: 0x800855ac, name: g_open_input_polled_buttons}
+  - {addr: 0x800855b4, name: g_open_gfx_transition}
+  - {addr: 0x800855ec, name: g_open_menu_formation_otag_index}
+  - {addr: 0x800855f0, name: g_open_title_demo_movie_index}
+  - {addr: 0x800855f4, name: g_open_music_test_list_entry_flags}
+  - {addr: 0x800856f4, name: g_open_system_result}
+  - {addr: 0x800856f8, name: g_open_gfx_transition_line_primitives}
+  - {addr: 0x80085ca8, name: g_open_file_current_openbk_image_id}
+  - {addr: 0x80085cac, name: g_open_gfx_overlay_fade}
+  - {addr: 0x80085d04, name: g_open_gfx_render_records_36}
+  - {addr: 0x80085d08, name: g_open_birthday_menu_records}
+  - {addr: 0x80085d0c, name: g_open_gfx_render_records_36_field_08}
+  - {addr: 0x80085d20, name: g_open_gfx_render_records_36_y_field_base}
+  - {addr: 0x80085d24, name: g_open_gfx_render_records_36_colors}
+  - {addr: 0x80085f44, name: g_open_gfx_render_record_pointers}
+  - {addr: 0x80085fc4, name: g_open_gfx_render_record_pointer_count}
+  - {addr: 0x80085fc8, name: g_open_gfx_fade_primitives}
+  - {addr: 0x80086018, name: g_open_gfx_otags}
+  - {addr: 0x80086098, name: g_open_gfx_render_records_56}
+  - {addr: 0x80086098, name: g_open_menu_render_records}
+  - {addr: 0x800860b4, name: g_open_gfx_record_translation}
+  - {addr: 0x80086418, name: g_open_input_directional_repeat_initial_delay}
+  - {addr: 0x8008641c, name: g_open_input_directional_repeat_period}
+  - {addr: 0x80086420, name: g_open_input_up_repeat_counter}
+  - {addr: 0x80086424, name: g_open_input_down_repeat_counter}
+  - {addr: 0x80086428, name: g_open_input_direction_counter_2}
+  - {addr: 0x8008642c, name: g_open_input_direction_counter_3}
+  - {addr: 0x80086430, name: g_open_birthday_title_image}
+  - {addr: 0x80087030, name: g_open_birthday_window_image}
+  - {addr: 0x8008e430, name: g_open_menu_formation_entry_mask}
+  - {addr: 0x8008e434, name: g_open_music_test_list_entries}
+  - {addr: 0x8008e534, name: g_open_movie_first_frame}
+  - {addr: 0x8008e538, name: g_open_movie_width}
+  - {addr: 0x8008e53c, name: g_open_system_runtime_flags}
+  - {addr: 0x8008e540, name: g_open_movie_height}
+  - {addr: 0x8008e544, name: g_open_movie_stream_status}
+  - {addr: 0x8008e548, name: g_open_script_dispatch_flags}
+  - {addr: 0x8008e548, name: g_open_script_state}
+  - {addr: 0x8008e564, name: g_open_script_timing_fraction}
+  - {addr: 0x8008e568, name: g_open_script_external_counter}
+  - {addr: 0x8008e574, name: g_open_script_byte_offset}
+  - {addr: 0x8008e57c, name: g_open_script_record_glyph_count_field_base}
+  - {addr: 0x8008e58c, name: g_open_script_glyph_x_field_base}
+  - {addr: 0x8008e58e, name: g_open_script_glyph_y_field_base}
+  - {addr: 0x8008e590, name: g_open_script_glyph_width_field_base}
+  - {addr: 0x8008e592, name: g_open_script_glyph_height_field_base}
+  - {addr: 0x8008fbe8, name: g_open_gfx_opntex_delay}
+  - {addr: 0x8008fbf0, name: g_open_controller_handler_indices}
+  - {addr: 0x8008fc00, name: g_open_gfx_primitive_count}
+  - {addr: 0x8008fc04, name: g_open_current_controller_index}
+  - {addr: 0x8008fc08, name: g_open_movie_last_frame}
+  - {addr: 0x8008fc0c, name: g_open_music_test_selected_option}
+  - {addr: 0x8008fc10, name: g_open_movie_aligned_height}
+  - {addr: 0x8008fc14, name: g_open_system_vsync_mode}
+  - {addr: 0x8008fc18, name: g_open_movie_current_frame}
+  - {addr: 0x8008fc1c, name: g_open_gfx_credit_band_primitives}
+  - {addr: 0x8008fc6c, name: g_open_gfx_sprite_primitive_pool}
+  - {addr: 0x8009046c, name: g_open_music_test_sound_handle}
+  - {addr: 0x80090470, name: g_open_script_glyph_primitives}
+  - {addr: 0x800c0000, name: g_open_movie_mdec_output_buffer_0}
+  - {addr: 0x800c2d00, name: g_open_movie_mdec_output_buffer_1}
+  - {addr: 0x800c5a00, name: g_open_work_buffer_0}
+
+regions:
+  - {addr: 0x800707f8, end: 0x8007348c, kind: data, why: "pointer table and zero-filled region; no decoded control transfer"}
+  - {addr: 0x80073b9c, end: 0x80073ba0, kind: data, why: "word 0x00ffffff before LIBPRESS code; same runtime address is a BATTLE candidate start"}
+  - {addr: 0x80073bc0, end: 0x80073bd0, kind: interior, why: "inside 0x80073ba0: branch target in DecDCTvlcSize; depends on t0 established at parent entry"}

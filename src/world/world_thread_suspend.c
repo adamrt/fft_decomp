@@ -1,0 +1,5 @@
+#include "fft/data.h"
+
+void world_thread_suspend(s32 thread_id) {
+    g_world_threads[thread_id].is_running = 0;
+}

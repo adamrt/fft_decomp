@@ -1,0 +1,2501 @@
+# EVENT/*.OUT: event overlays, one document each. Each runs alongside BATTLE;
+# calls into BATTLE-hosted names resolve through `links: [battle]`.
+module: event-attack
+file: EVENT/ATTACK.OUT
+lba: 2448
+size: 125956
+sha256: c5ee1f3b67a82fdf0e93566460134d11338914ca8d38ddc12a4225464c8d0121
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf004, size: 464, name: attack_gfx_build_scaled_draw_area_packets, hash: 89323ef0080a45f6}
+  - {addr: 0x801bf1d4, size: 52, name: attack_gfx_init_scaled_draw_area_packets, hash: 8568902b86f9d430}
+  - {addr: 0x801bf208, size: 44, name: attack_gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276}
+  - {addr: 0x801bf234, size: 88, name: attack_gfx_build_portrait_poly_ft4, hash: a8a2d7a5b553b63f}
+  - {addr: 0x801bf28c, size: 100, name: attack_gfx_clip_portrait_poly_from_right, hash: 8b8f88a21b561ac0}
+  - {addr: 0x801bf2f0, size: 100, name: attack_gfx_clip_portrait_poly_from_left, hash: 0e59600fae531215}
+  - {addr: 0x801bf354, size: 1064, name: attack_gfx_build_portrait_transition_primitives, hash: 9632d1e8775d742c}
+  - {addr: 0x801bf77c, size: 4352, name: attack_render_unit_status_panel_thread, hash: 9e9b6b997e6a356e}
+  - {addr: 0x801c087c, size: 8, name: attack_noop_801c087c, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c0884, size: 544, name: attack_gfx_init_menu_tile_and_line_primitives, hash: c0c46a118253c8ae}
+  - {addr: 0x801c0aa4, size: 40, name: attack_thread_stop_after_yield, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0acc, size: 40, name: attack_thread_stop_after_yield_2, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0af4, size: 1932, name: attack_panel_run_character_status_thread, hash: 032d9823d70a2a5d}
+  - {addr: 0x801c1280, size: 380, name: attack_panel_set_primitive_colors, hash: 96535460369c6487}
+  - {addr: 0x801c13fc, size: 84, name: attack_gfx_apply_menu_palette_for_mode, hash: edaf22379760b92c}
+  - {addr: 0x801c1450, size: 268, name: attack_text_render_signed_decimal_entries, hash: "6394222889009711"}
+  - {addr: 0x801c155c, size: 244, name: attack_text_render_decimal_entry_list, hash: aa34be9623796274}
+  - {addr: 0x801c1650, size: 772, name: attack_text_render_decimal_value, hash: 63cbe1ae8be917f1}
+  - {addr: 0x801c1954, size: 1380, name: attack_editor_run_numeric_thread, hash: e9ff018f5a716555}
+  - {addr: 0x801c1eb8, size: 104, name: attack_gfx_build_item_graphic_descriptor, hash: 7085296bf6f5bbac}
+  - {addr: 0x801c1f20, size: 8, name: attack_noop_801c1f20, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c1f28, size: 28, name: attack_thread_is_running, hash: d10e3403d7fec970}
+  - {addr: 0x801c1f44, size: 1236, name: attack_menu_draw_thread_status_indicators, hash: e022f2dec8a0a488}
+  - {addr: 0x801c2418, size: 580, name: attack_gfx_set_scaled_poly_ft4_geometry, hash: f989278e90fdce7c}
+  - {addr: 0x801c265c, size: 740, name: attack_gfx_build_status_group_primitives, hash: e865f008b1735c29}
+  - {addr: 0x801c2940, size: 412, name: attack_gfx_build_gradient_grid_primitives, hash: c1250559a6268b13}
+  - {addr: 0x801c2adc, size: 736, name: attack_gfx_build_scaled_sprite_cell_poly_ft4, hash: 37eac014a0b6e39f}
+  - {addr: 0x801c2dbc, size: 692, name: attack_gfx_build_scaled_sprite_primitive_chain, hash: 919ae95c336b4817}
+  - {addr: 0x801c3070, size: 8, name: attack_noop_801c3070, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c3078, size: 816, name: attack_deploy_find_fieldable_units, hash: 498671a5a9fc34c9}
+  - {addr: 0x801c33a8, size: 28, name: attack_load_unaligned_s16, hash: 7f613d531c790362}
+  - {addr: 0x801c33c4, size: 72, name: attack_sound_wait_music_idle, hash: 5cf0df43ec1c1bac}
+  - {addr: 0x801c340c, size: 168, name: attack_sound_play_scenario_music, hash: 27dd3fb89e7b80d9}
+  - {addr: 0x801c34b4, size: 1612, name: attack_load_scenario_conditionals, hash: bba39fd5570c99b6}
+  - {addr: 0x801c3b00, size: 424, name: attack_sound_resync_scenario_music_and_apply_map_darkness, hash: 7e9cd3acb0241ad1}
+  - {addr: 0x801c3ca8, size: 148, name: attack_deploy_mark_other_squad_units_undeployable, hash: 5cd7505bb7bab58e}
+  - {addr: 0x801c3d3c, size: 80, name: attack_deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568}
+  - {addr: 0x801c3d8c, size: 40, name: attack_thread_wait_forever, hash: 1784b8534b53f3ba}
+  - {addr: 0x801c3db4, size: 80, name: attack_deploy_has_roster_id_on_tiles, hash: 5d2d6845961ff568}
+  - {addr: 0x801c3e04, size: 88, name: attack_deploy_remove_roster_unit_from_tiles, hash: 784067ef9c2286de}
+  - {addr: 0x801c3e5c, size: 112, name: attack_deploy_swap_roster_unit_tile, hash: c3797b6bdb461354}
+  - {addr: 0x801c3ecc, size: 120, name: attack_deploy_reset_tables, hash: 695c7064518fcce4}
+  - {addr: 0x801c3f44, size: 6924, name: attack_deploy_run_screen, hash: df7c072d89ddaf8a}
+  - {addr: 0x801c5a50, size: 60, name: attack_deploy_get_coordinate_slots, hash: 11de08d7c44b511b}
+  - {addr: 0x801c5a8c, size: 8, name: attack_return_zero, hash: 207819bf4ebe3078}
+  - {addr: 0x801c5a94, size: 188, name: attack_deploy_handle_roster_navigation_input, hash: da4ad7035b8d8477}
+  - {addr: 0x801c5b50, size: 144, name: attack_deploy_select_unit_for_stats_display, hash: 297a8926d831fabb}
+  - {addr: 0x801c5be0, size: 1280, name: attack_load_party_unit_into_editor, hash: 7b1e9c80ec5fcac4}
+  - {addr: 0x801c60e0, size: 252, name: attack_deploy_select_next_roster_unit, hash: 4c748f3e62ac0c25}
+  - {addr: 0x801c61dc, size: 8, name: attack_noop_801c61dc, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c61e4, size: 252, name: attack_deploy_select_previous_roster_unit, hash: 34ac4872ee511417}
+  - {addr: 0x801c62e0, size: 572, name: attack_deploy_build_screen_arrow, hash: 87c5aeb2b91c55cf}
+  - {addr: 0x801c651c, size: 448, name: attack_deploy_build_menu_cursor_primitives, hash: 40b471709b0e8f1c}
+  - {addr: 0x801c66dc, size: 32, name: attack_deploy_set_valid_tile, hash: e0346046b49e8688}
+  - {addr: 0x801c66fc, size: 36, name: attack_deploy_get_valid_tile, hash: 34f839bd56de2662}
+  - {addr: 0x801c6720, size: 24, name: attack_deploy_set_cursor_tile, hash: 79b04b44579bdc5b}
+  - {addr: 0x801c6738, size: 16, name: attack_deploy_set_arrow_position_mode, hash: 52d7c6aa0da6a6c2}
+  - {addr: 0x801c6748, size: 132, name: attack_deploy_init_valid_tiles, hash: 1c91dfd7420efd7b}
+  - {addr: 0x801c67cc, size: 2748, name: attack_deploy_run_render_thread, hash: 4c06ab67a62141f0}
+  - {addr: 0x801c7288, size: 724, name: attack_out_prepare_valid_deployment_tiles, hash: 3a3158a171e2a4d4}
+  - {addr: 0x801c755c, size: 452, name: attack_init_deployment_cursor_primitives, hash: af62587e4847a1d1}
+  - {addr: 0x801c7720, size: 548, name: attack_update_deployment_cursor_primitives, hash: a6767c2bfaa72829}
+  - {addr: 0x801c7944, size: 196, name: attack_gfx_init_frame_ft4_array, hash: 6daf1a8edc856725}
+  - {addr: 0x801c7a08, size: 484, name: attack_deploy_build_portrait_quads, hash: 708d00bef4ce213d}
+  - {addr: 0x801c7bec, size: 1016, name: attack_deploy_update_screen_graphics, hash: 9c795189d3d0df1f}
+  - {addr: 0x801c7fe4, size: 32, name: attack_gfx_build_formation_sprites, hash: e919c44d2f3f3208}
+  - {addr: 0x801c8004, size: 32, name: attack_gfx_load_portraits, hash: bf7288775e5e6cac}
+  - {addr: 0x801c8024, size: 172, name: attack_file_load_sync, hash: 476d933e59508ca3}
+  - {addr: 0x801c80d0, size: 1224, name: attack_prepare_party_portrait_textures, hash: 2d30846164855c52}
+  - {addr: 0x801c8598, size: 1648, name: attack_gfx_prepare_formation_sprites, hash: a2000c973e9a87b8}
+  - {addr: 0x801c8c08, size: 232, name: attack_gfx_set_formation_icon_uv, hash: 353eab0a41a1e1a6}
+  - {addr: 0x801c8cf0, size: 1876, name: attack_deploy_run_select_menu, hash: 76d0198aad839707}
+  - {addr: 0x801c9444, size: 68, name: attack_text_init_battle_pointers, hash: 161ea8f59be23883}
+  - {addr: 0x801c9488, size: 1188, name: attack_text_build_deployment_strings, hash: 686fb6c3f5cef1eb}
+  - {addr: 0x801c992c, size: 1084, name: attack_gfx_build_shaded_panel_strips, hash: 92517fde5ecb3707}
+  - {addr: 0x801c9d68, size: 344, name: attack_map_show_title, hash: 01e9c8201ecae757}
+  - {addr: 0x801c9ec0, size: 204, name: attack_map_load_title_graphic, hash: 75a50e555b3e77a7}
+
+data:
+  - {addr: 0x801bf000, name: attack_D_801BF000}
+  - {addr: 0x801c9f8c, name: g_attack_deploy_cursor_texture_data}
+  - {addr: 0x801c9fac, name: g_attack_deploy_cursor_palette_source}
+  - {addr: 0x801c9fec, name: g_attack_deploy_tile_clut_data}
+  - {addr: 0x801ca054, name: g_attack_menu_indicator_packet_index}
+  - {addr: 0x801ca05c, name: g_attack_menu_indicator_brightness}
+  - {addr: 0x801ca064, name: g_attack_menu_indicator_fade_work}
+  - {addr: 0x801ca06c, name: g_attack_menu_indicator_state}
+  - {addr: 0x801ca080, name: g_attack_editor_status_gauges}
+  - {addr: 0x801ca082, name: g_attack_editor_team_state}
+  - {addr: 0x801ca0a4, name: g_attack_panel_comparison_billboard}
+  - {addr: 0x801ca0c8, name: g_attack_active_unit_data}
+  - {addr: 0x801ca0ca, name: g_attack_editor_job_id}
+  - {addr: 0x801ca0cc, name: g_attack_editor_brave}
+  - {addr: 0x801ca0ce, name: g_attack_editor_faith}
+  - {addr: 0x801ca0d0, name: g_attack_editor_zodiac}
+  - {addr: 0x801ca0d2, name: g_attack_editor_selected_unit_id}
+  - {addr: 0x801ca0d8, name: g_attack_panel_comparison_unit_data}
+  - {addr: 0x801ca0e8, name: g_attack_unit_editor_state}
+  - {addr: 0x801ca10c, name: g_attack_editor_item_and_ability_ids}
+  - {addr: 0x801ca168, name: g_attack_editor_third_ability_bytes}
+  - {addr: 0x801ca17c, name: g_attack_editor_fourth_ability_bytes}
+  - {addr: 0x801ca1b8, name: g_attack_editor_numeric_geometry}
+  - {addr: 0x801ca1be, name: g_attack_panel_slide_up_y}
+  - {addr: 0x801ca1c0, name: g_attack_panel_item_icon_texture}
+  - {addr: 0x801ca1c6, name: g_attack_panel_slide_down_y}
+  - {addr: 0x801ca1e0, name: g_attack_gfx_portrait_origin}
+  - {addr: 0x801ca1e8, name: g_attack_panel_gauge_bar_colors}
+  - {addr: 0x801ca218, name: g_attack_panel_selected_numeric_entries}
+  - {addr: 0x801ca290, name: g_attack_panel_comparison_numeric_entries}
+  - {addr: 0x801ca308, name: g_attack_panel_editor_label_cells}
+  - {addr: 0x801ca350, name: g_attack_panel_editor_mode_cell}
+  - {addr: 0x801ca35c, name: g_attack_panel_editor_value_cells}
+  - {addr: 0x801ca38c, name: g_attack_panel_frame_rect}
+  - {addr: 0x801ca394, name: g_attack_panel_sprite_cells}
+  - {addr: 0x801ca3e8, name: g_attack_panel_portrait_cell}
+  - {addr: 0x801ca3f4, name: g_attack_gfx_draw_area_template}
+  - {addr: 0x801ca3f6, name: g_attack_panel_status_position_y}
+  - {addr: 0x801ca3fc, name: g_attack_gfx_draw_area_scale_percent}
+  - {addr: 0x801ca414, name: g_attack_panel_editor_value_cluts}
+  - {addr: 0x801ca424, name: g_attack_panel_editor_label_cluts}
+  - {addr: 0x801ca440, name: g_attack_panel_editor_mode_cells}
+  - {addr: 0x801ca470, name: g_attack_panel_selected_portrait_rect}
+  - {addr: 0x801ca478, name: g_attack_panel_comparison_portrait_rect}
+  - {addr: 0x801ca480, name: g_attack_gfx_portrait_transition_offsets}
+  - {addr: 0x801ca4b4, name: g_attack_panel_origin_offsets}
+  - {addr: 0x801ca4c4, name: g_attack_character_status_frame_rect}
+  - {addr: 0x801ca4dc, name: g_attack_character_status_draw_area_rect}
+  - {addr: 0x801ca4e4, name: g_attack_panel_text_upload_rect_a}
+  - {addr: 0x801ca4ec, name: g_attack_panel_text_upload_rect_b}
+  - {addr: 0x801ca4f4, name: g_attack_panel_label_layouts_mode0}
+  - {addr: 0x801ca5d8, name: g_attack_panel_label_layouts_mode1}
+  - {addr: 0x801ca6bc, name: g_attack_panel_label_layouts_mode2}
+  - {addr: 0x801ca7a0, name: g_attack_panel_label_layouts_mode3}
+  - {addr: 0x801ca8e4, name: g_attack_panel_item_icon_layouts}
+  - {addr: 0x801ca920, name: g_attack_editor_numeric_table}
+  - {addr: 0x801ca930, name: g_attack_editor_numeric_entries_a}
+  - {addr: 0x801ca938, name: g_attack_editor_numeric_entries_b}
+  - {addr: 0x801ca940, name: g_attack_editor_numeric_entries_c}
+  - {addr: 0x801ca948, name: g_attack_editor_numeric_entries_d}
+  - {addr: 0x801ca950, name: g_attack_editor_numeric_entries_e}
+  - {addr: 0x801ca958, name: g_attack_editor_numeric_entries_f}
+  - {addr: 0x801ca960, name: g_attack_editor_numeric_texture}
+  - {addr: 0x801caa38, name: g_attack_editor_numeric_descriptor_a}
+  - {addr: 0x801caaec, name: g_attack_editor_numeric_descriptor_b}
+  - {addr: 0x801cabc4, name: g_attack_text_decimal_glyph}
+  - {addr: 0x801ccfd4, name: g_attack_deploy_arrow_clut_data}
+  - {addr: 0x801cd014, name: g_attack_formation_sprite_tall_cell}
+  - {addr: 0x801cd028, name: g_attack_deploy_zodiac_draw_context}
+  - {addr: 0x801cd02c, name: g_attack_deploy_zodiac_brightness_word}
+  - {addr: 0x801cd04c, name: g_attack_deploy_cursor_1_submitted}
+  - {addr: 0x801cd050, name: g_attack_deploy_cursor_0_submitted}
+  - {addr: 0x801cd054, name: g_attack_map_title_closing_past_midpoint}
+  - {addr: 0x801cd058, name: g_attack_deploy_deployed_unit_count}
+  - {addr: 0x801cd05c, name: g_attack_deploy_fieldable_unit_count}
+  - {addr: 0x801cd060, name: g_world_shop_purchase_unit_price}
+  - {addr: 0x801cd064, name: g_attack_deploy_selected_roster_index}
+  - {addr: 0x801cd068, name: g_attack_deploy_pending_roster_index}
+  - {addr: 0x801cd06c, name: g_attack_deploy_arrow_position_mode}
+  - {addr: 0x801cd070, name: g_attack_deploy_menu_state}
+  - {addr: 0x801cd074, name: g_attack_deploy_active_cursor}
+  - {addr: 0x801cd078, name: g_attack_deploy_grid_slide_x}
+  - {addr: 0x801cd07c, name: g_attack_deploy_grid_slide_y}
+  - {addr: 0x801cd080, name: g_attack_deploy_tiles_only_mode}
+  - {addr: 0x801cd08c, name: g_attack_deploy_cursor_clut_rect}
+  - {addr: 0x801cd094, name: g_attack_deploy_arrow_clut_rect}
+  - {addr: 0x801cd09c, name: g_attack_deploy_rect_09c}
+  - {addr: 0x801cd0a4, name: attack_D_801CD0A4}
+  - {addr: 0x801cd0ac, name: g_attack_deploy_rect_0ac}
+  - {addr: 0x801cd0b4, name: g_attack_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801cd0c4, name: g_attack_deploy_tile_clut_rect}
+  - {addr: 0x801cd0cc, name: g_attack_deploy_rect_0cc}
+  - {addr: 0x801cd0d4, name: g_attack_deploy_texture_location}
+  - {addr: 0x801cd0e4, name: g_attack_deploy_menu_entries}
+  - {addr: 0x801cd210, name: g_attack_status_display_thread_params}
+  - {addr: 0x801cd214, name: g_attack_status_display_offset_y}
+  - {addr: 0x801cd21c, name: g_attack_deploy_roster_navigation_direction}
+  - {addr: 0x801cd220, name: g_attack_deploy_selected_unit_deployed}
+  - {addr: 0x801cd220, name: g_attack_deploy_selected_unit_state}
+  - {addr: 0x801cd224, name: g_attack_numeric_editor_thread_params}
+  - {addr: 0x801cd230, name: g_attack_numeric_editor_redraw_request}
+  - {addr: 0x801cd238, name: g_attack_character_status_frame_config}
+  - {addr: 0x801cd244, name: g_attack_character_status_redraw_request}
+  - {addr: 0x801cd24c, name: g_attack_deploy_cursor_column}
+  - {addr: 0x801cd254, name: g_attack_deploy_cursor_row}
+  - {addr: 0x801cd25c, name: g_attack_deploy_unit_fieldable}
+  - {addr: 0x801cd270, name: g_attack_deploy_squad_data}
+  - {addr: 0x801cd274, name: g_attack_deploy_current_squad_data}
+  - {addr: 0x801cd2b4, name: g_attack_text_section_offset_1}
+  - {addr: 0x801cd2b8, name: g_attack_text_section_offset_2}
+  - {addr: 0x801cd330, name: g_attack_text_data}
+  - {addr: 0x801cf10c, name: g_attack_panel_status_uv_rects}
+  - {addr: 0x801cf4a4, name: g_attack_panel_status_scales}
+  - {addr: 0x801cf5d8, name: g_attack_panel_status_group_bounds}
+  - {addr: 0x801cf5e7, name: g_attack_panel_status_group_count}
+  - {addr: 0x801cf5e8, name: g_attack_panel_status_group_ids}
+  - {addr: 0x801cf5f0, name: g_attack_panel_status_animation}
+  - {addr: 0x801cf5f8, name: g_attack_deploy_slot_offsets}
+  - {addr: 0x801cf5f8, name: g_attack_panel_status_y_offsets}
+  - {addr: 0x801cf60c, name: g_attack_panel_status_offsets}
+  - {addr: 0x801cf648, name: g_attack_gfx_scaled_sprite_uv_rects}
+  - {addr: 0x801cf7a4, name: g_attack_gfx_scaled_sprite_scale}
+  - {addr: 0x801cf819, name: g_attack_gfx_scaled_sprite_count}
+  - {addr: 0x801cf938, name: g_attack_scenario_table}
+  - {addr: 0x801d3938, name: g_attack_event_condition_blocks}
+  - {addr: 0x801d5af4, name: g_attack_deploy_vram_copy_rect}
+  - {addr: 0x801d5afc, name: g_attack_deploy_vram_copy_x}
+  - {addr: 0x801d5afe, name: g_attack_deploy_vram_copy_y}
+  - {addr: 0x801d5b04, name: g_attack_deploy_second_pass}
+  - {addr: 0x801d5b0c, name: g_attack_deploy_menu_cursor_cells}
+  - {addr: 0x801d5b3c, name: g_attack_deploy_text_graphic_params}
+  - {addr: 0x801d5ba8, name: g_attack_deploy_text_screen_origin}
+  - {addr: 0x801d5bb0, name: g_attack_portrait_index_by_sprite_set}
+  - {addr: 0x801d5d58, name: g_attack_special_portrait_rect}
+  - {addr: 0x801d5d60, name: g_attack_special_portrait_palette_rect}
+  - {addr: 0x801d5d65, name: g_attack_monster_formation_sprite_table}
+  - {addr: 0x801d5d68, name: g_attack_portrait_sheet_rect_0}
+  - {addr: 0x801d5d70, name: g_attack_portrait_sheet_rect_1}
+  - {addr: 0x801d5d78, name: g_attack_portrait_sheet_rect_2}
+  - {addr: 0x801d5d80, name: g_attack_portrait_sheet_rect_3}
+  - {addr: 0x801d5db8, name: g_attack_formation_sheet_rect}
+  - {addr: 0x801d5dc0, name: g_attack_formation_sheet_source_rect}
+  - {addr: 0x801d5dc8, name: g_attack_deploy_select_menu_nodes}
+  - {addr: 0x801d5fb8, name: g_attack_deploy_unit_text_section}
+  - {addr: 0x801d5fbc, name: g_attack_deploy_help_text_section}
+  - {addr: 0x801d5fc0, name: g_attack_map_title_image_rect}
+  - {addr: 0x801d5fc8, name: g_attack_map_title_palette_rect}
+  - {addr: 0x801d5ff0, name: g_attack_map_title_palette_data}
+  - {addr: 0x801d6010, name: g_attack_thread_indicator_packets}
+  - {addr: 0x801d6500, name: g_attack_input_controller}
+  - {addr: 0x801d651c, name: g_attack_gfx_draw_offset_y}
+  - {addr: 0x801d6560, name: g_attack_panel_selected_editor_packets}
+  - {addr: 0x801d6b78, name: g_attack_panel_selected_packets}
+  - {addr: 0x801d6f28, name: g_attack_panel_comparison_editor_packets}
+  - {addr: 0x801d7540, name: g_attack_panel_comparison_packets}
+  - {addr: 0x801d78f0, name: g_attack_panel_selected_number_image}
+  - {addr: 0x801d7ff0, name: g_attack_panel_selected_name_image}
+  - {addr: 0x801d8570, name: g_attack_panel_selected_large_number_image}
+  - {addr: 0x801d8660, name: g_attack_panel_comparison_number_image}
+  - {addr: 0x801d8664, name: g_attack_panel_comparison_name_image}
+  - {addr: 0x801d8668, name: g_attack_panel_comparison_large_number_image}
+  - {addr: 0x801d866c, name: g_attack_panel_selected_portrait_image}
+  - {addr: 0x801d86ac, name: g_attack_panel_comparison_portrait_image}
+  - {addr: 0x801d86ec, name: g_attack_panel_frames_a}
+  - {addr: 0x801d8e9c, name: g_attack_panel_text_image_a}
+  - {addr: 0x801d9b1c, name: g_attack_panel_text_image_b}
+  - {addr: 0x801da79c, name: g_attack_editor_numeric_state}
+  - {addr: 0x801dad1c, name: g_attack_editor_numeric_text_a}
+  - {addr: 0x801db634, name: g_attack_editor_numeric_text_b}
+  - {addr: 0x801db648, name: g_attack_deploy_cursor_1_poly}
+  - {addr: 0x801db64c, name: g_attack_deploy_cursor_0_poly}
+  - {addr: 0x801db650, name: g_attack_deploy_render_buffers}
+  - {addr: 0x801db844, name: g_attack_gfx_frame_ft4}
+  - {addr: 0x801dbe84, name: g_attack_deploy_screen_arrow}
+  - {addr: 0x801dcaa8, name: g_attack_formation_job_data}
+  - {addr: 0x801dcaac, name: g_attack_deployed_unit_map_coordinates}
+  - {addr: 0x801dcadc, name: g_attack_deploy_cursor_palette_cycle}
+  - {addr: 0x801dcb1c, name: g_attack_deploy_cursor_clut}
+  - {addr: 0x801dcb3c, name: g_attack_deploy_tile_clut_buffer}
+  - {addr: 0x801dcb9c, name: g_attack_deploy_semitrans_clut_buffer}
+  - {addr: 0x801dcbc4, name: g_attack_deploy_confirm_result}
+  - {addr: 0x801dcbc8, name: g_attack_deploy_valid_tiles}
+  - {addr: 0x801dcbe4, name: g_attack_deploy_roster_id_by_tile}
+  - {addr: 0x801dcc00, name: g_attack_deploy_units_by_squad}
+  - {addr: 0x801dcc64, name: g_attack_deploy_roster_unit_deployable}
+  - {addr: 0x801dcc78, name: g_attack_deploy_current_squad_id}
+  - {addr: 0x801dcc7c, name: g_attack_deploy_current_squad}
+  - {addr: 0x801dcdfc, name: g_attack_editor_party_unit_stats}
+  - {addr: 0x801dcfbc, name: g_attack_deploy_text_polys}
+  - {addr: 0x801dd28c, name: g_attack_deploy_text_reveal_heights}
+  - {addr: 0x801dd2b0, name: g_attack_deploy_text_reveal_steps}
+  - {addr: 0x801dd2d4, name: g_attack_portrait_upload_rect}
+  - {addr: 0x801dd2dc, name: g_attack_portrait_palette_upload_rect}
+  - {addr: 0x801dd2e4, name: g_attack_portrait_staging}
+  - {addr: 0x801dd5e4, name: g_attack_formation_sprite_staging}
+  - {addr: 0x801dda64, name: g_attack_map_title_sprites}
+---
+module: event-bunit
+file: EVENT/BUNIT.OUT
+lba: 2832
+size: 187316
+sha256: d07efb36a128913ebe9c40355250c34117deef634f9c4371b527381d8f9237da
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf204, size: 464, name: bunit_gfx_build_scaled_draw_area_packets, hash: 6d2b5d586ec77661}
+  - {addr: 0x801bf3d4, size: 52, name: bunit_gfx_init_scaled_draw_area_packets, hash: ec5e4bf6bd7e4dd9}
+  - {addr: 0x801bf408, size: 44, name: bunit_gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276}
+  - {addr: 0x801bf434, size: 48, name: bunit_gfx_build_portrait_poly_ft4, hash: cb86608938578cd2}
+  - {addr: 0x801bf464, size: 100, name: bunit_gfx_clip_portrait_poly_from_right, hash: 4632c34e611fc393}
+  - {addr: 0x801bf4c8, size: 100, name: bunit_gfx_clip_portrait_poly_from_left, hash: e0267807ec7b0b13}
+  - {addr: 0x801bf52c, size: 1064, name: bunit_gfx_build_portrait_transition_primitives, hash: cdb73372750d229e}
+  - {addr: 0x801bf954, size: 4488, name: bunit_render_unit_status_panel_thread, hash: 4713ce1b910c04cd, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c0adc, size: 8, name: bunit_noop_801c0adc, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c0ae4, size: 544, name: bunit_gfx_init_menu_tile_and_line_primitives, hash: c0c46a118253c8ae}
+  - {addr: 0x801c0d04, size: 40, name: bunit_thread_stop_after_yield, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0d2c, size: 40, name: bunit_thread_stop_after_yield_2, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0d54, size: 1920, name: bunit_panel_run_character_status_thread, hash: 0c7124ae8f128af3}
+  - {addr: 0x801c14d4, size: 380, name: bunit_panel_set_primitive_colors, hash: 7021fdda77fe2ab5}
+  - {addr: 0x801c1650, size: 84, name: bunit_gfx_apply_menu_palette_for_mode, hash: 85e585627cce3af8}
+  - {addr: 0x801c16a4, size: 268, name: bunit_text_render_signed_decimal_entries, hash: f367bd9660fc24c5}
+  - {addr: 0x801c17b0, size: 244, name: bunit_text_render_decimal_entry_list, hash: 6c345ed8200efa05}
+  - {addr: 0x801c18a4, size: 772, name: bunit_text_render_decimal_value, hash: ca9036a63905ea24}
+  - {addr: 0x801c1ba8, size: 1368, name: bunit_run_numeric_editor_thread, hash: 132f79aff303d8c8}
+  - {addr: 0x801c2100, size: 496, name: bunit_menu_run_thread, hash: eb81d8765a930f5c}
+  - {addr: 0x801c22f0, size: 248, name: bunit_menu_open_submenu_thread, hash: c2d07656176c41ef}
+  - {addr: 0x801c23e8, size: 372, name: bunit_menu_run_simple_selection_thread, hash: 88cede358ce214e7}
+  - {addr: 0x801c255c, size: 104, name: bunit_gfx_build_item_graphic_descriptor, hash: 7085296bf6f5bbac}
+  - {addr: 0x801c25c4, size: 900, name: bunit_input_update_event_state, hash: acd007f8639f10f5, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c2948, size: 28, name: bunit_thread_is_running, hash: d10e3403d7fec970}
+  - {addr: 0x801c2964, size: 1236, name: bunit_menu_draw_thread_status_indicators, hash: 06245ec603b0e42d}
+  - {addr: 0x801c2e38, size: 624, name: bunit_gfx_init_vram_and_start_fade, hash: c23f6e3bd5b189f3}
+  - {addr: 0x801c30a8, size: 152, name: bunit_input_update_lock_timer, hash: 646e49326a7f1a0f}
+  - {addr: 0x801c3140, size: 16, name: bunit_input_get_lock_timer, hash: 5ffe36f037271c3b}
+  - {addr: 0x801c3150, size: 64, name: bunit_input_read_pad1_unless_locked, hash: 904c475e5825a616}
+  - {addr: 0x801c3190, size: 1120, name: bunit_entrypoint, hash: dc10118e0b14ebdd}
+  - {addr: 0x801c35f0, size: 28, name: bunit_menu_reset_results, hash: f1a9680225463c24}
+  - {addr: 0x801c360c, size: 96, name: bunit_menu_is_active_or_transitioning, hash: a0b95bde6cbc97b7}
+  - {addr: 0x801c366c, size: 1020, name: bunit_menu_run_unit_list_frame, hash: 213e7cb2462eaa46}
+  - {addr: 0x801c3a68, size: 944, name: bunit_menu_update_unit_browser, hash: 8b0ac5087fd1c93d}
+  - {addr: 0x801c3e18, size: 200, name: bunit_unit_copy_selected_data, hash: 59cebfc380508e42}
+  - {addr: 0x801c3ee0, size: 100, name: bunit_thread_toggle_8, hash: 88fc66111fe13272}
+  - {addr: 0x801c3f44, size: 100, name: bunit_thread_toggle_7, hash: 18ec66b6fb8f6cc5}
+  - {addr: 0x801c3fa8, size: 172, name: bunit_thread_toggle_9_and_12, hash: e355c29a2731c0da}
+  - {addr: 0x801c4054, size: 144, name: bunit_unit_get_current_stat, hash: 4ba9b81643f1e3bc}
+  - {addr: 0x801c40e4, size: 32, name: bunit_unit_get_level, hash: 58cb9fb25baf9b49}
+  - {addr: 0x801c4104, size: 32, name: bunit_unit_get_experience, hash: 31e270a1734f6901}
+  - {addr: 0x801c4124, size: 32, name: bunit_unit_get_brave, hash: 246b05d342c884b0}
+  - {addr: 0x801c4144, size: 32, name: bunit_unit_get_faith, hash: 8d252f873a03e098}
+  - {addr: 0x801c4164, size: 124, name: bunit_unit_get_max_stat, hash: 0582aeb905d42893}
+  - {addr: 0x801c41e0, size: 188, name: bunit_menu_is_unit_list_row_visible, hash: aa9baa00771d9394}
+  - {addr: 0x801c429c, size: 280, name: bunit_menu_update_unit_list_scroll, hash: eca581c8498c6c0a}
+  - {addr: 0x801c43b4, size: 700, name: bunit_menu_draw_pressable_button, hash: f23fb25a5d33ec97}
+  - {addr: 0x801c4670, size: 224, name: bunit_menu_init_unit_list, hash: 9b7cf4186658e38a}
+  - {addr: 0x801c4750, size: 4208, name: bunit_menu_update_unit_grid, hash: 93c70c2e5de2eb05}
+  - {addr: 0x801c57c0, size: 164, name: bunit_gfx_calculate_distance_falloff, hash: 4e4cda01f5bf2e91}
+  - {addr: 0x801c5864, size: 532, name: bunit_gfx_draw_falloff_shaded_rows, hash: 2288b6aa90c03ece}
+  - {addr: 0x801c5a78, size: 108, name: bunit_gfx_init_rhombus_cursor_tpages, hash: e7aff691018bf714}
+  - {addr: 0x801c5ae4, size: 916, name: bunit_gfx_update_rhombus_cursor_trail, hash: 83f9c117179ef1a2}
+  - {addr: 0x801c5e78, size: 1020, name: bunit_gfx_draw_unit_sprite_and_name_plate, hash: 5270d99f55cecd6f}
+  - {addr: 0x801c6274, size: 188, name: bunit_unit_build_list_index_map, hash: 85b3813e1ad5d145}
+  - {addr: 0x801c6330, size: 120, name: bunit_unit_build_reorderable_index_list, hash: f973b7be9f6b3a2c}
+  - {addr: 0x801c63a8, size: 468, name: bunit_menu_run_reorder_list, hash: 814b235b2017a455}
+  - {addr: 0x801c657c, size: 44, name: bunit_menu_clear_selection_records, hash: 98148178dd779b39}
+  - {addr: 0x801c65a8, size: 60, name: bunit_menu_clear_selection_record, hash: 971d949bbd11948f}
+  - {addr: 0x801c65e4, size: 76, name: bunit_menu_set_selection_record, hash: 74a1e89561e6aadf}
+  - {addr: 0x801c6630, size: 176, name: bunit_menu_get_selection_record, hash: 7536cd22e376eeb6}
+  - {addr: 0x801c66e0, size: 192, name: bunit_menu_is_unit_list_scroll_needed, hash: 28f8eae91bb947ee}
+  - {addr: 0x801c67a0, size: 148, name: bunit_unit_is_two_handing_weapon, hash: 90d336abe9d84508}
+  - {addr: 0x801c6834, size: 32, name: bunit_job_is_special_monster, hash: f4362856b8ecd185}
+  - {addr: 0x801c6854, size: 1460, name: bunit_panel_copy_unit_data_to_billboard, hash: e893beb59f02bf6f}
+  - {addr: 0x801c6e08, size: 320, name: bunit_panel_build_unit_billboard_list, hash: 72f9d3d86b9a4098}
+  - {addr: 0x801c6f48, size: 380, name: bunit_unit_sort_index_list_by_order_keys, hash: d11b39851ebec6b1}
+  - {addr: 0x801c70c4, size: 64, name: bunit_unit_copy_orders_to_reorder_list, hash: cac2171590658656}
+  - {addr: 0x801c7104, size: 68, name: bunit_unit_copy_reorder_list_to_orders, hash: a6104db1a4999b63}
+  - {addr: 0x801c7148, size: 96, name: bunit_unit_find_index_by_roster_id, hash: aeb870b2fb0d661f}
+  - {addr: 0x801c71a8, size: 44, name: bunit_job_get_generic_index, hash: 39c0e32433f9234e}
+  - {addr: 0x801c71d4, size: 88, name: bunit_job_find_first_for_skillset, hash: 0e69ad31124150c2}
+  - {addr: 0x801c722c, size: 76, name: bunit_job_get_base, hash: 0fb085973a10550b}
+  - {addr: 0x801c7278, size: 72, name: bunit_job_calculate_unlocks, hash: 79ecd32bffad7458}
+  - {addr: 0x801c72c0, size: 352, name: bunit_job_build_unit_job_list, hash: 0372cf84313e0cb9}
+  - {addr: 0x801c7420, size: 36, name: bunit_job_get_skillset, hash: 72f6f53360f055dc}
+  - {addr: 0x801c7444, size: 648, name: bunit_create_ability_list, hash: 373b01e6f8a27498}
+  - {addr: 0x801c76cc, size: 444, name: bunit_gfx_submit_frame_and_swap_buffers, hash: 03562779b98bb33c}
+  - {addr: 0x801c7888, size: 1560, name: bunit_gfx_init_packet_pools, hash: 534a0c774b97dee2}
+  - {addr: 0x801c7ea0, size: 1384, name: bunit_gfx_init_double_packet_buffers, hash: a4cfeb32963dd7b9}
+  - {addr: 0x801c8408, size: 52, name: bunit_menu_set_event_speed, hash: 33b6a2c8c1908b56}
+  - {addr: 0x801c843c, size: 32, name: bunit_menu_get_event_speed, hash: d1c5682dc9e305b3}
+  - {addr: 0x801c845c, size: 212, name: bunit_menu_init_scrollable_list_core, hash: c2663ee9beede6f5}
+  - {addr: 0x801c8530, size: 52, name: bunit_menu_init_scrollable_list, hash: 2e929bd3e1d1a802}
+  - {addr: 0x801c8564, size: 148, name: bunit_cmd_run_stream, hash: 596b0013f79e045b}
+  - {addr: 0x801c85f8, size: 80, name: bunit_menu_dispatch_with_override, hash: 3eea69c59c091978}
+  - {addr: 0x801c8648, size: 280, name: bunit_cmd_run_if_group_handler, hash: 8839eaaea9e0dd88}
+  - {addr: 0x801c8760, size: 396, name: bunit_cmd_run_if_else_group_handler, hash: 874d29e34d6a2029}
+  - {addr: 0x801c88ec, size: 256, name: bunit_cmd_draw_textured_quad_handler, hash: c024a5e6a5fdac7d}
+  - {addr: 0x801c89ec, size: 264, name: bunit_cmd_draw_row_callback_quad_handler, hash: aa0680488625c39f}
+  - {addr: 0x801c8af4, size: 1608, name: bunit_cmd_draw_window_frame_handler, hash: 0a50bf9bdc4971f4}
+  - {addr: 0x801c913c, size: 300, name: bunit_cmd_set_zoomed_draw_area_handler, hash: 2a2f64cf07a7b91f}
+  - {addr: 0x801c9268, size: 664, name: bunit_cmd_draw_background_tiles_handler, hash: 09b81548f04977d8}
+  - {addr: 0x801c9500, size: 84, name: bunit_cmd_set_clut_handler, hash: a7a0ade9fdaa50b5}
+  - {addr: 0x801c9554, size: 116, name: bunit_cmd_set_layout_clut_handler, hash: 9c9abdd96fb4e07c}
+  - {addr: 0x801c95c8, size: 84, name: bunit_cmd_set_tpage_handler, hash: bd3947ac43dead9e}
+  - {addr: 0x801c961c, size: 24, name: bunit_cmd_set_semitrans_handler, hash: f13890f2ccaa1896}
+  - {addr: 0x801c9634, size: 100, name: bunit_cmd_enqueue_draw_mode_handler, hash: 74bbfcd06b49e6bd}
+  - {addr: 0x801c9698, size: 104, name: bunit_cmd_set_draw_color_handler, hash: f8e9ecc48cf193a2}
+  - {addr: 0x801c9700, size: 24, name: bunit_cmd_set_otag_index_handler, hash: e3a66bb32067285c}
+  - {addr: 0x801c9718, size: 1076, name: bunit_menu_script_draw_formatted_number, hash: a52fa763ae07e832}
+  - {addr: 0x801c9b4c, size: 424, name: bunit_cmd_draw_right_aligned_number_handler, hash: fbd03bb0cdf31870}
+  - {addr: 0x801c9cf4, size: 652, name: bunit_menu_update_and_draw_animated_cursor, hash: 48df7a46e058abc1}
+  - {addr: 0x801c9f80, size: 864, name: bunit_menu_update_and_draw_bouncing_cursor, hash: 8fec6593004c6ff0}
+  - {addr: 0x801ca2e0, size: 108, name: bunit_cmd_skip_group, hash: a7fc8159f10402de}
+  - {addr: 0x801ca34c, size: 672, name: bunit_menu_draw_scrollable_list, hash: c454dc9d46c8694d}
+  - {addr: 0x801ca5ec, size: 48, name: bunit_menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d}
+  - {addr: 0x801ca61c, size: 52, name: bunit_menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d}
+  - {addr: 0x801ca650, size: 2500, name: bunit_cmd_run_scrollable_list_handler, hash: 358544f0b74bb783}
+  - {addr: 0x801cb014, size: 52, name: bunit_gfx_set_draw_color, hash: febb234714c08dd5}
+  - {addr: 0x801cb048, size: 16, name: bunit_gfx_set_otag_index, hash: b8570cd4076e6ca3}
+  - {addr: 0x801cb058, size: 220, name: bunit_text_set_palette_and_metrics, hash: 097927c9311af253}
+  - {addr: 0x801cb134, size: 100, name: bunit_cmd_release_otag_lock_handler, hash: 5762755fa4395bb7}
+  - {addr: 0x801cb198, size: 116, name: bunit_cmd_set_draw_area_if_unlocked_handler, hash: 27724050b3193070}
+  - {addr: 0x801cb20c, size: 92, name: bunit_cmd_add_next_otag_draw_area_handler, hash: 7af571cb94447649}
+  - {addr: 0x801cb268, size: 16, name: bunit_gfx_set_transition_frame, hash: 2975c13d1cb6d612}
+  - {addr: 0x801cb278, size: 16, name: bunit_gfx_get_transition_frame, hash: 198bb5d80e6a8297}
+  - {addr: 0x801cb288, size: 56, name: bunit_cmd_advance_transition_frame_handler, hash: 02b5eb90d2b04757}
+  - {addr: 0x801cb2c0, size: 16, name: bunit_gfx_get_draw_color, hash: cd5c665fda37b57c}
+  - {addr: 0x801cb2d0, size: 320, name: bunit_menu_scroll_list_by_page, hash: 267e3c7bf3437203}
+  - {addr: 0x801cb410, size: 284, name: bunit_input_read_page_scroll_direction, hash: c9c3ae74b59d1149}
+  - {addr: 0x801cb52c, size: 308, name: bunit_text_render_glyph_to_4bpp_image, hash: 19147e4fe2464c4d}
+  - {addr: 0x801cb660, size: 92, name: bunit_text_skip_encoded_segments, hash: 01a8767dd4ceba70}
+  - {addr: 0x801cb6bc, size: 648, name: bunit_text_render_ids_into_image, hash: 52056952222908be}
+  - {addr: 0x801cb944, size: 208, name: bunit_text_concatenate_ids, hash: e9d08ebd80233029}
+  - {addr: 0x801cba14, size: 40, name: bunit_thread_request_stop, hash: ea52b0a734b83ec7}
+  - {addr: 0x801cba3c, size: 264, name: bunit_text_render_id_rows_to_vram, hash: dcadefa443b8cc4f}
+  - {addr: 0x801cbb44, size: 156, name: bunit_menu_run_descriptor_thread, hash: 4d5aa7a1db4635fb}
+  - {addr: 0x801cbbe0, size: 160, name: bunit_text_start_selection_thread, hash: b84a2e0538e54eba}
+  - {addr: 0x801cbc80, size: 836, name: bunit_menu_update_node_cursor, hash: 5d59c71208e4c666}
+  - {addr: 0x801cbfc4, size: 28, name: bunit_bits_init_reader, hash: 91cbfbed4f54a717}
+  - {addr: 0x801cbfe0, size: 176, name: bunit_bits_read, hash: 5503b271ce6055f9}
+  - {addr: 0x801cc090, size: 904, name: bunit_input_update_controller, hash: bd50c5107ef8fba7}
+  - {addr: 0x801cc418, size: 244, name: bunit_menu_update_event_thread_state, hash: 77565cd3819b0ae8}
+  - {addr: 0x801cc50c, size: 396, name: bunit_menu_update_wrapped_grid_selection, hash: e06854ecee2acf50}
+  - {addr: 0x801cc698, size: 36, name: bunit_menu_clear_selection_values, hash: 5cf1ef72ac0cca0a}
+  - {addr: 0x801cc6bc, size: 32, name: bunit_menu_set_selection_value, hash: 46924fdb1fa68384}
+  - {addr: 0x801cc6dc, size: 164, name: bunit_menu_update_wrapped_horizontal_selection, hash: cb38c38746c32f7f}
+  - {addr: 0x801cc780, size: 104, name: bunit_menu_update_horizontal_selection_and_mark_change, hash: 54c85e2ccf804088}
+  - {addr: 0x801cc7e8, size: 32, name: bunit_input_clear_state, hash: c3b917b4bb4be9ca}
+  - {addr: 0x801cc808, size: 128, name: bunit_job_calculate_current_level, hash: 6792aa8905ba14f8}
+  - {addr: 0x801cc888, size: 96, name: bunit_job_calculate_current_jp, hash: 9be830d1dea82b7c}
+  - {addr: 0x801cc8e8, size: 96, name: bunit_job_calculate_current_total_jp, hash: 7788884e757641be}
+  - {addr: 0x801cc948, size: 128, name: bunit_job_calculate_next_level_jp_requirement, hash: 6953427c216412ff}
+  - {addr: 0x801cc9c8, size: 80, name: bunit_job_calculate_current_mastered, hash: 9e34c8881455e7b9}
+  - {addr: 0x801cca18, size: 532, name: bunit_menu_run_job_list, hash: 9f6d31e244a4b13e}
+  - {addr: 0x801ccc2c, size: 16, name: bunit_job_get_current_jp, hash: 37bd825c7c410897}
+  - {addr: 0x801ccc3c, size: 16, name: bunit_job_get_current_level, hash: c00599d9d4da1832}
+  - {addr: 0x801ccc4c, size: 16, name: bunit_job_get_next_level_jp_requirement, hash: 4b002aa7d2cccbc4}
+  - {addr: 0x801ccc5c, size: 16, name: bunit_job_get_current_total_jp, hash: 5a5079be6a69dc2b}
+  - {addr: 0x801ccc6c, size: 16, name: bunit_job_is_current_mastered, hash: f3957e2ed0b4ceeb}
+  - {addr: 0x801ccc7c, size: 112, name: bunit_ability_is_non_action_learned, hash: 70b6921fb12affba}
+  - {addr: 0x801cccec, size: 56, name: bunit_ability_is_non_action_unlearned, hash: 3c68eaf342aa2992}
+  - {addr: 0x801ccd24, size: 16, name: bunit_ability_is_action, hash: 360dd06bad7dc1c4}
+  - {addr: 0x801ccd34, size: 76, name: bunit_ability_get_mp_cost_display_value, hash: 296933d7c300aa12}
+  - {addr: 0x801ccd80, size: 100, name: bunit_ability_get_ct_display_value, hash: dce1900d85fce54f}
+  - {addr: 0x801ccde4, size: 80, name: bunit_ability_get_jp_cost_display_value, hash: 9d0d45965a20a0a5}
+  - {addr: 0x801cce34, size: 16, name: bunit_ability_is_action_tab, hash: 89dcb9502d0dc4b3}
+  - {addr: 0x801cce44, size: 24, name: bunit_ability_is_reaction_tab, hash: 3fd8b0a0c7bfb10e}
+  - {addr: 0x801cce5c, size: 24, name: bunit_ability_is_support_tab, hash: e1efb12822a39bf3}
+  - {addr: 0x801cce74, size: 24, name: bunit_ability_is_movement_tab, hash: 6d7998639c827ca2}
+  - {addr: 0x801cce8c, size: 36, name: bunit_ability_is_learned, hash: 42eb607a71b8516a}
+  - {addr: 0x801cceb0, size: 196, name: bunit_menu_update_job, hash: 3a1484828be00e47}
+  - {addr: 0x801ccf74, size: 976, name: bunit_run_ability_list_menu, hash: 4b1c6e2d1806893f}
+  - {addr: 0x801cd344, size: 256, name: bunit_gfx_enqueue_translucent_tile, hash: 50c95427e7c5d200}
+  - {addr: 0x801cd444, size: 460, name: bunit_gfx_enqueue_gouraud_quad, hash: 8f11049e7f2e617c}
+  - {addr: 0x801cd610, size: 632, name: bunit_gfx_enqueue_textured_quad_list, hash: 89e1989b186692ef}
+  - {addr: 0x801cd888, size: 532, name: bunit_gfx_enqueue_textured_quad, hash: 9f5ded393ed34318}
+  - {addr: 0x801cda9c, size: 648, name: bunit_gfx_enqueue_gouraud_textured_quad, hash: b012086d3eed574e}
+  - {addr: 0x801cdd24, size: 1044, name: bunit_gfx_enqueue_oriented_textured_quad, hash: 487cd03ab6bba3e3}
+  - {addr: 0x801ce138, size: 508, name: bunit_gfx_enqueue_textured_quad_corners, hash: b88c80b508ead92e}
+  - {addr: 0x801ce334, size: 216, name: bunit_gfx_enqueue_draw_mode, hash: 0b17bfff3c7058c9}
+  - {addr: 0x801ce40c, size: 228, name: bunit_gfx_enqueue_draw_area, hash: 612f894d2c6e6ab6}
+  - {addr: 0x801ce4f0, size: 264, name: bunit_gfx_enqueue_draw_move, hash: 895f33d0562e664e}
+  - {addr: 0x801ce5f8, size: 28, name: bunit_gfx_get_fade_state, hash: b5f1545375670598}
+  - {addr: 0x801ce614, size: 32, name: bunit_gfx_start_decreasing_fade, hash: a932dc92ed5cf2b6}
+  - {addr: 0x801ce634, size: 28, name: bunit_gfx_start_increasing_fade, hash: 43d7509c21f01101}
+  - {addr: 0x801ce650, size: 228, name: bunit_gfx_update_decreasing_fade, hash: 2ef5eed4a0a2eb48}
+  - {addr: 0x801ce734, size: 248, name: bunit_gfx_update_increasing_fade, hash: 0efe05036ac50b46}
+  - {addr: 0x801ce82c, size: 48, name: bunit_gfx_load_image_and_wait, hash: be3db739ba4a6ec6}
+  - {addr: 0x801ce85c, size: 48, name: bunit_gfx_store_image_and_wait, hash: 42b445a1713fca16}
+  - {addr: 0x801ce88c, size: 60, name: bunit_gfx_move_image_and_wait, hash: 2dee44c691484772}
+
+data:
+  - {addr: 0x801bf000, name: bunit_D_801BF000}
+  - {addr: 0x801bf200, name: g_bunit_text_decimal_format}
+  - {addr: 0x801ce8d0, name: g_bunit_menu_indicator_packet_index}
+  - {addr: 0x801ce8d8, name: g_bunit_menu_indicator_brightness}
+  - {addr: 0x801ce8e0, name: g_bunit_menu_indicator_fade_work}
+  - {addr: 0x801ce8e8, name: g_bunit_menu_indicator_state}
+  - {addr: 0x801ce8fc, name: g_bunit_panel_selected_billboard}
+  - {addr: 0x801ce920, name: g_bunit_panel_comparison_billboard}
+  - {addr: 0x801ce944, name: g_bunit_panel_selected_unit_data}
+  - {addr: 0x801ce954, name: g_bunit_panel_comparison_unit_data}
+  - {addr: 0x801ce964, name: g_bunit_editor_unit_fields}
+  - {addr: 0x801cea34, name: g_bunit_editor_numeric_geometry}
+  - {addr: 0x801cea3a, name: g_bunit_panel_slide_up_y}
+  - {addr: 0x801cea3c, name: g_bunit_panel_item_icon_texture}
+  - {addr: 0x801cea42, name: g_bunit_panel_slide_down_y}
+  - {addr: 0x801cea5c, name: g_bunit_gfx_portrait_origin}
+  - {addr: 0x801cea64, name: g_bunit_panel_gauge_bar_colors}
+  - {addr: 0x801cea94, name: g_bunit_panel_selected_numeric_entries}
+  - {addr: 0x801ceb0c, name: g_bunit_panel_comparison_numeric_entries}
+  - {addr: 0x801ceb84, name: g_bunit_panel_editor_label_cells}
+  - {addr: 0x801cebcc, name: g_bunit_panel_editor_mode_cell}
+  - {addr: 0x801cebd8, name: g_bunit_panel_editor_value_cells}
+  - {addr: 0x801cec08, name: g_bunit_panel_frame_rect}
+  - {addr: 0x801cec10, name: g_bunit_panel_sprite_cells}
+  - {addr: 0x801cec64, name: g_bunit_panel_portrait_cell}
+  - {addr: 0x801cec70, name: g_bunit_gfx_draw_area_template}
+  - {addr: 0x801cec78, name: g_bunit_gfx_draw_area_scale_percent}
+  - {addr: 0x801cec90, name: g_bunit_panel_editor_value_cluts}
+  - {addr: 0x801ceca0, name: g_bunit_panel_editor_label_cluts}
+  - {addr: 0x801cecbc, name: g_bunit_panel_editor_mode_cells}
+  - {addr: 0x801cecec, name: g_bunit_panel_selected_portrait_rect}
+  - {addr: 0x801cecf4, name: g_bunit_panel_comparison_portrait_rect}
+  - {addr: 0x801cecfc, name: g_bunit_gfx_portrait_transition_offsets}
+  - {addr: 0x801ced30, name: g_bunit_character_status_sprite_origin}
+  - {addr: 0x801ced40, name: g_bunit_character_status_frame_rect}
+  - {addr: 0x801ced58, name: g_bunit_character_status_draw_area_rect}
+  - {addr: 0x801ced60, name: g_bunit_character_status_equipment_text_rect}
+  - {addr: 0x801ced68, name: g_bunit_character_status_ability_text_rect}
+  - {addr: 0x801ced70, name: g_bunit_character_status_layout_mode0}
+  - {addr: 0x801cee54, name: g_bunit_character_status_layout_mode1}
+  - {addr: 0x801cef38, name: g_bunit_character_status_layout_mode2}
+  - {addr: 0x801cf01c, name: g_bunit_character_status_layout_mode3}
+  - {addr: 0x801cf160, name: g_bunit_character_status_item_icon_layout}
+  - {addr: 0x801cf19c, name: g_bunit_editor_numeric_table}
+  - {addr: 0x801cf1ac, name: g_bunit_editor_numeric_entries_a}
+  - {addr: 0x801cf1b4, name: g_bunit_editor_numeric_entries_b}
+  - {addr: 0x801cf1bc, name: g_bunit_editor_numeric_entries_c}
+  - {addr: 0x801cf1c4, name: g_bunit_editor_numeric_entries_d}
+  - {addr: 0x801cf1cc, name: g_bunit_editor_numeric_entries_e}
+  - {addr: 0x801cf1d4, name: g_bunit_editor_numeric_entries_f}
+  - {addr: 0x801cf1dc, name: g_bunit_editor_numeric_texture}
+  - {addr: 0x801cf2b4, name: g_bunit_editor_numeric_descriptor_a}
+  - {addr: 0x801cf368, name: g_bunit_editor_numeric_descriptor_b}
+  - {addr: 0x801cf440, name: g_bunit_text_decimal_glyph}
+  - {addr: 0x801cf450, name: g_bunit_unit_selected_index}
+  - {addr: 0x801cf452, name: g_bunit_unit_comparison_index}
+  - {addr: 0x801cf454, name: g_bunit_menu_current_menu}
+  - {addr: 0x801cf458, name: g_bunit_text_menu_section}
+  - {addr: 0x801cf4a8, name: g_bunit_unit_grid_dimmed_color}
+  - {addr: 0x801cf4b0, name: g_bunit_unit_grid_normal_color}
+  - {addr: 0x801cf4b3, name: g_bunit_status_banner_enabled}
+  - {addr: 0x801cf4b4, name: g_bunit_unit_browse_enabled}
+  - {addr: 0x801cf4b5, name: g_bunit_selected_roster_id}
+  - {addr: 0x801cf4b8, name: g_bunit_status_display_thread_params}
+  - {addr: 0x801cf4bc, name: g_bunit_status_display_offset_y}
+  - {addr: 0x801cf4c0, name: g_bunit_status_display_flags}
+  - {addr: 0x801cf4c4, name: g_bunit_status_display_redraw_request}
+  - {addr: 0x801cf4c8, name: g_bunit_status_display_highlight}
+  - {addr: 0x801cf4cc, name: g_bunit_comparison_display_thread_params}
+  - {addr: 0x801cf4d0, name: g_bunit_comparison_display_offset_y}
+  - {addr: 0x801cf4d4, name: g_bunit_comparison_display_flags}
+  - {addr: 0x801cf4d8, name: g_bunit_comparison_display_redraw_request}
+  - {addr: 0x801cf4e0, name: g_bunit_character_status_frame_config}
+  - {addr: 0x801cf4ec, name: g_bunit_character_status_redraw_request}
+  - {addr: 0x801cf4f0, name: g_bunit_character_status_highlight}
+  - {addr: 0x801cf4f4, name: g_bunit_numeric_editor_thread_params}
+  - {addr: 0x801cf500, name: g_bunit_numeric_editor_redraw_request}
+  - {addr: 0x801cf504, name: g_bunit_numeric_editor_highlight}
+  - {addr: 0x801cf508, name: g_bunit_status_banner_at_bottom}
+  - {addr: 0x801cf509, name: g_bunit_status_banner_at_bottom_latch}
+  - {addr: 0x801cf50a, name: g_bunit_unit_grid_selected_cell}
+  - {addr: 0x801cf50b, name: g_bunit_unit_list_page_offset}
+  - {addr: 0x801cf50c, name: g_bunit_unit_list_scroll_step}
+  - {addr: 0x801cf50d, name: g_bunit_input_lock_timer}
+  - {addr: 0x801cf514, name: g_bunit_unit_list_triangle_menu}
+  - {addr: 0x801cf550, name: g_bunit_unit_list_initialized}
+  - {addr: 0x801cf551, name: g_bunit_unit_list_triangle_menu_open}
+  - {addr: 0x801cf554, name: g_bunit_saved_unit_browse_enabled}
+  - {addr: 0x801cf555, name: g_bunit_saved_status_banner_enabled}
+  - {addr: 0x801cf556, name: g_bunit_status_banner_slide_step}
+  - {addr: 0x801cf557, name: g_bunit_unit_stat_mode}
+  - {addr: 0x801cf55c, name: g_bunit_gfx_falloff_focus_x}
+  - {addr: 0x801cf55e, name: g_bunit_gfx_falloff_focus_y}
+  - {addr: 0x801cf560, name: g_bunit_unit_grid_stat_number}
+  - {addr: 0x801cf56c, name: g_bunit_unit_grid_level_number}
+  - {addr: 0x801cf578, name: g_bunit_unit_grid_experience_number}
+  - {addr: 0x801cf584, name: g_bunit_unit_grid_brave_number}
+  - {addr: 0x801cf590, name: g_bunit_unit_grid_faith_number}
+  - {addr: 0x801cf59c, name: g_bunit_unit_grid_brave_number_wide}
+  - {addr: 0x801cf5a8, name: g_bunit_unit_grid_faith_number_wide}
+  - {addr: 0x801cf5b4, name: g_bunit_unit_grid_max_stat_number}
+  - {addr: 0x801cf5c0, name: g_bunit_unit_grid_stat_bar_script_top}
+  - {addr: 0x801cf5cc, name: g_bunit_unit_grid_stat_bar_script_bottom}
+  - {addr: 0x801cf5d8, name: g_bunit_slot_sprite_entries}
+  - {addr: 0x801cf734, name: g_bunit_menu_button_piece_scales}
+  - {addr: 0x801cf7ac, name: g_bunit_menu_button_piece_starts}
+  - {addr: 0x801cf7b4, name: g_bunit_menu_button_press_timers}
+  - {addr: 0x801cf7bc, name: g_bunit_unit_grid_cursor_target}
+  - {addr: 0x801cf7c4, name: g_bunit_unit_grid_label_tiles}
+  - {addr: 0x801cf7f4, name: g_bunit_unit_grid_label_tiles_bottom}
+  - {addr: 0x801cf824, name: g_bunit_unit_grid_gauge_offsets}
+  - {addr: 0x801cf828, name: g_bunit_unit_grid_hp_gauge_colors}
+  - {addr: 0x801cf834, name: g_bunit_unit_grid_mp_gauge_colors}
+  - {addr: 0x801cf840, name: g_bunit_unit_grid_ct_gauge_colors}
+  - {addr: 0x801cf84c, name: g_bunit_gfx_background_tile_layout}
+  - {addr: 0x801cf86c, name: g_bunit_cursor_shadow_sprite}
+  - {addr: 0x801cf880, name: g_bunit_cursor_sprite}
+  - {addr: 0x801cf894, name: g_bunit_cursor_trail_brightness}
+  - {addr: 0x801cf89c, name: g_bunit_sprite_cell_sizes}
+  - {addr: 0x801cf8bc, name: g_bunit_unit_shadow_sprite}
+  - {addr: 0x801cf8d0, name: g_bunit_unit_dot_sprite}
+  - {addr: 0x801cf8e4, name: g_bunit_unit_dot_glow_timer}
+  - {addr: 0x801cf8e5, name: g_bunit_unit_dot_glow_direction}
+  - {addr: 0x801cf900, name: g_bunit_menu_reorder_list_redraw_request}
+  - {addr: 0x801cf904, name: g_bunit_menu_reorder_list_desc}
+  - {addr: 0x801cf93c, name: g_bunit_menu_reorder_list_index}
+  - {addr: 0x801cf940, name: g_bunit_menu_reorder_list_initialized}
+  - {addr: 0x801cf944, name: g_bunit_unit_sort_field_indices}
+  - {addr: 0x801cf950, name: g_bunit_menu_event_speed}
+  - {addr: 0x801cf954, name: g_bunit_menu_scroll_pixel_offset}
+  - {addr: 0x801cf958, name: g_bunit_menu_cursor_row}
+  - {addr: 0x801cf95c, name: g_bunit_text_digit_texture_page}
+  - {addr: 0x801cf95e, name: g_bunit_menu_icon_texture_page}
+  - {addr: 0x801cf960, name: g_bunit_text_clut_2_mode0}
+  - {addr: 0x801cf962, name: g_bunit_text_clut_2_mode1}
+  - {addr: 0x801cf964, name: g_bunit_text_clut_1_mode1}
+  - {addr: 0x801cf966, name: g_bunit_text_clut_1_mode0}
+  - {addr: 0x801cf968, name: g_bunit_text_clut_3_mode0}
+  - {addr: 0x801cf96a, name: g_bunit_text_clut_3_mode1}
+  - {addr: 0x801cf96e, name: g_bunit_menu_cursor_mode0_foreground_clut}
+  - {addr: 0x801cf970, name: g_bunit_menu_cursor_mode0_background_clut}
+  - {addr: 0x801cf972, name: g_bunit_menu_cursor_mode1_foreground_clut}
+  - {addr: 0x801cf974, name: g_bunit_menu_cursor_mode1_background_clut}
+  - {addr: 0x801cf976, name: g_bunit_menu_button_clut}
+  - {addr: 0x801cf97a, name: g_bunit_unit_grid_hp_gauge_clut}
+  - {addr: 0x801cf97c, name: g_bunit_unit_grid_mp_gauge_clut}
+  - {addr: 0x801cf97e, name: g_bunit_unit_grid_ct_gauge_clut}
+  - {addr: 0x801cf980, name: g_bunit_gfx_background_clut}
+  - {addr: 0x801cf984, name: g_bunit_text_clut_0_mode1}
+  - {addr: 0x801cf986, name: g_bunit_text_clut_0_mode0}
+  - {addr: 0x801cf988, name: g_bunit_input_page_scroll_disabled}
+  - {addr: 0x801cf98c, name: g_bunit_cmd_handlers}
+  - {addr: 0x801cf9fc, name: g_bunit_gfx_transition_frame}
+  - {addr: 0x801cfa00, name: g_bunit_gfx_draw_area}
+  - {addr: 0x801cfa08, name: g_bunit_cmd_row_quad}
+  - {addr: 0x801cfa14, name: g_bunit_cmd_window_interior_command}
+  - {addr: 0x801cfa1c, name: g_bunit_gfx_window_zoom_percent}
+  - {addr: 0x801cfa24, name: g_bunit_gfx_blank_cell_rect}
+  - {addr: 0x801cfa38, name: g_bunit_menu_cursor_forward_offset_bytes}
+  - {addr: 0x801cfa38, name: g_bunit_menu_cursor_forward_offset_keyframes}
+  - {addr: 0x801cfa44, name: g_bunit_menu_cursor_reverse_offset_bytes}
+  - {addr: 0x801cfa44, name: g_bunit_menu_cursor_reverse_offset_keyframes}
+  - {addr: 0x801cfa58, name: g_bunit_bouncing_cursor_quad}
+  - {addr: 0x801cfa7c, name: g_bunit_menu_list_scroll_entry_ids}
+  - {addr: 0x801cfa80, name: g_bunit_menu_list_cursor_anim_state}
+  - {addr: 0x801cfa82, name: g_bunit_input_page_scroll_hold_frames}
+  - {addr: 0x801cfa84, name: g_bunit_help_nodes_unit_browse}
+  - {addr: 0x801cfbf8, name: g_bunit_help_node_23_help_base}
+  - {addr: 0x801cfc08, name: g_bunit_help_node_24_help_base}
+  - {addr: 0x801cfc74, name: g_bunit_help_nodes_banner_top}
+  - {addr: 0x801cfd34, name: g_bunit_help_nodes_banner_bottom}
+  - {addr: 0x801cfdf4, name: g_bunit_menu_thread_running}
+  - {addr: 0x801cfdf8, name: g_bunit_help_text_table}
+  - {addr: 0x801e345c, name: g_bunit_help_cursor_anim_state}
+  - {addr: 0x801e345e, name: g_bunit_help_cursor_initialized}
+  - {addr: 0x801e3460, name: g_bunit_bits_reader_reset}
+  - {addr: 0x801e3464, name: g_bunit_bits_index}
+  - {addr: 0x801e3468, name: g_bunit_input_latched_button}
+  - {addr: 0x801e346a, name: g_bunit_input_activation_timer}
+  - {addr: 0x801e346b, name: g_bunit_help_text_state}
+  - {addr: 0x801e346c, name: g_bunit_ability_category}
+  - {addr: 0x801e3470, name: g_bunit_job_list_menu_script}
+  - {addr: 0x801e3549, name: g_bunit_job_list_initialized}
+  - {addr: 0x801e354c, name: g_bunit_ability_list_menu_script}
+  - {addr: 0x801e3739, name: g_bunit_job_menu_active}
+  - {addr: 0x801e373a, name: g_bunit_ability_list_ready}
+  - {addr: 0x801e373c, name: g_bunit_ability_list_job_name_row}
+  - {addr: 0x801e3740, name: g_bunit_gfx_decreasing_fade_active}
+  - {addr: 0x801e3741, name: g_bunit_gfx_increasing_fade_active}
+  - {addr: 0x801e3744, name: g_bunit_gfx_fade_rect}
+  - {addr: 0x801e374c, name: g_bunit_thread_indicator_packets}
+  - {addr: 0x801e3c3c, name: g_bunit_frame_arg}
+  - {addr: 0x801e3c40, name: g_bunit_input_controller}
+  - {addr: 0x801e3c44, name: g_bunit_input_event}
+  - {addr: 0x801e3c48, name: g_bunit_input_current}
+  - {addr: 0x801e3c4c, name: g_bunit_previous_input}
+  - {addr: 0x801e3c50, name: g_bunit_input_initial_repeat_counter}
+  - {addr: 0x801e3c54, name: g_bunit_input_repeat_counter}
+  - {addr: 0x801e3c58, name: g_bunit_input_secondary_repeat_counter}
+  - {addr: 0x801e3c5c, name: g_bunit_gfx_draw_offset_y}
+  - {addr: 0x801e3ca0, name: g_bunit_panel_selected_editor_packets}
+  - {addr: 0x801e42b8, name: g_bunit_panel_selected_packets}
+  - {addr: 0x801e4668, name: g_bunit_panel_comparison_editor_packets}
+  - {addr: 0x801e4c80, name: g_bunit_panel_comparison_packets}
+  - {addr: 0x801e5030, name: g_bunit_panel_selected_number_image}
+  - {addr: 0x801e5730, name: g_bunit_panel_selected_name_image}
+  - {addr: 0x801e5cb0, name: g_bunit_panel_selected_large_number_image}
+  - {addr: 0x801e5da0, name: g_bunit_panel_comparison_number_image}
+  - {addr: 0x801e64a0, name: g_bunit_panel_comparison_name_image}
+  - {addr: 0x801e6a20, name: g_bunit_panel_comparison_large_number_image}
+  - {addr: 0x801e6b10, name: g_bunit_panel_selected_portrait_image}
+  - {addr: 0x801e6b50, name: g_bunit_panel_comparison_portrait_image}
+  - {addr: 0x801e6b90, name: g_bunit_character_status_frames}
+  - {addr: 0x801e7af0, name: g_bunit_character_status_equipment_text_image}
+  - {addr: 0x801e8770, name: g_bunit_character_status_ability_text_image}
+  - {addr: 0x801e93f0, name: g_bunit_editor_numeric_state_a}
+  - {addr: 0x801e9970, name: g_bunit_editor_numeric_state_b}
+  - {addr: 0x801e9ef0, name: g_bunit_editor_numeric_text_a}
+  - {addr: 0x801ea808, name: g_bunit_editor_numeric_text_b}
+  - {addr: 0x801eb120, name: g_bunit_thread_status_snapshot}
+  - {addr: 0x801eb134, name: g_bunit_menu_reorder_list_entries}
+  - {addr: 0x801eb150, name: g_bunit_menu_primary_result}
+  - {addr: 0x801eb152, name: g_bunit_menu_reorder_result}
+  - {addr: 0x801eb154, name: g_bunit_unit_list_count}
+  - {addr: 0x801eb158, name: g_bunit_text_reorder_list_buffer}
+  - {addr: 0x801eb1d8, name: g_bunit_unit_reorderable_count}
+  - {addr: 0x801eb1dc, name: g_bunit_unit_reorderable_indices}
+  - {addr: 0x801eb1f0, name: g_bunit_unit_list_index_map}
+  - {addr: 0x801eb204, name: g_bunit_unit_current_stat_value}
+  - {addr: 0x801eb208, name: g_bunit_unit_max_stat_value}
+  - {addr: 0x801eb20c, name: g_bunit_cursor_trail_points}
+  - {addr: 0x801eb22c, name: g_bunit_menu_selection_records}
+  - {addr: 0x801eb280, name: g_bunit_shown_unit_indices}
+  - {addr: 0x801eb2ac, name: g_bunit_unit_count}
+  - {addr: 0x801eb2b0, name: g_bunit_unit_records}
+  - {addr: 0x801ec8ac, name: g_bunit_menu_list_scroll_progress}
+  - {addr: 0x801ec8b0, name: g_bunit_gfx_sprite_color}
+  - {addr: 0x801ec8b4, name: g_bunit_gfx_otag_index}
+  - {addr: 0x801ec8b8, name: g_bunit_cmd_stream_input}
+  - {addr: 0x801ec8bc, name: g_bunit_menu_list_visible_rows}
+  - {addr: 0x801ec8c0, name: g_bunit_menu_list_row_height}
+  - {addr: 0x801ec8c4, name: g_bunit_menu_list_row_group_count}
+  - {addr: 0x801ec8c8, name: g_bunit_menu_scroll_list_active}
+  - {addr: 0x801ec8cc, name: g_bunit_gfx_semitrans_enabled}
+  - {addr: 0x801ec8d0, name: g_bunit_menu_window_right_x}
+  - {addr: 0x801ec8d4, name: g_bunit_menu_list_redraw_pending}
+  - {addr: 0x801ec8d8, name: g_bunit_menu_list_entries}
+  - {addr: 0x801ec8dc, name: g_bunit_menu_list_text_table}
+  - {addr: 0x801ec8e0, name: g_bunit_gfx_texture_page}
+  - {addr: 0x801ec8e4, name: g_bunit_gfx_clut_id}
+  - {addr: 0x801ec8e8, name: g_bunit_menu_list_vram_width}
+  - {addr: 0x801ec8ec, name: g_bunit_menu_list_glyph_width}
+  - {addr: 0x801ec8f0, name: g_bunit_menu_list_text_columns}
+  - {addr: 0x801ec8f4, name: g_bunit_text_layout_mode}
+  - {addr: 0x801ec8f8, name: g_bunit_menu_list_scroll_direction}
+  - {addr: 0x801ec8fc, name: g_bunit_gfx_otag_index_locked}
+  - {addr: 0x801ec900, name: g_bunit_help_nodes}
+  - {addr: 0x801ec900, name: g_bunit_help_nodes_reload}
+  - {addr: 0x801ec904, name: g_bunit_help_node_index}
+  - {addr: 0x801ec904, name: g_bunit_help_node_index_reload}
+  - {addr: 0x801ec904, name: g_bunit_help_node_index_reload_2}
+  - {addr: 0x801ec908, name: g_bunit_bits_cursor}
+  - {addr: 0x801ec90c, name: g_bunit_input_repeat_counters}
+  - {addr: 0x801ec94c, name: g_bunit_input_previous}
+  - {addr: 0x801ec950, name: g_bunit_menu_selection_values}
+  - {addr: 0x801ec974, name: g_bunit_job_menu_phase}
+  - {addr: 0x801ec978, name: g_bunit_ability_list_confirm_prompt_state}
+  - {addr: 0x801ec97c, name: g_bunit_job_selected_id}
+  - {addr: 0x801ec980, name: g_bunit_job_selected_generic_index}
+  - {addr: 0x801ec984, name: g_bunit_job_ids}
+  - {addr: 0x801ec9b0, name: g_bunit_ability_entries}
+  - {addr: 0x801ec9e4, name: g_bunit_job_current_level}
+  - {addr: 0x801ec9e8, name: g_bunit_job_current_jp}
+  - {addr: 0x801ec9ec, name: g_bunit_job_current_total_jp}
+  - {addr: 0x801ec9f0, name: g_bunit_job_next_level_jp_requirement}
+  - {addr: 0x801ec9f4, name: g_bunit_job_current_mastered}
+  - {addr: 0x801ec9f8, name: g_bunit_ability_type}
+  - {addr: 0x801ec9fc, name: g_bunit_ability_selected_specific}
+  - {addr: 0x801eca00, name: g_bunit_ability_selected_data_1}
+  - {addr: 0x801eca04, name: g_bunit_gfx_fade_color}
+  - {addr: 0x801eca05, name: g_bunit_gfx_fade_color_g}
+  - {addr: 0x801eca06, name: g_bunit_gfx_fade_color_b}
+  - {addr: 0x801eca08, name: g_bunit_gfx_fade_intensity}
+  - {addr: 0x801eca0c, name: g_bunit_menu_input_mask}
+  - {addr: 0x801eca10, name: g_bunit_gfx_poly_f3_capacity}
+  - {addr: 0x801eca14, name: g_bunit_gfx_poly_g3_capacity}
+  - {addr: 0x801eca18, name: g_bunit_gfx_poly_f4_capacity}
+  - {addr: 0x801eca1c, name: g_bunit_gfx_poly_g4_capacity}
+  - {addr: 0x801eca20, name: g_bunit_gfx_poly_f3_count}
+  - {addr: 0x801eca24, name: g_bunit_gfx_poly_g3_count}
+  - {addr: 0x801eca28, name: g_bunit_gfx_poly_f4_count}
+  - {addr: 0x801eca2c, name: g_bunit_gfx_poly_g4_count}
+  - {addr: 0x801eca30, name: g_bunit_text_metric_3}
+  - {addr: 0x801eca34, name: g_bunit_gfx_sprite_capacity}
+  - {addr: 0x801eca38, name: g_bunit_gfx_line_f2_capacity}
+  - {addr: 0x801eca3c, name: g_bunit_gfx_line_g2_capacity}
+  - {addr: 0x801eca40, name: g_bunit_gfx_line_f3_capacity}
+  - {addr: 0x801eca44, name: g_bunit_gfx_line_g3_capacity}
+  - {addr: 0x801eca48, name: g_bunit_gfx_line_f4_capacity}
+  - {addr: 0x801eca4c, name: g_bunit_gfx_line_g4_capacity}
+  - {addr: 0x801eca50, name: g_bunit_gfx_poly_ft3_capacity}
+  - {addr: 0x801eca54, name: g_bunit_gfx_line_f2_count}
+  - {addr: 0x801eca58, name: g_bunit_gfx_poly_gt3_capacity}
+  - {addr: 0x801eca5c, name: g_bunit_gfx_poly_ft4_capacity}
+  - {addr: 0x801eca60, name: g_bunit_gfx_line_g2_count}
+  - {addr: 0x801eca64, name: g_bunit_gfx_line_f3_count}
+  - {addr: 0x801eca68, name: g_bunit_gfx_poly_gt4_capacity}
+  - {addr: 0x801eca6c, name: g_bunit_gfx_line_g3_count}
+  - {addr: 0x801eca70, name: g_bunit_gfx_line_f4_count}
+  - {addr: 0x801eca74, name: g_bunit_gfx_line_g4_count}
+  - {addr: 0x801eca78, name: g_bunit_text_metric_2}
+  - {addr: 0x801eca7c, name: g_bunit_gfx_poly_ft3_count}
+  - {addr: 0x801eca80, name: g_bunit_gfx_poly_gt3_count}
+  - {addr: 0x801eca84, name: g_bunit_gfx_poly_ft4_count}
+  - {addr: 0x801eca88, name: g_bunit_gfx_poly_gt4_count}
+  - {addr: 0x801eca8c, name: g_bunit_gfx_sprite_8_capacity}
+  - {addr: 0x801eca90, name: g_bunit_gfx_drawenv_y}
+  - {addr: 0x801eca94, name: g_bunit_text_metric_1}
+  - {addr: 0x801eca98, name: g_bunit_menu_list_selected_index}
+  - {addr: 0x801eca9c, name: g_bunit_gfx_sprite_16_capacity}
+  - {addr: 0x801ecaa0, name: g_bunit_gfx_otag_count}
+  - {addr: 0x801ecaa4, name: g_bunit_gfx_draw_area_capacity}
+  - {addr: 0x801ecaa8, name: g_bunit_input_primary_repeat}
+  - {addr: 0x801ecaac, name: g_bunit_sound_queued_effect_id}
+  - {addr: 0x801ecab0, name: g_bunit_gfx_draw_area_count}
+  - {addr: 0x801ecab4, name: g_bunit_gfx_draw_mode_capacity}
+  - {addr: 0x801ecab8, name: g_bunit_gfx_tile_capacity}
+  - {addr: 0x801ecabc, name: g_bunit_gfx_draw_mode_count}
+  - {addr: 0x801ecac0, name: g_bunit_gfx_draw_move_capacity}
+  - {addr: 0x801ecac4, name: g_bunit_gfx_tile_count}
+  - {addr: 0x801ecac8, name: g_bunit_gfx_draw_move_count}
+  - {addr: 0x801ecacc, name: g_bunit_gfx_context}
+  - {addr: 0x801ecad0, name: g_bunit_menu_input_active_mask}
+  - {addr: 0x801ecad4, name: g_bunit_input_secondary_repeat}
+  - {addr: 0x801ecad8, name: g_bunit_gfx_sprite_count}
+  - {addr: 0x801ecadc, name: g_bunit_menu_scroll_base_index}
+  - {addr: 0x801ecae0, name: g_bunit_gfx_tile_1_capacity}
+  - {addr: 0x801ecae4, name: g_bunit_text_metric_0}
+  - {addr: 0x801ecae8, name: g_bunit_gfx_tile_8_capacity}
+  - {addr: 0x801ecaec, name: g_bunit_gfx_tile_1_count}
+  - {addr: 0x801ecaf0, name: g_bunit_text_metric_4}
+  - {addr: 0x801ecaf4, name: g_bunit_gfx_tile_8_count}
+  - {addr: 0x801ecaf8, name: g_bunit_unit_data}
+  - {addr: 0x801ecb4c, name: g_bunit_gfx_context_base}
+  - {addr: 0x801ecb50, name: g_bunit_menu_input_repeat_mask}
+  - {addr: 0x801ecb54, name: g_bunit_gfx_sprite_8_count}
+  - {addr: 0x801ecb58, name: g_bunit_gfx_tile_16_capacity}
+  - {addr: 0x801ecb5c, name: g_bunit_text_metric_5}
+  - {addr: 0x801ecb60, name: g_bunit_gfx_tile_16_count}
+  - {addr: 0x801ecb64, name: g_bunit_gfx_sprite_16_count}
+  - {addr: 0x801ecb68, name: g_bunit_help_screen_id}
+  - {addr: 0x801ecb6c, name: g_bunit_text_selection_id}
+  - {addr: 0x801ecb70, name: g_bunit_menu_row_callbacks}
+  - {addr: 0x801ecbb0, name: g_bunit_menu_list_entry_count}
+
+imports:
+  - {addr: 0x800222fc, name: memset}
+---
+module: event-card
+file: EVENT/CARD.OUT
+lba: 2768
+size: 107260
+sha256: c1d269962e0753398c392eef9c9953b17a2c178651cee9b9c3ec5de0eef32173
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf170, size: 56, name: card_save_clear_selection_indices, hash: 0309a94d3656604d, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bf1a8, size: 528, name: card_save_init_menu_graphics, hash: 02499317253c38cb, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bf3b8, size: 1464, name: card_save_run_menu, hash: 36968da9ed76675f, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bf970, size: 268, name: card_save_update_initial_prompt, hash: 6b6ce3c5a628a2a9, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bfa7c, size: 348, name: card_save_update_card_slot_selection, hash: 96c22418dda0eef3, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bfbd8, size: 520, name: card_save_update_slot_scan_result, hash: cf8b28ac678c041a, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bfde0, size: 972, name: card_save_update_slot_write, hash: d56e168b34803142, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c01ac, size: 2056, name: card_save_build_buffer, hash: bfe14a0517ecc7ac, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c09b4, size: 132, name: card_save_init_menu_state, hash: 6c86263b53a6fbe9, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c0a38, size: 544, name: card_save_update_slot_playtime, hash: 8096fa74ff7c2f74, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c0c58, size: 3016, name: card_save_update_slot_scan, hash: 622eaf8505e39a23, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c1820, size: 1288, name: card_save_build_slot_description, hash: b3ddcca4afe44418, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c1d28, size: 328, name: card_save_render_slot_text, hash: 2da3dbfa2b6e7fca, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c1e70, size: 344, name: card_save_init_occupied_slot_selection, hash: f7e390f9e0843bbf, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c1fc8, size: 3392, name: card_save_update_and_draw_slot_list, hash: e26df89b1acc9c61, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c2d08, size: 416, name: card_save_update_slot_scroll, hash: 07553e7d79ca258a, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c2ea8, size: 1568, name: card_build_save_file_header, hash: 1f7a34d4f23fd2e5, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c34c8, size: 720, name: card_gfx_set_scaled_poly_ft4_geometry_and_uv, hash: ab60dde2e48b7b56}
+  - {addr: 0x801c3798, size: 692, name: card_gfx_build_scaled_sprite_primitive_chain, hash: 34043b3fe18fd9cf}
+  - {addr: 0x801c3a4c, size: 896, name: card_input_update_event_state, hash: cf38d088504d874f, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c3dcc, size: 16, name: card_gfx_set_render_otag, hash: 9eb022e91cab3006}
+  - {addr: 0x801c3ddc, size: 296, name: card_save_run_menu_graphic_thread, hash: 88afd9c80e51af44}
+  - {addr: 0x801c3f04, size: 48, name: card_io_set_selected_slot, hash: dc02e68d0f30eb16, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c3f34, size: 56, name: card_io_get_selected_slot, hash: 2f074cef01de197a, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c3f6c, size: 56, name: card_io_consume_all_events, hash: af1eff05aa71709e, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c3fa4, size: 248, name: card_io_poll_bios_event_result, hash: b09a0624ae5e127d, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c409c, size: 168, name: card_io_wait_bios_event_result, hash: fc301b8babbf74b6, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4144, size: 104, name: card_io_consume_bios_events, hash: a0f0be2c6ce6bde9, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c41ac, size: 248, name: card_io_poll_hardware_event_result, hash: 92e49506b53967d8, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c42a4, size: 168, name: card_io_wait_hardware_event_result, hash: 2f0cbf7c56fcbf89, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c434c, size: 104, name: card_io_consume_hardware_events, hash: ec79e4bca9f78540, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c43b4, size: 200, name: card_io_get_info_with_retries, hash: 49d3c18bd212606b, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c447c, size: 212, name: card_io_load_with_retries, hash: 6dfa7ffea75b5fd9, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4550, size: 260, name: card_io_create_new_with_retries, hash: 8609d7bd3b3fc054, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4654, size: 296, name: card_io_poll_operation_result, hash: 7dcc7e43e91a981c, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c477c, size: 188, name: card_io_wait_operation_result, hash: 3b0dcd32d1f1f06e, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4838, size: 332, name: card_file_enumerate_saves, hash: 778a5a68dcafa7fc, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4984, size: 308, name: card_file_count_free_blocks, hash: 28fc8e05262732fe, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4ab8, size: 252, name: card_io_open_or_create_selected_card, hash: 1ed8b4b736cbd106, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4bb4, size: 232, name: card_io_format_selected_slot, hash: aa0f2ed47297b3c4, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4c9c, size: 384, name: card_file_open_selected_with_retries, hash: 8ad8e65a7cc2f553, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4e1c, size: 208, name: card_file_close_with_retries, hash: 3d4656824a2716d1, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4eec, size: 204, name: card_file_seek_with_retries, hash: 5513bda3c8478b59, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c4fb8, size: 684, name: card_file_write_buffer, hash: 66315f155df10733, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c5264, size: 276, name: card_file_delete_selected_with_retries, hash: 98a020db69d65c10, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c5378, size: 336, name: card_file_read_with_retries, hash: f5e8826fc23a26c9, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c54c8, size: 336, name: card_file_write_with_retries, hash: 26895f5b5e42b5a9, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c5618, size: 268, name: card_gfx_submit_frame_and_swap_buffers, hash: a0c3f91dfab11c0a}
+  - {addr: 0x801c5724, size: 188, name: card_gfx_init_primitive_lists, hash: 5281de40b6d6fde6}
+  - {addr: 0x801c57e0, size: 464, name: card_gfx_init_contexts, hash: 17d58bd69695ffbe}
+  - {addr: 0x801c59b0, size: 52, name: card_menu_set_event_speed, hash: 48e5f4bdd9a23db4}
+  - {addr: 0x801c59e4, size: 32, name: card_menu_get_event_speed, hash: 950823f3780118ae}
+  - {addr: 0x801c5a04, size: 180, name: card_cmd_draw_textured_quad_handler, hash: 80bb4d6a52a62e83}
+  - {addr: 0x801c5ab8, size: 1832, name: card_cmd_draw_window_frame_handler, hash: 0f8c1fe24c89ed4f}
+  - {addr: 0x801c61e0, size: 816, name: card_cmd_draw_tiled_rectangle_handler, hash: 6bf11123f13510a0}
+  - {addr: 0x801c6510, size: 84, name: card_cmd_set_tpage_handler, hash: c033f758528baa4e}
+  - {addr: 0x801c6564, size: 24, name: card_cmd_set_otag_index_handler, hash: 866b1fe58b80beba}
+  - {addr: 0x801c657c, size: 400, name: card_cmd_draw_decimal_number_handler, hash: 86de3729d1341209}
+  - {addr: 0x801c670c, size: 652, name: card_menu_update_and_draw_animated_cursor, hash: d2bf3388d465f9d3}
+  - {addr: 0x801c6998, size: 44, name: card_gfx_set_draw_color, hash: 56f9f1312189e13e}
+  - {addr: 0x801c69c4, size: 16, name: card_gfx_set_otag_index, hash: e32615753d53f066}
+  - {addr: 0x801c69d4, size: 220, name: card_text_set_palette_and_metrics, hash: 54dc2b565735014d}
+  - {addr: 0x801c6ab0, size: 16, name: card_gfx_get_draw_color, hash: d7432486c75c5701}
+  - {addr: 0x801c6ac0, size: 308, name: card_text_render_glyph_to_4bpp_image, hash: 57bd6d2052065015}
+  - {addr: 0x801c6bf4, size: 92, name: card_text_skip_encoded_segments, hash: f63f536b1105c27b}
+  - {addr: 0x801c6c50, size: 648, name: card_text_render_encoded_ids_to_image, hash: 2c7fd05e27cafa08}
+  - {addr: 0x801c6ed8, size: 120, name: card_thread_start_if_idle, hash: 87c0e98d46e6c909}
+  - {addr: 0x801c6f50, size: 224, name: card_text_start_thread_for_key, hash: 77aa21d89789557e}
+  - {addr: 0x801c7030, size: 40, name: card_thread_request_stop, hash: ea52b0a734b83ec7}
+  - {addr: 0x801c7058, size: 84, name: card_text_count_encoded_glyphs, hash: 913de49b8f13d563}
+  - {addr: 0x801c70ac, size: 264, name: card_text_render_id_rows_to_vram, hash: b0397e2667e01217}
+  - {addr: 0x801c71b4, size: 40, name: card_thread_stop_and_clear_state, hash: 966ee997927b0d37}
+  - {addr: 0x801c71dc, size: 92, name: card_thread_wait_and_clear_state, hash: e30c6fb66d27c973}
+  - {addr: 0x801c7238, size: 156, name: card_thread_start_managed, hash: c61eda6b69ac7d32}
+  - {addr: 0x801c72d4, size: 176, name: card_thread_start_managed_with_delay, hash: 52993ac90ae34196}
+  - {addr: 0x801c7384, size: 28, name: card_bits_init_primary_reader, hash: 54e0a4bece7b2596}
+  - {addr: 0x801c73a0, size: 28, name: card_bits_init_secondary_reader, hash: fe997547c3c389ab}
+  - {addr: 0x801c73bc, size: 172, name: card_bits_read_primary, hash: f39395a59ee56a46}
+  - {addr: 0x801c7468, size: 188, name: card_bits_write_primary, hash: b5df968a63ba61b1}
+  - {addr: 0x801c7524, size: 172, name: card_bits_read_secondary, hash: b76504149dc8bdb7}
+  - {addr: 0x801c75d0, size: 852, name: card_input_update_controller, hash: 7396270625cbf48d}
+  - {addr: 0x801c7924, size: 72, name: card_input_update_suppressed_during_fade, hash: 19864c090aa0c1dd}
+  - {addr: 0x801c796c, size: 32, name: card_input_clear_state, hash: 0dfe393e053ade05}
+  - {addr: 0x801c798c, size: 256, name: card_gfx_enqueue_translucent_tile, hash: 3b2718e061a53ee0}
+  - {addr: 0x801c7a8c, size: 632, name: card_gfx_enqueue_textured_quad_list, hash: f2057af634606a26}
+  - {addr: 0x801c7d04, size: 532, name: card_gfx_enqueue_textured_quad, hash: 2a6d85de60b3c978}
+  - {addr: 0x801c7f18, size: 1044, name: card_gfx_enqueue_oriented_textured_quad, hash: fcce98126bfc750a}
+  - {addr: 0x801c832c, size: 188, name: card_gfx_set_draw_mode_and_link_ot, hash: c667c941abe2c0ef}
+  - {addr: 0x801c83e8, size: 28, name: card_gfx_get_fade_state, hash: 3d58bc7e5f66be2e}
+  - {addr: 0x801c8404, size: 32, name: card_gfx_start_decreasing_fade, hash: 266e2c4662c1408a}
+  - {addr: 0x801c8424, size: 28, name: card_gfx_start_increasing_fade, hash: 446845d4250e5cb9}
+  - {addr: 0x801c8440, size: 228, name: card_gfx_update_decreasing_fade, hash: aa46b43783d989f6}
+  - {addr: 0x801c8524, size: 248, name: card_gfx_update_increasing_fade, hash: fa31b82b72f366f9}
+  - {addr: 0x801c861c, size: 48, name: card_gfx_load_image_and_wait, hash: be3db739ba4a6ec6}
+  - {addr: 0x801c864c, size: 48, name: card_gfx_store_image_and_wait, hash: 42b445a1713fca16}
+
+data:
+  - {addr: 0x801bf12c, name: g_card_save_title_template}
+  - {addr: 0x801bf144, name: g_card_file_slot_0_path}
+  - {addr: 0x801bf14c, name: g_card_file_slot_1_path}
+  - {addr: 0x801bf154, name: g_card_save_file_pattern}
+  - {addr: 0x801bf168, name: g_card_file_all_pattern}
+  - {addr: 0x801bf16c, name: g_card_text_decimal_format}
+  - {addr: 0x801c867c, name: g_card_sound_queued_effect_id}
+  - {addr: 0x801c8680, name: g_card_save_file_names}
+  - {addr: 0x801c86bc, name: g_card_text_data}
+  - {addr: 0x801c87b4, name: g_card_text_command_help}
+  - {addr: 0x801c8b3c, name: g_card_text_location_name}
+  - {addr: 0x801c8dec, name: g_card_text_job_name}
+  - {addr: 0x801c9370, name: g_card_save_menu_palette_image}
+  - {addr: 0x801c9570, name: g_card_save_list_cursor_index}
+  - {addr: 0x801c9572, name: g_card_save_list_scroll_anim_offset}
+  - {addr: 0x801c9574, name: g_card_save_list_scroll_base_y}
+  - {addr: 0x801c9576, name: g_card_save_list_selected_slot}
+  - {addr: 0x801c9578, name: g_card_save_list_top_row}
+  - {addr: 0x801c957c, name: g_card_save_initial_prompt_timer}
+  - {addr: 0x801c9580, name: g_card_menu_selection_index}
+  - {addr: 0x801c9582, name: g_card_save_slot_index}
+  - {addr: 0x801c9584, name: g_card_save_completed}
+  - {addr: 0x801c9588, name: g_card_gfx_fullscreen_fade_rect}
+  - {addr: 0x801c9590, name: g_card_gfx_fade_overlay_color}
+  - {addr: 0x801c9594, name: g_card_save_initial_prompt_descriptor}
+  - {addr: 0x801c960c, name: g_card_save_initial_prompt_thread_state}
+  - {addr: 0x801c9610, name: g_card_save_card_slot_selection_descriptor}
+  - {addr: 0x801c9688, name: g_card_save_slot_selection_thread_state}
+  - {addr: 0x801c968c, name: g_card_save_no_data_prompt_descriptor}
+  - {addr: 0x801c96c8, name: g_card_save_slot_scan_prompt_descriptor}
+  - {addr: 0x801c96cc, name: g_card_save_in_progress_thread_descriptor}
+  - {addr: 0x801c9708, name: g_card_save_checking_message_descriptor}
+  - {addr: 0x801c9744, name: g_card_save_failure_thread_descriptor}
+  - {addr: 0x801c9780, name: g_card_save_write_phase}
+  - {addr: 0x801c9784, name: g_card_save_format_prompt_descriptor}
+  - {addr: 0x801c97fc, name: g_card_save_overwrite_prompt_descriptor}
+  - {addr: 0x801c9874, name: g_card_save_formatting_message_descriptor}
+  - {addr: 0x801c98b0, name: g_card_save_card_error_prompt_descriptor}
+  - {addr: 0x801c98ec, name: g_card_save_slot_scan_active}
+  - {addr: 0x801c98ee, name: g_card_save_format_delay_counter}
+  - {addr: 0x801c98ef, name: g_card_save_error_prompt_closing}
+  - {addr: 0x801c98f0, name: g_card_save_slot_window_command}
+  - {addr: 0x801c98f8, name: g_card_save_slot_window_rect_source}
+  - {addr: 0x801c9900, name: g_card_save_slot_row_y}
+  - {addr: 0x801c9908, name: g_card_save_slot_text_row_ids}
+  - {addr: 0x801c9910, name: g_card_save_slot_number_commands}
+  - {addr: 0x801c9940, name: g_card_save_slot_cursor_position}
+  - {addr: 0x801c9944, name: g_card_save_slot_cursor_animation}
+  - {addr: 0x801c9946, name: g_card_save_list_input_armed}
+  - {addr: 0x801c9947, name: g_card_save_overwrite_prompt_active}
+  - {addr: 0x801c994c, name: g_card_save_slot_quads}
+  - {addr: 0x801c9d20, name: g_card_save_icon_records}
+  - {addr: 0x801ca680, name: g_card_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801ca688, name: g_card_gfx_draw_area_template}
+  - {addr: 0x801ca690, name: g_card_gfx_scaled_sprite_uv_rects}
+  - {addr: 0x801ca7ec, name: g_card_gfx_scaled_sprite_scale}
+  - {addr: 0x801ca861, name: g_card_gfx_scaled_sprite_count}
+  - {addr: 0x801ca864, name: g_card_input_display_state}
+  - {addr: 0x801ca870, name: g_card_input_display_scale_x}
+  - {addr: 0x801ca872, name: g_card_input_display_scale_y}
+  - {addr: 0x801ca888, name: g_card_file_open_descriptor}
+  - {addr: 0x801ca88c, name: g_card_io_selected_slot}
+  - {addr: 0x801ca88d, name: g_card_io_operation_pending}
+  - {addr: 0x801ca890, name: g_card_menu_event_speed}
+  - {addr: 0x801ca89c, name: g_card_text_digit_texture_page}
+  - {addr: 0x801ca89e, name: g_card_menu_cursor_texture_page}
+  - {addr: 0x801ca8a0, name: g_card_text_clut_2_mode0}
+  - {addr: 0x801ca8a2, name: g_card_text_clut_2_mode1}
+  - {addr: 0x801ca8a4, name: g_card_text_clut_1_mode1}
+  - {addr: 0x801ca8a6, name: g_card_text_clut_1_mode0}
+  - {addr: 0x801ca8a8, name: g_card_text_clut_3_mode0}
+  - {addr: 0x801ca8aa, name: g_card_text_clut_3_mode1}
+  - {addr: 0x801ca8ae, name: g_card_menu_cursor_mode0_foreground_clut}
+  - {addr: 0x801ca8b0, name: g_card_menu_cursor_mode0_background_clut}
+  - {addr: 0x801ca8b2, name: g_card_menu_cursor_mode1_foreground_clut}
+  - {addr: 0x801ca8b4, name: g_card_menu_cursor_mode1_background_clut}
+  - {addr: 0x801ca8c4, name: g_card_text_clut_0_mode1}
+  - {addr: 0x801ca8c6, name: g_card_text_clut_0_mode0}
+  - {addr: 0x801ca910, name: g_card_cmd_window_interior_command}
+  - {addr: 0x801ca918, name: g_card_menu_cursor_forward_offset_keyframes}
+  - {addr: 0x801ca924, name: g_card_menu_cursor_reverse_offset_keyframes}
+  - {addr: 0x801ca93c, name: g_card_thread_state}
+  - {addr: 0x801ca940, name: g_card_bits_primary_reset}
+  - {addr: 0x801ca941, name: g_card_bits_reader_2_reset}
+  - {addr: 0x801ca944, name: g_card_bits_reader_1_index}
+  - {addr: 0x801ca948, name: g_card_bits_writer_1_index}
+  - {addr: 0x801ca94c, name: g_card_bits_reader_2_index}
+  - {addr: 0x801ca950, name: g_card_input_activation_timer}
+  - {addr: 0x801ca954, name: g_card_gfx_decreasing_fade_active}
+  - {addr: 0x801ca955, name: g_card_gfx_increasing_fade_active}
+  - {addr: 0x801ca958, name: g_card_gfx_fade_rect}
+  - {addr: 0x801ca960, name: g_card_save_write_failed}
+  - {addr: 0x801ca964, name: D_801ca964}
+  - {addr: 0x801ca968, name: g_card_save_buffer}
+  - {addr: 0x801cc7e8, name: g_card_io_open_result}
+  - {addr: 0x801cc7f0, name: g_card_save_format_prompt_active}
+  - {addr: 0x801cc7f4, name: g_card_save_slot_scan_index}
+  - {addr: 0x801cc7f8, name: g_card_free_block_count}
+  - {addr: 0x801cc800, name: g_card_save_file_count}
+  - {addr: 0x801cc804, name: g_card_save_scan_setup_step}
+  - {addr: 0x801cc808, name: g_card_save_buffer_pointer}
+  - {addr: 0x801cc80c, name: g_card_save_menu_state}
+  - {addr: 0x801cc810, name: g_card_save_menu_work_buffer}
+  - {addr: 0x801cc814, name: g_card_save_occupied_slot_count}
+  - {addr: 0x801cc818, name: g_card_gfx_poly_ft4_buffers}
+  - {addr: 0x801d8398, name: g_card_save_slot_descriptions}
+  - {addr: 0x801d8848, name: g_card_input_event}
+  - {addr: 0x801d884c, name: g_card_input_controller}
+  - {addr: 0x801d8850, name: g_card_input_current}
+  - {addr: 0x801d8854, name: g_card_previous_input}
+  - {addr: 0x801d8858, name: g_card_input_initial_repeat_counter}
+  - {addr: 0x801d885c, name: g_card_input_repeat_counter}
+  - {addr: 0x801d8860, name: g_card_input_secondary_repeat_counter}
+  - {addr: 0x801d8864, name: g_card_thread_status_snapshot}
+  - {addr: 0x801d8874, name: g_card_gfx_scaled_sprite_primitive_buffers}
+  - {addr: 0x801d91d4, name: g_card_gfx_render_otag}
+  - {addr: 0x801d91d8, name: g_card_text_color}
+  - {addr: 0x801d91dc, name: g_card_text_otag_index}
+  - {addr: 0x801d91e0, name: g_card_gfx_draw_semitrans}
+  - {addr: 0x801d91e4, name: g_card_menu_window_right_x}
+  - {addr: 0x801d91f0, name: g_card_gfx_texture_page}
+  - {addr: 0x801d91f4, name: g_card_gfx_draw_clut}
+  - {addr: 0x801d91f8, name: g_card_text_layout_mode}
+  - {addr: 0x801d9202, name: g_card_gfx_tiled_rect}
+  - {addr: 0x801d920c, name: g_card_thread_active_key}
+  - {addr: 0x801d9210, name: g_card_bits_primary_cursor}
+  - {addr: 0x801d9214, name: g_card_bits_reader_2_stream}
+  - {addr: 0x801d9218, name: g_card_input_repeat_counters}
+  - {addr: 0x801d9258, name: g_card_input_previous}
+  - {addr: 0x801d925c, name: g_card_input_latched_button}
+  - {addr: 0x801d9260, name: g_card_gfx_fade_color}
+  - {addr: 0x801d9261, name: g_card_gfx_fade_color_g}
+  - {addr: 0x801d9262, name: g_card_gfx_fade_color_b}
+  - {addr: 0x801d9264, name: g_card_gfx_fade_intensity}
+  - {addr: 0x801d9268, name: g_card_input_newly_pressed}
+  - {addr: 0x801d926c, name: g_card_text_metric_3}
+  - {addr: 0x801d9270, name: g_card_gfx_poly_ft4_capacity}
+  - {addr: 0x801d9274, name: g_card_text_metric_2}
+  - {addr: 0x801d9278, name: g_card_gfx_poly_ft4_count}
+  - {addr: 0x801d927c, name: g_card_gfx_drawenv_y}
+  - {addr: 0x801d9280, name: g_card_text_digit_clut}
+  - {addr: 0x801d9280, name: g_card_text_metric_1}
+  - {addr: 0x801d9288, name: g_card_gfx_otag_length}
+  - {addr: 0x801d928c, name: g_card_gfx_tile_capacity}
+  - {addr: 0x801d9290, name: g_card_gfx_tile_count}
+  - {addr: 0x801d9294, name: g_card_gfx_context}
+  - {addr: 0x801d9298, name: g_card_input_primary_repeat}
+  - {addr: 0x801d92a0, name: g_card_text_metric_0}
+  - {addr: 0x801d92a4, name: g_card_text_metric_4}
+  - {addr: 0x801d92a8, name: g_card_gfx_context_base}
+  - {addr: 0x801d92ac, name: g_card_input_secondary_repeat}
+  - {addr: 0x801d92b0, name: g_card_text_metric_5}
+  - {addr: 0x801d92b4, name: g_card_menu_window_rect_source}
+  - {addr: 0x801d92b8, name: g_card_menu_script_callback}
+
+imports:
+  - {addr: 0x800222fc, name: memset}
+---
+module: event-debugchr
+file: EVENT/DEBUGCHR.OUT
+lba: 2512
+size: 64756
+sha256: cd25a1a9790eba822df3846240772db11aa5af75e41d5857583fa62472cc09a0
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf000, size: 464, name: debugchr_gfx_build_scaled_draw_area_packets, hash: c8fda5f772410a7c}
+  - {addr: 0x801bf1d0, size: 52, name: debugchr_gfx_init_scaled_draw_area_packets, hash: 50cc2b9872fcf539}
+  - {addr: 0x801bf204, size: 44, name: debugchr_gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276}
+  - {addr: 0x801bf230, size: 48, name: debugchr_gfx_build_portrait_poly_ft4, hash: cb86608938578cd2}
+  - {addr: 0x801bf260, size: 100, name: debugchr_gfx_clip_portrait_poly_from_right, hash: b486060e906e736a}
+  - {addr: 0x801bf2c4, size: 100, name: debugchr_gfx_clip_portrait_poly_from_left, hash: acc71cf2f3953a3f}
+  - {addr: 0x801bf328, size: 1064, name: debugchr_gfx_build_portrait_transition_primitives, hash: 28dadc40ac60e2ca}
+  - {addr: 0x801bf750, size: 4540, name: debugchr_render_unit_status_panel_thread, hash: 54bc0c002cea8319, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c090c, size: 8, name: debugchr_noop_801c090c, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c0914, size: 544, name: debugchr_gfx_init_menu_tile_and_line_primitives, hash: c0c46a118253c8ae}
+  - {addr: 0x801c0b34, size: 40, name: debugchr_thread_stop_after_yield, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0b5c, size: 40, name: debugchr_thread_stop_after_yield_2, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0b84, size: 1932, name: debugchr_panel_run_character_status_thread, hash: c6c24e466ddf3b87}
+  - {addr: 0x801c1310, size: 380, name: debugchr_panel_set_primitive_colors, hash: 76cde603c79a62bb}
+  - {addr: 0x801c148c, size: 84, name: debugchr_gfx_apply_menu_palette_for_mode, hash: 2f9f4012d54fe639}
+  - {addr: 0x801c14e0, size: 268, name: debugchr_text_render_signed_decimal_entries, hash: 83b20a6522686833}
+  - {addr: 0x801c15ec, size: 244, name: debugchr_text_render_decimal_entry_list, hash: e69a669a8f390ae0}
+  - {addr: 0x801c16e0, size: 772, name: debugchr_text_render_decimal_value, hash: 03dd737c13c51831}
+  - {addr: 0x801c19e4, size: 1380, name: debugchr_editor_run_numeric_thread, hash: 2d037c5ffcc03bfd}
+  - {addr: 0x801c1f48, size: 496, name: debugchr_menu_run_thread, hash: 8b017b936086850d}
+  - {addr: 0x801c2138, size: 248, name: debugchr_menu_open_submenu_thread, hash: f178e37cccaef173}
+  - {addr: 0x801c2230, size: 372, name: debugchr_menu_run_simple_selection_thread, hash: 1ab523580e5686a2}
+  - {addr: 0x801c23a4, size: 104, name: debugchr_gfx_build_item_graphic_descriptor, hash: 7085296bf6f5bbac}
+  - {addr: 0x801c240c, size: 8, name: debugchr_noop_801c240c, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c2414, size: 28, name: debugchr_thread_is_running, hash: d10e3403d7fec970}
+  - {addr: 0x801c2430, size: 1236, name: debugchr_menu_draw_thread_status_indicators, hash: 42aee85dfc3d3b51}
+  - {addr: 0x801c2904, size: 32, name: debugchr_text_clear_string_buffer, hash: 5eaa92c4790153fd}
+  - {addr: 0x801c2924, size: 460, name: debugchr_panel_copy_unit_data_to_billboard, hash: dc13403e0a243847}
+  - {addr: 0x801c2af0, size: 1348, name: debugchr_editor_load_selected_unit, hash: 944be0b3f140f098}
+  - {addr: 0x801c3034, size: 580, name: debugchr_gfx_set_scaled_poly_ft4_geometry, hash: f989278e90fdce7c}
+  - {addr: 0x801c3278, size: 700, name: debugchr_gfx_build_status_group_primitives, hash: ab6f9af67d5cf2a8}
+  - {addr: 0x801c3534, size: 400, name: debugchr_gfx_build_gradient_grid_primitives, hash: 57acda65df169872}
+  - {addr: 0x801c36c4, size: 720, name: debugchr_gfx_set_scaled_poly_ft4_geometry_and_uv, hash: ab60dde2e48b7b56}
+  - {addr: 0x801c3994, size: 692, name: debugchr_gfx_build_scaled_sprite_primitive_chain, hash: 73434c5bdf08700a}
+  - {addr: 0x801c3c48, size: 316, name: debugchr_editor_apply_values_to_battle_unit, hash: 1ccc2cc747f36f75}
+  - {addr: 0x801c3d84, size: 1544, name: debugchr_editor_run_unit_thread, hash: 609e3c9ca09a8630}
+  - {addr: 0x801c438c, size: 3768, name: debugchr_run_character_debug_session, hash: 358e46ce9946d944}
+
+data:
+  - {addr: 0x801c52a4, name: g_debugchr_editor_active}
+  - {addr: 0x801c52b0, name: g_debugchr_menu_indicator_packet_index}
+  - {addr: 0x801c52b8, name: g_debugchr_menu_indicator_brightness}
+  - {addr: 0x801c52c0, name: g_debugchr_menu_indicator_fade_work}
+  - {addr: 0x801c52c8, name: g_debugchr_menu_indicator_state}
+  - {addr: 0x801c52dc, name: g_debugchr_panel_selected_billboard}
+  - {addr: 0x801c52e8, name: g_debugchr_editor_values}
+  - {addr: 0x801c52ec, name: g_debugchr_editor_first_maximum}
+  - {addr: 0x801c52f2, name: g_debugchr_editor_second_maximum}
+  - {addr: 0x801c52f8, name: g_debugchr_editor_third_maximum}
+  - {addr: 0x801c5300, name: g_debugchr_panel_comparison_billboard}
+  - {addr: 0x801c5324, name: g_debugchr_panel_selected_unit_data}
+  - {addr: 0x801c5326, name: g_debugchr_editor_unit_type}
+  - {addr: 0x801c5328, name: g_debugchr_editor_brave}
+  - {addr: 0x801c532a, name: g_debugchr_editor_faith}
+  - {addr: 0x801c532c, name: g_debugchr_editor_zodiac}
+  - {addr: 0x801c532e, name: g_debugchr_editor_selected_unit_id}
+  - {addr: 0x801c5334, name: g_debugchr_panel_comparison_unit_data}
+  - {addr: 0x801c533e, name: g_debugchr_panel_comparison_unit_id}
+  - {addr: 0x801c5344, name: g_debugchr_editor_move}
+  - {addr: 0x801c5344, name: g_debugchr_editor_unit_fields}
+  - {addr: 0x801c5346, name: g_debugchr_editor_speed}
+  - {addr: 0x801c5348, name: g_debugchr_editor_jump}
+  - {addr: 0x801c5352, name: g_debugchr_editor_display_mode}
+  - {addr: 0x801c53c4, name: g_debugchr_editor_third_ability_bytes}
+  - {addr: 0x801c53d8, name: g_debugchr_editor_fourth_ability_bytes}
+  - {addr: 0x801c53ec, name: g_debugchr_editor_first_ability_bytes}
+  - {addr: 0x801c5400, name: g_debugchr_editor_second_ability_bytes}
+  - {addr: 0x801c5414, name: g_debugchr_editor_numeric_geometry}
+  - {addr: 0x801c5414, name: g_debugchr_panel_status_texture}
+  - {addr: 0x801c541a, name: g_debugchr_panel_slide_up_y}
+  - {addr: 0x801c541c, name: g_debugchr_panel_item_icon_texture}
+  - {addr: 0x801c5422, name: g_debugchr_panel_slide_down_y}
+  - {addr: 0x801c543c, name: g_debugchr_gfx_portrait_origin}
+  - {addr: 0x801c5444, name: g_debugchr_panel_gauge_bar_colors}
+  - {addr: 0x801c5474, name: g_debugchr_panel_selected_numeric_entries}
+  - {addr: 0x801c54ec, name: g_debugchr_panel_comparison_numeric_entries}
+  - {addr: 0x801c5564, name: g_debugchr_panel_editor_label_cells}
+  - {addr: 0x801c55ac, name: g_debugchr_panel_editor_mode_cell}
+  - {addr: 0x801c55b8, name: g_debugchr_panel_editor_value_cells}
+  - {addr: 0x801c55e8, name: g_debugchr_panel_frame_rect}
+  - {addr: 0x801c55f0, name: g_debugchr_panel_sprite_cells}
+  - {addr: 0x801c5644, name: g_debugchr_panel_portrait_cell}
+  - {addr: 0x801c5650, name: g_debugchr_gfx_draw_area_template}
+  - {addr: 0x801c5652, name: g_debugchr_panel_status_position_y}
+  - {addr: 0x801c5658, name: g_debugchr_gfx_draw_area_scale_percent}
+  - {addr: 0x801c5670, name: g_debugchr_panel_editor_value_cluts}
+  - {addr: 0x801c5680, name: g_debugchr_panel_editor_label_cluts}
+  - {addr: 0x801c569c, name: g_debugchr_panel_editor_mode_cells}
+  - {addr: 0x801c56cc, name: g_debugchr_panel_selected_portrait_rect}
+  - {addr: 0x801c56d4, name: g_debugchr_panel_comparison_portrait_rect}
+  - {addr: 0x801c56dc, name: g_debugchr_gfx_portrait_transition_offsets}
+  - {addr: 0x801c5710, name: g_debugchr_panel_origin_offsets}
+  - {addr: 0x801c5720, name: g_debugchr_character_status_frame_rect}
+  - {addr: 0x801c5738, name: g_debugchr_character_status_draw_area_rect}
+  - {addr: 0x801c5740, name: g_debugchr_panel_text_upload_rect_a}
+  - {addr: 0x801c5748, name: g_debugchr_panel_text_upload_rect_b}
+  - {addr: 0x801c5750, name: g_debugchr_panel_label_layouts_mode0}
+  - {addr: 0x801c5834, name: g_debugchr_panel_label_layouts_mode1}
+  - {addr: 0x801c5918, name: g_debugchr_panel_label_layouts_mode2}
+  - {addr: 0x801c59fc, name: g_debugchr_panel_label_layouts_mode3}
+  - {addr: 0x801c5b40, name: g_debugchr_panel_item_icon_layouts}
+  - {addr: 0x801c5b7c, name: g_debugchr_editor_numeric_table}
+  - {addr: 0x801c5b8c, name: g_debugchr_editor_numeric_entries_a}
+  - {addr: 0x801c5b94, name: g_debugchr_editor_numeric_entries_b}
+  - {addr: 0x801c5b9c, name: g_debugchr_editor_numeric_entries_c}
+  - {addr: 0x801c5ba4, name: g_debugchr_editor_numeric_entries_d}
+  - {addr: 0x801c5bac, name: g_debugchr_editor_numeric_entries_e}
+  - {addr: 0x801c5bb4, name: g_debugchr_editor_numeric_entries_f}
+  - {addr: 0x801c5bbc, name: g_debugchr_editor_numeric_texture}
+  - {addr: 0x801c5c94, name: g_debugchr_editor_numeric_descriptor_a}
+  - {addr: 0x801c5d48, name: g_debugchr_editor_numeric_descriptor_b}
+  - {addr: 0x801c5e20, name: g_debugchr_text_decimal_glyph}
+  - {addr: 0x801c5e34, name: g_debugchr_editor_template}
+  - {addr: 0x801c5ee4, name: g_debugchr_editor_template_normal}
+  - {addr: 0x801c5f94, name: g_debugchr_editor_template_special}
+  - {addr: 0x801c6044, name: g_debugchr_editor_fields}
+  - {addr: 0x801c6198, name: g_debugchr_panel_status_uv_rects}
+  - {addr: 0x801c6530, name: g_debugchr_panel_status_scales}
+  - {addr: 0x801c6664, name: g_debugchr_panel_status_group_bounds}
+  - {addr: 0x801c6673, name: g_debugchr_panel_status_group_count}
+  - {addr: 0x801c6674, name: g_debugchr_panel_status_group_ids}
+  - {addr: 0x801c667c, name: g_debugchr_panel_status_animation}
+  - {addr: 0x801c6684, name: g_debugchr_panel_status_y_offsets}
+  - {addr: 0x801c6698, name: g_debugchr_panel_status_offsets}
+  - {addr: 0x801c66d4, name: g_debugchr_gfx_scaled_sprite_uv_rects}
+  - {addr: 0x801c6830, name: g_debugchr_gfx_scaled_sprite_scale}
+  - {addr: 0x801c68a5, name: g_debugchr_gfx_scaled_sprite_count}
+  - {addr: 0x801c68a8, name: g_debugchr_status_display_thread_params}
+  - {addr: 0x801c68b4, name: g_debugchr_panel_refresh_a}
+  - {addr: 0x801c68b8, name: g_debugchr_thread_refresh_a}
+  - {addr: 0x801c68bc, name: g_debugchr_numeric_editor_thread_params}
+  - {addr: 0x801c68c8, name: g_debugchr_panel_refresh_b}
+  - {addr: 0x801c68cc, name: g_debugchr_thread_refresh_b}
+  - {addr: 0x801c68d0, name: g_debugchr_character_status_frame_config}
+  - {addr: 0x801c68dc, name: g_debugchr_panel_refresh_c}
+  - {addr: 0x801c68e0, name: g_debugchr_thread_refresh_c}
+  - {addr: 0x801c68e4, name: g_debugchr_editor_unit_ids}
+  - {addr: 0x801c68fc, name: g_debugchr_thread_indicator_packets}
+  - {addr: 0x801c6dec, name: g_debugchr_input_controller}
+  - {addr: 0x801c6e08, name: g_debugchr_gfx_draw_offset_y}
+  - {addr: 0x801c6e4c, name: g_debugchr_panel_selected_editor_packets}
+  - {addr: 0x801c7464, name: g_debugchr_panel_selected_packets}
+  - {addr: 0x801c7814, name: g_debugchr_panel_comparison_editor_packets}
+  - {addr: 0x801c7e2c, name: g_debugchr_panel_comparison_packets}
+  - {addr: 0x801c81dc, name: g_debugchr_panel_selected_number_image}
+  - {addr: 0x801c88dc, name: g_debugchr_panel_selected_name_image}
+  - {addr: 0x801c8e5c, name: g_debugchr_panel_selected_large_number_image}
+  - {addr: 0x801c8f4c, name: g_debugchr_panel_comparison_number_image}
+  - {addr: 0x801c964c, name: g_debugchr_panel_comparison_name_image}
+  - {addr: 0x801c9bcc, name: g_debugchr_panel_comparison_large_number_image}
+  - {addr: 0x801c9cbc, name: g_debugchr_panel_selected_portrait_image}
+  - {addr: 0x801c9cfc, name: g_debugchr_panel_comparison_portrait_image}
+  - {addr: 0x801c9d3c, name: g_debugchr_panel_frames_a}
+  - {addr: 0x801cac9c, name: g_debugchr_panel_text_image_a}
+  - {addr: 0x801cb91c, name: g_debugchr_panel_text_image_b}
+  - {addr: 0x801cc59c, name: g_debugchr_editor_numeric_state_a}
+  - {addr: 0x801ccb1c, name: g_debugchr_editor_numeric_state_b}
+  - {addr: 0x801cd09c, name: g_debugchr_editor_numeric_text_a}
+  - {addr: 0x801cd9b4, name: g_debugchr_editor_numeric_text_b}
+  - {addr: 0x801ce2dc, name: g_debugchr_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801ce2e4, name: g_debugchr_gfx_render_buffers}
+  - {addr: 0x801cec44, name: g_debugchr_editor_cursor_polys}
+  - {addr: 0x801cec94, name: g_debugchr_editor_cursor_shade_polys}
+  - {addr: 0x801cece4, name: g_debugchr_editor_field_table}
+  - {addr: 0x801cece8, name: g_debugchr_editor_current_field}
+  - {addr: 0x801cecec, name: g_debugchr_editor_selected_unit_slot}
+  - {addr: 0x801cecf0, name: g_debugchr_editor_field_edit_active}
+---
+module: event-equip
+file: EVENT/EQUIP.OUT
+lba: 2640
+size: 172884
+sha256: 4e4f15b739c078c300bb6a65725c334651a175e4c8872f46b14b0bd6d993cd62
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf004, size: 468, name: equip_menu_load_images_and_reset_lists, hash: ea3dbcc34294a976}
+  - {addr: 0x801bf1d8, size: 496, name: equip_menu_init_screen, hash: 147d63c2c90eaf5f}
+  - {addr: 0x801bf3c8, size: 100, name: equip_panel_toggle_unit_status_thread, hash: 25bafea36fa46b23}
+  - {addr: 0x801bf42c, size: 128, name: equip_panel_toggle_equipment_threads, hash: 1f0b42e76af7a194}
+  - {addr: 0x801bf4ac, size: 100, name: equip_panel_toggle_numeric_thread, hash: c87287dc70d17dac}
+  - {addr: 0x801bf510, size: 128, name: equip_panel_toggle_item_numeric_thread, hash: 7f5a28473a44bd57}
+  - {addr: 0x801bf590, size: 44, name: equip_menu_reset_state_flags, hash: 91f17a9247dbec09}
+  - {addr: 0x801bf5bc, size: 72, name: equip_menu_stop_threads, hash: c256a1db309301e7}
+  - {addr: 0x801bf604, size: 336, name: equip_unit_load_selected_data, hash: a4726c20fc7a9d20}
+  - {addr: 0x801bf754, size: 40, name: equip_menu_reset_selection_indices, hash: d85652e4ca0ab453}
+  - {addr: 0x801bf77c, size: 100, name: equip_text_show_message_with_sound, hash: 2d3c0e2daf08dc59}
+  - {addr: 0x801bf7e0, size: 568, name: equip_entrypoint, hash: 8be433f53088ee38}
+  - {addr: 0x801bfa18, size: 44, name: equip_menu_clear_selection_records, hash: 8c01966bfacc9bba}
+  - {addr: 0x801bfa44, size: 60, name: equip_menu_clear_selection_record, hash: fdca62f04b6534e1}
+  - {addr: 0x801bfa80, size: 76, name: equip_menu_set_selection_record, hash: e1f2abd2a5f39602}
+  - {addr: 0x801bfacc, size: 252, name: equip_menu_restore_list_selection, hash: cc67bd98802fd36b}
+  - {addr: 0x801bfbc8, size: 464, name: equip_gfx_build_scaled_draw_area_packets, hash: a19dedeaac3d305d}
+  - {addr: 0x801bfd98, size: 52, name: equip_gfx_init_scaled_draw_area_packets, hash: d2f5c8f99a47b099}
+  - {addr: 0x801bfdcc, size: 44, name: equip_gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276}
+  - {addr: 0x801bfdf8, size: 48, name: equip_gfx_build_portrait_poly_ft4, hash: cb86608938578cd2}
+  - {addr: 0x801bfe28, size: 100, name: equip_gfx_clip_portrait_poly_from_right, hash: 3e2eceefe192cbe3}
+  - {addr: 0x801bfe8c, size: 100, name: equip_gfx_clip_portrait_poly_from_left, hash: 3d34b3a8acab0923}
+  - {addr: 0x801bfef0, size: 1064, name: equip_gfx_build_portrait_transition_primitives, hash: 6379fd02254cc356}
+  - {addr: 0x801c0318, size: 4612, name: equip_render_unit_status_panel_thread, hash: 0a90a88495dfd5ba, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c151c, size: 8, name: equip_noop_801c151c, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c1524, size: 544, name: equip_gfx_init_menu_tile_and_line_primitives, hash: c0c46a118253c8ae}
+  - {addr: 0x801c1744, size: 1612, name: equip_panel_run_equipment_list_thread, hash: 7da830216ec8b83b}
+  - {addr: 0x801c1d90, size: 1492, name: equip_panel_run_ability_list_thread, hash: 6a196898819bd812}
+  - {addr: 0x801c2364, size: 1932, name: equip_panel_run_character_status_thread, hash: 1dda05d5a5262c06}
+  - {addr: 0x801c2af0, size: 380, name: equip_panel_set_primitive_colors, hash: 20be337bba8e7497}
+  - {addr: 0x801c2c6c, size: 84, name: equip_gfx_apply_menu_palette_for_mode, hash: b8ce70f8b32f6547}
+  - {addr: 0x801c2cc0, size: 268, name: equip_text_render_signed_decimal_entries, hash: 92b05110dccf3eff}
+  - {addr: 0x801c2dcc, size: 244, name: equip_text_render_decimal_entry_list, hash: 4b20c489d4050f7c}
+  - {addr: 0x801c2ec0, size: 772, name: equip_text_render_decimal_value, hash: cd6df0a76ca7176a}
+  - {addr: 0x801c31c4, size: 1400, name: equip_editor_run_numeric_thread, hash: 00a6e354d423dea5}
+  - {addr: 0x801c373c, size: 496, name: equip_menu_run_thread, hash: e42339a4a800a8f8}
+  - {addr: 0x801c392c, size: 248, name: equip_menu_open_submenu_thread, hash: 9382892b169008e4}
+  - {addr: 0x801c3a24, size: 372, name: equip_menu_run_simple_selection_thread, hash: f8b4eae323227396}
+  - {addr: 0x801c3b98, size: 104, name: equip_gfx_build_item_graphic_descriptor, hash: 7085296bf6f5bbac}
+  - {addr: 0x801c3c00, size: 8, name: equip_noop_801c3c00, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c3c08, size: 28, name: equip_thread_is_running, hash: d10e3403d7fec970}
+  - {addr: 0x801c3c24, size: 1240, name: equip_menu_draw_thread_status_indicators, hash: a9a11aad5290e5d4}
+  - {addr: 0x801c40fc, size: 40, name: equip_thread_wait_forever, hash: 23983331f707d2fa}
+  - {addr: 0x801c4124, size: 92, name: equip_item_get_total_with_equip_flag, hash: 7c0e3a55d7cefb73}
+  - {addr: 0x801c4180, size: 92, name: equip_item_get_available_with_equip_flag, hash: 3ace587681cacb49}
+  - {addr: 0x801c41dc, size: 112, name: equip_item_build_row_icon_rect, hash: 2fa08886d4146b72}
+  - {addr: 0x801c424c, size: 68, name: equip_item_build_row_graphic_descriptor, hash: c2411d85548a947e}
+  - {addr: 0x801c4290, size: 512, name: equip_menu_update_screen_state, hash: d3a4615d1be2ce87}
+  - {addr: 0x801c4490, size: 1408, name: equip_menu_run_equip_mode, hash: 67ec305728a461fa}
+  - {addr: 0x801c4a10, size: 956, name: equip_menu_run_remove_mode, hash: aaaa4594d9765d4a}
+  - {addr: 0x801c4dcc, size: 364, name: equip_menu_update_clear_all_equipment_prompt, hash: dda644870f127da5}
+  - {addr: 0x801c4f38, size: 16, name: equip_menu_get_preview_hp_bonus, hash: 6ba324cb66dff40f}
+  - {addr: 0x801c4f48, size: 16, name: equip_menu_get_preview_mp_bonus, hash: a2a1c5dd9fefc2eb}
+  - {addr: 0x801c4f58, size: 32, name: equip_menu_get_preview_hp_bonus_display, hash: 6d99c9dded090bdb}
+  - {addr: 0x801c4f78, size: 32, name: equip_menu_get_preview_mp_bonus_display, hash: 715d27d61c98e2da}
+  - {addr: 0x801c4f98, size: 724, name: equip_menu_update_equipment, hash: 6abfb203203d2f9d}
+  - {addr: 0x801c526c, size: 944, name: equip_menu_run_slot_item_browser, hash: 0db836beeb548c8f}
+  - {addr: 0x801c561c, size: 772, name: equip_menu_run_item_rearrange_mode, hash: 07c6315c51d8cbdd}
+  - {addr: 0x801c5920, size: 328, name: equip_menu_update_item_action_state, hash: 6b38592770b7b8bc}
+  - {addr: 0x801c5a68, size: 872, name: equip_run_item_type_order_mode, hash: 609e5be9bdf31b35}
+  - {addr: 0x801c5dd0, size: 220, name: equip_menu_draw_equipment_slot_marker, hash: 67526a8c92d2999e}
+  - {addr: 0x801c5eac, size: 808, name: equip_menu_draw_weapon_hand_icons, hash: 0e13bfdaa6abb47a}
+  - {addr: 0x801c61d4, size: 964, name: equip_menu_draw_item_status_list, hash: 540adc3d6181c1fd}
+  - {addr: 0x801c6598, size: 496, name: equip_gfx_enqueue_textured_quad_current_ot, hash: a9997ba47403568d}
+  - {addr: 0x801c6788, size: 196, name: equip_item_build_inventory_totals, hash: 14d058972e7d099b}
+  - {addr: 0x801c684c, size: 64, name: equip_item_adjust_inventory_count, hash: 06c575284b115ff1}
+  - {addr: 0x801c688c, size: 148, name: equip_unit_is_two_handing_weapon, hash: 297f434c62da4e59}
+  - {addr: 0x801c6920, size: 896, name: equip_unit_build_data_from_battle_stats, hash: 878bbd7ad76933c0}
+  - {addr: 0x801c6ca0, size: 276, name: equip_unit_load_data_from_battle_stats, hash: e23d868f93ea3956}
+  - {addr: 0x801c6db4, size: 600, name: equip_unit_commit_loadout_to_battle_stats, hash: 83c2cd7ae34a8020}
+  - {addr: 0x801c700c, size: 236, name: equip_item_get_ranking_value, hash: 182f2f01a7256fdd}
+  - {addr: 0x801c70f8, size: 1492, name: equip_item_sort_list_by_criteria, hash: 34f1458a5685682d}
+  - {addr: 0x801c76cc, size: 88, name: equip_item_expand_type_order_list, hash: 680fa5ae6e9a89b3}
+  - {addr: 0x801c7724, size: 96, name: equip_item_store_type_order_list, hash: 8b8d7d3c8a2297aa}
+  - {addr: 0x801c7784, size: 88, name: equip_item_store_category_list, hash: 48c40016f726fb75}
+  - {addr: 0x801c77dc, size: 256, name: equip_item_sort_list_by_category_order, hash: 87be8d27e2bd73e0}
+  - {addr: 0x801c78dc, size: 164, name: equip_item_rebuild_category_list, hash: ffa5da735754970a}
+  - {addr: 0x801c7980, size: 84, name: equip_item_is_in_category_list, hash: 51620ec7a2e5446b}
+  - {addr: 0x801c79d4, size: 104, name: equip_item_prepend_to_category_list, hash: ea719a53cf244b40}
+  - {addr: 0x801c7a3c, size: 128, name: equip_item_remove_from_category_list, hash: 71937d05d6e62d46}
+  - {addr: 0x801c7abc, size: 72, name: equip_item_clear_stat_sums, hash: 740a9e32a9c766bb}
+  - {addr: 0x801c7b04, size: 552, name: equip_collect_item_stat_deltas, hash: 0ac56f16113047c1}
+  - {addr: 0x801c7d2c, size: 188, name: equip_item_calculate_swap_stat_delta, hash: b8cc1a11e7a4d8e7}
+  - {addr: 0x801c7de8, size: 424, name: equip_item_subtract_scaled_stats, hash: 7621477fabb93d49}
+  - {addr: 0x801c7f90, size: 216, name: equip_unit_calculate_equipment_swap_stat_deltas, hash: f6342e487bb56d15}
+  - {addr: 0x801c8068, size: 288, name: equip_unit_calculate_equipment_stat_bonuses, hash: 1537c392f550f2cf}
+  - {addr: 0x801c8188, size: 68, name: equip_item_get_available_count, hash: 95bff62262fd6f25}
+  - {addr: 0x801c81cc, size: 24, name: equip_item_get_total_count, hash: 4d8bf16b76d8a671}
+  - {addr: 0x801c81e4, size: 340, name: equip_unit_set_slot_item, hash: a7b59d29a018e1ab}
+  - {addr: 0x801c8338, size: 152, name: equip_unit_can_equip_item, hash: ececc6829482cedf}
+  - {addr: 0x801c83d0, size: 508, name: equip_unit_validate_slot_item, hash: c59e53327bd83cef}
+  - {addr: 0x801c85cc, size: 660, name: equip_item_build_filtered_list, hash: 5e8f73b6dff92b4a}
+  - {addr: 0x801c8860, size: 36, name: equip_item_get_type, hash: 0d110fc92f07954c}
+  - {addr: 0x801c8884, size: 56, name: equip_item_get_type_icon_rect, hash: 1b6bfb5cb4770f34}
+  - {addr: 0x801c88bc, size: 96, name: equip_item_get_category, hash: 234911d51d5b0f1c}
+  - {addr: 0x801c891c, size: 48, name: equip_unit_copy_data_to_compare_slot, hash: 7721b3f4a2b21f57}
+  - {addr: 0x801c894c, size: 36, name: equip_unit_has_two_swords, hash: 1dd41e4a0efc124e}
+  - {addr: 0x801c8970, size: 36, name: equip_unit_has_two_hands, hash: c15e201267b4bcbf}
+  - {addr: 0x801c8994, size: 308, name: equip_text_render_glyph_to_4bpp_image, hash: b67461b2eb78e979}
+  - {addr: 0x801c8ac8, size: 92, name: equip_text_skip_encoded_segments, hash: b89f5b2fce3c6266}
+  - {addr: 0x801c8b24, size: 648, name: equip_text_render_encoded_ids_to_image, hash: 7182fd970e4c014a}
+  - {addr: 0x801c8dac, size: 120, name: equip_thread_start_if_idle, hash: 87c0e98d46e6c909}
+  - {addr: 0x801c8e24, size: 208, name: equip_text_concatenate_ids, hash: 3d0d184be7c8034b}
+  - {addr: 0x801c8ef4, size: 40, name: equip_thread_request_stop, hash: ea52b0a734b83ec7}
+  - {addr: 0x801c8f1c, size: 264, name: equip_text_render_id_rows_to_vram, hash: c878461238dbc9ef}
+  - {addr: 0x801c9024, size: 40, name: equip_thread_stop_and_clear_state, hash: be4dbfe6e8168a66}
+  - {addr: 0x801c904c, size: 156, name: equip_thread_start_managed, hash: 8a302f302bc0aafe}
+  - {addr: 0x801c90e8, size: 124, name: equip_text_start_help_thread, hash: 214e1e5f54bfe73c}
+  - {addr: 0x801c9164, size: 832, name: equip_update_controller_input, hash: 65ff61bb1c34603f}
+  - {addr: 0x801c94a4, size: 16, name: equip_set_s16_801d86ac, hash: aadf313708db9276}
+  - {addr: 0x801c94b4, size: 336, name: equip_input_update_with_message_state, hash: 63f30df9b75d076f}
+  - {addr: 0x801c9604, size: 36, name: equip_menu_clear_selection_values, hash: 8592e44c9c9b0dea}
+  - {addr: 0x801c9628, size: 32, name: equip_menu_set_selection_value, hash: b6f0c63d5e77263b}
+  - {addr: 0x801c9648, size: 32, name: equip_menu_set_selection_value_2, hash: b6f0c63d5e77263b}
+  - {addr: 0x801c9668, size: 164, name: equip_menu_update_wrapped_vertical_selection, hash: 61020c2f22b0321c}
+  - {addr: 0x801c970c, size: 104, name: equip_menu_update_vertical_selection_and_mark_change, hash: 1f1b001e88f556f0}
+  - {addr: 0x801c9774, size: 164, name: equip_menu_update_wrapped_horizontal_selection, hash: 46f4d2bb5ca95d72}
+  - {addr: 0x801c9818, size: 104, name: equip_menu_update_horizontal_selection_and_mark_change, hash: 308db0791e6f9542}
+  - {addr: 0x801c9880, size: 32, name: equip_input_clear_state, hash: b52e8464d8df1dd7}
+  - {addr: 0x801c98a0, size: 256, name: equip_gfx_enqueue_translucent_tile, hash: 9d6c6dff6c1087ff}
+  - {addr: 0x801c99a0, size: 260, name: equip_gfx_enqueue_line_f2, hash: 7409b09d6428807a}
+  - {addr: 0x801c9aa4, size: 632, name: equip_gfx_enqueue_textured_quad_list, hash: 5f606e521d761091}
+  - {addr: 0x801c9d1c, size: 532, name: equip_gfx_enqueue_textured_quad, hash: e79e4c2c08e12fd9}
+  - {addr: 0x801c9f30, size: 1044, name: equip_gfx_enqueue_oriented_textured_quad, hash: 25f4a04133164df8}
+  - {addr: 0x801ca344, size: 508, name: equip_gfx_enqueue_textured_quad_corners, hash: 282146b88b2b5bc9}
+  - {addr: 0x801ca540, size: 264, name: equip_gfx_enqueue_draw_move, hash: c74d384fcfbeac4a}
+  - {addr: 0x801ca648, size: 228, name: equip_gfx_enqueue_draw_area, hash: 0b025d4219863d75}
+  - {addr: 0x801ca72c, size: 216, name: equip_gfx_enqueue_draw_mode, hash: 39d3f71dc37474b8}
+  - {addr: 0x801ca804, size: 48, name: equip_gfx_load_image_and_wait, hash: be3db739ba4a6ec6}
+  - {addr: 0x801ca834, size: 48, name: equip_gfx_store_image_and_wait, hash: 42b445a1713fca16}
+  - {addr: 0x801ca864, size: 60, name: equip_gfx_move_image_and_wait, hash: 2dee44c691484772}
+  - {addr: 0x801ca8a0, size: 204, name: equip_menu_init_scrollable_list_core, hash: 4741aa86b1c1513e}
+  - {addr: 0x801ca96c, size: 52, name: equip_menu_init_scrollable_list, hash: 6a3f45c6b9c7fd8c}
+  - {addr: 0x801ca9a0, size: 52, name: equip_menu_init_and_draw_scrollable_list, hash: 503e07ba5c988426}
+  - {addr: 0x801ca9d4, size: 148, name: equip_cmd_run_stream, hash: 796e6e240ffcc397}
+  - {addr: 0x801caa68, size: 80, name: equip_menu_dispatch_with_override, hash: d3c4df2e5ae8c513}
+  - {addr: 0x801caab8, size: 280, name: equip_cmd_run_if_group_handler, hash: dc63cdd97deb4ab1}
+  - {addr: 0x801cabd0, size: 396, name: equip_cmd_run_if_else_group_handler, hash: 41490b9b5d7a75e9}
+  - {addr: 0x801cad5c, size: 184, name: equip_cmd_draw_translucent_tile_handler, hash: 7daebd5cd090df58}
+  - {addr: 0x801cae14, size: 256, name: equip_cmd_draw_textured_quad_handler, hash: 3672300e8e6a0c8d}
+  - {addr: 0x801caf14, size: 112, name: equip_cmd_draw_line_f2_handler, hash: 9a125788afe57a8e}
+  - {addr: 0x801caf84, size: 264, name: equip_cmd_draw_row_callback_quad_handler, hash: b66afccb939dd94c}
+  - {addr: 0x801cb08c, size: 1608, name: equip_cmd_draw_window_frame_handler, hash: abd265453db88592}
+  - {addr: 0x801cb6d4, size: 300, name: equip_cmd_set_zoomed_draw_area_handler, hash: 7d6314f93f4b800c}
+  - {addr: 0x801cb800, size: 816, name: equip_cmd_draw_tiled_rectangle_handler, hash: 53f3a353be4987fb}
+  - {addr: 0x801cbb30, size: 84, name: equip_cmd_set_clut_handler, hash: ec0ac942b9f202d0}
+  - {addr: 0x801cbb84, size: 116, name: equip_cmd_set_layout_clut_handler, hash: c1be2e1cdf9eecba}
+  - {addr: 0x801cbbf8, size: 84, name: equip_cmd_set_tpage_handler, hash: f1b465b0bce5b755}
+  - {addr: 0x801cbc4c, size: 24, name: equip_cmd_set_semitrans_handler, hash: 6340759d70435982}
+  - {addr: 0x801cbc64, size: 100, name: equip_cmd_enqueue_draw_mode_handler, hash: 2c51d30300513ef9}
+  - {addr: 0x801cbcc8, size: 104, name: equip_cmd_set_draw_color_handler, hash: ead031d84ebc84e9}
+  - {addr: 0x801cbd30, size: 24, name: equip_cmd_set_otag_index_handler, hash: 0d38c979b93736fb}
+  - {addr: 0x801cbd48, size: 1076, name: equip_cmd_draw_formatted_number_handler, hash: 66875582960ce0d8}
+  - {addr: 0x801cc17c, size: 428, name: equip_cmd_draw_right_aligned_number_handler, hash: 325db0fd2794a02d}
+  - {addr: 0x801cc328, size: 660, name: equip_menu_update_and_draw_animated_marker, hash: 3938e60d49f17206}
+  - {addr: 0x801cc5bc, size: 108, name: equip_cmd_skip_group, hash: e3dba406e3887731}
+  - {addr: 0x801cc628, size: 672, name: equip_menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef}
+  - {addr: 0x801cc8c8, size: 48, name: equip_menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9}
+  - {addr: 0x801cc8f8, size: 2492, name: equip_cmd_draw_scrollable_list_body_handler, hash: 94ee93a645f6dd65}
+  - {addr: 0x801cd2b4, size: 44, name: equip_gfx_set_draw_color, hash: 17666895092d599e}
+  - {addr: 0x801cd2e0, size: 16, name: equip_gfx_set_otag_index, hash: bb1416428e2ecf6d}
+  - {addr: 0x801cd2f0, size: 220, name: equip_text_set_palette_and_metrics, hash: 156ec1881c754753}
+  - {addr: 0x801cd3cc, size: 100, name: equip_cmd_release_otag_lock_handler, hash: e77483d981229efc}
+  - {addr: 0x801cd430, size: 116, name: equip_cmd_set_draw_area_if_unlocked_handler, hash: ba55df416db898b4}
+  - {addr: 0x801cd4a4, size: 92, name: equip_cmd_add_next_otag_draw_area_handler, hash: 6bbd6efdd3867c3b}
+  - {addr: 0x801cd500, size: 16, name: equip_gfx_set_transition_frame, hash: c29481e27ac6ffd6}
+  - {addr: 0x801cd510, size: 16, name: equip_gfx_get_transition_frame, hash: 9b3bf67680c26976}
+  - {addr: 0x801cd520, size: 56, name: equip_cmd_advance_transition_frame_handler, hash: 7d8e1868250a374c}
+  - {addr: 0x801cd558, size: 16, name: equip_gfx_get_draw_color, hash: 428cf158b493c273}
+  - {addr: 0x801cd568, size: 320, name: equip_menu_scroll_list_by_page, hash: "8964502444949709"}
+  - {addr: 0x801cd6a8, size: 284, name: equip_input_read_page_scroll_direction, hash: 2b43d6db87557730}
+  - {addr: 0x801cd7c4, size: 308, name: equip_gfx_swap_context_and_clear_otag, hash: b80d2604b85f4811}
+  - {addr: 0x801cd8f8, size: 392, name: equip_gfx_init_primitive_buffers, hash: 90b842a4cb363e79}
+  - {addr: 0x801cda80, size: 1200, name: equip_gfx_init_contexts, hash: bac1f313f8df9614}
+  - {addr: 0x801cdf30, size: 32, name: equip_menu_get_event_speed, hash: a526ea8bfeed34fc}
+  - {addr: 0x801cdf50, size: 28, name: equip_bits_init_primary_reader, hash: d22f691fd1460cc9}
+  - {addr: 0x801cdf6c, size: 28, name: equip_bits_init_secondary_reader, hash: 6f6ac58cb1eff727}
+  - {addr: 0x801cdf88, size: 172, name: equip_bits_read_primary, hash: df689577297f7bb1}
+  - {addr: 0x801ce034, size: 172, name: equip_bits_read_secondary, hash: 0e449e9dc2d2660e}
+
+data:
+  - {addr: 0x801bf000, name: g_equip_text_decimal_format}
+  - {addr: 0x801ce0e0, name: g_equip_text_data}
+  - {addr: 0x801ce178, name: g_equip_unit_status_panel_params}
+  - {addr: 0x801ce180, name: g_equip_unit_status_panel_flags}
+  - {addr: 0x801ce184, name: g_equip_unit_status_panel_redraw}
+  - {addr: 0x801ce18c, name: g_equip_equipment_panel_params}
+  - {addr: 0x801ce198, name: g_equip_equipment_panel_redraw}
+  - {addr: 0x801ce19c, name: g_equip_equipment_panel_style}
+  - {addr: 0x801ce1a0, name: g_equip_numeric_panel_params}
+  - {addr: 0x801ce1ac, name: g_equip_numeric_panel_redraw}
+  - {addr: 0x801ce1b0, name: g_equip_numeric_panel_style}
+  - {addr: 0x801ce1b4, name: g_equip_item_numeric_panel_params}
+  - {addr: 0x801ce1b8, name: g_equip_item_numeric_panel_y}
+  - {addr: 0x801ce1c0, name: g_equip_item_numeric_panel_redraw}
+  - {addr: 0x801ce1c4, name: g_equip_item_numeric_panel_style}
+  - {addr: 0x801ce1c8, name: g_equip_sound_queued_effect_id}
+  - {addr: 0x801ce1c9, name: g_equip_sound_suppress_queued}
+  - {addr: 0x801ce1ca, name: g_equip_menu_screen_state}
+  - {addr: 0x801ce1cb, name: g_equip_unit_selected_index}
+  - {addr: 0x801ce1cc, name: g_equip_unit_banner_enabled}
+  - {addr: 0x801ce1d0, name: g_equip_menu_screen_state_handlers}
+  - {addr: 0x801ce1e8, name: g_equip_menu_palette_image}
+  - {addr: 0x801ce3f4, name: g_equip_menu_indicator_buffer_index}
+  - {addr: 0x801ce3fc, name: g_equip_menu_indicator_brightness}
+  - {addr: 0x801ce404, name: g_equip_menu_indicator_edge_brightness}
+  - {addr: 0x801ce40c, name: g_equip_menu_indicator_state}
+  - {addr: 0x801ce414, name: g_equip_item_numeric_thread_enabled}
+  - {addr: 0x801ce424, name: g_equip_selected_unit_stat_summary}
+  - {addr: 0x801ce432, name: g_equip_selected_unit_hp_bonus}
+  - {addr: 0x801ce438, name: g_equip_selected_unit_mp_bonus}
+  - {addr: 0x801ce448, name: g_equip_panel_comparison_billboard}
+  - {addr: 0x801ce46c, name: g_equip_panel_selected_unit_data}
+  - {addr: 0x801ce47c, name: g_equip_panel_comparison_unit_data}
+  - {addr: 0x801ce48c, name: g_equip_unit_editor_stats}
+  - {addr: 0x801ce4cc, name: g_equip_item_preview_stat_detail}
+  - {addr: 0x801ce55c, name: g_equip_editor_numeric_geometry}
+  - {addr: 0x801ce562, name: g_equip_panel_slide_up_y}
+  - {addr: 0x801ce564, name: g_equip_panel_item_icon_texture}
+  - {addr: 0x801ce56a, name: g_equip_panel_slide_down_y}
+  - {addr: 0x801ce584, name: g_equip_gfx_portrait_origin}
+  - {addr: 0x801ce58c, name: g_equip_panel_gauge_bar_colors}
+  - {addr: 0x801ce5bc, name: g_equip_panel_selected_numeric_entries}
+  - {addr: 0x801ce664, name: g_equip_panel_comparison_numeric_entries}
+  - {addr: 0x801ce70c, name: g_equip_panel_editor_label_cells}
+  - {addr: 0x801ce754, name: g_equip_panel_editor_mode_cell}
+  - {addr: 0x801ce760, name: g_equip_panel_editor_value_cells}
+  - {addr: 0x801ce790, name: g_equip_panel_frame_rect}
+  - {addr: 0x801ce798, name: g_equip_panel_sprite_cells}
+  - {addr: 0x801ce7ec, name: g_equip_panel_portrait_cell}
+  - {addr: 0x801ce7f8, name: g_equip_gfx_draw_area_template}
+  - {addr: 0x801ce800, name: g_equip_gfx_draw_area_scale_percent}
+  - {addr: 0x801ce818, name: g_equip_panel_editor_value_cluts}
+  - {addr: 0x801ce828, name: g_equip_panel_editor_label_cluts}
+  - {addr: 0x801ce844, name: g_equip_panel_editor_mode_cells}
+  - {addr: 0x801ce874, name: g_equip_panel_selected_portrait_rect}
+  - {addr: 0x801ce87c, name: g_equip_panel_comparison_portrait_rect}
+  - {addr: 0x801ce884, name: g_equip_gfx_portrait_transition_offsets}
+  - {addr: 0x801ce8b8, name: g_equip_panel_origin_offsets}
+  - {addr: 0x801ce8c0, name: g_equip_right_panel_frame_rect}
+  - {addr: 0x801ce8c8, name: g_equip_character_status_frame_rect}
+  - {addr: 0x801ce8e0, name: g_equip_character_status_draw_area_rect}
+  - {addr: 0x801ce8e8, name: g_equip_panel_text_upload_rect_a}
+  - {addr: 0x801ce8f0, name: g_equip_panel_text_upload_rect_b}
+  - {addr: 0x801ce8f8, name: g_equip_panel_label_layouts_mode0}
+  - {addr: 0x801ce9dc, name: g_equip_panel_label_layouts_mode1}
+  - {addr: 0x801ceac0, name: g_equip_panel_label_layouts_mode2}
+  - {addr: 0x801ceba4, name: g_equip_panel_label_layouts_mode3}
+  - {addr: 0x801cece8, name: g_equip_panel_item_icon_layouts}
+  - {addr: 0x801ced24, name: g_equip_editor_numeric_table}
+  - {addr: 0x801ced34, name: g_equip_editor_numeric_entries_a}
+  - {addr: 0x801ced3c, name: g_equip_editor_numeric_entries_b}
+  - {addr: 0x801ced44, name: g_equip_editor_numeric_entries_c}
+  - {addr: 0x801ced4c, name: g_equip_editor_numeric_entries_d}
+  - {addr: 0x801ced54, name: g_equip_editor_numeric_entries_e}
+  - {addr: 0x801ced5c, name: g_equip_editor_numeric_entries_f}
+  - {addr: 0x801ced64, name: g_equip_editor_numeric_texture}
+  - {addr: 0x801cee3c, name: g_equip_editor_numeric_descriptor_a}
+  - {addr: 0x801ceef0, name: g_equip_editor_numeric_descriptor_b}
+  - {addr: 0x801cefc8, name: g_equip_text_decimal_glyph}
+  - {addr: 0x801ceff0, name: g_equip_menu_text_redraw_flag}
+  - {addr: 0x801ceffc, name: g_equip_command_menu}
+  - {addr: 0x801cf038, name: g_equip_menu_thread_running}
+  - {addr: 0x801cf03a, name: g_equip_thread_idle_stop_pending}
+  - {addr: 0x801cf03c, name: g_equip_equip_item_menu_script}
+  - {addr: 0x801cf102, name: g_equip_equip_mode_initialized}
+  - {addr: 0x801cf103, name: g_equip_equip_item_slot}
+  - {addr: 0x801cf104, name: g_equip_equip_item_list_refresh}
+  - {addr: 0x801cf106, name: g_equip_equip_item_preview_active}
+  - {addr: 0x801cf108, name: g_equip_equip_item_cursor_anim}
+  - {addr: 0x801cf10c, name: g_equip_slot_marker_rect}
+  - {addr: 0x801cf110, name: g_equip_remove_mode_initialized}
+  - {addr: 0x801cf112, name: g_equip_remove_item_cursor_anim}
+  - {addr: 0x801cf114, name: g_equip_remove_all_equipment_ids}
+  - {addr: 0x801cf120, name: g_equip_remove_item_marker_rect}
+  - {addr: 0x801cf124, name: g_equip_menu_clear_all_prompt_draw_params}
+  - {addr: 0x801cf128, name: g_equip_status_label_image}
+  - {addr: 0x801cf6c4, name: g_equip_item_action_menu}
+  - {addr: 0x801cf700, name: g_equip_item_action_menu_single_item}
+  - {addr: 0x801cf73c, name: g_equip_equipment_render_commands}
+  - {addr: 0x801cf800, name: g_equip_armor_bonus_render_commands}
+  - {addr: 0x801cf858, name: g_equip_menu_substate}
+  - {addr: 0x801cf859, name: g_equip_menu_ready}
+  - {addr: 0x801cf85c, name: g_equip_status_label_image_rect}
+  - {addr: 0x801cf864, name: g_equip_slot_item_browser_initialized}
+  - {addr: 0x801cf870, name: g_equip_rearrange_active}
+  - {addr: 0x801cf871, name: g_equip_item_action_menu_active}
+  - {addr: 0x801cf874, name: g_equip_type_order_menu_hand_body}
+  - {addr: 0x801cf8b0, name: g_equip_type_order_menu_other_slots}
+  - {addr: 0x801cf8ec, name: g_equip_type_order_ready}
+  - {addr: 0x801cf8f0, name: g_equip_menu_slot_marker_window}
+  - {addr: 0x801cf96c, name: g_equip_menu_slot_marker_rects}
+  - {addr: 0x801cf9d0, name: g_equip_menu_secondary_slot_marker}
+  - {addr: 0x801cf9e4, name: g_equip_menu_slot_marker_x}
+  - {addr: 0x801cf9ec, name: g_equip_status_display_image_rects}
+  - {addr: 0x801cfb44, name: g_equip_item_type_order_lists}
+  - {addr: 0x801cfb5c, name: g_equip_item_category_lists}
+  - {addr: 0x801cfb70, name: g_equip_item_type_icon_coords}
+  - {addr: 0x801cfbb8, name: g_equip_text_message_thread_active}
+  - {addr: 0x801cfbd4, name: g_equip_thread_state}
+  - {addr: 0x801cfbd8, name: g_equip_help_text_table}
+  - {addr: 0x801d86a8, name: g_equip_input_latched_button}
+  - {addr: 0x801d86aa, name: g_equip_input_activation_timer}
+  - {addr: 0x801d86ac, name: D_801d86ac}
+  - {addr: 0x801d86ae, name: g_equip_text_thread_running_state}
+  - {addr: 0x801d86af, name: g_equip_input_lock_timer}
+  - {addr: 0x801d86b0, name: g_equip_menu_list_scroll_offset}
+  - {addr: 0x801d86b4, name: g_equip_menu_list_row_index}
+  - {addr: 0x801d86b8, name: g_equip_text_digit_texture_page}
+  - {addr: 0x801d86ba, name: g_equip_menu_cursor_texture_page}
+  - {addr: 0x801d86bc, name: g_equip_text_clut_2_mode0}
+  - {addr: 0x801d86be, name: g_equip_text_clut_2_mode1}
+  - {addr: 0x801d86c0, name: g_equip_text_clut_1_mode1}
+  - {addr: 0x801d86c2, name: g_equip_text_clut_1_mode0}
+  - {addr: 0x801d86c4, name: g_equip_text_clut_3_mode0}
+  - {addr: 0x801d86c6, name: g_equip_text_clut_3_mode1}
+  - {addr: 0x801d86ca, name: g_equip_menu_cursor_mode0_foreground_clut}
+  - {addr: 0x801d86cc, name: g_equip_menu_cursor_mode0_background_clut}
+  - {addr: 0x801d86ce, name: g_equip_menu_cursor_mode1_foreground_clut}
+  - {addr: 0x801d86d0, name: g_equip_menu_cursor_mode1_background_clut}
+  - {addr: 0x801d86e0, name: g_equip_text_clut_0_mode0}
+  - {addr: 0x801d86e2, name: g_equip_text_clut_0_mode1}
+  - {addr: 0x801d86e4, name: g_equip_input_page_scroll_disabled}
+  - {addr: 0x801d8700, name: g_equip_cmd_handlers}
+  - {addr: 0x801d8764, name: g_equip_gfx_transition_frame}
+  - {addr: 0x801d8768, name: g_equip_gfx_draw_area}
+  - {addr: 0x801d8773, name: g_equip_cmd_row_sprite_body}
+  - {addr: 0x801d877c, name: g_equip_cmd_window_interior_command}
+  - {addr: 0x801d8784, name: g_equip_gfx_window_zoom_percent}
+  - {addr: 0x801d878c, name: g_equip_gfx_blank_cell_rect}
+  - {addr: 0x801d87a0, name: g_equip_menu_cursor_forward_offset_keyframes}
+  - {addr: 0x801d87ac, name: g_equip_menu_cursor_reverse_offset_keyframes}
+  - {addr: 0x801d87c0, name: g_equip_menu_list_scroll_entry_ids}
+  - {addr: 0x801d87c4, name: g_equip_menu_list_cursor_anim_state}
+  - {addr: 0x801d87c6, name: g_equip_input_page_scroll_hold_frames}
+  - {addr: 0x801d87c8, name: g_equip_menu_event_speed}
+  - {addr: 0x801d87cc, name: g_equip_bits_reader_1_reset}
+  - {addr: 0x801d87cd, name: g_equip_bits_reader_2_reset}
+  - {addr: 0x801d87d0, name: g_equip_bits_reader_1_index}
+  - {addr: 0x801d87d4, name: g_equip_bits_reader_2_index}
+  - {addr: 0x801d87dc, name: g_equip_text_restore_pending}
+  - {addr: 0x801d87e0, name: g_equip_unit_initial_equipment}
+  - {addr: 0x801d87ec, name: g_equip_gfx_poly_ft4_buffer}
+  - {addr: 0x801e04ec, name: g_equip_gfx_draw_move_buffer}
+  - {addr: 0x801e08ac, name: g_equip_gfx_draw_area_buffer}
+  - {addr: 0x801e099c, name: g_equip_gfx_otag_buffer}
+  - {addr: 0x801e0b9c, name: g_equip_gfx_contexts}
+  - {addr: 0x801e0d74, name: g_equip_gfx_draw_mode_buffer}
+  - {addr: 0x801e1044, name: g_equip_gfx_line_f2_buffer}
+  - {addr: 0x801e1184, name: g_equip_gfx_tile_buffer}
+  - {addr: 0x801e12c4, name: g_equip_menu_selection_entries}
+  - {addr: 0x801e12c4, name: g_equip_menu_selection_records}
+  - {addr: 0x801e12e4, name: g_equip_thread_indicator_packets}
+  - {addr: 0x801e17d4, name: g_equip_input_controller}
+  - {addr: 0x801e17f0, name: g_equip_gfx_draw_offset_y}
+  - {addr: 0x801e1834, name: g_equip_panel_selected_editor_packets}
+  - {addr: 0x801e1e4c, name: g_equip_panel_selected_packets}
+  - {addr: 0x801e21fc, name: g_equip_panel_comparison_editor_packets}
+  - {addr: 0x801e2814, name: g_equip_panel_comparison_packets}
+  - {addr: 0x801e2bc4, name: g_equip_panel_selected_number_image}
+  - {addr: 0x801e32c4, name: g_equip_panel_selected_name_image}
+  - {addr: 0x801e3844, name: g_equip_panel_selected_large_number_image}
+  - {addr: 0x801e3934, name: g_equip_panel_comparison_number_image}
+  - {addr: 0x801e4034, name: g_equip_panel_comparison_name_image}
+  - {addr: 0x801e45b4, name: g_equip_panel_comparison_large_number_image}
+  - {addr: 0x801e46a4, name: g_equip_panel_selected_portrait_image}
+  - {addr: 0x801e46e4, name: g_equip_panel_comparison_portrait_image}
+  - {addr: 0x801e4724, name: g_equip_panel_frames_a}
+  - {addr: 0x801e4ed4, name: g_equip_panel_frames_b}
+  - {addr: 0x801e5684, name: g_equip_panel_text_image_a}
+  - {addr: 0x801e6304, name: g_equip_panel_text_image_b}
+  - {addr: 0x801e6f84, name: g_equip_editor_numeric_state_a}
+  - {addr: 0x801e7504, name: g_equip_editor_numeric_state_b}
+  - {addr: 0x801e7a84, name: g_equip_editor_numeric_text_a}
+  - {addr: 0x801e839c, name: g_equip_editor_numeric_text_b}
+  - {addr: 0x801e8cc4, name: g_equip_item_row_icon_rect}
+  - {addr: 0x801e8cd0, name: g_equip_item_graphic_descriptor}
+  - {addr: 0x801e8ce4, name: g_equip_equip_item_list_open}
+  - {addr: 0x801e8cf0, name: g_equip_equip_item_previewed_cursor}
+  - {addr: 0x801e8cf8, name: g_equip_remove_item_previewed_slot}
+  - {addr: 0x801e8d00, name: g_equip_remove_all_equipment_prompt_active}
+  - {addr: 0x801e8d04, name: g_equip_remove_item_equipment}
+  - {addr: 0x801e8d10, name: g_equip_menu_clear_all_prompt_frame}
+  - {addr: 0x801e8d40, name: g_equip_slot_item_browser_previewed_index}
+  - {addr: 0x801e8d70, name: g_equip_rearrange_picked_cursor}
+  - {addr: 0x801e8d74, name: g_equip_rearrange_picked_scroll}
+  - {addr: 0x801e8d78, name: g_equip_rearrange_preview_cursor}
+  - {addr: 0x801e8d7c, name: g_equip_rearrange_anim_frame}
+  - {addr: 0x801e8d84, name: g_equip_item_list_has_multiple_entries}
+  - {addr: 0x801e8d88, name: g_equip_item_action_active_menu}
+  - {addr: 0x801e8d8c, name: g_equip_item_type_order}
+  - {addr: 0x801e8d9c, name: g_equip_item_type_order_active_menu}
+  - {addr: 0x801e8da0, name: g_equip_selected_slot}
+  - {addr: 0x801e8dac, name: g_equip_unit_saved_hp}
+  - {addr: 0x801e8db0, name: g_equip_unit_saved_mp}
+  - {addr: 0x801e8db4, name: g_equip_unit_records}
+  - {addr: 0x801e8ea8, name: g_equip_item_inventory_totals}
+  - {addr: 0x801e8fa8, name: g_equip_input_repeat_counters}
+  - {addr: 0x801e8fe8, name: g_equip_input_previous}
+  - {addr: 0x801e8fec, name: g_equip_menu_selection_values}
+  - {addr: 0x801e8ff4, name: g_equip_menu_list_scroll_progress}
+  - {addr: 0x801e8ff8, name: g_equip_gfx_sprite_color}
+  - {addr: 0x801e8ffc, name: g_equip_gfx_sprite_ot_index}
+  - {addr: 0x801e9000, name: g_equip_cmd_stream_input}
+  - {addr: 0x801e9004, name: g_equip_menu_list_visible_rows}
+  - {addr: 0x801e9008, name: g_equip_menu_list_row_height}
+  - {addr: 0x801e900c, name: g_equip_menu_list_row_group_count}
+  - {addr: 0x801e9010, name: g_equip_menu_list_row_mode}
+  - {addr: 0x801e9014, name: g_equip_gfx_semitransparency}
+  - {addr: 0x801e9018, name: g_equip_menu_window_right_x}
+  - {addr: 0x801e901c, name: g_equip_menu_list_redraw_pending}
+  - {addr: 0x801e9024, name: g_equip_menu_list_entries}
+  - {addr: 0x801e9028, name: g_equip_menu_list_text_table}
+  - {addr: 0x801e902c, name: g_equip_gfx_texture_page}
+  - {addr: 0x801e9030, name: g_equip_gfx_clut_id}
+  - {addr: 0x801e9034, name: g_equip_menu_list_vram_width}
+  - {addr: 0x801e9038, name: g_equip_menu_list_glyph_width}
+  - {addr: 0x801e903c, name: g_equip_menu_list_text_columns}
+  - {addr: 0x801e9040, name: g_equip_text_compact_layout}
+  - {addr: 0x801e9044, name: g_equip_menu_list_scroll_direction}
+  - {addr: 0x801e9048, name: g_equip_gfx_zoom_draw_area_active}
+  - {addr: 0x801e9052, name: g_equip_gfx_tiled_rect}
+  - {addr: 0x801e905c, name: g_equip_bits_reader_1_stream}
+  - {addr: 0x801e9060, name: g_equip_bits_reader_2_stream}
+  - {addr: 0x801e9064, name: g_equip_input_newly_pressed}
+  - {addr: 0x801e9068, name: g_equip_gfx_poly_f3_capacity}
+  - {addr: 0x801e906c, name: g_equip_gfx_poly_g3_capacity}
+  - {addr: 0x801e9070, name: g_equip_gfx_poly_f4_capacity}
+  - {addr: 0x801e9074, name: g_equip_gfx_poly_g4_capacity}
+  - {addr: 0x801e9078, name: g_equip_gfx_poly_f3_count}
+  - {addr: 0x801e907c, name: g_equip_gfx_poly_g3_count}
+  - {addr: 0x801e9080, name: g_equip_gfx_poly_f4_count}
+  - {addr: 0x801e9084, name: g_equip_gfx_poly_g4_count}
+  - {addr: 0x801e9088, name: g_equip_text_metric_3}
+  - {addr: 0x801e908c, name: g_equip_gfx_sprite_capacity}
+  - {addr: 0x801e9090, name: g_equip_gfx_line_f2_capacity}
+  - {addr: 0x801e9094, name: g_equip_gfx_line_g2_capacity}
+  - {addr: 0x801e9098, name: g_equip_gfx_line_f3_capacity}
+  - {addr: 0x801e909c, name: g_equip_gfx_line_g3_capacity}
+  - {addr: 0x801e90a0, name: g_equip_gfx_line_f4_capacity}
+  - {addr: 0x801e90a4, name: g_equip_gfx_line_g4_capacity}
+  - {addr: 0x801e90a8, name: g_equip_gfx_poly_ft3_capacity}
+  - {addr: 0x801e90ac, name: g_equip_gfx_line_f2_count}
+  - {addr: 0x801e90b0, name: g_equip_gfx_poly_gt3_capacity}
+  - {addr: 0x801e90b4, name: g_equip_gfx_poly_ft4_capacity}
+  - {addr: 0x801e90b8, name: g_equip_gfx_line_g2_count}
+  - {addr: 0x801e90bc, name: g_equip_gfx_line_f3_count}
+  - {addr: 0x801e90c0, name: g_equip_gfx_poly_gt4_capacity}
+  - {addr: 0x801e90c4, name: g_equip_gfx_line_g3_count}
+  - {addr: 0x801e90c8, name: g_equip_gfx_line_f4_count}
+  - {addr: 0x801e90cc, name: g_equip_gfx_line_g4_count}
+  - {addr: 0x801e90d0, name: g_equip_text_metric_2}
+  - {addr: 0x801e90d4, name: g_equip_gfx_poly_ft3_count}
+  - {addr: 0x801e90d8, name: g_equip_gfx_poly_gt3_count}
+  - {addr: 0x801e90dc, name: g_equip_gfx_poly_ft4_count}
+  - {addr: 0x801e90e0, name: g_equip_gfx_poly_gt4_count}
+  - {addr: 0x801e90e4, name: g_equip_gfx_sprite_16_capacity}
+  - {addr: 0x801e90e8, name: g_equip_gfx_drawenv_y}
+  - {addr: 0x801e90ec, name: g_equip_menu_result_rows}
+  - {addr: 0x801e90f4, name: g_equip_text_metric_1}
+  - {addr: 0x801e90f8, name: g_equip_menu_selected_list_index}
+  - {addr: 0x801e90fc, name: g_equip_gfx_sprite_8_capacity}
+  - {addr: 0x801e9100, name: g_equip_gfx_otag_length}
+  - {addr: 0x801e9104, name: g_equip_gfx_draw_area_capacity}
+  - {addr: 0x801e9108, name: g_equip_item_list_entries}
+  - {addr: 0x801e9220, name: g_equip_gfx_draw_area_count}
+  - {addr: 0x801e9224, name: g_equip_gfx_draw_mode_capacity}
+  - {addr: 0x801e9228, name: g_equip_gfx_tile_capacity}
+  - {addr: 0x801e922c, name: g_equip_gfx_draw_mode_count}
+  - {addr: 0x801e9230, name: g_equip_gfx_draw_move_capacity}
+  - {addr: 0x801e9234, name: g_equip_gfx_tile_count}
+  - {addr: 0x801e9238, name: g_equip_gfx_draw_move_count}
+  - {addr: 0x801e923c, name: g_equip_gfx_context}
+  - {addr: 0x801e9240, name: g_equip_input_primary_repeat}
+  - {addr: 0x801e9244, name: g_equip_gfx_sprite_count}
+  - {addr: 0x801e9248, name: g_equip_menu_scroll_base_index}
+  - {addr: 0x801e924c, name: g_equip_gfx_tile_16_capacity}
+  - {addr: 0x801e9250, name: g_equip_item_type_order_names}
+  - {addr: 0x801e92d0, name: g_equip_text_metric_0}
+  - {addr: 0x801e92d4, name: g_equip_gfx_tile_8_capacity}
+  - {addr: 0x801e92d8, name: g_equip_gfx_tile_1_count}
+  - {addr: 0x801e92dc, name: g_equip_text_metric_4}
+  - {addr: 0x801e92e0, name: g_equip_gfx_tile_8_count}
+  - {addr: 0x801e92e4, name: g_equip_unit_data}
+  - {addr: 0x801e92ec, name: g_equip_gfx_context_base}
+  - {addr: 0x801e92f0, name: g_equip_input_secondary_repeat}
+  - {addr: 0x801e92f4, name: g_equip_gfx_sprite_8_count}
+  - {addr: 0x801e92f8, name: g_equip_gfx_tile_1_capacity}
+  - {addr: 0x801e92fc, name: g_equip_text_metric_5}
+  - {addr: 0x801e9300, name: g_equip_gfx_tile_16_count}
+  - {addr: 0x801e9304, name: g_equip_gfx_sprite_16_count}
+  - {addr: 0x801e9308, name: g_equip_text_help_message_id}
+  - {addr: 0x801e930c, name: g_equip_menu_list_row_callbacks}
+  - {addr: 0x801e934c, name: g_equip_gfx_current_ot}
+  - {addr: 0x801e934c, name: g_equip_gfx_render_otag}
+  - {addr: 0x801e9350, name: g_equip_menu_list_entry_count}
+
+imports:
+  - {addr: 0x800222fc, name: memset}
+---
+module: event-etc
+file: EVENT/ETC.OUT
+lba: 2576
+size: 7548
+sha256: a4270c901d47ec76b3a0fdab8dbf0a106693ce0ccaab0cade7ef3edd5aa4e20e
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf01c, size: 956, name: etc_graphic_open, hash: 3557a41548363503}
+  - {addr: 0x801bf3d8, size: 8, name: etc_null_routine, hash: 6d64edf91449c1b1}
+  - {addr: 0x801bf3e0, size: 2168, name: etc_graphic_build_chapter_polygons, hash: 08645cca82b4dc99}
+  - {addr: 0x801bfc58, size: 1316, name: etc_graphic_build_game_over_polygons, hash: d08994f01c5e0530}
+  - {addr: 0x801c017c, size: 560, name: etc_graphic_show_chapter_title, hash: 9fcfb262c2e1e239}
+  - {addr: 0x801c03ac, size: 552, name: etc_graphic_show_game_over, hash: 6eb5298141a27c8f}
+  - {addr: 0x801c05d4, size: 116, name: etc_graphic_show_async, hash: d058479c66427e5b}
+
+data:
+  - {addr: 0x801bf000, name: g_etc_allocation_wait_message}
+  - {addr: 0x801c0658, name: g_etc_graphic_game_over_palette_rect}
+  - {addr: 0x801c089c, name: g_etc_graphics}
+  - {addr: 0x801c0a3c, name: g_etc_graphic_chapter_primitives_a}
+  - {addr: 0x801c0bdc, name: g_etc_graphic_chapter_primitives_b}
+---
+module: event-helpmenu
+file: EVENT/HELPMENU.OUT
+lba: 2256
+size: 99716
+sha256: f0cae89e84229dfe6b43be319f66f49bf8c80e861ffa3a1d91feb651b5c5d2f7
+load: 0x801df000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801df000, size: 80, name: helpmenu_menu_close, hash: af74553ec4c059ff}
+  - {addr: 0x801df050, size: 3460, name: helpmenu_run_battle_help_menu, hash: e2c1ec858fd1c5b6}
+  - {addr: 0x801dfdd4, size: 60, name: helpmenu_thread_find_running_from_4, hash: d0b478b250e3aa50}
+  - {addr: 0x801dfe10, size: 1992, name: helpmenu_menu_run_require_help, hash: 271ef372178e62f2}
+
+data:
+  - {addr: 0x801ce8fe, name: g_helpmenu_selected_unit_panel_mode}
+  - {addr: 0x801e05d8, name: g_helpmenu_menu_cursor_tile}
+  - {addr: 0x801e05e4, name: g_helpmenu_active_banner}
+  - {addr: 0x801e062c, name: g_helpmenu_active_unit_data}
+  - {addr: 0x801e064c, name: g_helpmenu_billboard}
+  - {addr: 0x801e06fc, name: g_helpmenu_view_mode_2_navigation}
+  - {addr: 0x801e078c, name: g_helpmenu_view_mode_4_navigation}
+  - {addr: 0x801e07fc, name: g_helpmenu_view_mode_3_navigation}
+  - {addr: 0x801e084c, name: g_helpmenu_require_navigation}
+  - {addr: 0x801e0ad4, name: g_helpmenu_menu_text_id_tables}
+  - {addr: 0x801e0b30, name: g_helpmenu_text_section_offsets}
+  - {addr: 0x801e0bb0, name: g_helpmenu_text_data}
+  - {addr: 0x801f74f8, name: g_helpmenu_controller_state_ptr}
+  - {addr: 0x801f74fc, name: g_helpmenu_current_text_ids}
+  - {addr: 0x801f7504, name: g_helpmenu_text_saved_pointers}
+---
+module: event-jobstts
+file: EVENT/JOBSTTS.OUT
+lba: 2384
+size: 112732
+sha256: f931c997144a2d6d8e3e54d6d465929ea3858148412a2bd6184b2ce9254ce694
+load: 0x801df000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801df004, size: 404, name: jobstts_menu_load_images_and_clear_selection, hash: e786b01b51200874}
+  - {addr: 0x801df198, size: 736, name: jobstts_entrypoint, hash: a58961af30913d26}
+  - {addr: 0x801df478, size: 44, name: jobstts_menu_clear_selection_records, hash: c8ef83eb24f7123c}
+  - {addr: 0x801df4a4, size: 60, name: jobstts_menu_clear_selection_record, hash: 2bb5b087e1621ebe}
+  - {addr: 0x801df4e0, size: 76, name: jobstts_menu_set_selection_record, hash: 21d529d3737f9365}
+  - {addr: 0x801df52c, size: 176, name: jobstts_menu_get_selection_record, hash: 0db7da1324171bf7}
+  - {addr: 0x801df5dc, size: 108, name: jobstts_job_calculate_current_level, hash: b5f033f5213a365d}
+  - {addr: 0x801df648, size: 76, name: jobstts_job_calculate_current_jp, hash: 7a7626e0618d8ab0}
+  - {addr: 0x801df694, size: 76, name: jobstts_job_calculate_current_total_jp, hash: 0df03e32871d265e}
+  - {addr: 0x801df6e0, size: 128, name: jobstts_job_calculate_next_level_jp_requirement, hash: a4c0646e2fecc0cc}
+  - {addr: 0x801df760, size: 76, name: jobstts_job_calculate_current_mastered, hash: 21d6ba91698660e1}
+  - {addr: 0x801df7ac, size: 440, name: jobstts_menu_update_job_list, hash: 46b52dabd5fe68f5}
+  - {addr: 0x801df964, size: 16, name: jobstts_job_get_current_jp, hash: 51fde6eb69508838}
+  - {addr: 0x801df974, size: 16, name: jobstts_job_get_current_level, hash: f6c5f24af18727bf}
+  - {addr: 0x801df984, size: 16, name: jobstts_job_get_next_level_jp_requirement, hash: 1db351534299a8c6}
+  - {addr: 0x801df994, size: 16, name: jobstts_job_get_current_total_jp, hash: a9fc77f08f31ef8f}
+  - {addr: 0x801df9a4, size: 16, name: jobstts_job_is_current_mastered, hash: d962cac7878808e2}
+  - {addr: 0x801df9b4, size: 112, name: jobstts_ability_is_non_action_learned, hash: 76a1cae15d554342}
+  - {addr: 0x801dfa24, size: 56, name: jobstts_ability_is_non_action_unlearned, hash: 47d28a7fb27637c9}
+  - {addr: 0x801dfa5c, size: 16, name: jobstts_ability_is_action, hash: 84baaf655025c0a7}
+  - {addr: 0x801dfa6c, size: 76, name: jobstts_ability_get_mp_cost_display_value, hash: 0efb5ccdbdb9aada}
+  - {addr: 0x801dfab8, size: 100, name: jobstts_ability_get_ct_display_value, hash: 893cc39d23f6ec05}
+  - {addr: 0x801dfb1c, size: 80, name: jobstts_ability_get_jp_cost_display_value, hash: c9f46c4abc533d3f}
+  - {addr: 0x801dfb6c, size: 36, name: jobstts_ability_is_learned, hash: 4e5603563e3371e6}
+  - {addr: 0x801dfb90, size: 16, name: jobstts_ability_is_action_tab, hash: 3c478037dee6619c}
+  - {addr: 0x801dfba0, size: 24, name: jobstts_ability_is_reaction_tab, hash: 9193e1ed081fc9db}
+  - {addr: 0x801dfbb8, size: 24, name: jobstts_ability_is_support_tab, hash: 90d8dec8477e7386}
+  - {addr: 0x801dfbd0, size: 24, name: jobstts_ability_is_movement_tab, hash: fea6a458f383390e}
+  - {addr: 0x801dfbe8, size: 952, name: jobstts_update_ability_list_menu, hash: f11f323916cdc7a9}
+  - {addr: 0x801dffa0, size: 32, name: jobstts_job_is_special_monster, hash: f4362856b8ecd185}
+  - {addr: 0x801dffc0, size: 360, name: jobstts_unit_copy_job_data, hash: 8549998d0529a4c8}
+  - {addr: 0x801e0128, size: 64, name: jobstts_unit_init_job_data, hash: 2f5b68b9627401dd}
+  - {addr: 0x801e0168, size: 76, name: jobstts_job_get_base, hash: 56e2d800265d4c96}
+  - {addr: 0x801e01b4, size: 352, name: jobstts_job_build_unit_job_list, hash: 3883f26eb277dc3a}
+  - {addr: 0x801e0314, size: 88, name: jobstts_job_find_first_for_skillset, hash: 0e69ad31124150c2}
+  - {addr: 0x801e036c, size: 36, name: jobstts_job_get_skillset, hash: 72f6f53360f055dc}
+  - {addr: 0x801e0390, size: 44, name: jobstts_job_get_generic_index, hash: 41e9cddd909306f7}
+  - {addr: 0x801e03bc, size: 592, name: jobstts_ability_build_list, hash: 765ef4759d963053}
+  - {addr: 0x801e060c, size: 308, name: jobstts_text_render_glyph_to_4bpp_image, hash: 1cfc444d6d3209dc}
+  - {addr: 0x801e0740, size: 92, name: jobstts_text_skip_encoded_segments, hash: f16b98f4a6075cd8}
+  - {addr: 0x801e079c, size: 648, name: jobstts_text_render_encoded_ids_to_image, hash: 8d74937185196c66}
+  - {addr: 0x801e0a24, size: 264, name: jobstts_text_render_id_rows_to_vram, hash: 5241f714170cf25b}
+  - {addr: 0x801e0b2c, size: 124, name: jobstts_text_start_help_thread, hash: f382afd4abb92b11}
+  - {addr: 0x801e0ba8, size: 832, name: jobstts_update_controller_input, hash: bbe451779e50aed3}
+  - {addr: 0x801e0ee8, size: 360, name: jobstts_input_update_with_message_state, hash: 150bea20a0faa1ea}
+  - {addr: 0x801e1050, size: 36, name: jobstts_menu_clear_selection_values, hash: f714166590860d01}
+  - {addr: 0x801e1074, size: 168, name: jobstts_menu_update_wrapped_horizontal_selection, hash: 5953cfbb7a4e9efe}
+  - {addr: 0x801e111c, size: 576, name: jobstts_gfx_enqueue_textured_quad_rect, hash: 5e19e9b09aeb355b}
+  - {addr: 0x801e135c, size: 632, name: jobstts_gfx_enqueue_textured_quad_list, hash: ab47c5a66b813d62}
+  - {addr: 0x801e15d4, size: 532, name: jobstts_gfx_enqueue_textured_quad, hash: 3fe37b9682605fd7}
+  - {addr: 0x801e17e8, size: 1056, name: jobstts_enqueue_oriented_textured_quad, hash: efbd76a3960a34a7}
+  - {addr: 0x801e1c08, size: 508, name: jobstts_gfx_enqueue_textured_quad_corners, hash: b9b6efafdcf485d3}
+  - {addr: 0x801e1e04, size: 264, name: jobstts_gfx_enqueue_draw_move, hash: 2338851ec6a79775}
+  - {addr: 0x801e1f0c, size: 228, name: jobstts_gfx_enqueue_draw_area, hash: 5384ef4ee1f792f8}
+  - {addr: 0x801e1ff0, size: 48, name: jobstts_gfx_load_image_and_wait, hash: be3db739ba4a6ec6}
+  - {addr: 0x801e2020, size: 48, name: jobstts_gfx_store_image_and_wait, hash: 42b445a1713fca16}
+  - {addr: 0x801e2050, size: 196, name: jobstts_menu_init_scrollable_list_core, hash: cbed765f1b648634}
+  - {addr: 0x801e2114, size: 52, name: jobstts_menu_init_scrollable_list, hash: 486b8503d50e4e8e}
+  - {addr: 0x801e2148, size: 52, name: jobstts_menu_init_and_draw_scrollable_list, hash: 5f113e345c0f0da5}
+  - {addr: 0x801e217c, size: 188, name: jobstts_cmd_run_stream, hash: 276770c4066d6467}
+  - {addr: 0x801e2238, size: 68, name: jobstts_cmd_run_stream_with_mode, hash: 925ea4eee2a0c636}
+  - {addr: 0x801e227c, size: 280, name: jobstts_cmd_run_if_group_handler, hash: 805a0f95f73a013b}
+  - {addr: 0x801e2394, size: 396, name: jobstts_cmd_run_if_else_group_handler, hash: 173681792d4416de}
+  - {addr: 0x801e2520, size: 24, name: jobstts_cmd_set_semitrans_handler, hash: e8f3f4f1b8bcabae}
+  - {addr: 0x801e2538, size: 256, name: jobstts_cmd_draw_textured_quad_handler, hash: 6dc0e28c0937d6cd}
+  - {addr: 0x801e2638, size: 1456, name: jobstts_create_border_tiles, hash: 6a98e48a107603be}
+  - {addr: 0x801e2be8, size: 272, name: jobstts_cmd_draw_border_tiles_with_transition_clip, hash: 3c407feb3809b329}
+  - {addr: 0x801e2cf8, size: 664, name: jobstts_cmd_draw_background_tiles_handler, hash: 4e00ec3720d82fa7}
+  - {addr: 0x801e2f90, size: 84, name: jobstts_cmd_set_clut_handler, hash: 24c0f51aabe0e17b}
+  - {addr: 0x801e2fe4, size: 116, name: jobstts_cmd_set_layout_clut_handler, hash: 41e76722475e6fa9}
+  - {addr: 0x801e3058, size: 84, name: jobstts_cmd_set_tpage_handler, hash: 6bd8f86e471c2d2f}
+  - {addr: 0x801e30ac, size: 44, name: jobstts_cmd_set_otag_index_if_unlocked_handler, hash: 2bdd2ff580aa0d01}
+  - {addr: 0x801e30d8, size: 704, name: jobstts_menu_script_draw_formatted_number, hash: a7c4288fdb526bef}
+  - {addr: 0x801e3398, size: 660, name: jobstts_menu_update_and_draw_animated_marker, hash: 1820d09644d45f32}
+  - {addr: 0x801e362c, size: 108, name: jobstts_cmd_skip_group, hash: 68ca8c4bcbe84a81}
+  - {addr: 0x801e3698, size: 672, name: jobstts_menu_draw_scrollable_list, hash: e44d487c3819b679}
+  - {addr: 0x801e3938, size: 48, name: jobstts_menu_init_and_draw_scrollable_list_simple, hash: 461e97c53dac7c63}
+  - {addr: 0x801e3968, size: 2512, name: jobstts_cmd_draw_scrollable_list_body_handler, hash: 8765fb678224aca4}
+  - {addr: 0x801e4338, size: 220, name: jobstts_text_set_palette_and_metrics, hash: 48580046bd100f9b}
+  - {addr: 0x801e4414, size: 136, name: jobstts_cmd_release_otag_lock_handler, hash: 376bac94034d2252}
+  - {addr: 0x801e449c, size: 116, name: jobstts_cmd_set_draw_area_if_unlocked_handler, hash: fbe7c3c7c2471b38}
+  - {addr: 0x801e4510, size: 92, name: jobstts_cmd_add_next_otag_draw_area_handler, hash: 24311d14e944847c}
+  - {addr: 0x801e456c, size: 16, name: jobstts_gfx_set_transition_frame, hash: 379bc481db4f0729}
+  - {addr: 0x801e457c, size: 16, name: jobstts_gfx_get_transition_frame, hash: 865935d79ad81c7d}
+  - {addr: 0x801e458c, size: 320, name: jobstts_menu_scroll_list_by_page, hash: 0fa518b015eb3a18}
+  - {addr: 0x801e46cc, size: 252, name: jobstts_input_read_page_scroll_direction, hash: c1ec59fe990bfe9e}
+  - {addr: 0x801e47c8, size: 300, name: jobstts_gfx_swap_context_and_clear_otag, hash: f9d99e269fd4a17e}
+  - {addr: 0x801e48f4, size: 252, name: jobstts_gfx_init_primitive_buffers, hash: 50311096d96fa683}
+  - {addr: 0x801e49f0, size: 1160, name: jobstts_gfx_init_contexts, hash: 16d845f28fbb8c54}
+  - {addr: 0x801e4e78, size: 32, name: jobstts_menu_get_event_speed, hash: 2e67f0497311e3fc}
+  - {addr: 0x801e4e98, size: 28, name: jobstts_bits_init_primary_reader, hash: 0f08e6a0c31b76ac}
+  - {addr: 0x801e4eb4, size: 28, name: jobstts_bits_init_secondary_reader, hash: 1d271e05aa18deee}
+  - {addr: 0x801e4ed0, size: 172, name: jobstts_bits_read_primary, hash: ae4e54d1a49f2fd0}
+  - {addr: 0x801e4f7c, size: 172, name: jobstts_bits_read_secondary, hash: 7101073a60f65554}
+
+data:
+  - {addr: 0x801df000, name: g_jobstts_text_decimal_format}
+  - {addr: 0x801e5028, name: g_jobstts_sound_queued_effect_id}
+  - {addr: 0x801e502c, name: g_jobstts_menu_palette_image}
+  - {addr: 0x801e522c, name: g_jobstts_active_page}
+  - {addr: 0x801e522e, name: g_jobstts_initialized}
+  - {addr: 0x801e5230, name: g_jobstts_job_selected_id}
+  - {addr: 0x801e5232, name: g_jobstts_ability_category}
+  - {addr: 0x801e5234, name: g_jobstts_job_list_render_commands}
+  - {addr: 0x801e530c, name: g_jobstts_job_list_menu_initialized}
+  - {addr: 0x801e5310, name: g_jobstts_ability_list_render_commands}
+  - {addr: 0x801e54fc, name: g_jobstts_ability_list_initialized}
+  - {addr: 0x801e5500, name: g_jobstts_ability_list_job_name_ids}
+  - {addr: 0x801e5508, name: g_jobstts_help_text_table}
+  - {addr: 0x801eff60, name: g_jobstts_input_latched_button}
+  - {addr: 0x801eff62, name: g_jobstts_input_activation_timer}
+  - {addr: 0x801eff63, name: g_jobstts_text_thread_running_state}
+  - {addr: 0x801eff64, name: g_jobstts_input_lock_timer}
+  - {addr: 0x801eff68, name: g_jobstts_menu_list_scroll_offset_y}
+  - {addr: 0x801eff6c, name: g_jobstts_menu_list_row_index}
+  - {addr: 0x801eff70, name: g_jobstts_gfx_background_texture_page}
+  - {addr: 0x801eff72, name: g_jobstts_menu_cursor_texture_page}
+  - {addr: 0x801eff74, name: g_jobstts_text_clut_2_mode0}
+  - {addr: 0x801eff76, name: g_jobstts_text_clut_2_mode1}
+  - {addr: 0x801eff78, name: g_jobstts_text_clut_1_mode1}
+  - {addr: 0x801eff7a, name: g_jobstts_text_clut_1_mode0}
+  - {addr: 0x801eff7c, name: g_jobstts_text_clut_3_mode0}
+  - {addr: 0x801eff7e, name: g_jobstts_text_clut_3_mode1}
+  - {addr: 0x801eff82, name: g_jobstts_menu_cursor_mode0_foreground_clut}
+  - {addr: 0x801eff84, name: g_jobstts_menu_cursor_mode0_background_clut}
+  - {addr: 0x801eff86, name: g_jobstts_menu_cursor_mode1_foreground_clut}
+  - {addr: 0x801eff88, name: g_jobstts_menu_cursor_mode1_background_clut}
+  - {addr: 0x801eff98, name: g_jobstts_text_clut_0_mode1}
+  - {addr: 0x801eff9a, name: g_jobstts_text_clut_0_mode0}
+  - {addr: 0x801eff9c, name: g_jobstts_cmd_handlers}
+  - {addr: 0x801efff4, name: g_jobstts_gfx_draw_area}
+  - {addr: 0x801efffc, name: g_jobstts_gfx_transition_frame}
+  - {addr: 0x801f0000, name: g_jobstts_cmd_window_interior_command}
+  - {addr: 0x801f0008, name: g_jobstts_gfx_transition_height_percent}
+  - {addr: 0x801f0018, name: g_jobstts_menu_cursor_forward_offset_keyframes}
+  - {addr: 0x801f0024, name: g_jobstts_menu_cursor_reverse_offset_keyframes}
+  - {addr: 0x801f0038, name: g_jobstts_menu_list_scroll_entry_ids}
+  - {addr: 0x801f003c, name: g_jobstts_menu_list_cursor_anim_state}
+  - {addr: 0x801f003e, name: g_jobstts_input_page_scroll_hold_frames}
+  - {addr: 0x801f0040, name: g_jobstts_menu_event_speed}
+  - {addr: 0x801f0044, name: g_jobstts_bits_primary_reset}
+  - {addr: 0x801f0045, name: g_jobstts_bits_secondary_reset}
+  - {addr: 0x801f0048, name: g_jobstts_bits_reader_1_index}
+  - {addr: 0x801f004c, name: g_jobstts_bits_reader_2_index}
+  - {addr: 0x801f0050, name: g_jobstts_ability_selected_specific}
+  - {addr: 0x801f0050, name: g_jobstts_ability_selected_specific_arg_alias}
+  - {addr: 0x801f0054, name: g_jobstts_previous_event_mode}
+  - {addr: 0x801f0058, name: g_jobstts_gfx_poly_ft4_buffer}
+  - {addr: 0x801f9c98, name: g_jobstts_gfx_draw_move_buffer}
+  - {addr: 0x801fa058, name: g_jobstts_gfx_draw_area_buffer}
+  - {addr: 0x801fa148, name: g_jobstts_gfx_otag_buffer}
+  - {addr: 0x801fa348, name: g_jobstts_gfx_contexts}
+  - {addr: 0x801fa530, name: g_jobstts_menu_selection_records}
+  - {addr: 0x801fa550, name: g_jobstts_job_ids}
+  - {addr: 0x801fa57c, name: g_jobstts_ability_entries}
+  - {addr: 0x801fa5b0, name: g_jobstts_job_current_level}
+  - {addr: 0x801fa5b4, name: g_jobstts_job_current_jp}
+  - {addr: 0x801fa5b8, name: g_jobstts_job_current_total_jp}
+  - {addr: 0x801fa5bc, name: g_jobstts_job_next_level_jp_requirement}
+  - {addr: 0x801fa5c0, name: g_jobstts_job_current_mastered}
+  - {addr: 0x801fa5c4, name: g_jobstts_ability_type}
+  - {addr: 0x801fa5c8, name: g_jobstts_unit_job_data}
+  - {addr: 0x801fa668, name: g_jobstts_input_repeat_counters}
+  - {addr: 0x801fa6a8, name: g_jobstts_input_previous}
+  - {addr: 0x801fa6ac, name: g_jobstts_menu_selection_values}
+  - {addr: 0x801fa6bc, name: g_jobstts_menu_list_scroll_progress}
+  - {addr: 0x801fa6c0, name: g_jobstts_text_color}
+  - {addr: 0x801fa6c4, name: g_jobstts_gfx_otag_index}
+  - {addr: 0x801fa6c8, name: g_jobstts_cmd_stream_input}
+  - {addr: 0x801fa6cc, name: g_jobstts_menu_list_visible_rows}
+  - {addr: 0x801fa6d0, name: g_jobstts_menu_list_row_height}
+  - {addr: 0x801fa6d4, name: g_jobstts_menu_list_row_group_count}
+  - {addr: 0x801fa6d8, name: g_jobstts_menu_list_row_rendering}
+  - {addr: 0x801fa6dc, name: g_jobstts_gfx_semitransparency}
+  - {addr: 0x801fa6e0, name: g_jobstts_menu_window_right_x}
+  - {addr: 0x801fa6e4, name: g_jobstts_menu_list_redraw_pending}
+  - {addr: 0x801fa6ec, name: g_jobstts_menu_list_entries}
+  - {addr: 0x801fa6f0, name: g_jobstts_menu_list_text_table}
+  - {addr: 0x801fa6f4, name: g_jobstts_gfx_texture_page}
+  - {addr: 0x801fa6f8, name: g_jobstts_gfx_clut_id}
+  - {addr: 0x801fa6fc, name: g_jobstts_menu_list_vram_width}
+  - {addr: 0x801fa700, name: g_jobstts_menu_list_glyph_width}
+  - {addr: 0x801fa704, name: g_jobstts_menu_list_text_columns}
+  - {addr: 0x801fa708, name: g_jobstts_text_layout_mode}
+  - {addr: 0x801fa70c, name: g_jobstts_gfx_otag_index_locked}
+  - {addr: 0x801fa710, name: g_jobstts_menu_list_scroll_direction}
+  - {addr: 0x801fa714, name: g_jobstts_bits_primary_source}
+  - {addr: 0x801fa718, name: g_jobstts_bits_secondary_source}
+  - {addr: 0x801fa71c, name: g_jobstts_menu_list_entry_count}
+  - {addr: 0x801fa720, name: g_jobstts_input_newly_pressed}
+  - {addr: 0x801fa724, name: g_jobstts_gfx_poly_f3_capacity}
+  - {addr: 0x801fa728, name: g_jobstts_gfx_poly_g3_capacity}
+  - {addr: 0x801fa72c, name: g_jobstts_gfx_poly_f4_capacity}
+  - {addr: 0x801fa730, name: g_jobstts_gfx_poly_g4_capacity}
+  - {addr: 0x801fa734, name: g_jobstts_gfx_poly_f3_count}
+  - {addr: 0x801fa738, name: g_jobstts_gfx_poly_g3_count}
+  - {addr: 0x801fa73c, name: g_jobstts_gfx_poly_f4_count}
+  - {addr: 0x801fa740, name: g_jobstts_gfx_poly_g4_count}
+  - {addr: 0x801fa744, name: g_jobstts_text_metric_3}
+  - {addr: 0x801fa748, name: g_jobstts_gfx_sprite_capacity}
+  - {addr: 0x801fa74c, name: g_jobstts_gfx_line_f2_capacity}
+  - {addr: 0x801fa750, name: g_jobstts_gfx_line_g2_capacity}
+  - {addr: 0x801fa754, name: g_jobstts_gfx_line_f3_capacity}
+  - {addr: 0x801fa758, name: g_jobstts_gfx_line_g3_capacity}
+  - {addr: 0x801fa75c, name: g_jobstts_gfx_line_f4_capacity}
+  - {addr: 0x801fa760, name: g_jobstts_gfx_line_g4_capacity}
+  - {addr: 0x801fa764, name: g_jobstts_gfx_poly_ft3_capacity}
+  - {addr: 0x801fa768, name: g_jobstts_gfx_line_f2_count}
+  - {addr: 0x801fa76c, name: g_jobstts_gfx_poly_gt3_capacity}
+  - {addr: 0x801fa770, name: g_jobstts_gfx_poly_ft4_capacity}
+  - {addr: 0x801fa774, name: g_jobstts_gfx_line_g2_count}
+  - {addr: 0x801fa778, name: g_jobstts_gfx_line_f3_count}
+  - {addr: 0x801fa77c, name: g_jobstts_gfx_poly_gt4_capacity}
+  - {addr: 0x801fa780, name: g_jobstts_gfx_line_g3_count}
+  - {addr: 0x801fa784, name: g_jobstts_gfx_line_f4_count}
+  - {addr: 0x801fa788, name: g_jobstts_gfx_line_g4_count}
+  - {addr: 0x801fa78c, name: g_jobstts_gfx_background_clut_id}
+  - {addr: 0x801fa790, name: g_jobstts_gfx_poly_ft3_count}
+  - {addr: 0x801fa794, name: g_jobstts_gfx_poly_gt3_count}
+  - {addr: 0x801fa798, name: g_jobstts_gfx_poly_ft4_count}
+  - {addr: 0x801fa79c, name: g_jobstts_gfx_poly_gt4_count}
+  - {addr: 0x801fa7a0, name: g_jobstts_gfx_sprite_16_capacity}
+  - {addr: 0x801fa7a4, name: g_jobstts_gfx_drawenv_y}
+  - {addr: 0x801fa7a8, name: g_jobstts_text_metric_1}
+  - {addr: 0x801fa7ac, name: g_jobstts_menu_list_selected_index}
+  - {addr: 0x801fa7b0, name: g_jobstts_gfx_sprite_8_capacity}
+  - {addr: 0x801fa7b4, name: g_jobstts_gfx_otag_length}
+  - {addr: 0x801fa7b8, name: g_jobstts_gfx_draw_area_capacity}
+  - {addr: 0x801fa7bc, name: g_jobstts_gfx_draw_area_count}
+  - {addr: 0x801fa7c0, name: g_jobstts_gfx_tile_capacity}
+  - {addr: 0x801fa7c4, name: g_jobstts_gfx_draw_move_capacity}
+  - {addr: 0x801fa7c8, name: g_jobstts_gfx_tile_count}
+  - {addr: 0x801fa7cc, name: g_jobstts_gfx_draw_move_count}
+  - {addr: 0x801fa7d0, name: g_jobstts_gfx_context}
+  - {addr: 0x801fa7d4, name: g_jobstts_input_primary_repeat}
+  - {addr: 0x801fa7d8, name: g_jobstts_gfx_sprite_count}
+  - {addr: 0x801fa7dc, name: g_jobstts_menu_scroll_base_index}
+  - {addr: 0x801fa7e0, name: g_jobstts_gfx_tile_16_capacity}
+  - {addr: 0x801fa7e4, name: g_jobstts_text_metric_0}
+  - {addr: 0x801fa7e8, name: g_jobstts_gfx_tile_8_capacity}
+  - {addr: 0x801fa7ec, name: g_jobstts_gfx_tile_1_count}
+  - {addr: 0x801fa7f0, name: g_jobstts_text_metric_4}
+  - {addr: 0x801fa7f4, name: g_jobstts_gfx_tile_8_count}
+  - {addr: 0x801fa7f8, name: g_jobstts_unit_data}
+  - {addr: 0x801fa7fc, name: g_jobstts_gfx_context_base}
+  - {addr: 0x801fa800, name: g_jobstts_input_secondary_repeat}
+  - {addr: 0x801fa804, name: g_jobstts_gfx_sprite_8_count}
+  - {addr: 0x801fa808, name: g_jobstts_gfx_tile_1_capacity}
+  - {addr: 0x801fa80c, name: g_jobstts_text_metric_5}
+  - {addr: 0x801fa810, name: g_jobstts_gfx_tile_16_count}
+  - {addr: 0x801fa814, name: g_jobstts_gfx_sprite_16_count}
+  - {addr: 0x801fa818, name: g_jobstts_text_selected_job_id}
+  - {addr: 0x801fa81c, name: g_jobstts_cmd_conditions}
+
+imports:
+  - {addr: 0x800222fc, name: memset}
+---
+module: event-option
+file: EVENT/OPTION.OUT
+lba: 2128
+size: 54508
+sha256: 0fcd32324e54e67549cb1ad9666a1e3fca953b1ef33592377eebe11b952e71e8
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf000, size: 480, name: option_menu_render_entries, hash: dff47199f4742289}
+  - {addr: 0x801bf1e0, size: 636, name: option_menu_update_scroll, hash: 61145072288429ea}
+  - {addr: 0x801bf45c, size: 3172, name: option_build_at_list, hash: f7232e2ba35ab622, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c00c0, size: 40, name: option_text_set_blit_source_rect, hash: f4a7a9d08a0373d4}
+  - {addr: 0x801c00e8, size: 24, name: option_text_set_blit_destination, hash: 957437a4742bb43c}
+  - {addr: 0x801c0100, size: 464, name: option_gfx_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996}
+  - {addr: 0x801c02d0, size: 52, name: option_gfx_init_scaled_draw_area_packets, hash: 21b5509e73189129}
+  - {addr: 0x801c0304, size: 1424, name: option_menu_run_dead_unit_panel_a, hash: 445eed2f2625ac87}
+  - {addr: 0x801c0894, size: 1436, name: option_menu_run_dead_unit_panel_b, hash: 43c0e695459c989f}
+  - {addr: 0x801c0e30, size: 40, name: option_thread_wait_forever, hash: 19480d7e83b49e1f}
+  - {addr: 0x801c0e58, size: 40, name: option_thread_stop_after_yield, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0e80, size: 1644, name: option_menu_start_dead_unit_threads, hash: d96dca0d02aaa010}
+  - {addr: 0x801c14ec, size: 808, name: option_menu_init_at_list, hash: 0e222271dd330fe9}
+  - {addr: 0x801c1814, size: 328, name: option_menu_close_at_list_threads, hash: 2d768b550d19a17f}
+  - {addr: 0x801c195c, size: 224, name: option_menu_start_at_list_thread, hash: 5bf5050f008c2b98}
+  - {addr: 0x801c1a3c, size: 640, name: option_entrypoint, hash: 8f7b254e0391baa2}
+  - {addr: 0x801c1cbc, size: 4384, name: option_build_options_menu, hash: 3180807fdb0707d1, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c2ddc, size: 1652, name: option_run_option_choice_menu, hash: d496c0741c324433}
+
+data:
+  - {addr: 0x801c3450, name: g_option_input_repeat_timings}
+  - {addr: 0x801c347c, name: g_option_gfx_draw_area_template}
+  - {addr: 0x801c3490, name: g_option_menu_panel_texture_windows_b}
+  - {addr: 0x801c34c8, name: g_option_menu_panel_texture_windows}
+  - {addr: 0x801c3514, name: g_option_gfx_draw_area_scale_percent}
+  - {addr: 0x801c3580, name: g_option_menu_entry_table}
+  - {addr: 0x801c35ac, name: g_option_menu_at_list_entry_table}
+  - {addr: 0x801c35d8, name: g_dead_unit_menu_entries}
+  - {addr: 0x801c3628, name: g_dead_unit_menu}
+  - {addr: 0x801c38ac, name: g_option_menu_at_list_state}
+  - {addr: 0x801c38dc, name: g_option_menu_at_list_entry_table_pointer}
+  - {addr: 0x801c38e4, name: g_option_menu_transition_duration}
+  - {addr: 0x801c38e6, name: g_option_menu_at_list_menu_type}
+  - {addr: 0x801c3924, name: g_option_reference_values}
+  - {addr: 0x801c395c, name: g_option_current_values}
+  - {addr: 0x801c3990, name: g_option_values_unchanged}
+  - {addr: 0x801c3994, name: g_option_choice_window_widths}
+  - {addr: 0x801c39cc, name: g_option_choice_counts}
+  - {addr: 0x801c3a04, name: g_option_value_text_id_bases}
+  - {addr: 0x801c3a3c, name: g_option_menu_icon_thread_param}
+  - {addr: 0x801c3a78, name: g_dead_unit_controller_input}
+  - {addr: 0x801c3a7c, name: g_option_menu_render_buffer}
+  - {addr: 0x801c9a7c, name: g_option_at_list_pages}
+  - {addr: 0x801c9ce4, name: g_option_text_glyph_source}
+  - {addr: 0x801c9cf4, name: g_option_text_glyph_dest}
+  - {addr: 0x801c9d04, name: g_option_menu_panel_pixels}
+  - {addr: 0x801ca104, name: g_option_menu_entry_panel_rect}
+  - {addr: 0x801ca10c, name: g_dead_unit_menu_values}
+  - {addr: 0x801ca10c, name: g_option_menu_at_list_primary_values}
+  - {addr: 0x801ca50c, name: g_option_menu_at_list_secondary_values}
+  - {addr: 0x801ca70c, name: g_option_menu_at_list_indices}
+  - {addr: 0x801ca90c, name: g_dead_unit_menu_flags}
+  - {addr: 0x801cad0c, name: g_option_menu_at_list_flags}
+  - {addr: 0x801caf14, name: g_dead_unit_primary_result}
+  - {addr: 0x801caf18, name: g_dead_unit_secondary_result}
+  - {addr: 0x801cb6fc, name: g_option_menu_at_list_descriptors}
+  - {addr: 0x801cb79c, name: g_option_menu_at_list_text}
+  - {addr: 0x801cbc4c, name: g_option_menu_title_image_rect}
+  - {addr: 0x801cbc54, name: g_option_menu_value_image_rect}
+  - {addr: 0x801cbc5c, name: g_option_menu_pages}
+  - {addr: 0x801cbf7c, name: g_option_picker_icon_records}
+  - {addr: 0x801cc074, name: g_option_menu_panel_frames}
+---
+module: event-require
+file: EVENT/REQUIRE.OUT
+lba: 2192
+size: 127684
+sha256: 97112c50c0b037b2cb5c9d93ae9e2a7506b582c5edbd86a1debfb7ab8e777630
+load: 0x801bf000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801bf01c, size: 472, name: require_gfx_build_scaled_draw_area_packets, hash: 79a90437bb46609d}
+  - {addr: 0x801bf1f4, size: 52, name: require_gfx_init_scaled_draw_area_packets, hash: 9f34b6fd6a40f6d7}
+  - {addr: 0x801bf228, size: 44, name: require_gfx_set_clut_rect_from_id, hash: 0538beffdf7c2276}
+  - {addr: 0x801bf254, size: 88, name: require_gfx_build_portrait_poly_ft4, hash: 5531851d002cce17}
+  - {addr: 0x801bf2ac, size: 100, name: require_gfx_clip_portrait_poly_from_right, hash: f06c2f5b8900d3fa}
+  - {addr: 0x801bf310, size: 100, name: require_gfx_clip_portrait_poly_from_left, hash: ca2ed33a312f5e93}
+  - {addr: 0x801bf374, size: 1064, name: require_gfx_build_portrait_transition_primitives, hash: 5d4cdd324a80f71e}
+  - {addr: 0x801bf79c, size: 4112, name: require_render_unit_status_panel_thread, hash: 84522d3712046bee}
+  - {addr: 0x801c07ac, size: 8, name: require_noop_801c07ac, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c07b4, size: 544, name: require_gfx_init_menu_tile_and_line_primitives, hash: c0c46a118253c8ae}
+  - {addr: 0x801c09d4, size: 40, name: require_thread_stop_after_yield, hash: fbcd24ded43d67df}
+  - {addr: 0x801c09fc, size: 40, name: require_thread_stop_after_yield_2, hash: fbcd24ded43d67df}
+  - {addr: 0x801c0a24, size: 1932, name: require_panel_run_character_status_thread, hash: 3488c32cb72cfd35}
+  - {addr: 0x801c11b0, size: 380, name: require_panel_set_primitive_colors, hash: 30e96407a0905f33}
+  - {addr: 0x801c132c, size: 84, name: require_gfx_apply_menu_palette_for_mode, hash: b44b9976ec55ce81}
+  - {addr: 0x801c1380, size: 268, name: require_text_render_signed_decimal_entries, hash: 060ec03592da47dc}
+  - {addr: 0x801c148c, size: 244, name: require_text_render_decimal_entry_list, hash: 09452bc55dfd8a51}
+  - {addr: 0x801c1580, size: 772, name: require_text_render_decimal_value, hash: 412cf185b4779164}
+  - {addr: 0x801c1884, size: 1380, name: require_editor_run_numeric_thread, hash: b79678f9d57614fd}
+  - {addr: 0x801c1de8, size: 496, name: require_menu_run_thread, hash: 8956351ca1cec311}
+  - {addr: 0x801c1fd8, size: 248, name: require_menu_open_submenu_thread, hash: 8a150a34cd0d353a}
+  - {addr: 0x801c20d0, size: 372, name: require_menu_run_simple_selection_thread, hash: 9c2efc75e9d065c4}
+  - {addr: 0x801c2244, size: 104, name: require_gfx_build_item_graphic_descriptor, hash: 7085296bf6f5bbac}
+  - {addr: 0x801c22ac, size: 8, name: require_noop_801c22ac, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c22b4, size: 28, name: require_thread_is_running, hash: d10e3403d7fec970}
+  - {addr: 0x801c22d0, size: 1236, name: require_menu_draw_thread_status_indicators, hash: 06809308c5329e70}
+  - {addr: 0x801c27a4, size: 32, name: require_text_clear_string_buffer, hash: 5eaa92c4790153fd}
+  - {addr: 0x801c27c4, size: 196, name: require_panel_copy_battle_stats_to_gauges, hash: 10a1714f8625994f}
+  - {addr: 0x801c2888, size: 1348, name: require_editor_load_selected_unit, hash: b9c009db7e6c8971}
+  - {addr: 0x801c2dcc, size: 580, name: require_gfx_set_scaled_poly_ft4_geometry, hash: f989278e90fdce7c}
+  - {addr: 0x801c3010, size: 700, name: require_gfx_build_status_group_primitives, hash: 61b10189a9c6f7fc}
+  - {addr: 0x801c32cc, size: 400, name: require_gfx_build_gradient_grid_primitives, hash: 3b20668a6d03a172}
+  - {addr: 0x801c345c, size: 720, name: require_gfx_set_scaled_poly_ft4_geometry_and_uv, hash: ab60dde2e48b7b56}
+  - {addr: 0x801c372c, size: 692, name: require_gfx_build_scaled_sprite_primitive_chain, hash: 0d33bf568d157774}
+  - {addr: 0x801c39e0, size: 40, name: require_thread_stop_after_16_frames, hash: 83373904c4781138}
+  - {addr: 0x801c3a08, size: 168, name: require_party_update_bio_variable_for_unit_class, hash: 39b2124bf596bf04}
+  - {addr: 0x801c3ab0, size: 244, name: require_reward_load_bonus_image, hash: 83bdf7ea18ea62c4}
+  - {addr: 0x801c3ba4, size: 108, name: require_input_wait_frames_or_skip, hash: 0a5f70e3ab9123be}
+  - {addr: 0x801c3c10, size: 248, name: require_gfx_fade_rgb_31_frames, hash: 72b0b45d367d072d}
+  - {addr: 0x801c3d08, size: 72, name: require_sound_wait_music_idle, hash: 5cf0df43ec1c1bac}
+  - {addr: 0x801c3d50, size: 168, name: require_sound_play_scenario_music, hash: 0794875f602ea289}
+  - {addr: 0x801c3df8, size: 428, name: require_text_show_battle_congratulations, hash: fc9664dd2c18d147}
+  - {addr: 0x801c3fa4, size: 1036, name: require_apply_permanent_brave_faith_changes_and_collect_warnings, hash: 43106ae75f10234c}
+  - {addr: 0x801c43b0, size: 48, name: require_panel_set_transition_value, hash: b73b92f350fd6a02}
+  - {addr: 0x801c43e0, size: 8, name: require_noop_801c43e0, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c43e8, size: 856, name: require_party_find_low_brave_high_faith_departures, hash: e98e52c97809419a}
+  - {addr: 0x801c4740, size: 884, name: require_party_find_join_candidates, hash: c7209d6d040d40db}
+  - {addr: 0x801c4ab4, size: 452, name: require_party_apply_permanent_brave_faith_changes, hash: f2f5bd68c21ed1ef}
+  - {addr: 0x801c4c78, size: 588, name: require_party_remove_low_brave_high_faith_units, hash: 8de725f6f99c0f9f}
+  - {addr: 0x801c4ec4, size: 124, name: require_condition_show_ready_bugged, hash: a81f2c639ae71f98}
+  - {addr: 0x801c4f40, size: 204, name: require_menu_wait_selection_threads, hash: e2254c8a7bfec0a8}
+  - {addr: 0x801c500c, size: 68, name: require_input_wait_skip, hash: 9b320be634f1ab52}
+  - {addr: 0x801c5050, size: 264, name: require_overlay_open_jobstts, hash: 73b78966be77b7de}
+  - {addr: 0x801c5158, size: 56, name: require_overlay_open_jobstts_thread, hash: 7ecb96b7481fd20c}
+  - {addr: 0x801c5190, size: 308, name: require_gfx_run_suspended_thread_transition, hash: e122a2adc24d56a1}
+  - {addr: 0x801c52c4, size: 232, name: require_gfx_set_formation_icon_uv, hash: 353eab0a41a1e1a6}
+  - {addr: 0x801c53ac, size: 172, name: require_file_load_sync, hash: 877e363fe3ae749d}
+  - {addr: 0x801c5458, size: 1144, name: require_prepare_party_portrait_textures, hash: 38cf6661ba29d0dd}
+  - {addr: 0x801c58d0, size: 1280, name: require_load_party_unit_into_editor, hash: e789845c276f79a5}
+  - {addr: 0x801c5dd0, size: 120, name: require_party_restore_item_counts, hash: 5036916d195f2e8b}
+  - {addr: 0x801c5e48, size: 200, name: require_party_sell_equipment_over_limit, hash: ce0d4bdda9e4c30b}
+  - {addr: 0x801c5f10, size: 240, name: require_party_store_equipment_or_sell_overflow, hash: 8dd80fb16f32c66e}
+  - {addr: 0x801c6000, size: 160, name: require_party_get_free_slot_status, hash: e45d44d7bf4d0697}
+  - {addr: 0x801c60a0, size: 2280, name: require_select_party_unit_to_remove, hash: f6bb31641f3d2f9d}
+  - {addr: 0x801c6988, size: 2024, name: require_apply_post_battle_unit_changes, hash: 319e61c527147a5b}
+  - {addr: 0x801c7170, size: 492, name: require_reward_collect_war_trophies_and_bonus_money, hash: 32339382b433870d}
+  - {addr: 0x801c735c, size: 40, name: require_reward_get_war_trophy_column_x, hash: f1e28eb8676390c8}
+  - {addr: 0x801c7384, size: 52, name: require_reward_get_war_trophy_entry_offset, hash: 59f25f8289f42a18}
+  - {addr: 0x801c73b8, size: 1984, name: require_render_war_trophies, hash: bf50608a35ad2092}
+  - {addr: 0x801c7b78, size: 4124, name: require_render_gil_reward_ticker, hash: 5567bfd43013223e}
+  - {addr: 0x801c8b94, size: 420, name: require_gfx_scale_poly_gt4_vertex_colors, hash: 66ed05c27d4e424c}
+  - {addr: 0x801c8d38, size: 292, name: require_gfx_init_poly_gt4_array_32, hash: f259cec1a6ecdc8c}
+  - {addr: 0x801c8e5c, size: 292, name: require_gfx_init_poly_gt4_array_8, hash: 0f1ae6684e05e365}
+  - {addr: 0x801c8f80, size: 4132, name: require_render_display_condition_general_cases, hash: 231240f68206f06c}
+  - {addr: 0x801c9fa4, size: 8, name: require_noop_801c9fa4, hash: 6d64edf91449c1b1}
+  - {addr: 0x801c9fac, size: 1688, name: require_render_display_condition_special_cases_thread, hash: ac96742eb4a60b78}
+  - {addr: 0x801ca644, size: 32, name: require_thread_exit_current, hash: d5e294538771c138}
+  - {addr: 0x801ca664, size: 2416, name: require_reward_animate_bonus_image_burst, hash: 5a5a3d742bcaea7a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801cafd4, size: 392, name: require_condition_dispatch, hash: 5daba3919c5bcdeb}
+  - {addr: 0x801cb15c, size: 192, name: require_overlay_run_helpmenu, hash: 080209a0102a063f}
+  - {addr: 0x801cb21c, size: 176, name: require_text_build_battle_nicknames, hash: f01073dd1236acab}
+
+data:
+  - {addr: 0x801bf000, name: g_jobstts_text_wait_for_allocation_message}
+  - {addr: 0x801cb2f0, name: g_require_menu_indicator_packet_index}
+  - {addr: 0x801cb2f8, name: g_require_menu_indicator_brightness}
+  - {addr: 0x801cb300, name: g_require_menu_indicator_fade_work}
+  - {addr: 0x801cb308, name: g_require_menu_indicator_state}
+  - {addr: 0x801cb31c, name: g_require_panel_active_unit_banner}
+  - {addr: 0x801cb31c, name: g_require_panel_selected_billboard}
+  - {addr: 0x801cb31e, name: g_require_editor_team_state}
+  - {addr: 0x801cb340, name: g_require_panel_comparison_billboard}
+  - {addr: 0x801cb364, name: g_require_active_unit_data}
+  - {addr: 0x801cb366, name: g_require_editor_unit_type}
+  - {addr: 0x801cb368, name: g_require_editor_brave}
+  - {addr: 0x801cb36a, name: g_require_editor_faith}
+  - {addr: 0x801cb36c, name: g_require_editor_zodiac}
+  - {addr: 0x801cb36e, name: g_require_editor_selected_unit_id}
+  - {addr: 0x801cb374, name: g_require_panel_comparison_unit_data}
+  - {addr: 0x801cb37e, name: g_require_panel_comparison_unit_id}
+  - {addr: 0x801cb384, name: g_require_editor_unit_fields}
+  - {addr: 0x801cb384, name: g_require_panel_billboard_data}
+  - {addr: 0x801cb404, name: g_require_editor_third_ability_bytes}
+  - {addr: 0x801cb418, name: g_require_editor_fourth_ability_bytes}
+  - {addr: 0x801cb42c, name: g_require_editor_first_ability_bytes}
+  - {addr: 0x801cb440, name: g_require_editor_second_ability_bytes}
+  - {addr: 0x801cb454, name: g_require_editor_numeric_geometry}
+  - {addr: 0x801cb454, name: g_require_panel_status_texture}
+  - {addr: 0x801cb45c, name: g_require_panel_item_icon_texture}
+  - {addr: 0x801cb47c, name: g_require_gfx_portrait_origin}
+  - {addr: 0x801cb484, name: g_require_panel_gauge_bar_colors}
+  - {addr: 0x801cb4b4, name: g_require_panel_selected_numeric_entries}
+  - {addr: 0x801cb52c, name: g_require_panel_comparison_numeric_entries}
+  - {addr: 0x801cb5a4, name: g_require_panel_editor_label_cells}
+  - {addr: 0x801cb5ec, name: g_require_panel_editor_mode_cell}
+  - {addr: 0x801cb5f8, name: g_require_panel_editor_value_cells}
+  - {addr: 0x801cb628, name: g_require_panel_frame_rect}
+  - {addr: 0x801cb630, name: g_require_panel_sprite_cells}
+  - {addr: 0x801cb684, name: g_require_panel_portrait_cell}
+  - {addr: 0x801cb690, name: g_require_gfx_draw_area_template}
+  - {addr: 0x801cb692, name: g_require_panel_status_position_y}
+  - {addr: 0x801cb698, name: g_require_gfx_draw_area_scale_percent}
+  - {addr: 0x801cb6b0, name: g_require_panel_editor_value_cluts}
+  - {addr: 0x801cb6c0, name: g_require_panel_editor_label_cluts}
+  - {addr: 0x801cb6dc, name: g_require_panel_editor_mode_cells}
+  - {addr: 0x801cb70c, name: g_require_panel_selected_portrait_rect}
+  - {addr: 0x801cb714, name: g_require_panel_comparison_portrait_rect}
+  - {addr: 0x801cb71c, name: g_require_gfx_portrait_transition_offsets}
+  - {addr: 0x801cb750, name: g_require_panel_origin_offsets}
+  - {addr: 0x801cb760, name: g_require_character_status_frame_rect}
+  - {addr: 0x801cb778, name: g_require_character_status_draw_area_rect}
+  - {addr: 0x801cb780, name: g_require_panel_text_upload_rect_a}
+  - {addr: 0x801cb788, name: g_require_panel_text_upload_rect_b}
+  - {addr: 0x801cb790, name: g_require_panel_label_layouts_mode0}
+  - {addr: 0x801cb874, name: g_require_panel_label_layouts_mode1}
+  - {addr: 0x801cb958, name: g_require_panel_label_layouts_mode2}
+  - {addr: 0x801cba3c, name: g_require_panel_label_layouts_mode3}
+  - {addr: 0x801cbb80, name: g_require_panel_item_icon_layouts}
+  - {addr: 0x801cbbbc, name: g_require_editor_numeric_table}
+  - {addr: 0x801cbbcc, name: g_require_editor_numeric_entries_a}
+  - {addr: 0x801cbbd4, name: g_require_editor_numeric_entries_b}
+  - {addr: 0x801cbbdc, name: g_require_editor_numeric_entries_c}
+  - {addr: 0x801cbbe4, name: g_require_editor_numeric_entries_d}
+  - {addr: 0x801cbbec, name: g_require_editor_numeric_entries_e}
+  - {addr: 0x801cbbf4, name: g_require_editor_numeric_entries_f}
+  - {addr: 0x801cbbfc, name: g_require_editor_numeric_texture}
+  - {addr: 0x801cbcd4, name: g_require_editor_numeric_descriptor_a}
+  - {addr: 0x801cbd88, name: g_require_editor_numeric_descriptor_b}
+  - {addr: 0x801cbe60, name: g_require_text_decimal_glyph}
+  - {addr: 0x801cbe70, name: g_require_text_section_offsets}
+  - {addr: 0x801cbef0, name: g_require_text_data}
+  - {addr: 0x801d0000, name: g_require_work}
+  - {addr: 0x801d0068, name: g_require_reward_bonus_image_rect}
+  - {addr: 0x801d0070, name: g_require_reward_bonus_palette_rect}
+  - {addr: 0x801d0078, name: g_require_gfx_fade_rgb}
+  - {addr: 0x801d007c, name: g_require_status_display_thread_params}
+  - {addr: 0x801d0088, name: g_require_status_display_redraw_request}
+  - {addr: 0x801d008c, name: g_require_panel_dim_a}
+  - {addr: 0x801d0090, name: g_require_numeric_editor_thread_params}
+  - {addr: 0x801d009c, name: g_require_numeric_editor_redraw_request}
+  - {addr: 0x801d00a0, name: g_require_panel_dim_b}
+  - {addr: 0x801d00a4, name: g_require_character_status_frame_config}
+  - {addr: 0x801d00b0, name: g_require_character_status_redraw_request}
+  - {addr: 0x801d00b4, name: g_require_panel_dim_c}
+  - {addr: 0x801d00b8, name: g_require_gfx_scaled_sprite_texture_page}
+  - {addr: 0x801d00e0, name: g_require_join_menu_descriptor}
+  - {addr: 0x801d0158, name: g_require_party_removal_menus}
+  - {addr: 0x801d02f0, name: g_require_panel_status_uv_rects}
+  - {addr: 0x801d0688, name: g_require_panel_status_scales}
+  - {addr: 0x801d07bc, name: g_require_panel_status_group_bounds}
+  - {addr: 0x801d07cb, name: g_require_panel_status_group_count}
+  - {addr: 0x801d07cc, name: g_require_panel_status_group_ids}
+  - {addr: 0x801d07d4, name: g_require_panel_status_animation}
+  - {addr: 0x801d07dc, name: g_require_panel_status_y_offsets}
+  - {addr: 0x801d07f0, name: g_require_panel_status_offsets}
+  - {addr: 0x801d082c, name: g_require_gfx_scaled_sprite_uv_rects}
+  - {addr: 0x801d0988, name: g_require_gfx_scaled_sprite_scale}
+  - {addr: 0x801d09fd, name: g_require_gfx_scaled_sprite_count}
+  - {addr: 0x801d0a00, name: g_require_gfx_formation_sprite_groups}
+  - {addr: 0x801d0adc, name: g_require_party_bio_update_records}
+  - {addr: 0x801d0b34, name: g_require_party_affected_unit_count}
+  - {addr: 0x801d0b38, name: g_require_thread_suspended_id}
+  - {addr: 0x801d0b3c, name: g_require_portrait_index_by_sprite_set}
+  - {addr: 0x801d0ce4, name: g_require_special_portrait_rect}
+  - {addr: 0x801d0cec, name: g_require_special_portrait_palette_rect}
+  - {addr: 0x801d0cf4, name: g_require_portrait_sheet_rect_0}
+  - {addr: 0x801d0cfc, name: g_require_portrait_sheet_rect_1}
+  - {addr: 0x801d0d04, name: g_require_portrait_sheet_rect_2}
+  - {addr: 0x801d0d0c, name: g_require_portrait_sheet_rect_3}
+  - {addr: 0x801d0d14, name: g_require_party_removable_flags}
+  - {addr: 0x801d0d2c, name: g_require_party_portrait_move_rect}
+  - {addr: 0x801d0d34, name: g_require_party_portrait_destination}
+  - {addr: 0x801d0d3c, name: g_require_party_palette_move_rect}
+  - {addr: 0x801d0d44, name: g_require_party_palette_destination}
+  - {addr: 0x801d0d46, name: g_require_party_palette_destination_y}
+  - {addr: 0x801d0d4c, name: g_require_reward_war_trophy_image_rect}
+  - {addr: 0x801d0d54, name: g_require_reward_war_trophy_clear_rect}
+  - {addr: 0x801d0d5c, name: g_require_reward_money_clip_rect_0}
+  - {addr: 0x801d0d64, name: g_require_reward_money_clip_rect_1}
+  - {addr: 0x801d0d6c, name: g_require_reward_screen_clip_rect_0}
+  - {addr: 0x801d0d74, name: g_require_reward_screen_clip_rect_1}
+  - {addr: 0x801d0d7c, name: g_require_reward_money_digit_positions}
+  - {addr: 0x801d0d94, name: g_require_reward_money_digit_speeds}
+  - {addr: 0x801d0dac, name: g_require_reward_money_digit_initial_speeds}
+  - {addr: 0x801d0dc4, name: g_require_reward_money_digit_targets}
+  - {addr: 0x801d0ddc, name: g_require_reward_money_digit_settling}
+  - {addr: 0x801d0df4, name: g_require_condition_general_quads}
+  - {addr: 0x801d0e54, name: g_require_condition_general_tpages}
+  - {addr: 0x801d0e6c, name: g_require_condition_general_quad_ranges}
+  - {addr: 0x801d0e70, name: g_require_condition_general_vertex_colors}
+  - {addr: 0x801d0ee8, name: g_require_condition_special_quads}
+  - {addr: 0x801d153c, name: g_require_condition_special_quad_ranges}
+  - {addr: 0x801d1548, name: g_require_condition_special_vertex_colors}
+  - {addr: 0x801d1b9c, name: g_require_thread_indicator_packets}
+  - {addr: 0x801d208c, name: g_require_input_controller}
+  - {addr: 0x801d20a8, name: g_require_gfx_draw_offset_y}
+  - {addr: 0x801d20ec, name: g_require_panel_selected_editor_packets}
+  - {addr: 0x801d2704, name: g_require_panel_selected_packets}
+  - {addr: 0x801d2ab4, name: g_require_panel_comparison_editor_packets}
+  - {addr: 0x801d30cc, name: g_require_panel_comparison_packets}
+  - {addr: 0x801d347c, name: g_require_panel_selected_number_image}
+  - {addr: 0x801d3b7c, name: g_require_panel_selected_name_image}
+  - {addr: 0x801d40fc, name: g_require_panel_selected_large_number_image}
+  - {addr: 0x801d41ec, name: g_require_panel_comparison_number_image}
+  - {addr: 0x801d41f0, name: g_require_panel_comparison_name_image}
+  - {addr: 0x801d41f4, name: g_require_panel_comparison_large_number_image}
+  - {addr: 0x801d41f8, name: g_require_panel_selected_portrait_image}
+  - {addr: 0x801d4238, name: g_require_panel_comparison_portrait_image}
+  - {addr: 0x801d4278, name: g_require_panel_frames_a}
+  - {addr: 0x801d4a28, name: g_require_panel_text_image_a}
+  - {addr: 0x801d56a8, name: g_require_panel_text_image_b}
+  - {addr: 0x801d6328, name: g_require_editor_numeric_state}
+  - {addr: 0x801d68a8, name: g_require_editor_numeric_text_a}
+  - {addr: 0x801d71c0, name: g_require_editor_numeric_text_b}
+  - {addr: 0x801d71d4, name: g_require_reward_burst_draw_modes}
+  - {addr: 0x801d71ec, name: g_require_message_menu_result}
+  - {addr: 0x801d71f0, name: g_require_menu_selection_result}
+  - {addr: 0x801d71f4, name: g_require_party_removal_result}
+  - {addr: 0x801d71f8, name: g_require_party_affected_unit_message_args}
+  - {addr: 0x801d72c0, name: g_require_party_affected_unit_message_ids}
+  - {addr: 0x801d7388, name: g_require_party_affected_battle_unit_indices}
+  - {addr: 0x801d7450, name: g_require_gfx_poly_ft4_banks}
+  - {addr: 0x801d7db0, name: g_require_formation_job_data}
+  - {addr: 0x801d7db4, name: g_require_portrait_cell_rect}
+  - {addr: 0x801d7dbc, name: g_require_portrait_palette_rect}
+  - {addr: 0x801d7dc4, name: g_require_portrait_cell_pixels}
+  - {addr: 0x801d80c4, name: g_require_editor_party_unit_stats}
+  - {addr: 0x801d8304, name: g_require_saved_thread_block}
+  - {addr: 0x801d8704, name: g_require_reward_war_trophy_search_result}
+  - {addr: 0x801d8719, name: g_require_reward_war_trophy_item_count}
+  - {addr: 0x801d8728, name: g_require_reward_war_trophy_entry_types}
+  - {addr: 0x801d8768, name: g_require_reward_war_trophy_entry_values}
+  - {addr: 0x801d87a8, name: g_require_reward_war_trophy_entry_count}
+  - {addr: 0x801d87ac, name: g_require_reward_money_digit_polys}
+  - {addr: 0x801d898c, name: g_require_reward_money_next_digit_polys}
+  - {addr: 0x801d8b6c, name: g_require_reward_money_sign_polys}
+  - {addr: 0x801d8bbc, name: g_require_reward_money_comma_polys}
+  - {addr: 0x801d8c0c, name: g_require_reward_burst_flash_polys}
+  - {addr: 0x801d8c3c, name: g_require_reward_burst_tiles}
+  - {addr: 0x801ddd3c, name: g_require_reward_burst_matrix}
+  - {addr: 0x801ddd5c, name: g_require_reward_burst_rotation}
+  - {addr: 0x801ddd64, name: g_require_reward_burst_offset}
+  - {addr: 0x801ddd74, name: g_require_reward_burst_rotated_offset}
+  - {addr: 0x801ddd84, name: g_require_reward_war_trophy_primitives}
+
+imports:
+  - {addr: 0x801dfe10, name: helpmenu_menu_run_require_help}
+
+overrides:
+  - {function: require_editor_run_numeric_thread, name: battle_gfx_draw_or_append_gpu_primitive, addr: 0x8014a5e8}
+  - {function: require_gfx_build_status_group_primitives, name: battle_gfx_draw_or_append_gpu_primitive, addr: 0x8014a5e8}
+  - {function: require_menu_draw_thread_status_indicators, name: battle_gfx_draw_or_append_gpu_primitive, addr: 0x8014a5e8}
+---
+module: event-small
+file: EVENT/SMALL.OUT
+lba: 2000
+size: 7891
+sha256: 09e0892d94aacee21dcb3f0d3c154745dbc3b9de21c6de2df602d0560fbe260f
+load: 0x801d7000
+source_dir: src/event
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801d7000, size: 100, name: small_text_init_battle_pointers, hash: 33b5d60b7f13ad41}
+  - {addr: 0x801d7064, size: 8, name: small_return_zero, hash: 207819bf4ebe3078}
+
+data:
+  - {addr: 0x801d7070, name: g_small_text_name_section_offsets}
+  - {addr: 0x801d70ec, name: g_small_text_name_data}

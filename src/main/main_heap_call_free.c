@@ -1,0 +1,4 @@
+#include "fft/main_heap.h"
+void main_heap_call_free(void* pointer) {
+    main_heap_free(pointer);
+}

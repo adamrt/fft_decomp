@@ -1,0 +1,198 @@
+#include "fft/battle.h"
+#include "fft/battle_text.h"
+#include "fft/event.h"
+#include "fft/main_heap.h"
+#include "fft/main_runtime.h"
+#include "fft/main_sound.h"
+#include "fft/menu_types.h"
+#include "fft/script_variables.h"
+#include "fft/thread.h"
+#include "psx/gpu.h"
+#include "psx/types.h"
+
+extern menu_text_state_t
+    g_battle_text_typewriter_state;             /* origin/stride passed to battle_text_render_glyph_to_4bpp_image */
+extern RECT g_battle_text_typewriter_vram_rect; /* VRAM destination of the finished glyph */
+extern u8 g_battle_text_slot_source_columns[];  /* per-slot source column */
+extern u8 g_battle_text_slot_row_pitches[];     /* per-slot source row pitch in bytes */
+extern s32 g_battle_text_glyphs_per_wait;       /* glyphs drawn before the typewriter waits */
+extern u8 g_battle_text_typewriter_glyph_images[3][8][0x54]; /* eight glyph images per slot */
+extern u8 g_battle_text_typewriter_previous_images[3][0x54]; /* previous image per slot */
+extern u8 g_battle_text_typewriter_column_scratch[14];       /* one-column scratch used by the phase shift */
+extern const u8 g_text_glyph_widths[];
+extern const u8* g_text_glyph_bitmap_data;
+
+/* Draw the pending dialogue glyph into VRAM and hold it for the typewriter
+ * delay.
+ *
+ * Twin of world_text_draw_glyph_with_typewriter_delay. The ring byte is read before the phase so the
+ * pen-x load lands in its own register behind the slot arithmetic, and the
+ * inner bound is `(s32)pitch / 2` so it is recomputed per row, as in the
+ * target.
+ */
+void battle_text_draw_dialogue_glyph(s32 pen_x, s32 pen_y, s32 delay) {
+    s32 slot;
+    s32 i;
+    s32 j;
+    s32 phase;
+    s32 ring;
+    s32 glyph;
+    s32 kind;
+    s32 next_glyph;
+    s32 next_kind;
+    u32 pitch;
+    u8* image;
+    u8* previous;
+    s32 row;
+    s32 offset;
+    battle_text_glyph_state_t* request;
+
+    request = &g_battle_text_typewriter_glyph;
+    if (g_battle_text_typewriter_glyph.dialogue_type_c == 0x10 || g_battle_text_typewriter_glyph.dialogue_type_c == 0) {
+        for (;;) {
+            slot = 16;
+            for (i = 0; i < 3; i++) {
+                if (g_battle_current_thread_id == g_battle_menu_slot_owner_thread_ids[i]) {
+                    slot = i;
+                    g_battle_menu_slot_owner_thread_ids[i] = g_battle_current_thread_id;
+                    break;
+                }
+            }
+            if (i == 3) {
+                for (row = 0; row < 3; row++) {
+                    if (g_battle_menu_slot_owner_thread_ids[row] == 0) {
+                        slot = row;
+                        g_battle_menu_slot_owner_thread_ids[row] = g_battle_current_thread_id;
+                        g_battle_text_slot_source_columns[slot] = 0;
+                        g_battle_text_slot_row_pitches[slot] = 0;
+                        break;
+                    }
+                }
+            }
+            if (slot != 16) {
+                break;
+            }
+            battle_thread_yield();
+        }
+
+        ring = (u8)g_battle_menu_slot_states[slot];
+        phase = request->flags_0 & 3;
+        image = g_battle_text_typewriter_glyph_images[slot][ring];
+        previous = g_battle_text_typewriter_previous_images[slot];
+        glyph = request->character_4;
+        kind = g_text_glyph_widths[glyph];
+        if (kind == 4 || glyph == TEXT_SPACE) {
+            if (phase == 2) {
+                pitch = 8;
+                g_battle_text_typewriter_vram_rect.w = 2;
+            } else {
+                pitch = 4;
+                g_battle_text_typewriter_vram_rect.w = 1;
+            }
+        } else if (kind == 2) {
+            pitch = 4;
+            g_battle_text_typewriter_vram_rect.w = 1;
+        } else if (kind == 6) {
+            pitch = 8;
+            g_battle_text_typewriter_vram_rect.w = 2;
+        } else {
+            pitch = 12;
+            g_battle_text_typewriter_vram_rect.w = 3;
+        }
+
+        if (phase == 2) {
+            offset = 0;
+            for (i = 0; i < 14; i++) {
+                j = offset / 2;
+                offset += g_battle_text_slot_row_pitches[slot];
+                g_battle_text_typewriter_column_scratch[i] = (previous + j)[g_battle_text_slot_source_columns[slot]];
+            }
+            for (i = 0; i < 14; i++) {
+                image[(s32)(i * pitch) / 2] = g_battle_text_typewriter_column_scratch[i];
+            }
+        }
+
+        next_glyph = request->character_4;
+        next_kind = g_text_glyph_widths[next_glyph];
+        if (next_kind == 4 || next_glyph == 0xFA) {
+            g_battle_text_slot_source_columns[slot] = phase == 2 ? 2 : 1;
+        } else if (next_kind == 2) {
+            if (phase == 2) {
+                g_battle_text_slot_source_columns[slot] = 1;
+            } else {
+                g_battle_text_slot_source_columns[slot] = 0;
+            }
+        } else if (next_kind == 6) {
+            g_battle_text_slot_source_columns[slot] = phase == 2 ? 3 : 2;
+        } else {
+            g_battle_text_slot_source_columns[slot] = phase == 2 ? 5 : 4;
+        }
+        g_battle_text_slot_row_pitches[slot] = pitch;
+
+        for (row = 0; row < 14; row++) {
+            offset = row * pitch;
+            for (i = phase >> 1; i < (s32)pitch / 2; i++) {
+                if (request->dialogue_type_c == 0) {
+                    (image + i)[offset / 2] = 0;
+                } else {
+                    (image + i)[offset / 2] = ((u8*)g_battle_menu_glyph_image
+                        + ((((request->flags_0 + (i << 1)) & 0xF) + 8) / 2))[(row << 7) + 0x400];
+                }
+            }
+        }
+
+        if (request->character_4 != 0xFA) {
+            g_battle_text_typewriter_state.origin_x = phase;
+            g_battle_text_typewriter_state.origin_y = 0;
+            g_battle_text_typewriter_state.stride = pitch;
+            battle_script_set_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT,
+                battle_script_get_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
+            battle_text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->character_4 * 0x23, (s32)image,
+                (u16*)&g_battle_text_typewriter_state.origin_x, request->palette_e);
+            g_battle_text_typewriter_vram_rect.x
+                = (pen_x >> 2) + (s16)(battle_script_get_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);
+            g_battle_text_typewriter_vram_rect.y = pen_y;
+            g_battle_text_typewriter_vram_rect.h = 14;
+            LoadImage(&g_battle_text_typewriter_vram_rect, (u32*)image);
+        }
+
+        g_battle_menu_slot_states[slot] = g_battle_menu_slot_states[slot] + 1;
+        battle_copy_bytes(previous, image, 0x54);
+
+        if (delay == 0) {
+            DrawSync(0);
+            g_battle_menu_slot_states[slot] = 0;
+        } else if (delay >= 2) {
+            for (i = 0; i < delay * (3 - g_battle_event_speed); i++) {
+                if (battle_thread_get_current_task_id() == NATIVE_THREAD_TASK_STOP_REQUEST) {
+                    break;
+                }
+                battle_thread_wait_frames(1);
+            }
+            g_battle_menu_slot_states[slot] = 0;
+        } else {
+            if (PadRead(1) & 0x20) {
+                g_battle_text_glyphs_per_wait = 8;
+            } else if ((g_main_game_options.value & 0x7000) == 0) {
+                g_battle_text_glyphs_per_wait = 8;
+            } else if ((g_main_game_options.value & 0x7000) == 0x1000) {
+                g_battle_text_glyphs_per_wait = 2;
+            } else {
+                g_battle_text_glyphs_per_wait = 1;
+            }
+            if (g_battle_menu_slot_states[slot] >= g_battle_text_glyphs_per_wait) {
+                for (i = 0; i < 3 - g_battle_event_speed; i++) {
+                    if (battle_thread_get_current_task_id() == NATIVE_THREAD_TASK_STOP_REQUEST) {
+                        break;
+                    }
+                    battle_thread_wait_frames(1);
+                }
+                g_battle_menu_slot_states[slot] = 0;
+            }
+        }
+
+        if (battle_script_get_variable(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE) == 0 && request->dialogue_type_c != 0) {
+            g_sound_effect_id_to_play = MAIN_SFX_TEXT_GLYPH;
+        }
+    }
+}

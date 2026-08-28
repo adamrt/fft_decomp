@@ -1,0 +1,1933 @@
+# EFFECT/E*.BIN: ability-effect overlays at 0x801c2500, one document each,
+# every one resident alongside BATTLE.
+module: effect-e000
+file: EFFECT/E000.BIN
+lba: 61000
+size: 52004
+sha256: df546bdddc034a3770408ea6f2f7ee42d5b33ce27e11dd01f1655063d23f1be7
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e000_update_particle_ribbons_short_state, hash: 402de41ad3570cb5}
+  - {addr: 0x801c44a0, size: 8, name: effect_e000_noop, hash: 6d64edf91449c1b1}
+
+data:
+  - {addr: 0x801c44a8, name: g_effect_e000_particle_ribbon_short_brightness_table}
+---
+module: effect-e004
+file: EFFECT/E004.BIN
+lba: 61094
+size: 93124
+sha256: e5aea693385c083888e8c755ac79deeeccd0788cd51574c0ebf71544ac1ae45e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e004_update_ring_stack_mesh_state, hash: da107a29753a841f}
+  - {addr: 0x801c39f8, size: 6012, name: effect_e004_update_polar_mesh_state, hash: 464e91a46d621209}
+
+data:
+  - {addr: 0x801c5174, name: g_effect_e004_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c524c, name: g_effect_e004_polar_mesh_brightness_table}
+---
+module: effect-e005
+file: EFFECT/E005.BIN
+lba: 61140
+size: 54252
+sha256: 20707ab7c8eb3016709da103d753025e5453ba0957482b084deb1d66af2f00fe
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e005_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e006
+file: EFFECT/E006.BIN
+lba: 61167
+size: 54748
+sha256: 99e1dff1d3b48ad47b45378af9884a3fd5fd4e2905fb8ceb08b89e697e9de176
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e006_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e007
+file: EFFECT/E007.BIN
+lba: 61194
+size: 54292
+sha256: ede88f8c96796c4d5bc2fc6ebc9e1d901a877e2aa046243b4acaa5e7c7cac8da
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e007_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e015
+file: EFFECT/E015.BIN
+lba: 61383
+size: 95372
+sha256: 5dc5f69c94d8af3158f1cabb9a276f8cadf5b9b2b5ad21e2e6824f85fdc79bcf
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e015_update_ring_stack_mesh_state, hash: abbcc54785141bac}
+  - {addr: 0x801c39f8, size: 5584, name: effect_e015_update_ring_mesh_state, hash: 211b02b490c1235a}
+  - {addr: 0x801c4fc8, size: 1908, name: effect_e015_update_textured_quad_grid_4x4, hash: 0a5510c678a3053f}
+
+data:
+  - {addr: 0x801c573c, name: g_effect_e015_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c5814, name: g_effect_e015_ring_mesh_brightness_table}
+  - {addr: 0x801c585c, name: g_effect_gfx_brightness_table}
+---
+module: effect-e033
+file: EFFECT/E033.BIN
+lba: 61855
+size: 88888
+sha256: aba5b1ff92aa40bb76dc1012129d91d9e5ffa6330819d41f8e03cdead4fb7035
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e033_update_polar_mesh_state, hash: 57f8cba9987654d0}
+  - {addr: 0x801c3c7c, size: 2924, name: effect_e033_update_wave_mesh_state, hash: 3ef47652c7eb73ad}
+
+data:
+  - {addr: 0x801c47e8, name: g_effect_e033_polar_mesh_brightness_table}
+  - {addr: 0x801c4890, name: g_effect_wave_mesh_brightness_table}
+---
+module: effect-e035
+file: EFFECT/E035.BIN
+lba: 61922
+size: 88780
+sha256: bf7b3e909536a74ad92bf9827bf4c053cb3f65030ce5ddfc920058bb5099938c
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e035_update_polar_mesh_state, hash: 57f8cba9987654d0}
+  - {addr: 0x801c3c7c, size: 2924, name: effect_e035_update_wave_mesh_state, hash: 3ef47652c7eb73ad}
+
+data:
+  - {addr: 0x801c47e8, name: g_effect_e033_polar_mesh_brightness_table}
+  - {addr: 0x801c4890, name: g_effect_e035_wave_mesh_brightness_table}
+---
+module: effect-e041
+file: EFFECT/E041.BIN
+lba: 62026
+size: 51932
+sha256: 9876bf9ef103901e8c70885e36c28dd01f07fa1b79956e2de11164bb8966500d
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e041_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e047
+file: EFFECT/E047.BIN
+lba: 62136
+size: 82272
+sha256: dab04ed2dde3c5b544930b5baef9a9e5299933f806b8561dbc4c602047b7a843
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e047_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e065
+file: EFFECT/E065.BIN
+lba: 62509
+size: 98720
+sha256: 3ebcb6118cd41532abb84f1269356ea48cb0047f7ef4aded9f6a09fc21994087
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e065_update_textured_quad_grid_4x4, hash: 5af81951d4a57d89}
+  - {addr: 0x801c2c74, size: 6012, name: effect_e065_update_polar_mesh_state, hash: 771a299c053fe24a}
+  - {addr: 0x801c43f0, size: 5368, name: effect_e065_update_ring_stack_mesh_state, hash: f2748954eb9da668}
+
+data:
+  - {addr: 0x801c58e8, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c5974, name: g_effect_e065_polar_mesh_brightness_table}
+  - {addr: 0x801c5a1c, name: g_effect_e065_ring_stack_mesh_brightness_table}
+---
+module: effect-e067
+file: EFFECT/E067.BIN
+lba: 62599
+size: 88988
+sha256: 989a1ea0c8d452be999746eca60a3f7819920a6616ca190323c11b7ce9df509d
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e067_update_ring_stack_mesh_state, hash: ec9f01532f0dadad}
+  - {addr: 0x801c39f8, size: 1908, name: effect_e067_update_textured_quad_grid_4x4, hash: 768f9361fd485798}
+
+data:
+  - {addr: 0x801c416c, name: g_effect_e067_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c4244, name: g_effect_gfx_brightness_table}
+---
+module: effect-e068
+file: EFFECT/E068.BIN
+lba: 62643
+size: 87996
+sha256: 0cb4245aa6c78a82c368d5abd5fbaaf8f39605a13ae35c976e87a7c4928792e0
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5904, name: effect_e068_update_tube_mesh_state, hash: ab2a4ed17ff0ffe5}
+
+data:
+  - {addr: 0x801c3c10, name: g_effect_tube_mesh_brightness_table}
+  - {addr: 0x801c3ce8, name: g_effect_tube_mesh_ring_scales}
+---
+module: effect-e069
+file: EFFECT/E069.BIN
+lba: 62686
+size: 54724
+sha256: a64c081b7f16924ed85031d99990cf68630b3bf05e4c187f5c225855c88eed8b
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e069_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e070
+file: EFFECT/E070.BIN
+lba: 62713
+size: 103248
+sha256: a27a2ef5229b33eef7d138746f03474ae2f382806c581578502d8d3f0dc15868
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e070_update_particle_ribbons_long_state, hash: 3b550609f912378d}
+  - {addr: 0x801c44a0, size: 6012, name: effect_e070_update_polar_mesh_state, hash: bce6de9538a6310f}
+  - {addr: 0x801c5c1c, size: 1908, name: effect_e070_update_textured_quad_grid_4x4, hash: d5823b091e7f313b}
+
+data:
+  - {addr: 0x801c6390, name: g_effect_e070_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c656c, name: g_effect_e070_polar_mesh_brightness_table}
+  - {addr: 0x801c6614, name: g_effect_gfx_brightness_table}
+---
+module: effect-e071
+file: EFFECT/E071.BIN
+lba: 62764
+size: 91620
+sha256: c9f21c2a445221159d43ad3a735dc019b783648ffd8fa2d8877ce31f8479f1c5
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e071_update_textured_quad_grid_4x4, hash: daf9ed8d679eda98}
+  - {addr: 0x801c2c74, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c2cec, size: 4744, name: effect_e071_update_summon_mesh_state, hash: 653686a6ff4966e9}
+
+data:
+  - {addr: 0x801c3f74, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c4000, name: g_effect_e071_summon_mesh_brightness_table}
+---
+module: effect-e072
+file: EFFECT/E072.BIN
+lba: 62809
+size: 82480
+sha256: 9c189b196189f88803790c1ceaabadf28049f82c589611524332a218baf5ec4e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e072_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e073
+file: EFFECT/E073.BIN
+lba: 62850
+size: 91612
+sha256: e031ff26c07e428c650578283cd8f8d2ad90aebf6deaab37999272997a2ddbd5
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e073_update_ring_stack_mesh_state, hash: 50e14c8635f4b510}
+  - {addr: 0x801c39f8, size: 2924, name: effect_e073_update_wave_mesh_state, hash: 3f0d8fa6d3a8ee3b}
+
+data:
+  - {addr: 0x801c4564, name: g_effect_e073_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c463c, name: g_effect_e073_wave_mesh_brightness_table}
+---
+module: effect-e074
+file: EFFECT/E074.BIN
+lba: 62895
+size: 94336
+sha256: 11276d23652954df7011388086a8f8110649f09fb82be7410dd3288ff56b56c3
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e074_update_textured_quad_grid_4x4, hash: dae7117bbf342f79}
+  - {addr: 0x801c2c74, size: 5368, name: effect_e074_update_ring_stack_mesh_state, hash: 164c7961cfc994ac}
+  - {addr: 0x801c416c, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c41e4, size: 4744, name: effect_e074_update_summon_mesh_state, hash: 1e8f06cd21cb78bb}
+
+data:
+  - {addr: 0x801c546c, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c54f8, name: g_effect_e074_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c55d0, name: g_effect_e074_summon_mesh_brightness_table}
+---
+module: effect-e076
+file: EFFECT/E076.BIN
+lba: 62943
+size: 88848
+sha256: 6ed2ca2f506ead46aac8261b9b87bb0c8b6842c8a1b4b37f221854fa99a84212
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e076_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e077
+file: EFFECT/E077.BIN
+lba: 62987
+size: 101168
+sha256: e4e59d7a5f505187fac1de0097efb9247afe184dced0526a1bd979453a1d793f
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e077_update_polar_mesh_state, hash: 71cd90876d1e56fd}
+  - {addr: 0x801c3c7c, size: 5368, name: effect_e077_update_ring_stack_mesh_state, hash: 628ae04cc4fa2217}
+  - {addr: 0x801c5174, size: 5624, name: effect_e077_update_particle_trails_state, hash: 6e39e4ec00d647cd}
+
+data:
+  - {addr: 0x801c676c, name: g_effect_e077_polar_mesh_brightness_table}
+  - {addr: 0x801c6814, name: g_effect_e077_ring_stack_mesh_brightness_table}
+---
+module: effect-e079
+file: EFFECT/E079.BIN
+lba: 63078
+size: 93228
+sha256: 10628f6500de5247f99e9376d41b0522697596e82fc12fc9aa2840317f28a835
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e079_update_ring_stack_mesh_state, hash: 50e14c8635f4b510}
+  - {addr: 0x801c39f8, size: 2924, name: effect_e079_update_wave_mesh_state, hash: 3f0d8fa6d3a8ee3b}
+
+data:
+  - {addr: 0x801c4564, name: g_effect_e073_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c463c, name: g_effect_e073_wave_mesh_brightness_table}
+---
+module: effect-e080
+file: EFFECT/E080.BIN
+lba: 63124
+size: 92236
+sha256: 2e988952cd54482cfe8ec336b03fddbbc82928adbeb23b79090cde1567d6c6ef
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 2924, name: effect_e080_update_wave_mesh_state, hash: 781d158acd136de4}
+  - {addr: 0x801c306c, size: 5584, name: effect_e080_update_ring_mesh_state, hash: 6b52b79bbad4e66a}
+  - {addr: 0x801c463c, size: 1908, name: effect_e080_update_textured_quad_grid_4x4, hash: 956f6a5e62faebf8}
+
+data:
+  - {addr: 0x801c4db0, name: g_effect_e080_wave_mesh_brightness_table}
+  - {addr: 0x801c4eac, name: g_effect_e080_ring_mesh_brightness_table}
+  - {addr: 0x801c4ef4, name: g_effect_gfx_brightness_table}
+---
+module: effect-e088
+file: EFFECT/E088.BIN
+lba: 63324
+size: 52440
+sha256: addd3a21428136dd5c4290050a949a1c02d6dc0ea6f0e374f9a276ffc9179c1e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e088_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e089
+file: EFFECT/E089.BIN
+lba: 63350
+size: 52268
+sha256: f53594ccc1960397e00cc4d6048ef79c5b9760ea6cde4f92a50607feb47edbee
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e089_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e090
+file: EFFECT/E090.BIN
+lba: 63376
+size: 52388
+sha256: 1822938ef9d146e6b9a734bec218f37447d8af1064faa98a990d0d5df925cb52
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e090_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e091
+file: EFFECT/E091.BIN
+lba: 63402
+size: 52380
+sha256: e060401b9c9c310e76f195d3f49ab70906ba29e8a1fa18d989a556172b266e1f
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e091_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e092
+file: EFFECT/E092.BIN
+lba: 63428
+size: 52964
+sha256: 6b2ec7042400370faa54ab9345552a0864b06c66a6b8e4ebf795dc6aabdd38b9
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e092_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e093
+file: EFFECT/E093.BIN
+lba: 63454
+size: 53252
+sha256: 02b13bdf04b13ffee4ac39f964e68e7137e67ea7e504258d780c593bae107bf2
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e093_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e094
+file: EFFECT/E094.BIN
+lba: 63481
+size: 54760
+sha256: 9e55d426d3be35995f8d09bc5011c8997b74b2b24bacd9d8137d0f13892a05bf
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e094_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e134
+file: EFFECT/E134.BIN
+lba: 64386
+size: 60300
+sha256: aa27165617ce47f256cd0b021a99766353f1f4d0568b2af62e6394a4e00af63a
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e134_update_ring_mesh_state, hash: 1b4a4703c7aca8ce}
+  - {addr: 0x801c3ad0, size: 5368, name: effect_e134_update_ring_stack_mesh_state, hash: bc6339e70c9109e1}
+
+data:
+  - {addr: 0x801c4fc8, name: g_effect_e134_ring_mesh_brightness_table}
+  - {addr: 0x801c5010, name: g_effect_e134_ring_stack_mesh_brightness_table}
+---
+module: effect-e138
+file: EFFECT/E138.BIN
+lba: 64487
+size: 52680
+sha256: 2f7e055c4798feade45b1be6ba89c9d2be17cb2b9e58ed451221d0de6a5f2a9e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e138_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e161
+file: EFFECT/E161.BIN
+lba: 64767
+size: 51336
+sha256: dcf648c993dab44fa9da5ea4c626e25e33e25557e35408c2df61b63f157ec36a
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5624, name: effect_e161_update_particle_trails_state, hash: 5dd38672ebdee544}
+---
+module: effect-e167
+file: EFFECT/E167.BIN
+lba: 64894
+size: 50144
+sha256: 530da7b5179e7c377b148a6f15d5215307a333287f98a420b8397e4bb4f08c35
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e167_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e174
+file: EFFECT/E174.BIN
+lba: 65062
+size: 95676
+sha256: 668066054b3ce869fde400819c6fe5c2a6d3532d3c303fe35fd9579bdc667227
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e174_update_ring_stack_mesh_state, hash: abbcc54785141bac}
+  - {addr: 0x801c39f8, size: 5584, name: effect_e174_update_ring_mesh_state, hash: 211b02b490c1235a}
+  - {addr: 0x801c4fc8, size: 1908, name: effect_e174_update_textured_quad_grid_4x4, hash: 0a5510c678a3053f}
+
+data:
+  - {addr: 0x801c573c, name: g_effect_e015_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c5814, name: g_effect_e015_ring_mesh_brightness_table}
+  - {addr: 0x801c585c, name: g_effect_gfx_brightness_table}
+---
+module: effect-e176
+file: EFFECT/E176.BIN
+lba: 65124
+size: 86992
+sha256: cb31ed4506051336be454092a0639a0309af04e3603992eb184d667fc5b88296
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e176_update_polar_mesh_state, hash: 908df950b67804c4}
+
+data:
+  - {addr: 0x801c3c7c, name: g_effect_polar_mesh_brightness_table}
+---
+module: effect-e193
+file: EFFECT/E193.BIN
+lba: 65533
+size: 50788
+sha256: 2e6d5587c6902224ddabf84a34a1aa299fc561016a16720d3c29806f3699cf61
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e193_update_polar_mesh_state, hash: 908df950b67804c4}
+
+data:
+  - {addr: 0x801c3c7c, name: g_effect_polar_mesh_brightness_table}
+---
+module: effect-e228
+file: EFFECT/E228.BIN
+lba: 66247
+size: 81852
+sha256: 3bb86490da8647f7409a039964739e740b611a40e9f884f056fc0d68c63d7a74
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e228_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e229
+file: EFFECT/E229.BIN
+lba: 66287
+size: 88032
+sha256: 30d61b17bb6dd0fc75854bf4d3d0026c388da378d5f48730ff5a9ccb9eb55ef7
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e229_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e230
+file: EFFECT/E230.BIN
+lba: 66330
+size: 87100
+sha256: a1bb67683b59b0333266315eb00174d80eb399b068c632dd333f787e09cad596
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e230_update_textured_quad_grid_8x8, hash: 6f1a8d13bdf9792f}
+  - {addr: 0x801c2c7c, size: 1908, name: effect_e230_update_textured_quad_grid_4x4, hash: 5870370c93d65ac4}
+  - {addr: 0x801c33f0, size: 2924, name: effect_e230_update_wave_mesh_state, hash: dd9c87a25aa097ec}
+
+data:
+  - {addr: 0x801c3f5c, name: g_effect_textured_grid_brightness_table}
+  - {addr: 0x801c4058, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c40e4, name: g_effect_e230_wave_mesh_brightness_table}
+---
+module: effect-e233
+file: EFFECT/E233.BIN
+lba: 66421
+size: 85672
+sha256: 630ddebcee5ccdbfbfecb700162fe4b31fb0b87f66070d6495122518e0437017
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e233_update_polar_mesh_state, hash: 908df950b67804c4}
+
+data:
+  - {addr: 0x801c3c7c, name: g_effect_polar_mesh_brightness_table}
+---
+module: effect-e235
+file: EFFECT/E235.BIN
+lba: 66485
+size: 87316
+sha256: d48e5abd65cbdd272399e4fd8a771c6d2db07b7e76a358b1a4dabbc1f1af0873
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e235_update_textured_quad_grid_4x4, hash: 892abecc1ddbefd6}
+  - {addr: 0x801c2c74, size: 5584, name: effect_e235_update_ring_mesh_state, hash: 441de84b92425f64}
+
+data:
+  - {addr: 0x801c4244, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c42d0, name: g_effect_e235_ring_mesh_brightness_table}
+---
+module: effect-e236
+file: EFFECT/E236.BIN
+lba: 66528
+size: 82960
+sha256: 08524be93d0f299c9b04f623b8cc28e67b8a636e9fc9fef2157546d23bb34147
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e236_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e240
+file: EFFECT/E240.BIN
+lba: 66640
+size: 89192
+sha256: 7523e3b0aa32043db2703b7fba2f662c65330019b7ce2419d33538e25693e9cd
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e240_update_polar_mesh_state, hash: 908df950b67804c4}
+
+data:
+  - {addr: 0x801c3c7c, name: g_effect_polar_mesh_brightness_table}
+---
+module: effect-e241
+file: EFFECT/E241.BIN
+lba: 66684
+size: 93156
+sha256: 8e742aacf8e1b0d14f76f9123e3f34590748c9165daa916477caa9a93dfe4442
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e241_update_textured_quad_grid_4x4, hash: 32fecd3d84aad01e}
+  - {addr: 0x801c2c74, size: 6012, name: effect_e241_update_polar_mesh_state, hash: 91041bebc960a7d1}
+
+data:
+  - {addr: 0x801c43f0, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c447c, name: g_effect_e241_polar_mesh_brightness_table}
+---
+module: effect-e242
+file: EFFECT/E242.BIN
+lba: 66730
+size: 105740
+sha256: f80ad3182a92938031f581ae78dbc35f39a97b8770b68e903049a0c49f43e903
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e242_update_particle_ribbons_short_state, hash: d046d63d43b93a53}
+  - {addr: 0x801c44a0, size: 1908, name: effect_e242_update_textured_quad_grid_4x4, hash: c777c397051e1f29}
+  - {addr: 0x801c4c14, size: 5368, name: effect_e242_update_ring_stack_mesh_state, hash: 2e736b118fb83e8f}
+  - {addr: 0x801c610c, size: 6012, name: effect_e242_update_polar_mesh_state, hash: fbc351f627ec2957}
+
+data:
+  - {addr: 0x801c7888, name: g_effect_e242_particle_ribbon_short_brightness_table}
+  - {addr: 0x801c7960, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c79ec, name: g_effect_e242_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c7ac4, name: g_effect_e242_polar_mesh_brightness_table}
+---
+module: effect-e244
+file: EFFECT/E244.BIN
+lba: 66804
+size: 86756
+sha256: 72da5248160434767a8f6801b2d48daa9e9fb2aff76deebd97ebc930cf8fae8e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e244_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e245
+file: EFFECT/E245.BIN
+lba: 66847
+size: 54264
+sha256: 285fbf770e9a8c5c24706ca1e14fdfce3658cc41d861f5e3735e12a9b5e5a3af
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e245_update_polar_mesh_state, hash: 8f8047bff22e4f2f}
+  - {addr: 0x801c3c7c, size: 1908, name: effect_e245_update_textured_quad_grid_4x4, hash: 123121c0883da522}
+
+data:
+  - {addr: 0x801c43f0, name: g_effect_e245_polar_mesh_brightness_table}
+  - {addr: 0x801c4498, name: g_effect_gfx_brightness_table}
+---
+module: effect-e246
+file: EFFECT/E246.BIN
+lba: 66874
+size: 86428
+sha256: 904e2018a0e3c13083457a6d393846590d61bbba61c672b4cea0fe3113b6ae7f
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e246_update_ring_mesh_state, hash: 45be3e4f15b1dfb3}
+
+data:
+  - {addr: 0x801c3ad0, name: g_effect_ring_mesh_brightness_table}
+---
+module: effect-e247
+file: EFFECT/E247.BIN
+lba: 66917
+size: 51592
+sha256: cb2e721c614cc4cf1cb4f356b9744bbed989b8f57c985b1a2319cecaabeae30f
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e247_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e248
+file: EFFECT/E248.BIN
+lba: 66943
+size: 57916
+sha256: 9a4d02b89b5f76fd726733888cd3dce53973f506f2668bc55aa790f1124a8dce
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e248_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e249
+file: EFFECT/E249.BIN
+lba: 66972
+size: 53020
+sha256: 83bc630611b24d7cc9031814d9d733e1863575dec9233ef6e8ef5537c81fbf0e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e249_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e255
+file: EFFECT/E255.BIN
+lba: 67003
+size: 52440
+sha256: d4671d1b60a7c651f77f07d98c5aed9ad453d8a4b626166a75e2919e7f77bc25
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e255_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e256
+file: EFFECT/E256.BIN
+lba: 67029
+size: 63740
+sha256: 71ffbd48255774173a4771c1cc968263345d5b6a0a62f23c4911a0d872824125
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e256_update_ring_stack_mesh_state, hash: 0f765f4a6dc7b427}
+  - {addr: 0x801c39f8, size: 5584, name: effect_e256_update_ring_mesh_state, hash: 7b71e787f38a6a51}
+
+data:
+  - {addr: 0x801c4fc8, name: g_effect_e256_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c50a0, name: g_effect_e256_ring_mesh_brightness_table}
+---
+module: effect-e257
+file: EFFECT/E257.BIN
+lba: 67061
+size: 52576
+sha256: 39e7a6ce3e7c555149d21aa69f2c8f3a604349ddc8d36561874afc66e635643b
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e257_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e258
+file: EFFECT/E258.BIN
+lba: 67087
+size: 92308
+sha256: 116dc4520789efa87fcab1b3a22676cbcef0fbf241c2db9bbfac383d538cbff0
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e258_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e259
+file: EFFECT/E259.BIN
+lba: 67133
+size: 93916
+sha256: f0376d99b612129e8148162156384318911862ffaae1b8fb694ac53f85d86083
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c2578, size: 4744, name: effect_e259_update_summon_mesh_state, hash: cae5f0fae079c9e4}
+  - {addr: 0x801c3800, size: 5368, name: effect_e259_update_ring_stack_mesh_state, hash: 02327eab85badfba}
+
+data:
+  - {addr: 0x801c4cf8, name: g_effect_e259_summon_mesh_brightness_table}
+  - {addr: 0x801c4dd0, name: g_effect_e259_ring_stack_mesh_brightness_table}
+---
+module: effect-e314
+file: EFFECT/E314.BIN
+lba: 68003
+size: 47580
+sha256: c3a858e9fbcb97ec7d06bca05b35a9d980ebececfa0988e18e46ea0b49be3773
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e314_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e317
+file: EFFECT/E317.BIN
+lba: 68042
+size: 43536
+sha256: 2fd6d86b4e297583d6bddebbd1e6f4b575eeaac3d6c4a4d6c7bc3435ba47664c
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e317_update_particle_ribbons_short_state, hash: ce6b5c91a6580576}
+  - {addr: 0x801c44a0, size: 5904, name: effect_e317_update_tube_mesh_state, hash: 85bbd16de21ca07c}
+
+data:
+  - {addr: 0x801c5bb0, name: g_effect_e317_particle_ribbon_short_brightness_table}
+  - {addr: 0x801c5c88, name: g_effect_e317_tube_mesh_brightness_table}
+  - {addr: 0x801c5d60, name: g_effect_e317_tube_mesh_ring_scales}
+---
+module: effect-e336
+file: EFFECT/E336.BIN
+lba: 68349
+size: 36016
+sha256: 44d318e390bc7b6016ae79b7e50bd107a8d702bd28a54b2a6a62fc26bb350633
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e336_update_particle_ribbons_short_state, hash: e96c9c666a3de7cc}
+
+data:
+  - {addr: 0x801c44a0, name: g_effect_particle_ribbon_short_brightness_table}
+---
+module: effect-e338
+file: EFFECT/E338.BIN
+lba: 68381
+size: 33100
+sha256: a87dc9d8abff7f909abf272d32648ba8beb622b75ad839b60c6fa81db4b4b495
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c2578, size: 4744, name: effect_e338_update_summon_mesh_state, hash: ea924af581a353ac}
+
+data:
+  - {addr: 0x801c3800, name: g_effect_e338_summon_mesh_brightness_table}
+---
+module: effect-e341
+file: EFFECT/E341.BIN
+lba: 68436
+size: 34124
+sha256: 85afe47ed1a4dcf1b3514858a19bb986e1a9d75fc759d29e061fae56d971428d
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5904, name: effect_e341_update_tube_mesh_state, hash: ab2a4ed17ff0ffe5}
+
+data:
+  - {addr: 0x801c3c10, name: g_effect_tube_mesh_brightness_table}
+  - {addr: 0x801c3ce8, name: g_effect_tube_mesh_ring_scales}
+---
+module: effect-e355
+file: EFFECT/E355.BIN
+lba: 68657
+size: 53416
+sha256: 07751bd29318803bea91581534f12f247941333ee96f19c02f6d72d5a84b600a
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e355_update_particle_ribbons_short_state, hash: e96c9c666a3de7cc}
+
+data:
+  - {addr: 0x801c44a0, name: g_effect_particle_ribbon_short_brightness_table}
+---
+module: effect-e371
+file: EFFECT/E371.BIN
+lba: 68948
+size: 61156
+sha256: a04c86083c35e0d8f9f48fe3aa3609ade0e0e2dae43ab370abf3184ab462ead6
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e371_update_ring_mesh_state, hash: 1886d32e4ca36886}
+  - {addr: 0x801c3ad0, size: 8096, name: effect_e371_update_particle_ribbons_short_state, hash: b5dd4c6b10a1df86}
+
+data:
+  - {addr: 0x801c5a70, name: g_effect_e371_ring_mesh_brightness_table}
+  - {addr: 0x801c5ab8, name: g_effect_e371_particle_ribbon_short_brightness_table}
+---
+module: effect-e373
+file: EFFECT/E373.BIN
+lba: 69002
+size: 59832
+sha256: 94e66ef81e4af556bdc311a173391b79a834f8a312ffda2b56b550e2766b58ae
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e373_update_ring_mesh_state, hash: 784dc3c3b5d7f62d}
+  - {addr: 0x801c3ad0, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c3b48, size: 4744, name: effect_e373_update_summon_mesh_state, hash: 23934938fae044ea}
+
+data:
+  - {addr: 0x801c4dd0, name: g_effect_e373_ring_mesh_brightness_table}
+  - {addr: 0x801c4e18, name: g_effect_e373_summon_mesh_brightness_table}
+---
+module: effect-e376
+file: EFFECT/E376.BIN
+lba: 69060
+size: 36716
+sha256: 22d4c7bbb1bb4443cbe3922261f808d32e66d49d827ea956800854abbe830133
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8668, name: effect_e376_update_tentacle_mesh_state, hash: 1d49ffadba8335ed}
+
+data:
+  - {addr: 0x801c46dc, name: g_effect_tentacle_mesh_brightness_table}
+---
+module: effect-e381
+file: EFFECT/E381.BIN
+lba: 69136
+size: 38420
+sha256: 0c0e7eef3b6923559b5ae5e3fb5f931524a82a116cda4849749d4123f50833ff
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8668, name: effect_e381_update_tentacle_mesh_state, hash: 1d49ffadba8335ed}
+
+data:
+  - {addr: 0x801c46dc, name: g_effect_tentacle_mesh_brightness_table}
+---
+module: effect-e382
+file: EFFECT/E382.BIN
+lba: 69155
+size: 37512
+sha256: ec8ae6f5c24ed3cce06264b39e2a184a816b9abe7e3edf15fe1a2d1147814c8f
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8668, name: effect_e382_update_tentacle_mesh_state, hash: 1d49ffadba8335ed}
+
+data:
+  - {addr: 0x801c46dc, name: g_effect_tentacle_mesh_brightness_table}
+---
+module: effect-e383
+file: EFFECT/E383.BIN
+lba: 69174
+size: 48096
+sha256: 52f788671ed490443b2810955cfba2b78e8930910db28e7eaa409d245f76c969
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e383_update_ring_mesh_state, hash: ba6441ae190407fc}
+  - {addr: 0x801c3ad0, size: 5368, name: effect_e383_update_ring_stack_mesh_state, hash: 50fe44656e8b101f}
+  - {addr: 0x801c4fc8, size: 5904, name: effect_e383_update_tube_mesh_state, hash: 496a5c6e101b1f8b}
+
+data:
+  - {addr: 0x801c66d8, name: g_effect_e383_ring_mesh_brightness_table}
+  - {addr: 0x801c6720, name: g_effect_e383_ring_stack_mesh_brightness_table}
+  - {addr: 0x801c67f8, name: g_effect_e383_tube_mesh_brightness_table}
+  - {addr: 0x801c68d0, name: g_effect_e383_tube_mesh_ring_scales}
+---
+module: effect-e384
+file: EFFECT/E384.BIN
+lba: 69198
+size: 97852
+sha256: 3dcee1fcc1ce056f4521d2311b422634f99c4d13f8bd185564f45238c159ceda
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e384_update_polar_mesh_state, hash: a26b6a634d12bf43}
+  - {addr: 0x801c3c7c, size: 8668, name: effect_e384_update_tentacle_mesh_state, hash: 9631ba61f32b2bac}
+  - {addr: 0x801c5e58, size: 1908, name: effect_e384_update_textured_quad_grid_4x4, hash: 21467990dfa7cf05}
+
+data:
+  - {addr: 0x801c65cc, name: g_effect_e384_polar_mesh_brightness_table}
+  - {addr: 0x801c6674, name: g_effect_e384_tentacle_mesh_brightness_table}
+  - {addr: 0x801c674c, name: g_effect_gfx_brightness_table}
+---
+module: effect-e385
+file: EFFECT/E385.BIN
+lba: 69246
+size: 84412
+sha256: cf5b23efbf7b3f68b14d24d8fc5708c14ce00215b94cdeb720837023d51f313e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e385_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e395
+file: EFFECT/E395.BIN
+lba: 69428
+size: 35280
+sha256: f2b3659a0d9a403b8e015caf3976a7c66e71ce88fc6ed013a615f522af01f742
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5368, name: effect_e395_update_ring_stack_mesh_state, hash: ca3b89f8dd906283}
+
+data:
+  - {addr: 0x801c39f8, name: g_effect_ring_stack_mesh_brightness_table}
+---
+module: effect-e401
+file: EFFECT/E401.BIN
+lba: 69606
+size: 47944
+sha256: 912c2f9eb41dc0652d4c32c7cf12d353bccee4b5f2fde6a1749594c63bf2cace
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8668, name: effect_e401_update_tentacle_mesh_state, hash: 1d49ffadba8335ed}
+
+data:
+  - {addr: 0x801c46dc, name: g_effect_tentacle_mesh_brightness_table}
+---
+module: effect-e402
+file: EFFECT/E402.BIN
+lba: 69630
+size: 53724
+sha256: b40d6ad4e902018ec1c3f4d8a1c6ed822ee00ec8469c474079a61f069280496b
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e402_update_particle_ribbons_short_state, hash: e96c9c666a3de7cc}
+
+data:
+  - {addr: 0x801c44a0, name: g_effect_particle_ribbon_short_brightness_table}
+---
+module: effect-e403
+file: EFFECT/E403.BIN
+lba: 69657
+size: 92040
+sha256: 6d5d4ab5d015bbcf49866bf175502687b0e2d7cf459495bf1adea3f6e739c972
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e403_update_particle_ribbons_long_state, hash: e71f8dbda015a493}
+
+data:
+  - {addr: 0x801c44a0, name: g_effect_e403_particle_ribbon_long_brightness_table}
+---
+module: effect-e408
+file: EFFECT/E408.BIN
+lba: 69840
+size: 92624
+sha256: 034171e45b22dcb619468400e846acd265dad9a22bda500cfa6e4640aae03e80
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e408_update_textured_quad_grid_4x4, hash: 32fecd3d84aad01e}
+  - {addr: 0x801c2c74, size: 6012, name: effect_e408_update_polar_mesh_state, hash: 91041bebc960a7d1}
+
+data:
+  - {addr: 0x801c43f0, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c447c, name: g_effect_e241_polar_mesh_brightness_table}
+---
+module: effect-e409
+file: EFFECT/E409.BIN
+lba: 69886
+size: 66096
+sha256: fa7a9ea2b2e9d4ffe7cef6b4d5affa2aa259b7c979a93a1db809a6cae49d62dd
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6012, name: effect_e409_update_polar_mesh_state, hash: 172069418efd8190}
+  - {addr: 0x801c3c7c, size: 8096, name: effect_e409_update_particle_ribbons_short_state, hash: f84c9cda7c2681ca}
+
+data:
+  - {addr: 0x801c5c1c, name: g_effect_e409_polar_mesh_brightness_table}
+  - {addr: 0x801c5cc4, name: g_effect_e409_particle_ribbon_short_brightness_table}
+---
+module: effect-e411
+file: EFFECT/E411.BIN
+lba: 69942
+size: 50372
+sha256: dd19e3e83e1e1c47b9e4eca5a38b735080d5e3e866466c011442d13947263193
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 4948, name: effect_e411_update_single_ring_mesh_state, hash: 86e54ae911d1e27b}
+
+data:
+  - {addr: 0x801c3854, name: g_effect_single_ring_mesh_brightness_table}
+---
+module: effect-e412
+file: EFFECT/E412.BIN
+lba: 69967
+size: 56136
+sha256: 0d4bdd7a320a7bf6e4bff0d7dd3c79fcc3c3f41b3573e4207c6cdec3a5dffd22
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e412_update_particle_ribbons_long_state, hash: 8a53dcbf41941ee1}
+  - {addr: 0x801c44a0, size: 1908, name: effect_e412_update_textured_quad_grid_4x4, hash: 0e4b4346f21dc805}
+
+data:
+  - {addr: 0x801c4c14, name: g_effect_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c4df0, name: g_effect_gfx_brightness_table}
+---
+module: effect-e450
+file: EFFECT/E450.BIN
+lba: 70053
+size: 61196
+sha256: 2ed84ad5cc07759ec3356e926ad8ba4c89c8543fa4c5b945dcc3971b8511cb5e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e450_update_textured_quad_grid_4x4, hash: ccef26cc127a5e9f}
+  - {addr: 0x801c2c74, size: 148, name: effect_e450_map_step_unfreeze_state, hash: 7010af2cee8fac92}
+  - {addr: 0x801c2d08, size: 5584, name: effect_e450_update_ring_mesh_state, hash: e58f9077bafaa3cc}
+  - {addr: 0x801c42d8, size: 148, name: effect_e450_map_step_freeze_state, hash: 7a52868d505092b0}
+
+data:
+  - {addr: 0x801c436c, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c43f8, name: g_effect_e450_ring_mesh_brightness_table}
+---
+module: effect-e451
+file: EFFECT/E451.BIN
+lba: 70083
+size: 61624
+sha256: 612444aa9ad610c16d98b4a2c9a67695efec30831f4e4aa773af084b6ea44967
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5624, name: effect_e451_update_particle_trails_state, hash: 5dd38672ebdee544}
+  - {addr: 0x801c3af8, size: 5584, name: effect_e451_update_ring_mesh_state, hash: 26a6aacc08f2798f}
+
+data:
+  - {addr: 0x801c50c8, name: g_effect_e451_ring_mesh_brightness_table}
+---
+module: effect-e452
+file: EFFECT/E452.BIN
+lba: 70114
+size: 61584
+sha256: de3ac494fed321447c39a5a513ef94ba36080eb28481846a6d131e02dc767c4a
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5584, name: effect_e452_update_ring_mesh_state, hash: b1d2acab22900fef}
+  - {addr: 0x801c3ad0, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c3b48, size: 4744, name: effect_e452_update_summon_mesh_state, hash: 56950ab67bb2bdff}
+  - {addr: 0x801c4dd0, size: 1916, name: effect_e452_update_textured_quad_grid_2x2, hash: 34a87769661dd184}
+
+data:
+  - {addr: 0x801c554c, name: g_effect_e452_ring_mesh_brightness_table}
+  - {addr: 0x801c5594, name: g_effect_e452_summon_mesh_brightness_table}
+  - {addr: 0x801c566c, name: g_effect_electricity_grid_brightness_table}
+---
+module: effect-e453
+file: EFFECT/E453.BIN
+lba: 70145
+size: 68668
+sha256: 1cecef75be4332159d65094fcb9e0f45a152a1439f0fa3f84ea4d53996c485f1
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8668, name: effect_e453_update_tentacle_mesh_state, hash: b3bc52a36955d729}
+  - {addr: 0x801c46dc, size: 6012, name: effect_e453_update_polar_mesh_state, hash: cfa336cfcfa41a0c}
+  - {addr: 0x801c5e58, size: 2924, name: effect_e453_update_wave_mesh_state, hash: 83ef420ce2bb22d7}
+  - {addr: 0x801c69c4, size: 320, name: effect_e453_map_split_mesh_and_set_3d_objects_to_state_3_state, hash: 1b6a06084d02d647}
+
+data:
+  - {addr: 0x801c6b04, name: g_effect_e453_tentacle_mesh_brightness_table}
+  - {addr: 0x801c6bdc, name: g_effect_e453_polar_mesh_brightness_table}
+  - {addr: 0x801c6c84, name: g_effect_e453_wave_mesh_brightness_table}
+---
+module: effect-e454
+file: EFFECT/E454.BIN
+lba: 70179
+size: 60300
+sha256: afeefeb69fe8183fc7dce5aff5460ecaec8c1a36e81ae690f94877251085a3c6
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1000, name: effect_e454_particle_update_banish_state, hash: 96b9db988669fa57}
+  - {addr: 0x801c28e8, size: 260, name: effect_e454_map_set_3d_objects_to_state_2_state, hash: c50b73d4a0e1859b}
+  - {addr: 0x801c29ec, size: 6012, name: effect_e454_update_polar_mesh_state, hash: b706f2b469299fd3}
+  - {addr: 0x801c4168, size: 1908, name: effect_e454_update_textured_quad_grid_4x4, hash: 7c4feff22928839e}
+
+data:
+  - {addr: 0x801c48dc, name: g_effect_e454_particle_work_offset_scale_16}
+  - {addr: 0x801c48dd, name: g_effect_e454_particle_work_offset_scale_64}
+  - {addr: 0x801c48f4, name: g_effect_e454_polar_mesh_brightness_table}
+  - {addr: 0x801c499c, name: g_effect_gfx_brightness_table}
+---
+module: effect-e455
+file: EFFECT/E455.BIN
+lba: 70209
+size: 50864
+sha256: 477f28910630d34243056085e0389c816bc30d0d90002d16f3b938a6536bf16b
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 260, name: effect_e455_map_set_3d_objects_to_state_1_state, hash: a2ca8ad126bc44f7}
+  - {addr: 0x801c2604, size: 260, name: effect_e455_map_set_3d_objects_to_state_2_state, hash: 488bc19ae1b5f90f}
+  - {addr: 0x801c2708, size: 148, name: effect_e455_map_step_unfreeze_state, hash: 816d3ed7ef0dcafa}
+  - {addr: 0x801c279c, size: 148, name: effect_e455_map_step_freeze_state, hash: b055bca9b224bb19}
+---
+module: effect-e456
+file: EFFECT/E456.BIN
+lba: 70234
+size: 52188
+sha256: 0825539a056244959f1aca9287db9086b6c2dd4d52e8dbcc3ba82aa5c5fac97a
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 172, name: effect_e456_map_update_specialized_destruction_state, hash: ff615cf6cf1cd454}
+  - {addr: 0x801c25ac, size: 2924, name: effect_e456_update_wave_mesh_state, hash: f5ac2668e6a3ba21}
+  - {addr: 0x801c3118, size: 148, name: effect_e456_map_step_unfreeze_state, hash: 5bf141db0212b40d}
+  - {addr: 0x801c31ac, size: 148, name: effect_e456_map_step_freeze_state, hash: 7e1058d25d4a77e7}
+
+data:
+  - {addr: 0x801c3240, name: g_effect_wave_mesh_brightness_table}
+---
+module: effect-e458
+file: EFFECT/E458.BIN
+lba: 70284
+size: 50640
+sha256: e25794e5e3d1b175ce96a18ae1c49da68e18c7a5167df9814ce7c1b3a542c7f0
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e458_update_textured_quad_grid_4x4, hash: e78fbae91480e6c0}
+  - {addr: 0x801c2c74, size: 168, name: effect_e458_timeline_set_remaining_duration_state, hash: 0682312fd498b75f}
+
+data:
+  - {addr: 0x801c2d1c, name: g_effect_gfx_brightness_table}
+---
+module: effect-e460
+file: EFFECT/E460.BIN
+lba: 70331
+size: 50904
+sha256: e78116b99777263fba1dc92f5ccfc26342f499476da85d1c95f9dd0c91bf356d
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e460_update_textured_quad_grid_4x4, hash: 819565fe92fe27fa}
+
+data:
+  - {addr: 0x801c2c74, name: g_effect_gfx_brightness_table}
+---
+module: effect-e461
+file: EFFECT/E461.BIN
+lba: 70356
+size: 69776
+sha256: 061dfb2d7d753ec06399f4543fcb066fe5192e64c856aaef6ee6c1a154ce7ece
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e461_update_particle_ribbons_long_state, hash: 36b0eda885db4647}
+  - {addr: 0x801c44a0, size: 6012, name: effect_e461_update_polar_mesh_state, hash: b2b1eaa8dc28890a}
+  - {addr: 0x801c5c1c, size: 5584, name: effect_e461_update_ring_mesh_state, hash: 3dc73b969a7f2fcf}
+
+data:
+  - {addr: 0x801c71ec, name: g_effect_e461_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c73c8, name: g_effect_e461_polar_mesh_brightness_table}
+  - {addr: 0x801c7470, name: g_effect_e461_ring_mesh_brightness_table}
+---
+module: effect-e462
+file: EFFECT/E462.BIN
+lba: 70391
+size: 69776
+sha256: 5ff0844e6a79f115b5aa7d454181638c82a4c56f1139b878d7d89dbfac32dd63
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e462_update_particle_ribbons_long_state, hash: 36b0eda885db4647}
+  - {addr: 0x801c44a0, size: 6012, name: effect_e462_update_polar_mesh_state, hash: b2b1eaa8dc28890a}
+  - {addr: 0x801c5c1c, size: 5584, name: effect_e462_update_ring_mesh_state, hash: 3dc73b969a7f2fcf}
+
+data:
+  - {addr: 0x801c71ec, name: g_effect_e461_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c73c8, name: g_effect_e461_polar_mesh_brightness_table}
+  - {addr: 0x801c7470, name: g_effect_e461_ring_mesh_brightness_table}
+---
+module: effect-e463
+file: EFFECT/E463.BIN
+lba: 70426
+size: 69776
+sha256: 08b6ba7f385905914a689772cee9639ab6c5f38357b57409c4e96e23314ecc3e
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e463_update_particle_ribbons_long_state, hash: 36b0eda885db4647}
+  - {addr: 0x801c44a0, size: 6012, name: effect_e463_update_polar_mesh_state, hash: b2b1eaa8dc28890a}
+  - {addr: 0x801c5c1c, size: 5584, name: effect_e463_update_ring_mesh_state, hash: 3dc73b969a7f2fcf}
+
+data:
+  - {addr: 0x801c71ec, name: g_effect_e461_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c73c8, name: g_effect_e461_polar_mesh_brightness_table}
+  - {addr: 0x801c7470, name: g_effect_e461_ring_mesh_brightness_table}
+---
+module: effect-e464
+file: EFFECT/E464.BIN
+lba: 70461
+size: 59712
+sha256: 6ef693049d9e1b469a4d6dbdd6eeb6588cb2c2334407d7ac8840e1f9a8e7d349
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c2578, size: 4744, name: effect_e464_update_summon_mesh_state, hash: 2839d18641d237ff}
+  - {addr: 0x801c3800, size: 4948, name: effect_e464_update_single_ring_mesh_state, hash: edddd6045178114b}
+  - {addr: 0x801c4b54, size: 624, name: effect_e464_particle_update_altima_transformation_state, hash: c2934ee8a7ae52a5}
+
+data:
+  - {addr: 0x801c4dc4, name: g_effect_summon_mesh_brightness_table}
+  - {addr: 0x801c4e9c, name: g_effect_e464_single_ring_mesh_brightness_table}
+  - {addr: 0x801c4ecc, name: g_effect_e464_particle_work_offset_scale_16}
+  - {addr: 0x801c4ecd, name: g_effect_e464_particle_work_offset_scale_64}
+---
+module: effect-e465
+file: EFFECT/E465.BIN
+lba: 70491
+size: 69776
+sha256: e3e64fea4570bf4600679bd37ca74db7dd20855f87ad764b87c1373a3ba499d5
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e465_update_particle_ribbons_long_state, hash: 36b0eda885db4647}
+  - {addr: 0x801c44a0, size: 6012, name: effect_e465_update_polar_mesh_state, hash: b2b1eaa8dc28890a}
+  - {addr: 0x801c5c1c, size: 5584, name: effect_e465_update_ring_mesh_state, hash: 3dc73b969a7f2fcf}
+
+data:
+  - {addr: 0x801c71ec, name: g_effect_e461_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c73c8, name: g_effect_e461_polar_mesh_brightness_table}
+  - {addr: 0x801c7470, name: g_effect_e461_ring_mesh_brightness_table}
+---
+module: effect-e466
+file: EFFECT/E466.BIN
+lba: 70526
+size: 69776
+sha256: cc89d2d4a73c23b26f78cb8d6e21b7e11be882fc9394b405b0fed634a4d26af6
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 8096, name: effect_e466_update_particle_ribbons_long_state, hash: 36b0eda885db4647}
+  - {addr: 0x801c44a0, size: 6012, name: effect_e466_update_polar_mesh_state, hash: b2b1eaa8dc28890a}
+  - {addr: 0x801c5c1c, size: 5584, name: effect_e466_update_ring_mesh_state, hash: 3dc73b969a7f2fcf}
+
+data:
+  - {addr: 0x801c71ec, name: g_effect_e461_particle_ribbon_long_brightness_table}
+  - {addr: 0x801c73c8, name: g_effect_e461_polar_mesh_brightness_table}
+  - {addr: 0x801c7470, name: g_effect_e461_ring_mesh_brightness_table}
+---
+module: effect-e467
+file: EFFECT/E467.BIN
+lba: 70561
+size: 52356
+sha256: 2e5bc9b9c2d3f08746d03f2f380231b52e04f6c98124bd6d5b786905527f23e9
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6492, name: effect_e467_update_anchored_polar_mesh_state, hash: cda049d53006ee4a}
+
+data:
+  - {addr: 0x801c3e5c, name: g_effect_e467_anchored_polar_mesh_brightness_table}
+---
+module: effect-e468
+file: EFFECT/E468.BIN
+lba: 70587
+size: 54136
+sha256: 5787c9c0501aed8fb13c6e2832b1bb2e1c22a4aa19659ea9e79162298851e3f9
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6492, name: effect_e468_update_anchored_polar_mesh_state, hash: cda049d53006ee4a}
+
+data:
+  - {addr: 0x801c3e5c, name: g_effect_anchored_polar_mesh_brightness_table}
+---
+module: effect-e469
+file: EFFECT/E469.BIN
+lba: 70614
+size: 52748
+sha256: 2794b18c4e7ce5af193283aceb516152f4266e5a5df3b4c953c7425269111246
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6492, name: effect_e469_update_anchored_polar_mesh_state, hash: cda049d53006ee4a}
+
+data:
+  - {addr: 0x801c3e5c, name: g_effect_anchored_polar_mesh_brightness_table}
+---
+module: effect-e471
+file: EFFECT/E471.BIN
+lba: 70663
+size: 52764
+sha256: c5e87efe6955a723f0e3d5bbe5b7158ac0f9ffc0707d945160dd783d01754098
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6492, name: effect_e471_update_anchored_polar_mesh_state, hash: cda049d53006ee4a}
+
+data:
+  - {addr: 0x801c3e5c, name: g_effect_anchored_polar_mesh_brightness_table}
+---
+module: effect-e472
+file: EFFECT/E472.BIN
+lba: 70689
+size: 53864
+sha256: c478f7961aa8726507d72ccd265769e1fda173ed9bbdb02f2be24b261381a526
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 6492, name: effect_e472_update_anchored_polar_mesh_state, hash: cda049d53006ee4a}
+
+data:
+  - {addr: 0x801c3e5c, name: g_effect_anchored_polar_mesh_brightness_table}
+---
+module: effect-e473
+file: EFFECT/E473.BIN
+lba: 70716
+size: 51572
+sha256: ab011ee612a6ed0837367334bfaf538b0ecbdee60598a898b7528e9f80294ae3
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e473_update_textured_quad_grid_8x8, hash: 0aabf95ffb22eed9}
+
+data:
+  - {addr: 0x801c2c7c, name: g_effect_textured_grid_brightness_table}
+---
+module: effect-e474
+file: EFFECT/E474.BIN
+lba: 70742
+size: 61464
+sha256: a994897c6c211f3ebd5401633673c244b2140ffdbd982f477e837369ae9d1244
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e474_update_textured_quad_grid_8x8, hash: 1f197b48f154251b}
+  - {addr: 0x801c2c7c, size: 5584, name: effect_e474_update_ring_mesh_state, hash: afb2e8c0d6ae9ae7}
+  - {addr: 0x801c424c, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c42c4, size: 4744, name: effect_e474_update_summon_mesh_state, hash: d92a2d33a073e9bf}
+
+data:
+  - {addr: 0x801c554c, name: g_effect_textured_grid_brightness_table}
+  - {addr: 0x801c5648, name: g_effect_e474_ring_mesh_brightness_table}
+  - {addr: 0x801c5690, name: g_effect_e474_summon_mesh_brightness_table}
+---
+module: effect-e475
+file: EFFECT/E475.BIN
+lba: 70773
+size: 61440
+sha256: 90d45e54b5646def803e705d2a2600a64e19158b2e7aab364bef0ed35e782ce1
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e475_update_textured_quad_grid_8x8, hash: 1f197b48f154251b}
+  - {addr: 0x801c2c7c, size: 5584, name: effect_e475_update_ring_mesh_state, hash: afb2e8c0d6ae9ae7}
+  - {addr: 0x801c424c, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c42c4, size: 4744, name: effect_e475_update_summon_mesh_state, hash: d92a2d33a073e9bf}
+
+data:
+  - {addr: 0x801c554c, name: g_effect_textured_grid_brightness_table}
+  - {addr: 0x801c5648, name: g_effect_e474_ring_mesh_brightness_table}
+  - {addr: 0x801c5690, name: g_effect_e474_summon_mesh_brightness_table}
+---
+module: effect-e476
+file: EFFECT/E476.BIN
+lba: 70803
+size: 61440
+sha256: 7c8459ed303aafeaf8ff8225094f2cee9b3ac20e6bfbabd1636a460c5f0bef05
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e476_update_textured_quad_grid_8x8, hash: 1f197b48f154251b}
+  - {addr: 0x801c2c7c, size: 5584, name: effect_e476_update_ring_mesh_state, hash: afb2e8c0d6ae9ae7}
+  - {addr: 0x801c424c, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c42c4, size: 4744, name: effect_e476_update_summon_mesh_state, hash: d92a2d33a073e9bf}
+
+data:
+  - {addr: 0x801c554c, name: g_effect_textured_grid_brightness_table}
+  - {addr: 0x801c5648, name: g_effect_e474_ring_mesh_brightness_table}
+  - {addr: 0x801c5690, name: g_effect_e474_summon_mesh_brightness_table}
+---
+module: effect-e477
+file: EFFECT/E477.BIN
+lba: 70833
+size: 61452
+sha256: 376a3502f26e4cb7d7ade7a0f5b816e1694527396d5a41ebfa4d83fe73694711
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e477_update_textured_quad_grid_8x8, hash: 1f197b48f154251b}
+  - {addr: 0x801c2c7c, size: 5584, name: effect_e477_update_ring_mesh_state, hash: afb2e8c0d6ae9ae7}
+  - {addr: 0x801c424c, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c42c4, size: 4744, name: effect_e477_update_summon_mesh_state, hash: d92a2d33a073e9bf}
+
+data:
+  - {addr: 0x801c554c, name: g_effect_textured_grid_brightness_table}
+  - {addr: 0x801c5648, name: g_effect_e474_ring_mesh_brightness_table}
+  - {addr: 0x801c5690, name: g_effect_e474_summon_mesh_brightness_table}
+---
+module: effect-e478
+file: EFFECT/E478.BIN
+lba: 70864
+size: 61444
+sha256: bac806d87c1230a752a4dba18d4de468f5854fa024d7e2053e1d3478d3f6f94b
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e478_update_textured_quad_grid_8x8, hash: 1f197b48f154251b}
+  - {addr: 0x801c2c7c, size: 5584, name: effect_e478_update_ring_mesh_state, hash: afb2e8c0d6ae9ae7}
+  - {addr: 0x801c424c, size: 120, name: effect_add_scratchpad_xyz_components, hash: 8f768abda88cbfca}
+  - {addr: 0x801c42c4, size: 4744, name: effect_e478_update_summon_mesh_state, hash: d92a2d33a073e9bf}
+
+data:
+  - {addr: 0x801c554c, name: g_effect_textured_grid_brightness_table}
+  - {addr: 0x801c5648, name: g_effect_e474_ring_mesh_brightness_table}
+  - {addr: 0x801c5690, name: g_effect_e474_summon_mesh_brightness_table}
+---
+module: effect-e480
+file: EFFECT/E480.BIN
+lba: 70919
+size: 60064
+sha256: a3363c3e60a58c4c84aa2a45b549ffe4c3c8cf9f1fc568506a2ffb2e8708cd70
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1908, name: effect_e480_update_textured_quad_grid_4x4, hash: ccef26cc127a5e9f}
+  - {addr: 0x801c2c74, size: 148, name: effect_e480_map_step_unfreeze_state, hash: 7010af2cee8fac92}
+  - {addr: 0x801c2d08, size: 5584, name: effect_e480_update_ring_mesh_state, hash: e58f9077bafaa3cc}
+  - {addr: 0x801c42d8, size: 148, name: effect_e480_map_step_freeze_state, hash: 7a52868d505092b0}
+
+data:
+  - {addr: 0x801c436c, name: g_effect_gfx_brightness_table}
+  - {addr: 0x801c43f8, name: g_effect_e480_ring_mesh_brightness_table}
+---
+module: effect-e481
+file: EFFECT/E481.BIN
+lba: 70949
+size: 31648
+sha256: d2089323371dea119d7d3ea54cc64f6a3a13cf7d45ca9f6d36e979c49c10c2a1
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e481_update_textured_quad_grid_2x2, hash: 33d5f006b29e378b}
+
+data:
+  - {addr: 0x801c2c7c, name: g_effect_electricity_grid_brightness_table}
+  - {addr: 0x801c2c7c, name: g_effect_gfx_brightness_table}
+---
+module: effect-e482
+file: EFFECT/E482.BIN
+lba: 70965
+size: 32380
+sha256: e5f3e7a827ee21f1dec651cb1dd173d74761e287b80a154195ea8f07eaa1a09f
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 1916, name: effect_e482_update_textured_quad_grid_2x2, hash: 33d5f006b29e378b}
+
+data:
+  - {addr: 0x801c2c7c, name: g_effect_electricity_grid_brightness_table}
+---
+module: effect-e483
+file: EFFECT/E483.BIN
+lba: 70981
+size: 50372
+sha256: 456dbe89994d5117b5da26bac3b703b6f733150dea977031fb7bb92fa7f079f1
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 4948, name: effect_e483_update_single_ring_mesh_state, hash: 86e54ae911d1e27b}
+
+data:
+  - {addr: 0x801c3854, name: g_effect_single_ring_mesh_brightness_table}
+---
+module: effect-e485
+file: EFFECT/E485.BIN
+lba: 71030
+size: 62224
+sha256: ce294c84a868b04603d54a2c0509e3abb1a4d65e989ac7ba738853563d5440b2
+load: 0x801c2500
+source_dir: src/effect
+profile: gcc-2.6.3_O2_aspsx-2.34
+links: [battle]
+
+functions:
+  - {addr: 0x801c2500, size: 5624, name: effect_e485_update_particle_trails_state, hash: 5dd38672ebdee544}
+  - {addr: 0x801c3af8, size: 5584, name: effect_e485_update_ring_mesh_state, hash: 26a6aacc08f2798f}
+
+data:
+  - {addr: 0x801c50c8, name: g_effect_e451_ring_mesh_brightness_table}

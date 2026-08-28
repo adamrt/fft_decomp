@@ -1,0 +1,4 @@
+# The image needs only the Go module files; everything else is bind-mounted.
+*
+!tools/go.mod
+!tools/go.sum
