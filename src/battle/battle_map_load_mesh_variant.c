@@ -96,7 +96,8 @@ s32 battle_map_load_mesh_variant(s32 mesh_slot) {
             void* mesh_data;
 
             mesh_data = g_battle_map_mesh_load_buffer;
-            mesh_data_offset = ((map_mesh_file_header_t*)mesh_data)->palette_word_offset * 4;
+            /* Retail scales this byte offset as a word index. */
+            mesh_data_offset = ((map_mesh_file_header_t*)mesh_data)->color_palette_offset * 4;
             mesh_data = (void*)((s32)mesh_data + mesh_data_offset);
             battle_map_update_palette_colors(mesh_slot, 1, 0, 1, (const u16*)mesh_data);
             main_heap_free(g_battle_map_mesh_load_buffer);

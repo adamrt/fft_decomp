@@ -22,6 +22,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   then overwrites it.
 - `src/battle/battle_map_light_state_command.c`: several arms return an
   uninitialized pointer.
+- `src/battle/battle_map_load_mesh_variant.c`: scales the mesh header's color
+  palette byte offset by four, placing the palette read past most mesh files.
 - `src/battle/battle_map_blend_ambient_light_color.c`,
   `src/battle/battle_map_blend_darkness_color.c`: modes `11` and above leave the
   target colour uninitialized (no default case).
