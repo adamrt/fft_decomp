@@ -40,7 +40,7 @@ void equip_menu_scroll_list_by_page(s32 direction, const u8* menu) {
     __asm__("" : : "r"(limit));
 
     g_equip_menu_selected_list_index = g_equip_menu_scroll_base_index;
-    equip_menu_draw_scrollable_list((u8*)menu);
+    equip_menu_draw_scrollable_list(menu);
     g_equip_menu_selected_list_index = row_offset + g_equip_menu_scroll_base_index;
     if ((s16)g_equip_menu_selected_list_index >= g_equip_menu_list_entry_count) {
         g_equip_menu_selected_list_index = g_equip_menu_list_entry_count - 1;

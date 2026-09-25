@@ -309,25 +309,25 @@ void world_build_options_menu(void) {
         world_menu_select_task_icon_tile((world_texture_prim_t*)&page->title);
         world_menu_select_task_icon_tile((world_texture_prim_t*)&page->value);
         world_menu_select_task_icon_tile((world_texture_prim_t*)frame);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[3]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[2]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.draw_mode);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[3]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.draw_mode);
         if (layout->hidden_rows != 0 && world_menu_is_input_allowed() != 0) {
             if (row_offset != 0) {
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrows[0]);
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrow_marks[0]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
             }
             if (row_offset != layout->hidden_rows) {
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrows[1]);
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrow_marks[1]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrows[1]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrow_marks[1]);
             }
             span = page->arrows[1].y0;
             top = page->arrows[0].y0 + page->arrows[0].h;
             span -= top;
             page->thumb.x0 = page->arrows[0].x0;
             page->thumb.y0 = top + span * entry->selected_index / (layout->row_count + layout->hidden_rows) - 2;
-            world_gfx_draw_or_append_gpu_primitive((s32*)&page->thumb);
+            world_gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
         if ((thread - 1)->is_running == 0) {
             world_thread_set_parameters(g_world_thread_current_id + 1, (s32)&entry->window_x, 0, 0);
@@ -338,16 +338,16 @@ void world_build_options_menu(void) {
             &page->title_area, &entry->window_x, i, g_active_graphics_buffer_index);
         world_gfx_build_scaled_draw_area_pair_swapped(
             &page->value_area, &value_rect, i, g_active_graphics_buffer_index);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->title_area.areas[1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icon_mode);
-        world_gfx_draw_or_append_gpu_primitive((s32*)frame);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->window_mode);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->title_area.areas[0]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->value_area.areas[1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->value);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->title);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->text_mode);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->value_area.areas[0]);
+        world_gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icon_mode);
+        world_gfx_draw_or_append_gpu_primitive(frame);
+        world_gfx_draw_or_append_gpu_primitive(&page->window_mode);
+        world_gfx_draw_or_append_gpu_primitive(&page->title_area.areas[0]);
+        world_gfx_draw_or_append_gpu_primitive(&page->value_area.areas[1]);
+        world_gfx_draw_or_append_gpu_primitive(&page->value);
+        world_gfx_draw_or_append_gpu_primitive(&page->title);
+        world_gfx_draw_or_append_gpu_primitive(&page->text_mode);
+        world_gfx_draw_or_append_gpu_primitive(&page->value_area.areas[0]);
         g_world_thread_call_target = (void (*)(void))main_sound_set_type;
         g_main_game_options.fields.cursor_movement = g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT];
         g_main_game_options.fields.cursor_repeat_speed = g_world_game_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];

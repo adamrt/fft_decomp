@@ -76,18 +76,18 @@ void world_menu_run_numeric_display_panel_thread(void) {
             record->sprites[16].clut = 0x7FFC;
             world_menu_init_primitive_colors_palette_bank_0(record->palette);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->draw_areas.areas[1]);
+        world_gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[1]);
         for (i = 0; i < 14; i++) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&record->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&record->sprites[i]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->sprites[17]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->mode0);
+        world_gfx_draw_or_append_gpu_primitive(&record->sprites[17]);
+        world_gfx_draw_or_append_gpu_primitive(&record->mode0);
         for (; i < 17; i++) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&record->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&record->sprites[i]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->mode1);
+        world_gfx_draw_or_append_gpu_primitive(&record->mode1);
         world_gfx_submit_primitive_group((world_primitive_group_t*)record->palette);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->draw_areas.areas[0]);
+        world_gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[0]);
     }
     world_thread_yield();
     world_thread_exit_current();

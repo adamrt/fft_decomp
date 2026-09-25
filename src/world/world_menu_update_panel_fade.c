@@ -38,12 +38,12 @@ void world_menu_update_panel_fade(void) {
             (frame->sides + i + 9)->r0 = intensity;
             (frame->sides + i + 9)->g0 = intensity;
             (frame->sides + i + 9)->b0 = intensity;
-            world_gfx_draw_or_append_gpu_primitive((s32*)&frame->sides[8 - i]);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&frame->sides[i + 9]);
+            world_gfx_draw_or_append_gpu_primitive(&frame->sides[8 - i]);
+            world_gfx_draw_or_append_gpu_primitive(&frame->sides[i + 9]);
         }
         world_gfx_draw_or_append_gpu_primitive(
-            (s32*)&g_world_menu_panel_fade_frames[g_world_menu_packet_buffer_index].center);
+            &g_world_menu_panel_fade_frames[g_world_menu_packet_buffer_index].center);
         world_gfx_draw_or_append_gpu_primitive(
-            (s32*)&g_world_menu_panel_fade_frames[g_world_menu_packet_buffer_index].draw_mode);
+            &g_world_menu_panel_fade_frames[g_world_menu_packet_buffer_index].draw_mode);
     }
 }

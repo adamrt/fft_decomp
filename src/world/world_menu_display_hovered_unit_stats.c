@@ -343,38 +343,38 @@ void world_menu_display_hovered_unit_stats(
         offs->b.x = -0x80;
         offs->b.y = y;
         SetDrawOffset(&offs->b, &offs->b.x);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&offs->b);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[0]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->draw_mode_1);
+        world_gfx_draw_or_append_gpu_primitive(&offs->b);
+        world_gfx_draw_or_append_gpu_primitive(&page->quads[0]);
+        world_gfx_draw_or_append_gpu_primitive(&page->quads[1]);
+        world_gfx_draw_or_append_gpu_primitive(&page->draw_mode_1);
         poly--;
         for (i = 0; i < 3; i++) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)poly);
+            world_gfx_draw_or_append_gpu_primitive(poly);
             poly--;
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[2]);
+        world_gfx_draw_or_append_gpu_primitive(&page->quads[2]);
         if (mode == 1) {
             page->quads[4].clut = 0x7D7C;
-            world_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[4]);
+            world_gfx_draw_or_append_gpu_primitive(&page->quads[4]);
         }
         if (mode != 2) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[3]);
+            world_gfx_draw_or_append_gpu_primitive(&page->quads[3]);
         } else if (text_id != 0) {
             world_menu_build_sprite_page(frame, frame_rect);
         }
         for (i = 0; i < 7; i++) {
             page->sprites[i].clut = g_world_unit_status_sprite_clut_pairs[i][running & 1];
-            world_gfx_draw_or_append_gpu_primitive((s32*)&page->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&page->sprites[i]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->draw_mode_0);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->portrait);
+        world_gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
+        world_gfx_draw_or_append_gpu_primitive(&page->portrait);
         if (running != 0) {
             world_menu_init_primitive_colors_palette_bank_1(&page->palette);
         } else {
             world_menu_init_primitive_colors_palette_bank_0(&page->palette);
         }
         world_gfx_submit_primitive_group((world_primitive_group_t*)&page->palette);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&offs->a);
+        world_gfx_draw_or_append_gpu_primitive(&offs->a);
         world_thread_yield();
         g_world_menu_hide_numeric_values = unit->unit_flags & 4;
         if (world_thread_get_current_task_id() == 0x11) {

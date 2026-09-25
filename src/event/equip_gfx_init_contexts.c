@@ -45,7 +45,7 @@ void equip_gfx_init_contexts(equip_gfx_buffer_t* base, u32* otag, POLY_F3* poly_
         context->draw_areas = draw_areas + g_equip_gfx_draw_area_capacity * index;
         context->draw_modes = draw_modes + g_equip_gfx_draw_mode_capacity * index;
 
-        equip_gfx_init_primitive_buffers((u8*)context);
+        equip_gfx_init_primitive_buffers(context);
     }
 
     equip_gfx_swap_context_and_clear_otag(0, -1);

@@ -113,8 +113,8 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
         break;
     case BATTLE_SECONDARY_EFFECT_EXECUTING:
         g_battle_effect_projectile_progress += g_battle_effect_projectile_speed;
-        battle_effect_find_projectile_xyz_along_trajectory((s32*)&g_battle_effect_projectile_delta,
-            g_battle_effect_projectile_length, g_battle_effect_projectile_progress, (s32*)&position);
+        battle_effect_find_projectile_xyz_along_trajectory(&g_battle_effect_projectile_delta,
+            g_battle_effect_projectile_length, g_battle_effect_projectile_progress, &position);
         position.vx = g_battle_effect_trajectory_origin.vx + position.vx;
         position.vy = g_battle_effect_trajectory_origin.vy + position.vy;
         position.vz = g_battle_effect_trajectory_origin.vz + position.vz;

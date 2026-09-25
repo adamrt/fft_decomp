@@ -174,10 +174,10 @@ void world_menu_labeled_number_entry_thread(void) {
         }
         world_menu_update_icon_cursor_sprites((world_menu_icon_thread_param_t*)param, &record.base, i, -1);
         world_menu_select_icon_cluts(&record.base);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&cursor_quads[i & 1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&shadow_quads[i & 1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record.base.sprites[0]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record);
+        world_gfx_draw_or_append_gpu_primitive(&cursor_quads[i & 1]);
+        world_gfx_draw_or_append_gpu_primitive(&shadow_quads[i & 1]);
+        world_gfx_draw_or_append_gpu_primitive(&record.base.sprites[0]);
+        world_gfx_draw_or_append_gpu_primitive(&record);
     }
     world_thread_yield();
     world_thread_exit_current();

@@ -285,12 +285,12 @@ void world_menu_scrolling_list_thread(void) {
         world_menu_update_icon_cursor_sprites((world_menu_icon_thread_param_t*)entry, &page->icons.base, i, cursor);
         if (layout->columns.hidden_rows != 0 && world_thread_is_previous_running() == 0) {
             if (row_offset != 0) {
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrows[0]);
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrow_marks[0]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
             }
             if (row_offset != layout->columns.hidden_rows) {
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrows[1]);
-                world_gfx_draw_or_append_gpu_primitive((s32*)&page->arrow_marks[1]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrows[1]);
+                world_gfx_draw_or_append_gpu_primitive(&page->arrow_marks[1]);
             }
             span = page->arrows[1].y0;
             top = page->arrows[0].y0 + page->arrows[0].h;
@@ -298,7 +298,7 @@ void world_menu_scrolling_list_thread(void) {
             page->thumb.x0 = page->arrows[0].x0;
             page->thumb.y0
                 = top + span * entry->selected_index / (layout->columns.row_count + layout->columns.hidden_rows) - 2;
-            world_gfx_draw_or_append_gpu_primitive((s32*)&page->thumb);
+            world_gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
         if (g_world_menu_scrolling_list_depth < 2 && delta == 0) {
             world_menu_handle_entry_confirm(entry, cursor);
@@ -338,21 +338,21 @@ void world_menu_scrolling_list_thread(void) {
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
         if ((s16)entry->header_id >= 5) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)page->icons.icons[0]);
-            world_gfx_draw_or_append_gpu_primitive((s32*)page->icons.icons[1]);
+            world_gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);
+            world_gfx_draw_or_append_gpu_primitive(page->icons.icons[1]);
             if (g_world_thread_contexts[g_world_thread_current_id].function_parameter_4 != 0) {
-                world_gfx_draw_or_append_gpu_primitive((s32*)page->icons.icons[2]);
+                world_gfx_draw_or_append_gpu_primitive(page->icons.icons[2]);
             }
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[3]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[2]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icon_mode);
-        world_gfx_draw_or_append_gpu_primitive((s32*)frame);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->text_mode);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.draw_mode);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base.sprites[0]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.base);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[3]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icon_mode);
+        world_gfx_draw_or_append_gpu_primitive(frame);
+        world_gfx_draw_or_append_gpu_primitive(&page->text_mode);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.draw_mode);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[0]);
+        world_gfx_draw_or_append_gpu_primitive(&page->icons.base);
         i++;
     }
     if (row_buffer_live != 0) {

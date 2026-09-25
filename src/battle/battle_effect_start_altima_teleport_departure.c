@@ -6,12 +6,12 @@ enum {
 };
 
 s32 battle_effect_start_altima_teleport_departure(battle_unit_misc_data_t* unit) {
-    u8 teleport_data[200];
+    battle_effect_secondary_init_t teleport_data;
     /* Always 0; a literal argument lets GCC merge the two case tails. */
     s32 animation_type;
     s32 effect_id;
 
-    battle_effect_init_altima_teleport_data(unit, teleport_data);
+    battle_effect_init_altima_teleport_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM:
         animation_type = 0;
@@ -25,7 +25,7 @@ s32 battle_effect_start_altima_teleport_departure(battle_unit_misc_data_t* unit)
         /* The target places the fallback after the animation tail. */
         goto fallback;
     }
-    battle_effect_set_ability_animation(animation_type, effect_id, (battle_effect_secondary_init_t*)teleport_data);
+    battle_effect_set_ability_animation(animation_type, effect_id, &teleport_data);
     return 1;
 
 fallback:

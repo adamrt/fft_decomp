@@ -622,8 +622,8 @@ loop_73:
     }
     shadow_quad->clut = shadow_clut;
     draw_offset = buffer_index * 0x28;
-    world_gfx_draw_or_append_gpu_primitive((s32*)(cursor_quad_base + draw_offset));
-    world_gfx_draw_or_append_gpu_primitive((s32*)((u8*)shadow_quads + draw_offset));
+    world_gfx_draw_or_append_gpu_primitive((cursor_quad_base + draw_offset));
+    world_gfx_draw_or_append_gpu_primitive(((u8*)shadow_quads + draw_offset));
     world_thread_wait_frames(1);
     frame += 1;
     goto loop_73;

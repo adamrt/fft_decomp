@@ -3557,7 +3557,8 @@ void battle_clear_menu_render_buffer(void* buffer, s32 bytes);
 void battle_effect_build_secondary_init_from_action(
     battle_unit_misc_data_t* unit, battle_effect_secondary_init_t* init);
 void battle_effect_call_build_secondary_init(battle_unit_misc_data_t* unit);
-void battle_effect_init_altima_teleport_data(battle_unit_misc_data_t* unit, u8* teleport_data);
+void battle_effect_init_altima_teleport_data(
+    battle_unit_misc_data_t* unit, battle_effect_secondary_init_t* teleport_data);
 s32 battle_effect_init_ninja_ball_secondary(s32 elements, battle_effect_secondary_init_t* source);
 void battle_effect_set_evade_type_data_item_and_throw_stone_hardcoding(battle_unit_misc_data_t* unit);
 void battle_effect_set_secondary_death_smoke(battle_unit_misc_data_t* unit);
@@ -3704,7 +3705,7 @@ void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* pos
 s32 battle_target_run_calculator(const battle_ai_command_action_t* source);
 void battle_target_set_ability_panels(const u8* source);
 s32 battle_target_set_all_panels_targeted_if_targetable(void);
-void battle_target_set_coordinates_for_ability(battle_stats_t* acting, u8* out);
+void battle_target_set_coordinates_for_ability(battle_stats_t* acting, battle_strike_work_t* out);
 s32 battle_target_set_weapon_attack_panels(battle_ai_command_action_t* source);
 s32 battle_target_set_jump_ability_panels(const u8* source);
 s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
@@ -3713,7 +3714,7 @@ void battle_unit_add_signed_byte_to_height(battle_unit_misc_data_t* unit, s32 de
 s32 battle_unit_apply_level_up_down_ability(void);
 s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min);
 s32 battle_unit_build_deployed_units_data(s32 a0);
-s32 battle_unit_build_gained_exp_jp_level_job_level(battle_stats_t* unit, u8* rewards);
+s32 battle_unit_build_gained_exp_jp_level_job_level(battle_stats_t* unit, battle_action_reward_display_t* rewards);
 void battle_unit_call_bow_hardcoding_by_misc_id(u16 attacker_id, u16 target_id);
 void battle_unit_call_set_animation_based_on_status(struct battle_unit_misc_data* unit);
 s32 battle_unit_check_chocobo(battle_stats_t* unit);
@@ -3735,7 +3736,7 @@ s32 battle_unit_get_map_coords_from_misc_id(u32 misc_id, s16* coords);
 battle_unit_misc_data_t* battle_unit_find_any_misc_data_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
 battle_unit_misc_data_t* battle_unit_get_overlapping_misc_data_pointer(
     battle_unit_misc_data_t* self, s32 x, s32 y, s32 z);
-u8* battle_unit_get_target_id_ptr_by_battle_id(u32 battle_id);
+battle_ai_command_action_t* battle_unit_get_target_id_ptr_by_battle_id(u32 battle_id);
 s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, battle_screen_coords_t* coords);
 s32 battle_unit_add_event_offset_by_misc_id(u32 misc_id, const battle_screen_coords_t* amount);
 void battle_unit_increment_or_decrement_height_mod(battle_unit_misc_data_t* unit);

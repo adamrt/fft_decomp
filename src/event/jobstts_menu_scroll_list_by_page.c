@@ -44,7 +44,7 @@ void jobstts_menu_scroll_list_by_page(jobstts_menu_page_scroll_direction_e direc
     __asm__("" : : "r"(limit));
 
     g_jobstts_menu_list_selected_index = g_jobstts_menu_scroll_base_index;
-    jobstts_menu_draw_scrollable_list((u8*)menu);
+    jobstts_menu_draw_scrollable_list(menu);
     g_jobstts_menu_list_selected_index = row_offset + g_jobstts_menu_scroll_base_index;
     if ((s16)g_jobstts_menu_list_selected_index >= g_jobstts_menu_list_entry_count) {
         g_jobstts_menu_list_selected_index = g_jobstts_menu_list_entry_count - 1;

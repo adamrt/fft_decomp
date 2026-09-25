@@ -155,13 +155,13 @@ void world_main_menu_text_window_thread(void) {
         record->sprite_b.r0 = g_world_menu_color_red;
         record->sprite_b.g0 = g_world_menu_color_green;
         record->sprite_b.b0 = g_world_menu_color_blue;
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->sprite_b);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->mode_b);
+        world_gfx_draw_or_append_gpu_primitive(&record->sprite_b);
+        world_gfx_draw_or_append_gpu_primitive(&record->mode_b);
         record->sprite_a.r0 = g_world_menu_color_red;
         record->sprite_a.g0 = g_world_menu_color_green;
         record->sprite_a.b0 = g_world_menu_color_blue;
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->sprite_a);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&record->mode_a);
+        world_gfx_draw_or_append_gpu_primitive(&record->sprite_a);
+        world_gfx_draw_or_append_gpu_primitive(&record->mode_a);
     }
     world_thread_yield();
     world_thread_exit_current();

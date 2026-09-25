@@ -15,7 +15,6 @@ extern battle_move_found_item_t g_battle_move_find_display_item;
 
 extern void battle_gfx_store_item_display_data(battle_gfx_render_unit_t*, u32);
 extern s32 battle_unit_learn_from_crystal(battle_stats_t* stats, s32 outcome);
-extern s32 battle_unit_build_gained_exp_jp_level_job_level(battle_stats_t* unit, u8* out);
 extern s32 battle_map_refresh_deep_dungeon(void);
 
 /* Starts the next post-action step selected by g_battle_move_find_result.
@@ -86,7 +85,7 @@ s32 battle_move_start_next_post_movement_step(void) {
         switch (g_battle_action_post_action_display_phase) {
         case 0:
             battle_action_init_movement_ability_benefit(casting->battle_data);
-            battle_unit_build_gained_exp_jp_level_job_level(casting->battle_data, (u8*)&casting->action_rewards);
+            battle_unit_build_gained_exp_jp_level_job_level(casting->battle_data, &casting->action_rewards);
             battle_gfx_prepare_post_action_display(casting);
             battle_gfx_init_earned_exp_jp_display(casting);
             battle_action_report_level_up(casting);

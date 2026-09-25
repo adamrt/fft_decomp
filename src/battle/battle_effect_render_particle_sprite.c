@@ -37,14 +37,14 @@ void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red,
     node->frame_timer -= 2;
     if (node->frame_timer <= 0) {
         for (;;) {
-            op = ((u8*)node->sequence_data)[(u16)node->sequence_offset];
+            op = node->sequence_data[(u16)node->sequence_offset];
             if (!(op & 0x80)) {
                 if ((u8)node->sprite_frame_index != op) {
                     node->sprite_frame_index = op;
                     node->kind |= 1;
                 }
-                node->frame_timer = ((u8*)node->sequence_data)[(u16)node->sequence_offset + 1];
-                node->depth_mode = ((u8*)node->sequence_data)[(u16)node->sequence_offset + 2];
+                node->frame_timer = node->sequence_data[(u16)node->sequence_offset + 1];
+                node->depth_mode = node->sequence_data[(u16)node->sequence_offset + 2];
                 if (node->frame_timer != 0) {
                     node->sequence_offset += 3;
                 }
@@ -55,15 +55,15 @@ void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red,
                 node->sequence_offset = 0;
                 break;
             case 2:
-                node->sprite_offset_x = ((u8*)node->sequence_data)[(u16)node->sequence_offset + 1]
-                    + (((u8*)node->sequence_data)[(u16)node->sequence_offset + 2] << 8);
-                node->sprite_offset_y = ((u8*)node->sequence_data)[(u16)node->sequence_offset + 3]
-                    + (((u8*)node->sequence_data)[(u16)node->sequence_offset + 4] << 8);
+                node->sprite_offset_x = node->sequence_data[(u16)node->sequence_offset + 1]
+                    + (node->sequence_data[(u16)node->sequence_offset + 2] << 8);
+                node->sprite_offset_y = node->sequence_data[(u16)node->sequence_offset + 3]
+                    + (node->sequence_data[(u16)node->sequence_offset + 4] << 8);
                 node->sequence_offset += 5;
                 break;
             case 3:
-                node->sprite_offset_x += (s8)((u8*)node->sequence_data)[(u16)node->sequence_offset + 1];
-                node->sprite_offset_y += (s8)((u8*)node->sequence_data)[(u16)node->sequence_offset + 2];
+                node->sprite_offset_x += (s8)node->sequence_data[(u16)node->sequence_offset + 1];
+                node->sprite_offset_y += (s8)node->sequence_data[(u16)node->sequence_offset + 2];
                 node->sequence_offset += 3;
                 break;
             }

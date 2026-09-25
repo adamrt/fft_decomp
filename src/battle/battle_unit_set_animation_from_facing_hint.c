@@ -13,7 +13,7 @@ s32 battle_unit_set_animation_from_facing_hint(u32 misc_id, s32 facing_hint) {
         if (animation < 3) {
             animation = 2;
         }
-        battle_unit_store_animation_facing_movement_data(animation, facing, (u8*)unit);
+        battle_unit_store_animation_facing_movement_data(animation, facing, unit);
         return misc_id;
     }
     return -1;

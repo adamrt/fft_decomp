@@ -2,24 +2,24 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-void equip_gfx_init_primitive_buffers(u8* buffers) {
+void equip_gfx_init_primitive_buffers(equip_gfx_context_t* context) {
     s32 i;
 
     for (i = 0; i < (s32)g_equip_gfx_line_f2_capacity; i++) {
-        SetLineF2((void*)((i * 0x10) + *(s32*)(buffers + 0x24)));
+        SetLineF2(&context->lines[i]);
     }
     for (i = 0; i < (s32)g_equip_gfx_poly_f4_capacity; i++) {
-        SetPolyF4((POLY_F4*)((i * 0x18) + *(s32*)(buffers + 0xC)));
-        SetShadeTex((void*)((i * 0x18) + *(s32*)(buffers + 0xC)), 0);
+        SetPolyF4(&context->poly_f4[i]);
+        SetShadeTex(&context->poly_f4[i], 0);
     }
     for (i = 0; i < (s32)g_equip_gfx_poly_ft4_capacity; i++) {
-        SetPolyFT4((POLY_FT4*)((i * 0x28) + *(s32*)(buffers + 0x10)));
-        SetShadeTex((void*)((i * 0x28) + *(s32*)(buffers + 0x10)), 0);
+        SetPolyFT4(&context->textured_quads[i]);
+        SetShadeTex(&context->textured_quads[i], 0);
     }
     for (i = 0; i < (s32)g_equip_gfx_tile_capacity; i++) {
-        SetTile((void*)((i * 0x10) + *(s32*)(buffers + 0x3C)));
+        SetTile(&context->tiles[i]);
     }
     for (i = 0; i < (s32)g_equip_gfx_draw_move_capacity; i++) {
-        SetDrawMove((void*)((i * 0x18) + *(s32*)(buffers + 0x58)));
+        SetDrawMove(&context->moves[i]);
     }
 }

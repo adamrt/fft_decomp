@@ -587,59 +587,59 @@ void world_menu_unit_status_banner_thread(void) {
             }
         }
         if (!(display->flags & 0x80)) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->draw_offset_b);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->value_sprites[0]);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->value_sprites[1]);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->draw_mode_a);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_offset_b);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[0]);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[1]);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_mode_a);
             i = 0;
             offset = 0x1E0;
             do {
-                world_gfx_draw_or_append_gpu_primitive((s32*)(summary + offset));
+                world_gfx_draw_or_append_gpu_primitive((summary + offset));
                 i += 1;
                 offset += 0x24;
             } while (i < 3);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->value_sprites[2]);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->value_sprites[3]);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[2]);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[3]);
             i = 0;
             offset = 0x154;
             do {
-                world_gfx_draw_or_append_gpu_primitive((s32*)(summary + offset));
+                world_gfx_draw_or_append_gpu_primitive((summary + offset));
                 i += 1;
                 offset += 0x14;
             } while (i < 7);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->draw_mode_b);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_mode_b);
             if (suppress == 0) {
                 if (anim_state >= 5) {
-                    world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->portrait[2]);
-                    world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->portrait[3]);
-                    world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->portrait[1]);
+                    world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[2]);
+                    world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[3]);
+                    world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[1]);
                 }
-                world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->portrait[0]);
+                world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[0]);
             }
             world_gfx_submit_primitive_group((world_primitive_group_t*)summary);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&SUMMARY(summary)->draw_offset_a);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&STATUS(status)->draw_offset_b);
+            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_offset_a);
+            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_offset_b);
             portrait_prim = (u8*)&STATUS(status)->portrait;
             SetSemiTrans(portrait_prim, 1);
-            world_gfx_draw_or_append_gpu_primitive((s32*)portrait_prim);
+            world_gfx_draw_or_append_gpu_primitive(portrait_prim);
             i = 3;
             offset = 0x128;
             do {
-                world_gfx_draw_or_append_gpu_primitive((s32*)(status + offset));
+                world_gfx_draw_or_append_gpu_primitive((status + offset));
                 i -= 1;
                 offset -= 0x14;
             } while (i >= 0);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&STATUS(status)->draw_mode_b);
+            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_mode_b);
             i = 4;
             offset = 0x13C;
             do {
-                world_gfx_draw_or_append_gpu_primitive((s32*)(status + offset));
+                world_gfx_draw_or_append_gpu_primitive((status + offset));
                 i += 1;
                 offset += 0x14;
             } while (i < 7);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&STATUS(status)->draw_mode_a);
+            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_mode_a);
             world_gfx_submit_primitive_group((world_primitive_group_t*)status);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&STATUS(status)->draw_offset_a);
+            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_offset_a);
         }
         world_thread_yield();
         if (world_thread_get_current_parameter_3() != 0) {

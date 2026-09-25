@@ -486,7 +486,7 @@ void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle)
 void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, VECTOR* position,
     battle_effect_rotation_vector_t* angles, VECTOR* scale, s32 parameter);
 s32 battle_effect_end_secondary_on_current_unit(void);
-void battle_effect_find_projectile_xyz_along_trajectory(s32* src, s32 total, s32 current, s32* dst);
+void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst);
 s32 battle_effect_get_animation_timing_curve_value(battle_effect_timing_entry_t* entry);
 s32 battle_effect_get_timing_curve_value(battle_effect_timing_entry_t* entry);
 s32 battle_effect_init_data(s32 result);

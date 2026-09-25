@@ -30,7 +30,7 @@ s32 battle_effect_trace_projectile_path(VECTOR* delta, SVECTOR* origin, s32* dis
     for (; i < steps; i++) {
         previous = position;
         progress += step;
-        battle_effect_find_projectile_xyz_along_trajectory((s32*)delta, *distance, progress, (s32*)&position);
+        battle_effect_find_projectile_xyz_along_trajectory(delta, *distance, progress, &position);
         position.vx += origin->vx;
         position.vy += origin->vy;
         position.vz += origin->vz;

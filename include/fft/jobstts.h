@@ -312,7 +312,7 @@ s32 jobstts_job_is_special_monster(s32 job_id);
 void jobstts_menu_clear_selection_record(s32 index);
 void jobstts_menu_clear_selection_records(void);
 void jobstts_menu_clear_selection_values(void);
-void jobstts_menu_draw_scrollable_list(u8* script);
+void jobstts_menu_draw_scrollable_list(const u8* script);
 s32 jobstts_menu_get_event_speed(void);
 void jobstts_menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 value, const void* data);
 void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, s32 data);

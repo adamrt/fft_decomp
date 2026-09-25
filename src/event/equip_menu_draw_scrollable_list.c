@@ -6,7 +6,7 @@
  * The 0x10 render command supplies the list geometry; 0x19 terminates a
  * stream that has no list.
  */
-void equip_menu_draw_scrollable_list(u8* script) {
+void equip_menu_draw_scrollable_list(const u8* script) {
     RECT rect;
     s16 row_ids[20];
     s32 i;

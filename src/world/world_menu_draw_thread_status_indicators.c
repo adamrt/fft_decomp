@@ -136,11 +136,11 @@ draw_panels:
                 prims->bottom[j].r0 = (u8)g_world_menu_indicator_fade_work[i];
                 prims->bottom[j].g0 = (u8)g_world_menu_indicator_fade_work[i];
                 prims->bottom[j].b0 = (u8)g_world_menu_indicator_fade_work[i];
-                world_gfx_draw_or_append_gpu_primitive((s32*)(k + prims->top));
-                world_gfx_draw_or_append_gpu_primitive((s32*)&prims->bottom[j]);
+                world_gfx_draw_or_append_gpu_primitive((k + prims->top));
+                world_gfx_draw_or_append_gpu_primitive(&prims->bottom[j]);
             }
-            world_gfx_draw_or_append_gpu_primitive((s32*)&prims->frame);
-            world_gfx_draw_or_append_gpu_primitive((s32*)&prims->mode);
+            world_gfx_draw_or_append_gpu_primitive(&prims->frame);
+            world_gfx_draw_or_append_gpu_primitive(&prims->mode);
         }
     }
 }

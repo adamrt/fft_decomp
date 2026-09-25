@@ -156,7 +156,7 @@ void world_menu_unit_summary_panel_thread(void) {
         frame_record->offset_b[0] = -0x80;
         frame_record->offset_b[1] = value;
         SetDrawOffset(frame_record->draw_offset_b, frame_record->offset_b);
-        world_gfx_draw_or_append_gpu_primitive((s32*)frame_record->draw_offset_b);
+        world_gfx_draw_or_append_gpu_primitive(frame_record->draw_offset_b);
         value = world_thread_find_running_by_task(NATIVE_THREAD_TASK_UNIT_EDITOR_PANEL);
         if (value != 0 && world_thread_is_running_80100164(value - 1) == 0) {
             value = 0;
@@ -171,32 +171,32 @@ void world_menu_unit_summary_panel_thread(void) {
             frame_record->portrait.b0 = 0x80;
         }
         SetSemiTrans(&frame_record->portrait, 1);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->portrait);
+        world_gfx_draw_or_append_gpu_primitive(&frame_record->portrait);
         for (i = 3; i >= 0; i--) {
             if (value != 0) {
                 frame_record->sprites[i].clut = 0x7D3C;
             } else {
                 frame_record->sprites[i].clut = 0x7C3C;
             }
-            world_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_mode_1);
+        world_gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_1);
         for (i = 4; i < 7; i++) {
             if (value != 0) {
                 frame_record->sprites[i].clut = 0x7D3C;
             } else {
                 frame_record->sprites[i].clut = 0x7C3C;
             }
-            world_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_mode_0);
+        world_gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
             world_menu_init_primitive_colors_palette_bank_1(frame_record->palette);
         } else {
             world_menu_init_primitive_colors_palette_bank_0(frame_record->palette);
         }
         world_gfx_submit_primitive_group((world_primitive_group_t*)frame_record->palette);
-        world_gfx_draw_or_append_gpu_primitive((s32*)frame_record->draw_offset_a);
+        world_gfx_draw_or_append_gpu_primitive(frame_record->draw_offset_a);
     }
 exit:
     world_thread_yield();

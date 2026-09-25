@@ -101,7 +101,7 @@ s32 battle_action_resolve_ability_strike(s32 misc_unit_id, battle_strike_work_t*
     work->used_weapon_id = g_current_ability.weapon_id;
     work->reaction_occurred = 0;
     work->current_hit_number = g_current_ability.strike_counter;
-    battle_target_set_coordinates_for_ability(attacker, (u8*)work);
+    battle_target_set_coordinates_for_ability(attacker, work);
     if (count == 0) {
         g_current_ability.strike_counter++;
         work->last_attack_id = *(u16*)&attacker->last_ability_id;

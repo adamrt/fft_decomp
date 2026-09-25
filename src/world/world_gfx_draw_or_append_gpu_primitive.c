@@ -2,7 +2,8 @@
 #include "psx/gpu.h"
 
 /* Merge the caller's display word with the active display word. */
-void world_gfx_draw_or_append_gpu_primitive(s32* word) {
+void world_gfx_draw_or_append_gpu_primitive(void* primitive) {
+    s32* word = primitive;
     s32* ptr;
     s32 value;
     s32 active;

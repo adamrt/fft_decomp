@@ -356,7 +356,7 @@ typedef struct effect_list_node {
     u8 depth_mode;             /* 0x14: third byte of the frame opcode; OT depth adjustment */
     u8 _unknown_15;
     s16 frame_timer;                            /* 0x16: counts down by 2; the next opcode runs at <= 0 */
-    s32 sequence_data;                          /* 0x18: base of the u8 animation sequence */
+    u8* sequence_data;                          /* 0x18: base of the u8 animation sequence */
     s16 sequence_offset;                        /* 0x1c: byte offset of the next sequence opcode */
     s8 frame_group_index;                       /* 0x1e: indexes g_battle_effect_frame_data */
     s8 sprite_frame_index;                      /* 0x1f: frame id from the sequence opcode */

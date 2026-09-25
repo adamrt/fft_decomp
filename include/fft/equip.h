@@ -497,7 +497,7 @@ void equip_gfx_init_contexts(equip_gfx_buffer_t* base, u32* otag, POLY_F3* poly_
 u8* equip_gfx_get_draw_color(void);
 s32 equip_gfx_get_transition_frame(void);
 void equip_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
-void equip_gfx_init_primitive_buffers(u8* context);
+void equip_gfx_init_primitive_buffers(equip_gfx_context_t* context);
 void equip_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* data);
 void equip_gfx_load_image_and_wait(RECT* rect, u32* data);
 void equip_gfx_set_clut_rect_from_id(s16* rect, u32 clut_id);
@@ -537,7 +537,7 @@ void equip_menu_clear_selection_records(void);
 void equip_menu_clear_selection_values(void);
 void equip_menu_dispatch_with_override(s32 menu, s32 state, s32 override);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
-void equip_menu_draw_scrollable_list(u8* script);
+void equip_menu_draw_scrollable_list(const u8* script);
 void equip_menu_draw_weapon_hand_icons(s16 g_main_item_weapon_flags);
 s32 equip_menu_get_event_speed(void);
 void equip_menu_init_screen(s32 battle_id);

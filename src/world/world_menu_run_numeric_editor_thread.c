@@ -35,18 +35,18 @@ void world_menu_run_numeric_editor_thread(void) {
         buffer = g_world_editor_numeric_state_a;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_a;
-        upload_a = (RECT*)g_world_editor_numeric_entries_a;
-        upload_b = (RECT*)g_world_editor_numeric_entries_b;
-        upload_c = (RECT*)g_world_editor_numeric_entries_c;
-        entries = (world_menu_number_entry_t*)g_world_editor_numeric_descriptor_a;
+        upload_a = g_world_editor_numeric_entries_a;
+        upload_b = g_world_editor_numeric_entries_b;
+        upload_c = g_world_editor_numeric_entries_c;
+        entries = g_world_editor_numeric_descriptor_a;
     } else {
         buffer = g_world_editor_numeric_state_b;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_b;
-        upload_a = (RECT*)g_world_editor_numeric_entries_d;
-        upload_b = (RECT*)g_world_editor_numeric_entries_e;
-        upload_c = (RECT*)g_world_editor_numeric_entries_f;
-        entries = (world_menu_number_entry_t*)g_world_editor_numeric_descriptor_b;
+        upload_a = g_world_editor_numeric_entries_d;
+        upload_b = g_world_editor_numeric_entries_e;
+        upload_c = g_world_editor_numeric_entries_f;
+        entries = g_world_editor_numeric_descriptor_b;
     }
     world_gfx_set_image_draw_mode(&buffer->draw_modes[0], 0);
     world_gfx_set_image_draw_mode(&buffer->draw_modes[1], 2);
@@ -54,7 +54,7 @@ void world_menu_run_numeric_editor_thread(void) {
     world_menu_build_line_box((RECT*)g_world_editor_numeric_table, &buffer->numeric_frame);
     world_gfx_reset_record_texture_window_3(&buffer->portrait);
     i = 0;
-    descriptor = (world_gfx_image_load_parameters_t*)g_world_editor_numeric_texture;
+    descriptor = g_world_editor_numeric_texture;
     for (; i < 18; i++) {
         world_menu_init_sprite(&buffer->sprites[i]);
         world_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i],
@@ -135,26 +135,26 @@ void world_menu_run_numeric_editor_thread(void) {
         }
         world_menu_select_primitive_color_palette(&buffer->numeric_frame, (world_menu_color_input_t*)thread);
         if (frame < 13) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait.areas[1]);
+            world_gfx_draw_or_append_gpu_primitive(&buffer->portrait.areas[1]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[1]);
+        world_gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[1]);
         for (i = 0; i < 14; i++) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
-        world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[17]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[0]);
+        world_gfx_draw_or_append_gpu_primitive(&buffer->sprites[17]);
+        world_gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[0]);
         for (; i < 17; i++) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[i]);
+            world_gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
         if (g_world_thread_current_id == 12) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[1]);
+            world_gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[1]);
         } else {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[2]);
+            world_gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[2]);
         }
         world_gfx_submit_primitive_group((world_primitive_group_t*)&buffer->numeric_frame);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[0]);
+        world_gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[0]);
         if (frame < 13) {
-            world_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait);
+            world_gfx_draw_or_append_gpu_primitive(&buffer->portrait);
         }
         world_thread_yield();
         if (world_thread_get_current_parameter_3() != 0) {

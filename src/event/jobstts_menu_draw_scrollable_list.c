@@ -5,7 +5,7 @@
  * The 0x10 render command supplies the list geometry; 0x16 terminates a
  * stream that has no list.
  */
-void jobstts_menu_draw_scrollable_list(u8* script) {
+void jobstts_menu_draw_scrollable_list(const u8* script) {
     RECT rect;
     s16 columns[20];
     s32 i;

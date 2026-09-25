@@ -1,10 +1,10 @@
-#include "psx/types.h"
+#include "fft/battle_effect.h"
 
-void battle_effect_find_projectile_xyz_along_trajectory(s32* src, s32 total, s32 current, s32* dst) {
+void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
     s32 progress;
 
     progress = (current << 8) / (total >> 4);
-    dst[0] = (progress * src[0]) >> 12;
-    dst[1] = (progress * src[1]) >> 12;
-    dst[2] = (progress * src[2]) >> 12;
+    dst->vx = (progress * src->vx) >> 12;
+    dst->vy = (progress * src->vy) >> 12;
+    dst->vz = (progress * src->vz) >> 12;
 }

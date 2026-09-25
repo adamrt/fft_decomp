@@ -2148,15 +2148,15 @@ extern world_gfx_image_load_parameters_t g_world_equipment_panel_sprite_params_2
 extern world_gfx_image_load_parameters_t g_world_equipment_panel_sprite_params_3[19];
 extern world_gfx_image_load_parameters_t g_world_equipment_panel_icon_params[5];
 extern u8 g_world_editor_numeric_table[];
-extern u8 g_world_editor_numeric_entries_a[];
-extern u8 g_world_editor_numeric_entries_b[];
-extern u8 g_world_editor_numeric_entries_c[];
-extern u8 g_world_editor_numeric_entries_d[];
-extern u8 g_world_editor_numeric_entries_e[];
-extern u8 g_world_editor_numeric_entries_f[];
-extern u8 g_world_editor_numeric_texture[];
-extern u8 g_world_editor_numeric_descriptor_a[];
-extern u8 g_world_editor_numeric_descriptor_b[];
+extern RECT g_world_editor_numeric_entries_a[];
+extern RECT g_world_editor_numeric_entries_b[];
+extern RECT g_world_editor_numeric_entries_c[];
+extern RECT g_world_editor_numeric_entries_d[];
+extern RECT g_world_editor_numeric_entries_e[];
+extern RECT g_world_editor_numeric_entries_f[];
+extern world_gfx_image_load_parameters_t g_world_editor_numeric_texture[];
+extern world_menu_number_entry_t g_world_editor_numeric_descriptor_a[];
+extern world_menu_number_entry_t g_world_editor_numeric_descriptor_b[];
 /* Same layout as world_text_render_decimal_entry_list's output record. */
 extern world_glyph_blit_t g_world_decimal_glyph_source;
 extern u8 g_world_formation_menu_text_table[];
@@ -3224,7 +3224,7 @@ void world_gfx_clip_sprite_record_left(world_gfx_sprite_record_t* record, s32 de
 void world_gfx_clip_sprite_record_right(world_gfx_sprite_record_t* record, s32 delta);
 void world_gfx_copy_screen_setup_in(const void* source_a, const void* source_b, const void* source_c);
 void world_gfx_copy_screen_setup_out(void* dest0, void* dest1, void* dest2, void* dest3);
-void world_gfx_draw_or_append_gpu_primitive(s32* primitive);
+void world_gfx_draw_or_append_gpu_primitive(void* primitive);
 void world_gfx_draw_screen_tint_tile(world_screen_tint_prims_t* prims, s32 intensity);
 void world_gfx_draw_signed_number(s32 value, u8 digits, void* image, u16* x);
 void world_gfx_enqueue_oriented_textured_quad(
