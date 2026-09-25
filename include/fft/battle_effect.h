@@ -175,6 +175,27 @@ typedef struct effect_timeline_color_tracks {
     battle_effect_background_track_t screen;      /* 0x258 */
 } effect_timeline_color_tracks_t;
 
+/* Single-phase timeline channels beginning eight bytes into the effect's
+ * timing section. The multi-phase effect_misc_data_t view has a different
+ * layout after its common header. */
+typedef struct battle_effect_tick_sound_track {
+    u16 duration[17]; /* 0x00 */
+    u8 kind[17];      /* 0x22; 0/1 none, 2+ on-hit sound index + 2 */
+    u8 _unknown_33;
+    s16 count; /* 0x34 */
+} battle_effect_tick_sound_track_t;
+
+typedef struct battle_effect_tick_channels {
+    u16 _unknown_00;
+    u16 duration;                                 /* 0x002 */
+    battle_effect_keyframe_table_t particle[5];   /* 0x004 */
+    battle_effect_tick_sound_track_t sound[3];    /* 0x284 */
+    battle_effect_palette_track_t affected_units; /* 0x326 */
+    battle_effect_palette_track_t caster;         /* 0x3ee */
+    battle_effect_palette_track_t target;         /* 0x4b6 */
+    battle_effect_background_track_t screen;      /* 0x57e */
+} battle_effect_tick_channels_t;
+
 /* Provisional view of the interpolated emitter values the Emitter Control
  * Routine passes in (0x801c878c). The secondary handlers pass a group record's
  * address minus two bytes (a raw byte offset: this view and
@@ -359,7 +380,7 @@ extern s16 g_battle_effect_load_countdown;
 extern effect_misc_data_t* g_battle_effect_misc_data;
 extern u8* g_battle_effect_motion_header;
 extern u8* g_battle_effect_nibble_table;
-extern u8* g_battle_effect_timing_channels;
+extern battle_effect_tick_channels_t* g_battle_effect_timing_channels;
 extern u8* g_battle_effect_parameter_sets;
 extern u8* g_battle_effect_parameter_sets_start;
 extern void* g_battle_effect_polygon_depth_data;

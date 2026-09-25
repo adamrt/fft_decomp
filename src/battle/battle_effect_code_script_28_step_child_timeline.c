@@ -5,27 +5,6 @@
 #include "fft/map.h"
 #include "psx/types.h"
 
-/* Animate-tick sound channel, 0x36 bytes. */
-typedef struct effect_tick_sound_track {
-    u16 duration[17]; /* 0x00 */
-    u8 kind[17];      /* 0x22; 0/1 none, 2+ on-hit sound index + 2 */
-    u8 _unknown_33;
-    s16 count; /* 0x34 */
-} effect_tick_sound_track_t;
-
-/* Single-phase timeline channels at g_battle_effect_timing_channels
- * (timeline section + 8). */
-typedef struct effect_tick_channels {
-    u16 _unknown_00;
-    u16 duration;                                 /* 0x002 */
-    battle_effect_keyframe_table_t particle[5];   /* 0x004 */
-    effect_tick_sound_track_t sound[3];           /* 0x284 */
-    battle_effect_palette_track_t affected_units; /* 0x326 */
-    battle_effect_palette_track_t caster;         /* 0x3ee */
-    battle_effect_palette_track_t target;         /* 0x4b6 */
-    battle_effect_background_track_t screen;      /* 0x57e */
-} effect_tick_channels_t;
-
 /* Animate-tick state overlaid on effect_record_t from 0x26. */
 typedef struct effect_tick_state {
     u16 target_index;          /* 0x00 (record 0x26) */
@@ -66,7 +45,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
     battle_effect_keyframe_table_t* table;
     battle_effect_palette_track_t* track;
     battle_effect_background_track_t* screen;
-    effect_tick_sound_track_t* sound;
+    battle_effect_tick_sound_track_t* sound;
     s32 i;
     s16 k;
     s16 units_keyframe;
@@ -92,7 +71,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
     state = (effect_tick_state_t*)&record->target_index;
     if (g_battle_effect_targets[target].id.bytes[1] != 2) {
         for (i = 0; i < 5; i++) {
-            table = &((effect_tick_channels_t*)g_battle_effect_timing_channels)->particle[i];
+            table = &g_battle_effect_timing_channels->particle[i];
             if (state->particle_remaining[i] == 0) {
                 if (state->particle_keyframe[i] == 0) {
                     state->particle_remaining[i] = table->frame_start[1] - table->frame_start[0];
@@ -129,7 +108,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
             state->particle_remaining[i]--;
         }
 
-        track = &((effect_tick_channels_t*)g_battle_effect_timing_channels)->affected_units;
+        track = &g_battle_effect_timing_channels->affected_units;
         units_keyframe = state->color_keyframe[0];
         if (units_keyframe < track->count - 1) {
             if (state->color_remaining[0] == 0) {
@@ -161,7 +140,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
             state->color_remaining[0]--;
         }
 
-        track = &((effect_tick_channels_t*)g_battle_effect_timing_channels)->caster;
+        track = &g_battle_effect_timing_channels->caster;
         caster_keyframe = state->color_keyframe[1];
         if (caster_keyframe < track->count - 1) {
             if (state->color_remaining[1] == 0) {
@@ -188,7 +167,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
             state->color_remaining[1]--;
         }
 
-        track = &((effect_tick_channels_t*)g_battle_effect_timing_channels)->target;
+        track = &g_battle_effect_timing_channels->target;
         target_keyframe = state->color_keyframe[2];
         if (target_keyframe < track->count - 1) {
             if (state->color_remaining[2] == 0) {
@@ -215,7 +194,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
             state->color_remaining[2]--;
         }
 
-        screen = &((effect_tick_channels_t*)g_battle_effect_timing_channels)->screen;
+        screen = &g_battle_effect_timing_channels->screen;
         screen_keyframe = state->color_keyframe[3];
         if (screen_keyframe < screen->count - 1) {
             if (state->color_remaining[3] == 0) {
@@ -255,7 +234,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
         }
 
         for (i = 0; i < 3; i++) {
-            sound = &((effect_tick_channels_t*)g_battle_effect_timing_channels)->sound[i];
+            sound = &g_battle_effect_timing_channels->sound[i];
             sound_keyframe = state->sound_keyframe[i];
             if (sound_keyframe < sound->count) {
                 if (state->sound_remaining[i] == 0) {
@@ -287,8 +266,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
             init.target.block = *(battle_effect_secondary_block_t*)&g_battle_effect_targets[target];
             battle_effect_init_secondary(10, g_battle_effect_misc_data->spawn_delay, &init);
         }
-        ((effect_tick_record_view_t*)record)->frame
-            = ((effect_tick_channels_t*)g_battle_effect_timing_channels)->duration;
+        ((effect_tick_record_view_t*)record)->frame = g_battle_effect_timing_channels->duration;
     }
     record->pc += 2;
     return 1;

@@ -65,8 +65,7 @@ void require_editor_run_numeric_thread(void) {
     descriptor = g_require_editor_numeric_texture;
     for (; i < 18; i++) {
         battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
-        battle_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i],
-            (const battle_image_location_t*)g_require_editor_numeric_geometry,
+        battle_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i], g_require_editor_numeric_geometry,
             (const battle_image_location_t*)g_require_editor_numeric_table,
             (const world_gfx_image_load_parameters_t*)descriptor);
         descriptor += 0xC;

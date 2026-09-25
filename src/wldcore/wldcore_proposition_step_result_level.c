@@ -13,17 +13,6 @@ s32 wldcore_get_completion_milestone_rank(void);
 void wldcore_menu_push_countdown_level(void);
 void wldcore_write_nine_bit_record(u32* bits, s32 record, u8* source);
 
-/* Provisional: the proposition-result menu level (type 0x11) pushed by
- * wldcore_proposition_push_result_level. Shared with that push, which seeds delay and proposition. */
-typedef struct wldcore_menu_proposition_result_level {
-    s32 render_index; /* 0x00 */
-    u8 unknown_04[0xc];
-    s32 phase; /* 0x10; 0 waiting for input, 1 fading out, 2 finished */
-    u8 unknown_14[0x14];
-    s32 delay;       /* 0x28; frames left of the result jingle */
-    s32 proposition; /* 0x2c; index into g_main_active_propositions */
-} wldcore_menu_proposition_result_level_t;
-
 /* Per-frame step of the proposition-result menu level.
  *
  * Phase 0 waits for confirm/cancel and then commits the result: it clears the
@@ -39,7 +28,7 @@ typedef struct wldcore_menu_proposition_result_level {
  * The proposition, result and share words are read as g_wldcore_job_selection
  * members: the target keeps that block's address in a register, which GCC
  * only does for an aggregate view, not for the scalar g_wldcore_job_selection.proposition_index names. */
-void wldcore_proposition_step_result_level(wldcore_menu_proposition_result_level_t* level) {
+void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* level) {
     u8 date[2];
     s32 proposition_flags;
     s32 war_funds;

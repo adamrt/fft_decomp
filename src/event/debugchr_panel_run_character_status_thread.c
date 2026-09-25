@@ -71,28 +71,20 @@ void debugchr_panel_run_character_status_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_debugchr_editor_numeric_geometry,
-                    (const battle_image_location_t*)g_debugchr_panel_origin_offsets,
-                    &g_debugchr_panel_label_layouts_mode0[i]);
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_debugchr_editor_numeric_geometry,
+                    g_debugchr_panel_origin_offsets, &g_debugchr_panel_label_layouts_mode0[i]);
             }
             if (mode == 1) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_debugchr_editor_numeric_geometry,
-                    (const battle_image_location_t*)g_debugchr_panel_origin_offsets,
-                    &g_debugchr_panel_label_layouts_mode1[i]);
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_debugchr_editor_numeric_geometry,
+                    g_debugchr_panel_origin_offsets, &g_debugchr_panel_label_layouts_mode1[i]);
             }
             if (mode == 2) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_debugchr_editor_numeric_geometry,
-                    (const battle_image_location_t*)g_debugchr_panel_origin_offsets,
-                    &g_debugchr_panel_label_layouts_mode2[i]);
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_debugchr_editor_numeric_geometry,
+                    g_debugchr_panel_origin_offsets, &g_debugchr_panel_label_layouts_mode2[i]);
             }
             if (mode == 3) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_debugchr_editor_numeric_geometry,
-                    (const battle_image_location_t*)g_debugchr_panel_origin_offsets,
-                    &g_debugchr_panel_label_layouts_mode3[i]);
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_debugchr_editor_numeric_geometry,
+                    g_debugchr_panel_origin_offsets, &g_debugchr_panel_label_layouts_mode3[i]);
             }
         }
         if (state->generic_monster != 0) {
@@ -143,8 +135,7 @@ void debugchr_panel_run_character_status_thread(void) {
         i = 0;
         cursor = (u8*)screen;
         for (; i < 5; i++) {
-            battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[19 + i],
-                (const battle_image_location_t*)g_debugchr_panel_item_icon_texture,
+            battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[19 + i], g_debugchr_panel_item_icon_texture,
                 (const battle_image_location_t*)FRAME_RECT, &g_debugchr_panel_item_icon_layouts[i]);
             if ((state->equipment[i] & 0xff) != 0xff) {
                 battle_get_item_graphic_data(&screen->sprites[19 + i], (s16)state->equipment[i]);

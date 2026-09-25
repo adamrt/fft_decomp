@@ -74,7 +74,7 @@ extern u8 g_require_editor_numeric_entries_c[];
 extern u8 g_require_editor_numeric_entries_d[];
 extern u8 g_require_editor_numeric_entries_e[];
 extern u8 g_require_editor_numeric_entries_f[];
-extern u8 g_require_editor_numeric_geometry[];
+extern battle_image_location_t g_require_editor_numeric_geometry[];
 extern battle_menu_status_panel_numeric_buffer_t g_require_editor_numeric_state[2];
 extern u8 g_require_editor_numeric_table[];
 extern u8 g_require_editor_numeric_text_a[];
@@ -140,8 +140,8 @@ extern u8 g_require_work[];
 
 /* Unnamed data, in address order. */
 extern s16 g_require_editor_team_state;
-extern u8 g_require_panel_item_icon_texture[];
-extern u8 g_require_panel_origin_offsets[];
+extern battle_image_location_t g_require_panel_item_icon_texture[];
+extern battle_image_location_t g_require_panel_origin_offsets[];
 extern battle_menu_status_panel_offset_pair_t g_require_character_status_frame_rect[];
 extern u8 g_require_character_status_draw_area_rect[];
 extern u8 g_require_panel_text_upload_rect_a[];

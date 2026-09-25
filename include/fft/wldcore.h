@@ -251,8 +251,8 @@ typedef struct wldcore_menu_message_level {
 /* Panel menu levels: number panels (0x8006f294, 0x80073ef8) and list panels
  * (0x8007dfcc, 0x80084230, 0x80071aa0). */
 typedef struct wldcore_menu_panel_level {
-    /* 0x00; 1 confirm, 0 or -1 cancel, set by the list and number-panel steps and branched on once
-     * WORLD thread 12 ends; cleared by the number-panel pushes */
+    /* 0x00; number panel: 0 running, 1 confirmed, 2 cancelled; list panels
+     * also use -1 for cancellation. Read after WORLD thread 12 ends. */
     s32 result;
     s32 variable_id; /* 0x04; script variable edited by number panels */
     u8 unknown_08[0x28];
