@@ -4,7 +4,7 @@
 
 /* View of battle_stats_t 0x16e..0x17f (action_actor_id through
  * action_target_y); the target keeps a second pointer biased to 0x16e. */
-typedef struct reflect_action_t {
+typedef struct battle_target_reflect_action {
     u8 actor_id;    /* 0x16e */
     u8 skillset_id; /* 0x16f */
     s16 ability_id; /* 0x170 */
@@ -14,10 +14,10 @@ typedef struct reflect_action_t {
     s16 target_x;         /* 0x17a */
     s16 target_elevation; /* 0x17c */
     s16 target_y;         /* 0x17e */
-} reflect_action_t;
+} battle_target_reflect_action_t;
 
 s32 battle_target_apply_reflect(battle_stats_t* unit) {
-    reflect_action_t* act;
+    battle_target_reflect_action_t* act;
     s32 x;
     s32 y;
     s32 z;
@@ -25,7 +25,7 @@ s32 battle_target_apply_reflect(battle_stats_t* unit) {
     s32 dy;
     s32 last_attack;
 
-    act = (reflect_action_t*)&unit->action_actor_id;
+    act = (battle_target_reflect_action_t*)&unit->action_actor_id;
     dx = unit->x - g_acting_unit_x;
     dy = unit->position.bits.y - g_acting_unit_y;
     if (dx == 0 && dy == 0) {

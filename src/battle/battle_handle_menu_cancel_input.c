@@ -13,15 +13,15 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct menu_cancel_ctx_t {
+typedef struct battle_menu_cancel_context {
     u8 _pad0[0x20];
     s16 count; /* 0x20 */
     u8 _pad1[0x12];
     s16* cursor; /* 0x34 */
-} menu_cancel_ctx_t;
+} battle_menu_cancel_context_t;
 
 void battle_handle_menu_cancel_input(void* menu) {
-    menu_cancel_ctx_t* ctx = (menu_cancel_ctx_t*)menu;
+    battle_menu_cancel_context_t* ctx = (battle_menu_cancel_context_t*)menu;
     s32 count;
     s32 i;
     s32 idx;

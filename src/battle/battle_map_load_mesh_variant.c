@@ -2,16 +2,16 @@
 #include "fft/main_heap.h"
 #include "fft/script_variables.h"
 
-typedef struct packed_gns_record_t {
+typedef struct battle_map_packed_gns_record {
     u8 bytes[0x14];
-} packed_gns_record_t;
+} battle_map_packed_gns_record_t;
 
 enum {
     MAP_MESH_LOAD_IDLE = 0,
     MAP_MESH_LOAD_WAITING = 0x8d,
 };
 
-extern packed_gns_record_t g_battle_map_selected_mesh_record;
+extern battle_map_packed_gns_record_t g_battle_map_selected_mesh_record;
 
 /* Target 0x800f4acc selects the last primary-mesh record, then substitutes
  * an alternate whose layout/weather/time comparison matches. It copies the
@@ -26,8 +26,8 @@ s32 battle_map_load_mesh_variant(s32 mesh_slot) {
             {
                 u8* record_data;
                 u8* resource_type;
-                packed_gns_record_t* record;
-                packed_gns_record_t* selected_record;
+                battle_map_packed_gns_record_t* record;
+                battle_map_packed_gns_record_t* selected_record;
                 /* Pin: unpinned, GCC hoists the 0x2e compare constant into
                  * $t0 instead of $t1 (register swap only, same size). */
                 register s32 primary_resource_type asm("$9");
@@ -37,12 +37,12 @@ s32 battle_map_load_mesh_variant(s32 mesh_slot) {
                 /* One byte base feeds both cursors; separate typed bases do not match. */
                 record_data = (u8*)&g_battle_map_gns_records[0];
                 resource_type = record_data + 5;
-                record = (packed_gns_record_t*)record_data;
+                record = (battle_map_packed_gns_record_t*)record_data;
                 do {
                     if (*resource_type == primary_resource_type) {
                         *selected_record = *record;
                     }
-                    resource_type += sizeof(packed_gns_record_t);
+                    resource_type += sizeof(battle_map_packed_gns_record_t);
                     record++;
                 } while (*resource_type < 0x80);
             }
@@ -72,11 +72,11 @@ s32 battle_map_load_mesh_variant(s32 mesh_slot) {
                                 << 16)
                             != 0) {
                             g_battle_map_selected_mesh_record
-                                = *(packed_gns_record_t*)((u8*)&g_battle_map_gns_records[0] + record_offset);
+                                = *(battle_map_packed_gns_record_t*)((u8*)&g_battle_map_gns_records[0] + record_offset);
                         }
                     }
-                    resource_type += sizeof(packed_gns_record_t);
-                    record_offset += sizeof(packed_gns_record_t);
+                    resource_type += sizeof(battle_map_packed_gns_record_t);
+                    record_offset += sizeof(battle_map_packed_gns_record_t);
                 } while (*resource_type < 0x80);
             }
         }

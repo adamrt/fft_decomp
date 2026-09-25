@@ -2,9 +2,9 @@
 #include "fft/data.h"
 #include "fft/map.h"
 
-struct battle_used_weapon_action_context_t;
+struct battle_action_used_weapon_context;
 
-extern void battle_action_store_used_weapon(struct battle_used_weapon_action_context_t* action);
+extern void battle_action_store_used_weapon(struct battle_action_used_weapon_context* action);
 
 /* Resolve one strike of the current ability: build the target list, run the
  * per-target formula setup and fill the strike work record.
@@ -80,7 +80,7 @@ s32 battle_action_resolve_ability_strike(s32 misc_unit_id, battle_strike_work_t*
     }
     g_current_ability.target_count = count;
     battle_action_store_ability_data(targets);
-    battle_action_store_used_weapon((struct battle_used_weapon_action_context_t*)&attacker->action_actor_id);
+    battle_action_store_used_weapon((struct battle_action_used_weapon_context*)&attacker->action_actor_id);
     for (i = 0; i < 21; i++) {
         target_id = targets[i];
         if (target_id != 0xff) {

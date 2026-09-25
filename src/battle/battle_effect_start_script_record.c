@@ -1,7 +1,7 @@
 #include "fft/effect.h"
 
-struct temp_effect_data_2_t;
-void battle_effect_reset_parent_timeline(struct temp_effect_data_2_t* data);
+struct battle_effect_parent_timeline_state;
+void battle_effect_reset_parent_timeline(struct battle_effect_parent_timeline_state* data);
 
 /* Allocate an effect state record for a script and reset its per-handler state.
  * Returns the record index, or 0 when none is available. */
@@ -32,6 +32,6 @@ s16 battle_effect_start_script_record(u8* script, s16 start_pc, s16 parent_index
     record->work_count = 0;
     record->emitter_index = -1;
     battle_effect_reset_child_timeline((battle_effect_temp_data_t*)record, 0);
-    battle_effect_reset_parent_timeline((struct temp_effect_data_2_t*)record);
+    battle_effect_reset_parent_timeline((struct battle_effect_parent_timeline_state*)record);
     return index;
 }

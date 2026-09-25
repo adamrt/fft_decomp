@@ -8,16 +8,16 @@
  * last_skillset_id (0x16f), last_ability_id (0x170) and the low byte of
  * used_item_or_equipment (0x176).
  */
-typedef struct battle_used_weapon_action_context_t {
+typedef struct battle_action_used_weapon_context {
     /* 0x0 */ u8 action_actor_id;
     /* 0x1 */ u8 last_skillset_id;
     /* 0x2 */ s16 last_ability_id;
     /* 0x4 */ u8 _pad04[4];
     /* 0x8 */ u8 used_item_id;
-} battle_used_weapon_action_context_t;
+} battle_action_used_weapon_context_t;
 
 /* Pick the weapon the current strike uses. */
-void battle_action_store_used_weapon(battle_used_weapon_action_context_t* action) {
+void battle_action_store_used_weapon(battle_action_used_weapon_context_t* action) {
     u8 weapon;
     s16 ability_id;
 

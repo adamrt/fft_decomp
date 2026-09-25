@@ -1,17 +1,17 @@
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 
-typedef struct item_graphic_data_t {
+typedef struct battle_gfx_item_graphic_data {
     u8 _pad0[0xc];
     u8 x_load_location;
     u8 y_load_location;
     u16 clut;
     s16 width;
     s16 height;
-} item_graphic_data_t;
+} battle_gfx_item_graphic_data_t;
 
 void battle_gfx_store_item_display_data(battle_gfx_render_unit_t* unit, u32 item_id) {
-    item_graphic_data_t data;
+    battle_gfx_item_graphic_data_t data;
 
     battle_get_item_graphic_data((SPRT*)&data, item_id);
     unit->found_item_display->clut = data.clut;

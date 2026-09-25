@@ -8,7 +8,7 @@
 #include "fft/script_variables.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-typedef struct event_instr_t event_instr_t;
+typedef struct battle_script_jump_instruction battle_script_jump_instruction_t;
 
 /* BATTLE scenario interpreter.
  *
@@ -27,7 +27,7 @@ typedef struct event_instr_t event_instr_t;
 /* Declared locally: other reconstructions bind these under different
  * provisional signatures, or the symbol is still unresolved. */
 s32 battle_map_set_tile_data_value();
-void battle_script_jump_event_instruction(event_instr_t* instr);
+void battle_script_jump_event_instruction(battle_script_jump_instruction_t* instr);
 void battle_script_warp_unit_display_to_paired_unit(s32 misc_id);
 s32 battle_script_run_scenario_conditions();
 
@@ -558,7 +558,7 @@ restart_script:
             g_battle_thread_call_target = (void (*)(void))battle_script_walk_to_thread;
             battle_thread_call_on_main_stack(parameters);
         } else if (opcode == EVENT_OPCODE_JUMP) {
-            battle_script_jump_event_instruction((event_instr_t*)parameters);
+            battle_script_jump_event_instruction((battle_script_jump_instruction_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_WALK) {
             battle_script_waitwalk_event_instruction(first_halfword);
         } else if (opcode == EVENT_OPCODE_WALK_TO_ANIM) {

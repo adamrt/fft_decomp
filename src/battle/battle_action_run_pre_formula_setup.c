@@ -14,8 +14,8 @@
  * which changes this function's code. */
 extern battle_current_ability_t g_current_ability_view;
 
-struct battle_used_weapon_action_context_t;
-extern void battle_action_store_used_weapon(struct battle_used_weapon_action_context_t* action);
+struct battle_action_used_weapon_context;
+extern void battle_action_store_used_weapon(struct battle_action_used_weapon_context* action);
 
 /* Pre-formula setup: loads the current ability, weapon and item data for one
  * attacker/target pair and runs the formula handler.
@@ -47,7 +47,7 @@ s32 battle_action_run_pre_formula_setup(const u8* source, u8 target_id) {
     g_battle_action_attacker_data = &g_current_action_data;
     g_battle_action_attacker = &g_battle_unit_stats[g_current_ability_view.attacker_id];
     if (g_battle_action_context != BATTLE_ACTION_CONTEXT_PRIMARY && battle_action_perform_reaction_ability() != 0) {
-        battle_action_store_used_weapon((struct battle_used_weapon_action_context_t*)&action);
+        battle_action_store_used_weapon((struct battle_action_used_weapon_context*)&action);
         return 0;
     }
     if (g_current_ability.knockback_flags & 0x80) {

@@ -1,6 +1,6 @@
 #include "psx/types.h"
 
-typedef struct temp_effect_data_2_t {
+typedef struct battle_effect_parent_timeline_state {
     u8 _pad00[0x28];
     /* Effect state layout, pattern 1. */
     s16 frame;           /* 0x28 */
@@ -9,9 +9,9 @@ typedef struct temp_effect_data_2_t {
     s16 values_2e[26];
     s16 values_62[26];
     s16 values_96[26];
-} temp_effect_data_2_t;
+} battle_effect_parent_timeline_state_t;
 
-void battle_effect_reset_parent_timeline(temp_effect_data_2_t* data) {
+void battle_effect_reset_parent_timeline(battle_effect_parent_timeline_state_t* data) {
     s32 index;
 
     index = 0;
