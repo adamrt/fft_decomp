@@ -335,7 +335,7 @@ void world_run_battle_help_menu(void) {
             g_world_sound_effect_id_to_play = MAIN_SFX_WINDOW_OPEN;
             world_thread_start(2, world_text_character_handling_thread);
             world_thread_set_parameters(2, 0x3B, (*(s16*)g_world_help_menu_cursor_tile) + 0x5800, 0);
-            ((world_thread_t*)g_world_threads)[2].task_words[3] = -0x20;
+            g_world_threads[2].task_words[3] = -0x20;
             world_thread_wait_until_inactive(2);
             *g_world_help_controller_state_ptr = 0;
             world_thread_wait_frames(1);
