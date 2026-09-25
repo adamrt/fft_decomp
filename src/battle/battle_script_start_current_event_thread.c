@@ -4,7 +4,6 @@
 #include "fft/script_variables.h"
 #include "psx/types.h"
 
-extern void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
 void battle_script_start_current_event_thread(void) {
     battle_unit_reset_animation_states();
     g_battle_script_attack_entry_mode = 1;

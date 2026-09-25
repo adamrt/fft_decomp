@@ -31,7 +31,7 @@ void bunit_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_numeric_entry_t* env_a;
     battle_menu_status_panel_editor_state_t* state;
     void* portrait_arg;
-    u8* transition;
+    const RECT* transition;
     u8* image;
     u8* render_b;
     u8* render_c;
@@ -89,7 +89,7 @@ void bunit_render_unit_status_panel_thread(void) {
         env_a = g_bunit_panel_selected_numeric_entries;
         state = &g_bunit_panel_selected_billboard;
         scroll = g_bunit_panel_selected_unit_data;
-        transition = g_bunit_panel_selected_portrait_rect;
+        transition = &g_bunit_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         image = g_bunit_panel_selected_portrait_image;
@@ -102,7 +102,7 @@ void bunit_render_unit_status_panel_thread(void) {
         env_a = g_bunit_panel_comparison_numeric_entries;
         state = &g_bunit_panel_comparison_billboard;
         scroll = g_bunit_panel_comparison_unit_data;
-        transition = g_bunit_panel_comparison_portrait_rect;
+        transition = &g_bunit_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         image = g_bunit_panel_comparison_portrait_image;
@@ -354,8 +354,8 @@ void bunit_render_unit_status_panel_thread(void) {
                 anim_state = 2;
             }
         }
-        bunit_gfx_build_portrait_transition_primitives((const RECT*)transition, &anim_state, &cur_unit, &prev_unit,
-            image, (POLY_FT4*)&editor->portrait[0], (s32)portrait_arg);
+        bunit_gfx_build_portrait_transition_primitives(
+            transition, &anim_state, &cur_unit, &prev_unit, image, (POLY_FT4*)&editor->portrait[0], (s32)portrait_arg);
         {
             CVECTOR* color;
             u16* py;

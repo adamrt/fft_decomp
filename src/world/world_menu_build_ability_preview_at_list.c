@@ -1,4 +1,5 @@
 #include "fft/battle.h"
+#include "fft/main_runtime.h"
 #include "fft/menu_types.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -13,11 +14,6 @@
  * world_menu_text_layout_t in include/fft/world.h (size assert 0x28 -> 0x2c).
  */
 #define LAYOUT(entry) ((world_menu_scroll_text_layout_t*)(entry)->text_binding)
-
-extern u8* g_event_overlay_load_address;
-/* Declared as src/battle/battle_action_preview_at_list.c defines it; this file
- * only takes its address, through the cast at the thread-target assignment. */
-extern s32 battle_action_preview_at_list(battle_stats_t* unit, s32 action, s32 at_list);
 
 /*
  * Build the AT (turn order) list previewing the ability the player is about to

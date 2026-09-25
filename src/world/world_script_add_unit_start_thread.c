@@ -1,11 +1,10 @@
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 #include "fft/event.h"
+#include "fft/main_runtime.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
-
-extern s32 g_main_debug_display_enabled;
 
 /*
  * Event thread started by the AddUnitStart instruction: walks the following

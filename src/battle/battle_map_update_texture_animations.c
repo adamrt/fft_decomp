@@ -5,10 +5,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-extern s32 battle_map_start_texture_animation(
-    s32 frame_duration, s32 polygon_group, s32 first_polygon, s32 last_polygon);
-extern u16 g_battle_map_palette_animation_frames[][16];
-
 /*
  * Advance the 32 map texture animations once per frame.
  *

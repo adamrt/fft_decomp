@@ -7,8 +7,6 @@
 #include "fft/thread.h"
 #include "fft/world.h"
 
-extern s32 get_total_equipment_quantity(s32 item_id, s32 include_equipped);
-
 /*
  * WORLD twin of the BATTLE system-function dispatcher battle_menu_dispatch_system_function; see
  * that source for the command map. Callers reach it through

@@ -1,7 +1,6 @@
+#include "fft/main_runtime.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern u8* g_event_overlay_load_address;
 
 /* WORLD twin of battle_menu_free_memory. */
 void world_menu_free_memory(void* buffer_pointer) {

@@ -3,7 +3,6 @@
 #include "fft/world.h"
 #include "psx/pad.h"
 
-extern s32 world_menu_refresh_learn_skillset_empty(s32 index);
 /* Runs the learn menu's job list for the selected formation unit.
  *
  * The first call builds the unlocked-job list and installs the job

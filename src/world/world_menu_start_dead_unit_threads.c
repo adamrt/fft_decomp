@@ -1,12 +1,11 @@
 #include "fft/data.h"
+#include "fft/main_runtime.h"
 #include "fft/main_unit.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-extern s32 get_total_equipment_quantity(s32 item_id, s32 include_equipped);
 
 /* Installs the dead-unit result panel as the active menu descriptor, rebuilds
  * its selectable list from the context bitmap, then runs the panel's worker

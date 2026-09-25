@@ -6,21 +6,7 @@
 #include "psx/gpu.h"
 #include "psx/gte.h"
 
-extern s32 battle_effect_calculate_launch_velocity(void);
 extern s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress);
-extern s32 battle_effect_end_secondary_on_current_unit(void);
-extern void battle_unit_call_bow_hardcoding_by_misc_id(u16 attacker_id, u16 target_id);
-
-extern s32 g_battle_effect_arrow_arc_distance;
-extern u16 g_battle_effect_arrow_arc_yaw;
-extern s16 g_battle_effect_arrow_arc_caster_relative_yaw;
-extern s16 g_battle_effect_arrow_arc_launch_angle;
-extern s16 g_battle_effect_projectile_step_count;
-extern s32 g_battle_effect_arc_trajectory_height;
-extern s32 D_801B8B98;
-extern s32 g_battle_effect_arrow_arc_distance_step;
-extern s32 g_battle_effect_arrow_arc_height;
-extern s32 g_battle_effect_arrow_arc_length;
 
 /*
  * Secondary-effect handler for bow and crossbow arrows.

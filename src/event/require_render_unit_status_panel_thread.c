@@ -38,7 +38,7 @@ void require_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_numeric_entry_t* numeric_entries;
     battle_menu_status_panel_gauges_t* state;
     void* portrait_arg;
-    u8* portrait_rect;
+    const RECT* portrait_rect;
     u8* portrait_image;
     u8* small_text_image;
     u8* name_image;
@@ -90,7 +90,7 @@ void require_render_unit_status_panel_thread(void) {
         numeric_entries = g_require_panel_selected_numeric_entries;
         state = &g_require_panel_selected_billboard;
         unit_data = (s16*)g_require_active_unit_data;
-        portrait_rect = g_require_panel_selected_portrait_rect;
+        portrait_rect = &g_require_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_image = g_require_panel_selected_portrait_image;
@@ -103,7 +103,7 @@ void require_render_unit_status_panel_thread(void) {
         numeric_entries = g_require_panel_comparison_numeric_entries;
         state = &g_require_panel_comparison_billboard;
         unit_data = g_require_panel_comparison_unit_data;
-        portrait_rect = g_require_panel_comparison_portrait_rect;
+        portrait_rect = &g_require_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_image = g_require_panel_comparison_portrait_image;
@@ -350,7 +350,7 @@ void require_render_unit_status_panel_thread(void) {
                 anim_state = 2;
             }
         }
-        require_gfx_build_portrait_transition_primitives((const RECT*)portrait_rect, &anim_state, &cur_unit, &prev_unit,
+        require_gfx_build_portrait_transition_primitives(portrait_rect, &anim_state, &cur_unit, &prev_unit,
             (u8*)portrait_image, (POLY_FT4*)&editor->portrait[0], (s32)portrait_arg);
         {
             CVECTOR* color;

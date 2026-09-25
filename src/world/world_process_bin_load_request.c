@@ -1,8 +1,6 @@
 #include "fft/main_runtime.h"
 #include "fft/world.h"
 
-extern u8* g_event_overlay_load_address;
-
 /* Per-frame driver for world_bin_load_file: start the disc read for the
  * pending request on the main thread, then poll until it finishes and clear
  * the request. */

@@ -3,7 +3,6 @@
 #include "fft/main_runtime.h"
 #include "psx/types.h"
 
-extern void battle_menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id);
 void battle_state_handle_target_select_confirm_state(void) {
     battle_unit_misc_data_t* caster;
     battle_unit_misc_data_t* target;

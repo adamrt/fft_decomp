@@ -7,7 +7,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-extern s32 battle_script_is_deployment_running(u32* ot, u32 buttons);
 /* Fade in the deployment banner, run map initialisation until it reaches step
  * 0xd, then fade the screen back in.
  *

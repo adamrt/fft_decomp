@@ -1,3 +1,4 @@
+#include "fft/card.h"
 #include "fft/data.h"
 #include "fft/main_runtime.h"
 #include "fft/main_sound.h"
@@ -21,8 +22,6 @@ typedef struct world_card_screen_packets {
     u8 unknown_c9f8[0x10];                /* 0xc9f8: gap before the published work area */
     u8 directory_buffer[0x258];           /* 0xca08: published through g_world_card_directory_buffer */
 } world_card_screen_packets_t;
-
-extern s8 g_card_save_occupied_slot_count;
 
 /*
  * Run the WORLD memory-card screen until its fade-out completes.

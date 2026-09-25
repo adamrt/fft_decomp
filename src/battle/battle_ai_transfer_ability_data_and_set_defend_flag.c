@@ -2,10 +2,9 @@
 #include "fft/data.h"
 #include "psx/types.h"
 
-/* A distinct symbol for this AI-block field: naming it through
- * g_battle_ai_data_base makes GCC share one base register where the target keeps
- * a lui per site. */
-extern battle_stats_t* g_battle_ai_temp_unit_data; /* g_battle_ai_data_base.acting_unit */
+/* g_battle_ai_temp_unit_data names g_battle_ai_data_base.acting_unit separately:
+ * a member access makes GCC share one base register where the target keeps a
+ * lui per site. */
 
 /* Reset the selected action to the candidate coordinates for the current
  * movement scenario; the Defend skillset marks a Defend when the unit has it. */

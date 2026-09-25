@@ -13,17 +13,9 @@ typedef struct battle_found_item {
 
 extern battle_found_item_t g_battle_move_find_display_item;
 
-extern s32 battle_menu_get_dead_unit_selection(s32 battle_id);
 extern void battle_gfx_store_item_display_data(battle_gfx_render_unit_t*, u32);
-extern void battle_unit_store_animation_facing_movement_data(s32 animation, s32 facing, battle_unit_misc_data_t* unit);
 extern s32 battle_unit_learn_from_crystal(battle_stats_t* stats, s32 outcome);
 extern s32 battle_unit_build_gained_exp_jp_level_job_level(battle_stats_t* unit, u8* out);
-extern void* battle_map_determine_rare_common_item(battle_stats_t* unit);
-extern s32 battle_action_apply_tile_trap(battle_stats_t* unit);
-extern void battle_unit_set_target_animation_from_attack_type(
-    battle_unit_misc_data_t* attacker, battle_unit_misc_data_t* target);
-extern void battle_effect_set_secondary_venom_trap(battle_unit_misc_data_t* unit);
-extern s32 battle_gfx_prepare_post_action_display_by_misc_id(u16 misc_id);
 extern s32 battle_map_refresh_deep_dungeon(void);
 
 /* Starts the next post-action step selected by g_battle_move_find_result.

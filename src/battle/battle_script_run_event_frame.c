@@ -11,8 +11,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s32 g_battle_event_frame_counter;
-
 extern s32 jobstts_entrypoint(s32 unit);
 extern s32 equip_entrypoint(s32 unit, void* otag);
 extern s32 bunit_entrypoint(void);

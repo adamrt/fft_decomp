@@ -4,7 +4,6 @@
 #include "fft/main_runtime.h"
 #include "fft/world.h"
 
-extern u8* g_event_overlay_load_address;
 /* The packed-word view of the options record; g_main_game_options names the
  * same address under its union type. The scalar name is retained because GCC
  * otherwise coalesces the saved-word load with the following bitfield writes

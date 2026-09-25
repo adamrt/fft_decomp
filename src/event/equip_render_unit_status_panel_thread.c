@@ -50,7 +50,7 @@ void equip_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_numeric_entry_t* numeric_entries; /* sp70 */
     battle_menu_status_panel_editor_state_t* state;            /* sp78 */
     void* portrait_arg;                                        /* sp80 */
-    u8* portrait_rect;                                         /* sp88 */
+    const RECT* portrait_rect;                                 /* sp88 */
     u8* portrait_image;                                        /* sp90 */
     u8* small_text_image;                                      /* sp98 */
     u8* name_image;                                            /* spA0 */
@@ -115,7 +115,7 @@ void equip_render_unit_status_panel_thread(void) {
          * this function reads it as the first of two 0x24-spaced editor states. */
         state = (battle_menu_status_panel_editor_state_t*)&g_equip_selected_unit_stat_summary;
         unit_data = (s16*)g_equip_panel_selected_unit_data;
-        portrait_rect = g_equip_panel_selected_portrait_rect;
+        portrait_rect = &g_equip_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_image = g_equip_panel_selected_portrait_image;
@@ -128,7 +128,7 @@ void equip_render_unit_status_panel_thread(void) {
         numeric_entries = g_equip_panel_comparison_numeric_entries;
         state = &g_equip_panel_comparison_billboard;
         unit_data = g_equip_panel_comparison_unit_data;
-        portrait_rect = g_equip_panel_comparison_portrait_rect;
+        portrait_rect = &g_equip_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_image = g_equip_panel_comparison_portrait_image;
@@ -412,7 +412,7 @@ void equip_render_unit_status_panel_thread(void) {
                 anim_state = 2;
             }
         }
-        equip_gfx_build_portrait_transition_primitives((const RECT*)portrait_rect, &anim_state, &cur_unit, &prev_unit,
+        equip_gfx_build_portrait_transition_primitives(portrait_rect, &anim_state, &cur_unit, &prev_unit,
             (u8*)portrait_image, (POLY_FT4*)&editor->portrait[0], (s32)portrait_arg);
         {
             CVECTOR* color;

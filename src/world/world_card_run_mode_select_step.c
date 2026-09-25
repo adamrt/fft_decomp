@@ -8,7 +8,6 @@
  * with `lb`/`lbu`. This function reads the halfword at that address instead
  * (`lh`), so the read is spelled through an s16 lvalue rather than the
  * declaration. */
-extern s8 g_card_save_occupied_slot_count;
 
 /*
  * Memory card menu state 1: choose between loading and saving.

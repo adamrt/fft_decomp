@@ -52,7 +52,7 @@ void debugchr_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_numeric_entry_t* number_entries; /* sp70 */
     battle_menu_status_panel_editor_state_t* state;           /* sp78 */
     void* portrait_request;                                   /* sp80 */
-    u8* transition;                                           /* sp88 */
+    const RECT* transition;                                   /* sp88 */
     u8* portrait_image;                                       /* sp90 */
     u8* value_pixels;                                         /* sp98 */
     u8* name_pixels;                                          /* spA0 */
@@ -115,7 +115,7 @@ void debugchr_render_unit_status_panel_thread(void) {
         number_entries = g_debugchr_panel_selected_numeric_entries;
         state = &g_debugchr_panel_selected_billboard;
         unit_info = g_debugchr_panel_selected_unit_data;
-        transition = g_debugchr_panel_selected_portrait_rect;
+        transition = &g_debugchr_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_image = g_debugchr_panel_selected_portrait_image;
@@ -128,7 +128,7 @@ void debugchr_render_unit_status_panel_thread(void) {
         number_entries = g_debugchr_panel_comparison_numeric_entries;
         state = &g_debugchr_panel_comparison_billboard;
         unit_info = g_debugchr_panel_comparison_unit_data;
-        transition = g_debugchr_panel_comparison_portrait_rect;
+        transition = &g_debugchr_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_image = g_debugchr_panel_comparison_portrait_image;
@@ -419,7 +419,7 @@ void debugchr_render_unit_status_panel_thread(void) {
                 anim_state = 2;
             }
         }
-        debugchr_gfx_build_portrait_transition_primitives((const RECT*)transition, &anim_state, &cur_unit, &prev_unit,
+        debugchr_gfx_build_portrait_transition_primitives(transition, &anim_state, &cur_unit, &prev_unit,
             (u8*)portrait_image, (POLY_FT4*)&editor->portrait[0], (s32)portrait_request);
         {
             CVECTOR* color;

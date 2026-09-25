@@ -37,9 +37,9 @@ void equip_editor_run_numeric_thread(void) {
     battle_menu_status_panel_numeric_buffer_t* buffers;
     u8* text_pixels;
     u8* entries;
-    u8* upload_a;
-    u8* upload_b;
-    u8* upload_c;
+    RECT* upload_a;
+    RECT* upload_b;
+    RECT* upload_c;
     const world_gfx_image_load_parameters_t* descriptor;
     s32 i;
     s32 frame;
@@ -54,17 +54,17 @@ void equip_editor_run_numeric_thread(void) {
         buffer = g_equip_editor_numeric_state_a;
         buffers = buffer;
         text_pixels = g_equip_editor_numeric_text_a;
-        upload_a = g_equip_editor_numeric_entries_a;
-        upload_b = g_equip_editor_numeric_entries_b;
-        upload_c = g_equip_editor_numeric_entries_c;
+        upload_a = &g_equip_editor_numeric_entries_a;
+        upload_b = &g_equip_editor_numeric_entries_b;
+        upload_c = &g_equip_editor_numeric_entries_c;
         entries = g_equip_editor_numeric_descriptor_a;
     } else {
         buffer = g_equip_editor_numeric_state_b;
         buffers = buffer;
         text_pixels = g_equip_editor_numeric_text_b;
-        upload_a = g_equip_editor_numeric_entries_d;
-        upload_b = g_equip_editor_numeric_entries_e;
-        upload_c = g_equip_editor_numeric_entries_f;
+        upload_a = &g_equip_editor_numeric_entries_d;
+        upload_b = &g_equip_editor_numeric_entries_e;
+        upload_c = &g_equip_editor_numeric_entries_f;
         entries = g_equip_editor_numeric_descriptor_b;
     }
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], 0);
@@ -122,9 +122,9 @@ void equip_editor_run_numeric_thread(void) {
                     (struct menu_number_entry*)(entries + 0x54),
                     (struct menu_number_position*)&g_menu_text_state.origin_x, 8);
             }
-            LoadImage((RECT*)upload_a, (u32*)text_pixels);
-            LoadImage((RECT*)upload_b, (u32*)(text_pixels + 0x168));
-            LoadImage((RECT*)upload_c, (u32*)(text_pixels + 0x468));
+            LoadImage(upload_a, (u32*)text_pixels);
+            LoadImage(upload_b, (u32*)(text_pixels + 0x168));
+            LoadImage(upload_c, (u32*)(text_pixels + 0x468));
         }
         field_y = g_main_gfx_screen_polarity * 0xF0;
         use_offset = field_y != 0xF0;

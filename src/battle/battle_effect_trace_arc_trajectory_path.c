@@ -4,7 +4,6 @@
 #include "psx/gte.h"
 #include "psx/types.h"
 
-extern s32 battle_effect_calculate_launch_velocity(void);
 /*
  * Step a lobbed projectile along a ballistic arc. The launch pitch comes from
  * ratan2(height, ONE) and is published in both the arc descriptor and

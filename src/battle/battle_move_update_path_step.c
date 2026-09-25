@@ -3,17 +3,8 @@
 #include "fft/battle_move.h"
 #include "psx/types.h"
 
-extern void battle_move_start_fly_step(battle_unit_misc_data_t* unit, s32 current_tile, s32 destination_tile);
-extern void battle_move_set_unit_path_flag(battle_unit_misc_data_t* unit);
-extern void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_misc_data_t* unit);
-extern void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_misc_data_t* unit);
-extern void battle_move_update_float_step_to_destination_tile_center(battle_unit_misc_data_t* unit);
-extern void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_misc_data_t* unit);
-extern void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_misc_data_t* unit);
 extern void battle_unit_dismount_rider_and_update_display(battle_unit_misc_data_t* unit);
 extern void battle_unit_init_coordinates(battle_unit_misc_data_t* unit);
-extern void battle_unit_mount_onto_pending_mount(battle_unit_misc_data_t* unit);
-extern void battle_effect_call_build_secondary_init(battle_unit_misc_data_t* unit);
 
 /*
  * Advance a walking unit by one frame: the elaborate sibling of

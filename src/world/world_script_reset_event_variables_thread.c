@@ -1,10 +1,10 @@
 #include "fft/main_runtime.h"
 #include "fft/script_variables.h"
 #include "fft/thread.h"
+#include "fft/wldcore.h"
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern s32 g_wldcore_next_map_id[];
 /* Advance the system flags, reset the script variables and stop this thread. */
 void world_script_reset_event_variables_thread(void) {
     g_main_system_flags += 3;

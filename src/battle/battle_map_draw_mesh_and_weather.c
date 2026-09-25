@@ -34,34 +34,7 @@ extern battle_weather_splash_rects_t g_battle_map_weather_splash_uv_rects;
 
 extern battle_map_mesh_part_view_t g_battle_map_mesh_parts_view[9];
 extern void* g_current_effect_work;
-extern s32 g_battle_map_loaded_id;
-extern MATRIX g_battle_map_weather_matrix;
-extern SVECTOR g_battle_map_weather_rotation;
-extern VECTOR g_battle_map_weather_translation;
-extern VECTOR g_battle_map_weather_scale;
-extern s32 g_battle_map_weather_sprite_scale;
-extern SVECTOR g_battle_map_command_0x96_rotation;
-extern map_tile_t* g_battle_map_tile_data_ptr;
-extern battle_weather_particle_t g_battle_map_weather_particles[64];
-extern battle_weather_particle_t g_battle_map_rain_splash_particles[32];
-extern u8 g_battle_map_weather_fall_speed;
-extern u8 g_battle_map_weather_primary_speed;
-extern u8 g_battle_map_rain_secondary_fall_speed;
-extern u8 g_battle_map_tile_width;
-extern u8 g_battle_map_tile_depth;
-extern s32 g_battle_map_lowest_surface_y;
-extern battle_render_buffer_t* g_battle_map_ambient_restored_buffer;
-extern s32 g_battle_map_textured_triangle_count;
-extern s32 g_battle_map_textured_quad_count;
-extern u8 g_battle_map_ambient_polygon_color[3];
-extern u16 g_battle_target_color_tile_x;
-extern u16 g_battle_target_color_tile_y;
-extern s16 g_battle_target_tile_mark_modes[3];
-extern battle_render_buffer_t* g_battle_target_tile_color_buffer;
 
-extern u8* battle_map_light_state_command(s32 command, u8* data);
-extern void battle_map_update_texture_animations(void);
-extern void battle_map_update_mesh_part_animations(void);
 extern void MulMatrix0(MATRIX* m0, void* m1, MATRIX* m2);
 extern void SetLightMatrix(MATRIX* m);
 extern void PushMatrix(void);
@@ -69,10 +42,7 @@ extern void PopMatrix(void);
 extern void MulMatrix2(MATRIX* m0, MATRIX* m1);
 extern void TransMatrix(void* m, void* v);
 extern void ScaleMatrix(void* m, void* v);
-extern void battle_map_queue_textured_triangles(u32* otag, void* prims, s32 depth, s32* count);
-extern void battle_map_queue_textured_quads(u32* otag, void* prims, s32 depth, s32* count);
-extern void battle_map_queue_untextured_triangles(u32* otag, void* prims, s32 depth, s32* count);
-extern void battle_map_queue_untextured_quads(u32* otag, void* prims, s32 depth, s32* count);
+
 /* The -0x20 colour deltas are passed as sign-extended words (0xffffffe0 in
  * the argument registers and stack slots); the u16 prototype would
  * zero-extend them, so this caller uses an all-s32 view.

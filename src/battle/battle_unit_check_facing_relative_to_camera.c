@@ -1,7 +1,6 @@
 #include "fft/battle.h"
 #include "psx/types.h"
 
-extern s32 battle_unit_get_facing_nibble_by_misc_id(u32 misc_id);
 /* Battle twin of world_unit_check_facing_relative_to_camera: nonzero when the
  * unit's facing, relative to the camera yaw quadrant, is one of the six
  * "away from camera" directions 7..12. */

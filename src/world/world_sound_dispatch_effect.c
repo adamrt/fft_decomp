@@ -2,7 +2,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern u8 g_world_menu_sound_effect_id; /* menu sound effect held for this frame */
 /* Per-frame WORLD sound effect dispatch: stops the previous looping sound
  * when a stop id (0x73/0x2d) is queued, remembers ids 2/3 as the held loop,
  * and plays whichever id remains. */

@@ -3,7 +3,6 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
-extern void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
 /* Fades the screen colour modulation from a start RGB to an end RGB over a duration.
  *
  * Twin of world_script_color_screen_thread. Parameters: mode byte, start RGB, end RGB,

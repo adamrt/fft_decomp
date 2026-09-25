@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern s32* g_wldcore_scratch_buffer;
-
 /* Sibling of world_formation_update_tutorial_categories_request driven by g_world_card_menu_request_state. */
 void world_card_update_menu_request(void) {
     s16 state = g_world_card_menu_request_state;
