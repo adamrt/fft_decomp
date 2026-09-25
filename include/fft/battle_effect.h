@@ -5,6 +5,15 @@
 #include "fft/unit_slots.h"
 #include "psx/types.h"
 
+/* Effect file preamble and offsets to its three following sections. */
+typedef struct battle_effect_resource {
+    u8 unknown_00[0xc];
+    s32 words[6];
+} battle_effect_resource_t;
+
+extern battle_effect_resource_t* g_battle_effect_model_data_ptrs[];
+s32 battle_effect_init_resource_sections(battle_effect_resource_t* resource);
+
 /* Twelve-byte on-hit effect vector at on_hit_effects_data (0x801b8a40), with a
  * saved copy at on_hit_effects_data_second_section (0x801b8a50). The
  * secondary-effect handlers store (0, 0x1000, 0) before stepping the effect

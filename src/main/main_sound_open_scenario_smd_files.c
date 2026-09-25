@@ -7,11 +7,11 @@ int main_sound_open_scenario_smd_files(int scenario) {
      * schedules the scale away from where the target computes it. */
     int file_offset = scenario * 8;
     int slot = 1;
-    void** loaded_smd_base = &g_main_sound_music.slots.smd[1];
+    suzuki_smd_header_t** loaded_smd_base = &g_main_sound_music.slots.smd[1];
     /* Pinned: unpinned, GCC gives the la to the walking pointer and copies
      * it to the base ($s1/$s4 swapped); index forms bias the pointer by 4. */
-    register void** loaded_smd __asm__("$17") = loaded_smd_base;
-    void* buffer;
+    register suzuki_smd_header_t** loaded_smd __asm__("$17") = loaded_smd_base;
+    suzuki_smd_header_t* buffer;
 
     do {
         checked_slots++;

@@ -10,8 +10,6 @@ extern s32 battle_effect_calculate_launch_velocity(void);
 extern s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress);
 extern s32 battle_effect_end_secondary_on_current_unit(void);
 extern void battle_unit_call_bow_hardcoding_by_misc_id(u16 attacker_id, u16 target_id);
-extern void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, VECTOR* position,
-    battle_effect_rotation_vector_t* angles, VECTOR* scale, s32 parameter);
 
 extern s32 g_battle_effect_arrow_arc_distance;
 extern u16 g_battle_effect_arrow_arc_yaw;

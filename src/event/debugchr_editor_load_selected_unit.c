@@ -21,7 +21,7 @@ void debugchr_editor_load_selected_unit(void) {
     s16 list_value;
 
     unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_id);
-    editor = g_debugchr_editor_unit_fields;
+    editor = g_debugchr_editor_unit_fields.halfwords;
     if (unit != 0) {
         debugchr_panel_copy_unit_data_to_billboard(unit, (u8*)&g_debugchr_panel_comparison_billboard);
     }

@@ -23,7 +23,7 @@ void require_load_party_unit_into_editor(s32 unused, s32 party_index) {
     u16 maximum_mp;
 
     main_unit_init_job_data(&g_require_editor_party_unit_stats, party_index, 0);
-    editor = g_require_editor_unit_fields;
+    editor = g_require_editor_unit_fields.halfwords;
     unit = &g_require_editor_party_unit_stats;
 
     /* The target stores this halfword standalone; the buffer is the u8 view. */

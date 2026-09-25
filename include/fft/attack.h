@@ -174,8 +174,8 @@ extern s16 g_attack_editor_brave;
 extern s16 g_attack_editor_faith;
 extern s16 g_attack_editor_zodiac;
 extern s16 g_attack_editor_selected_unit_id;
-/* battle_menu_status_panel_slot_state_t record at 0x801ca0e8 (monster-skillset and two-hands flags at +0x0e/+0x10). */
-extern u8 g_attack_unit_editor_state[];
+/* Status editor at 0x801ca0e8 (monster-skillset and two-hands flags at +0x0e/+0x10). */
+extern battle_menu_status_panel_slot_storage_t g_attack_unit_editor_state;
 extern u8 g_attack_editor_third_ability_bytes[];
 extern u8 g_attack_editor_fourth_ability_bytes[];
 extern battle_image_location_t g_attack_panel_item_icon_texture[];

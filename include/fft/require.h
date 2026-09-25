@@ -83,7 +83,7 @@ extern u8 g_require_editor_numeric_texture[];
 extern u8 g_require_editor_second_ability_bytes[];
 extern s16 g_require_editor_selected_unit_id;
 extern u8 g_require_editor_third_ability_bytes[];
-extern s16 g_require_editor_unit_fields[];
+extern battle_menu_status_panel_slot_storage_t g_require_editor_unit_fields;
 extern s16 g_require_editor_unit_type;
 extern s16 g_require_editor_zodiac;
 extern const u16 g_require_gfx_draw_area_scale_percent[12];

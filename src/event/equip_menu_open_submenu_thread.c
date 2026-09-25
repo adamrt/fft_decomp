@@ -4,32 +4,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct equip_thread_task {
-    /* 0x00 */ void (*func)(void);
-    /* 0x04 */ u16 unknown_04;
-    /* 0x06 */ u16 text_thread_id; /* world_menu_text_binding_t.text_thread_id */
-} equip_thread_task_t;
-
-typedef struct equip_event_thread {
-    /* 0x00 */ u8 unknown_00[0x1C];
-    /* 0x1C */ u16 text_id; /* menu struct text entry */
-    /* 0x1E */ u8 unknown_1e[0xE];
-    /* 0x2C */ u16 header_id; /* menu struct header */
-    /* 0x2E */ u8 unknown_2e[2];
-    /* 0x30 */ equip_thread_task_t* task;
-} equip_event_thread_t;
-
 void equip_menu_open_submenu_thread(void) {
-    equip_event_thread_t* thread;
-    equip_thread_task_t* task;
+    world_menu_text_entry_wait_param_t* thread;
+    world_menu_text_entry_wait_task_t* task;
     u32* input;
     s32 unknown_1c;
     s32 unknown_2c;
     u16 child_id;
     u16 task_arg;
 
-    thread = (equip_event_thread_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
-    thread->task->func();
+    thread = (world_menu_text_entry_wait_param_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
+    thread->task->setup();
 
     input = battle_script_get_controller_input_pointer(0);
     unknown_1c = thread->text_id;
@@ -37,7 +22,7 @@ void equip_menu_open_submenu_thread(void) {
     unknown_2c = thread->header_id;
     g_equip_input_controller = input;
     child_id = task->text_thread_id;
-    task_arg = task->unknown_04;
+    task_arg = task->text_parameter;
     *input = PSX_PAD_CIRCLE;
     battle_menu_handle_action(thread, 0);
 

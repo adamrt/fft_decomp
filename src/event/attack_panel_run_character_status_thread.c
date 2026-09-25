@@ -37,7 +37,7 @@ void attack_panel_run_character_status_thread(void) {
     g_attack_input_controller = battle_script_get_controller_input_pointer(0);
     screen = g_attack_panel_frames_a;
     base = g_attack_panel_frames_a;
-    state = (battle_menu_status_panel_slot_state_t*)g_attack_unit_editor_state;
+    state = &g_attack_unit_editor_state.state;
     rect = FRAME_RECT;
     battle_menu_init_numeric_display_frame_primitives((RECT*)rect, &screen->numeric_frame);
     attack_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);

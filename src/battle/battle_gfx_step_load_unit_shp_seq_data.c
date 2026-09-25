@@ -3,19 +3,6 @@
 #include "fft/main_heap.h"
 #include "fft/main_runtime.h"
 
-/* CD extent of one file: start sector and byte size. */
-typedef struct battle_file_extent {
-    s32 sector;
-    s32 size;
-} battle_file_extent_t;
-
-extern battle_file_extent_t g_battle_gfx_sprite_seq_files[]; /* sprite type SEQ */
-extern battle_file_extent_t g_battle_gfx_sprite_shp_files[]; /* sprite type SHP */
-extern battle_file_extent_t g_battle_gfx_weapon_seq_files[]; /* WEP SEQ */
-extern battle_file_extent_t g_battle_gfx_weapon_shp_files[]; /* WEP SHP */
-extern battle_file_extent_t g_battle_gfx_effect_seq_files[]; /* EFF SEQ */
-extern battle_file_extent_t g_battle_gfx_effect_shp_files[]; /* EFF SHP */
-
 void battle_gfx_copy_shp_data_to_ram();
 void battle_gfx_resolve_packed_offset_table();
 

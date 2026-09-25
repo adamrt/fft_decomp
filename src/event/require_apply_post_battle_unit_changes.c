@@ -184,8 +184,7 @@ void require_apply_post_battle_unit_changes(void) {
                         g_require_menu_selection_result = 0xff;
                         battle_thread_start(7, require_menu_run_simple_selection_thread);
                         battle_thread_set_parameters(7, (s32)(menu_fields - 4), 0, 0);
-                        if (((battle_menu_status_panel_slot_state_t*)g_require_editor_unit_fields)->generic_monster
-                            != 0) {
+                        if (g_require_editor_unit_fields.state.generic_monster != 0) {
                             battle_thread_start(5, battle_menu_run_icon_selection_loop);
                             battle_thread_set_parameters(5, (s32)(menu_fields + 0x1dc), 0, 0);
                         } else {

@@ -735,6 +735,17 @@ typedef struct item_attribute {
 
 typedef char item_attribute_size_must_be_25[(sizeof(item_attribute_t) == 25) ? 1 : -1];
 
+/* Flat byte view of item attributes used by the status-icon renderers. */
+typedef struct main_item_attribute_flat {
+    u8 attributes[3];
+    u8 move;
+    u8 jump;
+    u8 innate[5];
+    u8 immunity[5];
+    u8 starting[5];
+    u8 elemental_affinity[5];
+} main_item_attribute_flat_t;
+
 enum {
     JOB_JUMP_VALUE_MASK = 0x7f,
     JOB_JUMP_STEPPING_STONE = 0x80,

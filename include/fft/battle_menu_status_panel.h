@@ -189,6 +189,15 @@ typedef char
     battle_menu_status_panel_slot_state_size_must_be_0x38[(sizeof(battle_menu_status_panel_slot_state_t) == 0x38) ? 1
                                                                                                                   : -1];
 
+/* Editor storage is addressed both as a status record and as 28 halfwords. */
+typedef union battle_menu_status_panel_slot_storage {
+    battle_menu_status_panel_slot_state_t state;
+    s16 halfwords[0x1c];
+} battle_menu_status_panel_slot_storage_t;
+
+typedef char battle_menu_status_panel_slot_storage_size_must_be_0x38
+    [(sizeof(battle_menu_status_panel_slot_storage_t) == 0x38) ? 1 : -1];
+
 /* Unit gauge record (0x1e bytes) copied from battle_stats_t for the status
  * panel; the same shape as the first 0x1e bytes of battle_unit_status_record_t. */
 typedef struct battle_menu_status_panel_gauges {

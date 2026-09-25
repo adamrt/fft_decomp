@@ -4,16 +4,6 @@
 #include "fft/main_runtime.h"
 #include "psx/types.h"
 
-/* CD extent of one file: start sector and byte size. */
-typedef struct battle_file_extent {
-    s32 sector;
-    s32 size;
-} battle_file_extent_t;
-
-extern battle_file_extent_t g_battle_gfx_sprite_seq_files[];
-extern battle_file_extent_t g_battle_gfx_sprite_shp_files[];
-extern battle_file_extent_t g_battle_gfx_spritesheet_files[];
-
 /* Steps the per-unit graphics loader for the queued load descriptors.
  *
  * g_battle_gfx_state_words holds the file kind (0 SHP, 1 SEQ, 2 SPR), the

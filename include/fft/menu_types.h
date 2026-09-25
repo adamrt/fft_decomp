@@ -48,6 +48,23 @@ typedef struct world_menu_window_command {
     u8 height;
 } world_menu_window_command_t;
 
+/* Menu text-entry task referenced at +0x30 of the wait parameter. */
+typedef struct world_menu_text_entry_wait_task {
+    void (*setup)(void);
+    u16 text_parameter;
+    u16 text_thread_id;
+} world_menu_text_entry_wait_task_t;
+
+/* Shared prefix of the menu record passed to text-entry wait threads. */
+typedef struct world_menu_text_entry_wait_param {
+    u8 unknown_00[0x1c];
+    u16 text_id;
+    u8 unknown_1e[0x0e];
+    u16 header_id;
+    u8 unknown_2e[2];
+    world_menu_text_entry_wait_task_t* task;
+} world_menu_text_entry_wait_param_t;
+
 /* Image load parameters consumed by world_gfx_init_image_loading (0xc bytes;
  * the table at 0x80155838 holds one per menu sprite). */
 typedef struct world_gfx_image_load_parameters {

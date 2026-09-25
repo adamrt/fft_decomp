@@ -412,10 +412,10 @@ extern u8 g_main_sound_spu_malloc_table[];        /* 0x800408e0; SpuInitMalloc(6
  * main_sound_stop_forced_music hands it straight to
  * SuzukiDeallocateMUSChannels, which takes a suzuki_music_t*. */
 typedef struct main_sound_music_state {
-    s32 scenario_track;            /* 0x00 0x8004d95c slot of the playing scenario music */
-    suzuki_music_t* current_music; /* 0x04 0x8004d960 */
-    void* forced_music;            /* 0x08 0x8004d964 SMD data of the playing music */
-    s32 volume;                    /* 0x0c 0x8004d968 */
+    s32 scenario_track;                /* 0x00 0x8004d95c slot of the playing scenario music */
+    suzuki_music_t* current_music;     /* 0x04 0x8004d960 */
+    suzuki_smd_header_t* forced_music; /* 0x08 0x8004d964 SMD data of the playing music */
+    s32 volume;                        /* 0x0c 0x8004d968 */
 } main_sound_music_state_t;
 
 /* Music slot table at 0x8004d96c. Slots are 1-based: slots 1-2 hold the
@@ -427,9 +427,9 @@ typedef struct main_sound_music_state {
  * 0x8004d994 + 4t from a 0x8004d96c base; 0x80043a90 reads smd at
  * 0x8004d98c + 4*track and the handle 0x1c bytes below it. */
 typedef struct main_sound_music_slots {
-    s32 tune;       /* 0x00 0x8004d96c pending tune (id | 0x80) or playing tune id */
-    s32 handles[7]; /* 0x04 0x8004d970 Suzuki music handles; [0] is the last opened slot */
-    void* smd[8];   /* 0x20 0x8004d98c loaded SMD data per slot */
+    s32 tune;                    /* 0x00 0x8004d96c pending tune (id | 0x80) or playing tune id */
+    s32 handles[7];              /* 0x04 0x8004d970 Suzuki music handles; [0] is the last opened slot */
+    suzuki_smd_header_t* smd[8]; /* 0x20 0x8004d98c loaded SMD data per slot */
 } main_sound_music_slots_t;
 
 /* The music state and slot table are one object: main_sound_open_generic_sfx

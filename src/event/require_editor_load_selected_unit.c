@@ -20,7 +20,7 @@ void require_editor_load_selected_unit(void) {
     s16 list_value;
 
     unit = battle_unit_get_stats_from_battle_id(g_require_panel_comparison_unit_id);
-    editor = g_require_editor_unit_fields;
+    editor = g_require_editor_unit_fields.halfwords;
     if (unit != 0) {
         require_panel_copy_battle_stats_to_gauges(unit, &g_require_panel_comparison_billboard);
     }

@@ -37,14 +37,6 @@ typedef struct option_menu_page {
 
 typedef char option_menu_page_size_must_be_0x190[(sizeof(option_menu_page_t) == 0x190) ? 1 : -1];
 
-/* Text image placement: the upload rectangle plus the screen offsets
- * battle_gfx_init_image_loading reads. */
-typedef struct option_menu_text_window {
-    RECT rect;
-    s16 x_screen_offset;
-    s16 y_screen_offset;
-} option_menu_text_window_t;
-
 struct menu_frame_sprites;
 void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
     const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
@@ -61,7 +53,7 @@ extern option_menu_page_t g_option_menu_pages[2];
  * row-count loads, as in the target.
  */
 void option_build_options_menu(void) {
-    option_menu_text_window_t window;
+    world_menu_text_window_t window;
     RECT image_rect;
     RECT clear;
     RECT texture_window;

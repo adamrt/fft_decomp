@@ -5,6 +5,19 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
+typedef struct battle_gfx_file_extent {
+    s32 sector;
+    s32 size;
+} battle_gfx_file_extent_t;
+
+extern battle_gfx_file_extent_t g_battle_gfx_sprite_seq_files[];
+extern battle_gfx_file_extent_t g_battle_gfx_sprite_shp_files[];
+extern battle_gfx_file_extent_t g_battle_gfx_weapon_seq_files[];
+extern battle_gfx_file_extent_t g_battle_gfx_weapon_shp_files[];
+extern battle_gfx_file_extent_t g_battle_gfx_effect_seq_files[];
+extern battle_gfx_file_extent_t g_battle_gfx_effect_shp_files[];
+extern battle_gfx_file_extent_t g_battle_gfx_spritesheet_files[];
+
 typedef struct battle_gfx_sprite_part_display_data {
     s8 x_shift;
     s8 y_shift;

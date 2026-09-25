@@ -28,7 +28,7 @@ void attack_load_party_unit_into_editor(s32 unused, s32 party_index) {
     u16 maximum_mp;
 
     main_unit_init_job_data(&g_attack_editor_party_unit_stats, party_index, 0);
-    editor = g_attack_unit_editor_state;
+    editor = g_attack_unit_editor_state.halfwords;
     unit = &g_attack_editor_party_unit_stats;
 
     g_attack_active_unit_data = party_index;

@@ -56,7 +56,7 @@ extern u8 g_debugchr_editor_template_normal[];
 extern u8 g_debugchr_editor_template_special[];
 extern u8 g_debugchr_editor_third_ability_bytes[];
 extern s16 g_debugchr_editor_third_maximum;
-extern s16 g_debugchr_editor_unit_fields[];
+extern battle_menu_status_panel_slot_storage_t g_debugchr_editor_unit_fields;
 extern u8 g_debugchr_editor_unit_ids[];
 extern s16 g_debugchr_editor_unit_type;
 /* Views of g_debugchr_panel_selected_billboard.bars[i].value (values[3 * i])

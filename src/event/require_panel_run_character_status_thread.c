@@ -37,7 +37,7 @@ void require_panel_run_character_status_thread(void) {
     g_require_input_controller = battle_script_get_controller_input_pointer(0);
     screen = g_require_panel_frames_a;
     base = g_require_panel_frames_a;
-    state = (battle_menu_status_panel_slot_state_t*)g_require_editor_unit_fields;
+    state = &g_require_editor_unit_fields.state;
     rect = FRAME_RECT;
     battle_menu_init_numeric_display_frame_primitives((RECT*)rect, &screen->numeric_frame);
     require_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);

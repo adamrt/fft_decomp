@@ -62,7 +62,7 @@ void attack_text_build_deployment_strings(void) {
         for (j = 0; j < 5; j++) {
             APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j], 0x6800);
         }
-        if (((battle_menu_status_panel_slot_state_t*)g_attack_unit_editor_state)->generic_monster != 0) {
+        if (g_attack_unit_editor_state.state.generic_monster != 0) {
             for (j = 0; j < 5; j++) {
                 APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], 0x7800);
             }

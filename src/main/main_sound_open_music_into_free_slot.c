@@ -6,9 +6,9 @@ int main_sound_open_music_into_free_slot(int scenario) {
     /* Byte-offset form kept: indexing g_main_sound_scenario_smd_files[scenario]
      * schedules the scale away from where the target computes it. */
     int file_offset = scenario * 8;
-    void** loaded_smd_base = &g_main_sound_music.slots.smd[1];
+    suzuki_smd_header_t** loaded_smd_base = &g_main_sound_music.slots.smd[1];
     s32* handle = &g_main_sound_music.slots.handles[1];
-    void** loaded_smd = loaded_smd_base;
+    suzuki_smd_header_t** loaded_smd = loaded_smd_base;
     suzuki_smd_header_t* smd;
 
     do {

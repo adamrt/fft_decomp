@@ -24,13 +24,6 @@ typedef struct battle_effect_model_gt3 {
     u16 pad3;
 } battle_effect_model_gt3_t;
 
-/* Effect resource header: a 0x0c-byte preamble followed by a word array whose
- * entries 0, 2 and 4 are byte offsets of the three following sections. */
-typedef struct battle_effect_resource {
-    u8 unknown_00[0xc];
-    s32 words[6];
-} battle_effect_resource_t;
-
 /* Decoded model command from battle_effect_decode_next_model_command. */
 typedef struct battle_effect_decoded {
     u8 unknown_00[3];
@@ -59,9 +52,6 @@ typedef struct battle_effect_model3_work {
     POLY_G3 g3[2][16];
 } battle_effect_model3_work_t;
 
-extern battle_effect_resource_t* g_battle_effect_model_data_ptrs[];
-
-s32 battle_effect_init_resource_sections(battle_effect_resource_t* resource);
 void battle_effect_decode_next_model_command(battle_effect_decoded_t* out);
 
 /* Transformed model points live in the scratchpad as VECTORs, with the GTE
