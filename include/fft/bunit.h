@@ -38,15 +38,17 @@ enum {
 };
 
 /*
- * Documented prefix of the BUNIT.OUT unit-data record. This is the
- * formation/menu representation, not party_data_t, entd_unit_t, or battle_stats_t.
- * Its full size has not yet been established.
+ * BUNIT.OUT unit-data record. This is the formation/menu representation,
+ * distinct from party_data_t, entd_unit_t, and battle_stats_t. Unnamed fields
+ * remain padding until their uses establish a meaning.
  */
 typedef struct bunit_unit_data {
     s16 level; /* 0x00; getters at 0x801c4054..0x801c4163 read level, experience, brave and faith */
-    u8 _pad02[6];
+    s16 team_kind;  /* 0x02 */
+    s16 list_index; /* 0x04 */
+    s16 unit_count; /* 0x06; shown units plus eggs in each billboard record */
     s16 experience; /* 0x08 */
-    u8 _pad0a[2];
+    s16 entd_slot;  /* 0x0a */
     s16 current_hp;
     u8 _pad0e[2];
     s16 max_hp;
@@ -54,26 +56,53 @@ typedef struct bunit_unit_data {
     u8 _pad14[2];
     s16 max_mp;
     s16 current_ct;
-    u8 _pad1a[0xa];
+    u8 _pad1a[2];
+    s16 max_ct;          /* 0x1c */
+    s16 formation_index; /* 0x1e */
+    u8 _pad20[2];
+    s16 entd_slot_22; /* 0x22 */
     s16 monster_base_job_id; /* 0x24; used when character_identity is 0x82 */
     s16 brave;               /* 0x26 */
     s16 faith;               /* 0x28 */
-    u8 _pad2a[2];
+    s16 zodiac;              /* 0x2a */
     s16 roster_id; /* 0x2C; searched by bunit_unit_find_index_by_roster_id */
-    u8 _pad2e[0x10];
+    u8 _pad2e[2];
+    s16 move;               /* 0x30 */
+    s16 speed;              /* 0x32 */
+    s16 jump;               /* 0x34 */
+    s16 right_weapon_power; /* 0x36 */
+    s16 left_weapon_power;  /* 0x38 */
+    s16 right_weapon_evade; /* 0x3a */
+    s16 left_weapon_evade;  /* 0x3c */
     s16 uses_monster_skillset; /* 0x3e; nonzero restricts the job list to its base entry */
-    u8 _pad40[0x1e];
+    s16 two_handed;               /* 0x40 */
+    s16 physical_attack;          /* 0x42 */
+    s16 physical_class_evade;     /* 0x44 */
+    s16 physical_shield_evade;    /* 0x46 */
+    s16 physical_accessory_evade; /* 0x48 */
+    u8 _pad4a[2];
+    s16 magical_attack;          /* 0x4c */
+    s16 magical_class_evade;     /* 0x4e */
+    s16 magical_shield_evade;    /* 0x50 */
+    s16 magical_accessory_evade; /* 0x52 */
+    s16 equipment[5];            /* 0x54 */
     s16 abilities[5]; /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
                        * bunit_panel_copy_unit_data_to_billboard; bunit_create_ability_list reads [0]) */
     u8 _pad68[8];
     u8 gender_flags; /* 0x70; Bard/Dancer restrictions */
-    u8 _pad71[2];
+    u8 misc_unit_id;        /* 0x71 */
+    u8 initial_team_flags;  /* 0x72 */
     u8 formation_order_key; /* 0x73; bit 0x40 marks an encoded roster ID */
     u8 character_identity;  /* 0x74; special character, generic male/female/monster */
     u8 unlocked_jobs[3];    /* 0x75; bit reader consumes Squire through Mime */
-    u8 _pad78[0x39];
+    u8 learned_abilities[57]; /* 0x78 */
     u8 job_levels[10]; /* 0xb1; two packed job-level nibbles per byte */
+    u8 _padbb;
+    u16 job_points[20];       /* 0xbc; current JP by generic job */
+    u16 total_job_points[20]; /* 0xe4; cumulative JP by generic job */
 } bunit_unit_data_t;
+
+typedef char bunit_unit_data_size_must_be_0x10c[(sizeof(bunit_unit_data_t) == 0x10c) ? 1 : -1];
 
 typedef char bunit_unit_data_character_identity_must_be_0x74
     [((unsigned long)&((bunit_unit_data_t*)0)->character_identity == 0x74) ? 1 : -1];
@@ -473,8 +502,8 @@ extern s32 g_bunit_ability_list_menu_script;
 extern s16 g_bunit_frame_arg;
 extern u32* g_bunit_input_controller;
 extern s16 g_bunit_gfx_draw_offset_y;
-extern u8 g_bunit_editor_numeric_state_a[];
-extern u8 g_bunit_editor_numeric_state_b[];
+extern status_panel_numeric_buffer_t g_bunit_editor_numeric_state_a[2];
+extern status_panel_numeric_buffer_t g_bunit_editor_numeric_state_b[2];
 extern u8 g_bunit_editor_numeric_text_a[];
 extern u8 g_bunit_editor_numeric_text_b[];
 extern s8 g_bunit_unit_reorderable_count;
@@ -851,8 +880,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
 void bunit_menu_update_unit_list_scroll(s8* step, s8* offset);
 s16 bunit_menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, u16 input_mask);
 s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode);
-void bunit_panel_copy_unit_data_to_billboard(
-    struct battle_stats* unit, struct bunit_unit_record* record, s32 unused_slot);
+void bunit_panel_copy_unit_data_to_billboard(struct battle_stats* unit, bunit_unit_data_t* record, s32 unused_slot);
 void bunit_text_concatenate_ids(s32 text_table, u8* out, s16* list, s32 separate);
 void bunit_text_render_id_rows_to_vram(s32 text_table, u16* text_ids, RECT* destination, s32 flags);
 void bunit_text_render_ids_into_image(u8* image, struct bunit_text_line_rect_t* rect, s32 unused, s32 max_chars,

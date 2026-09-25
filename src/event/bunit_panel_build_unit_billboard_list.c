@@ -42,10 +42,11 @@ s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode
             } else if (!(unit->current_status_1 & BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_CRYSTAL))
                 && !(unit->current_status_2 & BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_TREASURE))) {
                 total++;
-                bunit_panel_copy_unit_data_to_billboard(unit, g_bunit_unit_records + record_offset, shown);
+                bunit_panel_copy_unit_data_to_billboard(
+                    unit, (bunit_unit_data_t*)(g_bunit_unit_records + record_offset), shown);
                 *shown_index = shown;
                 shown_index++;
-                record_offset += 0x10C;
+                record_offset += sizeof(bunit_unit_data_t);
                 shown++;
             }
         }
@@ -56,9 +57,9 @@ s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode
     if (shown > 0) {
         count_offset = 0;
         do {
-            *(s16*)(g_bunit_unit_records + count_offset + 6) = total;
+            ((bunit_unit_data_t*)(g_bunit_unit_records + count_offset))->unit_count = total;
             i++;
-            count_offset += 0x10C;
+            count_offset += sizeof(bunit_unit_data_t);
         } while (i < shown);
     }
     g_bunit_unit_count = shown;

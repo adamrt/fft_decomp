@@ -4,67 +4,6 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Full 0x10c layout of the BUNIT unit-data record (bunit_unit_data_t);
- * this function memsets and fills every field. */
-typedef struct bunit_unit_record {
-    s16 level;      /* 0x00 */
-    s16 team_kind;  /* 0x02 */
-    s16 list_index; /* 0x04 */
-    u8 _pad06[2];
-    s16 experience; /* 0x08 */
-    s16 entd_slot;  /* 0x0a */
-    s16 hp;         /* 0x0c */
-    u8 _pad0e[2];
-    s16 max_hp; /* 0x10 */
-    s16 mp;     /* 0x12 */
-    u8 _pad14[2];
-    s16 max_mp; /* 0x16 */
-    s16 ct;     /* 0x18 */
-    u8 _pad1a[2];
-    s16 max_ct;          /* 0x1c */
-    s16 formation_index; /* 0x1e */
-    u8 _pad20[2];
-    s16 entd_slot_22; /* 0x22 */
-    s16 job_id;       /* 0x24 */
-    s16 brave;        /* 0x26 */
-    s16 faith;        /* 0x28 */
-    s16 zodiac;       /* 0x2a */
-    s16 entd_slot_2c; /* 0x2c */
-    u8 _pad2e[2];
-    s16 move;                     /* 0x30 */
-    s16 speed;                    /* 0x32 */
-    s16 jump;                     /* 0x34 */
-    s16 right_weapon_power;       /* 0x36 */
-    s16 left_weapon_power;        /* 0x38 */
-    s16 right_weapon_evade;       /* 0x3a */
-    s16 left_weapon_evade;        /* 0x3c */
-    s16 uses_monster_skillset;    /* 0x3e */
-    s16 two_handed;               /* 0x40 */
-    s16 physical_attack;          /* 0x42 */
-    s16 physical_class_evade;     /* 0x44 */
-    s16 physical_shield_evade;    /* 0x46 */
-    s16 physical_accessory_evade; /* 0x48 */
-    u8 _pad4a[2];
-    s16 magical_attack;          /* 0x4c */
-    s16 magical_class_evade;     /* 0x4e */
-    s16 magical_shield_evade;    /* 0x50 */
-    s16 magical_accessory_evade; /* 0x52 */
-    s16 equipment[5];            /* 0x54 */
-    s16 abilities[5];            /* 0x5e; primary, secondary, reaction, support, movement */
-    u8 _pad68[8];
-    u8 gender_flags;          /* 0x70 */
-    u8 misc_unit_id;          /* 0x71 */
-    u8 initial_team_flags;    /* 0x72 */
-    u8 mount_info;            /* 0x73 */
-    u8 character_identity;    /* 0x74 */
-    u8 unlocked_jobs[3];      /* 0x75 */
-    u8 learned_abilities[57]; /* 0x78 */
-    u8 job_levels[10];        /* 0xb1 */
-    u8 _padbb;
-    u16 job_points[20];       /* 0xbc */
-    u16 total_job_points[20]; /* 0xe4 */
-} bunit_unit_record_t;
-
 /* Builds a BUNIT unit-data record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
  * only when battle_menu_init_monster_skill_check passes) or the equipment and
@@ -74,7 +13,7 @@ typedef struct bunit_unit_record {
  * slot so loop.c strength-reduces it into the record pointer; with an explicit
  * pointer walk the smaller loop lets loop.c hoist the constant 3 into $s6. The
  * caller also passes its shown-list slot, which is not read. */
-void bunit_panel_copy_unit_data_to_billboard(battle_stats_t* unit, bunit_unit_record_t* record, s32 unused_slot) {
+void bunit_panel_copy_unit_data_to_billboard(battle_stats_t* unit, bunit_unit_data_t* record, s32 unused_slot) {
     s16* abilities;
     s32 count;
     s32 i;
@@ -84,7 +23,7 @@ void bunit_panel_copy_unit_data_to_billboard(battle_stats_t* unit, bunit_unit_re
     u32 evade;
     u32 other;
 
-    memset(record, 0, sizeof(bunit_unit_record_t));
+    memset(record, 0, sizeof(bunit_unit_data_t));
     record->level = unit->level < 100 ? unit->level : 99;
     if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
         record->team_kind = 1;
@@ -103,26 +42,26 @@ void bunit_panel_copy_unit_data_to_billboard(battle_stats_t* unit, bunit_unit_re
     record->list_index = list_index;
     record->experience = unit->experience < 100 ? unit->experience : 99;
     record->entd_slot = unit->entd_slot;
-    record->hp = unit->hp < 1000 ? unit->hp : 999;
+    record->current_hp = unit->hp < 1000 ? unit->hp : 999;
     record->max_hp = unit->max_hp < 1000 ? unit->max_hp : 999;
-    record->mp = unit->mp < 1000 ? unit->mp : 999;
+    record->current_mp = unit->mp < 1000 ? unit->mp : 999;
     record->max_mp = unit->max_mp < 1000 ? unit->max_mp : 999;
     value = 100;
     if (unit->has_turn != 1) {
         value = unit->ct;
     }
-    record->ct = value;
+    record->current_ct = value;
     if (value >= 101) {
-        record->ct = 100;
+        record->current_ct = 100;
     }
     record->max_ct = 100;
     record->formation_index = unit->formation_index;
     record->entd_slot_22 = unit->entd_slot;
-    record->job_id = unit->job_id;
+    record->monster_base_job_id = unit->job_id;
     record->brave = unit->brave;
     record->faith = unit->faith;
     record->zodiac = *(u16*)&unit->birthday >> 12;
-    record->entd_slot_2c = unit->entd_slot;
+    record->roster_id = unit->entd_slot;
     record->move = unit->move;
     record->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
     record->jump = unit->jump;
@@ -191,7 +130,7 @@ void bunit_panel_copy_unit_data_to_billboard(battle_stats_t* unit, bunit_unit_re
 
     record->misc_unit_id = battle_unit_get_misc_id_by_battle_id(unit->entd_slot);
     record->initial_team_flags = unit->initial_team_flags;
-    record->mount_info = unit->mount_info;
+    record->formation_order_key = unit->mount_info;
     record->two_handed = bunit_unit_is_two_handing_weapon(record->equipment, unit->support_abilities[2] & 2);
     record->gender_flags = unit->unit_flags;
     record->character_identity = unit->character_identity;
