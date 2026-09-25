@@ -6,7 +6,7 @@
  * The level is spelled g_wldcore_menu_stack_records_next[current - 1]; the
  * equivalent g_wldcore_menu_stack_records[current] changes the address
  * arithmetic. */
-void wldcore_draw_close_indicator_if_pending(void* ordering_table) {
+void wldcore_draw_close_indicator_if_pending(GsOT* ordering_table) {
     s32 current;
 
     current = g_wldcore_menu_stack_depth;

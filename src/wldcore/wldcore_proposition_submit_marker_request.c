@@ -7,7 +7,7 @@
  * The colour is the shade word at 0x8009eef4 replicated across the three
  * channels and tinted in place by 0x80069718. sequence is written after that
  * call because the target reloads 0x800d0bb4 there. */
-void wldcore_proposition_submit_marker_request(s32 ot) {
+void wldcore_proposition_submit_marker_request(GsOT* ot) {
     wldcore_anim_draw_request_t request;
     CVECTOR color;
     s32 index;
@@ -37,5 +37,5 @@ void wldcore_proposition_submit_marker_request(s32 ot) {
     request.color.g = color.g;
     request.color.b = color.b;
     request.sequence = g_wldcore_proposition_selected_entry + 0x36;
-    wldcore_gfx_draw_animated_display_object((wldcore_anim_object_t*)&request, (void*)ot);
+    wldcore_gfx_draw_animated_display_object((wldcore_anim_object_t*)&request, ot);
 }

@@ -294,22 +294,22 @@ void etc_graphic_build_chapter_polygons(
     scratch = stack.layer;
     if (scratch != 0) {
         scratch = primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x34));
-        battle_gfx_draw_or_append_gpu_primitive((s32*)primitives);
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x34));
+        battle_gfx_draw_or_append_gpu_primitive(primitives);
         scratch = primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x9C));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x9C));
         scratch = primitives;
         last_primitive = scratch + 0x68;
     } else {
         scratch = primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x9C));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x9C));
         scratch = primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x68));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x68));
         scratch = primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x34));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x34));
         last_primitive = primitives;
     }
-    battle_gfx_draw_or_append_gpu_primitive((s32*)last_primitive);
+    battle_gfx_draw_or_append_gpu_primitive(last_primitive);
 }
 
 #undef PRIM

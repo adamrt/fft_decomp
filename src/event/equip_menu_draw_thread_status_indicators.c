@@ -12,7 +12,6 @@ extern s32 g_equip_menu_indicator_edge_brightness[2];
 extern s32 g_equip_menu_indicator_state[2];
 
 extern void SetSemiTrans(void* prim, s32 enable);
-void battle_gfx_draw_or_append_gpu_primitive(s32* primitive);
 
 /*
  * Builds and submits the two translucent letterbox panels used by the event

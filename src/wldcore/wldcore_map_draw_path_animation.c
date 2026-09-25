@@ -16,7 +16,7 @@
  * `do ... while (0)` whose loop notes weight its references for register
  * allocation as the target's (the column pointers then outrank `ot`, which is
  * spilled). */
-void wldcore_map_draw_path_animation(void* ot) {
+void wldcore_map_draw_path_animation(GsOT* ot) {
     SVECTOR verts[4];
     SVECTOR in;
     POLY_FT4 poly;

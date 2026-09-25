@@ -148,26 +148,26 @@ void require_editor_run_numeric_thread(void) {
         }
         require_gfx_apply_menu_palette_for_mode(&buffer->numeric_frame, thread);
         if (frame < 13) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait.areas[1]);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->portrait.areas[1]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[1]);
         for (i = 0; i < 14; i++) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[17]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&buffer->sprites[17]);
+        battle_gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[0]);
         for (; i < 17; i++) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->sprites[i]);
         }
         if (g_battle_current_thread_id == 12) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[1]);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[1]);
         } else {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[2]);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->draw_modes[2]);
         }
         battle_menu_submit_numeric_display_frame_primitives(&buffer->numeric_frame);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&buffer->draw_offsets[0]);
         if (frame < 13) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->portrait);
         }
         battle_thread_yield();
         if (battle_thread_get_current_parameter_3() != 0) {

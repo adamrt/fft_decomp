@@ -320,25 +320,25 @@ void option_build_options_menu(void) {
         battle_menu_select_sprite_clut(&page->title);
         battle_menu_select_sprite_clut(&page->value);
         battle_menu_select_sprite_clut(frame);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.sprites[3]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.sprites[1]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.sprites[2]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->icons.mode1);
+        battle_gfx_draw_or_append_gpu_primitive(&page->icons.sprites[3]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->icons.sprites[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->icons.sprites[2]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->icons.mode1);
         if (layout->hidden_rows != 0 && battle_menu_can_accept_input() != 0) {
             if (row_offset != 0) {
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&page->arrows[0]);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&page->arrow_marks[0]);
+                battle_gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
+                battle_gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
             }
             if (row_offset != layout->hidden_rows) {
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&page->arrows[1]);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&page->arrow_marks[1]);
+                battle_gfx_draw_or_append_gpu_primitive(&page->arrows[1]);
+                battle_gfx_draw_or_append_gpu_primitive(&page->arrow_marks[1]);
             }
             span = page->arrows[1].y0;
             top = page->arrows[0].y0 + page->arrows[0].h;
             span -= top;
             page->thumb.x0 = page->arrows[0].x0;
             page->thumb.y0 = top + span * entry->selected_index / (layout->row_count + layout->hidden_rows) - 2;
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&page->thumb);
+            battle_gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
         if ((thread - 1)->is_running == 0) {
             battle_thread_set_parameters(g_battle_current_thread_id + 1, (s32)&entry->window_x, 0, 0);
@@ -347,16 +347,16 @@ void option_build_options_menu(void) {
         }
         battle_menu_build_zoom_draw_area_pair(&page->title_area, &entry->window_x, i, g_main_gfx_screen_polarity);
         battle_menu_build_zoom_draw_area_pair(&page->value_area, &value_rect, i, g_main_gfx_screen_polarity);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->title_area.areas[1]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->icon_mode);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)frame);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->window_mode);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->title_area.areas[0]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->value_area.areas[1]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->value);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->title);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->text_mode);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->value_area.areas[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->icon_mode);
+        battle_gfx_draw_or_append_gpu_primitive(frame);
+        battle_gfx_draw_or_append_gpu_primitive(&page->window_mode);
+        battle_gfx_draw_or_append_gpu_primitive(&page->title_area.areas[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->value_area.areas[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->value);
+        battle_gfx_draw_or_append_gpu_primitive(&page->title);
+        battle_gfx_draw_or_append_gpu_primitive(&page->text_mode);
+        battle_gfx_draw_or_append_gpu_primitive(&page->value_area.areas[0]);
         g_battle_thread_call_target = (void (*)(void))main_sound_set_type;
         g_main_game_options.fields.cursor_movement = g_option_current_values[GAME_OPTION_CURSOR_MOVEMENT];
         g_main_game_options.fields.cursor_repeat_speed = g_option_current_values[GAME_OPTION_CURSOR_REPEAT_SPEED];

@@ -360,38 +360,38 @@ void battle_menu_display_hovered_unit_stats(
         offs->offset_b[0] = -0x80;
         offs->offset_b[1] = base_y;
         SetDrawOffset(offs->draw_offset_b, offs->offset_b);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)offs->draw_offset_b);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[0]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[1]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->draw_mode_1);
+        battle_gfx_draw_or_append_gpu_primitive(offs->draw_offset_b);
+        battle_gfx_draw_or_append_gpu_primitive(&page->quads[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->quads[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->draw_mode_1);
         poly--;
         for (i = 0; i < 3; i++) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+            battle_gfx_draw_or_append_gpu_primitive(poly);
             poly--;
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[2]);
+        battle_gfx_draw_or_append_gpu_primitive(&page->quads[2]);
         if (mode == 1) {
             page->quads[4].clut = 0x7D7C;
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[4]);
+            battle_gfx_draw_or_append_gpu_primitive(&page->quads[4]);
         }
         if (mode != 2) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&page->quads[3]);
+            battle_gfx_draw_or_append_gpu_primitive(&page->quads[3]);
         } else if (text_id != 0) {
             battle_menu_build_sprite_page(frame, frame_rect);
         }
         for (i = 0; i < 7; i++) {
             page->sprites[i].clut = g_battle_unit_status_sprite_clut_pairs[i][running & 1];
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&page->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&page->sprites[i]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->draw_mode_0);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&page->portrait);
+        battle_gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
+        battle_gfx_draw_or_append_gpu_primitive(&page->portrait);
         if (running != 0) {
             battle_menu_init_primitive_colors_palette_bank_1(&page->palette);
         } else {
             battle_menu_init_primitive_colors_palette_bank_0(&page->palette);
         }
         battle_menu_submit_numeric_display_frame_primitives(&page->palette);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)offs->draw_offset_a);
+        battle_gfx_draw_or_append_gpu_primitive(offs->draw_offset_a);
         battle_thread_yield();
         g_battle_menu_hide_numeric_values = unit->unit_flags & 4;
         if (battle_thread_get_current_task_id() == 0x11) {

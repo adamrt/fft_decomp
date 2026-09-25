@@ -31,7 +31,7 @@ void wldcore_gfx_calculate_scaled_rectangle(
  *   scheduler ready list ordered by source, and the other order transposes
  *   two of them.
  */
-void wldcore_gfx_draw_display_object_sprite(wldcore_display_object_t* object, s32 ot) {
+void wldcore_gfx_draw_display_object_sprite(wldcore_display_object_t* object, GsOT* ot) {
     GsSPRITE sprite;
     wldcore_display_rect_t frame;
     CVECTOR color;
@@ -105,5 +105,5 @@ void wldcore_gfx_draw_display_object_sprite(wldcore_display_object_t* object, s3
         sprite.w = object->rect.w;
         sprite.h = object->rect.h;
     }
-    world_gs_sortfastsprite(&sprite, (GsOT*)ot, object->priority);
+    world_gs_sortfastsprite(&sprite, ot, object->priority);
 }

@@ -236,31 +236,31 @@ void battle_menu_run_unit_editor_panel_thread(void) {
                     g_battle_current_thread_id - 1, (s32)&g_battle_menu_thread_menu_data[8], 0, 0);
             }
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->cursor);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->cursor);
         for (i = 0; i < 12; i++) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
         for (i = 14; i < 19; i++) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_modes[0]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[12]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[13]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_modes[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->draw_modes[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[12]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[13]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->draw_modes[1]);
         for (i = 0; i < 5; i++) {
             if ((u16)g_battle_unit_editor_panel_data.item_ids[i] != 0xFFFF) {
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[19 + i]);
+                battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[19 + i]);
             }
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_modes[2]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->tiles[0]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->tiles[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->draw_modes[2]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->tiles[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->tiles[1]);
         for (i = 0; i < 8; i++) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->lines[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame_record->lines[i]);
         }
         frame++;
         battle_menu_submit_numeric_display_frame_primitives(frame_record->palette);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->cursor_mode);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->cursor_mode);
     }
     g_battle_menu_hovered_unit_stats_display.y = 0xAA;
     g_battle_unit_summary_panel_rect.y = 0xAA;

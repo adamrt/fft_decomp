@@ -24,7 +24,7 @@
  * of it so the base spills to 0x80 as in the target. The 2-byte alignment of
  * SVECTOR makes `verts[0] = verts[2]` take GCC's unaligned block-move path
  * (lwl/lwr, swl/swr) as in the target. */
-void wldcore_map_draw_visible_routes(void* ot) {
+void wldcore_map_draw_visible_routes(GsOT* ot) {
     s32 flags[4];
     SVECTOR verts[4];
     SVECTOR in;

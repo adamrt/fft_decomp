@@ -110,14 +110,14 @@ void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade,
         }
     }
     if (reverse != 0) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[1]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[0]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[3]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[2]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[3]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[2]);
     } else {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[3]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[2]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[1]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&polys[0]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[3]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[2]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[1]);
+        battle_gfx_draw_or_append_gpu_primitive(&polys[0]);
     }
 }

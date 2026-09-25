@@ -93,12 +93,12 @@ void require_render_display_condition_special_cases_thread(void) {
                 POLY_GT4* poly = &(g_require_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, scale, poly);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             } else {
                 POLY_GT4* poly = &polys[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, scale, poly);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             }
         }
         battle_thread_yield();
@@ -121,12 +121,12 @@ void require_render_display_condition_special_cases_thread(void) {
                 POLY_GT4* poly = &(g_require_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, 0x80, poly);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             } else {
                 POLY_GT4* poly = &polys[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, 0x80, poly);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             }
         }
         battle_thread_yield();
@@ -147,12 +147,12 @@ fade_out:
                 POLY_GT4* poly = &(g_require_gfx_poly_gt4_array_32 + buffer * 40)[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, scale, poly);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             } else {
                 POLY_GT4* poly = &polys[quad_index];
 
                 require_gfx_scale_poly_gt4_vertex_colors(vertex_colors, scale, poly);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             }
         }
         battle_thread_yield();

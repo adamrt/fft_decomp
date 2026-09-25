@@ -82,7 +82,7 @@ void attack_deploy_update_screen_graphics(void) {
                 ((POLY_FT4*)((u8*)g_attack_deploy_text_polys + off))->y0 -= *value - 12;
                 ((POLY_FT4*)((u8*)g_attack_deploy_text_polys + off))->y1 -= *value - 12;
             }
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&g_attack_deploy_text_polys[parity][i]);
+            battle_gfx_draw_or_append_gpu_primitive(&g_attack_deploy_text_polys[parity][i]);
         }
         battle_thread_yield();
         if (battle_thread_get_current_parameter_3() == 0) {

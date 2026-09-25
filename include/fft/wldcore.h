@@ -1550,15 +1550,15 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture);
 void wldcore_map_init_tile_atlas(void);
 void wldcore_gfx_draw_projected_map_tiles(s32 arg);
 void wldcore_window_init_record_pools(void);
-void wldcore_gfx_draw_animated_display_object(wldcore_anim_object_t* object, void* ot);
-void wldcore_gfx_draw_context_value_display(void*);
+void wldcore_gfx_draw_animated_display_object(wldcore_anim_object_t* object, GsOT* ot);
+void wldcore_gfx_draw_context_value_display(GsOT* ot);
 void wldcore_file_poll_vram_image_stream(main_file_load_descriptor_t* stream);
-void wldcore_gfx_draw_display_object_sprite(wldcore_display_object_t* object, s32 ot);
+void wldcore_gfx_draw_display_object_sprite(wldcore_display_object_t* object, GsOT* ot);
 void wldcore_list_completed_propositions_clear_result(void);
 void wldcore_return_from_job_determinations(s32 job_id);
 s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask);
 void wldcore_window_build_yes_no_panel(wldcore_point32_t origin, s32 unused_2, s32 unused_3, s32 x2, s32 y2);
-void wldcore_gfx_draw_calendar_date(void* ot);
+void wldcore_gfx_draw_calendar_date(GsOT* ot);
 void wldcore_menu_push_location_menu_level(s32 menu);
 s32 wldcore_proposition_select_report_speaker(s32 job_id);
 void wldcore_proposition_determine_success(void);
@@ -1568,9 +1568,9 @@ void wldcore_proposition_apply_extra_days_multiplier(void);
 void wldcore_menu_push_event_transition_level(s32 mode);
 void wldcore_map_color_and_draw_dots(void);
 s32 wldcore_map_build_location_menu_entries(s32 proposition_id, s32* out);
-void wldcore_map_draw_visible_routes(void*);
+void wldcore_map_draw_visible_routes(GsOT* ot);
 s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* state, s32 value, s32 step);
-void wldcore_map_draw_path_animation(void*);
+void wldcore_map_draw_path_animation(GsOT* ot);
 void wldcore_map_find_best_route_path(s32 from, s32 to);
 void wldcore_map_step_route_travel(void);
 s32 wldcore_map_step_projection_motion(void);
@@ -1598,10 +1598,10 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode);
 void wldcore_convert_date_to_zodiac_date(s32* month, s32* day);
 
 /* dispatch */
-void wldcore_dispatch_display_object_list(s32 ot, wldcore_display_object_t** list, s32 count);
+void wldcore_dispatch_display_object_list(GsOT* ot, wldcore_display_object_t** list, s32 count);
 
 /* draw */
-void wldcore_draw_close_indicator_if_pending(void*);
+void wldcore_draw_close_indicator_if_pending(GsOT* ot);
 
 /* fade */
 void wldcore_fade_draw_screen_overlays(void);
@@ -1710,7 +1710,7 @@ wldcore_proposition_data_t* wldcore_proposition_get_data_pointer(s32 proposition
 s32 wldcore_proposition_load_picture(s32 index);
 void wldcore_proposition_load_picture_data_set(s32 value);
 s32 wldcore_proposition_step_message(wldcore_proposition_message_state_t* state, s32 message);
-void wldcore_proposition_submit_marker_request(s32 ot);
+void wldcore_proposition_submit_marker_request(GsOT* ot);
 
 /* reset */
 void wldcore_reset_game_if_special_keycode_is_pressed(void);

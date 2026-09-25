@@ -51,22 +51,22 @@ void attack_deploy_build_menu_cursor_primitives(s32 frame, u32 mode, u8* render_
         } while (i >= 0);
     }
 
-    battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0xA00));
+    battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0xA00));
     if (mode < 2) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0x884));
+        battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0x884));
     } else if (mode == 2) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0x8AC));
+        battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0x8AC));
     } else if (mode == 3) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0x8AC));
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0x884));
+        battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0x8AC));
+        battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0x884));
         if ((frame & 0x3F) < 0x20) {
             *(s16*)(render_buffer + 0x892) = 0x7DFC;
         } else {
             *(s16*)(render_buffer + 0x8BA) = 0x7DFC;
         }
     } else if (mode == 4) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0x8FC));
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(render_buffer + 0x8D4));
+        battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0x8FC));
+        battle_gfx_draw_or_append_gpu_primitive((render_buffer + 0x8D4));
         if ((frame & 0x3F) < 0x20) {
             *(s16*)(render_buffer + 0x8E2) = 0x7DFC;
         } else {

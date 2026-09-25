@@ -8,7 +8,8 @@
  * ETC full-screen graphics draw immediately. Normal battle rendering links
  * the primitive into the current ordering-table entry.
  */
-void battle_gfx_draw_or_append_gpu_primitive(s32* prim) {
+void battle_gfx_draw_or_append_gpu_primitive(void* primitive) {
+    s32* prim = primitive;
     s32* otag;
 
     if (g_battle_etc_graphics_enabled != 0) {

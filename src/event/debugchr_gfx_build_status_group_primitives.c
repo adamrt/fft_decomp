@@ -68,7 +68,7 @@ void debugchr_gfx_build_status_group_primitives(POLY_FT4* poly) {
 
             SetSemiTrans(poly, 1);
             SetShadeTex(poly, 0);
-            battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+            battle_gfx_draw_or_append_gpu_primitive(poly);
             poly++;
         }
     }

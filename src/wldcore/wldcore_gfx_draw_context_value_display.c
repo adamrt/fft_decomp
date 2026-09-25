@@ -24,7 +24,7 @@ void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, Gs
  * the constant stores and rotates v0/v1. The two globals read back at the end
  * of case 4 need s32 locals because the target loads them with `lw` into u16
  * fields. */
-void wldcore_gfx_draw_context_value_display(void* ot) {
+void wldcore_gfx_draw_context_value_display(GsOT* ot) {
     GsSPRITE sprite;
     GsSPRITE separator;
     GsLINE line;

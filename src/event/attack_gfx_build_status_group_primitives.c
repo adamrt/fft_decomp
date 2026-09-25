@@ -84,7 +84,7 @@ void attack_gfx_build_status_group_primitives(POLY_FT4* poly) {
                     poly->g0 = level;
                     poly->b0 = level;
                 }
-                battle_gfx_draw_or_append_gpu_primitive((s32*)poly);
+                battle_gfx_draw_or_append_gpu_primitive(poly);
             }
             poly++;
         }

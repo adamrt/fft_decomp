@@ -41,12 +41,12 @@ void battle_menu_update_panel_fade(void) {
             (frame->sides + i + 9)->r0 = intensity;
             (frame->sides + i + 9)->g0 = intensity;
             (frame->sides + i + 9)->b0 = intensity;
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame->sides[8 - i]);
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame->sides[i + 9]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame->sides[8 - i]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame->sides[i + 9]);
         }
         battle_gfx_draw_or_append_gpu_primitive(
-            (s32*)&g_battle_menu_panel_fade_frames[g_battle_menu_packet_buffer_index].center);
+            &g_battle_menu_panel_fade_frames[g_battle_menu_packet_buffer_index].center);
         battle_gfx_draw_or_append_gpu_primitive(
-            (s32*)&g_battle_menu_panel_fade_frames[g_battle_menu_packet_buffer_index].draw_mode);
+            &g_battle_menu_panel_fade_frames[g_battle_menu_packet_buffer_index].draw_mode);
     }
 }

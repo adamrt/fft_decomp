@@ -340,7 +340,7 @@ void battle_gfx_configure_misc_unit_palette_modulation_1f(s32 unit_id);
 void battle_gfx_construct_polygon_data_for_units(
     battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot);
 void battle_gfx_decompress_attack_spritesheet(u8* source, u8* destination);
-void battle_gfx_draw_or_append_gpu_primitive(s32* primitive);
+void battle_gfx_draw_or_append_gpu_primitive(void* primitive);
 void battle_gfx_draw_screen_color_modulation_overlay(void);
 void battle_gfx_draw_wait_direction_unit(void);
 void battle_gfx_free_tpage7_vram(RECT* rect);

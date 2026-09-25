@@ -41,10 +41,10 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
     wldcore_map_update_camera_direction_and_projection();
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_proposition_submit_marker_request((s32)&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_dispatch_display_object_list((s32)&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_dispatch_display_object_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
         (wldcore_display_object_t**)g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    wldcore_dispatch_display_object_list((s32)&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_dispatch_display_object_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
         (wldcore_display_object_t**)g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     world_gs_sortclear(0, 0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
@@ -69,7 +69,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
         g_wldcore_window_records[map_window_index].flags |= 0x10;
         g_main_system_flags = saved_system_flags | 0x3C20;
         g_wldcore_window_records[menu_window_index].flags |= 0x10;
-        wldcore_dispatch_display_object_list((s32)&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+        wldcore_dispatch_display_object_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
             (wldcore_display_object_t**)g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     }
     world_gs_draw_ot(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);

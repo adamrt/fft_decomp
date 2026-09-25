@@ -172,7 +172,7 @@ void require_render_gil_reward_ticker(void) {
     for (;;) {
         bank = i & 1;
         battle_thread_yield();
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank + 2]);
+        battle_gfx_draw_or_append_gpu_primitive(&areas[bank + 2]);
         for (pass = 0; pass < 2; pass++, tick++) {
             for (j = 0; j < digits; j++) {
                 POLY_FT4* pd;
@@ -243,15 +243,15 @@ void require_render_gil_reward_ticker(void) {
         }
         for (j = 0; j < digits; j++) {
             if (j * 16 < i) {
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&DIGITS[bank][j]);
-                battle_gfx_draw_or_append_gpu_primitive((s32*)&NEXT[bank][j]);
+                battle_gfx_draw_or_append_gpu_primitive(&DIGITS[bank][j]);
+                battle_gfx_draw_or_append_gpu_primitive(&NEXT[bank][j]);
             }
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank]);
+        battle_gfx_draw_or_append_gpu_primitive(&areas[bank]);
         if (digits >= 4 && i >= 0x31) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&g_require_reward_money_comma_polys[bank]);
+            battle_gfx_draw_or_append_gpu_primitive(&g_require_reward_money_comma_polys[bank]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&g_require_reward_money_sign_polys[bank]);
+        battle_gfx_draw_or_append_gpu_primitive(&g_require_reward_money_sign_polys[bank]);
         if (*g_require_input_controller & PSX_PAD_CIRCLE) {
             /* Confirm skips the settled-digit frame drawn at `finished`. */
             goto skipped;
@@ -260,14 +260,14 @@ void require_render_gil_reward_ticker(void) {
     }
 finished:
     for (j = 0; j < digits; j++) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&DIGITS[bank][j]);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&NEXT[bank][j]);
+        battle_gfx_draw_or_append_gpu_primitive(&DIGITS[bank][j]);
+        battle_gfx_draw_or_append_gpu_primitive(&NEXT[bank][j]);
     }
-    battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank]);
+    battle_gfx_draw_or_append_gpu_primitive(&areas[bank]);
     if (digits >= 4) {
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&g_require_reward_money_comma_polys[bank]);
+        battle_gfx_draw_or_append_gpu_primitive(&g_require_reward_money_comma_polys[bank]);
     }
-    battle_gfx_draw_or_append_gpu_primitive((s32*)&g_require_reward_money_sign_polys[bank]);
+    battle_gfx_draw_or_append_gpu_primitive(&g_require_reward_money_sign_polys[bank]);
 skipped:
     g_sound_effect_id_to_play = 0;
     i++;
@@ -275,7 +275,7 @@ skipped:
     for (;;) {
         bank = i & 1;
         battle_thread_yield();
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank + 2]);
+        battle_gfx_draw_or_append_gpu_primitive(&areas[bank + 2]);
         for (j = 0; j < digits; j++) {
             POLY_FT4* digit_quad;
 
@@ -297,14 +297,14 @@ skipped:
             digit_quad->v2 = 0x49;
             digit_quad->u3 = g_require_reward_money_digit_targets[j] * 13 + 13;
             digit_quad->v3 = 0x49;
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&DIGITS[bank][j]);
+            battle_gfx_draw_or_append_gpu_primitive(&DIGITS[bank][j]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank]);
+        battle_gfx_draw_or_append_gpu_primitive(&areas[bank]);
         tick++;
         if (digits >= 4) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&g_require_reward_money_comma_polys[bank]);
+            battle_gfx_draw_or_append_gpu_primitive(&g_require_reward_money_comma_polys[bank]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&g_require_reward_money_sign_polys[bank]);
+        battle_gfx_draw_or_append_gpu_primitive(&g_require_reward_money_sign_polys[bank]);
         if (tick == 60 || (*g_require_input_controller & PSX_PAD_CIRCLE)) {
             break;
         }
@@ -316,7 +316,7 @@ skipped:
     do {
         bank = i & 1;
         battle_thread_yield();
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank + 2]);
+        battle_gfx_draw_or_append_gpu_primitive(&areas[bank + 2]);
         for (j = 0; j < digits; j++) {
             POLY_FT4* digit_quad;
 
@@ -341,9 +341,9 @@ skipped:
             digit_quad->r0 = pass;
             digit_quad->g0 = pass;
             digit_quad->b0 = pass;
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&DIGITS[bank][j]);
+            battle_gfx_draw_or_append_gpu_primitive(&DIGITS[bank][j]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&areas[bank]);
+        battle_gfx_draw_or_append_gpu_primitive(&areas[bank]);
         /* Loading the base first keeps `la g_require_reward_money_comma_polys` above bank * 40. */
         commas = g_require_reward_money_comma_polys;
         comma = commas + bank;
@@ -355,9 +355,9 @@ skipped:
         sign->g0 = pass;
         sign->b0 = pass;
         if (digits >= 4) {
-            battle_gfx_draw_or_append_gpu_primitive((s32*)comma);
+            battle_gfx_draw_or_append_gpu_primitive(comma);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)sign);
+        battle_gfx_draw_or_append_gpu_primitive(sign);
         pass -= 12;
         i++;
     } while (pass >= 0x30);

@@ -61,7 +61,7 @@ void world_gs_sortflipsprite(GsSPRITE* sprite, void* ot, s32 pri);
  * as a USE-only pseudo. That pseudo and the part loop's folded entry test
  * (combine turns it into `blez count`, keeps `i = 0`, and leaves the slt
  * pseudo only a USE) get the unreferenced reload slots at 0x50 and 0x58. */
-void wldcore_gfx_draw_animated_display_object(wldcore_anim_object_t* object, void* ot) {
+void wldcore_gfx_draw_animated_display_object(wldcore_anim_object_t* object, GsOT* ot) {
     GsSPRITE sprite;
     CVECTOR color;
     wldcore_anim_sequence_t* sequence;

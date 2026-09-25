@@ -11,15 +11,13 @@
 s32 battle_unit_load_job_level(battle_stats_t* unit, s32 job_id, s32* out_slot) {
     s32 slot;
     s32 packed;
-    u8* levels;
     if ((u32)(job_id - JOB_ID_CHEMIST) < (JOB_ID_GENERIC_LAST - JOB_ID_CHEMIST + 1)) {
         *out_slot = job_id - JOB_ID_SQUIRE;
     } else {
         *out_slot = 0;
     }
     slot = *out_slot;
-    levels = (u8*)unit + (slot / 2);
-    packed = levels[0xD2];
+    packed = unit->job_levels[slot / 2];
     /* Reassigning packed in both arms keeps the target's `sra`; returning
      * `packed >> 4` directly lets GCC use the byte's range and emit `srl`. */
     if (!(slot & 1)) {

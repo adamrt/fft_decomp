@@ -235,20 +235,20 @@ void etc_graphic_build_game_over_polygons(
     scratch = stack.reverse_order;
     if (scratch != 0) {
         scratch = *(s32 volatile*)&primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x34));
-        battle_gfx_draw_or_append_gpu_primitive((s32*)primitives);
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x34));
+        battle_gfx_draw_or_append_gpu_primitive(primitives);
         scratch = *(s32 volatile*)&primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x9c));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x9c));
         scratch = *(s32 volatile*)&primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x68));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x68));
     } else {
         scratch = *(s32 volatile*)&primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x9c));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x9c));
         scratch = *(s32 volatile*)&primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x68));
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x68));
         scratch = *(s32 volatile*)&primitives;
-        battle_gfx_draw_or_append_gpu_primitive((s32*)(scratch + 0x34));
-        battle_gfx_draw_or_append_gpu_primitive((s32*)primitives);
+        battle_gfx_draw_or_append_gpu_primitive((scratch + 0x34));
+        battle_gfx_draw_or_append_gpu_primitive(primitives);
     }
 
 #undef primitive

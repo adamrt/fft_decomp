@@ -168,7 +168,7 @@ void battle_menu_run_unit_summary_panel_thread(void) {
         frame_record->offset_b[0] = -0x80;
         frame_record->offset_b[1] = value;
         SetDrawOffset(frame_record->draw_offset_b, frame_record->offset_b);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)frame_record->draw_offset_b);
+        battle_gfx_draw_or_append_gpu_primitive(frame_record->draw_offset_b);
         value = battle_thread_find_running_by_task(NATIVE_THREAD_TASK_UNIT_EDITOR_PANEL);
         if (value != 0 && battle_thread_is_running_8014cc94(value - 1) == 0) {
             value = 0;
@@ -183,32 +183,32 @@ void battle_menu_run_unit_summary_panel_thread(void) {
             frame_record->portrait.b0 = 0x80;
         }
         SetSemiTrans(&frame_record->portrait, 1);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->portrait);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->portrait);
         for (i = 3; i >= 0; i--) {
             if (value != 0) {
                 frame_record->sprites[i].clut = 0x7D3C;
             } else {
                 frame_record->sprites[i].clut = 0x7C3C;
             }
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_mode_1);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_1);
         for (i = 4; i < 7; i++) {
             if (value != 0) {
                 frame_record->sprites[i].clut = 0x7D3C;
             } else {
                 frame_record->sprites[i].clut = 0x7C3C;
             }
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->sprites[i]);
+            battle_gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
-        battle_gfx_draw_or_append_gpu_primitive((s32*)&frame_record->draw_mode_0);
+        battle_gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
             battle_menu_init_primitive_colors_palette_bank_1(frame_record->palette);
         } else {
             battle_menu_init_primitive_colors_palette_bank_0(frame_record->palette);
         }
         battle_menu_submit_numeric_display_frame_primitives(frame_record->palette);
-        battle_gfx_draw_or_append_gpu_primitive((s32*)frame_record->draw_offset_a);
+        battle_gfx_draw_or_append_gpu_primitive(frame_record->draw_offset_a);
     }
 exit:
     battle_thread_yield();

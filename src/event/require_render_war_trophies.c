@@ -139,7 +139,7 @@ void require_render_war_trophies(void) {
                     quad->v3 = sprite.v0 + 0x10;
                     quad->clut = sprite.clut;
                     quad->tpage = GetTPage(0, 0, 0x380, 0x120);
-                    battle_gfx_draw_or_append_gpu_primitive((s32*)quad);
+                    battle_gfx_draw_or_append_gpu_primitive(quad);
                 } else {
                     quad->x0 = require_reward_get_war_trophy_column_x(i, g_require_reward_war_trophy_entry_count)
                         + battle_text_count_decimal_digits(g_require_reward_war_trophy_entry_values[i]) * 7 + 0x12;
@@ -171,11 +171,11 @@ void require_render_war_trophies(void) {
                     quad->v3 = 0x18;
                     quad->clut = 0x7cbc;
                     quad->tpage = GetTPage(0, 0, 0x3c0, 0x100);
-                    battle_gfx_draw_or_append_gpu_primitive((s32*)quad);
+                    battle_gfx_draw_or_append_gpu_primitive(quad);
                 }
             }
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->banner);
-            battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_mode);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->banner);
+            battle_gfx_draw_or_append_gpu_primitive(&buffer->draw_mode);
             frame++;
             timer++;
         }

@@ -27,10 +27,10 @@ void wldcore_gfx_draw_world_frame_with_map(void) {
     wldcore_switch_to_stack((void*)0x1F8003FC);
     wldcore_gfx_draw_context_value_display(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_gfx_draw_calendar_date(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_proposition_submit_marker_request((s32)&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
-    wldcore_dispatch_display_object_list((s32)&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_proposition_submit_marker_request(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
+    wldcore_dispatch_display_object_list(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index],
         (wldcore_display_object_t**)g_wldcore_window_aux_render_object_queue, g_wldcore_window_aux_render_object_count);
-    wldcore_dispatch_display_object_list((s32)&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
+    wldcore_dispatch_display_object_list(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index],
         (wldcore_display_object_t**)g_wldcore_window_render_object_queue, g_wldcore_window_render_object_count);
     wldcore_restore_previous_stack();
     DrawSync(0);
