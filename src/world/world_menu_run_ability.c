@@ -71,7 +71,7 @@ void world_menu_run_ability(void) {
         g_world_menu_text_redraw_request = 1;
     }
     if (g_world_formation_current_menu == 2) {
-        running = world_menu_run_thread(15, (u8*)&g_world_ability_menu);
+        running = world_menu_run_thread(15, &g_world_ability_menu);
         g_world_ability_menu_initialized = running;
         g_world_formation_unit_cycle_mode = 2;
         if (running == 0) {

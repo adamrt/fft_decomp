@@ -32,7 +32,7 @@ void world_menu_run_numeric_editor_thread(void) {
     thread = (battle_menu_status_panel_frame_config_t*)g_world_threads[g_world_thread_current_id].function_parameter_1;
     g_world_input_frame_controller_input = world_input_get_menu_controller(0) + 1;
     if (g_world_thread_current_id == 12) {
-        buffer = (battle_menu_status_panel_numeric_buffer_t*)g_world_editor_numeric_state_a;
+        buffer = g_world_editor_numeric_state_a;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_a;
         upload_a = g_world_editor_numeric_entries_a;
@@ -40,7 +40,7 @@ void world_menu_run_numeric_editor_thread(void) {
         upload_c = g_world_editor_numeric_entries_c;
         entries = g_world_editor_numeric_descriptor_a;
     } else {
-        buffer = (battle_menu_status_panel_numeric_buffer_t*)g_world_editor_numeric_state_b;
+        buffer = g_world_editor_numeric_state_b;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_b;
         upload_a = g_world_editor_numeric_entries_d;

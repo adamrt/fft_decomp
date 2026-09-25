@@ -2,12 +2,12 @@
 #include "psx/types.h"
 
 u8* world_menu_script_draw_callback_sprite(u8* cmd) {
-    void* (*handler)(s32);
-    u8* entry;
+    world_item_icon_source_t* (*handler)(s32);
+    world_item_icon_source_t* entry;
     u8* dst;
     s32 index;
 
-    handler = (void* (*)(s32))g_world_menu_script_callbacks[cmd[2]];
+    handler = (world_item_icon_source_t * (*)(s32)) g_world_menu_script_callbacks[cmd[2]];
     if (g_world_menu_use_scroll_position == 0) {
         index = cmd[3];
     } else {
@@ -23,12 +23,13 @@ u8* world_menu_script_draw_callback_sprite(u8* cmd) {
         __asm__("" : "=r"(dst) : "0"(dst));
         dst[0] = cmd[4];
         dst[1] = cmd[5];
-        dst[2] = entry[4];
-        dst[3] = entry[6];
-        dst[4] = entry[0];
-        dst[5] = entry[2];
-        g_world_menu_clut = *(u16*)(entry + 8);
-        g_world_menu_texture_page = *(u16*)(entry + 10);
+        /* The icon source stores halfwords; the menu script copies their low bytes. */
+        dst[2] = *(u8*)&entry->w;
+        dst[3] = *(u8*)&entry->h;
+        dst[4] = *(u8*)&entry->u;
+        dst[5] = *(u8*)&entry->v;
+        g_world_menu_clut = entry->clut;
+        g_world_menu_texture_page = entry->tpage;
         world_menu_script_draw_sprite(dst - 3);
     }
     return cmd + cmd[1];
