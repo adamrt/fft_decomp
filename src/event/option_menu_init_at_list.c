@@ -60,7 +60,7 @@ void option_menu_init_at_list(option_at_menu_t* menu) {
     text = g_option_menu_at_list_text;
 
     for (index = 0; index < 0x28; index++) {
-        u8* unit;
+        battle_stats_t* unit;
         s32 name_index;
 
         if ((g_option_menu_at_list_descriptors[index].flags & 0x1f) == 0x1f) {
@@ -76,7 +76,7 @@ void option_menu_init_at_list(option_at_menu_t* menu) {
         /* The pointer must lead the index in the sum to match the target's
            operand order on the address add. */
         for (name_index = 0; name_index < 0x10; name_index++) {
-            u8 character = (unit + name_index)[0x12c];
+            u8 character = unit->name[name_index];
             *text = character;
             if ((character & 0xfe) == 0xfe) {
                 break;
@@ -110,7 +110,7 @@ void option_menu_init_at_list(option_at_menu_t* menu) {
             }
         }
 
-        if ((unit[0x1ba] & 0x30) != 0) {
+        if ((unit->initial_team_flags & 0x30) != 0) {
             g_option_menu_at_list_flags[entry_count] = 8;
         }
         entry_count++;
