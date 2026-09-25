@@ -1,3 +1,5 @@
+#include "fft/main_file.h"
+#include "fft/main_runtime.h"
 
 void* main_file_get_bin_as_tim(int sector, int size) {
     void* result = main_file_get_tim(sector, size);
