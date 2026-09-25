@@ -27,7 +27,7 @@ void require_render_war_trophies(void) {
     POLY_FT4* quad;
     require_war_trophy_primitives_t* buffer;
     require_war_trophy_primitives_t* prims;
-    void* image;
+    u32* image;
     s32 frame;
     s32 loaded;
     s32 timer;

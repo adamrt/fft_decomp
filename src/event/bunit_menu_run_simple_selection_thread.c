@@ -13,7 +13,7 @@ void bunit_menu_run_simple_selection_thread(void) {
     battle_menu_window_record_t records[2];
     s32 input;
     battle_menu_idle_action_entry_t* state;
-    void* buffer;
+    u32* buffer;
     s32 i;
     s32 fresh;
     battle_menu_window_record_t* record;

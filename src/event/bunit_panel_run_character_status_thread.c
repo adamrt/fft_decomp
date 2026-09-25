@@ -23,7 +23,7 @@ void bunit_panel_run_character_status_thread(void) {
     battle_menu_status_panel_buffer_t* screen;
     battle_menu_status_panel_buffer_t* base;
     battle_menu_status_panel_slot_state_t* state;
-    u8* cursor;
+    u8* cursor; /* Keep the screen base in a register; a SPRT* adds 0x1a0 before the loop. */
     s32 frame;
     s32 mode;
     s32 i;

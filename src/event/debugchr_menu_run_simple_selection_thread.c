@@ -17,7 +17,7 @@ void debugchr_menu_run_simple_selection_thread(void) {
     s32 done = 0;
     s32 frame;
     s32 redraw;
-    void* render;
+    u32* render;
     s32 frame_parity;
     s32 frame_offset;
     battle_menu_idle_action_entry_t* state = (battle_menu_idle_action_entry_t*)battle_thread_get_current_parameter_1();

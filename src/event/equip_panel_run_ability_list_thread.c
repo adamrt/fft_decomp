@@ -87,14 +87,14 @@ void equip_panel_run_ability_list_thread(void) {
                 battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
                     (const battle_image_location_t*)g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
-                    (const world_gfx_image_load_parameters_t*)g_equip_panel_label_layouts_mode0 + i);
+                    g_equip_panel_label_layouts_mode0 + i);
             }
         } else {
             for (i = 0; i < 19; i++) {
                 battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
                     (const battle_image_location_t*)g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
-                    (const world_gfx_image_load_parameters_t*)g_equip_panel_label_layouts_mode1 + i);
+                    g_equip_panel_label_layouts_mode1 + i);
             }
         }
         if (state->generic_monster != 0) {

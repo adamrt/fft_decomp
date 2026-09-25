@@ -366,11 +366,11 @@ extern battle_menu_status_panel_offset_pair_t g_equip_character_status_frame_rec
 extern u8 g_equip_character_status_draw_area_rect[];
 extern u8 g_equip_panel_text_upload_rect_a[];
 extern u8 g_equip_panel_text_upload_rect_b[];
-extern u8 g_equip_panel_label_layouts_mode0[];
-extern u8 g_equip_panel_label_layouts_mode1[];
-extern u8 g_equip_panel_label_layouts_mode2[];
-extern u8 g_equip_panel_label_layouts_mode3[];
-extern u8 g_equip_panel_item_icon_layouts[];
+extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode0[];
+extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode1[];
+extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode2[];
+extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode3[];
+extern world_gfx_image_load_parameters_t g_equip_panel_item_icon_layouts[];
 extern s16 g_equip_menu_text_redraw_flag;
 /* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
  * (in equip_run_item_type_order_mode) the item-type order menus. Each is

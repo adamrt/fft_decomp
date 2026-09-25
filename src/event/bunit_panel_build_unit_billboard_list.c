@@ -5,22 +5,12 @@
 #include "fft/unit_slots.h"
 #include "psx/types.h"
 
-typedef struct {
-    u8 character_identity; /* 0x00 */
-    u8 entd_slot;          /* 0x01 */
-    u8 _pad02[4];          /* 0x02 */
-    u8 unit_flags;         /* 0x06 */
-    u8 _pad07[0x51];       /* 0x07 */
-    u8 current_status_1;   /* 0x58 */
-    u8 current_status_2;   /* 0x59 */
-} bunit_unit_stats_t;
-
 /* Copy every battle unit that is not an egg, crystal or treasure into the next
  * status billboard record, store the shown-plus-egg unit count in each
  * record and sort the shown list; returns the number of shown units. `mode`
  * and `unit_data` are not read. */
 s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode) {
-    bunit_unit_stats_t* unit;
+    battle_stats_t* unit;
     s32 i;
     s32 shown;
     s32 total;
@@ -34,13 +24,15 @@ s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode
     i = 0;
     shown_index = g_bunit_shown_unit_indices;
     record_offset = 0;
+    /* Keep status-byte reads separate; GCC otherwise merges the two tests into one halfword load. */
     do {
-        unit = (bunit_unit_stats_t*)battle_unit_get_stats_from_battle_id(i);
+        unit = battle_unit_get_stats_from_battle_id(i);
         if ((unit != 0) && (unit->entd_slot != BATTLE_ENTD_SLOT_NONE)) {
             if (unit->unit_flags & UNIT_FLAG_EGG) {
                 total++;
-            } else if (!(unit->current_status_1 & BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_CRYSTAL))
-                && !(unit->current_status_2 & BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_TREASURE))) {
+            } else if (!(*(volatile u8*)&unit->status_sets.current[0]
+                           & BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_CRYSTAL))
+                && !(unit->status_sets.current[1] & BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_TREASURE))) {
                 total++;
                 bunit_panel_copy_unit_data_to_billboard(
                     unit, (bunit_unit_data_t*)(g_bunit_unit_records + record_offset), shown);

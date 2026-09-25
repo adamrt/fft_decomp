@@ -3,20 +3,6 @@
 #include "fft/bunit.h"
 #include "psx/types.h"
 
-/* Field view of bunit_unit_data_t for offsets the shared header does not name
- * yet: +0x02 selects the name-plate CLUT and +0x71 is passed as the misc ID of
- * battle_gfx_get_unit_sprite_frame_and_vram_ids. */
-typedef struct {
-    u8 _pad00[2];
-    s16 team_kind; /* 0x02: 1 enemy (bunit_unit_record_t.team_kind) */
-    u8 _pad04[0x28];
-    s16 roster_id; /* 0x2C */
-    u8 _pad2e[0x43];
-    u8 misc_unit_id; /* 0x71: bunit_unit_record_t.misc_unit_id */
-    u8 _pad72;
-    u8 formation_order_key; /* 0x73 */
-} bunit_unit_sprite_view_t;
-
 /* Stack view of bunit_oriented_quad_t whose clut/tpage slots receive the
  * sprite query's palette and spritesheet IDs directly; the query's last two
  * halfwords extend it to 0x18 bytes. */
@@ -42,8 +28,6 @@ typedef struct {
     u16 unk_2_14 : 2;
 } bunit_sprite_cell_t;
 
-#define BUNIT_UNIT(index) ((bunit_unit_sprite_view_t*)g_bunit_unit_data[index])
-
 /* Draw a unit's current SHP frame at (x, y), then its two name-plate quads.
  *
  * Brightness falls off with distance from the animated focal point; the
@@ -65,7 +49,7 @@ void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
 
     i = bunit_gfx_calculate_distance_falloff(x, y, 0xC8, 0x50);
     rgb[0] = rgb[1] = rgb[2] = i > 0x80 ? 0x80 : i;
-    frame = battle_gfx_get_unit_sprite_frame_and_vram_ids(BUNIT_UNIT(unit)->misc_unit_id, &quad.query);
+    frame = battle_gfx_get_unit_sprite_frame_and_vram_ids(g_bunit_unit_data[unit]->misc_unit_id, &quad.query);
     base_y = (quad.query.graphic_height >> 1) + 0x16;
     if (frame == (u8*)-1) {
         return;
@@ -75,7 +59,7 @@ void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         size = cells[i].size;
         quad.uw = quad.w = g_bunit_sprite_cell_sizes[size][0];
         quad.vh = quad.h = g_bunit_sprite_cell_sizes[size][1];
-        value = battle_unit_get_camera_facing_quadrant_by_battle_id(BUNIT_UNIT(unit)->roster_id);
+        value = battle_unit_get_camera_facing_quadrant_by_battle_id(g_bunit_unit_data[unit]->roster_id);
         dx = cells[i].dx;
         orientation = 0;
         if (value >= 2) {
@@ -86,13 +70,13 @@ void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
          * reassociate it onto x. */
         quad.x = x + (s16)(dx + 0x1C);
         quad.y = cells[i].dy + (y + base_y);
-        if (BUNIT_UNIT(unit)->formation_order_key & 0x80) {
+        if (g_bunit_unit_data[unit]->formation_order_key & 0x80) {
             quad.y -= 8;
         }
         quad.u = cells[i].cell % 32 * 8;
         quad.v = cells[i].cell / 32 * 8 + quad.query.graphic_y_offset;
         value = 7;
-        if (BUNIT_UNIT(unit)->formation_order_key & 0x40) {
+        if (g_bunit_unit_data[unit]->formation_order_key & 0x40) {
             value = 8;
             if (i >= 3) {
                 value = 6;
@@ -100,7 +84,7 @@ void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         }
         bunit_gfx_enqueue_oriented_textured_quad((bunit_oriented_quad_t*)&quad, rgb, orientation, 0, value);
     }
-    if (BUNIT_UNIT(unit)->formation_order_key & 0x40) {
+    if (g_bunit_unit_data[unit]->formation_order_key & 0x40) {
         return;
     }
     g_bunit_unit_shadow_sprite.x = x + 0x12;
@@ -109,7 +93,7 @@ void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     bunit_gfx_enqueue_oriented_textured_quad(&g_bunit_unit_shadow_sprite, 0, 0, 1, 5);
     g_bunit_unit_dot_sprite.x = x;
     g_bunit_unit_dot_sprite.y = y;
-    if (BUNIT_UNIT(unit)->team_kind == 1) {
+    if (g_bunit_unit_data[unit]->team_kind == 1) {
         g_bunit_unit_dot_sprite.clut = 0x3F12;
     } else {
         g_bunit_unit_dot_sprite.clut = 0x3F13;

@@ -185,11 +185,11 @@ extern battle_menu_status_panel_offset_pair_t g_attack_character_status_frame_re
 extern u8 g_attack_character_status_draw_area_rect[];
 extern u8 g_attack_panel_text_upload_rect_a[];
 extern u8 g_attack_panel_text_upload_rect_b[];
-extern u8 g_attack_panel_label_layouts_mode0[];
-extern u8 g_attack_panel_label_layouts_mode1[];
-extern u8 g_attack_panel_label_layouts_mode2[];
-extern u8 g_attack_panel_label_layouts_mode3[];
-extern u8 g_attack_panel_item_icon_layouts[];
+extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode0[];
+extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode1[];
+extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode2[];
+extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode3[];
+extern world_gfx_image_load_parameters_t g_attack_panel_item_icon_layouts[];
 extern s32 g_attack_map_title_closing_past_midpoint;
 extern s32 g_attack_deploy_active_cursor;
 extern s32 g_attack_deploy_grid_slide_x;
