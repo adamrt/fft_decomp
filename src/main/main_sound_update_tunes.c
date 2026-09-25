@@ -12,35 +12,35 @@ s32 main_sound_update_tunes(void) {
 
     tune = g_main_sound_music.slots.tune;
     if (tune & 0x80) {
-        s32* tune_handles;
-        s32* handle;
+        suzuki_music_t** tune_handles;
+        suzuki_music_t** handle;
 
         if (SuzukiGetMusicPlaying(g_main_sound_music.state.current_music) != 0) {
             return 0;
         }
         tune_index = g_main_sound_music.slots.tune & 0x3f;
         g_main_sound_music.slots.tune &= 0x7f;
-        tune_handles = &g_main_sound_music.slots.handles[2];
+        tune_handles = (suzuki_music_t**)&g_main_sound_music.slots.handles[2];
         handle = &tune_handles[tune_index];
         if (*handle == 0) {
-            *handle = (s32)SuzukiPutPlaySMD(g_main_sound_music.slots.smd[2 + tune_index]);
+            *handle = SuzukiPutPlaySMD(g_main_sound_music.slots.smd[2 + tune_index]);
         }
-        main_smd_reset_music((suzuki_music_t*)*handle, 0x7f, 0);
+        main_smd_reset_music(*handle, 0x7f, 0);
         return 1;
     }
     if (tune != 0) {
-        s32* tune_handles;
-        s32* handle;
+        suzuki_music_t** tune_handles;
+        suzuki_music_t** handle;
 
         tune_index = tune & 0x3f;
-        tune_handles = &g_main_sound_music.slots.handles[2];
+        tune_handles = (suzuki_music_t**)&g_main_sound_music.slots.handles[2];
         handle = &tune_handles[tune_index];
-        if (SuzukiGetMusicPlaying((suzuki_music_t*)*handle) != 0) {
+        if (SuzukiGetMusicPlaying(*handle) != 0) {
             return 0;
         }
-        SuzukiDeallocateMUSChannels((suzuki_music_t*)*handle);
+        SuzukiDeallocateMUSChannels(*handle);
         if (*handle != 0) {
-            SuzukiUnloadMUS((suzuki_music_t*)*handle);
+            SuzukiUnloadMUS(*handle);
         }
         *handle = 0;
         g_main_sound_music.slots.tune = 0;
