@@ -8,8 +8,6 @@ typedef struct world_menu_value_remap {
     u8 matches[3];  /* 0x02 */
 } world_menu_value_remap_t;
 
-enum { WORLD_UNKNOWN_ROW_BYTES = 17 };
-
 extern world_menu_value_remap_t g_world_menu_value_remap_table[8];
 
 /* Target 0x800f302c. When menu_index is in the 12-entry lookup table, remaps
@@ -33,11 +31,9 @@ void world_menu_remap_value_for_stored_unit(s32 menu_index) {
     row = g_world_menu_unit_selection_rows[g_world_unit_view_battle_id].bytes;
     for (k = 0, remap = g_world_menu_value_remap_table; k < 8; remap++, k++) {
         if (menu_index == g_world_menu_value_remap_table[k].menu_index) {
-            /* Byte-indexed scan of matches[]: the target reduces the index to
-             * a pointer with a signed bound (slt), which a pointer loop does
-             * not produce. */
+            /* Keep the signed index bound used by the target. */
             for (m = 2; m < 5; m++) {
-                if (*row == ((u8*)remap)[m]) {
+                if (*row == remap->matches[m - 2]) {
                     *row = g_world_menu_value_remap_table[k].replacement;
                     break;
                 }
