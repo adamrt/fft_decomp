@@ -1,6 +1,6 @@
 #include "fft/open.h"
 
-typedef struct open_movie_frame_header_t {
+typedef struct open_movie_frame_header {
     u8 padding_00[8];
     u32 frame_number;
     u8 padding_0c[4];
@@ -10,7 +10,7 @@ typedef struct open_movie_frame_header_t {
 
 s32 StGetNext(void** frame_data, open_movie_frame_header_t** header);
 
-typedef struct open_movie_acquire_locals_t {
+typedef struct open_movie_acquire_locals {
     void* frame_data;
     open_movie_frame_header_t* header;
     RECT clear_rect;
