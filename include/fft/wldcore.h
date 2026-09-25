@@ -865,7 +865,7 @@ typedef struct wldcore_menu_window_pair_render_level {
     s32 first_window;
     s32 second_window; /* 0x04 */
     s32 render_index;  /* 0x08 */
-    s32 _unknown_0c;   /* 0x0c; cleared by 0x800712b0 */
+    s32 panel_rows;    /* 0x0c; cleared by 0x800712b0 */
 } wldcore_menu_window_pair_render_level_t;
 
 /* Per-row flag column of the world list panels; the list steps compare it

@@ -17,9 +17,9 @@ void open_restore_birthday_date_menu(open_birthday_date_state_t* menu) {
     g_open_gfx_render_records_36[cursor].frame_timer = 0;
     g_open_gfx_render_records_36[cursor].frame_index = 0;
 
-    g_open_gfx_render_records_36[menu->_unknown_04].color.r = 0x80;
-    g_open_gfx_render_records_36[menu->_unknown_04].color.g = 0x80;
-    g_open_gfx_render_records_36[menu->_unknown_04].color.b = 0x80;
+    g_open_gfx_render_records_36[menu->label_record].color.r = 0x80;
+    g_open_gfx_render_records_36[menu->label_record].color.g = 0x80;
+    g_open_gfx_render_records_36[menu->label_record].color.b = 0x80;
 
     /* Keeps the base in its own register ($a2) at this position; CSE otherwise folds each store through $at. */
     records_56 = g_open_gfx_render_records_56;

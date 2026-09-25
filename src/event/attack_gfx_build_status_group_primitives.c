@@ -13,10 +13,10 @@ extern attack_editor_sprite_base_t g_attack_panel_status_offsets[];
 /* Rebuild and submit the scaled sprite quads of every visible editor entry,
  * advancing each entry's fade/blink state by one frame.
  *
- * The y bias is read as `*D_801CF5F8[entry]`: forming the row address first
+ * The y bias is read as `*g_attack_panel_status_y_offsets[entry]`: forming the row address first
  * makes the outer loop keep it as a spilled pointer induction variable
  * (0x30(sp), reloaded into $s4 per entry) as the target does; a plain
- * `D_801CF5F8[entry][0]` folds the table into each load instead. The draw
+ * `g_attack_panel_status_y_offsets[entry][0]` folds the table into each load instead. The draw
  * point pointer is loop-invariant and is hoisted into $s6. */
 void attack_gfx_build_status_group_primitives(POLY_FT4* poly) {
     s32 entry;

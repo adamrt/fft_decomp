@@ -24,7 +24,7 @@ void card_card_build_save_file_header(s32 slot, s32 level, card_save_header_t* h
     header->magic1 = CARD_SAVE_HEADER_MAGIC_C;
     header->icon_flags = CARD_SAVE_HEADER_ICON_ONE_FRAME;
     header->block_count = CARD_SAVE_HEADER_BLOCK_COUNT_ONE;
-    memset(header->_unknown_44, 0, 0x1C);
+    memset(header->reserved, 0, 0x1C);
     slot++;
     bcopy(g_card_save_title_template, header->title, 0x16);
 

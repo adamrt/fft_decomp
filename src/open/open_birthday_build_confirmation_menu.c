@@ -20,9 +20,9 @@ void open_birthday_build_confirmation_menu(const open_birthday_date_state_t* men
     g_open_gfx_render_records_36[cursor].frame_timer = 0;
     g_open_gfx_render_records_36[cursor].frame_index = 0;
 
-    g_open_gfx_render_records_36[state->_unknown_04].color.r = 0x40;
-    g_open_gfx_render_records_36[state->_unknown_04].color.g = 0x40;
-    g_open_gfx_render_records_36[state->_unknown_04].color.b = 0x40;
+    g_open_gfx_render_records_36[state->label_record].color.r = 0x40;
+    g_open_gfx_render_records_36[state->label_record].color.g = 0x40;
+    g_open_gfx_render_records_36[state->label_record].color.b = 0x40;
 
     g_open_gfx_render_records_36[state->cursor_record_36].palette = 7;
 

@@ -110,7 +110,7 @@ void battle_map_modify_palette(
                     break;
                 case 10:
                     for (i = 15; i >= 0; i--) {
-                        g_battle_map_palette_state.banks[palette_index].animations[i]._unknown_04[0] = 0;
+                        g_battle_map_palette_state.banks[palette_index].animations[i].repeat = 0;
                     }
                     return;
                 }
@@ -159,10 +159,10 @@ void battle_map_modify_palette(
                 animation->delay_counter = 0;
                 animation->mode = amount;
                 if (command == 9) {
-                    animation->_unknown_04[0] = 1;
-                    animation->_unknown_04[1] = red;
-                    animation->_unknown_04[2] = green;
-                    animation->_unknown_04[3] = blue;
+                    animation->repeat = 1;
+                    animation->repeat_rgb[0] = red;
+                    animation->repeat_rgb[1] = green;
+                    animation->repeat_rgb[2] = blue;
                 }
             }
             return;
@@ -272,7 +272,7 @@ void battle_map_modify_palette(
                         >> 10;
                     break;
                 case 10:
-                    g_battle_map_palette_state.banks[palette_index].animations[color_index]._unknown_04[0] = 0;
+                    g_battle_map_palette_state.banks[palette_index].animations[color_index].repeat = 0;
                     return;
                 }
                 if (out_red >= 0x20) {
@@ -318,10 +318,10 @@ void battle_map_modify_palette(
             animation->delay_counter = 0;
             animation->mode = amount;
             if (command == 9) {
-                animation->_unknown_04[0] = 1;
-                animation->_unknown_04[1] = red;
-                animation->_unknown_04[2] = green;
-                animation->_unknown_04[3] = blue;
+                animation->repeat = 1;
+                animation->repeat_rgb[0] = red;
+                animation->repeat_rgb[1] = green;
+                animation->repeat_rgb[2] = blue;
             }
             return;
         }

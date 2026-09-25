@@ -7,7 +7,7 @@ void battle_unit_save_previous_state(battle_unit_misc_data_t* unit) {
     u16 facing = unit->facing;
     u8 mount_value = unit->mount_state;
     u8 mount_id = unit->mount_partner_misc_id;
-    u8 field_11e = unit->current_unit_id_plus_one;
+    u8 current_unit_id_plus_one = unit->current_unit_id_plus_one;
 
     unit->previous_map_x = x;
     unit->previous_map_y = y;
@@ -15,5 +15,5 @@ void battle_unit_save_previous_state(battle_unit_misc_data_t* unit) {
     unit->previous_facing = facing;
     unit->previous_mount_state = mount_value;
     unit->previous_mount_partner_misc_id = mount_id;
-    unit->previous_unit_id_plus_one = field_11e;
+    unit->previous_unit_id_plus_one = current_unit_id_plus_one;
 }

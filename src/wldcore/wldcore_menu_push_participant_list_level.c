@@ -45,7 +45,7 @@ void wldcore_menu_push_participant_list_level(s32 proposition) {
         = g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[depth].window_pair_render.render_index]
               .base_y
         - -(g_wldcore_menu_cursor_states[15].selected_index * 16)
-        - -(g_wldcore_menu_stack_records_next[depth].window_pair_render._unknown_0c * 16 + 0xE);
+        - -(g_wldcore_menu_stack_records_next[depth].window_pair_render.panel_rows * 16 + 0xE);
     count = g_main_active_propositions[proposition].participant_count;
     g_wldcore_menu_stack_records_next[depth].list_window.entry_count = count;
     if (count < g_wldcore_menu_cursor_states[15].selected_index + 1) {

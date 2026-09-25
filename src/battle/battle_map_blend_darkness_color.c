@@ -83,7 +83,7 @@ void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 
         target_blue = g_battle_map_darkness_color.blue << 16;
         break;
     case 10:
-        g_battle_map_darkness_transition._unknown_04[0] = 0;
+        g_battle_map_darkness_transition.repeat = 0;
         return;
     }
 
@@ -124,10 +124,10 @@ void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 
         g_battle_map_darkness_transition.tick = 0;
         g_battle_map_darkness_transition.period = frame_duration;
         if (mode == 9) {
-            g_battle_map_darkness_transition._unknown_04[0] = 1;
-            g_battle_map_darkness_transition._unknown_04[1] = red;
-            g_battle_map_darkness_transition._unknown_04[2] = green;
-            g_battle_map_darkness_transition._unknown_04[3] = blue;
+            g_battle_map_darkness_transition.repeat = 1;
+            g_battle_map_darkness_transition.repeat_rgb[0] = red;
+            g_battle_map_darkness_transition.repeat_rgb[1] = green;
+            g_battle_map_darkness_transition.repeat_rgb[2] = blue;
         }
     } else {
         g_battle_map_darkness_transition.active = 0;

@@ -120,12 +120,11 @@ void world_formation_build_unit_record(battle_stats_t* unit, world_formation_uni
         }
     }
     bcopy(party->name, record->name, sizeof(record->name));
-    bcopy(unit->support_abilities, record->support_sets,
-        sizeof(record->support_sets) + sizeof(record->support_sets_3) + sizeof(record->_unknown_127));
+    bcopy(unit->support_abilities, record->support_abilities, sizeof(record->support_abilities));
     record->proposition_status = party->proposition_status;
     record->graphic_variant = unit->graphic_variant;
     record->birthday = *(u16*)&unit->birthday & 0x1ff;
     record->egg_color = party->egg_color;
-    record->two_handed
-        = world_item_check_two_hands_for_weapons((struct weapon_pair*)record->equipment, record->support_sets_3 & 2);
+    record->two_handed = world_item_check_two_hands_for_weapons(
+        (struct weapon_pair*)record->equipment, record->support_abilities[2] & 2);
 }

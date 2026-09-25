@@ -104,7 +104,7 @@ void equip_unit_build_data_from_battle_stats(battle_stats_t* stats, equip_unit_d
     }
     unit->formation_index_78 = stats->formation_index;
     bcopy(stats->equipment_categories, unit->equipment_categories, 4);
-    bcopy(stats->support_abilities, &unit->support_sets_1, 4);
+    bcopy(stats->support_abilities, unit->support_abilities, 4);
     unit->two_handing = equip_unit_is_two_handing_weapon(
         (weapon_pair_t*)unit->equipment, stats->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
 }

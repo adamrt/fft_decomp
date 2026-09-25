@@ -5,9 +5,9 @@
  * indexed by battle_effect_secondary_data_t::own_slot_id. It carries the same
  * roles the generic trap spawner keeps in the effect record itself. */
 typedef struct battle_effect_trap_state {
-    s32 count;       /* 0x00; slots started so far */
-    u16 _unknown_04; /* 0x04; reaches 1 when the effect is finished */
-    u8 ids[2];       /* 0x06 */
+    s32 count;        /* 0x00; slots started so far */
+    u16 finish_timer; /* 0x04; reaches 1 when the effect is finished */
+    u8 ids[2];        /* 0x06 */
 } battle_effect_trap_state_t;
 
 extern battle_effect_trap_state_t g_battle_effect_death_poof_states[];
@@ -21,7 +21,7 @@ enum {
 /*
  * Death Poof secondary effect (0x0f) handler for the two-slot trap group 4: it
  * starts this frame's share of the group's effect slots, steps them with a
- * (0, 0x1000, 0) on-hit vector and finishes once the spawn state's field_04
+ * (0, 0x1000, 0) on-hit vector and finishes once the spawn state's finish_timer
  * reaches 1.
  *
  * The unrecognized-phase return path preserves its second incoming argument
@@ -48,7 +48,7 @@ s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) 
         for (i = 0; i < BATTLE_EFFECT_TRAP_SLOT_COUNT; i++) {
             state->ids[i] = 0;
         }
-        state->_unknown_04 = 0;
+        state->finish_timer = 0;
         g_battle_effect_current_secondary->timer = 0;
         g_battle_effect_current_secondary->phase = BATTLE_SECONDARY_EFFECT_EXECUTING;
         result = 1;
@@ -108,10 +108,10 @@ s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) 
         battle_effect_copy_second_section_to_on_hit_data();
         current = g_battle_effect_current_secondary;
         current->timer = current->timer + 1;
-        result = state->_unknown_04 != 1;
+        result = state->finish_timer != 1;
         if (state->count == 0
             && (s16)current->timer > (s32)g_battle_effect_groups[BATTLE_EFFECT_TRAP_GROUP].spawn_start_frame) {
-            state->_unknown_04 = state->_unknown_04 + 1;
+            state->finish_timer = state->finish_timer + 1;
         }
         break;
     }

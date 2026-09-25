@@ -25,7 +25,7 @@ s32 battle_gfx_load_misc_unit_into_evtchr_slot(s32 misc_id, s32 slot) {
         if (((battle_gfx_vram_slot_t*)((u8*)g_battle_gfx_vram_slots + current_image_offset))->evtchr_load_marker == 0) {
             image_data = ((battle_gfx_vram_slot_t*)((u8*)g_battle_gfx_vram_slots + image_offset))->image_data;
             battle_gfx_decompress_attack_spritesheet(
-                g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot]._unknown_0002, image_data);
+                g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].compressed_attack_image, image_data);
             LoadImage(&g_battle_gfx_vram_slots[slot].image_rect, (u32*)image_data);
             rect.x = (unit->spritesheet_vram_slot >> 3) * 64 + 0x340;
             rect.y = (unit->spritesheet_vram_slot & 7) * 32 + 0x100;

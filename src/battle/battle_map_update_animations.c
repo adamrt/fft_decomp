@@ -91,8 +91,8 @@ void battle_map_update_animations(void) {
                         battle_map_blend_background_gradient_color(8, repeat[0], 0, 0, 0);
                         repeat[1] = 2;
                     } else if (repeat[1] == 2) {
-                        battle_map_blend_background_gradient_color(9, repeat[0], gradient_transition->_unknown_04[1],
-                            gradient_transition->_unknown_04[2], gradient_transition->_unknown_04[3]);
+                        battle_map_blend_background_gradient_color(9, repeat[0], gradient_transition->repeat_rgb[0],
+                            gradient_transition->repeat_rgb[1], gradient_transition->repeat_rgb[2]);
                         repeat[1] = 1;
                     } else {
                         goto deactivate;
@@ -104,8 +104,8 @@ void battle_map_update_animations(void) {
                 battle_map_blend_background_gradient_color(8, repeat[0], 0, 0, 0);
                 repeat[1] = 2;
             } else if (repeat[1] == 2) {
-                battle_map_blend_background_gradient_color(9, repeat[0], gradient_transition->_unknown_04[1],
-                    gradient_transition->_unknown_04[2], gradient_transition->_unknown_04[3]);
+                battle_map_blend_background_gradient_color(9, repeat[0], gradient_transition->repeat_rgb[0],
+                    gradient_transition->repeat_rgb[1], gradient_transition->repeat_rgb[2]);
                 repeat[1] = 1;
             } else {
             /* Shared with the first arm so this store starts a fresh CSE
@@ -135,30 +135,30 @@ void battle_map_update_animations(void) {
             if (++g_battle_map_ambient_light_transition.tick >= g_battle_map_ambient_light_transition.period >> 2) {
                 g_battle_map_ambient_light_transition.tick = 0;
                 if (++g_battle_map_ambient_light_transition.phase >= 0x20) {
-                    if (g_battle_map_ambient_light_transition._unknown_04[0] == 1) {
+                    if (g_battle_map_ambient_light_transition.repeat == 1) {
                         battle_map_blend_ambient_light_color(8, g_battle_map_ambient_light_transition.period, 0, 0, 0);
-                        g_battle_map_ambient_light_transition._unknown_04[0] = 2;
-                    } else if (g_battle_map_ambient_light_transition._unknown_04[0] == 2) {
+                        g_battle_map_ambient_light_transition.repeat = 2;
+                    } else if (g_battle_map_ambient_light_transition.repeat == 2) {
                         battle_map_blend_ambient_light_color(9, g_battle_map_ambient_light_transition.period,
-                            g_battle_map_ambient_light_transition._unknown_04[1],
-                            g_battle_map_ambient_light_transition._unknown_04[2],
-                            g_battle_map_ambient_light_transition._unknown_04[3]);
-                        g_battle_map_ambient_light_transition._unknown_04[0] = 1;
+                            g_battle_map_ambient_light_transition.repeat_rgb[0],
+                            g_battle_map_ambient_light_transition.repeat_rgb[1],
+                            g_battle_map_ambient_light_transition.repeat_rgb[2]);
+                        g_battle_map_ambient_light_transition.repeat = 1;
                     } else {
                         transition->active = 0;
                     }
                 }
             }
         } else if (++g_battle_map_ambient_light_transition.phase >= g_battle_map_ambient_light_transition.period * 8) {
-            if (g_battle_map_ambient_light_transition._unknown_04[0] == 1) {
+            if (g_battle_map_ambient_light_transition.repeat == 1) {
                 battle_map_blend_ambient_light_color(8, g_battle_map_ambient_light_transition.period, 0, 0, 0);
-                g_battle_map_ambient_light_transition._unknown_04[0] = 2;
-            } else if (g_battle_map_ambient_light_transition._unknown_04[0] == 2) {
+                g_battle_map_ambient_light_transition.repeat = 2;
+            } else if (g_battle_map_ambient_light_transition.repeat == 2) {
                 battle_map_blend_ambient_light_color(9, g_battle_map_ambient_light_transition.period,
-                    g_battle_map_ambient_light_transition._unknown_04[1],
-                    g_battle_map_ambient_light_transition._unknown_04[2],
-                    g_battle_map_ambient_light_transition._unknown_04[3]);
-                g_battle_map_ambient_light_transition._unknown_04[0] = 1;
+                    g_battle_map_ambient_light_transition.repeat_rgb[0],
+                    g_battle_map_ambient_light_transition.repeat_rgb[1],
+                    g_battle_map_ambient_light_transition.repeat_rgb[2]);
+                g_battle_map_ambient_light_transition.repeat = 1;
             } else {
                 transition->active = 0;
             }
@@ -182,29 +182,29 @@ void battle_map_update_animations(void) {
             if (++g_battle_map_darkness_transition.tick >= g_battle_map_darkness_transition.period >> 2) {
                 g_battle_map_darkness_transition.tick = 0;
                 if (++g_battle_map_darkness_transition.phase >= 0x20) {
-                    if (g_battle_map_darkness_transition._unknown_04[0] == 1) {
+                    if (g_battle_map_darkness_transition.repeat == 1) {
                         battle_map_blend_darkness_color(8, g_battle_map_darkness_transition.period, 0, 0, 0);
-                        g_battle_map_darkness_transition._unknown_04[0] = 2;
-                    } else if (g_battle_map_darkness_transition._unknown_04[0] == 2) {
+                        g_battle_map_darkness_transition.repeat = 2;
+                    } else if (g_battle_map_darkness_transition.repeat == 2) {
                         battle_map_blend_darkness_color(9, g_battle_map_darkness_transition.period,
-                            g_battle_map_darkness_transition._unknown_04[1],
-                            g_battle_map_darkness_transition._unknown_04[2],
-                            g_battle_map_darkness_transition._unknown_04[3]);
-                        g_battle_map_darkness_transition._unknown_04[0] = 1;
+                            g_battle_map_darkness_transition.repeat_rgb[0],
+                            g_battle_map_darkness_transition.repeat_rgb[1],
+                            g_battle_map_darkness_transition.repeat_rgb[2]);
+                        g_battle_map_darkness_transition.repeat = 1;
                     } else {
                         transition->active = 0;
                     }
                 }
             }
         } else if (++g_battle_map_darkness_transition.phase >= g_battle_map_darkness_transition.period * 8) {
-            if (g_battle_map_darkness_transition._unknown_04[0] == 1) {
+            if (g_battle_map_darkness_transition.repeat == 1) {
                 battle_map_blend_darkness_color(8, g_battle_map_darkness_transition.period, 0, 0, 0);
-                g_battle_map_darkness_transition._unknown_04[0] = 2;
-            } else if (g_battle_map_darkness_transition._unknown_04[0] == 2) {
+                g_battle_map_darkness_transition.repeat = 2;
+            } else if (g_battle_map_darkness_transition.repeat == 2) {
                 battle_map_blend_darkness_color(9, g_battle_map_darkness_transition.period,
-                    g_battle_map_darkness_transition._unknown_04[1], g_battle_map_darkness_transition._unknown_04[2],
-                    g_battle_map_darkness_transition._unknown_04[3]);
-                g_battle_map_darkness_transition._unknown_04[0] = 1;
+                    g_battle_map_darkness_transition.repeat_rgb[0], g_battle_map_darkness_transition.repeat_rgb[1],
+                    g_battle_map_darkness_transition.repeat_rgb[2]);
+                g_battle_map_darkness_transition.repeat = 1;
             } else {
                 transition->active = 0;
             }
@@ -251,16 +251,16 @@ void battle_map_update_animations(void) {
                         }
 
                         if (++g_battle_map_palette_state.banks[i].animations[row].blend_step >= 0x20) {
-                            if (g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] == 1) {
+                            if (g_battle_map_palette_state.banks[i].animations[row].repeat == 1) {
                                 battle_map_modify_palette(
                                     8, g_battle_map_palette_state.banks[i].animations[row].mode, i, row, 0, 0, 0, 0);
-                                g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] = 2;
-                            } else if (g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] == 2) {
+                                g_battle_map_palette_state.banks[i].animations[row].repeat = 2;
+                            } else if (g_battle_map_palette_state.banks[i].animations[row].repeat == 2) {
                                 battle_map_modify_palette(9, g_battle_map_palette_state.banks[i].animations[row].mode,
-                                    i, row, 0, g_battle_map_palette_state.banks[i].animations[row]._unknown_04[1],
-                                    g_battle_map_palette_state.banks[i].animations[row]._unknown_04[2],
-                                    g_battle_map_palette_state.banks[i].animations[row]._unknown_04[3]);
-                                g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] = 1;
+                                    i, row, 0, g_battle_map_palette_state.banks[i].animations[row].repeat_rgb[0],
+                                    g_battle_map_palette_state.banks[i].animations[row].repeat_rgb[1],
+                                    g_battle_map_palette_state.banks[i].animations[row].repeat_rgb[2]);
+                                g_battle_map_palette_state.banks[i].animations[row].repeat = 1;
                             } else {
                                 g_battle_map_palette_state.banks[i].animations[row].active = 0;
                             }
@@ -289,16 +289,16 @@ void battle_map_update_animations(void) {
                     }
 
                     if (++g_battle_map_palette_state.banks[i].animations[row].blend_step >= 8) {
-                        if (g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] == 1) {
+                        if (g_battle_map_palette_state.banks[i].animations[row].repeat == 1) {
                             battle_map_modify_palette(
                                 8, g_battle_map_palette_state.banks[i].animations[row].mode, i, row, 0, 0, 0, 0);
-                            g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] = 2;
-                        } else if (g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] == 2) {
+                            g_battle_map_palette_state.banks[i].animations[row].repeat = 2;
+                        } else if (g_battle_map_palette_state.banks[i].animations[row].repeat == 2) {
                             battle_map_modify_palette(9, g_battle_map_palette_state.banks[i].animations[row].mode, i,
-                                row, 0, g_battle_map_palette_state.banks[i].animations[row]._unknown_04[1],
-                                g_battle_map_palette_state.banks[i].animations[row]._unknown_04[2],
-                                g_battle_map_palette_state.banks[i].animations[row]._unknown_04[3]);
-                            g_battle_map_palette_state.banks[i].animations[row]._unknown_04[0] = 1;
+                                row, 0, g_battle_map_palette_state.banks[i].animations[row].repeat_rgb[0],
+                                g_battle_map_palette_state.banks[i].animations[row].repeat_rgb[1],
+                                g_battle_map_palette_state.banks[i].animations[row].repeat_rgb[2]);
+                            g_battle_map_palette_state.banks[i].animations[row].repeat = 1;
                         } else {
                             g_battle_map_palette_state.banks[i].animations[row].active = 0;
                         }
@@ -333,16 +333,16 @@ void battle_map_update_animations(void) {
                     }
 
                     if (++g_battle_map_palette_state.banks[i].animations[0].blend_step >= 0x20) {
-                        if (g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] == 1) {
+                        if (g_battle_map_palette_state.banks[i].animations[0].repeat == 1) {
                             battle_map_modify_palette(
                                 8, g_battle_map_palette_state.banks[i].animations[0].mode, i, 0, 1, 0, 0, 0);
-                            g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] = 2;
-                        } else if (g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] == 2) {
+                            g_battle_map_palette_state.banks[i].animations[0].repeat = 2;
+                        } else if (g_battle_map_palette_state.banks[i].animations[0].repeat == 2) {
                             battle_map_modify_palette(9, g_battle_map_palette_state.banks[i].animations[0].mode, i, 0,
-                                1, g_battle_map_palette_state.banks[i].animations[0]._unknown_04[1],
-                                g_battle_map_palette_state.banks[i].animations[0]._unknown_04[2],
-                                g_battle_map_palette_state.banks[i].animations[0]._unknown_04[3]);
-                            g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] = 1;
+                                1, g_battle_map_palette_state.banks[i].animations[0].repeat_rgb[0],
+                                g_battle_map_palette_state.banks[i].animations[0].repeat_rgb[1],
+                                g_battle_map_palette_state.banks[i].animations[0].repeat_rgb[2]);
+                            g_battle_map_palette_state.banks[i].animations[0].repeat = 1;
                         } else {
                             for (j = 15; j >= 0; j--) {
                                 g_battle_map_palette_state.banks[i].animations[j].active = 0;
@@ -373,16 +373,16 @@ void battle_map_update_animations(void) {
                 }
 
                 if (++g_battle_map_palette_state.banks[i].animations[0].blend_step >= 8) {
-                    if (g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] == 1) {
+                    if (g_battle_map_palette_state.banks[i].animations[0].repeat == 1) {
                         battle_map_modify_palette(
                             8, g_battle_map_palette_state.banks[i].animations[0].mode, i, 0, 1, 0, 0, 0);
-                        g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] = 2;
-                    } else if (g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] == 2) {
+                        g_battle_map_palette_state.banks[i].animations[0].repeat = 2;
+                    } else if (g_battle_map_palette_state.banks[i].animations[0].repeat == 2) {
                         battle_map_modify_palette(9, g_battle_map_palette_state.banks[i].animations[0].mode, i, 0, 1,
-                            g_battle_map_palette_state.banks[i].animations[0]._unknown_04[1],
-                            g_battle_map_palette_state.banks[i].animations[0]._unknown_04[2],
-                            g_battle_map_palette_state.banks[i].animations[0]._unknown_04[3]);
-                        g_battle_map_palette_state.banks[i].animations[0]._unknown_04[0] = 1;
+                            g_battle_map_palette_state.banks[i].animations[0].repeat_rgb[0],
+                            g_battle_map_palette_state.banks[i].animations[0].repeat_rgb[1],
+                            g_battle_map_palette_state.banks[i].animations[0].repeat_rgb[2]);
+                        g_battle_map_palette_state.banks[i].animations[0].repeat = 1;
                     } else {
                         for (j = 15; j >= 0; j--) {
                             g_battle_map_palette_state.banks[i].animations[j].active = 0;

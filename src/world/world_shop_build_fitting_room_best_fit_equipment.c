@@ -159,7 +159,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
     }
 
     i = 0; /* reused as the swap flag, as in the sibling */
-    if (g_world_formation_unit_pointers[unit_index]->support_sets_3 & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
+    if (g_world_formation_unit_pointers[unit_index]->support_abilities[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
         out[0] = ITEM_ID_NOTHING;
         out[1] = ITEM_ID_NOTHING;
     }

@@ -55,8 +55,8 @@ void world_formation_recalculate_selected_unit_stats(void) {
     main_unit_update_formation_stats(&unit);
     world_formation_build_unit_record(&unit, &record, main_party_get_data_pointer(roster_slot));
     bcopy(g_world_formation_unit_pointers[g_world_formation_selected_unit_index]->equipment, record.equipment, 0xa);
-    record.two_handed
-        = world_item_check_two_hands_for_weapons((struct weapon_pair*)record.equipment, record.support_sets_3 & 2);
+    record.two_handed = world_item_check_two_hands_for_weapons(
+        (struct weapon_pair*)record.equipment, record.support_abilities[2] & 2);
     bcopy(&record, &g_world_selected_unit_stat_summary, 0x22);
     bcopy(record.name_index, &g_world_selected_unit_identity, 0xe);
     bcopy(&record.move, &g_world_selected_unit_stat_detail, 0x40);

@@ -6,7 +6,7 @@
 /* Handler of the saved-record preview level: the phases mirror the
  * unexplored-land detail handler at 0x8007e6f4.
  *
- * Phase 1 waits for the render record at field_08 to leave its 0x100 state.
+ * Phase 1 waits for the render record at _unknown_08 to leave its 0x100 state.
  * Phase 2, once file loading finishes, uploads the preview TIM's CLUT, binds
  * the level's render record to the VRAM image with its right edge at x -0x3e
  * and centred on y 0x10, starts the progressive upload at 0x8007f998 and

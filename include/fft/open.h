@@ -247,7 +247,7 @@ typedef struct open_birthday_render_record_indices {
 /* Birthday date-selection controller state shared with its redraw routine. */
 typedef struct open_birthday_date_state {
     s32 cursor_record_36; /* 0x00: cursor moved between month and day */
-    s32 _unknown_04;
+    s32 label_record;
     s32 title_record_56;  /* 0x08: birthday title image (0xb800); palette 2 on
                              confirmation, 0 on restore */
     s32 window_record_56; /* 0x0c: flags bit 8 blocks input */
@@ -260,9 +260,9 @@ typedef struct open_birthday_date_state {
 /* Final birthday-confirmation controller state. */
 typedef struct open_birthday_confirmation_state {
     s32 cursor_record_36; /* 0x00 */
-    s32 _unused_04;
-    s32 menu_record_56;  /* 0x08 */
-    s32 selected_option; /* 0x0C: 0 confirms, 1 returns to date entry */
+    s32 label_record;     /* 0x04 */
+    s32 menu_record_56;   /* 0x08 */
+    s32 selected_option;  /* 0x0C: 0 confirms, 1 returns to date entry */
     s32 _unused_10[4];
     s32 month; /* 0x20 */
     s32 day;   /* 0x24 */

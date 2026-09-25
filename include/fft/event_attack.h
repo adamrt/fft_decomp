@@ -159,7 +159,7 @@ typedef struct attack_deployment_squad_data {
     u32 valid_tile_bitmap; /* 0x00; 5-by-5 deployment mask */
     s8 center_x;           /* 0x04 */
     s8 center_y;           /* 0x05 */
-    u8 _unknown_06;        /* 0x06 */
+    u8 upper_level;        /* 0x06 */
     u8 orientation_flags;  /* 0x07; original and rotated orientations */
     u8 unit_limit;         /* 0x08 */
     u8 map_id;             /* 0x09 */

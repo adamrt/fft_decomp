@@ -131,7 +131,7 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
     }
 
     i = 0; /* reused as the swap flag (the target keeps it in i's register) */
-    if (g_world_formation_unit_pointers[unit_index]->support_sets_3 & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
+    if (g_world_formation_unit_pointers[unit_index]->support_abilities[2] & BATTLE_SUPPORT_SET_3_MARTIAL_ARTS) {
         equipment[0] = ITEM_ID_NOTHING;
         equipment[1] = ITEM_ID_NOTHING;
     }

@@ -2688,8 +2688,8 @@ typedef struct effect_camera_keyframes_21 {
  * keyframe scanner, the timeline frame handler and the camera keyframe
  * dispatchers are views of this ONE object: the per-keyframe selector
  * halfwords sit at 0x806, and the camera position/target/zoom channels at
- * 0x6d4/0x73a/0x7a0 run exactly through what the scanner's view spelled as a
- * single field_6b2[170] threshold array. The for-each-target thresholds are
+ * 0x6d4/0x73a/0x7a0 run exactly through the 170-halfword region at 0x6b2 that the scanner's
+ * view reads as one threshold array. The for-each-target thresholds are
  * therefore 17 entries at 0x6b2, one per keyframe, immediately followed by the
  * three 17-entry three-halfword channels. The two phases' particle channels,
  * sound tracks and colour tracks follow, then the 21-entry main and cleanup
@@ -4370,10 +4370,10 @@ typedef char battle_vram_slot_size_must_be_0x7564[(sizeof(battle_gfx_vram_slot_t
 /* 0x32d6-byte spritesheet VRAM slot records at 0x800c7ce8 (nine slots);
  * g_battle_gfx_spritesheet_ids_by_vram_slot aliases the first record's byte 1. */
 typedef struct battle_gfx_spritesheet_slot {
-    u8 in_use;                /* 0x00; cleared when no live unit uses the slot */
-    u8 spritesheet_id;        /* 0x01 */
-    u8 _unknown_0002[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by 0x80087704 */
-    u8 palettes[16][32];      /* 0x30d6; 16 CLUTs with the STP bit set (0x80087704) */
+    u8 in_use;                          /* 0x00; cleared when no live unit uses the slot */
+    u8 spritesheet_id;                  /* 0x01 */
+    u8 compressed_attack_image[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by 0x80087704 */
+    u8 palettes[16][32];                /* 0x30d6; 16 CLUTs with the STP bit set (0x80087704) */
 } battle_gfx_spritesheet_slot_t;
 typedef char battle_spritesheet_slot_size_must_be_0x32d6[(sizeof(battle_gfx_spritesheet_slot_t) == 0x32d6) ? 1 : -1];
 
@@ -5565,7 +5565,7 @@ typedef struct battle_move_pathfind_scratch {
     u8 high_elevation; /* 0x09 */
     u8 target_x;       /* 0x0a */
     u8 target_y;       /* 0x0b */
-    u8 _unknown_0c;
+    u8 target_level;
     u8 unit_id;              /* 0x0d; mount id when riding */
     u8 move_type;            /* 0x0e; battle_move_class_e */
     u8 move_mod;             /* 0x0f */
@@ -5583,7 +5583,9 @@ typedef struct battle_move_pathfind_scratch {
     u8 unit_size;       /* 0x1b */
     u8 movement_set_3;  /* 0x1c */
     u8 fly_or_teleport; /* 0x1d */
-    u8 _unknown_1e[4];
+    u8 source_tile_occupied;
+    u8 destination_tile_occupied;
+    u8 _unused_20[2];
     u8 stepping_stone;      /* 0x22 */
     u8 ai_propagation_mode; /* 0x23; set only by AI target propagation (0x80178224 clears it) */
     u8 movement_set_2;      /* 0x24 */
@@ -5751,7 +5753,11 @@ typedef struct battle_move_spread_state {
     u8 destination_slope;       /* 0x59 */
     u8 budget_matches;          /* 0x5a; candidate budget equals predecessor budget minus step cost */
     u8 candidate_saved;         /* 0x5b; set by the save-selected-candidate step at 0x8017808c */
-    u8 _unknown_5c[6];
+    u8 _unused_5c[2];
+    u8 path_length;                  /* 0x5e; trace pass count, also each panel mark */
+    u8 source_climb;                 /* 0x5f; step bit 2 */
+    u8 destination_climb;            /* 0x60; step bit 3 */
+    u8 step_distance;                /* 0x61; axis distance, encoded minus one */
     u8 frontier_max_remaining_range; /* 0x62; maximum residual queued for the next pass */
     u8 _unused_63;
     /* 0x64 is |exit - entry| (0 when flying), stored into panel max_height_delta;
@@ -6207,7 +6213,8 @@ typedef struct map_palette_animation_state {
     u8 blend_step;    /* 0x01; index into g_battle_map_palette_blend_steps_32/_8 */
     u8 delay_counter; /* 0x02; one blend step each time it reaches mode >> 2 */
     u8 mode;
-    u8 _unknown_04[4];
+    u8 repeat;        /* 0x04; replay the recorded offsets */
+    u8 repeat_rgb[3]; /* 0x05 */
 } map_palette_animation_state_t;
 typedef char map_palette_animation_state_size_must_be_8[(sizeof(map_palette_animation_state_t) == 8) ? 1 : -1];
 
@@ -6383,7 +6390,8 @@ typedef struct map_color_transition {
     u8 phase;
     u8 tick; /* 0x02; frame counter, reset when it reaches period >> 2 */
     u8 period;
-    u8 _unknown_04[4];
+    u8 repeat;        /* 0x04; replay the recorded offsets */
+    u8 repeat_rgb[3]; /* 0x05 */
     map_color_transition_channels_t channels;
 } map_color_transition_t;
 typedef char map_color_transition_size_must_be_0x20[(sizeof(map_color_transition_t) == 0x20) ? 1 : -1];
@@ -6396,7 +6404,8 @@ typedef struct map_gradient_transition {
     u8 phase;
     u8 tick; /* 0x02; frame counter, reset when it reaches period >> 2 */
     u8 period;
-    u8 _unknown_04[4];
+    u8 repeat;        /* 0x04; replay the recorded offsets */
+    u8 repeat_rgb[3]; /* 0x05 */
     map_color_transition_channels_t channels[2];
     map_color_t colors[2];
 } map_gradient_transition_t;

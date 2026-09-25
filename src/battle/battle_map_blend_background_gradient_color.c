@@ -87,7 +87,7 @@ void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s3
             target_blue = g_map_background_gradient_transition.colors[i].blue << 16;
             break;
         case 10:
-            g_map_background_gradient_transition._unknown_04[0] = 0;
+            g_map_background_gradient_transition.repeat = 0;
             return;
         }
 
@@ -129,10 +129,10 @@ void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s3
         g_map_background_gradient_transition.tick = 0;
         g_map_background_gradient_transition.period = frame_duration;
         if (mode == 9) {
-            g_map_background_gradient_transition._unknown_04[0] = 1;
-            g_map_background_gradient_transition._unknown_04[1] = red;
-            g_map_background_gradient_transition._unknown_04[2] = green;
-            g_map_background_gradient_transition._unknown_04[3] = blue;
+            g_map_background_gradient_transition.repeat = 1;
+            g_map_background_gradient_transition.repeat_rgb[0] = red;
+            g_map_background_gradient_transition.repeat_rgb[1] = green;
+            g_map_background_gradient_transition.repeat_rgb[2] = blue;
         }
     } else {
         g_map_background_gradient_transition.active = 0;

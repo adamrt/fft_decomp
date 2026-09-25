@@ -1,9 +1,6 @@
 #include "fft/wldcore.h"
 #include "psx/types.h"
 
-/* Pending shared-header change: wldcore_sortbox_state_t.unknown_10[8] holds
- * two s32 fade counters (elapsed at +0x10, duration at +0x14). */
-
 /* Steps the world screen fade: ramps the menu brightness and the first fill box
  * colour toward the target until the elapsed counter reaches the duration. */
 s32 wldcore_fade_step_screen(void) {

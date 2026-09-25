@@ -2,5 +2,5 @@
 #include "psx/types.h"
 
 s32 equip_unit_has_two_swords(s16 unit_id) {
-    return g_equip_unit_data[unit_id]->support_sets_3 & 0x01;
+    return g_equip_unit_data[unit_id]->support_abilities[2] & 0x01;
 }

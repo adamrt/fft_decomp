@@ -5,8 +5,8 @@
  * the confirmation prompt window.
  *
  * The pushed record uses the open_birthday_confirmation_state_t layout
- * (cursor_record_36, unknown_04, menu_record_56, selected_option); it is
- * written through the generic stream_start/stream_length/field_08/field_0c
+ * (cursor_record_36, label_record, menu_record_56, selected_option); it is
+ * written through the generic stream_start/stream_length/_unknown_08/_unknown_0c
  * names because only direct array indexing keeps the target's per-field
  * absolute addressing. The prompt window's position is written through the
  * records_56 x/y view, which sets the base register before the index scale.

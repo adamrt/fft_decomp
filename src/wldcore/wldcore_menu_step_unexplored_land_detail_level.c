@@ -3,7 +3,7 @@
 
 /* Handler of the unexplored-land detail level (type 0x19).
  *
- * Phase 1 waits for the render record at field_08 to leave its 0x100 state.
+ * Phase 1 waits for the render record at _unknown_08 to leave its 0x100 state.
  * Phase 2, once file loading finishes, uploads the land picture's TIM pixels
  * and CLUT, binds the level's render record to the VRAM image at (-116, -34)
  * and makes it the scrollable text window's extra render record (position and

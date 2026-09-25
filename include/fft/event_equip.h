@@ -708,10 +708,7 @@ typedef struct equip_unit_data {
     u16 equipment[5];        /* 0x54; equip_unit_equipment_slot_e order */
     u8 _unused_5e[0x12];
     u8 equipment_categories[4]; /* 0x70 */
-    u8 support_sets_1;          /* 0x74 */
-    u8 support_sets_2;          /* 0x75 */
-    u8 support_sets_3;          /* 0x76; Two Swords and Two Hands */
-    u8 support_sets_4;          /* 0x77 */
+    u8 support_abilities[4];    /* 0x74; copy of battle_stats_t.support_abilities */
     u8 formation_index_78;      /* 0x78; battle_stats_t.formation_index */
     u8 _padding_79;             /* tail padding to 2-byte alignment */
 } equip_unit_data_t;

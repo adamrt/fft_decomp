@@ -696,7 +696,7 @@ typedef enum world_ability_list_mode {
 
 /* Provisional ability-list window layout at 0x80153c78: a
  * world_menu_text_layout_t whose three columns are ids, values and extras
- * (x[0] is unknown_04). */
+ * (x[0] is at 0x04). */
 typedef struct world_ability_menu_layout {
     s16 visible_rows; /* 0x00 */
     s16 hidden_rows;  /* 0x02 */
@@ -1744,9 +1744,7 @@ typedef struct world_formation_unit {
                                     it into nibbles */
     u16 egg_color; /* 0x122; party_data_t 0xd2; the formation sprite drawer (0x8011751c) loads it as a halfword palette
                       index */
-    u8 support_sets[2]; /* 0x124; with 0x126-0x127, a 4-byte copy of battle_stats_t.support_abilities */
-    u8 support_sets_3;  /* 0x126; "unit_t Support Sets #3", BATTLE_SUPPORT_SET_3_* (fft/unit.h) */
-    u8 _unknown_127;
+    u8 support_abilities[4]; /* 0x124; copy of battle_stats_t.support_abilities, BATTLE_SUPPORT_SET_1..4_* */
 } world_formation_unit_t;
 typedef char world_formation_unit_t_size_must_be_0x128[(sizeof(world_formation_unit_t) == 0x128) ? 1 : -1];
 

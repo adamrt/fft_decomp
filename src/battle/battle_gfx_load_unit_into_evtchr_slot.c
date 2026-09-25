@@ -10,7 +10,8 @@
 void battle_gfx_load_unit_into_evtchr_slot(battle_unit_misc_data_t* unit, s32 slot, s32 image_slot) {
     RECT rect;
 
-    battle_gfx_decompress_attack_spritesheet(g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot]._unknown_0002,
+    battle_gfx_decompress_attack_spritesheet(
+        g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].compressed_attack_image,
         g_battle_gfx_vram_slots[image_slot].image_data);
     LoadImage(&g_battle_gfx_vram_slots[slot].image_rect, (u32*)g_battle_gfx_vram_slots[image_slot].image_data);
     rect.x = (unit->spritesheet_vram_slot >> 3) * 64 + 0x340;

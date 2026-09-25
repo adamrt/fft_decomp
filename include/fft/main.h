@@ -101,14 +101,14 @@ enum { CARD_SAVE_SLOT_COUNT = 15 };
  * card_build_save_file_header (0x801c2ea8) and its WORLD twin
  * world_card_build_save_file_header (0x801322e4). */
 typedef struct card_save_header {
-    u8 magic0;            /* 0x00: 'S' */
-    u8 magic1;            /* 0x01: 'C' */
-    u8 icon_flags;        /* 0x02: 0x11, one icon frame */
-    u8 block_count;       /* 0x03 */
-    u8 title[0x40];       /* 0x04: Shift-JIS save-file title */
-    u8 _unknown_44[0x1C]; /* 0x44 */
-    u8 icon_clut[0x20];   /* 0x60 */
-    u8 icon_image[0x80];  /* 0x80 */
+    u8 magic0;           /* 0x00: 'S' */
+    u8 magic1;           /* 0x01: 'C' */
+    u8 icon_flags;       /* 0x02: 0x11, one icon frame */
+    u8 block_count;      /* 0x03 */
+    u8 title[0x40];      /* 0x04: Shift-JIS save-file title */
+    u8 reserved[0x1C];   /* 0x44 */
+    u8 icon_clut[0x20];  /* 0x60 */
+    u8 icon_image[0x80]; /* 0x80 */
 } card_save_header_t;
 
 extern s32 g_main_card_bios_events[MAIN_CARD_EVENT_COUNT];
@@ -338,7 +338,7 @@ extern event_file_block_t g_event_script_buffer[];
 /* sound */
 /* Suzuki sound driver (SCUS_942.21 0x800120f4-0x800186c4) records, tables and
  * globals. Offsets and widths are taken from the driver code named beside
- * each field; field_XX and _unknown_XX members are provisional. */
+ * each field; _unknown_XX members are provisional. */
 /* Linear ramp stepped once per tick by main_smd_step_ramp (0x80014f18):
  * value moves by step until count reaches zero, then snaps to target << 16.
  * The root-counter handler tests count with `lh` before stepping MUS
@@ -404,12 +404,12 @@ typedef struct suzuki_smd_header {
     u32 size;               /* 0x08 */
     u8 _unused_0c[4];       /* 0x0c */
     u16 id;                 /* 0x10; copied to MUS id and channel sound_id */
-    u8 _unknown_12;         /* 0x12; copied to MUS field_14 */
+    u8 _unknown_12;         /* 0x12; copied to MUS _unknown_014 */
     u8 tick_divisor;        /* 0x13 */
     u8 channel_count;       /* 0x14 */
-    u8 _unknown_15;         /* 0x15; copied to MUS field_17 */
+    u8 _unknown_15;         /* 0x15; copied to MUS _unknown_017 */
     u16 waveset_id;         /* 0x16 */
-    u16 _unknown_18;        /* 0x18; copied to MUS field_1a */
+    u16 _unknown_18;        /* 0x18; copied to MUS _unknown_01a */
     s8 reverb_mode;         /* 0x1a */
     u8 reverb_depth;        /* 0x1b */
     u8 reverb_delay;        /* 0x1c */
@@ -457,7 +457,7 @@ typedef struct suzuki_repeat {
 
 /* Suzuki sequencer channel record (0x160 bytes), the third argument of every
  * SMD opcode handler (note data, music, channel). Field names follow the
- * opcode that writes them; field_XX members are written by unnamed opcodes.
+ * opcode that writes them; _unknown_XXX members are written by unnamed opcodes.
  *
  * active is the note flag word: 0x1 in use, 0x4 set from MUS status 0x2000,
  * 0x8 keeps the velocity, 0x20 muted, 0x100 fermata, 0x400 note end or rest,
@@ -587,12 +587,12 @@ typedef struct suzuki_music {
     u8 _unused_00c[4];             /* 0x0c */
     u16 status;                    /* 0x10 */
     u16 id;                        /* 0x12; SMD id */
-    u8 _unknown_014;               /* 0x14; SMD field_12 */
+    u8 _unknown_014;               /* 0x14; SMD _unknown_12 */
     u8 tick_divisor;               /* 0x15 */
     u8 channel_count;              /* 0x16 */
-    u8 _unknown_017;               /* 0x17; SMD field_15 */
+    u8 _unknown_017;               /* 0x17; SMD _unknown_15 */
     s16 waveset_id;                /* 0x18; sound font id */
-    u16 _unknown_01a;              /* 0x1a; SMD field_18, 0x7f for SFX */
+    u16 _unknown_01a;              /* 0x1a; SMD _unknown_18, 0x7f for SFX */
     u8 _unknown_01c;               /* 0x1c; set by opcode 0xA4, adjusted by 0xA5 */
     u8 channel_select;             /* 0x1d; opcode 0x8D acts when its byte matches */
     u16 noise_clock;               /* 0x1e; opcodes 0xB4/0xB5 */
@@ -787,7 +787,7 @@ extern s32 g_main_smd_random_state;                       /* 0x80032a18 */
 extern s16 g_main_sound_sfx_instrument;
 extern u32 g_main_sound_sfx_key_off_voices;        /* SFX voices pending key-off */
 extern u32 g_main_sound_tick_count;                /* root-counter tick count; odd ticks step the ramps */
-extern u16 g_main_sound_spu_transfer_status_index; /* index into D_80032A04 */
+extern u16 g_main_sound_spu_transfer_status_index; /* index into g_main_sound_spu_transfer_status_records */
 extern u32 g_main_sound_heap_size;                 /* 0x80032a38 */
 extern CdlATV g_main_sound_cd_mix;                 /* 0x80032a3c; written by Put Sound Type */
 
