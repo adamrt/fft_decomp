@@ -6,7 +6,7 @@
 #include "fft/battle.h"
 
 /* character */
-extern battle_menu_status_panel_offset_pair_t g_require_character_status_frame_rect[];
+extern RECT g_require_character_status_frame_rect[];
 extern RECT g_require_character_status_draw_area_rect;
 extern s32 g_require_character_status_frame_config;
 extern s32 g_require_character_status_redraw_request;

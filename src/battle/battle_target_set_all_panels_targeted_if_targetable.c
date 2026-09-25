@@ -5,22 +5,23 @@ s32 battle_target_set_all_panels_targeted_if_targetable(void) {
     s32 count;
     s32 i;
     s32 no_tile;
-    volatile u8* src;
+    volatile map_tile_t* src;
     targeting_panel_entry_t* dst;
 
     count = 0;
     i = 0;
     no_tile = MAP_SURFACE_CROSS_SECTION;
-    src = (volatile u8*)g_battle_map_tile_data;
+    src = g_battle_map_tile_data;
     dst = g_battle_target_panel_data;
     do {
-        if ((u8)dst->a != 0 && !(src[6] & MAP_TILE_FLAG_BLOCKED) && (src[0] & MAP_SURFACE_MASK) != no_tile) {
+        if ((u8)dst->a != 0 && !(src->flags_06.value & MAP_TILE_FLAG_BLOCKED)
+            && (src->surface.value & MAP_SURFACE_MASK) != no_tile) {
             count++;
-            src[5] |= MAP_TILE_FLAG_ABILITY_RANGE;
+            src->ceiling_depth_and_marks |= MAP_TILE_FLAG_ABILITY_RANGE;
         } else {
-            src[5] &= ~MAP_TILE_FLAG_ABILITY_RANGE;
+            src->ceiling_depth_and_marks &= ~MAP_TILE_FLAG_ABILITY_RANGE;
         }
-        src += 8;
+        src++;
         i++;
         dst++;
     } while (i < 0x200);

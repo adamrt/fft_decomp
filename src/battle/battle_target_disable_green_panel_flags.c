@@ -3,12 +3,12 @@
 
 void battle_target_disable_green_panel_flags(void) {
     s32 i;
-    volatile u8* tile;
+    volatile map_tile_t* tile;
     i = 0;
-    tile = (volatile u8*)g_battle_map_tile_data;
+    tile = g_battle_map_tile_data;
     do {
         i++;
-        tile[5] &= ~MAP_TILE_FLAG_TARGETED;
-        tile += 8;
+        tile->ceiling_depth_and_marks &= ~MAP_TILE_FLAG_TARGETED;
+        tile++;
     } while (i < 0x200);
 }

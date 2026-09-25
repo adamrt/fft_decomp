@@ -17,8 +17,8 @@ void require_panel_run_character_status_thread(void) {
     s32 i;
     s32 scale;
     s32 mask;
-    battle_menu_status_panel_offset_pair_t* rect;
-    battle_menu_status_panel_offset_pair_t* offsets;
+    RECT* rect;
+    RECT* offsets;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
     thread
@@ -28,7 +28,7 @@ void require_panel_run_character_status_thread(void) {
     base = g_require_panel_frames_a;
     state = &g_require_editor_unit_fields.state;
     rect = FRAME_RECT;
-    battle_menu_init_numeric_display_frame_primitives((RECT*)rect, &screen->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(rect, &screen->numeric_frame);
     require_gfx_init_menu_tile_and_line_primitives(screen);
     require_gfx_init_scaled_draw_area_packets(&screen->portrait);
     for (i = 0; i < 2; i++) {

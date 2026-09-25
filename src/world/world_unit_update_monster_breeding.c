@@ -9,7 +9,7 @@
  * offspring jobs in its Chocobo-based breeding-table entry. The new egg's
  * hatch range comes from its offspring entry, and its level is based on a
  * random non-egg roster member. */
-void world_unit_update_monster_breeding(void) {
+void world_unit_update_monster_breeding(s32 unused) {
     u8 monsters[0x18];
     u8 levels[0x18];
     s32 monster_count = 0;

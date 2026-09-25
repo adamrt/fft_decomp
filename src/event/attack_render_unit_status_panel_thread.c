@@ -156,7 +156,7 @@ void attack_render_unit_status_panel_thread(void) {
     battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_attack_panel_frame_rect, &panel->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(&g_attack_panel_frame_rect.rect, &panel->numeric_frame);
     panel_sprites = &panel->sprites[0];
     battle_menu_init_sprite_array(panel_sprites, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
@@ -169,13 +169,13 @@ void attack_render_unit_status_panel_thread(void) {
     panel_sprite_offset = 0xEC;
     do {
         battle_gfx_init_image_loading((u8*)panel + panel_sprite_offset, g_attack_editor_numeric_geometry,
-            g_attack_panel_frame_rect, panel_geometry);
+            &g_attack_panel_frame_rect.location, panel_geometry);
         panel_geometry += 0xC;
         frame += 1;
         panel_sprite_offset += 0x14;
     } while (frame < 7);
-    battle_gfx_init_image_loading(
-        &panel->portrait, g_attack_editor_numeric_geometry, g_attack_panel_frame_rect, g_attack_panel_portrait_cell);
+    battle_gfx_init_image_loading(&panel->portrait, g_attack_editor_numeric_geometry,
+        &g_attack_panel_frame_rect.location, g_attack_panel_portrait_cell);
     if (state->team_state == 1) {
         panel->portrait.clut = 0x7FFD;
     } else {

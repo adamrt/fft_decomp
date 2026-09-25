@@ -14,33 +14,32 @@ typedef struct open_menu_render_record_tail_pair {
 
 void open_menu_init_render_record_fields(s32 record_index, open_menu_packed_halfword_pair_t first_pair,
     open_menu_packed_halfword_pair_t second_pair, open_menu_render_record_tail_pair_t pair, u32 flags) {
-    s32 offset = record_index * sizeof(open_render_record_56_t);
-    u8* tail_base;
+    open_menu_render_record_tail_pair_t* tail_base;
     open_menu_render_record_tail_pair_t* tail;
-    u8* quad_base;
+    RECT* quad_base;
     RECT* quad;
-    u8* color_base;
-    u8* color;
+    CVECTOR* color_base;
+    CVECTOR* color;
 
     g_open_gfx_render_records_56[record_index].flags
         = (g_open_gfx_render_records_56[record_index].flags & ~0x1c) | flags;
-    /* The tail fields go through a local base pointer, as the retail code
-     * materialises tail + constant before adding the record offset. */
-    tail_base = (u8*)&g_open_gfx_render_records_56[0].tail;
-    tail = (open_menu_render_record_tail_pair_t*)(tail_base + offset);
+    /* The retail code materialises each field base from the tail before
+     * adding the record stride. */
+    tail_base = (open_menu_render_record_tail_pair_t*)&g_open_gfx_render_records_56[0].tail;
+    tail = tail_base + record_index * (sizeof(open_render_record_56_t) / sizeof(*tail_base));
     *tail = pair;
     g_open_gfx_render_records_56[record_index].vram_x = (s16)first_pair.first;
     g_open_gfx_render_records_56[record_index].vram_y = (s16)first_pair.second;
-    quad_base = tail_base + 8;
-    quad = (RECT*)(quad_base + offset);
+    quad_base = (RECT*)(tail_base + 1);
+    quad = quad_base + record_index * (sizeof(open_render_record_56_t) / sizeof(RECT));
     quad->x = (first_pair.first & 0x3f) * 2;
     quad->y = (u8)first_pair.second;
     quad->w = (s16)second_pair.first * 2;
     quad->h = second_pair.second;
-    color_base = tail_base + 0x10;
-    color = color_base + offset;
-    color[0] = 0x80;
-    color[1] = 0x80;
-    color[2] = 0x80;
+    color_base = (CVECTOR*)(tail_base + 2);
+    color = color_base + record_index * (sizeof(open_render_record_56_t) / sizeof(CVECTOR));
+    color->r = 0x80;
+    color->g = 0x80;
+    color->b = 0x80;
     g_open_gfx_render_records_56[record_index].pop_in_step = 0;
 }

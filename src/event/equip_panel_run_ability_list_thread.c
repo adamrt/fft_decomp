@@ -132,7 +132,7 @@ void equip_panel_run_ability_list_thread(void) {
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
         offset[0] = thread->x - 0x73;
         offset[1] = thread->y;
-        equip_gfx_build_scaled_draw_area_packets(&screen->portrait, &g_equip_character_status_frame_rect[4], frame,
+        equip_gfx_build_scaled_draw_area_packets(&screen->portrait, &g_equip_character_status_frame_rect[2], frame,
             g_main_gfx_screen_polarity * 0xf0, (const s16*)offset);
         equip_panel_set_primitive_colors(screen, (const battle_menu_status_panel_frame_config_t*)thread);
         equip_gfx_apply_menu_palette_for_mode(&screen->numeric_frame, (s32*)thread);

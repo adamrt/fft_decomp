@@ -29,7 +29,7 @@ void wldcore_map_color_and_draw_dots(void) {
     wldcore_map_dot_source_t* src;
     wldcore_map_dot_t* dots;
     wldcore_map_dot_t* dot;
-    u8* flags_base;
+    s32* flags_base;
     u8* color;
     s32 y;
     s32 is_castle;
@@ -37,8 +37,8 @@ void wldcore_map_color_and_draw_dots(void) {
     s32 i;
 
     dots = g_wldcore_map_dots;
-    /* Queue entries are built as flags_base + i * stride; &dots[i].flags does not match. */
-    flags_base = (u8*)&dots->flags;
+    /* Queue entries are built from the flags column base; &dots[i].flags does not match. */
+    flags_base = &dots->flags;
     dot = dots;
     src = g_wldcore_map_dot_sources;
     g_wldcore_map_dot_pulse_direction = 0;

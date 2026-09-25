@@ -6,7 +6,7 @@
 #include "fft/battle.h"
 
 /* character */
-extern battle_menu_status_panel_offset_pair_t g_attack_character_status_frame_rect[];
+extern RECT g_attack_character_status_frame_rect[];
 extern RECT g_attack_character_status_draw_area_rect;
 extern s32 g_attack_character_status_redraw_request;
 extern u8 g_attack_character_status_frame_config[];
@@ -179,7 +179,7 @@ typedef struct attack_deploy_render_buffer {
     u8 _unknown_834[0x28];              /* 0x834 */
     POLY_F3 arrow;                      /* 0x85c */
     u8 _unused_870[0x14];               /* 0x870 */
-    u8 menu_cursor[0xa0];               /* 0x884 */
+    POLY_FT4 menu_cursor[4];            /* 0x884 */
     POLY_FT4 cursor[2][2];              /* 0x924 */
     DR_MODE draw_mode_9c4;              /* 0x9c4 */
     DR_MODE draw_mode_9d0;              /* 0x9d0 */
@@ -264,7 +264,7 @@ extern s16 g_attack_deploy_vram_copy_y;
  * the fade loop, as the target does. */
 extern s32 g_attack_deploy_zodiac_brightness_word[1];
 extern zodiac_draw_context_t g_attack_deploy_zodiac_draw_context;
-void attack_deploy_build_menu_cursor_primitives(s32 frame, u32 mode, u8* render_buffer);
+void attack_deploy_build_menu_cursor_primitives(s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer);
 void attack_deploy_build_screen_arrow(void);
 void attack_deploy_find_fieldable_units(void);
 s32 attack_deploy_is_roster_unit_deployed(s32 roster_id);
@@ -338,7 +338,12 @@ extern u8 g_attack_panel_editor_mode_cell[];
 extern u8 g_attack_panel_editor_mode_cells[];
 extern u8 g_attack_panel_editor_value_cells[];
 extern u16 g_attack_panel_editor_value_cluts[];
-extern u8 g_attack_panel_frame_rect[];
+/* The numeric frame reads all eight bytes; image loading reads its x/y prefix. */
+typedef union attack_panel_frame_geometry {
+    RECT rect;
+    battle_image_location_t location;
+} attack_panel_frame_geometry_t;
+extern attack_panel_frame_geometry_t g_attack_panel_frame_rect;
 extern CVECTOR g_attack_panel_gauge_bar_colors[];
 extern u8 g_attack_panel_portrait_cell[];
 extern battle_menu_status_panel_editor_packet_t g_attack_panel_selected_editor_packets[2];

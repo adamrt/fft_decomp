@@ -7,7 +7,7 @@
  * space and 0xFE terminates. The buffer is then handed to the image-row
  * renderer
  * with the caller's name, rect and palette passed through unchanged. */
-void world_text_kern_into_command_buffer(u8* text, u16* name, s16* rect, s32 palette) {
+void world_text_kern_into_command_buffer(u8* text, u16* name, RECT* rect, s32 palette) {
     u8 buf[0x78];
     u8* out;
     s32 len;
@@ -72,5 +72,5 @@ void world_text_kern_into_command_buffer(u8* text, u16* name, s16* rect, s32 pal
         } while (glyph != 0xFE);
     }
     buf[len] = 0xFE;
-    world_text_render_id_list_to_image_rows(buf, (s16*)name, (RECT*)rect, palette);
+    world_text_render_id_list_to_image_rows(buf, (s16*)name, rect, palette);
 }

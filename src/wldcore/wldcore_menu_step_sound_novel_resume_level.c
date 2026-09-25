@@ -50,7 +50,7 @@ void wldcore_menu_step_sound_novel_resume_level(wldcore_menu_sound_novel_resume_
         g_wldcore_window_render_object_count -= 4;
         g_wldcore_menu_stack_depth--;
         if (level->cursor_row != 0) {
-            ((void (*)(s16))wldcore_reset_selected_saved_record)(g_wldcore_saved_record_index);
+            wldcore_reset_selected_saved_record((s16)g_wldcore_saved_record_index);
         }
         wldcore_menu_push_sound_novel_level(level->mode);
         return;

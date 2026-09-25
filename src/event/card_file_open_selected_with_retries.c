@@ -14,9 +14,7 @@ s32 card_file_open_selected_with_retries(const char* filename, s32 mode) {
         }
     }
 
-    /* The caller compares the whole word the callee leaves in $v0; the u8
-     * return type would add an `andi v0,v0,0xff` before the test. */
-    if (((s32 (*)(void))card_io_get_selected_slot)() == 0) {
+    if (card_io_get_selected_slot() == 0) {
         strcpy(path, g_card_file_slot_0_path);
     } else {
         strcpy(path, g_card_file_slot_1_path);

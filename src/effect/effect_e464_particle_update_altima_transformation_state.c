@@ -11,14 +11,14 @@
 s32 effect_e464_particle_update_altima_transformation_state(
     s16 record_index, s32 byte_offset, s32 entry_index, s32 frame) {
     effect_record_t* record;
-    u8* work;
+    VECTOR* work;
     effect_work_record_t parent;
     s32 emitter_index;
     s32 i;
     s32 offset;
     effect_particle_vertex_emitter_view_t* emitter;
     VECTOR* vertex;
-    u8* vertex_work;
+    VECTOR* vertex_work;
 
     record = &g_effect_state_records[record_index];
 
@@ -49,7 +49,7 @@ s32 effect_e464_particle_update_altima_transformation_state(
             if ((u32)i < 12 && frame >= emitter->start_frame && frame < emitter->end_frame) {
                 offset = (&g_effect_e464_particle_work_offset_scale_16)[i * 2] << 4;
                 offset += (&g_effect_e464_particle_work_offset_scale_64)[i * 2] << 6;
-                vertex = (VECTOR*)(work + offset);
+                vertex = &work[offset >> 4];
                 parent.position[0] = vertex->vx << 12;
                 parent.position[1] = vertex->vy << 12;
                 parent.position[2] = vertex->vz << 12;

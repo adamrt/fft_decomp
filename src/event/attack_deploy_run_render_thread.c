@@ -55,7 +55,7 @@ void attack_deploy_run_render_thread(void) {
         battle_thread_yield();
         if (g_attack_deploy_tiles_only_mode == 0 && g_attack_deploy_menu_state != 5) {
             attack_deploy_build_menu_cursor_primitives(
-                frame, g_attack_deploy_menu_state, (u8*)&g_attack_deploy_render_buffers[frame & 1]);
+                frame, g_attack_deploy_menu_state, &g_attack_deploy_render_buffers[frame & 1]);
         }
         battle_gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].draw_mode_9c4);
         if (g_attack_deploy_tiles_only_mode != 0) {
@@ -109,8 +109,7 @@ void attack_deploy_run_render_thread(void) {
             attack_gfx_build_status_group_primitives(g_attack_deploy_render_buffers[frame & 1].status);
         }
         battle_gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].screen_offset);
-        attack_update_deployment_cursor_primitives(
-            frame, (attack_deploy_render_buffer_t*)&g_attack_deploy_render_buffers[frame & 1]);
+        attack_update_deployment_cursor_primitives(frame, &g_attack_deploy_render_buffers[frame & 1]);
         if (g_attack_deploy_tiles_only_mode == 0) {
             battle_gfx_draw_or_append_gpu_primitive(g_attack_deploy_render_buffers[frame & 1]._unknown_834);
         }

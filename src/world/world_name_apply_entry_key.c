@@ -70,5 +70,5 @@ void world_name_apply_entry_key(s16 key) {
     for (i--; g_world_name_entry_text[i] == TEXT_SPACE; i--) { }
     g_world_name_entry_text[i + 1] = TEXT_END_WAIT_FOR_CONFIRM;
     world_text_kern_into_command_buffer(
-        g_world_name_entry_text, g_world_name_entry_text_row_ids, g_world_name_entry_text_vram_rect, 0);
+        g_world_name_entry_text, g_world_name_entry_text_row_ids, &g_world_name_entry_text_vram_rect, 0);
 }

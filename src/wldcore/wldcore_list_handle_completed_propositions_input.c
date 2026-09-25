@@ -37,13 +37,13 @@ void wldcore_list_handle_completed_propositions_input(s32* values) {
         return;
     }
     if (buttons & PSX_PAD_SELECT) {
-        ((void (*)(s32*))wldcore_list_completed_propositions_clear_result)(values);
+        wldcore_list_completed_propositions_clear_result(values);
         wldcore_menu_push_message_level(0x1061, 1);
         return;
     }
     if (buttons & PSX_PAD_CIRCLE) {
         wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
-        ((void (*)(s32*))wldcore_list_completed_propositions_clear_result)(values);
+        wldcore_list_completed_propositions_clear_result(values);
         selection = &g_wldcore_window_panel_render_state.selected_index;
         index = *selection;
         value = values[*selection + 13];

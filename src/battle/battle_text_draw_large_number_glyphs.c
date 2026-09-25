@@ -2,8 +2,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef void (*battle_glyph_blit_fn)(void*, s32, const void*, battle_rect_t*);
-
 /* Draws `value` right to left as `digits & 0xff` large glyphs at `pos`, with
  * the sign and marker glyphs selected by the flag bits of `digits`. Sibling of
  * battle_draw_menu_number_glyphs (0x8014ac30) on the 5-pixel font. */
@@ -18,7 +16,7 @@ void battle_text_draw_large_number_glyphs(s32 value, s32 digits, void* resource,
         g_battle_text_large_number_glyph_rect.y = 0x10;
         if (digits & 1) {
             src->x = 0xB4;
-            ((battle_glyph_blit_fn)blit_text_glyph)((void*)g_battle_menu_glyph_image, (s32)resource, src, pos);
+            blit_text_glyph(g_battle_menu_glyph_image, resource, src, pos);
             pos->x += 5;
         }
         src->x = 0xBA;
@@ -26,15 +24,14 @@ void battle_text_draw_large_number_glyphs(s32 value, s32 digits, void* resource,
             src->x = 0xD0;
         }
         for (i = 0; i < 3; i++) {
-            ((battle_glyph_blit_fn)blit_text_glyph)(
-                (void*)g_battle_menu_glyph_image, (s32)resource, &g_battle_text_large_number_glyph_rect, pos);
+            blit_text_glyph(g_battle_menu_glyph_image, resource, &g_battle_text_large_number_glyph_rect, pos);
             pos->x += 5;
         }
         return;
     }
     if (digits & 0x800) {
         src->x = 0xBA;
-        ((battle_glyph_blit_fn)blit_text_glyph)((void*)g_battle_menu_glyph_image, (s32)resource, src, pos);
+        blit_text_glyph(g_battle_menu_glyph_image, resource, src, pos);
         pos->x += 7;
     }
     if (g_battle_menu_hide_numeric_values == 0) {
@@ -48,15 +45,13 @@ void battle_text_draw_large_number_glyphs(s32 value, s32 digits, void* resource,
     }
     if (digits & 0x1000) {
         src->x = 0xB4;
-        ((battle_glyph_blit_fn)blit_text_glyph)(
-            (void*)g_battle_menu_glyph_image, (s32)resource, &g_battle_text_large_number_glyph_rect, pos);
+        blit_text_glyph(g_battle_menu_glyph_image, resource, &g_battle_text_large_number_glyph_rect, pos);
         pos->x += 5;
     }
     if (digits & 0x8000) {
         pos->x -= 2;
         src->x = 0xB4;
-        ((battle_glyph_blit_fn)blit_text_glyph)(
-            (void*)g_battle_menu_glyph_image, (s32)resource, &g_battle_text_large_number_glyph_rect, pos);
+        blit_text_glyph(g_battle_menu_glyph_image, resource, &g_battle_text_large_number_glyph_rect, pos);
         pos->x += 7;
     }
     if (digits & 0x100) {
@@ -64,8 +59,7 @@ void battle_text_draw_large_number_glyphs(s32 value, s32 digits, void* resource,
         src->y = 0x1A;
         src->h = 4;
         pos->y += 3;
-        ((battle_glyph_blit_fn)blit_text_glyph)(
-            (void*)g_battle_menu_glyph_image, (s32)resource, &g_battle_text_large_number_glyph_rect, pos);
+        blit_text_glyph(g_battle_menu_glyph_image, resource, &g_battle_text_large_number_glyph_rect, pos);
         pos->x += 7;
         pos->y -= 3;
         src->y = 0x10;
@@ -78,16 +72,14 @@ void battle_text_draw_large_number_glyphs(s32 value, s32 digits, void* resource,
         if (g_battle_menu_hide_numeric_values != 0) {
             src->x = 0xD0;
         }
-        ((battle_glyph_blit_fn)blit_text_glyph)(
-            (void*)g_battle_menu_glyph_image, (s32)resource, &g_battle_text_large_number_glyph_rect, pos);
+        blit_text_glyph(g_battle_menu_glyph_image, resource, &g_battle_text_large_number_glyph_rect, pos);
         value /= 10;
         pos->x -= 5;
     }
     pos->x = cursor;
     if (digits & 0x2000) {
         src->x = 0xC0;
-        ((battle_glyph_blit_fn)blit_text_glyph)(
-            (void*)g_battle_menu_glyph_image, (s32)resource, &g_battle_text_large_number_glyph_rect, pos);
+        blit_text_glyph(g_battle_menu_glyph_image, resource, &g_battle_text_large_number_glyph_rect, pos);
         pos->x += 5;
     }
 }

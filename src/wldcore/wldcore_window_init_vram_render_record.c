@@ -7,7 +7,7 @@
 void wldcore_window_init_vram_render_record(
     s32 index, wldcore_xy16_t position, wldcore_xy16_t dimensions, wldcore_point32_t clut, s32 flags) {
     wldcore_window_render_bounds16_t* bounds;
-    u8* rgb;
+    wldcore_window_entry_52_rgb_t* rgb;
 
     g_wldcore_window_render_records[index].flags = (g_wldcore_window_render_records[index].flags & ~0x18) | flags;
     *(wldcore_point32_t*)&g_wldcore_window_render_records[index].clut_x = clut;
@@ -17,9 +17,9 @@ void wldcore_window_init_vram_render_record(
     bounds->position.y = (u8)position.y;
     bounds->dimensions.x = (s16)dimensions.x * 2;
     bounds->dimensions.y = dimensions.y;
-    rgb = &g_wldcore_window_render_records[index].red;
-    rgb[0] = 0x80;
-    rgb[1] = 0x80;
-    rgb[2] = 0x80;
+    rgb = (wldcore_window_entry_52_rgb_t*)&g_wldcore_window_render_records[index].red;
+    rgb->red = 0x80;
+    rgb->green = 0x80;
+    rgb->blue = 0x80;
     g_wldcore_window_render_records[index].anim_counter = 0;
 }

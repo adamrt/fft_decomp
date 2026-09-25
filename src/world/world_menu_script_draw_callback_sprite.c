@@ -2,12 +2,12 @@
 #include "psx/types.h"
 
 u8* world_menu_script_draw_callback_sprite(u8* cmd) {
-    world_item_icon_source_t* (*handler)(s32);
+    s32 (*handler)(s32);
     world_item_icon_source_t* entry;
     u8* dst;
     s32 index;
 
-    handler = (world_item_icon_source_t * (*)(s32)) g_world_menu_script_callbacks[cmd[2]];
+    handler = g_world_menu_script_callbacks[cmd[2]];
     if (g_world_menu_use_scroll_position == 0) {
         index = cmd[3];
     } else {
@@ -16,7 +16,7 @@ u8* world_menu_script_draw_callback_sprite(u8* cmd) {
             index -= 1;
         }
     }
-    entry = handler(index);
+    entry = (world_item_icon_source_t*)handler(index);
     if (entry != 0) {
         dst = &g_world_menu_script_sprite_command[3];
         /* Keeps dst in one base register instead of absolute stores. */

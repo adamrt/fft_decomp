@@ -15,7 +15,7 @@ typedef char world_menu_window_entry_size_must_be_0x3c[(sizeof(world_menu_window
 
 /* Opens menu entry `index` on thread 8, first placing its window at the default
  * origin and clamping that origin so the window stays on screen. */
-void world_menu_open_entry_window(s32 index) {
+void world_menu_open_entry_window(s32 index, s32 unused_x, s32 unused_y) {
     world_menu_window_entry_t* entry;
     s32 x;
     s32 y;

@@ -203,7 +203,7 @@ extern u16 g_world_name_entry_key_cursor_anim;
 extern u8 g_world_name_entry_char_to_special_column[];
 extern u8 g_world_name_entry_special_to_char_column[];
 extern u8 g_world_name_entry_cursor_x_positions[];
-extern s16 g_world_name_entry_text_vram_rect[];
+extern RECT g_world_name_entry_text_vram_rect;
 extern u16 g_world_name_entry_text_row_ids[];
 extern world_menu_entry_t g_world_name_confirm_menu;
 extern u8 g_world_name_confirm_initialized;
@@ -2205,7 +2205,7 @@ void world_unit_view_supervisor_thread(void);
 s32 world_update_unit_status_and_staged_status_data(s32);
 s32 world_get_misc_id(s32 unit_id);
 s32 world_unit_get_battle_index_by_entd_id(s32 entd_unit_id);
-void world_unit_update_monster_breeding(void);
+void world_unit_update_monster_breeding(s32 unused);
 
 /* text */
 /* WORLD text files materialize 32 section pointers after their 0x80-byte
@@ -2416,7 +2416,7 @@ s16 world_text_get_encoded_char_at_position(u8* text, s16 position, s32 mode);
 void world_text_init_format_section_pointers(s32* offset_table);
 void world_text_init_section_pointers(void);
 s32 world_text_is_printing(s32 thread_id);
-void world_text_kern_into_command_buffer(u8* text, u16* name, s16* rect, s32 palette);
+void world_text_kern_into_command_buffer(u8* text, u16* name, RECT* rect, s32 palette);
 void world_text_measure(s16* columns, s16* rows, const u8* text);
 s32 world_text_measure_entry_pixel_width(u8* entry);
 void world_text_measure_pixels(s16* width, s16* rows, const u8* text);
@@ -2989,7 +2989,7 @@ s32 world_menu_get_value_1(void);
 s32 world_menu_get_value_2(void);
 void world_menu_init_icon_slot(RECT* rect, s32 width, s32 height, world_texture_prim_t* slot, s32 icon_index);
 s32 world_menu_is_busy(s32 unused);
-void world_menu_open_entry_window(s32 index);
+void world_menu_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
 u8* world_menu_redraw_text_page_on_scroll(world_menu_entry_t* entry, s32* row_offset, s32* redraw);
 u8* world_menu_redraw_text_page_on_scroll_2(world_menu_entry_t* entry, s32* row_offset, s32* redraw);
 
@@ -3013,7 +3013,7 @@ void* world_menu_alloc_buffer(s32 size);
 void* world_menu_alloc_ui_buffer(s32 size);
 void world_menu_announce_entry_value_thread(void);
 void* world_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
-void world_menu_add_tile_primitive(s16* rect, u8* data, u8 semi_trans, s32 priority);
+void world_menu_add_tile_primitive(RECT* rect, u8* data, u8 semi_trans, s32 priority);
 void world_menu_build_icon_record(RECT* rect, world_menu_icon_thread_param_t* param, world_menu_icon_record_t* buffer);
 void world_menu_submit_icon_primitives(world_menu_icon_sprites_t* prims);
 void world_menu_build_layout_sprites(world_menu_sprite_layout_t* layout, SPRT* sprite);

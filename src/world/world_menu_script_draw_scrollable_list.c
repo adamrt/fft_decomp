@@ -34,7 +34,7 @@ u8* world_menu_script_draw_scrollable_list(world_menu_list_draw_record_t* record
     s32 rows;
     s32 index;
     u16 old_cursor;
-    u8* base;
+    world_menu_list_draw_record_t* base;
 
     priority = g_world_menu_draw_priority;
     if (g_world_menu_option_count <= 0) {
@@ -206,12 +206,12 @@ arrows:
     if (g_world_menu_scroll_pixel_offset == 0) {
         rows--;
     }
-    base = (u8*)record;
+    base = record;
     for (i = 0; i < rows; i++, g_world_menu_scroll_row_offset++) {
         if (g_world_menu_scroll_offset + i > g_world_menu_option_count - 1 && g_world_menu_scroll_pixel_offset == 0) {
             break;
         }
-        record = (world_menu_list_draw_record_t*)base;
+        record = base;
         for (j = 0; j < g_world_menu_list_row_record_count; j++) {
             record = (world_menu_list_draw_record_t*)g_world_menu_script_handlers[record->type]((u8*)record);
         }

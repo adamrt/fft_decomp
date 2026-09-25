@@ -10,8 +10,7 @@ void wldcore_menu_push_entry_window_level(void) {
     s32* counter;
 
     g_wldcore_menu_result = -1;
-    /* The target also passes a1/a2 window offsets to this one-argument callee. */
-    ((void (*)(s32, s32, s32))world_menu_open_entry_window)(4, -0x30, -0x38);
+    world_menu_open_entry_window(4, -0x30, -0x38);
     one = 1;
     g_wldcore_context_value_display_mode = one;
     g_wldcore_displayed_numeric_value = world_script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);

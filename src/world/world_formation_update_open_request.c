@@ -30,8 +30,7 @@ void world_formation_update_open_request(void) {
         g_world_menu_screen_open_request = 0;
         world_menu_start_thread_group(g_world_menu_thread_group_parameter, g_world_menu_location_id,
             g_world_menu_location_window_x, g_world_menu_location_window_y);
-        /* The target also passes a1/a2 window offsets to this one-argument callee. */
-        ((void (*)(s16, s32, s32))world_menu_open_entry_window)(g_world_menu_open_entry_index, -0x30, -0x38);
+        world_menu_open_entry_window(g_world_menu_open_entry_index, -0x30, -0x38);
         g_world_menu_thread_menu_data = g_world_menu_default_entries;
         world_formation_save_and_set_system_flags();
         wldcore_clear_screen_and_set_map_clip_rect(0);

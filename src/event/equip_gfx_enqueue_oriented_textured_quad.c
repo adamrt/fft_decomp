@@ -92,14 +92,14 @@ void equip_gfx_enqueue_oriented_textured_quad(
     poly->clut = descriptor->clut;
     poly->tpage = descriptor->tpage;
     {
-        u8* context = (u8*)g_equip_gfx_context;
+        equip_gfx_context_t* context = g_equip_gfx_context;
         u32 command_mask;
         u32 address_mask = 0xffffff;
         u32 offset = otag_index << 2;
 
         command_mask = 0xff000000;
-        poly->tag = (poly->tag & command_mask) | (*(u32*)(offset + *(u32*)context) & address_mask);
-        offset += *(u32*)context;
+        poly->tag = (poly->tag & command_mask) | (*(u32*)(offset + (u32)context->otag) & address_mask);
+        offset += (u32)context->otag;
         *(u32*)offset = (*(u32*)offset & command_mask) | ((u32)poly & address_mask);
     }
 }

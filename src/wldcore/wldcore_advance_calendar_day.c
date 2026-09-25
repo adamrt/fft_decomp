@@ -28,6 +28,5 @@ void wldcore_advance_calendar_day(void) {
     }
     wldcore_proposition_advance_daily_counters();
     wldcore_advance_brave_story_birthdays();
-    /* The target loads a0 = 1 before this argument-less call. */
-    ((void (*)(s32))world_unit_update_monster_breeding)(1);
+    world_unit_update_monster_breeding(1);
 }

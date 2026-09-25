@@ -211,7 +211,7 @@ s32 debugchr_thread_is_running(s32 thread_id);
 
 /* other */
 extern u32* g_debugchr_input_controller;
-extern battle_menu_status_panel_offset_pair_t g_debugchr_character_status_frame_rect[];
+extern RECT g_debugchr_character_status_frame_rect[];
 extern RECT g_debugchr_character_status_draw_area_rect;
 void debugchr_render_unit_status_panel_thread(void);
 void debugchr_run_character_debug_session(void);

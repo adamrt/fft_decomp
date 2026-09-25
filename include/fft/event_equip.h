@@ -483,7 +483,7 @@ s16 equip_menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_i
 /* panel */
 extern u8 g_equip_panel_selected_unit_data[];
 extern battle_image_location_t g_equip_panel_item_icon_texture[];
-extern battle_menu_status_panel_offset_pair_t g_equip_panel_origin_offsets[];
+extern RECT g_equip_panel_origin_offsets[];
 extern RECT g_equip_panel_text_upload_rect_a;
 extern RECT g_equip_panel_text_upload_rect_b;
 extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode0[];
@@ -775,7 +775,7 @@ extern u8 g_equip_sound_suppress_queued;
 /* RECT[1] (right panel) of g_equip_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets GCC
  * derive the table base from this address and changes equip_panel_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
-extern battle_menu_status_panel_offset_pair_t g_equip_character_status_frame_rect[];
+extern RECT g_equip_character_status_frame_rect[];
 extern RECT g_equip_character_status_draw_area_rect;
 extern u8 g_equip_status_label_image[];
 extern s16 g_equip_armor_bonus_render_commands[];

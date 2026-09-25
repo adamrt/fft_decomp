@@ -15,10 +15,12 @@ int main_sound_open_scenario_smd_files(int scenario) {
     do {
         checked_slots++;
         if (*loaded_smd == 0) {
-            buffer = main_heap_alloc_smd(*(int*)((char*)g_main_sound_scenario_smd_files + file_offset + 4));
+            buffer = main_heap_alloc_smd(
+                ((main_sound_smd_file_t*)((char*)g_main_sound_scenario_smd_files + file_offset))->size);
             if (buffer != 0) {
-                if (main_file_call_build_header(*(int*)((char*)g_main_sound_scenario_smd_files + file_offset),
-                        *(int*)((char*)g_main_sound_scenario_smd_files + file_offset + 4), buffer)
+                if (main_file_call_build_header(
+                        ((main_sound_smd_file_t*)((char*)g_main_sound_scenario_smd_files + file_offset))->sector,
+                        ((main_sound_smd_file_t*)((char*)g_main_sound_scenario_smd_files + file_offset))->size, buffer)
                     == 0) {
                     *loaded_smd = buffer;
                     /* slots.handles[0], addressed from the smd base: the member

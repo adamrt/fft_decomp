@@ -20,7 +20,7 @@ s32 effect_e454_particle_update_banish_state(s16 record_index, s32 byte_offset, 
     s32 offset;
     effect_particle_vertex_emitter_view_t* emitter;
     VECTOR* vertex;
-    u8* vertex_work;
+    VECTOR* vertex_work;
 
     record = &g_effect_state_records[record_index];
 

@@ -512,7 +512,7 @@ extern wldcore_point32_t g_wldcore_saved_context_value_display_position;
 extern wldcore_saved_record_t g_wldcore_active_saved_record;
 extern u32 g_wldcore_saved_system_flags;
 void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record);
-void wldcore_reset_selected_saved_record(void);
+void wldcore_reset_selected_saved_record(s32 unused);
 
 /* script */
 /* The world-conditional interpreter clears this result word before each
@@ -874,7 +874,7 @@ extern s16 g_wldcore_list_row_flags[];
 
 /* Row value column of the world list panels, read signed as `value & 0x7ff`. */
 extern s16 g_wldcore_list_entry_values[];
-void wldcore_list_completed_propositions_clear_result(void);
+void wldcore_list_completed_propositions_clear_result(s32* unused);
 void wldcore_list_open_script_flags_01a4_01bb(void);
 void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel);
 void wldcore_list_clamp_cursor_state(s32 index, s32 count, s32 visible);

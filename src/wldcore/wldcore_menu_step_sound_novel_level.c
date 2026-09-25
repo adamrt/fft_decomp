@@ -48,8 +48,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
             fade->flags[0] = (fade->flags[0] & ~8) | 2;
             main_sound_stop_weather_sfx_music();
             main_sound_remove_vfx_resource(g_wldcore_sound_novel_sound_resource);
-            /* The target loads g_wldcore_saved_record_index into a0 for this argument-less callee. */
-            ((void (*)(s32))wldcore_reset_selected_saved_record)(g_wldcore_saved_record_index);
+            wldcore_reset_selected_saved_record(g_wldcore_saved_record_index);
             g_wldcore_sound_novel_countdown_frames = 0;
             wldcore_menu_push_screen_transition_level(0x1B, level->message, 0);
             return;

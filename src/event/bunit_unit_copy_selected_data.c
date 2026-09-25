@@ -3,11 +3,11 @@
 void bunit_unit_copy_selected_data(void) {
     /* The retail code reads the index unsigned here (lhu) and signed below (lh). */
     s32 idx = *(u16*)&g_bunit_unit_selected_index;
-    u8* unit_data = (u8*)g_bunit_unit_data[(s16)idx];
+    bunit_unit_data_t* unit_data = g_bunit_unit_data[(s16)idx];
     g_bunit_unit_comparison_index = idx;
     bcopy(unit_data, &g_bunit_panel_selected_billboard, 0x22);
-    bcopy((u8*)g_bunit_unit_data[g_bunit_unit_selected_index] + 0x22, g_bunit_panel_selected_unit_data, 0xE);
-    bcopy((u8*)g_bunit_unit_data[g_bunit_unit_selected_index] + 0x30, &g_bunit_editor_unit_fields, 0x40);
+    bcopy(&g_bunit_unit_data[g_bunit_unit_selected_index]->entd_slot_22, g_bunit_panel_selected_unit_data, 0xE);
+    bcopy(&g_bunit_unit_data[g_bunit_unit_selected_index]->move, &g_bunit_editor_unit_fields, 0x40);
     g_bunit_status_display_redraw_request = 1;
     g_bunit_comparison_display_redraw_request = 1;
     g_bunit_character_status_redraw_request = 1;

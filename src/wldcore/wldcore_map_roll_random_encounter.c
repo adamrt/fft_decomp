@@ -22,11 +22,11 @@ typedef struct wldcore_encounter_entry {
 
 extern wldcore_encounter_entry_t (*g_wldcore_random_battle_data)[3];
 
-#define ENTRY_AT(byte_offset)   ((wldcore_encounter_entry_t*)((byte_offset) + base))
-#define ENTRY_BASE(byte_offset) ((wldcore_encounter_entry_t*)(base + (byte_offset)))
+#define ENTRY_AT(byte_offset)   ((wldcore_encounter_entry_t*)((byte_offset) + (s32)base))
+#define ENTRY_BASE(byte_offset) ((wldcore_encounter_entry_t*)((s32)base + (byte_offset)))
 
 s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
-    s32 base;
+    wldcore_encounter_entry_t(*base)[3];
     s32 offset;
     wldcore_encounter_entry_t* row;
     wldcore_encounter_entry_t* rolled;
@@ -40,7 +40,7 @@ s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
     if ((u32)location >= 19) {
         return 0;
     }
-    base = (s32)g_wldcore_random_battle_data;
+    base = g_wldcore_random_battle_data;
     offset = location * 72;
     for (location = 0; location < 3; location++) {
         if (ENTRY_BASE(offset + location * 24)->route == route) {

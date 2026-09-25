@@ -99,24 +99,24 @@ void battle_menu_run_unit_editor_panel_thread(void) {
         battle_copy_bytes(&g_battle_unit_editor_sprite_image_params_b[14], &g_battle_unit_editor_row_image_params_a[2],
             2 * sizeof(world_gfx_image_load_parameters_t));
     }
-    /* The panel passes SPRT and RECT records the POLY_FT4/battle_image_location_t prototype does not name. */
+    /* These sprite and rectangle records share the fields read by the image loader. */
     if (g_battle_unit_editor_panel_data.flag == 0) {
         for (i = 0; i < 19; i++) {
-            ((void (*)(void*, void*, void*, void*))battle_gfx_init_image_loading)(&frame_record->sprites[i],
-                &g_battle_menu_texture_location, &g_battle_unit_editor_panel_rect,
+            battle_gfx_init_image_loading((POLY_FT4*)&frame_record->sprites[i], &g_battle_menu_texture_location,
+                (const battle_image_location_t*)&g_battle_unit_editor_panel_rect,
                 &g_battle_unit_editor_sprite_image_params_a[i]);
         }
     } else {
         for (i = 0; i < 19; i++) {
-            ((void (*)(void*, void*, void*, void*))battle_gfx_init_image_loading)(&frame_record->sprites[i],
-                &g_battle_menu_texture_location, &g_battle_unit_editor_panel_rect,
+            battle_gfx_init_image_loading((POLY_FT4*)&frame_record->sprites[i], &g_battle_menu_texture_location,
+                (const battle_image_location_t*)&g_battle_unit_editor_panel_rect,
                 &g_battle_unit_editor_sprite_image_params_b[i]);
         }
     }
     battle_menu_init_sprite_array(&frame_record->sprites[19], 5, 0x7CFC);
     for (i = 0; i < 5; i++) {
-        ((void (*)(void*, void*, void*, void*))battle_gfx_init_image_loading)(&frame_record->sprites[19 + i],
-            &g_battle_item_icon_image_location, &g_battle_unit_editor_panel_rect,
+        battle_gfx_init_image_loading((POLY_FT4*)&frame_record->sprites[19 + i], &g_battle_item_icon_image_location,
+            (const battle_image_location_t*)&g_battle_unit_editor_panel_rect,
             &g_battle_unit_editor_item_icon_image_params[i]);
         battle_get_item_graphic_data(&frame_record->sprites[19 + i], g_battle_unit_editor_panel_data.item_ids[i]);
     }

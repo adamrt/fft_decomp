@@ -44,12 +44,21 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `src/battle/battle_camera_step_real_coords_toward_target.c`: in the positive
   direction the Y (`vz`) step adds the vector component twice; X and Z add it
   once.
+- `world_menu_open_entry_window` receives requested x/y origins but always
+  opens at its fixed default origin.
+- `src/main/main_party_save_unit.c` calls `main_party_remove_unit` without its
+  required roster index; the callee reads the current `$a0`.
 
 ## Calls that disagree with the callee
 
-Only a declaration without a prototype, or a function-pointer cast, spells
-these calls. Do not hoist them into a prototyped header declaration.
+Some calls need an erased signature or a function-pointer cast to preserve
+their register values. Others can declare ignored parameters and call directly
+without changing the bytes.
 
+- `g_battle_thread_call_target` is the main-stack dispatch slot for callees
+  with different signatures; assignments erase their function types.
+- `battle_target_set_panels_for_action` reads `$v0` after a void-returning
+  panel builder; the value is the callee's leftover register contents.
 - `src/event/equip_unit_load_selected_data.c` passes two arguments to
   `equip_unit_copy_data_to_compare_slot`, which takes none.
 - `src/world/world_menu_resize_parent_entry_to_digits.c` passes none to

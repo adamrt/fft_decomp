@@ -6908,18 +6908,6 @@ typedef union battle_menu_scratch_buffer {
     u16 clut_save[5 * 16];
 } battle_menu_scratch_buffer_t;
 
-/* The u16 x/y translation the status threads add to the frame tiles and
- * lines, read from the head of each overlay's panel-origin table (ATTACK
- * g_attack_character_status_frame_rect, DEBUGCHR
- * g_debugchr_character_status_frame_rect, EQUIP
- * g_equip_character_status_frame_rect, REQUIRE
- * g_require_character_status_frame_rect). Derived from the tile/line fixup
- * loops in the *_panel_run_character_status_thread routines. */
-typedef struct battle_menu_status_panel_offset_pair {
-    u16 x; /* 0x00 */
-    u16 y; /* 0x02 */
-} battle_menu_status_panel_offset_pair_t;
-
 /* The numeric editor's two adjacent rectangles: the first also supplies the
  * texture-page origin to image loading, while the second places the portrait. */
 typedef struct battle_menu_status_panel_numeric_geometry {
