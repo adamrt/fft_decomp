@@ -45,7 +45,7 @@ s32 battle_target_set_panels_for_action(u8* source) {
         break;
     case ACTION_MENU_TYPE_ELEMENTS:
         ability_id
-            = g_geomancy_terrain_ability_table[((u8*)g_battle_map_tile_data)[battle_map_calculate_location(unit) * 8]
+            = g_geomancy_terrain_ability_table[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.value
                 & 0x3f];
         mode = 1;
         break;

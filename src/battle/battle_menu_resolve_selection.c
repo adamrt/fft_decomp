@@ -26,12 +26,14 @@ s32 battle_menu_resolve_selection(void) {
     s32 index;
     s32 i;
     s32 menu;
+    const battle_menu_selection_t* selection;
 
     /* The object is four halfwords; command and option use their slots'
      * low bytes and item uses the full halfword at slot 2. */
-    command = ((u8*)g_battle_menu_pending_selection)[0];
-    option = ((u8*)g_battle_menu_pending_selection)[2];
-    item = ((u16*)g_battle_menu_pending_selection)[2];
+    selection = (const battle_menu_selection_t*)g_battle_menu_pending_selection;
+    command = selection->command;
+    option = selection->option;
+    item = selection->item;
     g_selected_ability = command;
     index = option;
     if (command != 0x12 && (command & 0xFE) != 0xFE) {
