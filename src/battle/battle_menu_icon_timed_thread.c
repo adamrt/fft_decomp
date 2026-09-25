@@ -30,12 +30,12 @@ extern void battle_menu_configure_frame_cluts(struct menu_frame_sprites* icons);
  * BATTLE twin of world_menu_icon_timed_thread. */
 void battle_menu_icon_timed_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    battle_menu_window_record_t records[2];
     world_menu_icon_thread_param_t* param;
     void* buffer;
     s32 i;
     s32 hold;
-    u8* record;
+    battle_menu_window_record_t* record;
     s16 width;
     s16 height;
     s32 pad;
@@ -49,9 +49,9 @@ void battle_menu_icon_timed_thread(void) {
     i = 0;
     param = (world_menu_icon_thread_param_t*)battle_thread_get_current_parameter_1();
     battle_text_layout_message_window((struct battle_message_window_layout*)param, &width, &height, &pad, 1);
-    battle_menu_build_window_sprites((battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param,
-        (battle_menu_window_record_t*)records[0]);
-    battle_copy_bytes(records[1], records[0], 0x7C);
+    battle_menu_build_window_sprites(
+        (battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param, &records[0]);
+    battle_copy_bytes(&records[1], &records[0], 0x7C);
     buffer = battle_menu_build_and_upload_window_frame_image(width, height, &rect, 1);
     g_menu_text_state.stride = width;
     /* The target passes x and y as full words; the s16 prototype narrows them. */
@@ -73,12 +73,12 @@ void battle_menu_icon_timed_thread(void) {
         }
         if (unset >= 0) {
             g_battle_current_thread_id--;
-            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)records[i & 1]);
+            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&records[i & 1]);
             g_battle_current_thread_id++;
         } else {
-            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)records[i & 1]);
+            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&records[i & 1]);
         }
-        record = records[i & 1];
+        record = &records[i & 1];
         battle_update_menu_cursor_primitives(param, (world_menu_icon_sprites_t*)record, i, -1);
         if (hold == 0) {
             battle_menu_handle_action(param, 0);

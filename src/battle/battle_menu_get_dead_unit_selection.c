@@ -25,6 +25,7 @@ s32 battle_menu_get_dead_unit_selection(s32 battle_id) {
     if ((u32)(result->status + 1) < 2) {
         main_noop_800449f8(0x11, 7);
     }
+    /* Reload the published context after the call; reusing result changes the frame and registers. */
     if (((battle_menu_result_t*)g_dead_unit_context)->status != 4) {
         return -1;
     }

@@ -23,12 +23,12 @@
  *             0x40 = the entry is the acting/queued unit (bracketed name);
  *             0x80 = turn value biased by 0x100.
  */
-typedef struct battle_at_descriptor {
+typedef struct battle_menu_at_descriptor {
     u8 flags;
     u8 turn_value;
     u8 unknown_02;
     u8 unknown_03;
-} battle_at_descriptor_t;
+} battle_menu_at_descriptor_t;
 
 /*
  * Provisional: the AT-list work area this builder fills, reached through
@@ -39,14 +39,14 @@ typedef struct battle_at_descriptor {
  * preview call, whose descriptor array follows it.
  */
 typedef struct battle_menu_at_list_work {
-    s16 primary_values[40];                 /* 0x000: turn-value column */
-    s16 secondary_values[40];               /* 0x050: unit-name column */
-    s16 entry_numbers[40];                  /* 0x0a0: ordinal column */
-    s16 primary_colors[40];                 /* 0x0f0 */
-    s16 secondary_colors[40];               /* 0x140 */
-    u8 text[0x4f0];                         /* 0x190: packed 0xfe-terminated names */
-    s32 request;                            /* 0x680: preview request header */
-    battle_at_descriptor_t descriptors[40]; /* 0x684 */
+    s16 primary_values[40];                      /* 0x000: turn-value column */
+    s16 secondary_values[40];                    /* 0x050: unit-name column */
+    s16 entry_numbers[40];                       /* 0x0a0: ordinal column */
+    s16 primary_colors[40];                      /* 0x0f0 */
+    s16 secondary_colors[40];                    /* 0x140 */
+    u8 text[0x4f0];                              /* 0x190: packed 0xfe-terminated names */
+    s32 request;                                 /* 0x680: preview request header */
+    battle_menu_at_descriptor_t descriptors[40]; /* 0x684 */
 } battle_menu_at_list_work_t;
 
 typedef char battle_menu_at_list_work_descriptors_offset_must_be_0x684
@@ -151,7 +151,7 @@ void battle_menu_build_ability_preview_at_list(void) {
         turn--;
     }
     for (index = 0; index < 39; index++) {
-        battle_at_descriptor_t* slot = &work->descriptors[index];
+        battle_menu_at_descriptor_t* slot = &work->descriptors[index];
         s32 name_index;
 
         if ((slot->flags & 0x1f) == 0x1f) {

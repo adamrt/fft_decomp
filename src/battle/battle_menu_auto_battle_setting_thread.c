@@ -30,7 +30,7 @@ extern void battle_menu_configure_frame_cluts(struct menu_frame_sprites* icons);
  * action menu if the unit's menu id changes. */
 void battle_menu_auto_battle_setting_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    battle_menu_window_record_t records[2];
     s32 cursor;
     s32 previous;
     battle_stats_t* stats;
@@ -43,7 +43,7 @@ void battle_menu_auto_battle_setting_thread(void) {
     s32 after;
     s32 selected;
     s16* colour;
-    u8* record;
+    battle_menu_window_record_t* record;
 
     param = (world_menu_icon_thread_param_t*)battle_thread_get_current_parameter_1();
     cursor = param->cursor;
@@ -60,14 +60,14 @@ void battle_menu_auto_battle_setting_thread(void) {
         cursor = 4;
     }
     previous = cursor;
-    battle_menu_build_window_sprites((battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param,
-        (battle_menu_window_record_t*)records[0]);
-    battle_copy_bytes(records[1], records[0], 0x7C);
+    battle_menu_build_window_sprites(
+        (battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param, &records[0]);
+    battle_copy_bytes(&records[1], &records[0], 0x7C);
     fresh = 0;
     i = 0;
     colour = g_battle_auto_battle_option_colors;
     for (;; i++) {
-        record = records[i & 1];
+        record = &records[i & 1];
         if (i == 0 || (g_battle_script_event_input & PSX_PAD_CIRCLE)) {
             buffer = battle_menu_build_and_upload_window_frame_image(param->width, param->height, &rect, 1);
             if (((g_battle_script_event_input & PSX_PAD_CIRCLE) && battle_thread_is_previous_running() == 0)

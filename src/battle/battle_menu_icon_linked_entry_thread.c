@@ -26,21 +26,21 @@ extern void battle_text_layout_message_window(
  * BATTLE twin of world_menu_icon_linked_entry_thread. */
 void battle_menu_icon_linked_entry_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    battle_menu_window_record_t records[2];
     world_menu_entry_t* param;
     void* buffer;
     s32 i;
     s32 parent;
-    u8* record;
+    battle_menu_window_record_t* record;
     s16 width;
     s16 height;
     s32 pad;
 
     param = (world_menu_entry_t*)battle_thread_get_current_parameter_1();
     battle_text_layout_message_window((struct battle_message_window_layout*)param, &width, &height, &pad, 0);
-    battle_menu_build_window_sprites((battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param,
-        (battle_menu_window_record_t*)records[0]);
-    battle_copy_bytes(records[1], records[0], 0x7C);
+    battle_menu_build_window_sprites(
+        (battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param, &records[0]);
+    battle_copy_bytes(&records[1], &records[0], 0x7C);
     parent = param->parent_indices[0];
     if (parent >= 0) {
         g_battle_menu_thread_menu_data[parent].window_x
@@ -65,12 +65,12 @@ void battle_menu_icon_linked_entry_thread(void) {
         }
         if (parent >= 0) {
             g_battle_current_thread_id--;
-            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)records[i & 1]);
+            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&records[i & 1]);
             g_battle_current_thread_id++;
         } else {
-            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)records[i & 1]);
+            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&records[i & 1]);
         }
-        record = records[i & 1];
+        record = &records[i & 1];
         battle_update_menu_cursor_primitives(
             (world_menu_icon_thread_param_t*)param, (world_menu_icon_sprites_t*)record, i, -1);
         battle_menu_handle_action(param, 0);

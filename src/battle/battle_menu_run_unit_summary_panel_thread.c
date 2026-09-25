@@ -12,7 +12,7 @@
 #include "psx/types.h"
 
 /* Provisional 0xF0-byte double-buffered frame of the unit summary panel. */
-typedef struct battle_unit_summary_frame {
+typedef struct battle_menu_unit_summary_frame {
     SPRT sprites[7];                          /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
     DR_MODE draw_mode_0;                      /* 0x8c */
     DR_MODE draw_mode_1;                      /* 0x98 */
@@ -22,7 +22,7 @@ typedef struct battle_unit_summary_frame {
     s16 offset_a[2];                          /* 0xc0 */
     s16 offset_b[2];                          /* 0xc4 */
     POLY_FT4 portrait;                        /* 0xc8 */
-} battle_unit_summary_frame_t;
+} battle_menu_unit_summary_frame_t;
 
 extern void battle_world_display_specific_menu_text(s32 buffer, s32 origin, s32 text);
 
@@ -38,8 +38,8 @@ extern void battle_world_display_specific_menu_text(s32 buffer, s32 origin, s32 
  * target keeps each of those roles in one callee-saved register. */
 void battle_menu_run_unit_summary_panel_thread(void) {
     RECT rects[4];
-    battle_unit_summary_frame_t frames[2];
-    battle_unit_summary_frame_t* frame_record;
+    battle_menu_unit_summary_frame_t frames[2];
+    battle_menu_unit_summary_frame_t* frame_record;
     battle_stats_t* unit;
     u8* buffer;
     u8* digits;
@@ -118,7 +118,7 @@ void battle_menu_run_unit_summary_panel_thread(void) {
     zodiac = g_battle_active_turn_unit.zodiac;
     frames[0].sprites[6].u0 = (s16)(zodiac % 7) * 0x18;
     frames[0].sprites[6].v0 = (s16)(zodiac / 7) * 0x14 + 0x2A;
-    battle_copy_bytes(&frames[1], &frames[0], sizeof(battle_unit_summary_frame_t));
+    battle_copy_bytes(&frames[1], &frames[0], sizeof(battle_menu_unit_summary_frame_t));
     frames[0].palette = &g_battle_unit_summary_palettes[0].primitives;
     frames[1].palette = &g_battle_unit_summary_palettes[1].primitives;
     battle_menu_init_numeric_display_frame_primitives(&g_battle_unit_summary_panel_rect, frames[0].palette);

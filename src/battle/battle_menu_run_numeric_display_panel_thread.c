@@ -14,15 +14,15 @@
 
 /* Provisional 0x1AC-byte double-buffered panel record at 0x80172834; layout
  * of world_panel_record_t (WORLD 0x801a2bd0). */
-typedef struct battle_panel_record {
+typedef struct battle_menu_numeric_panel_record {
     DR_MODE mode0;                                 /* 0x000 */
     DR_MODE mode1;                                 /* 0x00c */
     battle_gfx_scaled_draw_area_pair_t draw_areas; /* 0x018; battle_menu_set_disabled_texture_window */
     SPRT sprites[18];                              /* 0x040 */
     world_menu_palette_primitives_t* palette;      /* 0x1a8 */
-} battle_panel_record_t;
+} battle_menu_numeric_panel_record_t;
 
-extern battle_panel_record_t g_battle_menu_numeric_display_panel_records[2];
+extern battle_menu_numeric_panel_record_t g_battle_menu_numeric_display_panel_records[2];
 struct menu_number_entry;
 struct menu_number_position;
 
@@ -32,8 +32,8 @@ struct menu_number_position;
  * third parameter becomes non-zero. Started by
  * battle_menu_run_unit_editor_panel_thread on thread 0xA. */
 void battle_menu_run_numeric_display_panel_thread(void) {
-    battle_panel_record_t* records;
-    battle_panel_record_t* record;
+    battle_menu_numeric_panel_record_t* records;
+    battle_menu_numeric_panel_record_t* record;
     u8* buffer;
     s32 i;
     s32 frame;
@@ -71,7 +71,7 @@ void battle_menu_run_numeric_display_panel_thread(void) {
             (const battle_image_location_t*)&g_battle_numeric_display_frame_rect,
             &g_battle_numeric_display_image_params[i]);
     }
-    battle_copy_bytes(&record[1], record, 0x1AC);
+    battle_copy_bytes(&record[1], record, sizeof(*record));
     record[0].palette = &g_battle_numeric_display_palettes[0].primitives;
     record[1].palette = &g_battle_numeric_display_palettes[1].primitives;
     battle_menu_init_numeric_display_frame_primitives(&g_battle_numeric_display_frame_rect, record[0].palette);
