@@ -5,10 +5,10 @@
 
 /* Provisional view of the file loaded at g_open_file_destination: the image
  * pixels, 256 per row, start at 0x5600. */
-typedef struct {
+typedef struct open_gfx_image_file {
     u8 unknown_00[0x5600];
     u16 pixels[1];
-} open_image_file_t;
+} open_gfx_image_file_t;
 
 void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
     u16* copy_source;
@@ -23,10 +23,12 @@ void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
     s32 destination_offset;
     u16* pixels;
     u16 value;
+    open_gfx_image_file_t* file_image;
 
     copy_source = (u16*)g_open_work_buffer_0;
     copy_destination = (u16*)g_open_work_buffer_1;
-    file_pixels = ((open_image_file_t*)g_open_file_destination)->pixels;
+    file_image = g_open_file_destination;
+    file_pixels = file_image->pixels;
     g_open_gfx_image_copy_source_buffer = copy_source;
     g_open_gfx_image_copy_destination_buffer = copy_destination;
     g_open_gfx_image_copy_file_pixels = file_pixels;

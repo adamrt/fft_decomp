@@ -23,19 +23,19 @@
  * own locals keeps the target's x + byte operand order and v0/v1 allocation.
  */
 
-typedef struct open_anim_frame {
+typedef struct open_gfx_sprite_animation_frame {
     /* 0x00 */ u16 sprite_id;
     /* 0x02 */ u16 duration;
-} open_anim_frame_t;
+} open_gfx_sprite_animation_frame_t;
 
-typedef struct open_anim {
+typedef struct open_gfx_sprite_animation {
     /* 0x00 */ s32 frame_count;
-    /* 0x04 */ open_anim_frame_t frames[1];
-} open_anim_t;
+    /* 0x04 */ open_gfx_sprite_animation_frame_t frames[1];
+} open_gfx_sprite_animation_t;
 
 /* One sprite part: its first word also carries the texture/palette flag bits
  * read as sprite[t]; the part list is walked two words at a time. */
-typedef struct open_sprite_part {
+typedef struct open_gfx_sprite_part {
     /* 0x00 */ u8 x_offset;    /* biased by 0x80 */
     /* 0x01 */ u8 y_offset;    /* biased by 0x80 */
     /* 0x02 */ u16 attributes; /* texture page, semi-transparency and palette bits */
@@ -43,15 +43,15 @@ typedef struct open_sprite_part {
     /* 0x05 */ u8 w;
     /* 0x06 */ u8 v;
     /* 0x07 */ u8 u;
-} open_sprite_part_t;
+} open_gfx_sprite_part_t;
 
-#define PART(index) ((open_sprite_part_t*)&sprite[index])
+#define PART(index) ((open_gfx_sprite_part_t*)&sprite[index])
 
-extern open_anim_t** g_open_gfx_record_36_animations;
+extern open_gfx_sprite_animation_t** g_open_gfx_record_36_animations;
 
 void open_gfx_draw_render_record_36(open_sprite_actor_t* actor, u32* ot) {
     u32** sprites;
-    open_anim_t* anim;
+    open_gfx_sprite_animation_t* anim;
     u32* sprite;
     s32 value;
     s32 i;

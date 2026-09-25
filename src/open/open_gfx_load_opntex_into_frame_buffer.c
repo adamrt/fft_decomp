@@ -19,18 +19,18 @@ typedef struct {
             u16 h;
         } half;
     } size; /* 0x08 */
-} opntex_block_t;
+} open_opntex_block_t;
 
 /* Upload an OPNTEX image, preceded by its CLUT when flag bit 3 is set.
  *
- * Word 1 holds the flags, and each block is an opntex_block_t followed by the
+ * Word 1 holds the flags, and each block is an open_opntex_block_t followed by the
  * pixel data. The CLUT rectangle is flattened to one row of w * h entries.
  * Reading x and w through word locals keeps the target's full-word loads. The
  * product is pinned to $a3, where the allocator would not otherwise place
  * it. */
 void open_gfx_load_opntex_into_frame_buffer(const void* source_data) {
     u32* tim;
-    opntex_block_t* block;
+    open_opntex_block_t* block;
     RECT rect;
     s32 offset;
     s32 word;
@@ -43,7 +43,7 @@ void open_gfx_load_opntex_into_frame_buffer(const void* source_data) {
         s32 height;
         register s32 area __asm__("$7");
 
-        block = (opntex_block_t*)(tim + 2);
+        block = (open_opntex_block_t*)(tim + 2);
         offset = (block->length >> 2) + 2;
         word = block->position.word;
         rect.x = word;

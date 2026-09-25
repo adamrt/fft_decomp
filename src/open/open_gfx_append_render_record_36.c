@@ -6,18 +6,20 @@
  * `sb 0/1/2(records + 0x20 + index * 36)` rather than
  * `sb 0x20/0x21/0x22(records + index * 36)`.  Same 36-byte stride as
  * open_render_record_36_t. */
-typedef struct open_render_record_36_color {
+typedef struct open_gfx_render_record_36_color_view {
     /* 0x00 */ u8 r;
     /* 0x01 */ u8 g;
     /* 0x02 */ u8 b;
     /* 0x03 */ u8 tail[0x21];
-} open_render_record_36_color_t;
+} open_gfx_render_record_36_color_view_t;
 
-typedef char open_render_record_36_color_size_must_be_0x24[(sizeof(open_render_record_36_color_t) == 0x24) ? 1 : -1];
+typedef char open_gfx_render_record_36_color_size_must_be_0x24[(sizeof(open_gfx_render_record_36_color_view_t) == 0x24)
+        ? 1
+        : -1];
 
 s32 open_gfx_append_render_record_36(open_render_record_36_t** list, s32* count) {
     open_render_record_36_t* records = g_open_gfx_render_records_36;
-    open_render_record_36_color_t* colors = (open_render_record_36_color_t*)&records[0].r;
+    open_gfx_render_record_36_color_view_t* colors = (open_gfx_render_record_36_color_view_t*)&records[0].r;
     s32 index;
 
     list[*count] = &records[g_open_gfx_next_render_record_36];

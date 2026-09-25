@@ -5,18 +5,20 @@
  * open_gfx_append_render_record_36: the target hoists `addiu a3,a3,0x34` out
  * of the three byte stores.  Same 56-byte stride as
  * open_render_record_56_t. */
-typedef struct open_render_record_56_color {
+typedef struct open_gfx_render_record_56_color_view {
     /* 0x00 */ u8 r;
     /* 0x01 */ u8 g;
     /* 0x02 */ u8 b;
     /* 0x03 */ u8 tail[0x35];
-} open_render_record_56_color_t;
+} open_gfx_render_record_56_color_view_t;
 
-typedef char open_render_record_56_color_size_must_be_0x38[(sizeof(open_render_record_56_color_t) == 0x38) ? 1 : -1];
+typedef char open_gfx_render_record_56_color_size_must_be_0x38[(sizeof(open_gfx_render_record_56_color_view_t) == 0x38)
+        ? 1
+        : -1];
 
 s32 open_gfx_append_render_record_56(open_render_record_56_t** list, s32* count) {
     open_render_record_56_t* records = g_open_gfx_render_records_56;
-    open_render_record_56_color_t* colors = (open_render_record_56_color_t*)&records[0].color.r;
+    open_gfx_render_record_56_color_view_t* colors = (open_gfx_render_record_56_color_view_t*)&records[0].color.r;
     s32 index;
 
     list[*count] = &records[g_open_gfx_render_record_56_count];

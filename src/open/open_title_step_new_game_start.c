@@ -7,20 +7,20 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct open_new_game_state {
+typedef struct open_title_new_game_state {
     /* 0x00 */ u8 unused_00[0x10];
     /* 0x10 */ s32 step;
     /* 0x14 */ u8 unused_14[0x0c];
     /* 0x20 */ s32 name_text_id;
-} open_new_game_state_t;
+} open_title_new_game_state_t;
 
-typedef struct open_party_name_block {
+typedef struct open_title_party_name_block {
     /* 0x00 */ char name[16];
-} open_party_name_block_t;
+} open_title_party_name_block_t;
 
-void open_title_step_new_game_start(open_new_game_state_t* state) {
+void open_title_step_new_game_start(open_title_new_game_state_t* state) {
     RECT rect;
-    open_party_name_block_t* name;
+    open_title_party_name_block_t* name;
     party_data_t* party;
 
     if (state->step == 5) {
@@ -66,10 +66,10 @@ void open_title_step_new_game_start(open_new_game_state_t* state) {
         DrawSync(0);
 
         g_open_file_current_openbk_image_id = -1;
-        name = (open_party_name_block_t*)world_name_run_entry_screen(
+        name = (open_title_party_name_block_t*)world_name_run_entry_screen(
             world_text_find_entry(TEXT_ID_UNIT_NAME_SPECIAL_BASE), (u32*)g_open_file_destination);
         party = main_party_get_data_pointer(0);
-        *(open_party_name_block_t*)party->name = *name;
+        *(open_title_party_name_block_t*)party->name = *name;
         g_open_current_controller_index -= 1;
         open_birthday_push_date_controller();
         return;

@@ -2,12 +2,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct open_stream_controller_state {
+typedef struct open_movie_stream_controller_state {
     s32 start_sector;
     s32 stream_length;
-} open_stream_controller_state_t;
+} open_movie_stream_controller_state_t;
 
-void open_movie_finish_stream_controller_if_ready_or_skipped(const open_stream_controller_state_t* state) {
+void open_movie_finish_stream_controller_if_ready_or_skipped(const open_movie_stream_controller_state_t* state) {
     if (g_open_system_runtime_flags & 2) {
         if (!(g_open_input_new_button_presses & PSX_PAD_START)) {
             return;
