@@ -4,10 +4,8 @@
 #include "fft/wldcore.h"
 #include "psx/pad.h"
 
-typedef struct wldcore_list_window_state wldcore_list_window_state_t;
-
 u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_window_set_list_window_states(wldcore_list_window_state_t* state);
+void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* state);
 void wldcore_list_open_story_events(void);
 void wldcore_list_open_unexplored_lands(void);
 void wldcore_list_open_treasures(void);
@@ -116,7 +114,7 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
 
     if (buttons & PSX_PAD_SELECT) {
         level->mode = 2;
-        wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+        wldcore_window_set_list_window_states(level);
         wldcore_menu_push_message_level(
             g_wldcore_brave_story_help_text_ids[level->entries[level->selected_entry]] | 0x1000, 1);
         return;
@@ -128,35 +126,35 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
         switch (level->entries[level->selected_entry]) {
         case 0:
             wldcore_load_message_block_if_changed(0xB);
-            wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+            wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_script_flags_01a4_01bb();
             return;
         case 1:
             wldcore_load_message_block_if_changed(4);
-            wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+            wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_story_events();
             return;
         case 2:
-            wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+            wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_set_script_variables_03c0_03ff();
             return;
         case 3:
             wldcore_load_message_block_if_changed(0xA);
-            wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+            wldcore_window_set_list_window_states(level);
             wldcore_menu_push_proposition_category_level();
             return;
         case 4:
             wldcore_load_message_block_if_changed(2);
-            wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+            wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_unexplored_lands();
             return;
         case 5:
             wldcore_load_message_block_if_changed(3);
-            wldcore_window_set_list_window_states((wldcore_list_window_state_t*)level);
+            wldcore_window_set_list_window_states(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_treasures();
             return;

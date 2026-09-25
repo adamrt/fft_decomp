@@ -12,9 +12,10 @@
  * `scratch` retains the target's 12 reserved frame bytes without instructions.
  * The chained clear shares the main-window index between both stores. */
 void wldcore_menu_close_list_window_level(wldcore_menu_stack_record_t* level) {
-    s32 content_render = ((volatile wldcore_menu_stack_record_t*)level)->list_window.content_render;
-    s32 main_window = ((volatile wldcore_menu_stack_record_t*)level)->list_window.main_window;
-    register s32 side_window __asm__("$4") = ((volatile wldcore_menu_stack_record_t*)level)->list_window.side_window;
+    volatile wldcore_menu_stack_record_t* observed_level = level;
+    s32 content_render = observed_level->list_window.content_render;
+    s32 main_window = observed_level->list_window.main_window;
+    register s32 side_window __asm__("$4") = observed_level->list_window.side_window;
     s32 scratch[3];
     s32 lower_window;
     s32 upper_window;
