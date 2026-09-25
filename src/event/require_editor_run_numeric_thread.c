@@ -29,7 +29,7 @@ void require_editor_run_numeric_thread(void) {
     u8* upload_a;
     u8* upload_b;
     u8* upload_c;
-    u8* descriptor;
+    const world_gfx_image_load_parameters_t* descriptor;
     s32 i;
     s32 frame;
     s32 field_y;
@@ -63,13 +63,12 @@ void require_editor_run_numeric_thread(void) {
         &g_require_editor_numeric_table.source.texture_rect, &buffer->numeric_frame);
     require_gfx_init_scaled_draw_area_packets(&buffer->portrait);
     i = 0;
-    descriptor = g_require_editor_numeric_texture;
+    descriptor = (const world_gfx_image_load_parameters_t*)g_require_editor_numeric_texture;
     for (; i < 18; i++) {
         battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
         battle_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i], g_require_editor_numeric_geometry,
-            &g_require_editor_numeric_table.source.texture_origin,
-            (const world_gfx_image_load_parameters_t*)descriptor);
-        descriptor += 0xC;
+            &g_require_editor_numeric_table.source.texture_origin, descriptor);
+        descriptor++;
     }
     if (g_battle_current_thread_id != 12) {
         buffer->sprites[14].v0 += 0x4C;

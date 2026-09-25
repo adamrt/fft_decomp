@@ -68,7 +68,7 @@ void bunit_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_packet_t* panel;
     battle_menu_status_panel_editor_packet_t* editor;
     u8* cur;
-    u8* cur1;
+    SPRT* cur1;
     u8* cur2;
     u8* cur3;
     u8* cur5;
@@ -157,7 +157,7 @@ void bunit_render_unit_status_panel_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
         (RECT*)g_bunit_panel_frame_rect, (struct world_menu_palette_primitives*)panel);
-    cur1 = (u8*)&panel->sprites[0];
+    cur1 = &panel->sprites[0];
     battle_menu_init_sprite_array(cur1, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
     battle_text_configure_sprite_vram(&rects[2], 0x58, 0x20, cur1, 0);

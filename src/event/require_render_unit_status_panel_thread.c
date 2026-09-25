@@ -68,7 +68,7 @@ void require_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_packet_t* panel;
     battle_menu_status_panel_editor_packet_t* editor;
     u8* input_state;
-    u8* name_sprite;
+    SPRT* name_sprite;
     u8* number_image_lower;
     u8* small_text_image_2;
     u8* small_text_image_3;
@@ -158,7 +158,7 @@ void require_render_unit_status_panel_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
         (RECT*)g_require_panel_frame_rect, (struct world_menu_palette_primitives*)panel);
-    name_sprite = (u8*)&panel->sprites[0];
+    name_sprite = &panel->sprites[0];
     battle_menu_init_sprite_array(name_sprite, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
     battle_text_configure_sprite_vram(&rects[2], 0x58, 0x20, name_sprite, 0);

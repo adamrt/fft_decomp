@@ -5,14 +5,14 @@
 
 /* Job-wheel sprite record: destination rectangle followed by the 12-byte
  * source entry, as in world_formation_draw_unit_sprite. */
-typedef struct job_wheel_sprite {
+typedef struct world_formation_job_wheel_sprite {
     s16 x;                                  /* 0x00 */
     s16 y;                                  /* 0x02 */
     s16 w;                                  /* 0x04 */
     s16 h;                                  /* 0x06 */
     world_formation_graphic_entry_t source; /* 0x08 */
     u8 _pad14[0x10];                        /* unknown; the frame reserves 0x24 bytes for the record */
-} job_wheel_sprite_t;
+} world_formation_job_wheel_sprite_t;
 
 /*
  * Draw the job wheel's generic-job sprites around an ellipse.
@@ -24,7 +24,7 @@ typedef struct job_wheel_sprite {
  * gauge. Needs at least two jobs.
  */
 void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
-    job_wheel_sprite_t sprite;
+    world_formation_job_wheel_sprite_t sprite;
     s32 step;
     s32 ot_index;
     s32 i;

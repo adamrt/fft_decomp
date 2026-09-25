@@ -6,11 +6,11 @@
 #include "fft/world.h"
 
 /* Leading bytes of an Ability Data 1 record (8 bytes each at 0x8005ebf0). */
-typedef struct ability_data_1 {
+typedef struct world_text_spell_quote_ability_data {
     u16 jp_cost;     /* 0x00 */
     u8 learn_chance; /* 0x02 */
     u8 flags;        /* 0x03; 0x40 is tested before the no-quote path */
-} ability_data_1_t;
+} world_text_spell_quote_ability_data_t;
 
 extern s32 main_ability_calculate_pointers_and_type(s32 id, u8** out_ability_data, u8** out_secondary_data);
 struct battle_ai_command_action;
@@ -23,7 +23,7 @@ struct battle_ai_command_action;
  * lacks the spell-quote flag, status blocks it, options disable it, or
  * EVENT_SCRIPT_VAR_RANDOM_VALUE is 4 or more. Everything else uses command 7. */
 void world_text_determine_spell_quote(world_unit_command_action_t* action, s32 unit_id, s32 enabled) {
-    ability_data_1_t* ability;
+    world_text_spell_quote_ability_data_t* ability;
     ability_secondary_data_t* secondary;
     battle_stats_t* unit;
     s32 known;

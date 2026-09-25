@@ -1,12 +1,12 @@
 #include "fft/battle.h"
 #include "fft/script_variables.h"
 
-typedef struct {
+typedef struct battle_map_found_item_result {
     s32 field_0;
     u8 item_id; /* 0x8018f8a4; ID of the found item */
-} rare_buf_t;
+} battle_map_found_item_result_t;
 
-extern rare_buf_t g_battle_map_rare_item_result;
+extern battle_map_found_item_result_t g_battle_map_rare_item_result;
 
 /* Pick the rare or common move-find item on the unit's tile and mark the tile found.
  *

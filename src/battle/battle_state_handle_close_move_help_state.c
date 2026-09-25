@@ -8,9 +8,7 @@
 
 /* The 0x80 bytes at 0x9c..0x11c of the renderer-side Misc record (step count,
  * step list, movement flags and mount byte) copied as one unaligned block. */
-typedef struct {
-    u8 bytes[0x80];
-} battle_movement_path_block_t;
+typedef battle_walk_path_t battle_movement_path_block_t;
 
 /* Free-cursor movement step. With the acting unit under player control the
  * confirm button routes the cursor to the pathfinder and, on a reachable

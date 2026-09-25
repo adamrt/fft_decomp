@@ -76,7 +76,7 @@ void attack_render_unit_status_panel_thread(void) {
     battle_menu_status_panel_packet_t* panel;
     battle_menu_status_panel_editor_packet_t* editor;
     u8* input;
-    u8* panel_sprites;
+    SPRT* panel_sprites;
     u8* number_pixels_b;
     u8* value_pixels_b;
     u8* value_pixels_c;
@@ -170,7 +170,7 @@ void attack_render_unit_status_panel_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
         (RECT*)g_attack_panel_frame_rect, (struct world_menu_palette_primitives*)panel);
-    panel_sprites = (u8*)&panel->sprites[0];
+    panel_sprites = &panel->sprites[0];
     battle_menu_init_sprite_array(panel_sprites, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
     battle_text_configure_sprite_vram(&rects[2], 0x58, 0x20, panel_sprites, 0);

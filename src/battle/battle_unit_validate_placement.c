@@ -4,7 +4,7 @@
 /* Bitfield view of map_tile_t byte 3. Reading it as bitfields reproduces the
  * target's separate reload of the byte for each test; masking the shared
  * u8 field lets CSE merge them. */
-typedef struct map_tile_bits {
+typedef struct battle_unit_placement_tile_bits {
     map_tile_surface_t surface;
     u8 _unknown01;
     u8 field_02;
@@ -14,7 +14,7 @@ typedef struct map_tile_bits {
     u8 field_05;
     map_tile_flags_06_t flags_06;
     u8 camera_block_masks;
-} map_tile_bits_t;
+} battle_unit_placement_tile_bits_t;
 
 /* Validate a unit's placement tile.
  *
@@ -24,7 +24,7 @@ typedef struct map_tile_bits {
 s32 battle_unit_validate_placement(s32 unit_idx) {
     battle_stats_t* unit = &g_battle_unit_stats[unit_idx];
     battle_stats_t* other;
-    map_tile_bits_t* tile;
+    battle_unit_placement_tile_bits_t* tile;
     u8 x;
     u8 y;
     u8 higher_elevation;
@@ -39,7 +39,7 @@ s32 battle_unit_validate_placement(s32 unit_idx) {
     if (y >= g_map_max_y) {
         return -1;
     }
-    tile = (map_tile_bits_t*)&g_battle_map_tile_data[battle_map_calculate_location(unit)];
+    tile = (battle_unit_placement_tile_bits_t*)&g_battle_map_tile_data[battle_map_calculate_location(unit)];
     if (tile->flags_06.value & MAP_TILE_COLLISION_MASK) {
         return -1;
     }

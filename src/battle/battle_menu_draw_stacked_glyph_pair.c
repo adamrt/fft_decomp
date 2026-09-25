@@ -1,14 +1,10 @@
 #include "fft/battle.h"
+#include "fft/battle_menu_status_panel.h"
 #include "fft/battle_text.h"
 #include "psx/types.h"
 
 /* Source rectangle in the shared menu glyph image. */
-typedef struct battle_glyph {
-    s16 source_x;
-    s16 source_y;
-    s16 width;
-    s16 height;
-} battle_glyph_t;
+typedef battle_menu_status_panel_glyph_t battle_glyph_t;
 
 /* Destination cursor used by blit_text_glyph. */
 typedef struct battle_text_position {

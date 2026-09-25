@@ -11,9 +11,9 @@ typedef struct {
     u8 flags;
     u8 value;
     u8 unknown_02[2];
-} world_unit_list_slot_t;
+} world_menu_unit_list_slot_t;
 
-extern world_unit_list_slot_t g_world_action_target_list_slots[];
+extern world_menu_unit_list_slot_t g_world_action_target_list_slots[];
 
 #define LAYOUT(entry) ((world_menu_text_layout_t*)(entry)->text_binding)
 

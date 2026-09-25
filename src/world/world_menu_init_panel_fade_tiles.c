@@ -3,16 +3,16 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_fade_tile_frame_split {
+typedef struct world_menu_fade_tile_frame_split {
     DR_MODE draw_mode;
     TILE center;
     TILE backdrop[9];
     TILE bar[9];
-} world_fade_tile_frame_split_t;
+} world_menu_fade_tile_frame_split_t;
 
 /* Initialize the center tile and two nine-tile scanline strips. */
 void world_menu_init_panel_fade_tiles(void) {
-    world_fade_tile_frame_split_t* frame;
+    world_menu_fade_tile_frame_split_t* frame;
     s32 i;
     /* GetTPage's argument registers, tied by the barrier below. */
     register s32 mode __asm__("$4") = 0;
@@ -20,7 +20,7 @@ void world_menu_init_panel_fade_tiles(void) {
     register s32 x __asm__("$6") = 0x3c0;
     register s32 y __asm__("$7") = 0x100;
 
-    frame = (world_fade_tile_frame_split_t*)&g_world_menu_panel_fade_frames[0];
+    frame = (world_menu_fade_tile_frame_split_t*)&g_world_menu_panel_fade_frames[0];
 
     /* Materializes the frame base before the register saves and the GetTPage
      * call; without it GCC sets up the base after the call. */
@@ -59,6 +59,6 @@ void world_menu_init_panel_fade_tiles(void) {
         frame->bar[i].y0 = i + 0xde;
     }
 
-    world_script_copy_bytes(
-        &g_world_menu_panel_fade_frames[1], &g_world_menu_panel_fade_frames[0], sizeof(world_fade_tile_frame_split_t));
+    world_script_copy_bytes(&g_world_menu_panel_fade_frames[1], &g_world_menu_panel_fade_frames[0],
+        sizeof(world_menu_fade_tile_frame_split_t));
 }

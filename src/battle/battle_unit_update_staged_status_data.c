@@ -3,12 +3,10 @@
 #include "fft/battle_gfx.h"
 #include "fft/thread.h"
 #include "fft/unit_slots.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
-typedef struct {
-    u8 unknown_000[0x5F0];
-    unit_status_staging_t status_staging; /* 0x5f0 */
-} battle_event_work_t;
+typedef world_event_work_t battle_event_work_t;
 typedef char battle_event_work_size_must_be_0x9e2[(sizeof(battle_event_work_t) == 0x9E2) ? 1 : -1];
 
 /* Battle twin of world_unit_update_staged_status_data. Saves or restores the event status snapshot for every misc

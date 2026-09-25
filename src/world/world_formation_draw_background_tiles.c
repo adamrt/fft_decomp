@@ -2,20 +2,20 @@
 #include "psx/types.h"
 
 /* Screen x and texture u of one background tile; two alternating rows of four. */
-typedef struct world_background_tile {
+typedef struct world_formation_background_tile {
     u16 x;
     u16 u;
-} world_background_tile_t;
+} world_formation_background_tile_t;
 
 /* Local working set: the tile rectangle, its four corner RGB triples and the
  * per-grid-point shade table (rows 32 pixels apart, columns 64). */
-typedef struct world_background_draw_state {
+typedef struct world_formation_background_draw_state {
     world_gfx_textured_rect_source_t rect; /* 0x00 */
     u8 rgb[16];                            /* 0x18 */
     u8 shades[16][5];                      /* 0x28 */
-} world_background_draw_state_t;
+} world_formation_background_draw_state_t;
 
-extern world_background_tile_t g_world_formation_background_tiles[2][4];
+extern world_formation_background_tile_t g_world_formation_background_tiles[2][4];
 
 /*
  * Draw the formation-screen background as 64x32 tiles from `y` downwards,
@@ -28,13 +28,13 @@ extern world_background_tile_t g_world_formation_background_tiles[2][4];
  * hoist that product and the shade-row addresses.
  */
 void world_formation_draw_background_tiles(s32 y) {
-    world_background_draw_state_t st;
+    world_formation_background_draw_state_t st;
     s32 row;
     s32 col;
     register s32 draw_row __asm__("$20");
     s32 shade;
-    world_background_tile_t* tile;
-    world_background_tile_t(*tiles)[4];
+    world_formation_background_tile_t* tile;
+    world_formation_background_tile_t(*tiles)[4];
 
     draw_row = 0;
     st.rect.y = y;

@@ -1,7 +1,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_icon_source {
+typedef struct world_gfx_sprite_copy_source {
     u16 vram_x; /* 0x00: menu record text-image VRAM x; (vram_x & 0x3f) * 4 is SPRT.u0 */
     u8 vram_y;  /* 0x02: low byte of the menu record's VRAM y, copied to SPRT.v0 */
     u8 unused_03;
@@ -11,11 +11,11 @@ typedef struct world_icon_source {
     u8 unused_0c[8];
     u16 width;  /* 0x14 */
     u16 height; /* 0x16 */
-} world_icon_source_t;
+} world_gfx_sprite_copy_source_t;
 
 /* The destination is an SPRT packet: bytes +0x0c/+0x0d are its u/v
  * coordinates. */
-void world_gfx_copy_sprite_position_uv_and_size(world_icon_source_t* source, SPRT* sprite) {
+void world_gfx_copy_sprite_position_uv_and_size(world_gfx_sprite_copy_source_t* source, SPRT* sprite) {
     sprite->x0 = source->x;
     sprite->y0 = source->y;
     sprite->u0 = (source->vram_x & 0x3F) * 4;

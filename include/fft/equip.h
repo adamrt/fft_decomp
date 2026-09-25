@@ -262,7 +262,7 @@ extern u32 g_equip_input_primary_repeat;
 extern volatile u32 g_equip_input_repeat_counters[16];
 extern u32 g_equip_input_secondary_repeat;
 extern u8* g_equip_item_category_lists[];
-extern s16 g_equip_item_graphic_descriptor[6];
+extern battle_menu_status_panel_graphic_descriptor_t g_equip_item_graphic_descriptor;
 extern u8 g_equip_item_inventory_totals[];
 extern s16 g_equip_item_list_entries[];
 extern u8 g_equip_item_type_icon_coords[][2];
@@ -739,7 +739,7 @@ s32 equip_bits_read_secondary(s32 count);
 u8* equip_cmd_draw_tiled_rectangle_handler(u8* command);
 void equip_collect_item_stat_deltas(
     s32 raw_item, struct world_item_stat_summary* summary, struct world_item_stat_detail* detail, s32 alternate);
-void equip_gfx_build_item_graphic_descriptor(s16* descriptor);
+void equip_gfx_build_item_graphic_descriptor(battle_menu_status_panel_graphic_descriptor_t* descriptor);
 void equip_gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition,
     const s32* first_portrait, const s32* second_portrait, u8* image, POLY_FT4* poly, s32 direction);
 void equip_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index);
@@ -748,7 +748,7 @@ void equip_gfx_enqueue_textured_quad(
 void equip_gfx_enqueue_textured_quad_current_ot(
     const RECT* rect, s32 u, s32 v, const u8* color, s32 semitrans, u16 texture_page, u16 clut);
 s32 equip_item_build_filtered_list(s16 unit_index, u16 sort_mode, s8 category, s16* list, u8 equip_filter);
-s16* equip_item_build_row_graphic_descriptor(s32 row);
+battle_menu_status_panel_graphic_descriptor_t* equip_item_build_row_graphic_descriptor(s32 row);
 s32 equip_item_get_ranking_value(s32 item_id);
 void equip_item_subtract_scaled_stats(u8* out, u8* scaled, u8* base, s32 scale);
 s32 equip_menu_get_preview_hp_bonus(void);

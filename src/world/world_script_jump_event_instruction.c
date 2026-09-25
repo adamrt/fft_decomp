@@ -2,13 +2,13 @@
 #include "fft/event.h"
 #include "psx/types.h"
 
-typedef struct event_instr_t {
+typedef struct world_script_event_instruction {
     u8 pad[2];
     u8 param0;
     u8 param1;
-} event_instr_t;
+} world_script_event_instruction_t;
 
-void world_script_jump_event_instruction(event_instr_t* instr) {
+void world_script_jump_event_instruction(world_script_event_instruction_t* instr) {
     battle_screen_coords_t vec;
     s32 misc_id;
     battle_screen_coords_t* coords;

@@ -1,14 +1,11 @@
 #include "fft/battle.h"
 #include "fft/data.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Signed view of battle_ai_command_action_t: the ability id is read with a
  * signed halfword load here. */
-typedef struct {
-    u8 unit_id;     /* 0x00 */
-    u8 skillset;    /* 0x01 */
-    s16 ability_id; /* 0x02 */
-} battle_preview_action_t;
+typedef world_unit_command_action_t battle_preview_action_t;
 
 /*
  * Attack-preview caster panel: bind the selected unit's pending action to the

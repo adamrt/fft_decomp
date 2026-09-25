@@ -6,7 +6,7 @@
  * (direction in bits 6-7, 0x20 higher elevation, 0x10 path flag, jump length
  * in bits 0-1). Accessed as u32 bit-fields because the target reads and
  * writes the whole word. */
-typedef struct rider_path_head {
+typedef struct battle_unit_rider_path_head {
     u32 count : 8;
     u32 jump_length : 2;
     u32 step_bit_2 : 1;
@@ -15,18 +15,18 @@ typedef struct rider_path_head {
     u32 higher_elevation : 1;
     u32 direction : 2;
     u32 _unknown_10 : 16;
-} rider_path_head_t;
+} battle_unit_rider_path_head_t;
 
 /* Word view of misc +0x118; the target clears the packed byte at +0x11a
  * (bits 16-23) with a word read-modify-write. */
-typedef struct rider_move_state {
+typedef struct battle_unit_rider_move_state {
     u32 _unknown_00 : 16;
     u32 bit_0 : 1;
     u32 bits_1_3 : 3;
     u32 bit_4 : 1;
     u32 bits_5_7 : 3;
     u32 _unknown_18 : 8;
-} rider_move_state_t;
+} battle_unit_rider_move_state_t;
 
 /* Prepare a unit's one-step movement path and dismount it from its rider.
  *
@@ -35,13 +35,13 @@ typedef struct rider_move_state {
  * that order fixes the target's constant-load schedule. */
 s32 battle_unit_prepare_rider_dismount(u32 misc_id, s32 direction, s32 jump_length) {
     battle_unit_misc_data_t* unit;
-    rider_path_head_t* head;
-    rider_move_state_t* state;
+    battle_unit_rider_path_head_t* head;
+    battle_unit_rider_move_state_t* state;
 
     unit = battle_unit_get_misc_data_by_misc_id(misc_id & 0xffff);
     if (unit != 0) {
-        head = (rider_path_head_t*)&unit->movement_path_count;
-        state = (rider_move_state_t*)&unit->movement_path[0x7b];
+        head = (battle_unit_rider_path_head_t*)&unit->movement_path_count;
+        state = (battle_unit_rider_move_state_t*)&unit->movement_path[0x7b];
         unit->movement_path_count = 1;
         unit->walk_speed.word = 0x2000;
         unit->step_speed = 0x2000;

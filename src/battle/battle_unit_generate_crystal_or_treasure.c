@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Crystal/treasure pickup result at 0x8006623c. */
-typedef struct crystal_pickup_result {
+typedef struct battle_unit_crystal_pickup_result {
     s32 result;                 /* 0x00; -1 none, 4 treasure, 2 crystal, |1 learned */
     u8 unk_04[0x14];            /* 0x04 */
     u8 learned[19][3];          /* 0x18 */

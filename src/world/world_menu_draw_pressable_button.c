@@ -4,7 +4,7 @@
 /* Destination rectangle followed by the source rectangle, CLUT and tpage
  * consumed by world_gfx_enqueue_oriented_textured_quad (clut/tpage at 0x10/0x12, as in
  * world_gfx_sprite_desc_t). */
-typedef struct world_button_sprite {
+typedef struct world_menu_button_sprite {
     s16 x;     /* 0x00 */
     s16 y;     /* 0x02 */
     s16 w;     /* 0x04 */
@@ -15,19 +15,19 @@ typedef struct world_button_sprite {
     u16 v_h;   /* 0x0e */
     u16 clut;  /* 0x10 */
     u16 tpage; /* 0x12 */
-} world_button_sprite_t;
+} world_menu_button_sprite_t;
 
 /* 12-byte button piece: source rectangle, then its offset from the button origin. */
-typedef struct world_button_piece {
+typedef struct world_menu_button_piece {
     u16 u;        /* 0x00 */
     u16 v;        /* 0x02 */
     s16 w;        /* 0x04 */
     s16 h;        /* 0x06 */
     u16 x_offset; /* 0x08 */
     u16 y_offset; /* 0x0a */
-} world_button_piece_t;
+} world_menu_button_piece_t;
 
-extern world_button_piece_t g_world_menu_button_pieces[];
+extern world_menu_button_piece_t g_world_menu_button_pieces[];
 
 /*
  * Draw an on-screen button from its sprite pieces and animate its press.
@@ -38,8 +38,8 @@ extern world_button_piece_t g_world_menu_button_pieces[];
  * Compiled at -O1 like the other formation/shop sprite drawers.
  */
 void world_menu_draw_pressable_button(s16 index, s32 x, s32 y, s16 pressed, u16 disabled, u16 sound_effect_id) {
-    world_button_sprite_t sprite;
-    world_button_piece_t* piece;
+    world_menu_button_sprite_t sprite;
+    world_menu_button_piece_t* piece;
     s32 speed;
     s32 i;
     s32 count;

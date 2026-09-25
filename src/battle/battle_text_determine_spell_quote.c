@@ -7,11 +7,11 @@
 #include "fft/world.h"
 
 /* Leading bytes of an Ability Data 1 record (8 bytes each at 0x8005ebf0). */
-typedef struct ability_data_1 {
+typedef struct battle_text_ability_primary_prefix {
     u16 jp_cost;     /* 0x00 */
     u8 learn_chance; /* 0x02 */
     u8 flags;        /* 0x03; 0x40 is tested before the no-quote path */
-} ability_data_1_t;
+} battle_text_ability_primary_prefix_t;
 
 /* Chooses whether an ability announcement shows a spell quote.
  *
@@ -22,7 +22,7 @@ typedef struct ability_data_1 {
  * lacks the spell-quote flag, status blocks it, options disable it, or
  * EVENT_SCRIPT_VAR_RANDOM_VALUE is 4 or more. Everything else uses command 7. */
 void battle_text_determine_spell_quote(world_unit_command_action_t* action, s32 unit_id, s32 enabled) {
-    ability_data_1_t* ability;
+    battle_text_ability_primary_prefix_t* ability;
     ability_secondary_data_t* secondary;
     battle_stats_t* unit;
     s32 known;

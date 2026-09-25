@@ -5,13 +5,13 @@
 /* Formation sprite record: destination rectangle followed by the 12-byte
  * source entry filled by world_formation_build_unit_graphic_entry (so the
  * source clut/tpage land at 0x10/0x12, as world_gfx_sprite_desc_t expects). */
-typedef struct formation_sprite {
+typedef struct world_formation_unit_sprite {
     s16 x;                                  /* 0x00 */
     s16 y;                                  /* 0x02 */
     s16 w;                                  /* 0x04 */
     s16 h;                                  /* 0x06 */
     world_formation_graphic_entry_t source; /* 0x08 */
-} formation_sprite_t;
+} world_formation_unit_sprite_t;
 
 /* Draws one formation unit sprite centred on pos.
  *
@@ -21,7 +21,7 @@ typedef struct formation_sprite {
  * Compiled at -O1; the (s16) casts keep the centring offset from being
  * reassociated onto pos. */
 void world_formation_draw_unit_sprite(s16 unit_index, world_menu_point_t* pos, s8* rgb, s32 ot_index) {
-    formation_sprite_t sprite;
+    world_formation_unit_sprite_t sprite;
     s32 scale;
     s32 w;
     s32 h;

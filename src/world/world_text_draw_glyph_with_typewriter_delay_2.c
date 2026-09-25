@@ -6,14 +6,14 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_glyph_blit_desc {
+typedef struct world_text_glyph_blit_desc {
     s16 x; /* 0x00 */
     s16 y; /* 0x02 */
     u8 unk_04[4];
     s32 width; /* 0x08 */
-} world_glyph_blit_desc_t;
+} world_text_glyph_blit_desc_t;
 
-extern world_glyph_blit_desc_t g_world_text_message_box_state;
+extern world_text_glyph_blit_desc_t g_world_text_message_box_state;
 
 /* Draw the pending glyph into VRAM and hold it for the typewriter delay.
  *
