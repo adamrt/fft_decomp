@@ -390,7 +390,7 @@ void battle_menu_display_hovered_unit_stats(
         } else {
             battle_menu_init_primitive_colors_palette_bank_0(&page->palette);
         }
-        battle_menu_submit_numeric_display_frame_primitives((u8*)&page->palette);
+        battle_menu_submit_numeric_display_frame_primitives(&page->palette);
         battle_gfx_draw_or_append_gpu_primitive((s32*)offs->draw_offset_a);
         battle_thread_yield();
         g_battle_menu_hide_numeric_values = unit->unit_flags & 4;

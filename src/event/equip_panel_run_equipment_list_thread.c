@@ -164,7 +164,7 @@ void equip_panel_run_equipment_list_thread(void) {
         for (i = 0; i < 4; i++) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->lines[i]);
         }
-        battle_menu_submit_numeric_display_frame_primitives((u8*)&screen->numeric_frame);
+        battle_menu_submit_numeric_display_frame_primitives(&screen->numeric_frame);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->draw_offsets[0]);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->portrait);
         battle_thread_yield();

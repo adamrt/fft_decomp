@@ -272,7 +272,7 @@ typedef char battle_menu_status_panel_numeric_entry_size_must_be_0xc
  * strides come from the walks that configure and submit them, and the
  * draw-offset packets from the SetDrawOffset pairs. */
 typedef struct battle_menu_status_panel_editor_packet {
-    u8 unknown_000[0xec];                                 /* numeric display frame */
+    world_menu_palette_primitives_t numeric_frame;        /* 0x000 */
     DR_MODE draw_mode_a;                                  /* 0x0ec */
     DR_MODE draw_mode_b;                                  /* 0x0f8 */
     SPRT value_sprites[4];                                /* 0x104 */
@@ -290,7 +290,7 @@ typedef char battle_menu_status_panel_editor_packet_size_must_be_0x30c
  * block. sprites[6] doubles as the scroll cursor: the display threads write
  * its texture window from the scroll row/column. */
 typedef struct battle_menu_status_panel_packet {
-    u8 unknown_000[0xec];                                 /* numeric display frame */
+    world_menu_palette_primitives_t numeric_frame;        /* 0x000 */
     SPRT sprites[7];                                      /* 0x0ec */
     DR_MODE draw_mode_a;                                  /* 0x178 */
     DR_MODE draw_mode_b;                                  /* 0x184 */

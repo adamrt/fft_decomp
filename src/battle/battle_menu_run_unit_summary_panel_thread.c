@@ -207,7 +207,7 @@ void battle_menu_run_unit_summary_panel_thread(void) {
         } else {
             battle_menu_init_primitive_colors_palette_bank_0(frame_record->palette);
         }
-        battle_menu_submit_numeric_display_frame_primitives((u8*)frame_record->palette);
+        battle_menu_submit_numeric_display_frame_primitives(frame_record->palette);
         battle_gfx_draw_or_append_gpu_primitive((s32*)frame_record->draw_offset_a);
     }
 exit:

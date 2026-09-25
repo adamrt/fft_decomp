@@ -4,8 +4,8 @@
 s32 battle_effect_alloc_state_record(void) {
     s32 index;
     u16 next;
-    /* These base registers preserve the separate global address loads. */
-    register u16* allocated __asm__("$6");
+    /* Keep the available-list base in its target register. */
+    u16* allocated;
     register s16* available __asm__("$7");
     /* Unused local: the target reserves an 8-byte frame. */
     s32 unused;

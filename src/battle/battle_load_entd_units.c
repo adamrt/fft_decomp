@@ -21,7 +21,7 @@
  * initialisation result and the graphics descriptor's not-deployed flag:
  * sharing the one variable is what gives the flag enough uses to win s1 ahead
  * of battle_id. */
-void battle_load_entd_units(void* entd_data, s32 mode) {
+void battle_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
     s32 battle_id;
     s32 enemy_count;
     s32 party_limit;
@@ -36,7 +36,7 @@ void battle_load_entd_units(void* entd_data, s32 mode) {
     u8 presence;
     battle_stats_t* unit;
     entd_unit_t* entd;
-    entd_unit_t* entd_list = (entd_unit_t*)entd_data;
+    entd_unit_t* entd_list = entd_data->units;
 
     g_battle_player_unit_fallen = 0;
     g_enemy_level_sum = 0;

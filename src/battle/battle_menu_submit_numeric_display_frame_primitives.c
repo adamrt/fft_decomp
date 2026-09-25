@@ -1,18 +1,16 @@
+#include "fft/menu_types.h"
 #include "psx/types.h"
 
 /* Submit the twelve glyph packets and three framing packets. */
-void battle_menu_submit_numeric_display_frame_primitives(u8* display) {
+void battle_menu_submit_numeric_display_frame_primitives(world_menu_palette_primitives_t* display) {
     s32 index;
-    s32 offset;
 
     index = 0;
-    offset = 0x18;
     do {
-        battle_gfx_draw_or_append_gpu_primitive(display + offset);
+        battle_gfx_draw_or_append_gpu_primitive(&display->lines[index]);
         index++;
-        offset += 0x10;
     } while (index < 12);
-    battle_gfx_draw_or_append_gpu_primitive(display);
-    battle_gfx_draw_or_append_gpu_primitive(display + 0xd8);
-    battle_gfx_draw_or_append_gpu_primitive(display + 0x0c);
+    battle_gfx_draw_or_append_gpu_primitive(&display->draw_mode);
+    battle_gfx_draw_or_append_gpu_primitive(&display->sprite);
+    battle_gfx_draw_or_append_gpu_primitive(&display->draw_mode_menu);
 }

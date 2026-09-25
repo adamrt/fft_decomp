@@ -3046,7 +3046,7 @@ void battle_handle_menu_cancel_input(void* menu);
 s32 battle_is_skillset_in_spell_quote_exception_list(s32 skillset_id);
 
 /* load */
-void battle_load_entd_units(void* entd_data, s32 mode);
+void battle_load_entd_units(entd_encounter_t* entd_data, s32 mode);
 
 /* map */
 void battle_map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth);
@@ -3660,7 +3660,7 @@ void battle_menu_release_current_thread_slot(void);
 void battle_menu_restore_selection_for_selected_unit(s32 menu_id);
 void battle_menu_run_companion_overlay_9_10_thread(void);
 void battle_menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id);
-void battle_menu_submit_numeric_display_frame_primitives(u8* display);
+void battle_menu_submit_numeric_display_frame_primitives(world_menu_palette_primitives_t* display);
 void battle_menu_widen_bytes_to_halfwords(s16* dst, u8* src, s32 count);
 void battle_menu_zoom_cursor_frame(const void* source, SPRT* sprite, s32 step);
 void battle_noop_80079298(void);
@@ -3924,6 +3924,6 @@ s32 battle_process_map_gns_record(s32 phase, gns_command_record_prefix_t* record
 s32 battle_spread_targeting_panel_to_neighbors(s32 y, s32 x);
 void battle_target_build_directional_attack_panels(const void* source, u8 mode);
 void battle_target_check_moldball_virus_depth(s16 ability_id);
-u8 battle_unit_generate_treasure(u8* p);
+u8 battle_unit_generate_treasure(battle_stats_t* unit);
 
 #endif

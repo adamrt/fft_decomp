@@ -423,7 +423,7 @@ s32 battle_gfx_load_misc_unit_into_evtchr_slot(s32 misc_id, s32 slot);
 void battle_gfx_modify_vram_palette(s32 mode, const u16* source, s32 section_id, s32 unit_misc_id, s32 preset, s16 red,
     s16 green, s16 blue, s32 final_value);
 s32 battle_gfx_release_reserved_vram_slot(s32 slot_index);
-void battle_gfx_release_unit_vram_slot(u8* unit);
+void battle_gfx_release_unit_vram_slot(struct battle_unit_misc_data* unit);
 void battle_gfx_reset_unit_graphics_load_state(void);
 s32 battle_gfx_save_evtchr_slot(s32 slot_index);
 void battle_gfx_set_draw_mode_for_texture_page(void* mode, s32 page);

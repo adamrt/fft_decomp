@@ -135,8 +135,7 @@ void equip_render_unit_status_panel_thread(void) {
     }
     shake = 0;
 
-    battle_menu_init_numeric_display_frame_primitives(
-        (RECT*)g_equip_gfx_portrait_origin, (world_menu_palette_primitives_t*)editor);
+    battle_menu_init_numeric_display_frame_primitives((RECT*)g_equip_gfx_portrait_origin, &editor->numeric_frame);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, 1);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, 0);
     battle_menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -181,8 +180,7 @@ void equip_render_unit_status_panel_thread(void) {
     battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
-    battle_menu_init_numeric_display_frame_primitives(
-        (RECT*)g_equip_panel_frame_rect, (world_menu_palette_primitives_t*)panel);
+    battle_menu_init_numeric_display_frame_primitives((RECT*)g_equip_panel_frame_rect, &panel->numeric_frame);
     name_sprite = &panel->sprites[0];
     battle_menu_init_sprite_array(name_sprite, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
@@ -617,7 +615,7 @@ void equip_render_unit_status_panel_thread(void) {
                 }
                 battle_gfx_draw_or_append_gpu_primitive(&editor->portrait[0]);
             }
-            battle_menu_submit_numeric_display_frame_primitives(editor);
+            battle_menu_submit_numeric_display_frame_primitives(&editor->numeric_frame);
             battle_gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
             battle_gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
             portrait_poly = (u8*)&panel->portrait;
@@ -639,7 +637,7 @@ void equip_render_unit_status_panel_thread(void) {
                 off += 0x14;
             } while (i < 7);
             battle_gfx_draw_or_append_gpu_primitive(&panel->draw_mode_a);
-            battle_menu_submit_numeric_display_frame_primitives(panel);
+            battle_menu_submit_numeric_display_frame_primitives(&panel->numeric_frame);
             battle_gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
         battle_thread_yield();

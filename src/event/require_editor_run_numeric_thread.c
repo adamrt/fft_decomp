@@ -164,7 +164,7 @@ void require_editor_run_numeric_thread(void) {
         } else {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_modes[2]);
         }
-        battle_menu_submit_numeric_display_frame_primitives((u8*)&buffer->numeric_frame);
+        battle_menu_submit_numeric_display_frame_primitives(&buffer->numeric_frame);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->draw_offsets[0]);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait);

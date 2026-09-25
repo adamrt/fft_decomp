@@ -75,7 +75,7 @@ void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_misc_data_t* unit_da
             unit->animation_flags = 0;
             battle_gfx_run_unit_seq_script(unit, (battle_unit_anim_state_t*)&unit->sprite_graphic_trigger, 1);
             unit->requested_animation = 0;
-            battle_gfx_release_unit_vram_slot((u8*)unit);
+            battle_gfx_release_unit_vram_slot(unit);
         } else if (unit->requested_animation >= 12 || (unit->unit_id & 3) == g_battle_frame_counter % 4
             || (unit->movement.word & 0x20000000)) {
             /* Units below animation 12 update only on their frame slot. */
@@ -137,7 +137,7 @@ void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_misc_data_t* unit_da
                                 }
                             }
                         } else {
-                            battle_gfx_release_unit_vram_slot((u8*)unit);
+                            battle_gfx_release_unit_vram_slot(unit);
                         }
                     }
                 }

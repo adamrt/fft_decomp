@@ -185,7 +185,7 @@ void equip_panel_run_character_status_thread(void) {
         for (i = 0; i < 8; i++) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->lines[i]);
         }
-        battle_menu_submit_numeric_display_frame_primitives((u8*)&screen->numeric_frame);
+        battle_menu_submit_numeric_display_frame_primitives(&screen->numeric_frame);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->draw_offsets[0]);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->portrait);
