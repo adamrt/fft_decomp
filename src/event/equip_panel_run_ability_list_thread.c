@@ -47,17 +47,17 @@ void equip_panel_run_ability_list_thread(void) {
     g_equip_input_controller = battle_script_get_controller_input_pointer(0);
     if (g_battle_current_thread_id == 10) {
         text = g_equip_panel_text_image_a;
-        screen = (status_panel_buffer_t*)g_equip_panel_frames_a;
+        screen = g_equip_panel_frames_a;
         state = (status_panel_slot_state_t*)g_equip_unit_editor_stats;
-        base = (status_panel_buffer_t*)g_equip_panel_frames_a;
+        base = g_equip_panel_frames_a;
         upload = (RECT*)g_equip_panel_text_upload_rect_a;
         u = 0;
     } else {
         text = g_equip_panel_text_image_b;
-        screen = (status_panel_buffer_t*)g_equip_panel_frames_b;
+        screen = g_equip_panel_frames_b;
         state = (status_panel_slot_state_t*)&g_equip_item_preview_stat_detail;
         upload = (RECT*)g_equip_panel_text_upload_rect_b;
-        base = (status_panel_buffer_t*)g_equip_panel_frames_b;
+        base = g_equip_panel_frames_b;
         u = 0x50;
     }
     battle_menu_init_numeric_display_frame_primitives(&g_equip_right_panel_frame_rect, &screen->numeric_frame);

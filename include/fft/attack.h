@@ -132,7 +132,7 @@ extern u8 g_attack_editor_numeric_entries_d[];
 extern u8 g_attack_editor_numeric_entries_e[];
 extern u8 g_attack_editor_numeric_entries_f[];
 extern u8 g_attack_editor_numeric_geometry[];
-extern u8 g_attack_editor_numeric_state[];
+extern status_panel_numeric_buffer_t g_attack_editor_numeric_state[2];
 extern u8 g_attack_editor_numeric_table[];
 extern u8 g_attack_editor_numeric_text_a[];
 extern u8 g_attack_editor_numeric_text_b[];
@@ -212,7 +212,7 @@ extern help_navigation_record_t g_attack_deploy_select_menu_nodes[];
 extern u8* g_attack_deploy_unit_text_section; /* g_attack_scenario_table string arena, installed as text section 26 */
 extern u8*
     g_attack_deploy_help_text_section; /* g_attack_event_condition_blocks help text, installed as text section 27 */
-extern u8 g_attack_panel_frames_a[];
+extern status_panel_buffer_t g_attack_panel_frames_a[];
 extern u8 g_attack_panel_text_image_a[];
 extern u8 g_attack_panel_text_image_b[];
 

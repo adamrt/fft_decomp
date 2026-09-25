@@ -39,7 +39,7 @@ void require_editor_run_numeric_thread(void) {
     thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_require_input_controller = battle_script_get_controller_input_pointer(0) + 1;
     if (g_battle_current_thread_id == 12) {
-        buffer = (status_panel_numeric_buffer_t*)g_require_editor_numeric_state;
+        buffer = g_require_editor_numeric_state;
         buffers = buffer;
         text_pixels = g_require_editor_numeric_text_a;
         upload_a = g_require_editor_numeric_entries_a;
@@ -47,7 +47,7 @@ void require_editor_run_numeric_thread(void) {
         upload_c = g_require_editor_numeric_entries_c;
         entries = g_require_editor_numeric_descriptor_a;
     } else {
-        buffer = (status_panel_numeric_buffer_t*)g_require_editor_numeric_state;
+        buffer = g_require_editor_numeric_state;
         buffers = buffer;
         text_pixels = g_require_editor_numeric_text_b;
         upload_a = g_require_editor_numeric_entries_d;

@@ -35,8 +35,8 @@ void attack_panel_run_character_status_thread(void) {
     thread
         = *(status_panel_frame_config_t**)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads);
     g_attack_input_controller = battle_script_get_controller_input_pointer(0);
-    screen = (status_panel_buffer_t*)g_attack_panel_frames_a;
-    base = (status_panel_buffer_t*)g_attack_panel_frames_a;
+    screen = g_attack_panel_frames_a;
+    base = g_attack_panel_frames_a;
     state = (status_panel_slot_state_t*)g_attack_unit_editor_state;
     rect = FRAME_RECT;
     battle_menu_init_numeric_display_frame_primitives((RECT*)rect, &screen->numeric_frame);

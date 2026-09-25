@@ -39,7 +39,7 @@ void debugchr_editor_run_numeric_thread(void) {
     thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_debugchr_input_controller = battle_script_get_controller_input_pointer(0) + 1;
     if (g_battle_current_thread_id == 12) {
-        buffer = (status_panel_numeric_buffer_t*)g_debugchr_editor_numeric_state_a;
+        buffer = g_debugchr_editor_numeric_state_a;
         buffers = buffer;
         text_pixels = g_debugchr_editor_numeric_text_a;
         upload_a = g_debugchr_editor_numeric_entries_a;
@@ -47,7 +47,7 @@ void debugchr_editor_run_numeric_thread(void) {
         upload_c = g_debugchr_editor_numeric_entries_c;
         entries = g_debugchr_editor_numeric_descriptor_a;
     } else {
-        buffer = (status_panel_numeric_buffer_t*)g_debugchr_editor_numeric_state_b;
+        buffer = g_debugchr_editor_numeric_state_b;
         buffers = buffer;
         text_pixels = g_debugchr_editor_numeric_text_b;
         upload_a = g_debugchr_editor_numeric_entries_d;
