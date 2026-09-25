@@ -27,13 +27,6 @@ typedef struct battle_menu_scroll_list_page {
     u8 unknown_10c[0x28];
 } battle_menu_scroll_list_page_t;
 
-/* Provisional: three-column layout with the saved first visible row. */
-typedef world_menu_scroll_text_layout_t battle_menu_scroll_text_layout_t;
-
-/* Text image placement: the upload rectangle plus the screen offsets
- * battle_gfx_init_image_loading reads. */
-typedef world_menu_text_window_t battle_menu_text_window_t;
-
 struct battle_menu_text_position;
 extern u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     world_menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
@@ -60,7 +53,7 @@ extern void battle_menu_draw_stacked_glyph_pair(void* pixels, struct battle_menu
  * thread-id load.
  */
 void battle_menu_run_scrolling_ability_list_thread(void) {
-    battle_menu_text_window_t window;
+    world_menu_text_window_t window;
     RECT image_rect;
     RECT texture_window;
     SPRT icons0[2];
@@ -73,7 +66,7 @@ void battle_menu_run_scrolling_ability_list_thread(void) {
     s32 ring;
     s32 cursor;
     battle_menu_scroll_list_page_t* base;
-    battle_menu_scroll_text_layout_t* layout;
+    world_menu_scroll_text_layout_t* layout;
     s32 scroll_accum;
     s32 scroll_delta;
     s32 hold_time;
@@ -110,7 +103,7 @@ void battle_menu_run_scrolling_ability_list_thread(void) {
     toggle = 0;
     g_battle_menu_scroll_list_depth++;
     entry = (world_menu_entry_t*)battle_thread_get_current_parameter_1();
-    layout = (battle_menu_scroll_text_layout_t*)entry->text_binding;
+    layout = (world_menu_scroll_text_layout_t*)entry->text_binding;
     entry->window_height = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
     entry->overall_height = layout->columns.row_count * 16 + 0x1C;

@@ -2737,7 +2737,7 @@ extern u8 g_battle_rider_status_infliction_mask[5];
 extern s32 g_battle_ai_propagation_resume_pass;
 extern u8 g_battle_loaded_ability_flags_1;
 extern u8 g_battle_move_path[];
-extern u8 g_battle_target_panel_last;
+extern battle_target_panel_t g_battle_target_panel_last;
 /* g_reaction_unit_action_data_16e + 2: the saved battle_stats_t
  * last_ability_id. The container is a raw byte copy of the unit's action
  * fields, so this halfword keeps its own name. */

@@ -1774,6 +1774,8 @@ void wldcore_window_init_render_record_image(
 void wldcore_window_init_vram_render_record(
     s32 index, wldcore_xy16_t position, wldcore_xy16_t dimensions, wldcore_point32_t clut, s32 flags);
 void wldcore_window_load_image_record_to_vram(s32 index, u32* image);
+void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level);
+void wldcore_window_publish_slot_b8dd(wldcore_menu_list_window_level_t* level);
 void wldcore_window_reset_state_and_scroll(wldcore_menu_stack_record_t* level);
 void wldcore_window_set_render_objects_visible(s32 clear);
 void wldcore_window_set_render_state_2_from_arg_0x04(s32* param);

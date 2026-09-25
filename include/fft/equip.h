@@ -374,7 +374,7 @@ extern s16 g_equip_equipment_render_commands[];
 extern s16 g_equip_armor_bonus_render_commands[];
 extern RECT g_equip_status_label_image_rect;
 extern s8 g_equip_item_action_menu_active;
-extern void* g_equip_help_text_table;
+extern u32 g_equip_help_text_table[];
 extern s16 D_801d86ac;
 extern u16 g_equip_menu_cursor_texture_page;
 extern u16 g_equip_text_clut_2_mode0;

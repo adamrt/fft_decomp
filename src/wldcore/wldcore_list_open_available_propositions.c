@@ -4,7 +4,6 @@
 #include "fft/world.h"
 
 void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
-void wldcore_window_publish_slot_b806(s32* level);
 s32 wldcore_proposition_set_based_on_location(s32 index, s32 location);
 
 /* Opens the town menu's proposition-location list (row kind 1 of
@@ -41,7 +40,7 @@ void wldcore_list_open_available_propositions(void) {
                                             .list_window.frame_render]
             .flags &= ~0x10;
         wldcore_bar_build_menu_rows(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
-        wldcore_window_publish_slot_b806((s32*)&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth]);
+        wldcore_window_publish_slot_b806(&g_wldcore_menu_stack_records[g_wldcore_menu_stack_depth].list_window);
         index = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].list_window.main_window;
         record = &g_wldcore_window_records[index];
         record->anim_counter = 0;

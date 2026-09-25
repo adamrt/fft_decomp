@@ -471,7 +471,7 @@ extern s16 g_bunit_gfx_window_zoom_percent[];
  * byte pairs, shared by the animated and bouncing cursor renderers. */
 extern s8 g_bunit_menu_cursor_forward_offset_keyframes[];
 extern s8 g_bunit_menu_cursor_reverse_offset_keyframes[];
-extern u8 g_bunit_help_text_table;
+extern u32 g_bunit_help_text_table[];
 extern u8 g_bunit_help_text_state;
 extern s32 g_bunit_job_list_menu_script;
 extern s32 g_bunit_ability_list_menu_script;

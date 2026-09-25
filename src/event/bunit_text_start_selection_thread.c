@@ -14,7 +14,7 @@ void bunit_text_start_selection_thread(u8* menu_state) {
         return;
     }
     battle_text_save_pointer_table();
-    battle_text_relocate_pointer_table((const u32*)&g_bunit_help_text_table);
+    battle_text_relocate_pointer_table(g_bunit_help_text_table);
     battle_thread_start(1, battle_text_character_handling_thread);
     battle_thread_set_parameters(1, menu_state + 0x38, g_bunit_text_selection_id, 0);
     g_event_mode = 1;

@@ -26,7 +26,6 @@ void wldcore_list_open_completed_propositions(void);
 void wldcore_list_open_propositions(void);
 void wldcore_load_message_block_if_changed(s32 which);
 void wldcore_menu_pop_level_and_rebuild_screen();
-void wldcore_window_publish_slot_b806(s32* level);
 
 void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     s32 flags;
@@ -71,7 +70,7 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
         return;
     }
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_window_publish_slot_b806((s32*)level);
+        wldcore_window_publish_slot_b806(level);
         wldcore_menu_push_message_level(
             g_wldcore_bar_row_help_text_ids[level->entries[level->selected_entry]] | 0x1000, 1);
         return;
@@ -86,20 +85,20 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
         switch (level->entries[level->selected_entry]) {
         case 0:
             wldcore_load_message_block_if_changed(0);
-            wldcore_window_publish_slot_b806((s32*)level);
+            wldcore_window_publish_slot_b806(level);
             wldcore_list_open_rumors();
             return;
         case 1:
             wldcore_load_message_block_if_changed(1);
-            wldcore_window_publish_slot_b806((s32*)level);
+            wldcore_window_publish_slot_b806(level);
             wldcore_list_open_available_propositions();
             return;
         case 2:
-            wldcore_window_publish_slot_b806((s32*)level);
+            wldcore_window_publish_slot_b806(level);
             wldcore_list_open_completed_propositions();
             return;
         case 3:
-            wldcore_window_publish_slot_b806((s32*)level);
+            wldcore_window_publish_slot_b806(level);
             wldcore_list_open_propositions();
             return;
         case 4:

@@ -9,7 +9,7 @@
  * panel; the shape is kept as compiled.
  */
 void battle_target_set_state_for_all_unit_panels(battle_stats_t* unit, s32 flags) {
-    u8* panel;
+    targeting_panel_entry_t* panel;
     s32 i;
     s32 mark_allies;
     s32 mark_enemies;
@@ -24,12 +24,12 @@ void battle_target_set_state_for_all_unit_panels(battle_stats_t* unit, s32 flags
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
             team_diff = team ^ unit->initial_team_flags;
             team_diff_copy = team_diff;
-            panel = (u8*)g_battle_target_panel_data + battle_map_calculate_location(unit) * 5;
+            panel = &g_battle_target_panel_data[battle_map_calculate_location(unit)];
             if (mark_allies != 0 && (team_diff & BATTLE_TEAM_MASK) == 0) {
-                panel[1] = 1;
+                panel->b = 1;
             }
             if (mark_enemies != 0 && (team_diff_copy & BATTLE_TEAM_MASK) != 0) {
-                panel[1] = 1;
+                panel->b = 1;
             }
         }
     }

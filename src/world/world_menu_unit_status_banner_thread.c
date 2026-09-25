@@ -67,32 +67,28 @@ typedef struct world_formation_display {
                       g_world_comparison_display_thread_params.style) */
 } world_formation_display_t;
 
-#define SUMMARY(p)  ((world_formation_summary_packet_t*)(p))
-#define STATUS(p)   ((world_formation_status_packet_t*)(p))
-#define VSUMMARY(p) ((volatile world_formation_summary_packet_t*)(p))
-
 void world_menu_unit_status_banner_thread(void) {
     RECT rects[6];
     s32 anim_state;
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* render_a;                           /* sp60 */
-    u8* summary_base;                       /* sp68 */
-    world_menu_number_entry_t* entries;     /* sp70 */
-    world_formation_unit_state_t* state;    /* sp78 */
-    void* portrait_arg;                     /* sp80 */
-    u8* transition;                         /* sp88 */
-    u8* portrait_image;                     /* sp90 */
-    u8* render_b;                           /* sp98 */
-    u8* render_c;                           /* spA0 */
-    u8* status_base;                        /* spA8 */
-    world_unit_status_identity_t* identity; /* spB0 */
-    world_formation_display_t* display;     /* spB8 */
-    s32 frame;                              /* spC0 */
-    s32 shake;                              /* spC8 */
-    s32 highlight;                          /* spD0 */
-    s32 suppress;                           /* spD8 */
+    u8* render_a;                                   /* sp60 */
+    world_formation_summary_packet_t* summary_base; /* sp68 */
+    world_menu_number_entry_t* entries;             /* sp70 */
+    world_formation_unit_state_t* state;            /* sp78 */
+    void* portrait_arg;                             /* sp80 */
+    u8* transition;                                 /* sp88 */
+    u8* portrait_image;                             /* sp90 */
+    u8* render_b;                                   /* sp98 */
+    u8* render_c;                                   /* spA0 */
+    world_formation_status_packet_t* status_base;   /* spA8 */
+    world_unit_status_identity_t* identity;         /* spB0 */
+    world_formation_display_t* display;             /* spB8 */
+    s32 frame;                                      /* spC0 */
+    s32 shake;                                      /* spC8 */
+    s32 highlight;                                  /* spD0 */
+    s32 suppress;                                   /* spD8 */
 
     s32 thread_id;
     u8* threads;
@@ -104,8 +100,8 @@ void world_menu_unit_status_banner_thread(void) {
     s16 cell;
     s32* text_stride;
     s32* origin;
-    u8* status;
-    u8* summary;
+    world_formation_status_packet_t* status;
+    world_formation_summary_packet_t* summary;
     u8* cur;
     u8* render_a_upper;
     u8* render_b_second;
@@ -120,8 +116,8 @@ void world_menu_unit_status_banner_thread(void) {
     g_world_input_frame_controller_input = (u32*)(cur + 4);
     display = *(world_formation_display_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
     if (thread_id == 8) {
-        status = g_world_selected_unit_status_packets;
-        summary = g_world_selected_unit_summary_packets;
+        status = (world_formation_status_packet_t*)g_world_selected_unit_status_packets;
+        summary = (world_formation_summary_packet_t*)g_world_selected_unit_summary_packets;
         render_a = g_world_selected_unit_stat_text_image;
         render_b = g_world_selected_unit_number_text_image;
         render_c = g_world_selected_unit_name_text_image;
@@ -133,8 +129,8 @@ void world_menu_unit_status_banner_thread(void) {
         summary_base = summary;
         portrait_image = g_world_selected_unit_portrait_image;
     } else {
-        status = g_world_comparison_unit_status_packets;
-        summary = g_world_comparison_unit_summary_packets;
+        status = (world_formation_status_packet_t*)g_world_comparison_unit_status_packets;
+        summary = (world_formation_summary_packet_t*)g_world_comparison_unit_summary_packets;
         render_a = g_world_comparison_unit_stat_text_image;
         render_b = g_world_comparison_unit_number_text_image;
         render_c = g_world_comparison_unit_name_text_image;
@@ -148,25 +144,25 @@ void world_menu_unit_status_banner_thread(void) {
     }
     shake = 0;
 
-    world_menu_build_line_box((RECT*)g_world_gfx_portrait_origin, &SUMMARY(summary)->frame);
-    world_gfx_set_image_draw_mode(&SUMMARY(summary)->draw_mode_a, 1);
-    world_gfx_set_image_draw_mode(&SUMMARY(summary)->draw_mode_b, 0);
-    world_menu_init_sprite_array(&SUMMARY(summary)->label_sprites[0], 7, 0x7CBC);
-    world_menu_init_sprite_array(&SUMMARY(summary)->value_sprites[0], 4, 0x7CBC);
+    world_menu_build_line_box((RECT*)g_world_gfx_portrait_origin, &summary->frame);
+    world_gfx_set_image_draw_mode(&summary->draw_mode_a, 1);
+    world_gfx_set_image_draw_mode(&summary->draw_mode_b, 0);
+    world_menu_init_sprite_array(&summary->label_sprites[0], 7, 0x7CBC);
+    world_menu_init_sprite_array(&summary->value_sprites[0], 4, 0x7CBC);
     frame = 0;
     offset = 0x24C;
     do {
-        world_menu_init_quad((POLY_FT4*)(summary + offset));
+        world_menu_init_quad((POLY_FT4*)((u8*)summary + offset));
         frame += 1;
         offset += 0x28;
     } while (frame < 4);
-    world_menu_init_icon_slot(&rects[0], 0x38, 0x28, (world_texture_prim_t*)&SUMMARY(summary)->value_sprites[0], 2);
-    world_menu_init_icon_slot(&rects[1], 0x60, 0x10, (world_texture_prim_t*)&SUMMARY(summary)->value_sprites[1], 2);
+    world_menu_init_icon_slot(&rects[0], 0x38, 0x28, (world_texture_prim_t*)&summary->value_sprites[0], 2);
+    world_menu_init_icon_slot(&rects[1], 0x60, 0x10, (world_texture_prim_t*)&summary->value_sprites[1], 2);
     frame = 0;
     walk = g_world_unit_summary_value_sprite_params;
     offset = 0x104;
     do {
-        world_gfx_init_image_loading((POLY_FT4*)(summary + offset),
+        world_gfx_init_image_loading((POLY_FT4*)((u8*)summary + offset),
             (const world_image_location_t*)g_world_editor_numeric_geometry,
             (const world_image_location_t*)g_world_gfx_portrait_origin, walk);
         walk++;
@@ -187,56 +183,53 @@ void world_menu_unit_status_banner_thread(void) {
     walk = g_world_unit_summary_label_sprite_params;
     offset = 0x154;
     do {
-        world_gfx_init_image_loading((POLY_FT4*)(summary + offset),
+        world_gfx_init_image_loading((POLY_FT4*)((u8*)summary + offset),
             (const world_image_location_t*)g_world_editor_numeric_geometry,
             (const world_image_location_t*)g_world_gfx_portrait_origin, walk);
         walk++;
         frame += 1;
         offset += 0x14;
     } while (frame < 7);
-    world_script_copy_bytes(
-        summary + sizeof(world_formation_summary_packet_t), summary, sizeof(world_formation_summary_packet_t));
-    world_gfx_set_image_draw_mode(&STATUS(status)->draw_mode_a, 0);
-    world_gfx_set_image_draw_mode(&STATUS(status)->draw_mode_b, 1);
-    world_menu_build_line_box((RECT*)g_world_unit_status_panel_origin, &STATUS(status)->frame);
-    cur = (u8*)&STATUS(status)->sprites[0];
+    world_script_copy_bytes(summary + 1, summary, sizeof(world_formation_summary_packet_t));
+    world_gfx_set_image_draw_mode(&status->draw_mode_a, 0);
+    world_gfx_set_image_draw_mode(&status->draw_mode_b, 1);
+    world_menu_build_line_box((RECT*)g_world_unit_status_panel_origin, &status->frame);
+    cur = (u8*)&status->sprites[0];
     world_menu_init_sprite_array((SPRT*)cur, 7, 0x7C3C);
-    world_menu_init_quad(&STATUS(status)->portrait);
+    world_menu_init_quad(&status->portrait);
     world_menu_init_icon_slot(&rects[2], 0x58, 0x20, (world_texture_prim_t*)cur, 0);
-    world_menu_init_icon_slot(&rects[3], 0x10, 0xA, (world_texture_prim_t*)&STATUS(status)->sprites[1], 0);
-    world_menu_init_icon_slot(&rects[4], 0x10, 0xA, (world_texture_prim_t*)&STATUS(status)->sprites[2], 0);
-    world_menu_init_icon_slot(&rects[5], 0x10, 0xA, (world_texture_prim_t*)&STATUS(status)->sprites[3], 0);
+    world_menu_init_icon_slot(&rects[3], 0x10, 0xA, (world_texture_prim_t*)&status->sprites[1], 0);
+    world_menu_init_icon_slot(&rects[4], 0x10, 0xA, (world_texture_prim_t*)&status->sprites[2], 0);
+    world_menu_init_icon_slot(&rects[5], 0x10, 0xA, (world_texture_prim_t*)&status->sprites[3], 0);
     frame = 0;
     walk = g_world_unit_status_sprite_params;
     offset = 0xEC;
     do {
-        world_gfx_init_image_loading((POLY_FT4*)(status + offset),
+        world_gfx_init_image_loading((POLY_FT4*)((u8*)status + offset),
             (const world_image_location_t*)g_world_editor_numeric_geometry,
             (const world_image_location_t*)g_world_unit_status_panel_origin, walk);
         walk++;
         frame += 1;
         offset += 0x14;
     } while (frame < 7);
-    world_gfx_init_image_loading(&STATUS(status)->portrait,
-        (const world_image_location_t*)g_world_editor_numeric_geometry,
+    world_gfx_init_image_loading(&status->portrait, (const world_image_location_t*)g_world_editor_numeric_geometry,
         (const world_image_location_t*)g_world_unit_status_panel_origin,
         (const world_gfx_image_load_parameters_t*)g_world_unit_status_portrait_params);
     if (state->mode == 1) {
-        STATUS(status)->portrait.clut = 0x7FFD;
+        status->portrait.clut = 0x7FFD;
     } else {
-        STATUS(status)->portrait.clut = 0x7FBD;
+        status->portrait.clut = 0x7FBD;
     }
-    STATUS(status)->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
-    world_script_copy_bytes(
-        status + sizeof(world_formation_status_packet_t), status, sizeof(world_formation_status_packet_t));
+    status->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
+    world_script_copy_bytes(status + 1, status, sizeof(world_formation_status_packet_t));
     frame = 0;
     anim_state = 0;
     prev_unit = state->unit;
     cur_unit = state->unit;
     for (;;) {
         s32 parity = frame & 1;
-        status = status_base + parity * sizeof(world_formation_status_packet_t);
-        summary = summary_base + parity * sizeof(world_formation_summary_packet_t);
+        status = status_base + parity;
+        summary = summary_base + parity;
         if (state->bars[2].value >= 0x65) {
             state->bars[2].value = 0x64;
         }
@@ -247,13 +240,13 @@ void world_menu_unit_status_banner_thread(void) {
             world_script_copy_bytes(
                 &g_world_unit_summary_label_sprite_params[6], g_world_unit_summary_mode_row_params, 0xC);
         }
-        world_gfx_init_image_loading((POLY_FT4*)&SUMMARY(summary)->label_sprites[6],
+        world_gfx_init_image_loading((POLY_FT4*)&summary->label_sprites[6],
             (const world_image_location_t*)g_world_editor_numeric_geometry,
             (const world_image_location_t*)g_world_gfx_portrait_origin, &g_world_unit_summary_label_sprite_params[6]);
         if (state->mode == 1) {
-            STATUS(status)->portrait.clut = 0x7FFD;
+            status->portrait.clut = 0x7FFD;
         } else {
-            STATUS(status)->portrait.clut = 0x7FBD;
+            status->portrait.clut = 0x7FBD;
         }
         highlight = 0;
         if (world_thread_find_running_by_task(NATIVE_THREAD_TASK_STATUS_PANEL) != 0) {
@@ -265,7 +258,7 @@ void world_menu_unit_status_banner_thread(void) {
         i = 0;
         {
             u16* src;
-            u8* dst;
+            world_formation_summary_packet_t* dst;
             s32 clut_offset;
             clut_offset = highlight * 2;
             src = g_world_unit_summary_value_cluts;
@@ -274,16 +267,16 @@ void world_menu_unit_status_banner_thread(void) {
                 /* Keeps clut_offset + src recomputed each pass; otherwise loop
                  * strength reduction folds them into one walking pointer. */
                 __asm__("" : "=r"(clut_offset) : "0"(clut_offset));
-                SUMMARY(dst)->value_sprites[0].clut = *(u16*)(clut_offset + (u32)src);
+                dst->value_sprites[0].clut = *(u16*)(clut_offset + (u32)src);
                 src += 2;
                 i += 1;
-                dst += sizeof(SPRT);
+                dst = (world_formation_summary_packet_t*)((u8*)dst + sizeof(SPRT));
             } while (i < 4);
         }
         i = 0;
         {
             u16* src;
-            u8* dst;
+            world_formation_summary_packet_t* dst;
             s32 clut_offset;
             clut_offset = highlight * 2;
             src = g_world_unit_summary_label_cluts;
@@ -292,76 +285,76 @@ void world_menu_unit_status_banner_thread(void) {
                 /* Keeps clut_offset + src recomputed each pass; otherwise loop
                  * strength reduction folds them into one walking pointer. */
                 __asm__("" : "=r"(clut_offset) : "0"(clut_offset));
-                SUMMARY(dst)->label_sprites[0].clut = *(u16*)(clut_offset + (u32)src);
+                dst->label_sprites[0].clut = *(u16*)(clut_offset + (u32)src);
                 src += 2;
                 i += 1;
-                dst += sizeof(SPRT);
+                dst = (world_formation_summary_packet_t*)((u8*)dst + sizeof(SPRT));
             } while (i < 7);
         }
         i = 0;
         offset = 0;
         do {
             if (highlight != 0) {
-                STATUS(status + offset)->sprites[0].clut = 0x7D3C;
+                status->sprites[i].clut = 0x7D3C;
             } else {
-                STATUS(status + offset)->sprites[0].clut = 0x7C3C;
+                status->sprites[i].clut = 0x7C3C;
             }
             i += 1;
             offset += 0x14;
         } while (i < 7);
         if (highlight != 0) {
-            world_menu_init_primitive_colors_palette_bank_1(&SUMMARY(summary)->frame);
-            world_menu_init_primitive_colors_palette_bank_1(&STATUS(status)->frame);
+            world_menu_init_primitive_colors_palette_bank_1(&summary->frame);
+            world_menu_init_primitive_colors_palette_bank_1(&status->frame);
             if ((u32)(anim_state - 4) < 6U) {
-                SUMMARY(summary)->portrait[0].r0 = 0x20;
-                SUMMARY(summary)->portrait[0].g0 = 0x28;
-                SUMMARY(summary)->portrait[0].b0 = 0x38;
+                summary->portrait[0].r0 = 0x20;
+                summary->portrait[0].g0 = 0x28;
+                summary->portrait[0].b0 = 0x38;
             } else {
-                SUMMARY(summary)->portrait[0].r0 = 0x40;
-                SUMMARY(summary)->portrait[0].g0 = 0x50;
-                SUMMARY(summary)->portrait[0].b0 = 0x70;
+                summary->portrait[0].r0 = 0x40;
+                summary->portrait[0].g0 = 0x50;
+                summary->portrait[0].b0 = 0x70;
             }
-            SUMMARY(summary)->portrait[1].r0 = 0x20;
-            SUMMARY(summary)->portrait[1].g0 = 0x28;
-            SUMMARY(summary)->portrait[1].b0 = 0x38;
-            SUMMARY(summary)->portrait[2].r0 = 0x20;
-            SUMMARY(summary)->portrait[2].g0 = 0x28;
-            SUMMARY(summary)->portrait[2].b0 = 0x38;
-            SUMMARY(summary)->portrait[3].r0 = 0x20;
-            SUMMARY(summary)->portrait[3].g0 = 0x28;
-            SUMMARY(summary)->portrait[3].b0 = 0x38;
+            summary->portrait[1].r0 = 0x20;
+            summary->portrait[1].g0 = 0x28;
+            summary->portrait[1].b0 = 0x38;
+            summary->portrait[2].r0 = 0x20;
+            summary->portrait[2].g0 = 0x28;
+            summary->portrait[2].b0 = 0x38;
+            summary->portrait[3].r0 = 0x20;
+            summary->portrait[3].g0 = 0x28;
+            summary->portrait[3].b0 = 0x38;
         } else {
             s32 shade;
-            world_menu_init_primitive_colors_palette_bank_0(&SUMMARY(summary)->frame);
-            world_menu_init_primitive_colors_palette_bank_0(&STATUS(status)->frame);
+            world_menu_init_primitive_colors_palette_bank_0(&summary->frame);
+            world_menu_init_primitive_colors_palette_bank_0(&status->frame);
             if ((u32)(anim_state - 4) >= 6U) {
-                SUMMARY(summary)->portrait[0].r0 = 0x80;
-                SUMMARY(summary)->portrait[0].g0 = 0x80;
-                SUMMARY(summary)->portrait[0].b0 = 0x80;
+                summary->portrait[0].r0 = 0x80;
+                summary->portrait[0].g0 = 0x80;
+                summary->portrait[0].b0 = 0x80;
             } else {
-                SUMMARY(summary)->portrait[0].r0 = 0x40;
-                SUMMARY(summary)->portrait[0].g0 = 0x40;
-                SUMMARY(summary)->portrait[0].b0 = 0x40;
+                summary->portrait[0].r0 = 0x40;
+                summary->portrait[0].g0 = 0x40;
+                summary->portrait[0].b0 = 0x40;
             }
             shade = 0x40;
-            SUMMARY(summary)->portrait[1].r0 = shade;
-            SUMMARY(summary)->portrait[1].g0 = shade;
-            SUMMARY(summary)->portrait[1].b0 = shade;
-            SUMMARY(summary)->portrait[2].r0 = shade;
-            SUMMARY(summary)->portrait[2].g0 = shade;
-            SUMMARY(summary)->portrait[2].b0 = shade;
-            SUMMARY(summary)->portrait[3].r0 = shade;
-            SUMMARY(summary)->portrait[3].g0 = shade;
-            SUMMARY(summary)->portrait[3].b0 = shade;
+            summary->portrait[1].r0 = shade;
+            summary->portrait[1].g0 = shade;
+            summary->portrait[1].b0 = shade;
+            summary->portrait[2].r0 = shade;
+            summary->portrait[2].g0 = shade;
+            summary->portrait[2].b0 = shade;
+            summary->portrait[3].r0 = shade;
+            summary->portrait[3].g0 = shade;
+            summary->portrait[3].b0 = shade;
         }
         if (highlight != 0) {
-            STATUS(status)->portrait.r0 = 0x40;
-            STATUS(status)->portrait.g0 = 0x40;
-            STATUS(status)->portrait.b0 = 0x60;
+            status->portrait.r0 = 0x40;
+            status->portrait.g0 = 0x40;
+            status->portrait.b0 = 0x60;
         } else {
-            STATUS(status)->portrait.r0 = 0x80;
-            STATUS(status)->portrait.g0 = 0x80;
-            STATUS(status)->portrait.b0 = 0x80;
+            status->portrait.r0 = 0x80;
+            status->portrait.g0 = 0x80;
+            status->portrait.b0 = 0x80;
         }
         g_world_gfx_draw_area_y = ((u16)g_world_frame_arg != 0xF0) ? 0xF0 : 0;
         if ((display->flags & 0x20) && (shake == 0)) {
@@ -395,20 +388,20 @@ void world_menu_unit_status_banner_thread(void) {
         }
         draw_x = display->x;
         draw_y = (u16)g_world_gfx_draw_area_y;
-        STATUS(status)->draw_offset_a.x = draw_x - 0x80;
-        STATUS(status)->draw_offset_a.y = display->shake_y.low + draw_y;
-        SetDrawOffset(&STATUS(status)->draw_offset_a, &STATUS(status)->draw_offset_a.x);
-        STATUS(status)->draw_offset_b.x = -0x80;
-        STATUS(status)->draw_offset_b.y = g_world_gfx_draw_area_y;
-        SetDrawOffset(&STATUS(status)->draw_offset_b, &STATUS(status)->draw_offset_b.x);
+        status->draw_offset_a.x = draw_x - 0x80;
+        status->draw_offset_a.y = display->shake_y.low + draw_y;
+        SetDrawOffset(&status->draw_offset_a, &status->draw_offset_a.x);
+        status->draw_offset_b.x = -0x80;
+        status->draw_offset_b.y = g_world_gfx_draw_area_y;
+        SetDrawOffset(&status->draw_offset_b, &status->draw_offset_b.x);
         draw_x = display->x;
         draw_y = (u16)g_world_gfx_draw_area_y;
-        SUMMARY(summary)->draw_offset_a.x = draw_x - 0x80;
-        SUMMARY(summary)->draw_offset_a.y = display->shake_y.low + draw_y;
-        SetDrawOffset(&SUMMARY(summary)->draw_offset_a, &SUMMARY(summary)->draw_offset_a.x);
-        SUMMARY(summary)->draw_offset_b.x = -0x80;
-        SUMMARY(summary)->draw_offset_b.y = g_world_gfx_draw_area_y;
-        SetDrawOffset(&SUMMARY(summary)->draw_offset_b, &SUMMARY(summary)->draw_offset_b.x);
+        summary->draw_offset_a.x = draw_x - 0x80;
+        summary->draw_offset_a.y = display->shake_y.low + draw_y;
+        SetDrawOffset(&summary->draw_offset_a, &summary->draw_offset_a.x);
+        summary->draw_offset_b.x = -0x80;
+        summary->draw_offset_b.y = g_world_gfx_draw_area_y;
+        SetDrawOffset(&summary->draw_offset_b, &summary->draw_offset_b.x);
         if (anim_state >= 0xA) {
             anim_state = 0;
             prev_unit = cur_unit;
@@ -432,13 +425,13 @@ void world_menu_unit_status_banner_thread(void) {
             }
         }
         world_formation_build_portrait_transition_primitives((const RECT*)transition, &anim_state, &cur_unit,
-            &prev_unit, portrait_image, &SUMMARY(summary)->portrait[0], (s32)portrait_arg);
+            &prev_unit, portrait_image, &summary->portrait[0], (s32)portrait_arg);
         {
             CVECTOR* color;
             u16* bar_origin;
             s32 row_offset;
             s32 bar_offset;
-            u8* dst;
+            volatile world_formation_summary_packet_t* dst;
             color = g_world_unit_panel_bar_colors;
             i = 0;
             bar_origin = (u16*)g_world_gfx_portrait_origin;
@@ -454,74 +447,74 @@ void world_menu_unit_status_banner_thread(void) {
                    the target's register rotation. */
                 s32 x3_read;
                 s32 x2_read;
-                SetPolyG4(summary + bar_offset);
+                SetPolyG4((u8*)summary + bar_offset);
                 x = (s16)bar_origin[0];
                 x0 = x + 0x2F;
                 x1 = x + 0x4F;
-                VSUMMARY(dst)->bars[0].x0 = x0;
+                dst->bars[0].x0 = x0;
                 bar_y0 = bar_origin[1];
-                VSUMMARY(dst)->bars[0].x1 = x1;
-                VSUMMARY(dst)->bars[0].y0 = bar_y0 + row_offset;
+                dst->bars[0].x1 = x1;
+                dst->bars[0].y0 = bar_y0 + row_offset;
                 bar_y1 = bar_origin[1];
-                VSUMMARY(dst)->bars[0].x2 = x0;
-                VSUMMARY(dst)->bars[0].y1 = bar_y1 + row_offset;
+                dst->bars[0].x2 = x0;
+                dst->bars[0].y1 = bar_y1 + row_offset;
                 bar_y2 = bar_origin[1];
-                VSUMMARY(dst)->bars[0].x3 = x1;
-                x3_read = (u16)VSUMMARY(dst)->bars[0].x3;
-                VSUMMARY(dst)->bars[0].y2 = bar_y2 + row_offset + 3;
+                dst->bars[0].x3 = x1;
+                x3_read = (u16)dst->bars[0].x3;
+                dst->bars[0].y2 = bar_y2 + row_offset + 3;
                 bar_y3 = bar_origin[1];
-                x2_read = (u16)VSUMMARY(dst)->bars[0].x2;
+                x2_read = (u16)dst->bars[0].x2;
                 x3_read -= 3;
                 x2_read -= 3;
-                VSUMMARY(dst)->bars[0].x3 = x3_read;
-                VSUMMARY(dst)->bars[0].x2 = x2_read;
-                VSUMMARY(dst)->bars[0].y3 = bar_y3 + row_offset + 3;
+                dst->bars[0].x3 = x3_read;
+                dst->bars[0].x2 = x2_read;
+                dst->bars[0].y3 = bar_y3 + row_offset + 3;
                 if (highlight != 0) {
-                    VSUMMARY(dst)->bars[0].r0 = color->r >> 1;
-                    VSUMMARY(dst)->bars[0].g0 = color->g >> 1;
-                    VSUMMARY(dst)->bars[0].b0 = color->b;
+                    dst->bars[0].r0 = color->r >> 1;
+                    dst->bars[0].g0 = color->g >> 1;
+                    dst->bars[0].b0 = color->b;
                     color++;
-                    VSUMMARY(dst)->bars[0].r1 = color->r >> 1;
-                    VSUMMARY(dst)->bars[0].g1 = color->g >> 1;
-                    VSUMMARY(dst)->bars[0].b1 = color->b;
+                    dst->bars[0].r1 = color->r >> 1;
+                    dst->bars[0].g1 = color->g >> 1;
+                    dst->bars[0].b1 = color->b;
                     color++;
-                    VSUMMARY(dst)->bars[0].r2 = color->r >> 1;
-                    VSUMMARY(dst)->bars[0].g2 = color->g >> 1;
-                    VSUMMARY(dst)->bars[0].b2 = color->b;
+                    dst->bars[0].r2 = color->r >> 1;
+                    dst->bars[0].g2 = color->g >> 1;
+                    dst->bars[0].b2 = color->b;
                     color++;
-                    VSUMMARY(dst)->bars[0].r3 = color->r >> 1;
-                    VSUMMARY(dst)->bars[0].g3 = color->g >> 1;
-                    VSUMMARY(dst)->bars[0].b3 = color->b;
+                    dst->bars[0].r3 = color->r >> 1;
+                    dst->bars[0].g3 = color->g >> 1;
+                    dst->bars[0].b3 = color->b;
                     color++;
                 } else {
-                    VSUMMARY(dst)->bars[0].r0 = color->r;
-                    VSUMMARY(dst)->bars[0].g0 = color->g;
-                    VSUMMARY(dst)->bars[0].b0 = color->b;
+                    dst->bars[0].r0 = color->r;
+                    dst->bars[0].g0 = color->g;
+                    dst->bars[0].b0 = color->b;
                     color++;
-                    VSUMMARY(dst)->bars[0].r1 = color->r;
-                    VSUMMARY(dst)->bars[0].g1 = color->g;
-                    VSUMMARY(dst)->bars[0].b1 = color->b;
+                    dst->bars[0].r1 = color->r;
+                    dst->bars[0].g1 = color->g;
+                    dst->bars[0].b1 = color->b;
                     color++;
-                    VSUMMARY(dst)->bars[0].r2 = color->r;
-                    VSUMMARY(dst)->bars[0].g2 = color->g;
-                    VSUMMARY(dst)->bars[0].b2 = color->b;
+                    dst->bars[0].r2 = color->r;
+                    dst->bars[0].g2 = color->g;
+                    dst->bars[0].b2 = color->b;
                     color++;
-                    VSUMMARY(dst)->bars[0].r3 = color->r;
-                    VSUMMARY(dst)->bars[0].g3 = color->g;
-                    VSUMMARY(dst)->bars[0].b3 = color->b;
+                    dst->bars[0].r3 = color->r;
+                    dst->bars[0].g3 = color->g;
+                    dst->bars[0].b3 = color->b;
                     color++;
                 }
                 row_offset += 0xB;
-                dst += sizeof(POLY_G4);
+                dst = (volatile world_formation_summary_packet_t*)((u8*)dst + sizeof(POLY_G4));
                 i += 1;
                 bar_offset += 0x24;
             } while (i < 3);
         }
-        STATUS(status)->sprites[6].u0 = (s16)(identity->zodiac % 7) * 0x18;
+        status->sprites[6].u0 = (s16)(identity->zodiac % 7) * 0x18;
         cell = identity->zodiac;
-        STATUS(status)->sprites[6].w = 0x18;
-        STATUS(status)->sprites[6].h = 0x14;
-        STATUS(status)->sprites[6].v0 = (s16)(cell / 7) * 0x14 + 0x2A;
+        status->sprites[6].w = 0x18;
+        status->sprites[6].h = 0x14;
+        status->sprites[6].v0 = (s16)(cell / 7) * 0x14 + 0x2A;
         if ((frame == 0) || (display->work != 0)) {
             world_gfx_copy_screen_setup_in(&g_world_selected_unit_stat_summary, &g_world_selected_unit_identity,
                 &g_world_selected_unit_stat_detail);
@@ -587,59 +580,59 @@ void world_menu_unit_status_banner_thread(void) {
             }
         }
         if (!(display->flags & 0x80)) {
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_offset_b);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[0]);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[1]);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_mode_a);
+            world_gfx_draw_or_append_gpu_primitive(&summary->draw_offset_b);
+            world_gfx_draw_or_append_gpu_primitive(&summary->value_sprites[0]);
+            world_gfx_draw_or_append_gpu_primitive(&summary->value_sprites[1]);
+            world_gfx_draw_or_append_gpu_primitive(&summary->draw_mode_a);
             i = 0;
             offset = 0x1E0;
             do {
-                world_gfx_draw_or_append_gpu_primitive((summary + offset));
+                world_gfx_draw_or_append_gpu_primitive((u8*)summary + offset);
                 i += 1;
                 offset += 0x24;
             } while (i < 3);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[2]);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->value_sprites[3]);
+            world_gfx_draw_or_append_gpu_primitive(&summary->value_sprites[2]);
+            world_gfx_draw_or_append_gpu_primitive(&summary->value_sprites[3]);
             i = 0;
             offset = 0x154;
             do {
-                world_gfx_draw_or_append_gpu_primitive((summary + offset));
+                world_gfx_draw_or_append_gpu_primitive((u8*)summary + offset);
                 i += 1;
                 offset += 0x14;
             } while (i < 7);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_mode_b);
+            world_gfx_draw_or_append_gpu_primitive(&summary->draw_mode_b);
             if (suppress == 0) {
                 if (anim_state >= 5) {
-                    world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[2]);
-                    world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[3]);
-                    world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[1]);
+                    world_gfx_draw_or_append_gpu_primitive(&summary->portrait[2]);
+                    world_gfx_draw_or_append_gpu_primitive(&summary->portrait[3]);
+                    world_gfx_draw_or_append_gpu_primitive(&summary->portrait[1]);
                 }
-                world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->portrait[0]);
+                world_gfx_draw_or_append_gpu_primitive(&summary->portrait[0]);
             }
             world_gfx_submit_primitive_group((world_primitive_group_t*)summary);
-            world_gfx_draw_or_append_gpu_primitive(&SUMMARY(summary)->draw_offset_a);
-            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_offset_b);
-            portrait_prim = (u8*)&STATUS(status)->portrait;
+            world_gfx_draw_or_append_gpu_primitive(&summary->draw_offset_a);
+            world_gfx_draw_or_append_gpu_primitive(&status->draw_offset_b);
+            portrait_prim = (u8*)&status->portrait;
             SetSemiTrans(portrait_prim, 1);
             world_gfx_draw_or_append_gpu_primitive(portrait_prim);
             i = 3;
             offset = 0x128;
             do {
-                world_gfx_draw_or_append_gpu_primitive((status + offset));
+                world_gfx_draw_or_append_gpu_primitive((u8*)status + offset);
                 i -= 1;
                 offset -= 0x14;
             } while (i >= 0);
-            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_mode_b);
+            world_gfx_draw_or_append_gpu_primitive(&status->draw_mode_b);
             i = 4;
             offset = 0x13C;
             do {
-                world_gfx_draw_or_append_gpu_primitive((status + offset));
+                world_gfx_draw_or_append_gpu_primitive((u8*)status + offset);
                 i += 1;
                 offset += 0x14;
             } while (i < 7);
-            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_mode_a);
+            world_gfx_draw_or_append_gpu_primitive(&status->draw_mode_a);
             world_gfx_submit_primitive_group((world_primitive_group_t*)status);
-            world_gfx_draw_or_append_gpu_primitive(&STATUS(status)->draw_offset_a);
+            world_gfx_draw_or_append_gpu_primitive(&status->draw_offset_a);
         }
         world_thread_yield();
         if (world_thread_get_current_parameter_3() != 0) {

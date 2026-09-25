@@ -7,7 +7,6 @@
 void wldcore_menu_push_entry_window_level(void);
 void wldcore_list_open_tutorial_mask_1_entries(void);
 void wldcore_list_open_formation_tutorials(void);
-void wldcore_window_publish_slot_b8dd(s32* param);
 
 /* Per-frame step of the tutorial menu list level.
  *
@@ -81,7 +80,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         return;
     }
     if (buttons & PSX_PAD_SELECT) {
-        wldcore_window_publish_slot_b8dd((s32*)level);
+        wldcore_window_publish_slot_b8dd(level);
         wldcore_menu_push_message_level(level->entries[level->selected_entry] + 0x108B, 1);
         return;
     }
@@ -91,18 +90,18 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
         g_wldcore_tutorial_category_saved_cursor = *selected_entry;
         switch (level->entries[*selected_entry]) {
         case 0:
-            wldcore_window_publish_slot_b8dd((s32*)level);
+            wldcore_window_publish_slot_b8dd(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_formation_tutorials();
             return;
         case 1:
-            wldcore_window_publish_slot_b8dd((s32*)level);
+            wldcore_window_publish_slot_b8dd(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_tutorial_mask_1_entries();
             return;
         case 2:
             wldcore_load_message_block_if_changed(5);
-            wldcore_window_publish_slot_b8dd((s32*)level);
+            wldcore_window_publish_slot_b8dd(level);
             g_wldcore_window_records[level->main_window].sequence = 1;
             wldcore_list_open_tutorial_topics();
             return;

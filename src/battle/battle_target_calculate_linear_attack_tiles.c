@@ -6,7 +6,7 @@ void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
     s32 dx;
     s32 dy;
     s32 map_width;
-    u8* panel;
+    targeting_panel_entry_t* panel;
 
     switch (dir) {
     case 0:
@@ -45,15 +45,15 @@ void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
             return;
         }
         dir = y * map_width + x;
-        panel = (u8*)g_battle_target_panel_data + dir * 5;
-        if (panel[0] != 0) {
-            panel[1] = 1;
+        panel = &g_battle_target_panel_data[dir];
+        if ((u8)panel->a != 0) {
+            panel->b = 1;
         }
         dir += 0x100;
-        panel = (u8*)g_battle_target_panel_data + dir * 5;
+        panel = &g_battle_target_panel_data[dir];
         y += dy;
-        if (panel[0] != 0) {
-            panel[1] = 1;
+        if ((u8)panel->a != 0) {
+            panel->b = 1;
         }
         i += 1;
         x += dx;

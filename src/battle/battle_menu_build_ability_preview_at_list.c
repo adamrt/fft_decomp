@@ -52,17 +52,9 @@ typedef struct battle_menu_at_list_work {
 typedef char battle_menu_at_list_work_descriptors_offset_must_be_0x684
     [((unsigned long)&((battle_menu_at_list_work_t*)0)->descriptors == 0x684) ? 1 : -1];
 
-/*
- * Provisional: the layout record at 0x801669ec bound into menu entry 52. Its
- * head is exactly world_menu_text_layout_t; the halfword at +0x28 is the
- * scroll row this function sets and the column drawer receives as its
- * `row_offset` argument.
- */
-typedef world_menu_scroll_text_layout_t battle_menu_at_list_layout_t;
+#define LAYOUT(entry) ((world_menu_scroll_text_layout_t*)(entry)->text_binding)
 
-#define LAYOUT(entry) ((battle_menu_at_list_layout_t*)(entry)->text_binding)
-
-extern battle_menu_at_list_layout_t g_battle_menu_at_list_layout;
+extern world_menu_scroll_text_layout_t g_battle_menu_at_list_layout;
 
 /*
  * Build the AT (turn order) list previewing the ability the player is about to
