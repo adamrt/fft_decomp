@@ -146,11 +146,11 @@ extern battle_menu_status_panel_offset_pair_t g_require_character_status_frame_r
 extern u8 g_require_character_status_draw_area_rect[];
 extern u8 g_require_panel_text_upload_rect_a[];
 extern u8 g_require_panel_text_upload_rect_b[];
-extern u8 g_require_panel_label_layouts_mode0[];
-extern u8 g_require_panel_label_layouts_mode1[];
-extern u8 g_require_panel_label_layouts_mode2[];
-extern u8 g_require_panel_label_layouts_mode3[];
-extern u8 g_require_panel_item_icon_layouts[];
+extern world_gfx_image_load_parameters_t g_require_panel_label_layouts_mode0[];
+extern world_gfx_image_load_parameters_t g_require_panel_label_layouts_mode1[];
+extern world_gfx_image_load_parameters_t g_require_panel_label_layouts_mode2[];
+extern world_gfx_image_load_parameters_t g_require_panel_label_layouts_mode3[];
+extern world_gfx_image_load_parameters_t g_require_panel_item_icon_layouts[];
 extern battle_menu_status_panel_buffer_t g_require_panel_frames_a[];
 extern u8 g_require_panel_text_image_a[];
 extern u8 g_require_panel_text_image_b[];

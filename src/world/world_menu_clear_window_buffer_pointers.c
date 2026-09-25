@@ -1,7 +1,7 @@
 #include "fft/world.h"
 
 void world_menu_clear_window_buffer_pointers(void) {
-    void* empty = (void*)-1;
+    menu_window_buffer_t* empty = (menu_window_buffer_t*)-1;
     s32 index;
 
     index = 5;

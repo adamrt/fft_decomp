@@ -48,9 +48,9 @@ void battle_move_encode_path_steps(void) {
                 continue;
             }
             if (state->destination_unit_record_index || hit) {
-                state->work_x = record->coords[0];
-                state->work_y = record->coords[1];
-                state->work_level = record->coords[2] & 0x7f;
+                state->work_x = record->x;
+                state->work_y = record->y;
+                state->work_level = record->higher_elevation;
             }
             if (state->work_x == (s16)state->tile_x) {
                 dir = 0xc0;

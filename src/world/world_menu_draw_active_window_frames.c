@@ -16,7 +16,7 @@ void world_menu_draw_active_window_frames(void) {
     s32 bottom;
 
     for (i = 4; i >= 0; i -= 2) {
-        if (g_world_menu_window_buffer_pointers[i] == (void*)-1) {
+        if (g_world_menu_window_buffer_pointers[i] == (menu_window_buffer_t*)-1) {
             continue;
         }
         buffer = g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index];
@@ -64,15 +64,11 @@ void world_menu_draw_active_window_frames(void) {
         top = window->icon_sprites[0].y0 + window->icon_sprites[0].h;
         bottom -= top;
         /* Reload the pointer cell: retaining buffer removes target loads. */
-        span = (bottom - 4)
-            * ((menu_window_buffer_t*)g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index])
-                  ->scroll_position
-            / ((menu_window_buffer_t*)g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index])
-                  ->scroll_range;
+        span = (bottom - 4) * g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index]->scroll_position
+            / g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index]->scroll_range;
         window->icon_sprites[2].x0 = window->quads[0].x0 + offset;
         window->icon_sprites[2].y0 = top + span;
-        flags = ((menu_window_buffer_t*)g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index])
-                    ->icon_flags;
+        flags = g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index]->icon_flags;
         if (flags & 1) {
             world_gfx_draw_or_append_gpu_primitive((s32*)&window->icon_sprites[0]);
         }

@@ -4,21 +4,6 @@
 #include "fft/map.h"
 #include "psx/types.h"
 
-/* Seven-byte record at 0x8018f4e8 describing one other unit for pathfinding.
- * Byte 2 packs the higher-elevation
- * flag (bits 0-6, written from a 1-bit source) and the stepping-stone flag
- * (bit 7). */
-typedef struct battle_move_unit_record {
-    u8 x;                    /* 0x00 */
-    u8 y;                    /* 0x01 */
-    u8 higher_elevation : 7; /* 0x02 */
-    u8 stepping_stone : 1;
-    u8 unit_flags;      /* 0x03 */
-    u8 body_height;     /* 0x04 */
-    u8 standing_height; /* 0x05 */
-    u8 top_height;      /* 0x06 */
-} battle_move_unit_record_t;
-
 /* Fills the pathfinding scratch pad for `unit_id`: its movement, jump and
  * movement-type parameters at 0x1f800000, the per-surface terrain costs, and
  * one seven-byte record per other active unit at 0x1f800080.
@@ -34,8 +19,8 @@ typedef struct battle_move_unit_record {
  */
 void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     battle_move_pathfind_scratch_t* config;
-    battle_move_unit_record_t* record;
-    battle_move_unit_record_t* current;
+    battle_move_record_t* record;
+    battle_move_record_t* current;
     battle_stats_t* unit;
     battle_stats_t* other;
     map_tile_t* tile;
@@ -57,7 +42,7 @@ void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     s32 blocked;
 
     config = g_battle_move_config_ptr;
-    record = (battle_move_unit_record_t*)g_battle_move_records_ptr;
+    record = g_battle_move_records_ptr;
     battle_calculate_unit_height_data(&height_data, unit_id);
     unit = &g_battle_unit_stats[unit_id];
     for (i = 0; i < 3; i++) {
@@ -190,7 +175,7 @@ void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     config->field_1a = D_8018F4FC;
     mount = 0xFF;
     for (i = 15; i >= 0; i--) {
-        record[i].unit_flags = mount;
+        record[i].unit_id_flags = mount;
     }
     count = 0;
     for (i = 0; i < 21; i++) {
@@ -224,7 +209,7 @@ void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
             value |= 0x40;
         }
         current = &record[count];
-        current->unit_flags = value;
+        current->unit_id_flags = value;
         current->x = other->x;
         current->y = other->position.bits.y;
         current->higher_elevation = other->position.bits.higher_elevation;

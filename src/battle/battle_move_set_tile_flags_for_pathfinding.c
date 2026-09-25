@@ -64,7 +64,7 @@ void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
             record = &records[i];
             flags = record->unit_id_flags;
             if (flags != 0xff) {
-                index = ((record->coords[2] & 0x7f) << 8) + record->coords[1] * config->map_max_x + record->coords[0];
+                index = (record->higher_elevation << 8) + record->y * config->map_max_x + record->x;
                 if (g_battle_unit_stats[flags & 0x1f].character_identity == CHARACTER_IDENTITY_ALTIMA_SECOND_FORM) {
                     frontier[index] = (frontier[index] | 0x80) & 0xef;
                 }
@@ -73,7 +73,7 @@ void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
                 *unit_cell |= 4;
                 if (!(flags & 0x40)) {
                     if (!config->stepping_stone) {
-                        height = (record->coords[2] >> 7) << 3;
+                        height = record->stepping_stone << 3;
                         *unit_cell = (*unit_cell & 0xf7) | height;
                     } else {
                         *unit_cell &= 0xf7;

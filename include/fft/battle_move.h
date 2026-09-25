@@ -172,7 +172,10 @@ typedef char battle_move_spread_placement_must_be_71
  * rider adjustment, standing height includes terrain/water/Float adjustments,
  * and top height is their sum (0x80174a28–0x80174b44). */
 typedef struct battle_move_record {
-    u8 coords[3];       /* x, y, level | 0x80 stepping-stone flag */
+    u8 x;                    /* 0x00 */
+    u8 y;                    /* 0x01 */
+    u8 higher_elevation : 7; /* 0x02 */
+    u8 stepping_stone : 1;
     u8 unit_id_flags;   /* 0x03; 0x1f battle id, 0x20 not mountable, 0x40 not in active team, 0xff none */
     u8 body_height;     /* 0x04 */
     u8 standing_height; /* 0x05 */

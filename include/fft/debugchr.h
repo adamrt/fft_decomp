@@ -124,11 +124,11 @@ extern battle_menu_status_panel_offset_pair_t g_debugchr_character_status_frame_
 extern u8 g_debugchr_character_status_draw_area_rect[];
 extern u8 g_debugchr_panel_text_upload_rect_a[];
 extern u8 g_debugchr_panel_text_upload_rect_b[];
-extern u8 g_debugchr_panel_label_layouts_mode0[];
-extern u8 g_debugchr_panel_label_layouts_mode1[];
-extern u8 g_debugchr_panel_label_layouts_mode2[];
-extern u8 g_debugchr_panel_label_layouts_mode3[];
-extern u8 g_debugchr_panel_item_icon_layouts[];
+extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode0[];
+extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode1[];
+extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode2[];
+extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode3[];
+extern world_gfx_image_load_parameters_t g_debugchr_panel_item_icon_layouts[];
 extern u8 g_debugchr_panel_selected_editor_packets[];
 extern u8 g_debugchr_panel_selected_packets[];
 extern u8 g_debugchr_panel_comparison_editor_packets[];

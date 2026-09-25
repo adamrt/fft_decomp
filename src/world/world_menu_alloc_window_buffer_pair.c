@@ -15,7 +15,7 @@ void* world_menu_alloc_window_buffer_pair(void) {
     s32 i;
 
     for (index = 0; index < 6; index += 2) {
-        if (g_world_menu_window_buffer_pointers[index] == (void*)-1) {
+        if (g_world_menu_window_buffer_pointers[index] == (menu_window_buffer_t*)-1) {
             g_world_menu_window_buffer_pointers[index] = &g_world_menu_window_buffers[index];
             g_world_menu_window_buffer_pointers[index + 1] = &g_world_menu_window_buffers[index + 1];
             buffer = g_world_menu_window_buffer_pointers[index];

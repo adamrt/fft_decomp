@@ -1745,7 +1745,7 @@ extern world_menu_record_t g_world_menu_unit_selection_rows[];
 extern s32 g_world_menu_use_alternate_main_palette;
 extern u8 g_world_menu_use_alternate_palette;
 extern s16 g_world_menu_use_scroll_position;
-extern void* g_world_menu_window_buffer_pointers[6];
+extern menu_window_buffer_t* g_world_menu_window_buffer_pointers[6];
 extern s8 g_world_menu_window_scale_step;
 
 /* Provisional: month lengths indexed by 1-based month (0x8018deac; follows
