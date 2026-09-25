@@ -138,13 +138,6 @@ typedef struct effect_tentacle_mesh_geometry_view {
 typedef char
     assert_effect_tentacle_mesh_geometry_view_size[sizeof(effect_tentacle_mesh_geometry_view_t) == 0xc4 ? 1 : -1];
 
-/* effect_record_t view: the target reads the record's u8 target_index at 0x26
- * with a halfword load, which the u8 field cannot reproduce. */
-typedef struct effect_tentacle_mesh_record_view {
-    u8 _unknown_00[0x26];
-    s16 target_index; /* 0x26 */
-} effect_tentacle_mesh_record_view_t;
-
 extern u32 g_effect_e384_tentacle_mesh_brightness_table[][9];
 extern u32 g_effect_e453_tentacle_mesh_brightness_table[][9];
 extern u32 g_effect_tentacle_mesh_brightness_table[][9];

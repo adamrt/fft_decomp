@@ -5,14 +5,14 @@
 
 /* This handler's view of effect_geometry_entry_t: 0x4c selects the work
  * vertices that seed the emitter and 0xa8/0xaa bound its active frames. */
-typedef struct effect_banish_emitter_view {
+typedef struct effect_particle_vertex_emitter_view {
     u8 _unknown_00[0x4c];
     s16 vertex_group; /* 0x4c: 1-12 one vertex, 13 row 0, 14 rows 1-4 */
     u8 _unknown_4e[0x5a];
     s16 start_frame; /* 0xa8 */
     s16 end_frame;   /* 0xaa */
     u8 _unknown_ac[0x18];
-} effect_banish_emitter_view_t;
+} effect_particle_vertex_emitter_view_t;
 
 /* Banish particle handler: phase 1 allocates the 0x200-byte vertex work and
  * enables map data groups 1-6, phase 2 spawns each active emitter's particles
@@ -30,9 +30,9 @@ s32 effect_e454_particle_update_banish_state(s16 record_index, s32 byte_offset, 
     s32 group;
     s32 i;
     s32 offset;
-    effect_banish_emitter_view_t* emitter;
+    effect_particle_vertex_emitter_view_t* emitter;
     VECTOR* vertex;
-    void* new_work;
+    u8* vertex_work;
 
     record = &g_effect_state_records[record_index];
 
@@ -43,9 +43,9 @@ s32 effect_e454_particle_update_banish_state(s16 record_index, s32 byte_offset, 
         if (record->work_slots[byte_offset] != NULL) {
             battle_heap_free_block(record->work_slots[byte_offset]);
         }
-        new_work = battle_heap_alloc_block(0x200, record_index);
-        record->work_slots[byte_offset] = new_work;
-        g_current_effect_work = new_work;
+        vertex_work = battle_heap_alloc_block(0x200, record_index);
+        record->work_slots[byte_offset] = vertex_work;
+        g_current_effect_work = vertex_work;
         battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, 1, 1, 1);
         battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, 2, 1, 1);
         battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, 3, 1, 1);
@@ -58,7 +58,7 @@ s32 effect_e454_particle_update_banish_state(s16 record_index, s32 byte_offset, 
         work = record->work_slots[byte_offset];
         emitter_index = 0;
         do {
-            emitter = (effect_banish_emitter_view_t*)&g_effect_geometry_table->entries[emitter_index];
+            emitter = (effect_particle_vertex_emitter_view_t*)&g_effect_geometry_table->entries[emitter_index];
             group = emitter->vertex_group;
             if ((u32)(group - 1) < 12) {
                 if (frame >= emitter->start_frame && frame < emitter->end_frame) {

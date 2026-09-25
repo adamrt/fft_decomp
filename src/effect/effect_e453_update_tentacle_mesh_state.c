@@ -140,7 +140,7 @@ s32 effect_e453_update_tentacle_mesh_state(s16 record_index, s32 byte_offset, s3
         i = frame - 1;
         work = record->work_slots[byte_offset];
         curves1 = entry->curve_indices[1];
-        target_index = ((effect_tentacle_mesh_record_view_t*)record)->target_index;
+        target_index = *(s16*)&record->target_index;
         curves0 = entry->curve_indices[0];
         frame %= 160;
         READ_CURVE(factor, index, (curves1 >> 24) & 0xF, frame);
