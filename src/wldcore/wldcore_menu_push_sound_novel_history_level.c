@@ -1,13 +1,6 @@
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 
-/* Provisional: position view of the 36-byte window records at +0x18. */
-typedef struct wldcore_window_position36 {
-    s32 x;
-    s32 y;
-    u8 rest[0x1c];
-} wldcore_window_position36_t;
-
 /* Pushes the save-slot selection level (menu type 0x17).
  *
  * Suspends WORLD thread 14, appends the two header windows (kinds 0x6c and
@@ -35,7 +28,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
     wldcore_window_render_bounds16_t bounds;
     u8 unused[8];
     wldcore_window_record_t* windows;
-    wldcore_window_position36_t* positions;
+    wldcore_window_record_position_view_t* positions;
     wldcore_point32_t* position;
     wldcore_window_entry_52_rgb_t* colors;
     s16* newest;
@@ -46,7 +39,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
     world_thread_suspend(0xE);
 
     windows = g_wldcore_window_records;
-    positions = (wldcore_window_position36_t*)&windows->x;
+    positions = (wldcore_window_record_position_view_t*)&windows->x;
     index = wldcore_window_append_record_and_reset_color(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_history.upper_window = index;
@@ -78,7 +71,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
     wldcore_window_build_render_record_image(
         index, bounds.position, bounds.dimensions, 1, g_wldcore_window_image_buffer);
     position = (wldcore_point32_t*)&g_wldcore_window_render_records[index].base_x;
-    newest = (s16*)&g_wldcore_active_saved_record.text_history_3;
+    newest = &g_wldcore_active_saved_record.text_history_3;
     g_wldcore_window_render_records[index].priority = g_wldcore_menu_ordering_table_offset;
     position->x = -0x80;
     position->y = -0x64;

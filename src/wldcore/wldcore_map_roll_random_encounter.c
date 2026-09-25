@@ -4,21 +4,21 @@
 /* One random-encounter tier: the story-progress threshold that selects it,
  * the percentage chance an encounter happens, and the high-bit-first mask of
  * which of the entry's eight ENTDs may be drawn. */
-typedef struct {
-    u8 threshold;  /* 0x00 */
-    u8 chance;     /* 0x01 */
-    u8 encounters; /* 0x02 */
+typedef struct wldcore_encounter_tier {
+    u8 progress_threshold; /* 0x00 */
+    u8 encounter_chance;   /* 0x01 */
+    u8 encounter_mask;     /* 0x02 */
 } wldcore_encounter_tier_t;
 
 /* One road into a world-map location. Three per location, 19 locations
  * (ids 24..42), reached through the pointer cell g_wldcore_random_battle_data. */
-typedef struct {
+typedef struct wldcore_encounter_entry {
     u8 route;                          /* 0x00 */
-    u8 squad_id;                       /* 0x01: deployment zone id = this + 0x200 */
+    u8 deployment_squad_id;            /* 0x01: deployment zone id = this + 0x200 */
     wldcore_encounter_tier_t tiers[4]; /* 0x02 */
-    u8 entds[8];                       /* 0x0e */
-    u8 map_id;                         /* 0x16 */
-    u8 variable_id;                    /* 0x17 */
+    u8 entd_ids[8];                    /* 0x0e */
+    u8 battle_map_id;                  /* 0x16 */
+    u8 script_variable_id;             /* 0x17 */
 } wldcore_encounter_entry_t;
 
 extern wldcore_encounter_entry_t (*g_wldcore_random_battle_data)[3];
@@ -53,10 +53,10 @@ s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
     }
     offset += location * 24;
     row = ENTRY_AT(offset);
-    g_wldcore_random_battle_squad_id = row->squad_id + 0x200;
-    progress = world_script_get_variable(row->variable_id);
+    g_wldcore_random_battle_squad_id = row->deployment_squad_id + 0x200;
+    progress = world_script_get_variable(row->script_variable_id);
     for (location = 0; location < 4; location++) {
-        if (ENTRY_AT(offset + location * 3)->tiers[0].threshold >= progress) {
+        if (ENTRY_AT(offset + location * 3)->tiers[0].progress_threshold >= progress) {
             break;
         }
     }
@@ -64,13 +64,13 @@ s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
         return 0;
     }
     rolled = ENTRY_AT(location * 3 + offset);
-    chance = rolled->tiers[0].chance;
+    chance = rolled->tiers[0].encounter_chance;
     if (chance == 0) {
         return 0;
     }
     pick = rand() * 100 >> 15;
     if (chance >= pick) {
-        mask = rolled->tiers[0].encounters;
+        mask = rolled->tiers[0].encounter_mask;
         count = 0;
         for (location = 0; location < 8; location++) {
             if ((mask >> location) & 1) {
@@ -86,10 +86,10 @@ s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
                 }
             }
         }
-        /* entds[7 - location] as a flat byte index: the typed form folds the
+        /* entd_ids[7 - location] as a flat byte index: the typed form folds the
          * 0x0e field offset differently and breaks the match. */
         g_wldcore_random_battle_entd_id = ((u8*)base)[offset + 21 - location];
-        g_wldcore_random_battle_map_id = ENTRY_AT(offset)->map_id;
+        g_wldcore_random_battle_map_id = ENTRY_AT(offset)->battle_map_id;
         return 1;
     }
     return 0;

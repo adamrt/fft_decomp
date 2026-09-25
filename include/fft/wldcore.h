@@ -204,6 +204,13 @@ typedef struct wldcore_window_record {
 
 typedef char wldcore_window_record_size_must_be_0x24[sizeof(wldcore_window_record_t) == 0x24 ? 1 : -1];
 
+/* Position view starting at a window record's x field with its 0x24-byte stride. */
+typedef struct wldcore_window_record_position_view {
+    s32 x;
+    s32 y;
+    u8 stride_padding[0x1c];
+} wldcore_window_record_position_view_t;
+
 /* Window-layout request at the start of a layout-window menu level. The
  * first three words are what wldcore_window_apply_layout (0x8006f67c) reads. */
 typedef struct wldcore_window_layout_request {
@@ -247,7 +254,7 @@ typedef struct wldcore_menu_panel_level {
     /* 0x00; 1 confirm, 0 or -1 cancel, set by the list and number-panel steps and branched on once
      * WORLD thread 12 ends; cleared by the number-panel pushes */
     s32 result;
-    void* argument; /* 0x04; first argument of 0x8006f294 */
+    s32 variable_id; /* 0x04; script variable edited by number panels */
     u8 unknown_08[0x28];
     s32 entry_count; /* 0x30; rows in the panel list */
     /* 0x34; entry text ids, filled by wldcore_map_build_location_menu_entries (0x8008d2c8), whose result is
@@ -1665,6 +1672,7 @@ void wldcore_menu_dispatch_publish_handler(void);
 void wldcore_menu_dispatch_resume_handler(void);
 void wldcore_menu_display_text_entry(s32 index, s32 text_id, wldcore_point32_t point, void* buffer);
 void wldcore_menu_push_message_level(s32 text, s32 reload_text);
+void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value);
 void wldcore_menu_reset_window_list_and_store_origin(void);
 void wldcore_menu_restore_level_on_world_entry(void);
 void wldcore_menu_run_world_frame(GsOT* context);

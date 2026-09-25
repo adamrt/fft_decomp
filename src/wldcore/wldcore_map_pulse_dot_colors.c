@@ -6,13 +6,6 @@
 #include "fft/wldcore.h"
 #include "psx/types.h"
 
-/* The dot's three colour bytes at +0x30, walked as its own advancing base. */
-typedef struct map_dot_rgb {
-    u8 r;
-    u8 g;
-    u8 b;
-} map_dot_rgb_t;
-
 void wldcore_map_pulse_dot_colors(void) {
     s32 flags;
     s32 i;

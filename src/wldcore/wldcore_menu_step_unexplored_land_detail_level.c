@@ -1,15 +1,6 @@
 #include "fft/wldcore.h"
 #include "psx/gs.h"
 
-/* Provisional: the 8-byte image rectangle at +0x28 of render records and of
- * the scrollable text window, copied as one unit. */
-typedef struct {
-    u16 x;
-    u16 y;
-    s16 width;
-    u16 height;
-} wldcore_rect16_t;
-
 void world_gs_gettiminfo(u32* tim, GsIMAGE* image);
 void wldcore_list_open_unexplored_lands(void);
 
@@ -64,8 +55,8 @@ void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_variable_detail
         g_wldcore_window_render_records[render].flags = (g_wldcore_window_render_records[render].flags & ~0x10) | 0x100;
         g_wldcore_scrollable_text_window.extra_render_index = render;
         *(wldcore_point32_t*)&g_wldcore_scrollable_text_window.extra_base_x = *base;
-        *(wldcore_rect16_t*)&g_wldcore_scrollable_text_window.extra_x
-            = *(wldcore_rect16_t*)&g_wldcore_window_render_records[render].x;
+        *(wldcore_window_render_bounds16_t*)&g_wldcore_scrollable_text_window.extra_x
+            = *(wldcore_window_render_bounds16_t*)&g_wldcore_window_render_records[render].x;
         level->phase = level->phase + 1;
         break;
     case 3:

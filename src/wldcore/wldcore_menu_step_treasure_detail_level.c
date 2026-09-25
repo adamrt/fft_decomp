@@ -7,16 +7,7 @@
 #include "psx/gs.h"
 #include "psx/pad.h"
 
-/* Provisional: the 8-byte image rectangle at +0x28 of render records, copied
- * as one unit. */
-typedef struct {
-    u16 x;
-    u16 y;
-    s16 width;
-    u16 height;
-} wldcore_rect16_t;
-
-extern wldcore_rect16_t g_wldcore_scroll_text_extra_rect;
+extern wldcore_window_render_bounds16_t g_wldcore_scroll_text_extra_rect;
 
 void world_gs_gettiminfo(u32* tim, GsIMAGE* image);
 s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* im, s32 step);
@@ -81,7 +72,8 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
         wldcore_gfx_step_dissolve_image_upload(&image, 0);
         g_wldcore_scroll_text_extra_render_index = render;
         g_wldcore_scroll_text_extra_position = *base;
-        g_wldcore_scroll_text_extra_rect = *(wldcore_rect16_t*)&g_wldcore_window_render_records[render].x;
+        g_wldcore_scroll_text_extra_rect
+            = *(wldcore_window_render_bounds16_t*)&g_wldcore_window_render_records[render].x;
         level->phase = level->phase + 1;
         break;
     case 3:

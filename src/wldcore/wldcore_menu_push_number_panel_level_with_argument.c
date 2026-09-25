@@ -2,7 +2,7 @@
 
 /* Pushes the number-panel menu level (type 0x30) that edits script variable
  * `variable_id`, starting the panel at `value`. */
-void wldcore_menu_push_number_panel_level_with_argument(void* variable_id, s16 value) {
+void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value) {
     wldcore_point32_t origin;
     s32 record_index;
 
@@ -14,7 +14,7 @@ void wldcore_menu_push_number_panel_level_with_argument(void* variable_id, s16 v
     wldcore_window_init_number_panel_render_thread(0xC, 0x270F0000, 0, &origin);
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
-    g_wldcore_menu_stack_records_next[record_index].panel.argument = variable_id;
+    g_wldcore_menu_stack_records_next[record_index].panel.variable_id = variable_id;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_NUMBER_PANEL_WITH_ARGUMENT;
     g_wldcore_menu_stack_depth = record_index + 1;
 }
