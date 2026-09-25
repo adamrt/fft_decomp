@@ -2,7 +2,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_menu_icon_prims_t world_menu_icon_prims_t;
+typedef struct world_menu_icon_prims world_menu_icon_prims_t;
 extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /* Menu icon strip thread: rebuilds the text image every seventh frame and

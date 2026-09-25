@@ -1,6 +1,6 @@
 #include "psx/types.h"
 
-typedef struct world_chained_record_t {
+typedef struct world_chained_record {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 length;
     /* 0x02 */ u8 unk_02[2];

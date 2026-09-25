@@ -20,7 +20,7 @@ typedef struct world_menu_list_draw_record {
     u8 arrow_down_y;    /* 0x0d */
 } world_menu_list_draw_record_t;
 
-typedef struct world_chained_record_t world_chained_record_t;
+typedef struct world_chained_record world_chained_record_t;
 typedef struct world_menu_list_record world_menu_list_record_t;
 
 extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;

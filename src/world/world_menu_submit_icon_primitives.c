@@ -2,7 +2,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_menu_icon_prims_t {
+typedef struct world_menu_icon_prims {
     /* 0x00 */ DR_MODE mode[2];
     /* 0x18 */ SPRT sprites[4];
 } world_menu_icon_prims_t;

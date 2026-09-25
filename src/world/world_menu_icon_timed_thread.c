@@ -6,7 +6,7 @@
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-typedef struct world_menu_icon_prims_t world_menu_icon_prims_t;
+typedef struct world_menu_icon_prims world_menu_icon_prims_t;
 extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /* Timed menu icon thread: shows one text entry with alternating sprite

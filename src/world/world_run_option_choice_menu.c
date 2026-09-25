@@ -17,7 +17,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_icon_prims_t world_menu_icon_prims_t;
+typedef struct world_menu_icon_prims world_menu_icon_prims_t;
 extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 extern void main_sound_set_type(s32 value);
 extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;

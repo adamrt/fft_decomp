@@ -14,7 +14,7 @@
 #include "psx/types.h"
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-typedef struct world_menu_icon_prims_t world_menu_icon_prims_t;
+typedef struct world_menu_icon_prims world_menu_icon_prims_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s32 row_index);
 extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* prims);
 

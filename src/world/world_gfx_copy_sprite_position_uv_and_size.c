@@ -1,7 +1,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_icon_source_t {
+typedef struct world_icon_source {
     u16 vram_x; /* 0x00: menu record text-image VRAM x; (vram_x & 0x3f) * 4 is SPRT.u0 */
     u8 vram_y;  /* 0x02: low byte of the menu record's VRAM y, copied to SPRT.v0 */
     u8 unused_03;
