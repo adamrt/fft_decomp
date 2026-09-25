@@ -6,10 +6,6 @@
 #include "fft/main_sound.h"
 #include "psx/pad.h"
 
-/* The 0x80 bytes at 0x9c..0x11c of the renderer-side Misc record (step count,
- * step list, movement flags and mount byte) copied as one unaligned block. */
-typedef battle_walk_path_t battle_movement_path_block_t;
-
 /* Free-cursor movement step. With the acting unit under player control the
  * confirm button routes the cursor to the pathfinder and, on a reachable
  * destination, installs the returned step list on the casting record and
@@ -40,7 +36,8 @@ void battle_state_handle_close_move_help_state(void) {
             path = battle_move_build_path_to_tile(
                 casting->battle_data->misc_unit_id, g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
             if (path != 0) {
-                *(battle_movement_path_block_t*)&casting->movement_path_count = *(battle_movement_path_block_t*)path;
+                /* Copy the 0x80-byte movement block in the renderer-side Misc record. */
+                *(battle_walk_path_t*)&casting->movement_path_count = *(battle_walk_path_t*)path;
                 casting->walk_speed.word = 0x2000;
                 battle_target_set_tile_background_color(0, 1);
                 main_sound_play_sfx(MAIN_SFX_CONFIRM);
@@ -78,7 +75,7 @@ void battle_state_handle_close_move_help_state(void) {
         g_battle_cursor_x = x;
         g_battle_cursor_z = elevation;
         g_battle_cursor_y = y;
-        *(battle_movement_path_block_t*)&casting->movement_path_count = *(battle_movement_path_block_t*)path;
+        *(battle_walk_path_t*)&casting->movement_path_count = *(battle_walk_path_t*)path;
         casting->walk_speed.word = 0x2000;
         battle_state_enter_unit_moving_setup();
         return;

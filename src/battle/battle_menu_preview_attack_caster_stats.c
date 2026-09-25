@@ -3,10 +3,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Signed view of battle_ai_command_action_t: the ability id is read with a
- * signed halfword load here. */
-typedef world_unit_command_action_t battle_preview_action_t;
-
 /*
  * Attack-preview caster panel: bind the selected unit's pending action to the
  * previewed target, run the preview calculation on the main stack unless the
@@ -16,7 +12,8 @@ typedef world_unit_command_action_t battle_preview_action_t;
 void battle_menu_preview_attack_caster_stats(void) {
     battle_stats_t* attacker;
     battle_stats_t* target;
-    battle_preview_action_t* action;
+    /* Signed view of battle_ai_command_action_t for the ability id load. */
+    world_unit_command_action_t* action;
     u8* ability_data;
     ability_secondary_data_t* secondary;
     s16* selected;
@@ -25,7 +22,7 @@ void battle_menu_preview_attack_caster_stats(void) {
     target = battle_unit_get_stats_from_battle_id(g_battle_preview_target_unit_id);
     /* One address register serves both reads, as in the target. */
     selected = &g_battle_active_turn_unit.battle_id;
-    action = (battle_preview_action_t*)battle_unit_get_target_id_ptr_by_battle_id(*selected);
+    action = (world_unit_command_action_t*)battle_unit_get_target_id_ptr_by_battle_id(*selected);
     action->unit_id = *selected;
     if (action->ability_id < ABILITY_ID_ITEM_FIRST) {
         main_ability_calculate_pointers_and_type(action->ability_id & 0x1ff, &ability_data, (u8**)&secondary);

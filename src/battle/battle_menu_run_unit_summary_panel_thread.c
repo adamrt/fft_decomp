@@ -12,9 +12,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* Provisional 0xF0-byte double-buffered frame of the unit summary panel. */
-typedef world_unit_summary_frame_t battle_menu_unit_summary_frame_t;
-
 extern void battle_world_display_specific_menu_text(s32 buffer, s32 origin, s32 text);
 
 /* Unit summary panel thread, BATTLE twin of world_menu_unit_summary_panel_thread: renders the
@@ -29,8 +26,8 @@ extern void battle_world_display_specific_menu_text(s32 buffer, s32 origin, s32 
  * target keeps each of those roles in one callee-saved register. */
 void battle_menu_run_unit_summary_panel_thread(void) {
     RECT rects[4];
-    battle_menu_unit_summary_frame_t frames[2];
-    battle_menu_unit_summary_frame_t* frame_record;
+    world_unit_summary_frame_t frames[2];
+    world_unit_summary_frame_t* frame_record;
     battle_stats_t* unit;
     u8* buffer;
     u8* digits;
@@ -109,7 +106,7 @@ void battle_menu_run_unit_summary_panel_thread(void) {
     zodiac = g_battle_active_turn_unit.zodiac;
     frames[0].sprites[6].u0 = (s16)(zodiac % 7) * 0x18;
     frames[0].sprites[6].v0 = (s16)(zodiac / 7) * 0x14 + 0x2A;
-    battle_copy_bytes(&frames[1], &frames[0], sizeof(battle_menu_unit_summary_frame_t));
+    battle_copy_bytes(&frames[1], &frames[0], sizeof(world_unit_summary_frame_t));
     frames[0].palette = &g_battle_unit_summary_palettes[0].primitives;
     frames[1].palette = &g_battle_unit_summary_palettes[1].primitives;
     battle_menu_init_numeric_display_frame_primitives(&g_battle_unit_summary_panel_rect, frames[0].palette);

@@ -8,13 +8,11 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* Provisional: the double-buffered quad/sprite page at 0x80173cbc (0x144
- * bytes each): five Gouraud textured quads, two sprites and the two draw-mode
- * packets that select their texture windows. */
-typedef world_menu_quad_page_t battle_menu_quad_page_t;
-typedef char battle_menu_quad_page_size_must_be_0x144[sizeof(battle_menu_quad_page_t) == 0x144 ? 1 : -1];
+typedef char battle_menu_quad_page_size_must_be_0x144[sizeof(world_menu_quad_page_t) == 0x144 ? 1 : -1];
 
-extern battle_menu_quad_page_t g_battle_menu_height_display_pages[2];
+/* Double-buffered 0x144-byte pages at 0x80173cbc: five quads, two sprites,
+ * and two draw-mode packets for their texture windows. */
+extern world_menu_quad_page_t g_battle_menu_height_display_pages[2];
 
 /* Display thread for the selected tile: draws its quad group
  * (the selected tile's display height, built by
@@ -28,7 +26,7 @@ void battle_menu_selected_tile_info_display_thread(void) {
     s32 i;
     s32 j;
     s32 frame;
-    battle_menu_quad_page_t* page;
+    world_menu_quad_page_t* page;
     POLY_GT4* quad;
 
     g_battle_menu_hide_numeric_values = 0;
@@ -50,8 +48,8 @@ void battle_menu_selected_tile_info_display_thread(void) {
             (const battle_image_location_t*)g_battle_tile_info_image_location, &g_battle_tile_info_image_params[i]);
     }
     battle_text_configure_sprite_vram(&rect, 0x18, 0x10, &page->sprites[0], 0);
-    battle_copy_bytes(&g_battle_menu_height_display_pages[1], &g_battle_menu_height_display_pages[0],
-        sizeof(battle_menu_quad_page_t));
+    battle_copy_bytes(
+        &g_battle_menu_height_display_pages[1], &g_battle_menu_height_display_pages[0], sizeof(world_menu_quad_page_t));
 
     for (frame = 0;; frame++) {
         s32* stride;

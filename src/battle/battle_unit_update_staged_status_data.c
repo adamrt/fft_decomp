@@ -6,9 +6,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-typedef world_event_work_t battle_event_work_t;
-typedef char battle_event_work_size_must_be_0x9e2[(sizeof(battle_event_work_t) == 0x9E2) ? 1 : -1];
-
 /* Battle twin of world_unit_update_staged_status_data. Saves or restores the event status snapshot for every misc
  * record of a unit.
  *
@@ -21,7 +18,7 @@ void battle_unit_update_staged_status_data(u16 unit_id, u16 restore) {
     s32 battle_id;
     s32 battle_unit_index;
 
-    g_battle_unit_status_staging_data = &((battle_event_work_t*)g_battle_ai_workspace_ptr)->status_staging;
+    g_battle_unit_status_staging_data = &((world_event_work_t*)g_battle_ai_workspace_ptr)->status_staging;
     if (g_battle_menu_input_disabled == 0 && battle_unit_try_get_misc_data_by_unit_id(&unit_id, &misc_index) != 0) {
         unit_index = 0;
         g_battle_unit_status_staging_data->flags = 0;

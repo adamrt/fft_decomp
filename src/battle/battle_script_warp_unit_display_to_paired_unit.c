@@ -6,9 +6,7 @@
 /* Provisional: three-halfword map coordinate staged for
  * battle_unit_place_in_new_location. The WORLD twin stages the same triple in
  * g_world_script_warp_unit_coords. */
-typedef world_unit_coordinates_t battle_script_unit_coordinates_t;
-
-extern battle_script_unit_coordinates_t g_battle_script_warp_coords;
+extern world_unit_coordinates_t g_battle_script_warp_coords;
 
 void battle_script_warp_unit_display_to_paired_unit(s32 misc_id) {
     battle_stats_t* unit;

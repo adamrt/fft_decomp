@@ -11,10 +11,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* Provisional 0x2ec-byte double-buffered page of the unit status panel
- * (pairs at 0x8017225c, first page per mode from g_battle_unit_status_first_page_by_mode). */
-typedef world_unit_status_page_t battle_menu_unit_status_page_t;
-
 /* Two DR_OFFSET packets, each followed by the x/y pair SetDrawOffset reads. */
 typedef struct battle_menu_unit_status_offsets {
     u32 draw_offset_a[3]; /* 0x00 */
@@ -25,7 +21,8 @@ typedef struct battle_menu_unit_status_offsets {
 
 extern void battle_world_display_specific_menu_text(s32 buffer, s32 position, s32 text);
 
-extern battle_menu_unit_status_page_t g_battle_unit_status_panel_pages[];
+/* 0x2ec-byte pages in pairs at 0x8017225c; the first page depends on the mode. */
+extern world_unit_status_page_t g_battle_unit_status_panel_pages[];
 /* g_battle_menu_sprite_page_image_params[5..7], the unscaled templates of
  * elements 0..2; bound separately because the target addresses the two
  * arrays from different bases. */
@@ -60,7 +57,7 @@ void battle_menu_display_hovered_unit_stats(
     s32 speed;
     s32 text_id;
     battle_stats_t* unit;
-    battle_menu_unit_status_page_t* page;
+    world_unit_status_page_t* page;
     world_gfx_image_load_parameters_t* params;
     battle_menu_unit_status_offsets_t* offs;
     POLY_G4* poly;
@@ -149,7 +146,7 @@ void battle_menu_display_hovered_unit_stats(
                 (const battle_image_location_t*)frame_rect, params);
         }
     }
-    battle_copy_bytes(&page[1], page, sizeof(battle_menu_unit_status_page_t));
+    battle_copy_bytes(&page[1], page, sizeof(world_unit_status_page_t));
     text_loaded = 0;
     for (frame = 0;; frame++) {
         if (status->gauges[2].value > 100) {

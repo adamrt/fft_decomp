@@ -3,9 +3,6 @@
 #include "fft/battle_text.h"
 #include "psx/types.h"
 
-/* Source rectangle in the shared menu glyph image. */
-typedef battle_menu_status_panel_glyph_t battle_glyph_t;
-
 /* Destination cursor used by blit_text_glyph. */
 typedef struct battle_menu_text_position {
     u16 x;
@@ -16,8 +13,9 @@ typedef struct battle_menu_text_position {
     s32 pixel_adjustment;
 } battle_menu_text_position_t;
 
-extern battle_glyph_t g_battle_menu_stacked_glyph_lower;
-extern battle_glyph_t g_battle_menu_stacked_glyph_upper;
+/* Source rectangles in the shared menu glyph image. */
+extern battle_menu_status_panel_glyph_t g_battle_menu_stacked_glyph_lower;
+extern battle_menu_status_panel_glyph_t g_battle_menu_stacked_glyph_upper;
 
 void battle_menu_draw_stacked_glyph_pair(void* pixels, battle_menu_text_position_t* position) {
     position->x -= 2;

@@ -16,8 +16,7 @@ typedef struct {
 
 extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_glyph;
 extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_position;
-typedef world_gfx_4bpp_rect_t battle_nibble_region_t;
-extern void battle_text_mirror_packed_nibble_region_horizontal(u8* data, battle_nibble_region_t* region);
+extern void battle_text_mirror_packed_nibble_region_horizontal(u8* data, world_gfx_4bpp_rect_t* region);
 
 /* Battle twin of world_menu_build_window_image: build a 4bpp menu window image from the shared menu graphics,
  * optionally with its pointer tail, and upload it to `rect` unless `keep` is set.
@@ -110,7 +109,7 @@ void* battle_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode
             &g_battle_menu_window_sprite_position);
         if (i != 0) {
             battle_text_mirror_packed_nibble_region_horizontal(
-                (u8*)buf, (battle_nibble_region_t*)&g_battle_menu_window_sprite_position);
+                (u8*)buf, (world_gfx_4bpp_rect_t*)&g_battle_menu_window_sprite_position);
         }
     }
     if (keep != 0) {

@@ -3,11 +3,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Provisional: 0x30-byte unit-view thread set at 0x80169040, indexed by
- * the view mode. Each of the four slots names a thread entry (or -1), the
- * scheduler slot it runs in, and the task id it must carry. */
-typedef world_unit_view_thread_set_t battle_unit_view_thread_set_t;
-typedef char battle_unit_view_thread_set_size_must_be_0x30[(sizeof(battle_unit_view_thread_set_t) == 0x30) ? 1 : -1];
+typedef char battle_unit_view_thread_set_size_must_be_0x30[(sizeof(world_unit_view_thread_set_t) == 0x30) ? 1 : -1];
 
 enum {
     BATTLE_UNIT_VIEW_SLOT_IDLE = 0,
@@ -15,7 +11,9 @@ enum {
     BATTLE_UNIT_VIEW_SLOT_STARTED = 2,
 };
 
-extern battle_unit_view_thread_set_t g_battle_unit_view_thread_sets[];
+/* The 0x30-byte sets at 0x80169040 are indexed by view mode. Each slot names
+ * a thread entry (or -1), scheduler slot, and required task id. */
+extern world_unit_view_thread_set_t g_battle_unit_view_thread_sets[];
 
 /*
  * Battle twin of world_unit_view_supervisor_thread; started by
@@ -28,7 +26,7 @@ extern battle_unit_view_thread_set_t g_battle_unit_view_thread_sets[];
  */
 void battle_unit_view_supervisor_thread(void) {
     s32 states[16];
-    battle_unit_view_thread_set_t* set;
+    world_unit_view_thread_set_t* set;
     s32 mode;
     s32 i;
     s32 task;

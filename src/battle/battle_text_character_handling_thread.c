@@ -15,13 +15,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Dialog record handed to battle_menu_render_text_image_at_record_origin;
- * the same layout as the WORLD dialog record. dialog_type is the DisplayMessage
- * Dialog Type byte; box_type is its 0x70 bits (0x10 portrait box, 0x20 Check,
- * 0x30 Help, 0x50 eight lines). The offsets at 0x44..0x4c are the instruction's
- * arrow position and X/Y coordinates. */
-typedef world_text_dialog_record_t battle_text_dialog_record_t;
-
 typedef union battle_texture_prim battle_texture_prim_t;
 
 /* Members of g_battle_text_typewriter_glyph (+0x02, +0x04, +0x0c, +0x0e),
@@ -54,7 +47,9 @@ extern void battle_menu_animate_window_quad_crop(menu_window_buffer_t* buffers, 
  * label; the WORLD twin's `character == 0xE4 || character == 0xE6` form is not threaded here
  * and loses the substitution-table base CSE. */
 void battle_text_character_handling_thread(void) {
-    battle_text_dialog_record_t rec;
+    /* dialog_type is the DisplayMessage Dialog Type byte; box_type is its 0x70 bits.
+     * The offsets at 0x44..0x4c are the instruction's arrow position and coordinates. */
+    world_text_dialog_record_t rec;
     RECT from;
     RECT to;
     s32 repeat;
