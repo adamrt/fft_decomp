@@ -9,19 +9,19 @@ extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
  * alternates between two sprite records until input arrives. */
 void world_menu_icon_strip_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    world_menu_icon_record_t records[2];
     s32 input;
     world_menu_icon_thread_param_t* param;
     void* buffer;
     s32 i;
     s32 fresh;
-    u8* record;
+    world_menu_icon_record_t* record;
 
     input = 0;
     param = world_thread_get_current_parameter_1();
-    record = records[0];
+    record = &records[0];
     world_menu_build_icon_record(&rect, param, record);
-    world_script_copy_bytes(records[1], record, 0x7C);
+    world_script_copy_bytes(&records[1], record, 0x7C);
     fresh = 1;
     for (i = 0;; i++) {
         if (i % 7 == 0) {
@@ -40,8 +40,8 @@ void world_menu_icon_strip_thread(void) {
         if (world_menu_check_thread_completion(&input) != 0) {
             break;
         }
-        record = records[i & 1];
-        world_menu_select_icon_cluts((world_menu_icon_sprites_t*)record);
+        record = &records[i & 1];
+        world_menu_select_icon_cluts(&record->base);
         world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
     }
     world_thread_yield();

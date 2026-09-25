@@ -27,7 +27,7 @@ extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s
  * on_change callback runs. */
 void world_menu_number_entry_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    world_menu_icon_record_t records[2];
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
     world_menu_number_range_t* range;
@@ -63,8 +63,8 @@ void world_menu_number_entry_thread(void) {
     if (value < range->min || range->max < value) {
         value = range->min;
     }
-    world_menu_build_icon_record(&rect, (world_menu_icon_thread_param_t*)param, records[0]);
-    world_script_copy_bytes(records[1], records[0], 0x7C);
+    world_menu_build_icon_record(&rect, (world_menu_icon_thread_param_t*)param, &records[0]);
+    world_script_copy_bytes(&records[1], &records[0], 0x7C);
     for (j = 0; j < 2; j++) {
         world_menu_init_quad(&cursor_quads[j]);
         SetSemiTrans(&cursor_quads[j], 0);
@@ -102,7 +102,7 @@ void world_menu_number_entry_thread(void) {
     LoadImage(&rect, buffer);
     redraw = 1;
     for (i = 0;; i++) {
-        record = (world_menu_icon_sprites_t*)records[i & 1];
+        record = &records[i & 1].base;
         *param->value = value;
         world_thread_wait_frames(1);
         if (redraw == 1) {

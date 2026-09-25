@@ -14,7 +14,7 @@ extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
  * thread is idle. */
 void world_menu_formation_icon_list_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    world_menu_icon_record_t records[2];
     s32 cursor;
     world_menu_icon_thread_param_t* param;
     void* buffer;
@@ -22,7 +22,7 @@ void world_menu_formation_icon_list_thread(void) {
     world_menu_icon_sprites_t* record;
 
     param = world_thread_get_current_parameter_1();
-    record = (world_menu_icon_sprites_t*)records[0];
+    record = &records[0].base;
     cursor = param->cursor;
     if (cursor == -1) {
         cursor = 0;
@@ -32,7 +32,7 @@ void world_menu_formation_icon_list_thread(void) {
     SetShadeTex(&record->sprites[1], 0);
     SetShadeTex(&record->sprites[2], 0);
     SetShadeTex(&record->sprites[3], 0);
-    world_script_copy_bytes(records[1], record, 0x7C);
+    world_script_copy_bytes(&records[1], record, 0x7C);
     buffer = world_menu_build_and_upload_window_frame_image(param->width, param->height, &rect, 1);
     g_world_menu_text_state.stride = param->width;
     world_menu_set_text_origin(8, 9);
@@ -44,10 +44,10 @@ void world_menu_formation_icon_list_thread(void) {
         if (i == 0) {
             world_menu_free_memory(buffer);
         }
-        record = (world_menu_icon_sprites_t*)records[i & 1];
+        record = &records[i & 1].base;
         param->cursor = cursor;
         world_menu_select_icon_cluts(record);
-        world_menu_update_icon_cursor_sprites(param, (world_menu_icon_sprites_t*)record, i, cursor);
+        world_menu_update_icon_cursor_sprites(param, record, i, cursor);
         if (world_menu_check_thread_completion(&g_world_formation_menu_input_state.new_buttons) != 0) {
             break;
         }

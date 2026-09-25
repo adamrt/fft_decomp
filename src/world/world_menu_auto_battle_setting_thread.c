@@ -21,7 +21,7 @@ extern s16 g_world_menu_pending_selection[];
  * action menu if the unit's menu id changes. */
 void world_menu_auto_battle_setting_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    world_menu_icon_record_t records[2];
     s32 cursor;
     s32 previous;
     battle_stats_t* stats;
@@ -34,7 +34,7 @@ void world_menu_auto_battle_setting_thread(void) {
     s32 after;
     s32 selected;
     s16* colour;
-    u8* record;
+    world_menu_icon_record_t* record;
 
     param = world_thread_get_current_parameter_1();
     cursor = param->cursor;
@@ -51,13 +51,13 @@ void world_menu_auto_battle_setting_thread(void) {
         cursor = 4;
     }
     previous = cursor;
-    world_menu_build_icon_record(&rect, param, records[0]);
-    world_script_copy_bytes(records[1], records[0], 0x7C);
+    world_menu_build_icon_record(&rect, param, &records[0]);
+    world_script_copy_bytes(&records[1], &records[0], 0x7C);
     fresh = 0;
     i = 0;
     colour = g_world_auto_battle_option_colors;
     for (;; i++) {
-        record = records[i & 1];
+        record = &records[i & 1];
         if (i == 0 || (g_world_menu_new_button_input & PSX_PAD_CIRCLE)) {
             buffer = world_menu_build_and_upload_window_frame_image(param->width, param->height, &rect, 1);
             if (((g_world_menu_new_button_input & PSX_PAD_CIRCLE) && world_thread_is_previous_running() == 0)
@@ -119,8 +119,8 @@ void world_menu_auto_battle_setting_thread(void) {
         }
         world_menu_step_wrapping_cursor_on_scroll_buttons((world_menu_wrapping_cursor_bounds_t*)param, &cursor);
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
-        world_menu_select_icon_cluts((world_menu_icon_sprites_t*)record);
-        world_menu_update_icon_cursor_sprites(param, (world_menu_icon_sprites_t*)record, i, cursor);
+        world_menu_select_icon_cluts(&record->base);
+        world_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
         world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
     }
     world_thread_yield();

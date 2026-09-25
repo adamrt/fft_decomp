@@ -14,20 +14,20 @@ extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
  * alternate until input completes, selecting CLUTs in the linked slot. */
 void world_menu_icon_linked_entry_thread(void) {
     RECT rect;
-    u8 records[2][0x7C];
+    world_menu_icon_record_t records[2];
     world_menu_entry_t* param;
     void* buffer;
     s32 i;
     s32 parent;
-    u8* record;
+    world_menu_icon_record_t* record;
     s16 width;
     s16 height;
     s32 pad;
 
     param = world_thread_get_current_parameter_1();
     world_menu_size_entry_to_text(param, &width, &height, &pad, 0);
-    world_menu_build_icon_record(&rect, (world_menu_icon_thread_param_t*)param, records[0]);
-    world_script_copy_bytes(records[1], records[0], 0x7C);
+    world_menu_build_icon_record(&rect, (world_menu_icon_thread_param_t*)param, &records[0]);
+    world_script_copy_bytes(&records[1], &records[0], 0x7C);
     parent = param->parent_indices[0];
     if (parent >= 0) {
         g_world_menu_thread_menu_data[parent].window_x
@@ -51,14 +51,13 @@ void world_menu_icon_linked_entry_thread(void) {
         }
         if (parent >= 0) {
             g_world_thread_current_id--;
-            world_menu_select_icon_cluts((world_menu_icon_sprites_t*)records[i & 1]);
+            world_menu_select_icon_cluts(&records[i & 1].base);
             g_world_thread_current_id++;
         } else {
-            world_menu_select_icon_cluts((world_menu_icon_sprites_t*)records[i & 1]);
+            world_menu_select_icon_cluts(&records[i & 1].base);
         }
-        record = records[i & 1];
-        world_menu_update_icon_cursor_sprites(
-            (world_menu_icon_thread_param_t*)param, (world_menu_icon_sprites_t*)record, i, -1);
+        record = &records[i & 1];
+        world_menu_update_icon_cursor_sprites((world_menu_icon_thread_param_t*)param, &record->base, i, -1);
         world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, 0);
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
