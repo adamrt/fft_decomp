@@ -1,11 +1,11 @@
 #ifndef FFT_CARD_H
 #define FFT_CARD_H
 
+#include "fft/battle_menu_status_panel.h"
 #include "fft/data.h"
 #include "fft/geometry.h"
 #include "fft/main_zodiac.h"
 #include "fft/menu_types.h"
-#include "fft/status_panel.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
@@ -423,7 +423,7 @@ s32 card_file_write_buffer(const char* filename, const u8* source, s32 size, s32
 s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size);
 
 /* gfx */
-void card_gfx_build_scaled_sprite_primitive_chain(status_panel_scaled_sprite_t* sprite, POLY_FT4* poly);
+void card_gfx_build_scaled_sprite_primitive_chain(battle_menu_status_panel_scaled_sprite_t* sprite, POLY_FT4* poly);
 void card_gfx_enqueue_oriented_textured_quad(
     const card_oriented_quad_t* descriptor, const u8* color, s32 orientation, s32 semitrans, s32 otag_index);
 u8* card_gfx_get_draw_color(void);

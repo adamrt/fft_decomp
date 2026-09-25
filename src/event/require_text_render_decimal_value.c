@@ -2,7 +2,8 @@
 #include "fft/require.h"
 #include "psx/types.h"
 
-void require_text_render_decimal_value(s32 value, s32 flags, void* pixels, status_panel_text_position_t* position) {
+void require_text_render_decimal_value(
+    s32 value, s32 flags, void* pixels, battle_menu_status_panel_text_position_t* position) {
     s32 saved_color;
     s32 plus;
     s32 digits;

@@ -40,7 +40,8 @@ void equip_text_render_signed_decimal_entries(
             out->color = 0;
             entry->flags |= MENU_DECIMAL_SIGN_MINUS;
         }
-        equip_text_render_decimal_value(value, (s16)entry->flags, pixels, (status_panel_text_position_t*)out);
+        equip_text_render_decimal_value(
+            value, (s16)entry->flags, pixels, (battle_menu_status_panel_text_position_t*)out);
         out->color = 0;
         entry++;
     }

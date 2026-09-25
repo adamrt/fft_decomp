@@ -86,7 +86,7 @@ void world_menu_equipment_and_ability_panel_thread(void) {
         if (state->generic_monster != 0) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
-                if (ability == STATUS_PANEL_LABEL_NONE || ability == 0) {
+                if (ability == BATTLE_MENU_STATUS_PANEL_LABEL_NONE || ability == 0) {
                     screen->sprites[7 + i].x0 -= 0x200;
                 }
             }
@@ -111,7 +111,7 @@ void world_menu_equipment_and_ability_panel_thread(void) {
                 if (state->generic_monster != 0) {
                     mode = state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
                 }
-                if ((u16)state->ability_ids[i] == STATUS_PANEL_LABEL_NONE) {
+                if ((u16)state->ability_ids[i] == BATTLE_MENU_STATUS_PANEL_LABEL_NONE) {
                     g_world_menu_text_state.origin_y += 0x10;
                 } else {
                     world_menu_display_text_entry(

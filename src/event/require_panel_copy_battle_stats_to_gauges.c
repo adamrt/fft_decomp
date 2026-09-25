@@ -2,7 +2,7 @@
 #include "fft/require.h"
 #include "psx/types.h"
 
-void require_panel_copy_battle_stats_to_gauges(battle_stats_t* unit, status_panel_gauges_t* output) {
+void require_panel_copy_battle_stats_to_gauges(battle_stats_t* unit, battle_menu_status_panel_gauges_t* output) {
     u16 maximum_hp;
     u16 maximum_mp;
     u8 ct;

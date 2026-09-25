@@ -119,7 +119,7 @@ void attack_deploy_run_select_menu(void) {
                 if (node->value != 0) {
                     text_id = node->help_base + *node->value;
                     if (node->help_base == -0x6800
-                        && ((status_panel_slot_state_t*)g_attack_unit_editor_state)->generic_monster != 0) {
+                        && ((battle_menu_status_panel_slot_state_t*)g_attack_unit_editor_state)->generic_monster != 0) {
                         text_id = *node->value | 0x7800;
                         if ((*node->value & 0x7ff) == 0x7ff || (*node->value & 0x7ff) == 0) {
                             *input = 0;

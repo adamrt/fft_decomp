@@ -1,16 +1,16 @@
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
+#include "fft/battle_menu_status_panel.h"
 #include "fft/battle_text.h"
 #include "fft/bunit.h"
 #include "fft/main_heap.h"
 #include "fft/menu.h"
 #include "fft/menu_types.h"
-#include "fft/status_panel.h"
 #include "fft/thread.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The packet, state and thread layouts are the shared fft/status_panel.h
+/* The packet, state and thread layouts are the shared fft/battle_menu_status_panel.h
  * records of the DEBUGCHR twin debugchr_render_unit_status_panel_thread. */
 
 void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
@@ -27,17 +27,17 @@ void bunit_render_unit_status_panel_thread(void) {
     s32 prev_unit;
 
     u8* render_a;
-    status_panel_editor_packet_t* editor_base;
-    status_panel_numeric_entry_t* env_a;
-    status_panel_editor_state_t* state;
+    battle_menu_status_panel_editor_packet_t* editor_base;
+    battle_menu_status_panel_numeric_entry_t* env_a;
+    battle_menu_status_panel_editor_state_t* state;
     void* portrait_arg;
     u8* transition;
     u8* image;
     u8* render_b;
     u8* render_c;
-    status_panel_packet_t* panel_base;
+    battle_menu_status_panel_packet_t* panel_base;
     s16* scroll;
-    status_panel_display_thread_t* thread;
+    battle_menu_status_panel_display_thread_t* thread;
     s32 shake;
     s32 highlight;
     s32 suppress;
@@ -65,8 +65,8 @@ void bunit_render_unit_status_panel_thread(void) {
     s32 dx4;
     s16 srow;
     s32* origin;
-    status_panel_packet_t* panel;
-    status_panel_editor_packet_t* editor;
+    battle_menu_status_panel_packet_t* panel;
+    battle_menu_status_panel_editor_packet_t* editor;
     u8* cur;
     u8* cur1;
     u8* cur2;
@@ -79,7 +79,7 @@ void bunit_render_unit_status_panel_thread(void) {
     thread_id = g_battle_current_thread_id;
     threads = (u8*)g_battle_threads;
     g_bunit_input_controller = (u32*)(cur + 4);
-    thread = *(status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
+    thread = *(battle_menu_status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
     if (thread_id == 8) {
         panel = g_bunit_panel_selected_packets;
         editor = g_bunit_panel_selected_editor_packets;
@@ -152,7 +152,7 @@ void bunit_render_unit_status_panel_thread(void) {
         frame += 1;
         off3 += 0x14;
     } while (frame < 7);
-    battle_copy_bytes(editor + 1, editor, sizeof(status_panel_editor_packet_t));
+    battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
@@ -182,7 +182,7 @@ void bunit_render_unit_status_panel_thread(void) {
         panel->portrait.clut = 0x7FBD;
     }
     panel->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
-    battle_copy_bytes(panel + 1, panel, sizeof(status_panel_packet_t));
+    battle_copy_bytes(panel + 1, panel, sizeof(battle_menu_status_panel_packet_t));
     frame = 0;
     anim_state = 0;
     prev_unit = state->unit;
@@ -361,8 +361,8 @@ void bunit_render_unit_status_panel_thread(void) {
             u16* py;
             s32 scale;
             s32 arg;
-            status_panel_bar_t* rec;
-            volatile status_panel_editor_packet_t* dst;
+            battle_menu_status_panel_bar_t* rec;
+            volatile battle_menu_status_panel_editor_packet_t* dst;
             color = g_bunit_panel_gauge_bar_colors;
             i = 0;
             /* The bar rows read the origin y with lhu; an s16 walk changes the loads. */
@@ -449,7 +449,7 @@ void bunit_render_unit_status_panel_thread(void) {
                 }
                 rec++;
                 scale += 0xB;
-                dst = (volatile status_panel_editor_packet_t*)((u8*)dst + sizeof(POLY_G4));
+                dst = (volatile battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(POLY_G4));
                 i += 1;
                 arg += 0x24;
             } while (i < 3);

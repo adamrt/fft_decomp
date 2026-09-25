@@ -1,9 +1,9 @@
 #ifndef FFT_BUNIT_H
 #define FFT_BUNIT_H
 
+#include "fft/battle_menu_status_panel.h"
 #include "fft/character_identity.h"
 #include "fft/menu_types.h"
-#include "fft/status_panel.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/types.h"
@@ -43,7 +43,7 @@ enum {
  * remain padding until their uses establish a meaning.
  */
 typedef struct bunit_unit_data {
-    s16 level; /* 0x00; getters at 0x801c4054..0x801c4163 read level, experience, brave and faith */
+    s16 level;      /* 0x00; getters at 0x801c4054..0x801c4163 read level, experience, brave and faith */
     s16 team_kind;  /* 0x02 */
     s16 list_index; /* 0x04 */
     s16 unit_count; /* 0x06; shown units plus eggs in each billboard record */
@@ -60,21 +60,21 @@ typedef struct bunit_unit_data {
     s16 max_ct;          /* 0x1c */
     s16 formation_index; /* 0x1e */
     u8 _pad20[2];
-    s16 entd_slot_22; /* 0x22 */
+    s16 entd_slot_22;        /* 0x22 */
     s16 monster_base_job_id; /* 0x24; used when character_identity is 0x82 */
     s16 brave;               /* 0x26 */
     s16 faith;               /* 0x28 */
     s16 zodiac;              /* 0x2a */
-    s16 roster_id; /* 0x2C; searched by bunit_unit_find_index_by_roster_id */
+    s16 roster_id;           /* 0x2C; searched by bunit_unit_find_index_by_roster_id */
     u8 _pad2e[2];
-    s16 move;               /* 0x30 */
-    s16 speed;              /* 0x32 */
-    s16 jump;               /* 0x34 */
-    s16 right_weapon_power; /* 0x36 */
-    s16 left_weapon_power;  /* 0x38 */
-    s16 right_weapon_evade; /* 0x3a */
-    s16 left_weapon_evade;  /* 0x3c */
-    s16 uses_monster_skillset; /* 0x3e; nonzero restricts the job list to its base entry */
+    s16 move;                     /* 0x30 */
+    s16 speed;                    /* 0x32 */
+    s16 jump;                     /* 0x34 */
+    s16 right_weapon_power;       /* 0x36 */
+    s16 left_weapon_power;        /* 0x38 */
+    s16 right_weapon_evade;       /* 0x3a */
+    s16 left_weapon_evade;        /* 0x3c */
+    s16 uses_monster_skillset;    /* 0x3e; nonzero restricts the job list to its base entry */
     s16 two_handed;               /* 0x40 */
     s16 physical_attack;          /* 0x42 */
     s16 physical_class_evade;     /* 0x44 */
@@ -86,17 +86,17 @@ typedef struct bunit_unit_data {
     s16 magical_shield_evade;    /* 0x50 */
     s16 magical_accessory_evade; /* 0x52 */
     s16 equipment[5];            /* 0x54 */
-    s16 abilities[5]; /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
-                       * bunit_panel_copy_unit_data_to_billboard; bunit_create_ability_list reads [0]) */
+    s16 abilities[5];            /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
+                                  * bunit_panel_copy_unit_data_to_billboard; bunit_create_ability_list reads [0]) */
     u8 _pad68[8];
-    u8 gender_flags; /* 0x70; Bard/Dancer restrictions */
-    u8 misc_unit_id;        /* 0x71 */
-    u8 initial_team_flags;  /* 0x72 */
-    u8 formation_order_key; /* 0x73; bit 0x40 marks an encoded roster ID */
-    u8 character_identity;  /* 0x74; special character, generic male/female/monster */
-    u8 unlocked_jobs[3];    /* 0x75; bit reader consumes Squire through Mime */
+    u8 gender_flags;          /* 0x70; Bard/Dancer restrictions */
+    u8 misc_unit_id;          /* 0x71 */
+    u8 initial_team_flags;    /* 0x72 */
+    u8 formation_order_key;   /* 0x73; bit 0x40 marks an encoded roster ID */
+    u8 character_identity;    /* 0x74; special character, generic male/female/monster */
+    u8 unlocked_jobs[3];      /* 0x75; bit reader consumes Squire through Mime */
     u8 learned_abilities[57]; /* 0x78 */
-    u8 job_levels[10]; /* 0xb1; two packed job-level nibbles per byte */
+    u8 job_levels[10];        /* 0xb1; two packed job-level nibbles per byte */
     u8 _padbb;
     u16 job_points[20];       /* 0xbc; current JP by generic job */
     u16 total_job_points[20]; /* 0xe4; cumulative JP by generic job */
@@ -408,10 +408,10 @@ extern s16 g_bunit_menu_selection_values[];
 extern u8 g_bunit_menu_thread_running;
 extern u32 g_bunit_previous_input;
 extern const char g_bunit_text_decimal_format[];
-extern status_panel_glyph_t g_bunit_text_decimal_glyph;
+extern battle_menu_status_panel_glyph_t g_bunit_text_decimal_glyph;
 extern s32 g_bunit_text_selection_id;
 extern RECT g_bunit_gfx_draw_area_template;
-extern status_panel_indicator_prims_t g_bunit_thread_indicator_packets[2][2];
+extern battle_menu_status_panel_indicator_prims_t g_bunit_thread_indicator_packets[2][2];
 extern u8 g_bunit_thread_status_snapshot[16];
 extern s16 g_bunit_unit_count;
 extern s16 g_bunit_unit_current_stat_value;
@@ -426,13 +426,13 @@ extern s16 g_bunit_unit_selected_index;
 extern u8 g_bunit_unit_stat_mode;
 
 /* Unnamed data, in address order. */
-extern status_panel_editor_state_t g_bunit_panel_selected_billboard;
-extern status_panel_editor_state_t g_bunit_panel_comparison_billboard;
+extern battle_menu_status_panel_editor_state_t g_bunit_panel_selected_billboard;
+extern battle_menu_status_panel_editor_state_t g_bunit_panel_comparison_billboard;
 extern s16 g_bunit_panel_selected_unit_data[];
 extern s16 g_bunit_panel_comparison_unit_data[];
 /* Copy of the selected unit's 0x40 bytes from +0x30; only the leading
  * slot-state fields are read. */
-extern status_panel_slot_state_t g_bunit_editor_unit_fields;
+extern battle_menu_status_panel_slot_state_t g_bunit_editor_unit_fields;
 extern u8 g_bunit_editor_numeric_geometry[];
 extern u8 g_bunit_editor_numeric_table[];
 extern u8 g_bunit_editor_numeric_entries_a[];
@@ -502,8 +502,8 @@ extern s32 g_bunit_ability_list_menu_script;
 extern s16 g_bunit_frame_arg;
 extern u32* g_bunit_input_controller;
 extern s16 g_bunit_gfx_draw_offset_y;
-extern status_panel_numeric_buffer_t g_bunit_editor_numeric_state_a[2];
-extern status_panel_numeric_buffer_t g_bunit_editor_numeric_state_b[2];
+extern battle_menu_status_panel_numeric_buffer_t g_bunit_editor_numeric_state_a[2];
+extern battle_menu_status_panel_numeric_buffer_t g_bunit_editor_numeric_state_b[2];
 extern u8 g_bunit_editor_numeric_text_a[];
 extern u8 g_bunit_editor_numeric_text_b[];
 extern s8 g_bunit_unit_reorderable_count;
@@ -579,7 +579,7 @@ void bunit_gfx_enqueue_textured_quad_list(const bunit_textured_quad_descriptor_t
     u16 texture_page, u16 clut, s32 otag_index, s32 count);
 void bunit_gfx_enqueue_translucent_tile(RECT* rect, u8* color, u8 semi, s32 idx);
 s32 bunit_gfx_get_fade_state(void);
-void bunit_gfx_init_menu_tile_and_line_primitives(status_panel_menu_primitives_t* menu);
+void bunit_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
 void bunit_gfx_init_rhombus_cursor_tpages(void);
 void bunit_gfx_set_clut_rect_from_id(RECT* rect, s32 clut_id);
 void bunit_gfx_set_transition_frame(s32 frame);
@@ -634,16 +634,18 @@ s32 bunit_run_ability_list_menu(void);
 void bunit_run_numeric_editor_thread(void);
 
 /* panel */
-void bunit_panel_set_primitive_colors(status_panel_primitives_t* primitives, const status_panel_frame_config_t* state);
+void bunit_panel_set_primitive_colors(
+    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 
 /* text */
-void bunit_text_render_decimal_entry_list(
-    s32 pixels, status_panel_gauge_entry_t* entries, status_panel_text_position_t* out, s32 count);
-void bunit_text_render_decimal_value(s32 value, s32 flags, void* pixels, status_panel_text_position_t* position);
+void bunit_text_render_decimal_entry_list(s32 pixels, battle_menu_status_panel_gauge_entry_t* entries,
+    battle_menu_status_panel_text_position_t* out, s32 count);
+void bunit_text_render_decimal_value(
+    s32 value, s32 flags, void* pixels, battle_menu_status_panel_text_position_t* position);
 s32 bunit_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const bunit_text_image_position_t* position, s32 style);
-void bunit_text_render_signed_decimal_entries(
-    s32 pixels, status_panel_gauge_entry_t* entries, status_panel_text_position_t* out, s32 count);
+void bunit_text_render_signed_decimal_entries(s32 pixels, battle_menu_status_panel_gauge_entry_t* entries,
+    battle_menu_status_panel_text_position_t* out, s32 count);
 void bunit_text_set_palette_and_metrics(s32 mode);
 
 /* thread */
@@ -680,7 +682,7 @@ extern u8 g_bunit_character_status_draw_area_rect[];
 extern u8 g_bunit_character_status_equipment_text_image[];
 extern RECT g_bunit_character_status_equipment_text_rect;
 extern RECT g_bunit_character_status_frame_rect;
-extern status_panel_buffer_t g_bunit_character_status_frames[2];
+extern battle_menu_status_panel_buffer_t g_bunit_character_status_frames[2];
 extern world_gfx_image_load_parameters_t g_bunit_character_status_item_icon_layout[5];
 extern world_gfx_image_load_parameters_t g_bunit_character_status_layout_mode0[19];
 extern world_gfx_image_load_parameters_t g_bunit_character_status_layout_mode1[19];
@@ -761,7 +763,7 @@ extern u8 g_bunit_panel_comparison_editor_packets[];
 extern u8 g_bunit_panel_comparison_large_number_image[];
 extern u8 g_bunit_panel_comparison_name_image[];
 extern u8 g_bunit_panel_comparison_number_image[];
-extern status_panel_numeric_entry_t g_bunit_panel_comparison_numeric_entries[];
+extern battle_menu_status_panel_numeric_entry_t g_bunit_panel_comparison_numeric_entries[];
 extern u8 g_bunit_panel_comparison_packets[];
 extern u8 g_bunit_panel_comparison_portrait_image[];
 extern u8 g_bunit_panel_comparison_portrait_rect[];
@@ -779,7 +781,7 @@ extern u8 g_bunit_panel_selected_editor_packets[];
 extern u8 g_bunit_panel_selected_large_number_image[];
 extern u8 g_bunit_panel_selected_name_image[];
 extern u8 g_bunit_panel_selected_number_image[];
-extern status_panel_numeric_entry_t g_bunit_panel_selected_numeric_entries[];
+extern battle_menu_status_panel_numeric_entry_t g_bunit_panel_selected_numeric_entries[];
 extern u8 g_bunit_panel_selected_packets[];
 extern u8 g_bunit_panel_selected_portrait_image[];
 extern u8 g_bunit_panel_selected_portrait_rect[];

@@ -3,8 +3,8 @@
 #include "psx/types.h"
 
 /* Render signed gauge values with their positive, negative, or zero color. */
-void bunit_text_render_signed_decimal_entries(
-    s32 pixels, status_panel_gauge_entry_t* entries, status_panel_text_position_t* out, s32 count) {
+void bunit_text_render_signed_decimal_entries(s32 pixels, battle_menu_status_panel_gauge_entry_t* entries,
+    battle_menu_status_panel_text_position_t* out, s32 count) {
     s32 i;
     s32 amount;
 

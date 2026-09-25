@@ -3,8 +3,8 @@
 #include "psx/types.h"
 
 /* Render gauge values with sign colors, drawing a zero value as a placeholder. */
-void debugchr_text_render_decimal_entry_list(
-    s32 pixels, status_panel_gauge_entry_t* entries, status_panel_text_position_t* out, s32 count) {
+void debugchr_text_render_decimal_entry_list(s32 pixels, battle_menu_status_panel_gauge_entry_t* entries,
+    battle_menu_status_panel_text_position_t* out, s32 count) {
     s32 i;
 
     for (i = 0; i < count; entries++, i++, out->color = 0) {

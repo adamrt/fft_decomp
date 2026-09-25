@@ -16,14 +16,14 @@ void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_locat
     const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* Thread task 0x3b: numeric editor panel; twin of equip_editor_run_numeric_thread.
- * The primitive block is status_panel_numeric_buffer_t, double buffered at
+ * The primitive block is battle_menu_status_panel_numeric_buffer_t, double buffered at
  * g_require_editor_numeric_state; the thread parameter block is
- * status_panel_frame_config_t. */
+ * battle_menu_status_panel_frame_config_t. */
 
 void require_editor_run_numeric_thread(void) {
-    status_panel_frame_config_t* thread;
-    status_panel_numeric_buffer_t* buffer;
-    status_panel_numeric_buffer_t* buffers;
+    battle_menu_status_panel_frame_config_t* thread;
+    battle_menu_status_panel_numeric_buffer_t* buffer;
+    battle_menu_status_panel_numeric_buffer_t* buffers;
     u8* text_pixels;
     u8* entries;
     u8* upload_a;
@@ -36,7 +36,8 @@ void require_editor_run_numeric_thread(void) {
     s32 use_offset;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
+    thread
+        = (battle_menu_status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_require_input_controller = battle_script_get_controller_input_pointer(0) + 1;
     if (g_battle_current_thread_id == 12) {
         buffer = g_require_editor_numeric_state;
@@ -76,7 +77,7 @@ void require_editor_run_numeric_thread(void) {
         buffer->sprites[16].v0 += 0x4C;
     }
     buffer->sprites[10].clut = 0x7D7C;
-    battle_copy_bytes(&buffer[1], buffer, sizeof(status_panel_numeric_buffer_t));
+    battle_copy_bytes(&buffer[1], buffer, sizeof(battle_menu_status_panel_numeric_buffer_t));
 
     for (frame = 0;; frame++) {
         buffer = &buffers[frame & 1];
@@ -85,8 +86,9 @@ void require_editor_run_numeric_thread(void) {
             g_menu_text_state.stride = 0x14;
             battle_menu_set_text_origin(0, 0);
             if (g_battle_current_thread_id != 12) {
-                require_text_render_signed_decimal_entries((s32)text_pixels, (status_panel_gauge_entry_t*)entries,
-                    (status_panel_text_position_t*)&g_menu_text_state.origin_x, 3);
+                require_text_render_signed_decimal_entries((s32)text_pixels,
+                    (battle_menu_status_panel_gauge_entry_t*)entries,
+                    (battle_menu_status_panel_text_position_t*)&g_menu_text_state.origin_x, 3);
             } else {
                 battle_menu_draw_numeric_display_entries((s32)text_pixels, (struct menu_number_entry*)entries,
                     (struct menu_number_position*)&g_menu_text_state.origin_x, 3);
@@ -95,8 +97,8 @@ void require_editor_run_numeric_thread(void) {
             battle_menu_set_text_origin(0, 0);
             if (g_battle_current_thread_id != 12) {
                 require_text_render_signed_decimal_entries((s32)(text_pixels + 0x168),
-                    (status_panel_gauge_entry_t*)(entries + 0x24),
-                    (status_panel_text_position_t*)&g_menu_text_state.origin_x, 4);
+                    (battle_menu_status_panel_gauge_entry_t*)(entries + 0x24),
+                    (battle_menu_status_panel_text_position_t*)&g_menu_text_state.origin_x, 4);
             } else {
                 battle_menu_draw_numeric_display_entries((s32)(text_pixels + 0x168),
                     (struct menu_number_entry*)(entries + 0x24),
@@ -106,8 +108,8 @@ void require_editor_run_numeric_thread(void) {
             battle_menu_set_text_origin(0, 0);
             if (g_battle_current_thread_id != 12) {
                 require_text_render_signed_decimal_entries((s32)(text_pixels + 0x468),
-                    (status_panel_gauge_entry_t*)(entries + 0x54),
-                    (status_panel_text_position_t*)&g_menu_text_state.origin_x, 8);
+                    (battle_menu_status_panel_gauge_entry_t*)(entries + 0x54),
+                    (battle_menu_status_panel_text_position_t*)&g_menu_text_state.origin_x, 8);
             } else {
                 battle_menu_draw_numeric_display_entries((s32)(text_pixels + 0x468),
                     (struct menu_number_entry*)(entries + 0x54),

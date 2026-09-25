@@ -1,6 +1,6 @@
+#include "fft/battle_menu_status_panel.h"
 #include "fft/event.h"
 #include "fft/menu.h"
-#include "fft/status_panel.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
@@ -9,14 +9,14 @@
 /* Thread task 0x3b: numeric editor panel, the WORLD twin of
  * attack_editor_run_numeric_thread (also in REQUIRE and DEBUGCHR). Thread 0xc
  * edits unsigned entries, other threads signed ones, each in its own
- * double-buffered status_panel_numeric_buffer_t. The only code difference from
+ * double-buffered battle_menu_status_panel_numeric_buffer_t. The only code difference from
  * the event overlays is the draw offset: WORLD reads the 0/0xf0 field value
  * directly from g_world_frame_arg (lhu) where the overlays compute
  * g_main_gfx_screen_polarity * 0xf0. */
 void world_menu_run_numeric_editor_thread(void) {
-    status_panel_frame_config_t* thread;
-    status_panel_numeric_buffer_t* buffer;
-    status_panel_numeric_buffer_t* buffers;
+    battle_menu_status_panel_frame_config_t* thread;
+    battle_menu_status_panel_numeric_buffer_t* buffer;
+    battle_menu_status_panel_numeric_buffer_t* buffers;
     u8* text_pixels;
     u8* entries;
     u8* upload_a;
@@ -29,10 +29,10 @@ void world_menu_run_numeric_editor_thread(void) {
     s32 use_offset;
 
     world_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread = (status_panel_frame_config_t*)g_world_threads[g_world_thread_current_id].function_parameter_1;
+    thread = (battle_menu_status_panel_frame_config_t*)g_world_threads[g_world_thread_current_id].function_parameter_1;
     g_world_input_frame_controller_input = world_input_get_menu_controller(0) + 1;
     if (g_world_thread_current_id == 12) {
-        buffer = (status_panel_numeric_buffer_t*)g_world_editor_numeric_state_a;
+        buffer = (battle_menu_status_panel_numeric_buffer_t*)g_world_editor_numeric_state_a;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_a;
         upload_a = g_world_editor_numeric_entries_a;
@@ -40,7 +40,7 @@ void world_menu_run_numeric_editor_thread(void) {
         upload_c = g_world_editor_numeric_entries_c;
         entries = g_world_editor_numeric_descriptor_a;
     } else {
-        buffer = (status_panel_numeric_buffer_t*)g_world_editor_numeric_state_b;
+        buffer = (battle_menu_status_panel_numeric_buffer_t*)g_world_editor_numeric_state_b;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_b;
         upload_a = g_world_editor_numeric_entries_d;
@@ -69,7 +69,7 @@ void world_menu_run_numeric_editor_thread(void) {
         buffer->sprites[16].v0 += 0x4C;
     }
     buffer->sprites[10].clut = 0x7D7C;
-    world_script_copy_bytes(&buffer[1], buffer, sizeof(status_panel_numeric_buffer_t));
+    world_script_copy_bytes(&buffer[1], buffer, sizeof(battle_menu_status_panel_numeric_buffer_t));
 
     for (frame = 0;; frame++) {
         buffer = &buffers[frame & 1];

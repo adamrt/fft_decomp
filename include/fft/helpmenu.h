@@ -1,7 +1,7 @@
 #ifndef FFT_HELPMENU_H
 #define FFT_HELPMENU_H
 
-#include "fft/status_panel.h"
+#include "fft/battle_menu_status_panel.h"
 #include "psx/types.h"
 
 /* Menu descriptor for a pending help request. It is reached through the
@@ -31,7 +31,7 @@ typedef char help_request_kind_offset_must_be_0x3a[((unsigned long)&((help_reque
 extern u8 g_helpmenu_active_banner[];
 extern u8 g_helpmenu_active_unit_data[];
 /* 0x40-byte billboard filled by battle_action_copy_at_and_cursor_to; +0x0e is the monster-skillset flag. */
-extern status_panel_slot_state_t g_helpmenu_billboard;
+extern battle_menu_status_panel_slot_state_t g_helpmenu_billboard;
 extern s16 g_helpmenu_menu_cursor_tile[];
 extern help_navigation_record_t g_helpmenu_require_navigation[];
 /* 0x80 bytes of saved g_battle_text_section_pointers, i.e. 32 pointers. */

@@ -3,7 +3,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-void debugchr_gfx_init_menu_tile_and_line_primitives(status_panel_menu_primitives_t* menu) {
+void debugchr_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu) {
     s32 i;
 
     SetTile(&menu->tiles[0]);

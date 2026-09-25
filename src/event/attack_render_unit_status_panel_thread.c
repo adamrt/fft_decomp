@@ -32,21 +32,21 @@ void attack_render_unit_status_panel_thread(void) {
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* number_pixels;                            /* sp60 */
-    status_panel_editor_packet_t* editor_base;    /* sp68 */
-    status_panel_numeric_entry_t* number_entries; /* sp70 */
-    status_panel_gauges_t* state;                 /* sp78 */
-    void* portrait_request;                       /* sp80 */
-    u8* transition;                               /* sp88 */
-    u8* portrait_image;                           /* sp90 */
-    u8* value_pixels;                             /* sp98 */
-    u8* name_pixels;                              /* spA0 */
-    status_panel_packet_t* panel_base;            /* spA8 */
-    s16* unit_info;                               /* spB0 */
-    status_panel_display_thread_t* thread;        /* spB8 */
-    s32 shake;                                    /* spC0 */
-    s32 highlight;                                /* spC8 */
-    s32 hide_portrait;                            /* spD0 */
+    u8* number_pixels;                                        /* sp60 */
+    battle_menu_status_panel_editor_packet_t* editor_base;    /* sp68 */
+    battle_menu_status_panel_numeric_entry_t* number_entries; /* sp70 */
+    battle_menu_status_panel_gauges_t* state;                 /* sp78 */
+    void* portrait_request;                                   /* sp80 */
+    u8* transition;                                           /* sp88 */
+    u8* portrait_image;                                       /* sp90 */
+    u8* value_pixels;                                         /* sp98 */
+    u8* name_pixels;                                          /* spA0 */
+    battle_menu_status_panel_packet_t* panel_base;            /* spA8 */
+    s16* unit_info;                                           /* spB0 */
+    battle_menu_status_panel_display_thread_t* thread;        /* spB8 */
+    s32 shake;                                                /* spC0 */
+    s32 highlight;                                            /* spC8 */
+    s32 hide_portrait;                                        /* spD0 */
 
     /* Pin: unpinned, portrait_origin and frame tie on allocation priority and swap s7/fp. */
     register s16* portrait_origin __asm__("$23");
@@ -73,8 +73,8 @@ void attack_render_unit_status_panel_thread(void) {
     s32 editor_y_b;
     s16 portrait_cell;
     s32* text_position;
-    status_panel_packet_t* panel;
-    status_panel_editor_packet_t* editor;
+    battle_menu_status_panel_packet_t* panel;
+    battle_menu_status_panel_editor_packet_t* editor;
     u8* input;
     u8* panel_sprites;
     u8* number_pixels_b;
@@ -91,7 +91,7 @@ void attack_render_unit_status_panel_thread(void) {
     /* Raw index arithmetic: g_battle_threads holds one pointer per 0x400-byte
        thread slot. The equivalent `threads + (thread_id << 10)` pointer form
        moves the shift and changes the prologue. */
-    thread = *(status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
+    thread = *(battle_menu_status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
     if (thread_id == 8) {
         panel = g_attack_panel_selected_packets;
         editor = g_attack_panel_selected_editor_packets;
@@ -165,7 +165,7 @@ void attack_render_unit_status_panel_thread(void) {
         frame += 1;
         label_sprite_offset += 0x14;
     } while (frame < 7);
-    battle_copy_bytes(editor + 1, editor, sizeof(status_panel_editor_packet_t));
+    battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
@@ -195,7 +195,7 @@ void attack_render_unit_status_panel_thread(void) {
         panel->portrait.clut = 0x7FBD;
     }
     panel->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
-    battle_copy_bytes(panel + 1, panel, sizeof(status_panel_packet_t));
+    battle_copy_bytes(panel + 1, panel, sizeof(battle_menu_status_panel_packet_t));
     anim_state = 0;
     prev_unit = state->unit_index;
     cur_unit = state->unit_index;
@@ -229,7 +229,7 @@ void attack_render_unit_status_panel_thread(void) {
         i = 0;
         {
             u16* cluts;
-            status_panel_editor_packet_t* packet;
+            battle_menu_status_panel_editor_packet_t* packet;
             s32 clut_column;
             clut_column = highlight * 2;
             cluts = g_attack_panel_editor_value_cluts;
@@ -244,13 +244,13 @@ void attack_render_unit_status_panel_thread(void) {
                 packet->value_sprites[0].clut = *(u16*)(clut_column + (u32)cluts);
                 cluts += 2;
                 i += 1;
-                packet = (status_panel_editor_packet_t*)((u8*)packet + sizeof(SPRT));
+                packet = (battle_menu_status_panel_editor_packet_t*)((u8*)packet + sizeof(SPRT));
             } while (i < 4);
         }
         i = 0;
         {
             u16* cluts;
-            status_panel_editor_packet_t* packet;
+            battle_menu_status_panel_editor_packet_t* packet;
             s32 clut_column;
             clut_column = highlight * 2;
             cluts = g_attack_panel_editor_label_cluts;
@@ -261,7 +261,7 @@ void attack_render_unit_status_panel_thread(void) {
                 packet->label_sprites[0].clut = *(u16*)(clut_column + (u32)cluts);
                 cluts += 2;
                 i += 1;
-                packet = (status_panel_editor_packet_t*)((u8*)packet + sizeof(SPRT));
+                packet = (battle_menu_status_panel_editor_packet_t*)((u8*)packet + sizeof(SPRT));
             } while (i < 7);
         }
         i = 0;
@@ -407,7 +407,7 @@ void attack_render_unit_status_panel_thread(void) {
             CVECTOR* color;
             s32 bar_y;
             s32 bar_offset;
-            volatile status_panel_editor_packet_t* packet;
+            volatile battle_menu_status_panel_editor_packet_t* packet;
             color = g_attack_panel_gauge_bar_colors;
             i = 0;
             portrait_origin = g_attack_gfx_portrait_origin;
@@ -480,7 +480,7 @@ void attack_render_unit_status_panel_thread(void) {
                     color++;
                 }
                 bar_y += 0xB;
-                packet = (volatile status_panel_editor_packet_t*)((u8*)packet + sizeof(POLY_G4));
+                packet = (volatile battle_menu_status_panel_editor_packet_t*)((u8*)packet + sizeof(POLY_G4));
                 i += 1;
                 bar_offset += 0x24;
             } while (i < 3);

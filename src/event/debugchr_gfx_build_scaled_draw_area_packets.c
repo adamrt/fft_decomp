@@ -1,11 +1,11 @@
+#include "fft/battle_menu_status_panel.h"
 #include "fft/debugchr.h"
 #include "fft/event.h"
-#include "fft/status_panel.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-void debugchr_gfx_build_scaled_draw_area_packets(status_panel_portrait_primitive_tail_t* packet, const void* source,
-    s32 scale_index, s32 lower_half, const s16* offset) {
+void debugchr_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
+    const void* source, s32 scale_index, s32 lower_half, const s16* offset) {
     s32 percent;
     s32 w;
     s32 h;

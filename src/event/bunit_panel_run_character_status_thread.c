@@ -8,8 +8,8 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The status buffer is status_panel_buffer_t and the thread record
- * status_panel_frame_config_t, as in the WORLD twin world_menu_equipment_and_ability_panel_thread. The
+/* The status buffer is battle_menu_status_panel_buffer_t and the thread record
+ * battle_menu_status_panel_frame_config_t, as in the WORLD twin world_menu_equipment_and_ability_panel_thread. The
  * buffer's +0x3b0 tail is this overlay's scaled draw-area packet pair. */
 #define DRAW_AREA(screen) ((bunit_gfx_scaled_draw_area_pair_t*)&(screen)->portrait)
 
@@ -19,23 +19,24 @@ void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_locat
 /* Thread task 0x3b: the combined status panel for the selected unit. BUNIT
  * twin of WORLD world_menu_equipment_and_ability_panel_thread. */
 void bunit_panel_run_character_status_thread(void) {
-    status_panel_frame_config_t* thread;
-    status_panel_buffer_t* screen;
-    status_panel_buffer_t* base;
-    status_panel_slot_state_t* state;
+    battle_menu_status_panel_frame_config_t* thread;
+    battle_menu_status_panel_buffer_t* screen;
+    battle_menu_status_panel_buffer_t* base;
+    battle_menu_status_panel_slot_state_t* state;
     u8* cursor;
     s32 frame;
     s32 mode;
     s32 i;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
+    thread
+        = (battle_menu_status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_bunit_input_controller = battle_script_get_controller_input_pointer(0);
     screen = g_bunit_character_status_frames;
     base = g_bunit_character_status_frames;
     state = &g_bunit_editor_unit_fields;
     battle_menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
-    bunit_gfx_init_menu_tile_and_line_primitives((status_panel_menu_primitives_t*)screen);
+    bunit_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
     bunit_gfx_init_scaled_draw_area_packets((u8*)&screen->portrait);
     for (i = 0; i < 2; i++) {
         screen->tiles[i].x0 += g_bunit_character_status_frame_rect.x;
@@ -52,7 +53,7 @@ void bunit_panel_run_character_status_thread(void) {
     battle_menu_init_sprite_array(&screen->sprites[12], 7, 0x7c3c);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
-    battle_copy_bytes(&screen[1], screen, sizeof(status_panel_buffer_t));
+    battle_copy_bytes(&screen[1], screen, sizeof(battle_menu_status_panel_buffer_t));
 
     frame = 0;
     for (;;) {
@@ -90,7 +91,7 @@ void bunit_panel_run_character_status_thread(void) {
         if (state->generic_monster != 0) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
-                if (ability == STATUS_PANEL_LABEL_NONE || ability == 0) {
+                if (ability == BATTLE_MENU_STATUS_PANEL_LABEL_NONE || ability == 0) {
                     screen->sprites[7 + i].x0 -= 0x200;
                 }
             }
@@ -116,7 +117,7 @@ void bunit_panel_run_character_status_thread(void) {
                 if (state->generic_monster != 0) {
                     mode = state->ability_ids[i] + 0x7000;
                 }
-                if ((u16)state->ability_ids[i] == STATUS_PANEL_LABEL_NONE) {
+                if ((u16)state->ability_ids[i] == BATTLE_MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_text_state.origin_y += 0x10;
                 } else {
                     battle_menu_display_text_entry(
@@ -144,7 +145,7 @@ void bunit_panel_run_character_status_thread(void) {
             if ((state->equipment[i] & 0xff) != 0xff) {
                 battle_get_item_graphic_data(&screen->sprites[19 + i], (s16)state->equipment[i]);
             } else {
-                ((status_panel_buffer_t*)cursor)->sprites[19].x0 = -0x200;
+                ((battle_menu_status_panel_buffer_t*)cursor)->sprites[19].x0 = -0x200;
             }
             cursor += sizeof(SPRT);
         }
@@ -157,7 +158,7 @@ void bunit_panel_run_character_status_thread(void) {
         screen->draw_offsets[1].x = -0x80;
         screen->draw_offsets[1].y = g_bunit_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
-        bunit_panel_set_primitive_colors((status_panel_primitives_t*)screen, thread);
+        bunit_panel_set_primitive_colors((battle_menu_status_panel_primitives_t*)screen, thread);
         bunit_gfx_apply_menu_palette_for_mode((s32)&screen->numeric_frame, (s32*)thread);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&DRAW_AREA(screen)->areas[1]);

@@ -8,7 +8,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The frame is status_panel_buffer_t (0x3d8 bytes, double buffered); the
+/* The frame is battle_menu_status_panel_buffer_t (0x3d8 bytes, double buffered); the
  * WORLD twin world_menu_equipment_panel_thread uses the same layout. */
 
 void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
@@ -24,12 +24,12 @@ void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_locat
 void equip_panel_run_equipment_list_thread(void) {
     u8* text;
     s32 u;
-    status_panel_buffer_t* base;
-    status_panel_slot_state_t* state;
+    battle_menu_status_panel_buffer_t* base;
+    battle_menu_status_panel_slot_state_t* state;
     RECT* upload;
     RECT* area;
-    status_panel_frame_config_t* thread;
-    status_panel_buffer_t* screen;
+    battle_menu_status_panel_frame_config_t* thread;
+    battle_menu_status_panel_buffer_t* screen;
     s32 frame;
     s32 mode;
     s32 bank;
@@ -37,26 +37,27 @@ void equip_panel_run_equipment_list_thread(void) {
     s32 i;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
+    thread
+        = (battle_menu_status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_equip_input_controller = battle_script_get_controller_input_pointer(0);
     if (g_battle_current_thread_id == 10) {
         text = g_equip_panel_text_image_a;
         screen = g_equip_panel_frames_a;
-        state = (status_panel_slot_state_t*)g_equip_unit_editor_stats;
+        state = (battle_menu_status_panel_slot_state_t*)g_equip_unit_editor_stats;
         base = g_equip_panel_frames_a;
         upload = (RECT*)g_equip_panel_text_upload_rect_a;
         u = 0;
     } else {
         text = g_equip_panel_text_image_b;
         screen = g_equip_panel_frames_b;
-        state = (status_panel_slot_state_t*)&g_equip_item_preview_stat_detail;
+        state = (battle_menu_status_panel_slot_state_t*)&g_equip_item_preview_stat_detail;
         upload = (RECT*)g_equip_panel_text_upload_rect_b;
         base = g_equip_panel_frames_b;
         u = 0x50;
     }
     area = (RECT*)g_equip_panel_origin_offsets;
     battle_menu_init_numeric_display_frame_primitives(area, &screen->numeric_frame);
-    equip_gfx_init_menu_tile_and_line_primitives((status_panel_menu_primitives_t*)screen);
+    equip_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
     equip_gfx_init_scaled_draw_area_packets(&screen->portrait);
     screen->tiles[0].x0 += area->x;
     screen->tiles[0].y0 += area->y;
@@ -70,7 +71,7 @@ void equip_panel_run_equipment_list_thread(void) {
     battle_menu_init_sprite_array(&screen->sprites[12], 7, 0x7c3c);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
-    battle_copy_bytes(&screen[1], screen, sizeof(status_panel_buffer_t));
+    battle_copy_bytes(&screen[1], screen, sizeof(battle_menu_status_panel_buffer_t));
 
     frame = 0;
     for (;;) {
@@ -147,7 +148,7 @@ void equip_panel_run_equipment_list_thread(void) {
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
         equip_gfx_build_scaled_draw_area_packets(&screen->portrait, &g_equip_character_status_frame_rect[2], frame,
             g_main_gfx_screen_polarity * 0xf0, (const s16*)thread);
-        equip_panel_set_primitive_colors((status_panel_primitives_t*)screen, thread);
+        equip_panel_set_primitive_colors((battle_menu_status_panel_primitives_t*)screen, thread);
         equip_gfx_apply_menu_palette_for_mode((s32)&screen->numeric_frame, (s32*)thread);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->portrait.areas[1]);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->draw_offsets[1]);

@@ -3,7 +3,7 @@
 /* Build a centered sprite-cell quad using rounded 4.12 fixed-point geometry.
  *
  * This variant selects 8-bit texture mode and adds the PSX screen center to
- * the draw offset (status_panel_scaled_sprite_t.offset[4..5]). */
+ * the draw offset (battle_menu_status_panel_scaled_sprite_t.offset[4..5]). */
 void attack_gfx_build_scaled_sprite_cell_poly_ft4(POLY_FT4* poly, attack_gfx_texture_page_position_t* texture_page,
     const RECT* position, attack_gfx_sprite_rect_t* sprite_rect, attack_gfx_point_t* scale, const s16* offset) {
     s32 rx;

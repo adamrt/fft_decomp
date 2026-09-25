@@ -9,9 +9,9 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The primitive block is status_panel_numeric_buffer_t, double buffered
+/* The primitive block is battle_menu_status_panel_numeric_buffer_t, double buffered
  * (g_equip_editor_numeric_state_a for thread 12, g_equip_editor_numeric_state_b otherwise); the thread parameter
- * block is status_panel_frame_config_t. */
+ * block is battle_menu_status_panel_frame_config_t. */
 
 /* Record types private to equip_text_render_signed_decimal_entries.c. */
 typedef struct equip_stat_entry_t equip_stat_entry_t;
@@ -32,9 +32,9 @@ void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_locat
  * `buffers` is assigned in each branch (not after the if) so the spilled store
  * precedes upload_c's at the join, as in the target. */
 void equip_editor_run_numeric_thread(void) {
-    status_panel_frame_config_t* thread;
-    status_panel_numeric_buffer_t* buffer;
-    status_panel_numeric_buffer_t* buffers;
+    battle_menu_status_panel_frame_config_t* thread;
+    battle_menu_status_panel_numeric_buffer_t* buffer;
+    battle_menu_status_panel_numeric_buffer_t* buffers;
     u8* text_pixels;
     u8* entries;
     u8* upload_a;
@@ -47,7 +47,8 @@ void equip_editor_run_numeric_thread(void) {
     s32 use_offset;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
+    thread
+        = (battle_menu_status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_equip_input_controller = battle_script_get_controller_input_pointer(0) + 1;
     if (g_battle_current_thread_id == 12) {
         buffer = g_equip_editor_numeric_state_a;
@@ -85,7 +86,7 @@ void equip_editor_run_numeric_thread(void) {
         buffer->sprites[16].v0 = 0x6C;
     }
     buffer->sprites[10].clut = 0x7D7C;
-    battle_copy_bytes(&buffer[1], buffer, sizeof(status_panel_numeric_buffer_t));
+    battle_copy_bytes(&buffer[1], buffer, sizeof(battle_menu_status_panel_numeric_buffer_t));
 
     for (frame = 0;; frame++) {
         buffer = &buffers[frame & 1];

@@ -12,7 +12,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The packet, state and thread layouts are the shared fft/status_panel.h
+/* The packet, state and thread layouts are the shared fft/battle_menu_status_panel.h
  * records: the editor packets at g_equip_panel_selected_editor_packets / g_equip_panel_comparison_editor_packets, the
  * status-panel packets at g_equip_panel_selected_packets / g_equip_panel_comparison_packets, the editor states
  * g_equip_selected_unit_stat_summary / g_equip_panel_comparison_billboard, and the per-thread display record.
@@ -45,21 +45,21 @@ void equip_render_unit_status_panel_thread(void) {
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* number_image;                              /* sp60 */
-    status_panel_editor_packet_t* editor_base;     /* sp68 */
-    status_panel_numeric_entry_t* numeric_entries; /* sp70 */
-    status_panel_editor_state_t* state;            /* sp78 */
-    void* portrait_arg;                            /* sp80 */
-    u8* portrait_rect;                             /* sp88 */
-    u8* portrait_image;                            /* sp90 */
-    u8* small_text_image;                          /* sp98 */
-    u8* name_image;                                /* spA0 */
-    status_panel_packet_t* panel_base;             /* spA8 */
-    s16* unit_data;                                /* spB0 */
-    status_panel_display_thread_t* thread;         /* spB8 */
-    s32 shake;                                     /* spC0 */
-    s32 highlight;                                 /* spC8 */
-    s32 suppress;                                  /* spD0 */
+    u8* number_image;                                          /* sp60 */
+    battle_menu_status_panel_editor_packet_t* editor_base;     /* sp68 */
+    battle_menu_status_panel_numeric_entry_t* numeric_entries; /* sp70 */
+    battle_menu_status_panel_editor_state_t* state;            /* sp78 */
+    void* portrait_arg;                                        /* sp80 */
+    u8* portrait_rect;                                         /* sp88 */
+    u8* portrait_image;                                        /* sp90 */
+    u8* small_text_image;                                      /* sp98 */
+    u8* name_image;                                            /* spA0 */
+    battle_menu_status_panel_packet_t* panel_base;             /* spA8 */
+    s16* unit_data;                                            /* spB0 */
+    battle_menu_status_panel_display_thread_t* thread;         /* spB8 */
+    s32 shake;                                                 /* spC0 */
+    s32 highlight;                                             /* spC8 */
+    s32 suppress;                                              /* spD0 */
 
     s32 thread_id;
     s32 done;
@@ -85,8 +85,8 @@ void equip_render_unit_status_panel_thread(void) {
     s32 editor_base_offset_y;
     s16 icon_index;
     s32* text_position;
-    status_panel_packet_t* panel;
-    status_panel_editor_packet_t* editor;
+    battle_menu_status_panel_packet_t* panel;
+    battle_menu_status_panel_editor_packet_t* editor;
     u8* input_state;
     u8* name_sprite;
     u8* number_image_lower;
@@ -103,7 +103,7 @@ void equip_render_unit_status_panel_thread(void) {
     /* Raw index arithmetic: g_battle_threads holds one pointer per 0x400-byte
        thread slot. The equivalent `threads + (thread_id << 10)` pointer form
        moves the shift and changes the prologue. */
-    thread = *(status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
+    thread = *(battle_menu_status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
     if (thread_id == 0xD) {
         panel = g_equip_panel_selected_packets;
         editor = g_equip_panel_selected_editor_packets;
@@ -113,7 +113,7 @@ void equip_render_unit_status_panel_thread(void) {
         numeric_entries = g_equip_panel_selected_numeric_entries;
         /* Declared elsewhere in EQUIP as the 0x28-byte world_item_stat_summary_t;
          * this function reads it as the first of two 0x24-spaced editor states. */
-        state = (status_panel_editor_state_t*)&g_equip_selected_unit_stat_summary;
+        state = (battle_menu_status_panel_editor_state_t*)&g_equip_selected_unit_stat_summary;
         unit_data = (s16*)g_equip_panel_selected_unit_data;
         portrait_rect = g_equip_panel_selected_portrait_rect;
         panel_base = panel;
@@ -178,7 +178,7 @@ void equip_render_unit_status_panel_thread(void) {
         frame += 1;
         off3 += 0x14;
     } while (frame < 7);
-    battle_copy_bytes(editor + 1, editor, sizeof(status_panel_editor_packet_t));
+    battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
@@ -208,7 +208,7 @@ void equip_render_unit_status_panel_thread(void) {
         panel->portrait.clut = 0x7FBD;
     }
     panel->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
-    battle_copy_bytes(panel + 1, panel, sizeof(status_panel_packet_t));
+    battle_copy_bytes(panel + 1, panel, sizeof(battle_menu_status_panel_packet_t));
     frame = 0;
     anim_state = 0;
     prev_unit = state->unit;
@@ -242,7 +242,7 @@ void equip_render_unit_status_panel_thread(void) {
         i = 0;
         {
             u16* clut_table;
-            status_panel_editor_packet_t* dst;
+            battle_menu_status_panel_editor_packet_t* dst;
             s32 clut_offset;
             clut_offset = highlight * 2;
             clut_table = g_equip_panel_editor_value_cluts;
@@ -255,13 +255,13 @@ void equip_render_unit_status_panel_thread(void) {
                 dst->value_sprites[0].clut = *(u16*)(clut_offset + (u32)clut_table);
                 clut_table += 2;
                 i += 1;
-                dst = (status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
+                dst = (battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
             } while (i < 4);
         }
         i = 0;
         {
             u16* clut_table;
-            status_panel_editor_packet_t* dst;
+            battle_menu_status_panel_editor_packet_t* dst;
             s32 clut_offset;
             clut_offset = highlight * 2;
             clut_table = g_equip_panel_editor_label_cluts;
@@ -272,7 +272,7 @@ void equip_render_unit_status_panel_thread(void) {
                 dst->label_sprites[0].clut = *(u16*)(clut_offset + (u32)clut_table);
                 clut_table += 2;
                 i += 1;
-                dst = (status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
+                dst = (battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
             } while (i < 7);
         }
         i = 0;
@@ -419,8 +419,8 @@ void equip_render_unit_status_panel_thread(void) {
             u16* row_y;
             s32 row_offset;
             s32 prim_offset;
-            status_panel_bar_t* bar;
-            volatile status_panel_editor_packet_t* dst;
+            battle_menu_status_panel_bar_t* bar;
+            volatile battle_menu_status_panel_editor_packet_t* dst;
             color = g_equip_panel_gauge_bar_colors;
             i = 0;
             /* The bar rows read the origin y with lhu; an s16 walk changes the loads. */
@@ -512,7 +512,7 @@ void equip_render_unit_status_panel_thread(void) {
                 }
                 bar++;
                 row_offset += 0xB;
-                dst = (volatile status_panel_editor_packet_t*)((u8*)dst + sizeof(POLY_G4));
+                dst = (volatile battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(POLY_G4));
                 i += 1;
                 prim_offset += 0x24;
             } while (i < 3);
@@ -540,9 +540,11 @@ void equip_render_unit_status_panel_thread(void) {
                 } else {
                     position = stride - 2;
                     equip_text_render_decimal_entry_list((s32)number_image,
-                        (status_panel_gauge_entry_t*)&numeric_entries[10], (status_panel_text_position_t*)position, 1);
+                        (battle_menu_status_panel_gauge_entry_t*)&numeric_entries[10],
+                        (battle_menu_status_panel_text_position_t*)position, 1);
                     equip_text_render_decimal_entry_list((s32)number_image,
-                        (status_panel_gauge_entry_t*)&numeric_entries[12], (status_panel_text_position_t*)position, 1);
+                        (battle_menu_status_panel_gauge_entry_t*)&numeric_entries[12],
+                        (battle_menu_status_panel_text_position_t*)position, 1);
                     battle_menu_draw_numeric_display_entries((s32)number_image,
                         (struct menu_number_entry*)&numeric_entries[11], (struct menu_number_position*)position, 1);
                     battle_menu_draw_numeric_display_entries((s32)number_image,

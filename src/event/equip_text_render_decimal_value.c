@@ -2,16 +2,17 @@
 #include "fft/equip.h"
 #include "psx/types.h"
 
-void equip_text_render_decimal_value(s32 value, s32 flags, void* pixels, status_panel_text_position_t* position) {
+void equip_text_render_decimal_value(
+    s32 value, s32 flags, void* pixels, battle_menu_status_panel_text_position_t* position) {
     s32 current_value = value;
     s32 render_flags = flags;
     void* render_pixels = pixels;
-    status_panel_text_position_t* render_position = position;
+    battle_menu_status_panel_text_position_t* render_position = position;
     s32 saved_color;
     /* Pins: unpinned, GCC swaps render_flags/digit_index ($s3/$s2) and glyph/pixels
      * ($s5/$s6) and folds the repeated `minimum_digits = 1`. */
     register s32 digit_index __asm__("$18");
-    register status_panel_glyph_t* glyph __asm__("$21");
+    register battle_menu_status_panel_glyph_t* glyph __asm__("$21");
     register s32 updated_flags __asm__("$2");
     register s32 minimum_digits __asm__("$5");
     register s32 scratch __asm__("$3");

@@ -1,9 +1,9 @@
 #ifndef FFT_OPTION_H
 #define FFT_OPTION_H
 
+#include "fft/battle_menu_status_panel.h"
 #include "fft/battle_runtime.h"
 #include "fft/menu_types.h"
-#include "fft/status_panel.h"
 #include "fft/thread.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
@@ -52,9 +52,9 @@ typedef struct option_menu_text_layout {
 
 /* OPTION's text-menu view of the 0x3c-byte menu record. */
 typedef struct option_menu_entry {
-    u16 vram_x;      /* 0x00 */
-    u16 vram_y;      /* 0x02 */
-    s16 inner_width; /* 0x04: rect width * 4 */
+    u16 vram_x;       /* 0x00 */
+    u16 vram_y;       /* 0x02 */
+    s16 inner_width;  /* 0x04: rect width * 4 */
     u16 inner_height; /* 0x06 */
     u8 _pad08[0x30 - 0x08];
     option_menu_text_layout_t* text_binding; /* 0x30 */
@@ -185,9 +185,9 @@ void option_build_at_list(void);
 void option_build_options_menu(void);
 
 /* gfx */
-void option_gfx_build_scaled_draw_area_packets(status_panel_portrait_primitive_tail_t* packet, const void* source,
-    s32 scale_index, s32 lower_half, const s16* offset);
-void option_gfx_init_scaled_draw_area_packets(status_panel_portrait_primitive_tail_t* packet);
+void option_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
+    const void* source, s32 scale_index, s32 lower_half, const s16* offset);
+void option_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet);
 
 /* menu */
 void option_menu_init_at_list(option_at_menu_t* menu);

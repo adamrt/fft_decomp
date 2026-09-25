@@ -1,5 +1,5 @@
 /* REQUIRE twin of debugchr_render_unit_status_panel_thread: the same doubled
- * 0x30C editor / 0x1D8 panel packets (fft/status_panel.h), without the shake
+ * 0x30C editor / 0x1D8 panel packets (fft/battle_menu_status_panel.h), without the shake
  * offsets, the bar division and the zodiac branch.
  *
  * Compiler constraints (no instructions emitted): the two empty asm operands
@@ -34,17 +34,17 @@ void require_render_unit_status_panel_thread(void) {
     s32 prev_unit;
 
     u8* number_image;
-    status_panel_editor_packet_t* editor_base;
-    status_panel_numeric_entry_t* numeric_entries;
-    status_panel_gauges_t* state;
+    battle_menu_status_panel_editor_packet_t* editor_base;
+    battle_menu_status_panel_numeric_entry_t* numeric_entries;
+    battle_menu_status_panel_gauges_t* state;
     void* portrait_arg;
     u8* portrait_rect;
     u8* portrait_image;
     u8* small_text_image;
     u8* name_image;
-    status_panel_packet_t* panel_base;
+    battle_menu_status_panel_packet_t* panel_base;
     s16* unit_data;
-    status_panel_display_thread_t* thread;
+    battle_menu_status_panel_display_thread_t* thread;
     s32 frame;
     s32 highlight;
     s32 suppress;
@@ -65,8 +65,8 @@ void require_render_unit_status_panel_thread(void) {
     s32 editor_x;
     s16 icon_index;
     s32* text_position;
-    status_panel_packet_t* panel;
-    status_panel_editor_packet_t* editor;
+    battle_menu_status_panel_packet_t* panel;
+    battle_menu_status_panel_editor_packet_t* editor;
     u8* input_state;
     u8* name_sprite;
     u8* number_image_lower;
@@ -80,7 +80,7 @@ void require_render_unit_status_panel_thread(void) {
     thread_id = g_battle_current_thread_id;
     threads = (u8*)g_battle_threads;
     g_require_input_controller = (u32*)(input_state + 4);
-    thread = *(status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
+    thread = *(battle_menu_status_panel_display_thread_t**)((thread_id * NATIVE_THREAD_STRIDE) + (u32)threads);
     if (thread_id == 8) {
         panel = g_require_panel_selected_packets;
         editor = g_require_panel_selected_editor_packets;
@@ -153,7 +153,7 @@ void require_render_unit_status_panel_thread(void) {
         frame += 1;
         off3 += 0x14;
     } while (frame < 7);
-    battle_copy_bytes(editor + 1, editor, sizeof(status_panel_editor_packet_t));
+    battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
     battle_menu_init_numeric_display_frame_primitives(
@@ -183,7 +183,7 @@ void require_render_unit_status_panel_thread(void) {
         panel->portrait.clut = 0x7FBD;
     }
     panel->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
-    battle_copy_bytes(panel + 1, panel, sizeof(status_panel_packet_t));
+    battle_copy_bytes(panel + 1, panel, sizeof(battle_menu_status_panel_packet_t));
     frame = 0;
     anim_state = 0;
     prev_unit = state->unit_index;
@@ -218,7 +218,7 @@ void require_render_unit_status_panel_thread(void) {
         i = 0;
         {
             u16* clut_table;
-            status_panel_editor_packet_t* dst;
+            battle_menu_status_panel_editor_packet_t* dst;
             s32 clut_offset;
             clut_offset = highlight * 2;
             clut_table = g_require_panel_editor_value_cluts;
@@ -230,13 +230,13 @@ void require_render_unit_status_panel_thread(void) {
                 dst->value_sprites[0].clut = *(u16*)(clut_offset + (u32)clut_table);
                 clut_table += 2;
                 i += 1;
-                dst = (status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
+                dst = (battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
             } while (i < 4);
         }
         i = 0;
         {
             u16* clut_table;
-            status_panel_editor_packet_t* dst;
+            battle_menu_status_panel_editor_packet_t* dst;
             s32 clut_offset;
             clut_offset = highlight * 2;
             clut_table = g_require_panel_editor_label_cluts;
@@ -247,7 +247,7 @@ void require_render_unit_status_panel_thread(void) {
                 dst->label_sprites[0].clut = *(u16*)(clut_offset + (u32)clut_table);
                 clut_table += 2;
                 i += 1;
-                dst = (status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
+                dst = (battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(SPRT));
             } while (i < 7);
         }
         i = 0;
@@ -357,7 +357,7 @@ void require_render_unit_status_panel_thread(void) {
             s16* origin_xy;
             s32 row_offset;
             s32 prim_offset;
-            volatile status_panel_editor_packet_t* dst;
+            volatile battle_menu_status_panel_editor_packet_t* dst;
             color = g_require_panel_gauge_bar_colors;
             i = 0;
             origin_xy = g_require_gfx_portrait_origin;
@@ -427,7 +427,7 @@ void require_render_unit_status_panel_thread(void) {
                     color++;
                 }
                 row_offset += 0xB;
-                dst = (volatile status_panel_editor_packet_t*)((u8*)dst + sizeof(POLY_G4));
+                dst = (volatile battle_menu_status_panel_editor_packet_t*)((u8*)dst + sizeof(POLY_G4));
                 i += 1;
                 prim_offset += 0x24;
             } while (i < 3);

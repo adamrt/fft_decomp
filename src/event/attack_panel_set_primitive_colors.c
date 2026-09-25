@@ -2,7 +2,7 @@
 #include "fft/battle.h"
 #include "psx/types.h"
 
-/* status_panel_primitives_t: a 0x10-byte header followed by 0x14-byte SPRT
+/* battle_menu_status_panel_primitives_t: a 0x10-byte header followed by 0x14-byte SPRT
  * packets.  The layout follows from this function: the colour writes at
  * +0x1a4..0x1a6 (after SetShadeTex on +0x1a0) only land on a packet's r0/g0/b0
  * if the array starts at +0x10, and the 0x7cxx/0x7dxx values then fall on the
@@ -19,7 +19,7 @@
  * SetShadeTex argument is the one place the subscript form is right: it
  * yields the target's separate 0x1a0 integer offset giv. */
 void attack_panel_set_primitive_colors(
-    status_panel_primitives_t* primitives, const status_panel_frame_config_t* state) {
+    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state) {
     s32 i;
     s32 clut;
 

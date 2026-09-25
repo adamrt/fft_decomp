@@ -2,7 +2,8 @@
 #include "psx/types.h"
 
 /* DEBUGCHR copy of main_gfx_build_zodiac_bin. */
-void debugchr_gfx_build_scaled_sprite_primitive_chain(status_panel_scaled_sprite_t* sprite, POLY_FT4* poly) {
+void debugchr_gfx_build_scaled_sprite_primitive_chain(
+    battle_menu_status_panel_scaled_sprite_t* sprite, POLY_FT4* poly) {
     s32 i;
     s32 x;
     s32 y;

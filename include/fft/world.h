@@ -2,6 +2,7 @@
 #define FFT_WORLD_H
 
 #include "fft/battle_camera.h"
+#include "fft/battle_menu_status_panel.h"
 #include "fft/battle_runtime.h"
 #include "fft/data.h"
 #include "fft/geometry.h"
@@ -11,7 +12,6 @@
 #include "fft/menu_types.h"
 #include "fft/options.h"
 #include "fft/status.h"
-#include "fft/status_panel.h"
 #include "fft/thread.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
@@ -149,7 +149,7 @@ typedef struct world_crystal_pickup_result {
 
 typedef struct world_menu_color_input {
     u8 unknown_00[0x10];
-    s32 style; /* 0x10: 1 selects palette bank 1 (status_panel_frame_config_t.style) */
+    s32 style; /* 0x10: 1 selects palette bank 1 (battle_menu_status_panel_frame_config_t.style) */
 } world_menu_color_input_t;
 
 typedef char world_menu_line_f2_size_must_be_16[(sizeof(world_menu_line_f2_t) == 16) ? 1 : -1];
@@ -322,8 +322,8 @@ typedef struct world_menu_point {
 /* WORLD 0x801117f0 writes colors and CLUTs in the 25 SPRT records beginning
  * at +0x10, and the color selector reads the style word at +0x10 of its
  * config: the EVENT status-panel layouts. */
-typedef status_panel_primitives_t world_menu_status_panel_primitives_t;
-typedef status_panel_frame_config_t world_menu_status_panel_frame_config_t;
+typedef battle_menu_status_panel_primitives_t world_menu_status_panel_primitives_t;
+typedef battle_menu_status_panel_frame_config_t world_menu_status_panel_frame_config_t;
 
 /* Provisional: sprite placement record passed to world_gfx_enqueue_oriented_textured_quad:
  * position and size followed by a world_formation_graphic_entry_t source rectangle
@@ -717,7 +717,7 @@ typedef struct world_menu_scroll_text_layout {
  * (0x80110260), the WORLD twin of the EVENT menu primitive block: three
  * DR_MODEs at +0x00/+0x0c/+0x18 select image pages 0/2/4; two 16x90 TILEs at
  * +0x204 and eight vertical LINE_F2 borders at +0x224 frame two columns. */
-typedef status_panel_menu_primitives_t world_menu_column_primitives_t;
+typedef battle_menu_status_panel_menu_primitives_t world_menu_column_primitives_t;
 
 typedef char world_menu_column_primitives_tiles_offset_must_be_0x204
     [((unsigned long)&((world_menu_column_primitives_t*)0)->tiles == 0x204) ? 1 : -1];
@@ -1330,13 +1330,13 @@ typedef struct world_unit_coordinates {
  * 0x801c3d8c and 0x801c453c. Same layout as attack_status_primitives_t in the
  * ATTACK twin. */
 typedef struct world_status_frame {
-    DR_MODE draw_modes[3];                       /* 0x000 */
-    SPRT sprites[24];                            /* 0x024 */
-    TILE tiles[2];                               /* 0x204 */
-    LINE_F2 lines[8];                            /* 0x224 */
-    status_panel_draw_offset_t draw_offsets[2];  /* 0x2a4 */
-    world_menu_palette_primitives_t menu;        /* 0x2c4 */
-    world_gfx_scaled_draw_area_pair_t draw_area; /* 0x3b0 */
+    DR_MODE draw_modes[3];                                  /* 0x000 */
+    SPRT sprites[24];                                       /* 0x024 */
+    TILE tiles[2];                                          /* 0x204 */
+    LINE_F2 lines[8];                                       /* 0x224 */
+    battle_menu_status_panel_draw_offset_t draw_offsets[2]; /* 0x2a4 */
+    world_menu_palette_primitives_t menu;                   /* 0x2c4 */
+    world_gfx_scaled_draw_area_pair_t draw_area;            /* 0x3b0 */
 } world_status_frame_t;
 
 typedef char world_status_frame_size_must_be_0x3d8[sizeof(world_status_frame_t) == 0x3d8 ? 1 : -1];
@@ -1414,8 +1414,8 @@ typedef struct world_unit_status_page {
 
 /* The unit status panel's two draw offsets. */
 typedef struct world_unit_status_offsets {
-    status_panel_draw_offset_t a; /* 0x00 */
-    status_panel_draw_offset_t b; /* 0x10 */
+    battle_menu_status_panel_draw_offset_t a; /* 0x00 */
+    battle_menu_status_panel_draw_offset_t b; /* 0x10 */
 } world_unit_status_offsets_t;
 
 /* Provisional: one gauge of the status record. */
@@ -2025,8 +2025,8 @@ extern u8 g_world_help_menu_cursor_tile[];
 extern u8 g_world_help_active_banner[];
 extern u8 g_world_help_active_unit_data[];
 /* Copy of the 0x40-byte unit editor fields (world_gfx_copy_screen_setup_out);
- * the layout is status_panel_slot_state_t, as in the HELPMENU twin. */
-extern status_panel_slot_state_t g_world_help_billboard;
+ * the layout is battle_menu_status_panel_slot_state_t, as in the HELPMENU twin. */
+extern battle_menu_status_panel_slot_state_t g_world_help_billboard;
 extern world_help_navigation_entry_t g_world_help_terrain_navigation[];
 extern world_help_navigation_entry_t g_world_help_attack_preview_navigation[];
 extern world_help_navigation_entry_t g_world_help_unit_box_navigation[];
@@ -2613,7 +2613,7 @@ extern world_glyph_blit_t g_world_text_glyph_source;
 extern world_glyph_blit_t g_world_text_glyph_dest;
 extern u32* g_world_menu_list_controller_input;
 extern RECT g_world_gfx_draw_area_template;
-extern status_panel_indicator_prims_t g_world_thread_indicator_packets[2][2];
+extern battle_menu_status_panel_indicator_prims_t g_world_thread_indicator_packets[2][2];
 extern u32* g_world_input_frame_controller_input;
 extern s16 g_world_gfx_draw_area_y;
 extern u8 g_world_selected_unit_summary_packets[];

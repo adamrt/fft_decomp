@@ -1,9 +1,9 @@
 #ifndef FFT_EQUIP_H
 #define FFT_EQUIP_H
 
+#include "fft/battle_menu_status_panel.h"
 #include "fft/data.h"
 #include "fft/menu_types.h"
-#include "fft/status_panel.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/types.h"
@@ -357,12 +357,12 @@ extern struct world_item_stat_detail g_equip_item_preview_stat_detail;
 extern u8 g_equip_editor_numeric_geometry[];
 extern u8 g_equip_panel_item_icon_texture[];
 extern RECT g_equip_gfx_draw_area_template;
-extern status_panel_indicator_prims_t g_equip_thread_indicator_packets[2][2];
-extern status_panel_offset_pair_t g_equip_panel_origin_offsets[];
+extern battle_menu_status_panel_indicator_prims_t g_equip_thread_indicator_packets[2][2];
+extern battle_menu_status_panel_offset_pair_t g_equip_panel_origin_offsets[];
 /* RECT[1] (right panel) of g_equip_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets GCC
  * derive the table base from this address and changes equip_panel_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
-extern status_panel_offset_pair_t g_equip_character_status_frame_rect[];
+extern battle_menu_status_panel_offset_pair_t g_equip_character_status_frame_rect[];
 extern u8 g_equip_character_status_draw_area_rect[];
 extern u8 g_equip_panel_text_upload_rect_a[];
 extern u8 g_equip_panel_text_upload_rect_b[];
@@ -414,7 +414,7 @@ extern u8 g_equip_gfx_draw_mode_buffer[];
 extern u8 g_equip_gfx_line_f2_buffer[];
 extern u8 g_equip_gfx_tile_buffer[];
 extern u16 g_equip_gfx_draw_offset_y;
-extern status_panel_buffer_t g_equip_panel_frames_a[];
+extern battle_menu_status_panel_buffer_t g_equip_panel_frames_a[];
 extern u8 g_equip_panel_text_image_a[];
 extern u8 g_equip_panel_text_image_b[];
 extern u8 g_equip_text_restore_pending;
@@ -489,8 +489,8 @@ void equip_cmd_run_stream(u8* stream, s32 input);
 /* gfx */
 void equip_gfx_apply_menu_palette_for_mode(s32 unused, s32* thread);
 void equip_gfx_build_portrait_poly_ft4(s32 portrait_id, void* poly);
-void equip_gfx_build_scaled_draw_area_packets(status_panel_portrait_primitive_tail_t* packet, const void* source,
-    s32 scale_index, s32 lower_half, const s16* offset);
+void equip_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
+    const void* source, s32 scale_index, s32 lower_half, const s16* offset);
 void equip_gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount);
 void equip_gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount);
 void equip_gfx_enqueue_draw_area(RECT* rect, s32 idx);
@@ -506,9 +506,9 @@ void equip_gfx_init_contexts(equip_gfx_buffer_t* base, u32* otag, POLY_F3* poly_
     DR_MODE* draw_modes);
 u8* equip_gfx_get_draw_color(void);
 s32 equip_gfx_get_transition_frame(void);
-void equip_gfx_init_menu_tile_and_line_primitives(status_panel_menu_primitives_t* menu);
+void equip_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
 void equip_gfx_init_primitive_buffers(u8* context);
-void equip_gfx_init_scaled_draw_area_packets(status_panel_portrait_primitive_tail_t* data);
+void equip_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* data);
 void equip_gfx_load_image_and_wait(RECT* rect, u32* data);
 void equip_gfx_set_clut_rect_from_id(s16* rect, u32 clut_id);
 void equip_gfx_set_otag_index(s32 ot_index);
@@ -570,14 +570,16 @@ s32 equip_menu_update_equipment(void);
 s32 equip_menu_update_item_action_state(void);
 
 /* panel */
-void equip_panel_set_primitive_colors(status_panel_primitives_t* primitives, const status_panel_frame_config_t* state);
+void equip_panel_set_primitive_colors(
+    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 
 /* set */
 
 /* text */
-void equip_text_render_decimal_entry_list(
-    s32 pixels, status_panel_gauge_entry_t* entries, status_panel_text_position_t* out, s32 count);
-void equip_text_render_decimal_value(s32 value, s32 flags, void* pixels, status_panel_text_position_t* position);
+void equip_text_render_decimal_entry_list(s32 pixels, battle_menu_status_panel_gauge_entry_t* entries,
+    battle_menu_status_panel_text_position_t* out, s32 count);
+void equip_text_render_decimal_value(
+    s32 value, s32 flags, void* pixels, battle_menu_status_panel_text_position_t* position);
 s32 equip_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const equip_text_image_position_t* position, s32 style);
 void equip_text_set_palette_and_metrics(s32 compact);
@@ -639,8 +641,8 @@ extern u8 g_equip_editor_numeric_entries_c[];
 extern u8 g_equip_editor_numeric_entries_d[];
 extern u8 g_equip_editor_numeric_entries_e[];
 extern u8 g_equip_editor_numeric_entries_f[];
-extern status_panel_numeric_buffer_t g_equip_editor_numeric_state_a[2];
-extern status_panel_numeric_buffer_t g_equip_editor_numeric_state_b[2];
+extern battle_menu_status_panel_numeric_buffer_t g_equip_editor_numeric_state_a[2];
+extern battle_menu_status_panel_numeric_buffer_t g_equip_editor_numeric_state_b[2];
 
 /* Per-thread-slot window rect, upload rects, sprite descriptors and number
  * entries; the first set belongs to thread 12. */
@@ -680,12 +682,12 @@ extern s8 g_equip_menu_ready;
 extern void (*g_equip_menu_screen_state_handlers[])(void);
 extern s8 g_equip_menu_substate;
 extern s16 g_equip_menu_window_right_x;
-extern status_panel_editor_state_t g_equip_panel_comparison_billboard;
+extern battle_menu_status_panel_editor_state_t g_equip_panel_comparison_billboard;
 extern u8 g_equip_panel_comparison_editor_packets[];
 extern u8 g_equip_panel_comparison_large_number_image[];
 extern u8 g_equip_panel_comparison_name_image[];
 extern u8 g_equip_panel_comparison_number_image[];
-extern status_panel_numeric_entry_t g_equip_panel_comparison_numeric_entries[];
+extern battle_menu_status_panel_numeric_entry_t g_equip_panel_comparison_numeric_entries[];
 extern u8 g_equip_panel_comparison_packets[];
 extern u8 g_equip_panel_comparison_portrait_image[];
 extern u8 g_equip_panel_comparison_portrait_rect[];
@@ -697,14 +699,14 @@ extern u8 g_equip_panel_editor_mode_cells[];
 extern u8 g_equip_panel_editor_value_cells[];
 extern u16 g_equip_panel_editor_value_cluts[];
 extern u8 g_equip_panel_frame_rect[];
-extern status_panel_buffer_t g_equip_panel_frames_b[];
+extern battle_menu_status_panel_buffer_t g_equip_panel_frames_b[];
 extern CVECTOR g_equip_panel_gauge_bar_colors[];
 extern u8 g_equip_panel_portrait_cell[];
 extern u8 g_equip_panel_selected_editor_packets[];
 extern u8 g_equip_panel_selected_large_number_image[];
 extern u8 g_equip_panel_selected_name_image[];
 extern u8 g_equip_panel_selected_number_image[];
-extern status_panel_numeric_entry_t g_equip_panel_selected_numeric_entries[];
+extern battle_menu_status_panel_numeric_entry_t g_equip_panel_selected_numeric_entries[];
 extern u8 g_equip_panel_selected_packets[];
 extern u8 g_equip_panel_selected_portrait_image[];
 extern u8 g_equip_panel_selected_portrait_rect[];
@@ -738,7 +740,7 @@ extern RECT g_equip_status_display_image_rects[];
 
 /* The "%d" format string at the head of the overlay. */
 extern const char g_equip_text_decimal_format[];
-extern status_panel_glyph_t g_equip_text_decimal_glyph;
+extern battle_menu_status_panel_glyph_t g_equip_text_decimal_glyph;
 extern world_menu_entry_t g_equip_type_order_menu_hand_body;
 extern world_menu_entry_t g_equip_type_order_menu_other_slots;
 extern s8 g_equip_type_order_ready;

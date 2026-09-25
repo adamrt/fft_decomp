@@ -2,7 +2,7 @@
 #include "fft/equip.h"
 #include "psx/types.h"
 
-/* status_panel_primitives_t: a 0x10-byte header followed by 0x14-byte SPRT
+/* battle_menu_status_panel_primitives_t: a 0x10-byte header followed by 0x14-byte SPRT
  * packets.  The layout follows from this function: the colour writes at
  * +0x1a4..0x1a6 (after SetShadeTex on +0x1a0) only land on a packet's r0/g0/b0
  * if the array starts at +0x10, and the 0x7cxx/0x7dxx values then fall on the
@@ -14,7 +14,8 @@
  * target's base-biased pointers (+0xdc/+0xf0/+0x1a4), with no pins; the
  * subscript form `sprites[i + 1].clut` keeps `(i + 1) * 0x14` as its own
  * counter.  See attack_panel_set_primitive_colors.c. */
-void equip_panel_set_primitive_colors(status_panel_primitives_t* primitives, const status_panel_frame_config_t* state) {
+void equip_panel_set_primitive_colors(
+    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state) {
     s32 i;
     s32 clut;
 

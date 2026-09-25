@@ -25,7 +25,7 @@ void battle_gfx_draw_or_append_gpu_primitive(s32* primitive);
  *
  */
 void equip_menu_draw_thread_status_indicators(void) {
-    status_panel_indicator_prims_t* prims;
+    battle_menu_status_panel_indicator_prims_t* prims;
     battle_thread_t* thread;
     battle_thread_t* descriptor;
     s32 active;

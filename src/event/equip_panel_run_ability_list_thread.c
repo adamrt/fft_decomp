@@ -8,7 +8,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* Same double-buffered status_panel_buffer_t frame as equip_panel_run_equipment_list_thread and the
+/* Same double-buffered battle_menu_status_panel_buffer_t frame as equip_panel_run_equipment_list_thread and the
  * WORLD twin world_menu_ability_panel_thread. */
 
 /* Thread record; the origin is read as words for the draw-area offset. */
@@ -31,12 +31,12 @@ void equip_panel_run_ability_list_thread(void) {
        offset pair and the spill slots of u/base/upload. */
     s32 unused[4];
     s32 u;
-    status_panel_buffer_t* base;
+    battle_menu_status_panel_buffer_t* base;
     RECT* upload;
     equip_ability_panel_thread_t* thread;
     u8* text;
-    status_panel_buffer_t* screen;
-    status_panel_slot_state_t* state;
+    battle_menu_status_panel_buffer_t* screen;
+    battle_menu_status_panel_slot_state_t* state;
     s32 frame;
     s32 i;
     s32 id;
@@ -47,20 +47,20 @@ void equip_panel_run_ability_list_thread(void) {
     if (g_battle_current_thread_id == 10) {
         text = g_equip_panel_text_image_a;
         screen = g_equip_panel_frames_a;
-        state = (status_panel_slot_state_t*)g_equip_unit_editor_stats;
+        state = (battle_menu_status_panel_slot_state_t*)g_equip_unit_editor_stats;
         base = g_equip_panel_frames_a;
         upload = (RECT*)g_equip_panel_text_upload_rect_a;
         u = 0;
     } else {
         text = g_equip_panel_text_image_b;
         screen = g_equip_panel_frames_b;
-        state = (status_panel_slot_state_t*)&g_equip_item_preview_stat_detail;
+        state = (battle_menu_status_panel_slot_state_t*)&g_equip_item_preview_stat_detail;
         upload = (RECT*)g_equip_panel_text_upload_rect_b;
         base = g_equip_panel_frames_b;
         u = 0x50;
     }
     battle_menu_init_numeric_display_frame_primitives(&g_equip_right_panel_frame_rect, &screen->numeric_frame);
-    equip_gfx_init_menu_tile_and_line_primitives((status_panel_menu_primitives_t*)screen);
+    equip_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
     equip_gfx_init_scaled_draw_area_packets(&screen->portrait);
     /* The tile/line fixups must read g_equip_panel_origin_offsets as an array
      * element: a cast of a u8[] view folds the loop's y reads to absolute
@@ -77,7 +77,7 @@ void equip_panel_run_ability_list_thread(void) {
     battle_menu_init_sprite_array(&screen->sprites[12], 7, 0x7c3c);
     screen->sprites[0].clut = 0x7cbc;
     screen->sprites[1].clut = 0x7cbc;
-    battle_copy_bytes(&screen[1], screen, sizeof(status_panel_buffer_t));
+    battle_copy_bytes(&screen[1], screen, sizeof(battle_menu_status_panel_buffer_t));
 
     frame = 0;
     for (;;) {
@@ -100,7 +100,7 @@ void equip_panel_run_ability_list_thread(void) {
         if (state->generic_monster != 0) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
-                if (ability == STATUS_PANEL_LABEL_NONE || ability == 0) {
+                if (ability == BATTLE_MENU_STATUS_PANEL_LABEL_NONE || ability == 0) {
                     screen->sprites[7 + i].x0 -= 0x200;
                 }
             }
@@ -116,7 +116,7 @@ void equip_panel_run_ability_list_thread(void) {
                 if (state->generic_monster != 0) {
                     id = state->ability_ids[i] + 0x7000;
                 }
-                if ((u16)state->ability_ids[i] == STATUS_PANEL_LABEL_NONE) {
+                if ((u16)state->ability_ids[i] == BATTLE_MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_text_state.origin_y += 0x10;
                 } else {
                     battle_menu_display_text_entry(id, text, &g_menu_text_state.origin_x);
@@ -124,7 +124,7 @@ void equip_panel_run_ability_list_thread(void) {
                 }
             }
             for (; i < 5; i++) {
-                if ((u16)state->ability_ids[i] != STATUS_PANEL_LABEL_NONE) {
+                if ((u16)state->ability_ids[i] != BATTLE_MENU_STATUS_PANEL_LABEL_NONE) {
                     battle_menu_display_text_entry(state->ability_ids[i] + 0x7000, text, &g_menu_text_state.origin_x);
                 }
                 g_menu_text_state.origin_y += 0x10;
@@ -146,7 +146,7 @@ void equip_panel_run_ability_list_thread(void) {
         equip_gfx_build_scaled_draw_area_packets(&screen->portrait, &g_equip_character_status_frame_rect[4], frame,
             g_main_gfx_screen_polarity * 0xf0, (const s16*)offset);
         equip_panel_set_primitive_colors(
-            (status_panel_primitives_t*)screen, (const status_panel_frame_config_t*)thread);
+            (battle_menu_status_panel_primitives_t*)screen, (const battle_menu_status_panel_frame_config_t*)thread);
         equip_gfx_apply_menu_palette_for_mode((s32)&screen->numeric_frame, (s32*)thread);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->portrait.areas[1]);
         battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->draw_offsets[1]);

@@ -12,14 +12,14 @@
 typedef struct world_formation_summary_packet {
     world_menu_palette_primitives_t frame; /* 0x000: world_menu_build_line_box */
     u8 unknown_frame_tail[0xEC - sizeof(world_menu_palette_primitives_t)];
-    DR_MODE draw_mode_a;                      /* 0x0EC */
-    DR_MODE draw_mode_b;                      /* 0x0F8 */
-    SPRT value_sprites[4];                    /* 0x104 */
-    SPRT label_sprites[7];                    /* 0x154; [6] at 0x1CC is the mode row */
-    POLY_G4 bars[3];                          /* 0x1E0 */
-    POLY_FT4 portrait[4];                     /* 0x24C */
-    status_panel_draw_offset_t draw_offset_a; /* 0x2EC */
-    status_panel_draw_offset_t draw_offset_b; /* 0x2FC */
+    DR_MODE draw_mode_a;                                  /* 0x0EC */
+    DR_MODE draw_mode_b;                                  /* 0x0F8 */
+    SPRT value_sprites[4];                                /* 0x104 */
+    SPRT label_sprites[7];                                /* 0x154; [6] at 0x1CC is the mode row */
+    POLY_G4 bars[3];                                      /* 0x1E0 */
+    POLY_FT4 portrait[4];                                 /* 0x24C */
+    battle_menu_status_panel_draw_offset_t draw_offset_a; /* 0x2EC */
+    battle_menu_status_panel_draw_offset_t draw_offset_b; /* 0x2FC */
 } world_formation_summary_packet_t;
 
 /* Provisional 0x1D8-byte status-panel packet, doubled at 0x801C0B9C (thread 8)
@@ -27,12 +27,12 @@ typedef struct world_formation_summary_packet {
 typedef struct world_formation_status_packet {
     world_menu_palette_primitives_t frame; /* 0x000 */
     u8 unknown_frame_tail[0xEC - sizeof(world_menu_palette_primitives_t)];
-    SPRT sprites[7];                          /* 0x0EC; [6] is the zodiac/scroll cursor */
-    DR_MODE draw_mode_a;                      /* 0x178 */
-    DR_MODE draw_mode_b;                      /* 0x184 */
-    status_panel_draw_offset_t draw_offset_a; /* 0x190 */
-    status_panel_draw_offset_t draw_offset_b; /* 0x1A0 */
-    POLY_FT4 portrait;                        /* 0x1B0 */
+    SPRT sprites[7];                                      /* 0x0EC; [6] is the zodiac/scroll cursor */
+    DR_MODE draw_mode_a;                                  /* 0x178 */
+    DR_MODE draw_mode_b;                                  /* 0x184 */
+    battle_menu_status_panel_draw_offset_t draw_offset_a; /* 0x190 */
+    battle_menu_status_panel_draw_offset_t draw_offset_b; /* 0x1A0 */
+    POLY_FT4 portrait;                                    /* 0x1B0 */
 } world_formation_status_packet_t;
 
 typedef struct world_formation_bar {
