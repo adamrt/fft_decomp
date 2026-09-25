@@ -8,10 +8,11 @@
 void world_menu_set_auto_battle_thread(void) {
     s32 entry = world_thread_get_current_parameter_1();
     battle_stats_t* unit = world_unit_get_battle_stats_for_stored();
+    world_menu_thread_data_t* menu = (world_menu_thread_data_t*)g_world_menu_thread_menu_data;
 
-    if (((world_menu_thread_data_t*)g_world_menu_thread_menu_data)->selection == 3) {
+    if (menu->selection == 3) {
         unit->auto_battle_setting = 0x10;
-    } else if (((world_menu_thread_data_t*)g_world_menu_thread_menu_data)->selection == 4) {
+    } else if (menu->selection == 4) {
         unit->auto_battle_setting = 0x11;
     }
     g_world_menu_set_auto_battle_row_actions = -3;
