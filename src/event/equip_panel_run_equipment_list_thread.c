@@ -82,26 +82,22 @@ void equip_panel_run_equipment_list_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_equip_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
                     g_equip_panel_label_layouts_mode0 + i);
             }
             if (mode == 1) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_equip_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
                     g_equip_panel_label_layouts_mode1 + i);
             }
             if (mode == 2) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_equip_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
                     g_equip_panel_label_layouts_mode2 + i);
             }
             if (mode == 3) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_equip_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
                     g_equip_panel_label_layouts_mode3 + i);
             }

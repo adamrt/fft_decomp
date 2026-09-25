@@ -122,8 +122,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
         switch (g_battle_gfx_state_words[0]) {
         case 0:
             g_battle_gfx_shp_frame_data_cursor = g_battle_gfx_fallback_shp_frame_data;
-            battle_gfx_unpack_unit_shp_data((battle_gfx_unit_shp_frame_tables_t*)g_battle_gfx_spritesheet_fallback,
-                (u8*)g_battle_gfx_state_words[3]);
+            battle_gfx_unpack_unit_shp_data(&g_battle_gfx_spritesheet_fallback, (u8*)g_battle_gfx_state_words[3]);
             break;
         case 1:
             g_battle_gfx_load_data_cursor = g_battle_gfx_fallback_seq_data;

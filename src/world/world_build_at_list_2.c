@@ -10,9 +10,7 @@
 #include "psx/types.h"
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s32 row_index);
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /*
  * Scrolling three-column text list thread (an older sibling of
@@ -311,7 +309,7 @@ void world_build_at_list_2(void) {
         page->icons.base.sprites[0].x0 = 1000;
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)&page->icons.base);
+        world_menu_submit_icon_primitives(&page->icons.base);
     }
     world_thread_set_parameters(0xF, 0, 0, 1);
     entry->select_text_table = row_offset;

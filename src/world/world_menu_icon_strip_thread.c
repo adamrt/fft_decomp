@@ -2,9 +2,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
-
 /* Menu icon strip thread: rebuilds the text image every seventh frame and
  * alternates between two sprite records until input arrives. */
 void world_menu_icon_strip_thread(void) {
@@ -42,7 +39,7 @@ void world_menu_icon_strip_thread(void) {
         }
         record = &records[i & 1];
         world_menu_select_icon_cluts(&record->base);
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives(&record->base);
     }
     world_thread_yield();
     world_thread_exit_current();

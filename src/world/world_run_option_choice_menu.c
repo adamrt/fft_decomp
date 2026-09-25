@@ -17,8 +17,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 extern void main_sound_set_type(s32 value);
 extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;
 
@@ -84,7 +82,7 @@ void world_run_option_choice_menu(void) {
         param->x = 0x1AE;
     }
     param->text_image.width -= 4;
-    world_menu_build_icon_record(&rect, param, g_world_option_picker_icon_records[0]);
+    world_menu_build_icon_record(&rect, param, (world_menu_icon_record_t*)g_world_option_picker_icon_records[0]);
     world_script_copy_bytes(g_world_option_picker_icon_records[1], g_world_option_picker_icon_records[0], 0x7C);
     LoadImage(&rect, buffer);
     world_menu_free_memory(buffer);
@@ -140,7 +138,7 @@ void world_run_option_choice_menu(void) {
         }
         world_menu_select_icon_cluts((world_menu_icon_sprites_t*)record);
         world_menu_update_icon_cursor_sprites(param, (world_menu_icon_sprites_t*)record, width, cursor);
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives((world_menu_icon_sprites_t*)record);
         world_thread_wait_frames(1);
     }
     g_main_game_options.fields.cursor_movement = g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT];

@@ -5,8 +5,6 @@
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /* Menu icon thread that also opens a linked entry: when parent_indices[0]
  * names a menu entry, that entry is centred on this text width, placed below
@@ -60,7 +58,7 @@ void world_menu_icon_linked_entry_thread(void) {
         world_menu_update_icon_cursor_sprites((world_menu_icon_thread_param_t*)param, &record->base, i, -1);
         world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, 0);
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives(&record->base);
     }
     g_world_menu_sound_muted = 0;
     world_thread_yield();

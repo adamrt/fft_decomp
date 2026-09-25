@@ -6,8 +6,7 @@
 /* Publish the icon strip's text-image upload rectangle to the caller, build the
  * four menu sprites of the icon record, and place the icon sprites that the
  * strip's icon kind selects. */
-void world_menu_build_icon_record(RECT* rect, world_menu_icon_thread_param_t* param, void* buffer) {
-    world_menu_icon_record_t* record = (world_menu_icon_record_t*)buffer;
+void world_menu_build_icon_record(RECT* rect, world_menu_icon_thread_param_t* param, world_menu_icon_record_t* record) {
     s32 kind;
     /* Pins: cse merges a plain copy of kind; the target tests a second copy in $v1 into $v0. */
     register s32 index __asm__("$3");

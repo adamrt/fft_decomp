@@ -84,15 +84,13 @@ void equip_panel_run_ability_list_thread(void) {
         screen = &base[frame & 1];
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_equip_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
                     g_equip_panel_label_layouts_mode0 + i);
             }
         } else {
             for (i = 0; i < 19; i++) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_equip_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_equip_editor_numeric_geometry,
                     (const battle_image_location_t*)g_equip_panel_origin_offsets,
                     g_equip_panel_label_layouts_mode1 + i);
             }

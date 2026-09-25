@@ -8,8 +8,6 @@
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 extern s16 g_world_menu_pending_selection[];
 
 /* Formation-screen auto-battle setting menu thread.
@@ -121,7 +119,7 @@ void world_menu_auto_battle_setting_thread(void) {
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         world_menu_select_icon_cluts(&record->base);
         world_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives(&record->base);
     }
     world_thread_yield();
     world_thread_exit_current();

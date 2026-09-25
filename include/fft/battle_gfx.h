@@ -190,6 +190,18 @@ typedef struct battle_gfx_spritesheet_data {
 
 typedef char battle_gfx_spritesheet_data_size_must_be_4[(sizeof(battle_gfx_spritesheet_data_t) == 4) ? 1 : -1];
 
+/* Unit SHP frame tables filled by battle_gfx_unpack_unit_shp_data (0x800873bc):
+ * SHP header bytes 4..5 and 6..7, then two 0xd0-entry frame pointer tables.
+ * The second table repeats the first when the resource carries a single
+ * frame set (header 8). The frame starts are the first frame loaded from the
+ * second half of the sheet and the first frame loaded from the SP2 file. */
+typedef struct battle_gfx_unit_shp_frame_tables {
+    s32 attack_frame_start;
+    s32 sp2_frame_start;
+    u8* primary[0xd0];   /* 0x008 */
+    u8* secondary[0xd0]; /* 0x348 */
+} battle_gfx_unit_shp_frame_tables_t;
+
 enum { BATTLE_SPRITESHEET_ID_COUNT = 0x9f };
 
 /* VRAM load / screen placement point used by battle_gfx_init_image_loading. */
@@ -276,9 +288,9 @@ extern u8 g_battle_gfx_screen_color_modulation_backup[3];
 extern u8 g_battle_gfx_spritesheet_alt_data[];
 extern u8 g_battle_gfx_spritesheet_alt_fallback[];
 extern battle_gfx_spritesheet_data_t g_battle_gfx_spritesheet_data[BATTLE_SPRITESHEET_ID_COUNT];
-extern u8 g_battle_gfx_spritesheet_fallback[];
+extern battle_gfx_unit_shp_frame_tables_t g_battle_gfx_spritesheet_fallback;
 extern u8 g_battle_gfx_spritesheet_ids_by_vram_slot[];
-extern u8 g_battle_gfx_spritesheet_record_data[];
+extern battle_gfx_unit_shp_frame_tables_t g_battle_gfx_spritesheet_record_data[5];
 extern u8 g_battle_gfx_spritesheet_seq_data[];
 extern u8 g_battle_gfx_spritesheet_shp_data[];
 extern battle_gfx_spritesheet_slot_t g_battle_gfx_spritesheet_slots[];
@@ -307,7 +319,7 @@ void battle_gfx_draw_wait_direction_unit(void);
 void battle_gfx_free_tpage7_vram(RECT* rect);
 u32 battle_gfx_get_spritesheet_flying_flag(u32 spritesheet_id);
 u8* battle_gfx_get_spritesheet_seq_data_address(u32 index);
-u8* battle_gfx_get_spritesheet_shp_data_address(u32 index);
+battle_gfx_unit_shp_frame_tables_t* battle_gfx_get_spritesheet_shp_data_address(u32 index);
 s32 battle_gfx_get_spritesheet_vram_by_battle_id(u32 battle_id);
 void battle_gfx_tint_all_units_by_team(void);
 void battle_gfx_init_default_poly_ft4(POLY_FT4* primitive);

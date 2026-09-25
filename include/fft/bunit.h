@@ -434,7 +434,7 @@ extern s16 g_bunit_panel_comparison_unit_data[];
 /* Copy of the selected unit's 0x40 bytes from +0x30; only the leading
  * slot-state fields are read. */
 extern battle_menu_status_panel_slot_state_t g_bunit_editor_unit_fields;
-extern u8 g_bunit_editor_numeric_geometry[];
+extern battle_image_location_t g_bunit_editor_numeric_geometry[];
 extern u8 g_bunit_editor_numeric_table[];
 extern u8 g_bunit_editor_numeric_entries_a[];
 extern u8 g_bunit_editor_numeric_entries_b[];

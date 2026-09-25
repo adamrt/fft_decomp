@@ -111,12 +111,11 @@ typedef struct world_menu_line_layout {
     s8 add_w0, add_h0, add_w1, add_h1; /* 0x04 */
 } world_menu_line_layout_t;
 
-/* Provisional: menu record with a DR_MODE packet at +0x0c and four SPRT
- * packets at +0x18 (CLUT ids at +0x26/+0x3a/+0x4e/+0x62 chosen by
- * world_menu_select_icon_cluts); world_menu_icon_clamped_list_thread (0x8010b340) submits
- * all five. No whole-record size is claimed. */
+/* Icon packet head: two DR_MODE packets at +0x00/+0x0c and four SPRT packets
+ * at +0x18 (CLUT ids at +0x26/+0x3a/+0x4e/+0x62). The submitter draws all
+ * six packets. */
 typedef struct world_menu_icon_sprites {
-    u8 unknown_00[0x0c];
+    DR_MODE first_draw_mode;
     DR_MODE draw_mode;
     SPRT sprites[4];
 } world_menu_icon_sprites_t;
@@ -3439,7 +3438,8 @@ void* world_menu_alloc_ui_buffer(s32 size);
 void world_menu_announce_entry_value_thread(void);
 void* world_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 void world_menu_add_tile_primitive(s16* rect, u8* data, u8 semi_trans, s32 priority);
-void world_menu_build_icon_record(RECT* rect, world_menu_icon_thread_param_t* param, void* buffer);
+void world_menu_build_icon_record(RECT* rect, world_menu_icon_thread_param_t* param, world_menu_icon_record_t* buffer);
+void world_menu_submit_icon_primitives(world_menu_icon_sprites_t* prims);
 void world_menu_build_layout_sprites(world_menu_sprite_layout_t* layout, SPRT* sprite);
 void world_menu_build_line_box(RECT* rect, world_menu_palette_primitives_t* menu);
 s32 world_menu_build_quad_pieces(s32 group, POLY_GT4* poly);

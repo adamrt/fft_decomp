@@ -6,9 +6,6 @@
  * Collect the VRAM sprite identifiers for a unit and return its current SHP
  * frame pointer. Crystal and later special-status sheets share VRAM
  * spritesheet 11.
- *
- * The halfword at battle_unit_misc_data_t +0x1e0 is the frame index into the SHP
- * pointer table; it has no header field yet.
  */
 u8* battle_gfx_get_unit_sprite_frame_and_vram_ids(u32 misc_id, battle_unit_sprite_query_t* out) {
     battle_unit_misc_data_t* unit;
@@ -28,8 +25,8 @@ u8* battle_gfx_get_unit_sprite_frame_and_vram_ids(u32 misc_id, battle_unit_sprit
     out->graphic_y_offset = unit->special_graphic_y_offset;
 
     if (unit->mount_state != BATTLE_MISC_MOUNT_STATE_RIDER) {
-        return *(u8**)(unit->shp_data + unit->animation_frame * 4 + 8);
+        return unit->shp_data->primary[unit->animation_frame];
     } else {
-        return *(u8**)(unit->shp_data + unit->animation_frame * 4 + 0x348);
+        return unit->shp_data->secondary[unit->animation_frame];
     }
 }

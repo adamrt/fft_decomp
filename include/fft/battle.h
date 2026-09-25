@@ -42,18 +42,6 @@ typedef struct battle_gfx_source_frame {
     battle_gfx_source_part_t parts[1];
 } battle_gfx_source_frame_t;
 
-/* Unit SHP frame tables filled by battle_gfx_unpack_unit_shp_data (0x800873bc):
- * SHP header bytes 4..5 and 6..7, then two 0xd0-entry frame pointer tables.
- * The second table repeats the first when the resource carries a single
- * frame set (header 8). The frame starts are the first frame loaded from the
- * second half of the sheet and the first frame loaded from the SP2 file. */
-typedef struct battle_gfx_unit_shp_frame_tables {
-    s32 attack_frame_start;
-    s32 sp2_frame_start;
-    u8* primary[0xd0];   /* 0x008 */
-    u8* secondary[0xd0]; /* 0x348 */
-} battle_gfx_unit_shp_frame_tables_t;
-
 enum { BATTLE_EFFECT_FLAGS_0006 = 0x0006 };
 
 /* 0x8013b6e4 initializes independent nine-tile strips at +0x1c and +0xac
@@ -1374,9 +1362,9 @@ typedef struct battle_unit_misc_data {
     u8 _pad1f2[2];                 /* 0x1f2 */
     /* unit_t sprite SHP/SEQ pointers (0x1f4/0x1f8); poach_morbol_transformation
      * rewrites both for the Malboro spritesheet. */
-    u8* shp_data;                                             /* 0x1f4 */
+    battle_gfx_unit_shp_frame_tables_t* shp_data;             /* 0x1f4 */
     u8* seq_data;                                             /* 0x1f8 */
-    u8* saved_shp_data;                                       /* 0x1fc; pre-transformation SHP pointer (0x8008363c) */
+    battle_gfx_unit_shp_frame_tables_t* saved_shp_data;       /* 0x1fc; pre-transformation SHP pointer (0x8008363c) */
     u8* saved_seq_data;                                       /* 0x200; pre-transformation SEQ pointer */
     battle_gfx_sprite_display_data_t* sprite_display_section; /* 0x204 */
     battle_unit_sprite_block_t sprite_blocks[3];              /* 0x208..0x297 */

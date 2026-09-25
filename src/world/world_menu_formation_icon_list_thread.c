@@ -5,8 +5,6 @@
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /* Formation menu icon list thread: draws the text image once, then
  * alternates two sprite records, tinting the four icon sprites with the
@@ -27,7 +25,7 @@ void world_menu_formation_icon_list_thread(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    world_menu_build_icon_record(&rect, param, record);
+    world_menu_build_icon_record(&rect, param, &records[0]);
     SetShadeTex(&record->sprites[0], 0);
     SetShadeTex(&record->sprites[1], 0);
     SetShadeTex(&record->sprites[2], 0);
@@ -68,7 +66,7 @@ void world_menu_formation_icon_list_thread(void) {
         record->sprites[3].r0 = g_world_menu_color_red;
         record->sprites[3].g0 = g_world_menu_color_green;
         record->sprites[3].b0 = g_world_menu_color_blue;
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives(record);
     }
     world_thread_yield();
     world_thread_exit_current();

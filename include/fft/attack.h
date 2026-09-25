@@ -131,7 +131,7 @@ extern u8 g_attack_editor_numeric_entries_c[];
 extern u8 g_attack_editor_numeric_entries_d[];
 extern u8 g_attack_editor_numeric_entries_e[];
 extern u8 g_attack_editor_numeric_entries_f[];
-extern u8 g_attack_editor_numeric_geometry[];
+extern battle_image_location_t g_attack_editor_numeric_geometry[];
 extern battle_menu_status_panel_numeric_buffer_t g_attack_editor_numeric_state[2];
 extern u8 g_attack_editor_numeric_table[];
 extern u8 g_attack_editor_numeric_text_a[];

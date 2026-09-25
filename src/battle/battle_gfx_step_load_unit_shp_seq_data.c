@@ -163,8 +163,8 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
     case 2:
         switch (g_battle_gfx_state_words[0]) {
         case 0:
-            battle_gfx_unpack_unit_shp_data(g_battle_gfx_spritesheet_record_data + g_battle_gfx_state_words[2] * 0x688,
-                g_battle_gfx_state_words[3]);
+            battle_gfx_unpack_unit_shp_data(
+                &g_battle_gfx_spritesheet_record_data[g_battle_gfx_state_words[2]], g_battle_gfx_state_words[3]);
             break;
         case 1:
             battle_load_seq_data(

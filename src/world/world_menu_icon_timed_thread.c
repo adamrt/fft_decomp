@@ -6,8 +6,6 @@
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /* Timed menu icon thread: shows one text entry with alternating sprite
  * records until input arrives or the g_world_text_message_duration_frames frame budget (scaled by the
@@ -69,7 +67,7 @@ void world_menu_icon_timed_thread(void) {
             world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, 0);
             world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         }
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives(&record->base);
     }
     g_world_menu_panel_fade_intensity = 0;
     g_world_menu_sound_muted = 0;

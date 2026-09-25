@@ -5,8 +5,6 @@
 
 typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
 extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-typedef struct world_menu_icon_prims world_menu_icon_prims_t;
-extern void world_menu_submit_icon_primitives(world_menu_icon_prims_t* menu);
 
 /* Menu icon list with a wrapping cursor, run inline by its caller's thread:
  * builds the text image once, alternates two sprite records and clears their
@@ -55,7 +53,7 @@ void world_menu_run_icon_selection_loop(void) {
         world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, cursor);
         world_menu_step_wrapping_cursor_on_scroll_buttons((world_menu_wrapping_cursor_bounds_t*)param, &cursor);
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
-        world_menu_submit_icon_primitives((world_menu_icon_prims_t*)record);
+        world_menu_submit_icon_primitives(&record->base);
     }
     world_thread_yield();
     if (world_thread_get_current_parameter_2() == 0) {

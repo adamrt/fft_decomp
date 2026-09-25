@@ -64,26 +64,22 @@ void bunit_panel_run_character_status_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_bunit_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_bunit_editor_numeric_geometry,
                     (const battle_image_location_t*)&g_bunit_character_status_sprite_origin,
                     &g_bunit_character_status_layout_mode0[i]);
             }
             if (mode == 1) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_bunit_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_bunit_editor_numeric_geometry,
                     (const battle_image_location_t*)&g_bunit_character_status_sprite_origin,
                     &g_bunit_character_status_layout_mode1[i]);
             }
             if (mode == 2) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_bunit_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_bunit_editor_numeric_geometry,
                     (const battle_image_location_t*)&g_bunit_character_status_sprite_origin,
                     &g_bunit_character_status_layout_mode2[i]);
             }
             if (mode == 3) {
-                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i],
-                    (const battle_image_location_t*)g_bunit_editor_numeric_geometry,
+                battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[i], g_bunit_editor_numeric_geometry,
                     (const battle_image_location_t*)&g_bunit_character_status_sprite_origin,
                     &g_bunit_character_status_layout_mode3[i]);
             }
