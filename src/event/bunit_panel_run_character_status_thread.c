@@ -145,7 +145,7 @@ void bunit_panel_run_character_status_thread(void) {
             cursor += sizeof(SPRT);
         }
         g_bunit_gfx_draw_offset_y = (u16)g_bunit_frame_arg != 0xf0 ? 0xf0 : 0;
-        bunit_gfx_build_scaled_draw_area_packets(DRAW_AREA(screen), g_bunit_character_status_draw_area_rect, frame,
+        bunit_gfx_build_scaled_draw_area_packets(DRAW_AREA(screen), &g_bunit_character_status_draw_area_rect, frame,
             (u16)g_bunit_frame_arg, (const s16*)thread);
         screen->draw_offsets[0].x = thread->origin_x - 0x80;
         screen->draw_offsets[0].y = thread->origin_y + g_bunit_gfx_draw_offset_y;

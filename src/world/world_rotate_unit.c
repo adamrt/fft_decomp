@@ -1,8 +1,7 @@
+#include "fft/battle.h"
 #include "fft/event.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern s32 battle_unit_get_facing_nibble_by_misc_id(u32 misc_id);
 
 /* RotateUnit event instruction: turn the addressed unit(s) to a facing.
  *

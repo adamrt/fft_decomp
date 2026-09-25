@@ -3,6 +3,7 @@
 #include "fft/main_sound.h"
 #include "fft/main_unit.h"
 #include "fft/menu.h"
+#include "fft/open.h"
 #include "fft/script_variables.h"
 #include "fft/text.h"
 #include "fft/thread.h"
@@ -27,7 +28,6 @@ typedef struct world_screen_setup_c {
 extern s16 g_world_text_typewriter_glyph_y;
 extern s16 g_world_text_typewriter_glyph_bits_per_pixel;
 extern s16 g_world_text_typewriter_glyph_palette;
-extern s32 g_open_text_section_offsets[];
 
 #define WINDOW_AT(index) ((menu_window_buffer_t*)((index) * sizeof(menu_window_buffer_t) + (s32)win))
 

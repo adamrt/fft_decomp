@@ -18,9 +18,6 @@
  * constant, which is what sinks the extension below both branches.
  */
 
-extern u16 g_main_scenario_condition_offsets[];    /* 10 script byte offsets */
-extern s16 g_main_scenario_condition_data[];       /* condition script words */
-extern u8 g_world_scenario_condition_arg_counts[]; /* instruction length by opcode */
 s32 world_process_scenario_conditionals(void) {
     s16* condition;
     s32 i;

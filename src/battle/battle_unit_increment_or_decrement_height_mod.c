@@ -2,16 +2,16 @@
 #include "fft/main_runtime.h"
 
 /* 24 signed bob offsets copied to the stack from BATTLE rodata. */
-typedef struct battle_height_wave {
+typedef struct battle_unit_height_wave {
     s8 offsets[24];
-} battle_height_wave_t;
+} battle_unit_height_wave_t;
 
 /* The callee returns (s16), and this caller treats the result as a halfword
  * (sign-extending where it is widened). The shared prototype returns s32 for
  * callers that were matched against the full register. */
 typedef s16 (*battle_screen_z_halfword_fn_t)(battle_unit_misc_data_t* unit);
 
-extern battle_height_wave_t g_battle_unit_float_bob_offsets;
+extern battle_unit_height_wave_t g_battle_unit_float_bob_offsets;
 
 /* Raise a floating unit's height offset, or lower it back to the ground.
  *
@@ -21,7 +21,7 @@ extern battle_height_wave_t g_battle_unit_float_bob_offsets;
  * of the stored and recalculated heights. Jumping units whose height is
  * controlled by their jump animation are left untouched. */
 void battle_unit_increment_or_decrement_height_mod(battle_unit_misc_data_t* unit) {
-    battle_height_wave_t wave;
+    battle_unit_height_wave_t wave;
     s16 screen_z;
     u32 phase;
 

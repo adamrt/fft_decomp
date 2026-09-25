@@ -539,7 +539,7 @@ void bunit_gfx_init_packet_pools(bunit_gfx_context_t* buffer);
 
 /* gfx */
 void bunit_gfx_build_scaled_draw_area_packets(
-    bunit_gfx_scaled_draw_area_pair_t* packet, const void* source, s32 scale_index, s32 lower_half, const s16* offset);
+    bunit_gfx_scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index, s32 lower_half, const s16* offset);
 void bunit_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
 s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum);
 void bunit_gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount);
@@ -653,7 +653,7 @@ extern u16 g_bunit_ability_list_job_name_row[];
 extern u8 g_bunit_ability_list_ready;
 extern u8 g_bunit_character_status_ability_text_image[];
 extern RECT g_bunit_character_status_ability_text_rect;
-extern u8 g_bunit_character_status_draw_area_rect[];
+extern RECT g_bunit_character_status_draw_area_rect;
 extern u8 g_bunit_character_status_equipment_text_image[];
 extern RECT g_bunit_character_status_equipment_text_rect;
 extern RECT g_bunit_character_status_frame_rect;

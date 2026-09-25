@@ -1,6 +1,5 @@
+#include "fft/battle_gfx.h"
 #include "fft/event.h"
-
-extern void battle_gfx_apply_weather_time_tile_palette_mod_by_misc_id(u32 misc_id);
 
 /* Resolve the script's signed unit ID and refresh its environment palette
  * unless resolution returns the missing-unit sentinel. */

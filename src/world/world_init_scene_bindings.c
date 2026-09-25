@@ -1,9 +1,8 @@
 #include "fft/event.h"
+#include "fft/main_runtime.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern s32 g_main_script_variables[0x100];
 
 /* Bind the WORLD scheduler, script and menu subsystems to their backing
    storage and clear the per-scene state they share. */

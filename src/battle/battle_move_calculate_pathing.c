@@ -19,12 +19,12 @@ typedef struct {
     u8 marks;
     u8 flags_06;
     u8 camera_block_masks;
-} battle_path_tile_view_t;
+} battle_move_path_tile_view_t;
 
 /* g_battle_map_tile_data through the bitfield view, bound separately: this
  * function also addresses the map_tile_t array, and a cast of it lets GCC
  * share the two bases. */
-extern battle_path_tile_view_t g_battle_map_tile_data_view[512];
+extern battle_move_path_tile_view_t g_battle_map_tile_data_view[512];
 
 /* Pathfinding pass for a generic unit (id 0x7f) from (x, y, level) to the target
  * tile; returns the route buffer, or 0 when either tile is invalid or unreachable.
@@ -41,7 +41,7 @@ u8* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, 
     u8* frontier = g_battle_move_frontier_flags_ptr;
     s32 completed_pass = 0;
     s32 i;
-    battle_path_tile_view_t* tile;
+    battle_move_path_tile_view_t* tile;
     s32 empty_flags;
 
     *suspended = 0;

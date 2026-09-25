@@ -45,13 +45,13 @@ void equip_panel_run_equipment_list_thread(void) {
         screen = g_equip_panel_frames_a;
         state = (battle_menu_status_panel_slot_state_t*)g_equip_unit_editor_stats;
         base = g_equip_panel_frames_a;
-        upload = (RECT*)g_equip_panel_text_upload_rect_a;
+        upload = &g_equip_panel_text_upload_rect_a;
         u = 0;
     } else {
         text = g_equip_panel_text_image_b;
         screen = g_equip_panel_frames_b;
         state = (battle_menu_status_panel_slot_state_t*)&g_equip_item_preview_stat_detail;
-        upload = (RECT*)g_equip_panel_text_upload_rect_b;
+        upload = &g_equip_panel_text_upload_rect_b;
         base = g_equip_panel_frames_b;
         u = 0x50;
     }

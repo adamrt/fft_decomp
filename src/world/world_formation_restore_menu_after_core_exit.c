@@ -3,8 +3,6 @@
 #include "fft/script_variables.h"
 #include "fft/world.h"
 
-extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;
-
 /*
  * Restore formation-menu resources and settings when WLDCORE requests exit.
  *

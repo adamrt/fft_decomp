@@ -182,9 +182,9 @@ extern battle_image_location_t g_attack_panel_item_icon_texture[];
 extern RECT g_attack_gfx_draw_area_template;
 extern battle_image_location_t g_attack_panel_origin_offsets[];
 extern battle_menu_status_panel_offset_pair_t g_attack_character_status_frame_rect[];
-extern u8 g_attack_character_status_draw_area_rect[];
-extern u8 g_attack_panel_text_upload_rect_a[];
-extern u8 g_attack_panel_text_upload_rect_b[];
+extern RECT g_attack_character_status_draw_area_rect;
+extern RECT g_attack_panel_text_upload_rect_a;
+extern RECT g_attack_panel_text_upload_rect_b;
 extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode0[];
 extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode1[];
 extern world_gfx_image_load_parameters_t g_attack_panel_label_layouts_mode2[];
@@ -239,7 +239,7 @@ void attack_gfx_apply_menu_palette_for_mode(
 void attack_gfx_build_formation_sprites(void);
 void attack_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
 void attack_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
-    const void* source, s32 scale_index, s32 lower_half, const s16* offset);
+    const RECT* source, s32 scale_index, s32 lower_half, const s16* offset);
 void attack_gfx_build_scaled_sprite_cell_poly_ft4(POLY_FT4* poly, attack_gfx_texture_page_position_t* texture_page,
     const RECT* position, attack_gfx_sprite_rect_t* sprite_rect, attack_gfx_point_t* scale, const s16* offset);
 void attack_gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount);

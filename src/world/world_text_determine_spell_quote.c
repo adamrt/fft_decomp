@@ -2,6 +2,7 @@
 #include "fft/data.h"
 #include "fft/job.h"
 #include "fft/main_runtime.h"
+#include "fft/main_unit.h"
 #include "fft/script_variables.h"
 #include "fft/world.h"
 
@@ -12,7 +13,6 @@ typedef struct world_text_spell_quote_ability_data {
     u8 flags;        /* 0x03; 0x40 is tested before the no-quote path */
 } world_text_spell_quote_ability_data_t;
 
-extern s32 main_ability_calculate_pointers_and_type(s32 id, u8** out_ability_data, u8** out_secondary_data);
 struct battle_ai_command_action;
 
 /* Chooses whether an ability announcement shows a spell quote.

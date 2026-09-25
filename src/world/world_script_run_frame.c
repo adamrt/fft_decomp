@@ -10,8 +10,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s32 g_battle_entd_selection_mode;
-
 extern void AddPrims(u32* ot, void* first, void* last); /* follows AddPrim; AddPrims-shaped call */
 extern s32 jobstts_entrypoint(s32 unit);
 extern s32 equip_entrypoint(s32 unit, void* otag);

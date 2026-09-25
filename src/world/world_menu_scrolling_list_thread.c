@@ -9,10 +9,6 @@
 
 /* Provisional: three-column layout with the saved first visible row. */
 
-extern u8 g_main_menu_scroll_accel_delay;
-extern u8 g_main_menu_scroll_slow_step;
-extern u8 g_main_menu_scroll_fast_step;
-
 /*
  * Scrolling three-column ability list thread (the WORLD twin of BATTLE
  * battle_menu_run_scrolling_ability_list_thread, reached from world_menu_preview_ability_turn_at_list).

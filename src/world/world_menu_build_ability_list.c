@@ -17,24 +17,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern void* g_battle_ai_workspace_ptr; /* pointer cell reloaded per subsystem */
-extern world_menu_entry_t* g_world_menu_thread_menu_data;
-extern s16 g_world_unit_view_battle_id; /* selected unit index */
-extern u8 g_battle_action_menu_row_types[];
-extern s16 g_world_menu_row_type_confirm_actions[][2]; /* per row type: [1] == 1 lists by id */
-extern u8 g_main_item_quantities[];
-extern battle_ai_command_action_t g_world_menu_preview_action;
-extern battle_stats_t* world_unit_get_battle_stats_for_stored(void);
-extern s32 world_menu_widen_bytes_to_halfwords(u16* destination, const u8* source);
-extern s32 battle_menu_display_item_inventory_ability(s32 unit, s32 skillset, u8* items);
-extern s32 battle_menu_load_throw_abilities(s32 unit, s32 skillset, u8* items);
-extern s32 battle_menu_load_math_skill_attributes(s32 unit, s32 skillset, s16* ids);
-extern s32 battle_menu_load_math_skill_multiples(s32 unit, s32 skillset, s16* ids);
-extern s32 battle_menu_collect_calculator_abilities(s32 unit, u8 skillset, s16* ids);
-extern s32 battle_menu_collect_monster_skill_abilities(s32 unit, u8 skillset, s16* ids, s32 zero, u8* flags);
-extern s32 battle_menu_load_draw_out_abilities(s32 unit, s32 skillset, u8* items);
-extern s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* ability_ids, u8* ct_out, u8* turns_out);
-
 void world_menu_build_ability_list(s32 mode) {
     s32 unit_index;
     s32 window_x;

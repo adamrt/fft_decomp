@@ -7,11 +7,11 @@
 
 /* Copied as ten byte-aligned bytes from 0x80193dd4; the target uses signed
  * byte loads for the final two bytes and unsigned loads while scanning. */
-typedef struct battle_math_ability_id_list {
+typedef struct battle_ai_math_ability_id_list {
     s8 ability_ids[10];
-} battle_math_ability_id_list_t;
+} battle_ai_math_ability_id_list_t;
 
-extern battle_math_ability_id_list_t g_battle_math_extra_known_bit_ids;
+extern battle_ai_math_ability_id_list_t g_battle_math_extra_known_bit_ids;
 /* Borrowed from main's temporary skillset list, not a private AI copy. */
 
 /*
@@ -21,7 +21,7 @@ extern battle_math_ability_id_list_t g_battle_math_extra_known_bit_ids;
  * indices resume a suspended priority check; -1 suspends and 0 ends this pass.
  */
 s32 battle_ai_evaluate_math_targets(void) {
-    battle_math_ability_id_list_t special_abilities = g_battle_math_extra_known_bit_ids;
+    battle_ai_math_ability_id_list_t special_abilities = g_battle_math_extra_known_bit_ids;
     battle_ai_data_t* ai = &g_battle_ai_data_base;
     u8* special;
     s32 unit;

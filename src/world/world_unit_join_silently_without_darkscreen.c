@@ -1,8 +1,7 @@
 #include "fft/battle.h"
+#include "fft/main_unit.h"
 #include "fft/unit_slots.h"
 #include "fft/world.h"
-
-extern void save_unit_to_party(battle_stats_t* unit, u32 save_formation);
 
 /* Persist event units marked to join without opening the formation screen. */
 void world_unit_join_silently_without_darkscreen(void) {

@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern u8* battle_unit_get_target_id_ptr_by_battle_id(u32 battle_id);
-
 void world_menu_preview_attack_caster_stats(void) {
     battle_stats_t* stored;
     battle_stats_t* target;

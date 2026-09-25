@@ -11,16 +11,16 @@
 
 /* Per-frame zoom curves for the three numeric display digits, indexed by
  * display progress (0x80067bac..0x80067cb3, six 0x2c-byte records). */
-typedef struct battle_numeric_scale_table {
+typedef struct battle_gfx_numeric_scale_table {
     s16 value[21];
-} battle_numeric_scale_table_t;
+} battle_gfx_numeric_scale_table_t;
 
-extern battle_numeric_scale_table_t g_battle_numeric_digit_0_zoom_curve;
-extern battle_numeric_scale_table_t g_battle_numeric_digit_1_zoom_curve;
-extern battle_numeric_scale_table_t g_battle_numeric_digit_2_zoom_curve;
-extern battle_numeric_scale_table_t g_battle_numeric_digit_0_critical_zoom_curve;
-extern battle_numeric_scale_table_t g_battle_numeric_digit_1_critical_zoom_curve;
-extern battle_numeric_scale_table_t g_battle_numeric_digit_2_critical_zoom_curve;
+extern battle_gfx_numeric_scale_table_t g_battle_numeric_digit_0_zoom_curve;
+extern battle_gfx_numeric_scale_table_t g_battle_numeric_digit_1_zoom_curve;
+extern battle_gfx_numeric_scale_table_t g_battle_numeric_digit_2_zoom_curve;
+extern battle_gfx_numeric_scale_table_t g_battle_numeric_digit_0_critical_zoom_curve;
+extern battle_gfx_numeric_scale_table_t g_battle_numeric_digit_1_critical_zoom_curve;
+extern battle_gfx_numeric_scale_table_t g_battle_numeric_digit_2_critical_zoom_curve;
 
 /* Animate and queue the three numeric post-action display sprites.
  *
@@ -37,12 +37,12 @@ void battle_gfx_animate_post_action_text(battle_unit_misc_data_t* unit, const u1
     SVECTOR zoom_0 = g_battle_status_bubble_zoom;
     SVECTOR zoom_1 = g_battle_status_bubble_zoom;
     SVECTOR zoom_2 = g_battle_status_bubble_zoom;
-    battle_numeric_scale_table_t scale_0 = g_battle_numeric_digit_0_zoom_curve;
-    battle_numeric_scale_table_t scale_1 = g_battle_numeric_digit_1_zoom_curve;
-    battle_numeric_scale_table_t scale_2 = g_battle_numeric_digit_2_zoom_curve;
-    battle_numeric_scale_table_t critical_scale_0 = g_battle_numeric_digit_0_critical_zoom_curve;
-    battle_numeric_scale_table_t critical_scale_1 = g_battle_numeric_digit_1_critical_zoom_curve;
-    battle_numeric_scale_table_t critical_scale_2 = g_battle_numeric_digit_2_critical_zoom_curve;
+    battle_gfx_numeric_scale_table_t scale_0 = g_battle_numeric_digit_0_zoom_curve;
+    battle_gfx_numeric_scale_table_t scale_1 = g_battle_numeric_digit_1_zoom_curve;
+    battle_gfx_numeric_scale_table_t scale_2 = g_battle_numeric_digit_2_zoom_curve;
+    battle_gfx_numeric_scale_table_t critical_scale_0 = g_battle_numeric_digit_0_critical_zoom_curve;
+    battle_gfx_numeric_scale_table_t critical_scale_1 = g_battle_numeric_digit_1_critical_zoom_curve;
+    battle_gfx_numeric_scale_table_t critical_scale_2 = g_battle_numeric_digit_2_critical_zoom_curve;
     battle_gfx_sprite_display_data_t* display_0;
     battle_gfx_sprite_display_data_t* display_1;
     battle_gfx_sprite_display_data_t* display_2;

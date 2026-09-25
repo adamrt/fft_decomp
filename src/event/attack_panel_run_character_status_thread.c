@@ -106,7 +106,7 @@ void attack_panel_run_character_status_thread(void) {
                 }
                 g_menu_text_state.origin_y += 0x10;
             }
-            LoadImage((RECT*)g_attack_panel_text_upload_rect_a, (u32*)g_attack_panel_text_image_a);
+            LoadImage(&g_attack_panel_text_upload_rect_a, (u32*)g_attack_panel_text_image_a);
             battle_clear_menu_render_buffer(g_attack_panel_text_image_b, 0xc80);
             g_menu_inner_window_width = 0x50;
             battle_menu_set_text_origin(0, 0);
@@ -129,7 +129,7 @@ void attack_panel_run_character_status_thread(void) {
                 }
                 g_menu_text_state.origin_y += 0x10;
             }
-            LoadImage((RECT*)g_attack_panel_text_upload_rect_b, (u32*)g_attack_panel_text_image_b);
+            LoadImage(&g_attack_panel_text_upload_rect_b, (u32*)g_attack_panel_text_image_b);
             thread->redraw_request = 0;
         }
         i = 0;
@@ -149,7 +149,7 @@ void attack_panel_run_character_status_thread(void) {
         mask = -(mask != 0);
         g_attack_gfx_draw_offset_y = mask & 0xf0;
         attack_gfx_build_scaled_draw_area_packets(
-            &screen->portrait, g_attack_character_status_draw_area_rect, frame, scale, (const s16*)thread);
+            &screen->portrait, &g_attack_character_status_draw_area_rect, frame, scale, (const s16*)thread);
         screen->draw_offsets[0].x = thread->origin_x - 0x80;
         screen->draw_offsets[0].y = thread->origin_y + (u16)g_attack_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0], &screen->draw_offsets[0].x);

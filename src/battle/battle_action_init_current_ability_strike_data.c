@@ -10,9 +10,9 @@
 typedef union {
     u16 pair;
     u8 primary;
-} battle_ability_weapon_ids_t;
+} battle_action_ability_weapon_ids_t;
 
-#define WEAPON_IDS (*(battle_ability_weapon_ids_t*)&g_current_ability.primary_weapon_id)
+#define WEAPON_IDS (*(battle_action_ability_weapon_ids_t*)&g_current_ability.primary_weapon_id)
 
 /*
  * Seed the per-action "strike" state from the acting unit before an attack

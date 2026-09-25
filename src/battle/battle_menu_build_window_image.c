@@ -12,10 +12,10 @@ typedef struct {
     u8 unknown_04[4];
     s32 stride; /* 0x08 */
     u8 unknown_0c[4];
-} battle_window_sprite_pos_t;
+} battle_menu_window_sprite_pos_t;
 
-extern battle_window_sprite_pos_t g_battle_menu_window_sprite_glyph;
-extern battle_window_sprite_pos_t g_battle_menu_window_sprite_position;
+extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_glyph;
+extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_position;
 typedef world_gfx_4bpp_rect_t battle_nibble_region_t;
 extern void battle_text_mirror_packed_nibble_region_horizontal(u8* data, battle_nibble_region_t* region);
 

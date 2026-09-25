@@ -7,8 +7,6 @@
 #include "fft/thread.h"
 #include "fft/world.h"
 
-extern void battle_status_apply_unit_action_removal(battle_stats_t* unit);
-
 /* Snapshot a unit into the event staging record and queue its status removal.
  *
  * Returns 0 when the slot is already staged. Otherwise the unit's statuses,

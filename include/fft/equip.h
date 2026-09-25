@@ -353,9 +353,9 @@ extern battle_menu_status_panel_offset_pair_t g_equip_panel_origin_offsets[];
  * derive the table base from this address and changes equip_panel_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
 extern battle_menu_status_panel_offset_pair_t g_equip_character_status_frame_rect[];
-extern u8 g_equip_character_status_draw_area_rect[];
-extern u8 g_equip_panel_text_upload_rect_a[];
-extern u8 g_equip_panel_text_upload_rect_b[];
+extern RECT g_equip_character_status_draw_area_rect;
+extern RECT g_equip_panel_text_upload_rect_a;
+extern RECT g_equip_panel_text_upload_rect_b;
 extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode0[];
 extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode1[];
 extern world_gfx_image_load_parameters_t g_equip_panel_label_layouts_mode2[];

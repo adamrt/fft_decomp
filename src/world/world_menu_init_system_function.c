@@ -1,7 +1,6 @@
+#include "fft/battle.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern u8* battle_unit_get_target_id_ptr_by_battle_id(u32 unit_id);
 
 /* Run a system function for unit_id, looking up the unit's command action
  * first (except for commands 6 and 8); command 5 goes to the spell-quote

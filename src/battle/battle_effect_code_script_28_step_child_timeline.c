@@ -6,7 +6,7 @@
 #include "psx/types.h"
 
 /* Animate-tick state overlaid on effect_record_t from 0x26. */
-typedef struct effect_tick_state {
+typedef struct battle_effect_tick_state {
     u16 target_index;          /* 0x00 (record 0x26) */
     s16 frame;                 /* 0x02 */
     s16 particle_keyframe[5];  /* 0x04 */
@@ -18,12 +18,12 @@ typedef struct effect_tick_state {
     s16 color_remaining[4];    /* 0x2e */
     u8 _unknown_36[2];         /* 0x36 */
     u16 particle_step[5];      /* 0x38 */
-} effect_tick_state_t;
+} battle_effect_tick_state_t;
 
-typedef struct effect_tick_record_view {
+typedef struct battle_effect_tick_record_view {
     u8 _unknown_00[0x28];
     u16 frame; /* 0x28 */
-} effect_tick_record_view_t;
+} battle_effect_tick_record_view_t;
 
 /* Advance a single-phase effect timeline by one frame (script opcode 0x28).
  *
@@ -41,7 +41,7 @@ typedef struct effect_tick_record_view {
 s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
     map_background_gradient_colors_t colors;
     battle_effect_secondary_init_t init;
-    effect_tick_state_t* state;
+    battle_effect_tick_state_t* state;
     battle_effect_keyframe_table_t* table;
     battle_effect_palette_track_t* track;
     battle_effect_background_track_t* screen;
@@ -68,7 +68,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
     s32 sound_index;
 
     target = record->target_index;
-    state = (effect_tick_state_t*)&record->target_index;
+    state = (battle_effect_tick_state_t*)&record->target_index;
     if (g_battle_effect_targets[target].id.bytes[1] != 2) {
         for (i = 0; i < 5; i++) {
             table = &g_battle_effect_timing_channels->particle[i];
@@ -266,7 +266,7 @@ s32 battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
             init.target.block = *(battle_effect_secondary_block_t*)&g_battle_effect_targets[target];
             battle_effect_init_secondary(10, g_battle_effect_misc_data->spawn_delay, &init);
         }
-        ((effect_tick_record_view_t*)record)->frame = g_battle_effect_timing_channels->duration;
+        ((battle_effect_tick_record_view_t*)record)->frame = g_battle_effect_timing_channels->duration;
     }
     record->pc += 2;
     return 1;

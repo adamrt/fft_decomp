@@ -1,3 +1,4 @@
+#include "fft/main_runtime.h"
 #include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
@@ -21,8 +22,6 @@ typedef struct world_menu_list_draw_record {
 } world_menu_list_draw_record_t;
 
 typedef struct world_chained_record world_chained_record_t;
-
-extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;
 
 extern world_chained_record_t* world_skip_chained_records(world_chained_record_t* record);
 

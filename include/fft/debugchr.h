@@ -121,9 +121,9 @@ extern RECT g_debugchr_panel_selected_portrait_rect;
 extern RECT g_debugchr_panel_comparison_portrait_rect;
 extern battle_image_location_t g_debugchr_panel_origin_offsets[];
 extern battle_menu_status_panel_offset_pair_t g_debugchr_character_status_frame_rect[];
-extern u8 g_debugchr_character_status_draw_area_rect[];
-extern u8 g_debugchr_panel_text_upload_rect_a[];
-extern u8 g_debugchr_panel_text_upload_rect_b[];
+extern RECT g_debugchr_character_status_draw_area_rect;
+extern RECT g_debugchr_panel_text_upload_rect_a;
+extern RECT g_debugchr_panel_text_upload_rect_b;
 extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode0[];
 extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode1[];
 extern world_gfx_image_load_parameters_t g_debugchr_panel_label_layouts_mode2[];
@@ -154,7 +154,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id);
 /* gfx */
 void debugchr_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
 void debugchr_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
-    const void* source, s32 scale_index, s32 lower_half, const s16* offset);
+    const RECT* source, s32 scale_index, s32 lower_half, const s16* offset);
 void debugchr_gfx_build_status_group_primitives(POLY_FT4* poly);
 void debugchr_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
 void debugchr_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet);

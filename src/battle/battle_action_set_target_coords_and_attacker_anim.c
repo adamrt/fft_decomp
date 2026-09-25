@@ -6,7 +6,7 @@
 /* Current action block of Miscellaneous unit_t Data (0x18c..0x1ad), reached
  * through one pointer: the target addresses these fields relative to
  * misc + 0x18c. */
-typedef struct battle_misc_action_data {
+typedef struct battle_action_misc_data {
     u8 action_18c;           /* 0x00 (misc 0x18c) */
     u8 target_count;         /* 0x01 (misc 0x18d) */
     u8 target_list[0x10];    /* 0x02 (misc 0x18e) */
@@ -24,7 +24,7 @@ typedef struct battle_misc_action_data {
     u8 target_new_map_level; /* 0x1e */
     u8 used_weapon_id;       /* 0x1f */
     s16 reaction_ability_id; /* 0x20 (misc 0x1ac) */
-} battle_misc_action_data_t;
+} battle_action_misc_data_t;
 
 /* Blaze Gun, Glacier Gun and Blast Gun (item ids 0x4a..0x4c) play the weapon
  * strike even when an ability is used. */
@@ -42,7 +42,7 @@ typedef struct battle_misc_action_data {
 void battle_action_set_target_coords_and_attacker_anim(void) {
     battle_unit_misc_data_t* unit;
     battle_unit_misc_data_t* target;
-    battle_misc_action_data_t* action;
+    battle_action_misc_data_t* action;
     s32 i;
 
     g_animation_speed = 1;
@@ -52,7 +52,7 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
     if (unit->continue_attack_count == 0) {
         battle_unit_face_towards_action_target(unit, 0);
     }
-    action = (battle_misc_action_data_t*)&unit->action_18c;
+    action = (battle_action_misc_data_t*)&unit->action_18c;
     if (action->target_count != 0) {
         for (i = 0; i < action->target_count; i++) {
             target = battle_unit_get_misc_data_by_battle_id(action->target_list[i]);

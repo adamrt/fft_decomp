@@ -3,21 +3,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* File-scope declarations are spelled exactly as in fft/world.h, fft/battle.h
- * and src/world/world_shop_handle_item_sell_menu.c, so each symbol has one
- * spelling. */
-
 void world_thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
-extern s32 world_item_build_category_list(s16, u16, s8, world_item_list_entry_t*, u8);
-extern void world_script_set_vsync_mode_and_event_speed(s32 value);
-extern void world_menu_init_scrollable_list_core(const s16* values, s32 selected_index, u32 state);
-extern void world_menu_switch_item_category(s32 input);
-extern void world_menu_run_script_with_palette_mode(void* output, s32 input, s32 mode);
-extern void world_shop_run_obtain_gil_menu(void);
-extern s32 world_menu_get_entry_item_count(s32 index);
-extern s32 world_menu_get_entry_item_count_2(s32 index);
-extern world_item_icon_source_t* world_item_build_type_icon_source(s32);
-extern s32 world_item_get_selected_half_price(void);
 
 /* Shop item-list menu step; sibling of world_shop_handle_item_sell_menu.
  *

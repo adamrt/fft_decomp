@@ -13,13 +13,13 @@
 
 /* The target coordinates occupy a 16-byte frame slot, like the unreferenced
  * slot below the velocity copy in battle_move_animate_jump_start. */
-typedef struct battle_jump_target {
+typedef struct battle_move_jump_target {
     battle_screen_coords_t coords;
     u8 _pad06[10];
-} battle_jump_target_t;
+} battle_move_jump_target_t;
 
 void battle_move_animate_jump_arc_to_target(battle_unit_misc_data_t* unit) {
-    battle_jump_target_t target;
+    battle_move_jump_target_t target;
     VECTOR velocity;
     battle_unit_misc_data_t* other;
     s32 timer;

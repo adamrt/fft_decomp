@@ -17,9 +17,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern void main_sound_set_type(s32 value);
-extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;
-
 /* Option-menu value picker thread for one game option.
  *
  * The option index arrives in the thread's first parameter, which is then
