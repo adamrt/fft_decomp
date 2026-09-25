@@ -10,7 +10,7 @@
  * trailing image half to VRAM. */
 void world_script_load_portrait_colors_event_instruction(s32 index) {
     RECT rect;
-    void* buffer;
+    u8* buffer;
     u8* source;
     u8* upper_half;
     s32 i;
@@ -24,7 +24,7 @@ void world_script_load_portrait_colors_event_instruction(s32 index) {
         world_thread_yield();
         g_world_thread_inner_subroutine_callback = (void (*)(void))main_file_is_still_loading;
     } while (world_thread_call_on_main_stack() != 0);
-    upper_half = (u8*)buffer + 0x1800;
+    upper_half = buffer + 0x1800;
     world_script_copy_bytes(&rect, &g_world_menu_portrait_pixel_rect, 8);
     i = 0;
     source = buffer;
