@@ -156,7 +156,7 @@ void debugchr_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
 void debugchr_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
     const void* source, s32 scale_index, s32 lower_half, const s16* offset);
 void debugchr_gfx_build_status_group_primitives(POLY_FT4* poly);
-void debugchr_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
+void debugchr_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
 void debugchr_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet);
 void debugchr_gfx_set_scaled_poly_ft4_geometry(POLY_FT4* poly, const debug_chr_texture_page_t* texture,
     const s16* position, const s16* uv_rect, const s16* scale, const s16* offset);

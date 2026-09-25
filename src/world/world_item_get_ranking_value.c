@@ -2,10 +2,6 @@
 #include "fft/main_runtime.h"
 #include "fft/world.h"
 
-extern item_data_t g_main_item_primary_data[];
-extern shield_data_t g_main_item_shield_data[];
-extern armor_data_t g_main_item_helm_armor_secondary_data[];
-
 /* Return the item category's primary stat for descending menu sorts. */
 u8 world_item_get_ranking_value(s32 item_id) {
     s32 type;

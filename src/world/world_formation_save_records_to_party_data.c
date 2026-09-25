@@ -4,8 +4,6 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-extern item_data_t g_main_item_primary_data[];
-
 /*
  * Write each formation record's job, abilities, and equipment back into its
  * roster party_data_t, then rebuild the record from the refreshed unit.

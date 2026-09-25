@@ -60,7 +60,7 @@ void equip_panel_run_ability_list_thread(void) {
         u = 0x50;
     }
     battle_menu_init_numeric_display_frame_primitives(&g_equip_right_panel_frame_rect, &screen->numeric_frame);
-    equip_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
+    equip_gfx_init_menu_tile_and_line_primitives(screen);
     equip_gfx_init_scaled_draw_area_packets(&screen->portrait);
     /* The tile/line fixups must read g_equip_panel_origin_offsets as an array
      * element: a cast of a u8[] view folds the loop's y reads to absolute

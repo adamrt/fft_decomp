@@ -40,7 +40,7 @@ void equip_panel_run_character_status_thread(void) {
     state = (battle_menu_status_panel_slot_state_t*)g_equip_unit_editor_stats;
     rect = FRAME_RECT;
     battle_menu_init_numeric_display_frame_primitives((RECT*)rect, &screen->numeric_frame);
-    equip_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
+    equip_gfx_init_menu_tile_and_line_primitives(screen);
     equip_gfx_init_scaled_draw_area_packets(&screen->portrait);
     for (i = 0; i < 2; i++) {
         screen->tiles[i].x0 += rect->x;

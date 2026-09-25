@@ -555,7 +555,7 @@ void bunit_gfx_enqueue_textured_quad_list(const battle_menu_sprite_cell_t* quads
     u16 texture_page, u16 clut, s32 otag_index, s32 count);
 void bunit_gfx_enqueue_translucent_tile(RECT* rect, u8* color, u8 semi, s32 idx);
 s32 bunit_gfx_get_fade_state(void);
-void bunit_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
+void bunit_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
 void bunit_gfx_init_rhombus_cursor_tpages(void);
 void bunit_gfx_set_clut_rect_from_id(RECT* rect, s32 clut_id);
 void bunit_gfx_set_transition_frame(s32 frame);

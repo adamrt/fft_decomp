@@ -5,8 +5,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-extern item_data_t g_main_item_primary_data[];
-
 /* Flat view of item_attribute_t. The target addresses `starting` as
  * attribute * 25 + (base + 15), rebuilt from the live base + 5 register;
  * the nested status_sets member instead reuses the innate address + 10. */

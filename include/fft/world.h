@@ -37,6 +37,12 @@ typedef enum world_equipment_slot {
     WORLD_EQUIPMENT_SLOT_COUNT = 5,
 } world_unit_equipment_slot_e;
 
+/* Two-byte shop availability mask, stored most significant byte first. */
+typedef struct world_shop_item_availability {
+    u8 high;
+    u8 low;
+} world_shop_item_availability_t;
+
 /* Final selector for the WORLD ability-list builder at 0x801228f0. */
 typedef enum world_ability_list_mode {
     WORLD_ABILITY_LIST_MODE_VIEW_ALL = 0,
@@ -1754,6 +1760,7 @@ extern s32* g_world_script_variables;
 extern s16 g_world_shop_fitting_room_items[][5];
 extern u8 g_world_shop_hire_menu_initialized;
 extern u8 g_world_shop_item_category;
+extern world_shop_item_availability_t g_world_shop_item_availability[];
 extern s16 g_world_shop_menu_step;
 extern s16 g_world_shop_quantity_limit;
 extern world_menu_thread_data_t g_world_shop_quantity_menu_data;

@@ -41,13 +41,9 @@ typedef struct battle_menu_text_window {
     s16 y_screen_offset;
 } battle_menu_text_window_t;
 
-struct menu_frame_sprites;
 struct battle_text_position;
 extern u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     world_menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
-extern void battle_menu_configure_frame_cluts(struct menu_frame_sprites* frame);
-extern void battle_update_menu_cursor_primitives(
-    world_menu_icon_thread_param_t* param, world_menu_icon_sprites_t* record, s32 frame, s32 cursor);
 extern void battle_menu_draw_stacked_glyph_pair(void* pixels, struct battle_text_position* position);
 
 /*

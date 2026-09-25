@@ -1,9 +1,6 @@
 #include "fft/battle.h"
 #include "psx/types.h"
 
-extern s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
-extern s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
-extern s32 battle_menu_call_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities);
 /* Loads the unit's usable abilities for an action menu type into scratch lists.
  *
  * A frog only keeps the default, blank, monster and attack menus. Returns the

@@ -31,27 +31,6 @@ typedef struct battle_menu_ability_list {
     u8 enabled[0x52];   /* 0x334 */
 } battle_menu_ability_list_t;
 
-extern void* g_battle_ai_workspace_ptr; /* pointer cell reloaded per subsystem */
-extern u8 g_battle_action_menu_row_types[];
-/* Ability-list window layout at 0x80166994. Column modes: 0 text, 1 number,
- * 2 hidden, 3 alternate number. The columns read the work buffer's u16 text
- * ids and values through the layout's s16 pointers. */
-extern world_menu_text_layout_t g_battle_ability_menu_layout;
-extern s16 g_battle_menu_action_type_modes[][2];
-extern u8 g_main_item_quantities[];
-extern battle_stats_t* battle_unit_get_attacker_data_pointer(void);
-extern s32 battle_menu_copy_ff_terminated_bytes_to_halfwords(s16* dst, u8* src);
-extern void battle_menu_widen_bytes_to_halfwords(s16* dst, u8* src, s32 count);
-extern s32 battle_menu_display_item_inventory_ability(s32 unit, s32 skillset, u8* items);
-extern s32 battle_menu_load_throw_abilities(s32 unit, s32 skillset, u8* items);
-extern s32 battle_menu_load_math_skill_attributes(s32 unit, s32 skillset, s16* ids);
-extern s32 battle_menu_load_math_skill_multiples(s32 unit, s32 skillset, s16* ids);
-extern s32 battle_menu_collect_calculator_abilities(s32 unit, u8 skillset, s16* ids);
-extern s32 battle_menu_collect_monster_skill_abilities(s32 unit, u8 skillset, s16* ids, s32 zero, u8* flags);
-extern s32 battle_menu_load_draw_out_abilities(s32 unit, s32 skillset, u8* items);
-extern s32 battle_menu_load_charge_skillset(
-    s32 unit_id, s32 skillset_id, s16* ability_ids, u8* charge_times, u8* turn_counts);
-
 void battle_menu_build_ability_list(s32 mode) {
     s32 unit_index;
     s32 window_x;

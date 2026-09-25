@@ -175,7 +175,7 @@ void require_gfx_build_status_group_primitives(POLY_FT4* poly);
 void require_gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount);
 void require_gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount);
 void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
-void require_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
+void require_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
 void require_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet);
 void require_gfx_set_clut_rect_from_id(RECT* rect, s32 packed);
 void require_gfx_set_scaled_poly_ft4_geometry(POLY_FT4* poly, require_gfx_texture_page_position_t* texture_page,

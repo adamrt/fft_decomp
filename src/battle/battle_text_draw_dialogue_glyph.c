@@ -10,18 +10,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-extern menu_text_state_t
-    g_battle_text_typewriter_state;             /* origin/stride passed to battle_text_render_glyph_to_4bpp_image */
-extern RECT g_battle_text_typewriter_vram_rect; /* VRAM destination of the finished glyph */
-extern u8 g_battle_text_slot_source_columns[];  /* per-slot source column */
-extern u8 g_battle_text_slot_row_pitches[];     /* per-slot source row pitch in bytes */
-extern s32 g_battle_text_glyphs_per_wait;       /* glyphs drawn before the typewriter waits */
-extern u8 g_battle_text_typewriter_glyph_images[3][8][0x54]; /* eight glyph images per slot */
-extern u8 g_battle_text_typewriter_previous_images[3][0x54]; /* previous image per slot */
-extern u8 g_battle_text_typewriter_column_scratch[14];       /* one-column scratch used by the phase shift */
-extern const u8 g_text_glyph_widths[];
-extern const u8* g_text_glyph_bitmap_data;
-
 /* Draw the pending dialogue glyph into VRAM and hold it for the typewriter
  * delay.
  *

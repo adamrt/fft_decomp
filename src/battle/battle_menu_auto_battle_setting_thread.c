@@ -13,14 +13,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern void battle_update_menu_cursor_primitives(
-    world_menu_icon_thread_param_t* param, world_menu_icon_sprites_t* record, s32 frame, s32 cursor);
-struct battle_menu_frame_primitives;
-extern void battle_menu_submit_frame_primitives(struct battle_menu_frame_primitives* menu);
-extern void battle_menu_update_selection_from_input(battle_menu_idle_action_entry_t* bounds, s32* cursor);
-struct menu_frame_sprites;
-extern void battle_menu_configure_frame_cluts(struct menu_frame_sprites* icons);
-
 /* Auto-battle setting menu thread.
  *
  * The cursor starts at the attacker's auto_battle_setting (0, 0xC, 0xE,

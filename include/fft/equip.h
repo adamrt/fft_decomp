@@ -496,7 +496,7 @@ void equip_gfx_init_contexts(equip_gfx_buffer_t* base, u32* otag, POLY_F3* poly_
     DR_MODE* draw_modes);
 u8* equip_gfx_get_draw_color(void);
 s32 equip_gfx_get_transition_frame(void);
-void equip_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
+void equip_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
 void equip_gfx_init_primitive_buffers(u8* context);
 void equip_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* data);
 void equip_gfx_load_image_and_wait(RECT* rect, u32* data);

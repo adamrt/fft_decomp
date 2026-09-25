@@ -5,8 +5,6 @@
 #include "fft/world.h"
 #include "psx/libc.h"
 
-extern item_data_t g_main_item_primary_data[];
-
 /*
  * Rebuild the selected formation unit's derived stats from its job and
  * equipment, then refresh the three display snapshots.

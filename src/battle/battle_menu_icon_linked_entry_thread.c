@@ -7,13 +7,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-extern void battle_update_menu_cursor_primitives(
-    world_menu_icon_thread_param_t* param, world_menu_icon_sprites_t* record, s32 frame, s32 cursor);
-struct battle_menu_frame_primitives;
-extern void battle_menu_submit_frame_primitives(struct battle_menu_frame_primitives* menu);
-
-struct menu_frame_sprites;
-extern void battle_menu_configure_frame_cluts(struct menu_frame_sprites* icons);
 struct battle_message_window_layout;
 extern void battle_text_layout_message_window(
     struct battle_message_window_layout* window, s16* width, s16* height, s32* extra_frames, s32 pad_short);

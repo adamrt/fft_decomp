@@ -3,10 +3,6 @@
 #include "fft/world.h"
 #include "psx/libc.h"
 
-extern item_data_t g_main_item_primary_data[];
-extern shield_data_t g_main_item_shield_data[];
-extern accessory_data_t g_main_item_accessory_data[];
-
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
  *
  * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed first. The rest

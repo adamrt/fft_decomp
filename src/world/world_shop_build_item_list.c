@@ -2,14 +2,6 @@
 #include "fft/script_variables.h"
 #include "fft/world.h"
 
-typedef struct world_shop_item_availability {
-    u8 high;
-    u8 low;
-} world_shop_item_availability_t;
-
-extern item_data_t g_main_item_primary_data[];
-extern world_shop_item_availability_t g_world_shop_item_availability[];
-
 /* Build the item list offered by a normal or poachers' den shop.
  *
  * A normal shop selects items whose big-endian availability mask contains the

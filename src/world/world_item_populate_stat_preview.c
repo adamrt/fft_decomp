@@ -2,11 +2,6 @@
 #include "fft/main_runtime.h"
 #include "fft/world.h"
 
-extern item_data_t g_main_item_primary_data[];
-extern shield_data_t g_main_item_shield_data[];
-extern accessory_data_t g_main_item_accessory_data[];
-extern armor_data_t g_main_item_helm_armor_secondary_data[];
-
 /*
  * Extract an item's equipment stats and attribute bonuses for comparison.
  *

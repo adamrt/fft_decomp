@@ -36,7 +36,7 @@ void bunit_panel_run_character_status_thread(void) {
     base = g_bunit_character_status_frames;
     state = &g_bunit_editor_unit_fields;
     battle_menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
-    bunit_gfx_init_menu_tile_and_line_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
+    bunit_gfx_init_menu_tile_and_line_primitives(screen);
     bunit_gfx_init_scaled_draw_area_packets((u8*)&screen->portrait);
     for (i = 0; i < 2; i++) {
         screen->tiles[i].x0 += g_bunit_character_status_frame_rect.x;

@@ -243,7 +243,7 @@ void attack_gfx_build_scaled_sprite_cell_poly_ft4(POLY_FT4* poly, attack_gfx_tex
     const RECT* position, attack_gfx_sprite_rect_t* sprite_rect, attack_gfx_point_t* scale, const s16* offset);
 void attack_gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount);
 void attack_gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount);
-void attack_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_menu_primitives_t* menu);
+void attack_gfx_init_menu_tile_and_line_primitives(battle_menu_status_panel_buffer_t* menu);
 void attack_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* data);
 void attack_gfx_load_portraits(void);
 void attack_gfx_set_clut_rect_from_id(RECT* rect, s32 clut_id);
