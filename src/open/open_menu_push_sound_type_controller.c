@@ -12,12 +12,12 @@
  * Separate lifetimes for the append result and selected record preserve the
  * target's volatile-register allocation. */
 void open_menu_push_sound_type_controller(void) {
-    register s32 i;
-    register s32 y;
+    s32 i;
+    s32 y;
     s32 record;
-    register open_render_record_36_t* records;
-    register open_render_record_36_position_t* positions;
-    register open_controller_record_t* controllers;
+    open_render_record_36_t* records;
+    open_render_record_36_position_t* positions;
+    open_controller_record_t* controllers;
     /* Pin required: unpinned, the controller index and the stream base swap
      * $a0 and $a1. */
     register s32 controller_index __asm__("$4");
