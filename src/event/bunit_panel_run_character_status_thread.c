@@ -138,8 +138,7 @@ void bunit_panel_run_character_status_thread(void) {
         i = 0;
         cursor = (u8*)screen;
         for (; i < 5; i++) {
-            battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[19 + i],
-                (const battle_image_location_t*)g_bunit_panel_item_icon_texture,
+            battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[19 + i], g_bunit_panel_item_icon_texture,
                 (const battle_image_location_t*)&g_bunit_character_status_frame_rect,
                 &g_bunit_character_status_item_icon_layout[i]);
             if ((state->equipment[i] & 0xff) != 0xff) {

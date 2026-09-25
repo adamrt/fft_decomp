@@ -10,6 +10,6 @@ void card_gfx_init_primitive_lists(card_primitive_lists_t* lists) {
         SetShadeTex(&lists->polygons[i], 0);
     }
     for (i = 0; i < g_card_gfx_tile_capacity; i++) {
-        SetTile(lists->tiles + i * 0x10);
+        SetTile(&lists->tiles[i]);
     }
 }

@@ -6,8 +6,8 @@
 #include "psx/types.h"
 
 void card_save_run_menu(s32 unused) {
-    u8 tile_storage[0x140];
-    u8 otag_storage[0x200];
+    TILE tile_storage[20];
+    u32 otag_storage[0x80];
     u8 context_storage[0x1f8];
     volatile s32 leading_alignment;
     s32 input;
@@ -16,7 +16,7 @@ void card_save_run_menu(s32 unused) {
     u16 menu_input;
     volatile u16 alignment;
     s16 music_slot;
-    u8 save_buffer[0x258];
+    card_directory_entry_t save_buffer[15];
 
     g_card_gfx_otag_length = 0x40;
     g_card_gfx_poly_ft4_capacity = 0x258;
@@ -33,7 +33,7 @@ void card_save_run_menu(s32 unused) {
     while (main_return_zero_80043708() != 0) { }
     main_sound_switch_music_track(music_slot, 0x7f, 0);
     card_io_consume_all_events();
-    g_card_save_menu_work_buffer = (card_directory_entry_t*)save_buffer;
+    g_card_save_menu_work_buffer = save_buffer;
     card_save_init_menu_state();
     battle_thread_start(2, card_save_run_menu_graphic_thread);
     battle_thread_set_parameters(2, 0, 0, 0);

@@ -1,6 +1,7 @@
 #ifndef FFT_EQUIP_H
 #define FFT_EQUIP_H
 
+#include "fft/battle_gfx.h"
 #include "fft/battle_menu_status_panel.h"
 #include "fft/data.h"
 #include "fft/menu_types.h"
@@ -355,7 +356,7 @@ extern u8 g_equip_panel_selected_unit_data[];
 extern equip_stats_t g_equip_unit_editor_stats[];
 extern struct world_item_stat_detail g_equip_item_preview_stat_detail;
 extern u8 g_equip_editor_numeric_geometry[];
-extern u8 g_equip_panel_item_icon_texture[];
+extern battle_image_location_t g_equip_panel_item_icon_texture[];
 extern RECT g_equip_gfx_draw_area_template;
 extern battle_menu_status_panel_indicator_prims_t g_equip_thread_indicator_packets[2][2];
 extern battle_menu_status_panel_offset_pair_t g_equip_panel_origin_offsets[];

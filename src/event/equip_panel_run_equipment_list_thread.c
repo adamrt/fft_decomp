@@ -126,8 +126,7 @@ void equip_panel_run_equipment_list_thread(void) {
         screen->sprites[13].u0 = u;
         battle_menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
         for (i = 0; i < 5; i++) {
-            battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[19 + i],
-                (const battle_image_location_t*)g_equip_panel_item_icon_texture,
+            battle_gfx_init_image_loading((POLY_FT4*)&screen->sprites[19 + i], g_equip_panel_item_icon_texture,
                 (const battle_image_location_t*)g_equip_panel_origin_offsets, g_equip_panel_item_icon_layouts + i);
             id = state->equipment[i];
             if ((id & 0xff) != 0xff) {

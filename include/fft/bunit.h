@@ -1,6 +1,7 @@
 #ifndef FFT_BUNIT_H
 #define FFT_BUNIT_H
 
+#include "fft/battle_gfx.h"
 #include "fft/battle_menu_status_panel.h"
 #include "fft/character_identity.h"
 #include "fft/menu_types.h"
@@ -775,7 +776,7 @@ extern u8 g_bunit_panel_editor_value_cells[];
 extern u16 g_bunit_panel_editor_value_cluts[][2];
 extern u8 g_bunit_panel_frame_rect[];
 extern CVECTOR g_bunit_panel_gauge_bar_colors[];
-extern u8 g_bunit_panel_item_icon_texture[];
+extern battle_image_location_t g_bunit_panel_item_icon_texture[];
 extern u8 g_bunit_panel_portrait_cell[];
 extern u8 g_bunit_panel_selected_editor_packets[];
 extern u8 g_bunit_panel_selected_large_number_image[];

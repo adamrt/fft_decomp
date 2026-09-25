@@ -103,7 +103,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
     }
 
     card_save_update_slot_scroll(g_card_save_list_cursor_index);
-    g_card_menu_window_rect_source = (card_window_rect_source_t*)g_card_save_slot_window_rect_source;
+    g_card_menu_window_rect_source = g_card_save_slot_window_rect_source;
     scrolling = g_card_save_menu_state != CARD_SAVE_MENU_SELECT_SAVE;
     for (index = 0, row = 0; index < CARD_SAVE_SLOT_COUNT; index++, row++) {
         while (g_card_save_slot_file_states[index] == CARD_SAVE_SLOT_UNAVAILABLE) {

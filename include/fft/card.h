@@ -88,7 +88,7 @@ typedef struct card_primitive_lists {
     u8 unknown_00[0x10];
     POLY_FT4* polygons;
     u8 unknown_14[0x28];
-    u8* tiles;
+    TILE* tiles;
 } card_primitive_lists_t;
 
 /*
@@ -109,7 +109,7 @@ typedef struct card_graphics_context {
     u8 unknown_04[0x0c];         /* 0x04 */
     POLY_FT4* polygons;          /* 0x10 */
     u8 unknown_14[0x28];         /* 0x14 */
-    u8* tiles;                   /* 0x3c: TILE pool, advanced in bytes by the initializer */
+    TILE* tiles;                 /* 0x3c: TILE pool */
     u8 unknown_40[0x20];         /* 0x40 */
     DRAWENV draw_environment;    /* 0x60 */
     DISPENV display_environment; /* 0xbc */
@@ -363,6 +363,12 @@ extern s32 g_card_thread_active_key;
 extern s32 g_card_thread_state;
 extern u8 g_card_thread_status_snapshot[16];
 
+/* Window rectangle source record; only the RECT at +6 is known. */
+typedef struct card_window_rect_source {
+    u8 unk_0[6];
+    RECT rect;
+} card_window_rect_source_t;
+
 /* Unnamed data, in address order. */
 extern void* g_battle_formation_screen_active;
 extern world_menu_entry_t g_card_save_checking_message_descriptor[];
@@ -374,7 +380,7 @@ extern s8 g_card_save_slot_scan_active;
 extern s8 g_card_save_format_delay_counter;
 extern s8 g_card_save_error_prompt_closing;
 extern card_window_command_t g_card_save_slot_window_command;
-extern u8 g_card_save_slot_window_rect_source[];
+extern card_window_rect_source_t g_card_save_slot_window_rect_source[];
 extern u8 g_card_save_list_input_armed;
 extern u8 g_card_save_overwrite_prompt_active;
 extern u16 g_card_text_clut_2_mode0;
@@ -392,12 +398,6 @@ extern s8 g_card_save_slot_scan_index;
 extern s8 g_card_free_block_count;
 extern s8 g_card_save_file_count;
 extern s8 g_card_save_scan_setup_step;
-/* Window rectangle source record; only the RECT at +6 is known. */
-typedef struct card_window_rect_source {
-    u8 unk_0[6];
-    RECT rect;
-} card_window_rect_source_t;
-
 extern card_window_rect_source_t* g_card_menu_window_rect_source;
 extern s32 g_card_menu_script_callback;
 
@@ -537,7 +537,7 @@ void card_gfx_enqueue_textured_quad(
 void card_gfx_enqueue_translucent_tile(const RECT* rect, const u8* color, s32 semitrans, s32 otag_index);
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
-    s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, u8* tiles);
+    s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles);
 void card_gfx_init_primitive_lists(card_primitive_lists_t* lists);
 void card_gfx_load_image_and_wait(RECT* rect, u32* data);
 void card_input_update_event_state(void* state, u32 input, s32 count_frame);
