@@ -6332,11 +6332,11 @@ typedef struct battle_map_mesh_quad_positions {
 } battle_map_mesh_quad_positions_t;
 
 typedef struct battle_map_mesh_triangle_normals {
-    SVECTOR normals[3];
+    SVECTOR vertex[3];
 } battle_map_mesh_triangle_normals_t;
 
 typedef struct battle_map_mesh_quad_normals {
-    SVECTOR normals[4];
+    SVECTOR vertex[4];
 } battle_map_mesh_quad_normals_t;
 
 /* Per-part start indices and counts stored after the mesh transform data. */

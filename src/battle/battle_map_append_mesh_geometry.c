@@ -171,15 +171,15 @@ void battle_map_append_mesh_geometry(u16* geometry_data, battle_map_mesh_part_me
         polygon_end_copy = polygon_end;
         destination_offset = index * 0x18;
         do {
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[0].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[0].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[0].vz);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[1].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[1].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[1].vz);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[2].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[2].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].normals[2].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[0].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[0].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[0].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[1].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[1].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[1].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[2].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[2].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_normals[0].vertex[2].vz);
             index++;
             destination_offset += 0x18;
         } while (index < polygon_end_copy);
@@ -192,18 +192,18 @@ void battle_map_append_mesh_geometry(u16* geometry_data, battle_map_mesh_part_me
     if (has_polygons) {
         destination_byte_end <<= 5;
         do {
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[0].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[0].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[0].vz);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[1].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[1].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[1].vz);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[2].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[2].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[2].vz);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[3].vx);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[3].vy);
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].normals[3].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[0].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[0].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[0].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[1].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[1].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[1].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[2].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[2].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[2].vz);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[3].vx);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[3].vy);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_normals[0].vertex[3].vz);
             destination_offset += 0x20;
         } while (destination_offset < destination_byte_end);
     }

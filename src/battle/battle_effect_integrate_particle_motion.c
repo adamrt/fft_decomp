@@ -10,7 +10,8 @@ typedef struct battle_effect_particle {
     s16 target_x;                        /* 0x3c */
     s16 target_y;                        /* 0x3e */
     s16 target_z;                        /* 0x40 */
-    u8 _unused_42[3];                    /* 0x42 */
+    s16 lifetime;                        /* 0x42 */
+    u8 _unused_44;                       /* 0x44 */
     u8 curve_track;                      /* 0x45 */
     u8 _unused_46[4];                    /* 0x46 */
     s16 attract_weight;                  /* 0x4a */
