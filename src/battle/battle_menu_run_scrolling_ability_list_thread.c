@@ -374,7 +374,7 @@ void battle_menu_run_scrolling_ability_list_thread(void) {
         if (battle_menu_should_close_thread(&g_battle_script_event_input) != 0) {
             break;
         }
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&page->icons);
+        battle_menu_configure_frame_cluts(&page->icons);
         battle_set_menu_sprite_clut_variant_1(page->icons.extra[0]);
         battle_set_menu_sprite_clut_variant_1(page->icons.extra[1]);
         battle_set_menu_sprite_clut_variant_1(page->icons.extra[2]);

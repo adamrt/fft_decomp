@@ -3,8 +3,6 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-struct menu_frame_sprites;
-
 /* Menu window thread without a cursor: rebuilds the text image every seventh
  * frame and alternates between two sprite records until the menu closes. The
  * BUNIT twin of world_menu_icon_strip_thread. */
@@ -42,8 +40,8 @@ void bunit_menu_run_simple_selection_thread(void) {
             break;
         }
         record = &records[i & 1];
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)record);
-        battle_menu_submit_frame_primitives((struct battle_menu_frame_primitives*)record);
+        battle_menu_configure_frame_cluts(record);
+        battle_menu_submit_frame_primitives(record);
     }
     battle_thread_yield();
     battle_thread_exit_current();

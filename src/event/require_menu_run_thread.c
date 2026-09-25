@@ -4,7 +4,6 @@
 #include "fft/require.h"
 #include "psx/types.h"
 
-struct menu_frame_sprites;
 struct world_menu_icon_thread_param;
 struct world_menu_icon_sprites;
 
@@ -59,10 +58,10 @@ void require_menu_run_thread(void) {
         battle_menu_update_selection_from_input(state, &cursor);
         battle_menu_handle_action(state, cursor);
         battle_handle_menu_cancel_input(state);
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)record);
+        battle_menu_configure_frame_cluts(record);
         battle_update_menu_cursor_primitives(
             (struct world_menu_icon_thread_param*)state, (struct world_menu_icon_sprites*)record, i, cursor);
-        battle_menu_submit_frame_primitives((struct battle_menu_frame_primitives*)record);
+        battle_menu_submit_frame_primitives(record);
     }
     battle_thread_yield();
     battle_thread_exit_current();

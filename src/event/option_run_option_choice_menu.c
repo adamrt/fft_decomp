@@ -25,9 +25,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-struct menu_frame_sprites;
-struct battle_menu_frame_primitives;
-
 extern world_input_timing_profile_t g_option_input_repeat_timings[];
 
 void option_run_option_choice_menu(void) {
@@ -41,7 +38,7 @@ void option_run_option_choice_menu(void) {
     u32* buffer;
     s32 i;
     s32 cursor;
-    u8* record;
+    battle_menu_window_record_t* record;
 
     input = battle_script_get_controller_input_pointer(0);
     battle_script_get_controller_input_pointer(1);
@@ -80,16 +77,16 @@ void option_run_option_choice_menu(void) {
         param->x = 0x1AE;
     }
     param->text_image.width -= 4;
-    battle_menu_build_window_sprites((battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param,
-        (battle_menu_window_record_t*)g_option_picker_icon_records[0]);
-    battle_copy_bytes(g_option_picker_icon_records[1], g_option_picker_icon_records[0], 0x7C);
+    battle_menu_build_window_sprites(
+        (battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param, &g_option_picker_icon_records[0]);
+    battle_copy_bytes(&g_option_picker_icon_records[1], &g_option_picker_icon_records[0], sizeof(*record));
     LoadImage(&rect, buffer);
     battle_menu_free_memory(buffer);
     battle_thread_wait_frames(1);
     cursor = g_option_current_values[kind];
     for (width = 0;; width++) {
         battle_menu_should_close_thread((s32*)input);
-        record = g_option_picker_icon_records[width & 1];
+        record = &g_option_picker_icon_records[width & 1];
         if (battle_menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {
                 g_sound_effect_id_to_play = MAIN_SFX_CANCEL;
@@ -135,9 +132,9 @@ void option_run_option_choice_menu(void) {
                 g_sound_effect_id_to_play = MAIN_SFX_CURSOR_MOVE;
             }
         }
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)record);
+        battle_menu_configure_frame_cluts(record);
         battle_update_menu_cursor_primitives(param, (world_menu_icon_sprites_t*)record, width, cursor);
-        battle_menu_submit_frame_primitives((struct battle_menu_frame_primitives*)record);
+        battle_menu_submit_frame_primitives(record);
         battle_thread_wait_frames(1);
     }
     g_main_game_options.fields.cursor_movement = g_option_current_values[GAME_OPTION_CURSOR_MOVEMENT];

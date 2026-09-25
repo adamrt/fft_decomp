@@ -58,17 +58,17 @@ void battle_menu_icon_linked_entry_thread(void) {
         }
         if (parent >= 0) {
             g_battle_current_thread_id--;
-            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&records[i & 1]);
+            battle_menu_configure_frame_cluts(&records[i & 1]);
             g_battle_current_thread_id++;
         } else {
-            battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&records[i & 1]);
+            battle_menu_configure_frame_cluts(&records[i & 1]);
         }
         record = &records[i & 1];
         battle_update_menu_cursor_primitives(
             (world_menu_icon_thread_param_t*)param, (world_menu_icon_sprites_t*)record, i, -1);
         battle_menu_handle_action(param, 0);
         battle_handle_menu_cancel_input(param);
-        battle_menu_submit_frame_primitives((struct battle_menu_frame_primitives*)record);
+        battle_menu_submit_frame_primitives(record);
     }
     g_battle_sound_suppressed = 0;
     battle_thread_yield();

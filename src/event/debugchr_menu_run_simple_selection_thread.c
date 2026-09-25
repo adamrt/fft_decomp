@@ -6,25 +6,22 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-struct menu_frame_sprites;
-
 void debugchr_menu_run_simple_selection_thread(void) {
     u8 local_10[8];
-    u8 frames[0xf8];
-    u8* frame_pair;
-    u8* frame_base;
+    battle_menu_window_record_t frames[2];
+    battle_menu_window_record_t* frame_pair;
+    battle_menu_window_record_t* frame_base;
     s32* display_x;
     s32 done = 0;
     s32 frame;
     s32 redraw;
     u32* render;
     s32 frame_parity;
-    s32 frame_offset;
     battle_menu_idle_action_entry_t* state = (battle_menu_idle_action_entry_t*)battle_thread_get_current_parameter_1();
 
     frame_pair = frames;
     battle_menu_build_window_sprites(local_10, state, frame_pair);
-    battle_copy_bytes(frame_pair + 0x7c, frame_pair, 0x7c);
+    battle_copy_bytes(&frame_pair[1], frame_pair, sizeof(*frame_pair));
     redraw = 1;
     frame = 0;
     display_x = &g_menu_inner_window_width;
@@ -47,11 +44,8 @@ void debugchr_menu_run_simple_selection_thread(void) {
         if (battle_menu_should_close_thread(&done) != 0)
             break;
         frame_parity = frame & 1;
-        frame_offset = frame_parity << 5;
-        frame_offset -= frame_parity;
-        frame_offset <<= 2;
-        frame_pair = frame_base + frame_offset;
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)frame_pair);
+        frame_pair = &frame_base[frame_parity];
+        battle_menu_configure_frame_cluts(frame_pair);
         battle_menu_submit_frame_primitives(frame_pair);
         frame++;
     }

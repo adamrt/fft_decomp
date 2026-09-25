@@ -3489,15 +3489,14 @@ void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_misc_data_t* 
 void update_unit_action_statuses(battle_stats_t* unit, s32 action_state);
 
 struct battle_event_input_state;
-struct battle_menu_frame_primitives;
-struct menu_frame_sprites;
+struct battle_menu_window_record;
 struct world_menu_icon_sprites;
 struct world_menu_icon_thread_param;
 
 extern s32 g_battle_post_battle_unit_changes_active;
 
 void battle_action_copy_at_and_cursor_to(void* banner, void* unit, void* billboard, void* cursor_tile);
-void battle_menu_configure_frame_cluts(struct menu_frame_sprites* frame);
+void battle_menu_configure_frame_cluts(struct battle_menu_window_record* frame);
 extern CVECTOR g_battle_map_white_cvector;
 /* Default vectors shared with battle_process_map_gns_record, which emits them. */
 extern SVECTOR g_battle_map_zero_svector;
@@ -3642,7 +3641,7 @@ void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 void battle_menu_run_icon_selection_loop(void);
 void battle_menu_select_sprite_clut(SPRT* sprite);
 void battle_menu_set_disabled_texture_window(u8* menu);
-void battle_menu_submit_frame_primitives(struct battle_menu_frame_primitives* frame);
+void battle_menu_submit_frame_primitives(struct battle_menu_window_record* frame);
 void battle_menu_update_selection_from_input(battle_menu_idle_action_entry_t* ctx, s32* sel);
 void battle_script_load_event_input_state(const struct battle_event_input_state* saved);
 s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id);

@@ -21,9 +21,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-struct menu_frame_sprites;
-struct battle_menu_frame_primitives;
-
 void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
     const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
@@ -305,13 +302,13 @@ void option_build_at_list(void) {
         battle_gfx_draw_or_append_gpu_primitive(frame);
         battle_gfx_draw_or_append_gpu_primitive(&page->text_mode);
         battle_gfx_draw_or_append_gpu_primitive(&page->draw_areas);
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&page->icons.base);
+        battle_menu_configure_frame_cluts((battle_menu_window_record_t*)&page->icons.base);
         battle_update_menu_cursor_primitives((world_menu_icon_thread_param_t*)entry, &page->icons.base, i, cursor);
         i++;
         page->icons.base.sprites[0].x0 = 1000;
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
-        battle_menu_submit_frame_primitives((struct battle_menu_frame_primitives*)&page->icons.base);
+        battle_menu_submit_frame_primitives((battle_menu_window_record_t*)&page->icons.base);
     }
     battle_thread_set_parameters(g_battle_current_thread_id + 1, 0, 0, 1);
     battle_thread_yield();

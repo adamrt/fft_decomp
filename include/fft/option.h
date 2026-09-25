@@ -2,6 +2,7 @@
 #define FFT_OPTION_H
 
 #include "fft/battle_menu_status_panel.h"
+#include "fft/battle_menu_window.h"
 #include "fft/battle_runtime.h"
 #include "fft/menu_types.h"
 #include "fft/thread.h"
@@ -214,7 +215,7 @@ extern RECT g_option_menu_entry_panel_rect;
 extern struct world_menu_icon_thread_param g_option_menu_icon_thread_param;
 extern RECT g_option_menu_title_image_rect;
 extern RECT g_option_menu_value_image_rect;
-extern u8 g_option_picker_icon_records[2][0x7C];
+extern battle_menu_window_record_t g_option_picker_icon_records[2];
 extern s32 g_option_value_text_id_bases[];
 
 void option_menu_run_dead_unit_panel_a(void);

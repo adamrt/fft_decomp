@@ -37,7 +37,6 @@ typedef struct option_menu_page {
 
 typedef char option_menu_page_size_must_be_0x190[(sizeof(option_menu_page_t) == 0x190) ? 1 : -1];
 
-struct menu_frame_sprites;
 void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
     const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
@@ -289,7 +288,7 @@ void option_build_options_menu(void) {
                 entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
-        battle_menu_configure_frame_cluts((struct menu_frame_sprites*)&page->icons);
+        battle_menu_configure_frame_cluts(&page->icons);
         battle_update_menu_cursor_primitives(
             (world_menu_icon_thread_param_t*)entry, (world_menu_icon_sprites_t*)&page->icons, i, cursor);
         page->icons.sprites[1].y0 += 2;
