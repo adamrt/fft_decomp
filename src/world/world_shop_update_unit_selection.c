@@ -3,8 +3,6 @@
 #include "psx/libc.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /*
  * Restage the formation unit when the selection changes and step the unit
  * banner slide.

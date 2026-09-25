@@ -5,8 +5,6 @@
 #include "psx/libc.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /* Shop fitting-room equipment step, the shop twin of world_formation_run_equip_item_menu.
  *
  * With the slot list active, steps the equipment-slot cursor and shows the

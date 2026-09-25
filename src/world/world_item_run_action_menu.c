@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /*
  * Run the formation item-menu action strip (menu mode 2) and return the next
  * item-menu mode: 5 while the strip stays open, 2 once an action completes.

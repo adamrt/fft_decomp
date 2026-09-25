@@ -2240,6 +2240,7 @@ extern world_gfx_sprite_desc_t g_world_formation_label_equipping;
 extern world_gfx_sprite_desc_t g_world_formation_label_leaving;
 extern world_gfx_sprite_desc_t g_world_formation_unit_dot_sprite;
 extern world_gfx_sprite_desc_t g_world_formation_label_missing;
+extern world_order_menu_entry_t g_world_formation_panel_windows[];
 extern battle_menu_sprite_cell_t g_world_formation_label_tiles[];
 extern battle_menu_sprite_cell_t g_world_formation_label_tiles_bottom[];
 extern s8 g_world_formation_dot_glow_timer;
@@ -2364,6 +2365,7 @@ extern s16 g_world_menu_list_row_text_ids[];
 extern u16 g_world_menu_list_cursor_anim;
 extern u16 g_world_menu_scroll_hold_counter;
 extern s16 g_world_menu_text_redraw_request;
+extern s16 g_world_menu_pending_selection[4];
 extern u8 g_world_unit_status_banner_active;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialised */

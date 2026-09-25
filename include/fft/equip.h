@@ -561,7 +561,7 @@ s32 equip_menu_update_item_action_state(void);
 
 /* panel */
 void equip_panel_set_primitive_colors(
-    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
+    battle_menu_status_panel_buffer_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 
 /* set */
 

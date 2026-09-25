@@ -1,16 +1,14 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
-extern s32 battle_unit_get_facing_nibble_by_misc_id(u32 misc_id);
 
 /* BATTLE twin of world_unit_reset_animation_states: clears the per-unit
  * facing/animation records for all simulation slots and reseeds each unit's
  * facing from its misc data, or 0xff when the slot is empty. */
 void battle_unit_reset_animation_states(void) {
-    world_unit_animation_state_t* state;
+    battle_unit_rotation_state_t* state;
     s32 i;
 
     i = 0;

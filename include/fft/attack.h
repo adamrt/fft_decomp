@@ -253,7 +253,7 @@ void attack_gfx_set_scaled_poly_ft4_geometry(POLY_FT4* poly, attack_gfx_texture_
 
 /* panel */
 void attack_panel_set_primitive_colors(
-    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
+    battle_menu_status_panel_buffer_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 
 /* map */
 /* Scenario interpreter interfaces shared by battle_script_execute_event and

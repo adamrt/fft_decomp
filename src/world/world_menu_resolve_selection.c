@@ -3,7 +3,8 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Command and option use their s16 slots' low bytes; item uses its full halfword. */
+/* The selection slots are four halfwords. Command and option use their low
+ * bytes; item uses its full halfword. */
 typedef struct {
     u8 command;
     u8 pad1;
@@ -12,11 +13,6 @@ typedef struct {
     u16 item;
     u16 unused;
 } world_menu_selection_t;
-
-/* The selection slots are four halfwords (world_menu_update_menus_and_event_speed
- * fills g_world_menu_pending_selection[0..3] with -2). The first three have packed command,
- * option, and item fields; the fourth remains a separate result slot. */
-extern s16 g_world_menu_pending_selection[];
 
 /**
  * Resolve the pending action-menu command, option, and item selection.

@@ -6,8 +6,6 @@
 #include "psx/libc.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /* Run the formation "Equip" item menu: step the slot cursor, open the item
  * list for the selected slot, equip the highlighted item and keep the stat
  * preview in sync. Returns 0 when the menu is cancelled, 1 otherwise.

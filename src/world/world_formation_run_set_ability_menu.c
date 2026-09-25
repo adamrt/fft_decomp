@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /*
  * Run the formation Set Ability menu for the selected unit.
  *

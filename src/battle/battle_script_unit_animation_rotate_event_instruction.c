@@ -1,8 +1,7 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 /*
  * Parameters: 0x00 unit id (halfword), 0x02 rotation, 0x03 animation id
@@ -15,7 +14,7 @@ void battle_script_unit_animation_rotate_event_instruction(const u8* parameters)
     s16 call_misc_id;
     s16 misc_id;
     s32 index;
-    world_unit_animation_state_t* rotation_state;
+    battle_unit_rotation_state_t* rotation_state;
 
     misc_id = battle_script_load_halfword(data);
     rotation = data[2];

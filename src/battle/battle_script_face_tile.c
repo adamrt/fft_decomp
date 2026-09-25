@@ -1,9 +1,8 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/event.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 /*
  * Event instruction 0x69 (FaceTile): turn the addressed unit(s) to face a tile.
@@ -20,7 +19,7 @@ s32 battle_script_face_tile(u8* parameters) {
     u16 unit_id;
     s32 state;
     s32 i;
-    world_unit_animation_state_t* rotation_state;
+    battle_unit_rotation_state_t* rotation_state;
     s32 order;
     s32 facing;
     s32 dx;

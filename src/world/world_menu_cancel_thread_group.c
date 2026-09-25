@@ -3,8 +3,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s16 g_world_menu_pending_selection[];
-
 /* On the cancel button, flag the context's thread group as finished,
  * demote every waiting thread task (1 -> 3) and report -1 to the caller. */
 void world_menu_cancel_thread_group(world_menu_cancel_context_t* context) {

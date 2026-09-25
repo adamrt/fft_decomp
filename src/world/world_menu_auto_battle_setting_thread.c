@@ -6,8 +6,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s16 g_world_menu_pending_selection[];
-
 /* Formation-screen auto-battle setting menu thread.
  *
  * The cursor starts at the stored unit's auto_battle_setting (0, 0xC, 0xE,

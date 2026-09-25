@@ -1,9 +1,8 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/event.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 /*
  * WarpUnit event instruction: move an ENTD unit to a new tile and facing.
@@ -18,7 +17,7 @@ void battle_script_warp_unit(const u8* parameters) {
     s32 result;
     s16 unit_id;
     s16 tile[3];
-    world_unit_animation_state_t* rotation_state;
+    battle_unit_rotation_state_t* rotation_state;
 
     unit_id = battle_script_load_halfword(parameters);
     /* Remaining operands: x, y, higher elevation, facing. */

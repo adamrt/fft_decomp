@@ -611,7 +611,7 @@ void bunit_run_numeric_editor_thread(void);
 
 /* panel */
 void bunit_panel_set_primitive_colors(
-    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
+    battle_menu_status_panel_buffer_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 
 /* text */
 void bunit_text_render_decimal_entry_list(s32 pixels, battle_menu_status_panel_gauge_entry_t* entries,

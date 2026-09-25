@@ -1,9 +1,8 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/event.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 void battle_script_waitrotateunit_and_waitrotateall_event_instruction(s32 unit_id) {
     s32 i;

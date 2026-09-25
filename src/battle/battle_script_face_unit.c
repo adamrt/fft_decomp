@@ -1,12 +1,9 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/event.h"
 #include "fft/world.h"
 #include "psx/gte.h"
 #include "psx/types.h"
-
-/* Same seven-byte rotation records as g_world_unit_animation_states. */
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
-/* Unit ids tested by battle_script_filter_unit_id_by_mode, one per unit index. */
 
 /* Battle twin of world_script_face_unit. FaceUnit and FaceUnit2 event instructions:
  * turn two units toward each other.
@@ -29,7 +26,7 @@ void battle_script_face_unit(const u8* parameters, s32 second_only) {
     s32 reverse;
     s32 dx;
     s32 dy;
-    world_unit_animation_state_t* state;
+    battle_unit_rotation_state_t* state;
 
     order = 1;
     misc_id = battle_script_load_halfword(parameters);

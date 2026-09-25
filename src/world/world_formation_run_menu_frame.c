@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 extern u8 g_main_menu_scroll_accel_delay, g_main_menu_scroll_slow_step, g_main_menu_scroll_fast_step;
-extern s16 g_world_menu_pending_selection[4];
+
 /* The six input words at 0x801aed44 are g_world_formation_menu_input_state,
  * but a struct global makes GCC keep a base register for the field accesses
  * (see world_script_update_event_frame_input), so they are separate scalars here. */

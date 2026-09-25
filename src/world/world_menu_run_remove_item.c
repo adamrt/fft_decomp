@@ -5,8 +5,6 @@
 #include "psx/libc.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /* Handle single-slot removal and the remove-all confirmation.
  */
 s32 world_menu_run_remove_item(void) {

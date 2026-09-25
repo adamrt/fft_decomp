@@ -3,8 +3,6 @@
 #include "fft/thread.h"
 #include "fft/world.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /*
  * Run the "best fit" equipment menu: build the suggested set once, then run
  * the confirmation thread. On confirm, return the current equipment to the

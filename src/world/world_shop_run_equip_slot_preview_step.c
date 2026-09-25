@@ -4,8 +4,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /* Fitting-room counterpart of world_menu_run_remove_item: takes one equipment
  * slot off the selected unit, refunding a shop item's price from the fitting
  * room cost, and previews the stat change of the slot under the cursor

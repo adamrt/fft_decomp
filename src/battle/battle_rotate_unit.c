@@ -1,12 +1,9 @@
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/event.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern s32 battle_unit_get_facing_nibble_by_misc_id(u32 misc_id);
-/* 7 bytes per misc unit, shared layout with the WORLD rotation table. */
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 /* RotateUnit event instruction: turn the addressed unit(s) to a facing.
  *
@@ -27,7 +24,7 @@ void battle_rotate_unit(const u8* parameters) {
     s32 facing;
     s32 remaining;
     s32 restore_misc_index;
-    world_unit_animation_state_t* state;
+    battle_unit_rotation_state_t* state;
 
     order = 1;
     unit_id = battle_script_load_halfword(parameters);

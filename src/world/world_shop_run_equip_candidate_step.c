@@ -6,8 +6,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 extern void world_formation_update_and_draw_unit_grid(s32, s32, s32, s32, s32, s32 (*)(s32), s32 (*)(s32));
 
 /*

@@ -153,7 +153,7 @@ void bunit_panel_run_character_status_thread(void) {
         screen->draw_offsets[1].x = -0x80;
         screen->draw_offsets[1].y = g_bunit_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
-        bunit_panel_set_primitive_colors((battle_menu_status_panel_primitives_t*)screen, thread);
+        bunit_panel_set_primitive_colors(screen, thread);
         bunit_gfx_apply_menu_palette_for_mode((s32)&screen->numeric_frame, (s32*)thread);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&DRAW_AREA(screen)->areas[1]);

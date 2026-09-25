@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/pad.h"
 
-extern s16 g_world_menu_pending_selection[];
-
 /* Take the confirmed action for menu row row_index: start the linked menu
  * thread, or close the requested number of menu levels, then store the row as
  * the menu's selection.

@@ -13,8 +13,6 @@
 #include "fft/world.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 s32 world_item_run_category_menu(void) {
     s16 x;
     s16 y;

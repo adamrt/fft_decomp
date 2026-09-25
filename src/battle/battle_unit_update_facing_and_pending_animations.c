@@ -1,12 +1,9 @@
 #include "fft/battle.h"
 #include "fft/battle_move.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern s32 battle_unit_get_facing_nibble_by_misc_id(u32 misc_id);
-/* Same seven-byte rotation records as g_world_unit_animation_states. */
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 /* Battle twin of world_unit_update_facing_and_pending_animations: per frame,
  * apply pending animations to units that stopped moving and step each rotating
@@ -17,7 +14,7 @@ void battle_unit_update_facing_and_pending_animations(void) {
     s32 current;
     s32 next;
     s32 moving;
-    world_unit_animation_state_t* state;
+    battle_unit_rotation_state_t* state;
 
     state = g_battle_unit_misc_rotation_data;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {

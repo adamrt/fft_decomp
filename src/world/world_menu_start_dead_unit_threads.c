@@ -6,8 +6,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s16 g_world_menu_pending_selection[]; /* panel active */
-
 extern s32 get_total_equipment_quantity(s32 item_id, s32 include_equipped);
 
 /* Installs the dead-unit result panel as the active menu descriptor, rebuilds

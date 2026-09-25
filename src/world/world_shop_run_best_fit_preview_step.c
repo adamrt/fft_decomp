@@ -5,8 +5,6 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /*
  * Shop "best fit / fitting room" preview step, entry 8 of the shop callback
  * table at 0x8019525c.

@@ -3,8 +3,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-extern s16 g_world_menu_pending_selection[];
-
 /*
  * Thread body: loads overlay files 9 and 10, runs the companion overlay
  * with state 4 until it finishes, then restarts menu threads 9..14 and

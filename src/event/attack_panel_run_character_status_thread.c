@@ -156,7 +156,7 @@ void attack_panel_run_character_status_thread(void) {
         screen->draw_offsets[1].x = -0x80;
         screen->draw_offsets[1].y = g_attack_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
-        attack_panel_set_primitive_colors((battle_menu_status_panel_primitives_t*)screen, thread);
+        attack_panel_set_primitive_colors(screen, thread);
         attack_gfx_apply_menu_palette_for_mode((s32)&screen->numeric_frame, (s32*)thread);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->portrait.areas[1]);

@@ -1,8 +1,7 @@
 #include "fft/battle.h"
+#include "fft/battle_unit_rotation.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_animation_state_t g_battle_unit_misc_rotation_data[];
 
 /* Provisional: three-halfword map coordinate staged for
  * battle_unit_place_in_new_location. The WORLD twin stages the same triple in
@@ -17,7 +16,7 @@ extern battle_unit_coordinates_t g_battle_script_warp_coords;
 
 void battle_script_warp_unit_display_to_paired_unit(s32 misc_id) {
     battle_stats_t* unit;
-    world_unit_animation_state_t* state;
+    battle_unit_rotation_state_t* state;
     s32 facing;
     s32 battle_id;
 

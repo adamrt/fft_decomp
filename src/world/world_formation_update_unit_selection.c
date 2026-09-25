@@ -3,8 +3,6 @@
 #include "psx/libc.h"
 #include "psx/pad.h"
 
-extern world_order_menu_entry_t g_world_formation_panel_windows[];
-
 /*
  * Refresh formation-screen state after the selected unit may have changed.
  *

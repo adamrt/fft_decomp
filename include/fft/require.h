@@ -196,7 +196,7 @@ void require_overlay_open_jobstts(void);
 /* panel */
 void require_panel_copy_battle_stats_to_gauges(struct battle_stats* unit, battle_menu_status_panel_gauges_t* output);
 void require_panel_set_primitive_colors(
-    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
+    battle_menu_status_panel_buffer_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 
 /* party */
 void require_party_apply_permanent_brave_faith_changes(void);

@@ -169,7 +169,7 @@ void debugchr_gfx_set_clut_rect_from_id(RECT* rect, s32 packed);
 /* panel */
 void debugchr_panel_copy_unit_data_to_billboard(battle_stats_t* unit, u8* output);
 void debugchr_panel_set_primitive_colors(
-    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
+    battle_menu_status_panel_buffer_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 void debugchr_panel_run_character_status_thread(void);
 
 /* text */
