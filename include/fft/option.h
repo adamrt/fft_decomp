@@ -50,12 +50,13 @@ typedef struct option_menu_text_layout {
     s16* text_colors[3]; /* 0x1c */
 } option_menu_text_layout_t;
 
-/* Provisional: only the two fields option_menu_render_entries reads are
- * established; the layout otherwise follows world_menu_entry_t (0x3c bytes). */
+/* OPTION's text-menu view of the 0x3c-byte menu record. */
 typedef struct option_menu_entry {
-    u8 _pad00[0x04];
+    u16 vram_x;      /* 0x00 */
+    u16 vram_y;      /* 0x02 */
     s16 inner_width; /* 0x04: rect width * 4 */
-    u8 _pad06[0x30 - 0x06];
+    u16 inner_height; /* 0x06 */
+    u8 _pad08[0x30 - 0x08];
     option_menu_text_layout_t* text_binding; /* 0x30 */
 } option_menu_entry_t;
 
@@ -215,7 +216,7 @@ extern u8 g_option_picker_icon_records[2][0x7C];
 extern s32 g_option_value_text_id_bases[];
 
 void option_menu_run_dead_unit_panel_a(void);
-void* option_menu_update_scroll(u8* menu, s32* first_row, s32* render_pending);
+void* option_menu_update_scroll(option_menu_entry_t* menu, s32* first_row, s32* render_pending);
 void option_run_option_choice_menu(void);
 
 #endif

@@ -9,7 +9,7 @@
 /* option_scroll_layout_t lives in fft/option.h. */
 
 /* Apply scroll input, rebuild the menu image, and upload the changed region. */
-void* option_menu_update_scroll(u8* menu, s32* first_row, s32* render_pending) {
+void* option_menu_update_scroll(option_menu_entry_t* menu, s32* first_row, s32* render_pending) {
     RECT source;
     RECT clear_strip;
     option_scroll_layout_t* layout;
@@ -17,13 +17,13 @@ void* option_menu_update_scroll(u8* menu, s32* first_row, s32* render_pending) {
     u32* secondary_input;
     s32 changed;
 
-    layout = *(option_scroll_layout_t**)(menu + 0x30);
+    layout = (option_scroll_layout_t*)menu->text_binding;
     primary_input = battle_script_get_controller_input_pointer(0);
     secondary_input = battle_script_get_controller_input_pointer(1);
-    source.x = *(u16*)(menu + 0);
-    source.y = *(u16*)(menu + 2);
-    source.w = *(s16*)(menu + 4) >> 2;
-    source.h = *(u16*)(menu + 6);
+    source.x = menu->vram_x;
+    source.y = menu->vram_y;
+    source.w = menu->inner_width >> 2;
+    source.h = menu->inner_height;
     changed = 0;
 
     if (g_battle_menu_input_disabled != 0) {
@@ -58,8 +58,8 @@ void* option_menu_update_scroll(u8* menu, s32* first_row, s32* render_pending) {
         return 0;
     }
 
-    battle_clear_menu_render_buffer(g_option_menu_render_buffer, (*(s16*)(menu + 4) * *(s16*)(menu + 6)) / 2);
-    option_menu_render_entries((option_menu_entry_t*)menu, first_row, (void*)g_option_menu_render_buffer);
+    battle_clear_menu_render_buffer(g_option_menu_render_buffer, (menu->inner_width * *(s16*)&menu->inner_height) / 2);
+    option_menu_render_entries(menu, first_row, (void*)g_option_menu_render_buffer);
     *render_pending = 0;
     LoadImage(&source, (u32*)g_option_menu_render_buffer);
     battle_copy_bytes(&clear_strip, &source, sizeof(RECT));
