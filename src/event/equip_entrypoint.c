@@ -18,7 +18,7 @@ s32 equip_entrypoint(s32 unit, void* otag) {
 
     if (g_equip_menu_screen_state == 0) {
         equip_menu_init_screen(unit);
-        bcopy((u8*)g_equip_unit_data[0] + 0x54, g_equip_unit_initial_equipment, 0xA);
+        bcopy(g_equip_unit_data[0]->equipment, g_equip_unit_initial_equipment, 0xA);
         g_equip_menu_screen_state = 1;
     }
     g_equip_gfx_render_otag = otag;

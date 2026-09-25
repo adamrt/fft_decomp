@@ -10,7 +10,7 @@ s32 equip_unit_can_equip_item(s16 unit_index, s32 g_main_item_item_flags) {
     if (equip_item_get_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
         return -1;
     }
-    equip_bits_init_primary_reader((u8*)g_equip_unit_data[unit_index] + 0x70);
+    equip_bits_init_primary_reader(g_equip_unit_data[unit_index]->equipment_categories);
     equip_bits_read_primary(equip_item_get_type(item_id));
     if (equip_bits_read_primary(1) == 0) {
         result = -1;
