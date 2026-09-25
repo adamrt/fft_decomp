@@ -56,11 +56,10 @@ s32 battle_effect_summon_charge_secondary_handler(void) {
             j = g_battle_effect_current_secondary->slot_ids[i] = battle_effect_alloc_slot();
             if (j != 0) {
                 slot = &g_battle_effect_slots[j];
-                ((battle_effect_slot_t*)slot)->life = battle_effect_spawn_particle_motion(
+                slot->life = battle_effect_spawn_particle_motion(
                     (battle_effect_emitter_values_t*)((u8*)&g_battle_effect_groups[BATTLE_EFFECT_RING_GROUP] - 2),
                     &slot->motion);
-                battle_effect_init_trap_animation(
-                    BATTLE_EFFECT_RING_GROUP, BATTLE_EFFECT_RING_ANIMATION, (battle_effect_slot_t*)slot);
+                battle_effect_init_trap_animation(BATTLE_EFFECT_RING_GROUP, BATTLE_EFFECT_RING_ANIMATION, slot);
             }
         }
         g_battle_effect_current_secondary->timer = 0;

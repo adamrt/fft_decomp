@@ -13,14 +13,6 @@ typedef struct battle_effect_secondary_target_fields {
     u8 result_animation; /* 0x1d */
 } battle_effect_secondary_target_fields_t;
 
-/* Provisional view of the effect slot's colour bytes. */
-typedef struct battle_effect_colour_slot {
-    u8 _unknown_00[0x84];
-    u8 r; /* 0x84 */
-    u8 g; /* 0x85 */
-    u8 b; /* 0x86 */
-} battle_effect_colour_slot_t;
-
 /* Provisional 0x28-byte heap state kept in the secondary effect's allocation. */
 typedef struct battle_effect_burst_state {
     s32 frame;    /* 0x00 */
@@ -126,8 +118,7 @@ s32 battle_effect_glowing_tar_secondary_handler(void) {
                     slot->life = battle_effect_spawn_particle_motion(
                         (battle_effect_emitter_values_t*)((u8*)&g_battle_effect_groups[group] - 2), &slot->motion);
                     battle_effect_init_trap_animation(1, 0x7aca, slot);
-                    ((battle_effect_colour_slot_t*)slot)->r = ((battle_effect_colour_slot_t*)slot)->g
-                        = ((battle_effect_colour_slot_t*)slot)->b = 0xff;
+                    slot->red = slot->green = slot->blue = 0xff;
                     state->count_b++;
                     if (state->count_b == 16) {
                         break;
