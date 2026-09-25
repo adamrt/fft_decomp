@@ -28,7 +28,7 @@ void equip_menu_open_submenu_thread(void) {
     u16 child_id;
     u16 task_arg;
 
-    thread = *(equip_event_thread_t**)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads);
+    thread = (equip_event_thread_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     thread->task->func();
 
     input = battle_script_get_controller_input_pointer(0);

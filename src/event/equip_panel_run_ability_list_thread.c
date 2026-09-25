@@ -42,8 +42,7 @@ void equip_panel_run_ability_list_thread(void) {
     s32 id;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread = *(
-        equip_ability_panel_thread_t**)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads);
+    thread = (equip_ability_panel_thread_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_equip_input_controller = battle_script_get_controller_input_pointer(0);
     if (g_battle_current_thread_id == 10) {
         text = g_equip_panel_text_image_a;

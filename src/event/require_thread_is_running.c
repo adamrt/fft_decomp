@@ -2,6 +2,5 @@
 #include "psx/types.h"
 
 s32 require_thread_is_running(s32 thread_id) {
-    thread_id = (thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads;
-    return *(s32*)(thread_id + 0x48);
+    return g_battle_threads[thread_id].is_running;
 }

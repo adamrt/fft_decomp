@@ -32,8 +32,7 @@ void require_panel_run_character_status_thread(void) {
     status_panel_offset_pair_t* offsets;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_STATUS_PANEL);
-    thread
-        = *(status_panel_frame_config_t**)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads);
+    thread = (status_panel_frame_config_t*)g_battle_threads[g_battle_current_thread_id].function_parameter_1;
     g_require_input_controller = battle_script_get_controller_input_pointer(0);
     screen = g_require_panel_frames_a;
     base = g_require_panel_frames_a;
