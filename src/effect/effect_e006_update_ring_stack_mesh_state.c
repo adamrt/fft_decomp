@@ -41,7 +41,6 @@ s32 effect_e006_update_ring_stack_mesh_state(s32 record_index, s32 byte_offset, 
     s32 v_span;
     s32 buffer;
     u32* ot;
-    effect_state_t* state;
     effect_record_t* record;
     s32 abe;
     POLY_GT4* quad;
@@ -72,9 +71,8 @@ s32 effect_e006_update_ring_stack_mesh_state(s32 record_index, s32 byte_offset, 
     entry = (effect_ring_mesh_geometry_view_t*)&g_effect_geometry_table->entries[geometry_index];
     placement = entry->placement_flags;
     ot = main_gfx_get_otag();
-    state = (effect_state_t*)((u8*)record + byte_offset);
 
-    switch (state->phase) {
+    switch (record->phase[byte_offset]) {
     case EFFECT_PHASE_IDLE:
         break;
 
@@ -106,7 +104,7 @@ s32 effect_e006_update_ring_stack_mesh_state(s32 record_index, s32 byte_offset, 
         work->radius_offset = 0;
         work->radius_speed = 0;
         work->destroy_delay = 0;
-        ((effect_state_t*)((u8*)record + byte_offset))->phase = EFFECT_PHASE_UPDATE;
+        record->phase[byte_offset] = EFFECT_PHASE_UPDATE;
         break;
 
     case EFFECT_PHASE_UPDATE:
@@ -409,7 +407,7 @@ s32 effect_e006_update_ring_stack_mesh_state(s32 record_index, s32 byte_offset, 
             battle_heap_free_block(work);
             record->work_slots[byte_offset] = 0;
         }
-        state->phase = EFFECT_PHASE_IDLE;
+        record->phase[byte_offset] = EFFECT_PHASE_IDLE;
         break;
     }
 }
