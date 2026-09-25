@@ -8,7 +8,7 @@ u8* world_menu_script_draw_sprite(u8* cmd) {
     RECT rect;
     s32 y;
     s16 step;
-    s16* color;
+    CVECTOR* color;
 
     if (g_world_menu_use_scroll_position == 0) {
         y = cmd[4];
@@ -26,7 +26,7 @@ u8* world_menu_script_draw_sprite(u8* cmd) {
     if (cmd[0] == 4) {
         color = 0;
     } else {
-        color = (s16*)&g_world_menu_sprite_color;
+        color = &g_world_menu_sprite_color;
     }
     world_gfx_enqueue_textured_quad(&rect, cmd[7], cmd[8], color, g_world_menu_semi_trans, g_world_menu_texture_page,
         g_world_menu_clut, g_world_menu_draw_priority);

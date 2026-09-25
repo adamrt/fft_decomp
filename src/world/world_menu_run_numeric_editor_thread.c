@@ -18,11 +18,11 @@ void world_menu_run_numeric_editor_thread(void) {
     battle_menu_status_panel_numeric_buffer_t* buffer;
     battle_menu_status_panel_numeric_buffer_t* buffers;
     u8* text_pixels;
-    u8* entries;
-    u8* upload_a;
-    u8* upload_b;
-    u8* upload_c;
-    u8* descriptor;
+    world_menu_number_entry_t* entries;
+    RECT* upload_a;
+    RECT* upload_b;
+    RECT* upload_c;
+    world_gfx_image_load_parameters_t* descriptor;
     s32 i;
     s32 frame;
     s32 field_y;
@@ -35,18 +35,18 @@ void world_menu_run_numeric_editor_thread(void) {
         buffer = g_world_editor_numeric_state_a;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_a;
-        upload_a = g_world_editor_numeric_entries_a;
-        upload_b = g_world_editor_numeric_entries_b;
-        upload_c = g_world_editor_numeric_entries_c;
-        entries = g_world_editor_numeric_descriptor_a;
+        upload_a = (RECT*)g_world_editor_numeric_entries_a;
+        upload_b = (RECT*)g_world_editor_numeric_entries_b;
+        upload_c = (RECT*)g_world_editor_numeric_entries_c;
+        entries = (world_menu_number_entry_t*)g_world_editor_numeric_descriptor_a;
     } else {
         buffer = g_world_editor_numeric_state_b;
         buffers = buffer;
         text_pixels = g_world_editor_numeric_text_b;
-        upload_a = g_world_editor_numeric_entries_d;
-        upload_b = g_world_editor_numeric_entries_e;
-        upload_c = g_world_editor_numeric_entries_f;
-        entries = g_world_editor_numeric_descriptor_b;
+        upload_a = (RECT*)g_world_editor_numeric_entries_d;
+        upload_b = (RECT*)g_world_editor_numeric_entries_e;
+        upload_c = (RECT*)g_world_editor_numeric_entries_f;
+        entries = (world_menu_number_entry_t*)g_world_editor_numeric_descriptor_b;
     }
     world_gfx_set_image_draw_mode(&buffer->draw_modes[0], 0);
     world_gfx_set_image_draw_mode(&buffer->draw_modes[1], 2);
@@ -54,14 +54,13 @@ void world_menu_run_numeric_editor_thread(void) {
     world_menu_build_line_box((RECT*)g_world_editor_numeric_table, &buffer->numeric_frame);
     world_gfx_reset_record_texture_window_3(&buffer->portrait);
     i = 0;
-    descriptor = g_world_editor_numeric_texture;
+    descriptor = (world_gfx_image_load_parameters_t*)g_world_editor_numeric_texture;
     for (; i < 18; i++) {
         world_menu_init_sprite(&buffer->sprites[i]);
         world_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i],
             (const world_image_location_t*)g_world_editor_numeric_geometry,
-            (const world_image_location_t*)g_world_editor_numeric_table,
-            (const world_gfx_image_load_parameters_t*)descriptor);
-        descriptor += 0xC;
+            (const world_image_location_t*)g_world_editor_numeric_table, descriptor);
+        descriptor++;
     }
     if (g_world_thread_current_id != 12) {
         buffer->sprites[14].v0 += 0x4C;
@@ -78,37 +77,33 @@ void world_menu_run_numeric_editor_thread(void) {
             g_world_menu_text_state.stride = 0x14;
             world_menu_set_text_origin(0, 0);
             if (g_world_thread_current_id != 12) {
-                world_text_render_signed_gauge_entry_list((s32)text_pixels, (world_menu_number_entry_t*)entries,
-                    (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 3);
+                world_text_render_signed_gauge_entry_list(
+                    (s32)text_pixels, entries, (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 3);
             } else {
-                world_menu_draw_numeric_display_entries((s32)text_pixels, (world_menu_number_entry_t*)entries,
-                    (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 3);
+                world_menu_draw_numeric_display_entries(
+                    (s32)text_pixels, entries, (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 3);
             }
             g_world_menu_text_state.stride = 0x40;
             world_menu_set_text_origin(0, 0);
             if (g_world_thread_current_id != 12) {
-                world_text_render_signed_gauge_entry_list((s32)(text_pixels + 0x168),
-                    (world_menu_number_entry_t*)(entries + 0x24),
-                    (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 4);
+                world_text_render_signed_gauge_entry_list(
+                    (s32)(text_pixels + 0x168), entries + 3, (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 4);
             } else {
-                world_menu_draw_numeric_display_entries((s32)(text_pixels + 0x168),
-                    (world_menu_number_entry_t*)(entries + 0x24),
-                    (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 4);
+                world_menu_draw_numeric_display_entries(
+                    (s32)(text_pixels + 0x168), entries + 3, (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 4);
             }
             g_world_menu_text_state.stride = 0x64;
             world_menu_set_text_origin(0, 0);
             if (g_world_thread_current_id != 12) {
-                world_text_render_signed_gauge_entry_list((s32)(text_pixels + 0x468),
-                    (world_menu_number_entry_t*)(entries + 0x54),
-                    (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 8);
+                world_text_render_signed_gauge_entry_list(
+                    (s32)(text_pixels + 0x468), entries + 7, (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 8);
             } else {
-                world_menu_draw_numeric_display_entries((s32)(text_pixels + 0x468),
-                    (world_menu_number_entry_t*)(entries + 0x54),
-                    (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 8);
+                world_menu_draw_numeric_display_entries(
+                    (s32)(text_pixels + 0x468), entries + 7, (world_glyph_blit_t*)&g_world_menu_text_state.origin_x, 8);
             }
-            LoadImage((RECT*)upload_a, (u32*)text_pixels);
-            LoadImage((RECT*)upload_b, (u32*)(text_pixels + 0x168));
-            LoadImage((RECT*)upload_c, (u32*)(text_pixels + 0x468));
+            LoadImage(upload_a, (u32*)text_pixels);
+            LoadImage(upload_b, (u32*)(text_pixels + 0x168));
+            LoadImage(upload_c, (u32*)(text_pixels + 0x468));
         }
         field_y = (u16)g_world_frame_arg;
         use_offset = field_y != 0xF0;

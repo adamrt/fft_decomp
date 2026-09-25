@@ -33,7 +33,7 @@ extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s
  */
 void world_menu_labeled_number_entry_thread(void) {
     RECT rect;
-    u8 record[0x7C];
+    world_menu_icon_record_t record;
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
     s16 label_size[2];
@@ -61,7 +61,7 @@ void world_menu_labeled_number_entry_thread(void) {
     if (value < range->min || range->max < value) {
         value = range->min;
     }
-    world_menu_build_icon_record(&rect, (world_menu_icon_thread_param_t*)param, record);
+    world_menu_build_icon_record(&rect, (world_menu_icon_thread_param_t*)param, &record);
     for (i = 0; i < 2; i++) {
         world_menu_init_quad(&cursor_quads[i]);
         SetSemiTrans(&cursor_quads[i], 0);
@@ -175,13 +175,12 @@ void world_menu_labeled_number_entry_thread(void) {
             cursor_quad->clut = 0x7DFC;
             shadow_quad->clut = 0x7E3C;
         }
-        world_menu_update_icon_cursor_sprites(
-            (world_menu_icon_thread_param_t*)param, (world_menu_icon_sprites_t*)record, i, -1);
-        world_menu_select_icon_cluts((world_menu_icon_sprites_t*)record);
+        world_menu_update_icon_cursor_sprites((world_menu_icon_thread_param_t*)param, &record.base, i, -1);
+        world_menu_select_icon_cluts(&record.base);
         world_gfx_draw_or_append_gpu_primitive((s32*)&cursor_quads[i & 1]);
         world_gfx_draw_or_append_gpu_primitive((s32*)&shadow_quads[i & 1]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)&((world_menu_icon_sprites_t*)record)->sprites[0]);
-        world_gfx_draw_or_append_gpu_primitive((s32*)record);
+        world_gfx_draw_or_append_gpu_primitive((s32*)&record.base.sprites[0]);
+        world_gfx_draw_or_append_gpu_primitive((s32*)&record);
     }
     world_thread_yield();
     world_thread_exit_current();

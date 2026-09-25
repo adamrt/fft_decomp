@@ -63,6 +63,7 @@ void world_menu_draw_active_window_frames(void) {
         bottom = window->icon_sprites[1].y0;
         top = window->icon_sprites[0].y0 + window->icon_sprites[0].h;
         bottom -= top;
+        /* Reload the pointer cell: retaining buffer removes target loads. */
         span = (bottom - 4)
             * ((menu_window_buffer_t*)g_world_menu_window_buffer_pointers[i + g_world_menu_packet_buffer_index])
                   ->scroll_position

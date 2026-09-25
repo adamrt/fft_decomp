@@ -26,7 +26,7 @@ world_draw_number_command_t* world_menu_script_draw_formatted_number(
     s32 text_index;
     s32 i;
     s32 negative;
-    void* color;
+    CVECTOR* color;
     u16 clut;
     /* Pin required: unpinned, the digit count loads into $s0 instead of $a2. */
     register s32 remaining __asm__("$6");

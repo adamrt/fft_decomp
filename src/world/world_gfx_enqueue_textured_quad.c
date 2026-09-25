@@ -22,14 +22,14 @@ void world_gfx_enqueue_textured_quad(rect, u, v, color, semi_trans, texture_page
 /* clang-format on */
 {
     POLY_FT4* poly;
-    u8* rgb = color;
+    CVECTOR* rgb = color;
 
     poly = &g_world_gfx_active_packet_buffer->textured_quads[g_world_gfx_textured_quad_count++];
     if (rgb != 0) {
         SetShadeTex(poly, 0);
-        poly->r0 = rgb[0];
-        poly->g0 = rgb[1];
-        poly->b0 = rgb[2];
+        poly->r0 = rgb->r;
+        poly->g0 = rgb->g;
+        poly->b0 = rgb->b;
     } else {
         SetShadeTex(poly, 1);
     }

@@ -7,7 +7,7 @@
 /* volatile: the target re-reads the counter right after incrementing it */
 
 s32 world_menu_update_clear_all_abilities_prompt(void) {
-    world_formation_unit_t* unit;
+    world_formation_unit_ability_slots_t* unit;
     u16 value;
     s32 unused[16];
     s32 i;
@@ -30,12 +30,13 @@ s32 world_menu_update_clear_all_abilities_prompt(void) {
     if (g_world_input_primary_repeat & PSX_PAD_CIRCLE) {
         changed = 0;
         for (i = 1; i < 5; i++) {
-            unit = g_world_formation_unit_pointers[g_world_formation_selected_unit_index];
-            if (((world_formation_unit_ability_slots_t*)unit)->ability_slots[i] != 0) {
+            unit = (world_formation_unit_ability_slots_t*)
+                g_world_formation_unit_pointers[g_world_formation_selected_unit_index];
+            if (unit->ability_slots[i] != 0) {
                 changed = 1;
                 world_formation_set_unit_ability_slot(g_world_formation_selected_unit_index, i, 0,
-                    world_ability_is_equip_support_change(g_world_formation_selected_unit_index,
-                        (s16)((world_formation_unit_ability_slots_t*)unit)->ability_slots[i]));
+                    world_ability_is_equip_support_change(
+                        g_world_formation_selected_unit_index, (s16)unit->ability_slots[i]));
             }
         }
         world_formation_stage_selected_unit();

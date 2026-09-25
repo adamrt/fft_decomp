@@ -8,16 +8,17 @@ void world_gfx_enqueue_oriented_textured_quad(
     s32 quad_semitrans = semitrans;
     s32 quad_orientation = orientation;
     POLY_FT4* poly;
+    const CVECTOR* rgb = (const CVECTOR*)color;
     u16 index = g_world_gfx_textured_quad_count;
 
     g_world_gfx_textured_quad_count = index + 1;
     poly = &g_world_gfx_active_packet_buffer->textured_quads[index];
 
-    if (color != 0) {
+    if (rgb != 0) {
         SetShadeTex(poly, 0);
-        poly->r0 = color[0];
-        poly->g0 = color[1];
-        poly->b0 = color[2];
+        poly->r0 = rgb->r;
+        poly->g0 = rgb->g;
+        poly->b0 = rgb->b;
     } else {
         SetShadeTex(poly, 1);
     }
