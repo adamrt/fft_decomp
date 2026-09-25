@@ -1,15 +1,12 @@
 #include "fft/battle.h"
 #include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Provisional: 0x30-byte unit-view thread set at 0x80169040, indexed by
  * the view mode. Each of the four slots names a thread entry (or -1), the
  * scheduler slot it runs in, and the task id it must carry. */
-typedef struct battle_unit_view_thread_set {
-    void (*entries[4])(void); /* 0x00 */
-    s32 thread_ids[4];        /* 0x10 */
-    s32 task_ids[4];          /* 0x20 */
-} battle_unit_view_thread_set_t;
+typedef world_unit_view_thread_set_t battle_unit_view_thread_set_t;
 typedef char battle_unit_view_thread_set_size_must_be_0x30[(sizeof(battle_unit_view_thread_set_t) == 0x30) ? 1 : -1];
 
 enum {

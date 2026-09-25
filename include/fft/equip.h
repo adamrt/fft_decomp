@@ -477,7 +477,7 @@ u8* equip_cmd_draw_textured_quad_handler(u8* command);
 void equip_cmd_run_stream(u8* stream, s32 input);
 
 /* gfx */
-void equip_gfx_apply_menu_palette_for_mode(s32 unused, s32* thread);
+void equip_gfx_apply_menu_palette_for_mode(world_menu_palette_primitives_t* primitives, s32* thread);
 void equip_gfx_build_portrait_poly_ft4(s32 portrait_id, void* poly);
 void equip_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,
     const void* source, s32 scale_index, s32 lower_half, const s16* offset);

@@ -13,15 +13,7 @@
 
 /* Provisional 0x2ec-byte double-buffered page of the unit status panel
  * (pairs at 0x8017225c, first page per mode from g_battle_unit_status_first_page_by_mode). */
-typedef struct battle_menu_unit_status_page {
-    POLY_G4 bars[3];                         /* 0x000: HP/MP/CT gauges */
-    DR_MODE draw_mode_1;                     /* 0x06c */
-    DR_MODE draw_mode_0;                     /* 0x078 */
-    world_menu_palette_primitives_t palette; /* 0x084 */
-    POLY_FT4 quads[5];                       /* 0x170 */
-    SPRT sprites[7];                         /* 0x238 */
-    POLY_FT4 portrait;                       /* 0x2c4 */
-} battle_menu_unit_status_page_t;
+typedef world_unit_status_page_t battle_menu_unit_status_page_t;
 
 /* Two DR_OFFSET packets, each followed by the x/y pair SetDrawOffset reads. */
 typedef struct battle_menu_unit_status_offsets {

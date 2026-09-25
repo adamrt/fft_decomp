@@ -234,7 +234,8 @@ void attack_deploy_run_screen(void);
 void attack_text_build_deployment_strings(void);
 
 /* gfx */
-void attack_gfx_apply_menu_palette_for_mode(s32 unused, s32* thread);
+void attack_gfx_apply_menu_palette_for_mode(
+    world_menu_palette_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* thread);
 void attack_gfx_build_formation_sprites(void);
 void attack_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
 void attack_gfx_build_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet,

@@ -810,7 +810,8 @@ u8* bunit_cmd_draw_background_tiles_handler(u8* desc);
 u8* bunit_cmd_draw_textured_quad_handler(u8* cmd);
 void bunit_cmd_run_stream(u8* data, s32 flags);
 u8* bunit_cmd_skip_group(u8* command);
-void bunit_gfx_apply_menu_palette_for_mode(s32 primitives, s32* thread);
+void bunit_gfx_apply_menu_palette_for_mode(
+    world_menu_palette_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* thread);
 void bunit_gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition,
     const s32* first_portrait, const s32* second_portrait, u8* image, POLY_FT4* poly, s32 direction);
 void bunit_gfx_draw_falloff_shaded_rows(s32 y);

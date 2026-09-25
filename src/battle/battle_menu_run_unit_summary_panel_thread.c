@@ -8,21 +8,12 @@
 #include "fft/menu.h"
 #include "fft/menu_types.h"
 #include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
 /* Provisional 0xF0-byte double-buffered frame of the unit summary panel. */
-typedef struct battle_menu_unit_summary_frame {
-    SPRT sprites[7];                          /* 0x00: [0] name/job, [1]-[3] numbers, [6] zodiac */
-    DR_MODE draw_mode_0;                      /* 0x8c */
-    DR_MODE draw_mode_1;                      /* 0x98 */
-    world_menu_palette_primitives_t* palette; /* 0xa4 */
-    u32 draw_offset_a[3];                     /* 0xa8 */
-    u32 draw_offset_b[3];                     /* 0xb4 */
-    s16 offset_a[2];                          /* 0xc0 */
-    s16 offset_b[2];                          /* 0xc4 */
-    POLY_FT4 portrait;                        /* 0xc8 */
-} battle_menu_unit_summary_frame_t;
+typedef world_unit_summary_frame_t battle_menu_unit_summary_frame_t;
 
 extern void battle_world_display_specific_menu_text(s32 buffer, s32 origin, s32 text);
 

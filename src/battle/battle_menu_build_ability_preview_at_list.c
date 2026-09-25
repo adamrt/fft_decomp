@@ -58,10 +58,7 @@ typedef char battle_menu_at_list_work_descriptors_offset_must_be_0x684
  * scroll row this function sets and the column drawer receives as its
  * `row_offset` argument.
  */
-typedef struct battle_menu_at_list_layout {
-    world_menu_text_layout_t columns; /* 0x00 */
-    s16 scroll_row;                   /* 0x28 */
-} battle_menu_at_list_layout_t;
+typedef world_menu_scroll_text_layout_t battle_menu_at_list_layout_t;
 
 #define LAYOUT(entry) ((battle_menu_at_list_layout_t*)(entry)->text_binding)
 
@@ -241,11 +238,11 @@ void battle_menu_build_ability_preview_at_list(void) {
     }
     entry->selected_index = turn;
     if (turn < 3) {
-        LAYOUT(entry)->scroll_row = 0;
+        LAYOUT(entry)->row_offset = 0;
     } else if (turn >= count - 6) {
-        LAYOUT(entry)->scroll_row = count - 6;
+        LAYOUT(entry)->row_offset = count - 6;
     } else {
-        LAYOUT(entry)->scroll_row = turn - 3;
+        LAYOUT(entry)->row_offset = turn - 3;
     }
     g_battle_menu_at_list_layout.columns.text_ids[0] = work->entry_numbers;
     g_battle_menu_at_list_layout.columns.text_ids[2] = work->secondary_values;

@@ -154,7 +154,7 @@ void equip_editor_run_numeric_thread(void) {
             buffer->sprites[15].clut = 0x7FFC;
             buffer->sprites[16].clut = 0x7FFC;
         }
-        equip_gfx_apply_menu_palette_for_mode((s32)&buffer->numeric_frame, (s32*)thread);
+        equip_gfx_apply_menu_palette_for_mode(&buffer->numeric_frame, (s32*)thread);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait.areas[1]);
         }

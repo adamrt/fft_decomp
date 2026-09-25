@@ -147,7 +147,7 @@ void require_editor_run_numeric_thread(void) {
             buffer->sprites[15].clut = 0x7FFC;
             buffer->sprites[16].clut = 0x7FFC;
         }
-        require_gfx_apply_menu_palette_for_mode(&buffer->numeric_frame, (u8*)thread);
+        require_gfx_apply_menu_palette_for_mode(&buffer->numeric_frame, thread);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&buffer->portrait.areas[1]);
         }

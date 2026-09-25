@@ -11,11 +11,7 @@
 /* Provisional: the double-buffered quad/sprite page at 0x80173cbc (0x144
  * bytes each): five Gouraud textured quads, two sprites and the two draw-mode
  * packets that select their texture windows. */
-typedef struct battle_menu_quad_page {
-    POLY_GT4 quads[5]; /* 0x000 */
-    SPRT sprites[2];   /* 0x104 */
-    DR_MODE modes[2];  /* 0x12c */
-} battle_menu_quad_page_t;
+typedef world_menu_quad_page_t battle_menu_quad_page_t;
 typedef char battle_menu_quad_page_size_must_be_0x144[sizeof(battle_menu_quad_page_t) == 0x144 ? 1 : -1];
 
 extern battle_menu_quad_page_t g_battle_menu_height_display_pages[2];

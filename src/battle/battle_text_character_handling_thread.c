@@ -10,6 +10,7 @@
 #include "fft/script_variables.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -19,37 +20,7 @@
  * Dialog Type byte; box_type is its 0x70 bits (0x10 portrait box, 0x20 Check,
  * 0x30 Help, 0x50 eight lines). The offsets at 0x44..0x4c are the instruction's
  * arrow position and X/Y coordinates. */
-typedef struct battle_text_dialog_record {
-    void* buffer;     /* 0x00 */
-    u16 width;        /* 0x04 */
-    u16 height;       /* 0x06 */
-    RECT rect;        /* 0x08 */
-    s32 text;         /* 0x10 */
-    u16 color;        /* 0x14 */
-    u16 dialog_type;  /* 0x16 */
-    u16 box_type;     /* 0x18 */
-    u16 position;     /* 0x1a */
-    u16 options;      /* 0x1c */
-    u16 no_box;       /* 0x1e */
-    u16 line;         /* 0x20 */
-    u16 first_line;   /* 0x22 */
-    u16 last_line;    /* 0x24 */
-    u16 arrow_x;      /* 0x26 */
-    u16 arrow_y;      /* 0x28 */
-    s16 unk_2a;       /* 0x2a */
-    s16 mark;         /* 0x2c: measured width, later the 0xFB cursor mark */
-    s16 lines;        /* 0x2e */
-    s16 offset;       /* 0x30 */
-    u8 unk_32[2];     /* 0x32 */
-    s32 x;            /* 0x34 */
-    s32 y;            /* 0x38 */
-    s32 portrait;     /* 0x3c */
-    u16 origin_x;     /* 0x40 */
-    u16 origin_y;     /* 0x42 */
-    s32 arrow_offset; /* 0x44 */
-    s32 x_offset;     /* 0x48 */
-    s32 y_offset;     /* 0x4c */
-} battle_text_dialog_record_t;
+typedef world_text_dialog_record_t battle_text_dialog_record_t;
 
 typedef union battle_texture_prim battle_texture_prim_t;
 

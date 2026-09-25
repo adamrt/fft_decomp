@@ -200,7 +200,8 @@ extern const debug_chr_texture_page_t g_debugchr_panel_status_texture;
 extern battle_menu_status_panel_glyph_t g_debugchr_text_decimal_glyph;
 
 void debugchr_editor_apply_values_to_battle_unit(s32 unit_id);
-void debugchr_gfx_apply_menu_palette_for_mode(void* output, u8* context);
+void debugchr_gfx_apply_menu_palette_for_mode(
+    world_menu_palette_primitives_t* output, const battle_menu_status_panel_frame_config_t* context);
 void debugchr_gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition,
     const s32* first_portrait, const s32* second_portrait, u8* image, POLY_FT4* poly, s32 direction);
 

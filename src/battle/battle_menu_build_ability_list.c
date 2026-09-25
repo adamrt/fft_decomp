@@ -20,16 +20,7 @@
 #include "psx/types.h"
 
 /* Provisional ability-list work buffer at *g_battle_ai_workspace_ptr (0x52 rows each). */
-typedef struct battle_menu_ability_list {
-    u16 ids[0x52];      /* 0x000; 0xffff terminated, item/ability text-bank row flags */
-    u16 values[0x52];   /* 0x0a4 */
-    u16 extras[0x52];   /* 0x148 */
-    u8 mp_costs[0x52];  /* 0x1ec; 0xff terminated */
-    u8 bytes_23e[0x52]; /* 0x23e */
-    u8 flags[0x52];     /* 0x290; bit 1 = blocked by unit flag 0x59 & 8 */
-    u8 bytes_2e2[0x52]; /* 0x2e2 */
-    u8 enabled[0x52];   /* 0x334 */
-} battle_menu_ability_list_t;
+typedef world_ability_list_t battle_menu_ability_list_t;
 
 void battle_menu_build_ability_list(s32 mode) {
     s32 unit_index;

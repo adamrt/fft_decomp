@@ -28,18 +28,11 @@ typedef struct battle_menu_scroll_list_page {
 } battle_menu_scroll_list_page_t;
 
 /* Provisional: three-column layout with the saved first visible row. */
-typedef struct battle_menu_scroll_text_layout {
-    world_menu_text_layout_t columns; /* 0x00 */
-    s16 row_offset;                   /* 0x28 */
-} battle_menu_scroll_text_layout_t;
+typedef world_menu_scroll_text_layout_t battle_menu_scroll_text_layout_t;
 
 /* Text image placement: the upload rectangle plus the screen offsets
  * battle_gfx_init_image_loading reads. */
-typedef struct battle_menu_text_window {
-    RECT rect;
-    s16 x_screen_offset;
-    s16 y_screen_offset;
-} battle_menu_text_window_t;
+typedef world_menu_text_window_t battle_menu_text_window_t;
 
 struct battle_text_position;
 extern u8* battle_menu_redraw_text_page_on_scroll_in_rect(

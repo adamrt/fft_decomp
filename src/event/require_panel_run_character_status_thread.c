@@ -157,7 +157,7 @@ void require_panel_run_character_status_thread(void) {
         screen->draw_offsets[1].y = g_require_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
         require_panel_set_primitive_colors(screen, thread);
-        require_gfx_apply_menu_palette_for_mode(&screen->numeric_frame, (u8*)thread);
+        require_gfx_apply_menu_palette_for_mode(&screen->numeric_frame, thread);
         if (frame < 13) {
             battle_gfx_draw_or_append_gpu_primitive((s32*)&screen->portrait.areas[1]);
         }
