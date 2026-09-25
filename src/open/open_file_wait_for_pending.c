@@ -3,14 +3,15 @@
 #include "psx/types.h"
 
 void open_file_wait_for_pending(void) {
-    s32* status = &g_main_file_still_loading;
-    void* header;
+    u32* status = &g_main_file_still_loading;
+    main_file_load_descriptor_t* header;
 
     if (*status == 0) {
         return;
     }
 
-    header = (u8*)status - 4;
+    /* The loading flag aliases the descriptor's state field. */
+    header = (main_file_load_descriptor_t*)((u8*)status - sizeof(header->unknown_00));
     do {
         main_file_poll_load(header);
         VSync(0);
