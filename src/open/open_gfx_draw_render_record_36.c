@@ -92,11 +92,11 @@ loop:
             return;
         }
         ((SPRT*)&g_open_gfx_sprite_primitive_pool[g_active_graphics_buffer_index][g_open_gfx_primitive_count].sprt)->r0
-            = actor->r;
+            = actor->color.r;
         ((SPRT*)&g_open_gfx_sprite_primitive_pool[g_active_graphics_buffer_index][g_open_gfx_primitive_count].sprt)->g0
-            = actor->g;
+            = actor->color.g;
         ((SPRT*)&g_open_gfx_sprite_primitive_pool[g_active_graphics_buffer_index][g_open_gfx_primitive_count].sprt)->b0
-            = actor->b;
+            = actor->color.b;
         SetSprt(&g_open_gfx_sprite_primitive_pool[g_active_graphics_buffer_index][g_open_gfx_primitive_count].sprt);
         value = ((part_count - i) * 2) | 1;
         SetDrawMode(&g_open_gfx_sprite_primitive_pool[g_active_graphics_buffer_index][g_open_gfx_primitive_count].mode,

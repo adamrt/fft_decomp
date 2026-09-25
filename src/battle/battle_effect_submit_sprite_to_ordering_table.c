@@ -111,9 +111,9 @@ void battle_effect_submit_sprite_to_ordering_table(
         color = set->color.packed;
         quad->length = 9;
         quad->color.packed = color;
-        quad->color.field.code = code;
+        quad->color.field.cd = code;
         if (frame->flags & 0x200) {
-            quad->color.field.code = 0x2e;
+            quad->color.field.cd = 0x2e;
         }
         gte_stsxy3(&quad->xy0, &quad->xy1, &quad->xy2);
         gte_ldv0(&g_battle_effect_corner_bottom_right);

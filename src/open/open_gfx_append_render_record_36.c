@@ -19,7 +19,7 @@ typedef char open_gfx_render_record_36_color_size_must_be_0x24[(sizeof(open_gfx_
 
 s32 open_gfx_append_render_record_36(open_render_record_t** list, s32* count) {
     open_render_record_36_t* records = g_open_gfx_render_records_36;
-    open_gfx_render_record_36_color_view_t* colors = (open_gfx_render_record_36_color_view_t*)&records[0].r;
+    open_gfx_render_record_36_color_view_t* colors = (open_gfx_render_record_36_color_view_t*)&records[0].color.r;
     s32 index;
 
     list[*count] = (open_render_record_t*)&records[g_open_gfx_next_render_record_36];

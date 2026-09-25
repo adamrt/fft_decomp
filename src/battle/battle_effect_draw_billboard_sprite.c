@@ -67,10 +67,10 @@ void battle_effect_draw_billboard_sprite(battle_effect_sprite_slot_t* slot) {
     prim->length = 9;
     prim->color.packed = color;
     code = 0x2c;
-    prim->color.field.code = code;
+    prim->color.field.cd = code;
     frame = (battle_effect_sprite_frame_t*)&SPRITE_TABLE[offset];
     if (frame->flags & 0x200) {
-        prim->color.field.code = 0x2e;
+        prim->color.field.cd = 0x2e;
     }
     /* Keeps the &prim->xy0 setup ($a3) after this branch; otherwise GCC hoists
      * it into the branch delay slot. */

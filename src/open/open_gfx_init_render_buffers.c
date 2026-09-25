@@ -12,7 +12,7 @@ void open_gfx_init_render_buffers(void) {
     for (i = 0; i < 16; i++) {
         g_open_gfx_render_records_36[i].flags = 1;
         g_open_gfx_render_records_36[i].ot_layer = 8;
-        color = &g_open_gfx_render_records_36[i].r;
+        color = &g_open_gfx_render_records_36[i].color.r;
         color[0] = 0x80;
         color[1] = 0x80;
         color[2] = 0x80;

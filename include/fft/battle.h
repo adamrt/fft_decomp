@@ -2754,12 +2754,7 @@ typedef struct battle_effect_quad_prim {
     u8 length;        /* 0x03; tag word count */
     union {
         u32 packed;
-        struct {
-            u8 r;
-            u8 g;
-            u8 b;
-            u8 code;
-        } field;
+        CVECTOR field;
     } color; /* 0x04 */
     s32 xy0; /* 0x08 */
     u8 u0;
@@ -6337,23 +6332,11 @@ typedef struct battle_map_mesh_quad_positions {
 } battle_map_mesh_quad_positions_t;
 
 typedef struct battle_map_mesh_triangle_normals {
-    s16 x0, y0, z0;
-    u16 _unused_06;
-    s16 x1, y1, z1;
-    u16 _unused_0e;
-    s16 x2, y2, z2;
-    u16 _unused_16;
+    SVECTOR normals[3];
 } battle_map_mesh_triangle_normals_t;
 
 typedef struct battle_map_mesh_quad_normals {
-    s16 x0, y0, z0;
-    u16 _unused_06;
-    s16 x1, y1, z1;
-    u16 _unused_0e;
-    s16 x2, y2, z2;
-    u16 _unused_16;
-    s16 x3, y3, z3;
-    u16 _unused_1e;
+    SVECTOR normals[4];
 } battle_map_mesh_quad_normals_t;
 
 /* Per-part start indices and counts stored after the mesh transform data. */

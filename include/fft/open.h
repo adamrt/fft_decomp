@@ -187,10 +187,7 @@ typedef struct open_render_record_36 {
     /* 0x14 */ s32 palette; /* birthday menu: 9 = highlighted entry */
     /* 0x18 */ s32 x;
     /* 0x1c */ s32 y;
-    /* 0x20 */ u8 r;
-    /* 0x21 */ u8 g;
-    /* 0x22 */ u8 b;
-    /* 0x23 */ u8 _padding_23; /* tail padding to 4-byte alignment */
+    /* 0x20 */ CVECTOR color;
 } open_render_record_36_t;
 typedef char open_render_record_36_size_must_be_0x24[(sizeof(open_render_record_36_t) == 0x24) ? 1 : -1];
 
@@ -512,10 +509,7 @@ typedef struct open_sprite_actor {
     /* 0x14 */ s32 palette;
     /* 0x18 */ s32 x;
     /* 0x1c */ s32 y;
-    /* 0x20 */ u8 r;
-    /* 0x21 */ u8 g;
-    /* 0x22 */ u8 b;
-    /* 0x23 */ u8 _padding_23; /* tail padding to 4-byte alignment */
+    /* 0x20 */ CVECTOR color;
 } open_sprite_actor_t;
 typedef char open_sprite_actor_size_must_be_0x24[(sizeof(open_sprite_actor_t) == 0x24) ? 1 : -1];
 
