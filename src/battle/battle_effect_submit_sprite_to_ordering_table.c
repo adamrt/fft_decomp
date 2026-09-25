@@ -66,7 +66,7 @@
  * `zoom`) into the effect matrix, and projects each part's corners through the
  * GTE into a POLY_FT4 linked into `ot`. */
 void battle_effect_submit_sprite_to_ordering_table(
-    battle_effect_sprite_part_set_t* set, s16* position, s16 angle, VECTOR* zoom, u32* ot) {
+    battle_effect_sprite_block_t* set, s16* position, s16 angle, VECTOR* zoom, u32* ot) {
     battle_effect_quad_prim_t* prim;
     battle_effect_quad_prim_t* quad;
     battle_effect_sprite_part_t* frame;
@@ -99,7 +99,7 @@ void battle_effect_submit_sprite_to_ordering_table(
     }
     SetRotMatrix(&g_battle_effect_matrix);
     SetTransMatrix(&g_battle_effect_matrix);
-    for (i = 0; i < set->color.field.count; i++) {
+    for (i = 0; i < set->color.field.sprite_count; i++) {
         frame = set->frames[i];
         code = 0x2c;
         ((battle_effect_corner_t*)&g_battle_effect_corner_top_left)->packed = frame->corners[0];

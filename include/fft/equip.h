@@ -515,7 +515,8 @@ void equip_input_update_with_message_state(void);
 s32 equip_item_adjust_inventory_count(s32 g_main_item_item_flags, s32 delta);
 void equip_item_build_inventory_totals(void);
 equip_icon_rect_t* equip_item_build_row_icon_rect(s32 index);
-void equip_item_calculate_swap_stat_delta(s32 output, struct world_item_stat_summary* out, s16 from, s16 to, s32 slot);
+void equip_item_calculate_swap_stat_delta(
+    struct world_item_stat_detail* output, struct world_item_stat_summary* out, s16 from, s16 to, s32 slot);
 void equip_item_expand_type_order_list(s32 list_index, s16* destination);
 s32 equip_item_get_available_count(s32 item_id);
 s32 equip_item_get_available_with_equip_flag(s32 row);
@@ -588,7 +589,7 @@ void equip_thread_wait_forever(void);
 
 /* unit */
 void equip_unit_calculate_equipment_swap_stat_deltas(
-    s32 detail_total, struct world_item_stat_summary* acc, u16* froms, u16* tos);
+    struct world_item_stat_detail* detail_total, struct world_item_stat_summary* acc, u16* froms, u16* tos);
 s32 equip_unit_can_equip_item(s16 unit_index, s32 item_id);
 s32 equip_unit_has_two_hands(s16 unit_index);
 s32 equip_unit_has_two_swords(s16 unit_index);
@@ -750,7 +751,8 @@ void equip_gfx_enqueue_textured_quad_current_ot(
 s32 equip_item_build_filtered_list(s16 unit_index, u16 sort_mode, s8 category, s16* list, u8 equip_filter);
 battle_menu_status_panel_graphic_descriptor_t* equip_item_build_row_graphic_descriptor(s32 row);
 s32 equip_item_get_ranking_value(s32 item_id);
-void equip_item_subtract_scaled_stats(u8* out, u8* scaled, u8* base, s32 scale);
+void equip_item_subtract_scaled_stats(struct world_item_stat_detail* out, struct world_item_stat_detail* scaled,
+    struct world_item_stat_detail* base, s32 scale);
 s32 equip_menu_get_preview_hp_bonus(void);
 s32 equip_menu_get_preview_hp_bonus_display(void);
 s32 equip_menu_get_preview_mp_bonus(void);

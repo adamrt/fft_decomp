@@ -171,7 +171,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
     case 0:
         break;
     case 0x200:
-        battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_target.vx, &position.vx);
+        battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_target, &position);
         battle_camera_set_current_real_coords(&position);
         g_battle_effect_camera_position_current = g_battle_effect_camera_position_target;
         g_battle_effect_camera_position_start = g_battle_effect_camera_position_current;
@@ -184,7 +184,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
             battle_effect_interpolate_vector_q13_cos(&g_battle_effect_camera_position_start.vx,
                 &g_battle_effect_camera_position_target.vx, g_battle_effect_camera_position_duration,
                 g_battle_effect_camera_position_frame, &g_battle_effect_camera_position_current.vx);
-            battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_current.vx, &position.vx);
+            battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_current, &position);
             battle_camera_set_current_real_coords(&position);
         }
         if (g_battle_effect_camera_position_duration == g_battle_effect_camera_position_frame) {
@@ -198,7 +198,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
             battle_effect_interpolate_vector_q13_cos_q12(&g_battle_effect_camera_position_start.vx,
                 &g_battle_effect_camera_position_target.vx, g_battle_effect_camera_position_duration,
                 g_battle_effect_camera_position_frame, &g_battle_effect_camera_position_current.vx);
-            battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_current.vx, &position.vx);
+            battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_current, &position);
             battle_camera_set_current_real_coords(&position);
         }
         if (g_battle_effect_camera_position_duration == g_battle_effect_camera_position_frame) {
@@ -211,7 +211,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
             battle_effect_interpolate_vector_q13_linear(&g_battle_effect_camera_position_start.vx,
                 &g_battle_effect_camera_position_target.vx, g_battle_effect_camera_position_duration,
                 g_battle_effect_camera_position_frame, &g_battle_effect_camera_position_current.vx);
-            battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_current.vx, &position.vx);
+            battle_effect_shift_vector_left_12(&g_battle_effect_camera_position_current, &position);
             battle_camera_set_current_real_coords(&position);
         }
         if (g_battle_effect_camera_position_duration == g_battle_effect_camera_position_frame) {

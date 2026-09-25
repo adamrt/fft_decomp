@@ -9,10 +9,10 @@ battle_effect_sprite_block_t* battle_effect_alloc_sprite_block(u8 sprite_count) 
     s32 total_count;
 
     block = battle_heap_alloc_block(((u32)sprite_count * 4) + 8, 0);
-    block->sprite_count = sprite_count;
-    block->blue = 0x80;
-    block->green = 0x80;
-    block->red = 0x80;
+    block->color.field.sprite_count = sprite_count;
+    block->color.field.blue = 0x80;
+    block->color.field.green = 0x80;
+    block->color.field.red = 0x80;
     total_count = g_battle_effect_sprite_count + sprite_count;
     g_battle_effect_sprite_count = total_count;
     if (g_battle_effect_sprite_count_peak < total_count) {

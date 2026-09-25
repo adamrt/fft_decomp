@@ -42,17 +42,17 @@ void battle_camera_advance_effect_tracks(s16 frame) {
         k = index & 0xffff;
         switch (index / 0x10000) {
         case 0:
-            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->main.target[k], (s32*)&vector);
+            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->main.target[k], &vector);
             battle_camera_execute_position_command((s16)g_battle_effect_misc_data->main.selector[k], keyframe / 0x10000,
                 (keyframe & 0xffff) - frame, &vector);
             break;
         case 1:
-            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->target[k], (s32*)&vector);
+            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->target[k], &vector);
             battle_camera_execute_position_command(
                 (s16)g_battle_effect_misc_data->selector[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
             break;
         case 2:
-            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->cleanup.target[k], (s32*)&vector);
+            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->cleanup.target[k], &vector);
             battle_camera_execute_position_command((s16)g_battle_effect_misc_data->cleanup.selector[k],
                 keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
             break;
@@ -62,17 +62,17 @@ void battle_camera_advance_effect_tracks(s16 frame) {
         k = index & 0xffff;
         switch (index / 0x10000) {
         case 0:
-            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->main.zoom[k], (s32*)&vector);
+            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->main.zoom[k], &vector);
             battle_camera_execute_zoom_command((s16)g_battle_effect_misc_data->main.selector[k], keyframe / 0x10000,
                 (keyframe & 0xffff) - frame, &vector);
             break;
         case 1:
-            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->zoom[k], (s32*)&vector);
+            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->zoom[k], &vector);
             battle_camera_execute_zoom_command(
                 (s16)g_battle_effect_misc_data->selector[k], keyframe / 0x10000, (keyframe & 0xffff) - frame, &vector);
             break;
         case 2:
-            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->cleanup.zoom[k], (s32*)&vector);
+            battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->cleanup.zoom[k], &vector);
             battle_camera_execute_zoom_command((s16)g_battle_effect_misc_data->cleanup.selector[k], keyframe / 0x10000,
                 (keyframe & 0xffff) - frame, &vector);
             break;

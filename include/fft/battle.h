@@ -3409,6 +3409,8 @@ void battle_unit_update_animation_for_status_changes(battle_unit_misc_data_t* un
 void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_misc_data_t* unit);
 void battle_gfx_draw_unit_sprite_layers(battle_unit_misc_data_t* unit);
 void battle_unit_move_toward_action_target(battle_unit_misc_data_t* unit, s32 allow_height_change);
+void battle_move_accelerate_unit_to_destination_with_height_change(battle_unit_misc_data_t* unit);
+void battle_move_accelerate_unit_to_destination_no_height_change(battle_unit_misc_data_t* unit);
 void battle_menu_draw_active_window_frames(void);
 void battle_text_measure_pixels(s16* width, s16* rows, const u8* text);
 void battle_menu_build_zoom_draw_area_pair(void* packets, void* geometry, s32 step, s32 flag);

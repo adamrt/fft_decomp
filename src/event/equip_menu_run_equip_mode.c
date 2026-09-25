@@ -117,7 +117,7 @@ s32 equip_menu_run_equip_mode(void) {
                 if (result == 1) {
                     g_equip_equip_item_preview_active = 1;
                     g_equip_item_numeric_panel_redraw = result;
-                    equip_unit_calculate_equipment_swap_stat_deltas((s32)&g_equip_item_preview_stat_detail,
+                    equip_unit_calculate_equipment_swap_stat_deltas(&g_equip_item_preview_stat_detail,
                         &g_equip_selected_unit_stat_summary, g_equip_unit_data[g_equip_unit_selected_index]->equipment,
                         g_equip_unit_data[1]->equipment);
                     bcopy(

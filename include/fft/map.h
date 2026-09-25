@@ -528,7 +528,7 @@ s32 battle_map_is_gns_record_matching_state(s32 comparison, s16 record_state, s1
 void battle_map_load_palette_data(const u16* palette, s32 mesh_index, s32 palette_row_index, s32 load_all_rows);
 s32 battle_map_start_file_load(void* unused_file_table, u8* load_info, s32 destination, s32 suppress_loading_display);
 s32 battle_map_stop_texture_animations_and_weather_sfx(void);
-void battle_map_store_max_coordinates(void* destination);
+void battle_map_store_max_coordinates(SVECTOR* destination);
 void battle_map_update_palette_colors(
     s32 mode, s32 palette_group, s32 palette_index, s32 update_all, const u16* colors);
 

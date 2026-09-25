@@ -185,12 +185,21 @@ typedef struct battle_effect_rotation_vector {
     u16 _padding_06;
 } battle_effect_rotation_vector_t;
 
-/* Header followed by one word for each sprite in the effect frame. */
+struct battle_effect_sprite_part;
+
+/* Color and count header followed by one pointer for each sprite part. */
 typedef struct battle_effect_sprite_block {
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 sprite_count;
+    union {
+        u32 packed;
+        struct {
+            u8 red;
+            u8 green;
+            u8 blue;
+            u8 sprite_count;
+        } field;
+    } color;
+    u8 unknown_04[4];
+    struct battle_effect_sprite_part* frames[1];
 } battle_effect_sprite_block_t;
 
 /* Temporary effect-script workspace cleared by opcode 0x2A. */

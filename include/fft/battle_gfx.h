@@ -426,7 +426,7 @@ s32 battle_gfx_release_reserved_vram_slot(s32 slot_index);
 void battle_gfx_release_unit_vram_slot(struct battle_unit_misc_data* unit);
 void battle_gfx_reset_unit_graphics_load_state(void);
 s32 battle_gfx_save_evtchr_slot(s32 slot_index);
-void battle_gfx_set_draw_mode_for_texture_page(void* mode, s32 page);
+void battle_gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page);
 void battle_gfx_set_draw_mode_from_rect(void* mode, const u16* rect);
 void battle_gfx_set_primitive_brightness(u8* primitive, s32 brightness);
 void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);

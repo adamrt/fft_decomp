@@ -22,12 +22,12 @@ void battle_camera_start_effect_keyframe_moves(s16 frame) {
     }
     if (g_battle_effect_camera_position_mode == 0
         && battle_effect_find_next_keyframe(frame, 2, &index, &keyframe) != 0) {
-        battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->target[index], (s32*)&vector);
+        battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->target[index], &vector);
         battle_camera_execute_position_command(
             (s16)g_battle_effect_misc_data->selector[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &vector);
     }
     if (g_battle_effect_camera_zoom_mode == 0 && battle_effect_find_next_keyframe(frame, 4, &index, &keyframe) != 0) {
-        battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->zoom[index], (s32*)&vector);
+        battle_effect_convert_svector_to_vector(g_battle_effect_misc_data->zoom[index], &vector);
         battle_camera_execute_zoom_command(
             (s16)g_battle_effect_misc_data->selector[index], keyframe / 0x10000, (keyframe & 0xFFFF) - frame, &vector);
     }

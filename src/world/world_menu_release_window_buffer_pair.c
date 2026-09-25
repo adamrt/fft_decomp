@@ -3,10 +3,10 @@
 
 /* Mark both entries unused and clear their headers; a missing key stops
  * the current thread (0x800e27f4). */
-void world_menu_release_window_buffer_pair(void* value) {
+void world_menu_release_window_buffer_pair(menu_window_buffer_t* value) {
     s32 index;
 
-    if (value != (void*)-1) {
+    if (value != (menu_window_buffer_t*)-1) {
         /* One doubled index across both records lets GCC form the target's single
          * 0x118-biased induction value and four field displacements. */
         for (index = 0; index < 6; index += 2) {

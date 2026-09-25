@@ -4,6 +4,7 @@
 #include "fft/battle_file.h"
 #include "fft/effect.h"
 #include "fft/unit_slots.h"
+#include "psx/gte.h"
 #include "psx/types.h"
 
 /* Effect file preamble and offsets to its three following sections. */
@@ -243,21 +244,6 @@ typedef struct battle_effect_sprite_part {
 
 typedef char battle_effect_sprite_part_size_must_be_0x18[(sizeof(battle_effect_sprite_part_t) == 0x18) ? 1 : -1];
 
-/* Colour word (its top byte is the part count) followed by the part list. */
-typedef struct battle_effect_sprite_part_set {
-    union {
-        u32 packed;
-        struct {
-            u8 r;
-            u8 g;
-            u8 b;
-            u8 count;
-        } field;
-    } color;
-    u8 unknown_04[4];
-    battle_effect_sprite_part_t* frames[1];
-} battle_effect_sprite_part_set_t;
-
 /* Provisional arc descriptor handed to battle_effect_trace_arc_trajectory_path. */
 typedef struct battle_effect_arc {
     s16 unk_00; /* 0x00 */
@@ -453,7 +439,7 @@ void battle_effect_set_secondary_fall_dust(struct battle_unit_misc_data* unit);
 void battle_effect_set_secondary_level_up(struct battle_unit_misc_data* unit);
 void battle_effect_set_secondary_splash(struct battle_unit_misc_data* unit);
 void battle_effect_set_secondary_teleport(struct battle_unit_misc_data* unit);
-void battle_effect_shift_vector_left_12(const s32* src, s32* dst);
+void battle_effect_shift_vector_left_12(const VECTOR* src, VECTOR* dst);
 void battle_effect_shift_vector_right_12(const s32* src, s32* dst);
 void battle_effect_start_group(s32 group, s32 animation);
 void battle_effect_step_emitter_timeline(battle_keyframe_effect_state_t* state, battle_effect_keyframe_table_t* table,
@@ -478,7 +464,7 @@ s32 battle_effect_calculate_launch_velocity(void);
 s32 battle_effect_calculate_arc_trajectory_term(s32 a, s32 b);
 s32 battle_effect_check_arc_trajectory_between_units(u8 source_id, u8 target_id);
 s32 battle_effect_check_direct_trajectory_between_units(u8 source_id, u8 target_id);
-void battle_effect_convert_svector_to_vector(s16* src, s32* dst);
+void battle_effect_convert_svector_to_vector(s16* src, VECTOR* dst);
 void battle_effect_convert_tile_coords_to_world_coords(s16* in, s32* out);
 void battle_effect_copy_misc_unit_screen_location(u32 misc_id, VECTOR* destination);
 void battle_effect_copy_svector(u16* src, u16* dst);
@@ -504,7 +490,7 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
 void battle_effect_start_new(s32 effect_id, s32 target_mode, u8* target_data);
 void battle_effect_store_map_center_coordinates(VECTOR* destination);
 void battle_effect_submit_sprite_to_ordering_table(
-    battle_effect_sprite_part_set_t* set, s16* position, s16 angle, VECTOR* zoom, u32* ot);
+    battle_effect_sprite_block_t* set, s16* position, s16 angle, VECTOR* zoom, u32* ot);
 /* Steps the projectile along its trajectory, testing each obstacle. */
 s32 battle_effect_trace_projectile_path(VECTOR* delta, SVECTOR* origin, s32* distance, void* obstacles);
 void battle_effect_update_on_hit_sound_timer(u8* schedule, s16* entry_index, s16* countdown);
