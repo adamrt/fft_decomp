@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/gte.h"
 
 void battle_gfx_init_render_frame(void) {

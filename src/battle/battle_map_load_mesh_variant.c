@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_heap.h"
-#include "fft/script_variables.h"
 
 typedef struct battle_map_packed_gns_record {
     u8 bytes[0x14];

@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 enum { EFFECT_SCRIPT_PHASE_SLOT_COUNT = 4 };
 

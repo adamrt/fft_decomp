@@ -1,4 +1,5 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 s32 main_status_set_ct(battle_stats_t* unit, s32 status_id, s32 removing) {

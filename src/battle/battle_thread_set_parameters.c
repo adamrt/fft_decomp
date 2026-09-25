@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_thread_set_parameters(s32 thread_id, s32 parameter_1, s32 parameter_2, s32 parameter_3) {

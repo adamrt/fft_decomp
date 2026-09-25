@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 void battle_ai_restore_considered_action_data(void) {
     g_battle_action_state = BATTLE_ACTION_STATE_EXECUTE;

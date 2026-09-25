@@ -1,5 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 enum {
     BATTLE_EFFECT_PRIMITIVE_BUFFER_SIZE = 0x8000,

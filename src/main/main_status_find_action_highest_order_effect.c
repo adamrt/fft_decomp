@@ -1,4 +1,4 @@
-#include "fft/status.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /*

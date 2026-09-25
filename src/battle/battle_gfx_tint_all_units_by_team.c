@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_gfx_tint_all_units_by_team(void) {

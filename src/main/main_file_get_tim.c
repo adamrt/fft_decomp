@@ -1,5 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Allocates a game-heap buffer for a TIM of `size` bytes at disc `sector`,

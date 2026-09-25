@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xF2: for the modulator selected by 0xF0,

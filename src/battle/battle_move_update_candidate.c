@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /* Check a movement candidate and update its mode-dependent budget state.
  *

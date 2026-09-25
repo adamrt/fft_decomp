@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 
 void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
     s32 progress;

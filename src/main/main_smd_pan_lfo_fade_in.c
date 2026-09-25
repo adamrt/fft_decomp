@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xEB: modulator 2 counter_18 and its

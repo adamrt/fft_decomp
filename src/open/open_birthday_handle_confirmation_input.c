@@ -1,9 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
 #include "fft/open.h"
-#include "fft/script_variables.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 /* Handle confirmation, cancellation, and cursor movement on the final birthday prompt.

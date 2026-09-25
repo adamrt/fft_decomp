@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Ends the window tint transition and restores the parent content record.

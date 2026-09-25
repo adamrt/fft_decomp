@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_sound.h"
-#include "fft/map.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 /* Run a weather display command.

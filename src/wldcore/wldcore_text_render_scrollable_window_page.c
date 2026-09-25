@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Renders the page of a scrollable text window that starts at `row` and
  * clips its optional extra render record against the window top.

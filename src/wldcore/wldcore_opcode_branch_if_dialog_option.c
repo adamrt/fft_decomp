@@ -1,6 +1,4 @@
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Branches the sound-novel script to section g_wldcore_active_saved_record.instruction.bytes.operand_0 when the

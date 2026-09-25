@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_unit_rotation.h"
-#include "fft/event.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* RotateUnit event instruction: turn the addressed unit(s) to a facing.

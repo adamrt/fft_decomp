@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_move_displace_unit_along_step_direction(battle_unit_misc_data_t* unit, s32 x, s32 y, s32 delta) {

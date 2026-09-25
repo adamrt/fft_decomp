@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/option.h"
 #include "psx/types.h"
 
 void battle_menu_fade_out_thread(void) {

@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag) {
     DRAWENV env;

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Disable an AI ability that does nothing except add one unwanted status.

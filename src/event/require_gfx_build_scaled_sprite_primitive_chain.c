@@ -1,4 +1,4 @@
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* REQUIRE copy of main_gfx_build_zodiac_bin. */

@@ -1,6 +1,5 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void battle_gfx_init_deployment_and_reset_unit_graphics_state(void) {

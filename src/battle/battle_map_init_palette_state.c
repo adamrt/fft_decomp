@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 void battle_map_init_palette_state(void) {

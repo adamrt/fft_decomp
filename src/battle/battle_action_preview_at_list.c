@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_heap.h"
-#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Preview where a planned action lands on the AT list.

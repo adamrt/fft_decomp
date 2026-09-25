@@ -1,18 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu_window.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/option.h"
-#include "fft/options.h"
-#include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/event_option.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -37,10 +23,6 @@ typedef struct option_menu_page {
 
 typedef char option_menu_page_size_must_be_0x190[(sizeof(option_menu_page_t) == 0x190) ? 1 : -1];
 
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
-
-extern world_input_timing_profile_t g_option_input_repeat_timings[];
 extern option_menu_page_t g_option_menu_pages[2];
 
 /*

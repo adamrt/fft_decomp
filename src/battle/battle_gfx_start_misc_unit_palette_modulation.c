@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 enum {
     MISC_UNIT_SLOT_COUNT = 16,

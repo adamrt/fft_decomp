@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Jump to the offset in the third halfword when the counter selected by the
  * top two bits of the second byte is below the second halfword; otherwise

@@ -1,6 +1,3 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 
 /*

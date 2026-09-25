@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
-#include "fft/map.h"
 
 /* The result bytes as the target writes them. The elevation store is a 7-bit
  * field write that keeps bit 7 of the uninitialized local byte, and only these

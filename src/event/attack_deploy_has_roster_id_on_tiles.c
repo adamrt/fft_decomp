@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 s32 attack_deploy_has_roster_id_on_tiles(s32 roster_id) {

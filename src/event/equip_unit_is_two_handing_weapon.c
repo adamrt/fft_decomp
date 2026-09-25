@@ -1,6 +1,4 @@
-#include "fft/data.h"
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 s32 equip_unit_is_two_handing_weapon(weapon_pair_t* slots, s32 two_hands_support) {

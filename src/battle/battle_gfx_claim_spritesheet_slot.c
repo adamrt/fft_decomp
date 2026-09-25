@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 /* Claim a VRAM spritesheet slot for `spritesheet_id`: reuse the slot that

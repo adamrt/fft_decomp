@@ -1,9 +1,7 @@
 /* The header declares g_jobstts_menu_list_scroll_direction as u8, but every read here is a signed
  * `lb`; this candidate needs the header changed to s8. Until then the rename
  * keeps the header's declaration out of the way. */
-#include "fft/jobstts.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
+#include "fft/event_jobstts.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 

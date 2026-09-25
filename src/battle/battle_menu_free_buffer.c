@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/menu.h"
 #include "psx/types.h"
 
 void battle_menu_free_buffer(s32 buffer) {

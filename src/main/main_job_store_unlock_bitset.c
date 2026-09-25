@@ -1,4 +1,4 @@
-#include "fft/job.h"
+#include "fft/main.h"
 
 void main_job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs) {
     *destination++ = unlocked_jobs >> 16;

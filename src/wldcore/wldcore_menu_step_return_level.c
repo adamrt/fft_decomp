@@ -1,12 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
-s32 wldcore_location_process_entry(s32 from_location, s32 to_location);
-s32 world_menu_get_thread_activity(void);
-void wldcore_menu_push_variable_list_level(void);
 
 /* Per-frame handler of the world-map return level: waits out its own delay,
  * then pops the level and dispatches whichever pending system-flag request

@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_thread_wait_for_10_to_13(void) {

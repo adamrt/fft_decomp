@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 /* 24 signed bob offsets copied to the stack from BATTLE rodata. */
 typedef struct battle_unit_height_wave {

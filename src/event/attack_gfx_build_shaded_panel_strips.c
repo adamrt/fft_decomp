@@ -1,6 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle_gfx.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 
 /* libgpu-style rectangle setters; the macro argument re-evaluation and the
  * narrowing store into each field are part of the matched expression shapes. */

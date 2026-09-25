@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /*
  * Rebuilds the effect-node free list: node 0 is the list sentinel, nodes

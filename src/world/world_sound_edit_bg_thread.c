@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Thread task 0x35 continuation: ramp the parameter sound's echo level from

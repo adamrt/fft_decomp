@@ -1,5 +1,3 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/gte.h"
 #include "psx/pad.h"
@@ -24,12 +22,6 @@ typedef struct wldcore_window_position_record {
     s32 field_20;
 } wldcore_window_position_record_t;
 extern wldcore_window_position_record_t g_wldcore_window_position_records[];
-
-void wldcore_menu_push_focus_location_level(s32 id);
-void wldcore_menu_push_entry_window_level(void);
-s32 wldcore_location_process_entry(s32 from_location, s32 to_location);
-s32 wldcore_map_get_dot_snap_step(wldcore_point32_t point, s32* step_x, s32* step_y);
-void wldcore_menu_push_message_level(s32 text_id, s32 reload_text);
 
 /* Per-frame step of the world map cursor.
  *

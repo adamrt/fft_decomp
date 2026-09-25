@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_heap.h"
 #include "psx/types.h"
 
 /* Run the ability formula for a preview of attacker's command against target.

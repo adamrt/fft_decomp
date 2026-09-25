@@ -1,7 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/require.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_text_show_battle_congratulations(void) {

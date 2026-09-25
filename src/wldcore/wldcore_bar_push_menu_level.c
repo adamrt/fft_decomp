@@ -1,12 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void world_text_message_box_thread(void);
-void world_thread_set_parameters(s32 thread_id, s32 a, s32 b, s32 c);
-void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
 
 /* Opens a full-screen menu level (type 5): hides the map, loads data set
  * 0x16 or 0x17 by `EVENT_SCRIPT_VAR_TOWN_BACKGROUND`, starts WORLD thread 14 on

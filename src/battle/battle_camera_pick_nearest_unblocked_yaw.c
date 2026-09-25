@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 s16 battle_camera_pick_nearest_unblocked_yaw(s32 misc_id_a, s32 misc_id_b) {

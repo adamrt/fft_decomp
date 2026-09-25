@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 void battle_map_load_palette_data(const u16* palette, s32 mesh_index, s32 palette_row_index, s32 load_all_rows) {

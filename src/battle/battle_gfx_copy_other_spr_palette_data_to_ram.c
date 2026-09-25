@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_gfx_copy_other_spr_palette_data_to_ram(u8* src) {

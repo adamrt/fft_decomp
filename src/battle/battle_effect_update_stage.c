@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_runtime.h"
-#include "fft/effect.h"
-#include "fft/main_gfx.h"
-#include "fft/main_sound.h"
 
 s32 battle_effect_update_stage(void) {
     s32 result;

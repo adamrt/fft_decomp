@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Advances the animated cursor at `pos` and draws it, bouncing vertically,

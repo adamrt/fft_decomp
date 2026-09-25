@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_thread_suspend(s32 thread_id) {

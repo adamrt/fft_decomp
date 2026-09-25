@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* SMD opcode 0xB0: sets bit 11 of the channel flag word. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {

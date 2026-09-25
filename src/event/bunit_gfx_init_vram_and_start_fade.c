@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 typedef struct {

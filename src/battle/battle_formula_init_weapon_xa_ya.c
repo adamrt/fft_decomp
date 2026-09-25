@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 
 void battle_formula_init_weapon_xa_ya(void) {
     u8 weapon_type = g_main_item_primary_data[g_current_ability.weapon_id].type;

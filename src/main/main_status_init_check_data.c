@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/status.h"
+#include "fft/main.h"
 
 void main_status_init_check_data(void) {
     int status;

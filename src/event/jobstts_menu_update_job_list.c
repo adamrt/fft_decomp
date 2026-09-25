@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/jobstts.h"
-#include "fft/main_sound.h"
+#include "fft/event_jobstts.h"
 #include "psx/pad.h"
 
 /* Run the job list menu; on Circle, record the chosen job and return 1 to advance the menu state. */

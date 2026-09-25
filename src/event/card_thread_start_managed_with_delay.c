@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_thread_start_managed_with_delay(s32 thread_id, world_menu_entry_t* descriptor) {

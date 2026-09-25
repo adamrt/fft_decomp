@@ -1,10 +1,5 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level);
 
 /* Step handler for the number-panel menu level (type 0x30). While the panel
  * runs it accepts the confirm button (0x20), which plays sound 1 and writes

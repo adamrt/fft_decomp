@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 void bunit_menu_get_selection_record(s32 index, s16* out_index, s16* out_b, s16* list) {

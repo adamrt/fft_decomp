@@ -18,7 +18,6 @@
  *    Minus-over-negate does not work: it hoists a `negu` into the prologue
  *    and emits `subu`.
  */
-#include "fft/script_variables.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

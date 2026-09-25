@@ -1,15 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu_window.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -28,8 +17,6 @@ typedef struct battle_menu_scroll_list_page {
 } battle_menu_scroll_list_page_t;
 
 struct battle_menu_text_position;
-extern u8* battle_menu_redraw_text_page_on_scroll_in_rect(
-    world_menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 extern void battle_menu_draw_stacked_glyph_pair(void* pixels, struct battle_menu_text_position* position);
 
 /*

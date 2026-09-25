@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_ai_check_ability_use_based_on_ct(s32 unit_index) {

@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_text_start_help_thread(s32 thread_data) {
     if (g_jobstts_text_selected_job_id > 0) {

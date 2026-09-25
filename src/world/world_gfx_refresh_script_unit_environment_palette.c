@@ -1,5 +1,5 @@
-#include "fft/battle_gfx.h"
-#include "fft/event.h"
+#include "fft/battle.h"
+#include "fft/world.h"
 
 /* Resolve the script's signed unit ID and refresh its environment palette
  * unless resolution returns the missing-unit sentinel. */

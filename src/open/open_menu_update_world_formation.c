@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/open.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 void open_menu_update_world_formation(void) {

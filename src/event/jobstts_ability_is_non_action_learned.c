@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 /* Same target slot; the alias preserves independent a1/a2 materialization. */

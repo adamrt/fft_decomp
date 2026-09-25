@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 
 /* Four effect-pool/state initializers, called at effect setup and teardown. */
 void battle_effect_reset_subsystems(void) {

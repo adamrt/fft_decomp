@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Formula 0x60: damage ((MA + Y) / 2 * MA), 6.25% status. */

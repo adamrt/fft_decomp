@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 
 void battle_move_init_post_movement_display(void) {
     battle_stats_t* stats;

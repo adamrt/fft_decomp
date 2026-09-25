@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 u32 battle_gfx_get_unit_spritesheet_height(battle_unit_misc_data_t* unit) {
     if (unit == 0) {

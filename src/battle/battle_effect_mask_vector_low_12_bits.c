@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_effect_mask_vector_low_12_bits(const s16* src, s16* dst) {

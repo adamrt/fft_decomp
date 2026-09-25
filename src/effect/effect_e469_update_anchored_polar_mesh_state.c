@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect_polar_mesh.h"
+#include "fft/effect.h"
 
 /* Builds and draws a four-fold symmetric polar mesh of textured quads anchored
  * to an effect target.

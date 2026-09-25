@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Modulator step: sample and hold. Each time the timer expires value takes a

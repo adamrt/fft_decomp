@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /*
  * Check whether the spreading coordinates lie outside the map.

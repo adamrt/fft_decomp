@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 const u8* equip_cmd_set_semitrans_handler(const u8* data) {

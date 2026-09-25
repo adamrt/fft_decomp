@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/effect_particle_ribbon.h"
-#include "fft/effect_summon_mesh.h"
-#include "fft/map.h"
+#include "fft/effect.h"
 #include "psx/gte_inline.h"
 #include "psx/libc.h"
 

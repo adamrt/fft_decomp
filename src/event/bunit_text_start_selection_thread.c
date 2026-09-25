@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Start the text thread for g_bunit_text_selection_id (ids above 0x1FFFF are

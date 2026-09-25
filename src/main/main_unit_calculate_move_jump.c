@@ -1,4 +1,5 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_calculate_move_jump(battle_stats_t* unit, s32 keep_position) {

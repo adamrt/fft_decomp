@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Dispatches the target unit's first reaction ability whose bit is set in

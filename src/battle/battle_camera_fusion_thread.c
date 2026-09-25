@@ -8,11 +8,6 @@
  * makes loop.c discover the track giv before the script-variable and values
  * givs, which gives the target's induction-increment order. */
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* One track per camera component; 7 * 0xa4 == 0x47c, the allocation size the

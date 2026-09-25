@@ -1,10 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/status.h"
-#include "fft/unit_flags.h"
 #include "psx/types.h"
 
 enum {

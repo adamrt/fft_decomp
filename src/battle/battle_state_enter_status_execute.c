@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 
 /* Enters the status-execute state for the source unit and shows its message:
  * action type 0x500 shows message 0x183a with animation 0x16; otherwise the

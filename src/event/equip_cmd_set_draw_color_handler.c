@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Stream command: set the sprite RGB; the compact layout uses the second

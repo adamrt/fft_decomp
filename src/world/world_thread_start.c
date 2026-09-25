@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Initializes thread slot `thread_id` to run `function`: global pointer, stack at the end of its

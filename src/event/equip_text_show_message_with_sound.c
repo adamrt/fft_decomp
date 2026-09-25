@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id) {

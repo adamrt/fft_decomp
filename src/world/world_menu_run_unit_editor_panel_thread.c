@@ -1,9 +1,5 @@
 /* BATTLE twin: battle_menu_run_unit_editor_panel_thread. */
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/menu.h"
-#include "fft/text.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

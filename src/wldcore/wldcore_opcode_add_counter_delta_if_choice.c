@@ -7,9 +7,7 @@
  * union and bitfield spelling lets cse fold the address back into the load's
  * %lo displacement. Laundering the constant address through a non-volatile
  * asm hides it from cse and emits nothing. */
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Scalar views of the instruction word and of the u16 counter at 0x800d4852

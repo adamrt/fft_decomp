@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "psx/types.h"
 
 /* MirrorSprite (event instruction 0x68): mirrors the unit's sprite when the

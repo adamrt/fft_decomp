@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* g_battle_ai_temp_unit_data names g_battle_ai_data_base.acting_unit separately:

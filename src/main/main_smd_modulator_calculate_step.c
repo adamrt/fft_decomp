@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Returns the amplitude a modulator steps by so that its waveform spans

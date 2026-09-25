@@ -1,4 +1,4 @@
-#include "fft/etc.h"
+#include "fft/event_etc.h"
 #include "psx/types.h"
 
 /* Build and draw the four POLY_GT4 tiles of an ETC graphic revealed up to `fade`

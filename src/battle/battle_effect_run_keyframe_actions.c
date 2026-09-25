@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 
 /*
  * Dispatch one keyframe's action flags to a single effect target: bits 4-6

@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Sets the byte that SMD opcode 0x8D compares with its parameter. */

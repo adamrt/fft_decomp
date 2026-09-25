@@ -1,4 +1,4 @@
-#include "fft/debugchr.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 void debugchr_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet) {

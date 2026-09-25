@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Stack view of bunit_oriented_quad_t whose clut/tpage slots receive the

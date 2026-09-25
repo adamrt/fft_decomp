@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_status_init_unit(battle_stats_t* unit) {
     s32 status_set;

@@ -1,3 +1,4 @@
+#include "fft/open.h"
 #include "psx/etc.h"
 
 /* OPEN.BIN open_bin_decdctreset - wrapper around the DCT reset routine that also

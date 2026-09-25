@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Steps the per-unit graphics loader for the queued load descriptors.

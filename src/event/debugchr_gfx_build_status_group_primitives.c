@@ -1,5 +1,4 @@
-#include "fft/battle_gfx.h"
-#include "fft/debugchr.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 /* Render the animated status groups of the character debug panel.

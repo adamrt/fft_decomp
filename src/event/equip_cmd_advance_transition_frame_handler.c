@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 u8* equip_cmd_advance_transition_frame_handler(u8* data) {

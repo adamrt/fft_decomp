@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Target 0x8019ae30. */

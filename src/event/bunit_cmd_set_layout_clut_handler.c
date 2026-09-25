@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Set the sprite CLUT from the command's normal or compact-layout coordinates

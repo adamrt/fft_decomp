@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001bf590 - Prime the four "menu section dirty" flags before the

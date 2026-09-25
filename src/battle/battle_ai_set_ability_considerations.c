@@ -1,6 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 /* The target reads the AI flag word as two halfwords (lhu +0x0c/+0x0e). */
 #define AI_FLAGS_LO(a) (((u16*)&(a)->ai_flags)[0])

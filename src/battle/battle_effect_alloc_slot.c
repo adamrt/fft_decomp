@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_alloc_slot(void) {
     u8 head;

@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Set the window palettes of a list window: main window 10 (with sequence

@@ -1,10 +1,6 @@
-#include "fft/main_runtime.h"
 #include "fft/open.h"
 #include "psx/cd.h"
 #include "psx/types.h"
-
-s32 CdPosToInt(u8* position);
-s32 open_file_get_cd_sync_state_delta(void);
 
 void open_script_update_xa_audio(void) {
     u8 result[8];

@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Test (save == 0) or set the found flag of one of a map's four move-find item tiles.

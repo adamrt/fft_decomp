@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_unit_update_display_by_misc_id(u16 misc_id) {

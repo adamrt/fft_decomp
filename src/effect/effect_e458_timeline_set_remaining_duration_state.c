@@ -1,4 +1,3 @@
-#include "fft/battle.h"
 #include "fft/effect.h"
 
 typedef struct effect_timeline_record_view {

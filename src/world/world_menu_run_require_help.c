@@ -2,9 +2,6 @@
  * (helpmenu_menu_run_require_help), byte-identical apart from addresses.
  * The register pins and scheduling boundaries are the HELPMENU twin's; see
  * src/event/helpmenu_menu_run_require_help.c for the load-bearing shapes. */
-#include "fft/event.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

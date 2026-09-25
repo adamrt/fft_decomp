@@ -20,7 +20,7 @@ without changing a single byte.
 | Path | Contents |
 |---|---|
 | `src/<module>/` | One C file per function, named after it |
-| `include/fft/` | Shared game types, globals and prototypes |
+| `include/fft/` | One header per module (`main.h`, `battle.h`, `world.h`, `wldcore.h`, `open.h`, `effect.h`, `event_<overlay>.h`) plus shared type headers (`thread.h`, `gfx.h`, `data.h`, `unit.h`, `map.h`, `menu.h`, `script.h`) |
 | `include/psx/` | Clean-room Psy-Q SDK declarations (keep SDK names and signatures) |
 | `target/*.yaml` | Every disc module: functions with hashes, data names, libraries, regions |
 | `tools/` | Go tooling (its own module), rebuilt from the working tree on every `make` call |
@@ -145,7 +145,20 @@ function that matches only that way.
   one full rsin/rcos turn. Write `ONE` for 1.0; `>> 12` rescales after a
   multiply.
 - One declaration per symbol, in its header. `make check-config` fails on
-  conflicting declarations.
+  conflicting declarations. Globals and prototypes go in the header of their
+  name's module prefix. A type goes in the most specific module header that
+  every user can see: `battle.h` for BATTLE and its overlays (whose headers
+  include it), `world.h` for WORLD, WLDCORE and OPENING, and a shared type
+  header only when both families use it. Two exceptions: `main_` types stay
+  in `main.h`, and MAIN-only table or unit records (item, ability, job,
+  party, ENTD) sit with their siblings in `data.h` and `unit.h`. A `volatile`
+  or otherwise one-function view of a global stays local to that source
+  file, with its reason. A source file includes its own
+  module header, plus another module's header when it calls into that module
+  (MAIN and WORLD code calling BATTLE functions, for example). `main.h`
+  includes every shared header. Each header groups its declarations under
+  short lowercase subsystem labels (`/* ai */`), types first, then globals,
+  then functions.
 - Comments: an optional short summary above a function, then only the
   rationale needed to read the code. State facts, not history. Record retail
   bugs and caller/callee disagreements with one line in `QUIRKS.md`.

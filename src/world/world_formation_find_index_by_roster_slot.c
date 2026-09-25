@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Find the current formation-list index for a roster slot.

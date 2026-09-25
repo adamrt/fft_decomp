@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "psx/types.h"
 
 typedef struct battle_script_jump_instruction {

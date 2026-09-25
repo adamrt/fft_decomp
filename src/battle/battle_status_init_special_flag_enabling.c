@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 /* Enable the renderer status flags for each of a unit's current statuses.

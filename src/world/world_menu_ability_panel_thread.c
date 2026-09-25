@@ -5,8 +5,6 @@
  * second. A trimmed relative of attack_panel_run_character_status_thread
  * (same 0x3d8-byte frame layout and callee sequence).
  */
-#include "fft/menu.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"

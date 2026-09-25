@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 void battle_formula_heal_mp_z_times_ten(void) {

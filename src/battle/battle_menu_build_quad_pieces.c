@@ -1,11 +1,6 @@
 #include "fft/battle.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
-
-extern world_menu_quad_piece_t g_battle_menu_quad_pieces[]; /* quad piece table */
-extern world_menu_quad_colors_t g_battle_menu_quad_colors;  /* vertex colours */
-extern world_menu_quad_origin_t g_battle_menu_quad_origin;  /* screen origin */
 
 /* Fills one POLY_GT4 per piece of quad group `group` and returns the piece count.
  *

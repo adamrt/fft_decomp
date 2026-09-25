@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Sets or clears the SFX-enable bit 0x1000 of the driver status; disabling

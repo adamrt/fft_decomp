@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 void main_sound_set_current_music_track(int track) {
     int slot;

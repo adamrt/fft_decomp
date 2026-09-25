@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 /* Draw a rectangle tiled with 16-pixel textured quads.

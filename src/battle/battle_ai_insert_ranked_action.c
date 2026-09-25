@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Insert the best action into the ranked list, then reset it.

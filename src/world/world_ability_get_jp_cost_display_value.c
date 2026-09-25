@@ -1,5 +1,3 @@
-#include "fft/battle_ability.h"
-#include "fft/data.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

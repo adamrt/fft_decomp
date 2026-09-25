@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Set when a player-team unit becomes Crystal or Dead. */

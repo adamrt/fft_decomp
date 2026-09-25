@@ -13,9 +13,6 @@
  * makes GCC reload the byte (as the target does) where the (u32)(x - 0x78) < 5
  * form lets cse reuse the earlier load. */
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/unit_slots.h"
 #include "fft/world.h"
 
 s32 world_script_check_scenario_condition(s32 type, s32 id, s32 value, s32 x, s32 elevation) {

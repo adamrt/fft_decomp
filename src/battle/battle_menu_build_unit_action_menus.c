@@ -1,8 +1,4 @@
-#include "fft/ability_flags.h"
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 /* Builds a unit's 0xff-terminated action-menu skillset list and loads each

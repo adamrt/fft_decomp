@@ -1,11 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask);
-void wldcore_menu_push_scrollable_text_window_level(s32 text_id);
-void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
 
 /* Clear system flag 0x10000 and act on the pending world-menu request flags.
  *

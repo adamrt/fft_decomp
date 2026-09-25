@@ -1,4 +1,4 @@
-#include "fft/job.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 s32 bunit_job_is_special_monster(s32 job_id) {

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_state.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Current action block of Miscellaneous unit_t Data (0x18c..0x1ad), reached

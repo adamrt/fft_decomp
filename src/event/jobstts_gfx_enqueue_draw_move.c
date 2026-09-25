@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index) {
     DR_MOVE* prim;

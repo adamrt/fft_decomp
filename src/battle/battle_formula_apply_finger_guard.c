@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Cancel the action with Finger Guard when the target's Brave-based reaction roll succeeds. */

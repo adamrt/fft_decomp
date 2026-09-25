@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Return the original component with the largest signed-16 magnitude.
  *

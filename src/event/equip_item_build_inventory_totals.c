@@ -1,6 +1,4 @@
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Snapshot the player inventory counts, then add every item currently equipped

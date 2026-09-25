@@ -1,5 +1,3 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Runs the shop purchase-quantity menu for the highlighted item.

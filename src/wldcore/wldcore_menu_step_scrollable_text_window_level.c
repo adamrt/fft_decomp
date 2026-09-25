@@ -1,5 +1,3 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 
 /* Menu-level step for the scrollable text window at 0x8009eef8. While its

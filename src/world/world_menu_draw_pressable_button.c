@@ -1,4 +1,3 @@
-#include "fft/geometry.h"
 #include "fft/world.h"
 
 /* Destination rectangle followed by the source rectangle, CLUT and tpage

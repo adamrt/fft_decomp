@@ -1,21 +1,5 @@
-#include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-/* Second link name for g_main_system_flags (0x8004d950), as in
- * wldcore_list_handle_tutorial_mask_1_entries_input.c. */
-extern s32 g_main_system_flags_alias;
-
-s32 wldcore_script_run_until_yield(void);
-void wldcore_capture_state_and_play_time(void);
-void wldcore_menu_push_sound_novel_quit_level(void);
-void wldcore_menu_push_sound_novel_history_level(void);
-void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
-void world_thread_set_task_id_to_three(s32 thread_id);
 
 /*
  * Per-frame handler for a WLDCORE brightness/fade menu level.

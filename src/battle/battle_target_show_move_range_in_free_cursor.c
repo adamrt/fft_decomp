@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_sound.h"
 #include "psx/types.h"
 
 void battle_target_show_move_range_in_free_cursor(void) {

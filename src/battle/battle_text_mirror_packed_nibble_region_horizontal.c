@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Mirrors a packed nibble rectangle horizontally, swapping each nibble with its opposite. */

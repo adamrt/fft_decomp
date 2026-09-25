@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 s32 battle_state_sync_frame(u32 ordering_table) {
     s32 wait;

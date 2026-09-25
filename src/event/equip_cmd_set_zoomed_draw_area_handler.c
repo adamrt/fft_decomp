@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_cmd_set_zoomed_draw_area_handler(world_menu_window_command_t* command) {

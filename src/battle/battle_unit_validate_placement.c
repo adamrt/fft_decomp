@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 
 /* Bitfield view of map_tile_t byte 3. Reading it as bitfields reproduces the
  * target's separate reload of the byte for each test; masking the shared

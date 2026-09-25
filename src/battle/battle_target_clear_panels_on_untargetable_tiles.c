@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 void battle_target_clear_panels_on_untargetable_tiles(void) {

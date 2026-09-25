@@ -2,7 +2,6 @@
  * the partner pointer.  Scoped bindings reproduce that short-lived allocation
  * without emitting instructions. */
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Move a unit to (x, y, level) with a new facing, carrying its mounted partner.

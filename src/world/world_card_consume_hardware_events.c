@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_runtime.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Twin of world_card_consume_bios_events (0x8013270c) over the hardware

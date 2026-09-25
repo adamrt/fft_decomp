@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_move_set_spreading_tile_x_and_y_coordinates(void) {

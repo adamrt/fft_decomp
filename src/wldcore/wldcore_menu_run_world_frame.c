@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 void wldcore_menu_run_world_frame(GsOT* context) {

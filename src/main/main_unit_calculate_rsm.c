@@ -1,7 +1,5 @@
-#include "fft/character_identity.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 #define RSM_CANDIDATE_COUNT     480

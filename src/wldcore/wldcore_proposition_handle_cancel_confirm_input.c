@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
 
@@ -16,9 +15,6 @@ typedef struct wldcore_menu_proposition_confirm_level {
     u8 unknown_1c[4];  /* 0x1c */
     s32 second_window; /* 0x20 */
 } wldcore_menu_proposition_confirm_level_t;
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_list_open_propositions(void);
 
 /* Input step for the two-row proposition confirmation window: up/down toggle
  * the highlighted row and move the cursor window, Circle either

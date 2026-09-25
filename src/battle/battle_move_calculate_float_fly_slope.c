@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 s32 battle_move_calculate_float_fly_slope(battle_unit_misc_data_t* unit, map_tile_t* tile) {
     s32 movement_flags;

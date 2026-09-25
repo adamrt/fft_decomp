@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_party_remove_low_brave_high_faith_units(void) {

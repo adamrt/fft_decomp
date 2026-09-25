@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 
 /*
  * Restore the saved unit state and replay status changes made during an event.

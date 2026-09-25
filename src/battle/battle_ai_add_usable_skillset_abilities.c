@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
 
 /* Append a skillset's usable abilities to the unit's AI ability list and
  * return the updated count.

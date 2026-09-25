@@ -1,8 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/require.h"
-#include "fft/script_variables.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_reward_collect_war_trophies_and_bonus_money(void) {

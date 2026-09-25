@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Route controller input to the running battle event thread. */

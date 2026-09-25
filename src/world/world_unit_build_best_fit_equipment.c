@@ -7,8 +7,6 @@
  * hand (owned count >= 2 or different from the right-hand pick), falling back
  * to the shield category. Throwable items and later IDs are never re-offered
  * as weapons. Martial Arts clears both hands so the unit remains unarmed. */
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* Item-menu category per equipment slot (right hand, left hand, head, body,

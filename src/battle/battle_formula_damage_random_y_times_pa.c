@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 
 void battle_formula_damage_random_y_times_pa(void) {
     if (battle_formula_calculate_physical_evade() == 0) {

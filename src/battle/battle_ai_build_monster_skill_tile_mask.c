@@ -1,6 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/map.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /* The target loads 0xff as 255, not -1, for the first 2 directions. */
 /*

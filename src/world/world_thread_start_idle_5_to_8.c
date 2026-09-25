@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 void world_thread_start_idle_5_to_8(void) {

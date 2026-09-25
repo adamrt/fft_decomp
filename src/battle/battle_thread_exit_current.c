@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_thread_exit_current(void) {

@@ -1,8 +1,6 @@
 #include "fft/wldcore.h"
 #include "psx/gs.h"
 
-void world_gs_gettiminfo(u32* tim, GsIMAGE* image);
-
 /* World-script opcode: loads picture operand_0 through 0x80068ab4, places
  * its render record at (operand_2 - 0x80, operand_1 - 0x78), uploads the
  * TIM's pixels and CLUT, and binds the render record to the VRAM image. */

@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 party_data_t* main_party_get_data_pointer(s32 party_index) {
     party_data_t* party_data;

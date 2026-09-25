@@ -1,18 +1,6 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
-
-extern void battle_world_display_specific_menu_text(s32 buffer, s32 origin, s32 text);
 
 /* Unit summary panel thread, BATTLE twin of world_menu_unit_summary_panel_thread: renders the
  * unit's name/job, brave, faith and a third number into text images,

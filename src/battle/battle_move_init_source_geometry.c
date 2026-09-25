@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /*
  * Prepare source-side heights and ceiling for a movement candidate.

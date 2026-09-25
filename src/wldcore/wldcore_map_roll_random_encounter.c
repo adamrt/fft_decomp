@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* One random-encounter tier: the story-progress threshold that selects it,
  * the percentage chance an encounter happens, and the high-bit-first mask of

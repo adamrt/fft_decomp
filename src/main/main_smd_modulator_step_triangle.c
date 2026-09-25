@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Modulator step: triangle wave; the increment flips sign (flags bit 3)

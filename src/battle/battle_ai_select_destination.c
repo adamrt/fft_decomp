@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Select a reachable destination using priority-first or distance-first ordering.

@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 #include "psx/gpu.h"
 
 void main_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue) {

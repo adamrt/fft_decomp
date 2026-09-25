@@ -1,16 +1,5 @@
-#include "fft/attack.h"
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
-#include "fft/world.h"
-
-/* The packed-word view of the options record; g_main_game_options names the
- * same address under its union type. The scalar name is retained because GCC
- * otherwise coalesces the saved-word load with the following bitfield writes
- * and changes the target instruction order. */
-extern u32 g_main_game_options_raw;
+#include "fft/event_attack.h"
 
 /*
  * Initialize ATTACK resources and select the thread that starts deployment.

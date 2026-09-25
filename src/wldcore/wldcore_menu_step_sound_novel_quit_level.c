@@ -1,16 +1,5 @@
-#include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
-void world_thread_set_task_id_to_three(s32 thread_id);
-void wldcore_capture_state_and_play_time(void);
-void wldcore_window_reset_slot_state(s32* param);
-void wldcore_menu_push_text_window_level(s32 text, s32 reload_text);
-u32 wldcore_input_check_repeating_directional(u32 buttons);
 
 /* Step handler for the save confirmation level.
  *

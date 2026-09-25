@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
 
 /*
  * Mark the panels an AI action would affect and return how many are

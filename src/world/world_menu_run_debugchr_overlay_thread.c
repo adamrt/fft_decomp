@@ -1,8 +1,6 @@
-#include "fft/thread.h"
+#include "fft/event_debugchr.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern void debugchr_run_character_debug_session(void);
 
 void world_menu_run_debugchr_overlay_thread(void) {
     world_unit_start_view_thread(0, 0xFF, 0xFF);

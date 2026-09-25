@@ -1,4 +1,4 @@
-#include "fft/battle_runtime.h"
+#include "fft/battle.h"
 
 /* Turns buffer into a single free block that links to itself and empties the
  * per-owner lists; the effect stage calls this with the effect palette

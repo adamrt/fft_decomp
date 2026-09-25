@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
 #include "psx/types.h"
 
 void battle_state_enter_target_display(void) {

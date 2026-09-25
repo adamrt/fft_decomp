@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/wldcore.h"
 #include "psx/libc.h"
 #include "psx/types.h"

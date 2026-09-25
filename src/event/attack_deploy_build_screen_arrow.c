@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 
 typedef struct {
     POLY_FT4 poly;

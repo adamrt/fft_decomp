@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Point a sprite animation node at parameter set animation_index and restart

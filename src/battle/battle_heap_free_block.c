@@ -1,4 +1,4 @@
-#include "fft/battle_runtime.h"
+#include "fft/battle.h"
 
 /*
  * Release a block from battle_heap_alloc_block.

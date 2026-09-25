@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Defined with this record in world_script_jump_event_instruction.c; the

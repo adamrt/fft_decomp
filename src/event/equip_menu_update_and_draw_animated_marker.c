@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Idle (0x801d87a0, 6 steps) and active (0x801d87ac, 10 steps) animation

@@ -1,11 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/main_unit.h"
-#include "fft/menu_types.h"
-#include "fft/require.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

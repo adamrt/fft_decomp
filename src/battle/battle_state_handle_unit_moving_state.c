@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 void battle_state_handle_unit_moving_state(void) {
     battle_unit_misc_data_t* casting_misc_data;

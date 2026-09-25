@@ -1,4 +1,4 @@
-#include "fft/battle_state.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_state_get_animation_continue_check(void) {

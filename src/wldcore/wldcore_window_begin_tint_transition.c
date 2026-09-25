@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Activates the window pair named by a tint request: the window record takes

@@ -1,7 +1,3 @@
-#include "fft/battle_ability.h"
-#include "fft/data.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"

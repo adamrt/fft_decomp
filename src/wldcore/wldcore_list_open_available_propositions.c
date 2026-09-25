@@ -1,10 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
-s32 wldcore_proposition_set_based_on_location(s32 index, s32 location);
 
 /* Opens the town menu's proposition-location list (row kind 1 of
  * wldcore_bar_handle_menu_input). If the parent list level's frame is hidden (render flag

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
 /* Falls off the end: battle_move_calculate_pathing leaves the path block pointer in $v0 and

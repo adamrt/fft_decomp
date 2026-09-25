@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Menu step that toggles script variable 0x200 + dot_index. Once system
  * flag 0x08 is clear it plays the pending sound (setting the variable to 1

@@ -3,8 +3,6 @@
  * frame pair, thread record and callee sequence). It lists the five
  * equipment names of an item stat-detail record and draws their item icons.
  */
-#include "fft/menu.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"

@@ -2,20 +2,9 @@
  * WORLD twin: world_menu_run_unit_editor_panel_thread (same code, globals and callees rebound).
  */
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/menu.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-extern world_unit_editor_frame_t g_battle_menu_unit_editor_frames[2];
-extern u8 g_battle_unit_editor_line_colors[8 * WORLD_UNIT_EDITOR_LINE_SIZE];
-extern world_unit_editor_panel_data_t g_battle_unit_editor_panel_data;
 
 /* Unit debug editor panel thread (task 0x15). Builds two copies of the panel
  * frame (19 sprites, 5 item icons, two tiles, eight lines and the text images

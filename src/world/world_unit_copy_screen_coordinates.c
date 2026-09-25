@@ -1,4 +1,5 @@
 #include "fft/battle.h"
+#include "fft/world.h"
 
 void world_unit_copy_screen_coordinates(u32 misc_id, VECTOR* destination) {
     battle_screen_coords_t* screen_data;

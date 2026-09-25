@@ -1,12 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
-
-extern s32 g_wldcore_menu_ordering_table_offset;
-extern s32 g_wldcore_screen_fade_box_1_flags;
-extern s32 g_wldcore_screen_fade_box_0_priority;
-
-void wldcore_sound_novel_restore_saved_state(s32 render_index);
 
 void wldcore_menu_push_sound_novel_level(s32 argument) {
     wldcore_window_render_bounds16_t bounds;

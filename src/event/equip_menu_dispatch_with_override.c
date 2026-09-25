@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Run the menu command stream `menu` with `state`, forcing state 0 whenever `override` is set. */

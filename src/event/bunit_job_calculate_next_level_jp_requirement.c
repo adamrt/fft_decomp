@@ -1,6 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 u32 bunit_job_calculate_next_level_jp_requirement(s32 index) {

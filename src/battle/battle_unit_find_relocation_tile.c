@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Find a free tile near a unit for it to be moved to, returning 0 or -1.

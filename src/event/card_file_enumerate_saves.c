@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/etc.h"
 #include "psx/types.h"
 

@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 enum {
     EQUIP_SLOT_MARKER_WINDOW_STATE = 0,

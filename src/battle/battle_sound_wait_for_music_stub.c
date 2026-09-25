@@ -1,5 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_sound_wait_for_music_stub(void) {

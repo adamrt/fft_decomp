@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/thread.h"
-#include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 void world_script_dismiss_unit_event_instruction(s32 sprite_set) {

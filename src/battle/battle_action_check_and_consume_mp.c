@@ -1,7 +1,4 @@
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 
 /*
  * Check action restrictions and consume MP outside preview mode.

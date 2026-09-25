@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 
 s32 battle_script_get_current_scenario_finish_operation(void) {
     if (g_battle_scenario_event_active == 0) {

@@ -1,5 +1,4 @@
-#include "fft/effect.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_map_command_get_3d_object_state(s32 value) {

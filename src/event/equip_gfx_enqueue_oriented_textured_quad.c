@@ -1,5 +1,4 @@
-#include "fft/equip.h"
-#include "fft/main_gfx.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_gfx_enqueue_oriented_textured_quad(

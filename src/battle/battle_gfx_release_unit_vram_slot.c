@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 void battle_gfx_release_unit_vram_slot(battle_unit_misc_data_t* unit) {
     s32 i;

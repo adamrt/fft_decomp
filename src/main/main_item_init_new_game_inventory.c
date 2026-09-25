@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_item_init_new_game_inventory(void) {

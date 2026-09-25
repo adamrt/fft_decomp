@@ -1,5 +1,4 @@
-#include "fft/equip.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Unprototyped view: the void definition is called here with (index, 1) in a0/a1. */

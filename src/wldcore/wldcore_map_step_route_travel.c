@@ -1,12 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-s32 wldcore_script_process_conditional_set(s32 location, s32 condition);
-s32 wldcore_map_roll_random_encounter(s32 location, s32 route);
-s32 wldcore_location_collect_choice_text_ids(s32 location_id, s32* out);
-void wldcore_map_scroll_projection_if_focus_near_edge(wldcore_point32_t* delta);
 
 /* Advances the world-map movement along the current location route.
  *

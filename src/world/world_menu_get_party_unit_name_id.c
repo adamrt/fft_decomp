@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/main_unit.h"
 #include "fft/world.h"
 
 /* Assembles party_data_t.name_id from its two little-endian bytes. */

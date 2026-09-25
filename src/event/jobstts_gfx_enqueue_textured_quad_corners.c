@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 typedef struct jobstts_quad {
     s16 x0;

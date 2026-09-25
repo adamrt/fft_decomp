@@ -1,6 +1,3 @@
-#include "fft/character_identity.h"
-#include "fft/data.h"
-#include "fft/job.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/libc.h"

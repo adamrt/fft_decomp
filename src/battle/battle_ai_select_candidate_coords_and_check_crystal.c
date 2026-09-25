@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Mark an actor-origin choice and check the resulting tile for crystal or treasure.

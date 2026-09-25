@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_runtime.h"
 
 void battle_unit_clear_misc_units(void) {
     battle_unit_misc_data_t* unit;

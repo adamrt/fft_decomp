@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* The definition narrows clut to u16; this file passes it as a full word, so

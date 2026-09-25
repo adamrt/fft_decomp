@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 void battle_action_set_item_throw_stone_ability_display(void) {

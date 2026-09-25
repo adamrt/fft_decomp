@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 /* Run deployment and advance the battle state one rendered frame at a time. */
 void battle_state_run_game_loop(void) {

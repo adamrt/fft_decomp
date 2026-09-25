@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 void bunit_gfx_enqueue_gouraud_quad(u16* pts, u8* color, s32 semi, s32 idx) {

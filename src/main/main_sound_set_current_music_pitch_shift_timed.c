@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 int main_sound_set_current_music_pitch_shift_timed(int value, int time) {

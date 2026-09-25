@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 u32 main_job_calculate_level(u16 job_jp) {

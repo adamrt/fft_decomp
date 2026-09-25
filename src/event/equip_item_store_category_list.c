@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* Compact a -1-terminated s16 item list and append its byte terminator. */
 void equip_item_store_category_list(item_menu_category_e category, const s16* source) {

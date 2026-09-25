@@ -1,4 +1,4 @@
-#include "fft/main_file.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_file_reset_cdrom_cpu_ram(void) {

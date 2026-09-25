@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
 
 /*
  * Refresh cached unit decision flags before AI simulation.

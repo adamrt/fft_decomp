@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 #include "psx/types.h"
 
 /* Draw each entry of a menu number table at its own position, dispatching on

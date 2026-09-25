@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Clear the cursor sprite's width and install the disabled texture window. */

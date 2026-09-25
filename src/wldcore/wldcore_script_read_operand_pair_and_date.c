@@ -1,6 +1,4 @@
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 void wldcore_script_read_operand_pair_and_date(

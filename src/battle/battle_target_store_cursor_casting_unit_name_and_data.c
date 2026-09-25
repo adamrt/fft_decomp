@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
 #include "psx/types.h"
 
 void battle_target_store_cursor_casting_unit_name_and_data(void) {

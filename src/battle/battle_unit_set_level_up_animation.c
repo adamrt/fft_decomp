@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 
 enum {
     LEVEL_UP_ANIMATION_SUBMERGED = 0x09,

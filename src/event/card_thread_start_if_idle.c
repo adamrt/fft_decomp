@@ -1,4 +1,4 @@
-#include "fft/battle_text.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_thread_start_if_idle(s32 thread_id, s32 parameter_0, s32 parameter_1, s32 parameter_2) {

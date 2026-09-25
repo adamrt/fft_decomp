@@ -1,5 +1,4 @@
-#include "fft/debugchr.h"
-#include "fft/main_zodiac.h"
+#include "fft/event_debugchr.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

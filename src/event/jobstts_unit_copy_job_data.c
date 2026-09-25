@@ -1,5 +1,4 @@
-#include "fft/jobstts.h"
-#include "fft/main_unit.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 /* Copy the battle unit's job data into the compact JOBSTTS working record.

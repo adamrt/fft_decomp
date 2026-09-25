@@ -1,8 +1,4 @@
-#include "fft/data.h"
 #include "fft/world.h"
-
-s32 world_formation_can_equip_item_in_slot(s16 unit, s16 slot, s32 item_id);
-s32 world_item_change_quantity_on_equip(s32 item_id, s32 delta);
 
 /* Install an item into a formation unit's equipment slot.
  *

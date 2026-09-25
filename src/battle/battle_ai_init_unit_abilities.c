@@ -1,7 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /*
  * Initialize a unit's ability-use statistics and scenario targeting.

@@ -8,7 +8,6 @@
  * pair and costs instructions.
  *
  * The empty asm statement is explained where it stands. */
-#include "fft/data.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

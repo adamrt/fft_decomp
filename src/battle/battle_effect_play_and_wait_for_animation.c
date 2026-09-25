@@ -1,6 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/battle_state.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Plays the current effect through the inner-subroutine caller, then yields

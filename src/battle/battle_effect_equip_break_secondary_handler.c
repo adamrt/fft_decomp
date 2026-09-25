@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 /*
  * Secondary effect function 0x15 (Equip Break) in g_battle_effect_secondary_handlers.

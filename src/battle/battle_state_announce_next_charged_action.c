@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 extern void battle_text_determine_spell_quote(world_unit_command_action_t* action, s32 unit_id, s32 enabled);

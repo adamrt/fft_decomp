@@ -1,5 +1,3 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 
 /* Opens the active-proposition panel list as menu level type 0x12.

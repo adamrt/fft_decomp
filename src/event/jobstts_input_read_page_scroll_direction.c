@@ -1,6 +1,4 @@
-#include "fft/event.h"
-#include "fft/jobstts.h"
-#include "fft/main_runtime.h"
+#include "fft/event_jobstts.h"
 #include "psx/pad.h"
 
 /*

@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Caches the selected unit's total JP for the Learn Abilities menu's `index`th unlocked job. */

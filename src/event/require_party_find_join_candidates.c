@@ -1,8 +1,4 @@
-#include "fft/main_unit.h"
-#include "fft/require.h"
-#include "fft/script_variables.h"
-#include "fft/status.h"
-#include "fft/unit_slots.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 s32 require_party_find_join_candidates(void) {

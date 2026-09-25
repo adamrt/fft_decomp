@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

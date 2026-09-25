@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {

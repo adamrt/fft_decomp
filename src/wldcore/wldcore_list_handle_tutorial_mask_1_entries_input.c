@@ -1,18 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-/* Same address as g_main_system_flags (0x8004d950). The target re-reads the
- * flags in both arms after the (flags & 0xc) == 4 test; reading the test
- * through this second link name keeps GCC from reusing the tested load, where
- * a volatile declaration also reschedules the argument setup. */
-extern s32 g_main_system_flags_alias;
-
-void wldcore_list_tutorial_mask_1_clear_result(void);
 
 /* Input step of a list level that hands the chosen entry to the world script.
  *

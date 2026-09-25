@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_move.h"
-#include "fft/map.h"
 #include "psx/gte.h"
 
 /* Projects every display unit into camera space.

@@ -1,3 +1,4 @@
+#include "fft/event_bunit.h"
 
 void bunit_thread_stop_after_yield_2(void) {
     battle_thread_yield();

@@ -1,6 +1,4 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Opens the selected rumor in a scrollable text window and hides the parent
  * level's two windows and render record until the detail level closes.

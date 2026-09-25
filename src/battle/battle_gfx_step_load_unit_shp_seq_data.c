@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
 
 void battle_gfx_copy_shp_data_to_ram();
 void battle_gfx_resolve_packed_offset_table();

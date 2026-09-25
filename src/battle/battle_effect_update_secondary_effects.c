@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/main_gfx.h"
 
 typedef s32 (*battle_secondary_effect_function_t)(void);
 

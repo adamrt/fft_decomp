@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 void battle_action_copy_active_turn_data_from(const u8* banner, const u8* unit, const u8* billboard) {

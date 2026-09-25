@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
 
 void battle_script_set_variable(s32 variable_id, s32 value) {
     s32 saved_current_variable = *g_battle_script_variables;

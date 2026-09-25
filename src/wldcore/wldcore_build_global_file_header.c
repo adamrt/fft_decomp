@@ -1,5 +1,3 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Target 0x80068d40. */

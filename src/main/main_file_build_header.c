@@ -1,5 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 #include "psx/cd.h"
 
 /* Initialize a descriptor and enter the asynchronous loader's setup phase. */

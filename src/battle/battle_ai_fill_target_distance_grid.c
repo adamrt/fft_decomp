@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Fill target-distance estimates for rows containing reachable tiles.

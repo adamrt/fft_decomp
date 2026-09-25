@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 /* Runs one step of the battle map initialization sequence and returns the

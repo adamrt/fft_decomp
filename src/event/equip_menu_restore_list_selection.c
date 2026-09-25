@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_menu_restore_list_selection(s32 idx, s16* p1, s16* p2, s16* list) {

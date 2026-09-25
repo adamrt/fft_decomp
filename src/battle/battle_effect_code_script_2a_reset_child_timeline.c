@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Clear the child-timeline state (target, frame and keyframe tracks) that
  * opcode 28 steps. */

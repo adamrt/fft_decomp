@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/text.h"
 #include "fft/world.h"
 
 /* Builds the two-column status list for the stored unit: every set bit of

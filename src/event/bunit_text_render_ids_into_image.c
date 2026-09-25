@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
-#include "fft/text.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Renders a -1 terminated list of text ids into a 4bpp image, one entry per

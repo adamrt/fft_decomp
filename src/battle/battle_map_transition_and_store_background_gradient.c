@@ -1,4 +1,4 @@
-#include "fft/map.h"
+#include "fft/battle.h"
 
 void battle_map_transition_and_store_background_gradient(
     s32 frame_duration, const map_background_gradient_colors_t* colors) {

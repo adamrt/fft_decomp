@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_unit_update_and_animate_units_three_times(void) {

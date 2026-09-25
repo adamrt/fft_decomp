@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Push list-window menu level 0x25.
  *

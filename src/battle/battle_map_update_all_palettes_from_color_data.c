@@ -1,4 +1,4 @@
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_map_update_all_palettes_from_color_data(s32 map_slot, const void* color_data) {

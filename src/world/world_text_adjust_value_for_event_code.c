@@ -1,4 +1,4 @@
-#include "fft/text.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 s32 world_text_adjust_value_for_event_code(s32 event_code, s32 value) {

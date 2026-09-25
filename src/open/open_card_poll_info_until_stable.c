@@ -1,4 +1,3 @@
-#include "fft/card.h"
 #include "fft/open.h"
 
 s32 open_card_poll_info_until_stable(s32 retry_limit) {

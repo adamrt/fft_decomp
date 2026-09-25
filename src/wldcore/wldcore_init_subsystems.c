@@ -1,3 +1,4 @@
+#include "fft/wldcore.h"
 
 /* Initialize the WLDCORE subsystems before entering the world loop.
  * The matched range includes the jr delay slot at 0x80067cb0. */

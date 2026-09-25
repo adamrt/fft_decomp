@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Collects the text ids of the location's selectable choices into out.

@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 
 /* Return the selected unit's maximum HP, MP, or CT value. */
 s16 bunit_unit_get_max_stat(s32 unit_index, s32 value) {

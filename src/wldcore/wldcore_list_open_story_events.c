@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Opens a panel list of the set script flags 0x1bc-0x1fb (entry values
  * 0xe800 + flag index), shows up to eight rows at (0x4c, 0x4f) with width

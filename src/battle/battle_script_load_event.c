@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 void battle_script_load_event(s32 id) {
     event_file_block_t* block;

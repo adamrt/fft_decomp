@@ -1,6 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_calculate_entd_equipment(battle_stats_t* unit_arg, entd_unit_t* entd) {

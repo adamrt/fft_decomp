@@ -1,5 +1,3 @@
-#include "fft/event.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 
 /* WORLD 0x800fd4a8..0x800fd7c4. EVENT_SCRIPT_VAR_RANDOM_VALUE is read through the event

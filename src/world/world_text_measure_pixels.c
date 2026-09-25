@@ -1,7 +1,3 @@
-#include "fft/battle_text.h"
-#include "fft/data.h"
-#include "fft/main_unit.h"
-#include "fft/text.h"
 #include "fft/world.h"
 #include "psx/types.h"
 
@@ -9,8 +5,6 @@
 
 /* Player name buffer substituted for text command 0xE0, 0xFE-terminated. */
 /* Pixel width of each line measured by the last call. */
-/* Glyph pixel widths, 0xD0 entries per 0xDx prefix page. */
-s32 world_text_count_decimal_digits(s32 value);
 
 /* Measure a WORLD text entry in pixels: the widest line and the line count.
  *

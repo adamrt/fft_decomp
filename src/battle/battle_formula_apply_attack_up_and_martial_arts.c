@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 
 void battle_formula_apply_attack_up_and_martial_arts(void) {
     if (g_battle_action_attacker->support_abilities[1] & BATTLE_SUPPORT_SET_2_ATTACK_UP) {

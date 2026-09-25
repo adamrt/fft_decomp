@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 typedef struct jobstts_tex_region {
     u16 u;

@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/job.h"
+#include "fft/main.h"
 
 /*
  * Fills an in-battle unit record from its persistent party record.

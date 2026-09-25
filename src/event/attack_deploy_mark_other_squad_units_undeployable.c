@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_deploy_mark_other_squad_units_undeployable(void) {

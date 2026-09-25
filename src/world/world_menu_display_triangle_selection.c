@@ -1,5 +1,4 @@
-#include "fft/battle_runtime.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

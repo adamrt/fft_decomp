@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 /* Project the cursor tile to the screen.

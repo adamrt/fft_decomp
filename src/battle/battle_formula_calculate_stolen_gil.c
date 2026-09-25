@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 void battle_formula_calculate_stolen_gil(void) {

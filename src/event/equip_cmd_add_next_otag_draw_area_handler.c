@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001cd4a4 - Terminate the current sprite OT chain when disabled flag

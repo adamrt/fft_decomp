@@ -1,5 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 void battle_effect_interpolate_emitter_velocity_direction_spread(const void* source, s32 factor, s32* out) {
     const effect_geometry_entry_t* entry = source;

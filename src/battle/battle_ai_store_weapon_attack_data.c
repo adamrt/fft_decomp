@@ -1,6 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 /*
  * Merge one weapon's attack properties into the unit's AI weapon summary.

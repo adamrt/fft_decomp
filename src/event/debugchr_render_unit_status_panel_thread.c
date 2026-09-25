@@ -5,7 +5,7 @@
  *
  * The overlay draws two alternating copies of the editor and status panels;
  * `frame & 1` picks one, and the copy stride fixes each packet's size. The
- * packet, state and thread layouts are the shared fft/battle_menu_status_panel.h records,
+ * packet, state and thread layouts are the shared fft/menu.h records,
  * proven by this function's own accesses and the primitive strides it walks.
  * Three accesses are left in raw form because a struct
  * or pointer spelling breaks the match; each says so at its use.
@@ -13,17 +13,7 @@
  * Register pins and empty asm constraints are compiler constraints that emit no
  * instructions; each is explained where it appears.
  */
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu_status_panel.h"
-#include "fft/battle_text.h"
-#include "fft/debugchr.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/event_debugchr.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/types.h"
@@ -33,8 +23,6 @@
    displacement from an unmoved base; see the note at the loop. */
 
 struct world_menu_palette_primitives;
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 struct menu_number_entry;
 struct menu_number_position;
 

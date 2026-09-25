@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 void battle_status_inflict_by_entd_unit_id(s32 entd_id, s32 status, s32 which, s32 removal_only) {

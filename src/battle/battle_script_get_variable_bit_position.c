@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/battle.h"
 
 s32 battle_script_get_variable_bit_position(s32 value) {
     s32 result;

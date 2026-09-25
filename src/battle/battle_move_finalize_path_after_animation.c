@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_move_finalize_path_after_animation(battle_unit_misc_data_t* unit) {

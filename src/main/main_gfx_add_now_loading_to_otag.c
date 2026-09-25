@@ -1,5 +1,4 @@
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 void main_gfx_add_now_loading_to_otag(u32* otag) {
     int i;

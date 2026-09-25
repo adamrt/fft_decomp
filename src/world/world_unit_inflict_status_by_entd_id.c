@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "fft/world.h"
 
 void world_unit_inflict_status_by_entd_id(

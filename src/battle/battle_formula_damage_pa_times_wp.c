@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 
 /* Formula 0x64: damage (PA * WP); spear (PA * 3/2 * WP); weaponless (PA * Brave/100 * WP). */
 void battle_formula_damage_pa_times_wp(void) {

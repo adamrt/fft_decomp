@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 
 void battle_script_run_condition(event_opcode_e opcode) {
     if (opcode == EVENT_CONDITION_SECOND_GTE_FIRST) {

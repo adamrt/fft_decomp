@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 s32 world_unit_can_equip_item_id(s16 unit_index, s32 item_id) {

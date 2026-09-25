@@ -1,4 +1,5 @@
 #include "fft/battle.h"
+#include "fft/event_option.h"
 #include "psx/types.h"
 
 void battle_menu_open_option_menu_0(void) {

@@ -3,9 +3,6 @@
  * byte-identical apart from addresses). Layout notes below are the OPTION
  * twin's; the WORLD helpers are the same routines.
  */
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

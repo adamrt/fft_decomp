@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* Read controller input; the wrapper ignores its argument. */

@@ -1,5 +1,4 @@
 #include "fft/effect.h"
-#include "fft/map.h"
 
 #define NULL ((void*)0)
 

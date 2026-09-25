@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Initialize deployed units from map coordinates and return a failure bitmask.

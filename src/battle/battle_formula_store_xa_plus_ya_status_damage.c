@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 void battle_formula_store_xa_plus_ya_status_damage(void) {

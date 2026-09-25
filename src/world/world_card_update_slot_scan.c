@@ -1,5 +1,3 @@
-#include "fft/card.h"
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/etc.h"
 #include "psx/gpu.h"

@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Per-weapon-type sound tables, 0x20 entries each: swing, hit, and the

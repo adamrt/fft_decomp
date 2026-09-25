@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 s32 equip_unit_can_equip_item(s16 unit_index, s32 g_main_item_item_flags) {
     s32 item_id = g_main_item_item_flags & 0x3FF;

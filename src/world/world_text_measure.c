@@ -1,14 +1,7 @@
-#include "fft/battle_text.h"
-#include "fft/data.h"
-#include "fft/main_unit.h"
-#include "fft/text.h"
 #include "fft/world.h"
 #include "psx/types.h"
 
 #define TEXT_STATE ((world_text_backreference_state_t*)0x1F800000)
-
-/* Player name buffer substituted for text command 0xE0, 0xFE-terminated. */
-s32 world_text_count_decimal_digits(s32 value);
 
 /* Measure a WORLD text entry in characters: the widest line and the line count.
  *

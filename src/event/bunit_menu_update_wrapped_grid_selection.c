@@ -1,5 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/main_sound.h"
+#include "fft/event_bunit.h"
 #include "psx/pad.h"
 
 /* Move a wrapped grid selection in response to directional controller input. */

@@ -1,4 +1,3 @@
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

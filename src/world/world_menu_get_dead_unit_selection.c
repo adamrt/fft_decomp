@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* Declared as in the BATTLE callers; WORLD reads the result through

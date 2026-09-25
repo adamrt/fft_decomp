@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Sets the SFX music record's fixed header (status 2, id 0x7fff, eight

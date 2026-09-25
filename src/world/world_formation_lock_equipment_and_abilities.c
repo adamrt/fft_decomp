@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/job.h"
 #include "fft/world.h"
 
 s32 world_formation_lock_equipment_and_abilities(s32 unit_id) {

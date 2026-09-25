@@ -1,7 +1,5 @@
-#include "fft/attack.h"
 #include "fft/battle.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 /* Enter ATTACK.OUT when script variable 0x1fc is clear: mark the transition,

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 battle_stats_t* battle_unit_get_stats_from_battle_id(u32 id) {

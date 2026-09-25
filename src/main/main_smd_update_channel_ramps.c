@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Per-tick channel pass run before the SMD interpreter. Steps the MUS tempo

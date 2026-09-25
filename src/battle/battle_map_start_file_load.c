@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* `load_info` points to +0x06 of a raw GNS file row. Relative offsets

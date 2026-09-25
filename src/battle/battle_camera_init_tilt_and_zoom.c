@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
 #include "psx/types.h"
 
 /* volatile view: the target reloads this global at every use. */

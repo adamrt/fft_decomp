@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 /*
  * Each store addresses a field of g_battle_effect_secondary_data (0x54-byte

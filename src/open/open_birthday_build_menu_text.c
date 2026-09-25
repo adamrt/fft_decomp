@@ -1,5 +1,4 @@
 #include "fft/open.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Rebuild the selected birthday's month and day in the lower menu window.

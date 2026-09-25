@@ -1,7 +1,5 @@
 #include "fft/wldcore.h"
 
-void wldcore_list_open_rumors(void);
-
 /* Close this menu level once its message window is finished.
  *
  * Same wait as wldcore_menu_wait_text_then_pop_level; then toggles flag 0x10 on the

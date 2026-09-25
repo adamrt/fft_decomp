@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_move.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "psx/pad.h"
 
 /* Free-cursor movement step. With the acting unit under player control the

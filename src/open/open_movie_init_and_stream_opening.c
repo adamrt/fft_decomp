@@ -1,3 +1,4 @@
+#include "fft/open.h"
 #include "psx/types.h"
 
 void open_movie_init_and_stream_opening(s32 skip_movie) {

@@ -1,12 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_list_open_active_propositions(void);
-void wldcore_window_begin_tint_transition(wldcore_window_tint_request_t* request);
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_list_open_brave_story_propositions(void);
 
 /* Input step for the brave-story top-level list window.
  *

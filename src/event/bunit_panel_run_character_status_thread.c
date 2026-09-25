@@ -1,10 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/bunit.h"
-#include "fft/main_heap.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
+#include "fft/event_bunit.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
@@ -12,9 +6,6 @@
  * battle_menu_status_panel_frame_config_t, as in the WORLD twin world_menu_equipment_and_ability_panel_thread. The
  * buffer's +0x3b0 tail is this overlay's scaled draw-area packet pair. */
 #define DRAW_AREA(screen) ((bunit_gfx_scaled_draw_area_pair_t*)&(screen)->portrait)
-
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* Thread task 0x3b: the combined status panel for the selected unit. BUNIT
  * twin of WORLD world_menu_equipment_and_ability_panel_thread. */

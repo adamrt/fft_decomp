@@ -1,16 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_menu_window.h"
-#include "fft/battle_text.h"
-#include "fft/etc.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
-#include "fft/menu.h"
-#include "fft/option.h"
-#include "fft/script_variables.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -23,10 +11,6 @@ extern s16 g_battle_text_typewriter_glyph_y;
 extern s16 g_battle_text_typewriter_glyph_character;
 extern s16 g_battle_text_typewriter_glyph_dialogue_type;
 extern s16 g_battle_text_typewriter_glyph_palette;
-
-extern void battle_gfx_alloc_tpage7_vram(RECT* rect, union battle_texture_prim* sprite, u32* image_data);
-extern void battle_menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
-extern void battle_menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect);
 
 #define WINDOW_AT(index) ((menu_window_buffer_t*)((index) * sizeof(menu_window_buffer_t) + (s32)win))
 

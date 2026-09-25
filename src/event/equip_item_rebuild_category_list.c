@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 void equip_item_rebuild_category_list(s32 category) {
     s32 i;

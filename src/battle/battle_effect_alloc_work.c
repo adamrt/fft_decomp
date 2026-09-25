@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /*
  * Take a work record from the free chain and attach it to state record

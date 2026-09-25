@@ -1,9 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_heap.h"
-#include "fft/main_unit.h"
-#include "fft/text.h"
+#include "fft/main.h"
 #include "fft/world.h"
 #include "psx/libc.h"
 

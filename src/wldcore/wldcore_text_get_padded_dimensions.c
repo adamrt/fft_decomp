@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Padded width and height, not position.
  * The mask is written 0xfffc (not ~3) to keep the target's `andi`. */

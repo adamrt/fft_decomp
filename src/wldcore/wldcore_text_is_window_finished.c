@@ -1,10 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* state);
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_window_update_flag_from_owner_progress(wldcore_window_owner_t* owner);
 
 /*
  * Per-frame scrollable text window handler.  State 0 waits for page, cancel or

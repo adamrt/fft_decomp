@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {

@@ -1,5 +1,4 @@
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Maps a script variable id to its bit position within its storage word.

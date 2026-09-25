@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Quadratic height term used by the projectile trajectory calculation;

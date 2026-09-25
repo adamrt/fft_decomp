@@ -1,4 +1,3 @@
-#include "fft/event.h"
 #include "fft/world.h"
 
 /* Switch the active item category and restore its saved list cursor. */

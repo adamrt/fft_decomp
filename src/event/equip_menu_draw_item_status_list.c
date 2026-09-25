@@ -1,7 +1,4 @@
-#include "fft/data.h"
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
-#include "fft/status.h"
+#include "fft/event_equip.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

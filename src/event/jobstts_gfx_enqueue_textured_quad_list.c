@@ -1,5 +1,4 @@
-#include "fft/jobstts.h"
-#include "fft/menu_types.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_gfx_enqueue_textured_quad_list(
     battle_menu_sprite_cell_t* sprites, u8* color, s32 semitrans, u16 tpage, u16 clut, s32 ot_index, s32 count) {

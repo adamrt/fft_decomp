@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Mirror of battle_move_has_reached_destination_tile_entry_edge against the tile the unit currently occupies rather

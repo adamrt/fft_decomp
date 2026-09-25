@@ -1,6 +1,4 @@
-#include "fft/data.h"
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
+#include "fft/event_equip.h"
 
 /* Validate a candidate item against slot locks, job rules, and hand pairing.
  *

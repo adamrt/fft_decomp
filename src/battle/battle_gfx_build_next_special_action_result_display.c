@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/map.h"
 
 /* Int-argument view of battle_gfx_store_sprite_display_data: the target
  * sign-extends the (s16) u values, which its u16 prototype would andi 0xffff. */

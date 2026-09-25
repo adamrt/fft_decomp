@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 u32 jobstts_job_get_next_level_jp_requirement(void) {

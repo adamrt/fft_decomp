@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 s32 equip_menu_set_selection_value(s32 index, s32 value) {

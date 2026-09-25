@@ -1,5 +1,4 @@
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
+#include "fft/main.h"
 
 void main_boot_build_and_draw_sceap_logo(void) {
     POLY_F4 polygons[2];

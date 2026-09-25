@@ -1,7 +1,3 @@
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 void world_menu_draw_active_window_frames(void) {

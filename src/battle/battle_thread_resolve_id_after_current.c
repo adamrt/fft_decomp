@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_thread_resolve_id_after_current(s32 requested_thread_id) {

@@ -1,4 +1,4 @@
-#include "fft/main_heap.h"
+#include "fft/main.h"
 
 void main_util_clear_byte_data(void* destination, s32 count) {
     u8* dst = destination;

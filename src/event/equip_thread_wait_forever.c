@@ -1,3 +1,4 @@
+#include "fft/event_equip.h"
 
 void equip_thread_wait_forever(void) {
     for (;;) {

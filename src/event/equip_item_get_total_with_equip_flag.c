@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* Get the total inventory count for an equipment-menu row.
  *

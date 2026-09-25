@@ -9,7 +9,6 @@
  * value, where the target reloads). Its "r"(four) operand materialises the
  * `!= 4` compare constant before the store pair, as the target does.
  */
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 

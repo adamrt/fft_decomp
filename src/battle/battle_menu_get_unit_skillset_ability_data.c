@@ -1,8 +1,4 @@
-#include "fft/ability_flags.h"
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Build the parallel ability lists for one of a unit's skillsets.

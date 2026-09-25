@@ -1,12 +1,8 @@
-#include "fft/battle.h"
-#include "fft/main_heap.h"
-#include "fft/main_sound.h"
-#include "fft/option.h"
-#include "fft/thread.h"
+#include "fft/event_option.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* option_scroll_layout_t lives in fft/option.h. */
+/* option_scroll_layout_t lives in fft/event_option.h. */
 
 /* Apply scroll input, rebuild the menu image, and upload the changed region. */
 void* option_menu_update_scroll(option_menu_entry_t* menu, s32* first_row, s32* render_pending) {

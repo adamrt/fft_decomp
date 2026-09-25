@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 /* flags is passed as a sign-extended word; the u16 mode parameter would

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_ai_decide_status_ct_based(s32 limit, s32 unit_id) {

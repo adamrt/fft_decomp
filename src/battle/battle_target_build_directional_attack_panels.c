@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/main_heap.h"
+#include "fft/battle.h"
 
 /* Provisional 20-byte action copy; same layout as battle_stats_t +0x16e. */
 typedef struct battle_target_unit_action_copy {

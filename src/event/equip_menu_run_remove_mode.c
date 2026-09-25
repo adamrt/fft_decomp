@@ -1,7 +1,4 @@
-#include "fft/equip.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/libc.h"
 #include "psx/pad.h"
 #include "psx/types.h"

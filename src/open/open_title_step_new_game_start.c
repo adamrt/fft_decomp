@@ -1,9 +1,4 @@
-#include "fft/main_gfx.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
 #include "fft/open.h"
-#include "fft/text.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

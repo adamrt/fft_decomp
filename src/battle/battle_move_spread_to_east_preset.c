@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_move_spread_to_east_preset(void) {

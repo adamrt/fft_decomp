@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/effect.h"
 
 s32 battle_effect_update_cycle(void) {
     s32 stage_result;

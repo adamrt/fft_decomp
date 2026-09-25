@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 
 typedef struct battle_gfx_misc_data_header {
     u8 padding[4];

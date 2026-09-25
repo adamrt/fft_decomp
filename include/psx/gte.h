@@ -77,6 +77,9 @@ void SetFarColor(s32, s32, s32);
 /* RotTransPers-like by argument shape. */
 void RotTransSV(SVECTOR* in, SVECTOR* out, s32* flag);
 s32 RotTransPers(SVECTOR* v0, s32* sxy0, s32* p, s32* flag);
+s32 RotTransPers4(
+    SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, s32* sxy0, s32* sxy1, s32* sxy2, s32* sxy3, s32* p, s32* flag);
+s32 ReadGeomScreen(void);
 s32 RotTransPers3(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, s32* sxy0, s32* sxy1, s32* sxy2, s32* p, s32* flag);
 /* Psy-Q NormalClip: the sign of the screen-space winding of three packed XY points. */
 long NormalClip(long sxy0, long sxy1, long sxy2);

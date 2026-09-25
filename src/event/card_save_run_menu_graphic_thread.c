@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/event.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 typedef struct card_input_display_state {

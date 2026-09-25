@@ -1,5 +1,4 @@
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

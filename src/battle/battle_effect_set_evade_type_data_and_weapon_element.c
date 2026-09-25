@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 struct battle_effect_secondary_init;
 

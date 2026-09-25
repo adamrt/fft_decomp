@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 void bunit_gfx_init_scaled_draw_area_packets(u8* primitive) {

@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/event_helpmenu.h"
 
 s32 helpmenu_thread_find_running_from_4(void) {
     s32 thread_id;

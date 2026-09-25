@@ -1,9 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 mask);
-void wldcore_menu_push_proposition_report_level(s32 argument);
 
 /* Job-report confirmation idle handler (one of the g_wldcore_menu_idle_handlers
  * entries, dispatched every frame by wldcore_menu_dispatch_idle_handler): the

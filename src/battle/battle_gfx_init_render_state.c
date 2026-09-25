@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 void battle_gfx_init_render_state(void) {
     g_battle_gfx_numeric_display_matrix.m[2][2] = ONE;

@@ -1,5 +1,4 @@
 #include "fft/effect.h"
-#include "fft/map.h"
 
 s32 effect_e454_map_set_3d_objects_to_state_2_state(s16 record_index, s32 byte_offset) {
     effect_record_t* record = &g_effect_state_records[record_index];

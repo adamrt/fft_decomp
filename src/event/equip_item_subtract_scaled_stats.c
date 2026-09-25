@@ -1,4 +1,4 @@
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Store `base - scale * scaled` for each equipment-stat halfword of an item detail record. */

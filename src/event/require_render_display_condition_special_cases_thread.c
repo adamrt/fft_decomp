@@ -1,8 +1,4 @@
-#include "fft/battle_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/require.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

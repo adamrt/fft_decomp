@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/main_sound.h"
 #include "psx/types.h"
 
 void battle_effect_load_sound_section(s16 index) {

@@ -1,10 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 typedef struct wldcore_deep_dungeon_battle {
@@ -14,12 +8,8 @@ typedef struct wldcore_deep_dungeon_battle {
 } wldcore_deep_dungeon_battle_t;
 
 extern wldcore_deep_dungeon_battle_t* g_wldcore_deep_dungeon_battles;
-void world_build_at_list_2(void);
 
 s32 rand(void);
-void wldcore_bar_push_menu_level(void);
-void wldcore_menu_run_shop_and_rebuild_screen(s32 file_slot);
-void wldcore_window_set_render_state_2_from_arg_0x10(s32* level);
 
 /* Per-frame step of the location menu level: fades its two windows in, starts
  * the menu thread after the delay and handles input. A confirmed entry opens

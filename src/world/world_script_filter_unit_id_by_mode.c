@@ -1,5 +1,5 @@
 #include "fft/battle.h"
-#include "fft/status.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Filter a copied misc unit ID by presence, team, and status for modes 0-5.

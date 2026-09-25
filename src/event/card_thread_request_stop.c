@@ -1,3 +1,4 @@
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_thread_request_stop(s32 id) {

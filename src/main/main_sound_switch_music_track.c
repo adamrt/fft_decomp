@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 s32 main_sound_switch_music_track(s32 track, s32 volume, s32 fade) {

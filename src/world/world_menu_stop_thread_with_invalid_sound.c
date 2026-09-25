@@ -1,4 +1,3 @@
-#include "fft/thread.h"
 #include "fft/world.h"
 
 void world_menu_stop_thread_with_invalid_sound(void) {

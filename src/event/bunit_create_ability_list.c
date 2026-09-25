@@ -1,7 +1,4 @@
-#include "fft/battle_ability.h"
-#include "fft/bunit.h"
-#include "fft/data.h"
-#include "fft/main_unit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /*

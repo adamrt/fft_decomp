@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Render text into a menu image at origin through the main-stack text

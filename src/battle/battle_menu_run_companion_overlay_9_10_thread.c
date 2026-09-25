@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
-#include "fft/thread.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

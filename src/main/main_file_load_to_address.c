@@ -1,5 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 void* main_file_load_to_address(int sector, unsigned int size, void* destination) {
     main_file_load_descriptor_t* header;

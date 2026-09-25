@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_state.h"
-#include "fft/battle_text.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "psx/types.h"
 
 /* Enter BATTLE_GAME_STATE_BATTLE_MESSAGE_DISPLAY.

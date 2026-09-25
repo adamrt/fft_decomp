@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Fade state shared with battle_gfx_update_screen_color_modulation_fade: the

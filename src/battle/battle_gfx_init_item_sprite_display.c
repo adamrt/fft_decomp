@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 battle_gfx_sprite_display_data_t* battle_gfx_init_item_sprite_display(s32 unit_index) {
     s32 part_size;

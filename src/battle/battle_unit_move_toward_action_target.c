@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_state.h"
 
 /* Moves a unit toward its action target over distortion_timer frames.
  *

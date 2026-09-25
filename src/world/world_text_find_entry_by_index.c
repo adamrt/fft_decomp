@@ -1,4 +1,4 @@
-#include "fft/text.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Advance past `count` line terminators in a shift-JIS style byte stream. */

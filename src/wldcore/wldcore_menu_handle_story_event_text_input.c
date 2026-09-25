@@ -1,12 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_list_open_story_events(void);
 
 /* Handle confirm/cancel input for the story-event list level. */
 void wldcore_menu_handle_story_event_text_input(s32* selection) {

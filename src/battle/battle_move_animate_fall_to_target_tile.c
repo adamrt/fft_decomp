@@ -4,8 +4,6 @@
  * distortion-animation shape.
  */
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 /* The target sets $a1 to the coordinate buffer before this call too, so the

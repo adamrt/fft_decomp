@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/main_unit.h"
 #include "fft/world.h"
 
 void world_formation_dismiss_unit(s16 formation_idx) {

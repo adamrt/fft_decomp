@@ -1,13 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu_window.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
@@ -18,8 +9,6 @@ typedef struct battle_menu_unit_status_offsets {
     u32 draw_offset_b[3]; /* 0x10 */
     s16 offset_b[2];      /* 0x1c */
 } battle_menu_unit_status_offsets_t;
-
-extern void battle_world_display_specific_menu_text(s32 buffer, s32 position, s32 text);
 
 /* 0x2ec-byte pages in pairs at 0x8017225c; the first page depends on the mode. */
 extern world_unit_status_page_t g_battle_unit_status_panel_pages[];

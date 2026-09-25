@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* 1 when the unit is untargetable or dead per its AI decision record;

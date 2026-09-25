@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_effect_shift_vector_right_12(const s32* src, s32* dst) {

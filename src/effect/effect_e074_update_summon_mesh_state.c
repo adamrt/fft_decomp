@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/effect_summon_mesh.h"
+#include "fft/effect.h"
 #include "psx/gpu.h"
 
 /* Builds and draws a spinning dome of 8x16 textured quads.

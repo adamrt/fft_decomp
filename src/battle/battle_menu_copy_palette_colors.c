@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Copies two 0x20-byte palette rows into the menu palette color table. */

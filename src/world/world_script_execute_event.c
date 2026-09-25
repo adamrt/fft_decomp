@@ -1,14 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/data.h"
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
-#include "fft/menu.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 
@@ -30,7 +20,6 @@
 /* Declared locally: other reconstructions bind these under different
  * provisional signatures, or the symbol is still unresolved. */
 s32 battle_map_set_tile_data_value(s32 field, s32 x, s32 y, s32 layer, s32 value);
-extern s32 D_800459D8;
 
 void world_script_execute_event(void) {
     s32 unit_lookup_status;

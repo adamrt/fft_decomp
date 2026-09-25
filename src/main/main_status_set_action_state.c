@@ -1,4 +1,5 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 
 /* Sets the unit's charging/jump/defending/performing status bit for
  * `action_state` (clearing the other three) and notifies the battle status

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 /*
  * Secondary effect function 0x08 (Falling Tar) in g_battle_effect_secondary_handlers.

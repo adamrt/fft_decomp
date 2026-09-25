@@ -1,5 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_sound_play_scenario_music(s32 first_track, s32 second_track) {

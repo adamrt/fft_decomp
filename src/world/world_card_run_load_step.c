@@ -1,6 +1,3 @@
-#include "fft/card.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 #include "psx/libc.h"
 #include "psx/pad.h"

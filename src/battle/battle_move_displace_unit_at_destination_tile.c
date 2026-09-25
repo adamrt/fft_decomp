@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Pushes a unit sharing the mover's destination tile aside, mirroring

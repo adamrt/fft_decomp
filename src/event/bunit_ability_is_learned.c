@@ -1,5 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/data.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 s32 bunit_ability_is_learned(s32 index) {

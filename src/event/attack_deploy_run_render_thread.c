@@ -1,10 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_zodiac.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

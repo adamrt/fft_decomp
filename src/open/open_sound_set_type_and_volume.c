@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/open.h"
 #include "psx/types.h"
 
 void open_sound_set_type_and_volume(s32 sound_type, s32 duration) {

@@ -1,9 +1,4 @@
-#include "fft/battle_ability.h"
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /* Copied as ten byte-aligned bytes from 0x80193dd4; the target uses signed
  * byte loads for the final two bytes and unsigned loads while scanning. */

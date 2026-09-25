@@ -1,9 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"
-
-extern void world_gs_sortboxfill(GsBOXF* box, void* table, s32 priority);
 
 void wldcore_fade_draw_screen_overlays(void) {
     u32* flags;

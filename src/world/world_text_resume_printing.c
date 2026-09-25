@@ -1,4 +1,4 @@
-#include "fft/data.h"
+#include "fft/world.h"
 
 void world_text_resume_printing(s32 thread_id) {
     native_thread_t* thread = &g_world_threads[thread_id];

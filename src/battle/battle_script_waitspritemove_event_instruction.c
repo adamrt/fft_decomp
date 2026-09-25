@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_script_waitspritemove_event_instruction(s32 unit_id) {

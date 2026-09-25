@@ -2,12 +2,6 @@
  * at +0x4d4 comes from a conditional on `layout` whose body is a dead store: flow deletes
  * the store, the now-empty branch survives until after reload, and the post-reload jump
  * pass deletes the branch but not its operand reload. */
-#include "fft/data.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

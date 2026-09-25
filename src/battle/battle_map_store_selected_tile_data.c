@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 void battle_map_store_selected_tile_data(void) {

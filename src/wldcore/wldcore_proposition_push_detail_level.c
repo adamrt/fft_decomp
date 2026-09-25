@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Declared with an s32 value here: the target passes the entry value
  * without narrowing it. */

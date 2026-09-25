@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void) {
     battle_move_spread_state_t* state = g_battle_move_scratch_pad_ptr;

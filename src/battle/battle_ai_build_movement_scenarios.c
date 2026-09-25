@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /* Workspace aliases preserve the target's separate entry address loads. */
 extern s32 g_battle_ai_target_in_range;             /* 1 for range >= distance or charging; 0 otherwise. */

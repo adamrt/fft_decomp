@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Expands a nibble-RLE attack spritesheet into 0x6400 bytes of 4bpp pixels.

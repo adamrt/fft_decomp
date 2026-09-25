@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_sound.h"
 #include "psx/types.h"
 
 void battle_camera_handle_tilt_request(s32 mode) {

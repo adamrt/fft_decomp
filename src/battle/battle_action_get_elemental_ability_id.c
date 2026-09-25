@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 s32 battle_action_get_elemental_ability_id(battle_stats_t* unit) {

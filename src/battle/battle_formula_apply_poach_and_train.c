@@ -1,6 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/job.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Resolve Secret Hunt and Train after an HP-damaging formula 01-06 hit.

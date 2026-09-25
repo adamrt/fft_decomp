@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 void world_thread_set_task_id_36(void) {

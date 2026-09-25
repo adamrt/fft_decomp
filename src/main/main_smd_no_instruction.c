@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Handler of the 37 unassigned SMD opcode slots: consumes nothing. */

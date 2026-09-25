@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Size the primitive pools, load the unit `battle_id` and start the equipment screen threads. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "psx/types.h"
 
 /* Event instructions are an unaligned byte stream; operands are read bytewise. */

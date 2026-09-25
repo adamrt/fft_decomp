@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
-#include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

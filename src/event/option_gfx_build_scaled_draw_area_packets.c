@@ -1,7 +1,4 @@
-#include "fft/battle_menu_status_panel.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/option.h"
+#include "fft/event_option.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

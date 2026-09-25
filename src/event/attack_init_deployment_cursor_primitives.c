@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 
 /* Upload the cursor texture and build both deployment cursors' marker and
  * tile-highlight quads; attack_update_deployment_cursor_primitives positions them each frame. */

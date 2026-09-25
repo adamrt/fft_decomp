@@ -1,3 +1,5 @@
+#include "fft/battle.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 void world_map_data_load_complete_thread(void) {

@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_effect_interpolate_vector_q13(const s32* from, const s32* to, s32 t, s32* out) {

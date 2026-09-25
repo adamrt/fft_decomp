@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* World Map Script 0x1C - SetVar: read next two script args and set a variable. */
 void wldcore_opcode_map_set_var(void) {

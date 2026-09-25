@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_deploy_remove_roster_unit_from_tiles(s32 roster_id) {

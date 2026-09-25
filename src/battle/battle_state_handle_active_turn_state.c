@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/pad.h"
 
 void battle_state_handle_active_turn_state(void) {

@@ -1,6 +1,5 @@
 #include "fft/battle.h"
-#include "fft/small.h"
-#include "fft/world.h"
+#include "fft/event_small.h"
 #include "psx/types.h"
 
 s32 battle_poll_companion_executable_request(void) {

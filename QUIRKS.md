@@ -56,7 +56,7 @@ these calls. Do not hoist them into a prototyped header declaration.
   `world_text_count_decimal_digits` (see above).
 - `src/world/world_text_render_id_list_to_image_rows.c` passes a ninth stack
   argument that `world_text_render_ids_into_image` never reads. The BUNIT twin
-  instead declares it as `unused_flags` in `include/fft/bunit.h`; unify the two.
+  instead declares it as `unused_flags` in `include/fft/event_bunit.h`; unify the two.
 - `src/battle/battle_move_animate_fall_to_target_tile.c` passes a coordinate
   buffer to the one-argument
   `battle_gfx_calculate_screen_z_from_misc_screen_data`, as it does to
@@ -64,13 +64,13 @@ these calls. Do not hoist them into a prototyped header declaration.
 
 ## Declaration leads
 
-- `include/fft/menu_types.h`: `world_menu_entry_t.window_x` is `u16`, but
+- `include/fft/menu.h`: `world_menu_entry_t.window_x` is `u16`, but
   `src/world/world_menu_open_entry_window.c` needs it signed.
 - The unit status record (`battle_unit_status_record_t`, `include/fft/battle.h`)
   is redeclared per overlay: `status_panel_gauges_t` (ATTACK, REQUIRE), the head
   of `equip_unit_data_t`, `world_unit_status_billboard_t`, and HELPMENU's raw
   `g_helpmenu_active_banner`.
-- `equip_gfx_context_t` (`include/fft/equip.h`), `jobstts_gfx_context_t`,
+- `equip_gfx_context_t` (`include/fft/event_equip.h`), `jobstts_gfx_context_t`,
   `bunit_gfx_context_t` and `world_gfx_packet_buffer_t` share one 25-pointer
   pool layout (BUNIT and WORLD match through `0xec`); their pool names disagree.
 - `g_wldcore_zodiac_start_dates[12][2]` (`include/fft/wldcore.h`) and OPEN's
@@ -121,7 +121,7 @@ translation unit. Share their types and constants through headers.
   (`g_jobstts_text_decimal_format`, `g_bunit_text_decimal_format`) used by `src/event/jobstts_menu_script_draw_formatted_number.c` and
   `src/event/bunit_cmd_draw_right_aligned_number_handler.c`.
 - The game-options word packs its last five fields out of array order
-  (`include/fft/options.h`).
+  (`include/fft/menu.h`).
 - CallFunction (`battle_script_execute_event.c`, `world_script_execute_event.c`)
   tests selectors in sequence against one operand that the arms modify. So
   `0x06` also runs the `0x0f` warp, and `0x0e` can fall into later arms.

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Start a unit's climb jump from its current tile onto the higher tile `to`.

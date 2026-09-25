@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 /* Add an independent signed random offset to each X/Z/Y component. */
 void battle_effect_add_random_vector_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {

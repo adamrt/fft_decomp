@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 void battle_script_advance_date_by_one_year(void) {

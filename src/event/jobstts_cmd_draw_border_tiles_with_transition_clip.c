@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 /* Draw the border tiles through a vertically expanding transition clip. */
 u8* jobstts_cmd_draw_border_tiles_with_transition_clip(u8* command) {

@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_code_script_00_jump_and_yield(effect_record_t* effect) {
     s32 pc = effect->pc;

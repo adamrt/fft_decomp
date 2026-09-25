@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 
 void battle_formula_magical_heal(void) {
     battle_formula_store_ma_and_y();

@@ -1,8 +1,3 @@
-#include "fft/data.h"
-#include "fft/main_heap.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

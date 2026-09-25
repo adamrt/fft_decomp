@@ -1,5 +1,4 @@
-#include "fft/battle_runtime.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 
 /* Open BUNIT.OUT through a child thread and wait for its transition to finish. */
 void battle_menu_open_bunit(void) {

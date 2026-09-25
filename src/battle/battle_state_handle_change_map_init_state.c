@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
 
 void battle_state_handle_change_map_init_state(void) {
     s32 old_state;

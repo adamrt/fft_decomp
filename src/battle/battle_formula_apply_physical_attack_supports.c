@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 
 void battle_formula_apply_physical_attack_supports(void) {
     u8 weapon_characteristics = g_current_ability.weapon_data.flags;

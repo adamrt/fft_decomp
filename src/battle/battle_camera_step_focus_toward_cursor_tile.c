@@ -4,7 +4,6 @@
  * target compiler allocation for the three otherwise identical clamp copies.
  */
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
 
 /* Move one 12.4 fixed-point camera component toward its bound by its per-frame
  * step, without overshooting. The bound is compared against the component's

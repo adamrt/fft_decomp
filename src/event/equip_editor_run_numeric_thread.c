@@ -1,11 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/equip.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
+#include "fft/event_equip.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
@@ -13,14 +6,8 @@
  * (g_equip_editor_numeric_state_a for thread 12, g_equip_editor_numeric_state_b otherwise); the thread parameter
  * block is battle_menu_status_panel_frame_config_t. */
 
-/* Record types private to equip_text_render_signed_decimal_entries.c. */
-typedef struct equip_stat_entry equip_stat_entry_t;
-typedef struct equip_stat_out equip_stat_out_t;
 struct menu_number_entry;
 struct menu_number_position;
-
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* Thread task 0x3b: numeric editor panel.
  *

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 s32 battle_ai_save_fading_life_auto_battle(void) {
     if (g_battle_ai_data_base.decision_state == 0) {

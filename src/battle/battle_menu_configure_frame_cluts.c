@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_menu_window.h"
 
 /* Select the menu-frame palette rows for the active thread context. */
 void battle_menu_configure_frame_cluts(battle_menu_window_record_t* frame) {

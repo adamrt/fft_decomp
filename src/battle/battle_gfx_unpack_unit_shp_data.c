@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 /* Decode a two-set little-endian resource into the destination pointer

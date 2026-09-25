@@ -1,4 +1,3 @@
-#include "fft/main_file.h"
 #include "fft/wldcore.h"
 
 /* Load picture set `set` into its image buffer, skipping the transfer when it

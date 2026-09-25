@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 #include "psx/types.h"
 
 /* The subset of battle_effect_init_render_state that does not touch the

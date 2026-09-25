@@ -1,10 +1,4 @@
-#include "fft/attack.h"
-#include "fft/data.h"
-#include "fft/main_file.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "psx/gpu.h"
 
 /* This overlay reads BATTLE's attack entry mode unsigned (lhu). */

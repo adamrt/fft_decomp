@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 /* While a tutorial scripts the input, hold wait_value in the tutorial wait

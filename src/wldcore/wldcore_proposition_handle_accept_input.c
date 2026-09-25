@@ -1,10 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_list_open_available_propositions(void);
-void wldcore_window_build_yes_no_panel(wldcore_point32_t origin, s32 unused_2, s32 unused_3, s32 x2, s32 y2);
 
 /* Menu input step: cancel (0x40) closes this level and returns through
  * 0x80072a18; confirm (0x20) stores the 0x8009f2f4 + 0x8009f2f6 total, shows

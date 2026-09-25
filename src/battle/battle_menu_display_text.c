@@ -1,18 +1,9 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/main_unit.h"
-#include "fft/menu.h"
-#include "fft/script_variables.h"
-#include "fft/text.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Text-stream state in the scratchpad, 0x200 past the one used by the
  * BATTLE text measurers. */
 #define TEXT_STATE ((world_text_backreference_state_t*)0x1F800200)
-
-extern battle_text_pen_t g_battle_menu_text_pen;
-extern u8* battle_text_find_next_character(world_text_backreference_state_t* reader, u8* p);
 
 #define TEXT_NEXT(state, cursor) battle_text_find_next_character((state), (cursor))
 

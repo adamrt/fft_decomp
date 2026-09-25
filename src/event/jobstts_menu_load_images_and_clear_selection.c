@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_menu_load_images_and_clear_selection(void) {
     RECT rect;

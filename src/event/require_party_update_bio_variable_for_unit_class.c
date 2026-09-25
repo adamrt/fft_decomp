@@ -1,4 +1,4 @@
-#include "fft/battle.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* Three unit ids whose presence selects the event variable at +6. */

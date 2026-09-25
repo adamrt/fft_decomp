@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001bfa44 - Clear the 6-byte record at `index` in the table at 0x801e12c4. */

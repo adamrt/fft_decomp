@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_unit.h"
-#include "fft/status.h"
-#include "fft/unit_stats.h"
 #include "psx/types.h"
 
 /* The target masks each AT key itself (andi 0xff00 / 0xffff) and passes it as

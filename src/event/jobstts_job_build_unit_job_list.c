@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused) {
     u32 unit_index = (u8)unit_id;

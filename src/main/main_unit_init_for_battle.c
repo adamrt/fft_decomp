@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Build one runtime unit from an ENTD definition.

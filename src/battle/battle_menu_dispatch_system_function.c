@@ -1,13 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/option.h"
-#include "fft/script_variables.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 
 /*
  * System-function dispatcher called by battle_menu_init_system_function:

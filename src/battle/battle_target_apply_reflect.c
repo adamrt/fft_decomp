@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* View of battle_stats_t 0x16e..0x17f (action_actor_id through

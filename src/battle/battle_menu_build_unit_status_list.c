@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/text.h"
 
 /* Builds the two-column status list for the stored unit: every set bit of
  * the current status bytes becomes text id 0x8800 + byte * 8 + bit, then

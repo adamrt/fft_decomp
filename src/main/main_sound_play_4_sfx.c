@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Plays four sound effects on the SFX voice pairs 0, 2, 4 and 6. */

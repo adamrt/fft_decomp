@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 void battle_action_check_reflect_reaction(void) {

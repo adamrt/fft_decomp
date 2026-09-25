@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/debugchr.h"
-#include "fft/thread.h"
+#include "fft/event_debugchr.h"
 #include "fft/world.h"
 
 /* Target 0x800f001c. Loads the DEBUGCHR overlay (file 0xB) and runs the unit

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 s32 battle_menu_should_close_thread(s32* out_flag) {

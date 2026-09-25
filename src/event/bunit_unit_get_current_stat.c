@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 
 s16 bunit_unit_get_current_stat(s32 unit_index, s32 value) {
     bunit_unit_stat_e mode;

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 void battle_unit_set_attacker_animation_for_shield_block(
     battle_unit_misc_data_t* attacker, battle_unit_misc_data_t* target) {

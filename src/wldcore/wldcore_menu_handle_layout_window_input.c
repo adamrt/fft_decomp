@@ -1,6 +1,4 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 /* Input handler for a layout-window menu level.

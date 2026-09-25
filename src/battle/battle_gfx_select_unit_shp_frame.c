@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_move.h"
-#include "fft/map.h"
 
 /* Select the SHP frame table and frame entry for a unit.
  *

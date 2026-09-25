@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/world.h"
 
 void world_thread_stop_after_empty_slots_5_to_8(void) {
     s32 thread_id = 8;

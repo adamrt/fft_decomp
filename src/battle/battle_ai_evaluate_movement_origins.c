@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
 
 /*
  * Evaluate target tiles from eligible movement origins.

@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
-#include "fft/effect_summon_mesh.h"
 #include "psx/gte.h"
 #include "psx/libc.h"
 

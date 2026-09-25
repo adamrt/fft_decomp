@@ -1,5 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_system_run_game_loop(void) {

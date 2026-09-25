@@ -1,18 +1,6 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-void wldcore_list_open_available_propositions(void);
-void wldcore_window_load_party_unit_sprite_record(wldcore_menu_send_unit_level_t* level, s32 unit, s32 render_index);
-void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit_level_t* level);
-void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_level_t* level);
-void wldcore_proposition_push_detail_level(s32 value);
-void wldcore_menu_push_number_panel_level(void);
-void wldcore_window_set_states_and_blue_tint(wldcore_window_tint_request_t* param);
-void world_thread_request_redraw(s32 thread_id);
 
 /* Top-level step of the proposition send-unit menu level, dispatching on the
  * level's mode.

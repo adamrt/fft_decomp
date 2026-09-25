@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/card.h"
-#include "fft/main_sound.h"
+#include "fft/event_card.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

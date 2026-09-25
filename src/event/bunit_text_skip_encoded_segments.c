@@ -1,4 +1,4 @@
-#include "fft/battle_text.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 const u8* bunit_text_skip_encoded_segments(const u8* data, s16 count) {

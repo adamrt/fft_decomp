@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/option.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/event_option.h"
 #include "psx/types.h"
 
 /*
@@ -25,7 +22,7 @@ enum {
     OPTION_AT_TURN_VALUE_HIGH_BIT = 0x80,
 };
 
-/* option_scroll_layout_t and option_at_menu_t live in fft/option.h. */
+/* option_scroll_layout_t and option_at_menu_t live in fft/event_option.h. */
 
 extern option_at_descriptor_t g_option_menu_at_list_descriptors[];
 

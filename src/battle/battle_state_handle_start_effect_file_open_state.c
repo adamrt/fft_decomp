@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_state.h"
 #include "psx/types.h"
 
 void battle_state_handle_start_effect_file_open_state(void) {

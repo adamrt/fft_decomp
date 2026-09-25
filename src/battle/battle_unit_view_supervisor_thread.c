@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 typedef char battle_unit_view_thread_set_size_must_be_0x30[(sizeof(world_unit_view_thread_set_t) == 0x30) ? 1 : -1];

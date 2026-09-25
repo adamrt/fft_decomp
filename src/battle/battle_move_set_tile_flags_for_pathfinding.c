@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_move.h"
 
 void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
     battle_move_pathfind_scratch_t* config = g_battle_move_config_ptr;

@@ -1,11 +1,5 @@
-#include "fft/attack.h"
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/menu.h"
-#include "fft/script_variables.h"
+#include "fft/event_attack.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 typedef struct battle_script_jump_instruction battle_script_jump_instruction_t;
@@ -28,7 +22,6 @@ typedef struct battle_script_jump_instruction battle_script_jump_instruction_t;
  * provisional signatures, or the symbol is still unresolved. */
 s32 battle_map_set_tile_data_value();
 void battle_script_jump_event_instruction(battle_script_jump_instruction_t* instr);
-void battle_script_warp_unit_display_to_paired_unit(s32 misc_id);
 s32 battle_script_run_scenario_conditions();
 
 void battle_script_execute_event(void) {

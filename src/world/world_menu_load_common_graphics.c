@@ -1,6 +1,3 @@
-#include "fft/main_file.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* One pointer holds each loaded resource in turn. */

@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Pushes the active-proposition list level (type 0x26).
  *

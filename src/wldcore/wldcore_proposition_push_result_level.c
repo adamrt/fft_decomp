@@ -1,10 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void world_text_message_box_thread(void);
 
 /* Open the proposition-result panel for g_main_active_propositions[proposition]:
  * total the participants' rewards plus the bonus into g_wldcore_proposition_gil_amount, draw the

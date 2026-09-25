@@ -1,4 +1,4 @@
-#include "fft/debugchr.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 /* DEBUGCHR copy of main_gfx_build_zodiac_bin. */

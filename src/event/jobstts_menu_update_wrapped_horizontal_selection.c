@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/pad.h"
 
 /* Updates one wrapping input counter and returns its resulting value. */

@@ -1,19 +1,6 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/gs.h"
 #include "psx/pad.h"
-
-/* Second link name for g_main_system_flags (0x8004d950), as in
- * wldcore_list_handle_tutorial_mask_1_entries_input.c. */
-extern s32 g_main_system_flags_alias;
-
-void world_gs_gettiminfo(u32* tim, GsIMAGE* im);
-s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* im, s32 step);
-void wldcore_menu_push_sound_novel_level(s32 mode);
-void wldcore_menu_push_treasure_detail_level(s32 mode);
-void world_text_message_box_thread(void);
 
 /* Input step for the type-0x14 sound-novel resume level.
  *

@@ -1,20 +1,10 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu_status_panel.h"
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
-#include "fft/main_heap.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
+#include "fft/event_bunit.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The packet, state and thread layouts are the shared fft/battle_menu_status_panel.h
+/* The packet, state and thread layouts are the shared fft/menu.h
  * records of the DEBUGCHR twin debugchr_render_unit_status_panel_thread. */
 
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 struct menu_number_entry;
 struct menu_number_position;
 

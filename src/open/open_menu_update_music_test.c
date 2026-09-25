@@ -1,7 +1,4 @@
-#include "fft/main_sound.h"
 #include "fft/open.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 /* Controller 7 (hidden Music Test menu) state, pushed by

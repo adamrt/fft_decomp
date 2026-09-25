@@ -1,12 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_entry_window_level(void);
-void wldcore_list_open_tutorial_mask_1_entries(void);
-void wldcore_list_open_formation_tutorials(void);
 
 /* Per-frame step of the tutorial menu list level.
  *

@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_file.h"
-#include "fft/option.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Load portrait sector 0x164b + 4 * portrait_id straight into VRAM. */

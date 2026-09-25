@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Jump to the offset in the third halfword when the record work count exceeds
  * the second halfword; otherwise step over the 6-byte instruction. */

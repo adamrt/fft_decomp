@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
 
 /* Finalize Draw Out's katana-consumption result after target processing.
  *

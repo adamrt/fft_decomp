@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "psx/types.h"
 
 /* Battle twin of world_script_reset_event_state. Where WORLD has no-op stubs, BATTLE

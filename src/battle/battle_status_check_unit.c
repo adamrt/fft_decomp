@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_status_check_unit(battle_stats_t* unit) {

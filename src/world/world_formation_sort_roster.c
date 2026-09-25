@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Halfword view of a formation record; sort keys select a halfword field. */

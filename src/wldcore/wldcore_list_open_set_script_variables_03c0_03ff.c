@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Opens a panel list of the set script variables 0x3c0-0x3ff (entry values
  * 0xf000 + index * 16 + variable value), shows up to eight rows at

@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/helpmenu.h"
-#include "fft/main_heap.h"
+#include "fft/event_helpmenu.h"
 #include "psx/types.h"
 
 void helpmenu_menu_close(void) {

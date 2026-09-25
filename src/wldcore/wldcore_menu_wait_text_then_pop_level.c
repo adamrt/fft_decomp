@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 void wldcore_menu_wait_text_then_pop_level(wldcore_menu_message_level_t* level) {

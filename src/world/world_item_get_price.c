@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 s32 world_item_get_price(s32 item_id) {

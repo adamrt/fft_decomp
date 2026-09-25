@@ -1,3 +1,4 @@
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Build the Now Loading message centred horizontally (x = 0x80). */

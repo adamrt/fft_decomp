@@ -16,10 +16,7 @@
  * `bank` is read before it is first written (the target's s7 is live out of
  * the prologue), so it is left uninitialised on purpose.
  */
-#include "fft/battle_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

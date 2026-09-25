@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/script_variables.h"
-#include "fft/small.h"
+#include "fft/event_small.h"
 
 typedef struct small_text_name_section_offsets {
     u32 unit_names;

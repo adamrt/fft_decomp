@@ -1,9 +1,4 @@
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_advance_brave_story_birthdays(void);
-void world_unit_update_monster_breeding(void);
 
 /*
  * Advance the calendar by 1 day and run the daily updates.

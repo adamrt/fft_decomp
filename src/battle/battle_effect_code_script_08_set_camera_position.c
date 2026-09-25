@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_code_script_08_set_camera_position(effect_record_t* effect) {
     VECTOR coords;

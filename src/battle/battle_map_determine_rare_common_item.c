@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 
 typedef struct battle_map_found_item_result {
     s32 field_0;

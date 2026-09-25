@@ -1,4 +1,5 @@
 #include "fft/battle.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Returns 1 when the unit has any current status byte set. */

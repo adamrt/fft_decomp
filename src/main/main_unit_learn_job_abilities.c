@@ -1,8 +1,5 @@
-#include "fft/battle_ability.h"
-#include "fft/character_identity.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 
 /* Learns abilities for one job of a unit.
  * job_id 0x4a (Squire) stands for the unit's base job.  With an ENTD primary

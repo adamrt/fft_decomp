@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001caf14 - Stream command: draw a LINE_F2 from (x0, y0) to

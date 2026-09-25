@@ -1,5 +1,3 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 
 /* Build the item list offered by a normal or poachers' den shop.

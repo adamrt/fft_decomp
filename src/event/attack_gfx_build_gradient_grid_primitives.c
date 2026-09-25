@@ -1,5 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle_gfx.h"
+#include "fft/event_attack.h"
 
 void attack_gfx_build_gradient_grid_primitives(POLY_GT4* poly) {
     POLY_GT4* packet = poly;

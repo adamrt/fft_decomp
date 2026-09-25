@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
-#include "fft/battle_unit_rotation.h"
-#include "fft/unit_slots.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Battle twin of world_unit_update_facing_and_pending_animations: per frame,

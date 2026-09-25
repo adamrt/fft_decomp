@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_ai_exclude_enemies_acting_before_ct(void) {

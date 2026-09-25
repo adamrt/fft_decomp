@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Job level of the selected unit in the Learn Abilities menu's `index`th

@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 
 void battle_formula_lower_brave_y_without_faith(void) {
     if (battle_formula_calculate_magical_evade() == 0) {

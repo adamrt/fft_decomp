@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* The bubble offsets are signed pixel offsets; storing them through a u8

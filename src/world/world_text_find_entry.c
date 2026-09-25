@@ -1,4 +1,3 @@
-#include "fft/text.h"
 #include "fft/world.h"
 
 u8* world_text_find_entry(s32 combined_text_index) {

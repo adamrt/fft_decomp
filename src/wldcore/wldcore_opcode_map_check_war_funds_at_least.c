@@ -1,6 +1,4 @@
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Reject the Gil>= condition when current war funds are below the operand. */

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Non-blocking two-step file load driven by g_battle_thread_call_target:

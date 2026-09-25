@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* BATTLE twin of world_menu_run_skillset_thread: builds the skillset menu on the main stack,

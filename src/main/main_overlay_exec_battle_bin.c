@@ -1,4 +1,4 @@
-#include "fft/main_heap.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_overlay_exec_battle_bin(void) {

@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
  * interior through jobstts_cmd_draw_background_tiles_handler.

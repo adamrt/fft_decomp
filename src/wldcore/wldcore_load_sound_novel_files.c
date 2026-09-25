@@ -1,5 +1,3 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Provisional: two seven-entry sector-offset tables. Each entry is the start

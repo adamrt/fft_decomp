@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Runs the in-between-turn state machine in g_battle_between_turn_state until a phase yields a

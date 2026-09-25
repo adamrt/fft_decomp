@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 
 /* Decide whether the animated unit-list page has a row available to draw. */
 s32 bunit_menu_is_unit_list_row_visible(s32 page_offset) {

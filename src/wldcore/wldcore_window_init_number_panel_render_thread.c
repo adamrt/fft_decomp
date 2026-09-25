@@ -1,6 +1,4 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Initialize and start a numeric panel renderer.
  *

@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

@@ -1,5 +1,3 @@
-#include "fft/battle_text.h"
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 

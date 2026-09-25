@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Enter AI action simulation and preserve the current-ability scratch prefix.

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/main_runtime.h"
 
 void battle_camera_update_tilt(void) {
     s16 tilt;

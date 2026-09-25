@@ -1,6 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /*
  * Evaluate target alternatives for the considered ability.

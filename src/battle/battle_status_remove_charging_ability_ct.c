@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 s32 battle_status_remove_charging_ability_ct(battle_stats_t* unit, s32 do_disable) {

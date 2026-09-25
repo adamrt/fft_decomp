@@ -1,6 +1,4 @@
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Disc sectors and byte budgets of the resident sound files (LBAs from the

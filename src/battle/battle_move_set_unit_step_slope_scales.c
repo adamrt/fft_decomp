@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 
 /* Selects the slope bits of the two step tiles that face the movement
  * direction (top two bits of g_battle_move_step_value) and stores them as the unit's

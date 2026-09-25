@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 void world_menu_text_entry_wait_thread_for_selected_unit(void) {

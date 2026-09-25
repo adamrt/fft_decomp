@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 void world_formation_show_unit_message(s16 unit_index, s32 message_id) {

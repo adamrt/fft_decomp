@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Builds the world-map request block for the current entry at 0x800d0bb4 and

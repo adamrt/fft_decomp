@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Steps the 24-frame formation-grid transition and draws it.

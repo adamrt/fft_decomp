@@ -1,7 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Pushes the self-sizing message window as menu level type 2, the windowed
  * sibling of wldcore_menu_push_message_level (0x8006e860, type 3). It stores

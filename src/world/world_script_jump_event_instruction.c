@@ -1,5 +1,5 @@
 #include "fft/battle.h"
-#include "fft/event.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 typedef struct world_script_event_instruction {

@@ -1,12 +1,5 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_story_event_text_level(s32 value);
-s32 world_thread_is_running(s32 thread_id);
-void world_thread_set_parameters(s32 thread_id, s32 a, s32 b, s32 c);
 
 /* List level input step (cursor slot 10); twin of wldcore_list_handle_set_script_variables_03c0_03ff_input with help
  * message 0x1055. Cancel and confirm wait for file loading to finish; a

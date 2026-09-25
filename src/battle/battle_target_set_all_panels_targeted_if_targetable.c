@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 s32 battle_target_set_all_panels_targeted_if_targetable(void) {

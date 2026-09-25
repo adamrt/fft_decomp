@@ -1,5 +1,4 @@
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
+#include "fft/event_equip.h"
 
 /* Builds the -1-terminated list of owned item IDs in `category`, then sorts it.
  *

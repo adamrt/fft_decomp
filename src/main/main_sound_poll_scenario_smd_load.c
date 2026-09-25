@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 /*
  * handles[0] holds the slot whose SMD load is in flight; handles[1..2] hold

@@ -1,7 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/battle_state.h"
-#include "fft/event.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

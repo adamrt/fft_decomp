@@ -1,13 +1,5 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_list_open_available_propositions(void);
 
 /* Input step of the proposition-dispatch yes/no panel built by wldcore_window_build_yes_no_panel:
  * up/down toggle the row, cancel (0x40) and "no" close the panel; "yes" pays

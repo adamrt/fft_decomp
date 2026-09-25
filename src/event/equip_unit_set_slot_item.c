@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
     s16 value;

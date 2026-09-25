@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_menu_status_panel.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_gfx_apply_menu_palette_for_mode(

@@ -1,5 +1,4 @@
-#include "fft/battle_state.h"
-#include "fft/event.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_script_set_event_speed(s32 speed) {

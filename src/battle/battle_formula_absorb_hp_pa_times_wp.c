@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_formula_absorb_hp_pa_times_wp(void) {

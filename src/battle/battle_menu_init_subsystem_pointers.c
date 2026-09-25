@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Rebind the BATTLE menu subsystem's working pointers and clear its

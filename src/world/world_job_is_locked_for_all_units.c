@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/job.h"
 #include "fft/world.h"
 
 s32 world_job_is_locked_for_all_units(s16 job_id) {

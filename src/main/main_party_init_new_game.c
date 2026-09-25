@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
+#include "fft/main.h"
 #include "fft/world.h"
 
 enum {

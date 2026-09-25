@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 
 s32 battle_process_map_gns_record(s32 phase, gns_command_record_prefix_t* record) {
     char unused_zeroes[8] = { 0 };

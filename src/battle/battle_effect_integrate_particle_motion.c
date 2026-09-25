@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 #include "psx/types.h"
 
 /* Provisional particle list node (target_* is the homing target,

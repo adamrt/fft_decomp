@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 u16 world_job_get_selected_unit_job_points_entry(void) {

@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 /*
  * Select an action for the retreat-oriented AI path.

@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 
 s32 battle_gfx_save_evtchr_slot(s32 slot_index) {
     if (g_battle_gfx_vram_slots[slot_index].owner == 0xff) {

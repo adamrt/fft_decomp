@@ -1,8 +1,5 @@
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-void world_thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
 
 /* Tutorial command: replace the dialog text once the current text has
  * finished printing. Operands: two message-id bytes (little-endian, biased

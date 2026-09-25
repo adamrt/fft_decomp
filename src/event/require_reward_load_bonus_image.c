@@ -1,6 +1,4 @@
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_reward_load_bonus_image(s32 image_id) {

@@ -1,4 +1,4 @@
-#include "fft/main_heap.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Copy a nonempty byte sequence from source to destination.

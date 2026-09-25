@@ -1,6 +1,4 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Pushes the shared scrollable text window as menu level 0x1e for a story
  * event entry, the partner of the wldcore_menu_wait_tutorial_topic_text_then_pop_level pop: records the entry on the

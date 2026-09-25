@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Per-frame WLDCORE render pass: clears the current ordering table, runs the
  * menu frame and marker/display-object passes, draws screen fades, waits for

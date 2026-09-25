@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 /* Answer one of six unit queries about the misc id in `in_id`, copying it to

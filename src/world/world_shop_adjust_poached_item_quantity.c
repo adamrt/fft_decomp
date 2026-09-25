@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* scus_94221_datatables.txt: Fur Shop poached-item quantities.

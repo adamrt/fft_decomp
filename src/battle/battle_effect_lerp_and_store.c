@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_lerp_and_store(s32 start, s32 end, s32 factor, s32* out) {
     s32 result;

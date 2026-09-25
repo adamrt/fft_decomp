@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Apply Abandon by halving the target's current evasion contribution. */

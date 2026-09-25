@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 s32 bunit_job_find_first_for_skillset(s32 skillset_id) {

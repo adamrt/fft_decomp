@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 void battle_unit_set_specific_animation_value_on_battle_init(s32 misc_id, u32 value) {

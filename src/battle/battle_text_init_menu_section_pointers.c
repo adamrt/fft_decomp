@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 #include "psx/types.h"
 
 /* Relocate the 31 embedded menu-text offsets into the active section table.

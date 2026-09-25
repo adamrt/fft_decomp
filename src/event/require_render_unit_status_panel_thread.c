@@ -1,5 +1,5 @@
 /* REQUIRE twin of debugchr_render_unit_status_panel_thread: the same doubled
- * 0x30C editor / 0x1D8 panel packets (fft/battle_menu_status_panel.h), without the shake
+ * 0x30C editor / 0x1D8 panel packets (fft/menu.h), without the shake
  * offsets, the bar division and the zodiac branch.
  *
  * Compiler constraints (no instructions emitted): the two empty asm operands
@@ -7,23 +7,12 @@
  * (as in the twin), and the bar loop pins the two volatile read-backs to $2/$3,
  * which the allocator otherwise rotates by one register.
  */
-#include "fft/battle_gfx.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/require.h"
-#include "fft/text.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/types.h"
 
 struct world_menu_palette_primitives;
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 struct menu_number_entry;
 struct menu_number_position;
 

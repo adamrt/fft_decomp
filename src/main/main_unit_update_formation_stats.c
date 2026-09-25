@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_update_formation_stats(battle_stats_t* unit) {

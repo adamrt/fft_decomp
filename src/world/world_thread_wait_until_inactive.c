@@ -1,4 +1,4 @@
-#include "fft/data.h"
+#include "fft/world.h"
 
 void world_thread_wait_until_inactive(s32 thread_id) {
     do {

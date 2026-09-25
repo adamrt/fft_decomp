@@ -1,5 +1,4 @@
-#include "fft/jobstts.h"
-#include "fft/main_runtime.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 s32 jobstts_job_calculate_next_level_jp_requirement(s32 index) {

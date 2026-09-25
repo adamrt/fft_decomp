@@ -1,7 +1,4 @@
-#include "fft/data.h"
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 
 /*
  * Extract an item's equipment stats and attribute bonuses for comparison.

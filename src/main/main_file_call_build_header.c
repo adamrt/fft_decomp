@@ -1,4 +1,4 @@
-#include "fft/main_file.h"
+#include "fft/main.h"
 
 /*
  * Start an asynchronous disc read through the shared file header.

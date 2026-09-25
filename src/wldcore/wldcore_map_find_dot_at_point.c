@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Pick the highest-priority visible map dot whose screen position contains the

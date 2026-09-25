@@ -1,5 +1,4 @@
-#include "fft/battle_gfx.h"
-#include "fft/world.h"
+#include "fft/battle.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

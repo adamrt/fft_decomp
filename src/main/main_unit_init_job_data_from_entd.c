@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Load the party unit selected by an ENTD sprite set.

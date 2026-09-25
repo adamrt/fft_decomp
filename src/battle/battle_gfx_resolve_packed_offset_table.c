@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Unaligned record: the offset entries and the payload length are stored as

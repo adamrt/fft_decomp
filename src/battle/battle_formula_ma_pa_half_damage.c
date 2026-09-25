@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 
 void battle_formula_ma_pa_half_damage(void) {
     if (battle_formula_calculate_magical_evade() == 0) {

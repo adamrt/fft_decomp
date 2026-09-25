@@ -7,8 +7,6 @@
  * by g_battle_move_jump_gravity.
  */
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
 /* The target coordinates occupy a 16-byte frame slot, like the unreferenced

@@ -1,8 +1,5 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level);
 
 /* Input handler for the debug script-variable list level (type 0xb).
  *

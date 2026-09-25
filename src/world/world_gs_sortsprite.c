@@ -17,10 +17,6 @@ typedef struct {
  * single word load and compare. */
 #define GS_SPRITE_SCALE_WORD(sp) (*(s32*)&(sp)->scalex)
 
-extern s32 ReadGeomScreen(void);
-extern s32 RotTransPers4(
-    SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, s32* sxy0, s32* sxy1, s32* sxy2, s32* sxy3, s32* p, s32* flag);
-
 /*
  * WORLD copy of libgs GsSortSprite.
  *

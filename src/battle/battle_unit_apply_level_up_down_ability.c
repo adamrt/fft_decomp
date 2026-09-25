@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 
 s32 battle_unit_apply_level_up_down_ability(void) {
     s32 lv;

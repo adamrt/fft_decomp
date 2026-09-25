@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/effect_ring_mesh.h"
+#include "fft/effect.h"
 
 /* Builds and draws a spinning, flaring ring of 2x32 textured quads.
  *

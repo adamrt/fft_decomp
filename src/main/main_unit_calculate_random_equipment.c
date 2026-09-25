@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 /* Picks a random equippable item for the unit in one equipment slot.
  *

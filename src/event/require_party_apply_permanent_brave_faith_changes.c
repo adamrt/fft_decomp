@@ -1,7 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/require.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_party_apply_permanent_brave_faith_changes(void) {

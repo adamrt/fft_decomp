@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 struct battle_effect_parent_timeline_state;
 void battle_effect_reset_parent_timeline(struct battle_effect_parent_timeline_state* data);

@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Path a unit to a destination tile and start it walking at the given speed. */

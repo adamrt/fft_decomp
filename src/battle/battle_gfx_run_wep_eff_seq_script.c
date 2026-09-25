@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_state.h"
-#include "fft/main_runtime.h"
 
 /* Run a weapon/effect sprite's animation script up to its next frame.
  *

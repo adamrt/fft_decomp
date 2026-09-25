@@ -1,4 +1,3 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 
 /* Pushes the save-slot selection level (menu type 0x17).

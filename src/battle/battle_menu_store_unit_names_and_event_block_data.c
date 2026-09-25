@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 void battle_menu_store_unit_names_and_event_block_data(s32 event_id, s32 unit_a, s32 unit_b) {

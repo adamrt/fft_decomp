@@ -1,5 +1,4 @@
 #include "fft/effect.h"
-#include "fft/map.h"
 
 /* Effect phase handler that switches the map into its specialized destroyed state. */
 s32 effect_e456_map_update_specialized_destruction_state(s16 record_index, s32 byte_offset) {

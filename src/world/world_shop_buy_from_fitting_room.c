@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 void world_shop_buy_from_fitting_room(void) {

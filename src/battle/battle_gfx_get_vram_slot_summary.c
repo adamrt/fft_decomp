@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 /* Per-slot summary written by battle_gfx_get_vram_slot_summary. */
 typedef struct battle_gfx_vram_slot_summary {

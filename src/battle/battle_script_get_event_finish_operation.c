@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 u32 battle_script_get_event_finish_operation(void) {

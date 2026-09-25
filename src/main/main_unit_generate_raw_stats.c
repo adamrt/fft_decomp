@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_unit_generate_raw_stats(battle_stats_t* unit) {
     s32 unit_type;

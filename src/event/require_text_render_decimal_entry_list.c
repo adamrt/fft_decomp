@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* Render gauge values with an explicit sign, colored by sign, and a zero placeholder. */

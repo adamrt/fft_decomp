@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/pad.h"
 
 void battle_state_handle_highlight_units_state(void) {

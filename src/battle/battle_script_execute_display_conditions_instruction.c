@@ -1,4 +1,5 @@
 #include "fft/battle.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* Target 0x8013bd6c. */

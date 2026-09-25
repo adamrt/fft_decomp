@@ -1,5 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle_text.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_text_render_decimal_value(

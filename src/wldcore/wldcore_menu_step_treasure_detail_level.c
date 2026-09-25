@@ -1,19 +1,7 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/gpu.h"
 #include "psx/gs.h"
 #include "psx/pad.h"
-
-extern wldcore_window_render_bounds16_t g_wldcore_scroll_text_extra_rect;
-
-void world_gs_gettiminfo(u32* tim, GsIMAGE* image);
-s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* im, s32 step);
-void wldcore_menu_push_sound_novel_level(s32 mode);
-void wldcore_menu_push_sound_novel_resume_level(s32 mode);
-void wldcore_list_open_treasures(void);
 
 /* Handler of the saved-record preview level: the phases mirror the
  * unexplored-land detail handler at 0x8007e6f4.

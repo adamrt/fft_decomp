@@ -1,10 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-s32 wldcore_month_day_to_day_of_year(s32 month, s32 day);
-void wldcore_day_of_year_to_month_day(s32 day_of_year, s32* output_month, s32* output_day);
 
 /*
  * Advance the calendar by a script-requested number of days.

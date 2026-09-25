@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Uploads a loaded WAVESET.WD to SPU RAM and appends a heap copy of its

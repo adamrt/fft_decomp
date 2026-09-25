@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/main_heap.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Task 0x46: show message 0xa800 | parameter 2 about the unit whose battle id

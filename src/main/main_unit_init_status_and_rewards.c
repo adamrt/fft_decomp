@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_unit_init_status_and_rewards(battle_stats_t* unit, s32 clear_rewards) {
     if (unit->attributes[UNIT_ATTRIBUTE_SPEED] == 0) {

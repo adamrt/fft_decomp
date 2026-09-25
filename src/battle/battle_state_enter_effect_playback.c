@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/main_runtime.h"
 
 /* Enter the effect-playback game state, saving the state and animation speed
  * that battle_state_handle_effect_state restores. Returns 1 when the effect data is

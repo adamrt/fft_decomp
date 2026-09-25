@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 u32 main_ability_get_range(u32 ability_id) {
     u32 range;

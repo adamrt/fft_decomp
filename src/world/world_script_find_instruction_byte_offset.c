@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/world.h"
 
 s32 world_script_find_instruction_byte_offset(s32 offset, s32 instruction) {
     const u8* event = g_world_event_script;

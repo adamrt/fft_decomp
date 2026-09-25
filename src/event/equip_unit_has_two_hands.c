@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 s32 equip_unit_has_two_hands(s16 unit_id) {

@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 void equip_bits_init_primary_reader(const u8* data) {
     g_equip_bits_reader_1_reset = 1;

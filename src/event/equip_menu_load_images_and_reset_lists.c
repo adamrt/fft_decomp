@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_menu_load_images_and_reset_lists(void) {

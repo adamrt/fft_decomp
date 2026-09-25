@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_menu_window.h"
-#include "fft/menu.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Menu window thread without a cursor: rebuilds the text image every seventh

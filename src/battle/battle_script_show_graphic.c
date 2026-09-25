@@ -1,6 +1,5 @@
 #include "fft/battle.h"
-#include "fft/etc.h"
-#include "fft/thread.h"
+#include "fft/event_etc.h"
 #include "psx/types.h"
 
 void battle_script_show_graphic(void) {

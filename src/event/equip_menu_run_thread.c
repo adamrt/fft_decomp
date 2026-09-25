@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_menu_window.h"
-#include "fft/equip.h"
-#include "fft/menu.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 struct world_menu_icon_thread_param;

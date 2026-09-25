@@ -1,6 +1,5 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_set_equipment_stats(battle_stats_t* unit) {

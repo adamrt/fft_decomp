@@ -5,9 +5,6 @@
  * then battle_unit_set_screen_coords_from_real_coords).
  */
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_move.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 void battle_move_animate_jump_arc_to_own_tile(battle_unit_misc_data_t* unit) {

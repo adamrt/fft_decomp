@@ -1,15 +1,10 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 #include "psx/gs.h"
 #include "psx/gte.h"
 #include "psx/types.h"
 
 u16 GetTPage(s32 tp, s32 abr, s32 x, s32 y);
-void wldcore_gfx_copy_color_with_tint(CVECTOR* source, CVECTOR* out);
-void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot);
-void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad);
 void world_gs_sortfastsprite(GsSPRITE* sprite, GsOT* ot, u16 pri);
-void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
 
 /* Draws the HUD numeric readout at the context-value display position, laid
  * out by g_wldcore_context_value_display_mode: 1 is the labelled, underlined

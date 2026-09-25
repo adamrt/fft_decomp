@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Runs the main-menu mode-0 thread in the slot below the current thread,

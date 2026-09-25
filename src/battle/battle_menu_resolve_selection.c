@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/menu_types.h"
-#include "fft/option.h"
 #include "psx/types.h"
 
 /* Command and option use their s16 slots' low bytes; item uses its full halfword. */

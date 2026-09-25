@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 s32 card_file_count_free_blocks(const card_directory_entry_t* entries, s32 entry_count) {

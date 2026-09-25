@@ -1,7 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Script opcode: play the requested sound, weather quad and music track, then

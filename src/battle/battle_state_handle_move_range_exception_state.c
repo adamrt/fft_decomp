@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 void battle_state_handle_move_range_exception_state(void) {
     s32 selected_ability;

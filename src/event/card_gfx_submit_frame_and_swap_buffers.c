@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_runtime.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {

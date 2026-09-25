@@ -1,9 +1,6 @@
 #include "fft/wldcore.h"
 #include "psx/gs.h"
 
-void world_gs_gettiminfo(u32* tim, GsIMAGE* image);
-void wldcore_list_open_unexplored_lands(void);
-
 /* Handler of the unexplored-land detail level (type 0x19).
  *
  * Phase 1 waits for the render record at field_08 to leave its 0x100 state.

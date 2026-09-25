@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 
 /* BlueRemoveUnit (event instruction 0x99): tints every non-player unit whose
  * ENTD unit id is unit_id blue (red and green modulated by -0x1f).

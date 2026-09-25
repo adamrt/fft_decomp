@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/effect.h"
 
 s32 battle_effect_code_script_05(effect_record_t* effect) {
     u8* instruction = effect->script + effect->pc;

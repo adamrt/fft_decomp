@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 /*
  * Rolls the five 24-bit raw stats (3 bytes each, little-endian) for the

@@ -1,5 +1,4 @@
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 void main_gfx_draw_now_loading_message(void) {
     s32 frame;

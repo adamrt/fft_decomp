@@ -1,12 +1,6 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
-#include "fft/main_heap.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
-
-extern s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress);
 
 /*
  * Secondary-effect handler for bow and crossbow arrows.

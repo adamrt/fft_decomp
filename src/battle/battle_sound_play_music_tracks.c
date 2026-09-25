@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* BATTLE's copy of attack_sound_play_scenario_music (ATTACK.OUT 0x801c3e60). */

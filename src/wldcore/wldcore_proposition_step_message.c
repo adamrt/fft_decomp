@@ -1,7 +1,4 @@
-#include "fft/script_variables.h"
-#include "fft/text.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 /*

@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* data) {

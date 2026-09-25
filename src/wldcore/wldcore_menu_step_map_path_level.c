@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /*
  * Advances the world slideshow one frame: restarts it at the last page when

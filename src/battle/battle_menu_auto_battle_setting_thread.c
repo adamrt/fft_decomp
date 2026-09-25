@@ -4,11 +4,6 @@
  * rebound).
  */
 #include "fft/battle.h"
-#include "fft/battle_menu_window.h"
-#include "fft/menu.h"
-#include "fft/option.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 
 /*
  * Compare the unit tile's height with the supplied AI coordinates.

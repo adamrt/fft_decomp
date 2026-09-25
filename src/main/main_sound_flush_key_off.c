@@ -1,4 +1,4 @@
-#include "fft/main_sound_key_flush.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* The shared body in main_sound_key_flush.h. The generated linker script only

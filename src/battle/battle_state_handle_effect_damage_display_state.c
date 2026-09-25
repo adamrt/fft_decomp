@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 void battle_state_handle_effect_damage_display_state(void) {

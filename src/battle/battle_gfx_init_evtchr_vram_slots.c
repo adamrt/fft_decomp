@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_gfx_init_evtchr_vram_slots(void) {

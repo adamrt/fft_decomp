@@ -1,11 +1,5 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_effect.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
-#include "fft/unit_slots.h"
 
-extern s32 battle_effect_check_direct_trajectory_between_units(u8 actor_id, u8 target_id);
 /*
  * Score target tiles from the current simulated action origin.
  *

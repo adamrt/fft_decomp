@@ -1,4 +1,3 @@
-#include "fft/main_file.h"
 #include "fft/wldcore.h"
 
 /* Twin of wldcore_wait_for_file_load (0x800686c8) with the audio-queue depth

@@ -1,5 +1,3 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -18,12 +16,6 @@ typedef struct wldcore_menu_participant_list_level {
     u8 unknown_20[0x10];
     s32 entry_count; /* 0x30 */
 } wldcore_menu_participant_list_level_t;
-
-void wldcore_list_open_active_propositions(void);
-void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant);
-s32 world_thread_is_running(s32 thread_id);
-void world_thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
-u32 wldcore_input_check_repeating_directional(u32 buttons);
 
 /* Input step of the proposition participant-chooser level.
  *

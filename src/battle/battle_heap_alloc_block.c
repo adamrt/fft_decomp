@@ -1,4 +1,4 @@
-#include "fft/battle_runtime.h"
+#include "fft/battle.h"
 
 void* battle_heap_alloc_block(u32 size, s32 kind) {
     battle_heap_node_t* prev;

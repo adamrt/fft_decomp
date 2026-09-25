@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/effect_ring_mesh.h"
+#include "fft/effect.h"
 #include "psx/gte_inline.h"
 
 /* Builds and draws a spinning 9x8 lattice of textured quads (a closed tube).

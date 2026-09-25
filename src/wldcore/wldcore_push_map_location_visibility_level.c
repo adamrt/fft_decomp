@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Pushes menu level type 0x36, which animates a map location becoming

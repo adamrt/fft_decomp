@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 u8* jobstts_cmd_run_if_group_handler(u8* data) {

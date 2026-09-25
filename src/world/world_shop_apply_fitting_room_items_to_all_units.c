@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Move every reserved fitting-room item onto its formation unit and clear

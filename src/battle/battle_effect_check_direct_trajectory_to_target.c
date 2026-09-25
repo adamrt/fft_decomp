@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/map.h"
 #include "psx/gte.h"
 
 struct battle_effect_obstacle_unit_list;

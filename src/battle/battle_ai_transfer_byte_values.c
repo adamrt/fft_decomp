@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 void battle_ai_transfer_byte_values(u8* dst, const u8* src, s32 len) {
     s32 end;

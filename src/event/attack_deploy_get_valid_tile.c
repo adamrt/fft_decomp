@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 u8 attack_deploy_get_valid_tile(s32 column, s32 row) {

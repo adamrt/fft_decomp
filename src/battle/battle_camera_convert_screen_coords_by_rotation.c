@@ -1,4 +1,4 @@
-#include "fft/battle_camera.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /*

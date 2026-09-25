@@ -1,6 +1,5 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/thread.h"
+#include "fft/world.h"
 
 /* Run staged status commands for units whose Float or Jump state needs a
  * dedicated update thread. */

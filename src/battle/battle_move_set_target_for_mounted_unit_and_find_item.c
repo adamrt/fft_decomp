@@ -1,5 +1,4 @@
-#include "fft/battle_move.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /*

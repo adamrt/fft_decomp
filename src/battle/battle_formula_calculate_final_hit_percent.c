@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Scale the action accuracy by each evade source, then roll them in turn.

@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 void wldcore_opcode_start_pending_value_transition(void) {

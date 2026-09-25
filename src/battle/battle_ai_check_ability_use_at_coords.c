@@ -1,7 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /*
  * Check depth, terrain, and Monster Skill restrictions at an AI origin.

@@ -1,6 +1,4 @@
-#include "fft/equip.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
+#include "fft/event_equip.h"
 
 /* Runs one frame of the equipment menu state machine.
  *

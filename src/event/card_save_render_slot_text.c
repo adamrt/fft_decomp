@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_save_render_slot_text(s32 slot) {

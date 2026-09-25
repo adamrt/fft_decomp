@@ -1,4 +1,4 @@
-#include "fft/script_variables.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_script_is_tutorial_event_slot(void) {

@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* Return the item category's primary stat for descending menu sorts. */

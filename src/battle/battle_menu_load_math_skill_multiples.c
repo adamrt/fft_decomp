@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Collects the unit's learned Math Skill divisor abilities (Prime, 5, 4, 3)

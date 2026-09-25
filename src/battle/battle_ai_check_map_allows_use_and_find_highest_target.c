@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_ai_check_map_allows_use_and_find_highest_target(void) {

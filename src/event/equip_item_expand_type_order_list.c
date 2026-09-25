@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* Expand an item-type ordering table into the overlay's working list.
  *

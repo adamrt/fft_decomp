@@ -46,5 +46,8 @@ void StRingStatus(s16* free_sectors, s16* read_sectors);
 void StSetDataReadyCallback(void);
 void StSetRing(void* buffer, s32 sectors);
 void StSetStream(s32 mode, s32 start_frame, s32 end_frame, void* start_callback, void* end_callback);
+void StSetMask(s32 channel, s32 mask, s32 end_frame);
+s32 CdPosToInt(u8* position);
+s32 CdStatus(void);
 
 #endif

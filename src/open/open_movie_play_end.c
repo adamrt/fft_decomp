@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/open.h"
 
 void open_movie_play_end(void) {

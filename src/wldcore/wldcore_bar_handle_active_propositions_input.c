@@ -1,9 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_proposition_push_cancel_confirm_level(s32 value);
 
 /* List-menu input step: cancel (0x40) and confirm (0x20) close the level
  * through WORLD thread 12, and 0x100 opens help text 0x1062. Once the thread

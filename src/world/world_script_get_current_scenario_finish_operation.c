@@ -1,6 +1,3 @@
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 
 /* Return the active scenario's event-finish operations, or 0 outside a scenario. */

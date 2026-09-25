@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Provisional: weapon attack animations, three per weapon type (low, level,

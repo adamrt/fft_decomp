@@ -1,16 +1,6 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/etc.h"
 #include "psx/gpu.h"
-
-void wldcore_menu_push_brave_story_level(void);
-void world_text_message_box_thread(void);
-void wldcore_list_open_formation_tutorials(void);
-void wldcore_list_open_tutorial_mask_1_entries(void);
-void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset);
-void wldcore_menu_push_story_event_text_level(s32 value);
-void wldcore_menu_push_treasure_detail_level(s32 value);
 
 void wldcore_menu_step_screen_transition_level(wldcore_menu_screen_transition_level_t* level) {
     RECT rect;

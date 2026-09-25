@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 enum {
     ENTD_SET_BYTES = 0x14000,

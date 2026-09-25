@@ -1,3 +1,4 @@
+#include "fft/event_require.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

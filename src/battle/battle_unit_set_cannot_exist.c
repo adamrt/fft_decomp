@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 s32 battle_unit_set_cannot_exist(s32 unit_index) {

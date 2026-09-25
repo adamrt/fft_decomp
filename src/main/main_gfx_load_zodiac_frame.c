@@ -1,3 +1,4 @@
+#include "fft/main.h"
 #include "psx/gpu.h"
 
 /* BATTLE/ZODIAC.BIN is a headerless image, not an executable overlay.

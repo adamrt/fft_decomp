@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/menu.h"
 
 enum battle_menu_line_layout_offset {
     BATTLE_MENU_LINE_LAYOUT_X0 = 0,

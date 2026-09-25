@@ -1,6 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Advance the map background track one frame.

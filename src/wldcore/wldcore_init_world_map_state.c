@@ -1,10 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Resets state used when entering the world map.
@@ -12,11 +6,6 @@
  * The target derives each fade box's attribute word through the record base
  * while it walks the rectangle fields separately.
  */
-
-/* Neither is declared in include/fft/wldcore.h; the signatures follow their
- * definitions in src/wldcore/. */
-void wldcore_write_nine_bit_record(u32* bits, s32 record, u8* source);
-s32 wldcore_month_day_to_day_of_year(s32 month, s32 day);
 
 void wldcore_init_world_map_state(void) {
     wldcore_menu_cursor_state_t* cursor;

@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/status.h"
+#include "fft/battle.h"
 
 /*
  * Test whether the actor's available abilities can remove this current status.

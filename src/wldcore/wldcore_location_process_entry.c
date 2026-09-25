@@ -1,9 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask);
 
 /* Location-entry step: when the current location's conditional set yields
  * LoadEvent, stores script variable 0x27 and pushes menu level type 0x23;

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "fft/wldcore.h"
 #include "fft/world.h"
 

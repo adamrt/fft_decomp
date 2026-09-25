@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Collects the unit's learned Math Skill abilities (0x19e..0x1a5) whose

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Picks the equipment slot a Steal, Break or Might Sword ability targets.

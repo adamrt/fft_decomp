@@ -1,7 +1,5 @@
 #include "fft/wldcore.h"
 
-void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level);
-
 /* Pushes the debug script-variable list level (type 0xb): one cursor window
  * record and one render record, laid out by 0x8006ed30 and then positioned
  * from the render record's origin.

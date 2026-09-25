@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_move_is_unit_moving_by_misc_id(u32 misc_id) {

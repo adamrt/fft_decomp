@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
 
 void battle_unit_update_attack_result_animation(battle_unit_misc_data_t* unit) {
     s32 result;

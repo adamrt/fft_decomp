@@ -1,9 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_read_nine_bit_record(u32* bits, s32 record, u8* dest);
 
 /* Pushes the proposition-attempt detail text window as menu level 0x2a, the
  * partner of the 0x80088180 pop. Records the entry on the new level, decodes

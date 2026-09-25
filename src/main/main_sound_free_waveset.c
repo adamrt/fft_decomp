@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Unlinks a loaded waveset and frees its SPU RAM and heap header; does

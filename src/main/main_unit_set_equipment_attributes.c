@@ -1,6 +1,5 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 
 enum {
     ITEM_ID_MATERIA_BLADE = 0x20,

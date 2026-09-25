@@ -1,5 +1,4 @@
-#include "fft/equip.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 typedef struct equip_item_detail_delta_buffer {

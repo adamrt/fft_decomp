@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_runtime.h"
+#include "fft/open.h"
 #include "psx/types.h"
 
 void open_card_consume_hardware_events(void) {

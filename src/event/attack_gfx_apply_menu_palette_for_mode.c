@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_menu_status_panel.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 /* Select the menu-primitive palette bank from the panel style

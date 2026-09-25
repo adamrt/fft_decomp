@@ -11,10 +11,6 @@
  * 0x801055b4 are the out-of-line `close_and_return` tail of this same
  * function, as in the twin.
  */
-#include "fft/event.h"
-#include "fft/main_sound.h"
-#include "fft/text.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

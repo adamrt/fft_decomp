@@ -1,5 +1,5 @@
-#include "fft/event.h"
 #include "fft/wldcore.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 s32 world_unit_get_battle_index_by_entd_id(s32 entd_unit_id) {

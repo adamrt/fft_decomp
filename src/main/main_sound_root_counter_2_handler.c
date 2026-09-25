@@ -1,5 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/main_sound_key_flush.h"
+#include "fft/main.h"
 #include "psx/spu.h"
 #include "psx/types.h"
 

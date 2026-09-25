@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Rebuilds the unit's active reaction/support/movement bitfields

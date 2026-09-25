@@ -1,5 +1,4 @@
-#include "fft/battle_camera.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_state_reset_frame_pacing_timer(void) {

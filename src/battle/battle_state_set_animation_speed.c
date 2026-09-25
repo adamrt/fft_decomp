@@ -1,5 +1,4 @@
-#include "fft/battle_camera.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_state_set_animation_speed(s32 speed) {

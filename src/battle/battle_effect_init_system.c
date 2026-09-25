@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 
 /* Builds the effect-slot and secondary-effect free chains, clears their
  * sentinels and work areas, then resets effect rendering and the camera. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 s32 battle_target_clear_selection_state_of_all_panels(void) {

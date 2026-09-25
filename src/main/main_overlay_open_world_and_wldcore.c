@@ -1,4 +1,5 @@
-#include "fft/main_heap.h"
+#include "fft/main.h"
+#include "fft/wldcore.h"
 
 s32 main_overlay_open_world_and_wldcore(s32 load_world) {
     main_file_load_data_from_disc(0x14849, 0xDC, g_main_heap_low_overlay_load_address, 0);

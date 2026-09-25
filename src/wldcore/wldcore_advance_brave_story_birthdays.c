@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /*
  * The daily birthday sweep, run by wldcore_advance_calendar_day after the

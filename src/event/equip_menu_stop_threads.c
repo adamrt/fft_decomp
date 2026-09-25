@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* EQUIP.OUT 001bf5bc - Signal completion for menu sub-threads 0xD, 0xA, 0xC,

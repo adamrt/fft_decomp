@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 void jobstts_cmd_run_stream(u8* data, s32 flags) {

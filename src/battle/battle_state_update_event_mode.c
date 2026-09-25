@@ -1,11 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_move.h"
-#include "fft/battle_state.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

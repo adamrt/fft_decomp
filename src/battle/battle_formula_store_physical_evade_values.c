@@ -1,9 +1,4 @@
-#include "fft/ability_flags.h"
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/unit_equipment.h"
-#include "fft/unit_flags.h"
 #include "psx/types.h"
 
 /* Collects the current target's physical evade sources for the ability being

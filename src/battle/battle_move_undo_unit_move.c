@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 void battle_move_undo_unit_move(battle_unit_misc_data_t* unit) {
     battle_unit_misc_data_t* other;

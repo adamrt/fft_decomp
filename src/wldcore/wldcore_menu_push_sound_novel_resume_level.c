@@ -1,10 +1,6 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/gs.h"
-
-void world_gs_gettiminfo(u32* tim, GsIMAGE* im);
-s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* im, s32 step);
 
 /* Pushes menu level type 0x14 (driven by wldcore_menu_step_sound_novel_resume_level) with the given mode:
  * appends the cursor window, a VRAM render record for the TIM at g_wldcore_picture_buffer

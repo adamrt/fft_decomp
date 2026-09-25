@@ -1,10 +1,9 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* The packed-word views of the two options records. g_main_game_options and
  * g_main_game_options_defaults name the same two addresses under their union
  * type; the scalar names are what stop GCC coalescing the load. */
-extern u32 g_main_game_options_raw;
 extern volatile u32 g_main_game_options_defaults_raw;
 
 /* Clear the script/save words and restore the new-game calendar, input

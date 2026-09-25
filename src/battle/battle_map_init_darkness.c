@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 void battle_map_init_darkness(s32 unused_0, s32 unused_1, s32 map_id) {

@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 /* The `blez` target depends on which reorg pass fills its delay slot, not on
  * how the two `i = 0` insns are spelled (they are identical RTL by then).
  * Zeroing the counter ahead of the guard (see below) puts `move a0,zero`
@@ -9,7 +9,6 @@
  * the slot at all, and the -gcoff line note then keeps the assembler from
  * filling it, leaving a nop.
  */
-#include "fft/battle.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

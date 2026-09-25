@@ -1,9 +1,5 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/gs.h"
-
-void world_gs_gettiminfo(u32* tim, GsIMAGE* image);
 
 /* Pushes the town/location service list level (type 4) for menu id `menu`.
  *

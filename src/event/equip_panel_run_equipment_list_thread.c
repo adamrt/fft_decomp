@@ -1,18 +1,9 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/equip.h"
-#include "fft/main_gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
+#include "fft/event_equip.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
 /* The frame is battle_menu_status_panel_buffer_t (0x3d8 bytes, double buffered); the
  * WORLD twin world_menu_equipment_panel_thread uses the same layout. */
-
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* Equipment panel thread (task 0x3b): lists the five equipped item names and
  * draws their icons; EQUIP twin of WORLD world_menu_equipment_panel_thread.

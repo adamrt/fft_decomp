@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Sets the music's tempo scale (0x100 = 1.0; 0 means 0x100), immediately

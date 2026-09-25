@@ -1,5 +1,3 @@
-#include "fft/event.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* WORLD twin of battle_script_load_event: read one event block from the archive on

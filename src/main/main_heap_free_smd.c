@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 s32 main_heap_free_smd(void* ptr) {

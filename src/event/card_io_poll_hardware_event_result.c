@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_runtime.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 s32 card_io_poll_hardware_event_result(void) {

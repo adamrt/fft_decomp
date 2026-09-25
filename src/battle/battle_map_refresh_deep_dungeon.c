@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 s32 battle_map_refresh_deep_dungeon(void) {

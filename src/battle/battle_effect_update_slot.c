@@ -1,9 +1,6 @@
-#include "fft/battle_effect.h"
-#include "fft/battle_effect_sprite.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 struct battle_effect_motion;
-extern void battle_effect_draw_billboard_sprite(battle_effect_sprite_slot_t* slot);
 
 s32 battle_effect_update_slot(s32 id) {
     battle_effect_slot_t* slot = &g_battle_effect_slots[id];

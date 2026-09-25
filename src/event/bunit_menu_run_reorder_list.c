@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 
 void bunit_menu_run_reorder_list(void) {
     s16 opts[16];

@@ -1,9 +1,5 @@
-#include "fft/battle.h"
-#include "fft/helpmenu.h"
-#include "fft/main_heap.h"
-#include "fft/main_sound.h"
-#include "fft/require.h"
-#include "fft/thread.h"
+#include "fft/event_helpmenu.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_overlay_run_helpmenu(void) {

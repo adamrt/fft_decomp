@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_state_enter_jp_xp_gain(void) {
     battle_unit_misc_data_t* unit;

@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 typedef void (*battle_effect_function_t)(s16, u32, s32, s32);
 

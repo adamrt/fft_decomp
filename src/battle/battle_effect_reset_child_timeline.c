@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 void battle_effect_reset_child_timeline(battle_effect_temp_data_t* data, s16 value) {
     s32 index;

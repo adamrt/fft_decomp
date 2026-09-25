@@ -4,9 +4,6 @@
  * checks. The unit_id range test is spelled as two comparisons so GCC reloads
  * the byte as the target does. */
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/unit_slots.h"
 
 s32 battle_script_check_scenario_condition(s32 type, s32 id, s32 value, s32 tile_y, s32 elevation) {
     battle_stats_t* unit;

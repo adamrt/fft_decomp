@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 /* Word view of misc +0x9c: the path count byte and the first packed path
  * step. The step layout matches the movement_path comment in battle.h

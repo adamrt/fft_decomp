@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/thread.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Start the selected text thread only when its scheduler slot is idle.

@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 enum {
     BATTLE_ROTATION_Q12_MASK = 0x0FFF,

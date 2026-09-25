@@ -1,3 +1,4 @@
+#include "fft/event_attack.h"
 
 void attack_thread_stop_after_yield(void) {
     battle_thread_yield();

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_unit_rotation.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Provisional: three-halfword map coordinate staged for

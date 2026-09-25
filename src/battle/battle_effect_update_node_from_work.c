@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 #include "psx/types.h"
 
 /* Copy a work record's position, heading, and colour onto its list node.

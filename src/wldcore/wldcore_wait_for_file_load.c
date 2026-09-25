@@ -1,4 +1,4 @@
-#include "fft/main_file.h"
+#include "fft/wldcore.h"
 
 void wldcore_wait_for_file_load(void) {
     while (g_main_file_cd_state.state != MAIN_FILE_LOAD_STATE_IDLE) {

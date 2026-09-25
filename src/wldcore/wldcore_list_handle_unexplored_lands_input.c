@@ -1,12 +1,5 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_unexplored_land_detail_level(s32 value);
-s32 world_thread_is_running(s32 thread_id);
-void world_thread_set_parameters(s32 thread_id, s32 a, s32 b, s32 c);
 
 /* Twin of wldcore_list_handle_rumors_input for cursor slot 7: closes the level inline, opens
  * help message 0x1058 on 0x100, and hands a confirmed entry to 0x8007e360.

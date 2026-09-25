@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 /* Map ENTD's five equipment bytes into the seven simulation slots. */
 void main_unit_store_monster_equipment(battle_stats_t* unit, const entd_unit_t* entd) {

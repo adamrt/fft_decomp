@@ -1,11 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
 
 /* List level input step for cursor slot 18 (help message 0x108b). A confirmed
  * entry starts fade 2 and thread 12's closing animation; once it finishes the

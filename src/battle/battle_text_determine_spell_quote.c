@@ -1,10 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
-#include "fft/world.h"
 
 /* Leading bytes of an Ability Data 1 record (8 bytes each at 0x8005ebf0). */
 typedef struct battle_text_ability_primary_prefix {

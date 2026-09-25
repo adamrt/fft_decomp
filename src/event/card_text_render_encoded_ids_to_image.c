@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/card.h"
-#include "fft/text.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 /* The trailing unused_style word is never read, exactly as in the EQUIP twin

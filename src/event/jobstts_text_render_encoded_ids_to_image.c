@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/jobstts.h"
-#include "fft/text.h"
+#include "fft/event_jobstts.h"
 
 /* Render encoded menu text IDs into a 4-bpp image.
  *

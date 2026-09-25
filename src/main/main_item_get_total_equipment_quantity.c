@@ -1,7 +1,5 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Counts how many of `item_id` the player owns: the inventory stock plus the

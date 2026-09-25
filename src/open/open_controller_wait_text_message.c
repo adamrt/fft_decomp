@@ -1,6 +1,4 @@
 #include "fft/open.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 
 /* The thread-2 controller's view of its open_controller_record_t. */
 typedef struct open_controller_thread_completion {

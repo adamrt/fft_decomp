@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_state_enter_after_command(void) {
     g_animation_speed = 1;

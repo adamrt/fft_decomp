@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/event.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_menu_set_event_speed(s32 speed) {

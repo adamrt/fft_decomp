@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 /* Find the battle-stats record whose ENTD unit ID matches unit_id.

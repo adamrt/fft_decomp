@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 void battle_formula_apply_weather_effects_on_bows(void) {

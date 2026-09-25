@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /*

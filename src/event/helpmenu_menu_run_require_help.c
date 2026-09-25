@@ -22,14 +22,7 @@
  * lets CSE fold it into the $5 copy and loses the separate `li $9,0xb8`;
  * literal colours fold two constants away.
  */
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/helpmenu.h"
-#include "fft/main_heap.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/event_helpmenu.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

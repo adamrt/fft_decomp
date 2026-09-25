@@ -1,12 +1,6 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
-
-extern void attack_sound_resync_scenario_music_and_apply_map_darkness(void);
 
 /* Runs one step of the expanded battle-map initialization sequence.
  *

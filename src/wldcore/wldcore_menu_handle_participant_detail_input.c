@@ -1,15 +1,6 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_menu_push_layout_window_level(void);
-void wldcore_menu_push_participant_list_level(s32 proposition);
-void wldcore_unit_build_status_panel_data(s32 party_index);
 
 void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level_t* level) {
     RECT rect;

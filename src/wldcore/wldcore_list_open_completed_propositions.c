@@ -1,9 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
 
 /* Opens the list of active propositions at the current location as menu
  * level type 0xe.

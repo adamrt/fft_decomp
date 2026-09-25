@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_move.h"
-#include "fft/map.h"
 
 /* Return 1 when the acting unit cannot jump across tile_index at height.
  *

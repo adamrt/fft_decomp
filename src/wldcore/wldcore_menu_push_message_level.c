@@ -1,10 +1,5 @@
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/open.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Appends a window-list record for a text window: optionally reloads the

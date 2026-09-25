@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 s32 battle_map_get_weather(void) {

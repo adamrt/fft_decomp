@@ -1,4 +1,4 @@
-#include "fft/etc.h"
+#include "fft/event_etc.h"
 #include "psx/types.h"
 
 /* The retail build keeps its POLY_GT4 cursor 0x2a bytes into the primitive

@@ -1,7 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_heap.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /*

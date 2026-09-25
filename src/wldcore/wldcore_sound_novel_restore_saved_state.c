@@ -1,11 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_load_sound_novel_files(s32 chapter);
-void wldcore_opcode_load_picture(void);
-void wldcore_opcode_load_background_set(void);
 
 /* Provisional view of the picture state at 0x800d485c (render record index,
  * then the pending picture id). */

@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 u8* card_cmd_draw_decimal_number_handler(u8* command) {

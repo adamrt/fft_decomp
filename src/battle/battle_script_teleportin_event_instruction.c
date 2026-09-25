@@ -1,6 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/event.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 
 /* The event dispatcher supplies 1 as its second argument at 0x80145ecc;
  * this entry forwards only unit_id, unlike TeleportOut's removal flag. */

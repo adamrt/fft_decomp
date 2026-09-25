@@ -1,4 +1,4 @@
-#include "fft/battle_text.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 const u8* jobstts_text_skip_encoded_segments(const u8* text, s16 terminators) {

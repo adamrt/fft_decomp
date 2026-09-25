@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 void battle_unit_select_attack_animation_for_ability(

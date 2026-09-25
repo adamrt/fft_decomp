@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Array view of battle_effect_secondary_init_t's sixteen ten-byte target

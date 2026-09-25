@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/open.h"
 
 /* Build the three-entry sound-type menu and select the saved option.

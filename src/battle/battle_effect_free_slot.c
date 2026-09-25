@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Unlinks slot id from the active chain and pushes it onto the free chain;
  * slot 0 is the null sentinel and is ignored. */

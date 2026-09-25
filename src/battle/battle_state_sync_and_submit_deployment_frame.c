@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/battle.h"
 
 s32 battle_state_sync_and_submit_deployment_frame(u32 ordering_table) {
     s32 sync_result;

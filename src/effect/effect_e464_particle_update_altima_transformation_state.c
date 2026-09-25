@@ -1,5 +1,4 @@
 #include "fft/effect.h"
-#include "fft/map.h"
 
 /* E464: Altima's Transformation; the target range ends before trailing data. */
 

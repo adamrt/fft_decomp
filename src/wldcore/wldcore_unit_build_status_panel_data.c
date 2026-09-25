@@ -1,11 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_unit.h"
-#include "fft/unit_equipment.h"
-#include "fft/unit_flags.h"
-#include "fft/unit_stats.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Provisional: gauge view of g_world_selected_unit_stat_summary, laid out as
  * attack_status_gauges_t. */

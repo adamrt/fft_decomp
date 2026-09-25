@@ -1,14 +1,6 @@
-#include "fft/attack.h"
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/menu_types.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
-
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* The v/y adjustments and the tpage/clut stores address the current
  * primitive through a byte offset recomputed at the top of each iteration:

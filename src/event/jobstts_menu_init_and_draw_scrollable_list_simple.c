@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_menu_init_and_draw_scrollable_list_simple(
     const s16* entries, s32 selected_index, const void* data, const u8* commands) {

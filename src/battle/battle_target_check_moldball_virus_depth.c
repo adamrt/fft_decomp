@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* For Moldball Virus, clear the targeting panel of every tile with depth. */

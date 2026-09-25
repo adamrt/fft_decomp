@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 enum { TILE_SIZE_UNITS = 0x1c, TILE_EDGE_MARGIN = 7, REAL_COORD_SHIFT = 12 };

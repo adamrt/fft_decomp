@@ -1,6 +1,3 @@
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"

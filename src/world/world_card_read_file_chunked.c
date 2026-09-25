@@ -3,7 +3,6 @@
  * propagation test $v0 directly and drop the `move s1,v0`.
  * The shared `fail:` tail reproduces the target's cross-jumped `j; li v0,-1`
  * block at 0x64, which all three -1 returns reach. */
-#include "fft/card.h"
 #include "fft/world.h"
 #include "psx/api.h"
 #include "psx/types.h"

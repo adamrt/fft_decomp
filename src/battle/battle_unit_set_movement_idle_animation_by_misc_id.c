@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_unit_set_movement_idle_animation_by_misc_id(u32 misc_id) {

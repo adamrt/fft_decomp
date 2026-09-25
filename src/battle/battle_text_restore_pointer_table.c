@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 void battle_text_restore_pointer_table(void) {

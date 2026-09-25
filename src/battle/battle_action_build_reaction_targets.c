@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/unit_slots.h"
 
 /*
  * Build the target list for a reaction ability.

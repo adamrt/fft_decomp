@@ -1,11 +1,12 @@
-#ifndef FFT_EVENT_H
-#define FFT_EVENT_H
+#ifndef FFT_SCRIPT_H
+#define FFT_SCRIPT_H
 
-#include "fft/battle_runtime.h"
-#include "fft/thread.h"
-#include "fft/unit_slots.h"
+/* Event-script bytecode and variables shared by the BATTLE and WORLD interpreters. */
+
+#include "fft/unit.h"
 #include "psx/types.h"
 
+/* event */
 enum {
     EVENT_BLOCK_BYTES = 8192,
     EVENT_BLOCK_SECTORS = 4,
@@ -246,6 +247,7 @@ typedef struct event_file_block {
     u32 text_offset_or_marker;
     u8 data[EVENT_BLOCK_BYTES - 4];
 } event_file_block_t;
+typedef char event_file_block_size_must_be_8192[(sizeof(event_file_block_t) == EVENT_BLOCK_BYTES) ? 1 : -1];
 
 /* Eight-byte operand payload for event opcode 0x28 WalkTo. Multi-byte values
  * remain byte arrays because event scripts are not guaranteed to be aligned. */
@@ -257,266 +259,113 @@ typedef struct event_walk_to_parameters {
     u8 speed_le[2];
     u8 elevation_flag;
 } event_walk_to_parameters_t;
-
 typedef char event_walk_to_parameters_size_must_be_8[sizeof(event_walk_to_parameters_t) == 8 ? 1 : -1];
 
-typedef char event_file_block_size_must_be_8192[(sizeof(event_file_block_t) == EVENT_BLOCK_BYTES) ? 1 : -1];
+/* Provisional event work block at *g_battle_ai_workspace_ptr; only the staged-status
+ * snapshot at 0x5f0 is known. */
+typedef struct world_event_work {
+    u8 unknown_000[0x5F0];
+    unit_status_staging_t status_staging; /* 0x5f0 */
+} world_event_work_t;
+typedef char world_event_work_size_must_be_0x9e2[(sizeof(world_event_work_t) == 0x9E2) ? 1 : -1];
 
-/* Separate triggers, command arguments, and completion status. Argument
- * domains remain provisional: map commands 0x80/0x83, polls 0x81/0x84.
- * The u16 requests and arguments are read with lhu by the consumer
- * battle_script_process_pending_requests; every other access is a store. */
-extern u16 g_battle_3d_object_use_request; /* 0x80165fe2 */
-extern u16 g_battle_3d_object_wait_status; /* 0x8016606e */
-
-/* 0x80166054: camera consumer unpacks two 2-bit fields and a high nibble. */
-extern s32 g_battle_camera_speed_curve;
-extern u16 g_battle_current_music_track_index; /* 0x80165fd8 */
-
-/* BATTLE pointer slot 0x80173ca4; WORLD pointer slot 0x801cd75c. */
-extern event_file_block_t* g_battle_event_block;
-extern u16 g_battle_event_effect_target_misc_id; /* 0x80165ff8 */
-
-/* 0x80166000: consumer passes mode 2 when equal to 2, otherwise mode 0.
- * The last Effect operand is not a second Y coordinate. */
-extern s16 g_battle_event_effect_target_mode;
-extern u16 g_battle_event_map_command_80_arg1;              /* 0x80173c94 */
-extern u16 g_battle_event_map_command_80_arg2;              /* 0x80173c96 */
-extern u16 g_battle_event_map_command_83_arg1;              /* 0x80174058 */
-extern u16 g_battle_event_map_command_83_arg2;              /* 0x8017405a */
-extern u16 g_battle_event_music_switch_fade;                /* 0x80173f56; consumer multiplies by 4 */
-extern u16 g_battle_event_music_switch_volume;              /* 0x80173f54; scaled 0..96 to 0..127 */
-extern s16 g_battle_event_pending_effect_id;                /* 0x80173cb4 */
-extern s32 g_battle_event_pending_evtchr_save_slot;         /* 0x80173f4c */
-extern s32 g_battle_event_pending_loaded_evtchr_clear_slot; /* 0x80173ca0 */
-extern s16 g_battle_event_pending_map_jump_out_2_id;        /* 0x8017405c */
-
-/* Deferred BATTLE commands: producer 0x80143bd8, consumer
- * 0x80143418..0x801439c0. The outer update at 0x80142d58 clears one-shot
- * requests, schedules script threads, then applies commands on its normal
- * path. These are separate globals, not a contiguous struct. Signed pending
- * slots use -1; request bits and polled states do not. */
-extern s16 g_battle_event_pending_map_jump_out_id;            /* 0x80174054 */
-extern s16 g_battle_event_pending_map_state;                  /* 0x80173f64; script variable 0x24 */
-extern s32 g_battle_event_pending_reserved_vram_release_slot; /* 0x80173f48 */
-extern s32 g_battle_event_pending_saved_evtchr_clear_slot;    /* 0x80173f50 */
-
-/* 0x80173cac: packed misc ID << 8 | reserved VRAM slot; -1 absent. */
-extern s32 g_battle_event_pending_unit_vram_copy;
-extern s32 g_battle_event_speed;
-extern s16 g_battle_event_unit_slots[4];
-
-/* 0x80173f68: packed weather flags; consumer replaces it with a table index. */
-extern s16 g_battle_event_weather_request;
-extern u16 g_battle_field_object_use_request; /* 0x80165fe4 */
-extern u16 g_battle_field_object_wait_status; /* 0x80166070 */
-extern u16 g_battle_map_append_state;         /* 0x80165fe0 */
-
-/* 1 starts, 2 polls, >=3 is reset to zero by the outer update. */
-extern u16 g_battle_map_reload_state; /* 0x80165fde */
-
-/* SwitchTrack's first operand is a trigger, not the selected track ID.
- * The consumer toggles the zero-based index, then uses main music slot 1/2. */
-extern s16 g_battle_music_switch_request; /* 0x80165fc8 */
-/* u16: the only loads of these three in the tree are in
- * attack_sound_resync_scenario_music_and_apply_map_darkness, which the target
- * reaches with lhu (that file's own comment records the andi a u16 merge would
- * add). Every other use is a store, which is sign-agnostic. */
-extern u16 g_battle_music_track_1_id;          /* 0x80165fd4 */
-extern u16 g_battle_music_track_2_id;          /* 0x80165fd6 */
-extern s16 g_battle_music_unload_slot_request; /* 0x80165fca */
-
-/* 0x80165fc0: -1 absent; volume = low 16 bits,
- * duration = (packed >> 14) & 0x3ffc. Not a linear duration field. */
-extern s32 g_battle_music_volume_transition_request;
-extern s32 g_battle_screen_fade;
-
-/* Operand-byte counts, excluding the opcode; not per-operand width schemas.
- * BATTLE 0x8014d170, WORLD 0x8013a454. */
-extern u8 g_battle_script_event_instruction_sizes[EVENT_OPCODE_COUNT];
-
-/* 0x801660a3: suppress recursive write filtering while getters use operand 0. */
-extern u8 g_battle_script_variable_write_guard;
-
-/* 0x8016604e: result of battle_gfx_poll_unit_graphics_load, 0 done / 1 pending. */
-extern u16 g_battle_unit_graphics_load_pending;
-extern event_file_block_t g_event_script_buffer[];
-extern s16 g_world_event_effect_target_misc_id;
-extern s16 g_world_event_effect_target_mode;
-extern u8 g_world_event_instruction_sizes[EVENT_OPCODE_COUNT];
-/* Operand pairs that one world_script_execute_event opcode stores together;
- * each second halfword sits off a word boundary in WORLD bss, so each pair is
- * one object. */
-typedef struct world_event_command_args {
-    s16 arg1;
-    s16 arg2;
-} world_event_command_args_t;
-typedef struct world_event_music_switch {
-    s16 volume;
-    s16 fade;
-} world_event_music_switch_t;
-extern world_event_command_args_t g_world_event_map_command_80_args;
-extern world_event_command_args_t g_world_event_map_command_83_args;
-extern world_event_music_switch_t g_world_event_music_switch;
-extern s16 g_world_event_pending_effect_id;
-extern s32 g_world_event_pending_evtchr_save_slot;
-extern s32 g_world_event_pending_loaded_evtchr_clear_slot;
-extern s16 g_world_event_pending_map_jump_out_2_id;
-extern s16 g_world_event_pending_map_jump_out_id;
-extern s16 g_world_event_pending_map_state;
-extern s32 g_world_event_pending_reserved_vram_release_slot;
-extern s32 g_world_event_pending_saved_evtchr_clear_slot;
-extern s32 g_world_event_pending_unit_vram_copy;
-extern const u8* g_world_event_script;
-extern s16 g_world_event_unit_slots[4];
-extern u8 g_world_event_variable_write_guard; /* WORLD counterpart: 0x80153387 */
-extern s16 g_world_event_weather_request;
-
-/* block */
-void battle_block_start_thread(void);
-
-/* camera */
-void battle_camera_fusion_thread(void);
-void battle_camera_wait_until_idle(void);
-void battle_camera_thread(void);
-
-/* dismiss */
-void battle_dismiss_unit_event_instruction(s32 unit_id);
-
-/* gfx */
-void battle_gfx_load_evtchr_thread(void);
-
-/* 0x8008d104..0x8008d138: drains immediate loader steps (2), returns
- * 0 when finished or 1 while work remains pending (including allocation retry). */
-s32 battle_gfx_poll_unit_graphics_load(void);
-
-/* map */
-void battle_map_light_thread(void);
-
-/* noop */
-void battle_noop_80133150(s32 unused_unit_id);
-void battle_noop_80149be4(const u8* unused_parameters);
-
-/* script */
-s32 battle_script_add_ghost_unit_event_instruction(
-    s32 map_x, s32 map_y, s32 map_level, u16 map_height, s32 portrait_id, s32 misc_id, s32 flags);
-
-/* Scenario interpreter interfaces shared by battle_script_execute_event and
- * world_script_execute_event. Signatures are as the interpreters bind them;
- * unverified names stay provisional. */
-void battle_script_add_unit_start_thread(void);
-s32 battle_script_check_unit_moving_event_instruction(s32 misc_id);
-void battle_script_color_screen_thread(void);
-void battle_script_color_unit_event_instruction(u8* ptr);
-void battle_script_toggle_message_portrait_flip(u8* ptr);
-void battle_script_set_units_palette_update_suppression(s32 unit_id, s32 enable);
-void battle_script_apply_relative_camera(u8* p, s32* src);
-void battle_script_load_attack_graphics_event_instruction(void);
-void battle_script_execute_display_conditions_instruction(void);
-
-/* Whole matching interpreter ranges:
- * BATTLE 0x80143bd8..0x80145f78, WORLD 0x800f6f20..0x800f92a0 (exclusive). */
-void battle_script_execute_event(void);
-s32 battle_script_find_instruction_byte_offset(s32 offset, s32 opcode);
-
-/* 0x80149d6c..0x80149ebc: returns offset after the matching target marker;
- * missing targets stop the current thread. alternate_opcode accepts -1. */
-s32 battle_script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id);
-s32 battle_script_get_rand16(void);
-s32 battle_script_get_variable_bit_position(s32 variable_id);
-
-/* Encoded variable IDs select words, bits, or nibbles. The command runner's
- * fourth argument is supplied by existing callers but is not read. */
-s32* battle_script_get_variable_word_pointer_from_id(s32 variable_id);
-void battle_script_inflict_status_thread(void);
-s32 battle_script_is_tutorial_event_slot(void);
-void battle_script_load_portrait_colors_event_instruction(s32 portrait_id);
-void battle_script_mirrorsprite_event_instruction(u8* parameters);
-void battle_script_pause_event_instruction(void);
-void battle_script_play_effect_thread(void);
-void battle_script_resetpalette_event_instruction(const u8* parameters);
-void battle_script_run_condition(event_opcode_e opcode);
-void battle_script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32 unused);
-void battle_script_set_event_speed(s32 speed);
-void battle_script_switch_tutorial_thread_for_event_instructions(void);
-void battle_script_teleportin_event_instruction(s32 unit_id, s32 unused);
-void battle_script_teleportout_event_instruction(s32 arg, s32 remove);
-void battle_script_unit_animation_rotate_event_instruction(const u8* parameters);
-void battle_script_unlockdate_event_instruction(s32 bitset, s32 date_index, s32 month, s32 day);
-void battle_script_wait_value_event_instruction(u8* parameters);
-void battle_script_waitrotateunit_and_waitrotateall_event_instruction(s32 unit_id);
-void battle_script_waitspritemove_event_instruction(s32 unit_id);
-void battle_script_waitwalk_event_instruction(s32 unit_id);
-void battle_script_walk_to_thread(const event_walk_to_parameters_t* parameters);
-
-/* sound */
-void battle_sound_bg_thread(void);
-void battle_sound_edit_bg_thread(void);
-
-/* step */
-/* 0x80088904: 0 finished, 1 pending/deferred, 2 immediate progress. */
-s32 battle_gfx_step_queued_unit_graphics_load(void);
-
-/* condition */
-/* REQUIRE 0x801cafd4, invoked by both BATTLE and WORLD event dispatch. */
-void require_condition_dispatch(void);
-
-/* block */
-void world_block_start_thread(void);
-
-/* camera */
-void world_camera_fusion_thread(void);
-void world_camera_run_move_thread(void);
-void world_camera_thread(void);
-
-/* get */
-s32 world_get_misc_id(s32 unit_id);
-s32 world_get_script_variable_bit_position(s32 variable_id);
-s32 world_unit_get_battle_index_by_entd_id(s32 entd_unit_id);
-
-/* gfx */
-void world_gfx_load_evtchr_thread(void);
-void world_gfx_refresh_script_unit_environment_palette(const u8* parameters);
-
-/* map */
-void world_map_light_thread(void);
-
-/* noop */
-void world_noop_800e7808(s32 unused_unit_id);
-void world_noop_800fd074(const u8* unused_parameters);
-
-/* script */
-void world_script_add_unit_start_thread(void);
-s32 world_script_check_tutorial_event_slot(void);
-void world_script_color_screen_thread(void);
-void world_script_dismiss_unit_event_instruction(s32);
-void world_script_execute_display_conditions_instruction(void);
-void world_script_execute_event(void);
-s32 world_script_find_instruction_byte_offset(s32 offset, s32 instruction);
-s32 world_script_find_jump_target(s32, s32, s32, s32);
-u32 world_script_get_random_u16(void);
-s32* world_script_get_variable_word(s32 variable_id);
-void world_script_inflict_status_thread(void);
-s16 world_script_load_halfword(const u8* source);
-void world_script_load_portrait_colors_event_instruction(s32);
-void world_script_mirrorsprite_event_instruction(const u8* parameters);
-void world_script_pause_event_instruction(void);
-void world_script_play_effect_thread(void);
-void world_script_run_condition(event_opcode_e opcode);
-void world_script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32 unused);
-void world_script_teleport_unit_in(s32 unit_id, s32 unused);
-void world_script_unlockdate_event_instruction(u32* date_bits, s32 index, s32 month, s32 day);
-void world_script_waitrotateunit_and_waitrotateall_event_instruction(s32);
-void world_script_waitspritemove_event_instruction(s32);
-void world_script_waitwalk_event_instruction(s32 unit_id);
-
-/* sound */
-void world_sound_bg_thread(void);
-void world_sound_edit_bg_thread(void);
-
-/* text */
-void world_text_character_handling_thread(void);
-
-extern s32 g_battle_event_frame_counter;
+/* variables */
+/* Event-script variable ids shared by the BATTLE and WORLD interpreters.
+ * The calendar and location ids are also serialized into the memory-card
+ * slot description by CARD 0x801c01ac. */
+typedef enum event_script_variable_id {
+    /* Result word tested by the conditional-jump opcodes. */
+    EVENT_SCRIPT_VAR_COMPARISON_RESULT = 0x00,
+    EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION = 0x18,
+    /* First of the camera X, Z, Y and angle words (0x1a-0x1d) handed to the
+     * camera opcodes as one block. */
+    EVENT_SCRIPT_VAR_CAMERA_X = 0x1a,
+    EVENT_SCRIPT_VAR_CAMERA_ANGLE = 0x1d,
+    /* WORLD camera setup stores its 12-bit yaw here; the corresponding reader
+     * normalizes it into 0..0xfff. */
+    EVENT_SCRIPT_VAR_CAMERA_YAW = 0x1e,
+    EVENT_SCRIPT_VAR_CAMERA_ROTATION = 0x1f,
+    /* Reads synthesize a fresh random value; the backing word does not retain
+     * the value returned by the interpreter. */
+    EVENT_SCRIPT_VAR_RANDOM_VALUE = 0x21,
+    EVENT_SCRIPT_VAR_WEATHER_AND_TIME = 0x22,
+    EVENT_SCRIPT_VAR_WEATHER = 0x23,
+    EVENT_SCRIPT_VAR_TIME_OF_DAY = 0x24,
+    EVENT_SCRIPT_VAR_CURRENT_EVENT = 0x27,
+    EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS = 0x28,
+    EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS = 0x29,
+    EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS = 0x2a,
+    EVENT_SCRIPT_VAR_WAR_FUNDS = 0x2c,
+    EVENT_SCRIPT_VAR_MONTH = 0x2e,
+    EVENT_SCRIPT_VAR_DAY = 0x2f,
+    EVENT_SCRIPT_VAR_MAP_ARRANGEMENT = 0x30,
+    EVENT_SCRIPT_VAR_LOCATION = 0x31,
+    EVENT_SCRIPT_VAR_CURRENT_ENTD = 0x32,
+    EVENT_SCRIPT_VAR_CURRENT_MAP = 0x33,
+    EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT = 0x34,
+    EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID = 0x35,
+    EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID = 0x36,
+    /* ATTACK stores the selected squad's unit limit here; SMALL clears it
+     * during overlay setup. */
+    EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT = 0x39,
+    /* Set while CallFunction 0x06 saves the game. */
+    EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS = 0x51,
+    EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT = 0x52,
+    EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE = 0x53,
+    EVENT_SCRIPT_VAR_DATE_ADVANCE = 0x54,
+    EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT = 0x55,
+    EVENT_SCRIPT_VAR_TUTORIAL_WAIT_VALUE = 0x56,
+    /* Incremented for every glyph the dialog typewriter uploads. */
+    EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT = 0x57,
+    /* Added to the typewriter's VRAM x column (0x1c0); the dialog threads
+     * clear it when they start. */
+    EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET = 0x59,
+    /* Written by text control TEXT_SET_PORTRAIT. */
+    EVENT_SCRIPT_VAR_DIALOG_PORTRAIT = 0x5a,
+    /* The Deep Dungeon location menu stores the chosen floor here. WLDCORE
+     * also stages a script's pending sound effect, weather sound and music
+     * track in 0x5c-0x5e and clears all three once they have played. */
+    EVENT_SCRIPT_VAR_DEEP_DUNGEON_SELECTION = 0x5c,
+    EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT = 0x5c,
+    EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND = 0x5d,
+    EVENT_SCRIPT_VAR_PENDING_MUSIC_TRACK = 0x5e,
+    /* The player character's birthday, written by the OPEN birthday entry. */
+    EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH = 0x5f,
+    EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY = 0x60,
+    EVENT_SCRIPT_VAR_INJURED = 0x61,
+    EVENT_SCRIPT_VAR_CASUALTIES = 0x62,
+    /* Enables the contextual Anything entry in the action skillset menu. */
+    EVENT_SCRIPT_VAR_ANYTHING_ACTION_ENABLED = 0x63,
+    EVENT_SCRIPT_VAR_NEXT_SCENARIO = 0x64,
+    /* One less than the number of Deep Dungeon floors listed. */
+    EVENT_SCRIPT_VAR_DEEP_DUNGEON_LIST_LENGTH = 0x65,
+    /* Scaled by 10 and added to the TEXT_SET_VARIABLE_BASE variable by
+     * TEXT_STORE_VARIABLE, which then clears it. */
+    EVENT_SCRIPT_VAR_TEXT_STORE_INDEX = 0x66,
+    /* Incremented each March 21 and by whole years of advanced days, capped
+     * at 99. */
+    EVENT_SCRIPT_VAR_UNKNOWN_67 = 0x67,
+    EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT = 0x68,
+    /* WLDCORE also uses this value to select the current-location marker's
+     * animation on the world map. */
+    EVENT_SCRIPT_VAR_TOWN_BACKGROUND = 0x69,
+    EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY = 0x6f,
+    /* Special misc-unit count (capped at 4) that selects the Deep Dungeon
+     * map state; a change reloads the map. */
+    EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT = 0x70,
+    EVENT_SCRIPT_VAR_FUR_SHOP_ENABLED = 0x90,
+    EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED = 0x91,
+    EVENT_SCRIPT_VAR_FACTS_ENABLED = 0x92,
+    EVENT_SCRIPT_VAR_OLAN_SAW_RAMZA_FUNERAL = 0xa0,
+    /* When set, the interpreters skip the DismissUnit, CallFunction,
+     * UnlockDate, and SetDateAdvance side effects. */
+    EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS = 0x1fc,
+    /* Read at interpreter start and cleared at EventEnd. */
+    EVENT_SCRIPT_VAR_PENDING_STAGED_STATUS = 0x1fd,
+    /* ATTACK uses this branch while selecting deployment squads, and REQUIRE
+     * uses it while applying permanent Brave and Faith changes. */
+    EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE = 0x1fe,
+    EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD = 0x1ff,
+} event_script_variable_id_e;
 
 #endif

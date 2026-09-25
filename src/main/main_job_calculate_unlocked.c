@@ -1,4 +1,4 @@
-#include "fft/job.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Return the unlocked-job bitset for a unit's packed job levels.

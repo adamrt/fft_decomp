@@ -1,5 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 
 void attack_sound_play_scenario_music(s32 primary_track, s32 alternate_track) {
     main_sound_unload_scenario_music_and_tunes();

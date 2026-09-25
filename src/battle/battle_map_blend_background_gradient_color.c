@@ -1,4 +1,4 @@
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Start a fade of both background gradient colours toward a colour derived

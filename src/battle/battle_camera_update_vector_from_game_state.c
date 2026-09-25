@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_state.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 /* Accepted spelling (battle_camera_step_target_t*, per the definition); this

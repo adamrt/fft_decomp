@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
 void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_misc_data_t* unit) {

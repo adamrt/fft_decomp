@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Discards (0), saves (1) or restores (2) the snapshot of a MUS record. */

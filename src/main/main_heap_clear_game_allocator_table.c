@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_heap_clear_game_allocator_table(void) {

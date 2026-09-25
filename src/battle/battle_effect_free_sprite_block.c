@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Release an effect-frame sprite block and update the live sprite count. */
 void battle_effect_free_sprite_block(battle_effect_sprite_block_t* block) {

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
-#include "fft/main_unit.h"
 
 /* Transform a unit into a Morbol, keeping its name, position and facing. */
 void battle_unit_modify_entd_unit(battle_stats_t* unit) {

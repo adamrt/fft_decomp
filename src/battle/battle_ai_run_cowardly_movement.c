@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 s32 battle_ai_run_cowardly_movement(void) {
     battle_ai_data_t* ai = &g_battle_ai_data_base;

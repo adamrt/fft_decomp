@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 u8 bunit_job_get_skillset(s32 job_id) {

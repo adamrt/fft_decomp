@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 u8* battle_gfx_init_unit_sprite_display(s32 unit_index) {

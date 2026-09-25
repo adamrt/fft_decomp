@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_code_script_2c_nop(effect_record_t* effect) {
     effect->pc += 2;

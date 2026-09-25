@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Low bytes of the four halfword coordinates shared by icon and item row descriptors. */

@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_menu_update_and_draw_animated_cursor(const u16* position, u16* animation_state_arg, s32 mode) {

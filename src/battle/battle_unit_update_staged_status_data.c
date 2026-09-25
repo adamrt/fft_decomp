@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_gfx.h"
-#include "fft/thread.h"
-#include "fft/unit_slots.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Battle twin of world_unit_update_staged_status_data. Saves or restores the event status snapshot for every misc

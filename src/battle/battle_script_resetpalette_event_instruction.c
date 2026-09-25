@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 void battle_script_resetpalette_event_instruction(const u8* parameters) {

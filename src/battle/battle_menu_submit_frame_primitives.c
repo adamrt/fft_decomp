@@ -1,4 +1,4 @@
-#include "fft/battle_menu_window.h"
+#include "fft/battle.h"
 
 /* Submit the six primitives that compose one menu-frame buffer. */
 void battle_menu_submit_frame_primitives(battle_menu_window_record_t* frame) {

@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Resize the current thread's menu entry's first parent entry to fit a

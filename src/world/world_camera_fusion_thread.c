@@ -7,9 +7,6 @@
  * reads each track through a `track` pointer taken first in the body: that
  * makes loop.c discover the track giv before the script-variable and values
  * givs, which gives the target's induction-increment order. */
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

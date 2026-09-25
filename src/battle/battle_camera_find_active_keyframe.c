@@ -1,5 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Find the first camera keyframe of the channels in mask that is still ahead

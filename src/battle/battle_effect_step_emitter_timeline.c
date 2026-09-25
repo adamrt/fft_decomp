@@ -7,7 +7,7 @@
  * sums `*(i + p)` and `i[p]` build index-first -- see the comment at that
  * call.
  */
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_effect_step_emitter_timeline(battle_keyframe_effect_state_t* state, battle_effect_keyframe_table_t* table,

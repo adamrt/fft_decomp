@@ -1,6 +1,4 @@
-#include "fft/character_identity.h"
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 #define JOB_COUNT 19

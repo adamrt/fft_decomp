@@ -1,5 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 /* Low immediate byte of FntLoad's CLUT-Y addiu instruction. */
 

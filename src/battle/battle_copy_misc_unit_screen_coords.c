@@ -1,4 +1,4 @@
-#include "fft/battle_camera.h"
+#include "fft/battle.h"
 
 /* Copy a Misc Unit's renderer-space coordinates into the shared coordinate
  * triple. A -1 lookup result leaves the destination unchanged.

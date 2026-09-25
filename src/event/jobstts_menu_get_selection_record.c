@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 void jobstts_menu_get_selection_record(
     s32 index, s16* out_selected_index, s16* out_scroll_index, const s16* abilities) {

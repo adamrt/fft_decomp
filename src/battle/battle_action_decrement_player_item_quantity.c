@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 s32 battle_action_decrement_player_item_quantity(battle_stats_t* unit, s32 item_id, s32 always_one) {

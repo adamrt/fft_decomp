@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 void main_sound_stop_sfx(int sound_id) {
     if (sound_id == g_main_sound_weather_sfx_id) {

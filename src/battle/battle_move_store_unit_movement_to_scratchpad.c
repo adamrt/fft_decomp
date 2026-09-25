@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Fills the pathfinding scratch pad for `unit_id`: its movement, jump and

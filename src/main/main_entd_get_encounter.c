@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 /* Returns -1 for no current encounter and NULL while its file is loading. */
 entd_encounter_t* main_entd_get_encounter(void) {

@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 /* g_battle_map_gns_records viewed with the loader's halfword-aligned type,

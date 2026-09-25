@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/world.h"
 
 /* Resolves the script offset of a jump label.
  *

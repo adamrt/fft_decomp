@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 /* Swap a unit's spritesheet for a transformation status, or restore it.
  *

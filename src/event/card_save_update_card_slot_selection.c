@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 enum {

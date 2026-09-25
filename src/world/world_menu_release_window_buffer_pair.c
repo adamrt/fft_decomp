@@ -1,4 +1,3 @@
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Mark both entries unused and clear their headers; a missing key stops

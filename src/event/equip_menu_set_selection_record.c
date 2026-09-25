@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_index, u16* items) {

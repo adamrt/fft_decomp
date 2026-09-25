@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 /* Returns whether a same-team Monster Skill supporter occupies the supplied tile. */

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
 
 /* Initialize one battle slot from the current party entry.
  *

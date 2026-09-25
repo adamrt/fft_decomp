@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 void battle_state_handle_target_select_start_state(void) {

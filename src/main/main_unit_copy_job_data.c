@@ -1,5 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_copy_job_data(battle_stats_t* unit) {

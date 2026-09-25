@@ -1,4 +1,5 @@
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Return whether one unit, or any existing unit when id is -1, is moving. */

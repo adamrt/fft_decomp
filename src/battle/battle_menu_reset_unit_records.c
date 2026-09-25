@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 
 /* Reset the per-unit menu records, clearing each and marking byte 1 as
  * unset (0xFF).

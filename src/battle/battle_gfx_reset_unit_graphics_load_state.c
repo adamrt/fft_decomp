@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 /* The two clearing loops walk their arrays by byte offset. A struct-subscript
  * walk leaves GCC with both the index and the scaled address as induction

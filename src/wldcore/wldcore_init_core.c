@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Initialize the WLDCORE world buffers, menu state, and runtime tables. */
 void wldcore_init_core(void) {

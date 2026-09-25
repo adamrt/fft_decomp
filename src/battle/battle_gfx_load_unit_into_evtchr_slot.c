@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Capture a unit's graphics into an EVTCHR VRAM cache slot.

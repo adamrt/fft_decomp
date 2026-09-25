@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 
 /* Select the sound for an effect channel from its mode and call count.
  *

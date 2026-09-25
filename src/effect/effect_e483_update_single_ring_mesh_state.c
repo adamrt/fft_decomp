@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/effect_ring_mesh.h"
+#include "fft/effect.h"
 #include "psx/gte_inline.h"
 
 s32 effect_e483_update_single_ring_mesh_state(s32 record_index, s32 byte_offset, s32 geometry_index, s32 frame) {

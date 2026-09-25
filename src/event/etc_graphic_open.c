@@ -1,8 +1,4 @@
-#include "fft/etc.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
+#include "fft/event_etc.h"
 #include "psx/types.h"
 
 /* Load ETC graphic `graphic_id`: upload it straight to VRAM, or for the full-screen

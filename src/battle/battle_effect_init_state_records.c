@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Initialize the effect record pool and its intrusive free list.
  *

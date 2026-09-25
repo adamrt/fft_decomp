@@ -1,14 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_menu_push_layout_window_level(void);
-void wldcore_unit_build_status_panel_data(s32 party_index);
-void world_build_at_list_2(void);
 
 /* Location-browser step of the proposition send-unit level (modes 3-5,
  * entered from wldcore_menu_step_send_unit_level).

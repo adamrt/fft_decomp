@@ -1,4 +1,5 @@
-#include "fft/event.h"
+#include "fft/battle.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Event instruction 0x29 WaitWalk: yield until the unit stops moving. */

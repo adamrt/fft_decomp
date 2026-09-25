@@ -1,5 +1,4 @@
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void* main_heap_alloc(u32 size) {

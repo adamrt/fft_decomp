@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 void battle_state_handle_learn_ability_on_hit_state(void) {
     s32* selected_ability_address;

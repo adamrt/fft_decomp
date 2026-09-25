@@ -1,6 +1,4 @@
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Fills the caller's panel entry buffer with the menu entry ids offered at a

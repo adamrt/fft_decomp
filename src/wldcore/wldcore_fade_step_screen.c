@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Pending shared-header change: wldcore_sortbox_state_t.unknown_10[8] holds

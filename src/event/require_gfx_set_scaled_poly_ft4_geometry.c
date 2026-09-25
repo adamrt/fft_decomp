@@ -1,9 +1,9 @@
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/gpu.h"
 
 /* The record types mirror the field widths and offsets used by the
  * instruction-identical ATTACK implementation and REQUIRE target listing;
- * they live in fft/require.h so the callers share one spelling. */
+ * they live in fft/event_require.h so the callers share one spelling. */
 typedef char require_texture_page_position_size_must_be_4[sizeof(require_gfx_texture_page_position_t) == 4 ? 1 : -1];
 typedef char require_point_size_must_be_4[sizeof(require_gfx_point_t) == 4 ? 1 : -1];
 typedef char require_sprite_rect_size_must_be_0x0c[sizeof(require_gfx_sprite_rect_t) == 0x0c ? 1 : -1];

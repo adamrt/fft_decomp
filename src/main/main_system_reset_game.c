@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 void main_system_reset_game(void) {
     main_system_stop_display_and_audio_for_game_reset();

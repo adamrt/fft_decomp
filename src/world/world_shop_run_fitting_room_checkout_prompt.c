@@ -1,5 +1,3 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Pay and cannot-afford prompt menus; their cursors are reset on entry. */

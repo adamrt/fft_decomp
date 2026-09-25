@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/thread.h"
+#include "fft/world.h"
 
 void world_thread_reset_scheduler(void) {
     s32* word;

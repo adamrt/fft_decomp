@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Add a stolen or broken-off item to the player inventory while executing,

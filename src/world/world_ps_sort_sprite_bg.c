@@ -9,8 +9,6 @@
  * past the packet, which the caller stores as the new packet cursor.
  */
 
-extern void printf(const char* msg, ...);
-
 u32 world_ps_sort_sprite_bg(u32* tag, GsOT* ot, s32 z, s32 len) {
     u32* slot;
     s32 idx;

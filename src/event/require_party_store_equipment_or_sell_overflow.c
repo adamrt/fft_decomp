@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
+#include "fft/event_require.h"
 
 s32 require_party_store_equipment_or_sell_overflow(s32 unit_id) {
     battle_stats_t* unit;

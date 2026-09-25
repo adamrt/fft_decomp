@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
 
 void battle_gfx_init_item_get_rendering(battle_gfx_render_unit_t* unit) {
     SVECTOR position;

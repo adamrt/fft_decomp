@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
     s32 animation_frames;

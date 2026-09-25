@@ -1,5 +1,4 @@
-#include "fft/jobstts.h"
-#include "fft/main_gfx.h"
+#include "fft/event_jobstts.h"
 
 /* Texture cell for jobstts_enqueue_oriented_textured_quad; the same layout
  * as the tail of EQUIP/BUNIT's oriented-quad descriptors. */

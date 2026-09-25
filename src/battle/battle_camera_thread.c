@@ -15,9 +15,6 @@
  * gives the target's s0-s3 assignment.
  */
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))

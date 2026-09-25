@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
@@ -16,7 +13,6 @@ typedef struct {
 
 extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_glyph;
 extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_position;
-extern void battle_text_mirror_packed_nibble_region_horizontal(u8* data, world_gfx_4bpp_rect_t* region);
 
 /* Battle twin of world_menu_build_window_image: build a 4bpp menu window image from the shared menu graphics,
  * optionally with its pointer tail, and upload it to `rect` unless `keep` is set.

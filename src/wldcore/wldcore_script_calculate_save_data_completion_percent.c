@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 s32 wldcore_script_calculate_save_data_completion_percent(void) {

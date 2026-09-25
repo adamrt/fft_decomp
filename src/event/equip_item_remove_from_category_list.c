@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* Remove the first matching item from a category list. */
 void equip_item_remove_from_category_list(s32 item_id, s32 category_index) {

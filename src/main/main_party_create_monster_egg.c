@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 s32 main_party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
     s32 party_index;

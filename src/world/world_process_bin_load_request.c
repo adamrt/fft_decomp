@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* Per-frame driver for world_bin_load_file: start the disc read for the

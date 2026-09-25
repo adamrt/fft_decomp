@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
 
 /* Prepare Poison Marsh's automatic status action for a grounded unit.
  *

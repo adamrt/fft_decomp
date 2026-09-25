@@ -5,14 +5,7 @@
  * 4bpp scratch image instead of using the fixed one, uses the second texture-window table,
  * and lays the border out with 8-pixel instead of 16-pixel corners.
  */
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_text.h"
-#include "fft/geometry.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/option.h"
+#include "fft/event_option.h"
 #include "psx/types.h"
 
 union battle_texture_prim;

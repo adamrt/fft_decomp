@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_code_script_14_jump_if_counter_at_most(effect_record_t* ctx) {
     s16 pc = ctx->pc;

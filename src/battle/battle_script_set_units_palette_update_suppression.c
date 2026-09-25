@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 
 /* Event instructions 0x6c (enable 0) and 0x6d (enable 1): clear or set
  * palette-update suppression on the event unit, or on every unit its group

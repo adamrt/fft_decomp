@@ -1,4 +1,4 @@
-#include "fft/battle.h"
+#include "fft/main.h"
 
 void main_unit_reset_battle_state(battle_stats_t* unit) {
     unit->auto_battle_setting = 0;

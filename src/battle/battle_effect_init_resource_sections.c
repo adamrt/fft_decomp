@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 #include "psx/types.h"
 
 s32 battle_effect_init_resource_sections(battle_effect_resource_t* resource) {

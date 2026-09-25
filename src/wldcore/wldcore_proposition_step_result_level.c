@@ -1,17 +1,5 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-s32 main_job_add_proposition_jp(s32 party_index, s32 jp);
-void wldcore_list_open_completed_propositions(void);
-s32 wldcore_get_completion_milestone_rank(void);
-void wldcore_menu_push_countdown_level(void);
-void wldcore_write_nine_bit_record(u32* bits, s32 record, u8* source);
 
 /* Per-frame step of the proposition-result menu level.
  *

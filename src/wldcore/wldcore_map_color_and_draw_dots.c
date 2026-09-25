@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 typedef union wldcore_map_dot_source_word {

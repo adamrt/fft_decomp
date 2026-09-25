@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 /* Colour fade state at 0x800961c4..0x800961e1: the final colour, the colour

@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Adds JP to a battle unit's job slot and recomputes its level and unlocks.

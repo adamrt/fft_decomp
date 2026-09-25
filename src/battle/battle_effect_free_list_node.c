@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 void battle_effect_free_list_node(effect_list_node_t* node) {
     u16* free_head;

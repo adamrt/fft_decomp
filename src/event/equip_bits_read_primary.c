@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 s32 equip_bits_read_primary(s32 count) {
     s32 result;

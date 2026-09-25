@@ -1,8 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
+#include "fft/event_attack.h"
 
 /* This overlay reads BATTLE's attack entry mode unsigned (lhu). */
 #define ENTRY_MODE (*(u16*)&g_battle_script_attack_entry_mode)

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 
 s32* battle_script_get_variable_word_pointer_from_id(s32 id) {
     s32* result;

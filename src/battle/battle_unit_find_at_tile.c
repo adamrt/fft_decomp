@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
-#include "fft/unit_slots.h"
 
 /*
  * Find an eligible unit occupying the requested map tile.

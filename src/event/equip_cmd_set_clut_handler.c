@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/gpu.h"
 
 const u8* equip_cmd_set_clut_handler(const u8* data) {

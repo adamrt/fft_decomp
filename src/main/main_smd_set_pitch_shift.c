@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Sets the music's pitch shift, immediately when time is 0, otherwise as a ramp

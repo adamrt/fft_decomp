@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 s32 debugchr_thread_is_running(s32 thread_id) {

@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 void bunit_menu_init_scrollable_list(s32 entries, s32 selected_index, s16 scroll_base_index, s32 text_table) {

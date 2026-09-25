@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Resolve a SEQ record's two header halfwords and its 256 packed little-endian

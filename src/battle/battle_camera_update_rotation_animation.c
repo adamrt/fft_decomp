@@ -1,4 +1,4 @@
-#include "fft/battle_camera.h"
+#include "fft/battle.h"
 
 void battle_camera_update_rotation_animation(void) {
     if (g_battle_camera_rotation_countdown != 0) {

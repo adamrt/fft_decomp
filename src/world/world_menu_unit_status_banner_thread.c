@@ -1,6 +1,3 @@
-#include "fft/main_gfx.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"

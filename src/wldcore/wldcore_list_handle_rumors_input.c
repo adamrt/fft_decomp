@@ -1,12 +1,5 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_bar_push_rumor_detail_level(s32 value);
-s32 world_thread_is_running(s32 thread_id);
-void world_thread_set_parameters(s32 thread_id, s32 a, s32 b, s32 c);
 
 /* Yes/no list-level input step. Cancel (0x40) or confirm (0x20) starts
  * thread 12's closing animation and records the choice in result; 0x100

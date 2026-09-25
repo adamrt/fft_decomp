@@ -1,5 +1,4 @@
-#include "fft/battle_move.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 enum {

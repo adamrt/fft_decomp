@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/card.h"
-#include "fft/thread.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 s32 card_text_start_thread_for_key(s32 thread_id, s32 parameter_0, s32 key, s32 parameter_2, s32 thread_field_5c) {

@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 
 /* Calculate a clamped intensity falloff from BUNIT's animated focal point.
  *

@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_unit_get_battle_index_by_entd_unit_id(s32 unit_id) {

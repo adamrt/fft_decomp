@@ -1,3 +1,4 @@
+#include "fft/world.h"
 #include "psx/types.h"
 
 s32 world_card_write_file_with_retries(s32 descriptor, const void* source, s32 size) {

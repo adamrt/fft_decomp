@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 s32 battle_ai_calculate_ratio_times_4(s32 divisor, s32 dividend) {
     if (divisor == 0) {

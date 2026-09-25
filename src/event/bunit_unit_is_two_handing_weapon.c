@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 s32 bunit_unit_is_two_handing_weapon(s16* slots, s32 allow_secondary) {

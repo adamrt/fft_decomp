@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 void battle_move_init_spread_scratch(void) {
     battle_move_spread_state_t* spread = g_battle_move_scratch_pad_ptr;

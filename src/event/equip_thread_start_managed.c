@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 s32 equip_thread_start_managed(s32 thread_id, world_menu_entry_t* desc) {

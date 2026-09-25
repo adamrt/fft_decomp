@@ -1,6 +1,5 @@
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 s32 main_job_find_by_skillset(s32 skillset_id) {

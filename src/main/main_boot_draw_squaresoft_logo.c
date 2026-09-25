@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 #include "psx/gpu.h"
 
 int main_boot_draw_squaresoft_logo(u32 otag, u32* image) {

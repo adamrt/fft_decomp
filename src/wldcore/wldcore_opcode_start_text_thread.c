@@ -1,4 +1,3 @@
-#include "fft/event.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

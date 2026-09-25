@@ -1,5 +1,4 @@
-#include "fft/jobstts.h"
-#include "fft/main_sound.h"
+#include "fft/event_jobstts.h"
 #include "psx/pad.h"
 
 void jobstts_input_update_with_message_state(void) {

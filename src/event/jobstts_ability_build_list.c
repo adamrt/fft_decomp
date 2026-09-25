@@ -1,6 +1,4 @@
-#include "fft/battle_ability.h"
-#include "fft/data.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 /* Build the selected job's ability list for one menu category.
  *

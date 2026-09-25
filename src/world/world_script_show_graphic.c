@@ -1,5 +1,4 @@
-#include "fft/etc.h"
-#include "fft/thread.h"
+#include "fft/event_etc.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

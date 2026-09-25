@@ -1,17 +1,5 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
-
-void wldcore_menu_push_brave_story_level(void);
-void world_menu_set_slot_4_cursor_index(s32 index);
-void world_formation_view_zoom_thread(void);
-void wldcore_window_close_parent_list_all_windows(void);
-void wldcore_window_close_parent_list_frame_windows(void);
-void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset);
 
 /* Pushes the type-0x31 screen-transition level for screen `screen`.
  *

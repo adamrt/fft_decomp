@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 u8* battle_gfx_get_spritesheet_shp_data(u32 spritesheet_id) {

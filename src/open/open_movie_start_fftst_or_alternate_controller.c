@@ -1,4 +1,3 @@
-#include "fft/main_gfx.h"
 #include "fft/open.h"
 #include "psx/types.h"
 

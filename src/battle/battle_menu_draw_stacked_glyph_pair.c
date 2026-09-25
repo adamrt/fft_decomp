@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_menu_status_panel.h"
-#include "fft/battle_text.h"
 #include "psx/types.h"
 
 /* Destination cursor used by blit_text_glyph. */

@@ -1,10 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_window_set_layout_states(s32* param);
-void wldcore_menu_push_participant_list_level(s32 proposition);
 
 /* Input handler for the proposition list level (type 0x26).
  *

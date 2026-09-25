@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_save_build_slot_description(s32 mode, u8* destination) {

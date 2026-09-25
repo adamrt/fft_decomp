@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_unit_try_get_misc_data_by_unit_id(u16* unit_id, s32* state) {

@@ -1,8 +1,5 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/gpu.h"
-
-void world_build_at_list_2(void);
 
 /* Scalar view of g_wldcore_window_panel_render_state.select_text_table: as a
  * struct field its address would share the selected_index base register, but

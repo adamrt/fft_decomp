@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 #include "psx/types.h"
 
 /* The selector halfwords are u16 in effect_misc_data_t (the keyframe scanner

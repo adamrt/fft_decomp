@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 s32 bunit_cmd_advance_transition_frame_handler(s32 value) {

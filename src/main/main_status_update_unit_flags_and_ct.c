@@ -1,4 +1,5 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Apply Float and reconcile the unit's status flags and status CT.

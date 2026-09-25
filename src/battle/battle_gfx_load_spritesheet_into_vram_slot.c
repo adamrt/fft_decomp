@@ -11,7 +11,6 @@
  * written (dead x/y stores the target keeps).
  */
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 void battle_gfx_load_spritesheet_into_vram_slot(u8* data, u32 index, s32 unused, battle_unit_misc_data_t* unit) {

@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Builds the entry kinds of the list-window level that 0x80080e54 pushes.
  *

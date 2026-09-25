@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/bunit.h"
-#include "fft/main_sound.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 void bunit_menu_update_event_thread_state(void) {

@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/debugchr.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 void debugchr_text_render_decimal_value(

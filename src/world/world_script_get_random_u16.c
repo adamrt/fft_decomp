@@ -1,4 +1,3 @@
-#include "fft/event.h"
 #include "fft/world.h"
 
 u32 world_script_get_random_u16(void) {

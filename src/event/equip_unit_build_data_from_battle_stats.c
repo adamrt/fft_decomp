@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Build EQUIP.OUT's unit preview from a battle_stats_t record, clamping the

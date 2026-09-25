@@ -1,6 +1,4 @@
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/gte.h"
 
 /* Places the player's map marker on EVENT_SCRIPT_VAR_LOCATION, queues it for

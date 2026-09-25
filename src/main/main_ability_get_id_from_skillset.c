@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index) {
     if (skillset_id < SKILLSET_ID_MONSTER_FIRST) {

@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 s32 main_unit_has_status_in_set(const battle_stats_t* unit, main_status_check_set_e status_set_index) {
     const u8* status_set = g_main_status_check_sets[0];

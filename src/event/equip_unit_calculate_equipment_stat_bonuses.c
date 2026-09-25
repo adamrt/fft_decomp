@@ -1,9 +1,9 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* equip_stats_t is a 0x80-byte superset of the 0x40-byte stat record: every
  * halfword this function accumulates (0x06/0x08/0x0a/0x0c and
- * 0x16/0x18/0x20/0x22) sits at the offset fft/world.h gives
+ * 0x16/0x18/0x20/0x22) sits at the offset fft/menu.h gives
  * world_item_stat_detail_t, so the local view stays and only the detail
  * argument is cast. */
 struct world_item_stat_summary;

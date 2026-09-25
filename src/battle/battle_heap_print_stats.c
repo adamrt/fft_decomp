@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 
 /*
  * Debug-print battle heap usage: total and largest free_node block on the free_node

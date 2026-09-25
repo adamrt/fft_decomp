@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
 #include "psx/types.h"
 
 void battle_status_remove(void) {

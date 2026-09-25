@@ -1,7 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/etc.h"
 #include "psx/types.h"
 

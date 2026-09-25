@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
 
 s32 battle_ai_check_set_highest_unit_priority(void) {
     battle_ai_data_t* ai = &g_battle_ai_data_base;

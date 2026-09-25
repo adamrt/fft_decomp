@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/unit_slots.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_text_build_battle_nicknames(void) {

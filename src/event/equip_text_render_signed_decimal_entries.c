@@ -1,22 +1,5 @@
-#include "fft/battle_text.h"
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
-
-typedef struct equip_stat_entry {
-    u16 x;
-    u16 y;
-    s16* value;
-    u16 flags;
-    u16 unknown_0a;
-} equip_stat_entry_t;
-
-typedef struct equip_stat_out {
-    s16 x;
-    s16 y;
-    s32 unknown_04;
-    s32 unknown_08;
-    u32 color;
-} equip_stat_out_t;
 
 /* Render signed gauge values with their positive, negative, or zero color. */
 void equip_text_render_signed_decimal_entries(

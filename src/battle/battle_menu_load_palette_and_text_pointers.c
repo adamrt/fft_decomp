@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 #include "psx/types.h"
 
 void battle_menu_load_palette_and_text_pointers(void) {

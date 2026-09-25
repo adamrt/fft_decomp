@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Header words of the unit SEQ data at misc unit data 0x1f8. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Offsets of the point inside its 28-unit tile along X and Z. */

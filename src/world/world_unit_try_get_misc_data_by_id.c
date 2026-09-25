@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 s32 world_unit_try_get_misc_data_by_id(u16* unit_id, s32* misc_index) {

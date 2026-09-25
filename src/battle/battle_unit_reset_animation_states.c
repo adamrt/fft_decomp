@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_unit_rotation.h"
-#include "fft/unit_slots.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* BATTLE twin of world_unit_reset_animation_states: clears the per-unit

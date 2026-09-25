@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 #include "psx/types.h"
 
 /* Provisional eight-byte per-secondary-effect spawn state at 0x801bc0e0,

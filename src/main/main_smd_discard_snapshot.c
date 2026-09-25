@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_smd_discard_snapshot(suzuki_music_t* music) {

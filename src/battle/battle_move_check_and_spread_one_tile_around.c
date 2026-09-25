@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 void battle_move_check_and_spread_one_tile_around(void) {
     battle_move_spread_state_t* state;

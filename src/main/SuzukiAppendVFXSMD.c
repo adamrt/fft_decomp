@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Appends a loaded SED/SMD block to the end of the Suzuki driver's sound

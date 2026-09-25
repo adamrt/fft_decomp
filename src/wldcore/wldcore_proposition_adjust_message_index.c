@@ -1,4 +1,3 @@
-#include "fft/job.h"
 #include "fft/wldcore.h"
 
 /* Bravery/faith bands used to index the 3x3 table in proposition record 2:

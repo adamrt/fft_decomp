@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 
 void battle_unit_increase_blue_team_brave_by_10(void) {
     battle_stats_t* unit;

@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* Render signed gauge values with their positive, negative, or zero color. */

@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Twin of jobstts_cmd_run_stream; BUNIT's stream terminator is 0x1C. */

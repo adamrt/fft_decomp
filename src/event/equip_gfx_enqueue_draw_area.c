@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Queue a drawing-area primitive, shifting it to the back buffer when needed. */

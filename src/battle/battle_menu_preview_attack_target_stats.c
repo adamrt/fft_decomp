@@ -1,10 +1,5 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/types.h"
-
-extern world_unit_editor_panel_data_t g_battle_unit_editor_panel_data;
-extern world_unit_editor_panel_data_t g_battle_unit_comparison_editor_panel_data;
 
 void battle_menu_preview_attack_target_stats(void) {
     s16* sel;

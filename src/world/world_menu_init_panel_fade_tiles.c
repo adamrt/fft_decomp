@@ -1,4 +1,3 @@
-#include "fft/menu_types.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"

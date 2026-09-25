@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 s32 battle_effect_golem_secondary_handler(void) {
     battle_effect_secondary_data_t* effect;

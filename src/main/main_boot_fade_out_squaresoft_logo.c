@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 
 void main_boot_fade_out_squaresoft_logo(void) {
     POLY_F4 polygons[2];

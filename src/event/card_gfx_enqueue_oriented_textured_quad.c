@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_gfx.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_gfx_enqueue_oriented_textured_quad(

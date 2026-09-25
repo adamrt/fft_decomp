@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Initialize runtime tables and graphics state used by WLDCORE.
  * The matched range includes the jr delay slot at 0x800683f8. */

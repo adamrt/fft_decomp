@@ -1,3 +1,4 @@
+#include "fft/wldcore.h"
 #include "psx/types.h"
 
 /* Writes one nine-bit record: bits 0-4 from source[1], bits 5-8 from

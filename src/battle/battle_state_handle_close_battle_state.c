@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
 
 /* volatile view: the target reloads this global at every use. */
 extern volatile s32 g_main_gfx_screen_polarity;

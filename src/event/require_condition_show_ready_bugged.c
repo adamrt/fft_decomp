@@ -1,4 +1,4 @@
-#include "fft/battle.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_condition_show_ready_bugged(void) {

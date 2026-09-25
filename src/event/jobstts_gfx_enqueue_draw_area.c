@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 /* Queue a drawing-area primitive, shifting it to the back buffer when needed. */
 void jobstts_gfx_enqueue_draw_area(RECT* rect, s32 idx) {

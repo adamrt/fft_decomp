@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 #include "psx/types.h"
 
 /* Timeline track 2 handler: sets the effect camera position target and duration.

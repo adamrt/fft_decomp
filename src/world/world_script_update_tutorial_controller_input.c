@@ -1,8 +1,5 @@
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 #include "psx/pad.h"
-
-s32 world_input_read_tutorial_or_controller(void);
 
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.

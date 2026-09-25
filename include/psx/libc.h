@@ -8,6 +8,7 @@ extern char* strcat(char* destination, const char* source);
 extern char* strcpy(char* destination, const char* source);
 extern void* memset(void* destination, int value, unsigned int size);
 extern void* memcpy(void* destination, const void* source, unsigned int size);
+s32 strcmp(const char* left, const char* right);
 extern void bcopy(const void* source, void* destination, int size);
 extern int abs(int value);
 

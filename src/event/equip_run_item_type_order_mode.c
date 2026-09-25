@@ -1,7 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/equip.h"
-#include "fft/main_sound.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Runs the item-type sort sub-menu for the selected equipment slot.

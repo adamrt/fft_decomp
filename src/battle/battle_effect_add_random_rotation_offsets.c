@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Add independent random offsets to three packed rotation components. */
 void battle_effect_add_random_rotation_offsets(const battle_effect_rotation_vector_t* source,

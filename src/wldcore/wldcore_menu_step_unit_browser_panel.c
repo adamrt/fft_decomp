@@ -1,9 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/main_unit.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 /* Poll the confirm/cancel buttons for the world-map unit browser panel and

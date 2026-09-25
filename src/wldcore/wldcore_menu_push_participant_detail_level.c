@@ -1,11 +1,5 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
-
-void wldcore_unit_build_status_panel_data(s32 participant_index);
-void world_menu_unit_status_banner_thread(void);
-void world_menu_equipment_and_ability_panel_thread(void);
 
 /* Push the proposition participant detail level (type 0x28).
  *

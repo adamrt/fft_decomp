@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "psx/types.h"
 
 void battle_script_color_unit_event_instruction(u8* ptr) {

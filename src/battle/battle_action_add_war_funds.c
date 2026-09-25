@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 s32 battle_action_add_war_funds(battle_stats_t* unit, s32 total, u8 item_id) {

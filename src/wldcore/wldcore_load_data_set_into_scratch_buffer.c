@@ -1,4 +1,3 @@
-#include "fft/main_file.h"
 #include "fft/wldcore.h"
 
 /* Provisional: sector-offset table whose entry i is the start sector of set i

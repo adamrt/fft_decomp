@@ -1,8 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_read_nine_bit_record(u32* bits, s32 record, u8* dest);
 
 /* Pushes the treasure detail text window as menu level 0x1b; the twin of
  * wldcore_menu_push_unexplored_land_detail_level (unexplored lands, level 0x19) and

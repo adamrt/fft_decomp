@@ -31,8 +31,6 @@
  * reproduces: sp+24 to sp+312 is exactly 0x120 bytes, and every slot above it
  * is a reload slot on the 8-byte stride.
  */
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_id, s16* out) {

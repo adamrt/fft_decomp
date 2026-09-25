@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
 
 void battle_state_enter_target_select_denied(void) {
     battle_unit_misc_data_t* misc;

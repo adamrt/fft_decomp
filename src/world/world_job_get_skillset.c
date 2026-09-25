@@ -1,4 +1,3 @@
-#include "fft/main_unit.h"
 #include "fft/world.h"
 
 s32 world_job_get_skillset(s32 job_id) {

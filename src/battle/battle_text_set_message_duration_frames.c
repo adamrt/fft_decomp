@@ -1,4 +1,4 @@
-#include "fft/battle_text.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Frames the battle message/dialogue wait loop will hold before it fakes a

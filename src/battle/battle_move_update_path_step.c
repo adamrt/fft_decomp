@@ -1,9 +1,6 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
-extern void battle_unit_dismount_rider_and_update_display(battle_unit_misc_data_t* unit);
 extern void battle_unit_init_coordinates(battle_unit_misc_data_t* unit);
 
 /*

@@ -1,6 +1,3 @@
-#include "fft/event.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"

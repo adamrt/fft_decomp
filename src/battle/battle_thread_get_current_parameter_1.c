@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Hand-assembled in the retail binary, like the WORLD siblings

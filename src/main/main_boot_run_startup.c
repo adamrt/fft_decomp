@@ -1,5 +1,4 @@
-#include "fft/main_boot.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_boot_run_startup(void) {

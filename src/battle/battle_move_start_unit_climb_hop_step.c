@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Starts a unit's hop to a nearby tile (called from the knockback handler at

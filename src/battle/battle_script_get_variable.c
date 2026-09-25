@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 /* 0x8013b590: the word reached through 0x80165f9c is a temporary event

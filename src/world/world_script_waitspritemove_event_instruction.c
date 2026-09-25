@@ -1,5 +1,4 @@
-#include "fft/event.h"
-#include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Block until no thread is still running the sprite-move task (task 0xB) for

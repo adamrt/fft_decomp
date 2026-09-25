@@ -3,11 +3,6 @@
  * target's table.
  */
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 s32 battle_target_set_panels_for_action(u8* source) {

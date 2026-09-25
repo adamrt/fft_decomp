@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_ai_check_unit_for_crystal_or_treasure_status(void) {

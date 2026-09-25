@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Opens the paged text window: appends its four frame windows and the text
  * render record, lays the frames out around the padded text width, measures

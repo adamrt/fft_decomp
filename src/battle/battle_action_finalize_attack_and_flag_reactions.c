@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 #define STATUS_MASK(id) BATTLE_STATUS_BYTE_MASK(BATTLE_STATUS_ID_##id)

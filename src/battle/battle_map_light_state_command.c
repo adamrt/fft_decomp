@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* Map colour state commands, selected on command - 0x56: 0x56 applies the

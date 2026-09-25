@@ -1,7 +1,4 @@
-#include "fft/ability_flags.h"
 #include "fft/battle.h"
-#include "fft/main_unit.h"
-#include "fft/unit_flags.h"
 
 /* Apply the acting unit's pending EXP and JP rewards.
  *

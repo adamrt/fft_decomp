@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /*
  * Score reachable tiles by nearby eligible enemies.

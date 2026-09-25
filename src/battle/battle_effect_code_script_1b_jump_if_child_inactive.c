@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Jump to the offset in the second halfword when the phase child selected by
  * the second byte's high nibble is 0; otherwise step over the 4-byte

@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 s32 attack_deploy_is_roster_unit_deployed(s32 roster_id) {

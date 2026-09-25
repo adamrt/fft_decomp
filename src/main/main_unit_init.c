@@ -1,5 +1,5 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 s32 main_unit_init(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle) {
     entd_unit_t* entd_unit = &entd->units[unit_id];

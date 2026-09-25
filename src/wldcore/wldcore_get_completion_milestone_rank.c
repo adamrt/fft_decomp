@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Reports which completion milestone the party has just reached, as a
  * one-based rank, or 0 when g_wldcore_job_selection.result blocks it, the world phase in

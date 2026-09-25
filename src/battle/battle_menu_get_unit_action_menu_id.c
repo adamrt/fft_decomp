@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 s32 battle_menu_get_unit_action_menu_id(battle_stats_t* unit) {

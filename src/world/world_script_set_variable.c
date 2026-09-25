@@ -1,5 +1,3 @@
-#include "fft/event.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 
 void world_script_set_variable(s32 variable_id, s32 value) {

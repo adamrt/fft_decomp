@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/debugchr.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 /* The full panel's SPRTs begin at +0x24. The CLUT walks use pointer

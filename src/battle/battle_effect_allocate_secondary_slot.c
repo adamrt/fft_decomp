@@ -8,7 +8,6 @@
  * g_battle_effect_active_slot_tail load.
  */
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 s32 battle_effect_allocate_secondary_slot(void) {
     s32 id;

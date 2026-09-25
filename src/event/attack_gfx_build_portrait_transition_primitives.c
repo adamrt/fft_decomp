@@ -1,5 +1,4 @@
-#include "fft/attack.h"
-#include "fft/event.h"
+#include "fft/event_attack.h"
 
 void attack_gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition,
     const s32* first_portrait, const s32* second_portrait, u8* image, POLY_FT4* poly, s32 direction) {

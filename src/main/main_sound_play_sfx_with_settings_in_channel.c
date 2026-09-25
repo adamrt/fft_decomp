@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* main_sound_play_sfx_in_channel with explicit volume and balance bytes. */

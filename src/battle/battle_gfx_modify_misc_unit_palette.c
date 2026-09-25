@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 /* Apply palette modulation to a renderer-side unit's current CLUT.

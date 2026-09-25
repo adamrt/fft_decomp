@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 battle_menu_status_panel_graphic_descriptor_t* equip_item_build_row_graphic_descriptor(s32 row) {

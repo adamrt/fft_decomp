@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
-#include "fft/data.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
 #include "psx/types.h"
 
 /* Crystal/treasure pickup result at 0x8006623c. */

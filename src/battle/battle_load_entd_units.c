@@ -1,10 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_gfx.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

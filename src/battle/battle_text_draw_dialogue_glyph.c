@@ -1,12 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/menu_types.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

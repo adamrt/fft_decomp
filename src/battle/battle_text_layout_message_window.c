@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 
 /* Message window layout; only the fields written here are named. */
 typedef struct battle_text_message_window_layout {

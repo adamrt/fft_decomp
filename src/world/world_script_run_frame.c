@@ -1,20 +1,11 @@
-#include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_heap.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_bunit.h"
+#include "fft/event_card.h"
+#include "fft/event_equip.h"
+#include "fft/event_jobstts.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-extern void AddPrims(u32* ot, void* first, void* last); /* follows AddPrim; AddPrims-shaped call */
-extern s32 jobstts_entrypoint(s32 unit);
-extern s32 equip_entrypoint(s32 unit, void* otag);
-extern s32 bunit_entrypoint(void);
-extern void card_save_run_menu(s32 unused);
 
 /* Run one frame of WORLD bookkeeping around the thread scheduler.
  *

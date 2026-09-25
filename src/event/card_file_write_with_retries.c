@@ -1,3 +1,4 @@
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size) {

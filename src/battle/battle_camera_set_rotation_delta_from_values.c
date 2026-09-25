@@ -1,5 +1,4 @@
-#include "fft/battle_camera.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 void battle_camera_set_rotation_delta_from_values(const s16* values, s32 frame_count) {
     s32 animation_frames;

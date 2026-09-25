@@ -1,10 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/debugchr.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 void debugchr_editor_load_selected_unit(void) {

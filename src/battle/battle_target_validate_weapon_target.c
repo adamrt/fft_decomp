@@ -1,14 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
-#include "fft/battle_effect.h"
-#include "fft/data.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
-#include "fft/menu_types.h"
-#include "fft/status.h"
-#include "fft/unit_equipment.h"
-#include "fft/unit_flags.h"
 #include "psx/types.h"
 
 /* Re-validate the acting unit's stored target and mark the target's tile.

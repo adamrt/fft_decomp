@@ -1,18 +1,8 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_text.h"
-#include "fft/equip.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The packet, state and thread layouts are the shared fft/battle_menu_status_panel.h
+/* The packet, state and thread layouts are the shared fft/menu.h
  * records: the editor packets at g_equip_panel_selected_editor_packets / g_equip_panel_comparison_editor_packets, the
  * status-panel packets at g_equip_panel_selected_packets / g_equip_panel_comparison_packets, the editor states
  * g_equip_selected_unit_stat_summary / g_equip_panel_comparison_billboard, and the per-thread display record.
@@ -23,8 +13,6 @@
    displacement from an unmoved base; see the note at the loop. */
 
 struct world_menu_palette_primitives;
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 struct menu_number_entry;
 struct menu_number_position;
 

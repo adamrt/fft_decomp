@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 void battle_gfx_draw_screen_color_modulation_overlay(void) {

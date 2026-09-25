@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Claims the first free menu window buffer pair for the current thread,

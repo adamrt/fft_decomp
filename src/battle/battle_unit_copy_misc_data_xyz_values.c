@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
 
 void battle_unit_copy_misc_data_xyz_values(SVECTOR* destination, const battle_unit_misc_data_t* misc_data) {
     /* mounted_height_offset is read signed (lh) here. */

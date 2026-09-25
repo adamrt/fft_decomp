@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
+#include "fft/battle.h"
 
 /* Whether the unit has learned the given ability bit of a skillset: returns 1
  * for monsters (every ability known) and for skillsets the unit does not own.

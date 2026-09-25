@@ -1,11 +1,4 @@
-#include "fft/ability_flags.h"
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/menu_types.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 /*

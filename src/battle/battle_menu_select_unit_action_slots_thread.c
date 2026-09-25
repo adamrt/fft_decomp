@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Menu entry 4's value and the loop counter share $s0 in the target: the

@@ -1,6 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/event_bunit.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

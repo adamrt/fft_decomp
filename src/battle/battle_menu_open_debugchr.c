@@ -1,8 +1,6 @@
 #include "fft/battle.h"
-#include "fft/option.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
-
-extern void debugchr_run_character_debug_session(void);
 
 void battle_menu_open_debugchr(void) {
     battle_menu_store_unit_names_and_event_block_data(0, 0xFF, 0xFF);

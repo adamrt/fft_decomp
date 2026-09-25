@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_menu_window.h"
-#include "fft/thread.h"
 
 /* Build the window's background, edge sprites and optional compound-style sprites. */
 void battle_menu_build_window_sprites(

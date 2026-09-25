@@ -1,8 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* WLDCORE's entrypoint; the overlay is loaded at 0x80067000. */

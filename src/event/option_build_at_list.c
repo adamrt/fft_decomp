@@ -3,26 +3,10 @@
  * Port of world_build_at_list. The do/while (0) around the scroll redraw puts its render-buffer
  * references one loop level deeper, which raises the buffer's global-alloc priority above the
  * page pointer's (target: buffer s3, page s4; without it the two swap). */
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_menu_window.h"
-#include "fft/battle_text.h"
-#include "fft/data.h"
-#include "fft/event.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/option.h"
-#include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/event_option.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* OPTION's pair of list pages, alternated per frame. */
 extern world_menu_list_page_t g_option_at_list_pages[2];

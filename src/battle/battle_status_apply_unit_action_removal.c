@@ -1,5 +1,4 @@
-#include "fft/main_unit.h"
-#include "fft/status.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /*

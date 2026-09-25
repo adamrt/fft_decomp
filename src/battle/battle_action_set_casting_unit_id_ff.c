@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_action_set_casting_unit_id_ff(void) {
     g_animation_speed = 2;

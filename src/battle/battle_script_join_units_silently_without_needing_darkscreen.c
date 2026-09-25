@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_unit.h"
-#include "fft/unit_slots.h"
 
 /* Persist event units marked to join without opening the formation screen. */
 void battle_script_join_units_silently_without_needing_darkscreen(void) {

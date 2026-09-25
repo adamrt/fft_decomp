@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Pauses a music handle: clears the playing bit, sets the pause bit 0x100

@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_text_start_help_thread(s32 thread_data) {

@@ -1,4 +1,4 @@
-#include "fft/data.h"
+#include "fft/main.h"
 
 s32 main_party_find_slot_by_sprite_set(s32 sprite_set) {
     s32 party_index = 0;

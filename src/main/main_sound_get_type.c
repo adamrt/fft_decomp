@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 s32 main_sound_get_type(void) {
     s32 result;

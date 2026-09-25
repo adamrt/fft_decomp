@@ -1,13 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_state.h"
-#include "fft/data.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
-#include "fft/map.h"
-#include "fft/script_variables.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 #ifndef NULL

@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* Returns whether an item occurs in a 0xFF-terminated category list. */
 s32 equip_item_is_in_category_list(s32 item_id, s32 category_index) {

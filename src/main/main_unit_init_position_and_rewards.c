@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
+#include "fft/main.h"
 
 void main_unit_init_position_and_rewards(battle_stats_t* unit, entd_unit_t* entd) {
     unit->x = entd->x;

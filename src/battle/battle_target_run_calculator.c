@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 /* Marks the tiles of every unit selected by a Calculator (Arithmeticks) action.

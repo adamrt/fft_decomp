@@ -2,7 +2,6 @@
  * variable the allocator swaps the g_wldcore_map_dot_pulse_direction snapshot ($a0 in the target) and
  * the limit ($v1); reusing the function-scope allocno reproduces the target
  * pair. */
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

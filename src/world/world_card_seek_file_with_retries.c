@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Retries FileSeek up to ten times; gives up with -1 when

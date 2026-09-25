@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /*
  * Prepares a knocked-back unit's movement record: a one-step path, the

@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 s32 main_party_find_free_slot(s32 save_formation, u8* palette) {
     party_data_t* party_data[PARTY_ROSTER_SLOT_COUNT];

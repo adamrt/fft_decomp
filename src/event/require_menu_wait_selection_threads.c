@@ -1,5 +1,4 @@
-#include "fft/require.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_menu_wait_selection_threads(void) {

@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* EQUIP.OUT 001c41dc - Build the icon rect for the item in menu slot `index`. */
 equip_icon_rect_t* equip_item_build_row_icon_rect(s32 index) {

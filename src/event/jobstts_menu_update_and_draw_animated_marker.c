@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 
 /* Two animation curves, each a stride-2 run of (frame threshold, horizontal
  * pixel offset) bytes: 0x801f0018 has 6 steps used while the marker is idle,

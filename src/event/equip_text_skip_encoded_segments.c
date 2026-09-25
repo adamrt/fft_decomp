@@ -1,4 +1,4 @@
-#include "fft/battle_text.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 const u8* equip_text_skip_encoded_segments(const u8* data, s16 count) {

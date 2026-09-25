@@ -1,3 +1,4 @@
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_menu_init_and_draw_scrollable_list(

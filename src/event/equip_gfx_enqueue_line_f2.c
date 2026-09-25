@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* `rect` carries the two endpoints as (x0, y0, x1, y1). */

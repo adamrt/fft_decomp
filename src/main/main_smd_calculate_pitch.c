@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Converts a key in 1/256 semitones (key number << 8 | fine step) to an SPU

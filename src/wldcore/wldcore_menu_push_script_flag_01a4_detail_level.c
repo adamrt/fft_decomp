@@ -1,6 +1,4 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Pushes the script-variable detail text window as menu level 0x2f, the
  * partner of the wldcore_menu_close_script_flag_01a4_detail_level pop: records the entry on the new level, sets

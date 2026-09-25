@@ -1,5 +1,4 @@
-#include "fft/effect.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_map_command_set_3d_object_state(s32 value_a, s32 value_b) {

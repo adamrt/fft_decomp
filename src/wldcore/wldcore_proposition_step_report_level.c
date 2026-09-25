@@ -1,15 +1,7 @@
-#include "fft/main_file.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/gs.h"
 #include "psx/libc.h"
-
-s32 wldcore_proposition_step_participant_message(wldcore_proposition_message_state_t* state, s32 message, s32 speaker);
-void wldcore_proposition_push_result_level(s32 proposition);
-s32 wldcore_proposition_find_preferred_job_unit(void);
-void world_gs_gettiminfo(u32* tim, GsIMAGE* im);
 
 void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* level) {
     GsIMAGE image;

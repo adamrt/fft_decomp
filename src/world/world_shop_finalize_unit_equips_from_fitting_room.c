@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Finalize a unit's equipment from the Fitting Room. */

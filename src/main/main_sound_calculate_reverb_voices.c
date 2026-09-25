@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Sibling of the pitch-LFO (0x80014f58) and noise (0x80014ff8) voice

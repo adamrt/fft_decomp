@@ -1,10 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle_text.h"
-#include "fft/data.h"
-#include "fft/main_file.h"
-#include "fft/main_heap.h"
-#include "fft/main_unit.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 
 /* Appends one 0xfe/0xff-terminated string. Overflowing the arena jumps
  * straight to the cleanup and skips the help-text copy. */

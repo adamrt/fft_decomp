@@ -1,9 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/require.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_editor_load_selected_unit(void) {

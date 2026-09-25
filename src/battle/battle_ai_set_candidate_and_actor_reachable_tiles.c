@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Make only the candidate and acting tiles reachable in the selected scenario.

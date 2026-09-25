@@ -1,12 +1,5 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_proposition_push_detail_level(s32 value);
 
 /* List level input step for cursor slot 3 (help message 0x105f); confirmed
  * entries are handed to 0x800732b8. Confirm is refused with message 0xb80e

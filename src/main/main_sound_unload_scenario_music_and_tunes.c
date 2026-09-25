@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 void main_sound_unload_scenario_music_and_tunes(void) {
     main_sound_stop_forced_music();

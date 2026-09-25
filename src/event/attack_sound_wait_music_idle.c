@@ -1,5 +1,4 @@
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "psx/etc.h"
 #include "psx/types.h"
 

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 
 battle_stats_t* battle_unit_get_by_unit_id(s32 unit_id) {
     s32 index;

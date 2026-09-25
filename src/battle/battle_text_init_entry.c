@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/text.h"
 #include "psx/types.h"
 
 u8* battle_text_init_entry(u32 text_id) {

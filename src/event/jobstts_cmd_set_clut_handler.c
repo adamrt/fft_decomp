@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/gpu.h"
 
 const u8* jobstts_cmd_set_clut_handler(const u8* data) {

@@ -1,9 +1,5 @@
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-void world_formation_build_job_wheel_availability(void);
-void world_formation_layout_job_wheel_portrait(void);
 
 /* Formation menu step: either finish the pending job-wheel open (menu 0x15)
  * or advance the wheel scroll position by the frame step, capping at 16. */

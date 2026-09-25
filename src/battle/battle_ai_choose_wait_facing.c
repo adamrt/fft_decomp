@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 typedef struct battle_ai_wait_facing_work {
     battle_ai_coords_t target_coords;

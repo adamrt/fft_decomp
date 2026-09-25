@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/option.h"
 #include "psx/types.h"
 
 /* Runs any in-between-turn event, then opens the next acting unit's turn. */

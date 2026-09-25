@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
 void battle_move_update_float_step_to_destination_tile_center(battle_unit_misc_data_t* unit) {

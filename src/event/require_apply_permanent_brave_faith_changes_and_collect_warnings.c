@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/require.h"
-#include "fft/unit_slots.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* Apply permanent Brave/Faith changes and collect party-leaving warnings.

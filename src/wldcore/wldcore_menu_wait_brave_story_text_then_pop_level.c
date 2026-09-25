@@ -1,7 +1,5 @@
 #include "fft/wldcore.h"
 
-void wldcore_list_open_brave_story_propositions(void);
-
 /* Return from a message level to the window/render level beneath it.
  *
  * Waits until the message render record has left its 0x100 state and

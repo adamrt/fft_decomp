@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 #include "fft/world.h"
 
 battle_stats_t* world_unit_get_by_unit_id(s32 unit_id) {

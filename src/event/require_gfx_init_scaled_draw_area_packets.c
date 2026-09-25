@@ -1,4 +1,4 @@
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_gfx_init_scaled_draw_area_packets(battle_menu_status_panel_portrait_primitive_tail_t* packet) {

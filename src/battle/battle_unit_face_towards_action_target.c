@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 
 /* Turn a unit to face a target unit, or its action's target.
  *

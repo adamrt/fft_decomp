@@ -1,4 +1,3 @@
-#include "fft/event.h"
 #include "fft/world.h"
 
 /* Tutorial command: start the text thread on a new message. Operands: two

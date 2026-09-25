@@ -1,10 +1,4 @@
 #include "fft/battle.h"
-#include "fft/character_identity.h"
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/script_variables.h"
-#include "fft/status.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Snapshot a unit into the event staging record and queue its status removal.

@@ -1,4 +1,4 @@
-#include "fft/data.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 u8 world_item_get_type(s32 item_id) {

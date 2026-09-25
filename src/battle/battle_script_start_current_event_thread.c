@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 void battle_script_start_current_event_thread(void) {

@@ -1,5 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/job.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 s32 bunit_job_get_base(s16 unit_id) {

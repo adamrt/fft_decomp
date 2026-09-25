@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/battle.h"
 
 typedef struct battle_menu_cursor_bob_threshold {
     s8 threshold;

@@ -1,3 +1,4 @@
+#include "fft/world.h"
 #include "psx/gpu.h"
 
 /* Initialize an array of WORLD menu sprites with a shared CLUT. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
 
 void battle_menu_open_active_unit_idle_action_menu(void) {
     battle_unit_misc_data_t* misc_data;

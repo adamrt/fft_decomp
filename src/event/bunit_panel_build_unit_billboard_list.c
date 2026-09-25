@@ -1,8 +1,4 @@
-#include "fft/battle.h"
-#include "fft/bunit.h"
-#include "fft/status.h"
-#include "fft/unit_flags.h"
-#include "fft/unit_slots.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Copy every battle unit that is not an egg, crystal or treasure into the next

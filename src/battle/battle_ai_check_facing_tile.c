@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 
 /*
  * Reject a facing candidate outside the map or too far above the source.

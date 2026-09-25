@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 /* Resolve a battle ID before calculating its effect-space screen location. */
 void battle_effect_get_screen_location_by_battle_id(

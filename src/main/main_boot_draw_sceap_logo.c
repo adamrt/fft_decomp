@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 #include "psx/gpu.h"
 
 int main_boot_draw_sceap_logo(void* otag, u32* image) {

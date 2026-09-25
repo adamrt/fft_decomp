@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/effect.h"
 
 /*
  * Render the emitter selected by effect-script opcode 0x26.

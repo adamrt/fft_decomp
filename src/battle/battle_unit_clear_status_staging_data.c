@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 
 void battle_unit_clear_status_staging_data(void) {
     s32 i;

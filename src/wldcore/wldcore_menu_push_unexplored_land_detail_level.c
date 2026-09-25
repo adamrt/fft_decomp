@@ -1,8 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_read_nine_bit_record(u32* bits, s32 record, u8* dest);
 
 /* Pushes the unexplored-land detail text window as menu level 0x19. Records
  * the land on the new level, loads that land's picture data set, appends a

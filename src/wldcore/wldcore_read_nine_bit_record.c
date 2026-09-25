@@ -1,3 +1,4 @@
+#include "fft/wldcore.h"
 #include "psx/types.h"
 
 /* Reads one nine-bit record: bits 0-4 into dest[1], bits 5-8 into dest[0].

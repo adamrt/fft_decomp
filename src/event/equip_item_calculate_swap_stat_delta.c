@@ -1,5 +1,4 @@
-#include "fft/equip.h"
-#include "fft/world.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Compute the HP/MP and detailed stat changes for one equipment replacement. */

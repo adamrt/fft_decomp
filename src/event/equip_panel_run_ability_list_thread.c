@@ -1,10 +1,4 @@
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/equip.h"
-#include "fft/main_gfx.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/thread.h"
+#include "fft/event_equip.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
@@ -18,9 +12,6 @@ typedef struct equip_ability_panel_thread {
     s32 unknown_08;
     s32 redraw_request; /* 0x0c */
 } equip_ability_panel_thread_t;
-
-void battle_gfx_init_image_loading(POLY_FT4* primitive, const battle_image_location_t* base_load,
-    const battle_image_location_t* base_screen, const world_gfx_image_load_parameters_t* parameters);
 
 /* Two-column ability panel thread (task 0x3b); EQUIP twin of WORLD
  * world_menu_ability_panel_thread. Thread 10 draws the unit editor stats into the first

@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_move.h"
-#include "fft/battle_state.h"
-#include "fft/main_sound.h"
 
 /* Rare/common item result copied from battle_map_determine_rare_common_item. */
 typedef struct battle_move_found_item {
@@ -12,10 +7,6 @@ typedef struct battle_move_found_item {
 } battle_move_found_item_t;
 
 extern battle_move_found_item_t g_battle_move_find_display_item;
-
-extern void battle_gfx_store_item_display_data(battle_gfx_render_unit_t*, u32);
-extern s32 battle_unit_learn_from_crystal(battle_stats_t* stats, s32 outcome);
-extern s32 battle_map_refresh_deep_dungeon(void);
 
 /* Starts the next post-action step selected by g_battle_move_find_result.
  *

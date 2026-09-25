@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_move.h"
 
 /*
  * Build the player-side movement range for a unit: reset the pathfinding

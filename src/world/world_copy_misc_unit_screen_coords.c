@@ -1,4 +1,4 @@
-#include "fft/geometry.h"
+#include "fft/battle.h"
 #include "fft/world.h"
 
 struct battle_screen_coords;

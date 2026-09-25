@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 void battle_status_remove_transparent_if_jump_used(battle_stats_t* unit) {

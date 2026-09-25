@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/map.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/libc.h"
@@ -33,7 +29,6 @@ typedef struct battle_map_weather_splash_rects {
 extern battle_map_weather_splash_rects_t g_battle_map_weather_splash_uv_rects;
 
 extern battle_map_mesh_part_view_t g_battle_map_mesh_parts_view[9];
-extern void* g_current_effect_work;
 
 extern void MulMatrix0(MATRIX* m0, void* m1, MATRIX* m2);
 extern void SetLightMatrix(MATRIX* m);

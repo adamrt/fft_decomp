@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_heap.h"
 #include "psx/types.h"
 
 s32 battle_target_set_weapon_attack_panels(battle_ai_command_action_t* source) {

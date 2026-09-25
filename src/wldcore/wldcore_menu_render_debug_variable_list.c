@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Renders up to 10 script-variable rows in the debug list panel.
  *

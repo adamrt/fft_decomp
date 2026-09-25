@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
 #include "fft/open.h"
-#include "fft/world.h"
 
 /* Runtime flag bits: 0x80 world overlay loaded, 0x100 party chosen,
  * 0x4000 << party_mode selects the party (three bits, 0x1C000). */

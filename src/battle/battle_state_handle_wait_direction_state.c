@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "psx/pad.h"
 
 void battle_state_handle_wait_direction_state(void) {

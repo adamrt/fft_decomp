@@ -1,4 +1,4 @@
-#include "fft/main_zodiac.h"
+#include "fft/main.h"
 #include "psx/gte.h"
 
 void main_gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, main_zodiac_texture_position_t* texture,

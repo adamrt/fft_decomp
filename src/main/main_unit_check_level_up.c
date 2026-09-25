@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 s32 main_unit_check_level_up(battle_stats_t* unit) {

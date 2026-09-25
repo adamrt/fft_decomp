@@ -1,10 +1,8 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
-#include "fft/battle_state.h"
 #include "psx/types.h"
 
 /* battle_move_start_unit_step / _at_climb_speed and battle_move_start_unit_jump_step
- * are declared in fft/battle_move.h with fewer (or differently typed) parameters
+ * are declared in fft/battle.h with fewer (or differently typed) parameters
  * than this call site passes.  The target hands all three the unit plus both
  * tile pointers, so the calls go through a cast. */
 #define START_STEP(f) ((void (*)(battle_unit_misc_data_t*, const map_tile_t*, const map_tile_t*))(f))

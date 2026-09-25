@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 void battle_menu_mini_menu_cancel_delay_thread(void) {

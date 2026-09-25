@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
 
 enum {
     POACH_ITEM_COMMON = 0,

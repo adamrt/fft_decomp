@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_runtime.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 void card_io_consume_bios_events(void) {

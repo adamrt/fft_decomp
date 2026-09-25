@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
-#include "fft/thread.h"
 
 void battle_menu_build_main(void) {
     u8* parameter;

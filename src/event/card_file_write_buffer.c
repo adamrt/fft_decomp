@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 s32 card_file_write_buffer(const char* filename, const u8* source, s32 size, s32 create_file) {

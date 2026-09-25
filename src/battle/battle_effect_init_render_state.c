@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 
 #define EFFECT_PRIM_BUFFER_SIZE 0x8000
 #define EFFECT_CORNER_Z_DEFAULT 0x200

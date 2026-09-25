@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Battle twin of world_script_inflict_status_thread: Inflict Status event command thread.

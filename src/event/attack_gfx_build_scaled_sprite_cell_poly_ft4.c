@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 
 /* Build a centered sprite-cell quad using rounded 4.12 fixed-point geometry.
  *

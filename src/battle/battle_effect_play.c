@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 void battle_effect_play(void) {
     if (g_battle_effect_phase == 1) {

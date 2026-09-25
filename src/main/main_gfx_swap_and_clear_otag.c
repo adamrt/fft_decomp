@@ -1,5 +1,5 @@
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_gfx_swap_and_clear_otag(void) {

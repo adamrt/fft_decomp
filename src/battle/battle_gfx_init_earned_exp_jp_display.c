@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_gfx_init_earned_exp_jp_display(battle_unit_misc_data_t* unit) {
     battle_gfx_sprite_display_data_t* display_0;

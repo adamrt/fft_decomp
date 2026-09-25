@@ -1,6 +1,5 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 
 /* Initialize packed job levels, unlocked jobs, and ENTD skillset overrides. */
 

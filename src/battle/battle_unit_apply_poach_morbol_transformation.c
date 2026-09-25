@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
 
 void battle_unit_apply_poach_morbol_transformation(battle_unit_misc_data_t* unit) {
     u32 flags;

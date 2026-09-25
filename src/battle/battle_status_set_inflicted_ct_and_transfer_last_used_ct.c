@@ -1,5 +1,4 @@
-#include "fft/main_unit.h"
-#include "fft/status.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx) {

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
 #include "psx/types.h"
 
 void battle_camera_update_matrices(

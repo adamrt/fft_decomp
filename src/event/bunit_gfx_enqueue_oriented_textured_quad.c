@@ -1,5 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/main_gfx.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 void bunit_gfx_enqueue_oriented_textured_quad(

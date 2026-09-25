@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_state.h"
-#include "fft/effect.h"
 #include "psx/types.h"
 
 /* Altima teleport distortion animation: advance one frame of the eight-step

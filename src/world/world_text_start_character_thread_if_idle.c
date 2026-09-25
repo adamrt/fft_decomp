@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Start the text-character worker only when its thread slot is available. */

@@ -1,5 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 s32 battle_effect_run_block(s16 index) {
     effect_record_t* rec;

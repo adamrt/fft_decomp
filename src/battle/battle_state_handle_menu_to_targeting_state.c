@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/data.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 /*
  * Advance menu-to-targeting state and consume the unit's renderer command.

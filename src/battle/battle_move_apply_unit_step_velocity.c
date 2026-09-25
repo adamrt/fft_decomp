@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_move.h"
-#include "fft/battle_state.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 void battle_move_apply_unit_step_velocity(battle_unit_misc_data_t* unit) {

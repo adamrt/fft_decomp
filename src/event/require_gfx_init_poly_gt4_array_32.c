@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 
 void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     s32 count;

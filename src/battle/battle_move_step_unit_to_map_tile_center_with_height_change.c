@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /* The 0x80089ba0 callee uses fixed per-frame increments, unlike the
  * acceleration routine at 0x800898a0. */

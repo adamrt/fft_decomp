@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/debugchr.h"
-#include "fft/thread.h"
-#include "fft/unit_slots.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 /* Fills a status billboard (level, team kind, AT position, HP/MP/CT and the

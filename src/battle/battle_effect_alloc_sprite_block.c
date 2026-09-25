@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Allocate the variable-length sprite block for one effect frame.
  *

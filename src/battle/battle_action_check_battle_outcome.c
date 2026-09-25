@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_unit.h"
-#include "fft/unit_slots.h"
 
 enum {
     BATTLE_OUTCOME_SPECIAL_CLASS_MASK = 0x03,

@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/open.h"
 #include "psx/pad.h"
 

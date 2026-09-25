@@ -13,14 +13,7 @@
  *    described where they appear.
  *  - `PRIM_AT` keeps the target's `addu rd,index,base` operand order.
  */
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/debugchr.h"
-#include "fft/event.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/thread.h"
+#include "fft/event_debugchr.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

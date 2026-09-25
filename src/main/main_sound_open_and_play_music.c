@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 s32 main_sound_open_and_play_music(s32 file_index, s32 slot) {

@@ -2,8 +2,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern u8 D_8005E950[];
-
 /* Target 0x800f2ee0; byte-identical twin of battle_map_store_selected_tile_data. */
 void world_map_store_selected_tile_data(void) {
     s16 coords[3];

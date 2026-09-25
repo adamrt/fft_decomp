@@ -1,11 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_proposition_attempt_detail_level(s32 value);
-s32 world_thread_is_running(s32 thread_id);
-void world_thread_set_parameters(s32 thread_id, s32 a, s32 b, s32 c);
 
 /* List level input step for cursor slot 16 (the list opened by 0x80087b94):
  * twin of wldcore_list_handle_unexplored_lands_input with help message 0x105b and no file-loading gate.

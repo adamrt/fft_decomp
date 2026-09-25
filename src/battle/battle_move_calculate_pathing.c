@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_move.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 /* map_tile_t with byte 3 split into its half-height and depth bitfields. */

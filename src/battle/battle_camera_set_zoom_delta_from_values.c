@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_count) {
     s32 animation_frames;

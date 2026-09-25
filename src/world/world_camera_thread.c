@@ -3,9 +3,6 @@
  * 0x80146110; see that file for the interpolation modes and the
  * allocation-sensitive spellings.
  */
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

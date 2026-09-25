@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /*
  * Apply the saved movement candidate to the current spreading state.

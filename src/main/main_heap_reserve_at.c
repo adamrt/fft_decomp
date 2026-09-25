@@ -1,5 +1,4 @@
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 u8* main_heap_reserve_at(void* allocation, u32 size) {
     u32 addr;

@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /* Index of the first present unit standing on the current action's target
  * panel, or BATTLE_UNIT_ID_NONE if none. */

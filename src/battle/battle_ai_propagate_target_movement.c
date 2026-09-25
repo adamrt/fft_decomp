@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/battle_move.h"
 
 /* Propagate the acting unit's movement budget outward from a target tile.
  *

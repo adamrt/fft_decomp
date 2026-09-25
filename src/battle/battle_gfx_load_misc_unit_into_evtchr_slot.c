@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 #include "psx/types.h"
 
 s32 battle_gfx_load_misc_unit_into_evtchr_slot(s32 misc_id, s32 slot) {

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 
 /* Compute unit height after mount, Float, and water movement adjustments.
  *

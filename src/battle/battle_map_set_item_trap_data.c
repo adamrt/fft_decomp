@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
-#include "fft/unit_slots.h"
 
 /*
  * Fill the move-find result record for tile (x, y, layer): flag 4 and the

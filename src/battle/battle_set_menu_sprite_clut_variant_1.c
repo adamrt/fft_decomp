@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 #include "psx/gpu.h"
 
 /* Select the menu-sprite palette row for the active thread context. */

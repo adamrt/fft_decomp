@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 
 void battle_move_calculate_spread(void) {
     battle_move_pathfind_scratch_t* config = g_battle_move_config_ptr;

@@ -1,5 +1,3 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Reads 134 sectors from LBA 0x11d28 into the wldcore scratch buffer unless

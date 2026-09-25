@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Pushes the wide scrollable text window (0x8009eef8) as menu level type
  * 0x33: it appends one window record for the frame, measures the text, sizes

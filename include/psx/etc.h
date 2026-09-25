@@ -34,6 +34,7 @@ s32 GetVideoMode(void);
 void ChangeClearPad(s32 val);
 void PadStop(void);
 void StopCallback(void);
+void DMACallback(s32 dma_channel, void (*func)(void));
 
 DIRENTRY* firstfile(char* pattern, DIRENTRY* entry);
 DIRENTRY* nextfile(DIRENTRY* entry);

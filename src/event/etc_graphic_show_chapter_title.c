@@ -1,6 +1,4 @@
-#include "fft/etc.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
+#include "fft/event_etc.h"
 #include "psx/types.h"
 
 void etc_graphic_show_chapter_title(s32 graphic_id) {

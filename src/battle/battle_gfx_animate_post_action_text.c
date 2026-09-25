@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* The -31 colour deltas are passed as sign-extended words; the u16 prototype

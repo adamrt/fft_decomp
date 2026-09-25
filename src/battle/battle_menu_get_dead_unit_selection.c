@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Menu result record produced on the main thread stack by battle_unit_generate_crystal_or_treasure.

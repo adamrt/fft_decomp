@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_apply_level_growth(battle_stats_t* unit, s32 level_down) {

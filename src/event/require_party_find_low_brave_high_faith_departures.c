@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/require.h"
-#include "fft/unit_slots.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 #define MESSAGE_ID(index)   (*(s32*)(g_require_work + 0x72c0 + ((index) << 2)))

@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 s32 battle_gfx_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {

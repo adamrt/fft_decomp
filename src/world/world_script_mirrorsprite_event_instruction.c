@@ -1,5 +1,5 @@
 #include "fft/battle.h"
-#include "fft/event.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Event instruction 0x2f MirrorSprite: flip one unit's sprite horizontally.

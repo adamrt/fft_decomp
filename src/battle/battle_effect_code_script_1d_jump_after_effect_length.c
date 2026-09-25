@@ -1,5 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Jump to the offset in the second halfword once the timeline frame reaches

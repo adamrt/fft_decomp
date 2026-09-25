@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 
 u8* battle_gfx_get_spritesheet_seq_data_address(u32 index) {
     s32 value;

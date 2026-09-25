@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
+#include "fft/battle.h"
 
 /* EVENT_SCRIPT_VAR_RANDOM_VALUE is read through the event
  * RNG, not its ordinary storage. ZERO never reads the uninitialized operand.

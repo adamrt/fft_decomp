@@ -1,4 +1,4 @@
-#include "fft/event.h"
+#include "fft/battle.h"
 
 /* The scenario interpreter forwards its operand pointer in a0 even though
  * this entry does not consume it. Retain that caller-visible interface. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 /* Return the id of any OTHER live event thread whose current task word

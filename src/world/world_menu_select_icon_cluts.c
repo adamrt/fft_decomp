@@ -1,4 +1,3 @@
-#include "fft/thread.h"
 #include "fft/world.h"
 
 /* Choose the CLUT bank for the four menu icon sprites: the highlighted set

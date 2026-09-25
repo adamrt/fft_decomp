@@ -1,5 +1,4 @@
-#include "fft/equip.h"
-#include "fft/main_sound.h"
+#include "fft/event_equip.h"
 
 /* Move a scrollable list by one page while preserving its visible row. */
 void equip_menu_scroll_list_by_page(s32 direction, const u8* menu) {

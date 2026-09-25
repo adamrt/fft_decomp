@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_state.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Run a unit's SEQ animation script until it shows the next frame or ends.

@@ -1,6 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/battle_state.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Timeline state overlaid on effect_record_t from 0x26. */

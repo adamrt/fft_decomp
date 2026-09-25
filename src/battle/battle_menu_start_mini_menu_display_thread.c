@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/thread.h"
 
 enum {
     MINI_MENU_THREAD_ID = 8,

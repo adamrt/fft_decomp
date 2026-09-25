@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
 
 /*
  * Score each reachable tile, resuming suspended evaluations.

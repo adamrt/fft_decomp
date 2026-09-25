@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "psx/pad.h"
 
 /* Free-cursor game state: camera and cursor input, then the button actions

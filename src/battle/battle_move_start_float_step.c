@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
 /* Start the unit's next movement step from the current tile centre.

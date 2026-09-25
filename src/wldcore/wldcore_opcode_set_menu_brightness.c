@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 void wldcore_opcode_set_menu_brightness(void) {
     char unused[16];

@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/script_variables.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Battle twin of world_menu_build_skillset_entries: builds the skillset

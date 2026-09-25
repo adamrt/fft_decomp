@@ -1,4 +1,4 @@
-#include "fft/small.h"
+#include "fft/event_small.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

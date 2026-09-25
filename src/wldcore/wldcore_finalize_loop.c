@@ -1,8 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/etc.h"
 #include "psx/gpu.h"
 

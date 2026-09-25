@@ -1,5 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Target 0x8014b320. */

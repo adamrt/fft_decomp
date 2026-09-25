@@ -1,5 +1,4 @@
 #include "fft/open.h"
-#include "fft/world.h"
 
 /* Initialise a 56-byte render record as a window frame and build its image.
  *

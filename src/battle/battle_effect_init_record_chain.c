@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/effect.h"
 
 enum {
     EFFECT_RECORD_COUNT = 256,

@@ -1,9 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_menu_build_brave_story_entries(void);
 
 /* Pushes a list menu level (type 0x1C).
  *

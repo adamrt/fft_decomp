@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 u8* jobstts_cmd_release_otag_lock_handler(u8* data) {

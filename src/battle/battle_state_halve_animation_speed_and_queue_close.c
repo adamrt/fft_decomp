@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Queue the CloseBattle game state; callers always pass transition step 8. */

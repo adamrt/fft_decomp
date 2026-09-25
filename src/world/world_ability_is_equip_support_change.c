@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Return whether a support change requires equipment revalidation.

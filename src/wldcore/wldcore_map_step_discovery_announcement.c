@@ -1,8 +1,5 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_list_open_completed_propositions(void);
 
 /* Phase driver for a countdown object: phase 1 waits for the menu event flag
  * and plays cue 0x214, phase 2 waits 180 frames and plays cue 0x221, phase 3

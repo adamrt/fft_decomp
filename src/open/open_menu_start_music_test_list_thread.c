@@ -1,8 +1,6 @@
 #include "fft/open.h"
 #include "psx/types.h"
 
-void world_build_at_list_2(void);
-
 void open_menu_start_music_test_list_thread(
     s32 thread_id, s32 limit, const open_point32_t* extent, const open_point32_t* origin) {
     world_menu_text_layout_t* layout = &g_open_music_test_list_state;

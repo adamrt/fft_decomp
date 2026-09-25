@@ -1,6 +1,4 @@
-#include "fft/data.h"
-#include "fft/equip.h"
-#include "fft/main_runtime.h"
+#include "fft/event_equip.h"
 
 /* Sort a -1 terminated item list in place (EQUIP twin of world_item_sort_id_list).
  *

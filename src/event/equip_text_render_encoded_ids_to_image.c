@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/equip.h"
-#include "fft/text.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Render encoded menu text IDs into a 4-bpp image.

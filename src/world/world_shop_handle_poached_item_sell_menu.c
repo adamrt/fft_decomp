@@ -1,9 +1,6 @@
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-void world_thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
 
 /* Shop item-list menu step; sibling of world_shop_handle_item_sell_menu.
  *

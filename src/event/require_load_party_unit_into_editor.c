@@ -1,7 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 /* Load a party roster unit into the REQUIRE status/editor display.

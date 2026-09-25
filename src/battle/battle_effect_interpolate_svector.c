@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_effect_interpolate_svector(const s16* from, const s16* to, s32 t, s16* out) {

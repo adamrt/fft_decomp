@@ -1,8 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_list_build_proposition_detail_panel_image(
-    wldcore_menu_window_pair_render_level_t* level, s32 proposition, s32 coordinate_mode);
 
 /* Pushes the proposition participant list level (type 0x27) for
  * g_main_active_propositions[proposition].

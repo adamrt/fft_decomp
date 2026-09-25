@@ -1,7 +1,4 @@
-#include "fft/battle.h"
-#include "fft/equip.h"
-#include "fft/status.h"
-#include "fft/unit_slots.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Build the equipment data and HP/MP for `battle_id` and count the units still present on the field. */

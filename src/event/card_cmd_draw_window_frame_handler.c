@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 world_menu_window_command_t* card_cmd_draw_window_frame_handler(world_menu_window_command_t* command) {

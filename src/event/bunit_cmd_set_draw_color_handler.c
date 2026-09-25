@@ -1,4 +1,4 @@
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Set the sprite RGB from the command; g_bunit_text_layout_mode selects the second

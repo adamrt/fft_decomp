@@ -1,5 +1,5 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Grants +10 Brave, capped at 100, to every blue-team battle unit. */

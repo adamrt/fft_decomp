@@ -1,10 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_window_load_party_unit_sprite_record(wldcore_menu_send_unit_level_t* level, s32 unit, s32 render_index);
-void world_thread_request_redraw(s32 thread_id);
-u32 wldcore_input_check_repeating_directional(u32 buttons);
 
 /* Input step of the proposition send-unit level.
  *

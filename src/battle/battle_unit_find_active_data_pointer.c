@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 battle_stats_t* battle_unit_find_active_data_pointer(void) {

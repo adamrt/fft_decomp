@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 /* Add random X/Z/Y offsets and convert each result to Q12 coordinates. */
 void battle_effect_add_random_vector_offsets_and_store_q12(

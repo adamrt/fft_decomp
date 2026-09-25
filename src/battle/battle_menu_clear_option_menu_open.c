@@ -1,4 +1,4 @@
-#include "fft/battle_runtime.h"
+#include "fft/battle.h"
 
 /* Clears the "an options/menu overlay is on screen" flag. Called from the
  * BATTLE.BIN overlay loaders (EQUIP.OUT, DEBUGCHR.OUT, ...) once the overlay

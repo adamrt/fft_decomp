@@ -1,10 +1,5 @@
 #include "fft/wldcore.h"
 
-s32 wldcore_script_process_conditional_set(s32 index, s32 mask);
-void wldcore_menu_push_focus_location_level(s32 id);
-void wldcore_menu_push_map_path_level(s32 value, s32 value_hi, s32 flag);
-void wldcore_push_map_location_visibility_level(s32 value, s32 flag);
-
 /* Once the current location's script yields a map-menu action, reset the
  * current level's window and dispatch its path, location-visibility or focus
  * request. A focus location of 0xff means the current location.

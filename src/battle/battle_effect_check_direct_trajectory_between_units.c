@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
 #include "psx/gte.h"
 
 /* Collects every other active unit's tile position into a scratchpad list. */

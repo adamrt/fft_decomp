@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* Clears one equipment slot of a formation unit.  An item the unit owned goes

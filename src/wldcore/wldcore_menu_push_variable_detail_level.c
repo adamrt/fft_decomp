@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Opens the detail view (menu level type 0x20) for a script-variable list
  * entry selected in 0x8008368c: value is variable index * 16 + variable

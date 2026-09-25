@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 void world_thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third) {

@@ -1,4 +1,3 @@
-#include "fft/main_file.h"
 #include "fft/wldcore.h"
 
 /* Provisional: a seven-entry sector-offset table, the same shape as the pair

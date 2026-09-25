@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 u8* battle_unit_check_party_member_exists(s32 unit_id) {

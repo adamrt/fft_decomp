@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 s32 battle_ai_has_any_unit_decided_to_use_ability(void) {
     battle_ai_data_t* ai;

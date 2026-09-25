@@ -1,4 +1,4 @@
-#include "fft/battle_text.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_text_relocate_pointer_table(const u32* offsets) {

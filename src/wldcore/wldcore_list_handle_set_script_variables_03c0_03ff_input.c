@@ -1,11 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_menu_push_variable_detail_level(s32 value);
-s32 world_thread_is_running(s32 thread_id);
-void world_thread_set_parameters(s32 thread_id, s32 a, s32 b, s32 c);
 
 /* Script-variable list level input step (cursor slot 11) for the panel opened
  * by 0x8008343c; twin of wldcore_list_handle_unexplored_lands_input with help message 0x1056. Cancelling

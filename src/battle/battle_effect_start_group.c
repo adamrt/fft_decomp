@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 #include "psx/types.h"
 
 /* Spawn this frame's share of a trap group's effect slots.

@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/job.h"
+#include "fft/main.h"
 
 u8 main_unit_get_spritesheet_palette(battle_stats_t* unit, u8* palette) {
     u8 job_id;

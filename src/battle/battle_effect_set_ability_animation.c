@@ -1,11 +1,8 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/data.h"
-#include "fft/effect.h"
 #include "psx/types.h"
 
 /* The ability -> effect id tables. The target reads both with `lhu`, so the
- * elements are unsigned; include/fft/battle_effect.h declares the 0x801b63f0
+ * elements are unsigned; include/fft/battle.h declares the 0x801b63f0
  * table as s16, so the unsigned view is bound here under its own name rather
  * than by redeclaring the catalogued one. The 0x801b637c table serves ability
  * ids from 0x200 up and overlaps the other table's tail. */

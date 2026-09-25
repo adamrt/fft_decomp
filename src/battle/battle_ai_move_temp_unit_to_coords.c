@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /* Position the temporary simulation unit at the supplied AI coordinates. */
 void battle_ai_move_temp_unit_to_coords(battle_ai_coords_t* coord) {

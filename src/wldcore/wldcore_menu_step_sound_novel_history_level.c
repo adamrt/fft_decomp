@@ -1,11 +1,5 @@
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void world_menu_display_text_entry_mode_1(s32 p1, s32 p2, s32 p3);
 
 /* Provisional: the text box handed to world_menu_display_text_entry_mode_1 (0x800fe7a4); the s32
  * pixel width at +0x08 is the destination render record's width. The 16-byte

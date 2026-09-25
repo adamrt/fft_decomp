@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/job.h"
 #include "fft/world.h"
 
 /* Declared s32 here: the target uses the returned register without the

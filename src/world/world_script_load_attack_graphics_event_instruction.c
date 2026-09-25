@@ -1,6 +1,4 @@
-#include "fft/attack.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

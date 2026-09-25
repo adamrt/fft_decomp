@@ -1,4 +1,4 @@
-#include "fft/battle_effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_effect_set_misc_data_pointers(s16 effect_id) {

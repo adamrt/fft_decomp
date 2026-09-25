@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Returns 0 unless the record has a work list and requested_index is inside
  * it.  Note the retail loop walks work_count links, not requested_index, so

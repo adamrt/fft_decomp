@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* Per-frame tick while the Deep Dungeon overworld map is up: poll the

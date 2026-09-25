@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 void battle_state_handle_mini_menu_help_state(void) {
     if (battle_menu_is_still_building() != 2) {

@@ -1,4 +1,3 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 
 void wldcore_opcode_wait_for_text_thread(void) {

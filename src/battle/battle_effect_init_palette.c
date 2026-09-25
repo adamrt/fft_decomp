@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 
 void battle_effect_init_palette(s16 index) {
     RECT rect;

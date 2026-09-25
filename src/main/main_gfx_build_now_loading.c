@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Primitive tag helpers (clean-room equivalents of the libgpu macros). */

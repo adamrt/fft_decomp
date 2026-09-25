@@ -1,6 +1,4 @@
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
-#include "fft/thread.h"
+#include "fft/event_bunit.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

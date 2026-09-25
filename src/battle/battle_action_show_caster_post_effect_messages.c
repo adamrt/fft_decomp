@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_action_show_caster_post_effect_messages(void) {
     battle_unit_misc_data_t* unit;

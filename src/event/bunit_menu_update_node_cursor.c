@@ -1,6 +1,4 @@
-#include "fft/bunit.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 /* Select the menu's node table, handle directional/confirm/cancel input, and

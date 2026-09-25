@@ -1,4 +1,3 @@
-#include "fft/main_gfx.h"
 #include "fft/open.h"
 
 void open_movie_present_frame(void) {

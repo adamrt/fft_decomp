@@ -1,8 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
-#include "fft/menu_types.h"
-#include "fft/status.h"
+#include "fft/battle.h"
 
 /* Local view of the battle_ai_data_t tile masks as level/y rows. */
 typedef struct battle_ai_tile_rows_view {

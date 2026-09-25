@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 void main_sound_replay_weather_sfx(void) {
     int sound_id = g_main_sound_weather_sfx_id;

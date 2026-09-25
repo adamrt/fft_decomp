@@ -1,8 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/open.h"
-#include "fft/script_variables.h"
-#include "fft/world.h"
 #include "psx/cd.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
@@ -20,10 +16,6 @@ typedef struct open_title_controller {
     /* 0x34 */ s32 exiting;
     /* 0x38 */ u8 padding_38[0x64 - 0x38];
 } open_title_controller_t;
-
-s32 CdPosToInt(u8* loc);
-void open_menu_push_sound_type_controller(void);
-void open_title_start_new_game_or_clear_file_buffer(void);
 
 /* Per-frame handler for the OPEN title menu controller.
  *

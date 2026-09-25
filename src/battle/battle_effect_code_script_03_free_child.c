@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/effect.h"
 
 s32 battle_effect_code_script_03_free_child(effect_record_t* effect) {
     s32 slot_offset = (*(u8*)(effect->pc + (s32)effect->script + 1) >> 3) & 6;

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 void battle_state_handle_free_cursor_input(void) {
     battle_gfx_update_all_unit_rotation_and_vectors();

@@ -1,5 +1,4 @@
-#include "fft/card.h"
-#include "fft/main_runtime.h"
+#include "fft/event_card.h"
 
 enum {
     CARD_SAVE_HEADER_MAGIC_S = 'S',

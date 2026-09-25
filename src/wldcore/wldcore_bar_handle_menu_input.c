@@ -14,17 +14,9 @@
  * provisional.
  */
 
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
-void wldcore_list_open_available_propositions(void);
-void wldcore_list_open_completed_propositions(void);
-void wldcore_list_open_propositions(void);
-void wldcore_load_message_block_if_changed(s32 which);
 void wldcore_menu_pop_level_and_rebuild_screen();
 
 void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {

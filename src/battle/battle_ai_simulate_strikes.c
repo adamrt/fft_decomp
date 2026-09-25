@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ability.h"
-#include "fft/battle_ai.h"
 
 /*
  * Simulate strikes and eligible reactions, updating AI hit accounting.

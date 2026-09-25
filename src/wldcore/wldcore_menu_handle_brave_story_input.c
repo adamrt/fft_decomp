@@ -1,18 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-u32 wldcore_input_check_repeating_directional(u32 buttons);
-void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* state);
-void wldcore_list_open_story_events(void);
-void wldcore_list_open_unexplored_lands(void);
-void wldcore_list_open_treasures(void);
-void wldcore_menu_push_entry_window_level(void);
-void wldcore_list_open_script_flags_01a4_01bb(void);
-void wldcore_list_open_set_script_variables_03c0_03ff(void);
-void wldcore_menu_push_proposition_category_level(void);
 
 /* Input/update step of the world-map main menu level.
  *

@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_deploy_swap_roster_unit_tile(s32 column, s32 row, s32 roster_id) {

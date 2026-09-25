@@ -1,4 +1,4 @@
-#include "fft/effect.h"
+#include "fft/battle.h"
 
 /* Allocate one effect record and link it into the in-use list. */
 s32 battle_effect_alloc_state_record(void) {

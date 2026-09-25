@@ -5,7 +5,6 @@
  * The free-list walk index is an s32: a u16 adds an `andi 0xffff` per load.
  */
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
 
 void battle_effect_remove_secondary(u8 id) {
     battle_effect_secondary_data_t* slot;

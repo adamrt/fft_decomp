@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Opens an eight-row panel list (entry values 0xc010 + row) whose rows are

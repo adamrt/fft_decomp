@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 
 /* Battle twin of world_menu_validate_skill_selection_thread. Thread body: validates the skill chosen in menu entry 3
  * for the current menu (MP cost, blocking status, per-menu restrictions) and, when it is not usable, shows the matching

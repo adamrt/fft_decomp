@@ -1,11 +1,5 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
-
-void wldcore_unit_build_status_panel_data(s32 party_index);
-void world_menu_unit_status_banner_thread(void);
-void world_menu_equipment_and_ability_panel_thread(void);
 
 /* g_wldcore_thread8_offset_y aliases g_wldcore_thread8_params.y. Referencing it through
  * the block symbol makes GCC base that block's address register on +4; the

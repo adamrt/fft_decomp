@@ -1,8 +1,5 @@
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
-
-extern const u8* g_text_glyph_bitmap_data;
 
 s32 bunit_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const bunit_text_image_position_t* position, s32 style) {

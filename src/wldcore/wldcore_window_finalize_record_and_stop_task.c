@@ -1,5 +1,4 @@
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 void wldcore_window_finalize_record_and_stop_task(s32* param) {
     s32 index = *param;

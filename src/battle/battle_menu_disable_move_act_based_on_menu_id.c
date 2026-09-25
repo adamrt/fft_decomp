@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
 #include "psx/types.h"
 
 void battle_menu_disable_move_act_based_on_menu_id(void) {

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_ai_calculate_clockticks_until_unit_acts(battle_stats_t* unit) {

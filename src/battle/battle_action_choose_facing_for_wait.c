@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 void battle_action_choose_facing_for_wait(void) {
     battle_unit_misc_data_t* mounted_unit;

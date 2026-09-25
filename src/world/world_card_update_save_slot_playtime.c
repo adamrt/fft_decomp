@@ -1,4 +1,3 @@
-#include "fft/card.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

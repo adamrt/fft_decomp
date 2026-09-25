@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 
 void battle_unit_set_animation_based_on_mounted_state(battle_unit_misc_data_t* unit) {
     s32 anim;

@@ -1,5 +1,4 @@
-#include "fft/effect.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_map_command_start_texture_animation(s32 value_a, s32 value_b) {

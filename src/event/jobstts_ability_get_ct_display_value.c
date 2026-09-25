@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 s32 jobstts_ability_get_ct_display_value(s32 index) {

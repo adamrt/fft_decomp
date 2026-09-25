@@ -1,4 +1,4 @@
-#include "fft/job.h"
+#include "fft/wldcore.h"
 #include "psx/types.h"
 
 s32 wldcore_map_job_id_to_category_index(s32 job_id) {

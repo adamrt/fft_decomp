@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 s32 jobstts_ability_is_non_action_unlearned(s32 index) {

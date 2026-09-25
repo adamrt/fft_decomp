@@ -1,6 +1,4 @@
-#include "fft/battle.h"
-#include "fft/equip.h"
-#include "fft/main_unit.h"
+#include "fft/event_equip.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 #include "psx/types.h"
 
 void battle_unit_start_ability_charge_animation_for_movement(battle_unit_misc_data_t* unit) {

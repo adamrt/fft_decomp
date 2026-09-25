@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/data.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Validate and clamp the target's current action result before it applies.

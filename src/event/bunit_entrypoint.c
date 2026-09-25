@@ -7,12 +7,7 @@
  * globals must not be volatile here: sched2 hoists the 0x40/0x1f4/0x3c stores
  * above the zero stores, as in the target.
  */
-#include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_text.h"
-#include "fft/bunit.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
+#include "fft/event_bunit.h"
 #include "psx/etc.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

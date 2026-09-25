@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_action_handle_steal_exp(battle_stats_t* unit, u8 amount) {

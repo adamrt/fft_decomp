@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_state_handle_deep_dungeon_mesh_finish_state(void) {

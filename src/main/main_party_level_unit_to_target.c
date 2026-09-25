@@ -1,5 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Raises a roster unit by `level_delta` levels (capped at 99), growing each

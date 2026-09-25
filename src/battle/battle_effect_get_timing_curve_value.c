@@ -1,5 +1,4 @@
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_effect_get_timing_curve_value(battle_effect_timing_entry_t* entry) {

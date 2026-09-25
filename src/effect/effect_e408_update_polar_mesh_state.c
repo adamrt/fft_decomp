@@ -1,4 +1,4 @@
-#include "fft/effect_polar_mesh.h"
+#include "fft/effect.h"
 
 /* Builds and draws a four-fold symmetric polar mesh of textured quads.
  *

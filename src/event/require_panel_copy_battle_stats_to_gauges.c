@@ -1,5 +1,4 @@
-#include "fft/battle.h"
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_panel_copy_battle_stats_to_gauges(battle_stats_t* unit, battle_menu_status_panel_gauges_t* output) {

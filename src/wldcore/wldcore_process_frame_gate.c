@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
 
 /* Reinitialize WLDCORE when system-flag bit 1 transitions from set to clear. */

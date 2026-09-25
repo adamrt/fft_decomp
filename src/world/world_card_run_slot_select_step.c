@@ -1,4 +1,3 @@
-#include "fft/card.h"
 #include "fft/world.h"
 
 /* Memory card slot selection step: waits 0x28 frames, opens menu thread 6,

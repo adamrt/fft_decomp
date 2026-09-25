@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/script_variables.h"
 #include "psx/types.h"
 
 void battle_unit_init_for_store_anim_facing_move(s32 misc_id, s32 facing) {

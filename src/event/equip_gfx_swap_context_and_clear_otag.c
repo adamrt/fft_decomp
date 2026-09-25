@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Reset primitive counts, swap packet buffers, and clear the active OT tail. */

@@ -1,3 +1,4 @@
+#include "fft/world.h"
 #include "psx/types.h"
 
 void world_thread_wait_for_10_to_13(void) {

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 #include "psx/types.h"
 
 /* Collects the Draw Out weapon entry (ability id - 0x26) of each of the unit's

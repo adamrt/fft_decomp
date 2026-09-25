@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 
 struct battle_script_jump_instruction;
 extern void battle_script_jump_event_instruction(struct battle_script_jump_instruction* parameters);

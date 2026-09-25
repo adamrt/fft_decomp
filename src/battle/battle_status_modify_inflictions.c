@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/status.h"
 #include "psx/types.h"
 
 /* Filters the target's pending status inflictions and removals.

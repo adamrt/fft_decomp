@@ -1,3 +1,4 @@
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_thread_stop_after_16_frames(void) {

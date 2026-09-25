@@ -1,8 +1,4 @@
-#include "fft/battle.h"
-#include "fft/debugchr.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/event_debugchr.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

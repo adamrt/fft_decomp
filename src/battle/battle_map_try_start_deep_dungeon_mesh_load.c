@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 /* Target 0x80070ddc. */
 s32 battle_map_try_start_deep_dungeon_mesh_load(void) {

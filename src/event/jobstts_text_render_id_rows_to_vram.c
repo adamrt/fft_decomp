@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 /* Render each text id of the -1 terminated `list` as one 16-pixel row in VRAM at `rect`. */

@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
 
 void battle_state_handle_map_init_state(void) {
     char unused[24]; /* unreferenced; sizes the target's 0x30-byte frame */

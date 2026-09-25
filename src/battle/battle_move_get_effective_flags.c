@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 /*
  * Combines movement abilities with Float, Frog, and Chicken status effects.

@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 #include "psx/types.h"
 
 /* Start the camera position, target and zoom moves toward the next keyframe

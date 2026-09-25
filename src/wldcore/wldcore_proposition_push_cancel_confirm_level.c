@@ -1,8 +1,4 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-
-void wldcore_list_build_proposition_detail_panel_image(
-    wldcore_menu_window_pair_render_level_t* level, s32 proposition, s32 coordinate_mode);
 
 /* Pushes the proposition confirmation level (type 0x13) for active
  * proposition `proposition`: unpacks its proposition row, hides the parent

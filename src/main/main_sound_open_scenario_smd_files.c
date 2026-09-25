@@ -1,5 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 int main_sound_open_scenario_smd_files(int scenario) {
     int checked_slots = 0;

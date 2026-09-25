@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 /* Non-const view of g_battle_action_display_image_rects: the header's const
  * lets GCC move these loads and changes the schedule. */

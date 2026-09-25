@@ -1,4 +1,4 @@
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 const u8* jobstts_cmd_set_semitrans_handler(const u8* data) {

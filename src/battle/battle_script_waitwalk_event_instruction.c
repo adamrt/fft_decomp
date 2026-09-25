@@ -1,5 +1,4 @@
-#include "fft/event.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 
 void battle_script_waitwalk_event_instruction(s32 unit_id) {
     s32 misc_id = battle_get_misc_id(unit_id);

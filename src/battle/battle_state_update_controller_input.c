@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "psx/pad.h"
 
 s32 battle_state_update_controller_input(void) {

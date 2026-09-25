@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_sound_set_sfx_echo(int sound_id, int echo) {

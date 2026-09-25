@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
 
 /* Pick the evade-animation type: Throw Stone is hardcoded to type 6, Item and
  * Throw abilities use the item-toss type 0x10, and everything else looks the

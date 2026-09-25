@@ -1,5 +1,3 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "fft/world.h"
 
 /* L1 + R1 + Select + Start restarts the game. */

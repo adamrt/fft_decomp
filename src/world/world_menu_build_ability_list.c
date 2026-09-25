@@ -11,9 +11,6 @@
  * calls in each arm. The ff-terminated copy takes an ignored third argument
  * (0 or the row count), as the target's call sites load $a2. */
 #include "fft/battle.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/text.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

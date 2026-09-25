@@ -1,4 +1,4 @@
-#include "fft/menu.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Toggle the 0x1c counter of the menu window buffer whose 0x08 field matches

@@ -6,10 +6,6 @@
  * the arc and a second saved field (distortion_target) used as the frame threshold.
  */
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_move.h"
-#include "fft/effect.h"
-#include "fft/main_gfx.h"
 #include "psx/types.h"
 
 void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_misc_data_t* unit) {

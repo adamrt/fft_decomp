@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
-#include "fft/script_variables.h"
-#include "fft/unit_slots.h"
 #include "fft/world.h"
 
 /* Biased base: encoded event-unit IDs 0x64..0x67 reach the four halfwords at

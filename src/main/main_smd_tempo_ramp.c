@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 u8* main_smd_tempo_ramp(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {

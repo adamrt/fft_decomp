@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_menu_free_memory(void* buffer_pointer) {
     u32 buffer = (u32)buffer_pointer;

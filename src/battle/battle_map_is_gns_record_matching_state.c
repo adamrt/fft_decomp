@@ -1,4 +1,4 @@
-#include "fft/map.h"
+#include "fft/battle.h"
 
 s32 battle_map_is_gns_record_matching_state(s32 comparison, s16 record_state, s16 requested_state) {
     s32 matches;

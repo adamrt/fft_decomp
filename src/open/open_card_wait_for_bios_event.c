@@ -1,4 +1,3 @@
-#include "fft/card.h"
 #include "fft/open.h"
 #include "psx/types.h"
 

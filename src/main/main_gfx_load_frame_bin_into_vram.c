@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* The three VRAM uploads read consecutive regions of FRAME.BIN after its

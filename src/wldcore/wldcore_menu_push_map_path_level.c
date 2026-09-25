@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
 #include "fft/wldcore.h"
-
-void wldcore_map_prepare_path_animation(s32 from, s32 to);
 
 /* Pushes menu level type 0x35, which animates the world-map path the script
  * asked to draw or erase: wldcore_map_prepare_path_animation prepares the path, then the step

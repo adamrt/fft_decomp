@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 job_data_t* main_job_get_data_pointer(s32 job_id) {
     if (job_id < JOB_ID_COUNT) {

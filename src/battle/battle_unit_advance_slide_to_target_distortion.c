@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
 
 /* Distortion animation 0x0f: slide a unit toward its target over
  * distortion_timer frames (used by Rush).

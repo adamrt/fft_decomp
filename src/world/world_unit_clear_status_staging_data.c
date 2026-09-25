@@ -1,4 +1,3 @@
-#include "fft/unit_slots.h"
 #include "fft/world.h"
 
 void world_unit_clear_status_staging_data(void) {

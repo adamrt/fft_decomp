@@ -1,6 +1,4 @@
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Pushes menu level type 0xd: a cursor window, an upper window, a 0x28x0x30
  * text record (0xb805) and a text record listing text 0xb84e, the location

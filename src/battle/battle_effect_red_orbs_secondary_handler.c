@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/main_sound.h"
 
 /*
  * Secondary effect function 0x06 (Red Orbs) in g_battle_effect_secondary_handlers.

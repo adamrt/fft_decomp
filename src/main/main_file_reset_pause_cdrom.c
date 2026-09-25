@@ -1,4 +1,4 @@
-#include "fft/main_file.h"
+#include "fft/main.h"
 #include "psx/cd.h"
 
 void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state) {

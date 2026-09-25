@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/main_sound.h"
 #include "psx/types.h"
 
 void battle_camera_zoom_map(s32 mode) {

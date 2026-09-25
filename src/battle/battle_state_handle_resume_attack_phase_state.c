@@ -1,7 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 struct battle_gfx_misc_data_header;
 extern void battle_gfx_invalidate_sp2_vram_slot(struct battle_gfx_misc_data_header*);

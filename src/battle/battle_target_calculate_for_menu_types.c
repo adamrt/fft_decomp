@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 /* Validates a copied action and runs the targeting routine for its menu type.

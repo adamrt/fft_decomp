@@ -1,7 +1,5 @@
 /* The switch jump table lives at .rodata 0x800671dc (0x18 bytes). */
-#include "fft/text.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
 
 /*

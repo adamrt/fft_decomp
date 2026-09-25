@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_move.h"
 
 /* Spread movement across horizontal jumps of up to half the acting unit's Jump.
  *

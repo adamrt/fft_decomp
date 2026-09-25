@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/thread.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Opens a panel list of the 64 entries whose location mask (word table at
  * g_wldcore_rumor_location_masks) includes the current location and whose script variable

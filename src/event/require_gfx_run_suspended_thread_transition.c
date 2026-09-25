@@ -1,6 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/require.h"
-#include "fft/thread.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_gfx_run_suspended_thread_transition(void) {

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 /*
  * Populate the AI block acting-unit fields for the unit whose turn is being prepared.

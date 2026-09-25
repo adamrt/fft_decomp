@@ -1,4 +1,4 @@
-#include "fft/attack.h"
+#include "fft/event_attack.h"
 
 /* Configure a sprite quad using truncated 4.12 fixed-point geometry. */
 void attack_gfx_set_scaled_poly_ft4_geometry(POLY_FT4* poly, attack_gfx_texture_page_position_t* texture_page,

@@ -1,8 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
-#include "fft/menu_types.h"
-#include "fft/text.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
 
@@ -11,7 +7,7 @@
  * head is exactly world_menu_text_layout_t; the halfword at +0x28 is the
  * scroll row this function sets and world_menu_draw_text_columns receives as
  * its `row_offset` argument. Proposed as a `s16 scroll_row;` field appended to
- * world_menu_text_layout_t in include/fft/world.h (size assert 0x28 -> 0x2c).
+ * world_menu_text_layout_t in include/fft/menu.h (size assert 0x28 -> 0x2c).
  */
 #define LAYOUT(entry) ((world_menu_scroll_text_layout_t*)(entry)->text_binding)
 

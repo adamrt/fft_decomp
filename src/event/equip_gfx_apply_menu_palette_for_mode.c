@@ -1,4 +1,4 @@
-#include "fft/battle.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 /* Select the menu-primitive palette bank from the calling thread's mode word

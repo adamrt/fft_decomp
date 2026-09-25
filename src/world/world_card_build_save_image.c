@@ -1,8 +1,3 @@
-#include "fft/card.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
-#include "fft/wldcore.h"
 #include "fft/world.h"
 #include "psx/libc.h"
 #include "psx/types.h"

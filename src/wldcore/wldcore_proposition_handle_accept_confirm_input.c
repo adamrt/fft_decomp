@@ -1,15 +1,5 @@
-#include "fft/character_identity.h"
-#include "fft/data.h"
-#include "fft/main_sound.h"
-#include "fft/script_variables.h"
-#include "fft/unit_flags.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/pad.h"
-
-void wldcore_list_open_available_propositions(void);
-void wldcore_proposition_push_send_unit_level(void);
-u32 wldcore_input_check_repeating_directional(u32 buttons);
 
 /* Input step of the proposition yes/no confirmation panel.
  *

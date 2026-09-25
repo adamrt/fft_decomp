@@ -1,6 +1,4 @@
-#include "fft/battle_menu_status_panel.h"
-#include "fft/main_heap.h"
-#include "fft/option.h"
+#include "fft/event_option.h"
 #include "psx/types.h"
 
 /* Reset the mutable fields and restore the embedded menu template. */

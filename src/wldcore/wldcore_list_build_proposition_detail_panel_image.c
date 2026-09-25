@@ -1,6 +1,4 @@
-#include "fft/text.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Build the image of the proposition detail panel for g_main_active_propositions[proposition]:
  * the elapsed/assigned day counts and the location go into text substitution

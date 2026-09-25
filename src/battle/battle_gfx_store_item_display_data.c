@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 typedef struct battle_gfx_item_graphic_data {
     u8 _pad0[0xc];

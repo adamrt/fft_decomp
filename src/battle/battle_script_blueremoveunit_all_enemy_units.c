@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/event.h"
 
 void battle_script_blueremoveunit_all_enemy_units(void) {
     s32 i;

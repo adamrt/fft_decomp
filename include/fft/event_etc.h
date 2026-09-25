@@ -1,8 +1,9 @@
-#ifndef FFT_ETC_H
-#define FFT_ETC_H
+#ifndef FFT_EVENT_ETC_H
+#define FFT_EVENT_ETC_H
 
-#include "psx/gpu.h"
-#include "psx/types.h"
+/* EVENT/ETC.OUT: menu screen overlay that runs with BATTLE. */
+
+#include "fft/battle.h"
 
 /* ETC uses byte loads for texture coordinates and halfword loads for screen
  * geometry. Preserve both views of each little-endian dimension component. */
@@ -26,7 +27,6 @@ typedef struct etc_graphic_dimensions {
     etc_graphic_dimension_component_t x;      /* 0x08 */
     etc_graphic_dimension_component_t y;      /* 0x0a */
 } etc_graphic_dimensions_t;
-
 typedef char etc_graphic_dimensions_size_check[sizeof(etc_graphic_dimensions_t) == 12 ? 1 : -1];
 
 typedef struct etc_graphic {
@@ -39,25 +39,24 @@ typedef struct etc_graphic {
     void* unknown_18;
     s32 texture_mode;
 } etc_graphic_t;
-
 typedef char etc_graphic_size_check[sizeof(etc_graphic_t) == 0x20 ? 1 : -1];
 
-extern const char g_etc_allocation_wait_message[];
 extern POLY_GT4 g_etc_graphic_chapter_primitives_a[2][4];
 extern POLY_GT4 g_etc_graphic_chapter_primitives_b[2][4];
 extern RECT g_etc_graphic_game_over_palette_rect;
 extern etc_graphic_t g_etc_graphics[13];
-/* BATTLE flag at 0x80165ff2, set by etc_graphic_open while a full-screen ETC
- * graphic is shown; BATTLE then draws primitives immediately instead of
- * linking them into the ordering table. */
-extern u16 g_battle_etc_graphics_enabled;
 
 void etc_graphic_build_chapter_polygons(
     s32 graphic_id, s32 fade, s32 dimension_set, s32 layer, volatile s32 primitives, s32 color);
+
 void etc_graphic_build_game_over_polygons(
     s32 graphic_id, s32 fade, s32 dimension_set, s32 reverse_order, POLY_GT4* primitives, s32 color);
+
 void etc_graphic_open(s32 graphic_id);
 void etc_graphic_show_async(void);
 void etc_graphic_show_chapter_title(s32 graphic_id);
 void etc_graphic_show_game_over(s32 graphic_id);
+
+extern const char g_etc_allocation_wait_message[];
+
 #endif

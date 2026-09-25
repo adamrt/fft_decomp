@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
 
 s32 battle_action_report_job_level_up(battle_unit_misc_data_t* misc) {
     if (misc->action_rewards.job_level_for_display != 0) {

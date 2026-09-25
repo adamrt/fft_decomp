@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/open.h"
 #include "psx/types.h"
 
 s32 open_card_get_info_with_retries(s32 port, s32 retry_limit) {

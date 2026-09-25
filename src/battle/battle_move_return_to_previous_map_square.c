@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 
 void battle_move_return_to_previous_map_square(battle_unit_misc_data_t* unit) {
     unit->map_x = unit->previous_map_x;

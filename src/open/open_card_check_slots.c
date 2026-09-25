@@ -1,4 +1,3 @@
-#include "fft/card.h"
 #include "fft/open.h"
 
 s32 open_card_check_slots(void) {

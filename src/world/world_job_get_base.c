@@ -1,5 +1,4 @@
-#include "fft/data.h"
-#include "fft/job.h"
+#include "fft/world.h"
 
 s16 world_job_get_base(s16 formation_idx) {
     world_formation_unit_t* unit = g_world_formation_unit_pointers[formation_idx];

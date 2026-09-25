@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 
 int main_sound_play_tune(int tune) {
     if (tune != 0) {

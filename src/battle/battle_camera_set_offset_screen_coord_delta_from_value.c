@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_camera_set_offset_screen_coord_delta_from_value(const s32* destination_value, s32 frame_count) {
     s32 animation_frames;

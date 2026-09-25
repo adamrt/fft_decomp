@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
 #include "psx/types.h"
 
 /*

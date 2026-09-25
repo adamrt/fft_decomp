@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
 
 /* Writes the acting unit's tile into unit's action fields (0x16e..) as the
  * target of skillset/ability and runs the attack preview.  Returns -1 when the

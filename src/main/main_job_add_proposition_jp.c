@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* Awards proposition JP to a roster unit's current generic job (special jobs

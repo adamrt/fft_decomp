@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/effect.h"
 
 void battle_effect_update_active_slots(s32 group) {
     s32 i;

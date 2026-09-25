@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* The live world-script record at 0x800d4840. It has the same 0x38-byte layout
  * as the g_main_saved_records slots it is copied into, so the copy below is a
@@ -39,9 +36,6 @@ typedef struct wldcore_world_script_state {
  * second callee-saved register holding 0x800d4840, where the target folds the
  * bias into a displacement off the single 0x800d484c base. */
 #define WLDCORE_RECORD(state) ((wldcore_world_script_record_t*)((u8*)(state) - 12))
-
-void wldcore_sound_play_pending_script_sounds(s32 low, s32 high, s32 value);
-s32 wldcore_sound_novel_update_countdown_timer(void);
 
 /* Runs the world-script interpreter until the active record yields. Each turn
  * refreshes the pending script sounds from script variables 0x5c-0x5e, then:

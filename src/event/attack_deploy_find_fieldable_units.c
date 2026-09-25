@@ -1,6 +1,4 @@
-#include "fft/attack.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
+#include "fft/event_attack.h"
 
 #define ATTACK_NAME_BYTES       16
 #define ATTACK_NAME_END         0xfe

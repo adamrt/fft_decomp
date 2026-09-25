@@ -1,8 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle.h"
-#include "fft/main_file.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_map_load_title_graphic(void) {

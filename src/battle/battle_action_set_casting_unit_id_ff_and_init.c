@@ -1,3 +1,4 @@
+#include "fft/battle.h"
 #include "psx/types.h"
 
 void battle_action_set_casting_unit_id_ff_and_init(void) {

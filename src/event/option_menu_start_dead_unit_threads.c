@@ -1,6 +1,4 @@
-#include "fft/main_unit.h"
-#include "fft/option.h"
-#include "fft/text.h"
+#include "fft/event_option.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

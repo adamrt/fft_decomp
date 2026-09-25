@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_unit_set_equippable_items(battle_stats_t* unit) {
     s32 support = unit->support_abilities[0];

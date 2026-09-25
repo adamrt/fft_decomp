@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/battle.h"
 
 void battle_noop_801a1328(void) {
     s32 unused[0x40];

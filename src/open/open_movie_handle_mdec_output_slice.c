@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/open.h"
 
 /* Uploads the decoded MDEC slice and starts decoding the next one.

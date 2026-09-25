@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 
 /* Tutorial topic text window set up by 0x80084578. */

@@ -5,7 +5,6 @@
  * as an explicit shift so loop.c does not merge the two computations; and
  * width + 1 goes through its own variable (the target adds left afterwards).
  */
-#include "fft/main_runtime.h"
 #include "fft/open.h"
 #include "psx/gpu.h"
 #include "psx/types.h"

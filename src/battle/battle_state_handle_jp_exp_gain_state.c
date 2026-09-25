@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
 
 /* Finish the JP/EXP gain state once the camera and map rotation settle.
  *

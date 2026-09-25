@@ -1,4 +1,4 @@
-#include "fft/battle.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_unit_calculate_actual_stats(battle_stats_t* unit, s32 mode) {

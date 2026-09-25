@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/open.h"
 
 void open_title_start_new_game_transition(void) {

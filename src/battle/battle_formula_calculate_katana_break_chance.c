@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
 #include "psx/types.h"
 
 /* Draw Out: roll the katana's break chance for the attacker's used item. */

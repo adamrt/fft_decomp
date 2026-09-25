@@ -1,4 +1,3 @@
-#include "fft/main_sound.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

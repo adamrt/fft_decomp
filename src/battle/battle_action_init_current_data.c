@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 s32 battle_action_init_current_data(s32 id) {

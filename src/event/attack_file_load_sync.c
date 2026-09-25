@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/event_attack.h"
 #include "psx/types.h"
 
 void attack_file_load_sync(s32 lba, s32 size, void* destination) {

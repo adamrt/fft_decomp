@@ -7,7 +7,6 @@
  * and breaks the target's shared or/sb tails.
  */
 #include "fft/battle.h"
-#include "fft/map.h"
 #include "psx/types.h"
 
 s32 battle_map_set_tile_data_value(s32 field, s32 x, s32 y, s32 layer, s32 value) {

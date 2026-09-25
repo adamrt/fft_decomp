@@ -1,4 +1,4 @@
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2) {

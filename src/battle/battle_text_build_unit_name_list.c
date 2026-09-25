@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 void battle_text_build_unit_name_list(void) {

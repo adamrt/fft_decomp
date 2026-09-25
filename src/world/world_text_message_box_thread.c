@@ -1,7 +1,3 @@
-#include "fft/battle_text.h"
-#include "fft/menu.h"
-#include "fft/script_variables.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/types.h"

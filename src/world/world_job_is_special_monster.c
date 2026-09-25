@@ -1,4 +1,4 @@
-#include "fft/job.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 s32 world_job_is_special_monster(s32 job_id) {

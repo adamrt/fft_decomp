@@ -1,4 +1,4 @@
-#include "fft/main_sound.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 /* SuzukiPlaySoundFindChannel with explicit volume and balance bytes; SMD

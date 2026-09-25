@@ -1,4 +1,4 @@
-#include "fft/menu_types.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Submit the twelve glyph packets and three framing packets. */

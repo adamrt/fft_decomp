@@ -2,10 +2,6 @@
  * the text binding's halfword table, masked to 11 bits, with 0x2b remapped
  * to 0x63 and bit 15 set; other kinds index g_world_menu_entry_text_id_tables) and hands it to the
  * text-character handler before parking the menu input state. */
-#include "fft/data.h"
-#include "fft/event.h"
-#include "fft/main_sound.h"
-#include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
 

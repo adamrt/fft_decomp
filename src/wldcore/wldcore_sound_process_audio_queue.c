@@ -1,5 +1,3 @@
-#include "fft/main_file.h"
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 
 /* Services the audio command FIFO: dequeues the next command when idle and

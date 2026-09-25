@@ -1,4 +1,4 @@
-#include "fft/battle.h"
+#include "fft/event_attack.h"
 #include "psx/gpu.h"
 
 void attack_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly) {

@@ -1,4 +1,4 @@
-#include "fft/card.h"
+#include "fft/event_card.h"
 #include "psx/types.h"
 
 const u8* card_cmd_set_otag_index_handler(const u8* data) {

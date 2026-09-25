@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 #include "psx/types.h"
 
 void equip_menu_init_and_draw_scrollable_list_simple(s32 a0, s32 a1, s32 a2, s32 g_main_input_secondary_repeat_period) {

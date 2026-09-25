@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/map.h"
-#include "fft/unit_slots.h"
 #include "psx/types.h"
 
 /* Fill `list` (BATTLE_UNIT_SLOT_COUNT bytes, 0xff padded) with the ids of present units whose

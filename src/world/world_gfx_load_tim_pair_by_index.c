@@ -1,4 +1,3 @@
-#include "fft/main_file.h"
 #include "fft/world.h"
 
 /* Load the 1-based `index`th TIM from each of the two tables into the record. */

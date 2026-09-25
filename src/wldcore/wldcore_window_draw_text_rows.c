@@ -1,6 +1,4 @@
-#include "fft/text.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* Redraw the send-unit layout render record: a window frame with one

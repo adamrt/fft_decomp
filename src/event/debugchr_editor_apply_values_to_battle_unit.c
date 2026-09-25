@@ -1,4 +1,4 @@
-#include "fft/debugchr.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 void debugchr_editor_apply_values_to_battle_unit(s32 unit_id) {

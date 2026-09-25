@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/data.h"
-#include "fft/map.h"
 
 struct battle_action_used_weapon_context;
 

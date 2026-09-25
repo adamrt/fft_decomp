@@ -1,4 +1,4 @@
-#include "fft/data.h"
+#include "fft/main.h"
 #include "psx/types.h"
 
 void main_party_clear_all(void) {

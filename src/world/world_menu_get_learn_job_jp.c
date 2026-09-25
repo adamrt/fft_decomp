@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 
 /* JP the selected unit has in the Learn Abilities menu's `index`th unlocked job. */

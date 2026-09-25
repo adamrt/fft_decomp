@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/effect.h"
 
 s32 battle_effect_code_script_06_load_callback_pointer(effect_record_t* effect) {
     u8* command = (u8*)(effect->pc + (s32)effect->script);

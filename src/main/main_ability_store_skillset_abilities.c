@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 /* 0x80066204: scratch list of a skillset's usable ability ids. */
 /* Copies the skillset's ability ids into g_main_ability_temp_list, keeping only the

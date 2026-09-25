@@ -7,8 +7,6 @@
 #include "fft/battle.h"
 #include "psx/types.h"
 
-/* g_battle_camera_quadrant_block_directions maps a camera quadrant index to its map-tile camera-block direction. */
-
 void battle_camera_choose_unblocked_rotation_for_tile(
     const battle_screen_coords_t* tile_coords, battle_camera_rotation_t* rotation_out) {
     map_tile_t* tile;

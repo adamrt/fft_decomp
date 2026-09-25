@@ -1,4 +1,5 @@
 #include "fft/battle.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 void world_script_wait_for_unit_ready(s32 misc_id) {

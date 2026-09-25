@@ -1,8 +1,5 @@
-#include "fft/main_unit.h"
+#include "fft/event_attack.h"
 
-#include "fft/attack.h"
-#include "fft/data.h"
-#include "fft/main_runtime.h"
 #include "psx/types.h"
 
 /* g_attack_editor_status_gauges.team_state. Accessed through the struct, GCC keeps its address in

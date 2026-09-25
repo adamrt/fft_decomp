@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Per-frame WLDCORE render pass with the 3D map: clears both ordering
  * tables, projects and draws the map tiles into the auxiliary table and the

@@ -1,4 +1,4 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
 
 battle_ai_direction_e battle_ai_find_direction_of_target(const s8* target, const s8* origin) {
     s32 z1 = target[2];

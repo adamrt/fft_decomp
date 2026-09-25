@@ -1,4 +1,4 @@
-#include "fft/equip.h"
+#include "fft/event_equip.h"
 
 /* Reorder the selected items according to their category's display order. */
 s32 equip_item_sort_list_by_category_order(item_menu_category_e category, s16* list) {

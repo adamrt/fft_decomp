@@ -1,4 +1,3 @@
-#include "fft/battle_runtime.h"
 #include "fft/effect.h"
 
 s32 effect_e456_map_step_unfreeze_state(s16 record_index, s32 byte_offset) {

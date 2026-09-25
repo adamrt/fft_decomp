@@ -1,4 +1,4 @@
-#include "fft/require.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 void require_panel_set_transition_value(s32 value) {

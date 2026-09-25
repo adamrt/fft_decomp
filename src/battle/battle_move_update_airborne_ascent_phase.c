@@ -1,4 +1,4 @@
-#include "fft/battle_move.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Advances a jumping unit's ascent. Once its vertical velocity is no longer

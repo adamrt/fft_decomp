@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_unit_store_ramza_name_birthday_zodiac(battle_stats_t* unit) {
     s32 slot;

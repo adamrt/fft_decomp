@@ -1,7 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/menu.h"
-#include "fft/thread.h"
+#include "fft/battle.h"
 #include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"

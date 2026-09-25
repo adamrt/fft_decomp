@@ -1,8 +1,3 @@
-#include "fft/data.h"
-#include "fft/job.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
-#include "fft/script_variables.h"
 #include "fft/world.h"
 #include "psx/libc.h"
 #include "psx/types.h"

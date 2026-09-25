@@ -1,14 +1,4 @@
-#include "fft/geometry.h"
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
-
-void wldcore_list_open_set_script_variables_03c0_03ff(void);
-s32 world_menu_get_event_state_flag(void);
-
-void world_gfx_set_portrait_poly_texture(POLY_FT4* poly, s32 code);
 
 /* Per-frame step of the brave-story detail level.
  *

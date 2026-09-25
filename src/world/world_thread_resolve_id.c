@@ -1,4 +1,4 @@
-#include "fft/thread.h"
+#include "fft/world.h"
 
 s32 world_thread_resolve_id(s32 thread_id) {
     s32 index;

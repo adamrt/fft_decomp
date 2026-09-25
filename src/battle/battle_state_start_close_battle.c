@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_state_start_close_battle(s32 duration) {
     g_animation_speed = 2;

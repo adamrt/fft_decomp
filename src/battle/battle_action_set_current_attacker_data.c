@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
-#include "fft/main_heap.h"
 #include "psx/types.h"
 
 void battle_action_set_current_attacker_data(battle_stats_t* unit) {

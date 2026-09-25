@@ -1,4 +1,3 @@
-#include "fft/script_variables.h"
 #include "fft/world.h"
 
 /* Camera yaw normalised into 0..0xfff. */

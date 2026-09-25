@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
 
 /*
  * Unlink a Misc unit_t record from the list and release its per-unit slot.

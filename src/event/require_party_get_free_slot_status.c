@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/event_require.h"
 #include "psx/types.h"
 
 s32 require_party_get_free_slot_status(s32 unit_id) {

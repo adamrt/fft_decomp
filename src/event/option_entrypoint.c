@@ -1,6 +1,4 @@
-#include "fft/battle_runtime.h"
-#include "fft/main_runtime.h"
-#include "fft/option.h"
+#include "fft/event_option.h"
 #include "psx/types.h"
 
 /* Decode saved option fields and dispatch the requested option-menu mode. */

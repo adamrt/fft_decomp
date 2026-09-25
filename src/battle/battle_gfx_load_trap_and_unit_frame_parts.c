@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_gfx.h"
-#include "fft/main_runtime.h"
 
 /* s16 view of battle_gfx_store_sprite_display_data: the target sign-extends
  * u, v, width and height, which its u16 prototype would andi 0xffff. */

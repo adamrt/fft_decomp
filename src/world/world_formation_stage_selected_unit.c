@@ -1,4 +1,3 @@
-#include "fft/data.h"
 #include "fft/world.h"
 #include "psx/libc.h"
 

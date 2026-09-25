@@ -1,6 +1,4 @@
-#include "fft/main_file.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_entd_init_event_unit_data(int event_id) {
     entd_encounter_t* entd;

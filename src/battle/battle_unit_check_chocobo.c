@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 s32 battle_unit_check_chocobo(battle_stats_t* unit) {

@@ -1,4 +1,4 @@
-#include "fft/battle_gfx.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* A texture primitive is either a SPRT (code 0x64-0x67) or a POLY_FT4. */

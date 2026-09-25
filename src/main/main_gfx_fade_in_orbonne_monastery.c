@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 
 void main_gfx_fade_in_orbonne_monastery(void) {
     POLY_F4 fade_polygons[2];

@@ -1,6 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/map.h"
+#include "fft/battle.h"
 
 /*
  * Test whether the terrain selects the considered Geomancy ability.

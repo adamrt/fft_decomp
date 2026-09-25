@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 u8 main_party_calculate_highest_level(void) {
     u8 highest;

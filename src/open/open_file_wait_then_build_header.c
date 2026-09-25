@@ -1,4 +1,3 @@
-#include "fft/main_runtime.h"
 #include "fft/open.h"
 
 void open_file_wait_then_build_header(

@@ -3,13 +3,6 @@
  * (same code, globals and callees rebound).
  */
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/main_runtime.h"
-#include "fft/menu_types.h"
-#include "fft/option.h"
-#include "fft/text.h"
-#include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /*
@@ -53,8 +46,6 @@ typedef char battle_menu_at_list_work_descriptors_offset_must_be_0x684
     [((unsigned long)&((battle_menu_at_list_work_t*)0)->descriptors == 0x684) ? 1 : -1];
 
 #define LAYOUT(entry) ((world_menu_scroll_text_layout_t*)(entry)->text_binding)
-
-extern world_menu_scroll_text_layout_t g_battle_menu_at_list_layout;
 
 /*
  * Build the AT (turn order) list previewing the ability the player is about to

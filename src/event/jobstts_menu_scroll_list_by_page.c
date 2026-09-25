@@ -1,5 +1,4 @@
-#include "fft/jobstts.h"
-#include "fft/main_sound.h"
+#include "fft/event_jobstts.h"
 
 /* Rebase a scrollable list by one page while preserving its selected row.
  *

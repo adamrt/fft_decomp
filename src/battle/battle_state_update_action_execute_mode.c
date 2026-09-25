@@ -1,11 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_camera.h"
-#include "fft/battle_effect.h"
-#include "fft/battle_gfx.h"
-#include "fft/battle_move.h"
-#include "fft/main_gfx.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 
 void battle_state_update_action_execute_mode(void) {
     battle_unit_misc_data_t* unit;

@@ -1,6 +1,4 @@
 #include "fft/effect.h"
-#include "fft/effect_wave_mesh.h"
-#include "fft/main_gfx.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/types.h"

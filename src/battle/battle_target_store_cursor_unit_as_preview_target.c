@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/option.h"
 
 void battle_target_store_cursor_unit_as_preview_target(void) {
     battle_unit_misc_data_t* misc

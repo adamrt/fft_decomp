@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* World render/present pass with the 3D map, plus the menu-window handoff.
  *

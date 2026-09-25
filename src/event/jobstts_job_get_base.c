@@ -1,5 +1,4 @@
-#include "fft/job.h"
-#include "fft/jobstts.h"
+#include "fft/event_jobstts.h"
 #include "psx/types.h"
 
 s32 jobstts_job_get_base(s16 unit_id) {

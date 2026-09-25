@@ -1,5 +1,4 @@
-#include "fft/battle_ai.h"
-#include "fft/unit_slots.h"
+#include "fft/battle.h"
 
 /*
  * Save baseline unit data, or suspend simulated status and restore baseline status.

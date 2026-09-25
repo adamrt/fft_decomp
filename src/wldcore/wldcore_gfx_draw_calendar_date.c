@@ -1,9 +1,5 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"
-
-s32 world_script_get_variable(s32 variable);
 
 void wldcore_gfx_draw_calendar_date(GsOT* ot) {
     wldcore_anim_draw_request_t request;

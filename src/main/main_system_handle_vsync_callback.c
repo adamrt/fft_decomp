@@ -1,4 +1,4 @@
-#include "fft/main_runtime.h"
+#include "fft/main.h"
 
 void main_system_handle_vsync_callback(void) {
     rand();

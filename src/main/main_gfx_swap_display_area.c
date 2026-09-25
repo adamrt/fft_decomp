@@ -1,4 +1,4 @@
-#include "fft/main_gfx.h"
+#include "fft/main.h"
 #include "psx/gpu.h"
 
 int main_gfx_swap_display_area(u32 otag) {

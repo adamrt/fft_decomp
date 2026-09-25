@@ -1,7 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_ai.h"
-#include "fft/main_heap.h"
-#include "fft/map.h"
 #include "psx/etc.h"
 
 /* Local view of battle_ai_data_t::walkable_tiles as level/y rows. */

@@ -1,4 +1,4 @@
-#include "fft/job.h"
+#include "fft/world.h"
 #include "psx/types.h"
 
 /* Map a generic job id (Squire..Mime) to its 0-based index; anything else is 0.

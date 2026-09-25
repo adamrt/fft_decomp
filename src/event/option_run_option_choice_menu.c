@@ -10,22 +10,10 @@
  *   `i = 0`, so the slt result pseudo keeps its flow refs, gets no register, and reload gives
  *   it the target's second unreferenced 8-byte slot (frame 0x60; the text loop's entry test
  *   supplies the first). */
-#include "fft/battle.h"
-#include "fft/battle_menu_window.h"
-#include "fft/main_heap.h"
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
-#include "fft/menu.h"
-#include "fft/menu_types.h"
-#include "fft/option.h"
-#include "fft/options.h"
-#include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/event_option.h"
 #include "psx/gpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
-
-extern world_input_timing_profile_t g_option_input_repeat_timings[];
 
 void option_run_option_choice_menu(void) {
     RECT rect;

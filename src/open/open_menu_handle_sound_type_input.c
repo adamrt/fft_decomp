@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/main_sound.h"
 #include "fft/open.h"
-#include "fft/options.h"
 #include "psx/pad.h"
 
 #define OPEN_SOUND_MENU_ENTRY_HIGHLIGHTED 9

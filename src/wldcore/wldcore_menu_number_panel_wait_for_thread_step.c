@@ -1,9 +1,5 @@
-#include "fft/main_sound.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"
-
-void wldcore_list_open_available_propositions(void);
-void wldcore_proposition_push_dispatch_confirm_level(void);
 
 /* Input step of a number-panel level that waits on WORLD thread 12: once the
  * thread finishes, the pending result (level->result) selects which resume

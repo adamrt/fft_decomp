@@ -1,6 +1,4 @@
-#include "fft/battle_ability.h"
-#include "fft/bunit.h"
-#include "fft/data.h"
+#include "fft/event_bunit.h"
 #include "psx/types.h"
 
 u32 bunit_ability_get_jp_cost_display_value(s32 index) {

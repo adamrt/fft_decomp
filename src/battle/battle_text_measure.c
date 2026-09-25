@@ -1,9 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_text.h"
-#include "fft/data.h"
-#include "fft/main_unit.h"
-#include "fft/text.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 #define TEXT_STATE ((world_text_backreference_state_t*)0x1F800000)

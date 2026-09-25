@@ -1,6 +1,4 @@
 #include "fft/battle.h"
-#include "fft/battle_effect.h"
-#include "fft/thread.h"
 #include "psx/types.h"
 
 void battle_script_teleportout_event_instruction(s32 unit_id, s32 remove) {

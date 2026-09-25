@@ -1,6 +1,4 @@
-#include "fft/data.h"
-#include "fft/main_runtime.h"
-#include "fft/main_unit.h"
+#include "fft/battle.h"
 #include "psx/types.h"
 
 /* Remove the target's equipment named by the action's destroyed-slot mask.

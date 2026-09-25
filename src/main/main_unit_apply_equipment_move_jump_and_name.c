@@ -1,4 +1,4 @@
-#include "fft/main_unit.h"
+#include "fft/main.h"
 
 void main_unit_apply_equipment_move_jump_and_name(battle_stats_t* unit) {
     main_unit_set_equipment_stats(unit);

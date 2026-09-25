@@ -1,7 +1,4 @@
-#include "fft/main_runtime.h"
-#include "fft/script_variables.h"
 #include "fft/wldcore.h"
-#include "fft/world.h"
 
 /* Builds the town menu list level that wldcore_bar_handle_menu_input steps: row kinds 0
  * (rumors) and 4 (leave) always, 1 (wldcore_list_open_available_propositions) when script variable 0x91

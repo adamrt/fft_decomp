@@ -1,6 +1,5 @@
 #include "fft/battle.h"
-#include "fft/debugchr.h"
-#include "fft/option.h"
+#include "fft/event_debugchr.h"
 #include "psx/types.h"
 
 void battle_menu_open_debugchr_unit_editor(void) {

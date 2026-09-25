@@ -1,6 +1,4 @@
-#include "fft/attack.h"
-#include "fft/battle_menu_status_panel.h"
-#include "fft/event.h"
+#include "fft/event_attack.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 

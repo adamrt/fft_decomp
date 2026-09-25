@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/main_runtime.h"
 
 void battle_state_set_free_cursor(void) {
     battle_unit_misc_data_t* unit;

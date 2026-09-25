@@ -1,6 +1,4 @@
-#include "fft/battle_runtime.h"
-#include "fft/option.h"
-#include "fft/thread.h"
+#include "fft/event_option.h"
 #include "psx/types.h"
 
 /* Close the AT list's worker set and restore the parent option threads. */

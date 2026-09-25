@@ -1,5 +1,4 @@
 #include "fft/battle.h"
-#include "fft/job.h"
 #include "psx/types.h"
 
 /* Formula 0x58 "Set Morbol: Hit(MA+X)%". */

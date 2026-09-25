@@ -1,4 +1,4 @@
-#include "fft/data.h"
+#include "fft/world.h"
 
 /* Ramza's sprite sets and guest roster slots cannot be
  * dismissed. */
