@@ -2,19 +2,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct open_font_metrics {
-    /* 0x00 */ u8 u;
-    /* 0x01 */ u8 v;
-    /* 0x02 */ u8 flags;
-    /* 0x03 */ u8 bearing;
-    /* 0x04 */ u8 height;
-    /* 0x05 */ u8 width;
-    /* 0x06 */ u8 descender;
-    /* 0x07 */ u8 advance;
-} open_font_metrics_t;
-
-extern open_font_metrics_t* g_open_script_font_metrics;
-
 #define G g_open_script_state.records[index].glyphs[drawn]
 
 /* Lays out one OPEN script text line as textured glyph quads.

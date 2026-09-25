@@ -26,6 +26,18 @@ typedef enum open_script_dispatch_flag {
     OPEN_SCRIPT_DISPATCH_DECREASE_FADE_INTENSITY = 0x80,
 } open_script_dispatch_flag_e;
 
+/* Eight-byte glyph metrics record addressed by OPEN script text. */
+typedef struct open_font_metrics {
+    u8 u;
+    u8 v;
+    u8 flags;
+    u8 bearing;
+    u8 height;
+    u8 width;
+    u8 descender;
+    u8 advance;
+} open_font_metrics_t;
+
 /* Two-word point: music-test window extent/origin, sprite CLUT position and
  * the birthday menu's text origin. The birthday menu passes it by value; the
  * target homes a2/a3 into the incoming argument slots, which GCC 2.6.3 only
@@ -409,6 +421,7 @@ extern open_overlay_fade_t g_open_gfx_overlay_fade;
 extern s32 g_open_movie_stream_status;
 extern u32 g_open_movie_width;
 extern open_script_state_t g_open_script_state;
+extern open_font_metrics_t* g_open_script_font_metrics;
 /* Scalar views of g_open_script_state words. open_opcode_store_s16_and_advance,
  * open_script_update_timing_and_record_values and
  * open_gfx_update_opntex_sequence load and store each of these by absolute
