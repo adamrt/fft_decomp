@@ -26,11 +26,11 @@ typedef struct battle_map_mesh_part_view {
     u8 _unknown_90[8];    /* 0x90 */
 } battle_map_mesh_part_view_t;
 
-typedef struct battle_weather_splash_rects {
+typedef struct battle_map_weather_splash_rects {
     RECT rects[4];
-} battle_weather_splash_rects_t;
+} battle_map_weather_splash_rects_t;
 
-extern battle_weather_splash_rects_t g_battle_map_weather_splash_uv_rects;
+extern battle_map_weather_splash_rects_t g_battle_map_weather_splash_uv_rects;
 
 extern battle_map_mesh_part_view_t g_battle_map_mesh_parts_view[9];
 extern void* g_current_effect_work;
@@ -61,7 +61,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     MATRIX light_rotation;
     MATRIX light_matrix;
     MATRIX effect_matrix;
-    battle_weather_splash_rects_t splash_uv;
+    battle_map_weather_splash_rects_t splash_uv;
     battle_weather_sprite_rects_t drop_uv;
     VECTOR effect_translation;
     VECTOR unused_vector;

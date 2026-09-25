@@ -26,7 +26,7 @@ void require_reward_load_bonus_image(s32 image_id) {
         } while (battle_thread_call_on_main_stack() != 0);
     }
 
-    LoadImage((RECT*)g_require_reward_bonus_image_rect, (u32*)allocation);
+    LoadImage(&g_require_reward_bonus_image_rect, (u32*)allocation);
     /* The file stores 200 rows of 64 halfwords (0x6400 bytes) of pixels, then the palette. */
     LoadImage(&g_require_reward_bonus_palette_rect, (u32*)((u8*)allocation + 0x6400));
     battle_thread_yield();

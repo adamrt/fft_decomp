@@ -3,17 +3,6 @@
 
 #define NULL ((void*)0)
 
-/* This handler's view of effect_geometry_entry_t: 0x4c selects the work
- * vertices that seed the emitter and 0xa8/0xaa bound its active frames. */
-typedef struct effect_particle_vertex_emitter_view {
-    u8 _unknown_00[0x4c];
-    s16 vertex_group; /* 0x4c: 1-12 one vertex, 13 row 0, 14 rows 1-4 */
-    u8 _unknown_4e[0x5a];
-    s16 start_frame; /* 0xa8 */
-    s16 end_frame;   /* 0xaa */
-    u8 _unknown_ac[0x18];
-} effect_particle_vertex_emitter_view_t;
-
 /* Banish particle handler: phase 1 allocates the 0x200-byte vertex work and
  * enables map data groups 1-6, phase 2 spawns each active emitter's particles
  * at its work vertices, phase 3 frees the work.

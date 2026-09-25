@@ -5,18 +5,18 @@
 #include "psx/types.h"
 
 /* Two draw modes and three sprites, double-buffered by the thread below. */
-typedef struct world_text_window_record {
+typedef struct world_menu_text_window_record {
     DR_MODE mode_a;
     DR_MODE mode_b;
     SPRT sprite_a;
     SPRT sprite_b;
     SPRT sprite_c;
-} world_text_window_record_t;
+} world_menu_text_window_record_t;
 
 /* Signed window view of world_menu_entry_t: the target clamps the x/y origin
  * at 0x08/0x0a as signed halfwords (world_menu_entry_t types 0x08 as u16) and
  * reads a pointer to two text substitution words at 0x34. */
-typedef struct world_text_window_entry {
+typedef struct world_menu_text_window_entry {
     s16 image_x;       /* 0x00 */
     s16 image_y;       /* 0x02 */
     s16 width;         /* 0x04 */
@@ -33,7 +33,7 @@ typedef struct world_text_window_entry {
     u8 unknown_1e[0x34 - 0x1e];
     s32* text_values; /* 0x34 */
     u8 unknown_38[0x3c - 0x38];
-} world_text_window_entry_t;
+} world_menu_text_window_entry_t;
 
 /* Main menu text window thread:
  * sizes the entry's window to its text, clamps it on screen, redraws the text
@@ -41,11 +41,11 @@ typedef struct world_text_window_entry {
  * the window in 8-pixel steps toward the scroll-dependent target x. */
 void world_main_menu_text_window_thread(void) {
     RECT rect;
-    world_text_window_record_t records[2];
+    world_menu_text_window_record_t records[2];
     s16 width;
     s16 height;
-    world_text_window_entry_t* entry;
-    world_text_window_record_t* record;
+    world_menu_text_window_entry_t* entry;
+    world_menu_text_window_record_t* record;
     void* buffer;
     s32 i;
     s32 phase;
@@ -58,7 +58,8 @@ void world_main_menu_text_window_thread(void) {
     world_gfx_set_draw_mode_from_rect(&record->mode_a, (u16*)entry);
     world_gfx_set_image_draw_mode(&record->mode_b, 0);
     /* The target also passes a2 = 0 to this two-argument callee. */
-    ((void (*)(world_text_window_entry_t*, SPRT*, s32))world_menu_build_layout_sprites)(entry, &record->sprite_b, 0);
+    ((void (*)(world_menu_text_window_entry_t*, SPRT*, s32))world_menu_build_layout_sprites)(
+        entry, &record->sprite_b, 0);
     world_script_copy_bytes(g_world_text_substitution_values_backup, g_world_text_substitution_values, 0x80);
     g_world_text_substitution_values[0] = entry->text_values[0];
     g_world_text_substitution_values[1] = entry->text_values[1];
@@ -87,13 +88,13 @@ void world_main_menu_text_window_thread(void) {
         entry->y = -0x68;
     }
     /* The callee types this RECT, record and SPRT as raw u16 and POLY_FT4 pointers. */
-    ((void (*)(RECT*, world_text_window_entry_t*, SPRT*))world_menu_init_quad_from_record)(
+    ((void (*)(RECT*, world_menu_text_window_entry_t*, SPRT*))world_menu_init_quad_from_record)(
         &rect, entry, &record->sprite_a);
     SetSemiTrans(&record->sprite_a, 1);
     SetShadeTex(&record->sprite_a, 0);
     SetSemiTrans(&record->sprite_b, 1);
     SetShadeTex(&record->sprite_b, 0);
-    world_script_copy_bytes(&records[1], &records[0], sizeof(world_text_window_record_t));
+    world_script_copy_bytes(&records[1], &records[0], sizeof(world_menu_text_window_record_t));
     target = 0;
     for (i = 0;; i++) {
         record = &records[i & 1];

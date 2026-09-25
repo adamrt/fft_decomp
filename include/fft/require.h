@@ -124,7 +124,7 @@ extern s32 g_require_party_affected_battle_unit_indices[];
 extern s32 g_require_party_affected_unit_count;
 extern s32 g_require_party_affected_unit_message_args[];
 extern s32 g_require_party_affected_unit_message_ids[];
-extern const s16 g_require_reward_bonus_image_rect[];
+extern RECT g_require_reward_bonus_image_rect;
 extern RECT g_require_reward_bonus_palette_rect;
 extern s32 g_require_reward_war_trophy_entry_count;
 extern s32 g_require_reward_war_trophy_entry_types[];

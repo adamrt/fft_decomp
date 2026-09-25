@@ -8,7 +8,7 @@
 
 /* Text image record handed to world_menu_render_text_image_at_fixed_origin;
  * the leading fields follow world_menu_text_image_t. */
-typedef struct world_text_box_record {
+typedef struct world_text_message_box_record {
     void* buffer;    /* 0x00 */
     u16 width;       /* 0x04 */
     u16 height;      /* 0x06 */
@@ -28,7 +28,7 @@ typedef struct world_text_box_record {
     s16 lines;       /* 0x2e */
     s16 tail_offset; /* 0x30: world_menu_build_and_upload_window_image tail offset */
     u8 unk_32[0x50 - 0x32];
-} world_text_box_record_t;
+} world_text_message_box_record_t;
 
 /* Record `index` of the window buffer pair; the offset is the first addu
  * operand in the target, which plain `&win[index]` does not reproduce. */
@@ -55,7 +55,7 @@ typedef struct world_text_box_record {
  * constant is what reproduces the target's 0xFFFF reloads and its reload
  * register rotation. */
 void world_text_message_box_thread(void) {
-    world_text_box_record_t rec;
+    world_text_message_box_record_t rec;
     RECT from;
     RECT to;
     s32 column;

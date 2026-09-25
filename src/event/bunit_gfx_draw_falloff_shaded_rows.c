@@ -9,7 +9,7 @@ typedef struct {
     u8 unk_10[8];              /* 0x10 */
     u8 colors[16];             /* 0x18 */
     u8 brightness[16][5];      /* 0x28 */
-} bunit_shaded_background_work_t;
+} bunit_gfx_shaded_background_work_t;
 
 /* Draw rows of gouraud-textured quads whose vertex brightness falls off with
  * distance from the animated focal point.
@@ -19,7 +19,7 @@ typedef struct {
  * addresses stay unreduced as in the target, while the extra loop nesting
  * gives the reference weights that decide the target's register choice. */
 void bunit_gfx_draw_falloff_shaded_rows(s32 y) {
-    bunit_shaded_background_work_t work;
+    bunit_gfx_shaded_background_work_t work;
     s32 row;
     s32 col;
     s32 brightness;

@@ -14,14 +14,14 @@ typedef struct {
     u8 h_hi;   /* 0x07 */
     u16 clut;  /* 0x08 */
     u16 tpage; /* 0x0A */
-} bunit_row_sprite_t;
+} bunit_cmd_row_sprite_t;
 
 u8* bunit_cmd_draw_row_callback_quad_handler(u8* cmd) {
-    bunit_row_sprite_t* entry;
+    bunit_cmd_row_sprite_t* entry;
     s32 row;
-    bunit_row_sprite_t* (*callback)(s32);
+    bunit_cmd_row_sprite_t* (*callback)(s32);
 
-    callback = (bunit_row_sprite_t * (*)(s32)) g_bunit_menu_row_callbacks[cmd[2]];
+    callback = (bunit_cmd_row_sprite_t * (*)(s32)) g_bunit_menu_row_callbacks[cmd[2]];
     if (g_bunit_menu_scroll_list_active == 0) {
         row = cmd[3];
     } else {

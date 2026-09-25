@@ -10,9 +10,9 @@ typedef struct {
     u16 h;
     u16 dx;
     u16 dy;
-} bunit_sprite_entry_t;
+} bunit_menu_button_sprite_entry_t;
 
-extern bunit_sprite_entry_t g_bunit_slot_sprite_entries[];
+extern bunit_menu_button_sprite_entry_t g_bunit_slot_sprite_entries[];
 
 /* Draw one slot's span of g_bunit_slot_sprite_entries sprite entries at (x, y).
  *
@@ -69,7 +69,7 @@ void bunit_menu_draw_pressable_button(s16 slot, s16 x, s32 y, s16 pressed, s16 b
     desc.quad.tpage = g_bunit_menu_icon_texture_page;
     if (count > 0) {
         do {
-            bunit_sprite_entry_t* sprite = &g_bunit_slot_sprite_entries[entry];
+            bunit_menu_button_sprite_entry_t* sprite = &g_bunit_slot_sprite_entries[entry];
             desc.quad.x = x + sprite->dx;
             desc.quad.y = y + sprite->dy;
             desc.quad.w = abs(g_bunit_menu_button_piece_scales[entry][0] * (s16)sprite->w) >> 12;

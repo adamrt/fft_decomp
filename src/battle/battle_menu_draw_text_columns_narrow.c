@@ -10,8 +10,8 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-struct battle_text_position;
-extern void battle_menu_draw_stacked_glyph_pair(void* buffer, struct battle_text_position* origin);
+struct battle_menu_text_position;
+extern void battle_menu_draw_stacked_glyph_pair(void* buffer, struct battle_menu_text_position* origin);
 
 /* Draw the visible rows of a three-column menu text layout (text 8 pixels
  * narrower than the entry). Text columns append text 0x5088 for rows whose
@@ -59,7 +59,7 @@ void battle_menu_draw_text_columns_narrow(world_menu_entry_t* entry, s32* row_of
                         || ((world_ability_skill_use_tables_t*)g_battle_ai_workspace_ptr)->target[index] == 0)) {
                     g_menu_text_state.origin_y += 2;
                     battle_menu_draw_stacked_glyph_pair(
-                        buffer, (struct battle_text_position*)&g_menu_text_state.origin_x);
+                        buffer, (struct battle_menu_text_position*)&g_menu_text_state.origin_x);
                 } else {
                     value = (u16)layout->text_ids[column][index];
                     if (value & 0x7FF) {

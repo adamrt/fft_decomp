@@ -3,9 +3,9 @@
 typedef struct {
     POLY_FT4 poly;
     POLY_F3 tri[2];
-} arrow_gfx_t;
+} attack_deploy_arrow_gfx_t;
 
-extern arrow_gfx_t g_attack_deploy_screen_arrow;
+extern attack_deploy_arrow_gfx_t g_attack_deploy_screen_arrow;
 
 /* Build the textured deployment banner and its two arrowhead triangles. */
 void attack_deploy_build_screen_arrow(void) {

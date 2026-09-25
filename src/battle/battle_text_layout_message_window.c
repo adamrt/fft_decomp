@@ -2,7 +2,7 @@
 #include "fft/battle_text.h"
 
 /* Message window layout; only the fields written here are named. */
-typedef struct battle_message_window_layout {
+typedef struct battle_text_message_window_layout {
     u8 _unknown_00[4];
     s16 width_04;
     s16 height_06;
@@ -15,7 +15,7 @@ typedef struct battle_message_window_layout {
     s16 height_16;
     u8 _unknown_18[4];
     s16 text_id; /* 0x1c */
-} battle_message_window_layout_t;
+} battle_text_message_window_layout_t;
 
 /*
  * Size a message window to its text entry.
@@ -25,7 +25,7 @@ typedef struct battle_message_window_layout {
  * multiple of 4 plus 0x18 border, and centres the window on x = 0x102.
  */
 void battle_text_layout_message_window(
-    battle_message_window_layout_t* window, s16* width, s16* height, s32* extra_frames, s32 pad_short) {
+    battle_text_message_window_layout_t* window, s16* width, s16* height, s32* extra_frames, s32 pad_short) {
     u8* text;
 
     text = battle_text_init_entry(window->text_id);

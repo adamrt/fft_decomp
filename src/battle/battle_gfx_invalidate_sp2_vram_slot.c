@@ -1,11 +1,11 @@
 #include "fft/battle_gfx.h"
 
-typedef struct battle_misc_data_header {
+typedef struct battle_gfx_misc_data_header {
     u8 padding[4];
     u8 entd_id;
-} battle_misc_data_header_t;
+} battle_gfx_misc_data_header_t;
 
-void battle_gfx_invalidate_sp2_vram_slot(battle_misc_data_header_t* unit) {
+void battle_gfx_invalidate_sp2_vram_slot(battle_gfx_misc_data_header_t* unit) {
     u32 invalid;
     u8* slot;
     s32 count;

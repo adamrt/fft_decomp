@@ -1,9 +1,8 @@
+#include "fft/event.h"
 #include "fft/main_sound.h"
 #include "fft/open.h"
 #include "fft/thread.h"
 #include "fft/world.h"
-
-void world_text_character_handling_thread(void);
 
 /* The thread-2 controller record reuses the first two words as
  * run_followup (0x00) and result (0x04). */

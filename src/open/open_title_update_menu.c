@@ -22,7 +22,6 @@ typedef struct open_title_controller {
 } open_title_controller_t;
 
 s32 CdPosToInt(u8* loc);
-void open_title_push_menu_controller(s32 mode);
 void open_menu_push_sound_type_controller(void);
 void open_title_start_new_game_or_clear_file_buffer(void);
 

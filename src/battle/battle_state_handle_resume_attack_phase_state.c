@@ -3,8 +3,8 @@
 #include "fft/main_gfx.h"
 #include "fft/main_runtime.h"
 
-struct battle_misc_data_header;
-extern void battle_gfx_invalidate_sp2_vram_slot(struct battle_misc_data_header*);
+struct battle_gfx_misc_data_header;
+extern void battle_gfx_invalidate_sp2_vram_slot(struct battle_gfx_misc_data_header*);
 
 void battle_state_handle_resume_attack_phase_state(void) {
     s32 facing;
@@ -30,7 +30,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
             main_heap_free(g_battle_gfx_sp2_data);
             g_battle_gfx_sp2_data = 0;
         }
-        battle_gfx_invalidate_sp2_vram_slot((struct battle_misc_data_header*)unit);
+        battle_gfx_invalidate_sp2_vram_slot((struct battle_gfx_misc_data_header*)unit);
         if (g_action_type == BATTLE_TURN_EVENT_UNIT_READY && g_battle_action_phase == 1) {
             facing = *(s16*)&unit->facing;
             if (facing < 0) {

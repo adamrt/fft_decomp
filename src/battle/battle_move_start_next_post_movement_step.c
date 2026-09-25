@@ -6,12 +6,12 @@
 #include "fft/main_sound.h"
 
 /* Rare/common item result copied from battle_map_determine_rare_common_item. */
-typedef struct battle_found_item {
+typedef struct battle_move_found_item {
     s32 field_0;
     u8 item_id; /* 0x4 */
-} battle_found_item_t;
+} battle_move_found_item_t;
 
-extern battle_found_item_t g_battle_move_find_display_item;
+extern battle_move_found_item_t g_battle_move_find_display_item;
 
 extern void battle_gfx_store_item_display_data(battle_gfx_render_unit_t*, u32);
 extern s32 battle_unit_learn_from_crystal(battle_stats_t* stats, s32 outcome);
@@ -99,7 +99,7 @@ s32 battle_move_start_next_post_movement_step(void) {
     }
     if (g_battle_move_find_result & 4) {
         g_battle_move_find_display_item
-            = *(battle_found_item_t*)battle_map_determine_rare_common_item(casting->battle_data);
+            = *(battle_move_found_item_t*)battle_map_determine_rare_common_item(casting->battle_data);
         battle_gfx_store_item_display_data((battle_gfx_render_unit_t*)source, g_battle_move_find_display_item.item_id);
         battle_unit_store_animation_facing_movement_data(0x33, (s16)source->facing, source);
         if (!(source->team_flags & BATTLE_TEAM_MASK)) {

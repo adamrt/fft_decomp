@@ -12,7 +12,7 @@ typedef struct {
     u8 pad3;
     u16 item;
     u16 unused;
-} world_menu_selection_t;
+} world_menu_selection_view_t;
 
 /**
  * Resolve the pending action-menu command, option, and item selection.
@@ -21,7 +21,7 @@ typedef struct {
  * the command, option, and item packed into a single value.
  */
 s32 world_menu_resolve_selection(void) {
-    world_menu_selection_t* selection = (world_menu_selection_t*)g_world_menu_pending_selection;
+    world_menu_selection_view_t* selection = (world_menu_selection_view_t*)g_world_menu_pending_selection;
     s32 command;
     s32 option;
     u32 item;

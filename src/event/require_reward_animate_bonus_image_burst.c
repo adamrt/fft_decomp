@@ -35,9 +35,9 @@ typedef struct {
     s32 x;             /* 0x3C */
     s32 y;             /* 0x40 */
     s32 initial_delay; /* 0x44 */
-} require_burst_tile_t;
+} require_reward_burst_tile_t;
 
-extern require_burst_tile_t g_require_reward_burst_tiles[12][24];
+extern require_reward_burst_tile_t g_require_reward_burst_tiles[12][24];
 
 void require_reward_animate_bonus_image_burst(void) {
     s32 phase;
@@ -57,7 +57,7 @@ void require_reward_animate_bonus_image_burst(void) {
     s32 ox;
     s32 oy;
     u8* params;
-    require_burst_tile_t* tile;
+    require_reward_burst_tile_t* tile;
     POLY_F4* poly;
 
     g_require_thread_suspended_id = g_battle_current_thread_id;

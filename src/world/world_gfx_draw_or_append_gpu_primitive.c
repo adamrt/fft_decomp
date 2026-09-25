@@ -1,6 +1,5 @@
 #include "fft/world.h"
-
-extern void DrawPrim(void*);
+#include "psx/gpu.h"
 
 /* Merge the caller's display word with the active display word. */
 void world_gfx_draw_or_append_gpu_primitive(s32* word) {

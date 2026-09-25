@@ -8,13 +8,13 @@
 typedef struct {
     RECT rect;
     s16 text_ids[20];
-} world_menu_list_image_t;
+} world_menu_scrollable_list_image_t;
 
 /* Find the next list-layout record in a menu script stream, apply its
  * geometry, clamp the cursor and scroll position to the option count, and
  * redraw the visible text ids when a list font is active. */
 void world_menu_load_scrollable_list_layout(world_menu_list_record_t* record) {
-    world_menu_list_image_t image;
+    world_menu_scrollable_list_image_t image;
     s32 i;
 
     while (record->type != 0x10) {

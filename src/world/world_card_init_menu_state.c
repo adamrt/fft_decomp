@@ -1,7 +1,6 @@
+#include "fft/main_heap.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern void* game_malloc(s32 size);
 
 /* Resets the memory card menu state and allocates the 0x2000-byte load
  * buffer; also used by "Open tutorial files". */

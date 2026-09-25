@@ -2,7 +2,7 @@
 #include "fft/main_heap.h"
 
 /* Provisional 20-byte action copy; same layout as battle_stats_t +0x16e. */
-typedef struct battle_unit_action_copy {
+typedef struct battle_target_unit_action_copy {
     u8 actor_id;         /* 0x00 */
     u8 skillset_id;      /* 0x01 */
     s16 ability_id;      /* 0x02 */
@@ -15,10 +15,10 @@ typedef struct battle_unit_action_copy {
     s16 target_elevation; /* 0x0e */
     s16 target_y;         /* 0x10 */
     u8 _pad12[2];
-} battle_unit_action_copy_t;
+} battle_target_unit_action_copy_t;
 
 void battle_target_build_directional_attack_panels(const void* source, u8 mode) {
-    battle_unit_action_copy_t action;
+    battle_target_unit_action_copy_t action;
     battle_stats_t* unit;
     battle_target_panel_t* panel;
     s32 target_x;

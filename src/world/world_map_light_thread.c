@@ -5,8 +5,6 @@
 #include "psx/gte.h"
 #include "psx/types.h"
 
-extern void RotMatrix(SVECTOR* r, MATRIX* m);
-
 /* Thread task 7: interpolates the map light rotation (g_world_map_light_rotation) and scale
  * (g_world_map_light_scale) toward six halfword targets over the parameter's frame count,
  * rebuilding and submitting the light matrices once per frame, then stores

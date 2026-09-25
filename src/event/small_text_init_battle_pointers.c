@@ -2,12 +2,12 @@
 #include "fft/script_variables.h"
 #include "fft/small.h"
 
-typedef struct small_name_section_offsets {
+typedef struct small_text_name_section_offsets {
     u32 unit_names;
     u32 job_names;
-} small_name_section_offsets_t;
+} small_text_name_section_offsets_t;
 
-extern const small_name_section_offsets_t g_small_text_name_section_offsets;
+extern const small_text_name_section_offsets_t g_small_text_name_section_offsets;
 
 void small_text_init_battle_pointers(void) {
     u8* string_data;

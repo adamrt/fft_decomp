@@ -6,9 +6,9 @@
 /* Four skillset IDs copied as one unaligned word. */
 typedef struct {
     u8 ids[4];
-} battle_calculator_skillsets_t;
+} battle_menu_calculator_skillsets_t;
 
-extern battle_calculator_skillsets_t g_battle_menu_calculator_skillsets;
+extern battle_menu_calculator_skillsets_t g_battle_menu_calculator_skillsets;
 
 /*
  * Collects the unit's Calculator-eligible abilities from the four skillsets
@@ -24,7 +24,7 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
     u8 charge_times[0x18];
     u8 ability_flags[0x18];
     u8 turn_counts[0x18];
-    battle_calculator_skillsets_t skillsets;
+    battle_menu_calculator_skillsets_t skillsets;
     s32 count;
     s32 ability_count;
     s32 i;

@@ -10,13 +10,13 @@
 
 /* Double-buffered war-trophy primitives: one quad per entry, the banner
  * sprite and the draw mode; the second buffer is a copy of the first. */
-typedef struct require_war_trophy_primitives {
+typedef struct require_reward_war_trophy_primitives {
     POLY_FT4 quads[16]; /* 0x000 */
     SPRT banner;        /* 0x280 */
     DR_MODE draw_mode;  /* 0x294 */
-} require_war_trophy_primitives_t;
+} require_reward_war_trophy_primitives_t;
 
-extern require_war_trophy_primitives_t g_require_reward_war_trophy_primitives[2];
+extern require_reward_war_trophy_primitives_t g_require_reward_war_trophy_primitives[2];
 
 void require_render_war_trophies(void) {
     SPRT sprite;
@@ -25,8 +25,8 @@ void require_render_war_trophies(void) {
     s32 row;
     s32 i;
     POLY_FT4* quad;
-    require_war_trophy_primitives_t* buffer;
-    require_war_trophy_primitives_t* prims;
+    require_reward_war_trophy_primitives_t* buffer;
+    require_reward_war_trophy_primitives_t* prims;
     u32* image;
     s32 frame;
     s32 loaded;
@@ -60,11 +60,13 @@ void require_render_war_trophies(void) {
         prims->banner.h = 0x78;
         prims->banner.w = 0xf0;
         prims->banner.clut = 0x7cbc;
-        battle_copy_bytes(&prims[1], g_require_reward_war_trophy_primitives, sizeof(require_war_trophy_primitives_t));
+        battle_copy_bytes(
+            &prims[1], g_require_reward_war_trophy_primitives, sizeof(require_reward_war_trophy_primitives_t));
         frame = 0;
         while (1) {
-            buffer = (require_war_trophy_primitives_t*)((frame & 1) * sizeof(require_war_trophy_primitives_t)
-                + (s32)prims);
+            buffer
+                = (require_reward_war_trophy_primitives_t*)((frame & 1) * sizeof(require_reward_war_trophy_primitives_t)
+                    + (s32)prims);
             if ((*g_require_input_controller & PSX_PAD_CIRCLE) || frame == 0
                 || ((row != 7 && g_require_reward_war_trophy_entry_count - 1 != last) && timer >= 0x1f)
                 || ((row == 7 || g_require_reward_war_trophy_entry_count - 1 == last) && timer >= 0x79)) {

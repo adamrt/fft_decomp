@@ -535,6 +535,20 @@ typedef struct effect_geometry_entry {
 
 typedef char assert_effect_geometry_entry_size[sizeof(effect_geometry_entry_t) == 0xc4 ? 1 : -1];
 
+/* The E454 and E464 particle handlers use the renderer-specific meanings of
+ * the geometry entry's 0x4c and 0xa8 fields. */
+typedef struct effect_particle_vertex_emitter_view {
+    u8 _unknown_00[0x4c];
+    s16 vertex_group; /* 0x4c: selects a vertex in the effect work buffer */
+    u8 _unknown_4e[0x5a];
+    s16 start_frame; /* 0xa8 */
+    s16 end_frame;   /* 0xaa */
+    u8 _unknown_ac[0x18];
+} effect_particle_vertex_emitter_view_t;
+
+typedef char
+    assert_effect_particle_vertex_emitter_view_size[sizeof(effect_particle_vertex_emitter_view_t) == 0xc4 ? 1 : -1];
+
 /* Particle-system section addressed by effect-file header word 0x0c. */
 typedef struct effect_geometry_table {
     u16 _unknown_00;       /* 2, or 1 in seven shipped files */

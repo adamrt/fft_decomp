@@ -3,9 +3,6 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-extern DIRENTRY* firstfile(char* name, DIRENTRY* dir);
-extern DIRENTRY* nextfile(DIRENTRY* dir);
-
 /* Counts the save files on the selected memory card into `dir`: every
  * FFT save when `all` is nonzero, otherwise only the BISLPS-00700FF7*
  * entries.  strcpy is left to the compiler builtin so the prefix copy is

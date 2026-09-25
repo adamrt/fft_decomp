@@ -27,7 +27,7 @@ s32 equip_menu_update_equipment(void) {
         g_equip_unit_banner_enabled = 0;
         g_equip_item_numeric_panel_params = 0;
         g_equip_item_numeric_panel_y = -0x49;
-        equip_gfx_load_image_and_wait((RECT*)g_equip_status_label_image_rect, (u32*)g_equip_status_label_image);
+        equip_gfx_load_image_and_wait(&g_equip_status_label_image_rect, (u32*)g_equip_status_label_image);
     }
     if (g_equip_menu_substate == -1) {
         equip_panel_toggle_item_numeric_thread(0);

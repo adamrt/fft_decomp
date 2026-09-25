@@ -5,17 +5,6 @@
 
 #define NULL ((void*)0)
 
-/* This handler's view of effect_geometry_entry_t: 0x4c selects the work
- * vertex that seeds the emitter and 0xa8/0xaa bound its active frames. */
-typedef struct effect_particle_vertex_emitter_view {
-    u8 _unknown_00[0x4c];
-    s16 vertex_group; /* 0x4c: 1-12 */
-    u8 _unknown_4e[0x5a];
-    s16 start_frame; /* 0xa8 */
-    s16 end_frame;   /* 0xaa */
-    u8 _unknown_ac[0x18];
-} effect_particle_vertex_emitter_view_t;
-
 /* Altima transformation particle handler, the single-group form of
  * effect_e454_particle_update_banish_state: phase 1 allocates the 0x200-byte
  * vertex work and enables map data groups 1-6, phase 2 spawns each active

@@ -11,18 +11,13 @@ typedef struct {
     u32 xy;         /* 0x0c */
     u32 uv_clut;    /* 0x10 */
     u32 wh;         /* 0x14 */
-} world_sprt_packet_t;
+} world_gs_sprite_packet_t;
 
 /* The target tests scalex/scaley against the identity ONE/ONE (0x10001000) with a
  * single word load and compare. */
 #define GS_SPRITE_SCALE_WORD(sp) (*(s32*)&(sp)->scalex)
 
-extern void RotMatrix(SVECTOR* r, MATRIX* m);
-extern void ScaleMatrix(void* m, void* v);
 extern s32 ReadGeomScreen(void);
-extern void TransMatrix(void* m, void* v);
-extern void SetRotMatrix(MATRIX* m);
-extern void SetTransMatrix(MATRIX* m);
 extern s32 RotTransPers4(
     SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, s32* sxy0, s32* sxy1, s32* sxy2, s32* sxy3, s32* p, s32* flag);
 
@@ -54,7 +49,7 @@ void world_gs_sortsprite(GsSPRITE* sp, GsOT* ot, u16 pri) {
     s32 depth;
     s32 flag;
     void* packet;
-    world_sprt_packet_t* sprt;
+    world_gs_sprite_packet_t* sprt;
     world_poly_ft4_packet_t* poly;
     u32 attr;
     u32 code;

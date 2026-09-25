@@ -34,10 +34,10 @@ typedef world_menu_scroll_text_layout_t battle_menu_scroll_text_layout_t;
  * battle_gfx_init_image_loading reads. */
 typedef world_menu_text_window_t battle_menu_text_window_t;
 
-struct battle_text_position;
+struct battle_menu_text_position;
 extern u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     world_menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
-extern void battle_menu_draw_stacked_glyph_pair(void* pixels, struct battle_text_position* position);
+extern void battle_menu_draw_stacked_glyph_pair(void* pixels, struct battle_menu_text_position* position);
 
 /*
  * Scrolling three-column ability list thread, the BATTLE twin of
@@ -310,7 +310,7 @@ void battle_menu_run_scrolling_ability_list_thread(void) {
                                     == 0)) {
                             g_menu_text_state.origin_y += 2;
                             battle_menu_draw_stacked_glyph_pair(
-                                buffer, (struct battle_text_position*)&g_menu_text_state.origin_x);
+                                buffer, (struct battle_menu_text_position*)&g_menu_text_state.origin_x);
                         } else {
                             value = (u16)layout->columns.text_ids[column][index];
                             if (value & 0x7FF) {

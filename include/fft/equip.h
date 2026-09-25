@@ -372,7 +372,7 @@ extern world_menu_entry_t g_equip_item_action_menu;
 extern world_menu_entry_t g_equip_item_action_menu_single_item;
 extern s16 g_equip_equipment_render_commands[];
 extern s16 g_equip_armor_bonus_render_commands[];
-extern u8 g_equip_status_label_image_rect[];
+extern RECT g_equip_status_label_image_rect;
 extern s8 g_equip_item_action_menu_active;
 extern void* g_equip_help_text_table;
 extern s16 D_801d86ac;

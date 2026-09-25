@@ -7,9 +7,9 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-struct battle_message_window_layout;
+struct battle_text_message_window_layout;
 extern void battle_text_layout_message_window(
-    struct battle_message_window_layout* window, s16* width, s16* height, s32* extra_frames, s32 pad_short);
+    struct battle_text_message_window_layout* window, s16* width, s16* height, s32* extra_frames, s32 pad_short);
 
 /* Menu icon thread that also opens a linked entry: when parent_indices[0]
  * names a menu entry, that entry is centred on this text width, placed below
@@ -30,7 +30,7 @@ void battle_menu_icon_linked_entry_thread(void) {
     s32 pad;
 
     param = (world_menu_entry_t*)battle_thread_get_current_parameter_1();
-    battle_text_layout_message_window((struct battle_message_window_layout*)param, &width, &height, &pad, 0);
+    battle_text_layout_message_window((struct battle_text_message_window_layout*)param, &width, &height, &pad, 0);
     battle_menu_build_window_sprites(
         (battle_menu_window_header_t*)&rect, (battle_menu_window_spec_t*)param, &records[0]);
     battle_copy_bytes(&records[1], &records[0], 0x7C);

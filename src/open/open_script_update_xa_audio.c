@@ -3,9 +3,7 @@
 #include "psx/cd.h"
 #include "psx/types.h"
 
-s32 CdStatus(void);
 s32 CdPosToInt(u8* position);
-void main_file_reset_cd_subsystems(void);
 s32 open_file_get_cd_sync_state_delta(void);
 
 void open_script_update_xa_audio(void) {
