@@ -1,12 +1,12 @@
 #include "fft/battle.h"
 #include "fft/script_variables.h"
 
-s32 battle_process_map_gns_record(s32 phase, gns_file_record_t* record) {
+s32 battle_process_map_gns_record(s32 phase, gns_command_record_prefix_t* record) {
     char unused_zeroes[8] = { 0 };
     s32 unused_sizes[4] = { 0x1000, 0x1000, 0x1000, 0 };
     s32 requested_layout;
     s32 requested_layout_and_weather;
-    gns_file_record_t* selected;
+    gns_command_record_prefix_t* selected;
 
     if (phase == 2) {
         /* Everything below works on this copy; the parameter itself dies
@@ -26,7 +26,7 @@ s32 battle_process_map_gns_record(s32 phase, gns_file_record_t* record) {
             battle_map_dispatch_gns_resource(GNS_RESOURCE_SET_WEATHER_MODIFIER, (u8*)selected);
         } else {
             /*
-             * Requested map state, packed like gns_file_record_t.map_state: layout in
+             * Requested map state, packed like the file row's map_state: layout in
              * bits 0-11, weather in 12-14, time of day in 15.  The target reads
              * the record's variable id and map state as single bytes (lbu), not
              * as the halfwords the struct declares, so those two stay byte reads.
@@ -42,8 +42,7 @@ s32 battle_process_map_gns_record(s32 phase, gns_file_record_t* record) {
                 battle_map_dispatch_gns_resource(selected->resource_type, (u8*)selected);
             }
         }
-        /* Byte read of start_sector's low byte, as the target does. */
-        g_battle_map_gns_record_cursor += ((u8*)selected)[8];
+        g_battle_map_gns_record_cursor += selected->record_byte_length;
     }
     return 0;
 }

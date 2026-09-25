@@ -15,11 +15,10 @@ extern packed_gns_record_t g_battle_map_selected_mesh_record;
 
 /* Target 0x800f4acc selects the last primary-mesh record, then substitutes
  * an alternate whose layout/weather/time comparison matches. It copies the
- * selected 20-byte record verbatim, then uses processed load information at
- * +0x06 to load into a temporary 0x20000-byte buffer. Its loader's fourth
+ * selected 20-byte record verbatim, then passes its file-row tail at +0x06
+ * to load into a temporary 0x20000-byte buffer. Its loader's fourth
  * argument is 0x30; that argument is forwarded as display suppression, not
- * used to index a resource slot by battle_map_start_file_load.
- * The disk GNS record and processed loading view must not be conflated. */
+ * used to index a resource slot by battle_map_start_file_load. */
 s32 battle_map_load_mesh_variant(s32 mesh_slot) {
     switch (g_battle_map_mesh_load_state) {
     case MAP_MESH_LOAD_IDLE:

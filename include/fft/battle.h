@@ -3930,7 +3930,7 @@ void battle_effect_start_altima_teleport_white_flash(battle_unit_misc_data_t* un
 extern battle_stats_t battle_stats[BATTLE_UNIT_SLOT_COUNT];
 
 void battle_menu_open_illegal_move_help(void);
-s32 battle_process_map_gns_record(s32 phase, gns_file_record_t* record);
+s32 battle_process_map_gns_record(s32 phase, gns_command_record_prefix_t* record);
 s32 battle_spread_targeting_panel_to_neighbors(s32 y, s32 x);
 void battle_target_build_directional_attack_panels(const void* source, u8 mode);
 void battle_target_check_moldball_virus_depth(s16 ability_id);

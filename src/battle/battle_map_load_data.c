@@ -259,8 +259,8 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                     }
                     i++;
                     g_battle_map_gns_record_cursor = (s32)&g_battle_map_gns_records[i];
-                    while (((gns_file_record_t*)g_battle_map_gns_record_cursor)->resource_type != 0) {
-                        battle_process_map_gns_record(2, (gns_file_record_t*)g_battle_map_gns_record_cursor);
+                    while (((gns_command_record_prefix_t*)g_battle_map_gns_record_cursor)->resource_type != 0) {
+                        battle_process_map_gns_record(2, (gns_command_record_prefix_t*)g_battle_map_gns_record_cursor);
                     }
                     g_battle_map_gns_load_phase = 0;
                     g_battle_map_resource_load_state = 0x77;

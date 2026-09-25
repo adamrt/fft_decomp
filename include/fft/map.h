@@ -357,27 +357,46 @@ typedef char map_palette_state_size_must_be_0x8524[(sizeof(map_palette_state_t) 
 extern map_palette_state_t g_battle_map_palette_state;
 
 /*
- * A 20-byte record from MAPnnn.GNS.  For mesh records, the loader compares
- * map_state against a request assembled from the low 12 bits of the script
- * variable at offset 0, weather in bits 12-14, and time-of-day in bit 15.
+ * A 20-byte row from the file section of MAPnnn.GNS, before the 0x80
+ * separator. Resource type 0x31 marks repeated filler rows. For mesh records,
+ * the loader compares map_state against a request assembled from the low 12
+ * bits of the script variable at offset 0, weather in bits 12-14, and
+ * time-of-day in bit 15.
  *
  * The two bytes at 4 also form the conventional little-endian GNS record type
  * (for example, 0x2e01 for a primary mesh).  The game reads them separately:
  * the low byte selects the state comparison and the high byte selects the
- * resource type.
+ * resource type. In all 2,987 pre-separator rows of the USA disc, +0x06 is
+ * 0x3333 and +0x10..+0x13 are 55 66 77 88. The loader compares those bytes
+ * when checking whether a file changed, and tests +0x13 for a nonzero marker.
  */
 typedef struct gns_file_record {
     u16 script_variable_id;  /* 0x00 */
     s16 map_state;           /* 0x02 */
     u8 map_state_comparison; /* 0x04; gns_map_state_comparison_e */
     u8 resource_type;        /* 0x05; gns_resource_type_e */
-    u16 _unknown06;
-    u16 start_sector; /* 0x08; relative to the MAPnnn.GNS LBA */
-    u16 _unknown0a;
-    u32 byte_length; /* 0x0c; sector-rounded */
-    u16 _unknown10;
-    u16 _unknown12;
+    u16 padding_3333;        /* 0x06 */
+    u32 disc_lba;            /* 0x08; absolute, including the high halfword at +0x0a */
+    u32 byte_length;         /* 0x0c; sector-rounded */
+    u8 padding_55_66_77[3];  /* 0x10 */
+    u8 file_present_marker;  /* 0x13; 0x88 on disc, tested for nonzero */
 } gns_file_record_t;
+
+/* Command rows after the 0x80 separator reuse the 20-byte prefix, but +0x08
+ * is a byte stride (0x14 or 0x1c), not a disc LBA. The 0x1c rows have eight
+ * more payload bytes after this prefix. +0x06/+0x09..+0x0b are zero in the
+ * USA disc's command rows. */
+typedef struct gns_command_record_prefix {
+    u16 script_variable_id;  /* 0x00 */
+    s16 map_state;           /* 0x02 */
+    u8 map_state_comparison; /* 0x04 */
+    u8 resource_type;        /* 0x05 */
+    u16 reserved_06;
+    u8 record_byte_length; /* 0x08 */
+    u8 reserved_09;
+    u16 reserved_0a;
+    u8 payload[8]; /* 0x0c; command arguments, followed by more bytes for 0x1c rows */
+} gns_command_record_prefix_t;
 
 /* Start of a map mesh file as loaded by battle_map_load_mesh_variant; only
  * the word at 0x44 is proven. Scaled by 4, it locates the palette block passed
@@ -388,6 +407,7 @@ typedef struct map_mesh_file_header {
 } map_mesh_file_header_t;
 
 typedef char gns_file_record_size_must_be_0x14[(sizeof(gns_file_record_t) == 0x14) ? 1 : -1];
+typedef char gns_command_record_prefix_size_must_be_0x14[(sizeof(gns_command_record_prefix_t) == 0x14) ? 1 : -1];
 
 /* Halfword-aligned view of a 20-byte GNS record: the target copies these
  * records with lwl/lwr pairs, so the loader's type has no word member. */

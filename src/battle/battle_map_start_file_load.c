@@ -1,9 +1,8 @@
 #include "psx/types.h"
 
-/* Target 0x800f36c4 consumes processed load information, not a raw
- * gns_file_record_t. Relative offsets 0x02/0x06 hold full 32-bit LBA/length
- * values and 0x0d is presence; raw GNS instead has a 16-bit relative sector
- * at 0x08. The caller supplies this view from its separate descriptor table. */
+/* `load_info` points to +0x06 of a raw GNS file row. Relative offsets
+ * 0x02/0x06 hold its 32-bit absolute disc LBA and byte length; +0x0d is the
+ * nonzero file marker at row offset 0x13. */
 enum {
     MAP_FILE_LOAD_LBA_OFFSET = 0x02,
     MAP_FILE_LOAD_BYTE_LENGTH_OFFSET = 0x06,
