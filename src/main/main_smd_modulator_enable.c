@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xF6: restarts and activates the
  * modulator selected by the parameter byte. */
-u8* main_smd_modulator_enable(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_modulator_enable(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     suzuki_modulator_t* modulator;
 
     modulator = &channel->modulators[*note_data++];

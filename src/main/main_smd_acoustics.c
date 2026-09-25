@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xB8 "Acoustics": reverb depth, delay and feedback,
  * applied at once with reverb mode 10. */
-u8* main_smd_acoustics(u8* note_data, suzuki_music_t* music, void* channel) {
+u8* main_smd_acoustics(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s16 depth;
     s32 delay;
     s32 feedback;

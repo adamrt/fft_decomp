@@ -10,7 +10,7 @@
  * masking lands in $a2 before the copy back), and the reset argument is
  * taken before the calculate_step call, which places its `addiu` after the
  * 0x100 constant like the target. */
-u8* main_smd_pan_lfo_waveform(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_pan_lfo_waveform(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s32 depth;
     s16 speed;
     u16 param;

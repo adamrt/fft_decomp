@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* SMD opcode 0xFD "Scale Tempo". A zero byte leaves the tempo alone. */
-u8* main_smd_scale_tempo(u8* note_data, suzuki_music_t* music, void* channel) {
+u8* main_smd_scale_tempo(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     u32 scale;
 
     scale = *note_data++;

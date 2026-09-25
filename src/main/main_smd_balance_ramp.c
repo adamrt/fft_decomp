@@ -4,7 +4,7 @@
 /* SMD opcode 0xEA: ramps the balance to a target byte
  * over count ticks. balance_step is the per-tick delta; flags_06 bit 4 lets
  * the channel ramp pass (0x80015138) step it. */
-u8* main_smd_balance_ramp(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_balance_ramp(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     u16 count;
     s32 delta;
 

@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xD2: add to the channel pitch offset in
  * 1/8 semitone units. Fine twin of main_smd_opcode_d1. */
-u8* main_smd_opcode_d2(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_opcode_d2(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     channel->pitch_offset += (s8)note_data[0] << 3;
     channel->note_flags2 |= 0x200;
     return note_data + 1;

@@ -7,7 +7,7 @@
  *
  * speed is s16 like the calculate_step parameter: the target tests and
  * passes a copy of it and keeps the original for timer_reset. */
-u8* main_smd_pan_lfo(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_pan_lfo(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s32 depth;
     s16 speed;
     suzuki_modulator_t* modulator;

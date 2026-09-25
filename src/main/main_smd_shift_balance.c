@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xE9 "Shift Balance": signed balance delta. The byte is
  * fetched unsigned and sign-extended afterwards, as in "Balance". */
-u8* main_smd_shift_balance(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_shift_balance(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     u8 delta;
 
     delta = note_data[0];

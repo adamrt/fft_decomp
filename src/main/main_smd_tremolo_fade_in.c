@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xE3: modulator 1 counter_18 and its
  * reset value become 0x100 / (byte + 1), like 0xD7 does for modulator 0. */
-u8* main_smd_tremolo_fade_in(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_tremolo_fade_in(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s16 divisor;
 
     divisor = (note_data[0] + 1) & 0xff;

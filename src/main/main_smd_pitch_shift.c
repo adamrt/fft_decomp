@@ -7,7 +7,7 @@
  *
  * The fields are stored through channel: unlike its twins, a modulator
  * pointer here gets its own base register, which the target does not use. */
-u8* main_smd_pitch_shift(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_pitch_shift(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s32 depth;
     s16 speed;
 

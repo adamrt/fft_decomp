@@ -8,7 +8,7 @@
  * gives the stream, and reading resumes three bytes past it. Without a matching resource
  * the read position is returned unchanged, so the parameter bytes are read
  * next as note data. */
-u8* main_smd_play_vfx(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_play_vfx(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     main_sound_resource_t* resource;
     s16 sound;
     s16 id;

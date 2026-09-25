@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* SMD opcode 0xE7: deactivates modulator 1. */
-u8* main_smd_tremolo_off(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_tremolo_off(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     channel->modulators[1].flags &= ~1;
     return note_data;
 }

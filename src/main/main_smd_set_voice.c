@@ -5,7 +5,7 @@
  * voice. A voice number below 25 sets voice_mask to 1 << voice and marks
  * every voice parameter for update (func_flags 0x1ff); a larger number
  * clears both. */
-u8* main_smd_set_voice(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_set_voice(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     u8 voice;
 
     voice = *note_data++;

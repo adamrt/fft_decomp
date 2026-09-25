@@ -8,7 +8,7 @@
  * Taking the modulator pointer before the step calculation call keeps it a
  * separate pseudo (combine does not merge across the call), which places
  * the reset argument where the target has it. */
-u8* main_smd_tremolo_waveform(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_tremolo_waveform(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s32 depth;
     s16 speed;
     u16 waveform;

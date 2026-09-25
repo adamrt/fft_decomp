@@ -4,7 +4,7 @@
 /* SMD opcode 0xE4: programs modulator 1 (volume) as
  * a triangle (waveform 2) with the given speed, signed depth and delay, and
  * restarts it. The depth is negated before scaling. */
-u8* main_smd_tremolo(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_tremolo(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     s32 depth;
     s16 speed;
     suzuki_modulator_t* modulator;

@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xF5: bit n of the parameter restarts and
  * activates modulator n, a clear bit deactivates it (modulators 0-3). */
-u8* main_smd_modulator_enable_mask(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_modulator_enable_mask(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     suzuki_modulator_t* modulator;
     s32 i;
     u32 mask;

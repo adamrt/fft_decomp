@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xC1 "Envelope Shape": attack, sustain and release
  * modes. */
-u8* main_smd_envelope_shape(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_envelope_shape(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     u32 release_mode;
 
     channel->attack_mode = note_data[0];

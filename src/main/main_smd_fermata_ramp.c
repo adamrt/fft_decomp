@@ -3,7 +3,7 @@
 
 /* SMD opcode 0xE2 "Fermata Ramp": ramps the channel volume to a
  * signed target byte over the given number of steps. */
-u8* main_smd_fermata_ramp(u8* note_data, void* music, suzuki_music_channel_t* channel) {
+u8* main_smd_fermata_ramp(u8* note_data, suzuki_music_t* music, suzuki_music_channel_t* channel) {
     u16 steps;
     s32 delta;
 
