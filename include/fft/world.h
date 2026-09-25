@@ -845,7 +845,7 @@ typedef struct world_menu_number_entry {
 typedef char world_menu_number_entry_size_must_be_0xc[(sizeof(world_menu_number_entry_t) == 0xC) ? 1 : -1];
 
 extern u8 g_world_editor_numeric_geometry[];
-extern u8 g_world_editor_numeric_table[];
+extern RECT g_world_editor_numeric_table[2];
 extern RECT g_world_editor_numeric_entries_a[];
 extern RECT g_world_editor_numeric_entries_b[];
 extern RECT g_world_editor_numeric_entries_c[];
@@ -879,7 +879,7 @@ typedef char world_unit_status_identity_size_must_be_0xe[sizeof(world_unit_statu
 extern u8 g_world_comparison_unit_stat_summary[];
 extern world_unit_status_identity_t g_world_comparison_unit_identity;
 extern world_menu_number_entry_t g_world_comparison_unit_number_entries[];
-extern u8 g_world_comparison_unit_portrait_rect[];
+extern RECT g_world_comparison_unit_portrait_rect;
 extern world_status_thread_t g_world_comparison_display_thread_params;
 extern u8 g_world_comparison_unit_summary_packets[];
 extern u8 g_world_comparison_unit_status_packets[];
@@ -1135,7 +1135,7 @@ extern RECT g_world_wldface_vram_rect_1;
 extern RECT g_world_wldface_vram_rect_2;
 extern RECT g_world_wldface_vram_rect_3;
 extern u16 g_world_portrait_clut_by_sheet_id[]; /* CLUT word per sprite-sheet id */
-extern s16 g_world_gfx_portrait_origin[];
+extern RECT g_world_gfx_portrait_origin;
 extern const u16 g_world_gfx_panel_draw_area_scale_percent[12];
 extern u8 g_world_gfx_portrait_transition_offsets[];
 extern u8 g_world_gfx_black_tile_color[];
@@ -2134,13 +2134,13 @@ extern CVECTOR g_world_unit_panel_bar_colors[];
 extern world_menu_number_entry_t g_world_selected_unit_number_entries[];
 extern world_gfx_image_load_parameters_t g_world_unit_summary_label_sprite_params[];
 extern world_gfx_image_load_parameters_t g_world_unit_summary_value_sprite_params[];
-extern u8 g_world_unit_status_panel_origin[];
+extern RECT g_world_unit_status_panel_origin;
 extern world_gfx_image_load_parameters_t g_world_unit_status_sprite_params[];
 extern u8 g_world_unit_status_portrait_params[];
 extern u16 g_world_unit_summary_value_cluts[];
 extern u16 g_world_unit_summary_label_cluts[];
 extern u8 g_world_unit_summary_mode_row_params[];
-extern u8 g_world_selected_unit_portrait_rect[];
+extern RECT g_world_selected_unit_portrait_rect;
 extern world_status_thread_t g_world_stat_preview_panel_thread_params;
 extern world_menu_text_binding_t g_world_selected_unit_text_binding;
 extern u8 g_world_unit_status_banner_active;
@@ -2965,7 +2965,7 @@ void world_menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* re
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect);
 void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon);
 void world_menu_build_ability_list(s32 mode);
-void world_menu_build_and_upload_window_image(s32 a, s32 b, s32 c, s32 d, s32 e);
+void world_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void world_menu_build_idle_action_stub(void);
 void world_menu_build_sprite_page(s32 page_index, void* base_screen);
 void world_menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit);

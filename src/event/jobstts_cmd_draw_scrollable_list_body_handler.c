@@ -20,7 +20,10 @@
  * cast adds the other 8 bytes of frame and keeps the row count in a register of its own.
  */
 u8* jobstts_cmd_draw_scrollable_list_body_handler(u8* command) {
-    urect16_t rect;
+    union {
+        urect16_t unsigned_rect;
+        RECT signed_rect;
+    } rect;
     u8 unused_28[16];
     urect16_t marker;
     u8 unused_40[8];
@@ -72,13 +75,13 @@ u8* jobstts_cmd_draw_scrollable_list_body_handler(u8* command) {
                             height = g_jobstts_menu_list_row_height;
                             ids = &g_jobstts_menu_list_scroll_entry_ids;
                             id = g_jobstts_menu_list_entries[g_jobstts_menu_scroll_base_index - 1];
-                            rect.x = 0x100;
-                            rect.y = 0x20;
-                            rect.w = g_jobstts_menu_list_vram_width;
-                            rect.h = height;
+                            rect.unsigned_rect.x = 0x100;
+                            rect.unsigned_rect.y = 0x20;
+                            rect.unsigned_rect.w = g_jobstts_menu_list_vram_width;
+                            rect.unsigned_rect.h = height;
                             *ids = id;
                             jobstts_text_render_id_rows_to_vram(
-                                (s32)g_jobstts_menu_list_text_table, (s16*)ids, (RECT*)&rect, 0);
+                                (s32)g_jobstts_menu_list_text_table, (s16*)ids, &rect.signed_rect, 0);
                         }
                     }
                 } else if (input & PSX_PAD_UP) {
@@ -96,12 +99,13 @@ u8* jobstts_cmd_draw_scrollable_list_body_handler(u8* command) {
                             j = g_jobstts_menu_scroll_base_index + g_jobstts_menu_list_visible_rows - 1;
                             entry_ids = &g_jobstts_menu_list_scroll_entry_ids;
                             *entry_ids = g_jobstts_menu_list_entries[j + 1];
-                            rect.x = 0x100;
-                            rect.y = g_jobstts_menu_list_visible_rows * (s16)g_jobstts_menu_list_row_height + 0x30;
-                            rect.w = g_jobstts_menu_list_vram_width;
-                            rect.h = g_jobstts_menu_list_row_height;
+                            rect.unsigned_rect.x = 0x100;
+                            rect.unsigned_rect.y
+                                = g_jobstts_menu_list_visible_rows * (s16)g_jobstts_menu_list_row_height + 0x30;
+                            rect.unsigned_rect.w = g_jobstts_menu_list_vram_width;
+                            rect.unsigned_rect.h = g_jobstts_menu_list_row_height;
                             jobstts_text_render_id_rows_to_vram(
-                                (s32)g_jobstts_menu_list_text_table, (s16*)entry_ids, (RECT*)&rect, 0);
+                                (s32)g_jobstts_menu_list_text_table, (s16*)entry_ids, &rect.signed_rect, 0);
                         }
                     }
                 } else if ((g_jobstts_menu_list_selected_index < (g_jobstts_menu_list_entry_count - 1))
@@ -130,11 +134,11 @@ u8* jobstts_cmd_draw_scrollable_list_body_handler(u8* command) {
                     s32 height;
 
                     height = (s16)g_jobstts_menu_list_row_height;
-                    rect.x = 0x100;
-                    rect.w = g_jobstts_menu_list_vram_width;
-                    rect.h = height;
-                    rect.y = ((j - 1) * height) + 0x30;
-                    jobstts_gfx_enqueue_draw_move((const RECT*)&rect, 0x100, (height * j) + 0x30, ot_index - 1);
+                    rect.unsigned_rect.x = 0x100;
+                    rect.unsigned_rect.w = g_jobstts_menu_list_vram_width;
+                    rect.unsigned_rect.h = height;
+                    rect.unsigned_rect.y = ((j - 1) * height) + 0x30;
+                    jobstts_gfx_enqueue_draw_move(&rect.signed_rect, 0x100, (height * j) + 0x30, ot_index - 1);
                 }
             }
         }
@@ -151,47 +155,47 @@ u8* jobstts_cmd_draw_scrollable_list_body_handler(u8* command) {
             g_jobstts_menu_scroll_base_index++;
             g_jobstts_menu_list_selected_index++;
             if (g_jobstts_menu_list_text_table != 0) {
-                rect.x = 0x100;
-                rect.y = (s16)g_jobstts_menu_list_row_height + 0x30;
-                rect.w = g_jobstts_menu_list_vram_width;
-                rect.h = g_jobstts_menu_list_row_height * (u16)g_jobstts_menu_list_visible_rows;
-                jobstts_gfx_enqueue_draw_move((const RECT*)&rect, 0x100, 0x30, ot_index - 1);
+                rect.unsigned_rect.x = 0x100;
+                rect.unsigned_rect.y = (s16)g_jobstts_menu_list_row_height + 0x30;
+                rect.unsigned_rect.w = g_jobstts_menu_list_vram_width;
+                rect.unsigned_rect.h = g_jobstts_menu_list_row_height * (u16)g_jobstts_menu_list_visible_rows;
+                jobstts_gfx_enqueue_draw_move(&rect.signed_rect, 0x100, 0x30, ot_index - 1);
             }
         }
     }
     if (g_jobstts_menu_list_text_table != 0) {
         if ((s16)g_jobstts_menu_list_scroll_offset_y != 0) {
-            rect.x = command[7];
-            rect.y = command[8] - 5;
-            rect.w = g_jobstts_menu_list_vram_width * 4;
-            rect.h = (g_jobstts_menu_list_row_height * (u16)g_jobstts_menu_list_visible_rows) + 0xa;
-            jobstts_gfx_enqueue_textured_quad(&rect, 0, (s16)g_jobstts_menu_list_scroll_offset_y + 0x2b, 0,
-                g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, g_jobstts_text_metric_0,
+            rect.unsigned_rect.x = command[7];
+            rect.unsigned_rect.y = command[8] - 5;
+            rect.unsigned_rect.w = g_jobstts_menu_list_vram_width * 4;
+            rect.unsigned_rect.h = (g_jobstts_menu_list_row_height * (u16)g_jobstts_menu_list_visible_rows) + 0xa;
+            jobstts_gfx_enqueue_textured_quad(&rect.unsigned_rect, 0, (s16)g_jobstts_menu_list_scroll_offset_y + 0x2b,
+                0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, g_jobstts_text_metric_0,
                 (s16)g_jobstts_gfx_otag_index);
         } else {
-            rect.x = command[7];
-            rect.y = command[8];
-            rect.w = g_jobstts_menu_list_vram_width * 4;
-            rect.h = g_jobstts_menu_list_row_height * (u16)g_jobstts_menu_list_visible_rows;
-            jobstts_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_jobstts_gfx_semitransparency,
+            rect.unsigned_rect.x = command[7];
+            rect.unsigned_rect.y = command[8];
+            rect.unsigned_rect.w = g_jobstts_menu_list_vram_width * 4;
+            rect.unsigned_rect.h = g_jobstts_menu_list_row_height * (u16)g_jobstts_menu_list_visible_rows;
+            jobstts_gfx_enqueue_textured_quad(&rect.unsigned_rect, 0, 0x30, 0, g_jobstts_gfx_semitransparency,
                 g_jobstts_gfx_background_texture_page, g_jobstts_text_metric_0, (s16)g_jobstts_gfx_otag_index);
         }
     }
     if (g_jobstts_text_layout_mode == 0) {
         if (g_jobstts_menu_scroll_base_index != 0) {
-            rect.x = g_jobstts_menu_window_right_x;
-            rect.y = command[0xc];
-            rect.w = 8;
-            rect.h = 0x10;
-            jobstts_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, g_jobstts_gfx_semitransparency,
+            rect.unsigned_rect.x = g_jobstts_menu_window_right_x;
+            rect.unsigned_rect.y = command[0xc];
+            rect.unsigned_rect.w = 8;
+            rect.unsigned_rect.h = 0x10;
+            jobstts_gfx_enqueue_textured_quad(&rect.unsigned_rect, 0xd8, 0, 0, g_jobstts_gfx_semitransparency,
                 g_jobstts_menu_cursor_texture_page, g_jobstts_menu_cursor_mode0_foreground_clut, 0x1e);
         }
         if (g_jobstts_menu_scroll_base_index < (g_jobstts_menu_list_entry_count - g_jobstts_menu_list_visible_rows)) {
-            rect.x = g_jobstts_menu_window_right_x;
-            rect.y = command[0xd];
-            rect.w = 8;
-            rect.h = 0x10;
-            jobstts_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, g_jobstts_gfx_semitransparency,
+            rect.unsigned_rect.x = g_jobstts_menu_window_right_x;
+            rect.unsigned_rect.y = command[0xd];
+            rect.unsigned_rect.w = 8;
+            rect.unsigned_rect.h = 0x10;
+            jobstts_gfx_enqueue_textured_quad(&rect.unsigned_rect, 0xe0, 0, 0, g_jobstts_gfx_semitransparency,
                 g_jobstts_menu_cursor_texture_page, g_jobstts_menu_cursor_mode0_foreground_clut, 0x1e);
         }
         if (g_jobstts_menu_list_entry_count > g_jobstts_menu_list_visible_rows) {
@@ -200,11 +204,11 @@ u8* jobstts_cmd_draw_scrollable_list_body_handler(u8* command) {
             y = (j * g_jobstts_menu_list_selected_index) / (g_jobstts_menu_list_entry_count - 1);
             j = command[0xc] + 0xf;
             j += y;
-            rect.w = 8;
-            rect.h = 8;
-            rect.x = g_jobstts_menu_window_right_x;
-            rect.y = j;
-            jobstts_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_jobstts_gfx_semitransparency,
+            rect.unsigned_rect.w = 8;
+            rect.unsigned_rect.h = 8;
+            rect.unsigned_rect.x = g_jobstts_menu_window_right_x;
+            rect.unsigned_rect.y = j;
+            jobstts_gfx_enqueue_textured_quad(&rect.unsigned_rect, 0x10, 0x10, 0, g_jobstts_gfx_semitransparency,
                 g_jobstts_menu_cursor_texture_page, g_jobstts_menu_cursor_mode0_foreground_clut,
                 (s16)g_jobstts_gfx_otag_index);
         }

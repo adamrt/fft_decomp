@@ -307,7 +307,7 @@ void world_text_character_handling_thread(void) {
             win->portrait_code = rec.portrait;
         }
         value = world_thread_get_current_parameter_3();
-        world_menu_build_and_upload_window_image(rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+        world_menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
         win->portrait_battle_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         win[0].quads[0].clut = 0x7CBC;
@@ -594,7 +594,7 @@ void world_text_character_handling_thread(void) {
                     text = world_text_find_entry(rec.text);
                     no_wait = 0;
                     world_menu_build_and_upload_window_image(
-                        rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
                     color = 1;
                     cursor_x = rec.x;
                     width_override = no_value;
@@ -617,7 +617,7 @@ void world_text_character_handling_thread(void) {
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                     world_menu_build_and_upload_window_image(
-                        rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
                 } else if (rec.box_type != 0) {
                     g_world_sound_effect_id_to_play = MAIN_SFX_TEXT_PAGE;
                     rec.first_line = rec.line;
@@ -695,8 +695,7 @@ void world_text_character_handling_thread(void) {
                 column = 0;
                 text = world_text_find_entry(rec.text);
                 no_wait = 0;
-                world_menu_build_and_upload_window_image(
-                    rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+                world_menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
                 color = 1;
                 width_override = no_value;
                 cursor_x = rec.x;

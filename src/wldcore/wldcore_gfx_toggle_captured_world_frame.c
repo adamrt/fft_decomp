@@ -7,7 +7,7 @@
  * whole frame into both ordering tables, stores the composed image into the
  * scratch buffer, and re-arms the menu windows behind flag mask 0x3c20. */
 void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
-    s16 display_rect[4];
+    RECT display_rect;
     s32 buffer_index;
 
     if (capture == 0) {
@@ -48,8 +48,8 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
     world_gs_draw_ot(&g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
     world_gs_draw_ot(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     DrawSync(0);
-    wldcore_gfx_set_display_rect(g_active_graphics_buffer_index, display_rect);
-    StoreImage((RECT*)display_rect, (u32*)g_wldcore_scratch_buffer);
+    wldcore_gfx_set_display_rect(g_active_graphics_buffer_index, &display_rect.x);
+    StoreImage(&display_rect, (u32*)g_wldcore_scratch_buffer);
     DrawSync(0);
     g_wldcore_loaded_background_set = -1;
     world_gs_clear_ot(0, 0, &g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);

@@ -79,7 +79,7 @@ typedef char attack_sprite_rect_size_must_be_0x0c[(sizeof(attack_gfx_sprite_rect
 
 extern const u16 g_attack_gfx_draw_area_scale_percent[12];
 extern POLY_FT4 g_attack_gfx_frame_ft4[];
-extern s16 g_attack_gfx_portrait_origin[];
+extern battle_menu_panel_frame_geometry_t g_attack_gfx_portrait_origin;
 extern u8 g_attack_gfx_portrait_transition_offsets[];
 extern u8 g_attack_gfx_scaled_sprite_count;
 extern attack_gfx_point_t g_attack_gfx_scaled_sprite_scale[];
@@ -338,12 +338,7 @@ extern u8 g_attack_panel_editor_mode_cell[];
 extern u8 g_attack_panel_editor_mode_cells[];
 extern u8 g_attack_panel_editor_value_cells[];
 extern u16 g_attack_panel_editor_value_cluts[];
-/* The numeric frame reads all eight bytes; image loading reads its x/y prefix. */
-typedef union attack_panel_frame_geometry {
-    RECT rect;
-    battle_image_location_t location;
-} attack_panel_frame_geometry_t;
-extern attack_panel_frame_geometry_t g_attack_panel_frame_rect;
+extern battle_menu_panel_frame_geometry_t g_attack_panel_frame_rect;
 extern CVECTOR g_attack_panel_gauge_bar_colors[];
 extern u8 g_attack_panel_portrait_cell[];
 extern battle_menu_status_panel_editor_packet_t g_attack_panel_selected_editor_packets[2];

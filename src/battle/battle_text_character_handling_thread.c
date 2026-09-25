@@ -238,7 +238,7 @@ void battle_text_character_handling_thread(void) {
             win->portrait_code = rec.portrait;
         }
         value = battle_unit_get_battle_index_by_misc_id(battle_get_misc_id(battle_thread_get_current_parameter_3()));
-        battle_menu_build_and_upload_window_image(rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+        battle_menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
         win->portrait_battle_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         win[0].quads[0].clut = 0x7CBC;
@@ -537,7 +537,7 @@ void battle_text_character_handling_thread(void) {
                     text = battle_text_init_entry(rec.text);
                     no_wait = 0;
                     battle_menu_build_and_upload_window_image(
-                        rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
                     color = 1;
                     column = 0;
                     cursor_x = rec.x;
@@ -561,7 +561,7 @@ void battle_text_character_handling_thread(void) {
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                     battle_menu_build_and_upload_window_image(
-                        rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+                        rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
                 } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                     ClearImage(&rec.rect, 0, 0, 0);
                     battle_thread_yield();
@@ -664,7 +664,7 @@ void battle_text_character_handling_thread(void) {
                 text = battle_text_init_entry(rec.text);
                 no_wait = 0;
                 battle_menu_build_and_upload_window_image(
-                    rec.width, rec.height, (s32)&rec.rect, rec.dialog_type, rec.offset);
+                    rec.width, rec.height, &rec.rect, rec.dialog_type, rec.offset);
                 color = 1;
                 column = 0;
                 width_override = no_value;

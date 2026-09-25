@@ -110,7 +110,7 @@ void attack_render_unit_status_panel_thread(void) {
     }
     shake = 0;
 
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_attack_gfx_portrait_origin, &editor->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(&g_attack_gfx_portrait_origin.rect, &editor->numeric_frame);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, 1);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, 0);
     battle_menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -129,7 +129,7 @@ void attack_render_unit_status_panel_thread(void) {
     value_sprite_offset = 0x104;
     do {
         battle_gfx_init_image_loading((u8*)editor + value_sprite_offset, g_attack_editor_numeric_geometry,
-            g_attack_gfx_portrait_origin, value_geometry);
+            &g_attack_gfx_portrait_origin.location, value_geometry);
         value_geometry += 0xC;
         frame += 1;
         value_sprite_offset += 0x14;
@@ -148,7 +148,7 @@ void attack_render_unit_status_panel_thread(void) {
     label_sprite_offset = 0x154;
     do {
         battle_gfx_init_image_loading((u8*)editor + label_sprite_offset, g_attack_editor_numeric_geometry,
-            g_attack_gfx_portrait_origin, label_geometry);
+            &g_attack_gfx_portrait_origin.location, label_geometry);
         label_geometry += 0xC;
         frame += 1;
         label_sprite_offset += 0x14;
@@ -200,7 +200,7 @@ void attack_render_unit_status_panel_thread(void) {
             battle_copy_bytes(g_attack_panel_editor_mode_cell, g_attack_panel_editor_mode_cells, 0xC);
         }
         battle_gfx_init_image_loading(&editor->label_sprites[6], g_attack_editor_numeric_geometry,
-            g_attack_gfx_portrait_origin, g_attack_panel_editor_mode_cell);
+            &g_attack_gfx_portrait_origin.location, g_attack_panel_editor_mode_cell);
         if (state->team_state == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {
@@ -397,7 +397,7 @@ void attack_render_unit_status_panel_thread(void) {
             volatile battle_menu_status_panel_editor_packet_t* packet;
             color = g_attack_panel_gauge_bar_colors;
             i = 0;
-            portrait_origin = g_attack_gfx_portrait_origin;
+            portrait_origin = g_attack_gfx_portrait_origin.coordinates;
             bar_y = 0x18;
             packet = editor;
             bar_offset = 0x1E0;

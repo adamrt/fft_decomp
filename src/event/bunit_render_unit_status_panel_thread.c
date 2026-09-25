@@ -99,7 +99,7 @@ void bunit_render_unit_status_panel_thread(void) {
     }
     shake = 0;
 
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_bunit_gfx_portrait_origin, &editor->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(&g_bunit_gfx_portrait_origin.rect, &editor->numeric_frame);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, 1);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, 0);
     battle_menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -118,7 +118,7 @@ void bunit_render_unit_status_panel_thread(void) {
     off2 = 0x104;
     do {
         battle_gfx_init_image_loading(
-            (u8*)editor + off2, g_bunit_editor_numeric_geometry, g_bunit_gfx_portrait_origin, walk);
+            (u8*)editor + off2, g_bunit_editor_numeric_geometry, &g_bunit_gfx_portrait_origin.location, walk);
         walk += 0xC;
         frame += 1;
         off2 += 0x14;
@@ -136,7 +136,7 @@ void bunit_render_unit_status_panel_thread(void) {
     off3 = 0x154;
     do {
         battle_gfx_init_image_loading(
-            (u8*)editor + off3, g_bunit_editor_numeric_geometry, g_bunit_gfx_portrait_origin, walk2);
+            (u8*)editor + off3, g_bunit_editor_numeric_geometry, &g_bunit_gfx_portrait_origin.location, walk2);
         walk2 += 0xC;
         frame += 1;
         off3 += 0x14;
@@ -144,7 +144,7 @@ void bunit_render_unit_status_panel_thread(void) {
     battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_bunit_panel_frame_rect, &panel->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(&g_bunit_panel_frame_rect.rect, &panel->numeric_frame);
     cur1 = &panel->sprites[0];
     battle_menu_init_sprite_array(cur1, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
@@ -157,13 +157,13 @@ void bunit_render_unit_status_panel_thread(void) {
     off4 = 0xEC;
     do {
         battle_gfx_init_image_loading(
-            (u8*)panel + off4, g_bunit_editor_numeric_geometry, g_bunit_panel_frame_rect, walk3);
+            (u8*)panel + off4, g_bunit_editor_numeric_geometry, &g_bunit_panel_frame_rect.location, walk3);
         walk3 += 0xC;
         frame += 1;
         off4 += 0x14;
     } while (frame < 7);
-    battle_gfx_init_image_loading(
-        &panel->portrait, g_bunit_editor_numeric_geometry, g_bunit_panel_frame_rect, g_bunit_panel_portrait_cell);
+    battle_gfx_init_image_loading(&panel->portrait, g_bunit_editor_numeric_geometry, &g_bunit_panel_frame_rect.location,
+        g_bunit_panel_portrait_cell);
     if (state->mode == 1) {
         panel->portrait.clut = 0x7FFD;
     } else {
@@ -188,7 +188,7 @@ void bunit_render_unit_status_panel_thread(void) {
             battle_copy_bytes(g_bunit_panel_editor_mode_cell, g_bunit_panel_editor_mode_cells, 0xC);
         }
         battle_gfx_init_image_loading(&editor->label_sprites[6], g_bunit_editor_numeric_geometry,
-            g_bunit_gfx_portrait_origin, g_bunit_panel_editor_mode_cell);
+            &g_bunit_gfx_portrait_origin.location, g_bunit_panel_editor_mode_cell);
         if (state->mode == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {
@@ -354,7 +354,7 @@ void bunit_render_unit_status_panel_thread(void) {
             color = g_bunit_panel_gauge_bar_colors;
             i = 0;
             /* The bar rows read the origin y with lhu; an s16 walk changes the loads. */
-            py = (u16*)&g_bunit_gfx_portrait_origin[1];
+            py = (u16*)&g_bunit_gfx_portrait_origin.coordinates[1];
             scale = 0x18;
             dst = editor;
             arg = 0x1E0;
@@ -373,7 +373,7 @@ void bunit_render_unit_status_panel_thread(void) {
                 den = rec->limit;
                 {
                     s32 origin_x;
-                    origin_x = g_bunit_gfx_portrait_origin[0];
+                    origin_x = g_bunit_gfx_portrait_origin.coordinates[0];
                     x0 = origin_x + 0x2F;
                 }
                 if (den == 0) {

@@ -2,7 +2,10 @@
 #include "psx/types.h"
 
 void debugchr_menu_run_simple_selection_thread(void) {
-    u8 local_10[8];
+    union {
+        battle_menu_window_header_t header;
+        RECT rect;
+    } local_10;
     battle_menu_window_record_t frames[2];
     battle_menu_window_record_t* frame_pair;
     battle_menu_window_record_t* frame_base;
@@ -15,7 +18,7 @@ void debugchr_menu_run_simple_selection_thread(void) {
     battle_menu_idle_action_entry_t* state = (battle_menu_idle_action_entry_t*)battle_thread_get_current_parameter_1();
 
     frame_pair = frames;
-    battle_menu_build_window_sprites(local_10, state, frame_pair);
+    battle_menu_build_window_sprites(&local_10.header, state, frame_pair);
     battle_copy_bytes(&frame_pair[1], frame_pair, sizeof(*frame_pair));
     redraw = 1;
     frame = 0;
@@ -24,12 +27,12 @@ void debugchr_menu_run_simple_selection_thread(void) {
     for (;;) {
         if (frame == (frame / 7) * 7) {
             redraw = 1;
-            render
-                = battle_menu_build_and_upload_window_frame_image(state->inner_width, state->inner_height, local_10, 1);
+            render = battle_menu_build_and_upload_window_frame_image(
+                state->inner_width, state->inner_height, &local_10.rect, 1);
             battle_menu_set_text_origin(8, 9);
             *display_x = state->inner_width;
             battle_menu_display_text_entry(state->text_id, render, (u8*)display_x - 8);
-            LoadImage((RECT*)local_10, (u32*)render);
+            LoadImage(&local_10.rect, (u32*)render);
         }
         battle_thread_yield();
         if (redraw == 1) {

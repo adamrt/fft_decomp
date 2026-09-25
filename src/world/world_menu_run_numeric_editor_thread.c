@@ -47,7 +47,7 @@ void world_menu_run_numeric_editor_thread(void) {
     world_gfx_set_image_draw_mode(&buffer->draw_modes[0], 0);
     world_gfx_set_image_draw_mode(&buffer->draw_modes[1], 2);
     world_gfx_set_image_draw_mode(&buffer->draw_modes[2], 1);
-    world_menu_build_line_box((RECT*)g_world_editor_numeric_table, &buffer->numeric_frame);
+    world_menu_build_line_box(&g_world_editor_numeric_table[0], &buffer->numeric_frame);
     world_gfx_reset_record_texture_window_3(&buffer->portrait);
     i = 0;
     descriptor = g_world_editor_numeric_texture;
@@ -55,7 +55,7 @@ void world_menu_run_numeric_editor_thread(void) {
         world_menu_init_sprite(&buffer->sprites[i]);
         world_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i],
             (const world_image_location_t*)g_world_editor_numeric_geometry,
-            (const world_image_location_t*)g_world_editor_numeric_table, descriptor);
+            (const world_image_location_t*)&g_world_editor_numeric_table[0], descriptor);
         descriptor++;
     }
     if (g_world_thread_current_id != 12) {
@@ -105,7 +105,7 @@ void world_menu_run_numeric_editor_thread(void) {
         use_offset = field_y != 0xF0;
         g_world_gfx_draw_area_y = -use_offset & 0xF0;
         world_gfx_build_scaled_draw_area_pair_at_offset(
-            &buffer->portrait, &g_world_editor_numeric_table[8], frame, field_y, thread);
+            &buffer->portrait, &g_world_editor_numeric_table[1], frame, field_y, thread);
         buffer->draw_offsets[0].x = thread->origin_x - 0x80;
         buffer->draw_offsets[0].y = thread->origin_y + g_world_gfx_draw_area_y;
         SetDrawOffset(&buffer->draw_offsets[0], &buffer->draw_offsets[0].x);

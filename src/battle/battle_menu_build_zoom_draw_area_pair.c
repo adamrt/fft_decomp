@@ -2,10 +2,8 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The callers pass unrelated pointers, so the parameters are void* and the
- * typed view is a cast at each use. A cast of a pointer parameter is the
- * parameter's own pseudo and emits nothing, whereas assigning it to a typed
- * local would add copies that cost the match. */
+/* Callers pass unrelated pointer types. Keeping the packet view at each use
+ * avoids the extra copies that a typed local adds to the target code. */
 #define PAIR ((battle_gfx_scaled_draw_area_pair_t*)packets)
 
 /*
@@ -26,7 +24,7 @@ void battle_menu_build_zoom_draw_area_pair(void* packets, void* geometry, s32 st
         step = 11;
     }
     percent = g_battle_menu_zoom_percentages[step];
-    battle_copy_bytes(&PAIR->rects[0], (const RECT*)geometry, 8);
+    battle_copy_bytes(&PAIR->rects[0], geometry, 8);
     if (PAIR->rects[0].x < 0x80) {
         PAIR->rects[0].x += 0x80;
         PAIR->rects[0].y += 0x78;

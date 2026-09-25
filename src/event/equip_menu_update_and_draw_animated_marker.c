@@ -13,7 +13,7 @@
  * Twin of jobstts_menu_update_and_draw_animated_marker, which documents the
  * `state` packing and the `active_test` copies required for the match.
  */
-void equip_menu_update_and_draw_animated_marker(RECT* anchor, u16* state, s32 mode) {
+void equip_menu_update_and_draw_animated_marker(const point16_t* anchor, u16* state, s32 mode) {
     RECT rect;
     s32 active;
     s32 active_test;

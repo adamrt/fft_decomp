@@ -17,7 +17,7 @@ s32 equip_menu_update_clear_all_equipment_prompt(void) {
     /* Pinned: the target sets $a1 = &scratch.val at the loop head, before the
      * store; unpinned GCC forms it at the call. */
     register s32 call_argument_1 asm("$5");
-    s16* draw_params;
+    point16_t* draw_params;
     s32 flags;
 
     g_equip_text_help_message_id = -1;
@@ -25,11 +25,12 @@ s32 equip_menu_update_clear_all_equipment_prompt(void) {
     g_equip_menu_clear_all_prompt_frame = g_equip_menu_clear_all_prompt_frame + 1;
     if (g_equip_menu_clear_all_prompt_frame & 1) {
         index = 0;
-        draw_value = &g_equip_menu_clear_all_prompt_draw_params[1];
+        draw_value = &g_equip_menu_clear_all_prompt_draw_params.y;
         /* Keeps the draw_value address setup ahead of `li s1,0x90`. */
         __asm__ volatile("" : : "r"(draw_value));
         value = 0x90;
-        draw_params = draw_value - 1;
+        /* Recovering the anchor from y preserves the target's base register and displacement. */
+        draw_params = (point16_t*)(draw_value - 1);
         do {
             call_argument_1 = (s32)&scratch.val;
             /* Keeps the $a1 setup at the loop head, ahead of the store. */
@@ -38,8 +39,8 @@ s32 equip_menu_update_clear_all_equipment_prompt(void) {
             value += 0x10;
             index++;
             scratch.val = 0;
-            equip_menu_update_and_draw_animated_marker((RECT*)draw_params, (u16*)call_argument_1, g_event_mode);
-            draw_params = draw_value - 1;
+            equip_menu_update_and_draw_animated_marker(draw_params, (u16*)call_argument_1, g_event_mode);
+            draw_params = (point16_t*)(draw_value - 1);
         } while (index < 5);
     }
     flags = g_equip_input_primary_repeat;

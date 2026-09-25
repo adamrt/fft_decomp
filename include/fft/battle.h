@@ -6908,6 +6908,16 @@ typedef union battle_menu_scratch_buffer {
     u16 clut_save[5 * 16];
 } battle_menu_scratch_buffer_t;
 
+/* The status-panel frame uses all eight bytes; image placement and motion
+ * also read the leading coordinates. */
+typedef union battle_menu_panel_frame_geometry {
+    RECT rect;
+    battle_image_location_t location;
+    s16 coordinates[4];
+} battle_menu_panel_frame_geometry_t;
+typedef char
+    battle_menu_panel_frame_geometry_size_must_be_8[(sizeof(battle_menu_panel_frame_geometry_t) == 8) ? 1 : -1];
+
 /* The numeric editor's two adjacent rectangles: the first also supplies the
  * texture-page origin to image loading, while the second places the portrait. */
 typedef struct battle_menu_status_panel_numeric_geometry {
@@ -7491,7 +7501,7 @@ void battle_menu_configure_frame_cluts(struct battle_menu_window_record* frame);
 void battle_clear_menu_render_buffer(void* buffer, s32 bytes);
 void* battle_menu_alloc_window_buffer_pair(void);
 void battle_menu_build_ability_list(s32 mode);
-void battle_menu_build_and_upload_window_image(s32 width, s32 height, s32 rect, s32 mode, s32 tail_offset);
+void battle_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void battle_menu_build_sprite_page(s32 page_index, void* base_screen);
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
 void battle_menu_build_unit_portrait_poly(POLY_FT4* poly, u32 battle_id);

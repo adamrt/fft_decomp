@@ -75,7 +75,7 @@ void world_menu_unit_status_banner_thread(void) {
     world_menu_number_entry_t* entries;             /* sp70 */
     world_formation_unit_state_t* state;            /* sp78 */
     void* portrait_arg;                             /* sp80 */
-    u8* transition;                                 /* sp88 */
+    const RECT* transition;                         /* sp88 */
     u8* portrait_image;                             /* sp90 */
     u8* render_b;                                   /* sp98 */
     u8* render_c;                                   /* spA0 */
@@ -121,7 +121,7 @@ void world_menu_unit_status_banner_thread(void) {
         entries = g_world_selected_unit_number_entries;
         state = (world_formation_unit_state_t*)&g_world_selected_unit_stat_summary;
         identity = &g_world_selected_unit_identity;
-        transition = g_world_selected_unit_portrait_rect;
+        transition = &g_world_selected_unit_portrait_rect;
         status_base = status;
         summary_base = summary;
         portrait_image = g_world_selected_unit_portrait_image;
@@ -134,14 +134,14 @@ void world_menu_unit_status_banner_thread(void) {
         entries = g_world_comparison_unit_number_entries;
         state = (world_formation_unit_state_t*)g_world_comparison_unit_stat_summary;
         identity = &g_world_comparison_unit_identity;
-        transition = g_world_comparison_unit_portrait_rect;
+        transition = &g_world_comparison_unit_portrait_rect;
         status_base = status;
         summary_base = summary;
         portrait_image = g_world_comparison_unit_portrait_image;
     }
     shake = 0;
 
-    world_menu_build_line_box((RECT*)g_world_gfx_portrait_origin, &summary->frame);
+    world_menu_build_line_box(&g_world_gfx_portrait_origin, &summary->frame);
     world_gfx_set_image_draw_mode(&summary->draw_mode_a, 1);
     world_gfx_set_image_draw_mode(&summary->draw_mode_b, 0);
     world_menu_init_sprite_array(&summary->label_sprites[0], 7, 0x7CBC);
@@ -161,7 +161,7 @@ void world_menu_unit_status_banner_thread(void) {
     do {
         world_gfx_init_image_loading((POLY_FT4*)((u8*)summary + offset),
             (const world_image_location_t*)g_world_editor_numeric_geometry,
-            (const world_image_location_t*)g_world_gfx_portrait_origin, walk);
+            (const world_image_location_t*)&g_world_gfx_portrait_origin, walk);
         walk++;
         frame += 1;
         offset += 0x14;
@@ -182,7 +182,7 @@ void world_menu_unit_status_banner_thread(void) {
     do {
         world_gfx_init_image_loading((POLY_FT4*)((u8*)summary + offset),
             (const world_image_location_t*)g_world_editor_numeric_geometry,
-            (const world_image_location_t*)g_world_gfx_portrait_origin, walk);
+            (const world_image_location_t*)&g_world_gfx_portrait_origin, walk);
         walk++;
         frame += 1;
         offset += 0x14;
@@ -190,7 +190,7 @@ void world_menu_unit_status_banner_thread(void) {
     world_script_copy_bytes(summary + 1, summary, sizeof(world_formation_summary_packet_t));
     world_gfx_set_image_draw_mode(&status->draw_mode_a, 0);
     world_gfx_set_image_draw_mode(&status->draw_mode_b, 1);
-    world_menu_build_line_box((RECT*)g_world_unit_status_panel_origin, &status->frame);
+    world_menu_build_line_box(&g_world_unit_status_panel_origin, &status->frame);
     cur = (u8*)&status->sprites[0];
     world_menu_init_sprite_array((SPRT*)cur, 7, 0x7C3C);
     world_menu_init_quad(&status->portrait);
@@ -204,13 +204,13 @@ void world_menu_unit_status_banner_thread(void) {
     do {
         world_gfx_init_image_loading((POLY_FT4*)((u8*)status + offset),
             (const world_image_location_t*)g_world_editor_numeric_geometry,
-            (const world_image_location_t*)g_world_unit_status_panel_origin, walk);
+            (const world_image_location_t*)&g_world_unit_status_panel_origin, walk);
         walk++;
         frame += 1;
         offset += 0x14;
     } while (frame < 7);
     world_gfx_init_image_loading(&status->portrait, (const world_image_location_t*)g_world_editor_numeric_geometry,
-        (const world_image_location_t*)g_world_unit_status_panel_origin,
+        (const world_image_location_t*)&g_world_unit_status_panel_origin,
         (const world_gfx_image_load_parameters_t*)g_world_unit_status_portrait_params);
     if (state->mode == 1) {
         status->portrait.clut = 0x7FFD;
@@ -239,7 +239,7 @@ void world_menu_unit_status_banner_thread(void) {
         }
         world_gfx_init_image_loading((POLY_FT4*)&summary->label_sprites[6],
             (const world_image_location_t*)g_world_editor_numeric_geometry,
-            (const world_image_location_t*)g_world_gfx_portrait_origin, &g_world_unit_summary_label_sprite_params[6]);
+            (const world_image_location_t*)&g_world_gfx_portrait_origin, &g_world_unit_summary_label_sprite_params[6]);
         if (state->mode == 1) {
             status->portrait.clut = 0x7FFD;
         } else {
@@ -421,8 +421,8 @@ void world_menu_unit_status_banner_thread(void) {
                 anim_state = 2;
             }
         }
-        world_formation_build_portrait_transition_primitives((const RECT*)transition, &anim_state, &cur_unit,
-            &prev_unit, portrait_image, &summary->portrait[0], (s32)portrait_arg);
+        world_formation_build_portrait_transition_primitives(
+            transition, &anim_state, &cur_unit, &prev_unit, portrait_image, &summary->portrait[0], (s32)portrait_arg);
         {
             CVECTOR* color;
             u16* bar_origin;
@@ -431,7 +431,7 @@ void world_menu_unit_status_banner_thread(void) {
             volatile world_formation_summary_packet_t* dst;
             color = g_world_unit_panel_bar_colors;
             i = 0;
-            bar_origin = (u16*)g_world_gfx_portrait_origin;
+            bar_origin = (u16*)&g_world_gfx_portrait_origin;
             row_offset = 0x18;
             dst = summary;
             bar_offset = 0x1E0;

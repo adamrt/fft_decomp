@@ -81,7 +81,7 @@ typedef struct debug_chr_texture_page {
 extern const u16 g_debugchr_gfx_draw_area_scale_percent[12];
 extern RECT g_debugchr_gfx_draw_area_template;
 extern u16 g_debugchr_gfx_draw_offset_y;
-extern s16 g_debugchr_gfx_portrait_origin[];
+extern battle_menu_panel_frame_geometry_t g_debugchr_gfx_portrait_origin;
 extern u8 g_debugchr_gfx_portrait_transition_offsets[];
 extern u8 g_debugchr_gfx_render_buffers[2][0x4B0];
 extern u8 g_debugchr_gfx_scaled_sprite_count;
@@ -147,7 +147,7 @@ extern s16 g_debugchr_panel_slide_down_y[];
 extern u8 g_debugchr_panel_editor_label_cells[];
 extern u8 g_debugchr_panel_editor_mode_cell[];
 extern u8 g_debugchr_panel_editor_value_cells[];
-extern u8 g_debugchr_panel_frame_rect[];
+extern battle_menu_panel_frame_geometry_t g_debugchr_panel_frame_rect;
 extern u8 g_debugchr_panel_sprite_cells[];
 extern u8 g_debugchr_panel_portrait_cell[];
 extern u16 g_debugchr_panel_editor_value_cluts[];

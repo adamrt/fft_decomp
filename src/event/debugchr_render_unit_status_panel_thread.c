@@ -123,7 +123,7 @@ void debugchr_render_unit_status_panel_thread(void) {
     }
     shake = 0;
 
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_debugchr_gfx_portrait_origin, &editor->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(&g_debugchr_gfx_portrait_origin.rect, &editor->numeric_frame);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, 1);
     battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, 0);
     battle_menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -142,7 +142,7 @@ void debugchr_render_unit_status_panel_thread(void) {
     value_sprite_offset = 0x104;
     do {
         battle_gfx_init_image_loading((u8*)editor + value_sprite_offset, g_debugchr_editor_numeric_geometry,
-            g_debugchr_gfx_portrait_origin, value_geometry);
+            &g_debugchr_gfx_portrait_origin.location, value_geometry);
         value_geometry += 0xC;
         frame += 1;
         value_sprite_offset += 0x14;
@@ -161,7 +161,7 @@ void debugchr_render_unit_status_panel_thread(void) {
     label_sprite_offset = 0x154;
     do {
         battle_gfx_init_image_loading((u8*)editor + label_sprite_offset, g_debugchr_editor_numeric_geometry,
-            g_debugchr_gfx_portrait_origin, label_geometry);
+            &g_debugchr_gfx_portrait_origin.location, label_geometry);
         label_geometry += 0xC;
         frame += 1;
         label_sprite_offset += 0x14;
@@ -169,7 +169,7 @@ void debugchr_render_unit_status_panel_thread(void) {
     battle_copy_bytes(editor + 1, editor, sizeof(battle_menu_status_panel_editor_packet_t));
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, 0);
     battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, 1);
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_debugchr_panel_frame_rect, &panel->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(&g_debugchr_panel_frame_rect.rect, &panel->numeric_frame);
     panel_sprites = &panel->sprites[0];
     battle_menu_init_sprite_array(panel_sprites, 7, 0x7C3C);
     battle_gfx_init_default_poly_ft4(&panel->portrait);
@@ -182,13 +182,13 @@ void debugchr_render_unit_status_panel_thread(void) {
     panel_sprite_offset = 0xEC;
     do {
         battle_gfx_init_image_loading((u8*)panel + panel_sprite_offset, g_debugchr_editor_numeric_geometry,
-            g_debugchr_panel_frame_rect, panel_geometry);
+            &g_debugchr_panel_frame_rect.location, panel_geometry);
         panel_geometry += 0xC;
         frame += 1;
         panel_sprite_offset += 0x14;
     } while (frame < 7);
-    battle_gfx_init_image_loading(&panel->portrait, g_debugchr_editor_numeric_geometry, g_debugchr_panel_frame_rect,
-        g_debugchr_panel_portrait_cell);
+    battle_gfx_init_image_loading(&panel->portrait, g_debugchr_editor_numeric_geometry,
+        &g_debugchr_panel_frame_rect.location, g_debugchr_panel_portrait_cell);
     if (state->mode == 1) {
         panel->portrait.clut = 0x7FFD;
     } else {
@@ -214,7 +214,7 @@ void debugchr_render_unit_status_panel_thread(void) {
             battle_copy_bytes(g_debugchr_panel_editor_mode_cell, g_debugchr_panel_editor_mode_cells, 0xC);
         }
         battle_gfx_init_image_loading(&editor->label_sprites[6], g_debugchr_editor_numeric_geometry,
-            g_debugchr_gfx_portrait_origin, g_debugchr_panel_editor_mode_cell);
+            &g_debugchr_gfx_portrait_origin.location, g_debugchr_panel_editor_mode_cell);
         if (state->mode == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {
@@ -417,7 +417,7 @@ void debugchr_render_unit_status_panel_thread(void) {
             color = g_debugchr_panel_gauge_bar_colors;
             i = 0;
             /* The bar rows read the origin y with lhu; an s16 walk changes the loads. */
-            bar_origin_y = (u16*)&g_debugchr_gfx_portrait_origin[1];
+            bar_origin_y = (u16*)&g_debugchr_gfx_portrait_origin.coordinates[1];
             bar_y = 0x18;
             packet = editor;
             bar_offset = 0x1E0;
@@ -448,7 +448,7 @@ void debugchr_render_unit_status_panel_thread(void) {
                        target loads the portrait origin into $2 first and only biases it
                        in the branch delay slot. */
                     register s32 origin_x __asm__("$2");
-                    origin_x = g_debugchr_gfx_portrait_origin[0];
+                    origin_x = g_debugchr_gfx_portrait_origin.coordinates[0];
                     x0 = origin_x + 0x2F;
                 }
                 if (limit == 0) {

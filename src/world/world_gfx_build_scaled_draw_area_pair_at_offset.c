@@ -5,10 +5,8 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* The header owns the signature, so the typed views are spelled as casts at
- * the use sites rather than taken as typed parameters or copied into locals:
- * a cast of a pointer parameter is the parameter's own pseudo, which is what
- * a typed parameter would have given. */
+/* Callers pass different thread records; only the halfwords at offsets 0 and
+ * 4 are read here. Keeping the views at each use preserves register moves. */
 void world_gfx_build_scaled_draw_area_pair_at_offset(
     void* packets, const void* geometry, s32 buffer, s32 frame_offset, void* thread) {
     s32 percent;

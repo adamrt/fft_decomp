@@ -27,15 +27,15 @@ void world_formation_build_portrait_transition_primitives(const RECT* texture_re
     phase = 0;
     cursor = (u8*)poly_p;
     do {
-        *(volatile s16*)(cursor + 8) = g_world_gfx_portrait_origin[0] + 2;
-        *(volatile s16*)(cursor + 0xa) = g_world_gfx_portrait_origin[1] + 2;
-        *(volatile s16*)(cursor + 0x10) = g_world_gfx_portrait_origin[0] + 0x21;
-        *(volatile s16*)(cursor + 0x12) = g_world_gfx_portrait_origin[1] + 2;
-        *(volatile s16*)(cursor + 0x18) = g_world_gfx_portrait_origin[0] + 2;
-        *(volatile s16*)(cursor + 0x1a) = g_world_gfx_portrait_origin[1] + 0x32;
-        *(volatile s16*)(cursor + 0x20) = g_world_gfx_portrait_origin[0] + 0x21;
+        *(volatile s16*)(cursor + 8) = g_world_gfx_portrait_origin.x + 2;
+        *(volatile s16*)(cursor + 0xa) = g_world_gfx_portrait_origin.y + 2;
+        *(volatile s16*)(cursor + 0x10) = g_world_gfx_portrait_origin.x + 0x21;
+        *(volatile s16*)(cursor + 0x12) = g_world_gfx_portrait_origin.y + 2;
+        *(volatile s16*)(cursor + 0x18) = g_world_gfx_portrait_origin.x + 2;
+        *(volatile s16*)(cursor + 0x1a) = g_world_gfx_portrait_origin.y + 0x32;
+        *(volatile s16*)(cursor + 0x20) = g_world_gfx_portrait_origin.x + 0x21;
         phase++;
-        *(volatile s16*)(cursor + 0x22) = g_world_gfx_portrait_origin[1] + 0x32;
+        *(volatile s16*)(cursor + 0x22) = g_world_gfx_portrait_origin.y + 0x32;
         cursor += sizeof(POLY_FT4);
     } while (phase < 4);
 

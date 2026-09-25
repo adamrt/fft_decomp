@@ -155,7 +155,7 @@ extern u16 g_equip_gfx_otag_length;
 extern u16 g_equip_gfx_poly_f4_capacity;
 extern u16 g_equip_gfx_poly_ft4_capacity;
 extern u16 g_equip_gfx_poly_ft4_count;
-extern s16 g_equip_gfx_portrait_origin[];
+extern battle_menu_panel_frame_geometry_t g_equip_gfx_portrait_origin;
 extern u8 g_equip_gfx_portrait_transition_offsets[];
 extern void* g_equip_gfx_render_otag;
 extern s16 g_equip_gfx_semitransparency;
@@ -331,7 +331,7 @@ extern equip_icon_rect_t g_equip_item_row_icon_rect;
 extern world_menu_entry_t* g_equip_item_type_order_active_menu;
 extern u16 g_equip_remove_item_cursor_anim[];
 extern s16 g_equip_remove_item_equipment[];
-extern RECT g_equip_remove_item_marker_rect;
+extern point16_t g_equip_remove_item_marker_rect;
 extern s8 g_equip_remove_item_previewed_slot;
 void equip_item_clear_stat_sums(s16* summary, s16* detail);
 s32 equip_item_adjust_inventory_count(s32 g_main_item_item_flags, s32 delta);
@@ -379,7 +379,7 @@ typedef struct equip_menu_selection_record {
     s16 item_id;        /* 0x04: low 10 bits of the selected list entry */
 } equip_menu_selection_record_t;
 
-extern s16 g_equip_menu_clear_all_prompt_draw_params[];
+extern point16_t g_equip_menu_clear_all_prompt_draw_params;
 extern volatile u16 g_equip_menu_clear_all_prompt_frame;
 extern s8 g_equip_menu_event_speed;
 extern u16* g_equip_menu_list_entries;
@@ -458,7 +458,7 @@ void equip_menu_scroll_list_by_page(s32 direction, const u8* menu);
 void equip_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_index, u16* items);
 s32 equip_menu_set_selection_value(s32 index, s32 value);
 s32 equip_menu_set_selection_value_2(s32 index, s32 value);
-void equip_menu_update_and_draw_animated_marker(RECT* anchor, u16* state, s32 mode);
+void equip_menu_update_and_draw_animated_marker(const point16_t* anchor, u16* state, s32 mode);
 s32 equip_menu_update_clear_all_equipment_prompt(void);
 s32 equip_menu_update_equipment(void);
 s32 equip_menu_update_item_action_state(void);
@@ -510,7 +510,7 @@ extern u8 g_equip_panel_editor_mode_cell[];
 extern u8 g_equip_panel_editor_mode_cells[];
 extern u8 g_equip_panel_editor_value_cells[];
 extern u16 g_equip_panel_editor_value_cluts[];
-extern u8 g_equip_panel_frame_rect[];
+extern battle_menu_panel_frame_geometry_t g_equip_panel_frame_rect;
 extern battle_menu_status_panel_buffer_t g_equip_panel_frames_b[];
 extern CVECTOR g_equip_panel_gauge_bar_colors[];
 extern u8 g_equip_panel_portrait_cell[];
@@ -567,7 +567,7 @@ extern s8 g_equip_slot_item_browser_initialized;
 
 /* List index whose stat preview was last built; -1 forces a rebuild. */
 extern s8 g_equip_slot_item_browser_previewed_index;
-extern RECT g_equip_slot_marker_rect;
+extern point16_t g_equip_slot_marker_rect;
 
 /* text */
 typedef struct equip_stat_entry {
