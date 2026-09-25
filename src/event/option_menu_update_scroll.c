@@ -31,7 +31,7 @@ void* option_menu_update_scroll(u8* menu, s32* first_row, s32* render_pending) {
     }
 
     if (((*secondary_input & PSX_PAD_SQUARE) == 0)
-        && (*(s32*)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads + 0x60) == 0)) {
+        && (g_battle_threads[g_battle_current_thread_id].task_words[4] == 0)) {
         return 0;
     }
 
@@ -49,9 +49,9 @@ void* option_menu_update_scroll(u8* menu, s32* first_row, s32* render_pending) {
         }
         changed = 1;
         g_sound_effect_id_to_play = MAIN_SFX_CURSOR_MOVE;
-    } else if (*(s32*)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads + 0x60) != 0) {
+    } else if (g_battle_threads[g_battle_current_thread_id].task_words[4] != 0) {
         changed = 1;
-        *(s32*)((g_battle_current_thread_id * NATIVE_THREAD_STRIDE) + (s32)g_battle_threads + 0x60) = 0;
+        g_battle_threads[g_battle_current_thread_id].task_words[4] = 0;
     }
 
     if (changed == 0) {

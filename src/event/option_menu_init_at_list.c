@@ -9,11 +9,6 @@
  * 0x801cb6fc; the four-byte stride is proven by the strength-reduced index
  * register the target advances by 4 and by the +1 byte read for the turn
  * value.
- *
- * flags bits: 0x1f = battle unit id, 0x1f meaning "end of list";
- *             0x20 = fixed "wait" label instead of a turn value;
- *             0x40 = the entry is the acting/queued unit (bracketed name);
- *             0x80 = turn value biased by 0x100.
  */
 typedef struct option_at_descriptor_t {
     u8 flags;
@@ -21,6 +16,14 @@ typedef struct option_at_descriptor_t {
     u8 unknown_02;
     u8 unknown_03;
 } option_at_descriptor_t;
+
+enum {
+    OPTION_AT_UNIT_ID_MASK = 0x1f,
+    OPTION_AT_END_OF_LIST = 0x1f,
+    OPTION_AT_SHOW_WAIT_LABEL = 0x20,
+    OPTION_AT_ACTING_UNIT = 0x40,
+    OPTION_AT_TURN_VALUE_HIGH_BIT = 0x80,
+};
 
 /* option_scroll_layout_t and option_at_menu_t live in fft/option.h. */
 
@@ -63,13 +66,14 @@ void option_menu_init_at_list(option_at_menu_t* menu) {
         battle_stats_t* unit;
         s32 name_index;
 
-        if ((g_option_menu_at_list_descriptors[index].flags & 0x1f) == 0x1f) {
+        if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_UNIT_ID_MASK) == OPTION_AT_END_OF_LIST) {
             break;
         }
 
         g_option_menu_at_list_indices[index] = index + 1;
-        unit = battle_unit_get_stats_from_battle_id(g_option_menu_at_list_descriptors[index].flags & 0x1f);
-        if ((g_option_menu_at_list_descriptors[index].flags & 0x40) != 0) {
+        unit = battle_unit_get_stats_from_battle_id(
+            g_option_menu_at_list_descriptors[index].flags & OPTION_AT_UNIT_ID_MASK);
+        if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_ACTING_UNIT) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbe;
         }
@@ -83,27 +87,27 @@ void option_menu_init_at_list(option_at_menu_t* menu) {
             }
             text++;
         }
-        if ((g_option_menu_at_list_descriptors[index].flags & 0x40) != 0) {
+        if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_ACTING_UNIT) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbf;
         }
         *text++ = 0xfe;
 
-        if ((g_option_menu_at_list_descriptors[index].flags & 0x40) != 0) {
+        if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_ACTING_UNIT) != 0) {
             g_option_menu_at_list_secondary_values[entry_count] = index - 0x800;
         } else {
             g_option_menu_at_list_primary_values[entry_count] = index - 0x800;
         }
 
-        if ((g_option_menu_at_list_descriptors[index].flags & 0x40) == 0) {
+        if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_ACTING_UNIT) == 0) {
             g_option_menu_at_list_secondary_values[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
-            if ((g_option_menu_at_list_descriptors[index].flags & 0x20) != 0) {
+            if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_SHOW_WAIT_LABEL) != 0) {
                 g_option_menu_at_list_primary_values[entry_count] = (s16)0xb012;
             } else {
                 s32 value = g_option_menu_at_list_descriptors[index].turn_value;
-                if ((g_option_menu_at_list_descriptors[index].flags & 0x80) != 0) {
+                if ((g_option_menu_at_list_descriptors[index].flags & OPTION_AT_TURN_VALUE_HIGH_BIT) != 0) {
                     value += 0x100;
                 }
                 g_option_menu_at_list_primary_values[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;
