@@ -7,16 +7,6 @@
 #include "fft/world.h"
 #include "psx/libc.h"
 
-/* Byte view of party_data_t: the 16-bit name id is read and written one
- * byte at a time by this routine (lbu/sb pairs in the target). */
-typedef struct main_party_name_view {
-    u8 sprite_set; /* 0x00 */
-    u8 party_id;   /* 0x01 */
-    u8 _pad02[0xcc];
-    u8 name_id_lo; /* 0xce */
-    u8 name_id_hi; /* 0xcf */
-    u8 _padd0[0x30];
-} main_party_name_view_t;
 /*
  * Fills a fresh party record for a generic male (0), generic female (1),
  * monster (3) or Ramza (anything else, forced to 2).
@@ -33,9 +23,8 @@ void main_unit_generate_out_of_battle(party_data_t* party, s32 unit_type) {
     u8 generic_id;
     main_unit_generation_base_data_t* base;
     main_unit_generation_base_data_t* table;
-    volatile main_party_name_view_t* volatile_name_view;
-    main_party_name_view_t* name_view;
-    main_party_name_view_t* other;
+    volatile party_data_t* volatile_name_view;
+    party_data_t* other;
     s32 found;
     s32 jp;
     u32 hi;
@@ -125,16 +114,16 @@ void main_unit_generate_out_of_battle(party_data_t* party, s32 unit_type) {
     } else {
         /* volatile keeps the two byte stores ordered as the target has them
          * (the scheduler otherwise sinks the low byte past the high byte). */
-        volatile_name_view = (volatile main_party_name_view_t*)party;
-        volatile_name_view->name_id_lo = 0xff;
-        volatile_name_view->name_id_hi = hi;
+        volatile_name_view = party;
+        volatile_name_view->name_id[0] = 0xff;
+        volatile_name_view->name_id[1] = hi;
         do {
             found = 1;
             name_id = name_modifier + (rand() * 255) / 0x8000;
             for (i = 0; i < PARTY_GUEST_SLOT_FIRST; i++) {
-                other = (main_party_name_view_t*)&g_main_party_data[i];
+                other = &g_main_party_data[i];
                 if (other->party_id != PARTY_ID_NONE && (other->sprite_set & -(other->sprite_set >> 7)) == generic_id
-                    && (other->name_id_lo | (other->name_id_hi << 8)) == (name_id & 0xffff)) {
+                    && (other->name_id[0] | (other->name_id[1] << 8)) == (name_id & 0xffff)) {
                     found = 0;
                     break;
                 }
@@ -144,9 +133,8 @@ void main_unit_generate_out_of_battle(party_data_t* party, s32 unit_type) {
     /* Reuse the earlier arithmetic temporary: a separate single-set value
      * sinks the shift; reusing hi conflicts with v0 and selects v1. */
     zodiac = name_id >> PARTY_NAME_CLASS_SHIFT;
-    name_view = (main_party_name_view_t*)party;
-    name_view->name_id_lo = name_id;
-    name_view->name_id_hi = zodiac;
+    party->name_id[0] = name_id;
+    party->name_id[1] = zodiac;
     main_util_copy_bytes(world_text_find_entry(name_flags + (name_id & 0xff)), party->name, 0x10);
     party->proposition_status = 0;
     party->egg_color = 0;

@@ -15,7 +15,7 @@
  * failed (which also raises exception 0x11). */
 s32 main_sound_open_music_into_slot(s32 scenario, s32 slot) {
     if (g_main_sound_music.slots.smd[slot] == 0) {
-        void* data = main_heap_alloc_smd(g_main_sound_scenario_smd_files[scenario].size);
+        suzuki_smd_header_t* data = main_heap_alloc_smd(g_main_sound_scenario_smd_files[scenario].size);
 
         if (data != 0
             && main_file_call_build_header(g_main_sound_scenario_smd_files[scenario].sector,
