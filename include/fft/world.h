@@ -2596,7 +2596,7 @@ extern s16 g_world_dead_unit_move_result; /* secondary (move) menu result */
 extern u8 g_world_menu_at_list_text[];
 extern RECT g_world_options_menu_title_rect;
 extern RECT g_world_options_menu_value_rect;
-extern u8 g_world_option_picker_icon_records[2][0x7C];
+extern world_menu_icon_record_t g_world_option_picker_icon_records[2];
 extern s32* g_world_help_controller_state_ptr;
 extern u16* g_world_help_topic_text_ids;
 extern u8 g_world_formation_thread_status_snapshot[16];

@@ -58,6 +58,8 @@ typedef struct option_menu_entry {
     u16 inner_height; /* 0x06 */
     u8 _pad08[0x30 - 0x08];
     option_menu_text_layout_t* text_binding; /* 0x30 */
+    u8 _pad34[6];
+    s16 select_text_table; /* 0x3a */
 } option_menu_entry_t;
 
 /* Provisional layout of the OPTION dead-unit panel primitive block at
@@ -161,7 +163,7 @@ extern s16 g_option_menu_at_list_primary_values[];
 extern s16 g_option_menu_at_list_secondary_values[];
 extern option_at_menu_t g_option_menu_at_list_state[];
 extern u8 g_option_menu_at_list_text[];
-extern u8 g_option_menu_entry_table[];
+extern option_menu_text_layout_t g_option_menu_entry_table[1];
 extern option_panel_frame_t g_option_menu_panel_frames[2];
 extern u8 g_option_menu_panel_pixels[];
 /* One libgpu texture window per dead-unit panel DR_MODE packet. The static

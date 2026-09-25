@@ -383,7 +383,7 @@ extern u8* g_battle_effect_nibble_table;
 extern battle_effect_tick_channels_t* g_battle_effect_timing_channels;
 extern u8* g_battle_effect_parameter_sets;
 extern u8* g_battle_effect_parameter_sets_start;
-extern void* g_battle_effect_polygon_depth_data;
+extern u32* g_battle_effect_polygon_depth_data;
 extern u16 g_battle_effect_active_slot_tail;
 extern s32 g_battle_effect_primitive_sizes[];
 extern s32 g_battle_effect_saved_inertia_threshold;
@@ -519,7 +519,7 @@ extern SVECTOR g_battle_effect_corner_top_right;
 extern u8 g_battle_effect_ending_secondary_function_id; /* function byte to store; 5 = nothing */
 extern s16 (*g_battle_effect_instructions[])(effect_record_t*);
 extern MATRIX g_battle_effect_matrix; /* 0x801bc09c */
-extern s32 g_battle_effect_otag;
+extern u32* g_battle_effect_otag;
 /* Work-kind handlers, indexed by kind_flags >> 12. The int return type is
  * load-bearing even though the result is ignored: the value-returning call is
  * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end

@@ -176,7 +176,7 @@ void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, 
                 z += PT(3).vz;
                 z /= 16;
                 if (z > 0 && z < EFFECT_OT_DEPTH_MAX) {
-                    addPrim((u32*)g_battle_effect_polygon_depth_data + z, quad);
+                    addPrim(g_battle_effect_polygon_depth_data + z, quad);
                 }
             }
             i++;
@@ -203,7 +203,7 @@ void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, 
                 z /= 12;
                 g3_index++;
                 if (z > 0 && z < EFFECT_OT_DEPTH_MAX) {
-                    addPrim((u32*)g_battle_effect_polygon_depth_data + z, tri);
+                    addPrim(g_battle_effect_polygon_depth_data + z, tri);
                 }
             }
         }
@@ -241,7 +241,7 @@ void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, 
                 z /= 12;
                 j++;
                 if (z > 0 && z < EFFECT_OT_DEPTH_MAX) {
-                    addPrim((u32*)g_battle_effect_polygon_depth_data + z, tri);
+                    addPrim(g_battle_effect_polygon_depth_data + z, tri);
                 }
             }
         }
@@ -288,7 +288,7 @@ void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, 
                 z /= 12;
                 gt3_index++;
                 if (z > 0 && z < EFFECT_OT_DEPTH_MAX) {
-                    ot = (u32*)g_battle_effect_polygon_depth_data;
+                    ot = g_battle_effect_polygon_depth_data;
                     addPrim(ot, tri);
                 }
             }
@@ -327,7 +327,7 @@ void battle_effect_draw_projectile_model(battle_effect_rotation_vector_t* spin, 
                 z /= 12;
                 j++;
                 if (z > 0 && z < EFFECT_OT_DEPTH_MAX) {
-                    addPrim((u32*)g_battle_effect_polygon_depth_data + z, tri);
+                    addPrim(g_battle_effect_polygon_depth_data + z, tri);
                 }
             }
         }

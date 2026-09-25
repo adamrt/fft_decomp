@@ -103,7 +103,7 @@ void option_build_options_menu(void) {
         entry = (world_menu_entry_t*)thread->function_parameter_1;
     } while (0);
     page = g_option_menu_pages;
-    layout = (option_menu_text_layout_t*)g_option_menu_entry_table;
+    layout = g_option_menu_entry_table;
     entry->window_height = layout->row_count * 16 + 0x10;
     entry->inner_height = layout->row_count * 16 + 0x10;
     entry->overall_height = layout->row_count * 16 + 0x10;

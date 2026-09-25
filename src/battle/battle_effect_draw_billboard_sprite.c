@@ -100,8 +100,8 @@ void battle_effect_draw_billboard_sprite(battle_effect_sprite_slot_t* slot) {
     prim->v3 = bottom;
     prim->v2 = bottom;
     SetDrawMode(&slot->modes[g_battle_effect_buffer_index][0], 1, 1, 1, 0);
-    AddPrim(&((u32*)g_battle_effect_polygon_depth_data)[depth], &slot->modes[g_battle_effect_buffer_index][0]);
-    AddPrim(&((u32*)g_battle_effect_polygon_depth_data)[depth], prim);
+    AddPrim(&g_battle_effect_polygon_depth_data[depth], &slot->modes[g_battle_effect_buffer_index][0]);
+    AddPrim(&g_battle_effect_polygon_depth_data[depth], prim);
     SetDrawMode(&slot->modes[g_battle_effect_buffer_index][1], 1, 0, 1, 0);
-    AddPrim(&((u32*)g_battle_effect_polygon_depth_data)[depth], &slot->modes[g_battle_effect_buffer_index][1]);
+    AddPrim(&g_battle_effect_polygon_depth_data[depth], &slot->modes[g_battle_effect_buffer_index][1]);
 }

@@ -124,7 +124,7 @@ void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red,
         position[0] = output.vx;
         position[1] = output.vy;
         battle_effect_submit_sprite_to_ordering_table((battle_effect_sprite_part_set_t*)node->sprite_block, position,
-            node->screen_rotation_angle, &g_battle_camera_zoom, (u32*)g_battle_effect_otag + depth);
+            node->screen_rotation_angle, &g_battle_camera_zoom, g_battle_effect_otag + depth);
         break;
     case 2:
         position[0] = node->x + node->sprite_offset_x + g_battle_camera_matrix.t[0];
@@ -137,7 +137,7 @@ void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red,
             depth = 0x17e;
         }
         battle_effect_submit_sprite_to_ordering_table((battle_effect_sprite_part_set_t*)node->sprite_block, position,
-            node->screen_rotation_angle, &g_battle_camera_zoom, (u32*)g_battle_effect_otag + depth);
+            node->screen_rotation_angle, &g_battle_camera_zoom, g_battle_effect_otag + depth);
         break;
     case 4:
         SetRotMatrix(&g_battle_camera_matrix);
@@ -173,7 +173,7 @@ void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red,
         position[0] = output.vx;
         position[1] = output.vy;
         battle_effect_submit_sprite_to_ordering_table((battle_effect_sprite_part_set_t*)node->sprite_block, position,
-            node->screen_rotation_angle, 0, (u32*)g_battle_effect_otag + depth);
+            node->screen_rotation_angle, 0, g_battle_effect_otag + depth);
         break;
     case 6:
         position[0] = node->x + node->sprite_offset_x;
@@ -186,7 +186,7 @@ void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red,
             depth = 0x17e;
         }
         battle_effect_submit_sprite_to_ordering_table((battle_effect_sprite_part_set_t*)node->sprite_block, position,
-            node->screen_rotation_angle, 0, (u32*)g_battle_effect_otag + depth);
+            node->screen_rotation_angle, 0, g_battle_effect_otag + depth);
         break;
     }
 }

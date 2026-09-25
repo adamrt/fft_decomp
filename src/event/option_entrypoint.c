@@ -5,7 +5,7 @@
 
 /* Decode saved option fields and dispatch the requested option-menu mode. */
 void option_entrypoint(s32 menu_type) {
-    u8* menu = (u8*)battle_thread_get_current_parameter_1();
+    option_menu_entry_t* menu = (option_menu_entry_t*)battle_thread_get_current_parameter_1();
     s32 index;
     u32 packed = g_main_game_options.value;
 
@@ -61,8 +61,8 @@ void option_entrypoint(s32 menu_type) {
         battle_script_pulse_tutorial_wait_value(0xfd);
         battle_thread_start(g_battle_current_thread_id - 1, option_build_options_menu);
         child_thread = g_battle_current_thread_id;
-        *(s16*)(menu + 0x3a) = 1;
-        *(void**)(menu + 0x30) = g_option_menu_entry_table;
+        menu->select_text_table = 1;
+        menu->text_binding = g_option_menu_entry_table;
         battle_thread_set_parameters(child_thread - 1, menu, 0, 0);
         battle_thread_wait_until_inactive(g_battle_current_thread_id - 1);
         battle_thread_exit_current();

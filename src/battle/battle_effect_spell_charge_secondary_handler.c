@@ -257,7 +257,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                 }
             }
         }
-        AddPrim((u32*)g_battle_effect_polygon_depth_data + 1, &state->mode[g_battle_effect_buffer_index]);
+        AddPrim(g_battle_effect_polygon_depth_data + 1, &state->mode[g_battle_effect_buffer_index]);
         if (g_battle_effect_current_secondary->phase == BATTLE_SECONDARY_EFFECT_EXECUTING || state->count.all != 0) {
             result = 1;
         } else {

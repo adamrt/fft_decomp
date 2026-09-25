@@ -42,7 +42,7 @@ void world_run_option_choice_menu(void) {
     void* buffer;
     s32 i;
     s32 cursor;
-    u8* record;
+    world_menu_icon_sprites_t* record;
 
     input = world_input_get_menu_controller(0);
     world_input_get_menu_controller(1);
@@ -82,15 +82,15 @@ void world_run_option_choice_menu(void) {
         param->x = 0x1AE;
     }
     param->text_image.width -= 4;
-    world_menu_build_icon_record(&rect, param, (world_menu_icon_record_t*)g_world_option_picker_icon_records[0]);
-    world_script_copy_bytes(g_world_option_picker_icon_records[1], g_world_option_picker_icon_records[0], 0x7C);
+    world_menu_build_icon_record(&rect, param, &g_world_option_picker_icon_records[0]);
+    world_script_copy_bytes(&g_world_option_picker_icon_records[1], &g_world_option_picker_icon_records[0], 0x7C);
     LoadImage(&rect, buffer);
     world_menu_free_memory(buffer);
     world_thread_wait_frames(1);
     cursor = g_world_game_option_values[kind];
     for (width = 0;; width++) {
         world_menu_check_thread_completion((s32*)input);
-        record = g_world_option_picker_icon_records[width & 1];
+        record = &g_world_option_picker_icon_records[width & 1].base;
         if (world_menu_is_input_allowed()) {
             if (*input & PSX_PAD_CROSS) {
                 g_world_sound_effect_id_to_play = MAIN_SFX_CANCEL;
@@ -136,9 +136,9 @@ void world_run_option_choice_menu(void) {
                 g_world_sound_effect_id_to_play = MAIN_SFX_CURSOR_MOVE;
             }
         }
-        world_menu_select_icon_cluts((world_menu_icon_sprites_t*)record);
-        world_menu_update_icon_cursor_sprites(param, (world_menu_icon_sprites_t*)record, width, cursor);
-        world_menu_submit_icon_primitives((world_menu_icon_sprites_t*)record);
+        world_menu_select_icon_cluts(record);
+        world_menu_update_icon_cursor_sprites(param, record, width, cursor);
+        world_menu_submit_icon_primitives(record);
         world_thread_wait_frames(1);
     }
     g_main_game_options.fields.cursor_movement = g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT];

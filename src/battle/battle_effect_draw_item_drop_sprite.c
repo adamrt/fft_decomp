@@ -72,5 +72,5 @@ void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle)
     RotTransPers3(&g_battle_effect_corner_top_left, &g_battle_effect_corner_top_right,
         &g_battle_effect_corner_bottom_left, (s32*)&prim->x0, (s32*)&prim->x1, (s32*)&prim->x2, &sxy, &flag);
     RotTransPers(&g_battle_effect_corner_bottom_right, (s32*)&prim->x3, &sxy, &flag);
-    AddPrim((u8*)g_battle_effect_polygon_depth_data + depth * 4, prim);
+    AddPrim(g_battle_effect_polygon_depth_data + depth, prim);
 }
