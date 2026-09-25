@@ -16,7 +16,7 @@ s32 effect_e458_timeline_set_remaining_duration_state(s16 record_index, s32 byte
     u8* table;
     u8* record;
     effect_state_t* state;
-    record_offset = record_index * 0xf8;
+    record_offset = record_index * sizeof(effect_record_t);
     table = (u8*)g_effect_state_records;
     record = table + record_offset;
     state = (effect_state_t*)(record + byte_offset);
