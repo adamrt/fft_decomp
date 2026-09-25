@@ -1,6 +1,6 @@
 #include "fft/world.h"
 
-typedef struct open_text_image_dimensions_t {
+typedef struct open_text_image_dimensions {
     s32 width;
     s32 height;
 } open_text_image_dimensions_t;

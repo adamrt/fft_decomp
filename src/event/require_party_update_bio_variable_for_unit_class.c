@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Three unit ids whose presence selects the event variable at +6. */
-typedef struct require_bio_update_record_t {
+typedef struct require_bio_update_record {
     u16 unit_ids[3];
     u16 variable;
 } require_bio_update_record_t;

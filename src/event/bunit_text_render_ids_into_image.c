@@ -4,7 +4,7 @@
 #include "psx/types.h"
 
 /* x/y/w are read with lhu and the line height with lh, so this is not a RECT. */
-typedef struct bunit_text_line_rect_t {
+typedef struct bunit_text_line_rect {
     u16 x;
     u16 y;
     u16 w;

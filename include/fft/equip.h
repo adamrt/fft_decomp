@@ -626,8 +626,8 @@ void equip_render_unit_status_panel_thread(void);
 void equip_panel_run_equipment_list_thread(void);
 void equip_editor_run_numeric_thread(void);
 
-struct equip_stat_entry_t;
-struct equip_stat_out_t;
+struct equip_stat_entry;
+struct equip_stat_out;
 struct equip_text_image_bounds;
 
 extern u8* g_equip_bits_reader_1_stream;
@@ -778,7 +778,7 @@ void equip_text_render_encoded_ids_to_image(void* image, const struct equip_text
     s32 unused_style);
 void equip_text_render_id_rows_to_vram(void* text_table, s16* list, RECT* rect, s32 style);
 void equip_text_render_signed_decimal_entries(
-    void* pixels, struct equip_stat_entry_t* entry, struct equip_stat_out_t* out, s32 count);
+    void* pixels, struct equip_stat_entry* entry, struct equip_stat_out* out, s32 count);
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);
 const u8* equip_text_skip_encoded_segments(const u8* data, s16 count);
 s32 equip_unit_is_two_handing_weapon(weapon_pair_t* slots, s32 two_hands_support);

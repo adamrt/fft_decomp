@@ -1,6 +1,6 @@
 #include "fft/jobstts.h"
 
-typedef struct jobstts_quad_t {
+typedef struct jobstts_quad {
     s16 x0;
     s16 y0;
     s16 x1;

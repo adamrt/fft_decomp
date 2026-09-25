@@ -14,8 +14,8 @@
  * block is battle_menu_status_panel_frame_config_t. */
 
 /* Record types private to equip_text_render_signed_decimal_entries.c. */
-typedef struct equip_stat_entry_t equip_stat_entry_t;
-typedef struct equip_stat_out_t equip_stat_out_t;
+typedef struct equip_stat_entry equip_stat_entry_t;
+typedef struct equip_stat_out equip_stat_out_t;
 struct menu_number_entry;
 struct menu_number_position;
 

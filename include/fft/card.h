@@ -124,7 +124,7 @@ typedef char card_graphics_context_size_must_be_0xf4[(sizeof(card_graphics_conte
  * card_save_build_buffer (0x801c01ac) and parity-covered per 128-byte block.
  * Shares its layout with WORLD's world_card_save_buffer_t.
  */
-typedef struct card_save_buffer_t {
+typedef struct card_save_buffer {
     u8 unknown_000[0x100]; /* 0x000 */
     u8 slot;               /* 0x100 */
     u8 name[0x10];         /* 0x101 */
@@ -177,7 +177,7 @@ typedef char card_save_buffer_size_must_be_0x1e00[(sizeof(card_save_buffer_t) ==
 
 /* BIOS directory entry as returned by firstfile/nextfile and consumed by
  * card_file_enumerate_saves (0x801c2c60) and card_file_count_free_blocks. */
-typedef struct card_directory_entry_t {
+typedef struct card_directory_entry {
     u8 name[20];
     u32 attributes;
     s32 size;
@@ -185,7 +185,7 @@ typedef struct card_directory_entry_t {
 } card_directory_entry_t;
 
 /* One save slot's rendered description string, 0x50 bytes per slot. */
-typedef struct card_save_slot_text_t {
+typedef struct card_save_slot_text {
     u8 data[0x50];
 } card_save_slot_text_t;
 

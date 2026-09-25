@@ -2,7 +2,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-typedef struct equip_portrait_poly_pair_t {
+typedef struct equip_portrait_poly_pair {
     /* 0x00 */ u8 unknown_00[0x80];
 } equip_portrait_poly_pair_t;
 

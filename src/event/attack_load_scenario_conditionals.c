@@ -9,7 +9,7 @@
 
 /* 0x18-byte scenario record in the ATTACK.OUT data at 0x801cf938.
  * Halfwords are stored little-endian and unaligned. */
-typedef struct attack_scenario_t {
+typedef struct attack_scenario {
     u8 id[2];            /* 0x00 */
     u8 map_id;           /* 0x02 */
     u8 weather;          /* 0x03 */

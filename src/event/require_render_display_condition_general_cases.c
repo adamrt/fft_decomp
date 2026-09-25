@@ -26,7 +26,7 @@
 
 /* Four-byte record per general-case quad; only bit 5/6 of `page` is consumed,
  * shifted left by two for the 24bpp graph types. */
-typedef struct require_display_condition_tpage_t {
+typedef struct require_display_condition_tpage {
     u8 unk0;
     u8 unk1;
     u8 page;

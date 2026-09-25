@@ -1,6 +1,6 @@
 #include "fft/jobstts.h"
 
-typedef struct jobstts_tex_region_t {
+typedef struct jobstts_tex_region {
     u16 u;
     u16 v;
     u16 w;

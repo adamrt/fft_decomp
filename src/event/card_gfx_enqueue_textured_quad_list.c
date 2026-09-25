@@ -2,7 +2,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct card_textured_quad_descriptor_t {
+typedef struct card_textured_quad_descriptor {
     u8 x;
     u8 y;
     u8 w;

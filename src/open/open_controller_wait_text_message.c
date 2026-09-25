@@ -3,7 +3,7 @@
 #include "fft/world.h"
 
 /* The thread-2 controller's view of its open_controller_record_t. */
-typedef struct open_thread_completion_t {
+typedef struct open_thread_completion {
     s32 run_followup;
     s32 result;
 } open_thread_completion_t;

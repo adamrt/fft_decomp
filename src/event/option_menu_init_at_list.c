@@ -10,7 +10,7 @@
  * register the target advances by 4 and by the +1 byte read for the turn
  * value.
  */
-typedef struct option_at_descriptor_t {
+typedef struct option_at_descriptor {
     u8 flags;
     u8 turn_value;
     u8 unknown_02;

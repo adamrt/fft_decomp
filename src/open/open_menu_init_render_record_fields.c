@@ -1,13 +1,13 @@
 #include "fft/open.h"
 
-typedef struct open_packed_halfword_pair_t {
+typedef struct open_packed_halfword_pair {
     u16 first;
     u16 second;
 } open_packed_halfword_pair_t;
 
 /* Passed by value in $a3 + the first stack slot; copied whole into the
  * record tail (the retail code homes $a3 and reloads both words). */
-typedef struct open_render_record_tail_pair_t {
+typedef struct open_render_record_tail_pair {
     s32 parameter;
     void* image;
 } open_render_record_tail_pair_t;

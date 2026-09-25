@@ -1,6 +1,6 @@
 #include "fft/jobstts.h"
 
-typedef struct jobstts_sprite_t {
+typedef struct jobstts_sprite {
     u8 x;
     u8 y;
     u8 w;

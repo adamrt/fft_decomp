@@ -4,13 +4,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct equip_thread_task_t {
+typedef struct equip_thread_task {
     /* 0x00 */ void (*func)(void);
     /* 0x04 */ u16 unknown_04;
     /* 0x06 */ u16 text_thread_id; /* world_menu_text_binding_t.text_thread_id */
 } equip_thread_task_t;
 
-typedef struct equip_event_thread_t {
+typedef struct equip_event_thread {
     /* 0x00 */ u8 unknown_00[0x1C];
     /* 0x1C */ u16 text_id; /* menu struct text entry */
     /* 0x1E */ u8 unknown_1e[0xE];

@@ -2,7 +2,7 @@
 #include "fft/event.h"
 #include "psx/types.h"
 
-typedef struct card_input_display_state_t {
+typedef struct card_input_display_state {
     void* render_otag;
     u32 color; /* 0x04: copied into the poly r/g/b */
     u8 unknown_08[4];

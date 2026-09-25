@@ -1,7 +1,7 @@
 #include "fft/card.h"
 #include "psx/types.h"
 
-typedef struct card_tile_t {
+typedef struct card_tile {
     u32 tag;
     u8 r;
     u8 g;

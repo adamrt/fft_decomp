@@ -648,7 +648,7 @@ s32 battle_map_dispatch_map_data_command(s32 command, u32 index, s32 object_stat
 
 /* Low halfwords of a VECTOR's components, as effect_add_scratchpad_xyz_components
  * reads them (lhu at +0, +4 and +8). */
-typedef struct effect_wide_vector_t {
+typedef struct effect_wide_vector {
     u16 x;
     u16 pad_x;
     u16 y;

@@ -12,17 +12,6 @@
 #define ENV_SED_SECTOR    0x14C08
 #define ENV_SED_SIZE      0x1000
 
-/* Sector/size pairs of MUSIC_45.SMD .. MUSIC_49.SMD (LBA 85378..85382), the
- * five short tunes that stay loaded for the whole session. */
-typedef struct permanent_smd_file_t {
-    s32 sector;
-    s32 size;
-} permanent_smd_file_t;
-
-#define PERMANENT_SMD_COUNT 5
-
-extern permanent_smd_file_t g_main_sound_permanent_smd_files[PERMANENT_SMD_COUNT];
-
 void main_sound_open_generic_sfx(void) {
     s32 i;
 

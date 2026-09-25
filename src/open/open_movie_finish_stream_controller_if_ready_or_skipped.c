@@ -2,7 +2,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct open_stream_controller_state_t {
+typedef struct open_stream_controller_state {
     s32 start_sector;
     s32 stream_length;
 } open_stream_controller_state_t;

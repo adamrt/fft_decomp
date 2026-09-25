@@ -3,7 +3,7 @@
 #include "psx/pad.h"
 
 /* The title-exit controller's view of its open_controller_record_t. */
-typedef struct open_title_exit_state_t {
+typedef struct open_title_exit_state {
     s32 state;
 } open_title_exit_state_t;
 

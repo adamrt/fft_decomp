@@ -670,7 +670,7 @@ void bunit_panel_run_character_status_thread(void);
 bunit_menu_window_command_t* bunit_cmd_draw_window_frame_handler(bunit_menu_window_command_t* command);
 
 struct battle_stats;
-struct bunit_text_line_rect_t;
+struct bunit_text_line_rect;
 struct bunit_unit_record;
 
 extern s16 g_bunit_ability_entries[];
@@ -885,8 +885,8 @@ s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode
 void bunit_panel_copy_unit_data_to_billboard(struct battle_stats* unit, bunit_unit_data_t* record, s32 unused_slot);
 void bunit_text_concatenate_ids(s32 text_table, u8* out, s16* list, s32 separate);
 void bunit_text_render_id_rows_to_vram(s32 text_table, u16* text_ids, RECT* destination, s32 flags);
-void bunit_text_render_ids_into_image(u8* image, struct bunit_text_line_rect_t* rect, s32 unused, s32 max_chars,
-    u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
+void bunit_text_render_ids_into_image(u8* image, struct bunit_text_line_rect* rect, s32 unused, s32 max_chars, u8* font,
+    s16* ids, s32 count, s16 glyph, s32 unused_flags);
 const u8* bunit_text_skip_encoded_segments(const u8* data, s16 count);
 void bunit_text_start_selection_thread(u8* menu_state);
 void bunit_thread_toggle_7(s32 enable);

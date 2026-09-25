@@ -2,7 +2,7 @@
 #include "fft/equip.h"
 #include "psx/types.h"
 
-typedef struct equip_stat_entry_t {
+typedef struct equip_stat_entry {
     u16 x;
     u16 y;
     s16* value;
@@ -10,7 +10,7 @@ typedef struct equip_stat_entry_t {
     u16 unknown_0a;
 } equip_stat_entry_t;
 
-typedef struct equip_stat_out_t {
+typedef struct equip_stat_out {
     s16 x;
     s16 y;
     s32 unknown_04;

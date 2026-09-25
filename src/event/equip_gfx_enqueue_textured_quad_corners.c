@@ -1,7 +1,7 @@
 #include "fft/equip.h"
 #include "psx/types.h"
 
-typedef struct equip_quad_descriptor_t {
+typedef struct equip_quad_descriptor {
     u16 x0;
     u16 y0;
     u16 x1;
