@@ -13,7 +13,7 @@
 void battle_gfx_load_trap_and_unit_frame_parts(
     battle_unit_misc_data_t* unit, battle_unit_anim_state_t* sprite, u16 frame, u16 animation) {
     s32* frame_table;
-    s32 frame_data;
+    battle_gfx_source_frame_t* frame_data;
     battle_gfx_sprite_display_data_t* display;
     battle_gfx_source_part_t* part;
     u32 y_offset;
@@ -29,24 +29,24 @@ void battle_gfx_load_trap_and_unit_frame_parts(
     u32 mask;
 
     y_offset = (u16)unit->special_graphic_y_offset;
-    battle_gfx_select_unit_shp_frame(unit, sprite, frame, animation, &frame_table, &frame_data);
-    if (frame_data == -1) {
+    /* The selector returns a raw SHP pointer or the -1 sentinel. */
+    battle_gfx_select_unit_shp_frame(unit, sprite, frame, animation, &frame_table, (s32*)&frame_data);
+    if ((s32)frame_data == -1) {
         main_system_handle_animation_exception(8);
     }
     display = sprite->display;
-    count = display->part_count = (((battle_gfx_source_frame_t*)frame_data)->part_count_and_rotation & 7) + 1;
-    display->y_rotation
-        = g_battle_gfx_sprite_y_rotations[((battle_gfx_source_frame_t*)frame_data)->part_count_and_rotation >> 3];
+    count = display->part_count = (frame_data->part_count_and_rotation & 7) + 1;
+    display->y_rotation = g_battle_gfx_sprite_y_rotations[frame_data->part_count_and_rotation >> 3];
     if (count > 8) {
         count = 8;
         main_system_handle_animation_exception(10);
     }
-    flags = ((battle_gfx_source_frame_t*)frame_data)->flags;
+    flags = frame_data->flags;
     if (unit->spritesheet_id >= 0x9b) {
         display->spritesheet_id = (flags & 0x60) | 0xb;
         display->clut = unit->vram_palette_id;
         for (i = 0; i < count; i++) {
-            part = &((battle_gfx_source_frame_t*)frame_data)->parts[i];
+            part = &frame_data->parts[i];
             attr = part->attributes;
             size = (attr & 0x3c00) >> 10;
             {
@@ -74,7 +74,7 @@ void battle_gfx_load_trap_and_unit_frame_parts(
              * hoisted mask, which combine would fold into the `andi 0x61`. */
             __asm__("" : "=r"(mask) : "0"(mask));
             do {
-                part = &((battle_gfx_source_frame_t*)frame_data)->parts[i];
+                part = &frame_data->parts[i];
                 attr = part->attributes;
                 size = (attr & 0x3c00) >> 10;
                 if (size == 0xe) {
@@ -122,13 +122,13 @@ void battle_gfx_load_trap_and_unit_frame_parts(
         }
     } else if (frame < 0xd2) {
         if ((g_battle_gfx_vram_slots[0].owner & 0x1f) == unit->unit_id) {
-            battle_gfx_load_unit_frame_parts(unit, display, (battle_gfx_source_frame_t*)frame_data, 4);
+            battle_gfx_load_unit_frame_parts(unit, display, frame_data, 4);
         } else if ((g_battle_gfx_vram_slots[1].owner & 0x1f) == unit->unit_id) {
-            battle_gfx_load_unit_frame_parts(unit, display, (battle_gfx_source_frame_t*)frame_data, 5);
+            battle_gfx_load_unit_frame_parts(unit, display, frame_data, 5);
         }
     } else if (animation < 600) {
-        battle_gfx_load_unit_frame_parts(unit, display, (battle_gfx_source_frame_t*)frame_data, 4);
+        battle_gfx_load_unit_frame_parts(unit, display, frame_data, 4);
     } else {
-        battle_gfx_load_unit_frame_parts(unit, display, (battle_gfx_source_frame_t*)frame_data, 5);
+        battle_gfx_load_unit_frame_parts(unit, display, frame_data, 5);
     }
 }
