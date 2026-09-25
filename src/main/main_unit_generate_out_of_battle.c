@@ -33,6 +33,8 @@ void main_unit_generate_out_of_battle(party_data_t* party, s32 unit_type) {
     u8 generic_id;
     main_unit_generation_base_data_t* base;
     main_unit_generation_base_data_t* table;
+    volatile main_party_name_view_t* volatile_name_view;
+    main_party_name_view_t* name_view;
     main_party_name_view_t* other;
     s32 found;
     s32 jp;
@@ -123,8 +125,9 @@ void main_unit_generate_out_of_battle(party_data_t* party, s32 unit_type) {
     } else {
         /* volatile keeps the two byte stores ordered as the target has them
          * (the scheduler otherwise sinks the low byte past the high byte). */
-        ((volatile main_party_name_view_t*)party)->name_id_lo = 0xff;
-        ((volatile main_party_name_view_t*)party)->name_id_hi = hi;
+        volatile_name_view = (volatile main_party_name_view_t*)party;
+        volatile_name_view->name_id_lo = 0xff;
+        volatile_name_view->name_id_hi = hi;
         do {
             found = 1;
             name_id = name_modifier + (rand() * 255) / 0x8000;
@@ -141,8 +144,9 @@ void main_unit_generate_out_of_battle(party_data_t* party, s32 unit_type) {
     /* Reuse the earlier arithmetic temporary: a separate single-set value
      * sinks the shift; reusing hi conflicts with v0 and selects v1. */
     zodiac = name_id >> PARTY_NAME_CLASS_SHIFT;
-    ((main_party_name_view_t*)party)->name_id_lo = name_id;
-    ((main_party_name_view_t*)party)->name_id_hi = zodiac;
+    name_view = (main_party_name_view_t*)party;
+    name_view->name_id_lo = name_id;
+    name_view->name_id_hi = zodiac;
     main_util_copy_bytes(world_text_find_entry(name_flags + (name_id & 0xff)), party->name, 0x10);
     party->proposition_status = 0;
     party->egg_color = 0;
