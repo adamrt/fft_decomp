@@ -15,7 +15,7 @@
 struct battle_stats;
 struct battle_deployed_coords;
 
-extern u8 g_ability_aoe_data;
+extern u8 g_main_ability_aoe_data[];
 extern u8 g_ability_ct_data[];
 extern s32 g_active_graphics_buffer_index;
 extern s32 g_animation_speed;

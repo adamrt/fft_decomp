@@ -1,22 +1,9 @@
 #include "fft/main_unit.h"
 
-typedef struct {
-    u8 high_id_bits[3];
-    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
-} human_skillset_abilities_t;
-
-typedef struct {
-    u8 high_id_bits;
-    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
-} monster_skillset_abilities_t;
-
-extern human_skillset_abilities_t g_main_ability_human_skillset_abilities[];
-extern monster_skillset_abilities_t g_main_ability_monster_skillset_abilities[];
-
 s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index) {
     if (skillset_id < SKILLSET_ID_MONSTER_FIRST) {
-        u8* table_base;
-        human_skillset_abilities_t* skillset;
+        main_ability_human_skillset_t* table_base;
+        main_ability_human_skillset_t* skillset;
         s32 adjusted_index;
         s32 flag_byte_index;
         s32 high_id_bit;
@@ -25,8 +12,8 @@ s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index) {
             return 0;
         }
         adjusted_index = ability_index;
-        table_base = (u8*)g_main_ability_human_skillset_abilities;
-        skillset = (human_skillset_abilities_t*)(table_base + skillset_id * sizeof(human_skillset_abilities_t));
+        table_base = g_main_ability_human_skillset_abilities;
+        skillset = table_base + skillset_id;
         if (ability_index < 0) {
             adjusted_index = ability_index + 7;
         }
@@ -38,8 +25,8 @@ s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index) {
     }
 
     if (skillset_id < SKILLSET_ID_END) {
-        u8* table_base;
-        monster_skillset_abilities_t* skillset;
+        main_ability_monster_skillset_t* table_base;
+        main_ability_monster_skillset_t* skillset;
         s32 adjusted_index;
         s32 flag_byte_index;
         s32 high_id_bit;
@@ -48,9 +35,8 @@ s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index) {
             return 0;
         }
         adjusted_index = ability_index;
-        table_base = (u8*)g_main_ability_monster_skillset_abilities
-            - SKILLSET_ID_MONSTER_FIRST * sizeof(monster_skillset_abilities_t);
-        skillset = (monster_skillset_abilities_t*)(table_base + skillset_id * sizeof(monster_skillset_abilities_t));
+        table_base = g_main_ability_monster_skillset_abilities - SKILLSET_ID_MONSTER_FIRST;
+        skillset = table_base + skillset_id;
         if (ability_index < 0) {
             adjusted_index = ability_index + 7;
         }

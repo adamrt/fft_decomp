@@ -55,6 +55,20 @@ typedef enum main_unit_action_state {
 } main_unit_action_state_e;
 
 /* ability */
+typedef struct main_ability_human_skillset {
+    u8 high_id_bits[3];
+    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
+} main_ability_human_skillset_t;
+
+typedef struct main_ability_monster_skillset {
+    u8 high_id_bits;
+    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
+} main_ability_monster_skillset_t;
+
+extern main_ability_human_skillset_t g_main_ability_human_skillset_abilities[];
+extern main_ability_monster_skillset_t g_main_ability_monster_skillset_abilities[];
+extern u16 g_main_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT];
+
 s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* main_ability_store_skillset_abilities(s32 skillset, s32 flags);
 
