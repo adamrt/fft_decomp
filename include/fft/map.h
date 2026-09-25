@@ -398,27 +398,28 @@ typedef struct gns_command_record_prefix {
     u8 payload[8]; /* 0x0c; command arguments, followed by more bytes for 0x1c rows */
 } gns_command_record_prefix_t;
 
-/* Mesh files begin with a 0xc4-byte table of byte offsets to their chunks.
- * A zero offset means the chunk is absent. The reserved words are zero in
- * the USA disc's mesh files; the offset at 0x4c occurs only in MAP000.5. */
+/* Mesh files begin with 49 32-bit byte offsets indexed by resource ID (slot = ID * 4).
+ * The dispatcher visits IDs 0x10..0x30; slots 0..0x0f and the other reserved
+ * words are zero in the USA disc's mesh files. A zero offset means the chunk
+ * is absent. MAP000.5 alone has an embedded texture quarter at 0x4c. */
 typedef struct map_mesh_file_header {
-    u32 reserved_00[16];                  /* 0x00 */
-    u32 geometry_offset;                  /* 0x40 */
-    u32 color_palette_offset;             /* 0x44 */
-    u32 reserved_48;                      /* 0x48 */
-    u32 unknown_4c_offset;                /* 0x4c */
-    u32 reserved_50[5];                   /* 0x50 */
-    u32 lights_background_offset;         /* 0x64 */
-    u32 terrain_offset;                   /* 0x68 */
-    u32 texture_animation_offset;         /* 0x6c */
-    u32 palette_animation_offset;         /* 0x70 */
-    u32 reserved_74[2];                   /* 0x74 */
-    u32 grayscale_palette_offset;         /* 0x7c */
-    u32 reserved_80[3];                   /* 0x80 */
-    u32 mesh_animation_offset;            /* 0x8c */
-    u32 animated_mesh_offsets[8];         /* 0x90 */
-    u32 polygon_render_properties_offset; /* 0xb0 */
-    u32 reserved_b4[4];                   /* 0xb4 */
+    u32 unused_resource_offsets_00_0f[16]; /* 0x00 */
+    u32 geometry_offset;                   /* 0x40 */
+    u32 color_palette_offset;              /* 0x44 */
+    u32 reserved_48;                       /* 0x48 */
+    u32 texture_quarter_0_offset;          /* 0x4c */
+    u32 reserved_50[5];                    /* 0x50 */
+    u32 lights_background_offset;          /* 0x64 */
+    u32 terrain_offset;                    /* 0x68 */
+    u32 texture_animation_offset;          /* 0x6c */
+    u32 palette_animation_offset;          /* 0x70 */
+    u32 reserved_74[2];                    /* 0x74 */
+    u32 grayscale_palette_offset;          /* 0x7c */
+    u32 reserved_80[3];                    /* 0x80 */
+    u32 mesh_animation_offset;             /* 0x8c */
+    u32 animated_mesh_offsets[8];          /* 0x90 */
+    u32 polygon_render_properties_offset;  /* 0xb0 */
+    u32 reserved_b4[4];                    /* 0xb4 */
 } map_mesh_file_header_t;
 
 typedef char gns_file_record_size_must_be_0x14[(sizeof(gns_file_record_t) == 0x14) ? 1 : -1];
