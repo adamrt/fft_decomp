@@ -2,8 +2,6 @@
 #include "psx/gs.h"
 #include "psx/types.h"
 
-extern u32 world_ps_sort_sprite_bg(u32* tag, GsOT* ot, s32 z, s32 len);
-
 /* WORLD copy of libgs GsSortSprite for unscaled, unrotated sprites: attribute
  * bits 22/23 flip the texture, bits 24-25 and 28-29 select the texture page
  * depth and blend mode, bit 30 shading and bit 6 semi-transparency. */

@@ -14,8 +14,11 @@
 #include "fft/status.h"
 #include "fft/thread.h"
 #include "psx/gpu.h"
+#include "psx/gs.h"
 #include "psx/gte.h"
 #include "psx/types.h"
+
+struct weapon_pair;
 
 /* WORLD text files materialize 32 section pointers after their 0x80-byte
  * offset/header area. The same table is saved and restored around overlays. */
@@ -311,18 +314,6 @@ typedef struct world_gfx_packet_buffer {
 
 typedef char world_packet_buffer_gradient_lines_offset
     [((unsigned long)&((world_gfx_packet_buffer_t*)0)->gradient_lines == 0x30) ? 1 : -1];
-
-/* Window-command prefix. The tiled-rectangle handler uses +1 to advance
- * the stream and selects the shared signed rectangle when +2 is 2. */
-typedef struct world_menu_window_command {
-    u8 opcode;
-    u8 length;
-    u8 rectangle_source;
-    u8 x;
-    u8 y;
-    u8 width;
-    u8 height;
-} world_menu_window_command_t;
 
 /* Partial menu position: 0x8011bc4c updates the y halfword at +2 and passes
  * the record to the numeric renderer at 0x801282dc. */
@@ -3301,6 +3292,7 @@ void world_gs_reset_screen_state(u16 width, u16 height);
 void world_gs_set_draw_offsets(s32 x0, s32 y0, s32 x1, s32 y1);
 void world_gs_setdrawbuffclip(void);
 void world_gs_setdrawbuffoffset(void);
+u32 world_ps_sort_sprite_bg(u32* tag, GsOT* ot, s32 z, s32 len);
 
 /* increment */
 void world_script_set_specialized_map_destroyed(void);
@@ -3336,6 +3328,7 @@ void world_item_cash_out_excess_inventory(void);
 s32 world_item_change_quantity_on_equip(s32 item_id, s32 delta);
 void world_item_combine_stat_details(world_item_stat_detail_t* output, world_item_stat_detail_t* before,
     world_item_stat_detail_t* after, s32 multiplier);
+s32 world_item_check_two_hands_for_weapons(struct weapon_pair* slots, s32 two_hands_support);
 s32 world_item_count_owned_and_equipped(s32 item_id);
 s32 world_item_count_selected_equipped_by_party(void);
 s32 world_item_count_selected_owned_and_equipped(void);

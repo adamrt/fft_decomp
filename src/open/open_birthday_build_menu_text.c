@@ -17,8 +17,8 @@ void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     s32* substitution;
     u16 window_width;
 
-    index = open_gfx_append_render_record_56(
-        (open_render_record_56_t**)g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    index
+        = open_gfx_append_render_record_56(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     menu->window_record_56 = index;
     quad.x = 0;
     quad.y = 0x40;

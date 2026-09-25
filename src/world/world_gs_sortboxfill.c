@@ -17,8 +17,6 @@ typedef struct {
     u16 h;          /* 0x12 */
 } world_gs_boxf_packet_t;
 
-extern u32 world_ps_sort_sprite_bg(u32* tag, GsOT* ot, s32 z, s32 len);
-
 void world_gs_sortboxfill(GsBOXF* bp, void* otp, s32 pri) {
     world_gs_boxf_packet_t* packet;
     s32 attr;

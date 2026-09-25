@@ -3,9 +3,6 @@
 #include "fft/main_unit.h"
 #include "psx/types.h"
 
-struct turn_entry;
-extern u32 battle_action_get_number_of_turns_to_resolve(s32, s32, struct turn_entry*);
-
 /* Preview where a planned action lands on the AT list.
  *
  * Runs the attack preparation for action in the preview state, rebuilds
@@ -35,7 +32,7 @@ s32 battle_action_preview_at_list(battle_stats_t* unit, s32 action, s32 at_list)
     turns = battle_action_calculate_at_list((battle_at_entry_t*)at_list, 3);
     if (turns != -1) {
         turns = battle_action_get_number_of_turns_to_resolve(
-                    unit->misc_unit_id, unit->charged_ability_ct, (struct turn_entry*)at_list)
+                    unit->misc_unit_id, unit->charged_ability_ct, (battle_at_entry_t*)at_list)
             & 0xFF;
     }
     g_battle_action_state = old_state;

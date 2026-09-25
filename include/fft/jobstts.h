@@ -2,9 +2,12 @@
 #define FFT_JOBSTTS_H
 
 #include "fft/battle.h"
+#include "fft/battle_text.h"
 #include "fft/geometry.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
+
+extern world_menu_window_command_t g_jobstts_cmd_window_interior_command;
 
 typedef enum jobstts_page_scroll_direction {
     JOBSTTS_PAGE_SCROLL_UP = -1,
@@ -36,13 +39,6 @@ typedef struct jobstts_ability_selection_state {
 } jobstts_ability_selection_state_t;
 
 typedef char assert_jobstts_ability_selection_state_size[sizeof(jobstts_ability_selection_state_t) == 6 ? 1 : -1];
-
-typedef struct jobstts_text_image_bounds {
-    u16 x;
-    u16 y;
-    u16 row_stride;
-    s16 line_height;
-} jobstts_text_image_bounds_t;
 
 typedef struct jobstts_text_image_position {
     u16 x;
@@ -330,8 +326,9 @@ void jobstts_menu_load_images_and_clear_selection(void);
 void jobstts_input_update_with_message_state(void);
 
 /* text */
-void jobstts_text_render_encoded_ids_to_image(u8* image, const jobstts_text_image_bounds_t* bounds, s32 glyph_spacing,
-    s32 line_width, const void* glyph_data, const u16* text_ids, s32 max_entries, s32 fill_glyph_id, s32 unused_style);
+void jobstts_text_render_encoded_ids_to_image(u8* image, const battle_menu_text_image_bounds_t* bounds,
+    s32 glyph_spacing, s32 line_width, const void* glyph_data, const u16* text_ids, s32 max_entries, s32 fill_glyph_id,
+    s32 unused_style);
 void jobstts_text_render_id_rows_to_vram(s32 text_table, s16* list, RECT* rect, s32 style);
 s32 jobstts_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const jobstts_text_image_position_t* position, s32 style);

@@ -16,12 +16,12 @@ typedef char open_gfx_render_record_56_color_size_must_be_0x38[(sizeof(open_gfx_
         ? 1
         : -1];
 
-s32 open_gfx_append_render_record_56(open_render_record_56_t** list, s32* count) {
+s32 open_gfx_append_render_record_56(open_render_record_t** list, s32* count) {
     open_render_record_56_t* records = g_open_gfx_render_records_56;
     open_gfx_render_record_56_color_view_t* colors = (open_gfx_render_record_56_color_view_t*)&records[0].color.r;
     s32 index;
 
-    list[*count] = &records[g_open_gfx_render_record_56_count];
+    list[*count] = (open_render_record_t*)&records[g_open_gfx_render_record_56_count];
     g_open_gfx_render_records_56[g_open_gfx_render_record_56_count].flags &= ~0x3c;
     g_open_gfx_render_records_56[g_open_gfx_render_record_56_count].palette = 0;
     /* Emits nothing; without this boundary the whole function swaps v0 and v1. */

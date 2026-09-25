@@ -5,9 +5,6 @@
 #include "fft/main_unit.h"
 #include "psx/types.h"
 
-struct turn_entry;
-extern u32 battle_action_get_number_of_turns_to_resolve(s32 unit_id, s32 ct, struct turn_entry* at_list);
-
 /* Build the parallel ability lists for one of a unit's skillsets.
  *
  * Every learned slot of the skillset is listed in ability_ids (terminated with
@@ -22,7 +19,7 @@ extern u32 battle_action_get_number_of_turns_to_resolve(s32 unit_id, s32 ct, str
  * byte in a globally allocated register, which the target does not. */
 s32 battle_menu_get_unit_skillset_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out) {
-    u8 at_list[0xa0];
+    battle_at_entry_t at_list[40];
     battle_stats_t* unit;
     ability_secondary_data_t* secondary;
     s32 known;
@@ -63,7 +60,7 @@ s32 battle_menu_get_unit_skillset_ability_data(
     } else if (unit->support_abilities[3] & BATTLE_SUPPORT_SET_4_SHORT_CHARGE) {
         charge = 1;
     }
-    battle_action_calculate_at_list((battle_at_entry_t*)at_list, 0);
+    battle_action_calculate_at_list(at_list, 0);
     if (unit->equipped_flags & BATTLE_UNIT_EQUIPPED_FLAG_MATERIA_BLADE) {
         materia_blade = 1;
     }
@@ -119,14 +116,14 @@ s32 battle_menu_get_unit_skillset_ability_data(
                     ct = 0;
                 }
             }
-            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, (struct turn_entry*)at_list);
+            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = mp;
             ct_out[count] = ct;
             flags_out[count] = kind;
             turns_out[count] = turns;
         } else if (ability >= 0x196 && ability < 0x19e) {
             ct = g_main_jump_charge_ability_data_by_ability_id[ability * 2];
-            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, (struct turn_entry*)at_list);
+            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = 0;
             ct_out[count] = ct;
             flags_out[count] = 0;

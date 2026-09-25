@@ -8,7 +8,7 @@
  * shared-rectangle source; source 1 selects the alternate border texture
  * coordinates. The reassigned command pointer before the return keeps its
  * reference count high enough for global allocation to place it in s5. */
-equip_menu_window_command_t* equip_cmd_draw_window_frame_handler(equip_menu_window_command_t* command) {
+world_menu_window_command_t* equip_cmd_draw_window_frame_handler(world_menu_window_command_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -141,6 +141,6 @@ equip_menu_window_command_t* equip_cmd_draw_window_frame_handler(equip_menu_wind
     rect.h = 7;
     equip_gfx_enqueue_textured_quad(&rect, u_right - 5, v_bottom - 7, 0, g_equip_gfx_semitransparency,
         g_equip_text_digit_texture_page, clut, priority);
-    command = (equip_menu_window_command_t*)((u8*)command + command->length);
+    command = (world_menu_window_command_t*)((u8*)command + command->length);
     return command;
 }

@@ -3,6 +3,7 @@
 
 #include "fft/battle_gfx.h"
 #include "fft/battle_menu_status_panel.h"
+#include "fft/battle_text.h"
 #include "fft/data.h"
 #include "fft/menu_types.h"
 #include "psx/gpu.h"
@@ -93,18 +94,6 @@ typedef struct equip_unit_data {
 } equip_unit_data_t;
 
 typedef char equip_unit_data_size_must_be_0x7a[(sizeof(equip_unit_data_t) == 0x7A) ? 1 : -1];
-
-/* Window-frame command bytes; layout matches WORLD's world_menu_window_command_t.
- * 0x801d877c is the copy passed to the tiled-rectangle handler. */
-typedef struct equip_menu_window_command {
-    u8 opcode;
-    u8 length;
-    u8 rectangle_source;
-    u8 x;
-    u8 y;
-    u8 width;
-    u8 height;
-} equip_menu_window_command_t;
 
 /* Provisional: the 0x80-byte equipment stat-bonus accumulator written by
  * equip_unit_calculate_equipment_stat_bonuses (its definition establishes
@@ -622,18 +611,17 @@ void equip_unit_build_data_from_battle_stats(struct battle_stats* stats, equip_u
 void equip_unit_commit_loadout_to_battle_stats(void);
 void equip_item_sort_list_by_criteria(s32 sort_key, s16* list);
 void equip_unit_calculate_equipment_stat_bonuses(equip_stats_t* dst, u16* src);
-equip_menu_window_command_t* equip_cmd_draw_window_frame_handler(equip_menu_window_command_t* command);
+world_menu_window_command_t* equip_cmd_draw_window_frame_handler(world_menu_window_command_t* command);
 void equip_render_unit_status_panel_thread(void);
 void equip_panel_run_equipment_list_thread(void);
 void equip_editor_run_numeric_thread(void);
 
 struct equip_stat_entry;
 struct equip_stat_out;
-struct equip_text_image_bounds;
 
 extern u8* g_equip_bits_reader_1_stream;
 extern u8* g_equip_bits_reader_2_stream;
-extern equip_menu_window_command_t g_equip_cmd_window_interior_command;
+extern world_menu_window_command_t g_equip_cmd_window_interior_command;
 extern u8 g_equip_editor_numeric_descriptor_a[];
 extern u8 g_equip_editor_numeric_descriptor_b[];
 extern u8 g_equip_editor_numeric_entries_a[];
@@ -774,7 +762,7 @@ void equip_menu_update_vertical_selection_and_mark_change(
 s16 equip_menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, u16 input_mask);
 s16 equip_menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, u16 input_mask);
 void equip_text_concatenate_ids(s32 text_table, u8* dst, s16* list, s32 separate);
-void equip_text_render_encoded_ids_to_image(void* image, const struct equip_text_image_bounds* bounds,
+void equip_text_render_encoded_ids_to_image(void* image, const battle_menu_text_image_bounds_t* bounds,
     s32 glyph_spacing, s32 line_width, const void* glyph_data, const u16* text_ids, s32 max_entries, s32 fill_glyph_id,
     s32 unused_style);
 void equip_text_render_id_rows_to_vram(void* text_table, s16* list, RECT* rect, s32 style);

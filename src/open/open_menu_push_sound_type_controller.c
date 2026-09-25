@@ -32,7 +32,7 @@ void open_menu_push_sound_type_controller(void) {
     y = 0x1e;
     for (; i < 3; i++, y += 0xc) {
         record = open_gfx_append_render_record_36(
-            (open_render_record_36_t**)g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+            g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
         ((open_sound_menu_state_t*)&controllers[g_open_current_controller_index])->render_records[i] = record;
         g_open_gfx_render_records_36[record].ot_layer = 4;
         g_open_gfx_render_records_36[record].anim_id = i + 7;

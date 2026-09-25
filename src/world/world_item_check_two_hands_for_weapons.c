@@ -1,11 +1,7 @@
 #include "fft/data.h"
+#include "fft/equip.h"
 #include "fft/main_runtime.h"
 #include "psx/types.h"
-
-typedef struct weapon_pair {
-    s16 slot_a;
-    s16 slot_b;
-} weapon_pair_t;
 
 s32 world_item_check_two_hands_for_weapons(weapon_pair_t* slots, s32 two_hands_support) {
     s32 result;

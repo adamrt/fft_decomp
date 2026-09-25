@@ -19,24 +19,24 @@ void open_birthday_push_confirmation_controller(void) {
     s32 controller;
     open_render_record_56_position_t* position;
 
-    record = open_gfx_append_render_record_36(
-        (open_render_record_36_t**)g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record
+        = open_gfx_append_render_record_36(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_stream_start[g_open_current_controller_index].stream_start = record;
     g_open_gfx_render_records_36[record].anim_id = 2;
     g_open_gfx_render_records_36[record].ot_layer = 3;
     g_open_gfx_render_records_36[record].frame_timer = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
 
-    record = open_gfx_append_render_record_36(
-        (open_render_record_36_t**)g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record
+        = open_gfx_append_render_record_36(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_stream_start[g_open_current_controller_index].stream_length = record;
     g_open_gfx_render_records_36[record].anim_id = 0xE;
     g_open_gfx_render_records_36[record].ot_layer = 3;
     g_open_gfx_render_records_36[record].frame_timer = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
 
-    record = open_gfx_append_render_record_56(
-        (open_render_record_56_t**)g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record
+        = open_gfx_append_render_record_56(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_stream_start[g_open_current_controller_index].field_08 = record;
     quad.x = 0;
     quad.y = 0x60;

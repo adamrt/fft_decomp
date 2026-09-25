@@ -6,14 +6,14 @@
  * upload the rows to VRAM from the top of `destination` down. */
 void bunit_text_render_id_rows_to_vram(s32 text_table, u16* text_ids, RECT* destination, s32 flags) {
     u32 image[0x200];
-    RECT bounds;
+    battle_menu_text_image_bounds_t bounds;
     RECT upload_rect;
     s16 row_text_ids[2];
 
     bounds.x = 0;
     bounds.y = 0;
-    bounds.w = destination->w;
-    bounds.h = 0x10;
+    bounds.row_stride = destination->w;
+    bounds.line_height = 0x10;
     upload_rect.x = destination->x;
     upload_rect.y = destination->y;
     upload_rect.w = destination->w;

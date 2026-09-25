@@ -9,8 +9,6 @@
 extern world_order_menu_entry_t g_world_formation_panel_windows[];
 
 extern void world_formation_update_and_draw_unit_grid(s32, s32, s32, s32, s32, s32 (*)(s32), s32 (*)(s32));
-typedef struct weapon_pair weapon_pair_t;
-extern s32 world_item_check_two_hands_for_weapons(weapon_pair_t* slots, s32 two_hands_support);
 
 /*
  * Run one frame of the shop's "who can equip" unit browser for the item
@@ -86,9 +84,9 @@ void world_shop_run_equip_candidate_step(void) {
                     &g_world_selected_unit_stat_summary,
                     g_world_formation_unit_pointers[g_world_formation_selected_unit_index]->equipment,
                     g_world_formation_unit_pointers[20]->equipment);
-                g_world_item_preview_stat_detail.two_hands
-                    = world_item_check_two_hands_for_weapons((weapon_pair_t*)g_world_item_preview_stat_detail.equipment,
-                        world_ability_has_two_hands(g_world_formation_selected_unit_index));
+                g_world_item_preview_stat_detail.two_hands = world_item_check_two_hands_for_weapons(
+                    (struct weapon_pair*)g_world_item_preview_stat_detail.equipment,
+                    world_ability_has_two_hands(g_world_formation_selected_unit_index));
                 g_world_shop_equip_candidate_preview_visible = 1;
                 g_world_item_preview_stat_detail.equipment[slot] = g_world_shop_equip_candidate_item | 0x8000;
             }

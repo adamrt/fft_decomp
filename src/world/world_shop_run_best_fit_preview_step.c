@@ -7,9 +7,6 @@
 
 extern world_order_menu_entry_t g_world_formation_panel_windows[];
 
-typedef struct weapon_pair weapon_pair_t;
-extern s32 world_item_check_two_hands_for_weapons(weapon_pair_t* slots, s32 two_hands_support);
-
 /*
  * Shop "best fit / fitting room" preview step, entry 8 of the shop callback
  * table at 0x8019525c.
@@ -109,7 +106,7 @@ void world_shop_run_best_fit_preview_step(void) {
             g_world_formation_unit_pointers[g_world_formation_selected_unit_index]->equipment,
             g_world_item_preview_stat_detail.equipment);
         g_world_item_preview_stat_detail.two_hands
-            = world_item_check_two_hands_for_weapons((weapon_pair_t*)g_world_item_preview_stat_detail.equipment,
+            = world_item_check_two_hands_for_weapons((struct weapon_pair*)g_world_item_preview_stat_detail.equipment,
                 world_ability_has_two_hands(g_world_formation_selected_unit_index));
         world_menu_toggle_stat_preview_panel_thread(1);
         world_menu_toggle_preview_stats_window(1);

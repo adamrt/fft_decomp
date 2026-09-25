@@ -9,7 +9,7 @@ const RECT* destination;
 s32 flags;
 {
     u8 image[0x800];
-    card_text_image_bounds_t bounds;
+    battle_menu_text_image_bounds_t bounds;
     RECT upload_rect;
     u16 row_text_ids[2];
     u16 text_id;

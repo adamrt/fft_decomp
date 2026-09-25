@@ -18,8 +18,6 @@ typedef struct {
     s16 y1;         /* 0x12 */
 } world_gs_line_packet_t;
 
-extern u32 world_ps_sort_sprite_bg(u32* tag, GsOT* ot, s32 z, s32 len);
-
 /* libgs GsSortLine: build a flat-shaded LINE_F2 packet for the line and link
  * it into the ordering table.
  *

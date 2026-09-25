@@ -3,9 +3,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-typedef struct weapon_pair weapon_pair_t;
-extern s32 world_item_check_two_hands_for_weapons(weapon_pair_t* slots, s32 two_hands_support);
-
 /*
  * Fills one WORLD formation record from a unit's battle stats and party data.
  *
@@ -132,5 +129,5 @@ void world_formation_build_unit_record(battle_stats_t* unit, world_formation_uni
     record->birthday = *(u16*)&unit->birthday & 0x1ff;
     record->egg_color = party->egg_color;
     record->two_handed
-        = world_item_check_two_hands_for_weapons((weapon_pair_t*)record->equipment, record->support_sets_3 & 2);
+        = world_item_check_two_hands_for_weapons((struct weapon_pair*)record->equipment, record->support_sets_3 & 2);
 }

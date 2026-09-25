@@ -36,6 +36,18 @@ typedef enum action_menu_pseudo_skillset {
 /* Menu and graphics records shared by the BATTLE and WORLD menu code. */
 typedef LINE_F2 world_menu_line_f2_t;
 
+/* Seven-byte window command in the menu script streams. The length field
+ * advances to the next command, which may have a different size. */
+typedef struct world_menu_window_command {
+    u8 opcode;
+    u8 length;
+    u8 rectangle_source;
+    u8 x;
+    u8 y;
+    u8 width;
+    u8 height;
+} world_menu_window_command_t;
+
 /* Image load parameters consumed by world_gfx_init_image_loading (0xc bytes;
  * the table at 0x80155838 holds one per menu sprite). */
 typedef struct world_gfx_image_load_parameters {

@@ -3,20 +3,14 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
-typedef struct equip_text_image_bounds {
-    u16 x;
-    u16 y;
-    u16 row_stride;
-    s16 line_height;
-} equip_text_image_bounds_t;
-
 /* Render encoded menu text IDs into a 4-bpp image.
  *
  * Twin of card_text_render_encoded_ids_to_image; inline controls wrap lines,
  * move the cursor, and select glyph shading.
  */
-void equip_text_render_encoded_ids_to_image(void* image, const equip_text_image_bounds_t* bounds, s32 glyph_spacing,
-    s32 line_width, const void* glyph_data, const u16* text_ids, s32 max_entries, s32 fill_glyph_id, s32 unused_style) {
+void equip_text_render_encoded_ids_to_image(void* image, const battle_menu_text_image_bounds_t* bounds,
+    s32 glyph_spacing, s32 line_width, const void* glyph_data, const u16* text_ids, s32 max_entries, s32 fill_glyph_id,
+    s32 unused_style) {
     equip_text_image_position_t position;
     s32 row;
     s32 remaining_entries = max_entries;

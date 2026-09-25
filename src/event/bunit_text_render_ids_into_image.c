@@ -3,14 +3,6 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
-/* x/y/w are read with lhu and the line height with lh, so this is not a RECT. */
-typedef struct bunit_text_line_rect {
-    u16 x;
-    u16 y;
-    u16 w;
-    s16 line_height;
-} bunit_text_line_rect_t;
-
 /* Renders a -1 terminated list of text ids into a 4bpp image, one entry per
  * line of `rect` (x, y, width, line height). Bit 13 of an id draws eight
  * copies of `glyph` instead of a text entry; bits 14-15 select the style.
@@ -21,8 +13,8 @@ typedef struct bunit_text_line_rect {
  * `colors` and `colors2` are distinct copies of &ids[k]: one shared local
  * changes the register assignment. The caller also passes its row flags as a
  * ninth argument, which is never read. */
-void bunit_text_render_ids_into_image(u8* image, bunit_text_line_rect_t* rect, s32 unused, s32 max_chars, u8* font,
-    s16* ids, s32 count, s16 glyph, s32 unused_flags) {
+void bunit_text_render_ids_into_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
+    u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags) {
     bunit_text_image_position_t position;
     s32 line;
     s32 col;
@@ -34,7 +26,7 @@ void bunit_text_render_ids_into_image(u8* image, bunit_text_line_rect_t* rect, s
     s16* colors2;
 
     line = 0;
-    position.row_stride = rect->w;
+    position.row_stride = rect->row_stride;
     for (k = 0; ids[k] != -1; k++) {
         if (count == 0) {
             return;

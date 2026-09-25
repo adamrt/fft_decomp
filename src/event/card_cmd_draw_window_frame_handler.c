@@ -1,7 +1,7 @@
 #include "fft/card.h"
 #include "psx/types.h"
 
-card_window_command_t* card_cmd_draw_window_frame_handler(card_window_command_t* command) {
+world_menu_window_command_t* card_cmd_draw_window_frame_handler(world_menu_window_command_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -150,6 +150,6 @@ card_window_command_t* card_cmd_draw_window_frame_handler(card_window_command_t*
     rect.h = 7;
     card_gfx_enqueue_textured_quad(
         &rect, u_right - 5, v_bottom - 7, 0, g_card_gfx_draw_semitrans, g_card_text_digit_texture_page, clut, priority);
-    command = (card_window_command_t*)((u8*)command + command->length);
+    command = (world_menu_window_command_t*)((u8*)command + command->length);
     return command;
 }

@@ -2,23 +2,13 @@
 #define FFT_CARD_H
 
 #include "fft/battle_menu_status_panel.h"
+#include "fft/battle_text.h"
 #include "fft/data.h"
 #include "fft/geometry.h"
 #include "fft/main_zodiac.h"
 #include "fft/menu_types.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
-
-/* Window-frame command bytes; layout matches WORLD's world_menu_window_command_t. */
-typedef struct card_window_command {
-    u8 opcode;
-    u8 length;
-    u8 rectangle_source;
-    u8 x;
-    u8 y;
-    u8 width;
-    u8 height;
-} card_window_command_t;
 
 /* CARD save-menu dispatch at 0x801bf3b8.
  * Only states whose roles are established by the matching handlers are named. */
@@ -219,15 +209,6 @@ typedef struct card_oriented_quad {
 
 typedef char card_oriented_quad_size_must_be_0x14[(sizeof(card_oriented_quad_t) == 0x14) ? 1 : -1];
 
-/* Text image origin, row stride (in pixels) and line height handed to
- * card_text_render_encoded_ids_to_image. */
-typedef struct card_text_image_bounds {
-    u16 x;
-    u16 y;
-    u16 row_stride;
-    s16 line_height;
-} card_text_image_bounds_t;
-
 /* Pen position and row stride card_text_render_glyph_to_4bpp_image draws
  * one glyph at. */
 typedef struct card_text_image_position {
@@ -379,7 +360,7 @@ extern world_menu_entry_t g_card_save_card_error_prompt_descriptor[];
 extern s8 g_card_save_slot_scan_active;
 extern s8 g_card_save_format_delay_counter;
 extern s8 g_card_save_error_prompt_closing;
-extern card_window_command_t g_card_save_slot_window_command;
+extern world_menu_window_command_t g_card_save_slot_window_command;
 extern card_window_rect_source_t g_card_save_slot_window_rect_source[];
 extern u8 g_card_save_list_input_armed;
 extern u8 g_card_save_overwrite_prompt_active;
@@ -491,7 +472,7 @@ void card_save_update_slot_write(s32 slot);
 s32 card_status(s32 slot);
 
 /* text */
-void card_text_render_encoded_ids_to_image(u8* image, const card_text_image_bounds_t* bounds, s32 glyph_spacing,
+void card_text_render_encoded_ids_to_image(u8* image, const battle_menu_text_image_bounds_t* bounds, s32 glyph_spacing,
     s32 line_width, const void* glyph_data, const u16* text_ids, s32 max_glyphs, s32 terminator, s32 unused_style);
 s32 card_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const card_text_image_position_t* position, s32 style);
@@ -503,7 +484,7 @@ void card_thread_request_stop(s32 id);
 void card_thread_stop_and_clear_state(s32 id);
 void card_thread_wait_and_clear_state(s32 thread_id);
 
-card_window_command_t* card_cmd_draw_window_frame_handler(card_window_command_t* command);
+world_menu_window_command_t* card_cmd_draw_window_frame_handler(world_menu_window_command_t* command);
 s32 strcmp(const char* left, const char* right);
 
 /* card */
@@ -511,7 +492,7 @@ s32 world_card_seek_file_with_retries(s32 descriptor, s32 offset, s32 origin);
 s32 world_card_write_buffer_to_file(const char* filename, const u8* source, u32 size, s32 create_file);
 
 extern u8* g_card_bits_primary_cursor;
-extern card_window_command_t g_card_cmd_window_interior_command;
+extern world_menu_window_command_t g_card_cmd_window_interior_command;
 extern u16 g_card_gfx_otag_length;
 extern u16 g_card_gfx_poly_ft4_capacity;
 extern u16 g_card_gfx_poly_ft4_count;

@@ -1,20 +1,5 @@
 #include "fft/jobstts.h"
 
-/* Window command bytes, laid out like WORLD's world_menu_window_command_t;
- * byte 2 is not read by JOBSTTS. */
-typedef struct jobstts_window_command {
-    u8 opcode;
-    u8 length;
-    u8 unk_2;
-    u8 x;
-    u8 y;
-    u8 width;
-    u8 height;
-} jobstts_window_command_t;
-
-/* Window command copy passed to the tiled-background handler. */
-extern jobstts_window_command_t g_jobstts_cmd_window_interior_command;
-
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
  * interior through jobstts_cmd_draw_background_tiles_handler.
  *
@@ -24,7 +9,7 @@ extern jobstts_window_command_t g_jobstts_cmd_window_interior_command;
  */
 
 u8* jobstts_create_border_tiles(u8* stream) {
-    jobstts_window_command_t* command;
+    world_menu_window_command_t* command;
     urect16_t rect;
     s32 left;
     s32 top;
@@ -39,7 +24,7 @@ u8* jobstts_create_border_tiles(u8* stream) {
     u8 width;
     u8 height;
 
-    command = (jobstts_window_command_t*)stream;
+    command = (world_menu_window_command_t*)stream;
     priority = g_jobstts_gfx_otag_index;
     clut = g_jobstts_gfx_background_clut_id;
     left = command->x - 5;
@@ -139,6 +124,6 @@ u8* jobstts_create_border_tiles(u8* stream) {
     rect.h = 7;
     jobstts_gfx_enqueue_textured_quad(
         &rect, 0xF2, 0x11, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
-    command = (jobstts_window_command_t*)((u8*)command + command->length);
+    command = (world_menu_window_command_t*)((u8*)command + command->length);
     return (u8*)command;
 }

@@ -4,6 +4,14 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
+/* Origin and row geometry used by the EVENT menu text image renderers. */
+typedef struct battle_menu_text_image_bounds {
+    u16 x;
+    u16 y;
+    u16 row_stride;
+    s16 line_height;
+} battle_menu_text_image_bounds_t;
+
 /* Encoded menu-string controls. The 0xe2-0xfd meanings come from the dialog
  * interpreter branches (battle_text_character_handling_thread and its WORLD
  * twin) and, for 0xe7, the menu text-image renderers; codes with an operand

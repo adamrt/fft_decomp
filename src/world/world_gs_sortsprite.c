@@ -1,3 +1,4 @@
+#include "fft/world.h"
 #include "psx/gpu.h"
 #include "psx/gs.h"
 #include "psx/gte.h"
@@ -12,28 +13,9 @@ typedef struct {
     u32 wh;         /* 0x14 */
 } world_sprt_packet_t;
 
-/* POLY_FT4 packet as the packed words libgs writes it. */
-typedef struct {
-    u32 tag;       /* 0x00 */
-    u32 mode;      /* 0x04: r | g << 8 | b << 16 | code << 24 */
-    u32 xy0;       /* 0x08 */
-    u32 uv0_clut;  /* 0x0c */
-    u32 xy1;       /* 0x10 */
-    u32 uv1_tpage; /* 0x14 */
-    u32 xy2;       /* 0x18 */
-    u32 uv2;       /* 0x1c */
-    u32 xy3;       /* 0x20 */
-    u32 uv3;       /* 0x24 */
-} world_poly_ft4_packet_t;
-
 /* The target tests scalex/scaley against the identity ONE/ONE (0x10001000) with a
  * single word load and compare. */
 #define GS_SPRITE_SCALE_WORD(sp) (*(s32*)&(sp)->scalex)
-
-extern void* g_world_gs_out_packet_p;
-extern s16 g_world_gs_offset_x;
-extern s16 g_world_gs_offset_y;
-extern MATRIX g_world_gs_id_matrix;
 
 extern void RotMatrix(SVECTOR* r, MATRIX* m);
 extern void ScaleMatrix(void* m, void* v);
@@ -43,7 +25,6 @@ extern void SetRotMatrix(MATRIX* m);
 extern void SetTransMatrix(MATRIX* m);
 extern s32 RotTransPers4(
     SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, s32* sxy0, s32* sxy1, s32* sxy2, s32* sxy3, s32* p, s32* flag);
-extern u32 world_ps_sort_sprite_bg(u32* tag, GsOT* ot, s32 z, s32 len);
 
 /*
  * WORLD copy of libgs GsSortSprite.

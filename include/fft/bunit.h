@@ -3,23 +3,12 @@
 
 #include "fft/battle_gfx.h"
 #include "fft/battle_menu_status_panel.h"
+#include "fft/battle_text.h"
 #include "fft/character_identity.h"
 #include "fft/menu_types.h"
 #include "psx/gpu.h"
 #include "psx/gte.h"
 #include "psx/types.h"
-
-/* Window-frame command bytes; layout matches WORLD's world_menu_window_command_t.
- * 0x801cfa14 is the copy passed to the background-tile handler. */
-typedef struct bunit_menu_window_command {
-    u8 opcode;
-    u8 length;
-    u8 rectangle_source;
-    u8 x;
-    u8 y;
-    u8 width;
-    u8 height;
-} bunit_menu_window_command_t;
 
 typedef enum bunit_unit_stat {
     BUNIT_UNIT_STAT_HP = 0,
@@ -668,10 +657,9 @@ s16 bunit_unit_get_max_stat(s32 unit_index, s32 fallback);
 
 void bunit_render_unit_status_panel_thread(void);
 void bunit_panel_run_character_status_thread(void);
-bunit_menu_window_command_t* bunit_cmd_draw_window_frame_handler(bunit_menu_window_command_t* command);
+world_menu_window_command_t* bunit_cmd_draw_window_frame_handler(world_menu_window_command_t* command);
 
 struct battle_stats;
-struct bunit_text_line_rect;
 struct bunit_unit_record;
 
 extern s16 g_bunit_ability_entries[];
@@ -692,7 +680,7 @@ extern world_gfx_image_load_parameters_t g_bunit_character_status_layout_mode3[1
 extern RECT g_bunit_character_status_sprite_origin;
 extern u8* (*g_bunit_cmd_handlers[])(u8*);
 extern u32 g_bunit_cmd_stream_input;
-extern bunit_menu_window_command_t g_bunit_cmd_window_interior_command;
+extern world_menu_window_command_t g_bunit_cmd_window_interior_command;
 extern s32 g_bunit_comparison_display_flags;
 extern s32 g_bunit_comparison_display_offset_y;
 extern u8 g_bunit_cursor_trail_brightness[];
@@ -886,8 +874,8 @@ s32 bunit_panel_build_unit_billboard_list(s32 mode, s32 unit_data, s32 sort_mode
 void bunit_panel_copy_unit_data_to_billboard(struct battle_stats* unit, bunit_unit_data_t* record, s32 unused_slot);
 void bunit_text_concatenate_ids(s32 text_table, u8* out, s16* list, s32 separate);
 void bunit_text_render_id_rows_to_vram(s32 text_table, u16* text_ids, RECT* destination, s32 flags);
-void bunit_text_render_ids_into_image(u8* image, struct bunit_text_line_rect* rect, s32 unused, s32 max_chars, u8* font,
-    s16* ids, s32 count, s16 glyph, s32 unused_flags);
+void bunit_text_render_ids_into_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
+    u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
 const u8* bunit_text_skip_encoded_segments(const u8* data, s16 count);
 void bunit_text_start_selection_thread(u8* menu_state);
 void bunit_thread_toggle_7(s32 enable);

@@ -546,8 +546,8 @@ void open_file_wait_then_build_header(
     main_file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination);
 
 /* gfx */
-s32 open_gfx_append_render_record_36(open_render_record_36_t** list, s32* count);
-s32 open_gfx_append_render_record_56(open_render_record_56_t** list, s32* count);
+s32 open_gfx_append_render_record_36(open_render_record_t** list, s32* count);
+s32 open_gfx_append_render_record_56(open_render_record_t** list, s32* count);
 void open_gfx_backup_frame_vram_page(void);
 void open_gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* quad, RECT* rectangle);
 void open_gfx_clear_and_draw_current_frame(void);

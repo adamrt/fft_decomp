@@ -2816,6 +2816,7 @@ void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 
 /* action */
 s32 battle_action_add_poached_item_to_fur_shop_inventory(void);
 s32 battle_action_calculate_at_list(battle_at_entry_t* list, s32 mode);
+u32 battle_action_get_number_of_turns_to_resolve(s32 unit_index, s32 ct, battle_at_entry_t* entries);
 s32 battle_action_calculate_at_list_and_get_specific_unit_id(s32 unit_idx);
 s32 battle_action_calculate_chance_to_react(const battle_stats_t* unit);
 void battle_action_call_attack_preparation(battle_ai_command_action_t* action);

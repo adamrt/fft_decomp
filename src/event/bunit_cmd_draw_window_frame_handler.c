@@ -8,7 +8,7 @@
  * world_menu_parse_draw_window_frame without its shared-rectangle source);
  * source 1 selects the alternate border texture coordinates. The reassigned command pointer before the return keeps its
  * reference count high enough for global allocation to place it in s5. */
-bunit_menu_window_command_t* bunit_cmd_draw_window_frame_handler(bunit_menu_window_command_t* command) {
+world_menu_window_command_t* bunit_cmd_draw_window_frame_handler(world_menu_window_command_t* command) {
     RECT rect;
     s32 left;
     s32 top;
@@ -141,6 +141,6 @@ bunit_menu_window_command_t* bunit_cmd_draw_window_frame_handler(bunit_menu_wind
     rect.h = 7;
     bunit_gfx_enqueue_textured_quad(&rect, u_right - 5, v_bottom - 7, 0, g_bunit_gfx_semitrans_enabled,
         g_bunit_text_digit_texture_page, clut, priority);
-    command = (bunit_menu_window_command_t*)((u8*)command + command->length);
+    command = (world_menu_window_command_t*)((u8*)command + command->length);
     return command;
 }
