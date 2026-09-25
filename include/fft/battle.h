@@ -3417,7 +3417,7 @@ void battle_get_item_graphic_data(SPRT* sprite, s32 item_id);
 void battle_gfx_determine_status_bubble_parameters(battle_unit_misc_data_t*);
 s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id);
 void battle_unit_update_animation_for_status_changes(battle_unit_misc_data_t* unit);
-void battle_gfx_update_and_animate_unit_wep_eff(u8* unit);
+void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_misc_data_t* unit);
 void battle_gfx_draw_unit_sprite_layers(battle_unit_misc_data_t* unit);
 void battle_unit_move_toward_action_target(battle_unit_misc_data_t* unit, s32 allow_height_change);
 void battle_menu_draw_active_window_frames(void);
@@ -3481,7 +3481,8 @@ void battle_move_update_path_step(battle_unit_misc_data_t* unit);
 /* The last argument is an optional transform: the EFFECT overlay's particle
  * handlers pass a 0x58-byte record built on their stack, the battle script
  * opcode passes none. The emitter index arrives as a full word. */
-void battle_effect_spawn_emitter_particles(s16 effect_index, s32 frame, s32 emitter_index, void* transform);
+void battle_effect_spawn_emitter_particles(
+    s16 effect_index, s32 frame, s32 emitter_index, effect_work_record_t* transform);
 void save_3_u16(SVECTOR* output, u16 x, u16 y, u16 z);
 void battle_target_set_tile_background_color(s32 mode, s32 unused);
 void battle_unit_set_target_animation_from_attack_type(

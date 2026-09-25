@@ -22,8 +22,8 @@ typedef struct battle_unit_seq_header {
  *
  * unit is initialized in its declaration so its copy precedes the table
  * copies, and the unread unused_10 sizes the target's frame. */
-void battle_gfx_update_and_animate_unit_wep_eff(u8* unit_data) {
-    battle_unit_misc_data_t* unit = (battle_unit_misc_data_t*)unit_data;
+void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_misc_data_t* unit_data) {
+    battle_unit_misc_data_t* unit = unit_data;
     s16 unused_10[4]; /* Unread; occupies sp+0x10 like the target. */
     s16 flip_by_quadrant[4] = { 0, 0, 2, 2 };
     s16 animation_by_quadrant[4] = { 0, 1, 1, 0 };

@@ -31,7 +31,8 @@
  * The records returned by battle_effect_alloc_work are initialized through
  * effect_particle_physics_view_t. The 0x4c/0x50 lerps are computed and
  * discarded, as is the target's facing quadrant. */
-void battle_effect_spawn_emitter_particles(s16 effect_index, s32 frame, s32 emitter_index, void* transform) {
+void battle_effect_spawn_emitter_particles(
+    s16 effect_index, s32 frame, s32 emitter_index, effect_work_record_t* transform) {
     SVECTOR rotation;
     VECTOR out;
     SVECTOR caster;
@@ -149,9 +150,9 @@ void battle_effect_spawn_emitter_particles(s16 effect_index, s32 frame, s32 emit
         break;
     case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
         if (transform != 0) {
-            spawn.vx += ((effect_work_record_t*)transform)->position[0] >> 12;
-            spawn.vy += ((effect_work_record_t*)transform)->position[1] >> 12;
-            spawn.vz += ((effect_work_record_t*)transform)->position[2] >> 12;
+            spawn.vx += transform->position[0] >> 12;
+            spawn.vy += transform->position[1] >> 12;
+            spawn.vz += transform->position[2] >> 12;
         }
         break;
     case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
