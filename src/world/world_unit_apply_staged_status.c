@@ -1,8 +1,6 @@
 #include "fft/battle.h"
 #include "fft/world.h"
 
-extern s32 battle_status_queue_misc_graphics_flag_change(s32 status_id, s32 remove, s32 unit_id);
-
 /*
  * Restore the saved unit state and replay status changes made during an event.
  *

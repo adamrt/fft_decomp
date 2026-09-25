@@ -1746,6 +1746,9 @@ s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* window);
 /* unpack */
 void wldcore_unpack_proposition_row(wldcore_proposition_fields_t* out, s32 index);
 
+/* unit */
+s32 wldcore_unit_get_id_from_misc_id(s32 misc_id);
+
 /* wait */
 void wldcore_wait_and_build_file_header(
     main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);

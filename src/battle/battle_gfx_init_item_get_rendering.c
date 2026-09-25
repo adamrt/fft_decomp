@@ -1,10 +1,6 @@
 #include "fft/battle.h"
 #include "fft/main_gfx.h"
 
-typedef struct battle_gfx_sprite_display battle_gfx_sprite_display_t;
-extern void battle_gfx_construct_polygon_data_for_units(
-    battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot);
-
 void battle_gfx_init_item_get_rendering(battle_gfx_render_unit_t* unit) {
     SVECTOR position;
     SVECTOR zoom;

@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern s32 battle_unit_set_animation_from_facing_nibble(u32 misc_id, s32 facing);
-
 /* Face a unit, and its mount when one is linked, in the given direction.
    Script variable 0x1FD suppresses the mount update. */
 void world_unit_set_facing(s32 misc_id, s32 facing) {

@@ -1,9 +1,7 @@
+#include "fft/battle.h"
 #include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern void battle_unit_set_palette_update_suppression(u32 misc_id);
-extern void battle_unit_clear_palette_update_suppression(u32 misc_id);
 
 /* Set or clear palette-update suppression on every misc record resolved from
  * the given unit id. */

@@ -43,7 +43,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     s32 i;
     s16 mode;
     u8 rgb_value;
-    world_gfx_sprite_cell_t* cells;
+    battle_menu_sprite_cell_t* cells;
     world_menu_window_command_t* window;
     u8* color;
     world_formation_unit_t* unit;

@@ -2,16 +2,7 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct card_textured_quad_descriptor {
-    u8 x;
-    u8 y;
-    u8 w;
-    u8 h;
-    u8 u;
-    u8 v;
-} card_textured_quad_descriptor_t;
-
-void card_gfx_enqueue_textured_quad_list(const card_textured_quad_descriptor_t* quads, const u8* color, s32 semitrans,
+void card_gfx_enqueue_textured_quad_list(const battle_menu_sprite_cell_t* quads, const u8* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 otag_index, s32 count) {
     u32 command_mask;
     u32 address_mask;

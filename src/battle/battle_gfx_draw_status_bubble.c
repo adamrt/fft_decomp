@@ -2,10 +2,6 @@
 #include "fft/main_gfx.h"
 #include "psx/types.h"
 
-typedef struct battle_gfx_sprite_display battle_gfx_sprite_display_t;
-extern void battle_gfx_construct_polygon_data_for_units(
-    battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot);
-
 /*
  * Queue the unit's status bubble into the ordering table.
  *

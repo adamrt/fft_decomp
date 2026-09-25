@@ -1,22 +1,20 @@
 #ifndef FFT_BATTLE_GFX_H
 #define FFT_BATTLE_GFX_H
 
+#include "fft/battle_file.h"
 #include "fft/menu_types.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct battle_gfx_file_extent {
-    s32 sector;
-    s32 size;
-} battle_gfx_file_extent_t;
-
-extern battle_gfx_file_extent_t g_battle_gfx_sprite_seq_files[];
-extern battle_gfx_file_extent_t g_battle_gfx_sprite_shp_files[];
-extern battle_gfx_file_extent_t g_battle_gfx_weapon_seq_files[];
-extern battle_gfx_file_extent_t g_battle_gfx_weapon_shp_files[];
-extern battle_gfx_file_extent_t g_battle_gfx_effect_seq_files[];
-extern battle_gfx_file_extent_t g_battle_gfx_effect_shp_files[];
-extern battle_gfx_file_extent_t g_battle_gfx_spritesheet_files[];
+extern battle_file_extent_t g_battle_gfx_sprite_seq_files[];
+extern battle_file_extent_t g_battle_gfx_sprite_shp_files[];
+extern battle_file_extent_t g_battle_gfx_weapon_seq_files[];
+extern battle_file_extent_t g_battle_gfx_weapon_shp_files[];
+extern battle_file_extent_t g_battle_gfx_effect_seq_files[];
+extern battle_file_extent_t g_battle_gfx_effect_shp_files[];
+extern battle_file_extent_t g_battle_gfx_spritesheet_files[];
+extern battle_file_extent_t g_battle_gfx_sp2_files[];
+extern battle_file_extent_t g_battle_gfx_worker8_sp2_files[];
 
 typedef struct battle_gfx_sprite_part_display_data {
     s8 x_shift;
@@ -48,6 +46,20 @@ typedef struct battle_gfx_sprite_display_data {
     s16 y_rotation;     /* 0x0c; SEQ 0xe5 saves it, 0xdf clears it; the frame header selects it */
     battle_gfx_sprite_part_display_data_t parts[1]; /* 0x0e; count depends on the display */
 } battle_gfx_sprite_display_data_t;
+
+/* Render view of the same sprite display header. The first two colour bytes
+ * are read as one halfword, and texture/scale words as unsigned halfwords. */
+typedef struct battle_gfx_sprite_display {
+    u16 rg;
+    u8 b;
+    u8 unknown_03;
+    u16 tpage;
+    u16 clut;
+    u16 scale_x;
+    u16 scale_y;
+    u16 angle;
+    battle_gfx_sprite_part_display_data_t parts[1];
+} battle_gfx_sprite_display_t;
 
 /*
  * This is the HEADER only, not a whole slot: 0x0e + one 7-byte part record,
@@ -325,6 +337,8 @@ void battle_gfx_clear_four_state_words(void);
 s32 battle_gfx_clear_shadow_graphic_trigger_by_misc_id(u32 misc_id);
 void battle_gfx_clear_tpage7_vram_allocation_grid(void);
 void battle_gfx_configure_misc_unit_palette_modulation_1f(s32 unit_id);
+void battle_gfx_construct_polygon_data_for_units(
+    battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot);
 void battle_gfx_decompress_attack_spritesheet(u8* source, u8* destination);
 void battle_gfx_draw_or_append_gpu_primitive(s32* primitive);
 void battle_gfx_draw_screen_color_modulation_overlay(void);

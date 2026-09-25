@@ -1,6 +1,7 @@
 #ifndef FFT_BATTLE_EFFECT_H
 #define FFT_BATTLE_EFFECT_H
 
+#include "fft/battle_file.h"
 #include "fft/effect.h"
 #include "fft/unit_slots.h"
 #include "psx/types.h"
@@ -12,6 +13,7 @@ typedef struct battle_effect_resource {
 } battle_effect_resource_t;
 
 extern battle_effect_resource_t* g_battle_effect_model_data_ptrs[];
+extern battle_file_extent_t g_battle_effect_disc_entries[];
 s32 battle_effect_init_resource_sections(battle_effect_resource_t* resource);
 
 /* Twelve-byte on-hit effect vector at on_hit_effects_data (0x801b8a40), with a

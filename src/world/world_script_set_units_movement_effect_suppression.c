@@ -1,10 +1,8 @@
+#include "fft/battle.h"
 #include "fft/event.h"
 #include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern void battle_unit_set_movement_effect_suppression(u32 misc_id);
-extern void battle_unit_clear_movement_effect_suppression(u32 misc_id);
 
 /* Set or clear movement-effect suppression for units selected by an event operand. */
 void world_script_set_units_movement_effect_suppression(const u8* parameters) {

@@ -446,7 +446,7 @@ functions:
 
 data:
   - {addr: 0x8008c0ac, name: get_current_facing_byte_from_misc_id}
-  - {addr: 0x8008cdd0, name: get_unit_id_from_misc_id}
+  - {addr: 0x8008cdd0, name: wldcore_unit_get_id_from_misc_id}
   - {addr: 0x80092b04, name: wldcore_switch_to_stack}
   - {addr: 0x80092b1c, name: wldcore_restore_previous_stack}
   - {addr: 0x80092b2c, name: g_wldcore_anim_sequence_table}

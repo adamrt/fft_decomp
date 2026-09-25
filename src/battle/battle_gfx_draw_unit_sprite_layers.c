@@ -4,10 +4,6 @@
 #include "fft/main_gfx.h"
 #include "psx/gte.h"
 
-typedef struct battle_gfx_sprite_display battle_gfx_sprite_display_t;
-extern void battle_gfx_construct_polygon_data_for_units(
-    battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot);
-
 /* flags is passed as a sign-extended word; the u16 mode parameter would
  * zero-extend it, so these calls use a word-mode view. */
 #define CONSTRUCT_POLYGONS_WORD_MODE                                                                                   \

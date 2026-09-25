@@ -1,8 +1,6 @@
 #include "fft/battle.h"
 #include "fft/world.h"
 
-extern s32 battle_status_queue_misc_graphics_flag_change(s32 status_id, s32 remove, s32 unit_id);
-
 void world_unit_apply_zalera_draw_status_flags(s32 battle_unit_index, s32 enabled) {
     battle_stats_t* unit;
     s32 status_index;

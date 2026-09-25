@@ -796,20 +796,6 @@ typedef struct world_menu_quad_origin {
     s16 y; /* 0x02 */
 } world_menu_quad_origin_t;
 
-/* Provisional: 6-byte packed sprite cell (x, y, w, h, u, v) consumed by
- * world_gfx_add_sprite_cell_quads (0x8012c430): each cell becomes one POLY_FT4
- * spanning w x h with texture origin (u, v). */
-typedef struct world_gfx_sprite_cell {
-    u8 x; /* 0x00; screen x before the +0x80 menu origin */
-    u8 y; /* 0x01 */
-    u8 w; /* 0x02 */
-    u8 h; /* 0x03 */
-    u8 u; /* 0x04 */
-    u8 v; /* 0x05 */
-} world_gfx_sprite_cell_t;
-
-typedef char world_sprite_cell_size_must_be_6[(sizeof(world_gfx_sprite_cell_t) == 6) ? 1 : -1];
-
 /* Provisional: one 5-byte row of a WORLD menu text entry as rewritten by
  * world_menu_build_skillset_entries (0x800f3d44): the style byte at +1 is
  * 4 for a greyed row, the byte at +3 is the row separator (0xfa) or the
@@ -2247,8 +2233,8 @@ extern world_gfx_sprite_desc_t g_world_formation_label_equipping;
 extern world_gfx_sprite_desc_t g_world_formation_label_leaving;
 extern world_gfx_sprite_desc_t g_world_formation_unit_dot_sprite;
 extern world_gfx_sprite_desc_t g_world_formation_label_missing;
-extern world_gfx_sprite_cell_t g_world_formation_label_tiles[];
-extern world_gfx_sprite_cell_t g_world_formation_label_tiles_bottom[];
+extern battle_menu_sprite_cell_t g_world_formation_label_tiles[];
+extern battle_menu_sprite_cell_t g_world_formation_label_tiles_bottom[];
 extern s8 g_world_formation_dot_glow_timer;
 extern s8 g_world_formation_dot_glow_direction;
 extern u8 g_world_formation_cursor_trail_brightness[8];
@@ -3211,7 +3197,7 @@ void world_gfx_add_draw_area_primitive(RECT* rect, s32 otag_index);
 void world_gfx_add_draw_mode_primitive(s32 dfe, s32 dtd, s32 tpage, RECT* texture_window, s32 ot_index);
 void world_gfx_add_draw_move_primitive(RECT* src, s32 x, s32 y, s32 ot_index);
 void world_gfx_add_sprite_cell_quads(
-    world_gfx_sprite_cell_t* cell, u8* rgb, s32 semi_trans, u16 tpage, u16 clut, s32 ot_index, s32 count);
+    battle_menu_sprite_cell_t* cell, u8* rgb, s32 semi_trans, u16 tpage, u16 clut, s32 ot_index, s32 count);
 void world_gfx_alloc_texture_grid_rect(RECT* rect, world_texture_prim_t* prim, u32* image);
 void world_gfx_append_poly_g4_to_otag(s16* xy, u8* rgb, s32 semi_trans, s32 ot_index);
 void world_gfx_append_poly_gt4_to_otag(world_gfx_textured_rect_source_t* source, u8* rgb, s32 semi_trans, s32 ot_index);

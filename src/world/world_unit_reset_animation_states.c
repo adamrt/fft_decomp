@@ -3,8 +3,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern s32 battle_unit_get_facing_nibble_by_misc_id(u32 misc_id);
-
 /* Reset the per-unit facing/animation records for all 21 simulation slots and
  * reseed each unit's facing from its misc data, or 0xff when the slot is
  * empty. */

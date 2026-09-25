@@ -5,8 +5,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern void battle_unit_set_mounted_animation_by_misc_id(u32 misc_id);
-
 /* Inflict Status event command thread.
  *
  * Parameters: ENTD unit id halfword, mode byte, then a wait-frame halfword.

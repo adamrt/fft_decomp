@@ -31,30 +31,6 @@
         __asm__ volatile("swc2 $14, 0($14)" : : : "memory");                                                           \
     }
 
-/* One 7-byte sprite part: a signed offset, a size, a texture origin and flags
- * (0x02/0x04 mirror, 0x01 semi-transparent, 0x80 depth-sorted by camera pitch). */
-typedef struct battle_gfx_sprite_part {
-    s8 x;
-    s8 y;
-    u8 width;
-    u8 height;
-    u8 u;
-    u8 v;
-    u8 flags;
-} battle_gfx_sprite_part_t;
-
-typedef struct battle_gfx_sprite_display {
-    u16 rg; /* 0x00; red and green of the primitive colour */
-    u8 b;   /* 0x02 */
-    u8 unknown_03;
-    u16 tpage;                         /* 0x04 */
-    u16 clut;                          /* 0x06 */
-    u16 scale_x;                       /* 0x08 */
-    u16 scale_y;                       /* 0x0a */
-    u16 angle;                         /* 0x0c */
-    battle_gfx_sprite_part_t parts[1]; /* 0x0e */
-} battle_gfx_sprite_display_t;
-
 /* POLY_FT4 with the colour's red/green pair addressed as one halfword. */
 typedef struct battle_gfx_part_prim {
     u8 unknown_00[3];
@@ -94,7 +70,7 @@ typedef struct battle_gfx_part_prim {
 void battle_gfx_construct_polygon_data_for_units(
     battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot) {
     VECTOR unused;
-    battle_gfx_sprite_part_t* part;
+    battle_gfx_sprite_part_display_data_t* part;
     battle_gfx_part_prim_t* prim;
     s32 i;
     u16 flags;
@@ -123,14 +99,14 @@ void battle_gfx_construct_polygon_data_for_units(
         prim->length = 9;
         prim->code = 0x2c;
         if (mode & 2) {
-            x = -part->x - part->width;
+            x = -part->x_shift - part->width;
         } else {
-            x = part->x;
+            x = part->x_shift;
         }
         if (mode & 4) {
-            y = -part->y - part->height;
+            y = -part->y_shift - part->height;
         } else {
-            y = part->y;
+            y = part->y_shift;
         }
         if (flags & 2) {
             g_battle_gte_rtpt_vxy1.vx = g_battle_gte_rtps_vxy0.vx = x;

@@ -22,10 +22,6 @@ extern battle_numeric_scale_table_t g_battle_numeric_digit_0_critical_zoom_curve
 extern battle_numeric_scale_table_t g_battle_numeric_digit_1_critical_zoom_curve;
 extern battle_numeric_scale_table_t g_battle_numeric_digit_2_critical_zoom_curve;
 
-typedef struct battle_gfx_sprite_display battle_gfx_sprite_display_t;
-extern void battle_gfx_construct_polygon_data_for_units(
-    battle_gfx_sprite_display_t* display, s32 end, s32 start, s16* position, s16 angle, u16 mode, s16* scale, u32* ot);
-
 /* Animate and queue the three numeric post-action display sprites.
  *
  * Scales each digit sprite by its per-frame zoom curve, starts the next

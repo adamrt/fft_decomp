@@ -6,7 +6,7 @@
  * at (x + 0x80, y) with texture origin (u, v), and links it into ordering
  * table entry ot_index. With rgb the quads are shaded with that colour. */
 void world_gfx_add_sprite_cell_quads(
-    world_gfx_sprite_cell_t* cell, u8* rgb, s32 semi_trans, u16 tpage, u16 clut, s32 ot_index, s32 count) {
+    battle_menu_sprite_cell_t* cell, u8* rgb, s32 semi_trans, u16 tpage, u16 clut, s32 ot_index, s32 count) {
     POLY_FT4* poly;
 
     count--;

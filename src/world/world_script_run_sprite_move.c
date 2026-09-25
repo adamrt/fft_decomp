@@ -17,9 +17,6 @@
 #include "psx/gte.h"
 #include "psx/types.h"
 
-extern s16* battle_unit_get_event_offset_ptr_by_misc_id(u32);
-extern s32 battle_unit_add_event_offset_by_misc_id(u32, const battle_screen_coords_t*);
-
 /* The parameters are copied into locals in this order: it is what places the
  * s0 copy before the s2 copy in the prologue. */
 void world_script_run_sprite_move(void* arg, s32 use_speed) {

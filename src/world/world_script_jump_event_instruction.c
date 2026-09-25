@@ -8,9 +8,6 @@ typedef struct event_instr_t {
     u8 param1;
 } event_instr_t;
 
-extern s16* battle_unit_get_event_offset_ptr_by_misc_id(u32);
-extern s32 battle_unit_add_event_offset_by_misc_id(u32, const battle_screen_coords_t*);
-
 void world_script_jump_event_instruction(event_instr_t* instr) {
     battle_screen_coords_t vec;
     s32 misc_id;

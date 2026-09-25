@@ -262,20 +262,6 @@ typedef struct bunit_gfx_scaled_draw_area_pair {
 typedef char
     bunit_gfx_scaled_draw_area_pair_size_must_be_0x28[(sizeof(bunit_gfx_scaled_draw_area_pair_t) == 0x28) ? 1 : -1];
 
-/* Six-byte textured-quad list entry consumed by
- * bunit_gfx_enqueue_textured_quad_list: screen rectangle then texture
- * coordinates, all unsigned bytes. */
-typedef struct bunit_textured_quad_descriptor {
-    u8 x; /* 0x00 */
-    u8 y; /* 0x01 */
-    u8 w; /* 0x02 */
-    u8 h; /* 0x03 */
-    u8 u; /* 0x04 */
-    u8 v; /* 0x05 */
-} bunit_textured_quad_descriptor_t;
-
-typedef char bunit_textured_quad_descriptor_size_must_be_6[(sizeof(bunit_textured_quad_descriptor_t) == 6) ? 1 : -1];
-
 /* Ten-byte draw-number command (menu script opcodes 0x19-0x1B) executed by
  * bunit_menu_script_draw_formatted_number, which advances by `length`. Same layout as WORLD's
  * world_draw_number_command_t. */
@@ -565,7 +551,7 @@ void bunit_gfx_enqueue_gouraud_textured_quad(
 void bunit_gfx_enqueue_oriented_textured_quad(
     const bunit_oriented_quad_t* descriptor, const u8* color, s32 orientation, s32 semitrans, s32 otag_index);
 void bunit_gfx_enqueue_textured_quad_corners(bunit_sprite_desc_t* src, u8* color, s32 semi, s32 idx);
-void bunit_gfx_enqueue_textured_quad_list(const bunit_textured_quad_descriptor_t* quads, const u8* color, s32 semitrans,
+void bunit_gfx_enqueue_textured_quad_list(const battle_menu_sprite_cell_t* quads, const u8* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 otag_index, s32 count);
 void bunit_gfx_enqueue_translucent_tile(RECT* rect, u8* color, u8 semi, s32 idx);
 s32 bunit_gfx_get_fade_state(void);
@@ -803,8 +789,8 @@ extern bunit_draw_number_command_t g_bunit_unit_grid_faith_number_wide;
 extern s8 g_bunit_unit_grid_gauge_offsets[];
 extern u16 g_bunit_unit_grid_hp_gauge_clut;
 extern u8 g_bunit_unit_grid_hp_gauge_colors[];
-extern bunit_textured_quad_descriptor_t g_bunit_unit_grid_label_tiles[];
-extern bunit_textured_quad_descriptor_t g_bunit_unit_grid_label_tiles_bottom[];
+extern battle_menu_sprite_cell_t g_bunit_unit_grid_label_tiles[];
+extern battle_menu_sprite_cell_t g_bunit_unit_grid_label_tiles_bottom[];
 extern bunit_draw_number_command_t g_bunit_unit_grid_level_number;
 extern bunit_draw_number_command_t g_bunit_unit_grid_max_stat_number;
 extern u16 g_bunit_unit_grid_mp_gauge_clut;

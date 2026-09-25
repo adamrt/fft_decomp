@@ -1,16 +1,8 @@
 #include "fft/jobstts.h"
-
-typedef struct jobstts_sprite {
-    u8 x;
-    u8 y;
-    u8 w;
-    u8 h;
-    u8 u;
-    u8 v;
-} jobstts_sprite_t;
+#include "fft/menu_types.h"
 
 void jobstts_gfx_enqueue_textured_quad_list(
-    jobstts_sprite_t* sprites, u8* color, s32 semitrans, u16 tpage, u16 clut, s32 ot_index, s32 count) {
+    battle_menu_sprite_cell_t* sprites, u8* color, s32 semitrans, u16 tpage, u16 clut, s32 ot_index, s32 count) {
     POLY_FT4* poly;
 
     for (count -= 1; count >= 0; count--) {

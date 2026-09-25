@@ -1,10 +1,9 @@
+#include "fft/battle.h"
 #include "fft/event.h"
 #include "fft/thread.h"
 #include "fft/unit_slots.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern void battle_unit_set_status_animation_by_misc_id(u32 misc_id);
 
 void world_script_march_units(const u8* parameters) {
     u16 unit_id;

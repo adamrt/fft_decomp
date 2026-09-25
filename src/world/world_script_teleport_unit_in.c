@@ -1,7 +1,6 @@
+#include "fft/battle_effect.h"
 #include "fft/event.h"
 #include "fft/world.h"
-
-extern s32 battle_effect_set_secondary_teleport_by_misc_id(u32 misc_id);
 
 /* The interpreter also supplies a1=1; this entry does not consume it. */
 void world_script_teleport_unit_in(s32 unit_id, s32 unused) {

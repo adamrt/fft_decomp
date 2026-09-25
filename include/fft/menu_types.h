@@ -65,6 +65,18 @@ typedef struct world_menu_text_entry_wait_param {
     world_menu_text_entry_wait_task_t* task;
 } world_menu_text_entry_wait_param_t;
 
+/* Six-byte menu sprite cell: screen rectangle and texture origin. */
+typedef struct battle_menu_sprite_cell {
+    u8 x;
+    u8 y;
+    u8 w;
+    u8 h;
+    u8 u;
+    u8 v;
+} battle_menu_sprite_cell_t;
+
+typedef char battle_menu_sprite_cell_size_must_be_6[(sizeof(battle_menu_sprite_cell_t) == 6) ? 1 : -1];
+
 /* Image load parameters consumed by world_gfx_init_image_loading (0xc bytes;
  * the table at 0x80155838 holds one per menu sprite). */
 typedef struct world_gfx_image_load_parameters {

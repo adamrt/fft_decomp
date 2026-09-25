@@ -1,8 +1,7 @@
 #include "fft/battle_effect.h"
+#include "fft/battle_state.h"
 #include "fft/world.h"
 #include "psx/types.h"
-
-extern s32 battle_state_get_animation_continue_check(void);
 
 /* Runs the effect playback helper on the main stack, then yields once per
  * frame until the animation continue check reports completion. */

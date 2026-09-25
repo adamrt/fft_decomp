@@ -4,10 +4,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-extern void battle_unit_set_specific_animation_by_misc_id(u32 misc_id, u32 value);
-extern void battle_unit_set_status_animation_by_misc_id(u32);
-extern void battle_unit_set_mounted_animation_by_misc_id(u32);
-
 /* WORLD twin of battle_unit_set_specific_animation_value_on_battle_init. */
 void world_unit_set_animation(s32 misc_id, u32 value) {
     s32 battle_id;
