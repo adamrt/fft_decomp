@@ -21,7 +21,7 @@ s32 battle_unit_init_deployed_units_data(battle_deployed_coords_t* formation, s3
     s32 next_generated_unit_id;
     u8 palette;
 
-    g_main_current_formation_entry = (u8*)formation;
+    g_main_current_formation_entry = formation;
     if (is_red_team_debug) {
         next_generated_unit_id = 0xfe;
         slot_step = -1;
@@ -38,19 +38,15 @@ s32 battle_unit_init_deployed_units_data(battle_deployed_coords_t* formation, s3
         s32 identity;
 
         unit->misc_unit_id = battle_id;
-        if (((battle_deployed_coords_t*)g_main_current_formation_entry)[i].party_id != 0xff) {
+        if (g_main_current_formation_entry[i].party_id != 0xff) {
             unit->entd_slot = battle_id;
             unit->existence = 1;
-            if (main_unit_init_job_data(
-                    unit, ((battle_deployed_coords_t*)g_main_current_formation_entry)[i].party_id, 0)
-                != 0) {
+            if (main_unit_init_job_data(unit, g_main_current_formation_entry[i].party_id, 0) != 0) {
                 main_system_handle_battle_load_exception(battle_id + 0x1f4);
                 /* Stops cross-jumping from merging this arm with the placement failure. */
                 __asm__ volatile("" : : "r"(battle_id));
                 failures += weight;
-            } else if (battle_unit_set_placement_and_validate(
-                           battle_id, &((battle_deployed_coords_t*)g_main_current_formation_entry)[i])
-                != 0) {
+            } else if (battle_unit_set_placement_and_validate(battle_id, &g_main_current_formation_entry[i]) != 0) {
                 main_system_handle_battle_load_exception(battle_id + 0x190);
                 failures += weight;
             } else {
@@ -66,7 +62,7 @@ s32 battle_unit_init_deployed_units_data(battle_deployed_coords_t* formation, s3
                     unit->initial_team_flags = 0x18;
                     unit->sprite_palette = 1;
                 }
-                if (((battle_deployed_coords_t*)g_main_current_formation_entry)[i].facing_elevation_flags & 0x10) {
+                if (g_main_current_formation_entry[i].facing_elevation_flags & 0x10) {
                     unit->existence = 0;
                     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
                 } else {

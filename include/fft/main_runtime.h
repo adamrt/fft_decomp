@@ -1,6 +1,7 @@
 #ifndef FFT_MAIN_RUNTIME_H
 #define FFT_MAIN_RUNTIME_H
 
+#include "fft/battle_gfx.h"
 #include "fft/data.h"
 #include "fft/main_file.h"
 #include "fft/main_zodiac.h"
@@ -12,12 +13,13 @@
 
 /* Forward declarations for types defined in other module headers. */
 struct battle_stats;
+struct battle_deployed_coords;
 
 extern u8 g_ability_aoe_data;
 extern u8 g_ability_ct_data[];
 extern s32 g_active_graphics_buffer_index;
 extern s32 g_animation_speed;
-extern u8 g_battle_buffer_a[];
+extern battle_render_buffer_t g_battle_buffer_a[2];
 extern s32 g_battle_frame_counter;
 extern s32 g_battle_frame_measurement;
 extern int g_battle_overlay_loaded;
@@ -182,7 +184,7 @@ extern u8 g_main_throw_ability_item_types_by_ability_id[];
 extern u8 g_main_item_ability_item_ids[14];
 extern u8 g_main_calculator_primes[CALCULATOR_PRIME_COUNT];
 extern u16 g_main_month_start_day_offsets[13];
-extern u8* g_main_current_formation_entry;
+extern struct battle_deployed_coords* g_main_current_formation_entry;
 extern u8 g_main_crystal_learnable_abilities[];
 extern u8 g_main_crystal_treasure_item_id;
 extern u8 g_main_brave_story_character_ages[0x40];
