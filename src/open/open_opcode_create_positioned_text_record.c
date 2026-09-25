@@ -11,9 +11,9 @@ void open_opcode_create_positioned_text_record(const s16* command) {
     s32 y;
     s32 index;
     s32 last;
-    s16* operand;
+    const s16* operand;
 
-    operand = (s16*)command + 1;
+    operand = command + 1;
     /* Keeps p a stepped pointer; otherwise the reads fold to constant offsets from command. */
     __asm__("" : "=r"(operand) : "0"(operand));
     x = *operand++;

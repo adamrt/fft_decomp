@@ -19,7 +19,7 @@ void open_gfx_update_opntex_sequence(void) {
     s32 countdown;
     s32 frame;
     s32 control_value;
-    u8* source;
+    const u8* source;
 
     /* Hides the pointer's constant value; without it every access below folds to an absolute lui/%lo address. */
     __asm__ volatile("" : "=r"(duration_pointer) : "0"(duration_pointer));
