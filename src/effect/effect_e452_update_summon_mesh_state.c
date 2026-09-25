@@ -32,9 +32,9 @@ s32 effect_e452_update_summon_mesh_state(s16 record_index, s32 byte_offset, s32 
     effect_summon_mesh_work_t* work;
     POLY_GT4* quad;
     POLY_GT4* other;
-    effect_summon_mesh_point_t* point;
+    effect_summon_mesh_point_t* lattice_point;
     map_tile_t* tile;
-    u8* scratch;
+    u8* lattice_bytes;
     u16 placement;
     u8 target_index;
     s32 k;
@@ -170,15 +170,15 @@ s32 effect_e452_update_summon_mesh_state(s16 record_index, s32 byte_offset, s32 
 
         /* The base stays in a variable: the target adds it to the row offset
          * after each call instead of folding it into the induction variable. */
-        scratch = (u8*)0x1F800000;
+        lattice_bytes = (u8*)0x1F800000;
         for (j = 0; j < 9; j++) {
             k = ((radius + (work->radius_offset >> 8)) * rcos(j << 7)) >> 12;
             n = ((((radius + (work->radius_offset >> 8)) * rsin(j << 7)) >> 12) * growth.vy) >> 8;
             for (i = 0; i < 17; i++) {
-                point = (effect_summon_mesh_point_t*)(scratch + (j * 0x66 + i * 6));
-                point->x = (rcos(work->spin + (i << 8)) * k) >> 12;
-                point->z = (rsin(work->spin + (i << 8)) * k) >> 12;
-                point->y = -n;
+                lattice_point = (effect_summon_mesh_point_t*)(lattice_bytes + (j * 0x66 + i * 6));
+                lattice_point->x = (rcos(work->spin + (i << 8)) * k) >> 12;
+                lattice_point->z = (rsin(work->spin + (i << 8)) * k) >> 12;
+                lattice_point->y = -n;
             }
             growth.vy += growth_step.vy;
         }
