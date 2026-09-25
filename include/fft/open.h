@@ -495,6 +495,7 @@ void open_script_update_xa_audio(void);
 /* bin */
 void open_menu_start_music_test_list_thread(
     s32 thread_id, s32 limit, const open_point32_t* extent, const open_point32_t* origin);
+s32 open_bin_decdctbufsize(const u16* bs);
 void open_bin_decdctin(s32* packet, s32 mode);
 void open_bin_decdctout(u32 command, u32 words);
 void open_bin_decdctoutcallback(void* callback);
