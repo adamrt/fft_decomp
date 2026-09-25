@@ -41,8 +41,8 @@ typedef struct wldcore_menu_proposition_result_level {
  * only does for an aggregate view, not for the scalar g_wldcore_job_selection.proposition_index names. */
 void wldcore_proposition_step_result_level(wldcore_menu_proposition_result_level_t* level) {
     u8 date[2];
-    s32 flags;
-    s32 gil;
+    s32 proposition_flags;
+    s32 war_funds;
     s32 day;
     s32 month;
     s32 i;
@@ -86,16 +86,17 @@ void wldcore_proposition_step_result_level(wldcore_menu_proposition_result_level
     }
     g_wldcore_window_render_record_count = g_wldcore_window_render_record_count - 1;
     g_wldcore_window_render_object_count = g_wldcore_window_render_object_count - 1;
-    flags = world_script_get_variable(g_main_active_propositions[level->proposition].proposition_id + 0x360) & 0xFFFD;
+    proposition_flags
+        = world_script_get_variable(g_main_active_propositions[level->proposition].proposition_id + 0x360) & 0xFFFD;
     if (g_wldcore_job_selection.result == 0) {
-        flags |= 4;
+        proposition_flags |= 4;
     }
-    world_script_set_variable(g_main_active_propositions[level->proposition].proposition_id + 0x360, flags);
-    gil = world_script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_wldcore_proposition_gil_amount;
-    if (gil > 0x05F5E0FF) {
-        gil = 0x05F5E0FF;
+    world_script_set_variable(g_main_active_propositions[level->proposition].proposition_id + 0x360, proposition_flags);
+    war_funds = world_script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_wldcore_proposition_gil_amount;
+    if (war_funds > 0x05F5E0FF) {
+        war_funds = 0x05F5E0FF;
     }
-    world_script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, gil);
+    world_script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS, war_funds);
     g_wldcore_displayed_numeric_value = world_script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);
     day = world_script_get_variable(EVENT_SCRIPT_VAR_DAY);
     month = world_script_get_variable(EVENT_SCRIPT_VAR_MONTH);

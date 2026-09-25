@@ -21,7 +21,7 @@ void wldcore_proposition_roll_bonus_reward(void) {
     s32 i;
     s32 index;
     s32 participant_count;
-    u16 type;
+    u16 discovery_kind;
     s32 bonus;
 
     bonus_table = (u16*)wldcore_proposition_get_data_pointer(8);
@@ -33,8 +33,8 @@ void wldcore_proposition_roll_bonus_reward(void) {
     if (g_wldcore_job_selection.result != 0) {
         return;
     }
-    type = g_wldcore_selected_proposition_row[0].fields.discovery_kind;
-    if (type == 1) {
+    discovery_kind = g_wldcore_selected_proposition_row[0].fields.discovery_kind;
+    if (discovery_kind == 1) {
         g_wldcore_job_selection.reward_type = 1;
         count = 0;
         for (i = 0; i < 31; i++) {
@@ -43,9 +43,9 @@ void wldcore_proposition_roll_bonus_reward(void) {
                 count++;
             }
         }
-    } else if (type == 2) {
+    } else if (discovery_kind == 2) {
         count = 0;
-        g_wldcore_job_selection.reward_type = type;
+        g_wldcore_job_selection.reward_type = discovery_kind;
         for (i = 0; i < 16; i++) {
             if (world_script_get_variable(i + 0x350) == 0) {
                 candidates[count] = i;

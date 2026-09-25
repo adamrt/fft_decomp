@@ -100,6 +100,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
                     if (wldcore_script_process_conditional_set(g_wldcore_map_projection_state.marker.kind, 0x20) != 0) {
                         offset = g_wldcore_script_state.args[0] * 10;
                         records = g_wldcore_deep_dungeon_battles;
+                        /* The byte offset and shared base preserve the target's choice-index calculation. */
                         record = (wldcore_deep_dungeon_battle_t*)((u8*)records + offset);
                         g_wldcore_next_map_id[0] = record->map_id;
                         world_script_set_variable(
