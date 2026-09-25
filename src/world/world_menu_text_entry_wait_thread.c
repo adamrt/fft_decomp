@@ -21,9 +21,6 @@ typedef struct world_menu_list_param {
     world_menu_list_task_t* task; /* 0x30 */
 } world_menu_list_param_t;
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-
 void world_menu_text_entry_wait_thread(void) {
     world_menu_list_param_t* param;
     world_menu_list_task_t* task;
@@ -41,7 +38,7 @@ void world_menu_text_entry_wait_thread(void) {
     thread_id = task->thread_id;
     third = task->param_3;
     *g_world_input_frame_controller_input = PSX_PAD_CIRCLE;
-    world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, 0);
+    world_menu_handle_entry_confirm((world_menu_entry_t*)param, 0);
     world_thread_start(thread_id, world_text_character_handling_thread);
     world_thread_set_parameters_4(thread_id, first, second, third, third);
     world_thread_wait_until_inactive(g_world_thread_current_id - 1);

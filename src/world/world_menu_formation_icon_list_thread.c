@@ -3,9 +3,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-
 /* Formation menu icon list thread: draws the text image once, then
  * alternates two sprite records, tinting the four icon sprites with the
  * current menu colour and moving the wrapping cursor while the previous
@@ -51,7 +48,7 @@ void world_menu_formation_icon_list_thread(void) {
         }
         if (world_thread_is_previous_running() == 0) {
             world_menu_step_wrapping_cursor_on_scroll_buttons((world_menu_wrapping_cursor_bounds_t*)param, &cursor);
-            world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, cursor);
+            world_menu_handle_entry_confirm((world_menu_entry_t*)param, cursor);
             world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         }
         record->sprites[0].r0 = g_world_menu_color_red;

@@ -2,9 +2,6 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-typedef struct world_menu_list_record world_menu_list_record_t;
-extern void world_menu_load_scrollable_list_layout(world_menu_list_record_t* record);
-
 /* Scroll a menu list one page up (dir == -1) or down (dir == 1), as on Square + Up/Down.
  *
  * Built at -O1. `next` is assigned inside the comparison so the option count

@@ -2,19 +2,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-/* Menu-list layout record in the WORLD menu script stream. */
-typedef struct world_menu_list_record {
-    u8 type;   /* 0x00: 0x10 = list layout, 0x1c = end of stream */
-    u8 length; /* 0x01: byte length of this record */
-    u8 unknown_02[2];
-    u8 x;            /* 0x04 */
-    u8 row_height;   /* 0x05 */
-    u8 visible_rows; /* 0x06 */
-    u8 unknown_07[2];
-    u8 width_a; /* 0x09 */
-    u8 width_b; /* 0x0a */
-} world_menu_list_record_t;
-
 /* Text image upload: the VRAM rectangle followed by a -1 terminated list of
  * text ids for world_text_render_id_list_to_image_rows. The list length is inferred from the 0x80-byte
  * frame (at -O1 the frame carries 56 further bytes of spill slots). */

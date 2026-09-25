@@ -60,15 +60,15 @@ void bunit_run_numeric_editor_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], 0);
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], 2);
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], 1);
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_bunit_editor_numeric_table, &buffer->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(
+        &g_bunit_editor_numeric_table.source.texture_rect, &buffer->numeric_frame);
     bunit_gfx_init_scaled_draw_area_packets((u8*)&buffer->portrait);
     i = 0;
     descriptor = g_bunit_editor_numeric_texture;
     for (; i < 18; i++) {
         battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
         battle_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i], g_bunit_editor_numeric_geometry,
-            (const battle_image_location_t*)g_bunit_editor_numeric_table,
-            (const world_gfx_image_load_parameters_t*)descriptor);
+            &g_bunit_editor_numeric_table.source.texture_origin, (const world_gfx_image_load_parameters_t*)descriptor);
         descriptor += 0xC;
     }
     if (g_battle_current_thread_id != 12) {
@@ -123,7 +123,7 @@ void bunit_run_numeric_editor_thread(void) {
         use_offset = field_y != 0xF0;
         g_bunit_gfx_draw_offset_y = -use_offset & 0xF0;
         bunit_gfx_build_scaled_draw_area_packets((bunit_gfx_scaled_draw_area_pair_t*)&buffer->portrait,
-            &g_bunit_editor_numeric_table[8], frame, field_y, (s16*)thread);
+            &g_bunit_editor_numeric_table.draw_area_rect, frame, field_y, (s16*)thread);
         buffer->draw_offsets[0].x = thread->origin_x - 0x80;
         buffer->draw_offsets[0].y = thread->origin_y + g_bunit_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[0], &buffer->draw_offsets[0].x);

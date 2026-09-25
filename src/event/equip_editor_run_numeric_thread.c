@@ -70,14 +70,15 @@ void equip_editor_run_numeric_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], 0);
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], 2);
     SetDrawMode(&buffer->draw_modes[2], 0, 0, GetTPage(0, 2, 0x140, 0), &g_equip_gfx_draw_area_template);
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_equip_editor_numeric_table, &buffer->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(
+        &g_equip_editor_numeric_table.source.texture_rect, &buffer->numeric_frame);
     equip_gfx_init_scaled_draw_area_packets(&buffer->portrait);
     i = 0;
     descriptor = g_equip_editor_numeric_texture;
     for (; i < 18; i++) {
         battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
-        battle_gfx_init_image_loading(
-            &buffer->sprites[i], g_equip_editor_numeric_geometry, g_equip_editor_numeric_table, descriptor);
+        battle_gfx_init_image_loading(&buffer->sprites[i], g_equip_editor_numeric_geometry,
+            &g_equip_editor_numeric_table.source.texture_origin, descriptor);
         descriptor += 0xC;
     }
     if (g_battle_current_thread_id != 12) {
@@ -129,7 +130,7 @@ void equip_editor_run_numeric_thread(void) {
         use_offset = field_y != 0xF0;
         g_equip_gfx_draw_offset_y = -use_offset & 0xF0;
         equip_gfx_build_scaled_draw_area_packets(
-            &buffer->portrait, &g_equip_editor_numeric_table[8], frame, field_y, (s16*)thread);
+            &buffer->portrait, &g_equip_editor_numeric_table.draw_area_rect, frame, field_y, (s16*)thread);
         buffer->draw_offsets[0].x = thread->origin_x - 0x80;
         buffer->draw_offsets[0].y = thread->origin_y + g_equip_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[0], &buffer->draw_offsets[0].x);

@@ -896,7 +896,7 @@ data:
   - {addr: 0x8005ebf0, name: g_main_ability_data}
   - {addr: 0x8005fbf0, name: g_main_ability_range_data}
   - {addr: 0x8005fbf1, name: g_main_ability_aoe_data}
-  - {addr: 0x8005fbfc, name: g_ability_ct_data}
+  - {addr: 0x8005fbfc, name: g_main_ability_ct_data}
   - {addr: 0x80060d18, name: g_main_jump_charge_ability_data_by_ability_id}
   - {addr: 0x80060ea0, name: g_main_item_ability_item_ids_by_ability_id}
   - {addr: 0x80060ea2, name: g_main_throw_ability_item_types_by_ability_id}

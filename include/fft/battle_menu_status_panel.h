@@ -1,6 +1,7 @@
 #ifndef FFT_BATTLE_MENU_STATUS_PANEL_H
 #define FFT_BATTLE_MENU_STATUS_PANEL_H
 
+#include "fft/battle_gfx.h"
 #include "fft/menu_types.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
@@ -32,6 +33,16 @@ typedef struct battle_menu_status_panel_offset_pair {
     u16 x; /* 0x00 */
     u16 y; /* 0x02 */
 } battle_menu_status_panel_offset_pair_t;
+
+/* The numeric editor's two adjacent rectangles: the first also supplies the
+ * texture-page origin to image loading, while the second places the portrait. */
+typedef struct battle_menu_status_panel_numeric_geometry {
+    union {
+        RECT texture_rect;
+        battle_image_location_t texture_origin;
+    } source;            /* 0x00 */
+    RECT draw_area_rect; /* 0x08 */
+} battle_menu_status_panel_numeric_geometry_t;
 
 /* Menu primitive block written by the *_gfx_init_menu_tile_and_line_primitives
  * builders: three DR_MODE packets, two translucent 16x90 backdrop tiles and

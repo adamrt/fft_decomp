@@ -41,7 +41,7 @@ extern u8 g_debugchr_editor_numeric_entries_f[];
 extern battle_image_location_t g_debugchr_editor_numeric_geometry[];
 extern battle_menu_status_panel_numeric_buffer_t g_debugchr_editor_numeric_state_a[2];
 extern battle_menu_status_panel_numeric_buffer_t g_debugchr_editor_numeric_state_b[2];
-extern u8 g_debugchr_editor_numeric_table[];
+extern battle_menu_status_panel_numeric_geometry_t g_debugchr_editor_numeric_table;
 extern u8 g_debugchr_editor_numeric_text_a[];
 extern u8 g_debugchr_editor_numeric_text_b[];
 extern u8 g_debugchr_editor_numeric_texture[];

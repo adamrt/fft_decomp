@@ -59,14 +59,15 @@ void require_editor_run_numeric_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], 0);
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], 2);
     battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], 1);
-    battle_menu_init_numeric_display_frame_primitives((RECT*)g_require_editor_numeric_table, &buffer->numeric_frame);
+    battle_menu_init_numeric_display_frame_primitives(
+        &g_require_editor_numeric_table.source.texture_rect, &buffer->numeric_frame);
     require_gfx_init_scaled_draw_area_packets(&buffer->portrait);
     i = 0;
     descriptor = g_require_editor_numeric_texture;
     for (; i < 18; i++) {
         battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
         battle_gfx_init_image_loading((POLY_FT4*)&buffer->sprites[i], g_require_editor_numeric_geometry,
-            (const battle_image_location_t*)g_require_editor_numeric_table,
+            &g_require_editor_numeric_table.source.texture_origin,
             (const world_gfx_image_load_parameters_t*)descriptor);
         descriptor += 0xC;
     }
@@ -122,7 +123,7 @@ void require_editor_run_numeric_thread(void) {
         use_offset = field_y != 0xF0;
         g_require_gfx_draw_offset_y = -use_offset & 0xF0;
         require_gfx_build_scaled_draw_area_packets(
-            &buffer->portrait, &g_require_editor_numeric_table[8], frame, field_y, (s16*)thread);
+            &buffer->portrait, &g_require_editor_numeric_table.draw_area_rect, frame, field_y, (s16*)thread);
         buffer->draw_offsets[0].x = thread->origin_x - 0x80;
         buffer->draw_offsets[0].y = thread->origin_y + g_require_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[0], &buffer->draw_offsets[0].x);

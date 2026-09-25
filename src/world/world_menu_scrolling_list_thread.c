@@ -8,8 +8,6 @@
 #include "psx/types.h"
 
 /* Provisional: three-column layout with the saved first visible row. */
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
 
 extern u8 g_main_menu_scroll_accel_delay;
 extern u8 g_main_menu_scroll_slow_step;
@@ -307,7 +305,7 @@ void world_menu_scrolling_list_thread(void) {
             world_gfx_draw_or_append_gpu_primitive((s32*)&page->thumb);
         }
         if (g_world_menu_scrolling_list_depth < 2 && delta == 0) {
-            world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)entry, cursor);
+            world_menu_handle_entry_confirm(entry, cursor);
         }
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)entry);
         if ((g_world_event_speed == 1 && !(world_input_get_menu_repeat_counter() & 1)) || g_world_event_speed == 2) {

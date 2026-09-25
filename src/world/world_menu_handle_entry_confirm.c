@@ -5,19 +5,12 @@
 
 extern s16 g_world_menu_pending_selection[];
 
-typedef struct world_menu_confirm_entry {
-    u8 _pad00[0x24];
-    s16* parent_indices; /* 0x24 */
-    u8 _pad28[0x34 - 0x28];
-    s16* selection; /* 0x34 */
-} world_menu_confirm_entry_t;
-
 /* Take the confirmed action for menu row row_index: start the linked menu
  * thread, or close the requested number of menu levels, then store the row as
  * the menu's selection.
  *
  * WORLD analog of battle_menu_handle_action. */
-void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s32 row_index) {
+void world_menu_handle_entry_confirm(world_menu_entry_t* entry, s32 row_index) {
     s32 silent;
     s32 target;
     s32 i;
@@ -77,7 +70,7 @@ void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s32 row_
             }
         }
         g_world_menu_new_button_input = 0;
-        *entry->selection = row_index;
+        *entry->value = row_index;
         if (g_world_menu_sound_muted == 0 && silent == 0) {
             world_sound_set_effect_to_confirm();
         }

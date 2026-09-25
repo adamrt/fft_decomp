@@ -6,8 +6,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
 extern s16 g_world_menu_pending_selection[];
 
 /* Formation-screen auto-battle setting menu thread.
@@ -94,7 +92,7 @@ void world_menu_auto_battle_setting_thread(void) {
                 }
                 previous = cursor;
                 g_world_menu_thread_menu_data[2].selected_index = 0;
-                world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, previous);
+                world_menu_handle_entry_confirm((world_menu_entry_t*)param, previous);
             }
             for (j = 0; j < 5; j++) {
                 g_world_menu_text_color = colour[j];

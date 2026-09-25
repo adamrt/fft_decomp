@@ -9,9 +9,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s32 row_index);
-
 /*
  * Scrolling three-column text list thread (an older sibling of
  * world_menu_scrolling_list_thread with a fixed page pair at 0x801bfda4 and helper thread
@@ -247,7 +244,7 @@ void world_build_at_list_2(void) {
             break;
         }
         if (delta == 0) {
-            world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)entry, cursor);
+            world_menu_handle_entry_confirm(entry, cursor);
         }
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)entry);
         if ((g_world_event_speed == 1 && !(world_input_get_menu_repeat_counter() & 1)) || g_world_event_speed == 2) {

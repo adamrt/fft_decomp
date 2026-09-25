@@ -647,7 +647,7 @@ extern battle_menu_status_panel_numeric_buffer_t g_equip_editor_numeric_state_b[
 
 /* Per-thread-slot window rect, upload rects, sprite descriptors and number
  * entries; the first set belongs to thread 12. */
-extern u8 g_equip_editor_numeric_table[];
+extern battle_menu_status_panel_numeric_geometry_t g_equip_editor_numeric_table;
 extern u8 g_equip_editor_numeric_text_a[];
 extern u8 g_equip_editor_numeric_text_b[];
 extern u8 g_equip_editor_numeric_texture[];

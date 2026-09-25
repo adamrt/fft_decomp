@@ -4,9 +4,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-
 /* Timed menu icon thread: shows one text entry with alternating sprite
  * records until input arrives or the g_world_text_message_duration_frames frame budget (scaled by the
  * event speed) runs out. Bit 8 of the budget suppresses cancel handling
@@ -64,7 +61,7 @@ void world_menu_icon_timed_thread(void) {
         record = &records[i & 1];
         world_menu_update_icon_cursor_sprites(param, &record->base, i, -1);
         if (hold == 0) {
-            world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, 0);
+            world_menu_handle_entry_confirm((world_menu_entry_t*)param, 0);
             world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         }
         world_menu_submit_icon_primitives(&record->base);

@@ -123,6 +123,19 @@ typedef struct world_menu_icon_sprites {
 typedef char world_menu_icon_sprites_sprites_offset_must_be_0x18
     [((unsigned long)&((world_menu_icon_sprites_t*)0)->sprites == 0x18) ? 1 : -1];
 
+/* Variable-length list-layout command in a WORLD menu script. */
+typedef struct world_menu_list_record {
+    u8 type;   /* 0x00: 0x10 = list layout, 0x1c = end of stream */
+    u8 length; /* 0x01: byte length of this record */
+    u8 unknown_02[2];
+    u8 x;            /* 0x04 */
+    u8 row_height;   /* 0x05 */
+    u8 visible_rows; /* 0x06 */
+    u8 unknown_07[2];
+    u8 width_a; /* 0x09 */
+    u8 width_b; /* 0x0a */
+} world_menu_list_record_t;
+
 /* Provisional: record whose two TIM pointers at +0x1e00/+0x1e04 are filled
  * by world_gfx_load_tim_pair_by_index from the 8-byte LBA/size tables at
  * 0x80193c40 and 0x80193c78. Only these fields are known. */
@@ -3451,6 +3464,7 @@ void world_menu_cancel_thread_group(world_menu_cancel_context_t* context);
 void world_menu_check_action_restrictions(void);
 s32 world_menu_check_thread_completion(s32* input);
 void world_menu_confirm_action_silently(s32 parameter);
+void world_menu_handle_entry_confirm(world_menu_entry_t* entry, s32 row_index);
 void world_menu_clear_cursor_positions(void);
 void world_menu_clear_entry_flags(void);
 void world_menu_clear_transition_active_flag(void);
@@ -3504,6 +3518,7 @@ s32 world_menu_is_learn_ability_learned(s32 index);
 s32 world_menu_lerp_fixed12(s32 from, s32 to, s32 t);
 s32 world_menu_lerp_fixed12_b(s32 from, s32 to, s32 t);
 void world_menu_load_common_graphics(s32 load_extra_pages);
+void world_menu_load_scrollable_list_layout(world_menu_list_record_t* record);
 void world_menu_load_text_1bd8(void);
 void world_menu_load_text_1bd8_with_face(void);
 void world_menu_load_text_1c18(void);

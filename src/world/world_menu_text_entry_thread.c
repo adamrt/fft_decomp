@@ -4,9 +4,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-
 /* Menu thread body: runs the entry's text binding hook, starts the text
  * thread for it, then idles until input arrives or the previous thread's
  * third parameter is raised. */
@@ -29,7 +26,7 @@ void world_menu_text_entry_thread(void) {
     world_thread_wait_until_inactive(text_thread);
     *g_world_menu_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
-        world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)entry, 0);
+        world_menu_handle_entry_confirm(entry, 0);
         if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {
             break;
         }

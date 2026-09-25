@@ -2,9 +2,6 @@
 #include "psx/gpu.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-
 /* Menu icon list thread with a wrapping cursor: rebuilds the text image
  * whenever the parameter's redraw flag is raised and alternates between two
  * sprite records until the input check completes. */
@@ -54,7 +51,7 @@ void world_menu_icon_list_thread(void) {
             break;
         }
         world_menu_step_wrapping_cursor_on_scroll_buttons((world_menu_wrapping_cursor_bounds_t*)param, &cursor);
-        world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, cursor);
+        world_menu_handle_entry_confirm((world_menu_entry_t*)param, cursor);
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         world_menu_select_icon_cluts(&record->base);
         world_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);

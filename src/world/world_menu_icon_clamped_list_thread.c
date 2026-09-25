@@ -4,9 +4,6 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* param, s32 value);
-
 /* Menu icon list thread with a clamped cursor: builds the text image once,
  * steps the cursor on the up/down buttons while the previous thread is idle
  * and submits the four icon sprites of the alternating record each frame. */
@@ -52,7 +49,7 @@ void world_menu_icon_clamped_list_thread(void) {
             if (!(*g_world_menu_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_index) {
                 cursor++;
             }
-            world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, cursor);
+            world_menu_handle_entry_confirm((world_menu_entry_t*)param, cursor);
             world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
         }
         sprites = &record->base;

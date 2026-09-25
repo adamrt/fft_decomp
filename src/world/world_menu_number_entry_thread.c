@@ -15,9 +15,6 @@ typedef struct world_menu_number_param {
     s16* value;                       /* 0x34 */
 } world_menu_number_param_t;
 
-typedef struct world_menu_confirm_entry world_menu_confirm_entry_t;
-extern void world_menu_handle_entry_confirm(world_menu_confirm_entry_t* entry, s32 row_index);
-
 /* Numeric entry thread: edits the halfword at param->value one decimal digit
  * at a time within param->range. Left/right move the digit cursor, up/down
  * step the value by the g_world_menu_number_entry_digit_steps step of that digit (clamped to the range),
@@ -114,7 +111,7 @@ void world_menu_number_entry_thread(void) {
         }
         input = *g_world_menu_list_controller_input;
         world_menu_cancel_thread_group((world_menu_cancel_context_t*)param);
-        world_menu_handle_entry_confirm((world_menu_confirm_entry_t*)param, 0);
+        world_menu_handle_entry_confirm((world_menu_entry_t*)param, 0);
         if (input != *g_world_menu_list_controller_input) {
             if (*param->value == -1) {
                 *param->value = original;
