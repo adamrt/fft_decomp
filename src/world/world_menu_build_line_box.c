@@ -7,7 +7,7 @@
  * `menu`: line endpoints from the layout table, palette-bank-0 colours,
  * two draw modes and a sprite covering the box. */
 void world_menu_build_line_box(RECT* box, world_menu_palette_primitives_t* menu) {
-    world_menu_line_f2_t* line;
+    LINE_F2* line;
     s32 i;
     s32 offset;
 

@@ -33,9 +33,6 @@ typedef enum action_menu_pseudo_skillset {
     ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 0xbc,
 } action_menu_pseudo_skillset_e;
 
-/* Menu and graphics records shared by the BATTLE and WORLD menu code. */
-typedef LINE_F2 world_menu_line_f2_t;
-
 /* Seven-byte window command in the menu script streams. The length field
  * advances to the next command, which may have a different size. */
 typedef struct world_menu_window_command {
@@ -101,10 +98,10 @@ typedef struct world_image_location {
  * packets, twelve LINE_F2 packets and one SPRT whose CLUT (+0xe6) the
  * palette-bank initialisers set. */
 typedef struct world_menu_palette_primitives {
-    DR_MODE draw_mode;              /* 0x00: texture window g_world_gfx_texture_window */
-    DR_MODE draw_mode_menu;         /* 0x0c: texture window g_world_menu_numeric_display_texture_window */
-    world_menu_line_f2_t lines[12]; /* 0x18 */
-    SPRT sprite;                    /* 0xd8 */
+    DR_MODE draw_mode;      /* 0x00: texture window g_world_gfx_texture_window */
+    DR_MODE draw_mode_menu; /* 0x0c: texture window g_world_menu_numeric_display_texture_window */
+    LINE_F2 lines[12];      /* 0x18 */
+    SPRT sprite;            /* 0xd8 */
 } world_menu_palette_primitives_t;
 
 /* One 0x100-byte slot holding a panel's palette primitive set. */

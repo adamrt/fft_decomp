@@ -3,7 +3,7 @@
 /* BATTLE twin of world_thread_start; same context layout (fft/thread.h). */
 void battle_thread_start(s32 thread_id, void (*function)(void)) {
     void* global_pointer = battle_thread_get_current_global_pointer();
-    battle_thread_t* thread = &g_battle_threads[thread_id];
+    native_thread_t* thread = &g_battle_threads[thread_id];
 
     thread->global_pointer = global_pointer;
     thread->stack_pointer = thread->stack_top;

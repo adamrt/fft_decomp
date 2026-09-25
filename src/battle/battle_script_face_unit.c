@@ -26,7 +26,7 @@ void battle_script_face_unit(const u8* parameters, s32 second_only) {
     s32 reverse;
     s32 dx;
     s32 dy;
-    battle_unit_rotation_state_t* state;
+    world_unit_animation_state_t* state;
 
     order = 1;
     misc_id = battle_script_load_halfword(parameters);

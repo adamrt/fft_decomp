@@ -41,8 +41,6 @@ typedef struct menu_window_buffer {
     u8 is_message_box;    /* 0x117: set by the message-box thread; alternate frame clut and tint */
 } menu_window_buffer_t;
 
-typedef menu_window_buffer_t world_menu_window_buffer_t;
-
 typedef char menu_window_buffer_size_must_be_0x118[(sizeof(menu_window_buffer_t) == 0x118) ? 1 : -1];
 
 typedef char menu_window_buffer_selector_must_be_0x14

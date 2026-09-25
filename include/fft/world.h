@@ -173,7 +173,7 @@ typedef struct world_menu_color_input {
     s32 style; /* 0x10: 1 selects palette bank 1 (battle_menu_status_panel_frame_config_t.style) */
 } world_menu_color_input_t;
 
-typedef char world_menu_line_f2_size_must_be_16[(sizeof(world_menu_line_f2_t) == 16) ? 1 : -1];
+typedef char world_menu_line_f2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
 
 typedef char world_menu_palette_lines_offset_must_be_0x18
     [((unsigned long)&((world_menu_palette_primitives_t*)0)->lines == 0x18) ? 1 : -1];
@@ -327,12 +327,6 @@ typedef struct world_menu_point {
     s16 x;
     s16 y;
 } world_menu_point_t;
-
-/* WORLD 0x801117f0 writes colors and CLUTs in the 25 SPRT records beginning
- * at +0x10, and the color selector reads the style word at +0x10 of its
- * config: the EVENT status-panel layouts. */
-typedef battle_menu_status_panel_primitives_t world_menu_status_panel_primitives_t;
-typedef battle_menu_status_panel_frame_config_t world_menu_status_panel_frame_config_t;
 
 /* Provisional: sprite placement record passed to world_gfx_enqueue_oriented_textured_quad:
  * position and size followed by a world_formation_graphic_entry_t source rectangle
@@ -722,14 +716,11 @@ typedef struct world_menu_scroll_text_layout {
     s16 row_offset;                   /* 0x28 */
 } world_menu_scroll_text_layout_t;
 
-/* Menu record initialised by world_menu_init_column_frame_primitives
- * (0x80110260), the WORLD twin of the EVENT menu primitive block: three
- * DR_MODEs at +0x00/+0x0c/+0x18 select image pages 0/2/4; two 16x90 TILEs at
- * +0x204 and eight vertical LINE_F2 borders at +0x224 frame two columns. */
-typedef battle_menu_status_panel_menu_primitives_t world_menu_column_primitives_t;
-
-typedef char world_menu_column_primitives_tiles_offset_must_be_0x204
-    [((unsigned long)&((world_menu_column_primitives_t*)0)->tiles == 0x204) ? 1 : -1];
+/* world_menu_init_column_frame_primitives (0x80110260) fills the shared menu
+ * primitive block: three DR_MODEs select image pages 0/2/4; two 16x90 TILEs
+ * and eight vertical LINE_F2 borders frame two columns. */
+typedef char world_menu_column_frame_tiles_offset_must_be_0x204
+    [((unsigned long)&((battle_menu_status_panel_menu_primitives_t*)0)->tiles == 0x204) ? 1 : -1];
 
 /* Textured menu quad source for world_gfx_append_poly_ft4_to_otag (0x8012ccd0):
  * four screen points, four texture points (only the low byte of each
@@ -1349,7 +1340,7 @@ typedef struct world_status_thread {
 
 /* Provisional 0x2d0-byte double-buffered frame of the unit editor panel
  * (WORLD 0x801a3494, BATTLE 0x801730f8). The prefix is
- * world_menu_column_primitives_t (0x80110260 fills the same draw modes, tiles
+ * battle_menu_status_panel_menu_primitives_t (0x80110260 fills the same draw modes, tiles
  * and lines); the sprites fill its unknown gap, and the trailing cursor
  * mode/sprite/window follow world_panel_frame_t. */
 typedef struct world_unit_editor_frame {
@@ -3458,7 +3449,7 @@ void world_menu_clear_entry_flags(void);
 void world_menu_clear_transition_active_flag(void);
 void world_menu_clear_window_buffer_pointers(void);
 void world_menu_configure_status_panel_primitive_colors(
-    world_menu_status_panel_primitives_t* primitives, const world_menu_status_panel_frame_config_t* state);
+    battle_menu_status_panel_primitives_t* primitives, const battle_menu_status_panel_frame_config_t* state);
 void world_menu_display_text(s32 text_id, void* pixels, world_text_draw_origin_t* origin, u8* text);
 void world_menu_display_triangle_selection(void);
 void world_menu_draw_animated_cursor(world_menu_point_t* position, u16* state, s32 mode);

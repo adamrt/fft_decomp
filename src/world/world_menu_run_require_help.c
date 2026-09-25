@@ -18,7 +18,7 @@ void world_menu_run_require_help(void) {
     struct {
         s32 menu_index;
         s32 pad_b4;
-        world_thread_t* help_thread;
+        native_thread_t* help_thread;
         s32 pad_bc;
         s32 pad_c0;
         s32 pad_c4;
@@ -56,7 +56,7 @@ void world_menu_run_require_help(void) {
     register s32 active_offset __asm__("$3");
     register s32 idle_offset __asm__("$3");
     register s32 t1_scratch __asm__("$9"); /* menu index or texture u reload */
-    register world_thread_t* current_thread __asm__("$9");
+    register native_thread_t* current_thread __asm__("$9");
     register s32 reload_neighbor __asm__("$3");
     register s32 tex_u __asm__("$5");
     s32 navigation_offset;
@@ -111,11 +111,11 @@ void world_menu_run_require_help(void) {
     g_world_text_section_pointers[20] = (u8*)(g_world_help_text_section_offsets[20] + (s32)g_world_help_data_base);
     {
         /* g_world_threads holds the base of the native scheduler contexts;
-           the << 0xA index confirms the 0x400 stride of world_thread_t.
+           the << 0xA index confirms the 0x400 stride of native_thread_t.
            task_words[0] is the elapsed counter and task_words[1] the display state
            this handler drives (per-task words, see fft/thread.h). */
-        world_thread_t* self;
-        self = (world_thread_t*)((g_world_thread_current_id * NATIVE_THREAD_STRIDE) + (s32)g_world_threads);
+        native_thread_t* self;
+        self = (native_thread_t*)((g_world_thread_current_id * NATIVE_THREAD_STRIDE) + (s32)g_world_threads);
         world_gfx_copy_screen_setup_out(setup_banner, setup_unit_data, setup_billboard, setup_cursor_tile);
         if ((g_world_selected_unit_stat_summary.team_state != 0) || (g_world_unit_join_screen_active != 0)) {
             g_world_help_require_navigation[2].neighbors[2] = 7;
@@ -139,7 +139,7 @@ void world_menu_run_require_help(void) {
         cursor_quad_base = (u8*)cursor_quads;
         tex_v_max = 0x10;
         help_thread_id = task_id;
-        local.help_thread = (world_thread_t*)((u8*)g_world_threads + (help_thread_id * NATIVE_THREAD_STRIDE));
+        local.help_thread = (native_thread_t*)((u8*)g_world_threads + (help_thread_id * NATIVE_THREAD_STRIDE));
         /* A label loop: as a C loop the loop notes re-weight register
            allocation and hoist the quad addresses out of the frame loop. */
     loop_6:

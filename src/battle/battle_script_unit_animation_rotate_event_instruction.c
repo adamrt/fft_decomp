@@ -14,7 +14,7 @@ void battle_script_unit_animation_rotate_event_instruction(const u8* parameters)
     s16 call_misc_id;
     s16 misc_id;
     s32 index;
-    battle_unit_rotation_state_t* rotation_state;
+    world_unit_animation_state_t* rotation_state;
 
     misc_id = battle_script_load_halfword(data);
     rotation = data[2];

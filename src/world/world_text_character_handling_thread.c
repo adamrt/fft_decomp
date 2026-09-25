@@ -64,7 +64,7 @@ void world_text_character_handling_thread(void) {
     u16 no_wait;
     u16 variable_id;
     u16 value_index;
-    world_thread_t* thread;
+    native_thread_t* thread;
     s32 party_name_request;
     menu_window_buffer_t* win;
     menu_window_buffer_t* cursor_window;
@@ -102,7 +102,7 @@ void world_text_character_handling_thread(void) {
     world_script_set_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET, 0);
     value_index = 0;
     variable_id = 0x18;
-    thread = (world_thread_t*)((g_world_thread_current_id << 10) + (s32)g_world_threads);
+    thread = (native_thread_t*)((g_world_thread_current_id << 10) + (s32)g_world_threads);
     param = (s32)world_thread_get_current_parameter_1();
     rec.dialog_type = param;
     if ((param & 0x70) == 0x70) {

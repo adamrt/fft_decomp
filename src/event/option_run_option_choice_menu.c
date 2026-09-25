@@ -30,7 +30,7 @@ extern world_input_timing_profile_t g_option_input_repeat_timings[];
 void option_run_option_choice_menu(void) {
     RECT rect;
     u32* input;
-    battle_thread_t* thread;
+    native_thread_t* thread;
     s32 kind;
     s32 height;
     world_menu_icon_thread_param_t* param;

@@ -40,7 +40,7 @@ void world_run_battle_help_menu(void) {
             u16 h;
         } cursor_x;
         s32 pad_c4;
-        world_thread_t* help_thread;
+        native_thread_t* help_thread;
         s32 pad_cc;
         s32 pad_d0;
         s32 pad_d4;
@@ -73,7 +73,7 @@ void world_run_battle_help_menu(void) {
     POLY_FT4* init_cursor;
     POLY_FT4* init_shadow;
     register world_help_request_t* request __asm__("$18");
-    world_thread_t* self;
+    native_thread_t* self;
     world_help_request_table_t* request_table;
     world_help_navigation_entry_t* navigation_entry;
     void* setup_banner;
@@ -83,7 +83,7 @@ void world_run_battle_help_menu(void) {
     s32* controller_state;
     s32 missing_value;
     register s32 t1_scratch __asm__("$9"); /* menu index, table base, texture u or cursor x reload */
-    register world_thread_t* current_thread __asm__("$9");
+    register native_thread_t* current_thread __asm__("$9");
     register s16 h_right __asm__("$4");
     register s16 h_shadow_top __asm__("$4");
     s16 v_right;
@@ -127,7 +127,7 @@ void world_run_battle_help_menu(void) {
     g_world_text_section_pointers[15] = (u8*)(g_world_help_text_section_offsets[15] + (s32)g_world_help_data_base);
     g_world_text_section_pointers[19] = (u8*)(g_world_help_text_section_offsets[19] + (s32)g_world_help_data_base);
     g_world_text_section_pointers[20] = (u8*)(g_world_help_text_section_offsets[20] + (s32)g_world_help_data_base);
-    self = (world_thread_t*)((g_world_thread_current_id << 0xA) + (u8*)g_world_threads);
+    self = (native_thread_t*)((g_world_thread_current_id << 0xA) + (u8*)g_world_threads);
     world_gfx_copy_screen_setup_out(setup_banner, setup_unit_data, setup_billboard, setup_cursor_tile);
     if ((g_world_selected_unit_stat_summary.team_state != 0) || (g_world_unit_join_screen_active != 0)) {
         g_world_help_require_navigation[2].neighbors[2] = 7;
@@ -160,7 +160,7 @@ void world_run_battle_help_menu(void) {
         /* Skip threads without a pending request. `continue`/`break` keep
            the kind test on top, as in the target. */
         for (;;) {
-            request = (world_help_request_t*)((world_thread_t*)scan_thread)->function_parameter_1;
+            request = (world_help_request_t*)((native_thread_t*)scan_thread)->function_parameter_1;
             if (request->kind == missing_value) {
                 scan_id += 1;
                 scan_thread += 0x400;
@@ -313,7 +313,7 @@ void world_run_battle_help_menu(void) {
                 }
                 do {
                     world_thread_wait_frames(1);
-                } while (((world_thread_t*)(help_thread_offset + (s32)g_world_threads))[-1].is_running != 0);
+                } while (((native_thread_t*)(help_thread_offset + (s32)g_world_threads))[-1].is_running != 0);
                 *g_world_help_controller_state_ptr = 0;
                 world_thread_wait_frames(1);
                 world_text_restore_sections_and_stop_thread();
@@ -369,7 +369,7 @@ void world_run_battle_help_menu(void) {
     }
     cursor_quad_base = (u8*)cursor_quads;
     tex_v_max = 0x10;
-    local.help_thread = (world_thread_t*)((help_thread_id << 0xA) + (u8*)g_world_threads);
+    local.help_thread = (native_thread_t*)((help_thread_id << 0xA) + (u8*)g_world_threads);
     /* A label loop: as a C loop the loop notes re-weight register allocation
        and hoist a quad address out of the frame loop. */
 loop_73:

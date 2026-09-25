@@ -38,8 +38,8 @@ void attack_deploy_run_select_menu(void) {
     s32 selected;
     u32* input;
     s32 parent_id;
-    battle_thread_t* thread;
-    battle_thread_t* parent;
+    native_thread_t* thread;
+    native_thread_t* parent;
     help_navigation_record_t* node;
     help_navigation_record_t* nodes;
     s32 x;

@@ -14,8 +14,8 @@
  */
 void require_menu_draw_thread_status_indicators(void) {
     battle_menu_status_panel_indicator_prims_t* prims;
-    battle_thread_t* thread;
-    battle_thread_t* descriptor;
+    native_thread_t* thread;
+    native_thread_t* descriptor;
     s32 active;
     s32 i;
     s32 j;
@@ -26,13 +26,13 @@ void require_menu_draw_thread_status_indicators(void) {
     active = 0;
     if (require_thread_is_running(8) != 0) {
         if (g_battle_threads[8].task_id == NATIVE_THREAD_TASK_UNIT_STATUS_BANNER) {
-            thread = (battle_thread_t*)g_battle_threads[8].function_parameter_1;
+            thread = (native_thread_t*)g_battle_threads[8].function_parameter_1;
             active = (thread->function_parameter_1 == 0) * 8;
         }
     }
     if (require_thread_is_running(7) != 0) {
         if (g_battle_threads[7].task_id == NATIVE_THREAD_TASK_UNIT_STATUS_BANNER) {
-            descriptor = (battle_thread_t*)g_battle_threads[7].function_parameter_1;
+            descriptor = (native_thread_t*)g_battle_threads[7].function_parameter_1;
             if (descriptor->function_parameter_1 == 0) {
                 active = 7;
                 thread = descriptor;

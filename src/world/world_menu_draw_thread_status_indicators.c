@@ -14,8 +14,8 @@
  */
 void world_menu_draw_thread_status_indicators(void) {
     battle_menu_status_panel_indicator_prims_t* prims;
-    world_thread_t* thread;
-    world_thread_t* descriptor;
+    native_thread_t* thread;
+    native_thread_t* descriptor;
     s32 active;
     s32 i;
     s32 j;
@@ -26,13 +26,13 @@ void world_menu_draw_thread_status_indicators(void) {
     active = 0;
     if (world_thread_is_running_by_id(8) != 0) {
         if (g_world_threads[8].task_id == NATIVE_THREAD_TASK_UNIT_STATUS_BANNER) {
-            thread = (world_thread_t*)g_world_threads[8].function_parameter_1;
+            thread = (native_thread_t*)g_world_threads[8].function_parameter_1;
             active = (thread->function_parameter_1 == 0) * 8;
         }
     }
     if (world_thread_is_running_by_id(7) != 0) {
         if (g_world_threads[7].task_id == NATIVE_THREAD_TASK_UNIT_STATUS_BANNER) {
-            descriptor = (world_thread_t*)g_world_threads[7].function_parameter_1;
+            descriptor = (native_thread_t*)g_world_threads[7].function_parameter_1;
             if (descriptor->function_parameter_1 == 0) {
                 active = 7;
                 thread = descriptor;

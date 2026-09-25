@@ -24,7 +24,7 @@ void battle_rotate_unit(const u8* parameters) {
     s32 facing;
     s32 remaining;
     s32 restore_misc_index;
-    battle_unit_rotation_state_t* state;
+    world_unit_animation_state_t* state;
 
     order = 1;
     unit_id = battle_script_load_halfword(parameters);

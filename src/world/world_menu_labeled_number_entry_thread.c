@@ -38,7 +38,7 @@ void world_menu_labeled_number_entry_thread(void) {
     void* buffer;
     s16 original;
     s32 digits;
-    world_thread_t* thread;
+    native_thread_t* thread;
     world_menu_labeled_number_param_t* param;
     s16 value;
     s32 i;

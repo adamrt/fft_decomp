@@ -79,8 +79,8 @@ void battle_script_execute_event(void) {
     map_tile_t* tile;
     battle_stats_t* copy_destination;
     u8* effect_instruction;
-    battle_thread_t* wait_thread;
-    battle_thread_t* cancel_thread;
+    native_thread_t* wait_thread;
+    native_thread_t* cancel_thread;
 
     battle_thread_set_current_task_id(NATIVE_THREAD_TASK_EXECUTE_EVENT);
     if (battle_script_is_tutorial_event_slot() != 0) {

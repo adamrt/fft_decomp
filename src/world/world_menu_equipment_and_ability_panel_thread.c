@@ -31,7 +31,7 @@ void world_menu_equipment_and_ability_panel_thread(void) {
     base = g_world_change_banner_panel_frames;
     state = &g_world_selected_unit_stat_detail;
     world_menu_build_line_box(&g_world_equipment_ability_panel_origin, &screen->menu);
-    world_menu_init_column_frame_primitives((world_menu_column_primitives_t*)screen);
+    world_menu_init_column_frame_primitives((battle_menu_status_panel_menu_primitives_t*)screen);
     world_gfx_reset_record_texture_window_3(&screen->draw_area);
     for (i = 0; i < 2; i++) {
         screen->tiles[i].x0 += g_world_equipment_ability_panel_origin.x;
@@ -153,7 +153,7 @@ void world_menu_equipment_and_ability_panel_thread(void) {
         screen->draw_offsets[1].y = g_world_gfx_draw_area_y;
         SetDrawOffset(&screen->draw_offsets[1], &screen->draw_offsets[1].x);
         world_menu_configure_status_panel_primitive_colors(
-            (world_menu_status_panel_primitives_t*)screen, (const world_menu_status_panel_frame_config_t*)thread);
+            (battle_menu_status_panel_primitives_t*)screen, (const battle_menu_status_panel_frame_config_t*)thread);
         world_menu_select_primitive_color_palette(&screen->menu, (world_menu_color_input_t*)thread);
         if (frame < 13) {
             world_gfx_draw_or_append_gpu_primitive(&screen->draw_area.areas[1]);

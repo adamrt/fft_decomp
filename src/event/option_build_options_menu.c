@@ -60,7 +60,7 @@ void option_build_options_menu(void) {
     s32 row_offset;
     s32 ring;
     s32 cursor;
-    battle_thread_t* thread;
+    native_thread_t* thread;
     u8* buffer;
     u32* input0;
     u32* input1;

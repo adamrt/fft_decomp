@@ -19,7 +19,7 @@ s32 battle_script_face_tile(u8* parameters) {
     u16 unit_id;
     s32 state;
     s32 i;
-    battle_unit_rotation_state_t* rotation_state;
+    world_unit_animation_state_t* rotation_state;
     s32 order;
     s32 facing;
     s32 dx;

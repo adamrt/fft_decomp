@@ -20,7 +20,7 @@ enum battle_menu_line_layout_offset {
  * endpoint and whether it receives the rectangle width or height.
  */
 void battle_menu_init_numeric_display_frame_primitives(RECT* bounds, world_menu_palette_primitives_t* menu) {
-    world_menu_line_f2_t* line;
+    LINE_F2* line;
     s32 index;
     s32 offset;
 

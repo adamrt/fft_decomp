@@ -8,7 +8,7 @@
  * facing/animation records for all simulation slots and reseeds each unit's
  * facing from its misc data, or 0xff when the slot is empty. */
 void battle_unit_reset_animation_states(void) {
-    battle_unit_rotation_state_t* state;
+    world_unit_animation_state_t* state;
     s32 i;
 
     i = 0;

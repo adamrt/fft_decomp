@@ -11,7 +11,7 @@
 
 void world_menu_announce_entry_value_thread(void) {
     world_menu_entry_t* entry;
-    world_thread_t* thread;
+    native_thread_t* thread;
     s32 kind;
     s32 index;
     s32 value;

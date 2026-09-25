@@ -14,7 +14,7 @@ void battle_unit_update_facing_and_pending_animations(void) {
     s32 current;
     s32 next;
     s32 moving;
-    battle_unit_rotation_state_t* state;
+    world_unit_animation_state_t* state;
 
     state = g_battle_unit_misc_rotation_data;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {

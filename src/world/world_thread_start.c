@@ -6,7 +6,7 @@
  * 0x400-byte slot, running flag set, task id and scratch words cleared. */
 void world_thread_start(s32 thread_id, void (*function)(void)) {
     void* global_pointer = world_thread_get_current_global_pointer();
-    world_thread_t* thread = &g_world_threads[thread_id];
+    native_thread_t* thread = &g_world_threads[thread_id];
 
     thread->global_pointer = global_pointer;
     thread->stack_pointer = thread->stack_top;

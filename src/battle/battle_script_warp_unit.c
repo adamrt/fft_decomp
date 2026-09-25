@@ -17,7 +17,7 @@ void battle_script_warp_unit(const u8* parameters) {
     s32 result;
     s16 unit_id;
     s16 tile[3];
-    battle_unit_rotation_state_t* rotation_state;
+    world_unit_animation_state_t* rotation_state;
 
     unit_id = battle_script_load_halfword(parameters);
     /* Remaining operands: x, y, higher elevation, facing. */

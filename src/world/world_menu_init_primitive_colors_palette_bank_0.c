@@ -3,7 +3,7 @@
 void world_menu_init_primitive_colors_palette_bank_0(world_menu_palette_primitives_t* menu) {
     s32 index;
     s32 palette_offset;
-    world_menu_line_f2_t* line;
+    LINE_F2* line;
 
     index = 0;
     line = menu->lines;

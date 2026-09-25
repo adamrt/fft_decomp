@@ -10,7 +10,7 @@ extern world_unit_coordinates_t g_battle_script_warp_coords;
 
 void battle_script_warp_unit_display_to_paired_unit(s32 misc_id) {
     battle_stats_t* unit;
-    battle_unit_rotation_state_t* state;
+    world_unit_animation_state_t* state;
     s32 facing;
     s32 battle_id;
 

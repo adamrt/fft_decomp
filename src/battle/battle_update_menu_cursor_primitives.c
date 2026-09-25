@@ -14,7 +14,7 @@ extern void battle_menu_copy_cursor_frame_data();
  * reaches 27 frames. The cursor sprites follow the selected row. */
 void battle_update_menu_cursor_primitives(
     world_menu_icon_thread_param_t* param, world_menu_icon_sprites_t* record, s32 frame, s32 cursor) {
-    battle_thread_t* thread = &g_battle_threads[g_battle_current_thread_id];
+    native_thread_t* thread = &g_battle_threads[g_battle_current_thread_id];
     s32 x;
     s32 y;
 

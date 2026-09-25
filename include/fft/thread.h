@@ -31,11 +31,6 @@ typedef struct native_thread {
     u32 stack_top[4]; /* 0x3f0: initial SP/FP; the stack grows down from here */
 } native_thread_t;
 
-/* Same layout, separate module-owned scheduler instances. */
-typedef native_thread_t world_thread_t;
-
-typedef native_thread_t battle_thread_t;
-
 /* Scheduler arrays use sixteen fixed 0x400-byte native thread slots. */
 enum {
     NATIVE_THREAD_SLOT_COUNT = 16,
@@ -107,7 +102,7 @@ extern s32 g_battle_current_thread_id;
 
 /* Full BATTLE backing array at 0x8016986c. The pointer slot 0x80165f98 is
  * separate. */
-extern battle_thread_t g_battle_thread_contexts[];
+extern native_thread_t g_battle_thread_contexts[];
 
 /* View of g_battle_thread_contexts biased to task_id (0x801698b8): [i][0] is
  * thread i's task_id and [i][1] its task_words[0]. Target code addresses the
@@ -120,14 +115,14 @@ extern s32 g_world_thread_current_id;
 /* BATTLE's pointer slot at 0x80165f98, set to g_battle_thread_contexts by
  * battle_menu_init_subsystem_pointers. Every access indexes it with a 0x400
  * stride, and the scheduler primitives reach is_running (0x48) and task_id
- * (0x4c) through it, so it is a battle_thread_t*, not the u8* placeholder it
+ * (0x4c) through it, so it is a native_thread_t*, not the u8* placeholder it
  * was spelled as in 22 files. Files doing raw byte arithmetic cast (u8*) at
  * the use site. */
-extern battle_thread_t* g_battle_threads;
+extern native_thread_t* g_battle_threads;
 
 /* WORLD's pointer slot and fixed-array binding refer to the same scheduler
  * storage through different symbols. */
-extern world_thread_t* g_world_threads;
+extern native_thread_t* g_world_threads;
 
 /* thread */
 s32 battle_thread_call_on_main_stack();

@@ -42,7 +42,7 @@ void helpmenu_menu_run_require_help(void) {
     struct {
         s32 menu_index;
         s32 pad_b4;
-        battle_thread_t* text_thread;
+        native_thread_t* text_thread;
         s32 pad_bc;
         s32 pad_c0;
         s32 pad_c4;
@@ -83,7 +83,7 @@ void helpmenu_menu_run_require_help(void) {
     register s32 active_offset __asm__("$3");
     register s32 idle_offset __asm__("$3");
     register s32 scratch __asm__("$9");
-    register battle_thread_t* current_thread __asm__("$9");
+    register native_thread_t* current_thread __asm__("$9");
     register s32 reload_neighbor __asm__("$3");
     register s32 tex_u __asm__("$5");
     s32 navigation_offset;
@@ -138,11 +138,11 @@ void helpmenu_menu_run_require_help(void) {
     g_battle_text_section_pointers[20] = g_helpmenu_text_data + g_helpmenu_text_section_offsets[20];
     {
         /* g_battle_threads holds the base of the native scheduler contexts;
-           the << 0xA index confirms the 0x400 stride of battle_thread_t.
+           the << 0xA index confirms the 0x400 stride of native_thread_t.
            task_words[0] is the elapsed counter and task_words[1] the display state
            this handler drives (per-task words, see fft/thread.h). */
-        battle_thread_t* self_thread;
-        self_thread = (battle_thread_t*)((g_battle_current_thread_id << 0xA) + (s32)g_battle_threads);
+        native_thread_t* self_thread;
+        self_thread = (native_thread_t*)((g_battle_current_thread_id << 0xA) + (s32)g_battle_threads);
         battle_action_copy_at_and_cursor_to(banner, unit_data, billboard, cursor_tile);
         if ((g_helpmenu_selected_unit_panel_mode != 0) || (g_battle_post_battle_unit_changes_active != 0)) {
             g_helpmenu_require_navigation[2].destination[2] = 7;
@@ -166,7 +166,7 @@ void helpmenu_menu_run_require_help(void) {
         cursor_base = (u8*)cursor_polys;
         cursor_height = 0x10;
         text_thread_id = task_id;
-        local.text_thread = (battle_thread_t*)((u8*)g_battle_threads + (text_thread_id << 0xA));
+        local.text_thread = (native_thread_t*)((u8*)g_battle_threads + (text_thread_id << 0xA));
         /* Label loop: a for (;;) adds loop depth to every pseudo's reference
            count in flow and the allocation no longer matches. */
     loop_6:

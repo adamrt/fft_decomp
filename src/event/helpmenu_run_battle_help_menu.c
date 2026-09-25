@@ -17,7 +17,7 @@ void battle_thread_start(s32 thread_id, void (*function)(void));
 /* Run the battle help menu thread.
  *
  * The s16 fields read at 0x38/0x3a belong to help_request_t, reached through
- * the thread's function_parameter_1 word, not to battle_thread_t. The dispatch
+ * the thread's function_parameter_1 word, not to native_thread_t. The dispatch
  * cases share their wait-and-close tail through cross-jumping; the default case
  * passes its u16 text id directly so the shared tail starts where the target's
  * does. One `help_id` carries the id through every case, the confirm handler and
@@ -42,7 +42,7 @@ void helpmenu_run_battle_help_menu(void) {
             u16 h;
         } cursor_x;
         s32 pad_c4;
-        battle_thread_t* text_thread;
+        native_thread_t* text_thread;
         s32 pad_cc;
         s32 pad_d0;
         s32 pad_d4;
@@ -77,7 +77,7 @@ void helpmenu_run_battle_help_menu(void) {
     POLY_FT4* init_poly;
     POLY_FT4* init_shadow_poly;
     register help_request_t* request __asm__("$18");
-    battle_thread_t* self_thread;
+    native_thread_t* self_thread;
     help_request_table_t* request_table;
     help_navigation_record_t* navigation_entry;
     void* banner;
@@ -87,7 +87,7 @@ void helpmenu_run_battle_help_menu(void) {
     s32* controller_state;
     s32 missing_value;
     register s32 scratch __asm__("$9");
-    register battle_thread_t* current_thread __asm__("$9");
+    register native_thread_t* current_thread __asm__("$9");
     /* One s16 carries the right x and then the shadow y. */
     s16 horiz_coord;
     s16 vert_right_x;
@@ -131,7 +131,7 @@ void helpmenu_run_battle_help_menu(void) {
     g_battle_text_section_pointers[15] = g_helpmenu_text_data + g_helpmenu_text_section_offsets[15];
     g_battle_text_section_pointers[19] = g_helpmenu_text_data + g_helpmenu_text_section_offsets[19];
     g_battle_text_section_pointers[20] = g_helpmenu_text_data + g_helpmenu_text_section_offsets[20];
-    self_thread = (battle_thread_t*)((g_battle_current_thread_id << 0xA) + (u8*)g_battle_threads);
+    self_thread = (native_thread_t*)((g_battle_current_thread_id << 0xA) + (u8*)g_battle_threads);
     battle_action_copy_at_and_cursor_to(banner, unit_data, billboard, cursor_tile);
     if ((g_helpmenu_selected_unit_panel_mode != 0) || (g_battle_post_battle_unit_changes_active != 0)) {
         g_helpmenu_require_navigation[2].destination[2] = 7;
@@ -160,13 +160,13 @@ void helpmenu_run_battle_help_menu(void) {
     frame = text_thread_id;
     if (text_thread_id < 9) {
         missing_value = -1;
-        /* Walked as a u8* stepped by 0x400; a battle_thread_t* induction
+        /* Walked as a u8* stepped by 0x400; a native_thread_t* induction
            variable adds an instruction. */
         scan_slot = (frame << 0xA) + (u8*)g_battle_threads;
         /* Skip threads without a pending request. `continue`/`break` keep
            the kind test on top, as in the target. */
         for (;;) {
-            request = (help_request_t*)((battle_thread_t*)scan_slot)->function_parameter_1;
+            request = (help_request_t*)((native_thread_t*)scan_slot)->function_parameter_1;
             if (request->kind == missing_value) {
                 frame += 1;
                 scan_slot += 0x400;
@@ -321,7 +321,7 @@ void helpmenu_run_battle_help_menu(void) {
                    keeps the target's addu operand order; pointer + int swaps it. */
                 do {
                     battle_thread_wait_frames(1);
-                } while (((battle_thread_t*)(wait_slot_offset + (s32)g_battle_threads))[-1].is_running != 0);
+                } while (((native_thread_t*)(wait_slot_offset + (s32)g_battle_threads))[-1].is_running != 0);
                 *g_helpmenu_controller_state_ptr = 0;
                 battle_thread_wait_frames(1);
                 helpmenu_menu_close();
@@ -343,7 +343,7 @@ void helpmenu_run_battle_help_menu(void) {
             g_sound_effect_id_to_play = MAIN_SFX_WINDOW_OPEN;
             battle_thread_start(2, battle_text_character_handling_thread);
             battle_thread_set_parameters(2, 0x3B, g_helpmenu_menu_cursor_tile[0] + 0x5800, 0);
-            ((battle_thread_t*)g_battle_threads)[2].task_words[3] = -0x20;
+            ((native_thread_t*)g_battle_threads)[2].task_words[3] = -0x20;
             battle_thread_wait_until_inactive(2);
             *g_helpmenu_controller_state_ptr = 0;
             battle_thread_wait_frames(1);
@@ -378,7 +378,7 @@ void helpmenu_run_battle_help_menu(void) {
     }
     cursor_base = (u8*)cursor_polys;
     cursor_height = 0x10;
-    local.text_thread = (battle_thread_t*)((text_thread_id << 0xA) + (u8*)g_battle_threads);
+    local.text_thread = (native_thread_t*)((text_thread_id << 0xA) + (u8*)g_battle_threads);
 /* Label loop: a for (;;) adds loop depth to every pseudo's weight and changes the allocation. */
 loop_73:
     current_thread = local.text_thread;
