@@ -16,10 +16,10 @@
  * from the proposition_index address, which needs the rows and that word to be
  * members of one object (g_wldcore_job_selection). */
 void wldcore_proposition_determine_success(void) {
-    u8* job_table_a;
-    u8* job_table_b;
-    u8* tier_table_a;
-    u8* tier_table_b;
+    const u8* job_table_a;
+    const u8* job_table_b;
+    const u8* tier_table_a;
+    const u8* tier_table_b;
     party_data_t* unit;
     s32 participant_count;
     s32 total;
@@ -29,11 +29,11 @@ void wldcore_proposition_determine_success(void) {
     s32 i;
 
     participant_count = g_main_active_propositions[g_wldcore_job_selection.proposition_index].participant_count;
-    job_table_a = (u8*)wldcore_proposition_get_data_pointer(3);
-    job_table_b = (u8*)wldcore_proposition_get_data_pointer(4);
-    tier_table_a = (u8*)wldcore_proposition_get_data_pointer(5);
+    job_table_a = (const u8*)wldcore_proposition_get_data_pointer(3);
+    job_table_b = (const u8*)wldcore_proposition_get_data_pointer(4);
+    tier_table_a = (const u8*)wldcore_proposition_get_data_pointer(5);
     total = 0;
-    tier_table_b = (u8*)wldcore_proposition_get_data_pointer(6);
+    tier_table_b = (const u8*)wldcore_proposition_get_data_pointer(6);
 
     if (g_main_active_propositions[g_wldcore_job_selection.proposition_index].flags & 2) {
         for (i = 0; i < participant_count; i++) {

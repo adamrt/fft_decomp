@@ -21,7 +21,7 @@ s32 wldcore_proposition_find_preferred_job_unit(void) {
     s32 participant_count;
     s32 party_index;
     s32 base;
-    wldcore_proposition_data_t* messages;
+    const wldcore_proposition_data_t* messages;
     party_data_t* unit;
 
     participant_count = g_main_active_propositions[g_wldcore_job_selection.proposition_index].participant_count;

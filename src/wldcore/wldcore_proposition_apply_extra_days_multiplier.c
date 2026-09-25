@@ -6,8 +6,8 @@
 
 void wldcore_proposition_apply_extra_days_multiplier(void) {
     s32 record;
-    u16* reward_scale;
-    u16* bonus_scale;
+    const u16* reward_scale;
+    const u16* bonus_scale;
     s32 day;
     s32 count;
     s32 percent;
@@ -17,8 +17,8 @@ void wldcore_proposition_apply_extra_days_multiplier(void) {
     if (g_wldcore_job_selection.gate != 0) {
         return;
     }
-    reward_scale = (u16*)wldcore_proposition_get_data_pointer(0xC);
-    bonus_scale = (u16*)wldcore_proposition_get_data_pointer(0xD);
+    reward_scale = (const u16*)wldcore_proposition_get_data_pointer(0xC);
+    bonus_scale = (const u16*)wldcore_proposition_get_data_pointer(0xD);
     /* Byte view: the match needs each field offset folded into the symbol
      * address, which a wldcore_proposition_progress_t* base defeats. */
     record = g_wldcore_job_selection.proposition_index * sizeof(wldcore_proposition_progress_t);

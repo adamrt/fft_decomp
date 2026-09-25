@@ -2,20 +2,20 @@
 #include "psx/types.h"
 
 void wldcore_proposition_calculate_base_jp_and_gil(void) {
-    u16* first;
-    u16* second;
+    const u16* jp_rewards;
+    const u16* gil_rewards;
     s32 count;
     s32 i;
     s32 value;
 
     if (g_wldcore_job_selection.gate == 0) {
-        first = (u16*)wldcore_proposition_get_data_pointer(8);
-        second = (u16*)wldcore_proposition_get_data_pointer(9);
+        jp_rewards = (const u16*)wldcore_proposition_get_data_pointer(8);
+        gil_rewards = (const u16*)wldcore_proposition_get_data_pointer(9);
         count = g_main_active_propositions[g_wldcore_job_selection.proposition_index].participant_count;
         value = 0;
 
         for (i = 0; i < count; i++) {
-            value = first[g_wldcore_selected_proposition_row[0].fields.jp_reward - 1];
+            value = jp_rewards[g_wldcore_selected_proposition_row[0].fields.jp_reward - 1];
             if (g_wldcore_job_selection.result == 1) {
                 value = value / 10;
             }
@@ -27,7 +27,7 @@ void wldcore_proposition_calculate_base_jp_and_gil(void) {
         }
 
         for (i = 0; i < count; i++) {
-            value = second[g_wldcore_selected_proposition_row[0].fields.gil_reward - 1];
+            value = gil_rewards[g_wldcore_selected_proposition_row[0].fields.gil_reward - 1];
             if (g_wldcore_job_selection.result == 1) {
                 value = value / 5;
             }
