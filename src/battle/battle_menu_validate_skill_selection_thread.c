@@ -16,17 +16,19 @@ void battle_menu_validate_skill_selection_thread(void) {
     s32 message;
     s32 blocked;
     battle_stats_t* unit;
+    world_ability_skill_use_tables_t* skill_tables;
 
     skill = g_battle_menu_thread_menu_data[3].selected_index;
     parameter = (void*)battle_thread_get_current_parameter_1();
-    target = ((world_ability_skill_use_tables_t*)g_battle_ai_workspace_ptr)->target[skill];
+    skill_tables = (world_ability_skill_use_tables_t*)g_battle_ai_workspace_ptr;
+    target = skill_tables->target[skill];
     entry = g_battle_menu_ability_display_flags_ptr[skill];
-    mp_cost = ((world_ability_skill_use_tables_t*)g_battle_ai_workspace_ptr)->mp_cost[skill];
+    mp_cost = skill_tables->mp_cost[skill];
     if (target == 0xFF) {
         target = 0;
     }
     message = 0;
-    blocked = ((world_ability_skill_use_tables_t*)g_battle_ai_workspace_ptr)->flags[skill] & 2;
+    blocked = skill_tables->flags[skill] & 2;
     unit = battle_unit_get_attacker_data_pointer();
     if (g_battle_active_menu == 0 && unit->mp - mp_cost < 0) {
         message = 0x800A;

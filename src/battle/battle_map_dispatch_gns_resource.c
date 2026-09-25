@@ -7,26 +7,6 @@
 #include "psx/gte.h"
 #include "psx/types.h"
 
-typedef struct mesh_triangle_positions_t {
-    s16 x0, y0, z0;
-    u16 terrain_tile;
-    s16 x1, y1, z1;
-    s16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-} mesh_triangle_positions_t;
-
-typedef struct mesh_quad_positions_t {
-    s16 x0, y0, z0;
-    u16 terrain_tile;
-    s16 x1, y1, z1;
-    s16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-    s16 x3, y3, z3;
-    u16 _pad1e;
-} mesh_quad_positions_t;
-
 /* Bit view of the map weather flag word at 0x800b6698. */
 typedef struct battle_map_weather_bits {
     u32 snow : 1;
@@ -38,17 +18,6 @@ typedef struct battle_map_weather_bits {
 #define WEATHER ((battle_map_weather_bits_t*)&g_battle_map_weather_flags)
 
 /* Callee-side view, as declared by battle_map_append_mesh_geometry.c. */
-typedef struct map_mesh_part_metadata_t {
-    u8 _unknown00[0x88];
-    u16 textured_triangle_start;
-    u16 textured_quad_start;
-    u16 untextured_triangle_start;
-    u16 untextured_quad_start;
-    u16 textured_triangle_count;
-    u16 textured_quad_count;
-    u16 untextured_triangle_count;
-    u16 untextured_quad_count;
-} map_mesh_part_metadata_t;
 
 /* Lighting resource (GNS resource 0x32): the light colour matrix, the light
  * direction matrix, then the ambient colour and the background gradient's top
@@ -61,13 +30,6 @@ typedef struct battle_map_light_resource {
     u8 gradient_top[3];    /* 0x27 */
     u8 gradient_bottom[3]; /* 0x2a */
 } battle_map_light_resource_t;
-
-extern mesh_triangle_positions_t g_battle_map_textured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_textured_quad_positions[];
-extern mesh_triangle_positions_t g_battle_map_untextured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_untextured_quad_positions[];
-
-extern void battle_map_append_mesh_geometry(u16* geometry_data, map_mesh_part_metadata_t* metadata);
 
 /* Apply one map resource by type: mesh parts, polygon flags, palettes,
  * textures, lighting, texture animations, terrain, saved state, camera and
@@ -112,7 +74,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, u8* data) {
             g_battle_map_mesh_part_geometry[i] = 0;
         }
         g_battle_map_mesh_part_geometry[0] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[0]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[0]);
         g_battle_map_primary_textured_triangle_count = g_battle_map_textured_triangle_count;
         g_battle_map_primary_textured_quad_count = g_battle_map_textured_quad_count;
         g_battle_map_primary_untextured_triangle_count = g_battle_map_untextured_triangle_count;
@@ -120,41 +82,41 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, u8* data) {
         break;
     case 0x24:
         g_battle_map_mesh_part_geometry[1] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[1]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[1]);
         break;
     case 0x25:
         g_battle_map_mesh_part_geometry[2] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[2]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[2]);
         break;
     case 0x26:
         g_battle_map_mesh_part_geometry[3] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[3]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[3]);
         break;
     case 0x27:
         g_battle_map_mesh_part_geometry[4] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[4]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[4]);
         break;
     case 0x28:
         g_battle_map_mesh_part_geometry[5] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[5]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[5]);
         break;
     case 0x29:
         g_battle_map_mesh_part_geometry[6] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[6]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[6]);
         break;
     case 0x2a:
         g_battle_map_mesh_part_geometry[7] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[7]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[7]);
         break;
     case 0x2b:
         g_battle_map_mesh_part_geometry[8] = data;
-        battle_map_append_mesh_geometry((u16*)data, (map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[8]);
+        battle_map_append_mesh_geometry((u16*)data, (battle_map_mesh_part_metadata_t*)&g_battle_map_mesh_parts[8]);
         break;
     case 0x2c:
         polygon_flags = (u16*)(data + 0x380);
         for (i = 0; i < 360; i++) {
             flags = *polygon_flags++;
-            g_battle_map_textured_triangle_positions[i]._pad0e = flags;
+            g_battle_map_textured_triangle_positions[i].polygon_flags = flags;
             if (!(flags & 0x8000)) {
                 g_battle_render_buffers[0].gt3[i].r0 = 0x80;
                 g_battle_render_buffers[0].gt3[i].r1 = 0x80;
@@ -181,7 +143,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, u8* data) {
         }
         for (i = 0; i < 710; i++) {
             flags = *polygon_flags++;
-            g_battle_map_textured_quad_positions[i]._pad0e = flags;
+            g_battle_map_textured_quad_positions[i].polygon_flags = flags;
             if (!(flags & 0x8000)) {
                 g_battle_render_buffers[0].gt4[i].r0 = 0x80;
                 g_battle_render_buffers[0].gt4[i].r1 = 0x80;
@@ -213,10 +175,10 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, u8* data) {
             polygon_flags++;
         }
         for (i = 0; i < 64; i++) {
-            g_battle_map_untextured_triangle_positions[i]._pad0e = *polygon_flags++;
+            g_battle_map_untextured_triangle_positions[i].polygon_flags = *polygon_flags++;
         }
         for (i = 0; i < 256; i++) {
-            g_battle_map_untextured_quad_positions[i]._pad0e = *polygon_flags++;
+            g_battle_map_untextured_quad_positions[i].polygon_flags = *polygon_flags++;
         }
         battle_map_polygon_flag_command(0x46);
         break;

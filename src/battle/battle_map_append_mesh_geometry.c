@@ -1,5 +1,6 @@
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
+#include "fft/map.h"
 #include "psx/types.h"
 
 /*
@@ -15,71 +16,13 @@
  * triangles/quads. Mesh metadata +0x88..+0x96 retains starting indices and
  * incoming counts before the persistent totals advance.
  */
-typedef struct mesh_triangle_positions_t {
-    s16 x0, y0, z0;
-    u16 terrain_tile;
-    s16 x1, y1, z1;
-    u16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-} mesh_triangle_positions_t;
-
-typedef struct mesh_quad_positions_t {
-    s16 x0, y0, z0;
-    u16 terrain_tile;
-    s16 x1, y1, z1;
-    u16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-    s16 x3, y3, z3;
-    u16 _pad1e;
-} mesh_quad_positions_t;
-
-typedef struct mesh_triangle_normals_t {
-    s16 x0, y0, z0;
-    u16 _pad06;
-    s16 x1, y1, z1;
-    u16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-} mesh_triangle_normals_t;
-
-typedef struct mesh_quad_normals_t {
-    s16 x0, y0, z0;
-    u16 _pad06;
-    s16 x1, y1, z1;
-    u16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-    s16 x3, y3, z3;
-    u16 _pad1e;
-} mesh_quad_normals_t;
-
-typedef struct map_mesh_part_metadata_t {
-    u8 _unknown00[0x88];
-    u16 textured_triangle_start;
-    u16 textured_quad_start;
-    u16 untextured_triangle_start;
-    u16 untextured_quad_start;
-    u16 textured_triangle_count;
-    u16 textured_quad_count;
-    u16 untextured_triangle_count;
-    u16 untextured_quad_count;
-} map_mesh_part_metadata_t;
-
-extern mesh_triangle_positions_t g_battle_map_textured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_textured_quad_positions[];
-extern mesh_triangle_positions_t g_battle_map_untextured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_untextured_quad_positions[];
-extern mesh_triangle_normals_t g_battle_map_textured_triangle_normals[];
-extern mesh_quad_normals_t g_battle_map_textured_quad_normals[];
 
 /* Field address plus byte offset reproduces the target's per-field lui/addu
  * stores; record indexing does not. */
 #define READ_GEOMETRY_HALFWORD()       (*source++)
 #define COPY_GEOMETRY_HALFWORD(symbol) (*(u16*)((u8*)&(symbol) + destination_offset) = READ_GEOMETRY_HALFWORD())
 
-void battle_map_append_mesh_geometry(u16* geometry_data, map_mesh_part_metadata_t* metadata) {
+void battle_map_append_mesh_geometry(u16* geometry_data, battle_map_mesh_part_metadata_t* metadata) {
     u16* source = geometry_data;
     s32 index;
     s32 textured_triangle_count;
@@ -278,7 +221,7 @@ void battle_map_append_mesh_geometry(u16* geometry_data, map_mesh_part_metadata_
         polygon_end_copy = polygon_end;
         destination_offset = index * 0x18;
         do {
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_positions[0].terrain_tile);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_triangle_positions[0].terrain_tile.packed);
             index++;
             destination_offset += 0x18;
         } while (index < polygon_end_copy);
@@ -291,7 +234,7 @@ void battle_map_append_mesh_geometry(u16* geometry_data, map_mesh_part_metadata_
     if (has_polygons) {
         destination_byte_end <<= 5;
         do {
-            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_positions[0].terrain_tile);
+            COPY_GEOMETRY_HALFWORD(g_battle_map_textured_quad_positions[0].terrain_tile.packed);
             destination_offset += 0x20;
         } while (destination_offset < destination_byte_end);
     }

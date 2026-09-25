@@ -1,35 +1,8 @@
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
+#include "fft/map.h"
 #include "psx/gpu.h"
 #include "psx/types.h"
-
-/* Mesh position records from battle_map_append_mesh_geometry. The two
- * spare halfwords reset here are signed: the target stores -0x7fff and -2
- * as sign-extended constants. */
-typedef struct mesh_triangle_positions_t {
-    s16 x0, y0, z0;
-    s16 terrain_tile;
-    s16 x1, y1, z1;
-    s16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-} mesh_triangle_positions_t;
-
-typedef struct mesh_quad_positions_t {
-    s16 x0, y0, z0;
-    s16 terrain_tile;
-    s16 x1, y1, z1;
-    s16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-    s16 x3, y3, z3;
-    u16 _pad1e;
-} mesh_quad_positions_t;
-
-extern mesh_triangle_positions_t g_battle_map_textured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_textured_quad_positions[];
-extern mesh_triangle_positions_t g_battle_map_untextured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_untextured_quad_positions[];
 
 /*
  * Reset the battle map's mesh, draw-mode and per-part render state before a
@@ -77,26 +50,26 @@ void battle_map_reset_mesh_render_state(void) {
     g_battle_map_ambient_polygon_color[1] = 0x80;
     g_battle_map_ambient_polygon_color[2] = 0x80;
     for (i = 0; i < 360; i++) {
-        g_battle_map_textured_triangle_positions[i]._pad0e = -0x7fff;
+        g_battle_map_textured_triangle_positions[i].polygon_flags = -0x7fff;
     }
     for (i = 0; i < 710; i++) {
-        g_battle_map_textured_quad_positions[i]._pad0e = -0x7fff;
+        g_battle_map_textured_quad_positions[i].polygon_flags = -0x7fff;
     }
     for (i = 0; i < 64; i++) {
-        g_battle_map_untextured_triangle_positions[i]._pad0e = 0;
+        g_battle_map_untextured_triangle_positions[i].polygon_flags = 0;
     }
     for (i = 0; i < 256; i++) {
-        g_battle_map_untextured_quad_positions[i]._pad0e = 0;
+        g_battle_map_untextured_quad_positions[i].polygon_flags = 0;
     }
     for (i = 0; i < 32; i++) {
         g_battle_map_texture_animations[i].mode = 0;
         g_battle_map_texture_animations[i].active = 0;
     }
     for (i = 0; i < 360; i++) {
-        g_battle_map_textured_triangle_positions[i].terrain_tile = -2;
+        g_battle_map_textured_triangle_positions[i].terrain_tile.reset_value = -2;
     }
     for (i = 0; i < 710; i++) {
-        g_battle_map_textured_quad_positions[i].terrain_tile = -2;
+        g_battle_map_textured_quad_positions[i].terrain_tile.reset_value = -2;
     }
     for (i = 1; i < 9; i++) {
         g_battle_map_mesh_animation_instructions[i].states[0][1].next = 0;

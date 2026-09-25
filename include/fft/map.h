@@ -426,6 +426,67 @@ typedef char gns_file_record_size_must_be_0x14[(sizeof(gns_file_record_t) == 0x1
 typedef char gns_command_record_prefix_size_must_be_0x14[(sizeof(gns_command_record_prefix_t) == 0x14) ? 1 : -1];
 typedef char map_mesh_file_header_size_must_be_0xc4[(sizeof(map_mesh_file_header_t) == 0xc4) ? 1 : -1];
 
+typedef union battle_map_mesh_terrain_tile {
+    u16 packed;
+    s16 reset_value;
+} battle_map_mesh_terrain_tile_t;
+
+/* Polygon position and normal records copied from the mesh geometry block.
+ * Each XYZ vector occupies eight bytes; the first position's spare halfword
+ * stores the packed terrain tile. */
+typedef struct battle_map_mesh_triangle_positions {
+    s16 x0, y0, z0;
+    battle_map_mesh_terrain_tile_t terrain_tile;
+    s16 x1, y1, z1;
+    s16 polygon_flags;
+    s16 x2, y2, z2;
+    u16 _pad16;
+} battle_map_mesh_triangle_positions_t;
+
+typedef struct battle_map_mesh_quad_positions {
+    s16 x0, y0, z0;
+    battle_map_mesh_terrain_tile_t terrain_tile;
+    s16 x1, y1, z1;
+    s16 polygon_flags;
+    s16 x2, y2, z2;
+    u16 _pad16;
+    s16 x3, y3, z3;
+    u16 _pad1e;
+} battle_map_mesh_quad_positions_t;
+
+typedef struct battle_map_mesh_triangle_normals {
+    s16 x0, y0, z0;
+    u16 _pad06;
+    s16 x1, y1, z1;
+    u16 _pad0e;
+    s16 x2, y2, z2;
+    u16 _pad16;
+} battle_map_mesh_triangle_normals_t;
+
+typedef struct battle_map_mesh_quad_normals {
+    s16 x0, y0, z0;
+    u16 _pad06;
+    s16 x1, y1, z1;
+    u16 _pad0e;
+    s16 x2, y2, z2;
+    u16 _pad16;
+    s16 x3, y3, z3;
+    u16 _pad1e;
+} battle_map_mesh_quad_normals_t;
+
+/* Per-part start indices and counts stored after the mesh transform data. */
+typedef struct battle_map_mesh_part_metadata {
+    u8 _unknown00[0x88];
+    u16 textured_triangle_start;
+    u16 textured_quad_start;
+    u16 untextured_triangle_start;
+    u16 untextured_quad_start;
+    u16 textured_triangle_count;
+    u16 textured_quad_count;
+    u16 untextured_triangle_count;
+    u16 untextured_quad_count;
+} battle_map_mesh_part_metadata_t;
+
 /* Halfword-aligned view of a 20-byte GNS record: the target copies these
  * records with lwl/lwr pairs, so the loader's type has no word member. */
 typedef struct gns_record_view {
@@ -649,6 +710,7 @@ typedef struct map_selected_tile {
     s16 depth;          /* 0x08 */
 } map_selected_tile_t;
 
+void battle_map_append_mesh_geometry(u16* geometry_data, battle_map_mesh_part_metadata_t* metadata);
 void battle_map_copy_xy_coords_and_tile_data(u8* p);
 map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
 map_tile_t* battle_map_get_tile_data_ptr_from_misc_screen_coords(u32 misc_id);
@@ -696,10 +758,22 @@ extern u8 g_battle_map_palette_blend_steps_32[][32];
 extern u8 g_battle_map_palette_blend_steps_8[][8];
 extern u8 g_battle_map_palette_pending;
 extern u32 g_battle_map_palette_upload_words[];
+extern battle_map_mesh_triangle_positions_t* g_battle_map_part_textured_triangle_positions;
+extern battle_map_mesh_quad_positions_t* g_battle_map_part_textured_quad_positions;
+extern battle_map_mesh_triangle_positions_t* g_battle_map_part_untextured_triangle_positions;
+extern battle_map_mesh_quad_positions_t* g_battle_map_part_untextured_quad_positions;
+extern battle_map_mesh_triangle_normals_t* g_battle_map_part_textured_triangle_normals;
+extern battle_map_mesh_quad_normals_t* g_battle_map_part_textured_quad_normals;
 extern s32 g_battle_map_part_textured_quad_count;
 extern s32 g_battle_map_part_textured_triangle_count;
 extern s32 g_battle_map_part_untextured_quad_count;
 extern s32 g_battle_map_part_untextured_triangle_count;
+extern battle_map_mesh_triangle_positions_t g_battle_map_textured_triangle_positions[];
+extern battle_map_mesh_quad_positions_t g_battle_map_textured_quad_positions[];
+extern battle_map_mesh_triangle_positions_t g_battle_map_untextured_triangle_positions[];
+extern battle_map_mesh_quad_positions_t g_battle_map_untextured_quad_positions[];
+extern battle_map_mesh_triangle_normals_t g_battle_map_textured_triangle_normals[];
+extern battle_map_mesh_quad_normals_t g_battle_map_textured_quad_normals[];
 extern u8 g_battle_map_pending_lighting_data[0x2d];
 extern u8 g_battle_map_pending_palette_data[0x200];
 extern u8 g_battle_map_polygon_flag_clear_countdown;

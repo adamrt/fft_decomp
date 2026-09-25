@@ -7,28 +7,6 @@
 /* Textured polygon positions (battle_map_append_mesh_geometry). terrain_tile
  * packs the tile's layer (bit 0), z (bits 1..7) and x (bits 8..15); 0xfffe
  * marks a polygon without a tile. */
-typedef struct mesh_triangle_positions_t {
-    s16 x0, y0, z0;
-    u16 terrain_tile;
-    s16 x1, y1, z1;
-    s16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-} mesh_triangle_positions_t;
-
-typedef struct mesh_quad_positions_t {
-    s16 x0, y0, z0;
-    u16 terrain_tile;
-    s16 x1, y1, z1;
-    s16 _pad0e;
-    s16 x2, y2, z2;
-    u16 _pad16;
-    s16 x3, y3, z3;
-    u16 _pad1e;
-} mesh_quad_positions_t;
-
-extern mesh_triangle_positions_t g_battle_map_textured_triangle_positions[];
-extern mesh_quad_positions_t g_battle_map_textured_quad_positions[];
 
 /*
  * Recolour the textured map polygons that lie on marked tiles.
@@ -75,11 +53,12 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
         break;
     case 1:
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[0]; i++) {
-            if (g_battle_map_textured_triangle_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_triangle_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x20) {
@@ -93,16 +72,17 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
                     g_battle_data->gt3[i].b0 = 0x60;
                     g_battle_data->gt3[i].b1 = 0x60;
                     g_battle_data->gt3[i].b2 = 0x60;
-                    g_battle_map_textured_triangle_positions[i]._pad0e &= 0xfffe;
+                    g_battle_map_textured_triangle_positions[i].polygon_flags &= 0xfffe;
                 }
             }
         }
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[1]; i++) {
-            if (g_battle_map_textured_quad_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_quad_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_quad_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_quad_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_quad_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x20) {
@@ -119,7 +99,7 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
                     g_battle_data->gt4[i].b1 = 0x60;
                     g_battle_data->gt4[i].b2 = 0x60;
                     g_battle_data->gt4[i].b3 = 0x60;
-                    g_battle_map_textured_quad_positions[i]._pad0e &= 0xfffe;
+                    g_battle_map_textured_quad_positions[i].polygon_flags &= 0xfffe;
                 }
             }
         }
@@ -132,17 +112,18 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
         break;
     case 5:
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[0]; i++) {
-            if (g_battle_map_textured_triangle_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_triangle_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x20) {
                     g_battle_data->gt3[i].clut = (g_battle_data->gt3[i].clut & 0x803f) | 0x7800;
-                    if (g_battle_map_textured_triangle_positions[i]._pad0e & 0x8000) {
-                        g_battle_map_textured_triangle_positions[i]._pad0e |= 1;
+                    if (g_battle_map_textured_triangle_positions[i].polygon_flags & 0x8000) {
+                        g_battle_map_textured_triangle_positions[i].polygon_flags |= 1;
                     } else {
                         (g_battle_data->gt3 + i)->r0 = g_battle_map_ambient_polygon_color[0];
                         (g_battle_data->gt3 + i)->g0 = g_battle_map_ambient_polygon_color[1];
@@ -158,17 +139,18 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
             }
         }
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[1]; i++) {
-            if (g_battle_map_textured_quad_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_quad_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_quad_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_quad_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_quad_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x20) {
                     g_battle_data->gt4[i].clut = (g_battle_data->gt4[i].clut & 0x803f) | 0x7800;
-                    if (g_battle_map_textured_quad_positions[i]._pad0e & 0x8000) {
-                        g_battle_map_textured_quad_positions[i]._pad0e |= 1;
+                    if (g_battle_map_textured_quad_positions[i].polygon_flags & 0x8000) {
+                        g_battle_map_textured_quad_positions[i].polygon_flags |= 1;
                     } else {
                         (g_battle_data->gt4 + i)->r0 = g_battle_map_ambient_polygon_color[0];
                         (g_battle_data->gt4 + i)->g0 = g_battle_map_ambient_polygon_color[1];
@@ -191,11 +173,12 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
         break;
     case 2:
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[0]; i++) {
-            if (g_battle_map_textured_triangle_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_triangle_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x40) {
@@ -209,16 +192,17 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
                     g_battle_data->gt3[i].b0 = 0x20;
                     g_battle_data->gt3[i].b1 = 0x20;
                     g_battle_data->gt3[i].b2 = 0x20;
-                    g_battle_map_textured_triangle_positions[i]._pad0e &= 0xfffe;
+                    g_battle_map_textured_triangle_positions[i].polygon_flags &= 0xfffe;
                 }
             }
         }
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[1]; i++) {
-            if (g_battle_map_textured_quad_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_quad_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_quad_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_quad_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_quad_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x40) {
@@ -235,7 +219,7 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
                     g_battle_data->gt4[i].b1 = 0x20;
                     g_battle_data->gt4[i].b2 = 0x20;
                     g_battle_data->gt4[i].b3 = 0x20;
-                    g_battle_map_textured_quad_positions[i]._pad0e &= 0xfffe;
+                    g_battle_map_textured_quad_positions[i].polygon_flags &= 0xfffe;
                 }
             }
         }
@@ -248,17 +232,18 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
         break;
     case 3:
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[0]; i++) {
-            if (g_battle_map_textured_triangle_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_triangle_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x40) {
                     g_battle_data->gt3[i].clut = (g_battle_data->gt3[i].clut & 0x803f) | 0x7800;
-                    if (g_battle_map_textured_triangle_positions[i]._pad0e & 0x8000) {
-                        g_battle_map_textured_triangle_positions[i]._pad0e |= 1;
+                    if (g_battle_map_textured_triangle_positions[i].polygon_flags & 0x8000) {
+                        g_battle_map_textured_triangle_positions[i].polygon_flags |= 1;
                     } else {
                         (g_battle_data->gt3 + i)->r0 = g_battle_map_ambient_polygon_color[0];
                         (g_battle_data->gt3 + i)->g0 = g_battle_map_ambient_polygon_color[1];
@@ -274,17 +259,18 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
             }
         }
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[1]; i++) {
-            if (g_battle_map_textured_quad_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_quad_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_quad_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_quad_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_quad_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x40) {
                     g_battle_data->gt4[i].clut = (g_battle_data->gt4[i].clut & 0x803f) | 0x7800;
-                    if (g_battle_map_textured_quad_positions[i]._pad0e & 0x8000) {
-                        g_battle_map_textured_quad_positions[i]._pad0e |= 1;
+                    if (g_battle_map_textured_quad_positions[i].polygon_flags & 0x8000) {
+                        g_battle_map_textured_quad_positions[i].polygon_flags |= 1;
                     } else {
                         (g_battle_data->gt4 + i)->r0 = g_battle_map_ambient_polygon_color[0];
                         (g_battle_data->gt4 + i)->g0 = g_battle_map_ambient_polygon_color[1];
@@ -307,11 +293,12 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
         break;
     case 7:
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[0]; i++) {
-            if (g_battle_map_textured_triangle_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_triangle_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x80) {
@@ -325,16 +312,17 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
                     g_battle_data->gt3[i].b0 = 0x10;
                     g_battle_data->gt3[i].b1 = 0x10;
                     g_battle_data->gt3[i].b2 = 0x10;
-                    g_battle_map_textured_triangle_positions[i]._pad0e &= 0xfffe;
+                    g_battle_map_textured_triangle_positions[i].polygon_flags &= 0xfffe;
                 }
             }
         }
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[1]; i++) {
-            if (g_battle_map_textured_quad_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_quad_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_quad_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_quad_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_quad_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 if (g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks & 0x80) {
@@ -351,7 +339,7 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
                     g_battle_data->gt4[i].b1 = 0x10;
                     g_battle_data->gt4[i].b2 = 0x10;
                     g_battle_data->gt4[i].b3 = 0x10;
-                    g_battle_map_textured_quad_positions[i]._pad0e &= 0xfffe;
+                    g_battle_map_textured_quad_positions[i].polygon_flags &= 0xfffe;
                 }
             }
         }
@@ -364,19 +352,20 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
         break;
     case 8:
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[0]; i++) {
-            if (g_battle_map_textured_triangle_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_triangle_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_triangle_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_triangle_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_triangle_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 marks = g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks;
                 if (marks & 0x80) {
                     if (!(marks & 0x40)) {
                         g_battle_data->gt3[i].clut = (g_battle_data->gt3[i].clut & 0x803f) | 0x7800;
-                        if (g_battle_map_textured_triangle_positions[i]._pad0e & 0x8000) {
-                            g_battle_map_textured_triangle_positions[i]._pad0e |= 1;
+                        if (g_battle_map_textured_triangle_positions[i].polygon_flags & 0x8000) {
+                            g_battle_map_textured_triangle_positions[i].polygon_flags |= 1;
                         } else {
                             (g_battle_data->gt3 + i)->r0 = g_battle_map_ambient_polygon_color[0];
                             (g_battle_data->gt3 + i)->g0 = g_battle_map_ambient_polygon_color[1];
@@ -403,19 +392,20 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
             }
         }
         for (i = 0; i < g_battle_map_mesh_parts[0].counts[1]; i++) {
-            if (g_battle_map_textured_quad_positions[i].terrain_tile != 0xfffe) {
-                g_battle_target_color_tile_y = (g_battle_map_textured_quad_positions[i].terrain_tile >> 1) & 0x7f;
-                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile >> 8;
+            if (g_battle_map_textured_quad_positions[i].terrain_tile.packed != 0xfffe) {
+                g_battle_target_color_tile_y
+                    = (g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 1) & 0x7f;
+                g_battle_target_color_tile_x = g_battle_map_textured_quad_positions[i].terrain_tile.packed >> 8;
                 tile = (s16)g_battle_target_color_tile_y * g_battle_map_tile_width + (s16)g_battle_target_color_tile_x;
-                if (g_battle_map_textured_quad_positions[i].terrain_tile & 1) {
+                if (g_battle_map_textured_quad_positions[i].terrain_tile.packed & 1) {
                     tile += 0x100;
                 }
                 marks = g_battle_map_tile_data_ptr[tile].ceiling_depth_and_marks;
                 if (marks & 0x80) {
                     if (!(marks & 0x40)) {
                         g_battle_data->gt4[i].clut = (g_battle_data->gt4[i].clut & 0x803f) | 0x7800;
-                        if (g_battle_map_textured_quad_positions[i]._pad0e & 0x8000) {
-                            g_battle_map_textured_quad_positions[i]._pad0e |= 1;
+                        if (g_battle_map_textured_quad_positions[i].polygon_flags & 0x8000) {
+                            g_battle_map_textured_quad_positions[i].polygon_flags |= 1;
                         } else {
                             (g_battle_data->gt4 + i)->r0 = g_battle_map_ambient_polygon_color[0];
                             (g_battle_data->gt4 + i)->g0 = g_battle_map_ambient_polygon_color[1];
