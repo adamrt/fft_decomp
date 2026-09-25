@@ -1,3 +1,5 @@
+#include "fft/main_file.h"
+#include "fft/main_runtime.h"
 
 void* main_file_load_checked_to_address(int sector, int size, void* destination) {
     void* result = main_file_load_to_address(sector, size, destination);
