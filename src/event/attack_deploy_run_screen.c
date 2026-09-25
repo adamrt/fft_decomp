@@ -573,7 +573,7 @@ ramza_placed:
                         slots[count].roster_id = g_attack_deploy_units_by_squad[i][row * 5 + column];
                         slots[count].x = g_attack_deploy_current_squad_data->center_x - column + 2;
                         slots[count].y = g_attack_deploy_current_squad_data->center_y + row - 2;
-                        slots[count].upper_level = g_attack_deploy_current_squad_data->_pad_06;
+                        slots[count].upper_level = g_attack_deploy_current_squad_data->_unknown_06;
                         slots[count].facing = 0;
                         slots[count].unk_3_2 = 0;
                         count++;
@@ -587,7 +587,7 @@ ramza_placed:
                         slots[count].roster_id = g_attack_deploy_units_by_squad[i][row * 5 + column];
                         slots[count].x = g_attack_deploy_current_squad_data->center_x - row + 2;
                         slots[count].y = g_attack_deploy_current_squad_data->center_y - column + 2;
-                        slots[count].upper_level = g_attack_deploy_current_squad_data->_pad_06;
+                        slots[count].upper_level = g_attack_deploy_current_squad_data->_unknown_06;
                         slots[count].facing = 3;
                         slots[count].unk_3_2 = 0;
                         count++;
@@ -601,7 +601,7 @@ ramza_placed:
                         slots[count].roster_id = g_attack_deploy_units_by_squad[i][row * 5 + column];
                         slots[count].x = g_attack_deploy_current_squad_data->center_x + column - 2;
                         slots[count].y = g_attack_deploy_current_squad_data->center_y - row + 2;
-                        slots[count].upper_level = g_attack_deploy_current_squad_data->_pad_06;
+                        slots[count].upper_level = g_attack_deploy_current_squad_data->_unknown_06;
                         slots[count].facing = 2;
                         slots[count].unk_3_2 = 0;
                         count++;
@@ -615,7 +615,7 @@ ramza_placed:
                         slots[count].roster_id = g_attack_deploy_units_by_squad[i][row * 5 + column];
                         slots[count].x = g_attack_deploy_current_squad_data->center_x + row - 2;
                         slots[count].y = g_attack_deploy_current_squad_data->center_y + column - 2;
-                        slots[count].upper_level = g_attack_deploy_current_squad_data->_pad_06;
+                        slots[count].upper_level = g_attack_deploy_current_squad_data->_unknown_06;
                         slots[count].facing = 1;
                         slots[count].unk_3_2 = 0;
                         count++;

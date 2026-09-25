@@ -5,9 +5,9 @@
  * indexed by battle_effect_secondary_data_t::own_slot_id. It carries the same
  * roles the generic trap spawner keeps in the effect record itself. */
 typedef struct battle_effect_trap_state {
-    s32 count;    /* 0x00; slots started so far */
-    u16 field_04; /* 0x04; reaches 1 when the effect is finished */
-    u8 ids[2];    /* 0x06 */
+    s32 count;       /* 0x00; slots started so far */
+    u16 _unknown_04; /* 0x04; reaches 1 when the effect is finished */
+    u8 ids[2];       /* 0x06 */
 } battle_effect_trap_state_t;
 
 extern battle_effect_trap_state_t g_battle_effect_death_poof_states[];
@@ -48,7 +48,7 @@ s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) 
         for (i = 0; i < BATTLE_EFFECT_TRAP_SLOT_COUNT; i++) {
             state->ids[i] = 0;
         }
-        state->field_04 = 0;
+        state->_unknown_04 = 0;
         g_battle_effect_current_secondary->timer = 0;
         g_battle_effect_current_secondary->phase = BATTLE_SECONDARY_EFFECT_EXECUTING;
         result = 1;
@@ -108,10 +108,10 @@ s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) 
         battle_effect_copy_second_section_to_on_hit_data();
         current = g_battle_effect_current_secondary;
         current->timer = current->timer + 1;
-        result = state->field_04 != 1;
+        result = state->_unknown_04 != 1;
         if (state->count == 0
             && (s16)current->timer > (s32)g_battle_effect_groups[BATTLE_EFFECT_TRAP_GROUP].spawn_start_frame) {
-            state->field_04 = state->field_04 + 1;
+            state->_unknown_04 = state->_unknown_04 + 1;
         }
         break;
     }

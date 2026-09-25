@@ -4,11 +4,11 @@
 typedef struct world_gfx_sprite_copy_source {
     u16 vram_x; /* 0x00: menu record text-image VRAM x; (vram_x & 0x3f) * 4 is SPRT.u0 */
     u8 vram_y;  /* 0x02: low byte of the menu record's VRAM y, copied to SPRT.v0 */
-    u8 unused_03;
-    u8 unused_04[4];
+    u8 _unused_03;
+    u8 _unused_04[4];
     u16 x; /* 0x08 */
     u16 y; /* 0x0A */
-    u8 unused_0c[8];
+    u8 _unused_0c[8];
     u16 width;  /* 0x14 */
     u16 height; /* 0x16 */
 } world_gfx_sprite_copy_source_t;

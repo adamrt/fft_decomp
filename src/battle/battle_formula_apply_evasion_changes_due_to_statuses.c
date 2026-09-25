@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 typedef struct battle_formula_evasion_target {
-    u8 pad0[0x58];
+    u8 _unused_00[0x58];
     u8 x58;
     u8 x59;
     u8 x5A;

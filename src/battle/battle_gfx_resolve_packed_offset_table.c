@@ -4,7 +4,7 @@
 /* Unaligned record: the offset entries and the payload length are stored as
  * little-endian byte sequences, so every field is read one byte at a time. */
 typedef struct battle_gfx_packed_offset_table {
-    u8 unknown_00[4];   /* 0x000 */
+    u8 _unused_000[4];  /* 0x000 */
     u8 entry[0x100][4]; /* 0x004 */
     u8 payload_size[2]; /* 0x404 */
     u8 payload[1];      /* 0x406 */

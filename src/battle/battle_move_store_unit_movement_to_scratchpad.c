@@ -169,7 +169,7 @@ void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         config->can_ride = 0;
     }
     team = unit->initial_team_flags;
-    config->field_1a = D_8018F4FC;
+    config->_unknown_1a = D_8018F4FC;
     mount = 0xFF;
     for (i = 15; i >= 0; i--) {
         record[i].unit_id_flags = mount;

@@ -29,11 +29,11 @@ typedef struct world_formation_dismiss_entry {
  * world_menu_thread_data_t in include/fft/world.h.
  */
 typedef struct world_formation_dismiss_menu {
-    u8 _pad00[0x74];
+    u8 _unused_00[0x74];
     s16 selection; /* 0x74 */
-    u8 _pad76[0x94 - 0x76];
+    u8 _unused_76[0x94 - 0x76];
     s16 prompt_text_id; /* 0x94 */
-    u8 _pad96[0xec - 0x96];
+    u8 _unused_96[0xec - 0x96];
     s16 entry3_selected_index; /* 0xec: selected_index of the fourth 0x3c menu entry */
 } world_formation_dismiss_menu_t;
 

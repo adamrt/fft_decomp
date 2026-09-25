@@ -2,7 +2,7 @@
 
 typedef struct battle_ai_wait_facing_work {
     battle_ai_coords_t target_coords;
-    u8 _pad04[4];
+    u8 _unused_04[4];
     u8 viable_directions[4];
 } battle_ai_wait_facing_work_t;
 

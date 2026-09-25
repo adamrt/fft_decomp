@@ -317,7 +317,7 @@ typedef struct bunit_gfx_context {
     DR_MODE* draw_modes;                  /* 0x60 */
     DRAWENV draw_env;                     /* 0x64 */
     DISPENV disp_env;                     /* 0xc0 */
-    u8 unknown_d4[0x18];                  /* 0xd4 */
+    u8 _unused_d4[0x18];                  /* 0xd4 */
 } bunit_gfx_context_t;
 typedef char bunit_gfx_context_size_must_be_0xec[(sizeof(bunit_gfx_context_t) == 0xec) ? 1 : -1];
 typedef char bunit_gfx_context_textured_quads_must_be_0x10
@@ -670,23 +670,23 @@ typedef struct bunit_unit_data {
     s16 experience; /* 0x08 */
     s16 entd_slot;  /* 0x0a */
     s16 current_hp;
-    u8 _pad0e[2];
+    u8 _unused_00e[2];
     s16 max_hp;
     s16 current_mp;
-    u8 _pad14[2];
+    u8 _unused_014[2];
     s16 max_mp;
     s16 current_ct;
-    u8 _pad1a[2];
+    u8 _unused_01a[2];
     s16 max_ct;          /* 0x1c */
     s16 formation_index; /* 0x1e */
-    u8 _pad20[2];
+    u8 _unused_020[2];
     s16 entd_slot_22;        /* 0x22 */
     s16 monster_base_job_id; /* 0x24; used when character_identity is 0x82 */
     s16 brave;               /* 0x26 */
     s16 faith;               /* 0x28 */
     s16 zodiac;              /* 0x2a */
     s16 roster_id;           /* 0x2C; searched by bunit_unit_find_index_by_roster_id */
-    u8 _pad2e[2];
+    u8 _unused_02e[2];
     s16 move;                     /* 0x30 */
     s16 speed;                    /* 0x32 */
     s16 jump;                     /* 0x34 */
@@ -700,7 +700,7 @@ typedef struct bunit_unit_data {
     s16 physical_class_evade;     /* 0x44 */
     s16 physical_shield_evade;    /* 0x46 */
     s16 physical_accessory_evade; /* 0x48 */
-    u8 _pad4a[2];
+    u8 _unused_04a[2];
     s16 magical_attack;          /* 0x4c */
     s16 magical_class_evade;     /* 0x4e */
     s16 magical_shield_evade;    /* 0x50 */
@@ -708,7 +708,7 @@ typedef struct bunit_unit_data {
     s16 equipment[5];            /* 0x54 */
     s16 abilities[5];            /* 0x5e; primary skillset, secondary, reaction, support, movement (filled by
                                   * bunit_panel_copy_unit_data_to_billboard; bunit_create_ability_list reads [0]) */
-    u8 _pad68[8];
+    u8 _unused_068[8];
     u8 gender_flags;          /* 0x70; Bard/Dancer restrictions */
     u8 misc_unit_id;          /* 0x71 */
     u8 initial_team_flags;    /* 0x72 */
@@ -717,7 +717,7 @@ typedef struct bunit_unit_data {
     u8 unlocked_jobs[3];      /* 0x75; bit reader consumes Squire through Mime */
     u8 learned_abilities[57]; /* 0x78 */
     u8 job_levels[10];        /* 0xb1; two packed job-level nibbles per byte */
-    u8 _padbb;
+    u8 _padding_0bb;          /* aligns job_points */
     u16 job_points[20];       /* 0xbc; current JP by generic job */
     u16 total_job_points[20]; /* 0xe4; cumulative JP by generic job */
 } bunit_unit_data_t;

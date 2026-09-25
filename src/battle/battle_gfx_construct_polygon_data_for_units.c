@@ -32,7 +32,7 @@
 
 /* POLY_FT4 with the colour's red/green pair addressed as one halfword. */
 typedef struct battle_gfx_part_prim {
-    u8 unknown_00[3];
+    u8 _unused_00[3];
     u8 length;
     u16 rg;
     u8 b;
@@ -48,11 +48,11 @@ typedef struct battle_gfx_part_prim {
     s32 xy2;
     u8 u2;
     u8 v2;
-    u16 pad2;
+    u16 _padding_1e; /* aligns xy3 */
     s32 xy3;
     u8 u3;
     u8 v3;
-    u16 pad3;
+    u16 _padding_26; /* tail padding to 4-byte alignment */
 } battle_gfx_part_prim_t;
 
 /* Queue one POLY_FT4 per sprite part in [start, end) of a sprite display.

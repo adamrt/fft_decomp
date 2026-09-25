@@ -8,16 +8,16 @@ typedef struct battle_effect_tick_state {
     s16 particle_keyframe[5];  /* 0x04 */
     s16 sound_keyframe[3];     /* 0x0e */
     s16 color_keyframe[4];     /* 0x14 */
-    u8 _unknown_1c[2];         /* 0x1c */
+    u8 _unused_1c[2];          /* 0x1c */
     s16 particle_remaining[5]; /* 0x1e */
     s16 sound_remaining[3];    /* 0x28 */
     s16 color_remaining[4];    /* 0x2e */
-    u8 _unknown_36[2];         /* 0x36 */
+    u8 _unused_36[2];          /* 0x36 */
     u16 particle_step[5];      /* 0x38 */
 } battle_effect_tick_state_t;
 
 typedef struct battle_effect_tick_record_view {
-    u8 _unknown_00[0x28];
+    u8 _unused_00[0x28];
     u16 frame; /* 0x28 */
 } battle_effect_tick_record_view_t;
 

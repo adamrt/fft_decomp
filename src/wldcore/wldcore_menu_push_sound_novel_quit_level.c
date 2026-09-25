@@ -63,7 +63,7 @@ void wldcore_menu_push_sound_novel_quit_level(void) {
     fade->boxes[0].b = 0;
     fade->flags[0] |= 8;
     g_wldcore_menu_stack_records_next[depth].save_confirm.choice = 0;
-    g_wldcore_menu_stack_records_next[depth].save_confirm.field_18 = 0;
+    g_wldcore_menu_stack_records_next[depth].save_confirm._unknown_18 = 0;
     g_wldcore_menu_stack_records_next[depth].save_confirm.fade_in = 0;
     g_wldcore_menu_stack_records_next[depth].save_confirm.fade_out = 0;
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_SOUND_NOVEL_QUIT;

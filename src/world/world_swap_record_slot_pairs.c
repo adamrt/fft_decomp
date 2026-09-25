@@ -6,11 +6,11 @@
 typedef struct {
     u8 x;
     u8 y;
-    u8 pad[6];
+    u8 _unused_02[6];
 } world_800e6f64_slot_t;
 
 typedef struct {
-    u8 pad[0xc];
+    u8 _unused_00[0xc];
     world_800e6f64_slot_t slots[4];
 } world_800e6f64_record_t;
 

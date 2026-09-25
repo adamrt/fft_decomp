@@ -7,9 +7,9 @@
 typedef struct wldcore_history_text_origin {
     s16 x;
     s16 y;
-    u8 unknown_04[4];
+    u8 _unused_04[4];
     s32 width;
-    s32 unknown_0c;
+    s32 _unused_0c;
 } wldcore_history_text_origin_t;
 
 /* Handler of the history-text level (type 0x17).

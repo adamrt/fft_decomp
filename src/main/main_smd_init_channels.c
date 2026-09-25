@@ -73,9 +73,9 @@ void main_smd_init_channels(suzuki_music_t* music) {
                 slot = voice;
                 channel->voice = slot;
                 channel->loop_note_data = 0;
-                channel->field_24 = 0;
+                channel->_unknown_024 = 0;
                 channel->loop_count = 0;
-                channel->field_2a = 0;
+                channel->_unknown_02a = 0;
                 channel->rest_length = 0;
                 channel->length_adjust = 0;
                 channel->pitch_offset = 0;
@@ -90,10 +90,10 @@ void main_smd_init_channels(suzuki_music_t* music) {
                 channel->note_data = note_data;
                 if (slot < 25) {
                     channel->voice_mask = 1 << voice;
-                    channel->field_38 = 0xff9f;
+                    channel->_unknown_038 = 0xff9f;
                 } else {
                     channel->voice_mask = 0;
-                    channel->field_38 = 0;
+                    channel->_unknown_038 = 0;
                 }
                 for (i = 3; i >= 0; i--) {
                     channel->modulators[i].flags = 0;

@@ -50,16 +50,16 @@ s32 open_file_get_cd_sync_state_delta(void);
 typedef struct open_controller_record {
     /* 0x00 */ s32 stream_start;
     /* 0x04 */ s32 stream_length;
-    /* 0x08 */ s32 field_08;
-    /* 0x0c */ s32 field_0c;
-    /* 0x10 */ s32 field_10;
-    /* 0x14 */ s32 field_14;
-    /* 0x18 */ s32 field_18;
-    /* 0x1c */ s32 field_1c;
-    /* 0x20 */ s32 field_20; /* birthday date menu: month */
-    /* 0x24 */ s32 field_24; /* birthday date menu: day */
-    /* 0x28 */ s32 field_28; /* birthday date menu: selecting_month */
-    /* 0x2c */ u8 padding_2c[0x64 - 0x2c];
+    /* 0x08 */ s32 _unknown_08;
+    /* 0x0c */ s32 _unknown_0c;
+    /* 0x10 */ s32 _unknown_10;
+    /* 0x14 */ s32 _unknown_14;
+    /* 0x18 */ s32 _unused_18;
+    /* 0x1c */ s32 _unused_1c;
+    /* 0x20 */ s32 _unknown_20; /* birthday date menu: month */
+    /* 0x24 */ s32 _unknown_24; /* birthday date menu: day */
+    /* 0x28 */ s32 _unknown_28; /* birthday date menu: selecting_month */
+    /* 0x2c */ u8 _unused_2c[0x64 - 0x2c];
 } open_controller_record_t;
 typedef char open_controller_record_size_must_be_0x64[(sizeof(open_controller_record_t) == 0x64) ? 1 : -1];
 
@@ -67,7 +67,7 @@ typedef char open_controller_record_size_must_be_0x64[(sizeof(open_controller_re
 typedef struct open_controller_birthday {
     s32 month;
     s32 day;
-    u8 padding_08[0x64 - 8];
+    u8 _unused_08[0x64 - 8];
 } open_controller_birthday_t;
 
 typedef void (*open_controller_handler_t)(void* record);
@@ -190,7 +190,7 @@ typedef struct open_render_record_36 {
     /* 0x20 */ u8 r;
     /* 0x21 */ u8 g;
     /* 0x22 */ u8 b;
-    /* 0x23 */ u8 padding_23;
+    /* 0x23 */ u8 _padding_23; /* tail padding to 4-byte alignment */
 } open_render_record_36_t;
 typedef char open_render_record_36_size_must_be_0x24[(sizeof(open_render_record_36_t) == 0x24) ? 1 : -1];
 
@@ -198,7 +198,7 @@ typedef char open_render_record_36_size_must_be_0x24[(sizeof(open_render_record_
 typedef struct open_render_record_36_position {
     /* 0x00 */ s32 x; /* == g_open_gfx_render_records_36[i].x */
     /* 0x04 */ s32 y;
-    /* 0x08 */ u8 padding_08[0x24 - 8];
+    /* 0x08 */ u8 _unused_08[0x24 - 8];
 } open_render_record_36_position_t;
 
 /* Common prefix used to dispatch either render-record layout. */
@@ -237,24 +237,24 @@ typedef char open_render_record_56_size_must_be_0x38[(sizeof(open_render_record_
 typedef struct open_render_record_56_position {
     /* 0x00 */ s32 x; /* == g_open_gfx_render_records_56[i].x */
     /* 0x04 */ s32 y;
-    /* 0x08 */ u8 padding_08[0x38 - 8];
+    /* 0x08 */ u8 _unused_08[0x38 - 8];
 } open_render_record_56_position_t;
 
 /* birthday */
 /* Birthday-menu controller record containing four render-record indices. */
 typedef struct open_birthday_render_record_indices {
-    s32 unused;
+    s32 _unused_00;
     s32 indices[4];
 } open_birthday_render_record_indices_t;
 
 /* Birthday date-selection controller state shared with its redraw routine. */
 typedef struct open_birthday_date_state {
     s32 cursor_record_36; /* 0x00: cursor moved between month and day */
-    s32 unknown_04;
+    s32 _unknown_04;
     s32 title_record_56;  /* 0x08: birthday title image (0xb800); palette 2 on
                              confirmation, 0 on restore */
     s32 window_record_56; /* 0x0c: flags bit 8 blocks input */
-    s32 unknown_10[4];
+    s32 _unused_10[4];
     s32 month;           /* 0x20: 1..12 */
     s32 day;             /* 0x24 */
     s32 selecting_month; /* 0x28: 0 edits the day, 1 edits the month */
@@ -263,13 +263,13 @@ typedef struct open_birthday_date_state {
 /* Final birthday-confirmation controller state. */
 typedef struct open_birthday_confirmation_state {
     s32 cursor_record_36; /* 0x00 */
-    s32 unknown_04;
+    s32 _unused_04;
     s32 menu_record_56;  /* 0x08 */
     s32 selected_option; /* 0x0C: 0 confirms, 1 returns to date entry */
-    s32 unknown_10[4];
+    s32 _unused_10[4];
     s32 month; /* 0x20 */
     s32 day;   /* 0x24 */
-    u8 padding_28[0x64 - 0x28];
+    u8 _unused_28[0x64 - 0x28];
 } open_birthday_confirmation_state_t;
 typedef char
     open_birthday_confirmation_state_size_must_be_0x64[(sizeof(open_birthday_confirmation_state_t) == 0x64) ? 1 : -1];
@@ -303,7 +303,7 @@ void open_birthday_push_confirmation_controller(void);
 typedef struct menu_text_origin {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
-    /* 0x04 */ s32 unknown_04;
+    /* 0x04 */ s32 _unused_04;
     /* 0x08 */ s32 stride; /* OPEN/WLDCORE pass their window record's width */
 } menu_text_origin_t;
 
@@ -418,8 +418,8 @@ typedef struct open_opntex_sequence_state {
 typedef struct open_script_state {
     /* 0x0000 */ open_script_dispatch_state_t dispatch;
     /* 0x0030 */ open_script_record_t records[16];
-    /* 0x1670 */ s32 unknown_1670;
-    /* 0x1674 */ s32 unknown_1674; /* cleared by open_script_init_state */
+    /* 0x1670 */ s32 _unused_1670;
+    /* 0x1674 */ s32 _unknown_1674; /* cleared by open_script_init_state */
     /* 0x1678 */ s32 control_parameter;
     /* 0x167c */ s32 control_state;
     /* 0x1680 */ s32 xa_wait_frames;
@@ -504,7 +504,7 @@ typedef char open_sprite_prim_size_must_be_0x20[(sizeof(open_sprite_prim_t) == 0
  * the same layout as open_render_record_36_t, with the fields it animates
  * named. */
 typedef struct open_sprite_actor {
-    /* 0x00 */ s32 field_00;
+    /* 0x00 */ s32 _unused_00;
     /* 0x04 */ s32 anim_id;
     /* 0x08 */ s32 ot_layer;
     /* 0x0c */ s32 frame_index;
@@ -515,7 +515,7 @@ typedef struct open_sprite_actor {
     /* 0x20 */ u8 r;
     /* 0x21 */ u8 g;
     /* 0x22 */ u8 b;
-    /* 0x23 */ u8 padding_23;
+    /* 0x23 */ u8 _padding_23; /* tail padding to 4-byte alignment */
 } open_sprite_actor_t;
 typedef char open_sprite_actor_size_must_be_0x24[(sizeof(open_sprite_actor_t) == 0x24) ? 1 : -1];
 

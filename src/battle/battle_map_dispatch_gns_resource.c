@@ -7,7 +7,7 @@
 typedef struct battle_map_weather_bits {
     u32 snow : 1;
     u32 ignore_weather : 1;
-    u32 unknown_2 : 5;
+    u32 _unused_00_bit2 : 5;
     s32 modifier : 25;
 } battle_map_weather_bits_t;
 

@@ -37,7 +37,7 @@ void open_birthday_push_confirmation_controller(void) {
 
     record
         = open_gfx_append_render_record_56(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
-    g_open_controller_stream_start[g_open_current_controller_index].field_08 = record;
+    g_open_controller_stream_start[g_open_current_controller_index]._unknown_08 = record;
     quad.x = 0;
     quad.y = 0x60;
     quad.w = 0x28;
@@ -59,6 +59,6 @@ void open_birthday_push_confirmation_controller(void) {
     g_open_current_controller_index = controller + 1;
     g_open_gfx_render_records_36[g_open_controller_stream_start[controller].stream_length].y
         = g_open_gfx_render_records_56[record].y - 2;
-    g_open_controller_stream_start[controller].field_0c = 0;
+    g_open_controller_stream_start[controller]._unknown_0c = 0;
     g_open_controller_handler_indices[controller] = 6;
 }

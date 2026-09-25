@@ -26,7 +26,7 @@ void wldcore_menu_step_unexplored_land_detail_level(wldcore_menu_variable_detail
 
     switch (level->phase) {
     case 1:
-        if (!(g_wldcore_window_render_records[level->field_08].flags & 0x100)) {
+        if (!(g_wldcore_window_render_records[level->_unknown_08].flags & 0x100)) {
             level->phase = 2;
         }
         break;

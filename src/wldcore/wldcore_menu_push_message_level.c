@@ -24,7 +24,7 @@ void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
     g_wldcore_menu_result = -1;
     wldcore_sound_play_effect(MAIN_SFX_WINDOW_OPEN);
     index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[index].message.field_0c = 8;
+    g_wldcore_menu_stack_records_next[index].message._unknown_0c = 8;
     g_wldcore_menu_stack_records_next[index].message.window_index = 0;
     g_wldcore_menu_stack_types[index + 1] = WLDCORE_MENU_LEVEL_MESSAGE;
     g_wldcore_menu_stack_depth = index + 1;

@@ -14,7 +14,7 @@ void open_title_start_new_game_transition(void) {
     open_gfx_start_overlay_fade_out(0x20);
 
     controller = g_open_current_controller_index;
-    g_open_controller_stream_start[controller].field_10 = 0;
+    g_open_controller_stream_start[controller]._unknown_10 = 0;
     g_open_controller_handler_indices[controller] = 4;
     g_open_current_controller_index = controller + 1;
 }

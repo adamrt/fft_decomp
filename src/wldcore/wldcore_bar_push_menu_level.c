@@ -33,7 +33,7 @@ void wldcore_bar_push_menu_level(void) {
             g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     wldcore_bar_build_menu_rows(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window);
     record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[record_index].window_pair_render.field_0c = 0;
+    g_wldcore_menu_stack_records_next[record_index].window_pair_render._unknown_0c = 0;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_BAR_MENU;
     g_wldcore_menu_stack_depth = record_index + 1;
 }

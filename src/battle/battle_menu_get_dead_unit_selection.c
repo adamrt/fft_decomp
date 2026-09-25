@@ -5,7 +5,7 @@
  * Only the status word and the selected entry are established here. */
 typedef struct battle_menu_result {
     s32 status; /* 0x00: -1 cancelled, 0 idle, 4 selection available */
-    u8 unknown_04[0x4e];
+    u8 _unused_04[0x4e];
     u8 selection; /* 0x52 */
 } battle_menu_result_t;
 

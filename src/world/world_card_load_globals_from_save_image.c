@@ -61,7 +61,7 @@ s32 world_card_load_globals_from_save_image(s32 partial_load) {
     bcopy(g_world_load_work_buffer->item_quantities, g_main_item_quantities, 0x100);
     bcopy(g_world_load_work_buffer->poached_item_quantities, g_main_item_poached_quantities, 0x100);
     bcopy(g_world_load_work_buffer->item_location_flags, g_main_item_location_flags, 0x80);
-    D_80057b1c = g_world_load_work_buffer->field_1c88;
+    D_80057b1c = g_world_load_work_buffer->_unknown_1c88;
     bcopy(g_world_load_work_buffer->script_variables, g_main_script_variables, 0x400);
     bcopy(&g_world_load_work_buffer->options, &g_main_game_options, 4);
     i = 0;

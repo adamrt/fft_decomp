@@ -3,9 +3,9 @@
 #include "psx/types.h"
 
 typedef struct open_title_new_game_state {
-    /* 0x00 */ u8 unused_00[0x10];
+    /* 0x00 */ u8 _unused_00[0x10];
     /* 0x10 */ s32 step;
-    /* 0x14 */ u8 unused_14[0x0c];
+    /* 0x14 */ u8 _unused_14[0x0c];
     /* 0x20 */ s32 name_text_id;
 } open_title_new_game_state_t;
 

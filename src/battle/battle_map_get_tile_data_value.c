@@ -11,7 +11,7 @@ s32 battle_map_get_tile_data_value(s32 field, s32 x, s32 y, s32 layer) {
     case MAP_TILE_DATA_SURFACE_TYPE:
         return tile->surface.value & MAP_SURFACE_MASK;
     case MAP_TILE_DATA_UNKNOWN_01:
-        return tile->_unknown01;
+        return tile->_unknown_01;
     case MAP_TILE_DATA_HEIGHT:
         return tile->height;
     case MAP_TILE_DATA_HALF_HEIGHT:

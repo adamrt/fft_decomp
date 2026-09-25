@@ -13,7 +13,7 @@ typedef struct battle_menu_scroll_list_page {
     DR_MODE text_mode;                 /* 0x78 */
     DR_MODE icon_mode;                 /* 0x84 */
     battle_menu_window_record_t icons; /* 0x90 */
-    u8 unknown_10c[0x28];
+    u8 _unused_10c[0x28];
 } battle_menu_scroll_list_page_t;
 
 struct battle_menu_text_position;

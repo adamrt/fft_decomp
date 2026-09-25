@@ -3,7 +3,7 @@
 typedef struct wldcore_text_origin {
     s16 x;
     s16 y;
-    s32 unknown_04;
+    s32 _unused_04;
     s32 value;
 } wldcore_text_origin_t;
 

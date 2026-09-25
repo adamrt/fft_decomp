@@ -53,7 +53,7 @@ typedef struct wldcore_job_report_confirm_level {
     s32 cursor_window; /* 0x00; window record moved between the two rows */
     s32 render_index;  /* 0x04; render record holding the confirmation text */
     s32 selection;     /* 0x08; 0 = upper row, 1 = lower row */
-    s32 field_0c;
+    s32 _unused_0c;
     s32 argument; /* 0x10; argument of the level wldcore_menu_push_proposition_report_level pushes */
 } wldcore_job_report_confirm_level_t;
 
@@ -71,7 +71,7 @@ typedef struct wldcore_job_selection {
     s32 reward_index;         /* 0x18 */
     s32 reward_value;         /* 0x1c */
     s32 gate;                 /* 0x20; set for a dispatched proposition */
-    u8 unknown_24[0x10];
+    u8 _unused_24[0x10];
     s32 rows[3][3]; /* 0x34; per-participant score/report rows */
 } wldcore_job_selection_t;
 typedef char wldcore_job_selection_size_must_be_0x58[sizeof(wldcore_job_selection_t) == 0x58 ? 1 : -1];
@@ -93,10 +93,10 @@ typedef struct wldcore_opcode_state {
         wldcore_opcode_instruction_bytes_t bytes;
     } instruction;   /* 0x00 */
     u16 state_flags; /* 0x04; g_wldcore_state_flags */
-    u8 unknown_06[0x0e];
+    u8 _unused_06[0x0e];
     s16 render_index; /* 0x14; g_wldcore_sound_novel_picture_render_index */
     s16 picture;      /* 0x16; g_wldcore_sound_novel_picture_id */
-    u8 unknown_18[0x0e];
+    u8 _unused_18[0x0e];
     s16 x; /* 0x26 */
     s16 y; /* 0x28 */
 } wldcore_opcode_state_t;
@@ -238,7 +238,7 @@ void wldcore_advance_brave_story_birthdays(void);
 /* system */
 /* Provisional: four-byte per-location records reached through g_wldcore_location_records. */
 typedef struct wldcore_state_record {
-    u8 unknown_00[2];
+    u8 _unused_00[2];
     u8 picture; /* 0x02; proposition picture + 1, 0 for none */
     u8 is_town; /* 0x03; 1 offers the fixed town entries 0xb85d-0xb85f in the location menu */
 } wldcore_state_record_t;
@@ -264,9 +264,9 @@ void wldcore_reset_game_if_special_keycode_is_pressed(void);
 typedef struct wldcore_thread_block {
     s32 x; /* 0x00; panel draw x (thread 9 draws at x - 0x80); WORLD twin world_status_thread_t.x */
     s32 y; /* 0x04; added to the panel's draw offset; thread 8's shake offset */
-    u8 unknown_08[4];
+    u8 _unused_08[4];
     s32 redraw_request; /* 0x0c; scroll direction for thread 8, redraw request for 12 and 9 */
-    u8 unknown_10[4];
+    u8 _unused_10[4];
 } wldcore_thread_block_t;
 typedef char wldcore_thread_block_size_must_be_0x14[sizeof(wldcore_thread_block_t) == 0x14 ? 1 : -1];
 
@@ -321,8 +321,8 @@ typedef struct wldcore_display_object {
     s32 flags;                   /* 0x00 */
     s32 tpage;                   /* 0x04 */
     u16 priority;                /* 0x08 */
-    u16 unknown_0a;              /* 0x0A */
-    u8 unknown_0c[4];            /* 0x0C */
+    u16 _unused_0a;              /* 0x0A */
+    u8 _unused_0c[4];            /* 0x0C */
     s32 anim_counter;            /* 0x10 */
     s32 palette;                 /* 0x14; CLUT row offset: nonzero gives sprite cx = cx + (palette - 1) << 4 */
     s32 x;                       /* 0x18 */
@@ -340,7 +340,7 @@ typedef struct wldcore_anim_object {
     s32 flags;        /* 0x00 */
     s32 sequence;     /* 0x04; row of the sequence table at g_wldcore_anim_sequence_table */
     u16 priority;     /* 0x08 */
-    u16 unknown_0a;   /* 0x0A */
+    u16 _padding_0a;  /* 0x0A; aligns frame_index */
     s32 frame_index;  /* 0x0C */
     s32 anim_counter; /* 0x10 */
     s32 palette;      /* 0x14 */
@@ -434,7 +434,7 @@ typedef struct wldcore_location_list_level {
     s32 delay; /* 0x14; 8 at push, counted down by the location step (wldcore_menu_location_menu_level_t.delay) */
     s32 mode;  /* 0x18; 0 then 8 */
     s32 selected_entry;
-    u8 unknown_20[0x10];
+    u8 _unused_20[0x10];
     s32 entry_count; /* 0x30 */
     s32 entries[10]; /* 0x34 */
 } wldcore_location_list_level_t;
@@ -483,7 +483,7 @@ typedef struct wldcore_location_view {
     s32 location_id;      /* 0x08; .marker.kind */
     s32 picture_id;       /* 0x0c; .marker.sub_kind */
     SVECTOR coordinates;  /* 0x10; marker x/y/z */
-    u8 unknown_18[0x18];
+    u8 _unused_18[0x18];
     wldcore_point32_t point; /* 0x30; marker screen_x/screen_y */
 } wldcore_location_view_t;
 typedef char wldcore_location_view_size_must_be_0x38[sizeof(wldcore_location_view_t) == 0x38 ? 1 : -1];
@@ -501,7 +501,7 @@ s32 wldcore_location_process_entry(s32 from_location, s32 to_location);
 /* Provisional: the save-slot word list at g_wldcore_script_slot_table: section offsets into
  * the save-slot buffer, indexed from +0x04. */
 typedef struct wldcore_save_slot_table {
-    s32 unknown_00;
+    s32 _unused_00;
     u32 offsets[1]; /* 0x04 */
 } wldcore_save_slot_table_t;
 
@@ -597,9 +597,9 @@ typedef char wldcore_text_dimensions_size_must_be_8[(sizeof(wldcore_text_dimensi
  * wldcore_list_build_tutorial_category_panel_image reads it; only the record
  * index, row count and text-id rows are established. */
 typedef struct wldcore_text_list_panel {
-    u8 unknown_00[8];
+    u8 _unused_00[8];
     s32 render_index; /* 0x08 */
-    u8 unknown_0c[0x24];
+    u8 _unused_0c[0x24];
     s32 row_count;   /* 0x30 */
     s32 text_ids[1]; /* 0x34; row_count entries, relative to text 0xb8d9 */
 } wldcore_text_list_panel_t;
@@ -661,7 +661,7 @@ void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* sta
 /* Caller-owned message state prefix at 0x800794d0. Only the phase word at
  * +0x04 is established; this is not the full allocation's size. */
 typedef struct wldcore_proposition_message_state {
-    u8 unknown_00[4];
+    u8 _unused_00[4];
     s32 phase;
 } wldcore_proposition_message_state_t;
 
@@ -678,10 +678,10 @@ typedef struct wldcore_proposition_data {
 typedef struct wldcore_proposition_report_level {
     s32 state; /* 0x00; step index, -1 .. 0x12; pushed as -1, or 0x63 when g_wldcore_job_selection.gate is set */
     s32 phase; /* 0x04; wldcore_proposition_step_message phase; cleared at push */
-    u8 unknown_08[4];
+    u8 _unused_08[4];
     s32 load_phase;   /* 0x0c; 1 chapter data, 2 picture data; 1 at push */
     s32 render_index; /* 0x10; picture render record; -1 at push */
-    u8 unknown_14[0x18];
+    u8 _unused_14[0x18];
     s32 proposition; /* 0x2c; argument of the push */
 } wldcore_proposition_report_level_t;
 
@@ -689,12 +689,12 @@ typedef struct wldcore_proposition_report_level {
  * wldcore_proposition_push_result_level and stepped by 0x80078bb8. */
 typedef struct wldcore_proposition_result_level {
     s32 render_index; /* 0x00 */
-    u8 unknown_04[0xc];
+    u8 _unused_04[0xc];
     s32 phase; /* 0x10; 0 waiting for input, 1 fading out, 2 finished */
-    u8 unknown_14[0x14];
+    u8 _unused_14[0x14];
     s32 delay;       /* 0x28; frames before the success jingle restarts */
     s32 proposition; /* 0x2c; index into g_main_active_propositions */
-    u8 unknown_30[0x2c];
+    u8 _unused_30[0x2c];
 } wldcore_proposition_result_level_t;
 
 /* One 23-byte proposition row expanded to halfword fields by
@@ -706,7 +706,7 @@ typedef union wldcore_proposition_fields {
         u16 category_index; /* 0x00; 1-based row in proposition data records 3, 10 and 11 */
         u16 job_list_index; /* 0x02 */
         u16 id;             /* 0x04 */
-        u16 field_06;       /* 0x06 */
+        u16 _unused_06;     /* 0x06 */
         u16 fee_a;          /* 0x08; remapped through data record 1 */
         u16 fee_b;          /* 0x0a; remapped through data record 1 */
         u16 min_days;       /* 0x0c */
@@ -716,10 +716,10 @@ typedef union wldcore_proposition_fields {
         u16 discovery_kind; /* 0x14; 1 treasure, 2 unexplored land, else see random_bonus */
         u16 random_bonus;   /* 0x16; 1 enables the three-tier random reward */
         u16 gil_reward;     /* 0x18 */
-        u16 field_1a[6];    /* 0x1a */
+        u16 _unused_1a[6];  /* 0x1a */
         u16 speaker_mode;   /* 0x26 */
         u16 preferred_job;  /* 0x28 */
-        u16 field_2a[2];    /* 0x2a */
+        u16 _unused_2a[2];  /* 0x2a */
     } fields;
 } wldcore_proposition_fields_t;
 typedef char wldcore_proposition_fields_size_must_be_0x2e[sizeof(wldcore_proposition_fields_t) == 0x2e ? 1 : -1];
@@ -734,18 +734,18 @@ typedef struct wldcore_menu_send_unit_level {
     s32 preview_render; /* 0x10 */
     s32 list_render;    /* 0x14 */
     s32 cursor_window;  /* 0x18 */
-    u8 unknown_1c[4];
+    u8 _unused_1c[4];
     s32 mode;          /* 0x20 */
     s32 shown_preview; /* 0x24 */
     s32 slot;          /* 0x28 */
-    u8 unknown_2c[4];
+    u8 _unused_2c[4];
     s32 unit_count;      /* 0x30; wrap bound, written by wldcore_proposition_load_send_unit_candidates */
     s32 portrait_render; /* 0x34 */
     s32 portrait_frame;  /* 0x38 */
     s32 portrait_window; /* 0x3c */
     s32 left_arrow;      /* 0x40 */
     s32 right_arrow;     /* 0x44 */
-    u8 unknown_48[0x10];
+    u8 _unused_48[0x10];
     s32 shown_unit; /* 0x58 */
 } wldcore_menu_send_unit_level_t;
 typedef char wldcore_menu_send_unit_level_size_must_be_0x5c[sizeof(wldcore_menu_send_unit_level_t) == 0x5c ? 1 : -1];
@@ -813,7 +813,7 @@ extern wldcore_window_render_bounds16_t g_wldcore_scroll_text_extra_rect;
  * words indexed by the selected row are the only fields read. */
 typedef struct wldcore_bar_active_propositions_level {
     s32 confirmed;
-    u8 unknown_04[0x30];
+    u8 _unused_04[0x30];
     s32 values[1]; /* 0x34 */
 } wldcore_bar_active_propositions_level_t;
 
@@ -824,7 +824,7 @@ typedef struct wldcore_menu_panel_level {
      * also use -1 for cancellation. Read after WORLD thread 12 ends. */
     s32 result;
     s32 variable_id; /* 0x04; script variable edited by number panels */
-    u8 unknown_08[0x28];
+    u8 _unused_08[0x28];
     s32 entry_count; /* 0x30; rows in the panel list */
     /* 0x34; entry text ids, filled by wldcore_map_build_location_menu_entries (0x8008d2c8), whose result is
      * the entry count; the same offset as the list_window and proposition_list entries */
@@ -840,12 +840,12 @@ typedef struct wldcore_menu_list_window_level {
     s32 side_window;    /* 0x04 */
     s32 frame_render;   /* 0x08 */
     s32 content_render; /* 0x0c */
-    u8 unknown_10[8];
+    u8 _unused_10[8];
     s32 mode;           /* 0x18; cleared by the 0x80080e54 push */
     s32 selected_entry; /* 0x1c; initial row from g_wldcore_brave_story_saved_cursor */
     s32 upper_window;   /* 0x20 */
     s32 lower_window;   /* 0x24 */
-    u8 unknown_28[8];
+    u8 _unused_28[8];
     s32 entry_count; /* 0x30; rows drawn by 0x80080e54 */
     s32 entries[10]; /* 0x34; entry kinds, text id 0xb83f + kind */
 } wldcore_menu_list_window_level_t;
@@ -865,7 +865,7 @@ typedef struct wldcore_menu_window_pair_render_level {
     s32 first_window;
     s32 second_window; /* 0x04 */
     s32 render_index;  /* 0x08 */
-    s32 field_0c;      /* 0x0c; cleared by 0x800712b0 */
+    s32 _unknown_0c;   /* 0x0c; cleared by 0x800712b0 */
 } wldcore_menu_window_pair_render_level_t;
 
 /* Per-row flag column of the world list panels; the list steps compare it
@@ -931,7 +931,7 @@ typedef struct wldcore_map_dot {
     s32 screen_x;
     s32 screen_y;
     u8 rgb[3];
-    u8 pad2;
+    u8 _padding_33; /* tail padding to 4-byte alignment */
 } wldcore_map_dot_t;
 typedef char wldcore_map_dot_size_must_be_0x34[sizeof(wldcore_map_dot_t) == 0x34 ? 1 : -1];
 
@@ -997,7 +997,7 @@ typedef struct wldcore_map_visibility_level {
     s32 was_set;       /* 0x04; whether the variable was already set */
     s32 delay;         /* 0x08; frames the step handler waits, 0x10 here */
     s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
-    u8 unknown_10[0x4c];
+    u8 _unused_10[0x4c];
 } wldcore_map_visibility_level_t;
 typedef char wldcore_map_visibility_level_size_must_be_0x5c[sizeof(wldcore_map_visibility_level_t) == 0x5c ? 1 : -1];
 
@@ -1015,7 +1015,7 @@ typedef struct wldcore_map_path_level {
     s32 path_id_hi;    /* 0x04; g_wldcore_script_state.args[1] */
     s32 erase;         /* 0x08; step handler walks the path backwards when set */
     s32 pending_sound; /* 0x0c; set so the step handler plays a sound once */
-    u8 unknown_10[0x4c];
+    u8 _unused_10[0x4c];
 } wldcore_map_path_level_t;
 typedef char wldcore_map_path_level_size_must_be_0x5c[sizeof(wldcore_map_path_level_t) == 0x5c ? 1 : -1];
 
@@ -1098,9 +1098,9 @@ s32 wldcore_map_get_dot_snap_step(wldcore_point32_t point, s32* step_x, s32* ste
 /* Descriptor prefix read by 0x8007df84. The word-indexed text table is at
  * a record-relative offset; no fixed whole-record size is established. */
 typedef struct wldcore_window_text_table {
-    u8 unknown_00[8];
+    u8 _unused_00[8];
     s32 window_index; /* 0x08; renderer 0x8008aea0 indexes 52-byte windows */
-    u8 unknown_0c[16];
+    u8 _unused_0c[16];
     s32 table_word_offset; /* 0x1c */
 } wldcore_window_text_table_t;
 typedef char wldcore_text_table_offset_must_be_0x1c
@@ -1173,7 +1173,7 @@ typedef struct wldcore_menu_message_level {
     s32 reload_text;
     s32 saved_menu_result; /* 0x04; g_wldcore_menu_result at push time */
     s32 window_index;      /* 0x08; window record appended by the type-2 push; cleared by the type-3 push */
-    s32 field_0c;          /* 0x0c; set to 8 at push */
+    s32 _unknown_0c;       /* 0x0c; set to 8 at push */
 } wldcore_menu_message_level_t;
 
 /* Provisional: the type-1 world-map close/return level pushed by
@@ -1212,7 +1212,7 @@ typedef struct wldcore_menu_countdown {
  * reads the saved parent window/render indices at +0x08/+0x0c/+0x10. */
 typedef struct wldcore_menu_rumor_detail_level {
     s32 rumor_index;
-    s32 field_04;
+    s32 _unused_04;
     s32 first_window;
     s32 second_window;
     s32 render_index;
@@ -1228,9 +1228,9 @@ typedef struct wldcore_menu_proposition_list_level {
     s32 count_window;  /* 0x08; window sequence 0x64 */
     s32 days_window;   /* 0x0c; window sequence 0x65 */
     s32 render_index;  /* 0x10 */
-    u8 unknown_14[8];
+    u8 _unused_14[8];
     s32 cursor; /* 0x1c; initial row from g_wldcore_active_propositions_saved_cursor */
-    u8 unknown_20[0x10];
+    u8 _unused_20[0x10];
     s32 entry_count; /* 0x30 */
     s32 entries[10]; /* 0x34; indices into g_main_active_propositions */
 } wldcore_menu_proposition_list_level_t;
@@ -1243,7 +1243,7 @@ typedef struct wldcore_menu_variable_list_level {
     s32 render_index;   /* 0x04 */
     s32 first_variable; /* 0x08 */
     s32 cursor;         /* 0x0c; cursor row */
-    u8 unknown_10[0x20];
+    u8 _unused_10[0x20];
     s32 row_count; /* 0x30 */
 } wldcore_menu_variable_list_level_t;
 
@@ -1253,8 +1253,8 @@ typedef struct wldcore_menu_variable_list_level {
 typedef struct wldcore_menu_participant_level {
     s32 left_window;  /* 0x00 */
     s32 right_window; /* 0x04 */
-    s32 field_08;     /* 0x08; cleared at push */
-    s32 field_0c;     /* 0x0c; cleared at push */
+    s32 _unknown_08;  /* 0x08; cleared at push */
+    s32 _unused_0c;   /* 0x0c; cleared at push */
     s32 proposition;  /* 0x10; index into g_main_active_propositions */
     s32 participant;  /* 0x14; slot in participant_indices */
 } wldcore_menu_participant_level_t;
@@ -1265,7 +1265,7 @@ typedef struct wldcore_menu_participant_level {
 typedef struct wldcore_menu_variable_detail_level {
     s32 value;        /* 0x00 */
     s32 render_index; /* 0x04 */
-    s32 field_08;
+    s32 _unknown_08;
     s32 phase; /* 0x0c; set to 1 at push; the detail steps switch on it */
     s32 timer; /* 0x10; cleared at push; text delay or dissolve step, counted per frame */
 } wldcore_menu_variable_detail_level_t;
@@ -1282,7 +1282,7 @@ typedef struct wldcore_menu_event_transition_level {
     s32 phase;           /* 0x0c; 0 spin/scale in, 1 spin out, 2 done */
     s32 fade_phase;      /* 0x10; 0 none, 1 fade overlay ramps by 0x10, 2 ramps by 8 and restores the screen */
     s32 anim_step;       /* 0x14; +2/+4 per update; drives scale, shade, sounds 0x6c/0x6d and phase changes */
-    u8 unknown_18[8];
+    u8 _unused_18[8];
     s32 mode; /* 0x20; argument of 0x8008047c; 2 fades the screen instead */
 } wldcore_menu_event_transition_level_t;
 
@@ -1298,7 +1298,7 @@ typedef struct wldcore_menu_sound_novel_resume_level {
     s32 option_render;  /* 0x0c; text 0xb84b; the cursor rows are relative to its base */
     s32 dissolve_step;  /* 0x10; step of the progressive picture upload, 0 once it finishes */
     s32 cursor_row;     /* 0x14; 0 or 1, toggled by up/down; 1 resets the selected saved record */
-    u8 unknown_18[8];
+    u8 _unused_18[8];
     s32 mode; /* 0x20; argument of the push */
 } wldcore_menu_sound_novel_resume_level_t;
 
@@ -1306,12 +1306,12 @@ typedef struct wldcore_menu_sound_novel_resume_level {
  * wldcore_menu_push_screen_transition_level (0x80088308) and stepped by
  * wldcore_menu_step_screen_transition_level. */
 typedef struct wldcore_menu_screen_transition_level {
-    s32 screen;   /* 0x00; screen type 0x1b..0x2d to reopen */
-    s32 param_a;  /* 0x04 */
-    s32 param_b;  /* 0x08 */
-    s32 field_0c; /* 0x0c */
-    s32 delay;    /* 0x10; 0x14 at push */
-    s32 phase;    /* 0x14; cleared at push */
+    s32 screen;     /* 0x00; screen type 0x1b..0x2d to reopen */
+    s32 param_a;    /* 0x04 */
+    s32 param_b;    /* 0x08 */
+    s32 _unused_0c; /* 0x0c */
+    s32 delay;      /* 0x10; 0x14 at push */
+    s32 phase;      /* 0x14; cleared at push */
 } wldcore_menu_screen_transition_level_t;
 
 /* Provisional: the type-0x16 sound-novel save-confirmation level pushed by
@@ -1321,11 +1321,11 @@ typedef struct wldcore_menu_save_confirm_level {
     s32 cursor_window; /* 0x00 */
     s32 second_window; /* 0x04 */
     s32 render_index;  /* 0x08 */
-    s32 field_0c;
-    s32 fade_out; /* 0x10 */
-    s32 fade_in;  /* 0x14 */
-    s32 field_18; /* 0x18; cleared at push */
-    s32 choice;   /* 0x1c */
+    s32 _unused_0c;
+    s32 fade_out;    /* 0x10 */
+    s32 fade_in;     /* 0x14 */
+    s32 _unknown_18; /* 0x18; cleared at push */
+    s32 choice;      /* 0x1c */
 } wldcore_menu_save_confirm_level_t;
 
 /* Provisional: the type-0x17 history-text level pushed by
@@ -1349,9 +1349,9 @@ typedef struct wldcore_menu_sound_novel_history_level {
  * transition-data address. */
 typedef struct wldcore_menu_location_transition_level {
     s32 window_index; /* 0x00 */
-    u8 unknown_04[8];
+    u8 _unused_04[8];
     s32 location_id; /* 0x0c */
-    u8 unknown_10[0x20];
+    u8 _unused_10[0x20];
     s32 pending_result;       /* 0x30 */
     u8 transition_data[0x28]; /* 0x34 */
 } wldcore_menu_location_transition_level_t;
@@ -1395,7 +1395,7 @@ typedef struct wldcore_menu_location_menu_level {
     wldcore_menu_slot_set_t slots; /* 0x00; slots.result is the confirmed choice */
     s32 delay;                     /* 0x14 */
     s32 fade;                      /* 0x18 */
-    u8 unknown_1c[0x14];
+    u8 _unused_1c[0x14];
     s32 entry_count; /* 0x30 */
 } wldcore_menu_location_menu_level_t;
 
@@ -1408,12 +1408,12 @@ typedef struct wldcore_menu_sound_novel_level {
     s32 right_window;   /* 0x04; header window */
     s32 render_index;   /* 0x08; bar render record */
     s32 overlay_window; /* 0x0c; footer window */
-    u8 unknown_10[0xc];
-    s32 message;    /* 0x1c; argument of the push */
-    s32 unknown_20; /* 0x20; set to 1 at push */
-    s32 countdown;  /* 0x24; 9999 at push */
-    s32 phase;      /* 0x28; cleared at push */
-    s32 fade_timer; /* 0x2c; cleared at push */
+    u8 _unused_10[0xc];
+    s32 message;     /* 0x1c; argument of the push */
+    s32 _unknown_20; /* 0x20; set to 1 at push */
+    s32 countdown;   /* 0x24; 9999 at push */
+    s32 phase;       /* 0x28; cleared at push */
+    s32 fade_timer;  /* 0x2c; cleared at push */
 } wldcore_menu_sound_novel_level_t;
 
 /* Menu-stack level types: the g_wldcore_menu_stack_types value that selects a
@@ -1532,9 +1532,9 @@ typedef char wldcore_menu_stack_record_size_must_be_0x5c[sizeof(wldcore_menu_sta
  * only caller passes a cast wldcore_text_scrollable_window_t, whose fields at
  * those offsets are left_window_index, last_page_row and page_start_row. */
 typedef struct wldcore_window_owner {
-    u8 unknown_00[0x38];
+    u8 _unused_00[0x38];
     s32 window_index; /* 0x38 */
-    u8 unknown_3c[0x14];
+    u8 _unused_3c[0x14];
     s32 last_page_row;  /* 0x50 */
     s32 page_start_row; /* 0x54; flag 0x10 cleared while page_start_row < last_page_row */
 } wldcore_window_owner_t;
@@ -1563,7 +1563,7 @@ typedef struct wldcore_window_render_record {
     u8 red;
     u8 green;
     u8 blue;
-    u8 unknown_33;
+    u8 _padding_33; /* tail padding to 4-byte alignment */
 } wldcore_window_render_record_t;
 typedef char wldcore_render_record_size_must_be_0x34[sizeof(wldcore_window_render_record_t) == 0x34 ? 1 : -1];
 
@@ -1608,11 +1608,11 @@ typedef char wldcore_entry_52_rgb_size_must_be_0x34[sizeof(wldcore_window_entry_
 typedef struct wldcore_window_tint_request {
     s32 window_a;
     s32 render_a;
-    u8 unknown_08[8];
+    u8 _unused_08[8];
     s32 render_color; /* 0x10; render record whose colour is set */
     s32 render_b;
     s32 window_b;
-    u8 unknown_1c[0x24];
+    u8 _unused_1c[0x24];
     s32 window_c; /* 0x40; cleared only by 0x80076744 */
     s32 window_d;
 } wldcore_window_tint_request_t;
@@ -1785,7 +1785,7 @@ typedef struct wldcore_anim_draw_request {
     s32 x;            /* 0x18; screen x, stepped per glyph */
     s32 y;            /* 0x1c */
     CVECTOR color;
-    u8 unknown_24[4];
+    u8 _unused_24[4];
 } wldcore_anim_draw_request_t;
 typedef char wldcore_anim_draw_request_size_must_be_0x28[sizeof(wldcore_anim_draw_request_t) == 0x28 ? 1 : -1];
 

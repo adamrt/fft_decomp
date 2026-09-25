@@ -2,7 +2,7 @@
 
 /* Rare/common item result copied from battle_map_determine_rare_common_item. */
 typedef struct battle_move_found_item {
-    s32 field_0;
+    s32 _unused_00;
     u8 item_id; /* 0x4 */
 } battle_move_found_item_t;
 

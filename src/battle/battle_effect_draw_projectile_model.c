@@ -18,16 +18,16 @@ typedef struct battle_effect_model_gt3 {
     u8 r2, g2, b2, pad2;
     s16 x2, y2;
     u16 uv2;
-    u16 pad3;
+    u16 _padding_26; /* tail padding to 4-byte alignment */
 } battle_effect_model_gt3_t;
 
 /* Decoded model command from battle_effect_decode_next_model_command. */
 typedef struct battle_effect_decoded {
-    u8 unknown_00[3];
+    u8 _unused_00[3];
     u8 opcode;       /* 0x03 */
     u8 colors[4][4]; /* 0x04 */
     u16 uv[5];       /* 0x14 */
-    u8 unknown_1e[0x4a];
+    u8 _unused_1e[0x4a];
     u16 vertices[4]; /* 0x68 */
 } battle_effect_decoded_t;
 

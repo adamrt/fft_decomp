@@ -46,12 +46,12 @@ void open_menu_start_music_test_list_thread(
     bottom = oy - 0x78;
     g_open_music_test_list_params.window_width = width;
     g_open_music_test_list_params.window_height = 0;
-    g_open_music_test_list_params.unknown_10[0] = 0;
-    g_open_music_test_list_params.unknown_10[1] = 0;
+    g_open_music_test_list_params._unknown_10[0] = 0;
+    g_open_music_test_list_params._unknown_10[1] = 0;
     g_open_music_test_list_params.overall_width = width;
     g_open_music_test_list_params.overall_height = 0;
-    g_open_music_test_list_params.unknown_18[0] = 0;
-    g_open_music_test_list_params.unknown_18[1] = 0;
+    g_open_music_test_list_params._unknown_18[0] = 0;
+    g_open_music_test_list_params._unknown_18[1] = 0;
     g_open_music_test_list_params.text_id = 0;
     g_open_music_test_list_params.window_y = bottom;
     ey = extent->y;

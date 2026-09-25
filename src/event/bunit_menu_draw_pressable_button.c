@@ -29,7 +29,7 @@ void bunit_menu_draw_pressable_button(s16 slot, s16 x, s32 y, s16 pressed, s16 b
      * never accessed. */
     struct {
         bunit_oriented_quad_t quad;
-        s16 unused_14[6];
+        s16 _unused_14[6];
     } desc;
     u16 clut;
     s32 speed;

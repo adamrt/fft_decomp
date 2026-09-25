@@ -26,9 +26,9 @@ void battle_map_init_palette_state(void) {
     } while (group < 14);
 
     g_map_background_gradient_transition.active = 0;
-    g_map_background_gradient_transition._unknown04[0] = 0;
+    g_map_background_gradient_transition._unknown_04[0] = 0;
     g_battle_map_ambient_light_transition.active = 0;
-    g_battle_map_ambient_light_transition._unknown04[0] = 0;
+    g_battle_map_ambient_light_transition._unknown_04[0] = 0;
     g_battle_map_palette_state.banks[2].enabled = 0;
     g_battle_map_palette_state.banks[3].enabled = 0;
     g_battle_map_palette_state.banks[4].enabled = 0;

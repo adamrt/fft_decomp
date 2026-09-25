@@ -36,7 +36,7 @@ s32 main_file_build_header(
         PutDrawEnv(&g_main_gfx_draw_envs[1]);
         PutDispEnv(&g_main_gfx_display_envs[1]);
     }
-    header->unknown_00 = 0;
+    header->_unknown_00 = 0;
     header->sector_index = 0;
     header->error_count = 0;
     header->state = MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED;

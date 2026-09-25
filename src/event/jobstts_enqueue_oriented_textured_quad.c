@@ -4,11 +4,11 @@
  * as the tail of EQUIP/BUNIT's oriented-quad descriptors. */
 typedef struct jobstts_oriented_uv {
     u8 u;
-    u8 pad_01;
+    u8 _unused_01;
     u8 v;
-    u8 pad_03;
+    u8 _unused_03;
     u8 uw;
-    u8 pad_05;
+    u8 _unused_05;
     u8 vh;
     u16 clut;  /* 0x08 */
     u16 tpage; /* 0x0a */

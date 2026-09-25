@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 typedef struct battle_effect_frame_record {
-    s16 unknown_00;
+    s16 _unused_00;
     s16 count;
     battle_effect_sprite_part_t parts[1];
 } battle_effect_frame_record_t;

@@ -15,7 +15,7 @@ typedef struct world_card_screen_packets {
     DR_AREA draw_areas[2 * 10];           /* 0xc530: g_world_gfx_draw_area_capacity = 10 */
     u32 otags[2 * 64];                    /* 0xc620: g_world_ot_length = 64 */
     world_gfx_packet_buffer_t buffers[2]; /* 0xc820: the two packet-buffer headers */
-    u8 unknown_c9f8[0x10];                /* 0xc9f8: gap before the published work area */
+    u8 _unused_c9f8[0x10];                /* 0xc9f8: gap before the published work area */
     u8 directory_buffer[0x258];           /* 0xca08: published through g_world_card_directory_buffer */
 } world_card_screen_packets_t;
 

@@ -14,11 +14,11 @@ void world_menu_run_require_help(void) {
     POLY_FT4 shadow_quads[2];
     struct {
         s32 menu_index;
-        s32 pad_b4;
+        s32 _unused_04;
         native_thread_t* help_thread;
-        s32 pad_bc;
-        s32 pad_c0;
-        s32 pad_c4;
+        s32 _unused_0c;
+        s32 _unused_10;
+        s32 _unused_14;
     } local;
     s16* value_ptr;
     register s16 h_right __asm__("$4");

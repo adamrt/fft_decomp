@@ -88,7 +88,7 @@ void battle_text_character_handling_thread(void) {
         rec.dialog_type = (param & 0x1C) | 0x10;
         rec.dialog_type |= battle_unit_check_facing_relative_to_camera(battle_thread_get_current_parameter_3()) + 1;
     }
-    rec.unk_2a = 0;
+    rec._unknown_2a = 0;
     rec.origin_x = 8;
     rec.origin_y = 8;
     rec.box_type = rec.dialog_type & 0x70;

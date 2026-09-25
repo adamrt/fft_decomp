@@ -3,7 +3,7 @@
 
 typedef struct equip_item_detail_delta_buffer {
     world_item_stat_detail_t detail;
-    u8 unknown_40[0x40];
+    u8 _unused_40[0x40];
 } equip_item_detail_delta_buffer_t;
 
 /* Sum the stat changes of swapping each of the five equipment slots from `from_items` to `to_items`. */

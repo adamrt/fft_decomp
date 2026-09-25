@@ -6,7 +6,7 @@
 /* Provisional view of the file loaded at g_open_file_destination: the image
  * pixels, 256 per row, start at 0x5600. */
 typedef struct open_gfx_image_file {
-    u8 unknown_00[0x5600];
+    u8 _unused_0000[0x5600];
     u16 pixels[1];
 } open_gfx_image_file_t;
 

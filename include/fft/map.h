@@ -88,7 +88,7 @@ typedef struct map_color {
     u8 red;
     u8 green;
     u8 blue;
-    u8 _unknown03; /* Copied by the helper; not an established alpha channel. */
+    u8 _unused_03; /* Copied by the helper; not an established alpha channel. */
 } map_color_t;
 
 typedef struct map_background_gradient_colors {
@@ -101,7 +101,7 @@ typedef union map_tile_surface {
     u8 value;
     struct {
         u8 type : 6; /* map_surface_type_e */
-        u8 unknown : 2;
+        u8 _unused_00_bit6 : 2;
     } bits;
 } map_tile_surface_t;
 
@@ -125,7 +125,7 @@ typedef union map_tile_flags_06 {
  * reload and flag-update order at BATTLE 0x801451e4..0x80145244. */
 typedef struct map_tile {
     map_tile_surface_t surface; /* 0x00 */
-    u8 _unknown01;
+    u8 _unknown_01;
     u8 height; /* 0x02; tile height in whole units */
     /* 0x03; bits 0..4 slope half-height, bits 5..7 depth added to height
      * (battle_map_get_tile_data_value selectors 3/4, movement geometry setup). */
@@ -148,8 +148,8 @@ typedef char map_tile_size_must_be_8[(sizeof(map_tile_t) == 8) ? 1 : -1];
  * scus_94221_datatables.txt); their meaning is unproven. */
 typedef struct map_selected_tile {
     s16 surface_type;   /* 0x00 */
-    s16 unknown_02;     /* 0x02 */
-    s16 unknown_04;     /* 0x04 */
+    s16 _unknown_02;    /* 0x02 */
+    s16 _unknown_04;    /* 0x04 */
     u16 display_height; /* 0x06: half height + height * 2 + depth * 2 */
     s16 depth;          /* 0x08 */
 } map_selected_tile_t;

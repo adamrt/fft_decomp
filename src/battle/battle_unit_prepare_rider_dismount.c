@@ -13,18 +13,18 @@ typedef struct battle_unit_rider_path_head {
     u32 path_flag : 1;
     u32 higher_elevation : 1;
     u32 direction : 2;
-    u32 _unknown_10 : 16;
+    u32 _unused_02 : 16;
 } battle_unit_rider_path_head_t;
 
 /* Word view of misc +0x118; the target clears the packed byte at +0x11a
  * (bits 16-23) with a word read-modify-write. */
 typedef struct battle_unit_rider_move_state {
-    u32 _unknown_00 : 16;
+    u32 _unused_00 : 16;
     u32 bit_0 : 1;
     u32 bits_1_3 : 3;
     u32 bit_4 : 1;
     u32 bits_5_7 : 3;
-    u32 _unknown_18 : 8;
+    u32 _unused_03 : 8;
 } battle_unit_rider_move_state_t;
 
 /* Prepare a unit's one-step movement path and dismount it from its rider.

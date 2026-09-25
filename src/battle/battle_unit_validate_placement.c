@@ -5,12 +5,12 @@
  * u8 field lets CSE merge them. */
 typedef struct battle_unit_placement_tile_bits {
     map_tile_surface_t surface;
-    u8 _unknown01;
-    u8 field_02;
+    u8 _unused_01;
+    u8 _unused_02;
     u8 slope_half_height : 5;
     u8 depth : 3;
     u8 slope_type;
-    u8 field_05;
+    u8 _unused_05;
     map_tile_flags_06_t flags_06;
     u8 camera_block_masks;
 } battle_unit_placement_tile_bits_t;

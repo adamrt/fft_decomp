@@ -5,7 +5,7 @@
 typedef struct world_text_glyph_blit_desc {
     s16 x; /* 0x00 */
     s16 y; /* 0x02 */
-    u8 unk_04[4];
+    u8 _unused_04[4];
     s32 width; /* 0x08 */
 } world_text_glyph_blit_desc_t;
 

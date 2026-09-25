@@ -4,7 +4,7 @@
 /* The three VRAM uploads read consecutive regions of FRAME.BIN after its
  * 0x1000-byte prefix. Keep the regions word-aligned for LoadImage. */
 typedef struct main_gfx_frame_bin {
-    u8 unknown_0000[0x1000];
+    u8 _unused_0000[0x1000];
     u32 image[0x8000 / sizeof(u32)];
     u32 palette[0x200 / sizeof(u32)];
     u32 palette_tail[0x600 / sizeof(u32)];

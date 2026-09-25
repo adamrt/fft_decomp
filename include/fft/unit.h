@@ -477,7 +477,7 @@ typedef union battle_unit_birthday {
     u16 value;
     struct {
         u16 birthday : 9;
-        u16 unknown : 3;
+        u16 _unused_01_bit1 : 3;
         u16 zodiac : 4;
     } fields;
 } battle_unit_birthday_t;
@@ -589,7 +589,7 @@ typedef struct battle_stats {
     u8 mount_info;                     /* 0x182 */
     u8 existence;                      /* 0x183; battle_unit_existence_state_e */
     u8 equipped_flags;                 /* 0x184; battle_unit_equipped_flags_e */
-    u8 _pad185;
+    u8 _unused_185;
     u8 has_turn;                 /* 0x186 */
     u8 movement_taken;           /* 0x187 */
     u8 action_taken;             /* 0x188 */
@@ -691,7 +691,7 @@ typedef struct entd_unit {
     u8 ai_target_xy[2];   /* 0x21; AI "stay near" X, Y (copied to battle_stats_t ai_target_x onward) */
     u8 ai_flags;          /* 0x23 */
     u8 ai_target_unit_id; /* 0x24 */
-    u8 _pad25[3];
+    u8 _unused_25[3];
 } entd_unit_t;
 typedef char entd_unit_size_must_be_0x28[(sizeof(entd_unit_t) == 0x28) ? 1 : -1];
 
@@ -755,9 +755,9 @@ typedef struct party_data {
     u8 name[16];              /* 0xbe */
     u8 name_id[2];            /* 0xce; little-endian, accessed bytewise like the ability ids */
     u8 proposition_status;    /* 0xd0; nonzero while unavailable on a proposition */
-    u8 _pad_d1;
+    u8 _unused_d1;
     u8 egg_color; /* 0xd2; create/save/generate unit stores */
-    u8 _pad_d3[0x2d];
+    u8 _unused_d3[0x2d];
 } party_data_t;
 typedef char party_data_size_must_be_0x100[(sizeof(party_data_t) == 0x100) ? 1 : -1];
 

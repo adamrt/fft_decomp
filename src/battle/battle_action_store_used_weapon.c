@@ -10,7 +10,7 @@ typedef struct battle_action_used_weapon_context {
     /* 0x0 */ u8 action_actor_id;
     /* 0x1 */ u8 last_skillset_id;
     /* 0x2 */ s16 last_ability_id;
-    /* 0x4 */ u8 _pad04[4];
+    /* 0x4 */ u8 _unused_04[4];
     /* 0x8 */ u8 used_item_id;
 } battle_action_used_weapon_context_t;
 

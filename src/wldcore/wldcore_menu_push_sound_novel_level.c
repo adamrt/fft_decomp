@@ -89,7 +89,7 @@ void wldcore_menu_push_sound_novel_level(s32 argument) {
     g_wldcore_menu_ordering_table_offset = 9;
     g_wldcore_screen_fade_box_0_priority = 8;
     g_wldcore_screen_fade_box_1_flags |= 8;
-    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.unknown_20 = 1;
+    g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel._unknown_20 = 1;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.countdown = 0x270F;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.fade_timer = 0;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.phase = 0;

@@ -4,7 +4,7 @@
 /* Crystal/treasure pickup result at 0x8006623c. */
 typedef struct battle_unit_crystal_pickup_result {
     s32 result;                 /* 0x00; -1 none, 4 treasure, 2 crystal, |1 learned */
-    u8 unk_04[0x14];            /* 0x04 */
+    u8 _unused_04[0x14];        /* 0x04 */
     u8 learned[19][3];          /* 0x18 */
     u8 unit_index;              /* 0x51 */
     u8 treasure_item;           /* 0x52 */
@@ -16,7 +16,7 @@ extern crystal_pickup_result_t g_main_crystal_pickup_result;
  * bytes. The 2D indexing is what makes loop.c reduce `unit + i * 3` as the
  * outer-loop giv (target `move s6,s2` / `addiu a2,s6,0x99`). */
 typedef struct {
-    u8 unk_00[0x99];
+    u8 _unused_00[0x99];
     u8 learned_abilities[19][3];
 } battle_stats_learned_rows_t;
 

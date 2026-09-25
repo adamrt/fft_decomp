@@ -2,10 +2,10 @@
 
 typedef struct open_movie_ring_status {
     s32 backlog;
-    u8 padding_04[4];
+    u8 _unused_04[4];
     s16 free_sectors;
     s16 read_sectors;
-    u8 padding_0c[4]; /* 16-byte block at sp+0x10 */
+    u8 _unused_0c[4]; /* 16-byte block at sp+0x10 */
 } open_movie_ring_status_t;
 
 void open_movie_update_stream_frame(void) {

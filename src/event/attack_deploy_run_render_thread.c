@@ -112,7 +112,7 @@ void attack_deploy_run_render_thread(void) {
         attack_update_deployment_cursor_primitives(
             frame, (attack_deploy_render_buffer_t*)&g_attack_deploy_render_buffers[frame & 1]);
         if (g_attack_deploy_tiles_only_mode == 0) {
-            battle_gfx_draw_or_append_gpu_primitive(g_attack_deploy_render_buffers[frame & 1].unknown_834);
+            battle_gfx_draw_or_append_gpu_primitive(g_attack_deploy_render_buffers[frame & 1]._unknown_834);
         }
         count = 0;
         tile = g_attack_deploy_render_buffers[frame & 1].tiles[0];

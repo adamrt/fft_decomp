@@ -16,7 +16,7 @@ typedef struct jobstts_number_glyph {
     s16 v;
     u16 w;
     u16 h;
-    u16 reserved[8];
+    u16 _unused_10[8];
 } jobstts_number_glyph_t;
 
 /* Render command that draws the decimal value returned by one of the shared

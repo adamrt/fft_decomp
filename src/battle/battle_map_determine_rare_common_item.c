@@ -1,7 +1,7 @@
 #include "fft/battle.h"
 
 typedef struct battle_map_found_item_result {
-    s32 field_0;
+    s32 _unknown_00;
     u8 item_id; /* 0x8018f8a4; ID of the found item */
 } battle_map_found_item_result_t;
 
@@ -25,6 +25,6 @@ void* battle_map_determine_rare_common_item(battle_stats_t* unit) {
     g_battle_map_rare_item_result.item_id = item_id;
     battle_map_calculate_move_find_item_flag(
         battle_script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
-    g_battle_map_rare_item_result.field_0 = 0;
+    g_battle_map_rare_item_result._unknown_00 = 0;
     return &g_battle_map_rare_item_result;
 }

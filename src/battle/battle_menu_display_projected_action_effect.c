@@ -6,20 +6,20 @@
 typedef struct battle_menu_preview_value_panel {
     s16 x;                /* 0x00 */
     s16 y;                /* 0x02 */
-    u8 unknown_04[4];     /* 0x04 */
+    u8 _unused_04[4];     /* 0x04 */
     s16 format;           /* 0x08; digit count with 0x400 (plus) / 0x800 (minus) sign flags */
     s16 state;            /* 0x0a */
     u16 digits_x;         /* 0x0c */
-    u8 unknown_0e[8];     /* 0x0e */
+    u8 _unused_0e[8];     /* 0x0e */
     s16 hit_percent_kind; /* 0x16; second number entry's kind: 0 draws, 2 hides */
 } battle_menu_preview_value_panel_t;
 
 /* Provisional 0x3c-byte label entries at 0x80168474; entry 1 holds the defaults. */
 typedef struct battle_menu_preview_label_panel {
     u16 x;               /* 0x00 */
-    u8 unknown_02[0xa];  /* 0x02 */
-    u16 unknown_0c;      /* 0x0c */
-    u8 unknown_0e[0x2e]; /* 0x0e */
+    u8 _unused_02[0xa];  /* 0x02 */
+    u16 _unknown_0c;     /* 0x0c */
+    u8 _unused_0e[0x2e]; /* 0x0e */
 } battle_menu_preview_label_panel_t;
 
 extern battle_menu_preview_value_panel_t g_battle_menu_projected_value_panel;
@@ -63,8 +63,8 @@ s32 battle_menu_display_projected_action_effect(POLY_FT4* prim, const battle_ima
     image = 0;
     g_battle_menu_projected_value_panel.hit_percent_kind = 0;
     label->x = g_battle_menu_projected_label_panels[1].x;
-    label_0c = &label->unknown_0c;
-    *label_0c = g_battle_menu_projected_label_panels[1].unknown_0c;
+    label_0c = &label->_unknown_0c;
+    *label_0c = g_battle_menu_projected_label_panels[1]._unknown_0c;
     action = g_battle_menu_preview_target_action;
     g_battle_menu_active_turn_banner.projected_hit_percent = action->attack_accuracy;
     if ((u8)g_battle_preview_target_unit_id == 0xff || action == 0) {

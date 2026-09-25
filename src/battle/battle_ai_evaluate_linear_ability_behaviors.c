@@ -2,7 +2,7 @@
 
 /* Local view of the battle_ai_data_t tile masks as level/y rows. */
 typedef struct battle_ai_tile_rows_view {
-    u8 _pad0000[0xb94];
+    u8 _unused_000[0xb94];
     u16 movable_tiles[2][18];       /* 0x0b94 */
     u16 attack_origin_tiles[2][18]; /* 0x0bdc */
     u16 walkable_tiles[2][18];      /* 0x0c24 */

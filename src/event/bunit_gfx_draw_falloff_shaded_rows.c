@@ -6,7 +6,7 @@
  * per 32-pixel row). */
 typedef struct {
     bunit_gouraud_rect_t rect; /* 0x00 */
-    u8 unk_10[8];              /* 0x10 */
+    u8 _unused_10[8];          /* 0x10 */
     u8 colors[16];             /* 0x18 */
     u8 brightness[16][5];      /* 0x28 */
 } bunit_gfx_shaded_background_work_t;

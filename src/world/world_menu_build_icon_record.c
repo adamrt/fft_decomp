@@ -30,8 +30,8 @@ void world_menu_build_icon_record(RECT* rect, world_menu_icon_thread_param_t* pa
     width = *(u16*)&param->width;
     rect->w = (s16)width >> 2;
     rect->h = param->height;
-    record->unknown_74 = 0;
-    record->unknown_78 = 0;
+    record->_unknown_74 = 0;
+    record->_unknown_78 = 0;
     world_menu_init_sprite_array(record->base.sprites, 4, 0x7cfc);
     world_gfx_init_image_loading((POLY_FT4*)record->base.sprites, (const world_image_location_t*)param,
         (const world_image_location_t*)&param->icon_x, &param->text_image);

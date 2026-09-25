@@ -65,7 +65,7 @@ void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant
     g_main_system_flags |= 0x20000;
 
     depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_stack_records_next[depth].participant.field_08 = 0;
+    g_wldcore_menu_stack_records_next[depth].participant._unknown_08 = 0;
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_PARTICIPANT_DETAIL;
     g_wldcore_menu_stack_depth = depth + 1;
 }

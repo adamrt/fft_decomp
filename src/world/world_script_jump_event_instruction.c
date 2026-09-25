@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 typedef struct world_script_event_instruction {
-    u8 pad[2];
+    u8 _unused_00[2];
     u8 param0;
     u8 param1;
 } world_script_event_instruction_t;

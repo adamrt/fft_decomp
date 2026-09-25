@@ -1,7 +1,7 @@
 #include "fft/battle.h"
 
 typedef struct battle_gfx_misc_data_header {
-    u8 padding[4];
+    u8 _unused_00[4];
     u8 entd_id;
 } battle_gfx_misc_data_header_t;
 

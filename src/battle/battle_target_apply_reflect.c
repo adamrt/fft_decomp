@@ -7,7 +7,7 @@ typedef struct battle_target_reflect_action {
     u8 actor_id;    /* 0x16e */
     u8 skillset_id; /* 0x16f */
     s16 ability_id; /* 0x170 */
-    u8 pad172[6];
+    u8 _unused_04[6];
     u8 reaction_id;       /* 0x178 */
     u8 target_id;         /* 0x179 */
     s16 target_x;         /* 0x17a */

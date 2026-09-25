@@ -3,21 +3,21 @@
 typedef struct battle_menu_cursor_source {
     u16 texture_flags;
     u8 texture_v;
-    u8 _pad03[5];
+    u8 _unused_03[5];
     u16 x;
     u16 y;
-    u8 _pad0c[8];
+    u8 _unused_0c[8];
     u16 width;
     u16 height;
 } battle_menu_cursor_source_t;
 
 typedef struct battle_menu_cursor_frame {
-    u8 _pad00[8];
+    u8 _unused_00[8];
     u16 x;
     u16 y;
     u8 texture_u;
     u8 texture_v;
-    u8 _pad0e[2];
+    u8 _unused_0e[2];
     u16 width;
     u16 height;
 } battle_menu_cursor_frame_t;

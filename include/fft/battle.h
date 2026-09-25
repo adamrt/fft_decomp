@@ -176,13 +176,13 @@ typedef struct battle_ai_command_action {
     u16 calculator_type;
     u16 calculator_multiplier;
     u8 item_id;
-    u8 unknown_09;
+    u8 _unused_09;
     u8 targeting_type;
     u8 target_id;
     u16 target_x;
     u16 target_elevation;
     u16 target_y;
-    u8 unknown_12[2];
+    u8 _unused_12[2];
 } battle_ai_command_action_t;
 typedef char battle_ai_command_action_size_must_be_20[sizeof(battle_ai_command_action_t) == 20 ? 1 : -1];
 
@@ -197,7 +197,7 @@ typedef struct battle_ai_command {
             u16 x;
             u16 elevation;
             u16 y;
-            u8 unknown_06[14];
+            u8 _unused_06[14];
         } move;
         battle_ai_command_action_t action;
     } data;
@@ -256,15 +256,15 @@ typedef struct battle_ai_extended_snapshot {
     u8 faith;                           /* 0x19 */
     u8 transparent_removal_flag;        /* 0x1a */
     u8 hp_bytes[2];                     /* 0x1b */
-    u8 unknown_1d;
-    u16 mp;                /* 0x1e */
-    u8 charged_ability_ct; /* 0x20 */
-    u8 base_attributes[3]; /* 0x21; unit_attribute_index_e */
-    u8 attributes[3];      /* 0x24; unit_attribute_index_e */
-    u8 ct;                 /* 0x27 */
-    u8 x;                  /* 0x28 */
-    u8 position_bytes[2];  /* 0x29; packed unit position */
-    u8 has_turn;           /* 0x2b */
+    u8 _padding_1d;                     /* aligns mp */
+    u16 mp;                             /* 0x1e */
+    u8 charged_ability_ct;              /* 0x20 */
+    u8 base_attributes[3];              /* 0x21; unit_attribute_index_e */
+    u8 attributes[3];                   /* 0x24; unit_attribute_index_e */
+    u8 ct;                              /* 0x27 */
+    u8 x;                               /* 0x28 */
+    u8 position_bytes[2];               /* 0x29; packed unit position */
+    u8 has_turn;                        /* 0x2b */
     u8 movement_taken;
     u8 action_taken;
     u8 auto_battle_setting; /* 0x2e */
@@ -274,7 +274,7 @@ typedef struct battle_ai_extended_snapshot {
     u8 equipment[7];        /* 0x36 */
     u8 brave;               /* 0x3d */
     u8 mount_info;
-    u8 unknown_3f;
+    u8 _padding_3f; /* tail padding to 2-byte alignment */
 } battle_ai_extended_snapshot_t;
 typedef char battle_ai_extended_snapshot_must_be_64[sizeof(battle_ai_extended_snapshot_t) == 64 ? 1 : -1];
 typedef char battle_ai_snapshot_hp_must_be_0x1b[((unsigned long)&((battle_ai_extended_snapshot_t*)0)->hp_bytes == 0x1b)
@@ -313,7 +313,7 @@ typedef struct battle_ai_considered_ability {
     battle_ai_ability_flags_t ai_flags;        /* 0x0c */
     u8 element;                                /* 0x10 */
     u8 mp_cost;                                /* 0x11 */
-    u8 _pad12[2];
+    u8 _padding_12[2];                         /* tail padding to 4-byte alignment */
 } battle_ai_considered_ability_t;
 typedef char battle_ai_considered_ability_size_must_be_0x14[(sizeof(battle_ai_considered_ability_t) == 0x14) ? 1 : -1];
 typedef char battle_ai_status_tail_must_be_at_offset_8
@@ -327,7 +327,7 @@ typedef char battle_ai_status_tail_must_be_at_offset_8
 typedef struct battle_ai_action_data {
     u8 target_flags_set; /* 0x00; set to 1; name provisional */
     u8 reflected_action; /* 0x01; set while evaluating reflected-origin candidates */
-    u8 _pad02;
+    u8 _unused_02;
     u8 wait_facing_hint;       /* 0x03; direction 0..3, 4 keeps current, 5 chooses during Wait */
     battle_ai_coords_t coords; /* 0x04 */
     u8 unit_id;                /* 0x08 */
@@ -336,13 +336,13 @@ typedef struct battle_ai_action_data {
     u16 calculator_type;       /* 0x0c */
     u16 calculator_multiplier; /* 0x0e */
     u8 item_id;                /* 0x10 */
-    u8 _pad11;
+    u8 _unused_11;
     u8 targeting_type;    /* 0x12; 5 tile-targeted, 6 unit-targeted */
     u8 target_id;         /* 0x13 */
     u16 target_x;         /* 0x14; read with lhu */
     u16 target_elevation; /* 0x16; 0 or 1 map layer */
     u16 target_y;         /* 0x18 */
-    u8 _pad1a[2];
+    u8 _unused_1a[2];
     u8 rank_byte;        /* 0x1c; first comparison key at 0x80196db0; meaning unresolved. */
     u8 base_hit_percent; /* 0x1d */
     u16 priority;        /* 0x1e */
@@ -381,7 +381,7 @@ typedef union battle_ai_weapon_data {
         u8 flags_3;
         u8 weapon_id;
         u8 element;
-        u8 field_06[2];
+        u8 _unused_06[2];
     } bytes;
 } battle_ai_weapon_data_t;
 typedef char battle_ai_weapon_data_must_be_8[sizeof(battle_ai_weapon_data_t) == 8 ? 1 : -1];
@@ -451,13 +451,13 @@ typedef union battle_ai_targetability {
         u8 unit_active[BATTLE_UNIT_SLOT_COUNT];
         u8 unit_targetable[BATTLE_UNIT_SLOT_COUNT];
         u8 saved_prefix[16];
-        u8 _pad3a[2];
+        u8 _padding_3a[2]; /* aligns target_setting_flags */
         u32 target_setting_flags;
     } live;
     struct {
-        u8 _pad00[42];
+        u8 _unused_00[42];
         u8 unit_targetable_saved[BATTLE_UNIT_SLOT_COUNT];
-        u8 _pad3f;
+        u8 _unused_3f;
     } snapshot;
 } battle_ai_targetability_t;
 typedef char battle_ai_targetability_size_must_be_64[(sizeof(battle_ai_targetability_t) == 64) ? 1 : -1];
@@ -478,15 +478,15 @@ typedef struct battle_ai_data {
     u16 movable_tiles[0x24];       /* 0x0b94 */
     u16 attack_origin_tiles[0x24]; /* 0x0bdc */
     u16 walkable_tiles[0x24];      /* 0x0c24 */
-    u8 _pad0c6c;
+    u8 _unused_0c6c;
     u8 initial_targeting_state; /* 0x0c6d */
     u8 action_selection_phase;  /* 0x0c6e; 0x801971b8 selects scorer/distance resume; 0x80197ff4 uses 0..4 */
-    u8 _pad0c6f;
-    u8 outcome_evaluation_state; /* 0x0c70 */
-    u8 movement_decision_state;  /* 0x0c71 */
-    u8 search_resume_flag;       /* 0x0c72; distance-search initialization/resume flag
-                                  * at 0x801994f8; reused as a phase flag at 0x8019cd9c. */
-    u8 _pad0c73;
+    u8 _unused_0c6f;
+    u8 outcome_evaluation_state;               /* 0x0c70 */
+    u8 movement_decision_state;                /* 0x0c71 */
+    u8 search_resume_flag;                     /* 0x0c72; distance-search initialization/resume flag
+                                                * at 0x801994f8; reused as a phase flag at 0x8019cd9c. */
+    u8 _padding_0c73;                          /* aligns considered_unit_coords */
     battle_ai_coords_t considered_unit_coords; /* 0x0c74 */
     battle_ai_targetability_t targetability;   /* 0x0c78 */
     /* Included target/strike pairs, not unique units; 0xff disables counting. */
@@ -497,9 +497,9 @@ typedef struct battle_ai_data {
     u8 ability_counter;               /* 0x0cbd */
     u8 ability_targets_enemies_or_mp; /* 0x0cbe; provisional name: any usable ability has (flags & 0x42) == 0x40 */
     u8 crystal_treasure_status;       /* 0x0cbf; 1 crystal, 2 treasure */
-    u8 _pad0cc0[4];
+    u8 _unused_0cc0[4];
     battle_ai_coords_t candidate_coords[3]; /* 0x0cc4; indexed by movement_scenario */
-    u8 _pad0cd0[4];
+    u8 _unused_0cd0[4];
     u8 unit_action_records[16][0x14]; /* 0x0cd4 */
     u16 throw_ability_id;             /* 0x0e14 */
     u8 throw_weapon_id;               /* 0x0e16 */
@@ -533,7 +533,7 @@ typedef struct battle_ai_data {
     u8 saved_ability_ct;                 /* 0x0ed0 */
     u8 saved_current_status;             /* 0x0ed1 */
     u8 saved_inflicted_status;           /* 0x0ed2 */
-    u8 _pad0ed3;
+    u8 _unused_0ed3;
     u8 main_ai_state;             /* 0x0ed4 */
     u8 autobattle_state;          /* 0x0ed5 */
     u8 charging_state;            /* 0x0ed6 */
@@ -548,12 +548,12 @@ typedef struct battle_ai_data {
     u8 math_type_index;       /* 0x0ede; 0..3 */
     u8 math_multiplier_index; /* 0x0edf; 4..7 */
     /* Turn-controller globals saved/restored by 0x8019d37c–0x8019db80. */
-    s32 saved_turn_state_0;    /* 0x0ee0; snapshot of 0x8018f518 */
-    s32 saved_turn_state_1;    /* 0x0ee4; snapshot of 0x8018f51c */
-    s32 saved_turn_state_2;    /* 0x0ee8; snapshot of 0x8018f520 */
-    u16 simulated_turn_events; /* 0x0eec; interturn loop stops at 256 */
-    u8 progress_0eee;          /* 0x0eee */
-    u8 _pad0eef;
+    s32 saved_turn_state_0;                            /* 0x0ee0; snapshot of 0x8018f518 */
+    s32 saved_turn_state_1;                            /* 0x0ee4; snapshot of 0x8018f51c */
+    s32 saved_turn_state_2;                            /* 0x0ee8; snapshot of 0x8018f520 */
+    u16 simulated_turn_events;                         /* 0x0eec; interturn loop stops at 256 */
+    u8 progress_0eee;                                  /* 0x0eee */
+    u8 _padding_0eef;                                  /* aligns ability_lists */
     battle_ai_ability_entry_t ability_lists[16][0x22]; /* 0x0ef0; 0x88 bytes per unit */
     /* Blood Suck/Frog IDs start without unit bits; 0x8019729c/0x80197510
      * OR the acting physical slot into bits 10..15 before loading the entry. */
@@ -582,8 +582,8 @@ typedef struct battle_ai_data {
     u8 ability_processing_done;                           /* 0x19bc */
     u8 action_taken;                                      /* 0x19bd */
     u8 movement_taken;                                    /* 0x19be */
-    u8 _pad19bf[8];
-    u8 field_19c7; /* 0x19c7; last documented byte */
+    u8 _unused_19bf[8];
+    u8 _padding_19c7; /* 0x19c7; last documented byte; tail padding to 4-byte alignment */
 } battle_ai_data_t;
 typedef char battle_ai_data_size_must_be_0x19c8[(sizeof(battle_ai_data_t) == 0x19c8) ? 1 : -1];
 typedef char battle_ai_saved_targetability_must_be_0xca2
@@ -888,11 +888,11 @@ typedef enum battle_motion_flags {
 
 /* Provisional effect state view used by the two keyframe-action dispatchers. */
 typedef struct battle_keyframe_effect_state {
-    u8 _unknown_00[2];
+    u8 _unused_00[2];
     s16 callback_arg_02; /* Passed as callback arg0 by the 0x801a4000 dispatcher. */
-    u8 _unknown_04[0x22 - 4];
+    u8 _unused_04[0x22 - 4];
     u8 callback_state[7]; /* 0x22 */
-    u8 _unknown_29[0xd4 - 0x29];
+    u8 _unused_29[0xd4 - 0x29];
     s32 callback_ptrs[7]; /* 0xd4 */
 } battle_keyframe_effect_state_t;
 
@@ -906,7 +906,7 @@ void battle_rotate_unit(const u8* parameters);
 /* 0x00 selects which panel variant runs; 0x52 is the roster/item id. */
 typedef struct dead_unit_context {
     s32 kind; /* 0x00 */
-    u8 unknown_04[0x4e];
+    u8 _unused_04[0x4e];
     u8 item_id;     /* 0x52 */
     u8 flags[0x40]; /* 0x53 */
 } dead_unit_context_t;
@@ -1314,15 +1314,15 @@ typedef enum battle_game_state {
 /* Provisional 0x14-byte system-function record, table at 0x801692c0
  * (battle_menu_run_system_function_thread, battle_menu_dispatch_system_function). */
 typedef struct battle_system_function {
-    s16 value_00;         /* 0x00; copied to g_battle_menu_current_id */
-    u16 text_id;          /* 0x02; menu entry text id */
-    s16 menu_entry_index; /* 0x04; g_battle_menu_thread_menu_data index */
-    u16 value_06;         /* 0x06; copied to g_battle_menu_system_function_row_actions */
-    u16 value_08;         /* 0x08; menu entry value_20 */
-    u8 _pad0a[2];
+    s16 value_00;               /* 0x00; copied to g_battle_menu_current_id */
+    u16 text_id;                /* 0x02; menu entry text id */
+    s16 menu_entry_index;       /* 0x04; g_battle_menu_thread_menu_data index */
+    u16 value_06;               /* 0x06; copied to g_battle_menu_system_function_row_actions */
+    u16 value_08;               /* 0x08; menu entry value_20 */
+    u8 _padding_0a[2];          /* aligns thread_entry */
     void (*thread_entry)(void); /* 0x0c; started as thread 8 */
     s16 alternate_id;           /* 0x10; replaces the id when navigation messages are not On */
-    u8 _pad12[2];
+    u8 _padding_12[2];          /* tail padding to 4-byte alignment */
 } battle_system_function_t;
 typedef char battle_system_function_size_must_be_0x14[(sizeof(battle_system_function_t) == 0x14) ? 1 : -1];
 
@@ -1337,7 +1337,7 @@ typedef struct battle_heap_node {
 
 typedef struct battle_heap_owner_list {
     battle_heap_node_t* head;
-    s32 unk4;
+    s32 _unused_04;
 } battle_heap_owner_list_t;
 
 /* A random value between `min` and `max`, in either order. Spelled with rand()
@@ -1679,11 +1679,11 @@ typedef struct battle_unit_sprite_block {
     u16 frame_bias;                            /* 0x14 */
     u16 loop_count;                            /* 0x16 */
     u16 flags;                                 /* 0x18 */
-    u8 _pad1a[2];                              /* 0x1a */
+    u8 _padding_1a[2];                         /* 0x1a; aligns shp */
     battle_gfx_weapon_shp_t* shp;              /* 0x1c */
     u8** seq;                                  /* 0x20 */
     battle_gfx_sprite_display_data_t* display; /* 0x24 */
-    u8 _unknown_28[8];                         /* 0x28 */
+    u8 _unused_28[8];                          /* 0x28 */
 } battle_unit_sprite_block_t;
 typedef char battle_unit_sprite_block_size_must_be_0x30[(sizeof(battle_unit_sprite_block_t) == 0x30) ? 1 : -1];
 
@@ -1693,7 +1693,7 @@ typedef char battle_unit_sprite_block_size_must_be_0x30[(sizeof(battle_unit_spri
 typedef union battle_unit_command_state {
     battle_ai_command_t ai;
     struct {
-        u8 unknown_00[12];
+        u8 _unused_00[12];
         s32 facing_hint;
         SVECTOR target_panel; /* vx = panel x, vy = map level, vz = panel y */
     } cursor;
@@ -1749,8 +1749,8 @@ typedef struct battle_unit_misc_data {
     battle_gfx_sprite_display_flags_t sprite_display_flags; /* 0x012 */
     /* 0x014; SEQ opcode 0xe2, indexes g_battle_gfx_animation_layer_priorities. */
     u16 layer_priority;
-    u8 _pad016[2];
-    VECTOR real; /* 0x018; vx = x, vy = height, vz = map depth */
+    u8 _padding_016[2]; /* aligns real */
+    VECTOR real;        /* 0x018; vx = x, vy = height, vz = map depth */
     /* Per-frame real-coordinate velocity; the jump-start distortion animation
      * (0x8008a35c) copies all four words as one block. */
     VECTOR velocity; /* 0x028 */
@@ -1760,7 +1760,7 @@ typedef struct battle_unit_misc_data {
     s32 step_speed; /* 0x03c; interpolation speed of the current step; 0x2000 when a move/climb starts, raised by
                        jump gravity */
     SVECTOR screen; /* 0x040; vx = x, vy = height, vz = map depth */
-    u8 _pad048[8];
+    u8 _unused_048[8];
     /* Two more SVECTORs (vx = x, vy = height, vz = map depth) at 0x050 and
      * 0x060, used to create vectors for effects processing.
      * battle_unit_shift_forward_or_backward and
@@ -1774,7 +1774,7 @@ typedef struct battle_unit_misc_data {
      * only ever cleared with them. */
     SVECTOR screen_offset;   /* 0x058 */
     SVECTOR effect_vector_2; /* 0x060 */
-    u8 _pad068[4];
+    u8 _unused_068[4];
     /* Camera-relative facing, ((camera yaw + facing) & 0xfff) / 1024 and / 256,
      * stored at 0x80085c0c; copied from mount to rider at 0x80069174/0x80069180;
      * read as signed halfwords by battle_get_alternate_facing_quadrant_* (% 4) and
@@ -1812,7 +1812,7 @@ typedef struct battle_unit_misc_data {
     u8 movement_path_count; /* 0x09c */
     u8 movement_path[0x7c]; /* 0x09d..0x118; step: direction | 0x20 higher elevation | jump length */
     u8 movement_flags;      /* 0x119; battle_move_effective_flags_e bits */
-    u8 _pad11a;
+    u8 _unused_11a;
     u8 mount_byte;                /* 0x11b */
     u8 movement_value;            /* 0x11c */
     u8 last_path_count;           /* 0x11d; receives prior movement-path count at 0x8006d7b8 */
@@ -1820,7 +1820,7 @@ typedef struct battle_unit_misc_data {
     u8 previous_unit_id_plus_one; /* 0x11f */
     s16 item_get_camera_x;        /* 0x120 */
     s16 item_get_camera_y;        /* 0x122 */
-    u8 _pad124[4];
+    u8 _unused_124[4];
     u32 otag_depth_index;              /* 0x128 */
     s32 status_bubble_gte_flag;        /* 0x12c; RotTrans flag output while positioning the status bubble */
     u8 mount_state;                    /* 0x130; battle_misc_mount_state_e */
@@ -1855,7 +1855,7 @@ typedef struct battle_unit_misc_data {
      * 0x188); battle_unit_set_map_coords_after_death_dismount copies them to
      * map_x/map_z/map_y.  attack_result_animation_update passes &dismount. */
     battle_dismount_coords_t dismount; /* 0x184 */
-    u8 _pad18a[2];
+    u8 _unused_18a[2];
     /* Current action data, 0x18c..0x1d7. */
     u8 action_18c;           /* 0x18c; "Reaction ID / Attacking unit ID? - Used Ability ID" */
     u8 target_count;         /* 0x18d; attacker_face_targets, update_anim_display_for_all_targets */
@@ -1868,7 +1868,7 @@ typedef struct battle_unit_misc_data {
     u8 continue_attack;      /* 0x1a4 */
     u8 current_hit_number;   /* 0x1a5 */
     u8 reaction_id_1a6;      /* 0x1a6 */
-    u8 _unknown_1a7;
+    u8 _unused_1a7;
     u8 target_new_x;         /* 0x1a8; post-action knockback destination (transfer_target_coordinates) */
     u8 target_new_y;         /* 0x1a9 */
     u8 target_new_map_level; /* 0x1aa */
@@ -1889,7 +1889,7 @@ typedef struct battle_unit_misc_data {
     /* Action-display image IDs, not canonical status IDs.  Bit 0x80 marks a
      * removal; the dispatcher consumes entries from the end. */
     u8 status_display_image_list[BATTLE_ACTION_STATUS_DISPLAY_CAPACITY]; /* 0x1bc..0x1d6 */
-    u8 _pad1d7;
+    u8 _padding_1d7;                                                     /* aligns sprite_graphic_trigger */
     /* The unit_t sprite data block starts at 0x1d8; the trigger is written
      * as a halfword by animate_and_set_enemy_level_data_by_misc_id.
      * 0x1d8..0x207 is the unit's battle_unit_anim_state_t, spelled out here. */
@@ -1906,7 +1906,7 @@ typedef struct battle_unit_misc_data {
     u16 animation_frame_bias;      /* 0x1ec */
     u16 animation_loop_count;      /* 0x1ee */
     u16 animation_flags;           /* 0x1f0; toggled by script opcodes 0xec/0xeb */
-    u8 _pad1f2[2];                 /* 0x1f2 */
+    u8 _padding_1f2[2];            /* 0x1f2; aligns shp_data */
     /* unit_t sprite SHP/SEQ pointers (0x1f4/0x1f8); poach_morbol_transformation
      * rewrites both for the Malboro spritesheet. */
     battle_gfx_unit_shp_frame_tables_t* shp_data;             /* 0x1f4 */
@@ -1916,9 +1916,9 @@ typedef struct battle_unit_misc_data {
     battle_gfx_sprite_display_data_t* sprite_display_section; /* 0x204 */
     battle_unit_sprite_block_t sprite_blocks[3];              /* 0x208..0x297 */
     u8 shadow_graphic_trigger;                                /* 0x298; set_/unset_shadow_graphic_trigger_by_misc_id */
-    u8 shadow_dirty;   /* 0x299; bit 0 set when a step lands, cleared on shadow redraw */
-    u8 shadow_counter; /* 0x29a; shadow animation counter (battle_gfx_draw_unit_shadow) */
-    u8 _pad29b;
+    u8 shadow_dirty;        /* 0x299; bit 0 set when a step lands, cleared on shadow redraw */
+    u8 shadow_counter;      /* 0x29a; shadow animation counter (battle_gfx_draw_unit_shadow) */
+    u8 _padding_29b;        /* aligns shadow_quad */
     SVECTOR shadow_quad[4]; /* 0x29c; shadow corners written by battle_gfx_calculate_sprite_shadow_from_tile_slope */
     /*
      * Numerical display / status text (0x2bc..0x2d8).
@@ -1926,17 +1926,17 @@ typedef struct battle_unit_misc_data {
      * the activation flag, zero the animation progress and select FRAME.BIN in
      * the three numeric battle_gfx_sprite_display_data_t slots.
      */
-    u8 numeric_display_active; /* 0x2bc */
-    u8 _pad2bd;
+    u8 numeric_display_active;                             /* 0x2bc */
+    u8 _padding_2bd;                                       /* aligns numeric_display_selector */
     u16 numeric_display_selector;                          /* 0x2be; battle_numeric_display_selector_e */
     u16 numeric_display_value;                             /* 0x2c0; number to display */
     s16 numeric_display_progress;                          /* 0x2c2; animation progress, capped at 0x15 */
     battle_gfx_sprite_display_data_t* numeric_displays[3]; /* 0x2c4, 0x2c8, 0x2cc */
     u8 item_ability_display;                               /* 0x2d0; item ability display (byte store) */
-    u8 _pad2d1;                                            /* 0x2d1 */
+    u8 _unused_2d1;                                        /* 0x2d1 */
     s8 item_get_x_offset;                                  /* 0x2d2; setup_item_get_rendering reads (s8) */
     s8 item_get_y_offset;                                  /* 0x2d3 */
-    u8 _pad2d4[4];
+    u8 _unused_2d4[4];
     battle_gfx_sprite_display_data_t* item_display; /* 0x2d8; item_t/Equip display pointer */
     /* Status bubble (0x2dc..0x2e7);
      * battle_gfx_update_status_bubble_graphic_trigger sets the flag and clears
@@ -1954,7 +1954,7 @@ typedef struct battle_unit_misc_data {
     /* Six vectors used during sprite rotation/scaling render (0x2ec);
      * battle_gfx_init_position_vector_copies seeds all six from screen_x/z/y. */
     SVECTOR display_svectors[6]; /* 0x2ec..0x31b */
-    u8 _unknown_31c[0x124];      /* 0x31c..0x43f: sprite display sections */
+    u8 _unused_31c[0x124];       /* 0x31c..0x43f: sprite display sections */
 } battle_unit_misc_data_t;
 typedef char battle_misc_data_size_must_be_0x440[(sizeof(battle_unit_misc_data_t) == 0x440) ? 1 : -1];
 typedef char
@@ -2012,7 +2012,7 @@ typedef char battle_camera_rotation_size_must_be_6[sizeof(battle_camera_rotation
 typedef struct battle_camera_key {
     s32 time;  /* 0x00; cumulative frame of this key */
     s32 value; /* 0x04 */
-    u8 unknown_08[8];
+    u8 _unused_08[8];
 } battle_camera_key_t;
 
 /* Provisional per-component camera fusion track (0xa4 bytes). */
@@ -2277,7 +2277,7 @@ enum { BATTLE_EFFECT_FLAGS_0006 = 0x0006 };
 /* Verified prefix only: BATTLE 0x801aa7c4 reads/writes a halfword at +6.
  * Neither the full record nor the individual bit meanings are known. */
 typedef struct battle_effect_flag_prefix {
-    u8 unknown_00[6];
+    u8 _unused_00[6];
     u16 flags;
 } battle_effect_flag_prefix_t;
 typedef char
@@ -2306,12 +2306,12 @@ typedef struct battle_effect_secondary_data {
     s16 parameter;       /* 0x06; caster sprite palette, or the projectile animation's high half */
     s32 phase;           /* 0x08 */
     s16 timer;           /* 0x0c */
-    u8 _unknown_0e[2];
+    u8 _unused_0e[2];
     battle_effect_secondary_block_t caster_block; /* 0x10; from the init record's caster block */
     union {
         battle_effect_secondary_block_t block; /* from the init record's target block */
         struct {
-            s16 _unknown_1a;
+            s16 _unused_00;
             s16 x; /* 0x1c; fall-dust position, 1/16 of the real coordinate */
             s16 z; /* 0x1e */
             s16 y; /* 0x20 */
@@ -2341,11 +2341,11 @@ typedef struct battle_effect_target {
     union {
         u8 misc_id;
         s16 tile_x;
-        u8 bytes[2];   /* bytes[1]: 2 selects the child timeline's secondary-effect path */
-    } id;              /* 0x02 */
-    s16 map_z;         /* 0x04 */
-    s16 tile_y;        /* 0x06 */
-    u8 _unknown_08[2]; /* 0x08 */
+        u8 bytes[2];  /* bytes[1]: 2 selects the child timeline's secondary-effect path */
+    } id;             /* 0x02 */
+    s16 map_z;        /* 0x04 */
+    s16 tile_y;       /* 0x06 */
+    u8 _unused_08[2]; /* 0x08 */
 } battle_effect_target_t;
 typedef char battle_effect_target_size_must_be_0x0a[(sizeof(battle_effect_target_t) == 0x0a) ? 1 : -1];
 
@@ -2366,7 +2366,7 @@ typedef struct battle_effect_secondary_init {
         } fields;
         battle_effect_secondary_block_t block;
     } target; /* 0x04; first of up to 16 ten-byte target blocks */
-    u8 _unknown_0e[0x96];
+    u8 _unused_0e[0x96];
     union {
         struct {
             s16 target_type; /* 0xa4; copied whole from g_battle_effect_targets[16] */
@@ -2386,7 +2386,7 @@ typedef char battle_secondary_effect_init_size_must_be_0xc8[(sizeof(battle_effec
  * g_battle_effect_secondary_handlers handler. */
 typedef struct battle_effect_secondary_animation {
     u8 function_id; /* 0x00 */
-    u8 _unknown_01; /* 0x01 */
+    u8 _padding_01; /* 0x01; aligns parameter */
     s16 parameter;  /* 0x02; lh 0x801b84de[id * 4], read by the arrow/projectile handlers */
 } battle_effect_secondary_animation_t;
 
@@ -2395,15 +2395,15 @@ typedef struct battle_effect_secondary_animation {
  * 0x80072d8c indexes the array directly and the consumer walks it by
  * `idx * 8`, and only these three fields are ever read or written. */
 typedef struct battle_post_effect_msg {
-    u8 code;   /* 0x00 message code passed to battle_menu_init_system_function */
-    u8 unit;   /* 0x01 misc ID of the acting unit */
-    u8 pad[2]; /* 0x02 */
-    s32 value; /* 0x04 reported amount */
+    u8 code;           /* 0x00 message code passed to battle_menu_init_system_function */
+    u8 unit;           /* 0x01 misc ID of the acting unit */
+    u8 _padding_02[2]; /* 0x02; aligns value */
+    s32 value;         /* 0x04 reported amount */
 } battle_post_effect_msg_t;
 
 /* Effect file preamble and offsets to its three following sections. */
 typedef struct battle_effect_resource {
-    u8 unknown_00[0xc];
+    u8 _unused_00[0xc];
     s32 words[6];
 } battle_effect_resource_t;
 
@@ -2425,13 +2425,13 @@ typedef struct battle_effect_group {
     u8 spawn_start_frame; /* 0x00 */
     u8 spawn_end_frame;   /* 0x01 */
     u8 count;             /* 0x02 */
-    u8 unknown_03[7];
+    u8 _unused_03[7];
     /* 0x0a; emitter position[1] (vertical spawn offset); the level-up handler
      * seeds group 5's with -8, then lowers it by 3 per frame. */
     s16 position_y;
-    u8 unknown_0c[0x1c];
+    u8 _unused_0c[0x1c];
     u8 spawns_per_frame; /* 0x28; slots one frame may start */
-    u8 unknown_29[5];
+    u8 _unused_29[5];
 } battle_effect_group_t;
 typedef char battle_effect_group_size_must_be_0x2e[(sizeof(battle_effect_group_t) == 0x2e) ? 1 : -1];
 
@@ -2441,7 +2441,7 @@ typedef struct battle_effect_charge_trail {
     DVECTOR points[7]; /* 0x00; screen positions, newest at age % 7 */
     s16 age;           /* 0x1c */
     u8 slot_id;        /* 0x1e */
-    u8 _unknown_1f;
+    u8 _padding_1f;    /* tail padding to 2-byte alignment */
 } battle_effect_charge_trail_t;
 
 typedef struct battle_effect_charge_state {
@@ -2515,10 +2515,10 @@ typedef struct battle_effect_coord_data {
  * from the gaps between the observed offsets. */
 typedef struct battle_effect_keyframe_table {
     u16 frame_start[0x18]; /* 0x00 */
-    u8 _unknown_30;        /* 0x30 */
+    u8 _unused_30;         /* 0x30 */
     u8 action[0x19];       /* 0x31 */
     u16 selector[0x18];    /* 0x4a */
-    u8 _unknown_7a[4];     /* 0x7a */
+    u8 _unused_7a[4];      /* 0x7a */
     s16 last_index;        /* 0x7e */
 } battle_effect_keyframe_table_t;
 typedef char battle_effect_keyframe_table_size_must_be_0x80[(sizeof(battle_effect_keyframe_table_t) == 0x80) ? 1 : -1];
@@ -2562,12 +2562,12 @@ typedef struct effect_timeline_color_tracks {
 typedef struct battle_effect_tick_sound_track {
     u16 duration[17]; /* 0x00 */
     u8 kind[17];      /* 0x22; 0/1 none, 2+ on-hit sound index + 2 */
-    u8 _unknown_33;
-    s16 count; /* 0x34 */
+    u8 _padding_33;   /* aligns count */
+    s16 count;        /* 0x34 */
 } battle_effect_tick_sound_track_t;
 
 typedef struct battle_effect_tick_channels {
-    u16 _unknown_00;
+    u16 _unused_000;
     u16 duration;                                 /* 0x002 */
     battle_effect_keyframe_table_t particle[5];   /* 0x004 */
     battle_effect_tick_sound_track_t sound[3];    /* 0x284 */
@@ -2582,7 +2582,7 @@ typedef struct battle_effect_tick_channels {
  * address minus two bytes (a raw byte offset: this view and
  * battle_effect_group_t are not yet reconciled). */
 typedef struct battle_effect_emitter_values {
-    u8 _unknown_00[6];   /* 0x00 */
+    u8 _unused_00[6];    /* 0x00 */
     u16 anchor_flags;    /* 0x06; 0xe00 selects the spawn anchor */
     u16 motion_flags;    /* 0x08; 0x410 selects the orientation mode */
     s16 position[3];     /* 0x0a */
@@ -2593,7 +2593,7 @@ typedef struct battle_effect_emitter_values {
     s16 weight_max;      /* 0x24 */
     u16 speed_min;       /* 0x26 */
     u16 speed_max;       /* 0x28 */
-    u8 _unknown_2a[2];   /* 0x2a */
+    u8 _unused_2a[2];    /* 0x2a */
     s8 lifetime_min;     /* 0x2c */
     s8 lifetime_max;     /* 0x2d */
 } battle_effect_emitter_values_t;
@@ -2612,9 +2612,9 @@ typedef char battle_effect_sprite_part_size_must_be_0x18[(sizeof(battle_effect_s
 
 /* Provisional arc descriptor handed to battle_effect_trace_arc_trajectory_path. */
 typedef struct battle_effect_arc {
-    s16 unk_00; /* 0x00 */
-    u16 yaw;    /* 0x02 */
-    s16 pitch;  /* 0x04 */
+    s16 _unused_00; /* 0x00 */
+    u16 yaw;        /* 0x02 */
+    s16 pitch;      /* 0x04 */
 } battle_effect_arc_t;
 
 /* Arc endpoint handed to the per-arc obstacle test: the unit's raised tile
@@ -2670,7 +2670,7 @@ typedef struct battle_effect_g3_prim {
 typedef struct battle_effect_arrow_buffer {
     battle_effect_g3_prim_t g3[2][4]; /* 0x000 */
     POLY_G4 g4[2][13];                /* 0x0e0 */
-    u8 _unknown488[0x800];
+    u8 _unused_488[0x800];
 } battle_effect_arrow_buffer_t;
 typedef char battle_effect_arrow_buffer_size_must_be_0xc88[(sizeof(battle_effect_arrow_buffer_t) == 0xc88) ? 1 : -1];
 
@@ -2695,13 +2695,13 @@ typedef struct effect_camera_keyframes_21 {
  * sound tracks and colour tracks follow, then the 21-entry main and cleanup
  * camera tables. */
 typedef struct effect_misc_data {
-    u16 _unknown_00;
+    u16 _unused_0000;
     u16 phase2_duration; /* 0x002; effect script 0x1e adds it to the phase-2 start */
     u16 phase1_duration; /* 0x004 */
     u16 spawn_delay;     /* 0x006; frames between child spawns (see effect_flags_section_t) */
-    u8 _unknown_08[2];
+    u8 _unused_0008[2];
     u16 phase2_delay; /* 0x00a; battle_effect_find_next_keyframe also bounds its scan with it */
-    u8 _unknown_0c[0x6a6];
+    u8 _unused_000c[0x6a6];
     s16 frame_thresholds[17];                               /* 0x6b2; per-keyframe frame threshold */
     s16 position[17][3];                                    /* 0x6d4; camera position channel */
     s16 target[17][3];                                      /* 0x73a; camera target channel */
@@ -2738,7 +2738,7 @@ typedef struct battle_effect_sprite_table_header {
 
 typedef struct battle_effect_sprite_frame {
     u16 flags; /* 0x00; 0x200 selects the semi-transparent code, 0xe0 the texture-page mode bits */
-    u8 unknown_02[6];
+    u8 _unused_02[6];
     u8 u;           /* 0x08 */
     u8 v;           /* 0x09 */
     u8 width;       /* 0x0a */
@@ -2750,7 +2750,7 @@ typedef struct battle_effect_sprite_frame {
  * word and the colour as four bytes; this routine writes the tag's length byte
  * and copies the colour as a word, so both are named here. */
 typedef struct battle_effect_quad_prim {
-    u8 unknown_00[3]; /* 0x00; tag address */
+    u8 _unused_00[3]; /* 0x00; tag address */
     u8 length;        /* 0x03; tag word count */
     union {
         u32 packed;
@@ -2772,18 +2772,18 @@ typedef struct battle_effect_quad_prim {
     s32 xy2;   /* 0x18 */
     u8 u2;
     u8 v2;
-    u16 pad2;
-    s32 xy3; /* 0x20 */
+    u16 _padding_1e; /* aligns xy3 */
+    s32 xy3;         /* 0x20 */
     u8 u3;
     u8 v3;
-    u16 pad3;
+    u16 _padding_26; /* tail padding to 4-byte alignment */
 } battle_effect_quad_prim_t;
 
 /* The 0xcc battle_effect_slot_t, with the fields this sprite
  * path uses named. The colour word's top byte is the sprite frame index: the
  * quad's code byte overwrites it immediately after the word copy. */
 typedef struct battle_effect_sprite_slot {
-    u8 unknown_00[4];
+    u8 _unused_00[4];
     DR_MODE modes[2][2];                /* 0x04; two draw modes per buffer */
     battle_effect_quad_prim_t quads[2]; /* 0x34 */
     union {
@@ -2796,13 +2796,13 @@ typedef struct battle_effect_sprite_slot {
         } field;
     } color;  /* 0x84 */
     u16 clut; /* 0x88 */
-    u8 unknown_8a[4];
+    u8 _unused_8a[4];
     s16 angle; /* 0x8e */
-    u8 unknown_90[0xc];
+    u8 _unused_90[0xc];
     s32 x; /* 0x9c */
     s32 y; /* 0xa0 */
     s32 z; /* 0xa4 */
-    u8 unknown_a8[0x24];
+    u8 _unused_a8[0x24];
 } battle_effect_sprite_slot_t;
 typedef char battle_effect_sprite_slot_size_must_be_0xcc[sizeof(battle_effect_sprite_slot_t) == 0xcc ? 1 : -1];
 
@@ -2863,7 +2863,7 @@ typedef struct effect_sound_channel {
 typedef struct effect_flags_section {
     u32 flags;                          /* 0x00; EFFECT_FLAG_* bits */
     u8 spawn_delay_override;            /* 0x04 */
-    u8 _unknown_05[3];                  /* 0x05 */
+    u8 _unused_05[3];                   /* 0x05 */
     effect_sound_channel_t channels[4]; /* 0x08 */
 } effect_flags_section_t;
 typedef char effect_flags_section_size_must_be_0x18[(sizeof(effect_flags_section_t) == 0x18) ? 1 : -1];
@@ -2974,7 +2974,7 @@ typedef struct battle_effect_rotation_vector {
     u16 x;
     u16 y;
     u16 z;
-    u16 _padding_06;
+    u16 _unused_06;
 } battle_effect_rotation_vector_t;
 
 /* Color and count header followed by one pointer for each sprite part. */
@@ -2988,13 +2988,13 @@ typedef struct battle_effect_sprite_block {
             u8 sprite_count;
         } field;
     } color;
-    u8 unknown_04[4];
+    u8 _unused_04[4];
     struct battle_effect_sprite_part* frames[1];
 } battle_effect_sprite_block_t;
 
 /* Temporary effect-script workspace cleared by opcode 0x2A. */
 typedef struct battle_effect_temp_data {
-    u8 _unknown_00[0x26];
+    u8 _unused_00[0x26];
     s16 target_index; /* 0x26 */
     s16 frame;        /* 0x28 */
     s16 values_2a[13];
@@ -3020,12 +3020,12 @@ typedef struct effect_list_node {
     s16 z;                     /* 0x10 */
     s16 screen_rotation_angle; /* 0x12: battle_effect_update_node_from_work stores the velocity heading here */
     u8 depth_mode;             /* 0x14: third byte of the frame opcode; OT depth adjustment */
-    u8 _unknown_15;
-    s16 frame_timer;                            /* 0x16: counts down by 2; the next opcode runs at <= 0 */
-    u8* sequence_data;                          /* 0x18: base of the u8 animation sequence */
-    s16 sequence_offset;                        /* 0x1c: byte offset of the next sequence opcode */
-    s8 frame_group_index;                       /* 0x1e: indexes g_battle_effect_frame_data */
-    s8 sprite_frame_index;                      /* 0x1f: frame id from the sequence opcode */
+    u8 _padding_15;            /* aligns frame_timer */
+    s16 frame_timer;           /* 0x16: counts down by 2; the next opcode runs at <= 0 */
+    u8* sequence_data;         /* 0x18: base of the u8 animation sequence */
+    s16 sequence_offset;       /* 0x1c: byte offset of the next sequence opcode */
+    s8 frame_group_index;      /* 0x1e: indexes g_battle_effect_frame_data */
+    s8 sprite_frame_index;     /* 0x1f: frame id from the sequence opcode */
     battle_effect_sprite_block_t* sprite_block; /* 0x20 */
 } effect_list_node_t;
 typedef char assert_effect_list_node_size[sizeof(effect_list_node_t) == 0x24 ? 1 : -1];
@@ -3036,7 +3036,7 @@ typedef char assert_effect_list_node_size[sizeof(effect_list_node_t) == 0x24 ? 1
 typedef struct effect_work_record {
     struct effect_work_record* prev; /* 0x00 */
     struct effect_work_record* next; /* 0x04 */
-    u8 _unknown_08[0x04];
+    u8 _unused_08[0x04];
     s32 position[3]; /* 0x0c: x/y/z, 20.12 fixed; battle_effect_update_node_from_work copies >> 12 to the node */
     s32 velocity[3]; /* 0x18: x/y/z; battle_effect_update_node_from_work orients the node along it */
     s32 wave_y[3];   /* 0x24: randomized vertical-wave components from the emitter */
@@ -3045,9 +3045,9 @@ typedef struct effect_work_record {
     s16 anchor_y;    /* 0x3e: compared against position y >> 12 */
     s16 anchor_z;    /* 0x40: compared against position z >> 12 */
     s16 lifetime;    /* 0x42: decremented by the particle update */
-    u8 _unknown_44[0x02];
+    u8 _unused_44[0x02];
     u8 colour_curves[3]; /* 0x46: r/g/b rows of g_effect_palette_table */
-    u8 _unknown_49[0x03];
+    u8 _unused_49[0x03];
     u16 kind_flags;             /* 0x4c: bits 12-15 select how data is allocated/released; bit 1 orients to velocity */
     u16 flags;                  /* 0x4e: bit 6 = per-channel colour curves in use */
     s16 palette_frame;          /* 0x50: column of the colour-curve rows */
@@ -3064,7 +3064,7 @@ typedef char assert_effect_work_record_size[sizeof(effect_work_record_t) == 0x58
  * battle_effect_spawn_emitter_particles initialises battle_effect_alloc_work
  * records through this view. */
 typedef struct effect_particle_physics_view {
-    u8 _unknown_00[0x04];
+    u8 _unused_00[0x04];
     struct effect_particle_physics_view* next; /* 0x04 */
     s16 inertia;                               /* 0x08 */
     s16 weight;                                /* 0x0a */
@@ -3074,10 +3074,10 @@ typedef struct effect_particle_physics_view {
     s32 drag[3];                               /* 0x30 */
     s16 target[3];                             /* 0x3c */
     s16 lifetime;                              /* 0x42 */
-    u8 _unknown_44;
-    u8 homing_curve_index;    /* 0x45 */
-    u8 colour_curve_index[3]; /* 0x46 */
-    u8 _unknown_49;
+    u8 _unused_44;
+    u8 homing_curve_index;     /* 0x45 */
+    u8 colour_curve_index[3];  /* 0x46 */
+    u8 _padding_49;            /* aligns homing_strength */
     s16 homing_strength;       /* 0x4a */
     u16 kind_flags;            /* 0x4c: the emitter's work kind flags (battle_effect_spawn_emitter_particles) */
     u16 child_spawn_flags;     /* 0x4e */
@@ -3089,22 +3089,22 @@ typedef struct effect_particle_physics_view {
 typedef char assert_effect_particle_physics_view_size[sizeof(effect_particle_physics_view_t) == 0x58 ? 1 : -1];
 
 typedef struct effect_record {
-    u16 next_index;    /* 0x00: next record in the current intrusive list */
-    s16 record_index;  /* 0x02: initialized to this record's array index */
-    s16 parent_index;  /* 0x04: spawning record (g_battle_effect_current_record_index) for script opcode 02 */
-    s16 pc;            /* 0x06: byte offset of the current instruction in script */
-    u8* script;        /* 0x08 */
-    s16 phase_ids[4];  /* 0x0c: child record indexes stored by script opcode 02 */
-    s16 counters[4];   /* 0x14: opcodes 20..23 select one by the argument's top two bits */
-    u16 work_count;    /* 0x1c: entries on work_head */
-    u16 flags;         /* 0x1e: bit 0 marks an allocated record with a work list */
-    s16 emitter_index; /* 0x20: passed by script opcode 26; reset to -1 */
-    u8 phase[4];       /* 0x22: per-handler phase, indexed by the handler's byte_offset */
-    u8 target_index;   /* 0x26: current target, resolved to an anchor position by the emitter and native handlers */
-    u8 _unknown_27;
+    u16 next_index;     /* 0x00: next record in the current intrusive list */
+    s16 record_index;   /* 0x02: initialized to this record's array index */
+    s16 parent_index;   /* 0x04: spawning record (g_battle_effect_current_record_index) for script opcode 02 */
+    s16 pc;             /* 0x06: byte offset of the current instruction in script */
+    u8* script;         /* 0x08 */
+    s16 phase_ids[4];   /* 0x0c: child record indexes stored by script opcode 02 */
+    s16 counters[4];    /* 0x14: opcodes 20..23 select one by the argument's top two bits */
+    u16 work_count;     /* 0x1c: entries on work_head */
+    u16 flags;          /* 0x1e: bit 0 marks an allocated record with a work list */
+    s16 emitter_index;  /* 0x20: passed by script opcode 26; reset to -1 */
+    u8 phase[4];        /* 0x22: per-handler phase, indexed by the handler's byte_offset */
+    u8 target_index;    /* 0x26: current target, resolved to an anchor position by the emitter and native handlers */
+    u8 _padding_27;     /* aligns timeline_frame */
     s16 timeline_frame; /* 0x28: frame counter of battle_effect_code_script_29_step_parent_timeline; tested by opcodes
                            1d/1e */
-    u8 _unknown_2a[0xa6];
+    u8 _unused_2a[0xa6];
     effect_work_record_t* work_head; /* 0xd0 */
     s32 values_d4[4];                /* 0xd4: cleared at allocation */
     void* work_slots[5];             /* 0xe4: indexed by the same byte_offset */
@@ -3117,9 +3117,9 @@ typedef char assert_effect_record_size[sizeof(effect_record_t) == 0xf8 ? 1 : -1]
  * pointer cast CSEs into `record` instead. g_effect_state_records_view is
  * g_effect_state_records through this view. */
 typedef struct effect_record_target_view {
-    u8 _unknown_00[0x26];
+    u8 _unused_00[0x26];
     s16 target_index; /* 0x26 */
-    u8 _unknown_28[0xd0];
+    u8 _unused_28[0xd0];
 } effect_record_target_view_t;
 typedef char assert_effect_record_target_view_size[sizeof(effect_record_target_view_t) == 0xf8 ? 1 : -1];
 
@@ -3156,9 +3156,9 @@ typedef struct battle_effect_motion {
 typedef char battle_effect_motion_size_must_be_0x34[(sizeof(battle_effect_motion_t) == 0x34) ? 1 : -1];
 
 typedef struct battle_effect_slot {
-    u8 next; /* 0x00 */
-    u8 prev; /* 0x01 */
-    u8 _unknown_02[2];
+    u8 next;                             /* 0x00 */
+    u8 prev;                             /* 0x01 */
+    u8 _padding_02[2];                   /* aligns modes */
     DR_MODE modes[2][2];                 /* 0x04; two draw modes per buffer */
     POLY_FT4 quads[2];                   /* 0x34; one quad per buffer */
     u8 red;                              /* 0x84 */
@@ -3171,8 +3171,8 @@ typedef struct battle_effect_slot {
     s16 angle;                           /* 0x8e; billboard quad rotation */
     battle_effect_anim_script_t* script; /* 0x90 */
     s16 life;                            /* 0x94: negative runs until the script wraps */
-    u8 _unknown_96[0x02];
-    battle_effect_motion_t motion; /* 0x98 */
+    u8 _padding_96[0x02];                /* aligns motion */
+    battle_effect_motion_t motion;       /* 0x98 */
 } battle_effect_slot_t;
 typedef char assert_battle_effect_slot_size[sizeof(battle_effect_slot_t) == 0xcc ? 1 : -1];
 
@@ -3180,7 +3180,7 @@ typedef char assert_battle_effect_slot_size[sizeof(battle_effect_slot_t) == 0xcc
  * battle_effect_get_animation_timing_curve_value (0x801a1244). The owning
  * record is unidentified; only the halfword at 0x28 is proven. */
 typedef struct battle_effect_timing_entry {
-    u8 _unknown_00[0x28];
+    u8 _unused_00[0x28];
     u16 curve_index; /* 0x28: nibble index into g_battle_effect_nibble_table; bit 0 selects the high nibble */
 } battle_effect_timing_entry_t;
 
@@ -3204,15 +3204,15 @@ typedef struct effect_emitter_geometry_view {
 typedef struct effect_textured_quad_geometry_view {
     u16 texture_u; /* 0x14 */
     u16 texture_v; /* 0x16 */
-    u8 _unknown_18[0x16];
+    u8 _unused_04[0x16];
     s16 scroll_angle_start; /* 0x2e */
-    u8 _unknown_30[0x04];
+    u8 _unused_1c[0x04];
     s16 scroll_angle_end; /* 0x34 */
-    u8 _unknown_36[0x02];
+    u8 _unused_22[0x02];
     s16 wave_phase_speed_start[2]; /* 0x38 */
-    u8 _unknown_3c[0x02];
+    u8 _unused_28[0x02];
     s16 wave_phase_speed_end[2]; /* 0x3e */
-    u8 _unknown_42[0x0a];
+    u8 _unused_2e[0x0a];
 } effect_textured_quad_geometry_view_t;
 
 typedef union effect_geometry_motion_view {
@@ -3245,14 +3245,14 @@ typedef char assert_effect_geometry_motion_view_size[sizeof(effect_geometry_moti
  *     interval, bits 28-29 homing strength; bits 30-31 are copied to the work
  *     record's +0x45 homing-blend curve. */
 typedef struct effect_geometry_entry {
-    u8 _unknown_00;
+    u8 _unused_00;
     u8 animation_index;       /* 0x01: passed to battle_effect_init_parameter_set as the sequence */
     u16 work_kind_flags;      /* 0x02: copied to the work record's kind_flags */
     u8 animation_frame_group; /* 0x04: passed to battle_effect_init_parameter_set, stored doubled at node +0x1e */
-    u8 _unknown_05;
-    u16 flags;            /* 0x06: copied to the work record's flags; bit 6 = per-channel colour curves */
-    u32 curve_indices[2]; /* 0x08 */
-    u32 colour_curves;    /* 0x10: nibbles 0-2 = r/g/b */
+    u8 _padding_05;           /* aligns flags */
+    u16 flags;                /* 0x06: copied to the work record's flags; bit 6 = per-channel colour curves */
+    u32 curve_indices[2];     /* 0x08 */
+    u32 colour_curves;        /* 0x10: nibbles 0-2 = r/g/b */
     effect_geometry_motion_view_t motion; /* 0x14: effect-kind-specific fields */
     u16 texture_page_flags;               /* 0x4c: native renderers; bits 0-1 tpage x, bit 2 clears ABE */
     s16 brightness_row;                   /* 0x4e: native renderers */
@@ -3276,7 +3276,7 @@ typedef struct effect_geometry_entry {
     s16 target_offset_end[3];   /* 0xa2 */
     s16 texture_width;          /* 0xa8: native renderers */
     s16 texture_height;         /* 0xaa */
-    u8 _unknown_ac[0x04];
+    u8 _unused_ac[0x04];
     s16 particle_count_start;     /* 0xb0 */
     s16 particle_count_end;       /* 0xb2 */
     s16 spawn_interval_start;     /* 0xb4: frames between spawns */
@@ -3285,13 +3285,13 @@ typedef struct effect_geometry_entry {
     s16 homing_strength_end[2];   /* 0xbc */
     u8 child_emitter_on_death;    /* 0xc0: used when flags bits 0-1 are set */
     u8 child_emitter_mid_life;    /* 0xc1: used when flags bits 2-3 are set */
-    u8 _unknown_c2[0x02];
+    u8 _padding_c2[0x02];         /* tail padding to 4-byte alignment */
 } effect_geometry_entry_t;
 typedef char assert_effect_geometry_entry_size[sizeof(effect_geometry_entry_t) == 0xc4 ? 1 : -1];
 
 /* Particle-system section addressed by effect-file header word 0x0c. */
 typedef struct effect_geometry_table {
-    u16 _unknown_00;       /* 2, or 1 in seven shipped files */
+    u16 _unused_00;        /* 2, or 1 in seven shipped files */
     u16 entry_count;       /* 0x02 */
     s32 gravity[3];        /* 0x04: copied to on_hit_effects_data by effect script opcode 0x27 */
     s32 inertia_threshold; /* 0x10: passed to battle_effect_set_inertia_threshold by opcode 0x27 */
@@ -3303,7 +3303,7 @@ typedef struct effect_geometry_table {
  * four bytes are that count (row 0) or the last four frames of the previous
  * row, and factor[] indexes past 0x9b continue into the next row. */
 typedef struct effect_palette_entry {
-    u8 _unknown_00[4];
+    u8 _unused_00[4];
     u8 factor[0x9c];
 } effect_palette_entry_t;
 typedef char assert_effect_palette_entry_size[sizeof(effect_palette_entry_t) == 0xa0 ? 1 : -1];
@@ -3744,13 +3744,13 @@ typedef char battle_at_entry_size_must_be_4[(sizeof(battle_at_entry_t) == 4) ? 1
  * battle_menu_store_units_small_in_battle_display_data fills job_id..zodiac
  * for the unit named by battle_id. */
 typedef struct battle_active_unit {
-    s16 unknown_00; /* 0x00 */
+    s16 _unused_00; /* 0x00 */
     s16 job_id;     /* 0x02 */
     s16 brave;      /* 0x04 */
     s16 faith;      /* 0x06 */
     s16 zodiac;     /* 0x08 */
     s16 battle_id;  /* 0x0a: selected unit */
-    s16 unknown_0c; /* 0x0c */
+    s16 _unused_0c; /* 0x0c */
 } battle_active_unit_t;
 typedef char battle_active_unit_size_must_be_0xe[(sizeof(battle_active_unit_t) == 0xe) ? 1 : -1];
 
@@ -3851,7 +3851,7 @@ typedef struct battle_unit_anim_state {
     u16 frame_bias;                            /* 0x14 */
     u16 loop_count;                            /* 0x16 */
     u16 flags;                                 /* 0x18 */
-    u8 _pad1a[2];                              /* 0x1a */
+    u8 _padding_1a[2];                         /* 0x1a; aligns shp */
     s32* shp;                                  /* 0x1c; SHP frame table: 0x008 normal, 0x348 submerged */
     struct battle_gfx_shp0* seq;               /* 0x20 */
     u8* saved_shp;                             /* 0x24 */
@@ -3929,7 +3929,7 @@ typedef enum battle_misc_status_flags_5_6 {
  * g_battle_unit_misc_data record, in the previous record's last word. */
 typedef struct battle_unit_misc_slot_flag {
     s32 in_use;
-    u8 _unknown_04[0x43c];
+    u8 _unused_004[0x43c];
 } battle_unit_misc_slot_flag_t;
 typedef char battle_misc_slot_flag_size_must_be_0x440[(sizeof(battle_unit_misc_slot_flag_t) == 0x440) ? 1 : -1];
 
@@ -3940,7 +3940,7 @@ typedef char battle_misc_slot_flag_size_must_be_0x440[(sizeof(battle_unit_misc_s
 typedef struct battle_war_result {
     u8 item_ids[BATTLE_UNIT_SLOT_COUNT]; /* 0x00 */
     u8 item_count;                       /* 0x15 */
-    u8 _unknown_16[2];                   /* 0x16 */
+    u8 _padding_16[2];                   /* 0x16; aligns bonus_money */
     s32 bonus_money;                     /* 0x18; sum of bonus-money modifiers * 100 */
     s32 level_sum_money;                 /* 0x1c; g_enemy_level_sum * 100 */
     s32 level_bonus_money;               /* 0x20; (highest enemy level - lowest level) * 100 */
@@ -3955,7 +3955,7 @@ typedef struct battle_unit_height_data {
     u8 unit_height;
     u8 walking_height;
     u8 total_height;
-    u8 unknown_07; /* not written by battle_calculate_unit_height_data */
+    u8 _unused_07; /* not written by battle_calculate_unit_height_data */
 } battle_unit_height_data_t;
 typedef char battle_unit_height_data_size_must_be_8[sizeof(battle_unit_height_data_t) == 8 ? 1 : -1];
 
@@ -4005,7 +4005,7 @@ typedef struct battle_unit_graphics_load_descriptor {
     u8 map_x;
     u8 map_y;
     u8 map_level;
-    u8 _pad003;
+    u8 _padding_03; /* aligns map_height */
     u16 map_height;
     s16 portrait_id;
     u16 palette_id;
@@ -4309,17 +4309,17 @@ enum {
 };
 
 typedef struct battle_gfx_render_unit {
-    u8 _pad0[0x12];
+    u8 _unused_000[0x12];
     u16 sprite_flags;
-    u8 _pad14[0x10c];
+    u8 _unused_014[0x10c];
     SVECTOR camera_relative_position;
     u32 otag_depth;
-    u8 _pad12c[0x1a6];
+    u8 _unused_12c[0x1a6];
     s8 item_get_x_offset; /* 0x2d2; battle_unit_misc_data_t item_get_x_offset */
     s8 item_get_y_offset; /* 0x2d3 */
-    u8 _pad2d4[4];
+    u8 _unused_2d4[4];
     battle_gfx_sprite_display_data_t* found_item_display;
-    u8 _pad2dc[0x10];
+    u8 _unused_2dc[0x10];
     SVECTOR display_svectors[6];
 } battle_gfx_render_unit_t;
 
@@ -4327,7 +4327,7 @@ typedef struct battle_gfx_render_unit {
  * with an eight-byte stride; only the leading gate byte is used. */
 typedef struct battle_palette_update_entry {
     u8 pending; /* 0x00 */
-    u8 pad01[7];
+    u8 _unused_01[7];
 } battle_palette_update_entry_t;
 
 /* Render view of the same sprite display header. The first two colour bytes
@@ -4335,7 +4335,7 @@ typedef struct battle_palette_update_entry {
 typedef struct battle_gfx_sprite_display {
     u16 rg;
     u8 b;
-    u8 unknown_03;
+    u8 _padding_03; /* aligns tpage */
     u16 tpage;
     u16 clut;
     u16 scale_x;
@@ -4375,10 +4375,10 @@ typedef char battle_vram_slot_size_must_be_0x7564[(sizeof(battle_gfx_vram_slot_t
 /* 0x32d6-byte spritesheet VRAM slot records at 0x800c7ce8 (nine slots);
  * g_battle_gfx_spritesheet_ids_by_vram_slot aliases the first record's byte 1. */
 typedef struct battle_gfx_spritesheet_slot {
-    u8 in_use;             /* 0x00; cleared when no live unit uses the slot */
-    u8 spritesheet_id;     /* 0x01 */
-    u8 _unknown02[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by 0x80087704 */
-    u8 palettes[16][32];   /* 0x30d6; 16 CLUTs with the STP bit set (0x80087704) */
+    u8 in_use;                /* 0x00; cleared when no live unit uses the slot */
+    u8 spritesheet_id;        /* 0x01 */
+    u8 _unknown_0002[0x30d4]; /* 0x02; image data copied from SPR data +0x9200 by 0x80087704 */
+    u8 palettes[16][32];      /* 0x30d6; 16 CLUTs with the STP bit set (0x80087704) */
 } battle_gfx_spritesheet_slot_t;
 typedef char battle_spritesheet_slot_size_must_be_0x32d6[(sizeof(battle_gfx_spritesheet_slot_t) == 0x32d6) ? 1 : -1];
 
@@ -4427,7 +4427,7 @@ typedef struct battle_render_buffer {
     POLY_G4 overlay;   /* 0x0e578 */
     DR_MODE overlay_modes[2] /* 0x0e59c */;
     u32* otag;             /* 0x0e5b4 */
-    u8 unknown_e5b8[0x70]; /* 0x0e5b8 */
+    u8 _unused_e5b8[0x70]; /* 0x0e5b8 */
     POLY_FT3 ft3[64];      /* 0x0e628 */
 } battle_render_buffer_t;
 typedef char battle_render_buffer_size_must_be_0xee28[(sizeof(battle_render_buffer_t) == 0xee28) ? 1 : -1];
@@ -4973,7 +4973,7 @@ typedef struct battle_strike_work {
      * the knockback destination. */
     u8 knockback_flags;
     u8 can_earn_experience;
-    u8 unknown_24[4];
+    u8 _unused_24[4];
 } battle_strike_work_t;
 typedef char battle_strike_work_must_be_40[sizeof(battle_strike_work_t) == 40 ? 1 : -1];
 typedef char battle_strike_targets_must_be_2[((unsigned long)&((battle_strike_work_t*)0)->target_list == 2) ? 1 : -1];
@@ -4985,7 +4985,7 @@ typedef char
  * (battle_gfx_build_next_action_result_display, 0x800808b8, battle_gfx_animate_post_action_text). */
 typedef struct battle_action_result_display {
     u8 active;                                     /* 0x00 */
-    u8 _pad01;                                     /* 0x01 */
+    u8 _padding_01;                                /* 0x01; aligns selector */
     u16 selector;                                  /* 0x02; battle_numeric_display_selector_e */
     u16 value;                                     /* 0x04 */
     s16 progress;                                  /* 0x06 */
@@ -5044,20 +5044,20 @@ typedef struct battle_current_ability {
     u8 target_faith;                            /* 0x12 */
     u8 attacker_faith;                          /* 0x13 */
     u8 skillset;                                /* 0x14 */
-    u8 unknown_15;                              /* 0x15 */
+    u8 _padding_15;                             /* 0x15; aligns ability_id */
     u16 ability_id;                             /* 0x16 */
     u8 weapon_id;                               /* 0x18 */
     u8 two_hands_active;                        /* 0x19 */
     u8 proc_id;                                 /* 0x1a */
     u8 used_item_id;                            /* 0x1b */
     u8 base_hit;                                /* 0x1c */
-    u8 unknown_1d;                              /* 0x1d */
+    u8 _unused_1d;                              /* 0x1d */
     u8 accessory_evade;                         /* 0x1e */
     u8 right_shield_evade;                      /* 0x1f */
     u8 left_shield_evade;                       /* 0x20 */
     u8 class_evade;                             /* 0x21 */
     u8 facing_modifier;                         /* 0x22: 0 front, 1 side, 2 back */
-    u8 unknown_23;                              /* 0x23 */
+    u8 _unused_23;                              /* 0x23 */
     u8 charge_power;                            /* 0x24 */
     u8 formula;                                 /* 0x25 */
     u8 target_is_undead;                        /* 0x26 */
@@ -5092,7 +5092,7 @@ typedef struct battle_current_attacker_data {
     u8 right_hand_weapon_id;           /* 0x02 */
     u8 left_hand_weapon_id;            /* 0x03 */
     u8 team;                           /* 0x04 */
-    u8 unknown_05;                     /* 0x05 */
+    u8 _padding_05;                    /* 0x05; aligns target_delta_x */
     s16 target_delta_x;                /* 0x06 */
     s16 target_delta_y;                /* 0x08 */
     battle_ai_command_action_t action; /* 0x0a: copy of battle_stats_t +0x16e */
@@ -5559,9 +5559,9 @@ typedef enum battle_effective_movement_flags {
 /* Acting-unit scratch block at 0x1f800000, pointer at 0x8018f4e0.
  * Only target-proven bytes are named. */
 typedef struct battle_move_pathfind_scratch {
-    u8 _pad00[2];
+    u8 _unused_00[2];
     u8 jump_times_two; /* 0x02; 0x3e when flying / ignoring height */
-    u8 _pad03;
+    u8 _unused_03;
     u8 jump_or_1f;     /* 0x04 */
     u8 jump_half;      /* 0x05 */
     u8 move;           /* 0x06 */
@@ -5570,7 +5570,7 @@ typedef struct battle_move_pathfind_scratch {
     u8 high_elevation; /* 0x09 */
     u8 target_x;       /* 0x0a */
     u8 target_y;       /* 0x0b */
-    u8 _pad0c;
+    u8 _unknown_0c;
     u8 unit_id;              /* 0x0d; mount id when riding */
     u8 move_type;            /* 0x0e; battle_move_class_e */
     u8 move_mod;             /* 0x0f */
@@ -5581,14 +5581,14 @@ typedef struct battle_move_pathfind_scratch {
     u8 cannot_stay_on_water; /* 0x14 */
     u8 mountable_chocobo;    /* 0x15 */
     u8 can_ride;             /* 0x16 */
-    u8 _pad17;
+    u8 _unused_17;
     u8 map_max_x;       /* 0x18 */
     u8 map_max_y;       /* 0x19 */
-    u8 field_1a;        /* 0x1a; byte at 0x8018f4fc */
+    u8 _unknown_1a;     /* 0x1a; byte at 0x8018f4fc */
     u8 unit_size;       /* 0x1b */
     u8 movement_set_3;  /* 0x1c */
     u8 fly_or_teleport; /* 0x1d */
-    u8 _pad1e[4];
+    u8 _unknown_1e[4];
     u8 stepping_stone;      /* 0x22 */
     u8 ai_propagation_mode; /* 0x23; set only by AI target propagation (0x80178224 clears it) */
     u8 movement_set_2;      /* 0x24 */
@@ -5724,7 +5724,7 @@ typedef struct battle_move_spread_state {
     s16 destination_side_height_delta; /* 0x38 */
     s16 x_step;                        /* 0x3a */
     s16 y_step;                        /* 0x3c */
-    u8 _pad3e[2];
+    u8 _unused_3e[2];
     /* 0x40-0x43: whether the source/destination is a unit's compact record
      * (a path above a unit) and that record's index, from panel byte 0x02. */
     u8 source_unit_record_flag;       /* 0x40 */
@@ -5741,7 +5741,7 @@ typedef struct battle_move_spread_state {
     u8 destination_opposite_height;       /* 0x4b */
     u8 source_base_height_times_two;      /* 0x4c */
     u8 destination_base_height_times_two; /* 0x4d */
-    u8 _pad4e[2];
+    u8 _unused_4e[2];
     /* 0x50; height scratch: a side height compared with the exit/entry height,
      * a panel max_height_delta, or a unit record index in the jump check. */
     u8 work_height;
@@ -5756,9 +5756,9 @@ typedef struct battle_move_spread_state {
     u8 destination_slope;       /* 0x59 */
     u8 budget_matches;          /* 0x5a; candidate budget equals predecessor budget minus step cost */
     u8 candidate_saved;         /* 0x5b; set by the save-selected-candidate step at 0x8017808c */
-    u8 _pad5c[6];
+    u8 _unknown_5c[6];
     u8 frontier_max_remaining_range; /* 0x62; maximum residual queued for the next pass */
-    u8 _pad63;
+    u8 _unused_63;
     /* 0x64 is |exit - entry| (0 when flying), stored into panel max_height_delta;
      * 0x65-0x67 are the best candidate's tie-breakers (0x80177e64). */
     u8 height_delta;          /* 0x64 */
@@ -6027,7 +6027,7 @@ typedef struct map_texture_animation_state {
     u8 active;
     u8 elapsed_frames;
     u8 frame_duration;
-    u8 padding_03;
+    u8 _padding_03; /* aligns polygon_group */
     u16 polygon_group;
     u16 first_polygon;
     u16 last_polygon;
@@ -6212,7 +6212,7 @@ typedef struct map_palette_animation_state {
     u8 blend_step;    /* 0x01; index into g_battle_map_palette_blend_steps_32/_8 */
     u8 delay_counter; /* 0x02; one blend step each time it reaches mode >> 2 */
     u8 mode;
-    u8 _unknown04[4];
+    u8 _unknown_04[4];
 } map_palette_animation_state_t;
 typedef char map_palette_animation_state_size_must_be_8[(sizeof(map_palette_animation_state_t) == 8) ? 1 : -1];
 
@@ -6258,7 +6258,7 @@ typedef struct gns_file_record {
     s16 map_state;           /* 0x02 */
     u8 map_state_comparison; /* 0x04; gns_map_state_comparison_e */
     u8 resource_type;        /* 0x05; gns_resource_type_e */
-    u16 padding_3333;        /* 0x06 */
+    u16 _padding_06;         /* 0x06; aligns disc_lba */
     u32 disc_lba;            /* 0x08; absolute, including the high halfword at +0x0a */
     u32 byte_length;         /* 0x0c; sector-rounded */
     u8 padding_55_66_77[3];  /* 0x10 */
@@ -6275,10 +6275,10 @@ typedef struct gns_command_record_prefix {
     s16 map_state;           /* 0x02 */
     u8 map_state_comparison; /* 0x04 */
     u8 resource_type;        /* 0x05 */
-    u16 reserved_06;
+    u16 _unused_06;
     u8 record_byte_length; /* 0x08 */
-    u8 reserved_09;
-    u16 reserved_0a;
+    u8 _unused_09;
+    u16 _unused_0a;
     u8 payload[8]; /* 0x0c; command arguments, followed by more bytes for 0x1c rows */
 } gns_command_record_prefix_t;
 typedef char gns_command_record_prefix_size_must_be_0x14[(sizeof(gns_command_record_prefix_t) == 0x14) ? 1 : -1];
@@ -6291,20 +6291,20 @@ typedef struct map_mesh_file_header {
     u32 unused_resource_offsets_00_0f[16]; /* 0x00 */
     u32 geometry_offset;                   /* 0x40 */
     u32 color_palette_offset;              /* 0x44 */
-    u32 reserved_48;                       /* 0x48 */
+    u32 _unused_48;                        /* 0x48 */
     u32 texture_quarter_0_offset;          /* 0x4c */
-    u32 reserved_50[5];                    /* 0x50 */
+    u32 _unused_50[5];                     /* 0x50 */
     u32 lights_background_offset;          /* 0x64 */
     u32 terrain_offset;                    /* 0x68 */
     u32 texture_animation_offset;          /* 0x6c */
     u32 palette_animation_offset;          /* 0x70 */
-    u32 reserved_74[2];                    /* 0x74 */
+    u32 _unused_74[2];                     /* 0x74 */
     u32 grayscale_palette_offset;          /* 0x7c */
-    u32 reserved_80[3];                    /* 0x80 */
+    u32 _unused_80[3];                     /* 0x80 */
     u32 mesh_animation_offset;             /* 0x8c */
     u32 animated_mesh_offsets[8];          /* 0x90 */
     u32 polygon_render_properties_offset;  /* 0xb0 */
-    u32 reserved_b4[4];                    /* 0xb4 */
+    u32 _unused_b4[4];                     /* 0xb4 */
 } map_mesh_file_header_t;
 typedef char map_mesh_file_header_size_must_be_0xc4[(sizeof(map_mesh_file_header_t) == 0xc4) ? 1 : -1];
 
@@ -6322,7 +6322,7 @@ typedef struct battle_map_mesh_triangle_positions {
     s16 x1, y1, z1;
     s16 polygon_flags;
     s16 x2, y2, z2;
-    u16 _pad16;
+    u16 _unused_16;
 } battle_map_mesh_triangle_positions_t;
 
 typedef struct battle_map_mesh_quad_positions {
@@ -6331,34 +6331,34 @@ typedef struct battle_map_mesh_quad_positions {
     s16 x1, y1, z1;
     s16 polygon_flags;
     s16 x2, y2, z2;
-    u16 _pad16;
+    u16 _unused_16;
     s16 x3, y3, z3;
-    u16 _pad1e;
+    u16 _unused_1e;
 } battle_map_mesh_quad_positions_t;
 
 typedef struct battle_map_mesh_triangle_normals {
     s16 x0, y0, z0;
-    u16 _pad06;
+    u16 _unused_06;
     s16 x1, y1, z1;
-    u16 _pad0e;
+    u16 _unused_0e;
     s16 x2, y2, z2;
-    u16 _pad16;
+    u16 _unused_16;
 } battle_map_mesh_triangle_normals_t;
 
 typedef struct battle_map_mesh_quad_normals {
     s16 x0, y0, z0;
-    u16 _pad06;
+    u16 _unused_06;
     s16 x1, y1, z1;
-    u16 _pad0e;
+    u16 _unused_0e;
     s16 x2, y2, z2;
-    u16 _pad16;
+    u16 _unused_16;
     s16 x3, y3, z3;
-    u16 _pad1e;
+    u16 _unused_1e;
 } battle_map_mesh_quad_normals_t;
 
 /* Per-part start indices and counts stored after the mesh transform data. */
 typedef struct battle_map_mesh_part_metadata {
-    u8 _unknown00[0x88];
+    u8 _unused_00[0x88];
     u16 textured_triangle_start;
     u16 textured_quad_start;
     u16 untextured_triangle_start;
@@ -6400,7 +6400,7 @@ typedef struct map_color_transition {
     u8 phase;
     u8 tick; /* 0x02; frame counter, reset when it reaches period >> 2 */
     u8 period;
-    u8 _unknown04[4];
+    u8 _unknown_04[4];
     map_color_transition_channels_t channels;
 } map_color_transition_t;
 typedef char map_color_transition_size_must_be_0x20[(sizeof(map_color_transition_t) == 0x20) ? 1 : -1];
@@ -6413,7 +6413,7 @@ typedef struct map_gradient_transition {
     u8 phase;
     u8 tick; /* 0x02; frame counter, reset when it reaches period >> 2 */
     u8 period;
-    u8 _unknown04[4];
+    u8 _unknown_04[4];
     map_color_transition_channels_t channels[2];
     map_color_t colors[2];
 } map_gradient_transition_t;
@@ -6451,11 +6451,11 @@ typedef struct battle_map_mesh_keyframe {
     s16 value_10;       /* 0x10; scale x */
     s16 value_12;       /* 0x12; scale y */
     s16 value_14;       /* 0x14; scale z */
-    s16 _unknown_16;    /* 0x16 */
+    s16 _unused_16;     /* 0x16 */
     s16 angle_start[9]; /* 0x18 */
     s16 angle_end[9];   /* 0x2a */
     u16 flags[9];       /* 0x3c */
-    u16 _unknown_4e;    /* 0x4e */
+    u16 _unused_4e;     /* 0x4e */
 } battle_map_mesh_keyframe_t;
 typedef char battle_map_mesh_keyframe_size_must_be_0x50[(sizeof(battle_map_mesh_keyframe_t) == 0x50) ? 1 : -1];
 
@@ -6505,7 +6505,7 @@ typedef char battle_map_texture_animation_size_must_be_0x14[(sizeof(battle_map_t
 typedef struct battle_lightning_state {
     u32 timer;                  /* 0x00 */
     MATRIX color_matrices[3];   /* 0x04 */
-    u8 _unknown64[0x20];        /* 0x64 */
+    u8 _unused_64[0x20];        /* 0x64 */
     map_color_t base_colors[2]; /* 0x84 */
     map_color_t colors[2];      /* 0x8c */
 } battle_lightning_state_t;
@@ -6831,7 +6831,7 @@ typedef char battle_menu_record_size_must_be_0x11[(sizeof(battle_menu_record_t) 
  * battle_menu_resolve_selection walks all 31 rows. */
 typedef struct battle_menu_id_record {
     u16 menu_id;
-    u16 pad;
+    u16 _padding_02; /* aligns map */
     /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
      * and map[n + 1] any other value; named by battle_menu_resolve_selection,
      * its only reader. The other readers use menu_id alone. */
@@ -6854,26 +6854,26 @@ typedef char battle_menu_id_record_size_must_be_0x8[(sizeof(battle_menu_id_recor
  * (0x801416a0) reads it, and battle_menu_clear_idle_action_menu_entry_flags
  * (0x8013f76c) clears it. */
 typedef struct battle_menu_idle_action_entry {
-    u8 unknown_00[4];
+    u8 _unused_00[4];
     s16 inner_width;  /* 0x04; also stored to g_menu_inner_window_width */
     s16 inner_height; /* 0x06 */
     s16 window_x;     /* 0x08 */
     u16 flags_0a;     /* 0x0a; the menu threads clear bit 0 on entry */
-    u8 unknown_0c[2];
+    u8 _unused_0c[2];
     s16 window_height; /* 0x0e; set with inner_height by battle_menu_build_skillset_entries */
-    u8 unknown_10[6];
+    u8 _unused_10[6];
     s16 overall_height; /* 0x16; set with inner_height by battle_menu_build_skillset_entries */
-    u8 unknown_18[4];
+    u8 _unused_18[4];
     s16 text_id;     /* 0x1c; text entry drawn into the window */
     s16 last_option; /* 0x1e; highest option index (battle_menu_update_selection_from_input) */
     u16 value_20;    /* 0x20; set from the system-function table by battle_menu_run_system_function_thread */
-    u8 unknown_22[6];
+    u8 _unused_22[6];
     void (*thread_entry)(void); /* 0x28; menu thread started by battle_menu_start_entry_thread */
-    u8 unknown_2c[4];
+    u8 _unused_2c[4];
     s16* refresh_flag; /* 0x30; the menu threads redraw while *refresh_flag == 1 */
-    u8 unknown_34[4];
+    u8 _unused_34[4];
     s16 selected_index; /* 0x38 */
-    u8 unknown_3a[2];
+    u8 _padding_3a[2];  /* tail padding to 4-byte alignment */
 } battle_menu_idle_action_entry_t;
 typedef char battle_idle_action_menu_entry_refresh_must_be_0x30
     [((unsigned long)&((battle_menu_idle_action_entry_t*)0)->refresh_flag == 0x30) ? 1 : -1];
@@ -7001,7 +7001,7 @@ typedef char
 /* One value bar: the Gouraud bar is drawn value/limit wide. */
 typedef struct battle_menu_status_panel_bar {
     s16 value;
-    s16 unknown_02;
+    s16 _unused_02;
     s16 limit; /* 0x04; a zero limit draws the fixed 4-pixel stub */
 } battle_menu_status_panel_bar_t;
 typedef char battle_menu_status_panel_bar_size_must_be_6[(sizeof(battle_menu_status_panel_bar_t) == 6) ? 1 : -1];
@@ -7012,17 +7012,17 @@ typedef char battle_menu_status_panel_bar_size_must_be_6[(sizeof(battle_menu_sta
  * one of the 0xc-byte geometry rows and the panel's CLUT; `bars` holds the
  * three value/limit triples the Gouraud bars are drawn from. */
 typedef struct battle_menu_status_panel_editor_state {
-    u8 level; /* 0x00; debugchr_editor_apply_values_to_battle_unit writes it back */
-    u8 unknown_01;
+    u8 level;       /* 0x00; debugchr_editor_apply_values_to_battle_unit writes it back */
+    u8 _padding_01; /* aligns mode */
     s16 mode;       /* 0x02 */
     s16 list_index; /* 0x04: AT-list position; drawn as dashes (format 0xc00)
                        when negative */
-    s16 unknown_06;
-    u8 experience; /* 0x08; written back with level */
-    u8 unknown_09;
+    s16 _unused_06;
+    u8 experience;                          /* 0x08; written back with level */
+    u8 _padding_09;                         /* aligns unit */
     s16 unit;                               /* 0x0a */
     battle_menu_status_panel_bar_t bars[3]; /* 0x0c */
-    s16 unknown_1E[3];
+    s16 _unused_1e[3];
 } battle_menu_status_panel_editor_state_t;
 typedef char battle_menu_status_panel_editor_state_size_must_be_0x24
     [(sizeof(battle_menu_status_panel_editor_state_t) == 0x24) ? 1 : -1];
@@ -7031,10 +7031,10 @@ typedef char battle_menu_status_panel_editor_state_size_must_be_0x24
  * takes a base and a count of these; the display threads write only the
  * halfword at +8, choosing the code the value is drawn with. */
 typedef struct battle_menu_status_panel_numeric_entry {
-    u8 unknown_00[8];
+    u8 _unused_00[8];
     s16 format; /* 0x08: digits argument; low byte digit count, high byte sign/marker
                    flags (0xc00/0xe00 draw dashes) */
-    u8 unknown_0A[2];
+    u8 _unused_0a[2];
 } battle_menu_status_panel_numeric_entry_t;
 typedef char battle_menu_status_panel_numeric_entry_size_must_be_0xc
     [(sizeof(battle_menu_status_panel_numeric_entry_t) == 0xc) ? 1 : -1];
@@ -7080,8 +7080,8 @@ typedef char
  * target loads it into the draw-offset y. Only the members the display threads
  * use are named; the record's total size is not proven. */
 typedef struct battle_menu_status_panel_display_thread {
-    u16 x; /* 0x00 */
-    u16 unknown_02;
+    u16 x;           /* 0x00 */
+    u16 _padding_02; /* aligns shake_y */
     union {
         s32 word; /* 0x04 */
         u16 low;
@@ -7110,11 +7110,11 @@ typedef char battle_menu_status_panel_graphic_descriptor_size_must_be_0xc
 typedef struct battle_menu_status_panel_scaled_sprite {
     u32* ordering_tag;
     u8 intensity;
-    u8 pad_05[3];
+    u8 _padding_05[3]; /* aligns link_primitive */
     s32 link_primitive;
     s16 scale_x;
     s16 scale_y;
-    u8 pad_10[8];
+    u8 _unused_10[8];
     s16 offset[6];
 } battle_menu_status_panel_scaled_sprite_t;
 typedef char battle_menu_status_panel_scaled_sprite_size_must_be_0x24
@@ -7136,7 +7136,7 @@ typedef struct battle_menu_status_panel_gauge_entry {
     u16 y;
     s16* value;
     s16 flags;
-    u16 unknown_0a;
+    u16 _padding_0a; /* tail padding to 4-byte alignment */
 } battle_menu_status_panel_gauge_entry_t;
 typedef char
     battle_menu_status_panel_gauge_entry_size_must_be_0xc[(sizeof(battle_menu_status_panel_gauge_entry_t) == 0xc) ? 1
@@ -7150,10 +7150,10 @@ typedef char
 typedef struct battle_menu_status_panel_text_position {
     u16 x;
     u16 y;
-    u8 unknown_04[4];
-    u16 row_stride; /* 0x08 */
-    u16 unknown_0a;
-    u32 color; /* 0x0c */
+    u8 _unused_04[4];
+    u16 row_stride;  /* 0x08 */
+    u16 _padding_0a; /* aligns color */
+    u32 color;       /* 0x0c */
 } battle_menu_status_panel_text_position_t;
 typedef char battle_menu_status_panel_text_position_size_must_be_0x10
     [(sizeof(battle_menu_status_panel_text_position_t) == 0x10) ? 1 : -1];
@@ -7166,8 +7166,8 @@ typedef struct battle_menu_window_record {
     DR_MODE mode1;   /* 0x0c */
     SPRT sprites[4]; /* 0x18 */
     SPRT* extra[3];  /* 0x68 */
-    s32 unknown_74;  /* 0x74 */
-    s32 unknown_78;  /* 0x78 */
+    s32 _unknown_74; /* 0x74 */
+    s32 _unknown_78; /* 0x78 */
 } battle_menu_window_record_t;
 
 /* Provisional window request: VRAM source point, size, screen point and the
@@ -7177,9 +7177,9 @@ typedef struct battle_menu_window_spec {
     u16 width;                                /* 0x04 */
     u16 height;                               /* 0x06 */
     battle_image_location_t screen;           /* 0x08 */
-    u8 unknown_0c[4];                         /* 0x0c */
+    u8 _unused_0c[4];                         /* 0x0c */
     world_gfx_image_load_parameters_t params; /* 0x10 */
-    u8 unknown_1c[0x10];                      /* 0x1c */
+    u8 _unused_1c[0x10];                      /* 0x1c */
     s16 style;                                /* 0x2c */
 } battle_menu_window_spec_t;
 
@@ -7195,15 +7195,15 @@ typedef struct battle_menu_text_image {
     u16 height;   /* 0x06 */
     RECT rect;    /* 0x08 */
     void* text;   /* 0x10 */
-    u8 unknown_14[2];
+    u8 _unused_14[2];
     u16 dialog_type; /* 0x16; window-image mode */
     u16 box_type;    /* 0x18: 0 skips rendering, 0x10 selects the wide builder */
-    u8 unknown_1a[8];
+    u8 _unused_1a[8];
     u16 first_line; /* 0x22 */
     u16 last_line;  /* 0x24 */
-    u8 unknown_26[0x30 - 0x26];
+    u8 _unused_26[0x30 - 0x26];
     s16 tail_offset; /* 0x30; arrow position */
-    u8 unknown_32[0x40 - 0x32];
+    u8 _unused_32[0x40 - 0x32];
     u16 origin_x; /* 0x40 */
     u16 origin_y; /* 0x42 */
 } battle_menu_text_image_t;
@@ -7236,10 +7236,10 @@ typedef struct battle_rect {
  * first word is not the script-variable pointer.  Named separately so the
  * BATTLE object does not have to borrow the WORLD record's type. */
 typedef struct menu_text_state {
-    s32 unknown_00; /* 0x00 (0x80165f9c) */
+    s32 _unused_00; /* 0x00 (0x80165f9c) */
     s16 origin_x;   /* 0x04 (0x80165fa0): battle_menu_set_text_origin */
     s16 origin_y;   /* 0x06 (0x80165fa2) */
-    s32 unknown_08; /* 0x08 (0x80165fa4) */
+    s32 _unused_08; /* 0x08 (0x80165fa4) */
     s32 stride;     /* 0x0c (0x80165fa8): g_menu_inner_window_width */
     s32 color;      /* 0x10 (0x80165fac): glyph blit fill; 0x44444444 while text colour 4 is drawn */
 } menu_text_state_t;
@@ -7264,7 +7264,7 @@ typedef char help_navigation_record_size_must_be_0x10[(sizeof(help_navigation_re
 typedef struct battle_text_pen {
     u16 x;           /* 0x00 */
     u16 y;           /* 0x02 */
-    s32 unknown_04;  /* 0x04 */
+    s32 _unused_04;  /* 0x04 */
     s32 right_limit; /* 0x08 */
 } battle_text_pen_t;
 
@@ -7646,9 +7646,9 @@ typedef enum battle_numeric_display_selector {
  * battle_text_character_handling_thread and drawn by battle_text_draw_dialogue_glyph. */
 typedef struct battle_text_glyph_state {
     u16 flags_0;         /* 0x00; bits 0-1 give the glyph's pixel phase */
-    u16 _unknown_2;      /* 0x02 */
+    u16 _unused_02;      /* 0x02 */
     u16 character_4;     /* 0x04 */
-    u8 _unknown_6[6];    /* 0x06 */
+    u8 _unused_06[6];    /* 0x06 */
     s16 dialogue_type_c; /* 0x0c */
     s16 palette_e;       /* 0x0e */
 } battle_text_glyph_state_t;

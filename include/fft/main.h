@@ -101,14 +101,14 @@ enum { CARD_SAVE_SLOT_COUNT = 15 };
  * card_build_save_file_header (0x801c2ea8) and its WORLD twin
  * world_card_build_save_file_header (0x801322e4). */
 typedef struct card_save_header {
-    u8 magic0;           /* 0x00: 'S' */
-    u8 magic1;           /* 0x01: 'C' */
-    u8 icon_flags;       /* 0x02: 0x11, one icon frame */
-    u8 block_count;      /* 0x03 */
-    u8 title[0x40];      /* 0x04: Shift-JIS save-file title */
-    u8 reserved[0x1C];   /* 0x44 */
-    u8 icon_clut[0x20];  /* 0x60 */
-    u8 icon_image[0x80]; /* 0x80 */
+    u8 magic0;            /* 0x00: 'S' */
+    u8 magic1;            /* 0x01: 'C' */
+    u8 icon_flags;        /* 0x02: 0x11, one icon frame */
+    u8 block_count;       /* 0x03 */
+    u8 title[0x40];       /* 0x04: Shift-JIS save-file title */
+    u8 _unknown_44[0x1C]; /* 0x44 */
+    u8 icon_clut[0x20];   /* 0x60 */
+    u8 icon_image[0x80];  /* 0x80 */
 } card_save_header_t;
 
 extern s32 g_main_card_bios_events[MAIN_CARD_EVENT_COUNT];
@@ -139,7 +139,7 @@ typedef enum main_file_load_state {
 
 /* Asynchronous CD read state advanced by main_file_poll_load. */
 typedef struct main_file_load_descriptor {
-    s32 unknown_00;
+    s32 _unknown_00;
     s32 state; /* MAIN_FILE_LOAD_STATE_* */
     s32 error_count;
     s32 wait_frames;
@@ -281,7 +281,7 @@ typedef struct wldcore_saved_record {
     s16 counter_delta;        /* 0x12 */
     s16 text_id;              /* 0x14 */
     s16 brightness;           /* 0x16 */
-    s16 field_18;             /* 0x18 */
+    s16 _unknown_18;          /* 0x18 */
     s16 background_set;       /* 0x1a */
     s16 picture_render_index; /* 0x1c */
     s16 picture_id;           /* 0x1e */
@@ -355,8 +355,8 @@ typedef struct suzuki_ramp {
  * blocks in address order from g_main_sound_heap_blocks. */
 typedef struct suzuki_heap_block {
     u16 flags;                      /* 0x00; 0x8000 list head, 0x2 in use */
-    u16 _unknown_02;                /* 0x02; cleared on allocation */
-    u32 _unknown_04;                /* 0x04; cleared on allocation */
+    u16 _unused_02;                 /* 0x02; cleared on allocation */
+    u32 _unused_04;                 /* 0x04; cleared on allocation */
     u8* end;                        /* 0x08; end of the payload */
     struct suzuki_heap_block* next; /* 0x0c */
 } suzuki_heap_block_t;
@@ -383,13 +383,13 @@ typedef struct suzuki_instrument {
  * header_size bytes on the Suzuki heap, linked from g_main_sound_waveset_list
  * through next. Select Sound Font (0x80016e48) matches id. */
 typedef struct suzuki_waveset {
-    u8 _unknown_00[0x10];               /* 0x00; "dwdsP" magic, file size at 0x08 */
+    u8 _unused_00[0x10];                /* 0x00; "dwdsP" magic, file size at 0x08 */
     u32 header_size;                    /* 0x10 */
     u32 wave_size;                      /* 0x14 */
     u32 wave_offset;                    /* 0x18 */
-    u8 _unknown_1c[4];                  /* 0x1c */
+    u8 _unused_1c[4];                   /* 0x1c */
     u16 id;                             /* 0x20 */
-    u8 _unknown_22[6];                  /* 0x22 */
+    u8 _unused_22[6];                   /* 0x22 */
     u32 spu_address;                    /* 0x28; SpuMalloc result, freed by main_sound_free_waveset */
     struct suzuki_waveset* next;        /* 0x2c */
     suzuki_instrument_t instruments[1]; /* 0x30 */
@@ -400,16 +400,16 @@ typedef struct suzuki_waveset {
  * main_smd_get_music_filename. */
 typedef struct suzuki_smd_header {
     u8 magic[4];            /* 0x00 */
-    u8 _unknown_04[4];      /* 0x04 */
+    u8 _unused_04[4];       /* 0x04 */
     u32 size;               /* 0x08 */
-    u8 _unknown_0c[4];      /* 0x0c */
+    u8 _unused_0c[4];       /* 0x0c */
     u16 id;                 /* 0x10; copied to MUS id and channel sound_id */
-    u8 field_12;            /* 0x12; copied to MUS field_14 */
+    u8 _unknown_12;         /* 0x12; copied to MUS field_14 */
     u8 tick_divisor;        /* 0x13 */
     u8 channel_count;       /* 0x14 */
-    u8 field_15;            /* 0x15; copied to MUS field_17 */
+    u8 _unknown_15;         /* 0x15; copied to MUS field_17 */
     u16 waveset_id;         /* 0x16 */
-    u16 field_18;           /* 0x18; copied to MUS field_1a */
+    u16 _unknown_18;        /* 0x18; copied to MUS field_1a */
     s8 reverb_mode;         /* 0x1a */
     u8 reverb_depth;        /* 0x1b */
     u8 reverb_delay;        /* 0x1c */
@@ -448,7 +448,7 @@ typedef s32 (*suzuki_modulator_step_t)(suzuki_modulator_t* modulator);
  * Coda (0x99) and To Coda (0x9A). */
 typedef struct suzuki_repeat {
     u8 count;       /* 0x00 */
-    u8 _unknown_01; /* 0x01 */
+    u8 _unused_01;  /* 0x01 */
     u8 octave_base; /* 0x02 */
     u8 coda_octave; /* 0x03 */
     u8* start;      /* 0x04 */
@@ -496,29 +496,29 @@ typedef struct suzuki_music_channel {
     } sound_id;                /* 0x08 */
     u8 channel_number;         /* 0x0c; 0xff + channel index (SFX: the index); write-only */
     u8 priority;               /* 0x0d; SFX steal priority (channel id >> 8; stolen when <= 0x20); music: 0x10 */
-    u8 _unknown_0e[2];         /* 0x0e */
+    u8 _padding_00e[2];        /* 0x0e; aligns start_tick */
     u32 start_tick;            /* 0x10; g_main_sound_tick_count when main_sound_start_sfx started the channel */
     u8* note_data_start;       /* 0x14 */
     u8* note_data;             /* 0x18; read position */
     u8* loop_note_data;        /* 0x1c; set by Loop and opcode 0x8D, jumped to by End Bar & Loop */
     u8* restart_note_data;     /* 0x20; set by main_smd_init_channel_streams */
-    u32 field_24;              /* 0x24; cleared by the channel initialiser */
+    u32 _unknown_024;          /* 0x24; cleared by the channel initialiser */
     u16 loop_count;            /* 0x28; End Bar & Loop */
-    u8 field_2a;               /* 0x2a; cleared by the channel initialiser */
+    u8 _unknown_02a;           /* 0x2a; cleared by the channel initialiser */
     u8 loop_octave_base;       /* 0x2b; octave_base saved with loop_note_data */
     u8 instrument;             /* 0x2c */
     u8 voice;                  /* 0x2d; SPU voice (opcode 0xAA); bit 0 allows the pitch LFO */
     u16 release_2e;            /* 0x2e; Release stores its byte here and in release_time */
     suzuki_waveset_t* waveset; /* 0x30; Select Sound Font */
     u32 voice_mask;            /* 0x34; SPU voice bit(s) owned by this channel */
-    u32 field_38;              /* 0x38; initialised to 0xff9f */
+    u32 _unknown_038;          /* 0x38; initialised to 0xff9f */
     s16 spu_volume_left;       /* 0x3c; SpuSetVoiceVolume(Attr) left, from main_smd_update_voices */
     s16 spu_volume_right;      /* 0x3e */
     s16 spu_volume_mode_left;  /* 0x40; SpuSetVoiceVolumeAttr left mode; cleared by the channel initialiser */
     s16 spu_volume_mode_right; /* 0x42 */
-    u8 _unknown_44[4];         /* 0x44 */
+    u8 _unused_044[4];         /* 0x44 */
     u16 spu_pitch;             /* 0x48; SpuSetVoicePitch value, from main_smd_update_voices */
-    u8 _unknown_4a[6];         /* 0x4a */
+    u8 _unused_04a[6];         /* 0x4a */
     u32 start_address;         /* 0x50; instrument sample SPU address */
     u32 loop_address;          /* 0x54; instrument loop SPU address */
     s32 attack_mode;           /* 0x58 */
@@ -529,10 +529,10 @@ typedef struct suzuki_music_channel {
     u16 sustain_time;          /* 0x68 */
     u16 release_time;          /* 0x6a */
     u16 sustain_level;         /* 0x6c */
-    u8 _unknown_6e[6];         /* 0x6e */
+    u8 _unused_06e[6];         /* 0x6e */
     s16 rest_length;           /* 0x74; Rest or Fermata hold length, counted down per tick */
     u8 length_adjust;          /* 0x76; signed note-length adjust: opcode 0xAD adds to or clears it */
-    u8 _unknown_77;            /* 0x77 */
+    u8 _padding_077;           /* 0x77; aligns note_ticks */
     u16 note_ticks;            /* 0x78; ticks left in the note; 0 sets active bit 0x400 */
     u16 gate_time;             /* 0x7a; key-on time in sixteenths of the length (0xA9); initialised to 0xf */
     u8 previous_key;           /* 0x7c; previous note's key, the portamento start; cleared by the channel initialiser */
@@ -544,11 +544,11 @@ typedef struct suzuki_music_channel {
     s16 pitch_modulation;      /* 0x88; modulator target 0 output */
     s16 volume_modulation;     /* 0x8a; modulator target 1 output */
     s16 balance_modulation;    /* 0x8c; modulator target 2 output */
-    u8 _unknown_8e[2];         /* 0x8e */
+    u8 _unused_08e[2];         /* 0x8e */
     u16 portamento_ticks;      /* 0x90; portamento length (opcode 0xD6), mirrored into flags_06 bit 2 */
     s16 balance;               /* 0x92; balance byte << 8 */
     s16 velocity;              /* 0x94; velocity << 8, 0x6000 by default */
-    u8 _unknown_96[2];         /* 0x96 */
+    u8 _padding_096[2];        /* 0x96; aligns volume */
     s32 volume;                /* 0x98; volume byte << 24 */
     s32 pitch_slide_step;      /* 0x9c; opcode 0xD4 */
     s32 volume_step;           /* 0xa0; Fermata Ramp (0xE2) */
@@ -584,16 +584,16 @@ typedef struct suzuki_music {
     struct suzuki_music* next;     /* 0x00 */
     struct suzuki_music* snapshot; /* 0x04; freed by main_smd_free_snapshots */
     suzuki_smd_header_t* smd;      /* 0x08 */
-    u8 _unknown_0c[4];             /* 0x0c */
+    u8 _unused_00c[4];             /* 0x0c */
     u16 status;                    /* 0x10 */
     u16 id;                        /* 0x12; SMD id */
-    u8 field_14;                   /* 0x14; SMD field_12 */
+    u8 _unknown_014;               /* 0x14; SMD field_12 */
     u8 tick_divisor;               /* 0x15 */
     u8 channel_count;              /* 0x16 */
-    u8 field_17;                   /* 0x17; SMD field_15 */
+    u8 _unknown_017;               /* 0x17; SMD field_15 */
     s16 waveset_id;                /* 0x18; sound font id */
-    u16 field_1a;                  /* 0x1a; SMD field_18, 0x7f for SFX */
-    u8 field_1c;                   /* 0x1c; set by opcode 0xA4, adjusted by 0xA5 */
+    u16 _unknown_01a;              /* 0x1a; SMD field_18, 0x7f for SFX */
+    u8 _unknown_01c;               /* 0x1c; set by opcode 0xA4, adjusted by 0xA5 */
     u8 channel_select;             /* 0x1d; opcode 0x8D acts when its byte matches */
     u16 noise_clock;               /* 0x1e; opcodes 0xB4/0xB5 */
     s32 tick_20;                   /* 0x20; incremented every tick */
@@ -608,14 +608,14 @@ typedef struct suzuki_music {
     u16 ticks_per_beat;            /* 0x3a */
     u16 beat_unit;                 /* 0x3c */
     u16 beats_remaining;           /* 0x3e */
-    u8 _unknown_40[4];             /* 0x40 */
+    u8 _unused_040[4];             /* 0x40 */
     s32 reverb_mode;               /* 0x44 */
     s16 reverb_depth;              /* 0x48; depth byte << 8 */
-    u8 _unknown_4a[2];             /* 0x4a */
+    u8 _padding_04a[2];            /* 0x4a; aligns reverb_delay */
     s32 reverb_delay;              /* 0x4c */
     s32 reverb_feedback;           /* 0x50 */
     u16 stop_bar;                  /* 0x54; main_smd_set_stop_bar: the music stops when bar reaches it */
-    u8 _unknown_56[2];             /* 0x56 */
+    u8 _padding_056[2];            /* 0x56; aligns channel_mask */
     u32 channel_mask;              /* 0x58; bit n: channel n has note data and is still running */
     u32 mute_mask;                 /* 0x5c; muted channels */
     u32 key_on_mask;               /* 0x60 */
@@ -647,10 +647,10 @@ typedef char suzuki_music_channels_must_be_at_0xb8[(sizeof(suzuki_music_t) == 0x
  * in a singly linked list through next (SuzukiAppendVFXSMD). Play VFX SMD
  * (0x80015c38) matches id and indexes channel_offsets. */
 typedef struct main_sound_resource {
-    u8 unknown_00[0xa];
+    u8 _unused_00[0xa];
     u16 id;                           /* 0x0a */
     u16 volume_offset;                /* 0x0c; offset of the per-sound u8 volume table */
-    u8 unknown_0e[2];                 /* 0x0e */
+    u8 _padding_0e[2];                /* 0x0e; aligns next */
     struct main_sound_resource* next; /* 0x10 */
     u16 channel_offsets[1];           /* 0x14 */
 } main_sound_resource_t;
@@ -1302,9 +1302,9 @@ typedef struct main_zodiac_screen_position {
 
 typedef struct main_zodiac_sprite_frame {
     u8 u;
-    u8 unknown_01;
+    u8 _unused_01;
     u8 v;
-    u8 unknown_03;
+    u8 _padding_03; /* aligns width */
     s16 width;
     s16 height;
     s16 offset_x;
@@ -1317,20 +1317,20 @@ typedef struct main_zodiac_scale {
 } main_zodiac_scale_t;
 
 typedef struct main_zodiac_draw_offset {
-    u8 unknown_00[8];
+    u8 _unused_00[8];
     u16 x;
     u16 y;
 } main_zodiac_draw_offset_t;
 
 /* Draw state handed to SCUS Build ZODIAC.BIN (provisional layout). */
 typedef struct zodiac_draw_context {
-    u32* ot;       /* 0x00: ordering table entry the primitives link into */
-    u8 brightness; /* 0x04: r0/g0/b0 of every sprite */
-    u8 unknown_05[3];
+    u32* ot;             /* 0x00: ordering table entry the primitives link into */
+    u8 brightness;       /* 0x04: r0/g0/b0 of every sprite */
+    u8 _padding_05[3];   /* aligns link_primitives */
     s32 link_primitives; /* 0x08: nonzero: link each sprite into the OT */
     s16 scale_x;         /* 0x0c: 12.12 */
     s16 scale_y;         /* 0x0e: 12.12 */
-    u8 unknown_10[8];
+    u8 _unused_10[8];
     main_zodiac_draw_offset_t offset; /* 0x18 */
 } zodiac_draw_context_t;
 

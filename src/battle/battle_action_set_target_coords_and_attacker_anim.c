@@ -16,7 +16,7 @@ typedef struct battle_action_misc_data {
     u8 continue_attack;      /* 0x18 */
     u8 current_hit_number;   /* 0x19 */
     u8 reaction_id_1a6;      /* 0x1a */
-    u8 _unknown_1a7;         /* 0x1b */
+    u8 _unused_1b;           /* 0x1b */
     u8 target_new_x;         /* 0x1c */
     u8 target_new_y;         /* 0x1d */
     u8 target_new_map_level; /* 0x1e */

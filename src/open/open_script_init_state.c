@@ -44,7 +44,7 @@ void open_script_init_state(void) {
     g_open_script_state.dispatch.flags = 1;
     g_open_script_state.dispatch.tpage = (s16)GetTPage(0, 2, 0x300, 0);
     g_open_script_state.dispatch.clut = (s16)GetClut(0, 0x1e0);
-    g_open_script_state.unknown_1674 = 0;
+    g_open_script_state._unknown_1674 = 0;
     g_open_script_state.dispatch.external_counter = 0;
     g_open_script_state.dispatch.timing_fraction = 0;
     g_open_script_state.dispatch.timing_step = 0;

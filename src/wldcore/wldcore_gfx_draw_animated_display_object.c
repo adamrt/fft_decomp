@@ -21,10 +21,10 @@ typedef union wldcore_sprite_part {
     struct {
         u8 x; /* 0x00; biased by 0x80 */
         u8 y; /* 0x01; biased by 0x80 */
-        u8 unknown_02[2];
+        u8 _unused_02[2];
         u8 h; /* 0x04 */
         u8 w; /* 0x05 */
-        u8 unknown_06;
+        u8 _unused_06;
         u8 u; /* 0x07 */
     } field;
     struct {

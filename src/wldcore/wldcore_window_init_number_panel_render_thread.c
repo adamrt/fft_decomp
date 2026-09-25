@@ -23,8 +23,8 @@ void wldcore_window_init_number_panel_render_thread(
     void (*thread_function)(void);
     world_menu_entry_t* state;
 
-    g_wldcore_window_panel_number_state.unknown_04[0] = -1;
-    g_wldcore_window_panel_number_state.unknown_04[1] = -1;
+    g_wldcore_window_panel_number_state._unknown_04[0] = -1;
+    g_wldcore_window_panel_number_state._unknown_04[1] = -1;
     g_wldcore_window_panel_number_state.on_change = wldcore_noop_8008ffd8;
     g_wldcore_window_panel_number_state.min = lower_value;
     g_wldcore_window_panel_number_state.max = upper_value;
@@ -76,12 +76,12 @@ void wldcore_window_init_number_panel_render_thread(
         = (struct world_menu_text_binding*)&g_wldcore_window_panel_number_state; /* a value range */
     g_wldcore_window_panel_render_state.window_width = digit_width;
     g_wldcore_window_panel_render_state.window_height = panel_height;
-    g_wldcore_window_panel_render_state.unknown_10[0] = 0;
-    g_wldcore_window_panel_render_state.unknown_10[1] = 0;
+    g_wldcore_window_panel_render_state._unknown_10[0] = 0;
+    g_wldcore_window_panel_render_state._unknown_10[1] = 0;
     g_wldcore_window_panel_render_state.overall_width = digit_width;
     g_wldcore_window_panel_render_state.overall_height = panel_height;
-    g_wldcore_window_panel_render_state.unknown_18[0] = 0;
-    g_wldcore_window_panel_render_state.unknown_18[1] = 0;
+    g_wldcore_window_panel_render_state._unknown_18[0] = 0;
+    g_wldcore_window_panel_render_state._unknown_18[1] = 0;
     g_wldcore_window_panel_render_state.text_id = text_id;
     g_wldcore_window_panel_render_state.max_row_index = 0;
     g_wldcore_window_panel_render_state.field_0x20 = 0;

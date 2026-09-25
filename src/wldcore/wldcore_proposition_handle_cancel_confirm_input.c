@@ -8,11 +8,11 @@
 typedef struct wldcore_menu_proposition_confirm_level {
     s32 window;        /* 0x00 */
     s32 render_index;  /* 0x04 */
-    u8 unknown_08[8];  /* 0x08 */
+    u8 _unused_08[8];  /* 0x08 */
     s32 proposition;   /* 0x10; index into g_main_active_propositions */
     s32 choice;        /* 0x14; 0 = first row, 1 = second row */
     s32 confirmed;     /* 0x18; set once the answer has been taken */
-    u8 unknown_1c[4];  /* 0x1c */
+    u8 _unused_1c[4];  /* 0x1c */
     s32 second_window; /* 0x20 */
 } wldcore_menu_proposition_confirm_level_t;
 

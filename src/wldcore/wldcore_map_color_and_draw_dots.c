@@ -18,9 +18,9 @@ extern wldcore_map_dot_source_t* g_wldcore_map_dot_sources;
  * into the preceding branch delay slot across it, which the target leaves as
  * a nop. */
 typedef struct wldcore_map_dot_hidden_view {
-    u8 unknown_00[0x10];
+    u8 _unused_00[0x10];
     volatile s32 flags;
-    u8 unknown_14[0x20];
+    u8 _unused_14[0x20];
 } wldcore_map_dot_hidden_view_t;
 
 extern wldcore_map_dot_hidden_view_t g_wldcore_map_dots_view[];

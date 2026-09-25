@@ -14,7 +14,7 @@ typedef struct world_formation_slot_sprite {
     s16 y;
     s16 w;
     s16 h;
-    u8 unknown_08[0x14 - 0x08];
+    u8 _unused_08[0x14 - 0x08];
 } world_formation_slot_sprite_t;
 
 /*

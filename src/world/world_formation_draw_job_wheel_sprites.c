@@ -10,7 +10,7 @@ typedef struct world_formation_job_wheel_sprite {
     s16 w;                                  /* 0x04 */
     s16 h;                                  /* 0x06 */
     world_formation_graphic_entry_t source; /* 0x08 */
-    u8 _pad14[0x10];                        /* unknown; the frame reserves 0x24 bytes for the record */
+    u8 _unused_14[0x10];                    /* unknown; the frame reserves 0x24 bytes for the record */
 } world_formation_job_wheel_sprite_t;
 
 /*

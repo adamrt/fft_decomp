@@ -10,11 +10,11 @@ typedef struct open_title_menu_state {
     /* 0x1c */ s32 selected_item;
     /* 0x20 */ s32 state;
     /* 0x24 */ s32 cursor_record_36;
-    /* 0x28 */ s32 field_28;
-    /* 0x2c */ s32 field_2c;
-    /* 0x30 */ s32 field_30;
+    /* 0x28 */ s32 _unused_28;
+    /* 0x2c */ s32 _unused_2c;
+    /* 0x30 */ s32 _unused_30;
     /* 0x34 */ s32 exiting;
-    /* 0x38 */ u8 padding_38[0x64 - 0x38];
+    /* 0x38 */ u8 _unused_38[0x64 - 0x38];
 } open_title_menu_state_t;
 
 /* Title-menu view of g_open_controller_stream_start; indexing it as an array of

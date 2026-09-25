@@ -22,12 +22,12 @@
 #define EDITOR_UNIT_IDS ((u8*)g_debugchr_editor_unit_ids)
 
 typedef struct {
-    s32 unk_00;   /* 0x00 */
-    s32 unk_04;   /* 0x04 */
-    s32 unk_08;   /* 0x08 */
-    s32 redraw;   /* 0x0C */
-    s32 counter;  /* 0x10 */
-} debug_thread_t; /* 0x14 */
+    s32 _unused_00; /* 0x00 */
+    s32 _unused_04; /* 0x04 */
+    s32 _unused_08; /* 0x08 */
+    s32 redraw;     /* 0x0C */
+    s32 counter;    /* 0x10 */
+} debug_thread_t;   /* 0x14 */
 
 extern debug_thread_t g_debugchr_status_display_thread_params;
 extern debug_thread_t g_debugchr_numeric_editor_thread_params;

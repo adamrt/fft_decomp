@@ -77,5 +77,6 @@ func (p project) checkConfig() error {
 		fmt.Printf("  %s: %d functions (%d bytes)\n", language, counts[language], sizes[language])
 	}
 	fmt.Printf("  declarations: no conflicting file-scope declarations\n")
+	fmt.Printf("  placeholders: no accesses to _unused_ or _padding_ members\n")
 	return nil
 }

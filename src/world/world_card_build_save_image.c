@@ -60,7 +60,7 @@ void world_card_build_save_image(s32 slot) {
     bcopy(g_main_item_quantities, g_world_load_work_buffer->item_quantities, 0x100);
     bcopy(g_main_item_poached_quantities, g_world_load_work_buffer->poached_item_quantities, 0x100);
     bcopy(g_main_item_location_flags, g_world_load_work_buffer->item_location_flags, 0x80);
-    g_world_load_work_buffer->field_1c88 = D_80057b1c;
+    g_world_load_work_buffer->_unknown_1c88 = D_80057b1c;
     bcopy(g_main_script_variables, g_world_load_work_buffer->script_variables, 0x400);
     bcopy(&g_main_game_options, &g_world_load_work_buffer->options, 4);
     bcopy(g_main_item_type_order_tables.order_0, g_world_load_work_buffer->item_type_order_0, 0xc);

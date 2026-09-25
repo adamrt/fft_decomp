@@ -13,7 +13,7 @@ typedef struct battle_target_unit_action_copy {
     s16 target_x;         /* 0x0c */
     s16 target_elevation; /* 0x0e */
     s16 target_y;         /* 0x10 */
-    u8 _pad12[2];
+    u8 _unused_12[2];
 } battle_target_unit_action_copy_t;
 
 void battle_target_build_directional_attack_panels(const void* source, u8 mode) {

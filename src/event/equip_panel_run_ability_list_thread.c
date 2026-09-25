@@ -9,7 +9,7 @@
 typedef struct equip_ability_panel_thread {
     s32 x; /* 0x00 */
     s32 y; /* 0x04 */
-    s32 unknown_08;
+    s32 _unused_08;
     s32 redraw_request; /* 0x0c */
 } equip_ability_panel_thread_t;
 

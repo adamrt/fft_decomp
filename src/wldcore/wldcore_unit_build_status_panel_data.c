@@ -16,7 +16,7 @@ typedef struct wldcore_unit_status_gauges {
     s16 mp_bonus;   /* 0x14 */
     u16 max_mp;     /* 0x16 */
     s16 ct;         /* 0x18 */
-    s16 unknown_1a;
+    s16 _unused_1a;
     s16 max_ct; /* 0x1c */
 } wldcore_unit_status_gauges_t;
 
@@ -30,19 +30,19 @@ typedef struct wldcore_unit_status_detail {
     s16 right_weapon_evade; /* 0x0a */
     s16 left_weapon_evade;  /* 0x0c */
     s16 monster;            /* 0x0e; unit_flags & 0x20 */
-    s16 unknown_10;
+    s16 _unused_10;
     s16 physical_attack;          /* 0x12 */
     s16 physical_class_evade;     /* 0x14 */
     s16 physical_shield_evade;    /* 0x16 */
     s16 physical_accessory_evade; /* 0x18 */
-    s16 unknown_1a;
+    s16 _unused_1a;
     s16 magic_attack;            /* 0x1c */
     s16 magical_class_evade;     /* 0x1e */
     s16 magical_shield_evade;    /* 0x20 */
     s16 magical_accessory_evade; /* 0x22 */
     s16 equipment[5];            /* 0x24 */
     s16 abilities[5];            /* 0x2e */
-    u8 unknown_38[8];
+    u8 _unused_38[8];
 } wldcore_unit_status_detail_t;
 
 /* Loads party member party_index into the scratch unit at 0x800d467c and

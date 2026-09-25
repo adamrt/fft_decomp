@@ -6,7 +6,7 @@
  * master volume. */
 void main_smd_init_music_header(suzuki_music_t* music) {
     main_smd_free_snapshots(music);
-    music->field_1c = 0;
+    music->_unknown_01c = 0;
     music->channel_select = 0;
     music->min_loop_count = 0;
     music->bar = 1;

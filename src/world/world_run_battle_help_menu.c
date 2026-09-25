@@ -28,18 +28,18 @@ void world_run_battle_help_menu(void) {
        saved registers begin. */
     struct {
         world_help_navigation_entry_t* navigation;
-        s32 pad_b4;
+        s32 _unused_04;
         s32 menu_index;
-        s32 pad_bc;
+        s32 _unused_0c;
         union {
             s32 w;
             u16 h;
         } cursor_x;
-        s32 pad_c4;
+        s32 _unused_14;
         native_thread_t* help_thread;
-        s32 pad_cc;
-        s32 pad_d0;
-        s32 pad_d4;
+        s32 _unused_1c;
+        s32 _unused_20;
+        s32 _unused_24;
     } local;
     s32 help_id; /* also the pad direction index */
     register s32 reload_neighbor __asm__("$3");

@@ -13,7 +13,7 @@
  * slot below the velocity copy in battle_move_animate_jump_start. */
 typedef struct battle_move_jump_target {
     battle_screen_coords_t coords;
-    u8 _pad06[10];
+    u8 _unused_06[10];
 } battle_move_jump_target_t;
 
 void battle_move_animate_jump_arc_to_target(battle_unit_misc_data_t* unit) {

@@ -3,7 +3,7 @@
 /* Suzuki resource header: word 2 is the total size in bytes, including the
  * 8-byte header. */
 typedef struct main_sound_smd_resource {
-    u8 unknown_00[8];
+    u8 _unused_00[8];
     u32 words[1];
 } main_sound_smd_resource_t;
 

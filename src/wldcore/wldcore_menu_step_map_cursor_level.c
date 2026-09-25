@@ -17,9 +17,9 @@ extern wldcore_map_projection_view_t g_wldcore_map_projection_view;
  * loads, which only a real point member reproduces (a local copy spills to
  * the stack and a cast view computes the address into a register). */
 typedef struct wldcore_window_position_record {
-    u8 unknown_00[0x18];
+    u8 _unused_00[0x18];
     wldcore_point32_t position;
-    s32 field_20;
+    s32 _unused_20;
 } wldcore_window_position_record_t;
 extern wldcore_window_position_record_t g_wldcore_window_position_records[];
 

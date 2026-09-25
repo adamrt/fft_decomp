@@ -17,23 +17,23 @@ typedef struct dead_unit_entry_counts {
 } dead_unit_entry_counts_t;
 
 typedef struct dead_unit_menu {
-    u8 unknown_00[4];
+    u8 _unused_000[4];
     s16 inner_width; /* 0x04 */
-    u8 unknown_06[2];
+    u8 _unused_006[2];
     s16 window_x;     /* 0x08 */
     s16 window_y;     /* 0x0a */
     s16 window_width; /* 0x0c */
-    u8 unknown_0e[6];
+    u8 _unused_00e[6];
     s16 overall_width; /* 0x14 */
-    u8 unknown_16[0x18];
+    u8 _unused_016[0x18];
     dead_unit_entry_counts_t* entries; /* 0x30 */
-    u8 unknown_34[6];
+    u8 _unused_034[6];
     s16 menu_type;         /* 0x3a */
     u8 at_list_menu[0x78]; /* 0x3c */
     u8 confirm_menu[0x78]; /* 0xb4 */
     u8 message_menu[0x1c]; /* 0x12c */
     s16 message_id;        /* 0x148 */
-    u8 unknown_14a[0x1e];
+    u8 _unused_14a[0x1e];
     u8 move_menu[4]; /* 0x168 */
 } dead_unit_menu_t;
 typedef char dead_unit_menu_size_must_be_0x16c[sizeof(dead_unit_menu_t) == 0x16c ? 1 : -1];
@@ -78,9 +78,9 @@ typedef struct option_at_menu {
     s16 window_x;     /* 0x08 */
     s16 window_y;     /* 0x0a */
     s16 window_width; /* 0x0c */
-    u8 unknown_0e[6];
+    u8 _unused_0e[6];
     s16 overall_width; /* 0x14 */
-    u8 unknown_16[0x1a];
+    u8 _unused_16[0x1a];
     option_scroll_layout_t* layout; /* 0x30 */
 } option_at_menu_t;
 
@@ -103,9 +103,9 @@ typedef struct option_menu_entry {
     u16 vram_y;       /* 0x02 */
     s16 inner_width;  /* 0x04: rect width * 4 */
     u16 inner_height; /* 0x06 */
-    u8 _pad08[0x30 - 0x08];
+    u8 _unused_08[0x30 - 0x08];
     option_menu_text_layout_t* text_binding; /* 0x30 */
-    u8 _pad34[6];
+    u8 _unused_34[6];
     s16 select_text_table; /* 0x3a */
 } option_menu_entry_t;
 
@@ -173,7 +173,7 @@ void* option_menu_update_scroll(option_menu_entry_t* menu, s32* first_row, s32* 
 typedef struct option_glyph_blit {
     RECT rect;
     s32 stride;
-    u8 unknown_c[4];
+    u8 _unused_0c[4];
 } option_glyph_blit_t;
 typedef char option_glyph_blit_size_must_be_0x10[sizeof(option_glyph_blit_t) == 0x10 ? 1 : -1];
 

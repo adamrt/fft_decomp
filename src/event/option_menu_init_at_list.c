@@ -10,8 +10,8 @@
 typedef struct option_at_descriptor {
     u8 flags;
     u8 turn_value;
-    u8 unknown_02;
-    u8 unknown_03;
+    u8 _unused_02;
+    u8 _unused_03;
 } option_at_descriptor_t;
 
 enum {

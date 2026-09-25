@@ -40,10 +40,10 @@ void battle_menu_run_icon_selection_loop(void) {
         param->cursor = cursor;
         battle_menu_configure_frame_cluts(record);
         battle_update_menu_cursor_primitives(param, (world_menu_icon_sprites_t*)record, i, cursor);
-        if ((records[0].unknown_78 == 0 && records[1].unknown_78 == 2)
-            || (records[0].unknown_78 == 2 && records[1].unknown_78 == 0)) {
-            records[0].unknown_78 = 0;
-            records[1].unknown_78 = 0;
+        if ((records[0]._unknown_78 == 0 && records[1]._unknown_78 == 2)
+            || (records[0]._unknown_78 == 2 && records[1]._unknown_78 == 0)) {
+            records[0]._unknown_78 = 0;
+            records[1]._unknown_78 = 0;
         }
         if (battle_menu_should_close_thread(&g_battle_script_event_input) != 0) {
             break;

@@ -38,10 +38,10 @@ void world_menu_run_icon_selection_loop(void) {
         param->cursor = cursor;
         world_menu_select_icon_cluts(&record->base);
         world_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
-        if ((records[0].unknown_78 == 0 && records[1].unknown_78 == 2)
-            || (records[0].unknown_78 == 2 && records[1].unknown_78 == 0)) {
-            records[0].unknown_78 = 0;
-            records[1].unknown_78 = 0;
+        if ((records[0]._unknown_78 == 0 && records[1]._unknown_78 == 2)
+            || (records[0]._unknown_78 == 2 && records[1]._unknown_78 == 0)) {
+            records[0]._unknown_78 = 0;
+            records[1]._unknown_78 = 0;
         }
         if (world_menu_check_thread_completion(&g_world_menu_new_button_input) != 0) {
             break;

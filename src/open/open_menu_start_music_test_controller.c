@@ -25,9 +25,9 @@ void open_menu_start_music_test_controller(void) {
     controller = g_open_current_controller_index;
     g_open_controller_stream_start[controller].stream_start = 0;
     g_open_controller_stream_start[controller].stream_length = 0;
-    g_open_controller_stream_start[controller].field_08 = 0;
-    g_open_controller_stream_start[controller].field_0c = four;
-    g_open_controller_stream_start[controller].field_10 = 0;
+    g_open_controller_stream_start[controller]._unknown_08 = 0;
+    g_open_controller_stream_start[controller]._unknown_0c = four;
+    g_open_controller_stream_start[controller]._unknown_10 = 0;
     g_open_controller_handler_indices[controller] = 7;
     g_open_current_controller_index = controller + 1;
 }

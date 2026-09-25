@@ -67,13 +67,13 @@ typedef char attack_point_size_must_be_4[(sizeof(attack_gfx_point_t) == 4) ? 1 :
 
 typedef struct attack_gfx_sprite_rect {
     u8 u; /* 0x00 */
-    u8 _pad_01;
-    u8 v; /* 0x02 */
-    u8 _pad_03;
-    s16 width;    /* 0x04 */
-    s16 height;   /* 0x06 */
-    s16 offset_x; /* 0x08 */
-    s16 offset_y; /* 0x0A */
+    u8 _unused_01;
+    u8 v;           /* 0x02 */
+    u8 _padding_03; /* aligns width */
+    s16 width;      /* 0x04 */
+    s16 height;     /* 0x06 */
+    s16 offset_x;   /* 0x08 */
+    s16 offset_y;   /* 0x0A */
 } attack_gfx_sprite_rect_t;
 typedef char attack_sprite_rect_size_must_be_0x0c[(sizeof(attack_gfx_sprite_rect_t) == 0x0C) ? 1 : -1];
 
@@ -159,7 +159,7 @@ typedef struct attack_deployment_squad_data {
     u32 valid_tile_bitmap; /* 0x00; 5-by-5 deployment mask */
     s8 center_x;           /* 0x04 */
     s8 center_y;           /* 0x05 */
-    u8 _pad_06;            /* 0x06 */
+    u8 _unknown_06;        /* 0x06 */
     u8 orientation_flags;  /* 0x07; original and rotated orientations */
     u8 unit_limit;         /* 0x08 */
     u8 map_id;             /* 0x09 */
@@ -176,9 +176,9 @@ typedef struct attack_deploy_render_buffer {
     SPRT tiles[5][5];                   /* 0x000 */
     POLY_FT4 portraits[10];             /* 0x1f4 */
     POLY_FT4 status[30];                /* 0x384 */
-    u8 unknown_834[0x28];               /* 0x834 */
+    u8 _unknown_834[0x28];              /* 0x834 */
     POLY_F3 arrow;                      /* 0x85c */
-    u8 unknown_870[0x14];               /* 0x870 */
+    u8 _unused_870[0x14];               /* 0x870 */
     u8 menu_cursor[0xa0];               /* 0x884 */
     POLY_FT4 cursor[2][2];              /* 0x924 */
     DR_MODE draw_mode_9c4;              /* 0x9c4 */

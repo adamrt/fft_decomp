@@ -20,11 +20,11 @@ typedef union battle_effect_command {
     } op39;
     struct {
         u32 header;
-        u16 halves[5]; /* 0x04 */
-        u16 _pad0e;
-        s32 values[3]; /* 0x10 */
-        s32 x;         /* 0x1c */
-        s32 y;         /* 0x20 */
+        u16 halves[5];   /* 0x04 */
+        u16 _padding_0e; /* aligns values */
+        s32 values[3];   /* 0x10 */
+        s32 x;           /* 0x1c */
+        s32 y;           /* 0x20 */
     } op35;
 } battle_effect_command_t;
 
@@ -36,7 +36,7 @@ typedef struct battle_effect_decoded {
     } header;      /* 0x00 */
     s32 values[4]; /* 0x04 */
     u16 halves[5]; /* 0x14 */
-    u8 _unknown1e[0x4a];
+    u8 _unused_1e[0x4a];
     s32 x; /* 0x68 */
     s32 y; /* 0x6c */
 } battle_effect_decoded_t;

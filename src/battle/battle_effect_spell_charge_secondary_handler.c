@@ -10,7 +10,7 @@ typedef struct battle_effect_charge_params {
     s16 duration;
     s16 radius;
     u8 spawn_interval;
-    u8 _unknown_0b;
+    u8 _unused_0b;
     u8 max_trails;
     u8 fade_row;
 } battle_effect_charge_params_t;

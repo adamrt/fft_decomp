@@ -2,17 +2,17 @@
 
 /* Message window layout; only the fields written here are named. */
 typedef struct battle_text_message_window_layout {
-    u8 _unknown_00[4];
+    u8 _unused_00[4];
     s16 width_04;
     s16 height_06;
     s16 x; /* 0x08; centred on 0x102 */
-    u8 _unknown_0a[2];
+    u8 _unused_0a[2];
     s16 width_0c;
     s16 height_0e;
-    u8 _unknown_10[4];
+    u8 _unused_10[4];
     s16 width_14;
     s16 height_16;
-    u8 _unknown_18[4];
+    u8 _unused_18[4];
     s16 text_id; /* 0x1c */
 } battle_text_message_window_layout_t;
 

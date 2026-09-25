@@ -20,6 +20,6 @@ void world_map_store_selected_tile_data(void) {
     g_world_map_selected_tile_data.depth = depth;
     g_world_map_selected_tile_data.display_height += depth * 2;
     surface_offset = *selected * 2;
-    g_world_map_selected_tile_data.unknown_02 = D_8005E950[surface_offset];
-    g_world_map_selected_tile_data.unknown_04 = D_8005E950[surface_offset + 1];
+    g_world_map_selected_tile_data._unknown_02 = D_8005E950[surface_offset];
+    g_world_map_selected_tile_data._unknown_04 = D_8005E950[surface_offset + 1];
 }

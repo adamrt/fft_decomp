@@ -4,7 +4,7 @@
 /* map_tile_t with byte 3 split into its half-height and depth bitfields. */
 typedef struct {
     map_tile_surface_t surface;
-    u8 _unknown01;
+    u8 _unused_01;
     u8 height;
     struct {
         u8 half_height : 5;
@@ -51,7 +51,7 @@ u8* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, 
         config->high_elevation = level;
         config->target_x = target_x;
         config->target_y = target_y;
-        config->_pad0c = target_level;
+        config->_unknown_0c = target_level;
         config->map_max_x = g_battle_map_max_x;
         config->map_max_y = g_battle_map_max_y;
         g_battle_move_pathing_tile_index = (config->high_elevation << 8) + config->y * config->map_max_x + config->x;
@@ -59,7 +59,7 @@ u8* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, 
             || g_battle_map_tile_data[g_battle_move_pathing_tile_index].flags_06.bits.untargetable) {
             return 0;
         }
-        *(u16*)config = (config->_pad0c << 8) + config->target_y * config->map_max_x + config->target_x;
+        *(u16*)config = (config->_unknown_0c << 8) + config->target_y * config->map_max_x + config->target_x;
         if (g_battle_map_tile_data[*(u16*)config].flags_06.bits.blocked
             || g_battle_map_tile_data[*(u16*)config].flags_06.bits.untargetable) {
             return 0;
@@ -97,7 +97,7 @@ u8* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, 
         config->move = 124;
         config->can_ride = 0;
         D_8018F7CC = 0;
-        config->field_1a = D_8018F4FC;
+        config->_unknown_1a = D_8018F4FC;
         empty_flags = 0xFF;
         for (i = 15; i >= 0; i--) {
             records[i].unit_id_flags = empty_flags;
@@ -178,9 +178,10 @@ u8* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, 
     g_battle_move_reachable_unit_id = config->unit_id;
     state->tile_x = config->target_x;
     state->tile_y = config->target_y;
-    state->tile_level = config->_pad0c;
+    state->tile_level = config->_unknown_0c;
     state->selected_source_side_shift = 0;
-    g_battle_move_pathing_tile_index = (config->_pad0c << 8) + config->target_y * config->map_max_x + config->target_x;
+    g_battle_move_pathing_tile_index
+        = (config->_unknown_0c << 8) + config->target_y * config->map_max_x + config->target_x;
     if (!((g_battle_map_tile_data[g_battle_move_pathing_tile_index].ceiling_depth_and_marks >> 5) & 1)) {
         return 0;
     }
@@ -188,22 +189,22 @@ u8* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, 
     battle_target_clear_panel_spread_flags();
     g_battle_move_path_height_offsets = 0;
     g_battle_move_destination_unit_record = 0;
-    config->_pad1e[0] = 0;
-    config->_pad1e[1] = 0;
+    config->_unknown_1e[0] = 0;
+    config->_unknown_1e[1] = 0;
     state->outer_count = 4;
     state->candidate_remaining_range.value = 0xFF;
     state->source_unit_record_flag = 0;
     state->source_unit_record_index = 0;
-    state->_pad5c[2] = 0;
+    state->_unknown_5c[2] = 0;
     state->inner_count = 2;
     while (state->candidate_remaining_range.value != 0) {
         state->previous_source_side_shift = state->selected_source_side_shift;
         state->tile_index = state->tile_level * 256 + (s16)state->tile_y * config->map_max_x + state->tile_x;
         state->current_tile = &g_battle_map_tile_data[state->tile_index];
         state->current_panel = &g_battle_target_panels[state->tile_index];
-        state->_pad5c[2]++;
+        state->_unknown_5c[2]++;
         g_battle_move_pathing_scratch = state->current_panel->remaining_range;
-        state->current_panel->mark = state->_pad5c[2];
+        state->current_panel->mark = state->_unknown_5c[2];
         state->candidate_remaining_range.value = g_battle_move_pathing_scratch;
         if ((s16)state->tile_x == config->x && (s16)state->tile_y == config->y
             && state->tile_level == config->high_elevation) {

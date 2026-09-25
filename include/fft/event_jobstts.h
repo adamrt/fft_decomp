@@ -100,7 +100,7 @@ typedef struct jobstts_gfx_context {
     u8* sprites_8;            /* 0x54; 0x10 stride */
     DR_MOVE* draw_moves;      /* 0x58 */
     DR_AREA* draw_areas;      /* 0x5C */
-    u8 pad_60[0x94];          /* 0x60 */
+    u8 _unused_60[0x94];      /* 0x60 */
 } jobstts_gfx_context_t;
 typedef char jobstts_gfx_context_size_must_be_0xf4[(sizeof(jobstts_gfx_context_t) == 0xF4) ? 1 : -1];
 

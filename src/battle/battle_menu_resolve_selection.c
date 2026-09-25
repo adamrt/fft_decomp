@@ -4,9 +4,9 @@
 /* Command and option use their s16 slots' low bytes; item uses its full halfword. */
 typedef struct {
     u8 command;
-    u8 pad1;
+    u8 _unused_01;
     u8 option;
-    u8 pad3;
+    u8 _padding_03; /* aligns item */
     u16 item;
 } battle_menu_selection_t;
 

@@ -138,8 +138,13 @@ function that matches only that way.
   comment saying so.
 - Names carry the module prefix (`battle_`, `world_`, `wldcore_`, `open_`,
   `main_`, `<overlay>_`; globals `g_battle_`, …). Unknowns stay
-  `func_ADDRESS`, `D_ADDRESS` or `unk_XX` until the code supports a name.
-  snake_case; `_t` struct and `_e` enum typedefs; uppercase enum values;
+  `func_ADDRESS` or `D_ADDRESS` until the code supports a name. Unnamed
+  struct members are `_unknown_XX` (code accesses it, meaning unknown),
+  `_unused_XX` (no source accesses it by name) or `_padding_XX` (alignment
+  or size filler, with an inline comment saying which), where XX is the
+  hex offset in the member's own struct, zero-padded to the same width
+  throughout the struct. `make check-config` fails on any access to an
+  `_unused_` or `_padding_` member. snake_case; `_t` struct and `_e` enum typedefs; uppercase enum values;
   `_init_`, not `_initialize_`. `include/psx/` keeps SDK names.
 - Fixed point is 1.3.12 / 20.12 with 1.0 = `ONE` (4096, `psx/gte.h`), also
   one full rsin/rcos turn. Write `ONE` for 1.0; `>> 12` rescales after a
@@ -214,8 +219,9 @@ only if removal changes the bytes.
 
 Useful work, each step verified with `make validate`:
 
-- Name the remaining `D_` globals, `func_` functions and `unk_`/`field_`
-  members from what the code does with them.
+- Name the remaining `D_` globals, `func_` functions and `_unknown_`
+  members from what the code does with them, and examine `_unused_` members
+  (they may still be touched by whole-struct copies or another view).
 - Remove register pins, asm barriers, casts and raw offsets where a natural
   spelling matches (about 180 files still pin a register).
 - Replace `goto` (about 300 remain) with the loops, `if`/`else` and `switch`

@@ -4,17 +4,17 @@
 /* Provisional particle list node (target_* is the homing target,
  * attract_weight the homing strength). */
 typedef struct battle_effect_particle {
-    u8 _unknown_00[4];                   /* 0x00 */
+    u8 _unused_00[4];                    /* 0x00 */
     struct battle_effect_particle* next; /* 0x04 */
     battle_effect_motion_t motion;       /* 0x08 */
     s16 target_x;                        /* 0x3c */
     s16 target_y;                        /* 0x3e */
     s16 target_z;                        /* 0x40 */
-    u8 _unknown_42[3];                   /* 0x42 */
+    u8 _unused_42[3];                    /* 0x42 */
     u8 curve_track;                      /* 0x45 */
-    u8 _unknown_46[4];                   /* 0x46 */
+    u8 _unused_46[4];                    /* 0x46 */
     s16 attract_weight;                  /* 0x4a */
-    u8 _unknown_4c[4];                   /* 0x4c */
+    u8 _unused_4c[4];                    /* 0x4c */
     s16 curve_offset;                    /* 0x50 */
 } battle_effect_particle_t;
 

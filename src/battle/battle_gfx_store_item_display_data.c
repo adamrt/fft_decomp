@@ -1,7 +1,7 @@
 #include "fft/battle.h"
 
 typedef struct battle_gfx_item_graphic_data {
-    u8 _pad0[0xc];
+    u8 _unused_00[0xc];
     u8 x_load_location;
     u8 y_load_location;
     u16 clut;

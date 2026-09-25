@@ -82,9 +82,9 @@ void main_sound_start_sfx(s16 channel_id, s32 sound_id, s16 volume, s16 balance)
             channel->octave_base = 0x3c;
             channel->gate_time = 0xf;
             channel->loop_note_data = 0;
-            channel->field_24 = 0;
+            channel->_unknown_024 = 0;
             channel->loop_count = 0;
-            channel->field_2a = 0;
+            channel->_unknown_02a = 0;
             channel->rest_length = 0;
             channel->length_adjust = 0;
             channel->pitch_offset = 0;

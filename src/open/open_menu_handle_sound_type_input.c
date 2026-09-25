@@ -13,7 +13,7 @@ void open_menu_handle_sound_type_input(open_sound_menu_state_t* menu) {
         open_gfx_hide_four_render_records(
             (const open_birthday_render_record_indices_t*)&g_open_controller_records[g_open_current_controller_index]);
         /* The popped controller's own record, addressed from the pushed-record base. */
-        g_open_controller_stream_start[g_open_current_controller_index - 1].field_14 = 0;
+        g_open_controller_stream_start[g_open_current_controller_index - 1]._unknown_14 = 0;
         return;
     }
 

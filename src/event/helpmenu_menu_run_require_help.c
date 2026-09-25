@@ -34,11 +34,11 @@ void helpmenu_menu_run_require_help(void) {
     POLY_FT4 shadow_polys[2];
     struct {
         s32 menu_index;
-        s32 pad_b4;
+        s32 _unused_04;
         native_thread_t* text_thread;
-        s32 pad_bc;
-        s32 pad_c0;
-        s32 pad_c4;
+        s32 _unused_0c;
+        s32 _unused_10;
+        s32 _unused_14;
     } local;
     /* Each register pin is load-bearing: unpinning it alone, or with its
        same-register partners, changes the allocation. */

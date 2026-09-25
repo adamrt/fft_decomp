@@ -2,7 +2,7 @@
 
 typedef struct battle_ai_loader_charge_record {
     u8 ct;
-    u8 field_01;
+    u8 _unused_01;
 } battle_ai_loader_charge_record_t;
 typedef char battle_ai_loader_charge_record_must_be_2[sizeof(battle_ai_loader_charge_record_t) == 2 ? 1 : -1];
 

@@ -58,7 +58,7 @@ void card_save_build_buffer(s32 slot) {
         sizeof(g_card_save_buffer_pointer->poached_item_quantities));
     bcopy(g_main_item_location_flags, g_card_save_buffer_pointer->item_location_flags,
         sizeof(g_card_save_buffer_pointer->item_location_flags));
-    g_card_save_buffer_pointer->field_1c88 = D_80057b1c;
+    g_card_save_buffer_pointer->_unknown_1c88 = D_80057b1c;
     bcopy(g_main_script_variables, g_card_save_buffer_pointer->script_variables, sizeof(g_main_script_variables));
     bcopy(&g_main_game_options, g_card_save_buffer_pointer->game_options, 4);
     bcopy(g_main_item_type_order_tables.order_0, g_card_save_buffer_pointer->item_type_order_0, 0xc);

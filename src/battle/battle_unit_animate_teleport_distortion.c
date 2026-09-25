@@ -4,19 +4,19 @@
 /* Primitive the pulse animation scales; only the two 16.16-fraction scale
  * fields at 0x08/0x0a are touched here. */
 typedef struct battle_unit_teleport_pulse_prim {
-    u8 unknown_00[0x8];
+    u8 _unused_00[0x8];
     s16 scale_x; /* 0x08 */
     s16 scale_y; /* 0x0a */
 } battle_unit_teleport_pulse_prim_t;
 
 /* Renderer-side object shared with battle_move_interpolate_height_toward_fixed_drop (0x087..0x090 agree). */
 typedef struct battle_unit_teleport_pulse_obj {
-    u8 unknown_000[0x87];
+    u8 _unused_000[0x87];
     u8 active;      /* 0x087 */
     s32 phase;      /* 0x088 */
     s32 angle;      /* 0x08c */
     s32 fade_angle; /* 0x090 */
-    u8 unknown_094[0x170];
+    u8 _unused_094[0x170];
     battle_unit_teleport_pulse_prim_t* prim; /* 0x204 */
 } battle_unit_teleport_pulse_obj_t;
 

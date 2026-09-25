@@ -33,9 +33,9 @@ u8* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
     config->ai_propagation_mode = 0;
     state->tile_x = config->target_x = x;
     state->tile_y = config->target_y = y;
-    state->tile_level = config->_pad0c = elevation;
+    state->tile_level = config->_unknown_0c = elevation;
     battle_move_store_unit_movement_to_scratchpad(unit_id);
-    index = (config->_pad0c << 8) + config->target_y * config->map_max_x + config->target_x;
+    index = (config->_unknown_0c << 8) + config->target_y * config->map_max_x + config->target_x;
     if (!((g_battle_map_tile_data[index].ceiling_depth_and_marks >> 5) & 1)) {
         return 0;
     }
@@ -51,18 +51,18 @@ u8* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
     battle_move_set_tile_flags_for_pathfinding(2);
     g_battle_move_path_height_offsets = 0;
     g_battle_move_destination_unit_record = 0;
-    config->_pad1e[0] = 0;
-    config->_pad1e[1] = 0;
+    config->_unknown_1e[0] = 0;
+    config->_unknown_1e[1] = 0;
     state->source_unit_record_flag = 0;
     state->source_unit_record_index = 0;
     state->outer_count = 4;
-    index = (config->_pad0c << 8) + config->target_y * config->map_max_x + config->target_x;
+    index = (config->_unknown_0c << 8) + config->target_y * config->map_max_x + config->target_x;
     flags = frontier[index];
     if (flags & FRONTIER_FLAG_UNIT_ON_TILE) {
         if (!(flags & FRONTIER_FLAG_VALID_DESTINATION)) {
             return 0;
         }
-        config->_pad1e[1] = 1;
+        config->_unknown_1e[1] = 1;
         state->source_unit_record_index = g_battle_target_panels[index].unit_record_index;
         g_battle_move_destination_unit_record = (records[state->source_unit_record_index].unit_id_flags & 0x1f) + 0x80;
         state->outer_count = 0x1c;
@@ -73,7 +73,7 @@ u8* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
         if (!(source_flags & FRONTIER_FLAG_VALID_DESTINATION)) {
             return 0;
         }
-        config->_pad1e[0] = 1;
+        config->_unknown_1e[0] = 1;
     }
     if (config->move_type == 1) {
         move_flags = &g_battle_move_effective_flags;
@@ -99,16 +99,16 @@ u8* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
         return g_battle_move_path;
     }
     state->candidate_remaining_range.value = 0xff;
-    state->_pad5c[2] = 0;
+    state->_unknown_5c[2] = 0;
     state->inner_count = 4;
     state->selected_source_side_shift = 0;
     while (state->candidate_remaining_range.value != 0) {
         state->previous_source_side_shift = state->selected_source_side_shift;
-        pass = state->_pad5c[2] + 1;
+        pass = state->_unknown_5c[2] + 1;
         state->tile_index = state->tile_level * 256 + (s16)state->tile_y * config->map_max_x + state->tile_x;
         state->current_tile = &g_battle_map_tile_data[state->tile_index];
         state->current_panel = &g_battle_target_panels[state->tile_index];
-        state->_pad5c[2] = pass;
+        state->_unknown_5c[2] = pass;
         if (state->outer_count >= 5) {
             value = state->current_panel->ride_remaining_range;
             range = state->current_panel->remaining_range;
@@ -118,7 +118,7 @@ u8* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
                 value = range;
                 state->source_unit_record_flag = 0;
                 state->outer_count = 4;
-                state->current_panel->mark = state->_pad5c[2];
+                state->current_panel->mark = state->_unknown_5c[2];
             }
         } else if (state->source_unit_record_flag != 0) {
             value = g_battle_target_panels[state->source_unit_record_index + 0x200].remaining_range;
@@ -144,7 +144,7 @@ u8* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation) {
             state->outer_count = 4;
             continue;
         }
-        if (config->_pad1e[0] != 0) {
+        if (config->_unknown_1e[0] != 0) {
             state->inner_count = 7;
             battle_move_spread_to_neighbors();
             previous = state->candidate_remaining_range.value;

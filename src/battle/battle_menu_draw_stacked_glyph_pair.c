@@ -5,9 +5,9 @@
 typedef struct battle_menu_text_position {
     u16 x;
     u16 y;
-    u8 unknown_04[4];
-    u16 unknown_08;
-    u16 unknown_0a;
+    u8 _unused_04[4];
+    u16 _unused_08;
+    u16 _padding_0a; /* aligns pixel_adjustment */
     s32 pixel_adjustment;
 } battle_menu_text_position_t;
 

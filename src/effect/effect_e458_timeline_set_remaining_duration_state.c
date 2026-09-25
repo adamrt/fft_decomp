@@ -1,12 +1,12 @@
 #include "fft/effect.h"
 
 typedef struct effect_timeline_record_view {
-    u8 padding[0x28];
+    u8 _unused_00[0x28];
     s16 effect_timer;
 } effect_timeline_record_view_t;
 
 typedef struct effect_timeline_header {
-    u16 unknown_0;
+    u16 _unused_00;
     u16 effect_duration;
 } effect_timeline_header_t;
 

@@ -8,7 +8,7 @@
  * the leading flags word differs, and the checker ignores qualifiers. */
 typedef struct wldcore_window_render_record {
     volatile s32 flags;
-    u8 unknown_04[0x30];
+    u8 _unused_04[0x30];
 } wldcore_window_render_record_t;
 
 /* volatile (see above): the target keeps the read-modify-write order. */

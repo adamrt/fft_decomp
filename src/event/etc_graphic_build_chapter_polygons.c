@@ -13,21 +13,21 @@ void etc_graphic_build_chapter_polygons(
     /* Locals the retail build keeps on the stack, one word apart. */
     volatile struct {
         s32 layer;
-        s32 pad14;
+        s32 _unused_04;
         s32 dimensions;
-        s32 pad1c;
+        s32 _unused_0c;
         s32 texture_mode;
-        s32 pad24;
+        s32 _unused_14;
         s32 tpage_bits;
-        s32 pad2c;
+        s32 _unused_1c;
         s32 tpage_shifted;
-        s32 pad34;
+        s32 _unused_24;
         s32 tpage_right_alt;
-        s32 pad3c;
+        s32 _unused_2c;
         s32 tpage_right;
-        s32 pad44;
+        s32 _unused_34;
         s32 tpage_left_alt;
-        s32 pad4c;
+        s32 _unused_3c;
         s32 tpage_left;
     } stack;
     /* Each register pin is load-bearing: unpinning any one changes the allocation,

@@ -19,13 +19,13 @@ typedef struct wldcore_map_dot_render {
     s32 flags;      /* dot +0x10 */
     s32 sprite_id;  /* dot +0x14 */
     s32 priority;   /* dot +0x18 */
-    s32 unknown_0c; /* dot +0x1c */
-    s32 unknown_10; /* dot +0x20 */
-    s32 unknown_14; /* dot +0x24 */
+    s32 _unused_0c; /* dot +0x1c */
+    s32 _unused_10; /* dot +0x20 */
+    s32 _unused_14; /* dot +0x24 */
     s32 screen_x;   /* dot +0x28 */
     s32 screen_y;   /* dot +0x2c */
     u8 rgb[3];      /* dot +0x30 */
-    u8 pad2;
+    u8 _padding_23; /* tail padding to 4-byte alignment */
 } wldcore_map_dot_render_t;
 
 /* Pushes a map-dot menu level (type 0x32): records the dot index in the new

@@ -7,13 +7,13 @@
  * listing entry_count participant rows. */
 typedef struct wldcore_menu_participant_list_level {
     s32 cursor_window; /* 0x00 */
-    u8 unknown_04[4];
+    u8 _unused_04[4];
     s32 render_index; /* 0x08 */
-    u8 unknown_0c[4];
+    u8 _unused_0c[4];
     s32 proposition; /* 0x10; index into g_main_active_propositions */
-    u8 unknown_14[8];
+    u8 _unused_14[8];
     s32 cursor; /* 0x1c; selected row, 0..entry_count-1 */
-    u8 unknown_20[0x10];
+    u8 _unused_20[0x10];
     s32 entry_count; /* 0x30 */
 } wldcore_menu_participant_list_level_t;
 

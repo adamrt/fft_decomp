@@ -18,6 +18,6 @@ void battle_map_store_selected_tile_data(void) {
     g_battle_map_selected_tile_data.depth = depth;
     g_battle_map_selected_tile_data.display_height += depth * 2;
     table_index = *surface_type * 2;
-    g_battle_map_selected_tile_data.unknown_02 = D_8005E950[table_index];
-    g_battle_map_selected_tile_data.unknown_04 = D_8005E950[table_index + 1];
+    g_battle_map_selected_tile_data._unknown_02 = D_8005E950[table_index];
+    g_battle_map_selected_tile_data._unknown_04 = D_8005E950[table_index + 1];
 }

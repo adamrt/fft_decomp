@@ -8,7 +8,7 @@
 typedef struct {
     u8 flags;
     u8 value;
-    u8 unknown_02[2];
+    u8 _unused_02[2];
 } world_menu_unit_list_slot_t;
 
 extern world_menu_unit_list_slot_t g_world_action_target_list_slots[];

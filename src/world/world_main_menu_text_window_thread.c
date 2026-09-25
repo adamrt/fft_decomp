@@ -23,14 +23,14 @@ typedef struct world_menu_text_window_entry {
     s16 y;             /* 0x0a */
     s16 screen_width;  /* 0x0c */
     s16 screen_height; /* 0x0e */
-    u8 unknown_10[4];
+    u8 _unused_10[4];
     s16 image_width;  /* 0x14 */
     s16 image_height; /* 0x16 */
-    u8 unknown_18[4];
+    u8 _unused_18[4];
     s16 text_id; /* 0x1c */
-    u8 unknown_1e[0x34 - 0x1e];
+    u8 _unused_1e[0x34 - 0x1e];
     s32* text_values; /* 0x34 */
-    u8 unknown_38[0x3c - 0x38];
+    u8 _unused_38[0x3c - 0x38];
 } world_menu_text_window_entry_t;
 
 /* Main menu text window thread:

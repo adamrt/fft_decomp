@@ -20,8 +20,8 @@ void battle_menu_build_window_sprites(
     header->texture_y = spec->load.y;
     header->half_width = (s16)(spec->width) >> 2;
     header->height = spec->height;
-    record->unknown_74 = 0;
-    record->unknown_78 = 0;
+    record->_unknown_74 = 0;
+    record->_unknown_78 = 0;
     battle_menu_init_sprite_array(record->sprites, 4, 0x7cfc);
     battle_gfx_init_image_loading((POLY_FT4*)record->sprites, &spec->load, &spec->screen, &spec->params);
     SetSemiTrans(&record->sprites[1], 0);

@@ -5,25 +5,25 @@
 /* Text image record handed to world_menu_render_text_image_at_fixed_origin;
  * the leading fields follow world_menu_text_image_t. */
 typedef struct world_text_message_box_record {
-    void* buffer;    /* 0x00 */
-    u16 width;       /* 0x04 */
-    u16 height;      /* 0x06 */
-    RECT rect;       /* 0x08 */
-    s32 text;        /* 0x10 */
-    u16 color;       /* 0x14 */
-    u16 dialog_type; /* 0x16 */
-    u16 box_type;    /* 0x18: dialog_type & 0x70 */
-    u16 position;    /* 0x1a */
-    u16 options;     /* 0x1c: dialog_type & 0xc */
-    u8 unk_1e[2];    /* 0x1e */
-    u16 line;        /* 0x20 */
-    u16 first_line;  /* 0x22 */
-    u16 last_line;   /* 0x24 */
-    u8 unk_26[6];    /* 0x26 */
-    s16 mark;        /* 0x2c: characters per line, later the 0xFB cursor column */
-    s16 lines;       /* 0x2e */
-    s16 tail_offset; /* 0x30: world_menu_build_and_upload_window_image tail offset */
-    u8 unk_32[0x50 - 0x32];
+    void* buffer;     /* 0x00 */
+    u16 width;        /* 0x04 */
+    u16 height;       /* 0x06 */
+    RECT rect;        /* 0x08 */
+    s32 text;         /* 0x10 */
+    u16 color;        /* 0x14 */
+    u16 dialog_type;  /* 0x16 */
+    u16 box_type;     /* 0x18: dialog_type & 0x70 */
+    u16 position;     /* 0x1a */
+    u16 options;      /* 0x1c: dialog_type & 0xc */
+    u8 _unused_1e[2]; /* 0x1e */
+    u16 line;         /* 0x20 */
+    u16 first_line;   /* 0x22 */
+    u16 last_line;    /* 0x24 */
+    u8 _unused_26[6]; /* 0x26 */
+    s16 mark;         /* 0x2c: characters per line, later the 0xFB cursor column */
+    s16 lines;        /* 0x2e */
+    s16 tail_offset;  /* 0x30: world_menu_build_and_upload_window_image tail offset */
+    u8 _unused_32[0x50 - 0x32];
 } world_text_message_box_record_t;
 
 /* Record `index` of the window buffer pair; the offset is the first addu

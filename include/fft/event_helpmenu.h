@@ -15,7 +15,7 @@ void helpmenu_menu_close(void);
  * its own and do not overlap native_thread_t. WORLD's help menu uses the same
  * layout as world_help_request_table_t / world_help_request_t. */
 typedef struct help_request_table {
-    u8 unknown_00[0x10];
+    u8 _unused_00[0x10];
     s16* primary_ids;   /* 0x10 */
     s16* secondary_ids; /* 0x14 */
     s16* mode_flag;     /* 0x18 */
@@ -24,7 +24,7 @@ typedef char help_request_table_mode_flag_offset_must_be_0x18
     [((unsigned long)&((help_request_table_t*)0)->mode_flag == 0x18) ? 1 : -1];
 
 typedef struct help_request {
-    u8 unknown_00[0x30];
+    u8 _unused_00[0x30];
     help_request_table_t* table; /* 0x30 */
     s16* value;                  /* 0x34 */
     s16 selected_index;          /* 0x38 */

@@ -88,11 +88,11 @@ typedef struct equip_gfx_marker_rect {
     u16 w; /* 0x04 */
     u16 h; /* 0x06 */
     u8 u;  /* 0x08 */
-    u8 pad_09;
+    u8 _unused_09;
     u8 v; /* 0x0a */
-    u8 pad_0b;
+    u8 _unused_0b;
     u8 uw; /* 0x0c */
-    u8 pad_0d;
+    u8 _unused_0d;
     u8 vh;     /* 0x0e */
     u16 clut;  /* 0x10 */
     u16 tpage; /* 0x12 */
@@ -135,7 +135,7 @@ typedef char equip_gfx_context_size_must_be_0x64[(sizeof(equip_gfx_context_t) ==
  * equip_gfx_init_contexts step between the two by 0xec. */
 typedef struct equip_gfx_buffer {
     equip_gfx_context_t context;
-    u8 unknown_64[0x88];
+    u8 _unused_64[0x88];
 } equip_gfx_buffer_t;
 typedef char equip_gfx_buffer_size_must_be_0xec[(sizeof(equip_gfx_buffer_t) == 0xec) ? 1 : -1];
 
@@ -575,14 +575,14 @@ typedef struct equip_stat_entry {
     u16 y;
     s16* value;
     u16 flags;
-    u16 unknown_0a;
+    u16 _padding_0a; /* tail padding to 4-byte alignment */
 } equip_stat_entry_t;
 
 typedef struct equip_stat_out {
     s16 x;
     s16 y;
-    s32 unknown_04;
-    s32 unknown_08;
+    s32 _unused_04;
+    s32 _unused_08;
     u32 color;
 } equip_stat_out_t;
 
@@ -673,47 +673,47 @@ typedef struct equip_unit_data {
     s16 experience;          /* 0x08; capped at 99 */
     s16 entd_slot_0a;        /* 0x0a; same source as entd_slot */
     u16 hp;                  /* 0x0c; capped at 999 */
-    s16 unknown_0e;          /* 0x0e */
+    s16 _unused_0e;          /* 0x0e */
     u16 max_hp;              /* 0x10; capped at 999 */
     u16 mp;                  /* 0x12; capped at 999 */
-    s16 unknown_14;          /* 0x14 */
+    s16 _unused_14;          /* 0x14 */
     u16 max_mp;              /* 0x16; capped at 999 */
     s16 ct;                  /* 0x18; 100 while the unit has its turn */
-    s16 unknown_1a;          /* 0x1a */
+    s16 _unused_1a;          /* 0x1a */
     s16 max_ct;              /* 0x1c; always 100 */
     s16 battle_id;           /* 0x1e */
-    s16 unknown_20;          /* 0x20 */
+    s16 _unused_20;          /* 0x20 */
     s16 entd_slot;           /* 0x22 */
     s16 job_id;              /* 0x24 */
     s16 brave;               /* 0x26 */
     s16 faith;               /* 0x28 */
     s16 zodiac;              /* 0x2a; birthday high nibble */
     s16 formation_index;     /* 0x2c */
-    s16 unknown_2e;          /* 0x2e */
+    s16 _unused_2e;          /* 0x2e */
     s16 move;                /* 0x30 */
     s16 speed;               /* 0x32 */
     s16 jump;                /* 0x34 */
     s16 evasion_0_3[4];      /* 0x36 */
-    s16 unknown_3e;          /* 0x3e */
+    s16 _unused_3e;          /* 0x3e */
     s16 two_handing;         /* 0x40; equip_unit_is_two_handing_weapon result */
     s16 physical_attack;     /* 0x42 */
     s16 evasion_7;           /* 0x44 */
     s16 evasion_5_6_max;     /* 0x46 */
-    s16 unknown_48;          /* 0x48 */
-    s16 unknown_4a;          /* 0x4a */
+    s16 _unused_48;          /* 0x48 */
+    s16 _unused_4a;          /* 0x4a */
     s16 magic_attack;        /* 0x4c */
     s16 magical_class_evade; /* 0x4e; cleared (lower billboard M-C-Ev) */
     s16 evasion_9_10_max;    /* 0x50 */
     s16 evasion_8;           /* 0x52 */
     u16 equipment[5];        /* 0x54; equip_unit_equipment_slot_e order */
-    u8 unknown_5E[0x12];
+    u8 _unused_5e[0x12];
     u8 equipment_categories[4]; /* 0x70 */
     u8 support_sets_1;          /* 0x74 */
     u8 support_sets_2;          /* 0x75 */
     u8 support_sets_3;          /* 0x76; Two Swords and Two Hands */
     u8 support_sets_4;          /* 0x77 */
     u8 formation_index_78;      /* 0x78; battle_stats_t.formation_index */
-    u8 unknown_79;
+    u8 _padding_79;             /* tail padding to 2-byte alignment */
 } equip_unit_data_t;
 typedef char equip_unit_data_size_must_be_0x7a[(sizeof(equip_unit_data_t) == 0x7A) ? 1 : -1];
 
@@ -723,18 +723,18 @@ typedef char equip_unit_data_size_must_be_0x7a[(sizeof(equip_unit_data_t) == 0x7
  * halfwords sit at the lower-billboard offsets (0x801ca0e8: RH/LH WP, RH/LH
  * W-Ev, P-S/P-A-Ev, M-S/M-A-Ev) and follow world_item_stat_detail_t. */
 typedef struct equip_stats {
-    u8 pad_00[6];
+    u8 _unused_00[6];
     u16 right_weapon_power; /* 0x06 */
     u16 left_weapon_power;  /* 0x08 */
     u16 right_weapon_evade; /* 0x0a */
     u16 left_weapon_evade;  /* 0x0c */
-    u8 pad_0e[8];
+    u8 _unused_0e[8];
     u16 physical_shield_evade;    /* 0x16 */
     u16 physical_accessory_evade; /* 0x18 */
-    u8 pad_1a[6];
+    u8 _unused_1a[6];
     u16 magical_shield_evade;    /* 0x20 */
     u16 magical_accessory_evade; /* 0x22 */
-    u8 pad_24[0x5C];
+    u8 _unused_24[0x5C];
 } equip_stats_t;
 
 extern s16 g_equip_selected_unit_hp_bonus;

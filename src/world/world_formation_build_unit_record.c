@@ -121,7 +121,7 @@ void world_formation_build_unit_record(battle_stats_t* unit, world_formation_uni
     }
     bcopy(party->name, record->name, sizeof(record->name));
     bcopy(unit->support_abilities, record->support_sets,
-        sizeof(record->support_sets) + sizeof(record->support_sets_3) + sizeof(record->_pad127));
+        sizeof(record->support_sets) + sizeof(record->support_sets_3) + sizeof(record->_unknown_127));
     record->proposition_status = party->proposition_status;
     record->graphic_variant = unit->graphic_variant;
     record->birthday = *(u16*)&unit->birthday & 0x1ff;

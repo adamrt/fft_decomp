@@ -5,7 +5,7 @@
 typedef struct battle_sound_bg_request {
     u8 sound_id;     /* 0x0 */
     u8 volume;       /* 0x1 */
-    u8 unknown_02;   /* 0x2 */
+    u8 _unused_02;   /* 0x2 */
     u8 find_channel; /* 0x3 */
 } battle_sound_bg_request_t;
 

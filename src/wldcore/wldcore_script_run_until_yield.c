@@ -16,7 +16,7 @@ typedef struct wldcore_world_script_record {
     u16 flags;           /* 0x0c; g_wldcore_active_saved_record.state_flags */
     s16 section;         /* 0x0e; g_wldcore_active_saved_record.section */
     s16 word_index;      /* 0x10 */
-    u8 unknown_12[0x26]; /* 0x12; the rest of the 0x38-byte record */
+    u8 _unused_12[0x26]; /* 0x12; the rest of the 0x38-byte record */
 } wldcore_world_script_record_t;
 
 typedef char wldcore_world_script_record_size_must_be_0x38[sizeof(wldcore_world_script_record_t) == 0x38 ? 1 : -1];

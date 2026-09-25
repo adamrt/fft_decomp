@@ -62,13 +62,13 @@ typedef struct require_gfx_point {
 
 typedef struct require_gfx_sprite_rect {
     u8 u; /* 0x00 */
-    u8 _pad_01;
-    u8 v; /* 0x02 */
-    u8 _pad_03;
-    s16 width;    /* 0x04 */
-    s16 height;   /* 0x06 */
-    s16 offset_x; /* 0x08 */
-    s16 offset_y; /* 0x0a */
+    u8 _unused_01;
+    u8 v;           /* 0x02 */
+    u8 _padding_03; /* aligns width */
+    s16 width;      /* 0x04 */
+    s16 height;     /* 0x06 */
+    s16 offset_x;   /* 0x08 */
+    s16 offset_y;   /* 0x0a */
 } require_gfx_sprite_rect_t;
 
 /* One display-condition sprite: texture rectangle and screen offset, shared by

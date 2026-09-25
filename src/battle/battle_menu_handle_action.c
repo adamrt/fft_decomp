@@ -7,11 +7,11 @@
  * to one s16 action per option; 0x34 points at the halfword that receives
  * the chosen option. Same stride as battle_menu_idle_action_entry_t. */
 typedef struct battle_menu_action_entry {
-    u8 unknown_00[0x24];
+    u8 _unused_00[0x24];
     s16* actions; /* 0x24 */
-    u8 unknown_28[0xC];
+    u8 _unused_28[0xC];
     s16* selection; /* 0x34 */
-    u8 unknown_38[4];
+    u8 _unused_38[4];
 } battle_menu_action_entry_t;
 
 /* Act on a confirmed menu option when circle is pressed.

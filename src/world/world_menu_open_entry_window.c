@@ -4,12 +4,12 @@
 /* Window-origin view of world_menu_entry_t. The target clamps 0x08 as a signed
  * halfword, while the shared header types window_x as u16. */
 typedef struct world_menu_window_entry {
-    u8 unknown_00[8];
+    u8 _unused_00[8];
     s16 window_x; /* 0x08: world_menu_entry_t::window_x */
     s16 window_y; /* 0x0a: world_menu_entry_t::window_y */
     s16 width;    /* 0x0c: world_menu_entry_t::window_width */
     s16 height;   /* 0x0e: world_menu_entry_t::window_height */
-    u8 unknown_10[0x3c - 0x10];
+    u8 _unused_10[0x3c - 0x10];
 } world_menu_window_entry_t;
 typedef char world_menu_window_entry_size_must_be_0x3c[(sizeof(world_menu_window_entry_t) == 0x3c) ? 1 : -1];
 

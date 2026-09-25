@@ -10,7 +10,7 @@ void open_file_wait_for_pending(void) {
     }
 
     /* The loading flag aliases the descriptor's state field. */
-    header = (main_file_load_descriptor_t*)((u8*)status - sizeof(header->unknown_00));
+    header = (main_file_load_descriptor_t*)((u8*)status - sizeof(header->_unknown_00));
     do {
         main_file_poll_load(header);
         VSync(0);

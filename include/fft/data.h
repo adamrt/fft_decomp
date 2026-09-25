@@ -389,11 +389,11 @@ typedef struct item_data {
     u8 type_flags;
     u8 secondary_data_id;
     u8 type;
-    u8 unused_06;
+    u8 _unused_06;
     u8 attributes;
     u16 price;
     u8 shop_availability;
-    u8 unused_0b;
+    u8 _padding_0b; /* tail padding to 2-byte alignment */
 } item_data_t;
 typedef char item_data_size_must_be_12[(sizeof(item_data_t) == 12) ? 1 : -1];
 
@@ -404,7 +404,7 @@ typedef struct weapon_data {
     u8 range;      /* 0x00 */
     u8 flags;      /* 0x01; weapon_flag_e */
     u8 formula;    /* 0x02 */
-    u8 unknown_03; /* 0x03 */
+    u8 _unused_03; /* 0x03 */
     u8 power;      /* 0x04; copied to battle_stats_t equipment-stat slots 0x3c/0x3d */
     u8 evade;      /* 0x05; copied to battle_stats_t 0x3e/0x3f */
     u8 element;    /* 0x06 */
@@ -754,7 +754,7 @@ enum {
 };
 
 typedef struct status_effect_data {
-    u8 unknown_00[2];
+    u8 _unused_00[2];
     u8 order;
     u8 ct;
     u8 flags_1;

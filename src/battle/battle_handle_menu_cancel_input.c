@@ -13,9 +13,9 @@
 #include "psx/types.h"
 
 typedef struct battle_menu_cancel_context {
-    u8 _pad0[0x20];
+    u8 _unused_00[0x20];
     s16 count; /* 0x20 */
-    u8 _pad1[0x12];
+    u8 _unused_22[0x12];
     s16* cursor; /* 0x34 */
 } battle_menu_cancel_context_t;
 

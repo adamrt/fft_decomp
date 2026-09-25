@@ -1,7 +1,7 @@
 #include "psx/types.h"
 
 typedef struct battle_effect_parent_timeline_state {
-    u8 _pad00[0x28];
+    u8 _unused_00[0x28];
     /* Effect state layout, pattern 1. */
     s16 frame;           /* 0x28 */
     s16 spawn_countdown; /* 0x2a */

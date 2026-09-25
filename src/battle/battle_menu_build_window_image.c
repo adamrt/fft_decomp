@@ -6,9 +6,9 @@
 typedef struct {
     s16 x; /* 0x00 */
     s16 y; /* 0x02 */
-    u8 unknown_04[4];
+    u8 _unused_04[4];
     s32 stride; /* 0x08 */
-    u8 unknown_0c[4];
+    u8 _unused_0c[4];
 } battle_menu_window_sprite_pos_t;
 
 extern battle_menu_window_sprite_pos_t g_battle_menu_window_sprite_glyph;

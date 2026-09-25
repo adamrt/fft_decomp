@@ -11,10 +11,10 @@ typedef struct open_title_controller {
     /* 0x18 */ s32 cd_end_position;
     /* 0x1c */ s32 cursor;
     /* 0x20 */ s32 state;
-    /* 0x24 */ s32 field_24[3];
+    /* 0x24 */ s32 _unused_24[3];
     /* 0x30 */ s32 exit_timer;
     /* 0x34 */ s32 exiting;
-    /* 0x38 */ u8 padding_38[0x64 - 0x38];
+    /* 0x38 */ u8 _unused_38[0x64 - 0x38];
 } open_title_controller_t;
 
 /* Per-frame handler for the OPEN title menu controller.

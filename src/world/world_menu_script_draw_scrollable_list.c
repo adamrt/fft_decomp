@@ -8,12 +8,12 @@ typedef struct world_menu_list_draw_record {
     u8 type;            /* 0x00 */
     u8 length;          /* 0x01 */
     u8 show_cursor;     /* 0x02 */
-    u8 unknown_03;      /* 0x03 */
+    u8 _unused_03;      /* 0x03 */
     u8 skip_count;      /* 0x04 */
-    u8 unknown_05[2];   /* 0x05 */
+    u8 _unused_05[2];   /* 0x05 */
     u8 x;               /* 0x07 */
     u8 y;               /* 0x08 */
-    u8 unknown_09[2];   /* 0x09 */
+    u8 _unused_09[2];   /* 0x09 */
     u8 cursor_x_offset; /* 0x0b */
     u8 arrow_up_y;      /* 0x0c */
     u8 arrow_down_y;    /* 0x0d */

@@ -6,7 +6,7 @@ typedef struct battle_sound_bg_fade_request {
     u8 sound_id;    /* 0x0 */
     u8 volume_from; /* 0x1 */
     u8 volume_to;   /* 0x2 */
-    u8 unknown_03;  /* 0x3 */
+    u8 _unused_03;  /* 0x3 */
     u8 steps;       /* 0x4 */
 } battle_sound_bg_fade_request_t;
 

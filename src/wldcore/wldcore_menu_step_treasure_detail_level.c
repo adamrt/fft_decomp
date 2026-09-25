@@ -34,7 +34,7 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
 
     switch (level->phase) {
     case 1:
-        if (!(g_wldcore_window_render_records[level->field_08].flags & 0x100)) {
+        if (!(g_wldcore_window_render_records[level->_unknown_08].flags & 0x100)) {
             level->phase = 2;
         }
         break;
@@ -73,12 +73,12 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
         break;
     default:
         if ((g_main_system_flags & 0xC) == 4 && world_thread_is_running(0xE) == 0) {
-            slot = level->field_08;
+            slot = level->_unknown_08;
             g_main_system_flags ^= 4;
             g_wldcore_window_record_count -= 4;
             g_wldcore_window_render_record_count -= 2;
             g_wldcore_window_render_object_count -= 6;
-            saved = level->field_08;
+            saved = level->_unknown_08;
             g_wldcore_menu_stack_depth--;
             g_wldcore_saved_record_index = saved;
             if (slot < 5 && g_main_saved_records[slot].section != 0) {
@@ -111,7 +111,7 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
         if (g_wldcore_new_button_presses & PSX_PAD_TRIANGLE) {
             entry = g_wldcore_treasure_sound_novel_ids[level->value];
             if (entry != 0) {
-                level->field_08 = entry - 1;
+                level->_unknown_08 = entry - 1;
                 if (entry - 1 >= 5 || g_main_saved_records[entry - 1].section == 0) {
                     wldcore_fade_start_screen(2, 0x10);
                 }

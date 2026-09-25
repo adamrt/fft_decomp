@@ -9,12 +9,12 @@ typedef struct battle_effect_timeline_state {
     u16 spawned_count;            /* 0x06 (record 0x2c) */
     s16 particle_keyframe[2][5];  /* 0x08 */
     s16 track_keyframe[7][2];     /* 0x1c; four colour tracks then three sound tracks, per phase */
-    u8 _unknown_38[4];            /* 0x38 */
+    u8 _unused_38[4];             /* 0x38 */
     s16 particle_remaining[2][5]; /* 0x3c */
     s16 track_remaining[7][2];    /* 0x50 */
-    u8 _unknown_6c[4];            /* 0x6c */
+    u8 _unused_6c[4];             /* 0x6c */
     s16 particle_step[2][5];      /* 0x70 */
-    u8 _unknown_84[0x10];         /* 0x84 */
+    u8 _unused_84[0x10];          /* 0x84 */
     u8 sound_state[3][2][2];      /* 0x94 */
 } battle_effect_timeline_state_t;
 

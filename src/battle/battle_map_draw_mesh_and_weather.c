@@ -7,19 +7,19 @@
 /* g_battle_map_mesh_parts viewed from vectors_a[1] (0x800fbe08), bound
  * separately: the part loop's strength-reduced pointers depend on that base. */
 typedef struct battle_map_mesh_part_view {
-    SVECTOR rotation;     /* 0x00; vectors_a[1] */
-    u8 _unknown_08[0x10]; /* 0x08 */
-    SVECTOR translation;  /* 0x18; vectors_b[1] */
-    u8 _unknown_20[0x18]; /* 0x20 */
-    VECTOR scale;         /* 0x38; vectors_c[1] */
-    u8 _unknown_48[0x10]; /* 0x48 */
-    MATRIX matrix;        /* 0x58; matrix_60 */
-    u8 _unknown_78[6];    /* 0x78 */
-    u8 parent;            /* 0x7e */
-    u8 _unknown_7f;       /* 0x7f */
-    u16 starts[4];        /* 0x80 */
-    u16 counts[4];        /* 0x88 */
-    u8 _unknown_90[8];    /* 0x90 */
+    SVECTOR rotation;    /* 0x00; vectors_a[1] */
+    u8 _unused_08[0x10]; /* 0x08 */
+    SVECTOR translation; /* 0x18; vectors_b[1] */
+    u8 _unused_20[0x18]; /* 0x20 */
+    VECTOR scale;        /* 0x38; vectors_c[1] */
+    u8 _unused_48[0x10]; /* 0x48 */
+    MATRIX matrix;       /* 0x58; matrix_60 */
+    u8 _unused_78[6];    /* 0x78 */
+    u8 parent;           /* 0x7e */
+    u8 _padding_7f;      /* 0x7f; aligns starts */
+    u16 starts[4];       /* 0x80 */
+    u16 counts[4];       /* 0x88 */
+    u8 _unused_90[8];    /* 0x90 */
 } battle_map_mesh_part_view_t;
 
 typedef struct battle_map_weather_splash_rects {

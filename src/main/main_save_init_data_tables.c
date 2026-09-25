@@ -24,7 +24,7 @@ void main_save_init_data_tables(void) {
         record->state_flags = 0;
         g_main_saved_records[i].section = 0;
         g_main_saved_records[i].counter = 0;
-        record->field_18 = 0;
+        record->_unknown_18 = 0;
         record->text_id = 0;
         g_main_saved_records[i].counter_delta = 0;
         g_main_saved_records[i].buffer = g_main_save_slot_buffer;

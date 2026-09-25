@@ -71,7 +71,7 @@ void wldcore_list_open_rumors(void) {
                                                         .window_pair_render.first_window]
                                .anim_counter = 0;
         world_thread_set_parameters(0xE, 0x19, 0xB80A, 0);
-        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].window_pair_render.field_0c = 1;
+        g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 1].window_pair_render._unknown_0c = 1;
         return;
     }
     g_wldcore_menu_ordering_table_offset = 9;

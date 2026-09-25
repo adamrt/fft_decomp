@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 typedef struct battle_script_jump_instruction {
-    u8 pad[2];
+    u8 _unused_00[2];
     u8 param0;
     u8 param1;
 } battle_script_jump_instruction_t;

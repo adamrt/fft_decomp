@@ -1,9 +1,9 @@
 #include "fft/open.h"
 
 typedef struct open_movie_frame_header {
-    u8 padding_00[8];
+    u8 _unused_00[8];
     u32 frame_number;
-    u8 padding_0c[4];
+    u8 _unused_0c[4];
     u16 width;
     u16 height;
 } open_movie_frame_header_t;

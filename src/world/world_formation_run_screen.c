@@ -19,7 +19,7 @@ typedef struct world_formation_screen_packets {
     DR_AREA draw_areas[2 * 30];               /* 0xefb0: g_world_gfx_draw_area_capacity = 30 */
     u32 otags[2 * 64];                        /* 0xf280: g_world_ot_length = 64 */
     world_gfx_packet_buffer_t buffers[2];     /* 0xf480 */
-    u8 unknown_f658[0x18];
+    u8 _unused_f658[0x18];
 } world_formation_screen_packets_t;
 
 extern world_formation_menu_handler_t g_world_formation_menu_handlers[];

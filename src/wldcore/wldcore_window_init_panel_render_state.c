@@ -44,12 +44,12 @@ void wldcore_window_init_panel_render_state(
     origin_coordinate = origin->y;
     g_wldcore_window_panel_render_state.window_width = rounded_width;
     g_wldcore_window_panel_render_state.window_height = 0;
-    g_wldcore_window_panel_render_state.unknown_10[0] = 0;
-    g_wldcore_window_panel_render_state.unknown_10[1] = 0;
+    g_wldcore_window_panel_render_state._unknown_10[0] = 0;
+    g_wldcore_window_panel_render_state._unknown_10[1] = 0;
     g_wldcore_window_panel_render_state.overall_width = rounded_width;
     g_wldcore_window_panel_render_state.overall_height = 0;
-    g_wldcore_window_panel_render_state.unknown_18[0] = 0;
-    g_wldcore_window_panel_render_state.unknown_18[1] = 0;
+    g_wldcore_window_panel_render_state._unknown_18[0] = 0;
+    g_wldcore_window_panel_render_state._unknown_18[1] = 0;
     g_wldcore_window_panel_render_state.text_id = 0;
     g_wldcore_window_panel_render_state.window_y = origin_coordinate - 0x78;
     final_height = dimensions->y;

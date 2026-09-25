@@ -14,7 +14,7 @@ typedef struct battle_effect_projectile_g3x16_work {
 
 /* Effect slot view: the double-buffered item sprite quad at 0x34. */
 typedef struct battle_effect_item_slot_view {
-    u8 _unknown_00[0x34];
+    u8 _unused_00[0x34];
     POLY_FT4 prims[2]; /* 0x34 */
 } battle_effect_item_slot_view_t;
 

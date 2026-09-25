@@ -40,20 +40,20 @@ typedef struct world_formation_bar {
 
 /* Provisional 0x24-byte displayed-unit record at 0x8018AA98 / 0x8018AABC. */
 typedef struct world_formation_unit_state {
-    s16 unknown_00;
+    s16 _unused_00;
     s16 mode;       /* 0x02 */
     s16 list_index; /* 0x04: AT-list position; dashes (format 0xc00) when negative */
-    s16 unknown_06;
-    s16 unknown_08;
+    s16 _unused_06;
+    s16 _unused_08;
     s16 unit;                      /* 0x0A */
     world_formation_bar_t bars[3]; /* 0x0C */
-    s16 unknown_1e[3];
+    s16 _unused_1e[3];
 } world_formation_unit_state_t;
 
 /* Display record the thread's first parameter points at. */
 typedef struct world_formation_display {
-    u16 x; /* 0x00 */
-    u16 unknown_02;
+    u16 x;           /* 0x00 */
+    u16 _padding_02; /* aligns shake_y */
     union {
         s32 word; /* 0x04 */
         u16 low;

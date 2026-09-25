@@ -264,7 +264,7 @@ typedef char event_walk_to_parameters_size_must_be_8[sizeof(event_walk_to_parame
 /* Provisional event work block at *g_battle_ai_workspace_ptr; only the staged-status
  * snapshot at 0x5f0 is known. */
 typedef struct world_event_work {
-    u8 unknown_000[0x5F0];
+    u8 _unused_000[0x5F0];
     unit_status_staging_t status_staging; /* 0x5f0 */
 } world_event_work_t;
 typedef char world_event_work_size_must_be_0x9e2[(sizeof(world_event_work_t) == 0x9E2) ? 1 : -1];

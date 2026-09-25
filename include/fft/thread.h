@@ -21,7 +21,7 @@ typedef struct native_thread {
     s32 function_parameter_2; /* 0x04 */
     s32 function_parameter_3; /* 0x08 */
     s32 function_parameter_4; /* 0x0c; set by WORLD's four-parameter helper */
-    u8 _pad10[0x28];
+    u8 _unused_010[0x28];
     void* global_pointer;       /* 0x38 */
     u32* stack_pointer;         /* 0x3c */
     u32* frame_pointer;         /* 0x40 */
@@ -29,7 +29,7 @@ typedef struct native_thread {
     s32 is_running;             /* 0x48 */
     s32 task_id;                /* 0x4c */
     s32 task_words[7];          /* 0x50: per-task words, see above */
-    u8 _pad6c[0x3f0 - 0x6c];
+    u8 _unused_06c[0x3f0 - 0x6c];
     u32 stack_top[4]; /* 0x3f0: initial SP/FP; the stack grows down from here */
 } native_thread_t;
 typedef char native_thread_size_must_be_0x400[(sizeof(native_thread_t) == 0x400) ? 1 : -1];

@@ -8,13 +8,13 @@ void etc_graphic_build_game_over_polygons(
     /* Locals the retail build keeps on the stack, one word apart. */
     volatile struct {
         s32 reverse_order;
-        s32 pad14;
+        s32 _unused_04;
         s32 dimension_base;
-        s32 pad1c;
+        s32 _unused_0c;
         s32 first_tpage;
-        s32 pad24;
+        s32 _unused_14;
         s32 second_tpage;
-        s32 pad2c;
+        s32 _unused_1c;
         s32 third_tpage;
     } stack;
     /* Pins: unpinning any one of these changes the target's register allocation. */

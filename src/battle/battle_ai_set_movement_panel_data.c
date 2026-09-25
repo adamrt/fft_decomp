@@ -3,7 +3,7 @@
 
 /* Local view of battle_ai_data_t::walkable_tiles as level/y rows. */
 typedef struct battle_ai_walkable_view {
-    u8 _pad0000[0xc24];
+    u8 _unused_000[0xc24];
     u16 walkable_tiles[2][18];
 } battle_ai_walkable_view_t;
 

@@ -75,9 +75,9 @@ s32 card_file_enumerate_saves(card_directory_entry_t* entries, s32 all_files);
  * card_gfx_init_primitive_lists resets: the polygon and tile pointers sit at
  * the same 0x10/0x3c offsets in both views. */
 typedef struct card_primitive_lists {
-    u8 unknown_00[0x10];
+    u8 _unused_00[0x10];
     POLY_FT4* polygons;
-    u8 unknown_14[0x28];
+    u8 _unused_14[0x28];
     TILE* tiles;
 } card_primitive_lists_t;
 
@@ -96,15 +96,15 @@ typedef struct card_primitive_lists {
  */
 typedef struct card_graphics_context {
     u32* otag;                   /* 0x00 */
-    u8 unknown_04[0x0c];         /* 0x04 */
+    u8 _unused_04[0x0c];         /* 0x04 */
     POLY_FT4* polygons;          /* 0x10 */
-    u8 unknown_14[0x28];         /* 0x14 */
+    u8 _unused_14[0x28];         /* 0x14 */
     TILE* tiles;                 /* 0x3c: TILE pool */
-    u8 unknown_40[0x20];         /* 0x40 */
+    u8 _unused_40[0x20];         /* 0x40 */
     DRAWENV draw_environment;    /* 0x60 */
     DISPENV display_environment; /* 0xbc */
     DR_MODE draw_mode;           /* 0xd0 */
-    u8 unknown_dc[0x18];         /* 0xdc */
+    u8 _unused_dc[0x18];         /* 0xdc */
 } card_graphics_context_t;
 typedef char card_graphics_context_size_must_be_0xf4[(sizeof(card_graphics_context_t) == 0xf4) ? 1 : -1];
 
@@ -125,11 +125,11 @@ typedef struct card_oriented_quad {
     u16 w;
     u16 h;
     u8 u;
-    u8 pad_09;
+    u8 _unused_09;
     u8 v;
-    u8 pad_0b;
+    u8 _unused_0b;
     u8 uw;
-    u8 pad_0d;
+    u8 _unused_0d;
     u8 vh;
     u16 clut;
     u16 tpage;
@@ -231,7 +231,7 @@ void card_input_update_event_state(void* state, u32 input, s32 count_frame);
 /* menu */
 /* Window rectangle source record; only the RECT at +6 is known. */
 typedef struct card_window_rect_source {
-    u8 unk_0[6];
+    u8 _unused_00[6];
     RECT rect;
 } card_window_rect_source_t;
 
@@ -276,41 +276,41 @@ enum {
  * Shares its layout with WORLD's world_card_save_buffer_t.
  */
 typedef struct card_save_buffer {
-    u8 unknown_000[0x100]; /* 0x000 */
-    u8 slot;               /* 0x100 */
-    u8 name[0x10];         /* 0x101 */
-    u8 name_terminator;    /* 0x111 */
-    u8 job_id;             /* 0x112 */
-    u8 level;              /* 0x113 */
-    u8 month;              /* 0x114 */
-    u8 day;                /* 0x115 */
-    u8 location;           /* 0x116 */
-    u8 format_version;     /* 0x117 */
-    u8 parity_bits[8];     /* 0x118 */
-    s32 elapsed_seconds;   /* 0x120 */
+    u8 _unused_0000[0x100]; /* 0x000 */
+    u8 slot;                /* 0x100 */
+    u8 name[0x10];          /* 0x101 */
+    u8 name_terminator;     /* 0x111 */
+    u8 job_id;              /* 0x112 */
+    u8 level;               /* 0x113 */
+    u8 month;               /* 0x114 */
+    u8 day;                 /* 0x115 */
+    u8 location;            /* 0x116 */
+    u8 format_version;      /* 0x117 */
+    u8 parity_bits[8];      /* 0x118 */
+    s32 elapsed_seconds;    /* 0x120 */
     u8 treasure_acquisition_date_bits[0x35];
     u8 land_discovery_date_bits[0x12];
     u8 proposition_last_attempt_date_bits[0x6c];
     u8 proposition_states[0x60];
-    u8 reserved_237[1]; /* 0x237; serialized and parity-covered */
+    u8 _unused_0237[1]; /* 0x237; serialized and parity-covered */
     u8 saved_records[5][0x38];
     u32 saved_data_bits[40];
     u32 secondary_saved_data_bits[2];
     u8 brave_story_character_ages[0x40];
     u8 proposition_count; /* 0x438 */
     u8 active_propositions[8][9];
-    u8 reserved_481[3];                        /* 0x481; serialized and parity-covered */
+    u8 _unused_0481[3];                        /* 0x481; serialized and parity-covered */
     u8 party_records[20][0xe0];                /* 0x484 */
     u8 item_quantities[ITEM_ID_COUNT];         /* 0x1604 */
     u8 poached_item_quantities[ITEM_ID_COUNT]; /* 0x1704 */
     u8 item_location_flags[0x80];
     s32 script_variables[0x100];
     u8 game_options[4]; /* 0x1c84 */
-    u8 field_1c88;      /* 0x1c88 */
+    u8 _unknown_1c88;   /* 0x1c88 */
     s8 item_type_order_0[0xc];
-    u8 reserved_1c95[1]; /* 0x1c95; serialized and parity-covered */
+    u8 _unused_1c95[1]; /* 0x1c95; serialized and parity-covered */
     s8 item_type_order_1[8];
-    u8 reserved_1c9e[1]; /* 0x1c9e; serialized and parity-covered */
+    u8 _unused_1c9e[1]; /* 0x1c9e; serialized and parity-covered */
     s8 item_type_order_2[7];
     s8 item_type_order_3[5];
     s8 item_type_order_4[5];
@@ -321,7 +321,7 @@ typedef struct card_save_buffer {
     u8 armor_page_order[0x25];     /* 0x1d63 */
     u8 accessory_page_order[0x21]; /* 0x1d88 */
     u8 item_page_order[0x15];      /* 0x1da9 */
-    u8 unknown_1dbe[0x42];         /* 0x1dbe */
+    u8 _unused_1dbe[0x42];         /* 0x1dbe */
 } card_save_buffer_t;
 typedef char card_save_buffer_size_must_be_0x1e00[(sizeof(card_save_buffer_t) == 0x1e00) ? 1 : -1];
 

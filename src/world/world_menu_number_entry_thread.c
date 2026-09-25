@@ -9,7 +9,7 @@ typedef struct world_menu_number_param {
     s16 y;      /* 0x02 */
     s16 width;  /* 0x04 */
     s16 height; /* 0x06 */
-    u8 unknown_08[0x30 - 0x08];
+    u8 _unused_08[0x30 - 0x08];
     world_menu_number_range_t* range; /* 0x30 */
     s16* value;                       /* 0x34 */
 } world_menu_number_param_t;

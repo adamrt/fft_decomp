@@ -5,7 +5,7 @@
 /* Twelve-byte base-geometry record per visible entry (only its address is
  * passed on). */
 typedef struct attack_editor_sprite_base {
-    u8 unk_00[0xc];
+    u8 _unused_00[0xc];
 } attack_editor_sprite_base_t;
 
 extern attack_editor_sprite_base_t g_attack_panel_status_offsets[];

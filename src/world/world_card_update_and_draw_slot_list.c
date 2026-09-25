@@ -5,9 +5,9 @@
 
 /* Local view of world_menu_thread_data_t with the +0x0a field. */
 typedef struct world_card_prompt_thread_data {
-    u8 unknown_00[0x0a];
+    u8 _unused_00[0x0a];
     s16 window_y; /* 0x0a: menu record window y; prompt y chosen from the selected row */
-    u8 unknown_0c[0x74 - 0x0c];
+    u8 _unused_0c[0x74 - 0x0c];
     s16 selection; /* 0x74 */
 } world_card_prompt_thread_data_t;
 

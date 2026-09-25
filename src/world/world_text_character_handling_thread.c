@@ -9,9 +9,9 @@
  * through the scalar alias g_world_unit_view_battle_id; the struct access is required here
  * because an in-struct load keeps its place after the preceding stores. */
 typedef struct world_screen_setup_c {
-    u8 unk_00[0xA];
+    u8 _unused_00[0xA];
     s16 battle_id; /* 0x0a: active unit banner battle ID */
-    u8 unk_0c[2];
+    u8 _unused_0c[2];
 } world_screen_setup_c_t;
 
 /* g_world_text_typewriter_glyph.y, .bits_per_pixel and .palette under
@@ -101,7 +101,7 @@ void world_text_character_handling_thread(void) {
         rec.dialog_type = (param & 0x1C) | 0x10;
         rec.dialog_type |= world_unit_check_facing_relative_to_camera(world_thread_get_current_parameter_3()) + 1;
     }
-    rec.unk_2a = 0;
+    rec._unknown_2a = 0;
     rec.origin_x = 8;
     rec.origin_y = 8;
     rec.box_type = rec.dialog_type & 0x70;

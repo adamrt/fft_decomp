@@ -7,7 +7,7 @@
  * the matching component of g_battle_camera_current_real_coords divided by
  * ONE. Provisional view of the record. */
 typedef struct battle_camera_step_target {
-    u8 _unknown_00[0x40];
+    u8 _unused_00[0x40];
     battle_screen_coords_t coords; /* 0x40 */
 } battle_camera_step_target_t;
 

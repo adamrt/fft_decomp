@@ -35,8 +35,8 @@ typedef struct etc_graphic {
     s32 size;
     RECT* framebuffer_rect;
     etc_graphic_dimensions_t* dimensions;
-    void* unknown_14;
-    void* unknown_18;
+    void* _unused_14;
+    void* _unused_18;
     s32 texture_mode;
 } etc_graphic_t;
 typedef char etc_graphic_size_check[sizeof(etc_graphic_t) == 0x20 ? 1 : -1];

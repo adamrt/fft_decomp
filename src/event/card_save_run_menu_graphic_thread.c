@@ -4,10 +4,10 @@
 typedef struct card_input_display_state {
     void* render_otag;
     u32 color; /* 0x04: copied into the poly r/g/b */
-    u8 unknown_08[4];
+    u8 _unused_08[4];
     s16 scale_x; /* 0x0c; 4.12 sprite scale */
     u16 scale_y; /* 0x0e; 4.12 sprite scale */
-    u8 unknown_10[0x10];
+    u8 _unused_10[0x10];
     u16 offset_x; /* 0x20: offset[4] of the +0x18 view, added to every quad x */
     u16 offset_y; /* 0x22: offset[5], added to every quad y */
 } card_input_display_state_t;

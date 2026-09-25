@@ -8,7 +8,7 @@
  */
 s32 equip_menu_update_clear_all_equipment_prompt(void) {
     struct {
-        u8 pad[0x40];
+        u8 _unused_00[0x40];
         s16 val;
     } scratch;
     s32 index;

@@ -32,7 +32,7 @@ void wldcore_list_build_proposition_detail_panel_image(
     level->render_index = index;
     world_text_measure_pixels(&text_width, &text_rows, world_text_find_entry(*panel_text + 0xF7FF));
     rows = text_rows + 2;
-    level->field_0c = rows;
+    level->_unknown_0c = rows;
     g_world_text_substitution_values[0] = g_main_active_propositions[proposition].elapsed_days;
     g_world_text_substitution_values[1] = g_main_active_propositions[proposition].assigned_days;
     g_world_text_substitution_values[2] = g_main_active_propositions[proposition].location | TEXT_ID_SECTION_9000_BASE;
