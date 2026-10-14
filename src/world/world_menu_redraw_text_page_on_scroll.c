@@ -57,7 +57,7 @@ u8* world_menu_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offset, 
         return 0;
     }
     world_clear_menu_render_buffer(g_world_menu_text_page_image, entry->inner_width * entry->inner_height / 2);
-    world_menu_draw_text_columns(entry, row_offset, g_world_menu_text_page_image);
+    menu_draw_text_columns(entry, row_offset, g_world_menu_text_page_image);
     *redraw = 0;
     LoadImage(&rect, g_world_menu_text_page_image);
     mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));

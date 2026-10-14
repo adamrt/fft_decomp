@@ -44,14 +44,14 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
         rect.y = base_y + row * 16;
         rect.w = partial_width;
         rect.h = 16;
-        world_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
         for (column = 0; column < full_columns; column++) {
             rect.x = base_x + partial_width + column * 16;
             rect.y = base_y + row * 16;
             rect.w = 16;
             rect.h = 16;
-            world_gfx_enqueue_textured_quad(
+            menu_gfx_enqueue_textured_quad(
                 &rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
         }
     }
@@ -62,13 +62,13 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
     rect.y = base_y + row * 16;
     rect.w = partial_width;
     rect.h = partial_height;
-    world_gfx_enqueue_textured_quad(&rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+    menu_gfx_enqueue_textured_quad(&rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = base_x + partial_width + column * 16;
         rect.y = base_y + row * 16;
         rect.w = 16;
         rect.h = partial_height;
-        world_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
     }
     return menu_next_instruction(instruction);

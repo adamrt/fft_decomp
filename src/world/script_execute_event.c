@@ -24,7 +24,7 @@
  * The native inner-call trampoline intentionally forwards varying argument
  * counts through its () ABI. */
 
-void world_script_execute_event(void) {
+void script_execute_event(void) {
     s32 unit_lookup_status;
     s32 ghost_runtime_id;
     s32 region_runtime_id;
@@ -299,7 +299,7 @@ restart_event:
                 && (operand_1 - EVENT_ID_COMMON_FIRST) >= 0x1AU && operand_1 != 0) {
                 g_script_condition_unit_battle_id = 0xFF;
                 script_run_scenario_conditions();
-                if (world_script_load_next_event() != 0) {
+                if (script_load_next_event() != 0) {
                     goto restart_event;
                 }
             }
@@ -423,7 +423,7 @@ restart_event:
                 battle_unit_move_to_head(operand_1);
             }
         } else if (opcode == EVENT_OPCODE_UNIT_ANIM) {
-            world_script_unit_anim((const event_unit_anim_parameters_t*)parameters);
+            script_unit_anim((const event_unit_anim_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_MARCH) {
             script_march_units((const event_march_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_SET_UNIT_MOVEMENT_EFFECT_SUPPRESSION) {
@@ -498,10 +498,10 @@ restart_event:
         /* ---- Camera ---- */
         else if (opcode == EVENT_OPCODE_FOCUS) {
             camera_store_yaw_band(g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]);
-            world_script_focus((event_focus_parameters_t*)parameters);
+            script_focus((event_focus_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_FOCUS_SPEED) {
             event_words = g_script_variables;
-            world_script_focus_speed(
+            script_focus_speed(
                 parameters, event_words + EVENT_SCRIPT_VAR_CAMERA_X, event_words + EVENT_SCRIPT_VAR_CAMERA_TILT);
         } else if (opcode == EVENT_OPCODE_RELATIVE_CAMERA) {
             script_apply_relative_camera(
@@ -545,11 +545,11 @@ restart_event:
                 thread_yield();
             } while (main_file_is_still_loading() != 0);
         } else if (opcode == EVENT_OPCODE_ROTATE_UNIT) {
-            world_script_rotate_unit((const event_rotate_unit_parameters_t*)parameters);
+            script_rotate_unit((const event_rotate_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_FACE_EACH_OTHER) {
-            world_script_face_unit((const event_face_unit_parameters_t*)parameters, 0);
+            script_face_unit((const event_face_unit_parameters_t*)parameters, 0);
         } else if (opcode == EVENT_OPCODE_FACE_UNIT) {
-            world_script_face_unit((const event_face_unit_parameters_t*)parameters, 1);
+            script_face_unit((const event_face_unit_parameters_t*)parameters, 1);
         } else if (opcode == EVENT_OPCODE_FACE_TILE) {
             script_face_tile((const event_face_tile_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
@@ -676,7 +676,7 @@ restart_event:
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_EDIT_BG_SOUND) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, world_sound_edit_bg_thread);
+            thread_start(operand_1, sound_run_background_fade_thread);
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_SWITCH_TRACK) {
             g_world_sound_music_switch_request = operand_1;
@@ -937,7 +937,7 @@ restart_event:
             script_teleportin_event_instruction(first_operand, 1);
         } else if (opcode == EVENT_OPCODE_INFLICT_STATUS) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, world_script_inflict_status_thread);
+            thread_start(operand_1, script_inflict_status_thread);
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_UNKNOWN_95) {
         } else {

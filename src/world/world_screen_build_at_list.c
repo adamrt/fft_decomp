@@ -84,7 +84,7 @@ void world_screen_build_at_list(void) {
         g_world_text_list_pages[i].icons.icons[2] = &icons2[i];
         world_menu_build_icon_record(&image_rect, entry, &g_world_text_list_pages[i].icons);
     }
-    world_gfx_init_scaled_draw_area_packets(&page->draw_areas);
+    menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {

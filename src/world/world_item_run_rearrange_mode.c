@@ -69,10 +69,10 @@ s32 world_item_run_rearrange_mode(void) {
         rect.h = 0x10;
         rect.x = 0;
         rect.y = row * 16 - (s16)(g_world_menu_scroll_pixel_offset - 0x5E);
-        world_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, 0x5F, tile, 0x14);
+        menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, 0x5F, tile, 0x14);
         rect.x += 2;
         rect.y += 2;
-        world_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, tile2, 0x14);
+        menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, tile2, 0x14);
     }
     if (g_world_menu_cursor_position != g_world_item_rearrange_preview_cursor) {
         if (g_world_menu_option_count != 0) {

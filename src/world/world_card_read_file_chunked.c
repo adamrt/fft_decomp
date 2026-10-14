@@ -23,7 +23,7 @@ s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size
     }
     total = 0;
     for (i = 0; i < 0x28; i++) {
-        if (world_card_seek_file_with_retries(g_world_card_open_descriptor, total, 1) < 0) {
+        if (card_file_seek_with_retries(g_world_card_open_descriptor, total, 1) < 0) {
             break;
         }
         result = read(g_world_card_open_descriptor, destination + total, size - total);

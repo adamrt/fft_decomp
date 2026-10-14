@@ -135,13 +135,13 @@ void world_menu_run_game_options(void) {
     accum = 0;
     timer = 0;
     world_clear_menu_render_buffer(image, entry->inner_width * entry->inner_height / 2);
-    world_menu_draw_text_columns(entry, &row_offset, image);
+    menu_draw_text_columns(entry, &row_offset, image);
     ring = 0;
     image_rect.w = g_menu_text_state.pen.stride >> 2;
     LoadImage(&image_rect, (u32*)image);
     thread_wait_frames(1);
-    world_gfx_init_scaled_draw_area_packets(&page->title_area);
-    world_gfx_init_scaled_draw_area_packets(&page->value_area);
+    menu_init_scaled_draw_area_packets(&page->title_area);
+    menu_init_scaled_draw_area_packets(&page->value_area);
     world_menu_init_sprite(&base->title);
     text_configure_sprite_vram(&g_world_options_menu_title_rect, entry->inner_width, 0x2C, &base->title, 0);
     image = world_menu_build_and_upload_window_frame_image(

@@ -130,7 +130,7 @@ void world_menu_equipment_panel_thread(void) {
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_world_gfx_draw_area_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
-        world_panel_gfx_build_scaled_draw_area_packets(
+        menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_world_equipment_panel_draw_area, frame, g_world_frame_arg, thread);
         world_menu_configure_status_panel_primitive_colors(screen, thread);
         world_menu_select_primitive_color_palette(&screen->numeric_frame, thread);

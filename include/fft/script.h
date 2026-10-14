@@ -720,13 +720,10 @@ extern s32 g_world_script_loaded_event_id;
 /* Whole matching interpreter ranges:
  * BATTLE 0x80143bd8..0x80145f78, WORLD 0x800f6f20..0x800f92a0 (exclusive). */
 void script_execute_event(void);
-void world_script_execute_event(void);
 void script_process_inflict_status_commands(void);
 void script_load_event(s32 id);
-void world_script_load_event(s32 id);
 void script_reset_event_state(void);
 s32 script_load_next_event(void);
-s32 world_script_load_next_event(void);
 void script_run_next_event(void);
 void script_block_start_thread(void);
 void script_run_next_event_unused(void);
@@ -736,7 +733,6 @@ void script_frame_after_threads_stub(void);
 /* BATTLE and WORLD each link their own body. */
 s32 script_run_event_frame(u32* ot, u32 buttons);
 s32 script_is_deployment_running(u32* ot, u32 buttons);
-void world_script_start_current_event_thread(void);
 
 /* instruction cursors */
 s32 script_find_instruction_byte_offset(s32 offset, s32 opcode);

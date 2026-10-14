@@ -127,7 +127,7 @@ void world_menu_ability_panel_thread(void) {
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         offset[0] = thread->x - 0x73;
         offset[1] = thread->y;
-        world_panel_gfx_build_scaled_draw_area_packets(
+        menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_world_ability_panel_draw_area, frame, g_world_frame_arg, offset);
         world_menu_configure_status_panel_primitive_colors(screen, thread);
         world_menu_select_primitive_color_palette(&screen->numeric_frame, thread);

@@ -147,7 +147,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.y - 5;
             rect.w = g_world_menu_list_image_width * 4;
             rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows + 10;
-            world_gfx_enqueue_textured_quad(&rect, 0, g_world_menu_scroll_pixel_offset + 0x2B, 0,
+            menu_gfx_enqueue_textured_quad(&rect, 0, g_world_menu_scroll_pixel_offset + 0x2B, 0,
                 g_world_menu_semi_trans, g_world_menu_window_tpage, g_world_menu_window_clut,
                 g_world_menu_draw_priority);
         } else {
@@ -155,7 +155,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.y;
             rect.w = g_world_menu_list_image_width * 4;
             rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows;
-            world_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_world_menu_semi_trans, g_world_menu_window_tpage,
+            menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_world_menu_semi_trans, g_world_menu_window_tpage,
                 g_world_menu_window_clut, g_world_menu_draw_priority);
         }
     }
@@ -165,7 +165,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.arrow_up_y;
             rect.w = 8;
             rect.h = 0x10;
-            world_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
+            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
                 g_world_menu_clut_front, g_world_menu_draw_priority);
         }
         if (g_world_menu_scroll_offset < g_world_menu_option_count - g_world_menu_list_visible_rows) {
@@ -173,7 +173,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.arrow_down_y;
             rect.w = 8;
             rect.h = 0x10;
-            world_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
+            menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
                 g_world_menu_clut_front, g_world_menu_draw_priority);
         }
         if (g_world_menu_option_count > g_world_menu_list_visible_rows) {
@@ -184,7 +184,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = i;
             rect.w = 8;
             rect.h = 8;
-            world_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
+            menu_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
                 g_world_menu_clut_front, g_world_menu_draw_priority);
         }
     }

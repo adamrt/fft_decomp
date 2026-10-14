@@ -37,8 +37,8 @@
  * facings and exits the thread. An opcode outside the chain, or a
  * ForwardTargetExit reached in sequence, also ends the thread.
  *
- * The chain order is retail's compare order. world_script_execute_event is
- * the WORLD copy of this function. BATTLE differs in five places: WalkTo
+ * The chain order is retail's compare order. WORLD links its own body
+ * under the same name. BATTLE differs in five places: WalkTo
  * starts the unit's movement and Arrow sets an arrow trajectory (WORLD
  * recognizes both and does nothing), DarkScreen's thread opens REQUIRE and
  * runs its image burst (WORLD's only takes the task id), the two ChangeMap

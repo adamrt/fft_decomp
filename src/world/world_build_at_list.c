@@ -73,7 +73,7 @@ void world_build_at_list(void) {
         g_world_at_list_pages[i].icons.icons[2] = &icons2[i];
         world_menu_build_icon_record(&image_rect, entry, &g_world_at_list_pages[i].icons);
     }
-    world_gfx_init_scaled_draw_area_packets(&page->draw_areas);
+    menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
@@ -116,7 +116,7 @@ void world_build_at_list(void) {
     thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;
-    world_menu_draw_text_columns(entry, &row_offset, buffer);
+    menu_draw_text_columns(entry, &row_offset, buffer);
     ring = 0;
     image_rect.w = g_menu_text_state.pen.stride >> 2;
     LoadImage(&image_rect, (u32*)buffer);

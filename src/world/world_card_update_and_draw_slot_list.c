@@ -218,7 +218,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
             texture_page = GetTPage(0, 0, 0x180, 0);
             source_v = (i - 11) * 0x20 + 0x60;
         }
-        world_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_world_menu_window_clut, 11);
+        menu_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_world_menu_window_clut, 11);
     }
 
     world_menu_set_draw_priority(15);
@@ -236,13 +236,13 @@ void world_card_update_and_draw_slot_list(s32 input) {
         rect.y = 0x20;
         rect.w = 8;
         rect.h = 0x10;
-        world_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, 0, g_world_menu_icon_tpage, g_world_menu_clut_front, 15);
+        menu_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, 0, g_world_menu_icon_tpage, g_world_menu_clut_front, 15);
     }
     if (g_world_card_selectable_slot_count - g_world_card_list_first_visible_row >= 5) {
         rect.x = 0xe3;
         rect.y = 0xba;
         rect.w = 8;
         rect.h = 0x10;
-        world_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, 0, g_world_menu_icon_tpage, g_world_menu_clut_front, 15);
+        menu_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, 0, g_world_menu_icon_tpage, g_world_menu_clut_front, 15);
     }
 }

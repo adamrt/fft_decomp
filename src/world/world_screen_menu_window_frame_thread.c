@@ -124,7 +124,7 @@ void world_screen_menu_window_frame_thread(void) {
     prim->sprites[8].w = border_thin;
     prim->sprites[8].h = border_wide;
 
-    world_gfx_init_scaled_draw_area_packets(&prim->draw_areas);
+    menu_init_scaled_draw_area_packets(&prim->draw_areas);
     mem_copy_bytes_nonempty(
         &g_menu_scratch_buffer.panel_frames[1], &g_menu_scratch_buffer.panel_frames[0], sizeof(menu_panel_frame_t));
 

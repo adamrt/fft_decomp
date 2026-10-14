@@ -28,7 +28,7 @@ void world_menu_thin_window_frame_thread(void) {
     /* The two border thicknesses feed both the primitive fields and the
        argument registers throughout, even though the callee at 0x80138adc
        takes only the primitive pointer:
-       world_gfx_init_scaled_draw_area_packets reads none of them. */
+       menu_init_scaled_draw_area_packets reads none of them. */
     s32 border_wide;
     s32 border_thin;
     s32 span;
@@ -137,7 +137,7 @@ void world_menu_thin_window_frame_thread(void) {
     prim->sprites[8].w = border_wide;
     prim->sprites[8].h = border_thin;
 
-    world_gfx_init_scaled_draw_area_packets(&prim->draw_areas);
+    menu_init_scaled_draw_area_packets(&prim->draw_areas);
     mem_copy_bytes_nonempty(
         &g_menu_scratch_buffer.panel_frames[1], &g_menu_scratch_buffer.panel_frames[0], sizeof(menu_panel_frame_t));
 

@@ -64,12 +64,12 @@ void world_item_build_status_list_polygons(s16 item_id) {
             rect.y = y + 1;
             rect.w = 8;
             rect.h = 8;
-            world_gfx_enqueue_textured_quad(&rect, 0xA9, 0xF5, 0, 0, tpage, 0x3FD9, 8);
+            menu_gfx_enqueue_textured_quad(&rect, 0xA9, 0xF5, 0, 0, tpage, 0x3FD9, 8);
             rect.x = x;
             rect.y = y;
             rect.w = g_world_status_display_image_rects[i].w;
             rect.h = g_world_status_display_image_rects[i].h;
-            world_gfx_enqueue_textured_quad(&rect, g_world_status_display_image_rects[i].x,
+            menu_gfx_enqueue_textured_quad(&rect, g_world_status_display_image_rects[i].x,
                 g_world_status_display_image_rects[i].y, 0, 0, icon_tpage, 0x3FD9, 8);
             y += 9;
             drawn++;
@@ -88,12 +88,12 @@ void world_item_build_status_list_polygons(s16 item_id) {
             rect.y = y + 1;
             rect.w = 8;
             rect.h = 8;
-            world_gfx_enqueue_textured_quad(&rect, 0xA0, 0xF5, 0, 0, tpage, 0x3FD8, 8);
+            menu_gfx_enqueue_textured_quad(&rect, 0xA0, 0xF5, 0, 0, tpage, 0x3FD8, 8);
             rect.x = x;
             rect.y = y;
             rect.w = g_world_status_display_image_rects[i].w;
             rect.h = g_world_status_display_image_rects[i].h;
-            world_gfx_enqueue_textured_quad(&rect, g_world_status_display_image_rects[i].x,
+            menu_gfx_enqueue_textured_quad(&rect, g_world_status_display_image_rects[i].x,
                 g_world_status_display_image_rects[i].y, 0, 0, icon_tpage, 0x3FD8, 8);
             y += 9;
             drawn++;

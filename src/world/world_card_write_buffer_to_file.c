@@ -29,7 +29,7 @@ s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer
     }
     total_written = 0;
     for (retries = 0; retries < 40; retries++) {
-        if (world_card_seek_file_with_retries(g_world_card_open_descriptor, total_written, 1) < 0) {
+        if (card_file_seek_with_retries(g_world_card_open_descriptor, total_written, 1) < 0) {
             break;
         }
         result = write(g_world_card_open_descriptor, (const u8*)source + total_written, size - total_written);

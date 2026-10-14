@@ -933,8 +933,8 @@ typedef enum menu_text_column_mode {
     MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3, /* two-digit numbers, drawn by *_draw_menu_number_glyphs */
 } menu_text_column_mode_e;
 
-/* Provisional: three-column menu text layout walked by world_screen_menu_draw_text_columns (0x80109374) /
- * world_menu_draw_text_columns (reached through menu_entry_t::context when
+/* Provisional: three-column menu text layout walked by menu_draw_text_columns and its WORLD
+ * screen-menu copy world_screen_menu_draw_text_columns (reached through menu_entry_t::context when
  * that record is a layout rather than a binding). Column i uses x[i],
  * mode[i] (menu_text_column_mode_e), text_ids[i] and
  * text_colors[i], each indexed by row + row offset. */
@@ -1212,8 +1212,7 @@ typedef char menu_unit_stat_number_images_size_must_be_2328[sizeof(menu_unit_sta
 typedef struct menu_panel_record {
     DR_MODE mode0; /* 0x000 */
     DR_MODE mode1; /* 0x00c */
-    /* 0x018; world_gfx_init_scaled_draw_area_packets,
-     * menu_init_scaled_draw_area_packets */
+    /* 0x018; menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
     SPRT sprites[18];                   /* 0x040 */
     menu_palette_primitives_t* palette; /* 0x1a8 */
@@ -1226,16 +1225,14 @@ void menu_run_numeric_display_panel_thread(void);
  * record size is fixed by the second frame starting there and by the byte copy
  * between them. Members come from the panels' own accesses plus two helpers:
  * *_menu_init_sprite_array (0x8012e2b8) is handed the nine SPRT packets, and
- * world_gfx_init_scaled_draw_area_packets / menu_init_scaled_draw_area_packets
- * (0x80138adc) clears rects[0].w and installs rects[1] of the draw-area pair.
+ * menu_init_scaled_draw_area_packets clears rects[0].w and installs rects[1] of the draw-area pair.
  * The block is zero-filled in the overlay image, so none of it is initialized
  * data. */
 typedef struct menu_panel_frame {
     DR_MODE modes[7];                 /* 0x000: one per texture window */
     SPRT sprites[9];                  /* 0x054: 5 border spans then 4 corners */
     texture_primitive_t texture_prim; /* 0x108: tpage-7 VRAM allocation record */
-    /* 0x130; world_gfx_init_scaled_draw_area_packets,
-     * menu_init_scaled_draw_area_packets */
+    /* 0x130; menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
 } menu_panel_frame_t;
 typedef char menu_panel_frame_size_must_be_344[sizeof(menu_panel_frame_t) == 344 ? 1 : -1];

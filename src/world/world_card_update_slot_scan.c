@@ -177,7 +177,7 @@ void world_card_update_slot_scan(void) {
                     return;
                 }
                 if (descriptor != -1) {
-                    status = world_card_seek_file_with_retries(descriptor, 0x100, 0);
+                    status = card_file_seek_with_retries(descriptor, 0x100, 0);
                     if (status != -1) {
                         status = card_file_read_with_retries(descriptor, &g_world_load_work_buffer->summary, 0x80);
                     }

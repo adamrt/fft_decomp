@@ -13,7 +13,6 @@
 extern s32 g_world_camera_speed_curve;
 extern u16 g_world_camera_position_locked;
 extern s32 g_world_camera_yaw_unwrap_request;
-s32 world_camera_step_track(camera_track_t* track, s32 component);
 
 /* dead unit */
 
@@ -215,7 +214,7 @@ extern RECT g_world_screen_clear_rect;
 extern fade_overlay_t g_world_screen_tint_tiles[]; /* one tint tile per packet buffer */
 
 /* script */
-/* Operand pairs that one world_script_execute_event opcode stores together;
+/* Operand pairs that one WORLD script_execute_event opcode stores together;
  * each second 16-bit value sits off a 32-bit alignment boundary in WORLD bss, so each pair is
  * one object. */
 typedef struct world_event_command_args {
@@ -270,10 +269,6 @@ extern map_background_gradient_colors_t g_world_event_background_colors;
 void world_script_handle_tutorial_command_highlight_ring(void);
 void world_script_advance_tutorial_highlight_brightness(void);
 void script_earthquake_start(void);
-void world_script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
-void world_script_focus(event_focus_parameters_t* parameters);
-/* A typed operand plus a local Camera cursor reorders the original argument saves. */
-void world_script_focus_speed(u8* parameters, s32* position, s32* rotation);
 
 s32 world_script_handle_tutorial_command(void);
 void world_script_handle_tutorial_command_change_dialog(void);
@@ -288,11 +283,9 @@ void world_script_set_event_speed(s32 speed);
 void world_script_set_vsync_mode_and_event_speed(s32 value);
 void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
-void world_script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void world_script_update_tutorial_controller_input(void);
 void world_script_add_unit_start_thread(void);
 s32 world_script_check_tutorial_event_slot(void);
-void world_script_inflict_status_thread(void);
 void world_script_waitspritemove_event_instruction(s32);
 
 /* sound */
@@ -304,7 +297,6 @@ extern s16 g_world_sound_music_unload_slot_request;
 extern s32 g_world_sound_music_volume_transition_request;
 extern u8 g_world_sound_release_held_loop;
 void world_sound_dispatch_effect(void);
-void world_sound_edit_bg_thread(void);
 
 /* status */
 
@@ -659,8 +651,8 @@ typedef char wldcore_window_xy_size_must_be_36[sizeof(wldcore_window_xy_t) == 36
 
 extern menu_status_panel_buffer_t g_world_change_banner_panel_frames[2];
 
-/* Scenario interpreter interfaces shared by script_execute_event and
- * world_script_execute_event. Signatures are as the interpreters bind them;
+/* Scenario interpreter interfaces shared by the BATTLE and WORLD
+ * script_execute_event bodies. Signatures are as the interpreters bind them;
  * unverified names stay provisional. */
 extern s16 g_world_3d_object_use_request;
 extern u16 g_world_3d_object_wait_status;
@@ -761,9 +753,6 @@ extern u16 g_world_gfx_sprite_capacity;
 extern s32 g_active_graphics_buffer_index;
 void world_gfx_set_party_unit_portrait_poly_texture(s32 portrait_id, POLY_FT4* poly);
 
-void world_panel_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packets, const RECT* geometry,
-    s32 scale_index, s32 frame_offset, const menu_status_thread_t* thread);
-
 void world_gfx_add_draw_area_primitive(RECT* rect, s32 otag_index);
 
 void world_gfx_enqueue_gouraud_quad(point16_t* xy, rgb24_t* colors, s32 semi_trans, s32 ot_index);
@@ -785,14 +774,10 @@ void world_gfx_init_packet_pools(menu_gfx_context_t* buffer);
 void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t);
 void world_gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect);
 void world_gfx_init_menu_tile_and_line_primitives(menu_status_panel_buffer_t* menu);
-void world_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_panel_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_gfx_set_blit_dest_position(s32 x, s32 y);
 void world_gfx_set_fade_disabled(u8 disabled);
 void world_gfx_set_portrait_poly_texture(POLY_FT4* poly, s32 code);
-
-void world_gfx_enqueue_textured_quad(
-    const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semi_trans, u16 texture_page, u16 clut, s32 priority);
 
 s32 world_gfx_get_fade_state(void);
 void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
@@ -2040,7 +2025,6 @@ void world_menu_display_text(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* 
 void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode);
 void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s32 mode);
 void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode);
-void world_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void world_menu_draw_thread_status_indicators(void);
 void world_menu_enable_all_order_entries(void);
 void world_screen_menu_build_window_image_row(const u16* source, u16* dest, s32 count, s32 offset);
@@ -2263,7 +2247,7 @@ s32 world_card_wait_for_hardware_event(void);
 s32 world_card_wait_for_selected_status(s32 attempts);
 s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size);
 void world_card_build_save_image(s32 slot);
-s32 world_card_seek_file_with_retries(s32 descriptor, s32 offset, s32 origin);
+s32 card_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
 s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer_t* source, u32 size, s32 create_file);
 
 /* item */
@@ -2611,7 +2595,6 @@ s32 world_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 s32 world_unit_get_facing_sixteenth_by_runtime_id(s32 runtime_id);
 s32 world_coords_fit_in_byte(s32 x, s32 y);
 void world_free_work_buffer(void);
-void world_script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 
 /* unnamed */
 extern s8 D_8018D18A;

@@ -81,9 +81,9 @@ void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode) 
     rect.y = position->y;
     rect.w = 0x10;
     rect.h = 0x10;
-    world_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xA8, 0, 0, 0, g_world_menu_icon_tpage, front_clut, g_world_menu_draw_priority);
     rect.x += 2;
     rect.y += 2;
-    world_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, back_clut, g_world_menu_draw_priority);
+    menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, back_clut, g_world_menu_draw_priority);
 }

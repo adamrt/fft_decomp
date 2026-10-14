@@ -90,6 +90,6 @@ s32 world_ability_run_view_list(void) {
     rect.y = 0x2d;
     rect.w = 0x50;
     rect.h = 0x10;
-    world_gfx_enqueue_textured_quad(&rect, 0, 0xc8, 0, 0, g_world_menu_window_tpage, g_world_menu_window_clut, 0xb);
+    menu_gfx_enqueue_textured_quad(&rect, 0, 0xc8, 0, 0, g_world_menu_window_tpage, g_world_menu_window_clut, 0xb);
     return MENU_JOB_LIST_STEP_ABILITIES;
 }
