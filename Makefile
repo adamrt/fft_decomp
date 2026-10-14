@@ -118,6 +118,11 @@ share-audit: image ## Report shared C implementation candidates as JSON (MODULE=
 units: image ## Reconstruct original translation units into build/analysis/units (MODULE=x, ARGS="...")
 	@$(TOOLS) units $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
+.PHONY: unit-check
+unit-check: image ## Compile a merged translation-unit candidate and compare each function (SPEC=build/units/x.yaml, MODULE=x, ARGS="--merge")
+	@test -n "$(SPEC)" || { echo "SPEC is required: make unit-check SPEC=build/units/<unit>.yaml [MODULE=<id>] [ARGS=--merge]"; exit 2; }
+	@$(TOOLS) unit-check --spec="$(SPEC)" $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
+
 .PHONY: symbols
 symbols: image ## Rename a symbol: ACTION=rename-function|rename-global ARGS="--old A --new B"
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }

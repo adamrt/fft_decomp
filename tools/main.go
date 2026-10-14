@@ -210,7 +210,7 @@ type inventoryRecord struct {
 	StackSize    int    `json:"stack_size,omitempty"`
 }
 
-const usage = "usage: tools build [module|disc]|check [--module=M]|diff [--module=M] FUNC|library-diff --name=N --source=S --addr=A --size=B [--module=M] [--profile=P]|permute [--module=M] [--duration=S] [--jobs=N] FUNC|checksums|check-config|config-fmt|declarations ...|share-audit [--module=M] [--min-bytes=N] [--prefix=P]|units [--module=M] [--min-confidence=L] [--max-owners=N] [--out=D]|symbols <action> ...|extract"
+const usage = "usage: tools build [module|disc]|check [--module=M]|diff [--module=M] FUNC|library-diff --name=N --source=S --addr=A --size=B [--module=M] [--profile=P]|permute [--module=M] [--duration=S] [--jobs=N] FUNC|checksums|check-config|config-fmt|declarations ...|share-audit [--module=M] [--min-bytes=N] [--prefix=P]|units [--module=M] [--min-confidence=L] [--max-owners=N] [--out=D]|unit-check --spec=S [--module=M] [--merge]|symbols <action> ...|extract"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -226,6 +226,7 @@ func main() {
 		"declarations":           true,
 		"share-audit":            true,
 		"units":                  true,
+		"unit-check":             true,
 		"compile-permuter-input": true,
 	}
 	if !commandsWithArguments[os.Args[1]] && len(os.Args) != 2 {
@@ -261,6 +262,8 @@ func main() {
 		err = p.shareAuditCommand(os.Args[2:])
 	case "units":
 		err = p.unitsCommand(os.Args[2:])
+	case "unit-check":
+		err = p.unitCheckCommand(os.Args[2:])
 	case "extract":
 		err = p.extractDisc()
 	case "analyze":
