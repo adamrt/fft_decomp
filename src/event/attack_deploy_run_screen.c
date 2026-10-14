@@ -54,7 +54,7 @@ void attack_deploy_run_screen(void) {
     g_attack_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_attack_deploy_current_squad_data = &g_attack_deploy_squad_data[g_attack_deploy_current_squad_id];
     script_set_event_speed(1);
-    g_battle_screen_fade = 0xff;
+    g_gfx_screen_fade = 0xff;
     thread_yield();
     g_attack_deploy_grid_slide_y = 0x9c;
     g_attack_deploy_deployed_unit_count = 0;
@@ -175,15 +175,15 @@ ramza_placed:
             }
         }
         if (first_pass != 0) {
-            g_battle_screen_fade = 0xff;
+            g_gfx_screen_fade = 0xff;
             while (1) {
                 if (g_attack_status_display_offset_y[0] != 0) {
                     g_attack_status_display_offset_y[0] += 4;
                 }
-                if (g_battle_screen_fade != 0) {
-                    g_battle_screen_fade -= 0x10;
-                    if (g_battle_screen_fade < 0) {
-                        g_battle_screen_fade = 0;
+                if (g_gfx_screen_fade != 0) {
+                    g_gfx_screen_fade -= 0x10;
+                    if (g_gfx_screen_fade < 0) {
+                        g_gfx_screen_fade = 0;
                     }
                 }
                 if (g_attack_status_display_offset_y[0] == -8) {
@@ -194,7 +194,7 @@ ramza_placed:
                 if (g_attack_deploy_grid_slide_y != 0) {
                     g_attack_deploy_grid_slide_y -= 4;
                 }
-                if (g_battle_screen_fade == 0 && g_attack_status_display_offset_y[0] == 0
+                if (g_gfx_screen_fade == 0 && g_attack_status_display_offset_y[0] == 0
                     && g_attack_deploy_grid_slide_y == 0) {
                     break;
                 }
@@ -646,16 +646,16 @@ ramza_placed:
     thread_wait_until_inactive(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS);
     g_sound_music_volume_transition_request = 0x1e0000;
     thread_wait_frames(0x20);
-    g_battle_screen_fade = 0;
+    g_gfx_screen_fade = 0;
     do {
         thread_yield();
-        g_battle_screen_fade += 4;
-    } while (g_battle_screen_fade < 0x100);
+        g_gfx_screen_fade += 4;
+    } while (g_gfx_screen_fade < 0x100);
     thread_set_parameters(ATTACK_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
     thread_wait_frames(3);
-    g_battle_screen_fade = 0;
+    g_gfx_screen_fade = 0;
     script_set_event_speed(1);
     main_sound_unload_scenario_music_and_tunes();
     thread_exit_current();

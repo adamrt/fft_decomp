@@ -24,12 +24,12 @@ void menu_run_bunit_return_thread(void) {
         thread_set_parameters(i, 0, 0, 1);
     }
     for (i = 0; i < 0x100; i += 8) {
-        g_world_screen_fade = 0xFF - i;
+        g_gfx_screen_fade = 0xFF - i;
         thread_yield();
     }
     menu_clear_modal_open();
     g_menu_overlay_state = 0;
-    g_world_screen_fade = 0;
+    g_gfx_screen_fade = 0;
     g_world_menu_transition_timeout = 0;
     world_unit_start_view_thread(UNIT_VIEW_MODE_HOVERED_UNIT, g_menu_selected_unit.battle_id, 0xFF);
     thread_exit_current();

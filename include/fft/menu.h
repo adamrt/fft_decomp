@@ -30,6 +30,8 @@ extern u16 g_menu_modal_open;
 
 void menu_set_modal_open(void);
 void menu_clear_modal_open(void);
+/* Refused-command thread: queue the invalid sound and exit. */
+void menu_run_invalid_choice_thread(void);
 
 /* ability */
 /* Provisional ability-list work buffer at *g_ai_workspace_ptr (82 rows each).

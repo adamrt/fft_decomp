@@ -225,13 +225,13 @@ void require_party_apply_post_battle_changes(void) {
                     s32 removal_result;
                     s32 removal_unit_index;
 
-                    g_battle_screen_fade = 0;
+                    g_gfx_screen_fade = 0;
                     do {
                         thread_yield();
-                        g_battle_screen_fade += 0x10;
-                    } while (g_battle_screen_fade < 0x100);
+                        g_gfx_screen_fade += 0x10;
+                    } while (g_gfx_screen_fade < 0x100);
                     screen_fade_max = 0xff;
-                    g_battle_screen_fade = screen_fade_max;
+                    g_gfx_screen_fade = screen_fade_max;
                     g_battle_post_battle_unit_changes_active = 0;
                     removal_result = require_party_select_unit_to_remove();
                     /* The target loads *selected_unit_index_ptr at 0x514,
@@ -260,12 +260,12 @@ void require_party_apply_post_battle_changes(void) {
                     }
                     battle_menu_copy_billboard_data_in(
                         &g_require_panel_selected_billboard, unit_display_data, &g_require_editor_unit_fields);
-                    g_battle_screen_fade = screen_fade_max;
+                    g_gfx_screen_fade = screen_fade_max;
                     do {
                         thread_yield();
-                        g_battle_screen_fade -= 0x10;
-                    } while (g_battle_screen_fade > 0);
-                    g_battle_screen_fade = 0;
+                        g_gfx_screen_fade -= 0x10;
+                    } while (g_gfx_screen_fade > 0);
+                    g_gfx_screen_fade = 0;
                 }
             } while (g_require_party_removal_result != 0);
             if (require_party_sell_equipment_over_limit(*selected_unit_index_ptr) != 0) {

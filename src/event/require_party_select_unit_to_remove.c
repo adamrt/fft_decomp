@@ -90,12 +90,12 @@ s32 require_party_select_unit_to_remove(void) {
     thread_yield();
     thread_start(REQUIRE_THREAD_SLOT_TRANSITION, require_gfx_run_suspended_thread_transition);
     thread_set_parameters(REQUIRE_THREAD_SLOT_TRANSITION, 0, 0, 0);
-    g_battle_screen_fade = 0xff;
+    g_gfx_screen_fade = 0xff;
     do {
         thread_yield();
-        g_battle_screen_fade -= 0x10;
-    } while (g_battle_screen_fade > 0);
-    g_battle_screen_fade = 0;
+        g_gfx_screen_fade -= 0x10;
+    } while (g_gfx_screen_fade > 0);
+    g_gfx_screen_fade = 0;
     {
         s16* destination;
 
@@ -283,12 +283,12 @@ s32 require_party_select_unit_to_remove(void) {
         thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MENU);
     }
     require_panel_set_transition_value(0);
-    g_battle_screen_fade = 0;
+    g_gfx_screen_fade = 0;
     do {
         thread_yield();
-        g_battle_screen_fade += 0x10;
-    } while (g_battle_screen_fade < 0x100);
-    g_battle_screen_fade = 0xff;
+        g_gfx_screen_fade += 0x10;
+    } while (g_gfx_screen_fade < 0x100);
+    g_gfx_screen_fade = 0xff;
     thread_set_parameters(REQUIRE_THREAD_SLOT_TRANSITION, 0, 0, 1);
     return result;
 }

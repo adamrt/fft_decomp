@@ -346,6 +346,11 @@ typedef struct fade_overlay {
 } fade_overlay_t;
 typedef char fade_overlay_size_must_be_28[(sizeof(fade_overlay_t) == 28) ? 1 : -1];
 
+/* Gray level the screen-covering fade tile subtracts: 0 is clear, 255 is black. */
+extern s32 g_gfx_screen_fade;
+
+void gfx_ramp_screen_overlay_intensity_to_max(void);
+void gfx_ramp_screen_overlay_intensity_to_zero(void);
 void gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page);
 void gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
 void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);

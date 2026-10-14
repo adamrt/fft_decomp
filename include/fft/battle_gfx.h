@@ -721,14 +721,11 @@ extern fade_overlay_t g_battle_gfx_screen_fade_overlays[]; /* one fade overlay p
 extern DR_MODE g_battle_gfx_screen_modulation_draw_modes[2];
 extern POLY_F4 g_battle_gfx_screen_modulation_polygons[2];
 extern RECT g_battle_gfx_screen_modulation_tex_window;
-extern s32 g_battle_screen_fade;
 extern DR_MODE g_battle_screen_fade_draw_modes[];
 extern s16 g_battle_screen_fade_intensity;
 extern POLY_F4 g_battle_screen_fade_polygons[2];
 
 void battle_gfx_draw_screen_color_modulation_overlay(void);
-void battle_gfx_ramp_screen_overlay_intensity_to_max(void);
-void battle_gfx_ramp_screen_overlay_intensity_to_zero(void);
 void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
 void battle_gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
 void battle_gfx_update_screen_color_modulation_fade(void);

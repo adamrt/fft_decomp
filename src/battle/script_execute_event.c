@@ -96,7 +96,7 @@ void script_execute_event(void) {
 
     thread_set_current_task_id(THREAD_TASK_EXECUTE_EVENT);
     if (script_is_tutorial_event_slot() != 0) {
-        battle_gfx_ramp_screen_overlay_intensity_to_zero();
+        gfx_ramp_screen_overlay_intensity_to_zero();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
         for (work_index = 2; work_index < 0xE; work_index++) {
@@ -304,7 +304,7 @@ restart_script:
             } while (main_file_is_still_loading() != 0);
             thread_yield();
             if (script_is_tutorial_event_slot() != 0) {
-                battle_gfx_ramp_screen_overlay_intensity_to_max();
+                gfx_ramp_screen_overlay_intensity_to_max();
                 g_main_game_options = g_battle_saved_game_options;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                 battle_state_start_close_battle(0x20);

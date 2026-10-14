@@ -40,19 +40,19 @@ void etc_graphic_open(s32 graphic_id) {
     } else {
         g_gfx_draw_primitives_immediately = 1;
         if (graphic_id == ETC_GRAPHIC_END1) {
-            g_battle_screen_fade = -0xff;
+            g_gfx_screen_fade = -0xff;
             do {
                 thread_yield();
-                g_battle_screen_fade += 8;
-            } while (g_battle_screen_fade <= 0);
+                g_gfx_screen_fade += 8;
+            } while (g_gfx_screen_fade <= 0);
         } else {
-            g_battle_screen_fade = 0xff;
+            g_gfx_screen_fade = 0xff;
             do {
                 thread_yield();
-                g_battle_screen_fade -= 8;
-            } while (g_battle_screen_fade > 0);
+                g_gfx_screen_fade -= 8;
+            } while (g_gfx_screen_fade > 0);
         }
-        g_battle_screen_fade = 0;
+        g_gfx_screen_fade = 0;
 
         if (graphic_id == ETC_GRAPHIC_END1) {
             frame = 0;
@@ -92,16 +92,16 @@ void etc_graphic_open(s32 graphic_id) {
             }
         }
 
-        g_battle_screen_fade = 0;
+        g_gfx_screen_fade = 0;
         do {
             thread_yield();
             thread_yield();
-            g_battle_screen_fade += 8;
-        } while (g_battle_screen_fade < 0x100);
-        g_battle_screen_fade = 0xff;
+            g_gfx_screen_fade += 8;
+        } while (g_gfx_screen_fade < 0x100);
+        g_gfx_screen_fade = 0xff;
         g_gfx_draw_primitives_immediately = 0;
         if (graphic_id == ETC_GRAPHIC_END3) {
-            g_battle_screen_fade = 0;
+            g_gfx_screen_fade = 0;
         }
     }
 

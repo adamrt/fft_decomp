@@ -334,7 +334,6 @@ s32 battle_menu_init_attack_resources_and_threads(void);
 s32 battle_menu_is_still_building(void);
 void battle_menu_run_equip_thread(void);
 void battle_menu_run_helpmenu_thread(void);
-void battle_menu_run_invalid_choice_thread(void);
 void battle_menu_run_jobstts_thread(void);
 void battle_menu_selected_tile_info_display_thread(void);
 s32 battle_menu_should_close_thread(u32* input);

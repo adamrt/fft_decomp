@@ -11,7 +11,7 @@
  * END1.BIN to END5.BIN. Only the ones etc_graphic_open treats specially are
  * named. */
 typedef enum etc_graphic_id {
-    ETC_GRAPHIC_END1 = 8, /* g_battle_screen_fade rises from -0xff; for the others it falls from 0xff */
+    ETC_GRAPHIC_END1 = 8, /* g_gfx_screen_fade rises from -0xff; for the others it falls from 0xff */
     ETC_GRAPHIC_END3 = 10,
     ETC_GRAPHIC_END4 = 11,
     ETC_GRAPHIC_END5 = 12,

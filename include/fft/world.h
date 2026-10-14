@@ -226,7 +226,6 @@ void world_menu_run_option_choice(void);
 
 /* screen */
 
-extern s32 g_world_screen_fade;
 extern RECT g_world_screen_clear_rect;
 extern fade_overlay_t g_world_screen_tint_tiles[]; /* one tint tile per packet buffer */
 
@@ -324,7 +323,6 @@ void world_script_sprite_move(void);
 void world_script_sprite_move_beta(void);
 void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
-void world_gfx_ramp_screen_overlay_intensity_to_zero(void);
 void world_script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void world_script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void world_script_update_tutorial_controller_input(void);
@@ -910,7 +908,6 @@ void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll
 s32 world_gfx_get_vsync_mode_or_one(void);
 void world_gfx_load_wldface_to_frame_buffer(void);
 void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_otag);
-void world_gfx_ramp_screen_overlay_intensity_to_max(void);
 void world_gfx_set_blit_source_rect(s16 x, s16 y, s16 width, s16 height);
 void world_gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
 void world_gfx_set_image_blit_destination_origin(s16 x, s16 y);

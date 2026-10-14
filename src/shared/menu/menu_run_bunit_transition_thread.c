@@ -8,10 +8,10 @@ void menu_run_bunit_transition_thread(void) {
     s32 level;
 
     for (level = 0; level < 0x100; level += 0x10) {
-        g_world_screen_fade = level;
+        g_gfx_screen_fade = level;
         thread_yield();
     }
-    g_world_screen_fade = 0xFF;
+    g_gfx_screen_fade = 0xFF;
     g_menu_overlay_state = 1;
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
