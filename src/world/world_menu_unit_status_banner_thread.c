@@ -37,22 +37,22 @@ void world_menu_unit_status_banner_thread(void) {
     s32 cur_unit;
     s32 prev_unit;
 
-    u8* stat_image;                                   /* sp60 */
-    menu_status_panel_editor_packet_t* summary_base;  /* sp68 */
-    menu_number_entry_t* entries;                     /* sp70 */
-    menu_unit_status_record_t* state;                 /* sp78 */
-    s32 portrait_arg;                                 /* sp80 */
-    const RECT* transition;                           /* sp88 */
-    palette_t* portrait_palettes;                     /* sp90 */
-    world_unit_status_number_images_t* number_images; /* sp98 */
-    u8* name_image;                                   /* spA0 */
-    menu_status_panel_packet_t* status_base;          /* spA8 */
-    menu_unit_status_identity_t* identity;            /* spB0 */
-    menu_status_panel_display_thread_t* display;      /* spB8 */
-    s32 frame;                                        /* spC0 */
-    s32 shake;                                        /* spC8 */
-    s32 dimmed;                                       /* spD0 */
-    s32 suppress;                                     /* spD8 */
+    u8* stat_image;                                  /* sp60 */
+    menu_status_panel_editor_packet_t* summary_base; /* sp68 */
+    menu_number_entry_t* entries;                    /* sp70 */
+    menu_unit_status_record_t* state;                /* sp78 */
+    s32 portrait_arg;                                /* sp80 */
+    const RECT* transition;                          /* sp88 */
+    palette_t* portrait_palettes;                    /* sp90 */
+    menu_unit_number_images_t* number_images;        /* sp98 */
+    u8* name_image;                                  /* spA0 */
+    menu_status_panel_packet_t* status_base;         /* spA8 */
+    menu_unit_status_identity_t* identity;           /* spB0 */
+    menu_status_panel_display_thread_t* display;     /* spB8 */
+    s32 frame;                                       /* spC0 */
+    s32 shake;                                       /* spC8 */
+    s32 dimmed;                                      /* spD0 */
+    s32 suppress;                                    /* spD8 */
 
     s32 thread_id;
     s32 i;

@@ -498,15 +498,6 @@ extern menu_unit_stat_number_images_t g_world_editor_numeric_text_a;
 extern menu_unit_stat_number_images_t g_world_editor_numeric_text_b;
 
 /* comparison */
-/* Three 16x10 packed 4bpp images for the numbers below a unit's name. */
-typedef struct world_unit_status_number_images {
-    u8 brave[16 * 10 / 2];
-    u8 faith[16 * 10 / 2];
-    u8 roster_slot[16 * 10 / 2];
-} world_unit_status_number_images_t;
-typedef char
-    world_unit_status_number_images_size_must_be_240[sizeof(world_unit_status_number_images_t) == 240 ? 1 : -1];
-
 extern menu_unit_status_record_t g_world_comparison_unit_stat_summary;
 extern menu_unit_status_identity_t g_world_comparison_unit_identity;
 extern menu_number_entry_t g_world_comparison_unit_number_entries[];
@@ -516,7 +507,7 @@ extern menu_status_panel_editor_packet_t g_world_comparison_unit_summary_packets
 extern menu_status_panel_packet_t g_world_comparison_unit_status_packets[2];
 extern u8 g_world_comparison_unit_stat_text_image[];
 extern u8 g_world_comparison_unit_name_text_image[];
-extern world_unit_status_number_images_t g_world_comparison_unit_number_text_images;
+extern menu_unit_number_images_t g_world_comparison_unit_number_text_images;
 extern palette_t g_world_comparison_unit_portrait_palettes[2];
 
 /* gfx */
@@ -1444,7 +1435,7 @@ extern menu_status_panel_editor_packet_t g_world_selected_unit_summary_packets[2
 extern menu_status_panel_packet_t g_world_selected_unit_status_packets[2];
 extern u8 g_world_selected_unit_stat_text_image[];
 extern u8 g_world_selected_unit_name_text_image[];
-extern world_unit_status_number_images_t g_world_selected_unit_number_text_images;
+extern menu_unit_number_images_t g_world_selected_unit_number_text_images;
 extern palette_t g_world_selected_unit_portrait_palettes[2];
 extern u8 g_world_stat_preview_text_image[];
 s32 world_get_party_unit_formation_sprite(s32 party_index);

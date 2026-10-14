@@ -18,7 +18,7 @@ void menu_run_unit_summary_panel_thread(void) {
     menu_unit_summary_frame_t* frame_record;
     unit_stats_t* unit;
     u8* buffer;
-    u8* digits;
+    menu_unit_number_images_t* digits;
     glyph_blit_t* origin;
     s32* stride;
     SPRT* sprite;
@@ -31,7 +31,7 @@ void menu_run_unit_summary_panel_thread(void) {
 
     speed = 0x16;
     slide = 0x84;
-    digits = g_menu_unit_summary_digit_images;
+    digits = &g_menu_unit_summary_digit_images;
     menu_load_selected_unit();
     unit = menu_get_selected_unit_stats();
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
@@ -67,25 +67,25 @@ void menu_run_unit_summary_panel_thread(void) {
     menu_set_text_origin(0, 0x10);
     menu_display_text_string(buffer, origin, g_menu_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
-    menu_clear_render_buffer(digits, 0xF0);
+    menu_clear_render_buffer(digits, sizeof(*digits));
     *stride = 0x10;
     menu_set_text_origin(0, 0);
-    text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits, origin);
-    LoadImage(&rects[1], (u32*)digits);
+    text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits->brave, origin);
+    LoadImage(&rects[1], (u32*)digits->brave);
     menu_set_text_origin(0, 0);
-    text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits + 0x50, origin);
-    LoadImage(&rects[2], (u32*)(digits + 0x50));
+    text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits->faith, origin);
+    LoadImage(&rects[2], (u32*)digits->faith);
     menu_set_text_origin(0, 0);
     if (g_main_debug_display_enabled != 0) {
-        text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits + 0xA0, origin);
+        text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
     } else if (g_menu_selected_unit.battle_id >= 0x10) {
         value = unit->formation_index;
         if (value == 0xFF) {
             value = 0;
         }
-        text_draw_large_number_glyphs(value + 1, 0x4002, digits + 0xA0, origin);
+        text_draw_large_number_glyphs(value + 1, 0x4002, digits->roster_slot, origin);
     }
-    LoadImage(&rects[3], (u32*)(digits + 0xA0));
+    LoadImage(&rects[3], (u32*)digits->roster_slot);
     frames[0].sprites[6].clut = 0x7C3C;
     frames[0].sprites[6].w = 0x18;
     frames[0].sprites[6].h = 0x14;

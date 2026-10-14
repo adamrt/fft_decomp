@@ -2465,7 +2465,16 @@ extern u8 g_text_spell_quote_exception_skillsets[];
 extern u8 g_text_glyph_bitmaps[];
 
 /* unit panel data */
-extern u8 g_menu_unit_summary_digit_images[];
+/* Three 16x10 packed 4bpp images for the numbers below a unit's name:
+ * Brave, Faith and the roster slot. */
+typedef struct menu_unit_number_images {
+    u8 brave[16 * 10 / 2];
+    u8 faith[16 * 10 / 2];
+    u8 roster_slot[16 * 10 / 2];
+} menu_unit_number_images_t;
+typedef char menu_unit_number_images_size_must_be_240[sizeof(menu_unit_number_images_t) == 240 ? 1 : -1];
+
+extern menu_unit_number_images_t g_menu_unit_summary_digit_images;
 extern u8 g_menu_billboard_job_name[];                /* job name text window */
 extern u8 g_menu_billboard_unit_name[];               /* name text window */
 extern u8 g_menu_billboard_secondary_skillset_name[]; /* secondary skillset name text window */
