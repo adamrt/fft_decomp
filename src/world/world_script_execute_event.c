@@ -177,7 +177,7 @@ restart_event:
                 unit_increase_blue_team_brave_by_10();
             }
             if (operand_1 == EVENT_CALL_FUNCTION_REMOVE_ALL_ENEMY_UNITS) {
-                world_script_blue_remove_all_enemy_units();
+                script_blue_remove_all_enemy_units();
                 thread_wait_frames(0x78);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_REQUEST_CAMERA_YAW_WRAP) {
@@ -266,7 +266,7 @@ restart_event:
                 }
             }
         } else if (opcode == EVENT_OPCODE_BLUE_REMOVE_UNIT) {
-            world_script_blue_remove_unit(first_operand);
+            script_blue_remove_unit(first_operand);
         } else if ((opcode == EVENT_OPCODE_END) || (opcode == EVENT_OPCODE_END_2)) {
             map_wait_for_refresh();
             do {

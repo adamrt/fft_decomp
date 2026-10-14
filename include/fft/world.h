@@ -273,8 +273,6 @@ extern s16 g_world_event_weather_request;
 extern map_background_gradient_colors_t g_world_event_background_colors;
 void world_script_handle_tutorial_command_highlight_ring(void);
 void world_script_advance_tutorial_highlight_brightness(void);
-void world_script_blue_remove_all_enemy_units(void);
-void world_script_blue_remove_unit(s32 unit_id);
 void script_earthquake_start(void);
 void world_script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void world_script_focus(event_focus_parameters_t* parameters);

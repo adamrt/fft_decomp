@@ -345,8 +345,8 @@ functions:
   - {addr: 0x800fae18, size: 548, name: script_filter_unit_id_by_mode, hash: 984093d71e63f1ff, source: src/shared/script/script_filter_unit_id_by_mode.c}
   - {addr: 0x800fb03c, size: 216, name: script_teleportout_event_instruction, hash: a33f1da7ceb032c8, source: src/shared/script/script_teleportout_event_instruction.c}
   - {addr: 0x800fb114, size: 72, name: script_teleportin_event_instruction, hash: 93b4c6af1ff33bce, source: src/shared/script/script_teleportin_event_instruction.c}
-  - {addr: 0x800fb15c, size: 168, name: world_script_blue_remove_all_enemy_units, hash: 2274921be941b9ac}
-  - {addr: 0x800fb204, size: 200, name: world_script_blue_remove_unit, hash: acf2f50c451c3612}
+  - {addr: 0x800fb15c, size: 168, name: script_blue_remove_all_enemy_units, hash: 2274921be941b9ac, source: src/shared/script/script_blue_remove_all_enemy_units.c}
+  - {addr: 0x800fb204, size: 200, name: script_blue_remove_unit, hash: acf2f50c451c3612, source: src/shared/script/script_blue_remove_unit.c}
   - {addr: 0x800fb2cc, size: 332, name: world_script_warp_unit, hash: 6399d2888030776e}
   - {addr: 0x800fb418, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 14cce9870ae4f8c8, source: src/shared/script/script_unit_animation_rotate_event_instruction.c}
   - {addr: 0x800fb4f0, size: 512, name: world_script_face_unit, hash: 1dda3ec86c0c41a3, source: src/shared/script/script_face_unit.c, source_symbol: script_face_unit}
