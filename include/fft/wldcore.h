@@ -331,7 +331,6 @@ extern menu_status_thread_t g_wldcore_threadc_params;
 extern unit_stats_t g_wldcore_status_unit;
 party_unit_t* wldcore_get_party_unit(s32 party_index);
 s32 wldcore_get_ramza_roster_index(void);
-s32 wldcore_unit_get_battle_id_by_runtime_id(s32 runtime_id);
 void wldcore_unit_build_status_panel_data(s32 party_index);
 
 void wldcore_load_formation_unit_name_and_face(void);

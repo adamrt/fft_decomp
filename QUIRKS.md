@@ -612,6 +612,10 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `status_queue_runtime_graphics_flag_change` on the main stack (`0x80068e80`, 0x10 bytes into
   `wldcore_map_update_scroll_axis_speed`) and `unit_save_staged_status_data.c`
   runs `status_apply_unit_action_removal` (`0x8018ec44`, WORLD text data).
+  `unit_get_battle_id_by_event_unit_id.c` calls
+  `battle_unit_get_battle_id_by_runtime_id` (`0x8008cdd0`), which in WLDCORE
+  is the epilogue of `wldcore_map_color_and_draw_dots`: it would reload
+  `s0`..`s4` from the caller's frame and pop 48 bytes of its stack.
   `unit_set_animation.c` likewise reaches three BATTLE-only animation setters,
   behind script-variable tests WORLD scenes would have to pass first.
 - OPTION.OUT carries its own copy of `menu_init_scaled_draw_area_packets`

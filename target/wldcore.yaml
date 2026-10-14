@@ -446,7 +446,6 @@ functions:
 
 data:
   - {addr: 0x8008c0ac, name: world_unit_get_facing_sixteenth_by_runtime_id}
-  - {addr: 0x8008cdd0, name: wldcore_unit_get_battle_id_by_runtime_id}
   - {addr: 0x80092b04, name: wldcore_switch_to_stack}
   - {addr: 0x80092b1c, name: wldcore_restore_previous_stack}
   - {addr: 0x80092b2c, name: g_wldcore_anim_sequence_table}

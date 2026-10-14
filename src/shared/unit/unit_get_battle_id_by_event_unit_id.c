@@ -4,8 +4,8 @@
 
 /* Resolves an event unit id to a battle unit slot through
  * script_resolve_runtime_id. Returns 0x7d0 when the id resolves to no unit with
- * battle stats. WORLD binds the runtime-id lookup to WLDCORE's copy, which
- * sits at the same address as BATTLE's. */
+ * battle stats. WORLD's copy still calls BATTLE's runtime-id lookup, whose
+ * address is the tail of a WLDCORE routine there (see QUIRKS.md). */
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     s32 runtime_id = script_resolve_runtime_id(event_unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
