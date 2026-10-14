@@ -951,7 +951,7 @@ typedef char menu_text_layout_size_must_be_40[sizeof(menu_text_layout_t) == 40 ?
 
 /* menu drawing */
 /* Provisional: one double-buffered menu sprite page (0xa0 bytes) built by
- * world_menu_build_sprite_page and its BATTLE twin battle_menu_build_sprite_page:
+ * menu_build_sprite_page and its BATTLE twin battle_menu_build_sprite_page:
  * five DR_MODE texture-window packets followed by the five SPRTs they apply
  * to. Both modules keep two pages at 0x801cc074. */
 typedef struct menu_sprite_page {
@@ -959,6 +959,9 @@ typedef struct menu_sprite_page {
     SPRT sprites[5];  /* 0x3c */
 } menu_sprite_page_t;
 typedef char menu_sprite_page_size_must_be_160[(sizeof(menu_sprite_page_t) == 160) ? 1 : -1];
+extern RECT g_menu_sprite_page_texture_windows[5];
+extern image_load_parameters_t g_menu_sprite_page_image_params[30];
+void menu_build_sprite_page(s32 page_index, RECT* base_screen);
 
 /* Provisional: per-line placement for the twelve menu box lines
  * (table at 0x80154cd0, indexed like menu_palette_primitives_t.lines):
@@ -1236,6 +1239,18 @@ typedef struct menu_panel_frame {
     scaled_draw_area_pair_t draw_areas;
 } menu_panel_frame_t;
 typedef char menu_panel_frame_size_must_be_344[sizeof(menu_panel_frame_t) == 344 ? 1 : -1];
+
+/* Scratch in the event-overlay area at 0x801cc074, past the scene program:
+ * the sprite page builder lays it out as two sprite pages, WORLD's dead-unit
+ * and window-frame panels as two panel frames, and BATTLE's scrolling ability
+ * list saves its five 16-color CLUTs there. */
+typedef union menu_scratch_buffer {
+    menu_sprite_page_t sprite_pages[2];
+    menu_panel_frame_t panel_frames[2];
+    u16 clut_save[5 * 16];
+} menu_scratch_buffer_t;
+
+extern menu_scratch_buffer_t g_menu_scratch_buffer;
 
 /* 12-byte piece of a pressable button (*_menu_draw_pressable_button): source
  * rectangle, then its offset from the button origin. */

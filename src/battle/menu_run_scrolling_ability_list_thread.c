@@ -68,7 +68,7 @@ void menu_run_scrolling_ability_list_thread(void) {
     u16* clut;
     u16* saved_clut;
 
-    saved_clut = g_battle_menu_scratch_buffer.clut_save;
+    saved_clut = g_menu_scratch_buffer.clut_save;
     row_buffer_live = 0;
     hold_time = 0;
     if (g_battle_menu_scroll_list_depth != 0) {

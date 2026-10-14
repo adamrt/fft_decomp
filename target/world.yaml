@@ -131,7 +131,7 @@ functions:
   - {addr: 0x800e8aa8, size: 8, name: world_noop_800e8aa8, hash: 6d64edf91449c1b1}
   - {addr: 0x800e8ab0, size: 700, name: menu_run_selected_tile_info_display_thread, hash: 8648619103f31884, source: src/shared/menu/menu_run_selected_tile_info_display_thread.c}
   - {addr: 0x800e8d6c, size: 588, name: menu_build_quad_pieces, hash: d2e36de075951781, source: src/shared/menu/menu_build_quad_pieces.c}
-  - {addr: 0x800e8fb8, size: 300, name: world_menu_build_sprite_page, hash: 0677e90df05e1cdb}
+  - {addr: 0x800e8fb8, size: 300, name: menu_build_sprite_page, hash: 0677e90df05e1cdb, source: src/shared/menu/menu_build_sprite_page.c}
   - {addr: 0x800e90e4, size: 8, name: world_noop_800e90e4, hash: 6d64edf91449c1b1}
   - {addr: 0x800e90ec, size: 8, name: world_menu_display_projected_action_effect, hash: 6d64edf91449c1b1}
   - {addr: 0x800e90f4, size: 3764, name: menu_display_hovered_unit_stats, hash: 23548cb242115e60, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/menu/menu_display_hovered_unit_stats.c}
@@ -1189,8 +1189,8 @@ data:
   - {addr: 0x801557b0, name: g_menu_quad_group_starts}
   - {addr: 0x801557f4, name: g_menu_quad_colors}
   - {addr: 0x80155808, name: g_menu_quad_origin}
-  - {addr: 0x80155810, name: g_world_menu_sprite_page_texture_windows}
-  - {addr: 0x80155838, name: g_world_menu_sprite_page_image_params}
+  - {addr: 0x80155810, name: g_menu_sprite_page_texture_windows}
+  - {addr: 0x80155838, name: g_menu_sprite_page_image_params}
   - {addr: 0x80155874, name: g_world_menu_sprite_page_image_params_from_5}
   - {addr: 0x801559d0, name: g_world_unit_status_quad_clut_pairs}
   - {addr: 0x80155a88, name: g_world_unit_status_sprite_clut_pairs}
@@ -2096,7 +2096,7 @@ data:
   - {addr: 0x801ca760, name: g_world_gfx_fade_intensity}
   - {addr: 0x801ca764, name: g_world_script_tutorial_wait_time_remaining}
   - {addr: 0x801ca768, name: g_world_tutorial_state}
-  - {addr: 0x801cc074, name: g_world_menu_panel_buffer}
+  - {addr: 0x801cc074, name: g_menu_scratch_buffer}
   - {addr: 0x801cc570, name: g_world_script_tutorial_command_ptr}
   - {addr: 0x801cc574, name: g_world_script_tutorial_command_active}
   - {addr: 0x801cc578, name: g_world_script_tutorial_button_input}
@@ -2384,6 +2384,7 @@ overrides:
   - {function: menu_build_item_type_icon_source, name: g_menu_cursor_texture_page, addr: 0x8018df8a}
   - {function: menu_build_item_type_icon_source, name: g_menu_palette_clut, addr: 0x801cd1bc}
   - {function: menu_build_main, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
+  - {function: menu_build_sprite_page, name: battle_menu_init_semitransparent_sprt, addr: 0x800e2444}
   - {function: menu_build_window_image, name: battle_clear_menu_render_buffer, addr: 0x800ff3d4}
   - {function: menu_build_window_image, name: battle_text_mirror_packed_nibble_region_horizontal, addr: 0x800ff478}
   - {function: menu_build_window_image, name: blit_text_glyph, addr: 0x800feff0}
@@ -2406,7 +2407,6 @@ overrides:
   - {function: menu_dispatch_system_function, name: g_battle_system_function_table, addr: 0x80156750}
   - {function: menu_dispatch_system_function, name: script_start_current_event_thread, addr: 0x800f2c74}
   - {function: menu_display_hovered_unit_stats, name: battle_clear_menu_render_buffer, addr: 0x800ff3d4}
-  - {function: menu_display_hovered_unit_stats, name: battle_menu_build_sprite_page, addr: 0x800e8fb8}
   - {function: menu_display_hovered_unit_stats, name: battle_menu_build_unit_portrait_poly, addr: 0x800eaa50}
   - {function: menu_display_hovered_unit_stats, name: battle_menu_display_projected_action_effect, addr: 0x800e90ec}
   - {function: menu_display_hovered_unit_stats, name: battle_thread_find_running_by_task, addr: 0x800fd14c}
@@ -2414,7 +2414,6 @@ overrides:
   - {function: menu_display_hovered_unit_stats, name: battle_thread_is_running_asm, addr: 0x80100164}
   - {function: menu_display_hovered_unit_stats, name: g_battle_menu_hovered_stats_frame_count, addr: 0x80154dfe}
   - {function: menu_display_hovered_unit_stats, name: g_battle_menu_sprite_page_image_param_bases, addr: 0x80155874}
-  - {function: menu_display_hovered_unit_stats, name: g_battle_menu_sprite_page_image_params, addr: 0x80155838}
   - {function: menu_display_hovered_unit_stats, name: g_battle_unit_status_bounce_offsets, addr: 0x80154de0}
   - {function: menu_display_hovered_unit_stats, name: g_battle_unit_status_bounce_step, addr: 0x80154dfa}
   - {function: menu_display_hovered_unit_stats, name: g_battle_unit_status_first_page_by_mode, addr: 0x80155cf4}

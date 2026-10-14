@@ -18,7 +18,7 @@
 void world_menu_window_frame_thread(void) {
     RECT texture;
     /* Keeping both stride fields live retains their descriptor bases. */
-    menu_panel_frame_t* prim = g_world_menu_panel_buffer.panel_frames;
+    menu_panel_frame_t* prim = g_menu_scratch_buffer.panel_frames;
     s32* source_stride = &g_world_gfx_image_blit_source.stride;
     s32* dest_stride = &g_world_gfx_image_blit_destination.stride;
     urect16_t* menu;
@@ -135,12 +135,12 @@ void world_menu_window_frame_thread(void) {
     prim->sprites[8].h = border_wide;
 
     world_gfx_init_scaled_draw_area_packets(&prim->draw_areas);
-    mem_copy_bytes_nonempty(&g_world_menu_panel_buffer.panel_frames[1], &g_world_menu_panel_buffer.panel_frames[0],
-        sizeof(menu_panel_frame_t));
+    mem_copy_bytes_nonempty(
+        &g_menu_scratch_buffer.panel_frames[1], &g_menu_scratch_buffer.panel_frames[0], sizeof(menu_panel_frame_t));
 
     frame = 0;
     while (world_thread_get_current_parameter_3() == 0) {
-        prim = &g_world_menu_panel_buffer.panel_frames[frame & 1];
+        prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &prim->draw_areas, (const RECT*)menu, frame, g_active_graphics_buffer_index);
         /* The CLUT id the nine border sprites are drawn with this frame, which

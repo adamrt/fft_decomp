@@ -784,7 +784,7 @@ functions:
   - {addr: 0x80134430, size: 8, name: battle_noop_80134430, hash: 6d64edf91449c1b1}
   - {addr: 0x80134438, size: 700, name: menu_run_selected_tile_info_display_thread, hash: bee07b3b3a3c9327, source: src/shared/menu/menu_run_selected_tile_info_display_thread.c}
   - {addr: 0x801346f4, size: 588, name: menu_build_quad_pieces, hash: 1f61c8cb57818426, source: src/shared/menu/menu_build_quad_pieces.c}
-  - {addr: 0x80134940, size: 300, name: battle_menu_build_sprite_page, hash: 49b0a4658a71022b}
+  - {addr: 0x80134940, size: 300, name: menu_build_sprite_page, hash: 49b0a4658a71022b, source: src/shared/menu/menu_build_sprite_page.c}
   - {addr: 0x80134a6c, size: 8, name: battle_noop_80134a6c, hash: 6d64edf91449c1b1}
   - {addr: 0x80134a74, size: 2120, name: battle_menu_display_projected_action_effect, hash: 6cb0f635f91d292a}
   - {addr: 0x801352bc, size: 3692, name: menu_display_hovered_unit_stats, hash: a6325c0ce9b93247, source: src/shared/menu/menu_display_hovered_unit_stats.c}
@@ -2434,8 +2434,8 @@ data:
   - {addr: 0x80168324, name: g_menu_quad_group_starts}
   - {addr: 0x80168368, name: g_menu_quad_colors}
   - {addr: 0x8016837c, name: g_menu_quad_origin}
-  - {addr: 0x80168384, name: g_battle_menu_sprite_page_texture_windows}
-  - {addr: 0x801683ac, name: g_battle_menu_sprite_page_image_params}
+  - {addr: 0x80168384, name: g_menu_sprite_page_texture_windows}
+  - {addr: 0x801683ac, name: g_menu_sprite_page_image_params}
   - {addr: 0x801683e8, name: g_battle_menu_sprite_page_image_param_bases}
   - {addr: 0x80168454, name: g_battle_menu_attack_caster_quad_image_params}
   - {addr: 0x80168544, name: g_battle_unit_status_quad_clut_pairs}
@@ -2891,7 +2891,7 @@ data:
   - {addr: 0x801c24d0, name: g_battle_ability_effect_id}
   - {addr: 0x801c24d4, name: g_effect_root_record_index}
   - {addr: 0x801c24da, name: g_effect_active_list_node_head}
-  - {addr: 0x801cc074, name: g_battle_menu_scratch_buffer}
+  - {addr: 0x801cc074, name: g_menu_scratch_buffer}
 
 imports:
   - {addr: 0x801bf3b8, name: card_save_run_menu}

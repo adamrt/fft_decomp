@@ -130,30 +130,17 @@ extern RECT g_battle_numeric_display_text_rect_c;
 extern RECT g_battle_numeric_display_texture_window;
 
 /* windows and sprites */
-/* BATTLE scratch at 0x801cc074, in the event-overlay area past BATTLE.BIN:
- * battle_menu_build_sprite_page lays it out as two sprite pages and the
- * scrolling ability list saves its five 16-color CLUTs there. WORLD keeps
- * its own g_world_menu_panel_buffer at the same address. */
-typedef union battle_menu_scratch_buffer {
-    menu_sprite_page_t sprite_pages[2];
-    u16 clut_save[5 * 16];
-} battle_menu_scratch_buffer_t;
-
 /* Live caster-panel image parameters followed by their defaults. */
 extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][5];
 extern image_load_parameters_t g_battle_menu_icon_strip_image_params[20];
-extern battle_menu_scratch_buffer_t g_battle_menu_scratch_buffer;
 extern image_load_parameters_t g_battle_menu_single_icon_image_params[5];
 /* Entries 5..7 above; a separate alias preserves the original template base. */
 extern image_load_parameters_t g_battle_menu_sprite_page_image_param_bases[];
-extern image_load_parameters_t g_battle_menu_sprite_page_image_params[30];
-extern RECT g_battle_menu_sprite_page_texture_windows[5];
 extern menu_unit_editor_frame_t g_battle_menu_unit_editor_frames[2];
 extern glyph_blit_t g_battle_menu_window_sprite_glyph;
 extern glyph_blit_t g_battle_menu_window_sprite_position;
 
 u8* battle_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
-void battle_menu_build_sprite_page(s32 page_index, RECT* base_screen);
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 

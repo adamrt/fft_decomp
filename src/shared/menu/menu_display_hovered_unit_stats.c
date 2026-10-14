@@ -65,18 +65,18 @@ void menu_display_hovered_unit_stats(
             if (extent_w > 0x100) {
                 extent_w = 0;
             }
-            g_battle_menu_sprite_page_image_params[25].x_screen_offset
-                = g_battle_menu_sprite_page_image_params[28].x_screen_offset + extent_w;
-            g_battle_menu_sprite_page_image_params[26].x_screen_offset
-                = g_battle_menu_sprite_page_image_params[29].x_screen_offset + extent_w;
+            g_menu_sprite_page_image_params[25].x_screen_offset
+                = g_menu_sprite_page_image_params[28].x_screen_offset + extent_w;
+            g_menu_sprite_page_image_params[26].x_screen_offset
+                = g_menu_sprite_page_image_params[29].x_screen_offset + extent_w;
             for (frame = 0; frame < 3; frame++) {
-                g_battle_menu_sprite_page_image_params[frame].x_screen_offset
+                g_menu_sprite_page_image_params[frame].x_screen_offset
                     = g_battle_menu_sprite_page_image_param_bases[frame].x_screen_offset + extent_w;
-                g_battle_menu_sprite_page_image_params[frame].width
+                g_menu_sprite_page_image_params[frame].width
                     = g_battle_menu_sprite_page_image_param_bases[frame].width - extent_w;
             }
-            g_battle_menu_sprite_page_image_params[3].x_screen_offset
-                = g_battle_menu_sprite_page_image_params[8].x_screen_offset + extent_w;
+            g_menu_sprite_page_image_params[3].x_screen_offset
+                = g_menu_sprite_page_image_params[8].x_screen_offset + extent_w;
         }
     }
     page = &g_battle_unit_status_panel_pages[g_battle_unit_status_first_page_by_mode[mode]];
@@ -295,7 +295,7 @@ void menu_display_hovered_unit_stats(
         if (mode != UNIT_STATS_PANEL_ATTACK_TARGET) {
             gfx_draw_or_append_gpu_primitive(&page->quads[3]);
         } else if (text_id != 0) {
-            battle_menu_build_sprite_page(frame, frame_rect);
+            menu_build_sprite_page(frame, frame_rect);
         }
         for (i = 0; i < 7; i++) {
             page->sprites[i].clut = g_battle_unit_status_sprite_clut_pairs[i][running & 1];

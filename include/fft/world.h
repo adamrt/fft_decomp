@@ -1730,14 +1730,6 @@ typedef struct world_menu_number_range {
     void (*on_change)(void); /* 0x08 */
 } world_menu_number_range_t;
 
-/* The primitive block at 0x801cc074: the dead-unit and window-frame panels
- * lay it out as two panel frames, world_menu_build_sprite_page as two sprite
- * pages. */
-typedef union world_menu_panel_buffer {
-    menu_panel_frame_t panel_frames[2];
-    menu_sprite_page_t sprite_pages[2];
-} world_menu_panel_buffer_t;
-
 /* Result slots the shop menus share. */
 enum {
     WORLD_MENU_SELECTION_SHOP_QUANTITY = 3, /* chosen purchase/sale quantity */
@@ -1829,8 +1821,6 @@ extern s8
     g_world_menu_numeric_display_frame_offsets[]; /* twelve world_menu_line_layout_t records, walked by byte offset */
 
 extern u16 g_world_menu_hovered_stats_frame_count;
-extern RECT g_world_menu_sprite_page_texture_windows[5];
-extern image_load_parameters_t g_world_menu_sprite_page_image_params[30];
 extern menu_number_entry_t g_world_menu_hovered_unit_stats_setup[];
 extern menu_number_entry_t g_world_menu_right_unit_stats_setup[];
 extern menu_number_entry_t g_world_menu_attack_caster_stats_setup[];
@@ -1953,7 +1943,6 @@ extern u8 g_world_menu_list_text_columns;
 extern s8 g_world_menu_list_scroll_direction;
 extern RECT g_world_menu_window_rect;
 extern u8 g_world_grid_menu_selected_cell; /* selected cell */
-extern world_menu_panel_buffer_t g_world_menu_panel_buffer;
 extern u16 g_world_menu_alternate_number_clut;
 extern s16 g_world_menu_entry_ids[];
 extern s8 g_world_menu_music_slot; /* formation music slot */
@@ -2013,7 +2002,6 @@ void world_menu_labeled_number_entry_thread(void);
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon);
 void world_menu_build_idle_action_stub(s32 unused_menu_id);
-void world_menu_build_sprite_page(s32 page_index, const RECT* base_screen);
 
 void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 void world_screen_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
