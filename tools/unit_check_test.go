@@ -310,7 +310,7 @@ func TestUnitCompileMatchesSeparateCompilesAndResolvesInternalCalls(t *testing.T
 	}
 	// Reversing the bodies breaks the order validation first; growing the
 	// first body shifts the second and trips the address assertion.
-	grown := strings.Replace(string(merged), "return g_value;", "return g_value + g_value * 3;", 1)
+	grown := strings.Replace(string(merged), "return g_value;", "if (g_value > 7) { return g_value * 9 + 1; } return g_value;", 1)
 	if err := os.WriteFile(source, []byte(grown), 0o644); err != nil {
 		t.Fatal(err)
 	}
