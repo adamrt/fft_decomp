@@ -986,7 +986,6 @@ void map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 gr
 void map_set_darkness_color(s32 frame_duration, const CVECTOR* color);
 void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
 void map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
-void map_light_thread(void);
 void map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color);
 void map_transition_and_store_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
 void map_transition_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);

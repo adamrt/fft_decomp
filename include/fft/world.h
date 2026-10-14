@@ -74,12 +74,7 @@ extern u16 g_world_map_refresh_pending;
 extern RECT g_world_tile_info_image_location;
 extern image_load_parameters_t g_world_tile_info_image_params[2];
 extern s16 g_world_map_root_request_state; /* world_screen_request_state_e */
-extern VECTOR g_world_map_light_scale;     /* current light scale */
-extern MATRIX g_world_map_light_base_matrix;
-extern SVECTOR g_world_map_light_rotation; /* current light rotation */
-extern MATRIX g_world_map_light_color_matrix;
 s32 world_map_is_busy(void);
-void world_map_light_thread(void);
 
 /* locations */
 /* World-map location ids (EVENT_SCRIPT_VAR_LOCATION), named as the location

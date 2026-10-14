@@ -598,7 +598,7 @@ restart_event:
             world_script_waitspritemove_event_instruction(first_operand);
         } else if (opcode == EVENT_OPCODE_MAP_LIGHT) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, world_map_light_thread);
+            thread_start(operand_1, map_light_thread);
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
         }
         /* ---- Background, palettes, and terrain ---- */

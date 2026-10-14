@@ -334,7 +334,7 @@ functions:
   - {addr: 0x800fa290, size: 60, name: script_sprite_move_beta, hash: 757389eff0f977e2, source: src/shared/script/script_sprite_move_beta.c}
   - {addr: 0x800fa2cc, size: 192, name: world_script_waitspritemove_event_instruction, hash: 6691693858dee2bb}
   - {addr: 0x800fa38c, size: 32, name: script_copy_matrix, hash: 820dc3ed75e30848, source: src/shared/script/script_copy_matrix.c}
-  - {addr: 0x800fa3ac, size: 888, name: world_map_light_thread, hash: 2075c72a1d728138, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x800fa3ac, size: 888, name: map_light_thread, hash: 2075c72a1d728138, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/map/map_light_thread.c}
   - {addr: 0x800fa724, size: 60, name: camera_store_yaw_band, hash: ab7e1df661cddb5e, source: src/shared/camera/camera_store_yaw_band.c}
   - {addr: 0x800fa760, size: 396, name: camera_pick_nearest_unblocked_yaw, hash: 3f1d46a5c3271ec2, source: src/shared/camera/camera_pick_nearest_unblocked_yaw.c}
   - {addr: 0x800fa8ec, size: 224, name: script_apply_relative_camera, hash: 29e183114c9c011b, source: src/shared/script/script_apply_relative_camera.c}
@@ -2240,7 +2240,7 @@ data:
   - {addr: 0x801cd52c, name: g_world_input_primary_repeat}
   - {addr: 0x801cd530, name: g_world_input_secondary_repeat_latched}
   - {addr: 0x801cd534, name: g_world_gfx_sprite_count}
-  - {addr: 0x801cd538, name: g_world_map_light_scale}
+  - {addr: 0x801cd538, name: g_script_light_scale}
   - {addr: 0x801cd548, name: g_world_menu_music_slot}
   - {addr: 0x801cd54c, name: g_world_menu_scroll_offset}
   - {addr: 0x801cd550, name: g_world_event_map_command_80_args}
@@ -2317,12 +2317,12 @@ data:
   - {addr: 0x801cd874, name: g_world_event_pending_map_state}
   - {addr: 0x801cd87c, name: g_world_event_weather_request}
   - {addr: 0x801cd880, name: PSDGPU}
-  - {addr: 0x801cd884, name: g_world_map_light_base_matrix}
+  - {addr: 0x801cd884, name: g_script_light_base_direction_matrix}
   - {addr: 0x801cd8a4, name: g_text_section_pointers}
   - {addr: 0x801cd924, name: g_script_loaded_evtchr_buffer}
-  - {addr: 0x801cd928, name: g_world_map_light_rotation}
+  - {addr: 0x801cd928, name: g_script_light_angles}
   - {addr: 0x801cd930, name: g_world_gfx_sprite_capacity}
-  - {addr: 0x801cd934, name: g_world_map_light_color_matrix}
+  - {addr: 0x801cd934, name: g_script_light_base_color_matrix}
 
 imports:
   - {addr: 0x800222fc, name: memset}
@@ -2367,6 +2367,7 @@ overrides:
   - {function: gfx_enqueue_tile, name: g_bunit_gfx_tile_count, addr: 0x801cd514}
   - {function: gfx_load_evtchr_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: gfx_load_evtchr_thread, name: battle_thread_get_current_parameter_2, addr: 0x801000c4}
+  - {function: map_light_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: map_store_selected_tile_data, name: g_map_selected_tile_data, addr: 0x8013a310}
   - {function: map_wait_for_refresh, name: g_map_refresh_pending, addr: 0x80153350}
   - {function: menu_auto_battle_setting_thread, name: battle_menu_build_and_upload_window_frame_image, addr: 0x800ff9ac}

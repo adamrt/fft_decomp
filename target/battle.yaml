@@ -987,7 +987,7 @@ functions:
   - {addr: 0x80146f20, size: 60, name: script_sprite_move_beta, hash: c9868578c779e0f8, source: src/shared/script/script_sprite_move_beta.c}
   - {addr: 0x80146f5c, size: 192, name: script_waitspritemove_event_instruction, hash: 1432c177a10691bf}
   - {addr: 0x8014701c, size: 32, name: script_copy_matrix, hash: cd687ad6c14b8e80, source: src/shared/script/script_copy_matrix.c}
-  - {addr: 0x8014703c, size: 672, name: map_light_thread, hash: 21c64a562f0c9325}
+  - {addr: 0x8014703c, size: 672, name: map_light_thread, hash: 21c64a562f0c9325, source: src/shared/map/map_light_thread.c}
   - {addr: 0x801472dc, size: 60, name: camera_store_yaw_band, hash: 0478745f54a2dc9f, source: src/shared/camera/camera_store_yaw_band.c}
   - {addr: 0x80147318, size: 396, name: camera_pick_nearest_unblocked_yaw, hash: 57b2b9572ab8317c, source: src/shared/camera/camera_pick_nearest_unblocked_yaw.c}
   - {addr: 0x801474a4, size: 224, name: script_apply_relative_camera, hash: e7c8b47bcb236e25, source: src/shared/script/script_apply_relative_camera.c}

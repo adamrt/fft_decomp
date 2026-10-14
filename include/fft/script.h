@@ -1159,8 +1159,14 @@ void script_print_debug_message(void);
 
 /* map instructions */
 extern u16 g_script_map_darkness_durations[];
+/* Script-driven map light transform that map_light_thread interpolates. */
+extern SVECTOR g_script_light_angles;
+extern VECTOR g_script_light_scale;
+extern MATRIX g_script_light_base_direction_matrix;
+extern MATRIX g_script_light_base_color_matrix;
 
 void script_map_darkness(void);
 void script_set_specialized_map_destroyed(void);
+void map_light_thread(void);
 
 #endif

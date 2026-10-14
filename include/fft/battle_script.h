@@ -40,10 +40,6 @@ void script_warp_unit(const event_warp_unit_parameters_t* parameters);
 void script_earthquake_start(void);
 
 /* map and lighting */
-extern SVECTOR g_script_light_angles;
-extern MATRIX g_script_light_base_color_matrix;
-extern MATRIX g_script_light_base_direction_matrix;
-extern VECTOR g_script_light_scale;
 
 void script_dark_screen_thread(void);
 
