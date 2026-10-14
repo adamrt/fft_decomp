@@ -1,5 +1,6 @@
 #include "fft/battle_status.h"
 #include "fft/battle_unit.h"
+#include "fft/status.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 

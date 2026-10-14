@@ -1004,13 +1004,13 @@ functions:
   - {addr: 0x80147fac, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 92e26c055631d0fb, source: src/shared/script/script_unit_animation_rotate_event_instruction.c}
   - {addr: 0x80148084, size: 512, name: script_face_unit, hash: 390040f4c2819846, source: src/shared/script/script_face_unit.c}
   - {addr: 0x80148284, size: 516, name: script_rotate_unit, hash: 68d1d9ca7a73e6b2, source: src/shared/script/script_rotate_unit.c}
-  - {addr: 0x80148488, size: 180, name: status_queue_current_status_graphics, hash: 1f24e21ebfd693db, source: src/shared/unit/status_queue_current_status_graphics.c}
+  - {addr: 0x80148488, size: 180, name: status_queue_current_status_graphics, hash: 1f24e21ebfd693db, source: src/shared/status/status_queue_current_status_graphics.c}
   - {addr: 0x8014853c, size: 68, name: unit_clear_status_staging_data, hash: 46b30317dc3acbf3, source: src/shared/unit/unit_clear_status_staging_data.c}
   - {addr: 0x80148580, size: 808, name: unit_save_staged_status_data, hash: 78be53693ecbd23f, source: src/shared/unit/unit_save_staged_status_data.c}
   - {addr: 0x801488a8, size: 1072, name: unit_apply_staged_status_data, hash: 793904be68d4a23b, source: src/shared/unit/unit_apply_staged_status_data.c}
   - {addr: 0x80148cd8, size: 432, name: unit_update_staged_status_data, hash: 18a4ccc12e7e8be1, source: src/shared/unit/unit_update_staged_status_data.c}
   - {addr: 0x80148e88, size: 632, name: script_inflict_status_thread, hash: 61d3e9fb6f1a31dc, source: src/shared/script/script_inflict_status_thread.c}
-  - {addr: 0x80149100, size: 216, name: status_inflict_by_event_unit_id, hash: 5219ad791988f213, source: src/shared/unit/status_inflict_by_event_unit_id.c}
+  - {addr: 0x80149100, size: 216, name: status_inflict_by_event_unit_id, hash: 5219ad791988f213, source: src/shared/status/status_inflict_by_event_unit_id.c}
   - {addr: 0x801491d8, size: 448, name: script_change_stats, hash: 0f552e12e60b18e2, source: src/shared/script/script_change_stats.c}
   - {addr: 0x80149398, size: 248, name: script_unit_anim, hash: 8c66feb3346fed6e, source: src/shared/script/script_unit_anim.c}
   - {addr: 0x80149490, size: 156, name: script_march_units, hash: ab19a34ada7cae3e, source: src/shared/script/script_march_units.c}

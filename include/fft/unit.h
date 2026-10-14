@@ -709,8 +709,6 @@ void unit_clear_status_staging_data(void);
 s32 unit_save_staged_status_data(s32 battle_id);
 void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id);
 void unit_update_staged_status_data(u16 unit_id, u16 restore);
-void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
-void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 inflict, s32 less_strict_removal);
 
 /* unit */
 /* Character progression; excess EXP is discarded on a level-up. */

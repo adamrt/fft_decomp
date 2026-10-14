@@ -351,13 +351,13 @@ functions:
   - {addr: 0x800fb418, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 14cce9870ae4f8c8, source: src/shared/script/script_unit_animation_rotate_event_instruction.c}
   - {addr: 0x800fb4f0, size: 512, name: world_script_face_unit, hash: 1dda3ec86c0c41a3, source: src/shared/script/script_face_unit.c, source_symbol: script_face_unit}
   - {addr: 0x800fb6f0, size: 516, name: world_script_rotate_unit, hash: be57a905343502c5, source: src/shared/script/script_rotate_unit.c, source_symbol: script_rotate_unit}
-  - {addr: 0x800fb8f4, size: 180, name: status_queue_current_status_graphics, hash: 61b90cb85376108b, source: src/shared/unit/status_queue_current_status_graphics.c}
+  - {addr: 0x800fb8f4, size: 180, name: status_queue_current_status_graphics, hash: 61b90cb85376108b, source: src/shared/status/status_queue_current_status_graphics.c}
   - {addr: 0x800fb9a8, size: 68, name: unit_clear_status_staging_data, hash: 646a8fb825513b5d, source: src/shared/unit/unit_clear_status_staging_data.c}
   - {addr: 0x800fb9ec, size: 808, name: unit_save_staged_status_data, hash: 2d5ffba79c302f1b, source: src/shared/unit/unit_save_staged_status_data.c}
   - {addr: 0x800fbd14, size: 1072, name: unit_apply_staged_status_data, hash: 3be2d406abbb256c, source: src/shared/unit/unit_apply_staged_status_data.c}
   - {addr: 0x800fc144, size: 432, name: unit_update_staged_status_data, hash: 269b013af6ab131a, source: src/shared/unit/unit_update_staged_status_data.c}
   - {addr: 0x800fc2f4, size: 632, name: world_script_inflict_status_thread, hash: 2d2fdf0577757d84, source: src/shared/script/script_inflict_status_thread.c, source_symbol: script_inflict_status_thread}
-  - {addr: 0x800fc56c, size: 216, name: status_inflict_by_event_unit_id, hash: 3f69fc963f96b44e, source: src/shared/unit/status_inflict_by_event_unit_id.c}
+  - {addr: 0x800fc56c, size: 216, name: status_inflict_by_event_unit_id, hash: 3f69fc963f96b44e, source: src/shared/status/status_inflict_by_event_unit_id.c}
   - {addr: 0x800fc644, size: 448, name: script_change_stats, hash: c63a08b76749f8fe, source: src/shared/script/script_change_stats.c}
   - {addr: 0x800fc804, size: 248, name: world_script_unit_anim, hash: 2c433dd6a81d7c56, source: src/shared/script/script_unit_anim.c, source_symbol: script_unit_anim}
   - {addr: 0x800fc8fc, size: 156, name: script_march_units, hash: 90487a1ab3416a6e, source: src/shared/script/script_march_units.c}

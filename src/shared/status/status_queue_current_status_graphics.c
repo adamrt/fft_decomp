@@ -1,4 +1,5 @@
 #include "fft/battle_status.h"
+#include "fft/status.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 

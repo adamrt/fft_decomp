@@ -4,6 +4,7 @@
 /* BATTLE status infliction, upkeep and display state. Shared status IDs and
  * stored status sets are defined in unit.h. */
 
+#include "fft/status.h"
 #include "fft/unit.h"
 
 /* status indices */

@@ -5,6 +5,7 @@
 
 #include "fft/camera.h"
 #include "fft/main.h"
+#include "fft/status.h"
 #include "psx/libgs.h"
 
 /* camera */
