@@ -583,7 +583,7 @@ restart_event:
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
         } else if (opcode == EVENT_OPCODE_EARTHQUAKE_START) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, &world_script_earthquake_start);
+            thread_start(operand_1, &script_earthquake_start);
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
         } else if (opcode == EVENT_OPCODE_SPRITE_MOVE || opcode == EVENT_OPCODE_SPRITE_MOVE_BETA) {
             operand_1 = world_thread_resolve_id_after_current(THREAD_SLOT_FIRST_IDLE);

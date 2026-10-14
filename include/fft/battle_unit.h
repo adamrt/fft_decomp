@@ -1308,7 +1308,7 @@ void battle_unit_update_graphics_by_runtime_id(u32 runtime_id);
 void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height_change);
 s32 battle_unit_set_tile_position(s32 battle_id, u8 map_x, u8 map_y, u8 map_z, u8 facing);
 void battle_unit_shift_down_or_up(battle_unit_t* unit, s8 delta);
-void battle_unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
+void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* runtime);
 void battle_unit_dismount_rider_and_update_display(battle_unit_t* rider);
 SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id);

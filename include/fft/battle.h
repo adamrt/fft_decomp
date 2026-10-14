@@ -279,7 +279,7 @@ s32 battle_mul_div_s64(s32 a, s32 b, s32 c);
 extern u8 g_battle_job_level_gained_flag;
 extern game_options_t g_battle_saved_game_options;
 /* Unit coordinates shared by camera tile tests and dialogue positioning. */
-extern SVECTOR g_battle_scratch_coords;
+extern SVECTOR g_unit_scratch_coords;
 
 /* stubs */
 s32 battle_return_one(s32 unused_runtime_id);

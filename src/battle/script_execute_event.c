@@ -935,7 +935,7 @@ restart_script:
                 if (arrow_shooter_runtime_id != EVENT_RUNTIME_ID_NONE) {
                     arrow_shooter_battle_id = battle_unit_get_battle_id_by_runtime_id(arrow_shooter_runtime_id);
                     g_thread_call_target = (void (*)(void))effect_set_arrow_trajectory;
-                    thread_call_on_main_stack(arrow_shooter_battle_id, &g_battle_scratch_coords, operand_1);
+                    thread_call_on_main_stack(arrow_shooter_battle_id, &g_unit_scratch_coords, operand_1);
                 }
             }
         } else if (opcode == EVENT_OPCODE_MAP_FREEZE) {

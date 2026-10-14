@@ -31,16 +31,16 @@ s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b) {
     s32 dist;
 
     yaw = camera_wrap_yaw_angle() & 0xFFF;
-    battle_unit_copy_map_coords_by_runtime_id(runtime_id_a, &g_battle_scratch_coords);
+    unit_copy_map_coords_by_runtime_id(runtime_id_a, &g_unit_scratch_coords);
     /* The raw result is assigned before it is masked: combine then knows
      * nothing about the mask's high bits and the loop test keeps its sll 16. */
-    mask = map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_battle_scratch_coords.vx,
-        g_battle_scratch_coords.vz, g_battle_scratch_coords.vy);
+    mask = map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
+        g_unit_scratch_coords.vz, g_unit_scratch_coords.vy);
     mask &= 0xFF;
-    battle_unit_copy_map_coords_by_runtime_id(runtime_id_b, &g_battle_scratch_coords);
+    unit_copy_map_coords_by_runtime_id(runtime_id_b, &g_unit_scratch_coords);
     mask = (mask
-               | map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_battle_scratch_coords.vx,
-                   g_battle_scratch_coords.vz, g_battle_scratch_coords.vy))
+               | map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
+                   g_unit_scratch_coords.vz, g_unit_scratch_coords.vy))
         & 0xF;
     bit = 1;
     best = 0x8000;

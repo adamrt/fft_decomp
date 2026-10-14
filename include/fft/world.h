@@ -3,6 +3,7 @@
 
 /* WORLD/WORLD.BIN: world map, menus and event scripts. */
 
+#include "fft/camera.h"
 #include "fft/main.h"
 #include "psx/libgs.h"
 
@@ -10,13 +11,8 @@
 
 extern s32 g_world_camera_speed_curve;
 extern u16 g_world_camera_position_locked;
-extern u16 g_world_camera_shake_z_offset;
 extern s32 g_world_camera_yaw_unwrap_request;
-extern s16 g_world_camera_candidate_yaws[4];
 s32 world_camera_step_track(camera_track_t* track, s32 component);
-s16 world_camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b);
-void camera_fusion_thread(void);
-void camera_thread(void);
 
 /* dead unit */
 
@@ -279,7 +275,7 @@ void world_script_handle_tutorial_command_highlight_ring(void);
 void world_script_advance_tutorial_highlight_brightness(void);
 void world_script_blue_remove_all_enemy_units(void);
 void world_script_blue_remove_unit(s32 unit_id);
-void world_script_earthquake_start(void);
+void script_earthquake_start(void);
 void world_script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void world_script_focus(event_focus_parameters_t* parameters);
 /* A typed operand plus a local Camera cursor reorders the original argument saves. */
@@ -1568,7 +1564,7 @@ void world_unit_queue_current_status_graphics(s32 battle_unit_index, s32 enabled
 void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment);
 s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id);
 s32 world_unit_check_facing_relative_to_camera(s32 unit_id);
-s32 world_unit_get_map_coords_by_runtime_id(s32 runtime_id, SVECTOR* out);
+void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 world_formation_get_unit_palette_index(s32 roster_slot);
 s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
 
@@ -1659,7 +1655,7 @@ extern u8 g_world_text_name_entry_keys_data[];
 extern menu_palette_slot_t g_world_numeric_display_palettes[];
 extern glyph_blit_t g_world_text_draw_origin;
 extern SVECTOR g_world_text_partner_screen_coords;
-extern SVECTOR g_world_text_speaker_screen_coords;
+extern SVECTOR g_unit_scratch_coords;
 extern menu_panel_record_t g_world_numeric_display_panel_records[2];
 extern s32 g_world_text_substitution_values_backup[32]; /* 32-bit substitution values saved around the text calls */
 extern menu_list_page_t g_world_text_list_pages[2];

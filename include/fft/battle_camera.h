@@ -5,6 +5,7 @@
  * separate camera state and entry points in world.h. */
 
 #include "fft/battle_unit.h"
+#include "fft/camera.h"
 #include "fft/gfx.h"
 #include "fft/script.h"
 
@@ -18,7 +19,6 @@ extern MATRIX g_camera_matrix;
 /* Base of the large render-state records; low offsets overlap camera/GPU fields.
  * .vx is the camera pitch and .vy its yaw. */
 extern SVECTOR g_camera_render_state;
-extern u16 g_camera_shake_z_offset;
 
 void camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination);
@@ -27,7 +27,6 @@ void camera_init_defaults(void);
 void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
 void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation);
 void camera_update_matrices(MATRIX* camera_matrix, SVECTOR* rotation, VECTOR* screen_offset, VECTOR* camera_zoom);
-void camera_wait_until_idle(void);
 
 /* input */
 /* camera_get_input_direction sources: which button state it reads. */
@@ -106,7 +105,6 @@ typedef enum camera_rotation_action {
 } camera_rotation_action_e;
 
 extern s32 g_battle_previous_camera_yaw;
-extern s16 g_camera_diagonal_yaws[4];
 /* Maps a camera quadrant index to its map-tile camera-block direction. */
 extern u8 g_camera_quadrant_block_directions[4];
 extern camera_rotation_action_e g_camera_rotation_action;
@@ -121,8 +119,6 @@ extern s32 g_camera_yaw_target;
 void camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out);
 void camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset);
 SVECTOR* camera_get_rotation(void);
-void camera_normalize_yaw_angle(void);
-s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b);
 void camera_request_rotation(s32 angle);
 void camera_restore_rotation(void);
 void camera_rotate_left(s32 target_angle);
@@ -132,10 +128,8 @@ void camera_save_rotation(void);
 void camera_set_rotation(const SVECTOR* rotation);
 void camera_start_rotation_left(s32 target_angle);
 void camera_start_rotation_right(s32 target_angle);
-void camera_store_yaw_band(s32 value);
 void camera_update_rotation(void);
 void camera_update_rotation_animation(void);
-s32 camera_wrap_yaw_angle(void);
 
 /* tilt */
 /* g_camera_tilt_action and g_camera_zoom_action: the move in progress towards
@@ -156,7 +150,6 @@ enum {
 extern camera_step_action_e g_camera_tilt_action;
 extern s32 g_camera_tilt_increment;
 
-void camera_init_tilt_and_zoom(void);
 void camera_toggle_tilt(void);
 void camera_update_tilt(void);
 
@@ -174,7 +167,6 @@ extern u16 g_camera_zoom_countdown;
 extern VECTOR g_camera_zoom_delta;
 extern s32 g_camera_zoom_increment;
 
-void camera_clear_zoom_variable_low_bit(void);
 VECTOR* camera_get_zoom(void);
 void camera_restore_zoom(void);
 void camera_save_zoom(void);
@@ -195,11 +187,8 @@ extern s32 g_camera_speed_curve;
 void camera_execute_angle_command(s32 command, s32 target, s32 duration, const SVECTOR* angles);
 void camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset);
 void camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VECTOR* zoom);
-void camera_fusion_thread(void);
 void camera_load_state_from_script_variables(void);
-s32 camera_step_track(camera_track_t* track, s32 component);
 void camera_store_state_to_script_variables(void);
-void camera_thread(void);
 
 /* effect tracks */
 void camera_advance_effect_tracks(s16 frame);

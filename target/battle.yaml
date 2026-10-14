@@ -758,7 +758,7 @@ functions:
   - {addr: 0x80133048, size: 64, name: battle_unit_project_to_screen, hash: f71d84cad0b16447, source: src/shared/unit/battle_unit_project_to_screen.c}
   - {addr: 0x80133088, size: 92, name: battle_unit_copy_world_coords, hash: 804df09b5303cc41, source: src/shared/unit/battle_unit_copy_world_coords.c}
   - {addr: 0x801330e4, size: 76, name: battle_unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/shared/unit/battle_unit_copy_world_coords_to_vector.c}
-  - {addr: 0x80133130, size: 32, name: battle_unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb}
+  - {addr: 0x80133130, size: 32, name: unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb, source: src/shared/unit/unit_copy_map_coords_by_runtime_id.c}
   - {addr: 0x80133150, size: 8, name: script_report_missing_unit_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_report_missing_unit_stub.c}
   - {addr: 0x80133158, size: 828, name: script_resolve_runtime_id, hash: 0dc0e1d2249ad0d7, source: src/shared/script/script_resolve_runtime_id.c}
   - {addr: 0x80133494, size: 16, name: battle_return_argument_80133494, hash: ce4ad88e7603b293}
@@ -980,7 +980,7 @@ functions:
   - {addr: 0x801460e4, size: 44, name: camera_clear_zoom_variable_low_bit, hash: 1c850d2a2326188a, source: src/shared/camera/camera_clear_zoom_variable_low_bit.c}
   - {addr: 0x80146110, size: 1444, name: camera_thread, hash: de81056b9403d9c1, source: src/shared/camera/camera_thread.c}
   - {addr: 0x801466b4, size: 120, name: script_map_darkness, hash: 220b0a8f4c814539, source: src/shared/script/script_map_darkness.c}
-  - {addr: 0x8014672c, size: 176, name: script_earthquake_start, hash: 19be186d363036b4}
+  - {addr: 0x8014672c, size: 176, name: script_earthquake_start, hash: 19be186d363036b4, source: src/shared/script/script_earthquake_start.c}
   - {addr: 0x801467dc, size: 356, name: script_color_screen_thread, hash: 8de8d96c93e6ae8f, source: src/shared/script/script_color_screen_thread.c}
   - {addr: 0x80146940, size: 1444, name: script_run_sprite_move, hash: 558aa0057a55a6d2}
   - {addr: 0x80146ee4, size: 60, name: script_sprite_move, hash: 7decfeacb2be172a, source: src/shared/script/script_sprite_move.c}
@@ -989,7 +989,7 @@ functions:
   - {addr: 0x8014701c, size: 32, name: script_copy_matrix, hash: cd687ad6c14b8e80, source: src/shared/script/script_copy_matrix.c}
   - {addr: 0x8014703c, size: 672, name: map_light_thread, hash: 21c64a562f0c9325}
   - {addr: 0x801472dc, size: 60, name: camera_store_yaw_band, hash: 0478745f54a2dc9f, source: src/shared/camera/camera_store_yaw_band.c}
-  - {addr: 0x80147318, size: 396, name: camera_pick_nearest_unblocked_yaw, hash: 57b2b9572ab8317c}
+  - {addr: 0x80147318, size: 396, name: camera_pick_nearest_unblocked_yaw, hash: 57b2b9572ab8317c, source: src/shared/camera/camera_pick_nearest_unblocked_yaw.c}
   - {addr: 0x801474a4, size: 224, name: script_apply_relative_camera, hash: e7c8b47bcb236e25, source: src/shared/script/script_apply_relative_camera.c}
   - {addr: 0x80147584, size: 508, name: script_focus, hash: 3724d62c11a28f48, source: src/shared/script/script_focus.c}
   - {addr: 0x80147780, size: 408, name: script_focus_speed, hash: e8d9be5291edecad, source: src/shared/script/script_focus_speed.c}
@@ -2556,7 +2556,7 @@ data:
   - {addr: 0x8016e3f0, name: g_camera_script_vector}
   - {addr: 0x8016e400, name: g_camera_published_coords_ptr}
   - {addr: 0x8016e404, name: g_camera_script_rotation}
-  - {addr: 0x8016e40c, name: g_battle_scratch_coords}
+  - {addr: 0x8016e40c, name: g_unit_scratch_coords}
   - {addr: 0x8016e414, name: g_camera_published_rotation_ptr}
   - {addr: 0x8016e418, name: g_battle_event_background_colors}
   - {addr: 0x8016e420, name: g_script_warp_coords}

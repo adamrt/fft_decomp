@@ -104,7 +104,7 @@ functions:
   - {addr: 0x800e7700, size: 64, name: battle_unit_project_to_screen, hash: f71d84cad0b16447, source: src/shared/unit/battle_unit_project_to_screen.c}
   - {addr: 0x800e7740, size: 92, name: battle_unit_copy_world_coords, hash: 804df09b5303cc41, source: src/shared/unit/battle_unit_copy_world_coords.c}
   - {addr: 0x800e779c, size: 76, name: battle_unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/shared/unit/battle_unit_copy_world_coords_to_vector.c}
-  - {addr: 0x800e77e8, size: 32, name: world_unit_get_map_coords_by_runtime_id, hash: b293d475560aeacb}
+  - {addr: 0x800e77e8, size: 32, name: unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb, source: src/shared/unit/unit_copy_map_coords_by_runtime_id.c}
   - {addr: 0x800e7808, size: 8, name: script_report_missing_unit_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_report_missing_unit_stub.c}
   - {addr: 0x800e7810, size: 828, name: script_resolve_runtime_id, hash: ebe8f110139eeadb, source: src/shared/script/script_resolve_runtime_id.c}
   - {addr: 0x800e7b4c, size: 8, name: world_return_parameter_1, hash: cc2f57dc1c5c5ee3}
@@ -327,7 +327,7 @@ functions:
   - {addr: 0x800f940c, size: 44, name: camera_clear_zoom_variable_low_bit, hash: ce3ca9e1032c0236, source: src/shared/camera/camera_clear_zoom_variable_low_bit.c}
   - {addr: 0x800f9438, size: 1444, name: camera_thread, hash: ba7be01d018fa8b3, source: src/shared/camera/camera_thread.c}
   - {addr: 0x800f99dc, size: 120, name: script_map_darkness, hash: 0d797a52a22d5438, source: src/shared/script/script_map_darkness.c}
-  - {addr: 0x800f9a54, size: 176, name: world_script_earthquake_start, hash: 88082e85496cfa40}
+  - {addr: 0x800f9a54, size: 176, name: script_earthquake_start, hash: 88082e85496cfa40, source: src/shared/script/script_earthquake_start.c}
   - {addr: 0x800f9b04, size: 392, name: script_color_screen_thread, hash: 721b29c5952d0273, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/script/script_color_screen_thread.c}
   - {addr: 0x800f9c8c, size: 1480, name: script_run_sprite_move, hash: 74f215bd48a3cde4, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x800fa254, size: 60, name: script_sprite_move, hash: 4df4be2d389bc444, source: src/shared/script/script_sprite_move.c}
@@ -336,7 +336,7 @@ functions:
   - {addr: 0x800fa38c, size: 32, name: script_copy_matrix, hash: 820dc3ed75e30848, source: src/shared/script/script_copy_matrix.c}
   - {addr: 0x800fa3ac, size: 888, name: world_map_light_thread, hash: 2075c72a1d728138, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x800fa724, size: 60, name: camera_store_yaw_band, hash: ab7e1df661cddb5e, source: src/shared/camera/camera_store_yaw_band.c}
-  - {addr: 0x800fa760, size: 396, name: world_camera_pick_nearest_unblocked_yaw, hash: 3f1d46a5c3271ec2}
+  - {addr: 0x800fa760, size: 396, name: camera_pick_nearest_unblocked_yaw, hash: 3f1d46a5c3271ec2, source: src/shared/camera/camera_pick_nearest_unblocked_yaw.c}
   - {addr: 0x800fa8ec, size: 224, name: script_apply_relative_camera, hash: 29e183114c9c011b, source: src/shared/script/script_apply_relative_camera.c}
   - {addr: 0x800fa9cc, size: 508, name: world_script_focus, hash: ccd62b29dabd8f4a, source: src/shared/script/script_focus.c, source_symbol: script_focus}
   - {addr: 0x800fabc8, size: 444, name: world_script_focus_speed, hash: 852c4a06585aac3d, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/script/script_focus_speed.c, source_symbol: script_focus_speed}
@@ -1107,7 +1107,7 @@ data:
   - {addr: 0x801532c6, name: g_world_3d_object_use_request}
   - {addr: 0x801532c8, name: g_world_field_object_use_request}
   - {addr: 0x801532cc, name: g_script_unit_slots}
-  - {addr: 0x801532d4, name: g_world_camera_shake_z_offset}
+  - {addr: 0x801532d4, name: g_camera_shake_z_offset}
   - {addr: 0x801532d6, name: g_gfx_draw_primitives_immediately}
   - {addr: 0x801532d8, name: g_script_debug_paused}
   - {addr: 0x801532da, name: g_menu_input_mode}
@@ -1254,7 +1254,7 @@ data:
   - {addr: 0x80156b88, name: g_world_camera_yaw_unwrap_request}
   - {addr: 0x80156b8c, name: g_world_script_loaded_event_id}
   - {addr: 0x80156b90, name: g_script_map_darkness_durations}
-  - {addr: 0x80156ba8, name: g_world_camera_candidate_yaws}
+  - {addr: 0x80156ba8, name: g_camera_diagonal_yaws}
   - {addr: 0x80156bb0, name: g_world_unit_face_slot_order}
   - {addr: 0x80156be0, name: g_world_rotation_speed_frames}
   - {addr: 0x80156be8, name: g_unit_status_staging_masks}
@@ -1878,7 +1878,7 @@ data:
   - {addr: 0x8019ab44, name: g_text_typewriter_previous_images}
   - {addr: 0x8019ac40, name: g_text_typewriter_column_scratch}
   - {addr: 0x8019ac68, name: g_world_text_partner_screen_coords}
-  - {addr: 0x8019ac70, name: g_world_text_speaker_screen_coords}
+  - {addr: 0x8019ac70, name: g_unit_scratch_coords}
   - {addr: 0x8019ac7c, name: g_world_event_background_colors}
   - {addr: 0x8019ac84, name: g_script_warp_coords}
   - {addr: 0x8019ac8c, name: g_menu_anything_ability_id}
@@ -2665,6 +2665,7 @@ overrides:
   - {function: script_block_start_thread, name: script_waitspritemove_event_instruction, addr: 0x800fa2cc}
   - {function: script_block_start_thread, name: script_warp_unit, addr: 0x800fb2cc}
   - {function: script_color_screen_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
+  - {function: script_earthquake_start, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: script_face_tile, name: g_battle_rotation_speed_frames, addr: 0x80156be0}
   - {function: script_face_tile, name: g_script_unit_face_slot_order, addr: 0x80156bb0}
   - {function: script_interpolate_range_fixed12, name: battle_mul_div_s64, addr: 0x80100188}
@@ -2706,7 +2707,6 @@ overrides:
   - {function: world_screen_menu_thin_window_frame_thread, name: world_gfx_set_image_blit_source_rect, addr: 0x8010a480}
   - {function: world_script_face_unit, name: g_battle_rotation_speed_frames, addr: 0x80156be0}
   - {function: world_script_face_unit, name: g_script_unit_face_slot_order, addr: 0x80156bb0}
-  - {function: world_script_focus, name: camera_pick_nearest_unblocked_yaw, addr: 0x800fa760}
   - {function: world_script_inflict_status_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: world_script_inflict_status_thread, name: battle_unit_get_battle_id_by_event_unit_id, addr: 0x800e1e40}
   - {function: world_script_inflict_status_thread, name: status_inflict_by_event_unit_id, addr: 0x800fc56c}
