@@ -164,6 +164,16 @@ func TestUnitLinkerBindingsAndScript(t *testing.T) {
 	if _, err := unitLinkerBindings(resolver, conflicting, used); err == nil || !strings.Contains(err.Error(), "g_other") {
 		t.Fatalf("conflicting overrides: %v", err)
 	}
+	// An aliased member whose definition name resolves elsewhere is still
+	// defined by the object; only overrides may conflict.
+	aliased := &unitInstance{module: unit.module, members: []*functionSpec{{Addr: 0x80067000, Size: 32, Name: "unit_x", SourceSymbol: "unit_b"}}}
+	aliasBindings, err := unitLinkerBindings(resolver, aliased, map[string]struct{}{"unit_b": {}})
+	if err != nil {
+		t.Fatalf("aliased member: %v", err)
+	}
+	if _, bound := aliasBindings["unit_b"]; bound {
+		t.Fatal("aliased member definition must not be PROVIDEd")
+	}
 	rodataUnit := &unitInstance{module: unit.module, addr: 0x80067070, members: []*functionSpec{unit.module.function("unit_d")},
 		rodata: []rodataSpec{{Addr: 0x80067200, Size: 16}}}
 	if script := unitLinkerScript(rodataUnit, nil, false); !strings.Contains(script, ".rodata 0x80067200 : SUBALIGN(4)") {

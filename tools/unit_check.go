@@ -237,13 +237,14 @@ func unitLinkerBindings(resolver symbolResolver, unit *unitInstance, used map[st
 		}
 	}
 	for _, f := range unit.members {
+		// Module resolution of a member's own symbol can reach another
+		// module (an aliased entry is not named after its definition), but
+		// the object defines it; only an override can disagree.
 		symbol := f.sourceSymbol()
-		if addr, ok := bindings[symbol]; ok {
-			if addr != f.Addr {
-				return nil, fmt.Errorf("%s binds unit member %s to 0x%08x, but it is at 0x%08x", owner[symbol], symbol, addr, f.Addr)
-			}
-			delete(bindings, symbol)
+		if addr, ok := bindings[symbol]; ok && owner[symbol] != "" && addr != f.Addr {
+			return nil, fmt.Errorf("%s binds unit member %s to 0x%08x, but it is at 0x%08x", owner[symbol], symbol, addr, f.Addr)
 		}
+		delete(bindings, symbol)
 	}
 	if unit.profile.smallDataLimit != 0 {
 		bindings["_gp"] = unit.profile.globalPointer
