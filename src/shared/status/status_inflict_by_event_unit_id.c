@@ -17,7 +17,7 @@ void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s
     s32 byte;
     s32 bit;
 
-    idx = battle_unit_get_battle_id_by_event_unit_id(event_unit_id);
+    idx = unit_get_battle_id_by_event_unit_id(event_unit_id);
     if (idx == 0x7D0) {
         return;
     }

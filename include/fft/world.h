@@ -1453,12 +1453,10 @@ void resolve_unit_status_changes(void);
 s32 unit_has_adjacent_monster_skill_support(struct unit_stats* unit);
 void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment);
 s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id);
-s32 world_unit_check_facing_relative_to_camera(s32 unit_id);
 void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 world_formation_get_unit_palette_index(s32 roster_slot);
 s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
 
-s32 world_unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void world_unit_update_monster_breeding(s32 unused);
 
 /* text */

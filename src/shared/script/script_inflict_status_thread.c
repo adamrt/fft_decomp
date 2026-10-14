@@ -22,7 +22,7 @@ void script_inflict_status_thread(void) {
     unit_id = script_read_s16(parameters->unit_id_le);
     mode = parameters->mode;
     wait_frames = script_read_s16(parameters->wait_frames_le);
-    battle_unit_index = battle_unit_get_battle_id_by_event_unit_id(unit_id);
+    battle_unit_index = unit_get_battle_id_by_event_unit_id(unit_id);
     runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id == EVENT_RUNTIME_ID_NONE) {
         thread_exit_current();

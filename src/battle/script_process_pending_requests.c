@@ -38,7 +38,7 @@ void script_process_pending_requests(void) {
     s32 pending = 0;
     effect_start_target_data_t effect_target;
 
-    battle_unit_update_facing_and_pending_animations();
+    unit_update_facing_and_pending_animations();
     jump_out_map_id = g_battle_event_pending_map_jump_out_id;
     if (jump_out_map_id != -1) {
         battle_state_start_map_jump_out(jump_out_map_id, 0x10);

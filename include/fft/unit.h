@@ -1190,7 +1190,7 @@ typedef enum unit_rotate_mode {
 } unit_rotate_mode_e;
 
 /* Per-unit facing/animation state written by the event interpreters and
- * advanced every frame by *_unit_update_facing_and_pending_animations.
+ * advanced every frame by unit_update_facing_and_pending_animations.
  * Seven bytes per unit, 21 units. */
 typedef struct unit_animation_state {
     u8 target_facing;
@@ -1204,15 +1204,18 @@ typedef struct unit_animation_state {
 } unit_animation_state_t;
 typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) == 7 ? 1 : -1];
 
-/* event coordinates */
-extern SVECTOR g_unit_runtime_coords;
-
-SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
-void unit_set_animation(s32 runtime_id, u32 animation);
-
-/* animation state */
 extern u8 g_unit_rotation_speed_frames[];
 /* Unit graphics load result: 0 done, 1 pending. */
 extern u16 g_unit_graphics_load_pending;
+
+void unit_update_facing_and_pending_animations(void);
+
+/* event coordinates */
+extern SVECTOR g_unit_runtime_coords;
+
+s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
+SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
+s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
+void unit_set_animation(s32 runtime_id, u32 animation);
 
 #endif

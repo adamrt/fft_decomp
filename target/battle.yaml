@@ -698,7 +698,7 @@ functions:
   - {addr: 0x8012dbdc, size: 84, name: gfx_ramp_screen_overlay_intensity_to_zero, hash: dbd203faf8f613fe, source: src/shared/gfx/gfx_ramp_screen_overlay_intensity_to_zero.c}
   - {addr: 0x8012dc30, size: 84, name: gfx_ramp_screen_overlay_intensity_to_max, hash: 6d0834a9f0186591, source: src/shared/gfx/gfx_ramp_screen_overlay_intensity_to_max.c}
   - {addr: 0x8012dc84, size: 40, name: script_is_tutorial_event_slot, hash: 6776ea3a44ebbd82}
-  - {addr: 0x8012dcac, size: 76, name: battle_unit_get_battle_id_by_event_unit_id, hash: 521545fd32444875}
+  - {addr: 0x8012dcac, size: 76, name: unit_get_battle_id_by_event_unit_id, hash: 521545fd32444875, source: src/shared/unit/unit_get_battle_id_by_event_unit_id.c}
   - {addr: 0x8012dcf8, size: 20, name: menu_set_modal_open, hash: 8dbb087dee3cfcef, source: src/shared/menu/menu_set_modal_open.c}
   - {addr: 0x8012dd0c, size: 16, name: menu_clear_modal_open, hash: 998fd7a33c6ac225, source: src/shared/menu/menu_clear_modal_open.c}
   - {addr: 0x8012dd1c, size: 20, name: sound_queue_sfx_confirm, hash: 79d48c635cbe6203, source: src/shared/sound/sound_queue_sfx_confirm.c}
@@ -911,7 +911,7 @@ functions:
   - {addr: 0x8013f080, size: 64, name: menu_reset_subsystems, hash: b7eb4cd5ef76a5f9, source: src/shared/menu/menu_reset_subsystems.c}
   - {addr: 0x8013f0c0, size: 168, name: map_reset_script_light_transform, hash: da3f44e4a4a58abd}
   - {addr: 0x8013f168, size: 164, name: unit_reset_animation_states, hash: cdeb9e30a6664d49, source: src/shared/unit/unit_reset_animation_states.c}
-  - {addr: 0x8013f20c, size: 496, name: battle_unit_update_facing_and_pending_animations, hash: eec2ddc83dc662d7}
+  - {addr: 0x8013f20c, size: 496, name: unit_update_facing_and_pending_animations, hash: eec2ddc83dc662d7, source: src/shared/unit/unit_update_facing_and_pending_animations.c}
   - {addr: 0x8013f3fc, size: 164, name: script_start_current_event_thread, hash: 4d813122369868cd, source: src/shared/script/script_start_current_event_thread.c}
   - {addr: 0x8013f4a0, size: 8, name: battle_noop_8013f4a0, hash: 6d64edf91449c1b1}
   - {addr: 0x8013f4a8, size: 80, name: script_reset_event_state, hash: cc154e81b79d8046, source: src/shared/script/script_reset_event_state.c}
@@ -1017,7 +1017,7 @@ functions:
   - {addr: 0x8014952c, size: 180, name: script_set_units_movement_effect_suppression, hash: ad56c0ea33915d4c, source: src/shared/script/script_set_units_movement_effect_suppression.c}
   - {addr: 0x801495e0, size: 172, name: script_color_unit_event_instruction, hash: e5653129316a4e33, source: src/shared/script/script_color_unit_event_instruction.c}
   - {addr: 0x8014968c, size: 168, name: script_set_units_palette_update_suppression, hash: 406b68bd9d969db0, source: src/shared/script/script_set_units_palette_update_suppression.c}
-  - {addr: 0x80149734, size: 88, name: battle_unit_check_facing_relative_to_camera, hash: f7c874232339e58e}
+  - {addr: 0x80149734, size: 88, name: unit_check_facing_relative_to_camera, hash: f7c874232339e58e, source: src/shared/unit/unit_check_facing_relative_to_camera.c}
   - {addr: 0x8014978c, size: 368, name: script_face_tile, hash: 349c3977cc8bc891, source: src/shared/script/script_face_tile.c}
   - {addr: 0x801498fc, size: 176, name: script_waitrotateunit_and_waitrotateall_event_instruction, hash: 3ddb2ca1554cefe8, source: src/shared/script/script_waitrotateunit_and_waitrotateall_event_instruction.c}
   - {addr: 0x801499ac, size: 168, name: sound_run_background_sfx_thread, hash: 5840248306ebcf8a, source: src/shared/sound/sound_run_background_sfx_thread.c}

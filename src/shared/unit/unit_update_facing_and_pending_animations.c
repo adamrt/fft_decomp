@@ -2,10 +2,13 @@
 #include "fft/battle_unit.h"
 #include "psx/types.h"
 
-/* Battle twin of world_unit_update_facing_and_pending_animations: per frame,
- * apply pending animations to units that stopped moving and step each rotating
- * unit one facing toward its target. */
-void battle_unit_update_facing_and_pending_animations(void) {
+/* Per frame, apply each unit's pending animation on the frame it stops moving
+ * and step each rotating unit one facing (of 16) toward its target, after its
+ * delay and once every frames_per_step frames. The shortest mode turns
+ * whichever way is nearer; the other two modes always increment or decrement.
+ * Nothing calls it in WORLD, where its caller script_process_pending_requests
+ * is empty. */
+void unit_update_facing_and_pending_animations(void) {
     s32 i;
     s32 facing;
     s32 current;

@@ -1164,7 +1164,6 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
 s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limit);
 void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode);
 s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id);
-s32 battle_unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index);
 s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* tile, s32 facing);
 s32 battle_unit_poll_and_load_entd_units(void);
@@ -1255,7 +1254,6 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
 s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id);
 void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id);
 void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit);
-s32 battle_unit_check_facing_relative_to_camera(s32 event_unit_id);
 void battle_unit_clear_horizontal_flip_flag(u32 runtime_id);
 void battle_unit_clear_movement_effect_suppression(u32 runtime_id);
 void battle_unit_clear_palette_update_suppression(u32 runtime_id);
@@ -1275,7 +1273,6 @@ void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id);
 void battle_unit_store_animation_facing_movement_data(s32 animation, s32 facing, battle_unit_t* unit);
 void battle_unit_update_and_animate_units_three_times(void);
 void battle_unit_update_attack_result_animation(battle_unit_t* unit);
-void battle_unit_update_facing_and_pending_animations(void);
 void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, battle_unit_t* target);
 
 /* world coordinates */
