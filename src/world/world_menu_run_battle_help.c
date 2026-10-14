@@ -44,7 +44,7 @@ void world_menu_run_battle_help(void) {
     s32 missing_value;
 
     u_mid = 0xB8;
-    if (g_world_menu_transition_active != 0) {
+    if (g_menu_modal_open != 0) {
         thread_exit_current();
     }
     mem_copy_bytes_nonempty(

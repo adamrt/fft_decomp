@@ -62,7 +62,7 @@ void world_menu_validate_skill_selection_thread(void) {
         if (g_main_game_options.fields.navigation_messages == GAME_OPTION_OFF) {
             sound_queue_sfx_confirm_unless_restoring();
         } else {
-            g_world_menu_transition_active = 1;
+            g_menu_modal_open = 1;
             g_world_menu_selected_option = 0;
             g_menu_thread_menu_data[BATTLE_MENU_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
             thread_start(g_thread_current_id - 1, world_menu_icon_linked_entry_thread);
@@ -70,7 +70,7 @@ void world_menu_validate_skill_selection_thread(void) {
                 (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
             sound_queue_sfx_invalid();
             thread_wait_until_inactive(g_thread_current_id - 1);
-            g_world_menu_transition_active = 0;
+            g_menu_modal_open = 0;
         }
         if ((message != 0x800A && message != 0x8013) || g_world_menu_selected_option == -1) {
             g_world_menu_result = -1;

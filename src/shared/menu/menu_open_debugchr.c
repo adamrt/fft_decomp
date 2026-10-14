@@ -9,7 +9,7 @@
 /* Close the panels, run the requested debug session, then restore menu state. */
 void menu_open_debugchr(void) {
     battle_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
-    battle_menu_set_modal_open();
+    menu_set_modal_open();
     g_menu_overlay_state = 1;
     menu_request_open_companion_executable(COMPANION_OVERLAY_DEBUGCHR);
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
@@ -21,6 +21,6 @@ void menu_open_debugchr(void) {
     g_menu_overlay_state = 0;
     g_sound_suppressed = 0;
     g_script_event_input = 0;
-    battle_menu_clear_modal_open();
+    menu_clear_modal_open();
     thread_exit_current();
 }

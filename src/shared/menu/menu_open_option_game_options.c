@@ -4,7 +4,7 @@
 
 /* Thread entry of menu entry 0x0b: load OPTION.OUT and open the game options. */
 void menu_open_option_game_options(void) {
-    battle_menu_set_modal_open();
+    menu_set_modal_open();
     menu_request_open_companion_executable(COMPANION_OVERLAY_OPTION);
     option_entrypoint(OPTION_MENU_GAME_OPTIONS);
 }

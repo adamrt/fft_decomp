@@ -3,7 +3,7 @@
 
 /* Close the AT list's worker set and restore the parent option threads. */
 void option_menu_at_list_select_unit_thread(void) {
-    g_battle_menu_modal_open = 1;
+    g_menu_modal_open = 1;
     g_menu_overlay_state = 2;
 
     thread_suspend(g_thread_current_id + 1);
@@ -31,7 +31,7 @@ void option_menu_at_list_select_unit_thread(void) {
     thread_resume(g_thread_current_id + 3);
     thread_resume(g_thread_current_id + 4);
 
-    g_battle_menu_modal_open = 0;
+    g_menu_modal_open = 0;
     g_menu_overlay_state = 0;
     thread_exit_current();
 }

@@ -37,11 +37,11 @@ void menu_run_unit_editor_panel_thread(void) {
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     battle_menu_record_selection_for_selected_unit();
-    battle_menu_set_modal_open();
+    menu_set_modal_open();
     do {
         thread_yield();
     } while (g_battle_menu_hovered_stats_frame_count < 2);
-    battle_menu_clear_modal_open();
+    menu_clear_modal_open();
 
     frame_record = g_battle_menu_unit_editor_frames;
     records = frame_record;

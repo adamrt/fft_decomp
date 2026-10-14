@@ -21,7 +21,7 @@ void battle_menu_start_building_thread(void) {
     if (g_battle_event_input_suppression_frames != 0) {
         return;
     }
-    if (g_battle_menu_modal_open != 0) {
+    if (g_menu_modal_open != 0) {
         return;
     }
     if (camera_is_active() != 0) {

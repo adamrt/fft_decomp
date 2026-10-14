@@ -24,6 +24,13 @@ s32 menu_init_attack_resources_and_threads(void);
 void menu_reset_subsystems(void);
 s32 menu_poll_small_load(void);
 
+/* modal state */
+/* Nonzero while a modal selection, panel or companion overlay owns the input. */
+extern u16 g_menu_modal_open;
+
+void menu_set_modal_open(void);
+void menu_clear_modal_open(void);
+
 /* ability */
 /* Provisional ability-list work buffer at *g_ai_workspace_ptr (82 rows each).
  * WORLD twin of the BATTLE ability list. */

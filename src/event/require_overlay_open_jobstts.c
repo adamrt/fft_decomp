@@ -40,6 +40,6 @@ void require_overlay_open_jobstts(void) {
     *g_menu_input_controller = 0;
     main_heap_free(allocation);
     thread_wait_frames(2);
-    g_battle_menu_modal_open = 0;
+    g_menu_modal_open = 0;
     thread_exit_current();
 }

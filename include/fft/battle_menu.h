@@ -12,13 +12,11 @@ extern u16 g_battle_menu_at_list_selection_finished;
 extern s32 g_battle_menu_help_open;
 extern s32 g_battle_menu_help_opening;
 extern battle_menu_id_record_t g_battle_menu_id_records[31];
-extern u16 g_battle_menu_modal_open;
 extern u8 g_battle_menu_restore_depth;
 extern u8 g_battle_menu_restore_unit_id;
 extern u16 g_battle_menu_transition_state;
 extern u16 g_battle_saved_animation_speed; /* animation speed saved while an event thread forces speed 2 */
 
-void battle_menu_clear_modal_open(void);
 void battle_menu_clear_status_menu_state(void);
 void battle_menu_finish_at_list_selection(void);
 void battle_menu_init_stub(void);
@@ -27,7 +25,6 @@ void battle_menu_init_subsystems(void);
 void battle_menu_reset_subsystems(void);
 void battle_menu_reset_unit_record(s32 record_index);
 void battle_menu_reset_unit_records(void);
-void battle_menu_set_modal_open(void);
 s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* input and selection */

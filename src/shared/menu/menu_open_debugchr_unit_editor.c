@@ -12,7 +12,7 @@ void menu_open_debugchr_unit_editor(void) {
 
     if (battle_unit_get_stats_from_battle_id(*unit_index)->mount_info != 0) {
         world_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
-        world_menu_set_transition_active_flag();
+        menu_set_modal_open();
         g_menu_overlay_state = 1;
         menu_request_open_companion_executable(COMPANION_OVERLAY_DEBUGCHR);
         thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
@@ -26,7 +26,7 @@ void menu_open_debugchr_unit_editor(void) {
         g_script_event_input = 0;
         world_menu_build_idle_action_stub(g_menu_current_id);
         world_unit_start_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, *unit_index, *unit_index);
-        world_menu_clear_transition_active_flag();
+        menu_clear_modal_open();
         battle_menu_leave_status_screen_selection();
         thread_exit_current();
     }

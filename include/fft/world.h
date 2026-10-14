@@ -1962,7 +1962,6 @@ extern s32 g_world_menu_text_param_24; /* 0x80153308: record +0x24 */
 extern u16 g_world_menu_texture_page;
 extern s32 g_world_menu_thread_result;
 extern s32 g_world_menu_thread_running_status;
-extern u16 g_world_menu_transition_active;
 extern u16 g_world_menu_transition_timeout;
 extern menu_selection_remap_t g_world_menu_value_remap_table[8];
 extern menu_unit_selection_record_t g_world_menu_unit_selection_rows[];
@@ -2271,7 +2270,6 @@ void world_menu_confirm_action_silently(menu_entry_t* entry);
 void world_menu_handle_entry_confirm(menu_entry_t* entry, s32 row_index);
 void world_menu_clear_cursor_positions(void);
 void world_menu_clear_entry_selections(void);
-void world_menu_clear_transition_active_flag(void);
 void world_menu_clear_window_buffer_pointers(void);
 
 void world_menu_configure_status_panel_primitive_colors(
@@ -2362,7 +2360,6 @@ void world_menu_set_draw_priority(s32 priority);
 void world_menu_set_palette_colors(const menu_palette_pair_t* source);
 void world_menu_set_palette_mode(s32 mode);
 void world_menu_set_sprite_color(const rgb24_t* src);
-void world_menu_set_transition_active_flag(void);
 void world_menu_set_window_scale_step(s8 step);
 void world_menu_start_at_list_thread(void);
 void world_menu_start_dead_unit_threads(void);

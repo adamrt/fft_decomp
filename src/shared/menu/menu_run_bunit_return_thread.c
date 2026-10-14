@@ -27,7 +27,7 @@ void menu_run_bunit_return_thread(void) {
         g_world_screen_fade = 0xFF - i;
         thread_yield();
     }
-    world_menu_clear_transition_active_flag();
+    menu_clear_modal_open();
     g_menu_overlay_state = 0;
     g_world_screen_fade = 0;
     g_world_menu_transition_timeout = 0;

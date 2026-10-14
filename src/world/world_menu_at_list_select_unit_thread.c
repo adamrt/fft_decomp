@@ -7,7 +7,7 @@
  * g_text_section_pointers[TEXT_SECTION_AT_LIST] at g_world_menu_at_list_text, resumes the worker threads and
  * stops itself. */
 void world_menu_at_list_select_unit_thread(void) {
-    g_world_menu_transition_active = 1;
+    g_menu_modal_open = 1;
     g_menu_overlay_state = 2;
     thread_suspend(g_thread_current_id + 1);
     thread_suspend(g_thread_current_id + 2);
@@ -29,7 +29,7 @@ void world_menu_at_list_select_unit_thread(void) {
     thread_resume(g_thread_current_id + 2);
     thread_resume(g_thread_current_id + 3);
     thread_resume(g_thread_current_id + 4);
-    g_world_menu_transition_active = 0;
+    g_menu_modal_open = 0;
     g_menu_overlay_state = 0;
     thread_exit_current();
 }

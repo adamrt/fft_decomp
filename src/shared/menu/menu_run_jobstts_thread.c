@@ -14,7 +14,7 @@ void menu_run_jobstts_thread(void) {
     if (battle_thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
         thread_exit_current();
     }
-    battle_menu_set_modal_open();
+    menu_set_modal_open();
     sound_queue_sfx_confirm();
     menu_reserve_high_overlay(0x20000);
     menu_request_open_companion_executable(COMPANION_OVERLAY_JOBSTTS);
@@ -27,6 +27,6 @@ void menu_run_jobstts_thread(void) {
     g_script_event_input = 0;
     menu_free_high_overlay();
     thread_wait_frames(2);
-    battle_menu_clear_modal_open();
+    menu_clear_modal_open();
     thread_exit_current();
 }
