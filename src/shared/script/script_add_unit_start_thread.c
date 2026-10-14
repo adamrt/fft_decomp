@@ -1,18 +1,17 @@
 #include "fft/battle_gfx.h"
-#include "fft/battle_script.h"
-#include "fft/battle_text.h"
 #include "fft/battle_unit.h"
 #include "fft/main.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
-#include "psx/types.h"
 
 /*
- * Battle twin of world_script_add_unit_start_thread. Event thread started by
- * AddUnitStart: scans through AddUnitEnd, loading each AddUnit's graphics and
- * processing LoadAttackGraphics before waiting for pending loads.
+ * Event thread started by the AddUnitStart instruction: walks the following
+ * script instructions through AddUnitEnd, loading each AddUnit's graphics and
+ * processing LoadAttackGraphics before waiting for pending loads. WORLD binds
+ * the thread parameter accessor to its own copy.
  */
 void script_add_unit_start_thread(void) {
     s32 index;
@@ -39,13 +38,11 @@ void script_add_unit_start_thread(void) {
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             unit = battle_unit_find_stats_by_entd_unit_id(unit_id, &index);
             if (index == -2 || index >= 0) {
-                slot = 0;
-                do {
+                for (slot = 0; slot < EVENT_UNIT_SLOT_COUNT; slot++) {
                     if (battle_unit_get_stats_from_battle_id(slot) == unit) {
                         break;
                     }
-                    slot++;
-                } while (slot < EVENT_UNIT_SLOT_COUNT);
+                }
                 runtime_id = battle_unit_get_runtime_id_by_battle_id(slot);
                 if (runtime_id == -1) {
                     unit_save_staged_status_data(slot);
@@ -67,7 +64,7 @@ void script_add_unit_start_thread(void) {
                     break;
                 }
                 if (g_main_debug_display_enabled != 0) {
-                    FntPrint(g_battle_text_reading_character_message, slot);
+                    FntPrint(g_text_reading_character_message, slot);
                 }
             }
         }

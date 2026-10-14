@@ -813,7 +813,7 @@ restart_event:
             } while (world_thread_find_running_by_task(THREAD_TASK_ADD_UNIT) != 0);
         } else if (opcode == EVENT_OPCODE_ADD_UNIT_START) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, world_script_add_unit_start_thread);
+            thread_start(operand_1, script_add_unit_start_thread);
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
             instruction_offset = script_find_instruction_byte_offset(instruction_offset, EVENT_OPCODE_ADD_UNIT_END);
         } else if (opcode == EVENT_OPCODE_ADD_UNIT_END) {

@@ -2458,7 +2458,8 @@ extern menu_glyph_sheet_t g_menu_glyph_image_data;
 extern s32 g_menu_formation_display_mode;
 extern game_options_t g_menu_saved_game_options;
 
-/* spell quotes and glyph data */
+/* text data */
+extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
 extern s32 g_text_spell_quote_last_ability_id;
 extern u8 g_text_spell_quote_exception_skillsets[];
 extern u8 g_text_glyph_bitmaps[];

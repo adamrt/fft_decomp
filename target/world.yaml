@@ -252,7 +252,7 @@ functions:
   - {addr: 0x800f218c, size: 96, name: script_play_effect_and_wait, hash: 071ebe20d78399d5, source: src/shared/script/script_play_effect_and_wait.c}
   - {addr: 0x800f21ec, size: 48, name: script_play_effect_thread, hash: 23d695acccad5513, source: src/shared/script/script_play_effect_thread.c}
   - {addr: 0x800f221c, size: 1236, name: script_block_start_thread, hash: 5ed900a4fe6df008, source: src/shared/script/script_block_start_thread.c}
-  - {addr: 0x800f26f0, size: 468, name: world_script_add_unit_start_thread, hash: 16616b5eb112a78a}
+  - {addr: 0x800f26f0, size: 468, name: script_add_unit_start_thread, hash: 16616b5eb112a78a, source: src/shared/script/script_add_unit_start_thread.c}
   - {addr: 0x800f28c4, size: 72, name: menu_init_subsystems, hash: 5c83298d75f82198, source: src/shared/menu/menu_init_subsystems.c}
   - {addr: 0x800f290c, size: 140, name: menu_init_subsystem_pointers, hash: 1f417d9f35d58b41, source: src/shared/menu/menu_init_subsystem_pointers.c}
   - {addr: 0x800f2998, size: 64, name: menu_reset_subsystems, hash: 91ad0d0c590bd912, source: src/shared/menu/menu_reset_subsystems.c}
@@ -1025,7 +1025,7 @@ data:
   - {addr: 0x800e0050, name: g_text_decimal_format}
   - {addr: 0x800e0054, name: g_menu_wait_for_file_allocation_message}
   - {addr: 0x800e0070, name: g_script_pause_message}
-  - {addr: 0x800e007c, name: g_world_text_reading_character_message}
+  - {addr: 0x800e007c, name: g_text_reading_character_message}
   - {addr: 0x800e01e8, name: g_world_card_save_title_template}
   - {addr: 0x800eda00, name: g_open_work_buffer_1}
   - {addr: 0x800feff0, name: text_blit_glyph}
@@ -2510,6 +2510,7 @@ overrides:
   - {function: menu_update_menus_and_event_speed, name: script_set_event_speed, addr: 0x800f1330}
   - {function: menu_validate_skill_selection_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: menu_wait_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
+  - {function: script_add_unit_start_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: script_block_start_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: script_block_start_thread, name: battle_thread_resolve_id_after_current, addr: 0x800fd0d8}
   - {function: script_block_start_thread, name: script_waitspritemove_event_instruction, addr: 0x800fa2cc}

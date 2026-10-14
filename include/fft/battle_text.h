@@ -56,11 +56,10 @@ void battle_text_run_dialog_thread(void);
 /* spell quotes */
 
 /* diagnostics */
-extern const char g_battle_text_heap_dp_format[];      /* "DP %x\n" */
-extern const char g_battle_text_heap_remain_format[];  /* "HEAP REMAIN %x MAX %x\n" */
-extern const char g_battle_text_heap_task_format[];    /* "TASK %d %x\n" */
-extern const char g_battle_text_min_heap_format[];     /* "MIN HEAP %x " */
-extern char g_battle_text_reading_character_message[]; /* "reading charactor%d \n" */
+extern const char g_battle_text_heap_dp_format[];     /* "DP %x\n" */
+extern const char g_battle_text_heap_remain_format[]; /* "HEAP REMAIN %x MAX %x\n" */
+extern const char g_battle_text_heap_task_format[];   /* "TASK %d %x\n" */
+extern const char g_battle_text_min_heap_format[];    /* "MIN HEAP %x " */
 extern char g_battle_text_wait_for_allocation_message[];
 
 #endif

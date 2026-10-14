@@ -272,7 +272,6 @@ void world_script_set_vsync_mode_and_event_speed(s32 value);
 void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
 void world_script_update_tutorial_controller_input(void);
-void world_script_add_unit_start_thread(void);
 s32 world_script_check_tutorial_event_slot(void);
 void world_script_waitspritemove_event_instruction(s32);
 
@@ -1499,7 +1498,6 @@ extern s32 g_world_text_section_offsets[32];
 extern u8* g_world_text_section_pointer_backup[32];
 
 extern char g_world_text_wait_for_allocation_message[];
-extern char g_world_text_reading_character_message[]; /* "reading charactor%d \n" */
 extern u16 g_world_text_speaker_swap_unit_a;
 extern u16 g_world_text_speaker_swap_unit_b;
 extern s32 g_world_text_current_line;

@@ -721,6 +721,7 @@ extern s32 g_script_loaded_event_id;
 void script_execute_event(void);
 /* Empty in WORLD, which links its own stub under this name. */
 void script_process_pending_requests(void);
+void script_add_unit_start_thread(void);
 void script_process_inflict_status_commands(void);
 void script_load_event(s32 id);
 void script_reset_event_state(void);

@@ -905,7 +905,7 @@ functions:
   - {addr: 0x8013e874, size: 96, name: script_play_effect_and_wait, hash: fdc04e1986faf430, source: src/shared/script/script_play_effect_and_wait.c}
   - {addr: 0x8013e8d4, size: 48, name: script_play_effect_thread, hash: 014b4d70b5118cb2, source: src/shared/script/script_play_effect_thread.c}
   - {addr: 0x8013e904, size: 1236, name: script_block_start_thread, hash: 74b4fb7297f0daea, source: src/shared/script/script_block_start_thread.c}
-  - {addr: 0x8013edd8, size: 468, name: script_add_unit_start_thread, hash: e015fe2ea756d0dd}
+  - {addr: 0x8013edd8, size: 468, name: script_add_unit_start_thread, hash: e015fe2ea756d0dd, source: src/shared/script/script_add_unit_start_thread.c}
   - {addr: 0x8013efac, size: 72, name: menu_init_subsystems, hash: 4a2f2ce670dbb523, source: src/shared/menu/menu_init_subsystems.c}
   - {addr: 0x8013eff4, size: 140, name: menu_init_subsystem_pointers, hash: 7ca7d0d90e11c897, source: src/shared/menu/menu_init_subsystem_pointers.c}
   - {addr: 0x8013f080, size: 64, name: menu_reset_subsystems, hash: b7eb4cd5ef76a5f9, source: src/shared/menu/menu_reset_subsystems.c}
@@ -2267,7 +2267,7 @@ data:
   - {addr: 0x8012d8a0, name: g_text_decimal_format}
   - {addr: 0x8012d8a4, name: g_menu_wait_for_file_allocation_message}
   - {addr: 0x8012d8c0, name: g_script_pause_message}
-  - {addr: 0x8012d8cc, name: g_battle_text_reading_character_message}
+  - {addr: 0x8012d8cc, name: g_text_reading_character_message}
   - {addr: 0x8014bae4, name: text_blit_glyph}
   - {addr: 0x8014bd88, name: text_render_glyph_to_4bpp_image}
   - {addr: 0x8014bed8, name: menu_clear_render_buffer}
