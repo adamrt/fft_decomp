@@ -294,7 +294,6 @@ void world_script_set_event_speed(s32 speed);
 void world_script_set_vsync_mode_and_event_speed(s32 value);
 void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
-void world_script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void world_script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void world_script_update_tutorial_controller_input(void);
 void world_script_warp_unit(const event_warp_unit_parameters_t* instruction);
@@ -1543,8 +1542,7 @@ void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 world_formation_get_unit_palette_index(s32 roster_slot);
 s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
 
-void world_unit_inflict_status_by_event_unit_id(
-    s32 event_unit_id, s32 status_index, s32 is_infliction, s32 less_strict_removal);
+void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status_index, s32 is_infliction, s32 less_strict_removal);
 
 s32 world_unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void world_unit_update_monster_breeding(s32 unused);

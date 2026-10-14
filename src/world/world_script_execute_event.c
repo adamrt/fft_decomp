@@ -932,7 +932,7 @@ restart_event:
                 script_set_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE, first_operand);
             }
         } else if (opcode == EVENT_OPCODE_TELEPORT_OUT) {
-            world_script_teleportout_event_instruction(first_operand, 1);
+            script_teleportout_event_instruction(first_operand, 1);
         } else if (opcode == EVENT_OPCODE_TELEPORT_IN) {
             script_teleportin_event_instruction(first_operand, 1);
         } else if (opcode == EVENT_OPCODE_INFLICT_STATUS) {

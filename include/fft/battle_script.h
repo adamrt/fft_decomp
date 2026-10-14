@@ -30,7 +30,6 @@ s32 script_add_ghost_unit_event_instruction(
 void script_add_unit_start_thread(void);
 void script_blue_remove_all_enemy_units(void);
 void script_blue_remove_unit(s32 unit_id);
-void script_teleportout_event_instruction(s32 arg, s32 remove);
 
 /* unit movement */
 

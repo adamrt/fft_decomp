@@ -343,7 +343,7 @@ functions:
   - {addr: 0x800fad84, size: 16, name: world_noop_800fad84, hash: 70cab538e87be7b6}
   - {addr: 0x800fad94, size: 132, name: script_prepare_unit_filter, hash: 11ec43c5377ab1bf, source: src/shared/script/script_prepare_unit_filter.c}
   - {addr: 0x800fae18, size: 548, name: script_filter_unit_id_by_mode, hash: 984093d71e63f1ff, source: src/shared/script/script_filter_unit_id_by_mode.c}
-  - {addr: 0x800fb03c, size: 216, name: world_script_teleportout_event_instruction, hash: a33f1da7ceb032c8}
+  - {addr: 0x800fb03c, size: 216, name: script_teleportout_event_instruction, hash: a33f1da7ceb032c8, source: src/shared/script/script_teleportout_event_instruction.c}
   - {addr: 0x800fb114, size: 72, name: script_teleportin_event_instruction, hash: 93b4c6af1ff33bce, source: src/shared/script/script_teleportin_event_instruction.c}
   - {addr: 0x800fb15c, size: 168, name: world_script_blue_remove_all_enemy_units, hash: 2274921be941b9ac}
   - {addr: 0x800fb204, size: 200, name: world_script_blue_remove_unit, hash: acf2f50c451c3612}
@@ -357,7 +357,7 @@ functions:
   - {addr: 0x800fbd14, size: 1072, name: unit_apply_staged_status_data, hash: 3be2d406abbb256c, source: src/shared/unit/unit_apply_staged_status_data.c}
   - {addr: 0x800fc144, size: 432, name: unit_update_staged_status_data, hash: 269b013af6ab131a, source: src/shared/unit/unit_update_staged_status_data.c}
   - {addr: 0x800fc2f4, size: 632, name: world_script_inflict_status_thread, hash: 2d2fdf0577757d84, source: src/shared/script/script_inflict_status_thread.c, source_symbol: script_inflict_status_thread}
-  - {addr: 0x800fc56c, size: 216, name: world_unit_inflict_status_by_event_unit_id, hash: 3f69fc963f96b44e}
+  - {addr: 0x800fc56c, size: 216, name: status_inflict_by_event_unit_id, hash: 3f69fc963f96b44e, source: src/shared/unit/status_inflict_by_event_unit_id.c}
   - {addr: 0x800fc644, size: 448, name: script_change_stats, hash: c63a08b76749f8fe, source: src/shared/script/script_change_stats.c}
   - {addr: 0x800fc804, size: 248, name: world_script_unit_anim, hash: 2c433dd6a81d7c56, source: src/shared/script/script_unit_anim.c, source_symbol: script_unit_anim}
   - {addr: 0x800fc8fc, size: 156, name: script_march_units, hash: 90487a1ab3416a6e, source: src/shared/script/script_march_units.c}
@@ -2679,6 +2679,7 @@ overrides:
   - {function: script_sprite_move_beta, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: sound_run_background_sfx_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: sound_run_background_sfx_thread, name: sound_run_background_fade_thread, addr: 0x800fcec0}
+  - {function: status_inflict_by_event_unit_id, name: battle_unit_get_battle_id_by_event_unit_id, addr: 0x800e1e40}
   - {function: text_draw_glyph_with_typewriter_delay, name: battle_text_render_glyph_to_4bpp_image, addr: 0x800ff284}
   - {function: text_is_spell_quote_exception_skillset, name: g_battle_spell_quote_exception_skillsets, addr: 0x80156748}
   - {function: text_select_ability_announcement, name: g_battle_spell_quote_last_ability_id, addr: 0x8013a5ec}
@@ -2703,7 +2704,6 @@ overrides:
   - {function: world_script_face_unit, name: g_script_unit_face_slot_order, addr: 0x80156bb0}
   - {function: world_script_inflict_status_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: world_script_inflict_status_thread, name: battle_unit_get_battle_id_by_event_unit_id, addr: 0x800e1e40}
-  - {function: world_script_inflict_status_thread, name: status_inflict_by_event_unit_id, addr: 0x800fc56c}
   - {function: world_script_load_next_event, name: battle_thread_find_running_by_task, addr: 0x800fd14c}
   - {function: world_script_load_next_event, name: g_script_loaded_event_id, addr: 0x80156b8c}
   - {function: world_script_load_next_event, name: script_load_event, addr: 0x800f0470}

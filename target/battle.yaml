@@ -996,7 +996,7 @@ functions:
   - {addr: 0x80147918, size: 16, name: battle_noop_80147918, hash: 70cab538e87be7b6}
   - {addr: 0x80147928, size: 132, name: script_prepare_unit_filter, hash: 95c00a3b4735d757, source: src/shared/script/script_prepare_unit_filter.c}
   - {addr: 0x801479ac, size: 548, name: script_filter_unit_id_by_mode, hash: af495e872ad53a94, source: src/shared/script/script_filter_unit_id_by_mode.c}
-  - {addr: 0x80147bd0, size: 216, name: script_teleportout_event_instruction, hash: ca4b779f8a27569e}
+  - {addr: 0x80147bd0, size: 216, name: script_teleportout_event_instruction, hash: ca4b779f8a27569e, source: src/shared/script/script_teleportout_event_instruction.c}
   - {addr: 0x80147ca8, size: 72, name: script_teleportin_event_instruction, hash: 117e30d62a327134, source: src/shared/script/script_teleportin_event_instruction.c}
   - {addr: 0x80147cf0, size: 168, name: script_blue_remove_all_enemy_units, hash: 2274921be941b9ac}
   - {addr: 0x80147d98, size: 200, name: script_blue_remove_unit, hash: acf2f50c451c3612}
@@ -1010,7 +1010,7 @@ functions:
   - {addr: 0x801488a8, size: 1072, name: unit_apply_staged_status_data, hash: 793904be68d4a23b, source: src/shared/unit/unit_apply_staged_status_data.c}
   - {addr: 0x80148cd8, size: 432, name: unit_update_staged_status_data, hash: 18a4ccc12e7e8be1, source: src/shared/unit/unit_update_staged_status_data.c}
   - {addr: 0x80148e88, size: 632, name: script_inflict_status_thread, hash: 61d3e9fb6f1a31dc, source: src/shared/script/script_inflict_status_thread.c}
-  - {addr: 0x80149100, size: 216, name: status_inflict_by_event_unit_id, hash: 5219ad791988f213}
+  - {addr: 0x80149100, size: 216, name: status_inflict_by_event_unit_id, hash: 5219ad791988f213, source: src/shared/unit/status_inflict_by_event_unit_id.c}
   - {addr: 0x801491d8, size: 448, name: script_change_stats, hash: 0f552e12e60b18e2, source: src/shared/script/script_change_stats.c}
   - {addr: 0x80149398, size: 248, name: script_unit_anim, hash: 8c66feb3346fed6e, source: src/shared/script/script_unit_anim.c}
   - {addr: 0x80149490, size: 156, name: script_march_units, hash: ab19a34ada7cae3e, source: src/shared/script/script_march_units.c}
