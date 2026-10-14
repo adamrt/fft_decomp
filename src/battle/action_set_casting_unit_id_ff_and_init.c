@@ -5,5 +5,5 @@
  * deployment screen does when it finishes. */
 void action_set_casting_unit_id_ff_and_init(void) {
     action_set_casting_unit_id_ff();
-    battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, 0xff, 0, 1);
+    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, 0xff, 0, 1);
 }

@@ -295,7 +295,7 @@ functions:
   - {addr: 0x800f4f18, size: 124, name: menu_confirm_auto_battle_selection_thread, hash: 3b06a121f16b15f4, source: src/shared/menu/menu_confirm_auto_battle_selection_thread.c}
   - {addr: 0x800f4f94, size: 64, name: menu_store_auto_battle_main_target_id, hash: eba4aacd9409368b, source: src/shared/menu/menu_store_auto_battle_main_target_id.c}
   - {addr: 0x800f4fd4, size: 604, name: text_select_ability_announcement, hash: 6c48e87881d46ff1, source: src/shared/text/text_select_ability_announcement.c}
-  - {addr: 0x800f5230, size: 212, name: world_menu_init_system_function, hash: c537ae196a1827bb}
+  - {addr: 0x800f5230, size: 212, name: menu_init_system_function, hash: c537ae196a1827bb, source: src/shared/menu/menu_init_system_function.c}
   - {addr: 0x800f5304, size: 128, name: menu_get_dead_unit_selection, hash: 2cbfb3b781403e89, source: src/shared/menu/menu_get_dead_unit_selection.c}
   - {addr: 0x800f5384, size: 2556, name: menu_dispatch_system_function, hash: d8c0ee3dbff2b5b4, source: src/shared/menu/menu_dispatch_system_function.c}
   - {addr: 0x800f5d80, size: 168, name: unit_get_stats_by_unit_id, hash: 7009f26291692b1c, source: src/shared/unit/unit_get_stats_by_unit_id.c}

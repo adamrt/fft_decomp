@@ -23,33 +23,33 @@ void action_confirm(void) {
     switch (unit->ability_preview_phase) {
     case TARGET_PANELS_UNIT_OR_TILE:
         if (target != 0) {
-            battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 1, unit->stats->battle_id, 0,
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 1, unit->stats->battle_id, 0,
                 unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         } else {
-            battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 2, unit->stats->battle_id, 0,
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 2, unit->stats->battle_id, 0,
                 unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         }
         break;
     case TARGET_PANELS_TILE_ONLY:
         if (target != 0) {
-            battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 4, unit->stats->battle_id, 0,
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 4, unit->stats->battle_id, 0,
                 unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         } else {
-            battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 2, unit->stats->battle_id, 0,
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 2, unit->stats->battle_id, 0,
                 unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         }
         break;
     case TARGET_PANELS_NO_TARGETING:
         if (target != 0) {
-            battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 3, unit->stats->battle_id, 0,
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 3, unit->stats->battle_id, 0,
                 unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         } else {
-            battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 2, unit->stats->battle_id, 0,
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 2, unit->stats->battle_id, 0,
                 unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         }
         break;
     default:
-        battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 0, unit->stats->battle_id, 0,
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ACTION_CONFIRM, 0, unit->stats->battle_id, 0,
             unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
         break;
     }

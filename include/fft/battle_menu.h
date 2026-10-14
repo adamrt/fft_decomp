@@ -43,7 +43,6 @@ void battle_menu_dispatch_idle_action_menu(void);
 battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id);
 ai_command_t* menu_get_selected_command_address(void);
 battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
-s32 battle_menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 void battle_menu_open_active_unit_idle_action_menu(void);
 void battle_menu_open_free_cursor_help(void);
 void battle_menu_open_free_cursor_mini_menu(void);

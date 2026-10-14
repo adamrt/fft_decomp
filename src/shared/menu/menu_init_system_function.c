@@ -9,7 +9,7 @@
  * leftover v0 is returned. ABILITY_ANNOUNCEMENT drops option, parameter and
  * enabled. Everything else returns menu_dispatch_system_function's result;
  * for SCENARIO_CHECK and CLOSE the action pointer passed on is unset. */
-s32 battle_menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled) {
+s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled) {
     action_command_t* action;
 
     if (type != BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK && type != BATTLE_MENU_SYSTEM_COMMAND_CLOSE) {

@@ -17,5 +17,5 @@ void battle_state_enter_target_select_confirm(void) {
         }
     }
     stats = battle_unit_get_casting()->stats;
-    battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 0, stats->battle_id, 0, 1);
+    menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 0, stats->battle_id, 0, 1);
 }

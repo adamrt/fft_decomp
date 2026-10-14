@@ -1315,6 +1315,7 @@ void menu_start_system_function_thread(s32 system_function);
 
 s32 menu_dispatch_system_function(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, struct action_command* action);
+s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 
 /* First argument of *_menu_init_system_function and
  * *_menu_dispatch_system_function; `option` selects the variant. */
@@ -2269,8 +2270,8 @@ extern glyph_blit_t g_menu_text_pen;
 extern s32 g_text_glyph_first_row;
 extern s32 g_text_glyph_row_limit;
 extern u32 g_text_decimal_divisors[];
-extern s32 g_menu_text_param_22; /* 0x80153304: record +0x22 */
-extern s32 g_menu_text_param_24; /* 0x80153308: record +0x24 */
+extern s32 g_menu_text_param_22; /* line limits copied from the text record (+0x22, +0x24) */
+extern s32 g_menu_text_param_24;
 void text_print_fnt_value_and_next(s32 value);
 void text_relocate_pointer_table(const u32* offsets);
 /* BATTLE and WORLD each link their own body. */

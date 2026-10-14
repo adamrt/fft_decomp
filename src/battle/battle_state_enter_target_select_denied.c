@@ -25,15 +25,15 @@ void battle_state_enter_target_select_denied(void) {
     }
     unit = battle_unit_get_casting();
     if (runtime == 0) {
-        battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 3, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 3, unit->stats->battle_id, 0, 1);
         return;
     }
     kind = unit->target_select_command;
     if (kind == AI_COMMAND_AUTOBATTLE_TARGETED_SELECT) {
-        battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 1, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 1, unit->stats->battle_id, 0, 1);
         return;
     }
     if (kind == AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT) {
-        battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 2, unit->stats->battle_id, 0, 1);
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_TARGET_CONFIRM, 2, unit->stats->battle_id, 0, 1);
     }
 }

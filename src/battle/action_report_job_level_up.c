@@ -11,7 +11,7 @@ s32 action_report_job_level_up(battle_unit_t* unit) {
         u8 battle_id;
         text_set_message_duration_frames(0xB4);
         battle_id = unit->stats->battle_id;
-        battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183E, battle_id, battle_id, 1);
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183E, battle_id, battle_id, 1);
         battle_unit_set_level_up_animation(unit);
         target_move_cursor_to_unit(unit);
         effect_set_secondary_level_up(unit);
