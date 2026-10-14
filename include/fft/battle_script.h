@@ -32,7 +32,6 @@ void script_add_unit_start_thread(void);
 /* unit movement */
 
 void script_waitspritemove_event_instruction(s32 unit_id);
-void script_warp_unit(const event_warp_unit_parameters_t* parameters);
 
 /* unit statuses */
 

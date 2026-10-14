@@ -1089,6 +1089,7 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
 
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
 extern map_tile_coordinates_t g_script_warp_coords;
+void script_warp_unit(const event_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 void script_add_unit_stub(void);
 void script_opcode_74_event_instruction(const u8* unused_parameters);

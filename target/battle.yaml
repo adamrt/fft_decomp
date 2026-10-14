@@ -1000,7 +1000,7 @@ functions:
   - {addr: 0x80147ca8, size: 72, name: script_teleportin_event_instruction, hash: 117e30d62a327134, source: src/shared/script/script_teleportin_event_instruction.c}
   - {addr: 0x80147cf0, size: 168, name: script_blue_remove_all_enemy_units, hash: 2274921be941b9ac, source: src/shared/script/script_blue_remove_all_enemy_units.c}
   - {addr: 0x80147d98, size: 200, name: script_blue_remove_unit, hash: acf2f50c451c3612, source: src/shared/script/script_blue_remove_unit.c}
-  - {addr: 0x80147e60, size: 332, name: script_warp_unit, hash: a4238fc24406e01c}
+  - {addr: 0x80147e60, size: 332, name: script_warp_unit, hash: a4238fc24406e01c, source: src/shared/script/script_warp_unit.c}
   - {addr: 0x80147fac, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 92e26c055631d0fb, source: src/shared/script/script_unit_animation_rotate_event_instruction.c}
   - {addr: 0x80148084, size: 512, name: script_face_unit, hash: 390040f4c2819846, source: src/shared/script/script_face_unit.c}
   - {addr: 0x80148284, size: 516, name: script_rotate_unit, hash: 68d1d9ca7a73e6b2, source: src/shared/script/script_rotate_unit.c}

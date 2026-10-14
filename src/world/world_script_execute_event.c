@@ -793,7 +793,7 @@ restart_event:
                 }
             }
         } else if (opcode == EVENT_OPCODE_WARP_UNIT) {
-            world_script_warp_unit((const event_warp_unit_parameters_t*)parameters);
+            script_warp_unit((const event_warp_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_UNKNOWN_61) {
         } else if (opcode == EVENT_OPCODE_SET_BATTLE_UNIT_POSITION) {
             unit = battle_unit_get_stats_from_battle_id(operand_1);

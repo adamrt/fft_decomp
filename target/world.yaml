@@ -347,7 +347,7 @@ functions:
   - {addr: 0x800fb114, size: 72, name: script_teleportin_event_instruction, hash: 93b4c6af1ff33bce, source: src/shared/script/script_teleportin_event_instruction.c}
   - {addr: 0x800fb15c, size: 168, name: script_blue_remove_all_enemy_units, hash: 2274921be941b9ac, source: src/shared/script/script_blue_remove_all_enemy_units.c}
   - {addr: 0x800fb204, size: 200, name: script_blue_remove_unit, hash: acf2f50c451c3612, source: src/shared/script/script_blue_remove_unit.c}
-  - {addr: 0x800fb2cc, size: 332, name: world_script_warp_unit, hash: 6399d2888030776e}
+  - {addr: 0x800fb2cc, size: 332, name: script_warp_unit, hash: 6399d2888030776e, source: src/shared/script/script_warp_unit.c}
   - {addr: 0x800fb418, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 14cce9870ae4f8c8, source: src/shared/script/script_unit_animation_rotate_event_instruction.c}
   - {addr: 0x800fb4f0, size: 512, name: world_script_face_unit, hash: 1dda3ec86c0c41a3, source: src/shared/script/script_face_unit.c, source_symbol: script_face_unit}
   - {addr: 0x800fb6f0, size: 516, name: world_script_rotate_unit, hash: be57a905343502c5, source: src/shared/script/script_rotate_unit.c, source_symbol: script_rotate_unit}
@@ -2658,7 +2658,6 @@ overrides:
   - {function: script_block_start_thread, name: script_rotate_unit, addr: 0x800fb6f0}
   - {function: script_block_start_thread, name: script_unit_anim, addr: 0x800fc804}
   - {function: script_block_start_thread, name: script_waitspritemove_event_instruction, addr: 0x800fa2cc}
-  - {function: script_block_start_thread, name: script_warp_unit, addr: 0x800fb2cc}
   - {function: script_color_screen_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: script_earthquake_start, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: script_face_tile, name: g_battle_rotation_speed_frames, addr: 0x80156be0}
