@@ -393,4 +393,7 @@ void map_wait_for_refresh(void);
 extern map_selected_tile_t g_map_selected_tile_data;
 extern u16 g_map_refresh_pending;
 
+/* unreferenced stubs, neutral names */
+s32 map_return_zero_1(void);
+
 #endif

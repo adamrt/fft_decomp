@@ -2535,4 +2535,13 @@ void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit
 /* The caller leaves 0x16f in $a1, but the body never reads $a1. */
 void gfx_mirror_4bpp_rect(u8* data, const glyph_blit_t* region);
 
+/* unreferenced stubs, neutral names */
+void menu_noop_1(void);
+void menu_noop_2(void);
+void menu_noop_3(void);
+void menu_noop_4(void);
+void menu_noop_5(void);
+void menu_noop_6(void);
+void menu_noop_7(void);
+
 #endif

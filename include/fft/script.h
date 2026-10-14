@@ -1171,4 +1171,17 @@ void map_light_thread(void);
 /* event state */
 extern s16 g_script_threads_idle;
 
+/* unreferenced stubs, neutral names */
+void script_noop_1(void);
+void script_noop_2(void);
+void script_noop_3(void);
+void script_noop_4(void);
+void script_noop_5(void);
+void script_noop_6(void);
+void script_noop_7(void);
+void script_noop_8(void);
+void script_noop_9(void);
+void script_noop_10(void);
+s32 script_return_zero_1(void);
+
 #endif

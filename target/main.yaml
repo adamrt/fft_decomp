@@ -1383,7 +1383,7 @@ data:
   - {addr: 0x80132824, name: battle_text_find_entry}
   - {addr: 0x8013b590, name: script_get_variable}
   - {addr: 0x8013b644, name: script_set_variable}
-  - {addr: 0x8014a81c, name: battle_return_zero}
+  - {addr: 0x8014a81c, name: script_return_zero_1}
   - {addr: 0x8018e9bc, name: status_enable_special_flags}
   - {addr: 0x801908cc, name: g_battle_unit_stats}
 

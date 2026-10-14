@@ -275,7 +275,6 @@ extern SVECTOR g_unit_scratch_coords;
 
 /* stubs */
 s32 battle_return_one(s32 unused_runtime_id);
-s32 battle_return_zero(void);
 
 /* unnamed */
 extern s32 D_800F668C;
