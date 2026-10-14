@@ -165,7 +165,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 g_debugchr_status_display_thread_params.style = one;
                 g_debugchr_numeric_editor_thread_params.style = one;
                 g_debugchr_character_status_frame_config.style = one;
-                thread_start(g_thread_current_id - 1, battle_menu_build_unit_status_list);
+                thread_start(g_thread_current_id - 1, menu_build_unit_status_list);
                 thread_set_parameters(
                     g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST], 0, 0);
                 animation[0] = one;

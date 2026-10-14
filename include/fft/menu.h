@@ -1002,6 +1002,19 @@ typedef struct menu_scroll_text_layout {
     s16 row_offset;             /* 0x28 */
 } menu_scroll_text_layout_t;
 
+/* The ability list's and the unit status list's layouts; menu entries pass
+ * them as their context. */
+extern menu_scroll_text_layout_t g_menu_ability_layout;
+extern menu_scroll_text_layout_t g_menu_status_list_layout;
+extern u16 g_menu_status_list_row_actions[8];
+extern s16 g_menu_status_left_text_ids[20];
+extern s16 g_menu_status_right_text_ids[20];
+extern u16 g_menu_ability_display_flags[80];
+extern s16 g_menu_action_type_modes[][2];
+void menu_build_ability_list(s32 mode);
+void menu_build_unit_status_list(void);
+void menu_validate_skill_selection_thread(void);
+
 /* Provisional: 12-byte textured-quad piece record (table at 0x80154e20)
  * consumed by the POLY_GT4 builder at 0x800e8d6c: texture origin, size and
  * screen position relative to g_menu_quad_origin. */

@@ -1,12 +1,12 @@
 #include "fft/battle.h"
-#include "fft/battle_menu.h"
+#include "fft/menu.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
 
-/* Battle twin of world_menu_validate_skill_selection_thread. Thread body: validates the skill chosen in menu entry 3
+/* Battle twin of menu_validate_skill_selection_thread. Thread body: validates the skill chosen in menu entry 3
  * for the current menu (MP cost, blocking status, per-menu restrictions) and, when it is not usable, shows the matching
  * message before ending the thread. */
-void battle_menu_validate_skill_selection_thread(void) {
+void menu_validate_skill_selection_thread(void) {
     s32 skill;
     menu_entry_t* parameter;
     s32 ct;
@@ -21,7 +21,7 @@ void battle_menu_validate_skill_selection_thread(void) {
     parameter = (menu_entry_t*)battle_thread_get_current_parameter_1();
     skill_tables = &g_ai_workspace_ptr->ability_list;
     ct = skill_tables->skill_ct[skill];
-    entry = g_battle_ability_menu_layout.text_colors[0][skill];
+    entry = g_menu_ability_layout.columns.text_colors[0][skill];
     mp_cost = skill_tables->mp_costs[skill];
     if (ct == 0xFF) {
         ct = 0;

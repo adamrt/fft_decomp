@@ -54,7 +54,7 @@ void battle_menu_build_idle_action_menu(s32 menu_id) {
             menu_restore_selection_for_selected_unit(menu_id);
             selected_index = &g_menu_thread_menu_data[8].selected_index;
             *selected_index = 0;
-            g_battle_menu_status_scroll_offset = 0;
+            g_menu_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();
             thread_start(THREAD_SLOT_MENU_BUILDING, menu_start_entry_thread);
             thread_set_parameters(THREAD_SLOT_MENU_BUILDING, menu_id, 0, 0);

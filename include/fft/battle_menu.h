@@ -24,7 +24,6 @@ extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
 /* action menus */
 extern s16 g_battle_auto_battle_option_colors[5]; /* text color per option */
 extern s16 g_battle_menu_action_slot_row_actions[6];
-extern s16 g_battle_menu_action_type_modes[][2];
 extern menu_scroll_text_layout_t g_battle_menu_at_list_layout;
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
 extern s16 g_battle_menu_auto_battle_row_actions[8];
@@ -62,17 +61,13 @@ void battle_menu_set_next_script_action_menus(void);
 /* Ability-list window layout at 0x80166994. Column modes: 0 text, 1 number,
  * 2 hidden, 3 alternate number. The columns read the work buffer's u16 text
  * ids and values through the layout's s16 pointers. */
-extern menu_text_layout_t g_battle_ability_menu_layout;
-extern u16 g_battle_menu_ability_display_flags[80];
 extern RECT g_battle_menu_ability_list_clut_rect;
-extern s16 g_battle_menu_ability_scroll_offset;
 extern u8 g_battle_menu_billboard_secondary_skillset_name[];
 extern u8 g_battle_menu_billboard_skillset_name[];
 extern u8 g_battle_menu_calculator_skillsets[4];
 extern s32 g_battle_menu_scroll_list_depth;
 extern u8 g_battle_menu_skillset_disabled_flags[]; /* per-row grayed flag */
 
-void battle_menu_build_ability_list(s32 mode);
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
 s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
@@ -117,15 +112,9 @@ s32 battle_menu_display_projected_action_effect(
 
 /* status screen */
 extern s32 g_battle_menu_status_enabled;
-extern u16 g_battle_menu_status_list_row_actions[8];
 extern s32 g_battle_menu_status_requested;
 extern s32 g_battle_menu_status_screen_selected;
-/* row_offset of the status list's scroll layout, which starts at g_battle_menu_status_visible_rows */
-extern s16 g_battle_menu_status_scroll_offset;
-extern u16 g_battle_menu_status_scroll_rows;
-extern u16 g_battle_menu_status_visible_rows;
 
-void battle_menu_build_unit_status_list(void);
 void battle_menu_enter_status_screen_selection(void);
 void battle_menu_leave_status_screen_selection(void);
 
@@ -176,8 +165,6 @@ void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 extern u16* const* g_battle_help_active_text_id_tables;
 /* Source image used when battle overlays render menu glyphs. */
 extern menu_glyph_sheet_t g_battle_menu_glyph_image_data;
-extern s16 g_battle_menu_status_left_text_ids[20];
-extern s16 g_battle_menu_status_right_text_ids[20];
 extern s32 g_battle_menu_text_param_22; /* 0x80166020: record +0x22 */
 extern s32 g_battle_menu_text_param_24; /* 0x80166024: record +0x24 */
 extern glyph_blit_t g_battle_menu_text_pen;

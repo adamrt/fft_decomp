@@ -216,7 +216,7 @@ void menu_run_unit_editor_panel_thread(void) {
                 && (unit_has_any_current_status(g_menu_selected_unit.battle_id) != 0
                     || (g_menu_selected_unit_fields.state.generic_monster == 0
                         && g_menu_selected_unit_status.team_kind != 1))) {
-                thread_start(g_thread_current_id - 1, battle_menu_build_unit_status_list);
+                thread_start(g_thread_current_id - 1, menu_build_unit_status_list);
                 thread_set_parameters(
                     g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST], 0, 0);
             }

@@ -417,34 +417,12 @@ typedef enum world_ability_list_mode {
     WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
 } world_ability_list_mode_e;
 
-/* Provisional ability-list window layout at 0x80153c78: a
- * menu_text_layout_t whose three columns are ids, values and extras
- * (x[0] is at 0x04). */
-typedef struct world_ability_menu_layout {
-    s16 visible_rows; /* 0x00 */
-    s16 hidden_rows;  /* 0x02 */
-    u8 _unused_04[2];
-    s16 values_x;     /* 0x06: x[1] of menu_text_layout_t */
-    s16 extras_x;     /* 0x08: x[2]; a column x origin, not a y */
-    s16 ids_mode;     /* 0x0a: mode[0] (menu_text_column_mode_e) */
-    s16 values_mode;  /* 0x0c: mode[1] */
-    s16 extras_mode;  /* 0x0e: mode[2] */
-    u16* ids;         /* 0x10 */
-    u16* values;      /* 0x14 */
-    u16* extras;      /* 0x18 */
-    s16* row_actions; /* 0x1c; indexed by the selected skill */
-    u8 _unused_20[8];
-    s16 row_offset; /* 0x28; first visible row */
-} world_ability_menu_layout_t;
-typedef char world_ability_menu_layout_size_must_be_44[sizeof(world_ability_menu_layout_t) == 44 ? 1 : -1];
-
 extern s16 g_world_ability_category; /* menu_ability_category_e */
 extern s32 g_world_ability_selected_type;
 extern s32 g_world_secondary_bit_read_index;
 extern u8 g_world_secondary_bit_cursor_reset;
 extern const u8* g_world_secondary_bit_cursor;
 extern s32 g_world_spell_quote_last_ability_id;
-extern world_ability_menu_layout_t g_world_ability_menu_layout;
 extern u8 g_world_spell_quote_exception_skillsets[];
 extern RECT g_world_ability_panel_origin;
 extern RECT g_world_ability_panel_draw_area;
@@ -1848,7 +1826,6 @@ extern s32 g_world_menu_use_alternate_main_palette;
 extern u8 g_world_menu_use_alternate_palette;
 extern s16 g_world_menu_use_scroll_position;
 extern s8 g_world_menu_window_scale_step;
-extern u16 g_world_menu_ability_display_flags[80];
 extern s32 g_world_menu_last_dispatched_command;
 extern s32 g_world_menu_last_dispatched_option;
 extern u8 g_world_menu_restore_depth;
@@ -1859,11 +1836,9 @@ extern s32 g_world_menu_scrolling_list_depth;
 extern menu_quad_page_t g_world_menu_selected_tile_info_pages[2];
 extern u16 g_world_menu_input_block_frames;
 
-extern menu_scroll_text_layout_t g_world_menu_status_list_layout;
 extern menu_scroll_text_layout_t g_world_menu_at_list_layout;
 extern s16 g_world_menu_auto_battle_row_actions[8];
 extern s16 g_world_menu_action_slot_row_actions[6];
-extern u16 g_world_menu_status_list_row_actions[8];
 extern u16 g_world_menu_system_function_row_actions[];
 extern RECT g_world_menu_numeric_display_texture_window; /* texture window for the menu page */
 
@@ -1884,7 +1859,6 @@ extern image_load_parameters_t g_world_menu_icon_strip_image_params[];
 /* One image-load parameter block per single-icon kind 0..4; index 1 doubles as
  * the arrow placement used by kind 0x10. */
 extern image_load_parameters_t g_world_menu_single_icon_image_params[];
-extern s16 g_world_menu_row_type_confirm_actions[][2]; /* per row type: [1] == 1 lists by id */
 extern u8 g_world_menu_action_slot_default_messages[];
 
 /* Tail glyph source and destination records for menu_build_window_image. */
@@ -1963,8 +1937,6 @@ extern world_menu_grid_cell_t g_world_grid_menu_shop_scrolled_cells[];
 extern world_menu_grid_cell_t* g_world_active_grid_menu_cells;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialized */
-extern s16 g_world_menu_status_left_text_ids[20];
-extern s16 g_world_menu_status_right_text_ids[20];
 extern s16 g_world_menu_action_slot_selected_option;
 extern menu_allocation_t g_world_menu_buffer_allocations[MENU_BUFFER_ALLOCATION_COUNT];
 extern u8 g_world_menu_buffer_arena[WORLD_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
@@ -2057,7 +2029,6 @@ void world_draw_menu_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u
 void world_menu_labeled_number_entry_thread(void);
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon);
-void world_menu_build_ability_list(s32 mode);
 void world_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void world_menu_build_idle_action_stub(s32 unused_menu_id);
 void world_menu_build_sprite_page(s32 page_index, const RECT* base_screen);
@@ -2090,7 +2061,6 @@ u8* world_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* 
 void world_menu_resize_parent_entry_to_digits(void);
 void world_menu_build_icon_record(RECT* rect, menu_entry_t* param, menu_icon_record_t* buffer);
 void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
-void world_menu_build_unit_status_list(void);
 s32 world_menu_build_window_frame_image(s32 width, s32 height, u16* destination);
 void world_menu_clear_cursor_positions(void);
 
