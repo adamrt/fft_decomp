@@ -18,14 +18,14 @@ void menu_reset_unit_records(void) {
 
     fill = 0xFF;
     index = 0;
-    row = (u8*)g_world_menu_unit_selection_rows;
+    row = (u8*)g_menu_unit_selection_records;
     do {
         count = WORLD_MENU_UNIT_SELECTION_RECORD_BYTES - 1;
         do {
             row[count] = 0;
             count -= 1;
         } while (count >= 0);
-        ((u8*)g_world_menu_unit_selection_rows)[index + 1] = fill;
+        ((u8*)g_menu_unit_selection_records)[index + 1] = fill;
         index += WORLD_MENU_UNIT_SELECTION_RECORD_BYTES;
         row += WORLD_MENU_UNIT_SELECTION_RECORD_BYTES;
     } while (index < BATTLE_UNIT_SLOT_COUNT * WORLD_MENU_UNIT_SELECTION_RECORD_BYTES);

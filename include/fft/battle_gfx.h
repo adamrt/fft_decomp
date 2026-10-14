@@ -481,7 +481,6 @@ void battle_gfx_clear_unit_graphics_load_state(s32 unused_map_id);
 void battle_gfx_copy_shp_data_to_ram(battle_gfx_weapon_shp_t* dst, const battle_gfx_packed_weapon_shp_record_t* src);
 void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination);
 void battle_gfx_load_casting_unit_graphics(void);
-void battle_gfx_load_evtchr_thread(void);
 s32 battle_gfx_load_unit_attack_image_into_evtchr_slot(s32 runtime_id, s32 slot);
 s32 battle_gfx_load_unit_graphics_by_battle_id(s32, s32);
 void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot, s32 image_slot);

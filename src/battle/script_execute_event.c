@@ -729,7 +729,7 @@ restart_script:
         /* ---- EVTCHR and reserved VRAM slots ---- */
         else if (opcode == EVENT_OPCODE_LOAD_EVTCHR) {
             operand_2 = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_2, battle_gfx_load_evtchr_thread);
+            thread_start(operand_2, gfx_load_evtchr_thread);
             thread_set_parameters(
                 operand_2, operand_1, script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 2), 0);
             thread_yield();

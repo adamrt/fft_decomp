@@ -265,8 +265,6 @@ extern map_tile_coordinates_t g_world_script_warp_unit_coords;
 extern u32 g_world_script_tutorial_repeat_counters[16];
 extern u16 g_world_script_tutorial_previous_input;
 extern u8* g_world_script_tutorial_command_ptr;
-extern s32 g_world_event_pending_loaded_evtchr_slot;
-extern evtchr_file_record_t* g_world_event_loaded_evtchr_buffer;
 extern s16 g_world_event_effect_target_runtime_id;
 extern s16 g_world_event_effect_target_mode;
 extern world_event_command_args_t g_world_event_map_command_80_args;
@@ -291,7 +289,6 @@ void world_script_blue_remove_unit(s32 unit_id);
 void world_script_change_stats(const event_change_stats_parameters_t* parameters);
 void world_script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
 void world_script_earthquake_start(void);
-void world_script_toggle_message_portrait_flip(const u8* parameters);
 void world_script_face_tile(const event_face_tile_parameters_t* parameters);
 void world_script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void world_script_focus(event_focus_parameters_t* parameters);
@@ -323,7 +320,6 @@ void world_script_add_unit_start_thread(void);
 s32 world_script_check_tutorial_event_slot(void);
 void world_script_color_screen_thread(void);
 void world_script_inflict_status_thread(void);
-void world_script_load_portrait_colors_event_instruction(s32);
 void world_script_waitspritemove_event_instruction(s32);
 
 /* sound */
@@ -365,15 +361,11 @@ extern s32 g_world_primary_bit_read_index;
 extern s32 g_world_primary_bit_write_index;
 extern u8 g_world_primary_bit_cursor_reset;
 extern u8* g_world_primary_bit_cursor;
-extern s32 g_world_pending_bin_load_destination;
 extern s32 g_world_system_function_thread_busy;
-extern s32 g_world_bin_load_sectors[];         /* 0x80156388, indexed by request */
-extern s32 g_world_bin_load_sizes[];           /* 0x801563c8 */
-extern s32 g_world_bin_load_address_offsets[]; /* 0x80156408, relative to the overlay load address */
-extern s32 g_world_pending_bin_load_sectors[];
-extern s32 g_world_pending_bin_load_sizes[];
-extern s32 g_world_pending_bin_load_in_progress;
-extern s32 g_world_bin_load_in_progress; /* 0x801564cc */
+extern s32 g_menu_companion_executable_lbas[];    /* 0x80156388, indexed by request */
+extern s32 g_menu_companion_executable_sizes[];   /* 0x801563c8 */
+extern s32 g_menu_companion_executable_offsets[]; /* 0x80156408, relative to the overlay load address */
+extern s32 g_menu_companion_executable_loading;   /* 0x801564cc */
 extern s32 g_world_game_option_original_values[14];
 extern s32 g_world_game_option_values[14];
 s32 world_bits_read_primary(s32 bit_count);
@@ -391,8 +383,6 @@ void world_script_process_pending_requests(void);
 void world_camera_load_state_from_script_variables(void);
 void world_camera_store_state_to_script_variables(void);
 void world_card_close_stub(void);
-void world_menu_open_companion_executable(void);
-void world_menu_open_companion_data_file(void);
 
 /* thread */
 
@@ -849,8 +839,6 @@ void world_menu_clear_selection_record(s32 index);
 void world_menu_clear_selection_records(void);
 void world_gfx_clear_tpage7_vram_allocation_grid(void);
 
-void world_menu_copy_billboard_data_in(const menu_unit_status_record_t* status,
-    const menu_unit_status_identity_t* identity, const menu_status_panel_slot_storage_t* detail);
 void world_gfx_submit_screen_fade_overlay(fade_overlay_t* prims, s32 intensity);
 void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
 
@@ -894,7 +882,6 @@ void world_gfx_start_decreasing_fade(void);
 void world_gfx_start_increasing_fade(void);
 s32 world_gfx_update_fade_in_tile(void);
 s32 world_gfx_update_fade_out_tile(void);
-void world_gfx_load_evtchr_thread(void);
 
 /* job */
 
@@ -1606,7 +1593,6 @@ extern world_unit_status_number_images_t g_world_unit_summary_digit_images;
 extern menu_palette_primitives_t g_world_unit_editor_palette;
 extern menu_palette_slot_t g_world_unit_summary_palettes[];
 extern s32 g_world_companion_overlay_prims;
-extern vec3u16_t g_world_unit_runtime_coords;
 extern menu_unit_status_page_t g_world_unit_status_panel_pages[];
 extern menu_unit_editor_frame_t g_world_unit_editor_frames[2];
 extern menu_status_panel_editor_packet_t g_world_selected_unit_summary_packets[2];
@@ -1625,7 +1611,6 @@ s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id);
 s32 world_unit_check_facing_relative_to_camera(s32 unit_id);
 struct unit_stats* world_unit_get_active_stats(void);
 s32 world_unit_get_map_coords_by_runtime_id(s32 runtime_id, SVECTOR* out);
-vec3u16_t* world_unit_copy_world_coords_to_scratch(u32 runtime_id);
 s32 world_formation_get_unit_palette_index(s32 roster_slot);
 s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
 
@@ -1764,7 +1749,6 @@ void world_text_determine_spell_quote(action_command_t* action, s32 unit_id, s32
 void world_text_build_unit_name_list(void);
 void world_text_generate_formation_unit_name_string(void);
 s16 world_text_get_encoded_char_at_position(u8* text, s16 position, s32 mode);
-void world_text_relocate_pointer_table(s32* offset_table);
 void world_text_init_section_pointers(void);
 s32 world_text_is_printing(s32 thread_id);
 void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette);
@@ -1924,7 +1908,6 @@ extern s32 g_world_menu_thread_result;
 extern s32 g_world_menu_thread_running_status;
 extern u16 g_world_menu_transition_timeout;
 extern menu_selection_remap_t g_world_menu_value_remap_table[8];
-extern menu_unit_selection_record_t g_world_menu_unit_selection_rows[];
 extern s32 g_world_menu_use_alternate_main_palette;
 extern u8 g_world_menu_use_alternate_palette;
 extern s16 g_world_menu_use_scroll_position;

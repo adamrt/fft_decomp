@@ -20,7 +20,7 @@ void action_check_between_turn_events(void) {
     g_battle_casting_runtime_id = unit->runtime_id;
     battle_unit_store_entd_flags_without_control_flag(unit);
     if (unit->stats != 0) {
-        battle_menu_reset_unit_record(unit->stats->battle_id);
+        menu_reset_unit_record(unit->stats->battle_id);
         battle_unit_store_entd_flags_without_control_flag(unit);
         if (g_battle_menu_status_requested != 0 && !(unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)
             && g_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY) {

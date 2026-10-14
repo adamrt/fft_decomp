@@ -35,7 +35,7 @@ void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.reload_text = reload_text;
     if (reload_text != 0) {
         world_text_save_section_pointers();
-        world_text_relocate_pointer_table(g_open_text_section_offsets);
+        text_relocate_pointer_table(g_open_text_section_offsets);
     }
 
     index = wldcore_window_append_record_and_reset_color(

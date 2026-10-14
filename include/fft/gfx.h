@@ -259,6 +259,7 @@ void gfx_init_image_loading(
 void gfx_load_image_and_wait(RECT* rect, void* data);
 void gfx_move_image_and_wait(RECT* rect, s16 x, s16 y);
 void gfx_store_image_and_wait(RECT* rect, void* data);
+void gfx_load_evtchr_thread(void);
 
 /* scene texture allocation */
 /* Independent 15-row, 16-column grids for BATTLE and WORLD. */

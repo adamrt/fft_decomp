@@ -102,11 +102,11 @@ void world_text_character_handling_thread(void) {
     rec.y_offset = thread->task_words[3];
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && rec.options == 0xC) {
         world_text_save_section_pointers();
-        world_text_relocate_pointer_table(g_open_text_section_offsets);
+        text_relocate_pointer_table(g_open_text_section_offsets);
     }
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 0) {
         world_text_save_section_pointers();
-        world_text_relocate_pointer_table(g_open_text_section_offsets);
+        text_relocate_pointer_table(g_open_text_section_offsets);
         if (thread->function_parameter_2 == 0x807) {
             i = world_menu_get_party_unit_name_id();
             if (i >= 0x2FF) {

@@ -106,7 +106,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     g_world_event_pending_map_state = -1;
     g_world_event_pending_map_jump_out_2_id = -1;
     g_world_event_pending_effect_id = -1;
-    g_world_event_pending_loaded_evtchr_slot = -1;
+    g_script_pending_loaded_evtchr_slot = -1;
     g_world_event_pending_evtchr_save_slot = -1;
     g_world_event_pending_saved_evtchr_clear_slot = -1;
     g_world_event_pending_loaded_evtchr_clear_slot = -1;
@@ -180,8 +180,8 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         g_main_gfx_screen_polarity = polarity;
     }
-    world_menu_open_companion_executable();
-    world_menu_open_companion_data_file();
+    menu_open_companion_executable();
+    menu_open_companion_data_file();
     world_script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {

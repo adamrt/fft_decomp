@@ -8,7 +8,7 @@
  * stack, publishing it through g_battle_event_pending_loaded_evtchr_slot / g_battle_event_loaded_evtchr_buffer before
  * releasing it. Parameter 2 selects the block; each occupies 15 sectors from 0x1d4c.
  */
-void battle_gfx_load_evtchr_thread(void) {
+void gfx_load_evtchr_thread(void) {
     s32 parameter;
     s32 block;
     evtchr_file_record_t* buffer;
@@ -25,8 +25,8 @@ void battle_gfx_load_evtchr_thread(void) {
         thread_yield();
         g_thread_call_target = (void (*)(void))main_file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
-    g_battle_event_pending_loaded_evtchr_slot = parameter;
-    g_battle_event_loaded_evtchr_buffer = buffer;
+    g_script_pending_loaded_evtchr_slot = parameter;
+    g_script_loaded_evtchr_buffer = buffer;
     thread_yield();
     main_heap_free(buffer);
     thread_exit_current();

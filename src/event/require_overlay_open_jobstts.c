@@ -17,7 +17,7 @@
 void require_overlay_open_jobstts(void) {
     void* allocation;
 
-    battle_menu_copy_billboard_data_in(
+    menu_copy_billboard_data_in(
         &g_require_panel_selected_billboard, &g_require_active_unit_data, &g_require_editor_unit_fields);
     while (1) {
         allocation = main_heap_reserve_at(g_main_heap_high_overlay_load_address, 0x1f000);

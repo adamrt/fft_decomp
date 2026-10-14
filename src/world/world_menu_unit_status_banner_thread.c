@@ -344,8 +344,9 @@ void world_menu_unit_status_banner_thread(void) {
         status->sprites[6].h = 0x14;
         status->sprites[6].v0 = (cell / 7) * 0x14 + 0x2A;
         if ((frame == 0) || (display->work != 0)) {
-            world_menu_copy_billboard_data_in(&g_world_selected_unit_stat_summary, &g_world_selected_unit_identity,
-                &g_world_selected_unit_stat_detail);
+            /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
+            menu_copy_billboard_data_in(&g_world_selected_unit_stat_summary,
+                (const menu_active_unit_t*)&g_world_selected_unit_identity, &g_world_selected_unit_stat_detail);
             if (state->list_index < 0) {
                 entries[6].format = 0xC00;
             } else {

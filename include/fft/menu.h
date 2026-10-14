@@ -566,6 +566,8 @@ void menu_preview_attack_target_stats(void);
 
 void menu_copy_billboard_data_out(menu_unit_status_record_t* banner, menu_active_unit_t* unit,
     menu_status_panel_slot_storage_t* billboard, map_selected_tile_t* cursor_tile);
+void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
+    const menu_status_panel_slot_storage_t* billboard);
 void menu_clear_stat_preview(menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail);
 void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
     s16 item_before, s16 item_after, s32 slot);
@@ -1429,6 +1431,16 @@ typedef enum battle_companion_file {
     BATTLE_COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
 } battle_companion_file_e;
 void menu_run_companion_overlay_stub(void);
+extern u8* g_menu_companion_data_file_buffer;
+extern s32 g_menu_companion_data_file_loading;
+extern s32 g_menu_companion_data_file_lbas[];
+extern s32 g_menu_companion_data_file_sizes[];
+extern s32 g_menu_companion_executable_loading;
+extern s32 g_menu_companion_executable_lbas[];
+extern s32 g_menu_companion_executable_sizes[];
+extern s32 g_menu_companion_executable_offsets[];
+void menu_open_companion_data_file(void);
+void menu_open_companion_executable(void);
 
 /* g_battle_companion_overlay_state / g_world_companion_overlay_state: the overlay
  * entry the frame driver calls, cleared when the overlay returns. */
@@ -1528,6 +1540,8 @@ typedef struct menu_unit_selection_record {
     menu_list_selection_t lists[7]; /* 0x03 */
 } menu_unit_selection_record_t;
 typedef char menu_unit_selection_record_size_must_be_17[(sizeof(menu_unit_selection_record_t) == 17) ? 1 : -1];
+extern menu_unit_selection_record_t g_menu_unit_selection_records[];
+void menu_reset_unit_record(s32 record_index);
 
 /* Remap three remembered selections to one replacement for a menu. */
 typedef struct menu_selection_remap {
@@ -2192,6 +2206,7 @@ void text_fill_field_with_terminators(u8* text);
 s32 text_resolve_format_string_id(s32 format_code, s32 value);
 extern const char g_text_decimal_format[];
 void text_print_fnt_value_and_next(s32 value);
+void text_relocate_pointer_table(const u32* offsets);
 
 /* unit */
 /* Provisional 0x2d0-byte double-buffered frame of the unit editor panel

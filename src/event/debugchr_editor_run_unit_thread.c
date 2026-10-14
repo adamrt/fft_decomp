@@ -209,7 +209,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             unit_type_ptr = &g_debugchr_panel_selected_billboard.unit_index;
             *unit_type_ptr = *chosen_unit;
             debugchr_editor_load_selected_unit();
-            battle_menu_copy_billboard_data_in(&g_debugchr_panel_selected_billboard,
+            menu_copy_billboard_data_in(&g_debugchr_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
                 &g_menu_status_panel_fields);
             g_debugchr_status_display_thread_params.redraw_request = one;
@@ -232,7 +232,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             unit_type_ptr = &g_debugchr_panel_selected_billboard.unit_index;
             *unit_type_ptr = *chosen_unit;
             debugchr_editor_load_selected_unit();
-            battle_menu_copy_billboard_data_in(&g_debugchr_panel_selected_billboard,
+            menu_copy_billboard_data_in(&g_debugchr_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
                 &g_menu_status_panel_fields);
             g_debugchr_status_display_thread_params.redraw_request = 2;
@@ -257,7 +257,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         *comparison_ptr = g_debugchr_editor_unit_ids[0];
         *unit_type_id_ptr = g_debugchr_editor_unit_ids[0];
         debugchr_editor_load_selected_unit();
-        battle_menu_copy_billboard_data_in(
+        menu_copy_billboard_data_in(
             &g_debugchr_panel_selected_billboard, &g_debugchr_panel_selected_unit_data, &g_menu_status_panel_fields);
     }
 }

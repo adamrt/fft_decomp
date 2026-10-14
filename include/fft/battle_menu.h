@@ -20,7 +20,6 @@ void battle_menu_clear_status_menu_state(void);
 void battle_menu_init_subsystem_pointers(void);
 void battle_menu_init_subsystems(void);
 void battle_menu_reset_subsystems(void);
-void battle_menu_reset_unit_record(s32 record_index);
 void battle_menu_reset_unit_records(void);
 s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
@@ -32,7 +31,6 @@ extern u16 g_battle_menu_input_block_frames;
 extern s16 g_battle_menu_result; /* menu result: -4 pending, -1 canceled */
 extern s16 g_battle_menu_selected_option;
 extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
-extern menu_unit_selection_record_t g_battle_menu_unit_selection_records[BATTLE_UNIT_SLOT_COUNT];
 
 void battle_handle_menu_cancel_input(menu_entry_t* menu);
 s32 battle_menu_can_accept_input(void);
@@ -151,8 +149,6 @@ extern menu_number_entry_t g_battle_menu_right_unit_stats_setup[10];
 extern s32 g_battle_post_battle_unit_changes_active;
 
 void battle_menu_build_unit_portrait_poly(POLY_FT4* poly, u32 battle_id);
-void battle_menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
-    const menu_status_panel_slot_storage_t* billboard);
 void battle_menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output);
 void battle_menu_display_hovered_unit_stats(
     RECT* frame_rect, s32 mode, menu_number_entry_t* entries, menu_unit_status_record_t* status);
@@ -283,17 +279,8 @@ void battle_menu_release_current_thread_slot(void);
 void battle_menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 
 /* overlay loading */
-extern s32 g_battle_menu_companion_data_file_lbas[];
-extern s32 g_battle_menu_companion_data_file_loading;
-extern s32 g_battle_menu_companion_data_file_sizes[];
-extern s32 g_battle_menu_companion_executable_lbas[];
-extern s32 g_battle_menu_companion_executable_loading;
-extern s32 g_battle_menu_companion_executable_offsets[];
-extern s32 g_battle_menu_companion_executable_sizes[];
 
 void battle_menu_open_bunit(void);
-void battle_menu_open_companion_data_file(void);
-void battle_menu_open_companion_executable(void);
 void battle_menu_open_debugchr_unit_editor(void);
 s32 battle_menu_poll_small_load(void);
 void battle_menu_run_bunit_transition_thread(void);

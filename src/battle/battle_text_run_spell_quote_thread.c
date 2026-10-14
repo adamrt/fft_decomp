@@ -40,13 +40,13 @@ void battle_text_run_spell_quote_thread(void) {
         window_mode = 0x12;
     }
     message_id = battle_thread_get_current_parameter_2() | 0xA800;
-    g_battle_text_message_buffer = main_heap_alloc(0x4000);
+    g_menu_companion_data_file_buffer = main_heap_alloc(0x4000);
     menu_request_open_companion_data_file(BATTLE_COMPANION_FILE_SPELL_MES);
-    g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_battle_text_message_buffer;
+    g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_menu_companion_data_file_buffer;
     thread_start(THREAD_SLOT_MENU, battle_text_run_dialog_thread);
     thread_set_parameters(THREAD_SLOT_MENU, window_mode, message_id, id);
     thread_wait_until_inactive(THREAD_SLOT_MENU);
-    main_heap_free(g_battle_text_message_buffer);
+    main_heap_free(g_menu_companion_data_file_buffer);
     g_menu_pending_selection[0] = 7;
     script_set_event_speed(1);
     g_battle_system_function_thread_busy = 0;

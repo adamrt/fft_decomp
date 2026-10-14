@@ -17,8 +17,8 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `script_focus_speed` accumulates into an uninitialized `$s6`: the event
   dispatcher leaves `operand_3` there, while camera fusion leaves its key count.
   Those caller values affect the camera duration.
-- `src/battle/script_toggle_message_portrait_flip.c`,
-  `src/world/world_script_toggle_message_portrait_flip.c`: the record index is never
+- `src/shared/script/script_toggle_message_portrait_flip.c` (BATTLE and
+  WORLD): the record index is never
   assigned; all six passes use whatever `$s0` held. Keep the local
   uninitialized.
 - `src/wldcore/wldcore_proposition_determine_success.c`: the preferred-job

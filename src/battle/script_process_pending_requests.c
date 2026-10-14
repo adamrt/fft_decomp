@@ -128,9 +128,9 @@ void script_process_pending_requests(void) {
         g_battle_unit_graphics_load_pending = battle_gfx_poll_unit_graphics_load();
     }
     if (pending == 0) {
-        loaded_slot = g_battle_event_pending_loaded_evtchr_slot;
+        loaded_slot = g_script_pending_loaded_evtchr_slot;
         if (loaded_slot >= 0) {
-            battle_gfx_unpack_evtchr_file_to_vram_slot(loaded_slot, g_battle_event_loaded_evtchr_buffer);
+            battle_gfx_unpack_evtchr_file_to_vram_slot(loaded_slot, g_script_loaded_evtchr_buffer);
         }
         save_slot = g_battle_event_pending_evtchr_save_slot;
         if (save_slot >= 0) {

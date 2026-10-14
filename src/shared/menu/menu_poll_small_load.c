@@ -9,7 +9,7 @@ s32 menu_poll_small_load(void) {
     if (g_menu_companion_executable_request_index == 0) {
         return 0;
     }
-    battle_menu_open_companion_executable();
+    menu_open_companion_executable();
     if (g_menu_companion_executable_request_index != 0) {
         return 1;
     }

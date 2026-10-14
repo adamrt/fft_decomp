@@ -56,14 +56,12 @@ extern s32 g_battle_text_substitution_value_28;
 /* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
 u8* battle_text_find_entry(u32 text_id);
 void battle_text_init_menu_section_pointers(void);
-void battle_text_relocate_pointer_table(const u32* offsets);
 void battle_text_restore_section_pointers(void);
 void battle_text_save_section_pointers(void);
 
 /* messages */
 extern s32 g_battle_text_awaiting_input;
 extern s32 g_battle_text_current_line;
-extern u8* g_battle_text_message_buffer;
 extern u16 g_battle_text_speaker_swap_unit_a;
 extern u16 g_battle_text_speaker_swap_unit_b;
 

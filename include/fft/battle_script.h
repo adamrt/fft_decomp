@@ -54,9 +54,7 @@ void script_dark_screen_thread(void);
 
 /* graphics and messages */
 
-void script_load_portrait_colors_event_instruction(s32 portrait_id);
 void script_set_units_palette_update_suppression(s32 unit_id, s32 enable);
-void script_toggle_message_portrait_flip(const u8* parameters);
 
 /* frame hooks */
 

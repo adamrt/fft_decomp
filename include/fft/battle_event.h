@@ -15,10 +15,8 @@ extern u8
 extern u16 g_battle_event_input_suppression_frames;
 
 /* character graphics */
-extern evtchr_file_record_t* g_battle_event_loaded_evtchr_buffer;
-extern s32 g_battle_event_pending_evtchr_save_slot;         /* 0x80173f4c */
-extern s32 g_battle_event_pending_loaded_evtchr_clear_slot; /* 0x80173ca0 */
-extern s32 g_battle_event_pending_loaded_evtchr_slot;
+extern s32 g_battle_event_pending_evtchr_save_slot;           /* 0x80173f4c */
+extern s32 g_battle_event_pending_loaded_evtchr_clear_slot;   /* 0x80173ca0 */
 extern s32 g_battle_event_pending_reserved_vram_release_slot; /* 0x80173f48 */
 extern s32 g_battle_event_pending_saved_evtchr_clear_slot;    /* 0x80173f50 */
 /* 0x80173cac: packed unit ID << 8 | reserved VRAM slot; -1 absent. */

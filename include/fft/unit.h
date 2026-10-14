@@ -1204,4 +1204,9 @@ typedef struct unit_animation_state {
 } unit_animation_state_t;
 typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) == 7 ? 1 : -1];
 
+/* event coordinates */
+extern SVECTOR g_unit_runtime_coords;
+
+SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
+
 #endif

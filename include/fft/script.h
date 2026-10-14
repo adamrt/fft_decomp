@@ -701,6 +701,8 @@ extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
 extern s32 g_script_next_event_id;
 extern s16 g_script_scenario_event_active;
+extern s32 g_script_pending_loaded_evtchr_slot;
+extern evtchr_file_record_t* g_script_loaded_evtchr_buffer;
 s32 script_get_current_scenario_finish_operation(void);
 u32 script_get_event_finish_operation(void);
 
@@ -1083,6 +1085,8 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
 void script_add_unit_stub(void);
 void script_opcode_74_event_instruction(const u8* unused_parameters);
+void script_toggle_message_portrait_flip(const u8* parameters);
+void script_load_portrait_colors_event_instruction(s32 portrait_id);
 void script_run_sprite_move(const event_sprite_move_parameters_t* parameters, s32 use_speed);
 void script_sprite_move(void);
 void script_sprite_move_beta(void);

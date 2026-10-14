@@ -1286,13 +1286,11 @@ void battle_unit_update_facing_and_pending_animations(void);
 void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, battle_unit_t* target);
 
 /* world coordinates */
-extern SVECTOR g_battle_unit_runtime_coords;
 
 SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id);
 SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id);
 void battle_unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
 void battle_unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-SVECTOR* battle_unit_copy_world_coords_to_scratch(u32 runtime_id);
 void battle_unit_set_real_coords_from_world_coords(struct battle_unit* unit);
 void battle_unit_set_world_coords_from_real_coords(struct battle_unit* unit);
 void battle_unit_set_move_and_world_coords(battle_unit_t* unit);
