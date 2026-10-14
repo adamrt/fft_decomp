@@ -18,7 +18,7 @@ void action_init_learn_ability_on_hit(void) {
     g_main_system_animation_speed = 1;
     unit = battle_unit_get_source();
     battle_menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
-    battle_text_set_message_duration_frames(0x1E);
+    text_set_message_duration_frames(0x1E);
     switch (g_action_post_action_display_phase) {
     case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
         action_report_level_up(unit);

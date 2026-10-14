@@ -86,7 +86,7 @@ void card_save_run_menu(s32 unused) {
 
         card_gfx_set_render_otag(g_card_gfx_context->otag + 1);
         g_gfx_current_otag_entry = g_card_gfx_context->otag + 0x3c;
-        battle_menu_draw_active_window_frames();
+        menu_draw_active_window_frames();
         input = PadRead(0) & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
         buttons = g_card_input_newly_pressed & 0x0fff;
         input |= buttons;

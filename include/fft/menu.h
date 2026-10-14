@@ -123,7 +123,7 @@ typedef enum menu_window_icon_flags {
  * Event ChangeDialog scans records 0, 2 and 4, compares +0x14 with operand 0,
  * and checks the thread at +0x04 for task 0x33. For DisplayMessage, the text
  * threads store the dialog type's box nibble (& 0x70), the portrait unit and
- * the scroll state, and battle/world_menu_draw_active_window_frames read
+ * the scroll state, and battle/menu_draw_active_window_frames read
  * them. */
 typedef struct menu_window_buffer {
     s32 active;             /* 0x00: 1 once the text thread has built the window; the frame
@@ -162,6 +162,9 @@ extern u16 g_menu_cursor_zoom_percentages[];
 
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void);
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
+/* BATTLE and WORLD each link their own body. */
+void menu_draw_active_window_frames(void);
+void menu_select_sprite_clut(void* packet);
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step);
 
@@ -949,8 +952,8 @@ typedef struct menu_input_timing_profile {
 } menu_input_timing_profile_t;
 
 /* A text layout followed by the first visible row, as bound to a scrolling
- * list's menu_entry_t::context (world_menu_scrolling_list_thread and the AT list
- * built by world_menu_build_ability_preview_at_list). */
+ * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread and the AT list
+ * built by menu_build_ability_preview_at_list). */
 typedef struct menu_scroll_text_layout {
     menu_text_layout_t columns; /* 0x00 */
     s16 row_offset;             /* 0x28 */
@@ -1008,7 +1011,7 @@ typedef struct menu_icon_record {
 } menu_icon_record_t;
 
 /* Provisional: one of the two 0x134-byte packet pages a scrolling text list
- * alternates between frames (world_menu_scrolling_list_thread at 0x801a3d58,
+ * alternates between frames (menu_run_scrolling_ability_list_thread at 0x801a3d58,
  * world_build_at_list at 0x801ac6b4, world_screen_build_at_list at 0x801bfda4). */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
@@ -1119,6 +1122,9 @@ typedef char menu_at_list_work_size_must_be_1824[(sizeof(menu_at_list_work_t) ==
 
 void menu_init_at_list(menu_entry_t* entry);
 void menu_build_ability_preview_at_list(void);
+void menu_preview_ability_turn_at_list(void);
+/* BATTLE and WORLD each link their own body. */
+void menu_run_scrolling_ability_list_thread(void);
 
 /* skillset selection */
 extern s32 g_menu_selected_skill_ct;
@@ -2284,5 +2290,7 @@ extern RECT g_text_substitution_rect;
 
 void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
 void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
+extern u16 g_text_message_duration_frames;
+void text_set_message_duration_frames(u16 frames);
 
 #endif

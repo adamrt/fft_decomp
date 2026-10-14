@@ -13,7 +13,7 @@
  * Options-menu thread started by world_menu_run_main_mode (mode 0) with
  * entry->context = &g_world_option_menu_entry_table.
  *
- * Scrolls the two-column option list like world_menu_scrolling_list_thread, shows the
+ * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread, shows the
  * selected option's value text (g_world_option_menu_first_text_ids[i] + g_world_game_option_values[i]),
  * starts world_menu_run_option_choice on confirm, and each frame packs the option
  * values back into g_main_game_options, applies the sound mode on the main
@@ -265,7 +265,8 @@ void world_menu_run_game_options(void) {
         page->icons.base.sprites[1].y0 += 2;
         page->icons.base.sprites[2].y0 += 2;
         entry->selected_index = row_offset + cursor;
-        if ((g_script_event_speed == 1 && !(world_input_get_menu_repeat_counter() & 1)) || g_script_event_speed == 2) {
+        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
+            || g_script_event_speed == 2) {
             if (timer < g_main_menu_scroll_accel_delay) {
                 step = g_main_menu_scroll_slow_step * 2;
             } else {
@@ -278,7 +279,7 @@ void world_menu_run_game_options(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = world_input_get_menu_repeat_counter();
+            repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
@@ -286,9 +287,9 @@ void world_menu_run_game_options(void) {
             }
         }
         page->frame.v0 = ring * 16 + accum - 2;
-        world_menu_select_sprite_clut(&page->title);
-        world_menu_select_sprite_clut(&page->value);
-        world_menu_select_sprite_clut(frame);
+        menu_select_sprite_clut(&page->title);
+        menu_select_sprite_clut(&page->value);
+        menu_select_sprite_clut(frame);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[3]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);

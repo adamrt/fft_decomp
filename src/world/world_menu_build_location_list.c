@@ -40,5 +40,5 @@ void world_menu_build_location_list(void) {
     }
     g_menu_thread_menu_data[6].selected_index = selected;
     g_menu_thread_menu_data[6].window.y = (7 - g_world_menu_location_list_layout.columns.row_count) * 8 - 0x48;
-    world_menu_scrolling_list_thread();
+    menu_run_scrolling_ability_list_thread();
 }

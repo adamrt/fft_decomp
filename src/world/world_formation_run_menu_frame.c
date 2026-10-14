@@ -117,7 +117,7 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     g_menu_pending_selection[0] = -2;
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;
-    world_menu_draw_active_window_frames();
+    menu_draw_active_window_frames();
     script_load_event_input_state(&g_world_formation_menu_input_state);
     if (g_world_formation_menu_new_buttons != 0x100 && g_world_formation_menu_new_buttons != 0) {
         g_world_thread_change_cooldown = 5;

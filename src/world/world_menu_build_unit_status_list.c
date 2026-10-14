@@ -66,5 +66,5 @@ void world_menu_build_unit_status_list(void) {
         g_world_menu_status_list_layout.columns.row_count = count;
         g_world_menu_status_list_layout.columns.hidden_rows = 0;
     }
-    world_menu_scrolling_list_thread();
+    menu_run_scrolling_ability_list_thread();
 }

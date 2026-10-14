@@ -21,7 +21,7 @@ void battle_menu_open_move_confirm(void) {
     g_battle_game_state = BATTLE_GAME_STATE_MOVE_CONFIRM_MENU;
     source = battle_unit_get_source();
     caster = battle_unit_get_casting();
-    battle_text_set_message_duration_frames(0x3C);
+    text_set_message_duration_frames(0x3C);
     if (caster->path.flags & BATTLE_EFFECTIVE_MOVEMENT_TELEPORT) {
         if (caster->last_path_count == MOVE_PATH_TELEPORT_FAILED) {
             battle_menu_init_system_function(

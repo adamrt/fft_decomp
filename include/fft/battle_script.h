@@ -21,8 +21,6 @@ void script_set_event_speed(s32 speed);
 extern u32 g_script_saved_event_input;
 
 void script_route_event_input(void);
-void script_set_current_otag_entry_and_update_input(u32* entry, s32 input);
-void script_update_event_input_state(u32 state);
 
 /* conditions */
 

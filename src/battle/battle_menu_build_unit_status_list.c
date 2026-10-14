@@ -69,5 +69,5 @@ void battle_menu_build_unit_status_list(void) {
         g_battle_menu_status_visible_rows = count;
         g_battle_menu_status_scroll_rows = 0;
     }
-    battle_menu_run_scrolling_ability_list_thread();
+    menu_run_scrolling_ability_list_thread();
 }

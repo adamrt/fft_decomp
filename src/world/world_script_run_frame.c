@@ -42,7 +42,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
     g_gfx_current_otag_entry = ot;
     world_gfx_submit_screen_fade_overlay(&g_world_screen_tint_tiles[g_menu_packet_buffer_index], g_gfx_screen_fade);
     world_camera_store_state_to_script_variables();
-    world_menu_draw_active_window_frames();
+    menu_draw_active_window_frames();
 
     if (g_world_event_finish_check_pending != 0) {
         for (i = 1; i < 17; i++) {
@@ -87,7 +87,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
         g_world_event_finish_check_pending = 0;
     }
 
-    world_input_update_menu_repeat(buttons);
+    script_update_event_input_state(buttons);
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         g_script_unfiltered_controller_input = g_script_event_input;
         script_apply_input_overrides(&g_script_event_input);

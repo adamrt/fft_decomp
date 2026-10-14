@@ -66,7 +66,6 @@ void battle_text_save_section_pointers(void);
 extern s32 g_battle_text_awaiting_input;
 extern s32 g_battle_text_current_line;
 extern u8* g_battle_text_message_buffer;
-extern u16 g_battle_text_message_duration_frames;
 extern u16 g_battle_text_speaker_swap_unit_a;
 extern u16 g_battle_text_speaker_swap_unit_b;
 
@@ -74,7 +73,6 @@ void text_build_display_message(s32 offset, s32 flags, s32* out_width);
 void battle_text_build_display_message(s32 offset, s32 flags, s32* out_width);
 void battle_text_build_unit_name_list(void);
 void battle_text_run_dialog_thread(void);
-void battle_text_set_message_duration_frames(u16 frames);
 
 /* typewriter entrypoint */
 

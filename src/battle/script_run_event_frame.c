@@ -48,7 +48,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     battle_gfx_submit_screen_fade_overlay(
         &g_battle_gfx_screen_fade_overlays[g_menu_packet_buffer_index], g_gfx_screen_fade);
     camera_store_state_to_script_variables();
-    battle_menu_draw_active_window_frames();
+    menu_draw_active_window_frames();
 
     if (g_script_threads_idle != 0) {
         for (i = 1; i < 16; i++) {

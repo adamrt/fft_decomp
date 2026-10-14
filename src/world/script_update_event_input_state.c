@@ -8,7 +8,7 @@
  * Body of world_input_update_menu_state after its pad read: the same
  * initial/repeat/secondary key-repeat delays, restarted during a tutorial
  * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set. */
-void world_input_update_menu_repeat(u32 input) {
+void script_update_event_input_state(u32 input) {
     s32 initial_delay;
     s32 repeat_delay;
     s32 secondary_repeat_delay;

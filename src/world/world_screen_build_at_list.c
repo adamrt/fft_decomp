@@ -11,7 +11,7 @@
 
 /*
  * Scrolling three-column text list thread (an older sibling of
- * world_menu_scrolling_list_thread with a fixed page pair at 0x801bfda4 and helper thread
+ * menu_run_scrolling_ability_list_thread with a fixed page pair at 0x801bfda4 and helper thread
  * 15 running world_screen_menu_window_frame_thread). The menu-screen library's variant of
  * world_build_at_list: the formation screens, the world map menus and the title's music test run it.
  *
@@ -244,7 +244,8 @@ void world_screen_build_at_list(void) {
             world_menu_handle_entry_confirm(entry, cursor);
         }
         world_menu_cancel_thread_group(entry);
-        if ((g_script_event_speed == 1 && !(world_input_get_menu_repeat_counter() & 1)) || g_script_event_speed == 2) {
+        if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
+            || g_script_event_speed == 2) {
             if (timer < g_main_menu_scroll_accel_delay) {
                 step = g_main_menu_scroll_slow_step;
             } else {
@@ -256,7 +257,7 @@ void world_screen_build_at_list(void) {
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
-            repeat = world_input_get_menu_repeat_counter();
+            repeat = script_get_event_initial_repeat_counter();
             delta = 0;
             accum = 0;
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {

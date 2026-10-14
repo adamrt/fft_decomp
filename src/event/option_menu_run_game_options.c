@@ -280,9 +280,9 @@ void option_menu_run_game_options(void) {
             }
         }
         page->frame.v0 = ring * 16 + accum - 2;
-        battle_menu_select_sprite_clut(&page->title);
-        battle_menu_select_sprite_clut(&page->value);
-        battle_menu_select_sprite_clut(frame);
+        menu_select_sprite_clut(&page->title);
+        menu_select_sprite_clut(&page->value);
+        menu_select_sprite_clut(frame);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[3]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);

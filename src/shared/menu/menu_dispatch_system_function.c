@@ -189,7 +189,7 @@ s32 menu_dispatch_system_function(
         thread_start(THREAD_SLOT_SYSTEM_FUNCTION, battle_text_run_spell_quote_thread);
         thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_battle_spell_quote_last_ability_id, 0);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT) {
-        battle_text_set_message_duration_frames(0x3C);
+        text_set_message_duration_frames(0x3C);
         if (g_main_action_menu_types_by_skillset[unit->action_command.skillset_id] == ACTION_MENU_TYPE_ARITHMETICKS) {
             g_text_substitution_values[1] = unit->action_command.calculator_multiplier + TEXT_ID_ABILITY_NAME_BASE;
             g_text_substitution_values[0] = unit->action_command.calculator_type + TEXT_ID_ABILITY_NAME_BASE;

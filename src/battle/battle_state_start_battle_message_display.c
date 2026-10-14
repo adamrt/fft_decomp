@@ -21,7 +21,7 @@ void battle_state_start_battle_message_display(void) {
     action_build_targets_post_action_message();
     battle_unit_update_attack_result_animation(unit);
     unit->item_display_active = 0;
-    battle_text_set_message_duration_frames(0x3c);
+    text_set_message_duration_frames(0x3c);
     switch (unit->strike.post_action_message) {
     case BATTLE_POST_ACTION_MESSAGE_POACHED:
         main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
@@ -39,7 +39,7 @@ void battle_state_start_battle_message_display(void) {
     for (i = 0; i < unit->strike.target_count; i++) {
         target = battle_unit_get_by_battle_id(unit->strike.target_list[i]);
         if (target != 0 && target->stats != 0 && target->stats->action.hit != 0) {
-            battle_text_set_message_duration_frames(0x3c);
+            text_set_message_duration_frames(0x3c);
             /* Taking the row first keeps this loop above loop.c's size limit
              * for hoisting the constant 6 into a saved register. */
             animation = &g_battle_ability_animation_data[unit->sp2_ability_id];

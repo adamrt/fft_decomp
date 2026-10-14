@@ -114,7 +114,6 @@ extern s32 g_battle_menu_used_item_id;
 extern s32 g_battle_menu_used_skillset_id;
 
 void battle_menu_build_ability_list(s32 mode);
-void battle_menu_build_ability_preview_at_list(void);
 void battle_menu_build_skillset_entries(void);
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
@@ -135,8 +134,6 @@ s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_a
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-void battle_menu_preview_ability_turn_at_list(void);
-void battle_menu_run_scrolling_ability_list_thread(void);
 void battle_menu_run_skillset_thread(void);
 
 /* unit panels */
@@ -239,14 +236,12 @@ void battle_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect
 void battle_menu_build_sprite_page(s32 page_index, RECT* base_screen);
 u8* battle_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
-void battle_menu_draw_active_window_frames(void);
 void battle_menu_icon_linked_entry_thread(void);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 void battle_menu_reset_buffer_slots(void);
 void battle_menu_run_icon_selection_loop(void);
 void battle_menu_select_icon_cluts(menu_icon_sprites_t* frame);
 void battle_menu_select_icon_sprite_clut(SPRT* sprite);
-void battle_menu_select_sprite_clut(SPRT* sprite);
 void battle_menu_submit_icon_primitives(menu_icon_sprites_t* frame);
 void battle_menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
 

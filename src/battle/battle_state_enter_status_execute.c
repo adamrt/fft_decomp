@@ -15,13 +15,13 @@ void battle_state_enter_status_execute(void) {
     action_clear_at_list_active();
     g_action_post_action = 0;
     if (g_action_turn_event_type == BATTLE_TURN_EVENT_MIME) {
-        battle_text_set_message_duration_frames(0x3C);
+        text_set_message_duration_frames(0x3C);
         battle_menu_init_system_function(
             BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183A, unit->stats->battle_id, unit->stats->battle_id, 1);
         battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_KNEEL, unit->facing, unit);
         return;
     }
-    battle_text_set_message_duration_frames(0xB4);
+    text_set_message_duration_frames(0xB4);
     statuses = unit->statuses_to_add_5_6;
     if (statuses & BATTLE_UNIT_STATUS_CRYSTAL) {
         battle_menu_init_system_function(

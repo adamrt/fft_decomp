@@ -28,9 +28,9 @@ void menu_icon_timed_thread(void) {
     s32 unset;
 
     hold = 0;
-    if (g_battle_text_message_duration_frames >= 0x100) {
+    if (g_text_message_duration_frames >= 0x100) {
         hold = 1;
-        g_battle_text_message_duration_frames &= 0xFF;
+        g_text_message_duration_frames &= 0xFF;
     }
     i = 0;
     param = (menu_entry_t*)battle_thread_get_current_parameter_1();
@@ -47,7 +47,7 @@ void menu_icon_timed_thread(void) {
         if (i == 0) {
             battle_menu_free_memory(buffer);
         }
-        if (g_battle_text_message_duration_frames < i * g_script_event_speed) {
+        if (g_text_message_duration_frames < i * g_script_event_speed) {
             hold = 0;
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;

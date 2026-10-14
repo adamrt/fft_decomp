@@ -19,7 +19,7 @@
  * scenario and thread parameter before the loop; the shared pseudos give the
  * target's $s1/$s3/$s4 allocation. The ot_index choice must be an if/else
  * (a then-block of its own keeps sched from hoisting the 0x3c store above
- * world_menu_draw_active_window_frames), and tile_box is a never-modified
+ * menu_draw_active_window_frames), and tile_box is a never-modified
  * local rematerialised at its use; without it the loop is one insn too long
  * for loop.c to hoist the constant 6 into $s7.
  */
@@ -164,7 +164,7 @@ void world_shop_run_screen(s32 shop_type) {
             world_shop_update_unit_selection();
         }
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
-        world_menu_draw_active_window_frames();
+        menu_draw_active_window_frames();
         if (g_world_shop_menu_step == WORLD_SHOP_STEP_FUR_BUY_CONFIRM
             || g_world_shop_menu_step == WORLD_SHOP_STEP_FUR_SELL_CONFIRM
             || g_world_shop_menu_step == WORLD_SHOP_STEP_FITTING_ROOM_SELL

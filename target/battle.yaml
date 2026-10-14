@@ -722,7 +722,7 @@ functions:
   - {addr: 0x8012e59c, size: 8, name: battle_menu_clear_window_buffer_pair_by_thread, hash: 6d64edf91449c1b1}
   - {addr: 0x8012e5a4, size: 168, name: battle_menu_release_window_buffer_pair, hash: 1de9742bbda0b16a}
   - {addr: 0x8012e64c, size: 16, name: gfx_set_primitive_brightness, hash: d98b50e73c8678b4, source: src/shared/gfx/gfx_set_primitive_brightness.c}
-  - {addr: 0x8012e65c, size: 868, name: battle_menu_draw_active_window_frames, hash: 5d8d85cafd1b353c}
+  - {addr: 0x8012e65c, size: 868, name: menu_draw_active_window_frames, hash: 5d8d85cafd1b353c}
   - {addr: 0x8012e9c0, size: 60, name: battle_gfx_clear_tpage7_vram_allocation_grid, hash: 87e3ef6c7408d4d1, source: src/shared/gfx/gfx_clear_texture_allocation_grid.c, source_symbol: gfx_clear_texture_allocation_grid}
   - {addr: 0x8012e9fc, size: 660, name: gfx_alloc_texture_rect, hash: 172942b718e358b1, source: src/shared/gfx/gfx_alloc_texture_rect.c}
   - {addr: 0x8012ec90, size: 428, name: battle_gfx_free_tpage7_vram, hash: 83a3ad5b7c6ecddd, source: src/shared/gfx/gfx_free_texture_rect.c, source_symbol: gfx_free_texture_rect}
@@ -804,7 +804,7 @@ functions:
   - {addr: 0x80137f84, size: 272, name: battle_handle_menu_cancel_input, hash: 5c56c2d632802940}
   - {addr: 0x80138094, size: 224, name: battle_menu_should_close_thread, hash: 3a3f5ddcc1501b24}
   - {addr: 0x80138174, size: 596, name: battle_menu_build_window_sprites, hash: 14eb30841abcf4da}
-  - {addr: 0x801383c8, size: 76, name: battle_menu_select_sprite_clut, hash: 0a1e2175a3486b65}
+  - {addr: 0x801383c8, size: 76, name: menu_select_sprite_clut, hash: 0a1e2175a3486b65, source: src/shared/menu/menu_select_sprite_clut.c}
   - {addr: 0x80138414, size: 76, name: battle_menu_select_icon_sprite_clut, hash: 7fbd1eda323a9e3b}
   - {addr: 0x80138460, size: 128, name: battle_menu_select_icon_cluts, hash: f53407b6bcd1cdbc}
   - {addr: 0x801384e0, size: 144, name: battle_menu_get_cursor_bob_offset, hash: f47602e9b85539b1}
@@ -816,13 +816,13 @@ functions:
   - {addr: 0x80138b10, size: 84, name: battle_menu_submit_icon_primitives, hash: 3abc0aee8fb45d44, source: src/shared/menu/menu_submit_icon_primitives.c, source_symbol: menu_submit_icon_primitives}
   - {addr: 0x80138b64, size: 884, name: battle_menu_auto_battle_setting_thread, hash: abb41eaee69c7fdf, source: src/shared/menu/menu_auto_battle_setting_thread.c, source_symbol: menu_auto_battle_setting_thread}
   - {addr: 0x80138ed8, size: 484, name: battle_menu_run_icon_selection_loop, hash: 8cfe22df483b0535, source: src/shared/menu/menu_run_icon_selection_loop.c, source_symbol: menu_run_icon_selection_loop}
-  - {addr: 0x801390bc, size: 1216, name: battle_menu_build_ability_preview_at_list, hash: 6e702f32cf54faba, source: src/shared/menu/menu_build_ability_preview_at_list.c, source_symbol: menu_build_ability_preview_at_list}
-  - {addr: 0x8013957c, size: 48, name: battle_menu_preview_ability_turn_at_list, hash: a3d09a882786de18}
+  - {addr: 0x801390bc, size: 1216, name: menu_build_ability_preview_at_list, hash: 6e702f32cf54faba, source: src/shared/menu/menu_build_ability_preview_at_list.c}
+  - {addr: 0x8013957c, size: 48, name: menu_preview_ability_turn_at_list, hash: a3d09a882786de18, source: src/shared/menu/menu_preview_ability_turn_at_list.c}
   - {addr: 0x801395ac, size: 848, name: battle_menu_draw_text_columns_narrow, hash: d75e80a24787682e}
   - {addr: 0x801398fc, size: 736, name: battle_menu_redraw_text_page_on_scroll_in_rect, hash: 5123e70a9f03a283}
-  - {addr: 0x80139bdc, size: 16, name: script_get_event_initial_repeat_counter, hash: 1bc08cac58cdde01}
-  - {addr: 0x80139bec, size: 4848, name: battle_menu_run_scrolling_ability_list_thread, hash: a4bba4000533dd46}
-  - {addr: 0x8013aedc, size: 16, name: battle_text_set_message_duration_frames, hash: e02feb0de282649e}
+  - {addr: 0x80139bdc, size: 16, name: script_get_event_initial_repeat_counter, hash: 1bc08cac58cdde01, source: src/shared/script/script_get_event_initial_repeat_counter.c}
+  - {addr: 0x80139bec, size: 4848, name: menu_run_scrolling_ability_list_thread, hash: a4bba4000533dd46}
+  - {addr: 0x8013aedc, size: 16, name: text_set_message_duration_frames, hash: e02feb0de282649e, source: src/shared/text/text_set_message_duration_frames.c}
   - {addr: 0x8013aeec, size: 288, name: battle_menu_size_entry_to_text, hash: c07f6322a91d987d, source: src/shared/menu/menu_size_entry_to_text.c, source_symbol: menu_size_entry_to_text}
   - {addr: 0x8013b00c, size: 628, name: battle_menu_icon_timed_thread, hash: 5f240ea74b70ce9e, source: src/shared/menu/menu_icon_timed_thread.c, source_symbol: menu_icon_timed_thread}
   - {addr: 0x8013b280, size: 636, name: battle_menu_icon_linked_entry_thread, hash: 17aa3c9f1ea9e5dd, source: src/shared/menu/menu_icon_linked_entry_thread.c, source_symbol: menu_icon_linked_entry_thread}
@@ -962,7 +962,7 @@ functions:
   - {addr: 0x80142ca8, size: 132, name: script_route_event_input, hash: 7b610c69d3745c90}
   - {addr: 0x80142d2c, size: 44, name: script_filter_controller_input, hash: 9fe5b57eca447db5, source: src/shared/script/script_filter_controller_input.c}
   - {addr: 0x80142d58, size: 1620, name: script_run_event_frame, hash: d4dd1211bca4f542}
-  - {addr: 0x801433ac, size: 60, name: script_set_current_otag_entry_and_update_input, hash: 584c5bad6246264b}
+  - {addr: 0x801433ac, size: 60, name: script_set_current_otag_entry_and_update_input, hash: 584c5bad6246264b, source: src/shared/script/script_set_current_otag_entry_and_update_input.c}
   - {addr: 0x801433e8, size: 48, name: script_set_specialized_map_destroyed, hash: 6fdd321db8d2c523, source: src/shared/script/script_set_specialized_map_destroyed.c}
   - {addr: 0x80143418, size: 1448, name: script_process_pending_requests, hash: 12e72da2e6bf90b1}
   - {addr: 0x801439c0, size: 220, name: camera_load_state_from_script_variables, hash: 36400181c54e0d33}
@@ -2483,7 +2483,7 @@ data:
   - {addr: 0x80168ec0, name: g_battle_cursor_bob_thresholds}
   - {addr: 0x80168ed0, name: g_battle_cursor_bob_active_thresholds}
   - {addr: 0x80168eec, name: g_battle_menu_ability_list_clut_rect}
-  - {addr: 0x80168ef4, name: g_battle_text_message_duration_frames}
+  - {addr: 0x80168ef4, name: g_text_message_duration_frames}
   - {addr: 0x80168ef8, name: g_battle_menu_companion_executable_lbas}
   - {addr: 0x80168f38, name: g_battle_menu_companion_executable_sizes}
   - {addr: 0x80168f78, name: g_battle_menu_companion_executable_offsets}
