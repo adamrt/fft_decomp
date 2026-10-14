@@ -104,6 +104,13 @@ func TestResolveUnitInstanceChecksOrderProfileAndRodata(t *testing.T) {
 			t.Errorf("%s: accepted %+v", name, instance)
 		}
 	}
+	m, _ := config.module("battle")
+	m.function("unit_b").Profile = "gcc-2.6.3_O2_aspsx-2.34_divcheck"
+	checked, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: "battle", Functions: []string{"unit_a", "unit_b"}})
+	if err != nil || checked.profile.name != "gcc-2.6.3_O2_aspsx-2.34_divcheck" {
+		t.Fatalf("division-check member: %v %+v", err, checked)
+	}
+	m.function("unit_b").Profile = ""
 	alias, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: "battle", Functions: []string{"unit_e", "unit_f"}})
 	if err != nil {
 		t.Fatal(err)

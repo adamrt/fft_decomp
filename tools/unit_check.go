@@ -157,20 +157,14 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 		unit.rodata = append(unit.rodata, f.Rodata...)
 	}
 	unit.addr = unit.members[0].Addr
-	profileName := m.profileOf(unit.members[0])
-	for _, f := range unit.members[1:] {
-		if m.profileOf(f) != profileName {
-			return nil, fmt.Errorf("%s: profile disagreement: %s uses %s, %s uses %s", spec.name, unit.members[0].Name, profileName, f.Name, m.profileOf(f))
-		}
+	profileName, err := unitProfile(spec, m, unit.members)
+	if err != nil {
+		return nil, err
 	}
 	if instance.Profile != "" && instance.Profile != profileName {
 		return nil, fmt.Errorf("%s: instance %s asserts profile %s but its functions use %s", spec.name, m.ID, instance.Profile, profileName)
 	}
-	profile, ok := compilerProfileNamed(profileName)
-	if !ok {
-		return nil, fmt.Errorf("unknown compiler profile %q", profileName)
-	}
-	unit.profile = profile
+	unit.profile, _ = compilerProfileNamed(profileName)
 	sort.Slice(unit.rodata, func(i, j int) bool { return unit.rodata[i].Addr < unit.rodata[j].Addr })
 	for i := 1; i < len(unit.rodata); i++ {
 		previous := unit.rodata[i-1]
@@ -179,6 +173,37 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 		}
 	}
 	return unit, nil
+}
+
+// unitProfile is the one profile a unit instance compiles with. Members may
+// differ only in division checks: that flag belonged to the whole build, and
+// a function without a division compiles identically either way, so the
+// checked variant serves the unit.
+func unitProfile(spec *unitSpec, m *moduleSpec, members []*functionSpec) (string, error) {
+	chosen := m.profileOf(members[0])
+	chosenProfile, ok := compilerProfileNamed(chosen)
+	if !ok {
+		return "", fmt.Errorf("unknown compiler profile %q", chosen)
+	}
+	for _, f := range members[1:] {
+		name := m.profileOf(f)
+		if name == chosen {
+			continue
+		}
+		profile, ok := compilerProfileNamed(name)
+		if !ok {
+			return "", fmt.Errorf("unknown compiler profile %q", name)
+		}
+		same := profile.compilerPath == chosenProfile.compilerPath && profile.optimization == chosenProfile.optimization &&
+			profile.aspsxVersion == chosenProfile.aspsxVersion && profile.smallDataLimit == chosenProfile.smallDataLimit
+		if !same {
+			return "", fmt.Errorf("%s: profile disagreement: %s uses %s, %s uses %s", spec.name, members[0].Name, chosen, f.Name, name)
+		}
+		if profile.expandDiv && !chosenProfile.expandDiv {
+			chosen, chosenProfile = name, profile
+		}
+	}
+	return chosen, nil
 }
 
 // unitLinkerBindings merges every member's bindings. A member's own symbol is
