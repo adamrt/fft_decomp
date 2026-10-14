@@ -1,5 +1,5 @@
-#include "fft/battle_text.h"
-#include "fft/battle_unit.h"
+#include "fft/menu.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* Pack the names of the 21 battle units into the roster-unit-names text section,
@@ -8,13 +8,13 @@
  * A name is copied up to and including its first 0xfe or 0xff byte; a 16-byte
  * name without one gets a 0xfe appended, and an empty unit slot contributes a
  * lone 0xfe. */
-void battle_text_build_unit_name_list(void) {
+void text_build_unit_name_list(void) {
     u8* output;
     s32 unit_id;
     unit_stats_t* unit;
     s32 length;
 
-    battle_text_init_menu_section_pointers();
+    text_init_section_pointers();
     unit_id = 0;
     output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     for (; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {

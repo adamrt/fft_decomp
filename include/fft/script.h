@@ -1083,6 +1083,8 @@ void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_
 void script_walkto_event_instruction(const event_walk_to_parameters_t* parameters);
 
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
+extern map_tile_coordinates_t g_script_warp_coords;
+void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 void script_add_unit_stub(void);
 void script_opcode_74_event_instruction(const u8* unused_parameters);
 void script_toggle_message_portrait_flip(const u8* parameters);

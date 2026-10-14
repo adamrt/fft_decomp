@@ -14,7 +14,7 @@ void menu_run_system_function_thread(void) {
     menu_system_function_t* entry;
 
     g_battle_system_function_thread_busy = 1;
-    battle_text_init_menu_section_pointers();
+    text_init_section_pointers();
     id = g_thread_contexts[g_thread_current_id].function_parameter_1;
     if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
         id = g_battle_system_function_table[id].alternate_id;

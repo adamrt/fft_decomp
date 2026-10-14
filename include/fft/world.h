@@ -261,7 +261,6 @@ extern s32 g_world_script_saved_event_input;
 extern s16 g_world_event_map_jump_in_request;
 extern s16 g_world_event_finish_check_pending;
 extern u8 g_world_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
-extern map_tile_coordinates_t g_world_script_warp_unit_coords;
 extern u32 g_world_script_tutorial_repeat_counters[16];
 extern u16 g_world_script_tutorial_previous_input;
 extern u8* g_world_script_tutorial_command_ptr;
@@ -313,7 +312,6 @@ void world_script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void world_script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void world_script_update_tutorial_controller_input(void);
 void world_script_warp_unit(const event_warp_unit_parameters_t* instruction);
-s32 world_script_warp_unit_display_to_paired_unit(s32);
 void world_script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
 void world_script_set_units_palette_update_suppression(u16 id, s32 enable);
 void world_script_add_unit_start_thread(void);
@@ -1746,10 +1744,8 @@ void world_text_concatenate_entries(u8* text_table, u8* destination, const s16* 
 /* MAIN selects the WORLD address of text_find_entry through this existing alias. */
 u8* world_text_find_entry(u32 text_id);
 void world_text_determine_spell_quote(action_command_t* action, s32 unit_id, s32 enabled);
-void world_text_build_unit_name_list(void);
 void world_text_generate_formation_unit_name_string(void);
 s16 world_text_get_encoded_char_at_position(u8* text, s16 position, s32 mode);
-void world_text_init_section_pointers(void);
 s32 world_text_is_printing(s32 thread_id);
 void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette);
 s32 world_text_measure_entry_pixel_width(const u8* entry);

@@ -1247,7 +1247,6 @@ void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit);
 void battle_unit_set_level_up_animation(battle_unit_t* unit);
 void battle_unit_restore_facing_after_attack(battle_unit_t* unit);
 void battle_unit_set_facing(s32 runtime_id, s32 facing);
-void unit_set_animation(s32 runtime_id, u32 animation);
 void battle_unit_snap_all_facings_to_quadrants(void);
 void battle_unit_start_ability_charge_animation(battle_unit_t* unit);
 void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit);

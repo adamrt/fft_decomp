@@ -7,7 +7,7 @@
  *
  * The text begins after a header of 32 32-bit offsets. When menu input is disabled,
  * section 0 remains bound to the event/tutorial text already in use. */
-void battle_text_init_menu_section_pointers(void) {
+void text_init_section_pointers(void) {
     s32* source;
     u8** destination;
     /* These two assignments fill the target load delay before the loop. */

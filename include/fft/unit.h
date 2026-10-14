@@ -1208,5 +1208,6 @@ typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) 
 extern SVECTOR g_unit_runtime_coords;
 
 SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
+void unit_set_animation(s32 runtime_id, u32 animation);
 
 #endif

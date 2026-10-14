@@ -255,7 +255,7 @@ restart_event:
                 thread_yield();
             }
             if ((operand_1 - EVENT_CALL_FUNCTION_WARP_UNIT_4_DISPLAY_TO_UNIT_2_POSITION_AND_FACING) < 2U) {
-                world_script_warp_unit_display_to_paired_unit(operand_1);
+                script_warp_unit_display_to_paired_unit(operand_1);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS) {
                 zalera_runtime_id = script_resolve_runtime_id(CHARACTER_IDENTITY_ZALERA);

@@ -51,5 +51,5 @@ void attack_sound_resync_scenario_music_and_apply_map_darkness(void) {
     }
 
     map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
-    battle_text_build_unit_name_list();
+    text_build_unit_name_list();
 }

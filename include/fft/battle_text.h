@@ -55,7 +55,6 @@ extern s32 g_battle_text_substitution_value_28;
 
 /* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
 u8* battle_text_find_entry(u32 text_id);
-void battle_text_init_menu_section_pointers(void);
 void battle_text_restore_section_pointers(void);
 void battle_text_save_section_pointers(void);
 
@@ -67,7 +66,6 @@ extern u16 g_battle_text_speaker_swap_unit_b;
 
 void text_build_display_message(s32 offset, s32 flags, s32* out_width);
 void battle_text_build_display_message(s32 offset, s32 flags, s32* out_width);
-void battle_text_build_unit_name_list(void);
 void battle_text_run_dialog_thread(void);
 
 /* typewriter entrypoint */

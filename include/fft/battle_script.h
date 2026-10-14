@@ -33,11 +33,9 @@ void script_blue_remove_unit(s32 unit_id);
 void script_teleportout_event_instruction(s32 arg, s32 remove);
 
 /* unit movement */
-extern map_tile_coordinates_t g_script_warp_coords;
 
 void script_waitspritemove_event_instruction(s32 unit_id);
 void script_warp_unit(const event_warp_unit_parameters_t* parameters);
-void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 
 /* unit statuses */
 

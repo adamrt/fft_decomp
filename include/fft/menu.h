@@ -2207,6 +2207,9 @@ s32 text_resolve_format_string_id(s32 format_code, s32 value);
 extern const char g_text_decimal_format[];
 void text_print_fnt_value_and_next(s32 value);
 void text_relocate_pointer_table(const u32* offsets);
+/* BATTLE and WORLD each link their own body. */
+void text_init_section_pointers(void);
+void text_build_unit_name_list(void);
 
 /* unit */
 /* Provisional 0x2d0-byte double-buffered frame of the unit editor panel

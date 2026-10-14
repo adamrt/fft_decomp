@@ -16,7 +16,7 @@ void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
     if (g_menu_overlay_state == 1) {
         return;
     }
-    battle_text_build_unit_name_list();
+    text_build_unit_name_list();
     g_battle_menu_panel_fade_mode = g_battle_menu_panel_fade_modes[mode];
     if (unit_a != 0xff) {
         g_menu_selected_unit.battle_id = unit_a;
