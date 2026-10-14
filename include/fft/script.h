@@ -1079,7 +1079,7 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 void script_inflict_status_thread(void);
 /* TeleportIn forwards the unit ID; the interpreter's second argument is unused. */
 void script_teleportin_event_instruction(s32 unit_id, s32 unused);
-void script_teleportout_event_instruction(s32 arg, s32 remove);
+void script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void script_jump_event_instruction(const event_jump_parameters_t* parameters);
 void script_resetpalette_event_instruction(const event_unit_parameters_t* parameters);
 void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_t* parameters);
