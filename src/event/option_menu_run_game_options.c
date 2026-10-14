@@ -72,7 +72,7 @@ void option_menu_run_game_options(void) {
     image_parameters.width = entry->window.w - 0x20;
     image_parameters.height = entry->window.h - 0xE;
     battle_menu_build_window_sprites(&image_rect, entry, &page->icons);
-    buffer = battle_menu_alloc_memory(0x1E0);
+    buffer = menu_alloc_memory(0x1E0);
     g_option_menu_pages[0].icons.base.sprites[3].y0 -= 2;
     clear.x = entry->vram_origin.x;
     clear.y = 0xFE;
@@ -147,7 +147,7 @@ void option_menu_run_game_options(void) {
     battle_menu_display_text_entry(0x502B, image, &g_menu_text_state.pen);
     LoadImage(&g_option_menu_title_image_rect, (u32*)image);
     thread_wait_frames(1);
-    battle_menu_free_memory(image);
+    menu_free_memory(image);
     value_rect.x = base->title.x0;
     value_rect.y = base->title.y0;
     value_rect.w = base->title.w;
@@ -349,7 +349,7 @@ void option_menu_run_game_options(void) {
         g_main_menu_scroll_slow_step = g_option_input_repeat_timings[column].scroll_slow_step;
         g_main_menu_scroll_fast_step = g_option_input_repeat_timings[column].scroll_fast_step;
     }
-    battle_menu_free_memory(buffer);
+    menu_free_memory(buffer);
     battle_gfx_free_tpage7_vram(&g_option_menu_title_image_rect);
     battle_gfx_free_tpage7_vram(&g_option_menu_value_image_rect);
     thread_wait_frames(1);

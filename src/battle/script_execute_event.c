@@ -109,9 +109,9 @@ void script_execute_event(void) {
         g_menu_attack_target_stats_rect.y = 0xAA;
         g_menu_right_unit_stats_rect.y = 0xAA;
     }
-    battle_unit_clear_status_staging_data();
+    unit_clear_status_staging_data();
     if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
-        battle_unit_update_staged_status_data(0, 0);
+        unit_update_staged_status_data(0, 0);
     } else {
         script_process_inflict_status_commands();
     }
@@ -335,7 +335,7 @@ restart_script:
              * each displayed unit's facing quadrant to its battle record. */
             work_index = 0;
             battle_unit_snap_all_facings_to_quadrants();
-            battle_unit_update_staged_status_data(0, 1);
+            unit_update_staged_status_data(0, 1);
             for (; work_index < EVENT_UNIT_SLOT_COUNT; work_index++) {
                 if (battle_unit_has_runtime_id(work_index) != 0) {
                     operand_1 = battle_unit_get_battle_id_by_runtime_id(work_index);
@@ -815,14 +815,14 @@ restart_script:
                 }
                 operand_1 = battle_unit_get_runtime_id_by_battle_id(added_battle_id);
                 if (operand_1 == -1) {
-                    battle_unit_save_staged_status_data(added_battle_id);
+                    unit_save_staged_status_data(added_battle_id);
                     battle_gfx_load_unit_graphics_by_battle_id(added_battle_id, operand_3);
                     g_battle_unit_graphics_load_pending = 1U;
                 } else {
                     if (operand_3 == 0) {
                         battle_unit_draw_and_activate_by_runtime_id(operand_1);
                     }
-                    if (battle_unit_save_staged_status_data(added_battle_id) != 0) {
+                    if (unit_save_staged_status_data(added_battle_id) != 0) {
                         g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
                         thread_call_on_main_stack(operand_1);
                     }

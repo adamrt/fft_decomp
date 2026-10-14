@@ -33,7 +33,7 @@ void menu_icon_strip_thread(void) {
         }
         thread_yield();
         if (fresh == 1) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             fresh = 0;
         }
         if (battle_menu_should_close_thread(&input) != 0) {

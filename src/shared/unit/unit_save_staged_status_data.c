@@ -1,8 +1,7 @@
-#include "fft/battle_status.h"
+#include "fft/battle.h"
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/world.h"
 
 /* Snapshot a unit into the event staging record and queue its status removal.
  *
@@ -14,26 +13,26 @@
  * Each mask branch repeats the whole store tail; cross-jumping merges the
  * copies, and the repeated tail uses give the strength-reduced status walker
  * the target's s1 over the stats pointer. */
-s32 world_unit_save_staged_status_data(s32 unit_id) {
+s32 unit_save_staged_status_data(s32 battle_id) {
     unit_stats_t* stats;
     s32 i;
     s32 value;
     unit_status_staging_t* st;
 
-    if (g_world_unit_status_staging_data->state[unit_id] == UNIT_STATUS_STAGING_NONE) {
-        stats = battle_unit_get_stats_from_battle_id(unit_id);
+    if (g_unit_status_staging_data->state[battle_id] == UNIT_STATUS_STAGING_NONE) {
+        stats = battle_unit_get_stats_from_battle_id(battle_id);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            g_world_unit_status_staging_data->innate[unit_id][i] = stats->status_sets.innate[i];
-            g_world_unit_status_staging_data->inflicted[unit_id][i] = stats->inflicted_status[i];
-            g_world_unit_status_staging_data->current[unit_id][i] = stats->status_sets.current[i];
+            g_unit_status_staging_data->innate[battle_id][i] = stats->status_sets.innate[i];
+            g_unit_status_staging_data->inflicted[battle_id][i] = stats->inflicted_status[i];
+            g_unit_status_staging_data->current[battle_id][i] = stats->status_sets.current[i];
         }
         for (i = 0; i < BATTLE_TIMED_STATUS_COUNT; i++) {
-            g_world_unit_status_staging_data->status_ct[unit_id][i] = stats->status_ct[i];
+            g_unit_status_staging_data->status_ct[battle_id][i] = stats->status_ct[i];
         }
-        g_world_unit_status_staging_data->charged_ability_ct[unit_id] = stats->charged_ability_ct;
-        g_world_unit_status_staging_data->death_counter[unit_id] = stats->death_counter;
-        g_world_unit_status_staging_data->hp[unit_id] = stats->hp;
-        g_world_unit_status_staging_data->team_flags[unit_id] = stats->team_flags;
+        g_unit_status_staging_data->charged_ability_ct[battle_id] = stats->charged_ability_ct;
+        g_unit_status_staging_data->death_counter[battle_id] = stats->death_counter;
+        g_unit_status_staging_data->hp[battle_id] = stats->hp;
+        g_unit_status_staging_data->team_flags[battle_id] = stats->team_flags;
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
                 if ((stats->primary_skillset >= SKILLSET_ID_MONSTER_FIRST && stats->primary_skillset < SKILLSET_ID_END)
@@ -43,43 +42,44 @@ s32 world_unit_save_staged_status_data(s32 unit_id) {
                     || stats->job_id == JOB_ID_WIZARD_UNDEAD || stats->job_id == JOB_ID_TIME_MAGE_UNDEAD
                     || stats->job_id == JOB_ID_ORACLE_UNDEAD || stats->job_id == JOB_ID_SUMMONER_UNDEAD) {
                     value = stats->status_sets.current[i];
-                    value &= g_world_status_removal_mask_staged_monster[i];
-                    st = g_world_unit_status_staging_data;
+                    value &= g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD][i];
+                    st = g_unit_status_staging_data;
                     stats->action.status_changes.removal[i] = value;
-                    st->added[unit_id][i] = value;
-                    st->removed[unit_id][i] = value;
+                    st->added[battle_id][i] = value;
+                    st->removed[battle_id][i] = value;
                 } else {
                     value = stats->status_sets.current[i];
-                    value &= g_world_status_removal_mask_staged[i];
-                    st = g_world_unit_status_staging_data;
+                    value &= g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_PRE_BATTLE][i];
+                    st = g_unit_status_staging_data;
                     stats->action.status_changes.removal[i] = value;
-                    st->added[unit_id][i] = value;
-                    st->removed[unit_id][i] = value;
+                    st->added[battle_id][i] = value;
+                    st->removed[battle_id][i] = value;
                 }
             } else {
                 value = stats->status_sets.current[i];
-                value &= g_world_status_removal_mask_unstaged[i];
-                st = g_world_unit_status_staging_data;
+                value &= g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_BATTLE_STARTED][i];
+                st = g_unit_status_staging_data;
                 stats->action.status_changes.removal[i] = value;
-                st->added[unit_id][i] = value;
-                st->removed[unit_id][i] = value;
+                st->added[battle_id][i] = value;
+                st->removed[battle_id][i] = value;
             }
         }
-        if (g_world_unit_status_staging_data->removed[unit_id][STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
+        if (g_unit_status_staging_data->removed[battle_id][STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
             & STATUS_BYTE_MASK(STATUS_ID_JUMP)) {
-            g_world_unit_status_staging_data->jump_float_flags |= UNIT_STATUS_STAGING_JUMP_REMOVED;
+            g_unit_status_staging_data->jump_float_flags |= UNIT_STATUS_STAGING_JUMP_REMOVED;
         }
-        if (g_world_unit_status_staging_data->removed[unit_id][STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
+        if (g_unit_status_staging_data->removed[battle_id][STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
             & STATUS_BYTE_MASK(STATUS_ID_FLOAT)) {
-            g_world_unit_status_staging_data->jump_float_flags |= UNIT_STATUS_STAGING_FLOAT_REMOVED;
+            g_unit_status_staging_data->jump_float_flags |= UNIT_STATUS_STAGING_FLOAT_REMOVED;
         }
         if (stats->action.status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_CHARM)]
             & STATUS_BYTE_MASK(STATUS_ID_CHARM)) {
             stats->team_flags = stats->initial_team_flags;
         }
+        /* WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
         g_thread_call_target = (void (*)(void))status_apply_unit_action_removal;
         thread_call_on_main_stack(stats);
-        g_world_unit_status_staging_data->state[unit_id] = UNIT_STATUS_STAGING_SAVED;
+        g_unit_status_staging_data->state[battle_id] = UNIT_STATUS_STAGING_SAVED;
         return 1;
     }
     return 0;

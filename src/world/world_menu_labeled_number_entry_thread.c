@@ -91,7 +91,7 @@ void world_menu_labeled_number_entry_thread(void) {
         }
         thread_wait_frames(1);
         if (redraw == 1) {
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             redraw = 0;
         }
         if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {

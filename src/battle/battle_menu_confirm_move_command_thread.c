@@ -32,6 +32,6 @@ void battle_menu_confirm_move_command_thread(void) {
         thread_exit_current();
     }
     sound_queue_sfx_confirm_unless_restoring();
-    battle_menu_confirm_action_silently(entry);
+    menu_confirm_action_silently(entry);
     thread_exit_current();
 }

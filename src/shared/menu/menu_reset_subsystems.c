@@ -9,7 +9,7 @@
  * and reset the thread scheduler. */
 void menu_reset_subsystems(void) {
     script_seed_random_from_vsync();
-    battle_menu_reset_buffer_slots();
+    menu_reset_window_buffer_slots();
     battle_gfx_clear_tpage7_vram_allocation_grid();
     battle_menu_init_buffer_allocator();
     thread_reset_scheduler();

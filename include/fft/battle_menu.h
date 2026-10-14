@@ -8,7 +8,6 @@
 
 /* menu state */
 extern s32 g_battle_active_menu; /* active menu */
-extern u16 g_battle_menu_at_list_selection_finished;
 extern s32 g_battle_menu_help_open;
 extern s32 g_battle_menu_help_opening;
 extern battle_menu_id_record_t g_battle_menu_id_records[31];
@@ -18,8 +17,6 @@ extern u16 g_battle_menu_transition_state;
 extern u16 g_battle_saved_animation_speed; /* animation speed saved while an event thread forces speed 2 */
 
 void battle_menu_clear_status_menu_state(void);
-void battle_menu_finish_at_list_selection(void);
-void battle_menu_init_stub(void);
 void battle_menu_init_subsystem_pointers(void);
 void battle_menu_init_subsystems(void);
 void battle_menu_reset_subsystems(void);
@@ -39,7 +36,6 @@ extern menu_unit_selection_record_t g_battle_menu_unit_selection_records[BATTLE_
 
 void battle_handle_menu_cancel_input(menu_entry_t* menu);
 s32 battle_menu_can_accept_input(void);
-void battle_menu_clear_entry_selections(void);
 void battle_menu_display_triangle_selection(void);
 s32 battle_menu_get_cursor_bob_offset(s32 mode);
 s32 battle_menu_resolve_selection(void);
@@ -55,7 +51,6 @@ extern s16 g_battle_menu_auto_battle_row_actions[8];
 extern s16 g_battle_menu_confirm_stored_unit_row_actions;
 extern menu_entry_t g_battle_menu_idle_action_entries[];
 extern u8 g_battle_menu_idle_action_entry_labels[];
-extern u8 g_battle_menu_idle_action_flag_clear_ids[];
 extern u8 g_battle_menu_restriction_message_ids[];
 /* Action command staged by the battle menu and passed whole to
  * action_preview_at_list; the WORLD twin is g_world_menu_preview_action. */
@@ -65,14 +60,12 @@ extern s16 g_battle_menu_set_auto_battle_row_actions;
 extern s32 g_battle_menu_system_function_command;
 extern s32 g_battle_menu_system_function_option;
 extern u16 g_battle_menu_system_function_row_actions[];
-extern s16 g_battle_menu_wait_row_actions[4];
 
 void battle_menu_build_idle_action_menu(s32 menu_id);
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
 void battle_menu_check_action_restrictions(void);
 void battle_menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit);
 void battle_menu_close_move_help(void);
-void battle_menu_confirm_action_silently(menu_entry_t* menu);
 void battle_menu_dispatch_idle_action_menu(void);
 s32 battle_menu_dispatch_system_function(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
@@ -151,7 +144,6 @@ extern u8 g_battle_menu_billboard_unit_name[];
 extern s32 g_battle_menu_dead_unit_panel_parameter;
 extern u16 g_battle_menu_hovered_stats_frame_count;
 extern menu_number_entry_t g_battle_menu_hovered_unit_stats_setup[10];
-extern RECT g_battle_menu_portrait_pixel_rect;
 extern action_data_t* g_battle_menu_preview_target_action;
 /* The final two entries of g_battle_menu_attack_caster_stats_setup. */
 extern menu_number_entry_t g_battle_menu_projected_value_panel[2];
@@ -238,7 +230,6 @@ u8* battle_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, 
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void battle_menu_icon_linked_entry_thread(void);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
-void battle_menu_reset_buffer_slots(void);
 void battle_menu_run_icon_selection_loop(void);
 void battle_menu_select_icon_cluts(menu_icon_sprites_t* frame);
 void battle_menu_select_icon_sprite_clut(SPRT* sprite);
@@ -271,19 +262,13 @@ void battle_menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height
 
 /* palettes and fades */
 extern menu_palette_pair_t g_battle_menu_default_palette_colors;
-extern u8 g_battle_menu_numeric_display_palette_indices[12];
-extern menu_palette_pair_t g_battle_menu_palette_colors;
 extern s32 g_battle_menu_panel_fade_intensity;
 extern s32 g_battle_menu_panel_fade_mode; /* menu_panel_fade_mode_e */
 extern u8 g_battle_menu_panel_fade_modes[];
-extern RECT g_battle_menu_portrait_palette_rect;
 extern menu_palette_slot_t g_battle_numeric_display_palettes[];
 
-void battle_menu_copy_palette_colors(const menu_palette_pair_t* source);
 void battle_menu_fade_out_thread(void);
 void battle_menu_init_palette_and_text(s32 unused_0);
-void battle_menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu);
-void battle_menu_init_primitive_colors_normal(menu_palette_primitives_t* menu);
 void battle_menu_update_panel_fade(void);
 
 /* buffer allocation */
@@ -293,9 +278,6 @@ extern menu_allocation_t g_battle_menu_allocator_slot_records[MENU_BUFFER_ALLOCA
 extern u8 g_battle_menu_buffer_allocation_map[BATTLE_MENU_BUFFER_PAGE_COUNT];
 extern u8 g_battle_menu_buffer_arena[BATTLE_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
 
-void* battle_menu_alloc_buffer(s32 bytes);
-void* battle_menu_alloc_memory(s32 size);
-void battle_menu_free_memory(void* buffer);
 void battle_menu_init_buffer_allocator(void);
 void battle_menu_release_current_thread_slot(void);
 void battle_menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
@@ -315,7 +297,6 @@ void battle_menu_open_companion_executable(void);
 void battle_menu_open_debugchr_unit_editor(void);
 s32 battle_menu_poll_small_load(void);
 void battle_menu_run_bunit_transition_thread(void);
-void battle_menu_run_companion_overlay_stub(void);
 
 /* threads */
 extern s32 g_battle_menu_building_thread_started;

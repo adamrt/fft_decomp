@@ -56,7 +56,7 @@ u8* world_screen_menu_redraw_text_page_on_scroll(
     if (changed == 0) {
         return 0;
     }
-    buffer = world_menu_alloc_ui_buffer(entry->inner_width * entry->inner_height / 2);
+    buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     world_clear_menu_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     world_screen_menu_draw_text_columns(entry, row_offset, buffer);
     *redraw = 0;

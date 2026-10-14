@@ -730,6 +730,9 @@ void script_run_next_event_unused(void);
 void script_start_current_event_thread(void);
 void script_frame_after_requests_stub(void);
 void script_frame_after_threads_stub(void);
+/* BATTLE and WORLD each link their own body. */
+s32 script_run_event_frame(u32* ot, u32 buttons);
+s32 script_is_deployment_running(u32* ot, u32 buttons);
 void world_script_start_current_event_thread(void);
 
 /* instruction cursors */
@@ -1055,6 +1058,7 @@ s32 script_resolve_runtime_id(s32 unit_id);
 
 /* Resolve single selectors in place; leave group selectors for the filter loop. */
 s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode);
+s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode);
 void script_report_missing_unit_stub(s32 unused_unit_id);
 
 /* unit instructions */
@@ -1078,6 +1082,7 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
 
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
 void script_add_unit_stub(void);
+void script_opcode_74_event_instruction(const u8* unused_parameters);
 void script_run_sprite_move(const event_sprite_move_parameters_t* parameters, s32 use_speed);
 void script_sprite_move(void);
 void script_sprite_move_beta(void);

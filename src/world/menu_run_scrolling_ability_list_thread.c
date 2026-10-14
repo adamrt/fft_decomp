@@ -125,7 +125,7 @@ void menu_run_scrolling_ability_list_thread(void) {
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
     world_menu_build_and_upload_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
-    buffer = world_menu_alloc_ui_buffer(entry->inner_width * entry->inner_height / 2);
+    buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     world_clear_menu_render_buffer(buffer, window.rect.w * window.rect.h / 2);
     row_offset = layout->row_offset;
     if (layout->columns.hidden_rows < row_offset) {
@@ -200,7 +200,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                 image_rect.h = 0x10;
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
-                buffer = world_menu_alloc_ui_buffer(window.rect.w * 8);
+                buffer = menu_alloc_memory(window.rect.w * 8);
                 world_clear_menu_render_buffer(buffer, window.rect.w * 8);
                 g_menu_text_state.pen.stride = window.rect.w;
                 for (column = 0; column < 3; column++) {
@@ -259,7 +259,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         }
         thread_yield();
         if (redraw_pending != 0) {
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             redraw_pending = 0;
         }
         if (delta == 0 && world_menu_is_input_allowed() != 0) {
@@ -322,7 +322,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
                 g_script_event_input |= g_script_event_current_input & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             row_buffer_live = 0;
         }
         frame->v0 = (ring * 16 + accum - 2) & 0x7F;
@@ -359,7 +359,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         i++;
     }
     if (row_buffer_live != 0) {
-        world_menu_free_memory(buffer);
+        menu_free_memory(buffer);
     }
     thread_yield();
     g_world_menu_scrolling_list_depth--;

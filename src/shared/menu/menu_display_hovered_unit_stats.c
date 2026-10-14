@@ -117,7 +117,7 @@ void menu_display_hovered_unit_stats(
             status->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
         if (text_loaded != 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             text_loaded = 0;
         }
         for (i = 0; i < g_script_event_speed; i++) {
@@ -238,7 +238,7 @@ void menu_display_hovered_unit_stats(
             gauge++;
         }
         if (frame == 0) {
-            buffer = battle_menu_alloc_buffer(0x700);
+            buffer = menu_alloc_buffer(0x700);
             battle_clear_menu_render_buffer(buffer, 0x700);
             stride = &g_menu_text_state.pen.stride;
             origin = &g_menu_text_state.pen;
@@ -304,9 +304,9 @@ void menu_display_hovered_unit_stats(
         gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
         gfx_draw_or_append_gpu_primitive(&page->portrait);
         if (running != 0) {
-            battle_menu_init_primitive_colors_dimmed(&page->palette);
+            menu_init_primitive_colors_dimmed(&page->palette);
         } else {
-            battle_menu_init_primitive_colors_normal(&page->palette);
+            menu_init_primitive_colors_normal(&page->palette);
         }
         menu_submit_numeric_display_frame_primitives(&page->palette);
         gfx_draw_or_append_gpu_primitive(&offs->a);

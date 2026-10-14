@@ -10,11 +10,9 @@
 /* interpreter */
 extern s16 g_script_threads_idle;
 
-s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode);
 void script_process_pending_requests(void);
 /* Returns the event result that the battle state handlers switch on;
  * proven by 0x80078fb4 and 0x800785ac, which both consume it. */
-s32 script_run_event_frame(u32* ot, u32 buttons);
 void script_set_event_speed(s32 speed);
 
 /* input */
@@ -24,7 +22,6 @@ void script_route_event_input(void);
 
 /* conditions */
 
-s32 script_is_deployment_running(u32* ot, u32 buttons);
 s32 script_is_tutorial_event_slot(void);
 
 /* unit creation and removal */
@@ -62,6 +59,5 @@ void script_set_units_palette_update_suppression(s32 unit_id, s32 enable);
 void script_toggle_message_portrait_flip(const u8* parameters);
 
 /* frame hooks */
-void script_opcode_74_event_instruction(const u8* unused_parameters);
 
 #endif

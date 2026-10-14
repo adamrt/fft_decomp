@@ -109,7 +109,7 @@ void require_reward_run_war_trophies(void) {
             }
             thread_yield();
             if (loaded) {
-                battle_menu_free_memory(image);
+                menu_free_memory(image);
                 loaded = 0;
             }
             for (i = start; i <= last; i++) {
@@ -170,7 +170,7 @@ void require_reward_run_war_trophies(void) {
             timer++;
         }
         if (loaded) {
-            battle_menu_free_memory(image);
+            menu_free_memory(image);
         }
     }
     thread_set_parameters(thread, 0, 0, 1);

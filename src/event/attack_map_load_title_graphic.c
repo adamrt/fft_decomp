@@ -19,7 +19,7 @@ void attack_map_load_title_graphic(void) {
     s32 adjusted;
     s32 group_input;
 
-    image = battle_menu_alloc_memory(0x2800);
+    image = menu_alloc_memory(0x2800);
     title = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
     adjusted = title - 1;
     group_input = adjusted;
@@ -37,5 +37,5 @@ void attack_map_load_title_graphic(void) {
 
     LoadImage(&g_attack_map_title_image_rect, (u32*)(image + group * 0xa00));
     LoadImage(&g_attack_map_title_palette_rect, &g_attack_map_title_palette_data);
-    battle_menu_free_memory(image);
+    menu_free_memory(image);
 }

@@ -44,7 +44,7 @@ void menu_icon_linked_entry_thread(void) {
     for (i = 0;; i++) {
         thread_yield();
         if (i == 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         if (battle_menu_should_close_thread(&g_script_event_input) != 0) {
             break;

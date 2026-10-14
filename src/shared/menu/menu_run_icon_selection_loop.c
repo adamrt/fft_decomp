@@ -34,7 +34,7 @@ void menu_run_icon_selection_loop(void) {
     for (i = 0;; i++) {
         thread_yield();
         if (i == 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         record = &records[i & 1];
         param->selected_index = cursor;

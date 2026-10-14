@@ -78,6 +78,6 @@ void battle_menu_validate_skill_selection_thread(void) {
     } else {
         sound_queue_sfx_confirm_unless_restoring();
     }
-    battle_menu_confirm_action_silently(parameter);
+    menu_confirm_action_silently(parameter);
     thread_exit_current();
 }

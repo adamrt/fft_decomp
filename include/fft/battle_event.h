@@ -14,21 +14,6 @@ extern u8
 /* input */
 extern u16 g_battle_event_input_suppression_frames;
 
-/* unit staging */
-/* Per-byte status removal masks applied while an event stages a unit: three
- * eight-byte sets, of which the first STATUS_BYTE_COUNT bytes are used
- * (0x80169758). */
-typedef enum battle_event_status_mask_set {
-    BATTLE_EVENT_STATUS_MASK_BATTLE_STARTED = 0,
-    BATTLE_EVENT_STATUS_MASK_PRE_BATTLE = 1,
-    /* Monster skillsets, both Altima forms and the six undead jobs. */
-    BATTLE_EVENT_STATUS_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD = 2,
-} battle_event_status_mask_set_e;
-
-enum { BATTLE_EVENT_STATUS_MASK_COUNT = 3 };
-
-extern u8 g_battle_event_status_masks[BATTLE_EVENT_STATUS_MASK_COUNT][8];
-
 /* character graphics */
 extern evtchr_file_record_t* g_battle_event_loaded_evtchr_buffer;
 extern s32 g_battle_event_pending_evtchr_save_slot;         /* 0x80173f4c */

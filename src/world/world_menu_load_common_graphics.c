@@ -32,7 +32,7 @@ void world_menu_load_common_graphics(s32 load_extra_pages) {
     LoadImage(&g_world_menu_frame_image_rect, (u32*)frame->pixels[32]);
     LoadImage(&g_world_menu_frame_palette_rect, (u32*)frame->clut);
     LoadImage(&g_world_menu_frame_palette_tail_rect, (u32*)frame->palette_tail);
-    world_menu_set_palette_colors(&g_menu_glyph_sheet->palette);
+    menu_set_palette_colors(&g_menu_glyph_sheet->palette);
     DrawSync(0);
     main_heap_call_free(resource);
     if (load_extra_pages != 0) {

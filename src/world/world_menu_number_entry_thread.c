@@ -94,7 +94,7 @@ void world_menu_number_entry_thread(void) {
         thread_wait_frames(1);
         if (redraw == 1) {
             redraw = 0;
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {
             break;

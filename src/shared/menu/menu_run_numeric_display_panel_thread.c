@@ -21,7 +21,7 @@ void menu_run_numeric_display_panel_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&record->mode0, MENU_TEXTURE_PAGE_FRAME);
     battle_gfx_set_draw_mode_for_texture_page(&record->mode1, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     battle_gfx_init_scaled_draw_area_packets(&record->draw_areas);
-    number_images = battle_menu_alloc_memory(sizeof(*number_images));
+    number_images = menu_alloc_memory(sizeof(*number_images));
     battle_clear_menu_render_buffer(number_images, sizeof(*number_images));
     g_menu_text_state.pen.stride = 0x14;
     battle_menu_set_text_origin(0, 0);
@@ -39,7 +39,7 @@ void menu_run_numeric_display_panel_thread(void) {
     LoadImage(&g_battle_numeric_display_text_rect_b, (u32*)number_images->weapons);
     LoadImage(&g_battle_numeric_display_text_rect_c, (u32*)number_images->combat);
     thread_wait_frames(1);
-    battle_menu_free_memory(number_images);
+    menu_free_memory(number_images);
     for (i = 0; i < 18; i++) {
         battle_menu_init_semitransparent_sprt(&record->sprites[i]);
         gfx_init_image_loading(&record->sprites[i], &g_menu_texture_origin, &g_battle_numeric_display_frame_rect,
@@ -63,7 +63,7 @@ void menu_run_numeric_display_panel_thread(void) {
                 record->sprites[i].clut = 0x7D3C;
             }
             record->sprites[10].clut = 0x7EBC;
-            battle_menu_init_primitive_colors_dimmed(record->palette);
+            menu_init_primitive_colors_dimmed(record->palette);
         } else {
             for (i = 17; i >= 0; i--) {
                 record->sprites[i].clut = 0x7C3C;
@@ -72,7 +72,7 @@ void menu_run_numeric_display_panel_thread(void) {
             record->sprites[14].clut = 0x7FFC;
             record->sprites[15].clut = 0x7FFC;
             record->sprites[16].clut = 0x7FFC;
-            battle_menu_init_primitive_colors_normal(record->palette);
+            menu_init_primitive_colors_normal(record->palette);
         }
         gfx_draw_or_append_gpu_primitive(&record->draw_areas.areas[1]);
         for (i = 0; i < 14; i++) {

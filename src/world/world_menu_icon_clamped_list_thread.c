@@ -41,7 +41,7 @@ void world_menu_icon_clamped_list_thread(void) {
         record = &records[i & 1];
         thread_yield();
         if (i == 0) {
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         param->selected_index = cursor;
         if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {

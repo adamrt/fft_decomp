@@ -40,7 +40,7 @@ void world_menu_formation_icon_list_thread(void) {
     for (i = 0;; i++) {
         thread_yield();
         if (i == 0) {
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         record = &records[i & 1].base;
         param->selected_index = cursor;

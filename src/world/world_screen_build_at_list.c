@@ -120,7 +120,7 @@ void world_screen_build_at_list(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
-    buffer = world_menu_alloc_ui_buffer(entry->inner_width * entry->inner_height / 2);
+    buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     world_clear_menu_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, world_screen_menu_window_frame_thread);
@@ -193,7 +193,7 @@ void world_screen_build_at_list(void) {
                     image_rect.y = (((ring - 1) * 16) & 0xFF) + entry->vram_origin.y;
                 }
                 image_rect.h = 0x10;
-                buffer = world_menu_alloc_ui_buffer(0x800);
+                buffer = menu_alloc_memory(0x800);
                 world_clear_menu_render_buffer(buffer, 0x800);
                 g_menu_text_state.pen.stride = entry->inner_width;
                 for (column = 0; column < 3; column++) {
@@ -227,7 +227,7 @@ void world_screen_build_at_list(void) {
         }
         thread_yield();
         if (redraw_pending != 0) {
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             redraw_pending = 0;
         }
         if (delta == 0 && world_menu_is_input_allowed() != 0) {
@@ -263,7 +263,7 @@ void world_screen_build_at_list(void) {
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
                 *input0 |= *input1 & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         frame->v0 = ring * 16 + accum - 2;
         if (world_thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
@@ -309,7 +309,7 @@ void world_screen_build_at_list(void) {
     thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
     if (accum & 0xF) {
-        world_menu_free_memory(buffer);
+        menu_free_memory(buffer);
     }
     thread_yield();
     thread_exit_current();

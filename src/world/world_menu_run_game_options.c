@@ -78,7 +78,7 @@ void world_menu_run_game_options(void) {
     image_parameters.width = entry->window.w - 0x20;
     image_parameters.height = entry->window.h - 0xE;
     world_menu_build_icon_record(&image_rect, entry, &page->icons);
-    buffer = world_menu_alloc_ui_buffer(0x1E0);
+    buffer = menu_alloc_memory(0x1E0);
     g_world_options_menu_pages[0].icons.base.sprites[3].y0 -= 2;
     clear.x = entry->vram_origin.x;
     clear.y = 0xFE;
@@ -153,7 +153,7 @@ void world_menu_run_game_options(void) {
     world_menu_display_text_entry(0x502B, image, &g_menu_text_state.pen);
     LoadImage(&g_world_options_menu_title_rect, (u32*)image);
     thread_wait_frames(1);
-    world_menu_free_memory(image);
+    menu_free_memory(image);
     value_rect.x = base->title.x0;
     value_rect.y = base->title.y0;
     value_rect.w = base->title.w;
@@ -359,7 +359,7 @@ void world_menu_run_game_options(void) {
         g_main_menu_scroll_slow_step = g_world_option_input_timing_profiles[column].scroll_slow_step;
         g_main_menu_scroll_fast_step = g_world_option_input_timing_profiles[column].scroll_fast_step;
     }
-    world_menu_free_memory(buffer);
+    menu_free_memory(buffer);
     world_gfx_free_tpage7_vram(&g_world_options_menu_title_rect);
     world_gfx_free_tpage7_vram(&g_world_options_menu_value_rect);
     thread_wait_frames(1);

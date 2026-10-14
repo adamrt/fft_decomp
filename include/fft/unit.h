@@ -691,6 +691,25 @@ typedef enum unit_inflict_status_mode {
     UNIT_INFLICT_STATUS_MODE_POISON = 3,
 } unit_inflict_status_mode_e;
 
+/* Per-byte status removal masks applied while an event stages a unit: three
+ * eight-byte sets, of which the first STATUS_BYTE_COUNT bytes are used
+ * (BATTLE 0x80169758, WORLD 0x80156be8). */
+typedef enum unit_status_staging_mask {
+    UNIT_STATUS_STAGING_MASK_BATTLE_STARTED = 0,
+    UNIT_STATUS_STAGING_MASK_PRE_BATTLE = 1,
+    /* Monster skillsets, both Altima forms and the six undead jobs. */
+    UNIT_STATUS_STAGING_MASK_PRE_BATTLE_MONSTER_OR_UNDEAD = 2,
+} unit_status_staging_mask_e;
+
+enum { UNIT_STATUS_STAGING_MASK_COUNT = 3 };
+
+extern u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8];
+extern unit_status_staging_t* g_unit_status_staging_data;
+void unit_clear_status_staging_data(void);
+s32 unit_save_staged_status_data(s32 battle_id);
+void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id);
+void unit_update_staged_status_data(u16 unit_id, u16 restore);
+
 /* unit */
 /* Character progression; excess EXP is discarded on a level-up. */
 enum {

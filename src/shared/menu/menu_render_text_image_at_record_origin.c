@@ -26,6 +26,6 @@ void menu_render_text_image_at_record_origin(text_dialog_record_t* record) {
         battle_menu_display_text_entry(record->text, record->buffer, &g_menu_text_state.pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();
-        battle_menu_free_memory(record->buffer);
+        menu_free_memory(record->buffer);
     }
 }

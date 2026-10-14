@@ -15,7 +15,7 @@ void script_load_portrait_colors_event_instruction(s32 portrait_id) {
     s32 i;
     palette_t* palette;
 
-    buffer = battle_menu_alloc_memory(sizeof(*buffer));
+    buffer = menu_alloc_memory(sizeof(*buffer));
     do {
         thread_yield();
         g_thread_call_target = (void (*)(void))main_file_call_build_header;
@@ -26,7 +26,7 @@ void script_load_portrait_colors_event_instruction(s32 portrait_id) {
     } while (thread_call_on_main_stack() != 0);
 
     palette = buffer->palettes;
-    mem_copy_bytes_nonempty(&rect, &g_battle_menu_portrait_pixel_rect, sizeof(rect));
+    mem_copy_bytes_nonempty(&rect, &g_menu_portrait_pixel_rect, sizeof(rect));
     i = 0;
     pixels = buffer->pixels;
     rect.w = 8;
@@ -37,7 +37,7 @@ void script_load_portrait_colors_event_instruction(s32 portrait_id) {
         pixels += 1;
         i += 1;
     } while (i < 8);
-    LoadImage(&g_battle_menu_portrait_palette_rect, (u32*)palette);
-    battle_menu_free_memory(buffer);
+    LoadImage(&g_menu_portrait_palette_rect, (u32*)palette);
+    menu_free_memory(buffer);
     thread_yield();
 }

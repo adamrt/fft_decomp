@@ -45,7 +45,7 @@ void menu_icon_timed_thread(void) {
     for (;; i++) {
         thread_yield();
         if (i == 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         if (g_text_message_duration_frames < i * g_script_event_speed) {
             hold = 0;

@@ -1184,20 +1184,15 @@ void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit);
 
 /* statuses and mounts */
 extern const u32 g_battle_unit_status_mask_by_handler_index[STATUS_COUNT + 1];
-extern unit_status_staging_t* g_battle_unit_status_staging_data;
 
 /* The statuses a rider can be inflicted with, one mask per status byte. */
 extern u8 g_battle_rider_status_infliction_mask[STATUS_BYTE_COUNT];
 
-void battle_unit_apply_staged_status_data(s32 battle_id, s32 runtime_id);
-void battle_unit_clear_status_staging_data(void);
 void battle_unit_copy_rider_data_to_mount(battle_unit_t* unit, battle_unit_t* rider);
 void battle_unit_dismount_rider(battle_unit_t* unit);
 void battle_unit_mount_rider_onto_unit(battle_unit_t* rider, battle_unit_t* mount);
 void battle_unit_set_map_coords_after_death_dismount(battle_unit_t* unit);
 void battle_unit_set_tile_position_with_mount_partner(battle_unit_t* unit);
-void battle_unit_update_staged_status_data(u16 unit_id, u16 restore);
-s32 battle_unit_save_staged_status_data(s32 battle_id);
 battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stats_t* unit);
 void battle_unit_mount_onto_pending_mount(battle_unit_t* unit);
 s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_length);

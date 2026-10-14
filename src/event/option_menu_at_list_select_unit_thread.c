@@ -12,11 +12,11 @@ void option_menu_at_list_select_unit_thread(void) {
     thread_suspend(g_thread_current_id + 4);
 
     while ((g_option_menu_transition_timer = g_option_menu_transition_duration + 100),
-        g_battle_menu_at_list_selection_finished == 0) {
+        g_menu_at_list_selection_finished == 0) {
         thread_yield();
     }
 
-    g_battle_menu_at_list_selection_finished = 0;
+    g_menu_at_list_selection_finished = 0;
     g_option_menu_transition_timer = 0;
     battle_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xff, 0xff);
 

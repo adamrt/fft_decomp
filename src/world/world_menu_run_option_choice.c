@@ -81,7 +81,7 @@ void world_menu_run_option_choice(void) {
     mem_copy_bytes_nonempty(&g_world_option_picker_icon_records[1], &g_world_option_picker_icon_records[0],
         sizeof(g_world_option_picker_icon_records[1]));
     LoadImage(&rect, buffer);
-    world_menu_free_memory(buffer);
+    menu_free_memory(buffer);
     thread_wait_frames(1);
     cursor = g_world_game_option_values[kind];
     for (width = 0;; width++) {

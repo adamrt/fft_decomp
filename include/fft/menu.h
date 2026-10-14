@@ -96,6 +96,9 @@ typedef struct menu_palette_pair {
     rgba5551_t colors[2 * PALETTE_COLOR_COUNT];
 } menu_palette_pair_t;
 typedef char menu_palette_pair_size_must_be_64[(sizeof(menu_palette_pair_t) == 64) ? 1 : -1];
+extern menu_palette_pair_t g_menu_palette_colors;
+extern u8 g_menu_numeric_display_palette_indices[12];
+void menu_set_palette_colors(const menu_palette_pair_t* source);
 
 /* Shared 4bpp menu glyph sheet: 32 rows of 128 packed pixel bytes, then
  * its palette. Window-frame builders copy aligned pairs of bytes. */
@@ -161,6 +164,7 @@ extern u16* g_menu_window_tween_easing_tables[];
 extern u16 g_menu_cursor_zoom_percentages[];
 
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void);
+void menu_reset_window_buffer_slots(void);
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 /* BATTLE and WORLD each link their own body. */
 void menu_draw_active_window_frames(void);
@@ -199,7 +203,11 @@ typedef char menu_portrait_sheet_size_must_be_32768[(sizeof(menu_portrait_sheet_
 
 extern RECT g_menu_portrait_origin;
 extern u8 g_menu_portrait_transition_offsets[];
+extern RECT g_menu_portrait_pixel_rect;
+extern RECT g_menu_portrait_palette_rect;
 
+/* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
+void menu_load_portrait_image(s32 portrait_id);
 void menu_build_unflagged_portrait_poly(s32 portrait_id, POLY_FT4* poly);
 void menu_build_unit_portrait_transition(const RECT* texture_rect, s32* transition, const s32* first_portrait,
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
@@ -242,6 +250,8 @@ typedef struct menu_palette_primitives {
 } menu_palette_primitives_t;
 
 typedef char menu_palette_primitives_size_must_be_236[(sizeof(menu_palette_primitives_t) == 236) ? 1 : -1];
+void menu_init_primitive_colors_normal(menu_palette_primitives_t* menu);
+void menu_init_primitive_colors_dimmed(menu_palette_primitives_t* menu);
 
 void menu_init_numeric_display_frame_primitives(RECT* bounds, menu_palette_primitives_t* menu);
 
@@ -868,6 +878,14 @@ extern s32 g_menu_managed_thread_state;
 s32 menu_start_managed_thread(s32 thread_id, menu_entry_t* descriptor);
 void menu_request_thread_stop(s32 thread_id);
 void menu_stop_managed_thread(s32 thread_id);
+extern s16 g_menu_wait_row_actions[4];
+extern u8 g_menu_cleared_entry_indices[11];
+extern u16 g_menu_at_list_selection_finished;
+void menu_init_stub(void);
+void menu_confirm_action_silently(menu_entry_t* entry);
+void menu_wait_thread(void);
+void menu_clear_entry_selections(void);
+void menu_finish_at_list_selection(void);
 
 /* Numeric-entry and action-selection threads use value as a 16-bit result cell. */
 static inline s16* menu_entry_result(menu_entry_t* entry) {
@@ -1410,6 +1428,7 @@ typedef enum battle_companion_file {
     BATTLE_COMPANION_FILE_BONUS = 3,     /* EVENT/BONUS.BIN */
     BATTLE_COMPANION_FILE_SPELL_MES = 4, /* EVENT/SPELL.MES */
 } battle_companion_file_e;
+void menu_run_companion_overlay_stub(void);
 
 /* g_battle_companion_overlay_state / g_world_companion_overlay_state: the overlay
  * entry the frame driver calls, cleared when the overlay returns. */
@@ -1526,7 +1545,6 @@ void menu_mini_menu_cancel_delay_thread(void);
 void menu_confirm_sound_delay_thread(void);
 void menu_check_action_restrictions(void);
 void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit);
-void menu_confirm_action_silently(menu_entry_t* menu);
 void menu_reset_unit_records(void);
 void menu_reset_unit_records_wrapper(void);
 void menu_restore_selection_for_selected_unit(s32 menu_id);
@@ -1566,8 +1584,10 @@ typedef struct menu_allocation {
     s32 page_count; /* 0x04 */
 } menu_allocation_t;
 typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
-
+/* BATTLE and WORLD each link their own allocator over their own arena. */
+void* menu_alloc_memory(s32 size);
 void menu_free_memory(void* buffer);
+void* menu_alloc_buffer(s32 bytes);
 
 /* input */
 /* Pressed, held and previous buttons, followed by the menu repeat counters. */
@@ -2170,6 +2190,8 @@ const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 s32 text_count_decimal_digits(s32 value);
 void text_fill_field_with_terminators(u8* text);
 s32 text_resolve_format_string_id(s32 format_code, s32 value);
+extern const char g_text_decimal_format[];
+void text_print_fnt_value_and_next(s32 value);
 
 /* unit */
 /* Provisional 0x2d0-byte double-buffered frame of the unit editor panel

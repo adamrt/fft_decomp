@@ -150,7 +150,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         buffer = g_main_heap_companion_overlay_load_address + 0x2000;
     } else {
         StoreImage(&g_battle_menu_ability_list_clut_rect, (u32*)saved_clut);
-        buffer = battle_menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
+        buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     }
     battle_clear_menu_render_buffer(buffer, window.rect.w * window.rect.h / 2);
     row_offset = layout->row_offset;
@@ -248,7 +248,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                 image_rect.h = 0x10;
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
-                buffer = battle_menu_alloc_memory(window.rect.w * 8);
+                buffer = menu_alloc_memory(window.rect.w * 8);
                 battle_clear_menu_render_buffer(buffer, window.rect.w * 8);
                 g_menu_text_state.pen.stride = window.rect.w;
                 for (column = 0; column < 3; column++) {
@@ -329,7 +329,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             }
         }
         if (redraw_pending != 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             redraw_pending = 0;
         }
         if (scroll_delta == 0 && battle_menu_can_accept_input() != 0) {
@@ -393,7 +393,7 @@ void menu_run_scrolling_ability_list_thread(void) {
             if (repeat >= g_main_input_repeat_initial_delay / g_script_event_speed) {
                 g_script_event_input |= g_script_event_current_input & (PSX_PAD_UP | PSX_PAD_DOWN);
             }
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             row_buffer_live = 0;
         }
         frame->v0 = (ring * 16 + scroll_accum - 2) & 0x7F;
@@ -435,7 +435,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)saved_clut);
     }
     if (row_buffer_live != 0) {
-        battle_menu_free_memory(buffer);
+        menu_free_memory(buffer);
     }
     thread_yield();
     g_battle_menu_scroll_list_depth--;

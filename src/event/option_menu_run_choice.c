@@ -73,7 +73,7 @@ void option_menu_run_choice(void) {
     battle_menu_build_window_sprites(&rect, param, &g_option_picker_icon_records[0]);
     mem_copy_bytes_nonempty(&g_option_picker_icon_records[1], &g_option_picker_icon_records[0], sizeof(*record));
     LoadImage(&rect, (u32*)buffer);
-    battle_menu_free_memory(buffer);
+    menu_free_memory(buffer);
     thread_wait_frames(1);
     cursor = g_option_current_values[kind];
     for (width = 0;; width++) {

@@ -24,7 +24,7 @@ s32 world_menu_update_menus_and_event_speed(u32* ot, u32 input) {
     for (i = 3; i >= 0; i--) {
         g_menu_pending_selection[i] = value;
     }
-    world_script_run_frame(ot, input);
+    script_run_event_frame(ot, input);
     world_menu_update_panel_fade();
     result = world_menu_resolve_selection();
     if ((world_thread_is_running_asm(THREAD_SLOT_MENU) != 0

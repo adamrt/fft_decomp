@@ -199,8 +199,8 @@ void equip_panel_run_unit_status_thread(void) {
             i += 1;
         } while (i < 7);
         if (dimmed != 0) {
-            battle_menu_init_primitive_colors_dimmed(&editor->numeric_frame);
-            battle_menu_init_primitive_colors_dimmed(&panel->numeric_frame);
+            menu_init_primitive_colors_dimmed(&editor->numeric_frame);
+            menu_init_primitive_colors_dimmed(&panel->numeric_frame);
             if ((anim_state - 4) < 6U) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
             } else {
@@ -211,8 +211,8 @@ void equip_panel_run_unit_status_thread(void) {
             setRGB0(&editor->portrait[3], 0x20, 0x28, 0x38);
         } else {
             s32 shade;
-            battle_menu_init_primitive_colors_normal(&editor->numeric_frame);
-            battle_menu_init_primitive_colors_normal(&panel->numeric_frame);
+            menu_init_primitive_colors_normal(&editor->numeric_frame);
+            menu_init_primitive_colors_normal(&panel->numeric_frame);
             if ((anim_state - 4) >= 6U) {
                 setRGB0(&editor->portrait[0], 0x80, 0x80, 0x80);
             } else {

@@ -32,7 +32,7 @@ void world_screen_menu_window_frame_thread(void) {
     s32 frame;
 
     menu = (urect16_t*)world_thread_get_current_parameter_1();
-    pixels = world_menu_alloc_ui_buffer(0x400);
+    pixels = menu_alloc_memory(0x400);
 
     world_clear_menu_render_buffer(pixels, 0x400);
     texture.w = 0x80;
@@ -155,7 +155,7 @@ void world_screen_menu_window_frame_thread(void) {
         thread_yield();
     }
     thread_yield();
-    world_menu_free_memory(pixels);
+    menu_free_memory(pixels);
     world_gfx_free_tpage7_vram(&texture);
     thread_exit_current();
 }

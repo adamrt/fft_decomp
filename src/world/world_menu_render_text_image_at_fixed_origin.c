@@ -23,6 +23,6 @@ void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) 
         world_menu_display_text_entry(record->text, record->buffer, &g_menu_text_state.pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();
-        world_menu_free_memory(record->buffer);
+        menu_free_memory(record->buffer);
     }
 }

@@ -13,7 +13,7 @@ void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitiv
         SetLineF2(line);
         line++;
     }
-    world_menu_init_primitive_colors_normal(menu);
+    menu_init_primitive_colors_normal(menu);
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {

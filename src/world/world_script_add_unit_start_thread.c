@@ -42,14 +42,14 @@ void world_script_add_unit_start_thread(void) {
                 }
                 runtime_id = battle_unit_get_runtime_id_by_battle_id(slot);
                 if (runtime_id == -1) {
-                    world_unit_save_staged_status_data(slot);
+                    unit_save_staged_status_data(slot);
                     battle_gfx_load_unit_graphics_by_battle_id(slot, flag);
                     g_world_unit_graphics_load_pending = 1;
                 } else {
                     if (flag == 0) {
                         battle_unit_draw_and_activate_by_runtime_id(runtime_id);
                     }
-                    if (world_unit_save_staged_status_data(slot) != 0) {
+                    if (unit_save_staged_status_data(slot) != 0) {
                         g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
                         thread_call_on_main_stack(runtime_id);
                     }

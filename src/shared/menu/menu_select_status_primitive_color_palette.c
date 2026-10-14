@@ -8,8 +8,8 @@
 void menu_select_status_primitive_color_palette(
     menu_palette_primitives_t* primitives, const menu_status_thread_t* thread) {
     if (thread->style == 1 || g_menu_input_lock_mode == 1) {
-        battle_menu_init_primitive_colors_dimmed(primitives);
+        menu_init_primitive_colors_dimmed(primitives);
     } else {
-        battle_menu_init_primitive_colors_normal(primitives);
+        menu_init_primitive_colors_normal(primitives);
     }
 }

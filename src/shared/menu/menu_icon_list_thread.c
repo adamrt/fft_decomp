@@ -46,7 +46,7 @@ void menu_icon_list_thread(void) {
         record = &records[i & 1];
         thread_yield();
         if (fresh == 1) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             fresh = 0;
         }
         state->selected_index = cursor;

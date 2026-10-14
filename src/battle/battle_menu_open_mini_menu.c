@@ -10,5 +10,5 @@ void battle_menu_open_mini_menu(void) {
     camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MINI_MENU;
     target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
-    battle_menu_finish_at_list_selection();
+    menu_finish_at_list_selection();
 }

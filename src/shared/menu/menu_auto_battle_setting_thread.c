@@ -97,7 +97,7 @@ void menu_auto_battle_setting_thread(void) {
         }
         thread_yield();
         if (fresh != 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
             fresh = 0;
         }
         param->selected_index = cursor;

@@ -99,7 +99,7 @@ void world_main_menu_text_window_thread(void) {
         }
         thread_yield();
         if (phase == 0) {
-            world_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         if (world_thread_get_current_parameter_3() != 0) {
             break;

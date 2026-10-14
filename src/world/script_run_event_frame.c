@@ -22,7 +22,7 @@
  * The finish-operation getter is called through an s32-returning cast: the
  * target uses its return value without the u16 zero extension.
  */
-s32 world_script_run_frame(u32* ot, u32 buttons) {
+s32 script_run_event_frame(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
     s32 op;
@@ -164,7 +164,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
     }
 
     if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_STUB) {
-        world_menu_run_companion_overlay_stub();
+        menu_run_companion_overlay_stub();
         g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         world_script_set_event_speed(1);

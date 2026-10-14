@@ -7,7 +7,7 @@
  *
  * Scans the page occupancy map first-fit. When no run of free pages or no free slot
  * remains, it optionally prints a diagnostic, yields the thread, and rescans. */
-void* world_menu_alloc_ui_buffer(s32 size) {
+void* menu_alloc_memory(s32 size) {
     s32 page;
     s32 pages;
     s32 i;

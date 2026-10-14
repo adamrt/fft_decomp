@@ -9,8 +9,8 @@
  * Scans the page occupancy map first-fit. When no run of free pages or no free slot
  * remains, it optionally prints a diagnostic, yields the thread, and rescans.
  *
- * BATTLE twin of world_menu_alloc_ui_buffer. */
-void* battle_menu_alloc_memory(s32 size) {
+ * BATTLE twin of menu_alloc_memory. */
+void* menu_alloc_memory(s32 size) {
     s32 page;
     s32 n;
     s32 i;

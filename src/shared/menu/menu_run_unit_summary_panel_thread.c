@@ -57,7 +57,7 @@ void menu_run_unit_summary_panel_thread(void) {
     }
     frames[0].portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
     SetSemiTrans(&frames[0].portrait, 1);
-    buffer = battle_menu_alloc_buffer(0x580);
+    buffer = menu_alloc_buffer(0x580);
     battle_clear_menu_render_buffer(buffer, 0x580);
     stride = &g_menu_text_state.pen.stride;
     origin = &g_menu_text_state.pen;
@@ -103,7 +103,7 @@ void menu_run_unit_summary_panel_thread(void) {
         g_menu_hide_numeric_values = battle_unit_get_attacker_data_pointer()->unit_flags & UNIT_FLAG_EGG;
         frame_record = &frames[frame & 1];
         if (frame == 0) {
-            battle_menu_free_memory(buffer);
+            menu_free_memory(buffer);
         }
         value = (g_main_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
         for (i = 0; i < g_script_event_speed; i++) {
@@ -182,9 +182,9 @@ void menu_run_unit_summary_panel_thread(void) {
         }
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
-            battle_menu_init_primitive_colors_dimmed(frame_record->palette);
+            menu_init_primitive_colors_dimmed(frame_record->palette);
         } else {
-            battle_menu_init_primitive_colors_normal(frame_record->palette);
+            menu_init_primitive_colors_normal(frame_record->palette);
         }
         menu_submit_numeric_display_frame_primitives(frame_record->palette);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_a);

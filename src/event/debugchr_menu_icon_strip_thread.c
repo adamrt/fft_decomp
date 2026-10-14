@@ -41,7 +41,7 @@ void debugchr_menu_icon_strip_thread(void) {
         }
         thread_yield();
         if (redraw == 1) {
-            battle_menu_free_memory(render);
+            menu_free_memory(render);
             redraw = 0;
         }
         if (battle_menu_should_close_thread(&input) != 0)

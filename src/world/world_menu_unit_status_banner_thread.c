@@ -197,8 +197,8 @@ void world_menu_unit_status_banner_thread(void) {
             }
         }
         if (dimmed != 0) {
-            world_menu_init_primitive_colors_dimmed(&summary->numeric_frame);
-            world_menu_init_primitive_colors_dimmed(&status->numeric_frame);
+            menu_init_primitive_colors_dimmed(&summary->numeric_frame);
+            menu_init_primitive_colors_dimmed(&status->numeric_frame);
             if ((anim_state - 4) < 6U) {
                 setRGB0(&summary->portrait[0], 0x20, 0x28, 0x38);
             } else {
@@ -209,8 +209,8 @@ void world_menu_unit_status_banner_thread(void) {
             setRGB0(&summary->portrait[3], 0x20, 0x28, 0x38);
         } else {
             s32 shade;
-            world_menu_init_primitive_colors_normal(&summary->numeric_frame);
-            world_menu_init_primitive_colors_normal(&status->numeric_frame);
+            menu_init_primitive_colors_normal(&summary->numeric_frame);
+            menu_init_primitive_colors_normal(&status->numeric_frame);
             if ((anim_state - 4) >= 6U) {
                 setRGB0(&summary->portrait[0], 0x80, 0x80, 0x80);
             } else {

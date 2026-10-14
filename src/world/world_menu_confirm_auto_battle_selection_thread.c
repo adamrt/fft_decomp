@@ -14,6 +14,6 @@ void world_menu_confirm_auto_battle_selection_thread(void) {
         unit->auto_battle_setting = AI_AUTOBATTLE_RETREAT;
     }
     g_world_menu_set_auto_battle_row_actions = -3;
-    world_menu_confirm_action_silently(entry);
+    menu_confirm_action_silently(entry);
     thread_exit_current();
 }

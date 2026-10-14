@@ -42,11 +42,9 @@ void blit_text_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, co
 
 /* numbers */
 extern u32 g_battle_text_decimal_divisors[];
-extern const char g_battle_text_decimal_format[];
 extern glyph_blit_t g_battle_text_large_number_glyph_rect; /* glyph source rectangle in the large number font */
 
 void battle_text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
-void battle_text_print_fnt_value_and_next(s32 value);
 
 /* text sections */
 /* Text variables $27 and $28 (rows of glyph pixels drawn, 0x10 by default),

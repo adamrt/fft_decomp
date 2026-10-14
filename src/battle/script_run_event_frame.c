@@ -19,7 +19,7 @@
 
 /* Run one frame of BATTLE bookkeeping around the thread scheduler.
  *
- * BATTLE twin of world_script_run_frame: returns the scenario-finish result
+ * BATTLE twin of script_run_event_frame: returns the scenario-finish result
  * (9, 0xA, 0xB or 0x13, 0 when no finish operation is pending) once every
  * script thread has stopped, otherwise 1 (or g_script_frame_result_override while it is set, or 0
  * while menu input is disabled with state 2). The three BATTLE-only 16-bit clears come
@@ -173,7 +173,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     }
 
     if (g_battle_companion_overlay_state == COMPANION_OVERLAY_STATE_STUB) {
-        battle_menu_run_companion_overlay_stub();
+        menu_run_companion_overlay_stub();
         g_battle_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_battle_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         script_set_event_speed(1);

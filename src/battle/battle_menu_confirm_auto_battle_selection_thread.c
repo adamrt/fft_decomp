@@ -16,6 +16,6 @@ void battle_menu_confirm_auto_battle_selection_thread(void) {
         attacker->auto_battle_setting = AI_AUTOBATTLE_RETREAT;
     }
     g_battle_menu_set_auto_battle_row_actions = -3;
-    battle_menu_confirm_action_silently(parameter);
+    menu_confirm_action_silently(parameter);
     thread_exit_current();
 }

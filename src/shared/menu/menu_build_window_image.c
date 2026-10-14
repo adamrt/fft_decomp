@@ -23,7 +23,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
     partial = words != 0;
     words = (width >> 2) + partial;
     byte_count = (width * (kind == DIALOG_OPTIONS_NO_TAIL ? height : height + 0x10)) >> 1;
-    buf = battle_menu_alloc_memory(byte_count);
+    buf = menu_alloc_memory(byte_count);
     battle_clear_menu_render_buffer(buf, byte_count);
     x_off = 0;
     src = (u16*)g_menu_glyph_sheet->pixels;
@@ -92,5 +92,5 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
     }
     LoadImage(rect, (u32*)buf);
     thread_wait_frames(1);
-    battle_menu_free_memory(buf);
+    menu_free_memory(buf);
 }

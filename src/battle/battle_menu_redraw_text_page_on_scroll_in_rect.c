@@ -66,7 +66,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
             if (g_battle_menu_scroll_list_depth == 2) {
                 buffer = g_main_heap_companion_overlay_load_address + 0x2000;
             } else {
-                buffer = battle_menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
+                buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
             battle_clear_menu_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
             battle_menu_draw_text_columns_narrow(entry, row_offset, buffer);

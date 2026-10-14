@@ -12,7 +12,7 @@ void world_script_load_portrait_colors_event_instruction(s32 index) {
     palette_t* palettes;
     s32 i;
 
-    buffer = world_menu_alloc_ui_buffer(sizeof(*buffer));
+    buffer = menu_alloc_memory(sizeof(*buffer));
     do {
         thread_yield();
         g_thread_call_target = (void (*)(void))main_file_call_build_header;
@@ -22,7 +22,7 @@ void world_script_load_portrait_colors_event_instruction(s32 index) {
         g_thread_call_target = (void (*)(void))main_file_is_still_loading;
     } while (thread_call_on_main_stack() != 0);
     palettes = buffer->palettes;
-    mem_copy_bytes_nonempty(&rect, &g_world_menu_portrait_pixel_rect, sizeof(rect));
+    mem_copy_bytes_nonempty(&rect, &g_menu_portrait_pixel_rect, sizeof(rect));
     i = 0;
     pixels = buffer->pixels;
     rect.w = 8;
@@ -32,7 +32,7 @@ void world_script_load_portrait_colors_event_instruction(s32 index) {
         rect.x += 8;
         pixels++;
     }
-    LoadImage(&g_world_menu_portrait_palette_rect, (u32*)palettes);
-    world_menu_free_memory(buffer);
+    LoadImage(&g_menu_portrait_palette_rect, (u32*)palettes);
+    menu_free_memory(buffer);
     thread_yield();
 }

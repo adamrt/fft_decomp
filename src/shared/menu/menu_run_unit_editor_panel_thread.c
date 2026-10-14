@@ -117,7 +117,7 @@ void menu_run_unit_editor_panel_thread(void) {
         gfx_set_item_icon_sprite(&frame_record->sprites[19 + i], g_menu_selected_unit_fields.state.equipment[i]);
     }
 
-    buffer = battle_menu_alloc_buffer(0xC80);
+    buffer = menu_alloc_buffer(0xC80);
     battle_clear_menu_render_buffer(buffer, 0xC80);
     g_menu_text_state.pen.stride = 0x50;
     battle_menu_set_text_origin(0, 0);
@@ -165,7 +165,7 @@ void menu_run_unit_editor_panel_thread(void) {
     }
     LoadImage(&g_battle_unit_editor_text_rect_b, (u32*)buffer);
     thread_yield();
-    battle_menu_free_memory(buffer);
+    menu_free_memory(buffer);
 
     mem_copy_bytes_nonempty(&records[1], frame_record, sizeof(menu_unit_editor_frame_t));
     records[0].palette = &palette.primitives;
@@ -204,9 +204,9 @@ void menu_run_unit_editor_panel_thread(void) {
             }
         }
         if (value == 0) {
-            battle_menu_init_primitive_colors_normal(frame_record->palette);
+            menu_init_primitive_colors_normal(frame_record->palette);
         } else {
-            battle_menu_init_primitive_colors_dimmed(frame_record->palette);
+            menu_init_primitive_colors_dimmed(frame_record->palette);
         }
         if (battle_menu_can_accept_input() != 0) {
             if (g_script_event_input & PSX_PAD_CROSS) {

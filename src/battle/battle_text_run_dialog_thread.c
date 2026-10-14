@@ -585,7 +585,7 @@ void battle_text_run_dialog_thread(void) {
                 } else if (cursor_x & 1) {
                     cursor_x -= cursor_x & 3;
                 }
-                battle_text_print_fnt_value_and_next(rec.line + rec.lines);
+                text_print_fnt_value_and_next(rec.line + rec.lines);
             } else {
                 cursor_x = rec.x;
             }
