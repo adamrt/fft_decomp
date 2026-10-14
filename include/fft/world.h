@@ -1542,8 +1542,6 @@ void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 s32 world_formation_get_unit_palette_index(s32 roster_slot);
 s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
 
-void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status_index, s32 is_infliction, s32 less_strict_removal);
-
 s32 world_unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void world_unit_update_monster_breeding(s32 unused);
 
