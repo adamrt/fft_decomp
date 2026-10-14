@@ -165,6 +165,7 @@ extern u16 g_menu_cursor_zoom_percentages[];
 
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void);
 void menu_reset_window_buffer_slots(void);
+void menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 /* BATTLE and WORLD each link their own body. */
 void menu_draw_active_window_frames(void);
@@ -889,6 +890,9 @@ void menu_confirm_action_silently(menu_entry_t* entry);
 void menu_wait_thread(void);
 void menu_input_thread(void);
 void menu_build_main(void);
+extern s32 g_menu_help_open;
+extern s32 g_menu_building_thread_started;
+void menu_start_building_thread(void);
 /* BATTLE and WORLD each link their own bodies of the next four. */
 s32 menu_can_accept_input(void);
 void menu_handle_action(menu_entry_t* entry, s32 row_index);
@@ -1453,8 +1457,9 @@ extern s32 g_menu_companion_executable_sizes[];
 extern s32 g_menu_companion_executable_offsets[];
 void menu_open_companion_data_file(void);
 void menu_open_companion_executable(void);
+extern s32 g_menu_companion_overlay_state;
 
-/* g_battle_companion_overlay_state / g_world_companion_overlay_state: the overlay
+/* g_battle_companion_overlay_state / g_menu_companion_overlay_state: the overlay
  * entry the frame driver calls, cleared when the overlay returns. */
 typedef enum companion_overlay_state {
     COMPANION_OVERLAY_STATE_IDLE = 0,
@@ -1597,6 +1602,15 @@ typedef struct menu_command_map {
 } menu_command_map_t;
 typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];
 extern menu_command_map_t g_menu_command_maps[31];
+extern s32 g_menu_active_menu; /* active menu */
+extern s16 g_menu_result;      /* menu result: -4 pending, -1 canceled */
+extern s16 g_menu_selected_option;
+extern s32 g_menu_used_skillset_id;
+extern s32 g_menu_used_item_id;
+extern u16 g_menu_anything_ability_id;
+extern s32 g_menu_dead_unit_action;
+extern s32 g_menu_dead_unit_result;
+s32 menu_resolve_selection(void);
 
 /* memory */
 /* Both menu arenas track sixteen allocations in 256-byte pages. */

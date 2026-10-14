@@ -1,6 +1,6 @@
-#include "fft/battle_ai.h"
+#include "fft/battle.h"
+#include "fft/battle_action.h"
 #include "fft/menu.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /**
@@ -9,7 +9,7 @@
  * Remaps menu-specific values, publishes the resolved selection, and returns
  * the command, option, and item packed into a single value.
  */
-s32 world_menu_resolve_selection(void) {
+s32 menu_resolve_selection(void) {
     s32 command;
     s32 option;
     u32 item;
@@ -20,7 +20,7 @@ s32 world_menu_resolve_selection(void) {
     command = (u8)g_menu_pending_selection[0];
     option = (u8)g_menu_pending_selection[1];
     item = (u16)g_menu_pending_selection[2];
-    g_world_menu_selected_command = command;
+    g_menu_selected_command.kind = command;
     index = option;
     if (command != 0x12 && (command & 0xFE) != 0xFE) {
         menu = g_menu_current_id;
@@ -28,9 +28,9 @@ s32 world_menu_resolve_selection(void) {
             if (menu == g_menu_command_maps[i].menu_id) {
                 if (command != 0xFF) {
                     if (menu == BATTLE_MENU_ID_DEAD_UNIT) {
-                        command = g_world_dead_unit_action;
-                        /* Item selection updates only the low byte of the 16-bit item/equipment field. */
-                        *(u8*)&g_world_menu_preview_action.item_or_equipment = g_world_dead_unit_result;
+                        command = g_menu_dead_unit_action;
+                        /* Item selection updates only the low byte of the 16-bit command field. */
+                        *(u8*)&g_menu_selected_action.item_or_equipment = g_menu_dead_unit_result;
                         option = 0xFFFE;
                     } else if (menu == 0x19 || menu >= 0x64) {
                         command = *(g_menu_command_maps[i].map + option + 1);
@@ -50,7 +50,7 @@ s32 world_menu_resolve_selection(void) {
         if (i < 16) {
             g_menu_resolved_command = command;
         } else if (command == 5 || command == 6) {
-            g_world_menu_preview_action.targeting_type = command;
+            g_menu_selected_action.targeting_type = command;
         }
         if (command == 1) {
             g_menu_restore_pending = 1;
@@ -68,27 +68,27 @@ s32 world_menu_resolve_selection(void) {
             item = 0xFFFE;
             g_menu_resolved_command = command;
         }
-        g_world_menu_selected_command = command;
+        g_menu_selected_command.kind = command;
         if ((option & 0xFE) != 0xFE) {
             option = g_menu_skillsets[index];
             if (option == SKILLSET_ID_ATTACK || option == SKILLSET_ID_DEFEND || option == SKILLSET_ID_EQUIP_CHANGE
                 || option == SKILLSET_ID_BLANK_04 || option == SKILLSET_ID_ELEMENTAL || option == SKILLSET_ID_JUMP) {
-                g_world_menu_preview_action.ability_id = 0;
+                g_menu_selected_action.ability_id = 0;
                 item = 0xFFFE;
             } else if (option == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING && g_menu_skillset_build_result == 0) {
-                item = g_world_menu_anything_ability_id;
+                item = g_menu_anything_ability_id;
             } else {
                 item = g_ai_workspace_ptr->ability_list.ids[item] & 0x1FF;
             }
-            g_world_menu_preview_action.skillset_id = option;
-            g_world_menu_resolved_skillset = option;
+            g_menu_selected_action.skillset_id = option;
+            g_menu_used_skillset_id = option;
             if (item != 0xFFFE) {
                 if (option == SKILLSET_ID_ITEM || option == SKILLSET_ID_DRAW_OUT || option == SKILLSET_ID_THROW) {
-                    *(u8*)&g_world_menu_preview_action.item_or_equipment = item;
+                    *(u8*)&g_menu_selected_action.item_or_equipment = item;
                 } else {
-                    g_world_menu_preview_action.ability_id = item;
+                    g_menu_selected_action.ability_id = item;
                 }
-                g_world_menu_resolved_ability = item;
+                g_menu_used_item_id = item;
             }
         }
     }

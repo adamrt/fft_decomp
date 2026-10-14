@@ -13,7 +13,7 @@ s32 menu_should_close_thread(u32* input) {
     s32 i;
     s32 task_state;
 
-    if (g_menu_input_lock_mode != 0 || g_battle_menu_help_open != 0) {
+    if (g_menu_input_lock_mode != 0 || g_menu_help_open != 0) {
         *input = 0;
         return 0;
     }

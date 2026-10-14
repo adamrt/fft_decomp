@@ -43,7 +43,7 @@ void menu_start_entry_thread(void) {
     count = g_battle_menu_restore_depth;
     g_script_event_input = 0;
     if (g_menu_restore_pending != 0 && g_battle_menu_restore_unit_id == g_menu_selected_unit.battle_id) {
-        g_battle_menu_help_open = 1;
+        g_menu_help_open = 1;
         thread_wait_frames(2);
         if (count > 0) {
             thread_start(THREAD_SLOT_MENU_CHILD, menu_run_skillset_thread);
@@ -58,7 +58,7 @@ void menu_start_entry_thread(void) {
         }
         thread_wait_frames(2);
         g_menu_restore_pending = 0;
-        g_battle_menu_help_open = 0;
+        g_menu_help_open = 0;
     } else {
         g_battle_menu_restore_depth = 0;
         g_battle_menu_restore_unit_id = g_menu_selected_unit.battle_id;

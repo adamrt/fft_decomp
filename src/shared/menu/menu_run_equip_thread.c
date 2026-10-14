@@ -25,11 +25,11 @@ void menu_run_equip_thread(void) {
     menu_request_open_companion_executable(COMPANION_OVERLAY_EQUIP_SECOND_HALF);
     thread_suspend(THREAD_SLOT_MENU);
     thread_suspend(THREAD_SLOT_MENU_CHILD);
-    g_battle_companion_overlay_state = COMPANION_OVERLAY_STATE_EQUIP;
+    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_EQUIP;
     do {
         g_script_event_input = 0;
         thread_yield();
-    } while (g_battle_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
     g_menu_thread_menu_data = g_battle_menu_idle_action_entries;
     g_battle_menu_action_slot_row_actions[0] = -3;
     g_sound_suppressed = 1;

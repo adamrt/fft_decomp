@@ -3,5 +3,5 @@
 
 /* Clear the menu-building-started flag; the menu id is not read. */
 void world_menu_build_idle_action_stub(s32 unused_menu_id) {
-    g_world_menu_building_thread_started = 0;
+    g_menu_building_thread_started = 0;
 }

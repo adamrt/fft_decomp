@@ -150,7 +150,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         animation[1] = 0;
         animation[2] = 0;
 
-        if (event_mode == 0 && g_battle_menu_help_open == 0 && battle_thread_is_previous_running() == 0) {
+        if (event_mode == 0 && g_menu_help_open == 0 && battle_thread_is_previous_running() == 0) {
             input = *g_menu_input_controller;
             if ((input & PSX_PAD_CROSS) != 0) {
                 thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);

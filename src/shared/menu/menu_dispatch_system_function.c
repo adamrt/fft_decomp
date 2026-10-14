@@ -139,7 +139,7 @@ s32 menu_dispatch_system_function(
             value = 0x14;
         } else if (g_menu_resolved_command == 0xE) {
             value = 0x15;
-        } else if (g_battle_menu_used_skillset_id == SKILLSET_ID_DEFEND) {
+        } else if (g_menu_used_skillset_id == SKILLSET_ID_DEFEND) {
             value = 0x1C;
         }
         menu_start_system_function_thread(value);
@@ -168,13 +168,13 @@ s32 menu_dispatch_system_function(
             value = 0xB;
             if (option != 1) {
                 if (option == 2 || option == 4) {
-                    if (g_battle_menu_used_item_id == 0xFFFE || g_menu_selected_skill_ct == 0) {
+                    if (g_menu_used_item_id == 0xFFFE || g_menu_selected_skill_ct == 0) {
                         value = 0x2D;
                     } else {
                         value = 0xC;
                     }
                 } else {
-                    if (g_battle_menu_used_item_id != 0xFFFE || g_menu_selected_skill_ct == 0) {
+                    if (g_menu_used_item_id != 0xFFFE || g_menu_selected_skill_ct == 0) {
                         value = 0x2E;
                     } else {
                         value = 0xD;

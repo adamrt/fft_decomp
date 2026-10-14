@@ -9,7 +9,7 @@ void battle_state_handle_target_display_start_state(void) {
 
     battle_state_handle_free_cursor_input();
     battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
-    id = battle_menu_get_selected_command_address()->kind;
+    id = menu_get_selected_command_address()->kind;
     if ((id >= 7) && ((id < 9) || (id == 0xFF))) {
         g_action_post_action = 1;
     }

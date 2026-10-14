@@ -1366,7 +1366,6 @@ extern u16 g_battle_unit_status_sprite_clut_pairs[][2];
 extern image_load_parameters_t* g_battle_unit_status_sprite_image_params_by_mode[];
 extern image_load_parameters_t g_battle_unit_summary_portrait_image_params;
 extern image_load_parameters_t g_battle_unit_summary_sprite_image_params[];
-extern s32 g_battle_companion_overlay_state;
 extern u8 g_battle_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE];
 
 #endif

@@ -182,8 +182,7 @@ void menu_run_unit_editor_panel_thread(void) {
         frame_record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &frame_record->draw_areas, &g_battle_unit_editor_cursor_rect, frame, g_main_gfx_screen_polarity);
-        if (g_menu_input_lock_mode == 0 && g_battle_menu_help_open == 0
-            && battle_thread_get_current_parameter_3() != 0) {
+        if (g_menu_input_lock_mode == 0 && g_menu_help_open == 0 && battle_thread_get_current_parameter_3() != 0) {
             break;
         }
         value = battle_thread_is_running_asm(g_thread_current_id - 1);

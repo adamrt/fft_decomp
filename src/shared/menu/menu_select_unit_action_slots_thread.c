@@ -75,13 +75,13 @@ void menu_select_unit_action_slots_thread(void) {
                        .ids[g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index]
                 - 0x7000;
             if (i == 2) {
-                g_battle_menu_selected_action.calculator_type = text;
+                g_menu_selected_action.calculator_type = text;
             }
             if (i == 1) {
-                g_battle_menu_selected_action.calculator_multiplier = text;
+                g_menu_selected_action.calculator_multiplier = text;
             }
             if (i == 0) {
-                g_battle_menu_selected_action.ability_id = text;
+                g_menu_selected_action.ability_id = text;
             }
         }
     }

@@ -701,6 +701,7 @@ extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
 extern s32 g_script_next_event_id;
 extern s16 g_script_scenario_event_active;
+extern u16 g_script_input_suppression_frames;
 extern s32 g_script_pending_loaded_evtchr_slot;
 extern evtchr_file_record_t* g_script_loaded_evtchr_buffer;
 s32 script_get_current_scenario_finish_operation(void);

@@ -91,7 +91,7 @@ void card_input_update_event_state(u32* otag, u32 input, s32 count_frame) {
     /* CARD inserts its controller pointer at +4; the copy of six 32-bit values includes it. */
     script_load_event_input_state((const menu_input_state_t*)&g_card_input_event);
     if (g_card_input_event != PSX_PAD_SELECT && g_card_input_event != 0) {
-        g_battle_event_input_suppression_frames = 5;
+        g_script_input_suppression_frames = 5;
     }
 
     thread_id = 1;
@@ -105,13 +105,13 @@ void card_input_update_event_state(u32* otag, u32 input, s32 count_frame) {
     do {
         status = g_card_thread_status_snapshot[thread_id];
         if (status != battle_thread_is_running_asm(thread_id)) {
-            g_battle_event_input_suppression_frames = 5;
+            g_script_input_suppression_frames = 5;
         }
         thread_id++;
     } while (thread_id < 16);
 
-    if (g_battle_event_input_suppression_frames != 0) {
-        g_battle_event_input_suppression_frames--;
+    if (g_script_input_suppression_frames != 0) {
+        g_script_input_suppression_frames--;
     }
     g_battle_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;

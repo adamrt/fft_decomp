@@ -12,7 +12,7 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
     menu_entry_t* parameter;
     unit_stats_t* unit;
 
-    g_battle_active_menu = menu;
+    g_menu_active_menu = menu;
     parameter = (menu_entry_t*)battle_thread_get_current_parameter_1();
     mode = 0;
     message = 0;

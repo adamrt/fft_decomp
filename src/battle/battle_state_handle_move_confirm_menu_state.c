@@ -12,7 +12,7 @@ void battle_state_handle_move_confirm_menu_state(void) {
 
     battle_state_handle_free_cursor_input();
     battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
-    selected_command_address = battle_menu_get_selected_command_address();
+    selected_command_address = menu_get_selected_command_address();
     source_unit = battle_unit_get_source();
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;

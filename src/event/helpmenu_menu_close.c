@@ -7,6 +7,6 @@
 void helpmenu_menu_close(void) {
     mem_copy_bytes_nonempty(g_text_section_pointers, g_helpmenu_text_saved_pointers, 0x80);
     main_heap_free(g_main_heap_high_overlay_load_address);
-    g_battle_menu_help_open = 0;
+    g_menu_help_open = 0;
     thread_exit_current();
 }

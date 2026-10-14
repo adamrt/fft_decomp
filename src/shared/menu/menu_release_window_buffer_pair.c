@@ -1,4 +1,3 @@
-#include "fft/battle_menu.h"
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "psx/types.h"
@@ -8,8 +7,8 @@
  * cleared. -1 is ignored; a buffer that is not the first of one of the three
  * pairs stops the current thread.
  *
- * BATTLE twin of world_menu_release_window_buffer_pair. */
-void battle_menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
+ * BATTLE twin of menu_release_window_buffer_pair. */
+void menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
     s32 slot;
     menu_window_buffer_t* empty;
 

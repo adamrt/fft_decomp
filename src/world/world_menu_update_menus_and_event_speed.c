@@ -9,7 +9,7 @@
  * controller input while menu input is disabled, clears the four g_menu_pending_selection
  * slots to -2, runs the input/update steps and, while threads 6/7 or thread 8
  * (outside state 0x42) are running, forces event speed 2 (restoring the saved
- * animation speed afterwards). Returns world_menu_resolve_selection's result. */
+ * animation speed afterwards). Returns menu_resolve_selection's result. */
 s32 world_menu_update_menus_and_event_speed(u32* ot, u32 input) {
     s32 i;
     s16 value;
@@ -26,7 +26,7 @@ s32 world_menu_update_menus_and_event_speed(u32* ot, u32 input) {
     }
     script_run_event_frame(ot, input);
     menu_update_panel_fade();
-    result = world_menu_resolve_selection();
+    result = menu_resolve_selection();
     if ((world_thread_is_running_asm(THREAD_SLOT_MENU) != 0
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
         || world_thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0

@@ -116,29 +116,29 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     g_world_3d_object_use_request = 0;
     g_world_field_object_use_request = 0;
 
-    if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
+    if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
         ordering_table = jobstts_entrypoint(g_menu_selected_unit.battle_id, 0);
         g_world_companion_overlay_prims = (s32)ordering_table;
         if (ordering_table != 0) {
             AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
         } else {
-            g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
+            g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         }
     }
-    if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
+    if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
         prims = equip_entrypoint(g_menu_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
         g_world_companion_overlay_prims = prims;
         if (prims >= 2) {
             AddPrims(g_gfx_current_otag_entry, (void*)prims, (void*)(prims + 0xFC));
         } else {
-            g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
+            g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         }
     }
 
     script_load_event_input_state((menu_input_state_t*)&g_script_event_input);
     if (world_script_check_tutorial_event_slot() == 0 && g_script_event_input != PSX_PAD_SELECT
         && g_script_event_input != 0) {
-        g_world_thread_change_cooldown = 5;
+        g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < 16; i++) {
         g_world_event_thread_status_snapshot[i] = world_thread_is_running_asm(i);
@@ -146,11 +146,11 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     thread_yield();
     for (i = 1; i < 16; i++) {
         if (g_world_event_thread_status_snapshot[i] != world_thread_is_running_asm(i)) {
-            g_world_thread_change_cooldown = 5;
+            g_script_input_suppression_frames = 5;
         }
     }
-    if (g_world_thread_change_cooldown != 0) {
-        g_world_thread_change_cooldown--;
+    if (g_script_input_suppression_frames != 0) {
+        g_script_input_suppression_frames--;
     }
     world_camera_load_state_from_script_variables();
     g_world_frame_counter++;
@@ -163,21 +163,21 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         return g_script_frame_result_override;
     }
 
-    if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_STUB) {
+    if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_STUB) {
         menu_run_companion_overlay_stub();
-        g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
-    } else if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
+        g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
+    } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         world_script_set_event_speed(1);
         i = bunit_entrypoint(0, 0);
         target_move_cursor_to_battle_id(i);
         g_menu_selected_unit.battle_id = i;
-        g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
-    } else if (g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
+        g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
+    } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
         world_script_set_event_speed(1);
         polarity = g_main_gfx_screen_polarity;
         script_set_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
         card_save_run_menu(0);
-        g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
+        g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
         g_main_gfx_screen_polarity = polarity;
     }
     menu_open_companion_executable();

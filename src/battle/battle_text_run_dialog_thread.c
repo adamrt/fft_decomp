@@ -822,7 +822,7 @@ end:
     }
     g_battle_text_awaiting_input = 0;
     win->active = 0;
-    battle_menu_release_window_buffer_pair(win);
+    menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
     battle_menu_release_current_thread_slot();
     thread_yield();

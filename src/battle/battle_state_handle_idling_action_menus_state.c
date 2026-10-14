@@ -28,7 +28,7 @@ void battle_state_handle_idling_action_menus_state(void) {
     }
     battle_state_handle_free_cursor_input();
     battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
-    command = battle_menu_get_selected_command_address();
+    command = menu_get_selected_command_address();
     unit = battle_unit_get_casting();
     switch ((s32)command->kind) {
     case AI_COMMAND_MOVE:

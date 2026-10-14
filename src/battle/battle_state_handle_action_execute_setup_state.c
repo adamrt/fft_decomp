@@ -8,7 +8,7 @@ void battle_state_handle_action_execute_setup_state(void) {
 
     battle_state_handle_free_cursor_input();
     battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
-    selected_command = battle_menu_get_selected_command_address()->kind;
+    selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
     case 7:
         target_set_boxes_red();

@@ -76,32 +76,32 @@ void menu_start_dead_unit_threads(void) {
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE], 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_wait_frames(2);
-        g_battle_dead_unit_action = 0;
+        g_menu_dead_unit_action = 0;
         g_menu_thread_menu_data = previous_menu_descriptor;
         g_menu_pending_selection[0] = 0;
         /* Thread exit does not return; a source return changes epilogue sharing. */
         thread_exit_current();
     }
 
-    g_battle_dead_unit_result = 0;
+    g_menu_dead_unit_result = 0;
     if (context->result == 4) {
         if (main_item_get_total_equipment_quantity(context->treasure_item, 1) == 0x63) {
             g_text_substitution_values[0] = context->treasure_item;
             g_text_substitution_values[1] = context->treasure_item;
             message_id = 0x101b;
             g_text_substitution_values[2] = main_item_get_data_pointer(context->treasure_item)->price >> 2;
-            g_battle_dead_unit_result = context->treasure_item;
+            g_menu_dead_unit_result = context->treasure_item;
         } else {
             message_id = 0x101a;
             g_text_substitution_values[0] = context->treasure_item;
-            g_battle_dead_unit_result = context->treasure_item;
+            g_menu_dead_unit_result = context->treasure_item;
         }
         g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE].text_id = message_id;
         thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE], 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_wait_frames(2);
-        g_battle_dead_unit_action = 4;
+        g_menu_dead_unit_action = 4;
         g_menu_thread_menu_data = previous_menu_descriptor;
         g_menu_pending_selection[0] = 0;
         thread_exit_current();
@@ -143,7 +143,7 @@ void menu_start_dead_unit_threads(void) {
                 }
                 g_option_dead_unit_controller_input = script_get_controller_input_pointer(0);
                 if ((*g_option_dead_unit_controller_input & PSX_PAD_SELECT) != 0) {
-                    battle_menu_start_building_thread();
+                    menu_start_building_thread();
                 }
             }
 
@@ -151,7 +151,7 @@ void menu_start_dead_unit_threads(void) {
             thread_set_parameters(THREAD_BORROWED_SLOT_AT_LIST_MENU, 0, 0, 1);
             thread_suspend(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD);
             if (g_option_dead_unit_primary_result == 0) {
-                g_battle_dead_unit_action = 1;
+                g_menu_dead_unit_action = 1;
                 break;
             }
             if (g_option_dead_unit_primary_result == 1 || (g_option_dead_unit_primary_result & 0xff) == 0xff) {
@@ -167,14 +167,14 @@ void menu_start_dead_unit_threads(void) {
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_CONFIRM], 0, 0);
             thread_wait_until_inactive(g_thread_current_id - 1);
             if (g_option_dead_unit_primary_result == 0) {
-                g_battle_dead_unit_action = 2;
+                g_menu_dead_unit_action = 2;
                 break;
             }
             if (context->result != 2) {
                 continue;
             }
         }
-        g_battle_dead_unit_action = 0;
+        g_menu_dead_unit_action = 0;
         break;
     }
 

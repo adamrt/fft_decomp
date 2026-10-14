@@ -450,7 +450,7 @@ void world_text_message_box_thread(void) {
         world_menu_animate_window_quads_to_rects(win, &from, &to);
     }
     win->active = 0;
-    world_menu_release_window_buffer_pair(win);
+    menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
     world_text_release_current_message_box_slot();
     thread_yield();

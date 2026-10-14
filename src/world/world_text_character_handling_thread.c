@@ -838,7 +838,7 @@ end:
     }
     g_world_menu_event_state_flag = 0;
     win->active = 0;
-    world_menu_release_window_buffer_pair(win);
+    menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
     world_menu_release_current_thread_slot();
     YIELD_OR_INPUT();

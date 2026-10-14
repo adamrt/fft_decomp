@@ -11,14 +11,14 @@
  * next battle_menu_build_idle_action_menu call do nothing. The help thread starts
  * only when event input is not suppressed, no option menu is open, the camera is
  * idle, no companion overlay is running and the building slot is free. */
-void battle_menu_start_building_thread(void) {
+void menu_start_building_thread(void) {
     if (battle_thread_is_running_asm(THREAD_SLOT_MENU) != 0
         || battle_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         if (g_menu_current_id != BATTLE_MENU_ID_MINI_MENU) {
-            g_battle_menu_building_thread_started = 1;
+            g_menu_building_thread_started = 1;
         }
     }
-    if (g_battle_event_input_suppression_frames != 0) {
+    if (g_script_input_suppression_frames != 0) {
         return;
     }
     if (g_menu_modal_open != 0) {
@@ -27,13 +27,13 @@ void battle_menu_start_building_thread(void) {
     if (camera_is_active() != 0) {
         return;
     }
-    if (g_battle_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE) {
+    if (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE) {
         return;
     }
     if (battle_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         return;
     }
-    g_battle_menu_help_open = 1;
+    g_menu_help_open = 1;
     thread_start(THREAD_SLOT_MENU_BUILDING, menu_run_help_menu_thread);
     thread_set_parameters(THREAD_SLOT_MENU_BUILDING, 0, 0, 0);
 }

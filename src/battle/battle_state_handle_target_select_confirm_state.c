@@ -11,7 +11,7 @@ void battle_state_handle_target_select_confirm_state(void) {
 
     battle_state_handle_free_cursor_input();
     battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
-    switch ((s32)battle_menu_get_selected_command_address()->kind) {
+    switch ((s32)menu_get_selected_command_address()->kind) {
     case 7:
         caster = battle_unit_get_casting();
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);

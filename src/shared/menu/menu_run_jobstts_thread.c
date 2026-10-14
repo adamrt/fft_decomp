@@ -19,11 +19,11 @@ void menu_run_jobstts_thread(void) {
     menu_reserve_high_overlay(0x20000);
     menu_request_open_companion_executable(COMPANION_OVERLAY_JOBSTTS);
     thread_wait_frames(2);
-    g_battle_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
+    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
     do {
         g_script_event_input = 0;
         thread_yield();
-    } while (g_battle_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
     g_script_event_input = 0;
     menu_free_high_overlay();
     thread_wait_frames(2);

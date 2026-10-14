@@ -16,7 +16,7 @@ s32 menu_should_close_thread(u32* input) {
         && (*input & PSX_PAD_SELECT)) {
         parameter = (menu_entry_t*)world_thread_get_current_parameter_1();
         if (parameter->select_text_table != 0) {
-            if (g_world_thread_change_cooldown == 0) {
+            if (g_script_input_suppression_frames == 0) {
                 thread_start(THREAD_SCREEN_SLOT_TEXT, world_menu_announce_entry_value_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_TEXT, (s32)parameter, 0, 0);
                 g_menu_input_lock_mode = 1;
@@ -24,7 +24,7 @@ s32 menu_should_close_thread(u32* input) {
             *input = 0;
         }
     }
-    if (g_menu_input_lock_mode != 0 || g_world_text_overlay_active != 0) {
+    if (g_menu_input_lock_mode != 0 || g_menu_help_open != 0) {
         *input = 0;
         return 0;
     }

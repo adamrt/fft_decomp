@@ -8,6 +8,6 @@ void world_menu_close_help_menu(void) {
     mem_copy_bytes_nonempty(
         g_text_section_pointers, g_world_text_section_pointer_backup, sizeof(g_text_section_pointers));
     main_heap_free(g_main_heap_high_overlay_load_address);
-    g_world_text_overlay_active = 0;
+    g_menu_help_open = 0;
     thread_exit_current();
 }

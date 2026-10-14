@@ -120,7 +120,7 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     menu_draw_active_window_frames();
     script_load_event_input_state(&g_world_formation_menu_input_state);
     if (g_world_formation_menu_new_buttons != 0x100 && g_world_formation_menu_new_buttons != 0) {
-        g_world_thread_change_cooldown = 5;
+        g_script_input_suppression_frames = 5;
     }
 
     for (thread_id = 1; thread_id < 16; thread_id++) {
@@ -131,11 +131,11 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     for (thread_id = 1; thread_id < 16; thread_id++) {
         status = g_world_formation_thread_status_snapshot[thread_id];
         if (status != world_thread_is_running_asm(thread_id)) {
-            g_world_thread_change_cooldown = 5;
+            g_script_input_suppression_frames = 5;
         }
     }
-    if (g_world_thread_change_cooldown != 0) {
-        g_world_thread_change_cooldown--;
+    if (g_script_input_suppression_frames != 0) {
+        g_script_input_suppression_frames--;
     }
     if (g_menu_companion_executable_request_index != 0) {
         g_menu_companion_executable_request_index = 0;

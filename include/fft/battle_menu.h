@@ -7,8 +7,6 @@
 #include "fft/menu.h"
 
 /* menu state */
-extern s32 g_battle_active_menu; /* active menu */
-extern s32 g_battle_menu_help_open;
 extern s32 g_battle_menu_help_opening;
 extern u8 g_battle_menu_restore_depth;
 extern u8 g_battle_menu_restore_unit_id;
@@ -23,12 +21,9 @@ extern menu_cursor_bob_entry_t g_battle_cursor_bob_active_thresholds[];
 extern menu_cursor_bob_entry_t g_battle_cursor_bob_thresholds[];
 extern s16 g_battle_menu_action_slot_selected_option;
 extern u16 g_battle_menu_input_block_frames;
-extern s16 g_battle_menu_result; /* menu result: -4 pending, -1 canceled */
-extern s16 g_battle_menu_selected_option;
 extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
 
 s32 battle_menu_get_cursor_bob_offset(s32 mode);
-s32 battle_menu_resolve_selection(void);
 void battle_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel);
 
 /* action menus */
@@ -41,10 +36,10 @@ extern s16 g_battle_menu_auto_battle_row_actions[8];
 extern menu_entry_t g_battle_menu_idle_action_entries[];
 extern u8 g_battle_menu_idle_action_entry_labels[];
 extern u8 g_battle_menu_restriction_message_ids[];
-/* Action command staged by the battle menu and passed whole to
- * action_preview_at_list; the WORLD twin is g_world_menu_preview_action. */
-extern action_command_t g_battle_menu_selected_action;
-extern ai_command_t g_battle_menu_selected_command;
+/* The selected command: its kind, then the action command staged for
+ * action_preview_at_list. Both scenes alias the action at +4 under its own name. */
+extern ai_command_t g_menu_selected_command;
+extern action_command_t g_menu_selected_action;
 extern s32 g_battle_menu_system_function_command;
 extern s32 g_battle_menu_system_function_option;
 extern u16 g_battle_menu_system_function_row_actions[];
@@ -54,7 +49,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
 void battle_menu_close_move_help(void);
 void battle_menu_dispatch_idle_action_menu(void);
 battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id);
-ai_command_t* battle_menu_get_selected_command_address(void);
+ai_command_t* menu_get_selected_command_address(void);
 battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
 s32 battle_menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 void battle_menu_open_active_unit_idle_action_menu(void);
@@ -76,14 +71,11 @@ extern menu_text_layout_t g_battle_ability_menu_layout;
 extern u16 g_battle_menu_ability_display_flags[80];
 extern RECT g_battle_menu_ability_list_clut_rect;
 extern s16 g_battle_menu_ability_scroll_offset;
-extern u16 g_battle_menu_anything_ability_id;
 extern u8 g_battle_menu_billboard_secondary_skillset_name[];
 extern u8 g_battle_menu_billboard_skillset_name[];
 extern u8 g_battle_menu_calculator_skillsets[4];
 extern s32 g_battle_menu_scroll_list_depth;
 extern u8 g_battle_menu_skillset_disabled_flags[]; /* per-row grayed flag */
-extern s32 g_battle_menu_used_item_id;
-extern s32 g_battle_menu_used_skillset_id;
 
 void battle_menu_build_ability_list(s32 mode);
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
@@ -107,8 +99,6 @@ s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 
 /* unit panels */
-extern s32 g_battle_dead_unit_action;
-extern s32 g_battle_dead_unit_result;
 extern s32 g_battle_formation_display_mode;
 extern s32 g_battle_formation_screen_active;
 extern menu_number_entry_t g_battle_menu_attack_caster_stats_setup[8];
@@ -221,14 +211,11 @@ extern u8 g_battle_menu_buffer_arena[BATTLE_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_
 
 void battle_menu_init_buffer_allocator(void);
 void battle_menu_release_current_thread_slot(void);
-void battle_menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 
 /* overlay loading */
 
 /* threads */
-extern s32 g_battle_menu_building_thread_started;
 
 s32 battle_menu_is_still_building(void);
-void battle_menu_start_building_thread(void);
 
 #endif

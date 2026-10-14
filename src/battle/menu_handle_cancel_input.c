@@ -81,6 +81,6 @@ void menu_handle_cancel_input(menu_entry_t* menu) {
         g_script_event_input = 0;
         *cur = -1;
         sound_queue_sfx_cancel();
-        g_battle_event_input_suppression_frames = 5;
+        g_script_input_suppression_frames = 5;
     }
 }

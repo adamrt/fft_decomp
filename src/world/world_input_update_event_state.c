@@ -81,7 +81,7 @@ void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     script_load_event_input_state(&g_world_input_frame_state);
     script_load_event_input_state(&g_world_input_frame_state);
     if (g_world_input_frame_new != PSX_PAD_SELECT && g_world_input_frame_new != 0) {
-        g_world_thread_change_cooldown = 5;
+        g_script_input_suppression_frames = 5;
     }
 
     for (thread_id = 1; thread_id < 16; thread_id++) {
@@ -92,12 +92,12 @@ void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     for (thread_id = 1; thread_id < 16; thread_id++) {
         status = g_world_thread_status_snapshot[thread_id];
         if (status != world_thread_is_running_asm(thread_id)) {
-            g_world_thread_change_cooldown = 5;
+            g_script_input_suppression_frames = 5;
         }
     }
 
-    if (g_world_thread_change_cooldown != 0) {
-        g_world_thread_change_cooldown--;
+    if (g_script_input_suppression_frames != 0) {
+        g_script_input_suppression_frames--;
     }
     world_menu_draw_thread_status_indicators();
     g_world_frame_counter++;

@@ -182,10 +182,10 @@ restart_script:
                     }
                     script_set_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
                     menu_request_open_companion_executable(COMPANION_OVERLAY_CARD);
-                    g_battle_companion_overlay_state = COMPANION_OVERLAY_STATE_CARD_SAVE;
+                    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_CARD_SAVE;
                     do {
                         thread_yield();
-                    } while (g_battle_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+                    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
                     script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
                     operand_1 = 2;
                     do {

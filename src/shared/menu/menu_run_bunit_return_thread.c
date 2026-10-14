@@ -13,11 +13,11 @@ void menu_run_bunit_return_thread(void) {
         thread_yield();
     } while (world_thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0);
 
-    g_world_companion_overlay_state = COMPANION_OVERLAY_STATE_BUNIT;
-    g_world_text_overlay_active = 0;
+    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_BUNIT;
+    g_menu_help_open = 0;
     do {
         thread_wait_frames(1);
-    } while (g_world_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
 
     menu_free_high_overlay();
     for (i = 2; i < 15; i++) {

@@ -6,5 +6,5 @@ void battle_menu_open_help(void) {
     camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ACTION_HELP_MENU;
     g_battle_menu_help_opening = 1;
-    battle_menu_start_building_thread();
+    menu_start_building_thread();
 }

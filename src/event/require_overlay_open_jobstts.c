@@ -31,12 +31,12 @@ void require_overlay_open_jobstts(void) {
     }
     menu_request_open_companion_executable(COMPANION_OVERLAY_JOBSTTS);
     thread_wait_frames(2);
-    g_battle_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
+    g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_JOBSTTS;
     do {
         g_menu_input_controller = script_get_controller_input_pointer(0);
         *g_menu_input_controller = 0;
         thread_yield();
-    } while (g_battle_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
+    } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
     *g_menu_input_controller = 0;
     main_heap_free(allocation);
     thread_wait_frames(2);

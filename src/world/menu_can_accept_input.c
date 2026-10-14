@@ -21,7 +21,7 @@ s32 menu_can_accept_input(void) {
     if (world_thread_is_previous_running() == 0) {
         if (world_thread_get_current_parameter_3() == 0) {
             if (g_menu_input_lock_mode == 0) {
-                if (g_world_text_overlay_active == 0) {
+                if (g_menu_help_open == 0) {
                     if (g_world_menu_input_block_frames == 0) {
                         return 1;
                     }

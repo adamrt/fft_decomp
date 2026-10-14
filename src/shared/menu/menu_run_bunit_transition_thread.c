@@ -23,7 +23,7 @@ void menu_run_bunit_transition_thread(void) {
     menu_reserve_high_overlay(0x20000);
     menu_request_open_companion_executable(COMPANION_OVERLAY_BUNIT_SECOND_HALF);
     thread_wait_frames(2);
-    g_world_text_overlay_active = 1;
+    g_menu_help_open = 1;
     thread_start(THREAD_BORROWED_SLOT_FADE_OUT, menu_run_bunit_return_thread);
     thread_exit_current();
 }

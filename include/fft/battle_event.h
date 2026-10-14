@@ -12,7 +12,6 @@ extern u8
     g_battle_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
 
 /* input */
-extern u16 g_battle_event_input_suppression_frames;
 
 /* character graphics */
 extern s32 g_battle_event_pending_evtchr_save_slot;           /* 0x80173f4c */

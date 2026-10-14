@@ -40,5 +40,5 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     g_script_event_input = 0;
     *menu_entry_result(context) = -1;
     sound_queue_sfx_cancel();
-    g_world_thread_change_cooldown = 5;
+    g_script_input_suppression_frames = 5;
 }
