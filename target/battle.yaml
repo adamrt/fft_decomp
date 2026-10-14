@@ -1043,7 +1043,7 @@ functions:
   - {addr: 0x8014a598, size: 80, name: script_load_event_input_state, hash: aab488fb701967d4, source: src/shared/script/script_load_event_input_state.c}
   - {addr: 0x8014a5e8, size: 120, name: gfx_draw_or_append_gpu_primitive, hash: f436ef6d49b0750a, source: src/shared/gfx/gfx_draw_or_append_gpu_primitive.c}
   - {addr: 0x8014a660, size: 68, name: gfx_append_gpu_primitive_to_secondary_otag, hash: 29775e21c5c1e7bd, source: src/shared/gfx/gfx_append_gpu_primitive_to_secondary_otag.c}
-  - {addr: 0x8014a6a4, size: 40, name: battle_text_set_substitution_values_7e_7f, hash: a9c219bc5dcf7ca0}
+  - {addr: 0x8014a6a4, size: 40, name: text_set_substitution_values_7e_7f, hash: a9c219bc5dcf7ca0, source: src/shared/text/text_set_substitution_values_7e_7f.c}
   - {addr: 0x8014a6cc, size: 24, name: battle_menu_set_text_origin, hash: 8ba7a2a7b2adc30b, source: src/shared/menu/menu_set_text_origin.c, source_symbol: menu_set_text_origin}
   - {addr: 0x8014a6e4, size: 196, name: battle_gfx_set_draw_mode_for_texture_page, hash: 6872715b35eb6ca3, source: src/shared/gfx/gfx_set_draw_mode_for_texture_page.c, source_symbol: gfx_set_draw_mode_for_texture_page}
   - {addr: 0x8014a7a8, size: 116, name: battle_gfx_set_draw_mode_from_origin, hash: bcc1e098276ae84a, source: src/shared/gfx/gfx_set_draw_mode_from_origin.c, source_symbol: gfx_set_draw_mode_from_origin}
@@ -2401,7 +2401,7 @@ data:
   - {addr: 0x801660a6, name: g_battle_scenario_music_2_id}
   - {addr: 0x801660a8, name: g_battle_text_decimal_divisors}
   - {addr: 0x801660d4, name: g_menu_cursor_zoom_percentages}
-  - {addr: 0x801660ec, name: g_battle_text_substitution_rect}
+  - {addr: 0x801660ec, name: g_text_substitution_rect}
   - {addr: 0x801660fc, name: g_text_glyph_widths}
   - {addr: 0x80166994, name: g_battle_ability_menu_layout}
   - {addr: 0x801669bc, name: g_battle_menu_ability_scroll_offset}

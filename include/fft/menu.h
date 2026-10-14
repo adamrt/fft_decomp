@@ -2268,4 +2268,11 @@ void menu_run_bunit_transition_thread(void);
 
 /* Unit portrait transition primitives. */
 
+/* text substitutions */
+/* Text variables $7E/$7F: the four 16-bit values text_set_substitution_values_7e_7f stores
+ * (BATTLE 0x801660ec, table index 0x7e from 0x80165ef4; WORLD 0x801533d0 from 0x801531d8). */
+extern RECT g_text_substitution_rect;
+
+void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
+
 #endif

@@ -390,7 +390,7 @@ functions:
   - {addr: 0x800fda54, size: 80, name: script_load_event_input_state, hash: 83c70cd7e27a4998, source: src/shared/script/script_load_event_input_state.c}
   - {addr: 0x800fdaa4, size: 120, name: gfx_draw_or_append_gpu_primitive, hash: dca627eb5cafa52b, source: src/shared/gfx/gfx_draw_or_append_gpu_primitive.c}
   - {addr: 0x800fdb1c, size: 68, name: gfx_append_gpu_primitive_to_secondary_otag, hash: 02bbf18f6b22cc78, source: src/shared/gfx/gfx_append_gpu_primitive_to_secondary_otag.c}
-  - {addr: 0x800fdb60, size: 40, name: world_text_set_substitution_values_7e_7f, hash: a16257863fe24cf9}
+  - {addr: 0x800fdb60, size: 40, name: text_set_substitution_values_7e_7f, hash: a16257863fe24cf9, source: src/shared/text/text_set_substitution_values_7e_7f.c}
   - {addr: 0x800fdb88, size: 24, name: world_menu_set_text_origin, hash: a51a712749aadf4e, source: src/shared/menu/menu_set_text_origin.c, source_symbol: menu_set_text_origin}
   - {addr: 0x800fdba0, size: 196, name: world_gfx_set_draw_mode_for_texture_page, hash: 56f7c2353711f7fb, source: src/shared/gfx/gfx_set_draw_mode_for_texture_page.c, source_symbol: gfx_set_draw_mode_for_texture_page}
   - {addr: 0x800fdc64, size: 116, name: world_gfx_set_draw_mode_from_origin, hash: 4a235355ddf2066d, source: src/shared/gfx/gfx_set_draw_mode_from_origin.c, source_symbol: gfx_set_draw_mode_from_origin}
@@ -1156,7 +1156,7 @@ data:
   - {addr: 0x80153387, name: g_script_variable_write_guard}
   - {addr: 0x8015338c, name: g_world_text_decimal_divisors}
   - {addr: 0x801533b8, name: g_menu_cursor_zoom_percentages}
-  - {addr: 0x801533d0, name: g_world_text_substitution_rect}
+  - {addr: 0x801533d0, name: g_text_substitution_rect}
   - {addr: 0x801533e0, name: g_text_glyph_widths}
   - {addr: 0x80153c78, name: g_world_ability_menu_layout}
   - {addr: 0x80153ca4, name: g_world_menu_status_list_layout}

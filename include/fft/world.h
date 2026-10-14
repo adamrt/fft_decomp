@@ -1711,9 +1711,6 @@ extern s32 g_world_text_overlay_active;
 extern s32 g_world_text_section_offsets[32];
 extern u8* g_world_text_section_pointer_backup[32];
 
-/* Text substitutions $7E/$7F (0x801533d0, table index 0x7e from 0x801531d8)
- * as the four 16-bit values world_text_set_substitution_values_7e_7f stores. */
-extern RECT g_world_text_substitution_rect;
 extern char g_world_text_wait_for_allocation_message[];
 extern char g_world_text_decimal_format[];
 extern char g_world_text_reading_character_message[]; /* "reading charactor%d \n" */
