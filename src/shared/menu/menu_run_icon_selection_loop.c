@@ -49,7 +49,7 @@ void menu_run_icon_selection_loop(void) {
             break;
         }
         menu_handle_action(param, cursor);
-        battle_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
+        menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
         menu_handle_cancel_input(param);
         menu_submit_icon_primitives(&record->base);
     }

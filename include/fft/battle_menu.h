@@ -17,14 +17,9 @@ void battle_menu_clear_status_menu_state(void);
 s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* input and selection */
-extern menu_cursor_bob_entry_t g_battle_cursor_bob_active_thresholds[];
-extern menu_cursor_bob_entry_t g_battle_cursor_bob_thresholds[];
 extern s16 g_battle_menu_action_slot_selected_option;
 extern u16 g_battle_menu_input_block_frames;
 extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
-
-s32 battle_menu_get_cursor_bob_offset(s32 mode);
-void battle_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel);
 
 /* action menus */
 extern s16 g_battle_auto_battle_option_colors[5]; /* text color per option */

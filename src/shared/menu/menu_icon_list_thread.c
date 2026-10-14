@@ -53,7 +53,7 @@ void menu_icon_list_thread(void) {
         if (menu_should_close_thread(g_menu_input_controller) != 0) {
             break;
         }
-        battle_menu_step_wrapping_cursor_on_scroll_buttons(state, &cursor);
+        menu_step_wrapping_cursor_on_scroll_buttons(state, &cursor);
         menu_handle_action(state, cursor);
         menu_handle_cancel_input(state);
         menu_select_icon_cluts(&record->base);

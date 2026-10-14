@@ -790,6 +790,9 @@ typedef struct menu_cursor_bob_entry {
     s8 threshold;
     s8 offset;
 } menu_cursor_bob_entry_t;
+extern menu_cursor_bob_entry_t g_menu_cursor_bob_thresholds[];
+extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
+s32 menu_get_cursor_bob_offset(s32 mode);
 typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t) == 2 ? 1 : -1];
 
 /* menu drawing */
@@ -838,7 +841,7 @@ enum { MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2 };
  * world_menu_start_entry_chain_threads. The record is also the first parameter
  * of the menu threads it starts: the icon threads read 0x00..0x07 as the text
  * image's upload rect and 0x08/0x0a as the icon origin (the scrolling icon list
- * thread clears bit 0 of 0x0a), and world_menu_step_wrapping_cursor_on_scroll_buttons
+ * thread clears bit 0 of 0x0a), and menu_step_wrapping_cursor_on_scroll_buttons
  * wraps the cursor at max_row_index. */
 typedef struct menu_entry {
     point16_t vram_origin; /* 0x00: text-image VRAM origin passed to the draw-mode helpers */
@@ -898,6 +901,7 @@ s32 menu_can_accept_input(void);
 void menu_handle_action(menu_entry_t* entry, s32 row_index);
 void menu_handle_cancel_input(menu_entry_t* context);
 s32 menu_should_close_thread(u32* input);
+void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor);
 void menu_record_selection_for_selected_unit(void);
 void menu_clear_entry_selections(void);
 void menu_finish_at_list_selection(void);

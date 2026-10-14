@@ -1,12 +1,11 @@
-#include "fft/battle_menu.h"
-#include "fft/battle_script.h"
+#include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "psx/pad.h"
 
 /* While the menu may accept input, move a row cursor with Up and Down, wrapping
  * between row 0 and the entry's max_row_index, and play the cursor sound. */
-void battle_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel) {
+void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel) {
     s32 selection;
     s32 max;
     s32 cur;

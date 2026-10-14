@@ -33,9 +33,9 @@ void world_menu_update_entry_cursor_quads(
             thread->task_words[0] = 0;
         }
         if (thread->task_words[1] != 0) {
-            y = world_menu_get_cursor_bob_offset(1);
+            y = menu_get_cursor_bob_offset(1);
         } else {
-            y = world_menu_get_cursor_bob_offset(0);
+            y = menu_get_cursor_bob_offset(0);
         }
         thread->task_words[0] += g_script_event_speed;
         x = -(cursor + 1) * 6;

@@ -298,7 +298,6 @@ void world_script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void world_script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void world_script_update_tutorial_controller_input(void);
 void world_script_warp_unit(const event_warp_unit_parameters_t* instruction);
-void world_script_set_units_palette_update_suppression(u16 id, s32 enable);
 void world_script_add_unit_start_thread(void);
 s32 world_script_check_tutorial_event_slot(void);
 void world_script_inflict_status_thread(void);
@@ -389,7 +388,6 @@ extern u8 g_world_thread_status_snapshot[16];
 
 extern menu_gradient_panel_prims_t g_world_thread_indicator_packets[2][2];
 
-s32 world_menu_get_cursor_bob_offset(s32 mode);
 void world_text_release_current_message_box_slot(void);
 s32 world_thread_find_first_running_menu_thread(void);
 void world_formation_item_menu_idle_thread(void);
@@ -1560,7 +1558,6 @@ extern u8 g_world_stat_preview_text_image[];
 s32 world_get_party_unit_formation_sprite(s32 party_index);
 void resolve_unit_status_changes(void);
 s32 unit_has_adjacent_monster_skill_support(struct unit_stats* unit);
-void world_unit_queue_current_status_graphics(s32 battle_unit_index, s32 enabled);
 void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment);
 s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id);
 s32 world_unit_check_facing_relative_to_camera(s32 unit_id);
@@ -2095,7 +2092,6 @@ void world_menu_build_icon_record(RECT* rect, menu_entry_t* param, menu_icon_rec
 void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 void world_menu_build_unit_status_list(void);
 s32 world_menu_build_window_frame_image(s32 width, s32 height, u16* destination);
-void world_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor);
 void world_menu_clear_cursor_positions(void);
 
 void world_menu_configure_status_panel_primitive_colors(
@@ -2659,11 +2655,8 @@ extern s16 g_world_field_object_use_request;
 extern u16 g_world_field_object_wait_status;
 extern u16 g_world_frame_arg;
 extern s32 g_world_frame_counter;
-extern menu_cursor_bob_entry_t
-    g_world_cursor_bob_thresholds[]; /* (threshold, value) pairs, 0-terminated; entry 0 is the modulus */
-extern menu_cursor_bob_entry_t g_world_cursor_bob_active_thresholds[]; /* (threshold, value) pairs, 0-terminated */
-extern u16 g_world_saved_animation_speed;                              /* saved animation speed */
-extern u16 g_world_animation_speed_forced;                             /* animation speed override active */
+extern u16 g_world_saved_animation_speed;  /* saved animation speed */
+extern u16 g_world_animation_speed_forced; /* animation speed override active */
 extern u8 g_world_rotation_speed_frames[];
 extern s16 g_world_debug_variable_list_request_state;
 extern s32 g_world_preview_stats_window_active;

@@ -31,9 +31,9 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
             thread->task_words[0] = 0;
         }
         if (thread->task_words[1] != 0) {
-            x = battle_menu_get_cursor_bob_offset(1);
+            x = menu_get_cursor_bob_offset(1);
         } else {
-            x = battle_menu_get_cursor_bob_offset(0);
+            x = menu_get_cursor_bob_offset(0);
         }
         thread->task_words[0] += g_script_event_speed;
         x -= 12;

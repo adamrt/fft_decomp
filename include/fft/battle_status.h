@@ -59,7 +59,6 @@ extern SVECTOR g_status_bubble_zoom;
 extern const u8 g_status_display_image_ids[STATUS_COUNT];
 extern s32 g_status_menu_open;
 
-void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
 s32 status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id);
 
 #endif

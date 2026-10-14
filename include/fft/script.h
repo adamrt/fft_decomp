@@ -1071,6 +1071,7 @@ void script_change_stats(const event_change_stats_parameters_t* parameters);
 void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
 void script_march_units(const event_march_parameters_t* parameters);
 void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
+void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable);
 void script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void script_face_tile(const event_face_tile_parameters_t* parameters);
 void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);

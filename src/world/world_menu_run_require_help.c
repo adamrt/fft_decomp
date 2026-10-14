@@ -164,9 +164,9 @@ void world_menu_run_require_help(void) {
             }
         }
         if (self->task_words[1] != 0) {
-            bob = world_menu_get_cursor_bob_offset(1);
+            bob = menu_get_cursor_bob_offset(1);
         } else {
-            bob = world_menu_get_cursor_bob_offset(0);
+            bob = menu_get_cursor_bob_offset(0);
         }
         self->task_words[0] += g_script_event_speed;
         bob -= 4;

@@ -800,14 +800,14 @@ functions:
   - {addr: 0x80137b90, size: 8, name: battle_noop_80137b90, hash: 6d64edf91449c1b1}
   - {addr: 0x80137b98, size: 120, name: menu_can_accept_input, hash: f875053f5144ba32}
   - {addr: 0x80137c10, size: 708, name: menu_handle_action, hash: 46aaa86ad0be68d8}
-  - {addr: 0x80137ed4, size: 176, name: battle_menu_step_wrapping_cursor_on_scroll_buttons, hash: 2d20ad44b74b2253}
+  - {addr: 0x80137ed4, size: 176, name: menu_step_wrapping_cursor_on_scroll_buttons, hash: 2d20ad44b74b2253, source: src/shared/menu/menu_step_wrapping_cursor_on_scroll_buttons.c}
   - {addr: 0x80137f84, size: 272, name: menu_handle_cancel_input, hash: 5c56c2d632802940}
   - {addr: 0x80138094, size: 224, name: menu_should_close_thread, hash: 3a3f5ddcc1501b24}
   - {addr: 0x80138174, size: 596, name: battle_menu_build_window_sprites, hash: 14eb30841abcf4da}
   - {addr: 0x801383c8, size: 76, name: menu_select_sprite_clut, hash: 0a1e2175a3486b65, source: src/shared/menu/menu_select_sprite_clut.c}
   - {addr: 0x80138414, size: 76, name: menu_select_icon_sprite_clut, hash: 7fbd1eda323a9e3b, source: src/shared/menu/menu_select_icon_sprite_clut.c}
   - {addr: 0x80138460, size: 128, name: menu_select_icon_cluts, hash: f53407b6bcd1cdbc, source: src/shared/menu/menu_select_icon_cluts.c}
-  - {addr: 0x801384e0, size: 144, name: battle_menu_get_cursor_bob_offset, hash: f47602e9b85539b1}
+  - {addr: 0x801384e0, size: 144, name: menu_get_cursor_bob_offset, hash: f47602e9b85539b1, source: src/shared/menu/menu_get_cursor_bob_offset.c}
   - {addr: 0x80138570, size: 428, name: menu_update_icon_cursor_sprites, hash: 32608173304e34f5, source: src/shared/menu/menu_update_icon_cursor_sprites.c}
   - {addr: 0x8013871c, size: 80, name: menu_copy_sprite_position_uv_and_size, hash: 568fb2d3912cb994, source: src/shared/menu/menu_copy_sprite_position_uv_and_size.c}
   - {addr: 0x8013876c, size: 416, name: menu_zoom_cursor_frame, hash: 509e692236432dd6, source: src/shared/menu/menu_zoom_cursor_frame.c}
@@ -1004,7 +1004,7 @@ functions:
   - {addr: 0x80147fac, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 92e26c055631d0fb, source: src/shared/script/script_unit_animation_rotate_event_instruction.c}
   - {addr: 0x80148084, size: 512, name: script_face_unit, hash: 390040f4c2819846, source: src/shared/script/script_face_unit.c}
   - {addr: 0x80148284, size: 516, name: script_rotate_unit, hash: 68d1d9ca7a73e6b2, source: src/shared/script/script_rotate_unit.c}
-  - {addr: 0x80148488, size: 180, name: status_queue_current_status_graphics, hash: 1f24e21ebfd693db}
+  - {addr: 0x80148488, size: 180, name: status_queue_current_status_graphics, hash: 1f24e21ebfd693db, source: src/shared/unit/status_queue_current_status_graphics.c}
   - {addr: 0x8014853c, size: 68, name: unit_clear_status_staging_data, hash: 46b30317dc3acbf3, source: src/shared/unit/unit_clear_status_staging_data.c}
   - {addr: 0x80148580, size: 808, name: unit_save_staged_status_data, hash: 78be53693ecbd23f, source: src/shared/unit/unit_save_staged_status_data.c}
   - {addr: 0x801488a8, size: 1072, name: unit_apply_staged_status_data, hash: 793904be68d4a23b, source: src/shared/unit/unit_apply_staged_status_data.c}
@@ -1016,7 +1016,7 @@ functions:
   - {addr: 0x80149490, size: 156, name: script_march_units, hash: ab19a34ada7cae3e, source: src/shared/script/script_march_units.c}
   - {addr: 0x8014952c, size: 180, name: script_set_units_movement_effect_suppression, hash: ad56c0ea33915d4c, source: src/shared/script/script_set_units_movement_effect_suppression.c}
   - {addr: 0x801495e0, size: 172, name: script_color_unit_event_instruction, hash: e5653129316a4e33, source: src/shared/script/script_color_unit_event_instruction.c}
-  - {addr: 0x8014968c, size: 168, name: script_set_units_palette_update_suppression, hash: 406b68bd9d969db0}
+  - {addr: 0x8014968c, size: 168, name: script_set_units_palette_update_suppression, hash: 406b68bd9d969db0, source: src/shared/script/script_set_units_palette_update_suppression.c}
   - {addr: 0x80149734, size: 88, name: battle_unit_check_facing_relative_to_camera, hash: f7c874232339e58e}
   - {addr: 0x8014978c, size: 368, name: script_face_tile, hash: 349c3977cc8bc891, source: src/shared/script/script_face_tile.c}
   - {addr: 0x801498fc, size: 176, name: script_waitrotateunit_and_waitrotateall_event_instruction, hash: 3ddb2ca1554cefe8, source: src/shared/script/script_waitrotateunit_and_waitrotateall_event_instruction.c}
@@ -2480,8 +2480,8 @@ data:
   - {addr: 0x80168d44, name: g_battle_unit_editor_sprite_clut_pairs}
   - {addr: 0x80168d94, name: g_battle_menu_icon_strip_image_params}
   - {addr: 0x80168e84, name: g_battle_menu_single_icon_image_params}
-  - {addr: 0x80168ec0, name: g_battle_cursor_bob_thresholds}
-  - {addr: 0x80168ed0, name: g_battle_cursor_bob_active_thresholds}
+  - {addr: 0x80168ec0, name: g_menu_cursor_bob_thresholds}
+  - {addr: 0x80168ed0, name: g_menu_cursor_bob_active_thresholds}
   - {addr: 0x80168eec, name: g_battle_menu_ability_list_clut_rect}
   - {addr: 0x80168ef4, name: g_text_message_duration_frames}
   - {addr: 0x80168ef8, name: g_menu_companion_executable_lbas}

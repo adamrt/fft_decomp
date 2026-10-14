@@ -14,7 +14,7 @@
  * target's cross-jumped arm tails and its unfolded lift + 10 addition. */
 void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_render_buffer_t* buffer) {
     thread_t* thread = &g_threads[g_thread_current_id];
-    s32 bob = battle_menu_get_cursor_bob_offset(0);
+    s32 bob = menu_get_cursor_bob_offset(0);
     s32 i;
     u8(*tiles)[5];
 

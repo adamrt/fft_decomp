@@ -50,7 +50,7 @@ void world_menu_formation_icon_list_thread(void) {
             break;
         }
         if (world_thread_is_previous_running() == 0) {
-            world_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
+            menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
             menu_handle_action(param, cursor);
             menu_handle_cancel_input(param);
         }

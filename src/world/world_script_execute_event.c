@@ -260,8 +260,7 @@ restart_event:
             if (operand_1 == EVENT_CALL_FUNCTION_CLEAR_ZALERA_ACTIVE_STATUS_GRAPHICS) {
                 zalera_runtime_id = script_resolve_runtime_id(CHARACTER_IDENTITY_ZALERA);
                 if (zalera_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                    world_unit_queue_current_status_graphics(
-                        battle_unit_get_battle_id_by_runtime_id(zalera_runtime_id), 0);
+                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(zalera_runtime_id), 0);
                     g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
                     thread_call_on_main_stack(zalera_runtime_id);
                 }
@@ -619,9 +618,9 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_color_unit_event_instruction((const event_color_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_RESUME_UNIT_PALETTE_UPDATES) {
-            world_script_set_units_palette_update_suppression((u16)first_operand, 0);
+            script_set_units_palette_update_suppression((u16)first_operand, 0);
         } else if (opcode == EVENT_OPCODE_SUPPRESS_UNIT_PALETTE_UPDATES) {
-            world_script_set_units_palette_update_suppression((u16)first_operand, 1);
+            script_set_units_palette_update_suppression((u16)first_operand, 1);
         } else if (opcode == EVENT_OPCODE_COLOR_FIELD) {
             map_color_field(
                 parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
@@ -739,8 +738,7 @@ restart_event:
             if (zalera_runtime_id != EVENT_RUNTIME_ID_NONE) {
                 battle_unit_draw_and_activate_by_runtime_id(zalera_runtime_id);
                 if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_LIMBERRY_CEMETERY_BATTLE) {
-                    world_unit_queue_current_status_graphics(
-                        battle_unit_get_battle_id_by_runtime_id(zalera_runtime_id), 1);
+                    status_queue_current_status_graphics(battle_unit_get_battle_id_by_runtime_id(zalera_runtime_id), 1);
                     g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
                     thread_call_on_main_stack(zalera_runtime_id);
                 }

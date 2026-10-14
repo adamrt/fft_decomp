@@ -104,7 +104,7 @@ void menu_auto_battle_setting_thread(void) {
         if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
-        battle_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
+        menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
         menu_handle_cancel_input(param);
         menu_select_icon_cluts(&record->base);
         menu_update_icon_cursor_sprites(param, &record->base, i, cursor);

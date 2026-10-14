@@ -52,8 +52,6 @@ void script_dark_screen_thread(void);
 
 /* graphics and messages */
 
-void script_set_units_palette_update_suppression(s32 unit_id, s32 enable);
-
 /* frame hooks */
 
 #endif
