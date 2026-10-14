@@ -2114,7 +2114,6 @@ s32 world_menu_get_item_price_display_value(s32 entry_index);
 s32 world_menu_get_learn_job_jp(s32 index);
 s32 world_job_calculate_current_level(s32 index);
 s32 world_menu_get_window_scale_step(void);
-void world_menu_copy_unit_data_to_status_billboard(struct unit_stats* unit, menu_unit_status_record_t* output);
 void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive);
 void world_menu_run_display_script(menu_instruction_t* script, s32 value);
 rgb24_t* world_menu_get_sprite_color(void);

@@ -8,7 +8,7 @@
  * Otherwise an id in the special-character identity range is looked up by
  * character identity and accepted only for a deployed party member (unit id
  * 0x78..0x7c). */
-unit_stats_t* battle_unit_get_stats_by_unit_id(s32 unit_id) {
+unit_stats_t* unit_get_stats_by_unit_id(s32 unit_id) {
     s32 index;
     unit_stats_t* stats;
 

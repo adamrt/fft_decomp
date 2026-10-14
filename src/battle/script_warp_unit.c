@@ -52,5 +52,5 @@ void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
     rotation_state->delay = 0;
     rotation_state->rotating = 0;
     battle_unit_place_in_new_location(runtime_id, &tile, cursor.placement->facing);
-    battle_unit_set_facing(runtime_id, cursor.placement->facing * 4);
+    unit_set_facing(runtime_id, cursor.placement->facing * 4);
 }

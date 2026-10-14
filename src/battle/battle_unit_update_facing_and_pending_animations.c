@@ -57,7 +57,7 @@ void battle_unit_update_facing_and_pending_animations(void) {
             } else if (state->rotate_mode == UNIT_ROTATE_MODE_DECREMENT) {
                 facing = (current + 0xF) & 0xF;
             }
-            battle_unit_set_facing(i, facing);
+            unit_set_facing(i, facing);
         } else {
             g_unit_was_moving_latch[i] = 0;
             g_unit_pending_animation_ids[i] = 0;

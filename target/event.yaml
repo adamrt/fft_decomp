@@ -1163,7 +1163,7 @@ functions:
   - {addr: 0x801c2414, size: 28, name: menu_thread_is_running, hash: d10e3403d7fec970, source: src/shared/menu/menu_thread_is_running.c}
   - {addr: 0x801c2430, size: 1236, name: menu_draw_thread_status_indicators, hash: 42aee85dfc3d3b51, source: src/shared/menu/menu_draw_thread_status_indicators.c}
   - {addr: 0x801c2904, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, source: src/shared/text/text_fill_field_with_terminators.c}
-  - {addr: 0x801c2924, size: 460, name: battle_menu_copy_unit_data_to_status_billboard, hash: dc13403e0a243847, source: src/shared/menu/battle_menu_copy_unit_data_to_status_billboard.c}
+  - {addr: 0x801c2924, size: 460, name: menu_copy_unit_data_to_status_billboard, hash: dc13403e0a243847, source: src/shared/menu/menu_copy_unit_data_to_status_billboard.c}
   - {addr: 0x801c2af0, size: 1348, name: debugchr_editor_load_selected_unit, hash: 944be0b3f140f098}
   - {addr: 0x801c3034, size: 580, name: gfx_set_scaled_poly_ft4_4bpp, hash: f989278e90fdce7c, source: src/shared/gfx/gfx_set_scaled_poly_ft4_4bpp.c}
   - {addr: 0x801c3278, size: 700, name: menu_build_status_group_primitives, hash: ab6f9af67d5cf2a8, source: src/shared/menu/menu_build_status_group_primitives.c}

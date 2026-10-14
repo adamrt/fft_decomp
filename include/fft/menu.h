@@ -570,6 +570,8 @@ void menu_copy_billboard_data_out(menu_unit_status_record_t* banner, menu_active
     menu_status_panel_slot_storage_t* billboard, map_selected_tile_t* cursor_tile);
 void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
     const menu_status_panel_slot_storage_t* billboard);
+/* BATTLE and DEBUGCHR share one body; WORLD links a shorter one of its own. */
+void menu_copy_unit_data_to_status_billboard(struct unit_stats* unit, menu_unit_status_record_t* output);
 void menu_clear_stat_preview(menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail);
 void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
     s16 item_before, s16 item_after, s32 slot);
@@ -790,10 +792,13 @@ typedef struct menu_cursor_bob_entry {
     s8 threshold;
     s8 offset;
 } menu_cursor_bob_entry_t;
+typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t) == 2 ? 1 : -1];
+
+/* (threshold, offset) pairs ending at threshold 0; entry 0 holds the modulus. */
 extern menu_cursor_bob_entry_t g_menu_cursor_bob_thresholds[];
 extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
+
 s32 menu_get_cursor_bob_offset(s32 mode);
-typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t) == 2 ? 1 : -1];
 
 /* menu drawing */
 /* Six-byte menu sprite cell: screen rectangle and texture origin. */

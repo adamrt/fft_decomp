@@ -42,7 +42,7 @@ void world_script_warp_unit(const event_warp_unit_parameters_t* instruction) {
             state->rotating = 0;
             state->target_facing = facing * 4;
             battle_unit_place_in_new_location(index, &coordinates, parameters->facing);
-            battle_unit_set_facing(index, parameters->facing * 4);
+            unit_set_facing(index, parameters->facing * 4);
         }
     }
 }

@@ -693,7 +693,7 @@ functions:
   - {addr: 0x800f5a64, size: 136, name: sound_stop_weather_sfx, hash: 29ca15674c0eac0b}
   - {addr: 0x8012d8e4, size: 296, name: script_process_inflict_status_commands, hash: 49c7b4a5d64845fc, source: src/shared/script/script_process_inflict_status_commands.c}
   - {addr: 0x8012da0c, size: 244, name: unit_set_animation, hash: 0f6580006d1a308f, source: src/shared/unit/unit_set_animation.c}
-  - {addr: 0x8012db00, size: 144, name: battle_unit_set_facing, hash: 5c3eb103bc11e1c9, source: src/shared/unit/battle_unit_set_facing.c}
+  - {addr: 0x8012db00, size: 144, name: unit_set_facing, hash: 5c3eb103bc11e1c9, source: src/shared/unit/unit_set_facing.c}
   - {addr: 0x8012db90, size: 76, name: script_scale_music_volume, hash: b3e323c0af557cbc, source: src/shared/script/script_scale_music_volume.c}
   - {addr: 0x8012dbdc, size: 84, name: gfx_ramp_screen_overlay_intensity_to_zero, hash: dbd203faf8f613fe, source: src/shared/gfx/gfx_ramp_screen_overlay_intensity_to_zero.c}
   - {addr: 0x8012dc30, size: 84, name: gfx_ramp_screen_overlay_intensity_to_max, hash: 6d0834a9f0186591, source: src/shared/gfx/gfx_ramp_screen_overlay_intensity_to_max.c}
@@ -755,16 +755,16 @@ functions:
   - {addr: 0x80132e74, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 9ae491a067b74ea5, source: src/shared/menu/menu_lerp_rect_to_poly_ft4.c}
   - {addr: 0x80132f9c, size: 84, name: script_pause_event_instruction, hash: 87298c6e69d92c6c, source: src/shared/script/script_pause_event_instruction.c}
   - {addr: 0x80132ff0, size: 88, name: unit_copy_world_coords_to_scratch, hash: 0a61ba2db8f7e33b, source: src/shared/unit/unit_copy_world_coords_to_scratch.c}
-  - {addr: 0x80133048, size: 64, name: battle_unit_project_to_screen, hash: f71d84cad0b16447, source: src/shared/unit/battle_unit_project_to_screen.c}
-  - {addr: 0x80133088, size: 92, name: battle_unit_copy_world_coords, hash: 804df09b5303cc41, source: src/shared/unit/battle_unit_copy_world_coords.c}
-  - {addr: 0x801330e4, size: 76, name: battle_unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/shared/unit/battle_unit_copy_world_coords_to_vector.c}
+  - {addr: 0x80133048, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, source: src/shared/unit/unit_project_to_screen.c}
+  - {addr: 0x80133088, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, source: src/shared/unit/unit_copy_world_coords.c}
+  - {addr: 0x801330e4, size: 76, name: unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/shared/unit/unit_copy_world_coords_to_vector.c}
   - {addr: 0x80133130, size: 32, name: unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb, source: src/shared/unit/unit_copy_map_coords_by_runtime_id.c}
   - {addr: 0x80133150, size: 8, name: script_report_missing_unit_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_report_missing_unit_stub.c}
   - {addr: 0x80133158, size: 828, name: script_resolve_runtime_id, hash: 0dc0e1d2249ad0d7, source: src/shared/script/script_resolve_runtime_id.c}
   - {addr: 0x80133494, size: 16, name: battle_return_argument_80133494, hash: ce4ad88e7603b293}
   - {addr: 0x801334a4, size: 196, name: text_build_unit_name_list, hash: 9e89b0033e7a7acd, source: src/shared/text/text_build_unit_name_list.c}
   - {addr: 0x80133568, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, source: src/shared/text/text_fill_field_with_terminators.c}
-  - {addr: 0x80133588, size: 460, name: battle_menu_copy_unit_data_to_status_billboard, hash: dc13403e0a243847, source: src/shared/menu/battle_menu_copy_unit_data_to_status_billboard.c}
+  - {addr: 0x80133588, size: 460, name: menu_copy_unit_data_to_status_billboard, hash: dc13403e0a243847, source: src/shared/menu/menu_copy_unit_data_to_status_billboard.c}
   - {addr: 0x80133754, size: 1348, name: menu_load_selected_unit, hash: 30054c92a903e0bd, source: src/shared/menu/menu_load_selected_unit.c}
   - {addr: 0x80133c98, size: 84, name: unit_has_any_current_status, hash: 9d1f779a473099b3, source: src/shared/unit/unit_has_any_current_status.c}
   - {addr: 0x80133cec, size: 516, name: battle_menu_build_unit_status_list, hash: 640d7ce85b1f418f}
@@ -951,7 +951,7 @@ functions:
   - {addr: 0x801419b8, size: 212, name: battle_menu_init_system_function, hash: f31e72c8ed85d69a}
   - {addr: 0x80141a8c, size: 128, name: menu_get_dead_unit_selection, hash: 28d2493e3d487f43, source: src/shared/menu/menu_get_dead_unit_selection.c}
   - {addr: 0x80141b0c, size: 2556, name: menu_dispatch_system_function, hash: 8d18337247e2387c, source: src/shared/menu/menu_dispatch_system_function.c}
-  - {addr: 0x80142508, size: 168, name: battle_unit_get_stats_by_unit_id, hash: 1da6d81610a71ca5, source: src/shared/unit/battle_unit_get_stats_by_unit_id.c}
+  - {addr: 0x80142508, size: 168, name: unit_get_stats_by_unit_id, hash: 1da6d81610a71ca5, source: src/shared/unit/unit_get_stats_by_unit_id.c}
   - {addr: 0x801425b0, size: 220, name: script_run_scenario_conditions, hash: 57704dd3d16bc594, source: src/shared/script/script_run_scenario_conditions.c}
   - {addr: 0x8014268c, size: 8, name: battle_noop_8014268c, hash: 6d64edf91449c1b1}
   - {addr: 0x80142694, size: 1224, name: script_check_scenario_condition, hash: 7d82f147916f655f, source: src/shared/script/script_check_scenario_condition.c}
@@ -1838,7 +1838,7 @@ functions:
   - {addr: 0x801aa8e8, size: 56, name: effect_reset_subsystems, hash: f3527d103117930d}
   - {addr: 0x801aa920, size: 476, name: effect_copy_camera_angles_and_world_coords, hash: c7215f9b955ff294}
   - {addr: 0x801aaafc, size: 72, name: effect_init_camera_and_screen_data, hash: 8f9921926194b436}
-  - {addr: 0x801aab44, size: 76, name: effect_copy_unit_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/shared/unit/battle_unit_copy_world_coords_to_vector.c, source_symbol: battle_unit_copy_world_coords_to_vector}
+  - {addr: 0x801aab44, size: 76, name: effect_copy_unit_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/shared/unit/unit_copy_world_coords_to_vector.c, source_symbol: unit_copy_world_coords_to_vector}
   - {addr: 0x801aab90, size: 152, name: effect_convert_tile_coords_to_world_coords, hash: ad6c44c18d8a70fa}
   - {addr: 0x801aac28, size: 264, name: camera_choose_unblocked_rotation_for_tile, hash: ddce90512167476e}
   - {addr: 0x801aad30, size: 12, name: battle_noop_801aad30, hash: 4514fa940d280a8d}

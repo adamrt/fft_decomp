@@ -22,13 +22,13 @@ void menu_load_selected_unit(void) {
     unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_battle_id);
     editor = &g_menu_selected_unit_fields.state;
     if (unit != 0) {
-        battle_menu_copy_unit_data_to_status_billboard(unit, &g_menu_comparison_unit_status);
+        menu_copy_unit_data_to_status_billboard(unit, &g_menu_comparison_unit_status);
     }
 
     unit = battle_unit_get_stats_from_battle_id(g_menu_selected_unit.battle_id);
     if (unit == 0)
         return;
-    battle_menu_copy_unit_data_to_status_billboard(unit, &g_menu_selected_unit_status);
+    menu_copy_unit_data_to_status_billboard(unit, &g_menu_selected_unit_status);
 
     g_menu_selected_unit.job_id = unit->job_id;
     g_menu_selected_unit.brave = unit->brave;

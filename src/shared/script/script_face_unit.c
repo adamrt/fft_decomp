@@ -36,8 +36,8 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
             for (i = 0; i < EVENT_UNIT_SLOT_COUNT; i++) {
                 if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0
                     && runtime_id != unit_id) {
-                    battle_unit_copy_world_coords(runtime_id, &position);
-                    battle_unit_copy_world_coords(unit_id, &target);
+                    unit_copy_world_coords(runtime_id, &position);
+                    unit_copy_world_coords(unit_id, &target);
                     dx = target.vx - position.vx;
                     dy = target.vz - position.vz;
                     facing = -ratan2(dy, dx);

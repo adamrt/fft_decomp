@@ -112,7 +112,6 @@ extern menu_number_entry_t g_battle_menu_right_unit_stats_setup[10];
 extern s32 g_battle_post_battle_unit_changes_active;
 
 void battle_menu_build_unit_portrait_poly(POLY_FT4* poly, u32 battle_id);
-void battle_menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output);
 s32 battle_menu_display_projected_action_effect(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
 

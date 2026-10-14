@@ -33,7 +33,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
     }
     for (i = 0; i < EVENT_UNIT_SLOT_COUNT; i++) {
         if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &state) != 0) {
-            battle_unit_copy_world_coords(unit_id, &screen);
+            unit_copy_world_coords(unit_id, &screen);
             dx = tile.vx - screen.vx;
             dy = tile.vz - screen.vz;
             facing = ((-ratan2(dy, dx) + 0xC00) & 0xF00) >> 8;

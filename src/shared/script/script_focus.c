@@ -36,8 +36,8 @@ void script_focus(event_focus_parameters_t* parameters) {
         main_system_handle_malloc_exception(7, 0);
         return;
     }
-    battle_unit_copy_world_coords_to_vector(first, (VECTOR*)coords[0]);
-    battle_unit_copy_world_coords_to_vector(second, (VECTOR*)coords[1]);
+    unit_copy_world_coords_to_vector(first, (VECTOR*)coords[0]);
+    unit_copy_world_coords_to_vector(second, (VECTOR*)coords[1]);
     coords[0][1] += 0x20;
     coords[1][1] += 0x20;
     if (unit_a == CHARACTER_IDENTITY_ALTIMA_SECOND_FORM) {

@@ -4,7 +4,7 @@
 /* Faces a unit, and its mount partner when one is linked, in a direction given in
  * sixteenths of a turn. Script variable EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED
  * suppresses the partner's update. */
-void battle_unit_set_facing(s32 runtime_id, s32 facing) {
+void unit_set_facing(s32 runtime_id, s32 facing) {
     s32 battle_id;
     unit_stats_t* stats;
 

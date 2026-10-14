@@ -34,7 +34,7 @@ void battle_text_run_spell_quote_thread(void) {
     g_text_substitution_values[1] = id;
     g_text_substitution_values[2] = id;
     unit = battle_unit_get_stats_from_battle_id(id);
-    battle_unit_project_to_screen(battle_unit_get_runtime_id_by_battle_id(id), &screen_coords);
+    unit_project_to_screen(battle_unit_get_runtime_id_by_battle_id(id), &screen_coords);
     id = unit->unit_id;
     if (screen_coords.vy < 0x80) {
         window_mode = 0x12;

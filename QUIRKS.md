@@ -469,7 +469,7 @@ written that way.
 - `battle_menu_build_unit_portrait_poly` reads the speaker's battle record
   through `battle_unit_get_stats_from_battle_id`, which returns NULL for a
   speaker who is not on the field; the portrait test then reads kernel RAM.
-  `battle_menu_copy_unit_data_to_status_billboard` does the same while
+  `menu_copy_unit_data_to_status_billboard` (BATTLE and DEBUGCHR) does the same while
   counting units, for a runtime record with no battle unit (the final battle).
 - `world_item_sort_id_list`: it counts each unit's five equipment ids into a
   256-byte local array, but the ids are 16-bit values and an item tried on in the

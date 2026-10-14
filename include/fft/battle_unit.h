@@ -1130,7 +1130,7 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
 s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id);
 s32 battle_unit_disable_remove(s32 battle_id);
 s32 battle_unit_get_battle_id_by_runtime_id(u32 runtime_id);
-unit_stats_t* battle_unit_get_stats_by_unit_id(s32 unit_id);
+unit_stats_t* unit_get_stats_by_unit_id(s32 unit_id);
 battle_unit_t* battle_unit_get_casting(void);
 battle_unit_t* battle_unit_get_by_battle_id(u16 battle_id);
 battle_unit_t* battle_unit_get_by_runtime_id(u16 runtime_id);
@@ -1245,7 +1245,7 @@ void battle_unit_set_animation_based_on_status(battle_unit_t* unit);
 void battle_unit_set_idle_animation_for_movement(battle_unit_t* unit);
 void battle_unit_set_level_up_animation(battle_unit_t* unit);
 void battle_unit_restore_facing_after_attack(battle_unit_t* unit);
-void battle_unit_set_facing(s32 runtime_id, s32 facing);
+void unit_set_facing(s32 runtime_id, s32 facing);
 void battle_unit_snap_all_facings_to_quadrants(void);
 void battle_unit_start_ability_charge_animation(battle_unit_t* unit);
 void battle_unit_start_ability_charge_hold_animation(battle_unit_t* unit);
@@ -1287,8 +1287,8 @@ void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, ba
 
 SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id);
 SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id);
-void battle_unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
-void battle_unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
+void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
+void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void battle_unit_set_real_coords_from_world_coords(struct battle_unit* unit);
 void battle_unit_set_world_coords_from_real_coords(struct battle_unit* unit);
 void battle_unit_set_move_and_world_coords(battle_unit_t* unit);
@@ -1296,7 +1296,7 @@ void battle_unit_set_move_and_world_coords(battle_unit_t* unit);
 /* position and display */
 battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_data_t* out, s32 unit_id);
 battle_unit_t* battle_unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
-void battle_unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
+void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
 u8 battle_unit_get_effective_height(const unit_stats_t* unit);
 battle_unit_t* battle_unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
 void battle_unit_save_previous_state(battle_unit_t* unit);
