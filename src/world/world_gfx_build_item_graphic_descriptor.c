@@ -8,7 +8,7 @@
 void world_gfx_build_item_graphic_descriptor(menu_icon_source_t* source, s32 item_id) {
     SPRT sprite;
 
-    world_gfx_set_item_icon_sprite(&sprite, item_id);
+    gfx_set_item_icon_sprite(&sprite, item_id);
     source->u = sprite.u0;
     source->v = sprite.v0;
     source->w = 16;

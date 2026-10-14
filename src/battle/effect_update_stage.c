@@ -28,7 +28,7 @@ s32 effect_update_stage(void) {
         break;
     case EFFECT_PLAYBACK_PHASE_INIT_PALETTE:
         map_freeze();
-        battle_menu_suppress_height_display();
+        menu_suppress_height_display();
         effect_init_palette(g_battle_ability_effect_id);
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
         D_801BF000 = 0;
@@ -86,7 +86,7 @@ s32 effect_update_stage(void) {
             }
             map_configure_effect_data_state(MAP_EFFECT_DATA_END);
             map_unfreeze();
-            battle_menu_enable_height_display();
+            menu_enable_height_display();
             battle_state_clear_frame_pacing();
             g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;

@@ -108,8 +108,8 @@ void world_menu_unit_status_banner_thread(void) {
     for (frame = 0; frame < 4; frame++) {
         menu_init_default_poly_ft4(&summary->portrait[frame]);
     }
-    world_text_configure_sprite_vram(&rects[0], 0x38, 0x28, &summary->value_sprites[0], 2);
-    world_text_configure_sprite_vram(&rects[1], 0x60, 0x10, &summary->value_sprites[1], 2);
+    text_configure_sprite_vram(&rects[0], 0x38, 0x28, &summary->value_sprites[0], 2);
+    text_configure_sprite_vram(&rects[1], 0x60, 0x10, &summary->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
         gfx_init_image_loading(&summary->value_sprites[frame], g_world_editor_numeric_geometry, &g_gfx_portrait_origin,
             &g_world_unit_summary_value_sprite_params[frame]);
@@ -134,10 +134,10 @@ void world_menu_unit_status_banner_thread(void) {
     world_menu_init_numeric_display_frame_primitives(&g_world_unit_status_panel_origin, &status->numeric_frame);
     menu_init_sprite_array(status->sprites, 7, 0x7C3C);
     menu_init_default_poly_ft4(&status->portrait);
-    world_text_configure_sprite_vram(&rects[2], 0x58, 0x20, status->sprites, 0);
-    world_text_configure_sprite_vram(&rects[3], 0x10, 0xA, &status->sprites[1], 0);
-    world_text_configure_sprite_vram(&rects[4], 0x10, 0xA, &status->sprites[2], 0);
-    world_text_configure_sprite_vram(&rects[5], 0x10, 0xA, &status->sprites[3], 0);
+    text_configure_sprite_vram(&rects[2], 0x58, 0x20, status->sprites, 0);
+    text_configure_sprite_vram(&rects[3], 0x10, 0xA, &status->sprites[1], 0);
+    text_configure_sprite_vram(&rects[4], 0x10, 0xA, &status->sprites[2], 0);
+    text_configure_sprite_vram(&rects[5], 0x10, 0xA, &status->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
         gfx_init_image_loading(&status->sprites[frame], g_world_editor_numeric_geometry,
             &g_world_unit_status_panel_origin, &g_world_unit_status_sprite_params[frame]);

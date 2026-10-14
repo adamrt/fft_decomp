@@ -5,7 +5,7 @@
 void menu_build_item_icon_source(menu_icon_source_t* output, u32 item_id) {
     SPRT graphic;
 
-    battle_gfx_set_item_icon_sprite(&graphic, item_id);
+    gfx_set_item_icon_sprite(&graphic, item_id);
     output->u = graphic.u0;
     output->v = graphic.v0;
     output->w = 16;

@@ -99,7 +99,7 @@ s32 effect_linear_projectile_secondary_handler(void) {
                     }
                 }
             } else {
-                battle_gfx_set_item_icon_sprite(&sprite, item);
+                gfx_set_item_icon_sprite(&sprite, item);
                 g_effect_current_secondary->slot_ids[0] = effect_alloc_slot();
                 slot = &g_effect_slots[g_effect_current_secondary->slot_ids[0]];
                 dst = &slot->quads[1];

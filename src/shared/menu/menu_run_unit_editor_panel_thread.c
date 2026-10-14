@@ -112,9 +112,9 @@ void menu_run_unit_editor_panel_thread(void) {
     }
     menu_init_sprite_array(&frame_record->sprites[19], 5, 0x7CFC);
     for (i = 0; i < 5; i++) {
-        gfx_init_image_loading(&frame_record->sprites[19 + i], &g_battle_item_icon_image_location,
+        gfx_init_image_loading(&frame_record->sprites[19 + i], &g_gfx_item_icon_image_location,
             &g_battle_unit_editor_panel_rect, &g_battle_unit_editor_item_icon_image_params[i]);
-        battle_gfx_set_item_icon_sprite(&frame_record->sprites[19 + i], g_menu_selected_unit_fields.state.equipment[i]);
+        gfx_set_item_icon_sprite(&frame_record->sprites[19 + i], g_menu_selected_unit_fields.state.equipment[i]);
     }
 
     buffer = battle_menu_alloc_buffer(0xC80);

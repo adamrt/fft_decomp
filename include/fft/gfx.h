@@ -429,4 +429,11 @@ typedef struct camera_track {
 } camera_track_t;
 typedef char camera_track_size_must_be_164[sizeof(camera_track_t) == 164 ? 1 : -1];
 
+/* item icons */
+extern point16_t g_gfx_item_icon_image_location;
+extern s16 g_gfx_item_icon_clut_base_x;
+extern s16 g_gfx_item_icon_clut_base_y;
+
+void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
+
 #endif

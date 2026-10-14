@@ -32,7 +32,6 @@ s32 menu_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const battle_text_image_position_t* position, s32 style);
 void menu_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
 
-void battle_text_configure_sprite_vram(RECT* rect, s16 width, s16 height, void* packet, s32 clut_offset);
 /* The caller leaves 0x16f in $a1, but the body never reads $a1. */
 void battle_text_mirror_packed_nibble_region_horizontal(u8* data, const glyph_blit_t* region);
 s32 battle_text_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);

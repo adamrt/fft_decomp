@@ -749,7 +749,6 @@ extern menu_status_panel_buffer_t g_world_change_banner_panel_frames[2];
  * unverified names stay provisional. */
 extern s16 g_world_3d_object_use_request;
 extern u16 g_world_3d_object_wait_status;
-extern u16 g_world_gfx_draw_suppress_flag;
 extern u8 g_world_gfx_fade_decreasing;
 extern u8 g_world_gfx_fade_disabled;
 extern u8 g_world_gfx_fade_increasing;
@@ -857,7 +856,6 @@ void world_gfx_enqueue_draw_move(const RECT* src, s32 x, s32 y, s32 ot_index);
 void world_gfx_enqueue_textured_quad_list(
     const menu_sprite_cell_t* cell, const rgb24_t* rgb, s32 semi_trans, u16 tpage, u16 clut, s32 ot_index, s32 count);
 
-void world_gfx_alloc_tpage7_vram(RECT* rect, void* prim, u32* image);
 void world_gfx_enqueue_textured_quad_corners(
     const textured_quad_source_t* source, const rgb24_t* rgb, s32 semi_trans, s32 ot_index);
 void world_gfx_enqueue_gouraud_quad(point16_t* xy, rgb24_t* colors, s32 semi_trans, s32 ot_index);
@@ -2221,7 +2219,6 @@ s32 world_menu_get_selected_unit_mp_bonus_or_dashes(s32 unused_row);
 s32 world_menu_get_party_unit_name_id(void);
 s32 world_menu_get_selected_unit_hp_bonus(s32 unused_row);
 s32 world_menu_get_selected_unit_mp_bonus(s32 unused_row);
-void world_text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
 s32 world_menu_is_busy(s32 unused);
 void world_menu_open_entry_window(s32 index, s32 unused_x, s32 unused_y);
 u8* world_menu_redraw_text_page_on_scroll(menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused_cursor);
@@ -2547,9 +2544,8 @@ extern uv8_t g_world_item_type_icon_origins[];
 extern oriented_quad_t g_world_item_category_tab_cursor_sprite;
 extern struct menu_status_panel_slot_storage g_world_item_preview_stat_detail;
 extern u8* g_world_item_sorted_lists[];
-extern point16_t g_world_item_icon_image_location;
-extern s16 g_world_item_icon_clut_base_x; /* item icon CLUT base x */
-extern s16 g_world_item_icon_clut_base_y; /* item icon CLUT base y */
+extern s16 g_gfx_item_icon_clut_base_x; /* item icon CLUT base x */
+extern s16 g_gfx_item_icon_clut_base_y; /* item icon CLUT base y */
 
 /* Menu-subflow "running" flags. The readers sign-extend (lb), so these are
  * signed; the initializer only stores 0/1/2 and cannot distinguish. */
@@ -2599,7 +2595,6 @@ extern s16 g_world_item_category_strip_text_ids[]; /* option text ids of the act
 extern menu_entry_t* g_world_item_category_icon_strip;
 extern u16 g_world_item_saved_selected_unit_index;
 extern u8 g_world_item_menu_category;
-void world_gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 s32 world_item_count_equipped_by_party(s32 item_id);
 s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode);
 void world_gfx_build_item_graphic_descriptor(menu_icon_source_t* source, s32 item_id);

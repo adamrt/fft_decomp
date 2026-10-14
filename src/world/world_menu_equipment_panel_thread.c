@@ -116,7 +116,7 @@ void world_menu_equipment_panel_thread(void) {
                 &g_world_equipment_panel_origin, &g_world_equipment_panel_icon_params[i]);
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                world_gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
+                gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
             } else {
                 (&screen->sprites[i])[19].x0 = 0;
             }

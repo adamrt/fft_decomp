@@ -35,7 +35,7 @@ void option_menu_window_frame_thread(void) {
     battle_clear_menu_render_buffer(g_option_menu_panel_pixels, 0x400);
     texture.w = 0x80;
     texture.h = 0x10;
-    battle_gfx_alloc_tpage7_vram(&texture, &prim->texture_prim, (u32*)-1);
+    gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
     *source_stride = 0x100;
     *dest_stride = 0x80;
 

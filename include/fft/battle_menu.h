@@ -195,7 +195,6 @@ void battle_menu_leave_status_screen_selection(void);
 /* numeric displays */
 
 extern menu_quad_page_t g_battle_menu_height_display_pages[2];
-extern u16 g_battle_menu_height_display_suppressed;
 extern s8 g_battle_menu_numeric_display_frame_offsets[96];
 extern menu_panel_record_t g_battle_menu_numeric_display_panel_records[2];
 extern RECT g_battle_menu_numeric_display_texture_window;
@@ -211,10 +210,8 @@ void battle_menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyp
 void battle_menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 void battle_menu_draw_numeric_display_entries(
     u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
-void battle_menu_enable_height_display(void);
 void battle_menu_init_numeric_display_frame_primitives(RECT* bounds, menu_palette_primitives_t* menu);
 void battle_menu_run_numeric_display_panel_thread(void);
-void battle_menu_suppress_height_display(void);
 
 /* windows and sprites */
 /* BATTLE scratch at 0x801cc074, in the event-overlay area past BATTLE.BIN:

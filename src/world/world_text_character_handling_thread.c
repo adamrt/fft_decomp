@@ -288,7 +288,7 @@ void world_text_character_handling_thread(void) {
     rec.text = world_thread_get_current_parameter_2();
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
-    world_gfx_alloc_tpage7_vram(&rec.rect, win->quads, (u32*)-1);
+    gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         if (text[0] == TEXT_SET_PORTRAIT) {
             win->portrait_code = text[1];

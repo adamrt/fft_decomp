@@ -40,10 +40,10 @@ void menu_run_unit_summary_panel_thread(void) {
     battle_gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_sprite_array(sprite, 7, 0x7C3C);
     menu_init_default_poly_ft4(&frames[0].portrait);
-    battle_text_configure_sprite_vram(&rects[0], 0x58, 0x20, &frames[0].sprites[0], 0);
-    battle_text_configure_sprite_vram(&rects[1], 0x10, 0xA, &frames[0].sprites[1], 0);
-    battle_text_configure_sprite_vram(&rects[2], 0x10, 0xA, &frames[0].sprites[2], 0);
-    battle_text_configure_sprite_vram(&rects[3], 0x10, 0xA, &frames[0].sprites[3], 0);
+    text_configure_sprite_vram(&rects[0], 0x58, 0x20, &frames[0].sprites[0], 0);
+    text_configure_sprite_vram(&rects[1], 0x10, 0xA, &frames[0].sprites[1], 0);
+    text_configure_sprite_vram(&rects[2], 0x10, 0xA, &frames[0].sprites[2], 0);
+    text_configure_sprite_vram(&rects[3], 0x10, 0xA, &frames[0].sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
         gfx_init_image_loading(&frames[0].sprites[frame], &g_menu_texture_origin, &g_menu_unit_summary_panel_rect,
             &g_battle_unit_summary_sprite_image_params[frame]);

@@ -30,7 +30,7 @@ void effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     s16 bottom;
 
     slot = &g_effect_slots[g_effect_current_secondary->slot_ids[0]];
-    battle_gfx_set_item_icon_sprite(&sprite, item_id);
+    gfx_set_item_icon_sprite(&sprite, item_id);
     prim = &slot->quads[g_effect_buffer_index];
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);

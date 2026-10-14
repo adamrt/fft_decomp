@@ -119,7 +119,7 @@ void equip_panel_run_equipment_list_thread(void) {
             /* Read unsigned: the target extends the id only where it is passed on. */
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                battle_gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
+                gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
             } else {
                 (&screen->sprites[i])[19].x0 = 0;
             }

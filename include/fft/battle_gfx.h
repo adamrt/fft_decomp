@@ -695,11 +695,6 @@ void battle_gfx_draw_wait_direction_arrows(SVECTOR* vector, u32* ot);
 void battle_gfx_draw_wait_direction_unit(void);
 
 /* item icons */
-extern s16 g_battle_item_icon_clut_base_x;
-extern s16 g_battle_item_icon_clut_base_y;
-extern point16_t g_battle_item_icon_image_location;
-
-void battle_gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 
 /* screen effects */
 /* Commands of 0x800e77b8, which stores RGB and controls GTE background color. */
@@ -732,7 +727,6 @@ void battle_gfx_update_screen_color_modulation_fade(void);
 
 /* menu primitives */
 
-void battle_gfx_alloc_tpage7_vram(RECT* rect, void* prim, u32* image);
 void battle_gfx_build_scaled_draw_area_pair_swapped(
     scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 flag);
 void battle_gfx_clear_tpage7_vram_allocation_grid(void);

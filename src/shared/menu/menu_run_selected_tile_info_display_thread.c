@@ -36,7 +36,7 @@ void menu_run_selected_tile_info_display_thread(void) {
         gfx_init_image_loading(&page->sprites[i], &g_menu_texture_origin, &g_battle_tile_info_image_location,
             &g_battle_tile_info_image_params[i]);
     }
-    battle_text_configure_sprite_vram(&rect, 0x18, 0x10, &page->sprites[0], 0);
+    text_configure_sprite_vram(&rect, 0x18, 0x10, &page->sprites[0], 0);
     mem_copy_bytes_nonempty(
         &g_battle_menu_height_display_pages[1], &g_battle_menu_height_display_pages[0], sizeof(menu_quad_page_t));
 
@@ -63,7 +63,7 @@ void menu_run_selected_tile_info_display_thread(void) {
             g_menu_text_state.pen.stride = 0x18;
             battle_menu_set_text_origin(0x10, 0);
             battle_menu_draw_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_text_state.pen);
-            if (g_battle_menu_height_display_suppressed == 0) {
+            if (g_menu_height_display_suppressed == 0) {
                 LoadImage(&rect, buffer);
                 page->sprites[0].clut = 0x7CBC;
                 gfx_draw_or_append_gpu_primitive(&page->sprites[0]);

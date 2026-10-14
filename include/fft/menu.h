@@ -365,7 +365,7 @@ typedef struct menu_status_panel_slot_state {
     s16 equipment[5];            /* 0x24: RH, LH, helmet, armor, accessory; low byte 0xff
                                   * means "no entry"; otherwise rendered through the
                                   * item-name text section and passed to
-                                  * battle_gfx_set_item_icon_sprite */
+                                  * gfx_set_item_icon_sprite */
     s16 ability_ids[5];          /* 0x2e: primary/secondary skillset, reaction, support,
                                   * movement; -1 means no label; the first two rows select
                                   * the skillset-name or ability-name text section by mode,
@@ -1038,6 +1038,11 @@ typedef struct menu_quad_page {
 } menu_quad_page_t;
 typedef char menu_quad_page_size_must_be_324[sizeof(menu_quad_page_t) == 324 ? 1 : -1];
 
+/* Nonzero while effects hide the tile height in the selected-tile display. */
+extern u16 g_menu_height_display_suppressed;
+
+void menu_enable_height_display(void);
+void menu_suppress_height_display(void);
 void menu_run_selected_tile_info_display_thread(void);
 
 /* primitive queues */
@@ -2276,5 +2281,6 @@ void menu_run_bunit_transition_thread(void);
 extern RECT g_text_substitution_rect;
 
 void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
+void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
 
 #endif

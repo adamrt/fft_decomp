@@ -137,7 +137,7 @@ void option_menu_run_game_options(void) {
     battle_gfx_init_scaled_draw_area_packets(&page->title_area);
     battle_gfx_init_scaled_draw_area_packets(&page->value_area);
     battle_menu_init_semitransparent_sprt(&base->title);
-    battle_text_configure_sprite_vram(&g_option_menu_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
+    text_configure_sprite_vram(&g_option_menu_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
     image = battle_menu_build_and_upload_window_frame_image(
         entry->inner_width, 0x2C, &g_option_menu_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
     base->title.x0 = entry->window.x;
@@ -159,7 +159,7 @@ void option_menu_run_game_options(void) {
     thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_menu_entry_panel_rect, 0, 0);
     thread_yield();
     battle_menu_init_semitransparent_sprt(&base->value);
-    battle_text_configure_sprite_vram(&g_option_menu_value_image_rect, 0x3C, 0x10, &base->value, 0);
+    text_configure_sprite_vram(&g_option_menu_value_image_rect, 0x3C, 0x10, &base->value, 0);
     base->value.x0 = entry->window.x + 0x5C;
     base->value.y0 = entry->window.y + entry->window.h + 0xF;
     battle_clear_menu_render_buffer(buffer, 0x1E0);

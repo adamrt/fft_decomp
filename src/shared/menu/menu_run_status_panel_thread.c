@@ -127,7 +127,7 @@ void menu_run_status_panel_thread(void) {
             gfx_init_image_loading(&screen->sprites[19 + i], g_menu_status_panel_item_icon_texture,
                 g_menu_status_panel_frame_rect, &g_menu_status_panel_item_icon_layouts[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                battle_gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);
+                gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);
             } else {
                 /* The target indexes the five icon sprites from their own base (i * 0x14 + 0x1a8), as a
                  * separate array after the 19 label sprites would. */

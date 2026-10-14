@@ -131,7 +131,7 @@ void require_reward_run_war_trophies(void) {
                     quad->y3
                         = require_reward_get_war_trophy_entry_offset(i - start, g_require_reward_war_trophy_entry_count)
                         + 0x10;
-                    battle_gfx_set_item_icon_sprite(&sprite, g_require_reward_war_trophy_entry_values[i]);
+                    gfx_set_item_icon_sprite(&sprite, g_require_reward_war_trophy_entry_values[i]);
                     setUV4(quad, sprite.u0, sprite.v0, sprite.u0 + 0x10, sprite.v0, sprite.u0, sprite.v0 + 0x10,
                         sprite.u0 + 0x10, sprite.v0 + 0x10);
                     quad->clut = sprite.clut;
