@@ -615,7 +615,13 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `unit_get_battle_id_by_event_unit_id.c` calls
   `battle_unit_get_battle_id_by_runtime_id` (`0x8008cdd0`), which in WLDCORE
   is the epilogue of `wldcore_map_color_and_draw_dots`: it would reload
-  `s0`..`s4` from the caller's frame and pop 48 bytes of its stack.
+  `s0`..`s4` from the caller's frame and pop 48 bytes of its stack. The other
+  unit-core helpers the shared event code calls (`battle_unit_has_runtime_id`,
+  `battle_unit_get_runtime_id_by_battle_id`,
+  `battle_unit_get_stats_from_battle_id`,
+  `battle_unit_find_stats_by_entd_unit_id`,
+  `battle_gfx_load_unit_graphics_by_battle_id`) bind the same way, into the
+  middle of WLDCORE's map-dot routines or WORLD's menu data.
   `unit_set_animation.c` likewise reaches three BATTLE-only animation setters,
   behind script-variable tests WORLD scenes would have to pass first.
 - OPTION.OUT carries its own copy of `menu_init_scaled_draw_area_packets`
