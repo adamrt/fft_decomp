@@ -114,6 +114,10 @@ declarations: image ## Report conflicting file-scope declarations (ARGS="...")
 share-audit: image ## Report shared C implementation candidates as JSON (MODULE=x, ARGS="...")
 	@$(TOOLS) share-audit $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
+.PHONY: units
+units: image ## Reconstruct original translation units into build/analysis/units (MODULE=x, ARGS="...")
+	@$(TOOLS) units $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
+
 .PHONY: symbols
 symbols: image ## Rename a symbol: ACTION=rename-function|rename-global ARGS="--old A --new B"
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }
