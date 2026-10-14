@@ -20,7 +20,7 @@ void battle_state_handle_targeting_range_state(void) {
 
     unit = battle_unit_get_source();
     battle_state_handle_free_cursor_input();
-    battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
         target_move_cursor_by_input();
         camera_handle_rotation_input();

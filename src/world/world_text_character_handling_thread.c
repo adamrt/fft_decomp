@@ -295,7 +295,7 @@ void world_text_character_handling_thread(void) {
             win->portrait_code = rec.portrait;
         }
         value = world_thread_get_current_parameter_3();
-        world_menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+        menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
         win->portrait_battle_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         win[0].quads[0].clut = 0x7CBC;
@@ -568,7 +568,7 @@ void world_text_character_handling_thread(void) {
                     column = 0;
                     text = text_find_entry(rec.text);
                     no_wait = 0;
-                    world_menu_build_and_upload_window_image(
+                    menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                     delay = 1;
                     cursor_x = rec.x;
@@ -591,7 +591,7 @@ void world_text_character_handling_thread(void) {
                     continue;
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-                    world_menu_build_and_upload_window_image(
+                    menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else if (rec.box_type != DIALOG_BOX_TYPE_CENTERED) {
                     g_sound_pending_sfx_id = MAIN_SFX_TEXT_PAGE;
@@ -670,8 +670,7 @@ void world_text_character_handling_thread(void) {
                 column = 0;
                 text = text_find_entry(rec.text);
                 no_wait = 0;
-                world_menu_build_and_upload_window_image(
-                    rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 delay = 1;
                 width_override = no_value;
                 cursor_x = rec.x;
@@ -839,7 +838,7 @@ end:
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
-    world_menu_release_current_thread_slot();
+    menu_release_current_thread_slot();
     YIELD_OR_INPUT();
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 1) {
         g_menu_input_lock_mode = 0;

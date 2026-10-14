@@ -240,7 +240,7 @@ void battle_text_run_dialog_thread(void) {
         }
         value = battle_unit_get_battle_id_by_runtime_id(
             script_resolve_runtime_id(battle_thread_get_current_parameter_3()));
-        battle_menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+        menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
         win->portrait_battle_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         win[0].quads[0].clut = 0x7CBC;
@@ -526,7 +526,7 @@ void battle_text_run_dialog_thread(void) {
                     }
                     text = text_find_entry(rec.text);
                     no_wait = 0;
-                    battle_menu_build_and_upload_window_image(
+                    menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                     delay = 1;
                     column = 0;
@@ -550,7 +550,7 @@ void battle_text_run_dialog_thread(void) {
                     continue;
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-                    battle_menu_build_and_upload_window_image(
+                    menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                     ClearImage(&rec.rect, 0, 0, 0);
@@ -654,8 +654,7 @@ void battle_text_run_dialog_thread(void) {
                 }
                 text = text_find_entry(rec.text);
                 no_wait = 0;
-                battle_menu_build_and_upload_window_image(
-                    rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
+                menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 delay = 1;
                 column = 0;
                 width_override = no_value;
@@ -824,7 +823,7 @@ end:
     win->active = 0;
     menu_release_window_buffer_pair(win);
     gfx_free_texture_rect(&rec.rect);
-    battle_menu_release_current_thread_slot();
+    menu_release_current_thread_slot();
     thread_yield();
     thread_exit_current();
 }

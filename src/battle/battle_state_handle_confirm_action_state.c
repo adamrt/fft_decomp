@@ -18,7 +18,7 @@ void battle_state_handle_confirm_action_state(void) {
     s32 selected_command;
 
     battle_state_handle_free_cursor_input();
-    battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     unit = battle_unit_get_source();
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {

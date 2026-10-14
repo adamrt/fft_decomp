@@ -20,7 +20,7 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     u8 compiler_stack_pad[8];
 
     battle_state_handle_free_cursor_input();
-    battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
     selected_command_address = menu_get_selected_command_address();
     casting_unit = battle_unit_get_casting();
     selected_command = selected_command_address->kind;

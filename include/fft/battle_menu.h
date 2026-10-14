@@ -11,10 +11,8 @@ extern s32 g_battle_menu_help_opening;
 extern u8 g_battle_menu_restore_depth;
 extern u8 g_battle_menu_restore_unit_id;
 extern u16 g_battle_menu_transition_state;
-extern u16 g_battle_saved_animation_speed; /* animation speed saved while an event thread forces speed 2 */
 
 void battle_menu_clear_status_menu_state(void);
-s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* input and selection */
 extern s16 g_battle_menu_action_slot_selected_option;
@@ -156,7 +154,6 @@ extern glyph_blit_t g_battle_menu_window_sprite_glyph;
 extern glyph_blit_t g_battle_menu_window_sprite_position;
 
 u8* battle_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
-void battle_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void battle_menu_build_sprite_page(s32 page_index, RECT* base_screen);
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
@@ -191,7 +188,6 @@ extern u8 g_battle_menu_buffer_allocation_map[BATTLE_MENU_BUFFER_PAGE_COUNT];
 extern u8 g_battle_menu_buffer_arena[BATTLE_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
 
 void battle_menu_init_buffer_allocator(void);
-void battle_menu_release_current_thread_slot(void);
 
 /* overlay loading */
 

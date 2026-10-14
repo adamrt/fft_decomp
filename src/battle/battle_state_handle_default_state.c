@@ -15,7 +15,7 @@ void battle_state_handle_default_state(void) {
     camera_update_tilt_input();
     target_move_cursor_by_input();
     battle_state_handle_free_cursor_input();
-    battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
     input = g_main_input_pressed_buttons;
     if (input & PSX_PAD_SELECT) {
         action_clear_at_list_id();

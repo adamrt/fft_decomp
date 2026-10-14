@@ -81,7 +81,7 @@ functions:
   - {addr: 0x800e36a0, size: 140, name: menu_init_primitive_colors_dimmed, hash: ed7ffbf13272f8dc, source: src/shared/menu/menu_init_primitive_colors_dimmed.c}
   - {addr: 0x800e372c, size: 380, name: text_build_display_message, hash: 340aa3e43d90fd1d, source: src/shared/text/text_build_display_message.c}
   - {addr: 0x800e38a8, size: 656, name: world_input_update_menu_state, hash: 13af0965fdb71ad6, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x800e3b38, size: 84, name: world_menu_release_current_thread_slot, hash: 83ddde4c1bebdfdd}
+  - {addr: 0x800e3b38, size: 84, name: menu_release_current_thread_slot, hash: 83ddde4c1bebdfdd, source: src/shared/menu/menu_release_current_thread_slot.c}
   - {addr: 0x800e3b8c, size: 36, name: thread_get_current_task_id, hash: 3cea094e5efaa530, source: src/shared/thread/thread_get_current_task_id.c}
   - {addr: 0x800e3bb0, size: 1612, name: text_draw_glyph_with_typewriter_delay, hash: 998b0c534e9802dc, source: src/shared/text/text_draw_glyph_with_typewriter_delay.c}
   - {addr: 0x800e41fc, size: 108, name: text_resolve_format_string_id, hash: ca1c3176797cf8bd, source: src/shared/text/text_resolve_format_string_id.c}
@@ -263,7 +263,7 @@ functions:
   - {addr: 0x800f2d18, size: 8, name: world_noop_800f2d18, hash: 6d64edf91449c1b1}
   - {addr: 0x800f2d20, size: 80, name: script_reset_event_state, hash: de6bf31314f15ef6, source: src/shared/script/script_reset_event_state.c}
   - {addr: 0x800f2d70, size: 40, name: script_is_deployment_running, hash: 0c31ced998da1feb, source: src/shared/script/script_is_deployment_running.c}
-  - {addr: 0x800f2d98, size: 328, name: world_menu_update_menus_and_event_speed, hash: 2a50df3b6a1b8d8e}
+  - {addr: 0x800f2d98, size: 328, name: menu_update_menus_and_event_speed, hash: 2a50df3b6a1b8d8e, source: src/shared/menu/menu_update_menus_and_event_speed.c}
   - {addr: 0x800f2ee0, size: 260, name: map_store_selected_tile_data, hash: adad582c51dee948, source: src/shared/map/map_store_selected_tile_data.c}
   - {addr: 0x800f2fe4, size: 64, name: menu_clear_entry_selections, hash: 25e5397d31b98e28, source: src/shared/menu/menu_clear_entry_selections.c}
   - {addr: 0x800f3024, size: 8, name: world_noop_800f3024, hash: 6d64edf91449c1b1}
@@ -410,7 +410,7 @@ functions:
   - {addr: 0x800fef34, size: 188, name: menu_text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/shared/text/text_advance_cursor_with_backreferences.c, source_symbol: text_advance_cursor_with_backreferences}
   - {addr: 0x800ff450, size: 40, name: mem_copy_bytes_nonempty, hash: 73eb033d6e800062, source: src/shared/memory/mem_copy_bytes_nonempty.c}
   - {addr: 0x800ff478, size: 496, name: world_gfx_mirror_4bpp_rect, hash: 29198ac37701ca7e}
-  - {addr: 0x800ff668, size: 40, name: world_menu_build_and_upload_window_image, hash: c452a59dd99e0cda}
+  - {addr: 0x800ff668, size: 40, name: menu_build_and_upload_window_image, hash: c452a59dd99e0cda, source: src/shared/menu/menu_build_and_upload_window_image.c}
   - {addr: 0x800ff690, size: 796, name: menu_build_window_image, hash: af5f5261b59f0b0d, source: src/shared/menu/menu_build_window_image.c}
   - {addr: 0x800ff9ac, size: 636, name: world_menu_build_and_upload_window_frame_image, hash: 36ce56e38867d038}
   - {addr: 0x800ffc28, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/shared/menu/menu_build_window_image_row.c}
@@ -1242,8 +1242,8 @@ data:
   - {addr: 0x801564d0, name: g_menu_unit_view_thread_sets}
   - {addr: 0x80156690, name: g_menu_building_thread_started}
   - {addr: 0x801566b0, name: g_world_unit_view_panel_fade_modes}
-  - {addr: 0x801566b8, name: g_world_saved_animation_speed}
-  - {addr: 0x801566ba, name: g_world_animation_speed_forced}
+  - {addr: 0x801566b8, name: g_menu_saved_animation_speed}
+  - {addr: 0x801566ba, name: g_menu_animation_speed_forced}
   - {addr: 0x801566c0, name: g_menu_cleared_entry_indices}
   - {addr: 0x801566cc, name: g_world_menu_value_remap_table}
   - {addr: 0x801566f4, name: g_menu_action_type_modes}
@@ -2645,6 +2645,8 @@ overrides:
   - {function: menu_text_start_thread_if_idle, name: battle_text_run_dialog_thread, addr: 0x800e4d9c}
   - {function: menu_update_icon_cursor_sprites, name: battle_thread_is_previous_running, addr: 0x8010012c}
   - {function: menu_update_icon_cursor_sprites, name: g_battle_formation_display_mode, addr: 0x80153318}
+  - {function: menu_update_menus_and_event_speed, name: battle_thread_is_running_asm, addr: 0x80100164}
+  - {function: menu_update_menus_and_event_speed, name: script_set_event_speed, addr: 0x800f1330}
   - {function: menu_update_panel_fade, name: g_battle_menu_panel_fade_intensity, addr: 0x80153348}
   - {function: menu_update_panel_fade, name: g_battle_menu_panel_fade_mode, addr: 0x80153344}
   - {function: menu_validate_skill_selection_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}

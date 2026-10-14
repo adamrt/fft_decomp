@@ -79,7 +79,7 @@ void battle_state_update_action_execute_mode(void) {
         }
     } else {
         camera_update_cursor_tile_vector();
-        battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+        menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
         if (g_battle_state_animation_continue_check == 0 && unit->numeric_display.active == 0
             && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < 0x3cU)) {
             if (unit->strike.target_count != 0) {

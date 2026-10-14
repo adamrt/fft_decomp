@@ -16,7 +16,7 @@ void battle_state_handle_jp_exp_gain_state(void) {
     battle_unit_t* unit;
 
     battle_state_handle_free_cursor_input();
-    battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
     unit = battle_unit_get_source();
     if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) != 0) {
         return;

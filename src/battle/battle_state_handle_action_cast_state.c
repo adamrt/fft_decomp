@@ -8,7 +8,7 @@ void battle_state_handle_action_cast_state(void) {
     s32 selected_command;
 
     battle_state_handle_free_cursor_input();
-    battle_menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     /* Selections 7, 8 and 0xff are the ones ACTION_EXECUTE_SETUP handles;
      * they mark the action as finished (same test as the

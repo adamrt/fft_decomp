@@ -735,7 +735,7 @@ functions:
   - {addr: 0x8012f3cc, size: 136, name: menu_init_primitive_colors_normal, hash: 5a93f338b69dc23b, source: src/shared/menu/menu_init_primitive_colors_normal.c}
   - {addr: 0x8012f454, size: 140, name: menu_init_primitive_colors_dimmed, hash: a34bc154bfcc9d66, source: src/shared/menu/menu_init_primitive_colors_dimmed.c}
   - {addr: 0x8012f4e0, size: 380, name: text_build_display_message, hash: eedb1f6dcfecd6a0, source: src/shared/text/text_build_display_message.c}
-  - {addr: 0x8012f65c, size: 84, name: battle_menu_release_current_thread_slot, hash: 948b079789ed5c43}
+  - {addr: 0x8012f65c, size: 84, name: menu_release_current_thread_slot, hash: 948b079789ed5c43, source: src/shared/menu/menu_release_current_thread_slot.c}
   - {addr: 0x8012f6b0, size: 36, name: thread_get_current_task_id, hash: f10dac85694e4558, source: src/shared/thread/thread_get_current_task_id.c}
   - {addr: 0x8012f6d4, size: 1612, name: text_draw_glyph_with_typewriter_delay, hash: f53ad13089249377, source: src/shared/text/text_draw_glyph_with_typewriter_delay.c}
   - {addr: 0x8012fd20, size: 108, name: text_resolve_format_string_id, hash: 8dd43b50cdcd6fb8, source: src/shared/text/text_resolve_format_string_id.c}
@@ -916,7 +916,7 @@ functions:
   - {addr: 0x8013f4a0, size: 8, name: battle_noop_8013f4a0, hash: 6d64edf91449c1b1}
   - {addr: 0x8013f4a8, size: 80, name: script_reset_event_state, hash: cc154e81b79d8046, source: src/shared/script/script_reset_event_state.c}
   - {addr: 0x8013f4f8, size: 40, name: script_is_deployment_running, hash: a5c397fe33bff892, source: src/shared/script/script_is_deployment_running.c}
-  - {addr: 0x8013f520, size: 328, name: battle_menu_update_menus_and_event_speed, hash: ec52451103685bc8}
+  - {addr: 0x8013f520, size: 328, name: menu_update_menus_and_event_speed, hash: ec52451103685bc8, source: src/shared/menu/menu_update_menus_and_event_speed.c}
   - {addr: 0x8013f668, size: 260, name: map_store_selected_tile_data, hash: 407beefdbfb22c50, source: src/shared/map/map_store_selected_tile_data.c}
   - {addr: 0x8013f76c, size: 64, name: menu_clear_entry_selections, hash: 46ac5994ee2ced8c, source: src/shared/menu/menu_clear_entry_selections.c}
   - {addr: 0x8013f7ac, size: 8, name: battle_noop_8013f7ac, hash: 6d64edf91449c1b1}
@@ -1065,7 +1065,7 @@ functions:
   - {addr: 0x8014bf7c, size: 72, name: battle_text_read_packed_nibble, hash: ae6f7bc884e8a41c}
   - {addr: 0x8014bfc4, size: 80, name: battle_write_packed_nibble, hash: b50d2f23553363d9}
   - {addr: 0x8014c014, size: 336, name: battle_text_mirror_packed_nibble_region_horizontal, hash: d8749608f8fcb5ed}
-  - {addr: 0x8014c164, size: 40, name: battle_menu_build_and_upload_window_image, hash: e90647c567bcb102}
+  - {addr: 0x8014c164, size: 40, name: menu_build_and_upload_window_image, hash: e90647c567bcb102, source: src/shared/menu/menu_build_and_upload_window_image.c}
   - {addr: 0x8014c18c, size: 796, name: menu_build_window_image, hash: c553dd4a8afbd218, source: src/shared/menu/menu_build_window_image.c}
   - {addr: 0x8014c4a8, size: 688, name: battle_menu_build_and_upload_window_frame_image, hash: 99515c0e0a1f017c}
   - {addr: 0x8014c758, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/shared/menu/menu_build_window_image_row.c}
@@ -2492,8 +2492,8 @@ data:
   - {addr: 0x80169190, name: g_battle_menu_idle_action_entry_labels}
   - {addr: 0x80169200, name: g_menu_building_thread_started}
   - {addr: 0x80169220, name: g_battle_menu_panel_fade_modes}
-  - {addr: 0x80169228, name: g_battle_saved_animation_speed}
-  - {addr: 0x8016922a, name: g_battle_animation_speed_forced}
+  - {addr: 0x80169228, name: g_menu_saved_animation_speed}
+  - {addr: 0x8016922a, name: g_menu_animation_speed_forced}
   - {addr: 0x80169230, name: g_menu_cleared_entry_indices}
   - {addr: 0x8016923c, name: g_battle_menu_selection_remaps}
   - {addr: 0x80169264, name: g_menu_action_type_modes}

@@ -1,11 +1,9 @@
 #include "fft/battle.h"
-#include "fft/battle_map.h"
-#include "fft/battle_menu.h"
-#include "fft/battle_script.h"
-#include "fft/battle_unit.h"
+#include "fft/map.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /*
@@ -16,7 +14,7 @@
  * The `fill` staging variable places the -2 load ahead of the loop counter
  * the way the target does; a literal store hoists it after the counter.
  */
-s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
+s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     s32 i;
     s32 result;
     s32 fill;
@@ -37,14 +35,14 @@ s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
         || battle_thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0
         || battle_thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
-        if (g_battle_animation_speed_forced == 0) {
-            g_battle_animation_speed_forced = 1;
-            g_battle_saved_animation_speed = battle_state_get_animation_speed();
+        if (g_menu_animation_speed_forced == 0) {
+            g_menu_animation_speed_forced = 1;
+            g_menu_saved_animation_speed = battle_state_get_animation_speed();
             script_set_event_speed(2);
         }
-    } else if (g_battle_animation_speed_forced == 1) {
-        g_battle_animation_speed_forced = 0;
-        script_set_event_speed(g_battle_saved_animation_speed);
+    } else if (g_menu_animation_speed_forced == 1) {
+        g_menu_animation_speed_forced = 0;
+        script_set_event_speed(g_menu_saved_animation_speed);
     }
     return result;
 }

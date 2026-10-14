@@ -1213,7 +1213,6 @@ extern battle_ability_animation_data_t g_battle_ability_animation_data[BATTLE_AB
 extern u8 g_battle_ability_charge_animation_sets[BATTLE_CHARGE_ANIMATION_SET_COUNT]
                                                 [BATTLE_CHARGE_ANIMATION_VARIANT_COUNT];
 extern u8 g_battle_rotation_speed_frames[];
-extern u16 g_battle_animation_speed_forced; /* 1 while the event speed is forced */
 extern battle_distortion_animation_handler_t
     g_battle_unit_distortion_animation_handlers[BATTLE_DISTORTION_ANIMATION_COUNT];
 extern s32 g_battle_unit_palette_animation_offset;

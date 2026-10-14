@@ -2029,10 +2029,8 @@ void world_draw_menu_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u
 void world_menu_labeled_number_entry_thread(void);
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon);
-void world_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void world_menu_build_idle_action_stub(s32 unused_menu_id);
 void world_menu_build_sprite_page(s32 page_index, const RECT* base_screen);
-void world_menu_release_current_thread_slot(void);
 
 void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 void world_screen_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
@@ -2624,8 +2622,6 @@ extern s16 g_world_field_object_use_request;
 extern u16 g_world_field_object_wait_status;
 extern u16 g_world_frame_arg;
 extern s32 g_world_frame_counter;
-extern u16 g_world_saved_animation_speed;  /* saved animation speed */
-extern u16 g_world_animation_speed_forced; /* animation speed override active */
 extern u8 g_world_rotation_speed_frames[];
 extern s16 g_world_debug_variable_list_request_state;
 extern s32 g_world_preview_stats_window_active;

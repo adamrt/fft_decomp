@@ -81,9 +81,13 @@ s32 menu_job_get_next_level_jp_requirement(s32 unused_row);
 /* frame timing */
 /* Raw VSync mode; animation and script steps use 1 when this is zero. */
 extern s8 g_menu_event_speed;
+/* Set while a menu thread forces event speed 2; the previous speed is saved. */
+extern u16 g_menu_animation_speed_forced;
+extern u16 g_menu_saved_animation_speed;
 
 s32 menu_get_event_speed(void);
 void menu_set_vsync_mode_and_event_speed(s32 speed);
+s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* primitives */
 void menu_init_default_poly_ft4(POLY_FT4* poly);
@@ -112,6 +116,7 @@ extern menu_glyph_sheet_t* g_menu_glyph_sheet;
 
 void menu_build_window_image_row(const u16* tiles, u16* row, s32 count, s32 index);
 u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
+void menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 
 /* menu_window_buffer_t::icon_flags: which of the window's three icon sprites
  * are drawn. */
@@ -2209,6 +2214,7 @@ void text_save_section_pointers(void);
 extern u8* g_text_glyph_bitmap_data;
 extern s32 g_text_glyphs_per_wait;
 extern s32 g_text_slot_owner_thread_ids[3];
+void menu_release_current_thread_slot(void);
 extern s32 g_text_slot_glyph_counts[3];
 extern u8 g_text_slot_source_columns[];
 extern u8 g_text_slot_row_pitches[];
