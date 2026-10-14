@@ -1,6 +1,9 @@
 #include "fft/battle_unit.h"
+#include "fft/camera.h"
 #include "fft/script.h"
 #include "fft/thread.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 /*
  * Sprite-move worker called by script_sprite_move (mode 0) and
  * script_sprite_move_beta (mode 1) with the script cursor: a unit
@@ -10,13 +13,9 @@
  * negated previous step, re-applied each frame so the unit's coordinate is
  * rewritten rather than accumulated. Rows are 16 bytes apart in the target.
  *
- * Built with the divcheck profile, which reproduces the checked-division
- * guard after SquareRoot0.
+ * WORLD builds it with the divcheck profile, which adds the checked-division
+ * guard after SquareRoot0; BATTLE builds the same source without it.
  */
-#include "fft/world.h"
-#include "psx/libgte.h"
-#include "psx/types.h"
-
 /* The parameters are copied into locals in this order: it is what places the
  * s0 copy before the s2 copy in the prologue. */
 void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_speed) {

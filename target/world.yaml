@@ -329,7 +329,7 @@ functions:
   - {addr: 0x800f99dc, size: 120, name: script_map_darkness, hash: 0d797a52a22d5438, source: src/shared/script/script_map_darkness.c}
   - {addr: 0x800f9a54, size: 176, name: script_earthquake_start, hash: 88082e85496cfa40, source: src/shared/script/script_earthquake_start.c}
   - {addr: 0x800f9b04, size: 392, name: script_color_screen_thread, hash: 721b29c5952d0273, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/script/script_color_screen_thread.c}
-  - {addr: 0x800f9c8c, size: 1480, name: script_run_sprite_move, hash: 74f215bd48a3cde4, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x800f9c8c, size: 1480, name: script_run_sprite_move, hash: 74f215bd48a3cde4, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/script/script_run_sprite_move.c}
   - {addr: 0x800fa254, size: 60, name: script_sprite_move, hash: 4df4be2d389bc444, source: src/shared/script/script_sprite_move.c}
   - {addr: 0x800fa290, size: 60, name: script_sprite_move_beta, hash: 757389eff0f977e2, source: src/shared/script/script_sprite_move_beta.c}
   - {addr: 0x800fa2cc, size: 192, name: world_script_waitspritemove_event_instruction, hash: 6691693858dee2bb}
