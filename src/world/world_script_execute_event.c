@@ -946,7 +946,7 @@ restart_event:
         } else {
             break;
         }
-        instruction_offset += 1 + g_world_event_instruction_sizes[opcode];
+        instruction_offset += 1 + g_script_event_instruction_sizes[opcode];
     }
     thread_exit_current();
 }

@@ -66,7 +66,7 @@ void world_script_add_unit_start_thread(void) {
             }
         }
         slot++;
-        script += g_world_event_instruction_sizes[script[0]] + 1;
+        script += g_script_event_instruction_sizes[script[0]] + 1;
     }
     thread_exit_current();
 }

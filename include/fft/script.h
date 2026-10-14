@@ -35,8 +35,7 @@ enum {
 #define EVENT_TEXT_OFFSET_PROCESSED 0xf2f2f2f2U
 
 /* Retail scenario bytecode, reviewed against BATTLE 0x80143bd8..0x80145f78 and
- * the shared BATTLE/WORLD operand-length tables
- * (g_script_event_instruction_sizes, g_world_event_instruction_sizes).
+ * the shared BATTLE/WORLD operand-length table g_script_event_instruction_sizes.
  *
  * Encoding: one opcode byte, then the operand bytes the length table counts
  * for that opcode. 16-bit operands are little-endian and unaligned. After a
@@ -708,7 +707,6 @@ extern event_file_block_t* g_script_event_block;
 /* Operand-byte counts, excluding the opcode; not per-operand width schemas.
  * BATTLE 0x8014d170, WORLD 0x8013a454. The tables end after opcode 0xf3. */
 extern u8 g_script_event_instruction_sizes[0xf4];
-extern u8 g_world_event_instruction_sizes[0xf4];
 extern s32 g_script_loaded_event_id;
 extern s32 g_world_script_loaded_event_id;
 

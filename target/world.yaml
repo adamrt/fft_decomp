@@ -1047,7 +1047,7 @@ data:
   - {addr: 0x8013a418, name: g_world_unit_editor_secondary_skillset_name}
   - {addr: 0x8013a42c, name: g_world_unit_editor_unit_name}
   - {addr: 0x8013a440, name: g_world_unit_editor_job_name}
-  - {addr: 0x8013a454, name: g_world_event_instruction_sizes}
+  - {addr: 0x8013a454, name: g_script_event_instruction_sizes}
   - {addr: 0x8013a548, name: g_world_menu_ability_display_flags}
   - {addr: 0x8013a5e8, name: g_script_condition_unit_battle_id}
   - {addr: 0x8013a5ec, name: g_world_spell_quote_last_ability_id}
@@ -2356,8 +2356,6 @@ overrides:
   - {function: menu_init_panel_fade_tiles, name: g_gfx_texture_window, addr: 0x801531b0}
   - {function: menu_init_sprite_array, name: battle_menu_init_semitransparent_sprt, addr: 0x800e2444}
   - {function: menu_text_render_decimal_value, name: blit_text_glyph, addr: 0x800feff0}
-  - {function: script_find_instruction_byte_offset, name: g_script_event_instruction_sizes, addr: 0x8013a454}
-  - {function: script_find_jump_target, name: g_script_event_instruction_sizes, addr: 0x8013a454}
   - {function: script_interpolate_range_fixed12, name: battle_mul_div_s64, addr: 0x80100188}
   - {function: script_run_next_event, name: script_execute_event, addr: 0x800f6f20}
   - {function: script_run_next_event, name: script_load_next_event, addr: 0x800f92a0}
@@ -2369,7 +2367,6 @@ overrides:
   - {function: world_camera_fusion_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: world_camera_fusion_thread, name: camera_step_track, addr: 0x800f18c8}
   - {function: world_camera_fusion_thread, name: g_camera_position_locked, addr: 0x801532c0}
-  - {function: world_camera_fusion_thread, name: g_script_event_instruction_sizes, addr: 0x8013a454}
   - {function: world_camera_fusion_thread, name: script_focus, addr: 0x800fa9cc}
   - {function: world_camera_fusion_thread, name: script_focus_speed, addr: 0x800fabc8}
   - {function: world_camera_step_track, name: battle_fixed_cross_product_q12, addr: 0x801002d8}
@@ -2957,7 +2954,6 @@ overrides:
   - {function: world_screen_menu_thin_window_frame_thread, name: world_gfx_set_image_blit_source_rect, addr: 0x8010a480}
   - {function: world_script_block_start_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: world_script_block_start_thread, name: battle_thread_resolve_id_after_current, addr: 0x800fd0d8}
-  - {function: world_script_block_start_thread, name: g_script_event_instruction_sizes, addr: 0x8013a454}
   - {function: world_script_block_start_thread, name: script_face_unit, addr: 0x800fb4f0}
   - {function: world_script_block_start_thread, name: script_rotate_unit, addr: 0x800fb6f0}
   - {function: world_script_block_start_thread, name: script_sprite_move, addr: 0x800fa254}
@@ -2975,7 +2971,6 @@ overrides:
   - {function: world_script_face_unit, name: g_script_unit_face_slot_order, addr: 0x80156bb0}
   - {function: world_script_face_unit, name: script_filter_unit_id_by_mode, addr: 0x800fae18}
   - {function: world_script_focus, name: camera_pick_nearest_unblocked_yaw, addr: 0x800fa760}
-  - {function: world_script_focus, name: g_script_event_instruction_sizes, addr: 0x8013a454}
   - {function: world_script_inflict_status_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: world_script_inflict_status_thread, name: battle_unit_get_battle_id_by_event_unit_id, addr: 0x800e1e40}
   - {function: world_script_inflict_status_thread, name: battle_unit_update_staged_status_data, addr: 0x800fc144}
@@ -2986,7 +2981,6 @@ overrides:
   - {function: world_script_load_next_event, name: script_load_event, addr: 0x800f0470}
   - {function: world_script_march_units, name: script_filter_unit_id_by_mode, addr: 0x800fae18}
   - {function: world_script_process_inflict_status_commands, name: battle_thread_resolve_id, addr: 0x800fd07c}
-  - {function: world_script_process_inflict_status_commands, name: g_script_event_instruction_sizes, addr: 0x8013a454}
   - {function: world_script_process_inflict_status_commands, name: script_inflict_status_thread, addr: 0x800fc2f4}
   - {function: world_script_reset_event_state, name: battle_thread_is_running_asm, addr: 0x80100164}
   - {function: world_script_reset_event_state, name: camera_store_state_to_script_variables, addr: 0x800f6ea8}
@@ -3005,7 +2999,6 @@ overrides:
   - {function: world_sound_bg_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: world_sound_bg_thread, name: sound_run_background_fade_thread, addr: 0x800fcec0}
   - {function: world_sound_edit_bg_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
-  - {function: world_text_build_display_message, name: g_script_event_instruction_sizes, addr: 0x8013a454}
   - {function: world_text_determine_spell_quote, name: battle_menu_dispatch_system_function, addr: 0x800f5384}
   - {function: world_text_determine_spell_quote, name: battle_text_is_spell_quote_exception_skillset, addr: 0x800f49d8}
   - {function: world_text_determine_spell_quote, name: g_battle_spell_quote_last_ability_id, addr: 0x8013a5ec}
