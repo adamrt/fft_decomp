@@ -9,19 +9,19 @@
  * (stored row action -1). In a menu whose move is already used (ids 0x0e, 0x14,
  * 0x21, 0x2f, 0x31 and 0x33) only the invalid sound plays. Otherwise the command
  * is confirmed at once, as a silent Circle press. */
-void battle_menu_confirm_move_command_thread(void) {
+void menu_confirm_move_command_thread(void) {
     s16* stored_actions;
     menu_entry_t* entry;
     s32 menu;
 
     entry = (menu_entry_t*)battle_thread_get_current_parameter_1();
-    stored_actions = &g_battle_menu_confirm_stored_unit_row_actions;
+    stored_actions = &g_menu_confirm_stored_unit_row_actions;
     *stored_actions = -2;
-    if (battle_unit_get_attacker_data_pointer()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
+    if (menu_get_selected_unit_stats()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
         & STATUS_BYTE_MASK(STATUS_ID_DONT_MOVE)) {
         *stored_actions = -1;
         sound_queue_sfx_invalid();
-        battle_menu_icon_linked_entry_thread();
+        menu_icon_linked_entry_thread();
         thread_exit_current();
     }
     menu = g_menu_current_id;

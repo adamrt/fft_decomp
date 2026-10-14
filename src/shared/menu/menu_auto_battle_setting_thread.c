@@ -27,7 +27,7 @@ void menu_auto_battle_setting_thread(void) {
 
     param = (menu_entry_t*)battle_thread_get_current_parameter_1();
     cursor = param->selected_index;
-    stats = battle_unit_get_attacker_data_pointer();
+    stats = menu_get_selected_unit_stats();
     if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
         cursor = 0;
     } else if (stats->auto_battle_setting == AI_AUTOBATTLE_TARGETED) {

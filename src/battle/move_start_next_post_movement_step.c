@@ -28,7 +28,7 @@ s32 move_start_next_post_movement_step(void) {
     casting->state_frame_counter = 0;
     if (g_move_find_result & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
         target = battle_unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z);
-        item = battle_menu_get_dead_unit_selection(source->stats->battle_id);
+        item = menu_get_dead_unit_selection(source->stats->battle_id);
         if (item == -1) {
             animation = BATTLE_UNIT_ANIMATION_RAISE_HANDS;
         } else {

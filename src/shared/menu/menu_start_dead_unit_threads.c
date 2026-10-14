@@ -9,7 +9,7 @@
 
 /* Runs the crystal/treasure result panel and its list and choice threads. */
 void menu_start_dead_unit_threads(void) {
-    crystal_pickup_result_t* context = g_battle_dead_unit_context;
+    crystal_pickup_result_t* context = g_menu_dead_unit_context;
     menu_entry_t* previous_menu_descriptor = g_menu_thread_menu_data;
     menu_entry_t* menu;
     s32 value_count;
@@ -72,7 +72,7 @@ void menu_start_dead_unit_threads(void) {
     if (context->result == 0) {
         message_id = 0x183c;
         g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE].text_id = message_id;
-        thread_start(g_thread_current_id - 1, battle_menu_icon_linked_entry_thread);
+        thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE], 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_wait_frames(2);
@@ -97,7 +97,7 @@ void menu_start_dead_unit_threads(void) {
             g_battle_dead_unit_result = context->treasure_item;
         }
         g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE].text_id = message_id;
-        thread_start(g_thread_current_id - 1, battle_menu_icon_linked_entry_thread);
+        thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE], 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_wait_frames(2);
@@ -128,7 +128,7 @@ void menu_start_dead_unit_threads(void) {
         if ((context->result == 3 && g_option_dead_unit_secondary_result == 0) || context->result == 1) {
             thread_start(g_thread_current_id - 2, option_menu_run_at_list);
             thread_set_parameters(g_thread_current_id - 2, (s32)g_menu_thread_menu_data, 0, 0);
-            thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, battle_menu_icon_linked_entry_thread);
+            thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU, menu_icon_linked_entry_thread);
             thread_set_parameters(
                 THREAD_BORROWED_SLOT_AT_LIST_MENU, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_AT_LIST], 0, 0);
             for (;;) {
@@ -163,7 +163,7 @@ void menu_start_dead_unit_threads(void) {
 
         if ((g_option_dead_unit_secondary_result == 1 && context->result == 3) || context->result == 2) {
             g_option_dead_unit_primary_result = 0xff;
-            thread_start(g_thread_current_id - 1, battle_menu_icon_linked_entry_thread);
+            thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_CONFIRM], 0, 0);
             thread_wait_until_inactive(g_thread_current_id - 1);
             if (g_option_dead_unit_primary_result == 0) {

@@ -305,7 +305,7 @@ ramza_placed:
                 if (g_attack_deploy_deployed_unit_count == 0) {
                     g_sound_pending_sfx_id = MAIN_SFX_INVALID;
                     g_attack_deploy_menu_entries[2].text_id = 0x900b;
-                    thread_start(ATTACK_THREAD_SLOT_NOTICE, battle_menu_icon_linked_entry_thread);
+                    thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                     thread_set_parameters(ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
                     thread_wait_until_inactive(ATTACK_THREAD_SLOT_NOTICE);
                 } else {
@@ -330,7 +330,7 @@ ramza_placed:
 
                         cursor = *deployed;
                         *deployed = 1;
-                        thread_start(ATTACK_PROMPT_THREAD_SLOT_CONFIRM_MENU, battle_menu_icon_linked_entry_thread);
+                        thread_start(ATTACK_PROMPT_THREAD_SLOT_CONFIRM_MENU, menu_icon_linked_entry_thread);
                         thread_set_parameters(
                             ATTACK_PROMPT_THREAD_SLOT_CONFIRM_MENU, (s32)&g_menu_thread_menu_data[3], 0, 0);
                         thread_wait_until_inactive(ATTACK_PROMPT_THREAD_SLOT_CONFIRM_MENU);
@@ -390,7 +390,7 @@ ramza_placed:
                             } else {
                                 g_sound_pending_sfx_id = MAIN_SFX_INVALID;
                                 g_attack_deploy_menu_entries[2].text_id = 0x900c;
-                                thread_start(ATTACK_THREAD_SLOT_NOTICE, battle_menu_icon_linked_entry_thread);
+                                thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_set_parameters(
                                     ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
                                 thread_wait_until_inactive(ATTACK_THREAD_SLOT_NOTICE);
@@ -419,7 +419,7 @@ ramza_placed:
                                 && script_get_variable(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) == 1) {
                                 g_sound_pending_sfx_id = MAIN_SFX_INVALID;
                                 g_attack_deploy_menu_entries[2].text_id = 0x900d;
-                                thread_start(ATTACK_THREAD_SLOT_NOTICE, battle_menu_icon_linked_entry_thread);
+                                thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                                 thread_set_parameters(
                                     ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
                                 thread_wait_until_inactive(ATTACK_THREAD_SLOT_NOTICE);

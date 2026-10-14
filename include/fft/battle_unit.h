@@ -1144,7 +1144,6 @@ s32 battle_unit_update_fade_out_removal(battle_unit_t* unit);
 battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id);
 unit_stats_t* battle_unit_find_active_data_pointer(void);
 action_command_t* battle_unit_get_action_command_by_battle_id(s32 battle_id);
-unit_stats_t* battle_unit_get_attacker_data_pointer(void);
 battle_unit_t* battle_unit_find_overlapping_at_tile(battle_unit_t* self, s32 x, s32 y, s32 z);
 action_command_t* battle_unit_get_runtime_action_command_by_battle_id(u32 battle_id);
 battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id, s16 palette,

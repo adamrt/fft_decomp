@@ -269,7 +269,7 @@ void require_party_apply_post_battle_changes(void) {
                 }
             } while (g_require_party_removal_result != 0);
             if (require_party_sell_equipment_over_limit(*selected_unit_index_ptr) != 0) {
-                thread_start(REQUIRE_THREAD_SLOT_MENU, battle_menu_icon_linked_entry_thread);
+                thread_start(REQUIRE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
                 thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, (s32)&g_require_party_removal_menus[5], 0, 0);
                 thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MENU);
             }

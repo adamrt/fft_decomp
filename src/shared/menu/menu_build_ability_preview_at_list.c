@@ -39,7 +39,7 @@ void menu_build_ability_preview_at_list(void) {
     }
     action = &g_battle_menu_selected_action;
     action->actor_id = g_menu_selected_unit.battle_id;
-    stats = battle_unit_get_attacker_data_pointer();
+    stats = menu_get_selected_unit_stats();
     g_thread_call_target = (void (*)(void))action_preview_at_list;
     turn = thread_call_on_main_stack(stats, action, work->entries);
     if (staged_item != 0) {
@@ -52,7 +52,7 @@ void menu_build_ability_preview_at_list(void) {
         thread_set_parameters(
             g_thread_current_id, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_MESSAGE], 0, 0);
         count = 0;
-        battle_menu_icon_linked_entry_thread();
+        menu_icon_linked_entry_thread();
     }
     for (index = 0; index < BATTLE_AT_LIST_CAPACITY; index++) {
         work->primary_colors[index] = 0;

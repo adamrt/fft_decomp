@@ -34,7 +34,7 @@ void menu_start_entry_thread(void) {
     }
     script_pulse_tutorial_wait_value(0xFF);
     if (menu_id == BATTLE_MENU_ID_OTHER_UNIT || menu_id == BATTLE_MENU_ID_OTHER_UNIT_INSPECT) {
-        if (battle_unit_get_attacker_data_pointer()->unit_flags & UNIT_FLAG_EGG) {
+        if (menu_get_selected_unit_stats()->unit_flags & UNIT_FLAG_EGG) {
             menu_id = BATTLE_MENU_ID_EGG;
         }
     }

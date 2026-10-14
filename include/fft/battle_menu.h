@@ -43,7 +43,6 @@ extern s16 g_battle_menu_action_type_modes[][2];
 extern menu_scroll_text_layout_t g_battle_menu_at_list_layout;
 /* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
 extern s16 g_battle_menu_auto_battle_row_actions[8];
-extern s16 g_battle_menu_confirm_stored_unit_row_actions;
 extern menu_entry_t g_battle_menu_idle_action_entries[];
 extern u8 g_battle_menu_idle_action_entry_labels[];
 extern u8 g_battle_menu_restriction_message_ids[];
@@ -51,7 +50,6 @@ extern u8 g_battle_menu_restriction_message_ids[];
  * action_preview_at_list; the WORLD twin is g_world_menu_preview_action. */
 extern action_command_t g_battle_menu_selected_action;
 extern ai_command_t g_battle_menu_selected_command;
-extern s16 g_battle_menu_set_auto_battle_row_actions;
 extern s32 g_battle_menu_system_function_command;
 extern s32 g_battle_menu_system_function_option;
 extern u16 g_battle_menu_system_function_row_actions[];
@@ -125,7 +123,6 @@ void battle_menu_run_skillset_thread(void);
 
 /* unit panels */
 extern s32 g_battle_dead_unit_action;
-extern crystal_pickup_result_t* g_battle_dead_unit_context;
 extern s32 g_battle_dead_unit_result;
 extern s32 g_battle_formation_display_mode;
 extern s32 g_battle_formation_screen_active;
@@ -150,7 +147,6 @@ void battle_menu_display_hovered_unit_stats(
     RECT* frame_rect, s32 mode, menu_number_entry_t* entries, menu_unit_status_record_t* status);
 s32 battle_menu_display_projected_action_effect(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
-s32 battle_menu_get_dead_unit_selection(s32 battle_id);
 void battle_menu_load_selected_unit(void);
 void battle_menu_open_option_dead_unit_panel(void);
 void battle_menu_refresh_hovered_unit_stats_display(void);
@@ -219,7 +215,6 @@ void battle_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect
 void battle_menu_build_sprite_page(s32 page_index, RECT* base_screen);
 u8* battle_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
-void battle_menu_icon_linked_entry_thread(void);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 void battle_menu_submit_icon_primitives(menu_icon_sprites_t* frame);
 void battle_menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);

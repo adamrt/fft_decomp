@@ -16,7 +16,7 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
     parameter = (menu_entry_t*)battle_thread_get_current_parameter_1();
     mode = 0;
     message = 0;
-    unit = battle_unit_get_attacker_data_pointer();
+    unit = menu_get_selected_unit_stats();
     if (check_unit != 0) {
         if (battle_unit_get_action_restriction(unit) == BATTLE_UNIT_ACTION_RESTRICTION_DEEP_WATER) {
             message = 0x1003;
@@ -38,7 +38,7 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
     if (mode != 0) {
         if (g_main_game_options.fields.navigation_messages != GAME_OPTION_OFF || (message & 0xff00) != 0x8000) {
             g_menu_thread_menu_data[BATTLE_MENU_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
-            thread_start(g_thread_current_id - 1, battle_menu_icon_linked_entry_thread);
+            thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
             thread_set_parameters(g_thread_current_id - 1,
                 (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
         }

@@ -19,7 +19,7 @@ void menu_build_skillset_entries(void) {
     g_menu_skillset_build_result = battle_menu_build_unit_action_menus(g_menu_selected_unit.battle_id, g_menu_skillsets,
         g_battle_menu_skillset_disabled_flags, g_action_menu_row_types);
     rows = (menu_text_row_t*)text_find_entry(0x5010);
-    if (battle_unit_get_action_restriction(battle_unit_get_attacker_data_pointer())
+    if (battle_unit_get_action_restriction(menu_get_selected_unit_stats())
         == BATTLE_UNIT_ACTION_RESTRICTION_DEEP_WATER) {
         for (i = 0; i < 6; i++) {
             g_battle_menu_skillset_disabled_flags[i] = 1;

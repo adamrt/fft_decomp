@@ -28,7 +28,7 @@ void world_menu_validate_skill_selection_thread(void) {
     }
     message = 0;
     blocked = skill_tables->flags[skill] & 2;
-    unit = world_unit_get_active_stats();
+    unit = menu_get_selected_unit_stats();
     if (g_world_active_menu == ACTION_MENU_TYPE_DEFAULT && unit->mp - mp_cost < 0) {
         message = 0x800A;
         if (ct == 0) {
@@ -65,7 +65,7 @@ void world_menu_validate_skill_selection_thread(void) {
             g_menu_modal_open = 1;
             g_world_menu_selected_option = 0;
             g_menu_thread_menu_data[BATTLE_MENU_ID_ACTION_RESTRICTION_MESSAGE].text_id = message;
-            thread_start(g_thread_current_id - 1, world_menu_icon_linked_entry_thread);
+            thread_start(g_thread_current_id - 1, menu_icon_linked_entry_thread);
             thread_set_parameters(g_thread_current_id - 1,
                 (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ACTION_RESTRICTION_MESSAGE], 0, 0);
             sound_queue_sfx_invalid();

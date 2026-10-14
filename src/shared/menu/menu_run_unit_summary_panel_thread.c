@@ -33,7 +33,7 @@ void menu_run_unit_summary_panel_thread(void) {
     slide = 0x84;
     digits = g_battle_unit_summary_digit_images;
     battle_menu_load_selected_unit();
-    unit = battle_unit_get_attacker_data_pointer();
+    unit = menu_get_selected_unit_stats();
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
     sprite = frames[0].sprites;
     battle_gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
@@ -100,7 +100,7 @@ void menu_run_unit_summary_panel_thread(void) {
 
     for (frame = 0;; frame++) {
         thread_yield();
-        g_menu_hide_numeric_values = battle_unit_get_attacker_data_pointer()->unit_flags & UNIT_FLAG_EGG;
+        g_menu_hide_numeric_values = menu_get_selected_unit_stats()->unit_flags & UNIT_FLAG_EGG;
         frame_record = &frames[frame & 1];
         if (frame == 0) {
             menu_free_memory(buffer);

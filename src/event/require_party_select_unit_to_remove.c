@@ -113,7 +113,7 @@ s32 require_party_select_unit_to_remove(void) {
 
     for (;;) {
         g_require_party_removal_result = 0xff;
-        thread_start(REQUIRE_THREAD_SLOT_MESSAGE, battle_menu_icon_linked_entry_thread);
+        thread_start(REQUIRE_THREAD_SLOT_MESSAGE, menu_icon_linked_entry_thread);
         thread_set_parameters(REQUIRE_THREAD_SLOT_MESSAGE, (s32)&g_require_party_removal_menus[2], 0, 0);
         portrait_rect = &g_require_party_portrait_move_rect;
         portrait_destination = &g_require_party_portrait_destination;
@@ -139,7 +139,7 @@ s32 require_party_select_unit_to_remove(void) {
         continue;
 
     selection_menu:
-        thread_start(REQUIRE_THREAD_SLOT_MENU, battle_menu_icon_linked_entry_thread);
+        thread_start(REQUIRE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
         thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, (s32)&g_require_party_removal_menus[4], 0, 0);
         thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MENU);
         require_panel_set_transition_value(0);
@@ -278,7 +278,7 @@ s32 require_party_select_unit_to_remove(void) {
         }
     }
     if (should_restore != 0) {
-        thread_start(REQUIRE_THREAD_SLOT_MENU, battle_menu_icon_linked_entry_thread);
+        thread_start(REQUIRE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
         thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, (s32)&g_require_party_removal_menus[5], 0, 0);
         thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MENU);
     }

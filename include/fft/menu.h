@@ -1231,7 +1231,7 @@ typedef enum dead_unit_menu_entry {
 /* Crystal/treasure pickup result (g_main_crystal_pickup_result, 0x8006623c)
  * that battle_unit_generate_crystal_or_treasure builds on the main thread
  * stack call and returns; BATTLE keeps the pointer in g_battle_dead_unit_context and
- * WORLD in g_world_thread_inner_subroutine_result. The dead-unit panels pick
+ * WORLD in g_menu_dead_unit_context. The dead-unit panels pick
  * their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {
     s32 result;                 /* 0x00; -1 none, 0 idle, 4 treasure, 2 crystal, |1 learned */
@@ -1241,6 +1241,8 @@ typedef struct crystal_pickup_result {
     u8 treasure_item;           /* 0x52; the roster/item id the panels show */
     u8 learned_abilities[0x40]; /* 0x53 */
 } crystal_pickup_result_t;
+extern crystal_pickup_result_t* g_menu_dead_unit_context;
+s32 menu_get_dead_unit_selection(s32 battle_id);
 
 void menu_start_dead_unit_threads(void);
 
@@ -1715,7 +1717,12 @@ void menu_set_text_origin(s32 x, s32 y);
 /* list threads */
 extern u32* g_menu_input_controller;
 void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
+extern s16 g_menu_confirm_stored_unit_row_actions;
+extern s16 g_menu_set_auto_battle_row_actions;
+
 void menu_icon_linked_entry_thread(void);
+void menu_confirm_move_command_thread(void);
+void menu_confirm_auto_battle_selection_thread(void);
 void menu_icon_list_thread(void);
 void menu_icon_strip_thread(void);
 void menu_icon_timed_thread(void);

@@ -407,7 +407,6 @@ extern u16 g_world_thread_change_cooldown;
 extern u8 g_world_thread_status_snapshot[16];
 
 extern menu_gradient_panel_prims_t g_world_thread_indicator_packets[2][2];
-extern crystal_pickup_result_t* g_world_thread_inner_subroutine_result;
 
 s32 world_menu_get_cursor_bob_offset(s32 mode);
 void world_text_release_current_message_box_slot(void);
@@ -1607,7 +1606,6 @@ void world_unit_queue_current_status_graphics(s32 battle_unit_index, s32 enabled
 void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment);
 s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id);
 s32 world_unit_check_facing_relative_to_camera(s32 unit_id);
-struct unit_stats* world_unit_get_active_stats(void);
 s32 world_unit_get_map_coords_by_runtime_id(s32 runtime_id, SVECTOR* out);
 s32 world_formation_get_unit_palette_index(s32 roster_slot);
 s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
@@ -1926,9 +1924,7 @@ extern s16 g_world_menu_auto_battle_row_actions[8];
 extern s16 g_world_menu_action_slot_row_actions[6];
 extern u16 g_world_menu_status_list_row_actions[8];
 extern u16 g_world_menu_system_function_row_actions[];
-extern s16 g_world_menu_confirm_stored_unit_row_actions;
-extern s16 g_world_menu_result; /* menu result: -4 pending, -1 canceled */
-extern s16 g_world_menu_set_auto_battle_row_actions;
+extern s16 g_world_menu_result;                          /* menu result: -4 pending, -1 canceled */
 extern RECT g_world_menu_numeric_display_texture_window; /* texture window for the menu page */
 
 extern s8
@@ -2215,7 +2211,6 @@ void world_menu_run_display_script(menu_instruction_t* script, s32 value);
 rgb24_t* world_menu_get_sprite_color(void);
 s32 world_menu_handle_remove_all_equipment(void);
 s32 world_menu_has_items(s32 mode);
-void world_menu_icon_linked_entry_thread(void);
 void world_menu_icon_list_thread(void);
 void world_menu_init_and_load_scrollable_list(
     const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
