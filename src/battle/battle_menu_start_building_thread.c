@@ -34,6 +34,6 @@ void battle_menu_start_building_thread(void) {
         return;
     }
     g_battle_menu_help_open = 1;
-    thread_start(THREAD_SLOT_MENU_BUILDING, battle_menu_run_helpmenu_thread);
+    thread_start(THREAD_SLOT_MENU_BUILDING, menu_run_help_menu_thread);
     thread_set_parameters(THREAD_SLOT_MENU_BUILDING, 0, 0, 0);
 }

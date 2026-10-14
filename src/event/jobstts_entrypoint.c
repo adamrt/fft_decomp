@@ -49,7 +49,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
         jobstts_text_start_help_thread(3);
     }
     if (g_jobstts_previous_event_mode != 0 && g_menu_input_lock_mode == 0) {
-        battle_text_restore_section_pointers();
+        text_restore_section_pointers();
     }
     menu_set_palette_mode(g_menu_input_lock_mode);
     if (g_jobstts_active_page == MENU_JOB_LIST_STEP_JOBS) {

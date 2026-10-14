@@ -27,9 +27,9 @@ void menu_run_icon_selection_loop(void) {
     buffer = battle_menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
-    battle_menu_set_text_origin(8, 9);
+    menu_set_text_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    battle_menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
         thread_yield();
@@ -39,7 +39,7 @@ void menu_run_icon_selection_loop(void) {
         record = &records[i & 1];
         param->selected_index = cursor;
         menu_select_icon_cluts(&record->base);
-        battle_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
+        menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
         if ((records[0]._unknown_78 == 0 && records[1]._unknown_78 == 2)
             || (records[0]._unknown_78 == 2 && records[1]._unknown_78 == 0)) {
             records[0]._unknown_78 = 0;
@@ -51,7 +51,7 @@ void menu_run_icon_selection_loop(void) {
         menu_handle_action(param, cursor);
         battle_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
         menu_handle_cancel_input(param);
-        battle_menu_submit_icon_primitives(&record->base);
+        menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
     if (battle_thread_get_current_parameter_2() == 0) {

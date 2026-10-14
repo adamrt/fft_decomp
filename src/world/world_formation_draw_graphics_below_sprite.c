@@ -210,5 +210,5 @@ void world_formation_draw_graphics_below_sprite(
     }
     sprite->position.y = y + 40;
     sprite->source.tpage = GetTPage(0, 0, 0x180, 0);
-    world_gfx_enqueue_oriented_textured_quad(sprite, color, TEXTURE_UV_FLIP_NONE, 0, priority);
+    menu_gfx_enqueue_oriented_textured_quad(sprite, color, TEXTURE_UV_FLIP_NONE, 0, priority);
 }

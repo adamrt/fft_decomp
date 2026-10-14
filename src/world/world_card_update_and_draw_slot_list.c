@@ -168,13 +168,13 @@ void world_card_update_and_draw_slot_list(s32 input) {
         g_world_card_slot_quad_4.position.y = g_world_card_slot_quad_4.position.y + 1;
         g_world_card_slot_quad_1.position.y++;
         if (g_world_card_slot_quad_0.position.y >= 0 && g_world_card_slot_quad_0.position.y < 241) {
-            world_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_card_slot_quad_0, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            world_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_card_slot_quad_1, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            world_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_card_slot_quad_3, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            world_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_card_slot_quad_4, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             world_menu_set_draw_priority(11);
             g_world_card_slot_number_command.y = g_world_card_slot_quad_0.position.y;
@@ -183,7 +183,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
         }
         g_world_card_slot_quad_2.position.y = g_world_card_slot_quad_0.position.y;
         if (g_world_card_slot_quad_2.position.y >= 0 && g_world_card_slot_quad_2.position.y < 241) {
-            world_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_card_slot_quad_2, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_world_card_playtime_seconds_command.y = g_world_card_playtime_minutes_command.y
                 = g_world_card_playtime_hours_command.y = g_world_card_slot_quad_0.position.y;

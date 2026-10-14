@@ -56,11 +56,11 @@ void world_menu_run_option_choice(void) {
     thread_wait_frames(1);
     g_menu_text_state.pen.stride = width;
     for (i = 0; i < g_world_option_menu_entry_counts[kind]; i++) {
-        world_menu_set_text_origin(8, i * 16 + 8);
+        menu_set_text_origin(8, i * 16 + 8);
         if (i == g_world_game_option_values[kind]) {
             g_menu_text_palette_offset = 8;
         }
-        world_menu_display_text_entry(i + g_world_option_menu_first_text_ids[kind], buffer, &g_menu_text_state.pen);
+        menu_display_text_entry(i + g_world_option_menu_first_text_ids[kind], buffer, &g_menu_text_state.pen);
         g_menu_text_palette_offset = 0;
     }
     /* Dead store: allocation device, see the file header. */
@@ -133,8 +133,8 @@ void world_menu_run_option_choice(void) {
             }
         }
         menu_select_icon_cluts(record);
-        world_menu_update_icon_cursor_sprites(param, record, width, cursor);
-        world_menu_submit_icon_primitives(record);
+        menu_update_icon_cursor_sprites(param, record, width, cursor);
+        menu_submit_icon_primitives(record);
         thread_wait_frames(1);
     }
     g_main_game_options.fields.cursor_movement = g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT];

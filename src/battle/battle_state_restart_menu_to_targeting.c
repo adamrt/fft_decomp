@@ -13,6 +13,6 @@ void battle_state_restart_menu_to_targeting(void) {
     unit->command_ready = 0;
     target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 0);
     if (unit != 0 && unit->stats != 0) {
-        battle_unit_start_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->stats->battle_id, 0);
+        menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->stats->battle_id, 0);
     }
 }

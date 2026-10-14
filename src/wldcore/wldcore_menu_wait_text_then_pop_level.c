@@ -19,7 +19,7 @@ void wldcore_menu_wait_text_then_pop_level(wldcore_menu_message_level_t* level) 
     g_wldcore_window_render_object_count -= 1;
     g_wldcore_menu_stack_depth -= 1;
     if (level->reload_text != 0) {
-        world_text_restore_section_pointers();
+        text_restore_section_pointers();
     }
     wldcore_menu_dispatch_resume_handler();
 }

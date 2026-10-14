@@ -49,11 +49,10 @@ void menu_run_numeric_editor_frame_thread(void) {
         upload_c = &g_bunit_editor_numeric_entries_f;
         entries = g_bunit_editor_numeric_descriptor_b;
     }
-    battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
-    battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_menu_init_numeric_display_frame_primitives(
-        &g_bunit_editor_numeric_table.texture_rect, &buffer->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    menu_init_numeric_display_frame_primitives(&g_bunit_editor_numeric_table.texture_rect, &buffer->numeric_frame);
     menu_init_scaled_draw_area_packets(&buffer->portrait);
     i = 0;
     descriptor = g_bunit_editor_numeric_texture;
@@ -76,27 +75,26 @@ void menu_run_numeric_editor_frame_thread(void) {
         if (frame == 0 || thread->redraw_request != 0) {
             battle_clear_menu_render_buffer(number_images, sizeof(*number_images));
             g_menu_text_state.pen.stride = 0x14;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
                 bunit_text_render_signed_decimal_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
             } else {
-                battle_menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
+                menu_draw_numeric_display_entries(number_images->mobility, entries, &g_menu_text_state.pen, 3);
             }
             g_menu_text_state.pen.stride = 0x40;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
                 bunit_text_render_signed_decimal_entries(
                     number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
             } else {
-                battle_menu_draw_numeric_display_entries(
-                    number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
+                menu_draw_numeric_display_entries(number_images->weapons, entries + 3, &g_menu_text_state.pen, 4);
             }
             g_menu_text_state.pen.stride = 0x64;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
                 bunit_text_render_signed_decimal_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
             } else {
-                battle_menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
+                menu_draw_numeric_display_entries(number_images->combat, entries + 7, &g_menu_text_state.pen, 8);
             }
             LoadImage(upload_a, (u32*)number_images->mobility);
             LoadImage(upload_b, (u32*)number_images->weapons);

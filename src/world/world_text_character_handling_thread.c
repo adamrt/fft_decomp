@@ -101,11 +101,11 @@ void world_text_character_handling_thread(void) {
     rec.x_offset = thread->task_words[2];
     rec.y_offset = thread->task_words[3];
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && rec.options == 0xC) {
-        world_text_save_section_pointers();
+        text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
     }
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 0) {
-        world_text_save_section_pointers();
+        text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
         if (thread->function_parameter_2 == 0x807) {
             i = world_menu_get_party_unit_name_id();
@@ -305,7 +305,7 @@ void world_text_character_handling_thread(void) {
     } else {
         rec.first_line = 0;
         rec.last_line = rec.lines;
-        world_menu_render_text_image_at_record_origin(&rec);
+        menu_render_text_image_at_record_origin(&rec);
     }
     if (g_world_formation_screen_active != 0) {
         right -= 0x100;
@@ -506,7 +506,7 @@ void world_text_character_handling_thread(void) {
                                         WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                         rec.first_line += no_value;
                                         rec.last_line = rec.first_line + rec.lines;
-                                        world_menu_render_text_image_at_record_origin(&rec);
+                                        menu_render_text_image_at_record_origin(&rec);
                                     }
                                     if ((g_script_event_input & PSX_PAD_DOWN)
                                         && rec.first_line != rec.line - rec.lines) {
@@ -514,7 +514,7 @@ void world_text_character_handling_thread(void) {
                                         WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                         rec.first_line++;
                                         rec.last_line = rec.first_line + rec.lines;
-                                        world_menu_render_text_image_at_record_origin(&rec);
+                                        menu_render_text_image_at_record_origin(&rec);
                                     }
                                     if (!(g_script_event_current_input & PSX_PAD_SQUARE)) {
                                         win[0].icon_flags = 0;
@@ -533,7 +533,7 @@ void world_text_character_handling_thread(void) {
                                     WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
                                     rec.first_line++;
                                     rec.last_line = rec.first_line + rec.lines;
-                                    world_menu_render_text_image_at_record_origin(&rec);
+                                    menu_render_text_image_at_record_origin(&rec);
                                 } else {
                                     break;
                                 }
@@ -598,7 +598,7 @@ void world_text_character_handling_thread(void) {
                     g_sound_pending_sfx_id = MAIN_SFX_TEXT_PAGE;
                     rec.first_line = rec.line;
                     rec.last_line = rec.line + rec.lines;
-                    world_menu_render_text_image_at_record_origin(&rec);
+                    menu_render_text_image_at_record_origin(&rec);
                 }
                 cursor_y = rec.y - 0x10;
                 thread_yield();
@@ -775,7 +775,7 @@ void world_text_character_handling_thread(void) {
                         glyph->mode = rec.dialog_type & DIALOG_TYPE_BOX_TYPE_MASK;
                         glyph->palette = rec.color;
                     }
-                    world_text_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
+                    text_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
                     if (code == TEXT_SPACE) {
                         cursor_x += 4;
                     } else {
@@ -817,7 +817,7 @@ void world_text_character_handling_thread(void) {
                     glyph->mode = rec.box_type;
                     glyph->palette = rec.color;
                 }
-                world_text_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
+                text_draw_glyph_with_typewriter_delay(cursor_x, cursor_y, delay);
                 if (code == TEXT_SPACE) {
                     cursor_x += 4;
                 } else {
@@ -839,7 +839,7 @@ end:
     g_world_menu_event_state_flag = 0;
     win->active = 0;
     world_menu_release_window_buffer_pair(win);
-    world_gfx_free_tpage7_vram(&rec.rect);
+    gfx_free_texture_rect(&rec.rect);
     world_menu_release_current_thread_slot();
     YIELD_OR_INPUT();
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 1) {
@@ -848,7 +848,7 @@ end:
     if (((rec.box_type == DIALOG_BOX_TYPE_HELP || party_name_request != 0) && rec.options == 0xC)
         || ((rec.box_type == DIALOG_BOX_TYPE_HELP || party_name_request != 0)
             && g_world_formation_screen_active == 0)) {
-        world_text_restore_section_pointers();
+        text_restore_section_pointers();
     }
     if (g_thread_current_id != THREAD_SCREEN_SLOT_TEXT || rec.options != 0xC) {
         thread_exit_current();

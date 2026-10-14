@@ -26,9 +26,9 @@ void menu_icon_strip_thread(void) {
             fresh = 1;
             buffer = battle_menu_build_and_upload_window_frame_image(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            battle_menu_set_text_origin(8, 9);
+            menu_set_text_origin(8, 9);
             g_menu_text_state.pen.stride = state->inner_width;
-            battle_menu_display_text_entry(state->text_id, buffer, &g_menu_text_state.pen);
+            menu_display_text_entry(state->text_id, buffer, &g_menu_text_state.pen);
             LoadImage(&rect, (u32*)buffer);
         }
         thread_yield();
@@ -41,7 +41,7 @@ void menu_icon_strip_thread(void) {
         }
         record = &records[i & 1];
         menu_select_icon_cluts(&record->base);
-        battle_menu_submit_icon_primitives(&record->base);
+        menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
     thread_exit_current();

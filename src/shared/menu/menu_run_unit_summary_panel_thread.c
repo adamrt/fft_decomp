@@ -32,12 +32,12 @@ void menu_run_unit_summary_panel_thread(void) {
     speed = 0x16;
     slide = 0x84;
     digits = g_battle_unit_summary_digit_images;
-    battle_menu_load_selected_unit();
+    menu_load_selected_unit();
     unit = menu_get_selected_unit_stats();
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
     sprite = frames[0].sprites;
-    battle_gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
-    battle_gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_sprite_array(sprite, 7, 0x7C3C);
     menu_init_default_poly_ft4(&frames[0].portrait);
     text_configure_sprite_vram(&rects[0], 0x58, 0x20, &frames[0].sprites[0], 0);
@@ -62,20 +62,20 @@ void menu_run_unit_summary_panel_thread(void) {
     stride = &g_menu_text_state.pen.stride;
     origin = &g_menu_text_state.pen;
     *stride = 0x58;
-    battle_menu_set_text_origin(0, 0);
-    battle_menu_display_text_string(buffer, origin, g_battle_menu_billboard_unit_name);
-    battle_menu_set_text_origin(0, 0x10);
-    battle_menu_display_text_string(buffer, origin, g_battle_menu_billboard_job_name);
+    menu_set_text_origin(0, 0);
+    menu_display_text_string(buffer, origin, g_battle_menu_billboard_unit_name);
+    menu_set_text_origin(0, 0x10);
+    menu_display_text_string(buffer, origin, g_battle_menu_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
     battle_clear_menu_render_buffer(digits, 0xF0);
     *stride = 0x10;
-    battle_menu_set_text_origin(0, 0);
+    menu_set_text_origin(0, 0);
     battle_text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits, origin);
     LoadImage(&rects[1], (u32*)digits);
-    battle_menu_set_text_origin(0, 0);
+    menu_set_text_origin(0, 0);
     battle_text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits + 0x50, origin);
     LoadImage(&rects[2], (u32*)(digits + 0x50));
-    battle_menu_set_text_origin(0, 0);
+    menu_set_text_origin(0, 0);
     if (g_main_debug_display_enabled != 0) {
         battle_text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits + 0xA0, origin);
     } else if (g_menu_selected_unit.battle_id >= 0x10) {
@@ -95,8 +95,8 @@ void menu_run_unit_summary_panel_thread(void) {
     mem_copy_bytes_nonempty(&frames[1], &frames[0], sizeof(menu_unit_summary_frame_t));
     frames[0].palette = &g_battle_unit_summary_palettes[0].primitives;
     frames[1].palette = &g_battle_unit_summary_palettes[1].primitives;
-    battle_menu_init_numeric_display_frame_primitives(&g_menu_unit_summary_panel_rect, frames[0].palette);
-    battle_menu_init_numeric_display_frame_primitives(&g_menu_unit_summary_panel_rect, frames[1].palette);
+    menu_init_numeric_display_frame_primitives(&g_menu_unit_summary_panel_rect, frames[0].palette);
+    menu_init_numeric_display_frame_primitives(&g_menu_unit_summary_panel_rect, frames[1].palette);
 
     for (frame = 0;; frame++) {
         thread_yield();
@@ -191,9 +191,9 @@ void menu_run_unit_summary_panel_thread(void) {
     }
 exit:
     thread_yield();
-    battle_gfx_free_tpage7_vram(&rects[0]);
-    battle_gfx_free_tpage7_vram(&rects[1]);
-    battle_gfx_free_tpage7_vram(&rects[2]);
-    battle_gfx_free_tpage7_vram(&rects[3]);
+    gfx_free_texture_rect(&rects[0]);
+    gfx_free_texture_rect(&rects[1]);
+    gfx_free_texture_rect(&rects[2]);
+    gfx_free_texture_rect(&rects[3]);
     thread_exit_current();
 }

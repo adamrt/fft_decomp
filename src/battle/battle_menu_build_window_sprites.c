@@ -52,6 +52,6 @@ void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon
         record->icons[1] = 0;
         record->icons[2] = 0;
     }
-    battle_gfx_set_draw_mode_from_origin(&record->base.first_draw_mode, &param->vram_origin);
+    gfx_set_draw_mode_from_origin(&record->base.first_draw_mode, &param->vram_origin);
     SetDrawMode(&record->base.draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
 }

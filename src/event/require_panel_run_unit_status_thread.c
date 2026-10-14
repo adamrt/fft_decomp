@@ -84,9 +84,9 @@ void require_panel_run_unit_status_thread(void) {
         portrait_palettes = g_require_panel_comparison_portrait_palettes;
     }
 
-    battle_menu_init_numeric_display_frame_primitives(&g_gfx_portrait_origin, &editor->numeric_frame);
-    battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
+    menu_init_numeric_display_frame_primitives(&g_gfx_portrait_origin, &editor->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
     menu_init_sprite_array(&editor->value_sprites[0], 4, 0x7CBC);
     for (frame = 0; frame < 4; frame++) {
@@ -112,9 +112,9 @@ void require_panel_run_unit_status_thread(void) {
             &g_require_panel_editor_label_cells[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
-    battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
-    battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_menu_init_numeric_display_frame_primitives(&g_require_panel_frame_rect, &panel->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    menu_init_numeric_display_frame_primitives(&g_require_panel_frame_rect, &panel->numeric_frame);
     name_sprite = &panel->sprites[0];
     menu_init_sprite_array(name_sprite, 7, 0x7C3C);
     menu_init_default_poly_ft4(&panel->portrait);
@@ -310,31 +310,31 @@ void require_panel_run_unit_status_thread(void) {
             window_width = &g_menu_text_state.pen.stride;
             text_position = (glyph_blit_t*)(window_width - 2);
             *window_width = 0x38;
-            battle_menu_draw_numeric_display_entries(number_image, numeric_entries, text_position, 6);
+            menu_draw_numeric_display_entries(number_image, numeric_entries, text_position, 6);
             LoadImage(&rects[0], (u32*)number_image);
             number_image_lower = number_image + 0x400;
             *window_width = 0x60;
-            battle_menu_draw_numeric_display_entries(number_image_lower, &numeric_entries[8], text_position, 2);
+            menu_draw_numeric_display_entries(number_image_lower, &numeric_entries[8], text_position, 2);
             LoadImage(&rects[1], (u32*)number_image_lower);
             thread->work = 0;
             battle_clear_menu_render_buffer(name_image, 0x580);
             *window_width = 0x58;
-            battle_menu_set_text_origin(0, 0);
-            battle_menu_display_text_entry(unit_data->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
-            battle_menu_set_text_origin(0, 0x10);
-            battle_menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
+            menu_set_text_origin(0, 0);
+            menu_display_text_entry(unit_data->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
+            menu_set_text_origin(0, 0x10);
+            menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
             LoadImage(&rects[2], (u32*)name_image);
             battle_clear_menu_render_buffer(small_text_image, 0xF0);
             *window_width = 0x10;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             battle_text_draw_large_number_glyphs(unit_data->brave, 0x202, small_text_image, text_position);
             LoadImage(&rects[3], (u32*)small_text_image);
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             small_text_image_2 = small_text_image + 0x50;
             battle_text_draw_large_number_glyphs(unit_data->faith, 0x202, small_text_image_2, text_position);
             LoadImage(&rects[4], (u32*)small_text_image_2);
             if (g_battle_post_battle_unit_changes_active == 0) {
-                battle_menu_set_text_origin(0, 0);
+                menu_set_text_origin(0, 0);
                 small_text_image_3 = small_text_image + 0xA0;
                 battle_text_draw_large_number_glyphs(
                     unit_data->battle_id + 1, 0x4002, small_text_image_3, text_position);
@@ -389,11 +389,11 @@ void require_panel_run_unit_status_thread(void) {
         frame += 1;
     }
     thread_yield();
-    battle_gfx_free_tpage7_vram(&rects[0]);
-    battle_gfx_free_tpage7_vram(&rects[1]);
-    battle_gfx_free_tpage7_vram(&rects[2]);
-    battle_gfx_free_tpage7_vram(&rects[3]);
-    battle_gfx_free_tpage7_vram(&rects[4]);
-    battle_gfx_free_tpage7_vram(&rects[5]);
+    gfx_free_texture_rect(&rects[0]);
+    gfx_free_texture_rect(&rects[1]);
+    gfx_free_texture_rect(&rects[2]);
+    gfx_free_texture_rect(&rects[3]);
+    gfx_free_texture_rect(&rects[4]);
+    gfx_free_texture_rect(&rects[5]);
     thread_exit_current();
 }

@@ -8,5 +8,5 @@ void open_birthday_draw_menu_text_entry(s32 record_index, s32 combined_text_inde
     origin.rect.x = position.x;
     origin.rect.y = position.y;
     origin.stride = g_open_gfx_render_records_56[record_index].tail.quad.w;
-    world_menu_display_text_entry(combined_text_index, image, &origin);
+    menu_display_text_entry(combined_text_index, image, &origin);
 }

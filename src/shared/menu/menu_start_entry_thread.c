@@ -46,13 +46,13 @@ void menu_start_entry_thread(void) {
         g_battle_menu_help_open = 1;
         thread_wait_frames(2);
         if (count > 0) {
-            thread_start(THREAD_SLOT_MENU_CHILD, battle_menu_run_skillset_thread);
+            thread_start(THREAD_SLOT_MENU_CHILD, menu_run_skillset_thread);
             thread_set_parameters(
                 THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST], 0, 0);
         }
         thread_wait_frames(2);
         if (count >= 2) {
-            thread_start(THREAD_SLOT_MENU_GRANDCHILD, battle_menu_select_unit_action_slots_thread);
+            thread_start(THREAD_SLOT_MENU_GRANDCHILD, menu_select_unit_action_slots_thread);
             thread_set_parameters(
                 THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST], 0, 0);
         }

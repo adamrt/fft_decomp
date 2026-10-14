@@ -6,7 +6,7 @@
 
 /* Menu window thread without a cursor: rebuilds the text image every seventh
  * frame and alternates between two sprite records until the menu closes. The
- * DEBUGCHR twin of world_menu_icon_strip_thread. */
+ * DEBUGCHR twin of menu_icon_strip_thread. */
 void debugchr_menu_icon_strip_thread(void) {
     RECT rect;
     menu_icon_record_t frames[2];
@@ -32,10 +32,10 @@ void debugchr_menu_icon_strip_thread(void) {
             redraw = 1;
             render = battle_menu_build_and_upload_window_frame_image(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            battle_menu_set_text_origin(8, 9);
+            menu_set_text_origin(8, 9);
             *stride = state->inner_width;
             /* A pen-base local changes the store base and call argument. */
-            battle_menu_display_text_entry(
+            menu_display_text_entry(
                 state->text_id, render, (glyph_blit_t*)(stride - offsetof(glyph_blit_t, stride) / sizeof(*stride)));
             LoadImage(&rect, (u32*)render);
         }
@@ -49,7 +49,7 @@ void debugchr_menu_icon_strip_thread(void) {
         frame_parity = frame & 1;
         frame_pair = &frame_base[frame_parity];
         menu_select_icon_cluts(&frame_pair->base);
-        battle_menu_submit_icon_primitives(&frame_pair->base);
+        menu_submit_icon_primitives(&frame_pair->base);
         frame++;
     }
     thread_yield();

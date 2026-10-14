@@ -24,7 +24,7 @@ void world_formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* r
         sprite.position.y = pos->y - (s16)(h / 2 - 0x18);
         sprite.w = w;
         sprite.h = h;
-        world_gfx_enqueue_oriented_textured_quad(&sprite, rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index);
+        menu_gfx_enqueue_oriented_textured_quad(&sprite, rgb, TEXTURE_UV_FLIP_NONE, 0, ot_index);
         return;
     }
     sprite.position.x = pos->x - (s16)(sprite.source.w / 2 - 0x1F);

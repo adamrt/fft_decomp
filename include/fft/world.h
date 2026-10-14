@@ -15,8 +15,8 @@ extern s32 g_world_camera_yaw_unwrap_request;
 extern s16 g_world_camera_candidate_yaws[4];
 s32 world_camera_step_track(camera_track_t* track, s32 component);
 s16 world_camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b);
-void world_camera_fusion_thread(void);
-void world_camera_thread(void);
+void camera_fusion_thread(void);
+void camera_thread(void);
 
 /* dead unit */
 
@@ -84,10 +84,7 @@ extern VECTOR g_world_map_light_scale;     /* current light scale */
 extern MATRIX g_world_map_light_base_matrix;
 extern SVECTOR g_world_map_light_rotation; /* current light rotation */
 extern MATRIX g_world_map_light_color_matrix;
-void world_menu_selected_tile_info_display_thread(void);
 s32 world_map_is_busy(void);
-void world_map_store_selected_tile_data(void);
-void world_map_wait_for_refresh(void);
 void world_map_light_thread(void);
 
 /* locations */
@@ -281,14 +278,10 @@ extern s32 g_world_event_pending_unit_vram_copy;
 extern s16 g_world_event_weather_request;
 extern map_background_gradient_colors_t g_world_event_background_colors;
 void world_script_handle_tutorial_command_highlight_ring(void);
-void world_menu_init_subsystem_pointers(void);
 void world_script_advance_tutorial_highlight_brightness(void);
 void world_script_blue_remove_all_enemy_units(void);
 void world_script_blue_remove_unit(s32 unit_id);
-void world_script_change_stats(const event_change_stats_parameters_t* parameters);
-void world_script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
 void world_script_earthquake_start(void);
-void world_script_face_tile(const event_face_tile_parameters_t* parameters);
 void world_script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void world_script_focus(event_focus_parameters_t* parameters);
 /* A typed operand plus a local Camera cursor reorders the original argument saves. */
@@ -303,7 +296,6 @@ void world_script_handle_tutorial_command_wait(void);
 void world_script_handle_tutorial_command_wait_for_button(void);
 void world_script_handle_tutorial_command_wait_for_message(void);
 void world_script_handle_tutorial_command_wait_time(void);
-void world_script_march_units(const event_march_parameters_t* parameters);
 void world_script_set_event_speed(s32 speed);
 void world_script_set_vsync_mode_and_event_speed(s32 value);
 void world_script_start_tutorial(s32 index);
@@ -312,11 +304,9 @@ void world_script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void world_script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void world_script_update_tutorial_controller_input(void);
 void world_script_warp_unit(const event_warp_unit_parameters_t* instruction);
-void world_script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
 void world_script_set_units_palette_update_suppression(u16 id, s32 enable);
 void world_script_add_unit_start_thread(void);
 s32 world_script_check_tutorial_event_slot(void);
-void world_script_color_screen_thread(void);
 void world_script_inflict_status_thread(void);
 void world_script_waitspritemove_event_instruction(s32);
 
@@ -329,7 +319,6 @@ extern s16 g_world_sound_music_unload_slot_request;
 extern s32 g_world_sound_music_volume_transition_request;
 extern u8 g_world_sound_release_held_loop;
 void world_sound_dispatch_effect(void);
-void world_sound_bg_thread(void);
 void world_sound_edit_bg_thread(void);
 
 /* status */
@@ -353,7 +342,7 @@ void world_menu_run_battle_help(void);
 /* system */
 
 /* System-function table. Declared as an array: as a scalar, GCC hoists
- * world_menu_run_system_function_thread's menu-index reload above its store. */
+ * menu_run_system_function_thread's menu-index reload above its store. */
 extern menu_system_function_t g_world_system_function_table[];
 extern s32 g_world_primary_bit_read_index;
 extern s32 g_world_primary_bit_write_index;
@@ -817,30 +806,13 @@ void world_panel_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* pac
     s32 scale_index, s32 frame_offset, const menu_status_thread_t* thread);
 
 void world_gfx_add_draw_area_primitive(RECT* rect, s32 otag_index);
-void world_gfx_enqueue_draw_mode(s32 dfe, s32 dtd, s32 tpage, RECT* texture_window, s32 ot_index);
-void world_gfx_enqueue_draw_move(const RECT* src, s32 x, s32 y, s32 ot_index);
 
-void world_gfx_enqueue_textured_quad_list(
-    const menu_sprite_cell_t* cell, const rgb24_t* rgb, s32 semi_trans, u16 tpage, u16 clut, s32 ot_index, s32 count);
-
-void world_gfx_enqueue_textured_quad_corners(
-    const textured_quad_source_t* source, const rgb24_t* rgb, s32 semi_trans, s32 ot_index);
 void world_gfx_enqueue_gouraud_quad(point16_t* xy, rgb24_t* colors, s32 semi_trans, s32 ot_index);
-void world_gfx_enqueue_gouraud_textured_quad(
-    const textured_rect_source_t* source, const rgb24_t* colors, s32 semi_trans, s32 ot_index);
-void world_gfx_enqueue_tile(const RECT* box, const rgb24_t* rgb, u8 semi_trans, s32 ot_index);
 void world_gfx_append_poly_f4_to_otag(point16_t* xy, rgb24_t* rgb, s32 semi_trans, s32 ot_index);
-void world_gfx_build_scaled_draw_area_pair_swapped(
-    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 flag);
 void world_menu_clear_selection_record(s32 index);
 void world_menu_clear_selection_records(void);
-void world_gfx_clear_tpage7_vram_allocation_grid(void);
 
-void world_gfx_submit_screen_fade_overlay(fade_overlay_t* prims, s32 intensity);
 void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
-
-void world_gfx_enqueue_oriented_textured_quad(
-    const oriented_quad_t* descriptor, const rgb24_t* color, s32 orientation, s32 semitrans, s32 otag_index);
 
 void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction);
 
@@ -858,21 +830,17 @@ void world_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_panel_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_gfx_set_blit_dest_position(s32 x, s32 y);
 void world_gfx_set_fade_disabled(u8 disabled);
-void world_gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 image_type);
 void world_gfx_set_portrait_poly_texture(POLY_FT4* poly, s32 code);
-void world_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_base_index, s16* entries);
 
 void world_gfx_enqueue_textured_quad(
     const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semi_trans, u16 texture_page, u16 clut, s32 priority);
 
-void world_gfx_free_tpage7_vram(RECT* rect);
 s32 world_gfx_get_fade_state(void);
 void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 s32 world_gfx_get_vsync_mode_or_one(void);
 void world_gfx_load_wldface_to_frame_buffer(void);
 void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_otag);
 void world_gfx_set_blit_source_rect(s16 x, s16 y, s16 width, s16 height);
-void world_gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
 void world_gfx_set_image_blit_destination_origin(s16 x, s16 y);
 void world_gfx_set_image_blit_source_rect(s16 x, s16 y, s16 width, s16 height);
 void world_gfx_start_decreasing_fade(void);
@@ -1613,9 +1581,6 @@ s32 world_unit_get_zodiac_for_date(s32 month, s32 day);
 void world_unit_inflict_status_by_event_unit_id(
     s32 event_unit_id, s32 status_index, s32 is_infliction, s32 less_strict_removal);
 
-void world_menu_load_selected_unit(void);
-void world_unit_start_view_thread(s32 mode, s32 unit_a, s32 unit_b);
-void world_unit_view_supervisor_thread(void);
 s32 world_unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void world_unit_update_monster_breeding(s32 unused);
 
@@ -1724,11 +1689,8 @@ u8* world_text_bind_section_data(u32 index);
 void world_text_message_box_thread(void);
 void world_text_blit_font_glyph_to_4bpp(const u8* glyph, u8* image, glyph_blit_t* origin, s32 palette);
 s32 world_text_decode_font_glyph_to_4bpp(s32 glyph, u8* image, RECT* target, s32 palette);
-void world_text_build_display_message(s32 offset, s32 flags, s32* out_width);
 void world_text_blit_glyph(const u8* source, u8* image, const glyph_blit_t* source_rect, const glyph_blit_t* position);
-void world_text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay);
 void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 wait);
-void world_menu_draw_stacked_glyph_pair(u8* buffer, glyph_blit_t* dest);
 u8* world_text_find_entry_by_index(u8* p, s16 count, s32 unused);
 
 void world_text_render_decimal_value_or_dashes(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
@@ -1741,19 +1703,14 @@ u8* world_text_advance_entry_by_char_count(u8* text, s32 count);
 void world_text_concatenate_entries(u8* text_table, u8* destination, const s16* text_ids, s32 separate_entries);
 /* MAIN selects the WORLD address of text_find_entry through this existing alias. */
 u8* world_text_find_entry(u32 text_id);
-void world_text_determine_spell_quote(action_command_t* action, s32 unit_id, s32 enabled);
 void world_text_generate_formation_unit_name_string(void);
 s16 world_text_get_encoded_char_at_position(u8* text, s16 position, s32 mode);
 s32 world_text_is_printing(s32 thread_id);
 void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette);
 s32 world_text_measure_entry_pixel_width(const u8* entry);
-void world_text_restore_section_pointers(void);
 void world_menu_close_help_menu(void);
 void world_text_resume_printing(s32 thread_id);
-void world_menu_run_helpmenu_thread(void);
-void world_text_save_section_pointers(void);
 void world_text_show_message_and_play_sound(s32 message_id, s32 sound_id);
-void world_text_start_character_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 third);
 void world_menu_start_building_thread(void);
 void world_text_character_handling_thread(void);
 
@@ -1890,7 +1847,7 @@ extern menu_entry_t g_world_menu_system_entries[];
 extern s8 g_world_menu_temporary_draw_area_active;
 extern s32 g_world_menu_text_file_buffer[];
 /* Provisional: menu text origin/stride fields at 0x80153280 (the WORLD
- * script variable region; world_menu_set_text_origin writes +0x04/+0x06).
+ * script variable region; menu_set_text_origin writes +0x04/+0x06).
  * The text-image builders address these through one base register, so they
  * are modeled as one aggregate; the two 32-bit parameters at 0x80153304 and
  * 0x80153308 schedule as plain scalars and stay separate globals. */
@@ -1948,7 +1905,7 @@ extern s32 g_world_menu_building_thread_started;
 extern s16 g_world_menu_row_type_confirm_actions[][2]; /* per row type: [1] == 1 lists by id */
 extern u8 g_world_menu_action_slot_default_messages[];
 
-/* Tail glyph source and destination records for world_menu_build_window_image. */
+/* Tail glyph source and destination records for menu_build_window_image. */
 extern glyph_blit_t g_world_menu_window_sprite_source;
 extern glyph_blit_t g_world_menu_window_sprite_position;
 extern RECT g_world_menu_thin_panel_texture_windows[7];
@@ -2113,19 +2070,13 @@ void world_menu_unit_status_banner_thread(void);
 void world_menu_equipment_panel_thread(void);
 void world_menu_ability_panel_thread(void);
 
-void world_menu_display_hovered_unit_stats(
-    RECT* frame_rect, s32 mode, menu_number_entry_t* entries, menu_unit_status_record_t* status);
-
-void world_menu_select_unit_action_slots_thread(void);
 s32 world_menu_resolve_selection(void);
 void world_menu_number_entry_thread(void);
-void world_menu_equipment_and_ability_panel_thread(void);
 s16 world_menu_update_wrapped_vertical_selection(u16, u8, s32);
 void world_menu_run_script_with_callback_suppressed(void);
 void world_menu_open_name_entry_key_list(void);
 void world_clear_menu_render_buffer(void* dst, u32 count);
 void world_draw_menu_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
-void world_menu_draw_number_glyphs(s32 value, s32 digits, u8* resource, glyph_blit_t* pos);
 void world_menu_labeled_number_entry_thread(void);
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon);
@@ -2133,14 +2084,7 @@ void world_menu_build_ability_list(s32 mode);
 void world_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void world_menu_build_idle_action_stub(s32 unused_menu_id);
 void world_menu_build_sprite_page(s32 page_index, const RECT* base_screen);
-void world_menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit);
 void world_menu_release_current_thread_slot(void);
-
-s32 world_menu_dispatch_system_function(
-    s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
-
-void world_menu_draw_numeric_display_entries(
-    u8* pixels, menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
 
 void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 void world_screen_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
@@ -2159,8 +2103,6 @@ u8* world_menu_redraw_text_page_on_scroll_in_rect(
 
 s32 world_job_calculate_current_mastered(s32 index);
 void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record);
-void world_menu_render_text_image_at_record_origin(text_dialog_record_t* record);
-void world_menu_run_equip_thread(void);
 void world_screen_menu_window_frame_thread(void);
 void world_menu_run_order_unit(void);
 s32 world_menu_run_unit_status_banner_countdown(s32 message_id, s32 frames);
@@ -2168,33 +2110,24 @@ void world_menu_scroll_list_page(s32 dir, menu_instruction_t* instruction);
 void world_menu_add_gradient_line_primitive(point16_t* endpoints, rgb24_t* colors, s32 semi_trans, s32 ot_index);
 void world_menu_announce_entry_value_thread(void);
 u8* world_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
-void world_gfx_enqueue_line_f2(const point16_t endpoints[2], const rgb24_t* rgb, u8 semi_trans, s32 priority);
 void world_menu_resize_parent_entry_to_digits(void);
-void world_menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short);
 void world_menu_build_icon_record(RECT* rect, menu_entry_t* param, menu_icon_record_t* buffer);
-void world_menu_submit_icon_primitives(menu_icon_sprites_t* prims);
 void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
-void world_menu_init_numeric_display_frame_primitives(RECT* rect, menu_palette_primitives_t* menu);
-void world_menu_build_skillset_entries(void);
 void world_menu_build_unit_status_list(void);
 s32 world_menu_build_window_frame_image(s32 width, s32 height, u16* destination);
-u8* world_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
 void world_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor);
-void world_menu_check_action_restrictions(void);
 void world_menu_clear_cursor_positions(void);
 
 void world_menu_configure_status_panel_primitive_colors(
     menu_status_panel_buffer_t* primitives, const menu_status_thread_t* state);
 
 void world_menu_display_text(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text);
-void world_menu_display_triangle_selection(void);
 void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode);
 void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s32 mode);
 void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode);
 void world_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void world_menu_draw_thread_status_indicators(void);
 void world_menu_enable_all_order_entries(void);
-void world_menu_fade_out_thread(void);
 void world_screen_menu_build_window_image_row(const u16* source, u16* dest, s32 count, s32 offset);
 s32 world_menu_get_entry_item_count(s32 entry_index);
 s32 world_menu_get_entry_item_equipped_count(s32 entry_index);
@@ -2211,17 +2144,13 @@ void world_menu_run_display_script(menu_instruction_t* script, s32 value);
 rgb24_t* world_menu_get_sprite_color(void);
 s32 world_menu_handle_remove_all_equipment(void);
 s32 world_menu_has_items(s32 mode);
-void world_menu_icon_list_thread(void);
 void world_menu_init_and_load_scrollable_list(
     const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script);
 void world_menu_init_and_load_scrollable_list_with_scroll(
     const s16* values, s32 value, s32 selected, u8* text_table, menu_instruction_t* script);
-void world_menu_init_at_list(menu_entry_t* entry);
-void world_menu_init_palette_and_text(s32 unused);
 void world_option_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_menu_init_scrollable_list(const s16* values, s32 value, s32 selected, u8* text_table);
 void world_menu_init_scrollable_list_core(const s16* values, s32 selected_index, u8* text_table);
-void world_menu_init_subsystems(void);
 s32 world_menu_is_learn_ability_learned(s32 index);
 s32 world_screen_menu_lerp_fixed12(s32 from, s32 to, s32 t);
 void world_menu_load_common_graphics(s32 load_extra_pages);
@@ -2232,27 +2161,17 @@ void world_menu_load_text_1c18(void);
 void world_menu_store_sort_key_list(s32 index, s16* source);
 s32 world_job_calculate_current_total_jp(s32 index);
 void world_menu_release_window_buffer_pair(menu_window_buffer_t* value);
-void world_menu_reset_subsystems(void);
 void world_menu_reset_selection_results(void);
 void world_menu_init_buffer_allocator(void);
-void world_menu_reset_unit_records(void);
 void world_menu_run_ability(void);
 s32 world_menu_run_best_fit_equipment(void);
-void world_menu_run_bunit_transition_thread(void);
-void world_menu_run_jobstts_thread(void);
 s32 world_menu_run_learn(void);
 s32 world_menu_run_learn_job_list(void);
 void world_menu_run_main_mode(s32 mode);
 void world_menu_run_main_mode_0_thread(void);
-void world_menu_run_numeric_display_panel_thread(void);
-void world_menu_run_numeric_editor_thread(void);
 s32 world_menu_run_remove_ability(void);
 s32 world_menu_run_remove_item(void);
-void world_menu_run_script_with_palette_mode(menu_instruction_t* script, s32 input, s32 mode);
-void world_menu_run_skillset_thread(void);
-void world_menu_run_system_function_thread(void);
 s32 world_menu_run_thread(s32 thread_id, menu_entry_t* menu);
-void world_menu_open_debugchr_unit_editor(void);
 void world_menu_select_primitive_color_palette(menu_palette_primitives_t* menu, const menu_status_thread_t* input);
 void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value);
 void world_menu_set_brightness(s32 red, s32 green, s32 blue);
@@ -2265,15 +2184,11 @@ void world_menu_set_palette_mode(s32 mode);
 void world_menu_set_sprite_color(const rgb24_t* src);
 void world_menu_set_window_scale_step(s8 step);
 void world_menu_start_at_list_thread(void);
-void world_menu_start_dead_unit_threads(void);
 void world_menu_start_description_text_thread(s32 position);
-void world_menu_open_option_dead_unit_panel(void);
 void world_menu_start_or_poll_thread(s32 thread_id, menu_entry_t* data);
-void world_menu_start_system_function_thread(s32 parameter);
 void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y);
 s32 world_menu_update_vertical_selection_and_mark_change(u16 count, u8 cursor_id, s32 input, u8 sound);
 s32 world_menu_update_horizontal_selection_and_mark_change(u16 count, u8 index, s32 input, u8 value);
-s32 world_menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s32 old_index, s32 input);
 void world_menu_stop_thread(s32 thread_id);
 void world_menu_stop_thread_and_wait(s32 thread_id);
 void world_menu_stop_unit_status_banner_thread(s32 thread_id);
@@ -2296,22 +2211,12 @@ void world_menu_update_entry_cursor_quads(
 
 void world_menu_update_grid_cursor(s16 alternate);
 
-void world_menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
-
-void world_menu_update_panel_fade(void);
 void world_menu_update_thread_7_idle_countdown(void);
 void world_menu_load_sort_key_list(s32 index, s16* out);
 void world_menu_window_frame_thread(void);
 void world_menu_set_slot_4_cursor_index(s32 index);
 s32 world_menu_get_thread_activity(void);
-void world_menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
-void world_menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
 void world_menu_init_sprite(SPRT* sprite);
-void world_menu_set_text_origin(s32 x, s32 y);
-
-void world_menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text);
-
-void world_menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin);
 
 s16 world_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 
@@ -2413,11 +2318,11 @@ s32 world_card_build_save_slot_description(s32 mode, u8* destination);
 s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size);
 void world_card_build_save_file_header(s32 slot, s32 level, struct card_save_header* header);
 s32 world_card_check_selected(void);
-s32 world_card_close_file_with_retries(s32 descriptor);
+s32 card_file_close_with_retries(s32 descriptor);
 s32 world_card_count_free_blocks(const struct DIRENTRY* entries, s32 count);
 s32 world_card_count_save_files(struct DIRENTRY* dir, s32 all);
 s32 world_card_count_selectable_save_slots(void);
-s32 world_card_create_new_with_retries(s32 port, s32 retry_limit);
+s32 card_io_create_new_with_retries(s32 port, s32 retry_limit);
 s32 world_card_delete_file(const char* name);
 void world_card_draw_slot_text(s32 slot);
 s32 world_card_format_selected_slot(void);
@@ -2428,7 +2333,7 @@ s32 world_card_load_with_retries(s32 channel, s32 attempts);
 s32 world_card_open_file_with_retries(const char* filename, s32 mode);
 s32 world_card_poll_info_with_retries(s32 channel, s32 count);
 s32 world_card_probe_selected(void);
-s32 world_card_read_file_with_retries(s32 descriptor, void* destination, s32 size);
+s32 card_file_read_with_retries(s32 descriptor, void* destination, s32 size);
 void world_card_run_load_step(s32 slot);
 s32 world_card_run_menu_screen(s32 mode_select_enabled);
 void world_card_run_mode_select_step(void);
@@ -2443,7 +2348,7 @@ void world_card_update_slot_scan(void);
 s32 world_card_wait_for_bios_event(void);
 s32 world_card_wait_for_hardware_event(void);
 s32 world_card_wait_for_selected_status(s32 attempts);
-s32 world_card_write_file_with_retries(s32 descriptor, const void* source, s32 size);
+s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size);
 void world_card_build_save_image(s32 slot);
 s32 world_card_seek_file_with_retries(s32 descriptor, s32 offset, s32 origin);
 s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer_t* source, u32 size, s32 create_file);
@@ -2510,13 +2415,9 @@ s32 world_item_count_equipped_by_party(s32 item_id);
 s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode);
 void world_gfx_build_item_graphic_descriptor(menu_icon_source_t* source, s32 item_id);
 void world_item_build_status_list_polygons(s16 item_id);
-menu_icon_source_t* world_item_build_type_icon_source(s32 entry_index);
 
 void world_item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_storage_t* detail_total,
     menu_unit_status_record_t* total, const u16* items_before, const u16* items_after);
-
-void world_item_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
-    s16 item_before, s16 item_after, s32 slot);
 
 void world_item_cash_out_excess_inventory(void);
 s32 world_item_adjust_inventory_count(s16 item_id, s32 delta);
@@ -2524,7 +2425,6 @@ s32 world_item_adjust_inventory_count(s16 item_id, s32 delta);
 s32 world_item_count_owned_and_equipped(s16 item_id);
 s32 world_item_count_selected_equipped_by_party(s32 unused_row);
 s32 world_item_count_selected_owned_and_equipped(s32 unused_row);
-void world_item_draw_weapon_hand_icons(s16 weapon_id);
 s32 world_item_sort_list_by_category_order(s32 list_index, s16* entries);
 void world_item_store_category_list(s32 list_index, s16* sorted_ids);
 s32 world_item_get_equip_candidate_brightness(s32 unit_index);
@@ -2803,10 +2703,7 @@ s32 world_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 s32 world_unit_get_facing_sixteenth_by_runtime_id(s32 runtime_id);
 s32 world_coords_fit_in_byte(s32 x, s32 y);
 void world_free_work_buffer(void);
-s32 world_is_skillset_in_spell_quote_exception_list(s32 value);
-void world_script_process_inflict_status_commands(void);
 void world_script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
-void world_script_block_start_thread(void);
 
 /* unnamed */
 extern s8 D_8018D18A;

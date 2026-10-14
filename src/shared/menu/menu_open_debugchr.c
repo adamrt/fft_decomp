@@ -8,7 +8,7 @@
 
 /* Close the panels, run the requested debug session, then restore menu state. */
 void menu_open_debugchr(void) {
-    battle_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+    menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
     menu_set_modal_open();
     g_menu_overlay_state = 1;
     menu_request_open_companion_executable(COMPANION_OVERLAY_DEBUGCHR);

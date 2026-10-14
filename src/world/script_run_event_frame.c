@@ -40,7 +40,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         LoadImage(&rect, (u32*)g_main_heap_high_overlay_load_address);
     }
     g_gfx_current_otag_entry = ot;
-    world_gfx_submit_screen_fade_overlay(&g_world_screen_tint_tiles[g_menu_packet_buffer_index], g_gfx_screen_fade);
+    gfx_submit_screen_fade_overlay(&g_world_screen_tint_tiles[g_menu_packet_buffer_index], g_gfx_screen_fade);
     world_camera_store_state_to_script_variables();
     menu_draw_active_window_frames();
 

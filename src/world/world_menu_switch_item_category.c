@@ -17,7 +17,7 @@ void world_menu_switch_item_category(s32 input) {
             && g_world_shop_menu_step != WORLD_SHOP_STEP_FUR_BUY_LIST) {
             cursor_slot += 5;
         }
-        world_menu_set_selection_record(
+        menu_set_selection_record(
             cursor_slot, g_world_menu_cursor_position, g_world_menu_scroll_offset, g_world_menu_entry_ids);
         g_world_shop_item_category = category;
         if (g_world_shop_menu_step == WORLD_SHOP_STEP_BUY_LIST

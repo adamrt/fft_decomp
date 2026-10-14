@@ -49,11 +49,11 @@ void option_menu_run_choice(void) {
     thread_wait_frames(1);
     g_menu_text_state.pen.stride = width;
     for (i = 0; i < g_option_choice_counts[kind]; i++) {
-        battle_menu_set_text_origin(8, i * 16 + 8);
+        menu_set_text_origin(8, i * 16 + 8);
         if (i == g_option_current_values[kind]) {
             g_menu_text_palette_offset = 8;
         }
-        battle_menu_display_text_entry(i + g_option_value_text_id_bases[kind], buffer, &g_menu_text_state.pen);
+        menu_display_text_entry(i + g_option_value_text_id_bases[kind], buffer, &g_menu_text_state.pen);
         g_menu_text_palette_offset = 0;
     }
     /* Dead store: allocation device, see the file header. */
@@ -125,8 +125,8 @@ void option_menu_run_choice(void) {
             }
         }
         menu_select_icon_cluts(&record->base);
-        battle_menu_update_icon_cursor_sprites(param, &record->base, width, cursor);
-        battle_menu_submit_icon_primitives(&record->base);
+        menu_update_icon_cursor_sprites(param, &record->base, width, cursor);
+        menu_submit_icon_primitives(&record->base);
         thread_wait_frames(1);
     }
     g_main_game_options.fields.cursor_movement = g_option_current_values[GAME_OPTION_CURSOR_MOVEMENT];

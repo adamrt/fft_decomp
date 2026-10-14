@@ -18,7 +18,7 @@ s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size
         return -1;
     }
     if (_get_error(g_world_card_open_descriptor) != 0) {
-        world_card_close_file_with_retries(g_world_card_open_descriptor);
+        card_file_close_with_retries(g_world_card_open_descriptor);
         return -1;
     }
     total = 0;
@@ -34,7 +34,7 @@ s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size
             }
         }
     }
-    if (world_card_close_file_with_retries(g_world_card_open_descriptor) == 0) {
+    if (card_file_close_with_retries(g_world_card_open_descriptor) == 0) {
         return -1;
     }
     /* Ineffective check retained from the CARD twin: it emits nothing but

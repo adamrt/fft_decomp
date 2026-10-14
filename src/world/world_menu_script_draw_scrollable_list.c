@@ -116,7 +116,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
                     rect.y = (i - 1) * g_world_menu_row_height + 0x130;
                     rect.w = g_world_menu_list_image_width;
                     rect.h = g_world_menu_row_height;
-                    world_gfx_enqueue_draw_move(&rect, 0x240, g_world_menu_row_height * i + 0x130, priority - 1);
+                    menu_gfx_enqueue_draw_move(&rect, 0x240, g_world_menu_row_height * i + 0x130, priority - 1);
                 }
             }
         }
@@ -137,7 +137,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
                 rect.y = g_world_menu_row_height + 0x130;
                 rect.w = g_world_menu_list_image_width;
                 rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows;
-                world_gfx_enqueue_draw_move(&rect, 0x240, 0x130, priority - 1);
+                menu_gfx_enqueue_draw_move(&rect, 0x240, 0x130, priority - 1);
             }
         }
     }

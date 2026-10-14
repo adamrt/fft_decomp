@@ -377,8 +377,7 @@ restart_script:
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
             operand_1 = battle_thread_resolve_id(operand_1);
             thread_start(operand_1, battle_text_run_dialog_thread);
-            battle_text_build_display_message(
-                instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[6]);
+            text_build_display_message(instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[6]);
             g_thread_contexts[operand_1].function_parameter_1 = operand_2;
             g_thread_contexts[operand_1].function_parameter_2 = ((operand_4 << 8) + operand_3) - 1;
             dialogue_cursor = (u8*)g_script_event_block;

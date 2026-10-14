@@ -42,7 +42,7 @@ void world_shop_run_fur_sell_confirm_step(void) {
         g_world_shop_fur_sale_message_wait = 1;
     }
     world_menu_switch_item_category(0);
-    world_menu_run_script_with_palette_mode(
+    menu_run_script_with_palette_mode(
         &g_world_shop_sale_confirm_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     world_shop_run_obtain_gil_menu();
 }

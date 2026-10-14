@@ -24,7 +24,7 @@ void menu_icon_linked_entry_thread(void) {
     s32 pad;
 
     param = (menu_entry_t*)battle_thread_get_current_parameter_1();
-    battle_menu_size_entry_to_text(param, &width, &height, &pad, 0);
+    menu_size_entry_to_text(param, &width, &height, &pad, 0);
     battle_menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
     parent = param->row_actions[0];
@@ -38,8 +38,8 @@ void menu_icon_linked_entry_thread(void) {
     }
     buffer = battle_menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
-    battle_menu_set_text_origin(8, 9);
-    battle_menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_set_text_origin(8, 9);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, (u32*)buffer);
     for (i = 0;; i++) {
         thread_yield();
@@ -57,10 +57,10 @@ void menu_icon_linked_entry_thread(void) {
             menu_select_icon_cluts(&records[i & 1].base);
         }
         record = &records[i & 1];
-        battle_menu_update_icon_cursor_sprites(param, &record->base, i, -1);
+        menu_update_icon_cursor_sprites(param, &record->base, i, -1);
         menu_handle_action(param, 0);
         menu_handle_cancel_input(param);
-        battle_menu_submit_icon_primitives(&record->base);
+        menu_submit_icon_primitives(&record->base);
     }
     g_sound_suppressed = 0;
     thread_yield();

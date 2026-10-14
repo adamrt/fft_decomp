@@ -49,7 +49,7 @@ void require_reward_run_war_trophies(void) {
         ClearImage(&g_require_reward_war_trophy_clear_rect, 0, 0, 0);
         thread_yield();
         buffer = g_require_reward_war_trophy_primitives;
-        battle_gfx_set_draw_mode_for_texture_page(&buffer->draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+        gfx_set_draw_mode_for_texture_page(&buffer->draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
         for (i = 0; i < 16; i++) {
             menu_init_default_poly_ft4(&buffer->quads[i]);
         }
@@ -85,13 +85,12 @@ void require_reward_run_war_trophies(void) {
                 g_menu_text_state.pen.stride = 0x50;
                 timer = 0;
                 if (g_require_reward_war_trophy_entry_types[last] == REQUIRE_WAR_TROPHY_ENTRY_ITEM) {
-                    battle_menu_set_text_origin(0, 0);
-                    battle_menu_display_text_entry(
-                        g_require_reward_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE, image,
-                        &g_menu_text_state.pen);
+                    menu_set_text_origin(0, 0);
+                    menu_display_text_entry(g_require_reward_war_trophy_entry_values[last] + TEXT_ID_ITEM_NAME_BASE,
+                        image, &g_menu_text_state.pen);
                 } else {
-                    battle_menu_set_text_origin(0, 0);
-                    battle_menu_draw_number_glyphs(g_require_reward_war_trophy_entry_values[last],
+                    menu_set_text_origin(0, 0);
+                    menu_draw_number_glyphs(g_require_reward_war_trophy_entry_values[last],
                         text_count_decimal_digits(g_require_reward_war_trophy_entry_values[last]), image,
                         &g_menu_text_state.pen);
                 }

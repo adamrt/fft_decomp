@@ -28,7 +28,7 @@ s32 map_step_init_sequence(s32 map_id, s32 step) {
         menu_request_open_small();
         break;
     case 1:
-        if (battle_menu_poll_small_load() == 0) {
+        if (menu_poll_small_load() == 0) {
             step++;
         }
         break;

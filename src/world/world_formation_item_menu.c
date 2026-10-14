@@ -51,7 +51,7 @@ void world_formation_item_menu(void) {
     if (g_world_item_menu_initialized == 0 && thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU) == 0) {
         g_world_item_icon_menu.selected_index = 0;
         g_menu_thread_menu_data = &g_world_item_icon_menu;
-        thread_start(WORLD_THREAD_SLOT_UPPER_MENU, world_menu_icon_list_thread);
+        thread_start(WORLD_THREAD_SLOT_UPPER_MENU, menu_icon_list_thread);
         thread_set_parameters(WORLD_THREAD_SLOT_UPPER_MENU, (s32)g_menu_thread_menu_data, 0, 0);
         g_world_item_menu_unit_index = 0xFF;
         world_menu_clear_selection_records();

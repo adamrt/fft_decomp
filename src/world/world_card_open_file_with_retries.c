@@ -10,7 +10,7 @@ s32 world_card_open_file_with_retries(const char* filename, s32 mode) {
 
     i = 0;
     if (g_world_card_open_descriptor >= 0) {
-        result = world_card_close_file_with_retries(g_world_card_open_descriptor);
+        result = card_file_close_with_retries(g_world_card_open_descriptor);
         if (result == 0) {
             return -2;
         }

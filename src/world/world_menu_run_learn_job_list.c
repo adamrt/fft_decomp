@@ -41,7 +41,7 @@ s32 world_menu_run_learn_job_list(void) {
             world_menu_get_learn_job_jp(g_world_menu_cursor_position);
             world_job_calculate_current_total_jp(g_world_menu_cursor_position);
             world_job_calculate_next_level_jp_requirement(g_world_menu_cursor_position);
-            world_menu_set_selection_record(
+            menu_set_selection_record(
                 9, g_world_menu_cursor_position, g_world_menu_scroll_offset, g_world_menu_learn_unlocked_jobs);
             g_world_learn_job_list_initialized = 0;
             g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
@@ -49,7 +49,7 @@ s32 world_menu_run_learn_job_list(void) {
         }
         world_text_show_message_and_play_sound(0xC007, MAIN_SFX_ERROR_MESSAGE);
     }
-    world_menu_run_script_with_palette_mode(
+    menu_run_script_with_palette_mode(
         &g_world_learn_job_list_script, g_world_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }

@@ -179,15 +179,14 @@ void world_card_update_slot_scan(void) {
                 if (descriptor != -1) {
                     status = world_card_seek_file_with_retries(descriptor, 0x100, 0);
                     if (status != -1) {
-                        status
-                            = world_card_read_file_with_retries(descriptor, &g_world_load_work_buffer->summary, 0x80);
+                        status = card_file_read_with_retries(descriptor, &g_world_load_work_buffer->summary, 0x80);
                     }
                     if (status != -1 && g_world_load_work_buffer->summary.slot >= 0x10
                         && world_card_delete_file(g_world_card_save_file_names[g_world_card_slot_scan_index]) != 0) {
                         g_world_card_free_block_count++;
                         status = 0;
                     }
-                    if (world_card_close_file_with_retries(descriptor) == 0) {
+                    if (card_file_close_with_retries(descriptor) == 0) {
                         status = -1;
                     }
                     if (status == -1) {

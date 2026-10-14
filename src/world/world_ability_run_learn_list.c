@@ -89,7 +89,7 @@ s32 world_ability_run_learn_list(void) {
         category = world_menu_update_horizontal_selection_and_mark_change(
             4, WORLD_MENU_CURSOR_ABILITY_TAB, g_world_input_newly_pressed, MAIN_SFX_PAGE_SWITCH);
         if (category != g_world_ability_category) {
-            world_menu_set_selection_record(g_world_ability_category + 10, g_world_menu_cursor_position,
+            menu_set_selection_record(g_world_ability_category + 10, g_world_menu_cursor_position,
                 g_world_menu_scroll_offset, g_menu_ability_entries);
             g_world_ability_category = category;
             world_ability_find_unit_abilities(g_world_formation_selected_unit_index, g_world_learn_selected_job,
@@ -130,7 +130,7 @@ s32 world_ability_run_learn_list(void) {
     if (g_menu_input_lock_mode != 0 || running != 0) {
         mode = 1;
     }
-    world_menu_run_script_with_palette_mode(&g_world_ability_list_script, input, mode);
+    menu_run_script_with_palette_mode(&g_world_ability_list_script, input, mode);
     rect.x = 0x26;
     rect.y = 0x2d;
     rect.w = 0x50;

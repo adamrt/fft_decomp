@@ -9,7 +9,7 @@
  * target once the step stops changing it. A point is drawn only when its x+y
  * differs from the last drawn point by at least 5; older points are tinted
  * with the g_world_formation_cursor_trail_brightness brightness ramp. Each frame is drawn as four quadrant
- * pieces (world_gfx_enqueue_oriented_textured_quad modes 0..3) from two sprite layers at OT 3 and 4.
+ * pieces (menu_gfx_enqueue_oriented_textured_quad modes 0..3) from two sprite layers at OT 3 and 4.
  * Compiled at -O1 like the other formation sprite drawers; the mix of direct,
  * struct-pointer and s16-pointer accesses to the newest point selects the
  * target's address registers.
@@ -74,15 +74,15 @@ void world_formation_draw_cursor_trail(point16_t* cursor) {
                     = g_world_formation_cursor_shadow_sprite.h = g_world_formation_cursor_shadow_sprite.source.h = 16;
                 g_world_formation_cursor_shadow_sprite.position.y = g_world_formation_cursor_trail[i].y;
                 g_world_formation_cursor_sprite.position.y = g_world_formation_cursor_trail[i].y - 1;
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_shadow_sprite, color, TEXTURE_UV_FLIP_NONE, 1, 3);
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_sprite, color, TEXTURE_UV_FLIP_NONE, 1, 4);
                 g_world_formation_cursor_shadow_sprite.position.x += 31;
                 g_world_formation_cursor_sprite.position.x += 31;
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_shadow_sprite, color, TEXTURE_UV_FLIP_X, 1, 3);
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_sprite, color, TEXTURE_UV_FLIP_X, 1, 4);
                 g_world_formation_cursor_sprite.position.x = g_world_formation_cursor_shadow_sprite.position.x
                     = g_world_formation_cursor_trail[i].x;
@@ -90,15 +90,15 @@ void world_formation_draw_cursor_trail(point16_t* cursor) {
                     = g_world_formation_cursor_shadow_sprite.h = g_world_formation_cursor_shadow_sprite.source.h = 15;
                 g_world_formation_cursor_shadow_sprite.position.y = g_world_formation_cursor_trail[i].y + 16;
                 g_world_formation_cursor_sprite.position.y = g_world_formation_cursor_trail[i].y + 15;
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_shadow_sprite, color, TEXTURE_UV_FLIP_Y, 1, 3);
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_sprite, color, TEXTURE_UV_FLIP_Y, 1, 4);
                 g_world_formation_cursor_shadow_sprite.position.x += 31;
                 g_world_formation_cursor_sprite.position.x += 31;
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_shadow_sprite, color, TEXTURE_UV_FLIP_XY, 1, 3);
-                world_gfx_enqueue_oriented_textured_quad(
+                menu_gfx_enqueue_oriented_textured_quad(
                     &g_world_formation_cursor_sprite, color, TEXTURE_UV_FLIP_XY, 1, 4);
             }
         }

@@ -96,7 +96,7 @@ extern s32 g_battle_state_animation_continue_check;
 extern s32 g_battle_state_map_init_step;
 extern s32 g_battle_state_screen_fade_step;
 /* Array view: as a scalar, GCC hoists the menu-index reload above its store
- * in battle_menu_run_system_function_thread. */
+ * in menu_run_system_function_thread. */
 extern menu_system_function_t g_battle_system_function_table[];
 extern s32 g_battle_system_function_thread_busy;
 

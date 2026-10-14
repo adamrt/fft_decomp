@@ -71,7 +71,7 @@ s32 world_formation_run_equip_item_menu(void) {
                 g_world_menu_entry_ids, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_world_menu_script_callbacks[0].value = world_menu_get_entry_item_equipped_count;
             g_world_menu_script_callbacks[1].value = world_menu_get_entry_item_count;
-            g_world_menu_script_callbacks[2].icon = world_item_build_type_icon_source;
+            g_world_menu_script_callbacks[2].icon = menu_build_item_type_icon_source;
             g_world_menu_script_callbacks[3].icon = world_menu_get_entry_item_icon_source;
             g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
             g_world_equip_item_previewed_cursor = -1;
@@ -141,7 +141,7 @@ s32 world_formation_run_equip_item_menu(void) {
         if (g_world_equip_item_slot != 0) {
             slot = g_world_equip_item_slot - 1;
         }
-        world_menu_set_selection_record(
+        menu_set_selection_record(
             slot, g_world_menu_cursor_position, g_world_menu_scroll_offset, g_world_menu_entry_ids);
         g_world_equip_item_list_refresh = 0;
     }

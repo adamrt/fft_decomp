@@ -36,7 +36,7 @@ void menu_run_system_function_thread(void) {
     g_menu_current_id = menu_id;
     g_menu_thread_menu_data[entry->menu_entry_index].thread_count = entry->thread_count;
     if (id == 0x1f) {
-        thread_start(THREAD_SLOT_MENU, battle_menu_open_option_dead_unit_panel);
+        thread_start(THREAD_SLOT_MENU, menu_open_option_dead_unit_panel);
         thread_set_parameters(THREAD_SLOT_MENU, 0, g_battle_menu_dead_unit_panel_parameter, 0);
         thread_exit_current();
     }

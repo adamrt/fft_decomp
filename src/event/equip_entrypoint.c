@@ -34,7 +34,7 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
     }
     if (g_equip_text_restore_pending != 0) {
         if (g_menu_input_lock_mode == 0) {
-            battle_text_restore_section_pointers();
+            text_restore_section_pointers();
         }
     }
     equip_menu_set_palette_mode(g_menu_input_lock_mode);

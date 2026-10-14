@@ -20,8 +20,8 @@ void menu_run_selected_tile_info_display_thread(void) {
 
     g_menu_hide_numeric_values = 0;
     page = &g_battle_menu_height_display_pages[0];
-    battle_gfx_set_draw_mode_for_texture_page(&page->modes[0], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_gfx_set_draw_mode_for_texture_page(&page->modes[1], MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&page->modes[0], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&page->modes[1], MENU_TEXTURE_PAGE_FRAME);
     for (i = 0; i < 5; i++) {
         quad = &page->quads[i];
         SetPolyGT4(quad);
@@ -61,8 +61,8 @@ void menu_run_selected_tile_info_display_thread(void) {
         if (g_map_selected_tile_data.depth != 0) {
             battle_clear_menu_render_buffer(buffer, 0x100);
             g_menu_text_state.pen.stride = 0x18;
-            battle_menu_set_text_origin(0x10, 0);
-            battle_menu_draw_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_text_state.pen);
+            menu_set_text_origin(0x10, 0);
+            menu_draw_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_text_state.pen);
             if (g_menu_height_display_suppressed == 0) {
                 LoadImage(&rect, buffer);
                 page->sprites[0].clut = 0x7CBC;
@@ -74,6 +74,6 @@ void menu_run_selected_tile_info_display_thread(void) {
         }
     }
     thread_yield();
-    battle_gfx_free_tpage7_vram(&rect);
+    gfx_free_texture_rect(&rect);
     thread_exit_current();
 }

@@ -7,7 +7,7 @@
 /*
  * Position the two cursor quads to the right of a menu entry's text.
  *
- * Same highlight timer/phase handling as world_menu_update_icon_cursor_sprites
+ * Same highlight timer/phase handling as menu_update_icon_cursor_sprites
  * (32-bit thread fields at 0x50/0x54); the quads bob with the blink table value and sit
  * six pixels further left per cursor row. The first quad is the 16x16 arrow,
  * the second its two-pixel shadow offset.

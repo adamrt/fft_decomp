@@ -10,7 +10,7 @@
 
 /* Draw the message box's pending glyph into VRAM and hold it for the typewriter delay.
  *
- * Cousin of world_text_draw_glyph_with_typewriter_delay without the request pointer, task-id checks or
+ * Cousin of text_draw_glyph_with_typewriter_delay without the request pointer, task-id checks or
  * script counters. The ring byte is read before the phase and the inner bound
  * is `width / 2`, which keeps the per-row recomputation of the target.
  */

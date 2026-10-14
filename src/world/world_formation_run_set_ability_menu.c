@@ -160,7 +160,7 @@ s32 world_formation_run_set_ability_menu(void) {
                 g_world_set_ability_show_stat_preview = 0;
             }
         }
-        world_menu_run_script_with_palette_mode(
+        menu_run_script_with_palette_mode(
             &g_world_set_ability_window_script, g_world_input_primary_repeat, world_thread_is_task_active(0));
     }
     if (g_world_set_ability_list_close_pending != 0) {
@@ -171,7 +171,7 @@ s32 world_formation_run_set_ability_menu(void) {
         world_script_set_vsync_mode_and_event_speed(0);
         g_world_set_ability_show_stat_preview = 0;
         g_world_status_display_thread_params.redraw_request = 1;
-        world_menu_set_selection_record(g_world_set_ability_slot + 4, g_world_menu_cursor_position,
+        menu_set_selection_record(g_world_set_ability_slot + 4, g_world_menu_cursor_position,
             g_world_menu_scroll_offset, g_world_menu_entry_ids);
         thread_resume(WORLD_THREAD_SLOT_UPPER_MENU);
         g_world_set_ability_list_close_pending = 0;

@@ -46,5 +46,5 @@ void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value)
     sprite->position.x = x + 7;
     g_world_job_wheel_mastered_icon_sprite.position.y = y - 0xC;
     g_world_job_wheel_mastered_icon_sprite.source.u = level * 10 + 0x24;
-    world_gfx_enqueue_oriented_textured_quad(sprite, 0, TEXTURE_UV_FLIP_NONE, 0, otag_index);
+    menu_gfx_enqueue_oriented_textured_quad(sprite, 0, TEXTURE_UV_FLIP_NONE, 0, otag_index);
 }

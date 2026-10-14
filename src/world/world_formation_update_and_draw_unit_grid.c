@@ -88,7 +88,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_world_grid_menu_id == MENU_GRID_HELP_NONE
         && world_gfx_get_fade_state() == WORLD_FADE_STATE_NONE) {
-        g_world_formation_selected_unit_index = world_menu_update_wrapped_grid_selection(
+        g_world_formation_selected_unit_index = menu_update_wrapped_grid_selection(
             4, 5, g_world_formation_unit_count - 1, g_world_formation_selected_unit_index, input);
     }
     world_formation_step_scroll_velocity(&g_world_formation_scroll_velocity, &g_world_formation_scroll_position);
@@ -114,8 +114,8 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             MENU_PRESSABLE_BUTTON_L2, 0x26, value, input & PSX_PAD_L2, row, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R2, 0xc2, value, input & PSX_PAD_R2, row, MAIN_SFX_PAGE_SWITCH);
-        world_menu_run_script_with_palette_mode(window, 0, 0);
-        world_gfx_enqueue_textured_quad_list(
+        menu_run_script_with_palette_mode(window, 0, 0);
+        menu_gfx_enqueue_textured_quad_list(
             cells, 0, 0, g_world_menu_icon_tpage, g_world_menu_palette_clut_normal, 0xb, 8);
         if (g_world_formation_stat_display_mode < 3) {
             row = g_world_formation_stat_display_mode;
@@ -127,7 +127,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             row = 5;
             col = 3;
         }
-        world_gfx_enqueue_textured_quad_list(
+        menu_gfx_enqueue_textured_quad_list(
             &cells[row], 0, 0, g_world_menu_icon_tpage, g_world_menu_alternate_number_clut_normal, 0xc, col);
     }
     if (toggle_banner != 0) {
@@ -218,7 +218,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
                 rgb.g += g_world_formation_dot_glow_timer;
                 rgb.b += g_world_formation_dot_glow_timer;
             }
-            world_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_formation_unit_dot_sprite, &rgb, TEXTURE_UV_FLIP_NONE, 1, 8);
         }
     }

@@ -5,5 +5,5 @@
 void battle_menu_open_free_cursor_mini_menu(void) {
     camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MINI_MENU;
-    battle_menu_start_mini_menu_display_thread();
+    menu_start_mini_menu_display_thread();
 }

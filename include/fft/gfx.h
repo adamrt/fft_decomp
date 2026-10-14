@@ -177,7 +177,7 @@ typedef union texture_primitive {
     POLY_FT4 ft4;
 } texture_primitive_t;
 
-/* Textured menu quad source for world_gfx_enqueue_textured_quad_corners (0x8012ccd0):
+/* Textured menu quad source for gfx_enqueue_textured_quad_corners (0x8012ccd0):
  * four screen points, four texture points (only the low byte of each
  * 16-bit value is used), then the CLUT and texture page. */
 typedef struct textured_quad_source {
@@ -221,7 +221,7 @@ typedef struct oriented_quad {
 } oriented_quad_t;
 typedef char oriented_quad_size_must_be_20[sizeof(oriented_quad_t) == 20 ? 1 : -1];
 
-/* Gouraud-textured rectangle source for world_gfx_enqueue_gouraud_textured_quad
+/* Gouraud-textured rectangle source for gfx_enqueue_gouraud_textured_quad
  * (0x8012cfd4) and bunit_gfx_enqueue_gouraud_textured_quad: screen rectangle,
  * texture origin (only the low byte of u/v is used; the texture extent is the
  * screen extent), CLUT and texture page. The caller also passes four RGB

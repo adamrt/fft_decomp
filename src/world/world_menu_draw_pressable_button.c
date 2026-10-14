@@ -66,7 +66,7 @@ void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 
         if (g_world_menu_button_piece_scales[piece_index].y < 0) {
             flip += 2;
         }
-        world_gfx_enqueue_oriented_textured_quad(&sprite, 0, flip, 0, i + 50);
+        menu_gfx_enqueue_oriented_textured_quad(&sprite, 0, flip, 0, i + 50);
         piece_index++;
     }
 }

@@ -9,7 +9,7 @@ void open_controller_start_text_message(s32 parameter, s32 run_followup) {
         g_open_controller_records_next[controller].text_message.run_followup = run_followup;
     }
     if (run_followup != 0) {
-        world_text_save_section_pointers();
+        text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
     }
 

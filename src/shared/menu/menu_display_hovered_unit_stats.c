@@ -80,9 +80,9 @@ void menu_display_hovered_unit_stats(
         }
     }
     page = &g_battle_unit_status_panel_pages[g_battle_unit_status_first_page_by_mode[mode]];
-    battle_menu_init_numeric_display_frame_primitives(frame_rect, &page->palette);
-    battle_gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
+    menu_init_numeric_display_frame_primitives(frame_rect, &page->palette);
+    gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(page->sprites, 7, 0x7CBC);
     for (frame = 0; frame < 5; frame++) {
         menu_init_default_poly_ft4(&page->quads[frame]);
@@ -243,21 +243,21 @@ void menu_display_hovered_unit_stats(
             stride = &g_menu_text_state.pen.stride;
             origin = &g_menu_text_state.pen;
             *stride = 0x28;
-            battle_menu_draw_numeric_display_entries(buffer, entries, origin, 6);
+            menu_draw_numeric_display_entries(buffer, entries, origin, 6);
             LoadImage(&rects[0], (u32*)buffer);
             i = g_menu_hide_numeric_values;
             *stride = 0x60;
             g_menu_hide_numeric_values = 0;
             if (mode == UNIT_STATS_PANEL_HOVERED_UNIT || mode == UNIT_STATS_PANEL_RIGHT_UNIT) {
-                battle_menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
+                menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
                 g_menu_hide_numeric_values = i;
-                battle_menu_draw_numeric_display_entries(buffer + 0x400, entries + 8, origin, 2);
+                menu_draw_numeric_display_entries(buffer + 0x400, entries + 8, origin, 2);
             } else if (mode == UNIT_STATS_PANEL_ATTACK_CASTER) {
-                battle_menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
+                menu_draw_numeric_display_entries(buffer + 0x400, entries + 6, origin, 2);
                 g_menu_hide_numeric_values = i;
             } else if (text_id != 0) {
-                battle_menu_set_text_origin(2, 0);
-                battle_menu_display_text_string(buffer + 0x400, origin, text);
+                menu_set_text_origin(2, 0);
+                menu_display_text_string(buffer + 0x400, origin, text);
             }
             LoadImage(&rects[1], (u32*)(buffer + 0x400));
             text_loaded = 1;
@@ -321,7 +321,7 @@ exit:
     if (thread_get_current_task_id() == THREAD_TASK_HOVERED_UNIT_STATS) {
         g_battle_menu_hovered_stats_frame_count = 0;
     }
-    battle_gfx_free_tpage7_vram(&rects[0]);
-    battle_gfx_free_tpage7_vram(&rects[1]);
+    gfx_free_texture_rect(&rects[0]);
+    gfx_free_texture_rect(&rects[1]);
     thread_exit_current();
 }

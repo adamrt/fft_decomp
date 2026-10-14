@@ -44,7 +44,7 @@ void attack_text_build_deployment_strings(void) {
     file = main_heap_alloc(0x18000);
     g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
     thread_call_on_main_stack(DISC_SECTOR_EVENT_ATCHELP_LZW, 0x16800, file);
-    battle_text_save_section_pointers();
+    text_save_section_pointers();
     attack_text_init_battle_pointers(file);
     for (i = 0; i < 0x10; i++) {
         unit = main_party_get_unit(i);
@@ -80,6 +80,6 @@ void attack_text_build_deployment_strings(void) {
         *dst++ = *src++;
     }
 end:
-    battle_text_restore_section_pointers();
+    text_restore_section_pointers();
     main_heap_call_free(file);
 }

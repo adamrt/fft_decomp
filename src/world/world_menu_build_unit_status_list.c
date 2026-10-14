@@ -54,7 +54,7 @@ void world_menu_build_unit_status_list(void) {
     }
     sound_queue_sfx_confirm();
     if (count == 0) {
-        world_menu_run_jobstts_thread();
+        menu_run_jobstts_thread();
     }
     odd = count & 1;
     half = count / 2;

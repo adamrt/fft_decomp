@@ -2243,6 +2243,12 @@ data:
   - {addr: 0x801cbc5c, name: g_option_menu_pages}
   - {addr: 0x801cbf7c, name: g_option_picker_icon_records}
   - {addr: 0x801cc074, name: g_option_menu_panel_frames}
+
+overrides:
+  - {function: option_menu_run_at_list, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
+  - {function: option_menu_run_game_options, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
+  - {function: option_menu_thin_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
+  - {function: option_menu_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
 ---
 module: event-require
 file: EVENT/REQUIRE.OUT

@@ -26,7 +26,7 @@ s32 battle_state_announce_next_charged_action(void) {
                 g_battle_casting_runtime_id = actor->runtime_id;
                 command.skillset_id = 0;
                 actor_stats = actor->stats;
-                battle_text_select_ability_announcement(&command, actor_stats->battle_id, 1);
+                text_select_ability_announcement(&command, actor_stats->battle_id, 1);
                 ability_id = command.ability_id;
                 result = 0;
                 actor->continue_attack_count = 0;
@@ -40,7 +40,7 @@ s32 battle_state_announce_next_charged_action(void) {
             if (result == 0) {
                 g_battle_game_state = BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT;
                 g_battle_casting_runtime_id = unit->runtime_id;
-                battle_text_select_ability_announcement(&unit->stats->action_command, unit->stats->battle_id, 1);
+                text_select_ability_announcement(&unit->stats->action_command, unit->stats->battle_id, 1);
                 ability_id = unit->command_state.ai.data.action.ability_id;
                 unit->continue_attack_count = 0;
                 g_action_post_action = 0;
@@ -65,7 +65,7 @@ s32 battle_state_announce_next_charged_action(void) {
                 g_battle_casting_runtime_id = actor->runtime_id;
                 command.skillset_id = 0;
                 actor_stats = actor->stats;
-                battle_text_select_ability_announcement(&command, actor_stats->battle_id, 1);
+                text_select_ability_announcement(&command, actor_stats->battle_id, 1);
                 ability_id = command.ability_id;
                 result = 0;
                 actor->continue_attack_count = 0;

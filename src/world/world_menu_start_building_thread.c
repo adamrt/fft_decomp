@@ -16,7 +16,7 @@ void world_menu_start_building_thread(void) {
         && g_world_companion_overlay_state == COMPANION_OVERLAY_STATE_IDLE
         && world_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0) {
         g_world_text_overlay_active = 1;
-        thread_start(THREAD_SLOT_MENU_BUILDING, world_menu_run_helpmenu_thread);
+        thread_start(THREAD_SLOT_MENU_BUILDING, menu_run_help_menu_thread);
         thread_set_parameters(THREAD_SLOT_MENU_BUILDING, 0, 0, 0);
     }
 }

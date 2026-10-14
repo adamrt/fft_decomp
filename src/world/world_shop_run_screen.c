@@ -123,8 +123,8 @@ void world_shop_run_screen(s32 shop_type) {
         world_menu_set_palette_mode(g_menu_input_lock_mode);
         if (g_world_shop_background_visible != 0) {
             world_gfx_enqueue_textured_quad(&g_world_shop_background_rect, 0, 0, 0, 0, 0x14C, 0, 1);
-            world_gfx_enqueue_tile(&g_world_shop_backdrop_tile_rect, &g_world_gfx_black_tile_color, 0, 0);
-            world_gfx_enqueue_tile(tile_box, &g_world_gfx_black_tile_color, 0, g_world_ot_length - 1);
+            gfx_enqueue_tile(&g_world_shop_backdrop_tile_rect, &g_world_gfx_black_tile_color, 0, 0);
+            gfx_enqueue_tile(tile_box, &g_world_gfx_black_tile_color, 0, g_world_ot_length - 1);
         }
         if ((g_world_formation_unit_cycle_mode != 0 || g_world_formation_unit_browse_enabled != 0)
             && g_world_shop_menu_step < 0x14) {

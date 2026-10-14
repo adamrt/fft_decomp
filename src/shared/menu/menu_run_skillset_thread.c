@@ -13,14 +13,14 @@ void menu_run_skillset_thread(void) {
     menu_unit_selection_record_t* row;
     s32* param;
 
-    world_menu_check_action_restrictions();
-    g_thread_call_target = world_menu_build_skillset_entries;
+    menu_check_action_restrictions();
+    g_thread_call_target = menu_build_skillset_entries;
     thread_call_on_main_stack();
     param_value = 1;
     if (g_menu_skillset_build_result != 0) {
         g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index = 0;
         if (g_menu_restore_pending == 0) {
-            thread_start(g_thread_current_id - 1, world_menu_select_unit_action_slots_thread);
+            thread_start(g_thread_current_id - 1, menu_select_unit_action_slots_thread);
             thread_set_parameters(
                 g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST], 0, 0);
         } else {

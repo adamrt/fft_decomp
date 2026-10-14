@@ -89,8 +89,8 @@ void menu_auto_battle_setting_thread(void) {
             for (j = 0; j < 5; j++) {
                 g_menu_text_palette_offset = color[j];
                 g_menu_text_state.pen.stride = param->inner_width;
-                battle_menu_set_text_origin(8, j * 16 + 9);
-                battle_menu_display_text_entry(j + 0x5009, buffer, &g_menu_text_state.pen);
+                menu_set_text_origin(8, j * 16 + 9);
+                menu_display_text_entry(j + 0x5009, buffer, &g_menu_text_state.pen);
             }
             LoadImage(&rect, (u32*)buffer);
             fresh = 1;
@@ -107,8 +107,8 @@ void menu_auto_battle_setting_thread(void) {
         battle_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
         menu_handle_cancel_input(param);
         menu_select_icon_cluts(&record->base);
-        battle_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
-        battle_menu_submit_icon_primitives(&record->base);
+        menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
+        menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
     thread_exit_current();

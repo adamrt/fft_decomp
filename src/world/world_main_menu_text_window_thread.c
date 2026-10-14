@@ -36,8 +36,8 @@ void world_main_menu_text_window_thread(void) {
 
     entry = (menu_entry_t*)world_thread_get_current_parameter_1();
     record = records;
-    world_gfx_set_draw_mode_from_origin(&record->text_draw_mode, &entry->vram_origin);
-    world_gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_from_origin(&record->text_draw_mode, &entry->vram_origin);
+    gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     world_menu_build_layout_sprites(entry, record->frame_sprites, 0);
     mem_copy_bytes_nonempty(g_world_text_substitution_values_backup, g_text_substitution_values,
         sizeof(g_world_text_substitution_values_backup));
@@ -84,7 +84,7 @@ void world_main_menu_text_window_thread(void) {
             buffer = world_menu_build_and_upload_window_frame_image(
                 entry->inner_width, entry->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_text_state.pen.stride = entry->inner_width;
-            world_menu_set_text_origin(10, 8);
+            menu_set_text_origin(10, 8);
             g_menu_text_palette_offset = 0;
             mem_copy_bytes_nonempty(g_world_text_substitution_values_backup, g_text_substitution_values,
                 sizeof(g_world_text_substitution_values_backup));
@@ -92,7 +92,7 @@ void world_main_menu_text_window_thread(void) {
             g_text_substitution_values[0] = text_values[0];
             text_values = entry->value;
             g_text_substitution_values[1] = text_values[1];
-            world_menu_display_text_entry(entry->text_id, buffer, &g_menu_text_state.pen);
+            menu_display_text_entry(entry->text_id, buffer, &g_menu_text_state.pen);
             mem_copy_bytes_nonempty(g_text_substitution_values, g_world_text_substitution_values_backup,
                 sizeof(g_text_substitution_values));
             LoadImage(&rect, buffer);

@@ -65,7 +65,7 @@ void world_gfx_init_menu_tile_and_line_primitives(menu_status_panel_buffer_t* me
     menu->lines[7].y0 = 1;
     menu->lines[7].x1 = 0x8D;
     menu->lines[7].y1 = 0x5A;
-    world_gfx_set_draw_mode_for_texture_page(&menu->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
-    world_gfx_set_draw_mode_for_texture_page(&menu->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    world_gfx_set_draw_mode_for_texture_page(&menu->draw_modes[2], MENU_TEXTURE_PAGE_ITEM_ICONS);
+    gfx_set_draw_mode_for_texture_page(&menu->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&menu->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&menu->draw_modes[2], MENU_TEXTURE_PAGE_ITEM_ICONS);
 }

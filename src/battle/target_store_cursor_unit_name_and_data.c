@@ -17,5 +17,5 @@ void target_store_cursor_unit_name_and_data(void) {
         mode = UNIT_VIEW_MODE_TILE_INFO;
         unit_id = 0xFF;
     }
-    battle_unit_start_view_thread(mode, unit_id, 0xFF);
+    menu_start_unit_view_thread(mode, unit_id, 0xFF);
 }

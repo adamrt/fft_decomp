@@ -721,17 +721,8 @@ extern POLY_F4 g_battle_screen_fade_polygons[2];
 
 void battle_gfx_draw_screen_color_modulation_overlay(void);
 void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration);
-void battle_gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
 void battle_gfx_update_screen_color_modulation_fade(void);
 
 /* menu primitives */
-
-void battle_gfx_build_scaled_draw_area_pair_swapped(
-    scaled_draw_area_pair_t* packets, const RECT* geometry, s32 step, s32 flag);
-void battle_gfx_clear_tpage7_vram_allocation_grid(void);
-void battle_gfx_free_tpage7_vram(RECT* rect);
-void battle_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
-void battle_gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page);
-void battle_gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
 
 #endif

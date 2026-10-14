@@ -12,7 +12,7 @@ void world_script_draw_tutorial_highlight_quads(s32 brightness) {
     s32 i;
 
     brightness = brightness * 10;
-    world_gfx_enqueue_draw_mode(1, 0, GetTPage(0, 1, 0, 0), 0, 0x3C);
+    menu_gfx_enqueue_draw_mode(1, 0, GetTPage(0, 1, 0, 0), 0, 0x3C);
     g_world_tutorial_highlight_colors_a[2].r = g_world_tutorial_highlight_colors_a[0].r = brightness >> 1;
     g_world_tutorial_highlight_colors_a[2].g = g_world_tutorial_highlight_colors_a[0].g = brightness >> 3;
     g_world_tutorial_highlight_colors_a[2].b = g_world_tutorial_highlight_colors_a[0].b = brightness >> 3;

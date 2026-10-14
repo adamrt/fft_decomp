@@ -11,7 +11,7 @@ void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries,
         if (entries->kind == 0) {
             battle_text_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
         } else if (entries->kind == 1) {
-            battle_menu_draw_number_glyphs(*entries->value, entries->format, buffer, position);
+            menu_draw_number_glyphs(*entries->value, entries->format, buffer, position);
         }
         entries++;
     }

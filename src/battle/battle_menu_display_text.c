@@ -7,7 +7,7 @@
 
 /* Renders a text entry's glyphs into a menu image at the pen position.
  *
- * The thread target installed by battle_menu_display_text_entry. text 0 or 1
+ * The thread target installed by menu_display_text_entry. text 0 or 1
  * selects text_id's entry.
  * Handles the substitution, script-variable, palette, width and numeric
  * control codes; glyph drawing is limited to the characters counted from

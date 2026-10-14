@@ -14,9 +14,9 @@ s32 menu_init_attack_resources_and_threads(void) {
     s32 return_value;
     game_options_fields_t* options;
     g_menu_hide_numeric_values = 0;
-    world_menu_init_subsystems();
+    menu_init_subsystems();
     unit_reset_animation_states();
-    world_menu_reset_unit_records();
+    menu_reset_unit_records();
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOAD_USED;
     } else {

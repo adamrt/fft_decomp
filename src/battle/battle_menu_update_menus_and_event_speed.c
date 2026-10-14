@@ -31,7 +31,7 @@ s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
         g_menu_pending_selection[i] = fill;
     }
     script_run_event_frame(otag, controller_input);
-    battle_menu_update_panel_fade();
+    menu_update_panel_fade();
     result = battle_menu_resolve_selection();
     if ((battle_thread_is_running_asm(THREAD_SLOT_MENU) != 0
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)

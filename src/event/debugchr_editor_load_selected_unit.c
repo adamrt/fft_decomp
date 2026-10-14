@@ -8,7 +8,7 @@
 /*
  * Fills the comparison and selected-unit billboards and the status panel's
  * fields for the selected battle unit. DEBUGCHR copy of
- * battle_menu_load_selected_unit.
+ * menu_load_selected_unit.
  *
  * The 16-bit fields are: 0 move, 1 speed, 2 jump, 3/4 right and left weapon
  * power, 5/6 right and left weapon evade, 7 set for a monster skillset, 8 set

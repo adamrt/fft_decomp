@@ -78,10 +78,10 @@ void world_menu_labeled_number_entry_thread(void) {
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     text_measure_pixels(&label_size[0], &label_size[1], text_find_entry(param->text_id));
-    world_menu_set_text_origin(8, 9);
-    world_menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
-    world_menu_set_text_origin((u16)label_size[0] + 8, 9);
-    world_menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
+    menu_set_text_origin(8, 9);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_set_text_origin((u16)label_size[0] + 8, 9);
+    menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
     world_gfx_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, buffer);
     redraw = 1;
@@ -140,10 +140,10 @@ void world_menu_labeled_number_entry_thread(void) {
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_text_state.pen.stride = param->inner_width;
             text_measure(&label_size[0], &label_size[1], text_find_entry(param->text_id));
-            world_menu_set_text_origin(8, 9);
-            world_menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
-            world_menu_set_text_origin((u16)label_size[0] * 6 + 8, 9);
-            world_menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
+            menu_set_text_origin(8, 9);
+            menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+            menu_set_text_origin((u16)label_size[0] * 6 + 8, 9);
+            menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
             world_gfx_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
             LoadImage(&rect, buffer);
         }
@@ -159,7 +159,7 @@ void world_menu_labeled_number_entry_thread(void) {
             cursor_quad->clut = 0x7DFC;
             shadow_quad->clut = 0x7E3C;
         }
-        world_menu_update_icon_cursor_sprites(param, &record.base, i, -1);
+        menu_update_icon_cursor_sprites(param, &record.base, i, -1);
         menu_select_icon_cluts(&record.base);
         gfx_draw_or_append_gpu_primitive(&cursor_quads[i & 1]);
         gfx_draw_or_append_gpu_primitive(&shadow_quads[i & 1]);

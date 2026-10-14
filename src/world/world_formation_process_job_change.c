@@ -107,7 +107,7 @@ s32 world_formation_process_job_change(s32 job) {
         scratch.points[1].y++;
         world_menu_add_gradient_line_primitive(&scratch.points[1], g_world_job_change_wave_colors + 1, 1, 0x38);
     }
-    world_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
+    menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
     g_world_job_change_frame++;
     if (g_world_job_change_skip_requested != 0) {
         if (g_world_job_change_frame >= 40 && g_world_job_change_frame <= 220) {

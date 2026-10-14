@@ -614,6 +614,9 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   runs `status_apply_unit_action_removal` (`0x8018ec44`, WORLD text data).
   `unit_set_animation.c` likewise reaches three BATTLE-only animation setters,
   behind script-variable tests WORLD scenes would have to pass first.
+- OPTION.OUT carries its own copy of `menu_init_scaled_draw_area_packets`
+  (`0x801c02d0`) but its window and option threads call BATTLE's copy
+  (`0x80138adc`); target overrides keep that binding.
 - `src/battle/action_dispatch_target_reaction_ability.c`: formula 7
   suppresses reactions. Counter Magic (`0x1b3`) is tested last, after byte
   `+0x8d`, so Counter (`0x1ba`) wins.

@@ -64,7 +64,7 @@ void option_menu_run_at_list(void) {
     image_parameters.y_screen_offset = 0xC;
     image_parameters.width = entry->window.w - 0x12;
     image_parameters.height = entry->window.h - 0x1A;
-    battle_gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
     texture_window.x = 0;
     texture_window.y = entry->vram_origin.y & 0xff;
     texture_window.w = 0x100;
@@ -75,7 +75,7 @@ void option_menu_run_at_list(void) {
         g_option_at_list_pages[i].icons.icons[2] = &icons2[i];
         battle_menu_build_window_sprites(&image_rect, entry, &g_option_at_list_pages[i].icons);
     }
-    battle_gfx_init_scaled_draw_area_packets(&page->draw_areas);
+    menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
@@ -190,7 +190,7 @@ void option_menu_run_at_list(void) {
                     g_menu_text_state.pen.stride = entry->inner_width;
                     for (column = 0; column < 3; column++) {
                         index = cursor + row_offset + delta;
-                        battle_menu_set_text_origin(layout->x[column], 0);
+                        menu_set_text_origin(layout->x[column], 0);
                         if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                             g_menu_text_palette_offset = layout->text_colors[column][index];
                         }
@@ -198,14 +198,12 @@ void option_menu_run_at_list(void) {
                             g_menu_text_state.pen.color = 0x44444444;
                         }
                         if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                            battle_menu_display_text_entry(
-                                layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
+                            menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
                         } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                            battle_menu_display_number_entry(
+                            menu_display_number_entry(
                                 layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
                         } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                            battle_menu_draw_number_glyphs(
-                                layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                            menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
                         }
                     }
                     g_menu_text_state.pen.color = 0;
@@ -277,8 +275,7 @@ void option_menu_run_at_list(void) {
             page->thumb.y0 = top + span * entry->selected_index / (layout->row_count + layout->hidden_rows) - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
-        battle_gfx_build_scaled_draw_area_pair_swapped(
-            &page->draw_areas, &entry->window, i, g_main_gfx_screen_polarity);
+        gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_main_gfx_screen_polarity);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);
@@ -289,12 +286,12 @@ void option_menu_run_at_list(void) {
         gfx_draw_or_append_gpu_primitive(&page->text_mode);
         gfx_draw_or_append_gpu_primitive(&page->draw_areas);
         menu_select_icon_cluts(&page->icons.base);
-        battle_menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
+        menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
         i++;
         page->icons.base.sprites[0].x0 = 1000;
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
-        battle_menu_submit_icon_primitives(&page->icons.base);
+        menu_submit_icon_primitives(&page->icons.base);
     }
     thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
     thread_yield();

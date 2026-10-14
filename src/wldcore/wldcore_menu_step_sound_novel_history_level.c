@@ -96,7 +96,7 @@ void wldcore_menu_step_sound_novel_history_level(wldcore_menu_sound_novel_histor
                 box.rect.x = x;
                 box.rect.y = y;
                 box.stride = g_wldcore_window_render_records[level->render_index].bounds.w;
-                world_menu_display_text_entry_past_choice_marks(text_id, g_wldcore_window_image_buffer, &box);
+                menu_display_text_entry_past_choice_marks(text_id, g_wldcore_window_image_buffer, &box);
                 wldcore_window_load_image_record_to_vram(level->render_index, g_wldcore_window_image_buffer);
                 script_set_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);
                 script_set_variable(EVENT_SCRIPT_VAR_PENDING_WEATHER_SOUND, 0);

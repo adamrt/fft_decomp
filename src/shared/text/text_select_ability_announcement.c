@@ -21,7 +21,7 @@ void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32
     main_ability_calculate_pointers_and_type(action->ability_id & ABILITY_ID_MASK, &ability, &secondary);
     unit = battle_unit_get_stats_from_battle_id(unit_id);
     if (action->skillset_id != 0) {
-        known = battle_text_is_spell_quote_exception_skillset(action->skillset_id);
+        known = text_is_spell_quote_exception_skillset(action->skillset_id);
     } else {
         known = 1;
     }
@@ -42,20 +42,19 @@ void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32
         && g_main_game_options.fields.ability_names == GAME_OPTION_ON
         && (script_get_variable(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 0xF) < 4) {
         g_battle_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
-        battle_menu_dispatch_system_function(BATTLE_MENU_SYSTEM_COMMAND_SPELL_QUOTE, 0, unit_id, 0, enabled, action);
+        menu_dispatch_system_function(BATTLE_MENU_SYSTEM_COMMAND_SPELL_QUOTE, 0, unit_id, 0, enabled, action);
         return;
     }
     if (action->skillset_id != 0) {
-        known = battle_text_is_spell_quote_exception_skillset(action->skillset_id);
+        known = text_is_spell_quote_exception_skillset(action->skillset_id);
     } else {
         known = 0;
     }
     if ((known == 0 && (ability->type_flags & ABILITY_TYPE_FLAG_SHOW_NAME)
             && g_main_game_options.fields.ability_names == GAME_OPTION_ON)
         || action->skillset_id == SKILLSET_ID_ITEM || action->skillset_id == SKILLSET_ID_THROW) {
-        battle_menu_dispatch_system_function(
-            BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, enabled, action);
+        menu_dispatch_system_function(BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, enabled, action);
     } else {
-        battle_menu_dispatch_system_function(BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, 0, action);
+        menu_dispatch_system_function(BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT, 0, unit_id, 0, 0, action);
     }
 }

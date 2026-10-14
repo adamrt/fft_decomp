@@ -16,10 +16,6 @@ extern u16 g_battle_menu_transition_state;
 extern u16 g_battle_saved_animation_speed; /* animation speed saved while an event thread forces speed 2 */
 
 void battle_menu_clear_status_menu_state(void);
-void battle_menu_init_subsystem_pointers(void);
-void battle_menu_init_subsystems(void);
-void battle_menu_reset_subsystems(void);
-void battle_menu_reset_unit_records(void);
 s32 battle_menu_update_menus_and_event_speed(u32* otag, s32 controller_input);
 
 /* input and selection */
@@ -31,7 +27,6 @@ extern s16 g_battle_menu_result; /* menu result: -4 pending, -1 canceled */
 extern s16 g_battle_menu_selected_option;
 extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
 
-void battle_menu_display_triangle_selection(void);
 s32 battle_menu_get_cursor_bob_offset(s32 mode);
 s32 battle_menu_resolve_selection(void);
 void battle_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel);
@@ -56,12 +51,8 @@ extern u16 g_battle_menu_system_function_row_actions[];
 
 void battle_menu_build_idle_action_menu(s32 menu_id);
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
-void battle_menu_check_action_restrictions(void);
-void battle_menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit);
 void battle_menu_close_move_help(void);
 void battle_menu_dispatch_idle_action_menu(void);
-s32 battle_menu_dispatch_system_function(
-    s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
 battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id);
 ai_command_t* battle_menu_get_selected_command_address(void);
 battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
@@ -75,11 +66,7 @@ void battle_menu_open_mini_menu(void);
 void battle_menu_open_mini_menu_help(void);
 void battle_menu_open_move_confirm(void);
 void battle_menu_open_non_active_unit_idle_action_menu(void);
-void battle_menu_run_system_function_thread(void);
-void battle_menu_select_unit_action_slots_thread(void);
 void battle_menu_set_next_script_action_menus(void);
-void battle_menu_start_mini_menu_display_thread(void);
-void battle_menu_start_system_function_thread(s32 system_function);
 
 /* abilities */
 /* Ability-list window layout at 0x80166994. Column modes: 0 text, 1 number,
@@ -99,7 +86,6 @@ extern s32 g_battle_menu_used_item_id;
 extern s32 g_battle_menu_used_skillset_id;
 
 void battle_menu_build_ability_list(s32 mode);
-void battle_menu_build_skillset_entries(void);
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
 s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
@@ -119,7 +105,6 @@ s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_a
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-void battle_menu_run_skillset_thread(void);
 
 /* unit panels */
 extern s32 g_battle_dead_unit_action;
@@ -143,14 +128,8 @@ extern s32 g_battle_post_battle_unit_changes_active;
 
 void battle_menu_build_unit_portrait_poly(POLY_FT4* poly, u32 battle_id);
 void battle_menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_unit_status_record_t* output);
-void battle_menu_display_hovered_unit_stats(
-    RECT* frame_rect, s32 mode, menu_number_entry_t* entries, menu_unit_status_record_t* status);
 s32 battle_menu_display_projected_action_effect(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
-void battle_menu_load_selected_unit(void);
-void battle_menu_open_option_dead_unit_panel(void);
-void battle_menu_refresh_hovered_unit_stats_display(void);
-void battle_menu_restore_selection_for_selected_unit(s32 menu_id);
 
 /* status screen */
 extern s32 g_battle_menu_status_enabled;
@@ -180,13 +159,6 @@ extern RECT g_battle_numeric_display_text_rect_b;
 extern RECT g_battle_numeric_display_text_rect_c;
 extern RECT g_battle_numeric_display_texture_window;
 
-void battle_menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin);
-void battle_menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
-void battle_menu_draw_numeric_display_entries(
-    u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count);
-void battle_menu_init_numeric_display_frame_primitives(RECT* bounds, menu_palette_primitives_t* menu);
-void battle_menu_run_numeric_display_panel_thread(void);
-
 /* windows and sprites */
 /* BATTLE scratch at 0x801cc074, in the event-overlay area past BATTLE.BIN:
  * battle_menu_build_sprite_page lays it out as two sprite pages and the
@@ -213,11 +185,8 @@ extern glyph_blit_t g_battle_menu_window_sprite_position;
 u8* battle_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 void battle_menu_build_and_upload_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset);
 void battle_menu_build_sprite_page(s32 page_index, RECT* base_screen);
-u8* battle_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tail_offset, s32 keep);
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
-void battle_menu_submit_icon_primitives(menu_icon_sprites_t* frame);
-void battle_menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
 
 /* text rendering */
 extern u16* const* g_battle_help_active_text_id_tables;
@@ -232,16 +201,9 @@ extern s32 g_battle_menu_text_section_offsets[];
 
 void battle_clear_menu_render_buffer(void* buffer, u32 bytes);
 void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* text);
-void battle_menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin);
-void battle_menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin);
-void battle_menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text);
-void battle_menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position);
 void battle_menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
-void battle_menu_render_text_image_at_record_origin(text_dialog_record_t* record);
-void battle_menu_set_text_origin(s32 x, s32 y);
-void battle_menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short);
 
 /* palettes and fades */
 extern menu_palette_pair_t g_battle_menu_default_palette_colors;
@@ -249,10 +211,6 @@ extern s32 g_battle_menu_panel_fade_intensity;
 extern s32 g_battle_menu_panel_fade_mode; /* menu_panel_fade_mode_e */
 extern u8 g_battle_menu_panel_fade_modes[];
 extern menu_palette_slot_t g_battle_numeric_display_palettes[];
-
-void battle_menu_fade_out_thread(void);
-void battle_menu_init_palette_and_text(s32 unused_0);
-void battle_menu_update_panel_fade(void);
 
 /* buffer allocation */
 enum { BATTLE_MENU_BUFFER_PAGE_COUNT = 53 };
@@ -267,21 +225,10 @@ void battle_menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 
 /* overlay loading */
 
-void battle_menu_open_bunit(void);
-void battle_menu_open_debugchr_unit_editor(void);
-s32 battle_menu_poll_small_load(void);
-void battle_menu_run_bunit_transition_thread(void);
-
 /* threads */
 extern s32 g_battle_menu_building_thread_started;
 
-s32 battle_menu_init_attack_resources_and_threads(void);
 s32 battle_menu_is_still_building(void);
-void battle_menu_run_equip_thread(void);
-void battle_menu_run_helpmenu_thread(void);
-void battle_menu_run_jobstts_thread(void);
-void battle_menu_selected_tile_info_display_thread(void);
 void battle_menu_start_building_thread(void);
-void battle_menu_start_entry_thread(void);
 
 #endif

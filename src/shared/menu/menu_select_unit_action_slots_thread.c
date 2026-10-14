@@ -31,7 +31,7 @@ void menu_select_unit_action_slots_thread(void) {
 
     /* Typed list indexing changes the address order; these byte views retain it. */
     for (i = (g_menu_restore_pending == 0) ? 2 : 0; i >= 0; i--) {
-        battle_menu_check_action_slot_restrictions(menu, i, check_unit);
+        menu_check_action_slot_restrictions(menu, i, check_unit);
         if (menu == ACTION_MENU_TYPE_ARITHMETICKS) {
             slot = (menu_list_selection_t*)((u8*)row + (i + offsetof(menu_unit_selection_record_t, lists[4])) + i);
             g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index = slot->selected_index;
@@ -54,7 +54,7 @@ void menu_select_unit_action_slots_thread(void) {
         if (g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index]
             == ACTION_MENU_TYPE_CHANGE_EQUIPMENT) {
             g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index = 0;
-            battle_menu_run_equip_thread();
+            menu_run_equip_thread();
         }
         g_thread_call_target = battle_menu_build_ability_list;
         thread_call_on_main_stack(i);

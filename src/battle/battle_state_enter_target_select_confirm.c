@@ -13,7 +13,7 @@ void battle_state_enter_target_select_confirm(void) {
     if (unit != 0) {
         stats = unit->stats;
         if (stats != 0) {
-            battle_unit_start_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, stats->battle_id, 0);
+            menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, stats->battle_id, 0);
         }
     }
     stats = battle_unit_get_casting()->stats;

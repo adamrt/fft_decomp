@@ -18,22 +18,22 @@ void menu_run_numeric_display_panel_thread(void) {
     record = g_battle_menu_numeric_display_panel_records;
     records = record;
     thread_set_current_task_id(THREAD_TASK_NUMERIC_DISPLAY_PANEL);
-    battle_gfx_set_draw_mode_for_texture_page(&record->mode0, MENU_TEXTURE_PAGE_FRAME);
-    battle_gfx_set_draw_mode_for_texture_page(&record->mode1, MENU_TEXTURE_PAGE_TEXT_IMAGES);
-    battle_gfx_init_scaled_draw_area_packets(&record->draw_areas);
+    gfx_set_draw_mode_for_texture_page(&record->mode0, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&record->mode1, MENU_TEXTURE_PAGE_TEXT_IMAGES);
+    menu_init_scaled_draw_area_packets(&record->draw_areas);
     number_images = menu_alloc_memory(sizeof(*number_images));
     battle_clear_menu_render_buffer(number_images, sizeof(*number_images));
     g_menu_text_state.pen.stride = 0x14;
-    battle_menu_set_text_origin(0, 0);
-    battle_menu_draw_numeric_display_entries(
+    menu_set_text_origin(0, 0);
+    menu_draw_numeric_display_entries(
         number_images->mobility, g_battle_numeric_display_entries, &g_menu_text_state.pen, 3);
     g_menu_text_state.pen.stride = 0x40;
-    battle_menu_set_text_origin(0, 0);
-    battle_menu_draw_numeric_display_entries(
+    menu_set_text_origin(0, 0);
+    menu_draw_numeric_display_entries(
         number_images->weapons, &g_battle_numeric_display_entries[3], &g_menu_text_state.pen, 4);
     g_menu_text_state.pen.stride = 0x64;
-    battle_menu_set_text_origin(0, 0);
-    battle_menu_draw_numeric_display_entries(
+    menu_set_text_origin(0, 0);
+    menu_draw_numeric_display_entries(
         number_images->combat, &g_battle_numeric_display_entries[7], &g_menu_text_state.pen, 8);
     LoadImage(&g_battle_numeric_display_text_rect_a, (u32*)number_images->mobility);
     LoadImage(&g_battle_numeric_display_text_rect_b, (u32*)number_images->weapons);
@@ -48,12 +48,12 @@ void menu_run_numeric_display_panel_thread(void) {
     mem_copy_bytes_nonempty(&record[1], record, sizeof(*record));
     record[0].palette = &g_battle_numeric_display_palettes[0].primitives;
     record[1].palette = &g_battle_numeric_display_palettes[1].primitives;
-    battle_menu_init_numeric_display_frame_primitives(&g_battle_numeric_display_frame_rect, record[0].palette);
-    battle_menu_init_numeric_display_frame_primitives(&g_battle_numeric_display_frame_rect, record[1].palette);
+    menu_init_numeric_display_frame_primitives(&g_battle_numeric_display_frame_rect, record[0].palette);
+    menu_init_numeric_display_frame_primitives(&g_battle_numeric_display_frame_rect, record[1].palette);
     for (frame = 0;; frame++) {
         thread_yield();
         record = &records[frame & 1];
-        battle_gfx_build_scaled_draw_area_pair_swapped(
+        gfx_build_scaled_draw_area_pair_swapped(
             &record->draw_areas, &g_battle_numeric_display_texture_window, frame, g_main_gfx_screen_polarity);
         if (battle_thread_get_current_parameter_3() != 0) {
             break;

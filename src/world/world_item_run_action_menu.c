@@ -151,8 +151,8 @@ s8 world_item_run_action_menu(void) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
         g_world_item_category_input_lock = 1;
-        world_menu_set_selection_record(g_world_item_menu_category, g_world_menu_cursor_position,
-            g_world_menu_scroll_offset, g_world_menu_entry_ids);
+        menu_set_selection_record(g_world_item_menu_category, g_world_menu_cursor_position, g_world_menu_scroll_offset,
+            g_world_menu_entry_ids);
         g_world_item_menu_category = result;
         world_item_build_category_list(g_world_formation_selected_unit_index, g_world_item_menu_category + 1,
             g_world_item_menu_category != 4 ? g_world_item_menu_category + 1 : ITEM_LIST_FILTER_OTHER,

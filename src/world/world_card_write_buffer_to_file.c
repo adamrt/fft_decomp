@@ -15,7 +15,7 @@ s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer
         if (world_card_open_file_with_retries(filename, (source->header.block_count << 16) | 0x200) < 0) {
             return -1;
         }
-        if (world_card_close_file_with_retries(g_world_card_open_descriptor) == 0) {
+        if (card_file_close_with_retries(g_world_card_open_descriptor) == 0) {
             return -1;
         }
     }
@@ -24,7 +24,7 @@ s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer
         return -1;
     }
     if (_get_error(g_world_card_open_descriptor) != 0) {
-        world_card_close_file_with_retries(g_world_card_open_descriptor);
+        card_file_close_with_retries(g_world_card_open_descriptor);
         return -1;
     }
     total_written = 0;
@@ -40,7 +40,7 @@ s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer
             }
         }
     }
-    if (world_card_close_file_with_retries(g_world_card_open_descriptor) == 0) {
+    if (card_file_close_with_retries(g_world_card_open_descriptor) == 0) {
         return -1;
     }
     /* The CARD twin retains this ineffective result check. GCC removes it

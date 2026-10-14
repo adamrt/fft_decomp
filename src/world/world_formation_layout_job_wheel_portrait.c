@@ -27,5 +27,5 @@ void world_formation_layout_job_wheel_portrait(void) {
     rect.y = entry.v;
     rect.w = entry.w >> 2;
     rect.h = entry.h;
-    world_gfx_enqueue_draw_move(&rect, 0x240, 0x130, 0);
+    menu_gfx_enqueue_draw_move(&rect, 0x240, 0x130, 0);
 }

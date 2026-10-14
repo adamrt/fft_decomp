@@ -25,7 +25,7 @@ void battle_state_run_deployment(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS) != 0) {
         fade_enabled = 0;
     }
-    g_battle_deployment_skipped = battle_menu_init_attack_resources_and_threads();
+    g_battle_deployment_skipped = menu_init_attack_resources_and_threads();
     main_gfx_build_now_loading_center(g_battle_deployment_skipped);
     map_id = g_map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
     g_battle_state_map_init_step = 0;

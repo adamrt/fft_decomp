@@ -19,13 +19,13 @@ s32 world_menu_update_menus_and_event_speed(u32* ot, u32 input) {
     if (g_menu_input_mode != MENU_INPUT_PLAYER) {
         input = g_script_unfiltered_controller_input;
     }
-    world_map_store_selected_tile_data();
+    map_store_selected_tile_data();
     value = -2;
     for (i = 3; i >= 0; i--) {
         g_menu_pending_selection[i] = value;
     }
     script_run_event_frame(ot, input);
-    world_menu_update_panel_fade();
+    menu_update_panel_fade();
     result = world_menu_resolve_selection();
     if ((world_thread_is_running_asm(THREAD_SLOT_MENU) != 0
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)

@@ -23,12 +23,11 @@ void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode) {
         y = 0x4F;
         drawing.script = &g_world_item_category_tabs_wide_script;
     }
-    world_menu_run_script_with_palette_mode(drawing.script, 0, mode);
+    menu_run_script_with_palette_mode(drawing.script, 0, mode);
     drawing.quad = &g_world_item_category_tab_sprites[row];
     drawing.quad->position.x = x;
     drawing.quad->position.y = y - (row == 0);
-    world_gfx_enqueue_oriented_textured_quad(
-        drawing.quad, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
+    menu_gfx_enqueue_oriented_textured_quad(drawing.quad, world_menu_get_sprite_color(), TEXTURE_UV_FLIP_NONE, 0, 0x2C);
     cursor = &g_world_item_category_tab_cursor_sprite;
     cursor_x = x + 9;
     if (row == 3) {
@@ -36,5 +35,5 @@ void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode) {
     }
     cursor->position.x = cursor_x;
     g_world_item_category_tab_cursor_sprite.position.y = y + 10;
-    world_gfx_enqueue_oriented_textured_quad(cursor, 0, TEXTURE_UV_FLIP_NONE, 0, 0x2D);
+    menu_gfx_enqueue_oriented_textured_quad(cursor, 0, TEXTURE_UV_FLIP_NONE, 0, 0x2D);
 }

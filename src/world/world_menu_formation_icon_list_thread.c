@@ -33,9 +33,9 @@ void world_menu_formation_icon_list_thread(void) {
     buffer = world_menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
-    world_menu_set_text_origin(8, 9);
+    menu_set_text_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    world_menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, buffer);
     for (i = 0;; i++) {
         thread_yield();
@@ -45,7 +45,7 @@ void world_menu_formation_icon_list_thread(void) {
         record = &records[i & 1].base;
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
-        world_menu_update_icon_cursor_sprites(param, record, i, cursor);
+        menu_update_icon_cursor_sprites(param, record, i, cursor);
         if (menu_should_close_thread(&g_world_formation_menu_input_state.new_buttons) != 0) {
             break;
         }
@@ -58,7 +58,7 @@ void world_menu_formation_icon_list_thread(void) {
         setRGB0(&record->sprites[1], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
         setRGB0(&record->sprites[2], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
         setRGB0(&record->sprites[3], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
-        world_menu_submit_icon_primitives(record);
+        menu_submit_icon_primitives(record);
     }
     thread_yield();
     thread_exit_current();

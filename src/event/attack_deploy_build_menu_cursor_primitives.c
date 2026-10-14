@@ -9,7 +9,7 @@ void attack_deploy_build_menu_cursor_primitives(s32 frame, u32 mode, attack_depl
     s32 palette;
     POLY_FT4* ptr;
 
-    battle_gfx_set_draw_mode_for_texture_page(&render_buffer->menu_draw_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&render_buffer->menu_draw_mode, MENU_TEXTURE_PAGE_FRAME);
 
     for (i = 0; i < 4; i++) {
         ptr = &render_buffer->menu_cursor[i];

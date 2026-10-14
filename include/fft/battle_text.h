@@ -55,8 +55,6 @@ extern s32 g_battle_text_substitution_value_28;
 
 /* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
 u8* battle_text_find_entry(u32 text_id);
-void battle_text_restore_section_pointers(void);
-void battle_text_save_section_pointers(void);
 
 /* messages */
 extern s32 g_battle_text_awaiting_input;
@@ -64,24 +62,15 @@ extern s32 g_battle_text_current_line;
 extern u16 g_battle_text_speaker_swap_unit_a;
 extern u16 g_battle_text_speaker_swap_unit_b;
 
-void text_build_display_message(s32 offset, s32 flags, s32* out_width);
-void battle_text_build_display_message(s32 offset, s32 flags, s32* out_width);
 void battle_text_run_dialog_thread(void);
 
 /* typewriter entrypoint */
-
-void battle_text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay);
 
 /* spell quotes */
 extern u8 g_battle_spell_quote_exception_skillsets[];
 extern s32 g_battle_spell_quote_last_ability_id;
 
-s32 text_is_spell_quote_exception_skillset(s32 skillset_id);
-void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32 enabled);
-
-s32 battle_text_is_spell_quote_exception_skillset(s32 skillset_id);
 void battle_text_run_spell_quote_thread(void);
-void battle_text_select_ability_announcement(action_command_t* action, s32 unit_id, s32 enabled);
 
 /* diagnostics */
 extern const char g_battle_text_heap_dp_format[];      /* "DP %x\n" */

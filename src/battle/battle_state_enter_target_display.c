@@ -19,7 +19,7 @@ void battle_state_enter_target_display(void) {
     if (unit != 0) {
         target = unit->stats;
         if (target != 0) {
-            battle_unit_start_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, target->battle_id, 0);
+            menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, target->battle_id, 0);
         }
     }
 }

@@ -10,7 +10,7 @@
 void menu_reset_subsystems(void) {
     script_seed_random_from_vsync();
     menu_reset_window_buffer_slots();
-    battle_gfx_clear_tpage7_vram_allocation_grid();
+    gfx_clear_texture_allocation_grid();
     battle_menu_init_buffer_allocator();
     thread_reset_scheduler();
 }

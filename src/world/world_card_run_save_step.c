@@ -49,10 +49,9 @@ void world_card_run_save_step(s32 slot) {
             if (descriptor >= 0) {
                 header_written = world_card_seek_file_with_retries(descriptor, 0x100, 0);
                 if (header_written != -1) {
-                    header_written
-                        = world_card_write_file_with_retries(descriptor, &g_world_load_work_buffer->summary, 0x80);
+                    header_written = card_file_write_with_retries(descriptor, &g_world_load_work_buffer->summary, 0x80);
                 }
-                if (world_card_close_file_with_retries(descriptor) == 0) {
+                if (card_file_close_with_retries(descriptor) == 0) {
                     header_written = 0;
                 }
             }

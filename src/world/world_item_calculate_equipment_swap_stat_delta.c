@@ -12,7 +12,7 @@ void world_item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_stora
 
     menu_clear_stat_preview(total, detail_total);
     for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_COUNT; slot++) {
-        world_item_calculate_swap_stat_delta(
+        menu_calculate_swap_stat_delta(
             &detail, &delta, items_before[slot] & WORLD_ITEM_ID_MASK, items_after[slot] & WORLD_ITEM_ID_MASK, slot);
         menu_subtract_scaled_stat_preview(detail_total, detail_total, &detail, -1);
         total->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus += delta.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;

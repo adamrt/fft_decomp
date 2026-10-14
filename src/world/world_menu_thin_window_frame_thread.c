@@ -144,7 +144,7 @@ void world_menu_thin_window_frame_thread(void) {
     frame = 0;
     while (world_thread_get_current_parameter_3() == 0) {
         prim = &g_world_menu_panel_buffer.panel_frames[frame & 1];
-        world_gfx_build_scaled_draw_area_pair_swapped(
+        gfx_build_scaled_draw_area_pair_swapped(
             &prim->draw_areas, (const RECT*)menu, frame, g_active_graphics_buffer_index);
         /* The CLUT id the nine border sprites are drawn with this frame, which
            the target keeps in this variable's register once the texture column
@@ -173,6 +173,6 @@ void world_menu_thin_window_frame_thread(void) {
     }
     thread_yield();
     menu_free_memory(pixels);
-    world_gfx_free_tpage7_vram(&texture);
+    gfx_free_texture_rect(&texture);
     thread_exit_current();
 }

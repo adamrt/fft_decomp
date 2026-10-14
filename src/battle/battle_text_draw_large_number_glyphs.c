@@ -6,7 +6,7 @@
 
 /* Draws `value` right to left as `digits & 0xff` large glyphs at `pos`, with
  * the sign and marker glyphs selected by the flag bits of `digits`. Sibling of
- * battle_menu_draw_number_glyphs (0x8014ac30) on the 5-pixel font. */
+ * menu_draw_number_glyphs (0x8014ac30) on the 5-pixel font. */
 void battle_text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;

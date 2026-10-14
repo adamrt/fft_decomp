@@ -19,7 +19,7 @@ void world_menu_at_list_select_unit_thread(void) {
     }
     g_menu_at_list_selection_finished = 0;
     g_world_menu_transition_timeout = 0;
-    world_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
+    menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
     thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_UNIT_SUMMARY_PANEL);

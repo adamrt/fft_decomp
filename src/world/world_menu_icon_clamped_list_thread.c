@@ -33,9 +33,9 @@ void world_menu_icon_clamped_list_thread(void) {
     buffer = world_menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
-    world_menu_set_text_origin(8, 9);
+    menu_set_text_origin(8, 9);
     g_menu_text_palette_offset = 0;
-    world_menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
+    menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, buffer);
     for (i = 0;; i++) {
         record = &records[i & 1];
@@ -59,7 +59,7 @@ void world_menu_icon_clamped_list_thread(void) {
         }
         sprites = &record->base;
         menu_select_icon_cluts(sprites);
-        world_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
+        menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
         gfx_draw_or_append_gpu_primitive(&sprites->sprites[3].tag);
         gfx_draw_or_append_gpu_primitive(&sprites->sprites[2].tag);
         gfx_draw_or_append_gpu_primitive(&sprites->sprites[1].tag);

@@ -17,7 +17,7 @@ void world_shop_run_item_sell_list_step(void) {
             g_world_menu_entry_ids, g_world_menu_cursor_position, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_world_menu_script_callbacks[0].value = world_menu_get_entry_item_equipped_count;
         g_world_menu_script_callbacks[1].value = world_menu_get_entry_item_count;
-        g_world_menu_script_callbacks[2].icon = world_item_build_type_icon_source;
+        g_world_menu_script_callbacks[2].icon = menu_build_item_type_icon_source;
         g_world_menu_script_callbacks[3].icon = world_menu_get_entry_item_icon_source;
         g_world_menu_script_callbacks[4].value = world_item_get_selected_half_price;
         g_world_menu_script_callbacks[5].value = world_menu_get_entry_item_equipped_count;
@@ -40,7 +40,7 @@ void world_shop_run_item_sell_list_step(void) {
         }
     }
     world_menu_switch_item_category(g_world_input_secondary_repeat);
-    world_menu_run_script_with_palette_mode(
+    menu_run_script_with_palette_mode(
         &g_world_shop_sell_list_menu_script, g_world_input_primary_repeat, g_menu_input_lock_mode);
     world_shop_run_obtain_gil_menu();
 }

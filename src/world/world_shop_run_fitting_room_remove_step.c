@@ -76,7 +76,7 @@ void world_shop_run_fitting_room_remove_step(void) {
         g_world_shop_previewed_equip_slot = slot;
         if ((equipped_item >> 15) != 0) {
             world_menu_toggle_preview_stats_window(1);
-            world_item_calculate_swap_stat_delta(&g_world_item_preview_stat_detail, &g_world_selected_unit_stat_summary,
+            menu_calculate_swap_stat_delta(&g_world_item_preview_stat_detail, &g_world_selected_unit_stat_summary,
                 equipped_item, g_world_shop_fitting_room_items[g_world_formation_selected_unit_index][index], index);
             g_world_preview_stats_thread_params.redraw_request = 1;
         } else {

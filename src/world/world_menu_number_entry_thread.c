@@ -83,8 +83,8 @@ void world_menu_number_entry_thread(void) {
     buffer = world_menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     *stride = param->inner_width;
-    world_menu_set_text_origin(8, 9);
-    world_menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
+    menu_set_text_origin(8, 9);
+    menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
     world_gfx_draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
     LoadImage(&rect, buffer);
     redraw = 1;
@@ -141,7 +141,7 @@ void world_menu_number_entry_thread(void) {
             buffer = world_menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             *stride = param->inner_width;
-            world_menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
+            menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
             world_gfx_draw_signed_number(
                 value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
             LoadImage(&rect, buffer);
@@ -158,7 +158,7 @@ void world_menu_number_entry_thread(void) {
             cursor_quad->clut = 0x7DFC;
             shadow_quad->clut = 0x7E3C;
         }
-        world_menu_update_icon_cursor_sprites(param, record, i, -1);
+        menu_update_icon_cursor_sprites(param, record, i, -1);
         menu_select_icon_cluts(record);
         gfx_draw_or_append_gpu_primitive(&cursor_quads[i & 1]);
         gfx_draw_or_append_gpu_primitive(&shadow_quads[i & 1]);

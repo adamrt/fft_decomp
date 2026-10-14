@@ -100,9 +100,9 @@ void world_menu_unit_status_banner_thread(void) {
     }
     shake = 0;
 
-    world_menu_init_numeric_display_frame_primitives(&g_gfx_portrait_origin, &summary->numeric_frame);
-    world_gfx_set_draw_mode_for_texture_page(&summary->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    world_gfx_set_draw_mode_for_texture_page(&summary->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
+    menu_init_numeric_display_frame_primitives(&g_gfx_portrait_origin, &summary->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&summary->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&summary->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&summary->label_sprites[0], 7, 0x7CBC);
     menu_init_sprite_array(&summary->value_sprites[0], 4, 0x7CBC);
     for (frame = 0; frame < 4; frame++) {
@@ -129,9 +129,9 @@ void world_menu_unit_status_banner_thread(void) {
             &g_world_unit_summary_label_sprite_params[frame]);
     }
     mem_copy_bytes_nonempty(summary + 1, summary, sizeof(menu_status_panel_editor_packet_t));
-    world_gfx_set_draw_mode_for_texture_page(&status->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
-    world_gfx_set_draw_mode_for_texture_page(&status->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    world_menu_init_numeric_display_frame_primitives(&g_world_unit_status_panel_origin, &status->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&status->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&status->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    menu_init_numeric_display_frame_primitives(&g_world_unit_status_panel_origin, &status->numeric_frame);
     menu_init_sprite_array(status->sprites, 7, 0x7C3C);
     menu_init_default_poly_ft4(&status->portrait);
     text_configure_sprite_vram(&rects[2], 0x58, 0x20, status->sprites, 0);
@@ -356,41 +356,40 @@ void world_menu_unit_status_banner_thread(void) {
             {
                 g_menu_text_state.pen.stride = 0x38;
                 if (g_world_preview_stats_window_active == 0) {
-                    world_menu_draw_numeric_display_entries(stat_image, entries, &g_menu_text_state.pen, 6);
+                    menu_draw_numeric_display_entries(stat_image, entries, &g_menu_text_state.pen, 6);
                 } else {
                     menu_text_render_decimal_entry_list(stat_image, &entries[10], &g_menu_text_state.pen, 1);
                     menu_text_render_decimal_entry_list(stat_image, &entries[12], &g_menu_text_state.pen, 1);
-                    world_menu_draw_numeric_display_entries(stat_image, &entries[11], &g_menu_text_state.pen, 1);
-                    world_menu_draw_numeric_display_entries(stat_image, &entries[13], &g_menu_text_state.pen, 1);
-                    world_menu_draw_numeric_display_entries(stat_image, &entries[4], &g_menu_text_state.pen, 2);
+                    menu_draw_numeric_display_entries(stat_image, &entries[11], &g_menu_text_state.pen, 1);
+                    menu_draw_numeric_display_entries(stat_image, &entries[13], &g_menu_text_state.pen, 1);
+                    menu_draw_numeric_display_entries(stat_image, &entries[4], &g_menu_text_state.pen, 2);
                 }
             }
             LoadImage(&rects[0], (u32*)stat_image);
             stat_image_upper = stat_image + 0x400;
             g_menu_text_state.pen.stride = 0x60;
-            world_menu_draw_numeric_display_entries(stat_image_upper, &entries[8], &g_menu_text_state.pen, 2);
+            menu_draw_numeric_display_entries(stat_image_upper, &entries[8], &g_menu_text_state.pen, 2);
             LoadImage(&rects[1], (u32*)stat_image_upper);
             display->work = 0;
             world_clear_menu_render_buffer(name_image, 0x580);
             g_menu_text_state.pen.stride = 0x58;
-            world_menu_set_text_origin(0, 0);
-            world_menu_display_text_entry(
-                identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_text_state.pen);
-            world_menu_set_text_origin(0, 0x10);
-            world_menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_text_state.pen);
+            menu_set_text_origin(0, 0);
+            menu_display_text_entry(identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_text_state.pen);
+            menu_set_text_origin(0, 0x10);
+            menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_text_state.pen);
             LoadImage(&rects[2], (u32*)name_image);
             world_clear_menu_render_buffer(number_images, sizeof(*number_images));
             g_menu_text_state.pen.stride = 0x10;
-            world_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             world_text_render_decimal_value_or_dashes(
                 identity->brave, 0x202, number_images->brave, &g_menu_text_state.pen);
             LoadImage(&rects[3], (u32*)number_images->brave);
-            world_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             world_text_render_decimal_value_or_dashes(
                 identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
             if (g_world_unit_join_screen_active == 0) {
-                world_menu_set_text_origin(0, 0);
+                menu_set_text_origin(0, 0);
                 world_text_render_decimal_value_or_dashes(
                     identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_text_state.pen);
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
@@ -444,11 +443,11 @@ void world_menu_unit_status_banner_thread(void) {
         frame += 1;
     }
     thread_yield();
-    world_gfx_free_tpage7_vram(&rects[0]);
-    world_gfx_free_tpage7_vram(&rects[1]);
-    world_gfx_free_tpage7_vram(&rects[2]);
-    world_gfx_free_tpage7_vram(&rects[3]);
-    world_gfx_free_tpage7_vram(&rects[4]);
-    world_gfx_free_tpage7_vram(&rects[5]);
+    gfx_free_texture_rect(&rects[0]);
+    gfx_free_texture_rect(&rects[1]);
+    gfx_free_texture_rect(&rects[2]);
+    gfx_free_texture_rect(&rects[3]);
+    gfx_free_texture_rect(&rects[4]);
+    gfx_free_texture_rect(&rects[5]);
     thread_exit_current();
 }

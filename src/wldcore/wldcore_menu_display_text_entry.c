@@ -8,5 +8,5 @@ void wldcore_menu_display_text_entry(s32 index, s32 text_id, point32_t point, u3
     origin.rect.x = point.x;
     origin.rect.y = point.y;
     origin.stride = g_wldcore_window_render_records[index].bounds.w;
-    world_menu_display_text_entry(text_id, (u8*)buffer, &origin);
+    menu_display_text_entry(text_id, (u8*)buffer, &origin);
 }

@@ -9,10 +9,10 @@
 #include "psx/types.h"
 
 /* The status buffer is menu_status_panel_buffer_t and the thread record
- * menu_status_thread_t, as in the WORLD twin world_menu_equipment_and_ability_panel_thread. */
+ * menu_status_thread_t, as in the WORLD twin menu_run_equipment_ability_panel_thread. */
 
 /* Thread task 0x3b: the combined status panel for the selected unit. BUNIT
- * twin of WORLD world_menu_equipment_and_ability_panel_thread. */
+ * twin of WORLD menu_run_equipment_ability_panel_thread. */
 void menu_run_equipment_ability_panel_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_buffer_t* screen;
@@ -28,7 +28,7 @@ void menu_run_equipment_ability_panel_thread(void) {
     screen = g_bunit_character_status_frames;
     base = g_bunit_character_status_frames;
     state = &g_bunit_editor_unit_fields.state;
-    battle_menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
     for (i = 0; i < 2; i++) {
@@ -84,10 +84,10 @@ void menu_run_equipment_ability_panel_thread(void) {
         if (frame == 0 || thread->redraw_request == 1) {
             battle_clear_menu_render_buffer(g_bunit_character_status_equipment_text_image, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             for (i = 0; i < 5; i++) {
                 if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
-                    battle_menu_display_text_entry(state->equipment[i] + TEXT_ID_ITEM_NAME_BASE,
+                    menu_display_text_entry(state->equipment[i] + TEXT_ID_ITEM_NAME_BASE,
                         g_bunit_character_status_equipment_text_image, &g_menu_text_state.pen);
                 }
                 g_menu_text_state.pen.rect.y += 0x10;
@@ -96,7 +96,7 @@ void menu_run_equipment_ability_panel_thread(void) {
                 &g_bunit_character_status_equipment_text_rect, (u32*)g_bunit_character_status_equipment_text_image);
             battle_clear_menu_render_buffer(g_bunit_character_status_ability_text_image, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             for (i = 0; i < 2; i++) {
                 mode = state->ability_ids[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
                 if (state->generic_monster != 0) {
@@ -105,14 +105,13 @@ void menu_run_equipment_ability_panel_thread(void) {
                 if ((u16)state->ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
                     g_menu_text_state.pen.rect.y += 0x10;
                 } else {
-                    battle_menu_display_text_entry(
-                        mode, g_bunit_character_status_ability_text_image, &g_menu_text_state.pen);
+                    menu_display_text_entry(mode, g_bunit_character_status_ability_text_image, &g_menu_text_state.pen);
                     g_menu_text_state.pen.rect.y += 0x10;
                 }
             }
             for (; i < 5; i++) {
                 if (state->ability_ids[i] != -1) {
-                    battle_menu_display_text_entry(state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE,
+                    menu_display_text_entry(state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE,
                         g_bunit_character_status_ability_text_image, &g_menu_text_state.pen);
                 }
                 g_menu_text_state.pen.rect.y += 0x10;

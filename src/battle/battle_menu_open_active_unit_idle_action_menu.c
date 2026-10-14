@@ -18,7 +18,7 @@ void battle_menu_open_active_unit_idle_action_menu(void) {
     g_battle_game_state = BATTLE_GAME_STATE_IDLING_ACTION_MENUS;
 
     if (unit != 0 && unit->stats != 0) {
-        battle_unit_start_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->stats->battle_id, 0);
+        menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->stats->battle_id, 0);
     }
     battle_menu_build_idle_action_menu(battle_menu_get_id_based_on_mount_moveable_actable(unit->stats->battle_id));
 }

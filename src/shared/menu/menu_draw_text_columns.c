@@ -18,7 +18,7 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             if ((layout->text_ids[column][index] & 0x7FF) == 0x7FF) {
                 continue;
             }
-            battle_menu_set_text_origin(layout->x[column], row * 0x10);
+            menu_set_text_origin(layout->x[column], row * 0x10);
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }
@@ -27,11 +27,11 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
                 g_menu_text_state.pen.color = 0x44444444;
             }
             if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                battle_menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
+                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                battle_menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                battle_menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
             }
             g_menu_text_palette_offset = 0;
             g_menu_text_state.pen.color = 0;

@@ -31,6 +31,6 @@ void menu_run_bunit_return_thread(void) {
     g_menu_overlay_state = 0;
     g_gfx_screen_fade = 0;
     g_world_menu_transition_timeout = 0;
-    world_unit_start_view_thread(UNIT_VIEW_MODE_HOVERED_UNIT, g_menu_selected_unit.battle_id, 0xFF);
+    menu_start_unit_view_thread(UNIT_VIEW_MODE_HOVERED_UNIT, g_menu_selected_unit.battle_id, 0xFF);
     thread_exit_current();
 }

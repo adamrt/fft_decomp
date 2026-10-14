@@ -80,7 +80,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
         world_gfx_present_frame_and_swap_packet_buffer(0, 0);
         world_card_input_update_with_message_state();
         world_gfx_update_fade_in_tile();
-        world_gfx_enqueue_tile(&g_world_card_screen_background_tile, &g_world_gfx_black_tile_color, 0, 0);
+        gfx_enqueue_tile(&g_world_card_screen_background_tile, &g_world_gfx_black_tile_color, 0, 0);
         if (g_world_card_menu_step == WORLD_CARD_MENU_STEP_SELECT_SAVE
             && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0) {
             input = g_world_input_primary_repeat;

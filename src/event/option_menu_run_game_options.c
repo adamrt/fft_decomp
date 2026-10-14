@@ -79,8 +79,8 @@ void option_menu_run_game_options(void) {
     clear.w = (s16)image_parameters.width / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);
-    battle_gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
-    battle_gfx_set_draw_mode_for_texture_page(&page->text_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&page->text_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     texture_window.x = 0;
     texture_window.y = 0;
     texture_window.w = 0x100;
@@ -134,8 +134,8 @@ void option_menu_run_game_options(void) {
     image_rect.w = g_menu_text_state.pen.stride >> 2;
     LoadImage(&image_rect, (u32*)image);
     thread_wait_frames(1);
-    battle_gfx_init_scaled_draw_area_packets(&page->title_area);
-    battle_gfx_init_scaled_draw_area_packets(&page->value_area);
+    menu_init_scaled_draw_area_packets(&page->title_area);
+    menu_init_scaled_draw_area_packets(&page->value_area);
     battle_menu_init_semitransparent_sprt(&base->title);
     text_configure_sprite_vram(&g_option_menu_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
     image = battle_menu_build_and_upload_window_frame_image(
@@ -143,8 +143,8 @@ void option_menu_run_game_options(void) {
     base->title.x0 = entry->window.x;
     base->title.y0 = entry->window.y + entry->window.h + 1;
     g_menu_text_state.pen.stride = entry->inner_width;
-    battle_menu_set_text_origin(0x18, 0xE);
-    battle_menu_display_text_entry(0x502B, image, &g_menu_text_state.pen);
+    menu_set_text_origin(0x18, 0xE);
+    menu_display_text_entry(0x502B, image, &g_menu_text_state.pen);
     LoadImage(&g_option_menu_title_image_rect, (u32*)image);
     thread_wait_frames(1);
     menu_free_memory(image);
@@ -164,8 +164,8 @@ void option_menu_run_game_options(void) {
     base->value.y0 = entry->window.y + entry->window.h + 0xF;
     battle_clear_menu_render_buffer(buffer, 0x1E0);
     g_menu_text_state.pen.stride = 0x3C;
-    battle_menu_set_text_origin(0, 0);
-    battle_menu_display_text_entry(0x5021, buffer, &g_menu_text_state.pen);
+    menu_set_text_origin(0, 0);
+    menu_display_text_entry(0x5021, buffer, &g_menu_text_state.pen);
     LoadImage(&g_option_menu_value_image_rect, (u32*)buffer);
     mem_copy_bytes_nonempty(&base[1], base, sizeof(options_menu_page_t));
     for (;;) {
@@ -210,13 +210,12 @@ void option_menu_run_game_options(void) {
                 for (column = 0; column < 2; column++) {
                     if (layout->text_ids[column] != (s16*)-1) {
                         index = cursor + row_offset + delta;
-                        battle_menu_set_text_origin(layout->x[column], 0);
+                        menu_set_text_origin(layout->x[column], 0);
                         g_menu_text_palette_offset = layout->text_colors[column][index];
                         if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                            battle_menu_display_text_entry(
-                                layout->text_ids[column][index], image, &g_menu_text_state.pen);
+                            menu_display_text_entry(layout->text_ids[column][index], image, &g_menu_text_state.pen);
                         } else {
-                            battle_menu_display_number_entry(
+                            menu_display_number_entry(
                                 layout->text_ids[column][index], 2, image, &g_menu_text_state.pen);
                         }
                     }
@@ -240,8 +239,8 @@ void option_menu_run_game_options(void) {
             index = cursor + row_offset + delta;
             battle_clear_menu_render_buffer(buffer, 0x1E0);
             g_menu_text_state.pen.stride = 0x3C;
-            battle_menu_set_text_origin(0, 0);
-            battle_menu_display_text_entry(
+            menu_set_text_origin(0, 0);
+            menu_display_text_entry(
                 g_option_value_text_id_bases[index] + g_option_current_values[index], buffer, &g_menu_text_state.pen);
             LoadImage(&g_option_menu_value_image_rect, (u32*)buffer);
         }
@@ -254,7 +253,7 @@ void option_menu_run_game_options(void) {
             ClearImage(&clear, 0, 0, 0);
         }
         menu_select_icon_cluts(&page->icons.base);
-        battle_menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
+        menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
         page->icons.base.sprites[1].y0 += 2;
         page->icons.base.sprites[2].y0 += 2;
         entry->selected_index = row_offset + cursor;
@@ -308,9 +307,8 @@ void option_menu_run_game_options(void) {
         } else {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
         }
-        battle_gfx_build_scaled_draw_area_pair_swapped(
-            &page->title_area, &entry->window, i, g_main_gfx_screen_polarity);
-        battle_gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_main_gfx_screen_polarity);
+        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_main_gfx_screen_polarity);
+        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_main_gfx_screen_polarity);
         gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
         gfx_draw_or_append_gpu_primitive(&page->icon_mode);
         gfx_draw_or_append_gpu_primitive(frame);
@@ -350,8 +348,8 @@ void option_menu_run_game_options(void) {
         g_main_menu_scroll_fast_step = g_option_input_repeat_timings[column].scroll_fast_step;
     }
     menu_free_memory(buffer);
-    battle_gfx_free_tpage7_vram(&g_option_menu_title_image_rect);
-    battle_gfx_free_tpage7_vram(&g_option_menu_value_image_rect);
+    gfx_free_texture_rect(&g_option_menu_title_image_rect);
+    gfx_free_texture_rect(&g_option_menu_value_image_rect);
     thread_wait_frames(1);
     thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
     thread_exit_current();

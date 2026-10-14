@@ -16,9 +16,9 @@ void wldcore_start_core_background_threads(s32 party_index) {
     thread8->x = 0;
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, world_menu_unit_status_banner_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)thread8, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, world_menu_run_numeric_editor_thread);
+    thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_wldcore_threadc_params, 0, 0);
-    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, world_menu_equipment_and_ability_panel_thread);
+    thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_wldcore_thread9_params, 0, 0);
     g_main_system_flags |= MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS;
 }

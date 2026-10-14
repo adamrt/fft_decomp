@@ -6,7 +6,7 @@ s32 world_card_probe_selected(void) {
     s32 result = world_card_wait_for_selected_status(10);
 
     if (result == CARD_IO_RESULT_NEW_CARD) {
-        if (world_card_create_new_with_retries(g_world_card_selected_slot * 0x10, 10) != CARD_IO_RESULT_COMPLETE) {
+        if (card_io_create_new_with_retries(g_world_card_selected_slot * 0x10, 10) != CARD_IO_RESULT_COMPLETE) {
             return CARD_IO_RESULT_TIMEOUT;
         }
         result = world_card_load_with_retries(g_world_card_selected_slot * 0x10, 0x1e);

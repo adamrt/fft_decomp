@@ -1369,7 +1369,4 @@ extern image_load_parameters_t g_battle_unit_summary_sprite_image_params[];
 extern s32 g_battle_companion_overlay_state;
 extern u8 g_battle_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE];
 
-void battle_unit_view_supervisor_thread(void);
-void battle_unit_start_view_thread(s32 mode, s32 unit_a, s32 unit_b);
-
 #endif

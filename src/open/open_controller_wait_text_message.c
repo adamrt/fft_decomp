@@ -11,6 +11,6 @@ void open_controller_wait_text_message(open_controller_record_t* record) {
     g_open_menu_blocked_buttons = record->text_message.saved_blocked_buttons;
     g_open_current_controller_index--;
     if (record->text_message.run_followup != 0) {
-        world_text_restore_section_pointers();
+        text_restore_section_pointers();
     }
 }

@@ -132,13 +132,12 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         cursor.x = value;
         world_menu_set_draw_priority(0x28);
         world_menu_draw_animated_vertical_cursor(&cursor, &g_world_name_entry_text_cursor_anim, busy);
-        world_menu_run_script_with_palette_mode(&g_world_name_entry_display_script, 0, busy);
+        menu_run_script_with_palette_mode(&g_world_name_entry_display_script, 0, busy);
         world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50,
             g_world_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50,
             g_world_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
-        world_menu_run_script_with_palette_mode(
-            &g_world_name_entry_keyboard_script, g_world_input_primary_repeat, busy);
+        menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_world_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
         world_input_update_event_state(

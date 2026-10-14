@@ -270,10 +270,10 @@ typedef struct battle_menu_status_panel_numeric_geometry {
 
 /* Numeric editor panel buffer (0x2c0 bytes), double buffered by the
  * *_editor_run_numeric_thread routines (EQUIP equip_editor_run_numeric_thread copies it with
- * sizeof). The draw modes are set up with battle_gfx_set_draw_mode_for_texture_page /
+ * sizeof). The draw modes are set up with gfx_set_draw_mode_for_texture_page /
  * SetDrawMode, the 18 SPRTs by the gfx_init_image_loading walk,
  * +0x18c and +0x298 are the arguments of
- * battle_menu_init_numeric_display_frame_primitives and
+ * menu_init_numeric_display_frame_primitives and
  * *_gfx_init_scaled_draw_area_packets, and the draw offsets follow from the
  * SetDrawOffset(packet, position) pairs. */
 typedef struct menu_status_panel_numeric_buffer {
@@ -457,7 +457,7 @@ enum {
 /* Character-editor packet block (0x30c bytes) built by the editor display
  * threads. Two copies sit back to back and `frame & 1` selects one, so the
  * copy stride proves the size. The head is the numeric display frame that
- * battle_menu_init_numeric_display_frame_primitives builds, the SPRT/POLY
+ * menu_init_numeric_display_frame_primitives builds, the SPRT/POLY
  * strides come from the walks that configure and submit them, and the
  * draw-offset packets from the SetDrawOffset pairs. */
 typedef struct menu_status_panel_editor_packet {
@@ -509,7 +509,7 @@ typedef struct menu_status_panel_display_thread {
  * the DEBUGCHR routine and its byte-identical twins:
  *  - the DR_MODE packets at +0x00/+0x0c/+0x18 are submitted individually, and
  *    the numeric threads fill the same slots with
- *    battle_gfx_set_draw_mode_for_texture_page;
+ *    gfx_set_draw_mode_for_texture_page;
  *  - the submit loops walk the SPRTs from +0x24 with the sprite index as their
  *    counter (0..11 from +0x24, 12 at +0x114, 13 at +0x128, 14..18 from
  *    +0x13c, 19..23 from +0x1a0);
@@ -521,7 +521,7 @@ typedef struct menu_status_panel_display_thread {
  *  - the two draw-offset packets follow from the SetDrawOffset(packet,
  *    position) calls at +0x2a4/+0x2b0 and +0x2b4/+0x2c0;
  *  - +0x2c4 and +0x3b0 are the arguments of
- *    battle_menu_init_numeric_display_frame_primitives and the
+ *    menu_init_numeric_display_frame_primitives and the
  *    *_gfx_init_scaled_draw_area_packets / *_gfx_build_scaled_draw_area_packets
  *    pair. */
 typedef struct menu_status_panel_buffer {
@@ -842,16 +842,16 @@ enum { MENU_ROW_ACTION_CLEAR_SELECTION = 0x4d2 };
 typedef struct menu_entry {
     point16_t vram_origin; /* 0x00: text-image VRAM origin passed to the draw-mode helpers */
     s16 inner_width;       /* 0x04: text-image width; RECT.w = inner_width >> 2 (4bpp) */
-    s16 inner_height;      /* 0x06: text-image height (world_menu_size_entry_to_text) */
+    s16 inner_height;      /* 0x06: text-image height (menu_size_entry_to_text) */
     RECT window;           /* 0x08: screen position and extent passed to image and draw-area helpers */
     /* 0x10: text sprite placement (0x800ec108). width/height are set with the
      * inner and window sizes; the load origin and screen offsets are cleared
      * with them. */
     image_load_parameters_t text_image;
     s16 text_id;                 /* 0x1c: passed to text_find_entry */
-    s16 max_row_index;           /* 0x1e: row count - 1 (world_menu_build_skillset_entries) */
+    s16 max_row_index;           /* 0x1e: row count - 1 (menu_build_skillset_entries) */
     s16 thread_count;            /* 0x20: threads menu_handle_cancel_input stops, -1 when there is no thread
-                                    group; set from the system-function table by world_menu_run_system_function_thread */
+                                    group; set from the system-function table by menu_run_system_function_thread */
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24 */
     void (*thread_entry)(void);  /* 0x28 */
@@ -1018,7 +1018,7 @@ extern menu_quad_piece_t g_menu_quad_pieces[];
 s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
 
 /* Provisional: one 5-byte row of a WORLD menu text entry as rewritten by
- * world_menu_build_skillset_entries (0x800f3d44): the style byte at +1 is
+ * menu_build_skillset_entries (0x800f3d44): the style byte at +1 is
  * 4 for a grayed row, the byte at +3 is the row separator (0xfa) or the
  * list terminator (0xff). */
 typedef struct menu_text_row {
@@ -1179,7 +1179,7 @@ typedef struct menu_panel_record {
     DR_MODE mode0; /* 0x000 */
     DR_MODE mode1; /* 0x00c */
     /* 0x018; world_gfx_init_scaled_draw_area_packets,
-     * battle_gfx_init_scaled_draw_area_packets */
+     * menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
     SPRT sprites[18];                   /* 0x040 */
     menu_palette_primitives_t* palette; /* 0x1a8 */
@@ -1192,7 +1192,7 @@ void menu_run_numeric_display_panel_thread(void);
  * record size is fixed by the second frame starting there and by the byte copy
  * between them. Members come from the panels' own accesses plus two helpers:
  * *_menu_init_sprite_array (0x8012e2b8) is handed the nine SPRT packets, and
- * world_gfx_init_scaled_draw_area_packets / battle_gfx_init_scaled_draw_area_packets
+ * world_gfx_init_scaled_draw_area_packets / menu_init_scaled_draw_area_packets
  * (0x80138adc) clears rects[0].w and installs rects[1] of the draw-area pair.
  * The block is zero-filled in the overlay image, so none of it is initialized
  * data. */
@@ -1201,7 +1201,7 @@ typedef struct menu_panel_frame {
     SPRT sprites[9];                  /* 0x054: 5 border spans then 4 corners */
     texture_primitive_t texture_prim; /* 0x108: tpage-7 VRAM allocation record */
     /* 0x130; world_gfx_init_scaled_draw_area_packets,
-     * battle_gfx_init_scaled_draw_area_packets */
+     * menu_init_scaled_draw_area_packets */
     scaled_draw_area_pair_t draw_areas;
 } menu_panel_frame_t;
 typedef char menu_panel_frame_size_must_be_344[sizeof(menu_panel_frame_t) == 344 ? 1 : -1];
@@ -1264,7 +1264,7 @@ typedef char help_navigation_record_size_must_be_16[(sizeof(help_navigation_reco
 /* menu dispatch */
 /* Provisional 0x14-byte system-function record, tables at BATTLE 0x801692c0
  * and WORLD 0x80156750 (*_menu_run_system_function_thread,
- * battle_menu_dispatch_system_function). The member comments name the BATTLE
+ * menu_dispatch_system_function). The member comments name the BATTLE
  * globals; WORLD binds its own copies. */
 typedef struct menu_system_function {
     s16 menu_id;                /* 0x00; copied to g_menu_current_id */
@@ -1584,7 +1584,7 @@ s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s3
 
 /* One row of the 31-entry menu table at g_battle_menu_id_records; its first 12 rows are the
  * menus whose selection is remembered per unit.
- * battle_menu_restore_selection_for_selected_unit and battle_menu_record_selection_for_selected_unit
+ * menu_restore_selection_for_selected_unit and battle_menu_record_selection_for_selected_unit
  * prove the 8-byte stride and read only the leading menu id;
  * battle_menu_resolve_selection walks all 31 rows. */
 typedef struct menu_command_map {
@@ -1700,7 +1700,7 @@ void menu_display_hovered_unit_stats(
  * then the pen the glyph renderers receive. */
 typedef struct menu_text_state {
     s32* script_variables; /* 0x00; also bound as g_script_variables in each scene */
-    /* 0x04: rect.x/rect.y are the text origin (battle_menu_set_text_origin) and
+    /* 0x04: rect.x/rect.y are the text origin (menu_set_text_origin) and
      * the rect's size is not used; stride (0x0c) is the rect width * 4
      * (the inner window width); color (0x10) is the glyph blit fill,
      * 0x44444444 while text color 4 is drawn (*_menu_draw_text_columns). */
@@ -2138,8 +2138,8 @@ void menu_render_text_image_at_record_origin(text_dialog_record_t* record);
 
 /* One pending text glyph: BATTLE's dialogue renderer state at 0x8016dad4
  * (filled by battle_text_run_dialog_thread, drawn by
- * battle_text_draw_glyph_with_typewriter_delay), WORLD's typewriter request at 0x8019a338
- * (world_text_draw_glyph_with_typewriter_delay) and message-box glyph at
+ * text_draw_glyph_with_typewriter_delay), WORLD's typewriter request at 0x8019a338
+ * (text_draw_glyph_with_typewriter_delay) and message-box glyph at
  * 0x801c3474 (world_text_message_box_thread, ..._delay_2). The menu text state
  * and the LoadImage RECT follow it in memory but are separate globals. */
 typedef struct text_glyph_state {
@@ -2228,6 +2228,9 @@ void text_relocate_pointer_table(const u32* offsets);
 /* BATTLE and WORLD each link their own body. */
 void text_init_section_pointers(void);
 void text_build_unit_name_list(void);
+void text_build_display_message(s32 offset, s32 flags, s32* out_width);
+s32 text_is_spell_quote_exception_skillset(s32 skillset_id);
+void text_select_ability_announcement(struct action_command* action, s32 unit_id, s32 enabled);
 
 /* unit */
 /* Provisional 0x2d0-byte double-buffered frame of the unit editor panel

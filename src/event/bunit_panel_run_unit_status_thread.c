@@ -91,9 +91,9 @@ void bunit_panel_run_unit_status_thread(void) {
     }
     shake = 0;
 
-    battle_menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &editor->numeric_frame);
-    battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
+    menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &editor->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
     menu_init_sprite_array(&editor->value_sprites[0], 4, 0x7CBC);
     for (frame = 0; frame < 4; frame++) {
@@ -119,9 +119,9 @@ void bunit_panel_run_unit_status_thread(void) {
             &g_bunit_panel_editor_label_cells[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
-    battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
-    battle_gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    battle_menu_init_numeric_display_frame_primitives(&g_bunit_panel_frame_rect, &panel->numeric_frame);
+    gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
+    gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
+    menu_init_numeric_display_frame_primitives(&g_bunit_panel_frame_rect, &panel->numeric_frame);
     cur1 = &panel->sprites[0];
     menu_init_sprite_array(cur1, 7, 0x7C3C);
     menu_init_default_poly_ft4(&panel->portrait);
@@ -361,32 +361,32 @@ void bunit_panel_run_unit_status_thread(void) {
             win = &g_menu_text_state.pen.stride;
             origin = (glyph_blit_t*)(win - 2);
             *win = 0x38;
-            battle_menu_draw_numeric_display_entries(render_a, env_a, origin, 6);
+            menu_draw_numeric_display_entries(render_a, env_a, origin, 6);
             LoadImage(&rects[0], (u32*)render_a);
             cur2 = render_a + 0x400;
             *win = 0x60;
-            battle_menu_draw_numeric_display_entries(cur2, &env_a[6], origin, 4);
+            menu_draw_numeric_display_entries(cur2, &env_a[6], origin, 4);
             LoadImage(&rects[1], (u32*)cur2);
             thread->work = 0;
             battle_clear_menu_render_buffer(render_c, 0x580);
             *win = 0x58;
-            battle_menu_set_text_origin(0, 0);
-            battle_menu_display_text_entry(scroll[0] + TEXT_ID_UNIT_NAME_BASE, render_c, origin);
-            battle_menu_set_text_origin(0, 0x10);
-            battle_menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, render_c, origin);
+            menu_set_text_origin(0, 0);
+            menu_display_text_entry(scroll[0] + TEXT_ID_UNIT_NAME_BASE, render_c, origin);
+            menu_set_text_origin(0, 0x10);
+            menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, render_c, origin);
             LoadImage(&rects[2], (u32*)render_c);
             battle_clear_menu_render_buffer(render_b, 0xF0);
             *win = 0x10;
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             battle_text_draw_large_number_glyphs(scroll[2], 0x202, render_b, origin);
             LoadImage(&rects[3], (u32*)render_b);
-            battle_menu_set_text_origin(0, 0);
+            menu_set_text_origin(0, 0);
             cur3 = render_b + 0x50;
             battle_text_draw_large_number_glyphs(scroll[3], 0x202, cur3, origin);
             LoadImage(&rects[4], (u32*)cur3);
             if (g_battle_post_battle_unit_changes_active == 0) {
                 unit_stats_t* stats;
-                battle_menu_set_text_origin(0, 0);
+                menu_set_text_origin(0, 0);
                 stats = battle_unit_get_stats_from_battle_id(scroll[5]);
                 if (scroll[5] >= 0x10) {
                     s32 id = stats->formation_index;
@@ -444,11 +444,11 @@ void bunit_panel_run_unit_status_thread(void) {
         frame++;
     }
     thread_yield();
-    battle_gfx_free_tpage7_vram(&rects[0]);
-    battle_gfx_free_tpage7_vram(&rects[1]);
-    battle_gfx_free_tpage7_vram(&rects[2]);
-    battle_gfx_free_tpage7_vram(&rects[3]);
-    battle_gfx_free_tpage7_vram(&rects[4]);
-    battle_gfx_free_tpage7_vram(&rects[5]);
+    gfx_free_texture_rect(&rects[0]);
+    gfx_free_texture_rect(&rects[1]);
+    gfx_free_texture_rect(&rects[2]);
+    gfx_free_texture_rect(&rects[3]);
+    gfx_free_texture_rect(&rects[4]);
+    gfx_free_texture_rect(&rects[5]);
     thread_exit_current();
 }

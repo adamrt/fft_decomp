@@ -56,6 +56,6 @@ void world_menu_run_main_mode(s32 mode) {
         world_menu_start_at_list_thread();
     }
     if (mode == last_mode) {
-        world_menu_start_dead_unit_threads();
+        menu_start_dead_unit_threads();
     }
 }

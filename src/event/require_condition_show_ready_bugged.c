@@ -7,7 +7,7 @@
 void require_condition_show_ready_bugged(void) {
     s32 thread_id = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
 
-    thread_start(thread_id, battle_menu_refresh_hovered_unit_stats_display);
+    thread_start(thread_id, menu_refresh_hovered_unit_stats_display);
     thread_set_parameters(thread_id, 0, 0, 0);
     require_input_wait_frames_or_skip(0x3c);
     thread_set_parameters(thread_id, 0, 0, 1);

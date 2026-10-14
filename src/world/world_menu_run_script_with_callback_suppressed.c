@@ -8,6 +8,6 @@ void world_menu_run_script_with_callback_suppressed(void) {
     g_world_menu_script_callbacks[0].value = 0;
     g_world_shop_roster_count_menu_script.unit_count.value = g_world_shop_party_unit_count;
     /* The serialized script prefix shares the bytecode interpreter's instruction view. */
-    world_menu_run_script_with_palette_mode((menu_instruction_t*)&g_world_shop_roster_count_menu_script, 0, 0);
+    menu_run_script_with_palette_mode((menu_instruction_t*)&g_world_shop_roster_count_menu_script, 0, 0);
     g_world_menu_script_callbacks[0].value = previous_callback;
 }

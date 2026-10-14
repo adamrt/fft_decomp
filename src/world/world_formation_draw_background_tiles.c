@@ -52,7 +52,7 @@ void world_formation_draw_background_tiles(s32 y, s32 unused_1) {
                 rgb[1].r = rgb[1].g = rgb[1].b = shades[draw_row][col + 1];
                 rgb[2].r = rgb[2].g = rgb[2].b = shades[draw_row + 1][col];
                 rgb[3].r = rgb[3].g = rgb[3].b = shades[draw_row + 1][col + 1];
-                world_gfx_enqueue_gouraud_textured_quad(&rect, rgb, 0, rect.u == 0x58);
+                gfx_enqueue_gouraud_textured_quad(&rect, rgb, 0, rect.u == 0x58);
             }
         }
         rect.y += 0x20;

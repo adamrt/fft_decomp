@@ -8,7 +8,7 @@
 
 /*
  * The event CAMERA instruction (0x19) thread.
- * Instruction-for-instruction twin of world_camera_thread (0x800f9438).
+ * Instruction-for-instruction twin of camera_thread (0x800f9438).
  *
  * The script supplies seven camera-component targets and a frame count; 10000
  * keeps a component's current value. The packed speed-curve byte selects the
