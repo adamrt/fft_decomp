@@ -887,7 +887,7 @@ functions:
   - {addr: 0x8013da28, size: 56, name: thread_wait_for_unit_view_panels, hash: 7da441c388c2550e, source: src/shared/thread/thread_wait_for_unit_view_panels.c}
   - {addr: 0x8013da60, size: 8, name: battle_noop_8013da60, hash: 6d64edf91449c1b1}
   - {addr: 0x8013da68, size: 8, name: battle_noop_8013da68, hash: 6d64edf91449c1b1}
-  - {addr: 0x8013da70, size: 8, name: script_frame_after_threads_stub, hash: 6d64edf91449c1b1}
+  - {addr: 0x8013da70, size: 8, name: script_frame_after_threads_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_frame_after_threads_stub.c}
   - {addr: 0x8013da78, size: 8, name: battle_noop_8013da78, hash: 6d64edf91449c1b1}
   - {addr: 0x8013da80, size: 8, name: battle_noop_8013da80, hash: 6d64edf91449c1b1}
   - {addr: 0x8013da88, size: 92, name: script_assign_bitset_flag, hash: c0268b34d6b54219, source: src/shared/script/script_assign_bitset_flag.c}
@@ -1049,7 +1049,7 @@ functions:
   - {addr: 0x8014a7a8, size: 116, name: battle_gfx_set_draw_mode_from_origin, hash: bcc1e098276ae84a, source: src/shared/gfx/gfx_set_draw_mode_from_origin.c, source_symbol: gfx_set_draw_mode_from_origin}
   - {addr: 0x8014a81c, size: 8, name: battle_return_zero, hash: 207819bf4ebe3078}
   - {addr: 0x8014a824, size: 8, name: battle_noop_8014a824, hash: 6d64edf91449c1b1}
-  - {addr: 0x8014a82c, size: 8, name: script_frame_after_requests_stub, hash: 6d64edf91449c1b1}
+  - {addr: 0x8014a82c, size: 8, name: script_frame_after_requests_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_frame_after_requests_stub.c}
   - {addr: 0x8014a834, size: 584, name: gfx_init_image_loading, hash: 6b065a2d67c808c2, source: src/shared/gfx/gfx_init_image_loading.c}
   - {addr: 0x8014aa7c, size: 220, name: battle_menu_draw_numeric_display_entries, hash: c2ce3ac37a505f2f, source: src/shared/menu/menu_draw_numeric_display_entries.c, source_symbol: menu_draw_numeric_display_entries}
   - {addr: 0x8014ab58, size: 216, name: battle_menu_display_number_entry, hash: ee3a5bfa118b7022, source: src/shared/menu/menu_display_number_entry.c, source_symbol: menu_display_number_entry}

@@ -728,6 +728,8 @@ void script_run_next_event(void);
 void script_block_start_thread(void);
 void script_run_next_event_unused(void);
 void script_start_current_event_thread(void);
+void script_frame_after_requests_stub(void);
+void script_frame_after_threads_stub(void);
 void world_script_start_current_event_thread(void);
 
 /* instruction cursors */

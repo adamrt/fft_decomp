@@ -393,12 +393,10 @@ void world_menu_display_projected_action_effect(POLY_FT4* unused_primitive, cons
     const RECT* unused_base_screen, const image_load_parameters_t* unused_parameters);
 void world_text_run_spell_quote_thread(void);
 void world_menu_run_companion_overlay_stub(void);
-void world_script_frame_after_threads_stub(void);
 void world_map_reset_script_light_transform(void);
 void world_script_process_pending_requests(void);
 void world_camera_load_state_from_script_variables(void);
 void world_camera_store_state_to_script_variables(void);
-void world_script_frame_after_requests_stub(void);
 void world_card_close_stub(void);
 void world_menu_open_companion_executable(void);
 void world_menu_open_companion_data_file(void);

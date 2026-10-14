@@ -158,7 +158,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
     if (g_world_menu_input_block_frames != 0) {
         g_world_menu_input_block_frames--;
     }
-    world_script_frame_after_threads_stub();
+    script_frame_after_threads_stub();
     if (g_script_frame_result_override != 0) {
         return g_script_frame_result_override;
     }
@@ -183,7 +183,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
     world_menu_open_companion_executable();
     world_menu_open_companion_data_file();
     world_script_process_pending_requests();
-    world_script_frame_after_requests_stub();
+    script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
         return 1;
     }

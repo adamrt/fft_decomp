@@ -62,8 +62,6 @@ void script_set_units_palette_update_suppression(s32 unit_id, s32 enable);
 void script_toggle_message_portrait_flip(const u8* parameters);
 
 /* frame hooks */
-void script_frame_after_requests_stub(void);
-void script_frame_after_threads_stub(void);
 void script_opcode_74_event_instruction(const u8* unused_parameters);
 
 #endif

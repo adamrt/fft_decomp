@@ -234,7 +234,7 @@ functions:
   - {addr: 0x800f1340, size: 56, name: thread_wait_for_unit_view_panels, hash: da96c880c05276fb, source: src/shared/thread/thread_wait_for_unit_view_panels.c}
   - {addr: 0x800f1378, size: 8, name: world_noop_800f1378, hash: 6d64edf91449c1b1}
   - {addr: 0x800f1380, size: 8, name: world_noop_800f1380, hash: 6d64edf91449c1b1}
-  - {addr: 0x800f1388, size: 8, name: world_script_frame_after_threads_stub, hash: 6d64edf91449c1b1}
+  - {addr: 0x800f1388, size: 8, name: script_frame_after_threads_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_frame_after_threads_stub.c}
   - {addr: 0x800f1390, size: 8, name: world_noop_800f1390, hash: 6d64edf91449c1b1}
   - {addr: 0x800f1398, size: 8, name: world_noop_800f1398, hash: 6d64edf91449c1b1}
   - {addr: 0x800f13a0, size: 92, name: script_assign_bitset_flag, hash: 96cfecafc19e267a, source: src/shared/script/script_assign_bitset_flag.c}
@@ -396,7 +396,7 @@ functions:
   - {addr: 0x800fdc64, size: 116, name: world_gfx_set_draw_mode_from_origin, hash: 4a235355ddf2066d, source: src/shared/gfx/gfx_set_draw_mode_from_origin.c, source_symbol: gfx_set_draw_mode_from_origin}
   - {addr: 0x800fdcd8, size: 8, name: world_return_zero, hash: 207819bf4ebe3078}
   - {addr: 0x800fdce0, size: 8, name: world_noop, hash: 6d64edf91449c1b1}
-  - {addr: 0x800fdce8, size: 8, name: world_script_frame_after_requests_stub, hash: 6d64edf91449c1b1}
+  - {addr: 0x800fdce8, size: 8, name: script_frame_after_requests_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_frame_after_requests_stub.c}
   - {addr: 0x800fdcf0, size: 584, name: gfx_init_image_loading, hash: 56e863033028a2cf, source: src/shared/gfx/gfx_init_image_loading.c}
   - {addr: 0x800fdf38, size: 220, name: world_menu_draw_numeric_display_entries, hash: 461d47a099c3c386, source: src/shared/menu/menu_draw_numeric_display_entries.c, source_symbol: menu_draw_numeric_display_entries}
   - {addr: 0x800fe014, size: 216, name: world_menu_display_number_entry, hash: e179fd188c407888, source: src/shared/menu/menu_display_number_entry.c, source_symbol: menu_display_number_entry}
