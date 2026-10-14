@@ -26,7 +26,7 @@ void menu_icon_list_thread(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    battle_menu_build_window_sprites(&rect, state, record);
+    menu_build_window_sprites(&rect, state, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     fresh = 0;
     redraw = state->context;

@@ -786,7 +786,7 @@ functions:
   - {addr: 0x801346f4, size: 588, name: menu_build_quad_pieces, hash: 1f61c8cb57818426, source: src/shared/menu/menu_build_quad_pieces.c}
   - {addr: 0x80134940, size: 300, name: menu_build_sprite_page, hash: 49b0a4658a71022b, source: src/shared/menu/menu_build_sprite_page.c}
   - {addr: 0x80134a6c, size: 8, name: battle_noop_80134a6c, hash: 6d64edf91449c1b1}
-  - {addr: 0x80134a74, size: 2120, name: battle_menu_display_projected_action_effect, hash: 6cb0f635f91d292a}
+  - {addr: 0x80134a74, size: 2120, name: menu_display_projected_action_effect, hash: 6cb0f635f91d292a}
   - {addr: 0x801352bc, size: 3692, name: menu_display_hovered_unit_stats, hash: a6325c0ce9b93247, source: src/shared/menu/menu_display_hovered_unit_stats.c}
   - {addr: 0x80136128, size: 96, name: menu_refresh_hovered_unit_stats_display, hash: 44c12a5386f8c71d, source: src/shared/menu/menu_refresh_hovered_unit_stats_display.c}
   - {addr: 0x80136188, size: 96, name: menu_refresh_right_unit_stats_display, hash: f443baa5b3aaef86, source: src/shared/menu/menu_refresh_right_unit_stats_display.c}
@@ -803,7 +803,7 @@ functions:
   - {addr: 0x80137ed4, size: 176, name: menu_step_wrapping_cursor_on_scroll_buttons, hash: 2d20ad44b74b2253, source: src/shared/menu/menu_step_wrapping_cursor_on_scroll_buttons.c}
   - {addr: 0x80137f84, size: 272, name: menu_handle_cancel_input, hash: 5c56c2d632802940}
   - {addr: 0x80138094, size: 224, name: menu_should_close_thread, hash: 3a3f5ddcc1501b24}
-  - {addr: 0x80138174, size: 596, name: battle_menu_build_window_sprites, hash: 14eb30841abcf4da}
+  - {addr: 0x80138174, size: 596, name: menu_build_window_sprites, hash: 14eb30841abcf4da}
   - {addr: 0x801383c8, size: 76, name: menu_select_sprite_clut, hash: 0a1e2175a3486b65, source: src/shared/menu/menu_select_sprite_clut.c}
   - {addr: 0x80138414, size: 76, name: menu_select_icon_sprite_clut, hash: 7fbd1eda323a9e3b, source: src/shared/menu/menu_select_icon_sprite_clut.c}
   - {addr: 0x80138460, size: 128, name: menu_select_icon_cluts, hash: f53407b6bcd1cdbc, source: src/shared/menu/menu_select_icon_cluts.c}
@@ -840,7 +840,7 @@ functions:
   - {addr: 0x8013bd6c, size: 40, name: script_execute_display_conditions_instruction, hash: 889b5b3e5f2d0343, source: src/shared/script/script_execute_display_conditions_instruction.c}
   - {addr: 0x8013bd94, size: 48, name: script_dark_screen_thread, hash: 2379c22e7c612b3a}
   - {addr: 0x8013bdc4, size: 8, name: battle_noop_8013bdc4, hash: 6d64edf91449c1b1}
-  - {addr: 0x8013bdcc, size: 352, name: battle_text_run_spell_quote_thread, hash: c85ddcb980c97b80}
+  - {addr: 0x8013bdcc, size: 352, name: text_run_spell_quote_thread, hash: c85ddcb980c97b80}
   - {addr: 0x8013bf2c, size: 48, name: menu_open_option_game_options, hash: df54ee34a9c0ec3d, source: src/shared/menu/menu_open_option_game_options.c}
   - {addr: 0x8013bf5c, size: 48, name: menu_open_option_at_list, hash: 73bf5a8575c0b501, source: src/shared/menu/menu_open_option_at_list.c}
   - {addr: 0x8013bf8c, size: 48, name: menu_open_option_dead_unit_panel, hash: 6cd18434d58c6033, source: src/shared/menu/menu_open_option_dead_unit_panel.c}

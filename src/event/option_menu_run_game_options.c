@@ -71,7 +71,7 @@ void option_menu_run_game_options(void) {
     image_parameters.y_screen_offset = 0xA;
     image_parameters.width = entry->window.w - 0x20;
     image_parameters.height = entry->window.h - 0xE;
-    battle_menu_build_window_sprites(&image_rect, entry, &page->icons);
+    menu_build_window_sprites(&image_rect, entry, &page->icons);
     buffer = menu_alloc_memory(0x1E0);
     g_option_menu_pages[0].icons.base.sprites[3].y0 -= 2;
     clear.x = entry->vram_origin.x;

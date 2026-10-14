@@ -71,7 +71,7 @@ void world_build_at_list(void) {
         g_world_at_list_pages[i].icons.icons[0] = &icons0[i];
         g_world_at_list_pages[i].icons.icons[1] = &icons1[i];
         g_world_at_list_pages[i].icons.icons[2] = &icons2[i];
-        world_menu_build_icon_record(&image_rect, entry, &g_world_at_list_pages[i].icons);
+        menu_build_window_sprites(&image_rect, entry, &g_world_at_list_pages[i].icons);
     }
     menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),

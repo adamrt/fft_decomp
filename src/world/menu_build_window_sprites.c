@@ -7,8 +7,9 @@
 
 /* Publish the icon strip's text-image upload rectangle to the caller, build the
  * four menu sprites of the icon record, and place the icon sprites that the
- * strip's icon kind selects. */
-void world_menu_build_icon_record(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
+ * strip's icon kind selects. BATTLE links its own body under this name;
+ * only WORLD has the icon kind 0x10 branch. */
+void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
     s32 kind;
     s32 index;
     /* HImode is load-bearing. `cse` keys its constant equivalence classes by

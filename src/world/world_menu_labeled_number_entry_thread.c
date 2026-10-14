@@ -46,7 +46,7 @@ void world_menu_labeled_number_entry_thread(void) {
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
-    world_menu_build_icon_record(&rect, param, &record);
+    menu_build_window_sprites(&rect, param, &record);
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&cursor_quads[i]);
         SetSemiTrans(&cursor_quads[i], 0);

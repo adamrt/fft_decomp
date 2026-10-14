@@ -319,11 +319,7 @@ void world_bit_cursor_set_primary(u8* ptr);
 void world_bit_cursor_set_secondary(const u8* ptr);
 void world_bits_write_primary(u8 bit);
 void world_game_reset(void);
-void world_menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
-    const RECT* unused_base_screen, const image_load_parameters_t* unused_parameters);
-void world_text_run_spell_quote_thread(void);
 void world_map_reset_script_light_transform(void);
-void world_script_process_pending_requests(void);
 void world_camera_load_state_from_script_variables(void);
 void world_camera_store_state_to_script_variables(void);
 void world_card_close_stub(void);
@@ -1907,7 +1903,6 @@ void world_menu_add_gradient_line_primitive(point16_t* endpoints, rgb24_t* color
 void world_menu_announce_entry_value_thread(void);
 u8* world_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 void world_menu_resize_parent_entry_to_digits(void);
-void world_menu_build_icon_record(RECT* rect, menu_entry_t* param, menu_icon_record_t* buffer);
 void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 s32 world_menu_build_window_frame_image(s32 width, s32 height, u16* destination);
 void world_menu_clear_cursor_positions(void);

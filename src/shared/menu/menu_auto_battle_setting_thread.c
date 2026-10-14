@@ -40,7 +40,7 @@ void menu_auto_battle_setting_thread(void) {
         cursor = 4;
     }
     previous = cursor;
-    battle_menu_build_window_sprites(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     fresh = 0;
     i = 0;

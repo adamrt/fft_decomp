@@ -51,7 +51,7 @@ void world_menu_number_entry_thread(void) {
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
-    world_menu_build_icon_record(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     for (j = 0; j < 2; j++) {
         menu_init_default_poly_ft4(&cursor_quads[j]);

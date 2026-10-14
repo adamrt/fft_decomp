@@ -15,7 +15,7 @@
  * with window mode 0x11, or 0x12 when the unit is on the upper half of the
  * screen, from SPELL.MES (companion data file 4) loaded into a 16 KiB
  * buffer. */
-void battle_text_run_spell_quote_thread(void) {
+void text_run_spell_quote_thread(void) {
     SVECTOR screen_coords;
     unit_stats_t* unit;
     s32 id; /* Battle id, then the unit's unit_id: one variable in the target. */

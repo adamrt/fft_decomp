@@ -28,7 +28,7 @@ void world_menu_icon_clamped_list_thread(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    world_menu_build_icon_record(&rect, param, record);
+    menu_build_window_sprites(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     buffer = world_menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);

@@ -97,7 +97,7 @@ void menu_display_hovered_unit_stats(
             gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
             page->quads[frame].clut = 0x7CBC;
         }
-        battle_menu_display_projected_action_effect(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+        menu_display_projected_action_effect(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
     } else if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         for (frame = 0; frame < 2; frame++, params++) {
             gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);

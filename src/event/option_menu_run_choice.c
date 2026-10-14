@@ -70,7 +70,7 @@ void option_menu_run_choice(void) {
         param->vram_origin.x = 0x1AE;
     }
     param->text_image.width -= 4;
-    battle_menu_build_window_sprites(&rect, param, &g_option_picker_icon_records[0]);
+    menu_build_window_sprites(&rect, param, &g_option_picker_icon_records[0]);
     mem_copy_bytes_nonempty(&g_option_picker_icon_records[1], &g_option_picker_icon_records[0], sizeof(*record));
     LoadImage(&rect, (u32*)buffer);
     menu_free_memory(buffer);

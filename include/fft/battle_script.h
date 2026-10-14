@@ -9,7 +9,6 @@
 
 /* interpreter */
 
-void script_process_pending_requests(void);
 /* Returns the event result that the battle state handlers switch on;
  * proven by 0x80078fb4 and 0x800785ac, which both consume it. */
 void script_set_event_speed(s32 speed);

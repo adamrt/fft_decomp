@@ -182,7 +182,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     }
     menu_open_companion_executable();
     menu_open_companion_data_file();
-    world_script_process_pending_requests();
+    script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
         return 1;

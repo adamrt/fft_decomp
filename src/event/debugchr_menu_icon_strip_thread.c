@@ -21,7 +21,7 @@ void debugchr_menu_icon_strip_thread(void) {
     menu_entry_t* state = (menu_entry_t*)battle_thread_get_current_parameter_1();
 
     frame_pair = frames;
-    battle_menu_build_window_sprites(&rect, state, frame_pair);
+    menu_build_window_sprites(&rect, state, frame_pair);
     mem_copy_bytes_nonempty(&frame_pair[1], frame_pair, sizeof(*frame_pair));
     redraw = 1;
     frame = 0;

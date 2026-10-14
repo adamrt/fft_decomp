@@ -55,8 +55,6 @@ void battle_text_run_dialog_thread(void);
 
 /* spell quotes */
 
-void battle_text_run_spell_quote_thread(void);
-
 /* diagnostics */
 extern const char g_battle_text_heap_dp_format[];      /* "DP %x\n" */
 extern const char g_battle_text_heap_remain_format[];  /* "HEAP REMAIN %x MAX %x\n" */

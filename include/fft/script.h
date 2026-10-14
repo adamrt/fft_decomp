@@ -719,6 +719,8 @@ extern s32 g_script_loaded_event_id;
 /* Whole matching interpreter ranges:
  * BATTLE 0x80143bd8..0x80145f78, WORLD 0x800f6f20..0x800f92a0 (exclusive). */
 void script_execute_event(void);
+/* Empty in WORLD, which links its own stub under this name. */
+void script_process_pending_requests(void);
 void script_process_inflict_status_commands(void);
 void script_load_event(s32 id);
 void script_reset_event_state(void);

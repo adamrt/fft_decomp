@@ -621,6 +621,8 @@ void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const 
     s32 lower_half, const menu_status_thread_t* thread);
 void menu_build_status_group_primitives(POLY_FT4* poly);
 void menu_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
+s32 menu_display_projected_action_effect(
+    POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
 /* menu commands */
@@ -872,7 +874,7 @@ typedef struct menu_entry {
     void (*thread_entry)(void);  /* 0x28 */
     s16 header_id;               /* 0x2c: menu header; text-thread parameter (world_menu_text_entry_thread); the
                                     icon threads read it signed as the icon kind: 0x10 arrow, 0..4 single
-                                    icon, 5..15 four-piece icon (world_menu_build_icon_record) */
+                                    icon, 5..15 four-piece icon (menu_build_window_sprites) */
     u8 _padding_2e[2];           /* aligns context */
     /* 0x30: context interpreted by the menu thread. Text threads use menu_text_binding_t
      * here, the list threads a menu_text_layout_t, the number threads a
@@ -1064,7 +1066,7 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-/* Provisional: the 0x7c-byte icon record world_menu_build_icon_record fills.
+/* Provisional: the 0x7c-byte icon record menu_build_window_sprites fills.
  * Its head is exactly menu_icon_sprites_t; the three borrowed icon
  * sprites at +0x68 and the two state words at +0x74/+0x78 are what that builder
  * adds. */
@@ -1074,6 +1076,8 @@ typedef struct menu_icon_record {
     s32 _unknown_74;          /* 0x74 */
     s32 _unknown_78;          /* 0x78 */
 } menu_icon_record_t;
+
+void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 
 /* Provisional: one of the two 0x134-byte packet pages a scrolling text list
  * alternates between frames (menu_run_scrolling_ability_list_thread at 0x801a3d58,
@@ -2246,6 +2250,7 @@ extern s32 g_menu_text_active_key;
 void menu_text_start_help_thread(s32 thread_data);
 void menu_text_start_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 third);
 s32 menu_text_start_or_poll_thread(s32 thread_id, s32 parameter_0, s32 key, s32 parameter_2, s32 y_offset);
+void text_run_spell_quote_thread(void);
 
 /* menu bitstreams */
 /* Read-only secondary stream; CARD uses it to count save-buffer parity bits. */

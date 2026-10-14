@@ -6,8 +6,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Build the window's background, edge sprites and optional compound-style sprites. */
-void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
+/* Build the window's background, edge sprites and optional compound-style sprites.
+ * WORLD links its own, longer body under this name. */
+void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
     s16 style;
     s32 index;
 

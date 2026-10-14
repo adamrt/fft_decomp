@@ -24,7 +24,7 @@ void world_menu_formation_icon_list_thread(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    world_menu_build_icon_record(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     SetShadeTex(&record->sprites[0], 0);
     SetShadeTex(&record->sprites[1], 0);
     SetShadeTex(&record->sprites[2], 0);

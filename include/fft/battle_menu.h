@@ -75,8 +75,6 @@ extern menu_number_entry_t g_battle_menu_projected_value_panel[2];
 extern s32 g_battle_post_battle_unit_changes_active;
 
 void battle_menu_build_unit_portrait_poly(POLY_FT4* poly, u32 battle_id);
-s32 battle_menu_display_projected_action_effect(
-    POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
 
 /* status screen */
 extern s32 g_battle_menu_status_enabled;
@@ -97,7 +95,6 @@ extern image_load_parameters_t g_battle_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_battle_menu_single_icon_image_params[5];
 
 u8* battle_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
-void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 
 /* text rendering */
