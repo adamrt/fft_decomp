@@ -9,7 +9,7 @@
  * thread when it is not running.
  *
  * The unit name list is rebuilt and the panel fade mode taken from
- * g_battle_menu_panel_fade_modes[mode]. unit_a becomes the active-turn unit of
+ * g_menu_panel_fade_modes[mode]. unit_a becomes the active-turn unit of
  * the banner and unit_b the previewed target of the status billboard; 0xff leaves
  * either unchanged. Ignored while g_menu_overlay_state is 1. */
 void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
@@ -17,7 +17,7 @@ void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
         return;
     }
     text_build_unit_name_list();
-    g_battle_menu_panel_fade_mode = g_battle_menu_panel_fade_modes[mode];
+    g_menu_panel_fade_mode = g_menu_panel_fade_modes[mode];
     if (unit_a != 0xff) {
         g_menu_selected_unit.battle_id = unit_a;
         g_menu_selected_unit_status.unit_index = unit_a;

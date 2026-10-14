@@ -10,7 +10,7 @@
 /* Menu entry 4's value and the loop counter share $s0 in the target: the
  * index dies after the two table loads and the register is reused by the
  * `sll s0,v0,0x1` that forms the counter, so they are one variable here.
- * g_battle_menu_action_slot_row_actions is written as an in-loop expression rather than a pre-loop
+ * g_menu_action_slot_row_actions is written as an in-loop expression rather than a pre-loop
  * pointer local so that loop.c hoists it into the preheader after the bltz,
  * which is where the target's `lui/addiu s8` pair sits. */
 
@@ -46,9 +46,9 @@ void menu_select_unit_action_slots_thread(void) {
         }
         for (j = 0; j < 6; j++) {
             if (menu != ACTION_MENU_TYPE_ARITHMETICKS || i == 0) {
-                g_battle_menu_action_slot_row_actions[j] = 0x1024;
+                g_menu_action_slot_row_actions[j] = 0x1024;
             } else {
-                g_battle_menu_action_slot_row_actions[j] = -1;
+                g_menu_action_slot_row_actions[j] = -1;
             }
         }
         if (g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index]
@@ -65,7 +65,7 @@ void menu_select_unit_action_slots_thread(void) {
         if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {
             thread_exit_current();
         }
-        if (g_battle_menu_action_slot_selected_option == -1) {
+        if (g_menu_action_slot_selected_option == -1) {
             if (i == 2) {
                 thread_exit_current();
             }

@@ -105,11 +105,11 @@ void menu_load_selected_unit(void) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-            g_battle_menu_billboard_skillset_name[0] = 0xfe;
+            g_menu_billboard_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_battle_menu_billboard_secondary_skillset_name[1] = 0xfe;
+            g_menu_billboard_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -141,14 +141,14 @@ void menu_load_selected_unit(void) {
         }
     }
 
-    text_fill_field_with_terminators(g_battle_menu_billboard_unit_name);
-    text_fill_field_with_terminators(g_battle_menu_billboard_job_name);
-    text_fill_field_with_terminators(g_battle_menu_billboard_skillset_name);
-    text_fill_field_with_terminators(g_battle_menu_billboard_secondary_skillset_name);
+    text_fill_field_with_terminators(g_menu_billboard_unit_name);
+    text_fill_field_with_terminators(g_menu_billboard_job_name);
+    text_fill_field_with_terminators(g_menu_billboard_skillset_name);
+    text_fill_field_with_terminators(g_menu_billboard_secondary_skillset_name);
     /* The editor uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
-    mem_copy_bytes_nonempty(g_battle_menu_billboard_unit_name, unit->name, 0x10);
-    mem_copy_bytes_nonempty(g_battle_menu_billboard_job_name, unit->job_name, 0x10);
-    mem_copy_bytes_nonempty(g_battle_menu_billboard_skillset_name, unit->primary_skillset_name, 0x10);
-    mem_copy_bytes_nonempty(g_battle_menu_billboard_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_menu_billboard_unit_name, unit->name, 0x10);
+    mem_copy_bytes_nonempty(g_menu_billboard_job_name, unit->job_name, 0x10);
+    mem_copy_bytes_nonempty(g_menu_billboard_skillset_name, unit->primary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_menu_billboard_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
 }

@@ -241,10 +241,10 @@ restart_script:
                 copy_destination->position.y = unit->position.y;
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
                 battle_gfx_load_unit_graphics_by_battle_id(8, 1U);
-                g_battle_unit_graphics_load_pending = 1;
+                g_unit_graphics_load_pending = 1;
                 do {
                     thread_yield();
-                } while (g_battle_unit_graphics_load_pending != 0);
+                } while (g_unit_graphics_load_pending != 0);
                 thread_yield();
                 thread_yield();
             }
@@ -274,10 +274,10 @@ restart_script:
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
                 copy_destination->position.facing = unit->position.facing;
                 battle_gfx_load_unit_graphics_by_battle_id(7, 1U);
-                g_battle_unit_graphics_load_pending = 1U;
+                g_unit_graphics_load_pending = 1U;
                 do {
                     thread_yield();
-                } while (g_battle_unit_graphics_load_pending != 0);
+                } while (g_unit_graphics_load_pending != 0);
                 thread_yield();
                 thread_yield();
             }
@@ -305,7 +305,7 @@ restart_script:
             thread_yield();
             if (script_is_tutorial_event_slot() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
-                g_main_game_options = g_battle_saved_game_options;
+                g_main_game_options = g_menu_saved_game_options;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                 battle_state_start_close_battle(0x20);
             }
@@ -797,7 +797,7 @@ restart_script:
             if (ghost_runtime_id != EVENT_UNIT_SLOT_COUNT) {
                 script_add_ghost_unit_event_instruction(ghost_parameters[1], ghost_parameters[2], ghost_parameters[3],
                     ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]], ghost_parameters[5]);
-                g_battle_unit_graphics_load_pending = 1U;
+                g_unit_graphics_load_pending = 1U;
             } else {
                 /* No free runtime slot: the instruction is retried at once,
                  * with no yield in between. */
@@ -816,7 +816,7 @@ restart_script:
                 if (operand_1 == -1) {
                     unit_save_staged_status_data(added_battle_id);
                     battle_gfx_load_unit_graphics_by_battle_id(added_battle_id, operand_3);
-                    g_battle_unit_graphics_load_pending = 1U;
+                    g_unit_graphics_load_pending = 1U;
                 } else {
                     if (operand_3 == 0) {
                         battle_unit_draw_and_activate_by_runtime_id(operand_1);
@@ -844,7 +844,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_WAIT_ADD_UNIT) {
             do {
                 thread_yield();
-            } while (g_battle_unit_graphics_load_pending != 0);
+            } while (g_unit_graphics_load_pending != 0);
         } else if (opcode == EVENT_OPCODE_WAIT_ADD_UNIT_END) {
             do {
                 thread_yield();

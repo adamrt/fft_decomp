@@ -24,8 +24,6 @@ typedef struct battle_text_image_position {
 } battle_text_image_position_t;
 typedef char battle_text_image_position_size_must_be_6[(sizeof(battle_text_image_position_t) == 6) ? 1 : -1];
 
-extern u8 g_battle_text_glyph_bitmaps[];
-
 void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
     u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
 s32 menu_text_render_glyph_to_4bpp_image(
@@ -64,8 +62,6 @@ void battle_text_run_dialog_thread(void);
 /* typewriter entrypoint */
 
 /* spell quotes */
-extern u8 g_battle_spell_quote_exception_skillsets[];
-extern s32 g_battle_spell_quote_last_ability_id;
 
 void battle_text_run_spell_quote_thread(void);
 

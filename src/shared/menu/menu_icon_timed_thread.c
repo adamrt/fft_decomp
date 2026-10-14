@@ -70,7 +70,7 @@ void menu_icon_timed_thread(void) {
         }
         menu_submit_icon_primitives(&record->base);
     }
-    g_battle_menu_panel_fade_intensity = 0;
+    g_menu_panel_fade_intensity = 0;
     g_sound_suppressed = 0;
     thread_yield();
     if (battle_thread_get_current_parameter_2() == 0) {

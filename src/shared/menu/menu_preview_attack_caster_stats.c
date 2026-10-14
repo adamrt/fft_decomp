@@ -26,15 +26,15 @@ void menu_preview_attack_caster_stats(void) {
     /* Item IDs leave secondary unset before this range-flags read. */
     if (((secondary.range->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE) && action->ability_id < ABILITY_ID_ITEM_FIRST)
         || action->skillset_id == SKILLSET_ID_EQUIP_CHANGE) {
-        g_battle_menu_preview_target_action = 0;
+        g_menu_preview_target_action = 0;
     } else {
         g_thread_call_target = (void (*)(void))action_calculate_projected_effect;
         thread_call_on_main_stack(attacker, target, action);
-        g_battle_menu_preview_target_action = &target->action;
+        g_menu_preview_target_action = &target->action;
     }
     thread_yield();
     thread_yield();
     menu_load_selected_unit();
     menu_display_hovered_unit_stats(&g_menu_attack_caster_stats_rect, UNIT_STATS_PANEL_ATTACK_CASTER,
-        g_battle_menu_attack_caster_stats_setup, &g_menu_selected_unit_status);
+        g_menu_attack_caster_stats_setup, &g_menu_selected_unit_status);
 }

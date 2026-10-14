@@ -14,7 +14,6 @@ enum {
     CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178,
 };
 
-extern s32 g_camera_cross_product_overflow; /* set by battle_fixed_cross_product_q12 on Q12 overflow */
 extern MATRIX g_camera_matrix;
 /* Base of the large render-state records; low offsets overlap camera/GPU fields.
  * .vx is the camera pitch and .vy its yaw. */
@@ -60,7 +59,6 @@ void camera_update_zoom_input(void);
 /* position */
 extern VECTOR g_camera_current_real_coords;
 extern SVECTOR g_camera_integer_coords;
-extern u16 g_camera_position_locked;
 extern u16 g_camera_real_coord_countdown;
 extern VECTOR g_camera_real_coord_delta;
 extern VECTOR g_camera_saved_real_coords;
@@ -112,7 +110,6 @@ extern SVECTOR g_camera_rotation_backup;
 extern u16 g_camera_rotation_countdown;
 extern SVECTOR g_camera_rotation_delta;
 extern s32 g_camera_rotation_increment;
-extern s32 g_camera_wrap_yaw_pending;
 extern s32 g_camera_yaw_band;
 extern s32 g_camera_yaw_target;
 
@@ -181,8 +178,6 @@ extern SVECTOR* g_camera_published_rotation_ptr;
 extern SVECTOR g_camera_script_rotation;
 extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
 extern VECTOR g_camera_script_vector;
-/* 0x80166054: camera consumer unpacks two 2-bit fields and a high nibble. */
-extern s32 g_camera_speed_curve;
 
 void camera_execute_angle_command(s32 command, s32 target, s32 duration, const SVECTOR* angles);
 void camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset);

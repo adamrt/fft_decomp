@@ -19,7 +19,7 @@ void menu_run_selected_tile_info_display_thread(void) {
     POLY_GT4* quad;
 
     g_menu_hide_numeric_values = 0;
-    page = &g_battle_menu_height_display_pages[0];
+    page = &g_menu_height_display_pages[0];
     gfx_set_draw_mode_for_texture_page(&page->modes[0], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&page->modes[1], MENU_TEXTURE_PAGE_FRAME);
     for (i = 0; i < 5; i++) {
@@ -33,15 +33,14 @@ void menu_run_selected_tile_info_display_thread(void) {
     menu_init_sprite_array(page->sprites, 2, 0x7CBC);
     page->sprites[1].clut = 0x7D7C;
     for (i = 0; i < 2; i++) {
-        gfx_init_image_loading(&page->sprites[i], &g_menu_texture_origin, &g_battle_tile_info_image_location,
-            &g_battle_tile_info_image_params[i]);
+        gfx_init_image_loading(&page->sprites[i], &g_menu_texture_origin, &g_menu_tile_info_image_location,
+            &g_menu_tile_info_image_params[i]);
     }
     text_configure_sprite_vram(&rect, 0x18, 0x10, &page->sprites[0], 0);
-    mem_copy_bytes_nonempty(
-        &g_battle_menu_height_display_pages[1], &g_battle_menu_height_display_pages[0], sizeof(menu_quad_page_t));
+    mem_copy_bytes_nonempty(&g_menu_height_display_pages[1], &g_menu_height_display_pages[0], sizeof(menu_quad_page_t));
 
     for (frame = 0;; frame++) {
-        page = &g_battle_menu_height_display_pages[frame & 1];
+        page = &g_menu_height_display_pages[frame & 1];
         /* The target loads the display height signed (lh). */
         i = menu_build_quad_pieces(g_map_selected_tile_data.display_height, page->quads) - 1;
         thread_yield();

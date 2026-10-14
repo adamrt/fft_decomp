@@ -37,7 +37,7 @@ void menu_run_skillset_thread(void) {
     *param = param_value;
     row = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
     g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index = row->skillset_index;
-    g_world_menu_restore_depth = 1;
+    g_menu_restore_depth = 1;
     script_pulse_tutorial_wait_value(0xFC);
     menu_run_icon_selection_loop();
     row->skillset_index = g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index;

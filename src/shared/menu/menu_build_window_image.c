@@ -52,39 +52,39 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
         menu_build_window_image_row(src, row, words, src_index);
     }
     if (kind != DIALOG_OPTIONS_NO_TAIL) {
-        g_battle_menu_window_sprite_glyph.rect.x = 0x58;
-        g_battle_menu_window_sprite_glyph.rect.y = 0;
+        g_menu_window_sprite_glyph.rect.x = 0x58;
+        g_menu_window_sprite_glyph.rect.y = 0;
         if ((mode & DIALOG_TYPE_OPTIONS_MASK) == DIALOG_OPTIONS_ALTERNATE_TAIL) {
-            g_battle_menu_window_sprite_glyph.rect.x = 0x68;
+            g_menu_window_sprite_glyph.rect.x = 0x68;
         }
         if ((mode & DIALOG_TYPE_POSITION_MASK) == 1) {
-            g_battle_menu_window_sprite_glyph.rect.y = 0x10;
+            g_menu_window_sprite_glyph.rect.y = 0x10;
         }
-        g_battle_menu_window_sprite_position.rect.x = (width >> 1) + tail_offset - 8;
+        g_menu_window_sprite_position.rect.x = (width >> 1) + tail_offset - 8;
         if ((mode & DIALOG_TYPE_POSITION_MASK) != 2) {
-            g_battle_menu_window_sprite_position.rect.y = 0x38;
+            g_menu_window_sprite_position.rect.y = 0x38;
         } else {
-            g_battle_menu_window_sprite_position.rect.y = 0;
+            g_menu_window_sprite_position.rect.y = 0;
         }
-        g_battle_menu_window_sprite_position.stride = words * 4;
+        g_menu_window_sprite_position.stride = words * 4;
         i = g_threads[g_thread_current_id].task_words[5] & 0xF0;
         if (i != 0) {
             if ((mode & DIALOG_TYPE_POSITION_MASK) == 1) {
-                g_battle_menu_window_sprite_position.rect.x -= 0x10;
+                g_menu_window_sprite_position.rect.x -= 0x10;
             } else {
-                g_battle_menu_window_sprite_position.rect.x += 0x10;
+                g_menu_window_sprite_position.rect.x += 0x10;
             }
         }
-        if (g_battle_menu_window_sprite_position.rect.x < 0x10) {
-            g_battle_menu_window_sprite_position.rect.x = 0x10;
+        if (g_menu_window_sprite_position.rect.x < 0x10) {
+            g_menu_window_sprite_position.rect.x = 0x10;
         }
-        if (width - 0x10 < g_battle_menu_window_sprite_position.rect.x) {
-            g_battle_menu_window_sprite_position.rect.x = width - 0x10;
+        if (width - 0x10 < g_menu_window_sprite_position.rect.x) {
+            g_menu_window_sprite_position.rect.x = width - 0x10;
         }
-        blit_text_glyph(g_menu_glyph_sheet->pixels, (u8*)buf, &g_battle_menu_window_sprite_glyph,
-            &g_battle_menu_window_sprite_position);
+        blit_text_glyph(
+            g_menu_glyph_sheet->pixels, (u8*)buf, &g_menu_window_sprite_glyph, &g_menu_window_sprite_position);
         if (i != 0) {
-            battle_text_mirror_packed_nibble_region_horizontal((u8*)buf, &g_battle_menu_window_sprite_position);
+            battle_text_mirror_packed_nibble_region_horizontal((u8*)buf, &g_menu_window_sprite_position);
         }
     }
     if (keep != 0) {

@@ -128,7 +128,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
 
     if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
         ordering_table = jobstts_entrypoint(g_menu_selected_unit.battle_id, 0);
-        g_battle_companion_overlay_primitives = (s32)ordering_table;
+        g_menu_companion_overlay_primitives = (s32)ordering_table;
         if (ordering_table != 0) {
             AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
         } else {
@@ -137,7 +137,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     }
     if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
         prims = equip_entrypoint(g_menu_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
-        g_battle_companion_overlay_primitives = prims;
+        g_menu_companion_overlay_primitives = prims;
         if (prims >= 2) {
             AddPrims(g_gfx_current_otag_entry, (void*)prims, (void*)(prims + 0xFC));
         } else {

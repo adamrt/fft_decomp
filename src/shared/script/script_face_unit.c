@@ -8,7 +8,7 @@
  * turn two units toward each other.
  *
  * Parameters: first 16-bit unit id, second 16-bit unit id, rotate mode, speed index
- * into g_battle_rotation_speed_frames, and a delay multiplier. Every unit record of the second unit turns
+ * into g_unit_rotation_speed_frames, and a delay multiplier. Every unit record of the second unit turns
  * toward the first; unless second_only is set (FaceUnit), the first unit also turns
  * toward the second. Successive second-unit records are staggered like FaceTile.
  * The angle is built in place (negate, then add) so combine cannot fold the two
@@ -51,7 +51,7 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
                         state = &g_unit_animation_states[runtime_id];
                         state->target_facing = facing;
                         state->rotate_mode = parameters->mode;
-                        state->frames_per_step = g_battle_rotation_speed_frames[parameters->speed];
+                        state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
                         state->step_counter = 0;
                         state->rotating = 1;
                         state->delay = parameters->delay >> 2;
@@ -59,7 +59,7 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
                     state = &g_unit_animation_states[unit_id];
                     state->target_facing = reverse;
                     state->rotate_mode = parameters->mode;
-                    state->frames_per_step = g_battle_rotation_speed_frames[parameters->speed];
+                    state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
                     state->step_counter = 0;
                     state->rotating = 1;
                     state->delay = parameters->delay * order++ / 4;

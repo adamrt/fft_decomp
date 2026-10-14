@@ -17,7 +17,7 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
     s32 y;
 
     if (cursor >= 0) {
-        if (g_battle_formation_display_mode == 1) {
+        if (g_menu_formation_display_mode == 1) {
             thread->task_words[1] = 2;
             thread->task_words[0] = 0;
         }

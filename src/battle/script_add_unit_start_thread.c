@@ -50,7 +50,7 @@ void script_add_unit_start_thread(void) {
                 if (runtime_id == -1) {
                     unit_save_staged_status_data(slot);
                     battle_gfx_load_unit_graphics_by_battle_id(slot, flag);
-                    g_battle_unit_graphics_load_pending = 1;
+                    g_unit_graphics_load_pending = 1;
                 } else {
                     if (flag == 0) {
                         battle_unit_draw_and_activate_by_runtime_id(runtime_id);
@@ -63,7 +63,7 @@ void script_add_unit_start_thread(void) {
             }
             while (1) {
                 thread_yield();
-                if (g_battle_unit_graphics_load_pending == 0) {
+                if (g_unit_graphics_load_pending == 0) {
                     break;
                 }
                 if (g_main_debug_display_enabled != 0) {

@@ -11,6 +11,7 @@
 #include "psx/types.h"
 
 struct action_command;
+struct action_data;
 struct unit_stats;
 
 /* scene lifecycle */
@@ -251,7 +252,7 @@ void menu_update_panel_fade(void);
  * *_menu_init_primitive_colors_normal and _dimmed set. */
 typedef struct menu_palette_primitives {
     DR_MODE draw_mode;      /* 0x00: texture window g_gfx_texture_window */
-    DR_MODE draw_mode_menu; /* 0x0c: texture window g_world_menu_numeric_display_texture_window */
+    DR_MODE draw_mode_menu; /* 0x0c: texture window g_menu_numeric_display_texture_window */
     LINE_F2 lines[12];      /* 0x18 */
     SPRT sprite;            /* 0xd8 */
 } menu_palette_primitives_t;
@@ -1313,7 +1314,7 @@ typedef struct menu_system_function {
     s16 menu_id;                /* 0x00; copied to g_menu_current_id */
     u16 text_id;                /* 0x02; menu entry text id */
     s16 menu_entry_index;       /* 0x04; g_menu_thread_menu_data index */
-    u16 row_action;             /* 0x06; copied to g_battle_menu_system_function_row_actions */
+    u16 row_action;             /* 0x06; copied to g_menu_system_function_row_actions */
     u16 thread_count;           /* 0x08; menu entry thread_count */
     u8 _padding_0a[2];          /* aligns thread_entry */
     void (*thread_entry)(void); /* 0x0c; started as thread 8 */
@@ -1360,8 +1361,7 @@ typedef enum menu_system_dispatch_result {
 } menu_system_dispatch_result_e;
 
 /* g_menu_current_id: the open battle menu,
- * and the index of its entry in g_battle_menu_idle_action_entries (WORLD:
- * g_world_menu_system_entries), which is also what a row action from 0 to
+ * and the index of its entry in g_menu_idle_action_entries, which is also what a row action from 0 to
  * 0xff opens. The unit menus are picked by
  * battle_menu_get_id_based_on_mount_moveable_actable. A system function
  * (menu_system_function_t) shows its text in MESSAGE or in one of the
@@ -1441,7 +1441,7 @@ typedef enum battle_menu_id {
 
 extern s32 g_menu_current_id; /* battle_menu_id_e */
 
-/* Indices of the system function table (g_battle_system_function_table and
+/* Indices of the system function table (g_menu_system_function_table and
  * its WORLD twin) that the dispatcher names; the rest are message variants. */
 typedef enum battle_system_function_id {
     BATTLE_SYSTEM_FUNCTION_WAIT_MENU = 1,
@@ -1721,7 +1721,7 @@ void menu_draw_weapon_hand_icons(s16 weapon_id);
  * tables of them (kind 0 and 1 select the plain and colored number
  * renderers), as do the status panels' *_text_render_decimal_entry_list and
  * *_text_render_signed_decimal_entries, which leave kind unset. The 0xc stride
- * is proved by g_world_numeric_display_entries's three sublists at +0, +0x24
+ * is proved by g_menu_numeric_display_entries's three sublists at +0, +0x24
  * and +0x54 (entries 0, 3 and 7). */
 typedef struct menu_number_entry {
     u16 x;      /* 0x00 */
@@ -2327,7 +2327,7 @@ enum menu_unit_editor_line_layout_offset {
 };
 
 /* Provisional 0x2ec-byte double-buffered page of the unit status panel
- * (pairs at 0x801a25f8, first page per mode from g_world_unit_status_first_page_by_mode). */
+ * (pairs at 0x801a25f8, first page per mode from g_menu_unit_status_first_page_by_mode). */
 typedef struct menu_unit_status_page {
     POLY_G4 bars[3];                   /* 0x000: HP/MP/CT gauges */
     DR_MODE draw_mode_1;               /* 0x06c */
@@ -2414,5 +2414,106 @@ void text_set_substitution_values_7e_7f(s32 x, s32 y, s32 width, s32 height);
 void text_configure_sprite_vram(RECT* rect, s32 width, s32 height, void* packet, s32 clut_offset);
 extern u16 g_text_message_duration_frames;
 void text_set_message_duration_frames(u16 frames);
+
+/* menu state */
+extern s32 g_menu_companion_overlay_primitives;
+/* Array view: as a scalar, GCC hoists the menu-index reload above its store
+ * in menu_run_system_function_thread. */
+extern menu_system_function_t g_menu_system_function_table[];
+extern s32 g_menu_system_function_thread_busy;
+extern menu_entry_t g_menu_idle_action_entries[];
+extern s16 g_menu_action_slot_row_actions[6];
+extern s16 g_menu_action_slot_selected_option;
+extern u8 g_menu_restriction_message_ids[];
+extern s32 g_menu_panel_fade_mode; /* menu_panel_fade_mode_e */
+extern s32 g_menu_panel_fade_intensity;
+extern u8 g_menu_panel_fade_modes[];
+extern u8 g_menu_restore_depth;
+extern u8 g_menu_restore_unit_id;
+extern u16 g_menu_transition_state;
+extern u16 g_menu_hovered_stats_frame_count;
+extern s16 g_menu_auto_battle_option_colors[5]; /* text color per option */
+/* Row actions of the auto-battle setting menu (menu entry 0x80166b4c, +0x24). */
+extern s16 g_menu_auto_battle_row_actions[8];
+extern menu_scroll_text_layout_t g_menu_at_list_layout;
+/* Tail glyph source and destination records for menu_build_window_image. */
+extern glyph_blit_t g_menu_window_sprite_glyph;
+extern glyph_blit_t g_menu_window_sprite_position;
+extern s32 g_menu_system_function_command;
+extern s32 g_menu_system_function_option;
+extern u16 g_menu_system_function_row_actions[];
+extern menu_selection_remap_t g_menu_selection_remaps[8];
+/* Handed to the dead-unit panel thread as its second parameter. Nothing stores to it and the thread
+ * does not read the parameter. */
+extern s32 g_menu_dead_unit_panel_parameter;
+extern menu_palette_pair_t g_menu_default_palette_colors;
+extern u16* const* g_menu_help_active_text_id_tables;
+/* Source image used when menus render glyphs. */
+extern menu_glyph_sheet_t g_menu_glyph_image_data;
+extern s32 g_menu_formation_display_mode;
+extern game_options_t g_menu_saved_game_options;
+
+/* spell quotes and glyph data */
+extern s32 g_text_spell_quote_last_ability_id;
+extern u8 g_text_spell_quote_exception_skillsets[];
+extern u8 g_text_glyph_bitmaps[];
+
+/* unit panel data */
+extern u8 g_menu_billboard_job_name[];                /* job name text window */
+extern u8 g_menu_billboard_unit_name[];               /* name text window */
+extern u8 g_menu_billboard_secondary_skillset_name[]; /* secondary skillset name text window */
+extern u8 g_menu_billboard_skillset_name[];           /* primary skillset name text window */
+/* Entries 5..7 of g_menu_sprite_page_image_params; a separate alias preserves the original
+ * template base. */
+extern image_load_parameters_t g_menu_sprite_page_image_param_bases[];
+extern menu_number_entry_t g_menu_attack_caster_stats_setup[8];
+extern menu_number_entry_t g_menu_attack_target_stats_setup[8];
+extern menu_number_entry_t g_menu_hovered_unit_stats_setup[10];
+extern menu_number_entry_t g_menu_right_unit_stats_setup[10];
+extern struct action_data* g_menu_preview_target_action;
+extern menu_quad_page_t g_menu_height_display_pages[2];
+extern RECT g_menu_tile_info_image_location;
+extern image_load_parameters_t g_menu_tile_info_image_params[2];
+extern menu_palette_slot_t g_menu_unit_summary_palettes[];
+extern image_load_parameters_t g_menu_unit_summary_sprite_image_params[];
+
+/* numeric display data */
+extern menu_panel_record_t g_menu_numeric_display_panel_records[2];
+extern menu_number_entry_t g_menu_numeric_display_entries[15];
+extern RECT g_menu_numeric_display_frame_rect;
+extern image_load_parameters_t g_menu_numeric_display_image_params[18];
+extern menu_palette_slot_t g_menu_numeric_display_palettes[];
+extern RECT g_menu_numeric_display_text_rect_a;
+extern RECT g_menu_numeric_display_text_rect_b;
+extern RECT g_menu_numeric_display_text_rect_c;
+extern RECT g_menu_numeric_display_panel_texture_window;
+extern RECT g_menu_numeric_display_texture_window; /* texture window for the menu page */
+
+/* unit editor panel data */
+extern menu_unit_editor_frame_t g_menu_unit_editor_frames[2];
+extern RECT g_menu_unit_editor_cursor_rect; /* cursor source */
+extern image_load_parameters_t g_menu_unit_editor_item_icon_image_params[5];
+extern u8 g_menu_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE];
+extern menu_palette_primitives_t g_menu_unit_editor_palette;
+extern RECT g_menu_unit_editor_panel_rect; /* panel box */
+extern image_load_parameters_t g_menu_unit_editor_row_image_params_a[4];
+extern image_load_parameters_t g_menu_unit_editor_row_image_params_b[4];
+extern u16 g_menu_unit_editor_sprite_clut_pairs[19][2];
+extern image_load_parameters_t g_menu_unit_editor_sprite_image_params_a[19];
+extern image_load_parameters_t g_menu_unit_editor_sprite_image_params_b[19];
+extern RECT g_menu_unit_editor_text_rect_a; /* first text image */
+extern RECT g_menu_unit_editor_text_rect_b; /* second text image */
+
+/* unit status panel data */
+extern u16 g_menu_unit_status_bounce_step;
+extern u16 g_menu_unit_status_bounce_offsets[];
+extern u8 g_menu_unit_status_first_page_by_mode[];
+extern CVECTOR g_menu_unit_status_gauge_colors[];
+extern image_load_parameters_t g_menu_unit_status_icon_image_params[];
+extern menu_unit_status_page_t g_menu_unit_status_panel_pages[];
+extern u16 g_menu_unit_status_quad_clut_pairs[][2];
+extern image_load_parameters_t* g_menu_unit_status_quad_image_params_by_mode[];
+extern u16 g_menu_unit_status_sprite_clut_pairs[][2];
+extern image_load_parameters_t* g_menu_unit_status_sprite_image_params_by_mode[];
 
 #endif

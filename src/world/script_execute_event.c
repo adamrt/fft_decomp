@@ -181,7 +181,7 @@ restart_event:
                 thread_wait_frames(0x78);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_REQUEST_CAMERA_YAW_WRAP) {
-                g_world_camera_yaw_unwrap_request = 1;
+                g_camera_wrap_yaw_pending = 1;
             }
             if (operand_1 == EVENT_CALL_FUNCTION_DISABLE_DEBUG_DISPLAY) {
                 g_main_debug_display_enabled = 0;
@@ -203,8 +203,8 @@ restart_event:
             }
             if (operand_1 == EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC) {
                 g_world_sound_current_music_track_index = 0;
-                g_world_sound_music_track_1_id = MAIN_MUSIC_ALTIMA;
-                g_world_sound_music_track_2_id = 0;
+                g_sound_music_track_1_id = MAIN_MUSIC_ALTIMA;
+                g_sound_music_track_2_id = 0;
                 sound_play_music_tracks(MAIN_MUSIC_ALTIMA, MAIN_MUSIC_NONE);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_COPY_UNIT_8_POSITION_TO_UNIT_9_AND_RELOAD_GRAPHICS) {
@@ -214,10 +214,10 @@ restart_event:
                 copy_destination->position.y = unit->position.y;
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
                 battle_gfx_load_unit_graphics_by_battle_id(8, 1);
-                g_world_unit_graphics_load_pending = 1;
+                g_unit_graphics_load_pending = 1;
                 do {
                     thread_yield();
-                } while (g_world_unit_graphics_load_pending != 0);
+                } while (g_unit_graphics_load_pending != 0);
                 thread_yield();
                 thread_yield();
             }
@@ -247,10 +247,10 @@ restart_event:
                 copy_destination->position.higher_elevation = unit->position.higher_elevation;
                 copy_destination->position.facing = unit->position.facing;
                 battle_gfx_load_unit_graphics_by_battle_id(7, 1);
-                g_world_unit_graphics_load_pending = 1U;
+                g_unit_graphics_load_pending = 1U;
                 do {
                     thread_yield();
-                } while (g_world_unit_graphics_load_pending != 0);
+                } while (g_unit_graphics_load_pending != 0);
                 thread_yield();
                 thread_yield();
             }
@@ -278,7 +278,7 @@ restart_event:
             thread_yield();
             if (world_script_check_tutorial_event_slot() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
-                g_main_game_options = g_world_saved_game_options;
+                g_main_game_options = g_menu_saved_game_options;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                 battle_state_start_close_battle(0x20);
             }
@@ -518,7 +518,7 @@ restart_event:
                 = script_find_instruction_byte_offset(instruction_offset, EVENT_OPCODE_CAMERA_FUSION_END);
         } else if (opcode == EVENT_OPCODE_CAMERA_FUSION_END) {
         } else if (opcode == EVENT_OPCODE_CAMERA_SPEED_CURVE) {
-            g_world_camera_speed_curve = operand_1;
+            g_camera_speed_curve = operand_1;
         } else if (opcode == EVENT_OPCODE_UNKNOWN_74) {
             script_opcode_74_event_instruction(parameters);
         }
@@ -763,7 +763,7 @@ restart_event:
             if (ghost_runtime_id != EVENT_UNIT_SLOT_COUNT) {
                 script_add_ghost_unit_event_instruction(ghost_operands[1], ghost_operands[2], ghost_operands[3],
                     ghost_operands[4], first_operand, g_script_unit_slots[ghost_operands[0]], ghost_operands[5]);
-                g_world_unit_graphics_load_pending = 1U;
+                g_unit_graphics_load_pending = 1U;
             } else {
                 continue;
             }
@@ -781,7 +781,7 @@ restart_event:
                 if (operand_1 == -1) {
                     unit_save_staged_status_data(appearance_battle_id);
                     battle_gfx_load_unit_graphics_by_battle_id(appearance_battle_id, operand_3);
-                    g_world_unit_graphics_load_pending = 1U;
+                    g_unit_graphics_load_pending = 1U;
                 } else {
                     if (operand_3 == 0) {
                         battle_unit_draw_and_activate_by_runtime_id(operand_1);
@@ -806,7 +806,7 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_WAIT_ADD_UNIT) {
             do {
                 thread_yield();
-            } while (g_world_unit_graphics_load_pending != 0);
+            } while (g_unit_graphics_load_pending != 0);
         } else if (opcode == EVENT_OPCODE_WAIT_ADD_UNIT_END) {
             do {
                 thread_yield();

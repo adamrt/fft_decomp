@@ -95,10 +95,6 @@ extern s32 g_battle_previous_game_state;
 extern s32 g_battle_state_animation_continue_check;
 extern s32 g_battle_state_map_init_step;
 extern s32 g_battle_state_screen_fade_step;
-/* Array view: as a scalar, GCC hoists the menu-index reload above its store
- * in menu_run_system_function_thread. */
-extern menu_system_function_t g_battle_system_function_table[];
-extern s32 g_battle_system_function_thread_busy;
 
 void battle_bin_entrypoint(void);
 s32 battle_state_announce_next_charged_action(void);
@@ -277,7 +273,6 @@ s32 battle_mul_div_s64(s32 a, s32 b, s32 c);
 
 /* shared state */
 extern u8 g_battle_job_level_gained_flag;
-extern game_options_t g_battle_saved_game_options;
 /* Unit coordinates shared by camera tile tests and dialogue positioning. */
 extern SVECTOR g_unit_scratch_coords;
 

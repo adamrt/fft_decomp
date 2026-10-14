@@ -8,7 +8,6 @@
 #include "fft/script.h"
 
 /* interpreter */
-extern s16 g_script_threads_idle;
 
 void script_process_pending_requests(void);
 /* Returns the event result that the battle state handlers switch on;

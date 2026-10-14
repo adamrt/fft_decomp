@@ -7,7 +7,7 @@
  * Event instruction 0x69 (FaceTile): turn the addressed unit(s) to face a tile.
  *
  * Parameters: 0x00 unit id (16-bit value), 0x02 tile x, 0x03 tile y, 0x04 unused,
- * 0x05 clockwise flag, 0x06 rotation speed (index into g_battle_rotation_speed_frames), 0x07
+ * 0x05 clockwise flag, 0x06 rotation speed (index into g_unit_rotation_speed_frames), 0x07
  * rotation time. Each matching unit's screen position is compared with the
  * tile center to pick one of 16 facings; the n-th matching unit gets
  * rotation time * n / 4.
@@ -40,7 +40,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
             rotation_state = &g_unit_animation_states[unit_id];
             rotation_state->target_facing = facing;
             rotation_state->rotate_mode = parameters->mode;
-            rotation_state->frames_per_step = g_battle_rotation_speed_frames[parameters->speed];
+            rotation_state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
             rotation_state->step_counter = 0;
             rotation_state->rotating = 1;
             rotation_state->delay = (parameters->delay * order++) / 4;

@@ -819,8 +819,7 @@ extern s32 g_map_id;
 extern map_resource_t* g_map_mesh_load_buffer;
 extern s32 g_map_mesh_load_state;
 extern s32 g_map_resource_load_state; /* map_resource_load_state_e */
-extern u16 g_map_refresh_pending;
-extern u16 g_map_append_state; /* 0x80165fe0 */
+extern u16 g_map_append_state;        /* 0x80165fe0 */
 
 /* 1 starts, 2 polls, >=3 is reset to zero by the outer update. */
 extern u16 g_map_reload_state; /* 0x80165fde */
@@ -854,9 +853,6 @@ s32 map_load_mesh_variant(s32 palette_mode);
 /* terrain and selection */
 extern u8 g_map_max_x;
 extern u8 g_map_max_y;
-extern map_selected_tile_t g_map_selected_tile_data;
-extern RECT g_battle_tile_info_image_location;
-extern image_load_parameters_t g_battle_tile_info_image_params[2];
 
 /* Battle terrain: two layers of 256 records, indexed
  * (layer * 256 + y * width + x). Callers that walk it with raw byte offsets

@@ -25,7 +25,7 @@ void menu_build_ability_preview_at_list(void) {
     at_table = g_ai_workspace_ptr->ability_list.ids;
     work = (menu_at_list_work_t*)g_main_heap_companion_overlay_load_address;
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST].select_text_table = 0x13;
-    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST].context = &g_battle_menu_at_list_layout;
+    g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST].context = &g_menu_at_list_layout;
     text_id = at_table[g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index];
     g_menu_selected_action.targeting_type = BATTLE_TARGETING_TYPE_TILE;
     entry = &g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST];
@@ -130,9 +130,9 @@ void menu_build_ability_preview_at_list(void) {
     }
     work->primary_colors[turn] = 4;
     work->secondary_colors[turn] = 4;
-    g_battle_menu_at_list_layout.columns.mode[0] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
-    g_battle_menu_at_list_layout.columns.mode[1] = MENU_TEXT_COLUMN_TEXT;
-    g_battle_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_TEXT;
+    g_menu_at_list_layout.columns.mode[0] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
+    g_menu_at_list_layout.columns.mode[1] = MENU_TEXT_COLUMN_TEXT;
+    g_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_TEXT;
     if (bracketed != 0) {
         menu_scroll_text_layout_t* layout = entry->context;
 
@@ -151,7 +151,7 @@ void menu_build_ability_preview_at_list(void) {
         entry->window.w = 0x84;
         entry->text_image.width = 0x84;
         entry->inner_width = 0x84;
-        g_battle_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
+        g_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
     }
     if (count < 6) {
         menu_scroll_text_layout_t* layout;
@@ -181,10 +181,10 @@ void menu_build_ability_preview_at_list(void) {
 
         layout->row_offset = turn - 3;
     }
-    g_battle_menu_at_list_layout.columns.text_ids[0] = work->entry_numbers;
-    g_battle_menu_at_list_layout.columns.text_ids[2] = work->secondary_values;
-    g_battle_menu_at_list_layout.columns.text_colors[0] = work->primary_colors;
-    g_battle_menu_at_list_layout.columns.text_ids[1] = work->primary_values;
-    g_battle_menu_at_list_layout.columns.text_colors[1] = work->secondary_colors;
-    g_battle_menu_at_list_layout.columns.text_colors[2] = work->secondary_colors;
+    g_menu_at_list_layout.columns.text_ids[0] = work->entry_numbers;
+    g_menu_at_list_layout.columns.text_ids[2] = work->secondary_values;
+    g_menu_at_list_layout.columns.text_colors[0] = work->primary_colors;
+    g_menu_at_list_layout.columns.text_ids[1] = work->primary_values;
+    g_menu_at_list_layout.columns.text_colors[1] = work->secondary_colors;
+    g_menu_at_list_layout.columns.text_colors[2] = work->secondary_colors;
 }

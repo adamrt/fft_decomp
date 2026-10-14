@@ -27,7 +27,7 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
                 mode = 2;
             } else {
                 mode = 2;
-                message = g_battle_menu_restriction_message_ids[menu] + 0x1000;
+                message = g_menu_restriction_message_ids[menu] + 0x1000;
             }
         }
     }
@@ -53,10 +53,10 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
         mode = g_menu_action_type_modes
             [g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index]][0];
         if (mode < 0) {
-            g_battle_menu_action_slot_row_actions[0] = mode;
+            g_menu_action_slot_row_actions[0] = mode;
             menu_confirm_action_silently(parameter);
             thread_exit_current();
         }
     }
-    g_battle_menu_restore_depth = 2;
+    g_menu_restore_depth = 2;
 }

@@ -18,12 +18,12 @@ void menu_restore_selection_for_selected_unit(s32 menu_id) {
         return;
     }
     record = &g_menu_unit_selection_records[g_menu_selected_unit.battle_id];
-    for (row = 0, remap = g_battle_menu_selection_remaps; row < 8; remap++, row++) {
-        if (menu_id == g_battle_menu_selection_remaps[row].menu_id) {
+    for (row = 0, remap = g_menu_selection_remaps; row < 8; remap++, row++) {
+        if (menu_id == g_menu_selection_remaps[row].menu_id) {
             /* Keep the signed byte-table index used by the target. */
             for (candidate = 2; candidate < 5; candidate++) {
                 if (record->command_index == remap->matches[candidate - 2]) {
-                    record->command_index = g_battle_menu_selection_remaps[row].replacement;
+                    record->command_index = g_menu_selection_remaps[row].replacement;
                     break;
                 }
             }

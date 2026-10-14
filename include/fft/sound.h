@@ -14,8 +14,8 @@ extern s16 g_sound_music_set_track_request;
  * The consumer toggles the zero-based index, then uses main music slot 1/2. */
 extern s16 g_sound_music_switch_request; /* 0x80165fc8 */
 /* Track IDs are unsigned; -1 in the signed unload request means no request. */
-extern u16 g_sound_music_track_1_id;          /* 0x80165fd4 */
-extern u16 g_sound_music_track_2_id;          /* 0x80165fd6 */
+extern u16 g_sound_music_track_1_id;
+extern u16 g_sound_music_track_2_id;
 extern u16 g_sound_music_track_index;         /* 0x80165fd8; zero-based music slot */
 extern s16 g_sound_music_unload_slot_request; /* 0x80165fca */
 /* 0x80165fc0: -1 absent; volume = low 16 bits,

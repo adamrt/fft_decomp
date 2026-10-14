@@ -46,7 +46,7 @@ void menu_run_unit_summary_panel_thread(void) {
     text_configure_sprite_vram(&rects[3], 0x10, 0xA, &frames[0].sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
         gfx_init_image_loading(&frames[0].sprites[frame], &g_menu_texture_origin, &g_menu_unit_summary_panel_rect,
-            &g_battle_unit_summary_sprite_image_params[frame]);
+            &g_menu_unit_summary_sprite_image_params[frame]);
     }
     gfx_init_image_loading(&frames[0].portrait, &g_menu_texture_origin, &g_menu_unit_summary_panel_rect,
         &g_battle_unit_summary_portrait_image_params);
@@ -63,9 +63,9 @@ void menu_run_unit_summary_panel_thread(void) {
     origin = &g_menu_text_state.pen;
     *stride = 0x58;
     menu_set_text_origin(0, 0);
-    menu_display_text_string(buffer, origin, g_battle_menu_billboard_unit_name);
+    menu_display_text_string(buffer, origin, g_menu_billboard_unit_name);
     menu_set_text_origin(0, 0x10);
-    menu_display_text_string(buffer, origin, g_battle_menu_billboard_job_name);
+    menu_display_text_string(buffer, origin, g_menu_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
     battle_clear_menu_render_buffer(digits, 0xF0);
     *stride = 0x10;
@@ -93,8 +93,8 @@ void menu_run_unit_summary_panel_thread(void) {
     frames[0].sprites[6].u0 = zodiac % 7 * 0x18;
     frames[0].sprites[6].v0 = zodiac / 7 * 0x14 + 0x2A;
     mem_copy_bytes_nonempty(&frames[1], &frames[0], sizeof(menu_unit_summary_frame_t));
-    frames[0].palette = &g_battle_unit_summary_palettes[0].primitives;
-    frames[1].palette = &g_battle_unit_summary_palettes[1].primitives;
+    frames[0].palette = &g_menu_unit_summary_palettes[0].primitives;
+    frames[1].palette = &g_menu_unit_summary_palettes[1].primitives;
     menu_init_numeric_display_frame_primitives(&g_menu_unit_summary_panel_rect, frames[0].palette);
     menu_init_numeric_display_frame_primitives(&g_menu_unit_summary_panel_rect, frames[1].palette);
 
@@ -126,23 +126,23 @@ void menu_run_unit_summary_panel_thread(void) {
             }
         }
         if (g_menu_unit_summary_panel_rect.y == 0x1A) {
-            if (g_battle_unit_status_bounce_step == 0) {
-                g_battle_unit_status_bounce_step = 1;
-            } else if (g_battle_unit_status_bounce_step < 6) {
-                g_battle_unit_status_bounce_step = g_battle_unit_status_bounce_step + 1;
+            if (g_menu_unit_status_bounce_step == 0) {
+                g_menu_unit_status_bounce_step = 1;
+            } else if (g_menu_unit_status_bounce_step < 6) {
+                g_menu_unit_status_bounce_step = g_menu_unit_status_bounce_step + 1;
             }
         }
         if (g_menu_unit_summary_panel_rect.y == 0xAA) {
-            if (g_battle_unit_status_bounce_step == 6) {
-                g_battle_unit_status_bounce_step = 7;
-            } else if (g_battle_unit_status_bounce_step >= 7 && g_battle_unit_status_bounce_step < 0xB) {
-                g_battle_unit_status_bounce_step = g_battle_unit_status_bounce_step + 1;
-            } else if (g_battle_unit_status_bounce_step == 0xB) {
-                g_battle_unit_status_bounce_step = 0;
+            if (g_menu_unit_status_bounce_step == 6) {
+                g_menu_unit_status_bounce_step = 7;
+            } else if (g_menu_unit_status_bounce_step >= 7 && g_menu_unit_status_bounce_step < 0xB) {
+                g_menu_unit_status_bounce_step = g_menu_unit_status_bounce_step + 1;
+            } else if (g_menu_unit_status_bounce_step == 0xB) {
+                g_menu_unit_status_bounce_step = 0;
             }
         }
-        if (g_battle_unit_status_bounce_step != 0) {
-            frame_record->offset_a.y = value + g_battle_unit_status_bounce_offsets[g_battle_unit_status_bounce_step];
+        if (g_menu_unit_status_bounce_step != 0) {
+            frame_record->offset_a.y = value + g_menu_unit_status_bounce_offsets[g_menu_unit_status_bounce_step];
         } else {
             frame_record->offset_a.y = value;
         }

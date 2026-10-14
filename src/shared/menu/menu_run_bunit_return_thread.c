@@ -8,7 +8,7 @@ void menu_run_bunit_return_thread(void) {
     s32 i;
     s32 unused[2]; /* keeps the original 0x28 frame */
 
-    g_world_menu_transition_timeout = 4;
+    g_menu_transition_state = 4;
     do {
         thread_yield();
     } while (world_thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0);
@@ -30,7 +30,7 @@ void menu_run_bunit_return_thread(void) {
     menu_clear_modal_open();
     g_menu_overlay_state = 0;
     g_gfx_screen_fade = 0;
-    g_world_menu_transition_timeout = 0;
+    g_menu_transition_state = 0;
     menu_start_unit_view_thread(UNIT_VIEW_MODE_HOVERED_UNIT, g_menu_selected_unit.battle_id, 0xFF);
     thread_exit_current();
 }

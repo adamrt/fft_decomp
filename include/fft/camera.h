@@ -22,4 +22,11 @@ void camera_thread(void);
 void camera_wait_until_idle(void);
 s32 camera_wrap_yaw_angle(void);
 
+/* camera state */
+extern u16 g_camera_position_locked;
+/* Camera consumers unpack two 2-bit fields and a high nibble. */
+extern s32 g_camera_speed_curve;
+extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on overflow */
+extern s32 g_camera_wrap_yaw_pending;
+
 #endif

@@ -44,7 +44,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     world_camera_store_state_to_script_variables();
     menu_draw_active_window_frames();
 
-    if (g_world_event_finish_check_pending != 0) {
+    if (g_script_threads_idle != 0) {
         for (i = 1; i < 17; i++) {
             if (world_thread_is_running_asm(i) != 0) {
                 break;
@@ -54,12 +54,12 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
             op = script_get_current_scenario_finish_operation();
             if (op != 0) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
-                    g_world_event_finish_check_pending = 0;
+                    g_script_threads_idle = 0;
                     script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
                     return 9;
                 }
             } else {
-                g_world_event_finish_check_pending = 0;
+                g_script_threads_idle = 0;
                 g_menu_overlay_state = 0;
                 return 0;
             }
@@ -68,7 +68,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
             }
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, ((op & 0xC00) >> 2) | (op & 0xFF));
             op = (op & 0xF300) >> 8;
-            g_world_event_finish_check_pending = 0;
+            g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
             if (op == 0x80) {
                 return 9;
@@ -84,7 +84,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
             g_battle_entd_selection_mode = BATTLE_ENTD_SELECTION_MAP_ID;
             return 9;
         }
-        g_world_event_finish_check_pending = 0;
+        g_script_threads_idle = 0;
     }
 
     script_update_event_input_state(buttons);
@@ -118,7 +118,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
 
     if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_JOBSTTS) {
         ordering_table = jobstts_entrypoint(g_menu_selected_unit.battle_id, 0);
-        g_world_companion_overlay_prims = (s32)ordering_table;
+        g_menu_companion_overlay_primitives = (s32)ordering_table;
         if (ordering_table != 0) {
             AddPrims(g_gfx_current_otag_entry, ordering_table, &ordering_table[0x3f]);
         } else {
@@ -127,7 +127,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     }
     if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_EQUIP) {
         prims = equip_entrypoint(g_menu_selected_unit.battle_id, g_gfx_current_otag_entry + 1);
-        g_world_companion_overlay_prims = prims;
+        g_menu_companion_overlay_primitives = prims;
         if (prims >= 2) {
             AddPrims(g_gfx_current_otag_entry, (void*)prims, (void*)(prims + 0xFC));
         } else {
@@ -196,7 +196,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         }
     }
     if (i == 17) {
-        g_world_event_finish_check_pending = 1;
+        g_script_threads_idle = 1;
     }
     return 1;
 }

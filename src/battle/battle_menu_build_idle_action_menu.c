@@ -32,7 +32,7 @@ void battle_menu_build_idle_action_menu(s32 menu_id) {
         if ((g_menu_overlay_state == 0) && (g_menu_help_open == 0) && (g_menu_building_thread_started == 0)
             && (menu_id != BATTLE_MENU_ID_NONE)) {
             g_menu_current_id = menu_id;
-            g_menu_thread_menu_data = g_battle_menu_idle_action_entries;
+            g_menu_thread_menu_data = g_menu_idle_action_entries;
             unit_project_to_screen(
                 battle_unit_get_runtime_id_by_battle_id(g_menu_selected_unit.battle_id), &screen_position);
             i = 0;

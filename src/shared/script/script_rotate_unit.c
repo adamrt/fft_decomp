@@ -7,7 +7,7 @@
 /* RotateUnit event instruction: turn the addressed unit(s) to a facing.
  *
  * Parameters: 0x00 unit id (16-bit value), 0x02 facing code, 0x03 rotate mode,
- * 0x04 rotation speed (index into g_battle_rotation_speed_frames), 0x05 delay multiplier.
+ * 0x04 rotation speed (index into g_unit_rotation_speed_frames), 0x05 delay multiplier.
  * Facing codes 0x11-0x13 are relative to the unit's current facing, 0x10 is
  * relative to the camera quadrant, 0x14 restores the saved facing, and any
  * other value is absolute. Matching records are staggered by delay * n / 4.
@@ -35,13 +35,13 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
                     facing = battle_unit_get_facing_nibble_by_runtime_id(unit_id) + facing * 4;
                     facing = facing & 0xF;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_CAMERA) {
-                    facing = g_battle_rotation_speed_frames[4 + ((camera_wrap_yaw_angle() & 0xC00) >> 10)] * 4;
+                    facing = g_unit_rotation_speed_frames[4 + ((camera_wrap_yaw_angle() & 0xC00) >> 10)] * 4;
                 } else if (facing == EVENT_ROTATE_UNIT_FACING_RESTORE) {
                     state = &g_unit_animation_states[unit_id];
                     if (state->initial_facing != 0xFF) {
                         state->rotate_mode = UNIT_ROTATE_MODE_SHORTEST;
                         state->target_facing = state->initial_facing;
-                        state->frames_per_step = g_battle_rotation_speed_frames[parameters->speed];
+                        state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
                         state->step_counter = 0;
                         state->rotating = 1;
                         state->delay = parameters->delay * order++ / 4;
@@ -57,7 +57,7 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
                 state = &g_unit_animation_states[unit_id];
                 state->target_facing = facing;
                 state->rotate_mode = parameters->mode;
-                state->frames_per_step = g_battle_rotation_speed_frames[parameters->speed];
+                state->frames_per_step = g_unit_rotation_speed_frames[parameters->speed];
                 state->step_counter = 0;
                 state->rotating = 1;
                 state->delay = parameters->delay * order++ / 4;

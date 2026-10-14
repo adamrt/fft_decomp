@@ -715,7 +715,6 @@ extern event_file_block_t* g_script_event_block;
  * BATTLE 0x8014d170, WORLD 0x8013a454. The tables end after opcode 0xf3. */
 extern u8 g_script_event_instruction_sizes[0xf4];
 extern s32 g_script_loaded_event_id;
-extern s32 g_world_script_loaded_event_id;
 
 /* Whole matching interpreter ranges:
  * BATTLE 0x80143bd8..0x80145f78, WORLD 0x800f6f20..0x800f92a0 (exclusive). */
@@ -1165,5 +1164,8 @@ extern MATRIX g_script_light_base_color_matrix;
 void script_map_darkness(void);
 void script_set_specialized_map_destroyed(void);
 void map_light_thread(void);
+
+/* event state */
+extern s16 g_script_threads_idle;
 
 #endif

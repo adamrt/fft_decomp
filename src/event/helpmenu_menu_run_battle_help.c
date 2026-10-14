@@ -104,8 +104,8 @@ void helpmenu_menu_run_battle_help(void) {
             scan_thread++;
         }
         if (frame != 9) {
-            if (g_battle_help_active_text_id_tables == (u16* const*)missing_value) {
-                g_battle_help_active_text_id_tables = g_helpmenu_menu_text_id_tables;
+            if (g_menu_help_active_text_id_tables == (u16* const*)missing_value) {
+                g_menu_help_active_text_id_tables = g_helpmenu_menu_text_id_tables;
             }
             request_kind = request->select_text_table;
             if (request_kind != 0x10) {
@@ -214,7 +214,7 @@ void helpmenu_menu_run_battle_help(void) {
                     thread_set_parameters(help_thread_id - 1, 0x3B, help_id, 0);
                 } else {
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
-                    g_helpmenu_current_text_ids = g_battle_help_active_text_id_tables[request_kind];
+                    g_helpmenu_current_text_ids = g_menu_help_active_text_id_tables[request_kind];
                     thread_start(help_thread_id - 1, battle_text_run_dialog_thread);
                     thread_set_parameters(
                         help_thread_id - 1, 0x3B, g_helpmenu_current_text_ids[request->selected_index], 0);

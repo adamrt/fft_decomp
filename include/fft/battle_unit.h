@@ -1123,9 +1123,6 @@ extern battle_unit_slot_state_t g_battle_unit_slot_states[];
 extern s32 g_battle_unit_graphics_load_complete;
 extern battle_unit_t* g_battle_unit_list_head;
 
-/* 0x8016604e: result of battle_gfx_poll_unit_graphics_load, 0 done / 1 pending. */
-extern u16 g_battle_unit_graphics_load_pending;
-
 s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters);
 s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id);
 s32 battle_unit_disable_remove(s32 battle_id);
@@ -1212,7 +1209,6 @@ extern battle_ability_animation_data_t g_battle_ability_animation_data[BATTLE_AB
  * the one held while the unit charges or performs; 0 for none. */
 extern u8 g_battle_ability_charge_animation_sets[BATTLE_CHARGE_ANIMATION_SET_COUNT]
                                                 [BATTLE_CHARGE_ANIMATION_VARIANT_COUNT];
-extern u8 g_battle_rotation_speed_frames[];
 extern battle_distortion_animation_handler_t
     g_battle_unit_distortion_animation_handlers[BATTLE_DISTORTION_ANIMATION_COUNT];
 extern s32 g_battle_unit_palette_animation_offset;
@@ -1339,32 +1335,7 @@ u8 battle_unit_generate_treasure(unit_stats_t* unit);
 crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover);
 
 /* unit views */
-extern u16 g_battle_unit_status_bounce_step;
-extern image_load_parameters_t g_battle_unit_editor_sprite_image_params_a[19];
-extern image_load_parameters_t g_battle_unit_editor_sprite_image_params_b[19];
-extern image_load_parameters_t g_battle_unit_editor_row_image_params_a[4];
-extern image_load_parameters_t g_battle_unit_editor_row_image_params_b[4];
-extern image_load_parameters_t g_battle_unit_editor_item_icon_image_params[5];
-extern u16 g_battle_unit_editor_sprite_clut_pairs[19][2];
-extern menu_palette_slot_t g_battle_unit_summary_palettes[];
 extern u8 g_battle_unit_summary_digit_images[];
-extern menu_palette_primitives_t g_battle_unit_editor_palette;
-extern s32 g_battle_companion_overlay_primitives;
-extern RECT g_battle_unit_editor_cursor_rect; /* cursor source */
-extern RECT g_battle_unit_editor_panel_rect;  /* panel box */
-extern RECT g_battle_unit_editor_text_rect_a; /* first text image */
-extern RECT g_battle_unit_editor_text_rect_b; /* second text image */
-extern u16 g_battle_unit_status_bounce_offsets[];
-extern u8 g_battle_unit_status_first_page_by_mode[];
-extern menu_unit_status_page_t g_battle_unit_status_panel_pages[];
-extern CVECTOR g_battle_unit_status_gauge_colors[];
-extern image_load_parameters_t g_battle_unit_status_icon_image_params[];
-extern u16 g_battle_unit_status_quad_clut_pairs[][2];
-extern image_load_parameters_t* g_battle_unit_status_quad_image_params_by_mode[];
-extern u16 g_battle_unit_status_sprite_clut_pairs[][2];
-extern image_load_parameters_t* g_battle_unit_status_sprite_image_params_by_mode[];
 extern image_load_parameters_t g_battle_unit_summary_portrait_image_params;
-extern image_load_parameters_t g_battle_unit_summary_sprite_image_params[];
-extern u8 g_battle_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE];
 
 #endif

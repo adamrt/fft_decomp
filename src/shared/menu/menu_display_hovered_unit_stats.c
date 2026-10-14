@@ -47,7 +47,7 @@ void menu_display_hovered_unit_stats(
     slide = 0x84;
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
     if (thread_get_current_task_id() == THREAD_TASK_HOVERED_UNIT_STATS) {
-        g_battle_menu_hovered_stats_frame_count++;
+        g_menu_hovered_stats_frame_count++;
     }
     if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         text_id = unit->abilities.reaction;
@@ -71,15 +71,15 @@ void menu_display_hovered_unit_stats(
                 = g_menu_sprite_page_image_params[29].x_screen_offset + extent_w;
             for (frame = 0; frame < 3; frame++) {
                 g_menu_sprite_page_image_params[frame].x_screen_offset
-                    = g_battle_menu_sprite_page_image_param_bases[frame].x_screen_offset + extent_w;
+                    = g_menu_sprite_page_image_param_bases[frame].x_screen_offset + extent_w;
                 g_menu_sprite_page_image_params[frame].width
-                    = g_battle_menu_sprite_page_image_param_bases[frame].width - extent_w;
+                    = g_menu_sprite_page_image_param_bases[frame].width - extent_w;
             }
             g_menu_sprite_page_image_params[3].x_screen_offset
                 = g_menu_sprite_page_image_params[8].x_screen_offset + extent_w;
         }
     }
-    page = &g_battle_unit_status_panel_pages[g_battle_unit_status_first_page_by_mode[mode]];
+    page = &g_menu_unit_status_panel_pages[g_menu_unit_status_first_page_by_mode[mode]];
     menu_init_numeric_display_frame_primitives(frame_rect, &page->palette);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&page->draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
@@ -90,7 +90,7 @@ void menu_display_hovered_unit_stats(
     menu_init_default_poly_ft4(&page->portrait);
     text_configure_sprite_vram(&rects[0], 0x28, 0x28, &page->quads[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &page->quads[1], 2);
-    params = g_battle_unit_status_quad_image_params_by_mode[mode];
+    params = g_menu_unit_status_quad_image_params_by_mode[mode];
     if (mode == UNIT_STATS_PANEL_ATTACK_CASTER) {
         gfx_init_image_loading(&page->quads[4], &g_menu_texture_origin, frame_rect, &params[4]);
         for (frame = 0; frame < 2; frame++, params++) {
@@ -147,7 +147,7 @@ void menu_display_hovered_unit_stats(
         if (running != 0 && battle_thread_is_running_asm(running - 1) == 0) {
             running = 0;
         }
-        page = &g_battle_unit_status_panel_pages[g_battle_unit_status_first_page_by_mode[mode] + (frame & 1)];
+        page = &g_menu_unit_status_panel_pages[g_menu_unit_status_first_page_by_mode[mode] + (frame & 1)];
         battle_menu_build_unit_portrait_poly(&page->portrait, unit_id);
         if (running != 0) {
             setRGB0(&page->portrait, 0x40, 0x50, 0x70);
@@ -164,19 +164,19 @@ void menu_display_hovered_unit_stats(
         if (unit->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
             status->team_kind = 3;
         }
-        params = g_battle_unit_status_sprite_image_params_by_mode[mode];
-        if (g_battle_unit_status_bounce_step == 0) {
+        params = g_menu_unit_status_sprite_image_params_by_mode[mode];
+        if (g_menu_unit_status_bounce_step == 0) {
             setXY4(&page->portrait, frame_rect->x + 2, frame_rect->y + 2, frame_rect->x + 0x21, frame_rect->y + 2,
                 frame_rect->x + 2, frame_rect->y + 0x32, frame_rect->x + 0x21, frame_rect->y + 0x32);
             mem_copy_bytes_nonempty(
-                &params[6], &g_battle_unit_status_icon_image_params[status->team_kind], sizeof(*params));
+                &params[6], &g_menu_unit_status_icon_image_params[status->team_kind], sizeof(*params));
             for (i = 0; i < 7; i++, params++) {
                 gfx_init_image_loading(&page->sprites[i], &g_menu_texture_origin, frame_rect, params);
             }
         }
         if (mode != UNIT_STATS_PANEL_ATTACK_CASTER) {
             for (i = 0; i < 4; i++) {
-                page->quads[i].clut = g_battle_unit_status_quad_clut_pairs[i][running & 1];
+                page->quads[i].clut = g_menu_unit_status_quad_clut_pairs[i][running & 1];
             }
         }
         poly = page->bars;
@@ -184,7 +184,7 @@ void menu_display_hovered_unit_stats(
             page->quads[1].clut = 0x7C3C;
             page->quads[2].clut = 0x7D7C;
         }
-        color = g_battle_unit_status_gauge_colors;
+        color = g_menu_unit_status_gauge_colors;
         gauge = status->gauges;
         for (i = 0; i < 3; i++) {
             SetPolyG4(poly);
@@ -269,8 +269,8 @@ void menu_display_hovered_unit_stats(
         } else {
             offs->a.position.x = -0x80 - slide;
         }
-        if (g_battle_unit_status_bounce_step != 0) {
-            offs->a.position.y = base_y + g_battle_unit_status_bounce_offsets[g_battle_unit_status_bounce_step];
+        if (g_menu_unit_status_bounce_step != 0) {
+            offs->a.position.y = base_y + g_menu_unit_status_bounce_offsets[g_menu_unit_status_bounce_step];
         } else {
             offs->a.position.y = base_y;
         }
@@ -298,7 +298,7 @@ void menu_display_hovered_unit_stats(
             menu_build_sprite_page(frame, frame_rect);
         }
         for (i = 0; i < 7; i++) {
-            page->sprites[i].clut = g_battle_unit_status_sprite_clut_pairs[i][running & 1];
+            page->sprites[i].clut = g_menu_unit_status_sprite_clut_pairs[i][running & 1];
             gfx_draw_or_append_gpu_primitive(&page->sprites[i]);
         }
         gfx_draw_or_append_gpu_primitive(&page->draw_mode_0);
@@ -313,13 +313,13 @@ void menu_display_hovered_unit_stats(
         thread_yield();
         g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
         if (thread_get_current_task_id() == THREAD_TASK_HOVERED_UNIT_STATS) {
-            g_battle_menu_hovered_stats_frame_count++;
+            g_menu_hovered_stats_frame_count++;
         }
     }
 exit:
     thread_yield();
     if (thread_get_current_task_id() == THREAD_TASK_HOVERED_UNIT_STATS) {
-        g_battle_menu_hovered_stats_frame_count = 0;
+        g_menu_hovered_stats_frame_count = 0;
     }
     gfx_free_texture_rect(&rects[0]);
     gfx_free_texture_rect(&rects[1]);

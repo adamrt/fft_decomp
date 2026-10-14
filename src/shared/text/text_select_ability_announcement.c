@@ -9,7 +9,7 @@
  * Each scene binds its own quote history and menu dispatcher. Unknown
  * skillsets (not in the list and not the unit's flagged primary/secondary)
  * get quote command 5 unless the ability repeats the last quote
- * (g_battle_spell_quote_last_ability_id), the unit is a Calculator or Mime, the ability is >= 0x170 or
+ * (g_text_spell_quote_last_ability_id), the unit is a Calculator or Mime, the ability is >= 0x170 or
  * lacks the spell-quote flag, status blocks it, options disable it, or
  * EVENT_SCRIPT_VAR_RANDOM_VALUE is 4 or more. Everything else uses command 7. */
 void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32 enabled) {
@@ -33,7 +33,7 @@ void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32
         && (unit->position.spell_quote_skillsets & UNIT_SPELL_QUOTE_SUPPRESS_SECONDARY)) {
         known = 1;
     }
-    if (known == 0 && g_battle_spell_quote_last_ability_id != (action->ability_id & ABILITY_ID_MASK)
+    if (known == 0 && g_text_spell_quote_last_ability_id != (action->ability_id & ABILITY_ID_MASK)
         && unit->job_id != JOB_ID_CALCULATOR && unit->job_id != JOB_ID_MIME
         && action->ability_id < ABILITY_ID_ITEM_FIRST
         && (secondary.range->flags_3 & ABILITY_SECONDARY_FLAG_3_SPELL_QUOTE)
@@ -41,7 +41,7 @@ void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32
             & (STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT) | STATUS_BYTE_MASK(STATUS_ID_FROG)))
         && g_main_game_options.fields.ability_names == GAME_OPTION_ON
         && (script_get_variable(EVENT_SCRIPT_VAR_RANDOM_VALUE) & 0xF) < 4) {
-        g_battle_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
+        g_text_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
         menu_dispatch_system_function(BATTLE_MENU_SYSTEM_COMMAND_SPELL_QUOTE, 0, unit_id, 0, enabled, action);
         return;
     }

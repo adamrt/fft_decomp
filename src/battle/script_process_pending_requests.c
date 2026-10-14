@@ -124,8 +124,8 @@ void script_process_pending_requests(void) {
             effect_start_new(effect_id, EFFECT_START_ON_UNIT, effect_target);
         }
     }
-    if (g_battle_unit_graphics_load_pending != 0) {
-        g_battle_unit_graphics_load_pending = battle_gfx_poll_unit_graphics_load();
+    if (g_unit_graphics_load_pending != 0) {
+        g_unit_graphics_load_pending = battle_gfx_poll_unit_graphics_load();
     }
     if (pending == 0) {
         loaded_slot = g_script_pending_loaded_evtchr_slot;

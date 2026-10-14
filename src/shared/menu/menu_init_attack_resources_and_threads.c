@@ -28,11 +28,11 @@ s32 menu_init_attack_resources_and_threads(void) {
         attack_gfx_build_formation_sprites();
         attack_gfx_load_portraits();
     }
-    g_world_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
-    g_world_menu_panel_fade_intensity = 0;
+    g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
+    g_menu_panel_fade_intensity = 0;
     if (world_script_check_tutorial_event_slot() != 0) {
         g_gfx_screen_fade = 0xff;
-        g_world_saved_game_options = g_main_game_options;
+        g_menu_saved_game_options = g_main_game_options;
         options = &g_main_game_options.fields;
         options->cursor_movement = GAME_CURSOR_MOVEMENT_TYPE_A;
         options->multi_height_cursor_speed = GAME_MULTI_HEIGHT_CURSOR_SPEED_REGULAR;
@@ -48,8 +48,8 @@ s32 menu_init_attack_resources_and_threads(void) {
         thread_start(THREAD_BORROWED_SLOT_DEPLOYMENT, map_data_load_complete_thread);
         return_value = 1;
     } else {
-        g_world_sound_music_track_1_id = 0;
-        g_world_sound_music_track_2_id = 0;
+        g_sound_music_track_1_id = 0;
+        g_sound_music_track_2_id = 0;
         sound_play_music_tracks(MAIN_MUSIC_DEPLOYMENT, MAIN_MUSIC_NONE);
         attack_text_build_deployment_strings();
         attack_map_load_title_graphic();

@@ -1210,4 +1210,9 @@ extern SVECTOR g_unit_runtime_coords;
 SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
 void unit_set_animation(s32 runtime_id, u32 animation);
 
+/* animation state */
+extern u8 g_unit_rotation_speed_frames[];
+/* Unit graphics load result: 0 done, 1 pending. */
+extern u16 g_unit_graphics_load_pending;
+
 #endif

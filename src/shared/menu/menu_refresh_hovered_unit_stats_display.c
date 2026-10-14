@@ -4,10 +4,10 @@
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
 void menu_refresh_hovered_unit_stats_display(void) {
     menu_load_selected_unit();
-    g_battle_menu_hovered_unit_stats_setup[6].format = 2;
+    g_menu_hovered_unit_stats_setup[6].format = 2;
     if (g_menu_selected_unit_status.list_index < 0) {
-        g_battle_menu_hovered_unit_stats_setup[6].format = 0x0c00;
+        g_menu_hovered_unit_stats_setup[6].format = 0x0c00;
     }
     menu_display_hovered_unit_stats(&g_menu_hovered_unit_stats_rect, UNIT_STATS_PANEL_HOVERED_UNIT,
-        g_battle_menu_hovered_unit_stats_setup, &g_menu_selected_unit_status);
+        g_menu_hovered_unit_stats_setup, &g_menu_selected_unit_status);
 }

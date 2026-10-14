@@ -40,9 +40,9 @@ void menu_start_entry_thread(void) {
     }
     thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[menu_id].thread_entry);
     thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[menu_id], 0, 0);
-    count = g_battle_menu_restore_depth;
+    count = g_menu_restore_depth;
     g_script_event_input = 0;
-    if (g_menu_restore_pending != 0 && g_battle_menu_restore_unit_id == g_menu_selected_unit.battle_id) {
+    if (g_menu_restore_pending != 0 && g_menu_restore_unit_id == g_menu_selected_unit.battle_id) {
         g_menu_help_open = 1;
         thread_wait_frames(2);
         if (count > 0) {
@@ -60,8 +60,8 @@ void menu_start_entry_thread(void) {
         g_menu_restore_pending = 0;
         g_menu_help_open = 0;
     } else {
-        g_battle_menu_restore_depth = 0;
-        g_battle_menu_restore_unit_id = g_menu_selected_unit.battle_id;
+        g_menu_restore_depth = 0;
+        g_menu_restore_unit_id = g_menu_selected_unit.battle_id;
     }
     thread_exit_current();
 }
