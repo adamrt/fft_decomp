@@ -5,7 +5,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Claims and initialises unit runtime record for one queued unit: spritesheet VRAM
+/* Claims and initializes unit runtime record for one queued unit: spritesheet VRAM
  * slot and palette, map position, displays and the three weapon/body-part
  * sprite records, then links it at the head of the runtime-unit list.
  *

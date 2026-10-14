@@ -2,7 +2,7 @@
 #include "fft/battle_move.h"
 #include "psx/types.h"
 
-/* Start the unit's next movement step from the current tile centre.
+/* Start the unit's next movement step from the current tile center.
  *
  * Variant of move_start_unit_step_and_dismount_rider without the rider dismount: the step byte's top
  * two bits pick the direction, which sets the facing and edge offset; its low

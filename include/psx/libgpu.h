@@ -124,7 +124,7 @@ typedef enum {
 #define PSYQ_GPU_DISPLAY_REVERSE    0x80U
 
 /* GPU packet prefix: low 24 bits link to the next primitive; high 8 bits
- * contain the packet length. The next word stores colour and command bytes,
+ * contain the packet length. The next word stores color and command bytes,
  * making P_TAG 8 bytes. Primitive header macros access it through casts of
  * primitive pointers. */
 typedef struct {

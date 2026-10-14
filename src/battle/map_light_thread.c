@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /*
- * Scenario thread task 7: interpolates the map light colour and its three
+ * Scenario thread task 7: interpolates the map light color and its three
  * light vectors from their current values to six script-supplied targets over
  * the script's frame count, rebuilding the GTE light matrix each frame, then
  * commits the final values back to the live light state.

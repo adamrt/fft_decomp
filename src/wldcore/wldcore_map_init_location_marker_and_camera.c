@@ -4,7 +4,7 @@
 
 /* Places the player's map marker on EVENT_SCRIPT_VAR_LOCATION, queues it for
  * drawing, picks its animation from EVENT_SCRIPT_VAR_TOWN_BACKGROUND, then
- * centres the projection on it and refreshes the camera.
+ * centers the projection on it and refreshes the camera.
  *
  * The map-dot position is copied as one SVECTOR, which reproduces the
  * target's unaligned lwl/lwr 32-bit transfers. */

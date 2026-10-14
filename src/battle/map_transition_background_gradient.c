@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /*
- * Starts a fade of both background gradient colours toward `colors` over
+ * Starts a fade of both background gradient colors toward `colors` over
  * frame_duration * 8 frames, or applies them at once when frame_duration is
  * zero. Indexing base[i]/color[i] (not advancing pointers) is required: a
  * pointer walk splits into biased givs.

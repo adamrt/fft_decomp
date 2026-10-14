@@ -5,7 +5,7 @@
  *
  * Suspends WORLD thread 14, appends the two header windows (kinds 0x6c and
  * 0x6d, the second hidden) and the 0xf8 x 0xb0 panel render record built from
- * g_wldcore_window_image_buffer, centres the newest history entry's name text
+ * g_wldcore_window_image_buffer, centers the newest history entry's name text
  * (0x8800 + g_wldcore_active_saved_record.text_history_3) in it, and copies the four operand-history entries
  * (newest first) into the level at +0x0c..+0x18. It also tints the picture
  * render record to half brightness, clears the screen dim and sets the menu
@@ -18,7 +18,7 @@
  * Several spellings are load-bearing. `windows` holds the record base in a
  * saved register: the window positions are derived from it and the second
  * window's anim_counter store goes through it, while the other field stores use
- * the absolute `$at` form. The render position and colour pointers reproduce
+ * the absolute `$at` form. The render position and color pointers reproduce
  * the target's shared render-record base. The history is read through a
  * pointer to its newest entry: the indexed reads count as in-struct
  * references, so the scheduler keeps each load after the preceding level

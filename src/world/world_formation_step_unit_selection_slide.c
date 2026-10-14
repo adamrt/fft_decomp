@@ -3,7 +3,7 @@
 /* Steps the formation unit-selection slide; once its frame counter reaches 9 it
  * ends the slide, sets the status display redraw_request to 1 and clears flags.
  *
- * Compiled at -O1 like its neighbours: the final arm's two field stores share
+ * Compiled at -O1 like its neighbors: the final arm's two field stores share
  * one `la` of redraw_request, with flags at -4 from it. At -O2, cse2 folds that
  * -4 store back into an absolute address and the scheduler moves the first
  * arm's store into the frame load's delay slot.

@@ -1,7 +1,7 @@
 #include "fft/open.h"
 
-/* Recolour the birthday menu's render records for the confirmation prompt:
- * dim the date cursor, grey the label, and mark both windows as step 2.
+/* Recolor the birthday menu's render records for the confirmation prompt:
+ * dim the date cursor, gray the label, and mark both windows as step 2.
  *
  * The target reserves a 24-byte frame it never touches (the stack adjustment
  * is even scheduled into the last load-delay slot), so the original body

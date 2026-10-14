@@ -6,8 +6,8 @@
 /* Convert one display object into a libgs sprite primitive and sort it into the
  * ordering table handed down by wldcore_dispatch_display_object_list.
  *
- * Flag 0x004 selects the 8-bit colour mode (attribute 0x01000000); flag 0x400 copies
- * the object's colour verbatim, otherwise 0x80069718 applies the global fade
+ * Flag 0x004 selects the 8-bit color mode (attribute 0x01000000); flag 0x400 copies
+ * the object's color verbatim, otherwise 0x80069718 applies the global fade
  * tint to it; flag 0x100 selects the animated path, where 0x8006b678 looks up
  * the frame rectangle for anim_counter/2 and the counter is then stepped, the
  * flag clearing itself once the halved counter reaches 4.
@@ -32,8 +32,8 @@ void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_t* obje
     GsSPRITE sprite;
     RECT frame;
     CVECTOR color;
-    s32 centre_x;
-    s32 centre_y;
+    s32 center_x;
+    s32 center_y;
     s32 page;
     s32 step;
 
@@ -42,10 +42,10 @@ void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_t* obje
     } else {
         sprite.attribute = 0;
     }
-    centre_x = object->clut.x;
-    sprite.cx = centre_x;
-    centre_y = object->clut.y;
-    sprite.cy = centre_y;
+    center_x = object->clut.x;
+    sprite.cx = center_x;
+    center_y = object->clut.y;
+    sprite.cy = center_y;
     step = object->palette;
     if (step != 0) {
         sprite.cx = object->clut.x + ((step - 1) << 4);

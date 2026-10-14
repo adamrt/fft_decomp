@@ -7,7 +7,7 @@
 /* ColorUnit: start a palette modulation on a unit or a unit group.
  *
  * Operands: unit id or group (16-bit value), blend mode, red, green, blue (s8 each)
- * and a time. A plain unit id colours that one unit; id 0 and the group ids from
+ * and a time. A plain unit id colors that one unit; id 0 and the group ids from
  * EVENT_UNIT_GROUP_FIRST run all 21 unit ids through
  * script_filter_unit_id_by_mode. Nothing happens when a plain unit id does
  * not resolve. */

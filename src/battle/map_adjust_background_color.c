@@ -1,6 +1,6 @@
 #include "fft/battle_map.h"
 
-/* Add per-component deltas to the map background colour and apply it.
+/* Add per-component deltas to the map background color and apply it.
  *
  * A component whose tested delta is negative (`current + delta < current`)
  * becomes 0xff instead. The retail routine tests green with red_delta. */

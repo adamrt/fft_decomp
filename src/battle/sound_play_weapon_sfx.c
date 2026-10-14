@@ -46,7 +46,7 @@ void sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
                 break;
             case ACTION_MISS_TYPE_NULLIFIED:
             case ACTION_MISS_TYPE_ACCURACY_MISS:
-            case ACTION_MISS_TYPE_CANCELLED:
+            case ACTION_MISS_TYPE_CANCELED:
                 break;
             default:
                 if (target->stats->action.critical != 0) {

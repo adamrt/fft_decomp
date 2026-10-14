@@ -8,7 +8,7 @@
  *
  * A unit target copies the unit's world-coordinate record, and when
  * add_depth is set lowers Y to the tile's own surface height. A tile target
- * uses the tile centre (x * 28 + 14, y * 28 + 14) and takes its height
+ * uses the tile center (x * 28 + 14, y * 28 + 14) and takes its height
  * from the tile record, adding the slope depth when add_depth is set. */
 void effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out) {

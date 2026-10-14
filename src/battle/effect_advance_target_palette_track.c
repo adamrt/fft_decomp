@@ -3,9 +3,9 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Advance the surroundings colour track one frame.
+/* Advance the surroundings color track one frame.
  *
- * When an APPLY keyframe starts, its colour is applied to the field, to the
+ * When an APPLY keyframe starts, its color is applied to the field, to the
  * palette of every spectator unit (those that are neither a target nor the
  * caster) and, unless weather flag 2 is set, to the scaled map palette. The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in

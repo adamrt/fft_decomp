@@ -79,7 +79,7 @@ extern require_display_condition_colors_t g_require_condition_general_vertex_col
 /* Per-condition first-quad indices; entry n+1 bounds entry n. */
 extern u8 g_require_condition_special_quad_ranges[];
 extern sprite_sheet_frame_t g_require_condition_special_quads[];
-/* 0x14-byte vertex-colour records, one per quad. */
+/* 0x14-byte vertex-color records, one per quad. */
 extern require_display_condition_colors_t g_require_condition_special_vertex_colors[];
 
 /* REQUIRE 0x801cafd4, invoked by both BATTLE and WORLD event dispatch. */
@@ -130,7 +130,7 @@ typedef enum require_war_trophy_entry {
 /* The mode byte of the bonus-image burst parameters: the distance that sets
  * each tile's start delay. Any other value measures along a rotated x axis. */
 typedef enum require_reward_burst_mode {
-    REQUIRE_REWARD_BURST_FROM_CENTRE = 0,
+    REQUIRE_REWARD_BURST_FROM_CENTER = 0,
     REQUIRE_REWARD_BURST_FROM_ORIGIN = 1, /* the top-left corner */
     REQUIRE_REWARD_BURST_HORIZONTAL = 2,  /* x only */
 } require_reward_burst_mode_e;

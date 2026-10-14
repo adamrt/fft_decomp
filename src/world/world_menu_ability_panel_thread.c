@@ -88,7 +88,7 @@ void world_menu_ability_panel_thread(void) {
             }
         }
         /* No i = 0 here: the target's reset before this test is reorg
-           hoisting the loop's own initialisation into a delay slot, and an
+           hoisting the loop's own initialization into a delay slot, and an
            explicit one lengthens i's live range enough to lose it $s1. */
         if (frame == 0 || thread->redraw_request == 1) {
             world_clear_menu_render_buffer(text, 0xc80);

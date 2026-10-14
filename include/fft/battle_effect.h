@@ -132,7 +132,7 @@ typedef enum effect_hit_result {
     EFFECT_HIT_CRITICAL = 1,
     EFFECT_HIT_REFLECTED = 2,
     EFFECT_HIT_MISSED = 3,    /* weapon hits: evaded by an accessory, a hand or the class */
-    EFFECT_HIT_NO_EFFECT = 4, /* nullified, missed outright, cancelled, grasped or caught */
+    EFFECT_HIT_NO_EFFECT = 4, /* nullified, missed outright, canceled, grasped or caught */
     EFFECT_HIT_GOLEM = 5,
     EFFECT_HIT_BREAK = 6,     /* equipment broken */
     EFFECT_HIT_BREAK_ALT = 7, /* handled like BREAK; nothing stores it */
@@ -229,7 +229,7 @@ typedef struct effect_charge_state {
     s32 duration;       /* 0x1140 */
     s32 radius;         /* 0x1144 */
     s32 spawn_interval; /* 0x1148 */
-    s32 colour;         /* 0x114c */
+    s32 color;          /* 0x114c */
     s32 max_trails;     /* 0x1150 */
     s32 fade_row;       /* 0x1154 */
     s32 done;           /* 0x1158 */
@@ -282,9 +282,9 @@ enum {
     EFFECT_PALETTE_TRACK_KEYFRAMES = 33,
 };
 
-/* The screen colour track: the palette-track layout with a second colour per
+/* The screen color track: the palette-track layout with a second color per
  * keyframe. An APPLY keyframe shifts the map background gradient by twice
- * its colour; any other sets the gradient's two stops to its two colours. */
+ * its color; any other sets the gradient's two stops to its two colors. */
 typedef struct effect_background_track {
     s16 duration[EFFECT_PALETTE_TRACK_KEYFRAMES];
     rgb_s8_t color[EFFECT_PALETTE_TRACK_KEYFRAMES];
@@ -294,13 +294,13 @@ typedef struct effect_background_track {
 } effect_background_track_t;
 typedef char effect_background_track_size_must_be_300[(sizeof(effect_background_track_t) == 300) ? 1 : -1];
 
-/* preset of a colour track keyframe. */
+/* preset of a color track keyframe. */
 enum {
-    EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map colour mode (MAP_COLOR_MODE_*) the colour is applied in */
+    EFFECT_COLOR_KEYFRAME_MODE_MASK = 0x7f, /* the map color mode (MAP_COLOR_MODE_*) the color is applied in */
     EFFECT_COLOR_KEYFRAME_APPLY = 0x80,     /* clear on the unit tracks: the keyframe only waits */
 };
 
-/* A colour track of an effect timeline: timed palette changes of the
+/* A color track of an effect timeline: timed palette changes of the
  * surroundings, the caster or the targets. A keyframe lasts duration * 8
  * frames (one frame for 0); a track of count keyframes plays count - 1. */
 typedef struct effect_palette_track {
@@ -311,7 +311,7 @@ typedef struct effect_palette_track {
 } effect_palette_track_t;
 typedef char effect_palette_track_size_must_be_200[sizeof(effect_palette_track_t) == 200 ? 1 : -1];
 
-/* One phase's colour tracks. The surroundings are the map's field colour and
+/* One phase's color tracks. The surroundings are the map's field color and
  * the spectators: the living units that are neither a target nor the caster. */
 typedef struct effect_timeline_color_tracks {
     effect_palette_track_t surroundings; /* 0x000: the map and the units that only look on */
@@ -492,7 +492,7 @@ typedef struct effect_emitter_values {
     u8 spawn_end_frame;     /* 0x03; trap groups */
     u8 count;               /* 0x04; trap groups: slots the group owns */
     u8 _unused_05;          /* 0x05 */
-    u16 anchor_flags;       /* 0x06; effect_emitter_origin_e: CASTER and TARGET are honoured */
+    u16 anchor_flags;       /* 0x06; effect_emitter_origin_e: CASTER and TARGET are honored */
     u16 motion_flags;       /* 0x08; effect_emitter_velocity_e */
     vec3s16_t position;     /* 0x0a */
     vec3s16_t spread;       /* 0x10 */
@@ -512,7 +512,7 @@ typedef char effect_emitter_values_size_must_be_46[(sizeof(effect_emitter_values
 enum {
     EFFECT_SPRITE_PART_CLUT_MASK = 0x000f,
     EFFECT_SPRITE_PART_FLAG_SECOND_CLUT_ROW = 0x0010,  /* the CLUT is of MAP_CLUT_ROW_EFFECT_SECOND */
-    EFFECT_SPRITE_PART_TPAGE_MODE_MASK = 0x00e0,       /* the tpage's blend rate and 8-bit colour bits */
+    EFFECT_SPRITE_PART_TPAGE_MODE_MASK = 0x00e0,       /* the tpage's blend rate and 8-bit color bits */
     EFFECT_SPRITE_PART_FLAG_SEMI_TRANSPARENT = 0x0200, /* draw it semi-transparent */
 };
 
@@ -562,7 +562,7 @@ typedef struct effect_obstacle_unit_list {
     s32 count;                                  /* 0x00 */
     u8 battle_ids[BATTLE_UNIT_SLOT_COUNT];      /* 0x04 */
     u8 _padding_19;                             /* 0x19; aligns the position vectors */
-    SVECTOR positions[BATTLE_UNIT_SLOT_COUNT];  /* 0x1a; tile centre and height */
+    SVECTOR positions[BATTLE_UNIT_SLOT_COUNT];  /* 0x1a; tile center and height */
     u8 _padding_c2[2];                          /* 0xc2; aligns the sprite heights */
     s32 sprite_heights[BATTLE_UNIT_SLOT_COUNT]; /* 0xc4 */
 } effect_obstacle_unit_list_t;
@@ -650,14 +650,14 @@ typedef struct effect_sound_track {
  * The child timeline's channels are the effect_child_timeline_t that
  * g_effect_child_timeline addresses at 0x008; its camera table is the
  * 17-keyframe one at 0x6b2, laid out like effect_camera_keyframes_21_t. Each
- * phase has five particle channels, three sound tracks, four colour tracks
+ * phase has five particle channels, three sound tracks, four color tracks
  * and a 21-keyframe camera table. */
 typedef struct effect_timeline {
     u16 _unused_0000;
     u16 phase2_duration;           /* 0x002 */
     u16 phase1_duration;           /* 0x004 */
     u16 spawn_delay;               /* 0x006; frames between child spawns (see effect_flags_section_t) */
-    effect_child_timeline_t child; /* 0x008; child duration, particle, sound and colour tracks */
+    effect_child_timeline_t child; /* 0x008; child duration, particle, sound and color tracks */
     s16 end_frame[17];             /* 0x6b2; child camera table: frame each keyframe's moves arrive */
     vec3s16_t rotation[17];        /* 0x6d4 */
     vec3s16_t position[17];        /* 0x73a */
@@ -844,15 +844,15 @@ typedef enum effect_callback_phase {
 } effect_callback_phase_e;
 
 /* Emitter spawn origin: bits 9-11 of an emitter's 16-bit placement flags (byte 0x03
- * mask 0x0e). 0xa00 is the map centre:
+ * mask 0x0e). 0xa00 is the map center:
  * every handler adds half the map geometry width and depth there. */
 typedef enum effect_emitter_origin {
     EFFECT_EMITTER_ORIGIN_WORLD = 0x000,
-    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* centre of g_effect_target_tile */
+    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_effect_target_tile */
     EFFECT_EMITTER_ORIGIN_CASTER = 0x400,
     EFFECT_EMITTER_ORIGIN_TARGET = 0x600,
     EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE = 0x800, /* position of the spawning work record */
-    EFFECT_EMITTER_ORIGIN_MAP_CENTRE = 0xa00,
+    EFFECT_EMITTER_ORIGIN_MAP_CENTER = 0xa00,
     EFFECT_EMITTER_ORIGIN_TRACKED_ENTITY = 0xc00, /* target plus its unit coordinates */
 } effect_emitter_origin_e;
 
@@ -860,11 +860,11 @@ enum { EFFECT_EMITTER_ORIGIN_MASK = 0xe00 };
 
 /* Point particles home toward: bits 5-7 of the 16-bit placement flags (byte 0x02 mask
  * 0xe0). 0x00 and 0x20 both leave the
- * interpolated offset unchanged; 0x40 is the map centre. */
+ * interpolated offset unchanged; 0x40 is the map center. */
 typedef enum effect_emitter_homing {
     EFFECT_EMITTER_HOMING_OFFSET = 0x00,
     EFFECT_EMITTER_HOMING_OFFSET_ALT = 0x20,
-    EFFECT_EMITTER_HOMING_MAP_CENTRE = 0x40,
+    EFFECT_EMITTER_HOMING_MAP_CENTER = 0x40,
     EFFECT_EMITTER_HOMING_CASTER = 0x60,
     EFFECT_EMITTER_HOMING_TARGET = 0x80,
     EFFECT_EMITTER_HOMING_CURSOR_TILE = 0xa0,
@@ -909,7 +909,7 @@ typedef enum effect_camera_source {
     EFFECT_CAMERA_SOURCE_CURRENT_YAW_ROLL = 0x020, /* angle: given pitch; current yaw and roll plus the given */
     EFFECT_CAMERA_SOURCE_GIVEN = 0x040,            /* the command's vector */
     EFFECT_CAMERA_SOURCE_SAVED_PITCH = 0x060,      /* angle: saved pitch, current yaw and roll */
-    EFFECT_CAMERA_SOURCE_MAP_CENTRE = 0x080,
+    EFFECT_CAMERA_SOURCE_MAP_CENTER = 0x080,
     EFFECT_CAMERA_SOURCE_CURRENT = 0x0c0,
     EFFECT_CAMERA_SOURCE_SAVED = 0x100,
     EFFECT_CAMERA_SOURCE_CASTER = 0x140,
@@ -969,7 +969,7 @@ enum {
     EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK = 0x000c, /* spawn child_emitter_mid_life every frame it lives */
     EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_1 = 0x0004,
     EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_2 = 0x0008,
-    EFFECT_EMITTER_FLAG_COLOUR_CURVES = 0x0040, /* tint by the three colour curves; clear, a neutral 128 */
+    EFFECT_EMITTER_FLAG_COLOR_CURVES = 0x0040, /* tint by the three color curves; clear, a neutral 128 */
     /* A particle that comes within this distance of its homing target on all three axes ends its
      * life: the field shifted right by SHIFT is 16, 32 or 48 world units, 0 for never. */
     EFFECT_EMITTER_FLAG_ARRIVAL_DISTANCE_MASK = 0x0300,
@@ -1071,7 +1071,7 @@ typedef struct effect_child_timeline_state {
 } effect_child_timeline_state_t;
 typedef char effect_child_timeline_state_size_must_be_78[sizeof(effect_child_timeline_state_t) == 78 ? 1 : -1];
 
-/* Parent counters: ten particle tracks, fourteen colour/sound tracks and
+/* Parent counters: ten particle tracks, fourteen color/sound tracks and
  * two extra 16-bit values. The reset clears all 26, not just the 24 stepped tracks. */
 typedef union effect_parent_track_counters {
     s16 reset_slots[EFFECT_PARENT_TRACK_RESET_SLOT_COUNT];
@@ -1243,7 +1243,7 @@ typedef struct effect_work_record {
     s16 lifetime;                    /* 0x42; frames or EFFECT_PARTICLE_LIFETIME_ANIMATION_DRIVEN */
     u8 _unused_44;
     u8 homing_curve_selector;      /* 0x45; zero disables, otherwise curve row + 1 */
-    rgb24_t colour_curves;         /* 0x46; zero-based RGB animation curve indices */
+    rgb24_t color_curves;          /* 0x46; zero-based RGB animation curve indices */
     u8 _padding_49;                /* aligns homing_strength */
     s16 homing_strength;           /* 0x4a */
     s16 kind_flags;                /* 0x4c; EFFECT_EMITTER_* placement and EFFECT_WORK_KIND_* */
@@ -1321,7 +1321,7 @@ typedef char effect_anim_script_prefix_size_must_be_2[sizeof(effect_anim_script_
  * byte pair; slot 0 is the null sentinel. g_effect_active_slot_head heads the active chain
  * and g_effect_slot_free_head the free chain. RGB and the frame byte
  * are copied together by the billboard renderer; effect_init_trap_animation resets
- * the colour and writes the 16-bit values at 0x88 and 0x8e. */
+ * the color and writes the 16-bit values at 0x88 and 0x8e. */
 
 typedef struct effect_slot {
     u8 next;                      /* 0x00 */
@@ -1423,7 +1423,7 @@ typedef struct effect_geometry_entry {
     effect_emitter_spawn_curve_bindings_t spawn_bindings; /* 0x08 */
     u32 motion_curve_selectors; /* 0x0c: acceleration, acceleration step, lifetime, target offset, count and interval;
                                  * bits 28-29 bind homing strength and bits 30-31 bind its curve */
-    u32 colour_curves;          /* 0x10: zero-based RGB curve indices in the low three nibbles */
+    u32 color_curves;           /* 0x10: zero-based RGB curve indices in the low three nibbles */
     effect_emitter_geometry_view_t spawn;         /* 0x14: initial position, spread, angles and inertia */
     s16 _unknown_4c[2];                           /* 0x4c: lerped to _unknown_50 and discarded */
     s16 _unknown_50[2];                           /* 0x50 */
@@ -1487,10 +1487,10 @@ typedef char effect_wave_parameters_size_must_be_12[sizeof(effect_wave_parameter
 
 typedef struct effect_textured_quad_geometry_view {
     u8 _unused_00[0x06];
-    u16 flags;                                          /* 0x06: EFFECT_EMITTER_FLAG_COLOUR_CURVES */
+    u16 flags;                                          /* 0x06: EFFECT_EMITTER_FLAG_COLOR_CURVES */
     effect_textured_quad_scroll_curves_t scroll_curves; /* 0x08 */
     effect_wave_shape_curves_t wave_curves;             /* 0x0c */
-    u32 colour_curves;                                  /* 0x10: nibbles 0-2 = r/g/b */
+    u32 color_curves;                                   /* 0x10: nibbles 0-2 = r/g/b */
     u16 texture_u;                                      /* 0x14 */
     u16 texture_v;                                      /* 0x16 */
     u8 _unused_18[0x16];
@@ -1547,7 +1547,7 @@ typedef struct effect_particle_ribbon_geometry_view {
     u16 flags;                                        /* 0x06 */
     u32 spawn_curve_bindings;                         /* 0x08 */
     u32 target_curve_bindings;                        /* 0x0c */
-    u32 colour_curves;                                /* 0x10 */
+    u32 color_curves;                                 /* 0x10 */
     effect_emitter_geometry_view_t emitter;           /* 0x14: read by the effect_interpolate_emitter_* helpers */
     effect_texture_page_config_t texture_page_config; /* 0x4c */
     s16 brightness_row;                               /* 0x4e */
@@ -1616,9 +1616,9 @@ typedef char effect_polar_curve_bindings_size_must_be_8[sizeof(effect_polar_curv
 /* The polar renderer gives the particle emitter's parameter slots its own meanings. */
 typedef struct effect_polar_mesh_geometry_view {
     u8 _unused_00[0x06];
-    u16 flags;                                    /* 0x06: bit 6 = per-channel colour curves */
+    u16 flags;                                    /* 0x06: bit 6 = per-channel color curves */
     effect_polar_curve_bindings_t curve_bindings; /* 0x08 */
-    u32 colour_curves;                            /* 0x10: nibbles 0-2 = r/g/b */
+    u32 color_curves;                             /* 0x10: nibbles 0-2 = r/g/b */
     vec3s16_t center_start; /* 0x14: spawn position, read by effect_interpolate_emitter_spawn_position */
     vec3s16_t center_end;   /* 0x1a */
     s16 radius_start;       /* 0x20: spawn spread x */
@@ -1705,10 +1705,10 @@ typedef struct effect_radial_mesh_geometry {
     u8 _unused_00[0x02];
     u16 placement_flags; /* 0x02: bits 9-11 select how the origin is placed */
     u8 _unused_04[0x02];
-    u16 flags;                                           /* 0x06: bit 6 = per-channel colour curves */
+    u16 flags;                                           /* 0x06: bit 6 = per-channel color curves */
     effect_radial_motion_curve_bindings_t motion_curves; /* 0x08 */
     effect_radial_shape_curve_bindings_t shape_curves;   /* 0x0c */
-    u32 colour_curves;                                   /* 0x10: nibbles 0-2 = r/g/b */
+    u32 color_curves;                                    /* 0x10: nibbles 0-2 = r/g/b */
     vec3s16_t origin_start;                              /* 0x14 */
     vec3s16_t origin_end;                                /* 0x1a */
     s16 u_span;                                          /* 0x20 */
@@ -1783,7 +1783,7 @@ typedef struct effect_tentacle_mesh_geometry_view {
     u16 flags;                                        /* 0x06: bits 0-1 and 2-3 enable death and mid-life children */
     u32 spawn_curve_bindings;                         /* 0x08 */
     u32 tip_curve_bindings;                           /* 0x0c */
-    u32 colour_curves;                                /* 0x10 */
+    u32 color_curves;                                 /* 0x10 */
     effect_emitter_geometry_view_t emitter;           /* 0x14: read by the effect_interpolate_emitter_* helpers */
     effect_texture_page_config_t texture_page_config; /* 0x4c */
     s16 brightness_row;                               /* 0x4e */
@@ -1874,10 +1874,10 @@ typedef char assert_effect_geometry_table_prefix_size[sizeof(effect_geometry_tab
 /* Frames in one animation curve: emitter and particle frame counters wrap here. */
 enum { EFFECT_ANIMATION_CURVE_FRAMES = 160 };
 
-/* Textured RGB intensity that preserves the texture colour. */
+/* Textured RGB intensity that preserves the texture color. */
 enum { EFFECT_COLOR_NEUTRAL = 128 };
 
-/* One interpolation factor per frame; curve indices select emitter and colour tracks. */
+/* One interpolation factor per frame; curve indices select emitter and color tracks. */
 typedef u8 effect_animation_curve_t[EFFECT_ANIMATION_CURVE_FRAMES];
 typedef char assert_effect_animation_curve_size[sizeof(effect_animation_curve_t) == 160 ? 1 : -1];
 
@@ -2306,7 +2306,7 @@ void effect_init_camera_and_screen_data(void);
 
 /* palettes */
 extern effect_palette_section_t* g_effect_palette_ptr;
-/* Six RGB byte triples, packed into both CLUT images as 15-bit colours. */
+/* Six RGB byte triples, packed into both CLUT images as 15-bit colors. */
 extern rgb24_t g_effect_reflect_palette_colors[6];
 extern rgb24_t g_effect_trap_colors[];
 

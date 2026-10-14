@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /*
- * Labelled numeric entry thread: world_menu_number_entry_thread with a text label.
+ * Labeled numeric entry thread: world_menu_number_entry_thread with a text label.
  *
  * Draws param->text_id left of the number and edits the 16-bit value at
  * param->value one decimal digit at a time within the range bound at param->context. The value is

@@ -7,7 +7,7 @@
  *
  * Outside events it pushes aside a unit on the destination tile. Past the
  * destination tile's entry edge the horizontal motion stops, and once the unit is
- * down at the ground height there a float step starts into the FLOAT_TO_CENTRE
+ * down at the ground height there a float step starts into the FLOAT_TO_CENTER
  * stage of the direction. */
 void move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
     s32 direction;
@@ -23,7 +23,7 @@ void move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
         if (unit->world_coords.vy >= (s16)battle_gfx_calculate_world_height_from_world_coords(unit)) {
             unit->velocity.vy = 0;
             move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
-            unit->step_phase = g_move_float_to_centre_phases[direction];
+            unit->step_phase = g_move_float_to_center_phases[direction];
         }
     }
 }

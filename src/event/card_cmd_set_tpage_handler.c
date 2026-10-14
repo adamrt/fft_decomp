@@ -1,6 +1,6 @@
 #include "fft/event_card.h"
 
-/* Stream command: set the texture page from the command (colour mode
+/* Stream command: set the texture page from the command (color mode
  * data[4], x data[3] * 16, y data[2] * 256, blend rate 0) and return the
  * next command. */
 const u8* card_cmd_set_tpage_handler(const u8* data) {

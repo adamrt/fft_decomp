@@ -6,7 +6,7 @@
 
 /* Project the cursor tile to the screen.
  *
- * The tile centre (x * 28 + 14, surface height, y * 28 + 14) is raised by the
+ * The tile center (x * 28 + 14, surface height, y * 28 + 14) is raised by the
  * tile's depth, offset by the modify-by-5 or -by-1 conversion depending on
  * surface bit 0x40, and transformed by the battle camera. The projected X and
  * Y are kept in g_battle_cursor_screen_x/g_battle_cursor_screen_y for camera_update_cursor_tile_vector. */

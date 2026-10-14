@@ -1,11 +1,11 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Start a fade of both background gradient colours toward a colour derived
+/* Start a fade of both background gradient colors toward a color derived
  * from mode, with red/green/blue as 8-bit offsets in 16.16 fixed point.
  *
- * The per-colour twin of map_blend_ambient_light_color (same modes 0..10).
- * Each greyscale case needs its own block-scoped grey: one function-scope
+ * The per-color twin of map_blend_ambient_light_color (same modes 0..10).
+ * Each grayscale case needs its own block-scoped gray: one function-scope
  * variable spans four blocks, becomes a global pseudo and swaps $v0/$v1 in
  * the division, which also defeats the target's cross-jumped case tails. */
 void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
@@ -32,18 +32,18 @@ void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, 
             target_green = channels[i].green / 2 + (green << 16);
             target_blue = channels[i].blue / 2 + (blue << 16);
             break;
-        case MAP_COLOR_MODE_CURRENT_GREY: {
-            s32 grey = (channels[i].red * 2 + channels[i].green * 3 + channels[i].blue) / 6;
-            target_red = grey + (red << 16);
-            target_green = grey + (green << 16);
-            target_blue = grey + (blue << 16);
+        case MAP_COLOR_MODE_CURRENT_GRAY: {
+            s32 gray = (channels[i].red * 2 + channels[i].green * 3 + channels[i].blue) / 6;
+            target_red = gray + (red << 16);
+            target_green = gray + (green << 16);
+            target_blue = gray + (blue << 16);
             break;
         }
-        case MAP_COLOR_MODE_CURRENT_GREY_HALF: {
-            s32 grey = (channels[i].red * 2 + channels[i].green * 3 + channels[i].blue) / 12;
-            target_red = grey + (red << 16);
-            target_green = grey + (green << 16);
-            target_blue = grey + (blue << 16);
+        case MAP_COLOR_MODE_CURRENT_GRAY_HALF: {
+            s32 gray = (channels[i].red * 2 + channels[i].green * 3 + channels[i].blue) / 12;
+            target_red = gray + (red << 16);
+            target_green = gray + (green << 16);
+            target_blue = gray + (blue << 16);
             break;
         }
         case MAP_COLOR_MODE_BASE:
@@ -57,28 +57,28 @@ void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, 
             target_green = (g_map_background_gradient_transition.colors[i].g << 15) + (green << 16);
             target_blue = (g_map_background_gradient_transition.colors[i].b << 15) + (blue << 16);
             break;
-        case MAP_COLOR_MODE_BASE_GREY: {
-            s32 grey;
+        case MAP_COLOR_MODE_BASE_GRAY: {
+            s32 gray;
 
             base_red = g_map_background_gradient_transition.colors[i].r << 16;
             base_green = g_map_background_gradient_transition.colors[i].g << 16;
             base_blue = g_map_background_gradient_transition.colors[i].b << 16;
-            grey = (base_red * 2 + base_green * 3 + base_blue) / 6;
-            target_red = grey + (red << 16);
-            target_green = grey + (green << 16);
-            target_blue = grey + (blue << 16);
+            gray = (base_red * 2 + base_green * 3 + base_blue) / 6;
+            target_red = gray + (red << 16);
+            target_green = gray + (green << 16);
+            target_blue = gray + (blue << 16);
             break;
         }
-        case MAP_COLOR_MODE_BASE_GREY_HALF: {
-            s32 grey;
+        case MAP_COLOR_MODE_BASE_GRAY_HALF: {
+            s32 gray;
 
             base_red = g_map_background_gradient_transition.colors[i].r << 16;
             base_green = g_map_background_gradient_transition.colors[i].g << 16;
             base_blue = g_map_background_gradient_transition.colors[i].b << 16;
-            grey = (base_red * 2 + base_green * 3 + base_blue) / 12;
-            target_red = grey + (red << 16);
-            target_green = grey + (green << 16);
-            target_blue = grey + (blue << 16);
+            gray = (base_red * 2 + base_green * 3 + base_blue) / 12;
+            target_red = gray + (red << 16);
+            target_green = gray + (green << 16);
+            target_blue = gray + (blue << 16);
             break;
         }
         case MAP_COLOR_MODE_RESTORE:

@@ -1,7 +1,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Render the job wheel's centred job name ("Can't change" when fewer than two
+/* Render the job wheel's centerd job name ("Can't change" when fewer than two
  * jobs are listed). */
 void world_formation_build_job_wheel_job_name(void) {
     RECT destination_rect;

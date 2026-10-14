@@ -5,7 +5,7 @@
 
 /* Lays the unit's shadow quad on the terrain surface under the unit.
  *
- * The quad is a 20 x 20 square of world units centred on the unit's position
+ * The quad is a 20 x 20 square of world units centerd on the unit's position
  * (with its event, SEQ and float offsets), at the surface of the tile it stands
  * on: height plus depth, 12 world units per level, negative y upwards. On a
  * sloped tile (non-zero slope half-height, rising 12 units per step across the

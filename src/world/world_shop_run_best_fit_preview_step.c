@@ -34,7 +34,7 @@
  * sp+88.
  *
  * The target has `move s1,v0` after world_menu_run_thread and no
- * initialisation of s1 at loop 2's head: loop 2's counter is the run_thread
+ * initialization of s1 at loop 2's head: loop 2's counter is the run_thread
  * result's allocno, so the source assigns the result to `i` and the loop is
  * written `for (; i < WORLD_EQUIPMENT_SLOT_ACCESSORY; i++)`. A fresh block-local takes a call-clobbered
  * register; reusing a function-scope allocno that is already dead puts the

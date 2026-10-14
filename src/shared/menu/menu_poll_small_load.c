@@ -2,7 +2,7 @@
 #include "fft/event_small.h"
 #include "fft/menu.h"
 
-/* Drive a pending companion overlay load during map initialisation. Returns 1
+/* Drive a pending companion overlay load during map initialization. Returns 1
  * while the request is still pending; once it completes the SMALL.OUT text
  * pointers are bound and it returns 0. With no request it returns 0 at once. */
 s32 menu_poll_small_load(void) {

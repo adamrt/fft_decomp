@@ -1,11 +1,11 @@
 #include "fft/battle_move.h"
 #include "psx/types.h"
 
-/* Pushes a unit sharing the mover's tile aside as the mover steps off-centre.
+/* Pushes a unit sharing the mover's tile aside as the mover steps off-center.
  *
  * The push is 3/2 of the mover's distance short of 7 pixels past the tile
- * centre along direction. It is skipped while the mover's step before last
- * carries movement flag 0x10. The case order and per-case centre temporaries
+ * center along direction. It is skipped while the mover's step before last
+ * carries movement flag 0x10. The case order and per-case center temporaries
  * reproduce the target's cross-jumped tails. */
 void move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
     battle_unit_t* other;

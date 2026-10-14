@@ -3,7 +3,7 @@
 /* Spread one step from the current tile. Source i uses direction i % 4 (east,
  * north, west, south): 0..3 leave from the ground, 4..7 from the top of the
  * unit on the tile, and 8 and up (outer_count 0x24) from that unit's standing
- * height + i / 4 - 2. Each source whose neighbour is on the map tries
+ * height + i / 4 - 2. Each source whose neighbor is on the map tries
  * inner_count destinations: either level, on the ground or on a unit. */
 void move_check_and_spread_one_tile_around(void) {
     move_spread_state_t* state;

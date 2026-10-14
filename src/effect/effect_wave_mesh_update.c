@@ -123,8 +123,8 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         while (work->scroll_v < 0) {
             work->scroll_v += texture_height * ONE;
         }
-        if (geometry->textured_quad.flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-            row = (geometry->textured_quad.colour_curves & 0xfff);
+        if (geometry->textured_quad.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+            row = (geometry->textured_quad.color_curves & 0xfff);
             red = g_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
             green = g_effect_animation_curve_data

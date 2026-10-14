@@ -4,7 +4,7 @@
 
 /* Rebuild the selected birthday's month and day in the lower menu window.
  *
- * The month label is centred from its measured width; both entries are drawn
+ * The month label is centerd from its measured width; both entries are drawn
  * into one scratch image before it is uploaded to VRAM. */
 void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     RECT quad;

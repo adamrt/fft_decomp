@@ -1,7 +1,7 @@
 #include "fft/battle_map.h"
 #include "fft/battle_move.h"
 
-/* Moves a unit to the centre of its map tile over distortion_timer frames.
+/* Moves a unit to the center of its map tile over distortion_timer frames.
  *
  * Phase 0 splits the remaining screen-to-tile distance into equal Q12 steps;
  * phase 1 applies them (height only when allow_height_change is set) and

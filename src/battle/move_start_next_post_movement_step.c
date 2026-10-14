@@ -7,7 +7,7 @@
  *
  * Handles, in priority order, the crystal/treasure pickup (bit 0x1), the
  * EXP/JP and level-up reports (0x2), a found rare/common item (0x4), a tile
- * trap (0x8), a cancelled charge (0x10) and the post-action displays for the
+ * trap (0x8), a canceled charge (0x10) and the post-action displays for the
  * source (0x200) or its mount partner (0x400). Returns 1 when a step was
  * started, otherwise refreshes both units, re-enters the after-command state
  * unless the Deep Dungeon map refresh takes over, and returns 0. */

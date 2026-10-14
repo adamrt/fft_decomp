@@ -366,7 +366,7 @@ typedef struct map_selected_tile {
 } map_selected_tile_t;
 
 /* background */
-/* Map backgrounds use two four-byte runtime colour slots. The fourth byte
+/* Map backgrounds use two four-byte runtime color slots. The fourth byte
  * is copied with each CVECTOR but is not an alpha channel; mesh-file RGB
  * triples have a separate three-byte layout. */
 typedef enum map_background_gradient_color {

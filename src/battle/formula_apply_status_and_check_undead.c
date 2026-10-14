@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 /* Apply the ability's status. Returns 1 when it changes something or the
- * target is undead; otherwise the action is cancelled as a forced failure and
+ * target is undead; otherwise the action is canceled as a forced failure and
  * 0 returned. */
 s32 formula_apply_status_and_check_undead(void) {
     formula_apply_status();

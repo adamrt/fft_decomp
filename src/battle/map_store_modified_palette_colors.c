@@ -1,13 +1,13 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Make the colours staged for upload the base colours of a CLUT row: copy them
+/* Make the colors staged for upload the base colors of a CLUT row: copy them
  * from g_map_palette_modified_colors into the row's packed mirror, all 256
  * when store_all is 1, otherwise the 16 of CLUT clut_index. `store_all` then
  * serves as the loop counter.
  *
  * The event script issues it for the whole map row, so that later BASE and
- * RESTORE colour modes start from the colours as they are tinted then. */
+ * RESTORE color modes start from the colors as they are tinted then. */
 void map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_all) {
     if (store_all == 1) {
         u16* destination;

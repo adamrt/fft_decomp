@@ -5,7 +5,7 @@
 
 /*
  * Build the formation view's primitive list: one textured quad per graphic
- * entry, shaded with the view colour and placed at the entry's scaled
+ * entry, shaded with the view color and placed at the entry's scaled
  * offset, followed by a black backdrop quad; the backdrop is always linked
  * into the ordering table and the quads only when the view asks for it.
  */

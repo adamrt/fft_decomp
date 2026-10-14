@@ -43,7 +43,7 @@ void map_modify_palette(
                     out_green = (components[i].color.g >> 1) + green;
                     out_blue = (components[i].color.b >> 1) + blue;
                     break;
-                case MAP_COLOR_MODE_CURRENT_GREY: {
+                case MAP_COLOR_MODE_CURRENT_GRAY: {
                     s32 gray;
                     gray = (components[i].color.r * 2 + components[i].color.g * 3 + components[i].color.b) / 6;
                     out_red = red + gray;
@@ -51,7 +51,7 @@ void map_modify_palette(
                     out_blue = blue + gray;
                     break;
                 }
-                case MAP_COLOR_MODE_CURRENT_GREY_HALF: {
+                case MAP_COLOR_MODE_CURRENT_GRAY_HALF: {
                     s32 gray;
                     gray = (components[i].color.r * 2 + components[i].color.g * 3 + components[i].color.b) / 12;
                     out_red = red + gray;
@@ -71,7 +71,7 @@ void map_modify_palette(
                     out_green = green + ((g_map_palette_state.clut_rows[clut_row].packed_colors[i] & 0x3e0) >> 6);
                     out_blue = blue + ((g_map_palette_state.clut_rows[clut_row].packed_colors[i] & 0x7c00) >> 11);
                     break;
-                case MAP_COLOR_MODE_BASE_GREY: {
+                case MAP_COLOR_MODE_BASE_GRAY: {
                     s32 red_bits;
                     u32 green_bits;
                     u32 blue_bits;
@@ -86,7 +86,7 @@ void map_modify_palette(
                     out_blue = blue + gray;
                     break;
                 }
-                case MAP_COLOR_MODE_BASE_GREY_HALF: {
+                case MAP_COLOR_MODE_BASE_GRAY_HALF: {
                     s32 red_bits;
                     u32 green_bits;
                     u32 blue_bits;
@@ -185,7 +185,7 @@ void map_modify_palette(
                     out_green = (component->color.g >> 1) + green;
                     out_blue = (component->color.b >> 1) + blue;
                     break;
-                case MAP_COLOR_MODE_CURRENT_GREY: {
+                case MAP_COLOR_MODE_CURRENT_GRAY: {
                     s32 gray;
                     gray = (component->color.r * 2 + component->color.g * 3 + component->color.b) / 6;
                     out_red = red + gray;
@@ -193,7 +193,7 @@ void map_modify_palette(
                     out_blue = blue + gray;
                     break;
                 }
-                case MAP_COLOR_MODE_CURRENT_GREY_HALF: {
+                case MAP_COLOR_MODE_CURRENT_GRAY_HALF: {
                     s32 gray;
                     gray = (component->color.r * 2 + component->color.g * 3 + component->color.b) / 12;
                     out_red = red + gray;
@@ -229,7 +229,7 @@ void map_modify_palette(
                                & 0x7c00)
                             >> 11);
                     break;
-                case MAP_COLOR_MODE_BASE_GREY: {
+                case MAP_COLOR_MODE_BASE_GRAY: {
                     s32 red_bits;
                     u32 green_bits;
                     u32 blue_bits;
@@ -250,7 +250,7 @@ void map_modify_palette(
                     out_blue = blue + gray;
                     break;
                 }
-                case MAP_COLOR_MODE_BASE_GREY_HALF: {
+                case MAP_COLOR_MODE_BASE_GRAY_HALF: {
                     s32 red_bits;
                     u32 green_bits;
                     u32 blue_bits;

@@ -3,9 +3,9 @@
 #include "psx/types.h"
 
 /* Spread one targeting panel's remaining range to its four orthogonal
- * neighbours. A neighbour whose residual budget is lower than this panel's is
+ * neighbors. A neighbor whose residual budget is lower than this panel's is
  * refreshed to one less, on both map levels, and marked as a new frontier when
- * enough budget is left to keep spreading. Returns 1 when any neighbour was
+ * enough budget is left to keep spreading. Returns 1 when any neighbor was
  * marked. */
 s32 target_spread_panel_to_neighbors(s32 y, s32 x) {
     target_panel_t* panel;

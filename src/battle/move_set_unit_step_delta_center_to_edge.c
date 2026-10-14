@@ -2,13 +2,13 @@
 #include "psx/types.h"
 
 /* Set the unit's per-frame velocity for the first half of a step, from the tile
- * centre to its exit edge.
+ * center to its exit edge.
  *
  * The direction vector is 28 along the axis the step byte's top two bits select
  * and (edge_height - 1) * the tile's slope half-height * 6 in height, negated
  * because height is negative upward. edge_height is the slope_type height
  * of the side crossed (0 low, 1 sloping, 2 high), so a low side
- * lies below the centre and a high side above it. VectorNormal reduces the vector
+ * lies below the center and a high side above it. VectorNormal reduces the vector
  * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
  * applies the walk speed with move_interpolate_partial. */
 void move_set_unit_step_delta_center_to_edge(

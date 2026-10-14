@@ -4,7 +4,7 @@
 /* Input handler for a layout-window menu level.
  *
  * Circle pops the level, X opens the row's help message, and a direction moves
- * to the neighbouring layout named by the row. A row with a counter pointer
+ * to the neighboring layout named by the row. A row with a counter pointer
  * adds the counter to the base message id, and suppresses the message entirely
  * when the counter reads 0 or -1 (except for layout 0x0b). */
 void wldcore_menu_handle_layout_window_input(wldcore_window_layout_request_t* request) {

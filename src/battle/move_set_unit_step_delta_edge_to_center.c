@@ -6,12 +6,12 @@ enum {
 };
 
 /* Set the unit's per-frame velocity for the second half of a step, from the entry
- * edge of a tile to its centre.
+ * edge of a tile to its center.
  *
  * The mirror of move_set_unit_step_delta_center_to_edge: the height part
  * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
  * is not negated, so entering over a high side (slope height 2) moves the unit
- * down to the centre. */
+ * down to the center. */
 void move_set_unit_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;

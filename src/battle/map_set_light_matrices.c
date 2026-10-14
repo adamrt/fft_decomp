@@ -2,11 +2,11 @@
 #include "psx/types.h"
 
 /* Main-executable libgte routine at 0x8001d108; it loads the matrix into GTE
- * control registers 16-20 (the colour matrix), like Psy-Q SetColorMatrix. */
+ * control registers 16-20 (the color matrix), like Psy-Q SetColorMatrix. */
 
 /*
  * Copy two matrices into the working pair at g_map_light_color_matrix and into entries 0 and
- * 2 of g_map_lightning_state.color_matrices, then load the first into the GTE colour matrix.
+ * 2 of g_map_lightning_state.color_matrices, then load the first into the GTE color matrix.
  *
  * Each backup copy rereads the working field; a chained assignment assigns the
  * loop pointers to different registers.

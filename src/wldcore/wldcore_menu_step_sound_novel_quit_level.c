@@ -4,7 +4,7 @@
 
 /* Step handler for the save confirmation level.
  *
- * Drives the screen dim: fade_in raises the overlay colour in steps of 8 and
+ * Drives the screen dim: fade_in raises the overlay color in steps of 8 and
  * fade_out lowers it again, popping the level when it reaches 0. While no fade
  * runs it takes input: button 0x100 opens the help text for the highlighted
  * row through g_wldcore_sound_novel_quit_help_text_ids, up/down toggle the two rows and move the cursor
@@ -14,7 +14,7 @@
  * idle) it shifts the operand history g_wldcore_sound_novel_text_history_0..66, captures the play time
  * and hands off to wldcore_menu_push_screen_transition_level with screen 0x1b.
  *
- * Every colour store rereads the 32-bit fade value through a local: a direct
+ * Every color store rereads the 32-bit fade value through a local: a direct
  * `u8 = level->fade_in` assignment narrows the reload to `lbu`, while the
  * target keeps `lw`. The target stores the -1 history marker with a signed
  * `addiu`, so it is written through an s16 view of the u16 slot. The cursor

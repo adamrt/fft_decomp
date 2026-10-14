@@ -4,13 +4,13 @@
 #include "psx/libgte.h"
 
 /* Draws the HUD numeric readout at the context-value display position, laid
- * out by g_wldcore_context_value_display_mode: 1 is the labelled, underlined
+ * out by g_wldcore_context_value_display_mode: 1 is the labeled, underlined
  * value (war funds), 2 the play time as hours, minutes and seconds with
  * separators, 0 and 3 a plain eight-digit value (3 under a small label
- * sprite) and 4 a labelled five-digit secondary value plus the mode-1 readout.
+ * sprite) and 4 a labeled five-digit secondary value plus the mode-1 readout.
  *
  * Case 3 falls through into case 0, so the case bodies are ordered 1, 2, 3, 0,
- * 4 to follow the jump table at 0x80067020. The colour triple stores into
+ * 4 to follow the jump table at 0x80067020. The color triple stores into
  * `separator` precede those into `sprite`. The position read back at the end
  * of case 4 is a plain 32-bit load narrowed by the store, where the chained
  * assignment before the switch reads only the low 16 bits. */
@@ -69,7 +69,7 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot) {
         sprite.x += 6;
         wldcore_gfx_draw_number_digits_with_fill(g_wldcore_displayed_numeric_value_tertiary, 2, &sprite, ot, 1);
         break;
-    case WLDCORE_VALUE_DISPLAY_LABELLED:
+    case WLDCORE_VALUE_DISPLAY_LABELED:
         sprite.u = 0xA8;
         sprite.v = 0x20;
         sprite.w = 0xD;

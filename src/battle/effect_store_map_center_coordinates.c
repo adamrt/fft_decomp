@@ -3,7 +3,7 @@
 #include "fft/map.h"
 
 /* A tile is 28 units wide, so max * 14 is the middle of the map. */
-/* Writes the map's centre as three 32-bit X/Z/Y components with Z (height) zero
+/* Writes the map's center as three 32-bit X/Z/Y components with Z (height) zero
  * (effect camera target). */
 void effect_store_map_center_coordinates(VECTOR* destination) {
     SVECTOR map_max;

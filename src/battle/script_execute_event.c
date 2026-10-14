@@ -40,7 +40,7 @@
  * The chain order is retail's compare order. world_script_execute_event is
  * the WORLD copy of this function. BATTLE differs in five places: WalkTo
  * starts the unit's movement and Arrow sets an arrow trajectory (WORLD
- * recognises both and does nothing), DarkScreen's thread opens REQUIRE and
+ * recognizes both and does nothing), DarkScreen's thread opens REQUIRE and
  * runs its image burst (WORLD's only takes the task id), the two ChangeMap
  * instructions reset the script camera transform, and the thread scans of
  * ResumeWaitingDialog and WaitForInstruction cover slots 1..15 where WORLD's

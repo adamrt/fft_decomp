@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* SMD opcode 0xD8 "Vibrato": programs modulator 0 (pitch) as a
- * centred triangle (waveform 3) with the given speed, signed depth and
+ * centerd triangle (waveform 3) with the given speed, signed depth and
  * delay, and restarts it. The depth is squared with its sign kept.
  *
  * The fields are stored through channel: unlike its twins, a modulator

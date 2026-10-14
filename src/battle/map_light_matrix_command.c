@@ -3,8 +3,8 @@
 
 /*
  * Map light matrix commands, selected on command - 0x5e: 0x5e loads both
- * matrices from the arguments and applies the colour matrix to the GTE, 0x5f
- * saves and 0x60 restores them, 0x61 and 0x62 return the colour and light
+ * matrices from the arguments and applies the color matrix to the GTE, 0x5f
+ * saves and 0x60 restores them, 0x61 and 0x62 return the color and light
  * matrices. 0x66 and 0x68 start a transition from the current matrices over
  * duration frames and queue 0x67 or 0x69 in g_map_light_transition_command, which the map draw
  * loop then issues once per frame: 0x67 interpolates toward target matrices,

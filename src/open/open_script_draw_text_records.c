@@ -5,7 +5,7 @@
  * OPNTEX picture quad (unless its fade intensity is 0), the two edge bands and
  * one POLY_FT4 per glyph of every active text record.
  *
- * Glyph positions are relative to the centre of the 512x240 screen, and skew
+ * Glyph positions are relative to the center of the 512x240 screen, and skew
  * shifts the top edge of each glyph. The AddPrim calls pass the contents of
  * otag[15] and otag[8], not their addresses: after ClearOTagR those are the
  * addresses of entries 14 and 7, which is where the primitives are linked. */

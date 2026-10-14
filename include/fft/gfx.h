@@ -24,7 +24,7 @@ typedef struct rgb_s8 {
 } rgb_s8_t;
 typedef char rgb_s8_size_must_be_3[sizeof(rgb_s8_t) == 3 ? 1 : -1];
 
-/* Packed PS1 colour: the high bit enables semi-transparency for textured pixels. */
+/* Packed PS1 color: the high bit enables semi-transparency for textured pixels. */
 typedef struct rgba5551 {
     u16 red : 5;
     u16 green : 5;
@@ -38,7 +38,7 @@ enum {
     CLUT_PALETTE_COUNT = 16,
 };
 
-/* Sixteen packed texture colours. */
+/* Sixteen packed texture colors. */
 typedef rgba5551_t palette_t[PALETTE_COLOR_COUNT];
 typedef char assert_palette_size[sizeof(palette_t) == 32 ? 1 : -1];
 
@@ -162,7 +162,7 @@ typedef char sprite_draw_offset_size_must_be_12[sizeof(sprite_draw_offset_t) == 
 typedef struct glyph_blit {
     RECT rect;  /* 0x00 */
     s32 stride; /* 0x08 */
-    u32 color;  /* 0x0c: 32-bit colour value the decimal renderers set by value sign
+    u32 color;  /* 0x0c: 32-bit color value the decimal renderers set by value sign
                  * (0x77777777, 0xbbbbbbbb, ...) and clear after each draw */
 } glyph_blit_t;
 typedef char glyph_blit_size_must_be_16[sizeof(glyph_blit_t) == 16 ? 1 : -1];

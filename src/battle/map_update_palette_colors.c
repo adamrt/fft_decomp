@@ -1,9 +1,9 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Set or blend CLUTs of a map row to `colors`: all sixteen (256 colours) when
- * update_all is 1, otherwise CLUT clut_index (16 colours). Mode 0 applies the
- * colours at once; another value starts a blend toward them and is kept as the
+/* Set or blend CLUTs of a map row to `colors`: all sixteen (256 colors) when
+ * update_all is 1, otherwise CLUT clut_index (16 colors). Mode 0 applies the
+ * colors at once; another value starts a blend toward them and is kept as the
  * animation's mode (map_update_palette_colors_inner). Marks the rows for
  * upload. */
 void map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors) {

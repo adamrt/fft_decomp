@@ -3,12 +3,12 @@
 #include "fft/map.h"
 #include "psx/types.h"
 
-/* Advance the screen colour track one frame.
+/* Advance the screen color track one frame.
  *
  * A starting APPLY keyframe modulates the background gradient by
- * its doubled colour (and the scaled palette when weather flag 2 is set);
- * otherwise both colours become the new gradient stops, with the first also
- * driving the darkness colour under weather flag 2. */
+ * its doubled color (and the scaled palette when weather flag 2 is set);
+ * otherwise both colors become the new gradient stops, with the first also
+ * driving the darkness color under weather flag 2. */
 void effect_advance_map_background_track(effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
     map_background_gradient_colors_t colors;
     s16 current;

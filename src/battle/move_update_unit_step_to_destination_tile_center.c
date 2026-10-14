@@ -2,11 +2,11 @@
 #include "fft/battle_move.h"
 #include "psx/types.h"
 
-/* Step handler of the WALK_TO_CENTRE and CLIMB_TO_CENTRE stages (and of the
- * knockback step): advance the unit one frame toward the centre of its
+/* Step handler of the WALK_TO_CENTER and CLIMB_TO_CENTER stages (and of the
+ * knockback step): advance the unit one frame toward the center of its
  * destination tile.
  *
- * Outside events it pushes aside a unit on the destination tile. At the centre
+ * Outside events it pushes aside a unit on the destination tile. At the center
  * the horizontal motion stops; once the unit is also down at the ground height
  * there, it takes the destination tile as its map position and the step ends. */
 void move_update_unit_step_to_destination_tile_center(battle_unit_t* unit) {

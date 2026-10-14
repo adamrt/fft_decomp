@@ -4,7 +4,7 @@
 /* Distortion animation 0x0f: slide a unit away from its target over
  * distortion_timer frames (Rush winds up with it).
  *
- * Phase 0 aims at the first unit in the target list, or at the centre of the
+ * Phase 0 aims at the first unit in the target list, or at the center of the
  * action target tile (28 screen units per tile), reduces each horizontal step
  * by an eighth, wraps it into one 0xe000 span, and divides it into per-frame
  * velocity. Phase 1 applies that velocity until the timer runs out. Clearing

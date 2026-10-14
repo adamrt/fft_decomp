@@ -1,7 +1,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Draws one formation unit sprite centred on pos.
+/* Draws one formation unit sprite centerd on pos.
  *
  * When g_world_formation_dismiss_anim_timer selects this unit (high byte) the sprite is drawn shrunk by
  * (low byte + 1) without a shadow. Otherwise units with a proposition status

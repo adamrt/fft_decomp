@@ -9,9 +9,9 @@
  * frames the shield stays, at least 26: the child timeline passes the
  * effect's spawn_delay.
  *
- * Phase 1 allocates and initialises the work buffer; phase 2 advances a
+ * Phase 1 allocates and initializes the work buffer; phase 2 advances a
  * two-entry CLUT wipe near the end of the effect, uploads the CLUT, aims the
- * shield from the target's centre toward the caster and hands the transform
+ * shield from the target's center toward the caster and hands the transform
  * to effect_draw_projectile_model; phase 3 finishes. The wipe indices are assigned inside the
  * subscript, each to its own variable: a separate statement or a folded
  * `timer - 1 - span` changes the order and association of the index

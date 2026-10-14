@@ -3,7 +3,7 @@
 /*
  * Save-menu state CARD_SAVE_MENU_SELECT_CARD: runs the "slot 1 / slot 2" menu.
  *
- * Cancelling returns to the initial prompt, or leaves the screen once a save
+ * Canceling returns to the initial prompt, or leaves the screen once a save
  * has been completed. Choosing a card slot selects it for the card I/O,
  * forgets the last used save slot when the card slot changed, and starts the
  * scan.

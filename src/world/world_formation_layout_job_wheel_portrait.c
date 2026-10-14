@@ -2,7 +2,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Centre the two job-wheel portrait quads on (0x80, 0x7b) for the selected
+/* Center the two job-wheel portrait quads on (0x80, 0x7b) for the selected
  * unit's formation graphic and queue a VRAM move of that graphic to
  * (0x240, 0x130), where g_world_job_wheel_portrait_quad samples it. */
 void world_formation_layout_job_wheel_portrait(void) {

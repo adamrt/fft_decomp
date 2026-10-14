@@ -5,7 +5,7 @@
 
 /* Run the formation "Equip" item menu: step the slot cursor, open the item
  * list for the selected slot, equip the highlighted item and keep the stat
- * preview in sync. Returns 0 when the menu is cancelled, 1 otherwise.
+ * preview in sync. Returns 0 when the menu is canceled, 1 otherwise.
  */
 s32 world_formation_run_equip_item_menu(void) {
     s16 x;

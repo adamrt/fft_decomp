@@ -3,8 +3,8 @@
 /* Opcode 1: create and position a text record from an ending-script command
  * (opcode, x, y, text offset). Eight bytes.
  *
- * A coordinate of -1 centres the record on its last glyph's extent. X bit 0x100
- * instead centres the glyph selected by its low byte. */
+ * A coordinate of -1 centers the record on its last glyph's extent. X bit 0x100
+ * instead centers the glyph selected by its low byte. */
 void open_opcode_create_positioned_text_record(s16* command) {
     s32 x;
     s32 y;

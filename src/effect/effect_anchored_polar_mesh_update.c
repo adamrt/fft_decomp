@@ -9,7 +9,7 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 
-/* Draws a four-fold polar mesh anchored to an effect target. Its centre uses
+/* Draws a four-fold polar mesh anchored to an effect target. Its center uses
  * the target's render and secondary coordinates; each ring stores RGB bytes
  * separately. Shared index temporaries and the non-void signature preserve
  * register allocation and the phase-dispatch delay slots. */
@@ -167,10 +167,10 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             work->scroll_v += scratch->half_height * ONE;
         }
 
-        if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-            j = (entry->polar_mesh.colour_curves & 0xfff);
+        if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+            j = (entry->polar_mesh.color_curves & 0xfff);
             scratch->red_factor = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                (entry->polar_mesh.colour_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
+                (entry->polar_mesh.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
             scratch->green_factor
                 = g_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(j, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];

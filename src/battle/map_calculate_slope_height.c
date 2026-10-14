@@ -10,8 +10,8 @@
  * Return the negated terrain height, in world units, under a point.
  *
  * coords->vx and coords->vz are the X and Z positions (tile index * 28 + offset). A tile without a
- * slope half-height, or with an unrecognised slope type, yields
- * -(height * 12); the recognised types interpolate half * 12 across the tile
+ * slope half-height, or with an unrecognized slope type, yields
+ * -(height * 12); the recognized types interpolate half * 12 across the tile
  * along X, Z, or whichever of the two the corner type selects. x and z are
  * the offsets of the point inside its 28-unit tile.
  */

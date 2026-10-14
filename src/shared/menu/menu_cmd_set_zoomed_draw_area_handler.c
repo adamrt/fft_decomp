@@ -4,7 +4,7 @@
 
 /* Stream command for a window frame that zooms open: during the first four
  * transition frames it first queues a draw area cropped about the window's
- * centre to the zoom table's percentage of its size (and, for the first
+ * center to the zoom table's percentage of its size (and, for the first
  * three, withholds the stream's input), then draws the frame through
  * menu_cmd_draw_window_frame_handler. */
 menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* command) {

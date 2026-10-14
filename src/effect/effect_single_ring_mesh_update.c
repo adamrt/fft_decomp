@@ -128,7 +128,7 @@ s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emit
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
             break;
-        case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
+        case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
             map_store_max_coordinates(&map_max);
             origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
             origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
@@ -327,10 +327,10 @@ s32 effect_single_ring_mesh_update(s32 record_index, s32 callback_slot, s32 emit
 
         n = entry->radial_mesh.brightness_row;
         blue = EFFECT_COLOR_NEUTRAL;
-        if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-            k = (entry->radial_mesh.colour_curves & 0xfff);
+        if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+            k = (entry->radial_mesh.color_curves & 0xfff);
             red = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                (entry->radial_mesh.colour_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
+                (entry->radial_mesh.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
             green = g_effect_animation_curve_data
                         ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_GREEN_SHIFT)][frame];
             blue = g_effect_animation_curve_data

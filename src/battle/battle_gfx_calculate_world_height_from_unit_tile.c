@@ -1,7 +1,7 @@
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 
-/* battle_gfx_calculate_world_height_from_coords at the centre of the map tile
+/* battle_gfx_calculate_world_height_from_coords at the center of the map tile
  * of the unit, or of its mount for a rider. A rider's result is moved by -10 plus
  * the mount's float bob offset. */
 s32 battle_gfx_calculate_world_height_from_unit_tile(battle_unit_t* unit) {

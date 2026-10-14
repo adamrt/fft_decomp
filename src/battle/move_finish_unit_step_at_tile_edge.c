@@ -36,11 +36,11 @@ void move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
             switch (g_move_step_value.climb) {
             case 0:
                 move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
-                unit->step_phase = g_move_walk_to_centre_phases[direction];
+                unit->step_phase = g_move_walk_to_center_phases[direction];
                 break;
             case 1:
                 move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
-                unit->step_phase = g_move_climb_to_centre_phases[direction];
+                unit->step_phase = g_move_climb_to_center_phases[direction];
                 break;
             }
             tile = map_get_tile_data_pointer(

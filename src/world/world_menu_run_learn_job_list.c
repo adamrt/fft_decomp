@@ -5,7 +5,7 @@
 /* Runs the learn menu's job list for the selected formation unit.
  *
  * The first call builds the unlocked-job list and installs the job
- * level/JP menu-script callbacks. Returns -1 when cancelled, 1 when a job
+ * level/JP menu-script callbacks. Returns -1 when canceled, 1 when a job
  * with learnable abilities is confirmed (caching its id and generic job
  * index), and 0 while the list is still open. */
 s32 world_menu_run_learn_job_list(void) {

@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 /* Hit chance F(XA+YA)% for magic on allies: Magic Attack Up and zodiac
- * compatibility, none of the target's defences. Returns 1 on a miss. */
+ * compatibility, none of the target's defenses. Returns 1 on a miss. */
 s32 formula_calculate_friendly_magic_accuracy(void) {
     formula_apply_magic_attack_up();
     formula_apply_zodiac_compatibility();

@@ -6,7 +6,7 @@
  * Start tutorial `index` (0 only clears the tutorial id).
  *
  * Loads the tutorial's files and binds its command stream and messages, then
- * swaps the game state for the tutorial's: the current game is serialised
+ * swaps the game state for the tutorial's: the current game is serialized
  * into g_world_tutorial_state.saved_game, the 0x2000-byte tutorial save image
  * at sector 0x11A7F is loaded in its place (keeping the player's job-change
  * equip and sound options, with unequippable items shown) and unpacked into

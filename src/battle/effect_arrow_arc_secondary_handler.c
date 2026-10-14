@@ -14,7 +14,7 @@
  * the polygon work buffer. Phase 2 advances one step along the arc, orients
  * the arrow along the local slope and draws it with effect_draw_projectile_model; the last
  * step or a positive height ends the flight. Phase 3 returns 0. An unknown
- * phase returns `result` uninitialised, as the target returns $s6 unwritten.
+ * phase returns `result` uninitialized, as the target returns $s6 unwritten.
  */
 s32 effect_arrow_arc_secondary_handler(void) {
     SVECTOR rotation;

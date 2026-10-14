@@ -8,7 +8,7 @@
  * action_finalize_attack_and_flag_reactions.
  *
  * Returns that routine's result, or -1 for an invalid or empty slot. A result
- * that is not a hit is marked as cancelled. */
+ * that is not a hit is marked as canceled. */
 s32 action_store_target_stats_pointer_data(s32 unit_id) {
     unit_stats_t* stats;
     action_data_t* action;
@@ -28,7 +28,7 @@ s32 action_store_target_stats_pointer_data(s32 unit_id) {
     mem_copy_byte_data_source_first(&g_action_attacker_action_data, action, 0x2C);
     result = action_finalize_attack_and_flag_reactions(unit_id);
     if (g_action_target_data->hit == 0) {
-        g_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELLED;
+        g_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELED;
     }
     return result;
 }

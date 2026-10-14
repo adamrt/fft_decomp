@@ -1,10 +1,10 @@
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 
-/* Colour fade state at 0x800961c4..0x800961e1: the final colour, the colour
+/* Color fade state at 0x800961c4..0x800961e1: the final color, the color
  * currently in effect, a Q8 accumulator per channel, the per-frame Q8 step per
  * channel, and the number of frames left.  The three-element shape is what
- * makes GCC hold the base addresses of the current-colour and accumulator
+ * makes GCC hold the base addresses of the current-color and accumulator
  * arrays in registers for element 0. */
 
 void battle_gfx_update_screen_color_modulation_fade(void) {

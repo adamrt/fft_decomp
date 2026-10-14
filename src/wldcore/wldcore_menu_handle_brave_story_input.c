@@ -5,7 +5,7 @@
 /* Input/update step of the world-map main menu level.
  *
  * Latches the play-time counters into the D_800D09Ax mirror, then runs one of
- * three behaviours depending on g_main_system_flags bit 0x4 (a battle/event
+ * three behaviors depending on g_main_system_flags bit 0x4 (a battle/event
  * hand-off is in progress) and the level's own 32-bit mode:
  *  - hand-off in progress: wait for the world thread (slot 0xE) to stop and
  *    for the audio queue to drain, then tear the level down, pop the menu

@@ -2,8 +2,8 @@
 #include "psx/types.h"
 
 /*
- * Report whether a walking unit has reached the centre of its destination tile
- * along the given facing.  Tile centres are 28 world units apart with a
+ * Report whether a walking unit has reached the center of its destination tile
+ * along the given facing.  Tile centers are 28 world units apart with a
  * half-tile offset of 14.
  */
 s32 move_has_reached_destination_tile_center(s32 direction, battle_unit_t* unit) {

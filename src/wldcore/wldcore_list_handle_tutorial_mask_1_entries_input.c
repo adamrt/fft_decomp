@@ -8,7 +8,7 @@
  * State 2 waits for thread 14, then marks the selected entry in tutorial
  * progress mask 1, sets script variables 0x1fc and 0x27 and requests the event
  * through system flag 0x200000. While flags & 0xc is 4, a confirmed choice
- * starts thread 14 (state 2) and a cancelled one pops the level. Otherwise
+ * starts thread 14 (state 2) and a canceled one pops the level. Otherwise
  * cancel (0x40) and confirm (0x20) start thread 12 and record the choice;
  * 0x100 on a non-empty list opens help message 0x108c. */
 void wldcore_list_handle_tutorial_mask_1_entries_input(wldcore_menu_panel_level_t* level) {

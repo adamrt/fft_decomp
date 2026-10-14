@@ -5,7 +5,7 @@
 /* Fills a unit's action result for picking up a crystal or treasure
  * (BATTLE_CRYSTAL_* flags).
  *
- * The result starts as a cancelled miss. TAKE_TREASURE adds
+ * The result starts as a canceled miss. TAKE_TREASURE adds
  * g_main_crystal_treasure_item_id to the inventory and returns that call's
  * result, ignoring the other flags. RESTORE_HP_MP turns the result into a hit
  * that heals the missing HP and MP. LEARN_ABILITIES ORs
@@ -20,7 +20,7 @@ s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags) {
     u8* end;
 
     action_clear_current_data(&unit->action);
-    unit->action.miss_type = ACTION_MISS_TYPE_CANCELLED;
+    unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
     if (flags & BATTLE_CRYSTAL_TAKE_TREASURE) {
         return action_increment_item_quantity_for_steal_break(unit, g_main_crystal_treasure_item_id);

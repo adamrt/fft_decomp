@@ -23,7 +23,7 @@ menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instructio
     rect.y = y;
     rect.w = instruction->sprite.sprite.w;
     rect.h = instruction->sprite.sprite.h;
-    if (instruction->sprite.opcode == MENU_SCRIPT_OP_UNCOLOURED_QUAD) {
+    if (instruction->sprite.opcode == MENU_SCRIPT_OP_UNCOLORED_QUAD) {
         color = 0;
     } else {
         color = &g_world_menu_sprite_color;

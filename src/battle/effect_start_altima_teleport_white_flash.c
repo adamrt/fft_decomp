@@ -6,7 +6,7 @@
 /* Teleport distortion: begin the departure flash. Altima's forms release the
  * ability effect that effect_start_altima_teleport_departure requested;
  * the sprite switches to additive semi-transparency and a palette modulation of
- * +31 on each colour component starts. The distortion moves to its next phase
+ * +31 on each color component starts. The distortion moves to its next phase
  * with the timer at 0. */
 void effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM

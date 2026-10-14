@@ -245,7 +245,7 @@ s32 map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         light = &data->lighting;
         g_map_lighting_pending = 0;
         setVector(&g_map_light_rotation, 0, 0, 0);
-        vector = light->colour[0];
+        vector = light->color[0];
         vector += 9;
         direction.m[0][0] = vector[0];
         direction.m[0][1] = vector[1];

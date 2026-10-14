@@ -2,7 +2,7 @@
 #include "fft/battle_action.h"
 
 /* Applies the pending reaction ability's effect to the current target action
- * record and finishes the strike. Returns 0 when the ability's behaviour
+ * record and finishes the strike. Returns 0 when the ability's behavior
  * flags select the alternate handler, -1 for an ability with no effect entry,
  * and 1 once the action has been finalised.
  *

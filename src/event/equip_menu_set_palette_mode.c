@@ -2,7 +2,7 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-/* Select the normal (0) or alternate menu palette: the sprite colour and the six CLUT selections
+/* Select the normal (0) or alternate menu palette: the sprite color and the six CLUT selections
  * the menu commands draw with. Twin of world_menu_set_palette_mode. */
 void equip_menu_set_palette_mode(s32 mode) {
     g_menu_use_alternate_palette = mode;

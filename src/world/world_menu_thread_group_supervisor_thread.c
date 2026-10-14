@@ -3,8 +3,8 @@
 #include "psx/types.h"
 
 /* Menu thread-group dispatcher thread. Each request in parameter 1 selects a
- * group: running members with the expected task are signalled to continue,
- * others are signalled to finish (state 1) and awaited, then every finished
+ * group: running members with the expected task are signaled to continue,
+ * others are signaled to finish (state 1) and awaited, then every finished
  * or idle member is restarted with its function, the matching menu entry, and
  * its task id. The thread exits once no further request is pending. */
 void world_menu_thread_group_supervisor_thread(void) {

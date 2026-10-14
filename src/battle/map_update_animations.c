@@ -3,12 +3,12 @@
 
 /* Advances the per-frame map animations: texture palette rotations, the
  * background gradient, ambient light and darkness transitions, and the
- * colour blends of each map CLUT row.
+ * color blends of each map CLUT row.
  *
  * red/green/blue are s16: the extensions of their u8 + s8 sums fold into
  * copies, which reproduces the target's separate stored and packed values
  * and the reloads of the component bytes. The components are indexed from a
- * pointer to the CLUT's first colour so loop.c reduces one address giv, as in the target. */
+ * pointer to the CLUT's first color so loop.c reduces one address giv, as in the target. */
 void map_update_animations(void) {
     map_palette_color_components_t saved_component;
     map_background_gradient_colors_t gradient;

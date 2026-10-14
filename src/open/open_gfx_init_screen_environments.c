@@ -6,7 +6,7 @@
  *
  * The screen is 320x240 with OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN and 256x240
  * without it. Buffer 0 draws at y 0 and displays y 240, buffer 1 the reverse. The
- * drawing offset puts the origin at the centre of the screen, the background
+ * drawing offset puts the origin at the center of the screen, the background
  * clear is off, and the overlay fade's rectangle covers the screen in those
  * coordinates. OPEN_SYSTEM_RUNTIME_FLAG_RGB24 selects the 24-bit display the
  * movies use. Only the 320-pixel branch sets dfe.

@@ -1,6 +1,6 @@
 #include "fft/open.h"
 
-/* Initialise a 56-byte render record as a window frame and build its image.
+/* Initialize a 56-byte render record as a window frame and build its image.
  *
  * `tail` and `color` are pointers because the target materialises
  * &records[index].tail and &records[index].color as values, while every other

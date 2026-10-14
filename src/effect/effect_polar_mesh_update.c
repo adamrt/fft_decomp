@@ -7,7 +7,7 @@
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 
-/* Pack one primitive colour and code word after applying 4.12 brightness. */
+/* Pack one primitive color and code word after applying 4.12 brightness. */
 #define PACK_RGB(scratch, brightness)                                                                                  \
     ((((brightness) * (scratch)->red_factor) / ONE) | (scratch)->code                                                  \
         | ((((brightness) * (scratch)->green_factor) / ONE) << 8)                                                      \
@@ -16,7 +16,7 @@
 #define POLY_RGB(poly, n) (*(u32*)&(poly)->r##n)
 
 /* Builds a four-fold polar mesh from radius and angle curves, then draws its
- * double-buffered quads with a drifting centre and scrolling texture. Shared
+ * double-buffered quads with a drifting center and scrolling texture. Shared
  * index temporaries and the non-void signature preserve register allocation
  * and phase-dispatch delay slots. */
 s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
@@ -160,10 +160,10 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
             work->scroll_v += scratch->half_height * ONE;
         }
 
-        if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-            j = (entry->polar_mesh.colour_curves & 0xfff);
+        if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+            j = (entry->polar_mesh.color_curves & 0xfff);
             scratch->red_factor = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                (entry->polar_mesh.colour_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
+                (entry->polar_mesh.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
             scratch->green_factor
                 = g_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(j, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];

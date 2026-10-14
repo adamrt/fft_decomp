@@ -12,7 +12,7 @@
  * entry's text through text_find_entry / text_measure_pixels to
  * size the panel, copies the entry values into g_wldcore_list_entry_values with
  * cleared row flags, clamps the cursor to at most four visible rows, and
- * starts the panel render state centred on the measured width.
+ * starts the panel render state centerd on the measured width.
  *
  * The identical `menu += 0x37` arms split the block for the scheduler (jump2
  * cross-jumps them back together), keeping the add after the picture call so

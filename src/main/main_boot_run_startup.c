@@ -1,6 +1,6 @@
 #include "fft/main.h"
 
-/* Power-on initialisation: install the VSync, DrawSync and CD callbacks, start
+/* Power-on initialization: install the VSync, DrawSync and CD callbacks, start
  * the GPU, pad, SPU and CD, show the two logos, open the memory-card events and
  * load the shared sounds and the zodiac frame while the Squaresoft logo is up.
  *

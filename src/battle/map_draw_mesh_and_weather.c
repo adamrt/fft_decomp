@@ -11,7 +11,7 @@
 #define SAVED_GT4(i) g_target_tile_color_buffer->gt4[i]
 
 /* Queue the map mesh parts and weather particles for one frame, then apply or
- * restore the targeting and movement tile colours. */
+ * restore the targeting and movement tile colors. */
 void map_draw_mesh_and_weather(MATRIX* camera) {
     MATRIX light_rotation;
     MATRIX light_matrix;
@@ -533,7 +533,7 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
             }
         }
     }
-    /* The ambient colour restores use pointer arithmetic on the decayed arrays
+    /* The ambient color restores use pointer arithmetic on the decayed arrays
      * rather than GT3(i)/GT4(i) indexing: that keeps the target's
      * `addu offset, base` operand order (as in target_set_tile_background_color). */
     if (g_map_ambient_restored_buffer != 0) {

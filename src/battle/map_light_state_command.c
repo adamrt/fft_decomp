@@ -1,9 +1,9 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Map colour state commands, selected on command - 0x56: 0x56 applies the
- * background gradient pair, 0x5a the ambient colour and 0x63 the darkness
- * colour; the neighbouring commands save, restore or return those records.
+/* Map color state commands, selected on command - 0x56: 0x56 applies the
+ * background gradient pair, 0x5a the ambient color and 0x63 the darkness
+ * color; the neighboring commands save, restore or return those records.
  *
  * Only the GET arms assign `result`; the others return it uninitialized, as
  * the target does. */

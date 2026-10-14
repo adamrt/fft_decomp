@@ -20,7 +20,7 @@ enum {
 
 /* Draws a spinning stack of eight textured rings using alternating quad
  * buffers, scrolling texture and per-row brightness. Separate screen vectors
- * and chained colour stores preserve the renderer's register scheduling. */
+ * and chained color stores preserve the renderer's register scheduling. */
 s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
     SVECTOR vertex;
@@ -143,7 +143,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             break;
         case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
             break;
-        case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
+        case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
             map_store_max_coordinates(&map_max);
             origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
             origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
@@ -351,8 +351,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
 
         n = entry->radial_mesh.brightness_row;
         blue = EFFECT_COLOR_NEUTRAL;
-        if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-            k = (entry->radial_mesh.colour_curves & 0xfff);
+        if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+            k = (entry->radial_mesh.color_curves & 0xfff);
             red = g_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
             green = g_effect_animation_curve_data

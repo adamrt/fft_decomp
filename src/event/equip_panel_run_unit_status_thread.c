@@ -13,7 +13,7 @@
  * records: the editor packets at g_equip_panel_selected_editor_packets / g_equip_panel_comparison_editor_packets, the
  * status-panel packets at g_equip_panel_selected_packets / g_equip_panel_comparison_packets, the editor states
  * g_equip_selected_unit_stat_summary / g_equip_panel_comparison_billboard, and the per-thread display record.
- * g_equip_panel_gauge_bar_colors holds the four Gouraud vertex colours of each bar. */
+ * g_equip_panel_gauge_bar_colors holds the four Gouraud vertex colors of each bar. */
 
 /*
  * EQUIP twin of debugchr_panel_run_unit_status_thread (DEBUGCHR

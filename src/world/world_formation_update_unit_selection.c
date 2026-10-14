@@ -10,7 +10,7 @@
  * g_world_status_display_thread_params.redraw_request; it then toggles the per-menu windows and advances the slide.
  * The caller in world_menu_run_remove_item passes two arguments that this body
  * never reads. Compiled at O1 like its world_formation_stage_selected_unit
- * neighbour.
+ * neighbor.
  */
 void world_formation_update_unit_selection(void) {
     s32 saved;

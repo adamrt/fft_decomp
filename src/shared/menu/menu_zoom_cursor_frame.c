@@ -2,7 +2,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Scale the sprite about its centre and keep position and texture coordinates even. */
+/* Scale the sprite about its center and keep position and texture coordinates even. */
 void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step) {
     s32 scale;
     s32 offset;

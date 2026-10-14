@@ -34,7 +34,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `battle_gfx_update_all_unit_rotation_and_vectors`) do the same for units
   that chapter-end cutscenes walk off the map.
 - `src/battle/move_animate_fall_to_target_tile.c`: the event-state
-  (`0x34`) path writes the tile-centre depth into `real.vy` (not `real.vz`).
+  (`0x34`) path writes the tile-center depth into `real.vy` (not `real.vz`).
   The first frame adds the fall speed to it, which puts the unit below the
   ground, and the next frame snaps it to the ground: an event fall ends on its
   second frame.
@@ -53,13 +53,13 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   negative X therefore forces the 16-bit screen Y to `0xffff`.
 - `src/battle/map_blend_ambient_light_color.c`,
   `src/battle/map_blend_darkness_color.c`: modes `11` and above leave the
-  target colour uninitialized (no default case).
+  target color uninitialized (no default case).
 - `src/battle/ai_load_ability_entry.c`: the CT adjustments test the
   Monster Skill (`0x80`) and Defend (`0x40`) support bits; Short Charge and
   Non-Charge were presumably intended.
 - `src/battle/ai_evaluate_status_cancellation.c`: the Blood Suck branch
   tests decision bit `0x04`, which is built from Jump.
-- `src/battle/ai_build_monster_skill_tile_mask.c`: the `-1` neighbour
+- `src/battle/ai_build_monster_skill_tile_mask.c`: the `-1` neighbor
   offsets are loaded unsigned (+255), so only `+x`/`+y` survive, and the level
   loop runs for level 0 only.
 - `src/battle/ai_build_targetable_tile_mask.c`: radii 8–15 index past
@@ -633,8 +633,8 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   out-of-range path is inactive.
 - `EFFECT/E223.BIN` through `E225.BIN` contain effect data but have zero resident load sizes; requesting those file IDs loads Cure instead. The ability-effect mapping does not reference them.
 - `src/world/world_gfx_load_wldface_to_frame_buffer.c`: the WLDFACE rectangles (`g_world_wldface_vram_rects`) use x = 1664–1856; the GPU masks VRAM transfer coordinates, so the pages land at x = 640–832.
-- `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initialiser opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
-- `src/event/equip_menu_load_images_and_reset_lists.c` and `bunit_gfx_init_vram_and_start_fade.c`: store 16-colour CLUTs into the 4-entry `buf1`; they run on into `buf2`, which the frame places directly after it (the source reads as two arrays, the stack holds one).
+- `suzuki_sound_init`: `suzuki_sound_init_sfx_music` reaches `suzuki_smd_insert_music`, which disables and re-enables `g_suzuki_sound_root_counter_2_event` before the initializer opens that event: handle 0 at boot, the handle `suzuki_sound_quit` closed on a soft reset.
+- `src/event/equip_menu_load_images_and_reset_lists.c` and `bunit_gfx_init_vram_and_start_fade.c`: store 16-color CLUTs into the 4-entry `buf1`; they run on into `buf2`, which the frame places directly after it (the source reads as two arrays, the stack holds one).
 - `effect_code_script_2e_invalid`: opcodes 2e–77 report an error without setting a handler result; `effect_run_block` then tests the undefined return value.
 - EFFECT scripts never run seven state handlers: E000's script calls only `effect_noop` (opcode 07) and E314's names no file function, so native function ids 1 and 90 are bound by nothing; E134/E242 `effect_ring_stack_mesh_update`, E454/E455 `effect_map_set_3d_objects_state_2` and E456 `effect_map_freeze` sit in callback slots (script opcode 06) that no keyframe selector fires. E457.BIN, which has no code, binds native function 88 (0x801c2578, E259's `effect_dome_mesh_update`; data in its own image) to slot 0, and none of its keyframes names a slot.
 - `src/battle/map_draw_mesh_and_weather.c`: when map command 0x96 (E458) ends, `map_run_weather_command(0x8b)` restores a non-snow rain or storm mid-draw; the mode-0x55 block then re-links `ft3` drops the 0x96 block already linked at OT+2, an ordering-table cycle that holds `DrawSync` until its 240-VBlank timeout.

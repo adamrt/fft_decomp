@@ -1,24 +1,24 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Start a fade of the map darkness toward a colour derived from mode, with
+/* Start a fade of the map darkness toward a color derived from mode, with
  * red/green/blue as 8-bit offsets applied in 16.16 fixed point.
  *
  * Modes 0..3 derive the base from the live transition channels, 4..9 from the
- * last applied colour, and mode 10 only clears the repeat record. Modes 2, 3,
- * 6 and 7 replace the base with the greyscale (2R + 3G + B) / 6, halved again
+ * last applied color, and mode 10 only clears the repeat record. Modes 2, 3,
+ * 6 and 7 replace the base with the grayscale (2R + 3G + B) / 6, halved again
  * for 3 and 7. Mode 9 additionally records the offsets so the map animation
  * updater can replay them.
  *
  * There is no default case: modes 11 and above use the uninitialized target
- * colour, as the target does. */
+ * color, as the target does. */
 void map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 target_red;
     s32 target_green;
     s32 target_blue;
-    s32 grey;
+    s32 gray;
     s32 base_red;
     s32 base_green;
     s32 base_blue;
@@ -35,17 +35,17 @@ void map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, 
         target_green = channels->green / 2 + (green << 16);
         target_blue = channels->blue / 2 + (blue << 16);
         break;
-    case MAP_COLOR_MODE_CURRENT_GREY:
-        grey = (channels->red * 2 + channels->green * 3 + channels->blue) / 6;
-        target_red = grey + (red << 16);
-        target_green = grey + (green << 16);
-        target_blue = grey + (blue << 16);
+    case MAP_COLOR_MODE_CURRENT_GRAY:
+        gray = (channels->red * 2 + channels->green * 3 + channels->blue) / 6;
+        target_red = gray + (red << 16);
+        target_green = gray + (green << 16);
+        target_blue = gray + (blue << 16);
         break;
-    case MAP_COLOR_MODE_CURRENT_GREY_HALF:
-        grey = (channels->red * 2 + channels->green * 3 + channels->blue) / 12;
-        target_red = grey + (red << 16);
-        target_green = grey + (green << 16);
-        target_blue = grey + (blue << 16);
+    case MAP_COLOR_MODE_CURRENT_GRAY_HALF:
+        gray = (channels->red * 2 + channels->green * 3 + channels->blue) / 12;
+        target_red = gray + (red << 16);
+        target_green = gray + (green << 16);
+        target_blue = gray + (blue << 16);
         break;
     case MAP_COLOR_MODE_BASE:
     case MAP_COLOR_MODE_BASE_REPEAT:
@@ -54,28 +54,28 @@ void map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, 
         target_blue = (g_map_darkness_color.b + blue) << 16;
         break;
     case MAP_COLOR_MODE_BASE_HALF:
-        /* The base colour is unsigned, so the halved 16.16 value is a shift. */
+        /* The base color is unsigned, so the halved 16.16 value is a shift. */
         target_red = (g_map_darkness_color.r << 15) + (red << 16);
         target_green = (g_map_darkness_color.g << 15) + (green << 16);
         target_blue = (g_map_darkness_color.b << 15) + (blue << 16);
         break;
-    case MAP_COLOR_MODE_BASE_GREY:
+    case MAP_COLOR_MODE_BASE_GRAY:
         base_red = g_map_darkness_color.r << 16;
         base_green = g_map_darkness_color.g << 16;
         base_blue = g_map_darkness_color.b << 16;
-        grey = (base_red * 2 + base_green * 3 + base_blue) / 6;
-        target_red = grey + (red << 16);
-        target_green = grey + (green << 16);
-        target_blue = grey + (blue << 16);
+        gray = (base_red * 2 + base_green * 3 + base_blue) / 6;
+        target_red = gray + (red << 16);
+        target_green = gray + (green << 16);
+        target_blue = gray + (blue << 16);
         break;
-    case MAP_COLOR_MODE_BASE_GREY_HALF:
+    case MAP_COLOR_MODE_BASE_GRAY_HALF:
         base_red = g_map_darkness_color.r << 16;
         base_green = g_map_darkness_color.g << 16;
         base_blue = g_map_darkness_color.b << 16;
-        grey = (base_red * 2 + base_green * 3 + base_blue) / 12;
-        target_red = grey + (red << 16);
-        target_green = grey + (green << 16);
-        target_blue = grey + (blue << 16);
+        gray = (base_red * 2 + base_green * 3 + base_blue) / 12;
+        target_red = gray + (red << 16);
+        target_green = gray + (green << 16);
+        target_blue = gray + (blue << 16);
         break;
     case MAP_COLOR_MODE_RESTORE:
         target_red = g_map_darkness_color.r << 16;

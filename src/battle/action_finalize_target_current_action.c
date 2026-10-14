@@ -7,7 +7,7 @@
 /* Validate and clamp the target's current action result before it applies.
  *
  * A target that is dead (unless the ability cancels Dead or the target is
- * undead), petrified or walled, without the ability cancelling that status,
+ * undead), petrified or walled, without the ability canceling that status,
  * turns the action into a miss. Otherwise zero accuracy clears the hit flag,
  * HP/MP changes are capped at 999, a lethal HP hit drops knockback, and a
  * hit absorbed by the target team's Golem becomes a guarded miss. */
@@ -40,7 +40,7 @@ void action_finalize_target_current_action(void) {
         action_clear_knockback_flag();
         g_action_current_ability.post_action_message = BATTLE_POST_ACTION_MESSAGE_NONE;
         formula_force_attack_miss();
-        g_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELLED;
+        g_action_target_data->miss_type = ACTION_MISS_TYPE_CANCELED;
         return;
     }
     if (g_action_target_data->attack_accuracy == 0) {

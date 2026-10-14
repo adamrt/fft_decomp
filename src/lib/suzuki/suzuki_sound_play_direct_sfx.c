@@ -1,7 +1,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* Plays a sound on SFX channels 6-7 at the default volume (0x60) and centre
+/* Plays a sound on SFX channels 6-7 at the default volume (0x60) and center
  * balance, with a priority suzuki_sound_find_sfx_channel never steals. */
 void suzuki_sound_play_direct_sfx(s32 sound) {
     if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {

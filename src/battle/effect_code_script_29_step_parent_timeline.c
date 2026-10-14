@@ -6,7 +6,7 @@
 /* Opcode 29: advance the record's parent timeline by one frame. The second
  * 16-bit value is the script offset its child records start at.
  *
- * Before phase1_duration the phase 1 particle channels, colour tracks and
+ * Before phase1_duration the phase 1 particle channels, color tracks and
  * sound tracks run (and the time scale follows the timing curve under
  * EFFECT_FLAG_TIMING_CURVE_PHASE1); afterwards one child record per effect
  * target is started, spawn_delay frames apart. Phase 2 runs from

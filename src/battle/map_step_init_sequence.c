@@ -85,7 +85,7 @@ s32 map_step_init_sequence(s32 map_id, s32 step) {
         break;
     case 12:
         sound_start_weather_sfx();
-        /* Seed the three colour fades from the colours the loaded map set. */
+        /* Seed the three color fades from the colors the loaded map set. */
         map_init_background_gradient();
         map_init_ambient_light();
         map_init_darkness();

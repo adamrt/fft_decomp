@@ -515,7 +515,7 @@ void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit);
 
 /* sprite rendering */
 /* One of the two 60968-byte battle render buffers. The primitive pools are
- * pre-initialised once; main_gfx_swap_and_clear_otag reads the ordering table
+ * pre-initialized once; main_gfx_swap_and_clear_otag reads the ordering table
  * pointer at +0xe5b4. */
 typedef struct battle_render_buffer {
     POLY_GT3 gt3[360]; /* 0x00000 */

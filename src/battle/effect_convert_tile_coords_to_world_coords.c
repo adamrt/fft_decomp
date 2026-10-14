@@ -2,7 +2,7 @@
 #include "fft/battle_map.h"
 #include "fft/map.h"
 
-/* Convert a tile position (x, layer, y) to world coordinates: the tile centre (28
+/* Convert a tile position (x, layer, y) to world coordinates: the tile center (28
  * units per tile) at the tile's height, 12 units per level and negative upward.
  * The slope and the water depth are not counted. */
 void effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {

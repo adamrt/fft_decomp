@@ -8,7 +8,7 @@
  * Uploads the menu glyph image to (0x100, 0) and the menu palettes to
  * (0x100, 0xfa), and derives four more palette rows at y 0xfe from the CLUT
  * rows at (0x3c0, 0x1f0) and (0x3c0, 0x1f4): each row is copied with entry 4
- * made transparent, and its entries 4..15 are copied again as a 12-colour
+ * made transparent, and its entries 4..15 are copied again as a 12-color
  * row.
  */
 void jobstts_menu_load_images_and_clear_selection(void) {

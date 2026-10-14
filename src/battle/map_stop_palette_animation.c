@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Stop the blend of CLUT clut_index of a row, or of all sixteen when stop_all is
- * 1. The colours stay as blended so far. */
+ * 1. The colors stay as blended so far. */
 void map_stop_palette_animation(s32 clut_row, s32 clut_index, s32 stop_all) {
     s32 index;
 

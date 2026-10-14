@@ -21,7 +21,7 @@
  * Shapes the bytes depend on:
  *  - `.map_x`/`.map_y` are written through one loop-invariant s32* to element
  *    0's `.map_x`, as pos[i * 6] / pos[i * 6 + 1]. That makes the address a
- *    strength_reduce giv, initialised at the row head with the target's
+ *    strength_reduce giv, initialized at the row head with the target's
  *    lui/addiu/addu triple and carried with += 24. Two array-form stores each
  *    pay a full lui/addiu/addu/sw site; a source-level induction variable
  *    hoists the init into the outer preheader and is one instruction short.
@@ -35,7 +35,7 @@
  *    temps, giving the target's per-group `addu v0,v1,s0` / `addu v0,v1,s1`
  *    while s0 (the `.x` column) and s1 (the record base, CSE'd as
  *    `addiu s1,s0,-0x18`) stay live across both groups.
- *  - `y` is initialised before `k` and `i`: the target emits `li t3,-192`
+ *  - `y` is initialized before `k` and `i`: the target emits `li t3,-192`
  *    first in the outer preheader.
  */
 

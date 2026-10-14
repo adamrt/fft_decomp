@@ -10,7 +10,7 @@
  * from the tile height/depth pair scaled by the unit's per-step scales, taking
  * a mount's walking height into account when one is present and float/fly slope
  * otherwise.  A height difference of at most one step starts an ordinary step
- * (the WALK_TO_CENTRE phase) or a climb-speed step (CLIMB_TO_CENTRE); up to seven
+ * (the WALK_TO_CENTER phase) or a climb-speed step (CLIMB_TO_CENTER); up to seven
  * starts move_start_unit_climb_hop_step, and anything higher
  * move_start_unit_climb_jump_step. */
 void move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
@@ -65,11 +65,11 @@ void move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
             switch (g_move_step_value.climb) {
             case 0:
                 move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
-                unit->step_phase = MOVE_STEP_PHASE_WALK_TO_CENTRE_NORTH;
+                unit->step_phase = MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH;
                 return;
             case 1:
                 move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
-                unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_CENTRE_NORTH;
+                unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH;
                 return;
             }
             return;

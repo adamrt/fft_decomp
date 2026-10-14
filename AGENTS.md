@@ -58,6 +58,7 @@ not the module umbrella.
   member's own struct. Never access unused or padding members by name.
 - Use `ONE` for fixed-point 1.0 (4096). Add `const` only for genuinely read-only
   inputs and verify all callers under their historical compiler profiles.
+- Use American spelling.
 - Keep comments factual and short: explain behavior or a necessary constraint.
   Reference library material validates our interfaces; do not copy
   implementations or comments into the repository.

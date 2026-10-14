@@ -340,10 +340,10 @@ void wldcore_load_formation_unit_name_and_face(void);
  * (wldcore_gfx_draw_context_value_display). */
 typedef enum wldcore_value_display_mode {
     WLDCORE_VALUE_DISPLAY_PLAIN = 0,          /* eight digits */
-    WLDCORE_VALUE_DISPLAY_FUNDS = 1,          /* labelled and underlined; the war funds */
+    WLDCORE_VALUE_DISPLAY_FUNDS = 1,          /* labeled and underlined; the war funds */
     WLDCORE_VALUE_DISPLAY_PLAY_TIME = 2,      /* hours, minutes and seconds */
-    WLDCORE_VALUE_DISPLAY_LABELLED = 3,       /* PLAIN under a small label */
-    WLDCORE_VALUE_DISPLAY_COST_AND_FUNDS = 4, /* a labelled five-digit secondary value, then FUNDS */
+    WLDCORE_VALUE_DISPLAY_LABELED = 3,        /* PLAIN under a small label */
+    WLDCORE_VALUE_DISPLAY_COST_AND_FUNDS = 4, /* a labeled five-digit secondary value, then FUNDS */
 } wldcore_value_display_mode_e;
 
 /* g_wldcore_screen_fade_state.flags[]: 32-bit flags[0] controls the screen fade and its fill
@@ -390,7 +390,7 @@ extern s32 g_wldcore_background_sector_offsets[];
 extern s32 g_wldcore_context_value_display_mode;
 extern world_sprite_animation_sequence_t** g_wldcore_anim_sequence_table;
 extern world_sprite_cel_header_t** g_wldcore_anim_cel_table;
-/* Colour of the context-value display, tinted by wldcore_gfx_copy_color_with_tint. */
+/* Color of the context-value display, tinted by wldcore_gfx_copy_color_with_tint. */
 extern CVECTOR g_wldcore_hud_color;
 
 /* HUD ordering-table priority. The sort calls read it as a 16-bit value (lhu);
@@ -463,7 +463,7 @@ typedef struct wldcore_location_list_level {
 
 /* wldcore_location_entry_state_t.flags. */
 typedef enum wldcore_route_travel_flag {
-    WLDCORE_ROUTE_TRAVEL_ACTIVE = 0x01,   /* a path was found and is being travelled */
+    WLDCORE_ROUTE_TRAVEL_ACTIVE = 0x01,   /* a path was found and is being traveled */
     WLDCORE_ROUTE_TRAVEL_REVERSED = 0x02, /* the current leg runs its route end to start */
 } wldcore_route_travel_flag_e;
 
@@ -796,7 +796,7 @@ typedef char wldcore_proposition_report_size_must_be_88[sizeof(wldcore_propositi
 /* wldcore_proposition_progress_t.flags of an active proposition. */
 typedef enum wldcore_proposition_progress_flag {
     WLDCORE_PROPOSITION_PROGRESS_DISPATCHED = 0x01,
-    WLDCORE_PROPOSITION_PROGRESS_RECALLED = 0x02, /* cancelled: returns on the next day */
+    WLDCORE_PROPOSITION_PROGRESS_RECALLED = 0x02, /* canceled: returns on the next day */
     WLDCORE_PROPOSITION_PROGRESS_RETURNED = 0x04, /* the days are up: waiting for the report */
 } wldcore_proposition_progress_flag_e;
 
@@ -1025,7 +1025,7 @@ typedef enum wldcore_scroll_limits {
 /* Panel menu levels: number panels (0x8006f294, 0x80073ef8) and list panels
  * (0x8007dfcc, 0x80084230, 0x80071aa0). */
 typedef struct wldcore_menu_panel_level {
-    /* 0x00; number panel: 0 running, 1 confirmed, 2 cancelled; list panels
+    /* 0x00; number panel: 0 running, 1 confirmed, 2 canceled; list panels
      * also use -1 for cancellation. Read after WORLD thread 12 ends. */
     s32 result;
     s32 variable_id; /* 0x04; script variable edited by number panels */
@@ -1446,7 +1446,7 @@ typedef struct wldcore_window_layout_request {
 
 /* Provisional: 16-byte rows of the window-layout table at 0x8009e93c.
  * wldcore_menu_handle_layout_window_input reads the first ten bytes: a pointer
- * to the level's live counter, the base message id, and the four neighbouring
+ * to the level's live counter, the base message id, and the four neighboring
  * layout ids reached by the directional pad. wldcore_window_apply_layout reads
  * the trailing 16-bit values: the record's x and y extents (plus 14 and 12) and the
  * kind that selects the redraw delay. */

@@ -2,8 +2,8 @@
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 
-/* Advance the target colour track of the parent timeline one frame: an APPLY
- * keyframe recolours every unit target of the effect.
+/* Advance the target color track of the parent timeline one frame: an APPLY
+ * keyframe recolors every unit target of the effect.
  *
  * The frame timer and the loop counter are separate locals here: the target
  * keeps the timer in $v0 and the counter in $s1. */

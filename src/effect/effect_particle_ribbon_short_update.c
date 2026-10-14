@@ -210,7 +210,7 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
                 break;
             case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
                 break;
-            case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
+            case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
                 map_store_max_coordinates(&map_origin);
                 origin.vx += map_origin.vx * (MAP_TILE_SIZE / 2);
                 origin.vz += map_origin.vz * (MAP_TILE_SIZE / 2);
@@ -266,7 +266,7 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
                 break;
             case EFFECT_EMITTER_HOMING_OFFSET_ALT:
                 break;
-            case EFFECT_EMITTER_HOMING_MAP_CENTRE:
+            case EFFECT_EMITTER_HOMING_MAP_CENTER:
                 map_store_max_coordinates(&map_max);
                 target_base.vx += map_max.vx * (MAP_TILE_SIZE / 2);
                 target_base.vz += map_max.vz * (MAP_TILE_SIZE / 2);
@@ -449,10 +449,10 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
                 }
                 slot->frame_timer = entry->particle_ribbon.frame_delay;
             }
-            if (entry->particle_ribbon.flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-                factor = (entry->particle_ribbon.colour_curves & 0xfff);
+            if (entry->particle_ribbon.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+                factor = (entry->particle_ribbon.color_curves & 0xfff);
                 red = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                    (entry->particle_ribbon.colour_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][slot->age];
+                    (entry->particle_ribbon.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][slot->age];
                 green
                     = g_effect_animation_curve_data
                           ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_GREEN_SHIFT)][slot->age];

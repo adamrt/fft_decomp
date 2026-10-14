@@ -36,7 +36,7 @@
 /*
  * Advance the camera focus toward the cursor tile by one frame's step.
  *
- * The horizontal bounds are the centre of the cursor tile (28 units per tile,
+ * The horizontal bounds are the center of the cursor tile (28 units per tile,
  * half a tile of bias); the caller supplies the height bound directly.
  */
 void camera_step_focus_toward_cursor_tile(s16 height) {

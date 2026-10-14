@@ -9,7 +9,7 @@
  * (battle_gfx_start_unit_fade_out_red). Morbol swaps the sprite
  * for the Morbol spritesheet (VRAM slot, SHP, SEQ, texture page), refreshes the
  * tile palette and the idle animation, then rewrites the battle stats as a Morbol
- * and reinitialises the unit's AI ability data. */
+ * and reinitializes the unit's AI ability data. */
 void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit) {
     u32 flags;
     map_tile_t* tile;

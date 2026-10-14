@@ -1,7 +1,7 @@
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 
-/* Make the unit's item display show an item's 16x16 icon, centred on the
+/* Make the unit's item display show an item's 16x16 icon, centerd on the
  * display's origin. */
 void battle_gfx_store_item_display_data(battle_unit_t* unit, u32 item_id) {
     SPRT data;

@@ -8,7 +8,7 @@
  * The menu-screen library's copy of world_option_gfx_build_scaled_draw_area_packets; nothing calls it.
  * Build a double-buffered draw-area pair whose rectangle is `source` moved
  * left one page, shifted by `offset` (x by offset->x, y by offset->w) and
- * cropped to a percentage of its size about its centre.
+ * cropped to a percentage of its size about its center.
  *
  * One `crop` variable carries both halves of the crop: giving each axis its
  * own local makes the y subtraction a second allocno, which schedules three

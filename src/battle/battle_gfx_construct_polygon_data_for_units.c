@@ -19,7 +19,7 @@
  *
  * The unused VECTOR reproduces the target's 16-byte locals area. The nested
  * test with its duplicated `addPrim(ot, prim)` arm is the original shape: jump
- * optimisation merges the arms, but the references counted before that merge
+ * optimization merges the arms, but the references counted before that merge
  * give `ot` the allocation priority that places it in $s5 ahead of `display`. */
 void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_t* display, s32 end, s32 start,
     SVECTOR* position, s16 angle, s16 mode, SVECTOR* scale, u32* ot) {
@@ -88,7 +88,7 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
         gte_stsxy3_split(&prim->x0, &prim->x1, &prim->x2);
         gte_ldv0(&g_battle_gte_rtps_vxy0);
         gte_rtps();
-        /* The retail colour transfer combines red and green in one 16-bit value. */
+        /* The retail color transfer combines red and green in one 16-bit value. */
         *(u16*)&prim->r0 = *(u16*)&display->color.r;
         prim->b0 = display->color.b;
         gte_stsxy(&prim->x3);

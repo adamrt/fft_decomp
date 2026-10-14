@@ -1,7 +1,7 @@
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 
-/* Reset a unit's own sprite display: neutral colour, no flags on its eight
+/* Reset a unit's own sprite display: neutral color, no flags on its eight
  * parts and none of them in use. */
 battle_gfx_sprite_display_data_t* battle_gfx_init_unit_sprite_display(s32 runtime_id) {
     s32 body_part;

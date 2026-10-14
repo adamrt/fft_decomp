@@ -6,7 +6,7 @@
  * weapon element strengthen, physical modifiers, critical roll, XA * YA, then
  * the target's affinity to the weapon's elements. Returns 0 when the added
  * effect applies (formula_roll_conditional_status_proc), 1 when it does
- * not or the element cancelled the attack. */
+ * not or the element canceled the attack. */
 s32 formula_calculate_weapon_damage(void) {
     formula_calculate_base_xa();
     formula_apply_charge();

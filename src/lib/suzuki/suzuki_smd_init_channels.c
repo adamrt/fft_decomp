@@ -1,11 +1,11 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* Initialises the channels of a MUS record from its SMD channel table.
+/* Initializes the channels of a MUS record from its SMD channel table.
  *
  * Every channel with note data gets default note flags (muted when its bit
  * is in mute_mask), the SMD id, octave 5, velocity 0x6000, full volume and
- * centred balance, a stream at its SMD offset, instrument 0 of the MUS's
+ * centerd balance, a stream at its SMD offset, instrument 0 of the MUS's
  * waveset (the first loaded waveset when that id is not loaded) and an
  * SPU voice: channel n uses voice n - 1 modulo 25, so the first channel gets
  * voice 0xff and no voice bit. music->channel_mask collects one bit per

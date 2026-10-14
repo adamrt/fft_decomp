@@ -6,7 +6,7 @@
  *
  * Mode bits 0x1e0 pick the source: effect target `target` (0x0, which also
  * saves the current camera position to g_effect_camera_position_start), the given vector (0x40),
- * the map centre (0x80), the current camera (0xc0), the saved position at
+ * the map center (0x80), the current camera (0xc0), the saved position at
  * g_effect_camera_position_saved (0x100), the caster entry (0x140), the average of all unit
  * targets (0x180) or the tile at g_effect_target_tile (0x1c0). All but 0x40 add offset
  * when present. Bits 0x1e00 are kept in g_effect_camera_position_mode. */
@@ -34,7 +34,7 @@ void camera_execute_position_command(s32 command, s32 target, s32 duration, cons
     case EFFECT_CAMERA_SOURCE_GIVEN:
         g_effect_camera_position_target = *offset;
         break;
-    case EFFECT_CAMERA_SOURCE_MAP_CENTRE:
+    case EFFECT_CAMERA_SOURCE_MAP_CENTER:
         effect_store_map_center_coordinates(&g_effect_camera_position_target);
         if (offset) {
             effect_add_vectors(offset, &g_effect_camera_position_target, &g_effect_camera_position_target);

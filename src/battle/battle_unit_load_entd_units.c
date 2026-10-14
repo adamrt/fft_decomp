@@ -7,11 +7,11 @@
 
 /* Loads the 16 ENTD units of the encounter into the battle unit slots.
  *
- * Each present unit is initialised. A unit that would need a new spritesheet
+ * Each present unit is initialized. A unit that would need a new spritesheet
  * beyond the sheets left for the ENTD (nine less the deployment unit limit) is
  * taken off the field, and the units placed on the field are capped at that
  * number + 7; the exception reports use the error bases 600, 300, 100 and 200
- * plus the slot. `status` holds both the initialisation result and the
+ * plus the slot. `status` holds both the initialization result and the
  * graphics descriptor's not-deployed flag: sharing the one variable is what
  * gives the flag enough uses to win s1 ahead of battle_id. */
 void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {

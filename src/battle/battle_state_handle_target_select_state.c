@@ -8,7 +8,7 @@
  * Circle accepts the unit under the cursor. Selected ability 0xc requires a
  * unit outside the caster's non-player team and 0xe one inside it; any other
  * value leaves the selection pending. X returns to the caster and the script
- * action menus; triangle only recentres the cursor on the caster.
+ * action menus; triangle only recenters the cursor on the caster.
  */
 void battle_state_handle_target_select_state(void) {
     battle_unit_t* caster;

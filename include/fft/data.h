@@ -705,7 +705,7 @@ typedef union main_ability_secondary_pointer {
 } main_ability_secondary_pointer_t;
 typedef char main_ability_secondary_pointer_size_must_be_4[(sizeof(main_ability_secondary_pointer_t) == 4) ? 1 : -1];
 
-/* Static AI behaviour bytes. The AI working record replaces flags_4 with
+/* Static AI behavior bytes. The AI working record replaces flags_4 with
  * skillset usage flags after copying these four bytes. */
 typedef struct ability_ai_flags {
     u8 flags_1;

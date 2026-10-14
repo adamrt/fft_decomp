@@ -6,7 +6,7 @@
  * Run the formation item-menu action strip (menu mode 2) and return the next
  * item-menu mode: 5 while the strip stays open, 2 once an action completes.
  *
- * On entry the three option lines are enabled or greyed from the selected
+ * On entry the three option lines are enabled or grayed from the selected
  * item. Option 0 changes the owned quantity, option 1 unequips the item from
  * every formation unit and -1 steps the item category.
  *

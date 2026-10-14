@@ -2,13 +2,13 @@
 #include "psx/types.h"
 
 /*
- * Advance a unit's final vertical step onto its destination tile centre.
+ * Advance a unit's final vertical step onto its destination tile center.
  *
- * Once the tile centre is reached, the target height is the tile's screen Z,
+ * Once the tile center is reached, the target height is the tile's screen Z,
  * or 10 above the mount's when the path is complete and pending_mount bit 0x80
  * names a mount. The step ends when the unit reaches that height in its
  * direction of vertical travel (velocity.vy) or when path steps remain; it
- * then snaps to the centre, clears velocity, adopts the destination map
+ * then snaps to the center, clears velocity, adopts the destination map
  * coordinates and sets shadow_dirty bit 0.
  */
 void move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {

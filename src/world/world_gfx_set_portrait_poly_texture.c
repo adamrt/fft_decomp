@@ -6,7 +6,7 @@
  * Set the texture window, texture page and CLUT of a 32x48 portrait quad.
  *
  * The low byte of `code` is the portrait index: 40 portraits per texture
- * page, laid out 8 across and 5 down, with four 16-colour CLUTs per CLUT row.
+ * page, laid out 8 across and 5 down, with four 16-color CLUTs per CLUT row.
  * Indices 0x3F-0x52 instead use a 6-row CLUT block at y 0x1FA whose column
  * group comes from bits 10-11 of `code`.
  *

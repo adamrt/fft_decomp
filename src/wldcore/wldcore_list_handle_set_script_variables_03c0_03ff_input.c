@@ -3,7 +3,7 @@
 #include "psx/pad.h"
 
 /* Script-variable list level input step (cursor slot 11) for the panel opened
- * by 0x8008343c; twin of wldcore_list_handle_unexplored_lands_input with help message 0x1056. Cancelling
+ * by 0x8008343c; twin of wldcore_list_handle_unexplored_lands_input with help message 0x1056. Canceling
  * restores the parent list window's content render record (flag 0x100); a
  * confirmed entry's value is passed to 0x8008389c. */
 void wldcore_list_handle_set_script_variables_03c0_03ff_input(wldcore_menu_panel_level_t* level) {

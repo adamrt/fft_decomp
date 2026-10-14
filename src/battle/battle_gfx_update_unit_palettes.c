@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 /* Ends the repeating tint of every unit CLUT that has an animation running and
- * fades it back to its last applied colours. */
+ * fades it back to its last applied colors. */
 void battle_gfx_update_unit_palettes(void) {
     s32 palette_index;
 

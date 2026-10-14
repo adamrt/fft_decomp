@@ -3,7 +3,7 @@
 /* Builds the world-map request block for the current entry at 0x800d0bb4 and
  * submits it, unless system flag 0x2000 suppresses it or no entry is active.
  *
- * The colour is the 32-bit shade value at 0x8009eef4 replicated across the three
+ * The color is the 32-bit shade value at 0x8009eef4 replicated across the three
  * channels and tinted in place by 0x80069718. sequence is written after that
  * call because the target reloads 0x800d0bb4 there. */
 void wldcore_proposition_submit_marker_request(GsOT* ot) {

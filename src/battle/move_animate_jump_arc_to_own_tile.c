@@ -5,11 +5,11 @@
 #include "fft/map.h"
 #include "psx/types.h"
 
-/* Distortion animation 0x07: jump along an arc to the centre of the unit's own
+/* Distortion animation 0x07: jump along an arc to the center of the unit's own
  * map tile.
  *
  * Phase 0 asks move_calculate_jump_arc_velocity for the velocity and frame
- * count from the current screen position to the tile centre at ground height.
+ * count from the current screen position to the tile center at ground height.
  * Phase 1 applies the velocity for that many frames, the height speed gaining
  * g_move_jump_gravity each frame, then stops the horizontal motion. Phase
  * 2 keeps falling until the unit reaches the ground under it, snaps it to the

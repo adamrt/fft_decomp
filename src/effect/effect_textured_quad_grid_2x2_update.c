@@ -12,13 +12,13 @@
  *
  * Phase 1 builds both POLY_GT4 buffers of a 256x256 grid; phase 2 scrolls the
  * texture window along the emitter record's speed and angle curves, tints each
- * quad from the colour curves and the overlay-local vertex brightness rows, and
+ * quad from the color curves and the overlay-local vertex brightness rows, and
  * links the current buffer into the ordering table; phase 3 frees the work
  * block one call after it is first reached.
  *
  * row and column are also the update phase's curve scratch values. GCC 2.6.3
  * gives each C variable one pseudo, and that sharing is what places the curve
- * index, colour curves and brightness in s2 and the curve factor in s3.
+ * index, color curves and brightness in s2 and the curve factor in s3.
  */
 s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame) {
     s16 state_index = record_index;
@@ -117,8 +117,8 @@ s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s3
             work->scroll_v += texture_height * ONE;
         }
         blue = EFFECT_COLOR_NEUTRAL;
-        if (geometry->flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
-            row = (geometry->colour_curves & 0xfff);
+        if (geometry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
+            row = (geometry->color_curves & 0xfff);
             red = g_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
             green = g_effect_animation_curve_data

@@ -47,7 +47,7 @@ void battle_handle_menu_cancel_input(menu_entry_t* menu) {
                and never considers the join block's own `i = 0` -- leaving the
                branch pointing at it (`blez a1,0xa4`).  Written inside the arm,
                the slot is instead filled from the fallthrough thread, the
-               identical insn at the branch target is recognised as redundant,
+               identical insn at the branch target is recognized as redundant,
                and the branch is retargeted one instruction later. */
             i = 0;
             if (count > 0) {

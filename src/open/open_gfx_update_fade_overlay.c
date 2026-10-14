@@ -10,7 +10,7 @@
  * the TILE and its DR_MODE go into ordering-table entry ot_index.
  *
  * With a single struct, cse keeps the flags address in a register (the target's
- * `la a3`/`la a2`/`la s1`) and the stores through tiles[] serialise the x/y/w/h
+ * `la a3`/`la a2`/`la s1`) and the stores through tiles[] serialize the x/y/w/h
  * 16-bit copies exactly as the target does.  Per-block locals give block 2 its
  * own a2/a1/a0/v1 registers. */
 void open_gfx_update_fade_overlay(u32* ot) {

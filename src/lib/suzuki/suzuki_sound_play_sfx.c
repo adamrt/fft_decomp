@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Plays a sound effect on a free pair of SFX voices at the default volume
- * (0x60) and centre balance (0x40). */
+ * (0x60) and center balance (0x40). */
 void suzuki_sound_play_sfx(s32 sound_id) {
     if ((g_suzuki_sound_driver_flags & SUZUKI_SOUND_DRIVER_SFX_ENABLED) != 0) {
         s32 channel = suzuki_sound_find_sfx_channel(sound_id, 2);

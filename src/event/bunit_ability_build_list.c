@@ -6,7 +6,7 @@
  * BUNIT.OUT's per-job ability list builder, the sibling of the
  * JOBSTTS routine jobstts_ability_build_list. The two share their parameter
  * list, their category window table, their filter loop and their encode path;
- * this one additionally honours the uses_monster_skillset restriction.
+ * this one additionally honors the uses_monster_skillset restriction.
  */
 
 s32 bunit_ability_build_list(s16 unit_index, s16 job_id, s32 ability_category, s16* list, s32 mode) {

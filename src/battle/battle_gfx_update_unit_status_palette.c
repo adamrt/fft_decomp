@@ -20,10 +20,10 @@ void battle_gfx_update_unit_status_palette(battle_unit_t* unit, s32 tile_effect_
     if (status & BATTLE_UNIT_STATUS_PALETTE_MOD_MASK) {
         if (status & BATTLE_UNIT_STATUS_PETRIFY) {
             battle_gfx_modify_unit_palette(
-                unit, MAP_COLOR_MODE_BASE_GREY, MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 0, final_value);
+                unit, MAP_COLOR_MODE_BASE_GRAY, MAP_CLUT_ROW_UNITS, unit_id, 0, 0, 0, 0, final_value);
         } else if (status & BATTLE_UNIT_STATUS_BLOOD_SUCK) {
             battle_gfx_modify_unit_palette(
-                unit, MAP_COLOR_MODE_BASE_GREY, MAP_CLUT_ROW_UNITS, unit_id, 0, 3, -1, 8, final_value);
+                unit, MAP_COLOR_MODE_BASE_GRAY, MAP_CLUT_ROW_UNITS, unit_id, 0, 3, -1, 8, final_value);
         } else if (status & BATTLE_UNIT_STATUS_BERSERK) {
             battle_gfx_modify_unit_palette(
                 unit, MAP_COLOR_MODE_BASE, MAP_CLUT_ROW_UNITS, unit_id, 0, 8, 0, 0, final_value);

@@ -8,11 +8,11 @@
 /*
  * Map polygon flag commands for the textured triangles and quads.
  *
- * 0x94 restores the ambient colour g_map_ambient_polygon_color on
+ * 0x94 restores the ambient color g_map_ambient_polygon_color on
  * every polygon whose flag bit 15 is clear and records the render buffer it
  * wrote in g_map_ambient_restored_buffer; the map draw loop repeats the restore on the other
  * buffer and clears it. 0x46 copies flag bit 15 into bit 0 (after the flags
- * load and on the tile-colour reset); 0x47 clears bit 0 everywhere and stops
+ * load and on the tile-color reset); 0x47 clears bit 0 everywhere and stops
  * the g_map_polygon_flag_clear_countdown countdown whose expiry issues it. The flag field is s16
  * (the bit 15 tests load it with `lh`).
  */

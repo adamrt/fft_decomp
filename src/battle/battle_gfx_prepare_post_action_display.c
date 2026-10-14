@@ -133,7 +133,7 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
                 }
             } else if (miss == ACTION_MISS_TYPE_CATCH) {
                 unit->action_display_flags |= ACTION_DISPLAY_FLAG_CAUGHT;
-            } else if (miss != ACTION_MISS_TYPE_CANCELLED && miss != ACTION_MISS_TYPE_HIT
+            } else if (miss != ACTION_MISS_TYPE_CANCELED && miss != ACTION_MISS_TYPE_HIT
                 && miss != ACTION_MISS_TYPE_REFLECTED) {
                 unit->action_display_flags |= ACTION_DISPLAY_FLAG_MISSED;
             }

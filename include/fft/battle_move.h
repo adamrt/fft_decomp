@@ -379,9 +379,9 @@ extern move_step_t g_move_step_value;
 extern s16 g_move_target_screen_z;
 
 /* move_step_phase_e by step direction: the phase each kind of step enters. */
-extern u8 g_move_float_to_centre_phases[];
-extern u8 g_move_walk_to_centre_phases[];
-extern u8 g_move_climb_to_centre_phases[];
+extern u8 g_move_float_to_center_phases[];
+extern u8 g_move_walk_to_center_phases[];
+extern u8 g_move_climb_to_center_phases[];
 extern u8 g_move_jump_descent_phases[];
 
 /* The two map tiles of the step in progress, refreshed by move_get_current_and_destination_tiles from

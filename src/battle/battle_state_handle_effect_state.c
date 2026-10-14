@@ -1,6 +1,6 @@
 #include "fft/battle.h"
 
-/* Effect game-state handler: animate the units, the screen colour modulation and
+/* Effect game-state handler: animate the units, the screen color modulation and
  * the camera while an effect plays. When the effect cycle has ended, the game
  * state and animation speed saved by battle_state_enter_effect_playback are
  * restored. Neither function that stores this state has a caller, so the

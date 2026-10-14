@@ -3,7 +3,7 @@
 #include "fft/battle_effect.h"
 #include "psx/types.h"
 
-/* Start the animation script of trap group on slot: reset the colour and
+/* Start the animation script of trap group on slot: reset the color and
  * script state and store the 16-bit CLUT value (callers pass CLUTs of
  * MAP_CLUT_ROW_WEAPONS) at 0x88. */
 void effect_init_trap_animation(s32 group, u16 clut, effect_slot_t* slot) {

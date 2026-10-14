@@ -66,7 +66,7 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
                 battle_unit_face_towards_action_target(target, attacker);
                 animation = BATTLE_UNIT_ANIMATION_RAISE_HANDS;
                 break;
-            case ACTION_MISS_TYPE_CANCELLED:
+            case ACTION_MISS_TYPE_CANCELED:
             case ACTION_MISS_TYPE_REFLECTED:
             case ACTION_MISS_TYPE_GOLEM_GUARD:
                 break;

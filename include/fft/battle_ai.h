@@ -118,7 +118,7 @@ typedef union ai_coords {
     } fields;
 } ai_coords_t;
 
-/* Ability AI behaviour flags 1..4. Consumers read the 32-bit value, two 16-bit values,
+/* Ability AI behavior flags 1..4. Consumers read the 32-bit value, two 16-bit values,
  * or individual bytes; use the corresponding masks above for each view. */
 typedef union ai_ability_flags {
     u32 word;

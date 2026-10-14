@@ -4,7 +4,7 @@
  * Release a block from battle_heap_alloc_block.
  *
  * The block is unlinked from its owner's list, then returned to the circular
- * free list in address order and coalesced with both neighbours, as in the
+ * free list in address order and coalesced with both neighbors, as in the
  * K&R free().
  */
 void battle_heap_free_block(void* ptr) {

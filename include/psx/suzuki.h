@@ -169,7 +169,7 @@ enum {
 typedef enum suzuki_modulator_flag {
     SUZUKI_MODULATOR_ACTIVE = 0x1,
     SUZUKI_MODULATOR_RESTART_ON_KEY_ON = 0x2, /* suzuki_smd_read_instructions restarts it at each key-on */
-    SUZUKI_MODULATOR_HALF_PERIOD_DONE = 0x4,  /* centred triangle: later half-periods last twice as long */
+    SUZUKI_MODULATOR_HALF_PERIOD_DONE = 0x4,  /* centerd triangle: later half-periods last twice as long */
     SUZUKI_MODULATOR_NEGATED = 0x8,           /* the next step or amplitude is negated */
 } suzuki_modulator_flag_e;
 
@@ -220,9 +220,9 @@ typedef struct suzuki_music_channel {
     u8* note_data;          /* 0x18; read position */
     u8* loop_note_data;     /* 0x1c; loop point set by Loop and Loop Select; End Bar jumps to it */
     u8* restart_note_data;  /* 0x20; set by suzuki_smd_init_channel_streams */
-    u32 _unknown_024;       /* 0x24; cleared by both channel initialisers, never read */
+    u32 _unknown_024;       /* 0x24; cleared by both channel initializers, never read */
     u16 loop_count;         /* 0x28; times End Bar has jumped to the loop point */
-    u8 _unknown_02a;        /* 0x2a; cleared by both channel initialisers, never read */
+    u8 _unknown_02a;        /* 0x2a; cleared by both channel initializers, never read */
     u8 loop_octave_base;    /* 0x2b; octave_base saved with loop_note_data */
     u8 instrument;          /* 0x2c; index into waveset->instruments */
     u8 voice;               /* 0x2d; SPU voice (Set Voice); only an odd voice takes Enable LFO */
@@ -233,8 +233,8 @@ typedef struct suzuki_music_channel {
     s8 length_adjust;          /* 0x76; ticks added to each event's length (Length Adjust) */
     u8 _padding_077;           /* 0x77; aligns note_ticks */
     u16 note_ticks;            /* 0x78; ticks until the note is keyed off (SUZUKI_CHANNEL_KEYED_OFF) */
-    u16 gate_time;             /* 0x7a; key-on time in sixteenths of the length (Gate Time); initialised to 0xf */
-    u8 previous_key;           /* 0x7c; previous note's key, the portamento start; cleared by the channel initialiser */
+    u16 gate_time;             /* 0x7a; key-on time in sixteenths of the length (Gate Time); initialized to 0xf */
+    u8 previous_key;           /* 0x7c; previous note's key, the portamento start; cleared by the channel initializer */
     u8 key;                    /* 0x7d; key number of the current note */
     u16 octave_base;           /* 0x7e; key number of the current octave, octave * 12 */
     s32 pitch;              /* 0x80; 1/256 semitones << 16: each note's key, moved by the pitch slide and portamento */
@@ -268,7 +268,7 @@ typedef char suzuki_channel_voice_attr_size_must_be_64[(sizeof(SpuVoiceAttr) == 
 /* suzuki_music_channel_t.flags. */
 typedef enum suzuki_channel_flag {
     SUZUKI_CHANNEL_IN_USE = 0x0001,
-    /* Set at initialisation from SUZUKI_MUSIC_STATUS_IMMEDIATE_INSTRUMENT:
+    /* Set at initialization from SUZUKI_MUSIC_STATUS_IMMEDIATE_INSTRUMENT:
      * suzuki_smd_set_instrument marks the voice attributes at once. */
     SUZUKI_CHANNEL_IMMEDIATE_INSTRUMENT = 0x0004,
     /* Sound-effect channel (suzuki_sound_start_sfx): notes keep the channel
@@ -415,7 +415,7 @@ typedef enum suzuki_smd_opcode {
      * suzuki_smd_pitch_shift_waveform, suzuki_smd_pitch_shift_on and
      * suzuki_smd_pitch_shift_off. */
     SUZUKI_SMD_OPCODE_VIBRATO_FADE_IN = 0xd7,  /* fade-in length in ticks, less one */
-    SUZUKI_SMD_OPCODE_VIBRATO = 0xd8,          /* speed, signed depth, delay: a centred triangle */
+    SUZUKI_SMD_OPCODE_VIBRATO = 0xd8,          /* speed, signed depth, delay: a centerd triangle */
     SUZUKI_SMD_OPCODE_VIBRATO_WAVEFORM = 0xd9, /* speed, signed depth, waveform (bit 4: no restart on key-on) */
     SUZUKI_SMD_OPCODE_VIBRATO_ON = 0xda,
     SUZUKI_SMD_OPCODE_VIBRATO_OFF = 0xdb,
@@ -429,12 +429,12 @@ typedef enum suzuki_smd_opcode {
     SUZUKI_SMD_OPCODE_TREMOLO_WAVEFORM = 0xe5, /* speed, signed depth, waveform (bit 4: no restart on key-on) */
     SUZUKI_SMD_OPCODE_TREMOLO_ON = 0xe6,
     SUZUKI_SMD_OPCODE_TREMOLO_OFF = 0xe7,
-    SUZUKI_SMD_OPCODE_BALANCE = 0xe8,       /* balance: 0 left, 0x40 centre, 0x7f right */
+    SUZUKI_SMD_OPCODE_BALANCE = 0xe8,       /* balance: 0 left, 0x40 center, 0x7f right */
     SUZUKI_SMD_OPCODE_SHIFT_BALANCE = 0xe9, /* signed balance delta */
     SUZUKI_SMD_OPCODE_BALANCE_RAMP = 0xea,  /* ticks, target balance */
     /* The pan LFO opcodes program modulator 2 on the balance. */
     SUZUKI_SMD_OPCODE_PAN_LFO_FADE_IN = 0xeb,  /* fade-in length in ticks, less one */
-    SUZUKI_SMD_OPCODE_PAN_LFO = 0xec,          /* speed, signed depth, delay: a centred triangle */
+    SUZUKI_SMD_OPCODE_PAN_LFO = 0xec,          /* speed, signed depth, delay: a centerd triangle */
     SUZUKI_SMD_OPCODE_PAN_LFO_WAVEFORM = 0xed, /* speed, signed depth, waveform (bit 4: no restart on key-on) */
     SUZUKI_SMD_OPCODE_PAN_LFO_ON = 0xee,
     SUZUKI_SMD_OPCODE_PAN_LFO_OFF = 0xef,
@@ -507,7 +507,7 @@ typedef struct suzuki_music {
     u32 lfo_voice_mask;            /* 0x68 */
     u32 noise_voice_mask;          /* 0x6c */
     u32 reverb_voice_mask;         /* 0x70 */
-    s32 tempo_accumulator;         /* 0x74; one sequencer tick per 0x10000 of scaled_tempo; initialised to 0x10000 */
+    s32 tempo_accumulator;         /* 0x74; one sequencer tick per 0x10000 of scaled_tempo; initialized to 0x10000 */
     s32 scaled_tempo;              /* 0x78; tempo * tempo_scale */
     s32 tempo;                     /* 0x7c; 16.16 tempo advanced by Tempo Ramp */
     s32 tempo_step;                /* 0x80; per-tick tempo delta of Tempo Ramp */
@@ -580,7 +580,7 @@ typedef enum suzuki_sound_driver_flag {
     /* Only the flags argument of suzuki_sound_init can set it (the game
      * passes 0): start-up and suzuki_sound_set_type also call suzuki_sound_put_type. */
     SUZUKI_SOUND_DRIVER_PUT_TYPE = 0x2000,
-    SUZUKI_SOUND_DRIVER_INITIALISED = 0x8000,
+    SUZUKI_SOUND_DRIVER_INITIALIZED = 0x8000,
 } suzuki_sound_driver_flag_e;
 
 /* Output sound type of suzuki_sound_set_type and suzuki_sound_get_type (which

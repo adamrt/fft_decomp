@@ -2,7 +2,7 @@
 #include "fft/battle_map.h"
 
 /* Resets a unit's item sprite display to one 16 x 16 part of the ITEM.BIN page
- * with CLUT 7 of the sprite row, neutral colour and scale ONE. */
+ * with CLUT 7 of the sprite row, neutral color and scale ONE. */
 battle_gfx_sprite_display_data_t* battle_gfx_init_item_sprite_display(s32 runtime_id) {
     battle_gfx_sprite_display_data_t* display;
     s32 i;

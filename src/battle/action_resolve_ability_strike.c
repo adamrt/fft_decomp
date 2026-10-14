@@ -33,7 +33,7 @@ s32 action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* work) {
     attacker = &g_battle_unit_stats[battle_id];
     action_clear_current_data(&attacker->action);
     attacker->action.hit = 0;
-    attacker->action.miss_type = ACTION_MISS_TYPE_CANCELLED;
+    attacker->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     action_clear_current_data(&g_action_attacker_action_data);
     g_action_attacker_action_data.hit = 0;
     work->knockback_flags = 0;

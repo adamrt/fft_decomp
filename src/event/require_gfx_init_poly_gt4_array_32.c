@@ -1,6 +1,6 @@
 #include "fft/event_require.h"
 
-/* Initialise the 32 semi-transparent POLY_GT4s of g_require_gfx_poly_gt4_array_32
+/* Initialize the 32 semi-transparent POLY_GT4s of g_require_gfx_poly_gt4_array_32
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
 void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {

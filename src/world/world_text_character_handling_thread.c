@@ -407,7 +407,7 @@ void world_text_character_handling_thread(void) {
     rec.color = 0;
     rec.line = 0;
     g_world_text_current_line = 0;
-    /* Both arms are identical, as in the BATTLE twin whose first arm centres
+    /* Both arms are identical, as in the BATTLE twin whose first arm centers
      * the line; the split keeps the preceding stores ahead of these loads. */
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         cursor_x = rec.x;

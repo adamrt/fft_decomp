@@ -182,7 +182,7 @@ typedef struct card_save_buffer {
 
 typedef char card_save_buffer_size_must_be_7680[(sizeof(card_save_buffer_t) == 7680) ? 1 : -1];
 
-/* One selectable save-file icon: 16-colour CLUT plus 16x16 4bpp image. */
+/* One selectable save-file icon: 16-color CLUT plus 16x16 4bpp image. */
 typedef struct card_save_icon {
     palette_t clut; /* 0x00 */
     u8 image[0x80]; /* 0x20 */

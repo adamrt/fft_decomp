@@ -15,7 +15,7 @@
  * The retail code loads record fields at their declared width before
  * truncating them into the primitive (as if built with -fforce-mem); the
  * otherwise unused px/py/qx/qy/cx/qu/qv copies reproduce that. The SPRT casts
- * on the colour stores keep their index order and the 0x50-byte frame.
+ * on the color stores keep their index order and the 0x50-byte frame.
  */
 void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot) {
     point32_t clut;

@@ -143,7 +143,7 @@ void option_menu_run_at_list(void) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
         }
         if (delta == 0 && battle_menu_can_accept_input() != 0 && i != 0) {
-            /* Dead store (column is reinitialised before use); only the reload
+            /* Dead store (column is reinitialized before use); only the reload
              * of layout for this branch survives in the target. */
             if (layout == 0) {
                 column = 0;

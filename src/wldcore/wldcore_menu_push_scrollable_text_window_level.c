@@ -3,7 +3,7 @@
 
 /* Pushes the wide scrollable text window (0x8009eef8) as menu level type
  * 0x33: it appends one window record for the frame, measures the text, sizes
- * the window around it (at most four rows), initialises the scrollable text
+ * the window around it (at most four rows), initializes the scrollable text
  * state, hides the text render record and the parent level's window, and sets
  * system flags 0x08002000. */
 void wldcore_menu_push_scrollable_text_window_level(s32 text) {

@@ -68,7 +68,7 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
             g_wldcore_window_render_records[render_index].clut.x = ((value / 40) << 6) + ((value % 4) * 0x10 + page_x);
             g_wldcore_window_render_records[render_index].clut.y = ((value % 40) / 4) + 0x1F0;
             g_wldcore_window_render_records[render_index].tpage = portrait.tpage;
-            /* The rectangle at +0x28 and the colour triple at +0x30 are written
+            /* The rectangle at +0x28 and the color triple at +0x30 are written
              * through their own addresses; the rectangle and the base point are
              * then copied as blocks into the text window's extra-record fields. */
             bounds = &g_wldcore_window_render_records[render_index].bounds;

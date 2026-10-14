@@ -42,7 +42,7 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
                     out_green = green + ((color & 0x3e0) >> 6);
                     out_blue = blue + ((color & 0x7c00) >> 11);
                     break;
-                case MAP_COLOR_MODE_BASE_GREY:
+                case MAP_COLOR_MODE_BASE_GRAY:
                     gray_red = color & 0x1f;
                     gray_green = (color & 0x3e0) >> 5;
                     gray_blue = (color & 0x7c00) >> 10;
@@ -51,7 +51,7 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
                     out_green = green + gray;
                     out_blue = blue + gray;
                     break;
-                case MAP_COLOR_MODE_BASE_GREY_HALF:
+                case MAP_COLOR_MODE_BASE_GRAY_HALF:
                     gray_red = color & 0x1f;
                     gray_green = (color & 0x3e0) >> 5;
                     gray_blue = (color & 0x7c00) >> 10;
@@ -123,7 +123,7 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
                     out_green = green + ((color & 0x3e0) >> 6);
                     out_blue = blue + ((color & 0x7c00) >> 11);
                     break;
-                case MAP_COLOR_MODE_BASE_GREY:
+                case MAP_COLOR_MODE_BASE_GRAY:
                     gray_red = color & 0x1f;
                     gray_green = (color & 0x3e0) >> 5;
                     gray_blue = (color & 0x7c00) >> 10;
@@ -132,7 +132,7 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
                     out_green = green + gray;
                     out_blue = blue + gray;
                     break;
-                case MAP_COLOR_MODE_BASE_GREY_HALF:
+                case MAP_COLOR_MODE_BASE_GRAY_HALF:
                     gray_red = color & 0x1f;
                     gray_green = (color & 0x3e0) >> 5;
                     gray_blue = (color & 0x7c00) >> 10;

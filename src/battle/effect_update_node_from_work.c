@@ -4,10 +4,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Copy a work record's position, heading, and colour onto its list node.
+/* Copy a work record's position, heading, and color onto its list node.
  *
  * With kind_flags bit 1 the velocity is rotated into camera space and its
- * screen heading stored on the node. Colour-curve records take each channel
+ * screen heading stored on the node. Color-curve records take each channel
  * from its animation curve at the record's curve frame; others use neutral
  * 0x80. */
 void effect_update_node_from_work(s16 record_index, effect_work_record_t* work) {
@@ -26,11 +26,11 @@ void effect_update_node_from_work(s16 record_index, effect_work_record_t* work) 
         RotTrans(&direction, &rotated, &rotated.pad);
         work->data->screen_rotation_angle = ratan2(rotated.vy, rotated.vx);
     }
-    if (work->flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
+    if (work->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
         effect_render_particle_sprite(work->data,
-            g_effect_animation_curve_data->curves[work->colour_curves.r][work->curve_frame],
-            g_effect_animation_curve_data->curves[work->colour_curves.g][work->curve_frame],
-            g_effect_animation_curve_data->curves[work->colour_curves.b][work->curve_frame]);
+            g_effect_animation_curve_data->curves[work->color_curves.r][work->curve_frame],
+            g_effect_animation_curve_data->curves[work->color_curves.g][work->curve_frame],
+            g_effect_animation_curve_data->curves[work->color_curves.b][work->curve_frame]);
     } else {
         effect_render_particle_sprite(work->data, 0x80, 0x80, 0x80);
     }

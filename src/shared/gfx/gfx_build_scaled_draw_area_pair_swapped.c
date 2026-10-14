@@ -5,7 +5,7 @@
 
 /*
  * Build a double-buffered draw-area pair whose rectangle is cropped to a
- * percentage of `geometry` about its centre. Sources at x < 0x80 are moved
+ * percentage of `geometry` about its center. Sources at x < 0x80 are moved
  * to the right-hand page (x + 0x80, y + 0x78); others are moved left.
  */
 void gfx_build_scaled_draw_area_pair_swapped(

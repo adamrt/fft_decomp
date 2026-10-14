@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Appends a window-list record: saves g_wldcore_menu_ordering_table_offset into it, allocates a window
- * record from the render-object queue, initialises that window's delay and
+ * record from the render-object queue, initializes that window's delay and
  * counters, and applies layout 0 to it before advancing the list count.
  *
  * Writing the window columns as fields of g_wldcore_window_records (not separate stride

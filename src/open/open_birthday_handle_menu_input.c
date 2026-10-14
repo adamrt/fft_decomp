@@ -7,7 +7,7 @@
 
 /* Per-frame handler of the birthday date-entry controller (handler 5).
  *
- * Input is ignored while the date window is popping in. Start or Circle recolours
+ * Input is ignored while the date window is popping in. Start or Circle recolors
  * the menu for the prompt and pushes the confirmation controller. Up and Down
  * (with auto-repeat) step the selected field: a day rolls over into the next or
  * previous month, a month wraps between December and January and clamps the day

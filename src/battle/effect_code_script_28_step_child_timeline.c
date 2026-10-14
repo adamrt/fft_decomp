@@ -11,7 +11,7 @@
  * record's target.
  *
  * The five particle channels run keyframe actions and spawn emitters, the
- * four colour tracks recolour the other units, the caster, the target and the
+ * four color tracks recolor the other units, the caster, the target and the
  * screen, and the three sound tracks play the effect's sounds; a root record
  * then starts the child camera table's moves and, under
  * EFFECT_FLAG_TIMING_CURVE_CHILD, the time scale follows the animation

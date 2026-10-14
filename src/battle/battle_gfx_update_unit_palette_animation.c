@@ -3,10 +3,10 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Cycles the colours of the two deployed-unit palettes (sprite CLUTs 1 and 2).
+/* Cycles the colors of the two deployed-unit palettes (sprite CLUTs 1 and 2).
  *
  * Every fourth animation tick the offset advances through 0..14 and the palettes
- * are uploaded again with colours 1..15 rotated down by that many places; colour
+ * are uploaded again with colors 1..15 rotated down by that many places; color
  * 0 stays in place, and offset 0 uploads the palettes as stored. */
 void battle_gfx_update_unit_palette_animation(void) {
     s32 dst;
@@ -30,7 +30,7 @@ void battle_gfx_update_unit_palette_animation(void) {
             ((u8*)g_battle_gfx_cycled_deployed_palettes[0])[1] = ((u8*)g_battle_deployed_unit_palettes)[1];
             ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[0] = *(u16*)&g_battle_deployed_unit_palettes[1][0];
             ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[1] = ((u8*)g_battle_deployed_unit_palettes[1])[1];
-            /* Colours offset + 1..15 move down to 1.., and colours 1..offset wrap to the top. */
+            /* Colors offset + 1..15 move down to 1.., and colors 1..offset wrap to the top. */
             for (; src < 32; src++, dst++) {
                 ((u8*)g_battle_gfx_cycled_deployed_palettes[0])[dst] = ((u8*)g_battle_deployed_unit_palettes)[src];
                 ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[dst] = ((u8*)g_battle_deployed_unit_palettes[1])[src];

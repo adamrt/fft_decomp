@@ -10,7 +10,7 @@
  * of six 16-bit values. 16-bit CLUT values keep their low six bits (the CLUT) and gain the map CLUT row;
  * texture pages are copied verbatim. Destination strides are 0x28/0x34 for
  * textured triangles/quads and 0x14/0x18 for untextured triangles/quads.
- * Untextured POLY_F3/POLY_F4 packets start with colour 0/0/1.
+ * Untextured POLY_F3/POLY_F4 packets start with color 0/0/1.
  */
 void map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data) {
     /* Named count loads fold the retail four 16-bit cursor advances. */

@@ -11,7 +11,7 @@
  *
  * The projectile origin is the first unit raised by two thirds of its
  * sprite height, and the destination is the second unit raised by three
- * quarters of its height, or, when target_id is -1, to the centre of the tile
+ * quarters of its height, or, when target_id is -1, to the center of the tile
  * at tile_position (x, layer, y) on its surface. g_effect_trajectory_step_count receives the
  * flight duration derived from the distance, as in
  * effect_check_direct_trajectory_between_units / effect_trace_projectile_path.

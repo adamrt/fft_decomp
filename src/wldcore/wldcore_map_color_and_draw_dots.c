@@ -7,7 +7,7 @@
  *
  * Each dot takes its kind, sub-kind and map position from
  * g_wldcore_map_dot_sources; kind 2 uses the second dot sequence. A location
- * whose colour script variable is set gets palette 0xc (locations 0..23) or
+ * whose color script variable is set gets palette 0xc (locations 0..23) or
  * 0x10 (the rest), any other the default palette, and one whose visibility
  * variable is 0 is hidden. Resets the pulse state and projects the dots.
  */

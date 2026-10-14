@@ -13,7 +13,7 @@ enum {
 /* Secondary effect 0x16 (summon charge): three rings of ten effect slots
  * spinning around the target.
  *
- * Initialisation allocates the 30
+ * Initialization allocates the 30
  * slots and plays sound 0x21; the executing phase grows the radius, spin and
  * brightness with the timer, the finalizing phase widens the rings and fades
  * them out over finish_timer, and both then advance the ring angle, record each

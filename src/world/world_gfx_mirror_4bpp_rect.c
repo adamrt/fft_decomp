@@ -4,7 +4,7 @@
 /* The loop is an explicitly guarded do/while rather than a `for` because of
  * these placement facts:
  *  - `right = 1` is emitted between the loop's entry test and the loop top,
- *    which is only reachable when the initialisation follows the guard's jump;
+ *    which is only reachable when the initialization follows the guard's jump;
  *    with a `for`, the inits precede the duplicated exit test and the `li 1`
  *    is instead hoisted out of the row loop (a partial movable, with a
  *    compensating copy in the row loop's latch).

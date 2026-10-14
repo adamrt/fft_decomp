@@ -31,7 +31,7 @@ typedef struct {
     s16 vy;
 } DVECTOR;
 
-/* Psy-Q colour vector: r, g, b plus the GPU code byte. */
+/* Psy-Q color vector: r, g, b plus the GPU code byte. */
 typedef struct {
     u8 r;
     u8 g;

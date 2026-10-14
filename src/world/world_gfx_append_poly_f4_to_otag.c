@@ -2,7 +2,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Takes the next POLY_F4 from the pool, sets semi-transparency, colours it,
+/* Takes the next POLY_F4 from the pool, sets semi-transparency, colors it,
  * copies the four x/y pairs (x shifted by 0x80) and links it into
  * ordering-table entry ot_index (libgpu addPrim). */
 /* Target 0x8012bebc. */

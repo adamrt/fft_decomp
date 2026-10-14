@@ -1,7 +1,7 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Free the eight colour rotation slots (map_clut_cycle_state_t) by
+/* Free the eight color rotation slots (map_clut_cycle_state_t) by
  * clearing their active bytes. The 32 texture animation rows of the map are not
  * touched. The byte-offset loop preserves the original address sequence;
  * indexed active fields add four bytes. */

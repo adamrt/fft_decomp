@@ -9,7 +9,7 @@
  * Build the double-buffered draw-area pair of a window's open/close zoom.
  *
  * The first rectangle is `source` moved left one page (0x80), shifted by the
- * thread's x and y, and cropped about its centre to
+ * thread's x and y, and cropped about its center to
  * g_menu_draw_area_scale_percent[scale_index] percent of its size;
  * scale_index is doubled at event speed 2 and capped at 11. The second
  * rectangle is the frame buffer's own area. With `lower_half` zero both are

@@ -8,7 +8,7 @@
 #include "psx/types.h"
 
 /* Menu icon thread that also opens a linked entry: when row_actions[0]
- * names a menu entry, that entry is centred on this text width, placed below
+ * names a menu entry, that entry is centerd on this text width, placed below
  * this entry, and started in the previous thread slot. The icon records then
  * alternate until input completes, selecting CLUTs in the linked slot. */
 void menu_icon_linked_entry_thread(void) {

@@ -4,7 +4,7 @@
 /*
  * Confirm a name, using the original name when the edit buffer is empty.
  *
- * Names use 0xfe termination and contain at most 16 encoded bytes. Cancelling
+ * Names use 0xfe termination and contain at most 16 encoded bytes. Canceling
  * restores the empty-buffer marker if the original name was substituted.
  * Confirmation waits for the prompt thread to finish before reporting 0xff.
  */

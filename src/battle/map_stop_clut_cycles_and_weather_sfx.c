@@ -2,7 +2,7 @@
 #include "fft/sound.h"
 #include "psx/types.h"
 
-/* Stop the weather sound effects and every colour rotation the 32 map texture
+/* Stop the weather sound effects and every color rotation the 32 map texture
  * animations hold a handle for. Always returns 0. */
 s32 map_stop_clut_cycles_and_weather_sfx(void) {
     s32 index;

@@ -5,11 +5,11 @@
 
 /* Opcode handler 42 of the table at 0x8009ecfc, immediately after
  * wldcore_opcode_fade_screen_in. Drains the GPU and waits a frame, then either
- * arms the full-screen white overlay (sortbox colour 0xff/0xff/0xff, state bit
+ * arms the full-screen white overlay (sortbox color 0xff/0xff/0xff, state bit
  * 3 set, transfer bits cleared, state flag 0x100 set, menus blacked out) or
- * tears it down again (colour cleared, state bits 0/1/3 cleared, flag 0x100
+ * tears it down again (color cleared, state bits 0/1/3 cleared, flag 0x100
  * cleared, menus back to neutral 0x80 brightness). The operand byte selects:
- * zero arms it, non-zero clears it. boxes[0].r/green/blue are the catalogued
+ * zero arms it, non-zero clears it. boxes[0].r/green/blue are the cataloged
  * fields at g_wldcore_screen_fade_state+0x24..0x26, gating the draw in
  * wldcore_fade_draw_screen_overlays.
  *

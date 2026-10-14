@@ -8,20 +8,20 @@
  * marks a polygon without a tile. */
 
 /*
- * Recolour the textured map polygons that lie on marked tiles.
+ * Recolor the textured map polygons that lie on marked tiles.
  *
  * Each textured triangle/quad whose packed terrain tile (layer bit 0, z bits
  * 1..7, x bits 8..15; 0xfffe for none) resolves to a map tile with the mode's
- * mark bit in ceiling_depth_and_marks is recoloured: modes 1/2/7 tint marks
+ * mark bit in ceiling_depth_and_marks is recolored: modes 1/2/7 tint marks
  * 0x20/0x40/0x80 and select the marked-tile CLUT row (y 0x1e1), modes 5/3/8 restore the map CLUT row (y 0x1e0)
- * and the ambient colour g_map_ambient_polygon_color (keeping polygons whose flag bit 15 is
+ * and the ambient color g_map_ambient_polygon_color (keeping polygons whose flag bit 15 is
  * set), and mode 0 returns every polygon to the map CLUT row. g_target_tile_mark_modes[0..2] record the state
  * of the three mark layers; when the other two are both clear, or in their
  * restored states, the tint modes also shift the unit palettes. Mode 1 is the
  * blue movement-range highlight.
  *
  * The CLUT and tint stores index the render buffer's polygon arrays; the
- * ambient colour stores use pointer arithmetic on the decayed array
+ * ambient color stores use pointer arithmetic on the decayed array
  * (`g_battle_gfx_current_render_buffer->gt3 + i`) instead, which is what keeps the target's
  * `addu offset, base` operand order for them.
  *

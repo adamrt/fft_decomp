@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Clear the record's status inflictions and removals, and the shared list of
- * cancelled statuses with them. */
+ * canceled statuses with them. */
 void action_clear_status_changes(action_data_t* action) {
     s32 i;
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {

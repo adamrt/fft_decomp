@@ -2,7 +2,7 @@
 
 /* Turn a unit to face a target unit, or its action's target.
  *
- * Without an explicit target, targeting type 5 aims at the centre of the
+ * Without an explicit target, targeting type 5 aims at the center of the
  * action's target tile (28 screen units per tile) and other actions at the
  * target unit. The facing snaps to a quadrant, is copied to the mount/rider
  * partner, and is written back to the unit's battle position; units with

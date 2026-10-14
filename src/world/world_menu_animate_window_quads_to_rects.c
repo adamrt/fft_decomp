@@ -43,7 +43,7 @@ void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, REC
     if (quad_area < target_area) {
         step = 0x380;
     }
-    /* Initialising t between the two guards keeps jump.c from merging them
+    /* Initializing t between the two guards keeps jump.c from merging them
      * and supplies the second branch's delay-slot instruction. */
     t = 0;
     if (quad_area < target_area) {

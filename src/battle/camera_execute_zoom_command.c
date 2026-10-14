@@ -12,7 +12,7 @@ void camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VE
     switch (command & EFFECT_CAMERA_SOURCE_MASK) {
     case EFFECT_CAMERA_SOURCE_TARGET:
     case EFFECT_CAMERA_SOURCE_GIVEN:
-    case EFFECT_CAMERA_SOURCE_MAP_CENTRE:
+    case EFFECT_CAMERA_SOURCE_MAP_CENTER:
     case EFFECT_CAMERA_SOURCE_CASTER:
     case EFFECT_CAMERA_SOURCE_TARGET_AVERAGE:
         g_effect_camera_zoom_target = *zoom;

@@ -1,7 +1,7 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_gfx.h"
 
-/* Advance the caster colour track one frame: an APPLY keyframe recolours the
+/* Advance the caster color track one frame: an APPLY keyframe recolors the
  * caster. */
 void effect_advance_caster_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_runtime_id) {

@@ -1,6 +1,6 @@
 #include "fft/battle_map.h"
 
-/* Claim a free colour rotation slot: the colours first_color..last_color of a
+/* Claim a free color rotation slot: the colors first_color..last_color of a
  * CLUT row rotate one place every frame_duration frames. Returns the slot index +
  * 1 as the handle, or 0 when all eight slots are in use. */
 s32 map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color) {

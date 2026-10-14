@@ -1,11 +1,11 @@
 #include "fft/battle_map.h"
 
-/* GTE back colour commands for the map's ambient colour.
+/* GTE back color commands for the map's ambient color.
  *
  * SET stores the three components and loads them into the GTE, and returns the
- * address of the stored 32-bit red component; while the back colour is disabled it does
+ * address of the stored 32-bit red component; while the back color is disabled it does
  * neither and returns 0. GET returns that address. DISABLE loads black and blocks
- * SET; RESTORE reloads the stored colour and lifts the block.
+ * SET; RESTORE reloads the stored color and lifts the block.
  *
  * DISABLE, RESTORE and a command with no case return the unset `result`. Every
  * caller issues SET and ignores the result. */

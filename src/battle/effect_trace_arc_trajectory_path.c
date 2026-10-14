@@ -15,7 +15,7 @@
  * path g_effect_trajectory_step_count holds the full step count and the result is 1; on a hit it
  * holds the steps taken and the result is 0.
  *
- * `hit` is deliberately left uninitialised: the target reads $s6 after a
+ * `hit` is deliberately left uninitialized: the target reads $s6 after a
  * zero-step loop without ever writing it.
  */
 s32 effect_trace_arc_trajectory_path(

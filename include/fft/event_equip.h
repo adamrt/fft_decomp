@@ -377,7 +377,7 @@ s16 equip_menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_i
 extern u32 g_equip_help_text_table[];
 
 /* graphics */
-/* The scratch marker rect this routine drives; uncatalogued, but the same
+/* The scratch marker rect this routine drives; uncataloged, but the same
  * descriptor equip_menu_draw_equipment_slot_marker feeds to the oriented quad
  * enqueue. */
 extern oriented_quad_t g_equip_gfx_blank_cell_rect;

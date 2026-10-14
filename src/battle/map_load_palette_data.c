@@ -1,8 +1,8 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Load colours into a map CLUT row and mark the rows for upload: the row's
- * sixteen CLUTs (256 colours) when load_all is 1, otherwise the sixteen colours
+/* Load colors into a map CLUT row and mark the rows for upload: the row's
+ * sixteen CLUTs (256 colors) when load_all is 1, otherwise the sixteen colors
  * of CLUT clut_index. The blends of the loaded CLUTs stop. Nothing happens while
  * the row's updates are disabled. */
 void map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all) {

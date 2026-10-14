@@ -124,11 +124,11 @@ enum {
  * quadrant by rotating the first point a quarter turn. The renderer never
  * touches the unknown ranges. */
 typedef struct effect_polar_mesh_scratch {
-    s32 red_factor;   /* 0x00: colour curve factors, 128 when curves are off */
+    s32 red_factor;   /* 0x00: color curve factors, 128 when curves are off */
     s32 green_factor; /* 0x04 */
     s32 blue_factor;  /* 0x08 */
     u8 _unused_00c[0x04];
-    u32 rgb;  /* 0x10: packed 32-bit colour value of the current ring */
+    u32 rgb;  /* 0x10: packed 32-bit color value of the current ring */
     u32 code; /* 0x14: primitive code byte of the first quad, kept in bits 24-31 */
     u8 u0;    /* 0x18 */
     u8 u1;    /* 0x19 */
@@ -146,7 +146,7 @@ typedef struct effect_polar_mesh_scratch {
     s32 acceleration_angle; /* 0x60 */
     VECTOR center;          /* 0x64: interpolated emitter spawn position; z is written but unused */
     u8 _unused_074[0x30];
-    point32_t velocity; /* 0xa4: centre drift per ring, 20.12 fixed */
+    point32_t velocity; /* 0xa4: center drift per ring, 20.12 fixed */
     u8 _unused_0ac[0x08];
     point32_t acceleration; /* 0xb4 */
     u8 _unused_0bc[0x1c];
@@ -163,10 +163,10 @@ typedef struct effect_polar_mesh_scratch {
 /* Scratchpad (0x1f800000) layout of the Zodiac Stone glow variant. Its fields shift from
  * effect_polar_mesh_scratch_t, so it is a separate layout, not a view. */
 typedef struct effect_anchored_polar_mesh_scratch {
-    s32 red_factor;   /* 0x00: colour curve factors, 128 when curves are off */
+    s32 red_factor;   /* 0x00: color curve factors, 128 when curves are off */
     s32 green_factor; /* 0x04 */
     s32 blue_factor;  /* 0x08 */
-    u8 r;             /* 0x0c: colour bytes of the current ring */
+    u8 r;             /* 0x0c: color bytes of the current ring */
     u8 _unused_00d;
     u8 g; /* 0x0e */
     u8 _unused_00f;

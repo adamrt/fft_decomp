@@ -2,14 +2,14 @@
 #include "psx/types.h"
 
 /* Fade state shared with battle_gfx_update_screen_color_modulation_fade: the
- * final colour, the colour in effect, a Q8 accumulator and per-frame Q8 step
+ * final color, the color in effect, a Q8 accumulator and per-frame Q8 step
  * per channel, and the frames left. */
 
 /*
- * Start a screen colour-modulation fade towards (red, green, blue).
+ * Start a screen color-modulation fade towards (red, green, blue).
  *
  * The duration is scaled by the animation speed; a fade that rounds to zero
- * frames only records the target colour. The overlay draw mode is rebuilt
+ * frames only records the target color. The overlay draw mode is rebuilt
  * with the given semi-transparency mode for both screen polarities.
  */
 void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 green, u16 blue, u16 duration) {

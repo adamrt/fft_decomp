@@ -14,13 +14,13 @@
 typedef enum menu_script_opcode {
     MENU_SCRIPT_OP_IF_GROUP = 0x01,        /* *_cmd_run_if_group_handler */
     MENU_SCRIPT_OP_IF_ELSE_GROUP = 0x02,   /* *_cmd_run_if_else_group_handler */
-    MENU_SCRIPT_OP_UNCOLOURED_QUAD = 0x04, /* *_cmd_draw_textured_quad_handler; opcode 5 applies the draw colour */
+    MENU_SCRIPT_OP_UNCOLORED_QUAD = 0x04,  /* *_cmd_draw_textured_quad_handler; opcode 5 applies the draw color */
     MENU_SCRIPT_OP_SCROLLABLE_LIST = 0x10, /* the list geometry *_menu_draw_scrollable_list reads */
     /* The "draw number" opcodes of the WORLD and BUNIT scripts that
      * *_menu_script_draw_formatted_number tells apart from its plain form (0x0d). */
-    MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS = 0x19, /* sprite colour; leading zeros not drawn */
+    MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS = 0x19, /* sprite color; leading zeros not drawn */
     MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS = 0x1a,       /* leading zeros in the disabled clut */
-    MENU_SCRIPT_OP_NUMBER_TINTED = 0x1b,                  /* sprite colour */
+    MENU_SCRIPT_OP_NUMBER_TINTED = 0x1b,                  /* sprite color */
 } menu_script_opcode_e;
 
 /* instructions */

@@ -9,7 +9,7 @@
  * tile, then store that tile as the current action target.
  *
  * The candidate list reuses the targeting panels' mark byte for the tile
- * index, so upper-level candidates are recognised by their list position.
+ * index, so upper-level candidates are recognized by their list position.
  */
 void target_select_random_tile_for_random_fire_abilities(void) {
     s32 count;

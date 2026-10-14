@@ -1,6 +1,6 @@
 #include "fft/battle_map.h"
 
-/* Load the two map background gradient colours for the current map. */
+/* Load the two map background gradient colors for the current map. */
 void map_init_background_gradient(void) {
     map_background_gradient_colors_t* colors;
 

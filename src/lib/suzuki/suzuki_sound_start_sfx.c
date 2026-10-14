@@ -13,7 +13,7 @@
  * music channels on those voices are marked for a full voice update.
  *
  * The loop counter is set at the top of the start branch and flags carries
- * both 0x409 and 0x100: with the for-initialiser or two single-set
+ * both 0x409 and 0x100: with the for-initializer or two single-set
  * constants, the scheduler orders the branch's first instructions
  * differently from the target. */
 void suzuki_sound_start_sfx(s16 channel_id, s32 sound_id, s16 volume, s16 balance) {

@@ -3,7 +3,7 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
-/* Publish an executable request, wait for it to clear, then honour the frame exit request. */
+/* Publish an executable request, wait for it to clear, then honor the frame exit request. */
 void menu_request_open_companion_executable(s32 request_index) {
     while (g_menu_companion_executable_request_index != 0 || g_menu_companion_data_file_request_index != 0) {
         thread_yield();

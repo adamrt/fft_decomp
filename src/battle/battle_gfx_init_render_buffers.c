@@ -5,7 +5,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Initialises both battle render buffers: every primitive in each pool gets its
+/* Initializes both battle render buffers: every primitive in each pool gets its
  * GPU command code, the full-screen Gouraud overlay gets its corners and two
  * semi-transparent draw modes, and the ordering table pointers are bound.
  *

@@ -10,9 +10,9 @@
  * reverse, 5-0xC play once) and queue the DR_MOVE packet of the row;
  * palette modes (3 loops, 4/0x81 ping-pong, 0xD-0x14 play once) reload
  * CLUT canvas_x / 16 of the map row from palette frame frame_x + frame. Mode 0x1D
- * starts a rotation of the map row's colours canvas_x..canvas_x + width - 1.
+ * starts a rotation of the map row's colors canvas_x..canvas_x + width - 1.
  * Only the low byte of g_main_system_animation_speed is read (lbu), and the start call
- * passes the colour range unmasked, as the target does.
+ * passes the color range unmasked, as the target does.
  */
 void map_update_texture_animations(void) {
     s32 i;

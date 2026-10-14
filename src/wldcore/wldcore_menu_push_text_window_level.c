@@ -7,7 +7,7 @@
  * the reload flag and, when set, re-points the text formatter at
  * g_open_text_section_offsets; appends a window record (sequence 0xe,
  * priority 1); measures the entry, clamped to three rows; fills the shared
- * scrollable window and centres it and the window record on the measured box;
+ * scrollable window and centers it and the window record on the measured box;
  * then saves g_wldcore_menu_blocked_buttons in the level, sets it to -1, plays sound
  * 0x12, writes the level type and bumps the depth.
  *

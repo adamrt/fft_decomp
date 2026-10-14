@@ -35,7 +35,7 @@ extern menu_cursor_bob_entry_t g_battle_cursor_bob_active_thresholds[];
 extern menu_cursor_bob_entry_t g_battle_cursor_bob_thresholds[];
 extern s16 g_battle_menu_action_slot_selected_option;
 extern u16 g_battle_menu_input_block_frames;
-extern s16 g_battle_menu_result; /* menu result: -4 pending, -1 cancelled */
+extern s16 g_battle_menu_result; /* menu result: -4 pending, -1 canceled */
 extern s16 g_battle_menu_selected_option;
 extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
 extern menu_unit_selection_record_t g_battle_menu_unit_selection_records[BATTLE_UNIT_SLOT_COUNT];
@@ -49,7 +49,7 @@ s32 battle_menu_resolve_selection(void);
 void battle_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel);
 
 /* action menus */
-extern s16 g_battle_auto_battle_option_colors[5]; /* text colour per option */
+extern s16 g_battle_auto_battle_option_colors[5]; /* text color per option */
 extern s16 g_battle_menu_action_slot_row_actions[6];
 extern s16 g_battle_menu_action_type_modes[][2];
 extern menu_scroll_text_layout_t g_battle_menu_at_list_layout;
@@ -114,7 +114,7 @@ extern u8 g_battle_menu_billboard_secondary_skillset_name[];
 extern u8 g_battle_menu_billboard_skillset_name[];
 extern u8 g_battle_menu_calculator_skillsets[4];
 extern s32 g_battle_menu_scroll_list_depth;
-extern u8 g_battle_menu_skillset_disabled_flags[]; /* per-row greyed flag */
+extern u8 g_battle_menu_skillset_disabled_flags[]; /* per-row grayed flag */
 extern s32 g_battle_menu_used_item_id;
 extern s32 g_battle_menu_used_skillset_id;
 
@@ -222,7 +222,7 @@ void battle_menu_suppress_height_display(void);
 /* windows and sprites */
 /* BATTLE scratch at 0x801cc074, in the event-overlay area past BATTLE.BIN:
  * battle_menu_build_sprite_page lays it out as two sprite pages and the
- * scrolling ability list saves its five 16-colour CLUTs there. WORLD keeps
+ * scrolling ability list saves its five 16-color CLUTs there. WORLD keeps
  * its own g_world_menu_panel_buffer at the same address. */
 typedef union battle_menu_scratch_buffer {
     menu_sprite_page_t sprite_pages[2];

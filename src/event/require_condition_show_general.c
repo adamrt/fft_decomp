@@ -19,7 +19,7 @@
  * order; declaring `frame` before `quad_count` fixes their stack slots.
  *
  * `buffer` is read before it is first written (the target's s7 is live out of
- * the prologue), so it is left uninitialised on purpose.
+ * the prologue), so it is left uninitialized on purpose.
  */
 #include "fft/battle_script.h"
 #include "fft/event_require.h"
@@ -172,7 +172,7 @@ void require_condition_show_general(s32 hold_frames) {
         /* The one-trip loop emits nothing; its loop note weights these two
          * references of reveal_offset_top one level deeper, which keeps the
          * top offset ahead of the bottom one in global allocation (s3/s6)
-         * while both are initialised top first like the target. */
+         * while both are initialized top first like the target. */
         if (frame >= 9)
             do {
                 reveal_offset_top += 8;

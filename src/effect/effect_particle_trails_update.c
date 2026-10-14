@@ -149,7 +149,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 origin.vy += target.vy;
                 origin.vz += target.vz;
                 break;
-            case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
+            case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
                 map_store_max_coordinates(&map_max);
                 origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
                 origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
@@ -201,7 +201,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             case EFFECT_EMITTER_HOMING_OFFSET:
             case EFFECT_EMITTER_HOMING_OFFSET_ALT:
                 break;
-            case EFFECT_EMITTER_HOMING_MAP_CENTRE:
+            case EFFECT_EMITTER_HOMING_MAP_CENTER:
                 map_store_max_coordinates(&tip_map_max);
                 tip.vx += tip_map_max.vx * (MAP_TILE_SIZE / 2);
                 tip.vz += tip_map_max.vz * (MAP_TILE_SIZE / 2);

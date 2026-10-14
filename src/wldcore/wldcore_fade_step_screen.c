@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Steps the world screen fade: ramps the menu brightness and the first fill box
- * colour toward the target until the elapsed counter reaches the duration. */
+ * color toward the target until the elapsed counter reaches the duration. */
 s32 wldcore_fade_step_screen(void) {
     u32 flags;
     s32 elapsed;

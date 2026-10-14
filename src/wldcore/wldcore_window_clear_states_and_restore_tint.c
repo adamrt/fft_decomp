@@ -1,7 +1,7 @@
 #include "fft/wldcore.h"
 
 /* Clears the palette of two window records and two render records, resets one
- * render record's colour to neutral grey, then clears two more windows. */
+ * render record's color to neutral gray, then clears two more windows. */
 void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t* level) {
     CVECTOR* color;
 

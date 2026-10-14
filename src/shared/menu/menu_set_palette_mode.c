@@ -1,6 +1,6 @@
 #include "fft/menu.h"
 
-/* Select the normal (0) or alternate menu palette: the sprite colour and the six CLUT selections
+/* Select the normal (0) or alternate menu palette: the sprite color and the six CLUT selections
  * the menu commands draw with. */
 void menu_set_palette_mode(s32 mode) {
     g_menu_use_alternate_palette = mode;

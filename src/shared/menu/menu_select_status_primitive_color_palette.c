@@ -2,7 +2,7 @@
 #include "fft/battle_menu.h"
 #include "fft/menu.h"
 
-/* Select the menu primitives' normal or dimmed colours from the panel style
+/* Select the menu primitives' normal or dimmed colors from the panel style
  * or the global event mode. The palette initializer receives
  * `primitives` unchanged in $a0. */
 void menu_select_status_primitive_color_palette(

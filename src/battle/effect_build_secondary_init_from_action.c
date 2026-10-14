@@ -35,7 +35,7 @@ void effect_build_secondary_init_from_action(battle_unit_t* unit, effect_seconda
             case ACTION_MISS_TYPE_NULLIFIED:
             case ACTION_MISS_TYPE_ACCURACY_MISS:
             case ACTION_MISS_TYPE_FORCED_FAILURE:
-            case ACTION_MISS_TYPE_CANCELLED:
+            case ACTION_MISS_TYPE_CANCELED:
             case ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD:
             case ACTION_MISS_TYPE_CATCH:
                 init->targets[i].data.unit.result_animation = EFFECT_HIT_NO_EFFECT;

@@ -68,9 +68,9 @@ s32 effect_spawn_emitter_particles(s16 record_index, s32 frame, s32 emitter_inde
     s16 homing_min;
     s16 homing_max;
     u16 homing_curve_selector;
-    u8 colour_r;
-    u8 colour_g;
-    u8 colour_b;
+    u8 color_r;
+    u8 color_g;
+    u8 color_b;
     map_tile_t* tile;
 
     entry = &g_effect_geometry_table->entries[emitter_index];
@@ -170,7 +170,7 @@ s32 effect_spawn_emitter_particles(s16 record_index, s32 frame, s32 emitter_inde
             spawn.vz += parent->motion.position.z >> 12;
         }
         break;
-    case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
+    case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
         map_store_max_coordinates(&map_max);
         spawn.vx += map_max.vx * (MAP_TILE_SIZE / 2);
         spawn.vz += map_max.vz * (MAP_TILE_SIZE / 2);
@@ -460,7 +460,7 @@ s32 effect_spawn_emitter_particles(s16 record_index, s32 frame, s32 emitter_inde
             particle = particle->next;
         }
         break;
-    case EFFECT_EMITTER_HOMING_MAP_CENTRE:
+    case EFFECT_EMITTER_HOMING_MAP_CENTER:
         map_store_max_coordinates(&map_max);
         for (i = 0; i < count; i++) {
             particle->target.x = map_max.vx * (MAP_TILE_SIZE / 2) + target_offset.vx;
@@ -519,16 +519,16 @@ s32 effect_spawn_emitter_particles(s16 record_index, s32 frame, s32 emitter_inde
     if (motion_curve_selectors != 0) {
         curve = motion_curve_selectors >> EFFECT_EMITTER_CURVE_HOMING_STRENGTH_SHIFT & 3;
     }
-    colour_r = entry->emitter.colour_curves & 0xf;
-    colour_g = entry->emitter.colour_curves >> 4 & 0xf;
-    colour_b = entry->emitter.colour_curves >> 8 & 0xf;
+    color_r = entry->emitter.color_curves & 0xf;
+    color_g = entry->emitter.color_curves >> 4 & 0xf;
+    color_b = entry->emitter.color_curves >> 8 & 0xf;
     particle = head;
     for (i = 0; i < count; i++) {
         particle->homing_strength = RANDOM_BETWEEN(homing_min, homing_max);
         particle->homing_curve_selector = homing_curve_selector;
-        particle->colour_curves.r = colour_r;
-        particle->colour_curves.g = colour_g;
-        particle->colour_curves.b = colour_b;
+        particle->color_curves.r = color_r;
+        particle->color_curves.g = color_g;
+        particle->color_curves.b = color_b;
         if (behavior_flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
             particle->child_emitter_on_death = entry->emitter.child_emitter_on_death;
         }

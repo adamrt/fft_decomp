@@ -17,7 +17,7 @@
  * Twin of attack_editor_run_numeric_thread / bunit_menu_run_numeric_editor_thread
  * with EQUIP's own draw-mode setup. Builds the primitive block once, copies it
  * into the second buffer, then each frame re-renders the three text images when
- * requested, rescales the draw area, recolours the sprites for the thread
+ * requested, rescales the draw area, recolors the sprites for the thread
  * style and submits the block until the thread's third parameter is set.
  * `buffers` is assigned in each branch (not after the if) so the spilled store
  * precedes upload_c's at the join, as in the target. */

@@ -4,7 +4,7 @@
 #include "fft/memory.h"
 
 /* Put the map light transform of the event scripts back to the map's own light: no rotation, unit
- * scale, and the current light direction and colour matrices as the base map_light_thread
+ * scale, and the current light direction and color matrices as the base map_light_thread
  * interpolates from. */
 void map_reset_script_light_transform(void) {
     MATRIX* buffer;

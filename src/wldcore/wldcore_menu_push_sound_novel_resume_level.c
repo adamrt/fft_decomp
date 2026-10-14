@@ -6,7 +6,7 @@
  * appends the cursor window, a VRAM render record for the TIM at g_wldcore_picture_buffer
  * (uploaded progressively through wldcore_gfx_step_dissolve_image_upload, starting at step 0), and
  * two text render records (0xb84c with substitution value 0xe000 + mode, and
- * 0xb84b). The picture record is centred against the first text record from
+ * 0xb84b). The picture record is centerd against the first text record from
  * the TIM's width and half height, and the cursor window is placed at the
  * second text record's origin + (0x18, 0x3c).
  *

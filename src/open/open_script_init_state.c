@@ -5,13 +5,13 @@
 /* Resets the OPEN script/credits subsystem for a new sequence.
  *
  * Sets up both screen environments, clears VRAM, resets the script state and
- * the 16 script records, and initialises the two credit-band and two fade
+ * the 16 script records, and initializes the two credit-band and two fade
  * POLY_FT4 primitives.
  *
- * The record-clear loop counts up; loop optimisation reverses it into the
+ * The record-clear loop counts up; loop optimization reverses it into the
  * target's descending 0x164-stride offset with a bgez test. Stores are grouped
  * as the scheduler needs them: each screen environment's offset pair, and the
- * primitives' colour, UV and XY fields in that order (the fade loop's XY
+ * primitives' color, UV and XY fields in that order (the fade loop's XY
  * stores last keep 0x5a from being hoisted into a sixth saved register).
  */
 void open_script_init_state(void) {

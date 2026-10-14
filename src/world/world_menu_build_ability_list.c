@@ -2,7 +2,7 @@
 /* Builds the ability list for the active skillset menu entry (menu entry 4's
  * selected_index selects the skillset; g_action_menu_row_types gives its list type). Each type
  * fills the 0x52-row work buffer at *g_ai_workspace_ptr through its own loader, then
- * the rows are sized, greyed (not enough MP, or silenced for voice abilities)
+ * the rows are sized, grayed (not enough MP, or silenced for voice abilities)
  * and the window layout at 0x80153c78 is set up for 6 visible rows.
  * WORLD twin of battle_menu_build_ability_list (0x8013fa6c); the two are masked-identical.
  *

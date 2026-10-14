@@ -7,7 +7,7 @@
  * At the edge it stores the edge heights of the current and destination tiles
  * (height * 2 + slope half-height * edge value), clears the unit it stood on,
  * builds the velocity for the run of contiguous steps and enters the
- * FLY_TO_CENTRE stage. */
+ * FLY_TO_CENTER stage. */
 void move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
     s32 direction;
 
@@ -22,6 +22,6 @@ void move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
             + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
         move_set_velocity_for_contiguous_steps_with_final_tile_height(unit, &unit->path, &unit->current_path_step);
         move_interpolate_partial(unit, unit->walk_speed);
-        unit->step_phase = MOVE_STEP_PHASE_FLY_TO_CENTRE_NORTH;
+        unit->step_phase = MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH;
     }
 }

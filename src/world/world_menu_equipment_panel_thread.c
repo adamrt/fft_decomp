@@ -16,7 +16,7 @@
  * mode flags; the text image is rebuilt on the first frame or on request.
  *
  * The first text loop re-reads equipment[] instead of caching it: the target
- * reloads the slot as a byte after the colour store, and the colour field goes
+ * reloads the slot as a byte after the color store, and the color field goes
  * through a signed temporary because the target shifts it with sra. */
 void world_menu_equipment_panel_thread(void) {
     u8* text;

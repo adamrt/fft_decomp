@@ -1,6 +1,6 @@
 #include "fft/battle_map.h"
 
-/* Seed the darkness fade from the map's current darkness colour: the base colour
+/* Seed the darkness fade from the map's current darkness color: the base color
  * and the 16.16 transition channels.
  *
  * The unset `color` is passed as the command's data argument, which the GET

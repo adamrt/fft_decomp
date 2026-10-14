@@ -145,7 +145,7 @@ void world_build_at_list(void) {
             thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
         }
         if (delta == 0 && world_menu_is_input_allowed() != 0 && i != 0) {
-            /* Dead store (column is reinitialised before use); only the reload
+            /* Dead store (column is reinitialized before use); only the reload
              * of layout for this branch survives in the target. */
             if (layout == 0) {
                 column = 0;

@@ -9,7 +9,7 @@
  * Formation-screen unit grid for the unit list menu: handle the stat-mode,
  * browse and banner toggles, step the grid cursor, draw each visible unit
  * panel with its stat readout for g_bunit_unit_stat_mode (layouts 0-2 label,
- * two numbers and gauge; 3 and 4 two labelled numbers), then ease the cursor
+ * two numbers and gauge; 3 and 4 two labeled numbers), then ease the cursor
  * trail toward the selected cell.
  *
  * Twin of WORLD's world_formation_update_and_draw_unit_grid with world_formation_draw_graphics_below_sprite's panel

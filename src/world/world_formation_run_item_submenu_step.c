@@ -24,7 +24,7 @@
  * through an lvalue reinterpretation, as the twin src/world/world_item_run_category_menu.c does for the
  * sibling byte g_world_item_category_menu_initialized (`*(s8*)&g_world_item_category_menu_initialized`).
  *
- * 0x801c8518 carries two catalogued names and the store and the reload use
+ * 0x801c8518 carries two cataloged names and the store and the reload use
  * different ones, matching that same twin: one symbol for both lets cse
  * forward the stored value. */
 

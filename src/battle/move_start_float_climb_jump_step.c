@@ -6,7 +6,7 @@
  * The rise velocity is sqrt(2 * gravity * height) for the height difference in
  * half-height steps (6 world units each) plus two half-steps per tile of jump
  * length; a second apex term extends the frame count. The step byte's top two
- * bits pick the direction, which sets the centre-tile offset, facing, the
+ * bits pick the direction, which sets the center-tile offset, facing, the
  * destination coordinate, and a half-tile horizontal displacement spread over
  * the frame count. `from` is unused. `unused` reproduces an unreferenced 24-byte
  * frame slot. The separate `height -=`/`height +=` statements keep the target's

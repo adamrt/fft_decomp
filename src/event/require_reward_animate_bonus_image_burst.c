@@ -8,7 +8,7 @@
  * division whose divisor carries ASPSX's zero check (`bnez`/`break 7`).
  *
  * The bonus image is cut into a 12x24 grid of flat quads. Each tile starts
- * after a delay derived from its distance (script mode 0: from the centre,
+ * after a delay derived from its distance (script mode 0: from the center,
  * 1: from the origin, 2: horizontal only, other: rotated x), then two
  * rotations of its radius place the quad corners while angle and radius grow
  * (phase 0) or shrink (phase 1). Between the phases a full-screen flash quad is
@@ -72,7 +72,7 @@ void require_reward_animate_bonus_image_burst(void) {
             if (col & 1) {
                 tile->y = row * 24 - 24;
             }
-            if (mode == REQUIRE_REWARD_BURST_FROM_CENTRE) {
+            if (mode == REQUIRE_REWARD_BURST_FROM_CENTER) {
                 dx = tile->x - 0x80;
                 dy = tile->y - 0x80;
                 dist = SquareRoot0(dx * dx + dy * dy);

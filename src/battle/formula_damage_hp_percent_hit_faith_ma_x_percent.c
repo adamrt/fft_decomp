@@ -4,7 +4,7 @@
 
 /* Formula 0x0E: damage (Y)% of max HP, hit F(MA+X)%; magic evade. The
  * ability's status must apply. An undead target skips the evade and its magic
- * defences and is healed instead; a target immune to Dead is missed.
+ * defenses and is healed instead; a target immune to Dead is missed.
  *
  * 0x801938e6: set when the current target is undead, read by this formula to
  * skip the magic-defense stage. */

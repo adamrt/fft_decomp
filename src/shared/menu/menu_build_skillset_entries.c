@@ -29,7 +29,7 @@ void menu_build_skillset_entries(void) {
         }
     }
     /* The separator byte is materialised before the row counter in the
-     * target; a hoisted constant lands after the counter's initialiser. */
+     * target; a hoisted constant lands after the counter's initializer. */
     separator = 0xfa;
     for (i = 5; i >= 0; i--) {
         rows[i].terminator = separator;

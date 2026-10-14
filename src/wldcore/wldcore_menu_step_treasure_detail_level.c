@@ -11,7 +11,7 @@
  * that 32-bit value.
  * Phase 2, once file loading finishes, uploads the preview TIM's CLUT, binds
  * the level's render record to the VRAM image with its right edge at x -0x3e
- * and centred on y 0x10, starts the progressive upload at 0x8007f998 and
+ * and centerd on y 0x10, starts the progressive upload at 0x8007f998 and
  * publishes the record index, position and image rectangle in
  * g_wldcore_scrollable_text_window (extra_render_index, extra_base, extra_bounds). Phase
  * 3 advances that upload one step per frame. Phase 0 tears the level down once the fade started through system flag 4

@@ -62,7 +62,7 @@ s32 effect_spell_charge_secondary_handler(void) {
         g_effect_secondary_state.charge.duration = g_effect_charge_line_params[index].duration;
         g_effect_secondary_state.charge.radius = g_effect_charge_line_params[index].radius;
         g_effect_secondary_state.charge.spawn_interval = g_effect_charge_line_params[index].spawn_interval;
-        g_effect_secondary_state.charge.colour = g_effect_current_secondary->parameter;
+        g_effect_secondary_state.charge.color = g_effect_current_secondary->parameter;
         g_effect_secondary_state.charge.max_trails = g_effect_charge_line_params[index].max_trails;
         g_effect_secondary_state.charge.fade_row = g_effect_charge_line_params[index].fade_row;
         SetDrawMode(&state->mode[0], 1, 1, 0x20, 0);
@@ -175,9 +175,9 @@ s32 effect_spell_charge_secondary_handler(void) {
                 state->count.particles--;
             }
         }
-        red = g_effect_trap_colors[state->colour].r;
-        green = g_effect_trap_colors[state->colour].g;
-        blue = g_effect_trap_colors[state->colour].b;
+        red = g_effect_trap_colors[state->color].r;
+        green = g_effect_trap_colors[state->color].g;
+        blue = g_effect_trap_colors[state->color].b;
         offsets = &g_effect_charge_line_direction_offsets[0].vx;
         offsets_y = &g_effect_charge_line_direction_offsets[0].vy;
         for (i = 0; i < 16; i++) {

@@ -17,7 +17,7 @@
 #include "psx/types.h"
 
 /* Moves the bouncing help cursor over the require-help navigation table and
- * opens the confirmed entry's help text in a text thread until cancelled. */
+ * opens the confirmed entry's help text in a text thread until canceled. */
 void world_menu_run_require_help(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shadow[2];

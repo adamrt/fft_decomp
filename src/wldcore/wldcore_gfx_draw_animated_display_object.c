@@ -8,7 +8,7 @@
  * part of the current cel into a libgs sprite primitive and sort it into the
  * ordering table.
  *
- * Flag 0x400 copies the object's colour verbatim, otherwise the global fade
+ * Flag 0x400 copies the object's color verbatim, otherwise the global fade
  * tint is applied. Flag 0x800, or system flag 0x08000000 being clear, steps the
  * frame counter. Flag 0x20 overrides the part's own blend mode with the
  * object's (flags 0xc0).

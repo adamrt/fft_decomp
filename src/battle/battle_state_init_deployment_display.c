@@ -1,7 +1,7 @@
 #include "fft/battle.h"
 
 /* Reset the GPU and set up the two frame buffers for a width x height battle
- * screen with the given projection distance and background colour.
+ * screen with the given projection distance and background color.
  *
  * The second buffer lies at y 0xf0 unless the height is 0x1e0. The draw
  * environments start at x -0x80, so primitive x 0x80 is the left screen edge;

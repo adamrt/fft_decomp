@@ -4,7 +4,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Move both window quads through the easing table; table 4 also fades their colour. */
+/* Move both window quads through the easing table; table 4 also fades their color. */
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table) {
     RECT from;
     RECT from2;

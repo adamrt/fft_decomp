@@ -3,7 +3,7 @@
 #include "fft/wldcore.h"
 #include "psx/types.h"
 
-/* Clear a render record's text image, draw text `text_id` centred
+/* Clear a render record's text image, draw text `text_id` centerd
  * horizontally in it (nothing for id 0) and upload it. Also clears the
  * three pending sound script variables. */
 void wldcore_window_draw_centered_text(s32 window_index, s32 text_id) {

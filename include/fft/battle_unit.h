@@ -325,7 +325,7 @@ typedef struct battle_gfx_sprite_part_display_data {
 typedef char
     battle_gfx_sprite_part_display_data_size_must_be_7[(sizeof(battle_gfx_sprite_part_display_data_t) == 7) ? 1 : -1];
 
-/* A sprite display: texture page, CLUT, colour and the parts cut from it.
+/* A sprite display: texture page, CLUT, color and the parts cut from it.
  * Renderer APIs use this common header and variable part tail; the fixed
  * storage records below describe each slot inside a 0x440-byte runtime record. */
 typedef struct battle_gfx_sprite_display_data {
@@ -608,24 +608,24 @@ typedef enum move_step_direction {
  * a step write the NORTH value whatever the direction. */
 typedef enum move_step_phase {
     MOVE_STEP_PHASE_NONE = 0,
-    /* walking: from the tile centre to its exit edge, then on to the destination centre */
+    /* walking: from the tile center to its exit edge, then on to the destination center */
     MOVE_STEP_PHASE_WALK_TO_EDGE_SOUTH = 1,
-    MOVE_STEP_PHASE_WALK_TO_CENTRE_SOUTH = 2,
+    MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH = 2,
     MOVE_STEP_PHASE_WALK_TO_EDGE_EAST = 3,
-    MOVE_STEP_PHASE_WALK_TO_CENTRE_EAST = 4,
+    MOVE_STEP_PHASE_WALK_TO_CENTER_EAST = 4,
     MOVE_STEP_PHASE_WALK_TO_EDGE_NORTH = 5,
-    MOVE_STEP_PHASE_WALK_TO_CENTRE_NORTH = 6,
+    MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH = 6,
     MOVE_STEP_PHASE_WALK_TO_EDGE_WEST = 7,
-    MOVE_STEP_PHASE_WALK_TO_CENTRE_WEST = 8,
+    MOVE_STEP_PHASE_WALK_TO_CENTER_WEST = 8,
     /* the same two stages at climb speed */
     MOVE_STEP_PHASE_CLIMB_TO_EDGE_SOUTH = 9,
-    MOVE_STEP_PHASE_CLIMB_TO_CENTRE_SOUTH = 10,
+    MOVE_STEP_PHASE_CLIMB_TO_CENTER_SOUTH = 10,
     MOVE_STEP_PHASE_CLIMB_TO_EDGE_EAST = 11,
-    MOVE_STEP_PHASE_CLIMB_TO_CENTRE_EAST = 12,
+    MOVE_STEP_PHASE_CLIMB_TO_CENTER_EAST = 12,
     MOVE_STEP_PHASE_CLIMB_TO_EDGE_NORTH = 13,
-    MOVE_STEP_PHASE_CLIMB_TO_CENTRE_NORTH = 14,
+    MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH = 14,
     MOVE_STEP_PHASE_CLIMB_TO_EDGE_WEST = 15,
-    MOVE_STEP_PHASE_CLIMB_TO_CENTRE_WEST = 16,
+    MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST = 16,
     /* jumping: the take-off animation, rising, falling to the destination edge, the landing animation */
     MOVE_STEP_PHASE_JUMP_START_SOUTH = 17,
     MOVE_STEP_PHASE_JUMP_ASCENT_SOUTH = 18,
@@ -645,25 +645,25 @@ typedef enum move_step_phase {
     MOVE_STEP_PHASE_JUMP_LANDING_WEST = 32,
     /* flying */
     MOVE_STEP_PHASE_FLY_TO_EDGE_SOUTH = 34,
-    MOVE_STEP_PHASE_FLY_TO_CENTRE_SOUTH = 35,
+    MOVE_STEP_PHASE_FLY_TO_CENTER_SOUTH = 35,
     MOVE_STEP_PHASE_FLY_TO_EDGE_EAST = 36,
-    MOVE_STEP_PHASE_FLY_TO_CENTRE_EAST = 37,
+    MOVE_STEP_PHASE_FLY_TO_CENTER_EAST = 37,
     MOVE_STEP_PHASE_FLY_TO_EDGE_NORTH = 38,
-    MOVE_STEP_PHASE_FLY_TO_CENTRE_NORTH = 39,
+    MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH = 39,
     MOVE_STEP_PHASE_FLY_TO_EDGE_WEST = 40,
-    MOVE_STEP_PHASE_FLY_TO_CENTRE_WEST = 41,
+    MOVE_STEP_PHASE_FLY_TO_CENTER_WEST = 41,
     /* floating: the two walking stages, and the jump up to a higher tile */
     MOVE_STEP_PHASE_FLOAT_TO_EDGE_SOUTH = 43,
-    MOVE_STEP_PHASE_FLOAT_TO_CENTRE_SOUTH = 44,
+    MOVE_STEP_PHASE_FLOAT_TO_CENTER_SOUTH = 44,
     MOVE_STEP_PHASE_FLOAT_JUMP_SOUTH = 45,
     MOVE_STEP_PHASE_FLOAT_TO_EDGE_EAST = 47,
-    MOVE_STEP_PHASE_FLOAT_TO_CENTRE_EAST = 48,
+    MOVE_STEP_PHASE_FLOAT_TO_CENTER_EAST = 48,
     MOVE_STEP_PHASE_FLOAT_JUMP_EAST = 49,
     MOVE_STEP_PHASE_FLOAT_TO_EDGE_NORTH = 51,
-    MOVE_STEP_PHASE_FLOAT_TO_CENTRE_NORTH = 52,
+    MOVE_STEP_PHASE_FLOAT_TO_CENTER_NORTH = 52,
     MOVE_STEP_PHASE_FLOAT_JUMP_NORTH = 53,
     MOVE_STEP_PHASE_FLOAT_TO_EDGE_WEST = 55,
-    MOVE_STEP_PHASE_FLOAT_TO_CENTRE_WEST = 56,
+    MOVE_STEP_PHASE_FLOAT_TO_CENTER_WEST = 56,
     MOVE_STEP_PHASE_FLOAT_JUMP_WEST = 57,
     /* a teleport path (MOVE_PATH_TELEPORT and _FAILED): start the animation, then wait for it */
     MOVE_STEP_PHASE_TELEPORT_START = 59,
@@ -681,7 +681,7 @@ typedef enum battle_distortion_animation {
     BATTLE_DISTORTION_ANIMATION_RISE = 2,             /* 0x24 up */
     BATTLE_DISTORTION_ANIMATION_SETTLE = 3,           /* back to the height of where the unit stands */
     BATTLE_DISTORTION_ANIMATION_MOVE_TO_TARGET = 4,   /* to the first target, or to the targeted panel */
-    BATTLE_DISTORTION_ANIMATION_MOVE_TO_OWN_TILE = 5, /* to the centre of the unit's own tile */
+    BATTLE_DISTORTION_ANIMATION_MOVE_TO_OWN_TILE = 5, /* to the center of the unit's own tile */
     BATTLE_DISTORTION_ANIMATION_JUMP_TO_TARGET = 6,   /* the same two along a jump arc */
     BATTLE_DISTORTION_ANIMATION_JUMP_TO_OWN_TILE = 7,
     BATTLE_DISTORTION_ANIMATION_MOVE_TO_TARGET_LEVEL = 8, /* 4 and 5 without the change of height */

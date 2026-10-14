@@ -5,11 +5,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Fade in the deployment banner, run map initialisation until it reaches step
+/* Fade in the deployment banner, run map initialization until it reaches step
  * 0xd, then fade the screen back in.
  *
  * banner_p and the loop's fade = 0xff reproduce the target's preheader order and
- * register choice for the hoisted colour. The dead fade = 0 before done keeps the
+ * register choice for the hoisted color. The dead fade = 0 before done keeps the
  * step-0xd exit inline ahead of the per-frame path, as in the target; with a
  * plain break GCC moves that block to the loop tail. */
 void battle_state_run_deployment(void) {

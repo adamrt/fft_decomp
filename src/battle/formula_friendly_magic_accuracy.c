@@ -1,7 +1,7 @@
 #include "fft/battle_formula.h"
 
 /* Formula 0x0B: status, hit F(MA+X)%; no evade, and none of the target's magic
- * defences. */
+ * defenses. */
 void formula_friendly_magic_accuracy(void) {
     formula_store_ma_and_x();
     formula_apply_elemental_strengthen();

@@ -1,7 +1,7 @@
 #include "fft/battle_map.h"
 
-/* Seed the ambient light fade from the colour the map loaded: the base colour and
- * the 16.16 transition channels take the current GTE back colour.
+/* Seed the ambient light fade from the color the map loaded: the base color and
+ * the 16.16 transition channels take the current GTE back color.
  *
  * The unset `color` is passed as the command's data argument, which the GET
  * command does not read, and then receives the result. */

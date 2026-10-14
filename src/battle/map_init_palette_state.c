@@ -4,12 +4,12 @@
 /* Reset the map palette state at step 0 of the map init sequences: no upload or
  * move pending, every row open to updates with its sixteen CLUT animations
  * stopped, the background gradient and ambient light fades and their repeats off,
- * and the eight colour rotation slots free.
+ * and the eight color rotation slots free.
  *
  * Each row's `enabled` is set, which makes map_update_animations blend the
- * row's 256 colours as one under animation 0. The sprite, unit, unit shadow and
+ * row's 256 colors as one under animation 0. The sprite, unit, unit shadow and
  * action result rows get 0 and blend each of their sixteen CLUTs on its own. Of
- * the stored deltas only the first colour's red delta of each row is cleared. */
+ * the stored deltas only the first color's red delta of each row is cleared. */
 void map_init_palette_state(void) {
     s32 clut_row;
     s32 animation_index;

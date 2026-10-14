@@ -1,7 +1,7 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Stop a colour rotation by the handle map_start_clut_cycle
+/* Stop a color rotation by the handle map_start_clut_cycle
  * returned (slot index + 1). Returns 1 for a handle 1-8, else 0.
  *
  * Retail clears the active byte at handle * 10, not (handle - 1) * 10: it stops

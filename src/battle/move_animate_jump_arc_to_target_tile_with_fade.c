@@ -6,12 +6,12 @@
 #include "fft/map.h"
 #include "psx/types.h"
 
-/* Distortion animation 0x10: jump along an arc to the centre of the unit's own
+/* Distortion animation 0x10: jump along an arc to the center of the unit's own
  * map tile, darkened for the first part of the flight.
  *
  * Phase 0 computes the arc as move_animate_jump_arc_to_own_tile does,
  * hides the shadow, selects quarter-add blending and starts
- * a palette modulation of -31 on each colour component. Phase 1 flies until 4
+ * a palette modulation of -31 on each color component. Phase 1 flies until 4
  * frames remain (the threshold kept in distortion_target), then restores the
  * palette. Phase 2 flies the remaining frames and stops the horizontal motion.
  * Phase 3 falls to the ground, snaps the unit to the tile, shows the shadow,

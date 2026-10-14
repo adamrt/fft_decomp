@@ -5,7 +5,7 @@
  * message-id bytes (little-endian, biased by 0xB800) and a third byte stored
  * as the text thread's y offset.
  *
- * -O0, like the neighbouring tutorial handlers. The message id is summed as
+ * -O0, like the neighboring tutorial handlers. The message id is summed as
  * pointer arithmetic on purpose: written as plain integer addition, GCC
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
  * and the target adds the bias to the low byte first. */

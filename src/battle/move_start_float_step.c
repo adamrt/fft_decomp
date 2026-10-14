@@ -1,7 +1,7 @@
 #include "fft/battle_move.h"
 #include "psx/types.h"
 
-/* Start the unit's next movement step from the current tile centre.
+/* Start the unit's next movement step from the current tile center.
  *
  * The step byte's top two bits pick the direction, which sets the facing and
  * edge offset; its low two bits extend the destination tile coordinate. The

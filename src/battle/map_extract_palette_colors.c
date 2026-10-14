@@ -1,7 +1,7 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-/* Load the sixteen colours of one CLUT into a map CLUT row: the upload staging
+/* Load the sixteen colors of one CLUT into a map CLUT row: the upload staging
  * (g_map_palette_modified_colors), the row's packed mirror, and its
  * decoded 5-bit components and alpha bit. */
 void map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index) {

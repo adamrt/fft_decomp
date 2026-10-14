@@ -1920,9 +1920,9 @@ data:
   - {addr: 0x80067c5c, name: g_battle_numeric_digit_1_critical_zoom_curve}
   - {addr: 0x80067c88, name: g_battle_numeric_digit_2_critical_zoom_curve}
   - {addr: 0x800683b8, name: g_battle_deployment_clear_rect}
-  - {addr: 0x80093c98, name: g_move_float_to_centre_phases}
-  - {addr: 0x80093c9c, name: g_move_walk_to_centre_phases}
-  - {addr: 0x80093ca0, name: g_move_climb_to_centre_phases}
+  - {addr: 0x80093c98, name: g_move_float_to_center_phases}
+  - {addr: 0x80093c9c, name: g_move_walk_to_center_phases}
+  - {addr: 0x80093ca0, name: g_move_climb_to_center_phases}
   - {addr: 0x80093ca4, name: g_move_jump_descent_phases}
   - {addr: 0x80093ca8, name: g_move_jump_landing_phases}
   - {addr: 0x80093cac, name: g_map_deep_dungeon_load_in_progress}

@@ -2,7 +2,7 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-/* Initialise the five pairs of frame quads: an opaque quad on the texture
+/* Initialize the five pairs of frame quads: an opaque quad on the texture
  * page at (0x140, 0) and a semi-transparent one on the page at
  * (0x3c0, 0x100). */
 void attack_gfx_init_frame_ft4_array(void) {

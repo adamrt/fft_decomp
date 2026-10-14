@@ -3,7 +3,7 @@
 #include "psx/libgpu.h"
 
 /* Send an effect file's palette and texture section to VRAM. Its two
- * 256-colour blocks go to MAP_CLUT_ROW_EFFECT and MAP_CLUT_ROW_EFFECT_SECOND; the
+ * 256-color blocks go to MAP_CLUT_ROW_EFFECT and MAP_CLUT_ROW_EFFECT_SECOND; the
  * texture image that follows them to (0x180, 0).
  *
  * The image is preceded by its byte size as a 24-bit little-endian value and a

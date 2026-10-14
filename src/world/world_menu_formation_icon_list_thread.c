@@ -7,7 +7,7 @@
 
 /* Formation menu icon list thread: draws the text image once, then
  * alternates two sprite records, tinting the four icon sprites with the
- * current menu colour and moving the wrapping cursor while the previous
+ * current menu color and moving the wrapping cursor while the previous
  * thread is idle. */
 void world_menu_formation_icon_list_thread(void) {
     RECT rect;

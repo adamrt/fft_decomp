@@ -17,7 +17,7 @@
  * falls and gains g_move_jump_gravity per frame; on reaching it the unit
  * snaps to it, the position copies stop and the animation ends.
  *
- * During an event the unit is also centred on its tile, but retail writes the
+ * During an event the unit is also centerd on its tile, but retail writes the
  * depth coordinate into real.vy instead of real.vz. The height then sits below
  * the ground on the next frame, so an event fall ends on its second frame. */
 void move_animate_fall_to_target_tile(battle_unit_t* unit) {
@@ -48,7 +48,7 @@ void move_animate_fall_to_target_tile(battle_unit_t* unit) {
             unit->real.vx = x * ONE;
             y = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             unit->world_coords.vz = y;
-            /* Retail stores the tile-centre depth into real.vy (the height),
+            /* Retail stores the tile-center depth into real.vy (the height),
              * not real.vz. The first frame adds the fall speed to it and the
              * next one snaps the height to the ground. */
             unit->real.vy = y * ONE;

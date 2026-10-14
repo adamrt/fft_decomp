@@ -78,7 +78,7 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
         }
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         g_world_shop_checkout_prompt_initialized = 0;
-        return WORLD_SHOP_CHECKOUT_CANCELLED;
+        return WORLD_SHOP_CHECKOUT_CANCELED;
     }
     if (world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_shop_checkout_short_gil_menu) != 0) {
         return WORLD_SHOP_CHECKOUT_PROMPT_OPEN;
@@ -92,5 +92,5 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
         return WORLD_SHOP_CHECKOUT_DONE;
     }
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
-    return WORLD_SHOP_CHECKOUT_CANCELLED;
+    return WORLD_SHOP_CHECKOUT_CANCELED;
 }

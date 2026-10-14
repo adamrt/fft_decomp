@@ -7,7 +7,7 @@
  * Fitting room step that prices the tried-on equipment.
  *
  * Runs the checkout prompt: done returns to the shop's main menu (message
- * 0xf802); cancelled shows message 0xf818 until any face button, which
+ * 0xf802); canceled shows message 0xf818 until any face button, which
  * returns to the fitting room with the unit's stats recalculated.
  */
 void world_shop_run_fitting_room_checkout_step(void) {
@@ -28,7 +28,7 @@ void world_shop_run_fitting_room_checkout_step(void) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_MAIN_MENU;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf802, 0);
             g_world_shop_fitting_room_initialized = 0;
-        } else if (result == WORLD_SHOP_CHECKOUT_CANCELLED) {
+        } else if (result == WORLD_SHOP_CHECKOUT_CANCELED) {
             g_world_shop_checkout_complete = 1;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf818, 0);
         }

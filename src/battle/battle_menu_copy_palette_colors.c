@@ -2,7 +2,7 @@
 #include "fft/battle_menu.h"
 #include "fft/memory.h"
 
-/* Copies the normal and the dimmed 16-colour menu palette into the menu palette color table. */
+/* Copies the normal and the dimmed 16-color menu palette into the menu palette color table. */
 void battle_menu_copy_palette_colors(const menu_palette_pair_t* source) {
     rgba5551_t* destination;
 

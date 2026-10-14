@@ -9,7 +9,7 @@
  * Binds the overlay's text sections, uploads the menu glyph image to
  * (0x100, 0) and derives four palette rows at y 0xfe from the CLUT rows at
  * (0x3c0, 0x1f0) and (0x3c0, 0x1f4): each row is copied with entry 4 made
- * transparent, and its entries 4..15 are copied again as a 12-colour row.
+ * transparent, and its entries 4..15 are copied again as a 12-color row.
  * The 16-entry row is read into buf1, which holds four entries; the other
  * twelve land in buf2, which follows it on the stack. The 0x200-byte menu
  * palette image is copied to the stack before it is uploaded to

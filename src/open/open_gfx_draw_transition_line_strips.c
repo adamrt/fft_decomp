@@ -7,7 +7,7 @@
  *
  * Each step of the entry is one line of text: line_texture_rows holds its 16-pixel row
  * in the texture page and line_widths its width in pixels. The lines are
- * centred, 20 pixels apart, as a block around the middle of the screen. A
+ * centerd, 20 pixels apart, as a block around the middle of the screen. A
  * finished line is drawn at full width and the line in progress up to timer
  * pixels; the pass with i == step adds that line's leading edge, at most 16
  * pixels whose right-hand corners are black, so the text fades in as it is

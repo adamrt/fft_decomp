@@ -133,7 +133,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
             break;
-        case EFFECT_EMITTER_ORIGIN_MAP_CENTRE:
+        case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
             map_store_max_coordinates(&map_max);
             origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
             origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
@@ -290,10 +290,10 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         n = entry->brightness_row;
-        if (entry->flags & EFFECT_EMITTER_FLAG_COLOUR_CURVES) {
+        if (entry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             red = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
-                (entry->colour_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
-            k = (entry->colour_curves & 0xfff);
+                (entry->color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
+            k = (entry->color_curves & 0xfff);
             green = g_effect_animation_curve_data
                         ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_GREEN_SHIFT)][frame];
             blue = g_effect_animation_curve_data

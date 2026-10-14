@@ -19,10 +19,10 @@ void move_update_knockback_step(battle_unit_t* unit) {
         speed = unit->walk_speed;
         unit->walk_speed = (speed > ONE) ? speed / 4 * 3 : ONE;
         switch (unit->step_phase) {
-        case MOVE_STEP_PHASE_WALK_TO_CENTRE_SOUTH:
-        case MOVE_STEP_PHASE_WALK_TO_CENTRE_EAST:
-        case MOVE_STEP_PHASE_WALK_TO_CENTRE_NORTH:
-        case MOVE_STEP_PHASE_WALK_TO_CENTRE_WEST:
+        case MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH:
+        case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
+        case MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH:
+        case MOVE_STEP_PHASE_WALK_TO_CENTER_WEST:
             move_update_unit_step_to_destination_tile_center(unit);
             break;
         case MOVE_STEP_PHASE_WALK_TO_EDGE_SOUTH:

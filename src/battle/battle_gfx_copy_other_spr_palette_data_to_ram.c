@@ -1,7 +1,7 @@
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 
-/* Copy the first 21 OTHER.SPR palettes, setting STP on all but colour zero. */
+/* Copy the first 21 OTHER.SPR palettes, setting STP on all but color zero. */
 void battle_gfx_copy_other_spr_palette_data_to_ram(const battle_gfx_other_sprite_archive_t* archive) {
     s32 i = 0;
     s32 one = 1; /* held in a local: a literal changes the setup schedule */

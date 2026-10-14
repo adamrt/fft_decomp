@@ -909,7 +909,7 @@ typedef enum event_script_variable_id {
      * EVENT_SCRIPT_VAR_FACTS_ENABLED gates. */
     EVENT_SCRIPT_VAR_FACT_FIRST = 0x1a4,
     /* First variable of the world-map ranges WLDCORE indexes: one flag per
-     * Brave Story event, location dot, route, alternate dot colour, rumour,
+     * Brave Story event, location dot, route, alternate dot color, rumour,
      * treasure and unexplored land, then one nibble of state bits per proposition. */
     EVENT_SCRIPT_VAR_STORY_EVENT_FIRST = 0x1bc,
     EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST = 0x200,
@@ -949,7 +949,7 @@ typedef enum event_id {
     /* CallFunction JOIN_UNITS_SILENTLY also restores the new-game inventory
      * in the events below this one. */
     EVENT_ID_NEW_GAME_INVENTORY_END = 0x4e,
-    /* A Zodiac Stone speaks in these two. Their centred messages start at
+    /* A Zodiac Stone speaks in these two. Their centerd messages start at
      * the box's left edge while ETC's graphics are off. */
     EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9,
     /* Also the event the ending leaves current, with the next scenario

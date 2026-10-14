@@ -82,7 +82,7 @@ s32 menu_lerp_fixed12(s32 start, s32 end, s32 factor);
 void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor);
 
 /* palette */
-/* Two sixteen-colour banks: the normal menu colours followed by their dimmed forms. */
+/* Two sixteen-color banks: the normal menu colors followed by their dimmed forms. */
 typedef struct menu_palette_pair {
     rgba5551_t colors[2 * PALETTE_COLOR_COUNT];
 } menu_palette_pair_t;
@@ -134,7 +134,7 @@ typedef struct menu_window_buffer {
                                scroll_position / scroll_range of its span; 1 when freshly allocated */
     /* Primitive payload established by the WORLD allocator at 0x800e2548:
      * draw mode, four window sprites, three icon sprites, two quads and a
-     * trailing colour. */
+     * trailing color. */
     DR_MODE draw_mode;    /* 0x2c */
     SPRT sprites[4];      /* 0x38 */
     SPRT icon_sprites[3]; /* 0x88 */
@@ -283,7 +283,7 @@ typedef struct menu_status_thread {
     s32 flags;          /* 0x08: menu_status_panel_flags_e in the status display record */
     s32 redraw_request; /* 0x0c: set to 1 elsewhere to request a text/portrait rebuild; the status
                            display record also keeps the selection-slide direction here */
-    s32 style;          /* 0x10: 1 selects the dimmed menu colours */
+    s32 style;          /* 0x10: 1 selects the dimmed menu colors */
 } menu_status_thread_t;
 typedef char menu_status_thread_size_must_be_20[(sizeof(menu_status_thread_t) == 20) ? 1 : -1];
 
@@ -476,7 +476,7 @@ typedef struct menu_status_panel_display_thread {
     s32 shake_y;     /* 0x04; narrowed to a draw-offset 16-bit value when rendered */
     s32 flags;       /* 0x08: menu_status_panel_flags_e */
     s32 work;        /* 0x0c: redraw request flags, cleared once serviced */
-    s32 dimmed;      /* 0x10: nonzero forces the dimmed CLUTs and colours; bound as
+    s32 dimmed;      /* 0x10: nonzero forces the dimmed CLUTs and colors; bound as
                            g_bunit_status_display_dimmed and the WORLD display globals */
 } menu_status_panel_display_thread_t;
 
@@ -959,11 +959,11 @@ typedef struct menu_quad_piece {
     s16 y;          /* 0x0a */
 } menu_quad_piece_t;
 
-/* Provisional: the four vertex colours applied by the POLY_GT4 builder at
+/* Provisional: the four vertex colors applied by the POLY_GT4 builder at
  * 0x800e8d6c (record at 0x801557f4; the leading 32-bit value is untyped). */
 typedef struct menu_quad_colors {
     u32 _unused_00;
-    CVECTOR vertex[4]; /* 0x04; one colour per POLY_GT4 corner */
+    CVECTOR vertex[4]; /* 0x04; one color per POLY_GT4 corner */
 } menu_quad_colors_t;
 
 extern menu_quad_colors_t g_menu_quad_colors;
@@ -975,7 +975,7 @@ s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
 
 /* Provisional: one 5-byte row of a WORLD menu text entry as rewritten by
  * world_menu_build_skillset_entries (0x800f3d44): the style byte at +1 is
- * 4 for a greyed row, the byte at +3 is the row separator (0xfa) or the
+ * 4 for a grayed row, the byte at +3 is the row separator (0xfa) or the
  * list terminator (0xff). */
 typedef struct menu_text_row {
     u8 _unused_00;
@@ -1595,7 +1595,7 @@ void menu_draw_weapon_hand_icons(s16 weapon_id);
 
 /* One 12-byte positioned number: a text position, a pointer to the live
  * value and the decimal format. *_menu_draw_numeric_display_entries draws
- * tables of them (kind 0 and 1 select the plain and coloured number
+ * tables of them (kind 0 and 1 select the plain and colored number
  * renderers), as do the status panels' *_text_render_decimal_entry_list and
  * *_text_render_signed_decimal_entries, which leave kind unset. The 0xc stride
  * is proved by g_world_numeric_display_entries's three sublists at +0, +0x24
@@ -1634,7 +1634,7 @@ typedef struct menu_text_state {
     /* 0x04: rect.x/rect.y are the text origin (battle_menu_set_text_origin) and
      * the rect's size is not used; stride (0x0c) is the rect width * 4
      * (the inner window width); color (0x10) is the glyph blit fill,
-     * 0x44444444 while text colour 4 is drawn (*_menu_draw_text_columns). */
+     * 0x44444444 while text color 4 is drawn (*_menu_draw_text_columns). */
     glyph_blit_t pen;
 } menu_text_state_t;
 
@@ -2048,7 +2048,7 @@ typedef struct text_dialog_record {
     s16 _unknown_2a;   /* 0x2a */
     s16 mark;          /* 0x2c: measured width, later the 0xFB cursor mark */
     s16 lines;         /* 0x2e */
-    s16 tail_offset;   /* 0x30: dialog tail offset from the window centre */
+    s16 tail_offset;   /* 0x30: dialog tail offset from the window center */
     u8 _padding_32[2]; /* 0x32; aligns x */
     s32 x;             /* 0x34 */
     s32 y;             /* 0x38 */
@@ -2166,7 +2166,7 @@ typedef char menu_unit_editor_frame_size_must_be_720[sizeof(menu_unit_editor_fra
 
 void menu_run_unit_editor_panel_thread(void);
 
-/* Colour and endpoint offsets of the unit editor panel's eight frame lines,
+/* Color and endpoint offsets of the unit editor panel's eight frame lines,
  * relative to the panel box, seven bytes per line (WORLD 0x80156198, BATTLE
  * 0x80168d0c). The loop walks the table with a byte offset stepping by 7 (the
  * target's induction variable and exit test), so the fields are addressed by

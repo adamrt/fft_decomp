@@ -20,7 +20,7 @@ void world_map_light_thread(void) {
     } start, target;
     SVECTOR rotation;
     MATRIX light;
-    MATRIX colour;
+    MATRIX color;
     VECTOR scale;
     const u8* params;
     s32 i;
@@ -47,12 +47,12 @@ void world_map_light_thread(void) {
         rotation.vz = (target.vectors.rotation[2] - start.vectors.rotation[2]) * i / frames + start.vectors.rotation[2];
         RotMatrix(&rotation, &light);
         MulMatrix(&light, &g_world_map_light_base_matrix);
-        script_copy_matrix(&colour, &g_world_map_light_color_matrix);
+        script_copy_matrix(&color, &g_world_map_light_color_matrix);
         scale.vx = (target.vectors.scale[0] - start.vectors.scale[0]) * i / frames + start.vectors.scale[0];
         scale.vy = (target.vectors.scale[1] - start.vectors.scale[1]) * i / frames + start.vectors.scale[1];
         scale.vz = (target.vectors.scale[2] - start.vectors.scale[2]) * i / frames + start.vectors.scale[2];
-        ScaleMatrixL(&colour, &scale);
-        map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &colour, &light, 0);
+        ScaleMatrixL(&color, &scale);
+        map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &color, &light, 0);
         thread_wait_frames(1);
     }
     mem_copy_bytes_nonempty(&g_world_map_light_rotation, &rotation, sizeof(g_world_map_light_rotation));
