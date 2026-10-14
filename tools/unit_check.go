@@ -206,28 +206,43 @@ func unitProfile(spec *unitSpec, m *moduleSpec, members []*functionSpec) (string
 	return chosen, nil
 }
 
-// unitLinkerBindings merges every member's bindings. A member's own symbol is
-// never bound (its body must come from the object), and two members whose
-// overrides disagree about one name could not have been one object.
+// unitLinkerBindings binds the names the merged source uses the way the
+// linker does for the module, then applies the members' overrides: one object
+// has one address per symbol, so an override of any member governs the unit,
+// and two members whose overrides disagree could not have been one object.
+// A member's own symbol is never bound; its body must come from the object.
 func unitLinkerBindings(resolver symbolResolver, unit *unitInstance, used map[string]struct{}) (map[string]uint32, error) {
-	memberAddr := map[string]uint32{}
-	for _, f := range unit.members {
-		memberAddr[f.sourceSymbol()] = f.Addr
-	}
 	bindings := map[string]uint32{}
+	for name, addr := range resolver.own[unit.module.ID] {
+		if compilerEmitted(name) {
+			bindings[name] = addr
+		}
+	}
+	for name := range used {
+		if addr, ok := resolver.resolve(unit.module, name); ok {
+			bindings[name] = addr
+		}
+	}
 	owner := map[string]string{}
 	for _, f := range unit.members {
-		for name, addr := range resolver.linkerBindings(unit.module, f, used) {
-			if expected, member := memberAddr[name]; member {
-				if addr != expected {
-					return nil, fmt.Errorf("%s rebinds unit member %s to 0x%08x, but it is at 0x%08x", f.Name, name, addr, expected)
-				}
+		for _, override := range unit.module.Overrides {
+			if override.Function != f.Name {
 				continue
 			}
-			if existing, ok := bindings[name]; ok && existing != addr {
-				return nil, fmt.Errorf("%s and %s bind %s to different addresses (0x%08x and 0x%08x)", owner[name], f.Name, name, existing, addr)
+			if previous, ok := owner[override.Name]; ok && bindings[override.Name] != override.Addr {
+				return nil, fmt.Errorf("%s and %s bind %s to different addresses (0x%08x and 0x%08x)",
+					previous, f.Name, override.Name, bindings[override.Name], override.Addr)
 			}
-			bindings[name], owner[name] = addr, f.Name
+			bindings[override.Name], owner[override.Name] = override.Addr, f.Name
+		}
+	}
+	for _, f := range unit.members {
+		symbol := f.sourceSymbol()
+		if addr, ok := bindings[symbol]; ok {
+			if addr != f.Addr {
+				return nil, fmt.Errorf("%s binds unit member %s to 0x%08x, but it is at 0x%08x", owner[symbol], symbol, addr, f.Addr)
+			}
+			delete(bindings, symbol)
 		}
 	}
 	if unit.profile.smallDataLimit != 0 {
