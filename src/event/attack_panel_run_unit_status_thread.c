@@ -345,7 +345,7 @@ void attack_panel_run_unit_status_thread(void) {
             } else {
                 number_entries[6].format = 2;
             }
-            battle_clear_menu_render_buffer(number_pixels, 0x700);
+            menu_clear_render_buffer(number_pixels, 0x700);
             window_width = &g_menu_text_state.pen.stride;
             text_position = (glyph_blit_t*)(window_width - 2);
             *window_width = 0x38;
@@ -356,26 +356,26 @@ void attack_panel_run_unit_status_thread(void) {
             menu_draw_numeric_display_entries(number_pixels_b, &number_entries[8], text_position, 2);
             LoadImage(&rects[1], number_pixels_b);
             thread->work = 0;
-            battle_clear_menu_render_buffer(name_pixels, 0x580);
+            menu_clear_render_buffer(name_pixels, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
             menu_display_text_entry(unit_info->name_id + 0x5800, name_pixels, text_position);
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(unit_info->job_id + TEXT_ID_JOB_NAME_BASE, name_pixels, text_position);
             LoadImage(&rects[2], name_pixels);
-            battle_clear_menu_render_buffer(value_pixels, 0xF0);
+            menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            battle_text_draw_large_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
+            text_draw_large_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
             LoadImage(&rects[3], value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            battle_text_draw_large_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
+            text_draw_large_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], value_pixels_b);
             if (g_battle_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
-                battle_text_draw_large_number_glyphs(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);
+                text_draw_large_number_glyphs(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);
                 LoadImage(&rects[5], value_pixels_c);
             } else {
                 LoadImage(&rects[5], value_pixels + 0xA0);

@@ -30,18 +30,10 @@ s32 menu_text_render_glyph_to_4bpp_image(
     s32 glyph_id, u8* image, const battle_text_image_position_t* position, s32 style);
 void menu_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
 
-/* The caller leaves 0x16f in $a1, but the body never reads $a1. */
-void battle_text_mirror_packed_nibble_region_horizontal(u8* data, const glyph_blit_t* region);
 s32 battle_text_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
-void battle_text_render_glyph_to_4bpp_image(
-    const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
 void battle_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
-void blit_text_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
 
 /* numbers */
-extern glyph_blit_t g_battle_text_large_number_glyph_rect; /* glyph source rectangle in the large number font */
-
-void battle_text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 
 /* text sections */
 /* Text variables $27 and $28 (rows of glyph pixels drawn, 0x10 by default),

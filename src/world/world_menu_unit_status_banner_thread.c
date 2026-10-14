@@ -352,7 +352,7 @@ void world_menu_unit_status_banner_thread(void) {
             } else {
                 entries[6].format = 2;
             }
-            world_clear_menu_render_buffer(stat_image, 0x700);
+            menu_clear_render_buffer(stat_image, 0x700);
             {
                 g_menu_text_state.pen.stride = 0x38;
                 if (g_world_preview_stats_window_active == 0) {
@@ -371,26 +371,24 @@ void world_menu_unit_status_banner_thread(void) {
             menu_draw_numeric_display_entries(stat_image_upper, &entries[8], &g_menu_text_state.pen, 2);
             LoadImage(&rects[1], (u32*)stat_image_upper);
             display->work = 0;
-            world_clear_menu_render_buffer(name_image, 0x580);
+            menu_clear_render_buffer(name_image, 0x580);
             g_menu_text_state.pen.stride = 0x58;
             menu_set_text_origin(0, 0);
             menu_display_text_entry(identity->unit_index + TEXT_ID_UNIT_NAME_BASE, name_image, &g_menu_text_state.pen);
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_text_state.pen);
             LoadImage(&rects[2], (u32*)name_image);
-            world_clear_menu_render_buffer(number_images, sizeof(*number_images));
+            menu_clear_render_buffer(number_images, sizeof(*number_images));
             g_menu_text_state.pen.stride = 0x10;
             menu_set_text_origin(0, 0);
-            world_text_render_decimal_value_or_dashes(
-                identity->brave, 0x202, number_images->brave, &g_menu_text_state.pen);
+            text_draw_large_number_glyphs(identity->brave, 0x202, number_images->brave, &g_menu_text_state.pen);
             LoadImage(&rects[3], (u32*)number_images->brave);
             menu_set_text_origin(0, 0);
-            world_text_render_decimal_value_or_dashes(
-                identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
+            text_draw_large_number_glyphs(identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
             if (g_world_unit_join_screen_active == 0) {
                 menu_set_text_origin(0, 0);
-                world_text_render_decimal_value_or_dashes(
+                text_draw_large_number_glyphs(
                     identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_text_state.pen);
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
             } else {

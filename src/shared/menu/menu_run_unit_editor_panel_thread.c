@@ -118,7 +118,7 @@ void menu_run_unit_editor_panel_thread(void) {
     }
 
     buffer = menu_alloc_buffer(0xC80);
-    battle_clear_menu_render_buffer(buffer, 0xC80);
+    menu_clear_render_buffer(buffer, 0xC80);
     g_menu_text_state.pen.stride = 0x50;
     menu_set_text_origin(0, 0);
     for (i = 0; i < 5; i++) {
@@ -132,7 +132,7 @@ void menu_run_unit_editor_panel_thread(void) {
     }
     LoadImage(&g_menu_unit_editor_text_rect_a, (u32*)buffer);
     thread_yield();
-    battle_clear_menu_render_buffer(buffer, 0xC80);
+    menu_clear_render_buffer(buffer, 0xC80);
     g_menu_text_state.pen.stride = 0x50;
     menu_set_text_origin(0, 0);
     for (i = 0; i < 2; i++) {

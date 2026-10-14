@@ -1054,7 +1054,7 @@ functions:
   - {addr: 0x8014aa7c, size: 220, name: menu_draw_numeric_display_entries, hash: c2ce3ac37a505f2f, source: src/shared/menu/menu_draw_numeric_display_entries.c}
   - {addr: 0x8014ab58, size: 216, name: menu_display_number_entry, hash: ee3a5bfa118b7022, source: src/shared/menu/menu_display_number_entry.c}
   - {addr: 0x8014ac30, size: 656, name: menu_draw_number_glyphs, hash: 97ee6a6ad4dcbfc5, source: src/shared/menu/menu_draw_number_glyphs.c}
-  - {addr: 0x8014aec0, size: 932, name: battle_text_draw_large_number_glyphs, hash: 9b2bbc5f2d00b289}
+  - {addr: 0x8014aec0, size: 932, name: text_draw_large_number_glyphs, hash: 9b2bbc5f2d00b289}
   - {addr: 0x8014b264, size: 140, name: menu_draw_stacked_glyph_pair, hash: 85d8816274595d47, source: src/shared/menu/menu_draw_stacked_glyph_pair.c}
   - {addr: 0x8014b2f0, size: 48, name: menu_display_text_entry, hash: 13c8529cf5d5a487, source: src/shared/menu/menu_display_text_entry.c}
   - {addr: 0x8014b320, size: 48, name: menu_display_text_entry_past_choice_marks, hash: f66a71771a466060, source: src/shared/menu/menu_display_text_entry_past_choice_marks.c}
@@ -1064,7 +1064,7 @@ functions:
   - {addr: 0x8014bf54, size: 40, name: mem_copy_bytes_nonempty, hash: 73eb033d6e800062, source: src/shared/memory/mem_copy_bytes_nonempty.c}
   - {addr: 0x8014bf7c, size: 72, name: battle_text_read_packed_nibble, hash: ae6f7bc884e8a41c}
   - {addr: 0x8014bfc4, size: 80, name: battle_write_packed_nibble, hash: b50d2f23553363d9}
-  - {addr: 0x8014c014, size: 336, name: battle_text_mirror_packed_nibble_region_horizontal, hash: d8749608f8fcb5ed}
+  - {addr: 0x8014c014, size: 336, name: gfx_mirror_4bpp_rect, hash: d8749608f8fcb5ed}
   - {addr: 0x8014c164, size: 40, name: menu_build_and_upload_window_image, hash: e90647c567bcb102, source: src/shared/menu/menu_build_and_upload_window_image.c}
   - {addr: 0x8014c18c, size: 796, name: menu_build_window_image, hash: c553dd4a8afbd218, source: src/shared/menu/menu_build_window_image.c}
   - {addr: 0x8014c4a8, size: 688, name: battle_menu_build_and_upload_window_frame_image, hash: 99515c0e0a1f017c}
@@ -2268,12 +2268,12 @@ data:
   - {addr: 0x8012d8a4, name: g_menu_wait_for_file_allocation_message}
   - {addr: 0x8012d8c0, name: g_script_pause_message}
   - {addr: 0x8012d8cc, name: g_battle_text_reading_character_message}
-  - {addr: 0x8014bae4, name: blit_text_glyph}
-  - {addr: 0x8014bd88, name: battle_text_render_glyph_to_4bpp_image}
-  - {addr: 0x8014bed8, name: battle_clear_menu_render_buffer}
+  - {addr: 0x8014bae4, name: text_blit_glyph}
+  - {addr: 0x8014bd88, name: text_render_glyph_to_4bpp_image}
+  - {addr: 0x8014bed8, name: menu_clear_render_buffer}
   - {addr: 0x8014ca80, name: thread_yield}
-  - {addr: 0x8014ccb8, name: battle_mul_div_s64}
-  - {addr: 0x8014ce08, name: battle_fixed_cross_product_q12}
+  - {addr: 0x8014ccb8, name: mul_div_s64}
+  - {addr: 0x8014ce08, name: fixed_cross_product_q12}
   - {addr: 0x8014ceb4, name: thread_call_on_main_stack}
   - {addr: 0x8014cf68, name: g_action_display_image_rects}
   - {addr: 0x8014d02c, name: g_map_selected_tile_data}
@@ -2510,7 +2510,7 @@ data:
   - {addr: 0x80169750, name: g_unit_rotation_speed_frames}
   - {addr: 0x80169758, name: g_unit_status_staging_masks}
   - {addr: 0x80169770, name: g_menu_number_glyph}
-  - {addr: 0x80169780, name: g_battle_text_large_number_glyph_rect}
+  - {addr: 0x80169780, name: g_text_large_number_glyph_rect}
   - {addr: 0x80169790, name: g_menu_stacked_glyph_lower}
   - {addr: 0x801697a0, name: g_menu_stacked_glyph_upper}
   - {addr: 0x801697b0, name: g_menu_window_sprite_glyph}

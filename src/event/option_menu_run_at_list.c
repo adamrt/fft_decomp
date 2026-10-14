@@ -112,7 +112,7 @@ void option_menu_run_at_list(void) {
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
     buffer = g_option_menu_render_buffer;
-    battle_clear_menu_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
+    menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(g_thread_current_id + 1, option_menu_window_frame_thread);
     thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
@@ -186,7 +186,7 @@ void option_menu_run_at_list(void) {
                     }
                     image_rect.h = 0x10;
                     buffer = g_option_menu_render_buffer;
-                    battle_clear_menu_render_buffer(buffer, 0x800);
+                    menu_clear_render_buffer(buffer, 0x800);
                     g_menu_text_state.pen.stride = entry->inner_width;
                     for (column = 0; column < 3; column++) {
                         index = cursor + row_offset + delta;

@@ -58,7 +58,7 @@ void menu_run_unit_summary_panel_thread(void) {
     frames[0].portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
     SetSemiTrans(&frames[0].portrait, 1);
     buffer = menu_alloc_buffer(0x580);
-    battle_clear_menu_render_buffer(buffer, 0x580);
+    menu_clear_render_buffer(buffer, 0x580);
     stride = &g_menu_text_state.pen.stride;
     origin = &g_menu_text_state.pen;
     *stride = 0x58;
@@ -67,23 +67,23 @@ void menu_run_unit_summary_panel_thread(void) {
     menu_set_text_origin(0, 0x10);
     menu_display_text_string(buffer, origin, g_menu_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
-    battle_clear_menu_render_buffer(digits, 0xF0);
+    menu_clear_render_buffer(digits, 0xF0);
     *stride = 0x10;
     menu_set_text_origin(0, 0);
-    battle_text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits, origin);
+    text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits, origin);
     LoadImage(&rects[1], (u32*)digits);
     menu_set_text_origin(0, 0);
-    battle_text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits + 0x50, origin);
+    text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits + 0x50, origin);
     LoadImage(&rects[2], (u32*)(digits + 0x50));
     menu_set_text_origin(0, 0);
     if (g_main_debug_display_enabled != 0) {
-        battle_text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits + 0xA0, origin);
+        text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits + 0xA0, origin);
     } else if (g_menu_selected_unit.battle_id >= 0x10) {
         value = unit->formation_index;
         if (value == 0xFF) {
             value = 0;
         }
-        battle_text_draw_large_number_glyphs(value + 1, 0x4002, digits + 0xA0, origin);
+        text_draw_large_number_glyphs(value + 1, 0x4002, digits + 0xA0, origin);
     }
     LoadImage(&rects[3], (u32*)(digits + 0xA0));
     frames[0].sprites[6].clut = 0x7C3C;

@@ -135,7 +135,7 @@ void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 w
         g_world_text_message_box_state.rect.x = phase;
         g_world_text_message_box_state.rect.y = 0;
         g_world_text_message_box_state.stride = width;
-        world_text_blit_font_glyph_to_4bpp(
+        text_render_glyph_to_4bpp_image(
             g_text_glyph_bitmap_data + g_world_text_message_box_glyph.glyph * TEXT_GLYPH_BYTES, dst,
             &g_world_text_message_box_state, g_world_text_message_box_glyph.palette);
         g_world_text_message_box_vram_rect.x = (x >> 2) + 0x1c0;

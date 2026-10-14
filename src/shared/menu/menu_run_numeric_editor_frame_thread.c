@@ -73,7 +73,7 @@ void menu_run_numeric_editor_frame_thread(void) {
     for (frame = 0;; frame++) {
         buffer = &buffers[frame & 1];
         if (frame == 0 || thread->redraw_request != 0) {
-            battle_clear_menu_render_buffer(number_images, sizeof(*number_images));
+            menu_clear_render_buffer(number_images, sizeof(*number_images));
             g_menu_text_state.pen.stride = 0x14;
             menu_set_text_origin(0, 0);
             if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {

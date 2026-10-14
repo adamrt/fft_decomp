@@ -1,8 +1,9 @@
 #include "fft/battle_text.h"
 #include "psx/types.h"
 
-/* Mirrors a packed nibble rectangle horizontally, swapping each nibble with its opposite. */
-void battle_text_mirror_packed_nibble_region_horizontal(u8* data, const glyph_blit_t* region) {
+/* Mirrors a packed nibble rectangle horizontally, swapping each nibble with its opposite.
+ * WORLD links its own body under this name, with the nibble helpers inlined. */
+void gfx_mirror_4bpp_rect(u8* data, const glyph_blit_t* region) {
     s32 row;
     s32 col;
     s32 value;

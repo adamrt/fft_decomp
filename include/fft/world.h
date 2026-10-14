@@ -318,7 +318,6 @@ s32 world_bits_read_secondary(s32 bit_count);
 void world_bit_cursor_set_primary(u8* ptr);
 void world_bit_cursor_set_secondary(const u8* ptr);
 void world_bits_write_primary(u8 bit);
-s32 world_mul_div_64(s32 a, s32 b, s32 c);
 void world_game_reset(void);
 void world_menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, const image_load_parameters_t* unused_parameters);
@@ -751,7 +750,6 @@ void world_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otag
 
 void world_gfx_init_packet_pools(menu_gfx_context_t* buffer);
 void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t);
-void world_gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect);
 void world_gfx_init_menu_tile_and_line_primitives(menu_status_panel_buffer_t* menu);
 void world_panel_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_gfx_set_blit_dest_position(s32 x, s32 y);
@@ -1513,8 +1511,6 @@ extern u16 g_world_text_speaker_swap_unit_a;
 extern u16 g_world_text_speaker_swap_unit_b;
 extern s32 g_world_text_current_line;
 
-/* Same layout as g_world_decimal_glyph_source. */
-extern glyph_blit_t g_world_text_large_number_glyph_rect;
 extern s16 g_world_fixed_number_panel_request_state;
 extern s32 g_world_text_message_box_digit_divisors[];
 extern s32 g_world_text_message_box_slot_threads[3];
@@ -1556,13 +1552,10 @@ u8* world_text_get_resident_data(world_text_data_e index);
 u8* world_text_bind_section_data(u32 index);
 
 void world_text_message_box_thread(void);
-void world_text_blit_font_glyph_to_4bpp(const u8* glyph, u8* image, glyph_blit_t* origin, s32 palette);
 s32 world_text_decode_font_glyph_to_4bpp(s32 glyph, u8* image, RECT* target, s32 palette);
-void world_text_blit_glyph(const u8* source, u8* image, const glyph_blit_t* source_rect, const glyph_blit_t* position);
 void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 wait);
 u8* world_text_find_entry_by_index(u8* p, s16 count, s32 unused);
 
-void world_text_render_decimal_value_or_dashes(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
 void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* destination, s32 palette);
 
 void world_text_render_encoded_ids_to_image(
@@ -1883,7 +1876,6 @@ void world_menu_number_entry_thread(void);
 s16 world_menu_update_wrapped_vertical_selection(u16, u8, s32);
 void world_menu_run_script_with_callback_suppressed(void);
 void world_menu_open_name_entry_key_list(void);
-void world_clear_menu_render_buffer(void* dst, u32 count);
 void world_draw_menu_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 void world_menu_labeled_number_entry_thread(void);
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
@@ -2490,7 +2482,6 @@ extern u8 g_world_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_COUNT];
 /* Second slot-category table of world_shop_build_fitting_room_best_fit_equipment. */
 extern u8 g_world_fitting_room_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_COUNT];
 extern u8 g_world_order_unit_saved_browse_enabled;
-s32 world_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 s32 world_unit_get_facing_sixteenth_by_runtime_id(s32 runtime_id);
 s32 world_coords_fit_in_byte(s32 x, s32 y);
 void world_free_work_buffer(void);

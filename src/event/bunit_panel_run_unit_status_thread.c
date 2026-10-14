@@ -357,7 +357,7 @@ void bunit_panel_run_unit_status_thread(void) {
             } else {
                 env_a[6].format = 2;
             }
-            battle_clear_menu_render_buffer(render_a, 0x700);
+            menu_clear_render_buffer(render_a, 0x700);
             win = &g_menu_text_state.pen.stride;
             origin = (glyph_blit_t*)(win - 2);
             *win = 0x38;
@@ -368,21 +368,21 @@ void bunit_panel_run_unit_status_thread(void) {
             menu_draw_numeric_display_entries(cur2, &env_a[6], origin, 4);
             LoadImage(&rects[1], (u32*)cur2);
             thread->work = 0;
-            battle_clear_menu_render_buffer(render_c, 0x580);
+            menu_clear_render_buffer(render_c, 0x580);
             *win = 0x58;
             menu_set_text_origin(0, 0);
             menu_display_text_entry(scroll[0] + TEXT_ID_UNIT_NAME_BASE, render_c, origin);
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, render_c, origin);
             LoadImage(&rects[2], (u32*)render_c);
-            battle_clear_menu_render_buffer(render_b, 0xF0);
+            menu_clear_render_buffer(render_b, 0xF0);
             *win = 0x10;
             menu_set_text_origin(0, 0);
-            battle_text_draw_large_number_glyphs(scroll[2], 0x202, render_b, origin);
+            text_draw_large_number_glyphs(scroll[2], 0x202, render_b, origin);
             LoadImage(&rects[3], (u32*)render_b);
             menu_set_text_origin(0, 0);
             cur3 = render_b + 0x50;
-            battle_text_draw_large_number_glyphs(scroll[3], 0x202, cur3, origin);
+            text_draw_large_number_glyphs(scroll[3], 0x202, cur3, origin);
             LoadImage(&rects[4], (u32*)cur3);
             if (g_battle_post_battle_unit_changes_active == 0) {
                 unit_stats_t* stats;
@@ -393,7 +393,7 @@ void bunit_panel_run_unit_status_thread(void) {
                     if (id == BATTLE_FORMATION_INDEX_NONE) {
                         id = 0;
                     }
-                    battle_text_draw_large_number_glyphs(id + 1, 0x4002, render_b + 0xA0, origin);
+                    text_draw_large_number_glyphs(id + 1, 0x4002, render_b + 0xA0, origin);
                 }
             }
             LoadImage(&rects[5], (u32*)(render_b + 0xA0));

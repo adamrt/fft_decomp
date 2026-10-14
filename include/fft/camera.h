@@ -29,4 +29,8 @@ extern s32 g_camera_speed_curve;
 extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on overflow */
 extern s32 g_camera_wrap_yaw_pending;
 
+/* fixed-point math */
+s32 mul_div_s64(s32 a, s32 b, s32 c);
+s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
+
 #endif

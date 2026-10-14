@@ -128,7 +128,7 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
                                     goto done;
                                 }
                                 if (count >= g_menu_text_param_22) {
-                                    battle_text_render_glyph_to_4bpp_image(
+                                    text_render_glyph_to_4bpp_image(
                                         g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                                         &g_menu_text_pen, g_menu_text_palette_offset);
                                 }
@@ -177,7 +177,7 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
             break;
         }
         if (count >= g_menu_text_param_22) {
-            battle_text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
+            text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }
         pen->rect.x += g_text_glyph_widths[state->command];

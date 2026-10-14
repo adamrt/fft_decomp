@@ -38,7 +38,7 @@ void world_menu_thin_window_frame_thread(void) {
     menu = (urect16_t*)world_thread_get_current_parameter_1();
     pixels = menu_alloc_memory(0x400);
 
-    world_clear_menu_render_buffer(pixels, 0x400);
+    menu_clear_render_buffer(pixels, 0x400);
     texture.w = 0x80;
     texture.h = 0x10;
     gfx_alloc_texture_rect(&texture, &prim->texture_prim, (u32*)-1);
@@ -47,19 +47,19 @@ void world_menu_thin_window_frame_thread(void) {
 
     world_gfx_set_image_blit_source_rect(8, 8, 0x20, 0x10);
     world_gfx_set_image_blit_destination_origin(0, 0);
-    world_text_blit_glyph(
+    text_blit_glyph(
         g_menu_glyph_sheet->pixels, pixels, &g_world_gfx_image_blit_source, &g_world_gfx_image_blit_destination);
     world_gfx_set_image_blit_source_rect(0, 8, 8, 0x10);
     world_gfx_set_image_blit_destination_origin(0x20, 0);
-    world_text_blit_glyph(
+    text_blit_glyph(
         g_menu_glyph_sheet->pixels, pixels, &g_world_gfx_image_blit_source, &g_world_gfx_image_blit_destination);
     world_gfx_set_image_blit_source_rect(0, 0, 0x28, 8);
     world_gfx_set_image_blit_destination_origin(0x28, 0);
-    world_text_blit_glyph(
+    text_blit_glyph(
         g_menu_glyph_sheet->pixels, pixels, &g_world_gfx_image_blit_source, &g_world_gfx_image_blit_destination);
     world_gfx_set_image_blit_source_rect(0, 0x18, 0x28, 8);
     world_gfx_set_image_blit_destination_origin(0x28, 8);
-    world_text_blit_glyph(
+    text_blit_glyph(
         g_menu_glyph_sheet->pixels, pixels, &g_world_gfx_image_blit_source, &g_world_gfx_image_blit_destination);
 
     LoadImage(&texture, (u32*)pixels);

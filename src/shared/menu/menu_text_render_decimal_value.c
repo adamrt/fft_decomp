@@ -24,7 +24,7 @@ void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit
     if (flags & MENU_DECIMAL_SLASH_PREFIX) {
         position->rect.x -= 2;
         g_menu_decimal_glyph.rect.x = 0xb4;
-        blit_text_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
         position->rect.x += 7;
     }
     if (flags & MENU_DECIMAL_DOTS_PREFIX) {
@@ -32,7 +32,7 @@ void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit
         g_menu_decimal_glyph.rect.y = 0x1a;
         g_menu_decimal_glyph.rect.h = 4;
         position->rect.y += 3;
-        blit_text_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
         position->rect.x += 7;
         position->rect.y -= 3;
         g_menu_decimal_glyph.rect.y = 0x10;
@@ -48,7 +48,7 @@ void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit
                 position->rect.x += 5;
             }
         }
-        blit_text_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
         position->rect.x += 5;
         if (value == 0) {
             return;
@@ -57,7 +57,7 @@ void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit
     plus = flags & MENU_DECIMAL_SIGN_PLUS;
     if (plus) {
         g_menu_decimal_glyph.rect.x = 0xc8;
-        blit_text_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
         position->rect.x += 5;
     }
     digits = flags & MENU_DECIMAL_FIELD_WIDTH_MASK;
@@ -83,7 +83,7 @@ void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit
     }
     for (i = 0; i < (flags & 0xff); i++) {
         g_menu_decimal_glyph.rect.x = value % 10 * 6 + 0x78;
-        blit_text_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_decimal_glyph, position);
         position->rect.x -= 5;
         value /= 10;
         if (!(flags & MENU_DECIMAL_LEADING_ZEROS) && value == 0) {

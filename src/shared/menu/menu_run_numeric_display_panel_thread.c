@@ -22,7 +22,7 @@ void menu_run_numeric_display_panel_thread(void) {
     gfx_set_draw_mode_for_texture_page(&record->mode1, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     menu_init_scaled_draw_area_packets(&record->draw_areas);
     number_images = menu_alloc_memory(sizeof(*number_images));
-    battle_clear_menu_render_buffer(number_images, sizeof(*number_images));
+    menu_clear_render_buffer(number_images, sizeof(*number_images));
     g_menu_text_state.pen.stride = 0x14;
     menu_set_text_origin(0, 0);
     menu_draw_numeric_display_entries(

@@ -152,7 +152,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         StoreImage(&g_battle_menu_ability_list_clut_rect, (u32*)saved_clut);
         buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     }
-    battle_clear_menu_render_buffer(buffer, window.rect.w * window.rect.h / 2);
+    menu_clear_render_buffer(buffer, window.rect.w * window.rect.h / 2);
     row_offset = layout->row_offset;
     if (layout->columns.hidden_rows < row_offset) {
         row_offset = layout->columns.hidden_rows;
@@ -249,7 +249,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                 image_rect.y += 0x80;
                 row_buffer_live = 1;
                 buffer = menu_alloc_memory(window.rect.w * 8);
-                battle_clear_menu_render_buffer(buffer, window.rect.w * 8);
+                menu_clear_render_buffer(buffer, window.rect.w * 8);
                 g_menu_text_state.pen.stride = window.rect.w;
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;

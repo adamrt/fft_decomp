@@ -105,15 +105,15 @@ void camera_thread(void) {
             }
             if (mode == 0 || (group == 0 && j >= EVENT_CAMERA_COMPONENT_TILT)
                 || (group == 1 && j < EVENT_CAMERA_POSITION_COMPONENT_COUNT)) {
-                value = battle_mul_div_s64(delta, i, duration) + base;
+                value = mul_div_s64(delta, i, duration) + base;
                 if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
             } else if (mode == 1) {
                 decel = delta * weight;
                 accel = delta * ease * 2;
-                first = battle_mul_div_s64(accel + decel + decel, i, duration * 32);
-                value = battle_mul_div_s64(accel, ramp, duration * duration * 32) + first + base;
+                first = mul_div_s64(accel + decel + decel, i, duration * 32);
+                value = mul_div_s64(accel, ramp, duration * duration * 32) + first + base;
                 if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
@@ -122,8 +122,8 @@ void camera_thread(void) {
                 half = i * 2;
                 if (half < duration) {
                     decel = delta * weight;
-                    value = battle_mul_div_s64(
-                        battle_mul_div_s64(delta * ease * 2, half, duration) + decel + decel, half, duration * 32);
+                    value = mul_div_s64(
+                        mul_div_s64(delta * ease * 2, half, duration) + decel + decel, half, duration * 32);
                     if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += base * 4;
                     } else {
@@ -133,9 +133,8 @@ void camera_thread(void) {
                     decel = delta * weight;
                     accel = delta * ease * 2;
                     elapsed = half - duration;
-                    value = battle_mul_div_s64(
-                        accel + battle_mul_div_s64(accel, duration - elapsed, duration) + decel + decel, elapsed,
-                        duration * 32);
+                    value = mul_div_s64(accel + mul_div_s64(accel, duration - elapsed, duration) + decel + decel,
+                        elapsed, duration * 32);
                     if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += delta;
                         value += base * 4;

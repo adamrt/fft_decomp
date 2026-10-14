@@ -7,7 +7,7 @@
  * Called once for each component by the scene's camera-fusion thread.
  *
  * Each call samples the two tangent lines of the active key segment at this
- * frame and the next, intersects them (battle_fixed_cross_product_q12 is a Q12 cross product
+ * frame and the next, intersects them (fixed_cross_product_q12 is a Q12 cross product
  * that sets g_camera_cross_product_overflow on overflow) and moves the value along the resulting
  * control point. The locals span, frame and lead are reused across the
  * stages, as the target's register map requires. */
@@ -115,14 +115,14 @@ s32 camera_step_track(camera_track_t* track, s32 component) {
         time_delta1 = time3 - time2;
         value_delta1 = value3 - value2;
         time_delta0 = time1 - time0;
-        divisor = battle_fixed_cross_product_q12(value_delta0, time_delta1, time_delta0, value_delta1);
-        result = battle_fixed_cross_product_q12(time_delta1, value2 - value0, value_delta1, time2 - time0);
+        divisor = fixed_cross_product_q12(value_delta0, time_delta1, time_delta0, value_delta1);
+        result = fixed_cross_product_q12(time_delta1, value2 - value0, value_delta1, time2 - time0);
         if (divisor != 0) {
-            span = battle_mul_div_s64(time_delta0, result, divisor) + time0;   /* crossing time */
-            lead = battle_mul_div_s64(value_delta0, result, divisor) + value0; /* crossing value */
+            span = mul_div_s64(time_delta0, result, divisor) + time0;   /* crossing time */
+            lead = mul_div_s64(value_delta0, result, divisor) + value0; /* crossing value */
             divisor = span - track->prev_time;
             if (divisor != 0) {
-                result = battle_mul_div_s64(lead - track->prev_value, (track->frame * ONE) - track->prev_time, divisor)
+                result = mul_div_s64(lead - track->prev_value, (track->frame * ONE) - track->prev_time, divisor)
                     + track->prev_value;
                 track->prev_time = span;
                 track->prev_value = lead;

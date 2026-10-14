@@ -103,7 +103,6 @@ void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 /* text rendering */
 extern s32 g_battle_menu_text_section_offsets[];
 
-void battle_clear_menu_render_buffer(void* buffer, u32 bytes);
 void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* text);
 void battle_menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(

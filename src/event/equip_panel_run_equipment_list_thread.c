@@ -95,7 +95,7 @@ void equip_panel_run_equipment_list_thread(void) {
             }
         }
         if (frame == 0 || thread->redraw_request == 1) {
-            battle_clear_menu_render_buffer(text, 0xc80);
+            menu_clear_render_buffer(text, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 5; i++) {

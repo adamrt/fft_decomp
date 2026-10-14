@@ -58,7 +58,7 @@ void menu_run_selected_tile_info_display_thread(void) {
             gfx_draw_or_append_gpu_primitive(&page->quads[j]);
         }
         if (g_map_selected_tile_data.depth != 0) {
-            battle_clear_menu_render_buffer(buffer, 0x100);
+            menu_clear_render_buffer(buffer, 0x100);
             g_menu_text_state.pen.stride = 0x18;
             menu_set_text_origin(0x10, 0);
             menu_draw_number_glyphs(g_map_selected_tile_data.depth, 1, buffer, &g_menu_text_state.pen);

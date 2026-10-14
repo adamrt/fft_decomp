@@ -123,7 +123,7 @@ void world_menu_display_text(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* 
                                 goto end;
                             }
                             if (line >= g_menu_text_param_22) {
-                                world_text_blit_font_glyph_to_4bpp(
+                                text_render_glyph_to_4bpp_image(
                                     g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, pixels,
                                     &g_menu_text_pen, g_menu_text_palette_offset);
                             }
@@ -170,7 +170,7 @@ void world_menu_display_text(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* 
             break;
         }
         if (line >= g_menu_text_param_22) {
-            world_text_blit_font_glyph_to_4bpp(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, pixels,
+            text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, pixels,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }
         g_menu_text_pen.rect.x += g_text_glyph_widths[state->command];

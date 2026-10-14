@@ -2516,4 +2516,14 @@ extern image_load_parameters_t* g_menu_unit_status_quad_image_params_by_mode[];
 extern u16 g_menu_unit_status_sprite_clut_pairs[][2];
 extern image_load_parameters_t* g_menu_unit_status_sprite_image_params_by_mode[];
 
+/* glyph rendering */
+extern glyph_blit_t g_text_large_number_glyph_rect; /* glyph source rectangle in the large number font */
+
+void menu_clear_render_buffer(void* buffer, u32 bytes);
+void text_render_glyph_to_4bpp_image(const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
+void text_blit_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
+void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
+/* The caller leaves 0x16f in $a1, but the body never reads $a1. */
+void gfx_mirror_4bpp_rect(u8* data, const glyph_blit_t* region);
+
 #endif

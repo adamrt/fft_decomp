@@ -306,7 +306,7 @@ void require_panel_run_unit_status_thread(void) {
             } else {
                 numeric_entries[6].format = 2;
             }
-            battle_clear_menu_render_buffer(number_image, 0x700);
+            menu_clear_render_buffer(number_image, 0x700);
             window_width = &g_menu_text_state.pen.stride;
             text_position = (glyph_blit_t*)(window_width - 2);
             *window_width = 0x38;
@@ -317,27 +317,26 @@ void require_panel_run_unit_status_thread(void) {
             menu_draw_numeric_display_entries(number_image_lower, &numeric_entries[8], text_position, 2);
             LoadImage(&rects[1], (u32*)number_image_lower);
             thread->work = 0;
-            battle_clear_menu_render_buffer(name_image, 0x580);
+            menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
             menu_display_text_entry(unit_data->name_id + TEXT_ID_UNIT_NAME_BASE, name_image, text_position);
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(unit_data->job_id + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
             LoadImage(&rects[2], (u32*)name_image);
-            battle_clear_menu_render_buffer(small_text_image, 0xF0);
+            menu_clear_render_buffer(small_text_image, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            battle_text_draw_large_number_glyphs(unit_data->brave, 0x202, small_text_image, text_position);
+            text_draw_large_number_glyphs(unit_data->brave, 0x202, small_text_image, text_position);
             LoadImage(&rects[3], (u32*)small_text_image);
             menu_set_text_origin(0, 0);
             small_text_image_2 = small_text_image + 0x50;
-            battle_text_draw_large_number_glyphs(unit_data->faith, 0x202, small_text_image_2, text_position);
+            text_draw_large_number_glyphs(unit_data->faith, 0x202, small_text_image_2, text_position);
             LoadImage(&rects[4], (u32*)small_text_image_2);
             if (g_battle_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 small_text_image_3 = small_text_image + 0xA0;
-                battle_text_draw_large_number_glyphs(
-                    unit_data->battle_id + 1, 0x4002, small_text_image_3, text_position);
+                text_draw_large_number_glyphs(unit_data->battle_id + 1, 0x4002, small_text_image_3, text_position);
                 LoadImage(&rects[5], (u32*)small_text_image_3);
             } else {
                 LoadImage(&rects[5], (u32*)(small_text_image + 0xA0));

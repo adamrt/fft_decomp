@@ -54,8 +54,9 @@ static inline void world_set_4bpp_pixel(u8* pixels, s32 x, s32 y, s32 stride, s3
 }
 
 /* Mirrors a rectangle of a 4bpp image horizontally, swapping pixels from
- * both ends of each row toward the middle. */
-void world_gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect) {
+ * both ends of each row toward the middle. BATTLE links its own body under
+ * this name, calling out-of-line nibble helpers. */
+void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect) {
     s32 row;
     s32 col;
     s32 right;

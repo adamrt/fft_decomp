@@ -62,7 +62,7 @@ u8* world_menu_redraw_text_page_on_scroll_in_rect(
         return 0;
     }
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
-    world_clear_menu_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
+    menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     world_draw_menu_text_columns_narrow(entry, row_offset, buffer);
     *redraw = 0;
     LoadImage(&rect, buffer);

@@ -268,9 +268,6 @@ void battle_heap_print_stats(void);
 #define RANDOM_BETWEEN(min, max)                                                                                       \
     ((min) == (max) ? (min) : (max) < (min) ? rand() % ((min) - (max)) + (max) : rand() % ((max) - (min)) + (min))
 
-s32 battle_fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
-s32 battle_mul_div_s64(s32 a, s32 b, s32 c);
-
 /* shared state */
 extern u8 g_battle_job_level_gained_flag;
 /* Unit coordinates shared by camera tile tests and dialogue positioning. */

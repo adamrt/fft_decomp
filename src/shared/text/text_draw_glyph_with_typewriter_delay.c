@@ -126,7 +126,7 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
             g_text_typewriter_state.pen.stride = pitch;
             script_set_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT,
                 script_get_variable(EVENT_SCRIPT_VAR_PRINTED_CHARACTER_COUNT) + 1);
-            battle_text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->glyph * TEXT_GLYPH_BYTES, image,
+            text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + request->glyph * TEXT_GLYPH_BYTES, image,
                 &g_text_typewriter_state.pen, request->palette);
             g_text_typewriter_vram_rect.x
                 = (pen_x >> 2) + (s16)(script_get_variable(EVENT_SCRIPT_VAR_TYPEWRITER_VRAM_X_OFFSET) + 0x1C0);

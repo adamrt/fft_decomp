@@ -239,7 +239,7 @@ void menu_display_hovered_unit_stats(
         }
         if (frame == 0) {
             buffer = menu_alloc_buffer(0x700);
-            battle_clear_menu_render_buffer(buffer, 0x700);
+            menu_clear_render_buffer(buffer, 0x700);
             stride = &g_menu_text_state.pen.stride;
             origin = &g_menu_text_state.pen;
             *stride = 0x28;
