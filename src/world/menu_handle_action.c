@@ -10,7 +10,7 @@
  * the menu's selection.
  *
  * WORLD analog of battle_menu_handle_action. */
-void world_menu_handle_entry_confirm(menu_entry_t* entry, s32 row_index) {
+void menu_handle_action(menu_entry_t* entry, s32 row_index) {
     s32 silent;
     s32 target;
     s32 i;
@@ -24,7 +24,7 @@ void world_menu_handle_entry_confirm(menu_entry_t* entry, s32 row_index) {
         return;
     }
     silent = 0;
-    if ((g_script_event_input & PSX_PAD_CIRCLE) && world_menu_is_input_allowed() != 0) {
+    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input() != 0) {
         if (g_thread_contexts[g_thread_current_id].task_words[1] == 0) {
             g_thread_contexts[g_thread_current_id].task_words[1] = 2;
             g_thread_contexts[g_thread_current_id].task_words[0] = 0;
@@ -70,7 +70,7 @@ void world_menu_handle_entry_confirm(menu_entry_t* entry, s32 row_index) {
         }
         g_script_event_input = 0;
         *menu_entry_result(entry) = row_index;
-        if (g_world_menu_sound_muted == 0 && silent == 0) {
+        if (g_sound_suppressed == 0 && silent == 0) {
             sound_queue_sfx_confirm();
         }
     }

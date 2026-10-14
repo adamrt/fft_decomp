@@ -36,7 +36,7 @@ void menu_run_unit_editor_panel_thread(void) {
     g_battle_menu_panel_fade_mode = MENU_PANEL_FADE_OUT;
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
-    battle_menu_record_selection_for_selected_unit();
+    menu_record_selection_for_selected_unit();
     menu_set_modal_open();
     do {
         thread_yield();
@@ -208,7 +208,7 @@ void menu_run_unit_editor_panel_thread(void) {
         } else {
             menu_init_primitive_colors_dimmed(frame_record->palette);
         }
-        if (battle_menu_can_accept_input() != 0) {
+        if (menu_can_accept_input() != 0) {
             if (g_script_event_input & PSX_PAD_CROSS) {
                 thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
                 break;

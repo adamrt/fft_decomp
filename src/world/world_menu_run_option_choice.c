@@ -85,9 +85,9 @@ void world_menu_run_option_choice(void) {
     thread_wait_frames(1);
     cursor = g_world_game_option_values[kind];
     for (width = 0;; width++) {
-        world_menu_check_thread_completion(input);
+        menu_should_close_thread(input);
         record = &g_world_option_picker_icon_records[width & 1].base;
-        if (world_menu_is_input_allowed()) {
+        if (menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
@@ -132,7 +132,7 @@ void world_menu_run_option_choice(void) {
                 g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
             }
         }
-        world_menu_select_icon_cluts(record);
+        menu_select_icon_cluts(record);
         world_menu_update_icon_cursor_sprites(param, record, width, cursor);
         world_menu_submit_icon_primitives(record);
         thread_wait_frames(1);

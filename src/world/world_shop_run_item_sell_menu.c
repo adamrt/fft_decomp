@@ -1,3 +1,4 @@
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
@@ -25,7 +26,7 @@ s32 world_shop_run_item_sell_menu(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80F, 0);
         g_world_shop_quantity_limit = count;
         g_world_shop_sell_confirm_shown = 0;
-        g_world_menu_sound_muted = 1;
+        g_sound_suppressed = 1;
     }
     g_world_shop_sell_result = world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, g_world_shop_quantity_menu_data);
     if (thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU_CHILD) != 0 && g_world_shop_sell_confirm_shown == 0) {
@@ -46,7 +47,7 @@ s32 world_shop_run_item_sell_menu(void) {
         if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 1) {
             g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
         }
-        g_world_menu_sound_muted = 0;
+        g_sound_suppressed = 0;
     }
     return g_world_shop_sell_result;
 }

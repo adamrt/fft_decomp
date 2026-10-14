@@ -1,4 +1,5 @@
 #include "fft/script.h"
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
@@ -55,7 +56,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             }
         }
         world_formation_dismiss_unit(g_world_formation_selected_unit_index);
-        g_world_menu_sound_muted = 0;
+        g_sound_suppressed = 0;
         g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
         return;
     }
@@ -97,7 +98,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             }
             text_id = value + 0xE800;
             if (g_world_formation_dismiss_step == 0) {
-                g_world_menu_sound_muted = 1;
+                g_sound_suppressed = 1;
                 g_world_formation_dismiss_menu_data = &g_world_formation_dismiss_prompt;
                 if (g_world_formation_unit_banner_at_bottom != 0) {
                     value = 0x19;
@@ -139,7 +140,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             step = g_world_formation_dismiss_step;
             if (step == 1) {
                 selection = g_world_menu_selection_results[10];
-                g_world_menu_sound_muted = step;
+                g_sound_suppressed = step;
                 if (selection == 0) {
                     g_world_menu_sound_effect_id = MAIN_SFX_DISMISS;
                 } else if (selection == step) {
@@ -162,7 +163,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             return;
         }
         if (g_world_menu_selection_results[10] != 0) {
-            g_world_menu_sound_muted = 0;
+            g_sound_suppressed = 0;
             g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
             return;
         }
@@ -172,6 +173,6 @@ void world_formation_run_dismiss_unit_menu_step(void) {
     if (running != 0) {
         return;
     }
-    g_world_menu_sound_muted = 0;
+    g_sound_suppressed = 0;
     g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
 }

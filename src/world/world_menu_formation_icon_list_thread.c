@@ -44,15 +44,15 @@ void world_menu_formation_icon_list_thread(void) {
         }
         record = &records[i & 1].base;
         param->selected_index = cursor;
-        world_menu_select_icon_cluts(record);
+        menu_select_icon_cluts(record);
         world_menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (world_menu_check_thread_completion(&g_world_formation_menu_input_state.new_buttons) != 0) {
+        if (menu_should_close_thread(&g_world_formation_menu_input_state.new_buttons) != 0) {
             break;
         }
         if (world_thread_is_previous_running() == 0) {
             world_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
-            world_menu_handle_entry_confirm(param, cursor);
-            world_menu_cancel_thread_group(param);
+            menu_handle_action(param, cursor);
+            menu_handle_cancel_input(param);
         }
         setRGB0(&record->sprites[0], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);
         setRGB0(&record->sprites[1], g_world_menu_color_red, g_world_menu_color_green, g_world_menu_color_blue);

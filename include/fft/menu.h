@@ -169,6 +169,7 @@ void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RE
 /* BATTLE and WORLD each link their own body. */
 void menu_draw_active_window_frames(void);
 void menu_select_sprite_clut(void* packet);
+void menu_select_icon_sprite_clut(SPRT* slot);
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step);
 
@@ -849,7 +850,7 @@ typedef struct menu_entry {
     image_load_parameters_t text_image;
     s16 text_id;                 /* 0x1c: passed to text_find_entry */
     s16 max_row_index;           /* 0x1e: row count - 1 (world_menu_build_skillset_entries) */
-    s16 thread_count;            /* 0x20: threads world_menu_cancel_thread_group stops, -1 when there is no thread
+    s16 thread_count;            /* 0x20: threads menu_handle_cancel_input stops, -1 when there is no thread
                                     group; set from the system-function table by world_menu_run_system_function_thread */
     u8 _padding_22[0x24 - 0x22]; /* aligns row_actions */
     s16* row_actions;            /* 0x24 */
@@ -886,6 +887,14 @@ extern u16 g_menu_at_list_selection_finished;
 void menu_init_stub(void);
 void menu_confirm_action_silently(menu_entry_t* entry);
 void menu_wait_thread(void);
+void menu_input_thread(void);
+void menu_build_main(void);
+/* BATTLE and WORLD each link their own bodies of the next four. */
+s32 menu_can_accept_input(void);
+void menu_handle_action(menu_entry_t* entry, s32 row_index);
+void menu_handle_cancel_input(menu_entry_t* context);
+s32 menu_should_close_thread(u32* input);
+void menu_record_selection_for_selected_unit(void);
 void menu_clear_entry_selections(void);
 void menu_finish_at_list_selection(void);
 
@@ -951,6 +960,7 @@ typedef struct menu_icon_sprites {
     SPRT sprites[4];
 } menu_icon_sprites_t;
 typedef char menu_icon_sprites_size_must_be_104[(sizeof(menu_icon_sprites_t) == 104) ? 1 : -1];
+void menu_select_icon_cluts(menu_icon_sprites_t* frame);
 
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame);
 void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
@@ -1575,15 +1585,16 @@ s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s3
  * battle_menu_restore_selection_for_selected_unit and battle_menu_record_selection_for_selected_unit
  * prove the 8-byte stride and read only the leading menu id;
  * battle_menu_resolve_selection walks all 31 rows. */
-typedef struct battle_menu_id_record {
+typedef struct menu_command_map {
     u16 menu_id;
     u16 _padding_02; /* aligns map */
     /* 0x04: per-menu command remap table. map[0] handles the 0xFF selection
      * and map[n + 1] any other value; named by battle_menu_resolve_selection,
      * its only reader. The other readers use menu_id alone. */
     u8* map;
-} battle_menu_id_record_t;
-typedef char battle_menu_id_record_size_must_be_8[(sizeof(battle_menu_id_record_t) == 8) ? 1 : -1];
+} menu_command_map_t;
+typedef char menu_command_map_size_must_be_8[(sizeof(menu_command_map_t) == 8) ? 1 : -1];
+extern menu_command_map_t g_menu_command_maps[31];
 
 /* memory */
 /* Both menu arenas track sixteen allocations in 256-byte pages. */

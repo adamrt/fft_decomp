@@ -177,7 +177,7 @@ void world_menu_run_game_options(void) {
     mem_copy_bytes_nonempty(&base[1], base, sizeof(options_menu_page_t));
     for (;;) {
         page = &g_world_options_menu_pages[i & 1];
-        if (delta == 0 && world_menu_is_input_allowed() != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0) {
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
                     cursor--;
@@ -232,7 +232,7 @@ void world_menu_run_game_options(void) {
             }
             if (*input0 & PSX_PAD_CIRCLE) {
                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
-                if (world_menu_is_input_allowed() != 0) {
+                if (menu_can_accept_input() != 0) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
                     thread_start(g_thread_current_id - 1, world_menu_run_option_choice);
@@ -240,7 +240,7 @@ void world_menu_run_game_options(void) {
                 }
             }
             if (*input0 & PSX_PAD_CROSS) {
-                world_menu_cancel_thread_group(entry);
+                menu_handle_cancel_input(entry);
             }
         }
         if (g_menu_input_lock_mode == 0) {
@@ -253,14 +253,14 @@ void world_menu_run_game_options(void) {
             LoadImage(&g_world_options_menu_value_rect, (u32*)buffer);
         }
         thread_yield();
-        if (world_menu_check_thread_completion(input0) != 0) {
+        if (menu_should_close_thread(input0) != 0) {
             break;
         }
-        if (delta == 0 && world_menu_is_input_allowed() != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0) {
             world_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
-        world_menu_select_icon_cluts(&page->icons.base);
+        menu_select_icon_cluts(&page->icons.base);
         world_menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
         page->icons.base.sprites[1].y0 += 2;
         page->icons.base.sprites[2].y0 += 2;
@@ -294,7 +294,7 @@ void world_menu_run_game_options(void) {
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.draw_mode);
-        if (layout->hidden_rows != 0 && world_menu_is_input_allowed() != 0) {
+        if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);

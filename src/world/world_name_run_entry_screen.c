@@ -150,7 +150,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         if (g_sound_pending_sfx_id == 2 || g_sound_pending_sfx_id == 3) {
             g_world_menu_sound_effect_id = g_sound_pending_sfx_id;
         }
-        if (g_sound_pending_sfx_id < 0 || g_world_menu_sound_muted != 0) {
+        if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
             g_sound_pending_sfx_id = MAIN_SFX_NONE;
         }
         value = g_sound_pending_sfx_id;

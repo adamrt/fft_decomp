@@ -10,7 +10,7 @@
 void menu_confirm_action_silently(menu_entry_t* menu) {
     g_sound_suppressed = 1;
     g_script_event_input = PSX_PAD_CIRCLE;
-    battle_menu_handle_action(menu, 0);
+    menu_handle_action(menu, 0);
     g_sound_suppressed = 0;
     g_script_event_input = 0;
 }

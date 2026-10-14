@@ -1,3 +1,4 @@
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
@@ -31,7 +32,7 @@ s32 world_menu_run_best_fit_equipment(void) {
         thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
         g_world_formation_unit_cycle_mode = 1;
         g_world_item_best_remove_initialized = 1;
-        g_world_menu_sound_muted = 1;
+        g_sound_suppressed = 1;
     }
     g_world_item_best_remove_initialized
         = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, &g_world_best_fit_confirm_menu);
@@ -61,7 +62,7 @@ s32 world_menu_run_best_fit_equipment(void) {
             world_formation_stage_selected_unit();
         }
         thread_resume(WORLD_THREAD_SLOT_UPPER_MENU);
-        g_world_menu_sound_muted = 0;
+        g_sound_suppressed = 0;
         return 0;
     }
     return 1;

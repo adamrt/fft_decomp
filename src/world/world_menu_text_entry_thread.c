@@ -30,8 +30,8 @@ void world_menu_text_entry_thread(void) {
     thread_wait_until_inactive(text_thread);
     *g_world_menu_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
-        world_menu_handle_entry_confirm(entry, 0);
-        if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {
+        menu_handle_action(entry, 0);
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
         if ((thread - 1)->function_parameter_3 != 0) {

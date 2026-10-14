@@ -44,11 +44,11 @@ void debugchr_menu_icon_strip_thread(void) {
             menu_free_memory(render);
             redraw = 0;
         }
-        if (battle_menu_should_close_thread(&input) != 0)
+        if (menu_should_close_thread(&input) != 0)
             break;
         frame_parity = frame & 1;
         frame_pair = &frame_base[frame_parity];
-        battle_menu_select_icon_cluts(&frame_pair->base);
+        menu_select_icon_cluts(&frame_pair->base);
         battle_menu_submit_icon_primitives(&frame_pair->base);
         frame++;
     }

@@ -1,3 +1,4 @@
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/pad.h"
@@ -110,7 +111,7 @@ s8 world_item_run_action_menu(void) {
             g_world_preview_stats_thread_params.style = selected;
             item = g_world_menu_entry_ids[g_world_menu_cursor_position];
             if (g_world_item_action_menu_initialized == selected) {
-                g_world_menu_sound_muted = 1;
+                g_sound_suppressed = 1;
                 if (g_world_menu_selection_results[5] == 0) {
                     g_world_menu_sound_effect_id = MAIN_SFX_UNEQUIP;
                 } else if (g_world_menu_selection_results[5] == 1) {
@@ -130,7 +131,7 @@ s8 world_item_run_action_menu(void) {
                     }
                 }
             }
-            g_world_menu_sound_muted = 0;
+            g_sound_suppressed = 0;
             world_menu_reset_selection_results();
             g_world_preview_stats_thread_params.style = 0;
             g_world_item_unequip_all_menu.selected_index = 0;

@@ -36,11 +36,11 @@ void menu_icon_strip_thread(void) {
             menu_free_memory(buffer);
             fresh = 0;
         }
-        if (battle_menu_should_close_thread(&input) != 0) {
+        if (menu_should_close_thread(&input) != 0) {
             break;
         }
         record = &records[i & 1];
-        battle_menu_select_icon_cluts(&record->base);
+        menu_select_icon_cluts(&record->base);
         battle_menu_submit_icon_primitives(&record->base);
     }
     thread_yield();

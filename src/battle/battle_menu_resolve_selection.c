@@ -26,7 +26,7 @@ s32 battle_menu_resolve_selection(void) {
     if (command != 0x12 && (command & 0xFE) != 0xFE) {
         menu = g_menu_current_id;
         for (i = 0; i < 31; i++) {
-            if (menu == g_battle_menu_id_records[i].menu_id) {
+            if (menu == g_menu_command_maps[i].menu_id) {
                 if (command != 0xFF) {
                     if (menu == BATTLE_MENU_ID_DEAD_UNIT) {
                         command = g_battle_dead_unit_action;
@@ -34,13 +34,13 @@ s32 battle_menu_resolve_selection(void) {
                         *(u8*)&g_battle_menu_selected_action.item_or_equipment = g_battle_dead_unit_result;
                         option = 0xFFFE;
                     } else if (menu == 0x19 || menu >= 0x64) {
-                        command = *(g_battle_menu_id_records[i].map + option + 1);
+                        command = *(g_menu_command_maps[i].map + option + 1);
                         option = 0xFFFE;
                     } else {
-                        command = *(g_battle_menu_id_records[i].map + command + 1);
+                        command = *(g_menu_command_maps[i].map + command + 1);
                     }
                 } else {
-                    command = g_battle_menu_id_records[i].map[0];
+                    command = g_menu_command_maps[i].map[0];
                 }
                 break;
             }

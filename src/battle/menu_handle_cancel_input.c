@@ -28,7 +28,7 @@
  * thread) is asked to stop (task 3). The entry's result cell receives -1, the
  * event input is consumed, the cancel sound is queued and event input stays
  * suppressed for 5 frames. */
-void battle_handle_menu_cancel_input(menu_entry_t* menu) {
+void menu_handle_cancel_input(menu_entry_t* menu) {
     s32 count;
     s32 i;
     s32 idx;
@@ -38,7 +38,7 @@ void battle_handle_menu_cancel_input(menu_entry_t* menu) {
     s32 thread;
     char unused[8];
 
-    if ((g_script_event_input & PSX_PAD_CROSS) && battle_menu_can_accept_input() != 0) {
+    if ((g_script_event_input & PSX_PAD_CROSS) && menu_can_accept_input() != 0) {
         count = menu->thread_count;
         if (count != -1) {
             /* The counter is zeroed ahead of the guard, not inside the arm.

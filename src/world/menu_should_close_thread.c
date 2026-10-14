@@ -8,11 +8,11 @@
  * Input bit 0x100 opens the entry's auxiliary text thread when its table
  * selector is nonzero. Completion waits for all other task-3 threads.
  */
-s32 world_menu_check_thread_completion(u32* input) {
+s32 menu_should_close_thread(u32* input) {
     menu_entry_t* parameter;
     s32 i;
 
-    if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && world_menu_is_input_allowed() != 0
+    if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input() != 0
         && (*input & PSX_PAD_SELECT)) {
         parameter = (menu_entry_t*)world_thread_get_current_parameter_1();
         if (parameter->select_text_table != 0) {

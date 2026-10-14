@@ -38,19 +38,19 @@ void menu_run_icon_selection_loop(void) {
         }
         record = &records[i & 1];
         param->selected_index = cursor;
-        battle_menu_select_icon_cluts(&record->base);
+        menu_select_icon_cluts(&record->base);
         battle_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
         if ((records[0]._unknown_78 == 0 && records[1]._unknown_78 == 2)
             || (records[0]._unknown_78 == 2 && records[1]._unknown_78 == 0)) {
             records[0]._unknown_78 = 0;
             records[1]._unknown_78 = 0;
         }
-        if (battle_menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
-        battle_menu_handle_action(param, cursor);
+        menu_handle_action(param, cursor);
         battle_menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
-        battle_handle_menu_cancel_input(param);
+        menu_handle_cancel_input(param);
         battle_menu_submit_icon_primitives(&record->base);
     }
     thread_yield();

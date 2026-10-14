@@ -119,7 +119,7 @@ void menu_start_dead_unit_threads(void) {
     for (;;) {
         if (context->result == 3) {
             g_option_dead_unit_secondary_result = 0xff;
-            thread_start(g_thread_current_id - 1, battle_menu_run_icon_selection_loop);
+            thread_start(g_thread_current_id - 1, menu_run_icon_selection_loop);
             thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[DEAD_UNIT_MENU_MOVE], 0, 0);
             thread_wait_until_inactive(g_thread_current_id - 1);
         }

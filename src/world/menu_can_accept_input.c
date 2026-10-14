@@ -10,7 +10,7 @@
  * thread slot is idle, no stop is requested (parameter 3), no text task or
  * overlay is active and the block has run out.
  */
-s32 world_menu_is_input_allowed(void) {
+s32 menu_can_accept_input(void) {
     if ((world_thread_is_running_asm(THREAD_SCREEN_SLOT_TEXT)
             && (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].function_parameter_1 & 0x70) == 0x30)
         || (world_thread_is_running_asm(THREAD_SCREEN_SLOT_MESSAGE)

@@ -1,4 +1,5 @@
 #include "fft/menu.h"
+#include "fft/sound.h"
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"
@@ -77,7 +78,7 @@ s32 world_ability_run_learn_list(void) {
                     = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
                 g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
                 g_world_learn_confirm_submenu.selected_index = 0;
-                g_world_menu_sound_muted = 1;
+                g_sound_suppressed = 1;
             }
         } else if (g_world_input_primary_repeat & PSX_PAD_CROSS) {
             g_world_learn_ability_list_open = 0;
@@ -111,7 +112,7 @@ s32 world_ability_run_learn_list(void) {
             } else if (g_world_menu_selection_results[5] == 1) {
                 g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
             }
-            g_world_menu_sound_muted = 0;
+            g_sound_suppressed = 0;
             world_ability_find_unit_abilities(g_world_formation_selected_unit_index, g_world_learn_selected_job,
                 g_world_ability_category, g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
             world_menu_init_scrollable_list_core(g_menu_ability_entries, g_world_menu_cursor_position,

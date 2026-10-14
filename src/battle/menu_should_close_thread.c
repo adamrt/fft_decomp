@@ -9,7 +9,7 @@
  * returned. If another running thread carries the stop-request task id, the input
  * is cleared too. Returns 1 only when no such thread exists and the current
  * thread's third parameter is set, which is how a menu thread is asked to close. */
-s32 battle_menu_should_close_thread(u32* input) {
+s32 menu_should_close_thread(u32* input) {
     s32 i;
     s32 task_state;
 

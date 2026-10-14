@@ -12,5 +12,5 @@ void menu_run_triangle_selection(void) {
     }
     script_pulse_tutorial_wait_value(0xFE);
     g_menu_hide_numeric_values = 0;
-    battle_menu_run_icon_selection_loop();
+    menu_run_icon_selection_loop();
 }

@@ -1,3 +1,4 @@
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/pad.h"
@@ -65,7 +66,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
             }
         } else {
             g_world_menu_description_text_id = 0;
-            g_world_menu_sound_muted = g_world_shop_sell_equipped_prompt_active
+            g_sound_suppressed = g_world_shop_sell_equipped_prompt_active
                 = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_sell_equipped_menu);
             if (g_world_shop_sell_equipped_prompt_active == 0) {
                 if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 0) {

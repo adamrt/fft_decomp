@@ -144,7 +144,7 @@ void world_build_at_list(void) {
         } else {
             thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
         }
-        if (delta == 0 && world_menu_is_input_allowed() != 0 && i != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             /* Dead store (column is reinitialized before use); only the reload
              * of layout for this branch survives in the target. */
             if (layout == 0) {
@@ -222,19 +222,19 @@ void world_build_at_list(void) {
         if (redraw_pending != 0) {
             redraw_pending = 0;
         }
-        if (delta == 0 && world_menu_is_input_allowed() != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0) {
             redraw_pending = (s32)world_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
         entry->selected_index = cursor + row_offset;
         entry->select_text_table = row_offset;
-        if (world_menu_check_thread_completion(input0) != 0) {
+        if (menu_should_close_thread(input0) != 0) {
             break;
         }
         if (delta == 0) {
-            world_menu_handle_entry_confirm(entry, cursor);
+            menu_handle_action(entry, cursor);
         }
-        world_menu_cancel_thread_group(entry);
+        menu_handle_cancel_input(entry);
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_main_menu_scroll_accel_delay) {
@@ -261,7 +261,7 @@ void world_build_at_list(void) {
         } else {
             frame->clut = 0x7FFC;
         }
-        if (layout->hidden_rows != 0 && world_menu_is_input_allowed() != 0) {
+        if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
@@ -279,7 +279,7 @@ void world_build_at_list(void) {
         }
         world_gfx_build_scaled_draw_area_pair_swapped(
             &page->draw_areas, &entry->window, i, g_active_graphics_buffer_index);
-        world_menu_select_icon_sprite_clut(page->icons.icons[0]);
+        menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);
         }
@@ -288,7 +288,7 @@ void world_build_at_list(void) {
         gfx_draw_or_append_gpu_primitive(frame);
         gfx_draw_or_append_gpu_primitive(&page->text_mode);
         gfx_draw_or_append_gpu_primitive(&page->draw_areas);
-        world_menu_select_icon_cluts(&page->icons.base);
+        menu_select_icon_cluts(&page->icons.base);
         world_menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
         i++;
         page->icons.base.sprites[0].x0 = 1000;

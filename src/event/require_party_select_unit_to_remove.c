@@ -247,7 +247,7 @@ s32 require_party_select_unit_to_remove(void) {
         thread_set_four_parameters(
             REQUIRE_THREAD_SLOT_MESSAGE, 0x19, message_id, selected_battle_unit->unit_id, should_restore);
         g_threads[REQUIRE_THREAD_SLOT_MESSAGE].task_words[3] = 0x18;
-        thread_start(REQUIRE_THREAD_SLOT_MENU, battle_menu_run_icon_selection_loop);
+        thread_start(REQUIRE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
         thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, (s32)&g_require_party_removal_menus[0], 0, 0);
         require_menu_wait_selection_threads();
         if (g_require_menu_selection_result != 0)

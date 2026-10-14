@@ -77,9 +77,9 @@ void option_menu_run_choice(void) {
     thread_wait_frames(1);
     cursor = g_option_current_values[kind];
     for (width = 0;; width++) {
-        battle_menu_should_close_thread(input);
+        menu_should_close_thread(input);
         record = &g_option_picker_icon_records[width & 1];
-        if (battle_menu_can_accept_input()) {
+        if (menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
@@ -124,7 +124,7 @@ void option_menu_run_choice(void) {
                 g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
             }
         }
-        battle_menu_select_icon_cluts(&record->base);
+        menu_select_icon_cluts(&record->base);
         battle_menu_update_icon_cursor_sprites(param, &record->base, width, cursor);
         battle_menu_submit_icon_primitives(&record->base);
         thread_wait_frames(1);

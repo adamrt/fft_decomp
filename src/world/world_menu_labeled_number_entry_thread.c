@@ -94,12 +94,12 @@ void world_menu_labeled_number_entry_thread(void) {
             menu_free_memory(buffer);
             redraw = 0;
         }
-        if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
         input = *g_world_menu_list_controller_input;
-        world_menu_cancel_thread_group(param);
-        world_menu_handle_entry_confirm(param, 0);
+        menu_handle_cancel_input(param);
+        menu_handle_action(param, 0);
         if (input != *g_world_menu_list_controller_input) {
             if (*menu_entry_result(param) == -1) {
                 *menu_entry_result(param) = original;
@@ -160,7 +160,7 @@ void world_menu_labeled_number_entry_thread(void) {
             shadow_quad->clut = 0x7E3C;
         }
         world_menu_update_icon_cursor_sprites(param, &record.base, i, -1);
-        world_menu_select_icon_cluts(&record.base);
+        menu_select_icon_cluts(&record.base);
         gfx_draw_or_append_gpu_primitive(&cursor_quads[i & 1]);
         gfx_draw_or_append_gpu_primitive(&shadow_quads[i & 1]);
         gfx_draw_or_append_gpu_primitive(&record.base.sprites[0]);

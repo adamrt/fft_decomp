@@ -1,3 +1,4 @@
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
@@ -106,7 +107,7 @@ void world_shop_run_best_fit_preview_step(void) {
         g_world_preview_stats_thread_params.redraw_request = 1;
         g_world_shop_best_fit_menu_open = 1;
         g_world_formation_unit_cycle_mode = 1;
-        g_world_menu_sound_muted = 1;
+        g_sound_suppressed = 1;
     }
     i = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_best_fit_menu);
     if (i == 0) {
@@ -149,7 +150,7 @@ void world_shop_run_best_fit_preview_step(void) {
             world_formation_recalculate_selected_unit_stats();
         }
         g_world_shop_menu_step = WORLD_SHOP_STEP_FITTING_ROOM;
-        g_world_menu_sound_muted = 0;
+        g_sound_suppressed = 0;
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
     }
     if (g_world_shop_cost_window_visible != 0) {

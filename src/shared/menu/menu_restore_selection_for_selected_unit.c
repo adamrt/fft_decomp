@@ -10,7 +10,7 @@ void menu_restore_selection_for_selected_unit(s32 menu_id) {
     menu_selection_remap_t* remap;
 
     for (i = 0; i < 12; i++) {
-        if (g_battle_menu_id_records[i].menu_id == menu_id) {
+        if (g_menu_command_maps[i].menu_id == menu_id) {
             break;
         }
     }

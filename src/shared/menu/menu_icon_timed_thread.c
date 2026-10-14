@@ -52,21 +52,21 @@ void menu_icon_timed_thread(void) {
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;
         }
-        if (battle_menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         if (unset >= 0) {
             g_thread_current_id--;
-            battle_menu_select_icon_cluts(&records[i & 1].base);
+            menu_select_icon_cluts(&records[i & 1].base);
             g_thread_current_id++;
         } else {
-            battle_menu_select_icon_cluts(&records[i & 1].base);
+            menu_select_icon_cluts(&records[i & 1].base);
         }
         record = &records[i & 1];
         battle_menu_update_icon_cursor_sprites(param, &record->base, i, -1);
         if (hold == 0) {
-            battle_menu_handle_action(param, 0);
-            battle_handle_menu_cancel_input(param);
+            menu_handle_action(param, 0);
+            menu_handle_cancel_input(param);
         }
         battle_menu_submit_icon_primitives(&record->base);
     }

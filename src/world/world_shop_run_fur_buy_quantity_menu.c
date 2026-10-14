@@ -1,3 +1,4 @@
+#include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
@@ -39,7 +40,7 @@ s32 world_shop_run_fur_buy_quantity_menu(void) {
             count = stock;
         }
         g_world_shop_quantity_limit = count;
-        g_world_menu_sound_muted = 1;
+        g_sound_suppressed = 1;
     }
     g_world_shop_fur_purchase_result
         = world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, g_world_shop_quantity_menu_data);
@@ -61,7 +62,7 @@ s32 world_shop_run_fur_buy_quantity_menu(void) {
         if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 1) {
             g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
         }
-        g_world_menu_sound_muted = 0;
+        g_sound_suppressed = 0;
     }
     return g_world_shop_fur_purchase_result;
 }

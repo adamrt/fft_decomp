@@ -10,7 +10,6 @@
 extern s32 g_battle_active_menu; /* active menu */
 extern s32 g_battle_menu_help_open;
 extern s32 g_battle_menu_help_opening;
-extern battle_menu_id_record_t g_battle_menu_id_records[31];
 extern u8 g_battle_menu_restore_depth;
 extern u8 g_battle_menu_restore_unit_id;
 extern u16 g_battle_menu_transition_state;
@@ -32,8 +31,6 @@ extern s16 g_battle_menu_result; /* menu result: -4 pending, -1 canceled */
 extern s16 g_battle_menu_selected_option;
 extern menu_selection_remap_t g_battle_menu_selection_remaps[8];
 
-void battle_handle_menu_cancel_input(menu_entry_t* menu);
-s32 battle_menu_can_accept_input(void);
 void battle_menu_display_triangle_selection(void);
 s32 battle_menu_get_cursor_bob_offset(s32 mode);
 s32 battle_menu_resolve_selection(void);
@@ -70,7 +67,6 @@ s32 battle_menu_dispatch_system_function(
 battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id);
 ai_command_t* battle_menu_get_selected_command_address(void);
 battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
-void battle_menu_handle_action(menu_entry_t* menu, s32 selected_option);
 s32 battle_menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, s32 enabled);
 void battle_menu_open_active_unit_idle_action_menu(void);
 void battle_menu_open_free_cursor_help(void);
@@ -157,7 +153,6 @@ s32 battle_menu_display_projected_action_effect(
 s32 battle_menu_get_dead_unit_selection(s32 battle_id);
 void battle_menu_load_selected_unit(void);
 void battle_menu_open_option_dead_unit_panel(void);
-void battle_menu_record_selection_for_selected_unit(void);
 void battle_menu_refresh_hovered_unit_stats_display(void);
 void battle_menu_restore_selection_for_selected_unit(s32 menu_id);
 
@@ -226,9 +221,6 @@ u8* battle_menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, 
 void battle_menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
 void battle_menu_icon_linked_entry_thread(void);
 void battle_menu_init_semitransparent_sprt(SPRT* sprite);
-void battle_menu_run_icon_selection_loop(void);
-void battle_menu_select_icon_cluts(menu_icon_sprites_t* frame);
-void battle_menu_select_icon_sprite_clut(SPRT* sprite);
 void battle_menu_submit_icon_primitives(menu_icon_sprites_t* frame);
 void battle_menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
 
@@ -294,7 +286,6 @@ void battle_menu_run_equip_thread(void);
 void battle_menu_run_helpmenu_thread(void);
 void battle_menu_run_jobstts_thread(void);
 void battle_menu_selected_tile_info_display_thread(void);
-s32 battle_menu_should_close_thread(u32* input);
 void battle_menu_start_building_thread(void);
 void battle_menu_start_entry_thread(void);
 

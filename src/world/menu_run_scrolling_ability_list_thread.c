@@ -157,7 +157,7 @@ void menu_run_scrolling_ability_list_thread(void) {
         page = &base[i & 1];
         frame = &page->frame;
         SetSemiTrans(&frame, 1);
-        if (delta == 0 && world_menu_is_input_allowed() != 0 && i != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
                     toggle ^= 1;
@@ -262,20 +262,20 @@ void menu_run_scrolling_ability_list_thread(void) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
-        if (delta == 0 && world_menu_is_input_allowed() != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0) {
             buffer = world_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
         entry->selected_index = cursor + row_offset;
         layout->row_offset = row_offset;
-        if (world_menu_check_thread_completion(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
-        world_menu_select_icon_cluts(&page->icons.base);
-        world_menu_select_icon_sprite_clut(page->icons.icons[0]);
-        world_menu_select_icon_sprite_clut(page->icons.icons[1]);
-        world_menu_select_icon_sprite_clut(page->icons.icons[2]);
+        menu_select_icon_cluts(&page->icons.base);
+        menu_select_icon_sprite_clut(page->icons.icons[0]);
+        menu_select_icon_sprite_clut(page->icons.icons[1]);
+        menu_select_icon_sprite_clut(page->icons.icons[2]);
         if (world_thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
@@ -300,9 +300,9 @@ void menu_run_scrolling_ability_list_thread(void) {
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
         if (g_world_menu_scrolling_list_depth < 2 && delta == 0) {
-            world_menu_handle_entry_confirm(entry, cursor);
+            menu_handle_action(entry, cursor);
         }
-        world_menu_cancel_thread_group(entry);
+        menu_handle_cancel_input(entry);
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_main_menu_scroll_accel_delay) {

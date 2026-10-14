@@ -1,4 +1,5 @@
 #include "fft/event_card.h"
+#include "fft/sound.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

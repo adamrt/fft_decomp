@@ -44,7 +44,7 @@ void world_menu_icon_clamped_list_thread(void) {
             menu_free_memory(buffer);
         }
         param->selected_index = cursor;
-        if (world_menu_check_thread_completion(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
         if (world_thread_is_previous_running() == 0) {
@@ -54,11 +54,11 @@ void world_menu_icon_clamped_list_thread(void) {
             if (!(*g_world_menu_list_controller_input & PSX_PAD_DOWN) && cursor != param->max_row_index) {
                 cursor++;
             }
-            world_menu_handle_entry_confirm(param, cursor);
-            world_menu_cancel_thread_group(param);
+            menu_handle_action(param, cursor);
+            menu_handle_cancel_input(param);
         }
         sprites = &record->base;
-        world_menu_select_icon_cluts(sprites);
+        menu_select_icon_cluts(sprites);
         world_menu_update_icon_cursor_sprites(param, &record->base, i, cursor);
         gfx_draw_or_append_gpu_primitive(&sprites->sprites[3].tag);
         gfx_draw_or_append_gpu_primitive(&sprites->sprites[2].tag);

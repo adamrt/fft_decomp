@@ -25,7 +25,7 @@ void world_sound_dispatch_effect(void) {
     if (g_sound_pending_sfx_id == MAIN_SFX_CANCEL || g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE) {
         g_world_menu_sound_effect_id = g_sound_pending_sfx_id;
     }
-    if (g_sound_pending_sfx_id < 0 || g_world_menu_sound_muted != 0) {
+    if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     }
     sound_id = g_sound_pending_sfx_id;

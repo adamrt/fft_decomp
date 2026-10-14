@@ -193,13 +193,13 @@ void require_party_apply_post_battle_changes(void) {
                         thread_set_parameters(REQUIRE_THREAD_SLOT_MESSAGE,
                             (s32)(menu_fields - (unsigned long)&((menu_entry_t*)0)->inner_width), 0, 0);
                         if (g_require_editor_unit_fields.state.generic_monster != 0) {
-                            thread_start(REQUIRE_THREAD_SLOT_MENU, battle_menu_run_icon_selection_loop);
+                            thread_start(REQUIRE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(REQUIRE_THREAD_SLOT_MENU,
                                 (s32)(menu_fields + 8 * sizeof(*menu_base)
                                     - (unsigned long)&((menu_entry_t*)0)->inner_width),
                                 0, 0);
                         } else {
-                            thread_start(REQUIRE_THREAD_SLOT_MENU, battle_menu_run_icon_selection_loop);
+                            thread_start(REQUIRE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(REQUIRE_THREAD_SLOT_MENU,
                                 (s32)(menu_fields + sizeof(*menu_base)
                                     - (unsigned long)&((menu_entry_t*)0)->inner_width),

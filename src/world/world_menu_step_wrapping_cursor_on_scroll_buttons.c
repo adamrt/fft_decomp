@@ -6,7 +6,7 @@
 
 /* Step a wrapping cursor on the two scroll buttons and play the scroll SFX. */
 void world_menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor) {
-    if (world_menu_is_input_allowed() == 0) {
+    if (menu_can_accept_input() == 0) {
         return;
     }
     if (g_script_event_input & PSX_PAD_UP) {

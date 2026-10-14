@@ -15,7 +15,7 @@
  * 0x4d2 records the option as -1; a negative action -n closes n menu levels
  * by setting the third parameter of the next n threads (thread 8 also saves
  * the open menus' selections). */
-void battle_menu_handle_action(menu_entry_t* menu, s32 selected_option) {
+void menu_handle_action(menu_entry_t* menu, s32 selected_option) {
     s16* actions;
     s32 action;
     s32 silent;
@@ -28,7 +28,7 @@ void battle_menu_handle_action(menu_entry_t* menu, s32 selected_option) {
         return;
     }
     silent = 0;
-    if (!(g_script_event_input & PSX_PAD_CIRCLE) || battle_menu_can_accept_input() == 0) {
+    if (!(g_script_event_input & PSX_PAD_CIRCLE) || menu_can_accept_input() == 0) {
         return;
     }
     if (g_thread_contexts[g_thread_current_id].task_words[1] == 0) {
