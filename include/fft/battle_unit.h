@@ -1335,7 +1335,6 @@ u8 battle_unit_generate_treasure(unit_stats_t* unit);
 crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover);
 
 /* unit views */
-extern u8 g_battle_unit_summary_digit_images[];
 extern image_load_parameters_t g_battle_unit_summary_portrait_image_params;
 
 #endif

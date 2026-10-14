@@ -2418,7 +2418,7 @@ data:
   - {addr: 0x80166b10, name: g_menu_idle_action_entries}
   - {addr: 0x80167830, name: g_menu_numeric_display_texture_window}
   - {addr: 0x80167838, name: g_menu_numeric_display_palette_indices}
-  - {addr: 0x80167844, name: g_battle_menu_numeric_display_frame_offsets}
+  - {addr: 0x80167844, name: g_menu_numeric_display_frame_offsets}
   - {addr: 0x801678a4, name: g_battle_text_current_line}
   - {addr: 0x80167908, name: g_menu_window_tween_easing_tables}
   - {addr: 0x8016791c, name: g_text_section_backup_active}
@@ -2522,7 +2522,7 @@ data:
   - {addr: 0x8016982c, name: g_menu_selected_action}
   - {addr: 0x80169840, name: g_menu_skillset_build_result}
   - {addr: 0x8016986c, name: g_thread_contexts}
-  - {addr: 0x8016996c, name: g_battle_unit_summary_digit_images}
+  - {addr: 0x8016996c, name: g_menu_unit_summary_digit_images}
   - {addr: 0x80169a6c, name: g_menu_numeric_display_palettes}
   - {addr: 0x8016d16c, name: g_menu_unit_editor_palette}
   - {addr: 0x8016d26c, name: g_menu_unit_summary_palettes}
@@ -2924,7 +2924,6 @@ overrides:
   - {function: camera_update_zoom_animation, name: g_camera_real_coord_countdown, addr: 0x80096164}
   - {function: camera_update_zoom_animation, name: g_camera_real_coord_delta, addr: 0x800a1c74}
   - {function: menu_init_attack_resources_and_threads, name: world_script_check_tutorial_event_slot, addr: 0x8012dc84}
-  - {function: menu_init_numeric_display_frame_primitives, name: g_world_menu_numeric_display_frame_offsets, addr: 0x80167844}
   - {function: menu_init_numeric_display_frame_primitives, name: world_menu_init_sprite, addr: 0x8012e244}
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80165ecc}
   - {function: menu_open_debugchr_unit_editor, name: world_menu_build_idle_action_stub, addr: 0x8013cf58}

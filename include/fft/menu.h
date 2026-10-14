@@ -2464,6 +2464,7 @@ extern u8 g_text_spell_quote_exception_skillsets[];
 extern u8 g_text_glyph_bitmaps[];
 
 /* unit panel data */
+extern u8 g_menu_unit_summary_digit_images[];
 extern u8 g_menu_billboard_job_name[];                /* job name text window */
 extern u8 g_menu_billboard_unit_name[];               /* name text window */
 extern u8 g_menu_billboard_secondary_skillset_name[]; /* secondary skillset name text window */
@@ -2483,6 +2484,8 @@ extern menu_palette_slot_t g_menu_unit_summary_palettes[];
 extern image_load_parameters_t g_menu_unit_summary_sprite_image_params[];
 
 /* numeric display data */
+/* Twelve world_menu_line_layout_t records, walked by byte offset. */
+extern s8 g_menu_numeric_display_frame_offsets[96];
 extern menu_panel_record_t g_menu_numeric_display_panel_records[2];
 extern menu_number_entry_t g_menu_numeric_display_entries[15];
 extern RECT g_menu_numeric_display_frame_rect;

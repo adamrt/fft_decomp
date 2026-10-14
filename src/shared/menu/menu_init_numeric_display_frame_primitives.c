@@ -17,20 +17,20 @@ void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitiv
     line = menu->lines;
     offset = 0;
     for (i = 0; i < 12; i++) {
-        line->x0 = g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_X0] + box->x;
-        line->y0 = g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_Y0] + box->y;
-        line->x1 = g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_X1] + box->x;
-        line->y1 = g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_Y1] + box->y;
-        if (g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_W0] != 0) {
+        line->x0 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_X0] + box->x;
+        line->y0 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_Y0] + box->y;
+        line->x1 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_X1] + box->x;
+        line->y1 = g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_Y1] + box->y;
+        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_W0] != 0) {
             line->x0 += box->w;
         }
-        if (g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_H0] != 0) {
+        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_H0] != 0) {
             line->y0 += box->h;
         }
-        if (g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_W1] != 0) {
+        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_W1] != 0) {
             line->x1 += box->w;
         }
-        if (g_world_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_H1] != 0) {
+        if (g_menu_numeric_display_frame_offsets[offset + WORLD_MENU_LINE_LAYOUT_ADD_H1] != 0) {
             line->y1 += box->h;
         }
         offset += WORLD_MENU_LINE_LAYOUT_SIZE;

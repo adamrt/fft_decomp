@@ -1441,7 +1441,6 @@ extern s8 g_world_unit_status_banner_state; /* banner state: 0 idle, 1 finishing
 /* Panel scratch aliases inside g_thread_contexts[0] and [14], at
  * +0x100 and +0x200 in each slot's stack. These stay separate symbols;
  * the palette areas hold one slot per page. */
-extern world_unit_status_number_images_t g_world_unit_summary_digit_images;
 extern menu_status_panel_editor_packet_t g_world_selected_unit_summary_packets[2];
 extern menu_status_panel_packet_t g_world_selected_unit_status_packets[2];
 extern u8 g_world_selected_unit_stat_text_image[];
@@ -1707,9 +1706,6 @@ extern s16 g_world_menu_use_scroll_position;
 extern s8 g_world_menu_window_scale_step;
 extern s32 g_world_menu_scrolling_list_depth;
 extern u16 g_world_menu_input_block_frames;
-
-extern s8
-    g_world_menu_numeric_display_frame_offsets[]; /* twelve world_menu_line_layout_t records, walked by byte offset */
 
 /* Four image-load parameter blocks per icon kind, for kinds 5..15. */
 extern image_load_parameters_t g_world_menu_icon_strip_image_params[];

@@ -1174,7 +1174,7 @@ data:
   - {addr: 0x80154b14, name: g_world_help_portrait_clut_by_sheet_id}
   - {addr: 0x80154cbc, name: g_menu_numeric_display_texture_window}
   - {addr: 0x80154cc4, name: g_menu_numeric_display_palette_indices}
-  - {addr: 0x80154cd0, name: g_world_menu_numeric_display_frame_offsets}
+  - {addr: 0x80154cd0, name: g_menu_numeric_display_frame_offsets}
   - {addr: 0x80154d30, name: g_world_text_current_line}
   - {addr: 0x80154d94, name: g_menu_window_tween_easing_tables}
   - {addr: 0x80154da8, name: g_text_section_backup_active}
@@ -1849,7 +1849,7 @@ data:
   - {addr: 0x80195c90, name: g_menu_selected_action}
   - {addr: 0x80195ca4, name: g_menu_skillset_build_result}
   - {addr: 0x80195cd0, name: g_thread_contexts}
-  - {addr: 0x80195dd0, name: g_world_unit_summary_digit_images}
+  - {addr: 0x80195dd0, name: g_menu_unit_summary_digit_images}
   - {addr: 0x80195ed0, name: g_menu_numeric_display_palettes}
   - {addr: 0x801995d0, name: g_menu_unit_editor_palette}
   - {addr: 0x801996d0, name: g_menu_unit_summary_palettes}
@@ -2481,7 +2481,6 @@ overrides:
   - {function: menu_run_unit_summary_panel_thread, name: battle_thread_find_running_by_task, addr: 0x800fd14c}
   - {function: menu_run_unit_summary_panel_thread, name: battle_thread_get_current_parameter_3, addr: 0x801000f8}
   - {function: menu_run_unit_summary_panel_thread, name: battle_thread_is_running_asm, addr: 0x80100164}
-  - {function: menu_run_unit_summary_panel_thread, name: g_battle_unit_summary_digit_images, addr: 0x80195dd0}
   - {function: menu_run_unit_summary_panel_thread, name: g_battle_unit_summary_portrait_image_params, addr: 0x80155d54}
   - {function: menu_run_unit_view_supervisor_thread, name: battle_thread_get_current_parameter_1, addr: 0x80100090}
   - {function: menu_select_icon_cluts, name: battle_thread_is_previous_running, addr: 0x8010012c}
