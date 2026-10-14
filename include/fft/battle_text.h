@@ -41,7 +41,6 @@ void battle_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 va
 void blit_text_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
 
 /* numbers */
-extern u32 g_battle_text_decimal_divisors[];
 extern glyph_blit_t g_battle_text_large_number_glyph_rect; /* glyph source rectangle in the large number font */
 
 void battle_text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
@@ -50,8 +49,6 @@ void battle_text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, gly
 /* Text variables $27 and $28 (rows of glyph pixels drawn, 0x10 by default),
  * bound separately: battle_menu_display_text also takes the table base, and
  * element spellings let GCC address them from it. */
-extern s32 g_battle_text_substitution_value_27;
-extern s32 g_battle_text_substitution_value_28;
 
 /* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
 u8* battle_text_find_entry(u32 text_id);

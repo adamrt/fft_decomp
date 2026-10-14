@@ -742,12 +742,12 @@ void battle_text_run_dialog_thread(void) {
                     width_override = no_value;
                 }
                 for (i = digits - 1; i >= 0; i--) {
-                    character = value / g_battle_text_decimal_divisors[i];
-                    if (value < g_battle_text_decimal_divisors[i] && i != 0 && started == 0) {
+                    character = value / g_text_decimal_divisors[i];
+                    if (value < g_text_decimal_divisors[i] && i != 0 && started == 0) {
                         character = TEXT_SPACE;
                     } else {
                         started = 1;
-                        value -= character * g_battle_text_decimal_divisors[i];
+                        value -= character * g_text_decimal_divisors[i];
                     }
                     {
                         text_glyph_state_t* glyph = &g_text_typewriter_glyph;

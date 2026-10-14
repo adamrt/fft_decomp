@@ -13,8 +13,8 @@ void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t
     s32 top;
     s32 limit;
 
-    g_world_menu_text_param_22 = row;
-    g_world_menu_text_param_24 = row + state->rows_per_page;
+    g_menu_text_param_22 = row;
+    g_menu_text_param_24 = row + state->rows_per_page;
     bounds.x = state->image_x;
     bounds.y = state->image_y;
     bounds.w = (state->text_width + 0x18) & 0xFFFC;

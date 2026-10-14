@@ -18,8 +18,8 @@ void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) 
         g_menu_text_state.pen.stride = record->rect.w * 4;
         g_menu_text_state.pen.rect.x = 8;
         g_menu_text_state.pen.rect.y = 8;
-        g_world_menu_text_param_22 = record->first_line;
-        g_world_menu_text_param_24 = record->last_line;
+        g_menu_text_param_22 = record->first_line;
+        g_menu_text_param_24 = record->last_line;
         menu_display_text_entry(record->text, record->buffer, &g_menu_text_state.pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();

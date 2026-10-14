@@ -2265,6 +2265,12 @@ s32 text_count_decimal_digits(s32 value);
 void text_fill_field_with_terminators(u8* text);
 s32 text_resolve_format_string_id(s32 format_code, s32 value);
 extern const char g_text_decimal_format[];
+extern glyph_blit_t g_menu_text_pen;
+extern s32 g_text_glyph_first_row;
+extern s32 g_text_glyph_row_limit;
+extern u32 g_text_decimal_divisors[];
+extern s32 g_menu_text_param_22; /* 0x80153304: record +0x22 */
+extern s32 g_menu_text_param_24; /* 0x80153308: record +0x24 */
 void text_print_fnt_value_and_next(s32 value);
 void text_relocate_pointer_table(const u32* offsets);
 /* BATTLE and WORLD each link their own body. */

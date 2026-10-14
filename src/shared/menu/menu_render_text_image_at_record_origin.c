@@ -21,8 +21,8 @@ void menu_render_text_image_at_record_origin(text_dialog_record_t* record) {
         g_menu_text_state.pen.rect.x = record->origin_x;
         g_menu_text_state.pen.rect.y = record->origin_y;
         g_menu_text_state.pen.stride = record->rect.w * 4;
-        g_battle_menu_text_param_22 = record->first_line;
-        g_battle_menu_text_param_24 = record->last_line;
+        g_menu_text_param_22 = record->first_line;
+        g_menu_text_param_24 = record->last_line;
         menu_display_text_entry(record->text, record->buffer, &g_menu_text_state.pen);
         LoadImage(&record->rect, record->buffer);
         thread_yield();

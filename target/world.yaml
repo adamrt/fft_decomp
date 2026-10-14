@@ -1085,8 +1085,8 @@ data:
   - {addr: 0x80153268, name: g_menu_current_id}
   - {addr: 0x8015326c, name: g_script_event_speed}
   - {addr: 0x80153270, name: g_menu_text_palette_offset}
-  - {addr: 0x80153274, name: g_world_text_glyph_first_row}
-  - {addr: 0x80153278, name: g_world_text_glyph_row_limit}
+  - {addr: 0x80153274, name: g_text_glyph_first_row}
+  - {addr: 0x80153278, name: g_text_glyph_row_limit}
   - {addr: 0x8015327c, name: g_threads}
   - {addr: 0x80153280, name: g_menu_text_state}
   - {addr: 0x80153280, name: g_script_variables}
@@ -1122,8 +1122,8 @@ data:
   - {addr: 0x801532f8, name: g_menu_packet_buffer_index}
   - {addr: 0x801532fc, name: g_world_menu_scrolling_list_depth}
   - {addr: 0x80153300, name: g_menu_companion_data_file_buffer}
-  - {addr: 0x80153304, name: g_world_menu_text_param_22}
-  - {addr: 0x80153308, name: g_world_menu_text_param_24}
+  - {addr: 0x80153304, name: g_menu_text_param_22}
+  - {addr: 0x80153308, name: g_menu_text_param_24}
   - {addr: 0x8015330c, name: g_menu_input_lock_mode}
   - {addr: 0x80153310, name: g_menu_help_open}
   - {addr: 0x80153314, name: g_world_formation_screen_active}
@@ -1154,7 +1154,7 @@ data:
   - {addr: 0x80153380, name: g_text_slot_source_columns}
   - {addr: 0x80153384, name: g_text_slot_row_pitches}
   - {addr: 0x80153387, name: g_script_variable_write_guard}
-  - {addr: 0x8015338c, name: g_world_text_decimal_divisors}
+  - {addr: 0x8015338c, name: g_text_decimal_divisors}
   - {addr: 0x801533b8, name: g_menu_cursor_zoom_percentages}
   - {addr: 0x801533d0, name: g_text_substitution_rect}
   - {addr: 0x801533e0, name: g_text_glyph_widths}
@@ -1866,7 +1866,7 @@ data:
   - {addr: 0x8019a220, name: g_world_event_map_jump_in_request}
   - {addr: 0x8019a224, name: g_world_event_finish_check_pending}
   - {addr: 0x8019a228, name: g_world_companion_overlay_prims}
-  - {addr: 0x8019a22c, name: g_world_text_draw_origin}
+  - {addr: 0x8019a22c, name: g_menu_text_pen}
   - {addr: 0x8019a23c, name: g_unit_animation_states}
   - {addr: 0x8019a2d0, name: g_unit_pending_animation_ids}
   - {addr: 0x8019a2fc, name: g_unit_was_moving_latch}
@@ -2484,8 +2484,6 @@ overrides:
   - {function: menu_refresh_hovered_unit_stats_display, name: g_battle_menu_hovered_unit_stats_setup, addr: 0x80155af4}
   - {function: menu_refresh_right_unit_stats_display, name: g_battle_menu_right_unit_stats_setup, addr: 0x80155b6c}
   - {function: menu_render_text_image_at_record_origin, name: battle_menu_build_and_upload_window_frame_image, addr: 0x800ff9ac}
-  - {function: menu_render_text_image_at_record_origin, name: g_battle_menu_text_param_22, addr: 0x80153304}
-  - {function: menu_render_text_image_at_record_origin, name: g_battle_menu_text_param_24, addr: 0x80153308}
   - {function: menu_reset_subsystems, name: battle_menu_init_buffer_allocator, addr: 0x800e3088}
   - {function: menu_restore_selection_for_selected_unit, name: g_battle_menu_selection_remaps, addr: 0x801566cc}
   - {function: menu_run_equip_thread, name: g_battle_companion_overlay_primitives, addr: 0x8019a228}

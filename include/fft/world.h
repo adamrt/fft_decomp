@@ -1580,11 +1580,8 @@ extern u8* g_world_text_section_pointer_backup[32];
 extern char g_world_text_wait_for_allocation_message[];
 extern char g_world_text_reading_character_message[]; /* "reading charactor%d \n" */
 extern u8 g_world_text_glyph_bitmaps[];
-extern s32 g_world_text_glyph_first_row;
-extern s32 g_world_text_glyph_row_limit;
 extern u16 g_world_text_speaker_swap_unit_a;
 extern u16 g_world_text_speaker_swap_unit_b;
-extern u32 g_world_text_decimal_divisors[];
 extern s32 g_world_text_current_line;
 extern RECT g_world_numeric_display_frame_rect;
 extern RECT g_world_numeric_display_texture_window;
@@ -1617,7 +1614,6 @@ extern u8 g_world_text_shop_dialogue_data[];
 extern u8 g_world_text_shop_menu_labels_data[];
 extern u8 g_world_text_name_entry_keys_data[];
 extern menu_palette_slot_t g_world_numeric_display_palettes[];
-extern glyph_blit_t g_world_text_draw_origin;
 extern SVECTOR g_world_text_partner_screen_coords;
 extern SVECTOR g_unit_scratch_coords;
 extern menu_panel_record_t g_world_numeric_display_panel_records[2];
@@ -1804,8 +1800,6 @@ extern s32 g_world_menu_text_file_buffer[];
  * The text-image builders address these through one base register, so they
  * are modeled as one aggregate; the two 32-bit parameters at 0x80153304 and
  * 0x80153308 schedule as plain scalars and stay separate globals. */
-extern s32 g_world_menu_text_param_22; /* 0x80153304: record +0x22 */
-extern s32 g_world_menu_text_param_24; /* 0x80153308: record +0x24 */
 extern u16 g_world_menu_texture_page;
 extern s32 g_world_menu_thread_result;
 extern s32 g_world_menu_thread_running_status;

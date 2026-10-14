@@ -37,7 +37,7 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
     }
     /* The renderer uses the scratchpad block after the text measurer. */
     state = (text_reader_state_t*)getScratchAddr(128);
-    powers = g_battle_text_decimal_divisors;
+    powers = g_text_decimal_divisors;
     variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     state->return_cursor = (u8*)-1;
     state->value_cursor = g_text_substitution_values;
@@ -46,13 +46,13 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
     state->column = 0;
     state->max_column = 0;
     state->row = 0;
-    g_battle_menu_text_pen.rect.x = origin->rect.x;
-    pen = &g_battle_menu_text_pen;
+    g_menu_text_pen.rect.x = origin->rect.x;
+    pen = &g_menu_text_pen;
     count = 0;
-    g_battle_text_substitution_value_27 = 0;
-    g_battle_menu_text_pen.rect.y = origin->rect.y;
-    g_battle_text_substitution_value_28 = 0x10;
-    g_battle_menu_text_pen.stride = origin->stride;
+    g_text_glyph_first_row = 0;
+    g_menu_text_pen.rect.y = origin->rect.y;
+    g_text_glyph_row_limit = 0x10;
+    g_menu_text_pen.stride = origin->stride;
 
     while (1) {
         state->command = *cursor;
@@ -90,8 +90,8 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
                     pen->rect.x += 4;
                 } else if (state->command == TEXT_NEWLINE) {
                     pen->rect.x = origin->rect.x;
-                    if (count >= g_battle_menu_text_param_22) {
-                        g_battle_text_substitution_value_27 = 0;
+                    if (count >= g_menu_text_param_22) {
+                        g_text_glyph_first_row = 0;
                         pen->rect.y += 16;
                     }
                     count++;
@@ -124,13 +124,13 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
                                 state->command = state->value / *divisor;
                                 started = 1;
                                 state->value = state->value - state->command * *divisor;
-                                if (count >= g_battle_menu_text_param_24) {
+                                if (count >= g_menu_text_param_24) {
                                     goto done;
                                 }
-                                if (count >= g_battle_menu_text_param_22) {
+                                if (count >= g_menu_text_param_22) {
                                     battle_text_render_glyph_to_4bpp_image(
                                         g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
-                                        &g_battle_menu_text_pen, g_menu_text_palette_offset);
+                                        &g_menu_text_pen, g_menu_text_palette_offset);
                                 }
                             }
                             divisor--;
@@ -173,12 +173,12 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
             }
         }
         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
-        if (count >= g_battle_menu_text_param_24) {
+        if (count >= g_menu_text_param_24) {
             break;
         }
-        if (count >= g_battle_menu_text_param_22) {
+        if (count >= g_menu_text_param_22) {
             battle_text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
-                &g_battle_menu_text_pen, g_menu_text_palette_offset);
+                &g_menu_text_pen, g_menu_text_palette_offset);
         }
         pen->rect.x += g_text_glyph_widths[state->command];
         if (pen->rect.x >= pen->stride - 8) {
@@ -187,6 +187,6 @@ void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* 
     }
 done:
     g_menu_text_palette_offset = 0;
-    g_battle_menu_text_param_22 = 0;
-    g_battle_menu_text_param_24 = 0xFF;
+    g_menu_text_param_22 = 0;
+    g_menu_text_param_24 = 0xFF;
 }

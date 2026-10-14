@@ -757,12 +757,12 @@ void world_text_character_handling_thread(void) {
                     width_override = no_value;
                 }
                 for (i = digits - 1; i >= 0; i--) {
-                    code = value / g_world_text_decimal_divisors[i];
-                    if (value < g_world_text_decimal_divisors[i] && i != 0 && started == 0) {
+                    code = value / g_text_decimal_divisors[i];
+                    if (value < g_text_decimal_divisors[i] && i != 0 && started == 0) {
                         code = TEXT_SPACE;
                     } else {
                         started = 1;
-                        value -= code * g_world_text_decimal_divisors[i];
+                        value -= code * g_text_decimal_divisors[i];
                     }
                     {
                         text_glyph_state_t* glyph = &g_text_typewriter_glyph;

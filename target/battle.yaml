@@ -2325,8 +2325,8 @@ data:
   - {addr: 0x80165f84, name: g_menu_current_id}
   - {addr: 0x80165f88, name: g_script_event_speed}
   - {addr: 0x80165f8c, name: g_menu_text_palette_offset}
-  - {addr: 0x80165f90, name: g_battle_text_substitution_value_27}
-  - {addr: 0x80165f94, name: g_battle_text_substitution_value_28}
+  - {addr: 0x80165f90, name: g_text_glyph_first_row}
+  - {addr: 0x80165f94, name: g_text_glyph_row_limit}
   - {addr: 0x80165f98, name: g_threads}
   - {addr: 0x80165f9c, name: g_menu_text_state}
   - {addr: 0x80165f9c, name: g_script_variables}
@@ -2363,8 +2363,8 @@ data:
   - {addr: 0x80166014, name: g_menu_packet_buffer_index}
   - {addr: 0x80166018, name: g_battle_menu_scroll_list_depth}
   - {addr: 0x8016601c, name: g_menu_companion_data_file_buffer}
-  - {addr: 0x80166020, name: g_battle_menu_text_param_22}
-  - {addr: 0x80166024, name: g_battle_menu_text_param_24}
+  - {addr: 0x80166020, name: g_menu_text_param_22}
+  - {addr: 0x80166024, name: g_menu_text_param_24}
   - {addr: 0x80166028, name: g_menu_input_lock_mode}
   - {addr: 0x8016602c, name: g_menu_help_open}
   - {addr: 0x80166030, name: g_battle_formation_screen_active}
@@ -2399,7 +2399,7 @@ data:
   - {addr: 0x801660a3, name: g_script_variable_write_guard}
   - {addr: 0x801660a4, name: g_battle_scenario_music_1_id}
   - {addr: 0x801660a6, name: g_battle_scenario_music_2_id}
-  - {addr: 0x801660a8, name: g_battle_text_decimal_divisors}
+  - {addr: 0x801660a8, name: g_text_decimal_divisors}
   - {addr: 0x801660d4, name: g_menu_cursor_zoom_percentages}
   - {addr: 0x801660ec, name: g_text_substitution_rect}
   - {addr: 0x801660fc, name: g_text_glyph_widths}
@@ -2539,7 +2539,7 @@ data:
   - {addr: 0x8016d9bc, name: g_battle_event_map_jump_in_request}
   - {addr: 0x8016d9c0, name: g_script_threads_idle}
   - {addr: 0x8016d9c4, name: g_battle_companion_overlay_primitives}
-  - {addr: 0x8016d9c8, name: g_battle_menu_text_pen}
+  - {addr: 0x8016d9c8, name: g_menu_text_pen}
   - {addr: 0x8016d9d8, name: g_unit_animation_states}
   - {addr: 0x8016da6c, name: g_unit_pending_animation_ids}
   - {addr: 0x8016da98, name: g_unit_was_moving_latch}

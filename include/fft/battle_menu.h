@@ -162,9 +162,6 @@ void battle_menu_init_semitransparent_sprt(SPRT* sprite);
 extern u16* const* g_battle_help_active_text_id_tables;
 /* Source image used when battle overlays render menu glyphs. */
 extern menu_glyph_sheet_t g_battle_menu_glyph_image_data;
-extern s32 g_battle_menu_text_param_22; /* 0x80166020: record +0x22 */
-extern s32 g_battle_menu_text_param_24; /* 0x80166024: record +0x24 */
-extern glyph_blit_t g_battle_menu_text_pen;
 extern s32 g_battle_menu_text_section_offsets[];
 
 void battle_clear_menu_render_buffer(void* buffer, u32 bytes);
