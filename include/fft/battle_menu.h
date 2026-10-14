@@ -56,7 +56,6 @@ extern s16 g_battle_menu_confirm_stored_unit_row_actions;
 extern menu_entry_t g_battle_menu_idle_action_entries[];
 extern u8 g_battle_menu_idle_action_entry_labels[];
 extern u8 g_battle_menu_idle_action_flag_clear_ids[];
-extern s32 g_battle_menu_resolved_command;
 extern u8 g_battle_menu_restriction_message_ids[];
 /* Action command staged by the battle menu and passed whole to
  * action_preview_at_list; the WORLD twin is g_world_menu_preview_action. */
@@ -96,7 +95,6 @@ void battle_menu_select_unit_action_slots_thread(void);
 void battle_menu_set_next_script_action_menus(void);
 void battle_menu_start_mini_menu_display_thread(void);
 void battle_menu_start_system_function_thread(s32 system_function);
-void battle_menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id);
 
 /* abilities */
 /* Ability-list window layout at 0x80166994. Column modes: 0 text, 1 number,

@@ -49,7 +49,7 @@ s32 battle_menu_resolve_selection(void) {
             command = 7;
         }
         if (i < 16) {
-            g_battle_menu_resolved_command = command;
+            g_menu_resolved_command = command;
         } else if (command == 5 || command == 6) {
             g_battle_menu_selected_action.targeting_type = command;
         }
@@ -67,7 +67,7 @@ s32 battle_menu_resolve_selection(void) {
             }
             option = 0xFFFE;
             item = 0xFFFE;
-            g_battle_menu_resolved_command = command;
+            g_menu_resolved_command = command;
         }
         g_battle_menu_selected_command.kind = command;
         if ((option & 0xFE) != 0xFE) {

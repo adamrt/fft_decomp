@@ -946,7 +946,7 @@ functions:
   - {addr: 0x80141464, size: 496, name: battle_menu_run_system_function_thread, hash: fa520dc046636a1f, source: src/shared/menu/menu_run_system_function_thread.c, source_symbol: menu_run_system_function_thread}
   - {addr: 0x80141654, size: 76, name: battle_menu_start_system_function_thread, hash: d0d2ec3857d6477d, source: src/shared/menu/menu_start_system_function_thread.c, source_symbol: menu_start_system_function_thread}
   - {addr: 0x801416a0, size: 124, name: battle_menu_confirm_auto_battle_selection_thread, hash: eda1d68b079e1363}
-  - {addr: 0x8014171c, size: 64, name: battle_menu_store_auto_battle_main_target_id, hash: ac6b25a05f8fa4fc}
+  - {addr: 0x8014171c, size: 64, name: menu_store_auto_battle_main_target_id, hash: ac6b25a05f8fa4fc, source: src/shared/menu/menu_store_auto_battle_main_target_id.c}
   - {addr: 0x8014175c, size: 604, name: battle_text_select_ability_announcement, hash: 86e781967c5f629f, source: src/shared/text/text_select_ability_announcement.c, source_symbol: text_select_ability_announcement}
   - {addr: 0x801419b8, size: 212, name: battle_menu_init_system_function, hash: f31e72c8ed85d69a}
   - {addr: 0x80141a8c, size: 128, name: battle_menu_get_dead_unit_selection, hash: 28d2493e3d487f43}
@@ -955,22 +955,22 @@ functions:
   - {addr: 0x801425b0, size: 220, name: script_run_scenario_conditions, hash: 57704dd3d16bc594, source: src/shared/script/script_run_scenario_conditions.c}
   - {addr: 0x8014268c, size: 8, name: battle_noop_8014268c, hash: 6d64edf91449c1b1}
   - {addr: 0x80142694, size: 1224, name: script_check_scenario_condition, hash: 7d82f147916f655f, source: src/shared/script/script_check_scenario_condition.c}
-  - {addr: 0x80142b5c, size: 72, name: script_get_current_scenario_finish_operation, hash: 6176716da1909b09}
-  - {addr: 0x80142ba4, size: 44, name: script_get_event_finish_operation, hash: 4ac0cb6ed9cd918f}
+  - {addr: 0x80142b5c, size: 72, name: script_get_current_scenario_finish_operation, hash: 6176716da1909b09, source: src/shared/script/script_get_current_scenario_finish_operation.c}
+  - {addr: 0x80142ba4, size: 44, name: script_get_event_finish_operation, hash: 4ac0cb6ed9cd918f, source: src/shared/script/script_get_event_finish_operation.c}
   - {addr: 0x80142bd0, size: 84, name: script_pulse_tutorial_wait_value, hash: aa9e33de4476a4c0, source: src/shared/script/script_pulse_tutorial_wait_value.c}
   - {addr: 0x80142c24, size: 132, name: script_apply_input_overrides, hash: 6b06c6da216b8414, source: src/shared/script/script_apply_input_overrides.c}
   - {addr: 0x80142ca8, size: 132, name: script_route_event_input, hash: 7b610c69d3745c90}
   - {addr: 0x80142d2c, size: 44, name: script_filter_controller_input, hash: 9fe5b57eca447db5, source: src/shared/script/script_filter_controller_input.c}
   - {addr: 0x80142d58, size: 1620, name: script_run_event_frame, hash: d4dd1211bca4f542}
   - {addr: 0x801433ac, size: 60, name: script_set_current_otag_entry_and_update_input, hash: 584c5bad6246264b}
-  - {addr: 0x801433e8, size: 48, name: script_set_specialized_map_destroyed, hash: 6fdd321db8d2c523}
+  - {addr: 0x801433e8, size: 48, name: script_set_specialized_map_destroyed, hash: 6fdd321db8d2c523, source: src/shared/script/script_set_specialized_map_destroyed.c}
   - {addr: 0x80143418, size: 1448, name: script_process_pending_requests, hash: 12e72da2e6bf90b1}
   - {addr: 0x801439c0, size: 220, name: camera_load_state_from_script_variables, hash: 36400181c54e0d33}
   - {addr: 0x80143a9c, size: 204, name: camera_store_state_to_script_variables, hash: ccad4d511e07c5fe}
-  - {addr: 0x80143b68, size: 24, name: map_get_weather, hash: d20bef566195fa38}
+  - {addr: 0x80143b68, size: 24, name: map_get_weather, hash: d20bef566195fa38, source: src/shared/map/map_get_weather.c}
   - {addr: 0x80143b80, size: 40, name: script_run_next_event, hash: 5f28a3f8beb0666a, source: src/shared/script/script_run_next_event.c}
   - {addr: 0x80143ba8, size: 40, name: script_run_next_event_unused, hash: 5f28a3f8beb0666a, source: src/shared/script/script_run_next_event.c, source_symbol: script_run_next_event}
-  - {addr: 0x80143bd0, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1}
+  - {addr: 0x80143bd0, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1, source: src/shared/script/script_add_unit_stub.c}
   - {addr: 0x80143bd8, size: 9120, name: script_execute_event, hash: f5e240270b084a49}
   - {addr: 0x80145f78, size: 140, name: script_load_next_event, hash: 86e825112a99969c, source: src/shared/script/script_load_next_event.c}
   - {addr: 0x80146004, size: 116, name: unit_is_moving, hash: eddabf1eb74277bd, source: src/shared/unit/unit_is_moving.c}
@@ -979,12 +979,12 @@ functions:
   - {addr: 0x801460a4, size: 64, name: map_wait_for_refresh, hash: e988058d047260fa, source: src/shared/map/map_wait_for_refresh.c}
   - {addr: 0x801460e4, size: 44, name: camera_clear_zoom_variable_low_bit, hash: 1c850d2a2326188a, source: src/shared/camera/camera_clear_zoom_variable_low_bit.c}
   - {addr: 0x80146110, size: 1444, name: camera_thread, hash: de81056b9403d9c1, source: src/shared/camera/camera_thread.c}
-  - {addr: 0x801466b4, size: 120, name: script_map_darkness, hash: 220b0a8f4c814539}
+  - {addr: 0x801466b4, size: 120, name: script_map_darkness, hash: 220b0a8f4c814539, source: src/shared/script/script_map_darkness.c}
   - {addr: 0x8014672c, size: 176, name: script_earthquake_start, hash: 19be186d363036b4}
   - {addr: 0x801467dc, size: 356, name: script_color_screen_thread, hash: 8de8d96c93e6ae8f, source: src/shared/script/script_color_screen_thread.c}
   - {addr: 0x80146940, size: 1444, name: script_run_sprite_move, hash: 558aa0057a55a6d2}
-  - {addr: 0x80146ee4, size: 60, name: script_sprite_move, hash: 7decfeacb2be172a}
-  - {addr: 0x80146f20, size: 60, name: script_sprite_move_beta, hash: c9868578c779e0f8}
+  - {addr: 0x80146ee4, size: 60, name: script_sprite_move, hash: 7decfeacb2be172a, source: src/shared/script/script_sprite_move.c}
+  - {addr: 0x80146f20, size: 60, name: script_sprite_move_beta, hash: c9868578c779e0f8, source: src/shared/script/script_sprite_move_beta.c}
   - {addr: 0x80146f5c, size: 192, name: script_waitspritemove_event_instruction, hash: 1432c177a10691bf}
   - {addr: 0x8014701c, size: 32, name: script_copy_matrix, hash: cd687ad6c14b8e80, source: src/shared/script/script_copy_matrix.c}
   - {addr: 0x8014703c, size: 672, name: map_light_thread, hash: 21c64a562f0c9325}
@@ -2293,7 +2293,7 @@ data:
   - {addr: 0x8014d308, name: g_battle_spell_quote_last_ability_id}
   - {addr: 0x8014d30c, name: g_battle_menu_used_skillset_id}
   - {addr: 0x8014d310, name: g_battle_menu_used_item_id}
-  - {addr: 0x8014d314, name: g_battle_menu_resolved_command}
+  - {addr: 0x8014d314, name: g_menu_resolved_command}
   - {addr: 0x8014d318, name: g_battle_menu_system_function_command}
   - {addr: 0x8014d31c, name: g_battle_menu_system_function_option}
   - {addr: 0x8014d320, name: g_menu_selected_skill_ct}
@@ -2582,7 +2582,7 @@ data:
   - {addr: 0x80173c34, name: g_battle_gfx_screen_fade_overlays}
   - {addr: 0x80173c6c, name: g_battle_active_menu}
   - {addr: 0x80173c70, name: g_battle_menu_dead_unit_panel_parameter}
-  - {addr: 0x80173c74, name: g_battle_next_event_id}
+  - {addr: 0x80173c74, name: g_script_next_event_id}
   - {addr: 0x80173c78, name: g_battle_unit_status_staging_data}
   - {addr: 0x80173c7c, name: g_script_rand16_state}
   - {addr: 0x80173c80, name: g_script_frame_result_override}
@@ -2595,7 +2595,7 @@ data:
   - {addr: 0x80173ca4, name: g_script_event_block}
   - {addr: 0x80173ca8, name: g_thread_call_target}
   - {addr: 0x80173cac, name: g_battle_event_pending_unit_vram_copy}
-  - {addr: 0x80173cb0, name: g_battle_scenario_event_active}
+  - {addr: 0x80173cb0, name: g_script_scenario_event_active}
   - {addr: 0x80173cb4, name: g_battle_event_pending_effect_id}
   - {addr: 0x80173cb8, name: g_menu_thread_menu_data}
   - {addr: 0x80173cbc, name: g_battle_menu_height_display_pages}

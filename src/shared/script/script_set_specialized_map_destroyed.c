@@ -1,5 +1,5 @@
-#include "fft/battle_map.h"
-#include "fft/battle_script.h"
+#include "fft/map.h"
+#include "fft/script.h"
 
 /* Advance the map-destruction wait state from 1 (armed when a map append
  * finishes) to 2. script_process_pending_requests then releases the held

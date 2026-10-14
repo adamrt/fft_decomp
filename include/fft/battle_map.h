@@ -1001,7 +1001,6 @@ void map_set_light_matrices(MATRIX* first, MATRIX* second);
 void map_reset_script_light_transform(void);
 
 /* mesh animation */
-extern s16 g_map_destruction_wait_state;
 extern map_mesh_part_t g_map_mesh_parts[9];
 extern map_mesh_keyframe_t g_map_mesh_animation_keyframes[];
 extern map_mesh_instructions_t g_map_mesh_animation_instructions[9];

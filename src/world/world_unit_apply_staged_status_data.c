@@ -17,7 +17,7 @@ void world_unit_apply_staged_status_data(s32 unit_id, s32 runtime_id) {
     s32 byte_index;
     s32 mask;
     u8 inflict_status_mode;
-    if (!(world_script_get_current_scenario_finish_operation() & 0x8000)
+    if (!(script_get_current_scenario_finish_operation() & 0x8000)
         && g_world_unit_status_staging_data->state[unit_id] == UNIT_STATUS_STAGING_SAVED) {
         unit = battle_unit_get_stats_from_battle_id(unit_id);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {

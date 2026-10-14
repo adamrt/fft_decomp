@@ -51,7 +51,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
             }
         }
         if (i == 17) {
-            op = world_script_get_current_scenario_finish_operation();
+            op = script_get_current_scenario_finish_operation();
             if (op != 0) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
                     g_world_event_finish_check_pending = 0;
@@ -99,7 +99,7 @@ s32 world_script_run_frame(u32* ot, u32 buttons) {
     }
     if (g_world_map_append_state >= 3) {
         g_world_map_append_state = 0;
-        g_world_map_destruction_wait_state = 1;
+        g_map_destruction_wait_state = 1;
     }
     g_world_event_pending_map_jump_out_id = -1;
     g_world_event_weather_request = -1;

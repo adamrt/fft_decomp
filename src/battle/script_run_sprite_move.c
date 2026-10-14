@@ -1,5 +1,5 @@
 /*
- * BATTLE twin of WORLD world_script_run_sprite_move (identical code except the
+ * BATTLE twin of WORLD script_run_sprite_move (identical code except the
  * checked-division guard, which this default-profile copy lacks).
  *
  * Sprite-move worker called by script_sprite_move (mode 0) and

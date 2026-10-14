@@ -21,7 +21,7 @@ void attack_sound_resync_scenario_music_and_apply_map_darkness(void) {
     u16 replacement;
 
     scenario = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-    if (g_battle_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
+    if (g_script_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
         if (g_sound_music_track_1_id == 0 && g_sound_music_track_2_id == 0) {
             g_sound_music_track_index = 0;
             sound_play_music_tracks(g_battle_scenario_music_1_id, g_battle_scenario_music_2_id);

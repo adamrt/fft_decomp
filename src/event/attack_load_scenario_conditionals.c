@@ -85,7 +85,7 @@ s32 attack_load_scenario_conditionals(void) {
         g_main_special_portrait_unit_id = scenario->portrait_unit_id;
         return;
     }
-    g_battle_scenario_event_active = 0;
+    g_script_scenario_event_active = 0;
     for (i = EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST; i < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_END; i++) {
         script_set_variable(i, 0);
     }
@@ -145,7 +145,7 @@ s32 attack_load_scenario_conditionals(void) {
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
         return 0;
     }
-    g_battle_scenario_event_active++;
+    g_script_scenario_event_active++;
     attack_load_unaligned_s16(scenario->id);
     map_id = scenario->map_id;
     weather = scenario->weather;

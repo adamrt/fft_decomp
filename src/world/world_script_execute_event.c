@@ -194,11 +194,11 @@ restart_event:
                 script_set_variable(EVENT_SCRIPT_VAR_MUTE_TEXT_AUDIO_CUE, 0);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_MAP_DESTRUCTION_AND_WAIT) {
-                world_script_set_specialized_map_destroyed();
-                if (g_world_map_destruction_wait_state != 0) {
+                script_set_specialized_map_destroyed();
+                if (g_map_destruction_wait_state != 0) {
                     do {
                         thread_yield();
-                    } while (g_world_map_destruction_wait_state != 0);
+                    } while (g_map_destruction_wait_state != 0);
                 }
             }
             if (operand_1 == EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC) {
@@ -576,7 +576,7 @@ restart_event:
             g_world_text_speaker_swap_unit_b = script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3);
         } else if (opcode == EVENT_OPCODE_MAP_DARKNESS) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, &world_script_map_darkness);
+            thread_start(operand_1, &script_map_darkness);
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
         } else if (opcode == EVENT_OPCODE_COLOR_SCREEN) {
             operand_1 = world_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
@@ -589,9 +589,9 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_SPRITE_MOVE || opcode == EVENT_OPCODE_SPRITE_MOVE_BETA) {
             operand_1 = world_thread_resolve_id_after_current(THREAD_SLOT_FIRST_IDLE);
             if (opcode == EVENT_OPCODE_SPRITE_MOVE) {
-                thread_start(operand_1, &world_script_sprite_move);
+                thread_start(operand_1, &script_sprite_move);
             } else {
-                thread_start(operand_1, &world_script_sprite_move_beta);
+                thread_start(operand_1, &script_sprite_move_beta);
             }
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
             g_thread_contexts[operand_1].task_id = THREAD_TASK_SPRITE_MOVE;
@@ -772,7 +772,7 @@ restart_event:
             }
         } else if (opcode == EVENT_OPCODE_UNKNOWN_75) {
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
-            world_script_add_unit_stub();
+            script_add_unit_stub();
             appearance_unit = battle_unit_find_stats_by_entd_unit_id(first_operand, &unit_lookup_status);
             if ((unit_lookup_status == -2) || (unit_lookup_status >= 0)) {
                 for (appearance_battle_id = 0; appearance_battle_id < EVENT_UNIT_SLOT_COUNT; appearance_battle_id++) {

@@ -605,6 +605,10 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
 - CallFunction (`script_execute_event.c`, `world_script_execute_event.c`)
   tests selectors in sequence against one operand that the arms modify. So
   `0x06` also runs the `0x0f` warp, and `0x0e` can fall into later arms.
+- `src/shared/script/script_map_darkness.c`: WORLD's copy calls BATTLE's
+  `map_start_ambient_light_blend` address (`0x800934d0`). With WORLD and
+  WLDCORE loaded, that address is WLDCORE data, so a WORLD MapDarkness would
+  jump into data.
 - `src/battle/action_dispatch_target_reaction_ability.c`: formula 7
   suppresses reactions. Counter Magic (`0x1b3`) is tested last, after byte
   `+0x8d`, so Counter (`0x1ba`) wins.

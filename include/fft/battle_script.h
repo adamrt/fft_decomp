@@ -11,8 +11,6 @@
 extern s16 g_script_threads_idle;
 
 s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode);
-s32 script_get_current_scenario_finish_operation(void);
-u32 script_get_event_finish_operation(void);
 void script_process_pending_requests(void);
 /* Returns the event result that the battle state handlers switch on;
  * proven by 0x80078fb4 and 0x800785ac, which both consume it. */
@@ -35,7 +33,6 @@ s32 script_is_tutorial_event_slot(void);
 s32 script_add_ghost_unit_event_instruction(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 runtime_id, s32 flags);
 void script_add_unit_start_thread(void);
-void script_add_unit_stub(void);
 void script_blue_remove_all_enemy_units(void);
 void script_blue_remove_unit(s32 unit_id);
 void script_teleportout_event_instruction(s32 arg, s32 remove);
@@ -43,9 +40,6 @@ void script_teleportout_event_instruction(s32 arg, s32 remove);
 /* unit movement */
 extern map_tile_coordinates_t g_script_warp_coords;
 
-void script_run_sprite_move(const event_sprite_move_parameters_t* parameters, s32 use_speed);
-void script_sprite_move(void);
-void script_sprite_move_beta(void);
 void script_waitspritemove_event_instruction(s32 unit_id);
 void script_warp_unit(const event_warp_unit_parameters_t* parameters);
 void script_warp_unit_display_to_paired_unit(s32 runtime_id);
@@ -60,11 +54,8 @@ extern SVECTOR g_script_light_angles;
 extern MATRIX g_script_light_base_color_matrix;
 extern MATRIX g_script_light_base_direction_matrix;
 extern VECTOR g_script_light_scale;
-extern u16 g_script_map_darkness_durations[];
 
 void script_dark_screen_thread(void);
-void script_map_darkness(void);
-void script_set_specialized_map_destroyed(void);
 
 /* graphics and messages */
 

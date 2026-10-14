@@ -15,7 +15,7 @@ void battle_state_handle_target_select_confirm_state(void) {
     case 7:
         caster = battle_unit_get_casting();
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-        battle_menu_store_auto_battle_main_target_id(target->stats->battle_id, caster->stats->battle_id);
+        menu_store_auto_battle_main_target_id(target->stats->battle_id, caster->stats->battle_id);
         target_move_cursor_to_unit(caster);
         battle_menu_set_next_script_action_menus();
         break;

@@ -2,8 +2,8 @@
 #include "fft/script.h"
 #include "fft/thread.h"
 /*
- * Sprite-move worker called by world_script_sprite_move (mode 0) and
- * world_script_sprite_move_beta (mode 1) with the script cursor: a unit
+ * Sprite-move worker called by script_sprite_move (mode 0) and
+ * script_sprite_move_beta (mode 1) with the script cursor: a unit
  * 16-bit value, three 16-bit destination coordinates, an easing byte, a weight byte and a
  * 16-bit value that is a frame count (mode 0) or a speed (mode 1). pos[0] is the
  * start, pos[1] the destination, pos[2] the current position and pos[3] the
@@ -19,7 +19,7 @@
 
 /* The parameters are copied into locals in this order: it is what places the
  * s0 copy before the s2 copy in the prologue. */
-void world_script_run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_speed) {
+void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_speed) {
     s32 pos[4][4];
     SVECTOR vec;
     /* Indexed destination fields change allocation and shorten the target by four bytes. */

@@ -55,7 +55,7 @@ void attack_deploy_find_fieldable_units(void) {
         }
     }
 
-    if (g_battle_scenario_event_active != 0) {
+    if (g_script_scenario_event_active != 0) {
         return;
     }
 

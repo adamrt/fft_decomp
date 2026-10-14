@@ -380,4 +380,11 @@ typedef struct map_background_gradient_colors {
 } map_background_gradient_colors_t;
 typedef char map_background_gradient_colors_size_must_be_8[(sizeof(map_background_gradient_colors_t) == 8) ? 1 : -1];
 
+/* script state */
+/* Map-destruction handshake between the event interpreter and the frame loop. */
+extern s16 g_map_destruction_wait_state;
+
+/* The raw weather script variable, before indoor and snow flags apply. */
+s32 map_get_weather(void);
+
 #endif

@@ -59,21 +59,21 @@ s32 menu_dispatch_system_function(
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
                         battle_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
-                        g_battle_scenario_event_active = 1;
+                        g_script_scenario_event_active = 1;
                         script_start_current_event_thread();
                     } else {
-                        g_battle_next_event_id = EVENT_ID_GAME_OVER;
+                        g_script_next_event_id = EVENT_ID_GAME_OVER;
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
                 }
-                if (g_battle_scenario_event_active != 0) {
+                if (g_script_scenario_event_active != 0) {
                     if (script_run_scenario_conditions() != 0) {
                         if (option != 2) {
                             battle_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                             g_menu_overlay_state = 1;
                             script_start_current_event_thread();
                         } else {
-                            g_battle_next_event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+                            g_script_next_event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
                             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, value);
                         }
                         return MENU_SYSTEM_DISPATCH_EVENT;
@@ -93,7 +93,7 @@ s32 menu_dispatch_system_function(
                         }
                         script_start_current_event_thread();
                     } else {
-                        g_battle_next_event_id = EVENT_ID_BATTLE_START;
+                        g_script_next_event_id = EVENT_ID_BATTLE_START;
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
                 } else if (action_check_battle_outcome() == 0) {
@@ -101,10 +101,10 @@ s32 menu_dispatch_system_function(
                         battle_unit_start_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
-                        g_battle_scenario_event_active = 1;
+                        g_script_scenario_event_active = 1;
                         script_start_current_event_thread();
                     } else {
-                        g_battle_next_event_id = EVENT_ID_BATTLE_WON;
+                        g_script_next_event_id = EVENT_ID_BATTLE_WON;
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
                 } else {
@@ -124,20 +124,20 @@ s32 menu_dispatch_system_function(
     }
     if (command == BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT) {
         value = 8;
-        if (g_battle_menu_resolved_command == 0 || g_battle_menu_resolved_command == 0x19) {
+        if (g_menu_resolved_command == 0 || g_menu_resolved_command == 0x19) {
             value = 7;
             if (option == 2) {
                 value = 0x31;
             }
-        } else if (g_battle_menu_resolved_command == 1) {
+        } else if (g_menu_resolved_command == 1) {
             g_menu_restore_pending = 1;
             value = 6;
             if (option == 1) {
                 value = 0x29;
             }
-        } else if (g_battle_menu_resolved_command == 0xC) {
+        } else if (g_menu_resolved_command == 0xC) {
             value = 0x14;
-        } else if (g_battle_menu_resolved_command == 0xE) {
+        } else if (g_menu_resolved_command == 0xE) {
             value = 0x15;
         } else if (g_battle_menu_used_skillset_id == SKILLSET_ID_DEFEND) {
             value = 0x1C;
@@ -219,9 +219,9 @@ s32 menu_dispatch_system_function(
             value = 0x17;
         } else if (option == 3) {
             value = 0x20;
-        } else if (g_battle_menu_resolved_command == 0xC) {
+        } else if (g_menu_resolved_command == 0xC) {
             value = 0x1A;
-        } else if (g_battle_menu_resolved_command == 0xE) {
+        } else if (g_menu_resolved_command == 0xE) {
             value = 0x1B;
         }
         battle_menu_start_system_function_thread(value);

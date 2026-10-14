@@ -933,6 +933,8 @@ void menu_submit_icon_primitives(menu_icon_sprites_t* frame);
 void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor);
 void menu_run_icon_selection_loop(void);
 void menu_auto_battle_setting_thread(void);
+extern s32 g_menu_resolved_command;
+void menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id);
 
 /* Six-byte option row selected by customized-options bits 9-11 in
  * 0x80106660. The first three bytes set the shared initial, primary and

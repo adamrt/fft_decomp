@@ -76,11 +76,9 @@ typedef enum world_screen_request_state {
 extern u16 g_world_map_append_state;
 extern u16 g_world_map_reload_state;
 extern map_selected_tile_t g_world_map_selected_tile_data;
-extern s16 g_world_map_destruction_wait_state;
 extern u16 g_world_map_refresh_pending;
 extern RECT g_world_tile_info_image_location;
 extern image_load_parameters_t g_world_tile_info_image_params[2];
-extern u16 g_world_map_darkness_wait_frames[];
 extern s16 g_world_map_root_request_state; /* world_screen_request_state_e */
 extern VECTOR g_world_map_light_scale;     /* current light scale */
 extern MATRIX g_world_map_light_base_matrix;
@@ -286,8 +284,6 @@ extern s32 g_world_event_pending_unit_vram_copy;
 extern s16 g_world_event_weather_request;
 extern map_background_gradient_colors_t g_world_event_background_colors;
 void world_script_handle_tutorial_command_highlight_ring(void);
-void world_script_run_sprite_move(const event_sprite_move_parameters_t* parameters, s32 use_speed);
-void world_script_set_specialized_map_destroyed(void);
 void world_menu_init_subsystem_pointers(void);
 s32 world_script_filter_unit_id_by_mode(u16* out_id, const void* in_id, const s32* mode);
 void world_script_advance_tutorial_highlight_brightness(void);
@@ -302,7 +298,6 @@ void world_script_face_unit(const event_face_unit_parameters_t* parameters, s32 
 void world_script_focus(event_focus_parameters_t* parameters);
 /* A typed operand plus a local Camera cursor reorders the original argument saves. */
 void world_script_focus_speed(u8* parameters, s32* position, s32* rotation);
-s32 world_script_get_current_scenario_finish_operation(void);
 
 s32 world_script_handle_tutorial_command(void);
 void world_script_handle_tutorial_command_change_dialog(void);
@@ -313,14 +308,11 @@ void world_script_handle_tutorial_command_wait(void);
 void world_script_handle_tutorial_command_wait_for_button(void);
 void world_script_handle_tutorial_command_wait_for_message(void);
 void world_script_handle_tutorial_command_wait_time(void);
-void world_script_map_darkness(void);
 void world_script_march_units(const event_march_parameters_t* parameters);
 s32 world_script_run_frame(u32* ot, u32 buttons);
 void world_script_set_event_speed(s32 speed);
 void world_script_set_current_otag_entry_and_update_input(u32* ot, s32 buttons);
 void world_script_set_vsync_mode_and_event_speed(s32 value);
-void world_script_sprite_move(void);
-void world_script_sprite_move_beta(void);
 void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
 void world_script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
@@ -407,7 +399,6 @@ void world_map_reset_script_light_transform(void);
 void world_script_process_pending_requests(void);
 void world_camera_load_state_from_script_variables(void);
 void world_camera_store_state_to_script_variables(void);
-void world_script_add_unit_stub(void);
 void world_script_frame_after_requests_stub(void);
 void world_card_close_stub(void);
 void world_menu_open_companion_executable(void);
@@ -1964,7 +1955,6 @@ extern s8 g_world_menu_window_scale_step;
 extern u16 g_world_menu_ability_display_flags[80];
 extern s32 g_world_menu_resolved_skillset;
 extern s32 g_world_menu_resolved_ability;
-extern s32 g_world_menu_resolved_command;
 extern s32 g_world_menu_last_dispatched_command;
 extern s32 g_world_menu_last_dispatched_option;
 extern u8 g_world_menu_restore_depth;
@@ -2140,7 +2130,6 @@ extern menu_window_rect_source_t* g_world_menu_window_rect_source;
 /* Result slot per menu (-1 while none); world_menu_reset_selection_results clears all 16. */
 extern s16 g_world_menu_selection_results[16];
 extern s32 g_world_grid_menu_id; /* menu_grid_help_id_e */
-extern s16 g_world_menu_scenario_event_started;
 
 extern menu_callback_t g_world_menu_script_callbacks[16];
 extern u16 g_world_menu_disabled_number_clut;
@@ -2886,7 +2875,6 @@ extern u8 g_world_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_COUNT];
 /* Second slot-category table of world_shop_build_fitting_room_best_fit_equipment. */
 extern u8 g_world_fitting_room_best_fit_slot_categories[WORLD_EQUIPMENT_SLOT_COUNT];
 extern game_options_t g_world_saved_game_options;
-extern s32 g_world_finish_operation_event_id;
 extern u8 g_world_order_unit_saved_browse_enabled;
 extern s32 g_world_fixed_math_overflow; /* set by world_cross_product_q12 on Q12 overflow */
 s32 world_cross_product_q12(s32 a, s32 b, s32 c, s32 d);

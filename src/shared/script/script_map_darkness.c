@@ -1,11 +1,12 @@
 #include "fft/battle_map.h"
-#include "fft/battle_script.h"
+#include "fft/script.h"
 #include "fft/thread.h"
 
 /* Thread body of MapDarkness: start the ambient-light blend described by the
  * operands (blend mode, red, green, blue as s8, duration index), then keep the
  * thread alive under the MapDarkness task id for
- * g_script_map_darkness_durations[duration index] frames (1 to 256). */
+ * g_script_map_darkness_durations[duration index] frames (1 to 256). WORLD's copy
+ * also calls the BATTLE blend at 0x800934d0, which is WLDCORE data there. */
 void script_map_darkness(void) {
     event_unit_color_t* parameters;
 

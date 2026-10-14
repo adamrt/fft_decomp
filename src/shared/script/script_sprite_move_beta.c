@@ -1,4 +1,4 @@
-#include "fft/battle_script.h"
+#include "fft/script.h"
 #include "fft/thread.h"
 
 /* Thread body of SpriteMoveBeta: run the sprite move with the last operand taken

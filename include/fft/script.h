@@ -699,6 +699,10 @@ void script_load_attack_graphics_event_instruction(void);
 
 extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
+extern s32 g_script_next_event_id;
+extern s16 g_script_scenario_event_active;
+s32 script_get_current_scenario_finish_operation(void);
+u32 script_get_event_finish_operation(void);
 
 /* interpreter */
 /* BATTLE pointer slot 0x80173ca4; WORLD pointer slot 0x801cd75c. */
@@ -1071,6 +1075,10 @@ void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_
 void script_walkto_event_instruction(const event_walk_to_parameters_t* parameters);
 
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
+void script_add_unit_stub(void);
+void script_run_sprite_move(const event_sprite_move_parameters_t* parameters, s32 use_speed);
+void script_sprite_move(void);
+void script_sprite_move_beta(void);
 
 /* waits */
 void script_wait_for_unit_ready(s32 runtime_id);
@@ -1127,5 +1135,11 @@ extern s16 g_world_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13;
 
 void script_pause_event_instruction(void);
 void script_print_debug_message(void);
+
+/* map instructions */
+extern u16 g_script_map_darkness_durations[];
+
+void script_map_darkness(void);
+void script_set_specialized_map_destroyed(void);
 
 #endif
