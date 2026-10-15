@@ -649,7 +649,7 @@ void require_gfx_run_suspended_thread_transition(void) {
         gfx_build_gradient_grid_primitives_variant(g_require_gfx_poly_gt4_buffers[buffer]);
         menu_build_status_group_primitives_variant(g_gfx_poly_ft4_buffers[buffer]);
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;

@@ -430,7 +430,7 @@ void etc_graphic_show_async(void) {
     s32 graphic_id;
     s32 graphic_type;
 
-    graphic_id = thread_get_current_parameter_1_variant();
+    graphic_id = thread_get_current_parameter_1();
     etc_graphic_open(graphic_id);
     graphic_type = g_etc_graphics[graphic_id].texture_mode;
     if (graphic_type == 0) {

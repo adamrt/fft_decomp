@@ -16,19 +16,19 @@ void world_menu_formation_icon_list_thread(void) {
     s32 i;
     menu_icon_sprites_t* record;
 
-    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    param = (menu_entry_t*)thread_get_current_parameter_1();
     record = &records[0].base;
     cursor = param->selected_index;
     if (cursor == -1) {
         cursor = 0;
     }
-    menu_build_window_sprites_variant(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     SetShadeTex(&record->sprites[0], 0);
     SetShadeTex(&record->sprites[1], 0);
     SetShadeTex(&record->sprites[2], 0);
     SetShadeTex(&record->sprites[3], 0);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = menu_build_and_upload_window_frame_image_variant(
+    buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
@@ -44,10 +44,10 @@ void world_menu_formation_icon_list_thread(void) {
         param->selected_index = cursor;
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, i, cursor);
-        if (menu_should_close_thread_variant(&g_world_formation_menu_input_state.new_buttons) != 0) {
+        if (menu_should_close_thread(&g_world_formation_menu_input_state.new_buttons) != 0) {
             break;
         }
-        if (thread_is_previous_running_variant() == 0) {
+        if (thread_is_previous_running() == 0) {
             menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
             menu_handle_action(param, cursor);
             menu_handle_cancel_input(param);

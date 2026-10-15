@@ -22,7 +22,7 @@ void world_menu_announce_entry_value_thread(void) {
     s32 value;
     s32 next;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    entry = (menu_entry_t*)thread_get_current_parameter_1();
     kind = entry->select_text_table;
     if (kind == 2 || kind == -1) {
         next = g_thread_current_id + 1;
@@ -74,15 +74,15 @@ void world_menu_icon_clamped_list_thread(void) {
     menu_icon_sprites_t* sprites;
 
     g_world_menu_list_controller_input = script_get_controller_input_pointer(0);
-    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    param = (menu_entry_t*)thread_get_current_parameter_1();
     cursor = param->selected_index;
     record = &records[0];
     if (cursor == -1) {
         cursor = 0;
     }
-    menu_build_window_sprites_variant(&rect, param, record);
+    menu_build_window_sprites(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = menu_build_and_upload_window_frame_image_variant(
+    buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
@@ -96,10 +96,10 @@ void world_menu_icon_clamped_list_thread(void) {
             menu_free_memory(buffer);
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
-        if (thread_is_previous_running_variant() == 0) {
+        if (thread_is_previous_running() == 0) {
             if ((*g_world_menu_list_controller_input & PSX_PAD_UP) && cursor != 0) {
                 cursor--;
             }
@@ -132,7 +132,7 @@ static void world_menu_update_entry_cursor_quads(
             thread->task_words[1] = 2;
             thread->task_words[0] = 0;
         }
-        if (thread_is_previous_running_variant() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
             if (thread->task_words[1] != 0 && thread->task_words[0] >= 0x1B) {
                 thread->task_words[1] = 0;
                 thread->task_words[0] = 0;
@@ -203,7 +203,7 @@ void world_menu_number_entry_thread(void) {
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
-    menu_build_window_sprites_variant(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     for (j = 0; j < 2; j++) {
         menu_init_default_poly_ft4(&cursor_quads[j]);
@@ -232,7 +232,7 @@ void world_menu_number_entry_thread(void) {
         shadow_quads[j].v3 = 0x10;
     }
     digit = 0;
-    buffer = menu_build_and_upload_window_frame_image_variant(
+    buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     *stride = param->inner_width;
     menu_set_text_origin(8, 9);
@@ -248,7 +248,7 @@ void world_menu_number_entry_thread(void) {
             redraw = 0;
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
         input = *g_world_menu_list_controller_input;
@@ -290,7 +290,7 @@ void world_menu_number_entry_thread(void) {
             }
         }
         if (redraw == 1) {
-            buffer = menu_build_and_upload_window_frame_image_variant(
+            buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             *stride = param->inner_width;
             menu_set_text_origin(param->inner_width - digits * 6 - 0x10, 9);
@@ -303,7 +303,7 @@ void world_menu_number_entry_thread(void) {
         world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
-        if (thread_is_previous_running_variant() == 0) {
+        if (thread_is_previous_running() == 0) {
             cursor_quad->clut = 0x7D7C;
             shadow_quad->clut = 0x7DBC;
         } else {
@@ -360,7 +360,7 @@ void world_menu_labeled_number_entry_thread(void) {
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
-    menu_build_window_sprites_variant(&rect, param, &record);
+    menu_build_window_sprites(&rect, param, &record);
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&cursor_quads[i]);
         SetSemiTrans(&cursor_quads[i], 0);
@@ -388,7 +388,7 @@ void world_menu_labeled_number_entry_thread(void) {
         shadow_quads[i].v3 = 0x10;
     }
     digit = 0;
-    buffer = menu_build_and_upload_window_frame_image_variant(
+    buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     text_measure_pixels(&label_size[0], &label_size[1], text_find_entry(param->text_id));
@@ -408,7 +408,7 @@ void world_menu_labeled_number_entry_thread(void) {
             menu_free_memory(buffer);
             redraw = 0;
         }
-        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
         input = *g_world_menu_list_controller_input;
@@ -450,7 +450,7 @@ void world_menu_labeled_number_entry_thread(void) {
             }
         }
         if (redraw == 1) {
-            buffer = menu_build_and_upload_window_frame_image_variant(
+            buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_text_state.pen.stride = param->inner_width;
             text_measure(&label_size[0], &label_size[1], text_find_entry(param->text_id));
@@ -466,7 +466,7 @@ void world_menu_labeled_number_entry_thread(void) {
         world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
-        if (thread_is_previous_running_variant() == 0) {
+        if (thread_is_previous_running() == 0) {
             cursor_quad->clut = 0x7D7C;
             shadow_quad->clut = 0x7DBC;
         } else {
@@ -555,7 +555,7 @@ void world_menu_text_entry_thread(void) {
     *g_world_menu_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
         menu_handle_action(entry, 0);
-        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
         if ((thread - 1)->function_parameter_3 != 0) {

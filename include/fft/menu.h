@@ -126,7 +126,7 @@ typedef enum menu_window_icon_flags {
  * Event ChangeDialog scans records 0, 2 and 4, compares +0x14 with operand 0,
  * and checks the thread at +0x04 for task 0x33. For DisplayMessage, the text
  * threads store the dialog type's box nibble (& 0x70), the portrait unit and
- * the scroll state, and battle/menu_draw_active_window_frames_variant read
+ * the scroll state, and battle/menu_draw_active_window_frames read
  * them. */
 typedef struct menu_window_buffer {
     s32 active;             /* 0x00: 1 once the text thread has built the window; the frame
@@ -852,7 +852,7 @@ typedef struct menu_entry {
     void (*thread_entry)(void);  /* 0x28 */
     s16 header_id;               /* 0x2c: menu header; text-thread parameter (world_menu_text_entry_thread); the
                                     icon threads read it signed as the icon kind: 0x10 arrow, 0..4 single
-                                    icon, 5..15 four-piece icon (menu_build_window_sprites_variant) */
+                                    icon, 5..15 four-piece icon (menu_build_window_sprites) */
     u8 _padding_2e[2];           /* aligns context */
     /* 0x30: context interpreted by the menu thread. Text threads use menu_text_binding_t
      * here, the list threads a menu_text_layout_t, the number threads a
@@ -1045,7 +1045,7 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-/* Provisional: the 0x7c-byte icon record menu_build_window_sprites_variant fills.
+/* Provisional: the 0x7c-byte icon record menu_build_window_sprites fills.
  * Its head is exactly menu_icon_sprites_t; the three borrowed icon
  * sprites at +0x68 and the two state words at +0x74/+0x78 are what that builder
  * adds. */
@@ -2225,6 +2225,7 @@ extern s32 g_text_line_widths[];
 /* Glyph pixel widths, TEXT_GLYPHS_PER_PREFIX entries per prefix page. */
 extern const u8 g_text_glyph_widths[];
 /* Text IDs select a section in the upper five bits and an entry in the lower eleven. */
+extern s32 g_text_section_offsets[TEXT_SECTION_COUNT]; /* the text file's table; the text follows it */
 extern u8* g_text_section_pointers[TEXT_SECTION_COUNT];
 extern u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
 extern s32 g_text_section_backup_active;
@@ -2547,14 +2548,14 @@ void menu_noop_6(void);
 void menu_noop_7(void);
 
 /* per-module bodies: each module links its own copy under the shared name. */
-s32 menu_can_accept_input_variant(void);
-s32 menu_should_close_thread_variant(u32* input);
-u8* menu_build_and_upload_window_frame_image_variant(s32 width, s32 height, RECT* rect, s32 mode);
-void menu_build_idle_action_menu_variant(s32 unused_menu_id);
+s32 menu_can_accept_input(void);
+s32 menu_should_close_thread(u32* input);
+u8* menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
+void menu_build_idle_action_menu(s32 unused_menu_id);
 void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 id);
-void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
-void menu_draw_active_window_frames_variant(void);
-void menu_init_sprt_variant(SPRT* sprite);
+void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
+void menu_draw_active_window_frames(void);
+void menu_init_sprt(SPRT* sprite);
 void menu_run_scrolling_ability_list_thread_variant(void);
 
 /* Page scroll direction of the overlay unit, item and job lists. */

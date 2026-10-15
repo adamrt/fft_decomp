@@ -451,7 +451,7 @@ void menu_run_unit_status_thread_variant(void) {
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;

@@ -24,7 +24,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static s32 menu_display_projected_action_effect_variant(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
+static s32 menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);
 
 static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
@@ -335,7 +335,7 @@ void menu_run_selected_tile_info_display_thread(void) {
             continue;
         }
         g_menu_hide_numeric_values = 0;
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         for (j = i; j >= 0; j--) {
@@ -401,7 +401,7 @@ static void menu_build_sprite_page(s32 page_index, RECT* base_screen) {
 
     for (i = 0; i < 5; i++) {
         sprite = &page->sprites[i];
-        menu_init_sprt_variant(sprite);
+        menu_init_sprt(sprite);
         SetDrawMode(&page->modes[i], 1, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_menu_sprite_page_texture_windows[i]);
         gfx_init_image_loading(sprite, &g_menu_texture_origin, base_screen, &g_menu_sprite_page_image_params[i]);
     }
@@ -412,12 +412,11 @@ static void menu_build_sprite_page(s32 page_index, RECT* base_screen) {
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between menu_build_sprite_page
- * and menu_display_projected_action_effect_variant. Nothing on the disc calls it or
+ * and menu_display_projected_action_effect. Nothing on the disc calls it or
  * points at it; the name is a neutral placeholder until a reference turns up. */
 void menu_noop_2(void) {
 }
 
-#ifdef FFT_BATTLE
 /*
  * Loads the action-preview result image (HP/MP/gil/EXP/level/status/stat
  * change) and sets up the value panel for the current preview action.
@@ -427,9 +426,11 @@ void menu_noop_2(void) {
  * hide the panel return 2: the target jumps past the epilogue's `move v0,s1`
  * with the panel state's 2 still in $v0. An explicit `return 2;` adds a second
  * constant load, so they use a bare `return;`. The caller discards the result.
+ * WORLD has no action previews: its copy is empty and leaves $v0 unset.
  */
-static s32 menu_display_projected_action_effect_variant(
+static s32 menu_display_projected_action_effect(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params) {
+#ifdef FFT_BATTLE
     menu_number_entry_t* panel;
     u16* label_x;
     const action_display_image_rect_t* rect;
@@ -699,17 +700,8 @@ static s32 menu_display_projected_action_effect_variant(
         }
     }
     return image;
-}
 #endif
-
-#ifdef FFT_WORLD
-/* Empty in WORLD; BATTLE's body loads the result image of the previewed action into the unit panel.
- * Called with gfx_init_image_loading's arguments. It leaves $v0 unset; the shared caller discards
- * the result. */
-static s32 menu_display_projected_action_effect_variant(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
-    const RECT* unused_base_screen, image_load_parameters_t* unused_parameters) {
 }
-#endif
 
 static void menu_display_hovered_unit_stats(
     RECT* frame_rect, s32 mode, struct menu_number_entry* entries, menu_unit_status_record_t* status) {
@@ -797,7 +789,7 @@ static void menu_display_hovered_unit_stats(
             gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
             page->quads[frame].clut = 0x7CBC;
         }
-        menu_display_projected_action_effect_variant(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+        menu_display_projected_action_effect(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
     } else if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         for (frame = 0; frame < 2; frame++, params++) {
             gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
@@ -821,7 +813,7 @@ static void menu_display_hovered_unit_stats(
             text_loaded = 0;
         }
         for (i = 0; i < g_script_event_speed; i++) {
-            if (thread_get_current_parameter_3_variant() != 0) {
+            if (thread_get_current_parameter_3() != 0) {
                 if (mode == UNIT_STATS_PANEL_HOVERED_UNIT
                     && g_thread_contexts[THREAD_SLOT_RIGHT_UNIT_STATS].task_id == THREAD_TASK_ATTACK_CASTER_STATS) {
                     /* Both exits leave the step loop and the frame loop. */
@@ -844,7 +836,7 @@ static void menu_display_hovered_unit_stats(
             }
         }
         running = thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
-        if (running != 0 && thread_is_running_asm_variant(running - 1) == 0) {
+        if (running != 0 && thread_is_running_asm(running - 1) == 0) {
             running = 0;
         }
         page = &g_menu_unit_status_panel_pages[g_menu_unit_status_first_page_by_mode[mode] + (frame & 1)];
@@ -1199,7 +1191,7 @@ void menu_run_unit_summary_panel_thread(void) {
         }
         value = (g_main_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
         for (i = 0; i < g_script_event_speed; i++) {
-            if (thread_get_current_parameter_3_variant() != 0) {
+            if (thread_get_current_parameter_3() != 0) {
                 slide += 0x1E;
                 if (slide > 0x80) {
                     /* Leaves both the step loop and the frame loop. */
@@ -1245,7 +1237,7 @@ void menu_run_unit_summary_panel_thread(void) {
         SetDrawOffset(&frame_record->draw_offset_b, (u16*)&frame_record->offset_b);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_b);
         value = thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
-        if (value != 0 && thread_is_running_asm_variant(value - 1) == 0) {
+        if (value != 0 && thread_is_running_asm(value - 1) == 0) {
             value = 0;
         }
         if (value != 0) {
@@ -1428,7 +1420,7 @@ void menu_run_numeric_display_panel_thread(void) {
     thread_wait_frames(1);
     menu_free_memory(number_images);
     for (i = 0; i < 18; i++) {
-        menu_init_sprt_variant(&record->sprites[i]);
+        menu_init_sprt(&record->sprites[i]);
         gfx_init_image_loading(&record->sprites[i], &g_menu_texture_origin, &g_menu_numeric_display_frame_rect,
             &g_menu_numeric_display_image_params[i]);
     }
@@ -1442,10 +1434,10 @@ void menu_run_numeric_display_panel_thread(void) {
         record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &record->draw_areas, &g_menu_numeric_display_panel_texture_window, frame, g_main_gfx_screen_polarity);
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
-        if (thread_is_running_asm_variant(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
+        if (thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
             for (i = 17; i >= 0; i--) {
                 record->sprites[i].clut = 0x7D3C;
             }
@@ -1646,10 +1638,10 @@ void menu_run_unit_editor_panel_thread(void) {
         frame_record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &frame_record->draw_areas, &g_menu_unit_editor_cursor_rect, frame, g_main_gfx_screen_polarity);
-        if (g_menu_input_lock_mode == 0 && g_menu_help_open == 0 && thread_get_current_parameter_3_variant() != 0) {
+        if (g_menu_input_lock_mode == 0 && g_menu_help_open == 0 && thread_get_current_parameter_3() != 0) {
             break;
         }
-        value = thread_is_running_asm_variant(g_thread_current_id - 1);
+        value = thread_is_running_asm(g_thread_current_id - 1);
         for (i = 0; i < 19; i++) {
             frame_record->sprites[i].clut = g_menu_unit_editor_sprite_clut_pairs[i][value];
         }
@@ -1671,12 +1663,12 @@ void menu_run_unit_editor_panel_thread(void) {
         } else {
             menu_init_primitive_colors_dimmed(frame_record->palette);
         }
-        if (menu_can_accept_input_variant() != 0) {
+        if (menu_can_accept_input() != 0) {
             if (g_script_event_input & PSX_PAD_CROSS) {
                 thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
                 break;
             }
-            if ((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) == 0
+            if ((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
                 && (unit_has_any_current_status(g_menu_selected_unit.battle_id) != 0
                     || (g_menu_selected_unit_fields.state.generic_monster == 0
                         && g_menu_selected_unit_status.team_kind != 1))) {
@@ -1724,61 +1716,38 @@ void menu_run_unit_editor_panel_thread(void) {
     g_thread_contexts[THREAD_SLOT_TILE_INFO_PANEL].task_id = THREAD_TASK_TILE_INFO_PANEL;
     g_menu_overlay_state = 0;
     battle_menu_leave_status_screen_selection();
-    menu_build_idle_action_menu_variant(g_menu_current_id);
+    menu_build_idle_action_menu(g_menu_current_id);
     thread_exit_current();
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * menu_run_unit_editor_panel_thread and menu_can_accept_input_variant. Nothing on the
+ * menu_run_unit_editor_panel_thread and menu_can_accept_input. Nothing on the
  * disc calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 void menu_noop_3(void) {
 }
 
-#ifdef FFT_BATTLE
 /* Returns 1 when a menu thread may act on input: no previous event thread
- * running, no third thread parameter, not in event mode, no help menu open,
- * and g_battle_menu_input_block_frames clear. */
-s32 menu_can_accept_input_variant(void) {
-    if (thread_is_previous_running_variant() != 0 || thread_get_current_parameter_3_variant() != 0
-        || g_menu_input_lock_mode != 0 || g_menu_help_open != 0 || g_menu_input_block_frames != 0) {
-        return 0;
-    }
-    return 1;
-}
-#endif
-
+ * running, no third thread parameter (a stop request), not in event mode, no
+ * help menu open, and g_menu_input_block_frames clear. In WORLD, a help box
+ * (box type 0x30) in the text or message slot blocks input first and arms a
+ * five-frame block. */
+s32 menu_can_accept_input(void) {
 #ifdef FFT_WORLD
-/*
- * Returns 1 when the current menu thread may act on input.
- *
- * A help box (box type 0x30) in the text or message slot blocks input and
- * arms a five-frame block. Otherwise input is allowed while the previous
- * thread slot is idle, no stop is requested (parameter 3), no text task or
- * overlay is active and the block has run out.
- */
-s32 menu_can_accept_input_variant(void) {
-    if ((thread_is_running_asm_variant(THREAD_SCREEN_SLOT_TEXT)
+    if ((thread_is_running_asm(THREAD_SCREEN_SLOT_TEXT)
             && (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].function_parameter_1 & 0x70) == 0x30)
-        || (thread_is_running_asm_variant(THREAD_SCREEN_SLOT_MESSAGE)
+        || (thread_is_running_asm(THREAD_SCREEN_SLOT_MESSAGE)
             && (g_thread_contexts[THREAD_SCREEN_SLOT_MESSAGE].function_parameter_1 & 0x70) == 0x30)) {
         g_menu_input_block_frames = 5;
         return 0;
     }
-    if (thread_is_previous_running_variant() == 0) {
-        if (thread_get_current_parameter_3_variant() == 0) {
-            if (g_menu_input_lock_mode == 0) {
-                if (g_menu_help_open == 0) {
-                    if (g_menu_input_block_frames == 0) {
-                        return 1;
-                    }
-                }
-            }
-        }
-    }
-    return 0;
-}
 #endif
+    if (thread_is_previous_running() != 0 || thread_get_current_parameter_3() != 0 || g_menu_input_lock_mode != 0
+        || g_menu_help_open != 0 || g_menu_input_block_frames != 0) {
+        return 0;
+    }
+    return 1;
+}
 
 void menu_handle_action(menu_entry_t* entry, s32 row_index) {
     s32 silent;
@@ -1794,7 +1763,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
         return;
     }
     silent = 0;
-    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input_variant() != 0) {
+    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input() != 0) {
         if (g_thread_contexts[g_thread_current_id].task_words[1] == 0) {
             g_thread_contexts[g_thread_current_id].task_words[1] = 2;
             g_thread_contexts[g_thread_current_id].task_words[0] = 0;
@@ -1829,7 +1798,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
                 if (thread_id == 8) {
                     for (j = 0; j < target; j++) {
                         menu_thread_id = 8 - j;
-                        if (thread_is_running_asm_variant(menu_thread_id) != 0) {
+                        if (thread_is_running_asm(menu_thread_id) != 0) {
                             g_menu_pending_selection[j]
                                 = ((menu_entry_t*)g_thread_contexts[menu_thread_id].function_parameter_1)
                                       ->selected_index;
@@ -1853,7 +1822,7 @@ void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel) {
     s32 max;
     s32 cur;
 
-    if (menu_can_accept_input_variant() != 0) {
+    if (menu_can_accept_input() != 0) {
         if (g_script_event_input & PSX_PAD_UP) {
             selection = *sel;
             if (selection == 0) {
@@ -1888,7 +1857,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     if (!(g_script_event_input & PSX_PAD_CROSS)) {
         return;
     }
-    if (menu_can_accept_input_variant() == 0) {
+    if (menu_can_accept_input() == 0) {
         return;
     }
     count = context->thread_count;
@@ -1914,45 +1883,20 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     g_script_input_suppression_frames = 5;
 }
 
-#ifdef FFT_BATTLE
-s32 menu_should_close_thread_variant(u32* input) {
-    s32 i;
-    s32 task_state;
-
-    if (g_menu_input_lock_mode != 0 || g_menu_help_open != 0) {
-        *input = 0;
-        return 0;
-    }
-    i = 0;
-    task_state = 3;
-    for (; i < 16; i++) {
-        if (i != g_thread_current_id && thread_is_running_asm_variant(i) != 0
-            && g_thread_contexts[i].task_id == task_state) {
-            *input = 0;
-            break;
-        }
-    }
-    if (i == 16 && thread_get_current_parameter_3_variant() != 0) {
-        return 1;
-    }
-    return 0;
-}
+/* Suppress menu input while another thread has a stop request and report
+ * completion: 1 once no other running thread has a stop request and this
+ * thread's parameter 3 is set. In WORLD, SELECT first opens the entry's
+ * auxiliary text thread when its table selector is nonzero. */
+s32 menu_should_close_thread(u32* input) {
+#ifdef FFT_WORLD
+    menu_entry_t* parameter;
 #endif
+    s32 i;
 
 #ifdef FFT_WORLD
-/*
- * Suppress menu input while another task owns the UI and check completion.
- *
- * Input bit 0x100 opens the entry's auxiliary text thread when its table
- * selector is nonzero. Completion waits for all other task-3 threads.
- */
-s32 menu_should_close_thread_variant(u32* input) {
-    menu_entry_t* parameter;
-    s32 i;
-
-    if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input_variant() != 0
+    if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input() != 0
         && (*input & PSX_PAD_SELECT)) {
-        parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
+        parameter = (menu_entry_t*)thread_get_current_parameter_1();
         if (parameter->select_text_table != 0) {
             if (g_script_input_suppression_frames == 0) {
                 thread_start(THREAD_SCREEN_SLOT_TEXT, world_menu_announce_entry_value_thread);
@@ -1962,83 +1906,28 @@ s32 menu_should_close_thread_variant(u32* input) {
             *input = 0;
         }
     }
+#endif
     if (g_menu_input_lock_mode != 0 || g_menu_help_open != 0) {
         *input = 0;
         return 0;
     }
-    for (i = 0; i < 17; i++) {
-        if (i != g_thread_current_id && thread_is_running_asm_variant(i) != 0
+    for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
+        if (i != g_thread_current_id && thread_is_running_asm(i) != 0
             && g_thread_contexts[i].task_id == THREAD_TASK_STOP_REQUEST) {
             *input = 0;
             break;
         }
     }
-    if (i == 17 && thread_get_current_parameter_3_variant() != 0) {
+    if (i == VARIANT_THREAD_TABLE_SLOT_COUNT && thread_get_current_parameter_3() != 0) {
         return 1;
     }
     return 0;
 }
-#endif
 
-#ifdef FFT_BATTLE
-/* Build the window's background, edge sprites and optional compound-style sprites.
- * WORLD links its own, longer body under this name. */
-void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
-    s16 style;
-    s32 index;
-
-    thread_set_current_task_id(THREAD_TASK_MENU_WINDOW_BUILD);
-    rect->x = param->vram_origin.x;
-    rect->y = param->vram_origin.y;
-    rect->w = param->inner_width >> 2;
-    rect->h = param->inner_height;
-    record->_unknown_74 = 0;
-    record->_unknown_78 = 0;
-    menu_init_sprite_array(record->base.sprites, 4, 0x7cfc);
-    gfx_init_image_loading(record->base.sprites, &param->vram_origin, &param->window, &param->text_image);
-    SetSemiTrans(&record->base.sprites[1], 0);
-    SetSemiTrans(&record->base.sprites[2], 1);
-    record->base.sprites[1].w = 0x10;
-    record->base.sprites[1].h = 0x10;
-    record->base.sprites[2].w = 0x10;
-    record->base.sprites[2].h = 0x10;
-    record->base.sprites[1].u0 = 0xa8;
-    record->base.sprites[1].v0 = 0;
-    record->base.sprites[2].u0 = 0xb8;
-    record->base.sprites[2].v0 = 0;
-    style = param->header_id;
-    if (style < 5) {
-        gfx_init_image_loading(
-            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[style]);
-    } else if (style >= 5 && style <= 15) {
-        index = (style - 5) * 4;
-        menu_init_sprite_array(record->icons[0], 1, 0x7cfc);
-        menu_init_sprite_array(record->icons[1], 1, 0x7cfc);
-        menu_init_sprite_array(record->icons[2], 1, 0x7cfc);
-        gfx_init_image_loading(
-            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index]);
-        gfx_init_image_loading(
-            record->icons[0], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index + 1]);
-        gfx_init_image_loading(
-            record->icons[1], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index + 2]);
-        gfx_init_image_loading(
-            record->icons[2], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index + 3]);
-    } else {
-        record->icons[0] = 0;
-        record->icons[1] = 0;
-        record->icons[2] = 0;
-    }
-    gfx_set_draw_mode_from_origin(&record->base.first_draw_mode, &param->vram_origin);
-    SetDrawMode(&record->base.draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
-}
-#endif
-
-#ifdef FFT_WORLD
-/* Publish the icon strip's text-image upload rectangle to the caller, build the
- * four menu sprites of the icon record, and place the icon sprites that the
- * strip's icon kind selects. BATTLE links its own body under this name;
- * only WORLD has the icon kind 0x10 branch. */
-void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
+/* Publish the icon strip's text-image upload rectangle to the caller, build
+ * the four menu sprites of the icon record, and place the icon sprites that
+ * the strip's icon kind selects. Only WORLD has the icon kind 0x10 branch. */
+void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record) {
     s32 kind;
     s32 index;
     /* HImode is load-bearing. `cse` keys its constant equivalence classes by
@@ -2077,6 +1966,7 @@ void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_ico
     kind = param->header_id;
     /* The range test below reads its own 16-bit copy of the kind. */
     index = (s16)kind;
+#ifdef FFT_WORLD
     if (kind == 0x10) {
         const image_load_parameters_t* image_params;
 
@@ -2090,7 +1980,9 @@ void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_ico
         record->icons[0]->y0 = param->window.y - 1;
         gfx_init_image_loading(
             &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[1]);
-    } else if (kind < 5) {
+    } else
+#endif
+        if (kind < 5) {
         gfx_init_image_loading(
             &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[kind]);
     } else {
@@ -2119,13 +2011,12 @@ void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_ico
     gfx_set_draw_mode_from_origin(&record->base.first_draw_mode, &param->vram_origin);
     SetDrawMode(&record->base.draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
 }
-#endif
 
 void menu_select_sprite_clut(void* packet) {
     s32 clut;
     texture_primitive_t* primitive = packet;
 
-    if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
         clut = 0x7D3C;
     } else {
         clut = 0x7C3C;
@@ -2138,7 +2029,7 @@ void menu_select_sprite_clut(void* packet) {
 void menu_select_icon_sprite_clut(SPRT* sprite) {
     s32 clut;
 
-    if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
         clut = 0x7c7c;
     } else {
         clut = 0x7cbc;
@@ -2149,7 +2040,7 @@ void menu_select_icon_sprite_clut(SPRT* sprite) {
 /* Choose the CLUTs of the four menu-frame sprites: the dimmed set while the
  * previous thread is running or g_menu_input_lock_mode is 1. */
 void menu_select_icon_cluts(menu_icon_sprites_t* frame) {
-    if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
         frame->sprites[0].clut = 0x7d3c;
         frame->sprites[1].clut = 0x7dfc;
         frame->sprites[2].clut = 0x7e3c;
@@ -2210,7 +2101,7 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
             thread->task_words[1] = 2;
             thread->task_words[0] = 0;
         }
-        if (thread_is_previous_running_variant() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
             if (thread->task_words[1] != 0 && thread->task_words[0] >= 0x1B) {
                 thread->task_words[1] = 0;
                 thread->task_words[0] = 0;

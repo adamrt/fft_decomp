@@ -79,7 +79,7 @@ void world_menu_input_update_dialog_state(void) {
     thread_yield();
     input = PadRead(1);
     if (input == 0
-        || (script_is_tutorial_event_slot_variant() != 0
+        || (script_is_tutorial_event_slot() != 0
             && (script_get_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & 0x5000))) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;
@@ -588,7 +588,7 @@ void menu_render_text_image_at_record_origin(text_dialog_record_t* record) {
             record->buffer = menu_build_window_image(
                 record->width, record->height, &record->rect, record->dialog_type, record->tail_offset, 1);
         } else {
-            record->buffer = menu_build_and_upload_window_frame_image_variant(
+            record->buffer = menu_build_and_upload_window_frame_image(
                 record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
         g_menu_text_state.pen.rect.x = record->origin_x;

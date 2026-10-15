@@ -1033,7 +1033,7 @@ static void require_reward_run_war_trophies(void) {
         for (i = 0; i < 16; i++) {
             menu_init_default_poly_ft4(&buffer->quads[i]);
         }
-        menu_init_sprt_variant(&buffer->banner);
+        menu_init_sprt(&buffer->banner);
         prims->banner.x0 = 0x88;
         prims->banner.y0 = 0x78;
         prims->banner.u0 = 8;
@@ -1059,7 +1059,7 @@ static void require_reward_run_war_trophies(void) {
                 if (last == g_require_reward_war_trophy_entry_count || (row != 0 && (row & 7) == 0)) {
                     break;
                 }
-                image = menu_build_and_upload_window_frame_image_variant(
+                image = menu_build_and_upload_window_frame_image(
                     0x50, 0x10, &g_require_reward_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
                 menu_clear_render_buffer(image, 0x280);
                 g_menu_text_state.pen.stride = 0x50;
@@ -1607,7 +1607,7 @@ static void require_condition_show_general(s32 hold_frames) {
     colors = g_require_condition_general_vertex_colors;
     tpage = g_require_condition_general_tpages;
     condition = 0;
-    require_reward_load_bonus_image(thread_get_current_parameter_1_variant() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
+    require_reward_load_bonus_image(thread_get_current_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
     {
         u8* parameters = &range[condition];
 
@@ -1757,8 +1757,8 @@ void require_condition_run_special_thread(void) {
 
     table = g_require_condition_special_quad_ranges;
     color_table = g_require_condition_special_vertex_colors;
-    parameter_index = thread_get_current_parameter_1_variant();
-    use_small_array = thread_get_current_parameter_2_variant();
+    parameter_index = thread_get_current_parameter_1();
+    use_small_array = thread_get_current_parameter_2();
     {
         u8* parameters = &g_require_condition_special_quad_ranges[parameter_index];
 
@@ -1789,10 +1789,10 @@ void require_condition_run_special_thread(void) {
     /* Parameter 3 selects the next phase at any frame: 2 jumps from the
        fade-in past the hold loop to the fade-out, 1 ends the thread. */
     while (scale < 0x80) {
-        if (thread_get_current_parameter_3_variant() == 2) {
+        if (thread_get_current_parameter_3() == 2) {
             goto fade_out;
         }
-        if (thread_get_current_parameter_3_variant() == 1) {
+        if (thread_get_current_parameter_3() == 1) {
             goto done;
         }
         buffer ^= 1;
@@ -1817,10 +1817,10 @@ void require_condition_run_special_thread(void) {
         scale += 8;
     }
     for (;;) {
-        if (thread_get_current_parameter_3_variant() == 2) {
+        if (thread_get_current_parameter_3() == 2) {
             break;
         }
-        if (thread_get_current_parameter_3_variant() == 1) {
+        if (thread_get_current_parameter_3() == 1) {
             goto done;
         }
         buffer ^= 1;
@@ -1846,7 +1846,7 @@ void require_condition_run_special_thread(void) {
 fade_out:
     scale = 0x80;
     do {
-        if (thread_get_current_parameter_3_variant() == 1) {
+        if (thread_get_current_parameter_3() == 1) {
             break;
         }
         buffer ^= 1;
@@ -1926,7 +1926,7 @@ void require_reward_animate_bonus_image_burst(void) {
         require_reward_load_bonus_image(1);
     }
     /* Named operand loads fold the three native cursor advances. */
-    params = thread_get_current_parameter_2_variant();
+    params = thread_get_current_parameter_2();
     params++;
     mode = *params;
     params++;
@@ -2128,8 +2128,8 @@ void require_condition_dispatch(void) {
     s32 thread;
 
     thread_set_current_task_id(THREAD_TASK_CONDITION_DISPATCH);
-    condition = thread_get_current_parameter_1_variant();
-    parameter = thread_get_current_parameter_2_variant();
+    condition = thread_get_current_parameter_1();
+    parameter = thread_get_current_parameter_2();
     if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST)
         require_condition_show_general(parameter);
     thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);

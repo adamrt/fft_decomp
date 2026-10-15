@@ -161,7 +161,7 @@ void menu_run_equipment_list_thread_variant(void) {
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;
@@ -312,7 +312,7 @@ void menu_run_ability_list_thread_variant(void) {
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;

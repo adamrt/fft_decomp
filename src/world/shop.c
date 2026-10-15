@@ -163,7 +163,7 @@ void world_shop_run_screen(s32 shop_type) {
             world_shop_update_unit_selection();
         }
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
-        menu_draw_active_window_frames_variant();
+        menu_draw_active_window_frames();
         if (g_world_shop_menu_step == WORLD_SHOP_STEP_FUR_BUY_CONFIRM
             || g_world_shop_menu_step == WORLD_SHOP_STEP_FUR_SELL_CONFIRM
             || g_world_shop_menu_step == WORLD_SHOP_STEP_FITTING_ROOM_SELL

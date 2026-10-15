@@ -79,7 +79,6 @@ void battle_menu_leave_status_screen_selection(void);
 extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][5];
 
 /* text rendering */
-extern s32 g_battle_menu_text_section_offsets[];
 
 /* overlay loading */
 

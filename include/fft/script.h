@@ -1154,11 +1154,11 @@ void script_noop_10(void);
 s32 script_return_zero_1(void);
 
 /* per-module bodies: each module links its own copy under the shared name. */
-s32 script_is_tutorial_event_slot_variant(void);
+s32 script_is_tutorial_event_slot(void);
 s32 script_run_event_frame_variant(u32* ot, u32 buttons);
 void script_execute_event_variant(void);
-void script_dark_screen_thread_variant(void);
-void script_set_event_speed_variant(s32 speed);
+void script_dark_screen_thread(void);
+void script_set_event_speed(s32 speed);
 void script_update_event_input_state(u32 buttons);
 
 /* shared between programs */

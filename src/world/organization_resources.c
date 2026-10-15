@@ -442,7 +442,7 @@ void world_main_menu_text_window_thread(void) {
     s16 target;
     s32 x;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    entry = (menu_entry_t*)thread_get_current_parameter_1();
     record = records;
     gfx_set_draw_mode_from_origin(&record->text_draw_mode, &entry->vram_origin);
     gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
@@ -489,7 +489,7 @@ void world_main_menu_text_window_thread(void) {
         record = &records[i & 1];
         phase = i & 0x1F;
         if (phase == 0) {
-            buffer = menu_build_and_upload_window_frame_image_variant(
+            buffer = menu_build_and_upload_window_frame_image(
                 entry->inner_width, entry->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_text_state.pen.stride = entry->inner_width;
             menu_set_text_origin(10, 8);
@@ -509,7 +509,7 @@ void world_main_menu_text_window_thread(void) {
         if (phase == 0) {
             menu_free_memory(buffer);
         }
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         if (g_world_menu_use_alternate_main_palette != 0) {
@@ -954,7 +954,7 @@ static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* reco
     out->y = record->vram_origin.y;
     out->w = record->inner_width >> 2;
     out->h = record->inner_height;
-    menu_init_sprt_variant(primitive);
+    menu_init_sprt(primitive);
     primitive->clut = 0x7C3C;
     gfx_init_image_loading(primitive, &record->vram_origin, &record->window, &record->text_image);
 }
@@ -969,7 +969,7 @@ static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2],
     u16 x;
     s32 mode;
 
-    menu_init_sprt_variant(sprite);
+    menu_init_sprt(sprite);
     sprite->clut = 0x7D7C;
     mode = entry->header_id;
     if (mode == 1) {
@@ -996,7 +996,7 @@ static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2],
         }
     }
     sprite++;
-    menu_init_sprt_variant(sprite);
+    menu_init_sprt(sprite);
     sprite->w = 0x10;
     sprite->h = 0x10;
     sprite->clut = 0x7D7C;
@@ -1116,20 +1116,20 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     g_menu_pending_selection[0] = -2;
     g_gfx_current_otag_entry = otag;
     g_sound_pending_sfx_id = -1;
-    menu_draw_active_window_frames_variant();
+    menu_draw_active_window_frames();
     script_load_event_input_state(&g_world_formation_menu_input_state);
     if (g_world_formation_menu_new_buttons != 0x100 && g_world_formation_menu_new_buttons != 0) {
         g_script_input_suppression_frames = 5;
     }
 
     for (thread_id = 1; thread_id < 16; thread_id++) {
-        g_world_formation_thread_status_snapshot[thread_id] = thread_is_running_asm_variant(thread_id);
+        g_world_formation_thread_status_snapshot[thread_id] = thread_is_running_asm(thread_id);
     }
 
     thread_yield();
     for (thread_id = 1; thread_id < 16; thread_id++) {
         status = g_world_formation_thread_status_snapshot[thread_id];
-        if (status != thread_is_running_asm_variant(thread_id)) {
+        if (status != thread_is_running_asm(thread_id)) {
             g_script_input_suppression_frames = 5;
         }
     }

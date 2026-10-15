@@ -23,7 +23,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id);
+static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 
 void script_process_inflict_status_commands(void) {
     s32 instruction_offset;
@@ -142,20 +142,15 @@ void gfx_ramp_screen_overlay_intensity_to_max(void) {
     g_gfx_screen_fade = 0xff;
 }
 
-#ifdef FFT_BATTLE
 /* 1 while the current event id is one of the sixteen tutorial events,
- * 0x19a..0x1a9. */
-s32 script_is_tutorial_event_slot_variant(void) {
+ * 0x19a..0x1a9; WORLD has no tutorial events and always returns 0. */
+s32 script_is_tutorial_event_slot(void) {
+#ifdef FFT_BATTLE
     return (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) - EVENT_ID_TUTORIAL_FIRST) < 0x10U;
-}
-#endif
-
-#ifdef FFT_WORLD
-/* Always returns 0. */
-s32 script_is_tutorial_event_slot_variant(void) {
+#else
     return 0;
-}
 #endif
+}
 
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     s32 runtime_id = script_resolve_runtime_id(event_unit_id);
@@ -312,7 +307,7 @@ void script_update_event_input_state(u32 input) {
     u32 counter;
 
     if (input == 0
-        || (script_is_tutorial_event_slot_variant() != 0
+        || (script_is_tutorial_event_slot() != 0
             && (script_get_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & (PSX_PAD_UP | PSX_PAD_DOWN)) != 0)) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;
@@ -383,28 +378,14 @@ void menu_init_default_poly_ft4(POLY_FT4* poly) {
     poly->clut = getClut(0x3c0, 0x1f0);
 }
 
+/* Initialize the fixed sprite of the menu graphics; only BATTLE shades its texture. */
+void menu_init_sprt(SPRT* sprite) {
+    SetSprt(sprite);
 #ifdef FFT_BATTLE
-/* Initialize the fixed sprite used by BATTLE menu graphics. */
-void menu_init_sprt_variant(SPRT* sprite) {
-    SetSprt(sprite);
     SetShadeTex(sprite, 1);
-    setRGB0(sprite, 0x80, 0x80, 0x80);
-    sprite->x0 = 0x200;
-    sprite->u0 = 0;
-    sprite->v0 = 0;
-    sprite->w = 0;
-    sprite->h = 0;
-    sprite->y0 = 0;
-    sprite->clut = 0x7c3c;
-    SetSemiTrans(sprite, 1);
-}
-#endif
-
-#ifdef FFT_WORLD
-/* Initialize the fixed sprite used by WORLD menu graphics. */
-void menu_init_sprt_variant(SPRT* sprite) {
-    SetSprt(sprite);
+#else
     SetShadeTex(sprite, 0);
+#endif
     setRGB0(sprite, 0x80, 0x80, 0x80);
     sprite->x0 = 0x200;
     sprite->u0 = 0;
@@ -415,13 +396,12 @@ void menu_init_sprt_variant(SPRT* sprite) {
     sprite->clut = 0x7c3c;
     SetSemiTrans(sprite, 1);
 }
-#endif
 
 void menu_init_sprite_array(SPRT* sprites, s32 count, s32 clut) {
     s32 index;
 
     for (index = 0; index < count; index++) {
-        menu_init_sprt_variant(sprites);
+        menu_init_sprt(sprites);
         sprites->clut = clut;
         sprites++;
     }
@@ -504,16 +484,11 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
     thread_exit_current();
 }
 
-#ifdef FFT_BATTLE
-/* Empty in BATTLE and never called. WORLD's twin clears the window buffer pair of a thread. */
-static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
-}
-#endif
-
-#ifdef FFT_WORLD
 /* Clear the pair whose first record's thread matches; the target forms one
- * 0x118-biased induction value across both records (compare 0x800e27f4). */
-static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
+ * 0x118-biased induction value across both records (compare 0x800e27f4).
+ * BATTLE's copy is empty and never called. */
+static void menu_clear_window_buffer_pair_by_thread(s32 thread_id) {
+#ifdef FFT_WORLD
     s32 index;
 
     for (index = 0; index < 6; index += 2) {
@@ -523,8 +498,8 @@ static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
             return;
         }
     }
-}
 #endif
+}
 
 void menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
     s32 slot;
@@ -556,111 +531,21 @@ static void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness) {
     setRGB0(primitive, brightness, brightness, brightness);
 }
 
-#ifdef FFT_BATTLE
-/* Draws the active battle menu windows, last slot pair first.
- *
- * BATTLE twin of menu_draw_active_window_frames_variant: it scales the frame
- * primitives by the window's own brightness, positions the scroll icons and
- * builds the portrait quad from portrait_code (or the unit portrait when -1).
- * span starts as the lower icon's y and is narrowed in place to the scroll
- * thumb offset; a single-assignment temporary would load that y last. */
-void menu_draw_active_window_frames_variant(void) {
-    menu_window_buffer_t* window;
-    menu_window_buffer_t* buffer;
-    s32 height;
-    s32 i;
-    s32 offset;
-    s32 top;
-    s32 span;
-    s32 flags;
-    s32 u;
-
-    for (i = 4; i >= 0; i -= 2) {
-        if (g_menu_window_buffer_slots[i] == (menu_window_buffer_t*)-1) {
-            continue;
-        }
-        buffer = g_menu_window_buffer_slots[i + g_menu_packet_buffer_index];
-        if (buffer->active != 1 || g_thread_contexts[buffer->thread_id].is_running == 0) {
-            continue;
-        }
-        window = buffer;
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[0], window->color.r);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[1], window->color.r);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[2], window->color.r);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[3], window->color.r);
-        gfx_set_primitive_brightness((P_TAG*)&window->quads[0], window->color.r);
-        gfx_set_primitive_brightness((P_TAG*)&window->quads[1], window->color.r);
-        offset = window->quads[0].x1 - window->quads[0].x0;
-        if (offset / 8 * 8 == offset - 4) {
-            offset -= 15;
-        } else {
-            offset -= 13;
-        }
-        height = window->quads[0].y2 - window->quads[0].y0;
-        window->icon_sprites[0].x0 = window->quads[0].x0 + offset;
-        window->icon_sprites[0].y0 = window->quads[0].y0 + 8;
-        window->icon_sprites[1].x0 = window->quads[0].x0 + offset;
-        window->icon_sprites[1].y0 = window->quads[0].y0 + height - 0x1A;
-        if (window->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-            if (window->dialogue_selector == 1) {
-                window->icon_sprites[0].y0 -= 4;
-                window->icon_sprites[1].y0 -= 4;
-            } else {
-                window->icon_sprites[0].y0 += 4;
-                window->icon_sprites[1].y0 += 4;
-            }
-        }
-        span = window->icon_sprites[1].y0;
-        top = window->icon_sprites[0].y0 + window->icon_sprites[0].h;
-        span -= top;
-        span = (span - 4) * g_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->scroll_position
-            / g_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->scroll_range;
-        window->icon_sprites[2].x0 = window->quads[0].x0 + offset;
-        window->icon_sprites[2].y0 = top + span;
-        flags = g_menu_window_buffer_slots[i + g_menu_packet_buffer_index]->icon_flags;
-        if (flags & MENU_WINDOW_ICON_SCROLL_UP) {
-            gfx_draw_or_append_gpu_primitive(&window->icon_sprites[0]);
-        }
-        if (flags & MENU_WINDOW_ICON_SCROLL_DOWN) {
-            gfx_draw_or_append_gpu_primitive(&window->icon_sprites[1]);
-        }
-        if (flags & MENU_WINDOW_ICON_SCROLL_MARKER) {
-            gfx_draw_or_append_gpu_primitive(&window->icon_sprites[2]);
-        }
-        gfx_draw_or_append_gpu_primitive(&window->sprites[0]);
-        gfx_draw_or_append_gpu_primitive(&window->sprites[1]);
-        gfx_draw_or_append_gpu_primitive(&window->sprites[2]);
-        gfx_draw_or_append_gpu_primitive(&window->sprites[3]);
-        gfx_draw_or_append_gpu_primitive(&window->draw_mode);
-        if (window->portrait_code != -1) {
-            u = window->portrait_code << 5;
-            setUV4(&window->quads[1], u, 0xCE, u + 0x1F, 0xCE, u, 0xFE, u + 0x1F, 0xFE);
-            window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
-            window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
-        } else {
-            menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_battle_id);
-        }
-        gfx_flip_poly_ft4_uv_if_negative(&window->quads[1], -window->portrait_flipped);
-        gfx_draw_or_append_gpu_primitive(&window->quads[1]);
-        gfx_draw_or_append_gpu_primitive(&window->quads[0]);
-    }
-}
-#endif
-
-#ifdef FFT_WORLD
-/*
- * Draws the active WORLD message and menu windows, last slot pair first.
- *
- * WORLD copy of battle_menu_draw_active_window_frames with one brightness for
- * every window. A window is drawn while its buffer is active and its owner
- * thread runs. A message box is dimmed while a menu task is active. The
+/* Draws the active menu windows, last slot pair first. A window is drawn
+ * while its buffer is active and its owner thread runs; BATTLE scales its
+ * frame primitives by the window's own brightness, WORLD by the one menu
+ * brightness, and WORLD dims a message box while a menu task is active. The
  * scroll icons sit 15 pixels in from the right edge (13 when the width is not
  * 4 more than a multiple of 8), shifted 4 pixels up or down for a portrait
  * box, and the scroll marker lies between them in proportion to
  * scroll_position / scroll_range. The portrait quad takes its texture from
- * portrait_code unless that is -1.
- */
-void menu_draw_active_window_frames_variant(void) {
+ * portrait_code, or in BATTLE from the unit's portrait when that is -1. */
+#ifdef FFT_WORLD
+#    define WINDOW_BRIGHTNESS g_world_menu_color_red
+#else
+#    define WINDOW_BRIGHTNESS window->color.r
+#endif
+void menu_draw_active_window_frames(void) {
     menu_window_buffer_t* window;
     menu_window_buffer_t* buffer;
     s32 height;
@@ -670,6 +555,9 @@ void menu_draw_active_window_frames_variant(void) {
     s32 span;
     s32 flags;
     s32 bottom;
+#ifdef FFT_BATTLE
+    s32 u;
+#endif
 
     for (i = 4; i >= 0; i -= 2) {
         if (g_menu_window_buffer_slots[i] == (menu_window_buffer_t*)-1) {
@@ -680,12 +568,13 @@ void menu_draw_active_window_frames_variant(void) {
             continue;
         }
         window = buffer;
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[0], g_world_menu_color_red);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[1], g_world_menu_color_red);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[2], g_world_menu_color_red);
-        gfx_set_primitive_brightness((P_TAG*)&window->sprites[3], g_world_menu_color_red);
-        gfx_set_primitive_brightness((P_TAG*)&window->quads[0], g_world_menu_color_red);
-        gfx_set_primitive_brightness((P_TAG*)&window->quads[1], g_world_menu_color_red);
+        gfx_set_primitive_brightness((P_TAG*)&window->sprites[0], WINDOW_BRIGHTNESS);
+        gfx_set_primitive_brightness((P_TAG*)&window->sprites[1], WINDOW_BRIGHTNESS);
+        gfx_set_primitive_brightness((P_TAG*)&window->sprites[2], WINDOW_BRIGHTNESS);
+        gfx_set_primitive_brightness((P_TAG*)&window->sprites[3], WINDOW_BRIGHTNESS);
+        gfx_set_primitive_brightness((P_TAG*)&window->quads[0], WINDOW_BRIGHTNESS);
+        gfx_set_primitive_brightness((P_TAG*)&window->quads[1], WINDOW_BRIGHTNESS);
+#ifdef FFT_WORLD
         if (window->is_message_box != 0) {
             if (g_menu_input_lock_mode != 0) {
                 window->quads[0].clut = 0x7D3C;
@@ -694,6 +583,7 @@ void menu_draw_active_window_frames_variant(void) {
                 window->quads[0].clut = 0x7C3C;
             }
         }
+#endif
         offset = window->quads[0].x1 - window->quads[0].x0;
         if (offset / 8 * 8 == offset - 4) {
             offset -= 15;
@@ -738,13 +628,23 @@ void menu_draw_active_window_frames_variant(void) {
         gfx_draw_or_append_gpu_primitive(&window->sprites[3]);
         gfx_draw_or_append_gpu_primitive(&window->draw_mode);
         if (window->portrait_code != -1) {
+#ifdef FFT_BATTLE
+            u = window->portrait_code << 5;
+            setUV4(&window->quads[1], u, 0xCE, u + 0x1F, 0xCE, u, 0xFE, u + 0x1F, 0xFE);
+            window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
+            window->quads[1].clut = GetClut(window->portrait_code % 4 * 16 + 0x1C0, window->portrait_code / 4 + 0xFE);
+        } else {
+            menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_battle_id);
+        }
+        gfx_flip_poly_ft4_uv_if_negative(&window->quads[1], -window->portrait_flipped);
+#else
             menu_build_unit_portrait_poly_variant(&window->quads[1], window->portrait_code);
         }
+#endif
         gfx_draw_or_append_gpu_primitive(&window->quads[1]);
         gfx_draw_or_append_gpu_primitive(&window->quads[0]);
     }
 }
-#endif
 
 void gfx_clear_texture_allocation_grid(void) {
     s32 row;
@@ -1020,7 +920,7 @@ void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitiv
     }
     SetDrawMode(&menu->draw_mode_menu, 1, 0, GetTPage(0, 0, 0x3c0, 0x100), &g_menu_numeric_display_texture_window);
     SetDrawMode(&menu->draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
-    menu_init_sprt_variant(&menu->sprite);
+    menu_init_sprt(&menu->sprite);
     menu->sprite.x0 = box->x;
     menu->sprite.y0 = box->y;
     menu->sprite.w = box->w;

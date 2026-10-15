@@ -32,8 +32,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void camera_load_state_from_script_variables_variant(void);
-static void script_process_pending_requests_variant(void);
+static void camera_load_state_from_script_variables(void);
+static void script_process_pending_requests(void);
 static void script_route_event_input_variant(void);
 
 static s32 menu_dispatch_system_function(
@@ -61,7 +61,7 @@ static void menu_confirm_action_silently(menu_entry_t* menu) {
 void menu_wait_thread(void) {
     menu_entry_t* menu;
 
-    menu = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    menu = (menu_entry_t*)thread_get_current_parameter_1();
     g_menu_wait_row_actions[0] = -2;
     g_menu_wait_row_actions[1] = -2;
     menu_confirm_action_silently(menu);
@@ -79,7 +79,7 @@ void menu_confirm_move_command_thread(void) {
     menu_entry_t* entry;
     s32 menu;
 
-    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    entry = (menu_entry_t*)thread_get_current_parameter_1();
     stored_actions = &g_menu_confirm_stored_unit_row_actions;
     *stored_actions = -2;
     if (menu_get_selected_unit_stats()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]
@@ -171,7 +171,7 @@ void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
     unit_stats_t* unit;
 
     g_menu_active_menu = menu;
-    parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    parameter = (menu_entry_t*)thread_get_current_parameter_1();
     mode = 0;
     message = 0;
     unit = menu_get_selected_unit_stats();
@@ -234,7 +234,7 @@ void menu_validate_skill_selection_thread(void) {
     menu_ability_list_t* skill_tables;
 
     skill = g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index;
-    parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    parameter = (menu_entry_t*)thread_get_current_parameter_1();
     skill_tables = &g_ai_workspace_ptr->ability_list;
     ct = skill_tables->skill_ct[skill];
     entry = g_menu_ability_layout.columns.text_colors[0][skill];
@@ -410,14 +410,14 @@ static void menu_run_system_function_thread(void) {
     menu_system_function_t* entry;
 
     g_menu_system_function_thread_busy = 1;
-    text_init_section_pointers_variant();
+    text_init_section_pointers();
     id = g_thread_contexts[g_thread_current_id].function_parameter_1;
     if (g_main_game_options.fields.navigation_messages != GAME_OPTION_ON) {
         id = g_menu_system_function_table[id].alternate_id;
     }
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-        while (thread_is_running_asm_variant(THREAD_SLOT_EVENT) != 0) {
+        while (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
             if (g_thread_contexts[THREAD_SLOT_EVENT].task_id == THREAD_TASK_EXECUTE_EVENT) {
                 thread_exit_current();
             }
@@ -458,7 +458,7 @@ void menu_confirm_auto_battle_selection_thread(void) {
     s32 menu;
     menu_entry_t* parameter;
 
-    parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    parameter = (menu_entry_t*)thread_get_current_parameter_1();
     attacker = menu_get_selected_unit_stats();
     menu = g_menu_thread_menu_data[BATTLE_MENU_ID_AUTO_BATTLE].selected_index;
     if (menu == 3) {
@@ -608,7 +608,7 @@ static s32 menu_dispatch_system_function(
             }
             return MENU_SYSTEM_DISPATCH_DONE;
         } else if (option != 1) {
-            if (thread_is_running_asm_variant(THREAD_SLOT_EVENT) != 0) {
+            if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
                 main_system_report_stub(7, 3);
                 if (option != 2) {
                     menu_start_system_function_thread(BATTLE_SYSTEM_FUNCTION_CLOSE);
@@ -755,7 +755,7 @@ static s32 menu_dispatch_system_function(
         menu_start_system_function_thread(value);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_SPELL_QUOTE) {
         g_text_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
-        thread_start(THREAD_SLOT_SYSTEM_FUNCTION, text_run_spell_quote_thread_variant);
+        thread_start(THREAD_SLOT_SYSTEM_FUNCTION, text_run_spell_quote_thread);
         thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_text_spell_quote_last_ability_id, 0);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT) {
         text_set_message_duration_frames(0x3C);
@@ -1259,12 +1259,12 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     }
     g_gfx_current_otag_entry = ot;
     gfx_submit_screen_fade_overlay(&g_battle_gfx_screen_fade_overlays[g_menu_packet_buffer_index], g_gfx_screen_fade);
-    camera_store_state_to_script_variables_variant();
-    menu_draw_active_window_frames_variant();
+    camera_store_state_to_script_variables();
+    menu_draw_active_window_frames();
 
     if (g_script_threads_idle != 0) {
         for (i = 1; i < 16; i++) {
-            if (thread_is_running_asm_variant(i) != 0) {
+            if (thread_is_running_asm(i) != 0) {
                 break;
             }
         }
@@ -1358,23 +1358,22 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         }
     }
 
-    if (script_is_tutorial_event_slot_variant() == 0 && g_script_event_input != PSX_PAD_SELECT
-        && g_script_event_input != 0) {
+    if (script_is_tutorial_event_slot() == 0 && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
         g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < 16; i++) {
-        g_event_thread_status_snapshot[i] = thread_is_running_asm_variant(i);
+        g_event_thread_status_snapshot[i] = thread_is_running_asm(i);
     }
     thread_yield();
     for (i = 1; i < 16; i++) {
-        if (g_event_thread_status_snapshot[i] != thread_is_running_asm_variant(i)) {
+        if (g_event_thread_status_snapshot[i] != thread_is_running_asm(i)) {
             g_script_input_suppression_frames = 5;
         }
     }
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    camera_load_state_from_script_variables_variant();
+    camera_load_state_from_script_variables();
     g_battle_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {
@@ -1389,13 +1388,13 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         menu_run_companion_overlay_stub();
         g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
-        script_set_event_speed_variant(1);
+        script_set_event_speed(1);
         i = bunit_entrypoint(0, 0);
         battle_target_move_cursor_to_battle_id(i);
         g_menu_selected_unit.battle_id = i;
         g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
-        script_set_event_speed_variant(1);
+        script_set_event_speed(1);
         polarity = g_main_gfx_screen_polarity;
         script_set_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
         card_save_run_menu(0);
@@ -1404,7 +1403,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     }
     menu_open_companion_executable();
     menu_open_companion_data_file();
-    script_process_pending_requests_variant();
+    script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
         return 1;
@@ -1413,7 +1412,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         return 0;
     }
     for (i = 1; i < 16; i++) {
-        if (thread_is_running_asm_variant(i) != 0) {
+        if (thread_is_running_asm(i) != 0) {
             break;
         }
     }
@@ -1454,12 +1453,12 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     }
     g_gfx_current_otag_entry = ot;
     gfx_submit_screen_fade_overlay(&g_world_screen_tint_tiles[g_menu_packet_buffer_index], g_gfx_screen_fade);
-    camera_store_state_to_script_variables_variant();
-    menu_draw_active_window_frames_variant();
+    camera_store_state_to_script_variables();
+    menu_draw_active_window_frames();
 
     if (g_script_threads_idle != 0) {
         for (i = 1; i < 17; i++) {
-            if (thread_is_running_asm_variant(i) != 0) {
+            if (thread_is_running_asm(i) != 0) {
                 break;
             }
         }
@@ -1549,23 +1548,22 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     }
 
     script_load_event_input_state((menu_input_state_t*)&g_script_event_input);
-    if (script_is_tutorial_event_slot_variant() == 0 && g_script_event_input != PSX_PAD_SELECT
-        && g_script_event_input != 0) {
+    if (script_is_tutorial_event_slot() == 0 && g_script_event_input != PSX_PAD_SELECT && g_script_event_input != 0) {
         g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < 16; i++) {
-        g_event_thread_status_snapshot[i] = thread_is_running_asm_variant(i);
+        g_event_thread_status_snapshot[i] = thread_is_running_asm(i);
     }
     thread_yield();
     for (i = 1; i < 16; i++) {
-        if (g_event_thread_status_snapshot[i] != thread_is_running_asm_variant(i)) {
+        if (g_event_thread_status_snapshot[i] != thread_is_running_asm(i)) {
             g_script_input_suppression_frames = 5;
         }
     }
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    camera_load_state_from_script_variables_variant();
+    camera_load_state_from_script_variables();
     g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_menu_input_block_frames != 0) {
@@ -1580,13 +1578,13 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         menu_run_companion_overlay_stub();
         g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
-        script_set_event_speed_variant(1);
+        script_set_event_speed(1);
         i = bunit_entrypoint(0, 0);
         battle_target_move_cursor_to_battle_id(i);
         g_menu_selected_unit.battle_id = i;
         g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
-        script_set_event_speed_variant(1);
+        script_set_event_speed(1);
         polarity = g_main_gfx_screen_polarity;
         script_set_variable(EVENT_SCRIPT_VAR_SAVE_IN_PROGRESS, 1);
         card_save_run_menu(0);
@@ -1595,7 +1593,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     }
     menu_open_companion_executable();
     menu_open_companion_data_file();
-    script_process_pending_requests_variant();
+    script_process_pending_requests();
     script_frame_after_requests_stub();
     if (g_menu_input_mode == MENU_INPUT_BLOCKED) {
         return 1;
@@ -1604,7 +1602,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         return 0;
     }
     for (i = 1; i < 17; i++) {
-        if (thread_is_running_asm_variant(i) != 0) {
+        if (thread_is_running_asm(i) != 0) {
             break;
         }
     }
@@ -1618,11 +1616,11 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
 void script_set_current_otag_entry_and_update_input(u32* entry, s32 input) {
     script_update_event_input_state(input);
     g_gfx_current_otag_entry = entry;
-    menu_draw_active_window_frames_variant();
+    menu_draw_active_window_frames();
 }
 
 /* Advance the map-destruction wait state from 1 (armed when a map append
- * finishes) to 2. script_process_pending_requests_variant then releases the held
+ * finishes) to 2. script_process_pending_requests then releases the held
  * GNS data and polls the map load, returning the state to 0 when the load ends.
  * Any other state is left alone. */
 void script_set_specialized_map_destroyed(void) {
@@ -1632,13 +1630,14 @@ void script_set_specialized_map_destroyed(void) {
     }
 }
 
-#ifdef FFT_BATTLE
-#    ifndef NULL
-#        define NULL 0
-#    endif
+#ifndef NULL
+#    define NULL 0
+#endif
 
-/* Advances asynchronous battle-script, map, effect, and graphics requests. */
-static void script_process_pending_requests_variant(void) {
+/* Advances asynchronous battle-script, map, effect, and graphics requests.
+ * WORLD has none of them: its copy is empty. */
+static void script_process_pending_requests(void) {
+#ifdef FFT_BATTLE
     s16 destruction_state;
     s16 effect_id;
     s16 jump_out_map_id;
@@ -1807,20 +1806,14 @@ static void script_process_pending_requests_variant(void) {
             main_sound_set_current_music_target(volume_transition & 0xFFFF, (volume_transition >> 0xE) & 0x3FFC);
         }
     }
-}
 #endif
-
-#ifdef FFT_WORLD
-/* Empty in WORLD; BATTLE's body under this name advances the map, effect and graphics requests the event scripts leave
- * pending. */
-static void script_process_pending_requests_variant(void) {
 }
-#endif
 
-#ifdef FFT_BATTLE
 /* Load camera rotation, zoom and position back out of the script variable
- * block; the inverse of camera_store_state_to_script_variables. */
-static void camera_load_state_from_script_variables_variant(void) {
+ * block; the inverse of camera_store_state_to_script_variables. WORLD has
+ * no camera, so its copy is empty. */
+static void camera_load_state_from_script_variables(void) {
+#ifdef FFT_BATTLE
     setVector(&g_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
     battle_camera_set_rotation(&g_camera_script_rotation);
@@ -1833,22 +1826,16 @@ static void camera_load_state_from_script_variables_variant(void) {
     g_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
     g_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
     battle_camera_set_current_real_coords(&g_camera_script_vector);
-}
 #endif
-
-#ifdef FFT_WORLD
-/* Empty in WORLD; the BATTLE twin copies the camera script variables into the camera. */
-static void camera_load_state_from_script_variables_variant(void) {
 }
-#endif
 
-#ifdef FFT_BATTLE
 /* Publish the live camera rotation, zoom, and position to the script variable
- * block.
+ * block. WORLD has no camera, so its copy is empty.
  *
  * The three zoom components all land in the same 32-bit script variable; that is what the
  * target does. */
-void camera_store_state_to_script_variables_variant(void) {
+void camera_store_state_to_script_variables(void) {
+#ifdef FFT_BATTLE
     SVECTOR* rotation;
     VECTOR* zoom;
     VECTOR* coords;
@@ -1871,14 +1858,8 @@ void camera_store_state_to_script_variables_variant(void) {
     g_camera_published_coords_ptr = coords;
     g_camera_shake_z_offset = 0;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y] = coords->vz;
-}
 #endif
-
-#ifdef FFT_WORLD
-/* Empty in WORLD; the BATTLE twin copies the camera into the camera script variables. */
-void camera_store_state_to_script_variables_variant(void) {
 }
-#endif
 
 /* The raw weather script variable. map_get_effective_weather applies the
  * map's indoor and snow flags to it. */

@@ -58,7 +58,7 @@ s32 menu_init_attack_resources_and_threads(void) {
     }
     g_menu_panel_fade_mode = MENU_PANEL_FADE_NONE;
     g_menu_panel_fade_intensity = 0;
-    if (script_is_tutorial_event_slot_variant() != 0) {
+    if (script_is_tutorial_event_slot() != 0) {
         g_gfx_screen_fade = 0xff;
         g_menu_saved_game_options = g_main_game_options;
         options = &g_main_game_options.fields;
@@ -89,10 +89,10 @@ s32 menu_init_attack_resources_and_threads(void) {
 
 /* Start the mini menu when its slots are idle and menus are active. */
 void menu_start_mini_menu_display_thread(void) {
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU) != 0) {
         return;
     }
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_CHILD) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0) {
         return;
     }
     if (g_menu_overlay_state != 0) {
@@ -119,13 +119,13 @@ s32 menu_get_thread_activity_variant(void) {
     if (g_menu_transition_state != 0) {
         return g_menu_transition_state;
     }
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         return 2;
     }
     i = 4;
     do {
         if (i != 3) {
-            if (thread_is_running_asm_variant(i) != 0) {
+            if (thread_is_running_asm(i) != 0) {
                 break;
             }
         }
@@ -145,11 +145,11 @@ s32 menu_get_thread_activity_variant(void) {
 s32 menu_get_thread_activity_variant(void) {
     s32 i;
 
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         return 2;
     }
     for (i = 4; i < 9; i++) {
-        if (thread_is_running_asm_variant(i) != 0) {
+        if (thread_is_running_asm(i) != 0) {
             break;
         }
     }
@@ -195,7 +195,7 @@ void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
         g_menu_comparison_unit_data.battle_id = unit_b;
         g_menu_comparison_unit_status.unit_index = unit_b;
     }
-    if (thread_is_running_asm_variant(THREAD_SLOT_UNIT_VIEW) == 0) {
+    if (thread_is_running_asm(THREAD_SLOT_UNIT_VIEW) == 0) {
         thread_start(THREAD_SLOT_UNIT_VIEW, menu_run_unit_view_supervisor_thread);
     }
     thread_set_parameters(THREAD_SLOT_UNIT_VIEW, mode, 0, 0);
@@ -218,7 +218,7 @@ static void menu_run_unit_view_supervisor_thread(void) {
     thread_t* thread;
 
     for (;;) {
-        mode = thread_get_current_parameter_1_variant();
+        mode = thread_get_current_parameter_1();
         set = &g_menu_unit_view_thread_sets[mode];
         g_menu_unit_view_mode = mode;
         g_thread_contexts[g_thread_current_id].function_parameter_1 = 0xff;
@@ -268,26 +268,20 @@ static void menu_run_unit_view_supervisor_thread(void) {
                 g_thread_contexts[set->thread_ids[i]].task_id = set->task_ids[i];
             }
         }
-        if (thread_get_current_parameter_1_variant() == 0xff) {
+        if (thread_get_current_parameter_1() == 0xff) {
             thread_exit_current();
         }
     }
 }
 
+/* Set the event speed, which also divides the input repeat delays; BATTLE
+ * sets the animation speed with it. */
+void script_set_event_speed(s32 speed) {
+    g_script_event_speed = speed;
 #ifdef FFT_BATTLE
-/* Set the event speed and the animation speed together. The event speed also
- * divides the input repeat delays. */
-void script_set_event_speed_variant(s32 speed) {
-    g_script_event_speed = speed;
     battle_state_set_animation_speed(speed);
-}
 #endif
-
-#ifdef FFT_WORLD
-void script_set_event_speed_variant(s32 speed) {
-    g_script_event_speed = speed;
 }
-#endif
 
 void thread_wait_for_unit_view_panels(void) {
     thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
@@ -370,7 +364,7 @@ void camera_fusion_thread(void) {
 
     thread_set_current_task_id(THREAD_TASK_CAMERA);
     tracks = menu_alloc_memory(sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
-    script = (u8*)thread_get_current_parameter_1_variant();
+    script = (u8*)thread_get_current_parameter_1();
     menu_clear_render_buffer(tracks, sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
 
     /* One key per CAMERA instruction up to the end marker, plus the starting key. */
@@ -761,7 +755,7 @@ void script_block_start_thread(void) {
     s32 thread_id;
 
     g_thread_contexts[g_thread_current_id].task_id = THREAD_TASK_EVENT_BLOCK;
-    script = (u8*)thread_get_current_parameter_1_variant();
+    script = (u8*)thread_get_current_parameter_1();
     parameters = script + 1;
     while (script[0] != EVENT_OPCODE_BLOCK_END) {
         first_halfword = script_read_s16(parameters);
@@ -873,7 +867,7 @@ void script_add_unit_start_thread(void) {
 
     g_thread_contexts[g_thread_current_id].task_id = THREAD_TASK_ADD_UNIT;
     slot = 0;
-    script = (const u8*)thread_get_current_parameter_1_variant();
+    script = (const u8*)thread_get_current_parameter_1();
     while (1) {
         unit_id = script_read_s16(script + 1);
         opcode = script[0];
@@ -927,7 +921,7 @@ static void menu_init_subsystems(void) {
     menu_init_palette_and_text(0);
     menu_init_stub();
     menu_reset_subsystems();
-    map_reset_script_light_transform_variant();
+    map_reset_script_light_transform();
     menu_init_panel_fade_tiles();
 }
 
@@ -956,11 +950,11 @@ void menu_reset_subsystems(void) {
     thread_reset_scheduler();
 }
 
-#ifdef FFT_BATTLE
 /* Put the map light transform of the event scripts back to the map's own light: no rotation, unit
  * scale, and the current light direction and color matrices as the base map_light_thread
- * interpolates from. */
-void map_reset_script_light_transform_variant(void) {
+ * interpolates from. WORLD has no map light, so its copy is empty. */
+void map_reset_script_light_transform(void) {
+#ifdef FFT_BATTLE
     MATRIX* buffer;
 
     setVector(&g_script_light_angles, 0, 0, 0);
@@ -971,14 +965,8 @@ void map_reset_script_light_transform_variant(void) {
     mem_copy_bytes_nonempty(&g_script_light_base_color_matrix,
         battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_COLOR, buffer, buffer, 0),
         sizeof(g_script_light_base_color_matrix));
-}
 #endif
-
-#ifdef FFT_WORLD
-/* Empty in WORLD; the BATTLE twin puts the event scripts' map light transform back to the map's own light. */
-void map_reset_script_light_transform_variant(void) {
 }
-#endif
 
 static void unit_reset_animation_states(void) {
     unit_animation_state_t* state;
@@ -1003,7 +991,7 @@ static void unit_reset_animation_states(void) {
  * and step each rotating unit one facing (of 16) toward its target, after its
  * delay and once every frames_per_step frames. The shortest mode turns
  * whichever way is nearer; the other two modes always increment or decrement.
- * Nothing calls it in WORLD, where its caller script_process_pending_requests_variant
+ * Nothing calls it in WORLD, where its caller script_process_pending_requests
  * is empty. */
 void unit_update_facing_and_pending_animations(void) {
     s32 i;
@@ -1076,8 +1064,8 @@ void script_start_current_event_thread(void) {
     unit_reset_animation_states();
     g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
     if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
-        camera_store_state_to_script_variables_variant();
-        map_reset_script_light_transform_variant();
+        camera_store_state_to_script_variables();
+        map_reset_script_light_transform();
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
     }
@@ -1100,9 +1088,9 @@ void script_noop_8(void) {
  * camera/light reset hooks and clear camera interpolation and position lock. */
 void script_reset_event_state(void) {
     unit_reset_animation_states();
-    if (thread_is_running_asm_variant(THREAD_SLOT_EVENT) == 0) {
-        camera_store_state_to_script_variables_variant();
-        map_reset_script_light_transform_variant();
+    if (thread_is_running_asm(THREAD_SLOT_EVENT) == 0) {
+        camera_store_state_to_script_variables();
+        map_reset_script_light_transform();
         g_camera_speed_curve = 0;
         g_camera_position_locked = 0;
     }
@@ -1132,18 +1120,18 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     script_run_event_frame_variant(otag, controller_input);
     menu_update_panel_fade();
     result = menu_resolve_selection();
-    if ((thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0
+    if ((thread_is_running_asm(THREAD_SLOT_MENU) != 0
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
-        || thread_is_running_asm_variant(THREAD_SLOT_MENU_CHILD) != 0
-        || thread_is_running_asm_variant(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
+        || thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0
+        || thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
         if (g_menu_animation_speed_forced == 0) {
             g_menu_animation_speed_forced = 1;
             g_menu_saved_animation_speed = battle_state_get_animation_speed();
-            script_set_event_speed_variant(2);
+            script_set_event_speed(2);
         }
     } else if (g_menu_animation_speed_forced == 1) {
         g_menu_animation_speed_forced = 0;
-        script_set_event_speed_variant(g_menu_saved_animation_speed);
+        script_set_event_speed(g_menu_saved_animation_speed);
     }
     return result;
 }
@@ -1687,7 +1675,7 @@ void menu_run_skillset_thread(void) {
         }
         for (;;) {
             thread_yield();
-            if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
+            if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
                 thread_exit_current();
             }
         }
@@ -1727,7 +1715,7 @@ void menu_build_main(void) {
     menu_unit_selection_record_t* record;
     s32 unit_id;
 
-    parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    parameter = (menu_entry_t*)thread_get_current_parameter_1();
     unit_id = g_menu_selected_unit.battle_id;
     record = &g_menu_unit_selection_records[unit_id];
     /* A nonzero second parameter makes the icon loop return here instead of exiting. */

@@ -77,7 +77,7 @@ static void script_add_unit_stub(void) {
  * unit) hand their body to a new thread and seek to the matching End. Most
  * long-running instructions start a helper thread on the first idle slot with
  * a pointer to their operands; work that belongs to the main loop is posted
- * in request globals that script_process_pending_requests_variant serves.
+ * in request globals that script_process_pending_requests serves.
  *
  * EventEnd either chains into the event the scenario conditions select
  * (`goto restart_script`) or replays the staged statuses, settles the units'
@@ -142,7 +142,7 @@ void script_execute_event_variant(void) {
     thread_t* threads;
 
     thread_set_current_task_id(THREAD_TASK_EXECUTE_EVENT);
-    if (script_is_tutorial_event_slot_variant() != 0) {
+    if (script_is_tutorial_event_slot() != 0) {
         gfx_ramp_screen_overlay_intensity_to_zero();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
@@ -166,7 +166,7 @@ void script_execute_event_variant(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0);
     script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
 restart_script:
-    script_set_event_speed_variant(1U);
+    script_set_event_speed(1U);
     instruction_offset = 0;
     camera_normalize_yaw_angle();
     {
@@ -350,7 +350,7 @@ restart_script:
                 thread_yield();
             } while (main_file_is_still_loading() != 0);
             thread_yield();
-            if (script_is_tutorial_event_slot_variant() != 0) {
+            if (script_is_tutorial_event_slot() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
                 g_main_game_options = g_menu_saved_game_options;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
@@ -449,7 +449,7 @@ restart_script:
             for (work_index = 0; work_index < 6; work_index += 2) {
                 operand_2 = g_menu_window_buffers[work_index].thread_id;
                 if ((g_menu_window_buffers[work_index].dialogue_selector == operand_1)
-                    && (thread_is_running_asm_variant(operand_2) == 1)
+                    && (thread_is_running_asm(operand_2) == 1)
                     && (g_thread_contexts[operand_2].task_id == THREAD_TASK_DIALOG_AWAIT_TEXT)) {
                     operand_1 = script_read_s16(
                         ((event_change_dialog_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
@@ -516,11 +516,11 @@ restart_script:
         else if (opcode == EVENT_OPCODE_CHANGE_MAP_BETA) {
             g_event_pending_map_jump_out_id = first_operand;
             thread_wait_frames(2);
-            map_reset_script_light_transform_variant();
+            map_reset_script_light_transform();
         } else if (opcode == EVENT_OPCODE_CHANGE_MAP) {
             g_event_pending_map_jump_out_2_id = first_operand;
             thread_wait_frames(2);
-            map_reset_script_light_transform_variant();
+            map_reset_script_light_transform();
         } else if (opcode == EVENT_OPCODE_SET_DAYTIME) {
             g_event_pending_map_state = operand_1;
             thread_wait_frames(2);
@@ -719,11 +719,11 @@ restart_script:
         }
         /* ---- Event speed, dark screen, conditions, and graphics ---- */
         else if (opcode == EVENT_OPCODE_EVENT_SPEED) {
-            script_set_event_speed_variant(operand_1);
+            script_set_event_speed(operand_1);
         } else if (opcode == EVENT_OPCODE_DARK_SCREEN) {
             g_menu_hide_numeric_values = 0;
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, &script_dark_screen_thread_variant);
+            thread_start(operand_1, &script_dark_screen_thread);
             thread_set_parameters(operand_1, 0, (s32)parameters, 0);
         } else if (opcode == EVENT_OPCODE_REMOVE_DARK_SCREEN) {
             operand_1 = thread_find_running_by_task(THREAD_TASK_DARK_SCREEN_HOLD);
@@ -925,7 +925,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_YIELD) {
             thread_yield();
         } else if (opcode == EVENT_OPCODE_WAIT) {
-            if (script_is_tutorial_event_slot_variant() != 0 && first_operand >= 3) {
+            if (script_is_tutorial_event_slot() != 0 && first_operand >= 3) {
                 thread_wait_frames(first_operand / battle_state_get_animation_speed());
             } else {
                 thread_wait_frames(first_operand);
@@ -1095,7 +1095,7 @@ void script_execute_event_variant(void) {
     thread_t* threads;
 
     thread_set_current_task_id(THREAD_TASK_EXECUTE_EVENT);
-    if (script_is_tutorial_event_slot_variant() != 0) {
+    if (script_is_tutorial_event_slot() != 0) {
         gfx_ramp_screen_overlay_intensity_to_zero();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
@@ -1119,7 +1119,7 @@ void script_execute_event_variant(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0);
     script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
 restart_event:
-    script_set_event_speed_variant(1U);
+    script_set_event_speed(1U);
     instruction_offset = 0;
     camera_normalize_yaw_angle();
     {
@@ -1303,7 +1303,7 @@ restart_event:
                 thread_yield();
             } while (main_file_is_still_loading() != 0);
             thread_yield();
-            if (script_is_tutorial_event_slot_variant() != 0) {
+            if (script_is_tutorial_event_slot() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
                 g_main_game_options = g_menu_saved_game_options;
                 script_set_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS, 0);
@@ -1398,7 +1398,7 @@ restart_event:
             for (work_index = 0; work_index < 6; work_index += 2) {
                 operand_2 = g_menu_window_buffers[work_index].thread_id;
                 if ((g_menu_window_buffers[work_index].dialogue_selector == operand_1)
-                    && (thread_is_running_asm_variant(operand_2) == 1)
+                    && (thread_is_running_asm(operand_2) == 1)
                     && (g_thread_contexts[operand_2].task_id == THREAD_TASK_DIALOG_AWAIT_TEXT)) {
                     operand_1 = script_read_s16(
                         ((event_change_dialog_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
@@ -1465,11 +1465,11 @@ restart_event:
         else if (opcode == EVENT_OPCODE_CHANGE_MAP_BETA) {
             g_event_pending_map_jump_out_id = first_operand;
             thread_wait_frames(2);
-            map_reset_script_light_transform_variant();
+            map_reset_script_light_transform();
         } else if (opcode == EVENT_OPCODE_CHANGE_MAP) {
             g_event_pending_map_jump_out_2_id = first_operand;
             thread_wait_frames(2);
-            map_reset_script_light_transform_variant();
+            map_reset_script_light_transform();
         } else if (opcode == EVENT_OPCODE_SET_DAYTIME) {
             g_event_pending_map_state = operand_1;
             thread_wait_frames(2);
@@ -1666,11 +1666,11 @@ restart_event:
         }
         /* ---- Event speed, dark screen, conditions, and graphics ---- */
         else if (opcode == EVENT_OPCODE_EVENT_SPEED) {
-            script_set_event_speed_variant(operand_1);
+            script_set_event_speed(operand_1);
         } else if (opcode == EVENT_OPCODE_DARK_SCREEN) {
             g_menu_hide_numeric_values = 0;
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, &script_dark_screen_thread_variant);
+            thread_start(operand_1, &script_dark_screen_thread);
             thread_set_parameters(operand_1, 0, (s32)parameters, 0);
         } else if (opcode == EVENT_OPCODE_REMOVE_DARK_SCREEN) {
             operand_1 = thread_find_running_by_task(THREAD_TASK_DARK_SCREEN_HOLD);
@@ -1866,7 +1866,7 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_YIELD) {
             thread_yield();
         } else if (opcode == EVENT_OPCODE_WAIT) {
-            if (script_is_tutorial_event_slot_variant() != 0 && first_operand >= 3) {
+            if (script_is_tutorial_event_slot() != 0 && first_operand >= 3) {
                 thread_wait_frames(first_operand / battle_state_get_animation_speed());
             } else {
                 thread_wait_frames(first_operand);
@@ -2089,7 +2089,7 @@ static void camera_thread(void) {
     group = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_GROUP_MASK) >> EVENT_CAMERA_SPEED_CURVE_GROUP_SHIFT;
     ease = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_EASING_MASK) >> EVENT_CAMERA_SPEED_CURVE_EASING_SHIFT;
     thread_set_current_task_id(THREAD_TASK_CAMERA);
-    parameters = (const event_camera_parameters_t*)thread_get_current_parameter_1_variant();
+    parameters = (const event_camera_parameters_t*)thread_get_current_parameter_1();
     script = parameters->values.position_le[0];
     for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT + 1; i++) {
         target[i] = script_read_s16(script);
@@ -2222,7 +2222,7 @@ static void script_map_darkness(void) {
     event_unit_color_t* parameters;
 
     thread_set_current_task_id(THREAD_TASK_MAP_DARKNESS);
-    parameters = (event_unit_color_t*)thread_get_current_parameter_1_variant();
+    parameters = (event_unit_color_t*)thread_get_current_parameter_1();
     battle_map_start_ambient_light_blend(
         parameters->mode, parameters->duration, parameters->rgb.r, parameters->rgb.g, parameters->rgb.b);
     thread_wait_frames(g_script_map_darkness_durations[parameters->duration]);
@@ -2237,7 +2237,7 @@ static void script_earthquake_start(void) {
     s32 second_counter;
 
     thread_set_current_task_id(THREAD_TASK_EARTHQUAKE);
-    parameters = (event_earthquake_parameters_t*)thread_get_current_parameter_1_variant();
+    parameters = (event_earthquake_parameters_t*)thread_get_current_parameter_1();
     first_counter = 0;
     second_counter = 0;
     for (;;) {
@@ -2268,7 +2268,7 @@ static void script_color_screen_thread(void) {
     s32 duration;
 
     thread_set_current_task_id(THREAD_TASK_COLOR_SCREEN);
-    parameters = (u8*)thread_get_current_parameter_1_variant();
+    parameters = (u8*)thread_get_current_parameter_1();
     /* Separate record and RGB cursors drop the original argument-register copy. */
     mode = *parameters++;
     for (i = 0; i < 6; i++) {
@@ -2437,7 +2437,7 @@ static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s3
  * frame count. */
 void script_sprite_move(void) {
     thread_set_current_task_id(THREAD_TASK_SPRITE_MOVE);
-    script_run_sprite_move((const event_sprite_move_parameters_t*)thread_get_current_parameter_1_variant(), 0);
+    script_run_sprite_move((const event_sprite_move_parameters_t*)thread_get_current_parameter_1(), 0);
     thread_exit_current();
 }
 
@@ -2445,7 +2445,7 @@ void script_sprite_move(void) {
  * as a speed. */
 void script_sprite_move_beta(void) {
     thread_set_current_task_id(THREAD_TASK_SPRITE_MOVE);
-    script_run_sprite_move((const event_sprite_move_parameters_t*)thread_get_current_parameter_1_variant(), 1);
+    script_run_sprite_move((const event_sprite_move_parameters_t*)thread_get_current_parameter_1(), 1);
     thread_exit_current();
 }
 
@@ -2462,7 +2462,7 @@ void script_waitspritemove_event_instruction(s32 unit_id) {
     }
     for (;;) {
         for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
-            if (thread_is_running_asm_variant(i) != 0 && g_thread_contexts[i].task_id == THREAD_TASK_SPRITE_MOVE
+            if (thread_is_running_asm(i) != 0 && g_thread_contexts[i].task_id == THREAD_TASK_SPRITE_MOVE
                 && g_thread_contexts[i].task_words[0] == runtime_id) {
                 break;
             }
@@ -2505,7 +2505,7 @@ static void map_light_thread(void) {
 
     thread_set_current_task_id(THREAD_TASK_MAP_LIGHT);
     step = 0;
-    script = (const u8*)thread_get_current_parameter_1_variant();
+    script = (const u8*)thread_get_current_parameter_1();
     /* Indexed operand fields retain a separate base and add four bytes. */
     target = light_values.values;
     do {
@@ -3446,7 +3446,7 @@ void script_inflict_status_thread(void) {
     s32 state;
 
     thread_set_current_task_id(THREAD_TASK_INFLICT_STATUS);
-    parameters = (event_inflict_status_parameters_t*)thread_get_current_parameter_1_variant();
+    parameters = (event_inflict_status_parameters_t*)thread_get_current_parameter_1();
     unit_id = script_read_s16(parameters->unit_id_le);
     mode = parameters->mode;
     wait_frames = script_read_s16(parameters->wait_frames_le);

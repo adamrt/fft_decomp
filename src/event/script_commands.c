@@ -54,7 +54,7 @@ void sound_run_background_sfx_thread(void) {
     s32 resource = SUZUKI_SOUND_ID(MAIN_SOUND_RESOURCE_ENV, 0);
 
     thread_set_current_task_id(THREAD_TASK_BG_SOUND);
-    request = (event_background_sound_parameters_t*)thread_get_current_parameter_1_variant();
+    request = (event_background_sound_parameters_t*)thread_get_current_parameter_1();
     find_channel = request->find_channel;
     sound_id = request->sound_id;
     if (find_channel != 0) {
@@ -98,7 +98,7 @@ void sound_run_background_fade_thread(void) {
 
     thread_set_current_task_id(THREAD_TASK_BG_SOUND);
     step = 0;
-    request = (event_background_sound_parameters_t*)thread_get_current_parameter_1_variant();
+    request = (event_background_sound_parameters_t*)thread_get_current_parameter_1();
     sound_id = request->sound_id;
     volume_from = request->volume_from;
     steps = request->frames;
@@ -164,7 +164,7 @@ s32 thread_resolve_id(s32 requested_thread_id) {
     }
     i = 1;
     do {
-        if (thread_is_running_asm_variant(i) == 0) {
+        if (thread_is_running_asm(i) == 0) {
             return i;
         }
         i++;
@@ -186,7 +186,7 @@ s32 thread_resolve_id_after_current(s32 thread_id) {
         thread_exit_current();
     } else {
         do {
-            if (thread_is_running_asm_variant(index) == 0) {
+            if (thread_is_running_asm(index) == 0) {
                 return index;
             }
             index++;
@@ -202,7 +202,7 @@ s32 thread_find_running_by_task(s32 task_id) {
     s32 thread_id;
 
     for (thread_id = 1; thread_id < VARIANT_THREAD_TABLE_SLOT_COUNT; thread_id++) {
-        if (thread_id != g_thread_current_id && thread_is_running_asm_variant(thread_id) != 0
+        if (thread_id != g_thread_current_id && thread_is_running_asm(thread_id) != 0
             && g_thread_contexts[thread_id].task_id == task_id) {
             return thread_id;
         }
@@ -488,27 +488,41 @@ void script_wait_for_unit_ready(s32 runtime_id) {
     }
 }
 
+/* Turn the text file's table of section offsets into g_text_section_pointers.
+ * The text begins after the table of TEXT_SECTION_COUNT offsets, which are
+ * relative to its end. BATTLE leaves the last section alone and, while menu
+ * input is disabled, keeps section 0 bound to the event or tutorial text
+ * already in use. */
+/* BATTLE leaves the last section alone. */
 #ifdef FFT_BATTLE
-/* Relocate the 31 embedded menu-text offsets into the active section table.
- *
- * The text begins after a header of 32 32-bit offsets. When menu input is disabled,
- * section 0 remains bound to the event/tutorial text already in use. */
-void text_init_section_pointers_variant(void) {
+#    define TEXT_RELOCATED_SECTION_COUNT (TEXT_SECTION_COUNT - 1)
+#else
+#    define TEXT_RELOCATED_SECTION_COUNT TEXT_SECTION_COUNT
+#endif
+
+void text_init_section_pointers(void) {
     s32* source;
     u8** destination;
     /* These two assignments fill the target load delay before the loop. */
     s32* text;
+#ifdef FFT_BATTLE
     s32 menu_input_mode;
+#endif
     s32 index;
     s32 offset;
 
-    source = g_battle_menu_text_section_offsets;
+    source = g_text_section_offsets;
     index = 0;
+#ifdef FFT_BATTLE
     menu_input_mode = g_menu_input_mode;
-    text = source + 32;
+#endif
+    text = source + TEXT_SECTION_COUNT;
     destination = g_text_section_pointers;
     do {
-        if (menu_input_mode == MENU_INPUT_PLAYER || index != TEXT_SECTION_EVENT_MESSAGES) {
+#ifdef FFT_BATTLE
+        if (menu_input_mode == MENU_INPUT_PLAYER || index != TEXT_SECTION_EVENT_MESSAGES)
+#endif
+        {
             offset = *source;
             offset += (s32)text;
             *destination = (u8*)offset;
@@ -516,34 +530,8 @@ void text_init_section_pointers_variant(void) {
         source++;
         index++;
         destination++;
-    } while (index < 31);
+    } while (index < TEXT_RELOCATED_SECTION_COUNT);
 }
-#endif
-
-#ifdef FFT_WORLD
-/* Turn the text file's table of section offsets into
- * g_text_section_pointers. The offsets are relative to the end of the
- * table. */
-void text_init_section_pointers_variant(void) {
-    s32* offset;
-    u8** section;
-    s32 i;
-    u8* text;
-    s32 value;
-
-    offset = g_text_section_offsets;
-    i = 0;
-    text = (u8*)(offset + TEXT_SECTION_COUNT);
-    section = g_text_section_pointers;
-    for (; i < TEXT_SECTION_COUNT; i++) {
-        value = *offset;
-        offset++;
-        value += (s32)text;
-        *section = (u8*)value;
-        section++;
-    }
-}
-#endif
 
 u32* script_get_controller_input_pointer(s32 use_current) {
     u32* result = &g_script_event_input;

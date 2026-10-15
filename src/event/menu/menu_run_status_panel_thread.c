@@ -177,7 +177,7 @@ void menu_run_status_panel_thread(void) {
             gfx_draw_or_append_gpu_primitive(&screen->portrait);
         }
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;

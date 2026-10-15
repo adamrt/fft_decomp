@@ -24,7 +24,7 @@ extern u16 g_battle_event_map_command_83_arg2; /* 0x8017405a */
 /* Separate triggers, command arguments, and completion status. Argument
  * domains remain provisional: map commands 0x80/0x83, polls 0x81/0x84.
  * The u16 requests and arguments are read with lhu by the consumer
- * script_process_pending_requests_variant; every other access is a store. */
+ * script_process_pending_requests; every other access is a store. */
 extern u16 g_battle_3d_object_use_request;    /* 0x80165fe2 */
 extern u16 g_battle_event_3d_object_id;       /* 0x80173c94 */
 extern u16 g_battle_event_3d_object_state;    /* 0x80173c96 */

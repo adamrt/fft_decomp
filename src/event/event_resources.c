@@ -33,7 +33,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer);
+static void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame) {
     gfx_draw_or_append_gpu_primitive(&frame->sprites[3]);
@@ -62,7 +62,7 @@ void menu_auto_battle_setting_thread(void) {
     s16* color;
     menu_icon_record_t* record;
 
-    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    param = (menu_entry_t*)thread_get_current_parameter_1();
     cursor = param->selected_index;
     stats = menu_get_selected_unit_stats();
     if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
@@ -77,7 +77,7 @@ void menu_auto_battle_setting_thread(void) {
         cursor = 4;
     }
     previous = cursor;
-    menu_build_window_sprites_variant(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     fresh = 0;
     i = 0;
@@ -85,9 +85,9 @@ void menu_auto_battle_setting_thread(void) {
     for (;; i++) {
         record = &records[i & 1];
         if (i == 0 || (g_script_event_input & PSX_PAD_CIRCLE)) {
-            buffer = menu_build_and_upload_window_frame_image_variant(
+            buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running_variant() == 0) || i == 0) {
+            if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running() == 0) || i == 0) {
                 selected = cursor;
                 if (selected == 0) {
                     before = battle_menu_get_id_based_on_mount_moveable_actable(g_menu_selected_unit.battle_id);
@@ -101,7 +101,7 @@ void menu_auto_battle_setting_thread(void) {
                     after = battle_menu_get_id_based_on_mount_moveable_actable(g_menu_selected_unit.battle_id);
                     if (before != after) {
                         thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
-                        menu_build_idle_action_menu_variant(after);
+                        menu_build_idle_action_menu(after);
                     }
                 } else {
                     color[0] = 4;
@@ -138,7 +138,7 @@ void menu_auto_battle_setting_thread(void) {
             fresh = 0;
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
@@ -161,15 +161,15 @@ void menu_run_icon_selection_loop(void) {
     s32 i;
     menu_icon_record_t* record;
 
-    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    param = (menu_entry_t*)thread_get_current_parameter_1();
     record = &records[0];
     cursor = param->selected_index;
     if (cursor == -1) {
         cursor = 0;
     }
-    menu_build_window_sprites_variant(&rect, param, record);
+    menu_build_window_sprites(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = menu_build_and_upload_window_frame_image_variant(
+    buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
@@ -190,7 +190,7 @@ void menu_run_icon_selection_loop(void) {
             records[0]._unknown_78 = 0;
             records[1]._unknown_78 = 0;
         }
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         menu_handle_action(param, cursor);
@@ -199,7 +199,7 @@ void menu_run_icon_selection_loop(void) {
         menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
-    if (thread_get_current_parameter_2_variant() == 0) {
+    if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }
 }
@@ -396,31 +396,40 @@ static void menu_preview_ability_turn_at_list(void) {
     menu_run_scrolling_ability_list_thread_variant();
 }
 
-#ifdef FFT_BATTLE
-/*
- * Extended BATTLE counterpart of
- * world_draw_menu_text_columns_narrow (WORLD 0x800ed5f4).
- */
-
 /* Draw the visible rows of a three-column menu text layout (text 8 pixels
- * narrower than the entry). Text columns append text 0x5088 for rows whose
- * skill flag bit 0 is set while the current thread's fourth 32-bit value is non-zero;
- * alternate-number columns draw a special glyph for values 0/1 without a
- * target, and text 0x509d for values of 100 and above. */
-static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer) {
+ * narrower than the entry). BATTLE appends text 0x5088 to text columns whose
+ * skill flag bit 0 is set while the current thread's fourth 32-bit value is
+ * nonzero, and its number-glyph columns draw a special glyph for values 0/1
+ * without a target and text 0x509d for values of 100 and above; WORLD skips
+ * entries whose id is 0x7ff. */
+static void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
     s32 column;
     s32 index;
+#ifdef FFT_BATTLE
     s16 value;
+#else
+    /* WORLD's build reaches the stride through a pointer cell. */
+    s32* stride_cell = &g_menu_text_state.pen.stride;
+#endif
 
     for (row = 0; row < layout->row_count; row++) {
+#ifdef FFT_BATTLE
         g_menu_text_state.pen.stride = entry->inner_width - 8;
+#else
+        *stride_cell = entry->inner_width - 8;
+#endif
         for (column = 0; column < 3; column++) {
             index = row + *row_offset;
             if (layout->mode[column] == MENU_TEXT_COLUMN_HIDDEN) {
                 continue;
             }
+#ifdef FFT_WORLD
+            if ((layout->text_ids[column][index] & 0x7FF) == 0x7FF) {
+                continue;
+            }
+#endif
             menu_set_text_origin(layout->x[column], row * 0x10);
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
@@ -431,6 +440,7 @@ static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_
             }
             if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
                 menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
+#ifdef FFT_BATTLE
                 if (g_threads[g_thread_current_id].function_parameter_4 != 0
                     && (g_ai_workspace_ptr->ability_list.flags[index] & 1)) {
                     g_menu_text_palette_offset = layout->text_colors[column][index];
@@ -438,9 +448,11 @@ static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_
                     menu_set_text_origin(layout->x[column] + 0x50, row * 0x10);
                     menu_display_text_entry(0x5088, buffer, &g_menu_text_state.pen);
                 }
+#endif
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
                 menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
+#ifdef FFT_BATTLE
                 if ((column == 2 || (column == 1 && layout->mode[2] == MENU_TEXT_COLUMN_HIDDEN))
                     && layout->text_ids[column][index] >= 0 && layout->text_ids[column][index] < 2
                     && (g_ai_workspace_ptr->ability_list.skill_ct[index] == 0xFF
@@ -459,55 +471,15 @@ static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_
                         }
                     }
                 }
-            }
-            g_menu_text_palette_offset = 0;
-            g_menu_text_state.pen.color = 0;
-        }
-    }
-}
-#endif
-
-#ifdef FFT_WORLD
-/* Twin of world_screen_menu_draw_text_columns with the stride reduced by 8. */
-
-static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer) {
-    menu_text_layout_t* layout = entry->context;
-    s32 row;
-    s32 column;
-    s32 index;
-    s32* stride_cell = &g_menu_text_state.pen.stride;
-
-    for (row = 0; row < layout->row_count; row++) {
-        *stride_cell = entry->inner_width - 8;
-        for (column = 0; column < 3; column++) {
-            index = row + *row_offset;
-            if (layout->mode[column] == MENU_TEXT_COLUMN_HIDDEN) {
-                continue;
-            }
-            if ((layout->text_ids[column][index] & 0x7FF) == 0x7FF) {
-                continue;
-            }
-            menu_set_text_origin(layout->x[column], row * 0x10);
-            if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
-                g_menu_text_palette_offset = layout->text_colors[column][index];
-            }
-            g_menu_text_state.pen.color = 0;
-            if (g_menu_text_palette_offset == 4) {
-                g_menu_text_state.pen.color = 0x44444444;
-            }
-            if (layout->mode[column] == MENU_TEXT_COLUMN_TEXT) {
-                menu_display_text_entry(layout->text_ids[column][index], buffer, &g_menu_text_state.pen);
-            } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
-                menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
-            } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
+#else
                 menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+#endif
             }
             g_menu_text_palette_offset = 0;
             g_menu_text_state.pen.color = 0;
         }
     }
 }
-#endif
 
 #ifdef FFT_BATTLE
 /*
@@ -570,7 +542,7 @@ static u8* battle_menu_redraw_text_page_on_scroll_in_rect(
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-            menu_draw_text_columns_narrow_variant(entry, row_offset, buffer);
+            menu_draw_text_columns_narrow(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);
             mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
@@ -642,7 +614,7 @@ static u8* world_menu_redraw_text_page_on_scroll_in_rect(
     }
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-    menu_draw_text_columns_narrow_variant(entry, row_offset, buffer);
+    menu_draw_text_columns_narrow(entry, row_offset, buffer);
     *redraw = 0;
     LoadImage(&rect, buffer);
     mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
@@ -730,7 +702,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     }
     toggle = 0;
     g_battle_menu_scroll_list_depth++;
-    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    entry = (menu_entry_t*)thread_get_current_parameter_1();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
@@ -754,13 +726,13 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         base[i].icons.icons[0] = &icons0[i];
         base[i].icons.icons[1] = &icons1[i];
         base[i].icons.icons[2] = &icons2[i];
-        menu_build_window_sprites_variant(&image_rect, entry, &base[i].icons);
+        menu_build_window_sprites(&image_rect, entry, &base[i].icons);
     }
     SetDrawMode(&page->icon_mode, 0, 0, GetTPage(0, 2, 0x3C0, 0x100), &g_gfx_texture_window);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 1, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
-        menu_init_sprt_variant(&page->arrows[i]);
+        menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
         page->arrows[i].h = 0x10;
@@ -771,13 +743,13 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
-    menu_init_sprt_variant(&page->thumb);
+    menu_init_sprt(&page->thumb);
     page->thumb.u0 = 0x10;
     page->thumb.v0 = 0x10;
     page->thumb.w = 8;
     page->thumb.h = 8;
     page->thumb.clut = 0x7D7C;
-    menu_init_sprt_variant(&page->frame);
+    menu_init_sprt(&page->frame);
     gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
     menu_init_sprite_array(page->arrow_marks, 2, 0x7C3C);
     page->arrow_marks[0].w = 6;
@@ -792,7 +764,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
-    menu_build_and_upload_window_frame_image_variant(
+    menu_build_and_upload_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
     if (g_battle_menu_scroll_list_depth == 2) {
         buffer = g_main_heap_companion_overlay_load_address + 0x2000;
@@ -810,7 +782,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         row_offset = 0;
         cursor = 0;
     }
-    menu_draw_text_columns_narrow_variant(entry, &row_offset, buffer);
+    menu_draw_text_columns_narrow(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.rect.x / 4 + entry->vram_origin.x;
@@ -831,7 +803,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page = &base[i & 1];
         frame = &page->frame;
         SetSemiTrans(&frame, 1);
-        if (scroll_delta == 0 && menu_can_accept_input_variant() != 0 && i != 0) {
+        if (scroll_delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
                     toggle ^= 1;
@@ -847,7 +819,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                     (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST], 0, 0);
                 column = 0;
                 while (1) {
-                    if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
+                    if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
                         LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)(saved_clut + 48));
                         break;
                     }
@@ -980,7 +952,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
-        if (scroll_delta == 0 && menu_can_accept_input_variant() != 0) {
+        if (scroll_delta == 0 && menu_can_accept_input() != 0) {
             buffer
                 = battle_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, (s32)&cursor, &window.rect);
             redraw_pending = (s32)buffer;
@@ -988,20 +960,20 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         }
         entry->selected_index = cursor + row_offset;
         layout->row_offset = row_offset;
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         menu_select_icon_cluts(&page->icons.base);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         menu_select_icon_sprite_clut(page->icons.icons[1]);
         menu_select_icon_sprite_clut(page->icons.icons[2]);
-        if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
+        if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;
         }
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
-        if (layout->columns.hidden_rows != 0 && thread_is_previous_running_variant() == 0) {
+        if (layout->columns.hidden_rows != 0 && thread_is_previous_running() == 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
@@ -1087,7 +1059,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     }
     thread_yield();
     g_battle_menu_scroll_list_depth--;
-    if (thread_get_current_parameter_2_variant() == 0) {
+    if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }
 }
@@ -1142,7 +1114,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
 
     toggle = 0;
     page = g_world_ability_list_pages[g_thread_current_id];
-    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    entry = (menu_entry_t*)thread_get_current_parameter_1();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
@@ -1169,13 +1141,13 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page[i].icons.icons[0] = &icons0[i];
         page[i].icons.icons[1] = &icons1[i];
         page[i].icons.icons[2] = &icons2[i];
-        menu_build_window_sprites_variant(&image_rect, entry, &page[i].icons);
+        menu_build_window_sprites(&image_rect, entry, &page[i].icons);
     }
     SetDrawMode(&page->icon_mode, 0, 0, GetTPage(0, 2, 0x3C0, 0x100), &g_gfx_texture_window);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 1, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
-        menu_init_sprt_variant(&page->arrows[i]);
+        menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
         page->arrows[i].h = 0x10;
@@ -1186,13 +1158,13 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
-    menu_init_sprt_variant(&page->thumb);
+    menu_init_sprt(&page->thumb);
     page->thumb.u0 = 0x10;
     page->thumb.v0 = 0x10;
     page->thumb.w = 8;
     page->thumb.h = 8;
     page->thumb.clut = 0x7D7C;
-    menu_init_sprt_variant(&page->frame);
+    menu_init_sprt(&page->frame);
     gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
     menu_init_sprite_array(page->arrow_marks, 2, 0x7C3C);
     page->arrow_marks[0].w = 6;
@@ -1207,7 +1179,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
-    menu_build_and_upload_window_frame_image_variant(
+    menu_build_and_upload_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, window.rect.w * window.rect.h / 2);
@@ -1220,7 +1192,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         row_offset = 0;
         cursor = 0;
     }
-    menu_draw_text_columns_narrow_variant(entry, &row_offset, buffer);
+    menu_draw_text_columns_narrow(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.rect.x / 4 + entry->vram_origin.x;
@@ -1241,7 +1213,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page = &base[i & 1];
         frame = &page->frame;
         SetSemiTrans(&frame, 1);
-        if (delta == 0 && menu_can_accept_input_variant() != 0 && i != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
                     toggle ^= 1;
@@ -1346,27 +1318,27 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
-        if (delta == 0 && menu_can_accept_input_variant() != 0) {
+        if (delta == 0 && menu_can_accept_input() != 0) {
             buffer = world_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
         entry->selected_index = cursor + row_offset;
         layout->row_offset = row_offset;
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         menu_select_icon_cluts(&page->icons.base);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         menu_select_icon_sprite_clut(page->icons.icons[1]);
         menu_select_icon_sprite_clut(page->icons.icons[2]);
-        if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
+        if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;
         }
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
-        if (layout->columns.hidden_rows != 0 && thread_is_previous_running_variant() == 0) {
+        if (layout->columns.hidden_rows != 0 && thread_is_previous_running() == 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
@@ -1447,7 +1419,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     }
     thread_yield();
     g_world_menu_scrolling_list_depth--;
-    if (thread_get_current_parameter_2_variant() == 0) {
+    if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }
 }
@@ -1511,11 +1483,11 @@ void menu_icon_timed_thread(void) {
         g_text_message_duration_frames &= 0xFF;
     }
     i = 0;
-    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    param = (menu_entry_t*)thread_get_current_parameter_1();
     menu_size_entry_to_text(param, &width, &height, &pad, 1);
-    menu_build_window_sprites_variant(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
-    buffer = menu_build_and_upload_window_frame_image_variant(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
     menu_set_text_origin(pad + 8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
@@ -1530,7 +1502,7 @@ void menu_icon_timed_thread(void) {
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;
         }
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         if (unset >= 0) {
@@ -1551,7 +1523,7 @@ void menu_icon_timed_thread(void) {
     g_menu_panel_fade_intensity = 0;
     g_sound_suppressed = 0;
     thread_yield();
-    if (thread_get_current_parameter_2_variant() == 0) {
+    if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }
 }
@@ -1572,9 +1544,9 @@ void menu_icon_linked_entry_thread(void) {
     s16 height;
     s32 pad;
 
-    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    param = (menu_entry_t*)thread_get_current_parameter_1();
     menu_size_entry_to_text(param, &width, &height, &pad, 0);
-    menu_build_window_sprites_variant(&rect, param, &records[0]);
+    menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
     parent = param->row_actions[0];
     if (parent >= 0) {
@@ -1585,7 +1557,7 @@ void menu_icon_linked_entry_thread(void) {
         thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[parent].thread_entry);
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[parent], 0, 0);
     }
-    buffer = menu_build_and_upload_window_frame_image_variant(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
     menu_set_text_origin(8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
@@ -1595,7 +1567,7 @@ void menu_icon_linked_entry_thread(void) {
         if (i == 0) {
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         if (parent >= 0) {
@@ -1613,7 +1585,7 @@ void menu_icon_linked_entry_thread(void) {
     }
     g_sound_suppressed = 0;
     thread_yield();
-    if (thread_get_current_parameter_2_variant() == 0) {
+    if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }
 }
@@ -1621,11 +1593,11 @@ void menu_icon_linked_entry_thread(void) {
 void menu_input_thread(void) {
     menu_entry_t* menu;
 
-    menu = (menu_entry_t*)thread_get_current_parameter_1_variant();
+    menu = (menu_entry_t*)thread_get_current_parameter_1();
     g_sound_suppressed = 1;
     while (1) {
         thread_yield();
-        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
+        if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
         menu_handle_action(menu, 0);
@@ -1633,7 +1605,7 @@ void menu_input_thread(void) {
     }
     thread_yield();
     g_sound_suppressed = 0;
-    if (thread_get_current_parameter_2_variant() == 0) {
+    if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }
 }
@@ -1862,38 +1834,33 @@ void script_execute_display_conditions_instruction(void) {
     require_condition_dispatch();
 }
 
-#ifdef FFT_BATTLE
-/* The thread EVENT_OPCODE_DARK_SCREEN starts: loads REQUIRE.OUT and runs its bonus image burst. */
-void script_dark_screen_thread_variant(void) {
+/* The thread EVENT_OPCODE_DARK_SCREEN starts: it takes the task id, and in
+ * BATTLE loads REQUIRE.OUT and runs its bonus image burst (WORLD has no
+ * REQUIRE.OUT to run). */
+void script_dark_screen_thread(void) {
     thread_set_current_task_id(THREAD_TASK_DARK_SCREEN);
+#ifdef FFT_BATTLE
     menu_request_open_companion_executable(COMPANION_OVERLAY_REQUIRE);
     require_reward_animate_bonus_image_burst();
-}
 #endif
-
-#ifdef FFT_WORLD
-/* The thread EVENT_OPCODE_DARK_SCREEN starts. WORLD has no REQUIRE.OUT to run: it only takes the task id. */
-void script_dark_screen_thread_variant(void) {
-    thread_set_current_task_id(THREAD_TASK_DARK_SCREEN);
 }
-#endif
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
- * script_dark_screen_thread and text_run_spell_quote_thread_variant. Nothing on the
+ * script_dark_screen_thread and text_run_spell_quote_thread. Nothing on the
  * disc calls it or points at it; the name is a neutral placeholder until a
  * reference turns up. */
 void script_noop_2(void) {
 }
 
-#ifdef FFT_BATTLE
 /* Task 0x46: show message 0xa800 | parameter 2 about the unit whose battle id
  * is parameter 1.
  *
  * The id also fills the three text substitution values. The text thread runs
  * with window mode 0x11, or 0x12 when the unit is on the upper half of the
  * screen, from SPELL.MES (companion data file 4) loaded into a 16 KiB
- * buffer. */
-void text_run_spell_quote_thread_variant(void) {
+ * buffer. WORLD has no unit messages: its copy ends at once. */
+void text_run_spell_quote_thread(void) {
+#ifdef FFT_BATTLE
     SVECTOR screen_coords;
     unit_stats_t* unit;
     s32 id; /* Battle id, then the unit's unit_id: one variable in the target. */
@@ -1902,12 +1869,12 @@ void text_run_spell_quote_thread_variant(void) {
 
     g_menu_system_function_thread_busy = 1;
     thread_set_current_task_id(THREAD_TASK_UNIT_MESSAGE);
-    script_set_event_speed_variant(2);
+    script_set_event_speed(2);
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     thread_wait_frames(3);
     window_mode = 0x11;
-    id = thread_get_current_parameter_1_variant();
+    id = thread_get_current_parameter_1();
     g_text_substitution_values[0] = id;
     g_text_substitution_values[1] = id;
     g_text_substitution_values[2] = id;
@@ -1917,7 +1884,7 @@ void text_run_spell_quote_thread_variant(void) {
     if (screen_coords.vy < 0x80) {
         window_mode = 0x12;
     }
-    message_id = thread_get_current_parameter_2_variant() | 0xA800;
+    message_id = thread_get_current_parameter_2() | 0xA800;
     g_menu_companion_data_file_buffer = main_heap_alloc(0x4000);
     menu_request_open_companion_data_file(BATTLE_COMPANION_FILE_SPELL_MES);
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_menu_companion_data_file_buffer;
@@ -1926,18 +1893,11 @@ void text_run_spell_quote_thread_variant(void) {
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     main_heap_free(g_menu_companion_data_file_buffer);
     g_menu_pending_selection[0] = 7;
-    script_set_event_speed_variant(1);
+    script_set_event_speed(1);
     g_menu_system_function_thread_busy = 0;
     thread_exit_current();
-}
 #endif
-
-#ifdef FFT_WORLD
-/* Empty in WORLD: the thread BATTLE_MENU_SYSTEM_COMMAND_SPELL_QUOTE starts ends at once.
- * BATTLE links its own body under this name. */
-void text_run_spell_quote_thread_variant(void) {
 }
-#endif
 
 void menu_open_option_game_options(void) {
     menu_set_modal_open();
@@ -1979,7 +1939,7 @@ static void menu_run_bunit_return_thread(void) {
     g_menu_transition_state = 4;
     do {
         thread_yield();
-    } while (thread_is_running_asm_variant(THREAD_SLOT_MENU_GRANDCHILD) != 0);
+    } while (thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0);
 
     g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_BUNIT;
     g_menu_help_open = 0;
@@ -2049,10 +2009,10 @@ static void menu_run_help_menu_thread(void) {
 
 /* Run the job-status overlay while its state is nonzero. */
 void menu_run_jobstts_thread(void) {
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         thread_exit_current();
     }
-    if (thread_is_running_asm_variant(THREAD_SLOT_EVENT) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
         thread_exit_current();
     }
     menu_set_modal_open();
@@ -2138,7 +2098,7 @@ void menu_open_debugchr_unit_editor(void) {
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;
-        menu_build_idle_action_menu_variant(g_menu_current_id);
+        menu_build_idle_action_menu(g_menu_current_id);
         menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, *unit_index, *unit_index);
         menu_clear_modal_open();
         battle_menu_leave_status_screen_selection();
@@ -2199,8 +2159,8 @@ void gfx_load_evtchr_thread(void) {
     s32 block;
     evtchr_file_record_t* buffer;
 
-    parameter = thread_get_current_parameter_1_variant();
-    block = thread_get_current_parameter_2_variant();
+    parameter = thread_get_current_parameter_1();
+    block = thread_get_current_parameter_2();
     thread_set_current_task_id(THREAD_TASK_LOAD_EVTCHR);
     buffer = main_heap_alloc(0x7800);
     do {
@@ -2296,7 +2256,7 @@ void menu_set_palette_colors(const menu_palette_pair_t* source) {
 
 void menu_init_palette_and_text(s32 unused_0) {
     menu_set_palette_colors(&g_menu_default_palette_colors);
-    text_init_section_pointers_variant();
+    text_init_section_pointers();
 }
 
 /* Empty in BATTLE and WORLD; in BATTLE it sits between
@@ -2360,7 +2320,7 @@ void menu_run_companion_overlay_stub(void) {
 }
 
 static void menu_start_entry_thread(void) {
-    s32 menu_id = thread_get_current_parameter_1_variant();
+    s32 menu_id = thread_get_current_parameter_1();
     s32 count;
 
     thread_wait_until_inactive(THREAD_SLOT_MENU);
@@ -2372,7 +2332,7 @@ static void menu_start_entry_thread(void) {
         thread_yield();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-        if (script_is_tutorial_event_slot_variant() != 0) {
+        if (script_is_tutorial_event_slot() != 0) {
             g_menu_input_mode = MENU_INPUT_TUTORIAL;
             script_set_variable(
                 EVENT_SCRIPT_VAR_CURRENT_EVENT, script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) + 1);
@@ -2419,7 +2379,6 @@ static void menu_start_entry_thread(void) {
     thread_exit_current();
 }
 
-#ifdef FFT_BATTLE
 enum {
     IDLE_ACTION_MENU_ENTRY_COUNT = 0x34,
 };
@@ -2435,8 +2394,10 @@ enum {
  *
  * g_battle_menu_idle_action_entry_labels holds two window x bytes per entry, each
  * 0x80 less than the screen x; the second is used when the unit's projected x is
- * 0x101 or more, and a zero byte leaves the entry's x unchanged. */
-void menu_build_idle_action_menu_variant(s32 menu_id) {
+ * 0x101 or more, and a zero byte leaves the entry's x unchanged. WORLD only
+ * clears the menu-building-started flag and does not read the menu id. */
+void menu_build_idle_action_menu(s32 menu_id) {
+#ifdef FFT_BATTLE
     SVECTOR screen_position;
     s32 i;
     s32 column;
@@ -2477,19 +2438,13 @@ void menu_build_idle_action_menu_variant(s32 menu_id) {
         }
         g_menu_building_thread_started = 0;
     }
-}
-#endif
-
-#ifdef FFT_WORLD
-/* Clear the menu-building-started flag; the menu id is not read. */
-void menu_build_idle_action_menu_variant(s32 unused_menu_id) {
+#else
     g_menu_building_thread_started = 0;
-}
 #endif
+}
 
 void menu_start_building_thread(void) {
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0
-        || thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU) != 0 || thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         if (g_menu_current_id != BATTLE_MENU_ID_MINI_MENU) {
             g_menu_building_thread_started = 1;
         }
@@ -2506,7 +2461,7 @@ void menu_start_building_thread(void) {
     if (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE) {
         return;
     }
-    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         return;
     }
     g_menu_help_open = 1;

@@ -46,7 +46,7 @@ void attack_deploy_run_select_menu(void) {
         right[i].tpage = GetTPage(0, 2, 0x3c0, 0x100);
         right[i].clut = 0x7dbc;
     }
-    if (thread_get_current_parameter_1_variant() != 0) {
+    if (thread_get_current_parameter_1() != 0) {
         g_attack_deploy_select_menu_nodes[5].destination[1] = 5;
         g_attack_deploy_select_menu_nodes[9].destination[1] = 9;
         g_attack_deploy_select_menu_nodes[10].destination[1] = 10;
@@ -374,8 +374,8 @@ static void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32
     s32 edge;
     s32 height;
 
-    x = thread_get_current_parameter_1_variant();
-    y = thread_get_current_parameter_2_variant();
+    x = thread_get_current_parameter_1();
+    y = thread_get_current_parameter_2();
     poly = polys;
     height = 0x14;
     for (row = 0; row < 2; row++) {
@@ -466,7 +466,7 @@ void attack_map_show_title(void) {
     s32 buffer;
     s32 width;
 
-    step = thread_get_current_parameter_3_variant();
+    step = thread_get_current_parameter_3();
     buffer = 0;
     if (step == 0) {
         step = 1;

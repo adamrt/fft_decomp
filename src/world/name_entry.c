@@ -196,7 +196,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         menu_run_script_with_palette_mode_variant(
             &g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
-        menu_draw_active_window_frames_variant();
+        menu_draw_active_window_frames();
         menu_input_update_event_state_variant(
             g_menu_gfx_context->otag + 63, PadRead(0), g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         value = g_world_name_entry_state;

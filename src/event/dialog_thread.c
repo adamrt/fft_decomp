@@ -131,11 +131,11 @@ void text_run_dialog_thread_variant(void) {
     value_index = 0;
     variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
-    param = thread_get_current_parameter_1_variant();
+    param = thread_get_current_parameter_1();
     rec.dialog_type = param;
     if ((param & 0x70) == 0x70) {
         rec.dialog_type = (param & 0x1C) | 0x10;
-        rec.dialog_type |= unit_check_facing_relative_to_camera(thread_get_current_parameter_3_variant()) + 1;
+        rec.dialog_type |= unit_check_facing_relative_to_camera(thread_get_current_parameter_3()) + 1;
     }
     rec._unknown_2a = 0;
     rec.origin_x = 8;
@@ -152,7 +152,7 @@ void text_run_dialog_thread_variant(void) {
     } else {
         rec.portrait = thread->function_parameter_4 - 1;
     }
-    text = text_find_entry(thread_get_current_parameter_2_variant());
+    text = text_find_entry(thread_get_current_parameter_2());
     text_measure_pixels(&rec.mark, &rec.lines, text);
     if (thread->task_words[6] != 0) {
         rec.mark = thread->task_words[6];
@@ -190,15 +190,15 @@ void text_run_dialog_thread_variant(void) {
     }
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL) {
         center = rec.width >> 1;
-        value = script_resolve_runtime_id(thread_get_current_parameter_3_variant());
+        value = script_resolve_runtime_id(thread_get_current_parameter_3());
         unit_project_to_screen(value, &g_unit_scratch_coords);
         cursor_x = center;
         rec.tail_offset = 0;
         rec.x = g_unit_scratch_coords.vx - center - 4;
         if (rec.position == 0) {
-            if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_a) {
+            if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_a) {
                 value = g_text_speaker_swap_unit_b;
-            } else if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_b) {
+            } else if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_b) {
                 value = g_text_speaker_swap_unit_a;
             }
             unit_project_to_screen(script_resolve_runtime_id(value), &g_camera_script_rotation);
@@ -272,10 +272,10 @@ void text_run_dialog_thread_variant(void) {
         bottom = half_h + rec.y - 2;
     }
     win = menu_alloc_window_buffer_pair();
-    win->message_id = thread_get_current_parameter_2_variant();
+    win->message_id = thread_get_current_parameter_2();
     win->dialogue_selector = rec.position;
     win->box_type = rec.box_type;
-    rec.text = thread_get_current_parameter_2_variant();
+    rec.text = thread_get_current_parameter_2();
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
@@ -285,8 +285,7 @@ void text_run_dialog_thread_variant(void) {
         } else {
             win->portrait_code = rec.portrait;
         }
-        value = battle_unit_get_battle_id_by_runtime_id(
-            script_resolve_runtime_id(thread_get_current_parameter_3_variant()));
+        value = battle_unit_get_battle_id_by_runtime_id(script_resolve_runtime_id(thread_get_current_parameter_3()));
         menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
         win->portrait_battle_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
@@ -567,7 +566,7 @@ void text_run_dialog_thread_variant(void) {
                         }
                         thread_yield();
                     }
-                    win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2_variant();
+                    win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                     if ((rec.text & no_value) == no_value) {
                         break;
                     }
@@ -695,7 +694,7 @@ void text_run_dialog_thread_variant(void) {
                 thread_yield();
             }
             if (rec.no_box != 0) {
-                win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2_variant();
+                win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                 if ((rec.text & no_value) == no_value) {
                     break;
                 }
@@ -723,7 +722,7 @@ void text_run_dialog_thread_variant(void) {
         } else if (character == TEXT_RELEASE_WAITING_THREADS) {
             for (i = 0; i < 0x10; i++) {
                 if (g_thread_current_id != i && g_thread_contexts[i].task_id == THREAD_TASK_WAIT_FOR_RESUME
-                    && thread_is_running_asm_variant(i)) {
+                    && thread_is_running_asm(i)) {
                     g_thread_contexts[i].task_id = THREAD_TASK_RESUME;
                 }
             }
@@ -951,11 +950,11 @@ void text_run_dialog_thread_variant(void) {
     value_index = 0;
     variable_id = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
-    param = thread_get_current_parameter_1_variant();
+    param = thread_get_current_parameter_1();
     rec.dialog_type = param;
     if ((param & 0x70) == 0x70) {
         rec.dialog_type = (param & 0x1C) | 0x10;
-        rec.dialog_type |= unit_check_facing_relative_to_camera(thread_get_current_parameter_3_variant()) + 1;
+        rec.dialog_type |= unit_check_facing_relative_to_camera(thread_get_current_parameter_3()) + 1;
     }
     rec._unknown_2a = 0;
     rec.origin_x = 8;
@@ -1031,7 +1030,7 @@ void text_run_dialog_thread_variant(void) {
     } else {
         rec.portrait = thread->function_parameter_4 - 1;
     }
-    text = text_find_entry(thread_get_current_parameter_2_variant());
+    text = text_find_entry(thread_get_current_parameter_2());
     text_measure_pixels(&rec.mark, &rec.lines, text);
     if (thread->task_words[6] != 0) {
         rec.mark = thread->task_words[6];
@@ -1066,15 +1065,15 @@ void text_run_dialog_thread_variant(void) {
     }
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL) {
         center = rec.width >> 1;
-        value = script_resolve_runtime_id(thread_get_current_parameter_3_variant());
+        value = script_resolve_runtime_id(thread_get_current_parameter_3());
         unit_project_to_screen(value, &g_unit_scratch_coords);
         cursor_x = center;
         rec.tail_offset = 0;
         rec.x = g_unit_scratch_coords.vx - center - 4;
         if (rec.position == 0) {
-            if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_a) {
+            if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_a) {
                 value = g_text_speaker_swap_unit_b;
-            } else if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_b) {
+            } else if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_b) {
                 value = g_text_speaker_swap_unit_a;
             }
             unit_project_to_screen(script_resolve_runtime_id(value), &g_world_text_partner_screen_coords);
@@ -1148,10 +1147,10 @@ void text_run_dialog_thread_variant(void) {
         bottom = half_h + rec.y - 2;
     }
     win = menu_alloc_window_buffer_pair();
-    win->message_id = thread_get_current_parameter_2_variant();
+    win->message_id = thread_get_current_parameter_2();
     win->dialogue_selector = rec.position;
     win->box_type = rec.box_type;
-    rec.text = thread_get_current_parameter_2_variant();
+    rec.text = thread_get_current_parameter_2();
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
@@ -1161,7 +1160,7 @@ void text_run_dialog_thread_variant(void) {
         } else {
             win->portrait_code = rec.portrait;
         }
-        value = thread_get_current_parameter_3_variant();
+        value = thread_get_current_parameter_3();
         menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
         win->portrait_battle_id = value;
     } else if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
@@ -1428,7 +1427,7 @@ void text_run_dialog_thread_variant(void) {
                         CHECK_ABORT();
                         thread_yield();
                     }
-                    win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2_variant();
+                    win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                     if ((rec.text & no_value) == no_value) {
                         break;
                     }
@@ -1530,7 +1529,7 @@ void text_run_dialog_thread_variant(void) {
                 thread_yield();
             }
             if (rec.no_box != 0) {
-                win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2_variant();
+                win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                 if ((rec.text & no_value) == no_value) {
                     break;
                 }
@@ -1558,7 +1557,7 @@ void text_run_dialog_thread_variant(void) {
         } else if (code == TEXT_RELEASE_WAITING_THREADS) {
             for (i = 0; i < 0x11; i++) {
                 if (g_thread_current_id != i && g_thread_contexts[i].task_id == THREAD_TASK_WAIT_FOR_RESUME
-                    && thread_is_running_asm_variant(i)) {
+                    && thread_is_running_asm(i)) {
                     g_thread_contexts[i].task_id = THREAD_TASK_RESUME;
                 }
             }

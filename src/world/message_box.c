@@ -440,7 +440,7 @@ void menu_run_unit_status_thread_variant(void) {
             gfx_draw_or_append_gpu_primitive(&status->draw_offset_a);
         }
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame += 1;
@@ -461,7 +461,7 @@ static void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* r
             record->buffer = menu_build_window_image(
                 record->width, record->height, &record->rect, record->dialog_type, record->tail_offset, 1);
         } else {
-            record->buffer = menu_build_and_upload_window_frame_image_variant(
+            record->buffer = menu_build_and_upload_window_frame_image(
                 record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
         g_menu_text_state.pen.stride = record->rect.w * 4;
@@ -875,13 +875,13 @@ void world_text_message_box_thread(void) {
     value_index = 0;
     script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     g_world_menu_event_state_flag = 0;
-    param = thread_get_current_parameter_1_variant();
+    param = thread_get_current_parameter_1();
     rec.box_type = param & 0x70;
     rec.dialog_type = param;
     rec.position = param & 3;
     rec.options = param & 0xC;
-    text = text_find_entry(thread_get_current_parameter_2_variant());
-    base_entry = text_find_entry(thread_get_current_parameter_2_variant() & 0xF800);
+    text = text_find_entry(thread_get_current_parameter_2());
+    base_entry = text_find_entry(thread_get_current_parameter_2() & 0xF800);
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         rec.mark = 0x12;
         rec.lines = 3;
@@ -910,7 +910,7 @@ void world_text_message_box_thread(void) {
     right = x + half_w - 6;
     bottom = y + half_h - 2;
     win = menu_alloc_window_buffer_pair();
-    win->message_id = thread_get_current_parameter_2_variant();
+    win->message_id = thread_get_current_parameter_2();
     if (text[0] == TEXT_SET_PORTRAIT) {
         win[0].portrait_code = text[1];
         win[1].portrait_code = text[1];
@@ -921,15 +921,15 @@ void world_text_message_box_thread(void) {
     }
     win[0].is_message_box = 1;
     win[1].is_message_box = 1;
-    rec.text = thread_get_current_parameter_2_variant();
-    message = thread_get_current_parameter_2_variant();
+    rec.text = thread_get_current_parameter_2();
+    message = thread_get_current_parameter_2();
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
     } else {
-        menu_build_and_upload_window_frame_image_variant(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
+        menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
     }
     if (g_formation_screen_active != 0) {
         x -= 0x100;
@@ -982,13 +982,13 @@ void world_text_message_box_thread(void) {
     while (1) {
         no_value = 0xFFFF;
         code = *text;
-        if (thread_get_current_parameter_2_variant() != message) {
-            if ((thread_get_current_parameter_2_variant() & no_value) != no_value) {
-                while (base_entry != text_find_entry(thread_get_current_parameter_2_variant() & 0xF800)) {
+        if (thread_get_current_parameter_2() != message) {
+            if ((thread_get_current_parameter_2() & no_value) != no_value) {
+                while (base_entry != text_find_entry(thread_get_current_parameter_2() & 0xF800)) {
                     thread_yield();
                 }
             }
-            message = thread_get_current_parameter_2_variant();
+            message = thread_get_current_parameter_2();
             if ((message & no_value) == no_value) {
                 g_world_menu_event_state_flag = 0;
                 break;
@@ -997,8 +997,7 @@ void world_text_message_box_thread(void) {
             if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                 menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
             } else {
-                menu_build_and_upload_window_frame_image_variant(
-                    rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
+                menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
             }
             delay = 1;
             saved = (u8*)-1;
@@ -1060,7 +1059,7 @@ void world_text_message_box_thread(void) {
                 if (no_wait == 0) {
                     for (i = 0;; i += g_script_event_speed) {
                         thread_yield();
-                        if (thread_get_current_parameter_2_variant() != message) {
+                        if (thread_get_current_parameter_2() != message) {
                             break;
                         }
                         if (code == TEXT_PAGE_BREAK) {
@@ -1109,14 +1108,14 @@ void world_text_message_box_thread(void) {
                 if (code == TEXT_PAGE_BREAK) {
                     continue;
                 }
-                if (thread_get_current_parameter_2_variant() != message) {
+                if (thread_get_current_parameter_2() != message) {
                     continue;
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                     menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else {
-                    menu_build_and_upload_window_frame_image_variant(
+                    menu_build_and_upload_window_frame_image(
                         rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
                 }
                 cursor_y = y - 0x10;

@@ -385,7 +385,7 @@ void wldcore_menu_run_world_frame(GsOT* context) {
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS) {
         otag_entries = (u32*)context->org;
         g_gfx_current_otag_entry = otag_entries + g_wldcore_menu_ordering_table_offset;
-        menu_draw_active_window_frames_variant();
+        menu_draw_active_window_frames();
         sprite_entries = (u32*)context->org;
         menu_input_update_event_state_variant(sprite_entries + g_wldcore_menu_ordering_table_offset + 2,
             g_input_current_buttons, g_active_graphics_buffer_index * 240);

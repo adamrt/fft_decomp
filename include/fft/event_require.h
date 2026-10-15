@@ -220,7 +220,6 @@ typedef enum require_text_section {
     REQUIRE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3,   /* what a unit turned away or dismissed says */
 } require_text_section_e;
 
-extern s32 g_text_section_offsets[32];
 extern char g_require_text_wait_for_file_allocation_message[];
 
 void require_text_show_battle_congratulations(void);

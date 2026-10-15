@@ -164,7 +164,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             menu_build_status_group_primitives_variant((POLY_FT4*)(render_offset + (s32)render_buffers));
         }
 
-        if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
+        if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
             if (sound_latched == 0) {
                 g_sound_pending_sfx_id = one;
                 sound_latched = 1;
@@ -190,7 +190,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         animation[1] = 0;
         animation[2] = 0;
 
-        if (event_mode == 0 && g_menu_help_open == 0 && thread_is_previous_running_variant() == 0) {
+        if (event_mode == 0 && g_menu_help_open == 0 && thread_is_previous_running() == 0) {
             input = *g_menu_input_controller;
             if ((input & PSX_PAD_CROSS) != 0) {
                 thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
@@ -199,7 +199,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
             }
-            if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) == 0
+            if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
                 && (unit_has_any_current_status(g_debugchr_panel_selected_unit_data.battle_id) != 0
                     || g_menu_selected_unit_fields.state.generic_monster == 0)) {
                 g_debugchr_status_display_thread_params.style = one;
@@ -219,7 +219,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                         /* Typed polygon indexing reverses the ADDU operands. */
                         menu_build_status_group_primitives_variant((POLY_FT4*)(render_offset + (s32)render_buffers));
                     }
-                    if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
+                    if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
                         break;
                     }
                     frame++;

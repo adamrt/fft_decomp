@@ -64,7 +64,7 @@ void menu_run_numeric_editor_frame_thread_variant(void) {
     i = 0;
     descriptor = g_editor_numeric_texture;
     for (; i < 18; i++) {
-        menu_init_sprt_variant(&buffer->sprites[i]);
+        menu_init_sprt(&buffer->sprites[i]);
         gfx_init_image_loading(
             &buffer->sprites[i], g_editor_numeric_geometry, &g_editor_numeric_table.texture_rect, descriptor);
         descriptor++;
@@ -158,7 +158,7 @@ void menu_run_numeric_editor_frame_thread_variant(void) {
             gfx_draw_or_append_gpu_primitive(&buffer->portrait);
         }
         thread_yield();
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
     }

@@ -131,7 +131,7 @@ void attack_deploy_run_screen(void) {
     thread_yield();
     g_attack_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_attack_deploy_current_squad_data = &g_attack_deploy_squad_data[g_attack_deploy_current_squad_id];
-    script_set_event_speed_variant(1);
+    script_set_event_speed(1);
     g_gfx_screen_fade = 0xff;
     thread_yield();
     g_attack_deploy_grid_slide_y = 0x9c;
@@ -551,7 +551,7 @@ ramza_placed:
             attack_deploy_handle_roster_navigation_input();
             if (*input & PSX_PAD_SQUARE) {
                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
-                script_set_event_speed_variant(2);
+                script_set_event_speed(2);
                 if (g_attack_panel_status_animation[2] < 2) {
                     g_attack_panel_status_animation[2] = 1;
                 }
@@ -582,7 +582,7 @@ ramza_placed:
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
                 thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
                 thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-                script_set_event_speed_variant(1);
+                script_set_event_speed(1);
             }
             if (*input & PSX_PAD_TRIANGLE) {
                 if (g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
@@ -734,7 +734,7 @@ ramza_placed:
     thread_set_parameters(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
     thread_wait_frames(3);
     g_gfx_screen_fade = 0;
-    script_set_event_speed_variant(1);
+    script_set_event_speed(1);
     main_sound_unload_scenario_music_and_tunes();
     thread_exit_current();
 }
@@ -1236,7 +1236,7 @@ static void attack_deploy_run_render_thread(void) {
         g_attack_deploy_render_buffers[frame & 1].screen_position.y = offset_y;
         SetDrawOffset(&g_attack_deploy_render_buffers[frame & 1].screen_offset,
             (u16*)&g_attack_deploy_render_buffers[frame & 1].screen_position);
-        if (thread_get_current_parameter_3_variant() != 0) {
+        if (thread_get_current_parameter_3() != 0) {
             break;
         }
         if (g_attack_deploy_tiles_only_mode == 0) {
@@ -1582,7 +1582,7 @@ static void attack_deploy_update_screen_graphics(void) {
         for (i = 0; i < 9; i++) {
             off = parity * sizeof(g_attack_deploy_text_polys[0]) + i * sizeof(POLY_FT4);
             if ((g_attack_deploy_current_squad_data->unit_limit - g_attack_deploy_deployed_unit_count - 1 < 0 && i >= 6)
-                || thread_get_current_parameter_3_variant() != 0) {
+                || thread_get_current_parameter_3() != 0) {
                 if (g_attack_deploy_current_squad_data->unit_limit - g_attack_deploy_deployed_unit_count - 1 < 0) {
                     g_attack_deploy_text_graphic_params[7].x_load = 0xd0;
                 }
@@ -1619,7 +1619,7 @@ static void attack_deploy_update_screen_graphics(void) {
             gfx_draw_or_append_gpu_primitive(&g_attack_deploy_text_polys[parity][i]);
         }
         thread_yield();
-        if (thread_get_current_parameter_3_variant() == 0) {
+        if (thread_get_current_parameter_3() == 0) {
             continue;
         }
         for (i = 8; i >= 0; i--) {

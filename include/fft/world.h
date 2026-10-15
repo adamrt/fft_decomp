@@ -1200,7 +1200,6 @@ extern u8* g_world_text_resident_data[9];
 
 extern text_glyph_state_t g_world_text_message_box_glyph;
 extern glyph_blit_t g_world_text_message_box_state;
-extern s32 g_text_section_offsets[32];
 
 extern s16 g_world_fixed_number_panel_request_state;
 extern s32 g_world_text_message_box_digit_divisors[];

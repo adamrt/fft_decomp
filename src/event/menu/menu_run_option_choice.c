@@ -52,7 +52,7 @@ void menu_run_option_choice(void) {
         width += 2;
     }
     height = g_menu_option_choice_counts[kind] * 16 + 16;
-    buffer = menu_build_and_upload_window_frame_image_variant(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     thread_wait_frames(1);
     g_menu_text_state.pen.stride = width;
     for (i = 0; i < g_menu_option_choice_counts[kind]; i++) {
@@ -80,7 +80,7 @@ void menu_run_option_choice(void) {
         param->vram_origin.x = 0x1AE;
     }
     param->text_image.width -= 4;
-    menu_build_window_sprites_variant(&rect, param, &g_menu_option_picker_icon_records[0]);
+    menu_build_window_sprites(&rect, param, &g_menu_option_picker_icon_records[0]);
     mem_copy_bytes_nonempty(&g_menu_option_picker_icon_records[1], &g_menu_option_picker_icon_records[0],
         sizeof(g_menu_option_picker_icon_records[1]));
     LoadImage(&rect, buffer);
@@ -88,9 +88,9 @@ void menu_run_option_choice(void) {
     thread_wait_frames(1);
     cursor = g_menu_option_values[kind];
     for (width = 0;; width++) {
-        menu_should_close_thread_variant(input);
+        menu_should_close_thread(input);
         record = &g_menu_option_picker_icon_records[width & 1].base;
-        if (menu_can_accept_input_variant()) {
+        if (menu_can_accept_input()) {
             if (*input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;

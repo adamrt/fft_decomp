@@ -88,7 +88,7 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
 
     thread_id = 1;
     do {
-        g_thread_status_snapshot[thread_id] = thread_is_running_asm_variant(thread_id);
+        g_thread_status_snapshot[thread_id] = thread_is_running_asm(thread_id);
         thread_id++;
     } while (thread_id < 16);
 
@@ -96,7 +96,7 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
     thread_id = 1;
     do {
         status = g_thread_status_snapshot[thread_id];
-        if (status != thread_is_running_asm_variant(thread_id)) {
+        if (status != thread_is_running_asm(thread_id)) {
             g_script_input_suppression_frames = 5;
         }
         thread_id++;
