@@ -164,10 +164,12 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 		unit.size += f.Size
 		for _, span := range f.Rodata {
 			// Several members may share one literal (a constant in the
-			// object's read-only data): one range, declared once.
+			// object's read-only data): one range, declared once. A later
+			// member may also use only the first literals of an earlier
+			// member's run, so a range inside a declared one is that run.
 			shared := false
 			for _, existing := range unit.rodata {
-				if existing == span {
+				if existing == span || (span.Addr >= existing.Addr && span.Addr+uint32(span.Size) <= existing.Addr+uint32(existing.Size)) {
 					shared = true
 					break
 				}

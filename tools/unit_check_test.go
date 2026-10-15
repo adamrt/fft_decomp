@@ -119,6 +119,12 @@ func TestResolveUnitInstanceChecksOrderProfileAndRodata(t *testing.T) {
 	if err != nil || len(literal.rodata) != 1 {
 		t.Fatalf("shared literal: %v %+v", err, literal)
 	}
+	// A later member may use only the first literals of an earlier member's run.
+	m.function("unit_b").Rodata = []rodataSpec{{Addr: 0x80066ff8, Size: 4, Hash: "0000000000000002"}}
+	nested, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: "battle", Functions: []string{"unit_a", "unit_b"}})
+	if err != nil || len(nested.rodata) != 1 || nested.rodata[0] != shared {
+		t.Fatalf("nested literal: %v %+v", err, nested)
+	}
 	m.function("unit_a").Rodata, m.function("unit_b").Rodata = nil, nil
 	alias, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: "battle", Functions: []string{"unit_e", "unit_f"}})
 	if err != nil {
