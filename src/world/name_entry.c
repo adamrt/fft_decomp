@@ -13,6 +13,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void world_name_apply_entry_key(s16 key);
+static void world_name_init_entry(const u8* name);
+static void world_name_update_entry_cursor(void);
+
 u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1) {
     point16_t cursor;
     s32 busy;
@@ -224,7 +228,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
 }
 
 /* Open the name-entry key list: identity entry ids 0..8 plus a -1 terminator. */
-void world_menu_open_name_entry_key_list(void) {
+static void world_menu_open_name_entry_key_list(void) {
     s32 count;
     s32 i;
 
@@ -295,7 +299,7 @@ void world_name_handle_entry_confirmed_keys(void) {
  * between them remaps the column through
  * g_world_name_entry_special_to_char_column/g_world_name_entry_char_to_special_column. Left/right wrap within the row,
  * and a column change requests cursor sound 3. */
-void world_name_update_entry_cursor(void) {
+static void world_name_update_entry_cursor(void) {
     point16_t cursor;
     s32 previous;
     u32 input;
@@ -353,7 +357,7 @@ void world_name_update_entry_cursor(void) {
  * the cursor, -3 inserts a space, -4/-5 move the cursor left/right, and any
  * other key overwrites the slot at the cursor and advances it. The slots are
  * re-encoded with trailing spaces trimmed before the terminator. */
-void world_name_apply_entry_key(s16 key) {
+static void world_name_apply_entry_key(s16 key) {
     u16 chars[14];
     s32 i;
     s32 j;
@@ -479,7 +483,7 @@ void world_name_run_confirmation_menu(void) {
 }
 
 /* Seed the editable name and open its keyboard and message window. */
-void world_name_init_entry(const u8* name) {
+static void world_name_init_entry(const u8* name) {
     s32 i;
 
     g_world_name_entry_original_name = name;

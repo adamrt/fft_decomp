@@ -31,8 +31,30 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static void camera_thread(void);
+static void map_light_thread(void);
+static void map_wait_for_refresh(void);
+static void script_blue_remove_all_enemy_units(void);
+static void script_blue_remove_unit(s32 unit_id);
+static void script_change_stats(const event_change_stats_parameters_t* parameters);
+static void script_color_screen_thread(void);
+static void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
+static void script_earthquake_start(void);
+static void script_face_tile(const event_face_tile_parameters_t* parameters);
+static void script_map_darkness(void);
+static void script_march_units(const event_march_parameters_t* parameters);
+static void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
+static void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable);
+static void script_teleportin_event_instruction(s32 unit_id, s32 unused);
+static void script_teleportout_event_instruction(s32 unit_id, s32 remove);
+static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only);
+static void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
+static void unit_clear_status_staging_data(void);
+static s32 unit_is_moving(s32 runtime_id);
+static void unit_update_staged_status_data(u16 unit_id, u16 restore);
+
 /* Empty. EVENT_OPCODE_ADD_UNIT calls it before it looks the unit up. */
-void script_add_unit_stub(void) {
+static void script_add_unit_stub(void) {
 }
 
 #ifdef FFT_BATTLE
@@ -1976,7 +1998,7 @@ s32 script_load_next_event(void) {
 }
 
 /* Test one runtime ID; -1 scans all 21 event slots. */
-s32 unit_is_moving(s32 runtime_id) {
+static s32 unit_is_moving(s32 runtime_id) {
     s32 i;
 
     if (runtime_id != -1) {
@@ -2000,13 +2022,13 @@ s16 script_read_s16(const void* source) {
 }
 
 /* Store a 16-bit value at an unaligned script address, low byte first. */
-void script_write_s16(u8* destination, s16 value) {
+static void script_write_s16(u8* destination, s16 value) {
     destination[0] = value;
     destination[1] = value >> 8;
 }
 
 /* Yield until this scene's pending map refresh clears. */
-void map_wait_for_refresh(void) {
+static void map_wait_for_refresh(void) {
     if (g_map_refresh_pending != 0) {
         do {
             thread_yield();
@@ -2037,7 +2059,7 @@ void camera_clear_zoom_variable_low_bit(void) {
  * mode 1 and late mode 2 paths while first and elapsed are block-local, which
  * gives the target's s0-s3 assignment.
  */
-void camera_thread(void) {
+static void camera_thread(void) {
     s32 target[EVENT_CAMERA_COMPONENT_COUNT + 1];
     s32 start[EVENT_CAMERA_COMPONENT_COUNT];
     s32 i;
@@ -2196,7 +2218,7 @@ void camera_thread(void) {
  * thread alive under the MapDarkness task id for
  * g_script_map_darkness_durations[duration index] frames (1 to 256). WORLD's copy
  * also calls the BATTLE blend at 0x800934d0, which is WLDCORE data there. */
-void script_map_darkness(void) {
+static void script_map_darkness(void) {
     event_unit_color_t* parameters;
 
     thread_set_current_task_id(THREAD_TASK_MAP_DARKNESS);
@@ -2209,7 +2231,7 @@ void script_map_darkness(void) {
 
 /* Two independent frame counters apply the two shake pulses. The task loops
  * until another instruction tears it down. */
-void script_earthquake_start(void) {
+static void script_earthquake_start(void) {
     event_earthquake_parameters_t* parameters;
     s32 first_counter;
     s32 second_counter;
@@ -2234,7 +2256,7 @@ void script_earthquake_start(void) {
 }
 
 /* Advance the event screen-color fade by two frames per step. */
-void script_color_screen_thread(void) {
+static void script_color_screen_thread(void) {
     struct {
         s32 start_and_end[6];
         s32 current[3];
@@ -2287,7 +2309,7 @@ void script_color_screen_thread(void) {
  */
 /* The parameters are copied into locals in this order: it is what places the
  * s0 copy before the s2 copy in the prologue. */
-void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_speed) {
+static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s32 use_speed) {
     s32 pos[4][4];
     SVECTOR vec;
     /* Indexed destination fields change allocation and shorten the target by four bytes. */
@@ -2452,7 +2474,7 @@ void script_waitspritemove_event_instruction(s32 unit_id) {
     }
 }
 
-void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
+static void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
     mem_copy_bytes_nonempty(destination, source, sizeof(*destination));
 }
 
@@ -2462,7 +2484,7 @@ void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
  * the script's frame count, rebuilding the GTE light matrix each frame, then
  * commits the final values back to the live light state.
  */
-void map_light_thread(void) {
+static void map_light_thread(void) {
     union {
         struct {
             struct {
@@ -2548,7 +2570,7 @@ void camera_store_yaw_band(s32 value) {
  *
  * With all four directions blocked no candidate replaces the initial distance
  * 0x8000, and the result is the yaw variable plus 0x8000 truncated to s16. */
-s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b) {
+static s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b) {
     s32 yaw;
     s32 mask;
     s32 raw;
@@ -2753,7 +2775,7 @@ void script_noop_11(void) {
 }
 
 /* Resolve a single selector in place; groups keep their ID and set the filter mode. */
-s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
+static s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
     u32 id;
 
     id = *unit_id;
@@ -2781,7 +2803,7 @@ s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
  *
  * Unsupported modes fall off the end without a defined return value.
  */
-s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
+static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
     unit_stats_t* unit;
     s32 index;
     s32 i;
@@ -2864,7 +2886,7 @@ s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
  * it by -0x1f and wait 60 frames more. Then, when `remove` is set, mark its
  * battle unit as not existing. A unit id that does not resolve does nothing. The
  * interpreter always passes remove = 1. */
-void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
+static void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
     s32 unit;
     s32 idx;
 
@@ -2888,7 +2910,7 @@ void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
 
 /* Start the teleport-in effect for an event unit. The interpreter supplies 1
  * as its second argument; this entry forwards only the unit ID. */
-void script_teleportin_event_instruction(s32 unit_id, s32 unused) {
+static void script_teleportin_event_instruction(s32 unit_id, s32 unused) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
@@ -2899,7 +2921,7 @@ void script_teleportin_event_instruction(s32 unit_id, s32 unused) {
 /* CallFunction 4: tint blue (red and green modulated by -0x1f) every displayed
  * unit whose initial team is not the blue one, skipping units whose ENTD lookup
  * reports -2. */
-void script_blue_remove_all_enemy_units(void) {
+static void script_blue_remove_all_enemy_units(void) {
     s32 i;
     s32 idx;
     s32 out_index;
@@ -2925,7 +2947,7 @@ void script_blue_remove_all_enemy_units(void) {
  *
  * The team test reads the current team byte (0x05), not the initial one at
  * 0x1ba. */
-void script_blue_remove_unit(s32 unit_id) {
+static void script_blue_remove_unit(s32 unit_id) {
     s32 runtime_id;
     s32 battle_index;
     unit_stats_t* unit;
@@ -3170,7 +3192,7 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
 /* Queue the renderer status flags for each of a unit's current statuses on
  * the main stack; the Draw event instruction runs this only for the Zalera
  * event. */
-void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
+static void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
     unit_stats_t* stats;
     s32 i;
     s32 mask;
@@ -3186,7 +3208,7 @@ void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
 }
 
 /* Resets every unit slot's status staging state and inflict-status mode to none. */
-void unit_clear_status_staging_data(void) {
+static void unit_clear_status_staging_data(void) {
     s32 i;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         g_unit_status_staging_data->state[i] = UNIT_STATUS_STAGING_NONE;
@@ -3283,7 +3305,7 @@ s32 unit_save_staged_status_data(s32 battle_id) {
  * Each changed status is applied through the main-thread dispatcher before
  * the unit graphics are refreshed. State 2 prevents applying the snapshot twice.
  */
-void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
+static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
     unit_stats_t* unit;
     s32 i;
     s32 byte_index;
@@ -3367,7 +3389,7 @@ void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
  * With restore clear, each resolved battle unit is snapshotted and its graphics are
  * refreshed on the main stack; otherwise the snapshot is replayed through
  * battle_unit_apply_staged_status_data. Follow-up flags add 40-frame waits. */
-void unit_update_staged_status_data(u16 unit_id, u16 restore) {
+static void unit_update_staged_status_data(u16 unit_id, u16 restore) {
     s32 filter_mode;
     s32 unit_index;
     s32 battle_id;
@@ -3482,7 +3504,7 @@ void script_inflict_status_thread(void) {
  * The unit's pending infliction and removal bytes are cleared, the one status bit
  * is set and status_resolve_unit_changes runs on the main stack with
  * removal_only. Nothing happens when the id resolves to no unit on the field. */
-void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
+static void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s32 removal_only) {
     s32 idx;
     unit_stats_t* unit;
     s32 i;
@@ -3516,7 +3538,7 @@ void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s
  *
  * Parameters: 16-bit unit id, stat selector (event_change_stats_e), then a
  * 16-bit delta. HP clamps to max HP and the other stats to 0-100. */
-void script_change_stats(const event_change_stats_parameters_t* parameters) {
+static void script_change_stats(const event_change_stats_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 unit_index;
@@ -3609,7 +3631,7 @@ void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
  * in frames.  A unit id above 0xff selects a group, so the unit-state loop
  * runs over all 21 unit indices.
  */
-void script_march_units(const event_march_parameters_t* parameters) {
+static void script_march_units(const event_march_parameters_t* parameters) {
     u16 runtime_id;
     s32 state;
     s32 unit_index;
@@ -3635,7 +3657,7 @@ void script_march_units(const event_march_parameters_t* parameters) {
  * A unit id above 0xff selects a group, so the unit-state loop runs over all
  * 21 unit indices.
  */
-void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
+static void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
     u16 unit_id;
     s32 state;
     s32 unit_index;
@@ -3664,7 +3686,7 @@ void script_set_units_movement_effect_suppression(const event_movement_effect_pa
  * EVENT_UNIT_GROUP_FIRST run all 21 unit ids through
  * script_filter_unit_id_by_mode. Nothing happens when a plain unit id does
  * not resolve. */
-void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters) {
+static void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters) {
     const event_unit_color_t* color;
     u16 unit_id;
     s32 out;
@@ -3691,7 +3713,7 @@ void script_color_unit_event_instruction(const event_color_unit_parameters_t* pa
  *
  * 0x80149698 stores a0 directly as a 16-bit value. The interpreter passes a
  * zero-extended 32-bit value; signed argument normalization is not part of this ABI. */
-void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) {
+static void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) {
     u16 unit_id;
     s32 mode;
     s32 i;
@@ -3740,7 +3762,7 @@ s32 unit_check_facing_relative_to_camera(s32 event_unit_id) {
  * tile center to pick one of 16 facings; the n-th matching unit gets
  * rotation time * n / 4.
  */
-void script_face_tile(const event_face_tile_parameters_t* parameters) {
+static void script_face_tile(const event_face_tile_parameters_t* parameters) {
     SVECTOR screen;
     SVECTOR tile;
     u16 unit_id;

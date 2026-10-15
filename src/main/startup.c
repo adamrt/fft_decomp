@@ -7,7 +7,7 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-void main_file_reset_cdrom_cpu_ram(void) {
+static void main_file_reset_cdrom_cpu_ram(void) {
     SetMem(2);
     CdInit();
     CdSetDebug(0);

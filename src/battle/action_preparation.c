@@ -15,6 +15,20 @@
 #include "fft/script.h"
 #include "psx/types.h"
 
+static s32 battle_action_check_and_consume_mp(unit_stats_t* unit);
+static void battle_action_finalize_draw_out_katana_result(
+    unit_stats_t* attacker, battle_strike_work_t* work, u8 hit_count);
+static void battle_action_init_current_ability_strike_data(unit_stats_t* unit);
+static s32 battle_action_select_auto_potion_item(unit_stats_t* unit);
+static s32 battle_action_store_counter_ability(unit_stats_t* unit, s8 skillset_id, s16 ability_id, s32 validate_target);
+static s32 battle_target_apply_reflect(unit_stats_t* unit);
+static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* origin);
+static void battle_target_select_random_tile_for_random_fire_abilities(void);
+static void battle_target_set_coordinates_for_ability(const unit_stats_t* acting, battle_strike_work_t* out);
+static s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limit);
+static s32 battle_unit_set_placement_and_validate(s32 unit_idx, unit_deployment_coordinates_t* src);
+static s32 battle_unit_validate_placement(s32 unit_idx);
+
 /* Build a unit's targeting-height record.
  *
  * For a non-Chocobo, another unit at the same x, y, and elevation supplies
@@ -408,7 +422,8 @@ s32 battle_action_init_current_data(s32 id) {
  * reactions follow the target policy stored in the reaction flags table.
  * Returns 0 only for a reaction that targets the attacker.
  */
-s32 battle_action_build_reaction_targets(s32 actor_id, battle_strike_work_t* work, s32* target_count, u8* target_ids) {
+static s32 battle_action_build_reaction_targets(
+    s32 actor_id, battle_strike_work_t* work, s32* target_count, u8* target_ids) {
     unit_stats_t* actor = &g_battle_unit_stats[actor_id];
     unit_stats_t* unit_base = g_battle_unit_stats;
     unit_stats_t* unit;
@@ -521,7 +536,7 @@ s32 battle_action_build_reaction_targets(s32 actor_id, battle_strike_work_t* wor
  * weapon-range actions use the weapon/direct resolver. Random-fire selection
  * runs only after successful ordinary targeting outside AI simulation.
  */
-s32 battle_target_calculate_map_for_action(const action_command_t* action, u8* flags_3) {
+static s32 battle_target_calculate_map_for_action(const action_command_t* action, u8* flags_3) {
     ability_secondary_data_t* ability;
     u8 menu_type;
     u8 flags_4;
@@ -709,7 +724,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
 /* Store the tile a strike lands on in the strike work record: the random-fire
  * tile picked for this strike, else the target unit's tile and level, else the
  * action's target tile. skip_empty_tile_effect is cleared. */
-void battle_target_set_coordinates_for_ability(const unit_stats_t* acting, battle_strike_work_t* out) {
+static void battle_target_set_coordinates_for_ability(const unit_stats_t* acting, battle_strike_work_t* out) {
     unit_stats_t* target;
 
     out->skip_empty_tile_effect = 0;
@@ -735,7 +750,8 @@ void battle_target_set_coordinates_for_ability(const unit_stats_t* acting, battl
  * katana did not break, the action becomes a pseudo-status hit. When the
  * katana broke, retail copies can_earn_experience onto itself (lbu/sb of the
  * same byte): a genuine no-op kept for the match. */
-void battle_action_finalize_draw_out_katana_result(unit_stats_t* attacker, battle_strike_work_t* work, u8 hit_count) {
+static void battle_action_finalize_draw_out_katana_result(
+    unit_stats_t* attacker, battle_strike_work_t* work, u8 hit_count) {
     u16 flags;
 
     if (g_main_action_menu_types_by_skillset[attacker->action_command.skillset_id] != ACTION_MENU_TYPE_KATANA_INVENTORY)
@@ -772,7 +788,7 @@ void battle_action_finalize_draw_out_katana_result(unit_stats_t* attacker, battl
  * straight into the global instead sinks the load past the store and drops
  * that instruction.
  */
-void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
+static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
     ability_secondary_data_t* data;
     u8 menu_type;
     u8 weapon_kind;
@@ -863,7 +879,7 @@ void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
  * The candidate list reuses the targeting panels' mark byte for the tile
  * index, so upper-level candidates are recognized by their list position.
  */
-void battle_target_select_random_tile_for_random_fire_abilities(void) {
+static void battle_target_select_random_tile_for_random_fire_abilities(void) {
     s32 count;
     s32 lower_count;
     s32 i;
@@ -907,7 +923,7 @@ void battle_target_select_random_tile_for_random_fire_abilities(void) {
  * ordering is enabled the list is insertion-sorted by Manhattan distance from
  * `origin`.
  */
-s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* origin) {
+static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* origin) {
     /* A byte flag test retains the original compound-condition scheduling. */
     s32 distance[BATTLE_UNIT_SLOT_COUNT];
     s32 tile;
@@ -969,7 +985,7 @@ s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* origin) {
  * non-Mime abilities consume MP; the effective cost is recorded first.
  * Preview skips only subtraction; earlier bookkeeping still runs.
  */
-s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
+static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
     s16 ability_id;
     u8 menu;
     s32 result;
@@ -1399,7 +1415,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
  * Black Magic skillset, at the tile as far beyond it as the caster is in front
  * of it. -1 when the caster stands on the unit's tile or that tile is off the
  * map or blocked. */
-s32 battle_target_apply_reflect(unit_stats_t* unit) {
+static s32 battle_target_apply_reflect(unit_stats_t* unit) {
     action_command_t* act;
     s32 x;
     s32 y;
@@ -1432,7 +1448,8 @@ s32 battle_target_apply_reflect(unit_stats_t* unit) {
  * target of skillset/ability and runs the attack preview.  Returns -1 when the
  * action itself fails, -2 when the acting unit's tile is not targetable and
  * -3 when the preview fails; 0 otherwise. */
-s32 battle_action_store_counter_ability(unit_stats_t* unit, s8 skillset_id, s16 ability_id, s32 validate_target) {
+static s32 battle_action_store_counter_ability(
+    unit_stats_t* unit, s8 skillset_id, s16 ability_id, s32 validate_target) {
     /* A byte flag test retains the original compound-condition scheduling. */
     action_command_t* action;
     unit_stats_t* acting_unit;
@@ -1477,7 +1494,7 @@ s32 battle_action_store_counter_ability(unit_stats_t* unit, s8 skillset_id, s16 
 /* The item Auto Potion uses: the first of Potion, Hi-Potion and X-Potion the
  * party has in stock, or -1 with none. A unit that did not start on the blue team
  * always uses a Potion. */
-s32 battle_action_select_auto_potion_item(unit_stats_t* unit) {
+static s32 battle_action_select_auto_potion_item(unit_stats_t* unit) {
     if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
         return ITEM_ID_POTION;
     }
@@ -1943,7 +1960,7 @@ s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit
  * slots 0..4 and clears the remaining ENTD slots. The target reloads each row
  * from g_main_unit_deployed_coords at its distinct uses.
  */
-s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
+static s32 battle_unit_init_deployed_units_data(unit_deployment_coordinates_t* formation, s32 is_red_team_debug) {
     s32 failures = 0;
     s32 weight = 1;
     s32 i;
@@ -2033,7 +2050,7 @@ s32 battle_unit_build_deployed_units_data(unit_deployment_coordinates_t* formati
  *
  * The caller at 0x8017f48c tests the returned value after this function's
  * final call to battle_unit_validate_placement. */
-s32 battle_unit_set_placement_and_validate(s32 unit_idx, unit_deployment_coordinates_t* src) {
+static s32 battle_unit_set_placement_and_validate(s32 unit_idx, unit_deployment_coordinates_t* src) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_idx];
 
     unit->position.higher_elevation = src->flags.upper_level;
@@ -2048,7 +2065,7 @@ s32 battle_unit_set_placement_and_validate(s32 unit_idx, unit_deployment_coordin
  * Returns -1 when the position is off the map, the tile is unwalkable, too
  * steep or deep for the unit's movement abilities, lava or an obstacle, or
  * already occupied by an earlier unit slot at the same elevation; 0 otherwise. */
-s32 battle_unit_validate_placement(s32 unit_idx) {
+static s32 battle_unit_validate_placement(s32 unit_idx) {
     /* A byte collision test retains the original single-mask branch. */
     unit_stats_t* unit = &g_battle_unit_stats[unit_idx];
     unit_stats_t* other;
@@ -2219,7 +2236,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
  * Mode 0xff empties the list and mode 0 restarts it with value; any other mode
  * adds value when it is not listed yet. Returns 1 when value's position in the
  * list is limit or more (no spritesheet is left for it), else 0. */
-s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limit) {
+static s32 battle_unit_add_unique_entd_spritesheet(s32 mode, s16 value, s32 limit) {
     s32 idx;
     s32 i;
 

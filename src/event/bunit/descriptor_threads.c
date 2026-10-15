@@ -179,7 +179,7 @@ u32 bunit_bits_read(s32 bit_count) {
  * (period + 2) and a soft reset on L1+R1+Start+Select. Both masks are
  * also mirrored to g_bunit_input_primary_repeat/g_bunit_input_secondary_repeat.
  */
-void bunit_input_update_controller(void) {
+static void bunit_input_update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;

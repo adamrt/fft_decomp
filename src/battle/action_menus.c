@@ -148,7 +148,7 @@ void battle_menu_open_free_cursor_help(void) {
  * those maps select on. A new count is stored and a map data load started; the
  * old count is put back when the load cannot start. Returns whether a reload is
  * in progress. */
-s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
+static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
     s32 crystal_count;
     s32 previous_count;
 
@@ -176,7 +176,7 @@ s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
 /* Between turns: when the crystal count calls for a map reload
  * (map_check_deep_dungeon_crystal_and_init_state), enter the Deep Dungeon
  * mesh-load state at animation speed 1. Returns 1 when the state changed. */
-s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
+static s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state() != 0) {
         g_battle_game_state = BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_LOAD;
         g_main_system_animation_speed = 1;
@@ -188,7 +188,7 @@ s32 battle_map_try_start_deep_dungeon_mesh_load(void) {
 
 /* As map_try_start_deep_dungeon_mesh_load, entering the mesh-finish state
  * instead: the crystal count check made when a unit's post-movement steps end. */
-s32 battle_map_refresh_deep_dungeon(void) {
+static s32 battle_map_refresh_deep_dungeon(void) {
     if (battle_map_check_deep_dungeon_crystal_and_init_state()) {
         g_battle_game_state = BATTLE_GAME_STATE_DEEP_DUNGEON_MESH_FINISH;
         g_main_system_animation_speed = 1;
@@ -203,7 +203,7 @@ s32 battle_map_refresh_deep_dungeon(void) {
  * low byte the unit; BATTLE_TURN_EVENT_NONE means nothing is queued. Unit- and
  * ability-ready events resolve an ability, while action-result events dispatch
  * the queued per-unit result. The meaning of 0x400 remains uncertain. */
-void battle_action_run_between_turn_events(void) {
+static void battle_action_run_between_turn_events(void) {
     battle_unit_t* unit;
     s32 action;
     s32 runtime_id;
@@ -338,7 +338,7 @@ void battle_state_enter_status_execute(void) {
 }
 
 /* Enter the menu-to-targeting state and restart the source unit's command. */
-void battle_state_restart_menu_to_targeting(void) {
+static void battle_state_restart_menu_to_targeting(void) {
     battle_unit_t* unit;
 
     battle_camera_disable_map_pan();
@@ -514,7 +514,7 @@ void battle_action_handle_move_command(void) {
 
 /* Enter the move-range-exception state, reached when the casting unit has no
  * reachable tile: opens targeting-prompt option 2 for the source unit. */
-void battle_state_enter_move_range_exception(void) {
+static void battle_state_enter_move_range_exception(void) {
     battle_unit_t* unit;
 
     battle_camera_disable_map_pan();
@@ -605,7 +605,7 @@ void battle_state_enter_unit_moving_setup(void) {
 
 /* Saves the unit's tile, facing, mount link and stood-on unit before it moves;
  * move_return_to_previous_map_square restores them. */
-void battle_unit_save_previous_state(battle_unit_t* unit) {
+static void battle_unit_save_previous_state(battle_unit_t* unit) {
     u8 x = unit->map_x;
     u8 y = unit->map_y;
     u8 z = unit->map_z;
@@ -737,7 +737,7 @@ void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing) {
 /* Report a level up recorded in the unit's rewards: message 0x183f for three
  * seconds, the level-up animation and effect, the cursor on the unit and the
  * level-up tune. Returns 1 after reporting one, otherwise 0. */
-s32 battle_action_report_level_up(battle_unit_t* unit) {
+static s32 battle_action_report_level_up(battle_unit_t* unit) {
     if (unit->strike.action_rewards.level_for_display != 0) {
         u8 battle_id;
         text_set_message_duration_frames(0xB4);
@@ -755,7 +755,7 @@ s32 battle_action_report_level_up(battle_unit_t* unit) {
 /* Report a job level up recorded in the unit's rewards: message 0x183e for three
  * seconds, the level-up animation and effect, the cursor on the unit and the job
  * level-up tune. Returns 1 after reporting one, otherwise 0. */
-s32 battle_action_report_job_level_up(battle_unit_t* unit) {
+static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
     if (unit->strike.action_rewards.job_level_for_display != 0) {
         u8 battle_id;
         text_set_message_duration_frames(0xB4);
@@ -1025,7 +1025,7 @@ void battle_unit_face_toward_cursor(battle_unit_t* unit) {
 /* If the unit has no attack facing yet (0xffff), seed it from the unit's
  * current facing so the attack animation turns towards the same direction.
  * The target reads attack_facing with a signed `lh`, hence the s16 access. */
-void battle_unit_save_facing_before_attack(battle_unit_t* unit) {
+static void battle_unit_save_facing_before_attack(battle_unit_t* unit) {
     s16 facing;
     char unused[16];
 
@@ -1095,7 +1095,7 @@ void battle_unit_face_towards_action_target(battle_unit_t* unit, battle_unit_t* 
  * battle_unit_set_tile_position. For a mounted pair the partner record's facing
  * is copied too, without a null test, and the tile position is stored a second
  * time under the unit's own id. */
-void battle_unit_restore_facing_after_attack(battle_unit_t* unit) {
+static void battle_unit_restore_facing_after_attack(battle_unit_t* unit) {
     battle_unit_t* mount;
     s16 rot;
     s32 unused[4];
@@ -1142,7 +1142,7 @@ void battle_unit_restore_target_facings_after_attack(battle_unit_t* unit) {
 }
 
 /* battle_unit_restore_facing_after_attack for every runtime id 0..15. */
-void battle_unit_restore_all_facings_after_attack(void) {
+static void battle_unit_restore_all_facings_after_attack(void) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
@@ -1282,7 +1282,7 @@ s32 battle_action_resume_attack_phase_control(void) {
  * The 11-way dispatch really is a jump table in the target (at 0x80067548),
  * which is why the .ld places a .rodata output section there.
  */
-void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* runtime) {
+static void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* runtime) {
     action_data_t* action;
     s32 i;
     s32 queued;
@@ -1397,7 +1397,7 @@ void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* runtime) {
 
 /* Empty the post-effect message queue, then queue the messages of every target of
  * the casting unit. */
-void battle_action_build_targets_post_action_message(void) {
+static void battle_action_build_targets_post_action_message(void) {
     battle_unit_t* base;
     s32 i;
 
@@ -1429,7 +1429,7 @@ void battle_action_show_caster_post_effect_messages(void) {
  * The result code is kept in pending_attack_result; -1 (a rider killed on its
  * mount) finds a relocation tile and moves the unit there. The post-action
  * display and the display update follow. */
-void battle_unit_update_attack_result_animation(battle_unit_t* unit) {
+static void battle_unit_update_attack_result_animation(battle_unit_t* unit) {
     unit->pending_attack_result = battle_action_store_target_stats_pointer_data(unit->stats->battle_id);
     if (unit->pending_attack_result == -1) {
         battle_unit_find_relocation_tile(unit->stats->battle_id, &unit->dismount);

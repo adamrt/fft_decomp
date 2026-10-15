@@ -15,6 +15,21 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void card_save_build_buffer(s32 slot);
+static void card_save_build_file_header(s32 slot, s32 level, card_save_header_t* header);
+static void card_save_build_slot_description(s32 mode, u8* destination);
+static void card_save_init_menu_state(void);
+static s32 card_save_init_occupied_slot_selection(void);
+static void card_save_render_slot_text(s32 slot);
+static void card_save_update_and_draw_slot_list(u16 input);
+static void card_save_update_card_slot_selection(void);
+static void card_save_update_initial_prompt(void);
+static void card_save_update_slot_playtime(s32 slot);
+static void card_save_update_slot_scan(void);
+static void card_save_update_slot_scan_result(void);
+static void card_save_update_slot_scroll(s32 selection);
+static void card_save_update_slot_write(s32 slot);
+
 void card_save_clear_selection_indices(void) {
     g_card_menu_selection_index = -1;
     g_card_save_slot_index = -1;
@@ -30,7 +45,7 @@ void card_save_clear_selection_indices(void) {
  * entries 4..15 are copied again as a 12-color row. Sets the menu state to
  * the initial prompt and suspends thread 15.
  */
-void card_save_init_menu_graphics(void) {
+static void card_save_init_menu_graphics(void) {
     RECT rect;
     palette_t image_data;
 
@@ -204,7 +219,7 @@ void card_save_run_menu(s32 unused) {
 /* Save-menu state CARD_SAVE_MENU_INITIAL_PROMPT: after 40 frames, runs the
  * "save the game?" menu. Choosing row 0 goes on to card selection; anything
  * else leaves the screen. */
-void card_save_update_initial_prompt(void) {
+static void card_save_update_initial_prompt(void) {
     if (g_card_save_initial_prompt_thread_state == 0) {
         if (g_card_save_initial_prompt_timer < 40) {
             g_card_save_initial_prompt_timer++;
@@ -235,7 +250,7 @@ void card_save_update_initial_prompt(void) {
  * forgets the last used save slot when the card slot changed, and starts the
  * scan.
  */
-void card_save_update_card_slot_selection(void) {
+static void card_save_update_card_slot_selection(void) {
     if (g_card_save_slot_selection_thread_state == 0) {
         g_card_save_slot_selection_thread_state = 1;
         g_card_save_list_cursor_index = 0;
@@ -273,7 +288,7 @@ void card_save_update_card_slot_selection(void) {
  * selection. With no notice the slot list is reset to its first row and the
  * menu moves on to slot selection.
  */
-void card_save_update_slot_scan_result(void) {
+static void card_save_update_slot_scan_result(void) {
     s32 index;
     s32 all_empty;
 
@@ -329,7 +344,7 @@ void card_save_update_slot_scan_result(void) {
  * used slot. On failure the error notice stays until Circle or Cross, which
  * returns the menu to the card scan.
  */
-void card_save_update_slot_write(s32 slot) {
+static void card_save_update_slot_write(s32 slot) {
     s32 write_result;
     s32 header_result;
     s32 unused_18;
@@ -412,7 +427,7 @@ void card_save_update_slot_write(s32 slot) {
  * per-128-byte-block parity bit is appended through the primary bitstream
  * writer.
  */
-void card_save_build_buffer(s32 slot) {
+static void card_save_build_buffer(s32 slot) {
     s32 i;
     s32 j;
     s32 unused_18;
@@ -507,7 +522,7 @@ void card_save_build_buffer(s32 slot) {
 
 /* Reset the save list's scroll and cursor state and fill the 0x1e80-byte
  * save buffer with 0xff. */
-void card_save_init_menu_state(void) {
+static void card_save_init_menu_state(void) {
     g_card_save_list_scroll_base_y = 0x18;
     g_card_save_list_scroll_anim_offset = 0;
     g_card_save_list_top_row = 0;
@@ -521,7 +536,7 @@ void card_save_init_menu_state(void) {
 /* Store save slot `slot`'s play time as hours (capped at 99), minutes and
  * seconds from the save buffer's elapsed seconds, or zeros for a slot that
  * is not occupied. */
-void card_save_update_slot_playtime(s32 slot) {
+static void card_save_update_slot_playtime(s32 slot) {
     s32 component;
     s32 unused_04;
     s32 unused_08;
@@ -551,7 +566,7 @@ void card_save_update_slot_playtime(s32 slot) {
 }
 
 /* Dispatched in scanning state by card_save_run_menu. */
-void card_save_update_slot_scan(void) {
+static void card_save_update_slot_scan(void) {
     s32 result;
     s32 status;
     s32 unused_18;
@@ -780,7 +795,7 @@ void card_save_update_slot_scan(void) {
  * month name, a space, the two day digits and the location name at x 0x58.
  * Digits are stored as glyphs 0..9 and each line ends with 0xfe.
  */
-void card_save_build_slot_description(s32 mode, u8* destination) {
+static void card_save_build_slot_description(s32 mode, u8* destination) {
     s32 index;
     u8 stack_padding[4];
     const u8* source;
@@ -832,7 +847,7 @@ void card_save_build_slot_description(s32 mode, u8* destination) {
 /* Render save slot `slot`'s two-line description into its 0x32 x 0x20 strip
  * of VRAM: slots 0..5 at x 0x100, 6..10 at x 0x1c0 and 11..14 at x 0x180,
  * 0x20 rows apart. */
-void card_save_render_slot_text(s32 slot) {
+static void card_save_render_slot_text(s32 slot) {
     RECT rect;
 
     if (slot < 6) {
@@ -857,7 +872,7 @@ void card_save_render_slot_text(s32 slot) {
 /* Put the save list cursor on the last used slot and return the number of
  * available slots. The scroll step is then run until it has rested for ten
  * calls in a row, so the list opens already scrolled to the cursor. */
-s32 card_save_init_occupied_slot_selection(void) {
+static s32 card_save_init_occupied_slot_selection(void) {
     s32 slot;
     s32 occupied_count;
 
@@ -889,7 +904,7 @@ s32 card_save_init_occupied_slot_selection(void) {
 
 /* Input is accepted in selection state; rendering also runs
  * during the adjacent confirmation/write states. */
-void card_save_update_and_draw_slot_list(u16 input) {
+static void card_save_update_and_draw_slot_list(u16 input) {
     s32 index;
     s32 value;
     s32 remaining;
@@ -1109,7 +1124,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
  * so far, growing by 4 a call; after one row height (48) it folds into
  * g_card_save_list_scroll_base_y and returns to 0.
  */
-void card_save_update_slot_scroll(s32 selection) {
+static void card_save_update_slot_scroll(s32 selection) {
     if (g_card_save_list_scroll_anim_offset == 0) {
         if (selection < g_card_save_list_top_row) {
             g_card_save_list_scroll_anim_offset = 4;
@@ -1138,7 +1153,7 @@ void card_save_update_slot_scroll(s32 selection) {
  * the 1-based save slot number and the play time as full-width Shift-JIS
  * digits, then the icon selected by the slot. `level` is not read.
  */
-void card_save_build_file_header(s32 slot, s32 level, card_save_header_t* header) {
+static void card_save_build_file_header(s32 slot, s32 level, card_save_header_t* header) {
     s32 value;
     s32 digit;
     s32 divisor;

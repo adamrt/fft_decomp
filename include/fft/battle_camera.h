@@ -22,7 +22,6 @@ extern SVECTOR g_camera_render_state;
 void battle_camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void battle_camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination);
 void battle_camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVECTOR* destination);
-void battle_camera_init_defaults(void);
 void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords);
 void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation);
 void battle_camera_update_matrices(
@@ -65,18 +64,12 @@ extern VECTOR g_camera_real_coord_delta;
 extern VECTOR g_camera_saved_real_coords;
 extern VECTOR g_camera_step_vector;
 
-void battle_camera_calculate_acting_unit_vector_normal(void);
-s32 battle_camera_calculate_cursor_tile_vector_normal(void);
 VECTOR* battle_camera_get_current_real_coords(void);
 s32 battle_camera_is_active(void);
 void battle_camera_restore_current_real_coords(void);
 void battle_camera_save_current_real_coords(void);
-s32 battle_camera_scale_cursor_tile_vector(void);
 void battle_camera_set_current_real_coords(const VECTOR* coords);
-void battle_camera_shift_acting_unit_vector(void);
-void battle_camera_step_focus_toward_cursor_tile(s16 height);
 /* Some routines address these components as separate linker symbols. */
-void battle_camera_step_real_coords_toward_target(const battle_unit_t* target);
 void battle_camera_update_cursor_tile_vector(void);
 void battle_camera_update_real_coord_animation(void);
 void battle_camera_update_vector_from_game_state(void);
@@ -114,18 +107,11 @@ extern s32 g_camera_rotation_increment;
 extern s32 g_camera_yaw_band;
 extern s32 g_camera_yaw_target;
 
-void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out);
-void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset);
 SVECTOR* battle_camera_get_rotation(void);
-void battle_camera_request_rotation(s32 angle);
 void battle_camera_restore_rotation(void);
-void battle_camera_rotate_left(s32 target_angle);
-void battle_camera_rotate_right(s32 target_angle);
 void battle_camera_rotate_when_unit_tile_not_visible(const struct battle_unit* unit);
 void battle_camera_save_rotation(void);
 void battle_camera_set_rotation(const SVECTOR* rotation);
-void battle_camera_start_rotation_left(s32 target_angle);
-void battle_camera_start_rotation_right(s32 target_angle);
 void battle_camera_update_rotation(void);
 void battle_camera_update_rotation_animation(void);
 
@@ -148,7 +134,6 @@ enum {
 extern camera_step_action_e g_camera_tilt_action;
 extern s32 g_camera_tilt_increment;
 
-void battle_camera_toggle_tilt(void);
 void battle_camera_update_tilt(void);
 
 /* zoom */
@@ -169,7 +154,6 @@ VECTOR* battle_camera_get_zoom(void);
 void battle_camera_restore_zoom(void);
 void battle_camera_save_zoom(void);
 void battle_camera_set_zoom(const VECTOR* zoom);
-void battle_camera_toggle_zoom(void);
 void battle_camera_update_zoom(void);
 void battle_camera_update_zoom_animation(void);
 
@@ -180,16 +164,10 @@ extern SVECTOR g_camera_script_rotation;
 extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
 extern VECTOR g_camera_script_vector;
 
-void battle_camera_execute_angle_command(s32 command, s32 target, s32 duration, const SVECTOR* angles);
-void battle_camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset);
-void battle_camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VECTOR* zoom);
-
 /* effect tracks */
 void battle_camera_advance_effect_tracks(s16 frame);
-void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset);
 void battle_camera_calculate_relative_offset_by_1(const SVECTOR* input, SVECTOR* output);
 void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output);
-s32 battle_camera_find_active_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame);
 void battle_camera_start_effect_keyframe_moves(s16 frame);
 void battle_camera_update_effect_rotation_and_zoom(void);
 

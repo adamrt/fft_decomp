@@ -10,6 +10,16 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_gfx_prepare_play_time_display(void);
+static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step);
+static void wldcore_menu_push_sound_novel_history_level(void);
+static void wldcore_menu_push_sound_novel_quit_level(void);
+static void wldcore_menu_push_sound_novel_resume_level(s32 mode);
+static void wldcore_menu_push_unexplored_land_detail_level(s32 value);
+static void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown);
+static void wldcore_proposition_push_cancel_confirm_level(s32 proposition);
+static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index);
+
 /* The switch jump table lives at .rodata 0x800671dc (0x18 bytes). */
 
 /*
@@ -86,7 +96,7 @@ s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_leve
 
 /* Proposition job category of a job: 0..19 for Squire..Mime, 22 for the
  * special jobs below Squire and 21 for anything above Mime (monsters). */
-s32 wldcore_map_job_id_to_category_index(s32 job_id) {
+static s32 wldcore_map_job_id_to_category_index(s32 job_id) {
     if (job_id < JOB_ID_SQUIRE) {
         return 22;
     }
@@ -488,7 +498,7 @@ void wldcore_menu_push_countdown_level(void) {
 /* Show the countdown's next message and count it off; the last one also
  * fades the music out and moves the countdown to
  * WLDCORE_COUNTDOWN_PHASE_LAST_MESSAGE with the timer cleared. */
-void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown) {
+static void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown) {
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, countdown->current, 0);
     countdown->current++;
     countdown->remaining--;
@@ -725,7 +735,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
     }
 }
 
-void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
+static void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
     RECT bounds;
     u8 unused[0x30];
     s32 index;
@@ -932,7 +942,7 @@ void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t
  * (wldcore_sound_novel_restore_saved_state), blocks Cross, Square and Select
  * for the menu and starts the screen fade.
  */
-void wldcore_menu_push_sound_novel_level(s32 argument) {
+static void wldcore_menu_push_sound_novel_level(s32 argument) {
     RECT bounds;
     point32_t origin;
     world_animated_render_record_t* window1;
@@ -1204,7 +1214,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
  * fade state is written through a pointer, which keeps the
  * target's register base for the offset-0 32-bit flags. The unused array
  * preserves the target's 0x68-byte frame. */
-void wldcore_menu_push_sound_novel_quit_level(void) {
+static void wldcore_menu_push_sound_novel_quit_level(void) {
     RECT bounds;
     u8 unused[0x28];
     point32_t* base;
@@ -1443,7 +1453,7 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
 
 /* Restore the HUD position and display the current play time.
  * Cache the flags and time before publishing the display fields. */
-void wldcore_gfx_prepare_play_time_display(void) {
+static void wldcore_gfx_prepare_play_time_display(void) {
     u32 flags;
     s32 hours;
     s32 minutes;
@@ -1485,7 +1495,7 @@ void wldcore_gfx_prepare_play_time_display(void) {
  * references, so the scheduler keeps each load after the preceding level
  * store. `top` and `depth` are separate locals for the target's register
  * assignment, and `unused` preserves the 0x50-byte frame. */
-void wldcore_menu_push_sound_novel_history_level(void) {
+static void wldcore_menu_push_sound_novel_history_level(void) {
     RECT bounds;
     u8 unused[8];
     world_animated_render_record_t* windows;
@@ -1719,7 +1729,7 @@ void wldcore_menu_step_sound_novel_history_level(wldcore_menu_sound_novel_histor
 }
 
 /* Skip -1, otherwise draw the history text in text section 17 (0x8800). */
-void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index) {
+static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index) {
     /* Named text-array access reverses the final address-add operands. */
     s32 text_id = ((s32*)level)[index + level->scroll];
 
@@ -1843,7 +1853,7 @@ void wldcore_list_handle_unexplored_lands_input(wldcore_menu_panel_level_t* leve
  *
  * `unused` reproduces eight bytes of locals below the date bytes that the
  * target never touches. */
-void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
+static void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
     s32 index;
     point32_t* base;
     s32 coordinate_mode = 1;
@@ -2293,7 +2303,7 @@ void wldcore_menu_step_treasure_detail_level(wldcore_menu_variable_detail_level_
  * byte below the progress table, and no caller reads that result. Returns 0
  * once step reaches 50, otherwise 1.
  */
-s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
+static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
     u8* pixels;
     u16* order;
     u8* buffer;
@@ -2368,7 +2378,7 @@ s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
  * two offset temporaries keep GCC from folding base_x - (width - 0x3e) into
  * (base_x + 0x3e) - width, and each render-record base pointer is its own
  * local so the pointer shares the register of the constant it dies into. */
-void wldcore_menu_push_sound_novel_resume_level(s32 mode) {
+static void wldcore_menu_push_sound_novel_resume_level(s32 mode) {
     GsIMAGE image;
     RECT bounds;
     point32_t clut;

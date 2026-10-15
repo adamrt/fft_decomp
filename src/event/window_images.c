@@ -11,6 +11,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect);
+
 /* Copy a nonempty byte sequence from source to destination.
  *
  * The target performs the first byte copy before testing the decremented
@@ -33,7 +35,7 @@ void mem_copy_bytes_nonempty(void* destination, const void* source, s32 count) {
 }
 
 #ifdef FFT_BATTLE
-s32 battle_gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride) {
+static s32 battle_gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride) {
     s32 mask;
     s32 value;
 
@@ -58,7 +60,7 @@ s32 battle_gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride
  * which is dead there because `data` has already been copied out of it, so the
  * parity has to be assigned to `mask` rather than tested inline; a fresh local
  * or an inline `if (!(index & 1))` puts the `andi` in the return register. */
-void battle_gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value) {
+static void battle_gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value) {
     s32 mask;
     u8* destination;
 
@@ -79,7 +81,7 @@ void battle_gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s3
 #ifdef FFT_BATTLE
 /* Mirrors a packed nibble rectangle horizontally, swapping each nibble with its opposite.
  * WORLD links its own body under this name, with the nibble helpers inlined. */
-void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region) {
+static void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region) {
     s32 row;
     s32 col;
     s32 value;
@@ -155,7 +157,7 @@ static inline void world_set_4bpp_pixel(u8* pixels, s32 x, s32 y, s32 stride, s3
 /* Mirrors a rectangle of a 4bpp image horizontally, swapping pixels from
  * both ends of each row toward the middle. BATTLE links its own body under
  * this name, calling out-of-line nibble helpers. */
-void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
+static void gfx_mirror_4bpp_rect_variant(u8* pixels, const glyph_blit_t* rect) {
     s32 row;
     s32 col;
     s32 right;

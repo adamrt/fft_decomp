@@ -88,6 +88,9 @@ between type blocks; headers include their own dependencies.
   (check-config enforces it both ways); name other alternates by what
   distinguishes them. Preserve game terminology and evidence-based unknown
   names rather than guessing.
+- A function used only inside its own unit is `static` and appears in no
+  header; when the file uses it before its definition, a static prototype
+  follows the includes. Headers declare only what other files use.
 - Use snake_case, `_t` for struct typedefs, `_e` for enum typedefs, uppercase
   enumerators, and `_init_`. Use decimal for counts/ordinary enum values and
   hex for flags and encoded values. Header guards have no `FFT_` prefix.

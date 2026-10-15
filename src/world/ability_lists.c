@@ -9,28 +9,30 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-s32 world_ability_is_category_action(s32 unused_row) {
+static s32 world_ability_run_view_list(void);
+
+static s32 world_ability_is_category_action(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_ACTION;
 }
 
 /* Sibling of world_ability_is_category_action (category 0). */
-s32 world_ability_is_category_reaction(s32 unused_row) {
+static s32 world_ability_is_category_reaction(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_REACTION;
 }
 
 /* Sibling of world_ability_is_category_action (category 0). */
-s32 world_ability_is_category_support(s32 unused_row) {
+static s32 world_ability_is_category_support(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_SUPPORT;
 }
 
 /* Sibling of world_ability_is_category_action (category 0). */
-s32 world_ability_is_category_movement(s32 unused_row) {
+static s32 world_ability_is_category_movement(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_MOVEMENT;
 }
 
 /* Report whether ability entry `index` counts as already learned: the learned
  * flag in menu 12, otherwise the inverse of the disabled flag. */
-s32 world_menu_is_learn_ability_learned(s32 index) {
+static s32 world_menu_is_learn_ability_learned(s32 index) {
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ABILITY_LEARN) {
         return g_menu_ability_entries[index] & ABILITY_LIST_ENTRY_LEARNED;
     }
@@ -212,7 +214,7 @@ void world_menu_run_view_abilities(void) {
  * cursor rebuilds the list; cancel returns 0 (back to the job list) and
  * confirm returns -1 (close), otherwise 1.
  */
-s32 world_ability_run_view_list(void) {
+static s32 world_ability_run_view_list(void) {
     s32 unused[160];
     RECT rect;
     s16 x;

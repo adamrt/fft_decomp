@@ -386,8 +386,6 @@ extern s16 g_map_destruction_wait_state;
 
 /* The raw weather script variable, before indoor and snow flags apply. */
 s32 map_get_weather(void);
-void map_store_selected_tile_data(void);
-void map_wait_for_refresh(void);
 
 /* map state */
 extern map_selected_tile_t g_map_selected_tile_data;

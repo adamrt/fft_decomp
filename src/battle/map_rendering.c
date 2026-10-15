@@ -13,7 +13,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-void battle_map_polygon_flag_command(s32 command) {
+static void battle_map_init_weather_particles(map_weather_command_e command);
+static void battle_map_update_mesh_part_animations(void);
+static void battle_map_update_texture_animations(void);
+
+static void battle_map_polygon_flag_command(s32 command) {
     s32 i;
 
     switch (command) {
@@ -87,7 +91,7 @@ void battle_map_polygon_flag_command(s32 command) {
  * Each backup copy rereads the working field; a chained assignment assigns the
  * loop pointers to different registers.
  */
-void battle_map_set_light_matrices(MATRIX* first, MATRIX* second) {
+static void battle_map_set_light_matrices(MATRIX* first, MATRIX* second) {
     s32 i;
     s32 j;
 
@@ -1937,7 +1941,7 @@ void battle_map_run_weather_command(map_weather_command_e command) {
  * pointer is formed from one combined byte offset: the target adds the
  * buffer/primitive offset it already keeps for the field stores to the pool
  * base instead of reusing the SetSemiTrans argument. */
-void battle_map_init_weather_particles(map_weather_command_e command) {
+static void battle_map_init_weather_particles(map_weather_command_e command) {
     RECT rects[3];
     s16 sprite;
     s16 tile;
@@ -2076,7 +2080,7 @@ s32 battle_map_configure_effect_data_state(map_effect_data_command_e command) {
  *
  * A channel with none of the three curve bits is not recomputed, yet its start
  * value is still added to it every frame. */
-void battle_map_update_mesh_part_animations(void) {
+static void battle_map_update_mesh_part_animations(void) {
     s32 i;
     u8 next;
     u8 anim;
@@ -2508,7 +2512,7 @@ s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, 
  * Only the low byte of g_main_system_animation_speed is read (lbu), and the start call
  * passes the color range unmasked, as the target does.
  */
-void battle_map_update_texture_animations(void) {
+static void battle_map_update_texture_animations(void) {
     s32 i;
 
     for (i = 0; i < MAP_TEXTURE_ANIMATION_COUNT; i++) {
@@ -2757,7 +2761,7 @@ void battle_map_update_texture_animations(void) {
  * entry, extra entries skipped). The caller at 0x800f32e4 stops at type 0
  * before calling, so the result for type 0 or an unknown type is never used;
  * `next` is left unset there, which is why the target returns $a1. */
-map_state_record_t* battle_map_load_saved_state_record(map_state_record_t* record) {
+static map_state_record_t* battle_map_load_saved_state_record(map_state_record_t* record) {
     map_state_record_t* next;
     u32 count;
     u32 i;

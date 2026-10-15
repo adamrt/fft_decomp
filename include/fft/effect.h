@@ -392,7 +392,6 @@ typedef char assert_effect_dome_mesh_work_size[sizeof(effect_dome_mesh_work_t) =
  * the row, the lattice row (0-8) the column. */
 extern u32 g_effect_dome_mesh_brightness_table[][9];
 
-void effect_dome_mesh_load_translated_vertex(s32 group, s32 point, const VECTOR* offset, SVECTOR* output);
 s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* map vertex particles */

@@ -7,6 +7,14 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 world_formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor);
+static void world_formation_draw_cursor_trail(point16_t* cursor);
+static void world_formation_draw_egg_sprite(
+    point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index);
+static void world_formation_draw_graphics_below_sprite(
+    s16 unit_index, s32 mode, s32 x, s32 y, rgb24_t* color, s32 (*get_value)(s32), s32 enabled, s32 priority);
+static void world_formation_reset_slots_and_frame_tpages(void);
+
 void world_menu_toggle_preview_stats_window(s32 flag) {
     s32 stored;
 
@@ -91,7 +99,7 @@ void world_formation_stop_menu_threads(void) {
 }
 
 /* Pick the formation unit's stat by the current stat-select mode; `value` is unset for any other mode. */
-s32 world_get_formation_unit_stat_by_mode(s32 unit_index) {
+static s32 world_get_formation_unit_stat_by_mode(s32 unit_index) {
     s32 value;
 
     if (g_world_formation_stat_display_mode == MENU_UNIT_READOUT_HP) {
@@ -104,38 +112,38 @@ s32 world_get_formation_unit_stat_by_mode(s32 unit_index) {
     return value;
 }
 
-s32 world_formation_get_unit_level(s32 unit_id) {
+static s32 world_formation_get_unit_level(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->status.level;
 }
 
-s32 world_formation_get_unit_experience(s32 unit_id) {
+static s32 world_formation_get_unit_experience(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->status.experience;
 }
 
-s32 world_formation_get_unit_brave(s32 unit_id) {
+static s32 world_formation_get_unit_brave(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->identity.brave;
 }
 
-s32 world_formation_get_unit_faith(s32 unit_id) {
+static s32 world_formation_get_unit_faith(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->identity.faith;
 }
 
 /* An egg's birthday value packs two counts: returns the bits above the low
  * nibble (birthday >> 4) minus the low nibble. */
-s32 world_formation_get_unit_egg_hatch_progress(s32 unit_id) {
+static s32 world_formation_get_unit_egg_hatch_progress(s32 unit_id) {
     world_unit_t* unit = g_world_unit_pointers[unit_id];
     s32 low = unit->birthday & 0xF;
     return (unit->birthday >> 4) - low;
 }
 
-s32 world_formation_get_unit_egg_hatch_total(s32 unit_id) {
+static s32 world_formation_get_unit_egg_hatch_total(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->birthday >> 4;
 }
 
 /* Returns 1 when the selected unit is in the two upper visible rows of the grid at
  * `scroll_position` (after the scroll in progress), which puts the unit banner at the bottom
  * of the screen. Returns 0 while browsing a unit that is not an egg. */
-s32 world_formation_is_selected_unit_in_upper_rows(s32 scroll_position) {
+static s32 world_formation_is_selected_unit_in_upper_rows(s32 scroll_position) {
     s32 result = 1;
 
     if (g_world_formation_unit_browse_enabled == 0
@@ -169,7 +177,7 @@ s32 world_formation_is_selected_unit_in_upper_rows(s32 scroll_position) {
     return result;
 }
 
-void world_formation_step_scroll_velocity(s8* velocity, s8* position) {
+static void world_formation_step_scroll_velocity(s8* velocity, s8* position) {
     s8 next;
 
     if (*velocity == 0) {
@@ -607,7 +615,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
 /* Distance-based falloff: `base` minus the (y-stretched) distance from the
  * formation cursor to (x, y), clamped so it never drops below `floor`.
  * `dx` also holds the result. */
-s32 world_formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor) {
+static s32 world_formation_cursor_distance_falloff(s32 x, s32 y, s32 base, s32 floor) {
     s32 dx;
     s32 dy;
 
@@ -683,7 +691,7 @@ void world_formation_draw_background_tiles(s32 y, s32 unused_1) {
 
 /* Empty the eight cursor trail points (x = -1) and set the texture pages of
  * the cursor sprite and its shadow. */
-void world_formation_reset_slots_and_frame_tpages(void) {
+static void world_formation_reset_slots_and_frame_tpages(void) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -706,7 +714,7 @@ void world_formation_reset_slots_and_frame_tpages(void) {
  * struct-pointer and s16-pointer accesses to the newest point selects the
  * target's address registers.
  */
-void world_formation_draw_cursor_trail(point16_t* cursor) {
+static void world_formation_draw_cursor_trail(point16_t* cursor) {
     rgb24_t rgb;
     s32 i;
     s32 delta;
@@ -799,7 +807,7 @@ void world_formation_draw_cursor_trail(point16_t* cursor) {
 
 /* Draw the formation units and the backdrop or egg decoration for each
  * visible slot. */
-void world_formation_draw_unit_slots(point16_t* positions, s32 shade) {
+static void world_formation_draw_unit_slots(point16_t* positions, s32 shade) {
     rgb24_t sprite_rgb;
     rgb24_t backdrop_rgb;
     s32 i;
@@ -1084,7 +1092,7 @@ void world_formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* r
  * (hatch countdown; see world_formation_get_unit_egg_hatch_progress) as
  * hatch_countdown; the second layer is drawn only while it is below 2.
  */
-void world_formation_draw_egg_sprite(
+static void world_formation_draw_egg_sprite(
     point16_t* pos, s32 palette, const rgb24_t* rgb, s32 hatch_countdown, s32 ot_index) {
     g_world_formation_shadow_egg_sprites[2].position.x = g_world_formation_shadow_egg_sprites[1].position.x
         = pos->x + 0x14;
@@ -1123,7 +1131,7 @@ void world_formation_draw_sprite_with_shadow(const oriented_quad_t* pos, const r
 }
 
 /* Returns 1 when x and y both lie in 0..254. */
-s32 world_coords_fit_in_byte(s32 x, s32 y) {
+static s32 world_coords_fit_in_byte(s32 x, s32 y) {
     if (x >= 0 && x < 0xff) {
         return y >= 0 && y < 0xff;
     }
@@ -1142,7 +1150,7 @@ s32 world_coords_fit_in_byte(s32 x, s32 y) {
  * before color as the target's register assignment requires. top is reused
  * for y + 45 in layouts 3 and 4 so it shares s4 as in the target.
  */
-void world_formation_draw_graphics_below_sprite(
+static void world_formation_draw_graphics_below_sprite(
     s16 unit_index, s32 mode, s32 x, s32 y, rgb24_t* color, s32 (*get_value)(s32), s32 enabled, s32 priority) {
     RECT unused_rect;
     RECT rect;

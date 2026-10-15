@@ -10,6 +10,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_menu_push_proposition_report_level(s32 argument);
+static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t* level);
+static void wldcore_proposition_prepare_report(s32 proposition_index);
+static void wldcore_proposition_push_result_level(s32 proposition);
+static s32 wldcore_proposition_select_report_speaker(s32 index);
+static s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* state, s32 message);
+
 /* Pushes menu level type 0xd: a cursor window, an upper window, a 0x28x0x30
  * text record (0xb805) and a text record listing text 0xb84e, the errand
  * name (0xf7ff + g_wldcore_selected_proposition_row[0].name_text), text 0xb821 and
@@ -445,7 +452,7 @@ void wldcore_proposition_push_send_unit_level(void) {
  *
  * Units already assigned to a proposition, absent roster entries, monsters,
  * and special-character sprite sets are excluded. */
-s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t* level) {
+static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t* level) {
     s32 i;
     s32 j;
     party_unit_t* unit;
@@ -488,7 +495,7 @@ s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t
     return i;
 }
 
-void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
+static void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
     point32_t point;
     s32 index;
     s32 i;
@@ -511,7 +518,8 @@ void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
  * x 0x280 + 0x40 per 40 portraits + 16 * (code % 4), y 0x1F0 +
  * (code % 40) / 4), at full brightness, and show the record. The first
  * argument is not read. */
-void wldcore_window_load_party_unit_sprite_record(wldcore_menu_send_unit_level_t* unused, s32 party_index, s32 index) {
+static void wldcore_window_load_party_unit_sprite_record(
+    wldcore_menu_send_unit_level_t* unused, s32 party_index, s32 index) {
     POLY_FT4 poly;
     s32 code;
     s32 cell;
@@ -545,7 +553,7 @@ void wldcore_window_load_party_unit_sprite_record(wldcore_menu_send_unit_level_t
  *
  * The target's frame holds two 32-bit values no instruction touches, reproduced by
  * the unused point. */
-void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit_level_t* level) {
+static void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit_level_t* level) {
     point32_t unused;
     u32 buttons;
     s32 unit;
@@ -607,7 +615,7 @@ void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit_level_
 /* Build the status panel data of party member `party_index` and start the
  * three unit panel threads on it (status banner, numeric editor, equipment
  * and ability panel), raising MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS. */
-void wldcore_start_core_background_threads(s32 party_index) {
+static void wldcore_start_core_background_threads(s32 party_index) {
     menu_status_thread_t* thread8;
 
     wldcore_unit_build_status_panel_data(party_index);
@@ -625,7 +633,7 @@ void wldcore_start_core_background_threads(s32 party_index) {
     g_main_system_flags |= MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS;
 }
 
-void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_level_t* level) {
+static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_level_t* level) {
     u32 buttons;
     s32 selected;
     s32 direction;
@@ -1120,7 +1128,7 @@ void wldcore_proposition_handle_report_confirm_input(wldcore_proposition_report_
 /* Hides the parent level's two windows and render record, then pushes a
  * type-0x10 menu level for argument and sets WORLD thread 14's parameters.
  */
-void wldcore_menu_push_proposition_report_level(s32 argument) {
+static void wldcore_menu_push_proposition_report_level(s32 argument) {
     s32 depth;
 
     depth = g_wldcore_menu_stack_depth;
@@ -1459,7 +1467,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
  *
  * The first-column local stays live across the text calls. Reading the result
  * through the shared record keeps its load after the level-record stores. */
-void wldcore_proposition_push_result_level(s32 proposition) {
+static void wldcore_proposition_push_result_level(s32 proposition) {
     RECT bounds;
     point32_t point;
     s16 text_width;
@@ -1707,7 +1715,7 @@ void wldcore_proposition_step_result_level(wldcore_proposition_result_level_t* l
 /* Resolve finished proposition `proposition_index` before its report: unpack its data
  * row, pick the unit who reports, decide the result and work out the JP and
  * gil, the bonus reward and the extra-days multiplier. */
-void wldcore_proposition_prepare_report(s32 proposition_index) {
+static void wldcore_proposition_prepare_report(s32 proposition_index) {
     wldcore_unpack_proposition_row(
         g_wldcore_selected_proposition_row, g_main_active_propositions[proposition_index].proposition_id);
     g_wldcore_proposition_report.proposition_index = proposition_index;
@@ -1725,7 +1733,7 @@ void wldcore_proposition_prepare_report(s32 proposition_index) {
  * for the shared bravery/faith tails matches the target, which reloads the
  * stat after the compare. */
 
-s32 wldcore_proposition_select_report_speaker(s32 index) {
+static s32 wldcore_proposition_select_report_speaker(s32 index) {
     party_unit_t* unit;
     s32 best;
     s32 i;
@@ -1812,7 +1820,7 @@ s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index) {
  * Return 1 and clear the caller's phase after a new button-0x20 press
  * with the menu event flag set. Initial setup and continued waiting return 0.
  */
-s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* state, s32 message) {
+static s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* state, s32 message) {
     if (state->phase == 0) {
         s32* party_index;
         state->phase = 1;

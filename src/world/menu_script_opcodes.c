@@ -889,7 +889,7 @@ void menu_update_and_draw_bouncing_cursor_variant(point16_t* position, u16* stat
 }
 
 /* Walks past the records that follow the header, returning the next one. */
-menu_instruction_t* world_menu_skip_instruction_group(menu_instruction_t* instruction) {
+static menu_instruction_t* world_menu_skip_instruction_group(menu_instruction_t* instruction) {
     s32 count;
 
     if (instruction->header.opcode == MENU_SCRIPT_OP_IF_GROUP) {

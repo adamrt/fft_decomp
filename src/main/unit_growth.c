@@ -7,6 +7,11 @@
 #include "fft/memory.h"
 #include "psx/types.h"
 
+static void main_status_init_ct(unit_stats_t* unit);
+static void main_status_update_unit_flags_and_ct(unit_stats_t* unit);
+static u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palette);
+static void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_status_check, s32 initializing);
+
 void main_mem_copy_bytes_source_first(const void* source, void* destination, int count) {
     const u8* src = source;
     u8* dst = destination;
@@ -315,7 +320,7 @@ s32 main_job_find_by_skillset(u8 skillset_id) {
 /* Seed inflicted_status with the current statuses the unit does not have
  * innately, then set up the status CTs (main_status_init_ct) and reconcile the
  * status flags. */
-void main_status_init_unit(unit_stats_t* unit) {
+static void main_status_init_unit(unit_stats_t* unit) {
     s32 status_set;
 
     for (status_set = 0; status_set < STATUS_BYTE_COUNT; status_set++) {
@@ -328,7 +333,7 @@ void main_status_init_unit(unit_stats_t* unit) {
 
 /* Clear the timed-status CTs and start the death counter at 3, or at 0xff for
  * an immortal unit and for one with a save- or load-formation flag. */
-void main_status_init_ct(unit_stats_t* unit) {
+static void main_status_init_ct(unit_stats_t* unit) {
     main_mem_zero(unit->status_ct, sizeof(unit->status_ct));
     if ((unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL)
         || (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION))) {
@@ -339,7 +344,7 @@ void main_status_init_ct(unit_stats_t* unit) {
 }
 
 /* Apply Float and reconcile the unit's status flags and status CT. */
-void main_status_update_unit_flags_and_ct(unit_stats_t* unit) {
+static void main_status_update_unit_flags_and_ct(unit_stats_t* unit) {
     s32 status;
     u8 immunity;
 
@@ -388,7 +393,7 @@ void main_unit_init_stats_and_statuses(unit_stats_t* unit) {
  * equipment bonuses), then reconciles the status bits.  `skip_status_check`
  * leaves the critical/status notifications alone; `initializing` seeds the
  * inflicted statuses from the current ones and clears their CTs. */
-void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_status_check, s32 initializing) {
+static void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_status_check, s32 initializing) {
     u8 saved_inflicted[STATUS_BYTE_COUNT];
     u8 saved_current[STATUS_BYTE_COUNT];
     s32 i;
@@ -830,7 +835,7 @@ s32 main_util_roll_pass_fail(s32 maximum, s32 threshold) {
  * female, with Dancer and Mime counted one job lower. The monster selector
  * returns the spritesheet and palette already in the unit (from its job record).
  * Any higher identity gives job_id + 0x28. */
-u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palette) {
+static u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palette) {
     u8 job_id;
     u8 sprite_set;
 

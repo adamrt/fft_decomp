@@ -17,7 +17,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void require_editor_load_party_unit(s32 unused, s32 party_index) {
+static void require_overlay_run_helpmenu(void);
+static void require_text_build_battle_nicknames(void);
+
+static void require_editor_load_party_unit(s32 unused, s32 party_index) {
     unit_stats_t* unit;
     menu_status_panel_slot_state_t* editor;
     u16* innate_items;
@@ -161,7 +164,7 @@ void require_editor_load_party_unit(s32 unused, s32 party_index) {
 
 /* Return a roster unit's seven equipped items to the inventory. Always
  * returns 0. */
-s32 require_party_restore_item_counts(s32 party_index) {
+static s32 require_party_restore_item_counts(s32 party_index) {
     party_unit_t* party = main_party_get_unit(party_index);
     s32 index;
 
@@ -246,7 +249,7 @@ s32 require_party_store_equipment_or_sell_overflow(s32 unit_id) {
  * that is the palette of the first roster record with a Ramza identity (the
  * last record when there is none).
  */
-s32 require_party_get_free_slot_status(s32 unit_id) {
+static s32 require_party_get_free_slot_status(s32 unit_id) {
     party_unit_t* party;
     unit_stats_t* unit;
     s32 index;
@@ -289,7 +292,7 @@ s32 require_party_get_free_slot_status(s32 unit_id) {
    inside it), while the L1 search stays a do-while (with both blocks inside
    their loops should_restore outranks selected_battle_unit for s4); the
    formation search is a goto loop so the 3 bound stays in place. */
-s32 require_party_select_unit_to_remove(void) {
+static s32 require_party_select_unit_to_remove(void) {
     s32 party_index;
     u8* text;
     s32 selected_party_index;
@@ -556,7 +559,7 @@ s32 require_party_select_unit_to_remove(void) {
  * to the party or updates its bio variable. Restores the saved thread block
  * and menu descriptor on exit.
  */
-void require_party_apply_post_battle_changes(void) {
+static void require_party_apply_post_battle_changes(void) {
     s16 text_width_px;
     s16 text_height_px;
     menu_entry_t* saved_menu_descriptor;
@@ -871,7 +874,7 @@ void require_party_apply_post_battle_changes(void) {
  * inventory, unless 99 are already held or equipped: the item is then sold
  * for a quarter of its price, rounded toward zero.
  */
-void require_reward_collect_war_trophies_and_bonus_money(void) {
+static void require_reward_collect_war_trophies_and_bonus_money(void) {
     s32 i;
     s32 item_id;
     s32 quantity;
@@ -960,7 +963,7 @@ void require_reward_collect_war_trophies_and_bonus_money(void) {
 /* Screen x of war-trophy entry `value`'s column, given the entry count
  * `index`: one column at 0xd0 for fewer than five entries, otherwise 0x9c
  * for even entries and 0x104 for odd ones. */
-s32 require_reward_get_war_trophy_column_x(s32 value, s32 index) {
+static s32 require_reward_get_war_trophy_column_x(s32 value, s32 index) {
     s32 result = 0xd0;
 
     if (index >= 5) {
@@ -977,7 +980,7 @@ s32 require_reward_get_war_trophy_column_x(s32 value, s32 index) {
 /* Screen y of war-trophy row `value`, given the entry count `index`: 20
  * pixels per entry in the single column, per pair of entries in two
  * columns, from y 0x78. */
-s32 require_reward_get_war_trophy_entry_offset(s32 value, s32 index) {
+static s32 require_reward_get_war_trophy_entry_offset(s32 value, s32 index) {
     if (index < 5) {
         return value * 20 + 0x78;
     }
@@ -996,7 +999,7 @@ s32 require_reward_get_war_trophy_entry_offset(s32 value, s32 index) {
  * a number followed by an 18x8 label glyph. Each new line of text is uploaded to
  * VRAM and its buffer freed on the following frame.
  */
-void require_reward_run_war_trophies(void) {
+static void require_reward_run_war_trophies(void) {
     SPRT sprite;
     s32 start;
     s32 last;
@@ -1168,7 +1171,7 @@ void require_reward_run_war_trophies(void) {
  * to a single pointer induction variable. `pass` doubles as the fade level,
  * which the target's register allocation reflects.
  */
-void require_reward_run_gil_ticker(void) {
+static void require_reward_run_gil_ticker(void) {
     DR_AREA areas[4];
     s32 thread_id;
     s32 money;
@@ -1425,7 +1428,7 @@ skipped:
 }
 
 /* Scale each vertex color by scale / 128. */
-void require_gfx_scale_poly_gt4_vertex_colors(
+static void require_gfx_scale_poly_gt4_vertex_colors(
     const require_display_condition_colors_t* colors, s32 scale, POLY_GT4* poly) {
     s32 r;
     s32 g;
@@ -1452,7 +1455,7 @@ void require_gfx_scale_poly_gt4_vertex_colors(
 /* Initialize the 32 semi-transparent POLY_GT4s of g_require_gfx_poly_gt4_array_32
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
-void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
+static void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
     s32 count;
     s32 enabled;
     s16* palette_origin;
@@ -1480,7 +1483,7 @@ void require_gfx_init_poly_gt4_array_32(s32 x, s32 y) {
 /* Initialize the 8 semi-transparent POLY_GT4s of g_require_gfx_poly_gt4_array_8
  * with zeroed vertices, a one-texel texture cell, texture page 6 and the CLUT
  * at the bonus palette rectangle's origin offset by (x, y). */
-void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
+static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     s32 count;
     s32 enabled;
     s16* palette_origin;
@@ -1585,7 +1588,7 @@ void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     poly->x3 = QUAD(index).offset.x + 0x100 + QUAD(index).source.w;                                                    \
     poly->y3 = QUAD(index).offset.y + ((hide_pixels) + 0x78) + (QUAD(index).source.h - hide_pixels)
 
-void require_condition_show_general(s32 hold_frames) {
+static void require_condition_show_general(s32 hold_frames) {
     sprite_sheet_frame_t* quads;
     u8* range;
     require_display_condition_colors_t* colors;
@@ -2171,7 +2174,7 @@ void require_condition_dispatch(void) {
  * until 0x10000 bytes can be reserved at the high overlay address, loads the
  * overlay and runs menu_run_require_help in the first idle slot,
  * with the panel's two animation flags set while it runs. */
-void require_overlay_run_helpmenu(void) {
+static void require_overlay_run_helpmenu(void) {
     s32 thread_id;
 
     thread_set_current_task_id(THREAD_TASK_HELP_MENU);
@@ -2194,7 +2197,7 @@ void require_overlay_run_helpmenu(void) {
 /* Rebuild the roster name text section from the battle units: one 0xFE
  * terminated name per battle unit slot, with a terminator appended to a name
  * that fills all 16 bytes. */
-void require_text_build_battle_nicknames(void) {
+static void require_text_build_battle_nicknames(void) {
     u8* output;
     s32 unit_id;
 

@@ -209,7 +209,7 @@ void menu_start_dead_unit_threads(void) {
  * temporary: the store through the layout pointer may alias the menu record,
  * so the repeated window.y store is not redundant to the compiler.
  */
-void menu_init_at_list(menu_entry_t* menu) {
+static void menu_init_at_list(menu_entry_t* menu) {
     s32 entry_count;
     s32 has_special_entry;
     s32 index;

@@ -9,6 +9,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
+static void open_gfx_draw_animated_render_record(world_animated_render_record_t* actor, u32* ot);
+static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot);
+static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_t* object, GsOT* ot);
+
 #ifdef FFT_WLDCORE
 /* Reset both world-map window pools and their allocation counters. */
 void window_init_record_pools_variant(void) {
@@ -293,7 +298,7 @@ step_frame:
  *   scheduler ready list ordered by source, and the other order transposes
  *   two of them.
  */
-void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_t* object, GsOT* ot) {
+static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_t* object, GsOT* ot) {
     GsSPRITE sprite;
     RECT frame;
     CVECTOR color;
@@ -392,7 +397,7 @@ void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_t* obje
 
 #    define PART(index) ((world_sprite_part_t*)&sprite[index])
 
-void open_gfx_draw_animated_render_record(world_animated_render_record_t* actor, u32* ot) {
+static void open_gfx_draw_animated_render_record(world_animated_render_record_t* actor, u32* ot) {
     world_sprite_cel_header_t** sprites;
     world_sprite_animation_sequence_t* anim;
     world_sprite_cel_header_t* cel;
@@ -493,7 +498,7 @@ loop:
  * otherwise unused px/py/qx/qy/cx/qu/qv copies reproduce that. The SPRT casts
  * on the color stores keep their index order and the 0x50-byte frame.
  */
-void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot) {
+static void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot) {
     point32_t clut;
     RECT scaled;
     s32 step;
@@ -659,7 +664,7 @@ s32 window_append_record_variant(void** list, s32* count) {
 
 /* Build the centerd sub-rectangle of the source area for a scale mode
  * (20%, 50%, 80%, 90% or 100%), aligned to 4 pixels. */
-void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
+static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
     s32 scale;
     s32 source_width;
     s32 source_height;

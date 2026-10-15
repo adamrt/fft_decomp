@@ -2,6 +2,8 @@
 
 #include "fft/event_equip.h"
 
+static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id);
+
 /* Install an item into a unit's equipment slot. EQUIP copy of
  * world_formation_equip_item_to_unit_slot.
  *
@@ -43,7 +45,7 @@ s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id) {
  * type bit is set in the unit's equippable-types bitfield, EQUIP_SLOT_ITEM_CANNOT_EQUIP for an item
  * of the "other" menu category or a type the unit cannot use. The low ten
  * bits of the entry are the item id. */
-s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
+static s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
     s32 item_id = item_entry & 0x3FF;
     s32 result;
 
@@ -70,7 +72,7 @@ s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
  * The s16 id and its new_item copy reproduce the target's two callee-saved
  * copies of the masked id (the same shape as
  * world_formation_can_equip_item_in_slot). */
-equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
+static equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit, s16 slot, s32 item_id) {
     s32 result;
     s16 id;
     s16 new_item;

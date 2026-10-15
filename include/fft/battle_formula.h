@@ -57,7 +57,6 @@ void battle_formula_store_pa_and_x(void);
 void battle_formula_store_pa_and_y(void);
 void battle_formula_store_speed_and_x(void);
 void battle_formula_store_xa_times_ya_damage(void);
-void battle_formula_calculate_knockback(void);
 void battle_formula_apply_poach_and_train(void);
 
 /* accuracy and evasion */
@@ -68,7 +67,6 @@ extern u8 g_battle_zodiac_compatibility_modifiers[];
 
 void battle_formula_apply_evasion_changes_due_to_statuses(void);
 void battle_formula_calculate_abandon(void);
-s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost);
 void battle_formula_calculate_concentrate(void);
 void battle_formula_calculate_critical_hit(void);
 void battle_formula_calculate_dark_confuse(void);
@@ -78,17 +76,13 @@ s32 battle_formula_calculate_magic_accuracy_without_faith(void);
 s32 battle_formula_calculate_magical_evade(void);
 s32 battle_formula_calculate_physical_evade(void);
 void battle_formula_calculate_transparent(void);
-s32 battle_formula_calculate_hit(void);
 s32 battle_formula_calculate_physical_evade_charge(void);
 void battle_formula_store_magical_evade_values(void);
 void battle_formula_use_hp_damage_as_action_hit_percent(void);
 void battle_formula_apply_zodiac_compatibility(void);
 void battle_formula_store_physical_evade_values(void);
 s32 battle_formula_calculate_dance_song_hit(void);
-s32 battle_formula_calculate_friendly_magic_accuracy(void);
-s32 battle_formula_calculate_golem_accuracy(void);
 s32 battle_formula_calculate_magic_accuracy(void);
-s32 battle_formula_calculate_magic_accuracy_no_elemental(void);
 s32 battle_formula_calculate_physical_accuracy(void);
 s32 battle_formula_calculate_physical_status_accuracy(void);
 
@@ -122,7 +116,6 @@ void battle_formula_apply_target_xa_affecting_statuses(void);
 void battle_formula_apply_talk_skill(void);
 void battle_formula_check_dragon(void);
 void battle_formula_force_sleeping_target_miss(void);
-void battle_formula_roll_conditional_status_proc_inner(void);
 s32 battle_formula_roll_conditional_status_proc(void);
 void battle_formula_store_xa_plus_ya_status_damage(void);
 

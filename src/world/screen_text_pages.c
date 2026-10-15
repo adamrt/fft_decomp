@@ -11,7 +11,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-u8* world_screen_menu_redraw_text_page_on_scroll(
+static u8* world_screen_menu_redraw_text_page_on_scroll(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused_cursor) {
     menu_text_layout_t* layout = entry->context;
     u32* input0;

@@ -12,6 +12,20 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void world_menu_run_script_with_callback_suppressed(void);
+static void world_shop_apply_fitting_room_items_to_all_units(void);
+static void world_shop_buy_from_fitting_room(void);
+static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index);
+static void world_shop_install_callbacks_and_run(void);
+static void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equipment_index);
+static s32 world_shop_run_fitting_room_checkout_prompt(void);
+static s32 world_shop_run_fur_buy_quantity_menu(void);
+static s32 world_shop_run_fur_sell_quantity_menu(void);
+static s32 world_shop_run_item_purchase_quantity_menu(void);
+static s32 world_shop_run_item_sell_menu(void);
+static void world_shop_run_obtain_gil_menu(void);
+static void world_shop_run_soldier_office_fee_menu_script(void);
+
 void world_shop_run_screen(s32 shop_type) {
     POLY_FT4 textured_quads[2 * 500];
     POLY_G4 gradient_quads[2 * 90];
@@ -242,7 +256,7 @@ void world_menu_run_exit_fade_step(void) {
     }
 }
 
-void world_shop_run_obtain_gil_menu(void) {
+static void world_shop_run_obtain_gil_menu(void) {
     menu_callback_t* callback_slot;
     s32 (*previous_callback)(s32);
 
@@ -254,7 +268,7 @@ void world_shop_run_obtain_gil_menu(void) {
 }
 
 /* Returns the owned-and-equipped count for the selected item. */
-s32 world_item_count_selected_owned_and_equipped(s32 unused_row) {
+static s32 world_item_count_selected_owned_and_equipped(s32 unused_row) {
     s32 result;
 
     if (g_menu_list_entry_count != 0) {
@@ -266,7 +280,7 @@ s32 world_item_count_selected_owned_and_equipped(s32 unused_row) {
 }
 
 /* Returns the party-equipped count for the selected item. */
-s32 world_item_count_selected_equipped_by_party(s32 unused_row) {
+static s32 world_item_count_selected_equipped_by_party(s32 unused_row) {
     s32 result;
 
     if (g_menu_list_entry_count != 0) {
@@ -279,7 +293,7 @@ s32 world_item_count_selected_equipped_by_party(s32 unused_row) {
 
 /* Full-price twin of world_menu_get_item_half_price_display_value: the menu
  * item's price with bit 30 copied from its 0x4000 entry flag. */
-s32 world_menu_get_item_price_display_value(s32 entry_index) {
+static s32 world_menu_get_item_price_display_value(s32 entry_index) {
     s32 display_value = world_item_get_price(g_item_list_entries[entry_index]);
 
     if ((g_item_list_entries[entry_index] & WORLD_ITEM_LIST_ENTRY_UNEQUIPPABLE) != 0)
@@ -288,7 +302,7 @@ s32 world_menu_get_item_price_display_value(s32 entry_index) {
 }
 
 /* Switch the active item category and restore its saved list cursor. */
-void world_menu_switch_item_category(s32 input) {
+static void world_menu_switch_item_category(s32 input) {
     s16 x;
     s16 y;
     s32 category;
@@ -454,7 +468,7 @@ void world_menu_confirm_item_purchase(void) {
  * returns -2 when the stack is already full or -1 when no unit is
  * affordable. Afterwards it returns the quantity menu thread state, updating
  * the total-price prompt while the confirmation sub-thread is running. */
-s32 world_shop_run_item_purchase_quantity_menu(void) {
+static s32 world_shop_run_item_purchase_quantity_menu(void) {
     s32 owned;
     s32 count;
     s32 limit;
@@ -511,7 +525,7 @@ s32 world_shop_run_item_purchase_quantity_menu(void) {
 
 /* Equip-menu marker for the selected item: 8 when the unit already wears it
  * or cannot equip it, -1 when it is a fresh equippable choice. */
-s32 world_item_get_equip_candidate_marker(s32 unit_index) {
+static s32 world_item_get_equip_candidate_marker(s32 unit_index) {
     world_unit_t* unit = g_world_unit_pointers[unit_index];
     s32 i;
 
@@ -528,7 +542,7 @@ s32 world_item_get_equip_candidate_marker(s32 unit_index) {
 
 /* Menu callback: sprite brightness for a unit on the shop's "who can equip"
  * view: 0x80 when the unit can equip the candidate item, 0x40 when not. */
-s32 world_item_get_equip_candidate_brightness(s32 unit_index) {
+static s32 world_item_get_equip_candidate_brightness(s32 unit_index) {
     return world_unit_can_equip_item_id(unit_index, g_world_shop_equip_candidate_item) == 1 ? 0x80 : 0x40;
 }
 
@@ -628,7 +642,7 @@ void world_shop_run_equip_candidate_step(void) {
 
 /* Menu callback: half price of the highlighted item, or 0 for an empty list.
  * The row argument is not read. */
-s32 world_item_get_selected_half_price(s32 unused_row) {
+static s32 world_item_get_selected_half_price(s32 unused_row) {
     s32 result;
 
     if (g_menu_list_entry_count == 0) {
@@ -734,7 +748,7 @@ void world_shop_run_item_sell_confirm_step(void) {
  * the confirmation child runs and the plain prompt (0xF80F) otherwise. The
  * final frame queues the transaction sound for "yes" and the confirm sound
  * for "no". */
-s32 world_shop_run_item_sell_menu(void) {
+static s32 world_shop_run_item_sell_menu(void) {
     s32 count;
 
     if (g_world_shop_sell_result == 0) {
@@ -777,12 +791,12 @@ s32 world_shop_run_item_sell_menu(void) {
 
 /* Menu callback: add `delta` to the fitting room's running cost and return
  * the new total. */
-s32 world_shop_add_fitting_room_cost(s32 delta) {
+static s32 world_shop_add_fitting_room_cost(s32 delta) {
     return g_world_shop_fitting_room_cost = delta + g_world_shop_fitting_room_cost;
 }
 
 /* Menu callback: no marker (-1) for any unit. */
-s32 world_shop_fitting_room_get_unit_marker(s32 unused_unit_index) {
+static s32 world_shop_fitting_room_get_unit_marker(s32 unused_unit_index) {
     return -1;
 }
 
@@ -1019,7 +1033,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
     }
 }
 
-s32 world_shop_get_gil_minus_fitting_room_cost(s32 unused_row) {
+static s32 world_shop_get_gil_minus_fitting_room_cost(s32 unused_row) {
     s32 gil;
 
     gil = world_shop_adjust_gil(0);
@@ -1030,7 +1044,7 @@ s32 world_shop_get_gil_minus_fitting_room_cost(s32 unused_row) {
  *
  * Its only caller passes 0, but the body never reads that argument: `$a0` is
  * overwritten with 6 before any use and the result starts from zero. */
-s32 world_menu_is_busy(s32 unused) {
+static s32 world_menu_is_busy(s32 unused) {
     s32 result = 0;
 
     if (g_menu_input_lock_mode != 0) {
@@ -1044,7 +1058,7 @@ s32 world_menu_is_busy(s32 unused) {
 /* Run the fitting room's cost display script with its three menu value
  * callbacks installed (gil, fitting cost, gil minus cost); the script gets
  * no input while a menu is busy. */
-void world_shop_install_callbacks_and_run(void) {
+static void world_shop_install_callbacks_and_run(void) {
     g_world_menu_script_callbacks[0].value = world_shop_adjust_gil;
     g_world_menu_script_callbacks[1].value = world_shop_add_fitting_room_cost;
     g_world_menu_script_callbacks[2].value = world_shop_get_gil_minus_fitting_room_cost;
@@ -1181,7 +1195,7 @@ void world_shop_run_fitting_room_checkout_step(void) {
  * immediately. Returns 1 while a prompt is open; 0 and -1 are the two
  * closing outcomes world_shop_run_fitting_room_checkout_step dispatches on.
  */
-s32 world_shop_run_fitting_room_checkout_prompt(void) {
+static s32 world_shop_run_fitting_room_checkout_prompt(void) {
     s32 balance;
     s32 cost;
 
@@ -1268,7 +1282,7 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
 /* Move every reserved fitting-room item onto its formation unit and clear
  * the reservation. Equipment slots flagged in bit 14 are overwritten even
  * when no item was reserved. */
-void world_shop_apply_fitting_room_items_to_all_units(void) {
+static void world_shop_apply_fitting_room_items_to_all_units(void) {
     s32 i;
     s32 j;
 
@@ -1576,7 +1590,7 @@ void world_shop_run_sell_menu_subflow_step(void) {
 /* Clears one equipment slot of a formation unit.  An item the unit owned goes
  * back to the fitting room reserve; an item taken from the shop (bit 15 set)
  * is refunded from the fitting room cost instead. */
-void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equipment_index) {
+static void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equipment_index) {
     s32 equipped_item = g_world_unit_pointers[unit_index]->equipment[equipment_index];
 
     if (equipped_item != ITEM_ID_NOTHING) {
@@ -1589,7 +1603,7 @@ void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equipment_
 }
 
 /* Finalize a unit's equipment from the Fitting Room. */
-void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index) {
+static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index) {
     u16 reserved_item;
 
     g_world_unit_pointers[formation_index]->equipment[equipment_index] = ITEM_ID_NOTHING;
@@ -1621,7 +1635,7 @@ void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 
 /* Complete a fitting-room purchase: every tried-on item (entry bits 14-15
  * set) becomes the unit's own, and the equipment it displaced, kept in
  * g_world_shop_fitting_room_items, goes back to the inventory. */
-void world_shop_buy_from_fitting_room(void) {
+static void world_shop_buy_from_fitting_room(void) {
     s32 i;
     s32 j;
 
@@ -1703,7 +1717,7 @@ void world_shop_run_fur_menu_step(void) {
 /* Query the selected poached-stock entry with a 0 quantity adjustment.
  *
  * An empty menu returns 0. */
-s32 world_shop_get_selected_poached_item_quantity(s32 unused_row) {
+static s32 world_shop_get_selected_poached_item_quantity(s32 unused_row) {
     if (g_menu_list_entry_count != 0)
         return world_shop_adjust_poached_item_quantity(g_item_list_entries[g_menu_list_selected_index], 0);
     return 0;
@@ -1808,7 +1822,7 @@ void world_shop_run_fur_sell_confirm_step(void) {
 }
 
 /* Fur shop: the quantity prompt of a sale, capped by the inventory count. */
-s32 world_shop_run_fur_sell_quantity_menu(void) {
+static s32 world_shop_run_fur_sell_quantity_menu(void) {
     s32 count;
 
     if (g_world_shop_fur_quantity_menu_running == 0) {
@@ -1850,7 +1864,7 @@ s32 world_shop_run_fur_sell_quantity_menu(void) {
     return g_world_shop_fur_quantity_menu_running;
 }
 
-s32 world_menu_get_item_half_price_display_value(s32 entry_index) {
+static s32 world_menu_get_item_half_price_display_value(s32 entry_index) {
     s32 display_value = world_item_get_price(g_item_list_entries[entry_index]) >> 1;
 
     if ((g_item_list_entries[entry_index] & WORLD_ITEM_LIST_ENTRY_UNEQUIPPABLE) != 0)
@@ -1982,7 +1996,7 @@ void world_shop_run_fur_buy_confirm_step(void) {
 /* Fur shop twin of world_shop_run_item_purchase_quantity_menu: the quantity
  * prompt is capped by the 99-item inventory limit, the gil on hand at half
  * price and the poached stock. */
-s32 world_shop_run_fur_buy_quantity_menu(void) {
+static s32 world_shop_run_fur_buy_quantity_menu(void) {
     s32 owned;
     s32 count;
     s32 price;
@@ -2269,7 +2283,7 @@ void world_shop_reopen_soldier_office_menu_step(void) {
 }
 
 /* Menu callback: no marker (-1) for any unit. */
-s32 world_shop_rename_unit_get_unit_marker(s32 unused_unit_index) {
+static s32 world_shop_rename_unit_get_unit_marker(s32 unused_unit_index) {
     return -1;
 }
 
@@ -2371,7 +2385,7 @@ void world_shop_run_rename_name_entry_step(void) {
 
 /* Menu callback: the hiring fee for the highlighted row of the hire menu,
  * 1500 for row 0, 1400 for row 1 and 0 otherwise. */
-s32 world_shop_get_soldier_office_entry_fee(s32 unused_row) {
+static s32 world_shop_get_soldier_office_entry_fee(s32 unused_row) {
     s16 mode = g_world_shop_hire_menu_thread_data.selected_index;
 
     if (mode == 0) {
@@ -2383,7 +2397,7 @@ s32 world_shop_get_soldier_office_entry_fee(s32 unused_row) {
 /* Run the soldier office's fee display script with
  * world_shop_get_soldier_office_entry_fee installed as menu value callback 0,
  * then restore the previous callback. */
-void world_shop_run_soldier_office_fee_menu_script(void) {
+static void world_shop_run_soldier_office_fee_menu_script(void) {
     menu_callback_t* callback_slot;
     s32 (*previous_callback)(s32);
 
@@ -2395,7 +2409,7 @@ void world_shop_run_soldier_office_fee_menu_script(void) {
 }
 
 /* Display the party unit count directly while value callback 0 is disabled. */
-void world_menu_run_script_with_callback_suppressed(void) {
+static void world_menu_run_script_with_callback_suppressed(void) {
     s32 (*previous_callback)(s32);
 
     previous_callback = g_world_menu_script_callbacks[0].value;

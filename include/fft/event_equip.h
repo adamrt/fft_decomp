@@ -91,17 +91,13 @@ extern s16 g_equip_unit_saved_hp;
 extern s16 g_equip_unit_saved_mp;
 extern u8 g_equip_unit_selected_index;
 
-void equip_unit_build_data_from_stats(struct unit_stats* stats, equip_unit_data_t* unit);
-s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry);
 void equip_unit_commit_loadout_to_stats(void);
 void equip_unit_copy_data_to_compare_slot(s32 unused_selected_index, s32 unused_1);
 s32 equip_unit_has_two_hands(s16 unit_index);
 s32 equip_unit_has_two_swords(s16 unit_index);
-s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support);
 void equip_unit_load_data_from_stats(s32 battle_id);
 void equip_unit_load_selected_data(void);
 s32 equip_unit_set_slot_item(s16 unit_index, s16 slot, s32 item_id);
-equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit_index, s16 slot, s32 item_id);
 
 /* equipment selection */
 extern u16 g_equip_equip_item_cursor_anim[];
@@ -217,13 +213,8 @@ void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row);
 void equip_menu_init_screen(s32 battle_id);
-void equip_menu_load_images_and_reset_lists(void);
 void equip_menu_reset_selection_indices(void);
-void equip_menu_reset_state_flags(void);
 void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
-s32 equip_menu_run_equip_mode(void);
-s32 equip_menu_run_remove_mode(void);
-s32 equip_menu_update_clear_all_equipment_prompt(void);
 s32 equip_menu_update_item_action_state(void);
 
 /* help */
@@ -251,7 +242,6 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
-void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context);
 void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */

@@ -16,6 +16,9 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+static s32 battle_map_tile_data_15_stub(void);
+static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y);
+
 void battle_action_activate_move_act(unit_stats_t* unit) {
     unit->movement_taken = 0;
     unit->action_taken = 0;
@@ -159,7 +162,7 @@ s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y,
 
 /* Selector 15 of map_set_tile_data_value retries this until it returns 0, which it does at
  * once. The 8-byte frame is one the retail build kept for an unreferenced local. */
-s32 battle_map_tile_data_15_stub(void) {
+static s32 battle_map_tile_data_15_stub(void) {
     char unused[8];
 
     return 0;
@@ -206,7 +209,7 @@ s32 battle_formula_calculate_dance_song_hit(void) {
  * abs() is the builtin: its MIPS abssi2 pattern emits the target's
  * bgez/move/negu sequence. The coordinate stores are array elements so their
  * aggregate aliasing keeps the special-effect load after them. */
-void battle_formula_calculate_knockback(void) {
+static void battle_formula_calculate_knockback(void) {
     unit_stats_t* target;
     unit_stats_t* attacker;
     map_tile_t* tile;
@@ -308,7 +311,7 @@ void battle_formula_calculate_knockback(void) {
  * g_action_current_ability.knockback_fall_height and the ability target ID to
  * g_action_current_ability.post_action_target_id, and the destination
  * layer is returned; -1 means off-map, blocked or occupied. */
-s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) {
+static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) {
     map_tile_t* tile;
     map_tile_t* lower;
     map_tile_t* upper;
@@ -396,7 +399,7 @@ s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) {
 /* One evade roll, made only when executing: evaded with numerator in
  * denominator odds. Records the miss type and the item that blocked; returns 1
  * when evaded. */
-s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
+static s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
     if (main_util_roll_pass_fail(denominator, numerator) != 0) {
         return 0;
     }

@@ -9,7 +9,7 @@ void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
     battle_unit_get_map_coords_by_runtime_id(runtime_id, coords);
 }
 
-void script_report_missing_unit_stub(s32 unused_unit_id) {
+static void script_report_missing_unit_stub(s32 unused_unit_id) {
 }
 
 /* Resolve an event-script unit identifier to its active runtime ID.

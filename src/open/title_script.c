@@ -10,6 +10,19 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void open_controller_start_text_message(s32 parameter, s32 run_followup);
+static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index);
+static void open_gfx_draw_transition_line_strips(s32 intensity);
+static void open_gfx_step_image_crossfade(void);
+static void open_gfx_update_opntex_sequence(void);
+static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame);
+static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset);
+static void open_script_push_controller(void);
+static void open_script_update_screen_fade(void);
+static void open_script_update_timing_and_record_values(void);
+static void open_script_update_xa_audio(void);
+static s32 open_text_decode_hex_digit(s32 character);
+
 void open_menu_init_render_record_fields(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags) {
     RECT* quad_base;
@@ -38,7 +51,7 @@ void open_menu_init_render_record_fields(
 /* Fills the music-test list's column layout and menu entry, then starts the
  * AT list thread on them. The window is the extent's width plus a 24-pixel
  * margin, rounded down to a multiple of four; its height fields start at 0. */
-void open_menu_start_music_test_list_thread(s32 thread_id, s32 limit, point32_t* extent, point32_t* origin) {
+static void open_menu_start_music_test_list_thread(s32 thread_id, s32 limit, point32_t* extent, point32_t* origin) {
     s32 width;
 
     width = (extent->x + 0x18) & 0xFFFC;
@@ -219,7 +232,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
 }
 
 /* Start the text message thread and push the controller that waits for it. */
-void open_controller_start_text_message(s32 parameter, s32 run_followup) {
+static void open_controller_start_text_message(s32 parameter, s32 run_followup) {
     {
         s32 controller = g_open_current_controller_index;
 
@@ -544,7 +557,7 @@ s32 open_gfx_update_transition_sequence(void) {
  * The coordinates are written in setXY4 order (x0, y0, x1, y1, ...) per
  * primitive, and width + 1 goes through its own variable (the target adds left
  * afterwards). */
-void open_gfx_draw_transition_line_strips(s32 intensity) {
+static void open_gfx_draw_transition_line_strips(s32 intensity) {
     POLY_GT4* prims;
     s32 i;
     s32 prim_index;
@@ -643,7 +656,7 @@ void open_gfx_draw_transition_line_strips(s32 intensity) {
  * (row_flags[0]) and the progress row (row_flags[1], the same byte as
  * g_open_gfx_image_copy_progress); image operation 0x20 of a later transition
  * entry waits for the read and sets the running flag. */
-void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
+static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
     u16* copy_source;
     u16* copy_destination;
     u16* file_pixels;
@@ -709,7 +722,7 @@ void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
  * target. The s16 components are copied for the compare and the difference,
  * while the sums use the originals.
  */
-void open_gfx_step_image_crossfade(void) {
+static void open_gfx_step_image_crossfade(void) {
     s32 row;
     s32 last_row;
     s32 reverse_row;
@@ -779,7 +792,7 @@ void open_gfx_step_image_crossfade(void) {
     }
 }
 
-void open_script_init_state(void) {
+static void open_script_init_state(void) {
     RECT rect;
     s32 i;
     s32 j;
@@ -865,7 +878,7 @@ void open_script_init_state(void) {
  * g_open_opcode_handlers. A handler advances byte_offset itself; one that has to
  * wait clears OPEN_SCRIPT_DISPATCH_CONTINUE to end the frame and is entered again
  * on the next, and opcode 0 clears OPEN_SCRIPT_DISPATCH_RUNNING. */
-s32 open_script_init_and_dispatch_entries(void) {
+static s32 open_script_init_and_dispatch_entries(void) {
     open_script_dispatch_state_t* state;
     open_script_cursor_t* cursor;
     s32 result;
@@ -896,7 +909,7 @@ s32 open_script_init_and_dispatch_entries(void) {
     return 1;
 }
 
-u8* open_script_add_pointer_offset(u8* base, s32 byte_offset) {
+static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset) {
     return base + byte_offset;
 }
 
@@ -961,7 +974,7 @@ void open_script_draw_text_records(u32* otag, s32 graphics_buffer_index) {
  * (s3, ahead of the loop counter). The second metrics pointer is a separate
  * variable so the first stays in a0.
  */
-s32 open_script_build_text_record(u8* text) {
+static s32 open_script_build_text_record(u8* text) {
     s32 index;
     s32 i;
     s32 drawn;
@@ -1099,7 +1112,7 @@ s32 open_script_build_text_record(u8* text) {
  * The whole pixels moved are added to the y of every active text record and, as a
  * distance, to the external counter opcode 6 waits on. A record that leaves y
  * 0x10..0x100 is released. */
-void open_script_update_timing_and_record_values(void) {
+static void open_script_update_timing_and_record_values(void) {
     s32 step;
     s32 work;
     s32 index;
@@ -1149,7 +1162,7 @@ void open_script_update_timing_and_record_values(void) {
  * file's last sector.
  * Stopping: pauses the drive, restores double speed and brings the CD
  * volume back for the streams. */
-void open_script_update_xa_audio(void) {
+static void open_script_update_xa_audio(void) {
     u8 result[8];
     CdlFILTER filter;
     u8 mode;
@@ -1293,7 +1306,7 @@ void open_script_update_xa_audio(void) {
 }
 
 /* Value of a hexadecimal digit character, or 0 for any other character. */
-s32 open_text_decode_hex_digit(s32 character) {
+static s32 open_text_decode_hex_digit(s32 character) {
     u32 value;
 
     value = character - '0';
@@ -1316,7 +1329,7 @@ s32 open_text_decode_hex_digit(s32 character) {
  * Advance the script-controlled screen fade and tint the active fade quad.
  * Block-local control pointers retain the original materialized flag addresses.
  */
-void open_script_update_screen_fade(void) {
+static void open_script_update_screen_fade(void) {
     s32 intensity;
 
     {
@@ -1370,7 +1383,7 @@ void open_script_update_screen_fade(void) {
 /* Advance the OPNTEX sequence: run down the fade delay of the frame on
  * screen, and when the frame countdown expires load the next frame and start
  * its fade (or stop the sequence after the last frame). */
-void open_gfx_update_opntex_sequence(void) {
+static void open_gfx_update_opntex_sequence(void) {
     s32 frame;
     u32* source;
 
@@ -1421,7 +1434,7 @@ void open_movie_play_end(void) {
 
 /* Start the ending movie at CD mix level 0x7e and push handler 9. The second
  * argument, the stream's length in sectors, is not read. */
-void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
+static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame) {
     s32 controller;
 
     (void)unused;
@@ -1460,7 +1473,7 @@ void open_movie_finish_fftend_controller_if_ready_or_skipped(open_controller_rec
  * frame's background the picture copied from VRAM
  * (OPEN_SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM), reset the script state, which sets
  * up the 512-pixel screen, select VSync mode 2 and push handler 10. */
-void open_script_push_controller(void) {
+static void open_script_push_controller(void) {
     s32 controller;
 
     g_open_system_runtime_flags &= ~(OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | OPEN_SYSTEM_RUNTIME_FLAG_RGB24);

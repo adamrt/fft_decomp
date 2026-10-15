@@ -3,7 +3,7 @@
 #include "fft/main.h"
 #include "psx/libgpu.h"
 
-int main_boot_draw_squaresoft_logo(u32* otag, u32* image) {
+static int main_boot_draw_squaresoft_logo(u32* otag, u32* image) {
     RECT destination;
     int elapsed;
 
@@ -131,7 +131,7 @@ void main_boot_fade_out_squaresoft_logo(void) {
 /* Present one frame of the SCEAP.DAT fade: swap the display buffers after VSync,
  * upload the 320x32 strip at line 104 of the new draw buffer and draw the
  * caller's fade list over it. Returns VSync's result. */
-int main_boot_draw_sceap_logo(u32* otag, u32* image) {
+static int main_boot_draw_sceap_logo(u32* otag, u32* image) {
     RECT destination;
     int elapsed;
 

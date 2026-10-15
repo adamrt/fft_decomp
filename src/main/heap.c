@@ -239,7 +239,7 @@ suzuki_smd_header_t* main_file_get_smd(int sector, u32 size) {
 /* Allocates a game-heap buffer for a file of `size` bytes at disc `sector`,
  * queues the read and blocks until the file has landed.  Twin of
  * main_file_get_smd, which draws from the SMD allocator instead. */
-void* main_file_load_to_heap(s32 sector, u32 size) {
+static void* main_file_load_to_heap(s32 sector, u32 size) {
     void* destination;
     main_file_load_descriptor_t* header;
 

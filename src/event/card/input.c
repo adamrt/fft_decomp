@@ -18,7 +18,7 @@
  * periods are divided by the event speed. Counter slots 4..11 are skipped;
  * those buttons use only the newly pressed mask.
  */
-void card_input_update_controller(void) {
+static void card_input_update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;

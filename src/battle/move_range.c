@@ -15,7 +15,41 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
-s32 battle_move_get_weather_terrain_cost(void) {
+static void battle_move_apply_selected_candidate(move_spread_state_t* state);
+static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
+    s32 target_y, u32 target_level, s32 initialize, s32* suspended, s32 check_budget);
+static void battle_move_calculate_spread(void);
+static s32 battle_move_calculate_teleport_chances(void);
+static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height);
+static void battle_move_check_and_spread_one_tile_around(void);
+static void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span);
+static void battle_move_encode_path_steps(void);
+static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span);
+static void battle_move_set_reachable_tile_flags(void);
+static void battle_move_set_tile_flags_for_pathfinding(s32 mode);
+static void battle_move_spread_horizontal_jump(void);
+static void battle_move_spread_to_neighbors(void);
+static void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void);
+static void battle_target_apply_unit_team_eligibility(
+    s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff);
+static void battle_target_apply_vertical_fixed(s32 x, s32 y);
+static void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode);
+static void battle_target_calculate_aoe_vertical_tolerance(s32 x, s32 y, s32 lo, s32 hi);
+static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
+static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags);
+static void battle_target_clear_range_on_untargetable_tiles(void);
+static s32 battle_target_clear_selection_state_of_all_panels(void);
+static s32 battle_target_disable_green_panel_on_all_but_target_tile(const action_command_t* action);
+static s32 battle_target_run_calculator(const action_command_t* source);
+static s32 battle_target_set_all_panels_targeted_if_targetable(void);
+static s32 battle_target_set_green_panels_for_action(const action_command_t* action);
+static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags);
+static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x);
+static s32 battle_target_validate_height_overlap(
+    s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id);
+static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
+
+static s32 battle_move_get_weather_terrain_cost(void) {
     s32 weather;
 
     weather = battle_map_get_effective_weather();
@@ -54,7 +88,7 @@ battle_chocobo_mount_state_e battle_unit_get_chocobo_mount_state(const unit_stat
  * constants and `g_main_terrain_movement_cost_tables[cost_table]` let sched1 reorder the pre-loop
  * `li s2`/`li a3`/`lbu` sequence.
  */
-void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
+static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     move_pathfind_scratch_t* config;
     move_record_t* record;
     move_record_t* current;
@@ -363,7 +397,7 @@ s32 battle_move_set_reachable_tiles(s32 unit_id, s32 unused_map_x, s32 unused_ma
 }
 
 /* Clears the enterable flag on the tile of every dead or jumping unit. */
-void battle_move_clear_enterable_flags_under_dead_or_jumping_units(void) {
+static void battle_move_clear_enterable_flags_under_dead_or_jumping_units(void) {
     s32 unit_id;
 
     for (unit_id = 0; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {
@@ -389,7 +423,7 @@ void battle_move_clear_enterable_flags_under_dead_or_jumping_units(void) {
  * START_SPREAD queues the mover's own tile with Move + 1 range (and the unit
  * record on that tile when it is mountable); TERRAIN_ONLY leaves the units
  * out. */
-void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
+static void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     u8* frontier = g_move_frontier_flags_ptr;
@@ -511,7 +545,7 @@ void battle_move_set_tile_flags_for_pathfinding(s32 mode) {
  * any mountable panel. Otherwise the tile needs remaining range, a low
  * enough slope, a passable surface and depth the unit tolerates, and must be
  * crossable and either empty or a valid destination the unit can ride onto. */
-void battle_move_set_reachable_tile_flags(void) {
+static void battle_move_set_reachable_tile_flags(void) {
     move_pathfind_scratch_t* config;
     move_spread_state_t* spread;
     u8* flags;
@@ -630,7 +664,7 @@ void battle_move_spread_to_south_preset(void) {
 
 /* Reset the best-candidate fields of the spread state and load the current
  * tile's heights. */
-void battle_move_init_spread_scratch(void) {
+static void battle_move_init_spread_scratch(void) {
     move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->best_height_delta = 0xFF;
     spread->best_fly_height_delta = 0xFF;
@@ -642,7 +676,7 @@ void battle_move_init_spread_scratch(void) {
 
 /* Load the current tile's base height (doubled, in half-height units), half
  * height and slope into the spread state. */
-void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void) {
+static void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     state->source_base_height_times_two = state->current_tile->height << 1;
     state->source_half_height = state->current_tile->depth_half_height.half_height;
@@ -650,7 +684,7 @@ void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void) {
 }
 
 /* Work tile = current tile + one step of the preset direction. */
-void battle_move_set_spreading_tile_x_and_y_coordinates(void) {
+static void battle_move_set_spreading_tile_x_and_y_coordinates(void) {
     move_spread_state_t* spread = g_move_scratch_pad_ptr;
     spread->work_x = spread->tile_x + spread->x_step;
     spread->work_y = spread->tile_y + spread->y_step;
@@ -661,7 +695,7 @@ void battle_move_set_spreading_tile_x_and_y_coordinates(void) {
  *
  * Return 1 for an invalid coordinate, or 0 for an in-bounds tile.
  */
-s32 battle_move_check_spreading_tile_coordinates(void) {
+static s32 battle_move_check_spreading_tile_coordinates(void) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     move_pathfind_scratch_t* config = g_move_config_ptr;
     s32 x = state->work_x;
@@ -685,7 +719,7 @@ s32 battle_move_check_spreading_tile_coordinates(void) {
  * 3 for a restricted terrain exit, or 4 for a panel with less than 2
  * remaining range units. Return 0 when spreading can continue.
  */
-s32 battle_move_init_source_panel(s32 direction) {
+static s32 battle_move_init_source_panel(s32 direction) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     u8* frontier = g_move_frontier_flags_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
@@ -741,7 +775,7 @@ s32 battle_move_init_source_panel(s32 direction) {
  * Return 0 for an accepted path, otherwise a numeric rejection reason.
  * The mount helper can update separate state before a later rejection.
  */
-s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
+static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     move_pathfind_scratch_t* config = g_move_config_ptr;
     u8* flags = g_move_frontier_flags_ptr;
@@ -844,7 +878,7 @@ s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
  * unit on the tile, and 8 and up (outer_count 0x24) from that unit's standing
  * height + i / 4 - 2. Each source whose neighbor is on the map tries
  * inner_count destinations: either level, on the ground or on a unit. */
-void battle_move_check_and_spread_one_tile_around(void) {
+static void battle_move_check_and_spread_one_tile_around(void) {
     move_spread_state_t* state;
     s32 i;
     s32 j;
@@ -875,7 +909,7 @@ void battle_move_check_and_spread_one_tile_around(void) {
  * one register. The budget stays an s32 read through u8 casts: a u8 local is
  * born one RTL copy later, and that shorter live range outranks extra_span in
  * global allocation, swapping their registers. */
-void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span) {
+static void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span) {
     move_spread_state_t* state;
     move_pathfind_scratch_t* config;
     move_record_t* records;
@@ -946,7 +980,7 @@ enum {
  * exit side's two slope bits; exit_height is the exit side height (or tile
  * height plus unit size).
  */
-u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height) {
+static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height) {
     s32 elevation;
     map_tile_t* tile;
     map_tile_depth_t depth;
@@ -983,7 +1017,7 @@ u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exi
  * Matching: the a>b arm stages the stored ceiling bound in `high` with the
  * depth term loaded before the store, and the other arm's split `low`
  * assignment keeps `low` ahead of `high` in allocation priority. */
-s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shift_b, u8 height) {
+static s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shift_b, u8 height) {
     move_spread_state_t* state;
     move_record_t* records;
     u8* frontier;
@@ -1070,7 +1104,7 @@ s32 battle_move_check_horizontal_jump(s32 tile_index, u8 shift_a, u8 shift_b, u8
  * The first four directions spread from the tile and the rest from above the
  * unit (source_unit_record_flag). Each pass continues only while the source panel's remaining
  * range minus the jump span stays at least 2 and both spans are clear. */
-void battle_move_spread_horizontal_jump(void) {
+static void battle_move_spread_horizontal_jump(void) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 outer_index;
@@ -1271,7 +1305,7 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
 
 /* 1 when the teleport succeeds: always with Teleport 2, otherwise it fails
  * with a 10 in 100 chance per tile of distance beyond Move. */
-s32 battle_move_calculate_teleport_chances(void) {
+static s32 battle_move_calculate_teleport_chances(void) {
     move_pathfind_scratch_t* ctx = g_move_config_ptr;
     s32 dx, dy;
 
@@ -1294,7 +1328,7 @@ s32 battle_move_calculate_teleport_chances(void) {
  * the tile or unit record the back-trace marked with path_length - n; the byte
  * records the direction, the distance, the level, whether the step ends on a
  * unit and whether either end is a climb. */
-void battle_move_encode_path_steps(void) {
+static void battle_move_encode_path_steps(void) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     move_record_t* records = g_move_records_ptr;
@@ -1430,7 +1464,7 @@ void battle_move_encode_path_steps(void) {
  * Extended unit records and ordinary terrain use different height checks;
  * only the terrain path adds water depth after finding the ceiling.
  */
-s32 battle_move_init_source_geometry(s32 direction) {
+static s32 battle_move_init_source_geometry(s32 direction) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     u8* frontier = g_move_frontier_flags_ptr;
     move_record_t* records = g_move_records_ptr;
@@ -1476,7 +1510,7 @@ s32 battle_move_init_source_geometry(s32 direction) {
  * Tile candidates use the selected map layer. unit-record candidates use
  * compact standing/top heights and an auxiliary targeting panel.
  */
-s32 battle_move_init_destination_geometry(s32 candidate) {
+static s32 battle_move_init_destination_geometry(s32 candidate) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     u8* tile_flags = g_move_frontier_flags_ptr;
@@ -1547,7 +1581,7 @@ s32 battle_move_init_destination_geometry(s32 candidate) {
  * budgets by the smaller immediate height difference. Non-AI mode returns 0
  * after geometry checks and sets budget_matches only when the budget matches.
  */
-s32 battle_move_update_candidate(s32 extra_span) {
+static s32 battle_move_update_candidate(s32 extra_span) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     move_pathfind_scratch_t* config = g_move_config_ptr;
     u8* terrain_costs = g_move_terrain_costs_ptr;
@@ -1606,7 +1640,7 @@ s32 battle_move_update_candidate(s32 extra_span) {
  * Direction callbacks prepare each candidate; accepted movement updates use
  * zero extra span. Outside AI mode, candidate_saved enables the common finalizer.
  */
-void battle_move_spread_to_neighbors(void) {
+static void battle_move_spread_to_neighbors(void) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 direction;
@@ -1639,7 +1673,7 @@ void battle_move_spread_to_neighbors(void) {
  * when their saved presence bits are set. The destination update uses byte
  * masks because its equivalent bitfield assignments change register allocation.
  */
-void battle_move_apply_selected_candidate(move_spread_state_t* state) {
+static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
     state->candidate_remaining_range = state->saved_remaining_range;
     state->tile_x = state->saved_x;
     state->tile_y = state->saved_y;
@@ -1668,7 +1702,7 @@ void battle_move_apply_selected_candidate(move_spread_state_t* state) {
  * jump_half + 1 tiles away, provided every tile in between can be jumped over
  * at the landing height (move_check_horizontal_jump). The best
  * candidate is saved and, outside AI propagation, applied to the spread state. */
-void battle_move_calculate_spread(void) {
+static void battle_move_calculate_spread(void) {
     move_pathfind_scratch_t* config = g_move_config_ptr;
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     s32 outer_index;
@@ -1731,7 +1765,7 @@ void battle_move_calculate_spread(void) {
  * Every attempt clears budget_matches; accepted candidates replace the saved
  * coordinates, selectors and predecessor budget, then set candidate_saved.
  */
-void battle_move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span) {
+static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     u8 height_delta;
 
@@ -1815,7 +1849,7 @@ battle_walk_path_t* battle_move_calculate_walkto_pathing(
  * The 0xff record fill is an s32 local: a literal fill becomes a single-set
  * hoisted pseudo that sched1 places after `li s2,0xf`.
  */
-battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
+static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
     s32 target_y, u32 target_level, s32 initialize, s32* suspended, s32 check_budget) {
     u8 frontier_snapshot[MAP_TILE_COUNT];
     move_height_offsets_t no_offsets = { 0 };
@@ -2120,7 +2154,7 @@ s32 battle_ai_propagate_target_movement(
     return state->reachable_count;
 }
 
-void battle_target_check_moldball_virus_depth(s16 ability_id) {
+static void battle_target_check_moldball_virus_depth(s16 ability_id) {
     map_tile_t* tile;
     target_panel_t* panel;
     s32 i;
@@ -2142,7 +2176,7 @@ void battle_target_check_moldball_virus_depth(s16 ability_id) {
 
 /* Clear the range and the mark of each panel whose tile is flagged untargetable.
  * Only the 256 lower-level panels are visited. */
-void battle_target_clear_panels_on_untargetable_tiles(void) {
+static void battle_target_clear_panels_on_untargetable_tiles(void) {
     s32 i;
     map_tile_t* src;
     target_panel_t* dst;
@@ -2169,7 +2203,7 @@ void battle_target_clear_panels_on_untargetable_tiles(void) {
  * the front end fold the 0x100 into the symbol, and the target instead
  * strength-reduces 5 * j and 8 * j against hoisted table bases. Block-scoped
  * depth temporaries keep that value out of global allocation. */
-void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 single_layer) {
+static void battle_target_apply_vertical_tolerance(u8 ref_height, u8 tolerance, s32 single_layer) {
     s32 max_delta;
     s32 ref;
     s32 i;
@@ -2253,7 +2287,7 @@ void battle_target_clear_panel_spread_flags(void) {
 
 /* Remove the range from every panel, on both levels, within `range` tiles
  * (Manhattan distance) of (x, y). */
-void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
+static void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
     s32 i;
     s32 j;
     s32 dy;
@@ -2279,7 +2313,7 @@ void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
  * clears the mark and spreads from it; passes stop once none spread. A zero
  * count clears the tile data instead. Every caller passes 0 as the unused
  * second argument. */
-void battle_target_spread_panels(u8 passes, s32 unused) {
+static void battle_target_spread_panels(u8 passes, s32 unused) {
     s32 y;
     s32 x;
     s32 changed;
@@ -2313,7 +2347,7 @@ void battle_target_spread_panels(u8 passes, s32 unused) {
  * refreshed to one less, on both map levels, and marked as a new frontier when
  * enough budget is left to keep spreading. Returns 1 when any neighbor was
  * marked. */
-s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
+static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
     target_panel_t* panel;
     s32 changed;
     s32 i;
@@ -2371,7 +2405,7 @@ s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
  *
  * Float and BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER stand on the water surface;
  * BATTLE_MOVEMENT_SET_3_WALK_ON_WATER stands one level below it. */
-u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
+static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
     map_tile_t* tile;
     map_tile_depth_t terrain_depth;
     s32 height;
@@ -2413,7 +2447,7 @@ u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
  * away whose distance, less a quarter of the unit's height advantage, is
  * within range. Both elevation levels of each tile are tested.
  */
-void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range, u8 flags) {
+static void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range, u8 flags) {
     u8 height;
     u8 tile_height;
     s32 ux;
@@ -2464,7 +2498,7 @@ void battle_target_calculate_arc_range(const unit_stats_t* unit, u8 range, u8 fl
  * weapon flags select the special range shapes; direct also removes the close
  * range.
  */
-void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
+static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
     s32 y;
     s32 x;
     s32 index;
@@ -2515,7 +2549,7 @@ void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
  * 0x80 covers the four adjacent tiles within a narrow height band, otherwise
  * the two rings at distance 1 and 2 use a band that widens with distance.
  */
-void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags) {
+static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags) {
     u8 height;
     s32 x;
     s32 y;
@@ -2549,7 +2583,7 @@ void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 fla
  * height lies in lo..hi. Heights are in half steps (height * 2 + slope half
  * height + depth * 2); a negative lo counts as 0 and a position off the map is
  * ignored. The strike and lunge weapon ranges are built from it. */
-void battle_target_calculate_aoe_vertical_tolerance(s32 x, s32 y, s32 lo, s32 hi) {
+static void battle_target_calculate_aoe_vertical_tolerance(s32 x, s32 y, s32 lo, s32 hi) {
     s32 level;
     s32 idx;
     s32 height;
@@ -2578,7 +2612,7 @@ void battle_target_calculate_aoe_vertical_tolerance(s32 x, s32 y, s32 lo, s32 hi
 
 /* Remove the range from every panel, on both levels, whose tile is flagged
  * untargetable. */
-void battle_target_clear_range_on_untargetable_tiles(void) {
+static void battle_target_clear_range_on_untargetable_tiles(void) {
     s32 i = 0;
     target_panel_t* dst = g_target_panel_data;
     map_tile_t* src = g_map_tile_data;
@@ -2602,7 +2636,7 @@ void battle_target_clear_range_on_untargetable_tiles(void) {
  * t2 = t1 + 0x500). That needs `upper_panels` derived from `panels` and the
  * per-tile panel pointers taken upper layer first, because loop.c keeps its
  * giv list in reverse discovery order. */
-s32 battle_target_set_jump_ability_panels(const action_command_t* source) {
+static s32 battle_target_set_jump_ability_panels(const action_command_t* source) {
     u16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 ability_ct[0x48];
@@ -2732,7 +2766,7 @@ s32 battle_target_set_jump_ability_panels(const action_command_t* source) {
  * Range bits 0-6 seed the unit's panel on both map levels and bit 7 excludes
  * the unit's own tile afterwards. Panels flagged in flags bits 0-1 are never
  * marked. Returns the number of marked panels. */
-s32 battle_target_calculate_ability_range_with_map_parameters(const unit_stats_t* unit, u8 range) {
+static s32 battle_target_calculate_ability_range_with_map_parameters(const unit_stats_t* unit, u8 range) {
     /* A byte collision test retains the original single-mask branch. */
     target_panel_t* panel;
     target_panel_t* upper;
@@ -2779,7 +2813,7 @@ s32 battle_target_calculate_ability_range_with_map_parameters(const unit_stats_t
  * of the location index. Direct typed indexing removes that copy and changes
  * the later register allocation; the binding emits no instructions.
  */
-s32 battle_target_set_ability_panels(const action_command_t* source) {
+static s32 battle_target_set_ability_panels(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     ability_secondary_data_t* ability;
@@ -2870,7 +2904,7 @@ s32 battle_target_set_ability_panels(const action_command_t* source) {
 
 /* Build the targeting panels for a weapon attack: the weapon's range around the
  * acting unit, without the unit's own tile. Returns the number of tiles in range. */
-s32 battle_target_set_weapon_attack_panels(const action_command_t* source) {
+static s32 battle_target_set_weapon_attack_panels(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;
     s32 idx;
@@ -2894,7 +2928,7 @@ s32 battle_target_set_weapon_attack_panels(const action_command_t* source) {
 /* Publish the panels in range to the map: a tile whose panel has range left gets
  * MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
  * and every other tile loses the flag. Returns the number of flagged tiles. */
-s32 battle_target_set_all_panels_targeted_if_targetable(void) {
+static s32 battle_target_set_all_panels_targeted_if_targetable(void) {
     map_tile_t* tile;
     target_panel_t* panel;
     s32 count;
@@ -2923,7 +2957,7 @@ s32 battle_target_set_all_panels_targeted_if_targetable(void) {
  * vertical-fixed or a unit-panels flag; the others end with
  * target_set_all_panels_targeted_if_targetable, which tests the panel's
  * range instead of its mark. */
-s32 battle_target_clear_selection_state_of_all_panels(void) {
+static s32 battle_target_clear_selection_state_of_all_panels(void) {
     map_tile_t* tile;
     target_panel_t* panel;
     s32 count;
@@ -2948,7 +2982,7 @@ s32 battle_target_clear_selection_state_of_all_panels(void) {
  * The retail loop never advances the unit pointer, so it re-marks the same
  * panel; the shape is kept as compiled.
  */
-void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags) {
+static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags) {
     target_panel_t* panel;
     s32 i;
     s32 mark_allies;
@@ -2980,7 +3014,7 @@ void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 f
  * The target reads the first layer's availability byte unsigned and marks
  * both layers when that byte is nonzero. Sharing the loop index and panel
  * temporaries across the sweeps preserves the target register allocation. */
-void battle_target_apply_vertical_fixed(s32 x, s32 y) {
+static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
     s32 shared;
     s32 vertical;
     s32 tile_index;
@@ -3330,7 +3364,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
  *
  * `total` doubles as the height swap temporary, and the separate upper_index
  * keeps the target's instruction order for the upper-layer tile address. */
-s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id) {
+static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id) {
     battle_unit_height_data_t height;
     unit_stats_t* unit;
     map_tile_t* lower;
@@ -3488,7 +3522,7 @@ s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevati
 /* Return the target only when its vertical span overlaps the attacker's.
  *
  * The coordinate arguments are unused here but are part of the caller ABI. */
-s32 battle_target_validate_height_overlap(
+static s32 battle_target_validate_height_overlap(
     s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id) {
     battle_unit_height_data_t height_data;
     u32 target_walking_height;
@@ -3533,7 +3567,7 @@ void battle_target_disable_green_panel_flags(void) {
  * 5, 4 or 3. Units that are absent, crystallized, jumping, treasure, or
  * flagged 0x40 in mount_info are skipped. Returns the number of marked units,
  * or -1 when the command does not name one type and one multiplier ability. */
-s32 battle_target_run_calculator(const action_command_t* source) {
+static s32 battle_target_run_calculator(const action_command_t* source) {
     battle_unit_height_data_t height;
     action_command_t action;
     unit_stats_t* actor;
@@ -3632,7 +3666,7 @@ s32 battle_target_run_calculator(const action_command_t* source) {
 
 /* Leave only the action's target tile marked as targeted. Returns 1, or -1
  * when that tile is off the map or blocked. */
-s32 battle_target_disable_green_panel_on_all_but_target_tile(const action_command_t* action) {
+static s32 battle_target_disable_green_panel_on_all_but_target_tile(const action_command_t* action) {
     action_command_t action_copy;
     u8 x;
     u8 y;
@@ -3667,7 +3701,7 @@ s32 battle_target_disable_green_panel_on_all_but_target_tile(const action_comman
  * index pseudo the allocation priority the target needs (a2), while keeping the
  * `(elevation * 256 + y * width) + x` operand order.
  */
-s32 battle_target_set_green_panels_for_action(const action_command_t* action) {
+static s32 battle_target_set_green_panels_for_action(const action_command_t* action) {
     /* A byte collision test retains the original single-mask branch. */
     action_command_t action_copy;
     ability_secondary_data_t* ability;
@@ -3813,7 +3847,8 @@ s32 battle_target_set_green_panels_for_action(const action_command_t* action) {
  * same-team even if its initial and live team fields differ. `allow_allies`
  * and `allow_enemies` are raw nonzero flag values. Unless the ability AoE is
  * `0xff`, every nonempty panel left after filtering is marked selected. */
-void battle_target_apply_unit_team_eligibility(s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff) {
+static void battle_target_apply_unit_team_eligibility(
+    s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff) {
     s32 relation;
     u8 team_flags;
     s32 panel_index;
@@ -3884,7 +3919,7 @@ s32 battle_target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_ind
  * off the kept lines loses its range, and the marks that identified the lines are
  * cleared. The call also turns on nearest-first ordering of the target list
  * (g_battle_sort_targets_nearest_first). */
-void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode) {
+static void battle_target_build_directional_attack_panels(const action_command_t* source, u8 mode) {
     action_command_t action;
     unit_stats_t* unit;
     target_panel_t* panel;
@@ -3946,7 +3981,7 @@ void battle_target_build_directional_attack_panels(const action_command_t* sourc
  * the table is g_target_panels. The walk stops
  * at the map edge or after 32 tiles, and any other direction value marks nothing.
  * `dir` is reused as the panel index. */
-void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
+static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y) {
     s32 i;
     s32 dx;
     s32 dy;

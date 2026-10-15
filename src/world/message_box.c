@@ -455,7 +455,7 @@ void menu_run_unit_status_thread_variant(void) {
     thread_exit_current();
 }
 
-void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) {
+static void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
             record->buffer = menu_build_window_image(
@@ -476,7 +476,7 @@ void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) 
     }
 }
 
-void world_text_release_current_message_box_slot(void) {
+static void world_text_release_current_message_box_slot(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
@@ -494,7 +494,7 @@ void world_text_release_current_message_box_slot(void) {
  * script counters. The ring byte is read before the phase and the inner bound
  * is `width / 2`, which keeps the per-row recomputation of the target.
  */
-void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 wait) {
+static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 wait) {
     s32 slot;
     s32 i;
     s32 j;
@@ -657,7 +657,7 @@ void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y, s32 w
 
 /* Mirror a POLY_FT4 texture horizontally when direction is negative: u0/u1
  * and u2/u3 trade places, each shifted by one texel. */
-void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction) {
+static void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction) {
     s32 step;
     u8 u;
 
@@ -678,13 +678,13 @@ void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction) {
 }
 
 /* The menu-screen library's copy of menu_lerp_fixed12 (the same routine compiled twice). */
-s32 world_screen_menu_lerp_fixed12(s32 from, s32 to, s32 t) {
+static s32 world_screen_menu_lerp_fixed12(s32 from, s32 to, s32 t) {
     return ((to - from) * t) / ONE + from;
 }
 
 /* Interpolate the four corners of a textured quad between two RECTs. The menu-screen library's copy of
  * menu_lerp_rect_to_poly_ft4; world_menu_animate_window_quads_to_rects calls this one. */
-void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
+static void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
     setXY4(poly, world_screen_menu_lerp_fixed12(from->x, to->x, t), world_screen_menu_lerp_fixed12(from->y, to->y, t),
         world_screen_menu_lerp_fixed12(from->x + from->w, to->x + to->w, t),
         world_screen_menu_lerp_fixed12(from->y, to->y, t), world_screen_menu_lerp_fixed12(from->x, to->x, t),
@@ -700,7 +700,7 @@ void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, c
  * growing (its quad area is smaller than the destination area) the sweep runs
  * a little past 0x1000 and then settles back down to it.
  */
-void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon) {
+static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon) {
     RECT from_main;
     RECT from_icon;
     s32 quad_area;
@@ -787,7 +787,7 @@ void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, REC
  * center: each frame crops a sprite of the rectangle by the level's
  * percentage and copies the cropped bounds into the quad's corners.
  */
-void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
+static void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
     void* source; /* never assigned; the target passes an uninitialized $s5 */
     s32 level;

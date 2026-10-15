@@ -8,6 +8,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_advance_brave_story_birthdays(void);
+
 /* Streams CD-resident image chunks to VRAM through a retrying state machine.
  *
  * The switch jump table occupies 0x80067000-0x80067020, at the start of
@@ -708,7 +710,7 @@ void wldcore_calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * loop's base materialises as the biased constant 0x80057f35; entry 0 is the
  * only absolute access to 0x80057f34.
  */
-void wldcore_advance_brave_story_birthdays(void) {
+static void wldcore_advance_brave_story_birthdays(void) {
     const u8(*birthdays)[2] = g_wldcore_brave_story_birthdays;
     s32 day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
     s32 month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);

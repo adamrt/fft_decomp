@@ -8,6 +8,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 equip_menu_run_equip_mode(void);
+static s32 equip_menu_run_remove_mode(void);
+static s32 equip_menu_update_clear_all_equipment_prompt(void);
+
 void equip_menu_update_screen_state(void) {
     s32 result;
     s32 state;
@@ -78,7 +82,7 @@ void equip_menu_update_screen_state(void) {
  * The if/else spelling of the slot fallback is required: it keeps CSE from
  * reusing the stored slot for the category argument (the target reloads it)
  * and schedules the unit load ahead of the slot test. */
-s32 equip_menu_run_equip_mode(void) {
+static s32 equip_menu_run_equip_mode(void) {
     s16 selected;
     s16 scroll;
     s32 help_id;
@@ -205,7 +209,7 @@ s32 equip_menu_run_equip_mode(void) {
     return 1;
 }
 
-s32 equip_menu_run_remove_mode(void) {
+static s32 equip_menu_run_remove_mode(void) {
     /* Never referenced; the target frame reserves these bytes. */
     u8 unused[0x48];
     s32 i;
@@ -288,7 +292,7 @@ s32 equip_menu_run_remove_mode(void) {
  *
  * Returns 1 while waiting for input and 0 after the prompt is accepted or dismissed.
  */
-s32 equip_menu_update_clear_all_equipment_prompt(void) {
+static s32 equip_menu_update_clear_all_equipment_prompt(void) {
     u8 unused_buffer[0x40]; /* unreferenced; reserves the target's frame */
     u16 marker_state;
     s32 index;

@@ -14,6 +14,13 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
+static effect_list_node_t* battle_effect_alloc_list_node(s16 kind);
+static void battle_effect_free_list_node(effect_list_node_t* node);
+static s32 battle_effect_get_random_between(s32 value_a, s32 value_b);
+static void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index);
+static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
+
 void battle_heap_init(battle_heap_node_t* buffer, u32 buffer_size) {
     s32 owner;
     s16 block_count;
@@ -162,7 +169,7 @@ void battle_heap_print_stats(void) {
  *
  * The rotation terms form the identity matrix's third row and column. Every
  * corner starts at the same screen depth before an effect supplies geometry. */
-void battle_effect_init_render_state(void) {
+static void battle_effect_init_render_state(void) {
     g_effect_matrix.m[2][2] = ONE;
     g_effect_frame_parity = 0;
     g_effect_matrix.m[2][1] = 0;
@@ -205,7 +212,7 @@ s32 battle_effect_get_prim_buffer_offset(void) {
  *
  * The eight-byte prefix is followed by one pointer per sprite part. The renderer tracks
  * both current and peak occupancy for the shared effect pool. */
-effect_sprite_block_t* battle_effect_alloc_sprite_block(u8 sprite_count) {
+static effect_sprite_block_t* battle_effect_alloc_sprite_block(u8 sprite_count) {
     effect_sprite_block_t* block;
     s32 total_count;
 
@@ -223,7 +230,7 @@ effect_sprite_block_t* battle_effect_alloc_sprite_block(u8 sprite_count) {
 }
 
 /* Release an effect-frame sprite block and update the live sprite count. */
-void battle_effect_free_sprite_block(effect_sprite_block_t* block) {
+static void battle_effect_free_sprite_block(effect_sprite_block_t* block) {
     g_effect_sprite_count -= block->header.sprite_count;
     battle_heap_free_block(block);
 }
@@ -242,7 +249,7 @@ void battle_effect_start_render_frame(void) {
  *
  * The original renderer wraps before an allocation that would cross the
  * 0x8000-byte arena boundary; callers consume the result immediately. */
-void* battle_effect_alloc_primitive(effect_primitive_type_e primitive_type) {
+static void* battle_effect_alloc_primitive(effect_primitive_type_e primitive_type) {
     /* These registers retain the arena offset and primitive size across the wrap test. */
     s32 offset;
     register s32 size __asm__("$4");
@@ -272,7 +279,7 @@ void* battle_effect_alloc_primitive(effect_primitive_type_e primitive_type) {
  * with two draw-mode primitives, builds the 2D rotation (optionally scaled by
  * `zoom`) into the effect matrix, and projects each part's corners through the
  * GTE into a POLY_FT4 linked into `ot`. */
-void battle_effect_submit_sprite_to_ordering_table(
+static void battle_effect_submit_sprite_to_ordering_table(
     effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot) {
     DR_MODE* draw_mode;
     POLY_FT4* quad;
@@ -350,7 +357,7 @@ void battle_effect_submit_sprite_to_ordering_table(
  * slot angle, transforms the frame's four corners into the slot's
  * double-buffered POLY_FT4, and adds that quad between the slot's two draw-mode
  * primitives. */
-void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
+static void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
     SVECTOR local;
     VECTOR position;
     s32 sxy;
@@ -433,7 +440,7 @@ void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
 
 /* Allocate the 256 effect work records and chain them all into the free list.
  * Also clears the translation of the particle heading and emitter matrices. */
-void battle_effect_init_record_chain(void) {
+static void battle_effect_init_record_chain(void) {
     s32 index;
     effect_work_record_t* records;
 
@@ -467,7 +474,7 @@ void battle_effect_init_record_chain(void) {
  * record's data (0x0000-0x3000 map to list kinds 0, 2, 4 and 6); other kinds
  * get no data. g_effect_work_record_peak tracks the peak number of records in use.
  */
-effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s16 kind) {
+static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s16 kind) {
     effect_work_record_t* work;
     effect_record_t* owner;
 
@@ -1280,7 +1287,7 @@ void battle_noop_801a866c(void) {
 }
 
 /* Return a signed 16-bit value in the half-open interval between two bounds. */
-s16 battle_effect_get_random_between_s16(s16 minimum, s16 maximum) {
+static s16 battle_effect_get_random_between_s16(s16 minimum, s16 maximum) {
     s16 result;
 
     if (minimum == maximum) {
@@ -1355,11 +1362,11 @@ s32 battle_effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 curr
 }
 
 /* t ranges from 0 at from to 2 * ONE at to. */
-void battle_effect_interpolate_s16(s16 from, s16 to, s32 t, s16* out) {
+static void battle_effect_interpolate_s16(s16 from, s16 to, s32 t, s16* out) {
     *out = from + (((to - from) * t) / (2 * ONE));
 }
 
-void battle_effect_interpolate_svector(const SVECTOR* from, const SVECTOR* to, s32 t, SVECTOR* out) {
+static void battle_effect_interpolate_svector(const SVECTOR* from, const SVECTOR* to, s32 t, SVECTOR* out) {
     battle_effect_interpolate_s16(from->vx, to->vx, t, &out->vx);
     battle_effect_interpolate_s16(from->vy, to->vy, t, &out->vy);
     battle_effect_interpolate_s16(from->vz, to->vz, t, &out->vz);
@@ -1387,11 +1394,11 @@ void battle_effect_interpolate_svector_linear(
     battle_effect_interpolate_svector(from, to, (current << 13) / duration, out);
 }
 
-void battle_effect_lerp_component_q13(s32 from, s32 to, s32 t, s32* out) {
+static void battle_effect_lerp_component_q13(s32 from, s32 to, s32 t, s32* out) {
     *out = from + (to - from) * t / (2 * ONE);
 }
 
-void battle_effect_interpolate_vector_q13(const VECTOR* from, const VECTOR* to, s32 t, VECTOR* out) {
+static void battle_effect_interpolate_vector_q13(const VECTOR* from, const VECTOR* to, s32 t, VECTOR* out) {
     battle_effect_lerp_component_q13(from->vx, to->vx, t, &out->vx);
     battle_effect_lerp_component_q13(from->vy, to->vy, t, &out->vy);
     battle_effect_lerp_component_q13(from->vz, to->vz, t, &out->vz);
@@ -1427,7 +1434,7 @@ s32 battle_lerp_fixed8(s32 start, s32 end, s32 factor) {
 
 /* Store and return the interpolation with an eight-bit fractional factor.
  * The arithmetic right shift rounds negative products down. */
-s32 battle_lerp_fixed8_and_store(s32 start, s32 end, s32 factor, s32* out) {
+static s32 battle_lerp_fixed8_and_store(s32 start, s32 end, s32 factor, s32* out) {
     s32 result;
 
     result = ((end - start) * factor >> 8) + start;
@@ -1481,7 +1488,7 @@ void battle_effect_interpolate_emitter_velocity_direction_spread(
 /* Random integer between the two arguments, given in either order: at least the
  * smaller and less than the larger. Equal arguments return that value without
  * drawing a random number. */
-s32 battle_effect_get_random_between(s32 value_a, s32 value_b) {
+static s32 battle_effect_get_random_between(s32 value_a, s32 value_b) {
     s32 remainder;
     s32 random_value;
     s32 result;
@@ -1690,7 +1697,7 @@ void battle_effect_add_svectors(const SVECTOR* first, const SVECTOR* second, SVE
     out->vz = first->vz + second->vz;
 }
 
-void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
+static void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
@@ -1835,7 +1842,7 @@ void battle_effect_restore_inertia_threshold(void) {
 }
 
 /* Advance an effect slot's motion state by one frame. */
-void battle_effect_step_motion(effect_motion_t* motion) {
+static void battle_effect_step_motion(effect_motion_t* motion) {
     s32 unused[4]; /* The target reserves an unused 16-byte frame. */
 
     motion->position.x += motion->velocity.x;
@@ -1938,7 +1945,7 @@ void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
  * the free-list head.  The GetClut result is computed and discarded in the
  * target.
  */
-void battle_effect_init_free_list(void) {
+static void battle_effect_init_free_list(void) {
     s32 i;
 
     GetClut(0, 0x1f0);
@@ -1964,7 +1971,7 @@ void battle_effect_init_free_list(void) {
  * The free list is not tested for exhaustion: with none free the sentinel node 0
  * would be handed out. There are as many nodes as work records, and
  * effect_alloc_work_record is the only caller. */
-effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
+static effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
     u16* free_head = &g_effect_free_list_node_head;
     u16* list_head = &g_effect_active_list_node_head;
     u16 index = *free_head;
@@ -1989,7 +1996,7 @@ effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
     return node;
 }
 
-void battle_effect_free_list_node(effect_list_node_t* node) {
+static void battle_effect_free_list_node(effect_list_node_t* node) {
     u16* free_head;
 
     if (node->sprite_block != 0) {
@@ -2011,7 +2018,7 @@ void battle_effect_free_list_node(effect_list_node_t* node) {
 /* Point a sprite animation node at parameter set animation_index and restart
  * it: clear the sequence position and hold time, store frame_group doubled and
  * set kind bit 0 to mark the frame dirty. */
-void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index) {
+static void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index) {
     u8* sequences;
     u8* entry;
     s16 offset;
@@ -2037,7 +2044,7 @@ void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_
  * 0x83 adds a signed 8-bit x/y delta. kind bit 0 marks the frame dirty; bits
  * 1-2 select camera projection or a screen-space position, with or without
  * the camera zoom. The oversized frame is reproduced with unused locals. */
-void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue) {
+static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue) {
     effect_list_node_t* node;
     SVECTOR input;
     SVECTOR unused_20;

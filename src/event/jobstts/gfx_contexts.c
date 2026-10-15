@@ -83,7 +83,7 @@ void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
 }
 
 /* Initialize the POLY_FT4, TILE and DR_MOVE primitive headers of one graphics context. */
-void jobstts_gfx_init_primitive_buffers(jobstts_gfx_context_t* context) {
+static void jobstts_gfx_init_primitive_buffers(jobstts_gfx_context_t* context) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_ft4_capacity; i++) {

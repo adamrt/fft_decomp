@@ -37,7 +37,7 @@ void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {
 }
 
 /* Initialize the POLY_FT4 and TILE primitive headers of one graphics context. */
-void card_gfx_init_primitive_lists(card_graphics_context_t* lists) {
+static void card_gfx_init_primitive_lists(card_graphics_context_t* lists) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_ft4_capacity; i++) {

@@ -15,7 +15,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void menu_close(void) {
+static s32 thread_find_first_running_menu_thread(void);
+
+static void menu_close(void) {
     mem_copy_bytes_nonempty(g_text_section_pointers, g_text_saved_pointers, 0x80);
     main_heap_free(g_main_heap_high_overlay_load_address);
     g_menu_help_open = 0;
@@ -409,7 +411,7 @@ void menu_run_battle_help(void) {
 
 /* The lowest running slot from THREAD_SLOT_SYSTEM_FUNCTION (4) to THREAD_SLOT_MENU (8),
  * or 9 when none runs. */
-s32 thread_find_first_running_menu_thread(void) {
+static s32 thread_find_first_running_menu_thread(void) {
     s32 thread_id;
 
     for (thread_id = THREAD_SLOT_SYSTEM_FUNCTION; thread_id <= THREAD_SLOT_MENU; thread_id++) {

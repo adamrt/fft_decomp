@@ -7,7 +7,7 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
-void etc_graphic_open(s32 graphic_id) {
+static void etc_graphic_open(s32 graphic_id) {
     u8* image_buffer;
     s32 frame;
 
@@ -119,7 +119,7 @@ void etc_noop_801bf3d8(void) {
 
 /* Build the 2x2 POLY_GT4 grid that shows a chapter title graphic. Row 0 is
  * the part already revealed by `fade`; row 1 is the 32-pixel gradient edge. */
-void etc_graphic_build_chapter_polygons(
+static void etc_graphic_build_chapter_polygons(
     s32 graphic_id, s32 fade, s32 dimension_set, s32 layer, POLY_GT4* primitives, s32 color) {
     sprite_sheet_frame_t* dimensions;
     s32 texture_mode;
@@ -217,7 +217,7 @@ void etc_graphic_build_chapter_polygons(
  * The graphic is always 8-bit (texture mode 1). Retail keeps the first
  * half's right edge in the dead `graphic_id` argument. The unsigned vertical
  * origin preserves the width/x load order. */
-void etc_graphic_build_game_over_polygons(
+static void etc_graphic_build_game_over_polygons(
     s32 graphic_id, s32 fade, s32 dimension_set, s32 reverse_order, POLY_GT4* primitives, s32 color) {
     sprite_sheet_frame_t* dimensions;
     POLY_GT4* primitive;
@@ -316,7 +316,7 @@ void etc_graphic_build_game_over_polygons(
  * to 0 over 128 steps. Each frame builds the graphic twice, into the two
  * primitive sets (parts 2 and 0), alternating buffers by frame.
  */
-void etc_graphic_show_chapter_title(s32 graphic_id) {
+static void etc_graphic_show_chapter_title(s32 graphic_id) {
     /* The target reserves two otherwise unreferenced local 32-bit values. */
     s32 reserved_stack_words[2];
     s32 frame;
@@ -371,7 +371,7 @@ void etc_graphic_show_chapter_title(s32 graphic_id) {
  * brightness from 0x80 to 0 over 128 steps. The two primitive buffers
  * alternate by frame.
  */
-void etc_graphic_show_game_over(s32 graphic_id) {
+static void etc_graphic_show_game_over(s32 graphic_id) {
     /* The target reserves two otherwise unreferenced local 32-bit values. */
     s32 reserved_stack_words[2];
     s32 frame;

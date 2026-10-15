@@ -10,6 +10,55 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count);
+static s32 battle_ai_build_movement_scenarios(void);
+static s32 battle_ai_build_targeted_movement(void);
+static void battle_ai_build_unit_ability_list(s32 unit_id);
+static s32 battle_ai_calculate_ability_range(void);
+static s32 battle_ai_calculate_ratio_times_4(s32 divisor, s32 dividend);
+static s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit);
+static s32 battle_ai_check_target_type(s32 unit_id);
+static ai_rank_order_e battle_ai_compare_target_priority_and_hit_rate(
+    const ai_action_rank_t* first, const ai_action_rank_t* second);
+static void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t* entry, s32 status_id);
+static s32 battle_ai_evaluate_ability_list(void);
+static s32 battle_ai_evaluate_status_cancellation(s32 unit_id, s32 status_id);
+static void battle_ai_fill_foe_proximity_grid(void);
+static s32 battle_ai_fill_target_distance_grid(const ai_coords_t* target);
+static s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limit);
+static void battle_ai_focus_on_target(s32 unit_id);
+static void battle_ai_init_acting_unit_data(void);
+static void battle_ai_init_target_consideration(void);
+static void battle_ai_invert_target_priority(void);
+static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry);
+static s32 battle_ai_refresh_unit_decision_flags(void);
+static s32 battle_ai_run_cowardly_movement(void);
+static s32 battle_ai_score_reachable_tiles(void);
+static s32 battle_ai_select_action_autobattle(void);
+static s32 battle_ai_select_action_fading_life(void);
+static void battle_ai_select_action_fallback(void);
+static s32 battle_ai_select_action_general(void);
+static s32 battle_ai_select_action_initial(void);
+static s32 battle_ai_select_action_random(void);
+static s32 battle_ai_select_action_ranked(void);
+static s32 battle_ai_select_action_recovery(void);
+static s32 battle_ai_select_action_retreat(void);
+static s32 battle_ai_select_action_status(void);
+static s32 battle_ai_select_action_targeted(void);
+static s32 battle_ai_select_active_units(ai_unit_filter_e mode, s32 target_id);
+static s32 battle_ai_select_destination(s32 max_distance, ai_destination_order_e order);
+static void battle_ai_select_destination_with_nearest_fallback(s32 range);
+static void battle_ai_select_destination_with_range_floor(s32 distance_limit);
+static s32 battle_ai_select_peril_target(void);
+static void battle_ai_set_ability_considerations(s32 action_taken);
+static void battle_ai_set_candidate_and_actor_reachable_tiles(void);
+static s32 battle_ai_set_movement_panel_data(s32 movement_taken);
+static s32 battle_ai_should_exclude_from_imminent_enemies(s32 unit_id);
+static void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out);
+static s32 battle_ai_take_random_tile(
+    u16 tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT], ai_coords_t* coordinates, s32 count);
+static void battle_ai_update_team_targeting_flags(void);
+
 s32 battle_ai_build_command(s32 unit_id, ai_command_t* command) {
     ai_data_t* ai;
     unit_stats_t* unit;
@@ -118,7 +167,7 @@ preserve:
  *
  * A mounted rider uses its mount's movement allowance.
  */
-void battle_ai_init_acting_unit_data(void) {
+static void battle_ai_init_acting_unit_data(void) {
     ai_data_t* ai;
     unit_stats_t* unit;
     unit_stats_t* acting;
@@ -153,7 +202,7 @@ void battle_ai_init_acting_unit_data(void) {
  *
  * Keep the simulation flag set across suspension; clear it on completion.
  */
-s32 battle_ai_refresh_unit_decision_flags(void) {
+static s32 battle_ai_refresh_unit_decision_flags(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     ai_unit_decision_t* decision;
@@ -215,7 +264,7 @@ s32 battle_ai_refresh_unit_decision_flags(void) {
  * neither Critical nor Frog. The unavailable-team-support flag propagates to
  * all cached non-enemies, not just the units admitted to those counts.
  */
-void battle_ai_update_team_targeting_flags(void) {
+static void battle_ai_update_team_targeting_flags(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_unit_decision_t* acting_decision = g_ai_data_base.acting_unit_decision;
     s32 ally_count;
@@ -271,7 +320,7 @@ void battle_ai_update_team_targeting_flags(void) {
  * behavior. Other units may abandon special focus behavior when its target is
  * no longer eligible, then select an appropriate nearby unit.
  */
-void battle_ai_init_target_consideration(void) {
+static void battle_ai_init_target_consideration(void) {
     ai_unit_decision_t* decision;
     ai_data_t* ai;
     unit_stats_t* acting;
@@ -343,7 +392,7 @@ void battle_ai_init_target_consideration(void) {
  *
  * Set focus flag 0x40 and clear stay-near flag 0x20, retaining other flags.
  */
-void battle_ai_focus_on_target(s32 unit_id) {
+static void battle_ai_focus_on_target(s32 unit_id) {
     ai_unit_decision_t* decision = g_ai_data_base.acting_unit_decision;
 
     decision->main_target_id = unit_id;
@@ -360,7 +409,7 @@ void battle_ai_focus_on_target(s32 unit_id) {
  * when the frame budget is spent. i and j are reused as the spread unit id
  * and the teleport-range distances, as the target's register assignment
  * shows. */
-s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
+static s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     map_tile_t* tile;
@@ -481,7 +530,7 @@ s32 battle_ai_set_movement_panel_data(s32 movement_taken) {
  *
  * threshold holds first the status-check CT and later the enemy-count cutoff;
  * the single variable reproduces the target's register allocation. */
-void battle_ai_set_ability_considerations(s32 action_taken) {
+static void battle_ai_set_ability_considerations(s32 action_taken) {
     ai_data_t* ai;
     ai_considered_ability_t* ability;
     s32 delay;
@@ -769,7 +818,7 @@ void battle_ai_set_ability_considerations(s32 action_taken) {
  * status_infliction pointer folds +7 into its base; byte-stepping the typed AI
  * container retains the target's base pointer and named field access.
  */
-void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t* entry, s32 status_id) {
+static void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t* entry, s32 status_id) {
     ai_data_t* ai = &g_ai_data_base;
 
     if ((ai->considered_ability.ai_flags.word & AI_ABILITY_ADD_STATUS) == 0) {
@@ -818,7 +867,7 @@ void battle_ai_disable_ability_if_only_inflicts_status(ai_ability_entry_t* entry
  *
  * Decode its physical unit and specialize inventory, weapon and timing data.
  */
-void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
+static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     ai_data_t* ai = &g_ai_data_base;
     s32 ability_id, unit_id, menu, status_id;
     unit_stats_t* unit;
@@ -976,7 +1025,7 @@ static const u32 g_ai_recovery_status_ids_rodata[2] = {
  * Resume the selected pass without repeating action-record initialization.
  * Return -1 to suspend and 0 when that pass completes.
  */
-s32 battle_ai_select_action_initial(void) {
+static s32 battle_ai_select_action_initial(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 result;
 
@@ -1063,7 +1112,7 @@ void battle_ai_reset_action_ranking_fields(ai_action_data_t* action) {
  * preserves those changes until resumed and completed. The simulation helper
  * resumes from its saved phase when the frame budget is exhausted.
  */
-s32 battle_ai_evaluate_charging_movement(void) {
+static s32 battle_ai_evaluate_charging_movement(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit = g_ai_data_base.acting_unit;
     action_command_t* action = &unit->action_command;
@@ -1130,7 +1179,7 @@ evaluate_without_charge:
  * charged action skips the new ability search. The switch preserves the
  * target's completion-return delay slot.
  */
-s32 battle_ai_select_action_general(void) {
+static s32 battle_ai_select_action_general(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 charging_result;
     ai_autobattle_stage_e resume_state;
@@ -1183,7 +1232,7 @@ evaluate_charging:
  * A focused enemy uses enemy_ability_min_reach; a focused ally uses ally_ability_min_reach.
  * Without a focused target, use Move. The caller consumes the full register.
  */
-s32 battle_ai_get_movement_range(void) {
+static s32 battle_ai_get_movement_range(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_unit_decision_t* acting = g_ai_data_base.acting_unit_decision;
     if (acting->flags & AI_DECISION_FOCUS_TARGET) {
@@ -1211,7 +1260,7 @@ enum {
  * grid of 16 columns x 18 signed 16-bit values per map level. The lookup reads
  * the stored 16-bit pattern before negating them.
  */
-void battle_ai_invert_target_priority(void) {
+static void battle_ai_invert_target_priority(void) {
     ai_data_t* ai;
     ai_coords_t* coords;
     u8* level_row;
@@ -1240,7 +1289,7 @@ extern s32 g_ai_stay_near_destination_fixed; /* 1 after a reachable Stay Near de
  * Return -1 when a child suspends and 0 after all scenarios are prepared.
  * 32-bit scratch values preserve branch decisions across suspension.
  */
-s32 battle_ai_build_movement_scenarios(void) {
+static s32 battle_ai_build_movement_scenarios(void) {
     ai_unit_decision_t* decision;
     ai_data_t* ai;
     unit_stats_t* unit;
@@ -1349,7 +1398,7 @@ score_tiles:
  * Against an enemy target, targeting flag 0x01 raises smaller limits to 3.
  * Selection still uses the ordinary unrestricted distance-first fallback.
  */
-void battle_ai_select_destination_with_range_floor(s32 distance_limit) {
+static void battle_ai_select_destination_with_range_floor(s32 distance_limit) {
     ai_unit_decision_t* decision = g_ai_data_base.acting_unit_decision;
     if (g_ai_data_base.unit_decisions[decision->main_target_id].enemy_flag != 0
         && (decision->targeting_flags_1 & AI_TARGETING_FLAG_1_HAS_RANGED_ABILITY) && distance_limit < 3) {
@@ -1362,7 +1411,7 @@ void battle_ai_select_destination_with_range_floor(s32 distance_limit) {
  *
  * The fallback removes the distance bound. Neither pass requires a positive
  * priority. */
-void battle_ai_select_destination_with_nearest_fallback(s32 range) {
+static void battle_ai_select_destination_with_nearest_fallback(s32 range) {
     if (battle_ai_select_destination(range, AI_DESTINATION_PRIORITY_FIRST) == 0) {
         battle_ai_select_destination(0x7fffffff, AI_DESTINATION_DISTANCE_FIRST);
     }
@@ -1377,7 +1426,7 @@ void battle_ai_select_destination_with_nearest_fallback(s32 range) {
  * direct multidimensional indexing changes the loop code. Strides and field
  * offsets come from the workspace layout, with 16 tiles in each row.
  */
-s32 battle_ai_select_destination(s32 max_distance, ai_destination_order_e order) {
+static s32 battle_ai_select_destination(s32 max_distance, ai_destination_order_e order) {
     s32 x, y, level;
     s32 best_score = 0x7fffffff;
     s32 best_distance = 0x7fffffff;
@@ -1451,7 +1500,7 @@ s32 battle_ai_select_destination(s32 max_distance, ai_destination_order_e order)
  * 0 rows and return 0. The destination is cleared before reading the source,
  * so callers select scenario 1 to preserve the scenario 0 mask.
  */
-s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limit) {
+static s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limit) {
     s32 found = 0;
     ai_data_t* ai = &g_ai_data_base;
     s32 x, y, level;
@@ -1484,7 +1533,7 @@ s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limit) {
 
 /* 1 when the unit is untargetable or dead without Reraise per its AI decision
  * record, or petrified. */
-s32 battle_ai_check_target_type(s32 unit_id) {
+static s32 battle_ai_check_target_type(s32 unit_id) {
     u8 flags = g_ai_data_base.unit_decisions[unit_id].targeting_flags_2;
 
     if (((flags >> 4) & (AI_TARGET_UNTARGETABLE >> 4)) || ((flags >> 5) & (AI_TARGET_DEAD_WITHOUT_RERAISE >> 5))) {
@@ -1533,7 +1582,7 @@ s32 battle_ai_is_unit_untargetable(s32 unit_idx) {
  * Compare the decided marker, signed priority, then hit percentage. Every
  * candidate holds 0 in the marker, so priority is the first key that differs.
  */
-ai_rank_order_e battle_ai_compare_target_priority_and_hit_rate(
+static ai_rank_order_e battle_ai_compare_target_priority_and_hit_rate(
     const ai_action_rank_t* first, const ai_action_rank_t* second) {
     u8 decided_a, decided_b;
     s16 priority_a, priority_b;
@@ -1659,7 +1708,7 @@ void battle_ai_insert_ranked_action(void) {
  * Each visited entry consumes a random draw, including zero-hit entries.
  * If every draw fails but any hit rate is nonzero, select the first entry.
  */
-s32 battle_ai_select_action_ranked(void) {
+static s32 battle_ai_select_action_ranked(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 i;
     s32 any;
@@ -1689,7 +1738,7 @@ s32 battle_ai_select_action_ranked(void) {
  * Chicken takes precedence over Blood Suck, Confusion and Berserk. Return
  * -1 to suspend, 1 when selection completes, or 0 if none of these applies.
  */
-s32 battle_ai_select_action_status(void) {
+static s32 battle_ai_select_action_status(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     unit_stats_t* berserk_unit;
@@ -1822,7 +1871,7 @@ success:
  * 1 after copying the current action, including fields unchanged by this pass,
  * or 0 when selection fails.
  */
-s32 battle_ai_select_action_random(void) {
+static s32 battle_ai_select_action_random(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 value, skillset;
     u16* abilities;
@@ -1942,7 +1991,7 @@ ai_direction_e battle_ai_find_direction_of_target(const ai_coords_t* target, con
 /* Intersect attack-origin tiles with the current ability's range.
  *
  * The acting unit's coordinates are restored before every return. */
-s32 battle_ai_calculate_ability_range(void) {
+static s32 battle_ai_calculate_ability_range(void) {
     ai_data_t* ai = &g_ai_data_base;
     map_tile_t* tile;
     s32 count;
@@ -2010,7 +2059,7 @@ s32 battle_ai_calculate_ability_range(void) {
  * The supplied count determines the random ordinal. Return 0 when it is 0
  * or no corresponding set bit is found; otherwise write coordinates and return 1.
  */
-s32 battle_ai_take_random_tile(
+static s32 battle_ai_take_random_tile(
     u16 tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT], ai_coords_t* coordinates, s32 count) {
     ai_data_t* ai = &g_ai_data_base;
     s32 selected;
@@ -2082,7 +2131,7 @@ s32 battle_ai_count_flagged_tiles_within_map_bounds(u16 rows[MAP_TERRAIN_LAYER_C
  * considered flag, but does not bypass untargetability. AI_UNIT_FILTER_ANY and any
  * value outside the enum allow either side.
  */
-s32 battle_ai_select_active_units(ai_unit_filter_e mode, s32 target_id) {
+static s32 battle_ai_select_active_units(ai_unit_filter_e mode, s32 target_id) {
     s32 any_active = 0;
     s32 i;
     ai_data_t* ai = &g_ai_data_base;
@@ -2134,7 +2183,7 @@ s32 battle_ai_select_active_units(ai_unit_filter_e mode, s32 target_id) {
 /* Evaluate each entry of the acting unit's ability list in turn: 34 entries at
  * most, ended early by SKILLSET_ID_NONE. -1 suspends, and the next call
  * resumes inside the loop. */
-s32 battle_ai_evaluate_ability_list(void) {
+static s32 battle_ai_evaluate_ability_list(void) {
     ai_data_t* ai;
     ai_ability_entry_t* entry;
 
@@ -2165,7 +2214,7 @@ s32 battle_ai_evaluate_ability_list(void) {
  * recovery. All dispatched routines otherwise collapse success to 1 while
  * preserving the suspended result -1.
  */
-s32 battle_ai_select_action_autobattle(void) {
+static s32 battle_ai_select_action_autobattle(void) {
     s32 result;
 
     /* A -2 result falls back to another policy's case; those jumps stay gotos. */
@@ -2212,7 +2261,7 @@ s32 battle_ai_select_action_autobattle(void) {
  * Preserve the target across the staged movement and ability passes. Return
  * -1 to suspend and 0 when selection completes.
  */
-s32 battle_ai_select_action_targeted(void) {
+static s32 battle_ai_select_action_targeted(void) {
     s32 target = g_ai_data_base.acting_unit->auto_battle_target;
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
@@ -2326,7 +2375,7 @@ charging:
  * Recovery mode limits its initial destination search to 2 when farther away;
  * scenario 2 may approach one tile closer if the actor has not acted.
  */
-s32 battle_ai_build_targeted_movement(void) {
+static s32 battle_ai_build_targeted_movement(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 range;
     u8(*distance_rows)[AI_GRID_COLUMN_COUNT];
@@ -2382,7 +2431,7 @@ s32 battle_ai_build_targeted_movement(void) {
     return 0;
 }
 
-s32 battle_ai_select_action_recovery(void) {
+static s32 battle_ai_select_action_recovery(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* acting = g_ai_data_base.acting_unit;
     u8 statuses[AI_RECOVERY_STATUS_COUNT];
@@ -2511,7 +2560,7 @@ charging:
  * deliberately tests the transient Jump flag, preserving the shipped AI
  * quirk.
  */
-s32 battle_ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
+static s32 battle_ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_unit_decision_t* decision;
@@ -2601,7 +2650,7 @@ s32 battle_ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
  * the HP-recovery flag enables dead-with-Reraise, Critical and low-HP scoring.
  * Return 1 only when the best signed score exceeds 0x02000000.
  */
-s32 battle_ai_select_peril_target(void) {
+static s32 battle_ai_select_peril_target(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 best_score = 0;
     s32 i;
@@ -2670,7 +2719,7 @@ s32 battle_ai_select_peril_target(void) {
  * Innate statuses are excluded. The cancellation mask aggregates the actor's
  * usable ability list; it does not describe only the considered ability.
  */
-s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit) {
+static s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit) {
     ai_data_t* ai = &g_ai_data_base;
     s32 byte_off;
     s32 bit;
@@ -2695,7 +2744,7 @@ s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit
 /* With an ally in peril, switch to the recovery policy and return -2.
  * Otherwise focus on the unit's auto-battle target and run the general search;
  * -1 suspends. */
-s32 battle_ai_select_action_fading_life(void) {
+static s32 battle_ai_select_action_fading_life(void) {
     if (g_ai_data_base.resume_pending == 0) {
         if (battle_ai_select_peril_target() != 0) {
             g_ai_data_base.autobattle_setting = AI_AUTOBATTLE_RECOVERY;
@@ -2714,7 +2763,7 @@ s32 battle_ai_select_action_fading_life(void) {
  * Try abilities targeting the actor and an existing charge before the broader
  * ability pass. Return -1 to suspend and 0 when selection completes.
  */
-s32 battle_ai_select_action_retreat(void) {
+static s32 battle_ai_select_action_retreat(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_ability_entry_t* entry;
     s32 i, result;
@@ -2783,7 +2832,7 @@ charging:
 /* Score the reachable tiles, fill the distance grid for the decision's target,
  * and store the best destination as movement scenario 1. -1 suspends; the next
  * call resumes at the step that did. */
-s32 battle_ai_run_cowardly_movement(void) {
+static s32 battle_ai_run_cowardly_movement(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_cowardly_movement_stage_e state;
 
@@ -2903,7 +2952,7 @@ s32 battle_ai_calculate_distance_between_units(const unit_stats_t* first, const 
  * direct typed indexing introduces extra instructions. Field offsets come
  * from the shared workspace declaration.
  */
-void battle_ai_set_candidate_and_actor_reachable_tiles(void) {
+static void battle_ai_set_candidate_and_actor_reachable_tiles(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 row;
 
@@ -2942,7 +2991,7 @@ void battle_ai_set_candidate_and_actor_reachable_tiles(void) {
 
 /* Reset the selected action to the candidate coordinates for the current
  * movement scenario; the Defend skillset marks a Defend when the unit has it. */
-void battle_ai_select_action_fallback(void) {
+static void battle_ai_select_action_fallback(void) {
     u8 scenario = g_ai_data_base.movement_scenario;
     unit_stats_t* unit = g_ai_data_base.acting_unit;
     u32 coords;
@@ -2967,7 +3016,7 @@ void battle_ai_select_action_fallback(void) {
  * selected row, leaving zero-mask rows unchanged. Return -1 when the child
  * suspends through its out-parameter, or 0 after filling the grid.
  */
-s32 battle_ai_fill_target_distance_grid(const ai_coords_t* target) {
+static s32 battle_ai_fill_target_distance_grid(const ai_coords_t* target) {
     ai_data_t* ai = &g_ai_data_base;
     s32 suspended = 0;
     s32 use_manhattan;
@@ -3025,7 +3074,7 @@ s32 battle_ai_fill_target_distance_grid(const ai_coords_t* target) {
  * Only scenario-0 reachable tiles are updated; other cells remain unchanged.
  * The shared targetability list is rebuilt before scoring both map layers.
  */
-void battle_ai_fill_foe_proximity_grid(void) {
+static void battle_ai_fill_foe_proximity_grid(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 i;
     s32 level;
@@ -3083,7 +3132,7 @@ void battle_ai_fill_foe_proximity_grid(void) {
  *
  * The unit must be an enemy that acts no later than the acting unit and will
  * no longer be disabled by Stop, Don't Act, Sleep, Chicken, or Charm then. */
-s32 battle_ai_should_exclude_from_imminent_enemies(s32 unit_id) {
+static s32 battle_ai_should_exclude_from_imminent_enemies(s32 unit_id) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     s32 limit;
@@ -3108,7 +3157,7 @@ s32 battle_ai_should_exclude_from_imminent_enemies(s32 unit_id) {
  * Integer address stages preserve the target's addition order; direct typed
  * indexing changes the machine code. Each level has 18 rows of 16 tiles.
  */
-s32 battle_ai_score_reachable_tiles(void) {
+static s32 battle_ai_score_reachable_tiles(void) {
     s32 x, y, level;
     ai_data_t* ai = &g_ai_data_base;
     u32 row;
@@ -3427,7 +3476,7 @@ void battle_ai_init_unit_abilities(s32 unit_id) {
 
 /* dividend * 4 / divisor, or 0 for a zero divisor: a share in quarters, such
  * as how many of a unit's abilities Silence stops. */
-s32 battle_ai_calculate_ratio_times_4(s32 divisor, s32 dividend) {
+static s32 battle_ai_calculate_ratio_times_4(s32 divisor, s32 dividend) {
     if (divisor == 0) {
         return 0;
     }
@@ -3449,7 +3498,7 @@ typedef char ai_ability_entry_byte_view_must_be_4[sizeof(ai_ability_entry_byte_v
  * Non-monster skillsets include Attack and a secondary skillset. Frog Attack
  * is appended for every unit; a terminator is written only if space remains.
  */
-void battle_ai_build_unit_ability_list(s32 unit_id) {
+static void battle_ai_build_unit_ability_list(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_data_t* ai = &g_ai_data_base;
     ai_weapon_data_t* weapon;
@@ -3512,7 +3561,7 @@ void battle_ai_build_unit_ability_list(s32 unit_id) {
  * Range and weapon ID are replaced; elements and trajectory/formula flags
  * accumulate. Calling for the left hand last gives its range precedence.
  */
-void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
+static void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
     weapon_data_t* weapon;
     s32 flags;
     s32 formula;
@@ -3561,7 +3610,7 @@ void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32*
  * there and GCC 2.6.3 keeps source block order. The per-loop temporaries,
  * ai as a local and the int max_mp reproduce the target's allocation, loop
  * set-up order and signed comparison. */
-s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
+static s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
     s32 jump_found;
     ai_data_t* ai;
     u16* abilities;

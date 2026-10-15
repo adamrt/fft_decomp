@@ -30,6 +30,13 @@
 #include "psx/stddef.h"
 #include "psx/types.h"
 
+static s32 camera_step_track(camera_track_t* track, s32 component);
+static void map_store_selected_tile_data(void);
+static void menu_init_subsystems(void);
+static void menu_run_unit_view_supervisor_thread(void);
+static s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value);
+static void unit_reset_animation_states(void);
+
 s32 menu_init_attack_resources_and_threads(void) {
     s32 result;
     s32 return_value;
@@ -202,7 +209,7 @@ enum {
 
 /* Starts the requested unit-view panel threads, stops stale panels, and restarts
  * them after they exit. A new parameter replaces the pending view request. */
-void menu_run_unit_view_supervisor_thread(void) {
+static void menu_run_unit_view_supervisor_thread(void) {
     s32 states[16];
     menu_unit_view_thread_set_t* set;
     s32 mode;
@@ -316,7 +323,7 @@ void script_noop_7(void) {
 }
 
 /* Set or clear one flag in a 32-bit-word bitmap. */
-void script_assign_bitset_flag(u32* bits, s32 index, s32 set) {
+static void script_assign_bitset_flag(u32* bits, s32 index, s32 set) {
     s32 word = index / 32;
     u32 mask = 1U << (index & 0x1F);
 
@@ -470,7 +477,7 @@ void camera_fusion_thread(void) {
  * that sets g_camera_cross_product_overflow on overflow) and moves the value along the resulting
  * control point. The locals span, frame and lead are reused across the
  * stages, as the target's register map requires. */
-s32 camera_step_track(camera_track_t* track, s32 component) {
+static s32 camera_step_track(camera_track_t* track, s32 component) {
     s32 time[4];  /* line 0: time[0]->time[1]; line 1: time[2]->time[3] */
     s32 value[4]; /* matching values for the two sampled lines */
     s32 value_delta0;
@@ -620,7 +627,7 @@ s32 camera_step_track(camera_track_t* track, s32 component) {
 
 /* Linear interpolation from start to end at fraction / value, returned in 20.12
  * fixed point: start * ONE + (end - start) * fraction * ONE / value. */
-s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value) {
+static s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value) {
     return mul_div_s64(end - start, fraction * ONE, value) + (start * ONE);
 }
 
@@ -915,7 +922,7 @@ void script_add_unit_start_thread(void) {
     thread_exit_current();
 }
 
-void menu_init_subsystems(void) {
+static void menu_init_subsystems(void) {
     menu_init_subsystem_pointers();
     menu_init_palette_and_text(0);
     menu_init_stub();
@@ -973,7 +980,7 @@ void map_reset_script_light_transform_variant(void) {
 }
 #endif
 
-void unit_reset_animation_states(void) {
+static void unit_reset_animation_states(void) {
     unit_animation_state_t* state;
     s32 i;
 
@@ -1145,7 +1152,7 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
  * tile information display shows: the surface type, the depth, the displayed
  * height in half-height units (height * 2 + slope half-height + depth * 2) and
  * the surface type's two bytes of g_main_terrain_tile_info_pairs. */
-void map_store_selected_tile_data(void) {
+static void map_store_selected_tile_data(void) {
     SVECTOR coords;
     s16* surface_type;
     s32 depth;
@@ -1274,7 +1281,7 @@ void menu_confirm_sound_delay_thread(void) {
     thread_exit_current();
 }
 
-s32 menu_copy_u8_to_u16_terminated(u16* destination, const u8* source) {
+static s32 menu_copy_u8_to_u16_terminated(u16* destination, const u8* source) {
     s32 count = 0;
 
     for (;;) {
@@ -1289,7 +1296,7 @@ s32 menu_copy_u8_to_u16_terminated(u16* destination, const u8* source) {
 }
 
 /* Widen count bytes into 16-bit menu values; a nonpositive count writes nothing. */
-void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
+static void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -1310,7 +1317,7 @@ void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
  * stays an addiu immediate and the constant is not shared); window_x is a
  * separate local from the unit index, and its updates follow the loader
  * calls in each arm. */
-void menu_build_ability_list(s32 mode) {
+static void menu_build_ability_list(s32 mode) {
     s32 unit_index;
     s32 window_x;
     unit_stats_t* unit;
@@ -1594,7 +1601,7 @@ void menu_select_unit_action_slots_thread(void) {
 }
 
 /* Build skillset selection rows and size the selected unit's menu. */
-void menu_build_skillset_entries(void) {
+static void menu_build_skillset_entries(void) {
     menu_text_row_t* rows;
     s32 count;
     s32 i;

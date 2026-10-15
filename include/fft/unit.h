@@ -709,10 +709,7 @@ enum { UNIT_STATUS_STAGING_MASK_COUNT = 3 };
 
 extern u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8];
 extern unit_status_staging_t* g_unit_status_staging_data;
-void unit_clear_status_staging_data(void);
 s32 unit_save_staged_status_data(s32 battle_id);
-void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id);
-void unit_update_staged_status_data(u16 unit_id, u16 restore);
 
 /* unit */
 /* Character progression; excess EXP is discarded on a level-up. */

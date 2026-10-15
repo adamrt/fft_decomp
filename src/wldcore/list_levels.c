@@ -10,6 +10,18 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel);
+static void wldcore_list_open_active_propositions(void);
+static void wldcore_list_open_brave_story_propositions(void);
+static void wldcore_list_open_formation_tutorials(void);
+static void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset);
+static void wldcore_list_open_tutorial_mask_1_entries(void);
+static void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant);
+static void wldcore_menu_push_participant_list_level(s32 proposition);
+static void wldcore_menu_push_proposition_attempt_detail_level(s32 value);
+static void wldcore_window_close_parent_list_all_windows(void);
+static void wldcore_window_close_parent_list_frame_windows(void);
+
 void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[level->main_window].palette = g_wldcore_window_render_records[level->side_window].palette
         = g_wldcore_window_render_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth - 2]
@@ -164,7 +176,7 @@ void wldcore_menu_handle_proposition_category_input(wldcore_menu_list_window_lev
  * hoisted bound copy the target keeps in $a0.  The cursor row is folded as
  * base_y - row * -16 + 14 to keep base_y as the first addu operand.
  */
-void wldcore_list_open_active_propositions(void) {
+static void wldcore_list_open_active_propositions(void) {
     point32_t point;
     RECT bounds;
     point32_t* base;
@@ -413,7 +425,7 @@ void wldcore_list_handle_active_propositions_input(wldcore_menu_proposition_list
  * The 0x40 frame needs 32 bytes of locals the body never uses. The `- -`
  * spellings keep the target's operand order (render-record base first) that a
  * plain `+` of a loaded field loses to expand_binop's commutative swap. */
-void wldcore_menu_push_participant_list_level(s32 proposition) {
+static void wldcore_menu_push_participant_list_level(s32 proposition) {
     /* Target frame evidence establishes 32 bytes of otherwise unused locals. */
     u8 stack_scratch[32];
     s32 depth;
@@ -542,7 +554,7 @@ void wldcore_menu_handle_participant_list_input(wldcore_menu_stack_record_t* lev
  * three core background threads. Each window has its own pos/window pointer:
  * a single-set pointer keeps its address computation beside its first use.
  */
-void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant) {
+static void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant) {
     RECT rect;
     world_animated_render_record_t* window1;
     world_animated_render_record_t* window2;
@@ -844,7 +856,7 @@ done:
     wldcore_sound_play_effect(MAIN_SFX_PAGE_SWITCH);
 }
 
-void wldcore_list_open_brave_story_propositions(void) {
+static void wldcore_list_open_brave_story_propositions(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -958,7 +970,7 @@ void wldcore_list_handle_brave_story_propositions_input(wldcore_menu_panel_level
  *
  * `unused` reproduces eight bytes of locals below the date bytes that the
  * target never touches. */
-void wldcore_menu_push_proposition_attempt_detail_level(s32 value) {
+static void wldcore_menu_push_proposition_attempt_detail_level(s32 value) {
     s32 coordinate_mode = 1;
     u8 unused[8];
     calendar_date_t date;
@@ -1121,7 +1133,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
  * main window goes to palette 10 (sequence, frame_index and anim_counter
  * cleared), the side window to palette 6, the frame and content render
  * records to palette 2, and the upper/lower windows to palette 5, each hidden with flag 0x10. */
-void wldcore_window_close_parent_list_all_windows(void) {
+static void wldcore_window_close_parent_list_all_windows(void) {
     s32 index;
 
     index = g_wldcore_menu_stack_depth - 1;
@@ -1153,7 +1165,7 @@ void wldcore_window_close_parent_list_all_windows(void) {
  * window goes to palette 10 (sequence, frame_index and anim_counter cleared),
  * the side window to palette 6 and the frame render record to palette 2, each hidden with
  * flag 0x10. */
-void wldcore_window_close_parent_list_frame_windows(void) {
+static void wldcore_window_close_parent_list_frame_windows(void) {
     s32 index;
 
     index = g_wldcore_menu_stack_depth - 1;
@@ -1273,7 +1285,7 @@ void wldcore_menu_step_screen_transition_level(wldcore_menu_screen_transition_le
  * original declares locals it never reads, and GCC still reserves their slots.
  * The `- -(...)` in the cursor-row Y expression only flips the commutative
  * operand order of the final `addu`; it is arithmetically identical. */
-void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset) {
+static void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset) {
     s32 dead_locals[10];
     s32 window_index;
     s32 record_index;
@@ -1342,7 +1354,7 @@ void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset) {
  *
  * The base coordinates are written through a point view of base_x/base_y; the
  * target addresses them from &base_x, not from the record start. */
-void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel) {
+static void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel) {
     RECT bounds;
     point32_t point;
     s32 index;
@@ -1534,7 +1546,7 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
  *
  * The flag value lives in its own variable so the target keeps 8 in a saved
  * register across the loop. */
-void wldcore_list_open_formation_tutorials(void) {
+static void wldcore_list_open_formation_tutorials(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s32 i;
@@ -1645,7 +1657,7 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
  * flagged 8 when bit 32 + row of 0x8004c6bc is set, shown at (0x54, 0x50)
  * with width 0x8c; appends its record tagged 0x2d. Sibling of
  * wldcore_list_open_formation_tutorials. */
-void wldcore_list_open_tutorial_mask_1_entries(void) {
+static void wldcore_list_open_tutorial_mask_1_entries(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s32 i;

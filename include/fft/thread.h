@@ -179,7 +179,6 @@ typedef enum thread_task {
 s32 thread_find_running_by_task(s32 task_id);
 s32 thread_resolve_id(s32 requested_thread_id);
 s32 thread_resolve_id_after_current(s32 requested_thread_id);
-s32 thread_find_first_running_menu_thread(void);
 
 /* task parameters */
 void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);

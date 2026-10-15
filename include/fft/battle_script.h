@@ -24,7 +24,6 @@ s32 battle_script_add_ghost_unit_event_instruction(
 /* unit statuses */
 
 /* camera */
-void script_earthquake_start(void);
 
 /* map and lighting */
 

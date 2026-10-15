@@ -87,10 +87,6 @@ extern u16 g_wldcore_state_flags;
 extern wldcore_opcode_state_t g_wldcore_opcode_state;
 extern void (*g_wldcore_opcode_handlers[])(void);
 void wldcore_opcode_apply_pending_delta_and_clamp_value(void);
-void wldcore_opcode_branch_if_saved_bit(s32 expected);
-void wldcore_opcode_branch_if_local_flag(s32 expected);
-void wldcore_opcode_branch_if_savedata_bit(s32 expected);
-void wldcore_opcode_branch_if_dialog_option(s32 expected);
 void wldcore_opcode_map_request_deep_dungeon_entry(void);
 void wldcore_opcode_map_request_draw_path(void);
 void wldcore_opcode_map_request_erase_path(void);
@@ -245,16 +241,11 @@ extern u16 g_wldcore_sound_novel_text_history_3;
 extern s32 g_wldcore_sound_novel_wait_frames;
 extern u8 g_wldcore_sound_novel_quit_help_text_ids[];
 void wldcore_sound_process_audio_queue(void);
-void wldcore_sound_change_scenario_music(s32 music_id);
 void wldcore_sound_enqueue_audio_command(wldcore_audio_command_e command, s32 value);
 void wldcore_sound_enqueue_music_start(s32 value);
 void wldcore_sound_play_effect(s32 sound_id);
-void wldcore_sound_stop_music_and_play_sound(s32 sound_id);
-void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id);
 void wldcore_sound_wait_for_queue_drain(void);
 void wldcore_sound_novel_restore_saved_state(s32 render_index);
-void wldcore_sound_play_pending_script_sounds(s32 low, s32 high, s32 value);
-s32 wldcore_sound_novel_update_countdown_timer(void);
 void wldcore_load_sound_novel_files(s32 chapter);
 
 /* story */
@@ -294,7 +285,6 @@ extern u8 g_wldcore_treasure_picture_sets[];
 extern u8 g_wldcore_treasure_sound_novel_ids[];
 extern u8 g_wldcore_unexplored_land_count_milestones[];
 extern u8 g_wldcore_unexplored_land_picture_sets[];
-void wldcore_advance_brave_story_birthdays(void);
 
 /* system */
 /* g_main_system_flags as wldcore_process_frame_gate last saw it (main_system_flags_e). */
@@ -304,15 +294,9 @@ void wldcore_restore_previous_stack(void);
 void wldcore_init_stub(void);
 void wldcore_reset_game_if_special_keycode_is_pressed(void);
 
-void wldcore_init_world_map_state(void);
 void wldcore_switch_to_stack(void*);
-s32 wldcore_handle_exit_request(void);
 s32 wldcore_entrypoint(void);
-void wldcore_finalize_loop(void);
 void wldcore_init_core(void);
-void wldcore_init_runtime_state(void);
-void wldcore_init_subsystems(void);
-void wldcore_process_frame_gate(void);
 /* thread */
 /* Slots that the WLDCORE screens use for threads of their own. */
 typedef enum wldcore_thread_slot {
@@ -330,7 +314,6 @@ extern menu_status_thread_t g_wldcore_threadc_params;
 /* unit */
 extern unit_stats_t g_wldcore_status_unit;
 party_unit_t* wldcore_get_party_unit(s32 party_index);
-s32 wldcore_get_ramza_roster_index(void);
 void wldcore_unit_build_status_panel_data(s32 party_index);
 
 void wldcore_load_formation_unit_name_and_face(void);
@@ -410,13 +393,11 @@ extern u32* g_wldcore_scratch_buffer;
 extern rgb24_t g_wldcore_screen_brightness_rgb;
 extern wldcore_sortbox_state_t g_wldcore_screen_fade_state;
 
-void wldcore_gfx_draw_world_frame_with_map(void);
 s32 wldcore_fade_step_screen(void);
 void wldcore_gfx_toggle_captured_world_frame(s32 capture);
 void wldcore_gfx_draw_projected_map_tiles(GsOT* ot);
 void wldcore_gfx_draw_animated_display_object(world_animated_render_record_t* object, GsOT* ot);
 void wldcore_gfx_draw_context_value_display(GsOT* ot);
-void wldcore_gfx_draw_display_object_sprite(struct wldcore_window_render_record* object, GsOT* ot);
 void wldcore_gfx_draw_calendar_date(GsOT* ot);
 void wldcore_clear_screen_and_set_map_clip_rect(s32 mode);
 void wldcore_fade_draw_screen_overlays(void);
@@ -424,17 +405,9 @@ void wldcore_fade_start_screen(s32 flags, s32 duration);
 void wldcore_gfx_clear_vram_and_scratch(s32 clear_scratch);
 void wldcore_gfx_copy_color_with_tint(CVECTOR* source, CVECTOR* out);
 void wldcore_gfx_draw_world_frame(void);
-void wldcore_gfx_init_subsystem(void);
 void wldcore_gfx_set_display_rect(s32 buffer_index, RECT* rect);
-void wldcore_start_core_background_threads(s32 party_index);
-void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot);
-void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad);
-void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
-
-s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* im, s32 step);
 
 void wldcore_gfx_load_background_set(s32 set);
-void wldcore_gfx_prepare_play_time_display(void);
 /* location */
 /* Provisional: four-byte per-location records reached through g_wldcore_location_records. */
 typedef struct wldcore_state_record {
@@ -498,8 +471,6 @@ extern wldcore_location_entry_state_t g_wldcore_location_entry_state;
 extern wldcore_state_record_t* g_wldcore_location_records;
 extern s32 g_wldcore_location_marker_shade;
 extern u32* g_wldcore_location_frame_tim;
-s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* state, u32 value, s32 step);
-s32 wldcore_location_collect_choice_text_ids(s32 location_id, s32* out);
 s32 wldcore_location_process_entry(s32 from_location, s32 to_location);
 
 /* save */
@@ -516,7 +487,6 @@ extern point32_t g_wldcore_saved_context_value_display_position;
 extern wldcore_saved_record_t g_wldcore_active_saved_record;
 /* g_main_system_flags as saved by wldcore_gfx_toggle_captured_world_frame (main_system_flags_e). */
 extern u32 g_wldcore_saved_system_flags;
-void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record);
 void wldcore_reset_selected_saved_record(s32 unused);
 
 /* script */
@@ -587,8 +557,6 @@ extern wldcore_script_state_t g_wldcore_script_state;
  * The load_* opcode handlers declare volatile views of flags/data/ip locally. */
 extern s32 g_wldcore_script_flags;
 s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask);
-void wldcore_script_read_operand_pair(s32* out_id, s32* out_value);
-void wldcore_script_read_operand_pair_and_date(s32* out_a, s32* out_b, s32* out_c, s32* out_d);
 s32 wldcore_script_run_until_yield(void);
 u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode);
 
@@ -730,14 +698,11 @@ extern s32 g_wldcore_displayed_numeric_value;
 extern s32 g_wldcore_displayed_numeric_value_secondary;
 extern s32 g_wldcore_displayed_numeric_value_tertiary;
 extern s32 g_wldcore_loaded_message_block;
-void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t* state, s32 row);
 void wldcore_load_message_block_if_changed(s32 block);
 void wldcore_text_get_padded_dimensions(s32 text_id, size32_t* output);
 void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state);
 s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* window);
-void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* state);
 
-void wldcore_text_update_page_prompt_visibility(wldcore_text_scrollable_window_t* state);
 /* proposition */
 /* Provisional: the job-report confirmation level. The cursor window at +0x00
  * is moved between the two rows of the render record at +0x04, and +0x08
@@ -980,14 +945,11 @@ extern s32 g_wldcore_proposition_dispatch_days;
  * g_wldcore_active_propositions_saved_cursor. */
 extern s32 g_wldcore_proposition_category_saved_cursor[];
 extern u32 g_wldcore_proposition_detail_image_buffer[];
-void wldcore_proposition_prepare_report(s32 proposition_index);
 void wldcore_proposition_handle_report_confirm_input(wldcore_proposition_report_confirm_level_t* level);
-s32 wldcore_proposition_select_report_speaker(s32 proposition_index);
 void wldcore_proposition_determine_success(void);
 void wldcore_proposition_calculate_base_jp_and_gil(void);
 void wldcore_proposition_roll_bonus_reward(void);
 void wldcore_proposition_apply_extra_days_multiplier(void);
-s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t* level);
 s32 wldcore_proposition_adjust_message_index(s32 base, s32 party_index);
 void wldcore_proposition_advance_daily_counters(void);
 s32 wldcore_proposition_count_completed(s32 location);
@@ -995,19 +957,13 @@ s32 wldcore_proposition_count_completed(s32 location);
 void* wldcore_proposition_get_data_pointer(wldcore_proposition_data_record_e record);
 s32 wldcore_proposition_load_picture(s32 index);
 void wldcore_proposition_load_picture_data_set(s32 value);
-s32 wldcore_proposition_step_message(wldcore_proposition_report_level_t* state, s32 message);
 void wldcore_proposition_submit_marker_request(GsOT* ot);
 void wldcore_unpack_proposition_row(wldcore_proposition_fields_t* out, s32 index);
-void wldcore_proposition_push_cancel_confirm_level(s32 value);
 void wldcore_proposition_push_detail_level(s32 value);
 s32 wldcore_proposition_is_available_at_location(s32 index, s32 location);
 void wldcore_proposition_push_dispatch_confirm_level(void);
-void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit_level_t* level);
-void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_level_t* level);
 void wldcore_proposition_push_send_unit_level(void);
 s32 wldcore_proposition_step_participant_message(wldcore_proposition_report_level_t* state, s32 message, s32 speaker);
-void wldcore_proposition_push_result_level(s32 proposition);
-s32 wldcore_map_job_id_to_category_index(s32 job_id);
 s32 wldcore_proposition_find_preferred_job_unit(void);
 
 s32 wldcore_get_completion_milestone_rank(void);
@@ -1103,8 +1059,6 @@ extern s32 g_wldcore_bar_menu_saved_cursor;
 extern u8 g_wldcore_bar_row_help_text_ids[];
 void wldcore_bar_active_propositions_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level);
-void wldcore_bar_push_rumor_detail_level(s32 value);
-void wldcore_bar_push_menu_level(void);
 
 /* list */
 /* Menu level owning two window records and a render record: 0x800712b0
@@ -1127,7 +1081,6 @@ extern s16 g_wldcore_list_row_flags[];
 /* Row value column of the world list panels, read signed as `value & 0x7ff`. */
 extern s16 g_wldcore_list_entry_values[];
 void wldcore_list_open_script_flags_01a4_01bb(void);
-void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t* panel);
 void wldcore_list_clamp_cursor_state(s32 index, s32 count, s32 visible);
 void wldcore_list_clear_cursor_state(s32 index);
 void wldcore_list_open_tutorial_topics(void);
@@ -1137,8 +1090,6 @@ void wldcore_list_store_cursor_state(s32 index);
  * argument; the parameter is the argument the target passes in $a0. */
 void wldcore_list_rumors_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_propositions_block_all_buttons(wldcore_menu_panel_level_t* level);
-void wldcore_list_rumors_close_level(wldcore_menu_panel_level_t* level);
-void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* level);
 void wldcore_list_unexplored_lands_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_story_events_block_all_buttons(wldcore_menu_panel_level_t* level);
 void wldcore_list_script_variables_block_all_buttons(wldcore_menu_panel_level_t* level);
@@ -1148,18 +1099,9 @@ void wldcore_list_script_flags_block_all_buttons(wldcore_menu_panel_level_t* lev
 void wldcore_list_open_available_propositions(void);
 void wldcore_list_open_completed_propositions(void);
 void wldcore_list_open_propositions(void);
-void wldcore_list_open_rumors(void);
-void wldcore_list_open_tutorial_mask_1_entries(void);
-void wldcore_list_open_formation_tutorials(void);
 void wldcore_list_tutorial_mask_1_block_all_buttons(wldcore_menu_panel_level_t* unused_level);
-void wldcore_list_open_story_events(void);
 void wldcore_list_open_unexplored_lands(void);
 void wldcore_list_open_treasures(void);
-void wldcore_list_open_set_script_variables_03c0_03ff(void);
-void wldcore_list_open_active_propositions(void);
-void wldcore_list_open_brave_story_propositions(void);
-
-void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset);
 
 /* camera */
 /* Map camera block: translation, scale and rotation are passed together. */
@@ -1343,7 +1285,6 @@ void wldcore_map_color_and_draw_dots(void);
 s32 wldcore_map_build_location_menu_entries(s32 proposition_id, s32* out);
 void wldcore_map_draw_visible_routes(GsOT* ot);
 void wldcore_map_draw_path_animation(GsOT* ot);
-void wldcore_map_find_best_route_path(s32 from, s32 to);
 void wldcore_map_step_route_travel(void);
 s32 wldcore_map_step_projection_motion(void);
 void wldcore_map_apply_clamped_horizontal_scroll(s32* amount, s32* position);
@@ -1352,16 +1293,12 @@ void wldcore_map_apply_clamped_vertical_scroll(point32_t* amount, VECTOR* positi
 s32 wldcore_map_find_dot_at_point(point32_t point);
 void wldcore_map_init_location_marker_and_camera(void);
 s32 wldcore_map_is_point_outside_projection_bounds(const point32_t* point);
-void wldcore_map_negate_and_clamp_coordinates(const SVECTOR* input, VECTOR* output);
 void wldcore_map_project_and_cull_dots(void);
 void wldcore_map_project_and_cull_tiles(void);
 void wldcore_map_pulse_dot_colors(void);
 s32 wldcore_map_start_projection_motion_if_outside_bounds(const point32_t* point, const SVECTOR* coordinates);
 void wldcore_map_update_camera_direction_and_projection(void);
 void wldcore_map_update_scroll_axis_speed(wldcore_axis_state_t* axis, s32 direction);
-s32 wldcore_map_roll_random_encounter(s32 location, s32 route);
-void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta);
-void wldcore_push_map_location_visibility_level(s32 value, s32 flag);
 void wldcore_map_prepare_path_animation(s32 from, s32 to);
 s32 wldcore_map_get_dot_snap_step(point32_t point, s32* step_x, s32* step_y);
 
@@ -2011,10 +1948,8 @@ extern struct world_menu_number_range g_wldcore_window_panel_number_state;
 extern s32 g_wldcore_menu_root_window_index;
 void wldcore_window_build_yes_no_panel(point32_t origin);
 void wldcore_menu_push_location_menu_level(s32 menu);
-void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level);
 void wldcore_menu_push_event_transition_level(s32 mode);
 void wldcore_draw_close_indicator_if_pending(GsOT* ot);
-void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore);
 void wldcore_menu_dispatch_idle_handler(void);
 void wldcore_menu_dispatch_pending_script_requests(void);
 void wldcore_menu_dispatch_publish_handler(void);
@@ -2037,28 +1972,17 @@ void wldcore_window_finalize_record_and_stop_task(wldcore_menu_stack_record_t* l
 void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level);
 
 void wldcore_menu_push_message_level(s32 text, s32 reload_text);
-void wldcore_menu_push_fixed_number_panel_level(void);
-void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value);
-void wldcore_menu_push_root_level(void);
 void wldcore_menu_reset_window_list_and_store_origin(void);
-void wldcore_menu_restore_level_on_world_entry(void);
 void wldcore_menu_run_world_frame(GsOT* context);
-void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown);
-
-void wldcore_window_apply_layout(wldcore_window_layout_request_t* request);
 
 void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
 
 void wldcore_window_draw_centered_text(s32 window_index, s32 text_id);
-void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_level_t* level, s32 index);
-void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level);
 
 void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_values, s32 text_id, point32_t* origin);
 
 void wldcore_window_init_panel_render_state(
     s32 unused, s32 extent, wldcore_window_panel_layout_t* layout, point32_t* origin);
-
-void wldcore_window_init_record(s32 index, s32 priority, s32 sequence);
 
 void wldcore_window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags);
 
@@ -2078,49 +2002,25 @@ void wldcore_window_set_render_palette_2(wldcore_window_render_pair_t* pair);
 void wldcore_window_start_panel_render_thread(
     s32 thread_id, s32 extent, wldcore_window_panel_layout_t* layout, point32_t* origin);
 
-void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point32_t* output);
 void wldcore_window_set_layout_states(wldcore_menu_proposition_list_level_t* level);
-void wldcore_menu_push_participant_list_level(s32 proposition);
-void wldcore_menu_push_proposition_attempt_detail_level(s32 value);
 void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b);
-void wldcore_menu_push_script_flag_01a4_detail_level(s32 value);
-void wldcore_menu_push_variable_detail_level(s32 value);
 void wldcore_menu_push_story_event_text_level(s32 value);
 void wldcore_menu_push_treasure_detail_level(s32 value);
 void wldcore_menu_push_entry_window_level(void);
-void wldcore_menu_push_tutorial_topic_text_level(s32 value);
-void wldcore_menu_push_unexplored_land_detail_level(s32 value);
-void wldcore_menu_push_focus_location_level(s32 id);
-void wldcore_menu_push_map_path_level(s32 value, s32 value_hi, s32 flag);
 void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* state);
-void wldcore_menu_push_proposition_category_level(void);
-void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level);
 void wldcore_menu_push_layout_window_level(void);
-void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant);
 void wldcore_window_end_tint_transition(wldcore_menu_list_window_level_t* level);
 void wldcore_window_begin_tint_transition(wldcore_menu_list_window_level_t* level);
-void wldcore_menu_push_proposition_report_level(s32 argument);
-void wldcore_menu_build_brave_story_entries(void);
 void wldcore_menu_push_brave_story_level(void);
-void wldcore_window_close_parent_list_all_windows(void);
-void wldcore_window_close_parent_list_frame_windows(void);
 void wldcore_menu_push_scrollable_text_window_level(s32 text_id);
-void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id);
 void wldcore_window_set_secondary_render_palette_2(wldcore_menu_slot_set_t* slots);
-void wldcore_menu_push_variable_list_level(void);
-void wldcore_window_load_party_unit_sprite_record(wldcore_menu_send_unit_level_t* level, s32 unit, s32 render_index);
 void wldcore_menu_push_number_panel_level(void);
 void wldcore_window_clear_states_and_restore_tint(wldcore_menu_send_unit_level_t* level);
 void wldcore_window_set_states_and_blue_tint(wldcore_menu_send_unit_level_t* level);
-void wldcore_menu_push_sound_novel_quit_level(void);
-void wldcore_menu_push_sound_novel_history_level(void);
 void wldcore_window_reset_slot_state(wldcore_menu_save_confirm_level_t* level);
 void wldcore_menu_push_text_window_level(s32 text, s32 reload_text);
-void wldcore_menu_push_sound_novel_level(s32 mode);
-void wldcore_menu_push_sound_novel_resume_level(s32 mode);
 void wldcore_menu_push_countdown_level(void);
 
-void wldcore_window_number_panel_noop_callback(void);
 /* bits */
 
 void wldcore_set_bit_value(u32* bits, s32 index, s32 set);

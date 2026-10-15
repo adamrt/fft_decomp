@@ -20,7 +20,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
+static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
     s32 direction;
 
     direction = battle_move_get_direction(unit);
@@ -46,7 +46,7 @@ void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* 
  * (height * 2 + slope half-height * edge value), clears the unit it stood on,
  * builds the velocity for the run of contiguous steps and enters the
  * FLY_TO_CENTER stage. */
-void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
+static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
     s32 direction;
 
     direction = battle_move_get_direction(unit);
@@ -75,7 +75,7 @@ void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit)
  * then snaps to the center, clears velocity, adopts the destination map
  * coordinates and sets shadow_dirty bit 0.
  */
-void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {
+static void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {
     s32 done;
     s32 direction;
     battle_unit_t* mount;
@@ -120,7 +120,7 @@ void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_uni
 /* Selects the slope bits of the two step tiles that face the movement
  * direction (top two bits of g_move_step_value) and stores them as the unit's
  * per-step scales; a rider or a g_move_step_value bit 0x10 step clears them. */
-void battle_move_set_unit_step_slope_scales(battle_unit_t* unit) {
+static void battle_move_set_unit_step_slope_scales(battle_unit_t* unit) {
     battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
     battle_gfx_check_tile_status_palette_mod(unit, g_move_destination_tile->flags.shading, 1);
     switch (g_move_step_value.direction) {
@@ -153,7 +153,7 @@ void battle_move_set_unit_step_slope_scales(battle_unit_t* unit) {
 
 /* Step handler of the TELEPORT_ANIMATION phase: once the animation countdown
  * reaches 0, end the path and keep its count in last_path_count. */
-void battle_move_finalize_path_after_animation(battle_unit_t* unit) {
+static void battle_move_finalize_path_after_animation(battle_unit_t* unit) {
     if (unit->animation.wait == 0) {
         unit->step_phase = MOVE_STEP_PHASE_NONE;
         unit->last_path_count = unit->path.count;
@@ -162,13 +162,13 @@ void battle_move_finalize_path_after_animation(battle_unit_t* unit) {
 }
 
 /* Step handler of the TELEPORT_START phase. */
-void battle_move_update_teleport_start(battle_unit_t* unit) {
+static void battle_move_update_teleport_start(battle_unit_t* unit) {
     battle_move_start_teleport_animation(unit);
 }
 
 /* Called for the last step of a path: when the unit has a pending mount, set the
  * step's mount bit (0x10), which marks a step that ends on another unit. */
-void battle_move_set_unit_path_flag(battle_unit_t* unit) {
+static void battle_move_set_unit_path_flag(battle_unit_t* unit) {
     if (unit->path.pending_mount == 0) {
         return;
     }
@@ -392,7 +392,7 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
     }
 }
 
-void battle_move_init_knockback(battle_unit_t* unit) {
+static void battle_move_init_knockback(battle_unit_t* unit) {
     u32* path_word = (u32*)&unit->path;
     u32 state;
     u32 knockback_state;
@@ -1149,7 +1149,7 @@ void battle_camera_update_map_pan(void) {
 /* Set the destination of a left turn (falling yaw) and record the yaw it
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
-void battle_camera_rotate_left(s32 target_angle) {
+static void battle_camera_rotate_left(s32 target_angle) {
     g_battle_previous_camera_yaw = g_camera_render_state.vy & 0xfe00;
     g_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
@@ -1158,7 +1158,7 @@ void battle_camera_rotate_left(s32 target_angle) {
 }
 
 /* Start a left turn to target_angle from the slowest speed. */
-void battle_camera_start_rotation_left(s32 target_angle) {
+static void battle_camera_start_rotation_left(s32 target_angle) {
     g_camera_rotation_action = CAMERA_ROTATION_LEFT;
     g_camera_rotation_increment = 1;
     battle_camera_rotate_left(target_angle);
@@ -1167,7 +1167,7 @@ void battle_camera_start_rotation_left(s32 target_angle) {
 /* Set the destination of a right turn (rising yaw) and record the yaw it
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
-void battle_camera_rotate_right(s32 target_angle) {
+static void battle_camera_rotate_right(s32 target_angle) {
     g_battle_previous_camera_yaw = g_camera_render_state.vy & 0xfe00;
     g_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
@@ -1176,7 +1176,7 @@ void battle_camera_rotate_right(s32 target_angle) {
 }
 
 /* Start a right turn to target_angle from the slowest speed. */
-void battle_camera_start_rotation_right(s32 target_angle) {
+static void battle_camera_start_rotation_right(s32 target_angle) {
     g_camera_rotation_action = CAMERA_ROTATION_RIGHT;
     g_camera_rotation_increment = 1;
     battle_camera_rotate_right(target_angle);
@@ -1184,7 +1184,7 @@ void battle_camera_start_rotation_right(s32 target_angle) {
 
 /* Start an automatic turn of angle yaw units (0x400 is a quarter turn;
  * negative turns left) with its sound, unless a rotation is running. */
-void battle_camera_request_rotation(s32 angle) {
+static void battle_camera_request_rotation(s32 angle) {
     if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
         if (angle < 0) {
             battle_camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) + angle);
@@ -1305,7 +1305,7 @@ void battle_camera_zoom_map(s32 mode) {
 /* Toggle the battle map zoom between "in" (target=1, action=2) and
    "out" (target=4, action=4), playing the corresponding zoom SFX. Any
    other current zoom target is left alone. */
-void battle_camera_toggle_zoom(void) {
+static void battle_camera_toggle_zoom(void) {
     if (g_map_zoom_target == MAP_ZOOM_IN) {
         g_camera_zoom_action = CAMERA_STEP_DECREASE;
         g_map_zoom_target = MAP_ZOOM_OUT;
@@ -1419,7 +1419,7 @@ void battle_camera_handle_tilt_request(s32 mode) {
 }
 
 /* Toggle the camera tilt and play its sound. */
-void battle_camera_toggle_tilt(void) {
+static void battle_camera_toggle_tilt(void) {
     s32 target;
 
     target = g_map_tilt_target;
@@ -1497,7 +1497,7 @@ void battle_camera_update_tilt(void) {
 
 /* Aims the camera step vector from the camera position at the acting unit: the
  * unit-length direction (ONE) with its height component multiplied by four. */
-void battle_camera_calculate_acting_unit_vector_normal(void) {
+static void battle_camera_calculate_acting_unit_vector_normal(void) {
     VECTOR delta;
     battle_unit_t* unit;
 
@@ -1511,7 +1511,7 @@ void battle_camera_calculate_acting_unit_vector_normal(void) {
 
 /* The acting-unit camera step vector at double length, used when the unit is
  * outside the wider screen window. */
-void battle_camera_shift_acting_unit_vector(void) {
+static void battle_camera_shift_acting_unit_vector(void) {
     battle_camera_calculate_acting_unit_vector_normal();
     g_camera_step_vector.vx *= 2;
     g_camera_step_vector.vy *= 2;
@@ -1524,7 +1524,7 @@ void battle_camera_shift_acting_unit_vector(void) {
  * units above the floor, negated because world Y points down. The focus
  * offset is normalized by VectorNormal into g_camera_step_vector and
  * tripled. Returns the negated tile height. */
-s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
+static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
     map_tile_t* tile;
     SVECTOR tile_position;
     VECTOR delta;
@@ -1549,7 +1549,7 @@ s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
 /* Doubles the cursor tile vector computed by
  * camera_calculate_cursor_tile_vector_normal and passes that routine's
  * result through; callers hand it to camera_step_focus_toward_cursor_tile. */
-s32 battle_camera_scale_cursor_tile_vector(void) {
+static s32 battle_camera_scale_cursor_tile_vector(void) {
     s32 result = battle_camera_calculate_cursor_tile_vector_normal();
 
     g_camera_step_vector.vx *= 2;
@@ -1594,7 +1594,7 @@ s32 battle_camera_scale_cursor_tile_vector(void) {
  * The horizontal bounds are the center of the cursor tile (28 units per tile,
  * half a tile of bias); the caller supplies the height bound directly.
  */
-void battle_camera_step_focus_toward_cursor_tile(s16 height) {
+static void battle_camera_step_focus_toward_cursor_tile(s16 height) {
     CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vx, g_camera_step_vector.vx,
         g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
     CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vy, g_camera_step_vector.vy, height);
@@ -1609,7 +1609,7 @@ void battle_camera_step_focus_toward_cursor_tile(s16 height) {
  * while it is still short of the target in the step's direction, and is set to
  * the target exactly when the step carries it past. Called for the acting unit
  * while it moves, chooses its wait direction or starts an attack animation. */
-void battle_camera_step_real_coords_toward_target(const battle_unit_t* target) {
+static void battle_camera_step_real_coords_toward_target(const battle_unit_t* target) {
     if (g_camera_step_vector.vx < 0) {
         if (g_camera_current_real_coords.vx / ONE > target->world_coords.vx) {
             g_camera_current_real_coords.vx += g_camera_step_vector.vx;

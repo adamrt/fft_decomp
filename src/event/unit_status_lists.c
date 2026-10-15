@@ -24,6 +24,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 menu_display_projected_action_effect_variant(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
+    const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);
+
+static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
+static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
+
 s32 unit_has_any_current_status(s32 battle_id) {
     unit_stats_t* unit;
     s32 index;
@@ -355,7 +361,7 @@ void menu_run_selected_tile_info_display_thread(void) {
     thread_exit_current();
 }
 
-s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly) {
+static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly) {
     menu_quad_piece_t* piece;
     s32 count;
     s32 i;
@@ -388,7 +394,7 @@ s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly) {
  *
  * BATTLE twin of menu_build_sprite_page.
  */
-void menu_build_sprite_page(s32 page_index, RECT* base_screen) {
+static void menu_build_sprite_page(s32 page_index, RECT* base_screen) {
     s32 i;
     menu_sprite_page_t* page = &g_menu_scratch_buffer.sprite_pages[page_index & 1];
     SPRT* sprite;
@@ -422,7 +428,7 @@ void menu_noop_2(void) {
  * with the panel state's 2 still in $v0. An explicit `return 2;` adds a second
  * constant load, so they use a bare `return;`. The caller discards the result.
  */
-s32 menu_display_projected_action_effect_variant(
+static s32 menu_display_projected_action_effect_variant(
     POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params) {
     menu_number_entry_t* panel;
     u16* label_x;
@@ -700,12 +706,12 @@ s32 menu_display_projected_action_effect_variant(
 /* Empty in WORLD; BATTLE's body loads the result image of the previewed action into the unit panel.
  * Called with gfx_init_image_loading's arguments. It leaves $v0 unset; the shared caller discards
  * the result. */
-s32 menu_display_projected_action_effect_variant(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
+static s32 menu_display_projected_action_effect_variant(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_load_parameters_t* unused_parameters) {
 }
 #endif
 
-void menu_display_hovered_unit_stats(
+static void menu_display_hovered_unit_stats(
     RECT* frame_rect, s32 mode, struct menu_number_entry* entries, menu_unit_status_record_t* status) {
     RECT rects[4];
     menu_unit_status_offsets_t offsets[2];
@@ -2234,7 +2240,7 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
 }
 
 /* Copy a menu entry's window position and text-image UV and size to its sprite. */
-void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame) {
+static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame) {
     sprite->x0 = entry->window.x;
     sprite->y0 = entry->window.y;
     sprite->u0 = (entry->vram_origin.x & 0x3f) * 4;

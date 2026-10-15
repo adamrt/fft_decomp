@@ -89,7 +89,7 @@ void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
 /* Initialize the LINE_F2, POLY_F4, POLY_FT4, TILE and DR_MOVE primitive
  * headers of one graphics context, up to each pool's capacity; the quads
  * also get texture shading enabled. */
-void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
+static void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
     s32 i;
 
     for (i = 0; i < g_gfx_line_f2_capacity; i++) {

@@ -23,6 +23,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id);
+
 void script_process_inflict_status_commands(void) {
     s32 instruction_offset;
     s32 runtime_id;
@@ -504,14 +506,14 @@ menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
 
 #ifdef FFT_BATTLE
 /* Empty in BATTLE and never called. WORLD's twin clears the window buffer pair of a thread. */
-void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
+static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
 }
 #endif
 
 #ifdef FFT_WORLD
 /* Clear the pair whose first record's thread matches; the target forms one
  * 0x118-biased induction value across both records (compare 0x800e27f4). */
-void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
+static void menu_clear_window_buffer_pair_by_thread_variant(s32 thread_id) {
     s32 index;
 
     for (index = 0; index < 6; index += 2) {
@@ -550,7 +552,7 @@ void menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
 }
 
 /* Set the color in a GPU primitive's common header to one gray level. */
-void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness) {
+static void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness) {
     setRGB0(primitive, brightness, brightness, brightness);
 }
 

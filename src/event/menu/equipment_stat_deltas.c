@@ -4,6 +4,9 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
+static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,
+    const menu_status_panel_slot_storage_t* scaled, const menu_status_panel_slot_storage_t* base, s32 scale);
+
 void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
     s16 item_before, s16 item_after, s32 slot) {
     menu_unit_status_record_t summary_before;
@@ -21,7 +24,7 @@ void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, me
 }
 
 /* Store base minus scaled detail stats; inputs may alias the output. */
-void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,
+static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,
     const menu_status_panel_slot_storage_t* scaled, const menu_status_panel_slot_storage_t* base, s32 scale) {
     out->state.move = base->state.move - (scale * scaled->state.move);
     out->state.speed = base->state.speed - (scale * scaled->state.speed);

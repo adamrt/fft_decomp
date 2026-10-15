@@ -9,6 +9,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y);
+static void bunit_gfx_init_rhombus_cursor_tpages(void);
+static void bunit_gfx_update_rhombus_cursor_trail(point16_t* target);
+
 void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
     if (enable != 0) {
         if (g_bunit_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
@@ -30,7 +34,7 @@ void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
 /* Return the listed unit's current HP, MP, or CT value, as
  * g_bunit_unit_stat_mode selects. For any other mode the value returned is
  * never assigned. */
-s32 bunit_unit_get_current_stat(s32 unit_index) {
+static s32 bunit_unit_get_current_stat(s32 unit_index) {
     menu_unit_readout_e mode;
     bunit_unit_t* entry;
     s32 value;
@@ -50,24 +54,24 @@ s32 bunit_unit_get_current_stat(s32 unit_index) {
     return g_bunit_unit_current_stat_value;
 }
 
-s32 bunit_unit_get_level(s32 unit_id) {
+static s32 bunit_unit_get_level(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->level;
 }
 
-s32 bunit_unit_get_experience(s32 unit_id) {
+static s32 bunit_unit_get_experience(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->experience;
 }
 
-s32 bunit_unit_get_brave(s32 unit_id) {
+static s32 bunit_unit_get_brave(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->brave;
 }
 
-s32 bunit_unit_get_faith(s32 unit_id) {
+static s32 bunit_unit_get_faith(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->faith;
 }
 
 /* Return the selected unit's maximum HP, MP, or CT value. */
-s32 bunit_unit_get_max_stat(s32 unit_index) {
+static s32 bunit_unit_get_max_stat(s32 unit_index) {
     s32 value;
 
     if (g_bunit_unit_stat_mode == MENU_UNIT_READOUT_HP) {
@@ -84,7 +88,7 @@ s32 bunit_unit_get_max_stat(s32 unit_index) {
 /* Returns 1 when the selected unit is in the two upper visible rows of the list at
  * `page_offset` (after the scroll in progress), which puts the status banner at the bottom
  * of the screen. Returns 0 while browsing units. */
-s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset) {
+static s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset) {
     s32 in_upper_rows;
     s8 offset;
     s32 scroll_step;
@@ -126,7 +130,7 @@ s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset) {
  * if the selected unit lies outside the page shown at the current offset
  * (0, -0x3C, -0x78 = pages of four units); once a step reaches +/-0x3C,
  * commit it to the offset and stop. */
-void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
+static void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
     s8 cur;
     s8 next;
 
@@ -180,7 +184,7 @@ void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
  * active the sprite is drawn one pixel lower with CLUT g_bunit_menu_button_clut. abs()
  * matters: GCC expands it to the single-insn abssi2, which keeps the entry
  * loop body one basic block as in the target. */
-void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
+static void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id) {
     oriented_quad_t desc;
     /* Eight untouched bytes plus descriptor alignment retain the target frame. */
     s16 unused_tail[4];
@@ -643,7 +647,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
  * Vertical distance is doubled before the Euclidean distance calculation,
  * matching the menu renderer's non-square coordinate scale. `dx` also holds
  * the result. */
-s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum) {
+static s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum) {
     s32 dx;
     s32 dy;
 
@@ -710,7 +714,7 @@ void bunit_gfx_draw_falloff_shaded_rows(s32 y) {
 
 /* Empty the eight cursor trail points (x = -1) and set the texture pages of
  * the cursor sprite and its shadow. */
-void bunit_gfx_init_rhombus_cursor_tpages(void) {
+static void bunit_gfx_init_rhombus_cursor_tpages(void) {
     s16 term = -1;
     s32 i = 7;
     do {
@@ -729,7 +733,7 @@ void bunit_gfx_init_rhombus_cursor_tpages(void) {
  * quads per cursor layer, faded by g_bunit_cursor_trail_brightness except for the newest point.
  * abs() matters: GCC expands it to the single-insn abssi2, which keeps each
  * loop body one basic block as in the target. */
-void bunit_gfx_update_rhombus_cursor_trail(point16_t* target) {
+static void bunit_gfx_update_rhombus_cursor_trail(point16_t* target) {
     rgb24_t rgb;
     s32 i;
     s32 last;
@@ -813,7 +817,7 @@ void bunit_gfx_update_rhombus_cursor_trail(point16_t* target) {
  * selected unit's plate also pulses. The target keeps two short-lived values
  * in the loop counter and OT-index registers (the falloff result in `i`, the
  * facing quadrant in `value`), so the source reuses those variables. */
-void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
+static void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
     rgb24_t rgb;
     /* The query writes clut/tpage into the quad and two extra 16-bit values after it. */
     struct {

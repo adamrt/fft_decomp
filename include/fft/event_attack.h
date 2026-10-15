@@ -169,29 +169,14 @@ extern s32 g_attack_deploy_zodiac_brightness_word[1];
 extern zodiac_draw_context_t g_attack_deploy_zodiac_draw_context;
 extern unit_deployment_coordinates_t g_attack_deployed_unit_map_coordinates[12];
 
-void attack_deploy_build_menu_cursor_primitives(s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer);
-void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
-void attack_deploy_build_screen_arrow(void);
 void attack_deploy_find_fieldable_units(void);
 unit_deployment_coordinates_t* attack_deploy_get_coordinate_slots(void);
-void attack_deploy_handle_roster_navigation_input(void);
 s32 attack_deploy_has_roster_id_on_tiles(s32 roster_id);
 s32 attack_deploy_is_roster_unit_deployed(s32 roster_id);
 void attack_deploy_mark_other_squad_units_undeployable(void);
-void attack_deploy_prepare_valid_tiles(SPRT* sprites);
-void attack_deploy_remove_roster_unit_from_tiles(s32 roster_id);
-void attack_deploy_reset_tables(void);
-void attack_deploy_run_render_thread(void);
 void attack_deploy_run_screen(void);
 void attack_deploy_run_select_menu(void);
-void attack_deploy_select_next_roster_unit(void);
-void attack_deploy_select_previous_roster_unit(void);
-void attack_deploy_select_unit_for_stats_display(void);
-void attack_deploy_swap_roster_unit_tile(s32 column, s32 row, s32 roster_id);
-void attack_deploy_update_screen_graphics(void);
-void attack_deploy_init_cursor_primitives(void);
 void attack_text_build_deployment_strings(void);
-void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_render_buffer_t* buffer);
 
 /* formation */
 extern RECT g_attack_formation_sheet_rect;
@@ -242,8 +227,6 @@ extern u16 g_attack_panel_status_y_offsets[][2];
 extern s32 g_attack_status_display_offset_y[];
 extern s32 g_attack_status_display_thread_params;
 
-void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse);
-
 /* numeric editor */
 /* Five name ids and five ability/skillset ids of the unit loaded into the
  * editor (g_attack_editor_unit_fields + 0x24). The target walks them from this
@@ -260,8 +243,6 @@ void attack_editor_load_party_unit(s32 mode, s32 roster_index);
 extern POLY_FT4 g_attack_gfx_frame_ft4[];
 /* Map darkness uses RGB and ignores the fourth byte. */
 extern const CVECTOR g_attack_map_darkness_color;
-
-void attack_gfx_init_frame_ft4_array(void);
 
 /* portraits */
 extern RECT g_attack_portrait_palette_upload_rect;
@@ -282,8 +263,6 @@ extern s32 g_attack_text_job_names_offset;
 /* Entries [1] and [2] of the unit-name text file's section-offset table (0x801cd2b0, s32[32], ending at
  * g_attack_text_data). */
 extern s32 g_attack_text_roster_unit_names_offset;
-
-void attack_text_init_battle_pointers(attack_text_file_t* file);
 
 /* input */
 

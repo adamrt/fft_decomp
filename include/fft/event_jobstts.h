@@ -38,7 +38,6 @@ typedef char jobstts_unit_job_data_size_must_be_158[(sizeof(jobstts_unit_job_dat
 extern jobstts_unit_job_data_t* g_jobstts_unit_data[];
 extern jobstts_unit_job_data_t g_jobstts_unit_job_data;
 
-void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data_t* destination);
 void jobstts_unit_init_job_data(s32 unit_id);
 
 /* ability */
@@ -54,7 +53,6 @@ s32 jobstts_ability_build_list(
 extern menu_instruction_t g_jobstts_job_list_render_commands;
 
 s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused);
-s32 jobstts_job_get_base(s16 unit_id);
 
 /* menus */
 /* Unsigned here where the other overlays keep signed values. */
@@ -73,7 +71,6 @@ extern u8 g_jobstts_menu_palette_image[];
 /* Window right edge; WORLD's twin stores it to g_world_menu_window_right_x. */
 extern s16 g_jobstts_menu_window_right_x;
 
-void jobstts_menu_load_images_and_clear_selection(void);
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 
 /* help */
@@ -132,7 +129,6 @@ void jobstts_gfx_init_contexts(jobstts_gfx_context_t* base, u32* otag, POLY_F3* 
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas);
-void jobstts_gfx_init_primitive_buffers(jobstts_gfx_context_t* context);
 void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */

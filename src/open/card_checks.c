@@ -56,7 +56,7 @@ s32 card_io_poll_operation_result_variant(void) {
 /* Probe the selected slot until three probes in a row complete, and return
  * complete. Any other settled result counts against retry_limit and is returned
  * when the limit is reached. A nonpositive limit leaves the result unset. */
-s32 open_card_poll_info_until_stable(s32 retry_limit) {
+static s32 open_card_poll_info_until_stable(s32 retry_limit) {
     s32 attempts = 0;
     s32 consecutive_successes = 0;
     s32 result;

@@ -39,7 +39,7 @@ s32 world_input_filter_menu(void) {
  * -4 store back into an absolute address and the scheduler moves the first
  * arm's store into the frame load's delay slot.
  */
-void world_formation_step_unit_selection_slide(void) {
+static void world_formation_step_unit_selection_slide(void) {
     if (g_world_formation_unit_slide_frame < 9) {
         g_world_formation_unit_slide_frame = g_world_formation_unit_slide_frame + 1;
         g_menu_status_display_thread_params.redraw_request = 0;

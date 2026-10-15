@@ -14,6 +14,22 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_bar_push_menu_level(void);
+static void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, GsLINE* line);
+static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot);
+static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad);
+static void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore);
+static void wldcore_menu_push_fixed_number_panel_level(void);
+static void wldcore_menu_push_focus_location_level(s32 dot_index);
+static void wldcore_menu_push_map_path_level(s32 path_id, s32 path_id_hi, s32 erase);
+static void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value);
+static void wldcore_menu_push_root_level(void);
+static void wldcore_menu_push_variable_list_level(void);
+static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level);
+static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id);
+static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_set);
+static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request);
+
 /* Draws the HUD numeric readout at the context-value display position, laid
  * out by g_wldcore_context_value_display_mode: 1 is the labeled, underlined
  * value (war funds), 2 the play time as hours, minutes and seconds with
@@ -118,7 +134,7 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot) {
  *
  * The line is derived from the sprite's current position; the sprite origin is
  * then advanced by (4, 8) so the follow-up draws at the shifted position. */
-void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, GsLINE* line) {
+static void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, GsLINE* line) {
     /* u16: the target reads GsSPRITE's short x/y with lhu. */
     u16 x;
     u16 y;
@@ -156,7 +172,7 @@ void wldcore_gfx_draw_cursor_sprite_and_underline(GsOT* ot, GsSPRITE* sprite, Gs
  * digit, stepping the sprite eight pixels right per column. Leading zeros are
  * skipped: a column only draws once the running divisor has dropped to or
  * below value, and the last column always draws. */
-void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
+static void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot) {
     s32 divisor;
     s32 i;
     s32 digit;
@@ -199,7 +215,7 @@ void wldcore_gfx_draw_number_digits(s32 value, s32 digits, GsSPRITE* sprite, GsO
  * wldcore_gfx_draw_number_digits, but also draws the columns ahead of the
  * first significant digit: a zero glyph when `zero_pad` is set, otherwise the
  * 8x8 filler glyph at (0xd0, 0x28). */
-void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad) {
+static void wldcore_gfx_draw_number_digits_with_fill(s32 value, s32 digits, GsSPRITE* sprite, GsOT* ot, s32 zero_pad) {
     s32 divisor;
     s32 y;
     s32 digit;
@@ -420,7 +436,7 @@ void wldcore_menu_dispatch_publish_handler(void) {
  *
  * The level record is re-read into its own local after the script call; reusing
  * the window-level depth local changes the register allocation. */
-void wldcore_menu_push_root_level(void) {
+static void wldcore_menu_push_root_level(void) {
     wldcore_window_xy_t* xy;
     world_animated_render_record_t* records;
     s32 window_index;
@@ -815,7 +831,7 @@ finish:
 
 /* Push a map-dot focus level and hide its parent window during the projection move.
  * Keeping the render pointer as the base preserves the two related call addresses. */
-void wldcore_menu_push_focus_location_level(s32 dot_index) {
+static void wldcore_menu_push_focus_location_level(s32 dot_index) {
     world_animated_render_record_t* render;
 
     render = &g_wldcore_map_dots[dot_index].render;
@@ -863,7 +879,7 @@ void wldcore_map_step_projection_motion_then_pop_level(wldcore_menu_stack_record
 /* Start drawing or erasing a map path and hide the parent window until the
  * animation finishes. Indexed stores keep their named globals to preserve
  * the original address sequences. */
-void wldcore_menu_push_map_path_level(s32 path_id, s32 path_id_hi, s32 erase) {
+static void wldcore_menu_push_map_path_level(s32 path_id, s32 path_id_hi, s32 erase) {
     s32 depth;
     s32 window_index;
 
@@ -942,7 +958,7 @@ void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
 /* Start a delayed map-location visibility change and hide the parent window
  * until it finishes. Indexed stores keep their named globals to preserve
  * the original address sequences. */
-void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_set) {
+static void wldcore_push_map_location_visibility_level(s32 dot_index, s32 was_set) {
     s32 depth;
     s32 window_index;
 
@@ -1275,7 +1291,7 @@ void wldcore_menu_finish_close_request(wldcore_menu_message_level_t* level) {
  * of the stack record rather than kept in locals; the `- -` keeps the row
  * offset's constant on the multiply chain, which a plain `+` reassociates
  * onto base_y. */
-void wldcore_menu_push_variable_list_level(void) {
+static void wldcore_menu_push_variable_list_level(void) {
     s32 index;
     s32 record_index;
     u8 unused_locals[0x10];
@@ -1312,7 +1328,7 @@ void wldcore_menu_push_variable_list_level(void) {
  *
  * `value` first holds the row count for the panel height and then each
  * variable's value: one register (v1) in the target. */
-void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level) {
+static void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t* level) {
     RECT bounds;
     point32_t point;
     s32 index;
@@ -1461,7 +1477,7 @@ move_cursor:
 
 /* Pushes the number-panel menu level (type 0x30) that edits script variable
  * `variable_id`, starting the panel at `value`. */
-void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value) {
+static void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value) {
     point32_t origin;
     s32 record_index;
 
@@ -1559,7 +1575,7 @@ void wldcore_menu_push_layout_window_level(void) {
 /* Routing both stores through one base variable (rather than
  * `&g_wldcore_window_record_positions[index]`) is what reproduces the target's separate base register
  * held in $a0 across the whole function. */
-void wldcore_window_apply_layout(wldcore_window_layout_request_t* request) {
+static void wldcore_window_apply_layout(wldcore_window_layout_request_t* request) {
     wldcore_window_xy_t* xy = g_wldcore_window_record_positions;
     s32 index = request->window_index;
     s32 layout = request->layout;
@@ -2008,7 +2024,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
  * each of the four slots that is not -1 releases one window or render record
  * and its queue entry. With `restore` the level underneath is resumed. Also
  * unblocks the menu buttons and re-shows the location marker. */
-void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore) {
+static void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots, s32 restore) {
     g_menu_blocked_buttons = 0;
     if (slots->window_a != -1) {
         g_wldcore_window_record_count -= 1;
@@ -2040,7 +2056,7 @@ void wldcore_menu_close_level_and_release_records(wldcore_menu_slot_set_t* slots
  *
  * The local alias for the current location id reproduces the target's
  * saved-register base for its two loads. */
-void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id) {
+static void wldcore_menu_run_shop_and_rebuild_screen(s32 shop_id) {
     s32* selected;
     u32* clear;
     s32 i;
@@ -2157,7 +2173,7 @@ void wldcore_menu_step_scrollable_text_window_level(wldcore_menu_stack_record_t*
 
 /* Queue the fixed "9999"-style number panel used on the world map and append
  * its 0x5c-byte record. Sibling of wldcore_menu_push_number_panel_level_with_argument. */
-void wldcore_menu_push_fixed_number_panel_level(void) {
+static void wldcore_menu_push_fixed_number_panel_level(void) {
     point32_t origin;
     s32 record_index;
 
@@ -2212,7 +2228,7 @@ void wldcore_menu_step_unit_browser_panel(wldcore_menu_panel_level_t* level) {
  * 0x16 or 0x17 by `EVENT_SCRIPT_VAR_TOWN_BACKGROUND`, starts WORLD thread 14 on
  * 0x8010f250 with text 0xb806, and allocates two window records and one
  * render record for the level before 0x8007148c fills it. */
-void wldcore_bar_push_menu_level(void) {
+static void wldcore_bar_push_menu_level(void) {
     s32 value;
     s32 set;
     s32 record_index;

@@ -10,7 +10,7 @@
  * the second buffer sits 240 lines below the first (a 480-line mode uses one),
  * both draw environments clear to the given color, and the display is masked
  * until the caller turns it on. image_rect is not used. */
-void main_set_display_draw_new_game(int width, int height, int projection, u8 red, u8 green, u8 blue) {
+static void main_set_display_draw_new_game(int width, int height, int projection, u8 red, u8 green, u8 blue) {
     RECT image_rect = { 0, 0, 1024, 512 };
     int second_y = height == 480 ? 0 : 240;
 
@@ -32,7 +32,7 @@ void main_set_display_draw_new_game(int width, int height, int projection, u8 re
     PutDrawEnv(&g_main_gfx_draw_envs[g_main_gfx_screen_polarity]);
 }
 
-int main_gfx_swap_display_area(u32* otag) {
+static int main_gfx_swap_display_area(u32* otag) {
     /* Matching constraint: the retail function reserves one unused RECT. */
     RECT matching_stack_space;
     int elapsed;

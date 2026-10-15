@@ -99,7 +99,7 @@ void battle_gfx_tint_all_units_by_team(void) {
 }
 
 /* Advance the AT list cursor, wrapping after the list's 40 entries. */
-void battle_action_increment_at_list_id(void) {
+static void battle_action_increment_at_list_id(void) {
     g_action_at_list_id++;
     if (g_action_at_list_id >= BATTLE_AT_LIST_CAPACITY) {
         g_action_at_list_id = 0;
@@ -170,7 +170,7 @@ void battle_effect_build_secondary_init(battle_unit_t* unit, effect_secondary_in
  * derived from its action data. With no targets the first block instead holds
  * the cursor tile position. The record's target blocks form an array of up to
  * 16 entries starting at the header's first `target` block. */
-void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, effect_secondary_init_t* init) {
+static void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, effect_secondary_init_t* init) {
     battle_unit_t* target;
     action_data_t* action;
     s32 i;
@@ -263,7 +263,7 @@ void battle_effect_start_action_projectile_secondary(battle_unit_t* unit) {
  * The init record is a stack local of which effect_build_secondary_init
  * sets five fields; effect_init_secondary copies the rest of its caster
  * and target blocks and its used_weapon_id as the stack left them. */
-void battle_effect_set_secondary(battle_unit_t* unit, s32 effect_type) {
+static void battle_effect_set_secondary(battle_unit_t* unit, s32 effect_type) {
     effect_secondary_init_t data;
 
     battle_effect_build_secondary_init(unit, &data);
@@ -333,7 +333,7 @@ s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id) {
 /* Lands a projectile strike on its target: the weapon hit sound, the target's
  * reaction animation, its post-action display and the evade and weapon-element
  * effect data. Does nothing when either unit is missing. */
-void battle_unit_set_bow_hardcoding(battle_unit_t* attacker, battle_unit_t* target) {
+static void battle_unit_set_bow_hardcoding(battle_unit_t* attacker, battle_unit_t* target) {
     if ((attacker != 0) && (target != 0)) {
         battle_sound_play_weapon_sfx(attacker, 1);
         battle_unit_set_target_animation_from_attack_type(attacker, target);
@@ -359,7 +359,7 @@ void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_i
     battle_unit_set_bow_hardcoding(attacker, target);
 }
 
-void battle_unit_update_display(battle_unit_t* unit) {
+static void battle_unit_update_display(battle_unit_t* unit) {
     map_tile_t* tile;
 
     if (unit != 0) {
@@ -563,7 +563,7 @@ void battle_unit_dismount_rider_and_update_display(battle_unit_t* rider) {
  * result is twice the gap between that layer's underside (its height less its
  * ceiling depth) and a point 3 levels above this tile's surface. Otherwise it is
  * 0x40. */
-s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
+static s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
     map_tile_t* from;
     map_tile_t* to;
     s32 from_height;
@@ -588,7 +588,7 @@ s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
  * lower bound subtracts the layer step clearance from move_calculate_tile_layer_step_offset, the
  * upper bound is the tile surface height alone less 0x30.
  */
-s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
+static s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
     map_tile_t* tile;
     s32 clearance;
     s32 height;

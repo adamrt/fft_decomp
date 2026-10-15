@@ -24,7 +24,7 @@
  * lies below the center and a high side above it. VectorNormal reduces the vector
  * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
  * applies the walk speed with move_interpolate_partial. */
-void battle_move_set_unit_step_delta_center_to_edge(
+static void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 
@@ -64,7 +64,7 @@ enum {
  * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
  * is not negated, so entering over a high side (slope height 2) moves the unit
  * down to the center. */
-void battle_move_set_unit_step_delta_edge_to_center(
+static void battle_move_set_unit_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 
@@ -105,7 +105,7 @@ void battle_move_set_unit_step_delta_edge_to_center(
  * lies below the center and a high side above it. VectorNormal reduces the vector
  * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
  * applies the walk speed with move_interpolate_partial. */
-void battle_move_set_float_step_delta_center_to_edge(
+static void battle_move_set_float_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 
@@ -143,7 +143,7 @@ void battle_move_set_float_step_delta_center_to_edge(
  * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
  * is not negated, so entering over a high side (slope height 2) moves the unit
  * down to the center. */
-void battle_move_set_float_step_delta_edge_to_center(
+static void battle_move_set_float_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 
@@ -427,7 +427,8 @@ void battle_move_start_unit_step_at_climb_speed(
  * jump (length 2+) uses animation 0x1e with a per-direction facing, while a
  * short hop dismounts any rider and toggles movement bit 27 to alternate the
  * 0x30/0x31 hop animation. */
-void battle_move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to) {
+static void battle_move_start_unit_jump_step(
+    battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to) {
     u16 facings[4] = { BATTLE_FACING_EAST, BATTLE_FACING_WEST, BATTLE_FACING_SOUTH, BATTLE_FACING_NORTH };
     u8 next;
     u8 jump_phases[4] = { MOVE_STEP_PHASE_JUMP_START_EAST, MOVE_STEP_PHASE_JUMP_START_WEST,
@@ -497,7 +498,7 @@ void battle_move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unu
  * The step byte's top two bits give the direction, as in
  * move_start_unit_jump_step. `unused_10` reproduces an unreferenced
  * 16-byte frame slot below the height data. */
-void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+static void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     VECTOR unused_10;
     battle_unit_height_data_t height_data;
     move_step_t* step;
@@ -565,7 +566,7 @@ void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_
  *
  * Case bodies store the destination before clearing the other velocity axis;
  * that order gives the target's map_x/step load order. */
-void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+static void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     s32 unused[4];
     battle_unit_height_data_t height_data;
     s32 rise;
@@ -647,7 +648,7 @@ void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t
  * in-place accumulation register; `rise_height` and `apex` keep the multiplication
  * order (term * 6 or 12 before gravity) that one folded expression reassociates.
  */
-void battle_move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+static void battle_move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     move_step_t current_step;
     s32 rise;
     s32 frames;
@@ -1012,7 +1013,7 @@ void battle_sound_play_movement_sfx(battle_unit_t* unit, s32 sound_id) {
  * water and marsh surfaces, MAIN_SFX_LAND_WOOD for wooden floor, tree and box,
  * and MAIN_SFX_LAND_DEFAULT otherwise. Nothing plays for a unit whose motion
  * flags suppress landing effects, or when the destination tile does not exist. */
-void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
+static void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 surface;
     s32 sfx;
@@ -1059,7 +1060,7 @@ void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
  *
  * Nothing starts when the unit's 32-bit movement value carries
  * BATTLE_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS. */
-void battle_effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
+static void battle_effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 surface;
 
@@ -1244,7 +1245,7 @@ void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
  *
  * y is the map depth axis (world_coords.vz). Dead, crystal, treasure and jumping units
  * are left where they are. */
-void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, s32 delta) {
+static void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, s32 delta) {
     s16 axis;
     s16 screen_z;
 
@@ -1289,7 +1290,7 @@ void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, 
  * center along direction. It is skipped while the mover's step before last
  * carries movement flag 0x10. The case order and per-case center temporaries
  * reproduce the target's cross-jumped tails. */
-void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
+static void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
     battle_unit_t* other;
     s32 dist;
     s32 x;
@@ -1440,7 +1441,7 @@ move_direction_e battle_move_get_direction(const battle_unit_t* unit) {
 /* Continue a jump step on the ground once the landing animation is over: restart
  * the step (at climb speed when the step byte's climb bit is set) and enter its
  * to-center stage for the direction of travel. */
-void battle_move_advance_display_unit_step(battle_unit_t* unit) {
+static void battle_move_advance_display_unit_step(battle_unit_t* unit) {
     s32 direction;
 
     direction = battle_move_get_direction(unit);

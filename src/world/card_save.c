@@ -12,7 +12,21 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-s32 world_input_read_controller(s32 unused) {
+static void world_card_build_save_file_header(s32 slot, s32 level, card_save_header_t* header);
+static s32 world_card_build_save_slot_description(s32 mode, u8* destination);
+static s32 world_card_count_selectable_save_slots(void);
+static void world_card_draw_slot_text(s32 save_slot_index);
+static void world_card_run_load_step(s32 slot);
+static void world_card_run_mode_select_step(void);
+static void world_card_run_save_step(s32 slot);
+static void world_card_run_slot_select_step(void);
+static void world_card_scroll_menu_list(s32 row);
+static void world_card_update_and_draw_slot_list(s32 input);
+static void world_card_update_save_slot_playtime(s32 slot);
+static void world_card_update_slot_scan(void);
+static void world_free_work_buffer(void);
+
+static s32 world_input_read_controller(s32 unused) {
     return PadRead(0);
 }
 
@@ -23,7 +37,7 @@ s32 world_input_read_controller(s32 unused) {
  * activation delay, single-button latch, and repeat-counter logic. Counter
  * slots 4..11 are skipped; those buttons use only the newly pressed mask.
  */
-void world_input_update_controller(void) {
+static void world_input_update_controller(void) {
     s16 bit;
     s32 index;
     u32 current_input;
@@ -135,7 +149,7 @@ void world_input_update_controller(void) {
  * sound), 2 after it and 0 otherwise. When the text thread is not running
  * the task-active flag and the held-loop sound release are cleared.
  */
-void world_card_input_update_with_message_state(void) {
+static void world_card_input_update_with_message_state(void) {
     s32 running = 0;
     s32 step;
     u8 value;
@@ -285,7 +299,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
 
 /* Memory card slot selection step: waits 0x28 frames, opens menu thread 6,
  * then applies the chosen slot (g_world_menu_selection_results[5]) or reports cancel (9). */
-void world_card_run_slot_select_step(void) {
+static void world_card_run_slot_select_step(void) {
     s16* selected;
     s32 slot;
 
@@ -334,7 +348,7 @@ void world_card_run_slot_select_step(void) {
  * list (the same predicates world_card_count_selectable_save_slots counts). `i` is reused to hold the
  * previous save mode.
  */
-void world_card_run_mode_select_step(void) {
+static void world_card_run_mode_select_step(void) {
     s32 slot;
     s32 i;
     s32 all;
@@ -420,7 +434,7 @@ void world_card_run_mode_select_step(void) {
  * The read starts after the loading message has been displayed. A complete
  * read must also pass world_card_load_globals_from_save_image before the loaded-slot transition.
  */
-void world_card_run_load_step(s32 slot) {
+static void world_card_run_load_step(s32 slot) {
     u32 state = g_world_card_load_step_state;
     s32 input;
     s32 bytes_read;
@@ -474,7 +488,7 @@ void world_card_run_load_step(s32 slot) {
  * rewritten in place. A complete write refreshes the slot's cached
  * metadata and graphic, otherwise the error prompt is shown.
  */
-void world_card_run_save_step(s32 slot) {
+static void world_card_run_save_step(s32 slot) {
     u32 state = g_world_card_save_step_state;
     s32 input;
     s32 bytes_written;
@@ -824,13 +838,13 @@ void world_card_init_menu_state(void) {
     memset(buffer, 0xFF, 0x1E80);
 }
 
-void world_free_work_buffer(void) {
+static void world_free_work_buffer(void) {
     main_heap_free(g_world_load_work_buffer);
 }
 
 /* WORLD twin of card_save_update_slot_playtime: splits the loaded save's
  * play time into hours/minutes/seconds for the memory card menu. */
-void world_card_update_save_slot_playtime(s32 slot) {
+static void world_card_update_save_slot_playtime(s32 slot) {
     s32 component;
     s32 elapsed_seconds;
 
@@ -862,7 +876,7 @@ void world_card_update_save_slot_playtime(s32 slot) {
  * WORLD twin of CARD's card_save_update_slot_scan (0x801c0c58): same state
  * machine, but a NEW_CARD probe result is retried once before use.
  */
-void world_card_update_slot_scan(void) {
+static void world_card_update_slot_scan(void) {
     s32 result;
     s32 status;
     s32 descriptor;
@@ -1091,7 +1105,7 @@ void world_card_update_slot_scan(void) {
  *
  * `world_text_bind_section_data` has no return statement; the job-name table
  * passed on below is the address its store left in $v0. */
-s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
+static s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
     s32 index;
     u8* source;
 
@@ -1143,7 +1157,7 @@ s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
  * three columns of five on the memory card menu. */
 
 /* Each column sets the whole rectangle; the compiler merges the three tails. */
-void world_card_draw_slot_text(s32 save_slot_index) {
+static void world_card_draw_slot_text(s32 save_slot_index) {
     RECT destination_rect;
 
     if (save_slot_index < 6) {
@@ -1170,7 +1184,7 @@ void world_card_draw_slot_text(s32 save_slot_index) {
  * (occupied slots when g_world_card_save_mode is nonzero, every available slot otherwise),
  * select the last written slot, then run the slot list update until it settles for ten
  * consecutive passes. Returns the number of qualifying slots. */
-s32 world_card_count_selectable_save_slots(void) {
+static s32 world_card_count_selectable_save_slots(void) {
     s32 count;
     s32 i;
 
@@ -1209,7 +1223,7 @@ s32 world_card_count_selectable_save_slots(void) {
  * field and derives each call argument from it (reg - 2, reg - 8), which an
  * array of records would fold into a single base register.
  */
-void world_card_update_and_draw_slot_list(s32 input) {
+static void world_card_update_and_draw_slot_list(s32 input) {
     s32 i;
     s32 row;
     s32 remaining;
@@ -1455,7 +1469,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
  * covered so far, growing by 4 a call; after one row height (0x30) it folds
  * into g_world_card_list_scroll_y and returns to 0.
  */
-void world_card_scroll_menu_list(s32 row) {
+static void world_card_scroll_menu_list(s32 row) {
     s16 velocity;
     s16 first;
 
@@ -1494,7 +1508,7 @@ void world_card_scroll_menu_list(s32 row) {
  *
  * Callers pass the save slot (world_card_run_save_step; -1 for the tutorial
  * image), which also selects one of the 15 icon records; level is unused. */
-void world_card_build_save_file_header(s32 slot, s32 level, card_save_header_t* header) {
+static void world_card_build_save_file_header(s32 slot, s32 level, card_save_header_t* header) {
     s32 value;
     s32 digit;
     s32 divisor;

@@ -191,7 +191,7 @@ void world_formation_copy_unit_to_temp(s16 index, s32 unused_slot) {
  * No date validation is performed; exhausting the 13 limits reads 31 from
  * the following month-length data, not a valid extra zodiac entry.
  */
-s32 world_unit_get_zodiac_for_date(s32 month, s32 day) {
+static s32 world_unit_get_zodiac_for_date(s32 month, s32 day) {
     s32 i;
 
     for (i = 0; i < WORLD_ZODIAC_DATE_LIMIT_COUNT; i++) {
@@ -342,7 +342,7 @@ void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_ota
 
 /* Initializes every primitive pool of a packet buffer with its libgpu
  * constructor; quads additionally get texture shading enabled. */
-void world_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
+static void world_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     s32 i;
 
     for (i = 0; i < g_world_gfx_textured_quad_capacity; i++) {

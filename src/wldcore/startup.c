@@ -8,6 +8,16 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_finalize_loop(void);
+static void wldcore_gfx_draw_world_frame_with_map(void);
+static void wldcore_gfx_init_subsystem(void);
+static s32 wldcore_handle_exit_request(void);
+static void wldcore_init_runtime_state(void);
+static void wldcore_init_subsystems(void);
+static void wldcore_init_world_map_state(void);
+static void wldcore_menu_restore_level_on_world_entry(void);
+static void wldcore_process_frame_gate(void);
+
 s32 wldcore_entrypoint(void) {
     s32 buffer_index;
 
@@ -75,7 +85,7 @@ s32 wldcore_entrypoint(void) {
 }
 
 /* Reinitialize WLDCORE when system-flag bit 1 transitions from set to clear. */
-void wldcore_process_frame_gate(void) {
+static void wldcore_process_frame_gate(void) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) == 0
         && (g_wldcore_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) != 0) {
         wldcore_init_core();
@@ -127,7 +137,7 @@ void wldcore_init_core(void) {
  * map dots and menus into the main one, then sorts the auxiliary table's
  * clear, draws both tables and clears system flag 2. Sibling of
  * wldcore_gfx_draw_world_frame. */
-void wldcore_gfx_draw_world_frame_with_map(void) {
+static void wldcore_gfx_draw_world_frame_with_map(void) {
     GsClearOt(0, 0, &g_wldcore_gfx_aux_ordering_tables[g_active_graphics_buffer_index]);
     GsClearOt(0, 0, &g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
     wldcore_draw_close_indicator_if_pending(&g_wldcore_gfx_ordering_tables[g_active_graphics_buffer_index]);
@@ -194,7 +204,7 @@ void wldcore_gfx_draw_world_frame(void) {
 
 /* Initialize the WLDCORE subsystems before entering the world loop.
  * The matched range includes the jr delay slot at 0x80067cb0. */
-void wldcore_init_subsystems(void) {
+static void wldcore_init_subsystems(void) {
     SetDispMask(0);
     wldcore_init_world_map_state();
     wldcore_input_init_repeat_state();
@@ -249,7 +259,7 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
  * with `g_active_graphics_buffer_index * 0x14`.
  */
 
-void wldcore_gfx_init_subsystem(void) {
+static void wldcore_gfx_init_subsystem(void) {
     SetDispMask(0);
     GsInitGraph2(256, 240, 4, 0, 0);
     GsDefDispBuff(0, 0, 0, 240);
@@ -274,7 +284,7 @@ void wldcore_gfx_init_subsystem(void) {
  * while it walks the rectangle fields separately.
  */
 
-void wldcore_init_world_map_state(void) {
+static void wldcore_init_world_map_state(void) {
     menu_cursor_state_t* cursor;
     GsBOXF* box;
     party_unit_t* party;
@@ -402,7 +412,7 @@ void wldcore_init_world_map_state(void) {
 }
 
 /* Finalize one WLDCORE loop pass and publish the world status. */
-void wldcore_finalize_loop(void) {
+static void wldcore_finalize_loop(void) {
     DrawSync(0);
     VSync(0);
     SetDispMask(0);
@@ -415,7 +425,7 @@ void wldcore_finalize_loop(void) {
 
 /* Initialize runtime tables and graphics state used by WLDCORE.
  * The matched range includes the jr delay slot at 0x800683f8. */
-void wldcore_init_runtime_state(void) {
+static void wldcore_init_runtime_state(void) {
     s32 reserved_stack_words[2];
     s32 count;
     SetDispMask(0);
@@ -442,7 +452,7 @@ void wldcore_init_runtime_state(void) {
  * script requests are dispatched. Either way two audio commands follow. Flags
  * 0x40000 and 0x200000 are consumed after publishing g_main_saved_weather_variable as script
  * variable 0x23; each request ends in wldcore_menu_push_screen_transition_level. */
-void wldcore_menu_restore_level_on_world_entry(void) {
+static void wldcore_menu_restore_level_on_world_entry(void) {
     s32 flags;
 
     flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_RESTART;
@@ -486,7 +496,7 @@ void wldcore_menu_restore_level_on_world_entry(void) {
 /* Called at the top of wldcore_entrypoint's loop; a nonzero script
  * `EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT` clears system flag 0x10000 and
  * makes the entrypoint return. */
-s32 wldcore_handle_exit_request(void) {
+static s32 wldcore_handle_exit_request(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0) {
         g_main_system_flags &= ~MAIN_SYSTEM_FLAG_RESTART;
         world_formation_restore_menu_after_core_exit();

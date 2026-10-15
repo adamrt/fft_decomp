@@ -4,6 +4,8 @@
 #include "fft/wldcore.h"
 #include "psx/types.h"
 
+static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
+
 void main_gfx_call_build_zodiac_bin(zodiac_draw_context_t* context, POLY_FT4* poly) {
     menu_build_zodiac_primitives(context, poly);
 }
@@ -40,7 +42,7 @@ void main_overlay_open_world_bin(s32 mode) {
  * last argument is main_file_build_header's loading display mode: 0 blanks the
  * screen and sets up the "Now Loading" message, 1 leaves the display state alone,
  * and -1 turns the message off. */
-void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {
+static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode) {
     main_file_load_descriptor_t* descriptor = &g_main_file_cd_state;
 
     main_file_build_header(descriptor, sector, sectors, destination, loading_display_mode);

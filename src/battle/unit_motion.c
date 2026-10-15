@@ -144,7 +144,7 @@ void battle_unit_set_world_coords_from_real_coords(battle_unit_t* unit) {
  *
  * Vertical position is derived separately from the unit's terrain and mount
  * state. The stack-backed SVECTOR preserves the target's narrow stores. */
-void battle_unit_set_real_coords_from_map_coords(battle_unit_t* unit) {
+static void battle_unit_set_real_coords_from_map_coords(battle_unit_t* unit) {
     SVECTOR tile_center;
 
     tile_center.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
@@ -264,7 +264,7 @@ void battle_move_interpolate_height_toward_resting_height(battle_unit_t* unit) {
  * Q12 steps: during an event the unit's own map tile, else the first entry of
  * the target list, else the recorded action target panel.  Phase 1 applies the
  * steps (height only when allow_height_change is set). */
-void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height_change) {
+static void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height_change) {
     SVECTOR tile_center;
     VECTOR velocity;
     s32 timer;
@@ -331,7 +331,7 @@ void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height
  * Phase 0 splits the remaining screen-to-tile distance into equal Q12 steps;
  * phase 1 applies them (height only when allow_height_change is set) and
  * snaps to the tile once the timer runs out. */
-void battle_move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change) {
+static void battle_move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change) {
     SVECTOR tile_center;
     VECTOR velocity;
     s32 timer;
@@ -401,7 +401,7 @@ void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* un
  * sqrt(2 * gravity * height) / gravity frames: one over the height difference
  * plus 24, one over 24. `out->vy` is the negated speed of the first leg; x and
  * y (stored in vz) cover their distances evenly over the returned frame count. */
-s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
+static s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
     s32 to_z;
     s32 from_z;
     s32 height;
@@ -679,7 +679,7 @@ void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {
 /* Fill the init record of a teleport effect: the unit is the caster and the only
  * target, and there are no spectators. Both teleport starters use it for every
  * unit, not only for Altima. */
-void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data) {
+static void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data) {
     u8 runtime_id;
     u8 repeated_runtime_id;
 
@@ -696,7 +696,7 @@ void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_seconda
 /* Start the departure effect of a teleport. Altima's two forms request their own
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-out sound, and the result is 0. */
-s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit) {
+static s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit) {
     effect_secondary_init_t teleport_data;
 
     battle_effect_init_altima_teleport_data(unit, &teleport_data);
@@ -716,7 +716,7 @@ s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit) {
 /* Start the arrival effect of a teleport. Altima's two forms request their own
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-in sound, and the result is 0. */
-s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
+static s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
     effect_secondary_init_t teleport_data;
 
     battle_effect_init_altima_teleport_data(unit, &teleport_data);
@@ -738,7 +738,7 @@ s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
  * the sprite switches to additive semi-transparency and a palette modulation of
  * +31 on each color component starts. The distortion moves to its next phase
  * with the timer at 0. */
-void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
+static void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM
         || unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM) {
         battle_effect_play();
@@ -755,7 +755,7 @@ void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
  * palette is refreshed for the shadow mode of the tile it stands on and a palette
  * modulation of -31 on each color component starts. The distortion moves to its
  * next phase with the timer at 0. */
-void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
+static void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
     map_tile_t* tile;
 
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM

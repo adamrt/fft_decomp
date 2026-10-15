@@ -8,6 +8,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t* state, s32 row);
+static void wldcore_text_update_page_prompt_visibility(wldcore_text_scrollable_window_t* state);
+static void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* state);
+static void wldcore_window_init_record(s32 index, s32 priority, s32 sequence);
+static void wldcore_window_number_panel_noop_callback(void);
+
 void wldcore_window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags) {
     RECT* record_bounds;
     CVECTOR* rgb;
@@ -179,7 +185,7 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
 }
 
 /* The on_change callback of the number panel's value range: nothing to do. */
-void wldcore_window_number_panel_noop_callback(void) {
+static void wldcore_window_number_panel_noop_callback(void) {
 }
 
 void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state) {
@@ -251,7 +257,7 @@ void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state
 
 /* Initializes window record `index`: sets flags 0x810, stores its animation
  * sequence and OT priority, and restarts the animation. */
-void wldcore_window_init_record(s32 index, s32 priority, s32 sequence) {
+static void wldcore_window_init_record(s32 index, s32 priority, s32 sequence) {
     g_wldcore_window_records[index].sequence = sequence;
     g_wldcore_window_records[index].priority = priority;
     g_wldcore_window_records[index].anim_counter = 0;
@@ -342,7 +348,7 @@ s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* state) {
  *
  * The final base copy is one point32 block copy (both loads precede both
  * stores); two field assignments reorder it. */
-void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t* state, s32 row) {
+static void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t* state, s32 row) {
     RECT bounds;
     point32_t point;
     s32 i;
@@ -389,7 +395,7 @@ void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t
 }
 
 /* Show the text-page prompt while more pages remain. */
-void wldcore_text_update_page_prompt_visibility(wldcore_text_scrollable_window_t* state) {
+static void wldcore_text_update_page_prompt_visibility(wldcore_text_scrollable_window_t* state) {
     if (state->page_start_row < state->last_page_row) {
         g_wldcore_window_records[state->left_window_index].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
     } else {
@@ -401,7 +407,7 @@ void wldcore_text_update_page_prompt_visibility(wldcore_text_scrollable_window_t
  * Position the scroll-thumb window between the up and down arrow windows and
  * hide the arrows that are not usable at the current scroll position.
  */
-void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* state) {
+static void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window_t* state) {
     s32 top;
     s32 bottom;
 

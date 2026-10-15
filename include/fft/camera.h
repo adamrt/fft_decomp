@@ -15,10 +15,7 @@ void camera_clear_zoom_variable_low_bit(void);
 void camera_fusion_thread(void);
 void camera_init_tilt_and_zoom(void);
 void camera_normalize_yaw_angle(void);
-s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b);
-s32 camera_step_track(camera_track_t* track, s32 component);
 void camera_store_yaw_band(s32 value);
-void camera_thread(void);
 void camera_wait_until_idle(void);
 s32 camera_wrap_yaw_angle(void);
 
@@ -34,7 +31,6 @@ s32 mul_div_s64(s32 a, s32 b, s32 c);
 s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 
 /* per-module bodies: each module links its own copy under the shared name. */
-void camera_load_state_from_script_variables_variant(void);
 void camera_store_state_to_script_variables_variant(void);
 
 #endif

@@ -9,7 +9,7 @@
  * Player-controlled units and special monsters preserve the stored unlock
  * bits. Other units recalculate them from job levels and gender. Job-point
  * totals are capped to the four-digit value supported by the menu. */
-void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data_t* out) {
+static void jobstts_unit_copy_job_data(unit_stats_t* unit, jobstts_unit_job_data_t* out) {
     s32 i;
     s32 kind;
     s32 flags;
@@ -60,7 +60,7 @@ void jobstts_unit_init_job_data(s32 unit_id) {
 /* The job that heads a unit's job list: a monster's own job, Squire for a
  * generic human identity, and for a special character the identity value
  * itself, which is that character's job id. */
-s32 jobstts_job_get_base(s16 unit_id) {
+static s32 jobstts_job_get_base(s16 unit_id) {
     jobstts_unit_job_data_t* unit = g_jobstts_unit_data[unit_id];
     u32 job_id = unit->character_identity;
 

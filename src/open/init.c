@@ -6,6 +6,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static void open_system_init_runtime_state(void);
+
 /* Fades the CD audio (movie streams and XA) in or out over duration ticks.
  * A non-zero cd_mix_level is the CdMix attenuation suzuki_sound_put_type sets
  * for the current sound type, with the SPU's CD volume at 0x6400; 0 fades
@@ -165,7 +167,7 @@ void open_gfx_init_screen_environments(s32 clear_first) {
  * the frame image buffer at 0x801d0000 and the OPNTEX data buffer at 0x80140000;
  * no OPNBK image read; the overlay fade subtractive in ordering-table entry 2; no
  * buttons, no script and the first title demo movie next. */
-void open_system_init_runtime_state(void) {
+static void open_system_init_runtime_state(void) {
     g_open_system_runtime_flags = OPEN_SYSTEM_RUNTIME_FLAG_RUNNING | OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED
         | OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN;
     g_open_file_destination = (u8*)0x801d0000;

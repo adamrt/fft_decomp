@@ -21,7 +21,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
+static void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
     unit->map_x = unit->previous_map_x;
     unit->map_y = unit->previous_map_y;
     unit->map_z = unit->previous_map_z;
@@ -38,7 +38,7 @@ void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
 /* Cancel a move at the confirm prompt. The unit returns to its previous tile;
  * a mount takes its rider back with it, a unit that was riding is put back on
  * its mount, and a mount it climbed onto during the move is freed. */
-void battle_move_undo_unit_move(battle_unit_t* unit) {
+static void battle_move_undo_unit_move(battle_unit_t* unit) {
     battle_unit_t* other;
 
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
@@ -76,7 +76,7 @@ void battle_move_undo_unit_move(battle_unit_t* unit) {
  * the 16-bit-aligned screen block) that per-field stores do not reproduce.
  */
 
-void battle_unit_copy_rider_data_to_mount(battle_unit_t* unit, battle_unit_t* rider) {
+static void battle_unit_copy_rider_data_to_mount(battle_unit_t* unit, battle_unit_t* rider) {
     battle_unit_t* mount;
 
     if (rider->stats != 0) {
@@ -163,7 +163,7 @@ void battle_state_handle_wait_menu_state(void) {
     }
 }
 
-void battle_unit_set_tile_position_with_mount_partner(battle_unit_t* unit) {
+static void battle_unit_set_tile_position_with_mount_partner(battle_unit_t* unit) {
     battle_unit_t* mounted_unit;
 
     battle_unit_set_tile_position(
@@ -711,7 +711,7 @@ void battle_state_handle_secondary_effect_state(void) {
     battle_state_handle_free_cursor_input();
 }
 
-void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, battle_unit_t* target) {
+static void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, battle_unit_t* target) {
     if (attacker != 0 && target != 0) {
         battle_unit_set_target_animation_from_attack_type(attacker, target);
         battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
@@ -960,7 +960,7 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     }
 }
 
-s32 battle_map_update_deep_dungeon_and_animation(void) {
+static s32 battle_map_update_deep_dungeon_and_animation(void) {
     s32 runtime_id;
 
     battle_state_handle_free_cursor_input();

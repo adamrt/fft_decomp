@@ -13,6 +13,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 bunit_menu_run_unit_list_frame(void);
+static void bunit_menu_update_unit_browser(void);
+static void bunit_unit_copy_selected_data(void);
+
 /*
  * Load the BUNIT screen's VRAM images and start the fade-in.
  *
@@ -25,7 +29,7 @@
  * palette image is copied to the stack before it is uploaded to
  * (0x100, 0xfa).
  */
-void bunit_gfx_init_vram_and_start_fade(void) {
+static void bunit_gfx_init_vram_and_start_fade(void) {
     RECT rect;
     u16 buf1[4];
     u16 buf2[12];
@@ -86,7 +90,7 @@ void bunit_gfx_init_vram_and_start_fade(void) {
 /* Hold the menu input masks at zero while the comparison banner thread runs,
  * a status banner slide is requested or the unit list has to scroll, and for
  * nine further calls after the last of those. */
-void bunit_input_update_lock_timer(void) {
+static void bunit_input_update_lock_timer(void) {
     s32 timer;
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
@@ -115,7 +119,7 @@ s32 bunit_input_get_lock_timer(void) {
 }
 
 /* BUNIT.OUT 001c3150 - Return the pad-1 input, or 0 while the input lock timer is active. */
-s32 bunit_input_read_pad1_unless_locked(void) {
+static s32 bunit_input_read_pad1_unless_locked(void) {
     u32 input;
 
     input = PadRead(0);
@@ -260,7 +264,7 @@ s32 bunit_menu_is_active_or_transitioning(void) {
 
 /* Unit-list menu frame handler (g_bunit_menu_current_menu state -1 / 0). */
 
-s32 bunit_menu_run_unit_list_frame(void) {
+static s32 bunit_menu_run_unit_list_frame(void) {
     s32 input;
     bunit_unit_t* unit;
     u8 mode_b3;
@@ -362,7 +366,7 @@ s32 bunit_menu_run_unit_list_frame(void) {
  * record, restarts the slide animation, and reports the scroll direction in
  * g_bunit_status_display_redraw_request; otherwise it advances the g_bunit_status_banner_slide_step slide and stops
  * thread 7 once the slide completes. */
-void bunit_menu_update_unit_browser(void) {
+static void bunit_menu_update_unit_browser(void) {
     s32 index;
     s32 enable;
     s8 slide;
@@ -449,7 +453,7 @@ void bunit_menu_update_unit_browser(void) {
 
 /* Copy the selected unit's stat summary, identity and stat detail blocks
  * into the panel records and request a redraw of all four panels. */
-void bunit_unit_copy_selected_data(void) {
+static void bunit_unit_copy_selected_data(void) {
     bunit_unit_t* comparison;
 
     g_bunit_unit_comparison_index = g_unit_selected_index;

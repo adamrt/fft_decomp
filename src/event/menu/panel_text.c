@@ -6,6 +6,8 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
+static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
+
 void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitives, const menu_status_thread_t* state) {
     s32 i;
     s32 clut;
@@ -117,7 +119,7 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
  * sign and leading zeros, and widen the field for the value 100. A zero with
  * the minus flag draws only the sign glyph. Digits are drawn right to left,
  * at most the low byte of `flags` of them. */
-void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position) {
+static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position) {
     s32 saved_color;
     s32 plus;
     s32 digits;

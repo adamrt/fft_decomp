@@ -612,7 +612,7 @@ battle_gfx_source_frame_t* battle_gfx_get_unit_sprite_frame_and_vram_ids(
 
 /* The sprite height of the unit's sheet, or 0 for an absent, dead, crystal or
  * treasure unit. */
-u32 battle_gfx_get_unit_spritesheet_height(battle_unit_t* unit) {
+static u32 battle_gfx_get_unit_spritesheet_height(battle_unit_t* unit) {
     if (unit == 0) {
         return 0;
     }

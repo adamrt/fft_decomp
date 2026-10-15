@@ -5,7 +5,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
+static s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
     s16 jobs[24];
     s32 count;
     s32 i;

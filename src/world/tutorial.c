@@ -7,6 +7,18 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static void world_script_advance_tutorial_highlight_brightness(void);
+static void world_script_draw_tutorial_highlight_quads(s32 brightness);
+static void world_script_handle_tutorial_command_change_dialog(void);
+static void world_script_handle_tutorial_command_display_message(void);
+static s32 world_script_handle_tutorial_command_end(void);
+static void world_script_handle_tutorial_command_highlight_ring(void);
+static void world_script_handle_tutorial_command_shift(void);
+static void world_script_handle_tutorial_command_wait(void);
+static void world_script_handle_tutorial_command_wait_for_button(void);
+static void world_script_handle_tutorial_command_wait_for_message(void);
+static void world_script_handle_tutorial_command_wait_time(void);
+
 s32 world_input_get_tutorial_buttons(void) {
     return g_world_script_tutorial_buttons;
 }
@@ -90,7 +102,7 @@ s32 world_script_handle_tutorial_command(void) {
 
 /* Tutorial "end" command: fade the tutorial overlay out, then release the
  * saved screen state and restore the pre-tutorial world buffers. */
-s32 world_script_handle_tutorial_command_end(void) {
+static s32 world_script_handle_tutorial_command_end(void) {
     if (g_world_script_tutorial_command_active != 0) {
         if (world_gfx_update_fade_out_tile() == 0) {
             g_world_script_tutorial_id = 0;
@@ -114,7 +126,7 @@ s32 world_script_handle_tutorial_command_end(void) {
 /* Tutorial command below WORLD_TUTORIAL_CMD_SHIFT_LIMIT: press pad bit
  * number <command> for one frame, then wait 30 frames (counted by the VSync
  * mode) before moving to the next command. */
-void world_script_handle_tutorial_command_shift(void) {
+static void world_script_handle_tutorial_command_shift(void) {
     if (g_world_script_tutorial_command_active != 0) {
         g_world_script_tutorial_command_active -= menu_get_event_speed();
         g_world_script_tutorial_shift_command_bit = 0;
@@ -137,7 +149,7 @@ void world_script_handle_tutorial_command_shift(void) {
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
  * and the target adds the bias to the low byte first. */
 /* Address-of operand fields preserves the -O0 byte-address steps. */
-void world_script_handle_tutorial_command_display_message(void) {
+static void world_script_handle_tutorial_command_display_message(void) {
     thread_start(WORLD_THREAD_SLOT_TUTORIAL_TEXT, text_run_dialog_thread_variant);
     thread_set_parameters(WORLD_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(*(&((world_tutorial_message_instruction_t*)g_world_script_tutorial_command_ptr)->text_id_le[1])
@@ -153,7 +165,7 @@ void world_script_handle_tutorial_command_display_message(void) {
 
 /* Tutorial command: let the tutorial text continue and move on once its
  * thread has ended. */
-void world_script_handle_tutorial_command_wait_for_message(void) {
+static void world_script_handle_tutorial_command_wait_for_message(void) {
     world_text_resume_printing(WORLD_THREAD_SLOT_TUTORIAL_TEXT);
     if (thread_is_running(WORLD_THREAD_SLOT_TUTORIAL_TEXT) == 0) {
         g_world_script_tutorial_command_ptr++;
@@ -169,7 +181,7 @@ void world_script_handle_tutorial_command_wait_for_message(void) {
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
  * and the target adds the bias to the low byte first. */
 /* Address-of operand fields preserves the -O0 byte-address steps. */
-void world_script_handle_tutorial_command_change_dialog(void) {
+static void world_script_handle_tutorial_command_change_dialog(void) {
     if (world_text_is_printing(WORLD_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
         thread_set_parameters(WORLD_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
             (s32)((u8*)(*(&((world_tutorial_dialog_instruction_t*)g_world_script_tutorial_command_ptr)->text_id_le[1])
@@ -196,7 +208,7 @@ void world_script_handle_tutorial_command_change_dialog(void) {
  * turn on the GTE's ONE-unit circle, so sample 0 starts at the top.
  */
 /* Address-of operand fields preserves the -O0 byte-address steps. */
-void world_script_handle_tutorial_command_highlight_ring(void) {
+static void world_script_handle_tutorial_command_highlight_ring(void) {
     s32 radius;
     s32 outer_x;
     s32 outer_y;
@@ -249,7 +261,7 @@ void world_script_handle_tutorial_command_highlight_ring(void) {
 }
 
 /* Extend the tutorial highlight while other commands run; WAIT counts its brightness down. */
-void world_script_advance_tutorial_highlight_brightness(void) {
+static void world_script_advance_tutorial_highlight_brightness(void) {
     if (*g_world_script_tutorial_command_ptr != WORLD_TUTORIAL_CMD_WAIT) {
         g_world_script_tutorial_wait_timer = 0x12;
         g_world_tutorial_highlight_quad_count += menu_get_event_speed();
@@ -262,7 +274,7 @@ void world_script_advance_tutorial_highlight_brightness(void) {
 
 /* Tutorial command: count the wait timer down by the VSync mode and move to
  * the next command when it reaches zero. */
-void world_script_handle_tutorial_command_wait(void) {
+static void world_script_handle_tutorial_command_wait(void) {
     g_world_script_tutorial_wait_timer -= menu_get_event_speed();
     if (g_world_script_tutorial_wait_timer <= 0) {
         g_world_script_tutorial_wait_timer = 0;
@@ -276,7 +288,7 @@ void world_script_handle_tutorial_command_wait(void) {
  * way round, with brightness scaled by ten. Built with -O0 like the other
  * tutorial handlers.
  */
-void world_script_draw_tutorial_highlight_quads(s32 brightness) {
+static void world_script_draw_tutorial_highlight_quads(s32 brightness) {
     s32 i;
 
     brightness = brightness * 10;
@@ -302,7 +314,7 @@ void world_script_draw_tutorial_highlight_quads(s32 brightness) {
 /* Tutorial command: wait the number of frames in the command's operand byte
  * (counted by the VSync mode), then step past the two-byte command. */
 /* Address-of operand fields preserves the -O0 byte-address steps. */
-void world_script_handle_tutorial_command_wait_time(void) {
+static void world_script_handle_tutorial_command_wait_time(void) {
     if (g_world_script_tutorial_command_active != 0) {
         g_world_script_tutorial_wait_time_remaining -= menu_get_event_speed();
         if (g_world_script_tutorial_wait_time_remaining < 0) {
@@ -318,7 +330,7 @@ void world_script_handle_tutorial_command_wait_time(void) {
 
 /* Tutorial command: advance on any button once the tutorial text thread has
  * ended or has stopped printing. */
-void world_script_handle_tutorial_command_wait_for_button(void) {
+static void world_script_handle_tutorial_command_wait_for_button(void) {
     s32 running = thread_is_running(WORLD_THREAD_SLOT_TUTORIAL_TEXT);
 
     if (running == 0) {

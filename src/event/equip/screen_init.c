@@ -6,7 +6,7 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
-void equip_menu_load_images_and_reset_lists(void) {
+static void equip_menu_load_images_and_reset_lists(void) {
     RECT rect;
     u16 buf1[4];
     u16 buf2[12];

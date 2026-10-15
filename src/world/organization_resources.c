@@ -13,6 +13,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
+static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive);
+static void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y);
+static void world_menu_thread_group_supervisor_thread(void);
+
 void world_menu_build_location_list(void) {
     s32 i;
     s32 count;
@@ -107,7 +112,7 @@ void world_menu_set_slot_4_cursor_index(s32 index) {
 void world_noop_80106138(void) {
 }
 
-void world_gfx_load_wldface_to_frame_buffer(void) {
+static void world_gfx_load_wldface_to_frame_buffer(void) {
     menu_portrait_sheet_t* sheets;
 
     g_thread_call_target = main_file_load_checked_to_heap;
@@ -126,7 +131,7 @@ void world_gfx_load_wldface_to_frame_buffer(void) {
  * The first resource is cached across calls. Each temporary allocation stays
  * alive until its queued VRAM transfers finish.
  */
-void world_menu_load_common_graphics(s32 load_extra_pages) {
+static void world_menu_load_common_graphics(s32 load_extra_pages) {
     void* resource;
     world_menu_image_pages_t* pages;
     main_gfx_frame_bin_t* frame;
@@ -344,7 +349,7 @@ s32 world_text_is_printing(s32 thread_id) {
 }
 
 /* Idle thread body: yield to the next WORLD thread, forever. */
-void world_thread_idle_yield_forever(void) {
+static void world_thread_idle_yield_forever(void) {
     for (;;) {
         thread_yield();
     }
@@ -552,7 +557,7 @@ void world_main_menu_text_window_thread(void) {
     thread_exit_current();
 }
 
-void world_menu_run_main_mode_0_thread(void) {
+static void world_menu_run_main_mode_0_thread(void) {
     world_menu_run_main_mode(OPTION_MENU_GAME_OPTIONS);
 }
 
@@ -626,7 +631,7 @@ void world_formation_request_world_map_root(void) {
 /* Save the system flags and hide the world map's layers (dots, routes,
  * background, display objects, context value, date and location marker)
  * with the display off, for a full-screen menu. */
-void world_formation_save_and_set_system_flags(void) {
+static void world_formation_save_and_set_system_flags(void) {
     g_world_formation_saved_system_flags = g_main_system_flags;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES
         | MAIN_SYSTEM_FLAG_DISPLAY_OFF | MAIN_SYSTEM_FLAG_NO_BACKGROUND_IMAGE | MAIN_SYSTEM_FLAG_HIDE_DISPLAY_OBJECTS
@@ -634,7 +639,7 @@ void world_formation_save_and_set_system_flags(void) {
         | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
 }
 
-void world_formation_restore_saved_system_flags(void) {
+static void world_formation_restore_saved_system_flags(void) {
     g_main_system_flags = g_world_formation_saved_system_flags;
 }
 
@@ -651,7 +656,7 @@ void world_script_reset_event_variables_thread(void) {
 }
 
 /* Sibling of world_card_update_menu_request driven by g_world_formation_open_request_state. */
-void world_formation_update_open_request(void) {
+static void world_formation_update_open_request(void) {
     s16 state = g_world_formation_open_request_state;
     s32 i;
 
@@ -717,7 +722,7 @@ void world_formation_run_screen_for_menu_index(s32 menu_index) {
 /* Steps a pending request to open the tutorial categories from the world
  * map: start the screen fade-out, wait for it, then reset the menu context
  * and raise MAIN_SYSTEM_FLAG_REQUEST_TUTORIAL. */
-void world_formation_update_tutorial_categories_request(void) {
+static void world_formation_update_tutorial_categories_request(void) {
     s16 state = g_world_tutorial_categories_request_state;
 
     if (state == WORLD_SCREEN_REQUEST_IDLE) {
@@ -744,7 +749,7 @@ void world_formation_update_tutorial_categories_request(void) {
 /* Serve a pending request to open the debug variable list from the world
  * map: reset the menu context and raise
  * MAIN_SYSTEM_FLAG_REQUEST_VARIABLE_LIST. */
-void world_formation_update_debug_variable_list_request(void) {
+static void world_formation_update_debug_variable_list_request(void) {
     s32 state = g_world_debug_variable_list_request_state;
 
     if (state != 0 && state == 1) {
@@ -759,7 +764,7 @@ void world_formation_update_debug_variable_list_request(void) {
 /* Serve a pending request to open the fixed number panel from the world
  * map: reset the menu context, reload and relocate the menu text file and
  * raise MAIN_SYSTEM_FLAG_REQUEST_FIXED_NUMBER_PANEL. */
-void world_formation_update_fixed_number_panel_request(void) {
+static void world_formation_update_fixed_number_panel_request(void) {
     s32 state = g_world_fixed_number_panel_request_state;
 
     if (state != 0 && state == 1) {
@@ -775,7 +780,7 @@ void world_formation_update_fixed_number_panel_request(void) {
 }
 
 /* Sibling of world_formation_update_tutorial_categories_request driven by g_world_card_menu_request_state. */
-void world_card_update_menu_request(void) {
+static void world_card_update_menu_request(void) {
     s16 state = g_world_card_menu_request_state;
     s32 result;
     s32 i;
@@ -837,7 +842,7 @@ void world_card_update_menu_request(void) {
 }
 
 /* Sibling of world_formation_update_tutorial_categories_request driven by g_world_map_root_request_state. */
-void world_formation_update_world_map_root_request(void) {
+static void world_formation_update_world_map_root_request(void) {
     s16 state = g_world_map_root_request_state;
 
     if (state == WORLD_SCREEN_REQUEST_IDLE) {
@@ -864,7 +869,7 @@ void world_formation_update_world_map_root_request(void) {
 
 /* Records the location window request and starts the menu thread-group supervisor on thread 2, unless a
  * menu screen is already opening. */
-void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y) {
+static void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x, s32 window_y) {
     if (g_world_menu_screen_open_request == 0) {
         if (g_world_menu_location_id != location_id) {
             g_threads[12].task_id = THREAD_TASK_NONE;
@@ -887,7 +892,7 @@ void world_menu_start_thread_group(s32 parameter, s32 location_id, s32 window_x,
  * others are signaled to finish (state 1) and awaited, then every finished
  * or idle member is restarted with its function, the matching menu entry, and
  * its task id. The thread exits once no further request is pending. */
-void world_menu_thread_group_supervisor_thread(void) {
+static void world_menu_thread_group_supervisor_thread(void) {
     s32 state[16];
     world_menu_thread_group_t* group;
     s32 index;
@@ -944,7 +949,7 @@ void world_menu_thread_group_supervisor_thread(void) {
 }
 
 /* Set the text image's upload rectangle and initialize its sprite. */
-void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive) {
+static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive) {
     out->x = record->vram_origin.x;
     out->y = record->vram_origin.y;
     out->w = record->inner_width >> 2;
@@ -960,7 +965,7 @@ void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPR
  *
  * `mode` is reused to carry the y coordinate once the mode test is done; that
  * reuse is what puts the y value in the target's v1. */
-void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2) {
+static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2) {
     u16 x;
     s32 mode;
 

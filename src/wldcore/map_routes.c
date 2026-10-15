@@ -11,6 +11,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_map_negate_and_clamp_coordinates(const SVECTOR* input, VECTOR* output);
+static s32 wldcore_map_roll_random_encounter(s32 location, s32 route);
+static void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta);
+static void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point32_t* output);
+
 void wldcore_map_color_and_draw_dots(void) {
     wldcore_map_dot_source_t* src;
     wldcore_map_dot_t* dots;
@@ -277,7 +282,7 @@ s32 wldcore_map_build_location_menu_entries(s32 location_id, s32* out) {
     return count;
 }
 
-s32 wldcore_location_collect_choice_text_ids(s32 location_id, s32* out) {
+static s32 wldcore_location_collect_choice_text_ids(s32 location_id, s32* out) {
     s32 available;
     s32 i;
     s32 written;
@@ -431,7 +436,7 @@ void wldcore_map_draw_visible_routes(GsOT* ot) {
  * target's register choice for both index computations. The packed 32-bit position values supply x in the low
  * 16 bits and y in the high 16 bits; the `flags` local gives the
  * target's `or` operand order. */
-s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* state, u32 route, s32 step) {
+static s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* state, u32 route, s32 step) {
     s32 unused[8];
     wldcore_route_record_t* record;
     s32 index;
@@ -619,7 +624,7 @@ void wldcore_map_draw_path_animation(GsOT* ot) {
  * responsive while searching: past 200 vsyncs the world frame is redrawn.
  *
  * `unused` keeps 16 frame bytes the target reserves and never touches. */
-void wldcore_map_find_best_route_path(s32 from, s32 to) {
+static void wldcore_map_find_best_route_path(s32 from, s32 to) {
     s32 unused[4];
     s32 cost;
     s32 route;
@@ -940,7 +945,7 @@ s32 wldcore_map_is_point_outside_projection_bounds(const point32_t* point) {
 }
 
 /* Negate and clamp a signed coordinate pair to the world-scroll limits. */
-void wldcore_map_negate_and_clamp_coordinates(const SVECTOR* input, VECTOR* output) {
+static void wldcore_map_negate_and_clamp_coordinates(const SVECTOR* input, VECTOR* output) {
     s32 x;
     s32 y;
 
@@ -1007,7 +1012,7 @@ s32 wldcore_map_step_projection_motion(void) {
 /* Applies a scroll delta to the projection origin when the resulting window
  * origin would leave [-64, 72] horizontally or [-64, 64] vertically, and
  * raises system flag 0x2 if the origin's x or y changed. */
-void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta) {
+static void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta) {
     point32_t position;
     VECTOR saved;
 
@@ -1036,7 +1041,7 @@ void wldcore_map_scroll_projection_if_focus_near_edge(point32_t* delta) {
  * which is chance + 1 in 100. One of the ENTDs enabled in the tier's mask is
  * then drawn evenly. Returns 1 with the ENTD and map ids set; the squad id is
  * set as soon as the road is found. */
-s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
+static s32 wldcore_map_roll_random_encounter(s32 location, s32 route) {
     wldcore_encounter_entry_t(*base)[3];
     s32 offset;
     wldcore_encounter_entry_t* row;
@@ -1227,7 +1232,7 @@ void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordi
  * The callee receives the adjacent position and dimensions registers as one
  * eight-byte aggregate. Dimensions are preserved by the ABI but unused here.
  */
-void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point32_t* output) {
+static void wldcore_window_transform_point_for_mode(s32 mode, RECT bounds, point32_t* output) {
     switch (mode) {
     case 0:
     case 1:

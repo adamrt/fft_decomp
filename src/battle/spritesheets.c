@@ -460,8 +460,8 @@ void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 
  * must remain s16 to preserve the target's register allocation and tail
  * sharing.
  */
-void battle_gfx_modify_unit_palette(battle_unit_t* unit, s32 mode, s32 clut_row, s32 clut_index, s32 preset, s16 red,
-    s16 green, s16 blue, s32 final_value) {
+static void battle_gfx_modify_unit_palette(battle_unit_t* unit, s32 mode, s32 clut_row, s32 clut_index, s32 preset,
+    s16 red, s16 green, s16 blue, s32 final_value) {
     s32 slot;
     s32 sheet;
     s32 palette;
@@ -499,7 +499,7 @@ void battle_gfx_modify_unit_palette(battle_unit_t* unit, s32 mode, s32 clut_row,
  * first matching renderer status (mode/RGB pairs below; Undead skips Skeleton
  * and Ghoul spritesheets); otherwise, or with no tinting status, it falls back
  * to battle_gfx_tint_unit_palette_for_weather_and_tile. */
-void battle_gfx_update_unit_status_palette(battle_unit_t* unit, s32 tile_effect_level, s32 final_value) {
+static void battle_gfx_update_unit_status_palette(battle_unit_t* unit, s32 tile_effect_level, s32 final_value) {
     u32 status;
     s32 unit_id;
 

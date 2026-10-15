@@ -9,6 +9,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 wldcore_get_ramza_roster_index(void);
+static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value);
+static void wldcore_script_read_operand_pair(s32* out1, s32* out2);
+static void wldcore_script_read_operand_pair_and_date(
+    s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
+
 s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask) {
     s32 flags;
     u16 i;
@@ -73,7 +79,7 @@ void wldcore_opcode_map_check_var_equal(void) {
     }
 }
 
-void wldcore_script_read_operand_pair(s32* out1, s32* out2) {
+static void wldcore_script_read_operand_pair(s32* out1, s32* out2) {
     u16* ip = &g_wldcore_script_state.ip;
     u16 next_ip;
 
@@ -177,7 +183,7 @@ void wldcore_opcode_map_check_date_on_or_after(void) {
     }
 }
 
-void wldcore_script_read_operand_pair_and_date(
+static void wldcore_script_read_operand_pair_and_date(
     s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day) {
     u16* ipp;
     u16 ip;
@@ -363,7 +369,7 @@ void wldcore_opcode_map_check_ramza_brave_at_least(void) {
     }
 }
 
-s32 wldcore_get_ramza_roster_index(void) {
+static s32 wldcore_get_ramza_roster_index(void) {
     s32 i;
     for (i = 0; i < PARTY_MEMBER_SLOT_COUNT; i++) {
         party_unit_t* party = wldcore_get_party_unit(i);
@@ -571,7 +577,7 @@ void wldcore_list_handle_script_flags_01a4_01bb_input(wldcore_menu_panel_level_t
  *
  * The depth is spelled as the global at every use rather than cached in a
  * local: the target re-reads g_wldcore_menu_stack_depth after each call. */
-void wldcore_menu_push_script_flag_01a4_detail_level(s32 value) {
+static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value) {
     s32 coordinate_mode = 1;
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_index = value;

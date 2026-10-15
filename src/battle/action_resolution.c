@@ -16,6 +16,36 @@
 #include "fft/script.h"
 #include "psx/types.h"
 
+static s32 battle_action_add_poached_item_to_fur_shop_inventory(void);
+static void battle_action_apply_jp_change(unit_stats_t* unit);
+static void battle_action_check_arrow_guard_usability(void);
+static void battle_action_check_blade_grasp_usability(void);
+static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask);
+static void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(s16 reaction_id);
+static void battle_action_check_damage_split_usability(void);
+static void battle_action_check_distribute_usability(void);
+static void battle_action_check_face_up_and_absorb_used_mp_usability(s16 reaction_id);
+static void battle_action_check_mp_switch_distribute_and_damage_split_usability(void);
+static void battle_action_check_mp_switch_usability(void);
+static void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
+    s16 reaction_id);
+static s32 battle_action_check_reaction(const unit_stats_t* unit);
+static void battle_action_check_reflect_blade_grasp_and_arrow_guard(void);
+static void battle_action_check_reflect_reaction(void);
+static void battle_action_check_stat_save_and_restore_reaction_usability(void);
+static void battle_action_clear_status_changes(action_data_t* action);
+static void battle_action_dispatch_target_reaction_ability(void);
+static s32 battle_action_remove_broken_or_stolen_equipment(void);
+static void battle_action_set_target_variables(unit_stats_t* unit);
+static s32 battle_status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit);
+static void battle_status_remove(void);
+static void battle_status_remove_control(unit_stats_t* unit);
+static void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx);
+static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only);
+static s32 battle_unit_apply_level_up_down_ability(void);
+static s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min);
+static void battle_unit_update_attacker_earned_experience(s32 outcome);
+
 void battle_status_remove_transparent_if_jump_used(unit_stats_t* unit) {
     action_data_t* action = &g_action_attacker_action_data;
     g_action_attacker_data = action;
@@ -77,7 +107,7 @@ void battle_action_switch_ability_to_default_attack(void) {
 
 /* Reset the result records of the current target and the current attacker; the
  * attacker's starts as not hit. */
-void battle_action_clear_data(void) {
+static void battle_action_clear_data(void) {
     battle_action_clear_current_data(g_action_target_data);
     battle_action_clear_current_data(g_action_attacker_data);
     g_action_attacker_data->hit = 0;
@@ -87,7 +117,7 @@ void battle_action_clear_data(void) {
  * that is not a crystal, dead or petrified takes (fall height / 2 - Jump) *
  * MaxHP / 10 fall damage when that is positive, at most 999; a flying one
  * takes none. */
-void battle_move_apply_knockback(void) {
+static void battle_move_apply_knockback(void) {
     u8* flags;
     unit_stats_t* unit;
     action_data_t* action;
@@ -128,7 +158,7 @@ void battle_move_apply_knockback(void) {
  * The Damage Split case chains the damage store so the value reaches `healing` through
  * the target record; storing it there first is what orders the three global
  * pointer loads the way the target emits them. */
-s32 battle_action_perform_reaction_ability(void) {
+static s32 battle_action_perform_reaction_ability(void) {
     s16 ability_id;
     u8 attack_type;
     s32 healing;
@@ -477,7 +507,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
 
 /* For an ability whose status infliction type is cancel, copies its status bytes
  * to g_action_canceled_statuses. Run during the pre-formula setup. */
-void battle_status_remove(void) {
+static void battle_status_remove(void) {
     s32 i;
     if (g_action_current_ability.status_infliction.type & STATUS_INFLICTION_TYPE_CANCEL) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
@@ -605,7 +635,7 @@ void battle_action_clear_current_data(action_data_t* action) {
 
 /* Clear the record's status inflictions and removals, and the shared list of
  * canceled statuses with them. */
-void battle_action_clear_status_changes(action_data_t* action) {
+static void battle_action_clear_status_changes(action_data_t* action) {
     s32 i;
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         g_action_canceled_statuses[i] = 0;
@@ -808,7 +838,7 @@ s32 battle_action_finalize_attack_and_flag_reactions(s32 unit_id) {
  * roll of 0..255 is below 31 (31 in 256), otherwise the common one.
  *
  * Inventory quantities saturate at 0xff. */
-s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
+static s32 battle_action_add_poached_item_to_fur_shop_inventory(void) {
     unit_stats_t* unit;
     s32 idx;
     s32 item;
@@ -880,7 +910,7 @@ void battle_unit_transform_into_morbol(unit_stats_t* unit) {
  * level is stored before the growth runs, so the growth divides by growth +
  * new level. The unit changes only when executing; returns 1 when the action
  * carries either effect. */
-s32 battle_unit_apply_level_up_down_ability(void) {
+static s32 battle_unit_apply_level_up_down_ability(void) {
     s32 lv;
     s32 dir;
     u16 flags;
@@ -933,7 +963,7 @@ s32 battle_action_is_reaction_prevented(const unit_stats_t* unit) {
 /* Whether a reaction is already in play: 1 while a weapon's proc ability is
  * being resolved, 2 when the unit's result already carries a reaction, 0
  * otherwise. */
-s32 battle_action_check_reaction(const unit_stats_t* unit) {
+static s32 battle_action_check_reaction(const unit_stats_t* unit) {
     s32 result;
     /* Both globals are loaded unsigned (lhu) here. */
     if (g_action_current_ability.reaction_id != 0) {
@@ -948,7 +978,7 @@ s32 battle_action_check_reaction(const unit_stats_t* unit) {
 }
 
 /* Apply the target's reflect or weapon-evasion reactions before the attack resolves. */
-void battle_action_check_reflect_blade_grasp_and_arrow_guard(void) {
+static void battle_action_check_reflect_blade_grasp_and_arrow_guard(void) {
     u8 reaction_flags;
 
     if (g_action_context != ACTION_CONTEXT_PRIMARY) {
@@ -990,7 +1020,7 @@ void battle_action_check_reflect_blade_grasp_and_arrow_guard(void) {
  *
  * Counter Magic (byte 1) is tested last, after the byte-2 reactions, so
  * Absorb Used MP or Counter takes precedence over it. */
-void battle_action_dispatch_target_reaction_ability(void) {
+static void battle_action_dispatch_target_reaction_ability(void) {
     unit_stats_t* unit;
 
     if (g_action_current_ability.formula == ABILITY_FORMULA_WEAPON_HEAL)
@@ -1030,7 +1060,7 @@ void battle_action_dispatch_target_reaction_ability(void) {
 }
 
 /* Dispatch the target's first active MP Switch, Distribute, or Damage Split reaction. */
-void battle_action_check_mp_switch_distribute_and_damage_split_usability(void) {
+static void battle_action_check_mp_switch_distribute_and_damage_split_usability(void) {
     unit_stats_t* unit;
     u8 flags;
 
@@ -1055,7 +1085,7 @@ void battle_action_check_mp_switch_distribute_and_damage_split_usability(void) {
 
 /* Dispatch the first active stat-save or resource-restoring reaction. A weapon
  * that heals never triggers them. */
-void battle_action_check_stat_save_and_restore_reaction_usability(void) {
+static void battle_action_check_stat_save_and_restore_reaction_usability(void) {
     unit_stats_t* target;
     u8 reaction_flags;
 
@@ -1107,7 +1137,7 @@ void battle_action_check_stat_save_and_restore_reaction_usability(void) {
 /* Arm a counter-type reaction on the target: the attack must not come through
  * Math Skill, its flags_4 must have a bit of mask, and the target's Brave roll
  * must pass. Records the reaction and the ability it answers. */
-void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask) {
+static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask) {
     action_data_t* action;
 
     if (g_action_current_ability.skillset == SKILLSET_ID_MATH_SKILL)
@@ -1123,7 +1153,8 @@ void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask) {
 
 /* Record reaction_id when the action deals HP damage and the target passes its
  * reaction roll; the HP damage is the reaction's amount. */
-void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(s16 reaction_id) {
+static void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
+    s16 reaction_id) {
     action_data_t* action;
 
     if ((g_action_target_data->attack_type & ACTION_TYPE_HP_DAMAGE)
@@ -1136,7 +1167,7 @@ void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilg
 
 /* Record reaction_id for a target that is in Critical, is taking HP damage and
  * passes its reaction roll. */
-void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(s16 reaction_id) {
+static void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(s16 reaction_id) {
     unit_stats_t* unit;
 
     unit = g_action_target;
@@ -1149,7 +1180,7 @@ void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usa
 
 /* Record reaction_id when the ability cost MP and the target passes its reaction
  * roll; the MP cost is the reaction's amount. */
-void battle_action_check_face_up_and_absorb_used_mp_usability(s16 reaction_id) {
+static void battle_action_check_face_up_and_absorb_used_mp_usability(s16 reaction_id) {
     u8* used_mp = &g_action_current_ability.mp_cost;
     action_data_t* action;
     if (*used_mp != 0) {
@@ -1163,7 +1194,7 @@ void battle_action_check_face_up_and_absorb_used_mp_usability(s16 reaction_id) {
 
 /* Reflect: a reflectable ability not cast through Math Skill misses the target
  * and is recorded on it for the bounce. */
-void battle_action_check_reflect_reaction(void) {
+static void battle_action_check_reflect_reaction(void) {
     action_data_t* action;
     /* Loaded through a pointer so the reaction_id store stays above it. */
     u16* ability_ptr = &g_action_current_ability.ability_id;
@@ -1184,7 +1215,7 @@ void battle_action_check_reflect_reaction(void) {
 /* Blade Grasp. An ability flagged Blade Grasp eligible has its accuracy set to
  * 100 - Brave of the target; when the target passes its reaction roll during
  * execution the strike becomes a miss and the reaction is recorded. */
-void battle_action_check_blade_grasp_usability(void) {
+static void battle_action_check_blade_grasp_usability(void) {
     unit_stats_t* attacker;
     action_data_t* target;
 
@@ -1207,7 +1238,7 @@ void battle_action_check_blade_grasp_usability(void) {
  *
  * A successful Brave-based reaction changes the target result to the shared
  * class-evade/Arrow Guard miss type. */
-void battle_action_check_arrow_guard_usability(void) {
+static void battle_action_check_arrow_guard_usability(void) {
     unit_stats_t* target;
     action_data_t* action;
 
@@ -1233,7 +1264,7 @@ void battle_action_check_arrow_guard_usability(void) {
  * roll, move the HP damage onto MP (capped at 999) and mark the reaction.
  *
  * Only an executing action (not a preview or simulation) is converted. */
-void battle_action_check_mp_switch_usability(void) {
+static void battle_action_check_mp_switch_usability(void) {
     unit_stats_t* unit;
     action_data_t* action;
     action_data_t* action2;
@@ -1267,7 +1298,7 @@ void battle_action_check_mp_switch_usability(void) {
 
 /* Distribute: when the healing exceeds the target's missing HP and the reaction
  * roll passes, record the reaction with the excess as its amount. */
-void battle_action_check_distribute_usability(void) {
+static void battle_action_check_distribute_usability(void) {
     unit_stats_t* target = g_action_target;
     action_data_t* action = g_action_target_data;
     /* hp_healing is read signed (lh) here. */
@@ -1280,7 +1311,7 @@ void battle_action_check_distribute_usability(void) {
 
 /* Damage Split: when the target takes HP damage and passes its reaction roll,
  * record the reaction with half the damage, rounded up, as its amount. */
-void battle_action_check_damage_split_usability(void) {
+static void battle_action_check_damage_split_usability(void) {
     u16 hp;
     action_data_t* action;
 
@@ -1303,7 +1334,7 @@ s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit) {
     return main_util_roll_pass_fail(0x64, unit->brave);
 }
 
-s32 battle_action_remove_broken_or_stolen_equipment(void) {
+static s32 battle_action_remove_broken_or_stolen_equipment(void) {
     s32 i;
     s32 count;
     u8 item;
@@ -1357,7 +1388,7 @@ s32 battle_action_remove_broken_or_stolen_equipment(void) {
  *
  * The caller's ranges: Speed 1..50, PA and MA 1..99, Brave 0..100 (10 at least
  * for a rider), Faith 0..100, CT 0..255. */
-s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min) {
+static s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min) {
     s32 amount;
     s32 value;
 
@@ -1399,7 +1430,7 @@ s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min
  *
  * Success starts at 10; kills divide 20 by KO count. Level difference and
  * Gained EXP Up then adjust the result, which is clamped to 1 through 99. */
-void battle_unit_update_attacker_earned_experience(s32 outcome) {
+static void battle_unit_update_attacker_earned_experience(s32 outcome) {
     s16 base;
     s32 signed_exp;
     s32 divisor;
@@ -1548,7 +1579,7 @@ void battle_status_update_expiring(s32 unit_id) {
 }
 
 /* Make the unit the current target and reset its action result record. */
-void battle_action_set_target_variables(unit_stats_t* unit) {
+static void battle_action_set_target_variables(unit_stats_t* unit) {
     action_data_t* action = &unit->action;
     g_action_target = unit;
     g_action_target_data = action;
@@ -1558,7 +1589,7 @@ void battle_action_set_target_variables(unit_stats_t* unit) {
 
 /* 1 for an empty slot or a unit that is a crystal, dead, in the air from Jump,
  * petrified or a treasure; otherwise 0. */
-s32 battle_status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit) {
+static s32 battle_status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit) {
     s32 result;
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return 1;
@@ -1739,7 +1770,7 @@ s32 battle_unit_build_gained_exp_jp_level_job_level(unit_stats_t* unit, action_r
 
 /* Adds the pending JP change to the unit's job and, if that changed the job
    level, sets the job-level-gained flag so the caller queues the level-up report. */
-void battle_action_apply_jp_change(unit_stats_t* unit) {
+static void battle_action_apply_jp_change(unit_stats_t* unit) {
     s32 jp;
     s32 initial_level;
     u8 job;
@@ -1785,7 +1816,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
  * player control; without them the control bit comes back from the initial
  * team flags. Without Charm the team bits come back from the initial team as
  * well. */
-void battle_status_remove_control(unit_stats_t* unit) {
+static void battle_status_remove_control(unit_stats_t* unit) {
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
             & (STATUS_BYTE_MASK(STATUS_ID_CONFUSION) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)))
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
@@ -1803,7 +1834,7 @@ void battle_status_remove_control(unit_stats_t* unit) {
 /* Apply the removals of the unit's action result: each removed status leaves
  * inflicted_status, has its CT cleared and, when executing, its graphics flag
  * switched off; then the current set is rebuilt as innate | inflicted. */
-void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx) {
+static void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx) {
     unit_stats_t* unit;
     s32 i;
     s32 mask;
@@ -1834,7 +1865,7 @@ void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx) {
  * re-inflicting anything but Crystal or Oil). Transparent clears the removal
  * flag; Invite and Charm copy the attacker's team, Invite permanently. Ends by
  * storing the unit's current statuses. */
-void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only) {
+static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only) {
     s32 i;
     s32 j;
     s32 byte;

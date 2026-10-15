@@ -32,7 +32,7 @@
  * block: the target keeps that block, and a pre-initialized `packed` lets GCC
  * thread the failing tests straight to the call. Items 0x4a..0x4c (the
  * elemental guns) and ability 0x189 (Ninja Ball) are hard-coded exceptions. */
-void battle_effect_store_targets_and_display_types(s32 ability, battle_unit_t* unit) {
+static void battle_effect_store_targets_and_display_types(s32 ability, battle_unit_t* unit) {
     effect_secondary_init_t init;
     battle_unit_t* target;
     battle_unit_t* spectator;
@@ -568,7 +568,7 @@ void battle_action_confirm(void) {
  * AI_COMMAND_AUTOBATTLE_TARGETED_SELECT, blue on every unit of its own
  * team for AI_COMMAND_AUTOBATTLE_RECOVERY_SELECT. Other modes tint
  * nothing. */
-void battle_gfx_highlight_all_units_blue_or_red(s32 mode) {
+static void battle_gfx_highlight_all_units_blue_or_red(s32 mode) {
     battle_unit_t* caster;
     battle_unit_t* unit;
     s32 i;
@@ -599,7 +599,7 @@ void battle_gfx_highlight_all_units_blue_or_red(s32 mode) {
 
 /* Enter the target-select-start state: open the targeting prompt for the casting
  * unit. */
-void battle_state_enter_target_select_start(void) {
+static void battle_state_enter_target_select_start(void) {
     battle_unit_t* unit;
     unit_stats_t* stats;
 
@@ -679,7 +679,7 @@ void battle_state_enter_target_select_confirm(void) {
 
 /* Enter the target-display-start state: show the tile info panel and open the
  * targeting prompt for the casting unit. */
-void battle_state_enter_target_display_start(void) {
+static void battle_state_enter_target_display_start(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_TARGET_DISPLAY_START;
     menu_start_unit_view_thread(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);

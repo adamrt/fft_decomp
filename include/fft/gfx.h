@@ -427,12 +427,8 @@ void gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
 void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
 void gfx_set_formation_icon_uv(POLY_FT4* poly, s32 index);
 void gfx_set_clut_rect_from_id(RECT* rect, u16 clut_id);
-void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
 void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page, const RECT* position,
     const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
-void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
-    const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness);
 void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly);
 void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
 void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
@@ -441,15 +437,11 @@ void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 s
 void gfx_set_draw_color_variant(const rgb24_t* color);
 void menu_run_unit_status_thread_variant(void);
 void gfx_set_otag_index(s32 value);
-s32 battle_gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
-void battle_gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 
 /* portrait transitions */
 
 void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition, const s32* first_portrait,
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
-void gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount);
-void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount);
 
 /* Draw state shared by the resident, formation and deployment ZODIAC renderers. */
 typedef struct zodiac_draw_context {
@@ -512,7 +504,6 @@ extern s16 g_gfx_item_icon_clut_base_y;
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 
 /* per-module bodies: each module links its own copy under the shared name. */
-void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region);
 
 /* fades */
 extern u8 g_gfx_increasing_fade_active;

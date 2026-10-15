@@ -26,19 +26,12 @@ extern s32 g_card_file_open_descriptor;
 
 /* slot and events */
 void card_io_set_selected_slot(s32 slot);
-s32 card_io_get_selected_slot(void);
 void card_io_consume_all_events(void);
-void card_io_consume_bios_events(void);
-void card_io_consume_hardware_events(void);
 s32 card_io_poll_bios_event_result(void);
-s32 card_io_poll_hardware_event_result(void);
 s32 card_io_wait_for_bios_event(void);
-s32 card_io_wait_for_hardware_event(void);
 
 /* card operations */
 s32 card_io_get_info_with_retries_variant(s32 port, s32 retry_limit);
-s32 card_io_load_with_retries(s32 port, s32 retry_limit);
-s32 card_io_create_new_with_retries(s32 port, s32 retry_limit);
 s32 card_io_poll_operation_result_variant(void);
 s32 card_io_wait_operation_result(s32 retry_limit);
 s32 card_io_open_or_create_selected_card(void);

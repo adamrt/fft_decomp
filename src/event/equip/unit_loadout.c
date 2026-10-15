@@ -8,7 +8,7 @@
  * the two hand slots is occupied, its item is below the throwable range, and
  * the weapon either forces two hands or allows them while `two_hands_support`
  * (the Two Hands support ability) is set. */
-s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
+static s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
     s32 result;
     s32 item_id;
     s16 w0;
@@ -43,7 +43,7 @@ s32 equip_unit_is_two_handing_weapon(const s16* slots, s32 two_hands_support) {
 
 /* Build EQUIP.OUT's unit preview from a unit_stats_t record, clamping the
  * displayed values and folding empty equipment slots (0xFF and above) to 0. */
-void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_data_t* unit) {
+static void equip_unit_build_data_from_stats(unit_stats_t* stats, equip_unit_data_t* unit) {
     s32 i;
     s32 value;
     u8 larger;

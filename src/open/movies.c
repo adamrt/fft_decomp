@@ -7,6 +7,18 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void open_input_update_buttons_and_check_game_reset(void);
+static void open_menu_update_world_formation(void);
+static u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state);
+static s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state);
+static void open_movie_handle_mdec_output_slice(void);
+static void open_movie_init_mdec_stream_state(open_movie_mdec_stream_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1);
+static void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback);
+static void open_movie_present_frame(void);
+static void open_movie_start_cd_stream_read(const CdlLOC* location);
+static void open_movie_update_stream_frame(void);
+static void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* state, s32 unused);
+
 #define OPEN_OTAG_BUFFER_BYTES 64
 
 /* Entry point of OPEN.BIN for the title sequence. Runs until a controller clears
@@ -150,7 +162,7 @@ void open_movie_start_stream(s32 sector, s32 end_frame, s32 video_end_frame, s32
  * the next frame's bitstream is decoded, and the routine waits for the picture to
  * be complete. The stream stops when the frame header reached end_frame (pausing
  * the CD audio) or video_end_frame (leaving it playing). */
-void open_movie_update_stream_frame(void) {
+static void open_movie_update_stream_frame(void) {
     CdlLOC position;
     s16 free_sectors;
     s16 read_sectors;
@@ -211,7 +223,7 @@ void open_movie_pause_cd_audio(void) {
 
 /* Sets the two VLC and image buffers and the two frame positions. Retail
  * stores the slice width into the global state, not through `state`. */
-void open_movie_init_mdec_stream_state(open_movie_mdec_stream_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1) {
+static void open_movie_init_mdec_stream_state(open_movie_mdec_stream_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1) {
     state->vlc_buffers[0] = (u32*)g_open_work_buffer_0;
     state->vlc_buffers[1] = (u32*)g_open_work_buffer_1;
     state->vlc_buffer_index = 0;
@@ -233,7 +245,7 @@ void open_movie_init_mdec_stream_state(open_movie_mdec_stream_state_t* state, s3
  * it: a one-sector read with no destination makes the file loader seek to
  * `sector` and leaves its position in the loader descriptor, which is then
  * set as the read location. */
-void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
+static void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
     main_file_load_descriptor_t* header;
 
     DecDCTReset(0);
@@ -258,7 +270,7 @@ void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callbac
  * from the rectangle address. The slice size is built in one variable: its
  * sign extension, product and halving then share the second argument register.
  */
-void open_movie_handle_mdec_output_slice(void) {
+static void open_movie_handle_mdec_output_slice(void) {
     RECT* rect;
     s32 size;
 
@@ -288,7 +300,7 @@ void open_movie_handle_mdec_output_slice(void) {
 
 /* Fetch the next movie frame and decode its bitstream into the other VLC buffer,
  * releasing the frame's ring sectors. Returns 0 when no frame arrived. */
-s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state) {
+static s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state) {
     u32* frame_data;
 
     frame_data = open_movie_acquire_next_frame(state);
@@ -307,7 +319,7 @@ s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state) {
  * stream position, adopt a changed frame size (clearing the screen), and size
  * the decode rectangles: 24-bit rows take three 16-bit values per two pixels.
  * Returns the frame data, or NULL on timeout. */
-u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state) {
+static u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state) {
     u32* frame_data;
     StHEADER* header;
     s32 attempts;
@@ -353,7 +365,7 @@ u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state) {
  * (output_ready), then clear the flag. After 0x800000 passes without it the frame
  * is taken as complete and the output rectangle moves to the other frame buffer.
  * The second argument is not read. */
-void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* state, s32 unused) {
+static void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* state, s32 unused) {
     /* The timeout is read and written on the stack each iteration. */
     volatile s32 timeout = 0x800000;
 
@@ -371,7 +383,7 @@ void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* state, s32 
 
 /* Set the read location and start the streaming read (CdRead2 mode 0x1a0),
  * repeating both until the read is accepted. */
-void open_movie_start_cd_stream_read(const CdlLOC* location) {
+static void open_movie_start_cd_stream_read(const CdlLOC* location) {
     for (;;) {
         while (CdControl(CdlSetloc, (u8*)location, 0) == 0) { }
         if (CdRead2(0x1a0) != 0) {
@@ -390,7 +402,7 @@ void open_movie_start_cd_stream_read(const CdlLOC* location) {
  * enabled unless OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED is set.
  *
  * Nothing in OPEN.BIN sets OPEN_SYSTEM_RUNTIME_FLAG_CLEAR_FRAME. */
-void open_movie_present_frame(void) {
+static void open_movie_present_frame(void) {
     RECT image_rect;
     RECT move_rect;
     s32 display_index;
@@ -439,7 +451,7 @@ void open_movie_present_frame(void) {
  * OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED is set. L1, R1, Select and Start held
  * with nothing else reset the game. OPEN_SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED
  * would prevent that; no code in OPEN.BIN sets it. */
-void open_input_update_buttons_and_check_game_reset(void) {
+static void open_input_update_buttons_and_check_game_reset(void) {
     u32 input;
     u32 previous;
 
@@ -664,7 +676,7 @@ void open_birthday_convert_date_to_zodiac(s32* month, s32* day) {
  * one WORLD menu frame with the blocked buttons withheld, drawing from entry
  * g_open_menu_formation_otag_index of the ordering table OPEN is building. The
  * active buffer index is flipped for the duration of the call. */
-void open_menu_update_world_formation(void) {
+static void open_menu_update_world_formation(void) {
     if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME) {
         u32 blocked_buttons = g_menu_blocked_buttons;
 

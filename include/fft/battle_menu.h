@@ -25,7 +25,6 @@ void battle_menu_close_move_help(void);
 void battle_menu_dispatch_idle_action_menu(void);
 battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_id);
 ai_command_t* menu_get_selected_command_address(void);
-battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
 void battle_menu_open_active_unit_idle_action_menu(void);
 void battle_menu_open_free_cursor_help(void);
 void battle_menu_open_free_cursor_mini_menu(void);
@@ -49,13 +48,11 @@ extern u8 g_battle_menu_skillset_disabled_flags[]; /* per-row grayed flag */
 s32 battle_menu_call_load_charge_skillset(s32 unit_id, u8 skillset_id, s16* ability_ids);
 s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out);
 s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
-s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
 s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
 s32 battle_menu_collect_throwable_items(s32 unit_id, u8 ability, u8* items);
 s32 battle_menu_display_item_inventory_ability(s32 unit_id, s32 skillset, u8* out_item_ids);
 s32 battle_menu_get_unit_skillset_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);
-s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
 s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit);
 s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns);
 s32 battle_menu_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
@@ -63,7 +60,6 @@ u16 battle_menu_load_elemental_abilities(s32 skillset_slot, u8 unit_id);
 s32 battle_menu_load_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
 s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
-s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 
 /* unit panels */
@@ -84,9 +80,6 @@ extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][
 
 /* text rendering */
 extern s32 g_battle_menu_text_section_offsets[];
-
-u8* battle_menu_redraw_text_page_on_scroll_in_rect(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 
 /* overlay loading */
 

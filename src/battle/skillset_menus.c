@@ -12,6 +12,14 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag);
+static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit);
+static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list);
+static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
+static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
+static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
+static s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit);
+
 /* Build the parallel ability lists for one of a unit's skillsets.
  *
  * Every learned slot of the skillset is listed in ability_ids (terminated with
@@ -293,7 +301,7 @@ s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ab
 /* Collects the unit's learned Math Skill abilities (0x19e..0x1a5) whose
  * secondary-data flags intersect mask into out, -1-terminated, and returns
  * the count. */
-s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask) {
+static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask) {
     u16 abilities[0x14];
     u8 mp_costs[0x18];
     u8 charge_times[0x18];
@@ -495,7 +503,7 @@ s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit) {
 }
 
 /* Returns whether a same-team Monster Skill supporter occupies the supplied tile. */
-s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height) {
+static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height) {
     battle_unit_height_data_t height;
     u8 reference_height;
     s32 unit_index;
@@ -924,7 +932,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
  * runs out and the unit becomes a crystal or treasure, 3 when Death Sentence
  * expires on a unit that is not undead, and 0 when nothing happens.
  */
-s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
+static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     action_data_t* action = &unit->action;
     s32 roll;
     s32 mask;
@@ -1148,7 +1156,7 @@ s32 battle_action_calculate_at_list_and_get_specific_unit_id(s32 at_index) {
 }
 
 /* Return 1 when the unit cannot participate in the AT list. */
-s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit) {
+static s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return 1;
     }
@@ -1372,7 +1380,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
  * Mode 1 is a charged ability landing: battle ID + 0x40 with the ability id's
  * low byte in action_id_low, battle ID - 0x40 for an ability id of 0x100 or more, or
  * battle ID + 0x60 for Jump. Returns 1 when the entry was placed. */
-s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list) {
+static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list) {
     unit_stats_t* unit;
     s32 i;
     s32 j;
@@ -1421,7 +1429,7 @@ void battle_action_set_only_movement_taken(s32 unit_id) {
 
 /* Mark the unit's move and/or action as taken and end its turn once nothing is
  * left to do. -1 for an absent unit, 1 when the turn ended, otherwise 0. */
-s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
+static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
     unit_stats_t* unit;
     s32 ret;
     unit = &g_battle_unit_stats[idx];
@@ -1477,7 +1485,7 @@ s32 battle_action_end_turn(s32 unit_id) {
 }
 
 /* Returns whether a unit with no remaining move or action should end its turn. */
-s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
+static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
     s32 cannot_act;
     u8 no_move;
     u8 no_action;

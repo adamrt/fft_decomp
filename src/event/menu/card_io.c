@@ -8,12 +8,15 @@
 #include "psx/libapi.h"
 #include "psx/types.h"
 
+static void card_io_consume_bios_events(void);
+static void card_io_consume_hardware_events(void);
+
 void card_io_set_selected_slot(s32 slot) {
     g_card_slot = slot;
 }
 
 #if defined(FFT_WORLD) || defined(FFT_EVENT_CARD)
-s32 card_io_get_selected_slot(void) {
+static s32 card_io_get_selected_slot(void) {
     return g_card_slot;
 }
 #endif
@@ -64,7 +67,7 @@ s32 card_io_wait_for_bios_event(void) {
     }
 }
 
-void card_io_consume_bios_events(void) {
+static void card_io_consume_bios_events(void) {
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_DONE]);
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_ERROR]);
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_BIOS_TIMEOUT]);
@@ -74,7 +77,7 @@ void card_io_consume_bios_events(void) {
 /* Test the four hardware card events (done, error, timeout, new card) and return
  * the matching CARD_IO_RESULT_*, or CARD_IO_RESULT_PENDING when none has
  * fired. A result clears all four events. */
-s32 card_io_poll_hardware_event_result(void) {
+static s32 card_io_poll_hardware_event_result(void) {
     s32 result = CARD_IO_RESULT_PENDING;
     if (TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE]) == 1)
         result = CARD_IO_RESULT_COMPLETE;
@@ -92,7 +95,7 @@ s32 card_io_poll_hardware_event_result(void) {
 /* Poll the hardware card event until it reports a result. A poll that finds
  * nothing while bit 0 of _card_status is set ends the wait with
  * CARD_IO_RESULT_TIMEOUT. Nothing in OPEN.BIN calls it. */
-s32 card_io_wait_for_hardware_event(void) {
+static s32 card_io_wait_for_hardware_event(void) {
     s32 result;
     s32 ready;
 
@@ -107,7 +110,7 @@ s32 card_io_wait_for_hardware_event(void) {
 }
 
 /* Consume the four hardware-card event notifications in handle order. */
-void card_io_consume_hardware_events(void) {
+static void card_io_consume_hardware_events(void) {
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE]);
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_ERROR]);
     TestEvent(g_main_card_bios_events[MAIN_CARD_EVENT_HARDWARE_TIMEOUT]);
@@ -137,7 +140,7 @@ s32 card_io_get_info_with_retries_variant(s32 port, s32 retry_limit) {
 /* Run _card_load on `port` until the BIOS event reports completion, trying
  * up to `retry_limit` times two frames apart. Returns the last result (a
  * rejected call counts as a timeout). */
-s32 card_io_load_with_retries(s32 port, s32 retry_limit) {
+static s32 card_io_load_with_retries(s32 port, s32 retry_limit) {
     s32 i;
     s32 result;
 
@@ -158,7 +161,7 @@ s32 card_io_load_with_retries(s32 port, s32 retry_limit) {
  * `retry_limit` times. Returns CARD_IO_RESULT_COMPLETE once the hardware
  * event or a follow-up info request reports completion, otherwise the last
  * failure (a rejected call counts as a timeout). */
-s32 card_io_create_new_with_retries(s32 port, s32 retry_limit) {
+static s32 card_io_create_new_with_retries(s32 port, s32 retry_limit) {
     s32 i;
     s32 result;
 

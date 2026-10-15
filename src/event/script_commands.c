@@ -31,6 +31,13 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text);
+
+static void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
+static s32 script_get_rand16(void);
+static s32 script_get_variable_bit_position(s32 value);
+static s32* script_get_variable_word_pointer_from_id(s32 variable_id);
+
 /* Thread task 0x35, started by the event script's background-sound instruction:
  * restart an environment sound (sound resource ENV), on a free SFX channel pair
  * when find_channel is set and as the remembered background sound otherwise, and
@@ -415,7 +422,7 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
  * 0x80 own a whole 32-bit value; 0x80..0x35F pack 32 flags per 32-bit value starting at element
  * 0x80, and 0x360..0x3FF pack eight nibbles per 32-bit value starting at element 0x97.
  * Ids at or above 0x400 stop the calling thread; the result is unset if it returns. */
-s32* script_get_variable_word_pointer_from_id(s32 variable_id) {
+static s32* script_get_variable_word_pointer_from_id(s32 variable_id) {
     s32* word;
 
     if (variable_id < EVENT_SCRIPT_VAR_PACKED_BIT_FIRST) {
@@ -433,7 +440,7 @@ s32* script_get_variable_word_pointer_from_id(s32 variable_id) {
 }
 
 /* Return the packed variable field position, or -1 for a full word; invalid ids exit the thread. */
-s32 script_get_variable_bit_position(s32 value) {
+static s32 script_get_variable_bit_position(s32 value) {
     s32 result;
 
     result = -1;
@@ -470,7 +477,7 @@ void script_seed_random_from_vsync(void) {
 /* Step the event script's random generator, state * 0x6255 + 0x3619 kept to 16
  * bits, and return the new state. script_run_variable_command calls it
  * when a variable opcode reads EVENT_SCRIPT_VAR_RANDOM_VALUE. */
-s32 script_get_rand16(void) {
+static s32 script_get_rand16(void) {
     return g_script_rand16_state = (g_script_rand16_state * 0x6255U + 0x3619U) & 0xffffU;
 }
 
@@ -961,7 +968,7 @@ void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text) {
  * Reading each control operand through the byte local and the u8
  * variable_base keep the outer loop large enough that loop.c does not hoist
  * the 0xFFFF pending-width constant, as in the target. */
-void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
+static void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text) {
     text_reader_state_t* state;
     u8* cursor;
     u8 operand;
@@ -1147,7 +1154,7 @@ done:
  * Numbers (0xE4/0xE6) are drawn one digit per 6-pixel column. Indexing the
  * divisor table inside the digit loop, rather than walking a pointer, is
  * what gives the target's strength-reduced pointer and register choice. */
-void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text) {
+static void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text) {
     party_unit_t* party;
     u8* cursor;
     s32 i;

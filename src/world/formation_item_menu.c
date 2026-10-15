@@ -9,6 +9,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 world_formation_run_equip_item_menu(void);
+static s32 world_menu_handle_remove_all_equipment(void);
+static s32 world_menu_run_best_fit_equipment(void);
+static s32 world_menu_run_remove_item(void);
+
 void world_formation_item_menu(void) {
     s32 state;
     s8 running;
@@ -129,7 +134,7 @@ void world_formation_item_menu(void) {
  * list for the selected slot, equip the highlighted item and keep the stat
  * preview in sync. Returns 0 when the menu is canceled, 1 otherwise.
  */
-s32 world_formation_run_equip_item_menu(void) {
+static s32 world_formation_run_equip_item_menu(void) {
     s16 x;
     s16 y;
     u8 locked;
@@ -276,7 +281,7 @@ s32 world_formation_run_equip_item_menu(void) {
  * the confirmation thread. On confirm, return the current equipment to the
  * inventory and equip the suggested set.
  */
-s32 world_menu_run_best_fit_equipment(void) {
+static s32 world_menu_run_best_fit_equipment(void) {
     /* The target reserves 64 local bytes whose contents are not accessed. */
     s32 unused[16];
     s32 i;
@@ -333,7 +338,7 @@ s32 world_menu_run_best_fit_equipment(void) {
 
 /* Handle single-slot removal and the remove-all confirmation.
  */
-s32 world_menu_run_remove_item(void) {
+static s32 world_menu_run_remove_item(void) {
     /* The target reserves 72 local bytes whose contents are not accessed. */
     s32 unused[18];
     u8 locked;
@@ -459,7 +464,7 @@ s32 world_menu_run_remove_item(void) {
  * slots; Right exits the prompt. Both paths request the corresponding sound.
  * Return 1 while awaiting input and 0 when the prompt has finished.
  */
-s32 world_menu_handle_remove_all_equipment(void) {
+static s32 world_menu_handle_remove_all_equipment(void) {
     u16 value;
     /* The target reserves 64 additional local bytes; their purpose is unknown. */
     s32 unused[16];

@@ -5,7 +5,7 @@
 #include "fft/memory.h"
 #include "fft/script.h"
 
-void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount) {
+static void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount) {
     if (poly->u0 != poly->u1) {
         poly->u0 += amount;
         poly->u2 += amount;
@@ -18,7 +18,7 @@ void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount) {
 }
 
 /* Move the left edge right and trim the trailing texture coordinates. */
-void gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount) {
+static void gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount) {
     poly->x0 += amount;
     poly->x2 += amount;
     if (poly->u0 != poly->u1) {

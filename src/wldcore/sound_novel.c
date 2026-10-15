@@ -10,6 +10,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal);
+static void wldcore_opcode_branch_if_local_flag(s32 expected);
+static void wldcore_opcode_branch_if_saved_bit(s32 expected);
+static void wldcore_opcode_branch_if_savedata_bit(s32 expected);
+static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record);
+static void wldcore_sound_change_scenario_music(s32 music_id);
+static s32 wldcore_sound_novel_update_countdown_timer(void);
+static void wldcore_sound_play_pending_script_sounds(s32 sound_id, s32 weather_sound_id, s32 track);
+static void wldcore_sound_stop_music_and_play_sound(s32 sound_id);
+static void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id);
+
 void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     u32* word;
     s32 i;
@@ -112,7 +123,7 @@ void wldcore_reset_selected_saved_record(s32 unused) {
 
 /* Reset a sound-novel record to the start of a reading: no text history, no
  * picture or background, no sound, section 0 and brightness 0x30. */
-void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record) {
+static void wldcore_reset_saved_record_fields(wldcore_saved_record_t* record) {
     record->text_history_3 = -1;
     record->text_history_2 = -1;
     record->text_history_1 = -1;
@@ -249,7 +260,7 @@ void wldcore_window_draw_centered_text(s32 window_index, s32 text_id) {
  * The switch tests the separately cataloged neighbor
  * g_wldcore_active_saved_record.sound_mode, not part of g_wldcore_active_saved_record.music_selection.
  * The selection byte read goes through *(u8*) so it stays an lbu as in the target. */
-void wldcore_sound_play_pending_script_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
+static void wldcore_sound_play_pending_script_sounds(s32 sound_id, s32 weather_sound_id, s32 track) {
     s32* music_flags;
 
     if ((sound_id | weather_sound_id | track) == 0) {
@@ -296,7 +307,7 @@ enum {
  * g_wldcore_sound_quad_command_bytes: four sounds of the sound novel's
  * resource, one on each SFX channel pair. A zero byte selects that
  * resource's empty sound 0, which only stops its channel pair. */
-void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id) {
+static void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id) {
     s32 values[WLDCORE_SOUND_QUAD_COMMAND_COUNT];
     s32 i;
 
@@ -309,7 +320,7 @@ void wldcore_sound_stop_weather_sfx_and_send_quad(s32 sound_id) {
 
 /* Stop the weather sound and play environment sound `sound_id` as the
  * background sound. */
-void wldcore_sound_stop_music_and_play_sound(s32 sound_id) {
+static void wldcore_sound_stop_music_and_play_sound(s32 sound_id) {
     main_sound_stop_weather_sfx_music();
     main_sound_play_bg_sfx(sound_id + SUZUKI_SOUND_ID(MAIN_SOUND_RESOURCE_ENV, 0));
 }
@@ -328,7 +339,7 @@ extern s32 g_wldcore_sound_novel_countdown_frames_reset;
  * countdown becomes -1; once that thread has ended the script branches to
  * g_wldcore_sound_novel_countdown_section.
  */
-s32 wldcore_sound_novel_update_countdown_timer(void) {
+static s32 wldcore_sound_novel_update_countdown_timer(void) {
     s32 elapsed;
     s32 remaining;
     s32 hours;
@@ -443,7 +454,7 @@ void wldcore_opcode_branch_if_dialog_option_equal(void) {
 /* Branches the sound-novel script to section operand_0 when the
  * selected dialog option equals operand byte 2 (or differs from it, when `branch_if_equal` is 0); otherwise raises
  * state flag 4. */
-void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal) {
+static void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal) {
     u8 operand = (u8)(g_wldcore_active_saved_record.instruction >> 16);
 
     if (operand == script_get_variable(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) ? branch_if_equal == 1
@@ -591,7 +602,7 @@ void wldcore_opcode_branch_if_savedata_bit_set(void) {
 /* Script branch on a save-data bit selected by a 16-bit operand: when the
  * bit equals the expected value the branch target byte is armed at 0x800d484e
  * with state flag 0x02, otherwise only flag 0x04 is raised. */
-void wldcore_opcode_branch_if_savedata_bit(s32 expected) {
+static void wldcore_opcode_branch_if_savedata_bit(s32 expected) {
     u32* instruction = &g_wldcore_opcode_state.instruction;
     u16 flags;
 
@@ -617,7 +628,7 @@ void wldcore_opcode_branch_if_saved_bit_set(void) {
  * single operand byte: when the bit equals the expected value the branch
  * target byte is armed at 0x800d484e with state flag 0x02, otherwise only
  * flag 0x04 is raised. */
-void wldcore_opcode_branch_if_saved_bit(s32 expected) {
+static void wldcore_opcode_branch_if_saved_bit(s32 expected) {
     u32* instruction = &g_wldcore_opcode_state.instruction;
     u16 flags;
 
@@ -643,7 +654,7 @@ void wldcore_opcode_branch_if_local_flag_set(void) {
  * by the single operand byte: when the bit equals the expected value the
  * branch target byte is armed at 0x800d484e with state flag 0x02, otherwise
  * only flag 0x04 is raised. */
-void wldcore_opcode_branch_if_local_flag(s32 expected) {
+static void wldcore_opcode_branch_if_local_flag(s32 expected) {
     u32* instruction = &g_wldcore_opcode_state.instruction;
     u16 flags;
 
@@ -757,7 +768,7 @@ void wldcore_opcode_play_music(void) {
  * unload its slot (slot 2 is used when none is loaded) and start the new
  * track; the load-wait loop after it polls a stub that always returns 0. The saved record keeps the slot in the high
  * byte and the music id in the low byte. */
-void wldcore_sound_change_scenario_music(s32 music_id) {
+static void wldcore_sound_change_scenario_music(s32 music_id) {
     s16 packed = g_wldcore_active_saved_record.music_selection;
     s32 slot = packed >> 8;
 

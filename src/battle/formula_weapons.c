@@ -8,7 +8,7 @@
 
 /* Hit chance F(XA+YA)% for magic on allies: Magic Attack Up and zodiac
  * compatibility, none of the target's defenses. Returns 1 on a miss. */
-s32 battle_formula_calculate_friendly_magic_accuracy(void) {
+static s32 battle_formula_calculate_friendly_magic_accuracy(void) {
     battle_formula_apply_magic_attack_up();
     battle_formula_apply_zodiac_compatibility();
     battle_formula_store_xa_plus_ya_status_damage();
@@ -28,7 +28,7 @@ void battle_formula_calculate_magical_xa_times_ya(void) {
 /* Golem's hit chance: (MA with Magic Attack Up + X) * caster Faith / 100, the
  * Faith status counting as 100 and Innocent as 0. No zodiac compatibility and
  * no target Faith. Returns 1 on a miss. */
-s32 battle_formula_calculate_golem_accuracy(void) {
+static s32 battle_formula_calculate_golem_accuracy(void) {
     action_data_t* action;
 
     battle_formula_store_ma_and_x();
@@ -68,7 +68,7 @@ void battle_formula_calculate_truth_damage(void) {
 }
 
 /* formula_calculate_magic_accuracy without the elemental strengthen. */
-s32 battle_formula_calculate_magic_accuracy_no_elemental(void) {
+static s32 battle_formula_calculate_magic_accuracy_no_elemental(void) {
     battle_formula_store_ma_and_x();
     battle_formula_apply_magical_support_status_compatibility();
     battle_formula_store_xa_plus_ya_status_damage();

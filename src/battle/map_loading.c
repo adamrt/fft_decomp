@@ -8,6 +8,8 @@
 #include "fft/sound.h"
 #include "psx/types.h"
 
+static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data);
+
 /* Map loader: takes a command between loads, then advances the load of a map's
  * files by one step per call.
  *
@@ -615,7 +617,7 @@ void battle_map_append_mesh_geometry(const map_mesh_geometry_t* geometry_data, m
  * textured triangles/quads and 0x14/0x18 for untextured triangles/quads.
  * Untextured POLY_F3/POLY_F4 packets start with color 0/0/1.
  */
-void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data) {
+static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data) {
     /* Named count loads fold the retail four 16-bit cursor advances. */
     const u16* source = &geometry_data->textured_triangle_count;
     s32 polygon_index;

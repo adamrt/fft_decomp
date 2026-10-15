@@ -85,20 +85,7 @@ extern u8 g_card_save_title_template[0x16];
 extern u8 g_card_save_write_failed;
 extern u8 g_card_save_write_phase;
 
-void card_save_build_file_header(s32 slot, s32 level, card_save_header_t* header);
-void card_save_build_buffer(s32 slot);
-void card_save_build_slot_description(s32 mode, u8* destination);
-s32 card_save_init_occupied_slot_selection(void);
-void card_save_render_slot_text(s32 slot);
 void card_save_run_menu(s32 unused);
-void card_save_update_and_draw_slot_list(u16 input);
-void card_save_update_card_slot_selection(void);
-void card_save_update_initial_prompt(void);
-void card_save_update_slot_playtime(s32 slot);
-void card_save_update_slot_scan(void);
-void card_save_update_slot_scan_result(void);
-void card_save_update_slot_scroll(s32 selection);
-void card_save_update_slot_write(s32 slot);
 
 /* save screen results */
 extern s8 g_card_free_block_count;
@@ -147,7 +134,6 @@ void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 u
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
     s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles, s32 unused_17, s32 unused_18,
     s32 unused_19, s32 unused_20, s32 unused_21, s32 unused_22, s32 unused_23, s32 unused_24);
-void card_gfx_init_primitive_lists(card_graphics_context_t* lists);
 void card_gfx_set_render_otag(u32* otag);
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
 
@@ -157,7 +143,6 @@ extern u16 g_card_input_latched_button;
 extern u16 g_card_input_previous;
 extern u8 g_card_save_list_input_armed;
 
-void card_input_update_controller(void);
 void card_input_update_suppressed_during_fade(void);
 
 /* menus */
@@ -183,8 +168,6 @@ extern u8 g_card_save_menu_state; /* card_save_menu_state_e */
 
 extern DIRENTRY* g_card_save_menu_work_buffer;
 
-void card_save_init_menu_graphics(void);
-void card_save_init_menu_state(void);
 void card_save_run_menu_graphic_thread(void);
 
 /* menu commands */

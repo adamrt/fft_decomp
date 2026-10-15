@@ -7,6 +7,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_bar_push_rumor_detail_level(s32 value);
+static void wldcore_list_open_rumors(void);
+
 /* Sibling of the resetter at 0x8007cd78, differing only in the value stored
  * into sequence. The record stores may alias `level`, so they invalidate
  * the cached parameter loads and reproduce the target's
@@ -23,7 +26,7 @@ void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[index].frame_index = 0;
 }
 
-void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level) {
+static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level) {
     s32* selected = &g_wldcore_map_projection_state.marker.kind;
     s32 i;
 
@@ -160,7 +163,7 @@ void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
  * at (0x4c, 0x50) with width 0x96 and appends its record tagged 6. With no
  * entries it resets the parent window-pair level's records and shows text
  * 0xb80a instead. */
-void wldcore_list_open_rumors(void) {
+static void wldcore_list_open_rumors(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -251,7 +254,7 @@ void wldcore_list_rumors_block_all_buttons(wldcore_menu_panel_level_t* level) {
  * unblock the menu buttons. */
 /* Target 0x80072404. */
 /* The caller hands in its menu level; the target reads no argument. */
-void wldcore_list_rumors_close_level(wldcore_menu_panel_level_t* level) {
+static void wldcore_list_rumors_close_level(wldcore_menu_panel_level_t* level) {
     g_wldcore_menu_ordering_table_offset = 1;
     g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     --g_wldcore_menu_stack_depth;
@@ -299,7 +302,7 @@ void wldcore_list_handle_rumors_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
-void wldcore_bar_push_rumor_detail_level(s32 value) {
+static void wldcore_bar_push_rumor_detail_level(s32 value) {
     s32 coordinate_mode = 0;
     s32 depth;
     u8 unused[8];
@@ -468,7 +471,7 @@ void wldcore_list_propositions_block_all_buttons(wldcore_menu_panel_level_t* lev
  * unblock the menu buttons. */
 /* Target 0x80072ef4. */
 /* The caller hands in its menu level; the target reads no argument. */
-void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* level) {
+static void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* level) {
     g_wldcore_menu_ordering_table_offset = 1;
     g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
     --g_wldcore_menu_stack_depth;

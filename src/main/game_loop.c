@@ -5,7 +5,7 @@
 #include "fft/script.h"
 #include "psx/types.h"
 
-void main_system_stop_display_and_audio_for_game_reset(void) {
+static void main_system_stop_display_and_audio_for_game_reset(void) {
     DrawSync(0);
     DrawSync(0);
     SetDispMask(0);
@@ -20,13 +20,13 @@ void main_system_reset_game(void) {
     main_restore_game_loop_stack_pointer(&g_main_system_game_loop_stack_pointer);
 }
 
-void main_overlay_call_battle_entrypoint(void) {
+static void main_overlay_call_battle_entrypoint(void) {
     battle_bin_entrypoint();
 }
 
 /* Load BATTLE.BIN (sector 1000) into the whole low overlay area, which ends at
  * the high overlay address, and call its entry point. */
-void main_overlay_exec_battle_bin(void) {
+static void main_overlay_exec_battle_bin(void) {
     main_file_load_checked_to_address(DISC_SECTOR_BATTLE_BIN,
         g_main_heap_high_overlay_load_address - g_main_heap_low_overlay_load_address,
         g_main_heap_low_overlay_load_address);
@@ -45,7 +45,7 @@ void main_overlay_exec_battle_bin(void) {
  * then alternate until g_main_system_game_flow_state asks for a reset or the
  * ending. The ending sets event 0x12a, plays OPEN.BIN's ending cutscene and runs
  * BATTLE.BIN once more. */
-void main_system_run_game_loop(void) {
+static void main_system_run_game_loop(void) {
     int open_mode;
 
     g_main_system_frontend_world_result = 0;

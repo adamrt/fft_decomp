@@ -246,7 +246,7 @@ void attack_deploy_run_select_menu(void) {
 /* Point the battle text sections at an overlay text file: 32 offsets
  * followed by the section data they are relative to. The event-message
  * section is left as it is. */
-void attack_text_init_battle_pointers(attack_text_file_t* file) {
+static void attack_text_init_battle_pointers(attack_text_file_t* file) {
     s32* offsets;
     s32 i;
     u8* data;
@@ -362,7 +362,7 @@ end:
  * its branch: that keeps the target's loop hoisting, where
  * `x + (0x80 + width)` is recomputed once per row instead of leaving both loops.
  */
-void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse) {
+static void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse) {
     POLY_GT4* poly;
     s32 row;
     s32 rest;

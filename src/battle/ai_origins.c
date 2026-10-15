@@ -11,6 +11,30 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+static void battle_ai_build_monster_skill_tile_mask(void);
+static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 radius);
+static s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status);
+static s32 battle_ai_can_unit_act_within_charge_time(s32 unit_index);
+static s32 battle_ai_can_use_geomancy(const ai_coords_t* coords);
+static void battle_ai_clear_current_action_decision(void);
+static s32 battle_ai_evaluate_math_targets(void);
+static s32 battle_ai_evaluate_movement_origins(void);
+static s32 battle_ai_evaluate_reflected_target_origins(void);
+static s32 battle_ai_evaluate_self_target_origins(void);
+static s32 battle_ai_evaluate_target_tiles(void);
+static s32 battle_ai_exclude_enemies_acting_before_ct(void);
+static s32 battle_ai_filter_useful_targets(void);
+static void battle_ai_finalize_action_destination(void);
+static s32 battle_ai_find_unit_on_target_panel(void);
+static s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_coords_t* target);
+static s32 battle_ai_is_unit_active_after_delay(s32 limit, s32 unit_id);
+static void battle_ai_restore_unit_state(ai_snapshot_mode_e mode);
+static void battle_ai_save_unit_state(ai_snapshot_mode_e mode);
+static s32 battle_ai_simulate_action_hits(action_command_t* action);
+static void battle_ai_simulate_movement_and_pickup(void);
+static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode);
+static void battle_ai_take_next_movement_origin(void);
+
 void battle_mem_copy_u16_values(void* destination, const void* source, s32 byte_count) {
     u16* dst = destination;
     const u16* src = source;
@@ -133,7 +157,7 @@ s32 battle_ai_choose_wait_facing(void) {
  * Only the destination's lower layer is checked; a rise of 3 is rejected,
  * but descents are unrestricted. Slope and depth do not affect this test.
  */
-s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_coords_t* target) {
+static s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_coords_t* target) {
     u8 x = target->fields.x;
     u8 width = g_ai_data_base.map_max_x;
     u8 y;
@@ -356,7 +380,7 @@ static const u32 g_ai_math_extra_known_ability_ids_rodata[3] = {
  * Record the resume stage when returning -1 to suspend. Completed searches
  * restore the actor coordinates and submit the action to the ranked list.
  */
-s32 battle_ai_evaluate_self_target_origins(void) {
+static s32 battle_ai_evaluate_self_target_origins(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_tile_mask_mode_e mode;
 
@@ -490,7 +514,7 @@ s32 battle_ai_calculate_height_difference_between_units(const ai_coords_t* coord
  *
  * Return 1 for the terrain table's matching ability ID, otherwise 0.
  */
-s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
+static s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
     u32 tile_id;
     u32 tile_type;
     u32 ability_terrain;
@@ -510,7 +534,7 @@ s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
  * suspension, but the target does not reload the local reflector pointer
  * on resume; later target iterations can therefore use the caller's s2.
  */
-s32 battle_ai_evaluate_reflected_target_origins(void) {
+static s32 battle_ai_evaluate_reflected_target_origins(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* reflector;
     ai_unit_decision_t* decision;
@@ -625,7 +649,7 @@ void battle_ai_update_tile_pickup(void) {
  * Test four source skillsets and learned type/multiplier pairs. Persistent
  * indices resume a suspended priority check; -1 suspends and 0 ends this pass.
  */
-s32 battle_ai_evaluate_math_targets(void) {
+static s32 battle_ai_evaluate_math_targets(void) {
     u8 special_abilities[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
     ai_data_t* ai = &g_ai_data_base;
     s32 i;
@@ -704,7 +728,7 @@ s32 battle_ai_evaluate_math_targets(void) {
  * return 0 after restoring the temporary unit's position. The scan path
  * reloads its full row mask on resume and continues at its saved x index.
  */
-s32 battle_ai_evaluate_movement_origins(void) {
+static s32 battle_ai_evaluate_movement_origins(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 row;
 
@@ -784,7 +808,7 @@ begin_evaluation:
  * An actor-origin choice sets act_before_move and substitutes the movement
  * scenario's candidate coordinates; other origins clear that flag.
  */
-void battle_ai_finalize_action_destination(void) {
+static void battle_ai_finalize_action_destination(void) {
     ai_data_t* ai;
 
     ai = &g_ai_data_base;
@@ -803,7 +827,7 @@ void battle_ai_finalize_action_destination(void) {
  * Rank by signed tile priority, then foe proximity; later tiles win ties.
  * Requires a consistent nonempty movable mask/count; there is no empty guard.
  */
-void battle_ai_take_next_movement_origin(void) {
+static void battle_ai_take_next_movement_origin(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 best_key = 0x7fffffff;
     s32 x, y, level;
@@ -954,7 +978,7 @@ void battle_ai_build_attack_origin_masks(void) {
  * row templates. Jump Level 8 can supply radius 8 on non-arcing origin scans.
  * The lookup is unchecked.
  */
-void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 radius) {
+static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 radius) {
     ai_data_t* ai = &g_ai_data_base;
     s32 i;
     s32 x;
@@ -1023,7 +1047,7 @@ void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 radius) 
  * Only the low map level is visited; the high-level mask remains cleared.
  * Tile base heights must differ by at most 2; slope and depth are ignored.
  */
-void battle_ai_build_monster_skill_tile_mask(void) {
+static void battle_ai_build_monster_skill_tile_mask(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     s32 i;
@@ -1081,7 +1105,7 @@ void battle_ai_build_monster_skill_tile_mask(void) {
  * and resume suspended priority evaluation at its saved tile. A -1 result
  * suspends this pass; 0 ends it. Coordinate restoration belongs to callers.
  */
-s32 battle_ai_evaluate_target_tiles(void) {
+static s32 battle_ai_evaluate_target_tiles(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 x, y, level;
     u16 row;
@@ -1208,7 +1232,7 @@ s32 battle_ai_evaluate_target_tiles(void) {
 
 /* Index of the first present unit standing on the current action's target
  * panel, or BATTLE_UNIT_ID_NONE if none. */
-s32 battle_ai_find_unit_on_target_panel(void) {
+static s32 battle_ai_find_unit_on_target_panel(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 i;
     unit_stats_t* unit;
@@ -1545,7 +1569,7 @@ finish_without_scoring:
  * An unchanged 32-bit coordinate value skips all updates. Crystal recovery clears
  * Critical; a noncritical pickup adds priority unless the policy is Retreat.
  */
-void battle_ai_simulate_movement_and_pickup(void) {
+static void battle_ai_simulate_movement_and_pickup(void) {
     ai_data_t* ai = &g_ai_data_base;
 
     if (ai->current_action.coords.word != ai->acting_unit_coords.word) {
@@ -1570,7 +1594,7 @@ void battle_ai_simulate_movement_and_pickup(void) {
 
 /* Mark the candidate action as not decided on: only the selected action ever
  * holds AI_ACTION_DECIDED (ai_build_command). */
-void battle_ai_clear_current_action_decision(void) {
+static void battle_ai_clear_current_action_decision(void) {
     g_ai_data_base.current_action.rank.decided = 0;
 }
 
@@ -1581,7 +1605,7 @@ void battle_ai_clear_current_action_decision(void) {
  * The 0xff counter disables accounting; that path returns 1 without
  * requiring a valuable target. Counted entries are target/strike pairs.
  */
-s32 battle_ai_simulate_action_hits(action_command_t* action) {
+static s32 battle_ai_simulate_action_hits(action_command_t* action) {
     ai_data_t* ai;
     s32 base_hit;
     s32 cnt;
@@ -1615,7 +1639,7 @@ s32 battle_ai_simulate_action_hits(action_command_t* action) {
  * Hit accounting is disabled by counter 0xff; included target/strike pairs
  * can adjust priority and mark whether a valuable target was hit.
  */
-void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
+static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
     ai_data_t* ai = &g_ai_data_base;
     battle_strike_work_t work;
     s32 target_index;
@@ -1713,7 +1737,7 @@ void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
  * non-baseline mode saves only the compact status record before restoring the
  * baseline identity, death counter, current status, and Death Sentence CT.
  */
-void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
+static void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
     ai_data_t* ai = &g_ai_data_base;
     ai_status_snapshot_t* status;
     ai_extended_snapshot_t* snapshot;
@@ -1773,7 +1797,7 @@ void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
  * BASELINE restores selected baseline fields, action records, and team Golem
  * values. Any non-baseline mode restores only the compact status record.
  */
-void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
+static void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
     ai_data_t* ai = &g_ai_data_base;
     ai_status_snapshot_t* status;
     ai_extended_snapshot_t* snapshot;
@@ -1822,7 +1846,7 @@ void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
 
 /* Keep in the target list only the units the considered ability is useful on.
  * Returns 1 while one is left. */
-s32 battle_ai_filter_useful_targets(void) {
+static s32 battle_ai_filter_useful_targets(void) {
     ai_data_t* ai;
     s32 result;
     s32 i;
@@ -2147,7 +2171,7 @@ s32 battle_ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit
  * Only Charm, Don't Move, and Don't Act are filtered; other IDs return true.
  * Equality counts as lasting through the turn. This does not test presence.
  */
-s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status) {
+static s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status) {
     if (status == STATUS_ID_CHARM || (status - STATUS_ID_DONT_MOVE) < 2U) {
         if (battle_ai_calculate_clockticks_until_unit_acts(unit) > unit->status_ct[STATUS_CT_INDEX(status)]) {
             return 0;
@@ -2158,7 +2182,7 @@ s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 
 
 /* For an enemy-targeting ability, drop from the target list each enemy that
  * will act before the ability lands. Returns 1 while a target is left. */
-s32 battle_ai_exclude_enemies_acting_before_ct(void) {
+static s32 battle_ai_exclude_enemies_acting_before_ct(void) {
     s32 result;
     s32 i;
     ai_data_t* ai;
@@ -2185,7 +2209,7 @@ s32 battle_ai_exclude_enemies_acting_before_ct(void) {
 
 /* 1 when the unit gets a turn by the considered ability's charge deadline
  * and can act by then; 0 for an instant ability. */
-s32 battle_ai_can_unit_act_within_charge_time(s32 unit_index) {
+static s32 battle_ai_can_unit_act_within_charge_time(s32 unit_index) {
     s32 min_ct;
     u8 ct;
 
@@ -2204,7 +2228,7 @@ s32 battle_ai_can_unit_act_within_charge_time(s32 unit_index) {
 /* 1 when the unit can act limit clockticks from now: present, Speed above 0,
  * not crystal, petrified or treasure, with no Stop, Don't Move or Sleep that
  * lasts that long, and alive, or dead with Reraise and due a turn by then. */
-s32 battle_ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
+static s32 battle_ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
 
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {

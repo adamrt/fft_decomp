@@ -18,13 +18,6 @@
 extern menu_entry_t g_require_join_menu_descriptor[];
 extern u8 g_require_work[];
 
-s32 require_party_update_brave_faith_and_collect_warnings(void);
-void require_party_apply_post_battle_changes(void);
-void require_overlay_open_jobstts(void);
-void require_overlay_run_helpmenu(void);
-void require_party_report_brave_departure_stub(
-    s32 unused_battle_index, s32 unused_unit_id, s32 unused_character_identity);
-
 /* unit */
 /* Three unit ids whose presence selects the event variable at +6. */
 typedef struct require_party_bio_update_record {
@@ -52,15 +45,11 @@ extern s16 g_require_party_removal_result;
 
 void require_gfx_prepare_party_portrait_textures(void);
 void require_party_report_brave_faith_changes(void);
-s32 require_party_find_low_brave_high_faith_departures(void);
-s32 require_party_get_free_slot_status(s32 unit_id);
 void require_party_remove_low_brave_high_faith_units(void);
-s32 require_party_restore_item_counts(s32 party_index);
 s32 require_party_save_battle_units_and_find_join_candidates(void);
 s32 require_party_sell_equipment_over_limit(s32 unit_id);
 s32 require_party_store_equipment_or_sell_overflow(s32 unit_id);
 void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value);
-s32 require_party_select_unit_to_remove(void);
 
 /* conditions */
 /* One color record per display-condition quad; the fourth byte of each
@@ -92,7 +81,6 @@ extern require_display_condition_colors_t g_require_condition_special_vertex_col
 /* REQUIRE 0x801cafd4, invoked by both BATTLE and WORLD event dispatch. */
 void require_condition_dispatch(void);
 void require_condition_show_ready_bugged(void);
-void require_condition_show_general(s32 value);
 void require_condition_run_special_thread(void);
 
 /* rewards */
@@ -174,12 +162,7 @@ extern u8 g_require_reward_war_trophy_item_count;
 extern require_reward_war_trophy_primitives_t g_require_reward_war_trophy_primitives[2];
 extern battle_war_result_t g_require_reward_war_trophy_search_result;
 
-void require_reward_run_gil_ticker(void);
-void require_reward_run_war_trophies(void);
 void require_reward_animate_bonus_image_burst(void);
-void require_reward_collect_war_trophies_and_bonus_money(void);
-s32 require_reward_get_war_trophy_column_x(s32 value, s32 index);
-s32 require_reward_get_war_trophy_entry_offset(s32 value, s32 index);
 void require_reward_load_bonus_image(s32 image_id);
 
 /* character status */
@@ -204,8 +187,6 @@ void require_panel_set_transition_value(s32 value);
 extern s32 g_require_numeric_editor_origin_x;
 extern menu_status_thread_t g_require_numeric_editor_thread_params;
 
-void require_editor_load_party_unit(s32 unused, s32 party_index);
-
 /* menus */
 extern s16 g_require_menu_selection_result;
 extern s16 g_require_message_menu_result;
@@ -228,10 +209,6 @@ extern POLY_GT4 g_require_gfx_poly_gt4_buffers[2][40];
 void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread);
 void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
-void require_gfx_init_poly_gt4_array_32(s32 x, s32 y);
-void require_gfx_init_poly_gt4_array_8(s32 x, s32 y);
-void require_gfx_scale_poly_gt4_vertex_colors(
-    const require_display_condition_colors_t* colors, s32 scale, POLY_GT4* poly);
 
 /* text */
 /* Section offsets of the REQUIRE text file, relative to g_require_text_data (0x80 bytes before it). */
@@ -246,7 +223,6 @@ typedef enum require_text_section {
 extern s32 g_text_section_offsets[32];
 extern char g_require_text_wait_for_file_allocation_message[];
 
-void require_text_build_battle_nicknames(void);
 void require_text_show_battle_congratulations(void);
 
 /* input */

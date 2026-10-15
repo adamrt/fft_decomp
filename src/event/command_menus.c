@@ -32,7 +32,16 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void sound_queue_sfx_confirm_unless_restoring(void) {
+static void camera_load_state_from_script_variables_variant(void);
+static void script_process_pending_requests_variant(void);
+static void script_route_event_input_variant(void);
+
+static s32 menu_dispatch_system_function(
+    s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action);
+static event_scenario_condition_result_e script_check_scenario_condition(
+    event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation);
+
+static void sound_queue_sfx_confirm_unless_restoring(void) {
     if (g_menu_restore_pending == 0) {
         g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
     }
@@ -40,7 +49,7 @@ void sound_queue_sfx_confirm_unless_restoring(void) {
 
 /* Runs the menu's action handler on a simulated, silent Circle press with
  * option 0 selected, then clears the injected input. */
-void menu_confirm_action_silently(menu_entry_t* menu) {
+static void menu_confirm_action_silently(menu_entry_t* menu) {
     g_sound_suppressed = 1;
     g_script_event_input = PSX_PAD_CIRCLE;
     menu_handle_action(menu, 0);
@@ -289,7 +298,7 @@ void menu_validate_skill_selection_thread(void) {
     thread_exit_current();
 }
 
-s32 text_is_spell_quote_exception_skillset(s32 skillset_id) {
+static s32 text_is_spell_quote_exception_skillset(s32 skillset_id) {
     s32 i;
     s32 found = 0;
 
@@ -395,7 +404,7 @@ s32 menu_resolve_selection(void) {
 }
 
 /* Wait for menu/event threads, then start the selected system-function entry. */
-void menu_run_system_function_thread(void) {
+static void menu_run_system_function_thread(void) {
     s32 id;
     s32 menu_id;
     menu_system_function_t* entry;
@@ -437,7 +446,7 @@ void menu_run_system_function_thread(void) {
 }
 
 /* Clear menu selections and start the system-function worker. */
-void menu_start_system_function_thread(s32 system_function) {
+static void menu_start_system_function_thread(s32 system_function) {
     menu_clear_entry_selections();
     thread_start(THREAD_SLOT_SYSTEM_FUNCTION, menu_run_system_function_thread);
     thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, system_function, 0, 0);
@@ -571,7 +580,7 @@ s32 menu_get_dead_unit_selection(s32 battle_id) {
 }
 
 /* Dispatch an action-menu command to its scene system function or event. */
-s32 menu_dispatch_system_function(
+static s32 menu_dispatch_system_function(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action) {
     unit_stats_t* unit;
     s32 value;
@@ -886,7 +895,7 @@ s32 menu_dispatch_system_function(
  * Otherwise an id in the special-character identity range is looked up by
  * character identity and accepted only for a deployed party member (unit id
  * 0x78..0x7c). */
-unit_stats_t* unit_get_stats_by_unit_id(s32 unit_id) {
+static unit_stats_t* unit_get_stats_by_unit_id(s32 unit_id) {
     s32 index;
     unit_stats_t* stats;
 
@@ -981,7 +990,7 @@ void script_noop_9(void) {
  * compare with id, not value.
  *
  * Keep the two unit-id range comparisons: retail reloads the byte. */
-event_scenario_condition_result_e script_check_scenario_condition(
+static event_scenario_condition_result_e script_check_scenario_condition(
     event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation) {
     unit_stats_t* unit;
     s32 i;
@@ -1111,7 +1120,7 @@ void script_pulse_tutorial_wait_value(s32 wait_value) {
 }
 
 /* Apply disabled and forced input variables while retaining the high input bits. */
-void script_apply_input_overrides(u32* state) {
+static void script_apply_input_overrides(u32* state) {
     u32 high;
 
     if (*state == MAIN_INPUT_RESET_BUTTONS) {
@@ -1125,7 +1134,7 @@ void script_apply_input_overrides(u32* state) {
 
 #ifdef FFT_BATTLE
 /* Route controller input to the running battle event thread. */
-void script_route_event_input_variant(void) {
+static void script_route_event_input_variant(void) {
     s32 thread;
 
     if (g_menu_input_mode != MENU_INPUT_TUTORIAL) {
@@ -1150,7 +1159,7 @@ void script_route_event_input_variant(void) {
 /* WORLD twin of script_update_event_input_state_variant: while the event thread
  * (0x10) is current, latch the pad state and derive the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. */
-void script_route_event_input_variant(void) {
+static void script_route_event_input_variant(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;
@@ -1629,7 +1638,7 @@ void script_set_specialized_map_destroyed(void) {
 #    endif
 
 /* Advances asynchronous battle-script, map, effect, and graphics requests. */
-void script_process_pending_requests_variant(void) {
+static void script_process_pending_requests_variant(void) {
     s16 destruction_state;
     s16 effect_id;
     s16 jump_out_map_id;
@@ -1804,14 +1813,14 @@ void script_process_pending_requests_variant(void) {
 #ifdef FFT_WORLD
 /* Empty in WORLD; BATTLE's body under this name advances the map, effect and graphics requests the event scripts leave
  * pending. */
-void script_process_pending_requests_variant(void) {
+static void script_process_pending_requests_variant(void) {
 }
 #endif
 
 #ifdef FFT_BATTLE
 /* Load camera rotation, zoom and position back out of the script variable
  * block; the inverse of camera_store_state_to_script_variables. */
-void camera_load_state_from_script_variables_variant(void) {
+static void camera_load_state_from_script_variables_variant(void) {
     setVector(&g_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
     battle_camera_set_rotation(&g_camera_script_rotation);
@@ -1829,7 +1838,7 @@ void camera_load_state_from_script_variables_variant(void) {
 
 #ifdef FFT_WORLD
 /* Empty in WORLD; the BATTLE twin copies the camera script variables into the camera. */
-void camera_load_state_from_script_variables_variant(void) {
+static void camera_load_state_from_script_variables_variant(void) {
 }
 #endif
 

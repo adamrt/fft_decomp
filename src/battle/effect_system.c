@@ -19,7 +19,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
+static void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
     map_tile_t* tile;
 
     tile = battle_map_get_tile_data_pointer(in->vx, in->vz, in->vy);
@@ -31,7 +31,7 @@ void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out)
 /* Copies the camera rotation, snapped to the nearest yaw quadrant whose view
  * of the tile is not blocked. The camera angles are read as an SVECTOR: the
  * quadrant is a signed short division, which unsigned 16-bit values do not emit. */
-void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out) {
+static void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out) {
     map_tile_t* tile;
     SVECTOR* rotation;
     s32 mask;
@@ -70,7 +70,7 @@ void battle_noop_801aad30(s32 ignored_1, s32 ignored_2) {
 /* A tile is 28 units wide, so max * 14 is the middle of the map. */
 /* Writes the map's center as three 32-bit X/Z/Y components with Z (height) zero
  * (effect camera target). */
-void battle_effect_store_map_center_coordinates(VECTOR* destination) {
+static void battle_effect_store_map_center_coordinates(VECTOR* destination) {
     SVECTOR map_max;
     s32 max_y;
 
@@ -93,7 +93,7 @@ void battle_effect_store_map_center_coordinates(VECTOR* destination) {
  *
  * Mode 0x40 keeps its own `current` pointer: sharing `rotation` with the other
  * modes changes that case's register allocation. */
-void battle_camera_execute_angle_command(s32 command, s32 target, s32 duration, const SVECTOR* angles) {
+static void battle_camera_execute_angle_command(s32 command, s32 target, s32 duration, const SVECTOR* angles) {
     SVECTOR coords;
     SVECTOR* rotation;
     SVECTOR* current;
@@ -193,7 +193,7 @@ void battle_camera_execute_angle_command(s32 command, s32 target, s32 duration, 
  * g_effect_camera_position_saved (0x100), the caster entry (0x140), the average of all unit
  * targets (0x180) or the tile at g_effect_target_tile (0x1c0). All but 0x40 add offset
  * when present. Bits 0x1e00 are kept in g_effect_camera_position_mode. */
-void battle_camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset) {
+static void battle_camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset) {
     VECTOR sum;
     VECTOR* coords;
     SVECTOR* screen;
@@ -286,7 +286,7 @@ void battle_camera_execute_position_command(s32 command, s32 target, s32 duratio
  * (0xc0) or the saved zoom at g_effect_camera_zoom_saved (0x100), the latter two offset by
  * zoom when present. Other modes leave the camera untouched. Bits 0x1e00 are
  * kept in g_effect_camera_zoom_mode. */
-void battle_camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VECTOR* zoom) {
+static void battle_camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VECTOR* zoom) {
     switch (command & EFFECT_CAMERA_SOURCE_MASK) {
     case EFFECT_CAMERA_SOURCE_TARGET:
     case EFFECT_CAMERA_SOURCE_GIVEN:
@@ -722,7 +722,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
     }
 }
 
-s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
+static s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
     effect_timeline_t* data;
     s32 i;
 
@@ -754,7 +754,7 @@ s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index, s32* o
  *
  * The conditional-expression header reads keep the entry block from caching
  * the unit-data pointer. */
-s32 battle_camera_find_active_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
+static s32 battle_camera_find_active_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
     s32 phase1;
     s32 spawn_delay;
     s32 child_duration;
@@ -1014,7 +1014,7 @@ void battle_effect_init_system(void) {
  * storing and returning the raw id ($s0), which keeps the error path's `move
  * v0,s0` instead of a folded 0. Writing previous_slot_id before the next_slot_id
  * clear reproduces the target's early g_effect_secondary_active_tail load. */
-u8 battle_effect_allocate_secondary_slot(void) {
+static u8 battle_effect_allocate_secondary_slot(void) {
     s32 id;
     s32 slot;
     s32 i;
@@ -1050,7 +1050,7 @@ u8 battle_effect_allocate_secondary_slot(void) {
  * tail's next link is cleared.
  *
  * The free-chain walk index is an s32: a u16 adds an `andi 0xffff` per load. */
-void battle_effect_remove_secondary(u8 id) {
+static void battle_effect_remove_secondary(u8 id) {
     effect_secondary_data_t* slot;
     s32 tail;
 
@@ -1095,7 +1095,7 @@ void battle_effect_finalize_secondary(u8 secondary_id) {
 /* Take an effect slot from the free chain and push it on the head of the active
  * chain. Returns its id, or 0 (the null sentinel) when no slot is free; the
  * slot's life is cleared either way. */
-s32 battle_effect_alloc_slot(void) {
+static s32 battle_effect_alloc_slot(void) {
     u8 head;
     u8 tail;
     s32 id;
@@ -1117,7 +1117,7 @@ s32 battle_effect_alloc_slot(void) {
 
 /* Unlinks slot id from the active chain and pushes it onto the free chain;
  * slot 0 is the null sentinel and is ignored. */
-void battle_effect_free_slot(u8 id) {
+static void battle_effect_free_slot(u8 id) {
     u8 free_head;
 
     if (id == 0) {
@@ -1260,7 +1260,7 @@ s32 battle_effect_init_fall_dust_secondary(effect_secondary_init_t* source, VECT
  * record and return its id. Its null handler only steps through the phases, so
  * the record lasts two more frames. The arrow handler starts it when the arrow
  * lands without a hit. */
-s32 battle_effect_end_secondary_on_current_unit(void) {
+static s32 battle_effect_end_secondary_on_current_unit(void) {
     s32 secondary_id = battle_effect_allocate_secondary_slot() & 0xFF;
     s32 record_offset = secondary_id * sizeof(effect_secondary_data_t);
     u8 function_id;
@@ -1294,7 +1294,7 @@ s32 battle_effect_end_secondary_on_current_unit(void) {
  *
  * A polygon whose depth is not between 1 and EFFECT_OT_DEPTH_MAX - 1 is built but
  * not drawn. */
-void battle_effect_draw_projectile_model(
+static void battle_effect_draw_projectile_model(
     SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter) {
     effect_decoded_model_command_t command;
     s32 unused[2];
@@ -1528,7 +1528,7 @@ void battle_effect_draw_projectile_model(
  * matrix from the sprite angle, and transforms the four quad corners into the
  * slot's double-buffered primitive before adding it to the ordering table.
  */
-void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle) {
+static void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     SPRT sprite;
     SVECTOR local;
     VECTOR position;
@@ -1593,7 +1593,7 @@ void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle)
 /* Quadratic height term used by the projectile trajectory calculation;
  * this is not the complete trajectory.
  * distance is the attacker-to-target distance scaled by ONE. */
-s32 battle_effect_calculate_arc_height_term(s32 distance) {
+static s32 battle_effect_calculate_arc_height_term(s32 distance) {
     s32 gravity;
 
     distance >>= 6;
@@ -1607,7 +1607,7 @@ s32 battle_effect_calculate_arc_height_term(s32 distance) {
  * sprite height until both the arc apex and the target tile floor clear it,
  * storing the chosen height back into the target endpoint. Returns 0 when the
  * target is at zero distance or no height clears. */
-s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, s32* arc_a, s32* arc_b) {
+static s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, s32* arc_a, s32* arc_b) {
     map_tile_t* tile;
     s32 tile_height;
     s32 floor;
@@ -1664,7 +1664,7 @@ s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, s32* ar
  * g_effect_gravity_modifier is the trajectory gravity modifier
  * (0xa8000).
  */
-s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress) {
+static s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress) {
     s32 divisor;
     s32 height_sq;
     s32 progress_sq;
@@ -1700,7 +1700,7 @@ s32 battle_effect_calculate_arc_trajectory_term(s32 height, s32 progress) {
 
 /* Offset of a point current along a straight path of length total: dst is src,
  * the whole path's delta, scaled by current / total (a Q12 fraction). */
-void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
+static void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst) {
     s32 progress;
 
     progress = (current << 8) / (total >> 4);
@@ -1709,7 +1709,7 @@ void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 t
     dst->vz = (progress * src->vz) >> 12;
 }
 
-s32 battle_effect_calculate_launch_velocity(void) {
+static s32 battle_effect_calculate_launch_velocity(void) {
     return SquareRoot12((g_effect_gravity_modifier * g_effect_gravity_scale) >> 12);
 }
 
@@ -1718,7 +1718,7 @@ s32 battle_effect_calculate_launch_velocity(void) {
  * flagged by current-status bit 0x04 nor mount bit 0x40, with its tile
  * position and sprite height, into a scratchpad record returned via `out`.
  */
-void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, effect_obstacle_unit_list_t** out) {
+static void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, effect_obstacle_unit_list_t** out) {
     SVECTOR position;
     unit_stats_t* unit;
     s32 i;
@@ -1748,7 +1748,7 @@ void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, effect_
  * listed unit's sprite box; the blocking unit's battle id is reported through
  * `out_unit`, which is otherwise left at -1.
  */
-s32 battle_effect_test_position_for_obstacle(
+static s32 battle_effect_test_position_for_obstacle(
     effect_obstacle_unit_list_t* list, VECTOR* position, s32* out_unit, map_tile_coordinates_t* tile_ref) {
     map_tile_t* tile;
     s32 ceiling;
@@ -1812,7 +1812,7 @@ s32 battle_effect_test_position_for_obstacle(
  * `hit` is deliberately left uninitialized: the target reads $s6 after a
  * zero-step loop without ever writing it.
  */
-s32 battle_effect_trace_arc_trajectory_path(
+static s32 battle_effect_trace_arc_trajectory_path(
     SVECTOR* origin, s32* height, s32* distance, SVECTOR* arc, effect_obstacle_unit_list_t* obstacles) {
     SVECTOR rotation;
     SVECTOR step;
@@ -2085,7 +2085,7 @@ s32 battle_effect_get_bow_shot_angle(void) {
  * an obstacle stopped it. The `step` variable keeps the target's register
  * divide; a literal 0x2000 folds to a shift.
  */
-s32 battle_effect_trace_projectile_path(
+static s32 battle_effect_trace_projectile_path(
     VECTOR* delta, SVECTOR* origin, s32* distance, effect_obstacle_unit_list_t* obstacles) {
     VECTOR position;
     VECTOR previous;
@@ -2256,7 +2256,7 @@ void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s
 /* Start the animation script of trap group on slot: reset the color and
  * script state and store the 16-bit CLUT value (callers pass CLUTs of
  * MAP_CLUT_ROW_WEAPONS) at 0x88. */
-void battle_effect_init_trap_animation(s32 group, u16 clut, effect_slot_t* slot) {
+static void battle_effect_init_trap_animation(s32 group, u16 clut, effect_slot_t* slot) {
     u32 offset;
 
     slot->clut = clut;
@@ -2277,7 +2277,7 @@ void battle_effect_init_trap_animation(s32 group, u16 clut, effect_slot_t* slot)
  * frames. Its spawns_per_frame caps how many slots one frame may start; the
  * secondary effect's active_count counts the live slots and stops the
  * spawning at the group's total count. */
-void battle_effect_start_group(s32 group, s32 clut_index) {
+static void battle_effect_start_group(s32 group, s32 clut_index) {
     effect_slot_t* slot;
     s32 spawned;
     s32 i;
@@ -2311,7 +2311,7 @@ void battle_effect_start_group(s32 group, s32 clut_index) {
 /* Advance the current secondary effect's particles: every effect slot in the
  * first count entries of slot_ids, count being the particle group's. A slot that
  * has finished is freed and active_count drops by one. */
-void battle_effect_update_active_slots(s32 group) {
+static void battle_effect_update_active_slots(s32 group) {
     s32 i;
     s32 id;
 

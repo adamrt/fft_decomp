@@ -15,7 +15,19 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void attack_deploy_remove_roster_unit_from_tiles(s32 roster_id) {
+static void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly);
+static void attack_deploy_handle_roster_navigation_input(void);
+static void attack_deploy_init_cursor_primitives(void);
+static void attack_deploy_prepare_valid_tiles(SPRT* sprites);
+static void attack_deploy_run_render_thread(void);
+static void attack_deploy_select_next_roster_unit(void);
+static void attack_deploy_select_previous_roster_unit(void);
+static void attack_deploy_select_unit_for_stats_display(void);
+static void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_render_buffer_t* buffer);
+static void attack_deploy_update_screen_graphics(void);
+static void attack_gfx_init_frame_ft4_array(void);
+
+static void attack_deploy_remove_roster_unit_from_tiles(s32 roster_id) {
     s32 row;
     s32 column;
 
@@ -32,7 +44,7 @@ void attack_deploy_remove_roster_unit_from_tiles(s32 roster_id) {
 /* Move roster unit `roster_id` to deployment tile (column, row), swapping it
  * with whatever that tile held. Does nothing when the unit is not on the
  * grid. */
-void attack_deploy_swap_roster_unit_tile(s32 column, s32 row, s32 roster_id) {
+static void attack_deploy_swap_roster_unit_tile(s32 column, s32 row, s32 roster_id) {
     s32 scan_row;
     s32 scan_column;
     s32 old_value;
@@ -51,7 +63,7 @@ void attack_deploy_swap_roster_unit_tile(s32 column, s32 row, s32 roster_id) {
 
 /* Empty the deployment tables: the 5x5 grid of roster ids by tile and the
  * four squads' 25-entry unit lists. */
-void attack_deploy_reset_tables(void) {
+static void attack_deploy_reset_tables(void) {
     s32 row;
     s32 column;
 
@@ -748,7 +760,7 @@ s32 attack_return_zero(void) {
 
 /* L1 and R1 on the deployment screen: start the previous- or next-unit
  * thread in the roster step slot, unless one is still running. */
-void attack_deploy_handle_roster_navigation_input(void) {
+static void attack_deploy_handle_roster_navigation_input(void) {
     u32* flags;
 
     flags = script_get_controller_input_pointer(0);
@@ -766,7 +778,7 @@ void attack_deploy_handle_roster_navigation_input(void) {
 
 /* Move the roster cursor forward (wrapping at 20) to the first unit the
  * current squad may still deploy and load it into the status panels. */
-void attack_deploy_select_unit_for_stats_display(void) {
+static void attack_deploy_select_unit_for_stats_display(void) {
     attack_deploy_mark_other_squad_units_undeployable();
     while (1) {
         if (g_attack_deploy_selected_roster_index >= PARTY_ROSTER_SLOT_COUNT) {
@@ -936,7 +948,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
  * unit, wrapping over the 20 slots (or jump to the pending index when one is
  * set), load that unit into the panels and request their redraw with slide
  * direction 1. */
-void attack_deploy_select_next_roster_unit(void) {
+static void attack_deploy_select_next_roster_unit(void) {
     s32 pending;
 
     attack_deploy_mark_other_squad_units_undeployable();
@@ -970,7 +982,7 @@ void attack_noop_801c61dc(void) {
  * unit, wrapping over the 20 slots (or jump to the pending index when one is
  * set), load that unit into the panels and request their redraw with slide
  * direction 2. */
-void attack_deploy_select_previous_roster_unit(void) {
+static void attack_deploy_select_previous_roster_unit(void) {
     s32 pending;
 
     attack_deploy_mark_other_squad_units_undeployable();
@@ -999,7 +1011,7 @@ void attack_deploy_select_previous_roster_unit(void) {
 
 /* Build the textured deployment banner and its two arrowhead triangles.
  * The banner fields are written in libgpu setRGB0/setXY4/setUV4 order. */
-void attack_deploy_build_screen_arrow(void) {
+static void attack_deploy_build_screen_arrow(void) {
     SetPolyFT4(&g_attack_deploy_screen_arrow.poly);
     SetSemiTrans(&g_attack_deploy_screen_arrow.poly, 1);
     SetShadeTex(&g_attack_deploy_screen_arrow.poly, 0);
@@ -1036,7 +1048,8 @@ void attack_deploy_build_screen_arrow(void) {
 }
 
 /* Build and submit the deployment menu's animated cursor primitives. */
-void attack_deploy_build_menu_cursor_primitives(s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer) {
+static void attack_deploy_build_menu_cursor_primitives(
+    s32 frame, u32 mode, attack_deploy_render_buffer_t* render_buffer) {
     s32 i;
     s32 palette;
     POLY_FT4* ptr;
@@ -1129,7 +1142,7 @@ void attack_deploy_init_valid_tiles(void) {
  * computation; cross-jumping merges them, which keeps the polarity offset
  * chain at the top of the joined block as in the target. The offset has its
  * own variable rather than reusing `x`. */
-void attack_deploy_run_render_thread(void) {
+static void attack_deploy_run_render_thread(void) {
     s32 frame;
     s32 i;
     s32 x;
@@ -1320,7 +1333,7 @@ void attack_deploy_run_render_thread(void) {
  *
  * The y0 assignment is written out in both arms: the target's shared
  * subtract/add tail comes from cross-jumping those identical arm tails. */
-void attack_deploy_prepare_valid_tiles(SPRT* sprites) {
+static void attack_deploy_prepare_valid_tiles(SPRT* sprites) {
     s32 x;
     s32 y;
     s32 bit;
@@ -1406,7 +1419,7 @@ void attack_deploy_prepare_valid_tiles(SPRT* sprites) {
 
 /* Upload the cursor texture and build both deployment cursors' marker and
  * tile-highlight quads; attack_deploy_update_cursor_primitives positions them each frame. */
-void attack_deploy_init_cursor_primitives(void) {
+static void attack_deploy_init_cursor_primitives(void) {
     s32 i;
     s32 j;
 
@@ -1438,7 +1451,7 @@ void attack_deploy_init_cursor_primitives(void) {
  * arrays at g_attack_deploy_cursor_row/column. The ternary with the full
  * expression in each arm and the separate height variable reproduce the
  * target's cross-jumped arm tails and its unfolded lift + 10 addition. */
-void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_render_buffer_t* buffer) {
+static void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_render_buffer_t* buffer) {
     thread_t* thread = &g_threads[g_thread_current_id];
     s32 bob = menu_get_cursor_bob_offset(0);
     s32 i;
@@ -1480,7 +1493,7 @@ void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_render_buff
 /* Initialize the five pairs of frame quads: an opaque quad on the texture
  * page at (0x140, 0) and a semi-transparent one on the page at
  * (0x3c0, 0x100). */
-void attack_gfx_init_frame_ft4_array(void) {
+static void attack_gfx_init_frame_ft4_array(void) {
     s32 i;
 
     for (i = 0; i < 10; i += 2) {
@@ -1501,7 +1514,7 @@ void attack_gfx_init_frame_ft4_array(void) {
  * second quad squeezes the 20x20 texel cell at (0x90, 0x40) into a 20x10
  * marker under it. Each quad is written in libgpu setXYWH/setUVWH field order,
  * which the target's store order and constant offsets follow. */
-void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
+static void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4* poly) {
     s32 u;
     s32 v;
     s32 x;
@@ -1538,7 +1551,7 @@ void attack_deploy_build_portrait_quads(s32 column, s32 row, s32 index, POLY_FT4
  * parameter pointer, which is the target's induction-register order. The
  * equivalent g_attack_deploy_text_polys[parity][i] (or a flat index) form reduces a second
  * copy of the offset after the join below and changes the loop increments. */
-void attack_deploy_update_screen_graphics(void) {
+static void attack_deploy_update_screen_graphics(void) {
     s32 i;
     s32 parity;
     s32 squad;

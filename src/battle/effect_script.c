@@ -16,7 +16,11 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-void battle_effect_init_palette(s16 index) {
+static void battle_effect_free_state_record(s16 record_index);
+static s32 battle_effect_run_block(s16 index);
+static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index);
+
+static void battle_effect_init_palette(s16 index) {
     RECT rect;
     effect_file_header_t* base;
     effect_palette_section_t* data;
@@ -51,15 +55,15 @@ void battle_effect_init_palette(s16 index) {
     }
 }
 
-void battle_effect_reset_frame_data_pointer(void) {
+static void battle_effect_reset_frame_data_pointer(void) {
     g_effect_frame_data = g_effect_frame_data_start;
 }
 
-void battle_effect_reset_animation_sequences_pointer(void) {
+static void battle_effect_reset_animation_sequences_pointer(void) {
     g_effect_animation_sequences = g_effect_animation_sequences_start;
 }
 
-void battle_effect_set_frame_data_pointer(s16 effect_id) {
+static void battle_effect_set_frame_data_pointer(s16 effect_id) {
     effect_file_header_t* header;
     effect_sprite_section_t* section;
 
@@ -68,35 +72,35 @@ void battle_effect_set_frame_data_pointer(s16 effect_id) {
     g_effect_frame_data = (u8*)section->groups;
 }
 
-void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
+static void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
     header = g_effect_data_ptrs[effect_id];
     g_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
 }
 
-void battle_effect_set_script_pointer(s16 effect_id) {
+static void battle_effect_set_script_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
     header = g_effect_data_ptrs[effect_id];
     g_effect_script = (const u8*)header + header->script;
 }
 
-void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
+static void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
     header = g_effect_data_ptrs[effect_id];
     g_effect_animation_curve_data = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
 }
 
-void battle_effect_set_particle_system_data_pointer(s16 effect_id) {
+static void battle_effect_set_particle_system_data_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
     header = g_effect_data_ptrs[effect_id];
     g_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
 }
 
-void battle_effect_set_timeline_pointers(s16 effect_id) {
+static void battle_effect_set_timeline_pointers(s16 effect_id) {
     effect_file_header_t* header;
     effect_timeline_t* timeline;
 
@@ -109,7 +113,7 @@ void battle_effect_set_timeline_pointers(s16 effect_id) {
 /* Replace the effect sounds: unregister the sound resource of the previous effect
  * file, then register this file's sound section and take its id as the base for
  * the effect's sound ids. A file without a sound section clears both globals. */
-void battle_effect_load_sound_section(s16 index) {
+static void battle_effect_load_sound_section(s16 index) {
     effect_file_header_t* base;
     s32 offset;
 
@@ -129,7 +133,7 @@ void battle_effect_load_sound_section(s16 index) {
     }
 }
 
-void battle_effect_init_flags_section_pointer(s16 effect_id) {
+static void battle_effect_init_flags_section_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
     header = g_effect_data_ptrs[effect_id];
@@ -137,7 +141,7 @@ void battle_effect_init_flags_section_pointer(s16 effect_id) {
 }
 
 /* A zero section offset binds the pointer to the file header. */
-void battle_effect_set_timing_curves_pointer(s16 effect_id) {
+static void battle_effect_set_timing_curves_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
     header = g_effect_data_ptrs[effect_id];
@@ -147,7 +151,7 @@ void battle_effect_set_timing_curves_pointer(s16 effect_id) {
 /* Time scale of the parent timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
+static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
     s16 packed_index;
     s32 packed_value;
     s32 offset;
@@ -164,7 +168,7 @@ s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
 /* Time scale of the child timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-s32 battle_effect_get_animation_timing_curve_value(effect_record_t* record) {
+static s32 battle_effect_get_animation_timing_curve_value(effect_record_t* record) {
     s16 packed_index;
     s32 offset;
     s32 packed_value;
@@ -179,11 +183,11 @@ s32 battle_effect_get_animation_timing_curve_value(effect_record_t* record) {
 }
 
 /* Look up a native overlay callback by its resident catalog index. */
-effect_callback_t battle_effect_get_native_callback(s16 callback_id) {
+static effect_callback_t battle_effect_get_native_callback(s16 callback_id) {
     return g_effect_native_callbacks[callback_id];
 }
 
-void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
+static void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
     *lba = g_effect_disc_entries[effect_id].sector;
@@ -405,7 +409,7 @@ s32 battle_effect_get_playback_phase(void) {
  * the root record starts the script. Each later frame runs every allocated
  * record's script until it yields, freeing the records whose scripts end, and
  * the effect is over when none is left. */
-s32 battle_effect_update_stage(void) {
+static s32 battle_effect_update_stage(void) {
     s32 result;
     s32 id;
     s32 next;
@@ -531,7 +535,7 @@ void battle_effect_init_state_records(void) {
 }
 
 /* Allocate one effect record and link it into the in-use list. */
-s16 battle_effect_alloc_state_record(void) {
+static s16 battle_effect_alloc_state_record(void) {
     u16* available;
     s16* allocated;
     s16 index;
@@ -558,7 +562,7 @@ s16 battle_effect_alloc_state_record(void) {
  * separate `particle` copy keeps the call's work argument loaded at the loop
  * edges, as in the target, and the list-head pointers keep the target's
  * materialized global address. */
-void battle_effect_free_state_record(s16 record_index) {
+static void battle_effect_free_state_record(s16 record_index) {
     effect_work_record_t* work;
     effect_work_record_t* particle;
     s16 head;
@@ -610,7 +614,7 @@ void battle_effect_free_state_record(s16 record_index) {
 
 /* Clears a record's child-timeline state and sets the effect target it plays
  * on. */
-void battle_effect_reset_child_timeline(effect_record_t* record, s16 target_index) {
+static void battle_effect_reset_child_timeline(effect_record_t* record, s16 target_index) {
     s32 index;
 
     for (index = 0; index < EFFECT_CHILD_TRACK_RESET_SLOT_COUNT; index++) {
@@ -623,7 +627,7 @@ void battle_effect_reset_child_timeline(effect_record_t* record, s16 target_inde
 }
 
 /* Clear all 26 16-bit values in each bank, including the extra reset slots. */
-void battle_effect_reset_parent_timeline(effect_record_t* record) {
+static void battle_effect_reset_parent_timeline(effect_record_t* record) {
     s32 index;
 
     for (index = 0; index < EFFECT_PARENT_TRACK_RESET_SLOT_COUNT; index++) {
@@ -638,7 +642,7 @@ void battle_effect_reset_parent_timeline(effect_record_t* record) {
 
 /* Allocate an effect state record for a script and reset its per-handler state.
  * Returns the record index, or 0 when none is available. */
-s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index) {
+static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index) {
     s16 index;
     s16 i;
     effect_record_t* record;
@@ -1242,7 +1246,7 @@ effect_script_result_e battle_effect_code_script_27_init_particle_physics(effect
  * and 8-15 trigger unit reactions (bit 3 selects the caster entry), bits 0-2
  * register a callback slot.
  */
-void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_record_t* state) {
+static void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_record_t* state) {
     s32 runtime_id;
     u32 animation;
     u16 slot;
@@ -1278,7 +1282,7 @@ void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_record_t* s
     }
 }
 
-s32 battle_effect_select_sound_id(s32 channel) {
+static s32 battle_effect_select_sound_id(s32 channel) {
     s32 count;
     s32 sound;
 
@@ -1552,7 +1556,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
  * caster entry instead of the whole target list; bits 0-2 register a callback
  * slot.
  */
-void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) {
+static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) {
     s32 runtime_id;
     u16 animation;
     u16 slot;
@@ -1633,7 +1637,7 @@ void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* 
  * told to destroy its work on the call made with two frames of the keyframe
  * left. index, remaining and step are the channel's keyframe, the frames left
  * in it and the frames it has run. */
-void battle_effect_step_emitter_timeline(
+static void battle_effect_step_emitter_timeline(
     effect_record_t* state, effect_keyframe_table_t* table, s16* index, s16* remaining, s16* step) {
     s16 k;
     s32 sel;
@@ -1681,7 +1685,8 @@ void battle_effect_step_emitter_timeline(
  * caster) and, unless weather flag 2 is set, to the scaled map palette. The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in
  * the target. */
-void battle_effect_advance_target_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
+static void battle_effect_advance_target_palette_track(
+    effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
     s32 i;
@@ -1725,7 +1730,7 @@ void battle_effect_advance_target_palette_track(effect_palette_track_t* track, s
 
 /* Advance the caster color track one frame: an APPLY keyframe recolors the
  * caster. */
-void battle_effect_advance_caster_palette_track(
+static void battle_effect_advance_caster_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_runtime_id) {
     s16 current;
     s32 index;
@@ -1765,7 +1770,7 @@ void battle_effect_advance_caster_palette_track(
  *
  * The frame timer and the loop counter are separate locals here: the target
  * keeps the timer in $v0 and the counter in $s1. */
-void battle_effect_advance_coord_target_palette_track(
+static void battle_effect_advance_coord_target_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
@@ -1811,7 +1816,7 @@ void battle_effect_advance_coord_target_palette_track(
  * its doubled color (and the scaled palette when weather flag 2 is set);
  * otherwise both colors become the new gradient stops, with the first also
  * driving the darkness color under weather flag 2. */
-void battle_effect_advance_map_background_track(
+static void battle_effect_advance_map_background_track(
     effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
     map_background_gradient_colors_t colors;
     s16 current;
@@ -1870,7 +1875,7 @@ void battle_effect_advance_map_background_track(
  * Sound ids are relative to g_effect_sound_data_base, the effect sound
  * section's id set by effect_load_sound_section.
  */
-void battle_effect_advance_parent_sound_track(
+static void battle_effect_advance_parent_sound_track(
     effect_sound_track_t* schedule, s16* entry_index, s16* countdown, u8* unused_sound_state) {
     s16 index = *entry_index;
     s32 effect_kind;
@@ -2018,7 +2023,7 @@ effect_script_result_e battle_effect_code_script_2d_nop(effect_record_t* record)
 }
 
 /* Run until yield or abort; returns 1 on yield and 0 on abort. */
-s32 battle_effect_run_block(s16 index) {
+static s32 battle_effect_run_block(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */
     s16 result;

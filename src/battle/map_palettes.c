@@ -9,7 +9,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors) {
+static void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors) {
     s32 index;
     s16 green_for_packing;
     u32 blue_delta;
@@ -509,7 +509,8 @@ void battle_map_modify_palette(
  * zero. Indexing base[i]/color[i] (not advancing pointers) is required: a
  * pointer walk splits into biased givs.
  */
-void battle_map_transition_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
+static void battle_map_transition_background_gradient(
+    s32 frame_duration, const map_background_gradient_colors_t* colors) {
     map_color_transition_channels_t* base;
     const CVECTOR* color;
     map_background_gradient_colors_t current;
@@ -566,7 +567,7 @@ void battle_map_transition_and_store_background_gradient(
     g_map_background_gradient_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
 }
 
-void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
+static void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     map_background_gradient_colors_t current;
     s32 target_red;
@@ -706,7 +707,7 @@ void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s3
 
 /* Start a fade of the ambient light toward color over frame_duration * 8
  * frames, or apply it at once when frame_duration is zero. */
-void battle_map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
+static void battle_map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 red;
@@ -756,7 +757,7 @@ void battle_map_transition_and_store_ambient_light_color(s32 frame_duration, con
     g_map_ambient_light_color = *color;
 }
 
-void battle_map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
+static void battle_map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 target_red;
@@ -884,7 +885,7 @@ void battle_map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red,
 
 /* Start a fade of the map darkness toward color over frame_duration * 8
  * frames, or apply it at once when frame_duration is zero. */
-void battle_map_transition_darkness_color(s32 frame_duration, const CVECTOR* color) {
+static void battle_map_transition_darkness_color(s32 frame_duration, const CVECTOR* color) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 red;
@@ -933,7 +934,7 @@ void battle_map_transition_and_store_darkness_color(s32 frame_duration, const CV
     g_map_darkness_color = *color;
 }
 
-void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
+static void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 target_red;
@@ -1098,7 +1099,7 @@ s32 battle_map_stop_clut_cycle(s32 handle) {
  * clearing their active bytes. The 32 texture animation rows of the map are not
  * touched. The byte-offset loop preserves the original address sequence;
  * indexed active fields add four bytes. */
-void battle_map_reset_clut_cycles(void) {
+static void battle_map_reset_clut_cycles(void) {
     s32 offset;
 
     offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
@@ -1525,7 +1526,7 @@ void battle_map_stop_palette_animation(s32 clut_row, s32 clut_index, s32 stop_al
 /* Load the sixteen colors of one CLUT into a map CLUT row: the upload staging
  * (g_map_palette_modified_colors), the row's packed mirror, and its
  * decoded 5-bit components and alpha bit. */
-void battle_map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index) {
+static void battle_map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index) {
     s32 color_index;
     s32 selected_clut;
     s32 i;
@@ -1918,7 +1919,7 @@ void battle_map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue)
  * MAP_CLUT_ROW_UNIT_SHADOWS takes the same offsets while the unit stands on a
  * tile with depth, at or below the tile's surface, and the negated offsets
  * otherwise. An absent unit is skipped. */
-void battle_gfx_apply_unit_palette_modulation(
+static void battle_gfx_apply_unit_palette_modulation(
     s32 preset_color, s32 time, s32 runtime_id, s16 red, s16 green, s16 blue) {
     SVECTOR screen_coordinates;
     battle_unit_t* unit;

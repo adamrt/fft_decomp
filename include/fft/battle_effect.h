@@ -1924,11 +1924,9 @@ void battle_effect_call_play(void);
 void battle_effect_cancel_playback_request(void);
 s32 battle_effect_get_playback_phase(void);
 s32 battle_effect_init_data(void);
-void battle_effect_init_flags_section_pointer(s16 effect_id);
 void battle_effect_init_system(void);
 s32 battle_effect_is_item_ability(s32 ability_id);
 u32 battle_effect_load_ability(s32 ability_id);
-void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length);
 void battle_effect_play(void);
 void battle_effect_replace_flags_0006(struct effect_flag_prefix* object, s32 value);
 void battle_effect_reset_subsystems(void);
@@ -1936,7 +1934,6 @@ void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_seconda
 void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_target_data_t target);
 s32 battle_effect_try_init_data(void);
 s32 battle_effect_update_cycle(void);
-s32 battle_effect_update_stage(void);
 
 /* secondary effects */
 extern u16 g_effect_secondary_active_tail;
@@ -1982,9 +1979,7 @@ s32 battle_noop_801b2c04(void);
 s32 battle_noop_801b2e60(void);
 s32 battle_noop_801b3118(void);
 s32 battle_return_zero_801b0fec(void);
-u8 battle_effect_allocate_secondary_slot(void);
 s32 battle_effect_arrow_arc_secondary_handler(void);
-s32 battle_effect_end_secondary_on_current_unit(void);
 s32 battle_effect_equip_break_secondary_handler(void);
 s32 battle_effect_fall_dust_secondary_handler(void);
 void battle_effect_finalize_secondary(u8 secondary_id);
@@ -1999,10 +1994,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void);
 s32 battle_effect_null_secondary_handler(void);
 s32 battle_effect_red_orbs_secondary_handler(void);
 s32 battle_effect_reflect_secondary_handler(void);
-void battle_effect_remove_secondary(u8 id);
 void battle_effect_set_evade_type_data_and_weapon_element(struct battle_unit* unit, s32 is_bow);
-void battle_effect_set_landing_secondary_by_surface_type(battle_unit_t* unit);
-void battle_effect_set_secondary(struct battle_unit* unit, s32 effect);
 void battle_effect_set_secondary_death_smoke(battle_unit_t* unit);
 void battle_effect_set_secondary_fall_dust(struct battle_unit* unit);
 void battle_effect_set_secondary_level_up(struct battle_unit* unit);
@@ -2014,14 +2006,8 @@ void battle_effect_set_secondary_zodiac_poof(battle_unit_t* unit);
 s32 battle_effect_spell_charge_secondary_handler(void);
 s32 battle_effect_splash_secondary_handler(void);
 void battle_effect_start_action_projectile_secondary(battle_unit_t* unit);
-s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit);
-s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit);
-void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit);
-void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit);
-void battle_effect_start_group(s32 group, s32 clut_index);
 s32 battle_effect_summon_charge_secondary_handler(void);
 s32 battle_effect_teleport_secondary_handler(void);
-void battle_effect_update_active_slots(s32 group);
 s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough);
 s32 battle_effect_update_secondary_effects(void);
 s32 battle_effect_venom_trap_secondary_handler(void);
@@ -2036,16 +2022,11 @@ extern u8 g_effect_palette_target_runtime_ids[];
 extern effect_target_t g_effect_target_tile;
 
 void battle_effect_build_secondary_init(struct battle_unit* unit, struct effect_secondary_init* effect);
-void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, effect_secondary_init_t* init);
-void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out);
 void battle_effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void battle_effect_get_world_coords_by_battle_id(
     s32 adjust_for_tile_height, u32 battle_id, effect_secondary_init_t* effect_coordinates, SVECTOR* destination);
-void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data);
 void battle_effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out);
-void battle_effect_store_map_center_coordinates(VECTOR* destination);
-void battle_effect_store_targets_and_display_types(s32 ability_id, battle_unit_t* unit);
 
 /* elements */
 extern u8 g_effect_element_masks[];
@@ -2079,25 +2060,13 @@ extern map_tile_coordinates_t g_effect_trajectory_tile;
 
 extern s32 g_effect_trajectory_tile_flags;
 
-s32 battle_effect_calculate_arc_height_term(s32 distance);
-s32 battle_effect_calculate_arc_trajectory_term(s32 a, s32 b);
-s32 battle_effect_calculate_arcing_trajectory(battle_arc_query_t* query, s32* arc_a, s32* arc_b);
-s32 battle_effect_calculate_launch_velocity(void);
 s32 battle_effect_check_arc_trajectory_between_units(u8 source_id, u8 target_id);
 s32 battle_effect_check_direct_trajectory_between_units(u8 source_id, u8 target_id);
 s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile_position, s32 target_id);
-void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src, s32 total, s32 current, VECTOR* dst);
 s32 battle_effect_get_bow_shot_angle(void);
-void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, effect_obstacle_unit_list_t** out);
 s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id);
 void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id);
-s32 battle_effect_test_position_for_obstacle(
-    effect_obstacle_unit_list_t* list, VECTOR* position, s32* out_unit, map_tile_coordinates_t* tile_ref);
-s32 battle_effect_trace_arc_trajectory_path(
-    SVECTOR* origin, s32* height, s32* distance, SVECTOR* arc, effect_obstacle_unit_list_t* obstacles);
 /* Steps the projectile along its trajectory, testing each obstacle. */
-s32 battle_effect_trace_projectile_path(
-    VECTOR* delta, SVECTOR* origin, s32* distance, effect_obstacle_unit_list_t* obstacles);
 
 /* models */
 extern s32 g_effect_model_command_word_offset;
@@ -2109,27 +2078,12 @@ extern SVECTOR* g_effect_model_vertices;
 extern MATRIX g_effect_projectile_matrix;
 
 void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out);
-void battle_effect_draw_projectile_model(
-    SVECTOR* spin, VECTOR* position, SVECTOR* angles, VECTOR* scale, s32 parameter);
 s32 battle_effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1);
 
 /* timelines */
 extern effect_child_timeline_t* g_effect_child_timeline;
 extern effect_timeline_t* g_effect_timeline;
 extern const effect_timing_curves_t* g_effect_timing_curves;
-
-void battle_effect_advance_map_background_track(effect_background_track_t* track, s16* keyframe, s16* remaining_frames);
-s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame);
-s32 battle_effect_get_animation_timing_curve_value(effect_record_t* record);
-s32 battle_effect_get_timing_curve_value(effect_record_t* record);
-void battle_effect_reset_child_timeline(effect_record_t* record, s16 target_index);
-void battle_effect_reset_parent_timeline(effect_record_t* record);
-void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_record_t* state);
-void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state);
-void battle_effect_set_timeline_pointers(s16 effect_id);
-void battle_effect_set_timing_curves_pointer(s16 effect_id);
-void battle_effect_step_emitter_timeline(
-    effect_record_t* state, effect_keyframe_table_t* table, s16* index, s16* remaining, s16* step);
 
 /* scripts */
 /* Written by effect-script opcode 05; no game source reads it. */
@@ -2142,10 +2096,6 @@ extern const u8* g_effect_script;
 
 effect_script_result_e battle_effect_code_script_04_end(effect_record_t* unused_record);
 effect_script_result_e battle_effect_code_script_2e_invalid(effect_record_t* unused_record);
-effect_callback_t battle_effect_get_native_callback(s16 callback_id);
-s32 battle_effect_run_block(s16 index);
-void battle_effect_set_script_pointer(s16 effect_id);
-s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16 parent_index);
 
 /* particle motion */
 extern const effect_animation_curve_table_t* g_effect_animation_curve_data;
@@ -2173,10 +2123,8 @@ void battle_effect_restore_gravity(void);
 void battle_effect_restore_inertia_threshold(void);
 void battle_effect_save_gravity(void);
 void battle_effect_save_inertia_threshold(void);
-void battle_effect_set_animation_curve_data_pointer(s16 effect_id);
 void battle_effect_set_gravity(const vec3s32_t* src);
 void battle_effect_set_inertia_threshold(s32 threshold);
-void battle_effect_set_particle_system_data_pointer(s16 effect_id);
 /* parent is the particle a child emitter spawns from, read only for the
  * EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE origin: the particle update passes
  * the particle, the EFFECT overlay's particle handlers a record built on
@@ -2185,7 +2133,6 @@ void battle_effect_set_particle_system_data_pointer(s16 effect_id);
  * never sets and no caller reads. */
 s32 battle_effect_spawn_emitter_particles(s16 record_index, s32 frame, s32 emitter_index, effect_work_record_t* parent);
 s32 battle_effect_spawn_particle_motion(effect_emitter_values_t* values, effect_motion_t* motion);
-void battle_effect_step_motion(effect_motion_t* motion);
 
 /* particle pools */
 extern u16 g_effect_active_list_node_head;
@@ -2210,19 +2157,8 @@ extern s32 g_effect_work_record_peak;
  * peak. */
 extern effect_work_record_t* g_effect_work_records;
 
-effect_list_node_t* battle_effect_alloc_list_node(s16 kind);
-s32 battle_effect_alloc_slot(void);
-effect_sprite_block_t* battle_effect_alloc_sprite_block(u8 sprite_count);
-s16 battle_effect_alloc_state_record(void);
-effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s16 kind);
-void battle_effect_free_list_node(effect_list_node_t* node);
-void battle_effect_free_slot(u8 id);
-void battle_effect_free_sprite_block(effect_sprite_block_t* block);
-void battle_effect_free_state_record(s16);
 void battle_effect_free_work_record(s16 record_index, effect_work_record_t* work);
 effect_work_record_t* battle_effect_get_list_node(s16 record_index, s16 requested_index);
-void battle_effect_init_free_list(void);
-void battle_effect_init_record_chain(void);
 void battle_effect_init_state_records(void);
 s32 battle_effect_update_slot(s32 id);
 
@@ -2241,13 +2177,6 @@ extern u8* g_effect_frame_data_start;
 extern u8 g_effect_trap_animation_data[];
 extern effect_sprite_section_t g_effect_trap_frame_data;
 extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
-
-void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index);
-void battle_effect_init_trap_animation(s32 group, u16 clut, effect_slot_t* slot);
-void battle_effect_reset_animation_sequences_pointer(void);
-void battle_effect_reset_frame_data_pointer(void);
-void battle_effect_set_animation_sequences_pointer(s16 effect_id);
-void battle_effect_set_frame_data_pointer(s16 effect_id);
 
 /* particle rendering */
 /* Four-byte alignment preserves the original 32-bit copies into x/y. */
@@ -2270,16 +2199,9 @@ extern u8* g_effect_prim_buffer;
 extern s32 g_effect_prim_buffer_offset;
 extern s32 g_effect_primitive_sizes[3];
 
-void* battle_effect_alloc_primitive(effect_primitive_type_e primitive_type);
-void battle_effect_draw_billboard_sprite(effect_slot_t* slot);
-void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle);
 s32 battle_effect_get_prim_buffer_offset(void);
-void battle_effect_init_render_state(void);
-void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue);
 void battle_effect_reset_render_state(void);
 void battle_effect_start_render_frame(void);
-void battle_effect_submit_sprite_to_ordering_table(
-    effect_sprite_block_t* set, DVECTOR* position, s16 angle, VECTOR* zoom, u32* ot);
 
 /* camera */
 extern VECTOR g_effect_camera_position_current;
@@ -2313,32 +2235,18 @@ extern effect_palette_section_t* g_effect_palette_ptr;
 extern rgb24_t g_effect_reflect_palette_colors[6];
 extern rgb24_t g_effect_trap_colors[];
 
-void battle_effect_advance_caster_palette_track(
-    effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_runtime_id);
-void battle_effect_advance_coord_target_palette_track(
-    effect_palette_track_t* track, s16* keyframe, s16* remaining_frames);
-void battle_effect_advance_target_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames);
-void battle_effect_init_palette(s16 index);
-
 /* sound */
 extern u8 g_effect_sound_call_counts[]; /* per-channel call counts */
 extern s32 g_effect_sound_data_base;
 extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
 
-void battle_effect_advance_parent_sound_track(
-    effect_sound_track_t* schedule, s16* entry_index, s16* countdown, u8* unused_sound_state);
-void battle_effect_load_sound_section(s16 index);
-s32 battle_effect_select_sound_id(s32 channel);
-
 /* math */
 s32 battle_lerp_fixed8(s32 start, s32 end, s32 factor);
-s32 battle_lerp_fixed8_and_store(s32 start, s32 end, s32 factor, s32* out);
 void battle_effect_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination);
 void battle_effect_add_random_vector_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
 void battle_effect_add_random_vector_offsets_and_store_q12(
     const VECTOR* source, const VECTOR* ranges, VECTOR* destination);
 void battle_effect_add_rotation_vectors_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
-void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out);
 void battle_effect_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out);
 void battle_effect_add_vector_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out);
 void battle_effect_add_vectors(const VECTOR* first, const VECTOR* second, VECTOR* out);
@@ -2346,25 +2254,19 @@ void battle_effect_add_vectors_to_svector(const VECTOR* left, const VECTOR* righ
 void battle_effect_add_vectors_to_svector_rot_y_180(const VECTOR* left, const VECTOR* right, SVECTOR* result);
 void battle_effect_add_vectors_to_svector_rot_y_270(const VECTOR* left, const VECTOR* right, SVECTOR* result);
 void battle_effect_add_vectors_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result);
-s32 battle_effect_get_random_between(s32 value_a, s32 value_b);
-s16 battle_effect_get_random_between_s16(s16 minimum, s16 maximum);
-void battle_effect_interpolate_s16(s16 from, s16 to, s32 t, s16* out);
 s32 battle_effect_interpolate_s32_cos(s32 start, s32 end, s32 duration, s32 current);
-void battle_effect_interpolate_svector(const SVECTOR* from, const SVECTOR* to, s32 t, SVECTOR* out);
 void battle_effect_interpolate_svector_cos(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
 void battle_effect_interpolate_svector_cos_q12(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
 void battle_effect_interpolate_svector_linear(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out);
-void battle_effect_interpolate_vector_q13(const VECTOR* from, const VECTOR* to, s32 t, VECTOR* out);
 void battle_effect_interpolate_vector_q13_cos(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
 void battle_effect_interpolate_vector_q13_cos_q12(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
 void battle_effect_interpolate_vector_q13_linear(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out);
-void battle_effect_lerp_component_q13(s32 from, s32 to, s32 t, s32* out);
 void battle_effect_load_svector(const vec3s16_t* src, SVECTOR* dst);
 void battle_effect_load_vector(const vec3s16_t* src, VECTOR* dst);
 void battle_effect_mask_vector_low_12_bits(const SVECTOR* src, SVECTOR* dst);

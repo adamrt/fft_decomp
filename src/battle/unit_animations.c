@@ -79,7 +79,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
 /* The depth of water the unit stands in, which picks its animations: 0 on the surface (ON_WATER
  * movement, Float, a crystal), 1 for a chicken, frog or treasure and for IN_WATER movement,
  * otherwise the depth of its tile. */
-u8 battle_move_get_water_depth(battle_unit_t* unit) {
+static u8 battle_move_get_water_depth(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 status;
     u32 flags;
@@ -174,7 +174,7 @@ void battle_unit_select_weapon_attack_animation(battle_unit_t* attacker, battle_
 
 /* Start the animation of an item ability: the item held up for a target on
  * the unit's own tile or beside it, thrown for one further away. */
-void battle_unit_set_animation_for_item_abilities(battle_unit_t* unit, battle_unit_t* target) {
+static void battle_unit_set_animation_for_item_abilities(battle_unit_t* unit, battle_unit_t* target) {
     s32 dx;
     s32 dy;
 
@@ -739,7 +739,7 @@ void battle_unit_call_set_animation_based_on_status(struct battle_unit* unit) {
 /* When the target blocked with a hand or a golem took the blow, replace the
  * attacker's unarmed, swing or thrust animation with its recoil at the same
  * height. Only the TYPE1 and TYPE2 sheets have the recoils. */
-void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* attacker, battle_unit_t* target) {
+static void battle_unit_set_attacker_animation_for_shield_block(battle_unit_t* attacker, battle_unit_t* target) {
     unit_stats_t* stats;
     s32 kind;
     s32 anim;
@@ -921,7 +921,7 @@ void battle_unit_update_anim_display_for_all_targets(battle_unit_t* unit) {
  * whose index becomes the stored runtime ID; exhausting all 16 raises animation error
  * 6. Returns 0 on failure.
  */
-battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
+static battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
     s32 i;
 
     if (requested_runtime_id < BATTLE_UNIT_RUNTIME_SLOT_COUNT) {
@@ -951,7 +951,7 @@ battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
     return 0;
 }
 
-void battle_gfx_load_unit_frame_parts(
+static void battle_gfx_load_unit_frame_parts(
     battle_unit_t* unit, battle_gfx_sprite_display_data_t* display, battle_gfx_source_frame_t* src, s32 tpage) {
     battle_gfx_source_part_t* part;
     u32 i;
@@ -995,8 +995,8 @@ void battle_gfx_load_unit_frame_parts(
  * treasure keep the plain table, and a chicken or a frog changes at 4.
  * Higher frame ids index the SHP of an EVTCHR slot: slot 0 for the sequences
  * below 600 and slot 1 for the rest, the submerged table on a water tile. */
-void battle_gfx_select_unit_shp_frame(battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame, u16 sequence_id,
-    battle_gfx_unit_shp_frame_tables_t** out_table, battle_gfx_source_frame_t** out_frame) {
+static void battle_gfx_select_unit_shp_frame(battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame,
+    u16 sequence_id, battle_gfx_unit_shp_frame_tables_t** out_table, battle_gfx_source_frame_t** out_frame) {
     map_tile_t* tile;
     battle_gfx_unit_shp_frame_tables_t* table;
     battle_gfx_source_frame_t* selected;
@@ -1216,7 +1216,7 @@ void battle_gfx_load_trap_and_unit_frame_parts(
 /* SEQ script step: moves the sprite offset by delta across the unit's facing: +x
  * facing north, -x facing south, +z facing west, -z facing east. A diagonal
  * facing matches no case. */
-void battle_unit_shift_right_or_left(battle_unit_t* unit, s8 delta) {
+static void battle_unit_shift_right_or_left(battle_unit_t* unit, s8 delta) {
     s16* vector;
     switch (unit->facing & (BATTLE_FACING_EAST | BATTLE_FACING_NORTH)) {
     case BATTLE_FACING_NORTH:
@@ -1240,13 +1240,13 @@ void battle_unit_shift_right_or_left(battle_unit_t* unit, s8 delta) {
 
 /* SEQ script step: moves the sprite offset by delta along the height axis;
  * positive is down. */
-void battle_unit_shift_down_or_up(battle_unit_t* unit, s8 delta) {
+static void battle_unit_shift_down_or_up(battle_unit_t* unit, s8 delta) {
     unit->seq_offset.vy += delta;
 }
 
 /* SEQ script step: moves the sprite offset by delta along the unit's facing
  * (north is +z, east is +x). A diagonal facing matches no case. */
-void battle_unit_shift_forward_or_backward(battle_unit_t* unit, s8 delta) {
+static void battle_unit_shift_forward_or_backward(battle_unit_t* unit, s8 delta) {
     switch (unit->facing & (BATTLE_FACING_EAST | BATTLE_FACING_NORTH)) {
     case BATTLE_FACING_NORTH:
         unit->seq_offset.vz += delta;
@@ -1277,7 +1277,7 @@ void battle_unit_shift_forward_or_backward(battle_unit_t* unit, s8 delta) {
  * g_battle_gfx_targeted_frame_front or _back frame with a wait of 0. The
  * unpackers resolve a missing sequence to the start of the sequence data,
  * never to -1, so the MAIN_SYSTEM_ERROR_SEQ_ANIMATION test cannot fire. */
-void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim_state_t* state, s32 advance) {
+static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim_state_t* state, s32 advance) {
     battle_gfx_unit_seq_table_t* seq;
     battle_unit_sprite_block_t* block;
     battle_unit_t* target;
@@ -1610,7 +1610,7 @@ void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim_state_
 }
 
 /* Rebuilds the casting unit's sprite parts for its current animation and frame. */
-void battle_gfx_load_casting_unit_graphics(void) {
+static void battle_gfx_load_casting_unit_graphics(void) {
     battle_unit_t* unit;
 
     unit = battle_unit_get_casting();
@@ -1641,7 +1641,7 @@ void battle_gfx_load_casting_unit_graphics(void) {
  * function-scope (global allocation) while the other part temporaries are
  * block-local and `mode` is single-set, which gives the target's register
  * ties and schedule. */
-void battle_gfx_run_wep_eff_seq_script(
+static void battle_gfx_run_wep_eff_seq_script(
     battle_unit_t* unit, battle_unit_sprite_block_t* sprite, s32 index, s32 advance) {
     battle_gfx_weapon_shp_t* shp;
     u8** seq;
@@ -1910,7 +1910,7 @@ void battle_gfx_run_wep_eff_seq_script(
  * image buffer and uploaded to `slot`'s rectangle; the unit's 64x32 VRAM
  * block (column slot >> 3, row slot & 7 of the 0x340,0x100 spritesheet area)
  * is copied 200 lines below it. `slot` is then owned by the unit (id | 0x80). */
-void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot, s32 image_slot) {
+static void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot, s32 image_slot) {
     RECT rect;
 
     battle_gfx_decompress_attack_spritesheet(
@@ -1930,7 +1930,7 @@ void battle_gfx_load_unit_into_evtchr_slot(battle_unit_t* unit, s32 slot, s32 im
 
 /* Free the EVTCHR slots whose page holds the unit's attack image. One that
  * holds its SP2 image stays. */
-void battle_gfx_release_unit_vram_slot(battle_unit_t* unit) {
+static void battle_gfx_release_unit_vram_slot(battle_unit_t* unit) {
     s32 i;
     s32 slot_id;
 
@@ -1963,7 +1963,7 @@ void battle_gfx_release_unit_vram_slot(battle_unit_t* unit) {
  *
  * unit is initialized in its declaration so its copy precedes the table
  * copies, and the unread unused_10 sizes the target's frame. */
-void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data) {
+static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data) {
     battle_unit_t* unit = unit_data;
     s16 unused_10[4]; /* Unread; occupies sp+0x10 like the target. */
     /* The flip tables hold BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP for the views drawn mirrored. */
@@ -2201,7 +2201,7 @@ void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data) {
  * and y -0x1f..0x10f, the ordering-table depth within 1..0x17f,
  * sprite_graphic_trigger is set, the unit is not a mount carrying its rider and
  * status_bubble_active is set. */
-void battle_gfx_update_status_bubble_display(battle_unit_t* unit) {
+static void battle_gfx_update_status_bubble_display(battle_unit_t* unit) {
     DVECTOR screen_coords;
 
     /* The camera-relative position is read unsigned (lhu) here. */
@@ -2241,7 +2241,7 @@ void battle_gfx_update_status_bubble_display(battle_unit_t* unit) {
  * reload, but the duplicated RTL makes the mount loop large enough that
  * loop.c leaves `row * 16 + g_battle_gfx_animation_layer_priorities` inside it, which is why the target
  * recomputes the table address each iteration and spills `row`. */
-void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
+static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
     SVECTOR position;
     SVECTOR rider_position;
     SVECTOR zoom = { ONE, ONE, ONE };
@@ -2510,7 +2510,7 @@ void battle_unit_clear_all(void) {
  * FLASH starts the fade to black and moves to DARKEN. DARKEN then disables the
  * battle unit slot, removes the runtime record and returns 1; for the source unit it
  * only resets the graphic trigger. Every other path returns 0. */
-s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
+static s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
     u8 phase;
 
     phase = unit->fade_out_phase;
@@ -2555,7 +2555,7 @@ void battle_unit_update_and_animate_units(void) {
     }
 }
 
-void battle_gfx_unpack_unit_seq_data(
+static void battle_gfx_unpack_unit_seq_data(
     battle_gfx_native_unit_seq_table_t* destination, const battle_gfx_packed_seq_record_t* source) {
     const battle_gfx_packed_seq_record_t* header;
     const u8(*entry)[4];
@@ -2599,7 +2599,7 @@ void battle_gfx_unpack_unit_seq_data(
  * used for the entry base and the payload address), which only a second
  * variable reproduces; and it reserves an 8-byte frame that no instruction
  * touches, which only a declared local aggregate reproduces. */
-void battle_gfx_resolve_packed_offset_table(u8** entries, const battle_gfx_packed_offset_table_t* record) {
+static void battle_gfx_resolve_packed_offset_table(u8** entries, const battle_gfx_packed_offset_table_t* record) {
     const u8(*entry)[4];
     u32 index;
     u32 payload_size;
@@ -2642,7 +2642,7 @@ void battle_gfx_resolve_packed_offset_table(u8** entries, const battle_gfx_packe
  * a 16-bit count and that many bytes, appended at
  * g_battle_gfx_shp_frame_data_cursor.
  */
-void battle_gfx_unpack_unit_shp_data(
+static void battle_gfx_unpack_unit_shp_data(
     battle_gfx_unit_shp_frame_tables_t* dst, const battle_gfx_packed_unit_shp_record_t* src) {
     u32 i;
     u32 j;
@@ -2711,7 +2711,8 @@ void battle_gfx_unpack_unit_shp_data(
  * The header loops read through `data` while the blob copy indexes `src`;
  * using one name for both loses the target's separate copy of the argument.
  */
-void battle_gfx_copy_shp_data_to_ram(battle_gfx_weapon_shp_t* dst, const battle_gfx_packed_weapon_shp_record_t* src) {
+static void battle_gfx_copy_shp_data_to_ram(
+    battle_gfx_weapon_shp_t* dst, const battle_gfx_packed_weapon_shp_record_t* src) {
     u32 i;
     u32 j;
     s32 offset;
@@ -2750,7 +2751,7 @@ void battle_gfx_copy_shp_data_to_ram(battle_gfx_weapon_shp_t* dst, const battle_
  * and enable STP on each palette's entries 1..15.
  * Indexed byte copies preserve the original loop scheduling. Three RECT
  * locals preserve the 0x50-byte frame and its otherwise unused x/y stores. */
-void battle_gfx_load_spritesheet_into_vram_slot(
+static void battle_gfx_load_spritesheet_into_vram_slot(
     const battle_gfx_unit_sprite_file_t* source, u32 index, s32 unused, battle_unit_t* unit, s16 unused_palette) {
     const u8* data;
     u32 column;
@@ -2790,7 +2791,7 @@ void battle_gfx_load_spritesheet_into_vram_slot(
 
 /* Upload WEP.SPR's weapon, trail and particle images. Keep weapon and trail
  * CLUTs in their CPU tables; the particle CLUTs use the map palette manager. */
-void battle_gfx_load_wep_spr_data(battle_gfx_weapon_sprite_archive_t* archive) {
+static void battle_gfx_load_wep_spr_data(battle_gfx_weapon_sprite_archive_t* archive) {
     s32 i;
     u8* cursor;
 
@@ -2808,7 +2809,7 @@ void battle_gfx_load_wep_spr_data(battle_gfx_weapon_sprite_archive_t* archive) {
 }
 
 /* Copy the first 21 OTHER.SPR palettes, setting STP on all but color zero. */
-void battle_gfx_copy_other_spr_palette_data_to_ram(const battle_gfx_other_sprite_archive_t* archive) {
+static void battle_gfx_copy_other_spr_palette_data_to_ram(const battle_gfx_other_sprite_archive_t* archive) {
     s32 i = 0;
     s32 one = 1; /* held in a local: a literal changes the setup schedule */
     u8* dst = (u8*)&g_battle_gfx_other_palettes;
@@ -2826,7 +2827,7 @@ void battle_gfx_copy_other_spr_palette_data_to_ram(const battle_gfx_other_sprite
     } while (i < (s32)sizeof(g_battle_gfx_other_palettes));
 }
 
-battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id, s16 palette,
+static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id, s16 palette,
     s16 requested_runtime_id, unit_stats_t* stats, u32 flags, const battle_gfx_unit_sprite_file_t* data) {
     battle_unit_t* unit;
     union {
@@ -3287,7 +3288,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
     return g_battle_gfx_unit_graphics_load_state.file_kind;
 }
 
-void battle_unit_update_and_animate_units_three_times(void) {
+static void battle_unit_update_and_animate_units_three_times(void) {
     s32 i;
 
     for (i = 0; i < 3; i++) {

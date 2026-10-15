@@ -17,10 +17,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void battle_gfx_init_render_frame(void);
+static void battle_gfx_init_render_state(void);
+
 /* Uploads the fixed CLUTs of the sprite row: 1 and 2 the deployed-unit palettes,
  * 3 the wait-direction arrow, 4 the map selection cursor, 5 the shadow and 7 the
  * status bubble. */
-void battle_gfx_extract_deployed_unit_palettes(void) {
+static void battle_gfx_extract_deployed_unit_palettes(void) {
     RECT rect; /* never used; retail reserves its 8 bytes */
 
     battle_map_load_palette_data(&g_battle_deployed_unit_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
@@ -32,7 +35,7 @@ void battle_gfx_extract_deployed_unit_palettes(void) {
 }
 
 /* Empty. battle_state_run_deployment calls it each frame while the map is still being set up. */
-void battle_state_deployment_frame_stub(void) {
+static void battle_state_deployment_frame_stub(void) {
 }
 
 /* Fade in the deployment banner, run map initialization until it reaches step
@@ -42,7 +45,7 @@ void battle_state_deployment_frame_stub(void) {
  * register choice for the hoisted color. The dead fade = 0 before done keeps the
  * step-0xd exit inline ahead of the per-frame path, as in the target; with a
  * plain break GCC moves that block to the loop tail. */
-void battle_state_run_deployment(void) {
+static void battle_state_run_deployment(void) {
     RECT window = { 0, 0, 0, 0 };
     POLY_FT4 banner[2];
     u8 fade_enabled;
@@ -766,7 +769,7 @@ void battle_gfx_invalidate_sp2_vram_slot(battle_unit_t* unit) {
 
 /* The next nibble of the compressed spritesheet stream, the high nibble of each
  * byte first. */
-u32 battle_gfx_read_compressed_nibble(void) {
+static u32 battle_gfx_read_compressed_nibble(void) {
     u32 nibble;
     u8 value;
 
@@ -847,7 +850,7 @@ void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination)
     }
 }
 
-void battle_gfx_init_render_state(void) {
+static void battle_gfx_init_render_state(void) {
     g_battle_gfx_numeric_display_matrix.m[2][2] = ONE;
     g_battle_gte_rtps_vxy0.vz = 0x200;
     g_battle_gte_rtpt_vxy2.vz = 0x200;
@@ -989,7 +992,7 @@ void battle_gfx_release_unit_sprite_display_stub(battle_gfx_sprite_display_data_
 
 /* Starts a frame of sprite drawing: the GTE offset is reset to (0, 0) and the
  * primitive ring index reached last frame is recorded. */
-void battle_gfx_init_render_frame(void) {
+static void battle_gfx_init_render_frame(void) {
     SetGeomOffset(0, 0);
     /* The target loads the counter unsigned (lhu). */
     g_battle_gfx_previous_counter = g_battle_gfx_counter;
@@ -1133,7 +1136,7 @@ void battle_gfx_set_sprite_part_semi_transparent(
     }
 }
 
-void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset) {
+static void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset) {
     u16 x;
     u16 z;
 
@@ -1190,7 +1193,7 @@ void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR*
  * far_edge temporaries keep the target's add-then-subtract order; written
  * inline, GCC re-associates them into a longer sequence.
  */
-void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset) {
+static void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset) {
     s32 yaw;
 
     output->vy = input->vy - 0xb;

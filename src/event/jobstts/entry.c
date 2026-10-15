@@ -6,7 +6,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void jobstts_menu_load_images_and_clear_selection(void) {
+static void jobstts_menu_load_images_and_clear_selection(void) {
     RECT rect;
     palette_t palette;
 

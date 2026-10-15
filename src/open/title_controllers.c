@@ -10,6 +10,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void open_birthday_build_menu_text(open_birthday_date_state_t* menu);
+static void open_birthday_push_confirmation_controller(void);
+static void open_birthday_push_date_controller(void);
+static void open_menu_push_sound_type_controller(void);
+
 /* Load the title screen's graphics: upload the three TIMs at sectors 0, 0x11 and
  * 0x22 of OPNTEX.BIN, then read OPNBK image 0 as the frame image. */
 void open_file_load_main_menu_graphics(void) {
@@ -60,7 +65,7 @@ void open_file_load_end_movie_graphics(void) {
 /* Upload the two TIMs at sectors 0x43 and 0x54 of OPNTEX.BIN: the text pages at
  * VRAM (256, 256) and (320, 256) that the new-game prologue draws its lines from.
  * The only caller is open_title_start_new_game_transition. */
-void open_file_load_sound_menu_textures(void) {
+static void open_file_load_sound_menu_textures(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
     file_wait_then_build_header(header, 0x150a0, 0x11, g_open_file_destination);
@@ -201,7 +206,7 @@ void open_movie_finish_stream_controller_if_ready_or_skipped(open_controller_rec
 }
 
 /* Start the opening movie (the one caller passes the sector of OPEN/FFTOP.STR) and push its controller. */
-void open_movie_stream_fftop_and_push_controller(s32 start_sector, s32 unused_stream_length, s32 end_frame) {
+static void open_movie_stream_fftop_and_push_controller(s32 start_sector, s32 unused_stream_length, s32 end_frame) {
     s32 controller;
 
     (void)unused_stream_length;
@@ -335,7 +340,7 @@ void open_title_push_menu_controller(s32 argument) {
 }
 
 /* Show the four title menu entries. */
-void open_gfx_show_four_render_records(open_title_controller_t* title) {
+static void open_gfx_show_four_render_records(open_title_controller_t* title) {
     g_open_gfx_render_records_36[title->records_36[1]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
     g_open_gfx_render_records_36[title->records_36[2]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
     g_open_gfx_render_records_36[title->records_36[3]].flags &= ~WORLD_RENDER_RECORD_HIDDEN;
@@ -343,7 +348,7 @@ void open_gfx_show_four_render_records(open_title_controller_t* title) {
 }
 
 /* Hide the four title menu entries. */
-void open_gfx_hide_four_render_records(open_title_controller_t* title) {
+static void open_gfx_hide_four_render_records(open_title_controller_t* title) {
     g_open_gfx_render_records_36[title->records_36[1]].flags |= WORLD_RENDER_RECORD_HIDDEN;
     g_open_gfx_render_records_36[title->records_36[2]].flags |= WORLD_RENDER_RECORD_HIDDEN;
     g_open_gfx_render_records_36[title->records_36[3]].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -577,7 +582,7 @@ void open_title_update_menu(open_controller_record_t* record) {
  * selected render-record index is likewise read through the controller
  * record, while sound_mode_selection and step are addressed through
  * g_open_controller_selected_options. */
-void open_menu_push_sound_type_controller(void) {
+static void open_menu_push_sound_type_controller(void) {
     s32 i;
     s32 record;
     /* Pin required: unpinned, the controller index and the stream base swap
@@ -797,7 +802,7 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
  * before the position stores, which hoists the `lhu` of quad.w into the
  * load-delay slot instead of emitting a nop.
  */
-void open_birthday_push_date_controller(void) {
+static void open_birthday_push_date_controller(void) {
     RECT quad;
     s32 unused[4];
     s32 record;
@@ -848,7 +853,7 @@ void open_birthday_push_date_controller(void) {
  *
  * The month label is centerd from its measured width; both entries are drawn
  * into one scratch image before it is uploaded to VRAM. */
-void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
+static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     RECT quad;
     point32_t position;
     s16 width;
@@ -891,7 +896,7 @@ void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
 }
 
 /* Restore the date-selection records after leaving the confirmation prompt. */
-void open_birthday_restore_date_menu(open_birthday_date_state_t* menu) {
+static void open_birthday_restore_date_menu(open_birthday_date_state_t* menu) {
     open_render_record_56_t* records_56 = g_open_gfx_render_records_56;
     /* The target reserves a 24-byte frame it never touches, as in the twin
      * open_birthday_build_confirmation_menu. */
@@ -925,7 +930,7 @@ void open_birthday_restore_date_menu(open_birthday_date_state_t* menu) {
  * The target reserves a 24-byte frame it never touches (the stack adjustment
  * is even scheduled into the last load-delay slot), so the original body
  * declared an unused aggregate local of 17..24 bytes. */
-void open_birthday_build_confirmation_menu(open_birthday_date_state_t* state) {
+static void open_birthday_build_confirmation_menu(open_birthday_date_state_t* state) {
     s32 unused_scratch[6];
 
     g_open_gfx_render_records_36[state->cursor_record_36].sequence = 10;
@@ -1042,7 +1047,7 @@ void open_birthday_handle_menu_input(open_controller_record_t* record) {
  * records_56 x/y view, which sets the base register before the index scale.
  * The unused array reproduces the target's 0x70-byte frame.
  */
-void open_birthday_push_confirmation_controller(void) {
+static void open_birthday_push_confirmation_controller(void) {
     RECT quad;
     s32 unused[12];
     s32 record;

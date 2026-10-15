@@ -13,7 +13,7 @@
  * the secondary repeat period is two frames longer. Counter slots 4..11 are
  * skipped; those buttons use only the newly pressed mask.
  */
-void world_script_update_tutorial_controller_input(void) {
+static void world_script_update_tutorial_controller_input(void) {
     s16 bit;
     s32 index;
     u32 current_input;

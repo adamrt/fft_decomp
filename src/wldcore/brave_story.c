@@ -10,6 +10,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void wldcore_list_open_set_script_variables_03c0_03ff(void);
+static void wldcore_list_open_story_events(void);
+static void wldcore_menu_build_brave_story_entries(void);
+static void wldcore_menu_push_proposition_category_level(void);
+static void wldcore_menu_push_tutorial_topic_text_level(s32 topic);
+static void wldcore_menu_push_variable_detail_level(s32 value);
+
 /* Draws the indicator sprite while the current type-0x23 level's mode is not 2.
  *
  * The level is spelled g_wldcore_menu_stack_records_next[current - 1]; the
@@ -348,7 +355,7 @@ void wldcore_menu_push_brave_story_level(void) {
  * and lower windows sit on the kind-4 and kind-5 rows and lose flag 8 once all
  * 16 lands or the first 31 treasures are found.
  */
-void wldcore_menu_build_brave_story_entries(void) {
+static void wldcore_menu_build_brave_story_entries(void) {
     s32 count;
     s32 i;
 
@@ -684,7 +691,7 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
  * 0xe800 + flag index), shows up to eight rows at (0x4c, 0x4f) with width
  * 0x94, and appends its 0x5c-byte record tagged 0x1d. Twin of
  * wldcore_list_open_treasures, but walks the output arrays by pointer. */
-void wldcore_list_open_story_events(void) {
+static void wldcore_list_open_story_events(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -908,7 +915,7 @@ void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* lev
  * 0xf000 + index * 16 + variable value), shows up to eight rows at
  * (0x80, 0x50) with width 0x60, appends its 0x5c-byte record tagged 0x1f and
  * hides the parent list window's content render record. Twin of 0x80087b94. */
-void wldcore_list_open_set_script_variables_03c0_03ff(void) {
+static void wldcore_list_open_set_script_variables_03c0_03ff(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
     s16* values;
@@ -1015,7 +1022,7 @@ void wldcore_list_handle_set_script_variables_03c0_03ff_input(wldcore_menu_panel
  * thread 14 with text 0xb868 (variable 0, value substituted) or 0xb849.
  *
  * The unused 48-byte local reproduces the target's frame size. */
-void wldcore_menu_push_variable_detail_level(s32 value) {
+static void wldcore_menu_push_variable_detail_level(s32 value) {
     u8 unused[0x30];
     s32 variable;
     s32 index;
@@ -1280,7 +1287,7 @@ void wldcore_list_handle_tutorial_topics_input(wldcore_menu_panel_level_t* level
  * The menu-stack type store comes last so the
  * compiler scales depth by four late and in place, forcing the copy into v0
  * for depth + 1. */
-void wldcore_menu_push_tutorial_topic_text_level(s32 topic) {
+static void wldcore_menu_push_tutorial_topic_text_level(s32 topic) {
     s32 coordinate_mode = 1;
     s32 depth;
 
@@ -1352,7 +1359,7 @@ void wldcore_menu_wait_tutorial_topic_text_then_pop_level(void) {
  * as one multi-set variable it is left to global allocation, which gives the
  * target's v1/v0 assignment in the tail. `unused` reproduces the 0x58 frame.
  */
-void wldcore_menu_push_proposition_category_level(void) {
+static void wldcore_menu_push_proposition_category_level(void) {
     point32_t point;
     RECT bounds;
     s32 unused[4];

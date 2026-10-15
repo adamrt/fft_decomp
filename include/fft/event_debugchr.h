@@ -42,7 +42,6 @@ extern u8 g_debugchr_editor_unit_name[];
  * address, which the member spelling does not reproduce. */
 extern s16 g_debugchr_editor_values[];
 
-void debugchr_editor_apply_values_to_battle_unit(s32 unit_id);
 void debugchr_editor_run_unit_thread(s32 unit_id);
 void debugchr_editor_run_session(void);
 

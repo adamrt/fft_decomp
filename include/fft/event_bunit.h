@@ -129,14 +129,7 @@ void bunit_unit_build_list_index_map(void);
 s32 bunit_unit_build_reorderable_index_list(void);
 void bunit_unit_copy_orders_to_reorder_list(s32 unused, s16* entries);
 void bunit_unit_copy_reorder_list_to_orders(s32 unused, const s16* entries);
-void bunit_unit_copy_selected_data(void);
 s32 bunit_unit_find_index_by_battle_id(s16 battle_id);
-s32 bunit_unit_get_brave(s32 unit_id);
-s32 bunit_unit_get_current_stat(s32 unit_index);
-s32 bunit_unit_get_experience(s32 unit_id);
-s32 bunit_unit_get_faith(s32 unit_id);
-s32 bunit_unit_get_level(s32 unit_id);
-s32 bunit_unit_get_max_stat(s32 unit_index);
 void bunit_unit_sort_index_list_by_order_keys(s32 sort_mode);
 
 /* ability */
@@ -183,7 +176,6 @@ extern u32 g_bunit_status_display_flags; /* menu_status_panel_flags_e */
 extern s32 g_bunit_status_display_offset_y;
 
 void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable);
-void bunit_unit_build_record_from_stats(const struct unit_stats* unit, bunit_unit_t* record, s32 unused_slot);
 s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode);
 
 /* numeric editor */
@@ -228,21 +220,16 @@ extern menu_button_piece_t g_bunit_slot_sprite_entries[];
 extern u8 g_bunit_text_menu_section[];
 extern u8 g_bunit_unit_list_triangle_menu_open;
 
-void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id);
 void bunit_menu_init_unit_list(s32 unused_selected_index);
 s32 bunit_menu_is_active_or_transitioning(void);
-s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset);
 s32 bunit_menu_is_unit_list_scroll_needed(void);
 void bunit_menu_reset_results(void);
 s32 bunit_menu_run_descriptor_thread(s32 id, menu_entry_t* desc);
 void bunit_menu_run_reorder_list(void);
-s32 bunit_menu_run_unit_list_frame(void);
 void bunit_menu_update_job(void);
 void bunit_menu_update_node_cursor(s16 mode);
-void bunit_menu_update_unit_browser(void);
 s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_stat_panel, s16 allow_stat_cycle,
     s16 stat_mode, s16 buttons, s16 locked);
-void bunit_menu_update_unit_list_scroll(s8* step, s8* offset);
 
 /* help */
 extern u16 g_bunit_help_cursor_anim_state;
@@ -287,20 +274,14 @@ extern s16 g_bunit_gfx_line_f2_count;
 extern s16 g_bunit_gfx_poly_f4_count;
 extern u8 g_bunit_sprite_cell_sizes[][2];
 
-s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum);
 void bunit_gfx_draw_falloff_shaded_rows(s32 y);
-void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y);
 void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
     POLY_GT3* gouraud_textured_triangles, POLY_G4* gouraud_quads, POLY_GT4* gouraud_textured_quads, LINE_F2* flat_lines,
     LINE_F3* flat_lines_3, LINE_F4* flat_lines_4, LINE_G2* gouraud_lines, LINE_G3* gouraud_lines_3,
     LINE_G4* gouraud_lines_4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
-void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer);
-void bunit_gfx_init_rhombus_cursor_tpages(void);
-void bunit_gfx_init_vram_and_start_fade(void);
 void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
-void bunit_gfx_update_rhombus_cursor_trail(point16_t* target);
 
 /* input */
 /* Named fields hoist the address; keep the 32-bit event-input alias for scalar accesses. */
@@ -311,9 +292,6 @@ extern u32 g_bunit_input_primary_repeat;
 extern u32 g_bunit_input_secondary_repeat;
 
 s32 bunit_input_get_lock_timer(void);
-s32 bunit_input_read_pad1_unless_locked(void);
-void bunit_input_update_controller(void);
-void bunit_input_update_lock_timer(void);
 
 /* menu commands */
 /* The opcode that ends a BUNIT menu display stream. */

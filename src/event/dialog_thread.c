@@ -20,7 +20,11 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor) {
+static void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
+static void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor);
+static void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
+
+static u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor) {
     text_backref_t* backref;
     s32 remaining;
     s32 scratch;
@@ -50,7 +54,7 @@ u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, 
 }
 
 /* Append value and value + 1 to the active Psy-Q font stream. */
-void text_print_fnt_value_and_next(s32 value) {
+static void text_print_fnt_value_and_next(s32 value) {
     FntPrint(g_text_decimal_format, value);
     value++;
     FntPrint(g_text_decimal_format, value);
@@ -1757,7 +1761,7 @@ void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction) {
 }
 
 /* Grow the first window quad from the rectangle center using the cursor crop steps. */
-void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
+static void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
     void* source; /* never assigned; the target passes an uninitialized $s5 */
     s32 level;
@@ -1782,7 +1786,7 @@ void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RE
 }
 
 /* Move both window quads through the easing table; table 4 also fades their color. */
-void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table) {
+static void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table) {
     RECT from;
     RECT from2;
     u16* easing;
@@ -1835,12 +1839,12 @@ void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2,
 }
 
 /* Interpolate with a 20.12 factor; ONE reaches end. Division truncates toward zero. */
-s32 menu_lerp_fixed12(s32 start, s32 end, s32 factor) {
+static s32 menu_lerp_fixed12(s32 start, s32 end, s32 factor) {
     return ((end - start) * factor) / ONE + start;
 }
 
 /* Set a quad's corners to the rectangle interpolated between from and to by a 12-bit fraction. */
-void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor) {
+static void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor) {
     setXY4(poly, menu_lerp_fixed12(from->x, to->x, factor), menu_lerp_fixed12(from->y, to->y, factor),
         menu_lerp_fixed12(from->x + from->w, to->x + to->w, factor), menu_lerp_fixed12(from->y, to->y, factor),
         menu_lerp_fixed12(from->x, to->x, factor), menu_lerp_fixed12(from->y + from->h, to->y + to->h, factor),

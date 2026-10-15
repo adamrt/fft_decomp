@@ -13,8 +13,10 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
+static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output);
+
 /* Fill a 16-byte text field with terminators. */
-void text_fill_field_with_terminators(u8* text) {
+static void text_fill_field_with_terminators(u8* text) {
     u8 value = TEXT_END_WAIT_FOR_CONFIRM;
     s32 index;
 
@@ -33,7 +35,7 @@ void text_fill_field_with_terminators(u8* text) {
  * battle. A zero maximum HP or MP is stored as 1. list_index is always 1
  * here; unit_count counts the runtime ids whose battle unit is the first holder
  * of a nonzero ENTD unit id. */
-void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
     s32 resolved_id;
     s32 count;
     s32 i;
@@ -93,7 +95,7 @@ void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_un
 
 #if defined(FFT_BATTLE) || defined(FFT_EVENT_DEBUGCHR)
 /* Fill the level, team, AT-list position, HP/MP/CT and live-unit count. */
-void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
     s32 resolved_id;
     s32 count;
     s32 i;
@@ -155,7 +157,7 @@ void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_un
  * Team kind is 0 for the player's side, 1 for the enemy team, 2 for a unit on
  * neither the enemy team nor under player control, and 3 for a unit on auto
  * battle. A zero maximum HP or MP is stored as 1. */
-void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
+static void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
     u16 maximum_hp;
     u16 maximum_mp;
     u8 ct;

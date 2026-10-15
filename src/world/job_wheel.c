@@ -9,7 +9,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-s32 world_formation_get_job_wheel_cursor_job_level(s32 unused_row) {
+static void world_formation_build_job_wheel_availability(void);
+static void world_formation_build_job_wheel_job_name(void);
+static void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y);
+static void world_formation_layout_job_wheel_portrait(void);
+static s32 world_formation_process_job_change(s32 job);
+static void world_formation_step_job_wheel_close_animation(void);
+static void world_formation_step_job_wheel_open_animation(void);
+static void world_formation_update_job_wheel_state(void);
+static void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value);
+
+static s32 world_formation_get_job_wheel_cursor_job_level(s32 unused_row) {
     s32 index = job_get_generic_index(g_world_job_wheel_jobs[g_world_job_wheel_cursor_index]);
     s32 level = g_world_unit_pointers[g_unit_selected_index]->job_levels[index >> 1];
 
@@ -23,7 +33,7 @@ s32 world_formation_get_job_wheel_cursor_job_level(s32 unused_row) {
 
 /* Menu callback: 1 when the job under the wheel cursor can be chosen; 0 for
  * an unavailable job or a wheel with fewer than two jobs. */
-s32 world_formation_is_job_wheel_selection_available(s32 unused_row) {
+static s32 world_formation_is_job_wheel_selection_available(s32 unused_row) {
     if (g_world_job_wheel_job_count < 2) {
         return 0;
     }
@@ -33,7 +43,7 @@ s32 world_formation_is_job_wheel_selection_available(s32 unused_row) {
 /* Index of a job's entry in the job description and requirement texts: the
  * generic jobs come first (Squire is 0), and the special jobs below Squire
  * follow from index 19 + job id. */
-s32 world_job_get_text_index(s16 job_id) {
+static s32 world_job_get_text_index(s16 job_id) {
     if (job_id < JOB_ID_SQUIRE) {
         return (s16)(job_id + 19);
     }
@@ -302,7 +312,7 @@ void world_formation_run_job_wheel_menu(void) {
  * 0x4000 are tinted and those with a nonzero g_world_job_wheel_mastered_jobs entry get a level
  * gauge. Needs at least two jobs.
  */
-void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
+static void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
     oriented_quad_t sprite;
     u8 unused_sprite_tail[0x10]; /* Preserve the original 0x24-byte stack allocation. */
     s32 step;
@@ -378,7 +388,7 @@ void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 radius_
  * `i * k` with `k` holding the step: splitting any of them, or keeping a
  * separate phase accumulator, changes the target's register assignment.
  */
-s32 world_formation_process_job_change(s32 job) {
+static s32 world_formation_process_job_change(s32 job) {
     union {
         texture_source_t entry;
         point16_t points[3];
@@ -490,7 +500,7 @@ s32 world_formation_process_job_change(s32 job) {
 
 /* Begin the job wheel's close animation; with fewer than two jobs there is
  * no wheel and WORLD_FORMATION_MENU_JOB_WHEEL_OPENING is set at once. */
-void world_formation_start_job_wheel_close(void) {
+static void world_formation_start_job_wheel_close(void) {
     if (g_world_job_wheel_job_count < 2) {
         g_world_formation_current_menu = WORLD_FORMATION_MENU_JOB_WHEEL_OPENING;
     } else {
@@ -503,7 +513,7 @@ void world_formation_start_job_wheel_close(void) {
 /* One frame of the job wheel closing: over 20 frames the wheel turns a
  * quarter turn while its radius grows from 1.0 by 0x140 a frame. It ends by
  * setting the menu value WORLD_FORMATION_MENU_JOB_WHEEL_OPENING. */
-void world_formation_step_job_wheel_close_animation(void) {
+static void world_formation_step_job_wheel_close_animation(void) {
     s32 pos;
 
     if (g_world_job_wheel_closing == 0) {
@@ -524,7 +534,7 @@ void world_formation_step_job_wheel_close_animation(void) {
  * Units away on propositions have no choices. Fewer than 2 choices bypass
  * the wheel; otherwise its opening animation starts at 20 frames.
  */
-void world_formation_build_job_wheel_availability(void) {
+static void world_formation_build_job_wheel_availability(void) {
     s32 i;
     s16 unit;
     u16 entry;
@@ -560,7 +570,7 @@ void world_formation_build_job_wheel_availability(void) {
 /* One frame of the job wheel opening: the wheel turns through the last
  * quarter turn into place while its radius shrinks by 0x140 a frame to 1.0.
  * It ends by setting the menu value WORLD_FORMATION_MENU_JOB_WHEEL. */
-void world_formation_step_job_wheel_open_animation(void) {
+static void world_formation_step_job_wheel_open_animation(void) {
     s32 pos;
 
     if (g_world_job_wheel_opening == 0) {
@@ -577,7 +587,7 @@ void world_formation_step_job_wheel_open_animation(void) {
 
 /* Formation menu step: either finish the pending job-wheel open (menu 0x15)
  * or advance the wheel scroll position by the frame step, capping at 16. */
-void world_formation_update_job_wheel_state(void) {
+static void world_formation_update_job_wheel_state(void) {
     s32 step;
     /* The target frame is 0x30 bytes; 0x18 of unreferenced locals. */
     s32 unused[6];
@@ -606,7 +616,7 @@ void world_formation_update_job_wheel_state(void) {
 /* Center the two job-wheel portrait quads on (0x80, 0x7b) for the selected
  * unit's formation graphic and queue a VRAM move of that graphic to
  * (0x240, 0x130), where g_world_job_wheel_portrait_quad samples it. */
-void world_formation_layout_job_wheel_portrait(void) {
+static void world_formation_layout_job_wheel_portrait(void) {
     texture_source_t entry;
     RECT rect;
     s16 x;
@@ -633,7 +643,7 @@ void world_formation_layout_job_wheel_portrait(void) {
 
 /* Render the job wheel's centerd job name ("Can't change" when fewer than two
  * jobs are listed). */
-void world_formation_build_job_wheel_job_name(void) {
+static void world_formation_build_job_wheel_job_name(void) {
     RECT destination_rect;
     u8* font;
     s16* name;
@@ -667,7 +677,7 @@ void world_formation_build_job_wheel_job_name(void) {
  * 0x5E (frame 4 from 0x64 on); otherwise it shows frame 0. Frames are 10
  * texels apart from u 0x24.
  */
-void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value) {
+static void world_menu_select_stat_gauge_level(s32 x, s32 y, s32 otag_index, s32 value) {
     s32 level;
     oriented_quad_t* sprite;
 

@@ -266,7 +266,7 @@ s32 battle_move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile) {
 }
 
 /* A rider's mount; any other unit is returned itself. */
-battle_unit_t* battle_unit_get_mount(battle_unit_t* unit) {
+static battle_unit_t* battle_unit_get_mount(battle_unit_t* unit) {
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
         return battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
     }
@@ -279,7 +279,7 @@ battle_unit_t* battle_unit_get_mount(battle_unit_t* unit) {
  * vx/vz are integer world x/depth; vy selects the map layer.
  * An unavailable unit-height record falls back to terrain height.
  */
-s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, const SVECTOR* coords) {
+static s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, const SVECTOR* coords) {
     battle_unit_height_data_t height;
     map_tile_t* tile;
     s32 flags;
@@ -960,7 +960,7 @@ typedef s16 (*battle_screen_z_halfword_fn_t)(battle_unit_t* unit);
  * except during the crystal-learn state. The screen/real Z follow the lower
  * of the stored and recalculated heights. Jumping units whose height is
  * controlled by their jump animation are left untouched. */
-void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
+static void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
     s8 wave[24];
     s16 screen_z;
     u32 phase;
@@ -1007,7 +1007,7 @@ void battle_unit_increment_or_decrement_height_mod(battle_unit_t* unit) {
  * The block-scoped bubble_mask keeps GCC from rotating the loop's leading exit
  * tests to the bottom, and indexing g_battle_gfx_status_bubble_status_masks inside the loop lets loop.c
  * strength-reduce it into the target's pointer walk. */
-void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
+static void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
     s32 frame;
     s32 bubble;
     u32 status_flags;

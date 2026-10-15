@@ -8,7 +8,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void world_formation_ability_menu_idle_thread(void) {
+static s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id);
+static s32 world_formation_run_set_ability_menu(void);
+static s32 world_menu_run_learn(void);
+static s32 world_menu_run_remove_ability(void);
+static s32 world_menu_update_clear_all_abilities_prompt(void);
+
+static void world_formation_ability_menu_idle_thread(void) {
     for (;;) {
         thread_wait_frames(1);
     }
@@ -143,7 +149,7 @@ void world_menu_run_ability(void) {
  * Return 0 when canceled and 1 while active. The remove-all command opens its
  * confirmation; individual changes refresh the ability and stat previews.
  */
-s32 world_menu_run_remove_ability(void) {
+static s32 world_menu_run_remove_ability(void) {
     s16 unit_index;
     u8 lock_state;
     u8 slot;
@@ -261,7 +267,7 @@ s32 world_menu_run_remove_ability(void) {
 
 /* volatile: the target re-reads the counter right after incrementing it */
 
-s32 world_menu_update_clear_all_abilities_prompt(void) {
+static s32 world_menu_update_clear_all_abilities_prompt(void) {
     world_unit_t* unit;
     u16 value;
     s32 unused[16];
@@ -318,7 +324,7 @@ s32 world_menu_update_clear_all_abilities_prompt(void) {
  * `(u16)` casts keep the Move+N range checks in unsigned-short arithmetic
  * (`li 0xfe1a` / `addu` / `andi 0xffff`).
  */
-s32 world_formation_run_set_ability_menu(void) {
+static s32 world_formation_run_set_ability_menu(void) {
     s32 unused[2]; /* never referenced; reproduces the 0x40 frame */
     s16 x;
     s16 y;
@@ -489,7 +495,7 @@ s32 world_formation_run_set_ability_menu(void) {
 /* Learn menu processing: opens the menu on first entry, then runs either
  * the skillset list (state 0) or the ability list (state 1). Returns 0
  * once the menu has been closed. */
-s32 world_menu_run_learn(void) {
+static s32 world_menu_run_learn(void) {
     s32 result;
 
     if (g_world_learn_menu_initialized == 0) {
@@ -524,7 +530,7 @@ s32 world_menu_run_learn(void) {
  * The preview record at index 20 is excluded. With Max Equip at Job Change
  * enabled, equipment-type supports, Martial Arts, Two Hands and Two Swords
  * can invalidate the current loadout. */
-s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id) {
+static s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id) {
     if (unit_id == 20 || g_main_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
         return 0;
     if (ability_id >= ABILITY_ID_SUPPORT_EQUIP_ARMOR && ability_id < ABILITY_ID_SUPPORT_EQUIP_ARMOR + 8)

@@ -67,7 +67,7 @@ void require_text_show_battle_congratulations(void) {
  *
  * The staged multiplication and divisions preserve the target's two signed
  * constant-division sequences. */
-s32 require_party_update_brave_faith_and_collect_warnings(void) {
+static s32 require_party_update_brave_faith_and_collect_warnings(void) {
     s32 battle_index;
     s32 warning_count = 0;
     unit_stats_t* battle_unit;
@@ -206,14 +206,14 @@ void require_panel_set_transition_value(s32 value) {
 
 /* Empty. Called for each unit that leaves over a Brave below 6, with its battle index, unit id and
  * character identity. */
-void require_party_report_brave_departure_stub(
+static void require_party_report_brave_departure_stub(
     s32 unused_battle_index, s32 unused_unit_id, s32 unused_character_identity) {
 }
 
 /* Collect the party members that leave after the battle: Brave below 6 or
  * Faith of 95 and above. Story characters are named by their sprite group's
  * message; generic units by job and battle slot. Returns how many leave. */
-s32 require_party_find_low_brave_high_faith_departures(void) {
+static s32 require_party_find_low_brave_high_faith_departures(void) {
     s32 battle_index;
     s32 departure_count = 0;
     unit_stats_t* battle_unit;
@@ -593,7 +593,7 @@ void require_input_wait_skip(void) {
  * 32-bit controller value is zeroed every frame so this screen sees no input. Then
  * the reservation is freed and the option-menu flag cleared.
  */
-void require_overlay_open_jobstts(void) {
+static void require_overlay_open_jobstts(void) {
     void* allocation;
 
     menu_copy_billboard_data_in(&g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);

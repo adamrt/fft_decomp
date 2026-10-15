@@ -14,6 +14,12 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save);
+static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
+static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
+static void battle_status_disable_acting(unit_stats_t* unit);
+static u8 battle_unit_generate_treasure(unit_stats_t* unit);
+
 /* 1 when the unit, or its rider when it is a mount, is charging an attack of
  * the Charge skillset; with do_disable, status_disable_acting is called
  * on that unit. */
@@ -38,7 +44,7 @@ s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable)
 }
 
 /* Clears the unit's Charging, Jump, Defending and Performing statuses (action state 0). */
-void battle_status_disable_acting(unit_stats_t* unit) {
+static void battle_status_disable_acting(unit_stats_t* unit) {
     main_status_set_action_state(unit, 0);
 }
 
@@ -130,7 +136,7 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
  *
  * Each flag byte holds two maps, four tiles each; the test returns 1 while the item is
  * still unfound. */
-s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
+static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
     s32 byte_index;
     s32 bit;
 
@@ -303,7 +309,7 @@ s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags) {
  * or with nothing equipped one of the thirteen consumables other than Elixir.
  * Decided only when executing; in any other state the function returns without
  * a value. */
-u8 battle_unit_generate_treasure(unit_stats_t* unit) {
+static u8 battle_unit_generate_treasure(unit_stats_t* unit) {
     u8 candidates[UNIT_EQUIPMENT_SLOT_COUNT];
     s32 count;
     s32 i;
@@ -623,7 +629,7 @@ battle_menu_id_e battle_menu_get_id_based_on_mount_moveable_actable(s32 battle_i
  * restriction), and any other unit gets PLAYER_UNIT or OTHER_UNIT.
  *
  * The local can_evade holds the action restriction. */
-battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
+static battle_menu_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit) {
     unit_stats_t* act;
     s32 flag;
     s32 player_controlled;
@@ -786,7 +792,7 @@ s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8*
  * A frog only keeps the default, blank, monster and attack menus. Returns the
  * menu loader's result, or whether the menu type is below 15 for menus without
  * a loader. */
-s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
+static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
     u8 items[0x58];
     s16 abilities[0x44];
     u8 mp_costs[0x18];

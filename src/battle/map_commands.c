@@ -251,7 +251,7 @@ void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTO
  * pitch 0x12e (the low tilt), yaw 0xe00, position at the origin, cursor on tile
  * (0, 0), no acting or casting unit, no rotation, tilt or zoom in progress and
  * directional panning off. */
-void battle_camera_init_defaults(void) {
+static void battle_camera_init_defaults(void) {
     main_util_set_vector(&g_camera_current_screen_offset, 0x100, 0xA0, 0x280);
     main_util_set_vector(&g_camera_zoom, ONE, ONE, ONE);
     main_util_set_svector(&g_camera_render_state, 0x12E, 0xE00, 0);
@@ -309,7 +309,7 @@ extern volatile s32 g_battle_entd_selection_mode;
  * The id is script variable EVENT_SCRIPT_VAR_CURRENT_ENTD unless
  * g_battle_entd_selection_mode overrides it: 250, a random id 75..79, a random id
  * 1..59, or the map id when that is not 0. Returns main_entd_open_file's result. */
-s32 battle_unit_select_and_open_entd(void) {
+static s32 battle_unit_select_and_open_entd(void) {
     volatile s32* current_event_id;
     s32 event_id;
     s32 selection_mode;
@@ -335,7 +335,7 @@ s32 battle_unit_select_and_open_entd(void) {
 /* Loads the encounter's ENTD units once the ENTD file has arrived, then frees the
  * file. Returns 1 while the file is still loading, else 0 (also when there is no
  * current encounter). */
-s32 battle_unit_poll_and_load_entd_units(void) {
+static s32 battle_unit_poll_and_load_entd_units(void) {
     entd_encounter_t* entd_data;
 
     entd_data = main_entd_get_encounter();
@@ -360,7 +360,7 @@ enum {
  * signed adjustments is indexed by a uniform `rand()` bucket and applied to
  * the current weather strength before it is clamped to 0..4.
  */
-void battle_weather_randomize_from_calendar(void) {
+static void battle_weather_randomize_from_calendar(void) {
     u8 period_end_month[BATTLE_WEATHER_CALENDAR_PERIOD_COUNT] = { 2, 5, 7, 11 };
     u8 period_end_day[BATTLE_WEATHER_CALENDAR_PERIOD_COUNT] = { 19, 21, 23, 23 };
     u8 weather_period[BATTLE_WEATHER_CALENDAR_PERIOD_COUNT + 1] = { 3, 0, 2, 1, 3 };

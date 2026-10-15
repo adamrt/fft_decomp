@@ -12,6 +12,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen);
+
 void world_menu_announce_entry_value_thread(void) {
     menu_entry_t* entry;
     thread_t* thread;
@@ -119,7 +121,7 @@ void world_menu_icon_clamped_list_thread(void) {
     thread_exit_current();
 }
 
-void world_menu_update_entry_cursor_quads(
+static void world_menu_update_entry_cursor_quads(
     menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* shadow, s32 unused, s32 cursor) {
     thread_t* thread = &g_threads[g_thread_current_id];
     s32 x;
@@ -490,7 +492,7 @@ void world_menu_labeled_number_entry_thread(void) {
  *
  * `digits` arrives as a full 32-bit value and only its low byte is used.
  */
-void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
+static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph_blit_t* pen) {
     s32 original;
     s32 i;
 

@@ -1013,8 +1013,6 @@ extern s16 g_script_unit_slots[EVENT_UNIT_SELECTOR_SLOT_COUNT];
 /* Read through the resident scene's variable commands, preserving the comparison
  * result. Reading weather/time first rebuilds it from the separate variables. */
 s32 script_get_variable(s32 variable_id);
-s32 script_get_variable_bit_position(s32 variable_id);
-s32* script_get_variable_word_pointer_from_id(s32 variable_id);
 void script_set_variable(s32 variable_id, s32 value);
 /* The fourth argument is supplied by callers but is not read. */
 void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32 unused);
@@ -1022,14 +1020,11 @@ void script_run_condition(event_opcode_e opcode);
 
 /* random */
 extern s32 g_script_rand16_state;
-s32 script_get_rand16(void);
 void script_seed_random_from_vsync(void);
 
 /* scenario conditions */
 extern u8 g_script_condition_param_lengths[];
 extern s32 g_script_condition_unit_battle_id;
-event_scenario_condition_result_e script_check_scenario_condition(
-    event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation);
 s32 script_run_scenario_conditions(void);
 
 /* values */
@@ -1037,14 +1032,10 @@ void script_clamp_s32_to_range(s32* value, s32 minimum, s32 maximum);
 s32 script_scale_music_volume(s32 volume);
 
 /* operand arithmetic */
-void script_copy_matrix(MATRIX* destination, const MATRIX* source);
-s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value);
 
 /* input */
-void script_apply_input_overrides(u32* input);
 
 /* packed dates */
-void script_assign_bitset_flag(u32* bitset, s32 bit_index, s32 value);
 void script_unlockdate_event_instruction(u32* bitset, s32 date_index, s32 month, s32 day);
 
 /* date */
@@ -1055,31 +1046,18 @@ void script_advance_date_by_one_year(void);
 s32 script_resolve_runtime_id(s32 unit_id);
 
 /* Resolve single selectors in place; leave group selectors for the filter loop. */
-s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode);
-s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode);
-void script_report_missing_unit_stub(s32 unused_unit_id);
 
 /* unit instructions */
 extern u16 g_script_unit_face_slot_order[];
 extern map_tile_coordinates_t g_script_warp_coords;
 
-void script_change_stats(const event_change_stats_parameters_t* parameters);
-void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
-void script_march_units(const event_march_parameters_t* parameters);
-void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
-void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable);
 void script_unit_anim(const event_unit_anim_parameters_t* parameters);
-void script_face_tile(const event_face_tile_parameters_t* parameters);
 void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 void script_inflict_status_thread(void);
 
 /* TeleportIn forwards the unit ID; the interpreter's second argument is unused. */
-void script_teleportin_event_instruction(s32 unit_id, s32 unused);
 void script_waitspritemove_event_instruction(s32 unit_id);
-void script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
-void script_blue_remove_all_enemy_units(void);
-void script_blue_remove_unit(s32 unit_id);
 void script_jump_event_instruction(const event_jump_parameters_t* parameters);
 void script_resetpalette_event_instruction(const event_unit_parameters_t* parameters);
 void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_t* parameters);
@@ -1087,11 +1065,9 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
 void script_warp_unit(const event_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 runtime_id);
-void script_add_unit_stub(void);
 void script_opcode_74_event_instruction(const u8* unused_parameters);
 void script_toggle_message_portrait_flip(const u8* parameters);
 void script_load_portrait_colors_event_instruction(s32 portrait_id);
-void script_run_sprite_move(const event_sprite_move_parameters_t* parameters, s32 use_speed);
 void script_sprite_move(void);
 void script_sprite_move_beta(void);
 
@@ -1130,7 +1106,6 @@ void script_play_effect_thread(void);
 
 /* graphic display */
 void script_show_graphic(void);
-void script_color_screen_thread(void);
 
 /* display conditions */
 void script_execute_display_conditions_instruction(void);
@@ -1142,7 +1117,6 @@ void script_join_units_silently(void);
 /* operand access */
 /* Read and write unaligned little-endian signed 16-bit operands. */
 s16 script_read_s16(const void* source);
-void script_write_s16(u8* destination, s16 value);
 
 /* debug */
 extern const char g_script_pause_message[];
@@ -1161,9 +1135,7 @@ extern VECTOR g_script_light_scale;
 extern MATRIX g_script_light_base_direction_matrix;
 extern MATRIX g_script_light_base_color_matrix;
 
-void script_map_darkness(void);
 void script_set_specialized_map_destroyed(void);
-void map_light_thread(void);
 
 /* event state */
 extern s16 g_script_threads_idle;
@@ -1186,8 +1158,6 @@ s32 script_is_tutorial_event_slot_variant(void);
 s32 script_run_event_frame_variant(u32* ot, u32 buttons);
 void script_execute_event_variant(void);
 void script_dark_screen_thread_variant(void);
-void script_route_event_input_variant(void);
-void script_process_pending_requests_variant(void);
 void script_set_event_speed_variant(s32 speed);
 void script_update_event_input_state(u32 buttons);
 

@@ -299,15 +299,12 @@ int main_file_is_still_loading(void);
 void main_file_reset_cd_subsystems(void);
 void main_file_handle_cd_read_callback(u8 event, u8* result);
 void main_file_handle_cd_ready_callback(u8 event, u8* result);
-void main_file_reset_cdrom_cpu_ram(void);
 int main_file_build_header(
     main_file_load_descriptor_t* state, int lba, int sector_count, void* destination, int loading_display_mode);
 void* main_file_load_checked_to_heap(int sector, int size);
 void* main_file_load_checked_to_address(int sector, int size, void* destination);
 suzuki_smd_header_t* main_file_get_smd(int sector, u32 size);
-void* main_file_load_to_heap(s32 sector, u32 size);
 void* main_file_load_to_address(int sector, u32 size, void* destination);
-void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
 void main_file_poll_load(main_file_load_descriptor_t* state);
 void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state);
 
@@ -394,7 +391,6 @@ u32 main_job_calculate_level(u16 job_jp);
 u32 main_job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags);
 s32 main_job_find_by_skillset(u8 skillset_id);
 job_data_t* main_job_get_data_pointer(s32 job_id);
-s32 main_job_get_random_unlocked(const unit_stats_t* unit);
 void main_job_store_unlock_bitset(u8 destination[UNIT_UNLOCKED_JOB_BYTE_COUNT], u32 unlocked_jobs);
 
 /* save */
@@ -784,12 +780,9 @@ extern u8 g_main_status_check_sets[MAIN_STATUS_CHECK_SET_COUNT][STATUS_BYTE_COUN
 
 void main_status_init_check_data(void);
 void main_status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type);
-void main_status_init_ct(unit_stats_t* unit);
-void main_status_init_unit(unit_stats_t* unit);
 void main_status_set_action_state(unit_stats_t* unit, u8 action_state);
 s32 main_status_set_ct(unit_stats_t* unit, s32 status_id, s32 removing);
 void main_status_store_current(unit_stats_t* unit);
-void main_status_update_unit_flags_and_ct(unit_stats_t* unit);
 s32 main_status_find_action_highest_order_effect(const action_data_t* action);
 
 /* system */
@@ -916,8 +909,6 @@ void main_system_handle_battle_load_exception(s32 value);
 void main_system_handle_malloc_exception(s32 allocator_id, s32 error_code);
 void main_system_handle_pointer_exception(int error_code);
 void main_system_reset_game(void);
-void main_system_run_game_loop(void);
-void main_system_stop_display_and_audio_for_game_reset(void);
 void main_system_store_stack_pointer(u32* destination);
 void main_system_handle_draw_sync_callback(void);
 void main_system_handle_vsync_callback(void);
@@ -930,13 +921,9 @@ void main_boot_run_startup(void);
 void main_boot_reset_game_state(void);
 void main_boot_build_and_draw_sceap_logo(void);
 void main_boot_build_and_draw_squaresoft_logo(void);
-int main_boot_draw_sceap_logo(u32* otag, u32* image);
-int main_boot_draw_squaresoft_logo(u32* otag, u32* image);
 void main_boot_fade_out_squaresoft_logo(void);
 
 /* overlay */
-void main_overlay_call_battle_entrypoint(void);
-void main_overlay_exec_battle_bin(void);
 int main_overlay_exec_open_bin_main_loop(int mode);
 void main_overlay_exec_open_bin_ending(void);
 int main_overlay_open_world_and_wldcore(int load_world);
@@ -1018,7 +1005,6 @@ void main_entd_init_event_unit_data(int event_id);
 void main_party_clear_all(void);
 s32 main_party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color);
 s32 main_party_find_free_slot(s32 save_formation, u8* palette);
-s32 main_party_find_slot_by_sprite_set(s32 sprite_set);
 
 /* Out-of-battle generation normalizes every value except male, female and
  * monster to Ramza. The raw-stat generator indexes the tables directly. */
@@ -1028,13 +1014,7 @@ void main_party_init_new_game(s32 mode);
 u32 main_party_level_unit_to_target(party_unit_t* party_unit, s32 level_delta);
 void main_party_remove_unit(u32 index);
 s32 main_party_save_unit(unit_stats_t* unit, s32 allow_guest);
-void main_unit_apply_equipment_move_jump_and_name(unit_stats_t* unit);
 void main_unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
-void main_unit_calculate_abilities(unit_stats_t* unit, entd_unit_t* entd);
-void main_unit_calculate_actual_stats(unit_stats_t* unit, s32 mode);
-s32 main_unit_calculate_entd_data(unit_stats_t* unit, entd_unit_t* entd);
-void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* entd);
-void main_unit_calculate_jobs_and_skillsets_from_entd(unit_stats_t* unit, const entd_unit_t* entd);
 void main_unit_calculate_move_jump(unit_stats_t* unit, s32 keep_position);
 u8 main_unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette);
 s32 main_unit_calculate_random_equipment(
@@ -1042,22 +1022,12 @@ s32 main_unit_calculate_random_equipment(
 u16 main_unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, entd_unit_t* entd);
 s32 main_unit_calculate_zodiac_symbol(u16 birthday);
 s32 main_unit_check_level_up(unit_stats_t* unit);
-void main_unit_copy_job_data(unit_stats_t* unit);
-void main_unit_copy_job_growths_and_multipliers(unit_stats_t* unit);
 void main_unit_copy_last_ability_ct(unit_stats_t* unit);
 void main_unit_enable_rsm_flags(unit_stats_t* unit);
-void main_unit_generate_base_raw_stats(
-    unit_raw_stat_t raw_stats[UNIT_RAW_STAT_COUNT], main_unit_generation_type_e unit_type);
-void main_unit_generate_out_of_battle(party_unit_t* party, main_unit_generation_type_e unit_type);
-void main_unit_generate_party_base_raw_stats(party_unit_t* party, main_unit_generation_type_e unit_type);
-void main_unit_generate_raw_stats(unit_stats_t* unit);
-u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palette);
 s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_e status_set);
 s32 main_unit_init(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initialize_for_battle);
-void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* party_unit);
 s32 main_unit_init_for_battle(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind);
 s32 main_unit_init_job_data(unit_stats_t* unit, s32 slot, s32 use_world_text);
-s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* entd);
 void main_unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels);
 void main_unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards);
 void main_unit_learn_job_abilities(unit_stats_t* unit, s32 job_id, const entd_unit_t* entd);
@@ -1069,11 +1039,6 @@ void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check);
  * 0x8005c398..0x8005cbd0. Signatures are shared with the matching definitions. */
 void main_unit_set_equipment_stats(unit_stats_t* unit);
 void main_unit_set_equippable_items(unit_stats_t* unit);
-void main_unit_set_rsm_flag(unit_stats_t* unit, u32 ability_id);
-void main_unit_store_character_names(unit_stats_t* unit);
-void main_unit_store_monster_equipment(unit_stats_t* unit, const entd_unit_t* entd);
-void main_unit_store_ramza_name_birthday_zodiac(unit_stats_t* unit);
-void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_status_check, s32 initializing);
 u8 main_party_calculate_highest_level(void);
 void main_unit_increase_casualty_counters(unit_stats_t* unit);
 void main_unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd);
@@ -1151,9 +1116,7 @@ void main_gfx_load_frame_bin_into_vram(void);
 void main_gfx_load_zodiac_frame(void);
 void main_gfx_reset_display(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void main_gfx_swap_and_clear_otag(void);
-int main_gfx_swap_display_area(u32* otag);
 void main_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue);
-void main_set_display_draw_new_game(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void main_gfx_build_now_loading_center(u32 visible);
 void main_gfx_call_build_zodiac_bin(zodiac_draw_context_t* context, POLY_FT4* poly);
 

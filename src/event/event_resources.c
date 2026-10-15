@@ -33,6 +33,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer);
+
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame) {
     gfx_draw_or_append_gpu_primitive(&frame->sprites[3]);
     gfx_draw_or_append_gpu_primitive(&frame->sprites[1]);
@@ -203,7 +205,7 @@ void menu_run_icon_selection_loop(void) {
 }
 
 /* Build the selected ability/item AT preview and its three-column menu. */
-void menu_build_ability_preview_at_list(void) {
+static void menu_build_ability_preview_at_list(void) {
     menu_at_list_work_t* work;
     menu_entry_t* entry;
     unit_stats_t* stats;
@@ -388,7 +390,7 @@ void menu_build_ability_preview_at_list(void) {
 /* Thread body started from the ability list: build the AT list preview for the
  * highlighted ability, pulse tutorial wait value 0xfa and run it as a scrolling
  * list. */
-void menu_preview_ability_turn_at_list(void) {
+static void menu_preview_ability_turn_at_list(void) {
     menu_build_ability_preview_at_list();
     script_pulse_tutorial_wait_value(0xFA);
     menu_run_scrolling_ability_list_thread_variant();
@@ -405,7 +407,7 @@ void menu_preview_ability_turn_at_list(void) {
  * skill flag bit 0 is set while the current thread's fourth 32-bit value is non-zero;
  * alternate-number columns draw a special glyph for values 0/1 without a
  * target, and text 0x509d for values of 100 and above. */
-void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer) {
+static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
     s32 column;
@@ -468,7 +470,7 @@ void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset,
 #ifdef FFT_WORLD
 /* Twin of world_screen_menu_draw_text_columns with the stride reduced by 8. */
 
-void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer) {
+static void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
     s32 column;
@@ -521,7 +523,7 @@ void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset,
  * In mode 2 of g_battle_menu_scroll_list_depth the buffer is placed 0x2000 bytes past the event
  * overlay instead of being allocated. Returns that buffer when the page was
  * redrawn. */
-u8* battle_menu_redraw_text_page_on_scroll_in_rect(
+static u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* input;
@@ -591,7 +593,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
  * fixed at y = 0x80). Scrolls the row window on L1/R1 (or on the running
  * thread's redraw request), redraws the page into a freshly allocated image
  * buffer and uploads it. Returns that buffer when the page was redrawn. */
-u8* world_menu_redraw_text_page_on_scroll_in_rect(
+static u8* world_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
     u32* input0;
@@ -1456,7 +1458,7 @@ void text_set_message_duration_frames(u16 frames) {
 }
 
 /* Size a message window to its text and center it on x = 0x102. */
-void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short) {
+static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short) {
     const u8* text;
     u16 padded;
     u16 w;
@@ -1795,7 +1797,7 @@ void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level) {
     }
 }
 
-void menu_reserve_high_overlay(u32 size) {
+static void menu_reserve_high_overlay(u32 size) {
     while (1) {
         if (main_heap_reserve_at(g_main_heap_high_overlay_load_address, size)
             == g_main_heap_high_overlay_load_address) {
@@ -1808,7 +1810,7 @@ void menu_reserve_high_overlay(u32 size) {
     }
 }
 
-void menu_free_high_overlay(void) {
+static void menu_free_high_overlay(void) {
     main_heap_free(g_main_heap_high_overlay_load_address);
 }
 
@@ -1829,7 +1831,7 @@ void menu_request_open_companion_executable(s32 request_index) {
 }
 
 /* Publish a data-file request, wait for it to clear, then honor the frame exit request. */
-void menu_request_open_companion_data_file(s32 request_index) {
+static void menu_request_open_companion_data_file(s32 request_index) {
     while (g_menu_companion_executable_request_index != 0 || g_menu_companion_data_file_request_index != 0) {
         thread_yield();
     }
@@ -1970,7 +1972,7 @@ void menu_run_triangle_selection(void) {
 }
 
 /* Run BUNIT, release its high-overlay memory, then restore the unit view. */
-void menu_run_bunit_return_thread(void) {
+static void menu_run_bunit_return_thread(void) {
     s32 i;
     s32 unused[2]; /* keeps the original 0x28 frame */
 
@@ -2002,7 +2004,7 @@ void menu_run_bunit_return_thread(void) {
 }
 
 /* Fade out and load BUNIT, then start its return thread. */
-void menu_run_bunit_transition_thread(void) {
+static void menu_run_bunit_transition_thread(void) {
     s32 level;
 
     for (level = 0; level < 0x100; level += 0x10) {
@@ -2035,7 +2037,7 @@ void menu_open_bunit(void) {
 }
 
 /* Reserve and load the help overlay, then run its battle-help screen. */
-void menu_run_help_menu_thread(void) {
+static void menu_run_help_menu_thread(void) {
     if (thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL) != 0
         && thread_find_running_by_task(THREAD_TASK_MENU_WINDOW_BUILD) == 0) {
         sound_queue_sfx_confirm();
@@ -2357,7 +2359,7 @@ void menu_reset_unit_records_wrapper(void) {
 void menu_run_companion_overlay_stub(void) {
 }
 
-void menu_start_entry_thread(void) {
+static void menu_start_entry_thread(void) {
     s32 menu_id = thread_get_current_parameter_1_variant();
     s32 count;
 

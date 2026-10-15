@@ -31,7 +31,6 @@ extern s32 g_sound_suppressed;
 
 void sound_queue_sfx_cancel(void);
 void sound_queue_sfx_confirm(void);
-void sound_queue_sfx_confirm_unless_restoring(void);
 void sound_queue_sfx_cursor_move(void);
 void sound_queue_sfx_invalid(void);
 extern u8 g_sound_queued_effect_id; /* main_sfx_e */
@@ -43,7 +42,6 @@ extern u8 g_sound_weapon_hit_sfx_ids[];
  * hit, and the hit a shield or Golem stops (sound_play_weapon_sfx). */
 extern u8 g_sound_weapon_swing_sfx_ids[];
 
-void battle_sound_play_landing_sfx_by_surface_type(struct battle_unit* unit);
 void battle_sound_play_movement_sfx(struct battle_unit* unit, s32 sound_id);
 void battle_sound_play_weapon_sfx(struct battle_unit* unit, s32 hit);
 

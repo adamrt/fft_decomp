@@ -70,7 +70,7 @@ extern u16 g_bunit_gfx_line_g3_capacity;
  * constructor; polygons additionally get texture shading enabled.
  *
  * BUNIT twin of world_gfx_init_packet_pools. */
-void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
+static void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     s32 i;
 
     for (i = 0; i < g_gfx_poly_f3_capacity; i++) {
