@@ -44,12 +44,21 @@ type twinScope struct {
 	ranges []twinSymbol // sorted by addr, first occurrence wins
 }
 
+// newTwinScope lists the module's own symbols, then the linked modules' and
+// main's. A linked module's symbol counts only outside this module's own
+// image: BATTLE and WORLD occupy the same addresses and are never resident
+// together, so a WORLD address inside WORLD's image is WORLD's, named or not.
 func newTwinScope(config *projectConfig, m *moduleSpec) *twinScope {
 	scope := &twinScope{exact: map[uint32]string{}}
+	inside := func(addr uint32) bool { return addr >= m.Load && uint64(addr) < m.end() }
 	add := func(module *moduleSpec, imports bool) {
+		foreign := module != m
 		functions := append([]functionSpec(nil), module.Functions...)
 		sort.SliceStable(functions, func(i, j int) bool { return functions[i].Addr < functions[j].Addr })
 		for _, f := range functions {
+			if foreign && inside(f.Addr) {
+				continue
+			}
 			if _, seen := scope.exact[f.Addr]; !seen {
 				scope.exact[f.Addr] = f.Name
 				scope.ranges = append(scope.ranges, twinSymbol{f.Addr, f.Addr + uint32(f.Size), f.Name})
@@ -71,6 +80,9 @@ func newTwinScope(config *projectConfig, m *moduleSpec) *twinScope {
 		}
 		for _, list := range lists {
 			for _, symbol := range list {
+				if foreign && inside(symbol.Addr) {
+					continue
+				}
 				if _, seen := scope.exact[symbol.Addr]; !seen {
 					scope.exact[symbol.Addr] = symbol.Name
 					scope.ranges = append(scope.ranges, twinSymbol{symbol.Addr, 0, symbol.Name})
@@ -280,8 +292,15 @@ func twinSymbolize(m *moduleSpec, f *functionSpec, code []byte, scope *twinScope
 		}
 		tokens = append(tokens, text)
 		masked = append(masked, mask)
-		if dest > 0 {
+		// An indexed global access adds the index to the lui register before
+		// the %lo partner (lui at,%hi(sym); addu at,at,idx; lw v0,%lo(sym)(at)):
+		// the register still carries the symbol's high half.
+		indexed := op == 0 && (w&63 == 0x20 || w&63 == 0x21) && (rd == rs && lui[rs].set || rd == rt && lui[rt].set)
+		if dest > 0 && !indexed {
 			lui[dest] = luiState{}
+		}
+		if indexed && rd != rs {
+			lui[rd] = lui[rt]
 		}
 		if op == 15 && rt != 0 {
 			lui[rt] = luiState{value: uint32(w&0xffff) << 16, token: len(tokens) - 1, set: true}
@@ -686,8 +705,8 @@ func twinNearMisses(functions []*twinFunction, byKey map[string][]*twinFunction,
 		for i := 0; i < len(reps); i++ {
 			for j := i + 1; j < len(reps); j++ {
 				a, b := reps[i], reps[j]
-				if a.m.ID == b.m.ID || len(a.tokens) != len(b.tokens) {
-					continue
+				if a.m.ID == b.m.ID || len(a.tokens) != len(b.tokens) || a.source == b.source {
+					continue // one source already (a VARIANT_ constant explains the difference)
 				}
 				// The effect overlays are parameter variants of one source
 				// already; their pairwise differences are known.

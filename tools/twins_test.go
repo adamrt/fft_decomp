@@ -58,6 +58,12 @@ func TestTwinSymbolizeResolvesOperandsAndStripsDivisionChecks(t *testing.T) {
 	if d.unresolved != 0 || d.tokens[1] != "addiu\tv0,v0,%lo(#0+0x4)" || d.symbols[0] != "main_first" {
 		t.Fatalf("interior: %v %v", d.tokens, d.symbols)
 	}
+	// lui at,%hi(g_main_value); addu at,at,v1; lw v0,%lo(g_main_value)(at)
+	probe.Size = 12
+	e := twinSymbolize(m, probe, mipsWords(0x3c018001, 0x00230821, 0x8c220100), scope)
+	if strings.Join(e.tokens, "\n") != "lui\tat,%hi(#0)\naddu\tat,at,v1\nlw\tv0,%lo(#0)(at)" || e.symbols[0] != "g_main_value" {
+		t.Fatalf("indexed: %v %v", e.tokens, e.symbols)
+	}
 }
 
 func twinFixture(module, name, source string, symbols ...string) *twinFunction {
