@@ -1,6 +1,12 @@
 #include "fft/main.h"
 #include "psx/libcd.h"
 
+/* main_file_build_header with loading display mode -1: the read shows no "Now
+ * Loading" message. */
+int main_file_build_header_nnl(main_file_load_descriptor_t* header, int sector, int sectors, void* destination) {
+    return main_file_build_header(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);
+}
+
 /* Initialize a descriptor and enter the asynchronous loader's setup phase. */
 s32 main_file_build_header(
     main_file_load_descriptor_t* header, s32 lba, s32 sector_count, void* destination, s32 loading_display_mode) {
@@ -45,4 +51,15 @@ s32 main_file_build_header(
     header->sector_count = sector_count;
     header->destination = destination;
     return 0;
+}
+
+void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state) {
+    state->state = MAIN_FILE_LOAD_STATE_IDLE;
+    CdFlush();
+    while (CdControlB(CdlPause, 0, 0) == 0) { }
+    VSync(3);
+}
+
+void main_file_reset_cd_subsystems(void) {
+    CdReset(0);
 }

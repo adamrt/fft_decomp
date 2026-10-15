@@ -1,6 +1,11 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
+/* The bits above the low nibble of an egg's birthday value (birthday >> 4). */
+s32 world_formation_get_unit_egg_hatch_total(s32 unit_id) {
+    return g_world_unit_pointers[unit_id]->birthday >> 4;
+}
+
 /* Returns 1 when the selected unit is in the two upper visible rows of the grid at
  * `scroll_position` (after the scroll in progress), which puts the unit banner at the bottom
  * of the screen. Returns 0 while browsing a unit that is not an egg. */
