@@ -228,3 +228,72 @@ func TestRenameUnitCommandMovesTheFileAndRebindsMembers(t *testing.T) {
 		t.Fatalf("missing unit error = %v", err)
 	}
 }
+
+func TestUnitSymbolsCommandMaterializesAnAliasWhoseTargetStaysOutside(t *testing.T) {
+	const yaml = `module: battle
+file: BATTLE.BIN
+lba: 300
+size: 4096
+sha256: 33333333333333333333333333333333333333333333333333333333333333dd
+load: 0x80067000
+source_dir: src/battle
+profile: gcc-2.6.3_O2_aspsx-2.34
+
+functions:
+  - {addr: 0x80067000, size: 32, name: input_a, hash: 0000000000000a01}
+  - {addr: 0x80067020, size: 32, name: input_b, hash: 0000000000000b01}
+  - {addr: 0x80067040, size: 32, name: card_input_a, hash: 0000000000000a02, source: src/battle/input_a.c, source_symbol: input_a}
+  - {addr: 0x80067060, size: 32, name: card_c, hash: 0000000000000c01}
+
+overrides:
+  - {function: card_input_a, name: input_b, addr: 0x80067060}
+`
+	p := testProject(t, map[string]string{
+		"target/main.yaml":       testMainYAML,
+		"target/battle.yaml":     yaml,
+		"src/main/main_first.c":  "void main_first(void) {}\n",
+		"src/main/main_second.c": "void main_second(void) {}\n",
+		"src/battle/input_a.c":   "int input_b(void);\nint input_a(void) { return input_b(); }\n",
+		"src/battle/input_b.c":   "int input_b(void) { return 2; }\n",
+		"src/battle/card_c.c":    "int card_c(void) { return 3; }\n",
+	})
+	// The primary cannot join a unit while an alias entry still compiles its file.
+	if err := p.unitSymbolsCommand([]string{"--name", "inputs", "--source", "src/battle/inputs.c", "battle:input_a", "battle:input_b"}); err == nil || !strings.Contains(err.Error(), "also compiles") {
+		t.Fatalf("primary merge error = %v", err)
+	}
+	// The alias joins a unit as a materialized duplicate; the primary keeps its file.
+	if err := p.unitSymbolsCommand([]string{"--name", "card", "--source", "src/battle/card.c", "battle:card_input_a", "battle:card_c"}); err != nil {
+		t.Fatal(err)
+	}
+	config, err := p.loadCheckedConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	battle := config.byID["battle"]
+	if alias := battle.function("card_input_a"); alias.Unit != "card" || alias.Source != "" || alias.SourceSymbol != "" {
+		t.Fatalf("alias = %+v", *alias)
+	}
+	if primary := battle.function("input_a"); primary.Unit != "" || battle.sourceOf(primary) != "src/battle/input_a.c" {
+		t.Fatalf("primary = %+v", *primary)
+	}
+	if _, err := os.Stat(filepath.Join(p.root, "src", "battle", "input_a.c")); err != nil {
+		t.Fatalf("the primary's file should remain: %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(p.root, "src", "battle", "card.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "a second time as card_input_a") || !strings.Contains(string(data), "int card_input_a(void) { return card_c(); }") {
+		t.Fatalf("duplicate not materialized with its override applied:\n%s", data)
+	}
+	if len(battle.Overrides) != 0 {
+		t.Fatalf("alias override not spent: %+v", battle.Overrides)
+	}
+	// With the alias materialized, the primary is free to join a unit.
+	if err := p.unitSymbolsCommand([]string{"--name", "inputs", "--source", "src/battle/inputs.c", "battle:input_a", "battle:input_b"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.loadCheckedConfig(); err != nil {
+		t.Fatal(err)
+	}
+}

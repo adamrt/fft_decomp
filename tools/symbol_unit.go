@@ -180,7 +180,9 @@ func (p project) unitSymbolsCommand(args []string) error {
 				if err != nil {
 					return err
 				}
-				if f.Unit == "" {
+				// An alias entry takes a copy of its target's body; the
+				// target's own file stays with the target unless it joins too.
+				if f.Unit == "" && f.SourceSymbol == "" {
 					memberFiles[m.sourceOf(f)] = true
 				}
 				if bodies[f.Name] == nil {
