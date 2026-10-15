@@ -479,13 +479,37 @@ func mergeUnitSources(root string, sources []string) ([]byte, error) {
 }
 
 // validateUnitSource requires the merged file to define exactly the unit's
-// public symbols, in unit order.
+// public symbols, in unit order, with no program conditionals resolved.
 func validateUnitSource(root, source string, symbols []string) error {
 	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
 	if err != nil {
 		return err
 	}
 	return validateUnitSourceData(source, data, symbols)
+}
+
+// validateUnitSourceFor requires the merged file, as one module compiles it
+// (its program macros and defines applied to the conditionals), to define
+// exactly that module's members in order.
+func validateUnitSourceFor(root string, m *moduleSpec, source string, symbols []string) error {
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
+	if err != nil {
+		return err
+	}
+	return validateUnitSourceDataFor(m, source, data, symbols)
+}
+
+// validateUnitSourceDataFor is validateUnitSourceData on the text one module
+// sees after its conditionals are resolved.
+func validateUnitSourceDataFor(m *moduleSpec, source string, data []byte, symbols []string) error {
+	active, err := activeConditionalText(string(data), m.macros())
+	if err != nil {
+		return fmt.Errorf("%s: %w", source, err)
+	}
+	if err := validateUnitSourceData(source, []byte(active), symbols); err != nil {
+		return fmt.Errorf("for %s: %w", m.ID, err)
+	}
+	return nil
 }
 
 // validateUnitSourceData checks merged source text before it is written.

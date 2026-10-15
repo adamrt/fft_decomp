@@ -26,6 +26,7 @@ type unitsReport struct {
 }
 
 type unitsReportOptions struct {
+	Evidence      string `yaml:"evidence,omitempty"`
 	MinConfidence string `yaml:"min_confidence"`
 	MaxOwners     int    `yaml:"max_owners"`
 }
@@ -165,7 +166,7 @@ func hexAddr(addr uint32) string { return fmt.Sprintf("0x%08x", addr) }
 func unitsModuleReport(an *unitModuleAnalysis, options unitsOptions) unitsReport {
 	report := unitsReport{
 		SchemaVersion: unitsSchemaVersion, CandidateOnly: true, Module: an.m.ID, File: an.m.File,
-		Options: unitsReportOptions{MinConfidence: options.minConfidence, MaxOwners: options.maxOwners},
+		Options: unitsReportOptions{Evidence: options.evidence, MinConfidence: options.minConfidence, MaxOwners: options.maxOwners},
 		Totals: unitsReportTotals{Groups: len(an.groups), Functions: len(an.functions), DataRows: len(an.rows),
 			ByConfidence: map[string]int{"high": 0, "medium": 0, "low": 0}},
 		Alignments: []unitsReportAlign{}, Groups: []unitsReportGroup{},

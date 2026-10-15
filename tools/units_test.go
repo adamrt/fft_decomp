@@ -332,3 +332,61 @@ func TestUnitsCommandWritesReportsReadOnlyAndDeterministic(t *testing.T) {
 		}
 	}
 }
+
+func TestUnitsEvidenceModeTakesOnlyBinaryCuts(t *testing.T) {
+	// A synthetic group: a weak cut, a certain cut and a strong cut.
+	an := &unitModuleAnalysis{m: &moduleSpec{ID: "t"}}
+	for i := 0; i < 4; i++ {
+		an.functions = append(an.functions, unitFunction{index: i, f: &functionSpec{Addr: uint32(0x1000 + 16*i), Size: 16, Name: string(rune('a' + i))}, profile: "p"})
+	}
+	group := unitGroup{id: 1, first: 0, last: 3}
+	group.cuts = []unitCut{
+		{after: 0, score: 3, confidence: "low", evidence: []unitEvidence{{"prefix_change", 1, ""}, {"call_locality", 2, ""}}},
+		{after: 1, score: 6, confidence: "high", certain: true, evidence: []unitEvidence{{"profile_object", 6, ""}}},
+		{after: 2, score: 3, confidence: "low", evidence: []unitEvidence{{"alignment_divergence", 3, ""}}},
+	}
+	names := func(units []unitCandidate) string {
+		var parts []string
+		for _, unit := range units {
+			parts = append(parts, strings.Join(unitFunctionNames(an, unit), ""))
+		}
+		return strings.Join(parts, " ")
+	}
+	cases := map[string]string{"required": "ab cd", "strong": "ab c d"}
+	for mode, want := range cases {
+		g := group
+		g.units = nil
+		an.formUnits(&g, unitsOptions{minConfidence: "low", evidence: mode})
+		if got := names(g.units); got != want {
+			t.Fatalf("%s mode units = %q, want %q", mode, got, want)
+		}
+	}
+	g := group
+	an.formUnits(&g, unitsOptions{minConfidence: "low"})
+	if got := names(g.units); got != "a b c d" && got != "ab c d" && got != "ab cd" {
+		t.Fatalf("default mode units = %q", got)
+	}
+	// On the fixture every boundary the required mode keeps is certain.
+	p := unitsTestProject(t)
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	analyses, err := p.reconstructUnits(config, unitsOptions{minConfidence: "low", maxOwners: 3, evidence: "required"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, module := range analyses {
+		for _, group := range module.groups {
+			for index := 1; index < len(group.units); index++ {
+				cut := group.cuts[group.units[index].functions[0]-group.first-1]
+				if !cut.certain {
+					t.Fatalf("%s: unit boundary after %s rests on %v, not certain evidence", module.m.ID, module.functions[cut.after].f.Name, cut.evidence)
+				}
+			}
+		}
+	}
+	if err := p.unitsCommand([]string{"--evidence=weak", "--out=build/analysis/units"}); err == nil {
+		t.Fatal("an unknown evidence mode must be rejected")
+	}
+}

@@ -10,20 +10,31 @@ import (
 	"strings"
 )
 
-// unitSymbolsCommand merges the listed entries' per-function sources into one
-// unit source and makes the entries members of a unit of that name in each
-// of their modules. The members of one module must follow one another in
-// address order, every module must list the same functions, and the
-// per-function files must already be the same in every module.
+// unitMemberBody is one member's text as one module compiles it: the
+// per-function file, or its piece of an existing unit file.
+type unitMemberBody struct {
+	key      string // identity of the text: the file, or unit file + member
+	includes []string
+	text     string
+}
+
+// unitSymbolsCommand merges the listed entries' sources into one unit source
+// and makes the entries members of a unit of that name in each of their
+// modules. Members may be per-function files or members of existing units,
+// which the new unit absorbs whole. The members of one module must follow
+// one another in address order and the modules' orders must agree. A member
+// that only some of the unit's modules compile, or whose body differs per
+// module, is wrapped in the program macros of the modules that compile that
+// body, so each module still defines exactly its own members in order.
 func (p project) unitSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols unit", flag.ContinueOnError)
 	name := flags.String("name", "", "unit name")
-	source := flags.String("source", "", "merged source path under src/, such as src/thread/thread.c")
+	source := flags.String("source", "", "merged source path under src/, such as src/event/thread.c")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	usage := errors.New("usage: tools symbols unit --name NAME --source src/SUB/NAME.c [--dry-run] MODULE:ENTRY...")
+	usage := errors.New("usage: tools symbols unit --name NAME --source src/DIR/NAME.c [--dry-run] MODULE:ENTRY...")
 	if *name == "" || *source == "" || flags.NArg() == 0 {
 		return usage
 	}
@@ -42,6 +53,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 		}
 		byModule := map[*moduleSpec][]*functionSpec{}
 		var order []*moduleSpec
+		listed := map[string]bool{}
 		for _, text := range flags.Args() {
 			moduleID, entry, ok := strings.Cut(text, ":")
 			if !ok {
@@ -55,77 +67,129 @@ func (p project) unitSymbolsCommand(args []string) error {
 			if f == nil {
 				return fmt.Errorf("no function %s in %s", entry, m.ID)
 			}
-			if f.Asm != "" || f.SourceSymbol != "" || f.Unit != "" {
-				return fmt.Errorf("%s:%s must be a plain C entry (not assembly, an alias or a unit member)", m.ID, entry)
+			if f.Asm != "" || f.SourceSymbol != "" {
+				return fmt.Errorf("%s:%s must be a C definition (not assembly or an alias)", m.ID, entry)
 			}
+			if listed[m.ID+":"+f.Name] {
+				return fmt.Errorf("%s:%s is listed twice", m.ID, entry)
+			}
+			listed[m.ID+":"+f.Name] = true
 			if _, seen := byModule[m]; !seen {
 				order = append(order, m)
 			}
 			byModule[m] = append(byModule[m], f)
 		}
-		var mergedSources []string
-		var symbols []string
+		// Absorbed units must come whole, and old unit files must be plain
+		// (no conditionals) so their pieces can be cut per member.
+		absorbed := map[string]*unitDef{} // "module:unit" -> def
+		unitTexts := map[string]unitPieces{}
 		for _, m := range order {
 			if m.unit(*name) != nil {
 				return fmt.Errorf("%s already has a unit %s", m.ID, *name)
 			}
-			members := byModule[m]
-			sort.Slice(members, func(i, j int) bool { return members[i].Addr < members[j].Addr })
-			var functions, sources []string
-			for _, f := range members {
+			for _, f := range byModule[m] {
+				if f.Unit == "" {
+					continue
+				}
+				for _, member := range m.unitMembers(f.Unit) {
+					if !listed[m.ID+":"+member.Name] {
+						return fmt.Errorf("%s:%s is a member of unit %s; list all of that unit's members or none", m.ID, f.Name, f.Unit)
+					}
+				}
+				absorbed[m.ID+":"+f.Unit] = m.unit(f.Unit)
+				unitSource := m.unit(f.Unit).Source
+				if _, done := unitTexts[unitSource]; done {
+					continue
+				}
+				pieces, err := readUnitPieces(p.root, m, f.Unit)
+				if err != nil {
+					return err
+				}
+				unitTexts[unitSource] = pieces
+			}
+		}
+		if _, err := os.Stat(filepath.Join(p.root, filepath.FromSlash(clean))); err == nil {
+			return fmt.Errorf("%s already exists", clean)
+		}
+		// Per-module member lists in address order, checked for contiguity,
+		// profile agreement and jump-table alignment.
+		members := map[*moduleSpec][]string{}
+		for _, m := range order {
+			list := byModule[m]
+			sort.Slice(list, func(i, j int) bool { return list[i].Addr < list[j].Addr })
+			var functions []string
+			for _, f := range list {
 				functions = append(functions, f.Name)
-				sources = append(sources, m.sourceOf(f))
 			}
 			spec := &unitSpec{name: *name, source: clean, functions: functions}
 			if _, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID}); err != nil {
 				return err
 			}
 			if image, err := p.readModuleImage(m); err == nil {
-				if conflict := unitJumpTableConflict(image, m, members); conflict != "" {
+				if conflict := unitJumpTableConflict(image, m, list); conflict != "" {
 					return fmt.Errorf("%s: %s", m.ID, conflict)
 				}
 			}
-			if mergedSources == nil {
-				mergedSources, symbols = sources, functions
-			} else if strings.Join(sources, " ") != strings.Join(mergedSources, " ") {
-				return fmt.Errorf("%s compiles %v where %s compiles %v; a unit needs the same sources in every module", m.ID, sources, order[0].ID, mergedSources)
+			members[m] = functions
+		}
+		var lists [][]string
+		for _, m := range order {
+			lists = append(lists, members[m])
+		}
+		merged, err := mergeMemberOrders(lists)
+		if err != nil {
+			return err
+		}
+		// Bodies per member per module, keyed by text identity.
+		bodies := map[string]map[string]*unitMemberBody{} // function -> body key -> body
+		bodyModules := map[string]map[string][]*moduleSpec{}
+		memberFiles := map[string]bool{}
+		for _, m := range order {
+			for _, f := range byModule[m] {
+				body, err := memberBody(p.root, m, f, unitTexts)
+				if err != nil {
+					return err
+				}
+				if f.Unit == "" {
+					memberFiles[m.sourceOf(f)] = true
+				}
+				if bodies[f.Name] == nil {
+					bodies[f.Name] = map[string]*unitMemberBody{}
+					bodyModules[f.Name] = map[string][]*moduleSpec{}
+				}
+				bodies[f.Name][body.key] = body
+				bodyModules[f.Name][body.key] = append(bodyModules[f.Name][body.key], m)
 			}
 		}
-		for _, existing := range mergedSources {
-			if existing == clean {
+		for file := range memberFiles {
+			if file == clean {
 				return fmt.Errorf("%s is already a member source; choose a new path for the unit", clean)
 			}
 		}
 		// Every entry compiled from a member file must join the unit: a file
 		// left behind would be a second body of the same function.
-		listed := map[string]bool{}
-		for _, m := range order {
-			for _, f := range byModule[m] {
-				listed[m.ID+":"+f.Name] = true
-			}
-		}
 		for _, m := range config.Modules {
 			for index := range m.Functions {
 				f := &m.Functions[index]
-				for _, existing := range mergedSources {
-					if m.sourceOf(f) == existing && !listed[m.ID+":"+f.Name] {
-						return fmt.Errorf("%s:%s also compiles %s; list it in the unit or leave that function out", m.ID, f.Name, existing)
-					}
+				if f.Unit == "" && memberFiles[m.sourceOf(f)] && !listed[m.ID+":"+f.Name] {
+					return fmt.Errorf("%s:%s also compiles %s; list it in the unit or leave that function out", m.ID, f.Name, m.sourceOf(f))
 				}
 			}
 		}
-		if _, err := os.Stat(filepath.Join(p.root, filepath.FromSlash(clean))); err == nil {
-			return fmt.Errorf("%s already exists", clean)
-		}
-		merged, err := mergeUnitSources(p.root, mergedSources)
-		if err != nil {
-			return err
-		}
-		if err := validateUnitSourceData(clean, merged, symbols); err != nil {
-			return err
+		text, conditional := renderUnitSource(order, merged, bodies, bodyModules)
+		for _, m := range order {
+			if err := validateUnitSourceDataFor(m, clean, text, members[m]); err != nil {
+				return err
+			}
 		}
 		for _, m := range order {
-			m.Units = append(m.Units, unitDef{Name: *name, Source: clean})
+			var kept []unitDef
+			for _, unit := range m.Units {
+				if absorbed[m.ID+":"+unit.Name] == nil {
+					kept = append(kept, unit)
+				}
+			}
+			m.Units = append(kept, unitDef{Name: *name, Source: clean})
 			for _, f := range byModule[m] {
 				f.Unit = *name
 				f.Source = ""
@@ -141,11 +205,19 @@ func (p project) unitSymbolsCommand(args []string) error {
 		if err := os.MkdirAll(filepath.Dir(filepath.Join(p.root, filepath.FromSlash(clean))), 0o755); err != nil {
 			return err
 		}
-		if err := transaction.addCreation(filepath.Join(p.root, filepath.FromSlash(clean)), merged, 0o644); err != nil {
+		if err := transaction.addCreation(filepath.Join(p.root, filepath.FromSlash(clean)), text, 0o644); err != nil {
 			return err
 		}
+		var oldFiles []string
+		for file := range memberFiles {
+			oldFiles = append(oldFiles, file)
+		}
+		for file := range unitTexts {
+			oldFiles = append(oldFiles, file)
+		}
+		sort.Strings(oldFiles)
 		removed := 0
-		for _, old := range mergedSources {
+		for _, old := range oldFiles {
 			if stillUsed[old] {
 				continue
 			}
@@ -169,7 +241,8 @@ func (p project) unitSymbolsCommand(args []string) error {
 				return err
 			}
 		}
-		result = fmt.Sprintf("symbols: unit %s at %s holds %d functions in %d module(s); %d per-function file(s) removed", *name, clean, len(symbols), len(order), removed)
+		result = fmt.Sprintf("symbols: unit %s at %s holds %d functions in %d module(s), %d under program conditionals; %d file(s) removed",
+			*name, clean, len(merged), len(order), conditional, removed)
 		if *dryRun {
 			result = "planned: " + result
 			return nil
@@ -181,4 +254,182 @@ func (p project) unitSymbolsCommand(args []string) error {
 	}
 	fmt.Println(result)
 	return nil
+}
+
+// unitPieces is an existing unit file cut per member.
+type unitPieces struct {
+	includes []string
+	pieces   map[string]string
+}
+
+// readUnitPieces cuts a module's existing unit file into one piece per
+// member. A file with conditionals cannot be cut reliably.
+func readUnitPieces(root string, m *moduleSpec, unitName string) (unitPieces, error) {
+	unit := m.unit(unitName)
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(unit.Source)))
+	if err != nil {
+		return unitPieces{}, err
+	}
+	for number, line := range strings.Split(string(data), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "#") {
+			if word, _ := directiveWord(trimmed); conditionalDirectives[word] {
+				return unitPieces{}, fmt.Errorf("%s:%d: unit %s has program conditionals; split it by hand before merging", unit.Source, number+1, unitName)
+			}
+		}
+	}
+	var names []string
+	for _, f := range m.unitMembers(unitName) {
+		names = append(names, f.Name)
+	}
+	pieces, includes, err := splitUnitSource(string(data), names)
+	if err != nil {
+		return unitPieces{}, fmt.Errorf("%s: %w", unit.Source, err)
+	}
+	result := unitPieces{pieces: map[string]string{}}
+	for _, include := range strings.Split(includes, "\n") {
+		if include = strings.TrimSpace(include); include != "" {
+			result.includes = append(result.includes, include)
+		}
+	}
+	for index, name := range names {
+		result.pieces[name] = strings.TrimSpace(pieces[index])
+	}
+	return result, nil
+}
+
+// memberBody reads one member's text as module m compiles it.
+func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]unitPieces) (*unitMemberBody, error) {
+	if f.Unit != "" {
+		unit := m.unit(f.Unit)
+		pieces := units[unit.Source]
+		return &unitMemberBody{key: unit.Source + "#" + f.Name, includes: pieces.includes, text: pieces.pieces[f.Name]}, nil
+	}
+	source := m.sourceOf(f)
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
+	if err != nil {
+		return nil, err
+	}
+	body := &unitMemberBody{key: source}
+	var lines []string
+	for _, line := range strings.Split(string(data), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "#include") {
+			body.includes = append(body.includes, trimmed)
+			continue
+		}
+		lines = append(lines, line)
+	}
+	body.text = strings.TrimSpace(strings.Join(lines, "\n"))
+	return body, nil
+}
+
+// mergeMemberOrders merges the modules' member lists into one order that
+// keeps every list's order, or reports the first disagreement.
+func mergeMemberOrders(lists [][]string) ([]string, error) {
+	at := make([]int, len(lists))
+	position := make([]map[string]int, len(lists))
+	total := map[string]bool{}
+	for index, list := range lists {
+		position[index] = map[string]int{}
+		for i, name := range list {
+			position[index][name] = i
+			total[name] = true
+		}
+	}
+	var merged []string
+	for len(merged) < len(total) {
+		placed := false
+		for index, list := range lists {
+			if at[index] >= len(list) {
+				continue
+			}
+			candidate := list[at[index]]
+			ready := true
+			for other := range lists {
+				if pos, ok := position[other][candidate]; ok && pos != at[other] {
+					ready = false
+					break
+				}
+			}
+			if !ready {
+				continue
+			}
+			merged = append(merged, candidate)
+			for other := range lists {
+				if pos, ok := position[other][candidate]; ok && pos == at[other] {
+					at[other]++
+				}
+			}
+			placed = true
+			break
+		}
+		if !placed {
+			var heads []string
+			for index, list := range lists {
+				if at[index] < len(list) {
+					heads = append(heads, list[at[index]])
+				}
+			}
+			return nil, fmt.Errorf("the modules order the members differently around %s", strings.Join(heads, ", "))
+		}
+	}
+	return merged, nil
+}
+
+// renderUnitSource writes the merged unit: the include block, then every
+// member in merged order. A body that only some modules compile is wrapped
+// in those modules' program macros; a member with several bodies gets one
+// wrapped block per body, in module order. Returns the text and how many
+// members sit under conditionals.
+func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]map[string]*unitMemberBody, bodyModules map[string]map[string][]*moduleSpec) ([]byte, int) {
+	moduleIndex := map[*moduleSpec]int{}
+	for index, m := range order {
+		moduleIndex[m] = index
+	}
+	var includes []string
+	seen := map[string]bool{}
+	addIncludes := func(list []string) {
+		for _, include := range list {
+			if !seen[include] {
+				seen[include] = true
+				includes = append(includes, include)
+			}
+		}
+	}
+	var blocks []string
+	conditional := 0
+	for _, name := range merged {
+		keys := make([]string, 0, len(bodies[name]))
+		for key := range bodies[name] {
+			keys = append(keys, key)
+		}
+		sort.Slice(keys, func(i, j int) bool {
+			return moduleIndex[bodyModules[name][keys[i]][0]] < moduleIndex[bodyModules[name][keys[j]][0]]
+		})
+		for _, key := range keys {
+			body := bodies[name][key]
+			addIncludes(body.includes)
+			modules := bodyModules[name][key]
+			if len(keys) == 1 && len(modules) == len(order) {
+				blocks = append(blocks, body.text)
+				continue
+			}
+			conditional++
+			var tests []string
+			for _, m := range modules {
+				tests = append(tests, "defined("+moduleMacro(m.ID)+")")
+			}
+			guard := "#if " + strings.Join(tests, " || ")
+			if len(modules) == 1 {
+				guard = "#ifdef " + moduleMacro(modules[0].ID)
+			}
+			blocks = append(blocks, guard+"\n"+body.text+"\n#endif")
+		}
+	}
+	text := strings.Join(blocks, "\n\n") + "\n"
+	if len(includes) > 0 {
+		text = strings.Join(includes, "\n") + "\n\n" + text
+	}
+	return []byte(text), conditional
 }

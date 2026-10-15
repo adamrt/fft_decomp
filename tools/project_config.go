@@ -93,9 +93,46 @@ type defineSpec struct {
 // definePrefix starts every per-module build constant.
 const definePrefix = "VARIANT_"
 
-// defineFlags renders the module's defines as preprocessor flags.
+// moduleMacroPrefix starts the macro the build defines for each program, so
+// a shared source can keep a program-specific block: FFT_BATTLE, FFT_WORLD,
+// FFT_EVENT_BUNIT, FFT_EFFECT_E000.
+const moduleMacroPrefix = "FFT_"
+
+// moduleMacro names the program macro of a module id or family.
+func moduleMacro(id string) string {
+	return moduleMacroPrefix + strings.ToUpper(strings.ReplaceAll(id, "-", "_"))
+}
+
+// macroNames lists the program macros a compile of this module defines: its
+// own and, for an overlay family such as event-bunit, the family's (FFT_EVENT).
+func (m *moduleSpec) macroNames() []string {
+	names := []string{moduleMacro(m.ID)}
+	if family, _, ok := strings.Cut(m.ID, "-"); ok {
+		names = append(names, moduleMacro(family))
+	}
+	return names
+}
+
+// macros maps every macro a compile of this module defines to its value:
+// the program macros (1) and the VARIANT_ constants.
+func (m *moduleSpec) macros() map[string]string {
+	macros := make(map[string]string, len(m.Defines)+2)
+	for _, name := range m.macroNames() {
+		macros[name] = "1"
+	}
+	for _, define := range m.Defines {
+		macros[define.Name] = define.Value
+	}
+	return macros
+}
+
+// defineFlags renders the module's program macros and defines as
+// preprocessor flags.
 func (m *moduleSpec) defineFlags() []string {
-	flags := make([]string, 0, len(m.Defines))
+	flags := make([]string, 0, len(m.Defines)+2)
+	for _, name := range m.macroNames() {
+		flags = append(flags, "-D"+name+"=1")
+	}
 	for _, define := range m.Defines {
 		flags = append(flags, "-D"+define.Name+"="+define.Value)
 	}
@@ -824,7 +861,7 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 			for index, f := range members {
 				symbols[index] = f.Name
 			}
-			if err := validateUnitSource(p.root, unit.Source, symbols); err != nil {
+			if err := validateUnitSourceFor(p.root, m, unit.Source, symbols); err != nil {
 				fail("%s: %v", where, err)
 			}
 		}
@@ -879,7 +916,7 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 		fail("%v", err)
 	}
 	problems = append(problems, validateDefines(p.root, config)...)
-	problems = append(problems, validateVariantNames(config)...)
+	problems = append(problems, validateVariantNames(p.root, config)...)
 	if len(problems) > 0 {
 		if len(problems) > 40 {
 			problems = append(problems[:40], fmt.Sprintf("... and %d more", len(problems)-40))

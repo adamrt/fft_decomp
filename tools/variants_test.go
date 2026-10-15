@@ -18,14 +18,14 @@ func TestDefinesRenderCanonicallyAndReachCompileFlags(t *testing.T) {
 		t.Fatal(err)
 	}
 	battle, _ := config.module("battle")
-	if flags := strings.Join(battle.defineFlags(), " "); flags != "-DVARIANT_B=0x10 -DVARIANT_A=16" && flags != "-DVARIANT_A=16 -DVARIANT_B=0x10" {
+	if flags := strings.Join(battle.defineFlags(), " "); flags != "-DFFT_BATTLE=1 -DVARIANT_B=0x10 -DVARIANT_A=16" && flags != "-DFFT_BATTLE=1 -DVARIANT_A=16 -DVARIANT_B=0x10" {
 		t.Fatalf("flags = %q", flags)
 	}
 	rendered := string(renderModuleConfig(battle))
 	if !strings.Contains(rendered, "\ndefines: {VARIANT_A: 16, VARIANT_B: 0x10}\n") {
 		t.Fatalf("rendered:\n%s", rendered)
 	}
-	if flags := strings.Join(battle.defineFlags(), " "); flags != "-DVARIANT_A=16 -DVARIANT_B=0x10" {
+	if flags := strings.Join(battle.defineFlags(), " "); flags != "-DFFT_BATTLE=1 -DVARIANT_A=16 -DVARIANT_B=0x10" {
 		t.Fatalf("normalized flags = %q", flags)
 	}
 }
@@ -62,7 +62,7 @@ func TestValidateDefinesEnforcesTheVariantContract(t *testing.T) {
 		},
 		"source defines the macro": {
 			files: map[string]string{"src/battle/battle_helper.c": "#define VARIANT_PAGES 53\nvoid battle_helper(void) { int n = VARIANT_PAGES; }\n"},
-			want:  "come only from target defines",
+			want:  "come only from the build",
 		},
 		"header uses the macro": {
 			yaml:  "defines: {VARIANT_PAGES: 53}\n",
@@ -121,7 +121,7 @@ func TestValidateVariantNamesRequiresTheSuffixForPerModuleBodies(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	problems := validateVariantNames(config)
+	problems := validateVariantNames(p.root, config)
 	if len(problems) != 1 || !strings.Contains(problems[0], "battle_helper has a body under src/battle and src/event") {
 		t.Fatalf("problems = %v", problems)
 	}
@@ -136,7 +136,7 @@ func TestValidateVariantNamesRequiresTheSuffixForPerModuleBodies(t *testing.T) {
 	if config, err = p.loadProjectConfig(); err != nil {
 		t.Fatal(err)
 	}
-	problems = validateVariantNames(config)
+	problems = validateVariantNames(p.root, config)
 	if len(problems) != 2 || !strings.Contains(problems[1], "main_second_variant has one body (src/main)") {
 		t.Fatalf("problems = %v", problems)
 	}
@@ -145,5 +145,35 @@ func TestValidateVariantNamesRequiresTheSuffixForPerModuleBodies(t *testing.T) {
 		if got := moduleSourceDir(source); got != want {
 			t.Errorf("moduleSourceDir(%s) = %q, want %q", source, got, want)
 		}
+	}
+}
+
+func TestModuleMacrosAndConditionalRules(t *testing.T) {
+	for id, want := range map[string][]string{"battle": {"FFT_BATTLE"}, "event-bunit": {"FFT_EVENT_BUNIT", "FFT_EVENT"}, "effect-e000": {"FFT_EFFECT_E000", "FFT_EFFECT"}} {
+		m := &moduleSpec{ID: id}
+		if got := strings.Join(m.macroNames(), " "); got != strings.Join(want, " ") {
+			t.Fatalf("%s macros = %q, want %q", id, got, want)
+		}
+	}
+	m := &moduleSpec{ID: "world", Defines: []defineSpec{{Name: "VARIANT_X", Value: "17"}}}
+	if macros := m.macros(); macros["FFT_WORLD"] != "1" || macros["VARIANT_X"] != "17" || len(macros) != 2 {
+		t.Fatalf("macros = %v", macros)
+	}
+	known := map[string]bool{"FFT_BATTLE": true, "FFT_WORLD": true}
+	source := "#ifdef FFT_BATTLE\nint a;\n#elif defined(FFT_WORLD) || VARIANT_X > 1\nint b;\n#else\nint c;\n#endif\n#if DEBUG\n#endif\n#ifdef FFT_NOWHERE\n#endif\n"
+	problems := conditionalProblems("src/x.c", []byte(source), known, false)
+	if len(problems) != 2 || !strings.Contains(problems[0], "tests DEBUG") || !strings.Contains(problems[1], "FFT_NOWHERE, which names no module") {
+		t.Fatalf("source problems = %v", problems)
+	}
+	if problems := conditionalProblems("src/y.c", []byte("#ifndef NULL\n#    define NULL 0\n#endif\n"), known, false); len(problems) != 0 {
+		t.Fatalf("the NULL guard idiom must pass: %v", problems)
+	}
+	header := "#ifndef X_H\n#define X_H\n#ifdef FFT_BATTLE\n#endif\n#if VARIANT_X\n#endif\n#endif\n"
+	problems = conditionalProblems("include/x.h", []byte(header), known, true)
+	if len(problems) != 2 || !strings.Contains(problems[0], "tests FFT_BATTLE; headers may not") || !strings.Contains(problems[1], "tests VARIANT_X; headers may not") {
+		t.Fatalf("header problems = %v", problems)
+	}
+	if match := preprocessorDefine.FindSubmatch([]byte("#define FFT_BATTLE 1\n")); match == nil {
+		t.Fatal("a source defining a program macro must be caught")
 	}
 }

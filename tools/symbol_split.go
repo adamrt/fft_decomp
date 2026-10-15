@@ -62,6 +62,13 @@ func (p project) splitSymbolsCommand(args []string) error {
 		if err != nil {
 			return err
 		}
+		for number, line := range strings.Split(string(data), "\n") {
+			if trimmed := strings.TrimSpace(line); strings.HasPrefix(trimmed, "#") {
+				if word, _ := directiveWord(trimmed); conditionalDirectives[word] {
+					return fmt.Errorf("%s:%d: unit %s has program conditionals; split it by hand", source, number+1, *name)
+				}
+			}
+		}
 		pieces, includes, err := splitUnitSource(string(data), order)
 		if err != nil {
 			return fmt.Errorf("%s: %w", source, err)

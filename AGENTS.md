@@ -14,11 +14,17 @@ preserving every original byte.
   `units:` list names merged sources (original translation units) compiled
   once per module; a member row carries `unit:` instead of `source:`, members
   follow one another in address order, and the file defines exactly those
-  functions in that order. A module's
+  functions in that order, as that module sees the file. A module's
   `defines:` map holds the `VARIANT_` constants (passed as `-D`) that let one
   source serve programs built with different values; only a trial-proven
-  constant goes there, never a behavioral difference, and headers never use
-  them.
+  constant goes there, and headers never use them. Every compile also
+  defines the program macro `FFT_<MODULE>` (`FFT_BATTLE`, `FFT_WORLD`,
+  `FFT_EVENT_BUNIT`, plus `FFT_EVENT` and `FFT_EFFECT` for the overlay
+  families). A shared source may keep a program-specific block under
+  `#ifdef FFT_X` only as the minimal difference a trial proved in every
+  module that compiles the file, with a one-line comment saying what the
+  other program does. Sources test only `FFT_` and `VARIANT_` names in
+  conditionals; headers test neither.
 - Preserve retail bugs and ABI disagreements. Explain them briefly in source
   comments or `QUIRKS.md`.
 - Keep drafts, experiments, extracted files and generated output under ignored
@@ -66,7 +72,8 @@ not the module umbrella.
 - Use established module/subsystem prefixes and concise, behavior-based names.
   A shared thing takes one subsystem name without a module prefix; a prefix
   stays only on things one module has. The `_variant` suffix is reserved for a
-  function whose body each module links separately under the shared name
+  function with more than one body under one shared name: bodies in several
+  folders, or several conditional definitions in one shared file
   (check-config enforces it both ways); name other alternates by what
   distinguishes them. Preserve game terminology and evidence-based unknown
   names rather than guessing.
@@ -101,7 +108,8 @@ make build                       # rebuild the byte-identical disc
 make diff FUNC=f [MODULE=x]       # inspect one original-byte mismatch
 make library-diff ARGS="..."      # measure a scratch library candidate
 make compile-commands            # refresh editor metadata after source moves
-make symbols ACTION=unit ARGS="--name N --source src/x/N.c M:E..."  # merge entries into a unit
+make symbols ACTION=unit ARGS="--name N --source src/x/N.c M:E..."  # merge entries (or whole units) into a unit
+make units ARGS="--evidence=required|strong"  # unit map from binary evidence only
 ```
 
 `MODULE` accepts module IDs, overlay aliases, lists, `event` or `effect`.

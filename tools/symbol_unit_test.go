@@ -54,8 +54,20 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 	if err := p.unitSymbolsCommand([]string{"--name", "gap", "--source", "src/battle/gap.c", "battle:menu_b3", "battle:map_d1"}); err == nil || !strings.Contains(err.Error(), "does not follow") {
 		t.Fatalf("gap error = %v", err)
 	}
-	if err := p.moveSymbolsCommand([]string{"--dir", "src/menu", "battle:menu_b1"}); err == nil || !strings.Contains(err.Error(), "within unit") {
-		t.Fatalf("move guard error = %v", err)
+	// Moving a unit member moves the unit's file for every module listing it.
+	if err := p.moveSymbolsCommand([]string{"--dir", "src/menu", "battle:menu_b1"}); err != nil {
+		t.Fatalf("move unit: %v", err)
+	}
+	config, err = p.loadCheckedConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	battle = config.byID["battle"]
+	if battle.unit("menu_b").Source != "src/menu/menu_b.c" || battle.sourceOf(battle.function("menu_b2")) != "src/menu/menu_b.c" {
+		t.Fatalf("unit not moved: %+v", battle.Units)
+	}
+	if err := p.moveSymbolsCommand([]string{"--dir", "src/battle", "battle:menu_b2"}); err != nil {
+		t.Fatalf("move back: %v", err)
 	}
 	// A unit file may carry its own leading comment; members still get the includes.
 	unitPath := filepath.Join(p.root, "src", "battle", "menu_b.c")
@@ -87,5 +99,106 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 		if err := validateSourceDefinition(p.root, "src/battle/"+name+".c", name); err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestUnitSymbolsCommandAbsorbsUnitsAndWrapsModuleBodies(t *testing.T) {
+	p := unitsTestProject(t)
+	// A shared two-function unit in both modules first.
+	if err := p.unitSymbolsCommand([]string{"--name", "menu_a_head", "--source", "src/menu/menu_a_head.c", "battle:menu_a1", "battle:menu_a2", "world:menu_a1", "world:menu_a2"}); err != nil {
+		t.Fatal(err)
+	}
+	// Listing one member of it without the other is refused.
+	err := p.unitSymbolsCommand([]string{"--name", "menu_all", "--source", "src/menu/menu_all.c", "battle:menu_a1", "battle:menu_a3", "world:menu_a1", "world:menu_a3"})
+	if err == nil || !strings.Contains(err.Error(), "list all of that unit's members or none") {
+		t.Fatalf("partial absorb error = %v", err)
+	}
+	// Absorb it into a larger unit with a battle-only tail: menu_b1 follows
+	// menu_a4 in battle and world has no such function. The fixture compiles
+	// menu_b1 at -O1; give it the default profile so the unit has one.
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	config.byID["battle"].function("menu_b1").Profile = ""
+	for path, rendered := range renderConfigFiles(config) {
+		if err := os.WriteFile(filepath.Join(p.root, filepath.FromSlash(path)), rendered, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	args := []string{"--name", "menu_all", "--source", "src/menu/menu_all.c"}
+	for _, name := range []string{"menu_a1", "menu_a2", "menu_a3", "menu_a4", "menu_b1"} {
+		args = append(args, "battle:"+name)
+	}
+	for _, name := range []string{"menu_a1", "menu_a2", "menu_a3", "menu_a4"} {
+		args = append(args, "world:"+name)
+	}
+	if err := p.unitSymbolsCommand(args); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(p.root, "src", "menu", "menu_all.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	if !strings.Contains(text, "#ifdef FFT_BATTLE\nextern int g_b_scalar;\nint menu_b1(void) { return g_b_scalar / 3; }\n#endif") {
+		t.Fatalf("battle-only member not wrapped:\n%s", text)
+	}
+	if strings.Count(text, "#if") != 1 || strings.Index(text, "menu_a4(void)") > strings.Index(text, "#ifdef FFT_BATTLE") {
+		t.Fatalf("unexpected conditionals or order:\n%s", text)
+	}
+	if _, err := os.Stat(filepath.Join(p.root, "src", "menu", "menu_a_head.c")); !os.IsNotExist(err) {
+		t.Fatal("absorbed unit file should be removed")
+	}
+	config, err = p.loadCheckedConfig()
+	if err != nil {
+		t.Fatalf("checked config: %v", err)
+	}
+	battle, world := config.byID["battle"], config.byID["world"]
+	if battle.unit("menu_a_head") != nil || world.unit("menu_a_head") != nil || battle.unit("menu_all") == nil || world.unit("menu_all") == nil {
+		t.Fatalf("units = %+v / %+v", battle.Units, world.Units)
+	}
+	if battle.function("menu_b1").Unit != "menu_all" || world.function("menu_a4").Unit != "menu_all" {
+		t.Fatalf("members not rebound: %+v / %+v", *battle.function("menu_b1"), *world.function("menu_a4"))
+	}
+	if err := validateUnitSourceFor(p.root, world, "src/menu/menu_all.c", []string{"menu_a1", "menu_a2", "menu_a3", "menu_a4"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := validateUnitSourceFor(p.root, battle, "src/menu/menu_all.c", []string{"menu_a1", "menu_a2", "menu_a3", "menu_a4"}); err == nil {
+		t.Fatal("battle sees menu_b1 too; the member list without it must fail")
+	}
+	// Per-module bodies of one name become one block per body.
+	if err := os.WriteFile(filepath.Join(p.root, "src", "text", "text_c1_world.c"), []byte("extern int g_c_table[];\nint text_c1(void) { return g_c_table[1]; }\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	world.function("text_c1").Source = "src/text/text_c1_world.c"
+	for path, rendered := range renderConfigFiles(config) {
+		if err := os.WriteFile(filepath.Join(p.root, filepath.FromSlash(path)), rendered, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := p.unitSymbolsCommand([]string{"--name", "text_c", "--source", "src/text/text_c.c", "battle:text_c1", "battle:text_c2", "world:text_c1", "world:text_c2"}); err != nil {
+		t.Fatal(err)
+	}
+	data, err = os.ReadFile(filepath.Join(p.root, "src", "text", "text_c.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text = string(data)
+	if !strings.HasPrefix(text, "#ifdef FFT_BATTLE\nextern int g_c_table[];\nint text_c1(void) { return g_c_table[0]; }\n#endif\n\n#ifdef FFT_WORLD\nextern int g_c_table[];\nint text_c1(void) { return g_c_table[1]; }\n#endif\n\nint text_c2(void)") {
+		t.Fatalf("per-module bodies not wrapped in module order:\n%s", text)
+	}
+	// A unit with conditionals cannot be split or absorbed mechanically.
+	if err := p.splitSymbolsCommand([]string{"--unit", "text_c"}); err == nil || !strings.Contains(err.Error(), "program conditionals") {
+		t.Fatalf("split error = %v", err)
+	}
+	if err := p.unitSymbolsCommand([]string{"--name", "text_more", "--source", "src/text/text_more.c", "battle:text_c1", "battle:text_c2", "battle:text_c3", "world:text_c1", "world:text_c2", "world:text_c3"}); err == nil || !strings.Contains(err.Error(), "program conditionals") {
+		t.Fatalf("absorb error = %v", err)
+	}
+	if order, err := mergeMemberOrders([][]string{{"a", "b", "c"}, {"a", "c", "d"}, {"x", "b"}}); err != nil || strings.Join(order, " ") != "a x b c d" {
+		t.Fatalf("merged order = %v, %v", order, err)
+	}
+	if _, err := mergeMemberOrders([][]string{{"a", "b"}, {"b", "a"}}); err == nil || !strings.Contains(err.Error(), "order the members differently") {
+		t.Fatalf("inconsistent order error = %v", err)
 	}
 }

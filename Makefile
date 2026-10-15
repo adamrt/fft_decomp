@@ -115,7 +115,7 @@ share-audit: image ## Report shared C implementation candidates as JSON (MODULE=
 	@$(TOOLS) share-audit $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: units
-units: image ## Reconstruct original translation units into build/analysis/units (MODULE=x, ARGS="...")
+units: image ## Reconstruct original translation units into build/analysis/units (MODULE=x, ARGS="--evidence=required|strong ...")
 	@$(TOOLS) units $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: unit-check
@@ -136,7 +136,7 @@ twins: image ## Group byte-equivalent functions across modules under consistent 
 	@$(TOOLS) twins $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: symbols
-symbols: image ## Symbol edits: ACTION=rename-function|rename-global ARGS="--old A --new B"; ACTION=unify ARGS="--new N --header fft/x.h OLD..."; ACTION=share ARGS="--to src/x/n.c MODULE:ENTRY..."; ACTION=move ARGS="--dir src/x MODULE:ENTRY..."; ACTION=unit ARGS="--name N --source src/x/N.c MODULE:ENTRY..."; ACTION=split ARGS="--unit N"
+symbols: image ## Symbol edits: ACTION=rename-function|rename-global ARGS="--old A --new B"; ACTION=unify ARGS="--new N --header fft/x.h OLD..."; ACTION=share ARGS="--to src/x/n.c MODULE:ENTRY..."; ACTION=move ARGS="--dir src/x MODULE:ENTRY..."; ACTION=unit ARGS="--name N --source src/x/N.c MODULE:ENTRY..." (members may differ per module and absorb existing units); ACTION=split ARGS="--unit N"
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }
 	@$(TOOLS) symbols "$(ACTION)" $(ARGS)
 

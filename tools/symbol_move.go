@@ -10,7 +10,8 @@ import (
 )
 
 // moveSymbolsCommand moves entries' source files into another folder under
-// src/ and rebinds every entry compiled from each moved file. Names do not
+// src/ and rebinds every entry compiled from each moved file; a unit member
+// moves its unit's file for every module that lists the unit. Names do not
 // change; rename-function does that.
 func (p project) moveSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols move", flag.ContinueOnError)
@@ -51,9 +52,6 @@ func (p project) moveSymbolsCommand(args []string) error {
 			if f.Asm != "" {
 				return fmt.Errorf("%s:%s is assembly", m.ID, entry)
 			}
-			if f.Unit != "" {
-				return fmt.Errorf("%s:%s is compiled within unit %s", m.ID, entry, f.Unit)
-			}
 			from := m.sourceOf(f)
 			if filepath.ToSlash(filepath.Dir(from)) == clean {
 				return fmt.Errorf("%s is already under %s", from, clean)
@@ -80,8 +78,17 @@ func (p project) moveSymbolsCommand(args []string) error {
 		}
 		rebound := 0
 		for _, m := range config.Modules {
+			for index := range m.Units {
+				if to, ok := moves[m.Units[index].Source]; ok {
+					m.Units[index].Source = to
+					rebound++
+				}
+			}
 			for index := range m.Functions {
 				f := &m.Functions[index]
+				if f.Unit != "" {
+					continue
+				}
 				if to, ok := moves[m.sourceOf(f)]; ok {
 					f.Source = to
 					rebound++

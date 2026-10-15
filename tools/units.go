@@ -21,9 +21,31 @@ import (
 
 type unitsOptions struct {
 	minConfidence string
-	minScore      int // when set, a cut needs at least this score (or certainty) to split
+	minScore      int    // when set, a cut needs at least this score (or certainty) to split
+	evidence      string // when set, only "required" (certain) or "strong" (certain plus exact cross-module and data-shift) cuts split
 	maxOwners     int
 	outDir        string
+}
+
+// strongCutKinds are the boundary signals with an exact position that the
+// binary itself provides, beyond the certain ones: an object one linked
+// program carries and another lacks, a reorder, and a data-distance shift.
+var strongCutKinds = map[string]bool{"alignment_divergence": true, "alignment_reorder": true, "data_shift": true}
+
+// evidenceEligible reports whether a cut qualifies under an evidence mode.
+func (cut *unitCut) evidenceEligible(mode string) bool {
+	if cut.certain {
+		return true
+	}
+	if mode != "strong" {
+		return false
+	}
+	for _, evidence := range cut.evidence {
+		if strongCutKinds[evidence.Kind] {
+			return true
+		}
+	}
+	return false
 }
 
 var unitConfidenceRank = map[string]int{"none": 0, "low": 1, "medium": 2, "high": 3}
@@ -169,12 +191,13 @@ func (p project) unitsCommand(args []string) error {
 	minConfidence := flags.String("min-confidence", "low", "lowest boundary confidence eligible to split units: low, medium or high")
 	maxOwners := flags.Int("max-owners", 3, "data referenced by more functions than this is widely shared")
 	minScore := flags.Int("min-score", 0, "when set, a cut needs at least this score (or certainty) to split a unit")
+	evidence := flags.String("evidence", "", "when set, only required (certain) or strong (certain plus exact cross-module and data-shift) cuts split units")
 	out := flags.String("out", "build/analysis/units", "report directory under build/")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	usage := errors.New("usage: tools units [--module=MODULES] [--min-confidence=low|medium|high] [--max-owners=N] [--out=build/DIR]")
-	if flags.NArg() != 0 || *maxOwners < 1 || unitConfidenceRank[*minConfidence] == 0 {
+	usage := errors.New("usage: tools units [--module=MODULES] [--min-confidence=low|medium|high] [--min-score=N] [--evidence=required|strong] [--max-owners=N] [--out=build/DIR]")
+	if flags.NArg() != 0 || *maxOwners < 1 || unitConfidenceRank[*minConfidence] == 0 || (*evidence != "" && *evidence != "required" && *evidence != "strong") {
 		return usage
 	}
 	outDir := filepath.ToSlash(filepath.Clean(*out))
@@ -191,7 +214,7 @@ func (p project) unitsCommand(args []string) error {
 			return err
 		}
 	}
-	options := unitsOptions{minConfidence: *minConfidence, minScore: *minScore, maxOwners: *maxOwners, outDir: outDir}
+	options := unitsOptions{minConfidence: *minConfidence, minScore: *minScore, evidence: *evidence, maxOwners: *maxOwners, outDir: outDir}
 	analyses, err := p.reconstructUnits(config, options)
 	if err != nil {
 		return err
@@ -862,6 +885,12 @@ func (an *unitModuleAnalysis) formUnits(group *unitGroup, options unitsOptions) 
 		cut := &group.cuts[k-1]
 		forced[k] = cut.certain
 		eligible[k] = cut.certain || (cut.score > 0 && unitConfidenceRank[cut.confidence] >= minimum && cut.score >= options.minScore)
+		if options.evidence != "" {
+			// Evidence mode: every qualifying cut is taken and nothing
+			// else splits, so units are the maximal spans the binary allows.
+			forced[k] = cut.evidenceEligible(options.evidence)
+			eligible[k] = forced[k]
+		}
 		score[k] = cut.score
 		if cut.certain && score[k] < 6 {
 			score[k] = 6
