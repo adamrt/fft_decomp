@@ -93,6 +93,8 @@ void battle_move_set_unit_step_delta_edge_to_center(
     unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
 }
 
+/* The original wrote the body of battle_move_set_unit_step_delta_center_to_edge a second time as
+ * battle_move_set_float_step_delta_center_to_edge. */
 /* Set the unit's per-frame velocity for the first half of a step, from the tile
  * center to its exit edge.
  *
@@ -132,6 +134,8 @@ void battle_move_set_float_step_delta_center_to_edge(
     unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
 }
 
+/* The original wrote the body of battle_move_set_unit_step_delta_edge_to_center a second time as
+ * battle_move_set_float_step_delta_edge_to_center. */
 /* Set the unit's per-frame velocity for the second half of a step, from the entry
  * edge of a tile to its center.
  *
@@ -1832,6 +1836,8 @@ void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit
     }
 }
 
+/* The original wrote the body of battle_move_update_unit_step_to_destination_tile_center a second time as
+ * battle_move_update_float_step_to_destination_tile_center. */
 /* Step handler of the WALK_TO_CENTER and CLIMB_TO_CENTER stages (and of the
  * knockback step): advance the unit one frame toward the center of its
  * destination tile.

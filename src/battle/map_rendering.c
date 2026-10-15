@@ -344,8 +344,10 @@ static const u32 g_map_weather_splash_uv_rects_rodata[8] = {
     0x000f000f,
     0x00a00010,
     0x000f000f,
-}; /* g_map_weather_drop_uv_rects: read-only table of this object (24 bytes at 0x800e6b50), kept byte for byte
-    * until it is written as its typed definition. */
+};
+
+/* g_map_weather_drop_uv_rects: read-only table of this object (24 bytes at 0x800e6b50), kept byte for byte
+ * until it is written as its typed definition. */
 static const u32 g_map_weather_drop_uv_rects_rodata[6] = {
     0x00a00010,
     0x000f000f,
@@ -353,8 +355,10 @@ static const u32 g_map_weather_drop_uv_rects_rodata[6] = {
     0x000f000f,
     0x00a00030,
     0x000f000f,
-}; /* g_map_white_cvector: read-only table of this object (8 bytes at 0x800e6b68), kept byte for byte
-    * until it is written as its typed definition. */
+};
+
+/* g_map_white_cvector: read-only table of this object (8 bytes at 0x800e6b68), kept byte for byte
+ * until it is written as its typed definition. */
 static const u32 g_map_white_cvector_rodata[2] = {
     0x00ffffff,
     0x00000000,
@@ -1586,8 +1590,10 @@ void battle_target_set_tile_background_color(s32 mode, s32 unused) {
 static const u32 g_map_zero_svector_rodata[2] = {
     0x00000000,
     0x00000000,
-}; /* g_map_unit_scale_vector: read-only table of this object (20 bytes at 0x800e6b9c), kept byte for byte
-    * until it is written as its typed definition. */
+};
+
+/* g_map_unit_scale_vector: read-only table of this object (20 bytes at 0x800e6b9c), kept byte for byte
+ * until it is written as its typed definition. */
 static const u32 g_map_unit_scale_vector_rodata[5] = {
     0x00001000,
     0x00001000,

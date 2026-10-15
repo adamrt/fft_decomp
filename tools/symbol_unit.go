@@ -393,6 +393,7 @@ func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]un
 			}
 			text = regexp.MustCompile(`\b`+regexp.QuoteMeta(override.Name)+`\b`).ReplaceAllString(text, replacement)
 		}
+		text = fmt.Sprintf("/* The original wrote the body of %s a second time as %s. */\n", f.SourceSymbol, f.Name) + text
 		return &unitMemberBody{key: body.key + "@" + f.Name, includes: body.includes, text: text}, nil
 	}
 	if f.Unit != "" {
@@ -608,6 +609,9 @@ func ownedRodataTables(image []byte, m *moduleSpec, members []*functionSpec) ([]
 		}
 		if after == "" {
 			return nil, nil, fmt.Errorf("table %s at 0x%08x precedes every member literal", row.Name, addr)
+		}
+		if fillers[after] != "" {
+			fillers[after] += "\n\n"
 		}
 		fillers[after] += renderRodataFiller(row.Name, addr, bytes)
 	}

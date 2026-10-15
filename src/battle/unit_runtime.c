@@ -10,6 +10,8 @@
 #include "fft/main.h"
 #include "psx/types.h"
 
+/* The original wrote the body of battle_unit_add_event_offset_by_runtime_id a second time as
+ * battle_unit_add_event_offset_by_runtime_id_unused. */
 /* Add `amount` to a unit's event offset. The copy every caller uses;
  * battle_unit_add_event_offset_by_runtime_id_unused is the same routine compiled twice. */
 s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVECTOR* amount) {

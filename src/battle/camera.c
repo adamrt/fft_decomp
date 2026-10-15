@@ -193,6 +193,8 @@ void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 f
         (*destination_value - g_camera_zoom.vz) / animation_frames);
 }
 
+/* The original wrote the body of battle_camera_set_real_coord_delta_from_values a second time as
+ * battle_camera_set_zoom_delta_from_values. */
 /* Starts a linear move of the camera position by the vector `values` (20.12) over
  * frame_count frames (divided by the animation speed). No retail code calls it. */
 void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_count) {
@@ -205,6 +207,8 @@ void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_co
         values->vz / animation_frames);
 }
 
+/* The original wrote the body of battle_camera_update_real_coord_animation a second time as
+ * battle_camera_update_zoom_animation. */
 /* Advances the camera-position move by one frame while its countdown runs. Only
  * the uncalled camera_set_real_coord_delta_* routines start the countdown,
  * so nothing moves in retail. */
