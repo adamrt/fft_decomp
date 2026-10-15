@@ -1,6 +1,24 @@
+#include "fft/unit.h"
+#include "fft/battle_action.h"
+#include "fft/battle_map.h"
+#include "fft/battle_menu.h"
+#include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
-#include "fft/unit.h"
+
+/* Returns 1 when any current status byte is set; missing battle IDs remain unchecked. */
+s32 unit_has_any_current_status(s32 battle_id) {
+    unit_stats_t* unit;
+    s32 index;
+
+    unit = battle_unit_get_stats_from_battle_id(battle_id);
+    for (index = 0; index < STATUS_BYTE_COUNT; index++) {
+        if (unit->status_sets.current[index] != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* Builds the two-column status list for the stored unit: every set bit of
  * the current status bytes becomes text id 0x8800 + byte * 8 + bit, then
@@ -69,4 +87,23 @@ void menu_build_unit_status_list(void) {
         g_menu_status_list_layout.columns.hidden_rows = 0;
     }
     menu_run_scrolling_ability_list_thread_variant();
+}
+
+/* Copy the selected panel and tile records into four caller-owned buffers. */
+void menu_copy_billboard_data_out(menu_unit_status_record_t* banner, menu_active_unit_t* unit,
+    menu_status_panel_slot_storage_t* billboard, map_selected_tile_t* cursor_tile) {
+    mem_copy_bytes_nonempty(banner, &g_menu_selected_unit_status, sizeof(g_menu_selected_unit_status));
+    mem_copy_bytes_nonempty(unit, &g_menu_selected_unit, sizeof(g_menu_selected_unit));
+    mem_copy_bytes_nonempty(billboard, &g_menu_selected_unit_fields, sizeof(g_menu_selected_unit_fields));
+    mem_copy_bytes_nonempty(cursor_tile, &g_map_selected_tile_data, sizeof(g_map_selected_tile_data));
+}
+
+/* Load the active-turn banner, the active-turn unit record and the billboard data
+ * from the caller's copies: the inverse of menu_copy_billboard_data_out,
+ * without the cursor tile record. REQUIRE.OUT publishes its own records this way. */
+void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
+    const menu_status_panel_slot_storage_t* billboard) {
+    mem_copy_bytes_nonempty(&g_menu_selected_unit_status, banner, sizeof(g_menu_selected_unit_status));
+    mem_copy_bytes_nonempty(&g_menu_selected_unit, unit, sizeof(g_menu_selected_unit));
+    mem_copy_bytes_nonempty(&g_menu_selected_unit_fields, billboard, sizeof(g_menu_selected_unit_fields));
 }

@@ -91,6 +91,24 @@ func (p project) unitSymbolsCommand(args []string) error {
 				return fmt.Errorf("%s is already a member source; choose a new path for the unit", clean)
 			}
 		}
+		// Every entry compiled from a member file must join the unit: a file
+		// left behind would be a second body of the same function.
+		listed := map[string]bool{}
+		for _, m := range order {
+			for _, f := range byModule[m] {
+				listed[m.ID+":"+f.Name] = true
+			}
+		}
+		for _, m := range config.Modules {
+			for index := range m.Functions {
+				f := &m.Functions[index]
+				for _, existing := range mergedSources {
+					if m.sourceOf(f) == existing && !listed[m.ID+":"+f.Name] {
+						return fmt.Errorf("%s:%s also compiles %s; list it in the unit or leave that function out", m.ID, f.Name, existing)
+					}
+				}
+			}
+		}
 		if _, err := os.Stat(filepath.Join(p.root, filepath.FromSlash(clean))); err == nil {
 			return fmt.Errorf("%s already exists", clean)
 		}
