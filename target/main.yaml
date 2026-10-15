@@ -760,7 +760,7 @@ functions:
   - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b, unit: system_stubs_and_overlay_returns}
   - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, unit: system_stubs_and_overlay_returns}
   - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: system_stubs_and_overlay_returns}
-  - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/gfx/gfx_build_zodiac_sprite_polygon.c}
+  - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f}
   - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e, unit: zodiac_and_overlay_loading}
   - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7, unit: zodiac_and_overlay_loading}
@@ -815,7 +815,7 @@ functions:
   - {addr: 0x8005c8ec, size: 152, name: main_unit_calculate_move_jump, hash: bad416e1a3b09741, unit: unit_stats_and_party}
   - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007", source: src/unit/main/main_unit_store_character_names.c}
   - {addr: 0x8005cbd0, size: 148, name: main_party_calculate_highest_level, hash: 149c03a50c0d50b6}
-  - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e, source: src/memory/mem_copy_bytes_source_first.c}
+  - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e}
   - {addr: 0x8005cc98, size: 476, name: main_unit_calculate_random_equipment, hash: 57273afe761c2134, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005ce74, size: 584, name: main_unit_learn_job_abilities, hash: 64efa860cd5766d5, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005d0bc, size: 776, name: main_unit_calculate_rsm, hash: 89c806b79390dc83, unit: unit_equipment_jobs_and_abilities}
@@ -846,7 +846,7 @@ functions:
   - {addr: 0x8005e1b0, size: 80, name: main_unit_has_status_in_set, hash: 8b0638eb283dca01, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005e200, size: 44, name: main_ability_get_known, hash: f03d26c875a93271, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005e22c, size: 40, name: main_util_copy_action_data, hash: 3a97060e78efbf69, unit: unit_equipment_jobs_and_abilities}
-  - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/memory/mem_copy_bytes_source_first.c, source_symbol: mem_copy_bytes_source_first}
+  - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/main/mem_copy_bytes_source_first.c, source_symbol: mem_copy_bytes_source_first}
   - {addr: 0x8005e288, size: 496, name: main_item_get_total_equipment_quantity, hash: 3e5d96728559f2cd, unit: item_quantities_and_status}
   - {addr: 0x8005e478, size: 112, name: main_unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: item_quantities_and_status}
   - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, unit: item_quantities_and_status}

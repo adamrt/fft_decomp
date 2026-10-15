@@ -538,8 +538,8 @@ functions:
   - {addr: 0x8008b2fc, size: 16, name: camera_get_current_real_coords, hash: ecfdf2b076fb4d0d, unit: unit_motion_and_camera_deltas}
   - {addr: 0x8008b30c, size: 44, name: camera_set_current_real_coords, hash: 1d830242a07abb29, unit: unit_motion_and_camera_deltas}
   - {addr: 0x8008b338, size: 148, name: camera_set_real_coord_delta_from_destination, hash: abe756829f2d9f31, unit: unit_motion_and_camera_deltas}
-  - {addr: 0x8008b3cc, size: 116, name: camera_set_real_coord_delta_from_values, hash: 65001faab3c7464b, source: src/camera/camera_set_real_coord_delta_from_values.c}
-  - {addr: 0x8008b440, size: 120, name: camera_update_real_coord_animation, hash: 84697252f7c9cdc4, source: src/camera/camera_update_real_coord_animation.c}
+  - {addr: 0x8008b3cc, size: 116, name: camera_set_real_coord_delta_from_values, hash: 65001faab3c7464b}
+  - {addr: 0x8008b440, size: 120, name: camera_update_real_coord_animation, hash: 84697252f7c9cdc4}
   - {addr: 0x8008b4b8, size: 56, name: camera_save_screen_offset, hash: cf7553f0e127d510, unit: camera_screen_offset_and_zoom}
   - {addr: 0x8008b4f0, size: 56, name: camera_restore_screen_offset, hash: 6cb6fb28912c6cdc, unit: camera_screen_offset_and_zoom}
   - {addr: 0x8008b528, size: 16, name: camera_get_screen_offset, hash: b81de340ddcadb3e, unit: camera_screen_offset_and_zoom}
@@ -552,8 +552,8 @@ functions:
   - {addr: 0x8008b824, size: 16, name: camera_get_zoom, hash: f818d7eb175daeb0, unit: camera_screen_offset_and_zoom}
   - {addr: 0x8008b834, size: 44, name: camera_set_zoom, hash: 997b6c1f8a81dbd7, unit: camera_screen_offset_and_zoom}
   - {addr: 0x8008b860, size: 148, name: camera_set_zoom_delta_from_value, hash: dcce3478f5e41fb8, unit: camera_screen_offset_and_zoom}
-  - {addr: 0x8008b8f4, size: 116, name: camera_set_zoom_delta_from_values, hash: f6b7b2baf0083ff9, source: src/camera/camera_set_real_coord_delta_from_values.c, source_symbol: camera_set_real_coord_delta_from_values}
-  - {addr: 0x8008b968, size: 120, name: camera_update_zoom_animation, hash: 8340a44fd2a65f16, source: src/camera/camera_update_real_coord_animation.c, source_symbol: camera_update_real_coord_animation}
+  - {addr: 0x8008b8f4, size: 116, name: camera_set_zoom_delta_from_values, hash: f6b7b2baf0083ff9, source: src/battle/camera_set_real_coord_delta_from_values.c, source_symbol: camera_set_real_coord_delta_from_values}
+  - {addr: 0x8008b968, size: 120, name: camera_update_zoom_animation, hash: 8340a44fd2a65f16, source: src/battle/camera_update_real_coord_animation.c, source_symbol: camera_update_real_coord_animation}
   - {addr: 0x8008b9e0, size: 56, name: camera_save_rotation, hash: 56a116cb1234da2b, unit: camera_rotation_and_unit_mounting}
   - {addr: 0x8008ba18, size: 56, name: camera_restore_rotation, hash: 3ee9b66c5c061eea, unit: camera_rotation_and_unit_mounting}
   - {addr: 0x8008ba50, size: 16, name: camera_get_rotation, hash: c0df002b98af4d4f, unit: camera_rotation_and_unit_mounting}
@@ -597,8 +597,8 @@ functions:
   - {addr: 0x8008c664, size: 360, name: move_start_unit_walk_to, hash: ba93e4c07cc705a5, unit: camera_rotation_and_unit_mounting}
   - {addr: 0x8008c7cc, size: 280, name: battle_unit_prepare_rider_dismount, hash: db39375d33c662a9, unit: camera_rotation_and_unit_mounting}
   - {addr: 0x8008c8e4, size: 92, name: battle_unit_mount_by_runtime_ids, hash: 9a343375417f3209, unit: camera_rotation_and_unit_mounting}
-  - {addr: 0x8008c940, size: 132, name: battle_unit_add_event_offset_by_runtime_id_unused, hash: 493d784ed1d983b8, source: src/unit/battle/battle_unit_add_event_offset_by_runtime_id.c, source_symbol: battle_unit_add_event_offset_by_runtime_id}
-  - {addr: 0x8008c9c4, size: 132, name: battle_unit_add_event_offset_by_runtime_id, hash: 3e04eb8aa78e5d6a, source: src/unit/battle/battle_unit_add_event_offset_by_runtime_id.c}
+  - {addr: 0x8008c940, size: 132, name: battle_unit_add_event_offset_by_runtime_id_unused, hash: 493d784ed1d983b8, source: src/battle/battle_unit_add_event_offset_by_runtime_id.c, source_symbol: battle_unit_add_event_offset_by_runtime_id}
+  - {addr: 0x8008c9c4, size: 132, name: battle_unit_add_event_offset_by_runtime_id, hash: 3e04eb8aa78e5d6a}
   - {addr: 0x8008ca48, size: 52, name: battle_unit_get_event_offset_by_runtime_id, hash: dda54d06ce7c4f0d, unit: unit_evtchr_vram_and_effect_calls}
   - {addr: 0x8008ca7c, size: 312, name: battle_unit_place_in_new_location, hash: 3aa051ec1d7b87ff, unit: unit_evtchr_vram_and_effect_calls}
   - {addr: 0x8008cbb4, size: 36, name: battle_unit_has_runtime_id, hash: c4f802b7a57a883d, unit: unit_evtchr_vram_and_effect_calls}
@@ -811,7 +811,7 @@ functions:
   - {addr: 0x8012fd8c, size: 1024, name: text_measure, hash: db194586ee0af6b5, unit: text_display_messages}
   - {addr: 0x8013018c, size: 1180, name: text_measure_pixels, hash: 92c6053117958c19, unit: text_display_messages}
   - {addr: 0x80130628, size: 240, name: menu_render_text_image_at_record_origin, hash: 458d39111bad80dd, unit: text_display_messages}
-  - {addr: 0x80130718, size: 188, name: text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/text/text_advance_cursor_with_backreferences.c}
+  - {addr: 0x80130718, size: 188, name: text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/event/text_advance_cursor_with_backreferences.c}
   - {addr: 0x801307d4, size: 160, name: text_advance_cursor_with_separate_backreference_state, hash: 267aa40059dcef97, unit: text_cursor_and_backreferences}
   - {addr: 0x80130874, size: 76, name: text_print_fnt_value_and_next, hash: 32702a6e63eea736, unit: text_cursor_and_backreferences}
   - {addr: 0x801308c0, size: 8036, name: text_run_dialog_thread_variant, hash: c934521a2b7c294a, unit: text_cursor_and_backreferences}
@@ -826,7 +826,7 @@ functions:
   - {addr: 0x80132ff0, size: 88, name: unit_copy_world_coords_to_scratch, hash: 0a61ba2db8f7e33b, unit: text_cursor_and_backreferences}
   - {addr: 0x80133048, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, unit: text_cursor_and_backreferences}
   - {addr: 0x80133088, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, unit: text_cursor_and_backreferences}
-  - {addr: 0x801330e4, size: 76, name: unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/unit/unit_copy_world_coords_to_vector.c}
+  - {addr: 0x801330e4, size: 76, name: unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/event/unit_copy_world_coords_to_vector.c}
   - {addr: 0x80133130, size: 32, name: unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb, unit: unit_coords_and_return_stubs}
   - {addr: 0x80133150, size: 8, name: script_report_missing_unit_stub, hash: 6d64edf91449c1b1, unit: unit_coords_and_return_stubs}
   - {addr: 0x80133158, size: 828, name: script_resolve_runtime_id, hash: 0dc0e1d2249ad0d7, unit: unit_coords_and_return_stubs}
@@ -1037,8 +1037,8 @@ functions:
   - {addr: 0x801439c0, size: 220, name: camera_load_state_from_script_variables_variant, hash: 36400181c54e0d33, unit: menu_selection_sfx_and_script_threads}
   - {addr: 0x80143a9c, size: 204, name: camera_store_state_to_script_variables_variant, hash: ccad4d511e07c5fe, unit: menu_selection_sfx_and_script_threads}
   - {addr: 0x80143b68, size: 24, name: map_get_weather, hash: d20bef566195fa38, unit: menu_selection_sfx_and_script_threads}
-  - {addr: 0x80143b80, size: 40, name: script_run_next_event, hash: 5f28a3f8beb0666a, source: src/script/script_run_next_event.c}
-  - {addr: 0x80143ba8, size: 40, name: script_run_next_event_unused, hash: 5f28a3f8beb0666a, source: src/script/script_run_next_event.c, source_symbol: script_run_next_event}
+  - {addr: 0x80143b80, size: 40, name: script_run_next_event, hash: 5f28a3f8beb0666a, source: src/event/script_run_next_event.c}
+  - {addr: 0x80143ba8, size: 40, name: script_run_next_event_unused, hash: 5f28a3f8beb0666a, source: src/event/script_run_next_event.c, source_symbol: script_run_next_event}
   - {addr: 0x80143bd0, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1, unit: script_unit_instructions}
   - {addr: 0x80143bd8, size: 9120, name: script_execute_event_variant, hash: f5e240270b084a49, unit: script_unit_instructions}
   - {addr: 0x80145f78, size: 140, name: script_load_next_event, hash: 86e825112a99969c, unit: script_unit_instructions}
@@ -1129,7 +1129,7 @@ functions:
   - {addr: 0x8014b320, size: 48, name: menu_display_text_entry_past_choice_marks, hash: f66a71771a466060, unit: script_sound_camera_and_menus}
   - {addr: 0x8014b350, size: 68, name: menu_display_text_string, hash: ebe5d1168147a19f, unit: script_sound_camera_and_menus}
   - {addr: 0x8014b394, size: 1684, name: menu_display_text_variant, hash: 80dbacaf4e422774, unit: script_sound_camera_and_menus}
-  - {addr: 0x8014ba28, size: 188, name: menu_text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/text/text_advance_cursor_with_backreferences.c, source_symbol: text_advance_cursor_with_backreferences}
+  - {addr: 0x8014ba28, size: 188, name: menu_text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/event/text_advance_cursor_with_backreferences.c, source_symbol: text_advance_cursor_with_backreferences}
   - {addr: 0x8014bf54, size: 40, name: mem_copy_bytes_nonempty, hash: 73eb033d6e800062, unit: memory_copies_and_nibbles}
   - {addr: 0x8014bf7c, size: 72, name: gfx_read_packed_nibble, hash: ae6f7bc884e8a41c, unit: memory_copies_and_nibbles}
   - {addr: 0x8014bfc4, size: 80, name: gfx_write_packed_nibble, hash: b50d2f23553363d9, unit: memory_copies_and_nibbles}
@@ -1907,7 +1907,7 @@ functions:
   - {addr: 0x801aa8e8, size: 56, name: effect_reset_subsystems, hash: f3527d103117930d, unit: effect_vectors_and_camera_setup}
   - {addr: 0x801aa920, size: 476, name: effect_copy_camera_angles_and_world_coords, hash: c7215f9b955ff294, unit: effect_vectors_and_camera_setup}
   - {addr: 0x801aaafc, size: 72, name: effect_init_camera_and_screen_data, hash: 8f9921926194b436, unit: effect_vectors_and_camera_setup}
-  - {addr: 0x801aab44, size: 76, name: effect_copy_unit_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/unit/unit_copy_world_coords_to_vector.c, source_symbol: unit_copy_world_coords_to_vector}
+  - {addr: 0x801aab44, size: 76, name: effect_copy_unit_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/event/unit_copy_world_coords_to_vector.c, source_symbol: unit_copy_world_coords_to_vector}
   - {addr: 0x801aab90, size: 152, name: effect_convert_tile_coords_to_world_coords, hash: ad6c44c18d8a70fa, unit: effect_secondary_system_and_camera}
   - {addr: 0x801aac28, size: 264, name: camera_choose_unblocked_rotation_for_tile, hash: ddce90512167476e, unit: effect_secondary_system_and_camera}
   - {addr: 0x801aad30, size: 12, name: battle_noop_801aad30, hash: 4514fa940d280a8d, unit: effect_secondary_system_and_camera}
