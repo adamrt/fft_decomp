@@ -20,9 +20,9 @@ s32 equip_menu_update_equipment(void) {
         g_equip_menu_ready = 1;
         g_equip_selected_slot = equip_menu_init_selection_value(2, 0);
         thread_suspend(EQUIP_THREAD_SLOT_COMMAND_MENU);
-        equip_thread_request_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
-        equip_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
-        equip_thread_request_stop(EQUIP_THREAD_SLOT_EQUIPMENT_LIST);
+        menu_request_thread_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(EQUIP_THREAD_SLOT_EQUIPMENT_LIST);
         equip_menu_init_scrollable_list_core(0, 0, 0);
         g_equip_menu_substate = MENU_ITEM_LIST_STATE_BROWSE;
         g_equip_unit_banner_enabled = 0;
@@ -64,16 +64,16 @@ s32 equip_menu_update_equipment(void) {
     if (g_menu_input_lock_mode != 0 || thread_is_running(2) != 0) {
         override = 1;
     }
-    equip_menu_dispatch_with_override(&g_equip_equipment_render_commands, input, override);
+    menu_run_script_with_palette_mode(&g_equip_equipment_render_commands, input, override);
     equip_menu_draw_equipment_slot_marker(0, g_equip_selected_slot, g_menu_input_lock_mode);
     if (g_equip_menu_list_entry_count != 0) {
         item_id = g_equip_item_list_entries[g_equip_menu_selected_list_index];
         if (item_id < ITEM_ID_THROWABLE_FIRST) {
-            equip_menu_draw_weapon_hand_icons(item_id);
+            menu_draw_weapon_hand_icons(item_id);
         }
         if (g_equip_item_list_entries[g_equip_menu_selected_list_index] >= ITEM_ID_HEADGEAR_FIRST
             && g_equip_item_list_entries[g_equip_menu_selected_list_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
-            equip_menu_dispatch_with_override(&g_equip_armor_bonus_render_commands, 0, 0);
+            menu_run_script_with_palette_mode(&g_equip_armor_bonus_render_commands, 0, 0);
         }
         equip_menu_draw_item_status_list(g_equip_item_list_entries[g_equip_menu_selected_list_index]);
     }

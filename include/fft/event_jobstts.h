@@ -255,19 +255,15 @@ extern jobstts_command_handler_t g_jobstts_cmd_handlers[22];
 extern s32 g_jobstts_cmd_stream_input;
 extern menu_window_command_t g_jobstts_cmd_window_interior_command;
 
-menu_instruction_t* jobstts_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_cmd_draw_background_tiles_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_cmd_draw_textured_quad_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_run_if_else_group_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_run_if_group_handler(menu_instruction_t* instruction);
 void jobstts_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
 void jobstts_cmd_run_stream_with_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
-menu_instruction_t* jobstts_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_set_semitrans_handler(menu_instruction_t* instruction);
 
@@ -278,10 +274,7 @@ extern const char g_jobstts_text_decimal_format[];
 extern s32 g_jobstts_text_selection_id;
 
 const u8* jobstts_text_find_entry_by_index(const u8* text, s16 terminators, s32 unused_2);
-void jobstts_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused,
-    s32 max_chars, u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
 void jobstts_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
-void jobstts_text_start_help_thread(s32 thread_data);
 
 /* bit streams */
 extern u8 g_jobstts_bits_primary_reset;

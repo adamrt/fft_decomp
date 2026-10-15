@@ -80,7 +80,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         if (previous_mode != 0 && g_menu_input_lock_mode == 0) {
             text_restore_section_pointers();
         }
-        bunit_menu_set_palette_mode(g_menu_input_lock_mode);
+        menu_set_palette_mode(g_menu_input_lock_mode);
         if (g_bunit_menu_current_menu == BUNIT_MENU_JOB) {
             bunit_menu_update_job();
             /* The target also passes a1 = 0 to this one-argument callee. */

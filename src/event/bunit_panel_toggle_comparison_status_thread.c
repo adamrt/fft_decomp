@@ -13,6 +13,6 @@ void bunit_panel_toggle_comparison_status_thread(s32 enable) {
                 THREAD_SCREEN_SLOT_COMPARISON_STATUS, &g_bunit_comparison_display_thread_params, 0, 0);
         }
     } else {
-        bunit_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
     }
 }

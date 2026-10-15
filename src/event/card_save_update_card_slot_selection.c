@@ -17,7 +17,7 @@ void card_save_update_card_slot_selection(void) {
     }
 
     g_card_save_slot_selection_thread_state
-        = card_thread_start_managed(THREAD_SCREEN_SLOT_MENU, g_card_save_card_slot_selection_descriptor);
+        = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_card_slot_selection_descriptor);
     if (g_card_save_slot_selection_thread_state == 0) {
         if (g_card_save_slot_index == -1) {
             if (g_card_save_completed != 0) {

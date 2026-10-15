@@ -30,7 +30,7 @@ menu_instruction_t* bunit_cmd_draw_row_callback_quad_handler(menu_instruction_t*
         g_bunit_cmd_row_quad.sprite.v = entry->v;
         g_menu_gfx_clut_id = entry->clut;
         g_menu_gfx_texture_page = entry->tpage;
-        bunit_cmd_draw_textured_quad_handler((menu_instruction_t*)&g_bunit_cmd_row_quad);
+        menu_cmd_draw_textured_quad_handler((menu_instruction_t*)&g_bunit_cmd_row_quad);
     }
     return menu_next_instruction(cmd);
 }

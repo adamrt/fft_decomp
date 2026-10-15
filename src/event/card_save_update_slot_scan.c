@@ -126,7 +126,7 @@ void card_save_update_slot_scan(void) {
             g_card_save_slot_scan_active = 0;
         } else {
             g_card_save_format_prompt_active
-                = card_thread_start_managed(THREAD_SCREEN_SLOT_MENU, g_card_save_format_prompt_descriptor);
+                = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_format_prompt_descriptor);
             if (g_card_save_format_prompt_active == 0 && g_card_save_slot_index == 0) {
                 card_menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_formatting_message_descriptor);
             }
@@ -138,7 +138,7 @@ void card_save_update_slot_scan(void) {
         result = card_io_poll_operation_result();
         card_menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_card_error_prompt_descriptor);
         if ((g_card_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_card_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
-            card_thread_stop_and_clear_state(THREAD_SCREEN_SLOT_MENU);
+            menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);
             g_card_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_card_save_error_prompt_closing = 1;
         } else if (result == CARD_IO_RESULT_NEW_CARD || result == CARD_IO_RESULT_COMPLETE) {

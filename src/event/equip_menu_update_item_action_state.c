@@ -29,14 +29,14 @@ s32 equip_menu_update_item_action_state(void) {
 
     g_equip_text_help_message_id = g_equip_item_action_active_menu->selected_index + 0x102F;
     g_equip_item_action_menu_active
-        = equip_thread_start_managed(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_action_active_menu);
+        = menu_start_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_action_active_menu);
     if (g_equip_item_action_menu_active == 0) {
         return MENU_ITEM_LIST_STATE_BROWSE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_equip_item_action_menu.selected_index == 2) {
             g_equip_item_action_menu_active = 0;
-            equip_thread_stop_and_clear_state(EQUIP_THREAD_SLOT_POPUP_MENU);
+            menu_stop_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU);
             return MENU_ITEM_LIST_STATE_SORT_ORDER;
         }
         g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;

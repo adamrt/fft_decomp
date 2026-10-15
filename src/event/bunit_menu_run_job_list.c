@@ -46,7 +46,7 @@ s32 bunit_menu_run_job_list(void) {
         bunit_job_calculate_current_jp(g_bunit_menu_list_selected_index);
         bunit_job_calculate_current_total_jp(g_bunit_menu_list_selected_index);
         menu_job_calculate_next_level_jp_requirement(g_bunit_menu_list_selected_index);
-        bunit_menu_set_selection_record(9, g_bunit_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
+        menu_set_selection_record(9, g_bunit_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
         g_bunit_job_list_initialized = 0;
         g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;

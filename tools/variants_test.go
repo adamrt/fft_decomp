@@ -141,7 +141,7 @@ func TestValidateVariantNamesRequiresTheSuffixForPerModuleBodies(t *testing.T) {
 		t.Fatalf("problems = %v", problems)
 	}
 	// Shared and library trees never count as module folders.
-	for source, want := range map[string]string{"src/shared/menu/x.c": "", "src/lib/psyq/libgpu/x.c": "", "src/battle/x.c": "src/battle", "src/event/x.c": "src/event"} {
+	for source, want := range map[string]string{"src/shared/menu/x.c": "src/shared/menu", "src/lib/psyq/libgpu/x.c": "", "src/battle/x.c": "src/battle", "src/event/x.c": "src/event"} {
 		if got := moduleSourceDir(source); got != want {
 			t.Errorf("moduleSourceDir(%s) = %q, want %q", source, got, want)
 		}

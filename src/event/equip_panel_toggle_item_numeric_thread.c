@@ -12,7 +12,7 @@ void equip_panel_toggle_item_numeric_thread(s32 enable) {
             thread_set_parameters(EQUIP_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_equip_item_numeric_panel_params, 0, 0);
         }
     } else {
-        equip_thread_request_stop(EQUIP_THREAD_SLOT_ITEM_NUMERIC);
+        menu_request_thread_stop(EQUIP_THREAD_SLOT_ITEM_NUMERIC);
     }
     g_equip_item_numeric_thread_enabled = enable;
     g_equip_numeric_panel_style = enable;

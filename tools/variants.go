@@ -133,19 +133,20 @@ func validateDefines(root string, config *projectConfig) []string {
 	return problems
 }
 
-// moduleSourceDir names the per-module folder of a source, or "" for the
-// shared and library trees.
+// moduleSourceDir names the folder a body lives in, or "" for the library
+// trees. A shared folder counts: a shared body beside a module's own body
+// under one name is a variant pair too.
 func moduleSourceDir(source string) string {
 	parts := strings.Split(source, "/")
-	if len(parts) < 3 || parts[0] != "src" || parts[1] == "shared" || parts[1] == "lib" {
+	if len(parts) < 3 || parts[0] != "src" || parts[1] == "lib" {
 		return ""
 	}
 	return filepath.ToSlash(filepath.Dir(source))
 }
 
 // validateVariantNames enforces the _variant rule: a C definition symbol
-// with bodies under more than one module folder ends in _variant, and a
-// _variant symbol has bodies under at least two.
+// with bodies under more than one folder ends in _variant, and a _variant
+// symbol has bodies under at least two.
 func validateVariantNames(config *projectConfig) []string {
 	dirs := make(map[string]map[string]bool)
 	for _, m := range config.Modules {

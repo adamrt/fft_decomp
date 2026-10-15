@@ -110,7 +110,7 @@ menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* comma
     g_menu_window_interior_command.y = command->window.y;
     g_menu_window_interior_command.width = command->window.width;
     g_menu_window_interior_command.height = command->window.height;
-    bunit_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_menu_window_interior_command);
+    menu_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_menu_window_interior_command);
 
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;

@@ -300,7 +300,7 @@ void equip_panel_run_unit_status_thread(void) {
                 anim_state = 2;
             }
         }
-        menu_build_unit_portrait_transition(
+        gfx_build_portrait_transition_primitives(
             portrait_rect, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
         {
             CVECTOR* color;

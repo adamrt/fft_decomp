@@ -74,7 +74,7 @@ s32 equip_menu_run_equip_mode(void) {
                 g_equip_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_menu_row_callbacks[0].value = equip_menu_get_entry_item_equipped_count;
             g_menu_row_callbacks[1].value = equip_menu_get_entry_item_count;
-            g_menu_row_callbacks[2].icon = equip_item_build_type_icon_source;
+            g_menu_row_callbacks[2].icon = menu_build_item_type_icon_source;
             g_menu_row_callbacks[3].icon = equip_menu_get_entry_item_icon_source;
             g_equip_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             g_equip_equip_item_previewed_cursor = -1;

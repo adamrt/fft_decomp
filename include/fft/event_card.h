@@ -296,9 +296,6 @@ extern u8 g_card_save_slot_selection_thread_state;
 extern u8 g_card_thread_status_snapshot[16];
 
 void card_menu_stop_thread_and_wait(s32 thread_id);
-void card_thread_request_stop(s32 id);
-s32 card_thread_start_managed(s32 thread_id, menu_entry_t* descriptor);
-void card_thread_stop_and_clear_state(s32 id);
 
 /* sound */
 extern u8 g_card_sound_queued_effect_id; /* main_sfx_e */

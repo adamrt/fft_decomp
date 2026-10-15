@@ -46,7 +46,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     g_jobstts_previous_event_mode = g_menu_input_lock_mode;
     jobstts_input_update_with_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
-        jobstts_text_start_help_thread(3);
+        menu_text_start_help_thread(3);
     }
     if (g_jobstts_previous_event_mode != 0 && g_menu_input_lock_mode == 0) {
         text_restore_section_pointers();

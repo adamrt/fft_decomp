@@ -12,6 +12,6 @@ void equip_panel_toggle_unit_status_thread(s32 enable) {
             thread_set_parameters(EQUIP_THREAD_SLOT_UNIT_STATUS, (s32)g_equip_unit_status_panel_params, 0, 0);
         }
     } else {
-        equip_thread_request_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
+        menu_request_thread_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
     }
 }

@@ -234,7 +234,6 @@ extern s32 g_require_status_display_redraw_request;
 extern menu_status_thread_t g_require_status_display_thread_params;
 
 void require_panel_copy_stats_to_gauges(struct unit_stats* unit, menu_unit_status_record_t* output);
-void require_panel_run_character_status_thread(void);
 void require_panel_set_transition_value(s32 value);
 void require_panel_run_unit_status_thread(void);
 
@@ -266,7 +265,6 @@ extern menu_status_thread_t g_require_numeric_editor_thread_params;
 
 void require_editor_load_party_unit(s32 unused, s32 party_index);
 void require_editor_load_selected_unit(void);
-void require_editor_run_numeric_thread(void);
 
 /* menus */
 extern s16 g_require_menu_selection_result;
@@ -296,7 +294,6 @@ extern POLY_GT4 g_require_gfx_poly_gt4_array_32[];
 extern POLY_GT4 g_require_gfx_poly_gt4_array_8[];
 extern POLY_GT4 g_require_gfx_poly_gt4_buffers[2][40];
 
-void require_gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 void require_gfx_build_portrait_poly_ft4(s32 flags, POLY_FT4* output);
 void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread);

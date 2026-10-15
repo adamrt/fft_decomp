@@ -73,7 +73,7 @@ s32 bunit_ability_update_list_menu(void) {
     category = bunit_menu_update_horizontal_selection_and_mark_change(
         4, 0, g_bunit_menu_input_repeat_mask, MAIN_SFX_PAGE_SWITCH);
     if (category != g_menu_ability_category) {
-        bunit_menu_set_selection_record(g_menu_ability_category + 10, g_bunit_menu_list_selected_index,
+        menu_set_selection_record(g_menu_ability_category + 10, g_bunit_menu_list_selected_index,
             g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         bunit_ability_build_list(

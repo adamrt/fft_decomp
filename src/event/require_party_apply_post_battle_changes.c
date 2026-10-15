@@ -98,10 +98,10 @@ void require_party_apply_post_battle_changes(void) {
                 thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, require_panel_run_unit_status_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_require_status_display_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, require_editor_run_numeric_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_require_numeric_editor_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, require_panel_run_character_status_thread);
+                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)transition_c_ptr, 0, 0);
             } else {
                 u16 index_value;

@@ -87,14 +87,14 @@ void bunit_menu_update_unit_browser(void) {
         g_bunit_comparison_display_offset_y = slide * 8;
         if (--g_bunit_status_banner_slide_step < -0xF) {
             g_bunit_status_banner_slide_step = 0;
-            bunit_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
+            menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     } else if (slide > 0) {
         g_bunit_status_display_offset_y = slide * 8 - 0x78;
         g_bunit_comparison_display_offset_y = slide * 8 + 0x90;
         if (++g_bunit_status_banner_slide_step >= 0x10) {
             g_bunit_status_banner_slide_step = 0;
-            bunit_thread_request_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
+            menu_request_thread_stop(THREAD_SCREEN_SLOT_COMPARISON_STATUS);
         }
     }
 }

@@ -68,7 +68,7 @@ s32 equip_item_run_type_order_mode(void) {
             &g_equip_selected_unit_stat_summary, &g_equip_item_preview_stat_detail, 0);
         g_equip_item_numeric_panel_redraw = 1;
     }
-    if (equip_thread_start_managed(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_type_order_active_menu) == 0) {
+    if (menu_start_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_type_order_active_menu) == 0) {
         g_equip_type_order_ready = 0;
         return MENU_ITEM_LIST_STATE_ACTION;
     }

@@ -144,9 +144,6 @@ extern s8 g_equip_remove_item_previewed_slot;
 s32 equip_item_adjust_inventory_count(s32 item_entry, s32 delta);
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 void equip_item_build_inventory_totals(void);
-menu_icon_source_t* equip_item_build_type_icon_source(s32 index);
-void equip_item_calculate_swap_stat_delta(
-    menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* out, s16 from, s16 to, s32 slot);
 s32 equip_item_get_equipped_count(s32 item_entry);
 s32 equip_item_get_ranking_value(s32 item_id);
 s32 equip_item_get_total_count(s16 item_id);
@@ -331,11 +328,9 @@ item_menu_category_e equip_item_get_menu_category(s16 item_id);
 s32 equip_item_run_rearrange_mode(void);
 void equip_menu_clear_selection_records(void);
 void equip_menu_clear_selection_values(void);
-void equip_menu_dispatch_with_override(menu_instruction_t* script, s32 state, s32 override);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
 void equip_menu_draw_item_status_list(s16 item_id);
 void equip_menu_draw_scrollable_list(const menu_instruction_t* script);
-void equip_menu_draw_weapon_hand_icons(s16 weapon_id);
 s32 equip_menu_get_entry_item_count(s32 row);
 s32 equip_menu_get_entry_item_equipped_count(s32 row);
 menu_icon_source_t* equip_menu_get_entry_item_icon_source(s32 row);
@@ -446,12 +441,8 @@ extern s8 g_equip_gfx_transition_frame;
 extern s16 g_equip_gfx_window_zoom_percent[];
 extern s8 g_equip_gfx_zoom_draw_area_active;
 
-void equip_gfx_enqueue_line_f2(const point16_t endpoints[2], const rgb24_t* color, u8 semitrans, s32 otag_index);
-void equip_gfx_enqueue_textured_quad_corners(
-    const textured_quad_source_t* descriptor, const rgb24_t* color, s32 semitrans, s32 otag_index);
 void equip_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 unused_priority);
-void equip_gfx_enqueue_tile(const RECT* rect, const rgb24_t* color, u8 semitrans, s32 otag_index);
 s32 equip_gfx_get_transition_frame(void);
 void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
@@ -487,23 +478,19 @@ extern s32 g_equip_cmd_stream_input;
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equip_command_menu;
 
-menu_instruction_t* equip_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_draw_textured_quad_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_tiled_rectangle_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 void equip_cmd_run_stream(menu_instruction_t* instruction, s32 input);
-menu_instruction_t* equip_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_set_otag_index_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_set_semitrans_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_set_zoomed_draw_area_handler(menu_instruction_t* instruction);
 
 /* text */
 extern u16 g_equip_text_clut_0_mode0;
@@ -523,7 +510,6 @@ extern u8 g_equip_text_restore_pending;
 void equip_text_concatenate_entries(const u8* text_table, u8* dst, s16* list, s32 separate);
 void equip_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entry, glyph_blit_t* out, s32 count);
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);
-void equip_text_start_help_thread(s32 text_id);
 
 /* bit streams */
 extern s32 g_equip_bits_reader_1_index;
@@ -559,10 +545,6 @@ extern u8 g_equip_text_thread_running_state;
 extern u8 g_equip_thread_idle_stop_pending;
 extern menu_gradient_panel_prims_t g_equip_thread_indicator_packets[2][2];
 
-void equip_text_start_character_thread_if_idle(s32 thread_id, s32 parameter_0, s32 parameter_1, s32 parameter_2);
-void equip_thread_request_stop(s32 id);
-s32 equip_thread_start_managed(s32 thread_id, menu_entry_t* desc);
-void equip_thread_stop_and_clear_state(s32 id);
 void equip_thread_wait_forever(void);
 
 /* sound */

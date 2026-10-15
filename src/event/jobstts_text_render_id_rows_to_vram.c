@@ -21,7 +21,7 @@ void jobstts_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, 
         ids[0] = *list;
         ids[1] = -1;
         memset(buffer, 0, 0x800);
-        jobstts_text_render_encoded_ids_to_image(buffer, &clear_rect, 0xA, 0x64, text_table, ids, 0x64, 0xE7, style);
+        menu_text_render_encoded_ids_to_image(buffer, &clear_rect, 0xA, 0x64, text_table, ids, 0x64, 0xE7, style);
         gfx_load_image_and_wait(&dest_rect, buffer);
         list += 1;
         dest_rect.y += 0x10;

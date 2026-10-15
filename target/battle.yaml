@@ -765,7 +765,7 @@ functions:
   - {addr: 0x80133494, size: 16, name: battle_return_argument_80133494, hash: ce4ad88e7603b293}
   - {addr: 0x801334a4, size: 196, name: text_build_unit_name_list, hash: 9e89b0033e7a7acd, source: src/shared/text/text_build_unit_name_list.c}
   - {addr: 0x80133568, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, source: src/shared/text/text_fill_field_with_terminators.c}
-  - {addr: 0x80133588, size: 460, name: menu_copy_unit_data_to_status_billboard, hash: dc13403e0a243847, source: src/shared/menu/menu_copy_unit_data_to_status_billboard.c}
+  - {addr: 0x80133588, size: 460, name: menu_copy_unit_data_to_status_billboard_variant, hash: dc13403e0a243847, source: src/shared/menu/menu_copy_unit_data_to_status_billboard_variant.c}
   - {addr: 0x80133754, size: 1348, name: menu_load_selected_unit, hash: 30054c92a903e0bd, source: src/shared/menu/menu_load_selected_unit.c}
   - {addr: 0x80133c98, size: 84, name: unit_has_any_current_status, hash: 9d1f779a473099b3, source: src/shared/unit/unit_has_any_current_status.c}
   - {addr: 0x80133cec, size: 516, name: menu_build_unit_status_list, hash: 640d7ce85b1f418f, source: src/shared/menu/menu_build_unit_status_list.c}

@@ -10,6 +10,6 @@ menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* stream) {
     endpoints[0].y = stream->line.y0;
     endpoints[1].x = stream->line.x1;
     endpoints[1].y = stream->line.y1;
-    equip_gfx_enqueue_line_f2(endpoints, &stream->line.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
+    gfx_enqueue_line_f2(endpoints, &stream->line.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
     return menu_next_instruction(stream);
 }

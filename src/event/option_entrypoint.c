@@ -61,6 +61,6 @@ void option_entrypoint(s32 menu_type) {
         option_menu_start_at_list_thread();
     }
     if (menu_type == OPTION_MENU_DEAD_UNIT) {
-        option_menu_start_dead_unit_threads();
+        menu_start_dead_unit_threads();
     }
 }

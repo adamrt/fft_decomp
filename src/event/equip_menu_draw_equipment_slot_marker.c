@@ -27,7 +27,7 @@ void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override) {
 
     x = g_equip_menu_slot_marker_x[slot];
     width = 0x40;
-    equip_menu_dispatch_with_override(&g_equip_menu_slot_marker_window, EQUIP_SLOT_MARKER_WINDOW_STATE, override);
+    menu_run_script_with_palette_mode(&g_equip_menu_slot_marker_window, EQUIP_SLOT_MARKER_WINDOW_STATE, override);
     marker = &g_equip_menu_slot_marker_rects[slot];
     marker->position.x = x;
     marker->position.y = width - (slot == 0);

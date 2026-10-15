@@ -25,6 +25,6 @@ menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* 
     rect.y = y;
     rect.w = cmd->tile.width;
     rect.h = cmd->tile.height;
-    equip_gfx_enqueue_tile(&rect, &cmd->tile.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
+    gfx_enqueue_tile(&rect, &cmd->tile.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
     return menu_next_instruction(cmd);
 }

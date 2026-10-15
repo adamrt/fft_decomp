@@ -483,10 +483,10 @@ ramza_placed:
                 if (g_attack_panel_status_animation[4] < 2) {
                     g_attack_panel_status_animation[4] = 1;
                 }
-                thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, attack_editor_run_numeric_thread);
+                thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)g_attack_numeric_editor_thread_params, 0, 0);
-                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, attack_panel_run_character_status_thread);
+                thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)g_attack_character_status_frame_config, 0, 0);
                 thread_start(ATTACK_PROMPT_THREAD_SLOT_DETAIL_MARKER, attack_thread_wait_forever);

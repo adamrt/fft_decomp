@@ -280,7 +280,6 @@ extern s32 g_attack_status_display_offset_y[];
 extern s32 g_attack_status_display_thread_params;
 
 void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse);
-void attack_panel_run_character_status_thread(void);
 void attack_panel_run_unit_status_thread(void);
 
 /* numeric editor */
@@ -312,7 +311,6 @@ extern s32 g_attack_numeric_editor_redraw_request;
 extern u8 g_attack_numeric_editor_thread_params[];
 
 void attack_editor_load_party_unit(s32 mode, s32 roster_index);
-void attack_editor_run_numeric_thread(void);
 
 /* menus */
 

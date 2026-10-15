@@ -13,8 +13,7 @@ void equip_item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_stora
     menu_clear_stat_preview(summary_total, detail_total);
 
     for (i = 0; i < 5; i++) {
-        equip_item_calculate_swap_stat_delta(
-            &detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
+        menu_calculate_swap_stat_delta(&detail_delta, &summary_delta, from_items[i] & 0x3FF, to_items[i] & 0x3FF, i);
         menu_subtract_scaled_stat_preview(detail_total, detail_total, &detail_delta, -1);
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
         summary_total->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus += summary_delta.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;

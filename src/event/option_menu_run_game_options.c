@@ -129,7 +129,7 @@ void option_menu_run_game_options(void) {
     accum = 0;
     timer = 0;
     menu_clear_render_buffer(image, entry->inner_width * entry->inner_height / 2);
-    option_menu_draw_text_columns(entry, &row_offset, image);
+    menu_draw_text_columns(entry, &row_offset, image);
     ring = 0;
     image_rect.w = g_menu_text_state.pen.stride >> 2;
     LoadImage(&image_rect, (u32*)image);

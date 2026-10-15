@@ -28,7 +28,7 @@ s32 bunit_menu_run_unit_list_frame(void) {
         }
         if (bunit_gfx_update_increasing_fade() == 0) {
             g_bunit_unit_list_initialized = 0;
-            bunit_thread_request_stop(BUNIT_THREAD_SLOT_MENU);
+            menu_request_thread_stop(BUNIT_THREAD_SLOT_MENU);
             return 0;
         }
         if (g_bunit_unit_list_triangle_menu_open != 0) {

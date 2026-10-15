@@ -11,6 +11,6 @@ void bunit_panel_toggle_unit_status_thread(s32 enable) {
             thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, &g_bunit_status_display_thread_params, 0, 0);
         }
     } else {
-        bunit_thread_request_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
     }
 }

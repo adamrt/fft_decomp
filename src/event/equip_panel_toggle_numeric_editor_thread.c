@@ -12,6 +12,6 @@ void equip_panel_toggle_numeric_editor_thread(s32 enable) {
             thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)g_equip_numeric_panel_params, 0, 0);
         }
     } else {
-        equip_thread_request_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
     }
 }

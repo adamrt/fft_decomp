@@ -35,7 +35,6 @@ extern menu_entry_t g_option_menu_at_list_state[1];
 extern u8 g_option_menu_at_list_text[];
 
 void option_menu_run_at_list(void);
-void option_menu_init_at_list(menu_entry_t* menu);
 void option_menu_start_at_list_thread(void);
 
 /* dead unit */
@@ -44,8 +43,6 @@ extern menu_text_layout_t g_option_dead_unit_menu_entries;
 extern s16 g_option_dead_unit_menu_flags[];
 extern s16 g_option_dead_unit_primary_result;
 extern s16 g_option_dead_unit_secondary_result;
-
-void option_menu_start_dead_unit_threads(void);
 
 /* menus */
 extern menu_text_layout_t g_option_menu_entry_table[1];
@@ -56,7 +53,6 @@ extern u16 g_option_menu_transition_duration;
 extern s16 g_option_menu_transition_timer;
 extern RECT g_option_menu_value_image_rect;
 
-void option_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 u8* option_menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 void option_menu_window_frame_thread(void);
 

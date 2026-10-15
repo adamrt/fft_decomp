@@ -120,7 +120,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_bunit_help_screen_id == MENU_GRID_HELP_NONE
         && bunit_gfx_get_fade_state() == 0) {
-        g_bunit_unit_grid_selected_cell = bunit_menu_update_wrapped_grid_selection(
+        g_bunit_unit_grid_selected_cell = menu_update_wrapped_grid_selection(
             4, 5, g_bunit_unit_reorderable_count - 1, g_bunit_unit_grid_selected_cell, buttons);
         g_bunit_unit_selected_index = g_bunit_unit_reorderable_indices[g_bunit_unit_grid_selected_cell];
     }

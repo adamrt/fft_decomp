@@ -44,7 +44,7 @@ void bunit_gfx_draw_falloff_shaded_rows(s32 y) {
                 rgb[1].r = rgb[1].g = rgb[1].b = shades[row][col + 1];
                 rgb[2].r = rgb[2].g = rgb[2].b = shades[row + 1][col];
                 rgb[3].r = rgb[3].g = rgb[3].b = shades[row + 1][col + 1];
-                bunit_gfx_enqueue_gouraud_textured_quad(&rect, rgb, 0, u == 0x58);
+                gfx_enqueue_gouraud_textured_quad(&rect, rgb, 0, u == 0x58);
             }
         }
     }

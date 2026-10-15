@@ -112,7 +112,7 @@ functions:
   - {addr: 0x800e7b54, size: 8, name: world_return_argument_800e7b54, hash: cc2f57dc1c5c5ee3}
   - {addr: 0x800e7b5c, size: 196, name: text_build_unit_name_list, hash: 9a9afb823d5db8ad, source: src/shared/text/text_build_unit_name_list.c}
   - {addr: 0x800e7c20, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, source: src/shared/text/text_fill_field_with_terminators.c}
-  - {addr: 0x800e7c40, size: 396, name: menu_copy_unit_data_to_status_billboard, hash: 9b61737b18a8d657}
+  - {addr: 0x800e7c40, size: 396, name: menu_copy_unit_data_to_status_billboard_variant, hash: 9b61737b18a8d657}
   - {addr: 0x800e7dcc, size: 1348, name: menu_load_selected_unit, hash: f635c99de88e0baf, source: src/shared/menu/menu_load_selected_unit.c}
   - {addr: 0x800e8310, size: 84, name: unit_has_any_current_status, hash: f4242604b8850c34, source: src/shared/unit/unit_has_any_current_status.c}
   - {addr: 0x800e8364, size: 516, name: menu_build_unit_status_list, hash: 97f6760c5281c86d, source: src/shared/menu/menu_build_unit_status_list.c}
@@ -2370,7 +2370,6 @@ overrides:
   - {function: menu_init_at_list, name: g_option_menu_at_list_secondary_values, addr: 0x801ad144}
   - {function: menu_init_at_list, name: g_option_menu_at_list_text, addr: 0x801ae3d4}
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x801531b0}
-  - {function: menu_load_selected_unit, name: battle_menu_init_monster_skill_check, addr: 0x80182430}
   - {function: menu_open_option_at_list, name: option_entrypoint, addr: 0x80102e78}
   - {function: menu_open_option_dead_unit_panel, name: option_entrypoint, addr: 0x80102e78}
   - {function: menu_open_option_game_options, name: option_entrypoint, addr: 0x80102e78}

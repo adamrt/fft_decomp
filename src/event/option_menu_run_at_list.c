@@ -116,7 +116,7 @@ void option_menu_run_at_list(void) {
     redraw_pending = 1;
     thread_start(g_thread_current_id + 1, option_menu_window_frame_thread);
     thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
-    option_menu_draw_text_columns(entry, &row_offset, buffer);
+    menu_draw_text_columns(entry, &row_offset, buffer);
     ring = 0;
     image_rect.w = g_menu_text_state.pen.stride >> 2;
     LoadImage(&image_rect, (u32*)buffer);

@@ -9,7 +9,7 @@ void card_menu_stop_thread_and_wait(s32 id) {
     s32 output;
 
     while (thread_is_running(id) != 0) {
-        card_thread_request_stop(id);
+        menu_request_thread_stop(id);
         card_input_update_event_state(&output, 0, 0);
     }
     g_menu_managed_thread_state = 0;

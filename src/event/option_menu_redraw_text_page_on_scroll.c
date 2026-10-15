@@ -59,7 +59,7 @@ u8* option_menu_redraw_text_page_on_scroll(
     }
 
     menu_clear_render_buffer(g_option_menu_render_buffer, (menu->inner_width * menu->inner_height) / 2);
-    option_menu_draw_text_columns(menu, first_row, g_option_menu_render_buffer);
+    menu_draw_text_columns(menu, first_row, g_option_menu_render_buffer);
     *render_pending = 0;
     LoadImage(&source, (u32*)g_option_menu_render_buffer);
     mem_copy_bytes_nonempty(&clear_strip, &source, sizeof(RECT));

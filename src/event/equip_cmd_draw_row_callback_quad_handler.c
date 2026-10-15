@@ -34,7 +34,7 @@ menu_instruction_t* equip_cmd_draw_row_callback_quad_handler(menu_instruction_t*
         tpage = entry->tpage;
         g_menu_gfx_clut_id = clut;
         g_menu_gfx_texture_page = tpage;
-        equip_cmd_draw_textured_quad_handler((menu_instruction_t*)&g_equip_cmd_row_sprite_command);
+        menu_cmd_draw_textured_quad_handler((menu_instruction_t*)&g_equip_cmd_row_sprite_command);
     }
 
     return menu_next_instruction(cmd);

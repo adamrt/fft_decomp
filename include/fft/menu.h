@@ -216,8 +216,6 @@ extern RECT g_menu_portrait_palette_rect;
 /* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
 void menu_load_portrait_image(s32 portrait_id);
 void menu_build_unflagged_portrait_poly(s32 portrait_id, POLY_FT4* poly);
-void menu_build_unit_portrait_transition(const RECT* texture_rect, s32* transition, const s32* first_portrait,
-    const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);
 
 /* status panels */
 /* Battle menu status and character-editor panel records. The EVENT overlays
@@ -576,7 +574,7 @@ void menu_copy_billboard_data_out(menu_unit_status_record_t* banner, menu_active
 void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const menu_active_unit_t* unit,
     const menu_status_panel_slot_storage_t* billboard);
 /* BATTLE and DEBUGCHR share one body; WORLD links a shorter one of its own. */
-void menu_copy_unit_data_to_status_billboard(struct unit_stats* unit, menu_unit_status_record_t* output);
+void menu_copy_unit_data_to_status_billboard_variant(struct unit_stats* unit, menu_unit_status_record_t* output);
 void menu_clear_stat_preview(menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail);
 void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
     s16 item_before, s16 item_after, s32 slot);
