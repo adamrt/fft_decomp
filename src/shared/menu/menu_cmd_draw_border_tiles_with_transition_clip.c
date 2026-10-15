@@ -18,10 +18,10 @@ menu_instruction_t* menu_cmd_draw_border_tiles_with_transition_clip(menu_instruc
         rect.x = 0;
         rect.y = (command->window.y + (command->window.height >> 1)) - (rect.h >> 1);
         menu_gfx_enqueue_draw_area(&rect, g_menu_gfx_otag_index);
-        g_jobstts_gfx_otag_index_locked = 1;
+        g_gfx_otag_index_locked = 1;
         g_menu_gfx_otag_index = g_menu_gfx_otag_index + 1;
     } else {
-        g_jobstts_gfx_otag_index_locked = 0;
+        g_gfx_otag_index_locked = 0;
     }
     next = jobstts_cmd_draw_window_frame_handler(command);
     g_menu_gfx_otag_index++;

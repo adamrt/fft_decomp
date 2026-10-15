@@ -27,7 +27,7 @@ void menu_run_equipment_ability_panel_thread(void) {
     g_menu_input_controller = script_get_controller_input_pointer(0);
     screen = g_bunit_character_status_frames;
     base = g_bunit_character_status_frames;
-    state = &g_editor_unit_fields.state;
+    state = &g_menu_selected_unit_fields.state;
     menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);

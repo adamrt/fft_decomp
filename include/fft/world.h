@@ -1427,7 +1427,6 @@ extern s32 g_world_menu_main_scroll_threshold;
 extern s16 g_world_menu_order_unit_cursor;
 extern s16 g_world_menu_order_unit_entries[];
 extern s8 g_world_menu_order_unit_open;
-extern u16 g_world_menu_palette_clut;
 extern u8 g_world_menu_prompt_active;
 extern const RECT g_world_option_gfx_draw_area_template;
 extern s16 g_world_menu_row_height;

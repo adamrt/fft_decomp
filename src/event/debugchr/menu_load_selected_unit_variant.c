@@ -36,7 +36,7 @@ void menu_load_selected_unit_variant(void) {
     s16 list_value;
 
     unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_data.battle_id);
-    editor = &g_menu_status_panel_fields.state;
+    editor = &g_menu_selected_unit_fields.state;
     if (unit != 0) {
         menu_copy_unit_data_to_status_billboard_variant(unit, &g_panel_comparison_billboard);
     }

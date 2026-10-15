@@ -84,7 +84,7 @@ void menu_run_unit_status_thread_variant(void) {
         portrait_palettes = g_require_panel_comparison_portrait_palettes;
     }
 
-    menu_init_numeric_display_frame_primitives(&g_gfx_portrait_origin, &editor->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&editor->label_sprites[0], 7, 0x7CBC);
@@ -95,7 +95,7 @@ void menu_run_unit_status_thread_variant(void) {
     text_configure_sprite_vram(&rects[0], 0x38, 0x28, &editor->value_sprites[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
-        gfx_init_image_loading(&editor->value_sprites[frame], g_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&editor->value_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_panel_editor_value_cells[frame]);
     }
     if (state->team_kind >= 4) {
@@ -107,7 +107,7 @@ void menu_run_unit_status_thread_variant(void) {
         mem_copy_bytes_nonempty(g_panel_editor_mode_cell, g_panel_editor_mode_cells, 0xC);
     }
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&editor->label_sprites[frame], g_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&editor->label_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_panel_editor_label_cells[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
@@ -150,7 +150,7 @@ void menu_run_unit_status_thread_variant(void) {
             mem_copy_bytes_nonempty(g_panel_editor_mode_cell, g_panel_editor_mode_cells, 0xC);
         }
         gfx_init_image_loading(
-            &editor->label_sprites[6], g_editor_numeric_geometry, &g_gfx_portrait_origin, g_panel_editor_mode_cell);
+            &editor->label_sprites[6], g_editor_numeric_geometry, &g_menu_portrait_origin, g_panel_editor_mode_cell);
         if (state->team_kind == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {
@@ -257,18 +257,18 @@ void menu_run_unit_status_thread_variant(void) {
                 s32 y;
 
                 SetPolyG4(&editor->bars[i]);
-                x1 = g_gfx_portrait_origin.x;
+                x1 = g_menu_portrait_origin.x;
                 x0 = x1 + 0x2F;
                 x1 += 0x4F;
                 editor->bars[i].x0 = x0;
                 y = i * 0xB + 0x18;
-                editor->bars[i].y0 = g_gfx_portrait_origin.y + y;
+                editor->bars[i].y0 = g_menu_portrait_origin.y + y;
                 editor->bars[i].x1 = x1;
-                editor->bars[i].y1 = g_gfx_portrait_origin.y + y;
+                editor->bars[i].y1 = g_menu_portrait_origin.y + y;
                 editor->bars[i].x2 = x0;
-                editor->bars[i].y2 = g_gfx_portrait_origin.y + y + 3;
+                editor->bars[i].y2 = g_menu_portrait_origin.y + y + 3;
                 editor->bars[i].x3 = x1;
-                editor->bars[i].y3 = g_gfx_portrait_origin.y + y + 3;
+                editor->bars[i].y3 = g_menu_portrait_origin.y + y + 3;
                 editor->bars[i].x2 -= 3;
                 editor->bars[i].x3 -= 3;
                 if (dimmed != 0) {

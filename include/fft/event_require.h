@@ -184,7 +184,6 @@ void require_reward_load_bonus_image(s32 image_id);
 
 /* character status */
 extern menu_status_thread_t g_require_character_status_frame_config;
-extern RECT g_require_character_status_frame_rect[];
 /* The scalar x alias preserves the retail transition-store scheduling. */
 extern s32 g_require_character_status_origin_x;
 

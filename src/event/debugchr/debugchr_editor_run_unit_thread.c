@@ -74,7 +74,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
     /* The template store is repeated in both arms: jump2 cross-jumps the
      * identical tails only after sched2, so the join keeps the store ahead of
      * the thread-setup constant loads. */
-    if (g_menu_status_panel_fields.state.generic_monster != 0) {
+    if (g_menu_selected_unit_fields.state.generic_monster != 0) {
         mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xa8);
         g_debugchr_editor_fields[15].destination[0] = 0xe;
     } else {
@@ -161,7 +161,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             }
             if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) == 0
                 && (unit_has_any_current_status(g_debugchr_panel_selected_unit_data.battle_id) != 0
-                    || g_menu_status_panel_fields.state.generic_monster == 0)) {
+                    || g_menu_selected_unit_fields.state.generic_monster == 0)) {
                 g_debugchr_status_display_thread_params.style = one;
                 g_debugchr_numeric_editor_thread_params.style = one;
                 g_debugchr_character_status_frame_config.style = one;
@@ -211,7 +211,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             menu_load_selected_unit_variant();
             menu_copy_billboard_data_in(&g_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
-                &g_menu_status_panel_fields);
+                &g_menu_selected_unit_fields);
             g_debugchr_status_display_thread_params.redraw_request = one;
             g_debugchr_numeric_editor_thread_params.redraw_request = one;
             g_debugchr_character_status_frame_config.redraw_request = one;
@@ -234,7 +234,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             menu_load_selected_unit_variant();
             menu_copy_billboard_data_in(&g_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
-                &g_menu_status_panel_fields);
+                &g_menu_selected_unit_fields);
             g_debugchr_status_display_thread_params.redraw_request = 2;
             g_debugchr_numeric_editor_thread_params.redraw_request = one;
             g_debugchr_character_status_frame_config.redraw_request = one;
@@ -258,6 +258,6 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         *unit_type_id_ptr = g_debugchr_editor_unit_ids[0];
         menu_load_selected_unit_variant();
         menu_copy_billboard_data_in(
-            &g_panel_selected_billboard, &g_debugchr_panel_selected_unit_data, &g_menu_status_panel_fields);
+            &g_panel_selected_billboard, &g_debugchr_panel_selected_unit_data, &g_menu_selected_unit_fields);
     }
 }

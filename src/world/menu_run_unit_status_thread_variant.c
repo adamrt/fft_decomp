@@ -100,7 +100,7 @@ void menu_run_unit_status_thread_variant(void) {
     }
     shake = 0;
 
-    menu_init_numeric_display_frame_primitives(&g_gfx_portrait_origin, &summary->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &summary->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&summary->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&summary->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
     menu_init_sprite_array(&summary->label_sprites[0], 7, 0x7CBC);
@@ -111,7 +111,7 @@ void menu_run_unit_status_thread_variant(void) {
     text_configure_sprite_vram(&rects[0], 0x38, 0x28, &summary->value_sprites[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &summary->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
-        gfx_init_image_loading(&summary->value_sprites[frame], g_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&summary->value_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_world_unit_summary_value_sprite_params[frame]);
     }
     if (state->team_kind >= 4) {
@@ -125,7 +125,7 @@ void menu_run_unit_status_thread_variant(void) {
             sizeof(image_load_parameters_t));
     }
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&summary->label_sprites[frame], g_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&summary->label_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_world_unit_summary_label_sprite_params[frame]);
     }
     mem_copy_bytes_nonempty(summary + 1, summary, sizeof(menu_status_panel_editor_packet_t));
@@ -169,7 +169,7 @@ void menu_run_unit_status_thread_variant(void) {
             mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6], g_world_unit_summary_mode_row_params,
                 sizeof(image_load_parameters_t));
         }
-        gfx_init_image_loading(&summary->label_sprites[6], g_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&summary->label_sprites[6], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_world_unit_summary_label_sprite_params[6]);
         if (state->team_kind == 1) {
             status->portrait.clut = 0x7FFD;
@@ -305,16 +305,16 @@ void menu_run_unit_status_thread_variant(void) {
                 s32 y;
 
                 SetPolyG4(&summary->bars[i]);
-                x0 = g_gfx_portrait_origin.x + 0x2F;
+                x0 = g_menu_portrait_origin.x + 0x2F;
                 summary->bars[i].x0 = x0;
                 y = i * 0xB + 0x18;
-                summary->bars[i].y0 = g_gfx_portrait_origin.y + y;
+                summary->bars[i].y0 = g_menu_portrait_origin.y + y;
                 summary->bars[i].x1 = x0 + 0x20;
-                summary->bars[i].y1 = g_gfx_portrait_origin.y + y;
+                summary->bars[i].y1 = g_menu_portrait_origin.y + y;
                 summary->bars[i].x2 = x0;
-                summary->bars[i].y2 = g_gfx_portrait_origin.y + y + 3;
+                summary->bars[i].y2 = g_menu_portrait_origin.y + y + 3;
                 summary->bars[i].x3 = x0 + 0x20;
-                summary->bars[i].y3 = g_gfx_portrait_origin.y + y + 3;
+                summary->bars[i].y3 = g_menu_portrait_origin.y + y + 3;
                 summary->bars[i].x2 -= 3;
                 summary->bars[i].x3 -= 3;
                 if (dimmed != 0) {

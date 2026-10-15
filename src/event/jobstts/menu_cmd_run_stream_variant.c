@@ -7,7 +7,7 @@
  * semi-transparency state; `flags` is the input the handlers see. Then
  * advances the transition frame, up to 10. */
 void menu_cmd_run_stream_variant(menu_instruction_t* instruction, s32 flags) {
-    g_jobstts_gfx_otag_index_locked = 0;
+    g_gfx_otag_index_locked = 0;
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;
     g_menu_cmd_stream_input = flags;

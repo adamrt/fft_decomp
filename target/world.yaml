@@ -1453,7 +1453,7 @@ data:
   - {addr: 0x8018abd6, name: g_panel_slide_up_y}
   - {addr: 0x8018abd8, name: g_panel_item_icon_texture}
   - {addr: 0x8018abde, name: g_panel_slide_down_y}
-  - {addr: 0x8018abf8, name: g_gfx_portrait_origin}
+  - {addr: 0x8018abf8, name: g_menu_portrait_origin}
   - {addr: 0x8018ac00, name: g_world_unit_panel_bar_colors}
   - {addr: 0x8018ac30, name: g_world_selected_unit_number_entries}
   - {addr: 0x8018acd8, name: g_world_comparison_unit_number_entries}
@@ -1469,7 +1469,7 @@ data:
   - {addr: 0x8018aeb8, name: g_world_unit_summary_mode_row_params}
   - {addr: 0x8018aee8, name: g_world_selected_unit_portrait_rect}
   - {addr: 0x8018aef0, name: g_world_comparison_unit_portrait_rect}
-  - {addr: 0x8018aef8, name: g_gfx_portrait_transition_offsets}
+  - {addr: 0x8018aef8, name: g_menu_portrait_transition_offsets}
   - {addr: 0x8018af08, name: g_world_text_message_box_digit_divisors}
   - {addr: 0x8018af2c, name: g_world_text_message_box_slot_threads}
   - {addr: 0x8018af38, name: g_world_text_message_box_slot_glyph_counters}
@@ -2279,7 +2279,7 @@ data:
   - {addr: 0x801cd1b0, name: g_gfx_line_g3_count}
   - {addr: 0x801cd1b4, name: g_gfx_line_f4_count}
   - {addr: 0x801cd1b8, name: g_gfx_line_g4_count}
-  - {addr: 0x801cd1bc, name: g_world_menu_palette_clut}
+  - {addr: 0x801cd1bc, name: g_menu_palette_clut}
   - {addr: 0x801cd1c0, name: g_event_pending_map_jump_out_id}
   - {addr: 0x801cd1c4, name: g_gfx_poly_ft3_count}
   - {addr: 0x801cd1c8, name: g_gfx_poly_gt3_count}
@@ -2428,7 +2428,6 @@ overrides:
   - {function: card_file_seek_with_retries, name: card_io_wait_operation_result, addr: 0x80132b50}
   - {function: card_io_create_new_with_retries, name: card_io_wait_operation_result, addr: 0x80132b50}
   - {function: gfx_enqueue_line_f2, name: g_equip_gfx_line_f2_count, addr: 0x801cd198}
-  - {function: menu_build_item_type_icon_source, name: g_menu_palette_clut, addr: 0x801cd1bc}
   - {function: menu_build_scaled_draw_area_packets, name: g_menu_draw_area_scale_percent, addr: 0x8018ae74}
   - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x8016e44c}
   - {function: menu_init_at_list, name: g_option_menu_at_list_descriptors, addr: 0x801ae334}
@@ -2449,8 +2448,8 @@ overrides:
   - {function: menu_run_equipment_ability_panel_thread, name: g_bunit_character_status_layout_mode3, addr: 0x8018b23c}
   - {function: menu_run_equipment_ability_panel_thread, name: g_bunit_character_status_sprite_origin, addr: 0x8018af50}
   - {function: menu_run_equipment_ability_panel_thread, name: g_character_status_draw_area_rect, addr: 0x8018af78}
-  - {function: menu_run_equipment_ability_panel_thread, name: g_editor_unit_fields, addr: 0x8018ab00}
   - {function: menu_run_equipment_ability_panel_thread, name: g_gfx_draw_offset_y, addr: 0x801c0540}
+  - {function: menu_run_equipment_ability_panel_thread, name: g_menu_selected_unit_fields, addr: 0x8018ab00}
   - {function: menu_run_equipment_ability_panel_thread, name: menu_init_scaled_draw_area_packets, addr: 0x8010ca18}
   - {function: menu_run_numeric_editor_frame_thread_variant, name: g_gfx_draw_offset_y, addr: 0x801c0540}
   - {function: menu_run_numeric_editor_frame_thread_variant, name: menu_init_scaled_draw_area_packets, addr: 0x8010ca18}

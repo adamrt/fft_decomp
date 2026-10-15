@@ -25,7 +25,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     menu_unit_status_record_t* gauges;
 
     main_unit_init_job_data(&g_editor_party_unit_stats, party_index, 0);
-    editor = &g_editor_unit_fields.state;
+    editor = &g_menu_selected_unit_fields.state;
     unit = &g_editor_party_unit_stats;
     gauges = &g_panel_selected_billboard;
 

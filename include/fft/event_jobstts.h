@@ -112,14 +112,12 @@ typedef char jobstts_gfx_context_size_must_be_244[(sizeof(jobstts_gfx_context_t)
 extern u16 g_jobstts_gfx_background_texture_page;
 extern jobstts_gfx_context_t* g_jobstts_gfx_context_base;
 extern jobstts_gfx_context_t g_jobstts_gfx_contexts[];
-extern RECT g_jobstts_gfx_draw_area;
 extern u16 g_jobstts_gfx_draw_area_capacity;
 extern u16 g_jobstts_gfx_draw_move_capacity;
 extern s16 g_jobstts_gfx_line_f2_count;
 
 extern volatile u16 g_jobstts_gfx_line_g2_capacity; /* LINE_G2 capacity; load order matters in 0x801e49f0 */
 extern volatile u16 g_jobstts_gfx_line_g3_capacity; /* LINE_G3 capacity; load order matters in 0x801e49f0 */
-extern s8 g_jobstts_gfx_otag_index_locked;
 extern s16 g_jobstts_gfx_poly_f4_count;
 extern s16 g_jobstts_gfx_poly_g4_count;
 extern s16 g_jobstts_gfx_tile_count;

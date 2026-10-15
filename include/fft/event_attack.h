@@ -221,7 +221,6 @@ void attack_gfx_prepare_party_portrait_textures(void);
 
 /* character status */
 extern u8 g_attack_character_status_frame_config[];
-extern RECT g_attack_character_status_frame_rect[];
 
 /* unit panels */
 extern RECT g_attack_deploy_cursor_texture_rect;

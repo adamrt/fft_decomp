@@ -206,7 +206,7 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     s32 row;
 
     priority = g_menu_gfx_otag_index;
-    clut = g_world_menu_palette_clut;
+    clut = g_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
         left = g_menu_window_rect_source->rect.x - 5;
         top = g_menu_window_rect_source->rect.y - 9;
@@ -386,7 +386,7 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
     s32 base_y;
 
     priority = g_menu_gfx_otag_index;
-    clut = g_world_menu_palette_clut;
+    clut = g_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
         base_x = g_world_menu_window_rect.x;
         base_y = g_world_menu_window_rect.y;

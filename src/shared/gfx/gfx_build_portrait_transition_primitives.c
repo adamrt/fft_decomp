@@ -25,9 +25,9 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
     second_rect.x += 0x10;
 
     for (i = 0; i < 4; i++) {
-        setXY4(&poly[i], g_gfx_portrait_origin.x + 2, g_gfx_portrait_origin.y + 2, g_gfx_portrait_origin.x + 0x21,
-            g_gfx_portrait_origin.y + 2, g_gfx_portrait_origin.x + 2, g_gfx_portrait_origin.y + 0x32,
-            g_gfx_portrait_origin.x + 0x21, g_gfx_portrait_origin.y + 0x32);
+        setXY4(&poly[i], g_menu_portrait_origin.x + 2, g_menu_portrait_origin.y + 2, g_menu_portrait_origin.x + 0x21,
+            g_menu_portrait_origin.y + 2, g_menu_portrait_origin.x + 2, g_menu_portrait_origin.y + 0x32,
+            g_menu_portrait_origin.x + 0x21, g_menu_portrait_origin.y + 0x32);
     }
 
     if (*transition == 0) {
@@ -63,17 +63,17 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         i = *transition - 4;
         menu_build_portrait_poly_variant(*second_portrait, poly);
         if (direction == 1) {
-            gfx_clip_portrait_poly_from_right(poly, g_gfx_portrait_transition_offsets[i]);
+            gfx_clip_portrait_poly_from_right(poly, g_menu_portrait_transition_offsets[i]);
         } else {
-            gfx_clip_portrait_poly_from_left(poly, g_gfx_portrait_transition_offsets[i]);
+            gfx_clip_portrait_poly_from_left(poly, g_menu_portrait_transition_offsets[i]);
         }
         poly++;
 
         menu_build_portrait_poly_variant(*first_portrait, poly);
         if (direction == 1) {
-            gfx_clip_portrait_poly_from_left(poly, 0x1f - g_gfx_portrait_transition_offsets[i]);
+            gfx_clip_portrait_poly_from_left(poly, 0x1f - g_menu_portrait_transition_offsets[i]);
         } else {
-            gfx_clip_portrait_poly_from_right(poly, 0x1f - g_gfx_portrait_transition_offsets[i]);
+            gfx_clip_portrait_poly_from_right(poly, 0x1f - g_menu_portrait_transition_offsets[i]);
         }
         poly++;
 
@@ -83,9 +83,9 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
         if (direction == 1) {
-            gfx_clip_portrait_poly_from_right(poly, g_gfx_portrait_transition_offsets[i + 8]);
+            gfx_clip_portrait_poly_from_right(poly, g_menu_portrait_transition_offsets[i + 8]);
         } else {
-            gfx_clip_portrait_poly_from_left(poly, g_gfx_portrait_transition_offsets[i + 8]);
+            gfx_clip_portrait_poly_from_left(poly, g_menu_portrait_transition_offsets[i + 8]);
         }
         poly++;
 
@@ -95,9 +95,9 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         SetShadeTex(poly, 0);
         SetSemiTrans(poly, 1);
         if (direction == 1) {
-            gfx_clip_portrait_poly_from_left(poly, 0x1f - g_gfx_portrait_transition_offsets[i + 8]);
+            gfx_clip_portrait_poly_from_left(poly, 0x1f - g_menu_portrait_transition_offsets[i + 8]);
         } else {
-            gfx_clip_portrait_poly_from_right(poly, 0x1f - g_gfx_portrait_transition_offsets[i + 8]);
+            gfx_clip_portrait_poly_from_right(poly, 0x1f - g_menu_portrait_transition_offsets[i + 8]);
         }
         *transition += g_script_event_speed;
     }

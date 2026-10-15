@@ -58,7 +58,7 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
     if (instruction->number.alternate_palette != 0) {
         clut = g_world_menu_alternate_number_clut;
     } else {
-        clut = g_world_menu_palette_clut;
+        clut = g_menu_palette_clut;
     }
     if (value & MENU_NUMBER_VALUE_DISABLED) {
         clut = g_world_menu_disabled_number_clut;
@@ -110,7 +110,7 @@ menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t
                 negative = 0;
             } else {
                 if (instruction->number.opcode == MENU_SCRIPT_OP_NUMBER_DIM_LEADING_ZEROS) {
-                    clut = g_world_menu_palette_clut;
+                    clut = g_menu_palette_clut;
                 }
                 if (blanks != 0) {
                     digit = 0;

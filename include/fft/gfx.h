@@ -444,8 +444,6 @@ extern image_load_parameters_t g_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_menu_single_icon_image_params[5];
 
 /* portrait transitions */
-extern RECT g_gfx_portrait_origin;
-extern u8 g_gfx_portrait_transition_offsets[];
 
 void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* transition, const s32* first_portrait,
     const s32* second_portrait, palette_t palettes[2], POLY_FT4* poly, s32 direction);

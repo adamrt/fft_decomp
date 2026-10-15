@@ -88,7 +88,7 @@ void debugchr_editor_run_session(void) {
     }
     menu_load_selected_unit_variant();
     g_debugchr_editor_selected_unit_slot = 0;
-    if (g_menu_status_panel_fields.state.generic_monster != 0) {
+    if (g_menu_selected_unit_fields.state.generic_monster != 0) {
         mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
         g_debugchr_editor_fields[15].destination[0] = 0xE;
     } else {
@@ -145,7 +145,7 @@ loop_outer:
             selected_battle_id[-5] = unit_index;
             g_panel_selected_billboard.unit_index = unit_index;
             menu_load_selected_unit_variant();
-            if (g_menu_status_panel_fields.state.generic_monster != 0) {
+            if (g_menu_selected_unit_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
             } else {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_normal, 0xA8);
@@ -170,7 +170,7 @@ loop_outer:
             selected_battle_id[-5] = unit_index;
             g_panel_selected_billboard.unit_index = unit_index;
             menu_load_selected_unit_variant();
-            if (g_menu_status_panel_fields.state.generic_monster != 0) {
+            if (g_menu_selected_unit_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
             } else {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_normal, 0xA8);

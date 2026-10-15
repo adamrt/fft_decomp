@@ -117,7 +117,7 @@ void attack_deploy_run_select_menu(void) {
             if (buttons & PSX_PAD_CIRCLE) {
                 if (node->value != 0) {
                     text_id = node->help_base + *node->value;
-                    if (node->help_base == -0x6800 && g_editor_unit_fields.state.generic_monster != 0) {
+                    if (node->help_base == -0x6800 && g_menu_selected_unit_fields.state.generic_monster != 0) {
                         text_id = *node->value | 0x7800;
                         if ((*node->value & 0x7ff) == 0x7ff || (*node->value & 0x7ff) == 0) {
                             *input = 0;
@@ -343,7 +343,7 @@ void attack_text_build_deployment_strings(void) {
         for (j = 0; j < 5; j++) {
             APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j], 0x6800);
         }
-        if (g_editor_unit_fields.state.generic_monster != 0) {
+        if (g_menu_selected_unit_fields.state.generic_monster != 0) {
             for (j = 0; j < 5; j++) {
                 APPEND_TEXT_ID(g_attack_editor_item_and_ability_ids[j + 5], 0x7800);
             }

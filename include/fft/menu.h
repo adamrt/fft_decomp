@@ -542,23 +542,14 @@ typedef struct menu_status_panel_buffer {
 typedef char menu_status_panel_buffer_size_must_be_984[(sizeof(menu_status_panel_buffer_t) == 984) ? 1 : -1];
 
 /* status panel rendering */
-extern u16 g_menu_gfx_draw_offset_y;
-extern RECT g_menu_status_panel_draw_area_rect;
-extern menu_status_panel_slot_storage_t g_menu_status_panel_fields;
+extern RECT g_character_status_draw_area_rect;
 extern RECT g_menu_status_panel_frame_rect[];
-extern menu_status_panel_buffer_t g_menu_status_panel_frames[];
-extern image_load_parameters_t g_menu_status_panel_item_icon_layouts[];
-extern point16_t g_menu_status_panel_item_icon_texture[];
-extern image_load_parameters_t g_menu_status_panel_label_layouts_mode0[];
-extern image_load_parameters_t g_menu_status_panel_label_layouts_mode1[];
-extern image_load_parameters_t g_menu_status_panel_label_layouts_mode2[];
-extern image_load_parameters_t g_menu_status_panel_label_layouts_mode3[];
-extern point16_t g_menu_status_panel_numeric_geometry[];
-extern RECT g_menu_status_panel_origin_offsets[];
-extern u8 g_menu_status_panel_text_image_a[];
-extern u8 g_menu_status_panel_text_image_b[];
-extern RECT g_menu_status_panel_text_upload_rect_a;
-extern RECT g_menu_status_panel_text_upload_rect_b;
+extern menu_status_panel_buffer_t g_panel_frames_a[];
+extern RECT g_panel_origin_offsets[];
+extern u8 g_panel_text_image_a[];
+extern u8 g_panel_text_image_b[];
+extern RECT g_panel_text_upload_rect_a;
+extern RECT g_panel_text_upload_rect_b;
 
 void menu_run_status_panel_thread(void);
 void menu_run_equipment_ability_panel_thread(void);
@@ -2696,7 +2687,6 @@ extern RECT g_menu_option_value_image_rect;
 
 /* other */
 extern menu_list_page_t g_at_list_pages[2];
-extern RECT g_character_status_draw_area_rect;
 extern s32 g_character_status_redraw_request;
 extern u32* g_dead_unit_controller_input;
 extern menu_entry_t g_dead_unit_menu[DEAD_UNIT_MENU_ENTRY_COUNT];
@@ -2718,7 +2708,6 @@ extern menu_unit_stat_number_images_t g_editor_numeric_text_b;
 extern struct unit_stats g_editor_party_unit_stats;
 extern u8 g_editor_primary_skillset_name[];
 extern u8 g_editor_secondary_skillset_name[];
-extern menu_status_panel_slot_storage_t g_editor_unit_fields;
 extern s32 g_formation_screen_active;
 extern u16 g_frame_arg;
 extern s32 g_frame_counter;
@@ -2756,9 +2745,7 @@ extern RECT g_panel_comparison_portrait_rect;
 extern u16 g_panel_editor_label_cluts[][2];
 extern u16 g_panel_editor_value_cluts[][2];
 extern RECT g_panel_frame_rect;
-extern menu_status_panel_buffer_t g_panel_frames_a[];
 extern CVECTOR g_panel_gauge_bar_colors[];
-extern RECT g_panel_origin_offsets[];
 extern menu_unit_status_record_t g_panel_selected_billboard;
 extern menu_status_panel_editor_packet_t g_panel_selected_editor_packets[2];
 extern u8 g_panel_selected_large_number_image[];
@@ -2769,10 +2756,6 @@ extern menu_status_panel_packet_t g_panel_selected_packets[2];
 extern RECT g_panel_selected_portrait_rect;
 extern s16 g_panel_slide_down_y[];
 extern s16 g_panel_slide_up_y[];
-extern u8 g_panel_text_image_a[];
-extern u8 g_panel_text_image_b[];
-extern RECT g_panel_text_upload_rect_a;
-extern RECT g_panel_text_upload_rect_b;
 extern u16 g_portrait_index_by_sprite_set[];
 extern RECT g_portrait_sheet_rect_0;
 extern RECT g_portrait_sheet_rect_1;
