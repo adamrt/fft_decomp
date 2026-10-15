@@ -319,7 +319,7 @@ units:
   - {name: menu_ability_display_values, source: src/shared/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/shared/menu/menu_ability_tab_predicates.c}
   - {name: menu_gfx_textured_quads, source: src/shared/menu/menu_gfx_textured_quads.c}
-  - {name: menu_toggle_unit_status_thread_unit, source: src/shared/menu/menu_toggle_unit_status_thread_unit.c}
+  - {name: menu_status_panel_toggles, source: src/shared/menu/menu_status_panel_toggles.c}
   - {name: menu_window_threads, source: src/shared/menu/menu_window_threads.c}
 
 functions:
@@ -359,8 +359,8 @@ functions:
   - {addr: 0x801c366c, size: 1020, name: bunit_menu_run_unit_list_frame, hash: 213e7cb2462eaa46, source: src/shared/menu/bunit_menu_run_unit_list_frame.c}
   - {addr: 0x801c3a68, size: 944, name: bunit_menu_update_unit_browser, hash: 8b0ac5087fd1c93d, source: src/shared/menu/bunit_menu_update_unit_browser.c}
   - {addr: 0x801c3e18, size: 200, name: bunit_unit_copy_selected_data, hash: 59cebfc380508e42, source: src/shared/unit/bunit_unit_copy_selected_data.c}
-  - {addr: 0x801c3ee0, size: 100, name: menu_toggle_unit_status_thread, hash: 88fc66111fe13272, unit: menu_toggle_unit_status_thread_unit}
-  - {addr: 0x801c3f44, size: 100, name: menu_toggle_comparison_status_thread, hash: 18ec66b6fb8f6cc5, unit: menu_toggle_unit_status_thread_unit}
+  - {addr: 0x801c3ee0, size: 100, name: menu_toggle_unit_status_thread, hash: 88fc66111fe13272, unit: menu_status_panel_toggles}
+  - {addr: 0x801c3f44, size: 100, name: menu_toggle_comparison_status_thread, hash: 18ec66b6fb8f6cc5, unit: menu_status_panel_toggles}
   - {addr: 0x801c3fa8, size: 172, name: bunit_panel_toggle_equipment_and_numeric_editor_threads, hash: e355c29a2731c0da}
   - {addr: 0x801c4054, size: 144, name: bunit_unit_get_current_stat, hash: 4ba9b81643f1e3bc, source: src/shared/unit/bunit_unit_get_current_stat.c}
   - {addr: 0x801c40e4, size: 32, name: bunit_unit_get_level, hash: 58cb9fb25baf9b49, source: src/shared/unit/bunit_unit_get_level.c}
