@@ -1,7 +1,0 @@
-#include "fft/battle_effect.h"
-#include "psx/libgte.h"
-#include "psx/types.h"
-
-s32 effect_calculate_launch_velocity(void) {
-    return SquareRoot12((g_effect_gravity_modifier * g_effect_gravity_scale) >> 12);
-}

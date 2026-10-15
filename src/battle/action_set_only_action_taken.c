@@ -1,6 +1,0 @@
-#include "fft/battle_action.h"
-#include "psx/types.h"
-
-void action_set_only_action_taken(s32 unit_id) {
-    action_set_move_act_flags(unit_id, 0, 1);
-}

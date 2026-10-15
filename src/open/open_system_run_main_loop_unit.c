@@ -1,0 +1,464 @@
+#include "fft/open.h"
+#include "psx/libcd.h"
+#include "psx/pad.h"
+#include "psx/types.h"
+
+/* Each graphics buffer's ordering table holds 16 32-bit entries. */
+#define OPEN_OTAG_BUFFER_BYTES 64
+
+/* Entry point of OPEN.BIN for the title sequence. Runs until a controller clears
+ * OPEN_SYSTEM_RUNTIME_FLAG_RUNNING and returns g_open_system_result: 0 for a new
+ * game, or a loaded save with a next scenario and no formation return event,
+ * which main_system_run_game_loop takes straight into BATTLE; 1 for any other
+ * loaded save and 2 for the tutorial, which go to WORLD.
+ *
+ * skip_movie starts at the title menu instead of the FFTST.STR logo movie. Each
+ * frame polls the CD read, clears the ordering table and queues the overlay fade,
+ * steps the movie, runs the WORLD menu frame while it is on and then the current
+ * controller, draws the render records, reads the pad and flips the buffers. */
+s32 open_system_run_main_loop(s32 skip_movie) {
+    u32* otag_0;
+    u32* otag_1;
+
+    open_movie_init_and_stream_opening(skip_movie);
+    if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
+        otag_0 = g_open_gfx_otags[0];
+        otag_1 = g_open_gfx_otags[1];
+        do {
+            s32 graphics_buffer_index;
+            u32* current_otag;
+
+            main_file_poll_load(&g_main_file_cd_state);
+            open_gfx_clear_and_draw_current_frame();
+            open_movie_update_stream_frame();
+            open_menu_update_world_formation();
+            open_controller_dispatch_current();
+
+            graphics_buffer_index = g_active_graphics_buffer_index;
+            /* index * 64 + base: the retail addu sums the offset first. */
+            current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_0);
+            window_dispatch_record_list_variant(
+                current_otag, g_open_gfx_render_record_pointers, g_open_gfx_render_record_pointer_count);
+
+            graphics_buffer_index = g_active_graphics_buffer_index;
+            current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
+            DrawOTag(current_otag - 1);
+            DrawSync(0);
+            open_input_update_buttons_and_check_game_reset();
+            VSync(0);
+            open_movie_present_frame();
+            main_system_frame_stub();
+        } while ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
+    }
+
+    SetDispMask(0);
+    open_sound_set_cd_mix_and_volume(0xc0, 0x78);
+    return g_open_system_result;
+}
+
+/* Each graphics buffer's ordering table holds 16 32-bit entries. */
+#define OPEN_OTAG_BUFFER_BYTES 64
+
+/* Entry point of OPEN.BIN for the ending: play FFTEND.STR, then run the ending
+ * script until it finishes.
+ *
+ * Each frame polls the CD read, clears the ordering table, steps the movie,
+ * queues the script's primitives, runs the current controller, reads the pad and
+ * calls VSync with g_open_system_vsync_mode (0 during the movie, 2 while the
+ * script runs). The ordering table is drawn after the buffer flip, on top of the
+ * background open_movie_present_frame has just put into the new draw buffer. On
+ * exit the VRAM page saved by open_movie_init_and_play_end is restored, the
+ * display is blanked and the CD audio returns to mix level 0xc0. */
+void open_system_run_ending_cutscene(void) {
+    u32* otag_0;
+    u32* otag_1;
+
+    open_movie_init_and_play_end();
+    if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0) {
+        otag_0 = g_open_gfx_otags[0];
+        otag_1 = g_open_gfx_otags[1];
+        do {
+            s32 graphics_buffer_index;
+            u32* current_otag;
+
+            main_file_poll_load(&g_main_file_cd_state);
+            open_gfx_clear_and_draw_current_frame();
+            open_movie_update_stream_frame();
+            graphics_buffer_index = g_active_graphics_buffer_index;
+            /* index * 64 + base: the retail addu sums the offset first. */
+            current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_0);
+            open_script_draw_text_records(current_otag, graphics_buffer_index);
+            open_controller_dispatch_current();
+            DrawSync(0);
+            open_input_update_buttons_and_check_game_reset();
+            VSync(g_open_system_vsync_mode);
+            open_movie_present_frame();
+            current_otag = (u32*)((g_active_graphics_buffer_index ^ 1) * OPEN_OTAG_BUFFER_BYTES + (u32)otag_1);
+            DrawOTag(current_otag - 1);
+            main_system_frame_stub();
+        } while ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_RUNNING) != 0);
+    }
+
+    open_gfx_restore_frame_vram_page();
+    SetDispMask(0);
+    open_sound_set_cd_mix_and_volume(0xc0, 0x78);
+}
+
+/* Starts streaming a movie. The stream stops with the CD audio paused at end_frame, and
+ * without touching the audio at video_end_frame (-1: none). */
+void open_movie_start_stream(s32 sector, s32 end_frame, s32 video_end_frame, s32 cd_mix_level) {
+    open_sound_set_cd_mix_and_volume(0, 1);
+    suzuki_sound_set_type(suzuki_sound_get_type());
+    g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN | OPEN_SYSTEM_RUNTIME_FLAG_RGB24;
+    open_gfx_init_screen_environments(1);
+
+    g_open_movie_aligned_height = 0;
+    g_open_movie_width = 0;
+    g_open_movie_current_frame = 0;
+    g_open_movie_stream_status = OPEN_MOVIE_STREAM_PLAYING;
+    g_open_movie_end_frame = end_frame;
+    g_open_movie_video_end_frame = video_end_frame;
+    open_movie_init_mdec_stream_state(&g_open_movie_mdec_stream_state, 0, 8, 0, 0xf8);
+
+    for (;;) {
+        open_movie_init_stream(sector, open_movie_handle_mdec_output_slice);
+        while (CdRead2(0x1e0) == 0) { }
+        if (open_movie_decode_next_frame(&g_open_movie_mdec_stream_state) != 0) {
+            break;
+        }
+        main_file_reset_cd_subsystems();
+    }
+
+    open_sound_set_cd_mix_and_volume(cd_mix_level, 0x20);
+    PutDrawEnv(&g_open_gfx_screen_environments[0].draw);
+    PutDispEnv(&g_open_gfx_screen_environments[0].disp);
+    g_open_file_current_openbk_image_id = -1;
+    g_open_system_runtime_flags
+        = (g_open_system_runtime_flags
+              & ~(OPEN_SYSTEM_RUNTIME_FLAG_WORLD_OVERLAY_LOADED | OPEN_SYSTEM_RUNTIME_FLAG_PARTY_CHOSEN))
+        | (OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING | OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING);
+}
+
+/* Per-frame movie step while a stream plays.
+ *
+ * When the ring has fewer than 16 free sectors the stream is masked up to the
+ * frame StGetBackloc reports and the read restarts at that location. The MDEC is
+ * then started on the bitstream decoded last frame and on the first output slice,
+ * the next frame's bitstream is decoded, and the routine waits for the picture to
+ * be complete. The stream stops when the frame header reached end_frame (pausing
+ * the CD audio) or video_end_frame (leaving it playing). */
+void open_movie_update_stream_frame(void) {
+    CdlLOC position;
+    s16 free_sectors;
+    s16 read_sectors;
+    s32 words;
+
+    if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
+        return;
+    }
+
+    StRingStatus(&free_sectors, &read_sectors);
+    if (free_sectors < 16) {
+        StSetMask(1, StGetBackloc(&position), -1);
+        open_movie_start_cd_stream_read(&position);
+    }
+
+    DecDCTin(g_open_movie_mdec_stream_state.vlc_buffers[g_open_movie_mdec_stream_state.vlc_buffer_index], 3);
+    words = g_open_movie_mdec_stream_state.output_rect.w;
+    words *= g_open_movie_mdec_stream_state.output_rect.h;
+    DecDCTout(
+        g_open_movie_mdec_stream_state.output_buffers[g_open_movie_mdec_stream_state.output_buffer_index], words / 2);
+    open_movie_decode_next_frame(&g_open_movie_mdec_stream_state);
+    open_movie_wait_for_mdec_output(&g_open_movie_mdec_stream_state, 0);
+
+    if (g_open_movie_stream_status == OPEN_MOVIE_STREAM_STOP_AND_PAUSE_AUDIO) {
+        open_movie_stop_stream(1);
+    }
+    if (g_open_movie_stream_status == OPEN_MOVIE_STREAM_STOP) {
+        open_movie_stop_stream(0);
+    }
+}
+
+void open_movie_stop_stream(s32 pause_cd_audio) {
+    DrawSync(0);
+    DecDCToutCallback(0);
+    StUnSetRing();
+
+    if (pause_cd_audio != 0) {
+        open_movie_pause_cd_audio();
+    }
+
+    g_open_system_runtime_flags &= ~OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING;
+}
+
+/* While the CD audio plays: drop its volume to 0, pause the drive, wait four
+ * vertical blanks and clear OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING. */
+void open_movie_pause_cd_audio(void) {
+    if ((g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) != 0) {
+        open_sound_set_cd_mix_and_volume(0, 1);
+
+        while (CdControlB(CdlPause, 0, 0) == 0) { }
+
+        VSync(4);
+        g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING;
+    }
+}
+
+#define OPEN_MDEC_SLICE_WIDTH 24
+
+/* Sets the two VLC and image buffers and the two frame positions. Retail
+ * stores the slice width into the global state, not through `state`. */
+void open_movie_init_mdec_stream_state(open_movie_mdec_stream_state_t* state, s32 x0, s32 y0, s32 x1, s32 y1) {
+    state->vlc_buffers[0] = (u32*)g_open_work_buffer_0;
+    state->vlc_buffers[1] = (u32*)g_open_work_buffer_1;
+    state->vlc_buffer_index = 0;
+    state->output_buffers[0] = g_open_movie_mdec_output_buffer_0;
+    state->output_buffers[1] = g_open_movie_mdec_output_buffer_1;
+    state->output_buffer_index = 0;
+    state->frame_rects[0].x = x0;
+    state->frame_rects[0].y = y0;
+    state->frame_rects[1].x = x1;
+    state->frame_rects[1].y = y1;
+    state->frame_rect_index = 0;
+    state->output_rect.x = x0;
+    state->output_rect.y = y0;
+    g_open_movie_mdec_stream_state.output_rect.w = OPEN_MDEC_SLICE_WIDTH;
+    state->output_ready = 0;
+}
+
+/* Prepare the MDEC and the 0x30-sector CD ring for a movie and aim the drive at
+ * it: a one-sector read with no destination makes the file loader seek to
+ * `sector` and leaves its position in the loader descriptor, which is then
+ * set as the read location. */
+void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_callback) {
+    main_file_load_descriptor_t* header;
+
+    DecDCTReset(0);
+    DecDCToutCallback(output_callback);
+    StSetRing(g_open_movie_cd_stream_ring_buffer, 0x30);
+    StSetStream(1, 0, -1, 0, 0);
+
+    header = &g_main_file_cd_state;
+    main_file_build_header_nnl(header, sector, 1, 0);
+    while (g_main_file_still_loading != 0) {
+        main_file_poll_load(header);
+        VSync(0);
+    }
+
+    while (CdControl(CdlSetloc, (u8*)&g_main_file_cd_state.position, 0) == 0) { }
+}
+
+/* Uploads the decoded MDEC slice and starts decoding the next one.
+ *
+ * The rectangle pointer and the output-buffer array are both addressed through
+ * the shared stream state, so GCC derives the buffer array (`addiu s1,s0,-0x20`)
+ * from the rectangle address. The slice size is built in one variable: its
+ * sign extension, product and halving then share the second argument register.
+ */
+void open_movie_handle_mdec_output_slice(void) {
+    RECT* rect;
+    s32 size;
+
+    if (g_psyq_cd_stream_interrupt_pending != 0) {
+        StCdInterrupt();
+        g_psyq_cd_stream_interrupt_pending = 0;
+    }
+    rect = &g_open_movie_mdec_stream_state.output_rect;
+    LoadImage(rect, g_open_movie_mdec_stream_state.output_buffers[g_open_movie_mdec_stream_state.output_buffer_index]);
+    g_open_movie_mdec_stream_state.output_buffer_index = !g_open_movie_mdec_stream_state.output_buffer_index;
+    rect->x += g_open_movie_mdec_stream_state.output_rect.w;
+    if (rect->x < g_open_movie_mdec_stream_state.frame_rects[g_open_movie_mdec_stream_state.frame_rect_index].x
+            + g_open_movie_mdec_stream_state.frame_rects[g_open_movie_mdec_stream_state.frame_rect_index].w) {
+        size = g_open_movie_mdec_stream_state.output_rect.w;
+        size *= g_open_movie_mdec_stream_state.output_rect.h;
+        size /= 2;
+        DecDCTout(
+            g_open_movie_mdec_stream_state.output_buffers[g_open_movie_mdec_stream_state.output_buffer_index], size);
+    } else {
+        g_open_movie_mdec_stream_state.output_ready = 1;
+        g_open_movie_mdec_stream_state.frame_rect_index = !g_open_movie_mdec_stream_state.frame_rect_index;
+        rect->x = g_open_movie_mdec_stream_state.frame_rects[g_open_movie_mdec_stream_state.frame_rect_index].x;
+        g_open_movie_mdec_stream_state.output_rect.y
+            = g_open_movie_mdec_stream_state.frame_rects[g_open_movie_mdec_stream_state.frame_rect_index].y;
+    }
+}
+
+/* Fetch the next movie frame and decode its bitstream into the other VLC buffer,
+ * releasing the frame's ring sectors. Returns 0 when no frame arrived. */
+s32 open_movie_decode_next_frame(open_movie_mdec_stream_state_t* state) {
+    u32* frame_data;
+
+    frame_data = open_movie_acquire_next_frame(state);
+    if (frame_data == 0) {
+        return 0;
+    }
+    state->vlc_buffer_index = !state->vlc_buffer_index;
+    DecDCTvlc(frame_data, state->vlc_buffers[state->vlc_buffer_index]);
+    StFreeRing(frame_data);
+    return 1;
+}
+
+#define OPEN_MOVIE_ACQUIRE_MAX_ATTEMPTS 0x80
+
+/* Wait for the next movie frame (at most 129 vertical blanks), track the
+ * stream position, adopt a changed frame size (clearing the screen), and size
+ * the decode rectangles: 24-bit rows take three 16-bit values per two pixels.
+ * Returns the frame data, or NULL on timeout. */
+u32* open_movie_acquire_next_frame(open_movie_mdec_stream_state_t* state) {
+    u32* frame_data;
+    StHEADER* header;
+    s32 attempts;
+
+    attempts = 0;
+    /* Passing header through StGetNext's 32-bit data-pointer slot preserves native header reloads. */
+    while (StGetNext(&frame_data, (u32**)&header) != 0) {
+        VSync(0);
+        if (attempts == OPEN_MOVIE_ACQUIRE_MAX_ATTEMPTS) {
+            return 0;
+        }
+        attempts++;
+    }
+
+    g_open_movie_current_frame = header->frameCount;
+    if (header->frameCount >= g_open_movie_end_frame) {
+        g_open_movie_stream_status = OPEN_MOVIE_STREAM_STOP_AND_PAUSE_AUDIO;
+    }
+    if (g_open_movie_video_end_frame != -1 && header->frameCount >= g_open_movie_video_end_frame) {
+        g_open_movie_stream_status = OPEN_MOVIE_STREAM_STOP;
+    }
+
+    if (g_open_movie_width != header->width || g_open_movie_height != header->height) {
+        RECT clear_rect;
+
+        clear_rect.x = 0;
+        clear_rect.y = 0;
+        clear_rect.w = 0x1e0;
+        clear_rect.h = 0x1e0;
+        ClearImage(&clear_rect, 0, 0, 0);
+        g_open_movie_width = header->width;
+        g_open_movie_height = header->height;
+        g_open_movie_aligned_height = (header->height + 15) & 0xfff0;
+    }
+
+    state->frame_rects[0].w = state->frame_rects[1].w = g_open_movie_width * 3 / 2;
+    state->frame_rects[0].h = state->frame_rects[1].h = g_open_movie_aligned_height;
+    state->output_rect.h = g_open_movie_aligned_height;
+    return frame_data;
+}
+
+/* Busy-wait until the MDEC output callback has delivered the whole frame
+ * (output_ready), then clear the flag. After 0x800000 passes without it the frame
+ * is taken as complete and the output rectangle moves to the other frame buffer.
+ * The second argument is not read. */
+void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* state, s32 unused) {
+    /* The timeout is read and written on the stack each iteration. */
+    volatile s32 timeout = 0x800000;
+
+    while (state->output_ready == 0) {
+        if (--timeout == 0) {
+            state->output_ready = 1;
+            state->frame_rect_index = !state->frame_rect_index;
+            state->output_rect.x = state->frame_rects[state->frame_rect_index].x;
+            state->output_rect.y = state->frame_rects[state->frame_rect_index].y;
+        }
+    }
+
+    state->output_ready = 0;
+}
+
+/* Set the read location and start the streaming read (CdRead2 mode 0x1a0),
+ * repeating both until the read is accepted. */
+void open_movie_start_cd_stream_read(const CdlLOC* location) {
+    for (;;) {
+        while (CdControl(CdlSetloc, (u8*)location, 0) == 0) { }
+        if (CdRead2(0x1a0) != 0) {
+            break;
+        }
+    }
+}
+
+/* Flip the frame buffers and repaint the background of the new draw buffer.
+ *
+ * Applies the other buffer's draw and display environments. Unless a movie is
+ * streaming, the 256- or 320-pixel-wide frame is then cleared
+ * (OPEN_SYSTEM_RUNTIME_FLAG_CLEAR_FRAME), overwritten with the 512x240 picture at
+ * VRAM (512, 256) (OPEN_SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM, the ending script)
+ * or uploaded from the frame image at g_open_file_destination. The display is
+ * enabled unless OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED is set.
+ *
+ * Nothing in OPEN.BIN sets OPEN_SYSTEM_RUNTIME_FLAG_CLEAR_FRAME. */
+void open_movie_present_frame(void) {
+    RECT image_rect;
+    RECT move_rect;
+    s32 display_index;
+    u32 flags;
+
+    display_index = g_active_graphics_buffer_index ^ 1;
+    g_active_graphics_buffer_index = display_index;
+    PutDrawEnv(&g_open_gfx_screen_environments[display_index].draw);
+
+    display_index = g_active_graphics_buffer_index;
+    PutDispEnv(&g_open_gfx_screen_environments[display_index].disp);
+
+    flags = g_open_system_runtime_flags;
+    if ((flags & OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING) == 0) {
+        image_rect.h = 240;
+        image_rect.x = 0;
+        if ((flags & OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN) != 0) {
+            image_rect.w = 320;
+        } else {
+            image_rect.w = 256;
+        }
+        if ((g_active_graphics_buffer_index & 1) != 0) {
+            image_rect.y = 240;
+        } else {
+            image_rect.y = 0;
+        }
+
+        flags = g_open_system_runtime_flags;
+        if ((flags & OPEN_SYSTEM_RUNTIME_FLAG_CLEAR_FRAME) != 0) {
+            ClearImage(&image_rect, 0, 0, 0);
+        } else if ((flags & OPEN_SYSTEM_RUNTIME_FLAG_FRAME_FROM_VRAM) != 0) {
+            move_rect.x = 512;
+            move_rect.y = 256;
+            move_rect.w = 512;
+            move_rect.h = 240;
+            MoveImage(&move_rect, image_rect.x, image_rect.y);
+        } else {
+            LoadImage(&image_rect, g_open_file_destination);
+        }
+    }
+
+    SetDispMask(((g_open_system_runtime_flags >> 6) ^ 1) & 1);
+}
+
+/* Read the pad and derive the held and newly pressed buttons, both 0 while
+ * OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED is set. L1, R1, Select and Start held
+ * with nothing else reset the game. OPEN_SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED
+ * would prevent that; no code in OPEN.BIN sets it. */
+void open_input_update_buttons_and_check_game_reset(void) {
+    u32 input;
+    u32 previous;
+
+    g_input_previous_buttons = g_input_polled_buttons;
+    input = PadRead(0);
+    g_input_polled_buttons = input;
+
+    if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED) {
+        g_open_input_new_button_presses = 0;
+        g_input_current_buttons = 0;
+    } else {
+        previous = g_input_previous_buttons;
+        g_input_current_buttons = input;
+        g_open_input_new_button_presses = input & ~previous;
+    }
+
+    if (!(g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_SOFT_RESET_DISABLED)
+        && g_input_polled_buttons == (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_SELECT | PSX_PAD_START)) {
+        DrawSync(0);
+        suzuki_sound_set_master_volume(0x3fff, 1);
+        suzuki_sound_put_type(0xc0);
+        open_sound_set_cd_mix_and_volume(0, 1);
+        main_system_reset_game();
+    }
+}

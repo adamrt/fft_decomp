@@ -1,6 +1,0 @@
-#include "fft/battle_effect.h"
-#include "psx/types.h"
-
-void effect_lerp_component_q13(s32 from, s32 to, s32 t, s32* out) {
-    *out = from + (to - from) * t / (2 * ONE);
-}

@@ -9,6 +9,7 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
+  - {name: attack_deploy_run_select_menu_unit, source: src/shared/text/attack_deploy_run_select_menu_unit.c}
   - {name: sound_wait_for_music_stub_unit, source: src/shared/sound/sound_wait_for_music_stub_unit.c}
 
 functions:
@@ -83,12 +84,12 @@ functions:
   - {addr: 0x801c80d0, size: 1224, name: attack_gfx_prepare_party_portrait_textures, hash: 2d30846164855c52, source: src/shared/gfx/attack_gfx_prepare_party_portrait_textures.c}
   - {addr: 0x801c8598, size: 1648, name: attack_gfx_prepare_formation_sprites, hash: a2000c973e9a87b8, source: src/shared/gfx/attack_gfx_prepare_formation_sprites.c}
   - {addr: 0x801c8c08, size: 232, name: gfx_set_formation_icon_uv, hash: 353eab0a41a1e1a6, source: src/shared/gfx/gfx_set_formation_icon_uv.c}
-  - {addr: 0x801c8cf0, size: 1876, name: attack_deploy_run_select_menu, hash: 76d0198aad839707}
-  - {addr: 0x801c9444, size: 68, name: attack_text_init_battle_pointers, hash: 161ea8f59be23883, source: src/shared/text/attack_text_init_battle_pointers.c}
-  - {addr: 0x801c9488, size: 1188, name: attack_text_build_deployment_strings, hash: 686fb6c3f5cef1eb, source: src/shared/text/attack_text_build_deployment_strings.c}
-  - {addr: 0x801c992c, size: 1084, name: attack_gfx_build_shaded_panel_strips, hash: 92517fde5ecb3707, source: src/shared/gfx/attack_gfx_build_shaded_panel_strips.c}
-  - {addr: 0x801c9d68, size: 344, name: attack_map_show_title, hash: 01e9c8201ecae757, source: src/shared/map/attack_map_show_title.c}
-  - {addr: 0x801c9ec0, size: 204, name: attack_map_load_title_graphic, hash: 75a50e555b3e77a7, source: src/shared/map/attack_map_load_title_graphic.c}
+  - {addr: 0x801c8cf0, size: 1876, name: attack_deploy_run_select_menu, hash: 76d0198aad839707, unit: attack_deploy_run_select_menu_unit}
+  - {addr: 0x801c9444, size: 68, name: attack_text_init_battle_pointers, hash: 161ea8f59be23883, unit: attack_deploy_run_select_menu_unit}
+  - {addr: 0x801c9488, size: 1188, name: attack_text_build_deployment_strings, hash: 686fb6c3f5cef1eb, unit: attack_deploy_run_select_menu_unit}
+  - {addr: 0x801c992c, size: 1084, name: attack_gfx_build_shaded_panel_strips, hash: 92517fde5ecb3707, unit: attack_deploy_run_select_menu_unit}
+  - {addr: 0x801c9d68, size: 344, name: attack_map_show_title, hash: 01e9c8201ecae757, unit: attack_deploy_run_select_menu_unit}
+  - {addr: 0x801c9ec0, size: 204, name: attack_map_load_title_graphic, hash: 75a50e555b3e77a7, unit: attack_deploy_run_select_menu_unit}
 
 data:
   - {addr: 0x801bf000, name: g_attack_map_darkness_color}
@@ -879,28 +880,29 @@ links: [battle]
 defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 units:
+  - {name: card_save_unit, source: src/event/card/card_save_unit.c}
   - {name: gfx_get_fade_state_unit, source: src/shared/gfx/gfx_get_fade_state_unit.c}
   - {name: gfx_load_image_and_wait_unit, source: src/shared/gfx/gfx_load_image_and_wait_unit.c}
   - {name: menu_gfx_enqueue_textured_quad_unit, source: src/shared/menu/menu_gfx_enqueue_textured_quad_unit.c}
 
 functions:
-  - {addr: 0x801bf170, size: 56, name: card_save_clear_selection_indices, hash: 0309a94d3656604d, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801bf1a8, size: 528, name: card_save_init_menu_graphics, hash: 02499317253c38cb, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801bf3b8, size: 1464, name: card_save_run_menu, hash: 36968da9ed76675f, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801bf970, size: 268, name: card_save_update_initial_prompt, hash: 6b6ce3c5a628a2a9, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801bfa7c, size: 348, name: card_save_update_card_slot_selection, hash: 96c22418dda0eef3, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801bfbd8, size: 520, name: card_save_update_slot_scan_result, hash: cf8b28ac678c041a, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801bfde0, size: 972, name: card_save_update_slot_write, hash: d56e168b34803142, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c01ac, size: 2056, name: card_save_build_buffer, hash: bfe14a0517ecc7ac, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c09b4, size: 132, name: card_save_init_menu_state, hash: 6c86263b53a6fbe9, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c0a38, size: 544, name: card_save_update_slot_playtime, hash: 8096fa74ff7c2f74, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c0c58, size: 3016, name: card_save_update_slot_scan, hash: 622eaf8505e39a23, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c1820, size: 1288, name: card_save_build_slot_description, hash: b3ddcca4afe44418, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c1d28, size: 328, name: card_save_render_slot_text, hash: 2da3dbfa2b6e7fca, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c1e70, size: 344, name: card_save_init_occupied_slot_selection, hash: f7e390f9e0843bbf, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c1fc8, size: 3392, name: card_save_update_and_draw_slot_list, hash: e26df89b1acc9c61, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c2d08, size: 416, name: card_save_update_slot_scroll, hash: 07553e7d79ca258a, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c2ea8, size: 1568, name: card_save_build_file_header, hash: 1f7a34d4f23fd2e5, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801bf170, size: 56, name: card_save_clear_selection_indices, hash: 0309a94d3656604d, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801bf1a8, size: 528, name: card_save_init_menu_graphics, hash: 02499317253c38cb, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801bf3b8, size: 1464, name: card_save_run_menu, hash: 36968da9ed76675f, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801bf970, size: 268, name: card_save_update_initial_prompt, hash: 6b6ce3c5a628a2a9, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801bfa7c, size: 348, name: card_save_update_card_slot_selection, hash: 96c22418dda0eef3, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801bfbd8, size: 520, name: card_save_update_slot_scan_result, hash: cf8b28ac678c041a, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801bfde0, size: 972, name: card_save_update_slot_write, hash: d56e168b34803142, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c01ac, size: 2056, name: card_save_build_buffer, hash: bfe14a0517ecc7ac, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c09b4, size: 132, name: card_save_init_menu_state, hash: 6c86263b53a6fbe9, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c0a38, size: 544, name: card_save_update_slot_playtime, hash: 8096fa74ff7c2f74, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c0c58, size: 3016, name: card_save_update_slot_scan, hash: 622eaf8505e39a23, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c1820, size: 1288, name: card_save_build_slot_description, hash: b3ddcca4afe44418, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c1d28, size: 328, name: card_save_render_slot_text, hash: 2da3dbfa2b6e7fca, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c1e70, size: 344, name: card_save_init_occupied_slot_selection, hash: f7e390f9e0843bbf, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c1fc8, size: 3392, name: card_save_update_and_draw_slot_list, hash: e26df89b1acc9c61, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c2d08, size: 416, name: card_save_update_slot_scroll, hash: 07553e7d79ca258a, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
+  - {addr: 0x801c2ea8, size: 1568, name: card_save_build_file_header, hash: 1f7a34d4f23fd2e5, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_unit}
   - {addr: 0x801c34c8, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/shared/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
   - {addr: 0x801c3798, size: 692, name: menu_build_zodiac_primitives, hash: 34043b3fe18fd9cf, source: src/shared/menu/menu_build_zodiac_primitives.c}
   - {addr: 0x801c3a4c, size: 896, name: menu_input_update_event_state_variant, hash: cf38d088504d874f, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
@@ -1324,16 +1326,17 @@ links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 25, VARIANT_MENU_ITEM_CURSOR_DEPTH: 31, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 4, VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 units:
+  - {name: equip_menu_load_images_and_reset_lists_unit, source: src/shared/menu/equip_menu_load_images_and_reset_lists_unit.c}
   - {name: gfx_load_image_and_wait_unit, source: src/shared/gfx/gfx_load_image_and_wait_unit.c}
   - {name: menu_gfx_enqueue_textured_quad_unit, source: src/shared/menu/menu_gfx_enqueue_textured_quad_unit.c}
   - {name: menu_icon_list_thread_unit, source: src/shared/menu/menu_icon_list_thread_unit.c}
   - {name: menu_load_sort_key_list_unit, source: src/shared/menu/menu_load_sort_key_list_unit.c}
 
 functions:
-  - {addr: 0x801bf004, size: 468, name: equip_menu_load_images_and_reset_lists, hash: ea3dbcc34294a976, source: src/shared/menu/equip_menu_load_images_and_reset_lists.c}
-  - {addr: 0x801bf1d8, size: 496, name: equip_menu_init_screen, hash: 147d63c2c90eaf5f, source: src/shared/menu/equip_menu_init_screen.c}
-  - {addr: 0x801bf3c8, size: 100, name: equip_panel_toggle_unit_status_thread, hash: 25bafea36fa46b23}
-  - {addr: 0x801bf42c, size: 128, name: equip_panel_toggle_equipment_threads, hash: 1f0b42e76af7a194}
+  - {addr: 0x801bf004, size: 468, name: equip_menu_load_images_and_reset_lists, hash: ea3dbcc34294a976, unit: equip_menu_load_images_and_reset_lists_unit}
+  - {addr: 0x801bf1d8, size: 496, name: equip_menu_init_screen, hash: 147d63c2c90eaf5f, unit: equip_menu_load_images_and_reset_lists_unit}
+  - {addr: 0x801bf3c8, size: 100, name: equip_panel_toggle_unit_status_thread, hash: 25bafea36fa46b23, unit: equip_menu_load_images_and_reset_lists_unit}
+  - {addr: 0x801bf42c, size: 128, name: equip_panel_toggle_equipment_threads, hash: 1f0b42e76af7a194, unit: equip_menu_load_images_and_reset_lists_unit}
   - {addr: 0x801bf4ac, size: 100, name: menu_toggle_numeric_editor_thread, hash: c87287dc70d17dac, source: src/shared/menu/menu_toggle_numeric_editor_thread.c}
   - {addr: 0x801bf510, size: 128, name: equip_panel_toggle_item_numeric_thread, hash: 7f5a28473a44bd57}
   - {addr: 0x801bf590, size: 44, name: equip_menu_reset_state_flags, hash: 91f17a9247dbec09, source: src/shared/menu/equip_menu_reset_state_flags.c}
@@ -1839,14 +1842,17 @@ source_dir: src/event/etc
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
+units:
+  - {name: etc_graphic_open_unit, source: src/event/etc/etc_graphic_open_unit.c}
+
 functions:
-  - {addr: 0x801bf01c, size: 956, name: etc_graphic_open, hash: 3557a41548363503}
-  - {addr: 0x801bf3d8, size: 8, name: etc_noop_801bf3d8, hash: 6d64edf91449c1b1}
-  - {addr: 0x801bf3e0, size: 2168, name: etc_graphic_build_chapter_polygons, hash: 08645cca82b4dc99}
-  - {addr: 0x801bfc58, size: 1316, name: etc_graphic_build_game_over_polygons, hash: d08994f01c5e0530}
-  - {addr: 0x801c017c, size: 560, name: etc_graphic_show_chapter_title, hash: 9fcfb262c2e1e239}
-  - {addr: 0x801c03ac, size: 552, name: etc_graphic_show_game_over, hash: 6eb5298141a27c8f}
-  - {addr: 0x801c05d4, size: 116, name: etc_graphic_show_async, hash: d058479c66427e5b}
+  - {addr: 0x801bf01c, size: 956, name: etc_graphic_open, hash: 3557a41548363503, unit: etc_graphic_open_unit}
+  - {addr: 0x801bf3d8, size: 8, name: etc_noop_801bf3d8, hash: 6d64edf91449c1b1, unit: etc_graphic_open_unit}
+  - {addr: 0x801bf3e0, size: 2168, name: etc_graphic_build_chapter_polygons, hash: 08645cca82b4dc99, unit: etc_graphic_open_unit}
+  - {addr: 0x801bfc58, size: 1316, name: etc_graphic_build_game_over_polygons, hash: d08994f01c5e0530, unit: etc_graphic_open_unit}
+  - {addr: 0x801c017c, size: 560, name: etc_graphic_show_chapter_title, hash: 9fcfb262c2e1e239, unit: etc_graphic_open_unit}
+  - {addr: 0x801c03ac, size: 552, name: etc_graphic_show_game_over, hash: 6eb5298141a27c8f, unit: etc_graphic_open_unit}
+  - {addr: 0x801c05d4, size: 116, name: etc_graphic_show_async, hash: d058479c66427e5b, unit: etc_graphic_open_unit}
 
 data:
   - {addr: 0x801bf000, name: g_etc_allocation_wait_message}
@@ -1904,6 +1910,7 @@ defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 
 
 units:
   - {name: gfx_load_image_and_wait_unit, source: src/shared/gfx/gfx_load_image_and_wait_unit.c}
+  - {name: jobstts_menu_update_wrapped_horizontal_selection_unit, source: src/shared/menu/jobstts_menu_update_wrapped_horizontal_selection_unit.c}
   - {name: menu_ability_is_unit, source: src/shared/menu/menu_ability_is_unit.c}
   - {name: menu_ability_unit, source: src/shared/menu/menu_ability_unit.c}
   - {name: menu_gfx_enqueue_textured_quad_unit, source: src/shared/menu/menu_gfx_enqueue_textured_quad_unit.c}
@@ -1955,8 +1962,8 @@ functions:
   - {addr: 0x801e0ba8, size: 832, name: menu_input_update_controller, hash: bbe451779e50aed3, source: src/shared/menu/menu_input_update_controller.c}
   - {addr: 0x801e0ee8, size: 360, name: menu_input_update_with_message_state_variant, hash: 150bea20a0faa1ea}
   - {addr: 0x801e1050, size: 36, name: menu_clear_selection_values, hash: f714166590860d01, source: src/shared/menu/menu_clear_selection_values.c}
-  - {addr: 0x801e1074, size: 168, name: jobstts_menu_update_wrapped_horizontal_selection, hash: 5953cfbb7a4e9efe, source: src/shared/menu/jobstts_menu_update_wrapped_horizontal_selection.c}
-  - {addr: 0x801e111c, size: 576, name: jobstts_gfx_enqueue_textured_quad_rect, hash: 5e19e9b09aeb355b, source: src/shared/gfx/jobstts_gfx_enqueue_textured_quad_rect.c}
+  - {addr: 0x801e1074, size: 168, name: jobstts_menu_update_wrapped_horizontal_selection, hash: 5953cfbb7a4e9efe, unit: jobstts_menu_update_wrapped_horizontal_selection_unit}
+  - {addr: 0x801e111c, size: 576, name: jobstts_gfx_enqueue_textured_quad_rect, hash: 5e19e9b09aeb355b, unit: jobstts_menu_update_wrapped_horizontal_selection_unit}
   - {addr: 0x801e135c, size: 632, name: menu_gfx_enqueue_textured_quad_list, hash: ab47c5a66b813d62, unit: menu_gfx_enqueue_textured_quad_unit}
   - {addr: 0x801e15d4, size: 532, name: menu_gfx_enqueue_textured_quad, hash: 3fe37b9682605fd7, unit: menu_gfx_enqueue_textured_quad_unit}
   - {addr: 0x801e17e8, size: 1056, name: jobstts_gfx_enqueue_oriented_textured_quad, hash: efbd76a3960a34a7, source: src/shared/gfx/jobstts_gfx_enqueue_oriented_textured_quad.c}
@@ -2262,6 +2269,8 @@ links: [battle]
 
 units:
   - {name: menu_icon_list_thread_unit, source: src/shared/menu/menu_icon_list_thread_unit.c}
+  - {name: require_editor_load_party_unit_unit, source: src/event/require/require_editor_load_party_unit_unit.c}
+  - {name: require_thread_stop_after_16_frames_unit, source: src/event/require/require_thread_stop_after_16_frames_unit.c}
   - {name: sound_wait_for_music_stub_unit, source: src/shared/sound/sound_wait_for_music_stub_unit.c}
 
 functions:
@@ -2299,11 +2308,11 @@ functions:
   - {addr: 0x801c32cc, size: 400, name: gfx_build_gradient_grid_primitives_variant, hash: 3b20668a6d03a172, source: src/shared/gfx/gfx_build_gradient_grid_primitives_variant.c}
   - {addr: 0x801c345c, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/shared/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
   - {addr: 0x801c372c, size: 692, name: menu_build_zodiac_primitives, hash: 0d33bf568d157774, source: src/shared/menu/menu_build_zodiac_primitives.c}
-  - {addr: 0x801c39e0, size: 40, name: require_thread_stop_after_16_frames, hash: 83373904c4781138, source: src/shared/thread/require_thread_stop_after_16_frames.c}
-  - {addr: 0x801c3a08, size: 168, name: require_party_update_bio_variable_for_unit_class, hash: 39b2124bf596bf04}
-  - {addr: 0x801c3ab0, size: 244, name: require_reward_load_bonus_image, hash: 83bdf7ea18ea62c4}
-  - {addr: 0x801c3ba4, size: 108, name: require_input_wait_frames_or_skip, hash: 0a5f70e3ab9123be}
-  - {addr: 0x801c3c10, size: 248, name: require_gfx_fade_rgb_31_frames, hash: 72b0b45d367d072d, source: src/shared/gfx/require_gfx_fade_rgb_31_frames.c}
+  - {addr: 0x801c39e0, size: 40, name: require_thread_stop_after_16_frames, hash: 83373904c4781138, unit: require_thread_stop_after_16_frames_unit}
+  - {addr: 0x801c3a08, size: 168, name: require_party_update_bio_variable_for_unit_class, hash: 39b2124bf596bf04, unit: require_thread_stop_after_16_frames_unit}
+  - {addr: 0x801c3ab0, size: 244, name: require_reward_load_bonus_image, hash: 83bdf7ea18ea62c4, unit: require_thread_stop_after_16_frames_unit}
+  - {addr: 0x801c3ba4, size: 108, name: require_input_wait_frames_or_skip, hash: 0a5f70e3ab9123be, unit: require_thread_stop_after_16_frames_unit}
+  - {addr: 0x801c3c10, size: 248, name: require_gfx_fade_rgb_31_frames, hash: 72b0b45d367d072d, unit: require_thread_stop_after_16_frames_unit}
   - {addr: 0x801c3d08, size: 72, name: sound_wait_for_music_stub, hash: 5cf0df43ec1c1bac, unit: sound_wait_for_music_stub_unit}
   - {addr: 0x801c3d50, size: 168, name: sound_play_music_tracks, hash: 0794875f602ea289, unit: sound_wait_for_music_stub_unit}
   - {addr: 0x801c3df8, size: 428, name: require_text_show_battle_congratulations, hash: fc9664dd2c18d147, source: src/shared/text/require_text_show_battle_congratulations.c}
@@ -2323,29 +2332,29 @@ functions:
   - {addr: 0x801c52c4, size: 232, name: gfx_set_formation_icon_uv, hash: 353eab0a41a1e1a6, source: src/shared/gfx/gfx_set_formation_icon_uv.c}
   - {addr: 0x801c53ac, size: 172, name: file_load_sync, hash: 877e363fe3ae749d, source: src/shared/file/file_load_sync.c}
   - {addr: 0x801c5458, size: 1144, name: require_gfx_prepare_party_portrait_textures, hash: 38cf6661ba29d0dd, source: src/shared/gfx/require_gfx_prepare_party_portrait_textures.c}
-  - {addr: 0x801c58d0, size: 1280, name: require_editor_load_party_unit, hash: e789845c276f79a5}
-  - {addr: 0x801c5dd0, size: 120, name: require_party_restore_item_counts, hash: 5036916d195f2e8b}
-  - {addr: 0x801c5e48, size: 200, name: require_party_sell_equipment_over_limit, hash: ce0d4bdda9e4c30b}
-  - {addr: 0x801c5f10, size: 240, name: require_party_store_equipment_or_sell_overflow, hash: 8dd80fb16f32c66e}
-  - {addr: 0x801c6000, size: 160, name: require_party_get_free_slot_status, hash: e45d44d7bf4d0697}
-  - {addr: 0x801c60a0, size: 2280, name: require_party_select_unit_to_remove, hash: f6bb31641f3d2f9d}
-  - {addr: 0x801c6988, size: 2024, name: require_party_apply_post_battle_changes, hash: 319e61c527147a5b}
-  - {addr: 0x801c7170, size: 492, name: require_reward_collect_war_trophies_and_bonus_money, hash: 32339382b433870d}
-  - {addr: 0x801c735c, size: 40, name: require_reward_get_war_trophy_column_x, hash: f1e28eb8676390c8}
-  - {addr: 0x801c7384, size: 52, name: require_reward_get_war_trophy_entry_offset, hash: 59f25f8289f42a18}
-  - {addr: 0x801c73b8, size: 1984, name: require_reward_run_war_trophies, hash: bf50608a35ad2092}
-  - {addr: 0x801c7b78, size: 4124, name: require_reward_run_gil_ticker, hash: 5567bfd43013223e}
-  - {addr: 0x801c8b94, size: 420, name: require_gfx_scale_poly_gt4_vertex_colors, hash: 66ed05c27d4e424c, source: src/shared/gfx/require_gfx_scale_poly_gt4_vertex_colors.c}
-  - {addr: 0x801c8d38, size: 292, name: require_gfx_init_poly_gt4_array_32, hash: f259cec1a6ecdc8c, source: src/shared/gfx/require_gfx_init_poly_gt4_array_32.c}
-  - {addr: 0x801c8e5c, size: 292, name: require_gfx_init_poly_gt4_array_8, hash: 0f1ae6684e05e365, source: src/shared/gfx/require_gfx_init_poly_gt4_array_8.c}
-  - {addr: 0x801c8f80, size: 4132, name: require_condition_show_general, hash: 231240f68206f06c}
-  - {addr: 0x801c9fa4, size: 8, name: require_noop_801c9fa4, hash: 6d64edf91449c1b1}
-  - {addr: 0x801c9fac, size: 1688, name: require_condition_run_special_thread, hash: ac96742eb4a60b78}
-  - {addr: 0x801ca644, size: 32, name: require_thread_exit_current, hash: d5e294538771c138, source: src/shared/thread/require_thread_exit_current.c}
-  - {addr: 0x801ca664, size: 2416, name: require_reward_animate_bonus_image_burst, hash: 5a5a3d742bcaea7a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x801cafd4, size: 392, name: require_condition_dispatch, hash: 5daba3919c5bcdeb}
-  - {addr: 0x801cb15c, size: 192, name: require_overlay_run_helpmenu, hash: 080209a0102a063f}
-  - {addr: 0x801cb21c, size: 176, name: require_text_build_battle_nicknames, hash: f01073dd1236acab, source: src/shared/text/require_text_build_battle_nicknames.c}
+  - {addr: 0x801c58d0, size: 1280, name: require_editor_load_party_unit, hash: e789845c276f79a5, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c5dd0, size: 120, name: require_party_restore_item_counts, hash: 5036916d195f2e8b, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c5e48, size: 200, name: require_party_sell_equipment_over_limit, hash: ce0d4bdda9e4c30b, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c5f10, size: 240, name: require_party_store_equipment_or_sell_overflow, hash: 8dd80fb16f32c66e, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c6000, size: 160, name: require_party_get_free_slot_status, hash: e45d44d7bf4d0697, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c60a0, size: 2280, name: require_party_select_unit_to_remove, hash: f6bb31641f3d2f9d, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c6988, size: 2024, name: require_party_apply_post_battle_changes, hash: 319e61c527147a5b, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c7170, size: 492, name: require_reward_collect_war_trophies_and_bonus_money, hash: 32339382b433870d, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c735c, size: 40, name: require_reward_get_war_trophy_column_x, hash: f1e28eb8676390c8, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c7384, size: 52, name: require_reward_get_war_trophy_entry_offset, hash: 59f25f8289f42a18, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c73b8, size: 1984, name: require_reward_run_war_trophies, hash: bf50608a35ad2092, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c7b78, size: 4124, name: require_reward_run_gil_ticker, hash: 5567bfd43013223e, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c8b94, size: 420, name: require_gfx_scale_poly_gt4_vertex_colors, hash: 66ed05c27d4e424c, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c8d38, size: 292, name: require_gfx_init_poly_gt4_array_32, hash: f259cec1a6ecdc8c, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c8e5c, size: 292, name: require_gfx_init_poly_gt4_array_8, hash: 0f1ae6684e05e365, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c8f80, size: 4132, name: require_condition_show_general, hash: 231240f68206f06c, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c9fa4, size: 8, name: require_noop_801c9fa4, hash: 6d64edf91449c1b1, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801c9fac, size: 1688, name: require_condition_run_special_thread, hash: ac96742eb4a60b78, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801ca644, size: 32, name: require_thread_exit_current, hash: d5e294538771c138, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801ca664, size: 2416, name: require_reward_animate_bonus_image_burst, hash: 5a5a3d742bcaea7a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801cafd4, size: 392, name: require_condition_dispatch, hash: 5daba3919c5bcdeb, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801cb15c, size: 192, name: require_overlay_run_helpmenu, hash: 080209a0102a063f, unit: require_editor_load_party_unit_unit}
+  - {addr: 0x801cb21c, size: 176, name: require_text_build_battle_nicknames, hash: f01073dd1236acab, unit: require_editor_load_party_unit_unit}
 
 data:
   - {addr: 0x801bf000, name: g_require_text_wait_for_file_allocation_message}
@@ -2559,9 +2568,12 @@ source_dir: src/event/small
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
+units:
+  - {name: small_text_init_battle_pointers_unit, source: src/shared/text/small_text_init_battle_pointers_unit.c}
+
 functions:
-  - {addr: 0x801d7000, size: 100, name: small_text_init_battle_pointers, hash: 33b5d60b7f13ad41, source: src/shared/text/small_text_init_battle_pointers.c}
-  - {addr: 0x801d7064, size: 8, name: small_return_zero, hash: 207819bf4ebe3078}
+  - {addr: 0x801d7000, size: 100, name: small_text_init_battle_pointers, hash: 33b5d60b7f13ad41, unit: small_text_init_battle_pointers_unit}
+  - {addr: 0x801d7064, size: 8, name: small_return_zero, hash: 207819bf4ebe3078, unit: small_text_init_battle_pointers_unit}
 
 data:
   - {addr: 0x801d7070, name: g_small_text_name_section_offsets}
