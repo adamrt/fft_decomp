@@ -1,0 +1,25 @@
+#include "fft/script.h"
+#include "fft/wldcore.h"
+#include "psx/libetc.h"
+#include "psx/libgpu.h"
+#include "psx/pad.h"
+#include "psx/types.h"
+
+/* Initialize the WLDCORE subsystems before entering the world loop.
+ * The matched range includes the jr delay slot at 0x80067cb0. */
+void wldcore_init_subsystems(void) {
+    SetDispMask(0);
+    wldcore_init_world_map_state();
+    wldcore_input_init_repeat_state();
+    wldcore_load_scratch_data_blocking();
+    wldcore_gfx_init_subsystem();
+    window_init_record_pools_variant();
+    wldcore_map_init_tile_atlas();
+    wldcore_load_formation_unit_name_and_face();
+    wldcore_map_color_and_draw_dots();
+    wldcore_init_stub();
+    wldcore_map_init_location_marker_and_camera();
+    wldcore_menu_reset_window_list_and_store_origin();
+    wldcore_init_runtime_state();
+    wldcore_menu_restore_level_on_world_entry();
+}

@@ -57,8 +57,20 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 	if err := p.moveSymbolsCommand([]string{"--dir", "src/menu", "battle:menu_b1"}); err == nil || !strings.Contains(err.Error(), "within unit") {
 		t.Fatalf("move guard error = %v", err)
 	}
+	// A unit file may carry its own leading comment; members still get the includes.
+	unitPath := filepath.Join(p.root, "src", "battle", "menu_b.c")
+	unitText, err := os.ReadFile(unitPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(unitPath, append([]byte("/* The b menus. */\n\n#include \"fft/menu.h\"\n\n"), unitText...), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	if err := p.splitSymbolsCommand([]string{"--unit", "menu_b"}); err != nil {
 		t.Fatal(err)
+	}
+	if piece, err := os.ReadFile(filepath.Join(p.root, "src", "battle", "menu_b2.c")); err != nil || !strings.HasPrefix(string(piece), "#include \"fft/menu.h\"") || strings.Contains(string(piece), "The b menus") {
+		t.Fatalf("split piece lost its includes or kept the file comment:\n%s", piece)
 	}
 	config, err = p.loadCheckedConfig()
 	if err != nil {

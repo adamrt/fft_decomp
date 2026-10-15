@@ -131,8 +131,24 @@ func splitUnitSource(text string, members []string) ([]string, string, error) {
 	lines := strings.Split(text, "\n")
 	var includes []string
 	bodyStart := 0
+	inComment := false
 	for index, line := range lines {
 		trimmed := strings.TrimSpace(line)
+		// The file's own comment and blank lines precede the includes.
+		if inComment {
+			if strings.Contains(trimmed, "*/") {
+				inComment = false
+			}
+			bodyStart = index + 1
+			continue
+		}
+		if strings.HasPrefix(trimmed, "/*") {
+			if !strings.Contains(trimmed, "*/") {
+				inComment = true
+			}
+			bodyStart = index + 1
+			continue
+		}
 		if strings.HasPrefix(trimmed, "#include") {
 			includes = append(includes, trimmed)
 			bodyStart = index + 1
@@ -141,6 +157,7 @@ func splitUnitSource(text string, members []string) ([]string, string, error) {
 		if trimmed != "" {
 			break
 		}
+		bodyStart = index + 1
 	}
 	pieces := make([]string, 0, len(members))
 	cursor := bodyStart

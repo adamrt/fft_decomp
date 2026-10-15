@@ -1,4 +1,5 @@
 #include "fft/event_equip.h"
+#include "fft/main.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

@@ -1,0 +1,54 @@
+#include "fft/battle_script.h"
+#include "fft/event_attack.h"
+#include "fft/gfx.h"
+#include "fft/menu.h"
+#include "fft/script.h"
+#include "fft/sound.h"
+#include "fft/thread.h"
+#include "psx/libgpu.h"
+#include "psx/pad.h"
+#include "psx/types.h"
+
+/* Thread body that animates the map-title panel strip with double-buffered
+ * primitives: widen it by the thread's step, hold it, then sweep it again
+ * with `reverse` set. The hold phase reuses `width` as its frame counter. */
+void attack_map_show_title(void) {
+    s32 step;
+    s32 buffer;
+    s32 width;
+
+    step = thread_get_current_parameter_3_variant();
+    buffer = 0;
+    if (step == 0) {
+        step = 1;
+    }
+
+    width = 8;
+    do {
+        buffer ^= 1;
+        attack_gfx_build_shaded_panel_strips(g_attack_map_title_sprites[buffer], width, 0x80, 0);
+        width += step;
+        thread_yield();
+    } while (width < 0xf8);
+
+    width = 0;
+    do {
+        buffer ^= 1;
+        attack_gfx_build_shaded_panel_strips(g_attack_map_title_sprites[buffer], 0xf8, 0x80, 0);
+        width += step;
+        thread_yield();
+    } while (width < 0x6e);
+
+    width = 8;
+    do {
+        buffer ^= 1;
+        attack_gfx_build_shaded_panel_strips(g_attack_map_title_sprites[buffer], width, 0x80, 1);
+        if (width >= 0x81) {
+            g_attack_map_title_closing_past_midpoint = 1;
+        }
+        width += step;
+        thread_yield();
+    } while (width < 0xf9);
+
+    thread_exit_current();
+}

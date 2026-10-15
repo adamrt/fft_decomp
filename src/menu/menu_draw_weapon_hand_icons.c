@@ -1,7 +1,9 @@
+#include "fft/event_equip.h"
 #include "fft/main.h"
 #include "fft/menu.h"
+#include "psx/libgpu.h"
+#include "psx/types.h"
 
-/* Draw the weapon handling icons in the item detail panel. */
 void menu_draw_weapon_hand_icons(s16 weapon_id) {
     RECT rect;
     s16 x;

@@ -1,4 +1,6 @@
+#include "fft/main.h"
 #include "fft/world.h"
+#include "psx/types.h"
 
 /*
  * Builds a sorted, unique list of Reaction, Support, or Movement abilities

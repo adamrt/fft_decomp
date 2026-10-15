@@ -1,6 +1,0 @@
-#include "fft/main.h"
-#include "psx/types.h"
-
-void main_party_remove_unit(u32 index) {
-    g_main_party_units[index].party_id = PARTY_ID_NONE;
-}

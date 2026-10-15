@@ -21,6 +21,7 @@ import (
 
 type unitsOptions struct {
 	minConfidence string
+	minScore      int // when set, a cut needs at least this score (or certainty) to split
 	maxOwners     int
 	outDir        string
 }
@@ -167,6 +168,7 @@ func (p project) unitsCommand(args []string) error {
 	module := flags.String("module", "", "modules to report (ids, aliases, event or effect)")
 	minConfidence := flags.String("min-confidence", "low", "lowest boundary confidence eligible to split units: low, medium or high")
 	maxOwners := flags.Int("max-owners", 3, "data referenced by more functions than this is widely shared")
+	minScore := flags.Int("min-score", 0, "when set, a cut needs at least this score (or certainty) to split a unit")
 	out := flags.String("out", "build/analysis/units", "report directory under build/")
 	if err := flags.Parse(args); err != nil {
 		return err
@@ -189,7 +191,7 @@ func (p project) unitsCommand(args []string) error {
 			return err
 		}
 	}
-	options := unitsOptions{minConfidence: *minConfidence, maxOwners: *maxOwners, outDir: outDir}
+	options := unitsOptions{minConfidence: *minConfidence, minScore: *minScore, maxOwners: *maxOwners, outDir: outDir}
 	analyses, err := p.reconstructUnits(config, options)
 	if err != nil {
 		return err
@@ -859,7 +861,7 @@ func (an *unitModuleAnalysis) formUnits(group *unitGroup, options unitsOptions) 
 	for k := 1; k < n; k++ {
 		cut := &group.cuts[k-1]
 		forced[k] = cut.certain
-		eligible[k] = cut.certain || (cut.score > 0 && unitConfidenceRank[cut.confidence] >= minimum)
+		eligible[k] = cut.certain || (cut.score > 0 && unitConfidenceRank[cut.confidence] >= minimum && cut.score >= options.minScore)
 		score[k] = cut.score
 		if cut.certain && score[k] < 6 {
 			score[k] = 6

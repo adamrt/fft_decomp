@@ -3,10 +3,6 @@
 #include "fft/wldcore.h"
 #include "psx/pad.h"
 
-/* Opens a panel list of the set script variables 0x1a4-0x1bb (entry values
- * 0x9800 + index), shows up to eight rows at (0x58, 0x50) with width 0x8c,
- * hides the parent list window's content render record and appends its
- * 0x5c-byte record tagged 0x2e. Twin of 0x80087b94. */
 void wldcore_list_open_script_flags_01a4_01bb(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
