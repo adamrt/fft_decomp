@@ -42,8 +42,9 @@ type moduleSpec struct {
 	SHA256    string
 	Load      uint32
 	SourceDir string
-	Profile   string   // default compiler profile of the module's functions
-	Links     []string // modules resident alongside this one, searched after it
+	Profile   string       // default compiler profile of the module's functions
+	Links     []string     // modules resident alongside this one, searched after it
+	Defines   []defineSpec // VARIANT_ macros passed as -D flags to every compile of this module
 	Libraries []librarySpec
 	Functions []functionSpec
 	Data      []symbolSpec
@@ -70,6 +71,35 @@ type rodataSpec struct {
 	Addr uint32
 	Size int
 	Hash string
+}
+
+// defineSpec is one per-module build constant: a VARIANT_ macro whose value
+// a trial proved differs between the programs that compile one source.
+type defineSpec struct {
+	Name  string
+	Value string
+}
+
+// definePrefix starts every per-module build constant.
+const definePrefix = "VARIANT_"
+
+// defineFlags renders the module's defines as preprocessor flags.
+func (m *moduleSpec) defineFlags() []string {
+	flags := make([]string, 0, len(m.Defines))
+	for _, define := range m.Defines {
+		flags = append(flags, "-D"+define.Name+"="+define.Value)
+	}
+	return flags
+}
+
+// defineValue reports the module's value for a VARIANT_ macro.
+func (m *moduleSpec) defineValue(name string) (string, bool) {
+	for _, define := range m.Defines {
+		if define.Name == name {
+			return define.Value, true
+		}
+	}
+	return "", false
 }
 
 type symbolSpec struct {
@@ -243,21 +273,22 @@ func splitYAMLDocuments(data []byte) [][]byte {
 }
 
 type moduleFileYAML struct {
-	Module    string         `yaml:"module"`
-	File      string         `yaml:"file"`
-	LBA       int            `yaml:"lba"`
-	Size      int            `yaml:"size"`
-	SHA256    string         `yaml:"sha256"`
-	Load      uint32         `yaml:"load"`
-	SourceDir string         `yaml:"source_dir"`
-	Profile   string         `yaml:"profile"`
-	Links     []string       `yaml:"links"`
-	Libraries []libraryYAML  `yaml:"libraries"`
-	Functions []functionYAML `yaml:"functions"`
-	Data      []symbolYAML   `yaml:"data"`
-	Imports   []symbolYAML   `yaml:"imports"`
-	Overrides []overrideYAML `yaml:"overrides"`
-	Regions   []regionYAML   `yaml:"regions"`
+	Module    string            `yaml:"module"`
+	File      string            `yaml:"file"`
+	LBA       int               `yaml:"lba"`
+	Size      int               `yaml:"size"`
+	SHA256    string            `yaml:"sha256"`
+	Load      uint32            `yaml:"load"`
+	SourceDir string            `yaml:"source_dir"`
+	Profile   string            `yaml:"profile"`
+	Links     []string          `yaml:"links"`
+	Defines   map[string]string `yaml:"defines"`
+	Libraries []libraryYAML     `yaml:"libraries"`
+	Functions []functionYAML    `yaml:"functions"`
+	Data      []symbolYAML      `yaml:"data"`
+	Imports   []symbolYAML      `yaml:"imports"`
+	Overrides []overrideYAML    `yaml:"overrides"`
+	Regions   []regionYAML      `yaml:"regions"`
 }
 
 type functionYAML struct {
@@ -315,6 +346,9 @@ func parseModuleConfig(data []byte) (*moduleSpec, error) {
 		Comment: leadingComment(data), ID: file.Module, File: file.File, LBA: file.LBA,
 		Size: file.Size, SHA256: file.SHA256, Load: file.Load, SourceDir: file.SourceDir,
 		Profile: file.Profile, Links: file.Links,
+	}
+	for name, value := range file.Defines {
+		module.Defines = append(module.Defines, defineSpec{Name: name, Value: value})
 	}
 	for _, item := range file.Libraries {
 		module.Libraries = append(module.Libraries, librarySpec(item))
@@ -381,6 +415,7 @@ func (m *moduleSpec) normalize() {
 		return m.Overrides[i].Name < m.Overrides[j].Name
 	})
 	sort.SliceStable(m.Libraries, func(i, j int) bool { return m.Libraries[i].Addr < m.Libraries[j].Addr })
+	sort.SliceStable(m.Defines, func(i, j int) bool { return m.Defines[i].Name < m.Defines[j].Name })
 	sort.SliceStable(m.Regions, func(i, j int) bool {
 		if m.Regions[i].Addr != m.Regions[j].Addr {
 			return m.Regions[i].Addr < m.Regions[j].Addr
@@ -414,6 +449,14 @@ func renderModuleConfig(m *moduleSpec) []byte {
 			links[index] = yamlText(link)
 		}
 		fmt.Fprintf(&out, "links: [%s]\n", strings.Join(links, ", "))
+	}
+	if len(m.Defines) > 0 {
+		defines := make([]string, len(m.Defines))
+		for index, define := range m.Defines {
+			// Values are integer literals, written bare.
+			defines[index] = yamlText(define.Name) + ": " + define.Value
+		}
+		fmt.Fprintf(&out, "defines: {%s}\n", strings.Join(defines, ", "))
 	}
 	section := func(name string, count int, row func(int) string) {
 		if count == 0 {
@@ -734,6 +777,7 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 	if err := validateSourceInventory(p.root, "src", sources, "module configuration"); err != nil {
 		fail("%v", err)
 	}
+	problems = append(problems, validateDefines(p.root, config)...)
 	if len(problems) > 0 {
 		if len(problems) > 40 {
 			problems = append(problems[:40], fmt.Sprintf("... and %d more", len(problems)-40))

@@ -629,11 +629,13 @@ func cc1Command(compilerPath string) []string {
 
 // repreprocess redoes the preprocessing step into the same destination, for the
 // retries after a compile failure that a concurrent source write can cause.
-func (p project) repreprocess(sourcePath, preprocessed string) error {
+func (p project) repreprocess(sourcePath, preprocessed string, defines []string) error {
 	staging := preprocessed + ".staging"
 	cppDir, cppSource := p.preprocessInput(sourcePath)
-	if err := runInDir(cppDir, "mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude",
-		cppSource, "-o", staging); err != nil {
+	cpp := []string{"mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude"}
+	cpp = append(cpp, defines...)
+	cpp = append(cpp, cppSource, "-o", staging)
+	if err := runInDir(cppDir, cpp...); err != nil {
 		return err
 	}
 	info, err := os.Stat(staging)
@@ -646,7 +648,11 @@ func (p project) repreprocess(sourcePath, preprocessed string) error {
 	return os.Rename(staging, preprocessed)
 }
 
-func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string, profile compilerProfile) (map[string][]byte, error) {
+// compileHistoricalSections preprocesses sourcePath with the module's -D
+// defines, compiles it under profile, links it with linkPath and returns the
+// allocatable sections. Defines reach the cache key through the preprocessed
+// text, so a source that never uses them keeps its cache entry.
+func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string, profile compilerProfile, defines ...string) (map[string][]byte, error) {
 	if err := os.MkdirAll(buildDir, 0o755); err != nil {
 		return nil, err
 	}
@@ -676,10 +682,9 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 		// this file, so no reader may see a partial write.
 		staging := preprocessed + ".staging"
 		cppDir, cppSource := p.preprocessInput(sourcePath)
-		cpp := []string{
-			"mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude",
-			cppSource, "-o", staging,
-		}
+		cpp := []string{"mipsel-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-Iinclude"}
+		cpp = append(cpp, defines...)
+		cpp = append(cpp, cppSource, "-o", staging)
 		if err := runInDir(cppDir, cpp...); err != nil {
 			return nil, err
 		}
@@ -720,7 +725,7 @@ func (p project) compileHistoricalSections(sourcePath, linkPath, buildDir string
 			// re-preprocess and retry briefly before reporting the error.
 			for retry := 0; retry < historicalCompileRetries; retry++ {
 				time.Sleep(historicalCompileRetryDelay)
-				if retryErr := p.repreprocess(sourcePath, preprocessed); retryErr != nil {
+				if retryErr := p.repreprocess(sourcePath, preprocessed, defines); retryErr != nil {
 					return nil, errors.Join(compileErr, retryErr)
 				}
 				if compileErr = runInDir(p.root, cc1...); compileErr == nil {

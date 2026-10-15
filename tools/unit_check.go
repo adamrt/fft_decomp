@@ -301,7 +301,8 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 		return nil, err
 	}
 	buildDir := filepath.Join(workDir, unit.module.ID)
-	sections, err := p.compileHistoricalSections(source, linker, buildDir, unit.profile)
+	defines := unit.module.defineFlags()
+	sections, err := p.compileHistoricalSections(source, linker, buildDir, unit.profile, defines...)
 	if err == nil {
 		return sections, nil
 	}
@@ -315,7 +316,7 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 		if expanded, bindErr := unitLinkerBindings(resolver, unit, undefined); bindErr == nil {
 			if rescript := unitLinkerScript(unit, expanded, true); rescript != script {
 				if _, writeErr := writeLinkerScript(workDir, unit.module.ID, rescript); writeErr == nil {
-					if sections, retryErr := p.compileHistoricalSections(source, linker, buildDir, unit.profile); retryErr == nil {
+					if sections, retryErr := p.compileHistoricalSections(source, linker, buildDir, unit.profile, defines...); retryErr == nil {
 						return sections, nil
 					}
 				}

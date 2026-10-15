@@ -191,10 +191,16 @@ func (p project) functionLinker(resolver symbolResolver, m *moduleSpec, f *funct
 	return source, script, err
 }
 
-// compileFunction compiles one configured function with its profile, linked
-// at its target address, under workDir/<name>, and returns its allocatable
-// sections.
+// compileFunction compiles one configured function with its profile and the
+// module's defines, linked at its target address, under workDir/<name>, and
+// returns its allocatable sections.
 func (p project) compileFunction(resolver symbolResolver, m *moduleSpec, f *functionSpec, workDir string) (map[string][]byte, error) {
+	return p.compileFunctionDefines(resolver, m, f, workDir, m.defineFlags())
+}
+
+// compileFunctionDefines is compileFunction with an explicit define list, for
+// trials that probe a constant before it enters the module configuration.
+func (p project) compileFunctionDefines(resolver symbolResolver, m *moduleSpec, f *functionSpec, workDir string, defines []string) (map[string][]byte, error) {
 	source, script, err := p.functionLinker(resolver, m, f)
 	if err != nil {
 		return nil, err
@@ -207,7 +213,7 @@ func (p project) compileFunction(resolver symbolResolver, m *moduleSpec, f *func
 	if !ok {
 		return nil, fmt.Errorf("unknown compiler profile %q", m.profileOf(f))
 	}
-	sections, err := p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile)
+	sections, err := p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
 	if err == nil {
 		return sections, nil
 	}
@@ -227,7 +233,7 @@ func (p project) compileFunction(resolver symbolResolver, m *moduleSpec, f *func
 			}
 			if expanded, scriptErr := linkerScript(f, bindings); scriptErr == nil && expanded != script {
 				if _, writeErr := writeLinkerScript(workDir, f.Name, expanded); writeErr == nil {
-					return p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile)
+					return p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
 				}
 			}
 		}
@@ -236,7 +242,7 @@ func (p project) compileFunction(resolver symbolResolver, m *moduleSpec, f *func
 	// its bindings; when a fresh read differs, relink with that once.
 	if _, fresh, freshErr := p.functionLinker(resolver, m, f); freshErr == nil && fresh != script {
 		if _, writeErr := writeLinkerScript(workDir, f.Name, fresh); writeErr == nil {
-			return p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile)
+			return p.compileHistoricalSections(source, linker, filepath.Join(workDir, f.Name), profile, defines...)
 		}
 	}
 	return nil, err
