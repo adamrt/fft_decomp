@@ -201,14 +201,36 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 	return results, nil
 }
 
+// compileEntry compiles one entry the way the module build does: a plain
+// function by itself, a unit member through its unit, returning that
+// member's slices.
+func (p project) compileEntry(config *projectConfig, resolver symbolResolver, m *moduleSpec, f *functionSpec, workDir string) (map[string][]byte, error) {
+	if f.Unit == "" {
+		return p.compileFunction(resolver, m, f, workDir)
+	}
+	results := make([]compiledFunction, len(m.Functions))
+	indexOf := map[string]int{}
+	for index := range m.Functions {
+		indexOf[m.Functions[index].Name] = index
+	}
+	p.compileUnit(config, resolver, m, m.unit(f.Unit), workDir, results, indexOf)
+	result := results[indexOf[f.Name]]
+	return result.sections, result.err
+}
+
 // compileUnit compiles one configured unit once and hands each member its
 // slice of the merged sections, or the unit's error.
 func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *moduleSpec, unit *unitDef, workDir string, results []compiledFunction, indexOf map[string]int) {
 	members := m.unitMembers(unit.Name)
+	step := func() {
+		if p.progress != nil {
+			p.progress.step()
+		}
+	}
 	setError := func(err error) {
 		for _, f := range members {
 			results[indexOf[f.Name]].err = fmt.Errorf("unit %s: %w", unit.Name, err)
-			p.progress.step()
+			step()
 		}
 	}
 	instance, err := m.unitInstance(config, unit.Name)
@@ -241,7 +263,7 @@ func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *
 			slices[".rodata"] = rodata
 		}
 		results[indexOf[f.Name]].sections = slices
-		p.progress.step()
+		step()
 	}
 }
 

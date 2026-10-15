@@ -148,7 +148,7 @@ func (p project) diffCommand(args []string) error {
 		return err
 	}
 	defer unlock()
-	sections, err := p.compileFunction(newSymbolResolver(config), m, f, workDir)
+	sections, err := p.compileEntry(config, newSymbolResolver(config), m, f, workDir)
 	if err != nil {
 		return fmt.Errorf("compile %s: %w", f.Name, err)
 	}
