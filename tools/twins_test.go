@@ -78,8 +78,8 @@ func twinFixture(module, name, source string, symbols ...string) *twinFunction {
 
 func TestTwinGroupClassifiesByNamesAndSources(t *testing.T) {
 	shared := twinGroup([]*twinFunction{
-		twinFixture("battle", "menu_x", "src/shared/menu/menu_x.c", "thread_yield", "g_a"),
-		twinFixture("world", "menu_x", "src/shared/menu/menu_x.c", "thread_yield", "g_a"),
+		twinFixture("battle", "menu_x", "src/menu/menu_x.c", "thread_yield", "g_a"),
+		twinFixture("world", "menu_x", "src/menu/menu_x.c", "thread_yield", "g_a"),
 	})
 	if shared.Status != "shared" || shared.Unlocked != 0 || shared.Unified != 2 {
 		t.Fatalf("shared = %+v", shared)

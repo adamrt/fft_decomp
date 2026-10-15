@@ -54,7 +54,7 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 	if err := p.unitSymbolsCommand([]string{"--name", "gap", "--source", "src/battle/gap.c", "battle:menu_b3", "battle:map_d1"}); err == nil || !strings.Contains(err.Error(), "does not follow") {
 		t.Fatalf("gap error = %v", err)
 	}
-	if err := p.moveSymbolsCommand([]string{"--dir", "src/shared/menu", "battle:menu_b1"}); err == nil || !strings.Contains(err.Error(), "within unit") {
+	if err := p.moveSymbolsCommand([]string{"--dir", "src/menu", "battle:menu_b1"}); err == nil || !strings.Contains(err.Error(), "within unit") {
 		t.Fatalf("move guard error = %v", err)
 	}
 	if err := p.splitSymbolsCommand([]string{"--unit", "menu_b"}); err != nil {

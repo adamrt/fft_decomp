@@ -358,13 +358,13 @@ func appendToHeaderGroup(data []byte, label, line string) ([]byte, error) {
 // files go away when nothing else uses them.
 func (p project) shareSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols share", flag.ContinueOnError)
-	to := flags.String("to", "", "shared source path under src/, such as src/shared/menu/menu_x.c")
+	to := flags.String("to", "", "shared source path under src/, such as src/menu/menu_x.c")
 	from := flags.String("from", "", "MODULE:ENTRY whose source becomes the shared file (default: the first entry whose source is not already --to)")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	usage := errors.New("usage: tools symbols share --to src/shared/SUB/NAME.c [--from MODULE:ENTRY] [--dry-run] MODULE:ENTRY...")
+	usage := errors.New("usage: tools symbols share --to src/SUB/NAME.c [--from MODULE:ENTRY] [--dry-run] MODULE:ENTRY...")
 	if *to == "" || flags.NArg() == 0 {
 		return usage
 	}

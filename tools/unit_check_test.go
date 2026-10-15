@@ -66,7 +66,7 @@ func TestUnitSpecParsingAndDefaults(t *testing.T) {
 	}
 	for _, text := range []string{
 		"functions: [a]\ninstances: []\n",
-		"functions: [a]\nsource: src/shared/thread/thread.c\ninstances:\n  - {module: battle}\n",
+		"functions: [a]\nsource: src/thread/thread.c\ninstances:\n  - {module: battle}\n",
 		"functions: [a, a]\ninstances:\n  - {module: battle}\n",
 		"functions: [a]\nunknown: 1\ninstances:\n  - {module: battle}\n",
 		"instances:\n  - {module: battle}\n",

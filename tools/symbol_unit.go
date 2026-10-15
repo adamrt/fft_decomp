@@ -18,7 +18,7 @@ import (
 func (p project) unitSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols unit", flag.ContinueOnError)
 	name := flags.String("name", "", "unit name")
-	source := flags.String("source", "", "merged source path under src/, such as src/shared/thread/thread.c")
+	source := flags.String("source", "", "merged source path under src/, such as src/thread/thread.c")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err

@@ -182,20 +182,33 @@ func placementNewName(name, sub string, tokens map[string]string, folderToken ma
 	return stripped, ""
 }
 
-// sharedSubsystemTokens maps the name tokens used under src/shared/<sub>/ to
-// their folder, and each folder to its most common token.
+// programFolders are the top-level src/ folders that hold one program's own
+// code rather than a subsystem.
+var programFolders = map[string]bool{"battle": true, "world": true, "wldcore": true, "main": true, "open": true, "event": true, "effect": true, "lib": true}
+
+// subsystemFolder names the subsystem of a top-level src/<subsystem>/ path.
+func subsystemFolder(source string) string {
+	parts := strings.Split(source, "/")
+	if len(parts) > 2 && parts[0] == "src" && !programFolders[parts[1]] {
+		return parts[1]
+	}
+	return ""
+}
+
+// sharedSubsystemTokens maps the name tokens used under src/<sub>/ to their
+// folder, and each folder to its most common token.
 func sharedSubsystemTokens(root string) (map[string]string, map[string]string, error) {
-	entries, err := os.ReadDir(filepath.Join(root, "src", "shared"))
+	entries, err := os.ReadDir(filepath.Join(root, "src"))
 	if err != nil {
 		return nil, nil, err
 	}
 	tokens := map[string]string{}
 	folderToken := map[string]string{}
 	for _, entry := range entries {
-		if !entry.IsDir() {
+		if !entry.IsDir() || programFolders[entry.Name()] {
 			continue
 		}
-		files, err := os.ReadDir(filepath.Join(root, "src", "shared", entry.Name()))
+		files, err := os.ReadDir(filepath.Join(root, "src", entry.Name()))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -217,17 +230,22 @@ func sharedSubsystemTokens(root string) (map[string]string, map[string]string, e
 }
 
 // sharedSubsystemOf names the subsystem folder of a shared source. A
-// module-prefixed file under src/shared is one program's own routine of the
-// subsystem, not a shared body, so it is not counted as shared evidence.
+// module-prefixed file, or a body in a module subfolder, is one program's
+// own routine of the subsystem, not a shared body, so it is not counted as
+// shared evidence.
 func sharedSubsystemOf(source string) string {
-	parts := strings.Split(source, "/")
-	if len(parts) > 3 && parts[0] == "src" && parts[1] == "shared" {
-		if token := strings.SplitN(parts[len(parts)-1], "_", 2)[0]; unitModuleTokens[token] {
-			return ""
-		}
-		return parts[2]
+	sub := subsystemFolder(source)
+	if sub == "" {
+		return ""
 	}
-	return ""
+	parts := strings.Split(source, "/")
+	if len(parts) != 3 {
+		return ""
+	}
+	if token := strings.SplitN(parts[2], "_", 2)[0]; unitModuleTokens[token] {
+		return ""
+	}
+	return sub
 }
 
 func (p project) placementCommand(args []string) error {
@@ -384,7 +402,7 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 			row.NewName, note = placementNewName(fn.f.sourceSymbol(), sub, tokens, folderToken)
 			row.Apply = row.NewName != ""
 			if row.Apply {
-				row.Destination = "src/shared/" + sub + "/" + row.NewName + ".c"
+				row.Destination = "src/" + sub + "/" + row.NewName + ".c"
 				if row.NewName != fn.f.sourceSymbol() && taken[row.NewName] {
 					row.Apply, note = false, "name "+row.NewName+" is taken"
 				} else if _, err := os.Stat(filepath.Join(p.root, filepath.FromSlash(row.Destination))); err == nil {
@@ -572,7 +590,7 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 		if family.Name == "" {
 			family.Name, family.Apply, family.Note = "?", false, "no name to propose"
 		}
-		shared := "src/shared/" + family.Subsystem
+		shared := "src/" + family.Subsystem
 		bodyIDs := map[string]string{}
 		folderOf := map[string]string{}
 		claimed := map[string]string{}
@@ -587,7 +605,7 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 			for _, member := range bodies[id] {
 				modules[nodes[member].module] = true
 				if sub := sharedSubsystemOf(nodes[member].fn.source); sub != "" {
-					folder = "src/shared/" + sub
+					folder = "src/" + sub
 				}
 			}
 			if folder == "" && (len(modules) > 1 || family.Kind == "share") {

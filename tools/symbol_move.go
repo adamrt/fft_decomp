@@ -14,12 +14,12 @@ import (
 // change; rename-function does that.
 func (p project) moveSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols move", flag.ContinueOnError)
-	dir := flags.String("dir", "", "destination folder under src/, such as src/shared/menu")
+	dir := flags.String("dir", "", "destination folder under src/, such as src/menu")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	usage := errors.New("usage: tools symbols move --dir src/shared/SUB [--dry-run] MODULE:ENTRY...")
+	usage := errors.New("usage: tools symbols move --dir src/SUB [--dry-run] MODULE:ENTRY...")
 	if *dir == "" || flags.NArg() == 0 {
 		return usage
 	}

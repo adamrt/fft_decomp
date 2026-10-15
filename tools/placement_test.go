@@ -80,7 +80,7 @@ func TestPlacementCommandWritesReportsReadOnlyAndDeterministic(t *testing.T) {
 	for _, row := range append(append([]placementRow(nil), report.Moves...), report.Review...) {
 		rows[row.Function] = row
 	}
-	if row, ok := rows["menu_b1"]; !ok || row.Subsystem != "menu" || row.Destination != "src/shared/menu/menu_b1.c" || !row.Apply {
+	if row, ok := rows["menu_b1"]; !ok || row.Subsystem != "menu" || row.Destination != "src/menu/menu_b1.c" || !row.Apply {
 		t.Fatalf("menu_b1 row = %+v (present %t)", row, ok)
 	}
 	if row, ok := rows["menu_b1"]; ok && row.Module != "battle" {

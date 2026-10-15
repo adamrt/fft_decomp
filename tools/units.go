@@ -916,11 +916,8 @@ func (an *unitModuleAnalysis) formUnits(group *unitGroup, options unitsOptions) 
 			unit.functions = append(unit.functions, j)
 			unit.prefixes[fn.prefix]++
 			profiles[fn.profile]++
-			if strings.HasPrefix(fn.source, "src/shared/") {
-				parts := strings.Split(fn.source, "/")
-				if len(parts) > 2 {
-					shared["src/shared/"+parts[2]]++
-				}
+			if sub := sharedSubsystemOf(fn.source); sub != "" {
+				shared["src/"+sub]++
 			}
 		}
 		unit.profile = mostCommon(profiles)

@@ -102,7 +102,7 @@ func TestUnifyRenamesCopiesAcrossModulesAndKeepsOneDeclaration(t *testing.T) {
 
 func TestShareBindsEntriesToOneSourceAndRemovesTwins(t *testing.T) {
 	p := unifyFixture(t)
-	if err := p.symbolsCommand([]string{"share", "--to", "src/shared/menu/battle_helper.c", "battle:battle_helper", "attack:attack_entry"}); err != nil {
+	if err := p.symbolsCommand([]string{"share", "--to", "src/menu/battle_helper.c", "battle:battle_helper", "attack:attack_entry"}); err != nil {
 		t.Fatal(err)
 	}
 	config, err := p.loadProjectConfig()
@@ -112,7 +112,7 @@ func TestShareBindsEntriesToOneSourceAndRemovesTwins(t *testing.T) {
 	battle, _ := config.module("battle")
 	attack, _ := config.module("event-attack")
 	b, a := battle.function("battle_helper"), attack.function("attack_entry")
-	if b.Source != "src/shared/menu/battle_helper.c" || b.SourceSymbol != "" || a.Source != b.Source || a.SourceSymbol != "battle_helper" {
+	if b.Source != "src/menu/battle_helper.c" || b.SourceSymbol != "" || a.Source != b.Source || a.SourceSymbol != "battle_helper" {
 		t.Fatalf("bindings: %+v %+v", b, a)
 	}
 	for _, gone := range []string{"src/battle/battle_helper.c", "src/event/attack_entry.c"} {
@@ -123,7 +123,7 @@ func TestShareBindsEntriesToOneSourceAndRemovesTwins(t *testing.T) {
 	if err := p.validateProjectConfig(config); err != nil {
 		t.Fatal(err)
 	}
-	if err := p.symbolsCommand([]string{"share", "--to", "src/shared/menu/x.c", "battle:nowhere"}); err == nil || !strings.Contains(err.Error(), "no function") {
+	if err := p.symbolsCommand([]string{"share", "--to", "src/menu/x.c", "battle:nowhere"}); err == nil || !strings.Contains(err.Error(), "no function") {
 		t.Fatalf("unknown entry: %v", err)
 	}
 	if err := p.symbolsCommand([]string{"share", "--to", "build/x.c", "battle:battle_helper"}); err == nil || !strings.Contains(err.Error(), "under src/") {

@@ -28,14 +28,17 @@ preserving every original byte.
 
 ## Organization
 
-- `src/shared/<subsystem>/`: all code of a subsystem, one file per function,
-  named after it. A bare subsystem prefix is a shared routine; a module
+- `src/<subsystem>/`: all code of a subsystem (`menu`, `gfx`, `sound`, `text`,
+  `script`, `thread`, `camera`, `map`, `unit`, `item`, `job`, `card`, `file`,
+  `window`, `bits`, `memory`, `status`), one file per function or one unit
+  file, named after it. A bare subsystem prefix is a shared routine; a module
   prefix (`battle_gfx_`, `wldcore_menu_`) is that program's own routine of the
-  subsystem. Register explicit `source:` paths in each original module;
-  preserve meaningful separate entries.
+  subsystem. A `_variant` body that only one program links sits in that
+  program's subfolder, `src/<subsystem>/<module>/`. Register explicit `source:`
+  paths in each original module; preserve meaningful separate entries.
 - `src/<module>/`: program-specific code outside any subsystem (battle actions
-  and formulas, the world map opcodes, overlay screens) and the module's
-  `_variant` bodies. Each EVENT overlay has its own `src/event/<overlay>/`.
+  and formulas, the world map opcodes, overlay screens). Each EVENT overlay
+  has its own `src/event/<overlay>/`.
 - `src/lib/psyq/<library>/` and `src/lib/suzuki/`: reconstructed linked libraries.
   Keep established public names, signatures and original module bindings.
 - `include/fft/`: game module, subsystem and shared-type headers.

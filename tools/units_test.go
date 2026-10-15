@@ -24,18 +24,18 @@ source_dir: src/battle
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 functions:
-  - {addr: 0x80067000, size: 32, name: menu_a1, hash: 0000000000000a01, source: src/shared/menu/menu_a1.c}
-  - {addr: 0x80067020, size: 32, name: menu_a2, hash: 0000000000000a02, source: src/shared/menu/menu_a2.c}
-  - {addr: 0x80067040, size: 32, name: menu_a3, hash: 0000000000000a03, source: src/shared/menu/menu_a3.c}
-  - {addr: 0x80067060, size: 32, name: menu_a4, hash: 0000000000000a04, source: src/shared/menu/menu_a4.c}
+  - {addr: 0x80067000, size: 32, name: menu_a1, hash: 0000000000000a01, source: src/menu/menu_a1.c}
+  - {addr: 0x80067020, size: 32, name: menu_a2, hash: 0000000000000a02, source: src/menu/menu_a2.c}
+  - {addr: 0x80067040, size: 32, name: menu_a3, hash: 0000000000000a03, source: src/menu/menu_a3.c}
+  - {addr: 0x80067060, size: 32, name: menu_a4, hash: 0000000000000a04, source: src/menu/menu_a4.c}
   - {addr: 0x80067080, size: 32, name: menu_b1, hash: 0000000000000b01, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {addr: 0x800670a0, size: 32, name: menu_b2, hash: 0000000000000b02, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {addr: 0x800670c0, size: 32, name: menu_b3, hash: 0000000000000b03, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {addr: 0x800670e0, size: 32, name: menu_b4, hash: 0000000000000b04, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80067120, size: 32, name: text_c1, hash: 0000000000000c01, source: src/shared/text/text_c1.c}
-  - {addr: 0x80067140, size: 32, name: text_c2, hash: 0000000000000c02, source: src/shared/text/text_c2.c}
-  - {addr: 0x80067160, size: 32, name: text_c3, hash: 0000000000000c03, source: src/shared/text/text_c3.c}
-  - {addr: 0x80067180, size: 32, name: text_c4, hash: 0000000000000c04, source: src/shared/text/text_c4.c}
+  - {addr: 0x80067120, size: 32, name: text_c1, hash: 0000000000000c01, source: src/text/text_c1.c}
+  - {addr: 0x80067140, size: 32, name: text_c2, hash: 0000000000000c02, source: src/text/text_c2.c}
+  - {addr: 0x80067160, size: 32, name: text_c3, hash: 0000000000000c03, source: src/text/text_c3.c}
+  - {addr: 0x80067180, size: 32, name: text_c4, hash: 0000000000000c04, source: src/text/text_c4.c}
   - {addr: 0x80067300, size: 32, name: map_d1, hash: 0000000000000d01}
   - {addr: 0x80067320, size: 32, name: map_d2, hash: 0000000000000d02}
 
@@ -62,14 +62,14 @@ source_dir: src/world
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 functions:
-  - {addr: 0x800e0000, size: 32, name: menu_a1, hash: 1000000000000a01, source: src/shared/menu/menu_a1.c}
-  - {addr: 0x800e0020, size: 32, name: menu_a2, hash: 1000000000000a02, source: src/shared/menu/menu_a2.c}
-  - {addr: 0x800e0040, size: 32, name: menu_a3, hash: 1000000000000a03, source: src/shared/menu/menu_a3.c}
-  - {addr: 0x800e0060, size: 32, name: menu_a4, hash: 1000000000000a04, source: src/shared/menu/menu_a4.c}
-  - {addr: 0x800e0080, size: 32, name: text_c1, hash: 1000000000000c01, source: src/shared/text/text_c1.c}
-  - {addr: 0x800e00a0, size: 32, name: text_c2, hash: 1000000000000c02, source: src/shared/text/text_c2.c}
-  - {addr: 0x800e00c0, size: 32, name: text_c3, hash: 1000000000000c03, source: src/shared/text/text_c3.c}
-  - {addr: 0x800e00e0, size: 32, name: text_c4, hash: 1000000000000c04, source: src/shared/text/text_c4.c}
+  - {addr: 0x800e0000, size: 32, name: menu_a1, hash: 1000000000000a01, source: src/menu/menu_a1.c}
+  - {addr: 0x800e0020, size: 32, name: menu_a2, hash: 1000000000000a02, source: src/menu/menu_a2.c}
+  - {addr: 0x800e0040, size: 32, name: menu_a3, hash: 1000000000000a03, source: src/menu/menu_a3.c}
+  - {addr: 0x800e0060, size: 32, name: menu_a4, hash: 1000000000000a04, source: src/menu/menu_a4.c}
+  - {addr: 0x800e0080, size: 32, name: text_c1, hash: 1000000000000c01, source: src/text/text_c1.c}
+  - {addr: 0x800e00a0, size: 32, name: text_c2, hash: 1000000000000c02, source: src/text/text_c2.c}
+  - {addr: 0x800e00c0, size: 32, name: text_c3, hash: 1000000000000c03, source: src/text/text_c3.c}
+  - {addr: 0x800e00e0, size: 32, name: text_c4, hash: 1000000000000c04, source: src/text/text_c4.c}
 
 data:
   - {addr: 0x800e0200, name: g_a_table}
@@ -79,25 +79,25 @@ data:
 func unitsTestProject(t *testing.T) project {
 	t.Helper()
 	return testProject(t, map[string]string{
-		"target/main.yaml":          testMainYAML,
-		"target/battle.yaml":        unitsTestBattleYAML,
-		"target/world.yaml":         unitsTestWorldYAML,
-		"src/main/main_first.c":     "void main_first(void) {}\n",
-		"src/main/main_second.c":    "void main_second(void) {}\n",
-		"src/shared/menu/menu_a1.c": "extern int g_a_table[];\nint menu_a1(void) { return g_a_table[0]; }\n",
-		"src/shared/menu/menu_a2.c": "extern int g_a_table[];\nint menu_a2(void) { return menu_a1() + g_a_table[1]; }\n",
-		"src/shared/menu/menu_a3.c": "int menu_a3(void) { return menu_a2(); }\n",
-		"src/shared/menu/menu_a4.c": "int menu_a4(void) { return menu_a3(); }\n",
-		"src/battle/menu_b1.c":      "extern int g_b_scalar;\nint menu_b1(void) { return g_b_scalar / 3; }\n",
-		"src/battle/menu_b2.c":      "int menu_b2(void) { return menu_b1(); }\n",
-		"src/battle/menu_b3.c":      "int menu_b3(void) { return menu_b2(); }\n",
-		"src/battle/menu_b4.c":      "int menu_b4(void) { return menu_b3(); }\n",
-		"src/shared/text/text_c1.c": "extern int g_c_table[];\nint text_c1(void) { return g_c_table[0]; }\n",
-		"src/shared/text/text_c2.c": "int text_c2(void) { return text_c1(); }\n",
-		"src/shared/text/text_c3.c": "int text_c3(void) { return text_c2(); }\n",
-		"src/shared/text/text_c4.c": "int text_c4(void) { return text_c3(); }\n",
-		"src/battle/map_d1.c":       "extern int g_d_table[];\nextern int g_late;\nint map_d1(void) { return g_d_table[0] + g_late; }\n",
-		"src/battle/map_d2.c":       "int map_d2(void) { return map_d1(); }\n",
+		"target/main.yaml":       testMainYAML,
+		"target/battle.yaml":     unitsTestBattleYAML,
+		"target/world.yaml":      unitsTestWorldYAML,
+		"src/main/main_first.c":  "void main_first(void) {}\n",
+		"src/main/main_second.c": "void main_second(void) {}\n",
+		"src/menu/menu_a1.c":     "extern int g_a_table[];\nint menu_a1(void) { return g_a_table[0]; }\n",
+		"src/menu/menu_a2.c":     "extern int g_a_table[];\nint menu_a2(void) { return menu_a1() + g_a_table[1]; }\n",
+		"src/menu/menu_a3.c":     "int menu_a3(void) { return menu_a2(); }\n",
+		"src/menu/menu_a4.c":     "int menu_a4(void) { return menu_a3(); }\n",
+		"src/battle/menu_b1.c":   "extern int g_b_scalar;\nint menu_b1(void) { return g_b_scalar / 3; }\n",
+		"src/battle/menu_b2.c":   "int menu_b2(void) { return menu_b1(); }\n",
+		"src/battle/menu_b3.c":   "int menu_b3(void) { return menu_b2(); }\n",
+		"src/battle/menu_b4.c":   "int menu_b4(void) { return menu_b3(); }\n",
+		"src/text/text_c1.c":     "extern int g_c_table[];\nint text_c1(void) { return g_c_table[0]; }\n",
+		"src/text/text_c2.c":     "int text_c2(void) { return text_c1(); }\n",
+		"src/text/text_c3.c":     "int text_c3(void) { return text_c2(); }\n",
+		"src/text/text_c4.c":     "int text_c4(void) { return text_c3(); }\n",
+		"src/battle/map_d1.c":    "extern int g_d_table[];\nextern int g_late;\nint map_d1(void) { return g_d_table[0] + g_late; }\n",
+		"src/battle/map_d2.c":    "int map_d2(void) { return map_d1(); }\n",
 	})
 }
 
@@ -232,7 +232,7 @@ func TestUnitSegmentationFollowsEvidenceAndSizePrior(t *testing.T) {
 		t.Fatalf("units = %v, want %v", got, want)
 	}
 	units := battle.groups[0].units
-	if units[0].suggestedName != "menu (src/shared/menu)" || units[1].profile != "gcc-2.6.3_O1_aspsx-2.34" || units[2].suggestedName != "text (src/shared/text)" {
+	if units[0].suggestedName != "menu (src/menu)" || units[1].profile != "gcc-2.6.3_O1_aspsx-2.34" || units[2].suggestedName != "text (src/text)" {
 		t.Fatalf("unit summaries: %q %q %q", units[0].suggestedName, units[1].profile, units[2].suggestedName)
 	}
 	if len(units[0].counterparts) != 1 || units[0].counterparts[0].Module != "world" || units[0].counterparts[0].Matched != 4 {
