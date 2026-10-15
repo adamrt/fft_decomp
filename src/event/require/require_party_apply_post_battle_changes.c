@@ -48,14 +48,13 @@ void require_party_apply_post_battle_changes(void) {
     mem_copy_bytes_nonempty(g_require_saved_thread_block, &g_threads[THREAD_SLOT_EVENT], 0x400);
 
     text_data = g_text_data;
-    g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = text_data + g_require_text_section_offsets[1];
-    g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
-        = text_data + g_require_text_section_offsets[2];
+    g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = text_data + g_text_section_offsets[1];
+    g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES] = text_data + g_text_section_offsets[2];
     saved_menu_descriptor = g_menu_thread_menu_data;
     menu_base = g_require_join_menu_descriptor;
     g_menu_thread_menu_data = menu_base;
-    g_text_section_pointers[REQUIRE_TEXT_SECTION_DISMISS_UNIT_REPLIES] = text_data + g_require_text_section_offsets[3];
-    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = text_data + g_require_text_section_offsets[4];
+    g_text_section_pointers[REQUIRE_TEXT_SECTION_DISMISS_UNIT_REPLIES] = text_data + g_text_section_offsets[3];
+    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = text_data + g_text_section_offsets[4];
 
     affected_index = 0;
     require_text_build_battle_nicknames();

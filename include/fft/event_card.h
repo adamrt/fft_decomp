@@ -168,7 +168,6 @@ extern u16 g_card_gfx_draw_clut;
 extern u16 g_card_gfx_drawenv_y;
 extern rgb24_t g_card_gfx_fade_overlay_color;
 extern RECT g_card_gfx_fullscreen_fade_rect;
-extern POLY_FT4 g_card_gfx_poly_ft4_buffers[];
 extern u32* g_card_gfx_render_otag;
 /* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
 extern POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30];

@@ -23,12 +23,8 @@ void option_entrypoint(s32 menu_type);
 
 /* at list */
 extern battle_at_entry_t g_option_menu_at_list_descriptors[BATTLE_AT_LIST_CAPACITY];
-/* OPTION addresses the at-list record's context and menu type as separate
- * globals (0x30 and 0x3a into g_menu_at_list_state). */
-extern s16 g_option_menu_at_list_flags[];
 
 /* dead unit */
-extern s16 g_option_dead_unit_menu_flags[];
 extern s16 g_option_dead_unit_primary_result;
 extern s16 g_option_dead_unit_secondary_result;
 

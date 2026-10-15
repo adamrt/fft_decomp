@@ -9,9 +9,9 @@ s32 battle_state_update_deployment_controller_input(void) {
     u32 current;
 
     current = PadRead(1);
-    previous = g_main_input_previous_buttons;
+    previous = g_input_previous_buttons;
     g_input_current_buttons = current;
-    g_main_input_previous_buttons = current;
+    g_input_previous_buttons = current;
     g_main_input_pressed_buttons = ~previous & current;
     g_main_input_released_buttons = ~current & previous;
 

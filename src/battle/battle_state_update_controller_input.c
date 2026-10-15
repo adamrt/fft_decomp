@@ -26,7 +26,7 @@ s32 battle_state_update_controller_input(void) {
     }
 
     pressed = g_main_input_pressed_buttons;
-    previous = g_main_input_previous_buttons;
+    previous = g_input_previous_buttons;
     current = g_input_current_buttons;
     g_main_input_pressed_copy_0 = pressed;
     g_main_input_pressed_copy_1 = pressed;
@@ -46,7 +46,7 @@ s32 battle_state_update_controller_input(void) {
         g_main_input_stable_frames = 0;
     }
 
-    g_main_input_previous_buttons = g_input_current_buttons;
+    g_input_previous_buttons = g_input_current_buttons;
     if ((g_main_input_pressed_buttons & PSX_PAD_TRIANGLE) != 0 && g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         unit = battle_unit_get_source();
         if (g_battle_menu_status_enabled != 0 && g_battle_menu_status_requested == 0
@@ -56,7 +56,7 @@ s32 battle_state_update_controller_input(void) {
         }
     }
 
-    if ((g_main_input_previous_buttons & (PSX_PAD_START | PSX_PAD_SELECT | PSX_PAD_L1 | PSX_PAD_R1))
+    if ((g_input_previous_buttons & (PSX_PAD_START | PSX_PAD_SELECT | PSX_PAD_L1 | PSX_PAD_R1))
         == (PSX_PAD_START | PSX_PAD_SELECT | PSX_PAD_L1 | PSX_PAD_R1)) {
         main_system_reset_game();
     }

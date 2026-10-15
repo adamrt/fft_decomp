@@ -15,7 +15,6 @@
 #include "fft/thread.h"
 
 /* screen */
-extern u16 g_equip_remove_all_equipment_ids[];
 extern s8 g_equip_remove_mode_initialized;
 extern s8 g_equip_type_order_ready;
 
@@ -126,7 +125,6 @@ extern s16 g_equip_item_type_order[];
 extern menu_entry_t* g_equip_item_type_order_active_menu;
 extern u8 g_equip_item_type_order_names[];
 extern u16 g_equip_remove_item_cursor_anim[];
-extern s16 g_equip_remove_item_equipment[];
 extern point16_t g_equip_remove_item_marker_rect;
 
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
@@ -240,27 +238,10 @@ extern u16 g_equip_gfx_draw_move_capacity;
 extern LINE_F2 g_equip_gfx_line_f2_buffer[];
 extern u16 g_equip_gfx_line_f2_count;
 
-extern u16 g_equip_gfx_line_f3_count;
-
-extern u16 g_equip_gfx_line_f4_count;
 extern volatile u16 g_equip_gfx_line_g2_capacity; /* LINE_G2 capacity; load order matters in 0x801cda80 */
-extern u16 g_equip_gfx_line_g2_count;
 extern volatile u16 g_equip_gfx_line_g3_capacity; /* LINE_G3 capacity; load order matters in 0x801cda80 */
-extern u16 g_equip_gfx_line_g3_count;
-extern u16 g_equip_gfx_line_g4_count;
-extern u16 g_equip_gfx_poly_f3_count;
 extern u16 g_equip_gfx_poly_f4_count;
-extern u16 g_equip_gfx_poly_ft3_count;
-extern u16 g_equip_gfx_poly_g3_count;
 extern u16 g_equip_gfx_poly_g4_count;
-extern u16 g_equip_gfx_poly_gt3_count;
-extern u16 g_equip_gfx_poly_gt4_count;
-extern u16 g_equip_gfx_sprite_16_count;
-extern u16 g_equip_gfx_sprite_8_count;
-extern u16 g_equip_gfx_sprite_count;
-extern u16 g_equip_gfx_tile_16_count;
-extern u16 g_equip_gfx_tile_1_count;
-extern u16 g_equip_gfx_tile_8_count;
 extern TILE g_equip_gfx_tile_buffer[];
 
 void equip_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,

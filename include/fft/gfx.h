@@ -423,6 +423,25 @@ extern image_load_parameters_t g_panel_label_layouts_mode2[];
 extern image_load_parameters_t g_panel_label_layouts_mode3[];
 extern image_load_parameters_t g_panel_portrait_cell[];
 extern image_load_parameters_t g_panel_sprite_cells[];
+extern s16 g_gfx_line_f3_count;
+extern s16 g_gfx_line_f4_count;
+extern s16 g_gfx_line_g2_count;
+extern s16 g_gfx_line_g3_count;
+extern s16 g_gfx_line_g4_count;
+extern s16 g_gfx_poly_f3_count;
+extern s16 g_gfx_poly_ft3_count;
+extern POLY_FT4 g_gfx_poly_ft4_buffers[2][30];
+extern s16 g_gfx_poly_g3_count;
+extern s16 g_gfx_poly_gt3_count;
+extern s16 g_gfx_poly_gt4_count;
+extern s16 g_gfx_sprite_16_count;
+extern s16 g_gfx_sprite_8_count;
+extern s16 g_gfx_sprite_count;
+extern s16 g_gfx_tile_16_count;
+extern s16 g_gfx_tile_1_count;
+extern s16 g_gfx_tile_8_count;
+extern image_load_parameters_t g_menu_icon_strip_image_params[20];
+extern image_load_parameters_t g_menu_single_icon_image_params[5];
 
 /* portrait transitions */
 extern RECT g_gfx_portrait_origin;

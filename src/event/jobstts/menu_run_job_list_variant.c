@@ -22,7 +22,7 @@ s32 menu_run_job_list_variant(void) {
     g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CIRCLE) {
-        g_jobstts_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
+        g_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
         job_calculate_current_level_variant(g_menu_list_selected_index);
         job_calculate_current_jp_variant(g_menu_list_selected_index);
         job_calculate_current_total_jp_variant(g_menu_list_selected_index);

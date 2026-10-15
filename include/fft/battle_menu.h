@@ -81,8 +81,6 @@ void battle_menu_leave_status_screen_selection(void);
 /* windows and sprites */
 /* Live caster-panel image parameters followed by their defaults. */
 extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][5];
-extern image_load_parameters_t g_battle_menu_icon_strip_image_params[20];
-extern image_load_parameters_t g_battle_menu_single_icon_image_params[5];
 
 /* text rendering */
 extern s32 g_battle_menu_text_section_offsets[];

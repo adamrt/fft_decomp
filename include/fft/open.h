@@ -41,7 +41,6 @@ extern s32 g_open_input_down_repeat_counter;
 /* Volatile: open_menu_handle_sound_type_input reloads it (lui/lw) for every
  * test; readers that test it twice from one load take a local copy. */
 extern volatile u32 g_open_input_new_button_presses;
-extern u32 g_open_input_previous_buttons;
 extern s32 g_open_input_up_repeat_counter;
 u32 open_input_update_repeat(u32 buttons);
 void open_input_init_directional_state(void);

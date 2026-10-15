@@ -209,7 +209,7 @@ data:
   - {addr: 0x800852a0, name: g_open_gfx_next_render_record_36}
   - {addr: 0x800852a4, name: g_open_gfx_opntex_data}
   - {addr: 0x800852a8, name: g_open_gfx_next_render_record_56}
-  - {addr: 0x800852ac, name: g_open_input_previous_buttons}
+  - {addr: 0x800852ac, name: g_input_previous_buttons}
   - {addr: 0x800852b0, name: g_open_movie_mdec_stream_state}
   - {addr: 0x800852c0, name: g_open_controller_records}
   - {addr: 0x800852e8, name: g_open_music_test_list_params}

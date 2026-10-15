@@ -1068,7 +1068,7 @@ data:
   - {addr: 0x8013a8b8, name: g_menu_glyph_image_data}
   - {addr: 0x8013b8b8, name: g_menu_default_palette_colors}
   - {addr: 0x8013b8f8, name: g_text_glyph_bitmaps}
-  - {addr: 0x8014e5c0, name: g_world_text_section_offsets}
+  - {addr: 0x8014e5c0, name: g_text_section_offsets}
   - {addr: 0x80153188, name: g_menu_texture_origin}
   - {addr: 0x80153190, name: g_gfx_item_icon_image_location}
   - {addr: 0x80153198, name: g_gfx_item_icon_clut_base_x}
@@ -1228,8 +1228,8 @@ data:
   - {addr: 0x8015615c, name: g_menu_unit_editor_item_icon_image_params}
   - {addr: 0x80156198, name: g_menu_unit_editor_line_colors}
   - {addr: 0x801561d0, name: g_menu_unit_editor_sprite_clut_pairs}
-  - {addr: 0x80156224, name: g_world_menu_icon_strip_image_params}
-  - {addr: 0x80156314, name: g_world_menu_single_icon_image_params}
+  - {addr: 0x80156224, name: g_menu_icon_strip_image_params}
+  - {addr: 0x80156314, name: g_menu_single_icon_image_params}
   - {addr: 0x80156350, name: g_menu_cursor_bob_thresholds}
   - {addr: 0x80156360, name: g_menu_cursor_bob_active_thresholds}
   - {addr: 0x80156384, name: g_text_message_duration_frames}
@@ -1556,7 +1556,7 @@ data:
   - {addr: 0x8018ca70, name: g_world_best_fit_confirm_menu}
   - {addr: 0x8018caac, name: g_world_remove_item_unit_index}
   - {addr: 0x8018caae, name: g_world_remove_item_cursor_anim}
-  - {addr: 0x8018cab0, name: g_world_remove_all_equipment_ids}
+  - {addr: 0x8018cab0, name: g_remove_all_equipment_ids}
   - {addr: 0x8018caba, name: g_world_remove_item_saved_primary_input}
   - {addr: 0x8018cabc, name: g_world_remove_item_saved_secondary_input}
   - {addr: 0x8018cabe, name: g_world_remove_item_saved_newly_pressed}
@@ -1924,8 +1924,8 @@ data:
   - {addr: 0x801acd44, name: g_menu_at_list_primary_values}
   - {addr: 0x801ad144, name: g_menu_at_list_secondary_values}
   - {addr: 0x801ad344, name: g_menu_at_list_indices}
-  - {addr: 0x801ad544, name: g_world_dead_unit_menu_flags}
-  - {addr: 0x801ad944, name: g_world_menu_at_list_flags}
+  - {addr: 0x801ad544, name: g_dead_unit_menu_flags}
+  - {addr: 0x801ad944, name: g_menu_at_list_flags}
   - {addr: 0x801adb4c, name: g_world_dead_unit_menu_result}
   - {addr: 0x801adb50, name: g_world_dead_unit_move_result}
   - {addr: 0x801ae334, name: g_world_action_target_list_slots}
@@ -2020,7 +2020,7 @@ data:
   - {addr: 0x801c8478, name: g_equip_item_previewed_cursor}
   - {addr: 0x801c847c, name: g_remove_item_previewed_slot}
   - {addr: 0x801c8480, name: g_remove_all_equipment_prompt_active}
-  - {addr: 0x801c8484, name: g_world_remove_item_equipment}
+  - {addr: 0x801c8484, name: g_remove_item_equipment}
   - {addr: 0x801c8490, name: g_world_remove_all_equipment_blink_counter}
   - {addr: 0x801c84c0, name: g_world_item_category_previewed_cursor}
   - {addr: 0x801c84f0, name: g_item_rearrange_picked_cursor}
@@ -2196,16 +2196,16 @@ data:
   - {addr: 0x801cd198, name: g_world_gfx_flat_line_count}
   - {addr: 0x801cd19c, name: g_gfx_poly_gt3_capacity}
   - {addr: 0x801cd1a0, name: g_world_gfx_textured_quad_capacity}
-  - {addr: 0x801cd1a4, name: g_world_gfx_line_f3_count}
+  - {addr: 0x801cd1a4, name: g_gfx_line_f3_count}
   - {addr: 0x801cd1a8, name: g_world_gfx_gradient_line_count}
   - {addr: 0x801cd1ac, name: g_world_gfx_textured_gradient_quad_capacity}
-  - {addr: 0x801cd1b0, name: g_world_gfx_line_g3_count}
-  - {addr: 0x801cd1b4, name: g_world_gfx_line_f4_count}
-  - {addr: 0x801cd1b8, name: g_world_gfx_line_g4_count}
+  - {addr: 0x801cd1b0, name: g_gfx_line_g3_count}
+  - {addr: 0x801cd1b4, name: g_gfx_line_f4_count}
+  - {addr: 0x801cd1b8, name: g_gfx_line_g4_count}
   - {addr: 0x801cd1bc, name: g_world_menu_palette_clut}
   - {addr: 0x801cd1c0, name: g_event_pending_map_jump_out_id}
-  - {addr: 0x801cd1c4, name: g_world_gfx_poly_ft3_count}
-  - {addr: 0x801cd1c8, name: g_world_gfx_poly_gt3_count}
+  - {addr: 0x801cd1c4, name: g_gfx_poly_ft3_count}
+  - {addr: 0x801cd1c8, name: g_gfx_poly_gt3_count}
   - {addr: 0x801cd1cc, name: g_menu_gfx_poly_ft4_count}
   - {addr: 0x801cd1d0, name: g_menu_gfx_poly_gt4_count}
   - {addr: 0x801cd1d4, name: g_gfx_sprite_8_capacity}
@@ -2240,7 +2240,7 @@ data:
   - {addr: 0x801cd528, name: g_menu_gfx_context}
   - {addr: 0x801cd52c, name: g_menu_input_primary_repeat}
   - {addr: 0x801cd530, name: g_world_input_secondary_repeat_latched}
-  - {addr: 0x801cd534, name: g_world_gfx_sprite_count}
+  - {addr: 0x801cd534, name: g_gfx_sprite_count}
   - {addr: 0x801cd538, name: g_script_light_scale}
   - {addr: 0x801cd548, name: g_world_menu_music_slot}
   - {addr: 0x801cd54c, name: g_menu_scroll_base_index}
@@ -2249,27 +2249,27 @@ data:
   - {addr: 0x801cd558, name: g_world_formation_menu_text_buffer}
   - {addr: 0x801cd5d8, name: g_world_menu_window_clut}
   - {addr: 0x801cd5dc, name: g_gfx_tile_8_capacity}
-  - {addr: 0x801cd5e0, name: g_world_gfx_tile_1_count}
+  - {addr: 0x801cd5e0, name: g_gfx_tile_1_count}
   - {addr: 0x801cd5e4, name: g_world_menu_active_clut_front}
-  - {addr: 0x801cd5e8, name: g_world_gfx_tile_8_count}
+  - {addr: 0x801cd5e8, name: g_gfx_tile_8_count}
   - {addr: 0x801cd5ec, name: g_world_unit_pointers}
   - {addr: 0x801cd63c, name: g_world_formation_temp_unit}
   - {addr: 0x801cd644, name: GsLIGHTWSMATRIX}
   - {addr: 0x801cd664, name: g_world_gfx_packet_buffers}
   - {addr: 0x801cd668, name: g_menu_input_secondary_repeat}
   - {addr: 0x801cd66c, name: g_text_glyph_bitmap_data}
-  - {addr: 0x801cd674, name: g_world_gfx_sprite_8_count}
+  - {addr: 0x801cd674, name: g_gfx_sprite_8_count}
   - {addr: 0x801cd678, name: GsDRAWENV}
   - {addr: 0x801cd6d4, name: GsDISPENV}
   - {addr: 0x801cd6e8, name: g_gfx_tile_16_capacity}
   - {addr: 0x801cd6ec, name: GsORGOFSX}
   - {addr: 0x801cd6f0, name: GsORGOFSY}
   - {addr: 0x801cd6f4, name: g_world_menu_active_clut_back}
-  - {addr: 0x801cd6f8, name: g_world_gfx_tile_16_count}
+  - {addr: 0x801cd6f8, name: g_gfx_tile_16_count}
   - {addr: 0x801cd6fc, name: _LC}
   - {addr: 0x801cd71c, name: g_world_shop_cost_window_visible}
   - {addr: 0x801cd720, name: g_menu_window_rect_source}
-  - {addr: 0x801cd724, name: g_world_gfx_sprite_16_count}
+  - {addr: 0x801cd724, name: g_gfx_sprite_16_count}
   - {addr: 0x801cd728, name: g_world_menu_selection_results}
   - {addr: 0x801cd748, name: g_script_pending_loaded_evtchr_slot}
   - {addr: 0x801cd74c, name: HWD0}
@@ -2308,8 +2308,8 @@ data:
   - {addr: 0x801cd84c, name: g_gfx_poly_f4_capacity}
   - {addr: 0x801cd850, name: g_world_gfx_gradient_quad_capacity}
   - {addr: 0x801cd854, name: GsCLIP3near}
-  - {addr: 0x801cd858, name: g_world_gfx_poly_f3_count}
-  - {addr: 0x801cd85c, name: g_world_gfx_poly_g3_count}
+  - {addr: 0x801cd858, name: g_gfx_poly_f3_count}
+  - {addr: 0x801cd85c, name: g_gfx_poly_g3_count}
   - {addr: 0x801cd860, name: g_world_gfx_poly_f4_count}
   - {addr: 0x801cd864, name: g_gfx_poly_g4_count}
   - {addr: 0x801cd868, name: PSDCNT}
@@ -2354,9 +2354,7 @@ overrides:
   - {function: menu_build_item_type_icon_source, name: g_menu_palette_clut, addr: 0x801cd1bc}
   - {function: menu_build_scaled_draw_area_packets, name: g_menu_draw_area_scale_percent, addr: 0x8018ae74}
   - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x8016e44c}
-  - {function: menu_init_at_list, name: g_option_dead_unit_menu_flags, addr: 0x801ad544}
   - {function: menu_init_at_list, name: g_option_menu_at_list_descriptors, addr: 0x801ae334}
-  - {function: menu_init_at_list, name: g_option_menu_at_list_flags, addr: 0x801ad944}
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x801531b0}
   - {function: menu_open_option_at_list, name: option_entrypoint, addr: 0x80102e78}
   - {function: menu_open_option_dead_unit_panel, name: option_entrypoint, addr: 0x80102e78}
@@ -2381,7 +2379,6 @@ overrides:
   - {function: menu_run_numeric_editor_frame_thread_variant, name: menu_init_scaled_draw_area_packets, addr: 0x8010ca18}
   - {function: menu_run_script_with_palette_mode_variant, name: menu_set_palette_mode, addr: 0x801298c0}
   - {function: menu_run_unit_summary_panel_thread, name: g_battle_unit_summary_portrait_image_params, addr: 0x80155d54}
-  - {function: menu_start_dead_unit_threads, name: g_option_dead_unit_menu_flags, addr: 0x801ad544}
   - {function: menu_start_dead_unit_threads, name: g_option_dead_unit_primary_result, addr: 0x801adb4c}
   - {function: menu_start_dead_unit_threads, name: g_option_dead_unit_secondary_result, addr: 0x801adb50}
   - {function: menu_start_dead_unit_threads, name: thread_wait_forever, addr: 0x8010226c}

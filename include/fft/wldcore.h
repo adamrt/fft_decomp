@@ -34,7 +34,6 @@ void wldcore_file_seek_to_battle_bin(void);
 void wldcore_load_scratch_data_blocking(void);
 /* input */
 extern u32 g_wldcore_input_new_button_presses;
-extern u32 g_wldcore_input_previous_buttons;
 extern s32 g_wldcore_input_repeat_counter_up;
 extern s32 g_wldcore_input_repeat_counter_down;
 extern s32 g_wldcore_input_repeat_counter_left;

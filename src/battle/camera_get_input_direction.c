@@ -23,7 +23,7 @@ s32 camera_get_input_direction(s32 source) {
     case BATTLE_CURSOR_INPUT_OPTION_B:
         switch (source) {
         case CAMERA_INPUT_HELD:
-            input = g_main_input_previous_buttons;
+            input = g_input_previous_buttons;
             break;
         case CAMERA_INPUT_PRESSED:
             input = g_main_input_pressed_buttons;
@@ -43,7 +43,7 @@ s32 camera_get_input_direction(s32 source) {
                 break;
             }
             if (threshold < g_main_input_stable_frames && g_main_input_stable_frames % divisor == 0) {
-                input = g_main_input_previous_buttons;
+                input = g_input_previous_buttons;
             }
             break;
         case CAMERA_INPUT_RELEASED:
@@ -54,10 +54,10 @@ s32 camera_get_input_direction(s32 source) {
     case BATTLE_CURSOR_INPUT_FREE_CURSOR:
         switch (source) {
         case CAMERA_INPUT_HELD:
-            input = g_main_input_previous_buttons | g_main_input_previous_copy_0;
+            input = g_input_previous_buttons | g_main_input_previous_copy_0;
             break;
         case CAMERA_INPUT_PRESSED:
-            previous = g_main_input_previous_buttons | g_main_input_previous_copy_0;
+            previous = g_input_previous_buttons | g_main_input_previous_copy_0;
             pressed = g_main_input_pressed_buttons;
             input = 0;
             if (pressed & PSX_PAD_UP) {
@@ -117,7 +117,7 @@ s32 camera_get_input_direction(s32 source) {
                 break;
             }
             if (threshold < g_main_input_stable_frames && g_main_input_stable_frames % divisor == 0) {
-                input = g_main_input_previous_buttons | g_main_input_previous_copy_0;
+                input = g_input_previous_buttons | g_main_input_previous_copy_0;
             }
             break;
         case CAMERA_INPUT_RELEASED:

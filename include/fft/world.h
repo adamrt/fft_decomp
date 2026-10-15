@@ -25,7 +25,6 @@ extern RECT g_world_screen_menu_thin_panel_texture_windows[7];
  * window's w/h; world_screen_menu_window_frame_thread fills in the runtime x/y.
  * Indexing the array reproduces the target's symbol-plus-byte-offset addressing. */
 extern RECT g_world_screen_menu_panel_texture_windows[7];
-extern s16 g_world_dead_unit_menu_flags[512];
 extern s16 g_world_dead_unit_menu_result; /* primary menu result */
 extern s16 g_world_dead_unit_move_result; /* secondary (move) menu result */
 
@@ -369,7 +368,6 @@ extern menu_status_thread_t g_world_equipment_ability_panel_thread_params;
 extern s8 g_world_equip_menu_initialized;
 extern u16 g_world_equip_item_cursor_anim;
 extern point16_t g_world_equip_item_cursor_point;
-extern u16 g_world_remove_all_equipment_ids[WORLD_EQUIPMENT_SLOT_COUNT];
 extern point16_t g_world_remove_all_equipment_cursor_point;
 extern volatile u16 g_world_remove_all_equipment_blink_counter;
 
@@ -536,14 +534,8 @@ extern u16 g_world_gfx_gradient_line_capacity; /* gradient line count */
 extern u16 g_world_gfx_line_g3_capacity;
 extern u16 g_world_gfx_flat_line_count;
 extern u16 g_world_gfx_textured_quad_capacity; /* textured quad count */
-extern u16 g_world_gfx_line_f3_count;
 extern u16 g_world_gfx_gradient_line_count;
 extern u16 g_world_gfx_textured_gradient_quad_capacity; /* textured gradient quad count */
-extern u16 g_world_gfx_line_g3_count;
-extern u16 g_world_gfx_line_f4_count;
-extern u16 g_world_gfx_line_g4_count;
-extern u16 g_world_gfx_poly_ft3_count;
-extern u16 g_world_gfx_poly_gt3_count;
 extern u16 g_world_gfx_draw_buffer_clip_y;
 
 extern u16 g_world_ot_length;
@@ -555,18 +547,9 @@ extern u16 g_world_gfx_draw_area_count;
 
 /* Draw move count; volatile for the same read order as g_world_gfx_draw_area_capacity. */
 extern volatile u16 g_world_gfx_draw_move_capacity;
-extern u16 g_world_gfx_sprite_count;
-extern u16 g_world_gfx_tile_1_count;
-extern u16 g_world_gfx_tile_8_count;
 extern menu_gfx_context_t* g_world_gfx_packet_buffers;
-extern u16 g_world_gfx_sprite_8_count;
-
-extern u16 g_world_gfx_tile_16_count;
-extern u16 g_world_gfx_sprite_16_count;
 
 extern u16 g_world_gfx_gradient_quad_capacity; /* gradient quad count */
-extern u16 g_world_gfx_poly_f3_count;
-extern u16 g_world_gfx_poly_g3_count;
 extern u16 g_world_gfx_poly_f4_count;
 extern s32 g_active_graphics_buffer_index;
 
@@ -1297,7 +1280,7 @@ extern u8* g_world_text_resident_data[9];
 
 extern text_glyph_state_t g_world_text_message_box_glyph;
 extern glyph_blit_t g_world_text_message_box_state;
-extern s32 g_world_text_section_offsets[32];
+extern s32 g_text_section_offsets[32];
 
 extern s16 g_world_fixed_number_panel_request_state;
 extern s32 g_world_text_message_box_digit_divisors[];
@@ -1464,13 +1447,6 @@ extern u8 g_world_menu_use_alternate_palette;
 extern s16 g_world_menu_use_scroll_position;
 extern s32 g_world_menu_scrolling_list_depth;
 
-/* Four image-load parameter blocks per icon kind, for kinds 5..15. */
-extern image_load_parameters_t g_world_menu_icon_strip_image_params[];
-
-/* One image-load parameter block per single-icon kind 0..4; index 1 doubles as
- * the arrow placement used by kind 0x10. */
-extern image_load_parameters_t g_world_menu_single_icon_image_params[];
-
 extern s16 g_world_menu_open_entry_index;
 extern world_menu_thread_group_t g_world_menu_thread_groups[];
 extern s32 g_world_menu_thread_group_parameter;
@@ -1532,7 +1508,6 @@ extern world_menu_grid_cell_t g_world_grid_menu_shop_scrolled_cells[];
 extern world_menu_grid_cell_t* g_world_active_grid_menu_cells;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialized */
-extern s16 g_world_menu_at_list_flags[256];
 extern battle_at_entry_t g_world_action_target_list_slots[BATTLE_AT_LIST_CAPACITY];
 extern s16 g_world_menu_submenu_page_row_text_ids[];
 extern u32* g_world_menu_list_controller_input;
@@ -1839,7 +1814,6 @@ extern oriented_quad_t g_world_item_category_tab_sprites[];       /* 20-byte qua
 extern u8 g_world_item_category_tab_x[];                          /* per-row base x */
 extern u8 g_world_item_category_input_lock;
 extern u8 g_world_item_menu_saved_browse_enabled;
-extern s16 g_world_remove_item_equipment[WORLD_EQUIPMENT_SLOT_COUNT];
 extern s8 g_world_item_category_previewed_cursor;
 extern s16 g_world_item_category_strip_text_ids[]; /* option text ids of the active strip, -1 terminated */
 extern menu_entry_t* g_world_item_category_icon_strip;

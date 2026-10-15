@@ -40,8 +40,8 @@ s32 menu_run_job_list_variant(void) {
         return MENU_JOB_LIST_STEP_CLOSE;
     }
     if ((mask & PSX_PAD_CIRCLE) && g_bunit_menu_current_menu == BUNIT_MENU_JOB) {
-        g_bunit_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
-        g_bunit_job_selected_generic_index = job_get_generic_index(g_bunit_job_selected_id);
+        g_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];
+        g_bunit_job_selected_generic_index = job_get_generic_index(g_job_selected_id);
         job_calculate_current_level_variant(g_menu_list_selected_index);
         job_calculate_current_jp_variant(g_menu_list_selected_index);
         job_calculate_current_total_jp_variant(g_menu_list_selected_index);

@@ -1196,7 +1196,7 @@ data:
   - {addr: 0x8004593c, name: _ramsize}
   - {addr: 0x80045940, name: _stacksize}
   - {addr: 0x80045944, name: g_input_current_buttons}
-  - {addr: 0x80045948, name: g_main_input_previous_buttons}
+  - {addr: 0x80045948, name: g_input_previous_buttons}
   - {addr: 0x8004594c, name: g_main_input_pressed_buttons}
   - {addr: 0x80045950, name: g_main_input_released_buttons}
   - {addr: 0x80045954, name: g_main_input_previous_copy_0}

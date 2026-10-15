@@ -2790,4 +2790,11 @@ extern u32 g_help_text_table[];
 /* scrollable lists */
 extern u16 g_menu_list_scroll_progress;
 
+/* other */
+extern s16 g_dead_unit_menu_flags[];
+extern u32 g_input_previous_buttons;
+extern s16 g_menu_at_list_flags[];
+extern u16 g_remove_all_equipment_ids[5]; /* weapon, shield, head, body, accessory */
+extern s16 g_remove_item_equipment[5];
+
 #endif

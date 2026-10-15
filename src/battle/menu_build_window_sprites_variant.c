@@ -33,21 +33,21 @@ void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_ico
     record->base.sprites[2].v0 = 0;
     style = param->header_id;
     if (style < 5) {
-        gfx_init_image_loading(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-            &g_battle_menu_single_icon_image_params[style]);
+        gfx_init_image_loading(
+            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[style]);
     } else if (style >= 5 && style <= 15) {
         index = (style - 5) * 4;
         menu_init_sprite_array(record->icons[0], 1, 0x7cfc);
         menu_init_sprite_array(record->icons[1], 1, 0x7cfc);
         menu_init_sprite_array(record->icons[2], 1, 0x7cfc);
-        gfx_init_image_loading(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-            &g_battle_menu_icon_strip_image_params[index]);
-        gfx_init_image_loading(record->icons[0], &g_menu_texture_origin, &param->window,
-            &g_battle_menu_icon_strip_image_params[index + 1]);
-        gfx_init_image_loading(record->icons[1], &g_menu_texture_origin, &param->window,
-            &g_battle_menu_icon_strip_image_params[index + 2]);
-        gfx_init_image_loading(record->icons[2], &g_menu_texture_origin, &param->window,
-            &g_battle_menu_icon_strip_image_params[index + 3]);
+        gfx_init_image_loading(
+            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index]);
+        gfx_init_image_loading(
+            record->icons[0], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index + 1]);
+        gfx_init_image_loading(
+            record->icons[1], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index + 2]);
+        gfx_init_image_loading(
+            record->icons[2], &g_menu_texture_origin, &param->window, &g_menu_icon_strip_image_params[index + 3]);
     } else {
         record->icons[0] = 0;
         record->icons[1] = 0;

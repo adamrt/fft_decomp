@@ -11,7 +11,7 @@ void text_init_section_pointers_variant(void) {
     u8* text;
     s32 value;
 
-    offset = g_world_text_section_offsets;
+    offset = g_text_section_offsets;
     i = 0;
     text = (u8*)(offset + TEXT_SECTION_COUNT);
     section = g_text_section_pointers;

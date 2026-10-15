@@ -10,7 +10,7 @@ void wldcore_reset_game_if_special_keycode_is_pressed(void) {
     u32 input;
     u32 previous;
 
-    g_wldcore_input_previous_buttons = g_input_polled_buttons;
+    g_input_previous_buttons = g_input_polled_buttons;
     input = PadRead(0);
     g_input_polled_buttons = input;
 
@@ -18,7 +18,7 @@ void wldcore_reset_game_if_special_keycode_is_pressed(void) {
         g_wldcore_input_new_button_presses = 0;
         g_input_current_buttons = 0;
     } else {
-        previous = g_wldcore_input_previous_buttons;
+        previous = g_input_previous_buttons;
         g_input_current_buttons = input;
         g_wldcore_input_new_button_presses = input & ~previous;
     }

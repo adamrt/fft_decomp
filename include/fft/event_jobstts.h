@@ -52,7 +52,6 @@ s32 jobstts_ability_build_list(
 
 /* job */
 extern menu_instruction_t g_jobstts_job_list_render_commands;
-extern u16 g_jobstts_job_selected_id;
 
 s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused);
 s32 jobstts_job_get_base(s16 unit_id);
@@ -118,28 +117,11 @@ extern u16 g_jobstts_gfx_draw_area_capacity;
 extern u16 g_jobstts_gfx_draw_move_capacity;
 extern s16 g_jobstts_gfx_line_f2_count;
 
-extern s16 g_jobstts_gfx_line_f3_count;
-
-extern s16 g_jobstts_gfx_line_f4_count;
 extern volatile u16 g_jobstts_gfx_line_g2_capacity; /* LINE_G2 capacity; load order matters in 0x801e49f0 */
-extern s16 g_jobstts_gfx_line_g2_count;
 extern volatile u16 g_jobstts_gfx_line_g3_capacity; /* LINE_G3 capacity; load order matters in 0x801e49f0 */
-extern s16 g_jobstts_gfx_line_g3_count;
-extern s16 g_jobstts_gfx_line_g4_count;
 extern s8 g_jobstts_gfx_otag_index_locked;
-extern s16 g_jobstts_gfx_poly_f3_count;
 extern s16 g_jobstts_gfx_poly_f4_count;
-extern s16 g_jobstts_gfx_poly_ft3_count;
-extern s16 g_jobstts_gfx_poly_g3_count;
 extern s16 g_jobstts_gfx_poly_g4_count;
-extern s16 g_jobstts_gfx_poly_gt3_count;
-extern s16 g_jobstts_gfx_poly_gt4_count;
-extern s16 g_jobstts_gfx_sprite_16_count;
-extern s16 g_jobstts_gfx_sprite_8_count;
-extern s16 g_jobstts_gfx_sprite_count;
-extern s16 g_jobstts_gfx_tile_16_count;
-extern s16 g_jobstts_gfx_tile_1_count;
-extern s16 g_jobstts_gfx_tile_8_count;
 extern s16 g_jobstts_gfx_tile_count;
 extern s16 g_jobstts_gfx_transition_height_percent[];
 

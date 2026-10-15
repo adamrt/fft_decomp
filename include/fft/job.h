@@ -14,6 +14,9 @@ s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category,
 /* state */
 extern s32 g_job_current_mastered;
 
+/* state */
+extern s16 g_job_selected_id;
+
 #endif
 s32 job_calculate_current_level_variant(s32 index);
 s32 job_calculate_current_total_jp_variant(s32 index);

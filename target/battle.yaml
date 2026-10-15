@@ -2475,8 +2475,8 @@ data:
   - {addr: 0x80168cd0, name: g_menu_unit_editor_item_icon_image_params}
   - {addr: 0x80168d0c, name: g_menu_unit_editor_line_colors}
   - {addr: 0x80168d44, name: g_menu_unit_editor_sprite_clut_pairs}
-  - {addr: 0x80168d94, name: g_battle_menu_icon_strip_image_params}
-  - {addr: 0x80168e84, name: g_battle_menu_single_icon_image_params}
+  - {addr: 0x80168d94, name: g_menu_icon_strip_image_params}
+  - {addr: 0x80168e84, name: g_menu_single_icon_image_params}
   - {addr: 0x80168ec0, name: g_menu_cursor_bob_thresholds}
   - {addr: 0x80168ed0, name: g_menu_cursor_bob_active_thresholds}
   - {addr: 0x80168eec, name: g_battle_menu_ability_list_clut_rect}

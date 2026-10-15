@@ -18,7 +18,7 @@ void camera_update_rotation(void) {
         if (*yaw <= g_camera_yaw_target) {
             angle = (u16)g_camera_yaw_target & 0xFFF;
             *yaw = angle;
-            if (g_main_input_previous_buttons & PSX_PAD_L1) {
+            if (g_input_previous_buttons & PSX_PAD_L1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
                     camera_rotate_left((angle & 0xFE0) - 0x400);
                 }
@@ -35,7 +35,7 @@ void camera_update_rotation(void) {
         if (*yaw >= g_camera_yaw_target) {
             angle = (u16)g_camera_yaw_target & 0xFFF;
             *yaw = angle;
-            if (g_main_input_previous_buttons & PSX_PAD_R1) {
+            if (g_input_previous_buttons & PSX_PAD_R1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
                     camera_rotate_left((angle & 0xFE0) + 0x400);
                 }

@@ -542,7 +542,7 @@ data:
   - {addr: 0x800bb504, name: g_wldcore_window_records}
   - {addr: 0x800bb51c, name: g_wldcore_window_record_positions}
   - {addr: 0x800bb930, name: g_wldcore_menu_stack_records}
-  - {addr: 0x800bb984, name: g_wldcore_input_previous_buttons}
+  - {addr: 0x800bb984, name: g_input_previous_buttons}
   - {addr: 0x800bb988, name: g_wldcore_picture_buffer}
   - {addr: 0x800bb98c, name: g_wldcore_menu_stack_records_next}
   - {addr: 0x800bbc6c, name: g_wldcore_next_map_id}

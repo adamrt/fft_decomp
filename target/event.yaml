@@ -761,7 +761,7 @@ data:
   - {addr: 0x801ec950, name: g_menu_selection_values}
   - {addr: 0x801ec974, name: g_bunit_job_menu_phase}
   - {addr: 0x801ec978, name: g_bunit_ability_list_confirm_prompt_state}
-  - {addr: 0x801ec97c, name: g_bunit_job_selected_id}
+  - {addr: 0x801ec97c, name: g_job_selected_id}
   - {addr: 0x801ec980, name: g_bunit_job_selected_generic_index}
   - {addr: 0x801ec984, name: g_menu_job_ids}
   - {addr: 0x801ec9b0, name: g_menu_ability_entries}
@@ -780,8 +780,8 @@ data:
   - {addr: 0x801eca14, name: g_gfx_poly_g3_capacity}
   - {addr: 0x801eca18, name: g_gfx_poly_f4_capacity}
   - {addr: 0x801eca1c, name: g_gfx_poly_g4_capacity}
-  - {addr: 0x801eca20, name: g_bunit_gfx_poly_f3_count}
-  - {addr: 0x801eca24, name: g_bunit_gfx_poly_g3_count}
+  - {addr: 0x801eca20, name: g_gfx_poly_f3_count}
+  - {addr: 0x801eca24, name: g_gfx_poly_g3_count}
   - {addr: 0x801eca28, name: g_bunit_gfx_poly_f4_count}
   - {addr: 0x801eca2c, name: g_gfx_poly_g4_count}
   - {addr: 0x801eca30, name: g_menu_disabled_number_clut}
@@ -796,15 +796,15 @@ data:
   - {addr: 0x801eca54, name: g_bunit_gfx_line_f2_count}
   - {addr: 0x801eca58, name: g_gfx_poly_gt3_capacity}
   - {addr: 0x801eca5c, name: g_gfx_poly_ft4_capacity}
-  - {addr: 0x801eca60, name: g_bunit_gfx_line_g2_count}
-  - {addr: 0x801eca64, name: g_bunit_gfx_line_f3_count}
+  - {addr: 0x801eca60, name: g_gfx_line_g2_count}
+  - {addr: 0x801eca64, name: g_gfx_line_f3_count}
   - {addr: 0x801eca68, name: g_gfx_poly_gt4_capacity}
-  - {addr: 0x801eca6c, name: g_bunit_gfx_line_g3_count}
-  - {addr: 0x801eca70, name: g_bunit_gfx_line_f4_count}
-  - {addr: 0x801eca74, name: g_bunit_gfx_line_g4_count}
+  - {addr: 0x801eca6c, name: g_gfx_line_g3_count}
+  - {addr: 0x801eca70, name: g_gfx_line_f4_count}
+  - {addr: 0x801eca74, name: g_gfx_line_g4_count}
   - {addr: 0x801eca78, name: g_menu_palette_clut}
-  - {addr: 0x801eca7c, name: g_bunit_gfx_poly_ft3_count}
-  - {addr: 0x801eca80, name: g_bunit_gfx_poly_gt3_count}
+  - {addr: 0x801eca7c, name: g_gfx_poly_ft3_count}
+  - {addr: 0x801eca80, name: g_gfx_poly_gt3_count}
   - {addr: 0x801eca84, name: g_menu_gfx_poly_ft4_count}
   - {addr: 0x801eca88, name: g_menu_gfx_poly_gt4_count}
   - {addr: 0x801eca8c, name: g_gfx_sprite_8_capacity}
@@ -826,22 +826,22 @@ data:
   - {addr: 0x801ecacc, name: g_menu_gfx_context}
   - {addr: 0x801ecad0, name: g_menu_input_primary_repeat}
   - {addr: 0x801ecad4, name: g_bunit_input_secondary_repeat}
-  - {addr: 0x801ecad8, name: g_bunit_gfx_sprite_count}
+  - {addr: 0x801ecad8, name: g_gfx_sprite_count}
   - {addr: 0x801ecadc, name: g_menu_scroll_base_index}
   - {addr: 0x801ecae0, name: g_gfx_tile_1_capacity}
   - {addr: 0x801ecae4, name: g_menu_window_clut}
   - {addr: 0x801ecae8, name: g_gfx_tile_8_capacity}
-  - {addr: 0x801ecaec, name: g_bunit_gfx_tile_1_count}
+  - {addr: 0x801ecaec, name: g_gfx_tile_1_count}
   - {addr: 0x801ecaf0, name: g_menu_active_clut_front}
-  - {addr: 0x801ecaf4, name: g_bunit_gfx_tile_8_count}
+  - {addr: 0x801ecaf4, name: g_gfx_tile_8_count}
   - {addr: 0x801ecaf8, name: g_bunit_unit_pointers}
   - {addr: 0x801ecb4c, name: g_bunit_gfx_context_base}
   - {addr: 0x801ecb50, name: g_menu_input_secondary_repeat}
-  - {addr: 0x801ecb54, name: g_bunit_gfx_sprite_8_count}
+  - {addr: 0x801ecb54, name: g_gfx_sprite_8_count}
   - {addr: 0x801ecb58, name: g_gfx_tile_16_capacity}
   - {addr: 0x801ecb5c, name: g_menu_active_clut_back}
-  - {addr: 0x801ecb60, name: g_bunit_gfx_tile_16_count}
-  - {addr: 0x801ecb64, name: g_bunit_gfx_sprite_16_count}
+  - {addr: 0x801ecb60, name: g_gfx_tile_16_count}
+  - {addr: 0x801ecb64, name: g_gfx_sprite_16_count}
   - {addr: 0x801ecb68, name: g_bunit_help_screen_id}
   - {addr: 0x801ecb6c, name: g_text_selection_id}
   - {addr: 0x801ecb70, name: g_menu_row_callbacks}
@@ -1067,7 +1067,7 @@ data:
   - {addr: 0x801cc80c, name: g_card_save_menu_state}
   - {addr: 0x801cc810, name: g_card_save_menu_work_buffer}
   - {addr: 0x801cc814, name: g_card_save_occupied_slot_count}
-  - {addr: 0x801cc818, name: g_card_gfx_poly_ft4_buffers}
+  - {addr: 0x801cc818, name: g_gfx_poly_ft4_buffers}
   - {addr: 0x801d8398, name: g_card_save_slot_descriptions}
   - {addr: 0x801d8848, name: g_input_event}
   - {addr: 0x801d884c, name: g_input_controller}
@@ -1573,7 +1573,7 @@ data:
   - {addr: 0x801cf10c, name: g_equip_slot_marker_rect}
   - {addr: 0x801cf110, name: g_equip_remove_mode_initialized}
   - {addr: 0x801cf112, name: g_equip_remove_item_cursor_anim}
-  - {addr: 0x801cf114, name: g_equip_remove_all_equipment_ids}
+  - {addr: 0x801cf114, name: g_remove_all_equipment_ids}
   - {addr: 0x801cf120, name: g_equip_remove_item_marker_rect}
   - {addr: 0x801cf124, name: g_equip_menu_clear_all_prompt_draw_params}
   - {addr: 0x801cf128, name: g_equip_status_label_image}
@@ -1680,7 +1680,7 @@ data:
   - {addr: 0x801e8cf0, name: g_equip_item_previewed_cursor}
   - {addr: 0x801e8cf8, name: g_remove_item_previewed_slot}
   - {addr: 0x801e8d00, name: g_remove_all_equipment_prompt_active}
-  - {addr: 0x801e8d04, name: g_equip_remove_item_equipment}
+  - {addr: 0x801e8d04, name: g_remove_item_equipment}
   - {addr: 0x801e8d10, name: g_equip_menu_clear_all_prompt_frame}
   - {addr: 0x801e8d40, name: g_equip_slot_item_browser_previewed_index}
   - {addr: 0x801e8d70, name: g_item_rearrange_picked_cursor}
@@ -1728,8 +1728,8 @@ data:
   - {addr: 0x801e906c, name: g_gfx_poly_g3_capacity}
   - {addr: 0x801e9070, name: g_gfx_poly_f4_capacity}
   - {addr: 0x801e9074, name: g_gfx_poly_g4_capacity}
-  - {addr: 0x801e9078, name: g_equip_gfx_poly_f3_count}
-  - {addr: 0x801e907c, name: g_equip_gfx_poly_g3_count}
+  - {addr: 0x801e9078, name: g_gfx_poly_f3_count}
+  - {addr: 0x801e907c, name: g_gfx_poly_g3_count}
   - {addr: 0x801e9080, name: g_equip_gfx_poly_f4_count}
   - {addr: 0x801e9084, name: g_equip_gfx_poly_g4_count}
   - {addr: 0x801e9088, name: g_menu_disabled_number_clut}
@@ -1744,17 +1744,17 @@ data:
   - {addr: 0x801e90ac, name: g_equip_gfx_line_f2_count}
   - {addr: 0x801e90b0, name: g_gfx_poly_gt3_capacity}
   - {addr: 0x801e90b4, name: g_gfx_poly_ft4_capacity}
-  - {addr: 0x801e90b8, name: g_equip_gfx_line_g2_count}
-  - {addr: 0x801e90bc, name: g_equip_gfx_line_f3_count}
+  - {addr: 0x801e90b8, name: g_gfx_line_g2_count}
+  - {addr: 0x801e90bc, name: g_gfx_line_f3_count}
   - {addr: 0x801e90c0, name: g_gfx_poly_gt4_capacity}
-  - {addr: 0x801e90c4, name: g_equip_gfx_line_g3_count}
-  - {addr: 0x801e90c8, name: g_equip_gfx_line_f4_count}
-  - {addr: 0x801e90cc, name: g_equip_gfx_line_g4_count}
+  - {addr: 0x801e90c4, name: g_gfx_line_g3_count}
+  - {addr: 0x801e90c8, name: g_gfx_line_f4_count}
+  - {addr: 0x801e90cc, name: g_gfx_line_g4_count}
   - {addr: 0x801e90d0, name: g_menu_palette_clut}
-  - {addr: 0x801e90d4, name: g_equip_gfx_poly_ft3_count}
-  - {addr: 0x801e90d8, name: g_equip_gfx_poly_gt3_count}
+  - {addr: 0x801e90d4, name: g_gfx_poly_ft3_count}
+  - {addr: 0x801e90d8, name: g_gfx_poly_gt3_count}
   - {addr: 0x801e90dc, name: g_menu_gfx_poly_ft4_count}
-  - {addr: 0x801e90e0, name: g_equip_gfx_poly_gt4_count}
+  - {addr: 0x801e90e0, name: g_gfx_poly_gt4_count}
   - {addr: 0x801e90e4, name: g_gfx_sprite_8_capacity}
   - {addr: 0x801e90e8, name: g_menu_gfx_drawenv_y}
   - {addr: 0x801e90ec, name: g_equip_menu_result_rows}
@@ -1773,23 +1773,23 @@ data:
   - {addr: 0x801e9238, name: g_menu_gfx_draw_move_count}
   - {addr: 0x801e923c, name: g_menu_gfx_context}
   - {addr: 0x801e9240, name: g_menu_input_primary_repeat}
-  - {addr: 0x801e9244, name: g_equip_gfx_sprite_count}
+  - {addr: 0x801e9244, name: g_gfx_sprite_count}
   - {addr: 0x801e9248, name: g_menu_scroll_base_index}
   - {addr: 0x801e924c, name: g_gfx_tile_1_capacity}
   - {addr: 0x801e9250, name: g_equip_item_type_order_names}
   - {addr: 0x801e92d0, name: g_menu_window_clut}
   - {addr: 0x801e92d4, name: g_gfx_tile_8_capacity}
-  - {addr: 0x801e92d8, name: g_equip_gfx_tile_1_count}
+  - {addr: 0x801e92d8, name: g_gfx_tile_1_count}
   - {addr: 0x801e92dc, name: g_menu_active_clut_front}
-  - {addr: 0x801e92e0, name: g_equip_gfx_tile_8_count}
+  - {addr: 0x801e92e0, name: g_gfx_tile_8_count}
   - {addr: 0x801e92e4, name: g_equip_unit_data}
   - {addr: 0x801e92ec, name: g_equip_gfx_context_base}
   - {addr: 0x801e92f0, name: g_menu_input_secondary_repeat}
-  - {addr: 0x801e92f4, name: g_equip_gfx_sprite_8_count}
+  - {addr: 0x801e92f4, name: g_gfx_sprite_8_count}
   - {addr: 0x801e92f8, name: g_gfx_tile_16_capacity}
   - {addr: 0x801e92fc, name: g_menu_active_clut_back}
-  - {addr: 0x801e9300, name: g_equip_gfx_tile_16_count}
-  - {addr: 0x801e9304, name: g_equip_gfx_sprite_16_count}
+  - {addr: 0x801e9300, name: g_gfx_tile_16_count}
+  - {addr: 0x801e9304, name: g_gfx_sprite_16_count}
   - {addr: 0x801e9308, name: g_menu_help_message_text_id}
   - {addr: 0x801e930c, name: g_menu_row_callbacks}
   - {addr: 0x801e934c, name: g_equip_gfx_current_ot}
@@ -1976,7 +1976,7 @@ data:
   - {addr: 0x801e502c, name: g_jobstts_menu_palette_image}
   - {addr: 0x801e522c, name: g_jobstts_active_page}
   - {addr: 0x801e522e, name: g_jobstts_initialized}
-  - {addr: 0x801e5230, name: g_jobstts_job_selected_id}
+  - {addr: 0x801e5230, name: g_job_selected_id}
   - {addr: 0x801e5232, name: g_menu_ability_category}
   - {addr: 0x801e5234, name: g_jobstts_job_list_render_commands}
   - {addr: 0x801e530c, name: g_jobstts_job_list_menu_initialized}
@@ -2069,8 +2069,8 @@ data:
   - {addr: 0x801fa728, name: g_gfx_poly_g3_capacity}
   - {addr: 0x801fa72c, name: g_gfx_poly_f4_capacity}
   - {addr: 0x801fa730, name: g_gfx_poly_g4_capacity}
-  - {addr: 0x801fa734, name: g_jobstts_gfx_poly_f3_count}
-  - {addr: 0x801fa738, name: g_jobstts_gfx_poly_g3_count}
+  - {addr: 0x801fa734, name: g_gfx_poly_f3_count}
+  - {addr: 0x801fa738, name: g_gfx_poly_g3_count}
   - {addr: 0x801fa73c, name: g_jobstts_gfx_poly_f4_count}
   - {addr: 0x801fa740, name: g_jobstts_gfx_poly_g4_count}
   - {addr: 0x801fa744, name: g_menu_disabled_number_clut}
@@ -2085,17 +2085,17 @@ data:
   - {addr: 0x801fa768, name: g_jobstts_gfx_line_f2_count}
   - {addr: 0x801fa76c, name: g_gfx_poly_gt3_capacity}
   - {addr: 0x801fa770, name: g_gfx_poly_ft4_capacity}
-  - {addr: 0x801fa774, name: g_jobstts_gfx_line_g2_count}
-  - {addr: 0x801fa778, name: g_jobstts_gfx_line_f3_count}
+  - {addr: 0x801fa774, name: g_gfx_line_g2_count}
+  - {addr: 0x801fa778, name: g_gfx_line_f3_count}
   - {addr: 0x801fa77c, name: g_gfx_poly_gt4_capacity}
-  - {addr: 0x801fa780, name: g_jobstts_gfx_line_g3_count}
-  - {addr: 0x801fa784, name: g_jobstts_gfx_line_f4_count}
-  - {addr: 0x801fa788, name: g_jobstts_gfx_line_g4_count}
+  - {addr: 0x801fa780, name: g_gfx_line_g3_count}
+  - {addr: 0x801fa784, name: g_gfx_line_f4_count}
+  - {addr: 0x801fa788, name: g_gfx_line_g4_count}
   - {addr: 0x801fa78c, name: g_menu_palette_clut}
-  - {addr: 0x801fa790, name: g_jobstts_gfx_poly_ft3_count}
-  - {addr: 0x801fa794, name: g_jobstts_gfx_poly_gt3_count}
+  - {addr: 0x801fa790, name: g_gfx_poly_ft3_count}
+  - {addr: 0x801fa794, name: g_gfx_poly_gt3_count}
   - {addr: 0x801fa798, name: g_menu_gfx_poly_ft4_count}
-  - {addr: 0x801fa79c, name: g_jobstts_gfx_poly_gt4_count}
+  - {addr: 0x801fa79c, name: g_gfx_poly_gt4_count}
   - {addr: 0x801fa7a0, name: g_gfx_sprite_8_capacity}
   - {addr: 0x801fa7a4, name: g_menu_gfx_drawenv_y}
   - {addr: 0x801fa7a8, name: g_menu_alternate_number_clut}
@@ -2110,22 +2110,22 @@ data:
   - {addr: 0x801fa7cc, name: g_menu_gfx_draw_move_count}
   - {addr: 0x801fa7d0, name: g_menu_gfx_context}
   - {addr: 0x801fa7d4, name: g_menu_input_primary_repeat}
-  - {addr: 0x801fa7d8, name: g_jobstts_gfx_sprite_count}
+  - {addr: 0x801fa7d8, name: g_gfx_sprite_count}
   - {addr: 0x801fa7dc, name: g_menu_scroll_base_index}
   - {addr: 0x801fa7e0, name: g_gfx_tile_1_capacity}
   - {addr: 0x801fa7e4, name: g_menu_window_clut}
   - {addr: 0x801fa7e8, name: g_gfx_tile_8_capacity}
-  - {addr: 0x801fa7ec, name: g_jobstts_gfx_tile_1_count}
+  - {addr: 0x801fa7ec, name: g_gfx_tile_1_count}
   - {addr: 0x801fa7f0, name: g_menu_active_clut_front}
-  - {addr: 0x801fa7f4, name: g_jobstts_gfx_tile_8_count}
+  - {addr: 0x801fa7f4, name: g_gfx_tile_8_count}
   - {addr: 0x801fa7f8, name: g_jobstts_unit_data}
   - {addr: 0x801fa7fc, name: g_jobstts_gfx_context_base}
   - {addr: 0x801fa800, name: g_menu_input_secondary_repeat}
-  - {addr: 0x801fa804, name: g_jobstts_gfx_sprite_8_count}
+  - {addr: 0x801fa804, name: g_gfx_sprite_8_count}
   - {addr: 0x801fa808, name: g_gfx_tile_16_capacity}
   - {addr: 0x801fa80c, name: g_menu_active_clut_back}
-  - {addr: 0x801fa810, name: g_jobstts_gfx_tile_16_count}
-  - {addr: 0x801fa814, name: g_jobstts_gfx_sprite_16_count}
+  - {addr: 0x801fa810, name: g_gfx_tile_16_count}
+  - {addr: 0x801fa814, name: g_gfx_sprite_16_count}
   - {addr: 0x801fa818, name: g_text_selection_id}
   - {addr: 0x801fa81c, name: g_menu_row_callbacks}
 
@@ -2198,8 +2198,8 @@ data:
   - {addr: 0x801ca10c, name: g_menu_at_list_primary_values}
   - {addr: 0x801ca50c, name: g_menu_at_list_secondary_values}
   - {addr: 0x801ca70c, name: g_menu_at_list_indices}
-  - {addr: 0x801ca90c, name: g_option_dead_unit_menu_flags}
-  - {addr: 0x801cad0c, name: g_option_menu_at_list_flags}
+  - {addr: 0x801ca90c, name: g_dead_unit_menu_flags}
+  - {addr: 0x801cad0c, name: g_menu_at_list_flags}
   - {addr: 0x801caf14, name: g_option_dead_unit_primary_result}
   - {addr: 0x801caf18, name: g_option_dead_unit_secondary_result}
   - {addr: 0x801cb6fc, name: g_option_menu_at_list_descriptors}
@@ -2366,7 +2366,7 @@ data:
   - {addr: 0x801cbcd4, name: g_editor_numeric_descriptor_a}
   - {addr: 0x801cbd88, name: g_editor_numeric_descriptor_b}
   - {addr: 0x801cbe60, name: g_menu_decimal_glyph}
-  - {addr: 0x801cbe70, name: g_require_text_section_offsets}
+  - {addr: 0x801cbe70, name: g_text_section_offsets}
   - {addr: 0x801cbef0, name: g_text_data}
   - {addr: 0x801d0000, name: g_require_work}
   - {addr: 0x801d0068, name: g_require_reward_bonus_image_rect}
@@ -2461,7 +2461,7 @@ data:
   - {addr: 0x801d71f8, name: g_require_party_affected_unit_message_args}
   - {addr: 0x801d72c0, name: g_require_party_affected_unit_message_ids}
   - {addr: 0x801d7388, name: g_require_party_affected_battle_unit_indices}
-  - {addr: 0x801d7450, name: g_require_gfx_poly_ft4_buffers}
+  - {addr: 0x801d7450, name: g_gfx_poly_ft4_buffers}
   - {addr: 0x801d7db0, name: g_formation_job_data}
   - {addr: 0x801d7db4, name: g_require_portrait_cell_rect}
   - {addr: 0x801d7dbc, name: g_require_portrait_palette_rect}

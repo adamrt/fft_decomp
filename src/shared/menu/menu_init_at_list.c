@@ -29,8 +29,8 @@ void menu_init_at_list(menu_entry_t* menu) {
     thread_call_on_main_stack(g_option_menu_at_list_descriptors, 0);
 
     for (index = 0; index < 0x100; index++) {
-        g_option_dead_unit_menu_flags[index] = 0;
-        g_option_menu_at_list_flags[index] = 0;
+        g_dead_unit_menu_flags[index] = 0;
+        g_menu_at_list_flags[index] = 0;
     }
 
     g_text_section_pointers[TEXT_SECTION_AT_LIST] = g_menu_at_list_text;
@@ -91,7 +91,7 @@ void menu_init_at_list(menu_entry_t* menu) {
         }
 
         if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE) {
-            g_option_menu_at_list_flags[entry_count] = 8;
+            g_menu_at_list_flags[entry_count] = 8;
         }
         entry_count++;
     }

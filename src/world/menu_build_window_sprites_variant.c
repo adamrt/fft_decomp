@@ -59,11 +59,11 @@ void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_ico
         image_params = param->context;
         record->icons[0]->x0 = image_params->height + param->window.x + 7;
         record->icons[0]->y0 = param->window.y - 1;
-        gfx_init_image_loading(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-            &g_world_menu_single_icon_image_params[1]);
+        gfx_init_image_loading(
+            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[1]);
     } else if (kind < 5) {
-        gfx_init_image_loading(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-            &g_world_menu_single_icon_image_params[kind]);
+        gfx_init_image_loading(
+            &record->base.sprites[3], &g_menu_texture_origin, &param->window, &g_menu_single_icon_image_params[kind]);
     } else {
         if (index >= 5 && index < 0x10) {
             menu_init_sprite_array(record->icons[0], 1, 0x7cfc);
@@ -74,13 +74,13 @@ void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_ico
              * instruction short; `(kind << 2) + n` selects the target's 4-op form. */
             kind -= 5;
             gfx_init_image_loading(&record->base.sprites[3], &g_menu_texture_origin, &param->window,
-                &g_world_menu_icon_strip_image_params[(kind << 2)]);
+                &g_menu_icon_strip_image_params[(kind << 2)]);
             gfx_init_image_loading(record->icons[0], &g_menu_texture_origin, &param->window,
-                &g_world_menu_icon_strip_image_params[(kind << 2) + 1]);
+                &g_menu_icon_strip_image_params[(kind << 2) + 1]);
             gfx_init_image_loading(record->icons[1], &g_menu_texture_origin, &param->window,
-                &g_world_menu_icon_strip_image_params[(kind << 2) + 2]);
+                &g_menu_icon_strip_image_params[(kind << 2) + 2]);
             gfx_init_image_loading(record->icons[2], &g_menu_texture_origin, &param->window,
-                &g_world_menu_icon_strip_image_params[(kind << 2) + 3]);
+                &g_menu_icon_strip_image_params[(kind << 2) + 3]);
         } else {
             record->icons[0] = 0;
             record->icons[1] = 0;

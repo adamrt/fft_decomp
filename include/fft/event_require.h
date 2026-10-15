@@ -222,7 +222,6 @@ extern RECT g_require_portrait_palette_rect;
 /* graphics */
 extern u8 g_require_gfx_fade_rgb[3];
 extern u8 g_require_gfx_formation_sprite_groups[][3];
-extern POLY_FT4 g_require_gfx_poly_ft4_buffers[2][30];
 extern POLY_GT4 g_require_gfx_poly_gt4_array_32[];
 extern POLY_GT4 g_require_gfx_poly_gt4_array_8[];
 extern POLY_GT4 g_require_gfx_poly_gt4_buffers[2][40];
@@ -245,7 +244,7 @@ typedef enum require_text_section {
     REQUIRE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3,   /* what a unit turned away or dismissed says */
 } require_text_section_e;
 
-extern s32 g_require_text_section_offsets[32];
+extern s32 g_text_section_offsets[32];
 extern char g_require_text_wait_for_file_allocation_message[];
 
 void require_text_build_battle_nicknames(void);

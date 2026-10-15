@@ -39,8 +39,8 @@ void card_save_run_menu(s32 unused) {
     g_gfx_otag_count = 0x40;
     g_gfx_poly_ft4_capacity = 0x258;
     g_gfx_tile_capacity = 10;
-    card_gfx_init_contexts(context_storage, otag_storage, 0, 0, 0, g_card_gfx_poly_ft4_buffers, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, tile_storage, 0, 0, 0, 0, 0, 0, 0, 0);
+    card_gfx_init_contexts(context_storage, otag_storage, 0, 0, 0, g_gfx_poly_ft4_buffers, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        tile_storage, 0, 0, 0, 0, 0, 0, 0, 0);
     card_save_init_menu_graphics();
     music_slot = main_sound_open_music_into_free_slot(MAIN_MUSIC_SAVE);
     while (main_sound_is_music_loading_stub() != 0) { }

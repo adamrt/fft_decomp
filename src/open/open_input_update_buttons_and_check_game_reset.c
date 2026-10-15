@@ -10,7 +10,7 @@ void open_input_update_buttons_and_check_game_reset(void) {
     u32 input;
     u32 previous;
 
-    g_open_input_previous_buttons = g_input_polled_buttons;
+    g_input_previous_buttons = g_input_polled_buttons;
     input = PadRead(0);
     g_input_polled_buttons = input;
 
@@ -18,7 +18,7 @@ void open_input_update_buttons_and_check_game_reset(void) {
         g_open_input_new_button_presses = 0;
         g_input_current_buttons = 0;
     } else {
-        previous = g_open_input_previous_buttons;
+        previous = g_input_previous_buttons;
         g_input_current_buttons = input;
         g_open_input_new_button_presses = input & ~previous;
     }

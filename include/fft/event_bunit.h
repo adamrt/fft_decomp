@@ -149,7 +149,6 @@ extern u8 g_bunit_ability_list_ready;
 extern u8 g_bunit_job_list_initialized;
 
 extern s16 g_bunit_job_selected_generic_index;
-extern s16 g_bunit_job_selected_id;
 
 s32 bunit_job_build_unit_job_list(s32 unit_id, s16* job_ids, s32 unused_2);
 
@@ -285,22 +284,7 @@ extern u16 g_bunit_gfx_draw_move_capacity;
 extern s16 g_bunit_gfx_falloff_focus_x;
 extern s16 g_bunit_gfx_falloff_focus_y;
 extern s16 g_bunit_gfx_line_f2_count;
-extern s16 g_bunit_gfx_line_f3_count;
-extern s16 g_bunit_gfx_line_f4_count;
-extern s16 g_bunit_gfx_line_g2_count;
-extern s16 g_bunit_gfx_line_g3_count;
-extern s16 g_bunit_gfx_line_g4_count;
-extern s16 g_bunit_gfx_poly_f3_count;
 extern s16 g_bunit_gfx_poly_f4_count;
-extern s16 g_bunit_gfx_poly_ft3_count;
-extern s16 g_bunit_gfx_poly_g3_count;
-extern s16 g_bunit_gfx_poly_gt3_count;
-extern s16 g_bunit_gfx_sprite_16_count;
-extern s16 g_bunit_gfx_sprite_8_count;
-extern s16 g_bunit_gfx_sprite_count;
-extern s16 g_bunit_gfx_tile_16_count;
-extern s16 g_bunit_gfx_tile_1_count;
-extern s16 g_bunit_gfx_tile_8_count;
 extern u8 g_bunit_sprite_cell_sizes[][2];
 
 s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum);

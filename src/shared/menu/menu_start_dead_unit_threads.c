@@ -26,7 +26,7 @@ void menu_start_dead_unit_threads(void) {
     g_dead_unit_menu[DEAD_UNIT_MENU_LIST].context = &g_dead_unit_menu_entries;
 
     for (index = 0x1ff; index >= 0; index--) {
-        g_option_dead_unit_menu_flags[index] = 0;
+        g_dead_unit_menu_flags[index] = 0;
     }
 
     value_count = 0;

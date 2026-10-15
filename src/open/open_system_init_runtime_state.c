@@ -13,7 +13,7 @@ void open_system_init_runtime_state(void) {
     g_open_gfx_opntex_data = (u32*)0x80140000;
     g_open_gfx_overlay_fade.abr = 2;
     g_open_gfx_overlay_fade.ot_index = 2;
-    g_open_input_previous_buttons = 0;
+    g_input_previous_buttons = 0;
     g_open_input_new_button_presses = 0;
     g_input_current_buttons = 0;
     g_menu_blocked_buttons = 0;
