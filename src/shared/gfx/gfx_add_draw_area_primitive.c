@@ -5,7 +5,7 @@
 /* Takes the next DR_AREA packet from the pool, fills it from rect (moved to
  * the second frame buffer when g_world_gfx_draw_buffer_clip_y >= 0x65) and links it into
  * ordering-table entry ot_index (libgpu addPrim). */
-void world_gfx_add_draw_area_primitive(RECT* rect, s32 ot_index) {
+void gfx_add_draw_area_primitive(RECT* rect, s32 ot_index) {
     DR_AREA* area;
 
     if (g_world_gfx_draw_buffer_clip_y >= 0x65) {

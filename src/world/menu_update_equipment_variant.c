@@ -36,7 +36,7 @@ s32 menu_update_equipment_variant(void) {
 
     if (g_world_item_submenu_initialized == 0) {
         g_world_item_submenu_initialized = 1;
-        g_menu_selected_slot = world_menu_init_cursor_position(WORLD_MENU_CURSOR_ITEM_TAB, 0);
+        g_menu_selected_slot = menu_init_cursor_position(WORLD_MENU_CURSOR_ITEM_TAB, 0);
         thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);

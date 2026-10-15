@@ -53,7 +53,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
         j = equip_input_read_page_scroll_direction();
         if (j != 0) {
             if (j != 2) {
-                menu_scroll_list_by_page(j, command);
+                menu_scroll_list_by_page_variant(j, command);
             }
         } else {
             input = g_menu_cmd_stream_input;

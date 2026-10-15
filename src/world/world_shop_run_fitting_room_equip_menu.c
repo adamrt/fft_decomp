@@ -141,8 +141,9 @@ void world_shop_run_fitting_room_equip_menu(void) {
     }
     cursor_y = &g_world_shop_fitting_slot_cursor_point.y;
     *cursor_y = g_world_shop_fitting_equip_slot * 16 + 0x90;
-    world_menu_set_draw_priority(0x3d);
-    world_menu_draw_animated_cursor(&g_world_shop_fitting_slot_cursor_point, &g_world_shop_fitting_slot_cursor_anim,
+    gfx_set_otag_index(0x3d);
+    menu_update_and_draw_sliding_cursor_variant(&g_world_shop_fitting_slot_cursor_point,
+        &g_world_shop_fitting_slot_cursor_anim,
         g_world_shop_fitting_room_item_list_open != 0 || g_menu_input_lock_mode != 0);
     if (g_world_shop_cost_window_visible != 0) {
         world_shop_install_callbacks_and_run();

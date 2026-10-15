@@ -119,7 +119,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         if (g_card_save_slot_row_y < -48 || g_card_save_slot_row_y >= 241) {
             continue;
         }
-        card_gfx_set_otag_index(10);
+        gfx_set_otag_index(10);
         value = row != g_card_save_list_cursor_index || scrolling != 0;
         menu_set_palette_mode(value);
         card_cmd_draw_window_frame_handler(&g_card_save_slot_window_command);
@@ -130,14 +130,14 @@ void card_save_update_and_draw_slot_list(u16 input) {
         g_card_save_slot_quads[1].position.y++;
         if (g_card_save_slot_quads[0].position.y >= 0 && g_card_save_slot_quads[0].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[0], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[0], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[1], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[1], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[3], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[3], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[4], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            card_gfx_set_otag_index(11);
+                &g_card_save_slot_quads[4], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
+            gfx_set_otag_index(11);
             g_card_save_slot_number_commands[0].number.y = g_card_save_slot_quads[0].position.y;
             g_card_save_slot_number_commands[0].number.value = index + 1;
             card_cmd_draw_decimal_number_handler(&g_card_save_slot_number_commands[0].number);
@@ -145,7 +145,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         g_card_save_slot_quads[2].position.y = g_card_save_slot_quads[0].position.y;
         if (g_card_save_slot_quads[2].position.y >= 0 && g_card_save_slot_quads[2].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
-                &g_card_save_slot_quads[2], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
+                &g_card_save_slot_quads[2], menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_card_save_slot_number_commands[3].number.y = g_card_save_slot_number_commands[2].number.y
                 = g_card_save_slot_number_commands[1].number.y = g_card_save_slot_quads[0].position.y;
             g_card_save_slot_number_commands[3].number.value = g_main_card_save_slot_playtimes[index].seconds;
@@ -182,7 +182,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         menu_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_menu_window_clut, 11);
     }
 
-    card_gfx_set_otag_index(15);
+    gfx_set_otag_index(15);
     value = g_card_save_list_cursor_index - g_card_save_list_top_row;
     if (value < 0) {
         value = 0;
@@ -191,7 +191,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         value = 3;
     }
     g_card_save_slot_cursor_position.y = value * 48 + 0x28;
-    menu_update_and_draw_sliding_cursor(
+    menu_update_and_draw_sliding_cursor_variant(
         &g_card_save_slot_cursor_position, &g_card_save_slot_cursor_animation, scrolling);
     if (g_menu_input_lock_mode != 0) {
         cursor_clut = g_menu_cursor_mode1_foreground_clut;

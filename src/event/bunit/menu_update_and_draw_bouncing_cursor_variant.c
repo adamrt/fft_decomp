@@ -2,11 +2,15 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-/* Advances the animated cursor at `pos` and draws it, sliding horizontally,
- * with its semi-transparent shadow. `mode` bit 0 starts the reverse curve;
- * mode 0 cancels it. */
-void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
-    RECT rect;
+/* Advances the animated cursor at `pos` and draws it, bouncing vertically,
+ * with its semi-transparent shadow through the shared sprite descriptor.
+ *
+ * Same state machine and curves as bunit_menu_update_and_draw_animated_cursor; the
+ * curve offset moves the quad's y edges instead of its x origin.
+ */
+void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode) {
+    u16 unused[4]; /* never accessed; the sibling's rect keeps the 0x38-byte frame */
+    s32 bottom;
     s32 active;
     s32 active_bit;
     s32 timer;
@@ -76,12 +80,15 @@ void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
         shadow_clut = g_menu_cursor_mode0_background_clut;
     }
 
-    rect.x = offset + pos->x - 2;
-    rect.y = pos->y;
-    rect.w = 0x10;
-    rect.h = 0x10;
-    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, cursor_clut, 0x3C);
-    rect.x += 2;
-    rect.y += 2;
-    menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, shadow_clut, 0x3B);
+    bottom = offset + 0x10;
+    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, offset + pos->y, pos->x + 0x10, offset + pos->y, pos->x,
+        pos->y + bottom, pos->x + 0x10, pos->y + bottom);
+    g_bunit_bouncing_cursor_quad.clut = cursor_clut;
+    g_bunit_bouncing_cursor_quad.tpage = g_menu_cursor_texture_page;
+    gfx_enqueue_textured_quad_corners(&g_bunit_bouncing_cursor_quad, 0, 0, 0x3C);
+    setXY4(&g_bunit_bouncing_cursor_quad, pos->x, offset + pos->y + 2, pos->x + 0x10, offset + pos->y + 2, pos->x,
+        pos->y + bottom + 2, pos->x + 0x10, pos->y + bottom + 2);
+    g_bunit_bouncing_cursor_quad.clut = shadow_clut;
+    g_bunit_bouncing_cursor_quad.tpage = 0x5F;
+    gfx_enqueue_textured_quad_corners(&g_bunit_bouncing_cursor_quad, 0, 1, 0x3B);
 }

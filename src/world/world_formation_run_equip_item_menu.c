@@ -143,10 +143,10 @@ s32 world_formation_run_equip_item_menu(void) {
     world_menu_toggle_preview_stats_window(g_world_equip_item_preview_active);
     cursor_y = &g_world_equip_item_cursor_point.y;
     *cursor_y = g_world_equip_item_slot * 16 + 0x90;
-    world_menu_set_draw_priority(0x28);
+    gfx_set_otag_index(0x28);
     /* The mode is an argument expression so &g_world_equip_item_cursor_point is formed before its
        branches and derived from cursor_y (addiu a0,s0,-2), as in the target. */
-    world_menu_draw_animated_cursor(&g_world_equip_item_cursor_point, &g_world_equip_item_cursor_anim,
+    menu_update_and_draw_sliding_cursor_variant(&g_world_equip_item_cursor_point, &g_world_equip_item_cursor_anim,
         g_world_equip_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;
 }

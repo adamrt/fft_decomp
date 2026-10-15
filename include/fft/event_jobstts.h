@@ -202,7 +202,7 @@ enum {
 
 extern menu_window_command_t g_jobstts_cmd_window_interior_command;
 
-menu_instruction_t* jobstts_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruction_t* instruction);
 

@@ -30,7 +30,7 @@ void world_formation_draw_graphics_below_sprite(
         return;
     }
     do {
-        world_menu_set_draw_priority(priority);
+        gfx_set_otag_index(priority);
     } while (0);
     world_menu_set_sprite_color(color);
     if (mode < 7) {

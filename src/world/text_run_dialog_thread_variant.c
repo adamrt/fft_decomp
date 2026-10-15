@@ -108,7 +108,7 @@ void text_run_dialog_thread_variant(void) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
         if (thread->function_parameter_2 == 0x807) {
-            i = world_menu_get_party_unit_name_id();
+            i = menu_get_party_unit_name_id();
             if (i >= 0x2FF) {
                 i = 0x2FF;
             }

@@ -465,4 +465,7 @@ void gfx_start_decreasing_fade(void);
 s32 gfx_get_fade_state(void);
 void gfx_start_increasing_fade(void);
 
+/* unified */
+void gfx_set_otag_index(s32 value);
+
 #endif

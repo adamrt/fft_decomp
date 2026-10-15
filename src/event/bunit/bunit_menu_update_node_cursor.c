@@ -88,10 +88,10 @@ void bunit_menu_update_node_cursor(s16 mode) {
     pos.y = y;
     if (node->vertical_cursor != 0) {
         pos.y = y + 1;
-        bunit_menu_update_and_draw_bouncing_cursor(&pos, &g_bunit_help_cursor_anim_state, running);
+        menu_update_and_draw_bouncing_cursor_variant(&pos, &g_bunit_help_cursor_anim_state, running);
     } else {
         pos.x = x - 2;
         pos.y = y + 6;
-        menu_update_and_draw_sliding_cursor(&pos, &g_bunit_help_cursor_anim_state, running);
+        menu_update_and_draw_sliding_cursor_variant(&pos, &g_bunit_help_cursor_anim_state, running);
     }
 }

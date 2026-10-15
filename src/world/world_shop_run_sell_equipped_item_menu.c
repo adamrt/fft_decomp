@@ -90,8 +90,8 @@ void world_shop_run_sell_equipped_item_menu(void) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
         g_world_shop_sell_equipped_cursor_point.y = g_world_shop_sell_equipped_slot * 16 + 0x90;
-        world_menu_set_draw_priority(0x3d);
-        world_menu_draw_animated_cursor(&g_world_shop_sell_equipped_cursor_point,
+        gfx_set_otag_index(0x3d);
+        menu_update_and_draw_sliding_cursor_variant(&g_world_shop_sell_equipped_cursor_point,
             &g_world_shop_sell_equipped_cursor_anim, world_thread_is_task_active(0));
     }
     world_shop_install_callbacks_and_run();

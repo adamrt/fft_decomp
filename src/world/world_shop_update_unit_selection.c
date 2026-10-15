@@ -79,7 +79,7 @@ void world_shop_update_unit_selection(void) {
     if (g_world_shop_menu_step >= 20) {
         world_menu_start_equipment_and_ability_panel_thread(g_world_formation_unit_browse_enabled);
     } else {
-        world_menu_toggle_change_banner_panel_thread(g_world_formation_unit_browse_enabled);
+        menu_toggle_change_banner_panel_thread(g_world_formation_unit_browse_enabled);
     }
     menu_toggle_unit_status_thread(
         g_world_formation_unit_banner_enabled != 0 || g_world_formation_unit_browse_enabled != 0);

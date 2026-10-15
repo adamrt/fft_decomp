@@ -95,5 +95,5 @@ void world_shop_run_equip_candidate_step(void) {
         }
     }
     world_menu_toggle_preview_stats_window(g_world_shop_equip_candidate_preview_visible);
-    world_menu_toggle_stat_preview_panel_thread(g_world_shop_equip_candidate_preview_visible);
+    menu_toggle_stat_preview_panel_thread(g_world_shop_equip_candidate_preview_visible);
 }

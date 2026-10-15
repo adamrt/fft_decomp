@@ -54,6 +54,6 @@ void world_name_update_entry_cursor(void) {
     if (g_world_name_entry_cursor_index != previous) {
         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
-    world_menu_set_draw_priority(0x28);
-    world_menu_draw_animated_cursor(&cursor, &g_world_name_entry_key_cursor_anim, g_menu_input_lock_mode);
+    gfx_set_otag_index(0x28);
+    menu_update_and_draw_sliding_cursor_variant(&cursor, &g_world_name_entry_key_cursor_anim, g_menu_input_lock_mode);
 }

@@ -68,7 +68,7 @@ s32 equip_menu_run_equip_mode(void) {
             g_equip_equip_item_list_open = 1;
             g_equip_equipment_panel_style = 1;
             thread_suspend(EQUIP_THREAD_SLOT_COMMAND_MENU);
-            equip_menu_restore_list_selection(g_equip_equip_item_slot != 0 ? g_equip_equip_item_slot - 1 : 0, &selected,
+            menu_restore_list_selection(g_equip_equip_item_slot != 0 ? g_equip_equip_item_slot - 1 : 0, &selected,
                 &scroll, g_item_list_entries);
             menu_init_scrollable_list(
                 g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -138,7 +138,7 @@ s32 equip_menu_run_equip_mode(void) {
     }
     equip_panel_toggle_item_numeric_thread(g_equip_equip_item_preview_active);
     g_equip_slot_marker_rect.y = g_equip_equip_item_slot * 16 + 0x90;
-    equip_gfx_set_otag_index(0x28);
+    gfx_set_otag_index(0x28);
     menu_update_and_draw_animated_cursor(&g_equip_slot_marker_rect, g_equip_equip_item_cursor_anim,
         g_equip_equip_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;

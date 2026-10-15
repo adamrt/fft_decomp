@@ -3,7 +3,7 @@
 
 /* EQUIP.OUT 001caf14 - Stream command: draw a LINE_F2 from (x0, y0) to
    (x1, y1) with the RGB that follows the endpoints in the command. */
-menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* stream) {
+menu_instruction_t* menu_cmd_draw_line_f2_handler(menu_instruction_t* stream) {
     point16_t endpoints[2];
 
     endpoints[0].x = stream->line.x0;

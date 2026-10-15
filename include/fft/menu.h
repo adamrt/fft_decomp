@@ -1936,7 +1936,7 @@ extern s8 g_menu_cursor_reverse_offset_keyframes[];
 extern u16 g_menu_cursor_texture_page;
 
 void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s32 mode);
-void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
+void menu_update_and_draw_sliding_cursor_variant(point16_t* pos, u16* state, s32 mode);
 
 /* input and palette state */
 extern u16 g_menu_active_clut_back;
@@ -2670,5 +2670,8 @@ s32 menu_update_equipment_variant(void);
 void menu_run_at_list_variant(void);
 void menu_start_at_list_thread_variant(void);
 void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
+
+/* unified */
+void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode);
 
 #endif

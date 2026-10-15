@@ -22,7 +22,7 @@
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
  */
-menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* instruction) {
+menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* instruction) {
     RECT rect;
     s32 unused[4];
     point16_t point;
@@ -52,7 +52,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
         i = menu_input_read_page_scroll_direction_variant();
         if (i != 0) {
             if (i != 2) {
-                world_menu_scroll_list_page(i, instruction);
+                menu_scroll_list_by_page_variant(i, instruction);
             }
         } else if ((g_menu_cmd_stream_input & 0x10000000) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
             index = g_menu_scroll_base_index;
@@ -189,7 +189,8 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
         point.x = instruction->list.x - instruction->list.cursor_x_offset;
         point.y
             = instruction->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_world_menu_row_height;
-        world_menu_draw_animated_cursor(&point, &g_world_menu_list_cursor_anim, g_world_menu_use_alternate_palette);
+        menu_update_and_draw_sliding_cursor_variant(
+            &point, &g_world_menu_list_cursor_anim, g_world_menu_use_alternate_palette);
     }
     instruction = menu_next_instruction(instruction);
     g_world_menu_scroll_row_offset = 0;

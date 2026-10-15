@@ -7,7 +7,7 @@
  * no Select or Start (mask 0xF0FF) while a help text is requested or
  * showing, or while the dismiss menu's message runs. */
 s32 world_input_filter_menu(void) {
-    s32 input = world_input_read_tutorial_or_controller(0);
+    s32 input = menu_input_read_tutorial_or_controller(0);
 
     if (g_world_item_category_input_lock != 0 || g_world_unit_status_banner_active != 0
         || world_input_get_lockout_timer() != 0) {

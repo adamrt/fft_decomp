@@ -10,13 +10,13 @@ s32 open_card_check_slots(void) {
 
     card_io_consume_all_events();
 
-    open_card_set_slot(1);
+    card_set_slot(1);
     result = open_card_poll_info_until_stable(3);
     if (result == CARD_IO_RESULT_COMPLETE || result == CARD_IO_RESULT_NEW_CARD) {
         card_present = 1;
     }
 
-    open_card_set_slot(0);
+    card_set_slot(0);
     result = open_card_poll_info_until_stable(3);
     if (result == CARD_IO_RESULT_COMPLETE || result == CARD_IO_RESULT_NEW_CARD) {
         card_present = 1;

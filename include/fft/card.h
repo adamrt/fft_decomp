@@ -12,4 +12,7 @@ s32 card_wait_for_hardware_event_variant(void);
 /* state */
 extern u8 g_card_slot;
 
+/* unified */
+s32 card_get_info_with_retries_variant(s32 port, s32 retry_limit);
+
 #endif

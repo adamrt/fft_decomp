@@ -267,7 +267,7 @@ menu_instruction_t* menu_cmd_draw_window_frame_handler(menu_instruction_t* comma
 menu_instruction_t* menu_cmd_draw_textured_quad_handler(menu_instruction_t* instruction);
 
 /* draw area commands */
-menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler_variant(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* instruction);
 
@@ -284,13 +284,13 @@ static __inline__ const menu_instruction_t* menu_next_const_instruction(const me
 
 /* list scripts */
 void menu_draw_scrollable_list(const menu_instruction_t* script);
-void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
-void menu_init_and_draw_scrollable_list(
-    s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 
 menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t* instruction);
 void menu_run_script_with_palette_mode_variant(menu_instruction_t* script, s32 flags, s32 event_mode);
+void menu_init_and_draw_scrollable_list_variant(
+    const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
+void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 
 #endif /* MENU_SCRIPT_H */

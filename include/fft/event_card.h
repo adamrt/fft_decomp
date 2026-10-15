@@ -176,13 +176,11 @@ extern POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30];
 extern u16 g_card_gfx_texture_page;
 extern u16 g_card_gfx_tile_capacity;
 
-rgb24_t* card_gfx_get_draw_color(void);
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
     s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles, s32 unused_17, s32 unused_18,
     s32 unused_19, s32 unused_20, s32 unused_21, s32 unused_22, s32 unused_23, s32 unused_24);
 void card_gfx_init_primitive_lists(card_graphics_context_t* lists);
-void card_gfx_set_otag_index(s32 value);
 void card_gfx_set_render_otag(u32* otag);
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
 

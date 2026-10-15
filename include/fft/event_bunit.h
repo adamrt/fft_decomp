@@ -296,7 +296,6 @@ void bunit_menu_reset_results(void);
 s32 bunit_menu_run_descriptor_thread(s32 id, menu_entry_t* desc);
 void bunit_menu_run_reorder_list(void);
 s32 bunit_menu_run_unit_list_frame(void);
-void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 void bunit_menu_update_job(void);
 void bunit_menu_update_node_cursor(s16 mode);
 void bunit_menu_update_unit_browser(void);
@@ -400,7 +399,6 @@ void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otag
 void bunit_gfx_init_packet_pools(menu_gfx_context_t* buffer);
 void bunit_gfx_init_rhombus_cursor_tpages(void);
 void bunit_gfx_init_vram_and_start_fade(void);
-void bunit_gfx_set_otag_index(s16 value);
 void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
 void bunit_gfx_update_rhombus_cursor_trail(point16_t* target);
 
@@ -433,8 +431,6 @@ void bunit_input_update_lock_timer(void);
 enum {
     BUNIT_CMD_END = 0x1c,
 };
-
-menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* instruction);
 
 /* text */
 extern u8 g_bunit_help_text_state;

@@ -6,7 +6,7 @@
  * `enable` is set and neither of the g_world_status_display_thread_params.flags 0x60 bits is set; stops threads 10 and
  * 12 otherwise.
  */
-void world_menu_toggle_change_banner_panel_thread(s32 enable) {
+void menu_toggle_change_banner_panel_thread(s32 enable) {
     s32 state = enable;
 
     if (state != 0) {

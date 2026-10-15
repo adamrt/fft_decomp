@@ -19,7 +19,7 @@ menu_instruction_t* world_menu_handle_window_command_with_scaled_clip(menu_instr
         clip.h = instruction->window.height * scale / 100;
         clip.x = instruction->window.x + (instruction->window.width >> 1) - (clip.w >> 1);
         clip.y = instruction->window.y + (instruction->window.height >> 1) - (clip.h >> 1);
-        world_gfx_add_draw_area_primitive(&clip, g_menu_gfx_otag_index - 1);
+        gfx_add_draw_area_primitive(&clip, g_menu_gfx_otag_index - 1);
         g_gfx_otag_index_locked = 1;
     } else {
         g_gfx_otag_index_locked = 0;

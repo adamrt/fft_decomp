@@ -179,7 +179,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
     y = 0x24 + g_bunit_unit_list_page_offset + g_bunit_unit_list_scroll_step;
     cell.w = 0x38;
     cell.h = 0x30;
-    bunit_gfx_set_otag_index(8);
+    gfx_set_otag_index(8);
     unit = 0;
     color = menu_gfx_get_draw_color_variant();
     saved_color.r = color->r;

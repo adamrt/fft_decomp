@@ -79,7 +79,7 @@ void world_formation_update_unit_selection(void) {
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM
         || g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_EQUIP
         || g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_BEST_FIT) {
-        world_menu_toggle_change_banner_panel_thread(1);
+        menu_toggle_change_banner_panel_thread(1);
     } else if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ABILITY) {
         world_menu_toggle_ability_panel_thread(1);
     }

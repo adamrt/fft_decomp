@@ -95,7 +95,7 @@ void world_formation_item_menu(void) {
         running = thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU);
         g_world_item_menu_initialized = running;
         if (running == 0) {
-            world_menu_toggle_change_banner_panel_thread(0);
+            menu_toggle_change_banner_panel_thread(0);
             roster_slot = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
             world_formation_build_record_list(0, g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
             g_unit_selected_index = world_formation_find_index_by_roster_slot(roster_slot);

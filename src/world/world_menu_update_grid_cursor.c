@@ -82,13 +82,13 @@ void world_menu_update_grid_cursor(s16 alternate) {
     }
     cursor.x = g_world_active_grid_menu_cells[g_world_grid_menu_selected_cell].cursor.x;
     cursor.y = g_world_active_grid_menu_cells[g_world_grid_menu_selected_cell].cursor.y;
-    world_menu_set_draw_priority(0x3C);
+    gfx_set_otag_index(0x3C);
     if (g_world_active_grid_menu_cells[g_world_grid_menu_selected_cell].vertical != 0) {
         cursor.y++;
-        world_menu_draw_animated_vertical_cursor(&cursor, &g_world_grid_menu_cursor_anim, busy);
+        menu_update_and_draw_bouncing_cursor_variant(&cursor, &g_world_grid_menu_cursor_anim, busy);
     } else {
         cursor.x -= 2;
         cursor.y += 6;
-        world_menu_draw_animated_cursor(&cursor, &g_world_grid_menu_cursor_anim, busy);
+        menu_update_and_draw_sliding_cursor_variant(&cursor, &g_world_grid_menu_cursor_anim, busy);
     }
 }

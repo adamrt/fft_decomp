@@ -4,7 +4,7 @@
 /* Issue _card_info on `port` up to retry_limit times, waiting for its BIOS event
  * each time. Returns complete on the first success, otherwise the result of the
  * last attempt (error when _card_info itself refused). */
-s32 open_card_get_info_with_retries(s32 port, s32 retry_limit) {
+s32 card_get_info_with_retries_variant(s32 port, s32 retry_limit) {
     s32 i;
     s32 result;
 

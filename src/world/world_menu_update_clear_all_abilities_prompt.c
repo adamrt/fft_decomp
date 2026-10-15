@@ -12,13 +12,14 @@ s32 world_menu_update_clear_all_abilities_prompt(void) {
     s32 changed;
 
     g_menu_help_message_text_id = -1;
-    world_menu_set_draw_priority(0x28);
+    gfx_set_otag_index(0x28);
     g_world_clear_abilities_blink_counter = g_world_clear_abilities_blink_counter + 1;
     if (g_world_clear_abilities_blink_counter & 1) {
         for (i = 1; i < 5; i++) {
             g_world_clear_abilities_cursor_point.y = i * 0x10 + 0x90;
             value = 0;
-            world_menu_draw_animated_cursor(&g_world_clear_abilities_cursor_point, &value, g_menu_input_lock_mode);
+            menu_update_and_draw_sliding_cursor_variant(
+                &g_world_clear_abilities_cursor_point, &value, g_menu_input_lock_mode);
         }
     }
     if (g_menu_input_primary_repeat & PSX_PAD_RIGHT) {

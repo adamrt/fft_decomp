@@ -19,7 +19,7 @@ s32 world_card_check_selected(void) {
     if (result >= CARD_IO_RESULT_COMPLETE) {
         g_world_card_info_pending = 0;
         if (result > CARD_IO_RESULT_COMPLETE) {
-            result = world_card_poll_info_with_retries(g_card_slot * 0x10, 2);
+            result = card_get_info_with_retries_variant(g_card_slot * 0x10, 2);
         }
     }
     if (result == CARD_IO_RESULT_ERROR) {

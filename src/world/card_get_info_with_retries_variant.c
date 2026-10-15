@@ -3,7 +3,7 @@
 
 /* Poll _card_info up to count times; return complete on the first successful
  * event, otherwise the last event result (timeout when _card_info failed). */
-s32 world_card_poll_info_with_retries(s32 channel, s32 count) {
+s32 card_get_info_with_retries_variant(s32 channel, s32 count) {
     s32 result;
     s32 i;
 

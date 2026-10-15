@@ -54,8 +54,8 @@ void world_shop_run_fitting_room_remove_step(void) {
     g_menu_help_message_text_id = value;
     cursor_y = &g_world_shop_equip_slot_cursor_point.y;
     *cursor_y = (u8)slot * 16 + 0x90;
-    world_menu_set_draw_priority(0x3D);
-    world_menu_draw_animated_cursor(
+    gfx_set_otag_index(0x3D);
+    menu_update_and_draw_sliding_cursor_variant(
         &g_world_shop_equip_slot_cursor_point, &g_world_shop_equip_slot_cursor_anim, world_thread_is_task_active(0));
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         equipped_item = g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot];

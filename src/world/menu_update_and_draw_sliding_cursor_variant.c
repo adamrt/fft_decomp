@@ -8,7 +8,7 @@
  * Bit 15 selects the alternate animation. The `state_mode` copies are the
  * target's own `move v0,s2` before each test.
  */
-void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode) {
+void menu_update_and_draw_sliding_cursor_variant(point16_t* position, u16* state, s32 mode) {
     RECT rect;
     /* Pin required: unpinned, the roles held in $s2/$s3/$s4 rotate. */
     register s32 active __asm__("$20");

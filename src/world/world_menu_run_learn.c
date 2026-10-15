@@ -13,7 +13,7 @@ s32 world_menu_run_learn(void) {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
         menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_world_formation_unit_cycle_mode = 0;
-        world_menu_init_cursor_position(WORLD_MENU_CURSOR_ABILITY_TAB, 0);
+        menu_init_cursor_position(WORLD_MENU_CURSOR_ABILITY_TAB, 0);
         menu_clear_selection_record(9);
         g_world_learn_menu_initialized = 1;
     }

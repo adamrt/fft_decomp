@@ -54,7 +54,7 @@ s32 equip_menu_run_remove_mode(void) {
     selection
         = menu_update_vertical_selection_and_mark_change(5, 1, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
     g_equip_remove_item_marker_rect.y = ((selection & 0xFF) << 4) + 0x90;
-    equip_gfx_set_otag_index(0x28);
+    gfx_set_otag_index(0x28);
     menu_update_and_draw_animated_cursor(
         &g_equip_remove_item_marker_rect, g_equip_remove_item_cursor_anim, g_menu_input_lock_mode);
 

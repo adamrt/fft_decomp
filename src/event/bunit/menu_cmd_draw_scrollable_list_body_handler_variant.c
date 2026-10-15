@@ -13,7 +13,7 @@
  * referenced). The scroll-down path follows WORLD's world_menu_script_draw_scrollable_list
  * spelling.
  */
-menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* command) {
+menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
     RECT rect;
     u8 pad0[0x10];
     point16_t marker;
@@ -52,7 +52,7 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
         j = menu_input_read_page_scroll_direction_variant();
         if (j != 0) {
             if (j != 2) {
-                menu_scroll_list_by_page(j, command);
+                menu_scroll_list_by_page_variant(j, command);
             }
         } else {
             input = g_menu_cmd_stream_input;
@@ -196,7 +196,7 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor(
+        menu_update_and_draw_sliding_cursor_variant(
             &marker, &g_bunit_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);

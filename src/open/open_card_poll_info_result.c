@@ -24,7 +24,7 @@ s32 open_card_poll_info_result(void) {
         g_open_card_info_pending = 0;
     }
     if (result > CARD_IO_RESULT_COMPLETE) {
-        result = open_card_get_info_with_retries(g_card_slot << 4, 2);
+        result = card_get_info_with_retries_variant(g_card_slot << 4, 2);
     }
     if (result == CARD_IO_RESULT_ERROR) {
         result = CARD_IO_RESULT_TIMEOUT;

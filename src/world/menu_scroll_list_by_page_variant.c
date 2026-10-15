@@ -5,7 +5,7 @@
  *
  * The cursor keeps its row on the page; a move that changes the first visible
  * option plays the cursor sound. */
-void world_menu_scroll_list_page(s32 dir, menu_instruction_t* instruction) {
+void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e dir, const menu_instruction_t* instruction) {
     s32 old;
     s16 delta;
     s32 unused[2]; /* 8 frame bytes no instruction uses */

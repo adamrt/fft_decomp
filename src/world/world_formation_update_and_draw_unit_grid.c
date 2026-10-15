@@ -137,7 +137,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     pos.w = 0x38;
     pos.h = 0x30;
     y = 0x24 + g_world_formation_scroll_position + g_world_formation_scroll_velocity;
-    world_menu_set_draw_priority(8);
+    gfx_set_otag_index(8);
     i = 0;
     color = menu_gfx_get_draw_color_variant();
     g_world_formation_saved_sprite_color.r = color->r;

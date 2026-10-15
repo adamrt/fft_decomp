@@ -275,7 +275,7 @@ void equip_menu_init_screen(s32 battle_id);
 void equip_menu_load_images_and_reset_lists(void);
 void equip_menu_reset_selection_indices(void);
 void equip_menu_reset_state_flags(void);
-void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+void menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 s32 equip_menu_run_equip_mode(void);
 s32 equip_menu_run_remove_mode(void);
 s32 equip_menu_update_clear_all_equipment_prompt(void);
@@ -355,7 +355,6 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
 void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context);
-void equip_gfx_set_otag_index(s32 ot_index);
 void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */
@@ -377,7 +376,7 @@ enum {
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equip_command_menu;
 
-menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
 
 /* text */

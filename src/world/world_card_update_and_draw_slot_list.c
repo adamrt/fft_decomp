@@ -158,7 +158,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
         if (g_world_card_slot_window.rect.y < -48 || g_world_card_slot_window.rect.y >= 241) {
             continue;
         }
-        world_menu_set_draw_priority(10);
+        gfx_set_otag_index(10);
         value = row != g_world_card_slot_cursor_row || busy != 0;
         world_menu_set_palette_mode(value);
         world_menu_parse_draw_window_frame((menu_instruction_t*)&g_world_card_slot_window_command);
@@ -176,7 +176,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
                 &g_world_card_slot_quad_3, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
             menu_gfx_enqueue_oriented_textured_quad(
                 &g_world_card_slot_quad_4, menu_gfx_get_draw_color_variant(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            world_menu_set_draw_priority(11);
+            gfx_set_otag_index(11);
             g_world_card_slot_number_command.y = g_world_card_slot_quad_0.position.y;
             g_world_card_slot_number_command.value = i + 1;
             menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_slot_number_command);
@@ -221,7 +221,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
         menu_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_world_menu_window_clut, 11);
     }
 
-    world_menu_set_draw_priority(15);
+    gfx_set_otag_index(15);
     value = g_world_card_slot_cursor_row - g_world_card_list_first_visible_row;
     if (value < 0) {
         value = 0;
@@ -230,7 +230,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
         value = 3;
     }
     g_world_card_slot_cursor_point.y = value * 48 + 0x28;
-    world_menu_draw_animated_cursor(&g_world_card_slot_cursor_point, &g_world_card_slot_cursor_anim, busy);
+    menu_update_and_draw_sliding_cursor_variant(&g_world_card_slot_cursor_point, &g_world_card_slot_cursor_anim, busy);
     if (g_world_card_list_first_visible_row != 0) {
         rect.x = 0xe3;
         rect.y = 0x20;

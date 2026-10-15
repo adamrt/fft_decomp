@@ -6,7 +6,7 @@
  * This variant offsets a shared textured quad vertically before submitting
  * two `POLY_FT4` layers. Bit 15 selects the alternate animation.
  */
-void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s32 mode) {
+void menu_update_and_draw_bouncing_cursor_variant(point16_t* position, u16* state, s32 mode) {
     RECT rect; /* never used; retail reserves its 8 bytes */
     u32 state_mode;
     s32 alternate;
