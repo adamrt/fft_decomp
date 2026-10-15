@@ -145,16 +145,16 @@ functions:
   - {addr: 0x800701ac, size: 80, name: open_opcode_start_fade_intensity_decrease, hash: 5eb2d91a96a89dc9, unit: title_script}
   - {addr: 0x800701fc, size: 68, name: open_opcode_wait_for_xa_audio_idle, hash: 62a970bd0a049ed2, unit: title_script}
   - {addr: 0x80070240, size: 104, name: open_opcode_start_opntex_sequence, hash: d633de2c09194393, unit: title_script}
-  - {addr: 0x800702a8, size: 16, name: card_set_slot, hash: 1f22427930c61f2c, unit: card_io}
+  - {addr: 0x800702a8, size: 16, name: card_io_set_selected_slot, hash: 1f22427930c61f2c, unit: card_io}
   - {addr: 0x800702b8, size: 40, name: card_io_consume_all_events, hash: 8f5b83a6cd3ad9da, unit: card_io}
   - {addr: 0x800702e0, size: 192, name: card_io_poll_bios_event_result, hash: 5d6b60fd071709b7, unit: card_io}
-  - {addr: 0x800703a0, size: 72, name: card_wait_for_bios_event_variant, hash: 0556139c9eb1bc66, unit: card_io}
+  - {addr: 0x800703a0, size: 72, name: card_io_wait_for_bios_event, hash: 0556139c9eb1bc66, unit: card_io}
   - {addr: 0x800703e8, size: 88, name: card_io_consume_bios_events, hash: bd2def49b8e92c22, unit: card_io}
   - {addr: 0x80070440, size: 192, name: card_io_poll_hardware_event_result, hash: c96ae6060b0e6c36, unit: card_io}
-  - {addr: 0x80070500, size: 72, name: card_wait_for_hardware_event_variant, hash: d2aebf9256a22720, unit: card_io}
+  - {addr: 0x80070500, size: 72, name: card_io_wait_for_hardware_event, hash: d2aebf9256a22720, unit: card_io}
   - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, unit: card_io}
-  - {addr: 0x800705a0, size: 140, name: card_get_info_with_retries_variant, hash: ba3559c7e03836a0, unit: card_checks}
-  - {addr: 0x8007062c, size: 188, name: card_poll_info_result_variant, hash: f6ce5450918332a3, unit: card_checks}
+  - {addr: 0x800705a0, size: 140, name: card_io_get_info_with_retries_variant, hash: ba3559c7e03836a0, unit: card_checks}
+  - {addr: 0x8007062c, size: 188, name: card_io_poll_operation_result_variant, hash: f6ce5450918332a3, unit: card_checks}
   - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6, unit: card_checks}
   - {addr: 0x8007077c, size: 124, name: open_card_check_slots, hash: b46039f85ab0f00d, unit: card_checks}
   - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/lib/psyq/libpress/DecDCTReset.c}

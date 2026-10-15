@@ -78,16 +78,6 @@ typedef enum card_save_slot_state {
     CARD_SAVE_SLOT_AVAILABLE = 1
 } card_save_slot_state_e;
 
-/* The software- and hardware-card pollers return the first event observed in
- * the IOE, ERROR, TIMOUT, NEW order installed by main_card_init_events. */
-typedef enum card_io_result {
-    CARD_IO_RESULT_PENDING = -1,
-    CARD_IO_RESULT_COMPLETE = 0,
-    CARD_IO_RESULT_ERROR = 1,
-    CARD_IO_RESULT_TIMEOUT = 2,
-    CARD_IO_RESULT_NEW_CARD = 3,
-} card_io_result_e;
-
 enum { CARD_SAVE_SLOT_COUNT = 15 };
 
 /* g_main_card_save_last_used_slot when no slot was loaded or written. */
@@ -204,11 +194,6 @@ extern s8 g_main_card_save_slot_file_states[];
 extern card_save_summary_t g_main_card_save_slot_metadata[CARD_SAVE_SLOT_COUNT];
 extern card_save_play_time_t g_main_card_save_slot_playtimes[CARD_SAVE_SLOT_COUNT];
 
-void card_io_consume_all_events(void);
-void card_io_consume_bios_events(void);
-void card_io_consume_hardware_events(void);
-s32 card_io_poll_bios_event_result(void);
-s32 card_io_poll_hardware_event_result(void);
 void main_card_init_events(void);
 
 /* file */

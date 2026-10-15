@@ -49,7 +49,6 @@ extern s8 g_card_save_completed;
 extern s8 g_card_save_error_prompt_closing;
 extern s8 g_card_save_file_count;
 extern const char* g_card_save_file_names[];
-extern const char g_card_save_file_pattern[];
 extern s8 g_card_save_format_delay_counter;
 extern s8 g_card_save_format_prompt_active;
 extern menu_entry_t g_card_save_format_prompt_descriptor[2];
@@ -101,37 +100,9 @@ void card_save_update_slot_scan_result(void);
 void card_save_update_slot_scroll(s32 selection);
 void card_save_update_slot_write(s32 slot);
 
-/* card io */
-extern s8 g_card_io_open_result;
-extern u8 g_card_io_operation_pending;
-extern u8 g_card_io_selected_slot;
-
-s32 card_io_create_new_with_retries(s32 port, s32 retry_limit);
-s32 card_io_format_selected_slot(void);
-s32 card_io_get_info_with_retries(s32 port, s32 retry_limit);
-s32 card_io_get_selected_slot(void);
-s32 card_io_load_with_retries(s32 port, s32 retry_limit);
-s32 card_io_open_or_create_selected_card(void);
-s32 card_io_poll_operation_result(void);
-void card_io_set_selected_slot(s32 value);
-
-/* files */
-extern const char g_card_file_all_pattern[];
-extern s32 g_card_file_open_descriptor;
-extern const char g_card_file_slot_0_path[];
-extern const char g_card_file_slot_1_path[];
-
+/* save screen results */
 extern s8 g_card_free_block_count;
-
-s32 card_file_close_with_retries(s32 descriptor);
-s32 card_file_count_free_blocks(const DIRENTRY* entries, s32 entry_count);
-s32 card_file_delete_selected_with_retries(const char* filename);
-s32 card_file_enumerate_saves(DIRENTRY* entries, s32 all_files);
-s32 card_file_open_selected_with_retries(const char* filename, s32 mode);
-s32 card_file_read_with_retries(s32 descriptor, void* destination, s32 size);
-s32 card_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
-s32 card_file_write_buffer(const char* filename, const card_save_buffer_t* source, s32 size, s32 create_file);
-s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size);
+extern s8 g_card_io_open_result;
 
 /* graphics */
 /*

@@ -1663,7 +1663,6 @@ typedef enum world_card_menu_step {
 extern card_save_buffer_t* g_world_load_work_buffer;
 extern s16 g_world_card_list_scroll_velocity;
 extern u8 g_world_card_menu_step; /* world_card_menu_step_e */
-extern s32 g_world_card_open_descriptor;
 extern card_save_icon_t g_world_card_save_icon_records[15];
 extern u8 g_world_card_save_title_template[0x16];
 extern u8 g_world_card_slot_cursor_row;
@@ -1741,21 +1740,10 @@ extern u8 g_world_card_save_slot_descriptions[][0x8C];
 s32 world_card_build_save_slot_description(s32 mode, u8* destination);
 s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size);
 void world_card_build_save_file_header(s32 slot, s32 level, struct card_save_header* header);
-s32 card_file_close_with_retries(s32 descriptor);
-s32 world_card_count_free_blocks(const struct DIRENTRY* entries, s32 count);
-s32 world_card_count_save_files(struct DIRENTRY* dir, s32 all);
 s32 world_card_count_selectable_save_slots(void);
-s32 card_io_create_new_with_retries(s32 port, s32 retry_limit);
-s32 world_card_delete_file(const char* name);
 void world_card_draw_slot_text(s32 slot);
-s32 world_card_format_selected_slot(void);
-s32 world_card_get_selected_slot(void);
 void world_card_init_menu_state(void);
 s32 world_card_load_globals_from_save_image(s32 partial_load);
-s32 world_card_load_with_retries(s32 channel, s32 attempts);
-s32 world_card_open_file_with_retries(const char* filename, s32 mode);
-s32 world_card_probe_selected(void);
-s32 card_file_read_with_retries(s32 descriptor, void* destination, s32 size);
 void world_card_run_load_step(s32 slot);
 s32 world_card_run_menu_screen(s32 mode_select_enabled);
 void world_card_run_mode_select_step(void);
@@ -1766,10 +1754,7 @@ void world_card_update_and_draw_slot_list(s32 input);
 void world_card_update_menu_request(void);
 void world_card_update_save_slot_playtime(s32 slot);
 void world_card_update_slot_scan(void);
-s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size);
 void world_card_build_save_image(s32 slot);
-s32 card_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
-s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer_t* source, u32 size, s32 create_file);
 
 /* item */
 

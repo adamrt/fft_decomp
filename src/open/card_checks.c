@@ -7,13 +7,13 @@
 /* Issue _card_info on `port` up to retry_limit times, waiting for its BIOS event
  * each time. Returns complete on the first success, otherwise the result of the
  * last attempt (error when _card_info itself refused). */
-s32 card_get_info_with_retries_variant(s32 port, s32 retry_limit) {
+s32 card_io_get_info_with_retries_variant(s32 port, s32 retry_limit) {
     s32 i;
     s32 result;
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
-            result = card_wait_for_bios_event_variant();
+            result = card_io_wait_for_bios_event();
             if (result == CARD_IO_RESULT_COMPLETE)
                 break;
         } else {
@@ -27,7 +27,7 @@ s32 card_get_info_with_retries_variant(s32 port, s32 retry_limit) {
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-s32 card_poll_info_result_variant(void) {
+s32 card_io_poll_operation_result_variant(void) {
     s32 status;
     s32 result;
 
@@ -45,7 +45,7 @@ s32 card_poll_info_result_variant(void) {
         g_card_info_pending = 0;
     }
     if (result > CARD_IO_RESULT_COMPLETE) {
-        result = card_get_info_with_retries_variant(g_card_slot << 4, 2);
+        result = card_io_get_info_with_retries_variant(g_card_slot << 4, 2);
     }
     if (result == CARD_IO_RESULT_ERROR) {
         result = CARD_IO_RESULT_TIMEOUT;
@@ -63,7 +63,7 @@ s32 open_card_poll_info_until_stable(s32 retry_limit) {
 
     while (attempts < retry_limit) {
         do {
-            result = card_poll_info_result_variant();
+            result = card_io_poll_operation_result_variant();
         } while (result == CARD_IO_RESULT_PENDING);
 
         if (result == CARD_IO_RESULT_COMPLETE) {
@@ -89,13 +89,13 @@ s32 open_card_check_slots(void) {
 
     card_io_consume_all_events();
 
-    card_set_slot(1);
+    card_io_set_selected_slot(1);
     result = open_card_poll_info_until_stable(3);
     if (result == CARD_IO_RESULT_COMPLETE || result == CARD_IO_RESULT_NEW_CARD) {
         card_present = 1;
     }
 
-    card_set_slot(0);
+    card_io_set_selected_slot(0);
     result = open_card_poll_info_until_stable(3);
     if (result == CARD_IO_RESULT_COMPLETE || result == CARD_IO_RESULT_NEW_CARD) {
         card_present = 1;
