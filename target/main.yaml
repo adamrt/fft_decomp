@@ -41,8 +41,8 @@ functions:
   - {addr: 0x80011bf4, size: 484, name: main_file_build_header, hash: 2289317868ab7dd4, unit: main_file_build_header_nnl_unit}
   - {addr: 0x80011dd8, size: 64, name: main_file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: main_file_build_header_nnl_unit}
   - {addr: 0x80011e18, size: 32, name: main_file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: main_file_build_header_nnl_unit}
-  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/file/main_file_poll_load.c, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5, source: src/gfx/main_gfx_draw_now_loading_message.c}
+  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/file/main/main_file_poll_load.c, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
+  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5, source: src/gfx/main/main_gfx_draw_now_loading_message.c}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, source: src/lib/suzuki/suzuki_smd_create_music.c}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, source: src/lib/suzuki/suzuki_smd_unload_music.c}
   - {addr: 0x800121cc, size: 8, name: suzuki_noop_800121cc, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800121cc.c}
@@ -678,59 +678,59 @@ functions:
   - {addr: 0x80041b1c, size: 612, name: main_boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x80041d80, size: 280, name: main_boot_draw_sceap_logo, hash: bdee131a2f49829f}
   - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, source: src/gfx/main_gfx_reset_display.c, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x800424c0, size: 72, name: main_file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, source: src/file/main_file_reset_cdrom_cpu_ram.c}
-  - {addr: 0x80042508, size: 124, name: main_gfx_load_zodiac_frame, hash: cece1a887e42aea4, source: src/gfx/main_gfx_load_zodiac_frame.c, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
+  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, source: src/gfx/main/main_gfx_reset_display.c, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x800424c0, size: 72, name: main_file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, source: src/file/main/main_file_reset_cdrom_cpu_ram.c}
+  - {addr: 0x80042508, size: 124, name: main_gfx_load_zodiac_frame, hash: cece1a887e42aea4, source: src/gfx/main/main_gfx_load_zodiac_frame.c, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
   - {addr: 0x80042584, size: 268, name: main_boot_run_startup, hash: f89462346cd91dbc}
   - {addr: 0x80042690, size: 276, name: main_boot_reset_game_state, hash: 30bc9957e9902423}
   - {addr: 0x800427a4, size: 220, name: main_entd_open_file, hash: 2842b52d61b959ce}
   - {addr: 0x80042880, size: 176, name: main_entd_get_encounter, hash: 8eeb97f209cde10e}
   - {addr: 0x80042930, size: 224, name: main_entd_init_event_unit_data, hash: 93e02043901b5bc7}
-  - {addr: 0x80042a10, size: 160, name: main_item_init_new_game_inventory, hash: 37d23fecd658ca21, source: src/item/main_item_init_new_game_inventory.c}
+  - {addr: 0x80042a10, size: 160, name: main_item_init_new_game_inventory, hash: 37d23fecd658ca21, source: src/item/main/main_item_init_new_game_inventory.c}
   - {addr: 0x80042ab0, size: 108, name: main_party_init_new_game, hash: f14ad7433eefb74c}
   - {addr: 0x80042b1c, size: 16, name: main_util_set_svector, hash: 694486283a46f5f8}
   - {addr: 0x80042b2c, size: 16, name: main_util_set_vector, hash: 28901a8f332a5d7a}
   - {addr: 0x80042b3c, size: 476, name: main_set_display_draw_new_game, hash: 8715c0b670c3f523, source: src/main/main_set_display_draw.c, source_symbol: main_set_display_draw, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x80042d18, size: 188, name: main_gfx_swap_display_area, hash: 18f2c8600c046389, source: src/gfx/main_gfx_swap_display_area.c}
-  - {addr: 0x80042dd4, size: 904, name: main_gfx_fade_in_orbonne_monastery, hash: 1ce397677ccb4bb6, source: src/gfx/main_gfx_fade_in_orbonne_monastery.c, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x8004315c, size: 896, name: main_gfx_fade_out_orbonne_monastery, hash: 588fa5761ae61f7b, source: src/gfx/main_gfx_fade_out_orbonne_monastery.c, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80042d18, size: 188, name: main_gfx_swap_display_area, hash: 18f2c8600c046389, source: src/gfx/main/main_gfx_swap_display_area.c}
+  - {addr: 0x80042dd4, size: 904, name: main_gfx_fade_in_orbonne_monastery, hash: 1ce397677ccb4bb6, source: src/gfx/main/main_gfx_fade_in_orbonne_monastery.c, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x8004315c, size: 896, name: main_gfx_fade_out_orbonne_monastery, hash: 588fa5761ae61f7b, source: src/gfx/main/main_gfx_fade_out_orbonne_monastery.c, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
   - {addr: 0x800434dc, size: 208, name: main_system_handle_vsync_callback, hash: a0172ee6d97c1bfd}
   - {addr: 0x800435ac, size: 8, name: main_system_handle_draw_sync_callback, hash: 6d64edf91449c1b1}
-  - {addr: 0x800435b4, size: 8, name: main_file_handle_cd_ready_callback, hash: 6d64edf91449c1b1, source: src/file/main_file_handle_cd_ready_callback.c}
-  - {addr: 0x800435bc, size: 8, name: main_file_handle_cd_read_callback, hash: 6d64edf91449c1b1, source: src/file/main_file_handle_cd_read_callback.c}
-  - {addr: 0x800435c4, size: 156, name: main_sound_open_and_play_music, hash: dc882519778a9dfe, source: src/sound/main_sound_open_and_play_music.c}
-  - {addr: 0x80043660, size: 168, name: main_sound_open_music_into_free_slot, hash: 185c9e9bb1bb9c55, source: src/sound/main_sound_open_music_into_free_slot.c}
-  - {addr: 0x80043708, size: 8, name: main_sound_is_music_loading_stub, hash: 207819bf4ebe3078, source: src/sound/main_sound_is_music_loading_stub.c}
-  - {addr: 0x80043710, size: 200, name: main_sound_open_music_into_slot, hash: d068d9f896a5379b, source: src/sound/main_sound_open_music_into_slot.c}
-  - {addr: 0x800437d8, size: 248, name: main_sound_open_scenario_smd_files, hash: 0b6f75c1755d440b, source: src/sound/main_sound_open_scenario_smd_files.c}
-  - {addr: 0x800438d0, size: 136, name: main_sound_poll_scenario_smd_load, hash: 96a506be6e381a11, source: src/sound/main_sound_poll_scenario_smd_load.c}
-  - {addr: 0x80043958, size: 104, name: main_sound_wait_for_scenario_smd_load, hash: 793faa58744c23db, source: src/sound/main_sound_wait_for_scenario_smd_load.c}
-  - {addr: 0x800439c0, size: 120, name: main_sound_unload_scenario_mus, hash: c92064cadd7628ae, source: src/sound/main_sound_unload_scenario_mus.c}
-  - {addr: 0x80043a38, size: 88, name: main_sound_stop_current_music, hash: 6b4c533ed48aaf0e, source: src/sound/main_sound_stop_current_music.c}
-  - {addr: 0x80043a90, size: 180, name: main_sound_switch_music_track, hash: 69069da0383341dc, source: src/sound/main_sound_switch_music_track.c}
-  - {addr: 0x80043b44, size: 16, name: main_sound_get_current_scenario_music, hash: ed983cc491943ec8, source: src/sound/main_sound_get_current_scenario_music.c}
-  - {addr: 0x80043b54, size: 76, name: main_sound_set_current_music_volume, hash: a1d1ea2b032eb3a5, source: src/sound/main_sound_set_current_music_volume.c}
-  - {addr: 0x80043ba0, size: 72, name: main_sound_set_current_music_volume_timed, hash: 12aee3665cc12e32, source: src/sound/main_sound_set_current_music_volume_timed.c}
-  - {addr: 0x80043be8, size: 84, name: main_sound_set_current_music_target, hash: 1f57d764fcc9219d, source: src/sound/main_sound_set_current_music_target.c}
-  - {addr: 0x80043c3c, size: 76, name: main_sound_set_current_music_tempo_scale_timed, hash: 12d3ddf3f76e80af, source: src/sound/main_sound_set_current_music_tempo_scale_timed.c}
-  - {addr: 0x80043c88, size: 76, name: main_sound_set_current_music_pitch_shift_timed, hash: 0997b09f98b20f70, source: src/sound/main_sound_set_current_music_pitch_shift_timed.c}
-  - {addr: 0x80043cd4, size: 76, name: main_sound_set_current_music_balance_shift_timed, hash: e8a9fa6318c8a42b, source: src/sound/main_sound_set_current_music_balance_shift_timed.c}
-  - {addr: 0x80043d20, size: 96, name: main_sound_play_tune, hash: 66e21780561ddd1d, source: src/sound/main_sound_play_tune.c}
-  - {addr: 0x80043d80, size: 96, name: main_sound_set_tune_volume, hash: bb2b40daa06f22bf, source: src/sound/main_sound_set_tune_volume.c}
-  - {addr: 0x80043de0, size: 288, name: main_sound_update_tunes, hash: 46f151791fb86bc2, source: src/sound/main_sound_update_tunes.c}
-  - {addr: 0x80043f00, size: 56, name: main_sound_unload_scenario_music_and_tunes, hash: 8a55c4911959dc2e, source: src/sound/main_sound_unload_scenario_music_and_tunes.c}
-  - {addr: 0x80043f38, size: 24, name: main_sound_get_music_handle, hash: 006705ceb0b16735, source: src/sound/main_sound_get_music_handle.c}
-  - {addr: 0x80043f50, size: 56, name: main_sound_unload_current_scenario_music, hash: 00e6b4c7c08d9437, source: src/sound/main_sound_unload_current_scenario_music.c}
-  - {addr: 0x80043f88, size: 112, name: main_sound_set_current_music_track, hash: 990c6633acf74e71, source: src/sound/main_sound_set_current_music_track.c}
-  - {addr: 0x80043ff8, size: 32, name: main_sound_play_sfx, hash: 5460a41510478fdd, source: src/sound/main_sound_play_sfx.c}
-  - {addr: 0x80044018, size: 32, name: main_sound_play_sfx_find_channel, hash: 93a986ea943c5d65, source: src/sound/main_sound_play_sfx_find_channel.c}
-  - {addr: 0x80044038, size: 40, name: main_sound_play_bg_sfx, hash: d3b2bdc64299c755, source: src/sound/main_sound_play_bg_sfx.c}
-  - {addr: 0x80044060, size: 44, name: main_sound_replay_bg_sfx, hash: d4b1a5bec31f46a3, source: src/sound/main_sound_replay_bg_sfx.c}
-  - {addr: 0x8004408c, size: 64, name: main_sound_set_sfx_echo, hash: 17e97804797bfd75, source: src/sound/main_sound_set_sfx_echo.c}
-  - {addr: 0x800440cc, size: 40, name: main_sound_stop_weather_sfx_music, hash: c0c1ba34c9724590, source: src/sound/main_sound_stop_weather_sfx_music.c}
-  - {addr: 0x800440f4, size: 52, name: main_sound_stop_sfx, hash: 21e1e455590397bf, source: src/sound/main_sound_stop_sfx.c}
-  - {addr: 0x80044128, size: 44, name: main_sound_stop_current_weather_sfx, hash: 47c3d337927a07ec, source: src/sound/main_sound_stop_current_weather_sfx.c}
-  - {addr: 0x80044154, size: 360, name: main_sound_open_generic_sfx, hash: ba9b164dee501015, source: src/sound/main_sound_open_generic_sfx.c}
+  - {addr: 0x800435b4, size: 8, name: main_file_handle_cd_ready_callback, hash: 6d64edf91449c1b1, source: src/file/main/main_file_handle_cd_ready_callback.c}
+  - {addr: 0x800435bc, size: 8, name: main_file_handle_cd_read_callback, hash: 6d64edf91449c1b1, source: src/file/main/main_file_handle_cd_read_callback.c}
+  - {addr: 0x800435c4, size: 156, name: main_sound_open_and_play_music, hash: dc882519778a9dfe, source: src/sound/main/main_sound_open_and_play_music.c}
+  - {addr: 0x80043660, size: 168, name: main_sound_open_music_into_free_slot, hash: 185c9e9bb1bb9c55, source: src/sound/main/main_sound_open_music_into_free_slot.c}
+  - {addr: 0x80043708, size: 8, name: main_sound_is_music_loading_stub, hash: 207819bf4ebe3078, source: src/sound/main/main_sound_is_music_loading_stub.c}
+  - {addr: 0x80043710, size: 200, name: main_sound_open_music_into_slot, hash: d068d9f896a5379b, source: src/sound/main/main_sound_open_music_into_slot.c}
+  - {addr: 0x800437d8, size: 248, name: main_sound_open_scenario_smd_files, hash: 0b6f75c1755d440b, source: src/sound/main/main_sound_open_scenario_smd_files.c}
+  - {addr: 0x800438d0, size: 136, name: main_sound_poll_scenario_smd_load, hash: 96a506be6e381a11, source: src/sound/main/main_sound_poll_scenario_smd_load.c}
+  - {addr: 0x80043958, size: 104, name: main_sound_wait_for_scenario_smd_load, hash: 793faa58744c23db, source: src/sound/main/main_sound_wait_for_scenario_smd_load.c}
+  - {addr: 0x800439c0, size: 120, name: main_sound_unload_scenario_mus, hash: c92064cadd7628ae, source: src/sound/main/main_sound_unload_scenario_mus.c}
+  - {addr: 0x80043a38, size: 88, name: main_sound_stop_current_music, hash: 6b4c533ed48aaf0e, source: src/sound/main/main_sound_stop_current_music.c}
+  - {addr: 0x80043a90, size: 180, name: main_sound_switch_music_track, hash: 69069da0383341dc, source: src/sound/main/main_sound_switch_music_track.c}
+  - {addr: 0x80043b44, size: 16, name: main_sound_get_current_scenario_music, hash: ed983cc491943ec8, source: src/sound/main/main_sound_get_current_scenario_music.c}
+  - {addr: 0x80043b54, size: 76, name: main_sound_set_current_music_volume, hash: a1d1ea2b032eb3a5, source: src/sound/main/main_sound_set_current_music_volume.c}
+  - {addr: 0x80043ba0, size: 72, name: main_sound_set_current_music_volume_timed, hash: 12aee3665cc12e32, source: src/sound/main/main_sound_set_current_music_volume_timed.c}
+  - {addr: 0x80043be8, size: 84, name: main_sound_set_current_music_target, hash: 1f57d764fcc9219d, source: src/sound/main/main_sound_set_current_music_target.c}
+  - {addr: 0x80043c3c, size: 76, name: main_sound_set_current_music_tempo_scale_timed, hash: 12d3ddf3f76e80af, source: src/sound/main/main_sound_set_current_music_tempo_scale_timed.c}
+  - {addr: 0x80043c88, size: 76, name: main_sound_set_current_music_pitch_shift_timed, hash: 0997b09f98b20f70, source: src/sound/main/main_sound_set_current_music_pitch_shift_timed.c}
+  - {addr: 0x80043cd4, size: 76, name: main_sound_set_current_music_balance_shift_timed, hash: e8a9fa6318c8a42b, source: src/sound/main/main_sound_set_current_music_balance_shift_timed.c}
+  - {addr: 0x80043d20, size: 96, name: main_sound_play_tune, hash: 66e21780561ddd1d, source: src/sound/main/main_sound_play_tune.c}
+  - {addr: 0x80043d80, size: 96, name: main_sound_set_tune_volume, hash: bb2b40daa06f22bf, source: src/sound/main/main_sound_set_tune_volume.c}
+  - {addr: 0x80043de0, size: 288, name: main_sound_update_tunes, hash: 46f151791fb86bc2, source: src/sound/main/main_sound_update_tunes.c}
+  - {addr: 0x80043f00, size: 56, name: main_sound_unload_scenario_music_and_tunes, hash: 8a55c4911959dc2e, source: src/sound/main/main_sound_unload_scenario_music_and_tunes.c}
+  - {addr: 0x80043f38, size: 24, name: main_sound_get_music_handle, hash: 006705ceb0b16735, source: src/sound/main/main_sound_get_music_handle.c}
+  - {addr: 0x80043f50, size: 56, name: main_sound_unload_current_scenario_music, hash: 00e6b4c7c08d9437, source: src/sound/main/main_sound_unload_current_scenario_music.c}
+  - {addr: 0x80043f88, size: 112, name: main_sound_set_current_music_track, hash: 990c6633acf74e71, source: src/sound/main/main_sound_set_current_music_track.c}
+  - {addr: 0x80043ff8, size: 32, name: main_sound_play_sfx, hash: 5460a41510478fdd, source: src/sound/main/main_sound_play_sfx.c}
+  - {addr: 0x80044018, size: 32, name: main_sound_play_sfx_find_channel, hash: 93a986ea943c5d65, source: src/sound/main/main_sound_play_sfx_find_channel.c}
+  - {addr: 0x80044038, size: 40, name: main_sound_play_bg_sfx, hash: d3b2bdc64299c755, source: src/sound/main/main_sound_play_bg_sfx.c}
+  - {addr: 0x80044060, size: 44, name: main_sound_replay_bg_sfx, hash: d4b1a5bec31f46a3, source: src/sound/main/main_sound_replay_bg_sfx.c}
+  - {addr: 0x8004408c, size: 64, name: main_sound_set_sfx_echo, hash: 17e97804797bfd75, source: src/sound/main/main_sound_set_sfx_echo.c}
+  - {addr: 0x800440cc, size: 40, name: main_sound_stop_weather_sfx_music, hash: c0c1ba34c9724590, source: src/sound/main/main_sound_stop_weather_sfx_music.c}
+  - {addr: 0x800440f4, size: 52, name: main_sound_stop_sfx, hash: 21e1e455590397bf, source: src/sound/main/main_sound_stop_sfx.c}
+  - {addr: 0x80044128, size: 44, name: main_sound_stop_current_weather_sfx, hash: 47c3d337927a07ec, source: src/sound/main/main_sound_stop_current_weather_sfx.c}
+  - {addr: 0x80044154, size: 360, name: main_sound_open_generic_sfx, hash: ba9b164dee501015, source: src/sound/main/main_sound_open_generic_sfx.c}
   - {addr: 0x800442bc, size: 200, name: main_heap_alloc_smd, hash: a37ef45a15eb4c27}
   - {addr: 0x80044384, size: 108, name: main_heap_free_smd, hash: 1d3fc00bb5ccc417}
   - {addr: 0x800443f0, size: 36, name: main_heap_clear_smd_allocator_table, hash: 86fdd143dae92bbd}
@@ -738,26 +738,26 @@ functions:
   - {addr: 0x800444dc, size: 292, name: main_heap_reserve_at, hash: bb2cd7a4ddd3dc36}
   - {addr: 0x80044600, size: 112, name: main_heap_free, hash: 51b9936a5ea34c17}
   - {addr: 0x80044670, size: 36, name: main_heap_clear_game_allocator_table, hash: baa90df5f4fd6324}
-  - {addr: 0x80044694, size: 52, name: main_file_call_build_header, hash: 0a87b13dd21b6135, source: src/file/main_file_call_build_header.c}
-  - {addr: 0x800446c8, size: 16, name: main_file_is_still_loading, hash: 2bf2cd79d5e3b972, source: src/file/main_file_is_still_loading.c}
-  - {addr: 0x800446d8, size: 228, name: main_file_get_smd, hash: 7c3adb54cd59bad4, source: src/file/main_file_get_smd.c}
-  - {addr: 0x800447bc, size: 228, name: main_file_load_to_heap, hash: a436e8832314d2f3, source: src/file/main_file_load_to_heap.c}
-  - {addr: 0x800448a0, size: 180, name: main_file_load_to_address, hash: 9da2049c8a2e24ac, source: src/file/main_file_load_to_address.c}
-  - {addr: 0x80044954, size: 60, name: main_file_load_checked_to_address, hash: e4a2578d2206edfb, source: src/file/main_file_load_checked_to_address.c}
-  - {addr: 0x80044990, size: 60, name: main_file_load_checked_to_heap, hash: f704f1ec47fb6ed5, source: src/file/main_file_load_checked_to_heap.c}
+  - {addr: 0x80044694, size: 52, name: main_file_call_build_header, hash: 0a87b13dd21b6135, source: src/file/main/main_file_call_build_header.c}
+  - {addr: 0x800446c8, size: 16, name: main_file_is_still_loading, hash: 2bf2cd79d5e3b972, source: src/file/main/main_file_is_still_loading.c}
+  - {addr: 0x800446d8, size: 228, name: main_file_get_smd, hash: 7c3adb54cd59bad4, source: src/file/main/main_file_get_smd.c}
+  - {addr: 0x800447bc, size: 228, name: main_file_load_to_heap, hash: a436e8832314d2f3, source: src/file/main/main_file_load_to_heap.c}
+  - {addr: 0x800448a0, size: 180, name: main_file_load_to_address, hash: 9da2049c8a2e24ac, source: src/file/main/main_file_load_to_address.c}
+  - {addr: 0x80044954, size: 60, name: main_file_load_checked_to_address, hash: e4a2578d2206edfb, source: src/file/main/main_file_load_checked_to_address.c}
+  - {addr: 0x80044990, size: 60, name: main_file_load_checked_to_heap, hash: f704f1ec47fb6ed5, source: src/file/main/main_file_load_checked_to_heap.c}
   - {addr: 0x800449cc, size: 32, name: main_heap_call_free, hash: 68e41579281fa6e2}
   - {addr: 0x800449f8, size: 8, name: main_system_report_stub, hash: 6d64edf91449c1b1}
   - {addr: 0x80044a00, size: 8, name: main_system_handle_malloc_exception, hash: 6d64edf91449c1b1}
   - {addr: 0x80044a08, size: 44, name: main_system_handle_error, hash: 0520ba9fd79942b9}
   - {addr: 0x80044a34, size: 44, name: main_system_handle_pointer_exception, hash: c49c56d6a872179f}
-  - {addr: 0x80044a60, size: 28, name: main_gfx_get_otag, hash: 0e1f986e004b6e64, source: src/gfx/main_gfx_get_otag.c}
-  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b, source: src/gfx/main_gfx_swap_and_clear_otag.c}
-  - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, source: src/gfx/main_save_init_state_and_options.c}
-  - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, source: src/gfx/main_overlay_call_battle_return_zero.c}
+  - {addr: 0x80044a60, size: 28, name: main_gfx_get_otag, hash: 0e1f986e004b6e64, source: src/gfx/main/main_gfx_get_otag.c}
+  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b, source: src/gfx/main/main_gfx_swap_and_clear_otag.c}
+  - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, source: src/gfx/main/main_save_init_state_and_options.c}
+  - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, source: src/gfx/main/main_overlay_call_battle_return_zero.c}
   - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/gfx/gfx_build_zodiac_sprite_polygon.c}
   - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, source: src/menu/menu_build_zodiac_primitives.c}
-  - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e, source: src/gfx/main_gfx_call_build_zodiac_bin.c}
-  - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7, source: src/gfx/main_gfx_load_frame_bin_into_vram.c}
+  - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e, source: src/gfx/main/main_gfx_call_build_zodiac_bin.c}
+  - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7, source: src/gfx/main/main_gfx_load_frame_bin_into_vram.c}
   - {addr: 0x800451cc, size: 104, name: main_overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: main_overlay_open_world_and_wldcore_unit}
   - {addr: 0x80045234, size: 52, name: main_overlay_open_world_bin, hash: f0dc6ce1683e216e, unit: main_overlay_open_world_and_wldcore_unit}
   - {addr: 0x80045268, size: 132, name: main_file_load_data_from_disc, hash: 061eb9238379898e, unit: main_overlay_open_world_and_wldcore_unit}
@@ -841,7 +841,7 @@ functions:
   - {addr: 0x8005e200, size: 44, name: main_ability_get_known, hash: f03d26c875a93271, unit: main_ability_get_known_unit}
   - {addr: 0x8005e22c, size: 40, name: main_util_copy_action_data, hash: 3a97060e78efbf69, unit: main_ability_get_known_unit}
   - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/memory/mem_copy_bytes_source_first.c, source_symbol: mem_copy_bytes_source_first}
-  - {addr: 0x8005e288, size: 496, name: main_item_get_total_equipment_quantity, hash: 3e5d96728559f2cd, source: src/item/main_item_get_total_equipment_quantity.c}
+  - {addr: 0x8005e288, size: 496, name: main_item_get_total_equipment_quantity, hash: 3e5d96728559f2cd, source: src/item/main/main_item_get_total_equipment_quantity.c}
   - {addr: 0x8005e478, size: 112, name: main_unit_init_position_and_rewards, hash: 9421b9d560e38650, source: src/unit/main/main_unit_init_position_and_rewards.c}
   - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, source: src/unit/main/main_status_find_action_highest_order_effect.c}
   - {addr: 0x8005e5d8, size: 108, name: main_unit_calculate_zodiac_symbol, hash: 0042a97bca78c29a, source: src/unit/main/main_unit_calculate_zodiac_symbol.c}

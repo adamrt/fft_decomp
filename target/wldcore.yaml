@@ -45,14 +45,14 @@ functions:
   - {addr: 0x800685e0, size: 96, name: file_wait_then_build_header, hash: 5d2462dc5511c5a9, source: src/file/file_wait_then_build_header.c}
   - {addr: 0x80068640, size: 136, name: wldcore_load_scratch_data_blocking, hash: bd1749a0f84c27ce}
   - {addr: 0x800686c8, size: 100, name: file_wait_for_pending_variant, hash: 2cb1c83c2614745a, source: src/file/wldcore/file_wait_for_pending_variant.c}
-  - {addr: 0x8006872c, size: 828, name: wldcore_file_poll_vram_image_stream, hash: 26a8e79c258efc1c, source: src/file/wldcore_file_poll_vram_image_stream.c, rodata: [{addr: 0x80067000, size: 32, hash: afd8c59574a140ff}]}
+  - {addr: 0x8006872c, size: 828, name: wldcore_file_poll_vram_image_stream, hash: 26a8e79c258efc1c, source: src/file/wldcore/wldcore_file_poll_vram_image_stream.c, rodata: [{addr: 0x80067000, size: 32, hash: afd8c59574a140ff}]}
   - {addr: 0x80068a68, size: 76, name: wldcore_proposition_load_picture, hash: 43c1d216b7baabcd}
   - {addr: 0x80068ab4, size: 136, name: wldcore_proposition_load_picture_data_set, hash: aad04349279159e2}
-  - {addr: 0x80068b3c, size: 136, name: wldcore_gfx_load_background_set, hash: 68a43c0bacc24d2c, source: src/gfx/wldcore_gfx_load_background_set.c}
+  - {addr: 0x80068b3c, size: 136, name: wldcore_gfx_load_background_set, hash: 68a43c0bacc24d2c, source: src/gfx/wldcore/wldcore_gfx_load_background_set.c}
   - {addr: 0x80068bc4, size: 160, name: wldcore_load_message_block_if_changed, hash: 6d52ff3612d01b49}
   - {addr: 0x80068c64, size: 220, name: wldcore_load_sound_novel_files, hash: 070cab2d292b95f8}
-  - {addr: 0x80068d40, size: 52, name: wldcore_file_seek_to_battle_bin, hash: e96aed18062103de, source: src/file/wldcore_file_seek_to_battle_bin.c}
-  - {addr: 0x80068d74, size: 48, name: wldcore_gfx_set_display_rect, hash: 318e2bd701eb87fa, source: src/gfx/wldcore_gfx_set_display_rect.c}
+  - {addr: 0x80068d40, size: 52, name: wldcore_file_seek_to_battle_bin, hash: e96aed18062103de, source: src/file/wldcore/wldcore_file_seek_to_battle_bin.c}
+  - {addr: 0x80068d74, size: 48, name: wldcore_gfx_set_display_rect, hash: 318e2bd701eb87fa, source: src/gfx/wldcore/wldcore_gfx_set_display_rect.c}
   - {addr: 0x80068da4, size: 204, name: wldcore_reset_game_if_special_keycode_is_pressed, hash: 6121aaec16ecf650}
   - {addr: 0x80068e70, size: 312, name: wldcore_map_update_scroll_axis_speed, hash: 847c2250f4204453}
   - {addr: 0x80068fa8, size: 104, name: wldcore_input_init_repeat_state, hash: cd033db34fcf2c41}
@@ -74,74 +74,74 @@ functions:
   - {addr: 0x8006a018, size: 148, name: wldcore_gfx_clear_vram_and_scratch, hash: 6d07a88a3d3e8359}
   - {addr: 0x8006a0ac, size: 76, name: unit_birthday_calculate_day_of_year, hash: efdeb3089d1c7472, source: src/unit/unit_birthday_calculate_day_of_year.c}
   - {addr: 0x8006a0f8, size: 72, name: wldcore_calendar_calculate_month_and_day, hash: 65bc42f96d71e765}
-  - {addr: 0x8006a140, size: 1100, name: wldcore_gfx_toggle_captured_world_frame, hash: 78cf845743021b10, source: src/gfx/wldcore_gfx_toggle_captured_world_frame.c}
-  - {addr: 0x8006a58c, size: 764, name: wldcore_map_init_tile_atlas, hash: d59a2e4f5886bb67, source: src/map/wldcore_map_init_tile_atlas.c}
-  - {addr: 0x8006a888, size: 336, name: wldcore_map_project_and_cull_tiles, hash: 54969fac20cc375c, source: src/map/wldcore_map_project_and_cull_tiles.c}
-  - {addr: 0x8006a9d8, size: 496, name: wldcore_gfx_draw_projected_map_tiles, hash: ab12c8bcb6910983, source: src/gfx/wldcore_gfx_draw_projected_map_tiles.c}
-  - {addr: 0x8006abc8, size: 64, name: wldcore_map_apply_clamped_scroll, hash: d7be6cf7b2797cc0, source: src/map/wldcore_map_apply_clamped_scroll.c}
-  - {addr: 0x8006ac08, size: 144, name: wldcore_map_apply_clamped_horizontal_scroll, hash: c3019786556de6da, source: src/map/wldcore_map_apply_clamped_horizontal_scroll.c}
-  - {addr: 0x8006ac98, size: 144, name: wldcore_map_apply_clamped_vertical_scroll, hash: d77a7b8dc971843f, source: src/map/wldcore_map_apply_clamped_vertical_scroll.c}
+  - {addr: 0x8006a140, size: 1100, name: wldcore_gfx_toggle_captured_world_frame, hash: 78cf845743021b10, source: src/gfx/wldcore/wldcore_gfx_toggle_captured_world_frame.c}
+  - {addr: 0x8006a58c, size: 764, name: wldcore_map_init_tile_atlas, hash: d59a2e4f5886bb67, source: src/map/wldcore/wldcore_map_init_tile_atlas.c}
+  - {addr: 0x8006a888, size: 336, name: wldcore_map_project_and_cull_tiles, hash: 54969fac20cc375c, source: src/map/wldcore/wldcore_map_project_and_cull_tiles.c}
+  - {addr: 0x8006a9d8, size: 496, name: wldcore_gfx_draw_projected_map_tiles, hash: ab12c8bcb6910983, source: src/gfx/wldcore/wldcore_gfx_draw_projected_map_tiles.c}
+  - {addr: 0x8006abc8, size: 64, name: wldcore_map_apply_clamped_scroll, hash: d7be6cf7b2797cc0, source: src/map/wldcore/wldcore_map_apply_clamped_scroll.c}
+  - {addr: 0x8006ac08, size: 144, name: wldcore_map_apply_clamped_horizontal_scroll, hash: c3019786556de6da, source: src/map/wldcore/wldcore_map_apply_clamped_horizontal_scroll.c}
+  - {addr: 0x8006ac98, size: 144, name: wldcore_map_apply_clamped_vertical_scroll, hash: d77a7b8dc971843f, source: src/map/wldcore/wldcore_map_apply_clamped_vertical_scroll.c}
   - {addr: 0x8006ad28, size: 248, name: window_init_record_pools_variant, hash: e025d61aca5111d9, source: src/window/wldcore/window_init_record_pools_variant.c}
   - {addr: 0x8006ae20, size: 176, name: window_dispatch_record_list_variant, hash: a7e465f544089ca3, source: src/window/wldcore/window_dispatch_record_list_variant.c}
-  - {addr: 0x8006aed0, size: 924, name: wldcore_gfx_draw_animated_display_object, hash: 370928c0ecd01289, source: src/gfx/wldcore_gfx_draw_animated_display_object.c}
-  - {addr: 0x8006b26c, size: 500, name: wldcore_gfx_draw_display_object_sprite, hash: 3a72d1b76b19a115, source: src/gfx/wldcore_gfx_draw_display_object_sprite.c}
+  - {addr: 0x8006aed0, size: 924, name: wldcore_gfx_draw_animated_display_object, hash: 370928c0ecd01289, source: src/gfx/wldcore/wldcore_gfx_draw_animated_display_object.c}
+  - {addr: 0x8006b26c, size: 500, name: wldcore_gfx_draw_display_object_sprite, hash: 3a72d1b76b19a115, source: src/gfx/wldcore/wldcore_gfx_draw_display_object_sprite.c}
   - {addr: 0x8006b460, size: 232, name: window_append_animated_record_variant, hash: 9d472c712e7475fd, source: src/window/wldcore/window_append_animated_record_variant.c}
   - {addr: 0x8006b548, size: 304, name: window_append_record_variant, hash: 8b95487b55821e0b, source: src/window/wldcore/window_append_record_variant.c}
   - {addr: 0x8006b678, size: 276, name: gfx_calculate_scaled_rectangle, hash: 63903852735eac70, source: src/gfx/gfx_calculate_scaled_rectangle.c}
-  - {addr: 0x8006b78c, size: 840, name: wldcore_gfx_draw_context_value_display, hash: a64c4fe093eb72d2, source: src/gfx/wldcore_gfx_draw_context_value_display.c, rodata: [{addr: 0x80067020, size: 20, hash: ec1dbbcbf2752505}]}
-  - {addr: 0x8006bad4, size: 244, name: wldcore_gfx_draw_cursor_sprite_and_underline, hash: 477515410b583ab3, source: src/gfx/wldcore_gfx_draw_cursor_sprite_and_underline.c}
-  - {addr: 0x8006bbc8, size: 444, name: wldcore_gfx_draw_number_digits, hash: 4f4c1a14ea91b92e, source: src/gfx/wldcore_gfx_draw_number_digits.c}
-  - {addr: 0x8006bd84, size: 536, name: wldcore_gfx_draw_number_digits_with_fill, hash: a418021d05820d27, source: src/gfx/wldcore_gfx_draw_number_digits_with_fill.c}
-  - {addr: 0x8006bf9c, size: 364, name: wldcore_gfx_draw_calendar_date, hash: fad8f45c4135b000, source: src/gfx/wldcore_gfx_draw_calendar_date.c}
+  - {addr: 0x8006b78c, size: 840, name: wldcore_gfx_draw_context_value_display, hash: a64c4fe093eb72d2, source: src/gfx/wldcore/wldcore_gfx_draw_context_value_display.c, rodata: [{addr: 0x80067020, size: 20, hash: ec1dbbcbf2752505}]}
+  - {addr: 0x8006bad4, size: 244, name: wldcore_gfx_draw_cursor_sprite_and_underline, hash: 477515410b583ab3, source: src/gfx/wldcore/wldcore_gfx_draw_cursor_sprite_and_underline.c}
+  - {addr: 0x8006bbc8, size: 444, name: wldcore_gfx_draw_number_digits, hash: 4f4c1a14ea91b92e, source: src/gfx/wldcore/wldcore_gfx_draw_number_digits.c}
+  - {addr: 0x8006bd84, size: 536, name: wldcore_gfx_draw_number_digits_with_fill, hash: a418021d05820d27, source: src/gfx/wldcore/wldcore_gfx_draw_number_digits_with_fill.c}
+  - {addr: 0x8006bf9c, size: 364, name: wldcore_gfx_draw_calendar_date, hash: fad8f45c4135b000, source: src/gfx/wldcore/wldcore_gfx_draw_calendar_date.c}
   - {addr: 0x8006c108, size: 244, name: wldcore_proposition_submit_marker_request, hash: 1dc3a756616af99e}
-  - {addr: 0x8006c1fc, size: 76, name: wldcore_load_formation_unit_name_and_face, hash: 612b5687dd91566d, source: src/menu/wldcore_load_formation_unit_name_and_face.c}
-  - {addr: 0x8006c248, size: 264, name: wldcore_menu_run_world_frame, hash: a7b6c9f7d5ebedab, source: src/menu/wldcore_menu_run_world_frame.c}
-  - {addr: 0x8006c350, size: 140, name: wldcore_menu_reset_window_list_and_store_origin, hash: 70bde74f247d3161, source: src/menu/wldcore_menu_reset_window_list_and_store_origin.c}
-  - {addr: 0x8006c3dc, size: 112, name: wldcore_menu_dispatch_idle_handler, hash: 2d06b000d9070865, source: src/menu/wldcore_menu_dispatch_idle_handler.c}
-  - {addr: 0x8006c44c, size: 112, name: wldcore_menu_dispatch_resume_handler, hash: c5020d97809230c1, source: src/menu/wldcore_menu_dispatch_resume_handler.c}
-  - {addr: 0x8006c4bc, size: 112, name: wldcore_menu_dispatch_publish_handler, hash: d5a7b467aa69b15e, source: src/menu/wldcore_menu_dispatch_publish_handler.c}
-  - {addr: 0x8006c52c, size: 640, name: wldcore_menu_push_root_level, hash: e415cf31bc2c341d, source: src/menu/wldcore_menu_push_root_level.c}
-  - {addr: 0x8006c7ac, size: 152, name: wldcore_menu_resume_root_level, hash: c5128ecd86d7c8b8, source: src/menu/wldcore_menu_resume_root_level.c}
-  - {addr: 0x8006c844, size: 80, name: wldcore_window_reset_state_and_scroll, hash: 2dc3ab15b28bf859, source: src/menu/wldcore_window_reset_state_and_scroll.c}
-  - {addr: 0x8006c894, size: 360, name: wldcore_menu_dispatch_pending_script_requests, hash: b156b072359898b5, source: src/menu/wldcore_menu_dispatch_pending_script_requests.c}
-  - {addr: 0x8006c9fc, size: 3576, name: wldcore_menu_step_map_cursor_level, hash: a33bbace5619364e, source: src/menu/wldcore_menu_step_map_cursor_level.c}
-  - {addr: 0x8006d7f4, size: 308, name: wldcore_menu_push_focus_location_level, hash: f515d77f6e972be6, source: src/menu/wldcore_menu_push_focus_location_level.c}
-  - {addr: 0x8006d928, size: 352, name: wldcore_map_step_projection_motion_then_pop_level, hash: 58e814e9fb319b81, source: src/menu/wldcore_map_step_projection_motion_then_pop_level.c}
-  - {addr: 0x8006da88, size: 304, name: wldcore_menu_push_map_path_level, hash: 80bc1ab53ecc36ee, source: src/menu/wldcore_menu_push_map_path_level.c}
-  - {addr: 0x8006dbb8, size: 664, name: wldcore_menu_step_map_path_level, hash: 6c1bb124c0f5007c, source: src/menu/wldcore_menu_step_map_path_level.c}
-  - {addr: 0x8006de50, size: 252, name: wldcore_push_map_location_visibility_level, hash: 5b94199b77124379, source: src/menu/wldcore_push_map_location_visibility_level.c}
-  - {addr: 0x8006df4c, size: 432, name: wldcore_map_step_location_visibility_change, hash: b70784a6ea5fc254, source: src/menu/wldcore_map_step_location_visibility_change.c}
-  - {addr: 0x8006e0fc, size: 268, name: wldcore_menu_push_entry_window_level, hash: 519de82a790539fd, source: src/menu/wldcore_menu_push_entry_window_level.c}
-  - {addr: 0x8006e208, size: 672, name: wldcore_menu_step_return_level, hash: 5bfaba8eb0907f33, source: src/menu/wldcore_menu_step_return_level.c}
-  - {addr: 0x8006e4a8, size: 724, name: wldcore_menu_push_text_window_level, hash: 36c0187ff6c4e72f, source: src/menu/wldcore_menu_push_text_window_level.c}
-  - {addr: 0x8006e77c, size: 228, name: wldcore_menu_wait_text_then_pop_level, hash: 59ff660170defc8d, source: src/menu/wldcore_menu_wait_text_then_pop_level.c}
-  - {addr: 0x8006e860, size: 348, name: wldcore_menu_push_message_level, hash: e2465c318b69dbe5, source: src/menu/wldcore_menu_push_message_level.c}
-  - {addr: 0x8006e9bc, size: 212, name: wldcore_menu_finish_close_request, hash: 7d51d48476b51618, source: src/menu/wldcore_menu_finish_close_request.c}
-  - {addr: 0x8006ea90, size: 672, name: wldcore_menu_push_variable_list_level, hash: c7322cd10daebffd, source: src/menu/wldcore_menu_push_variable_list_level.c}
-  - {addr: 0x8006ed30, size: 444, name: wldcore_menu_render_debug_variable_list, hash: c07707ad0a38ca8a, source: src/menu/wldcore_menu_render_debug_variable_list.c}
-  - {addr: 0x8006eeec, size: 936, name: wldcore_menu_handle_debug_variable_list_input, hash: b5774ea3eeddc98a, source: src/menu/wldcore_menu_handle_debug_variable_list_input.c}
-  - {addr: 0x8006f294, size: 200, name: wldcore_menu_push_number_panel_level_with_argument, hash: 689a5bb4d25e4b5d, source: src/menu/wldcore_menu_push_number_panel_level_with_argument.c}
-  - {addr: 0x8006f35c, size: 460, name: wldcore_menu_step_number_panel_level, hash: b55a89b6140634a4, source: src/menu/wldcore_menu_step_number_panel_level.c}
-  - {addr: 0x8006f528, size: 340, name: wldcore_menu_push_layout_window_level, hash: ab1438ef2fc8d3e1, source: src/menu/wldcore_menu_push_layout_window_level.c}
-  - {addr: 0x8006f67c, size: 212, name: wldcore_window_apply_layout, hash: 4fed0d29e1d2fe7b, source: src/menu/wldcore_window_apply_layout.c}
-  - {addr: 0x8006f750, size: 104, name: wldcore_window_finalize_record_and_stop_task, hash: 9e9129e51d124b70, source: src/menu/wldcore_window_finalize_record_and_stop_task.c}
-  - {addr: 0x8006f7b8, size: 8, name: wldcore_menu_publish_layout_window_level, hash: 6d64edf91449c1b1, source: src/menu/wldcore_menu_publish_layout_window_level.c}
-  - {addr: 0x8006f7c0, size: 816, name: wldcore_menu_handle_layout_window_input, hash: c1e8409fe84df98d, source: src/menu/wldcore_menu_handle_layout_window_input.c}
-  - {addr: 0x8006faf0, size: 2036, name: wldcore_menu_push_location_menu_level, hash: f4f64a730589fe4a, source: src/menu/wldcore_menu_push_location_menu_level.c}
-  - {addr: 0x800702e4, size: 56, name: wldcore_window_restore_location_list_palette, hash: fee0e6d3cb0d88e0, source: src/menu/wldcore_window_restore_location_list_palette.c}
-  - {addr: 0x8007031c, size: 60, name: wldcore_window_set_secondary_render_palette_2, hash: a2f7429843d1a51b, source: src/menu/wldcore_window_set_secondary_render_palette_2.c}
-  - {addr: 0x80070358, size: 1552, name: wldcore_menu_step_location_menu_level, hash: 5af1aba511f1e8d3, source: src/menu/wldcore_menu_step_location_menu_level.c}
-  - {addr: 0x80070968, size: 320, name: wldcore_menu_close_level_and_release_records, hash: ead85974b020521a, source: src/menu/wldcore_menu_close_level_and_release_records.c}
-  - {addr: 0x80070aa8, size: 316, name: wldcore_menu_run_shop_and_rebuild_screen, hash: 3dcf9c23a2dd9c21, source: src/menu/wldcore_menu_run_shop_and_rebuild_screen.c}
-  - {addr: 0x80070be4, size: 796, name: wldcore_menu_push_scrollable_text_window_level, hash: 23808f2560fecd67, source: src/menu/wldcore_menu_push_scrollable_text_window_level.c}
-  - {addr: 0x80070f00, size: 488, name: wldcore_menu_step_scrollable_text_window_level, hash: b63d983cca36c974, source: src/menu/wldcore_menu_step_scrollable_text_window_level.c}
-  - {addr: 0x800710e8, size: 176, name: wldcore_menu_push_fixed_number_panel_level, hash: 33b0f93444bd91a8, source: src/menu/wldcore_menu_push_fixed_number_panel_level.c}
-  - {addr: 0x80071198, size: 280, name: wldcore_menu_step_unit_browser_panel, hash: 1dbc6b949132b78d, source: src/menu/wldcore_menu_step_unit_browser_panel.c}
+  - {addr: 0x8006c1fc, size: 76, name: wldcore_load_formation_unit_name_and_face, hash: 612b5687dd91566d, source: src/menu/wldcore/wldcore_load_formation_unit_name_and_face.c}
+  - {addr: 0x8006c248, size: 264, name: wldcore_menu_run_world_frame, hash: a7b6c9f7d5ebedab, source: src/menu/wldcore/wldcore_menu_run_world_frame.c}
+  - {addr: 0x8006c350, size: 140, name: wldcore_menu_reset_window_list_and_store_origin, hash: 70bde74f247d3161, source: src/menu/wldcore/wldcore_menu_reset_window_list_and_store_origin.c}
+  - {addr: 0x8006c3dc, size: 112, name: wldcore_menu_dispatch_idle_handler, hash: 2d06b000d9070865, source: src/menu/wldcore/wldcore_menu_dispatch_idle_handler.c}
+  - {addr: 0x8006c44c, size: 112, name: wldcore_menu_dispatch_resume_handler, hash: c5020d97809230c1, source: src/menu/wldcore/wldcore_menu_dispatch_resume_handler.c}
+  - {addr: 0x8006c4bc, size: 112, name: wldcore_menu_dispatch_publish_handler, hash: d5a7b467aa69b15e, source: src/menu/wldcore/wldcore_menu_dispatch_publish_handler.c}
+  - {addr: 0x8006c52c, size: 640, name: wldcore_menu_push_root_level, hash: e415cf31bc2c341d, source: src/menu/wldcore/wldcore_menu_push_root_level.c}
+  - {addr: 0x8006c7ac, size: 152, name: wldcore_menu_resume_root_level, hash: c5128ecd86d7c8b8, source: src/menu/wldcore/wldcore_menu_resume_root_level.c}
+  - {addr: 0x8006c844, size: 80, name: wldcore_window_reset_state_and_scroll, hash: 2dc3ab15b28bf859, source: src/menu/wldcore/wldcore_window_reset_state_and_scroll.c}
+  - {addr: 0x8006c894, size: 360, name: wldcore_menu_dispatch_pending_script_requests, hash: b156b072359898b5, source: src/menu/wldcore/wldcore_menu_dispatch_pending_script_requests.c}
+  - {addr: 0x8006c9fc, size: 3576, name: wldcore_menu_step_map_cursor_level, hash: a33bbace5619364e, source: src/menu/wldcore/wldcore_menu_step_map_cursor_level.c}
+  - {addr: 0x8006d7f4, size: 308, name: wldcore_menu_push_focus_location_level, hash: f515d77f6e972be6, source: src/menu/wldcore/wldcore_menu_push_focus_location_level.c}
+  - {addr: 0x8006d928, size: 352, name: wldcore_map_step_projection_motion_then_pop_level, hash: 58e814e9fb319b81, source: src/menu/wldcore/wldcore_map_step_projection_motion_then_pop_level.c}
+  - {addr: 0x8006da88, size: 304, name: wldcore_menu_push_map_path_level, hash: 80bc1ab53ecc36ee, source: src/menu/wldcore/wldcore_menu_push_map_path_level.c}
+  - {addr: 0x8006dbb8, size: 664, name: wldcore_menu_step_map_path_level, hash: 6c1bb124c0f5007c, source: src/menu/wldcore/wldcore_menu_step_map_path_level.c}
+  - {addr: 0x8006de50, size: 252, name: wldcore_push_map_location_visibility_level, hash: 5b94199b77124379, source: src/menu/wldcore/wldcore_push_map_location_visibility_level.c}
+  - {addr: 0x8006df4c, size: 432, name: wldcore_map_step_location_visibility_change, hash: b70784a6ea5fc254, source: src/menu/wldcore/wldcore_map_step_location_visibility_change.c}
+  - {addr: 0x8006e0fc, size: 268, name: wldcore_menu_push_entry_window_level, hash: 519de82a790539fd, source: src/menu/wldcore/wldcore_menu_push_entry_window_level.c}
+  - {addr: 0x8006e208, size: 672, name: wldcore_menu_step_return_level, hash: 5bfaba8eb0907f33, source: src/menu/wldcore/wldcore_menu_step_return_level.c}
+  - {addr: 0x8006e4a8, size: 724, name: wldcore_menu_push_text_window_level, hash: 36c0187ff6c4e72f, source: src/menu/wldcore/wldcore_menu_push_text_window_level.c}
+  - {addr: 0x8006e77c, size: 228, name: wldcore_menu_wait_text_then_pop_level, hash: 59ff660170defc8d, source: src/menu/wldcore/wldcore_menu_wait_text_then_pop_level.c}
+  - {addr: 0x8006e860, size: 348, name: wldcore_menu_push_message_level, hash: e2465c318b69dbe5, source: src/menu/wldcore/wldcore_menu_push_message_level.c}
+  - {addr: 0x8006e9bc, size: 212, name: wldcore_menu_finish_close_request, hash: 7d51d48476b51618, source: src/menu/wldcore/wldcore_menu_finish_close_request.c}
+  - {addr: 0x8006ea90, size: 672, name: wldcore_menu_push_variable_list_level, hash: c7322cd10daebffd, source: src/menu/wldcore/wldcore_menu_push_variable_list_level.c}
+  - {addr: 0x8006ed30, size: 444, name: wldcore_menu_render_debug_variable_list, hash: c07707ad0a38ca8a, source: src/menu/wldcore/wldcore_menu_render_debug_variable_list.c}
+  - {addr: 0x8006eeec, size: 936, name: wldcore_menu_handle_debug_variable_list_input, hash: b5774ea3eeddc98a, source: src/menu/wldcore/wldcore_menu_handle_debug_variable_list_input.c}
+  - {addr: 0x8006f294, size: 200, name: wldcore_menu_push_number_panel_level_with_argument, hash: 689a5bb4d25e4b5d, source: src/menu/wldcore/wldcore_menu_push_number_panel_level_with_argument.c}
+  - {addr: 0x8006f35c, size: 460, name: wldcore_menu_step_number_panel_level, hash: b55a89b6140634a4, source: src/menu/wldcore/wldcore_menu_step_number_panel_level.c}
+  - {addr: 0x8006f528, size: 340, name: wldcore_menu_push_layout_window_level, hash: ab1438ef2fc8d3e1, source: src/menu/wldcore/wldcore_menu_push_layout_window_level.c}
+  - {addr: 0x8006f67c, size: 212, name: wldcore_window_apply_layout, hash: 4fed0d29e1d2fe7b, source: src/menu/wldcore/wldcore_window_apply_layout.c}
+  - {addr: 0x8006f750, size: 104, name: wldcore_window_finalize_record_and_stop_task, hash: 9e9129e51d124b70, source: src/menu/wldcore/wldcore_window_finalize_record_and_stop_task.c}
+  - {addr: 0x8006f7b8, size: 8, name: wldcore_menu_publish_layout_window_level, hash: 6d64edf91449c1b1, source: src/menu/wldcore/wldcore_menu_publish_layout_window_level.c}
+  - {addr: 0x8006f7c0, size: 816, name: wldcore_menu_handle_layout_window_input, hash: c1e8409fe84df98d, source: src/menu/wldcore/wldcore_menu_handle_layout_window_input.c}
+  - {addr: 0x8006faf0, size: 2036, name: wldcore_menu_push_location_menu_level, hash: f4f64a730589fe4a, source: src/menu/wldcore/wldcore_menu_push_location_menu_level.c}
+  - {addr: 0x800702e4, size: 56, name: wldcore_window_restore_location_list_palette, hash: fee0e6d3cb0d88e0, source: src/menu/wldcore/wldcore_window_restore_location_list_palette.c}
+  - {addr: 0x8007031c, size: 60, name: wldcore_window_set_secondary_render_palette_2, hash: a2f7429843d1a51b, source: src/menu/wldcore/wldcore_window_set_secondary_render_palette_2.c}
+  - {addr: 0x80070358, size: 1552, name: wldcore_menu_step_location_menu_level, hash: 5af1aba511f1e8d3, source: src/menu/wldcore/wldcore_menu_step_location_menu_level.c}
+  - {addr: 0x80070968, size: 320, name: wldcore_menu_close_level_and_release_records, hash: ead85974b020521a, source: src/menu/wldcore/wldcore_menu_close_level_and_release_records.c}
+  - {addr: 0x80070aa8, size: 316, name: wldcore_menu_run_shop_and_rebuild_screen, hash: 3dcf9c23a2dd9c21, source: src/menu/wldcore/wldcore_menu_run_shop_and_rebuild_screen.c}
+  - {addr: 0x80070be4, size: 796, name: wldcore_menu_push_scrollable_text_window_level, hash: 23808f2560fecd67, source: src/menu/wldcore/wldcore_menu_push_scrollable_text_window_level.c}
+  - {addr: 0x80070f00, size: 488, name: wldcore_menu_step_scrollable_text_window_level, hash: b63d983cca36c974, source: src/menu/wldcore/wldcore_menu_step_scrollable_text_window_level.c}
+  - {addr: 0x800710e8, size: 176, name: wldcore_menu_push_fixed_number_panel_level, hash: 33b0f93444bd91a8, source: src/menu/wldcore/wldcore_menu_push_fixed_number_panel_level.c}
+  - {addr: 0x80071198, size: 280, name: wldcore_menu_step_unit_browser_panel, hash: 1dbc6b949132b78d, source: src/menu/wldcore/wldcore_menu_step_unit_browser_panel.c}
   - {addr: 0x800712b0, size: 476, name: wldcore_bar_push_menu_level, hash: bf1acfda6e80fa75}
   - {addr: 0x8007148c, size: 1092, name: wldcore_bar_build_menu_rows, hash: 0bf2b1b02faf6e4f, unit: wldcore_bar_build_menu_rows_unit}
   - {addr: 0x800718d0, size: 236, name: wldcore_window_clear_layout_states_and_queue_msg_b806, hash: a6d8e7a5dc83c4a5, unit: wldcore_bar_build_menu_rows_unit}
-  - {addr: 0x800719bc, size: 228, name: wldcore_window_publish_slot_b806, hash: 512442d2f93c0290, source: src/window/wldcore_window_publish_slot_b806.c}
-  - {addr: 0x80071aa0, size: 272, name: wldcore_menu_pop_level_and_rebuild_screen, hash: b422526c51f8f5d4, source: src/menu/wldcore_menu_pop_level_and_rebuild_screen.c}
+  - {addr: 0x800719bc, size: 228, name: wldcore_window_publish_slot_b806, hash: 512442d2f93c0290, source: src/window/wldcore/wldcore_window_publish_slot_b806.c}
+  - {addr: 0x80071aa0, size: 272, name: wldcore_menu_pop_level_and_rebuild_screen, hash: b422526c51f8f5d4, source: src/menu/wldcore/wldcore_menu_pop_level_and_rebuild_screen.c}
   - {addr: 0x80071bb0, size: 1212, name: wldcore_bar_handle_menu_input, hash: 0a6e9dc857b30aa8, rodata: [{addr: 0x80067034, size: 20, hash: ae99fb771d003104}]}
   - {addr: 0x8007206c, size: 844, name: wldcore_list_open_rumors, hash: fceb17e0a6e9a75a}
   - {addr: 0x800723b8, size: 56, name: wldcore_list_rumors_restore_prompt, hash: eaf13c42017efa17}
@@ -159,30 +159,30 @@ functions:
   - {addr: 0x80073594, size: 52, name: wldcore_window_restore_proposition_detail_palette, hash: 2b59627b9d412f6c}
   - {addr: 0x800735c8, size: 56, name: wldcore_window_set_render_palette_2, hash: e431f3e0f46c12c5}
   - {addr: 0x80073600, size: 376, name: wldcore_proposition_handle_accept_input, hash: 0fe7fa0826684fbc}
-  - {addr: 0x80073778, size: 948, name: wldcore_window_build_yes_no_panel, hash: c841fa104d3e8cc2, source: src/menu/wldcore_window_build_yes_no_panel.c}
-  - {addr: 0x80073b2c, size: 972, name: wldcore_proposition_handle_accept_confirm_input, hash: 71bf0da24cf8ba22, source: src/menu/wldcore_proposition_handle_accept_confirm_input.c}
-  - {addr: 0x80073ef8, size: 248, name: wldcore_menu_push_number_panel_level, hash: 2c7c0fe19fe5cc44, source: src/menu/wldcore_menu_push_number_panel_level.c}
-  - {addr: 0x80073ff0, size: 324, name: wldcore_menu_number_panel_wait_for_thread_step, hash: 8df00d2ef4888cf8, source: src/menu/wldcore_menu_number_panel_wait_for_thread_step.c}
+  - {addr: 0x80073778, size: 948, name: wldcore_window_build_yes_no_panel, hash: c841fa104d3e8cc2, source: src/menu/wldcore/wldcore_window_build_yes_no_panel.c}
+  - {addr: 0x80073b2c, size: 972, name: wldcore_proposition_handle_accept_confirm_input, hash: 71bf0da24cf8ba22, source: src/menu/wldcore/wldcore_proposition_handle_accept_confirm_input.c}
+  - {addr: 0x80073ef8, size: 248, name: wldcore_menu_push_number_panel_level, hash: 2c7c0fe19fe5cc44, source: src/menu/wldcore/wldcore_menu_push_number_panel_level.c}
+  - {addr: 0x80073ff0, size: 324, name: wldcore_menu_number_panel_wait_for_thread_step, hash: 8df00d2ef4888cf8, source: src/menu/wldcore/wldcore_menu_number_panel_wait_for_thread_step.c}
   - {addr: 0x80074134, size: 1620, name: wldcore_proposition_push_dispatch_confirm_level, hash: 47106833c249f4b5}
   - {addr: 0x80074788, size: 936, name: wldcore_proposition_handle_dispatch_confirm_input, hash: 2c4bfafc1c4ee158}
   - {addr: 0x80074b30, size: 272, name: wldcore_proposition_advance_daily_counters, hash: c1fc1299f41ccd9d}
   - {addr: 0x80074c40, size: 144, name: wldcore_proposition_count_completed, hash: df8dd28acf91d0b1}
   - {addr: 0x80074cd0, size: 2792, name: wldcore_proposition_push_send_unit_level, hash: ae9b7ca2cbe27dc7}
   - {addr: 0x800757b8, size: 408, name: wldcore_proposition_load_send_unit_candidates, hash: 367e06355e25ae5b}
-  - {addr: 0x80075950, size: 248, name: wldcore_window_draw_text_rows, hash: f0645630c918641c, source: src/window/wldcore_window_draw_text_rows.c}
-  - {addr: 0x80075a48, size: 400, name: wldcore_window_load_party_unit_sprite_record, hash: bfa0efbfc4651b1f, source: src/window/wldcore_window_load_party_unit_sprite_record.c}
-  - {addr: 0x80075bd8, size: 888, name: wldcore_proposition_step_send_unit_slot_input, hash: b3fe4404c27224e7, source: src/window/wldcore_proposition_step_send_unit_slot_input.c}
-  - {addr: 0x80075f50, size: 228, name: wldcore_start_core_background_threads, hash: f2e421b177035135, source: src/window/wldcore_start_core_background_threads.c}
-  - {addr: 0x80076034, size: 1808, name: wldcore_proposition_step_send_unit_browser, hash: a0abc061e713bac1, source: src/window/wldcore_proposition_step_send_unit_browser.c}
-  - {addr: 0x80076744, size: 328, name: wldcore_window_clear_states_and_restore_tint, hash: ea45271dfaf3e099, source: src/window/wldcore_window_clear_states_and_restore_tint.c}
-  - {addr: 0x8007688c, size: 324, name: wldcore_window_set_states_and_blue_tint, hash: 0caaf7b1601583ee, source: src/window/wldcore_window_set_states_and_blue_tint.c}
-  - {addr: 0x800769d0, size: 1956, name: wldcore_menu_step_send_unit_level, hash: 0acd40dafba7b3a6, source: src/window/wldcore_menu_step_send_unit_level.c}
+  - {addr: 0x80075950, size: 248, name: wldcore_window_draw_text_rows, hash: f0645630c918641c, source: src/window/wldcore/wldcore_window_draw_text_rows.c}
+  - {addr: 0x80075a48, size: 400, name: wldcore_window_load_party_unit_sprite_record, hash: bfa0efbfc4651b1f, source: src/window/wldcore/wldcore_window_load_party_unit_sprite_record.c}
+  - {addr: 0x80075bd8, size: 888, name: wldcore_proposition_step_send_unit_slot_input, hash: b3fe4404c27224e7, source: src/window/wldcore/wldcore_proposition_step_send_unit_slot_input.c}
+  - {addr: 0x80075f50, size: 228, name: wldcore_start_core_background_threads, hash: f2e421b177035135, source: src/window/wldcore/wldcore_start_core_background_threads.c}
+  - {addr: 0x80076034, size: 1808, name: wldcore_proposition_step_send_unit_browser, hash: a0abc061e713bac1, source: src/window/wldcore/wldcore_proposition_step_send_unit_browser.c}
+  - {addr: 0x80076744, size: 328, name: wldcore_window_clear_states_and_restore_tint, hash: ea45271dfaf3e099, source: src/window/wldcore/wldcore_window_clear_states_and_restore_tint.c}
+  - {addr: 0x8007688c, size: 324, name: wldcore_window_set_states_and_blue_tint, hash: 0caaf7b1601583ee, source: src/window/wldcore/wldcore_window_set_states_and_blue_tint.c}
+  - {addr: 0x800769d0, size: 1956, name: wldcore_menu_step_send_unit_level, hash: 0acd40dafba7b3a6, source: src/window/wldcore/wldcore_menu_step_send_unit_level.c}
   - {addr: 0x80077174, size: 1016, name: wldcore_list_open_completed_propositions, hash: c20b2597caaa9cdf}
   - {addr: 0x8007756c, size: 56, name: wldcore_list_completed_propositions_restore_prompt, hash: a8fc925d11479518}
   - {addr: 0x800775a4, size: 20, name: wldcore_list_completed_propositions_block_all_buttons, hash: 11034aa27eaa3095}
   - {addr: 0x800775b8, size: 524, name: wldcore_list_handle_completed_propositions_input, hash: f99bbe8731fd99ed}
   - {addr: 0x800777c4, size: 524, name: wldcore_proposition_handle_report_confirm_input, hash: d7ae5c2cd60eda40}
-  - {addr: 0x800779d0, size: 508, name: wldcore_menu_push_proposition_report_level, hash: 23de2a03f9bc3c8b, source: src/menu/wldcore_menu_push_proposition_report_level.c}
+  - {addr: 0x800779d0, size: 508, name: wldcore_menu_push_proposition_report_level, hash: 23de2a03f9bc3c8b, source: src/menu/wldcore/wldcore_menu_push_proposition_report_level.c}
   - {addr: 0x80077bcc, size: 2576, name: wldcore_proposition_step_report_level, hash: 8616ccc28fb800dc, rodata: [{addr: 0x80067048, size: 404, hash: 44b703c9d00f32db}]}
   - {addr: 0x800785dc, size: 1500, name: wldcore_proposition_push_result_level, hash: 29f6d04787ac62bc}
   - {addr: 0x80078bb8, size: 1484, name: wldcore_proposition_step_result_level, hash: 4e38f2d61a2876a3}
@@ -191,16 +191,16 @@ functions:
   - {addr: 0x800793f0, size: 224, name: wldcore_proposition_adjust_message_index, hash: a81520df4d010d6e}
   - {addr: 0x800794d0, size: 244, name: wldcore_proposition_step_message, hash: 4b01d85a59ee4969}
   - {addr: 0x800795c4, size: 604, name: wldcore_proposition_step_participant_message, hash: ab80ad9223197797, rodata: [{addr: 0x800671dc, size: 24, hash: f9c589d3d0cc9d4b}]}
-  - {addr: 0x80079820, size: 36, name: wldcore_map_job_id_to_category_index, hash: 2ff3de5323a524e3, source: src/map/wldcore_map_job_id_to_category_index.c}
+  - {addr: 0x80079820, size: 36, name: wldcore_map_job_id_to_category_index, hash: 2ff3de5323a524e3, source: src/map/wldcore/wldcore_map_job_id_to_category_index.c}
   - {addr: 0x80079844, size: 1064, name: wldcore_proposition_determine_success, hash: cf4e732c8358bf29}
   - {addr: 0x80079c6c, size: 424, name: wldcore_proposition_calculate_base_jp_and_gil, hash: b052592ae6d24bc4}
   - {addr: 0x80079e14, size: 820, name: wldcore_proposition_roll_bonus_reward, hash: 70675445a9d2b128}
   - {addr: 0x8007a148, size: 352, name: wldcore_proposition_apply_extra_days_multiplier, hash: a82e6cd89335801f}
   - {addr: 0x8007a2a8, size: 608, name: wldcore_proposition_find_preferred_job_unit, hash: 5e765cfa218d3e60}
-  - {addr: 0x8007a508, size: 432, name: wldcore_menu_push_countdown_level, hash: e8c894c9b1fb458c, source: src/menu/wldcore_menu_push_countdown_level.c}
-  - {addr: 0x8007a6b8, size: 116, name: wldcore_menu_show_next_sequence_message, hash: 4e07db2299c982d2, source: src/menu/wldcore_menu_show_next_sequence_message.c}
-  - {addr: 0x8007a72c, size: 320, name: wldcore_get_completion_milestone_rank, hash: 5ad9215823f4dc39, source: src/menu/wldcore_get_completion_milestone_rank.c}
-  - {addr: 0x8007a86c, size: 384, name: wldcore_map_step_discovery_announcement, hash: 54a732cf9dd5fa87, source: src/menu/wldcore_map_step_discovery_announcement.c}
+  - {addr: 0x8007a508, size: 432, name: wldcore_menu_push_countdown_level, hash: e8c894c9b1fb458c, source: src/menu/wldcore/wldcore_menu_push_countdown_level.c}
+  - {addr: 0x8007a6b8, size: 116, name: wldcore_menu_show_next_sequence_message, hash: 4e07db2299c982d2, source: src/menu/wldcore/wldcore_menu_show_next_sequence_message.c}
+  - {addr: 0x8007a72c, size: 320, name: wldcore_get_completion_milestone_rank, hash: 5ad9215823f4dc39, source: src/menu/wldcore/wldcore_get_completion_milestone_rank.c}
+  - {addr: 0x8007a86c, size: 384, name: wldcore_map_step_discovery_announcement, hash: 54a732cf9dd5fa87, source: src/menu/wldcore/wldcore_map_step_discovery_announcement.c}
   - {addr: 0x8007a9ec, size: 952, name: wldcore_list_open_propositions, hash: ca9e63ec64900d30, unit: wldcore_list_open_propositions_unit}
   - {addr: 0x8007ada4, size: 56, name: wldcore_bar_active_propositions_restore_prompt, hash: e5af538714087be6, unit: wldcore_list_open_propositions_unit}
   - {addr: 0x8007addc, size: 20, name: wldcore_bar_active_propositions_block_all_buttons, hash: 11034aa27eaa3095, unit: wldcore_list_open_propositions_unit}
@@ -289,7 +289,7 @@ functions:
   - {addr: 0x800890f0, size: 1100, name: wldcore_list_open_tutorial_categories, hash: 61d22220966e7b4d, unit: wldcore_menu_push_screen_transition_level_unit}
   - {addr: 0x8008953c, size: 392, name: wldcore_list_build_tutorial_category_panel_image, hash: 6e7e170a9de6189f, unit: wldcore_menu_push_screen_transition_level_unit}
   - {addr: 0x800896c4, size: 236, name: wldcore_window_clear_layout_states_and_queue_msg_b8dd, hash: 1fe1a6d4d29bc858, unit: wldcore_menu_push_screen_transition_level_unit}
-  - {addr: 0x800897b0, size: 228, name: wldcore_window_publish_slot_b8dd, hash: 512442d2f93c0290, source: src/window/wldcore_window_publish_slot_b806.c, source_symbol: wldcore_window_publish_slot_b806}
+  - {addr: 0x800897b0, size: 228, name: wldcore_window_publish_slot_b8dd, hash: 512442d2f93c0290, source: src/window/wldcore/wldcore_window_publish_slot_b806.c, source_symbol: wldcore_window_publish_slot_b806}
   - {addr: 0x80089894, size: 1468, name: wldcore_list_handle_tutorial_categories_input, hash: a3346d6f4a1eb56a, unit: wldcore_list_handle_tutorial_categories_input_unit}
   - {addr: 0x80089e50, size: 412, name: wldcore_list_open_formation_tutorials, hash: e1c1e7140539bd33, unit: wldcore_list_handle_tutorial_categories_input_unit}
   - {addr: 0x80089fec, size: 20, name: wldcore_list_formation_tutorials_restore_blocked_buttons, hash: 7e9ed99f23ab0769, unit: wldcore_list_handle_tutorial_categories_input_unit}

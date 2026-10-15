@@ -147,7 +147,7 @@ functions:
   - {addr: 0x800703e8, size: 88, name: card_io_consume_bios_events, hash: bd2def49b8e92c22, unit: card_io_consume_bios_events_unit}
   - {addr: 0x80070440, size: 192, name: card_io_poll_hardware_event_result, hash: c96ae6060b0e6c36, unit: card_io_consume_bios_events_unit}
   - {addr: 0x80070500, size: 72, name: card_wait_for_hardware_event_variant, hash: d2aebf9256a22720, source: src/card/card_wait_for_hardware_event_variant.c}
-  - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, source: src/card/card_io_consume_hardware_events.c}
+  - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, source: src/card/card/card_io_consume_hardware_events.c}
   - {addr: 0x800705a0, size: 140, name: card_get_info_with_retries_variant, hash: ba3559c7e03836a0, source: src/card/open/card_get_info_with_retries_variant.c}
   - {addr: 0x8007062c, size: 188, name: card_poll_info_result_variant, hash: f6ce5450918332a3, source: src/card/open/card_poll_info_result_variant.c}
   - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6, source: src/card/open_card_poll_info_until_stable.c}
