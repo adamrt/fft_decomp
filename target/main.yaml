@@ -813,7 +813,7 @@ functions:
   - {addr: 0x8005c398, size: 560, name: main_unit_set_equipment_stats, hash: 8bbdcd34209f742e, unit: unit_stats_and_party}
   - {addr: 0x8005c5c8, size: 804, name: main_unit_set_equipment_attributes, hash: 692a362c43589a84, unit: unit_stats_and_party}
   - {addr: 0x8005c8ec, size: 152, name: main_unit_calculate_move_jump, hash: bad416e1a3b09741, unit: unit_stats_and_party}
-  - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007", source: src/unit/main/main_unit_store_character_names.c}
+  - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007"}
   - {addr: 0x8005cbd0, size: 148, name: main_party_calculate_highest_level, hash: 149c03a50c0d50b6}
   - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e}
   - {addr: 0x8005cc98, size: 476, name: main_unit_calculate_random_equipment, hash: 57273afe761c2134, unit: unit_equipment_jobs_and_abilities}
@@ -855,7 +855,7 @@ functions:
   - {addr: 0x8005e670, size: 92, name: main_unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, unit: item_quantities_and_status}
   - {addr: 0x8005e6cc, size: 120, name: main_status_change_unit, hash: dc7a2bc945f89882, unit: item_quantities_and_status}
   - {addr: 0x8005e744, size: 52, name: main_status_store_current, hash: a213e350e165866b, unit: item_quantities_and_status}
-  - {addr: 0x8005e778, size: 48, name: main_unit_copy_last_ability_ct, hash: "3904255598531e38", source: src/status/main/main_unit_copy_last_ability_ct.c}
+  - {addr: 0x8005e778, size: 48, name: main_unit_copy_last_ability_ct, hash: "3904255598531e38"}
   - {addr: 0x8005e7a8, size: 320, name: main_status_set_action_state, hash: a518a597cf1ee626, unit: status_action_and_battle_load_exception, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
   - {addr: 0x8005e8e8, size: 36, name: main_system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, unit: status_action_and_battle_load_exception}
 
