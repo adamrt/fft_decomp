@@ -9,7 +9,7 @@ void equip_cmd_run_stream(menu_instruction_t* instruction, s32 input) {
     g_menu_gfx_otag_index = 0;
     g_menu_gfx_semitransparency = 0;
     g_equip_cmd_stream_input = input;
-    g_equip_gfx_zoom_draw_area_active = 0;
+    g_gfx_otag_index_locked = 0;
     if (instruction->header.opcode != EQUIP_CMD_END) {
         do {
             instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);

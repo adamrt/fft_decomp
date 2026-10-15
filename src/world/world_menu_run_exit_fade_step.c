@@ -15,7 +15,7 @@ void world_menu_run_exit_fade_step(void) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_EXIT;
             g_world_shop_exit_step_initialized = 0;
         }
-    } else if (g_world_input_newly_pressed & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
+    } else if (g_menu_input_newly_pressed & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
         world_gfx_start_increasing_fade();
         main_sound_set_current_music_target(0, 0xF0);
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);

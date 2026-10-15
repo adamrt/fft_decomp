@@ -113,7 +113,7 @@ void world_shop_run_screen(s32 shop_type) {
         world_input_update_with_message_state();
         world_menu_update_thread_7_idle_countdown();
         world_gfx_update_fade_in_tile();
-        if (g_world_input_primary_repeat & PSX_PAD_SELECT) {
+        if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
             world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
         }
         if (g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
@@ -135,7 +135,7 @@ void world_shop_run_screen(s32 shop_type) {
             }
             buttons = 0;
             if (disabled == 0) {
-                buttons = g_world_input_secondary_repeat;
+                buttons = g_menu_input_secondary_repeat;
             }
             if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0) {
                 if (buttons & PSX_PAD_L1) {
@@ -175,11 +175,11 @@ void world_shop_run_screen(s32 shop_type) {
         } else {
             ot_index = 9;
         }
-        world_input_update_event_state(g_menu_gfx_context->otag + ot_index, world_input_filter_menu(),
+        menu_input_update_event_state_variant(g_menu_gfx_context->otag + ot_index, world_input_filter_menu(),
             g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         if (g_world_shop_menu_step != last_step) {
             g_world_formation_unit_cycle_mode = 0;
-            world_script_set_vsync_mode_and_event_speed(0);
+            menu_set_vsync_mode_and_event_speed(0);
             g_world_menu_description_text_id = 0;
             world_menu_reset_selection_results();
             last_step = g_world_shop_menu_step;
@@ -188,7 +188,7 @@ void world_shop_run_screen(s32 shop_type) {
     }
     main_sound_unload_scenario_mus(g_world_menu_music_slot);
     world_formation_save_records_to_party();
-    world_script_set_vsync_mode_and_event_speed(0);
+    menu_set_vsync_mode_and_event_speed(0);
     world_formation_reset_menu_context();
     gfx_load_image_and_wait(&g_world_shop_background_vram_rect, tim);
     main_heap_free(tim);

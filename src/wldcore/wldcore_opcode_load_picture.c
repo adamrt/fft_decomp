@@ -22,7 +22,7 @@ void wldcore_opcode_load_picture(void) {
     g_wldcore_opcode_state.x = x;
     g_wldcore_opcode_state.y = y;
     wldcore_proposition_load_picture_data_set(picture);
-    wldcore_wait_for_file_load();
+    file_wait_for_pending_variant();
     g_wldcore_window_render_records[g_wldcore_opcode_state.render_index].base.x = x - 0x80;
     g_wldcore_window_render_records[g_wldcore_opcode_state.render_index].base.y = y - 0x78;
     GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);

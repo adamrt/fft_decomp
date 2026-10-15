@@ -97,7 +97,7 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     g_wldcore_screen_fade_state.priorities[1] = 0xB;
     wldcore_sound_wait_for_queue_drain();
     wldcore_load_sound_novel_files(g_wldcore_saved_record_index);
-    wldcore_wait_for_file_load();
+    file_wait_for_pending_variant();
     section = g_wldcore_active_saved_record.section;
     if (section != 0) {
         /* The 32-bit view preserves register order; the named offset field swaps the index and base. */

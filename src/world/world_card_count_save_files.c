@@ -9,7 +9,7 @@ s32 world_card_count_save_files(DIRENTRY* dir, s32 all) {
     char path[128];
     s32 count;
 
-    if (g_world_card_selected_slot == 0) {
+    if (g_card_slot == 0) {
         strcpy(path, "bu00:");
     } else {
         strcpy(path, "bu10:");

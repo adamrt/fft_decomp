@@ -141,7 +141,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             if (world_card_run_menu_screen(0) == 0) {
                 g_open_file_current_openbk_image_id = -1;
                 open_file_build_openbk_header(0, g_open_file_destination);
-                open_file_wait_for_pending();
+                file_wait_for_pending_variant();
                 g_open_gfx_next_render_record_36 -= 6;
                 g_open_gfx_render_record_pointer_count -= 6;
                 g_open_current_controller_index--;

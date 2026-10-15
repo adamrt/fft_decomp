@@ -72,13 +72,13 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
                 g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
                 enabled = 0;
                 g_world_formation_unit_browse_enabled = 0;
-                world_menu_stop_unit_status_banner_thread(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-                world_menu_stop_unit_status_banner_thread(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+                menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
+                menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
             }
         }
         if (toggle_banner != 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
             && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
-            && world_formation_is_unit_list_scroll_needed() == 0 && (g_world_input_primary_repeat & PSX_PAD_SQUARE)) {
+            && world_formation_is_unit_list_scroll_needed() == 0 && (g_menu_input_primary_repeat & PSX_PAD_SQUARE)) {
             g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
             g_world_formation_unit_banner_enabled = g_world_formation_unit_banner_enabled == 0;
         }
@@ -145,7 +145,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     g_world_formation_saved_sprite_color.b = color->b;
     for (row = 0; row < 5; row++, y += 0x3c) {
         value = 0;
-        if (g_world_formation_unit_banner_enabled != 0 && g_world_status_display_thread_params.flags == 0) {
+        if (g_world_formation_unit_banner_enabled != 0 && g_menu_status_display_thread_params.flags == 0) {
             if (g_world_formation_unit_banner_at_bottom != 0) {
                 value = y > 0x8f;
             } else if (y < 0x47) {

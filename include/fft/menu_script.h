@@ -231,8 +231,6 @@ typedef char menu_callback_size_must_be_4[sizeof(menu_callback_t) == 4 ? 1 : -1]
 menu_instruction_t* menu_cmd_set_draw_color_handler(menu_instruction_t* command);
 
 /* command dispatch */
-/* Each display stream has its own handler table and end opcode. */
-extern menu_instruction_t* (*g_menu_cmd_handlers[])(menu_instruction_t* instruction);
 extern menu_callback_t g_menu_row_callbacks[16];
 extern s16 g_menu_list_row_mode;
 extern s16 g_menu_scroll_base_index;
@@ -272,5 +270,14 @@ static __inline__ menu_instruction_t* menu_next_instruction(menu_instruction_t* 
 static __inline__ const menu_instruction_t* menu_next_const_instruction(const menu_instruction_t* instruction) {
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
+
+/* unified */
+menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command);
+void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
+extern u32 g_menu_cmd_stream_input;
+extern menu_instruction_t* (*g_menu_cmd_handlers[])(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 
 #endif /* MENU_SCRIPT_H */

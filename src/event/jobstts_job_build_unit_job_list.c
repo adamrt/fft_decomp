@@ -29,15 +29,14 @@ s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused) {
         job_ids[1] = -1;
         return 1;
     }
-    jobstts_bits_read_primary(1);
+    bits_read_primary(1);
     count = 1;
     i = 1;
     loop_slot = slot;
     out = job_ids + 1;
     for (; i < JOB_ID_GENERIC_COUNT; i++) {
         job = i + JOB_ID_SQUIRE;
-        if ((jobstts_bits_read_primary(1) != 0)
-            && ((job != JOB_ID_BARD) || !((*loop_slot)->unit_flags & UNIT_FLAG_FEMALE))
+        if ((bits_read_primary(1) != 0) && ((job != JOB_ID_BARD) || !((*loop_slot)->unit_flags & UNIT_FLAG_FEMALE))
             && ((job != JOB_ID_DANCER) || !((*loop_slot)->unit_flags & UNIT_FLAG_MALE))) {
             *out = job;
             out++;

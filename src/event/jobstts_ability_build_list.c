@@ -61,7 +61,7 @@ s32 jobstts_ability_build_list(
         if (job_is_special_monster(g_jobstts_unit_data[unit_index]->job_id) != 0) {
             kind = 1;
         } else {
-            kind = jobstts_bits_read_primary(1);
+            kind = bits_read_primary(1);
         }
 
         ability_id = abilities[i];

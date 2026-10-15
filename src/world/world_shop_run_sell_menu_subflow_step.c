@@ -18,11 +18,11 @@ void world_shop_run_sell_menu_subflow_step(void) {
         world_formation_stop_menu_threads();
         g_world_formation_unit_cycle_mode = 0;
         g_world_shop_sell_subflow_step = WORLD_SHOP_STEP_SELL_LIST;
-        world_menu_clear_selection_record(5);
-        world_menu_clear_selection_record(6);
-        world_menu_clear_selection_record(7);
-        world_menu_clear_selection_record(8);
-        world_menu_clear_selection_record(9);
+        menu_clear_selection_record(5);
+        menu_clear_selection_record(6);
+        menu_clear_selection_record(7);
+        menu_clear_selection_record(8);
+        menu_clear_selection_record(9);
         g_world_shop_sell_subflow_initialized = 1;
     }
     g_world_shop_menu_step = g_world_shop_sell_subflow_step;
@@ -39,7 +39,7 @@ void world_shop_run_sell_menu_subflow_step(void) {
         g_world_formation_unit_cycle_mode = 2;
         g_world_shop_sell_subflow_initialized = 0;
         g_world_formation_unit_browse_enabled = 1;
-        world_script_set_vsync_mode_and_event_speed(2);
+        menu_set_vsync_mode_and_event_speed(2);
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         return;
     }

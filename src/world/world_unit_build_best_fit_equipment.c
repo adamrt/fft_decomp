@@ -82,7 +82,7 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
                             list[0] = list[i];
                             break;
                         }
-                        owned = world_item_adjust_inventory_count(list[i], 0);
+                        owned = item_adjust_inventory_count(list[i], 0);
                         if (held_weapon == list[i])
                             owned++;
                         if (held_off_hand == list[i])

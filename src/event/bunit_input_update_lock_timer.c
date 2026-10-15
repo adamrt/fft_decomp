@@ -23,8 +23,8 @@ void bunit_input_update_lock_timer(void) {
     }
     g_bunit_input_lock_timer = timer;
     if (g_bunit_input_lock_timer != 0) {
-        g_bunit_menu_input_mask = 0;
-        g_bunit_menu_input_repeat_mask = 0;
-        g_bunit_menu_input_active_mask = 0;
+        g_menu_input_newly_pressed = 0;
+        g_menu_input_secondary_repeat = 0;
+        g_menu_input_primary_repeat = 0;
     }
 }

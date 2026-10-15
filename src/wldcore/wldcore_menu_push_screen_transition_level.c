@@ -67,7 +67,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
         g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
         wldcore_window_close_parent_list_all_windows();
         wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_STORY_EVENTS);
-        wldcore_wait_for_file_load();
+        file_wait_for_pending_variant();
         g_wldcore_story_events_cursor_state = g_main_saved_list_cursor_state;
         break;
     case WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES:
@@ -91,7 +91,7 @@ void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 para
     case WLDCORE_MENU_LEVEL_TREASURE_DETAIL:
         wldcore_window_close_parent_list_all_windows();
         wldcore_load_message_block_if_changed(WLDCORE_MESSAGE_BLOCK_TREASURES);
-        wldcore_wait_for_file_load();
+        file_wait_for_pending_variant();
         wldcore_sound_wait_for_queue_drain();
         suzuki_sound_set_master_volume(0x3FFF, 1);
         wldcore_sound_enqueue_music_start(WLDCORE_AUDIO_MUSIC(2, MAIN_MUSIC_BRAVE_STORY));

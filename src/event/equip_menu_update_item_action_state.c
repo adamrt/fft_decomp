@@ -16,7 +16,7 @@ s32 equip_menu_update_item_action_state(void) {
         g_equip_text_help_message_id = 0;
         equip_menu_reset_selection_indices();
         g_equip_item_numeric_panel_style = 0;
-        if (g_equip_item_list_entries[1] != -1) {
+        if (g_item_list_entries[1] != -1) {
             g_equip_item_list_has_multiple_entries = 1;
             menu = &g_equip_item_action_menu;
         } else {

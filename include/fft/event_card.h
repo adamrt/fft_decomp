@@ -4,6 +4,10 @@
 /* EVENT/CARD.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* save menus */
 /*
@@ -155,19 +159,12 @@ typedef struct card_graphics_context {
 } card_graphics_context_t;
 typedef char card_graphics_context_size_must_be_244[(sizeof(card_graphics_context_t) == 244) ? 1 : -1];
 
-extern card_graphics_context_t* g_card_gfx_context;
 extern card_graphics_context_t* g_card_gfx_context_base;
-extern u8 g_card_gfx_decreasing_fade_active;
+extern card_graphics_context_t* g_card_gfx_context;
 extern u16 g_card_gfx_draw_clut;
-extern s16 g_card_gfx_draw_semitrans;
 extern u16 g_card_gfx_drawenv_y;
-extern rgb24_t g_card_gfx_fade_color;
-extern s16 g_card_gfx_fade_intensity;
 extern rgb24_t g_card_gfx_fade_overlay_color;
-extern RECT g_card_gfx_fade_rect;
 extern RECT g_card_gfx_fullscreen_fade_rect;
-extern u8 g_card_gfx_increasing_fade_active;
-extern u16 g_card_gfx_otag_length;
 extern POLY_FT4 g_card_gfx_poly_ft4_buffers[];
 extern u16 g_card_gfx_poly_ft4_capacity;
 extern u16 g_card_gfx_poly_ft4_count;
@@ -176,10 +173,6 @@ extern u32* g_card_gfx_render_otag;
 extern POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30];
 extern u16 g_card_gfx_texture_page;
 extern u16 g_card_gfx_tile_capacity;
-extern u16 g_card_gfx_tile_count;
-/* The four tiled-rect scalars below viewed as one RECT; the window-frame
- * parser's store-back only matches as RECT field stores. */
-extern RECT g_card_gfx_tiled_rect;
 
 void card_gfx_enqueue_oriented_textured_quad(
     const oriented_quad_t* descriptor, const rgb24_t* color, s32 orientation, s32 semitrans, s32 otag_index);
@@ -187,7 +180,6 @@ void card_gfx_enqueue_textured_quad(
     const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans, u16 texture_page, u16 clut, s32 otag_index);
 void card_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 otag_index, s32 count);
-void card_gfx_enqueue_tile(const RECT* rect, const rgb24_t* color, s32 semitrans, s32 otag_index);
 rgb24_t* card_gfx_get_draw_color(void);
 s32 card_gfx_get_fade_state(void);
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
@@ -195,15 +187,11 @@ void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 u
     s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles, s32 unused_17, s32 unused_18,
     s32 unused_19, s32 unused_20, s32 unused_21, s32 unused_22, s32 unused_23, s32 unused_24);
 void card_gfx_init_primitive_lists(card_graphics_context_t* lists);
-void card_gfx_set_draw_color(const rgb24_t* color);
-void card_gfx_set_draw_mode_and_link_ot(s32 dfe, s32 dtd, s32 tpage, RECT* texture_window, s32 otag_index);
 void card_gfx_set_otag_index(s32 value);
 void card_gfx_set_render_otag(u32* otag);
 void card_gfx_start_decreasing_fade(void);
 void card_gfx_start_increasing_fade(void);
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
-s32 card_gfx_update_decreasing_fade(void);
-s32 card_gfx_update_increasing_fade(void);
 
 /* input */
 extern u8 g_card_input_activation_timer;
@@ -213,19 +201,14 @@ extern zodiac_draw_context_t g_card_input_display_state;
 extern u32 g_card_input_event;
 extern u32 g_card_input_initial_repeat_counter;
 extern u16 g_card_input_latched_button;
-extern u16 g_card_input_newly_pressed;
 extern u16 g_card_input_previous;
-extern u32 g_card_input_primary_repeat;
 extern u32 g_card_input_repeat_counter;
 extern s32 g_card_input_repeat_counters[16];
-extern u32 g_card_input_secondary_repeat;
 extern u32 g_card_input_secondary_repeat_counter;
 extern u32 g_card_previous_input;
 extern u8 g_card_save_list_input_armed;
 
-void card_input_clear_state(void);
 void card_input_update_controller(void);
-void card_input_update_event_state(u32* otag, u32 input, s32 count_frame);
 void card_input_update_suppressed_during_fade(void);
 
 /* menus */
@@ -255,7 +238,6 @@ extern u8 g_card_save_menu_state; /* card_save_menu_state_e */
 
 extern DIRENTRY* g_card_save_menu_work_buffer;
 
-void card_menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
 void card_menu_update_and_draw_animated_cursor(const point16_t* position, u16* animation_state, s32 mode);
 void card_save_init_menu_graphics(void);
 void card_save_init_menu_state(void);
@@ -265,7 +247,6 @@ void card_save_run_menu_graphic_thread(void);
 extern menu_window_command_t g_card_cmd_window_interior_command;
 
 menu_draw_number_command_t* card_cmd_draw_decimal_number_handler(menu_draw_number_command_t* command);
-menu_window_command_t* card_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command);
 menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t* command);
 
 /* text */
@@ -273,20 +254,12 @@ extern s16 g_card_save_slot_text_row_ids[];
 extern const u8 g_card_text_command_help[];
 extern u8 g_card_text_data[];
 extern const char g_card_text_decimal_format[];
-extern u16 g_card_text_digit_texture_page;
 extern const u8 g_card_text_job_name[];
 extern const u8 g_card_text_location_name[];
-extern s16 g_card_text_otag_index;
 
 /* bit streams */
-extern u8* g_card_bits_primary_cursor;
-extern u8 g_card_bits_primary_reset;
-extern s32 g_card_bits_reader_1_index;
-extern s32 g_card_bits_writer_1_index;
 
 void card_bits_init_primary_reader(const u8* data);
-u32 card_bits_read_primary(s32 count);
-void card_bits_write_primary(s32 value);
 
 /* threads */
 extern menu_entry_t g_card_save_failure_thread_descriptor[];
@@ -294,8 +267,6 @@ extern menu_entry_t g_card_save_in_progress_thread_descriptor[];
 extern u8 g_card_save_initial_prompt_thread_state;
 extern u8 g_card_save_slot_selection_thread_state;
 extern u8 g_card_thread_status_snapshot[16];
-
-void card_menu_stop_thread_and_wait(s32 thread_id);
 
 /* sound */
 extern u8 g_card_sound_queued_effect_id; /* main_sfx_e */

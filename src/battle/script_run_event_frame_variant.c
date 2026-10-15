@@ -92,7 +92,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         g_script_threads_idle = 0;
     }
 
-    script_update_event_input_state_variant(buttons);
+    script_update_event_input_state(buttons);
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         g_script_unfiltered_controller_input = g_script_event_input;
         script_apply_input_overrides(&g_script_event_input);

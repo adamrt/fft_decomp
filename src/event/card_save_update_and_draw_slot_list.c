@@ -28,8 +28,8 @@ void card_save_update_and_draw_slot_list(u16 input) {
         row = card_io_poll_operation_result();
         if (row > CARD_IO_RESULT_COMPLETE) {
             if (card_io_wait_operation_result(3) != CARD_IO_RESULT_COMPLETE) {
-                card_menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
-                card_menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
+                menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
+                menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
                 g_card_save_overwrite_prompt_active = 0;
                 g_card_save_menu_state = CARD_SAVE_MENU_SCANNING;
                 g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
@@ -170,7 +170,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
             rect.h = 0x1f;
         }
         if (index < 6) {
-            texture_page = g_card_text_digit_texture_page;
+            texture_page = g_menu_atlas_texture_page;
             source_v = index * 0x20 + 0x30;
         } else if (index < 11) {
             texture_page = GetTPage(0, 0, 0x1c0, 0);

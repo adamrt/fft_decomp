@@ -64,7 +64,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
                     key_a = g_main_item_primary_data[item_a].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
-                    key_a = world_item_get_ranking_value(item_a);
+                    key_a = item_get_ranking_value(item_a);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_a < ITEM_ID_THROWABLE_FIRST) {
                         key_a = g_main_item_weapon_data[g_main_item_primary_data[item_a].secondary_data_id].evade;
@@ -89,7 +89,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                         key_a = 0;
                     }
                 } else if (criterion == ITEM_SORT_KEY_HELD_COUNT) {
-                    key_a = world_item_adjust_inventory_count(item_a, 0) + counts[item_a];
+                    key_a = item_adjust_inventory_count(item_a, 0) + counts[item_a];
                 }
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_b = g_main_item_primary_data[item_b].type;
@@ -99,7 +99,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
                     key_b = g_main_item_primary_data[item_b].price;
                 } else if (criterion == ITEM_SORT_KEY_RANKING) {
-                    key_b = world_item_get_ranking_value(item_b);
+                    key_b = item_get_ranking_value(item_b);
                 } else if (criterion == ITEM_SORT_KEY_PHYSICAL_EVADE) {
                     if (item_b < ITEM_ID_THROWABLE_FIRST) {
                         key_b = g_main_item_weapon_data[g_main_item_primary_data[item_b].secondary_data_id].evade;
@@ -124,7 +124,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                         key_b = 0;
                     }
                 } else {
-                    key_b = world_item_adjust_inventory_count(item_b, 0) + counts[item_b];
+                    key_b = item_adjust_inventory_count(item_b, 0) + counts[item_b];
                 }
                 k++;
                 if (criterion == ITEM_SORT_KEY_RANKING) {

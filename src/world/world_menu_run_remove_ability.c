@@ -34,7 +34,7 @@ s32 world_menu_run_remove_ability(void) {
         g_world_clear_abilities_prompt_active = 0;
         g_world_remove_ability_initialized = 1;
     }
-    if (g_world_input_primary_repeat & PSX_PAD_CROSS) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         world_menu_toggle_preview_stats_window(0);
         g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
         g_world_remove_ability_initialized = 0;
@@ -48,7 +48,7 @@ s32 world_menu_run_remove_ability(void) {
     if (lock_state != 0) {
         g_world_menu_description_text_id = 0;
         world_menu_toggle_preview_stats_window(0);
-        if (g_world_input_primary_repeat & PSX_PAD_CIRCLE) {
+        if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
         }
         return 1;
@@ -63,7 +63,7 @@ s32 world_menu_run_remove_ability(void) {
         }
         return 1;
     }
-    if (g_world_input_primary_repeat & PSX_PAD_LEFT) {
+    if (g_menu_input_primary_repeat & PSX_PAD_LEFT) {
         world_ability_find_stat_changes_due_to_equipped(
             &g_world_item_preview_stat_detail, g_world_remove_ability_slots[4], 0);
         world_menu_toggle_preview_stats_window(1);
@@ -72,7 +72,7 @@ s32 world_menu_run_remove_ability(void) {
         g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
     }
     slot = world_menu_update_vertical_selection_and_mark_change(
-               4, WORLD_MENU_CURSOR_REMOVE_ABILITY_SLOT, g_world_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH)
+               4, WORLD_MENU_CURSOR_REMOVE_ABILITY_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH)
         + 1;
     cursor_y = &g_world_remove_ability_cursor_point.y;
     slot_index = slot;
@@ -89,7 +89,7 @@ s32 world_menu_run_remove_ability(void) {
     } else {
         g_world_menu_description_text_id = ability + 0x9800;
     }
-    if (g_world_input_primary_repeat & PSX_PAD_CIRCLE) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         saved_slots = g_world_remove_ability_slots;
         saved_slot = saved_slots + slot;
         sound = *saved_slot;

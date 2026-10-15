@@ -23,9 +23,9 @@ functions:
   - {addr: 0x80068308, size: 244, name: wldcore_init_runtime_state, hash: 958d57491c632bc5}
   - {addr: 0x800683fc, size: 400, name: wldcore_menu_restore_level_on_world_entry, hash: b0014d61c955a268}
   - {addr: 0x8006858c, size: 84, name: wldcore_handle_exit_request, hash: 4cc1e38c1a2d32ff}
-  - {addr: 0x800685e0, size: 96, name: wldcore_file_wait_then_build_header, hash: 5d2462dc5511c5a9}
+  - {addr: 0x800685e0, size: 96, name: file_wait_then_build_header, hash: 5d2462dc5511c5a9, source: src/shared/file/file_wait_then_build_header.c}
   - {addr: 0x80068640, size: 136, name: wldcore_load_scratch_data_blocking, hash: bd1749a0f84c27ce}
-  - {addr: 0x800686c8, size: 100, name: wldcore_wait_for_file_load, hash: 2cb1c83c2614745a}
+  - {addr: 0x800686c8, size: 100, name: file_wait_for_pending_variant, hash: 2cb1c83c2614745a}
   - {addr: 0x8006872c, size: 828, name: wldcore_file_poll_vram_image_stream, hash: 26a8e79c258efc1c, rodata: [{addr: 0x80067000, size: 32, hash: afd8c59574a140ff}]}
   - {addr: 0x80068a68, size: 76, name: wldcore_proposition_load_picture, hash: 43c1d216b7baabcd}
   - {addr: 0x80068ab4, size: 136, name: wldcore_proposition_load_picture_data_set, hash: aad04349279159e2}
@@ -53,7 +53,7 @@ functions:
   - {addr: 0x80069e58, size: 172, name: wldcore_write_nine_bit_record, hash: a100a01dd3458fa8}
   - {addr: 0x80069f04, size: 276, name: wldcore_read_nine_bit_record, hash: 337a6e03c2eb3680}
   - {addr: 0x8006a018, size: 148, name: wldcore_gfx_clear_vram_and_scratch, hash: 6d07a88a3d3e8359}
-  - {addr: 0x8006a0ac, size: 76, name: wldcore_calendar_calculate_day_of_year, hash: efdeb3089d1c7472}
+  - {addr: 0x8006a0ac, size: 76, name: unit_birthday_calculate_day_of_year, hash: efdeb3089d1c7472, source: src/shared/unit/unit_birthday_calculate_day_of_year.c}
   - {addr: 0x8006a0f8, size: 72, name: wldcore_calendar_calculate_month_and_day, hash: 65bc42f96d71e765}
   - {addr: 0x8006a140, size: 1100, name: wldcore_gfx_toggle_captured_world_frame, hash: 78cf845743021b10}
   - {addr: 0x8006a58c, size: 764, name: wldcore_map_init_tile_atlas, hash: d59a2e4f5886bb67}
@@ -471,7 +471,7 @@ data:
   - {addr: 0x8009e470, name: g_wldcore_message_block_sector_offsets}
   - {addr: 0x8009e634, name: g_wldcore_sound_novel_script_sector_offsets}
   - {addr: 0x8009e650, name: g_wldcore_sound_novel_text_sector_offsets}
-  - {addr: 0x8009e66c, name: g_wldcore_calendar_days_per_month}
+  - {addr: 0x8009e66c, name: g_unit_birthday_month_lengths}
   - {addr: 0x8009e678, name: g_wldcore_calendar_zodiac_start_dates}
   - {addr: 0x8009e690, name: g_wldcore_menu_idle_handlers}
   - {addr: 0x8009e774, name: g_wldcore_menu_resume_handlers}

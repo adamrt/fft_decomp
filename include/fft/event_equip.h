@@ -4,6 +4,10 @@
 /* EVENT/EQUIP.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* screen */
 extern u16 g_equip_remove_all_equipment_ids[];
@@ -11,8 +15,6 @@ extern s8 g_equip_remove_all_equipment_prompt_active;
 extern s8 g_equip_remove_mode_initialized;
 extern s8 g_equip_type_order_ready;
 
-void equip_item_collect_stat_deltas(
-    s16 raw_item, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate);
 s32 equip_entrypoint(s32 unit, u32* otag);
 
 /* unit */
@@ -87,9 +89,6 @@ extern s16 g_equip_unit_saved_hp;
 extern s16 g_equip_unit_saved_mp;
 extern u8 g_equip_unit_selected_index;
 
-void equip_item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_storage_t* detail_total,
-    menu_unit_status_record_t* summary_total, const u16* from_items, const u16* to_items);
-void equip_item_sum_equipment_stat_details(menu_status_panel_slot_storage_t* total, const u16* equipment);
 void equip_unit_build_data_from_stats(struct unit_stats* stats, equip_unit_data_t* unit);
 s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry);
 void equip_unit_commit_loadout_to_stats(void);
@@ -128,7 +127,6 @@ extern menu_entry_t g_equip_item_action_menu;
 extern u8* g_equip_item_category_lists[];
 extern menu_icon_source_t g_equip_item_graphic_descriptor;
 extern u8 g_equip_item_inventory_totals[];
-extern s16 g_equip_item_list_entries[];
 extern u8 g_equip_item_list_has_multiple_entries;
 extern struct menu_status_panel_slot_storage g_equip_item_preview_stat_detail;
 extern u8 g_equip_item_type_icon_coords[][2];
@@ -141,18 +139,10 @@ extern s16 g_equip_remove_item_equipment[];
 extern point16_t g_equip_remove_item_marker_rect;
 extern s8 g_equip_remove_item_previewed_slot;
 
-s32 equip_item_adjust_inventory_count(s32 item_entry, s32 delta);
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 void equip_item_build_inventory_totals(void);
-s32 equip_item_get_equipped_count(s32 item_entry);
-s32 equip_item_get_ranking_value(s32 item_id);
-s32 equip_item_get_total_count(s16 item_id);
 s32 equip_item_get_type(s32 item_id);
 void equip_item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
-s32 equip_item_is_in_category_list(s32 item_id, s32 category_index);
-void equip_item_prepend_to_category_list(s32 item_id, s32 category_index);
-void equip_item_rebuild_category_list(s32 category);
-void equip_item_remove_from_category_list(s32 item_id, s32 category_index);
 s32 equip_item_sort_list_by_category_order(s32 category_index, s16* list);
 void equip_item_sort_list_by_criteria(s32 mode, s16* list);
 void equip_item_store_category_list(s32 category_index, const s16* source);
@@ -182,7 +172,6 @@ extern s32 g_equip_item_numeric_panel_params;
 extern s32 g_equip_item_numeric_panel_redraw;
 extern s32 g_equip_item_numeric_panel_style;
 extern s32 g_equip_item_numeric_panel_y;
-extern u8 g_equip_numeric_panel_params[];
 extern s32 g_equip_numeric_panel_redraw;
 extern s32 g_equip_numeric_panel_style;
 extern menu_unit_status_record_t g_equip_panel_comparison_billboard;
@@ -232,7 +221,6 @@ extern s32 g_equip_unit_status_panel_redraw;
 void equip_panel_run_equipment_list_thread(void);
 void equip_panel_toggle_equipment_threads(s32 enable);
 void equip_panel_toggle_item_numeric_thread(s32 enable);
-void equip_panel_toggle_numeric_editor_thread(s32 enable);
 void equip_panel_toggle_unit_status_thread(s32 enable);
 void equip_panel_run_unit_status_thread(void);
 
@@ -254,8 +242,6 @@ extern menu_unit_stat_number_images_t g_equip_editor_numeric_text_a;
 extern menu_unit_stat_number_images_t g_equip_editor_numeric_text_b;
 extern image_load_parameters_t g_equip_editor_numeric_texture[];
 
-void equip_editor_run_numeric_thread(void);
-
 /* menus */
 /* g_equip_menu_screen_state: the index of the screen's handler in
  * g_equip_menu_screen_state_handlers. The command menu enters its picked row
@@ -274,12 +260,8 @@ typedef s32 (*equip_row_callback_t)(s32 row);
 extern menu_instruction_t g_equip_equip_item_menu_script;
 extern s8 g_equip_item_action_menu_active;
 extern menu_entry_t g_equip_item_action_menu_single_item;
-extern u16 g_equip_menu_active_clut_back;
-extern u16 g_equip_menu_active_clut_front;
-extern u16 g_equip_menu_alternate_number_clut;
 extern point16_t g_equip_menu_clear_all_prompt_draw_params;
 extern volatile u16 g_equip_menu_clear_all_prompt_frame;
-extern u16 g_equip_menu_disabled_number_clut;
 
 extern s32 g_equip_menu_indicator_brightness[2];
 /* Double-buffer index, current level, fade level and state, one pair each for
@@ -313,26 +295,20 @@ extern oriented_quad_t g_equip_menu_secondary_slot_marker;
 /* Signed 16-bit value: EQUIP reads this state with lh at 0x801c4584,
  * 0x801c45bc, and 0x801c4614. */
 extern s16 g_equip_menu_selected_list_index;
-extern menu_selection_record_t g_equip_menu_selection_entries[5];
 extern oriented_quad_t g_equip_menu_slot_marker_rects[];
 extern menu_instruction_t g_equip_menu_slot_marker_window;
 extern u8 g_equip_menu_slot_marker_x[];
 extern s8 g_equip_menu_substate; /* menu_item_list_state_e */
 extern s16 g_equip_menu_text_redraw_flag;
-extern u16 g_equip_menu_window_clut;
 
 extern menu_entry_t g_equip_type_order_menu_hand_body;
 extern menu_entry_t g_equip_type_order_menu_other_slots;
 
-item_menu_category_e equip_item_get_menu_category(s16 item_id);
 s32 equip_item_run_rearrange_mode(void);
-void equip_menu_clear_selection_records(void);
 void equip_menu_clear_selection_values(void);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
 void equip_menu_draw_item_status_list(s16 item_id);
 void equip_menu_draw_scrollable_list(const menu_instruction_t* script);
-s32 equip_menu_get_entry_item_count(s32 row);
-s32 equip_menu_get_entry_item_equipped_count(s32 row);
 menu_icon_source_t* equip_menu_get_entry_item_icon_source(s32 row);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
 s32 equip_menu_get_preview_hp_bonus_display(s32 unused_row);
@@ -355,7 +331,6 @@ s32 equip_menu_run_equip_mode(void);
 s32 equip_menu_run_remove_mode(void);
 s32 equip_menu_run_slot_item_browser(void);
 void equip_menu_scroll_list_by_page(s32 direction, const menu_instruction_t* menu);
-void equip_menu_set_palette_mode(s32 mode);
 void equip_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_index, s16* items);
 s32 equip_menu_set_selection_value(u8 index, s16 value);
 void equip_menu_store_sort_key_list(s32 list_index, const s16* source);
@@ -379,7 +354,6 @@ extern oriented_quad_t g_equip_gfx_blank_cell_rect;
 extern menu_gfx_context_t* g_equip_gfx_context_base;
 extern menu_gfx_context_t g_equip_gfx_contexts[];
 extern u32* g_equip_gfx_current_ot;
-extern RECT g_equip_gfx_draw_area;
 extern DR_AREA g_equip_gfx_draw_area_buffer[];
 extern u16 g_equip_gfx_draw_area_capacity;
 extern DR_MODE g_equip_gfx_draw_mode_buffer[];
@@ -433,13 +407,7 @@ extern u16 g_equip_gfx_tile_8_capacity;
 extern u16 g_equip_gfx_tile_8_count;
 extern TILE g_equip_gfx_tile_buffer[];
 extern u16 g_equip_gfx_tile_capacity;
-extern u16 g_equip_gfx_tile_count;
-/* Tiled-rectangle bounds inside an unnamed command buffer; the four s16
- * fields are packed at a 2-byte stride (the CARD twin is g_card_gfx_tiled_rect). */
-extern RECT g_equip_gfx_tiled_rect;
-extern s8 g_equip_gfx_transition_frame;
 extern s16 g_equip_gfx_window_zoom_percent[];
-extern s8 g_equip_gfx_zoom_draw_area_active;
 
 void equip_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 unused_priority);
@@ -450,7 +418,6 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
     LINE_G4* line_g4, TILE* tiles, TILE_1* tiles_1, TILE_8* tiles_8, TILE_16* tiles_16, SPRT* sprites,
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
 void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context);
-void equip_gfx_set_draw_color(const rgb24_t* color);
 void equip_gfx_set_otag_index(s32 ot_index);
 void equip_gfx_set_transition_frame(s32 value);
 void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
@@ -460,7 +427,6 @@ extern u8 g_equip_input_lock_timer;
 extern u8 g_equip_input_page_scroll_disabled;
 extern u16 g_equip_input_page_scroll_hold_frames;
 
-void equip_input_clear_state(void);
 s32 equip_input_read_page_scroll_direction(void);
 void equip_input_update_with_message_state(void);
 
@@ -478,51 +444,29 @@ extern s32 g_equip_cmd_stream_input;
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equip_command_menu;
 
-menu_instruction_t* equip_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_draw_tiled_rectangle_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 void equip_cmd_run_stream(menu_instruction_t* instruction, s32 input);
 menu_instruction_t* equip_cmd_set_otag_index_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_set_semitrans_handler(menu_instruction_t* instruction);
 
 /* text */
-extern u16 g_equip_text_clut_0_mode0;
-extern u16 g_equip_text_clut_0_mode1;
-extern u16 g_equip_text_clut_1_mode0;
-extern u16 g_equip_text_clut_1_mode1;
-extern u16 g_equip_text_clut_2_mode0;
-extern u16 g_equip_text_clut_2_mode1;
-extern u16 g_equip_text_clut_3_mode0;
-extern u16 g_equip_text_clut_3_mode1;
 extern u8 g_equip_text_data[];
 /* The "%d" format string at the head of the overlay. */
 extern const char g_equip_text_decimal_format[];
 extern s32 g_equip_text_help_message_id;
 extern u8 g_equip_text_restore_pending;
 
-void equip_text_concatenate_entries(const u8* text_table, u8* dst, s16* list, s32 separate);
-void equip_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entry, glyph_blit_t* out, s32 count);
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);
 
 /* bit streams */
-extern s32 g_equip_bits_reader_1_index;
-extern u8 g_equip_bits_reader_1_reset;
-extern u8* g_equip_bits_reader_1_stream;
-extern s32 g_equip_bits_reader_2_index;
-extern u8 g_equip_bits_reader_2_reset;
-extern u8* g_equip_bits_reader_2_stream;
 
 void equip_bits_init_primary_reader(const u8* data);
 void equip_bits_init_secondary_reader(const u8* data);
-u32 equip_bits_read_primary(s32 count);
-s32 equip_bits_read_secondary(s32 count);
 
 /* threads */
 /* Slots of the equip screen's own threads. The WORLD formation screen runs

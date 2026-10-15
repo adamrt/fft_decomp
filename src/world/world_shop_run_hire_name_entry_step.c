@@ -5,7 +5,7 @@
 void world_shop_run_hire_name_entry_step(void) {
     if (g_world_shop_hire_name_entry_initialized == 0) {
         g_world_formation_unit_banner_enabled = 0;
-        world_menu_toggle_unit_status_thread(0);
+        menu_toggle_unit_status_thread(0);
         g_world_shop_hire_name_entry_initialized = 1;
     }
     g_world_shop_entered_unit_name

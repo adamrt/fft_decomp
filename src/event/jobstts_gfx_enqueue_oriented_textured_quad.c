@@ -8,7 +8,7 @@ void jobstts_gfx_enqueue_oriented_textured_quad(
     s32 quad_ot_index = ot_index;
     POLY_FT4* poly;
 
-    poly = &g_jobstts_gfx_context->textured_quads[g_jobstts_gfx_poly_ft4_count++];
+    poly = &g_menu_gfx_context->textured_quads[g_menu_gfx_poly_ft4_count++];
 
     if (color != 0) {
         SetShadeTex(poly, 0);
@@ -59,6 +59,6 @@ void jobstts_gfx_enqueue_oriented_textured_quad(
     poly->clut = uv->clut;
     poly->tpage = uv->tpage;
 
-    setaddr(poly, g_jobstts_gfx_context->otag[quad_ot_index]);
-    catPrim(&g_jobstts_gfx_context->otag[quad_ot_index], poly);
+    setaddr(poly, g_menu_gfx_context->otag[quad_ot_index]);
+    catPrim(&g_menu_gfx_context->otag[quad_ot_index], poly);
 }

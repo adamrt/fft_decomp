@@ -4,10 +4,10 @@
 
 /* Queue the full draw area at the next ordering-table slot when unlocked. */
 menu_instruction_t* menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* data) {
-    if (g_bunit_gfx_otag_index_locked == 0) {
+    if (g_gfx_otag_index_locked == 0) {
         s32 otag_index = g_menu_gfx_otag_index;
-        g_bunit_gfx_draw_area.y = 0;
-        menu_gfx_enqueue_draw_area(&g_bunit_gfx_draw_area, otag_index + 1);
+        g_gfx_draw_area.y = 0;
+        menu_gfx_enqueue_draw_area(&g_gfx_draw_area, otag_index + 1);
     }
     return menu_next_instruction(data);
 }

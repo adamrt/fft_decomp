@@ -33,7 +33,7 @@ void open_birthday_handle_menu_input(open_controller_record_t* record) {
     if (open_input_update_repeat(PSX_PAD_UP) != 0) {
         if (menu->selecting_month == 0) {
             menu->day += 1;
-            if (g_open_birthday_month_lengths[menu->month - 1] < menu->day) {
+            if (g_unit_birthday_month_lengths[menu->month - 1] < menu->day) {
                 menu->month += 1;
                 if (menu->month > OPEN_BIRTHDAY_MONTH_COUNT) {
                     menu->month = 1;
@@ -45,8 +45,8 @@ void open_birthday_handle_menu_input(open_controller_record_t* record) {
             if (menu->month > OPEN_BIRTHDAY_MONTH_COUNT) {
                 menu->month = 1;
             }
-            if (g_open_birthday_month_lengths[menu->month - 1] < menu->day) {
-                menu->day = g_open_birthday_month_lengths[menu->month - 1];
+            if (g_unit_birthday_month_lengths[menu->month - 1] < menu->day) {
+                menu->day = g_unit_birthday_month_lengths[menu->month - 1];
             }
         }
         g_open_gfx_render_record_pointer_count -= 1;
@@ -61,15 +61,15 @@ void open_birthday_handle_menu_input(open_controller_record_t* record) {
                 if (menu->month <= 0) {
                     menu->month = OPEN_BIRTHDAY_MONTH_COUNT;
                 }
-                menu->day = g_open_birthday_month_lengths[menu->month - 1];
+                menu->day = g_unit_birthday_month_lengths[menu->month - 1];
             }
         } else {
             menu->month -= 1;
             if (menu->month <= 0) {
                 menu->month = OPEN_BIRTHDAY_MONTH_COUNT;
             }
-            if (g_open_birthday_month_lengths[menu->month - 1] < menu->day) {
-                menu->day = g_open_birthday_month_lengths[menu->month - 1];
+            if (g_unit_birthday_month_lengths[menu->month - 1] < menu->day) {
+                menu->day = g_unit_birthday_month_lengths[menu->month - 1];
             }
         }
         g_open_gfx_render_record_pointer_count -= 1;

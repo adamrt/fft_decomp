@@ -24,7 +24,7 @@ void wldcore_menu_push_proposition_attempt_detail_level(s32 value) {
     u8 unused[8];
     calendar_date_t date;
 
-    wldcore_wait_for_file_load();
+    file_wait_for_pending_variant();
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_index = value;
     wldcore_read_nine_bit_record(g_main_proposition_last_attempt_date_bits, value, &date);
     g_wldcore_scrollable_text_window.text_id = value + TEXT_ID_WORLD_MESSAGE_BASE;

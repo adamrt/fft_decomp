@@ -15,9 +15,9 @@ void world_menu_toggle_ability_panel_thread(s32 enable) {
                 WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL, (s32)&g_world_ability_panel_thread_params, 0, 0);
         }
         g_world_formation_unit_banner_enabled = 1;
-        world_menu_toggle_numeric_editor_thread(enable);
+        menu_toggle_numeric_editor_thread(enable);
     } else {
-        world_menu_stop_unit_status_banner_thread(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
-        world_menu_stop_unit_status_banner_thread(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
+        menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
+        menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
     }
 }

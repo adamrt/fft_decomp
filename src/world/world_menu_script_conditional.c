@@ -27,7 +27,7 @@ menu_instruction_t* world_menu_script_conditional(menu_instruction_t* script) {
     } else {
         count -= 1;
         while (count != -1) {
-            instruction = g_world_menu_script_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
             count -= 1;
         }
     }

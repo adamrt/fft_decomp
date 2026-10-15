@@ -45,7 +45,7 @@ void helpmenu_menu_run_require_help(void) {
         shadow_poly->tpage = GetTPage(0, 2, 0x3C0, 0x100);
         shadow_poly->clut = 0x7DBC;
     }
-    mem_copy_bytes_nonempty(g_helpmenu_text_saved_pointers, g_text_section_pointers, 0x80);
+    mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, 0x80);
     g_text_section_pointers[HELP_TEXT_SECTION_UNIT_STATUS]
         = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
     g_text_section_pointers[HELP_TEXT_SECTION_MENU_COMMANDS]
@@ -219,5 +219,5 @@ void helpmenu_menu_run_require_help(void) {
     }
     *g_helpmenu_controller_state_ptr = 0;
     thread_wait_frames(1);
-    helpmenu_menu_close();
+    menu_close();
 }

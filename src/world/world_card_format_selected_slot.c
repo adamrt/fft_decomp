@@ -12,7 +12,7 @@ s32 world_card_format_selected_slot(void) {
     if (world_card_wait_for_selected_status(10) > CARD_IO_RESULT_COMPLETE) {
         return 0;
     }
-    if (g_world_card_selected_slot == 0) {
+    if (g_card_slot == 0) {
         strcpy(name, "bu00:");
     } else {
         strcpy(name, "bu10:");

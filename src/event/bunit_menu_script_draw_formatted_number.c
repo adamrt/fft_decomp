@@ -59,7 +59,7 @@ menu_instruction_t* bunit_menu_script_draw_formatted_number(menu_instruction_t* 
     }
     opcode = command->number.opcode;
     if (opcode == MENU_SCRIPT_OP_NUMBER_TINTED || opcode == MENU_SCRIPT_OP_NUMBER_TINTED_NO_LEADING_ZEROS) {
-        color = &g_menu_gfx_sprite_color;
+        color = &g_menu_text_color;
     } else {
         color = 0;
     }

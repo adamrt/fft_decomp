@@ -23,7 +23,7 @@ void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otag
     g_bunit_gfx_context_base = buffers;
     g_menu_gfx_context = buffers;
     for (i = 0; i < 2; i++) {
-        g_bunit_gfx_context_base[i].otag = otags + g_bunit_gfx_otag_count * i;
+        g_bunit_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
         g_bunit_gfx_context_base[i].flat_triangles = flat_triangles + g_bunit_gfx_poly_f3_capacity * i;
         g_bunit_gfx_context_base[i].textured_triangles = textured_triangles + g_bunit_gfx_poly_ft3_capacity * i;
         g_bunit_gfx_context_base[i].flat_quads = flat_quads + g_bunit_gfx_poly_f4_capacity * i;

@@ -12,7 +12,7 @@ menu_instruction_t* jobstts_cmd_release_otag_lock_handler(menu_instruction_t* da
         otag_index = g_menu_gfx_otag_index + 1;
         g_jobstts_gfx_draw_area.y = 0;
         g_menu_gfx_otag_index = otag_index;
-        jobstts_gfx_enqueue_draw_area(&g_jobstts_gfx_draw_area, otag_index);
+        menu_gfx_enqueue_draw_area(&g_jobstts_gfx_draw_area, otag_index);
         g_jobstts_gfx_otag_index_locked = 0;
         g_menu_gfx_otag_index = g_menu_gfx_otag_index + 1;
     }

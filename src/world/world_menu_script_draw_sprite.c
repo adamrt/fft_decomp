@@ -29,6 +29,6 @@ menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instructio
         color = &g_world_menu_sprite_color;
     }
     menu_gfx_enqueue_textured_quad(&rect, instruction->sprite.sprite.u, instruction->sprite.sprite.v, color,
-        g_world_menu_semi_trans, g_world_menu_texture_page, g_world_menu_clut, g_world_menu_draw_priority);
+        g_menu_gfx_semitransparency, g_world_menu_texture_page, g_world_menu_clut, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }

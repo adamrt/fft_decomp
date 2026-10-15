@@ -65,7 +65,7 @@ void jobstts_menu_draw_scrollable_list(const menu_instruction_t* script) {
         rect.y = 0x30;
         rect.w = g_jobstts_menu_list_vram_width;
         rect.h = g_jobstts_menu_list_row_height;
-        jobstts_text_render_id_rows_to_vram(g_jobstts_menu_list_text_table, columns, &rect, 0);
+        text_render_id_rows_to_vram(g_jobstts_menu_list_text_table, columns, &rect, 0);
     }
 
     g_jobstts_menu_list_scroll_direction = 0;

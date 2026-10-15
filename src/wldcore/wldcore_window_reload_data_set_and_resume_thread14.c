@@ -9,7 +9,7 @@ void wldcore_window_reload_data_set_and_resume_thread14(wldcore_menu_stack_recor
 
     if (set != -1) {
         wldcore_gfx_load_background_set(set);
-        wldcore_wait_for_file_load();
+        file_wait_for_pending_variant();
     }
     g_wldcore_window_render_records[g_wldcore_active_saved_record.picture_render_index].flags
         &= ~WORLD_RENDER_RECORD_BLANK;

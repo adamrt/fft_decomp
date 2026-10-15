@@ -10,7 +10,7 @@ void equip_panel_toggle_equipment_threads(s32 enable) {
             thread_start(EQUIP_THREAD_SLOT_EQUIPMENT_LIST, equip_panel_run_equipment_list_thread);
             thread_set_parameters(EQUIP_THREAD_SLOT_EQUIPMENT_LIST, (s32)g_equip_equipment_panel_params, 0, 0);
         }
-        equip_panel_toggle_numeric_editor_thread(enable);
+        menu_toggle_numeric_editor_thread(enable);
         return;
     }
     menu_request_thread_stop(EQUIP_THREAD_SLOT_EQUIPMENT_LIST);

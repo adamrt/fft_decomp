@@ -16,7 +16,7 @@ void world_shop_run_rename_unit_prompt_step(void) {
     s32 text_id;
 
     if (g_world_shop_rename_prompt_initialized == 0) {
-        if (!(g_world_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE))) {
+        if (!(g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE))) {
             world_shop_run_obtain_gil_menu();
             world_shop_run_soldier_office_fee_menu_script();
             world_menu_run_script_with_callback_suppressed();
@@ -38,16 +38,16 @@ void world_shop_run_rename_unit_prompt_step(void) {
         g_world_menu_description_text_id = 0;
     }
     world_formation_update_and_draw_unit_grid(
-        1, 1, 0, g_world_input_secondary_repeat, g_menu_input_lock_mode, world_shop_rename_unit_get_unit_marker, 0);
+        1, 1, 0, g_menu_input_secondary_repeat, g_menu_input_lock_mode, world_shop_rename_unit_get_unit_marker, 0);
     if (g_world_shop_rename_error_shown != 0) {
         g_world_menu_description_text_id = -1;
-        if (g_world_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
+        if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_world_shop_rename_error_shown = 0;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
         }
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0 && world_formation_is_unit_list_scroll_needed() == 0) {
-        input = g_world_input_primary_repeat;
+        input = g_menu_input_primary_repeat;
         if (input & PSX_PAD_CIRCLE) {
             if (g_world_unit_pointers[g_world_formation_selected_unit_index]->sprite_set
                 == CHARACTER_IDENTITY_REIS_DRAGON) {

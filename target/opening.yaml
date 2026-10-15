@@ -37,7 +37,7 @@ functions:
   - {addr: 0x80068384, size: 156, name: open_title_init_new_game_party, hash: 3b01ce90b00a6557}
   - {addr: 0x80068420, size: 300, name: open_birthday_convert_date_to_zodiac, hash: 9aaa68be5ea32880}
   - {addr: 0x8006854c, size: 160, name: open_menu_update_world_formation, hash: b27c035b144dee4f}
-  - {addr: 0x800685ec, size: 76, name: open_birthday_calculate_day_of_year, hash: e796a8582427e794}
+  - {addr: 0x800685ec, size: 76, name: unit_birthday_calculate_day_of_year, hash: e796a8582427e794, source: src/shared/unit/unit_birthday_calculate_day_of_year.c}
   - {addr: 0x80068638, size: 76, name: open_sound_set_cd_mix_and_volume, hash: 3fcd975cc8b2da0c}
   - {addr: 0x80068684, size: 88, name: open_movie_init_and_stream_opening, hash: 7f2fe3e68306a213}
   - {addr: 0x800686dc, size: 132, name: open_movie_init_and_play_end, hash: c5005cd2d64378db}
@@ -53,8 +53,8 @@ functions:
   - {addr: 0x800696c8, size: 232, name: open_gfx_append_animated_render_record, hash: a3135d544f819f6f}
   - {addr: 0x800697b0, size: 272, name: open_gfx_append_window_record, hash: 6a95dfcd435c9a47}
   - {addr: 0x800698c0, size: 276, name: gfx_calculate_scaled_rectangle, hash: 9676150bdf1ed31c, source: src/shared/gfx/gfx_calculate_scaled_rectangle.c}
-  - {addr: 0x800699d4, size: 96, name: open_file_wait_then_build_header, hash: b839cd0a4c5eb016}
-  - {addr: 0x80069a34, size: 92, name: open_file_wait_for_pending, hash: 5e8c5303cf510992}
+  - {addr: 0x800699d4, size: 96, name: file_wait_then_build_header, hash: b839cd0a4c5eb016, source: src/shared/file/file_wait_then_build_header.c}
+  - {addr: 0x80069a34, size: 92, name: file_wait_for_pending_variant, hash: 5e8c5303cf510992}
   - {addr: 0x80069a90, size: 220, name: open_file_load_main_menu_graphics, hash: c9dcd99baa6edbc0}
   - {addr: 0x80069b6c, size: 204, name: open_file_load_end_movie_graphics, hash: 7f816e64bff3ea9a}
   - {addr: 0x80069c38, size: 144, name: open_file_load_sound_menu_textures, hash: 2e359e04e3a564a1}
@@ -137,10 +137,10 @@ functions:
   - {addr: 0x800702a8, size: 16, name: open_card_set_slot, hash: 1f22427930c61f2c}
   - {addr: 0x800702b8, size: 40, name: card_io_consume_all_events, hash: 8f5b83a6cd3ad9da, source: src/shared/card/card_io_consume_all_events.c}
   - {addr: 0x800702e0, size: 192, name: card_io_poll_bios_event_result, hash: 5d6b60fd071709b7, source: src/shared/card/card_io_poll_bios_event_result.c}
-  - {addr: 0x800703a0, size: 72, name: open_card_wait_for_bios_event, hash: 0556139c9eb1bc66}
+  - {addr: 0x800703a0, size: 72, name: card_wait_for_bios_event, hash: 0556139c9eb1bc66, source: src/shared/card/card_wait_for_bios_event.c}
   - {addr: 0x800703e8, size: 88, name: card_io_consume_bios_events, hash: bd2def49b8e92c22, source: src/shared/card/card_io_consume_bios_events.c}
   - {addr: 0x80070440, size: 192, name: card_io_poll_hardware_event_result, hash: c96ae6060b0e6c36, source: src/shared/card/card_io_poll_hardware_event_result.c}
-  - {addr: 0x80070500, size: 72, name: open_card_wait_for_hardware_event, hash: d2aebf9256a22720}
+  - {addr: 0x80070500, size: 72, name: card_wait_for_hardware_event, hash: d2aebf9256a22720, source: src/shared/card/card_wait_for_hardware_event.c}
   - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, source: src/shared/card/card_io_consume_hardware_events.c}
   - {addr: 0x800705a0, size: 140, name: open_card_get_info_with_retries, hash: ba3559c7e03836a0}
   - {addr: 0x8007062c, size: 188, name: open_card_poll_info_result, hash: f6ce5450918332a3}
@@ -179,7 +179,7 @@ data:
   - {addr: 0x80070d88, name: g_open_script_initial_data_base}
   - {addr: 0x80073b9c, name: g_psyq_press_vlc_limit_halfwords}
   - {addr: 0x80073f10, name: g_psyq_press_vlc_state}
-  - {addr: 0x80073f34, name: g_open_birthday_month_lengths}
+  - {addr: 0x80073f34, name: g_unit_birthday_month_lengths}
   - {addr: 0x80073f40, name: g_open_birthday_zodiac_start_dates}
   - {addr: 0x80073f58, name: g_open_file_openbk_start_sector_offsets}
   - {addr: 0x80073f5c, name: g_open_file_openbk_end_sector_offsets}
@@ -187,7 +187,7 @@ data:
   - {addr: 0x80073fb4, name: g_open_music_test_row_actions}
   - {addr: 0x80073fd4, name: g_open_music_test_music_ids}
   - {addr: 0x80074034, name: g_open_opcode_handlers}
-  - {addr: 0x80074074, name: g_open_card_slot}
+  - {addr: 0x80074074, name: g_card_slot}
   - {addr: 0x80074075, name: g_open_card_info_pending}
   - {addr: 0x80074078, name: g_psyq_press_quant_table}
   - {addr: 0x800740fc, name: g_psyq_press_scale_table}

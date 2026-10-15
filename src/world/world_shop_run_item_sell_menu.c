@@ -16,9 +16,9 @@ s32 world_shop_run_item_sell_menu(void) {
 
     if (g_world_shop_sell_result == 0) {
         g_world_shop_sell_confirm_shown = 0;
-        g_world_shop_sell_item = g_world_menu_entry_ids[g_world_menu_cursor_position];
+        g_world_shop_sell_item = g_item_list_entries[g_world_menu_cursor_position];
         g_world_menu_prompt_active = 1;
-        count = world_item_adjust_inventory_count(g_world_shop_sell_item, 0);
+        count = item_adjust_inventory_count(g_world_shop_sell_item, 0);
         if (count == 0) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80E, 0);
             return -1;
@@ -28,7 +28,7 @@ s32 world_shop_run_item_sell_menu(void) {
         g_world_shop_sell_confirm_shown = 0;
         g_sound_suppressed = 1;
     }
-    g_world_shop_sell_result = world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, g_world_shop_quantity_menu_data);
+    g_world_shop_sell_result = menu_start_managed_thread(WORLD_THREAD_SLOT_UPPER_MENU, g_world_shop_quantity_menu_data);
     if (thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU_CHILD) != 0 && g_world_shop_sell_confirm_shown == 0) {
         g_text_substitution_values[0] = world_item_get_half_price(g_world_shop_sell_item)
             * g_world_menu_selection_results[WORLD_MENU_SELECTION_SHOP_QUANTITY];

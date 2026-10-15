@@ -4,6 +4,10 @@
 /* EVENT/SMALL.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* text */
 typedef struct small_text_name_section_offsets {

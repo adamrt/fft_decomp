@@ -265,7 +265,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     bar_points[2].y = g_bunit_unit_grid_gauge_offsets[3] + top + 8;
                     bar_points[3].x += bar_points[2].x;
                     bar_points[3].y = g_bunit_unit_grid_gauge_offsets[3] + top + 8;
-                    bunit_gfx_enqueue_gouraud_quad(bar_points, gradient, 0, 8);
+                    gfx_enqueue_gouraud_quad(bar_points, gradient, 0, 8);
                 } else if (g_bunit_unit_stat_mode == MENU_UNIT_READOUT_LEVEL_EXP) {
                     top = cell_y + 45;
                     rect.x = cell.x - 1;

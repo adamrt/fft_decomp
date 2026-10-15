@@ -14,7 +14,7 @@ void world_formation_init_menu_display(void) {
     palette_t palette;
 
     world_formation_reset_menu_context();
-    world_script_set_vsync_mode_and_event_speed(0);
+    menu_set_vsync_mode_and_event_speed(0);
     if (g_world_menu_context_id != WORLD_MENU_CONTEXT_NAME_ENTRY) {
         rect.x = 0;
         rect.y = 0;

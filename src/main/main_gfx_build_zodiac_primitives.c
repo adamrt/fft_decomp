@@ -37,8 +37,8 @@ void main_gfx_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* 
         y /= ONE;
         scale.x = x;
         scale.y = y;
-        main_gfx_build_zodiac_sprite_polygon(poly, &g_main_gfx_zodiac_texture_position,
-            &g_main_gfx_zodiac_screen_position, &g_main_gfx_zodiac_sprite_frames[i], &scale, &context->offset);
+        gfx_build_zodiac_sprite_polygon(poly, &g_main_gfx_zodiac_texture_position, &g_main_gfx_zodiac_screen_position,
+            &g_main_gfx_zodiac_sprite_frames[i], &scale, &context->offset);
         if (context->link_primitives != 0) {
             addPrim(context->ot, poly);
             poly++;

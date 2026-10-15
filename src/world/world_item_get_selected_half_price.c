@@ -8,7 +8,7 @@ s32 world_item_get_selected_half_price(s32 unused_row) {
     if (g_world_menu_option_count == 0) {
         result = 0;
     } else {
-        result = world_item_get_half_price(g_world_menu_entry_ids[g_world_menu_cursor_position]);
+        result = world_item_get_half_price(g_item_list_entries[g_world_menu_cursor_position]);
     }
     return result;
 }

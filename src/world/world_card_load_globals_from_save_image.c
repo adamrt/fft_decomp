@@ -39,16 +39,16 @@ s32 world_card_load_globals_from_save_image(s32 partial_load) {
         world_bit_cursor_set_primary(g_world_load_work_buffer->parity_bits);
         /* The sweep reads the image as raw 128-byte blocks; block 3 starts mid-field. */
         block = (u8*)g_world_load_work_buffer + 3 * 0x80;
-        world_bits_read_primary(3);
+        bits_read_primary(3);
         for (i = 3; i >= 0 && i < 0x3c; i++) {
             parity = 0;
             world_bit_cursor_set_secondary(block);
             for (j = 0; j < 0x400; j++) {
-                parity += world_bits_read_secondary(1);
+                parity += bits_read_secondary(1);
             }
             block += 0x80;
             parity &= 1;
-            if (parity != (u8)world_bits_read_primary(1)) {
+            if (parity != (u8)bits_read_primary(1)) {
                 return 0;
             }
         }

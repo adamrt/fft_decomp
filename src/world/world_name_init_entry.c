@@ -28,5 +28,5 @@ void world_name_init_entry(const u8* name) {
     g_world_menu_sound_effect_id = MAIN_SFX_NONE;
     g_world_name_entry_state = 0;
     world_menu_open_name_entry_key_list();
-    world_script_set_vsync_mode_and_event_speed(2);
+    menu_set_vsync_mode_and_event_speed(2);
 }

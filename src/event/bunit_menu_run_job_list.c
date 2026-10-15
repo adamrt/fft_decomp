@@ -32,7 +32,7 @@ s32 bunit_menu_run_job_list(void) {
     }
 
     g_bunit_text_selection_id = g_menu_job_ids[g_bunit_menu_list_selected_index] + 0x6000;
-    mask = g_bunit_menu_input_active_mask;
+    mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CROSS) {
         menu_set_vsync_mode_and_event_speed(0);
         g_bunit_sound_queued_effect_id = MAIN_SFX_CANCEL;
@@ -52,6 +52,6 @@ s32 bunit_menu_run_job_list(void) {
         return MENU_JOB_LIST_STEP_ABILITIES;
     }
     bunit_menu_dispatch_with_override(
-        &g_bunit_job_list_menu_script, g_bunit_menu_input_active_mask, g_menu_input_lock_mode);
+        &g_bunit_job_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }

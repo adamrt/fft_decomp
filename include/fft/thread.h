@@ -227,4 +227,7 @@ void* thread_get_current_global_pointer(void);
 extern void (*g_thread_call_target)(void);
 s32 thread_call_on_main_stack();
 
+/* unified */
+s32 thread_find_first_running_menu_thread(void);
+
 #endif

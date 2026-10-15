@@ -4,6 +4,10 @@
 /* EVENT/ETC.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* graphics */
 /* Index into g_etc_graphics, named after the image file: 0 to 6 are chapter

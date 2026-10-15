@@ -33,7 +33,7 @@ menu_instruction_t* world_menu_script_draw_plain_number(menu_instruction_t* inst
     while (blanks != -1) {
         g_world_menu_number_blank_sprite.position.x = x;
         menu_gfx_enqueue_oriented_textured_quad(
-            &g_world_menu_number_blank_sprite, 0, TEXTURE_UV_FLIP_NONE, 0, g_world_menu_draw_priority);
+            &g_world_menu_number_blank_sprite, 0, TEXTURE_UV_FLIP_NONE, 0, g_menu_gfx_otag_index);
         blanks -= 1;
         x += 8;
     }
@@ -44,7 +44,7 @@ menu_instruction_t* world_menu_script_draw_plain_number(menu_instruction_t* inst
     i = 0;
     while (i < value) {
         menu_gfx_enqueue_textured_quad(
-            &rect, text[i] * 8 - 0xD8, 0x32, 0, 0, g_world_menu_icon_tpage, 0x7EE7, g_world_menu_draw_priority);
+            &rect, text[i] * 8 - 0xD8, 0x32, 0, 0, g_world_menu_icon_tpage, 0x7EE7, g_menu_gfx_otag_index);
         i++;
         rect.x += 8;
     }

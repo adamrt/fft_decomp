@@ -4,11 +4,14 @@
 /* EVENT/HELPMENU.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* help menus */
 extern s16 g_helpmenu_selected_unit_panel_mode;
 
-void helpmenu_menu_close(void);
 void helpmenu_menu_run_battle_help(void);
 void helpmenu_menu_run_require_help(void);
 
@@ -31,8 +34,6 @@ extern help_navigation_record_t g_helpmenu_view_mode_4_navigation[];
 extern u16* g_helpmenu_current_text_ids;
 extern u16* const g_helpmenu_menu_text_id_tables[23];
 extern u8 g_helpmenu_text_data[];
-/* 0x80 bytes of saved g_text_section_pointers, i.e. 32 pointers. */
-extern u8* g_helpmenu_text_saved_pointers[32];
 /* Section offsets of the help text file, relative to g_helpmenu_text_data (0x80 bytes before it). */
 extern s32 g_helpmenu_text_section_offsets[32];
 
@@ -40,6 +41,5 @@ extern s32 g_helpmenu_text_section_offsets[32];
 extern u32* g_helpmenu_controller_state_ptr;
 
 /* threads */
-s32 helpmenu_thread_find_first_running_menu_thread(void);
 
 #endif

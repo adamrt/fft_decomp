@@ -14,9 +14,9 @@ void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll
     s32 found_end;
     s32 i;
 
-    *selected_index = g_world_menu_selection_records[index].selected_index;
-    *scroll_base_index = g_world_menu_selection_records[index].scroll_base_index;
-    entry_id = g_world_menu_selection_records[index].entry_id;
+    *selected_index = g_menu_selection_records[index].selected_index;
+    *scroll_base_index = g_menu_selection_records[index].scroll_base_index;
+    entry_id = g_menu_selection_records[index].entry_id;
     found_end = 0;
     for (i = 0; i < *selected_index; i++) {
         if (entries[i] == -1) {

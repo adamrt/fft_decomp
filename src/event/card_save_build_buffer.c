@@ -97,9 +97,9 @@ void card_save_build_buffer(s32 slot) {
         parity = 0;
         menu_bits_init_secondary_reader(block);
         for (j = 0; j < CARD_SAVE_PARITY_BITS_PER_BLOCK; j++) {
-            parity += menu_bits_read_secondary(1);
+            parity += bits_read_secondary(1);
         }
         block += CARD_SAVE_PARITY_BLOCK_BYTES;
-        card_bits_write_primary(parity & 1);
+        bits_write_primary(parity & 1);
     }
 }

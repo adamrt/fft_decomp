@@ -8,9 +8,9 @@
 void wldcore_load_message_block_if_changed(s32 block) {
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_wldcore_message_buffer;
     if (block != g_wldcore_loaded_message_block) {
-        wldcore_wait_for_file_load();
+        file_wait_for_pending_variant();
         g_wldcore_loaded_message_block = block;
-        wldcore_file_wait_then_build_header(&g_main_file_cd_state,
+        file_wait_then_build_header(&g_main_file_cd_state,
             g_wldcore_message_block_sector_offsets[block] + DISC_SECTOR_WORLD_WLDMES_BIN,
             g_wldcore_message_block_sector_offsets[block + 1] - g_wldcore_message_block_sector_offsets[block],
             g_wldcore_message_buffer);

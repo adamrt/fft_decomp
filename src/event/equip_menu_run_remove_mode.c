@@ -44,9 +44,8 @@ s32 equip_menu_run_remove_mode(void) {
     }
     if (input & PSX_PAD_LEFT) {
         g_equip_remove_all_equipment_prompt_active = 1;
-        equip_item_calculate_equipment_swap_stat_delta(&g_equip_item_preview_stat_detail,
-            &g_equip_selected_unit_stat_summary, g_equip_unit_data[g_equip_unit_selected_index]->equipment,
-            g_equip_remove_all_equipment_ids);
+        item_calculate_equipment_swap_stat_delta(&g_equip_item_preview_stat_detail, &g_equip_selected_unit_stat_summary,
+            g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_remove_all_equipment_ids);
         g_equip_unit_status_panel_redraw = 1;
         g_equip_item_numeric_panel_redraw = 1;
         equip_panel_toggle_item_numeric_thread(1);
@@ -79,7 +78,7 @@ s32 equip_menu_run_remove_mode(void) {
         has_item = g_equip_remove_item_equipment[selection & 0xFF];
         if (has_item != 0) {
             equip_unit_set_slot_item(1, (u8)selection, 0);
-            equip_item_calculate_equipment_swap_stat_delta(&g_equip_item_preview_stat_detail,
+            item_calculate_equipment_swap_stat_delta(&g_equip_item_preview_stat_detail,
                 &g_equip_selected_unit_stat_summary, g_equip_unit_data[g_equip_unit_selected_index]->equipment,
                 g_equip_unit_data[1]->equipment);
             bcopy(g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment, 10);

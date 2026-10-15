@@ -561,7 +561,7 @@ extern RECT g_menu_status_panel_text_upload_rect_b;
 void menu_run_status_panel_thread(void);
 void menu_run_equipment_ability_panel_thread(void);
 void menu_run_numeric_editor_thread(void);
-void menu_run_numeric_editor_frame_thread(void);
+void menu_run_numeric_editor_frame_thread_variant(void);
 void menu_load_selected_unit(void);
 void menu_refresh_hovered_unit_stats_display(void);
 void menu_refresh_right_unit_stats_display(void);
@@ -1111,7 +1111,7 @@ void menu_suppress_height_display(void);
 void menu_run_selected_tile_info_display_thread(void);
 
 /* primitive queues */
-extern rgb24_t g_menu_gfx_sprite_color;
+extern rgb24_t g_menu_text_color;
 extern menu_gfx_context_t* g_menu_gfx_context;
 extern s16 g_menu_gfx_otag_index;
 extern s16 g_menu_gfx_semitransparency;
@@ -1126,7 +1126,7 @@ extern u16 g_menu_gfx_drawenv_y;
 rgb24_t* menu_gfx_get_draw_color(void);
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 idx);
 
-void menu_gfx_enqueue_draw_mode(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
+void menu_gfx_enqueue_draw_mode_variant(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
 
 void menu_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index);
 
@@ -1926,7 +1926,6 @@ extern u16 g_menu_text_clut_2_mode0;
 extern u16 g_menu_text_clut_2_mode1;
 extern u16 g_menu_text_clut_3_mode0;
 extern u16 g_menu_text_clut_3_mode1;
-extern rgb24_t g_menu_text_color;
 extern u16 g_menu_window_clut;
 void menu_input_update_controller(void);
 void menu_set_palette_mode(s32 mode);
@@ -2248,13 +2247,8 @@ void menu_text_start_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 th
 s32 menu_text_start_or_poll_thread(s32 thread_id, s32 parameter_0, s32 key, s32 parameter_2, s32 y_offset);
 
 /* menu bitstreams */
-/* Read-only secondary stream; CARD uses it to count save-buffer parity bits. */
-extern s32 g_menu_bits_secondary_index;
-extern u8 g_menu_bits_secondary_reset;
-extern const u8* g_menu_bits_secondary_source;
 
 void menu_bits_init_secondary_reader(const u8* data);
-u32 menu_bits_read_secondary(s32 count);
 
 /* encoded text entries */
 const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2);
@@ -2558,5 +2552,27 @@ void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8
 void menu_draw_active_window_frames_variant(void);
 void menu_init_sprt_variant(SPRT* sprite);
 void menu_run_scrolling_ability_list_thread_variant(void);
+
+/* unified */
+u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
+extern u8 g_menu_render_buffer[];
+void menu_clear_selection_record(s32 index);
+/* The record count differs per module (14 in BUNIT). */
+extern menu_selection_record_t g_menu_selection_records[];
+void menu_stop_thread_and_wait(s32 thread_id);
+void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
+void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
+void menu_toggle_comparison_status_thread(s32 enable);
+void menu_run_unit_status_thread_variant(void);
+extern menu_status_thread_t g_menu_comparison_display_thread_params;
+void menu_toggle_unit_status_thread(s32 enable);
+extern menu_status_thread_t g_menu_status_display_thread_params;
+void menu_toggle_numeric_editor_thread(s32 enable);
+extern menu_status_thread_t g_menu_numeric_panel_params;
+void menu_input_clear_state(void);
+s32 menu_get_entry_item_count(s32 row);
+s32 menu_get_entry_item_equipped_count(s32 row);
+void menu_close(void);
+void menu_clear_selection_records(void);
 
 #endif

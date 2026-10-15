@@ -9,7 +9,7 @@ s32 bunit_menu_run_unit_list_frame(void) {
     u8 mode_b3;
     u8 mode_b4;
 
-    input = g_bunit_menu_input_active_mask;
+    input = g_menu_input_primary_repeat;
     if (g_bunit_menu_current_menu == BUNIT_MENU_UNIT_LIST) {
         if (g_bunit_unit_list_initialized == 0) {
             g_bunit_status_banner_enabled = g_bunit_saved_status_banner_enabled;
@@ -26,7 +26,7 @@ s32 bunit_menu_run_unit_list_frame(void) {
             bunit_menu_reset_results();
             g_bunit_unit_list_initialized = 1;
         }
-        if (bunit_gfx_update_increasing_fade() == 0) {
+        if (gfx_update_increasing_fade() == 0) {
             g_bunit_unit_list_initialized = 0;
             menu_request_thread_stop(BUNIT_THREAD_SLOT_MENU);
             return 0;

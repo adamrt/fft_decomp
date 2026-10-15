@@ -123,7 +123,7 @@ void option_menu_run_game_options(void) {
     base->arrow_marks[1].v0 = 0xC;
     base->arrow_marks[1].x0 = base->arrows[1].x0;
     base->arrow_marks[1].y0 = base->arrows[1].y0 + 0xE;
-    image = g_option_menu_render_buffer;
+    image = g_menu_render_buffer;
     delta = 0;
     i = 0;
     accum = 0;
@@ -203,7 +203,7 @@ void option_menu_run_game_options(void) {
                 } else {
                     image_rect.y = ((ring - 1) * 16) & 0xFF;
                 }
-                image = g_option_menu_render_buffer;
+                image = g_menu_render_buffer;
                 image_rect.h = 0x10;
                 menu_clear_render_buffer(image, entry->inner_width * 8);
                 g_menu_text_state.pen.stride = entry->inner_width;
@@ -249,7 +249,7 @@ void option_menu_run_game_options(void) {
             break;
         }
         if (delta == 0 && menu_can_accept_input_variant() != 0) {
-            option_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
+            menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
         menu_select_icon_cluts(&page->icons.base);

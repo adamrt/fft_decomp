@@ -35,7 +35,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
     u16 old_cursor;
     menu_instruction_t* base;
 
-    priority = g_world_menu_draw_priority;
+    priority = g_menu_gfx_otag_index;
     if (g_world_menu_option_count <= 0) {
         for (j = instruction->list.skip_count; j != -1; j--) {
             instruction = world_menu_skip_instruction_group(instruction);
@@ -54,8 +54,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             if (i != 2) {
                 world_menu_scroll_list_page(i, instruction);
             }
-        } else if ((g_world_menu_display_script_input & 0x10000000)
-            || (g_world_menu_display_script_input & PSX_PAD_UP)) {
+        } else if ((g_menu_cmd_stream_input & 0x10000000) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
             index = g_world_menu_scroll_offset;
             if (index == g_world_menu_cursor_position) {
                 if (index > 0) {
@@ -70,11 +69,10 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
                             g_world_menu_list_text_table, g_world_menu_list_row_text_ids, &rect, 0);
                     }
                 }
-            } else if (g_world_menu_display_script_input & PSX_PAD_UP) {
+            } else if (g_menu_cmd_stream_input & PSX_PAD_UP) {
                 g_world_menu_cursor_position--;
             }
-        } else if ((g_world_menu_display_script_input & 0x40000000)
-            || (g_world_menu_display_script_input & PSX_PAD_DOWN)) {
+        } else if ((g_menu_cmd_stream_input & 0x40000000) || (g_menu_cmd_stream_input & PSX_PAD_DOWN)) {
             if (g_world_menu_scroll_offset + g_world_menu_list_visible_rows - 1 == g_world_menu_cursor_position) {
                 if (g_world_menu_scroll_offset + g_world_menu_list_visible_rows - 1 < g_world_menu_option_count - 1) {
                     g_world_menu_list_scroll_direction = 1;
@@ -91,7 +89,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
                 }
             } else {
                 if (g_world_menu_cursor_position < g_world_menu_option_count - 1
-                    && (g_world_menu_display_script_input & PSX_PAD_DOWN)) {
+                    && (g_menu_cmd_stream_input & PSX_PAD_DOWN)) {
                     g_world_menu_cursor_position++;
                 }
             }
@@ -148,15 +146,15 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.w = g_world_menu_list_image_width * 4;
             rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows + 10;
             menu_gfx_enqueue_textured_quad(&rect, 0, g_world_menu_scroll_pixel_offset + 0x2B, 0,
-                g_world_menu_semi_trans, g_world_menu_window_tpage, g_world_menu_window_clut,
-                g_world_menu_draw_priority);
+                g_menu_gfx_semitransparency, g_world_menu_window_tpage, g_world_menu_window_clut,
+                g_menu_gfx_otag_index);
         } else {
             rect.x = instruction->list.x;
             rect.y = instruction->list.y;
             rect.w = g_world_menu_list_image_width * 4;
             rect.h = g_world_menu_row_height * g_world_menu_list_visible_rows;
-            menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_world_menu_semi_trans, g_world_menu_window_tpage,
-                g_world_menu_window_clut, g_world_menu_draw_priority);
+            menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage,
+                g_world_menu_window_clut, g_menu_gfx_otag_index);
         }
     }
     if (g_world_menu_use_alternate_palette == 0) {
@@ -165,16 +163,16 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.arrow_up_y;
             rect.w = 8;
             rect.h = 0x10;
-            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
-                g_world_menu_clut_front, g_world_menu_draw_priority);
+            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_menu_gfx_semitransparency, g_world_menu_icon_tpage,
+                g_world_menu_clut_front, g_menu_gfx_otag_index);
         }
         if (g_world_menu_scroll_offset < g_world_menu_option_count - g_world_menu_list_visible_rows) {
             rect.x = g_world_menu_window_right_x;
             rect.y = instruction->list.arrow_down_y;
             rect.w = 8;
             rect.h = 0x10;
-            menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
-                g_world_menu_clut_front, g_world_menu_draw_priority);
+            menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_menu_gfx_semitransparency, g_world_menu_icon_tpage,
+                g_world_menu_clut_front, g_menu_gfx_otag_index);
         }
         if (g_world_menu_option_count > g_world_menu_list_visible_rows) {
             i = instruction->list.arrow_up_y + 0xF;
@@ -184,8 +182,8 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = i;
             rect.w = 8;
             rect.h = 8;
-            menu_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_world_menu_semi_trans, g_world_menu_icon_tpage,
-                g_world_menu_clut_front, g_world_menu_draw_priority);
+            menu_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_menu_gfx_semitransparency, g_world_menu_icon_tpage,
+                g_world_menu_clut_front, g_menu_gfx_otag_index);
         }
     }
     if (instruction->list.show_cursor != 0) {
@@ -207,7 +205,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
         }
         instruction = base;
         for (j = 0; j < g_world_menu_list_row_record_count; j++) {
-            instruction = g_world_menu_script_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
         }
     }
     g_world_menu_use_scroll_position = 0;

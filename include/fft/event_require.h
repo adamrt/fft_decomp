@@ -4,6 +4,10 @@
 /* EVENT/REQUIRE.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* post battle */
 extern job_data_t* g_require_formation_job_data;
@@ -318,10 +322,6 @@ extern s32 g_require_text_section_offsets[32];
 extern char g_require_text_wait_for_file_allocation_message[];
 
 void require_text_build_battle_nicknames(void);
-void require_text_render_decimal_entry_list(
-    u8* pixels, const menu_number_entry_t* entries, glyph_blit_t* output, s32 count);
-void require_text_render_signed_decimal_entries(
-    u8* pixels, menu_number_entry_t* entries, glyph_blit_t* output, s32 count);
 void require_text_show_battle_congratulations(void);
 
 /* input */

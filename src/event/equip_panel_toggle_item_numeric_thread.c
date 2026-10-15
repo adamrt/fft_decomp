@@ -8,7 +8,7 @@
 void equip_panel_toggle_item_numeric_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIP_THREAD_SLOT_ITEM_NUMERIC) == 0) {
-            thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, equip_editor_run_numeric_thread);
+            thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_editor_frame_thread_variant);
             thread_set_parameters(EQUIP_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_equip_item_numeric_panel_params, 0, 0);
         }
     } else {

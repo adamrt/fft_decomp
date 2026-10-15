@@ -8,7 +8,7 @@ void world_menu_start_equipment_and_ability_panel_thread(s32 enabled) {
         return;
     }
     enabled = 1;
-    if (g_world_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
+    if (g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
         return;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
@@ -17,5 +17,5 @@ void world_menu_start_equipment_and_ability_panel_thread(s32 enabled) {
         thread_set_parameters(
             THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_world_equipment_ability_panel_thread_params, 0, 0);
     }
-    world_menu_toggle_numeric_editor_thread(enabled);
+    menu_toggle_numeric_editor_thread(enabled);
 }

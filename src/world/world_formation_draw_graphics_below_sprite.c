@@ -94,7 +94,7 @@ void world_formation_draw_graphics_below_sprite(
             xy[2].y = g_world_formation_gauge_bar_offsets[3] + top + 8;
             xy[3].x += xy[2].x;
             xy[3].y = g_world_formation_gauge_bar_offsets[3] + top + 8;
-            world_gfx_enqueue_gouraud_quad(xy, rgb, 0, priority);
+            gfx_enqueue_gouraud_quad(xy, rgb, 0, priority);
         } else if (g_world_formation_stat_display_mode == MENU_UNIT_READOUT_LEVEL_EXP) {
             s32 y40;
 

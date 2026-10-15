@@ -23,7 +23,7 @@ void world_card_run_save_step(s32 slot) {
         g_world_card_save_failed = 0;
         D_801CC7D8 = 0;
         world_card_build_save_image(slot);
-        world_menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_saving_message);
+        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_saving_message);
         return;
     }
     if (state < 2) {
@@ -31,10 +31,10 @@ void world_card_run_save_step(s32 slot) {
         return;
     }
     if (g_world_card_save_failed != 0) {
-        world_menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_save_error_message);
-        input = g_world_input_primary_repeat;
+        menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_save_error_message);
+        input = g_menu_input_primary_repeat;
         if ((input & PSX_PAD_CIRCLE) || (input & PSX_PAD_CROSS)) {
-            world_menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
+            menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             g_world_card_save_step_state = 0;
             g_world_card_menu_step = WORLD_CARD_MENU_STEP_SCANNING;
         }
@@ -42,7 +42,7 @@ void world_card_run_save_step(s32 slot) {
         bytes_written = world_card_write_buffer_to_file(g_world_card_save_file_names[slot], g_world_load_work_buffer,
             0x1E00, g_main_card_save_slot_file_states[slot]);
         header_written = 0;
-        world_menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
+        menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
         if (bytes_written == 0x1E00) {
             g_world_load_work_buffer->summary.slot = slot;
             descriptor = world_card_open_file_with_retries(g_world_card_save_file_names[slot], 2);

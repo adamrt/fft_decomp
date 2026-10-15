@@ -22,6 +22,6 @@ menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction)
     rect.y = y;
     rect.w = instruction->tile.width;
     rect.h = instruction->tile.height;
-    gfx_enqueue_tile(&rect, &instruction->tile.color, g_world_menu_semi_trans, g_world_menu_draw_priority);
+    gfx_enqueue_tile(&rect, &instruction->tile.color, g_menu_gfx_semitransparency, g_menu_gfx_otag_index);
     return menu_next_instruction(instruction);
 }

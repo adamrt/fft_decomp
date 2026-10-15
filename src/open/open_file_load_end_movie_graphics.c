@@ -8,12 +8,12 @@ void open_file_load_end_movie_graphics(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
     RECT frame;
 
-    open_file_wait_then_build_header(header, 0x150c2, 0x11, g_open_file_destination);
-    open_file_wait_for_pending();
+    file_wait_then_build_header(header, 0x150c2, 0x11, g_open_file_destination);
+    file_wait_for_pending_variant();
     open_gfx_load_opntex_into_frame_buffer(g_open_file_destination);
 
     open_file_build_openbk_header(6, g_open_gfx_opntex_data);
-    open_file_wait_for_pending();
+    file_wait_for_pending_variant();
 
     frame.x = 0x200;
     frame.y = 0x100;
@@ -22,6 +22,6 @@ void open_file_load_end_movie_graphics(void) {
     LoadImage(&frame, g_open_gfx_opntex_data);
     DrawSync(0);
 
-    open_file_wait_then_build_header(header, 0x150d3, 0x170, g_open_gfx_opntex_data);
-    open_file_wait_for_pending();
+    file_wait_then_build_header(header, 0x150d3, 0x170, g_open_gfx_opntex_data);
+    file_wait_for_pending_variant();
 }

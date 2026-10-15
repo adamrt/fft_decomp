@@ -4,6 +4,10 @@
 /* EVENT/DEBUGCHR.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* editor */
 extern s32 g_debugchr_editor_active;
@@ -107,9 +111,6 @@ void debugchr_editor_run_numeric_thread(void);
 extern POLY_FT4 g_debugchr_gfx_render_buffers[2][30];
 
 /* text */
-
-void debugchr_text_render_signed_decimal_entries(
-    u8* pixels, menu_number_entry_t* entries, glyph_blit_t* output, s32 count);
 
 /* input */
 

@@ -21,7 +21,7 @@ s32 equip_item_run_type_order_mode(void) {
         for (i = 0; (names[i] = g_equip_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
-        equip_text_concatenate_entries(g_equip_text_data, g_equip_item_type_order_names, names, 1);
+        text_concatenate_entries(g_equip_text_data, g_equip_item_type_order_names, names, 1);
         g_equip_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         g_equip_type_order_ready = 1;
     }
@@ -54,17 +54,17 @@ s32 equip_item_run_type_order_mode(void) {
         for (i = 0; (names[i] = g_equip_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
-        equip_text_concatenate_entries(g_equip_text_data, g_equip_item_type_order_names, names, 1);
+        text_concatenate_entries(g_equip_text_data, g_equip_item_type_order_names, names, 1);
         category = g_equip_selected_slot;
         g_equip_menu_text_redraw_flag = 1;
         equip_item_build_filtered_list(g_equip_unit_selected_index, category + 0x81,
-            g_equip_selected_slot != EQUIP_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER,
-            g_equip_item_list_entries, ITEM_LIST_MODE_ALL);
-        equip_item_store_category_list(g_equip_selected_slot, g_equip_item_list_entries);
-        equip_menu_init_scrollable_list_core(g_equip_item_list_entries, g_equip_menu_selected_list_index,
-            g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+            g_equip_selected_slot != EQUIP_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+            ITEM_LIST_MODE_ALL);
+        equip_item_store_category_list(g_equip_selected_slot, g_item_list_entries);
+        equip_menu_init_scrollable_list_core(
+            g_item_list_entries, g_equip_menu_selected_list_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         equip_gfx_set_transition_frame(10);
-        equip_item_collect_stat_deltas(g_equip_item_list_entries[g_equip_menu_selected_list_index],
+        item_collect_stat_deltas_variant(g_item_list_entries[g_equip_menu_selected_list_index],
             &g_equip_selected_unit_stat_summary, &g_equip_item_preview_stat_detail, 0);
         g_equip_item_numeric_panel_redraw = 1;
     }

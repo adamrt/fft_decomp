@@ -20,11 +20,11 @@ void world_input_update_with_message_state(void) {
     world_script_update_tutorial_controller_input();
     step = world_menu_get_window_scale_step();
     if (step >= 1 && step <= 3) {
-        world_input_clear_state();
+        menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
         if (running != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
-            world_input_clear_state();
+            menu_input_clear_state();
             if (running != 0 && g_menu_input_lock_mode != 0) {
                 value = 1;
                 if (g_world_text_task_phase != 0) {
@@ -36,7 +36,7 @@ void world_input_update_with_message_state(void) {
             }
         } else if (g_world_text_task_phase != 0 || world_gfx_get_fade_state() != WORLD_FADE_STATE_NONE) {
             g_world_text_task_phase = 0;
-            world_input_clear_state();
+            menu_input_clear_state();
         }
     }
     if (running == 0) {

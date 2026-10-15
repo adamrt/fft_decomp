@@ -31,21 +31,21 @@ void world_shop_run_fitting_room_remove_step(void) {
         g_world_shop_previewed_unit_index = unit;
         g_world_shop_equip_slot_preview_initialized = 0;
         world_shop_update_unit_selection();
-        world_input_clear_state();
+        menu_input_clear_state();
     }
     if (g_world_shop_equip_slot_preview_initialized == 0) {
         g_world_shop_previewed_equip_slot = -1;
         g_world_shop_equip_slot_preview_initialized = 1;
     }
-    if (g_world_input_primary_repeat & PSX_PAD_CROSS) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         world_menu_toggle_preview_stats_window(0);
-        g_world_status_display_thread_params.redraw_request = 1;
+        g_menu_status_display_thread_params.redraw_request = 1;
         g_world_shop_menu_step = WORLD_SHOP_STEP_FITTING_ROOM;
         g_world_shop_equip_slot_preview_initialized = 0;
         g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
     }
     slot = world_menu_update_vertical_selection_and_mark_change(
-        WORLD_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_world_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
+        WORLD_EQUIPMENT_SLOT_COUNT, WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[(u8)slot] != ITEM_ID_NOTHING) {
         value = (g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[(u8)slot] & WORLD_ITEM_ID_MASK)
             + 0x6800;
@@ -58,7 +58,7 @@ void world_shop_run_fitting_room_remove_step(void) {
     world_menu_set_draw_priority(0x3D);
     world_menu_draw_animated_cursor(
         &g_world_shop_equip_slot_cursor_point, &g_world_shop_equip_slot_cursor_anim, world_thread_is_task_active(0));
-    if (g_world_input_primary_repeat & PSX_PAD_CIRCLE) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         equipped_item = g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[(u8)slot];
         if ((equipped_item >> 15) == 0) {
             g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
@@ -82,7 +82,7 @@ void world_shop_run_fitting_room_remove_step(void) {
         } else {
             world_menu_toggle_preview_stats_window(0);
         }
-        g_world_status_display_thread_params.redraw_request = 1;
+        g_menu_status_display_thread_params.redraw_request = 1;
     }
     if (g_world_shop_cost_window_visible != 0) {
         world_shop_install_callbacks_and_run();

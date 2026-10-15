@@ -59,7 +59,7 @@ menu_instruction_t* jobstts_cmd_draw_formatted_number_handler(menu_instruction_t
             glyph.rect.w = 6;
             glyph.rect.h = 3;
             glyph.rect.x = dash_x;
-            jobstts_gfx_enqueue_textured_quad(&glyph.rect, 0xBA, 0x13, 0, g_jobstts_gfx_semitransparency,
+            menu_gfx_enqueue_textured_quad(&glyph.rect, 0xBA, 0x13, 0, g_jobstts_gfx_semitransparency,
                 g_jobstts_gfx_background_texture_page, clut, g_menu_gfx_otag_index);
             value = cell;
         }
@@ -83,7 +83,7 @@ menu_instruction_t* jobstts_cmd_draw_formatted_number_handler(menu_instruction_t
             glyph.rect.y = y;
             glyph.rect.h = glyph.h;
             glyph.rect.x = cell_x;
-            jobstts_gfx_enqueue_textured_quad(&glyph.rect, glyph.u + (glyph.w * digit), glyph.v, 0,
+            menu_gfx_enqueue_textured_quad(&glyph.rect, glyph.u + (glyph.w * digit), glyph.v, 0,
                 g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, g_menu_gfx_otag_index);
             i += 1;
         } while (i < data->number.width);

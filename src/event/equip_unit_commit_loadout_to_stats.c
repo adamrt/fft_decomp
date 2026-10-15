@@ -58,7 +58,7 @@ void equip_unit_commit_loadout_to_stats(void) {
     stats->hp = hp;
     max = stats->max_mp;
     stats->mp = mp > max ? max : mp;
-    equip_item_sum_equipment_stat_details(&bonuses, g_equip_unit_data[0]->equipment);
+    item_sum_equipment_stat_details(&bonuses, g_equip_unit_data[0]->equipment);
     stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER] = bonuses.state.right_weapon_power;
     stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER] = bonuses.state.left_weapon_power;
     stats->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_EVADE] = bonuses.state.right_weapon_evade;

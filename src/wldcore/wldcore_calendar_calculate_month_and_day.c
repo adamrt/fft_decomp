@@ -9,7 +9,7 @@ void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month
 
     month = 0;
     while (1) {
-        days_in_month = g_wldcore_calendar_days_per_month[month];
+        days_in_month = g_unit_birthday_month_lengths[month];
         if (day_of_year < days_in_month) {
             break;
         }

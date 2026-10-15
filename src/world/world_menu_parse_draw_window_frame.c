@@ -28,7 +28,7 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     s32 column;
     s32 row;
 
-    priority = g_world_menu_draw_priority;
+    priority = g_menu_gfx_otag_index;
     clut = g_world_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
         left = g_world_menu_window_rect_source->rect.x - 5;
@@ -70,52 +70,53 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     rect.w = 5;
     rect.h = 9;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_left, v_top, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, u_left, v_top, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 9;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_middle, v_top, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 9;
         menu_gfx_enqueue_textured_quad(
-            &rect, u_middle, v_top, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+            &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 9;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_right - 5, v_top, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, u_right - 5, v_top, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
 
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
-    menu_gfx_enqueue_textured_quad(&rect, 2, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+    menu_gfx_enqueue_textured_quad(
+        &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     rect.x = left + (5 + partial_width) + full_columns * 16;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
     menu_gfx_enqueue_textured_quad(
-        &rect, 0x1A, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     for (row = 0; row < full_rows; row++) {
         rect.x = left;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
         menu_gfx_enqueue_textured_quad(
-            &rect, 2, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+            &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
         rect.x = left + (5 + partial_width) + full_columns * 16;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
         menu_gfx_enqueue_textured_quad(
-            &rect, 0x1A, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+            &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     }
 
     if (instruction->window.rectangle_source == 2) {
@@ -137,27 +138,27 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     rect.w = 5;
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_left, v_bottom - 7, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, u_left, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_middle, v_bottom - 7, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 7;
         menu_gfx_enqueue_textured_quad(
-            &rect, u_middle, v_bottom - 7, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+            &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 7;
     menu_gfx_enqueue_textured_quad(
-        &rect, u_right - 5, v_bottom - 7, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+        &rect, u_right - 5, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     instruction = menu_next_instruction(instruction);
     return instruction;
 }

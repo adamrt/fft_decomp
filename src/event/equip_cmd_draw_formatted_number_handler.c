@@ -42,12 +42,12 @@ menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* 
         negative = 1;
     }
     if (data->number.alternate_palette != 0) {
-        clut = g_equip_menu_alternate_number_clut;
+        clut = g_menu_alternate_number_clut;
     } else {
         clut = g_menu_palette_clut;
     }
     if (value & MENU_NUMBER_VALUE_DISABLED) {
-        clut = g_equip_menu_disabled_number_clut;
+        clut = g_menu_disabled_number_clut;
         value &= ~MENU_NUMBER_VALUE_DISABLED;
     }
     if (data->number.style == 1) {
@@ -117,7 +117,7 @@ menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* 
                     glyph.u = glyph.w * (digit - 8) + 0x20;
                 }
                 menu_gfx_enqueue_textured_quad(&glyph.rect, glyph.u, glyph.v, 0, g_menu_gfx_semitransparency,
-                    g_menu_atlas_texture_page, g_equip_menu_window_clut, g_menu_gfx_otag_index);
+                    g_menu_atlas_texture_page, g_menu_window_clut, g_menu_gfx_otag_index);
             }
         }
     }

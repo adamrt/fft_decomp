@@ -38,5 +38,5 @@ void equip_menu_init_screen(s32 battle_id) {
     equip_unit_load_selected_data();
     equip_panel_toggle_unit_status_thread(1);
     equip_panel_toggle_equipment_threads(1);
-    equip_panel_toggle_numeric_editor_thread(1);
+    menu_toggle_numeric_editor_thread(1);
 }

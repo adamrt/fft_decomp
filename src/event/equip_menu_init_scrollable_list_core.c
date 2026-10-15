@@ -21,13 +21,13 @@ void equip_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* 
         g_menu_scroll_base_index = 0;
     }
 
-    g_menu_gfx_sprite_color.r = 0x80;
-    g_menu_gfx_sprite_color.g = 0x80;
-    g_menu_gfx_sprite_color.b = 0x80;
+    g_menu_text_color.r = 0x80;
+    g_menu_text_color.g = 0x80;
+    g_menu_text_color.b = 0x80;
     g_menu_gfx_otag_index = 0;
     g_menu_list_row_mode = 0;
     g_menu_list_scroll_offset = 0;
     g_equip_menu_list_redraw_pending = 1;
-    g_equip_gfx_transition_frame = 0;
-    g_equip_gfx_zoom_draw_area_active = 0;
+    g_gfx_transition_frame = 0;
+    g_gfx_otag_index_locked = 0;
 }

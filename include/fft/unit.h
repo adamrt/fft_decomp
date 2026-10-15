@@ -1218,4 +1218,8 @@ SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void unit_set_animation(s32 runtime_id, u32 animation);
 
+/* unified */
+s32 unit_birthday_calculate_day_of_year(s32 month, s32 day);
+extern u8 g_unit_birthday_month_lengths[12];
+
 #endif

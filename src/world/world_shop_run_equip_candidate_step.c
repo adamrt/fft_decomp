@@ -21,12 +21,12 @@ void world_shop_run_equip_candidate_step(void) {
     s32 slot;
     s32 text_id;
 
-    input = g_world_input_secondary_repeat;
+    input = g_menu_input_secondary_repeat;
     if (g_world_shop_equip_candidate_initialized == 0) {
-        world_script_set_vsync_mode_and_event_speed(0);
+        menu_set_vsync_mode_and_event_speed(0);
         g_world_formation_unit_browse_enabled = 0;
         g_world_shop_background_visible = 0;
-        g_world_shop_equip_candidate_item = g_world_menu_entry_ids[g_world_menu_cursor_position];
+        g_world_shop_equip_candidate_item = g_item_list_entries[g_world_menu_cursor_position];
         world_formation_init_cursor_and_scroll_state(0);
         g_world_shop_equip_candidate_preview_visible = 0;
         g_world_shop_equip_candidate_initialized = 1;
@@ -40,7 +40,7 @@ void world_shop_run_equip_candidate_step(void) {
             return;
         }
     } else if (g_world_formation_unit_browse_enabled == 0) {
-        g_world_status_display_thread_params.redraw_request = 1;
+        g_menu_status_display_thread_params.redraw_request = 1;
     }
     if (g_world_formation_unit_banner_enabled != 0 && g_world_formation_unit_browse_enabled == 0) {
         text_id = MENU_GRID_HELP_BANNER_TOP;
@@ -76,7 +76,7 @@ void world_shop_run_equip_candidate_step(void) {
                     WORLD_FORMATION_PREVIEW_UNIT_INDEX, slot, g_world_shop_equip_candidate_item);
                 bcopy(g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment,
                     g_world_item_preview_stat_detail.state.equipment, 10);
-                world_item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail,
+                item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail,
                     &g_world_selected_unit_stat_summary,
                     g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment,
                     g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment);
@@ -94,7 +94,7 @@ void world_shop_run_equip_candidate_step(void) {
             g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
             g_world_formation_unit_banner_enabled = 0;
             g_world_shop_menu_step = WORLD_SHOP_STEP_BUY_LIST;
-            world_script_set_vsync_mode_and_event_speed(2);
+            menu_set_vsync_mode_and_event_speed(2);
             g_world_shop_background_visible = 1;
             g_world_shop_equip_candidate_initialized = 0;
         }

@@ -3,5 +3,5 @@
 
 /* Returns the memory card slot selected for world map save/load. */
 s32 world_card_get_selected_slot(void) {
-    return g_world_card_selected_slot;
+    return g_card_slot;
 }

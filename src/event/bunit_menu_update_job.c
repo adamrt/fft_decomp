@@ -8,7 +8,7 @@ void bunit_menu_update_job(void) {
         g_bunit_job_menu_active = 1;
         g_bunit_job_menu_phase = MENU_JOB_LIST_STEP_JOBS;
         bunit_menu_set_selection_value(0, 0);
-        bunit_menu_clear_selection_records();
+        menu_clear_selection_records();
         g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
     }
     if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
@@ -18,7 +18,7 @@ void bunit_menu_update_job(void) {
     }
     if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_CLOSE) {
         g_bunit_menu_current_menu = BUNIT_MENU_UNIT_LIST;
-        bunit_input_clear_state();
+        menu_input_clear_state();
         g_bunit_job_menu_active = 0;
     }
 }

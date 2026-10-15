@@ -10,7 +10,7 @@ void world_shop_run_item_sell_confirm_step(void) {
     s32 result = 1;
 
     if (g_world_shop_sell_message_wait != 0) {
-        if (g_world_input_primary_repeat
+        if (g_menu_input_primary_repeat
             & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_DPAD_MASK)) {
             g_world_shop_sell_message_wait = 0;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF80D, 0);
@@ -22,16 +22,16 @@ void world_shop_run_item_sell_confirm_step(void) {
     }
     if (result == 0) {
         if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 0) {
-            world_shop_adjust_gil(world_item_get_half_price(g_world_menu_entry_ids[g_world_menu_cursor_position])
+            world_shop_adjust_gil(world_item_get_half_price(g_item_list_entries[g_world_menu_cursor_position])
                 * g_world_menu_selection_results[WORLD_MENU_SELECTION_SHOP_QUANTITY]);
-            world_item_adjust_inventory_count(g_world_menu_entry_ids[g_world_menu_cursor_position],
+            item_adjust_inventory_count(g_item_list_entries[g_world_menu_cursor_position],
                 -g_world_menu_selection_results[WORLD_MENU_SELECTION_SHOP_QUANTITY]);
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF811, 0);
-            world_item_reconcile_sorted_list(g_world_shop_item_category);
+            item_rebuild_category_list(g_world_shop_item_category);
             world_item_build_category_list(0, g_world_shop_item_category + 1,
                 g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
-                g_world_menu_entry_ids, ITEM_LIST_MODE_ALL);
-            world_menu_init_and_load_scrollable_list(g_world_menu_entry_ids, g_world_menu_cursor_position,
+                g_item_list_entries, ITEM_LIST_MODE_ALL);
+            world_menu_init_and_load_scrollable_list(g_item_list_entries, g_world_menu_cursor_position,
                 g_text_section_pointers[TEXT_SECTION_ITEM_NAMES], &g_world_shop_sell_list_menu_script);
             world_menu_set_window_scale_step(10);
         } else {

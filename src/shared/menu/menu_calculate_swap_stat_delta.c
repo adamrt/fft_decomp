@@ -10,8 +10,8 @@ void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, me
     menu_status_panel_slot_storage_t detail_before;
     menu_status_panel_slot_storage_t detail_after;
 
-    equip_item_collect_stat_deltas(item_before, &summary_before, &detail_before, slot);
-    equip_item_collect_stat_deltas(item_after, &summary_after, &detail_after, slot);
+    item_collect_stat_deltas_variant(item_before, &summary_before, &detail_before, slot);
+    item_collect_stat_deltas_variant(item_after, &summary_after, &detail_after, slot);
     delta->gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus
         - summary_before.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
     delta->gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus = summary_after.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus

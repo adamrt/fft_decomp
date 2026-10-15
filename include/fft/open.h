@@ -3,19 +3,20 @@
 
 /* OPEN/OPEN.BIN: opening and title. */
 
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 #include "fft/world.h"
 #include "psx/libpress.h"
 
 /* card */
 extern u8 g_open_card_info_pending;
-extern u8 g_open_card_slot;
 s32 open_card_check_slots(void);
 s32 open_card_get_info_with_retries(s32 port, s32 retry_limit);
 s32 open_card_poll_info_result(void);
 s32 open_card_poll_info_until_stable(s32 retry_limit);
 void open_card_set_slot(u8 slot);
-s32 open_card_wait_for_bios_event(void);
-s32 open_card_wait_for_hardware_event(void);
 
 /* file */
 extern s32 g_open_file_current_openbk_image_id;
@@ -26,10 +27,6 @@ void open_file_build_openbk_header(s32 image_id, void* destination);
 void open_file_load_end_movie_graphics(void);
 void open_file_load_main_menu_graphics(void);
 void open_file_load_sound_menu_textures(void);
-void open_file_wait_for_pending(void);
-
-void open_file_wait_then_build_header(
-    main_file_load_descriptor_t* header, s32 sector, s32 sector_count, void* destination);
 
 s32 open_file_get_cd_sync_state_delta(void);
 
@@ -331,8 +328,6 @@ void open_movie_start_fftst_or_skip_controller(open_controller_record_t* unused_
 void open_title_update_exit_transition(open_controller_record_t* record);
 
 /* birthday */
-/* Days in each month of the birthday entry. February has 28, so 29 February cannot be entered. */
-extern u8 g_open_birthday_month_lengths[12];
 extern u8 g_open_birthday_title_image[];
 extern u8 g_open_birthday_window_image[];
 
@@ -344,7 +339,6 @@ extern u8 g_open_birthday_zodiac_start_dates[ZODIAC_SIGN_ORDINARY_COUNT * 2];
 void open_birthday_push_date_controller(void);
 void open_birthday_build_confirmation_menu(open_birthday_date_state_t* state);
 void open_birthday_build_menu_text(open_birthday_date_state_t* menu);
-s32 open_birthday_calculate_day_of_year(s32 month, s32 day);
 void open_birthday_convert_date_to_zodiac(s32* month, s32* day);
 
 void open_birthday_draw_menu_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u8* image);

@@ -21,11 +21,11 @@ s32 world_menu_update_clear_all_abilities_prompt(void) {
             world_menu_draw_animated_cursor(&g_world_clear_abilities_cursor_point, &value, g_menu_input_lock_mode);
         }
     }
-    if (g_world_input_primary_repeat & PSX_PAD_RIGHT) {
+    if (g_menu_input_primary_repeat & PSX_PAD_RIGHT) {
         g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
         return 0;
     }
-    if (g_world_input_primary_repeat & PSX_PAD_CIRCLE) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         changed = 0;
         for (i = 1; i < 5; i++) {
             unit = g_world_unit_pointers[g_world_formation_selected_unit_index];

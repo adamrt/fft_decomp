@@ -21,7 +21,7 @@ menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
     if (predicate(arg) != 0) {
         count_true -= 1;
         while (count_true != -1) {
-            instruction = g_world_menu_script_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
             count_true -= 1;
         }
         count_false -= 1;
@@ -37,7 +37,7 @@ menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
         }
         count_false -= 1;
         while (count_false != -1) {
-            instruction = g_world_menu_script_handlers[instruction->header.opcode](instruction);
+            instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
             count_false -= 1;
         }
     }

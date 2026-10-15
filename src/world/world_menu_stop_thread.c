@@ -2,6 +2,6 @@
 #include "psx/types.h"
 
 void world_menu_stop_thread(s32 thread_id) {
-    world_menu_stop_unit_status_banner_thread(thread_id);
-    g_world_menu_thread_running_status = 0;
+    menu_request_thread_stop(thread_id);
+    g_menu_managed_thread_state = 0;
 }

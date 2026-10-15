@@ -4,6 +4,10 @@
 /* EVENT/JOBSTTS.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* screen */
 
@@ -88,13 +92,10 @@ extern s16 g_jobstts_menu_list_visible_rows;
 extern u16 g_jobstts_menu_list_vram_width;
 extern u8 g_jobstts_menu_palette_image[];
 extern s16 g_jobstts_menu_scroll_base_index;
-extern menu_selection_record_t g_jobstts_menu_selection_records[5];
 extern u16 g_jobstts_menu_selection_values[];
 /* Window right edge; WORLD's twin stores it to g_world_menu_window_right_x. */
 extern s16 g_jobstts_menu_window_right_x;
 
-void jobstts_menu_clear_selection_record(s32 index);
-void jobstts_menu_clear_selection_records(void);
 void jobstts_menu_clear_selection_values(void);
 void jobstts_menu_draw_scrollable_list(const menu_instruction_t* script);
 void jobstts_menu_get_selection_record(s32 index, s16* out_selected_index, s16* out_scroll_index, const s16* abilities);
@@ -145,17 +146,13 @@ typedef struct jobstts_gfx_context {
 typedef char jobstts_gfx_context_size_must_be_244[(sizeof(jobstts_gfx_context_t) == 244) ? 1 : -1];
 
 extern u16 g_jobstts_gfx_background_texture_page;
-extern jobstts_gfx_context_t* g_jobstts_gfx_context;
 extern jobstts_gfx_context_t* g_jobstts_gfx_context_base;
 extern jobstts_gfx_context_t g_jobstts_gfx_contexts[];
 extern RECT g_jobstts_gfx_draw_area;
 extern DR_AREA g_jobstts_gfx_draw_area_buffer[];
 extern u16 g_jobstts_gfx_draw_area_capacity;
-extern u16 g_jobstts_gfx_draw_area_count;
 extern DR_MOVE g_jobstts_gfx_draw_move_buffer[];
 extern u16 g_jobstts_gfx_draw_move_capacity;
-extern u16 g_jobstts_gfx_draw_move_count;
-extern u16 g_jobstts_gfx_drawenv_y;
 extern u16 g_jobstts_gfx_line_f2_capacity;
 extern s16 g_jobstts_gfx_line_f2_count;
 
@@ -181,7 +178,6 @@ extern u16 g_jobstts_gfx_poly_ft3_capacity;
 extern s16 g_jobstts_gfx_poly_ft3_count;
 extern POLY_FT4 g_jobstts_gfx_poly_ft4_buffer[];
 extern u16 g_jobstts_gfx_poly_ft4_capacity;
-extern u16 g_jobstts_gfx_poly_ft4_count;
 extern u16 g_jobstts_gfx_poly_g3_capacity;
 extern s16 g_jobstts_gfx_poly_g3_count;
 extern u16 g_jobstts_gfx_poly_g4_capacity;
@@ -208,16 +204,8 @@ extern s16 g_jobstts_gfx_tile_count;
 extern s8 g_jobstts_gfx_transition_frame;
 extern s16 g_jobstts_gfx_transition_height_percent[];
 
-void jobstts_gfx_enqueue_draw_area(RECT* rect, s32 idx);
-void jobstts_gfx_enqueue_draw_move(const RECT* rect, s32 u, s32 v, s32 otag_index);
 void jobstts_gfx_enqueue_oriented_textured_quad(
     RECT* rect, texture_source_t* uv, rgb24_t* color, s32 orientation, s32 semitrans, s32 ot_index);
-void jobstts_gfx_enqueue_textured_quad(
-    const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans, u16 tpage, u16 clut, s32 ot_index);
-void jobstts_gfx_enqueue_textured_quad_corners(
-    textured_quad_source_t* quad, rgb24_t* color, s32 semitrans, s32 ot_index);
-void jobstts_gfx_enqueue_textured_quad_list(
-    menu_sprite_cell_t* sprites, rgb24_t* color, s32 semitrans, u16 tpage, u16 clut, s32 ot_index, s32 count);
 void jobstts_gfx_enqueue_textured_quad_rect(
     RECT* rect, menu_icon_source_t* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
 s32 jobstts_gfx_get_transition_frame(void);
@@ -273,16 +261,9 @@ menu_instruction_t* jobstts_cmd_set_semitrans_handler(menu_instruction_t* instru
 extern const char g_jobstts_text_decimal_format[];
 extern s32 g_jobstts_text_selection_id;
 
-const u8* jobstts_text_find_entry_by_index(const u8* text, s16 terminators, s32 unused_2);
-void jobstts_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
-
 /* bit streams */
-extern u8 g_jobstts_bits_primary_reset;
-extern const u8* g_jobstts_bits_primary_source;
-extern s32 g_jobstts_bits_reader_1_index;
 
 void jobstts_bits_init_primary_reader(const u8* data);
-u32 jobstts_bits_read_primary(s32 count);
 
 /* threads */
 extern u8 g_jobstts_text_thread_running_state;

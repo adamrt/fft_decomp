@@ -18,7 +18,7 @@ s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
     u8* source;
 
     if (mode == 1) {
-        source = world_text_find_entry_by_index(g_world_card_slot_text_table, 14, 1);
+        source = menu_text_find_entry_by_index(g_world_card_slot_text_table, 14, 1);
         while ((*destination++ = *source++) != 0xFE) { }
     } else if (mode < 0) {
         return 0;
@@ -30,21 +30,21 @@ s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
         }
         *destination++ = 0xE7;
         *destination++ = 0x58;
-        source = world_text_find_entry_by_index(
+        source = menu_text_find_entry_by_index(
             world_text_bind_section_data(WORLD_TEXT_DATA_JOB_NAMES), g_world_load_work_buffer->summary.job_id, 1);
         while (*source != 0xFE) {
             *destination++ = *source++;
         }
         *destination++ = 0xE7;
         *destination++ = 0xAC;
-        source = world_text_find_entry_by_index(g_world_card_slot_text_table, 13, 1);
+        source = menu_text_find_entry_by_index(g_world_card_slot_text_table, 13, 1);
         while (*source != 0xFE) {
             *destination++ = *source++;
         }
         *destination++ = g_world_load_work_buffer->summary.level / 10;
         *destination++ = g_world_load_work_buffer->summary.level % 10;
         *destination++ = 0xFE;
-        source = world_text_find_entry_by_index(
+        source = menu_text_find_entry_by_index(
             g_world_card_slot_text_table, g_world_load_work_buffer->summary.date.month, 1);
         while (*source != 0xFE) {
             *destination++ = *source++;
@@ -54,7 +54,7 @@ s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
         *destination++ = g_world_load_work_buffer->summary.date.day % 10;
         *destination++ = 0xE7;
         *destination++ = 0x58;
-        source = world_text_find_entry_by_index(
+        source = menu_text_find_entry_by_index(
             g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES], g_world_load_work_buffer->summary.location, 1);
         while ((*destination++ = *source++) != 0xFE) { }
     }

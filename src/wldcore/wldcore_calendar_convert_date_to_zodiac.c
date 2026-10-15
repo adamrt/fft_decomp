@@ -31,7 +31,7 @@ void wldcore_calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
         previous_dates = g_wldcore_calendar_zodiac_start_dates;
         previous_month = previous_dates[index].month;
         delta = start_days[index * sizeof(calendar_date_t)];
-        delta = g_wldcore_calendar_days_per_month[previous_month - 1] - delta + 1;
+        delta = g_unit_birthday_month_lengths[previous_month - 1] - delta + 1;
         *day_ptr += delta;
     } else {
         *month_ptr = index + 1;

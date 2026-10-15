@@ -38,11 +38,11 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
             g_jobstts_gfx_draw_move_buffer, g_jobstts_gfx_draw_area_buffer);
         jobstts_menu_load_images_and_clear_selection();
         jobstts_unit_init_job_data(unit);
-        jobstts_menu_clear_selection_records();
+        menu_clear_selection_records();
         g_jobstts_initialized = 1;
     }
     jobstts_gfx_swap_context_and_clear_otag(0, -1);
-    result = g_jobstts_gfx_context->otag;
+    result = g_menu_gfx_context->otag;
     g_jobstts_previous_event_mode = g_menu_input_lock_mode;
     jobstts_input_update_with_message_state();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {

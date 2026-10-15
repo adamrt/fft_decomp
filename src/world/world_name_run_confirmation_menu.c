@@ -47,7 +47,7 @@ void world_name_run_confirmation_menu(void) {
             g_world_name_entry_state = 0xff;
             g_world_menu_prompt_active = 0;
         }
-    } else if (world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_name_confirm_menu) == 0) {
+    } else if (menu_start_managed_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_name_confirm_menu) == 0) {
         if (g_world_name_confirm_result == 0) {
             g_world_name_confirm_finished = 1;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, -1, 0);

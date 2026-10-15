@@ -32,7 +32,7 @@ void world_menu_ability_panel_thread(void) {
 
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
-    g_world_input_frame_controller_input = script_get_controller_input_pointer(0);
+    g_menu_input_controller = script_get_controller_input_pointer(0);
     if (g_thread_current_id == WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) {
         text = g_world_change_banner_text_image;
         screen = g_world_change_banner_panel_frames;
@@ -49,7 +49,7 @@ void world_menu_ability_panel_thread(void) {
         u = 0x50;
     }
     menu_init_numeric_display_frame_primitives(&g_world_ability_panel_origin, &screen->numeric_frame);
-    world_gfx_init_menu_tile_and_line_primitives(screen);
+    menu_init_status_panel_primitives(screen);
     world_panel_gfx_init_scaled_draw_area_packets(&screen->portrait);
     screen->tiles[1].x0 += g_world_equipment_panel_origin.x;
     screen->tiles[1].y0 += g_world_equipment_panel_origin.y;
@@ -129,8 +129,8 @@ void world_menu_ability_panel_thread(void) {
         offset[1] = thread->y;
         menu_build_scaled_draw_area_packets(
             &screen->portrait, &g_world_ability_panel_draw_area, frame, g_world_frame_arg, offset);
-        world_menu_configure_status_panel_primitive_colors(screen, thread);
-        world_menu_select_primitive_color_palette(&screen->numeric_frame, thread);
+        menu_set_status_panel_primitive_colors(screen, thread);
+        menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
         gfx_draw_or_append_gpu_primitive(&screen->sprites[1]);

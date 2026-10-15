@@ -20,7 +20,7 @@ void wldcore_bar_push_menu_level(void) {
         set = 0x17;
     }
     wldcore_gfx_load_background_set(set);
-    wldcore_wait_for_file_load();
+    file_wait_for_pending_variant();
     g_main_system_flags |= MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
     thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BAR_WELCOME, 0);

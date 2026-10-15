@@ -16,4 +16,9 @@ void text_init_section_pointers_variant(void);
 void text_run_dialog_thread_variant(void);
 void text_run_spell_quote_thread_variant(void);
 
+/* unified */
+void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
+void text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
+extern u8* g_text_saved_pointers[32];
+
 #endif

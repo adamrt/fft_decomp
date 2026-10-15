@@ -109,7 +109,7 @@ void world_build_at_list(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
-    buffer = g_world_menu_text_page_image;
+    buffer = g_menu_render_buffer;
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
     thread_start(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, world_menu_window_frame_thread);
@@ -186,7 +186,7 @@ void world_build_at_list(void) {
                     image_rect.y = (((ring - 1) * 16) & 0xFF) + entry->vram_origin.y;
                 }
                 image_rect.h = 0x10;
-                buffer = g_world_menu_text_page_image;
+                buffer = g_menu_render_buffer;
                 menu_clear_render_buffer(buffer, 0x800);
                 g_menu_text_state.pen.stride = entry->inner_width;
                 for (column = 0; column < 3; column++) {
@@ -221,7 +221,7 @@ void world_build_at_list(void) {
             redraw_pending = 0;
         }
         if (delta == 0 && menu_can_accept_input_variant() != 0) {
-            redraw_pending = (s32)world_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
+            redraw_pending = (s32)menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
         entry->selected_index = cursor + row_offset;

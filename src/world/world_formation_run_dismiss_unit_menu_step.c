@@ -132,7 +132,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
         return;
     }
 
-    running = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, g_world_formation_dismiss_menu_data);
+    running = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_world_formation_dismiss_menu_data);
     step = g_world_formation_dismiss_step;
     g_world_dismiss_unit_prompt_running = running;
     if (step != 0) {

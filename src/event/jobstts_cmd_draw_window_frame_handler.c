@@ -40,53 +40,53 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     rect.y = top;
     rect.w = 5;
     rect.h = 9;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xDA, 3, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 9;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xDF, 3, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 9;
-        jobstts_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 0xDF, 3, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 9;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xF2, 3, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
 
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 2, 8, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     rect.x = left + (5 + partial_width) + full_columns * 16;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0x1A, 8, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     for (row = 0; row < full_rows; row++) {
         rect.x = left;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
-        jobstts_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 2, 8, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
         rect.x = left + (5 + partial_width) + full_columns * 16;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
-        jobstts_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 0x1A, 8, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     }
 
@@ -101,27 +101,27 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
     rect.y = top;
     rect.w = 5;
     rect.h = 7;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xDA, 0x11, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 7;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xDF, 0x11, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 7;
-        jobstts_gfx_enqueue_textured_quad(&rect, 0xDF, 0x11, 0, g_jobstts_gfx_semitransparency,
+        menu_gfx_enqueue_textured_quad(&rect, 0xDF, 0x11, 0, g_jobstts_gfx_semitransparency,
             g_jobstts_gfx_background_texture_page, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 7;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0xF2, 0x11, 0, g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     command = menu_next_instruction(command);
     return command;

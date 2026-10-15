@@ -20,11 +20,11 @@ s32 world_formation_set_unit_ability_slot(s16 unit_id, s16 slot, s16 ability, s3
                 if (g_world_unit_pointers[unit_id]->identity.job_id != JOB_ID_MIME) {
                     world_unit_build_best_fit_equipment(unit_id, equipment);
                     for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
-                        world_item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[i], 1);
+                        item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[i], 1);
                     }
                     for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
                         g_world_unit_pointers[unit_id]->equipment[i] = equipment[i];
-                        world_item_adjust_inventory_count(equipment[i], -1);
+                        item_adjust_inventory_count(equipment[i], -1);
                     }
                     world_formation_save_records_to_party();
                     world_menu_run_unit_status_banner_countdown(0xD811, 0x1E);

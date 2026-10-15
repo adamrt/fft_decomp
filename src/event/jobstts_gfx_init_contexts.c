@@ -19,7 +19,7 @@ void jobstts_gfx_init_contexts(jobstts_gfx_context_t* base, u32* otag, POLY_F3* 
     jobstts_gfx_context_t* context;
 
     g_jobstts_gfx_context_base = base;
-    g_jobstts_gfx_context = base;
+    g_menu_gfx_context = base;
 
     for (index = 0; index < JOBSTTS_GFX_CONTEXT_COUNT; index++) {
         context = &g_jobstts_gfx_context_base[index];

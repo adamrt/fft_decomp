@@ -77,7 +77,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         g_menu_gfx_poly_ft4_count = 0;
         g_world_gfx_poly_g3_count = 0;
         g_world_gfx_poly_gt3_count = 0;
-        g_world_gfx_gradient_quad_count = 0;
+        g_gfx_poly_g4_count = 0;
         g_menu_gfx_poly_gt4_count = 0;
         g_world_gfx_flat_line_count = 0;
         g_world_gfx_line_f3_count = 0;
@@ -85,7 +85,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         g_world_gfx_gradient_line_count = 0;
         g_world_gfx_line_g3_count = 0;
         g_world_gfx_line_g4_count = 0;
-        g_world_gfx_tile_count = 0;
+        g_gfx_tile_count = 0;
         g_world_gfx_tile_1_count = 0;
         g_world_gfx_tile_8_count = 0;
         g_world_gfx_tile_16_count = 0;
@@ -98,7 +98,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         GetDrawEnv(&env);
         g_world_gfx_draw_buffer_clip_y = env.clip.y;
         while (DrawSync(1) != 0) { }
-        VSync(g_world_gfx_vsync_mode);
+        VSync(g_menu_event_speed);
         {
             menu_gfx_context_t* context = g_world_gfx_packet_buffers;
 
@@ -116,13 +116,13 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         world_input_update_with_message_state();
         busy = world_map_is_busy();
         if (busy == 0) {
-            if (g_world_input_primary_repeat & PSX_PAD_L1) {
+            if (g_menu_input_primary_repeat & PSX_PAD_L1) {
                 world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_CURSOR_LEFT);
             }
-            if (g_world_input_primary_repeat & PSX_PAD_R1) {
+            if (g_menu_input_primary_repeat & PSX_PAD_R1) {
                 world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_CURSOR_RIGHT);
             }
-            if (g_world_input_primary_repeat & PSX_PAD_SQUARE) {
+            if (g_menu_input_primary_repeat & PSX_PAD_SQUARE) {
                 world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_DELETE);
             }
         }
@@ -133,14 +133,14 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         world_menu_set_draw_priority(0x28);
         world_menu_draw_animated_vertical_cursor(&cursor, &g_world_name_entry_text_cursor_anim, busy);
         menu_run_script_with_palette_mode(&g_world_name_entry_display_script, 0, busy);
-        world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50,
-            g_world_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
-        world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50,
-            g_world_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_world_input_primary_repeat, busy);
+        world_menu_draw_pressable_button(
+            MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
+        world_menu_draw_pressable_button(
+            MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
+        menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames_variant();
-        world_input_update_event_state(
+        menu_input_update_event_state_variant(
             g_menu_gfx_context->otag + 63, PadRead(0), g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         value = g_world_name_entry_state;
         if (value != g_world_name_entry_last_state) {
@@ -164,7 +164,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         g_world_menu_sound_effect_id = MAIN_SFX_NONE;
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     }
-    world_script_set_vsync_mode_and_event_speed(2);
+    menu_set_vsync_mode_and_event_speed(2);
     world_formation_reset_menu_context();
     world_gfx_set_fade_disabled(0);
     return g_world_name_entry_text;

@@ -15,7 +15,7 @@ void world_shop_run_fitting_room_checkout_step(void) {
 
     g_world_shop_background_visible = 1;
     if (g_world_shop_checkout_complete != 0) {
-        if (g_world_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
+        if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_FITTING_ROOM;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
             g_world_shop_checkout_complete = 0;

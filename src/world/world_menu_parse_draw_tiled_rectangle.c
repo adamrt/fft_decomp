@@ -18,7 +18,7 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
     s32 column;
     s32 base_y;
 
-    priority = g_world_menu_draw_priority;
+    priority = g_menu_gfx_otag_index;
     clut = g_world_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
         base_x = g_world_menu_window_rect.x;
@@ -45,14 +45,14 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
         rect.w = partial_width;
         rect.h = 16;
         menu_gfx_enqueue_textured_quad(
-            &rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
         for (column = 0; column < full_columns; column++) {
             rect.x = base_x + partial_width + column * 16;
             rect.y = base_y + row * 16;
             rect.w = 16;
             rect.h = 16;
             menu_gfx_enqueue_textured_quad(
-                &rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+                &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
         }
     }
     if (partial_height == 0) {
@@ -62,14 +62,15 @@ menu_instruction_t* world_menu_parse_draw_tiled_rectangle(menu_instruction_t* in
     rect.y = base_y + row * 16;
     rect.w = partial_width;
     rect.h = partial_height;
-    menu_gfx_enqueue_textured_quad(&rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+    menu_gfx_enqueue_textured_quad(
+        &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = base_x + partial_width + column * 16;
         rect.y = base_y + row * 16;
         rect.w = 16;
         rect.h = partial_height;
         menu_gfx_enqueue_textured_quad(
-            &rect, 8, 8, 0, g_world_menu_semi_trans, g_world_menu_window_tpage, clut, priority);
+            &rect, 8, 8, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
     }
     return menu_next_instruction(instruction);
 }

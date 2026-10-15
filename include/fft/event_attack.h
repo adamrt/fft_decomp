@@ -4,13 +4,16 @@
 /* EVENT/ATTACK.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* screen */
 extern u8 g_attack_event_condition_blocks[];
 
 extern u8 g_attack_scenario_table[];
 
-void attack_file_load_sync(s32 lba, s32 size, void* destination);
 s32 attack_load_scenario_conditionals(void);
 s16 attack_load_unaligned_s16(const u8* ptr);
 
@@ -326,8 +329,6 @@ extern const CVECTOR g_attack_map_darkness_color;
 
 void attack_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
 void attack_gfx_build_status_group_primitives(POLY_FT4* poly);
-void attack_gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
-    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
 void attack_gfx_init_frame_ft4_array(void);
 
 /* portraits */

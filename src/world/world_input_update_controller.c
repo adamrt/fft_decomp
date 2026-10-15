@@ -22,12 +22,12 @@ void world_input_update_controller(void) {
     current_input = world_input_read_controller(0);
     if (current_input & PSX_PAD_TRIANGLE) {
         if (g_world_input_triangle_latch != 0) {
-            world_input_clear_state();
+            menu_input_clear_state();
         } else {
             g_world_input_triangle_latch = 1;
-            g_world_input_newly_pressed = PSX_PAD_TRIANGLE;
-            g_world_input_secondary_repeat = PSX_PAD_TRIANGLE;
-            g_world_input_primary_repeat = PSX_PAD_TRIANGLE;
+            g_menu_input_newly_pressed = PSX_PAD_TRIANGLE;
+            g_menu_input_secondary_repeat = PSX_PAD_TRIANGLE;
+            g_menu_input_primary_repeat = PSX_PAD_TRIANGLE;
         }
     } else {
         g_world_input_triangle_latch = 0;
@@ -61,13 +61,13 @@ void world_input_update_controller(void) {
         if (g_world_input_activation_timer >= 10) {
             g_world_input_activation_timer = 10;
         }
-        g_world_input_newly_pressed = filtered_input;
+        g_menu_input_newly_pressed = filtered_input;
         for (index = 0; index < 16; index++) {
             s32 mask = 1U << index;
 
-            if (mask & g_world_input_newly_pressed) {
+            if (mask & g_menu_input_newly_pressed) {
                 if (mask & g_world_input_previous) {
-                    g_world_input_newly_pressed &= ~mask;
+                    g_menu_input_newly_pressed &= ~mask;
                 } else {
                     g_world_input_previous |= mask;
                 }
@@ -99,11 +99,11 @@ void world_input_update_controller(void) {
         }
         current_input &= 0xf00ff00f;
         filtered_input &= 0xf00ff00f;
-        current_input |= g_world_input_newly_pressed & 0x0ff0;
-        filtered_input |= g_world_input_newly_pressed & 0x0ff0;
-        g_world_input_primary_repeat = current_input;
-        g_world_input_secondary_repeat = filtered_input;
+        current_input |= g_menu_input_newly_pressed & 0x0ff0;
+        filtered_input |= g_menu_input_newly_pressed & 0x0ff0;
+        g_menu_input_primary_repeat = current_input;
+        g_menu_input_secondary_repeat = filtered_input;
     }
-    g_world_input_primary_repeat_latched = g_world_input_primary_repeat;
-    g_world_input_secondary_repeat_latched = g_world_input_secondary_repeat;
+    g_world_input_primary_repeat_latched = g_menu_input_primary_repeat;
+    g_world_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }

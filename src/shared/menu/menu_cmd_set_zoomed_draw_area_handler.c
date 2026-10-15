@@ -12,10 +12,10 @@ menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* co
     s32 frame;
     s32 scale;
 
-    frame = g_bunit_gfx_transition_frame;
+    frame = g_gfx_transition_frame;
     if (frame < 4) {
         if (frame < 3) {
-            g_bunit_cmd_stream_input = 0;
+            g_menu_cmd_stream_input = 0;
         }
         scale = g_bunit_gfx_window_zoom_percent[frame];
         area.w = command->window.width * scale / 100;
@@ -23,9 +23,9 @@ menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* co
         area.x = command->window.x + (command->window.width >> 1) - (area.w >> 1);
         area.y = command->window.y + (command->window.height >> 1) - (area.h >> 1);
         menu_gfx_enqueue_draw_area(&area, g_menu_gfx_otag_index - 1);
-        g_bunit_gfx_otag_index_locked = 1;
+        g_gfx_otag_index_locked = 1;
     } else {
-        g_bunit_gfx_otag_index_locked = 0;
+        g_gfx_otag_index_locked = 0;
     }
     return menu_cmd_draw_window_frame_handler(command);
 }

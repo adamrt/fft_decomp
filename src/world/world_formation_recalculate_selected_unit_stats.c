@@ -64,7 +64,7 @@ void world_formation_recalculate_selected_unit_stats(void) {
     bcopy(&record.status, &g_world_selected_unit_stat_summary, sizeof(menu_unit_status_record_t));
     bcopy(&record.identity, &g_world_selected_unit_identity, sizeof(menu_unit_status_identity_t));
     bcopy(&record.move, &g_world_selected_unit_stat_detail, 0x40);
-    world_item_sum_equipment_stat_details(
+    item_sum_equipment_stat_details(
         &g_world_selected_unit_stat_detail, g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment);
     world_formation_copy_unit_to_temp(g_world_formation_selected_unit_index, WORLD_FORMATION_PREVIEW_UNIT_INDEX);
     world_menu_enable_all_order_entries();

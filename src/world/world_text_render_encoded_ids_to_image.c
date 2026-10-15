@@ -39,7 +39,7 @@ void world_text_render_encoded_ids_to_image(
                 target.x += world_text_decode_font_glyph_to_4bpp(glyph, image, &target, (*colors2 >> 14) | palette);
             }
         } else {
-            text = world_text_find_entry_by_index(font, ids[k] & 0xFFF, 2);
+            text = menu_text_find_entry_by_index(font, ids[k] & 0xFFF, 2);
             code = *text++;
             if (code < 0xFE) {
                 colors = &ids[k];

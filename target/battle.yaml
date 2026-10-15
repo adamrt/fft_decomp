@@ -713,7 +713,7 @@ functions:
   - {addr: 0x8012df0c, size: 52, name: camera_wrap_yaw_angle, hash: 40b97089558b718b, source: src/shared/camera/camera_wrap_yaw_angle.c}
   - {addr: 0x8012df40, size: 40, name: menu_get_selected_unit_stats, hash: 34ff5c65d4712d47, source: src/shared/menu/menu_get_selected_unit_stats.c}
   - {addr: 0x8012df68, size: 48, name: script_clamp_s32_to_range, hash: 5dad512952649360, source: src/shared/script/script_clamp_s32_to_range.c}
-  - {addr: 0x8012df98, size: 504, name: script_update_event_input_state_variant, hash: e554290105b145d9}
+  - {addr: 0x8012df98, size: 504, name: script_update_event_input_state, hash: e554290105b145d9, source: src/shared/script/script_update_event_input_state.c}
   - {addr: 0x8012e190, size: 8, name: menu_init_stub, hash: 6d64edf91449c1b1, source: src/shared/menu/menu_init_stub.c}
   - {addr: 0x8012e198, size: 172, name: menu_init_default_poly_ft4, hash: 2ae011af04ed842a, source: src/shared/menu/menu_init_default_poly_ft4.c}
   - {addr: 0x8012e244, size: 116, name: menu_init_sprt_variant, hash: 647a4b56f616f141}

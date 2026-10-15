@@ -47,8 +47,7 @@ void world_menu_run_battle_help(void) {
     if (g_menu_modal_open != 0) {
         thread_exit_current();
     }
-    mem_copy_bytes_nonempty(
-        g_world_text_section_pointer_backup, g_text_section_pointers, sizeof(g_world_text_section_pointer_backup));
+    mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, sizeof(g_text_saved_pointers));
     setup_banner = &g_world_help_active_banner;
     setup_unit_data = &g_world_help_active_unit_data;
     setup_billboard = &g_world_help_billboard;
@@ -75,7 +74,7 @@ void world_menu_run_battle_help(void) {
         g_world_help_require_navigation[2].destination[2] = 7;
         g_world_help_require_navigation[7].destination[3] = 2;
     }
-    help_thread_id = world_thread_find_first_running_menu_thread();
+    help_thread_id = thread_find_first_running_menu_thread();
     g_world_help_controller_state_ptr = script_get_controller_input_pointer(0);
     menu_index = 0;
     for (quad_index = 0; quad_index < 2; quad_index++) {
@@ -114,13 +113,13 @@ void world_menu_run_battle_help(void) {
                     thread_set_parameters(help_thread_id - 1, 0x3B, help_id, 0);
                     *g_world_help_controller_state_ptr = 0;
                     thread_wait_frames(1);
-                    world_menu_close_help_menu();
+                    menu_close();
                 } else if (request_kind == 4) {
                     help_id = g_menu_skillsets[request->selected_index];
                     if (help_id == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING) {
                         *g_world_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
-                        world_menu_close_help_menu();
+                        menu_close();
                     }
                     help_id |= 0x9800;
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
@@ -129,7 +128,7 @@ void world_menu_run_battle_help(void) {
                 } else if (request_kind == 0) {
                     *g_world_help_controller_state_ptr = 0;
                     thread_wait_frames(1);
-                    world_menu_close_help_menu();
+                    menu_close();
                 } else if (request_kind == 5) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[0][request->selected_index];
@@ -145,7 +144,7 @@ void world_menu_run_battle_help(void) {
                     if (help_id == 0) {
                         *g_world_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
-                        world_menu_close_help_menu();
+                        menu_close();
                     }
                     help_id |= 0x6800;
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
@@ -158,7 +157,7 @@ void world_menu_run_battle_help(void) {
                     if (help_id == 0) {
                         *g_world_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
-                        world_menu_close_help_menu();
+                        menu_close();
                     }
                     help_id += ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE;
                     help_id |= 0x7800;
@@ -178,7 +177,7 @@ void world_menu_run_battle_help(void) {
                     if (help_id == 0) {
                         *g_world_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
-                        world_menu_close_help_menu();
+                        menu_close();
                     }
                     help_id |= 0xA000;
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
@@ -222,12 +221,12 @@ void world_menu_run_battle_help(void) {
                 } while (g_threads[frame - 1].is_running != 0);
                 *g_world_help_controller_state_ptr = 0;
                 thread_wait_frames(1);
-                world_menu_close_help_menu();
+                menu_close();
             }
         } else {
             *g_world_help_controller_state_ptr = 0;
             thread_wait_frames(1);
-            world_menu_close_help_menu();
+            menu_close();
         }
     }
     if (help_thread_id < 9) {
@@ -244,7 +243,7 @@ void world_menu_run_battle_help(void) {
             thread_wait_until_inactive(THREAD_SCREEN_SLOT_MESSAGE);
             *g_world_help_controller_state_ptr = 0;
             thread_wait_frames(1);
-            world_menu_close_help_menu();
+            menu_close();
         } else if (view_mode == UNIT_VIEW_MODE_HOVERED_UNIT) {
             /* Unreachable: the arm above already takes modes 1 and 2. */
             navigation = g_world_help_terrain_navigation;
@@ -391,5 +390,5 @@ void world_menu_run_battle_help(void) {
     }
     *g_world_help_controller_state_ptr = 0;
     thread_wait_frames(1);
-    world_menu_close_help_menu();
+    menu_close();
 }

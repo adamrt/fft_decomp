@@ -744,7 +744,7 @@ functions:
   - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b}
   - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa}
   - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5}
-  - {addr: 0x80044ba0, size: 736, name: main_gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f}
+  - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/shared/gfx/gfx_build_zodiac_sprite_polygon.c}
   - {addr: 0x80044e80, size: 692, name: main_gfx_build_zodiac_primitives, hash: 26ab908a528421ce}
   - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e}
   - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7}

@@ -43,7 +43,7 @@ s32 world_formation_process_job_change(s32 job) {
         g_world_job_change_active = 1;
         g_world_job_change_frame = 0;
         g_world_job_change_skip_requested = 0;
-        world_input_clear_state();
+        menu_input_clear_state();
         g_world_job_change_old_sprite_image = main_heap_alloc(0x1e0);
         gfx_store_image_and_wait(&g_world_job_change_old_sprite_rect, g_world_job_change_old_sprite_image);
         g_world_job_change_new_sprite_image = main_heap_alloc(0x1e0);
@@ -107,14 +107,14 @@ s32 world_formation_process_job_change(s32 job) {
         scratch.points[1].y++;
         world_menu_add_gradient_line_primitive(&scratch.points[1], g_world_job_change_wave_colors + 1, 1, 0x38);
     }
-    menu_gfx_enqueue_draw_mode(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
+    menu_gfx_enqueue_draw_mode_variant(0, 0, GetTPage(0, 3, 0x100, 0), 0, 0x37);
     g_world_job_change_frame++;
     if (g_world_job_change_skip_requested != 0) {
         if (g_world_job_change_frame >= 40 && g_world_job_change_frame <= 220) {
             g_world_job_change_frame = 220;
             main_sound_set_tune_volume(0x46);
         }
-    } else if (g_world_input_newly_pressed & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
+    } else if (g_menu_input_newly_pressed & (PSX_PAD_CIRCLE | PSX_PAD_CROSS)) {
         g_world_job_change_skip_requested = 1;
     }
     if (g_world_job_change_frame < 220) {

@@ -15,9 +15,9 @@ void bunit_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll
     s32 entry_id;
     s32 i;
 
-    *selected_index = g_bunit_menu_selection_records[index].selected_index;
-    *scroll_base_index = g_bunit_menu_selection_records[index].scroll_base_index;
-    entry_id = g_bunit_menu_selection_records[index].entry_id;
+    *selected_index = g_menu_selection_records[index].selected_index;
+    *scroll_base_index = g_menu_selection_records[index].scroll_base_index;
+    entry_id = g_menu_selection_records[index].entry_id;
     if (entry_id == entries[*selected_index]) {
         return;
     }

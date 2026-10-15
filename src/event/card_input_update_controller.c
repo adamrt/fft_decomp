@@ -58,13 +58,13 @@ void card_input_update_controller(void) {
     if (g_card_input_activation_timer >= 10) {
         g_card_input_activation_timer = 10;
     }
-    g_card_input_newly_pressed = filtered_input;
+    g_menu_input_newly_pressed = filtered_input;
     for (index = 0; index < 16; index++) {
         s32 mask = 1 << index;
 
-        if (mask & g_card_input_newly_pressed) {
+        if (mask & g_menu_input_newly_pressed) {
             if (mask & g_card_input_previous) {
-                g_card_input_newly_pressed &= ~mask;
+                g_menu_input_newly_pressed &= ~mask;
             } else {
                 g_card_input_previous |= mask;
             }
@@ -96,8 +96,8 @@ void card_input_update_controller(void) {
     }
     current_input &= 0xf00ff00f;
     filtered_input &= 0xf00ff00f;
-    current_input |= g_card_input_newly_pressed & 0x0ff0;
-    filtered_input |= g_card_input_newly_pressed & 0x0ff0;
-    g_card_input_primary_repeat = current_input;
-    g_card_input_secondary_repeat = filtered_input;
+    current_input |= g_menu_input_newly_pressed & 0x0ff0;
+    filtered_input |= g_menu_input_newly_pressed & 0x0ff0;
+    g_menu_input_primary_repeat = current_input;
+    g_menu_input_secondary_repeat = filtered_input;
 }

@@ -14,7 +14,7 @@ void open_menu_start_music_test_controller(void) {
     s32 controller;
 
     open_file_build_openbk_header(1, g_open_file_destination);
-    open_file_wait_for_pending();
+    file_wait_for_pending_variant();
 
     for (i = 0; i < 96; i++) {
         g_open_music_test_list_entries[i] = i + 0xc000;

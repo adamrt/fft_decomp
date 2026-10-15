@@ -20,18 +20,18 @@ void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_ota
      * otherwise GCC moves its calculation into GetDrawEnv's delay slot. */
     __asm__("" : : "r"(envp));
     g_menu_gfx_poly_ft4_count = 0;
-    g_world_gfx_gradient_quad_count = 0;
+    g_gfx_poly_g4_count = 0;
     g_menu_gfx_poly_gt4_count = 0;
     g_world_gfx_flat_line_count = 0;
     g_world_gfx_gradient_line_count = 0;
-    g_world_gfx_tile_count = 0;
+    g_gfx_tile_count = 0;
     g_menu_gfx_draw_move_count = 0;
     g_world_gfx_draw_area_count = 0;
     g_menu_gfx_draw_mode_count = 0;
     GetDrawEnv(envp);
     g_world_gfx_draw_buffer_clip_y = envp->clip.y;
     while (DrawSync(1) != 0) { }
-    VSync(g_world_gfx_vsync_mode);
+    VSync(g_menu_event_speed);
     context = g_world_gfx_packet_buffers;
     if (g_menu_gfx_context == context) {
         context++;

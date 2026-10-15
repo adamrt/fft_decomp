@@ -3,10 +3,13 @@
 
 /* WORLD/WLDCORE.BIN: the world core that runs with WORLD. */
 
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 #include "fft/world.h"
 
 /* calendar */
-extern u8 g_wldcore_calendar_days_per_month[12]; /* 0x8009e66c; non-leap-year month lengths */
 
 extern s32 g_wldcore_calendar_display_x;
 extern s32 g_wldcore_calendar_display_y;
@@ -17,17 +20,11 @@ extern calendar_date_t g_wldcore_calendar_zodiac_start_dates[ZODIAC_SIGN_ORDINAR
 void wldcore_calendar_advance_day(void);
 void wldcore_calendar_convert_date_to_zodiac(s32* month, s32* day);
 void wldcore_calendar_advance_days(s32 days);
-s32 wldcore_calendar_calculate_day_of_year(s32 month, s32 day);
 void wldcore_calendar_calculate_month_and_day(s32 day_of_year, s32* output_month, s32* output_day);
 
 /* file */
 void wldcore_file_poll_vram_image_stream(main_file_load_descriptor_t* stream);
 void wldcore_file_seek_to_battle_bin(void);
-
-void wldcore_file_wait_then_build_header(
-    main_file_load_descriptor_t* header, s32 sector, s32 sectors, void* destination);
-
-void wldcore_wait_for_file_load(void);
 
 void wldcore_load_scratch_data_blocking(void);
 /* input */

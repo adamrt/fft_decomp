@@ -35,7 +35,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     s32 sound_id;
     s32 sound_request;
 
-    g_bunit_gfx_otag_count = 0x40;
+    g_gfx_otag_count = 0x40;
     g_bunit_gfx_poly_ft4_capacity = 0x1f4;
     g_bunit_gfx_poly_f3_capacity = 0;
     g_bunit_gfx_poly_ft3_capacity = 0;
@@ -70,8 +70,8 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         previous_mode = g_menu_input_lock_mode;
         bunit_menu_update_event_thread_state();
         bunit_input_update_lock_timer();
-        bunit_gfx_update_decreasing_fade();
-        if (g_bunit_menu_input_mask & PSX_PAD_SELECT) {
+        gfx_update_decreasing_fade();
+        if (g_menu_input_newly_pressed & PSX_PAD_SELECT) {
             bunit_text_start_selection_thread(3);
         }
         if (g_bunit_help_screen_id != MENU_GRID_HELP_NONE) {
@@ -117,7 +117,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     } while (running != 0);
     bunit_panel_toggle_equipment_and_numeric_editor_threads(0);
-    bunit_panel_toggle_unit_status_thread(0);
+    menu_toggle_unit_status_thread(0);
     while (DrawSync(1) != 0) { }
     VSync(0);
     return g_bunit_selected_battle_id;

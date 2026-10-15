@@ -44,7 +44,7 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
     }
     if (g_world_shop_checkout_prompt_active != 0) {
         g_world_shop_checkout_prompt_active
-            = world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, g_world_shop_checkout_prompt_menu);
+            = menu_start_managed_thread(WORLD_THREAD_SLOT_UPPER_MENU, g_world_shop_checkout_prompt_menu);
         if (g_world_shop_checkout_prompt_active != 0) {
             return WORLD_SHOP_CHECKOUT_PROMPT_OPEN;
         }
@@ -58,11 +58,11 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
                 world_shop_buy_from_fitting_room();
                 world_formation_save_records_to_party();
                 g_world_menu_sound_effect_id = MAIN_SFX_SHOP_TRANSACTION;
-                world_item_reconcile_sorted_list(0);
-                world_item_reconcile_sorted_list(1);
-                world_item_reconcile_sorted_list(2);
-                world_item_reconcile_sorted_list(3);
-                world_item_reconcile_sorted_list(4);
+                item_rebuild_category_list(0);
+                item_rebuild_category_list(1);
+                item_rebuild_category_list(2);
+                item_rebuild_category_list(3);
+                item_rebuild_category_list(4);
                 g_world_shop_checkout_prompt_initialized = 0;
                 return WORLD_SHOP_CHECKOUT_DONE;
             }
@@ -81,7 +81,7 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
         g_world_shop_checkout_prompt_initialized = 0;
         return WORLD_SHOP_CHECKOUT_CANCELED;
     }
-    if (world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_shop_checkout_short_gil_menu) != 0) {
+    if (menu_start_managed_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_shop_checkout_short_gil_menu) != 0) {
         return WORLD_SHOP_CHECKOUT_PROMPT_OPEN;
     }
     g_world_shop_checkout_prompt_initialized = 0;

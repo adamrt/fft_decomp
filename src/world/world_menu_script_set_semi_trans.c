@@ -4,6 +4,6 @@
    semi-transparency flag used by the window/text primitives. Returns the
    address of the next instruction (byte 1 is the instruction length). */
 menu_instruction_t* world_menu_script_set_semi_trans(menu_instruction_t* instruction) {
-    g_world_menu_semi_trans = instruction->draw_state.value;
+    g_menu_gfx_semitransparency = instruction->draw_state.value;
     return menu_next_instruction(instruction);
 }

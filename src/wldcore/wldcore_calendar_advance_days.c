@@ -40,7 +40,7 @@ void wldcore_calendar_advance_days(s32 days) {
     days %= 365;
     month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
-    today = wldcore_calendar_calculate_day_of_year(month, day);
+    today = unit_birthday_calculate_day_of_year(month, day);
     for (i = 0; i < 64; i++) {
         g_main_brave_story_character_ages[i] += years;
         if (i == 0) {
@@ -50,7 +50,7 @@ void wldcore_calendar_advance_days(s32 days) {
             month = birthdays[i][0];
             day = birthdays[i][1];
         }
-        until_birthday = wldcore_calendar_calculate_day_of_year(month, day) - today;
+        until_birthday = unit_birthday_calculate_day_of_year(month, day) - today;
         if (until_birthday > 0 && days >= until_birthday) {
             g_main_brave_story_character_ages[i] += 1;
         }

@@ -32,16 +32,16 @@ s32 jobstts_ability_update_list_menu(void) {
         g_jobstts_cmd_conditions[13] = menu_ability_is_action_tab;
         g_jobstts_cmd_conditions[14] = menu_ability_is_non_action_unlearned;
         g_jobstts_cmd_conditions[15] = menu_ability_is_action;
-        jobstts_menu_clear_selection_record(MENU_ABILITY_CATEGORY_ACTION);
-        jobstts_menu_clear_selection_record(MENU_ABILITY_CATEGORY_REACTION);
-        jobstts_menu_clear_selection_record(MENU_ABILITY_CATEGORY_SUPPORT);
-        jobstts_menu_clear_selection_record(MENU_ABILITY_CATEGORY_MOVEMENT);
+        menu_clear_selection_record(MENU_ABILITY_CATEGORY_ACTION);
+        menu_clear_selection_record(MENU_ABILITY_CATEGORY_REACTION);
+        menu_clear_selection_record(MENU_ABILITY_CATEGORY_SUPPORT);
+        menu_clear_selection_record(MENU_ABILITY_CATEGORY_MOVEMENT);
         rect.x = 0x100;
         rect.y = 0xc8;
         rect.w = 0x14;
         rect.h = 0x10;
         g_jobstts_ability_list_job_name_ids[0] = g_jobstts_job_selected_id;
-        jobstts_text_render_id_rows_to_vram(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_jobstts_ability_list_job_name_ids, &rect, 0);
         g_menu_ability_category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, 0);
         jobstts_ability_build_list(
@@ -91,7 +91,7 @@ s32 jobstts_ability_update_list_menu(void) {
     rect.y = 0x27;
     rect.w = 0x50;
     rect.h = 0x10;
-    jobstts_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0, 0xc8, 0, 0, g_jobstts_gfx_background_texture_page, g_menu_window_clut, 0xb);
     return MENU_JOB_LIST_STEP_ABILITIES;
 }

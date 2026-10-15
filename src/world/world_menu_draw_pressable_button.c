@@ -21,7 +21,7 @@ void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 
     u32 flip;
     u16 clut;
 
-    speed = g_world_gfx_vsync_mode;
+    speed = g_menu_event_speed;
     if (speed == 0) {
         speed = 1;
     }

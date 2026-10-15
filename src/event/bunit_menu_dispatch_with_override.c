@@ -9,5 +9,5 @@ void bunit_menu_dispatch_with_override(menu_instruction_t* script, s32 state, s3
         effective_state = 0;
     }
     menu_set_palette_mode(override);
-    bunit_cmd_run_stream(script, effective_state);
+    menu_cmd_run_stream(script, effective_state);
 }

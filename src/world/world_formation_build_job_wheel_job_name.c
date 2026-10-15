@@ -22,7 +22,7 @@ void world_formation_build_job_wheel_job_name(void) {
     destination_rect.w = 0x14;
     destination_rect.h = 0x10;
     world_text_render_id_list_to_image_rows(font, name, &destination_rect, 0);
-    pixel_width = world_text_measure_entry_pixel_width(world_text_find_entry_by_index(font, *name & 0x3FF, 2));
+    pixel_width = world_text_measure_entry_pixel_width(menu_text_find_entry_by_index(font, *name & 0x3FF, 2));
     g_world_job_wheel_name_rect.x = ((0x50 - pixel_width) >> 1) + 0x58;
     g_world_job_wheel_name_rect.y = 0xD7;
     g_world_job_wheel_name_rect.w = pixel_width;

@@ -29,15 +29,15 @@ void world_item_build_status_list_polygons(s16 item_id) {
     attribute = g_main_item_primary_data[item_id].attributes;
     world_bit_cursor_set_primary(ITEM_ATTRIBUTES_FLAT[attribute].immunity);
     for (i = 0; i < STATUS_COUNT; i++) {
-        if (world_bits_read_primary(1) != 0) {
+        if (bits_read_primary(1) != 0) {
             count++;
         }
     }
     world_bit_cursor_set_primary(ITEM_ATTRIBUTES_FLAT[attribute].innate);
     world_bit_cursor_set_secondary(ITEM_ATTRIBUTES_FLAT[attribute].starting);
     for (i = 0; i < STATUS_COUNT; i++) {
-        bit = world_bits_read_primary(1);
-        bit |= world_bits_read_secondary(1);
+        bit = bits_read_primary(1);
+        bit |= bits_read_secondary(1);
         if (bit != 0) {
             count++;
         }
@@ -59,7 +59,7 @@ void world_item_build_status_list_polygons(s16 item_id) {
         if (drawn >= count) {
             break;
         }
-        if (world_bits_read_primary(1) != 0) {
+        if (bits_read_primary(1) != 0) {
             rect.x = x - 7;
             rect.y = y + 1;
             rect.w = 8;
@@ -81,8 +81,8 @@ void world_item_build_status_list_polygons(s16 item_id) {
         if (drawn >= count) {
             break;
         }
-        bit = world_bits_read_primary(1);
-        bit |= world_bits_read_secondary(1);
+        bit = bits_read_primary(1);
+        bit |= bits_read_secondary(1);
         if (bit != 0) {
             rect.x = x - 8;
             rect.y = y + 1;

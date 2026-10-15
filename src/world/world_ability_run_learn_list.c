@@ -28,7 +28,7 @@ s32 world_ability_run_learn_list(void) {
         g_world_menu_script_callbacks[1].value = world_job_get_cached_total_jp;
         g_world_menu_script_callbacks[2].value = world_job_get_cached_level_jp_requirement;
         g_world_menu_script_callbacks[3].value = world_job_get_selected_unit_job_points_entry;
-        g_world_menu_script_callbacks[4].value = world_ability_is_non_action_learned;
+        g_world_menu_script_callbacks[4].value = menu_ability_is_non_action_learned;
         g_world_menu_script_callbacks[5].value = world_job_get_cached_skillset_empty_flag;
         g_world_menu_script_callbacks[6].value = world_menu_is_learn_ability_learned;
         g_world_menu_script_callbacks[7].value = world_ability_get_mp_cost_display_value;
@@ -41,10 +41,10 @@ s32 world_ability_run_learn_list(void) {
         g_world_menu_script_callbacks[14].value = world_ability_is_non_action_unlearned;
         g_world_learn_confirm_prompt_state = 0;
         g_world_menu_script_callbacks[15].value = world_ability_is_selected_action_type;
-        world_menu_clear_selection_record(10);
-        world_menu_clear_selection_record(11);
-        world_menu_clear_selection_record(12);
-        world_menu_clear_selection_record(13);
+        menu_clear_selection_record(10);
+        menu_clear_selection_record(11);
+        menu_clear_selection_record(12);
+        menu_clear_selection_record(13);
         g_world_ability_category = world_menu_update_wrapped_horizontal_selection(4, WORLD_MENU_CURSOR_ABILITY_TAB, 0);
         world_ability_find_unit_abilities(g_world_formation_selected_unit_index, g_world_learn_selected_job,
             g_world_ability_category, g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
@@ -67,7 +67,7 @@ s32 world_ability_run_learn_list(void) {
             = (g_menu_ability_entries[g_world_menu_cursor_position] & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
     }
     if (g_world_learn_confirm_prompt_state == 0) {
-        if ((g_world_input_primary_repeat & PSX_PAD_CIRCLE) && g_world_menu_option_count != 0) {
+        if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_world_menu_option_count != 0) {
             index = g_world_menu_cursor_position;
             if (g_menu_ability_entries[index] >> 14) {
                 world_text_show_message_and_play_sound(0xc009, MAIN_SFX_ERROR_MESSAGE);
@@ -75,19 +75,19 @@ s32 world_ability_run_learn_list(void) {
                 g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
             } else {
                 g_world_learn_confirm_prompt_state
-                    = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
+                    = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
                 g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
                 g_world_learn_confirm_submenu.selected_index = 0;
                 g_sound_suppressed = 1;
             }
-        } else if (g_world_input_primary_repeat & PSX_PAD_CROSS) {
+        } else if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             g_world_learn_ability_list_open = 0;
             g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
             g_world_formation_cursor_ot_override = 0;
             return MENU_JOB_LIST_STEP_JOBS;
         }
         category = world_menu_update_horizontal_selection_and_mark_change(
-            4, WORLD_MENU_CURSOR_ABILITY_TAB, g_world_input_newly_pressed, MAIN_SFX_PAGE_SWITCH);
+            4, WORLD_MENU_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, MAIN_SFX_PAGE_SWITCH);
         if (category != g_world_ability_category) {
             menu_set_selection_record(g_world_ability_category + 10, g_world_menu_cursor_position,
                 g_world_menu_scroll_offset, g_menu_ability_entries);
@@ -100,7 +100,8 @@ s32 world_ability_run_learn_list(void) {
             world_menu_set_window_scale_step(10);
         }
     } else {
-        g_world_learn_confirm_prompt_state = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
+        g_world_learn_confirm_prompt_state
+            = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
         if (g_world_learn_confirm_prompt_state == 0) {
             if (g_world_menu_selection_results[5] == 0) {
                 world_ability_learn(g_world_formation_selected_unit_index, g_world_learn_selected_job,
@@ -124,7 +125,7 @@ s32 world_ability_run_learn_list(void) {
     running = g_world_learn_confirm_prompt_state;
     input = 0;
     if (running == 0) {
-        input = g_world_input_primary_repeat;
+        input = g_menu_input_primary_repeat;
     }
     mode = 0;
     if (g_menu_input_lock_mode != 0 || running != 0) {

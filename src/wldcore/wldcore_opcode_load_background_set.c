@@ -10,7 +10,7 @@ void wldcore_opcode_load_background_set(void) {
         DrawSync(0);
         g_wldcore_active_saved_record.background_set = value;
         wldcore_gfx_load_background_set(value);
-        wldcore_wait_for_file_load();
+        file_wait_for_pending_variant();
     }
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }

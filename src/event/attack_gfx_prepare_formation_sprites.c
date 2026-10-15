@@ -46,7 +46,7 @@ void attack_gfx_prepare_formation_sprites(void) {
     buffer = main_heap_alloc(0x10000);
     if (g_script_attack_entry_mode != 0) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
-            attack_file_load_sync(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
+            file_load_sync(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
         } else {
             g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
             thread_call_on_main_stack(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);

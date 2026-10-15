@@ -18,7 +18,7 @@ void open_birthday_convert_date_to_zodiac(s32* month, s32* day) {
     if (*day < g_open_birthday_zodiac_start_dates[index * 2 + 1]) {
         index = (index + ZODIAC_SIGN_ORDINARY_COUNT - 1) % ZODIAC_SIGN_ORDINARY_COUNT;
         *month = index + 1;
-        length = (g_open_birthday_month_lengths - 1)[g_open_birthday_zodiac_start_dates[index * 2]];
+        length = (g_unit_birthday_month_lengths - 1)[g_open_birthday_zodiac_start_dates[index * 2]];
         span = g_open_birthday_zodiac_start_dates[index * 2 + 1];
         span = length - span + 1;
         *day += span;

@@ -66,11 +66,11 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             world_input_update_with_message_state();
             if (g_world_unit_status_banner_active != 0) {
                 world_menu_run_unit_status_banner_countdown(0, 0);
-                world_input_clear_state();
+                menu_input_clear_state();
             }
             world_menu_update_thread_7_idle_countdown();
             world_gfx_update_fade_in_tile();
-            if (g_world_input_primary_repeat & PSX_PAD_SELECT) {
+            if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
                 world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
             }
             if (g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
@@ -103,7 +103,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                     i = 1;
                 }
                 if (i == 0) {
-                    buttons = g_world_input_secondary_repeat;
+                    buttons = g_menu_input_secondary_repeat;
                 }
                 world_formation_cycle_selected_unit(buttons);
                 world_menu_draw_pressable_button(
@@ -131,12 +131,12 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             if (g_world_formation_cursor_ot_override != 0) {
                 i = g_world_formation_cursor_ot_override;
             }
-            world_input_update_event_state(g_menu_gfx_context->otag + i, world_input_filter_menu(),
+            menu_input_update_event_state_variant(g_menu_gfx_context->otag + i, world_input_filter_menu(),
                 g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
             if (g_world_formation_current_menu != last_menu) {
                 g_world_formation_cursor_ot_override = 0;
                 g_world_formation_unit_cycle_mode = 0;
-                world_script_set_vsync_mode_and_event_speed(0);
+                menu_set_vsync_mode_and_event_speed(0);
                 g_world_menu_description_text_id = 0;
                 world_menu_reset_selection_results();
                 last_menu = g_world_formation_current_menu;
@@ -150,20 +150,20 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
         for (i = 1; i < 16; i++) {
             if (thread_is_running(i) != 0) {
                 buttons = 1;
-                world_menu_stop_unit_status_banner_thread(i);
+                menu_request_thread_stop(i);
             }
         }
         if (thread_is_running(WORLD_THREAD_SLOT_TUTORIAL_TEXT) != 0) {
             buttons = 1;
             world_text_resume_printing(WORLD_THREAD_SLOT_TUTORIAL_TEXT);
         }
-        world_input_update_event_state(g_menu_gfx_context->otag, 0, 0);
+        menu_input_update_event_state_variant(g_menu_gfx_context->otag, 0, 0);
     } while (buttons != 0);
     if (tutorial == 0) {
         main_sound_unload_scenario_mus(g_world_menu_music_slot);
     }
     world_formation_save_records_to_party();
     world_formation_stop_menu_threads();
-    world_script_set_vsync_mode_and_event_speed(0);
+    menu_set_vsync_mode_and_event_speed(0);
     world_formation_reset_menu_context();
 }

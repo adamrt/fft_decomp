@@ -14,7 +14,7 @@ void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable) {
         }
         thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_equipment_ability_panel_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, &g_bunit_character_status_frame_config, 0, 0);
-        thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread);
+        thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_frame_thread_variant);
         thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, &g_bunit_numeric_editor_thread_params, 0, 0);
     } else {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);

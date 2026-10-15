@@ -4,6 +4,10 @@
 /* EVENT/BUNIT.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* screen */
 extern u16 g_bunit_frame_arg;
@@ -164,7 +168,6 @@ s32 bunit_job_is_current_mastered(s32 unused_row);
 extern s32 g_bunit_comparison_display_flags;
 extern s32 g_bunit_comparison_display_offset_y;
 extern s32 g_bunit_comparison_display_redraw_request;
-extern u32 g_bunit_comparison_display_thread_params;
 
 /* character status */
 extern u8 g_bunit_character_status_ability_text_image[];
@@ -223,12 +226,8 @@ extern u32 g_bunit_status_display_flags; /* menu_status_panel_flags_e */
 extern s32 g_bunit_status_display_offset_y;
 
 extern s32 g_bunit_status_display_redraw_request;
-extern u32 g_bunit_status_display_thread_params;
 
-void bunit_panel_toggle_comparison_status_thread(s32 enable);
 void bunit_panel_toggle_equipment_and_numeric_editor_threads(s32 enable);
-void bunit_panel_toggle_unit_status_thread(s32 enable);
-void bunit_panel_run_unit_status_thread(void);
 void bunit_unit_build_record_from_stats(const struct unit_stats* unit, bunit_unit_t* record, s32 unused_slot);
 s32 bunit_unit_build_data_list(s32 mode, s32 unit_data, s32 sort_mode);
 
@@ -313,7 +312,6 @@ extern u8 g_bunit_menu_reorder_list_initialized;
 
 extern s16 g_bunit_menu_reorder_list_redraw_request;
 extern s16 g_bunit_menu_reorder_result;
-extern menu_selection_record_t g_bunit_menu_selection_records[BUNIT_MENU_SELECTION_RECORD_COUNT];
 extern menu_button_piece_t g_bunit_slot_sprite_entries[];
 /* Text-section buffers: bunit_menu_run_reorder_list passes g_bunit_text_reorder_list_buffer
  * straight to bunit_text_concatenate_entries as its u8* output string and
@@ -322,8 +320,6 @@ extern menu_button_piece_t g_bunit_slot_sprite_entries[];
 extern u8 g_bunit_text_menu_section[];
 extern u8 g_bunit_unit_list_triangle_menu_open;
 
-void bunit_menu_clear_selection_record(s32 index);
-void bunit_menu_clear_selection_records(void);
 void bunit_menu_dispatch_with_override(menu_instruction_t* script, s32 state, s32 override);
 void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id);
 void bunit_menu_draw_scrollable_list(const menu_instruction_t* script);
@@ -396,18 +392,12 @@ extern oriented_quad_t g_bunit_gfx_blank_cell_rect;
 
 /* Base of the two frame buffers; g_menu_gfx_context alternates between them. */
 extern menu_gfx_context_t* g_bunit_gfx_context_base;
-extern u8 g_bunit_gfx_decreasing_fade_active;
-extern RECT g_bunit_gfx_draw_area;
 extern u16 g_bunit_gfx_draw_area_capacity;
 extern u16 g_bunit_gfx_draw_mode_capacity;
 extern u16 g_bunit_gfx_draw_move_capacity;
 extern u16 g_bunit_gfx_draw_offset_y;
-extern rgb24_t g_bunit_gfx_fade_color;
-extern s16 g_bunit_gfx_fade_intensity;
-extern RECT g_bunit_gfx_fade_rect[];
 extern s16 g_bunit_gfx_falloff_focus_x;
 extern s16 g_bunit_gfx_falloff_focus_y;
-extern u8 g_bunit_gfx_increasing_fade_active;
 extern u16 g_bunit_gfx_line_f2_capacity;
 extern s16 g_bunit_gfx_line_f2_count;
 extern u16 g_bunit_gfx_line_f3_capacity;
@@ -418,8 +408,6 @@ extern s16 g_bunit_gfx_line_g2_count;
 extern s16 g_bunit_gfx_line_g3_count;
 extern u16 g_bunit_gfx_line_g4_capacity;
 extern s16 g_bunit_gfx_line_g4_count;
-extern u16 g_bunit_gfx_otag_count;
-extern s8 g_bunit_gfx_otag_index_locked;
 extern u16 g_bunit_gfx_poly_f3_capacity;
 extern s16 g_bunit_gfx_poly_f3_count;
 extern u16 g_bunit_gfx_poly_f4_capacity;
@@ -430,7 +418,6 @@ extern u16 g_bunit_gfx_poly_ft4_capacity;
 extern u16 g_bunit_gfx_poly_g3_capacity;
 extern s16 g_bunit_gfx_poly_g3_count;
 extern u16 g_bunit_gfx_poly_g4_capacity;
-extern u16 g_bunit_gfx_poly_g4_count;
 extern u16 g_bunit_gfx_poly_gt3_capacity;
 extern s16 g_bunit_gfx_poly_gt3_count;
 extern u16 g_bunit_gfx_poly_gt4_capacity;
@@ -447,15 +434,12 @@ extern s16 g_bunit_gfx_tile_1_count;
 extern u16 g_bunit_gfx_tile_8_capacity;
 extern s16 g_bunit_gfx_tile_8_count;
 extern u16 g_bunit_gfx_tile_capacity;
-extern u16 g_bunit_gfx_tile_count;
-extern s8 g_bunit_gfx_transition_frame;
 extern s16 g_bunit_gfx_window_zoom_percent[];
 extern u8 g_bunit_sprite_cell_sizes[][2];
 
 s32 bunit_gfx_calculate_distance_falloff(s32 x, s32 y, s32 base_value, s32 minimum);
 void bunit_gfx_draw_falloff_shaded_rows(s32 y);
 void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y);
-void bunit_gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
 s32 bunit_gfx_get_fade_state(void);
 void bunit_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otags, POLY_F3* flat_triangles,
     POLY_FT3* textured_triangles, POLY_F4* flat_quads, POLY_FT4* textured_quads, POLY_G3* gouraud_triangles,
@@ -472,8 +456,6 @@ void bunit_gfx_set_transition_frame(s32 frame);
 void bunit_gfx_start_decreasing_fade(void);
 void bunit_gfx_start_increasing_fade(void);
 void bunit_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
-s32 bunit_gfx_update_decreasing_fade(void);
-s32 bunit_gfx_update_increasing_fade(void);
 void bunit_gfx_update_rhombus_cursor_trail(point16_t* target);
 
 /* input */
@@ -493,12 +475,8 @@ extern u32 g_bunit_input_repeat_counter;
 extern s32 g_bunit_input_repeat_counters[16];
 extern u32 g_bunit_input_secondary_repeat;
 extern u32 g_bunit_input_secondary_repeat_counter;
-extern u32 g_bunit_menu_input_active_mask;
-extern u16 g_bunit_menu_input_mask;
-extern u32 g_bunit_menu_input_repeat_mask;
 extern u32 g_bunit_previous_input;
 
-void bunit_input_clear_state(void);
 s32 bunit_input_get_lock_timer(void);
 s32 bunit_input_read_pad1_unless_locked(void);
 bunit_menu_vertical_scroll_direction_e bunit_input_read_page_scroll_direction(void);
@@ -513,15 +491,10 @@ enum {
 };
 
 extern menu_sprite_command_t g_bunit_cmd_row_quad;
-extern u32 g_bunit_cmd_stream_input;
 
-menu_instruction_t* bunit_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
-menu_instruction_t* bunit_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
-menu_instruction_t* bunit_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* instruction);
-void bunit_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
 menu_instruction_t* bunit_cmd_set_otag_index_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_set_semitrans_handler(menu_instruction_t* instruction);
 
@@ -532,9 +505,6 @@ extern const char g_bunit_text_decimal_format[];
 extern u8 g_bunit_text_reorder_list_buffer[];
 extern s32 g_bunit_text_selection_id;
 
-void bunit_text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
-void bunit_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
-void bunit_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
 void bunit_text_start_selection_thread(s32 thread_data);
 
 /* bit streams */

@@ -23,12 +23,12 @@ void world_script_update_tutorial_controller_input(void) {
     current_input = world_input_read_tutorial_or_controller(0);
     if (current_input & PSX_PAD_TRIANGLE) {
         if (g_world_input_triangle_latched != 0) {
-            world_input_clear_state();
+            menu_input_clear_state();
         } else {
             g_world_input_triangle_latched = 1;
-            g_world_input_newly_pressed = PSX_PAD_TRIANGLE;
-            g_world_input_secondary_repeat = PSX_PAD_TRIANGLE;
-            g_world_input_primary_repeat = PSX_PAD_TRIANGLE;
+            g_menu_input_newly_pressed = PSX_PAD_TRIANGLE;
+            g_menu_input_secondary_repeat = PSX_PAD_TRIANGLE;
+            g_menu_input_primary_repeat = PSX_PAD_TRIANGLE;
         }
     } else {
         g_world_input_triangle_latched = 0;
@@ -75,13 +75,13 @@ void world_script_update_tutorial_controller_input(void) {
         if (g_world_script_tutorial_activation_timer >= 10) {
             g_world_script_tutorial_activation_timer = 10;
         }
-        g_world_input_newly_pressed = filtered_input;
+        g_menu_input_newly_pressed = filtered_input;
         for (index = 0; index < 16; index++) {
             s32 mask = 1U << index;
 
-            if (mask & g_world_input_newly_pressed) {
+            if (mask & g_menu_input_newly_pressed) {
                 if (mask & g_world_script_tutorial_previous_input) {
-                    g_world_input_newly_pressed &= ~mask;
+                    g_menu_input_newly_pressed &= ~mask;
                 } else {
                     g_world_script_tutorial_previous_input |= mask;
                 }
@@ -112,15 +112,15 @@ void world_script_update_tutorial_controller_input(void) {
             }
         }
         {
-            u32 newly_pressed = g_world_input_newly_pressed & 0x0ff0;
+            u32 newly_pressed = g_menu_input_newly_pressed & 0x0ff0;
             current_input &= 0xf00ff00f;
             filtered_input &= 0xf00ff00f;
             current_input |= newly_pressed;
             filtered_input |= newly_pressed;
-            g_world_input_primary_repeat = current_input;
-            g_world_input_secondary_repeat = filtered_input;
+            g_menu_input_primary_repeat = current_input;
+            g_menu_input_secondary_repeat = filtered_input;
         }
     }
-    g_world_input_primary_repeat_latched = g_world_input_primary_repeat;
-    g_world_input_secondary_repeat_latched = g_world_input_secondary_repeat;
+    g_world_input_primary_repeat_latched = g_menu_input_primary_repeat;
+    g_world_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }

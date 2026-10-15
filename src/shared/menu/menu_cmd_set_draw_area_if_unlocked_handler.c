@@ -6,7 +6,7 @@
 menu_instruction_t* menu_cmd_set_draw_area_if_unlocked_handler(menu_instruction_t* data) {
     RECT area;
 
-    if (g_bunit_gfx_otag_index_locked == 0) {
+    if (g_gfx_otag_index_locked == 0) {
         area.x = data->draw_area.x;
         area.y = data->draw_area.y;
         area.w = data->draw_area.width;

@@ -11,7 +11,7 @@ void wldcore_calendar_advance_day(void) {
     s32 month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
     s32 day = script_get_variable(EVENT_SCRIPT_VAR_DAY) + 1;
 
-    if (g_wldcore_calendar_days_per_month[month - 1] < day) {
+    if (g_unit_birthday_month_lengths[month - 1] < day) {
         month++;
         if (month == 13) {
             month = 1;

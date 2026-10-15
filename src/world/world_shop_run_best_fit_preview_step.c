@@ -94,8 +94,7 @@ void world_shop_run_best_fit_preview_step(void) {
         g_world_item_preview_stat_detail.state.equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY]
             = g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
         bcopy(staged, g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment, sizeof(staged));
-        world_item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail,
-            &g_world_selected_unit_stat_summary,
+        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_world_selected_unit_stat_summary,
             g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment,
             (u16*)g_world_item_preview_stat_detail.state.equipment);
         g_world_item_preview_stat_detail.state.two_hands
@@ -103,13 +102,13 @@ void world_shop_run_best_fit_preview_step(void) {
                 world_ability_has_two_hands(g_world_formation_selected_unit_index));
         world_menu_toggle_stat_preview_panel_thread(1);
         world_menu_toggle_preview_stats_window(1);
-        g_world_status_display_thread_params.redraw_request = 1;
+        g_menu_status_display_thread_params.redraw_request = 1;
         g_world_preview_stats_thread_params.redraw_request = 1;
         g_world_shop_best_fit_menu_open = 1;
         g_world_formation_unit_cycle_mode = 1;
         g_sound_suppressed = 1;
     }
-    i = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_best_fit_menu);
+    i = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_best_fit_menu);
     if (i == 0) {
         if (g_world_menu_selection_results[5] == 0) {
             g_world_menu_sound_effect_id = MAIN_SFX_EQUIP;
@@ -119,7 +118,7 @@ void world_shop_run_best_fit_preview_step(void) {
         }
         world_menu_toggle_stat_preview_panel_thread(0);
         world_menu_toggle_preview_stats_window(0);
-        g_world_status_display_thread_params.redraw_request = 1;
+        g_menu_status_display_thread_params.redraw_request = 1;
         g_world_shop_best_fit_menu_open = 0;
         g_world_formation_unit_cycle_mode = 2;
         if (g_world_menu_selection_results[5] == 0) {

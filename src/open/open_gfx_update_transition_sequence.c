@@ -68,7 +68,7 @@ s32 open_gfx_update_transition_sequence(void) {
                     open_gfx_copy_file_image_to_210x180_buffer(image_command & OPEN_GFX_TRANSITION_IMAGE_INDEX_MASK);
                     break;
                 case OPEN_GFX_TRANSITION_START_CROSSFADE:
-                    open_file_wait_for_pending();
+                    file_wait_for_pending_variant();
                     g_open_gfx_image_copy_row_flags[0] = 1;
                     break;
                 }

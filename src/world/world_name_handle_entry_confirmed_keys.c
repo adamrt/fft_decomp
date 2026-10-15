@@ -23,14 +23,14 @@ void world_name_handle_entry_confirmed_keys(void) {
     }
     world_name_update_entry_cursor();
     g_world_name_entry_confirm_message_shown = 0;
-    if ((g_world_input_primary_repeat & (PSX_PAD_CROSS | PSX_PAD_START)) && g_world_name_entry_input_delay >= 10) {
+    if ((g_menu_input_primary_repeat & (PSX_PAD_CROSS | PSX_PAD_START)) && g_world_name_entry_input_delay >= 10) {
         previous = g_world_name_entry_state;
         g_world_name_entry_state = 1;
         g_world_name_entry_saved_state = previous;
     } else {
         g_world_name_entry_confirm_message_shown = 1;
     }
-    if ((g_world_input_primary_repeat & PSX_PAD_CIRCLE) && g_world_name_entry_input_delay >= 10) {
+    if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_world_name_entry_input_delay >= 10) {
         g_world_menu_sound_effect_id = MAIN_SFX_SELECT;
         if (g_world_name_entry_list_cursor == 0) {
             if (g_world_name_entry_cursor_index == 5) {

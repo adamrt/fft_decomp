@@ -9,7 +9,7 @@ void world_menu_update_thread_7_idle_countdown(void) {
 
     if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) != 0) {
         value = 10;
-    } else if (g_world_status_display_thread_params.flags
+    } else if (g_menu_status_display_thread_params.flags
         & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP)) {
         value = 10;
     } else {
@@ -20,6 +20,6 @@ void world_menu_update_thread_7_idle_countdown(void) {
     }
     g_world_input_lockout_timer = value;
     if (g_world_input_lockout_timer != 0) {
-        world_input_clear_state();
+        menu_input_clear_state();
     }
 }

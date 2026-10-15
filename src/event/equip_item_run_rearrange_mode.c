@@ -44,15 +44,15 @@ s32 equip_item_run_rearrange_mode(void) {
             g_equip_item_action_menu.selected_index = 0;
             return MENU_ITEM_LIST_STATE_ACTION;
         }
-        id = g_equip_item_list_entries[picked];
+        id = g_item_list_entries[picked];
         value = id;
-        g_equip_item_list_entries[picked] = g_equip_item_list_entries[cursor];
-        g_equip_item_list_entries[cursor] = id;
-        equip_item_store_category_list(g_equip_selected_slot, g_equip_item_list_entries);
-        equip_menu_init_scrollable_list_core(g_equip_item_list_entries, g_equip_menu_selected_list_index,
-            g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        g_item_list_entries[picked] = g_item_list_entries[cursor];
+        g_item_list_entries[cursor] = id;
+        equip_item_store_category_list(g_equip_selected_slot, g_item_list_entries);
+        equip_menu_init_scrollable_list_core(
+            g_item_list_entries, g_equip_menu_selected_list_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         equip_gfx_set_transition_frame(10);
-        equip_item_collect_stat_deltas(
+        item_collect_stat_deltas_variant(
             value, &g_equip_selected_unit_stat_summary, &g_equip_item_preview_stat_detail, 0);
         g_equip_item_numeric_panel_redraw = 1;
         g_equip_rearrange_active = 0;
@@ -80,12 +80,12 @@ s32 equip_item_run_rearrange_mode(void) {
     }
     if (g_equip_menu_selected_list_index != g_equip_rearrange_preview_cursor) {
         if (g_equip_menu_list_entry_count != 0) {
-            value = g_equip_item_list_entries[g_equip_menu_selected_list_index];
+            value = g_item_list_entries[g_equip_menu_selected_list_index];
         } else {
             value = 0;
         }
         g_equip_rearrange_preview_cursor = g_equip_menu_selected_list_index;
-        equip_item_collect_stat_deltas(
+        item_collect_stat_deltas_variant(
             value, &g_equip_selected_unit_stat_summary, &g_equip_item_preview_stat_detail, 0);
         g_equip_item_numeric_panel_redraw = 1;
     }

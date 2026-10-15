@@ -21,7 +21,7 @@ void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
     g_equip_gfx_line_g2_count = 0;
     g_equip_gfx_line_g3_count = 0;
     g_equip_gfx_line_g4_count = 0;
-    g_equip_gfx_tile_count = 0;
+    g_gfx_tile_count = 0;
     g_equip_gfx_tile_1_count = 0;
     g_equip_gfx_tile_8_count = 0;
     g_equip_gfx_tile_16_count = 0;

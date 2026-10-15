@@ -420,8 +420,10 @@ func (p project) shareSymbolsCommand(args []string) error {
 		if err := validateSourceDefinition(p.root, keptSource, symbol); err != nil {
 			return err
 		}
-		// Rebind every listed entry, and every entry anywhere that compiled
-		// from a member's old file (aliases of the same body).
+		// Rebind every listed entry, and every entry that compiled from the
+		// kept file at its old path (aliases of the same body). Other members'
+		// old files are left to their remaining users and removed only when
+		// none remain.
 		oldSources := map[string]bool{}
 		for _, item := range members {
 			oldSources[item.m.sourceOf(item.f)] = true
@@ -432,11 +434,11 @@ func (p project) shareSymbolsCommand(args []string) error {
 		for _, m := range config.Modules {
 			for index := range m.Functions {
 				f := &m.Functions[index]
-				listed := false
+				listed := m.sourceOf(f) == keptSource && keptSource != clean
 				for _, item := range members {
 					listed = listed || (item.m == m && item.f.Name == f.Name)
 				}
-				if !listed && !oldSources[m.sourceOf(f)] {
+				if !listed {
 					continue
 				}
 				f.Source = clean

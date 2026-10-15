@@ -36,16 +36,16 @@ s32 bunit_ability_update_list_menu(void) {
         g_menu_row_callbacks[14].value = menu_ability_is_non_action_unlearned;
         g_bunit_ability_list_confirm_prompt_state = 0;
         g_menu_row_callbacks[15].value = menu_ability_is_action;
-        bunit_menu_clear_selection_record(10);
-        bunit_menu_clear_selection_record(11);
-        bunit_menu_clear_selection_record(12);
-        bunit_menu_clear_selection_record(13);
+        menu_clear_selection_record(10);
+        menu_clear_selection_record(11);
+        menu_clear_selection_record(12);
+        menu_clear_selection_record(13);
         rect.x = 0x100;
         rect.y = 0xC8;
         rect.w = 0x14;
         rect.h = 0x10;
         g_bunit_ability_list_job_name_row[0] = g_bunit_job_selected_id;
-        bunit_text_render_id_rows_to_vram(
+        text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_bunit_ability_list_job_name_row, &rect, 0);
         g_menu_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
         bunit_ability_build_list(
@@ -60,18 +60,18 @@ s32 bunit_ability_update_list_menu(void) {
     } else {
         g_bunit_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
     }
-    if (g_bunit_menu_input_active_mask & PSX_PAD_CROSS) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_bunit_ability_list_ready = 0;
         g_bunit_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
-    if (g_bunit_menu_input_active_mask & PSX_PAD_CIRCLE) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         g_bunit_ability_list_ready = 0;
         g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
     category = bunit_menu_update_horizontal_selection_and_mark_change(
-        4, 0, g_bunit_menu_input_repeat_mask, MAIN_SFX_PAGE_SWITCH);
+        4, 0, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (category != g_menu_ability_category) {
         menu_set_selection_record(g_menu_ability_category + 10, g_bunit_menu_list_selected_index,
             g_menu_scroll_base_index, g_menu_ability_entries);
@@ -84,7 +84,7 @@ s32 bunit_ability_update_list_menu(void) {
         bunit_gfx_set_transition_frame(10);
     }
     bunit_menu_dispatch_with_override(
-        &g_bunit_ability_list_menu_script, g_bunit_menu_input_active_mask, g_menu_input_lock_mode);
+        &g_bunit_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     rect.x = 0x26;
     rect.y = 0x2D;
     rect.w = 0x50;

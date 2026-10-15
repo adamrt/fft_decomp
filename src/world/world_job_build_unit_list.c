@@ -30,10 +30,10 @@ s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode) {
     jobs[count++] = job;
     if (job_is_special_monster(g_world_unit_pointers[unit_index]->identity.job_id) == 0
         && g_world_unit_pointers[unit_index]->uses_monster_skillset == 0) {
-        world_bits_read_primary(1);
+        bits_read_primary(1);
         for (i = 1; i < JOB_ID_GENERIC_COUNT; i++) {
             job = i + JOB_ID_SQUIRE;
-            unlocked = world_bits_read_primary(1);
+            unlocked = bits_read_primary(1);
             if (job == JOB_ID_BARD && (g_world_unit_pointers[unit_index]->gender_flags & UNIT_FLAG_FEMALE)) {
                 continue;
             }

@@ -23,12 +23,12 @@ s32 menu_text_render_glyph_to_4bpp_image(
         stride = position->row_stride * 2;
         dst = image + stride * (position->y + row) + (position->x >> 1);
         for (col = 0; col < 5; col++) {
-            pixel = card_bits_read_primary(2);
+            pixel = bits_read_primary(2);
             if (pixel != 0) {
                 pixel += style * 4;
             }
             byte = pixel;
-            pixel = card_bits_read_primary(2);
+            pixel = bits_read_primary(2);
             if (pixel != 0) {
                 pixel += style * 4;
             }

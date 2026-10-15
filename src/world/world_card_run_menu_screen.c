@@ -83,7 +83,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
         gfx_enqueue_tile(&g_world_card_screen_background_tile, &g_world_gfx_black_tile_color, 0, 0);
         if (g_world_card_menu_step == WORLD_CARD_MENU_STEP_SELECT_SAVE
             && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0) {
-            input = g_world_input_primary_repeat;
+            input = g_menu_input_primary_repeat;
         } else {
             input = 0;
         }
@@ -111,12 +111,12 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 60;
         menu_draw_active_window_frames_variant();
         buttons = PadRead(0) & PSX_PAD_DPAD_MASK;
-        buttons |= g_world_input_newly_pressed & 0xfff;
+        buttons |= g_menu_input_newly_pressed & 0xfff;
         if (thread_is_running(THREAD_SCREEN_SLOT_TEXT) == 0 && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0
             && thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU) == 0) {
             buttons &= 0xff00;
         }
-        world_input_update_event_state(
+        menu_input_update_event_state_variant(
             g_menu_gfx_context->otag + 60, buttons, g_world_gfx_draw_buffer_clip_y == 0 ? 0xf0 : 0);
         world_sound_dispatch_effect();
     }

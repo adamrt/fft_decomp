@@ -154,14 +154,14 @@ menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction
             rect.w = g_equip_menu_list_vram_width * 4;
             rect.h = g_equip_menu_list_row_height * g_equip_menu_list_visible_rows + 10;
             menu_gfx_enqueue_textured_quad(&rect, 0, g_menu_list_scroll_offset + 0x2b, 0, g_menu_gfx_semitransparency,
-                g_menu_atlas_texture_page, g_equip_menu_window_clut, g_menu_gfx_otag_index);
+                g_menu_atlas_texture_page, g_menu_window_clut, g_menu_gfx_otag_index);
         } else {
             rect.x = command->list.x;
             rect.y = command->list.y;
             rect.w = g_equip_menu_list_vram_width * 4;
             rect.h = g_equip_menu_list_row_height * g_equip_menu_list_visible_rows;
             menu_gfx_enqueue_textured_quad(&rect, 0, 0x30, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page,
-                g_equip_menu_window_clut, g_menu_gfx_otag_index);
+                g_menu_window_clut, g_menu_gfx_otag_index);
         }
     }
     if (g_menu_use_alternate_palette == 0) {

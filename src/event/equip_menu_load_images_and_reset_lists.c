@@ -67,10 +67,10 @@ void equip_menu_load_images_and_reset_lists(void) {
     g_equip_text_help_message_id = 0;
     equip_menu_reset_selection_indices();
     equip_item_build_inventory_totals();
-    equip_item_rebuild_category_list(0);
-    equip_item_rebuild_category_list(1);
-    equip_item_rebuild_category_list(2);
-    equip_item_rebuild_category_list(3);
-    equip_item_rebuild_category_list(4);
-    equip_menu_clear_selection_records();
+    item_rebuild_category_list(0);
+    item_rebuild_category_list(1);
+    item_rebuild_category_list(2);
+    item_rebuild_category_list(3);
+    item_rebuild_category_list(4);
+    menu_clear_selection_records();
 }

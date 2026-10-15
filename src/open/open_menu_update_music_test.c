@@ -44,7 +44,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
             g_open_system_runtime_flags
                 ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED | OPEN_SYSTEM_RUNTIME_FLAG_WORLD_MENU_FRAME;
             open_file_build_openbk_header(0, g_open_file_destination);
-            open_file_wait_for_pending();
+            file_wait_for_pending_variant();
             g_open_current_controller_index--;
             open_title_push_menu_controller(0);
         }

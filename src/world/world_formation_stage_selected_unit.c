@@ -26,11 +26,11 @@ void world_formation_stage_selected_unit(void) {
         sizeof(menu_unit_status_identity_t));
     bcopy(&units[g_world_formation_selected_unit_index]->move, &g_world_selected_unit_stat_detail, 0x40);
     world_formation_copy_unit_to_temp(g_world_formation_selected_unit_index, WORLD_FORMATION_PREVIEW_UNIT_INDEX);
-    if (g_world_status_display_thread_params.flags == MENU_STATUS_PANEL_HIDDEN) {
+    if (g_menu_status_display_thread_params.flags == MENU_STATUS_PANEL_HIDDEN) {
         g_world_formation_unit_slide_pending
             = !(units[g_world_formation_selected_unit_index]->gender_flags & UNIT_FLAG_EGG);
     } else {
-        g_world_status_display_thread_params.flags
+        g_menu_status_display_thread_params.flags
             = (g_world_unit_pointers[g_world_formation_selected_unit_index]->gender_flags & UNIT_FLAG_EGG)
             ? MENU_STATUS_PANEL_HIDDEN
             : 0;

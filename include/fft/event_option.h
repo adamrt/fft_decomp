@@ -4,6 +4,10 @@
 /* EVENT/OPTION.OUT: menu screen overlay that runs with BATTLE. */
 
 #include "fft/battle.h"
+#include "fft/bits.h"
+#include "fft/card.h"
+#include "fft/file.h"
+#include "fft/item.h"
 
 /* screen */
 extern s32 g_option_menu_state;
@@ -47,13 +51,11 @@ extern s16 g_option_dead_unit_secondary_result;
 /* menus */
 extern menu_text_layout_t g_option_menu_entry_table[1];
 extern options_menu_page_t g_option_menu_pages[2];
-extern u8 g_option_menu_render_buffer[];
 extern RECT g_option_menu_title_image_rect;
 extern u16 g_option_menu_transition_duration;
 extern s16 g_option_menu_transition_timer;
 extern RECT g_option_menu_value_image_rect;
 
-u8* option_menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 void option_menu_window_frame_thread(void);
 
 /* graphics */

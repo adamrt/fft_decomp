@@ -15,7 +15,7 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
         g_world_shop_hire_fee_confirm_menu.selected_index = 0;
         g_world_shop_hire_result_shown = 0;
         g_world_shop_hire_menu_initialized = 1;
-        g_world_status_display_thread_params.y = 0;
+        g_menu_status_display_thread_params.y = 0;
         D_801CD0EC = 0;
         D_801CD0F4 = 0;
         g_world_formation_unit_banner_enabled = 0;
@@ -28,11 +28,11 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
         }
     }
     if (g_world_shop_hire_result_shown != 0) {
-        if (g_world_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
+        if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_SOLDIER_OFFICE_REOPEN;
         }
     } else {
-        i = world_menu_run_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_shop_hire_menu_thread_data);
+        i = menu_start_managed_thread(WORLD_THREAD_SLOT_UPPER_MENU, &g_world_shop_hire_menu_thread_data);
         if (i == 0) {
             if (g_world_menu_selection_results[0] == 3 || g_world_menu_selection_results[0] == -1) {
                 g_world_shop_hire_menu_initialized = 0;

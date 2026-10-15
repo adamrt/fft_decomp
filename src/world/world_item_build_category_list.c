@@ -27,14 +27,14 @@ s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16*
     for (; item < ITEM_ID_END; item++) {
         entry = item;
         if (mode == ITEM_LIST_MODE_EQUIPPABLE_IN_INVENTORY) {
-            result = world_item_adjust_inventory_count(item, 0);
+            result = item_adjust_inventory_count(item, 0);
         } else {
-            result = world_item_count_owned_and_equipped(item);
+            result = item_get_total_count_variant(item);
         }
         if (result == 0) {
             continue;
         }
-        type = world_item_get_menu_category(entry);
+        type = item_get_menu_category(entry);
         result = 0;
         if (category < 2) {
             result = type < 2;

@@ -8,10 +8,10 @@ s32 world_card_check_selected(void) {
     s32 result;
 
     if (g_world_card_info_pending == 0) {
-        _card_info(g_world_card_selected_slot * 0x10);
+        _card_info(g_card_slot * 0x10);
         g_world_card_info_pending = 1;
     }
-    busy = _card_status(g_world_card_selected_slot) & 1;
+    busy = _card_status(g_card_slot) & 1;
     result = card_io_poll_bios_event_result();
     if (busy != 0 && result == CARD_IO_RESULT_PENDING) {
         result = CARD_IO_RESULT_TIMEOUT;
@@ -19,7 +19,7 @@ s32 world_card_check_selected(void) {
     if (result >= CARD_IO_RESULT_COMPLETE) {
         g_world_card_info_pending = 0;
         if (result > CARD_IO_RESULT_COMPLETE) {
-            result = world_card_poll_info_with_retries(g_world_card_selected_slot * 0x10, 2);
+            result = world_card_poll_info_with_retries(g_card_slot * 0x10, 2);
         }
     }
     if (result == CARD_IO_RESULT_ERROR) {

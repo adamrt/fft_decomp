@@ -36,7 +36,7 @@ void card_save_run_menu(s32 unused) {
     s16 music_slot;
     DIRENTRY save_buffer[15];
 
-    g_card_gfx_otag_length = 0x40;
+    g_gfx_otag_count = 0x40;
     g_card_gfx_poly_ft4_capacity = 0x258;
     g_card_gfx_tile_capacity = 10;
     card_gfx_init_contexts(context_storage, otag_storage, 0, 0, 0, g_card_gfx_poly_ft4_buffers, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -52,15 +52,15 @@ void card_save_run_menu(s32 unused) {
     thread_set_parameters(THREAD_BORROWED_SLOT_CARD_BACKDROP, 0, 0, 0);
     g_card_save_initial_prompt_timer = 0;
 
-    while (card_gfx_update_increasing_fade() != 0) {
+    while (gfx_update_increasing_fade() != 0) {
         card_gfx_submit_frame_and_swap_buffers(0, 0);
         card_input_update_suppressed_during_fade();
-        card_gfx_update_decreasing_fade();
-        card_gfx_enqueue_tile(&g_card_gfx_fullscreen_fade_rect, &g_card_gfx_fade_overlay_color, 0, 0);
+        gfx_update_decreasing_fade();
+        gfx_enqueue_tile(&g_card_gfx_fullscreen_fade_rect, &g_card_gfx_fade_overlay_color, 0, 0);
 
         menu_input = g_card_save_menu_state == CARD_SAVE_MENU_SELECT_SAVE
                 && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0
-            ? g_card_input_primary_repeat
+            ? g_menu_input_primary_repeat
             : 0;
         if (g_card_save_menu_state >= CARD_SAVE_MENU_SELECT_SAVE && g_card_save_menu_state <= CARD_SAVE_MENU_WRITING) {
             card_save_update_and_draw_slot_list(menu_input);
@@ -88,13 +88,14 @@ void card_save_run_menu(s32 unused) {
         g_gfx_current_otag_entry = g_card_gfx_context->otag + 0x3c;
         menu_draw_active_window_frames_variant();
         input = PadRead(0) & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT);
-        buttons = g_card_input_newly_pressed & 0x0fff;
+        buttons = g_menu_input_newly_pressed & 0x0fff;
         input |= buttons;
         if (thread_is_running(THREAD_SCREEN_SLOT_TEXT) == 0 && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0
             && thread_is_running(14) == 0) {
             input &= 0xff00;
         }
-        card_input_update_event_state(g_card_gfx_context->otag + 0x3c, input, g_card_gfx_drawenv_y == 0 ? 0xf0 : 0);
+        menu_input_update_event_state_variant(
+            g_card_gfx_context->otag + 0x3c, input, g_card_gfx_drawenv_y == 0 ? 0xf0 : 0);
 
         if (g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE || g_sound_pending_sfx_id == MAIN_SFX_CANCEL) {
             g_card_sound_queued_effect_id = g_sound_pending_sfx_id;

@@ -125,7 +125,7 @@ void wldcore_init_world_map_state(void) {
         day = 1;
         script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_MONTH, 1);
         script_set_variable(EVENT_SCRIPT_VAR_PLAYER_BIRTH_DAY, day);
-        day_of_year = wldcore_calendar_calculate_day_of_year(month, day);
+        day_of_year = unit_birthday_calculate_day_of_year(month, day);
         wldcore_calendar_convert_date_to_zodiac(&month, &day);
         party = main_party_get_unit(0);
         party->birthday_day = day_of_year;

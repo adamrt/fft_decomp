@@ -12,7 +12,7 @@ void wldcore_load_scratch_data_blocking(void) {
     s32 unused_stack_slot[2];
 
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_RESTART) == 0) {
-        wldcore_file_wait_then_build_header(
+        file_wait_then_build_header(
             &g_main_file_cd_state, DISC_SECTOR_WORLD_WLDTEX_TM2, 0x86, g_wldcore_scratch_buffer);
         while (g_main_file_cd_state.state != MAIN_FILE_LOAD_STATE_IDLE) {
             wldcore_file_poll_vram_image_stream(&g_main_file_cd_state);

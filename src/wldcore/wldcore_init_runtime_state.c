@@ -8,7 +8,7 @@ void wldcore_init_runtime_state(void) {
     SetDispMask(0);
     g_wldcore_map_projection_state.marker.sub_kind
         = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
-    wldcore_wait_for_file_load();
+    file_wait_for_pending_variant();
     count = GsGetActiveBuff();
     g_active_graphics_buffer_index = count;
     GsSetWorkBase(g_wldcore_gfx_world_primitive_buffers + count * 0xE000);

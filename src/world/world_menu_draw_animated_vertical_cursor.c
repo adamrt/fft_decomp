@@ -82,7 +82,7 @@ void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s
     g_world_vertical_cursor_quad.y3 = position->y + y_end;
     g_world_vertical_cursor_quad.clut = front_clut;
     g_world_vertical_cursor_quad.tpage = g_world_menu_icon_tpage;
-    gfx_enqueue_textured_quad_corners(&g_world_vertical_cursor_quad, 0, 0, g_world_menu_draw_priority);
+    gfx_enqueue_textured_quad_corners(&g_world_vertical_cursor_quad, 0, 0, g_menu_gfx_otag_index);
 
     g_world_vertical_cursor_quad.x0 = position->x;
     g_world_vertical_cursor_quad.y0 = y_offset + position->y + 2;
@@ -94,5 +94,5 @@ void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s
     g_world_vertical_cursor_quad.y3 = position->y + y_end + 2;
     g_world_vertical_cursor_quad.clut = back_clut;
     g_world_vertical_cursor_quad.tpage = 0x5F;
-    gfx_enqueue_textured_quad_corners(&g_world_vertical_cursor_quad, 0, 1, g_world_menu_draw_priority);
+    gfx_enqueue_textured_quad_corners(&g_world_vertical_cursor_quad, 0, 1, g_menu_gfx_otag_index);
 }

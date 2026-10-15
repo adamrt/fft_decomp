@@ -25,11 +25,11 @@ s32 world_menu_handle_remove_all_equipment(void) {
             world_menu_draw_animated_cursor(&g_world_remove_all_equipment_cursor_point, &value, g_menu_input_lock_mode);
         }
     }
-    if (g_world_input_primary_repeat & PSX_PAD_RIGHT) {
+    if (g_menu_input_primary_repeat & PSX_PAD_RIGHT) {
         g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
         return 0;
     }
-    if (g_world_input_primary_repeat & PSX_PAD_CIRCLE) {
+    if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         changed = 0;
         for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
             if (g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[i] != ITEM_ID_NOTHING) {

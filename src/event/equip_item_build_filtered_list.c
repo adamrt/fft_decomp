@@ -24,10 +24,10 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
     count = 0;
     for (; item_id < ITEM_ID_END; item_id++) {
         entry = item_id;
-        if (equip_item_get_total_count(item_id) == 0) {
+        if (item_get_total_count_variant(item_id) == 0) {
             continue;
         }
-        item_category = equip_item_get_menu_category(item_id);
+        item_category = item_get_menu_category(item_id);
         matches = 0;
         if (category < 2) {
             matches = item_category < 2;

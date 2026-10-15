@@ -23,11 +23,11 @@ void equip_input_update_with_message_state(void) {
     menu_input_update_controller();
     frame = equip_gfx_get_transition_frame();
     if (frame >= 1 && frame <= 3) {
-        equip_input_clear_state();
+        menu_input_clear_state();
     } else {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
         if (running != 0) {
-            equip_input_clear_state();
+            menu_input_clear_state();
             if (g_equip_text_thread_running_state != 0) {
                 state = 2;
             } else {

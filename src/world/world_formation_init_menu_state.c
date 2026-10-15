@@ -27,15 +27,15 @@ void world_formation_init_menu_state(void) {
     g_world_menu_order_unit_open = 0;
     /* Through the records rather than the member scalars (offset_y, flags,
      * highlight): the target addresses these stores from one base each. */
-    g_world_status_display_thread_params.y = 0x90;
-    g_world_status_display_thread_params.flags = 0;
-    g_world_status_display_thread_params.style = 0;
-    g_world_comparison_display_thread_params.style = 0;
+    g_menu_status_display_thread_params.y = 0x90;
+    g_menu_status_display_thread_params.flags = 0;
+    g_menu_status_display_thread_params.style = 0;
+    g_menu_comparison_display_thread_params.style = 0;
     g_world_change_banner_panel_thread_params.style = 0;
     g_world_stat_preview_panel_thread_params.style = 0;
     g_world_ability_panel_thread_params.style = 0;
     g_world_equipment_ability_panel_thread_params.style = 0;
-    g_world_numeric_editor_thread_params.style = 0;
+    g_menu_numeric_panel_params.style = 0;
     g_world_preview_stats_thread_params.style = 0;
     g_world_preview_stats_thread_params.y = 2;
     g_world_formation_triangle_menu.selected_index = 0;

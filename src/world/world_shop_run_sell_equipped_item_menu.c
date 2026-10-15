@@ -29,7 +29,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
         }
     } else {
         if (g_world_shop_sell_equipped_result_shown != 0) {
-            if (g_world_input_primary_repeat
+            if (g_menu_input_primary_repeat
                 & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_DPAD_MASK)) {
                 thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80d, 0);
                 g_world_shop_sell_equipped_result_shown = 0;
@@ -37,7 +37,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
         } else if (g_world_shop_sell_equipped_prompt_active == 0) {
             g_world_shop_sell_equipped_slot
                 = world_menu_update_vertical_selection_and_mark_change(WORLD_EQUIPMENT_SLOT_COUNT,
-                    WORLD_MENU_CURSOR_REMOVE_SLOT, g_world_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
+                    WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
             if (g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[g_world_shop_sell_equipped_slot]
                 != ITEM_ID_NOTHING) {
                 text_id = (g_world_unit_pointers[g_world_formation_selected_unit_index]
@@ -47,7 +47,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
             } else {
                 text_id = -1;
             }
-            input = g_world_input_primary_repeat;
+            input = g_menu_input_primary_repeat;
             g_world_menu_description_text_id = text_id;
             if (input & PSX_PAD_CIRCLE) {
                 item = g_world_unit_pointers[g_world_formation_selected_unit_index]
@@ -67,7 +67,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
         } else {
             g_world_menu_description_text_id = 0;
             g_sound_suppressed = g_world_shop_sell_equipped_prompt_active
-                = world_menu_run_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_sell_equipped_menu);
+                = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_sell_equipped_menu);
             if (g_world_shop_sell_equipped_prompt_active == 0) {
                 if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 0) {
                     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf811, 0);

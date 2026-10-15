@@ -119,9 +119,9 @@ void world_card_build_save_image(s32 slot) {
         parity = 0;
         world_bit_cursor_set_secondary(block);
         for (j = 0; j < 0x400; j++) {
-            parity += world_bits_read_secondary(1);
+            parity += bits_read_secondary(1);
         }
         block += 0x80;
-        world_bits_write_primary(parity & 1);
+        bits_write_primary(parity & 1);
     }
 }

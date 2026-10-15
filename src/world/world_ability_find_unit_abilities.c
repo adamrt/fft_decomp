@@ -71,7 +71,7 @@ s32 world_ability_find_unit_abilities(s16 unit, s16 job, s32 kind, s16* out, s32
             }
             learned = 1;
         } else {
-            learned = world_bits_read_primary(1);
+            learned = bits_read_primary(1);
         }
         id = abilities[i];
         if (id == 0) {
