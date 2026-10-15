@@ -62,9 +62,11 @@ units:
   - {name: state_unit_moving_and_map_change, source: src/battle/state_unit_moving_and_map_change.c}
   - {name: status_transparent_and_charging, source: src/battle/status_transparent_and_charging.c}
   - {name: target_tile_background_colors, source: src/battle/target_tile_background_colors.c}
+  - {name: text, source: src/event/text.c}
   - {name: text_cursor_and_backreferences, source: src/event/text_cursor_and_backreferences.c}
   - {name: text_display_messages, source: src/event/text_display_messages.c}
-  - {name: thread, source: src/thread/thread.c}
+  - {name: thread, source: src/event/thread.c}
+  - {name: thread_parameters_and_globals, source: src/event/thread_parameters_and_globals.c}
   - {name: tile_data_and_formulas_1, source: src/battle/tile_data_and_formulas_1.c}
   - {name: unit_animation_and_palette_updates, source: src/battle/unit_animation_and_palette_updates.c}
   - {name: unit_coords_and_return_stubs, source: src/event/unit_coords_and_return_stubs.c}
@@ -1145,13 +1147,13 @@ functions:
   - {addr: 0x8014ca1c, size: 28, name: thread_is_running, hash: d10e3403d7fec970, unit: thread}
   - {addr: 0x8014ca38, size: 32, name: thread_set_parameters, hash: 40bfd9d6b347f675, unit: thread}
   - {addr: 0x8014ca58, size: 40, name: thread_set_four_parameters, hash: f24ec1f8ce5a962b, unit: thread}
-  - {addr: 0x8014cbb4, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, source: src/thread/thread_get_current_global_pointer.c}
-  - {addr: 0x8014cbc0, size: 52, name: thread_get_current_parameter_1_variant, hash: 4427bc41b35c9c1f, source: src/thread/battle/thread_get_current_parameter_1_variant.c}
-  - {addr: 0x8014cbf4, size: 52, name: thread_get_current_parameter_2_variant, hash: 7ffeb5877d79f219, source: src/thread/battle/thread_get_current_parameter_2_variant.c}
-  - {addr: 0x8014cc28, size: 52, name: thread_get_current_parameter_3_variant, hash: d1fc2dccdda1feee, source: src/thread/battle/thread_get_current_parameter_3_variant.c}
-  - {addr: 0x8014cc5c, size: 56, name: thread_is_previous_running_variant, hash: f14ee857209e40f9, source: src/thread/battle/thread_is_previous_running_variant.c}
-  - {addr: 0x8014cc94, size: 36, name: thread_is_running_asm_variant, hash: 1057a9f27abe5a5a, source: src/thread/battle/thread_is_running_asm_variant.c}
-  - {addr: 0x8014ce78, size: 60, name: text_skip_to_entry, hash: 90cff8271922ef07, source: src/text/text_skip_to_entry.c}
+  - {addr: 0x8014cbb4, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, unit: thread_parameters_and_globals}
+  - {addr: 0x8014cbc0, size: 52, name: thread_get_current_parameter_1_variant, hash: 4427bc41b35c9c1f, unit: thread_parameters_and_globals}
+  - {addr: 0x8014cbf4, size: 52, name: thread_get_current_parameter_2_variant, hash: 7ffeb5877d79f219, unit: thread_parameters_and_globals}
+  - {addr: 0x8014cc28, size: 52, name: thread_get_current_parameter_3_variant, hash: d1fc2dccdda1feee, unit: thread_parameters_and_globals}
+  - {addr: 0x8014cc5c, size: 56, name: thread_is_previous_running_variant, hash: f14ee857209e40f9, unit: thread_parameters_and_globals}
+  - {addr: 0x8014cc94, size: 36, name: thread_is_running_asm_variant, hash: 1057a9f27abe5a5a, unit: thread_parameters_and_globals}
+  - {addr: 0x8014ce78, size: 60, name: text_skip_to_entry, hash: 90cff8271922ef07, unit: text}
   - {addr: 0x80174370, size: 88, name: move_get_weather_terrain_cost, hash: 93bdb40ee3440793, unit: move_pathing_and_target_tiles}
   - {addr: 0x801743c8, size: 104, name: battle_unit_get_chocobo_mount_state, hash: 7fbe3284351b693c, unit: move_pathing_and_target_tiles}
   - {addr: 0x80174430, size: 1884, name: move_store_unit_movement_to_scratchpad, hash: 24f5bfdb9efb73c1, unit: move_pathing_and_target_tiles}

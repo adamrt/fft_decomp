@@ -40,9 +40,11 @@ units:
   - {name: script_unit_helpers_and_modal_sfx, source: src/event/script_unit_helpers_and_modal_sfx.c}
   - {name: script_unit_instructions, source: src/event/script_unit_instructions.c}
   - {name: sound_music_track_loading, source: src/sound/sound_music_track_loading.c}
+  - {name: text, source: src/event/text.c}
   - {name: text_cursor_and_backreferences, source: src/event/text_cursor_and_backreferences.c}
   - {name: text_display_messages, source: src/event/text_display_messages.c}
-  - {name: thread, source: src/thread/thread.c}
+  - {name: thread, source: src/event/thread.c}
+  - {name: thread_parameters_and_globals, source: src/event/thread_parameters_and_globals.c}
   - {name: unit_coords_and_return_stubs, source: src/event/unit_coords_and_return_stubs.c}
   - {name: world_card_file_io, source: src/card/world/world_card_file_io.c}
   - {name: world_formation_display_and_messages, source: src/world/world_formation_display_and_messages.c}
@@ -484,13 +486,13 @@ functions:
   - {addr: 0x800ffeec, size: 28, name: thread_is_running, hash: 22d1fa2a224de3cd, unit: thread}
   - {addr: 0x800fff08, size: 32, name: thread_set_parameters, hash: 9a58f319d509b5e5, unit: thread}
   - {addr: 0x800fff28, size: 40, name: thread_set_four_parameters, hash: 5d14fd3dbdba4502, unit: thread}
-  - {addr: 0x80100084, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, source: src/thread/thread_get_current_global_pointer.c}
-  - {addr: 0x80100090, size: 52, name: thread_get_current_parameter_1_variant, hash: 6e27c290b74e8721, source: src/thread/world/thread_get_current_parameter_1_variant.c}
-  - {addr: 0x801000c4, size: 52, name: thread_get_current_parameter_2_variant, hash: 520e69329eb48696, source: src/thread/world/thread_get_current_parameter_2_variant.c}
-  - {addr: 0x801000f8, size: 52, name: thread_get_current_parameter_3_variant, hash: 2eb16d761d6d87fe, source: src/thread/world/thread_get_current_parameter_3_variant.c}
-  - {addr: 0x8010012c, size: 56, name: thread_is_previous_running_variant, hash: 0a6edd120247a375, source: src/thread/world/thread_is_previous_running_variant.c}
-  - {addr: 0x80100164, size: 36, name: thread_is_running_asm_variant, hash: d9c5668fe09910ef, source: src/thread/world/thread_is_running_asm_variant.c}
-  - {addr: 0x80100348, size: 60, name: text_skip_to_entry, hash: 90cff8271922ef07, source: src/text/text_skip_to_entry.c}
+  - {addr: 0x80100084, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, unit: thread_parameters_and_globals}
+  - {addr: 0x80100090, size: 52, name: thread_get_current_parameter_1_variant, hash: 6e27c290b74e8721, unit: thread_parameters_and_globals}
+  - {addr: 0x801000c4, size: 52, name: thread_get_current_parameter_2_variant, hash: 520e69329eb48696, unit: thread_parameters_and_globals}
+  - {addr: 0x801000f8, size: 52, name: thread_get_current_parameter_3_variant, hash: 2eb16d761d6d87fe, unit: thread_parameters_and_globals}
+  - {addr: 0x8010012c, size: 56, name: thread_is_previous_running_variant, hash: 0a6edd120247a375, unit: thread_parameters_and_globals}
+  - {addr: 0x80100164, size: 36, name: thread_is_running_asm_variant, hash: d9c5668fe09910ef, unit: thread_parameters_and_globals}
+  - {addr: 0x80100348, size: 60, name: text_skip_to_entry, hash: 90cff8271922ef07, unit: text}
   - {addr: 0x80100430, size: 480, name: menu_draw_text_columns, hash: ea0c5d112530bb05, source: src/menu/menu_draw_text_columns.c}
   - {addr: 0x80100610, size: 636, name: menu_redraw_text_page_on_scroll, hash: 327edc74c76a57e0, source: src/menu/menu_redraw_text_page_on_scroll.c}
   - {addr: 0x8010088c, size: 3184, name: menu_run_at_list_variant, hash: 632132e7dd8d11d5, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/menu/world/menu_run_at_list_variant.c}

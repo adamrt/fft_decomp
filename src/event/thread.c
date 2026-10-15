@@ -1,4 +1,5 @@
-/* Thread start/resume/suspend/exit, scheduler reset, waits, running test and parameters. */
+/* Thread, one object of the library BATTLE and WORLD link in the same order; cuts inside the library are chosen by
+ * topic. */
 
 #include "fft/thread.h"
 #include "psx/types.h"
