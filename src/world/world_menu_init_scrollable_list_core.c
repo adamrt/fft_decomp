@@ -6,19 +6,19 @@ void world_menu_init_scrollable_list_core(const s16* values, s32 value, u8* text
     g_world_menu_list_text_table = text_table;
 
     if (values != 0) {
-        g_world_menu_option_count = 0;
-        while (g_world_menu_list_entry_ids[g_world_menu_option_count] != -1) {
-            g_world_menu_option_count++;
+        g_menu_list_entry_count = 0;
+        while (g_world_menu_list_entry_ids[g_menu_list_entry_count] != -1) {
+            g_menu_list_entry_count++;
         }
     }
 
-    g_world_menu_cursor_position = value;
+    g_menu_list_selected_index = value;
     if (value == 0) {
-        g_world_menu_scroll_offset = 0;
+        g_menu_scroll_base_index = 0;
     }
     g_menu_gfx_otag_index = 0;
     g_world_menu_use_scroll_position = 0;
-    g_world_menu_scroll_pixel_offset = 0;
+    g_menu_list_scroll_offset = 0;
     g_world_menu_sprite_color.r = 0x80;
     g_world_menu_sprite_color.g = 0x80;
     g_world_menu_sprite_color.b = 0x80;

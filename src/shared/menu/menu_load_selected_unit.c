@@ -19,7 +19,7 @@ void menu_load_selected_unit(void) {
     u8 field_value;
     s16 list_value;
 
-    unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_battle_id);
+    unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     editor = &g_menu_selected_unit_fields.state;
     if (unit != 0) {
         menu_copy_unit_data_to_status_billboard_variant(unit, &g_menu_comparison_unit_status);

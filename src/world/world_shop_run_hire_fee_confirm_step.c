@@ -10,7 +10,7 @@
  */
 void world_shop_run_hire_fee_confirm_step(void) {
     s16 choice;
-    g_world_menu_description_text_id = 0;
+    g_menu_help_message_text_id = 0;
     if (g_world_shop_hire_fee_message_wait != 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_SOLDIER_OFFICE_REOPEN;

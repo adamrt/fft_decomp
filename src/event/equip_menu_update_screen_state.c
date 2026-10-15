@@ -37,7 +37,7 @@ void equip_menu_update_screen_state(void) {
     if (state == EQUIP_SCREEN_STATE_COMMAND_MENU) {
         value_ptr = &g_equip_menu_result_rows[0];
         mode = *value_ptr;
-        g_equip_text_help_message_id = g_equip_command_menu.selected_index + 0x1029;
+        g_menu_help_message_text_id = g_equip_command_menu.selected_index + 0x1029;
         if (mode == 1) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
             equip_menu_reset_selection_indices();

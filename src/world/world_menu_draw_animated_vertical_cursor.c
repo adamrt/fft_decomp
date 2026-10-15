@@ -64,11 +64,11 @@ void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s
         *state = 0;
     }
     if (mode != 0) {
-        front_clut = g_world_menu_clut_front_alt;
-        back_clut = g_world_menu_clut_back_alt;
+        front_clut = g_menu_cursor_mode1_foreground_clut;
+        back_clut = g_menu_cursor_mode1_background_clut;
     } else {
-        front_clut = g_world_menu_clut_front;
-        back_clut = g_world_menu_clut_back;
+        front_clut = g_menu_cursor_mode0_foreground_clut;
+        back_clut = g_menu_cursor_mode0_background_clut;
     }
 
     g_world_vertical_cursor_quad.x0 = position->x;

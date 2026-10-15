@@ -14,8 +14,8 @@ menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instructio
         y = instruction->sprite.sprite.y;
     } else {
         step = g_world_menu_row_height;
-        y = step * g_world_menu_scroll_row_offset + instruction->sprite.sprite.y - g_world_menu_scroll_pixel_offset;
-        if (g_world_menu_scroll_pixel_offset < 0) {
+        y = step * g_world_menu_scroll_row_offset + instruction->sprite.sprite.y - g_menu_list_scroll_offset;
+        if (g_menu_list_scroll_offset < 0) {
             y -= step;
         }
     }

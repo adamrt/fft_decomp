@@ -11,7 +11,7 @@ void world_shop_run_fur_menu_step(void) {
     s32 i;
 
     if (g_world_shop_fur_opened == 0) {
-        g_world_menu_cursor_position = 0;
+        g_menu_list_selected_index = 0;
         menu_set_vsync_mode_and_event_speed(0);
         g_world_shop_fur_has_secret_hunt = 0;
         g_world_shop_fur_has_poached_stock = 0;

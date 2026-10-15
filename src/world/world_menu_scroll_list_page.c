@@ -10,27 +10,27 @@ void world_menu_scroll_list_page(s32 dir, menu_instruction_t* instruction) {
     s16 delta;
     s32 unused[2]; /* 8 frame bytes no instruction uses */
 
-    old = g_world_menu_scroll_offset;
-    delta = g_world_menu_cursor_position - g_world_menu_scroll_offset;
+    old = g_menu_scroll_base_index;
+    delta = g_menu_list_selected_index - g_menu_scroll_base_index;
     if (dir == -1) {
-        g_world_menu_scroll_offset -= instruction->list.visible_rows;
-        if (g_world_menu_scroll_offset < 0) {
-            g_world_menu_scroll_offset = 0;
+        g_menu_scroll_base_index -= instruction->list.visible_rows;
+        if (g_menu_scroll_base_index < 0) {
+            g_menu_scroll_base_index = 0;
         }
     } else if (dir == 1) {
-        g_world_menu_scroll_offset += instruction->list.visible_rows;
+        g_menu_scroll_base_index += instruction->list.visible_rows;
         /* `dir` is 1 here. */
-        if (g_world_menu_option_count - (g_world_menu_scroll_offset + dir) < instruction->list.visible_rows) {
-            g_world_menu_scroll_offset = g_world_menu_option_count - instruction->list.visible_rows;
+        if (g_menu_list_entry_count - (g_menu_scroll_base_index + dir) < instruction->list.visible_rows) {
+            g_menu_scroll_base_index = g_menu_list_entry_count - instruction->list.visible_rows;
         }
     }
-    g_world_menu_cursor_position = g_world_menu_scroll_offset;
+    g_menu_list_selected_index = g_menu_scroll_base_index;
     world_menu_load_scrollable_list_layout(instruction);
-    g_world_menu_cursor_position = delta + g_world_menu_scroll_offset;
-    if (g_world_menu_cursor_position >= g_world_menu_option_count) {
-        g_world_menu_cursor_position = g_world_menu_option_count - 1;
+    g_menu_list_selected_index = delta + g_menu_scroll_base_index;
+    if (g_menu_list_selected_index >= g_menu_list_entry_count) {
+        g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
-    if (old != g_world_menu_scroll_offset) {
+    if (old != g_menu_scroll_base_index) {
         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
 }

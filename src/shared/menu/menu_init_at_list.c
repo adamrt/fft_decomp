@@ -33,10 +33,10 @@ void menu_init_at_list(menu_entry_t* menu) {
         g_option_menu_at_list_flags[index] = 0;
     }
 
-    g_text_section_pointers[TEXT_SECTION_AT_LIST] = g_option_menu_at_list_text;
+    g_text_section_pointers[TEXT_SECTION_AT_LIST] = g_menu_at_list_text;
     entry_count = 0;
     has_special_entry = 0;
-    text = g_option_menu_at_list_text;
+    text = g_menu_at_list_text;
 
     for (index = 0; index < BATTLE_AT_LIST_CAPACITY; index++) {
         unit_stats_t* unit;

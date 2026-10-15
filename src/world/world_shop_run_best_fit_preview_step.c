@@ -90,19 +90,18 @@ void world_shop_run_best_fit_preview_step(void) {
             }
         }
         world_shop_build_fitting_room_best_fit_equipment(
-            g_unit_selected_index, g_world_menu_context_id, g_world_item_preview_stat_detail.state.equipment);
-        g_world_item_preview_stat_detail.state.equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY]
+            g_unit_selected_index, g_world_menu_context_id, g_item_preview_stat_detail.state.equipment);
+        g_item_preview_stat_detail.state.equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY]
             = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
         bcopy(staged, g_world_unit_pointers[g_unit_selected_index]->equipment, sizeof(staged));
-        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
-            g_world_unit_pointers[g_unit_selected_index]->equipment,
-            (u16*)g_world_item_preview_stat_detail.state.equipment);
-        g_world_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
-            g_world_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
+        item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
+            g_world_unit_pointers[g_unit_selected_index]->equipment, (u16*)g_item_preview_stat_detail.state.equipment);
+        g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
+            g_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
         world_menu_toggle_stat_preview_panel_thread(1);
         world_menu_toggle_preview_stats_window(1);
         g_menu_status_display_thread_params.redraw_request = 1;
-        g_world_preview_stats_thread_params.redraw_request = 1;
+        g_menu_preview_stats_thread_params.redraw_request = 1;
         g_world_shop_best_fit_menu_open = 1;
         g_world_formation_unit_cycle_mode = 1;
         g_sound_suppressed = 1;
@@ -132,7 +131,7 @@ void world_shop_run_best_fit_preview_step(void) {
                  * it loads the unit's own slot ONCE at the loop head -- the
                  * `sra ,0xf` lands in the `bgez` delay slot and the same
                  * register is sign-extended again for world_item_get_price. */
-                suggested = g_world_item_preview_stat_detail.state.equipment[i];
+                suggested = g_item_preview_stat_detail.state.equipment[i];
                 shifted = suggested << 16;
                 item = shifted >> 16;
                 current = g_world_unit_pointers[g_unit_selected_index]->equipment[i];

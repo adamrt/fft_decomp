@@ -136,7 +136,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                 g_world_formation_cursor_ot_override = 0;
                 g_world_formation_unit_cycle_mode = 0;
                 menu_set_vsync_mode_and_event_speed(0);
-                g_world_menu_description_text_id = 0;
+                g_menu_help_message_text_id = 0;
                 world_menu_reset_selection_results();
                 last_menu = g_world_formation_current_menu;
             }

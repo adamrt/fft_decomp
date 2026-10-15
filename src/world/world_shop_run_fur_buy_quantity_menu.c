@@ -15,7 +15,7 @@ s32 world_shop_run_fur_buy_quantity_menu(void) {
 
     if (g_world_shop_fur_purchase_result == 0) {
         g_world_shop_fur_purchase_confirm_shown = 0;
-        g_world_shop_fur_purchase_item = g_item_list_entries[g_world_menu_cursor_position];
+        g_world_shop_fur_purchase_item = g_item_list_entries[g_menu_list_selected_index];
         g_world_menu_prompt_active = 1;
         owned = item_get_total_count_variant(g_world_shop_fur_purchase_item);
         if (owned >= 99) {

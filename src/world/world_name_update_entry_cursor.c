@@ -13,7 +13,7 @@ void world_name_update_entry_cursor(void) {
     u32 input;
 
     previous = g_world_name_entry_cursor_index;
-    if (g_world_menu_cursor_position > 0) {
+    if (g_menu_list_selected_index > 0) {
         if (g_world_name_entry_list_cursor == 0) {
             g_world_name_entry_cursor_index = g_world_name_entry_special_to_char_column[previous];
             previous = g_world_name_entry_cursor_index;
@@ -28,10 +28,10 @@ void world_name_update_entry_cursor(void) {
         if (g_menu_input_primary_repeat & PSX_PAD_RIGHT) {
             g_world_name_entry_cursor_index = (g_world_name_entry_cursor_index + 1) % 11;
         }
-        g_world_name_entry_list_cursor = g_world_menu_cursor_position;
+        g_world_name_entry_list_cursor = g_menu_list_selected_index;
         cursor.x = g_world_name_entry_cursor_index * 20 + 2;
-        cursor.y = (g_world_name_entry_list_cursor - g_world_menu_scroll_offset) * 16 + 0x80;
-    } else if (g_world_menu_cursor_position == 0) {
+        cursor.y = (g_world_name_entry_list_cursor - g_menu_scroll_base_index) * 16 + 0x80;
+    } else if (g_menu_list_selected_index == 0) {
         if (g_world_name_entry_list_cursor != 0) {
             g_world_name_entry_cursor_index = g_world_name_entry_char_to_special_column[previous];
             previous = g_world_name_entry_cursor_index;

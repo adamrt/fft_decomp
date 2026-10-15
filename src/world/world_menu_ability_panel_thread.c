@@ -43,7 +43,7 @@ void world_menu_ability_panel_thread(void) {
     } else {
         text = g_world_stat_preview_text_image;
         screen = g_world_stat_preview_panel_frames;
-        state = &g_world_item_preview_stat_detail.state;
+        state = &g_item_preview_stat_detail.state;
         upload = &g_world_equipment_panel_ability_text_rect;
         base = g_world_stat_preview_panel_frames;
         u = 0x50;

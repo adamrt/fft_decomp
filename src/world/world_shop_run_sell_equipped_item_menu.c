@@ -46,7 +46,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
                 text_id = -1;
             }
             input = g_menu_input_primary_repeat;
-            g_world_menu_description_text_id = text_id;
+            g_menu_help_message_text_id = text_id;
             if (input & PSX_PAD_CIRCLE) {
                 item = g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot];
                 if (item == ITEM_ID_NOTHING || (item >> 15) != 0) {
@@ -62,7 +62,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
                 close = 1;
             }
         } else {
-            g_world_menu_description_text_id = 0;
+            g_menu_help_message_text_id = 0;
             g_sound_suppressed = g_world_shop_sell_equipped_prompt_active
                 = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_sell_equipped_menu);
             if (g_world_shop_sell_equipped_prompt_active == 0) {

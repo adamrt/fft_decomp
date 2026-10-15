@@ -63,8 +63,8 @@ void equip_menu_load_images_and_reset_lists(void) {
     rect.w = 0xC;
     rect.h = 1;
     gfx_load_image_and_wait(&rect, buf2);
-    equip_menu_clear_selection_values();
-    g_equip_text_help_message_id = 0;
+    menu_clear_selection_values();
+    g_menu_help_message_text_id = 0;
     equip_menu_reset_selection_indices();
     equip_item_build_inventory_totals();
     item_rebuild_category_list(0);

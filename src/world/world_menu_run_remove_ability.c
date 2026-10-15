@@ -46,7 +46,7 @@ s32 world_menu_run_remove_ability(void) {
         lock_state = 0;
     }
     if (lock_state != 0) {
-        g_world_menu_description_text_id = 0;
+        g_menu_help_message_text_id = 0;
         world_menu_toggle_preview_stats_window(0);
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
@@ -65,10 +65,10 @@ s32 world_menu_run_remove_ability(void) {
     }
     if (g_menu_input_primary_repeat & PSX_PAD_LEFT) {
         world_ability_find_stat_changes_due_to_equipped(
-            &g_world_item_preview_stat_detail, g_world_remove_ability_slots[4], 0);
+            &g_item_preview_stat_detail, g_world_remove_ability_slots[4], 0);
         world_menu_toggle_preview_stats_window(1);
         g_world_clear_abilities_prompt_active = 1;
-        g_world_preview_stats_thread_params.redraw_request = 1;
+        g_menu_preview_stats_thread_params.redraw_request = 1;
         g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
     }
     slot = menu_update_vertical_selection_and_mark_change(
@@ -81,13 +81,13 @@ s32 world_menu_run_remove_ability(void) {
     world_menu_draw_animated_cursor(
         &g_world_remove_ability_cursor_point, &g_world_remove_ability_cursor_anim, g_menu_input_lock_mode);
     ability = g_world_unit_pointers[g_unit_selected_index]->abilities.slots[slot_index];
-    g_world_menu_description_text_id = ability;
+    g_menu_help_message_text_id = ability;
     if (ability == 0) {
-        g_world_menu_description_text_id = -1;
+        g_menu_help_message_text_id = -1;
     } else if (slot_index >= 2) {
-        g_world_menu_description_text_id = ability + 0x7800;
+        g_menu_help_message_text_id = ability + 0x7800;
     } else {
-        g_world_menu_description_text_id = ability + 0x9800;
+        g_menu_help_message_text_id = ability + 0x9800;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         saved_slots = g_world_remove_ability_slots;
@@ -114,8 +114,8 @@ s32 world_menu_run_remove_ability(void) {
             movement_ability = g_world_remove_ability_slots[4];
             if (movement_ability >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                 && movement_ability <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3) {
-                world_ability_find_stat_changes_due_to_equipped(&g_world_item_preview_stat_detail, movement_ability, 0);
-                g_world_preview_stats_thread_params.redraw_request = 1;
+                world_ability_find_stat_changes_due_to_equipped(&g_item_preview_stat_detail, movement_ability, 0);
+                g_menu_preview_stats_thread_params.redraw_request = 1;
                 preview = 1;
             }
         }

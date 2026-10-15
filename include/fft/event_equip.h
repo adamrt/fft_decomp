@@ -126,10 +126,8 @@ enum {
 };
 
 extern menu_entry_t* g_equip_item_action_active_menu;
-extern menu_entry_t g_equip_item_action_menu;
 extern u8 g_equip_item_inventory_totals[];
 extern u8 g_equip_item_list_has_multiple_entries;
-extern struct menu_status_panel_slot_storage g_equip_item_preview_stat_detail;
 extern s16 g_equip_item_type_order[];
 extern menu_entry_t* g_equip_item_type_order_active_menu;
 extern u8 g_equip_item_type_order_names[];
@@ -144,11 +142,6 @@ void equip_item_sort_list_by_criteria(s32 mode, s16* list);
 s32 equip_item_run_type_order_mode(void);
 
 /* rearrange */
-extern s8 g_equip_rearrange_active;
-extern u8 g_equip_rearrange_anim_frame;
-extern s16 g_equip_rearrange_picked_cursor;
-extern u16 g_equip_rearrange_picked_scroll;
-extern s16 g_equip_rearrange_preview_cursor;
 
 /* slot */
 /* One-shot entry flag for this mode. */
@@ -162,10 +155,6 @@ extern menu_instruction_t g_equip_armor_bonus_render_commands;
 extern u8 g_equip_equipment_panel_params[];
 extern s32 g_equip_equipment_panel_redraw;
 extern s32 g_equip_equipment_panel_style;
-extern s32 g_equip_item_numeric_panel_params;
-extern s32 g_equip_item_numeric_panel_redraw;
-extern s32 g_equip_item_numeric_panel_style;
-extern s32 g_equip_item_numeric_panel_y;
 extern s32 g_equip_numeric_panel_redraw;
 extern s32 g_equip_numeric_panel_style;
 extern menu_unit_status_record_t g_equip_panel_comparison_billboard;
@@ -281,8 +270,6 @@ extern s16 g_equip_menu_text_redraw_flag;
 extern menu_entry_t g_equip_type_order_menu_hand_body;
 extern menu_entry_t g_equip_type_order_menu_other_slots;
 
-s32 equip_item_run_rearrange_mode(void);
-void equip_menu_clear_selection_values(void);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row);
@@ -375,7 +362,6 @@ void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_
     SPRT_8* sprites_8, SPRT_16* sprites_16, DR_MOVE* draw_moves, DR_AREA* draw_areas, DR_MODE* draw_modes);
 void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context);
 void equip_gfx_set_otag_index(s32 ot_index);
-void equip_gfx_set_transition_frame(s32 value);
 void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */
@@ -410,7 +396,6 @@ menu_instruction_t* equip_cmd_set_semitrans_handler(menu_instruction_t* instruct
 extern u8 g_equip_text_data[];
 /* The "%d" format string at the head of the overlay. */
 extern const char g_equip_text_decimal_format[];
-extern s32 g_equip_text_help_message_id;
 extern u8 g_equip_text_restore_pending;
 
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);

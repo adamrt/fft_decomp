@@ -12,8 +12,8 @@ menu_instruction_t* world_menu_script_conditional(menu_instruction_t* script) {
     if (g_world_menu_use_scroll_position == 0) {
         arg = instruction->conditional.value;
     } else {
-        arg = g_world_menu_scroll_offset + g_world_menu_scroll_row_offset;
-        if (g_world_menu_scroll_pixel_offset < 0) {
+        arg = g_menu_scroll_base_index + g_world_menu_scroll_row_offset;
+        if (g_menu_list_scroll_offset < 0) {
             arg -= 1;
         }
     }

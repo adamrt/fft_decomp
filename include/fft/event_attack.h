@@ -325,10 +325,6 @@ void attack_editor_load_party_unit(s32 mode, s32 roster_index);
 /* graphics */
 extern u16 g_attack_gfx_draw_offset_y;
 extern POLY_FT4 g_attack_gfx_frame_ft4[];
-extern u8 g_attack_gfx_scaled_sprite_count;
-extern point16_t g_attack_gfx_scaled_sprite_scale[];
-extern point16_t g_attack_gfx_scaled_sprite_texture_page[];
-extern sprite_sheet_frame_t g_attack_gfx_scaled_sprite_uv_rects[];
 /* Map darkness uses RGB and ignores the fourth byte. */
 extern const CVECTOR g_attack_map_darkness_color;
 

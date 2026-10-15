@@ -176,7 +176,7 @@ void world_shop_run_screen(s32 shop_type) {
         if (g_world_shop_menu_step != last_step) {
             g_world_formation_unit_cycle_mode = 0;
             menu_set_vsync_mode_and_event_speed(0);
-            g_world_menu_description_text_id = 0;
+            g_menu_help_message_text_id = 0;
             world_menu_reset_selection_results();
             last_step = g_world_shop_menu_step;
         }

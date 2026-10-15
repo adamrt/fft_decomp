@@ -745,7 +745,7 @@ functions:
   - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa}
   - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5}
   - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/shared/gfx/gfx_build_zodiac_sprite_polygon.c}
-  - {addr: 0x80044e80, size: 692, name: main_gfx_build_zodiac_primitives, hash: 26ab908a528421ce}
+  - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, source: src/shared/menu/menu_build_zodiac_primitives.c}
   - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e}
   - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7}
   - {addr: 0x800451cc, size: 104, name: main_overlay_open_world_and_wldcore, hash: 9de0809817ea03b9}
@@ -1244,10 +1244,10 @@ data:
   - {addr: 0x800473ac, name: g_main_game_options}
   - {addr: 0x800473b0, name: g_main_game_options_defaults}
   - {addr: 0x800473b4, name: g_main_gfx_zodiac_screen_position}
-  - {addr: 0x800473bc, name: g_main_gfx_zodiac_texture_position}
-  - {addr: 0x800473c4, name: g_main_gfx_zodiac_sprite_frames}
-  - {addr: 0x80047520, name: g_main_gfx_zodiac_sprite_scales}
-  - {addr: 0x80047595, name: g_main_gfx_zodiac_sprite_count}
+  - {addr: 0x800473bc, name: g_menu_gfx_scaled_sprite_texture_page}
+  - {addr: 0x800473c4, name: g_menu_gfx_scaled_sprite_uv_rects}
+  - {addr: 0x80047520, name: g_menu_gfx_scaled_sprite_scale}
+  - {addr: 0x80047595, name: g_menu_gfx_scaled_sprite_count}
   - {addr: 0x80047598, name: g_main_gfx_frame_image_rect}
   - {addr: 0x800475a0, name: g_main_gfx_frame_palette_rect}
   - {addr: 0x800475a8, name: g_main_gfx_frame_palette_tail_rect}
@@ -1389,6 +1389,8 @@ data:
 
 overrides:
   - {function: main_party_init_new_game, name: script_set_variable, addr: 0x800ef25c}
+  - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x800473b4}
+  - {function: menu_build_zodiac_primitives, name: gfx_set_scaled_poly_ft4_8bpp, addr: 0x80044ba0}
 
 regions:
   - {addr: 0x80011ba8, end: 0x80011bb0, kind: handwritten, why: "callable jr-ra/nop tail after deprecated-entry padding"}

@@ -31,10 +31,10 @@ menu_instruction_t* world_menu_script_draw_formatted_number(menu_instruction_t* 
         row = instruction->number.value;
         y = instruction->number.y;
     } else {
-        row = g_world_menu_scroll_offset + g_world_menu_scroll_row_offset;
+        row = g_menu_scroll_base_index + g_world_menu_scroll_row_offset;
         step = g_world_menu_row_height;
-        y = step * g_world_menu_scroll_row_offset + instruction->number.y - g_world_menu_scroll_pixel_offset;
-        if (g_world_menu_scroll_pixel_offset < 0) {
+        y = step * g_world_menu_scroll_row_offset + instruction->number.y - g_menu_list_scroll_offset;
+        if (g_menu_list_scroll_offset < 0) {
             row--;
             y -= step;
         }

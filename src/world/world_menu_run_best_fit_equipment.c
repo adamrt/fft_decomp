@@ -16,15 +16,14 @@ s32 world_menu_run_best_fit_equipment(void) {
 
     if (g_world_item_best_remove_initialized == 0) {
         g_world_best_fit_confirm_menu.selected_index = 0;
-        world_unit_build_best_fit_equipment(g_unit_selected_index, g_world_item_preview_stat_detail.state.equipment);
-        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
-            g_world_unit_pointers[g_unit_selected_index]->equipment,
-            (u16*)g_world_item_preview_stat_detail.state.equipment);
-        g_world_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
-            g_world_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
+        world_unit_build_best_fit_equipment(g_unit_selected_index, g_item_preview_stat_detail.state.equipment);
+        item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
+            g_world_unit_pointers[g_unit_selected_index]->equipment, (u16*)g_item_preview_stat_detail.state.equipment);
+        g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
+            g_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
         world_menu_toggle_preview_stats_window(1);
         world_menu_toggle_stat_preview_panel_thread(1);
-        g_world_preview_stats_thread_params.redraw_request = 1;
+        g_menu_preview_stats_thread_params.redraw_request = 1;
         g_menu_status_display_thread_params.redraw_request = 1;
         thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
         g_world_formation_unit_cycle_mode = 1;
@@ -51,8 +50,8 @@ s32 world_menu_run_best_fit_equipment(void) {
             }
             for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
                 g_world_unit_pointers[g_unit_selected_index]->equipment[i]
-                    = g_world_item_preview_stat_detail.state.equipment[i];
-                item_adjust_inventory_count(g_world_item_preview_stat_detail.state.equipment[i], -1);
+                    = g_item_preview_stat_detail.state.equipment[i];
+                item_adjust_inventory_count(g_item_preview_stat_detail.state.equipment[i], -1);
             }
             world_formation_save_records_to_party();
             world_formation_stage_selected_unit();

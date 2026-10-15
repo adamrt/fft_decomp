@@ -32,7 +32,7 @@ void world_formation_view_zoom_thread(void) {
             g_world_formation_view.scale_y -= step;
         }
         g_world_formation_view.brightness = g_world_menu_color_red;
-        world_gfx_build_zodiac_primitives(&g_world_formation_view, g_world_formation_view_quads[frame & 1]);
+        menu_build_zodiac_primitives(&g_world_formation_view, g_world_formation_view_quads[frame & 1]);
         thread_yield();
         if (thread_get_current_parameter_3_variant() != 0) {
             thread_exit_current();

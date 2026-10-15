@@ -8,7 +8,7 @@
  * Team kind is 0 for the player's side, 1 for the enemy team, 2 for a unit on
  * neither the enemy team nor under player control, and 3 for a unit on auto
  * battle. A zero maximum HP or MP is stored as 1. */
-void require_panel_copy_stats_to_gauges(unit_stats_t* unit, menu_unit_status_record_t* output) {
+void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_unit_status_record_t* output) {
     u16 maximum_hp;
     u16 maximum_mp;
     u8 ct;

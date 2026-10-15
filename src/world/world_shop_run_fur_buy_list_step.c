@@ -40,8 +40,8 @@ void world_shop_run_fur_buy_list_step(void) {
         result = thread_is_running(THREAD_SCREEN_SLOT_MESSAGE);
         g_world_shop_fur_equip_check_pending = result;
         if (result == 0) {
-            menu_set_selection_record(g_world_shop_item_category, g_world_menu_cursor_position,
-                g_world_menu_scroll_offset, g_item_list_entries);
+            menu_set_selection_record(
+                g_world_shop_item_category, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
             g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_BUY_EQUIP;
             g_world_shop_fur_purchase_list_initialized = 0;
         }
@@ -53,10 +53,10 @@ void world_shop_run_fur_buy_list_step(void) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_MENU;
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF830, 0);
             g_sound_queued_effect_id = MAIN_SFX_CANCEL;
-        } else if ((input & PSX_PAD_TRIANGLE) && g_world_menu_option_count != 0 && g_world_shop_item_category != 4) {
+        } else if ((input & PSX_PAD_TRIANGLE) && g_menu_list_entry_count != 0 && g_world_shop_item_category != 4) {
             g_world_shop_fur_equip_check_pending = 1;
         } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-            if (g_world_menu_option_count == 0) {
+            if (g_menu_list_entry_count == 0) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
             } else {
                 g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_BUY_CONFIRM;
@@ -69,7 +69,7 @@ void world_shop_run_fur_buy_list_step(void) {
     world_menu_switch_item_category(g_menu_input_secondary_repeat);
     menu_run_script_with_palette_mode(
         &g_world_shop_fur_purchase_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
-    if (world_map_is_busy() != 0 || g_world_menu_option_count == 0 || g_world_shop_item_category == 4) {
+    if (world_map_is_busy() != 0 || g_menu_list_entry_count == 0 || g_world_shop_item_category == 4) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C,

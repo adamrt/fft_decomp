@@ -26,7 +26,7 @@ void world_shop_run_equip_candidate_step(void) {
         menu_set_vsync_mode_and_event_speed(0);
         g_world_formation_unit_browse_enabled = 0;
         g_world_shop_background_visible = 0;
-        g_world_shop_equip_candidate_item = g_item_list_entries[g_world_menu_cursor_position];
+        g_world_shop_equip_candidate_item = g_item_list_entries[g_menu_list_selected_index];
         world_formation_init_cursor_and_scroll_state(0);
         g_world_shop_equip_candidate_preview_visible = 0;
         g_world_shop_equip_candidate_initialized = 1;
@@ -47,9 +47,9 @@ void world_shop_run_equip_candidate_step(void) {
         if (g_world_formation_unit_banner_at_bottom != 0) {
             text_id = MENU_GRID_HELP_BANNER_BOTTOM;
         }
-        g_world_menu_description_text_id = text_id;
+        g_menu_help_message_text_id = text_id;
     } else {
-        g_world_menu_description_text_id = 0;
+        g_menu_help_message_text_id = 0;
     }
     if (g_world_formation_unit_browse_enabled != 0) {
         if (g_unit_selected_index != g_world_shop_equip_candidate_last_unit) {
@@ -72,15 +72,14 @@ void world_shop_run_equip_candidate_step(void) {
                 world_formation_equip_item_to_unit_slot(
                     WORLD_FORMATION_PREVIEW_UNIT_INDEX, slot, g_world_shop_equip_candidate_item);
                 bcopy(g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment,
-                    g_world_item_preview_stat_detail.state.equipment, 10);
-                item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail,
+                    g_item_preview_stat_detail.state.equipment, 10);
+                item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail,
                     &g_menu_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
                     g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment);
-                g_world_item_preview_stat_detail.state.two_hands
-                    = unit_is_two_handing_weapon(g_world_item_preview_stat_detail.state.equipment,
-                        world_ability_has_two_hands(g_unit_selected_index));
+                g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
+                    g_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
                 g_world_shop_equip_candidate_preview_visible = 1;
-                g_world_item_preview_stat_detail.state.equipment[slot]
+                g_item_preview_stat_detail.state.equipment[slot]
                     = g_world_shop_equip_candidate_item | WORLD_EQUIPMENT_SHOP_ITEM;
             }
         }

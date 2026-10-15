@@ -23,7 +23,7 @@ void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
         g_menu_selected_unit_status.unit_index = unit_a;
     }
     if (unit_b != 0xff) {
-        g_menu_comparison_battle_id = unit_b;
+        g_menu_comparison_unit_data.battle_id = unit_b;
         g_menu_comparison_unit_status.unit_index = unit_b;
     }
     if (thread_is_running_asm_variant(THREAD_SLOT_UNIT_VIEW) == 0) {

@@ -36,7 +36,7 @@ void world_menu_run_order_unit(void) {
         g_world_formation_unit_browse_enabled = g_world_order_unit_saved_browse_enabled;
     }
 
-    g_world_menu_description_text_id = g_world_menu_order_unit_entries[g_world_menu_order_unit_cursor] + 0x103f;
+    g_menu_help_message_text_id = g_world_menu_order_unit_entries[g_world_menu_order_unit_cursor] + 0x103f;
     if (g_world_menu_selection_results[9] != -1) {
         /* Move the chosen entry to the front and redraw the options. */
         index = g_world_menu_selection_results[9];

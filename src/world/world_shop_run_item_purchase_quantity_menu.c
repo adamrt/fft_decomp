@@ -16,7 +16,7 @@ s32 world_shop_run_item_purchase_quantity_menu(void) {
     if (g_world_shop_quantity_menu_running == 0) {
         g_world_shop_purchase_total_shown = 0;
         g_world_menu_prompt_active = 1;
-        g_world_shop_purchase_item = g_item_list_entries[g_world_menu_cursor_position];
+        g_world_shop_purchase_item = g_item_list_entries[g_menu_list_selected_index];
         owned = item_get_total_count_variant(g_world_shop_purchase_item);
         if (owned >= 99) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF807, 0);

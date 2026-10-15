@@ -10,7 +10,7 @@ void world_formation_init_menu_state(void) {
     g_world_item_best_remove_initialized = 0;
     g_world_item_submenu_initialized = 0;
     g_world_item_category_menu_initialized = 0;
-    g_world_item_rearrange_initialized = 0;
+    g_item_rearrange_initialized = 0;
     g_world_item_action_menu_initialized = 0;
     g_world_item_sort_order_initialized = 0;
     g_world_item_equipping_units_initialized = 0;
@@ -36,8 +36,8 @@ void world_formation_init_menu_state(void) {
     g_world_ability_panel_thread_params.style = 0;
     g_world_equipment_ability_panel_thread_params.style = 0;
     g_menu_numeric_panel_params.style = 0;
-    g_world_preview_stats_thread_params.style = 0;
-    g_world_preview_stats_thread_params.y = 2;
+    g_menu_preview_stats_thread_params.style = 0;
+    g_menu_preview_stats_thread_params.y = 2;
     g_world_formation_triangle_menu.selected_index = 0;
     g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
     g_unit_selected_index = 0;

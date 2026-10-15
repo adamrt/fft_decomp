@@ -9,7 +9,7 @@ void world_shop_run_main_menu_step(void) {
 
     if (g_world_shop_main_menu_running == 0) {
         g_world_formation_unit_cycle_mode = 0;
-        g_world_menu_cursor_position = 0;
+        g_menu_list_selected_index = 0;
     }
     running = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_main_menu_thread_data);
     g_world_shop_main_menu_running = running;

@@ -17,8 +17,8 @@ s32 world_item_show_units_equipping_selected(void) {
     if (g_world_item_equipping_units_initialized == 0) {
         world_formation_save_records_to_party();
         g_world_formation_unit_count = world_formation_build_record_list(
-            g_item_list_entries[g_world_menu_cursor_position], g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
-        g_world_menu_description_text_id = MENU_GRID_HELP_UNIT_BROWSE;
+            g_item_list_entries[g_menu_list_selected_index], g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
+        g_menu_help_message_text_id = MENU_GRID_HELP_UNIT_BROWSE;
         g_world_formation_unit_browse_enabled = 1;
         g_world_formation_unit_banner_enabled = 1;
         world_menu_toggle_preview_stats_window(0);

@@ -1150,10 +1150,6 @@ extern u32 g_main_gfx_now_loading_visible;
 extern u32 g_main_gfx_battle_otags[2][0x180];
 extern main_gfx_unit_graphics_load_queue_t g_main_gfx_unit_graphics_load_queue;
 extern upoint16_t g_main_gfx_zodiac_screen_position;
-extern u8 g_main_gfx_zodiac_sprite_count;
-extern sprite_sheet_frame_t g_main_gfx_zodiac_sprite_frames[];
-extern point16_t g_main_gfx_zodiac_sprite_scales[];
-extern point16_t g_main_gfx_zodiac_texture_position;
 extern DISPENV g_main_gfx_display_envs[2];
 extern DRAWENV g_main_gfx_draw_envs[2];
 extern s32 g_main_gfx_loading_display_frame_counter;
@@ -1176,7 +1172,6 @@ int main_gfx_swap_display_area(u32* otag);
 void main_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void main_set_display_draw_new_game(int width, int height, int projection, u8 red, u8 green, u8 blue);
 void main_gfx_build_now_loading_center(u32 visible);
-void main_gfx_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
 void main_gfx_call_build_zodiac_bin(zodiac_draw_context_t* context, POLY_FT4* poly);
 
 /* menu */

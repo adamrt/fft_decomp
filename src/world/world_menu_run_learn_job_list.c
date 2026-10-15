@@ -24,7 +24,7 @@ s32 world_menu_run_learn_job_list(void) {
         world_menu_init_scrollable_list(g_menu_job_ids, x, y, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_world_learn_job_list_initialized = 1;
     }
-    g_world_menu_description_text_id = g_menu_job_ids[g_world_menu_cursor_position] + 0x6000;
+    g_menu_help_message_text_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         menu_set_vsync_mode_and_event_speed(0);
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;
@@ -32,15 +32,15 @@ s32 world_menu_run_learn_job_list(void) {
         return MENU_JOB_LIST_STEP_CLOSE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        if (job_calculate_current_mastered(g_world_menu_cursor_position) == 0
+        if (job_calculate_current_mastered(g_menu_list_selected_index) == 0
             || g_world_formation_current_menu == WORLD_FORMATION_MENU_VIEW_ABILITIES) {
-            g_world_learn_selected_job = g_menu_job_ids[g_world_menu_cursor_position];
+            g_world_learn_selected_job = g_menu_job_ids[g_menu_list_selected_index];
             g_world_learn_selected_job_index = job_get_generic_index(g_world_learn_selected_job);
-            world_job_calculate_current_level(g_world_menu_cursor_position);
-            world_menu_get_learn_job_jp(g_world_menu_cursor_position);
-            world_job_calculate_current_total_jp(g_world_menu_cursor_position);
-            menu_job_calculate_next_level_jp_requirement(g_world_menu_cursor_position);
-            menu_set_selection_record(9, g_world_menu_cursor_position, g_world_menu_scroll_offset, g_menu_job_ids);
+            world_job_calculate_current_level(g_menu_list_selected_index);
+            world_menu_get_learn_job_jp(g_menu_list_selected_index);
+            world_job_calculate_current_total_jp(g_menu_list_selected_index);
+            menu_job_calculate_next_level_jp_requirement(g_menu_list_selected_index);
+            menu_set_selection_record(9, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_job_ids);
             g_world_learn_job_list_initialized = 0;
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             return MENU_JOB_LIST_STEP_ABILITIES;

@@ -70,7 +70,7 @@ void world_formation_init_menu_display(void) {
     rect.h = 1;
     gfx_load_image_and_wait(&rect, &palette[4]);
     gfx_load_image_and_wait(&g_world_formation_status_label_image_rect, g_world_formation_status_label_image);
-    g_world_menu_description_text_id = 0;
+    g_menu_help_message_text_id = 0;
     world_menu_init_scrollable_list_core(0, 0, 0);
     world_gfx_start_decreasing_fade();
     menu_clear_selection_values();

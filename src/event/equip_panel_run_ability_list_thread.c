@@ -40,7 +40,7 @@ void equip_panel_run_ability_list_thread(void) {
     } else {
         text = g_menu_status_panel_text_image_b;
         screen = g_equip_panel_frames_b;
-        state = &g_equip_item_preview_stat_detail.state;
+        state = &g_item_preview_stat_detail.state;
         upload = &g_menu_status_panel_text_upload_rect_b;
         base = g_equip_panel_frames_b;
         u = 0x50;

@@ -49,12 +49,12 @@ void world_menu_update_grid_cursor(s16 alternate) {
             g_world_grid_menu_id = MENU_GRID_HELP_NONE;
             g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_world_grid_menu_initialized = 0;
-            g_world_menu_description_text_id = menu_id;
+            g_menu_help_message_text_id = menu_id;
         } else if (input & PSX_PAD_CIRCLE) {
             text_id
                 = g_world_active_grid_menu_cells[cell].text_id != 0 ? *g_world_active_grid_menu_cells[cell].text_id : 0;
             if (g_world_grid_menu_selected_cell < 0x12 || g_world_grid_menu_selected_cell >= 0x1C || text_id != 0) {
-                g_world_menu_description_text_id
+                g_menu_help_message_text_id
                     = text_id + g_world_active_grid_menu_cells[g_world_grid_menu_selected_cell].text_offset;
                 world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
             }

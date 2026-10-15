@@ -20,7 +20,7 @@ void world_shop_run_recruit_unit_preview_step(void) {
             g_world_formation_unit_banner_enabled = 1;
             g_world_formation_unit_banner_at_bottom = 0;
             g_menu_status_display_thread_params.y = 0;
-            g_world_menu_description_text_id = MENU_GRID_HELP_RECRUIT_PREVIEW;
+            g_menu_help_message_text_id = MENU_GRID_HELP_RECRUIT_PREVIEW;
             g_world_shop_recruit_preview_initialized = 1;
         }
         world_shop_run_obtain_gil_menu();

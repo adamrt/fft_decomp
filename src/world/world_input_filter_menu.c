@@ -16,7 +16,7 @@ s32 world_input_filter_menu(void) {
         if (g_world_formation_current_menu == WORLD_FORMATION_MENU_DISMISS_UNIT) {
             input &= 0xF0FF;
         }
-    } else if (g_world_menu_description_text_id != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
+    } else if (g_menu_help_message_text_id != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
         input &= 0xF0FF;
     }
     return input;

@@ -25,22 +25,22 @@ void world_menu_load_scrollable_list_layout(menu_instruction_t* script) {
     g_world_menu_list_glyph_width = record->width_a;
     g_world_menu_list_text_columns = record->width_b;
     g_world_menu_list_image_width = (g_world_menu_list_glyph_width * g_world_menu_list_text_columns) >> 2;
-    if (g_world_menu_cursor_position >= g_world_menu_option_count) {
-        g_world_menu_cursor_position = g_world_menu_option_count - 1;
+    if (g_menu_list_selected_index >= g_menu_list_entry_count) {
+        g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
-    if (g_world_menu_cursor_position - g_world_menu_scroll_offset >= g_world_menu_list_visible_rows) {
-        g_world_menu_scroll_offset = g_world_menu_cursor_position;
+    if (g_menu_list_selected_index - g_menu_scroll_base_index >= g_world_menu_list_visible_rows) {
+        g_menu_scroll_base_index = g_menu_list_selected_index;
     }
-    if (g_world_menu_cursor_position < g_world_menu_scroll_offset) {
-        g_world_menu_scroll_offset = g_world_menu_cursor_position;
+    if (g_menu_list_selected_index < g_menu_scroll_base_index) {
+        g_menu_scroll_base_index = g_menu_list_selected_index;
     }
-    if (g_world_menu_option_count < g_world_menu_list_visible_rows) {
-        g_world_menu_scroll_offset = 0;
-    } else if (g_world_menu_option_count - g_world_menu_scroll_offset < g_world_menu_list_visible_rows) {
-        g_world_menu_scroll_offset = g_world_menu_option_count - g_world_menu_list_visible_rows;
+    if (g_menu_list_entry_count < g_world_menu_list_visible_rows) {
+        g_menu_scroll_base_index = 0;
+    } else if (g_menu_list_entry_count - g_menu_scroll_base_index < g_world_menu_list_visible_rows) {
+        g_menu_scroll_base_index = g_menu_list_entry_count - g_world_menu_list_visible_rows;
     }
-    if (g_world_menu_cursor_position >= g_world_menu_option_count) {
-        g_world_menu_cursor_position = g_world_menu_option_count - 1;
+    if (g_menu_list_selected_index >= g_menu_list_entry_count) {
+        g_menu_list_selected_index = g_menu_list_entry_count - 1;
     }
     if (g_world_menu_list_text_table != 0) {
         rect.x = 0x240;
@@ -49,7 +49,7 @@ void world_menu_load_scrollable_list_layout(menu_instruction_t* script) {
         rect.h = g_world_menu_list_visible_rows * 16;
         ClearImage(&rect, 0, 0, 0);
         for (i = 0; i < g_world_menu_list_visible_rows; i++) {
-            text_ids[i] = g_world_menu_list_entry_ids[i + g_world_menu_scroll_offset];
+            text_ids[i] = g_world_menu_list_entry_ids[i + g_menu_scroll_base_index];
         }
         text_ids[i] = -1;
         rect.x = 0x240;

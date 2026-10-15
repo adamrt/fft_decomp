@@ -33,7 +33,6 @@ typedef struct require_party_bio_update_record {
     u16 variable;
 } require_party_bio_update_record_t;
 
-extern menu_active_unit_t g_require_active_unit_data;
 extern s32 g_require_party_affected_battle_unit_indices[];
 extern s32 g_require_party_affected_unit_count;
 extern s32 g_require_party_affected_unit_message_args[];
@@ -193,7 +192,6 @@ extern s32 g_require_character_status_origin_x;
 extern s32 g_require_character_status_redraw_request;
 
 /* unit panels */
-extern menu_unit_status_record_t g_require_panel_comparison_billboard;
 extern menu_status_panel_editor_packet_t g_require_panel_comparison_editor_packets[2];
 extern u8 g_require_panel_comparison_large_number_image[];
 extern u8 g_require_panel_comparison_name_image[];
@@ -202,7 +200,6 @@ extern menu_number_entry_t g_require_panel_comparison_numeric_entries[];
 extern menu_status_panel_packet_t g_require_panel_comparison_packets[2];
 extern palette_t g_require_panel_comparison_portrait_palettes[2];
 extern RECT g_require_panel_comparison_portrait_rect;
-extern menu_active_unit_t g_require_panel_comparison_unit_data;
 extern s32 g_require_panel_dim_a;
 extern s32 g_require_panel_dim_b;
 extern s32 g_require_panel_dim_c;
@@ -223,7 +220,6 @@ extern image_load_parameters_t g_require_panel_label_layouts_mode2[];
 extern image_load_parameters_t g_require_panel_label_layouts_mode3[];
 extern RECT g_require_panel_origin_offsets[];
 extern image_load_parameters_t g_require_panel_portrait_cell[];
-extern menu_unit_status_record_t g_require_panel_selected_billboard;
 extern menu_status_panel_editor_packet_t g_require_panel_selected_editor_packets[2];
 extern u8 g_require_panel_selected_large_number_image[];
 extern u8 g_require_panel_selected_name_image[];
@@ -242,12 +238,10 @@ extern s32 g_require_status_display_origin_x;
 extern s32 g_require_status_display_redraw_request;
 extern menu_status_thread_t g_require_status_display_thread_params;
 
-void require_panel_copy_stats_to_gauges(struct unit_stats* unit, menu_unit_status_record_t* output);
 void require_panel_set_transition_value(s32 value);
 void require_panel_run_unit_status_thread(void);
 
 /* numeric editor */
-extern u8 g_require_editor_job_name[];
 extern menu_number_entry_t g_require_editor_numeric_descriptor_a[];
 extern menu_number_entry_t g_require_editor_numeric_descriptor_b[];
 extern RECT g_require_editor_numeric_entries_a;
@@ -263,17 +257,12 @@ extern menu_unit_stat_number_images_t g_require_editor_numeric_text_a;
 extern menu_unit_stat_number_images_t g_require_editor_numeric_text_b;
 extern image_load_parameters_t g_require_editor_numeric_texture[];
 extern struct unit_stats g_require_editor_party_unit_stats;
-extern u8 g_require_editor_primary_skillset_name[];
-extern u8 g_require_editor_secondary_skillset_name[];
-extern menu_status_panel_slot_storage_t g_require_editor_unit_fields;
-extern u8 g_require_editor_unit_name[];
 /* The scalar x alias preserves the retail transition-store scheduling. */
 extern s32 g_require_numeric_editor_origin_x;
 extern s32 g_require_numeric_editor_redraw_request;
 extern menu_status_thread_t g_require_numeric_editor_thread_params;
 
 void require_editor_load_party_unit(s32 unused, s32 party_index);
-void require_editor_load_selected_unit(void);
 
 /* menus */
 extern s16 g_require_menu_selection_result;

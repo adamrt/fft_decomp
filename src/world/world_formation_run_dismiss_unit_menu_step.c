@@ -118,7 +118,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             }
             g_world_dismiss_unit_prompt_running = 1;
         }
-        g_world_menu_description_text_id = -1;
+        g_menu_help_message_text_id = -1;
     }
 
     if (g_world_formation_dismiss_step == 2) {

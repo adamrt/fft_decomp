@@ -236,13 +236,15 @@ void world_card_update_and_draw_slot_list(s32 input) {
         rect.y = 0x20;
         rect.w = 8;
         rect.h = 0x10;
-        menu_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_world_menu_clut_front, 15);
+        menu_gfx_enqueue_textured_quad(
+            &rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
     if (g_world_card_selectable_slot_count - g_world_card_list_first_visible_row >= 5) {
         rect.x = 0xe3;
         rect.y = 0xba;
         rect.w = 8;
         rect.h = 0x10;
-        menu_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, 0, g_menu_cursor_texture_page, g_world_menu_clut_front, 15);
+        menu_gfx_enqueue_textured_quad(
+            &rect, 0xe0, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
 }

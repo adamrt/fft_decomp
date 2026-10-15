@@ -11,7 +11,7 @@ s32 world_menu_update_clear_all_abilities_prompt(void) {
     s32 i;
     s32 changed;
 
-    g_world_menu_description_text_id = -1;
+    g_menu_help_message_text_id = -1;
     world_menu_set_draw_priority(0x28);
     g_world_clear_abilities_blink_counter = g_world_clear_abilities_blink_counter + 1;
     if (g_world_clear_abilities_blink_counter & 1) {

@@ -9,7 +9,7 @@ void equip_panel_toggle_item_numeric_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIP_THREAD_SLOT_ITEM_NUMERIC) == 0) {
             thread_start(EQUIP_THREAD_SLOT_ITEM_NUMERIC, menu_run_numeric_editor_frame_thread_variant);
-            thread_set_parameters(EQUIP_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_equip_item_numeric_panel_params, 0, 0);
+            thread_set_parameters(EQUIP_THREAD_SLOT_ITEM_NUMERIC, (s32)&g_menu_preview_stats_thread_params, 0, 0);
         }
     } else {
         menu_request_thread_stop(EQUIP_THREAD_SLOT_ITEM_NUMERIC);

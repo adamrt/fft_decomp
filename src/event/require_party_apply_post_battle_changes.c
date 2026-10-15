@@ -60,12 +60,12 @@ void require_party_apply_post_battle_changes(void) {
     affected_index = 0;
     require_text_build_battle_nicknames();
     initial_unit_index_ptr = g_require_party_affected_battle_unit_indices;
-    initial_unit_data = &g_require_active_unit_data;
+    initial_unit_data = &g_menu_selected_unit;
     battle_unit_get_stats_from_battle_id(*initial_unit_index_ptr);
-    g_require_active_unit_data.battle_id = *initial_unit_index_ptr;
+    g_menu_selected_unit.battle_id = *initial_unit_index_ptr;
     initial_unit_data->name_id = *initial_unit_index_ptr;
-    require_editor_load_selected_unit();
-    g_require_panel_selected_billboard.unit_index = *initial_unit_index_ptr;
+    menu_load_selected_unit();
+    g_menu_selected_unit_status.unit_index = *initial_unit_index_ptr;
 
     /* `affected_index < count` (not `count > 0`): combine folds the known
      * zero into a `blez` and leaves the eliminated compare pseudo with a
@@ -86,7 +86,7 @@ void require_party_apply_post_battle_changes(void) {
             g_require_numeric_editor_origin_x = -0x100;
             *transition_c_ptr = -0x100;
             menu_copy_billboard_data_in(
-                &g_require_panel_selected_billboard, &g_require_active_unit_data, &g_require_editor_unit_fields);
+                &g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
 
             /* This zero feeds the else-arm fade and fills the `bnez` delay
              * slot; the separate zero before the second fade is copied into
@@ -118,14 +118,14 @@ void require_party_apply_post_battle_changes(void) {
                 index_value = *unit_index_ptr;
                 unit_display_data->battle_id = index_value;
                 unit_display_data->name_id = index_value;
-                require_editor_load_selected_unit();
+                menu_load_selected_unit();
                 menu_copy_billboard_data_in(
-                    &g_require_panel_selected_billboard, unit_display_data, &g_require_editor_unit_fields);
+                    &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
                 index_value = *unit_index_ptr;
                 g_require_status_display_redraw_request = one;
                 g_require_numeric_editor_redraw_request = one;
                 g_require_character_status_redraw_request = one;
-                g_require_panel_selected_billboard.unit_index = index_value;
+                g_menu_selected_unit_status.unit_index = index_value;
                 thread_yield();
             }
 
@@ -192,7 +192,7 @@ void require_party_apply_post_battle_changes(void) {
                         thread_start(REQUIRE_THREAD_SLOT_MESSAGE, menu_icon_strip_thread);
                         thread_set_parameters(REQUIRE_THREAD_SLOT_MESSAGE,
                             (s32)(menu_fields - (unsigned long)&((menu_entry_t*)0)->inner_width), 0, 0);
-                        if (g_require_editor_unit_fields.state.generic_monster != 0) {
+                        if (g_menu_selected_unit_fields.state.generic_monster != 0) {
                             thread_start(REQUIRE_THREAD_SLOT_MENU, menu_run_icon_selection_loop);
                             thread_set_parameters(REQUIRE_THREAD_SLOT_MENU,
                                 (s32)(menu_fields + 8 * sizeof(*menu_base)
@@ -249,17 +249,17 @@ void require_party_apply_post_battle_changes(void) {
                     display_index = *selected_unit_index_ptr;
                     unit_display_data->battle_id = display_index;
                     unit_display_data->name_id = display_index;
-                    require_editor_load_selected_unit();
+                    menu_load_selected_unit();
                     index_value = *selected_unit_index_ptr;
                     g_require_status_display_redraw_request = one;
                     g_require_numeric_editor_redraw_request = one;
                     g_require_character_status_redraw_request = one;
-                    g_require_panel_selected_billboard.unit_index = index_value;
+                    g_menu_selected_unit_status.unit_index = index_value;
                     if (g_require_party_removal_result == 0) {
                         require_panel_set_transition_value(1);
                     }
                     menu_copy_billboard_data_in(
-                        &g_require_panel_selected_billboard, unit_display_data, &g_require_editor_unit_fields);
+                        &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
                     g_gfx_screen_fade = screen_fade_max;
                     do {
                         thread_yield();

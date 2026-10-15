@@ -13,8 +13,8 @@ menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction)
         y = instruction->tile.y;
     } else {
         step = g_world_menu_row_height;
-        y = step * g_world_menu_scroll_row_offset + instruction->tile.y + g_world_menu_scroll_pixel_offset;
-        if (g_world_menu_scroll_pixel_offset < 0) {
+        y = step * g_world_menu_scroll_row_offset + instruction->tile.y + g_menu_list_scroll_offset;
+        if (g_menu_list_scroll_offset < 0) {
             y -= step;
         }
     }

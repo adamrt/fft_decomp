@@ -9,7 +9,7 @@ s32 world_shop_run_fur_sell_quantity_menu(void) {
 
     if (g_world_shop_fur_quantity_menu_running == 0) {
         g_world_shop_sell_total_shown = 0;
-        g_world_shop_sell_quantity_item = g_item_list_entries[g_world_menu_cursor_position];
+        g_world_shop_sell_quantity_item = g_item_list_entries[g_menu_list_selected_index];
         g_world_menu_prompt_active = 1;
         count = item_adjust_inventory_count(g_world_shop_sell_quantity_item, 0);
         if (count == 0) {

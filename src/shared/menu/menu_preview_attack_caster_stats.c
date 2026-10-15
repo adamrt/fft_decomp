@@ -15,7 +15,7 @@ void menu_preview_attack_caster_stats(void) {
     s16* selected;
 
     attacker = menu_get_selected_unit_stats();
-    target = battle_unit_get_stats_from_battle_id(g_menu_comparison_battle_id);
+    target = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     /* One address register serves both reads, as in the target. */
     selected = &g_menu_selected_unit.battle_id;
     action = battle_unit_get_runtime_action_command_by_battle_id(*selected);

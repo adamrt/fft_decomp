@@ -69,6 +69,8 @@ s32 jobstts_job_get_current_total_jp(s32 unused_row);
 s32 jobstts_job_is_current_mastered(s32 unused_row);
 
 /* menus */
+/* Unsigned here where the other overlays keep signed values. */
+extern u16 g_jobstts_menu_selection_values[];
 typedef enum jobstts_page_scroll_direction {
     JOBSTTS_PAGE_SCROLL_UP = -1,
     JOBSTTS_PAGE_SCROLL_NONE = 0,
@@ -81,11 +83,9 @@ extern u16 g_jobstts_menu_list_cursor_anim_state;
 extern s16 g_jobstts_menu_list_scroll_entry_ids;
 extern u16 g_jobstts_menu_list_scroll_progress;
 extern u8 g_jobstts_menu_palette_image[];
-extern u16 g_jobstts_menu_selection_values[];
 /* Window right edge; WORLD's twin stores it to g_world_menu_window_right_x. */
 extern s16 g_jobstts_menu_window_right_x;
 
-void jobstts_menu_clear_selection_values(void);
 void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 void jobstts_menu_load_images_and_clear_selection(void);
 s32 jobstts_menu_update_job_list(void);

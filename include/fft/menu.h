@@ -340,7 +340,9 @@ typedef char menu_active_unit_size_must_be_14[(sizeof(menu_active_unit_t) == 14)
 
 /* The selected panel unit can differ from the unit whose turn is active. */
 extern menu_active_unit_t g_menu_selected_unit;
-extern s16 g_menu_comparison_battle_id;
+/* The unit shown beside the selected one in the comparison panels; REQUIRE
+ * holds the same record. */
+extern menu_active_unit_t g_menu_comparison_unit_data;
 
 struct unit_stats* menu_get_selected_unit_stats(void);
 
@@ -1812,6 +1814,8 @@ void menu_toggle_unit_status_thread(s32 enable);
 extern menu_status_thread_t g_menu_status_display_thread_params;
 void menu_toggle_numeric_editor_thread(s32 enable);
 extern menu_status_thread_t g_menu_numeric_panel_params;
+extern menu_status_thread_t g_menu_preview_stats_thread_params;
+extern menu_entry_t g_menu_at_list_state;
 
 /* options */
 /*
@@ -2647,5 +2651,8 @@ extern RECT g_menu_panel_texture_windows[7];
 extern u8 g_menu_window_frame_image[];
 void menu_thin_window_frame_thread(void);
 void menu_window_frame_thread(void);
+extern s32 g_menu_help_message_text_id;
+void menu_set_window_scale_step(s32 value);
+extern u8 g_menu_at_list_text[];
 
 #endif

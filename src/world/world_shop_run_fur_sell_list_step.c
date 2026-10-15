@@ -41,7 +41,7 @@ void world_shop_run_fur_sell_list_step(void) {
         g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_MENU;
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;
     } else if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
-        if (g_world_menu_option_count == 0) {
+        if (g_menu_list_entry_count == 0) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
         } else {
             g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_SELL_CONFIRM;

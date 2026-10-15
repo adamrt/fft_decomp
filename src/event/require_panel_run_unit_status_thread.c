@@ -63,8 +63,8 @@ void require_panel_run_unit_status_thread(void) {
         small_text_image = g_require_panel_selected_large_number_image;
         name_image = g_require_panel_selected_name_image;
         numeric_entries = g_require_panel_selected_numeric_entries;
-        state = &g_require_panel_selected_billboard;
-        unit_data = &g_require_active_unit_data;
+        state = &g_menu_selected_unit_status;
+        unit_data = &g_menu_selected_unit;
         portrait_rect = &g_require_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
@@ -76,8 +76,8 @@ void require_panel_run_unit_status_thread(void) {
         small_text_image = g_require_panel_comparison_large_number_image;
         name_image = g_require_panel_comparison_name_image;
         numeric_entries = g_require_panel_comparison_numeric_entries;
-        state = &g_require_panel_comparison_billboard;
-        unit_data = &g_require_panel_comparison_unit_data;
+        state = &g_menu_comparison_unit_status;
+        unit_data = &g_menu_comparison_unit_data;
         portrait_rect = &g_require_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;

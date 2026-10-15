@@ -55,7 +55,7 @@ s32 menu_display_projected_action_effect_variant(
      * (from kernel RAM) before the null test. */
     action = g_menu_preview_target_action;
     g_menu_selected_unit_status.projected_hit_percent = action->attack_accuracy;
-    target_id = g_menu_comparison_battle_id;
+    target_id = g_menu_comparison_unit_data.battle_id;
     if (target_id == 0xff || action == 0) {
         g_battle_menu_projected_value_panel[0].kind = 2;
         g_battle_menu_projected_value_panel[1].kind = 2;

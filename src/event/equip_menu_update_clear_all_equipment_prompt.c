@@ -14,7 +14,7 @@ s32 equip_menu_update_clear_all_equipment_prompt(void) {
     s32 unequipped;
     s32 flags;
 
-    g_equip_text_help_message_id = -1;
+    g_menu_help_message_text_id = -1;
     equip_gfx_set_otag_index(0x28);
     g_equip_menu_clear_all_prompt_frame = g_equip_menu_clear_all_prompt_frame + 1;
     if (g_equip_menu_clear_all_prompt_frame & 1) {

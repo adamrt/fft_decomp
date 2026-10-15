@@ -2281,7 +2281,7 @@ data:
   - {addr: 0x8014d038, name: g_menu_selected_unit_status}
   - {addr: 0x8014d05c, name: g_menu_comparison_unit_status}
   - {addr: 0x8014d080, name: g_menu_selected_unit}
-  - {addr: 0x8014d09a, name: g_menu_comparison_battle_id}
+  - {addr: 0x8014d090, name: g_menu_comparison_unit_data}
   - {addr: 0x8014d0a0, name: g_menu_selected_unit_fields}
   - {addr: 0x8014d0e0, name: g_menu_comparison_unit_fields}
   - {addr: 0x8014d120, name: g_menu_billboard_skillset_name}
@@ -2376,7 +2376,6 @@ data:
   - {addr: 0x80166044, name: g_option_menu_state}
   - {addr: 0x80166048, name: g_menu_overlay_state}
   - {addr: 0x8016604a, name: g_menu_transition_state}
-  - {addr: 0x8016604a, name: g_option_menu_transition_timer}
   - {addr: 0x8016604c, name: g_menu_at_list_selection_finished}
   - {addr: 0x8016604e, name: g_unit_graphics_load_pending}
   - {addr: 0x80166050, name: g_script_input_suppression_frames}

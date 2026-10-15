@@ -35,7 +35,7 @@ void menu_run_unit_view_supervisor_thread(void) {
                     && (task != THREAD_TASK_HOVERED_UNIT_STATS
                         || g_menu_unit_view_cached_battle_id == g_menu_selected_unit.battle_id)
                     && (task != THREAD_TASK_RIGHT_UNIT_STATS
-                        || g_menu_unit_view_cached_comparison_id == g_menu_comparison_battle_id)
+                        || g_menu_unit_view_cached_comparison_id == g_menu_comparison_unit_data.battle_id)
                     && (task != THREAD_TASK_UNIT_SUMMARY_PANEL
                         || g_menu_unit_view_cached_battle_id == g_menu_selected_unit.battle_id)) {
                     continue;
@@ -50,7 +50,7 @@ void menu_run_unit_view_supervisor_thread(void) {
             }
         }
         g_menu_unit_view_cached_battle_id = g_menu_selected_unit.battle_id;
-        g_menu_unit_view_cached_comparison_id = g_menu_comparison_battle_id;
+        g_menu_unit_view_cached_comparison_id = g_menu_comparison_unit_data.battle_id;
         for (;;) {
             for (i = 0; i < 4; i++) {
                 if (states[set->thread_ids[i]] == MENU_UNIT_VIEW_SLOT_RESTART

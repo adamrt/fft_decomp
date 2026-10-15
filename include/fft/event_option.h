@@ -34,14 +34,14 @@ void option_menu_run_choice(void);
 extern menu_list_page_t g_option_at_list_pages[2];
 extern battle_at_entry_t g_option_menu_at_list_descriptors[BATTLE_AT_LIST_CAPACITY];
 extern menu_text_layout_t g_option_menu_at_list_entry_table[1];
+/* OPTION addresses the at-list record's context and menu type as separate
+ * globals (0x30 and 0x3a into g_menu_at_list_state). */
 extern menu_text_layout_t* g_option_menu_at_list_entry_table_pointer;
+extern s16 g_option_menu_at_list_menu_type;
 extern s16 g_option_menu_at_list_flags[];
 extern s16 g_option_menu_at_list_indices[];
-extern s16 g_option_menu_at_list_menu_type;
 extern s16 g_option_menu_at_list_primary_values[];
 extern s16 g_option_menu_at_list_secondary_values[];
-extern menu_entry_t g_option_menu_at_list_state[1];
-extern u8 g_option_menu_at_list_text[];
 
 void option_menu_run_at_list(void);
 void option_menu_start_at_list_thread(void);
@@ -57,8 +57,6 @@ extern s16 g_option_dead_unit_secondary_result;
 extern menu_text_layout_t g_option_menu_entry_table[1];
 extern options_menu_page_t g_option_menu_pages[2];
 extern RECT g_option_menu_title_image_rect;
-extern u16 g_option_menu_transition_duration;
-extern s16 g_option_menu_transition_timer;
 extern RECT g_option_menu_value_image_rect;
 
 /* graphics */

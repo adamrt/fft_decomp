@@ -42,7 +42,7 @@ s32 equip_item_run_type_order_mode(void) {
         i = 0x39;
     }
     picked = g_equip_menu_result_rows[2]; /* type-order row picked in the sub-menu, or -1 */
-    g_equip_text_help_message_id = i + 0x1000;
+    g_menu_help_message_text_id = i + 0x1000;
     if (picked != -1) {
         first = g_equip_item_type_order[picked];
         for (i = picked - 1; i >= 0; i--) {
@@ -63,10 +63,10 @@ s32 equip_item_run_type_order_mode(void) {
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
         equip_menu_init_scrollable_list_core(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
-        equip_gfx_set_transition_frame(10);
+        menu_set_window_scale_step(10);
         item_collect_stat_deltas_variant(g_item_list_entries[g_menu_list_selected_index],
-            &g_menu_selected_unit_stat_summary, &g_equip_item_preview_stat_detail, 0);
-        g_equip_item_numeric_panel_redraw = 1;
+            &g_menu_selected_unit_stat_summary, &g_item_preview_stat_detail, 0);
+        g_menu_preview_stats_thread_params.redraw_request = 1;
     }
     if (menu_start_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU, g_equip_item_type_order_active_menu) == 0) {
         g_equip_type_order_ready = 0;

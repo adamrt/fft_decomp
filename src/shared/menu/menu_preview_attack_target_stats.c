@@ -14,7 +14,7 @@ void menu_preview_attack_target_stats(void) {
     thread_yield();
     saved = g_menu_selected_unit.battle_id;
     /* The target loads the preview unit id unsigned (lhu). */
-    g_menu_selected_unit.battle_id = g_menu_comparison_battle_id;
+    g_menu_selected_unit.battle_id = g_menu_comparison_unit_data.battle_id;
     menu_load_selected_unit();
     g_menu_selected_unit.battle_id = saved;
     g_menu_comparison_unit_fields.state.generic_monster = g_menu_selected_unit_fields.state.generic_monster;

@@ -60,15 +60,15 @@ s32 world_ability_run_learn_list(void) {
         g_world_learn_ability_list_open = 1;
         g_world_formation_cursor_ot_override = 0x3c;
     }
-    if (g_world_menu_option_count == 0) {
-        g_world_menu_description_text_id = -1;
+    if (g_menu_list_entry_count == 0) {
+        g_menu_help_message_text_id = -1;
     } else {
-        g_world_menu_description_text_id
-            = (g_menu_ability_entries[g_world_menu_cursor_position] & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
+        g_menu_help_message_text_id
+            = (g_menu_ability_entries[g_menu_list_selected_index] & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
     }
     if (g_world_learn_confirm_prompt_state == 0) {
-        if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_world_menu_option_count != 0) {
-            index = g_world_menu_cursor_position;
+        if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_menu_list_entry_count != 0) {
+            index = g_menu_list_selected_index;
             if (g_menu_ability_entries[index] >> 14) {
                 world_text_show_message_and_play_sound(0xc009, MAIN_SFX_ERROR_MESSAGE);
             } else if (world_menu_is_learn_ability_learned(index) != 0) {
@@ -89,15 +89,15 @@ s32 world_ability_run_learn_list(void) {
         category = menu_update_horizontal_selection_and_mark_change(
             4, WORLD_MENU_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, MAIN_SFX_PAGE_SWITCH);
         if (category != g_world_ability_category) {
-            menu_set_selection_record(g_world_ability_category + 10, g_world_menu_cursor_position,
-                g_world_menu_scroll_offset, g_menu_ability_entries);
+            menu_set_selection_record(g_world_ability_category + 10, g_menu_list_selected_index,
+                g_menu_scroll_base_index, g_menu_ability_entries);
             g_world_ability_category = category;
             ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
                 g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
             world_menu_get_selection_record(g_world_ability_category + 10, &x, &y, g_menu_ability_entries);
             world_menu_init_scrollable_list(
                 g_menu_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-            world_menu_set_window_scale_step(10);
+            menu_set_window_scale_step(10);
         }
     } else {
         g_world_learn_confirm_prompt_state
@@ -105,8 +105,8 @@ s32 world_ability_run_learn_list(void) {
         if (g_world_learn_confirm_prompt_state == 0) {
             if (g_world_menu_selection_results[5] == 0) {
                 world_ability_learn(g_unit_selected_index, g_world_learn_selected_job,
-                    g_menu_ability_entries[g_world_menu_cursor_position]);
-                category = g_main_ability_data[g_menu_ability_entries[g_world_menu_cursor_position]].jp_cost;
+                    g_menu_ability_entries[g_menu_list_selected_index]);
+                category = g_main_ability_data[g_menu_ability_entries[g_menu_list_selected_index]].jp_cost;
                 g_world_unit_pointers[g_unit_selected_index]
                     ->job_points.current.values[g_world_learn_selected_job_index] -= category;
                 main_sound_play_sfx_find_channel(MAIN_SFX_ABILITY_LEARNED);
@@ -116,9 +116,9 @@ s32 world_ability_run_learn_list(void) {
             g_sound_suppressed = 0;
             ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
                 g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
-            world_menu_init_scrollable_list_core(g_menu_ability_entries, g_world_menu_cursor_position,
+            world_menu_init_scrollable_list_core(g_menu_ability_entries, g_menu_list_selected_index,
                 g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-            world_menu_set_window_scale_step(10);
+            menu_set_window_scale_step(10);
             world_menu_reset_selection_results();
         }
     }

@@ -55,11 +55,11 @@ s32 world_ability_run_view_list(void) {
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_world_ability_view_list_initialized = 1;
     }
-    if (g_world_menu_option_count == 0
-        || ((entry = g_menu_ability_entries[g_world_menu_cursor_position]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
-        g_world_menu_description_text_id = -1;
+    if (g_menu_list_entry_count == 0
+        || ((entry = g_menu_ability_entries[g_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
+        g_menu_help_message_text_id = -1;
     } else {
-        g_world_menu_description_text_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
+        g_menu_help_message_text_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_world_ability_view_list_initialized = 0;
@@ -74,15 +74,15 @@ s32 world_ability_run_view_list(void) {
     category = menu_update_horizontal_selection_and_mark_change(
         4, WORLD_MENU_CURSOR_ABILITY_TAB, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (category != g_world_ability_category) {
-        menu_set_selection_record(g_world_ability_category + 10, g_world_menu_cursor_position,
-            g_world_menu_scroll_offset, g_menu_ability_entries);
+        menu_set_selection_record(g_world_ability_category + 10, g_menu_list_selected_index, g_menu_scroll_base_index,
+            g_menu_ability_entries);
         g_world_ability_category = category;
         ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
             g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_VIEW_ALL);
         world_menu_get_selection_record(g_world_ability_category + 10, &x, &y, g_menu_ability_entries);
         world_menu_init_scrollable_list(
             g_menu_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        world_menu_set_window_scale_step(10);
+        menu_set_window_scale_step(10);
     }
     menu_run_script_with_palette_mode(
         &g_world_ability_list_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);

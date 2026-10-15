@@ -20,44 +20,44 @@ void require_editor_load_party_unit(s32 unused, s32 party_index) {
     menu_unit_status_record_t* gauges;
 
     main_unit_init_job_data(&g_require_editor_party_unit_stats, party_index, 0);
-    editor = &g_require_editor_unit_fields.state;
+    editor = &g_menu_selected_unit_fields.state;
     unit = &g_require_editor_party_unit_stats;
-    gauges = &g_require_panel_selected_billboard;
+    gauges = &g_menu_selected_unit_status;
 
-    g_require_active_unit_data.name_id = party_index;
-    g_require_active_unit_data.battle_id = party_index;
+    g_menu_selected_unit.name_id = party_index;
+    g_menu_selected_unit.battle_id = party_index;
     gauges->team_kind = 0;
-    g_require_active_unit_data.job_id = unit->job_id;
-    g_require_active_unit_data.brave = unit->brave;
-    g_require_active_unit_data.faith = unit->faith;
-    g_require_active_unit_data.zodiac = unit->birthday.zodiac;
+    g_menu_selected_unit.job_id = unit->job_id;
+    g_menu_selected_unit.brave = unit->brave;
+    g_menu_selected_unit.faith = unit->faith;
+    g_menu_selected_unit.zodiac = unit->birthday.zodiac;
     if (unit->initial_team_flags & BATTLE_TEAM_MASK) {
         gauges->team_kind = 1;
     }
     if (!(unit->initial_team_flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
         gauges->team_kind = 2;
     }
-    g_require_panel_selected_billboard.list_index = 0;
-    g_require_panel_selected_billboard.unit_count = 0;
-    g_require_panel_selected_billboard.unit_index = party_index + 0x100;
-    g_require_panel_selected_billboard.level = unit->level;
-    g_require_panel_selected_billboard.experience = unit->experience;
+    g_menu_selected_unit_status.list_index = 0;
+    g_menu_selected_unit_status.unit_count = 0;
+    g_menu_selected_unit_status.unit_index = party_index + 0x100;
+    g_menu_selected_unit_status.level = unit->level;
+    g_menu_selected_unit_status.experience = unit->experience;
     maximum_hp = unit->max_hp;
-    g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
+    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
     if (maximum_hp == 0) {
-        g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
+        g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
     }
-    g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
-        = g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
+    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
+        = g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
     maximum_mp = unit->max_mp;
-    g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
+    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
     if (maximum_mp == 0) {
-        g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
+        g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
     }
-    g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
-        = g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
-    g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
-    g_require_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
+    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
+        = g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
+    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
+    g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -117,11 +117,11 @@ void require_editor_load_party_unit(s32 unused, s32 party_index) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-            g_require_editor_primary_skillset_name[0] = 0xfe;
+            g_menu_billboard_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_require_editor_secondary_skillset_name[1] = 0xfe;
+            g_menu_billboard_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;

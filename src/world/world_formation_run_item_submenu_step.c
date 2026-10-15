@@ -16,7 +16,7 @@
  * later position is the natural one.
  *
  * fft/world.h owns g_world_formation_unit_cycle_mode,
- * g_world_formation_cursor_ot_override, g_world_preview_stats_thread_params, g_world_preview_stats_thread_params.y,
+ * g_world_formation_cursor_ot_override, g_menu_preview_stats_thread_params, g_menu_preview_stats_thread_params.y,
  * g_world_item_submenu_initialized, g_world_menu_* and g_world_formation_unit_banner_enabled, so those are not
  * redeclared here.
  *
@@ -43,8 +43,8 @@ s32 world_formation_run_item_submenu_step(void) {
         menu_request_thread_stop(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL);
         g_world_item_menu_mode = MENU_ITEM_LIST_STATE_BROWSE;
         g_world_formation_unit_banner_enabled = 0;
-        g_world_preview_stats_thread_params.x = 0;
-        g_world_preview_stats_thread_params.y = -0x49;
+        g_menu_preview_stats_thread_params.x = 0;
+        g_menu_preview_stats_thread_params.y = -0x49;
     }
     g_world_formation_cursor_ot_override = 9;
     if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_CLOSE) {
@@ -53,8 +53,8 @@ s32 world_formation_run_item_submenu_step(void) {
         g_world_item_submenu_initialized = 0;
         g_world_formation_unit_banner_enabled = 1;
         thread_resume(WORLD_THREAD_SLOT_UPPER_MENU);
-        g_world_preview_stats_thread_params.x = 2;
-        g_world_preview_stats_thread_params.y = 2;
+        g_menu_preview_stats_thread_params.x = 2;
+        g_menu_preview_stats_thread_params.y = 2;
         g_world_formation_unit_cycle_mode = 2;
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return 0;
@@ -62,7 +62,7 @@ s32 world_formation_run_item_submenu_step(void) {
     if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_BROWSE) {
         g_world_item_menu_mode = world_item_run_category_menu();
     } else if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_REARRANGE) {
-        g_world_item_menu_mode = world_item_run_rearrange_mode();
+        g_world_item_menu_mode = item_run_rearrange_mode();
     } else if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_ACTION) {
         g_world_formation_cursor_ot_override = 0x3C;
         g_world_item_menu_mode = world_item_run_action_menu();
@@ -84,7 +84,7 @@ s32 world_formation_run_item_submenu_step(void) {
     }
     disabled = 0;
     if (world_map_is_busy() != 0 || g_world_item_menu_mode != MENU_ITEM_LIST_STATE_BROWSE
-        || item_get_equipped_count_variant(g_item_list_entries[g_world_menu_cursor_position]) == 0) {
+        || item_get_equipped_count_variant(g_item_list_entries[g_menu_list_selected_index]) == 0) {
         disabled = 1;
     }
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 0xB8, 0x3C,
@@ -95,15 +95,15 @@ s32 world_formation_run_item_submenu_step(void) {
     }
     menu_run_script_with_palette_mode(&g_world_item_list_window_script, input, busy);
     world_menu_draw_row_window_and_cursor(0, g_menu_selected_slot, busy);
-    if (g_world_menu_option_count != 0) {
-        if (g_item_list_entries[g_world_menu_cursor_position] < ITEM_ID_THROWABLE_FIRST) {
-            menu_draw_weapon_hand_icons(g_item_list_entries[g_world_menu_cursor_position]);
+    if (g_menu_list_entry_count != 0) {
+        if (g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_THROWABLE_FIRST) {
+            menu_draw_weapon_hand_icons(g_item_list_entries[g_menu_list_selected_index]);
         }
-        if (g_item_list_entries[g_world_menu_cursor_position] >= ITEM_ID_HEADGEAR_FIRST
-            && g_item_list_entries[g_world_menu_cursor_position] < ITEM_ID_ACCESSORY_FIRST) {
+        if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
+            && g_item_list_entries[g_menu_list_selected_index] < ITEM_ID_ACCESSORY_FIRST) {
             menu_run_script_with_palette_mode(&g_world_item_hp_mp_bonus_window_script, 0, 0);
         }
-        menu_draw_item_status_list(g_item_list_entries[g_world_menu_cursor_position]);
+        menu_draw_item_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
     return 1;
 }

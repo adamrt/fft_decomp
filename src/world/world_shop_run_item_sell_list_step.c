@@ -14,7 +14,7 @@ void world_shop_run_item_sell_list_step(void) {
             g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         world_menu_init_scrollable_list_core(
-            g_item_list_entries, g_world_menu_cursor_position, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+            g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         g_world_menu_script_callbacks[0].value = menu_get_entry_item_equipped_count;
         g_world_menu_script_callbacks[1].value = menu_get_entry_item_count;
         g_world_menu_script_callbacks[2].icon = menu_build_item_type_icon_source;
@@ -31,7 +31,7 @@ void world_shop_run_item_sell_list_step(void) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF802, 0);
         g_world_shop_menu_step = WORLD_SHOP_STEP_MAIN_MENU;
     } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        if (g_world_menu_option_count == 0) {
+        if (g_menu_list_entry_count == 0) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
         } else {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
