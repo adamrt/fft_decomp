@@ -80,26 +80,25 @@ void world_shop_run_best_fit_preview_step(void) {
         s16* reserved;
 
         g_world_shop_best_fit_menu.selected_index = 0;
-        bcopy(g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment, staged, sizeof(staged));
-        unit_slot = &g_world_unit_pointers[g_world_formation_selected_unit_index];
+        bcopy(g_world_unit_pointers[g_unit_selected_index]->equipment, staged, sizeof(staged));
+        unit_slot = &g_world_unit_pointers[g_unit_selected_index];
         room_base = &g_world_shop_fitting_room_items[0][0];
-        reserved = room_base + g_world_formation_selected_unit_index * WORLD_EQUIPMENT_SLOT_COUNT;
+        reserved = room_base + g_unit_selected_index * WORLD_EQUIPMENT_SLOT_COUNT;
         for (i = 0; i < WORLD_EQUIPMENT_SLOT_ACCESSORY; i++, reserved++) {
             if (((*unit_slot)->equipment[i] >> 15) != 0) {
                 (*unit_slot)->equipment[i] = *reserved;
             }
         }
-        world_shop_build_fitting_room_best_fit_equipment(g_world_formation_selected_unit_index, g_world_menu_context_id,
-            g_world_item_preview_stat_detail.state.equipment);
+        world_shop_build_fitting_room_best_fit_equipment(
+            g_unit_selected_index, g_world_menu_context_id, g_world_item_preview_stat_detail.state.equipment);
         g_world_item_preview_stat_detail.state.equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY]
-            = g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
-        bcopy(staged, g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment, sizeof(staged));
+            = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
+        bcopy(staged, g_world_unit_pointers[g_unit_selected_index]->equipment, sizeof(staged));
         item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_world_selected_unit_stat_summary,
-            g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment,
+            g_world_unit_pointers[g_unit_selected_index]->equipment,
             (u16*)g_world_item_preview_stat_detail.state.equipment);
-        g_world_item_preview_stat_detail.state.two_hands
-            = unit_is_two_handing_weapon(g_world_item_preview_stat_detail.state.equipment,
-                world_ability_has_two_hands(g_world_formation_selected_unit_index));
+        g_world_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
+            g_world_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
         world_menu_toggle_stat_preview_panel_thread(1);
         world_menu_toggle_preview_stats_window(1);
         g_menu_status_display_thread_params.redraw_request = 1;
@@ -111,10 +110,10 @@ void world_shop_run_best_fit_preview_step(void) {
     i = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_world_shop_best_fit_menu);
     if (i == 0) {
         if (g_world_menu_selection_results[5] == 0) {
-            g_world_menu_sound_effect_id = MAIN_SFX_EQUIP;
+            g_sound_queued_effect_id = MAIN_SFX_EQUIP;
         }
         if (g_world_menu_selection_results[5] == 1) {
-            g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         }
         world_menu_toggle_stat_preview_panel_thread(0);
         world_menu_toggle_preview_stats_window(0);
@@ -136,15 +135,15 @@ void world_shop_run_best_fit_preview_step(void) {
                 suggested = g_world_item_preview_stat_detail.state.equipment[i];
                 shifted = suggested << 16;
                 item = shifted >> 16;
-                current = g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[i];
+                current = g_world_unit_pointers[g_unit_selected_index]->equipment[i];
                 if (item == 0 || shifted < 0) {
-                    world_shop_return_unit_equip_to_fitting_room(g_world_formation_selected_unit_index, i);
+                    world_shop_return_unit_equip_to_fitting_room(g_unit_selected_index, i);
                     world_shop_add_fitting_room_cost(world_item_get_price(item));
                 } else if ((current >> 15) != 0) {
                     world_shop_add_fitting_room_cost(-world_item_get_price(current));
-                    g_world_shop_fitting_room_items[g_world_formation_selected_unit_index][i] = ITEM_ID_NOTHING;
+                    g_world_shop_fitting_room_items[g_unit_selected_index][i] = ITEM_ID_NOTHING;
                 }
-                g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[i] = item;
+                g_world_unit_pointers[g_unit_selected_index]->equipment[i] = item;
             }
             world_formation_recalculate_selected_unit_stats();
         }

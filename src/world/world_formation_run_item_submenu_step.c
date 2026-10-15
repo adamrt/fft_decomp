@@ -56,7 +56,7 @@ s32 world_formation_run_item_submenu_step(void) {
         g_world_preview_stats_thread_params.x = 2;
         g_world_preview_stats_thread_params.y = 2;
         g_world_formation_unit_cycle_mode = 2;
-        g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return 0;
     }
     if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_BROWSE) {

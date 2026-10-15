@@ -9,5 +9,5 @@ s32 bunit_job_calculate_current_jp(s32 index) {
 
     generic_job = job_get_generic_index(g_menu_job_ids[index]);
     return g_bunit_job_current_jp
-        = g_bunit_unit_pointers[g_bunit_unit_selected_index]->job_points.current.values[generic_job];
+        = g_bunit_unit_pointers[g_unit_selected_index]->job_points.current.values[generic_job];
 }

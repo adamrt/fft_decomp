@@ -204,7 +204,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         rect.w = 8;
         rect.h = 0x10;
         card_gfx_enqueue_textured_quad(
-            &rect, 0xd8, 0, 0, 0, g_card_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
+            &rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
     if (g_card_save_occupied_slot_count - g_card_save_list_top_row >= 5) {
         rect.x = 0xe3;
@@ -212,6 +212,6 @@ void card_save_update_and_draw_slot_list(u16 input) {
         rect.w = 8;
         rect.h = 0x10;
         card_gfx_enqueue_textured_quad(
-            &rect, 0xe0, 0, 0, 0, g_card_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
+            &rect, 0xe0, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
 }

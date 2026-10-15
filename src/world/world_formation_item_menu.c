@@ -60,11 +60,11 @@ void world_formation_item_menu(void) {
         g_world_item_menu_initialized = 1;
     }
     if (g_world_formation_current_menu < 9) {
-        world_formation_place_unit_portrait_at_rest(g_world_formation_selected_unit_index);
+        world_formation_place_unit_portrait_at_rest(g_unit_selected_index);
     }
-    if (g_world_item_menu_unit_index != g_world_formation_selected_unit_index) {
-        g_world_item_menu_unit_index = (u8)g_world_formation_selected_unit_index;
-        if (world_formation_get_unit_lock(g_world_formation_selected_unit_index) < 0) {
+    if (g_world_item_menu_unit_index != g_unit_selected_index) {
+        g_world_item_menu_unit_index = (u8)g_unit_selected_index;
+        if (world_formation_get_unit_lock(g_unit_selected_index) < 0) {
             g_world_item_icon_menu.text_id = 0xD802;
         } else {
             g_world_item_icon_menu.text_id = 0xD801;
@@ -78,14 +78,14 @@ void world_formation_item_menu(void) {
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM) {
         g_world_formation_unit_cycle_mode = 2;
         if (g_world_menu_selection_results[1] >= 0 && g_world_menu_selection_results[1] < 3
-            && world_formation_get_unit_lock(g_world_formation_selected_unit_index) < 0) {
-            g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+            && world_formation_get_unit_lock(g_unit_selected_index) < 0) {
+            g_sound_queued_effect_id = MAIN_SFX_INVALID;
             world_menu_reset_selection_results();
             return;
         }
         selection = &g_world_menu_selection_results[1];
         if (*selection != -1) {
-            g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             thread_start(WORLD_THREAD_SLOT_UPPER_MENU_CHILD, world_formation_item_menu_idle_thread);
             g_world_formation_current_menu = *selection + WORLD_FORMATION_MENU_ITEM_EQUIP;
             world_menu_set_cursor_position(WORLD_MENU_CURSOR_EQUIP_SLOT, 0);
@@ -96,9 +96,9 @@ void world_formation_item_menu(void) {
         g_world_item_menu_initialized = running;
         if (running == 0) {
             world_menu_toggle_change_banner_panel_thread(0);
-            roster_slot = g_world_unit_pointers[g_world_formation_selected_unit_index]->identity.roster_slot;
+            roster_slot = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
             world_formation_build_record_list(0, g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
-            g_world_formation_selected_unit_index = world_formation_find_index_by_roster_slot(roster_slot);
+            g_unit_selected_index = world_formation_find_index_by_roster_slot(roster_slot);
             g_world_formation_current_menu = WORLD_FORMATION_MENU_ITEM_LEAVE;
             g_world_formation_unit_browse_enabled = g_world_item_menu_saved_browse_enabled;
             g_world_formation_unit_banner_enabled = g_world_formation_saved_banner_enabled;

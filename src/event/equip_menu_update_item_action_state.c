@@ -39,7 +39,7 @@ s32 equip_menu_update_item_action_state(void) {
             menu_stop_managed_thread(EQUIP_THREAD_SLOT_POPUP_MENU);
             return MENU_ITEM_LIST_STATE_SORT_ORDER;
         }
-        g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;
+        g_sound_queued_effect_id = MAIN_SFX_INVALID;
     }
     return MENU_ITEM_LIST_STATE_ACTION;
 }

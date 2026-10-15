@@ -229,5 +229,6 @@ s32 thread_call_on_main_stack();
 
 /* unified */
 s32 thread_find_first_running_menu_thread(void);
+void thread_wait_forever(void);
 
 #endif

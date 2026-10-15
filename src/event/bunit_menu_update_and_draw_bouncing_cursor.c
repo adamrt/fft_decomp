@@ -50,11 +50,11 @@ void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 
 
     active_bit = active;
     if (active_bit != 0) {
-        for (i = 0; g_bunit_menu_cursor_reverse_offset_keyframes[i] < timer; i += 2) { }
-        raw_offset = g_bunit_menu_cursor_reverse_offset_keyframes[i + 1];
+        for (i = 0; g_menu_cursor_reverse_offset_keyframes[i] < timer; i += 2) { }
+        raw_offset = g_menu_cursor_reverse_offset_keyframes[i + 1];
     } else {
-        for (i = 0; g_bunit_menu_cursor_forward_offset_keyframes[i] < timer; i += 2) { }
-        raw_offset = g_bunit_menu_cursor_forward_offset_keyframes[i + 1];
+        for (i = 0; g_menu_cursor_forward_offset_keyframes[i] < timer; i += 2) { }
+        raw_offset = g_menu_cursor_forward_offset_keyframes[i + 1];
     }
 
     offset = raw_offset;
@@ -84,7 +84,7 @@ void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 
     setXY4(&g_bunit_bouncing_cursor_quad, pos->x, offset + pos->y, pos->x + 0x10, offset + pos->y, pos->x,
         pos->y + bottom, pos->x + 0x10, pos->y + bottom);
     g_bunit_bouncing_cursor_quad.clut = cursor_clut;
-    g_bunit_bouncing_cursor_quad.tpage = g_bunit_menu_icon_texture_page;
+    g_bunit_bouncing_cursor_quad.tpage = g_menu_cursor_texture_page;
     gfx_enqueue_textured_quad_corners(&g_bunit_bouncing_cursor_quad, 0, 0, 0x3C);
     setXY4(&g_bunit_bouncing_cursor_quad, pos->x, offset + pos->y + 2, pos->x + 0x10, offset + pos->y + 2, pos->x,
         pos->y + bottom + 2, pos->x + 0x10, pos->y + bottom + 2);

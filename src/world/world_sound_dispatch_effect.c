@@ -13,26 +13,26 @@ void world_sound_dispatch_effect(void) {
     s32 sound_id;
 
     if (g_world_sound_release_held_loop != 0) {
-        g_world_menu_sound_effect_id = MAIN_SFX_NONE;
+        g_sound_queued_effect_id = MAIN_SFX_NONE;
     }
     if (g_sound_pending_sfx_id == MAIN_SFX_TEXT_GLYPH || g_sound_pending_sfx_id == MAIN_SFX_TEXT_PAGE) {
         main_sound_play_sfx_find_channel(g_sound_pending_sfx_id);
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
-    } else if (g_world_menu_sound_effect_id == MAIN_SFX_ERROR_MESSAGE) {
+    } else if (g_sound_queued_effect_id == MAIN_SFX_ERROR_MESSAGE) {
         main_sound_play_sfx_find_channel(MAIN_SFX_ERROR_MESSAGE);
-        g_world_menu_sound_effect_id = MAIN_SFX_NONE;
+        g_sound_queued_effect_id = MAIN_SFX_NONE;
     }
     if (g_sound_pending_sfx_id == MAIN_SFX_CANCEL || g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE) {
-        g_world_menu_sound_effect_id = g_sound_pending_sfx_id;
+        g_sound_queued_effect_id = g_sound_pending_sfx_id;
     }
     if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     }
     sound_id = g_sound_pending_sfx_id;
     if (sound_id == MAIN_SFX_NONE) {
-        sound_id = g_world_menu_sound_effect_id;
+        sound_id = g_sound_queued_effect_id;
     }
-    g_world_menu_sound_effect_id = MAIN_SFX_NONE;
+    g_sound_queued_effect_id = MAIN_SFX_NONE;
     g_sound_pending_sfx_id = MAIN_SFX_NONE;
     if (sound_id != MAIN_SFX_NONE) {
         main_sound_play_sfx(sound_id);

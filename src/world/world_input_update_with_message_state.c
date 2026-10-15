@@ -44,6 +44,6 @@ void world_input_update_with_message_state(void) {
         g_world_sound_release_held_loop = 0;
     }
     if (g_world_text_task_phase == 1) {
-        g_world_menu_sound_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
     }
 }

@@ -22,10 +22,10 @@ s32 world_ability_build_equippable_rsm_list(s16 unit_index, s32 slot, s16* out) 
     s32 last;
     s16 job_id = g_world_unit_pointers[unit_index]->identity.job_id;
 
-    count = world_ability_find_unit_abilities(
+    count = ability_build_list_variant(
         unit_index, world_job_get_base(unit_index), slot, abilities, WORLD_ABILITY_LIST_MODE_LEARNED_ONLY);
     for (i = 1; i < JOB_ID_GENERIC_COUNT - 1; i++) {
-        count += world_ability_find_unit_abilities(
+        count += ability_build_list_variant(
             unit_index, JOB_ID_SQUIRE + i, slot, &abilities[count], WORLD_ABILITY_LIST_MODE_LEARNED_ONLY);
     }
 

@@ -33,7 +33,7 @@ menu_instruction_t* bunit_cmd_draw_right_aligned_number_handler(menu_instruction
     glyph_rect.h = 0x10;
     for (j = 0; j < count; j++) {
         menu_gfx_enqueue_textured_quad(&glyph_rect, (digits[j] - '0') * 8 + 0xA8, 0x30, 0, 0,
-            g_bunit_menu_icon_texture_page, 0x3ED3, g_menu_gfx_otag_index);
+            g_menu_cursor_texture_page, 0x3ED3, g_menu_gfx_otag_index);
         glyph_rect.x += 8;
     }
     return menu_next_instruction(cmd);

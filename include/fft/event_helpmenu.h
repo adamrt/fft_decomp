@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* help menus */
 extern s16 g_helpmenu_selected_unit_panel_mode;

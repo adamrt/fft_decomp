@@ -12,7 +12,7 @@ void world_menu_run_view_abilities(void) {
         g_world_equipment_ability_panel_thread_params.style = 1;
         world_menu_init_cursor_position(WORLD_MENU_CURSOR_ABILITY_TAB, 0);
         menu_clear_selection_records();
-        g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
     }
     if (g_world_view_abilities_step == MENU_JOB_LIST_STEP_JOBS) {
         g_world_view_abilities_step = world_menu_run_learn_job_list();

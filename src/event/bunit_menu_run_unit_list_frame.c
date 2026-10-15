@@ -14,11 +14,11 @@ s32 bunit_menu_run_unit_list_frame(void) {
         if (g_bunit_unit_list_initialized == 0) {
             g_bunit_status_banner_enabled = g_bunit_saved_status_banner_enabled;
             g_bunit_unit_browse_enabled = g_bunit_saved_unit_browse_enabled;
-            bunit_menu_init_unit_list(g_bunit_unit_selected_index);
+            bunit_menu_init_unit_list(g_unit_selected_index);
             g_bunit_unit_list_count = bunit_unit_build_data_list(-1, (s32)g_bunit_unit_pointers, 1);
             g_bunit_unit_reorderable_count = bunit_unit_build_reorderable_index_list();
             bunit_unit_build_list_index_map();
-            g_bunit_unit_grid_selected_cell = g_bunit_unit_list_index_map[g_bunit_unit_selected_index];
+            g_bunit_unit_grid_selected_cell = g_bunit_unit_list_index_map[g_unit_selected_index];
             bunit_unit_copy_selected_data();
             g_bunit_status_display_dimmed = 0;
             g_bunit_numeric_editor_thread_params.style = 0;
@@ -48,7 +48,7 @@ s32 bunit_menu_run_unit_list_frame(void) {
                     g_bunit_unit_list_initialized = 0;
                 } else if (g_bunit_menu_primary_result == 1) {
                     bunit_gfx_start_increasing_fade();
-                    g_bunit_selected_battle_id = g_bunit_unit_pointers[g_bunit_unit_selected_index]->battle_id;
+                    g_bunit_selected_battle_id = g_bunit_unit_pointers[g_unit_selected_index]->battle_id;
                 }
                 g_bunit_character_status_frame_config.style = 0;
                 g_bunit_numeric_editor_thread_params.style = 0;
@@ -68,14 +68,14 @@ s32 bunit_menu_run_unit_list_frame(void) {
             return 1;
         }
         if ((input & PSX_PAD_TRIANGLE) || (input & PSX_PAD_START)) {
-            g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             g_bunit_character_status_frame_config.style = 1;
             g_bunit_numeric_editor_thread_params.style = 1;
             g_bunit_unit_list_triangle_menu_open = 1;
         } else if ((input & PSX_PAD_CIRCLE) && g_bunit_unit_browse_enabled != 0) {
-            unit = g_bunit_unit_pointers[g_bunit_unit_selected_index];
+            unit = g_bunit_unit_pointers[g_unit_selected_index];
             if (unit->uses_monster_skillset != 0 || (unit->initial_team_flags & BATTLE_TEAM_MASK)) {
-                g_bunit_sound_queued_effect_id = MAIN_SFX_INVALID;
+                g_sound_queued_effect_id = MAIN_SFX_INVALID;
             } else {
                 g_bunit_status_display_dimmed = 1;
                 g_bunit_numeric_editor_thread_params.style = 1;

@@ -17,7 +17,7 @@ void world_formation_update_unit_selection(void) {
     s32 previous;
     s32* flags;
 
-    if (g_world_formation_selected_unit_index != g_world_formation_selected_unit_index_latch) {
+    if (g_unit_selected_index != g_world_formation_selected_unit_index_latch) {
         if (g_world_formation_unit_banner_enabled != 0) {
             saved = g_menu_status_display_thread_params.flags;
             if (g_world_formation_unit_banner_at_bottom_latch != g_world_formation_unit_banner_at_bottom) {
@@ -52,8 +52,7 @@ void world_formation_update_unit_selection(void) {
         } else if ((g_menu_input_primary_repeat & PSX_PAD_LEFT) || (g_menu_input_secondary_repeat & PSX_PAD_L1)) {
             g_menu_status_display_thread_params.redraw_request = 2;
         } else {
-            g_menu_status_display_thread_params.redraw_request
-                = previous < g_world_formation_selected_unit_index ? 1 : 2;
+            g_menu_status_display_thread_params.redraw_request = previous < g_unit_selected_index ? 1 : 2;
         }
     } else if (g_world_formation_unit_banner_at_bottom_latch != g_world_formation_unit_banner_at_bottom
         && g_world_formation_banner_slide_step == 0) {

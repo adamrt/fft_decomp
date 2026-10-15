@@ -13,13 +13,13 @@ void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
     if (cur == 0) {
         switch (*offset) {
         case -0x78:
-            if (g_bunit_unit_selected_index < 8) {
+            if (g_unit_selected_index < 8) {
                 *step = 4;
             }
             break;
         case -0x3C:
-            if (g_bunit_unit_selected_index < 0x10) {
-                if (g_bunit_unit_selected_index < 4) {
+            if (g_unit_selected_index < 0x10) {
+                if (g_unit_selected_index < 4) {
                     *step = 4;
                 }
             } else {
@@ -27,7 +27,7 @@ void bunit_menu_update_unit_list_scroll(s8* step, s8* offset) {
             }
             break;
         case 0:
-            if (g_bunit_unit_selected_index >= 0xC) {
+            if (g_unit_selected_index >= 0xC) {
                 *step = -4;
             }
             break;

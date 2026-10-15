@@ -117,8 +117,7 @@ void world_shop_run_screen(s32 shop_type) {
             world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
         }
         if (g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
-            world_menu_update_grid_cursor(
-                g_world_unit_pointers[g_world_formation_selected_unit_index]->uses_monster_skillset);
+            world_menu_update_grid_cursor(g_world_unit_pointers[g_unit_selected_index]->uses_monster_skillset);
         }
         world_menu_set_palette_mode(g_menu_input_lock_mode);
         if (g_world_shop_background_visible != 0) {
@@ -139,15 +138,12 @@ void world_shop_run_screen(s32 shop_type) {
             }
             if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0) {
                 if (buttons & PSX_PAD_L1) {
-                    g_world_formation_selected_unit_index = g_world_formation_selected_unit_index == 0
-                        ? g_world_formation_unit_count - 1
-                        : g_world_formation_selected_unit_index - 1;
+                    g_unit_selected_index
+                        = g_unit_selected_index == 0 ? g_world_formation_unit_count - 1 : g_unit_selected_index - 1;
                     buttons &= ~PSX_PAD_R1;
                 } else if (buttons & PSX_PAD_R1) {
-                    g_world_formation_selected_unit_index
-                        = g_world_formation_selected_unit_index == g_world_formation_unit_count - 1
-                        ? 0
-                        : g_world_formation_selected_unit_index + 1;
+                    g_unit_selected_index
+                        = g_unit_selected_index == g_world_formation_unit_count - 1 ? 0 : g_unit_selected_index + 1;
                 }
             } else {
                 buttons = 0;

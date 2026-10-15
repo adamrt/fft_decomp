@@ -55,6 +55,6 @@ void equip_input_update_with_message_state(void) {
         g_equip_sound_suppress_queued = 0;
     }
     if (g_equip_text_thread_running_state == 1) {
-        g_equip_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
     }
 }

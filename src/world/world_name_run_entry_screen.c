@@ -147,21 +147,21 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
             g_world_name_entry_last_state = value;
         }
         if (g_sound_pending_sfx_id == 2 || g_sound_pending_sfx_id == 3) {
-            g_world_menu_sound_effect_id = g_sound_pending_sfx_id;
+            g_sound_queued_effect_id = g_sound_pending_sfx_id;
         }
         if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
             g_sound_pending_sfx_id = MAIN_SFX_NONE;
         }
         value = g_sound_pending_sfx_id;
         if (value == MAIN_SFX_NONE) {
-            value = g_world_menu_sound_effect_id;
+            value = g_sound_queued_effect_id;
         }
         if (value == MAIN_SFX_TEXT_GLYPH) {
             main_sound_play_sfx_find_channel(MAIN_SFX_TEXT_GLYPH);
         } else if (value != MAIN_SFX_NONE) {
             main_sound_play_sfx(value);
         }
-        g_world_menu_sound_effect_id = MAIN_SFX_NONE;
+        g_sound_queued_effect_id = MAIN_SFX_NONE;
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     }
     menu_set_vsync_mode_and_event_speed(2);

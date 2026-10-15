@@ -9,7 +9,7 @@ void bunit_menu_update_job(void) {
         g_bunit_job_menu_phase = MENU_JOB_LIST_STEP_JOBS;
         bunit_menu_set_selection_value(0, 0);
         menu_clear_selection_records();
-        g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
     }
     if (g_bunit_job_menu_phase == MENU_JOB_LIST_STEP_JOBS) {
         g_bunit_job_menu_phase = bunit_menu_run_job_list();

@@ -4,7 +4,7 @@
 
 /* Update a wrapped selection, request the supplied menu state on change and
  * return the new selection. */
-s32 bunit_menu_update_horizontal_selection_and_mark_change(
+s32 menu_update_horizontal_selection_and_mark_change(
     u16 entry_count, u8 selection_index, s32 input_mask, u8 changed_state) {
     s16 previous_selection;
     s16 selection;
@@ -13,7 +13,7 @@ s32 bunit_menu_update_horizontal_selection_and_mark_change(
     previous_selection = g_menu_selection_values[selection_index];
     selection = menu_update_wrapped_horizontal_selection(entry_count, selection_index, input_mask);
     if (previous_selection != selection) {
-        g_bunit_sound_queued_effect_id = changed_state;
+        g_sound_queued_effect_id = changed_state;
     }
     return selection;
 }

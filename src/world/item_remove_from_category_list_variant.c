@@ -9,7 +9,7 @@ void item_remove_from_category_list_variant(s32 item_id, s32 list_index) {
     s32 index;
     s32 terminator;
 
-    list = g_world_item_sorted_lists[list_index];
+    list = g_item_category_lists[list_index];
     index = 0;
     while (list[index] != item_id) {
         if (list[index] == ITEM_ID_NONE) {

@@ -50,19 +50,19 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             return;
         }
         for (i = 0; g_world_formation_dismiss_entries[i].sprite_set != -1; i++) {
-            if (g_world_unit_pointers[g_world_formation_selected_unit_index]->sprite_set
+            if (g_world_unit_pointers[g_unit_selected_index]->sprite_set
                 == g_world_formation_dismiss_entries[i].sprite_set) {
                 script_set_variable(g_world_formation_dismiss_entries[i].variable_id, 0xC);
             }
         }
-        world_formation_dismiss_unit(g_world_formation_selected_unit_index);
+        world_formation_dismiss_unit(g_unit_selected_index);
         g_sound_suppressed = 0;
         g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
         return;
     }
 
     if (g_world_dismiss_unit_prompt_running == 0) {
-        sprite = g_world_formation_selected_unit_index;
+        sprite = g_unit_selected_index;
         if (g_world_unit_pointers[sprite]->proposition_status != 0) {
             world_text_show_message_and_play_sound(0xC012, MAIN_SFX_ERROR_MESSAGE);
             g_world_formation_dismiss_step = 2;
@@ -73,9 +73,8 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             if (g_world_formation_unit_browse_enabled != 0) {
                 g_world_formation_unit_cycle_mode = 1;
             }
-            g_text_substitution_values[0]
-                = g_world_unit_pointers[g_world_formation_selected_unit_index]->identity.roster_slot;
-            unit = g_world_unit_pointers[g_world_formation_selected_unit_index];
+            g_text_substitution_values[0] = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
+            unit = g_world_unit_pointers[g_unit_selected_index];
             sprite = unit->sprite_set;
             if (sprite >= 0x4B) {
                 flags = unit->gender_flags;
@@ -142,9 +141,9 @@ void world_formation_run_dismiss_unit_menu_step(void) {
                 selection = g_world_menu_selection_results[10];
                 g_sound_suppressed = step;
                 if (selection == 0) {
-                    g_world_menu_sound_effect_id = MAIN_SFX_DISMISS;
+                    g_sound_queued_effect_id = MAIN_SFX_DISMISS;
                 } else if (selection == step) {
-                    g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                    g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                 }
                 /* A default assignment plus a conditional override, not an
                  * if/else over the two stores: the target puts `li v1,1` in the
@@ -153,7 +152,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
                  * branch sense and orders the two `li`s the other way, which
                  * also costs the store's register. */
                 step = 1;
-                if (g_world_menu_sound_effect_id != MAIN_SFX_NONE) {
+                if (g_sound_queued_effect_id != MAIN_SFX_NONE) {
                     step = 0x64;
                 }
                 g_world_formation_dismiss_step = step;
@@ -167,7 +166,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
             g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
             return;
         }
-        g_world_formation_dismiss_anim_timer = (g_world_formation_selected_unit_index << 8) + 1;
+        g_world_formation_dismiss_anim_timer = (g_unit_selected_index << 8) + 1;
         return;
     }
     if (running != 0) {

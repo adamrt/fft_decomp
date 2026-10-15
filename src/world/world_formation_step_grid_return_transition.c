@@ -28,7 +28,7 @@ s32 world_formation_step_grid_return_transition(s32 mode) {
         return 0;
     }
     if (g_world_formation_grid_return_frame == 0) {
-        world_formation_init_selection_cursor(g_world_formation_selected_unit_index);
+        world_formation_init_selection_cursor(g_unit_selected_index);
         g_world_formation_grid_return_done = 0;
         g_world_formation_grid_return_frame = 24;
     }
@@ -39,7 +39,7 @@ s32 world_formation_step_grid_return_transition(s32 mode) {
         row_y = (i / 4) * 60 + 0x24;
         y = g_world_formation_scroll_position + row_y;
         x = (i % 4) * 62 + 6;
-        if (i == g_world_formation_selected_unit_index) {
+        if (i == g_unit_selected_index) {
             if (mode < 2) {
                 target_x = 0x8B;
                 target_y = 0x9E;

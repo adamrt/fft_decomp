@@ -20,17 +20,17 @@ s32 bunit_menu_is_selected_unit_in_upper_rows(s32 page_offset) {
         }
         switch (offset) {
         case -0x78:
-            if (g_bunit_unit_selected_index >= 0x10) {
+            if (g_unit_selected_index >= 0x10) {
                 in_upper_rows = 0;
             }
             break;
         case -0x3c:
-            if (g_bunit_unit_selected_index >= 0xc) {
+            if (g_unit_selected_index >= 0xc) {
                 in_upper_rows = 0;
             }
             break;
         case 0:
-            if (g_bunit_unit_selected_index >= 8) {
+            if (g_unit_selected_index >= 8) {
                 in_upper_rows = 0;
             }
             break;

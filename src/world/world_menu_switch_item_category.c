@@ -9,7 +9,7 @@ void world_menu_switch_item_category(s32 input) {
     s16 item;
     s32 description;
 
-    category = world_menu_update_horizontal_selection_and_mark_change(
+    category = menu_update_horizontal_selection_and_mark_change(
         5, WORLD_MENU_CURSOR_SHOP_ITEM_TAB, input, MAIN_SFX_PAGE_SWITCH);
     cursor_slot = g_world_shop_item_category;
     if (cursor_slot != category) {

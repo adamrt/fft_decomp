@@ -169,16 +169,16 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
             rect.y = command->list.arrow_up_y;
             rect.w = 8;
             rect.h = 0x10;
-            menu_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, g_menu_gfx_semitransparency,
-                g_bunit_menu_icon_texture_page, g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
+            menu_gfx_enqueue_textured_quad(&rect, 0xd8, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
+                g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
         if (g_menu_scroll_base_index < g_bunit_menu_list_entry_count - g_bunit_menu_list_visible_rows) {
             rect.x = g_menu_window_right_x;
             rect.y = command->list.arrow_down_y;
             rect.w = 8;
             rect.h = 0x10;
-            menu_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, g_menu_gfx_semitransparency,
-                g_bunit_menu_icon_texture_page, g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
+            menu_gfx_enqueue_textured_quad(&rect, 0xe0, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
+                g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
         if (g_bunit_menu_list_entry_count > g_bunit_menu_list_visible_rows) {
             top = command->list.arrow_up_y;
@@ -192,7 +192,7 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
             rect.x = g_menu_window_right_x;
             rect.y = j;
             menu_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_menu_gfx_semitransparency,
-                g_bunit_menu_icon_texture_page, g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
+                g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, g_menu_gfx_otag_index);
         }
     }
     if (command->list.show_cursor != 0) {
@@ -221,7 +221,7 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
     }
     g_menu_list_row_mode = 0;
     if (previous_selected != g_bunit_menu_list_selected_index) {
-        g_bunit_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     return command;
 }

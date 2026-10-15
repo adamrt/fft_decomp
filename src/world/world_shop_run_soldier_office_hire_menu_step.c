@@ -62,7 +62,7 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
                         main_party_remove_unit(g_world_unit_pointers[slot]->identity.roster_slot);
                         g_world_shop_hire_result_shown = 1;
                     } else {
-                        g_world_formation_selected_unit_index = slot;
+                        g_unit_selected_index = slot;
                         world_formation_stage_selected_unit();
                         g_world_formation_unit_banner_at_bottom = 0;
                         g_world_formation_unit_banner_at_bottom_latch = 0;

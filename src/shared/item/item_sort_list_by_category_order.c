@@ -1,14 +1,14 @@
 #include "fft/event_equip.h"
 
 /* Reorder the selected items according to their category's display order. */
-s32 equip_item_sort_list_by_category_order(s32 category_index, s16* list) {
+s32 item_sort_list_by_category_order(s32 category_index, s16* list) {
     s16 sorted_items[144];
     u8* category_order;
     s32 category_item_count;
     s32 sorted_count;
     s32 category_order_index;
 
-    category_order = g_equip_item_category_lists[category_index];
+    category_order = g_item_category_lists[category_index];
     for (category_item_count = 0; category_order[category_item_count] != EQUIP_ITEM_LIST_END; category_item_count++) { }
 
     category_order_index = 0;

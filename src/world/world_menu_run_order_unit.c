@@ -15,7 +15,7 @@ void world_menu_run_order_unit(void) {
     s32 selected_entry;
 
     if (g_world_menu_order_unit_open == 0) {
-        world_menu_load_sort_key_list(0, g_world_menu_order_unit_entries);
+        menu_load_sort_key_list(0, g_world_menu_order_unit_entries);
         for (index = 0; index < 7; index++) {
             option_ids[index] = g_world_menu_order_unit_entries[index] + 14;
         }
@@ -53,7 +53,7 @@ void world_menu_run_order_unit(void) {
         option_ids[7] = -1;
         text_concatenate_entries(g_world_formation_menu_text_table, g_world_formation_menu_text_buffer, option_ids, 1);
         g_world_menu_text_redraw_request = 1;
-        world_menu_store_sort_key_list(0, g_world_menu_order_unit_entries);
+        menu_store_sort_key_list(0, g_world_menu_order_unit_entries);
         world_formation_sort_roster(0);
     }
 }

@@ -34,7 +34,7 @@ void world_shop_run_recruit_unit_preview_step(void) {
         menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
         thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_message_box_thread);
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF826, 0);
-        g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         g_world_shop_recruit_preview_initialized = 0;
     }
 }

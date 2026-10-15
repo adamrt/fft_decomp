@@ -7,7 +7,7 @@ void item_prepend_to_category_list_variant(s32 item_id, s32 category_index) {
     u8* list;
     s32 i;
 
-    list = g_equip_item_category_lists[category_index];
+    list = g_item_category_lists[category_index];
     i = 0;
     while (list[i] != EQUIP_ITEM_LIST_END) {
         i++;

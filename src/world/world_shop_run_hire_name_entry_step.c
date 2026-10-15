@@ -9,7 +9,7 @@ void world_shop_run_hire_name_entry_step(void) {
         g_world_shop_hire_name_entry_initialized = 1;
     }
     g_world_shop_entered_unit_name
-        = world_name_run_entry_keyboard_frame(g_world_unit_pointers[g_world_formation_selected_unit_index]->name, 0);
+        = world_name_run_entry_keyboard_frame(g_world_unit_pointers[g_unit_selected_index]->name, 0);
     if (g_world_shop_entered_unit_name != 0) {
         g_world_shop_hire_name_entry_initialized = 0;
         g_text_substitution_values[0] = g_world_shop_service_fee;

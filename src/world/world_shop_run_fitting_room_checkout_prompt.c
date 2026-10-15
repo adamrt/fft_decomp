@@ -57,7 +57,7 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
                 world_shop_add_fitting_room_cost(balance);
                 world_shop_buy_from_fitting_room();
                 world_formation_save_records_to_party();
-                g_world_menu_sound_effect_id = MAIN_SFX_SHOP_TRANSACTION;
+                g_sound_queued_effect_id = MAIN_SFX_SHOP_TRANSACTION;
                 item_rebuild_category_list(0);
                 item_rebuild_category_list(1);
                 item_rebuild_category_list(2);
@@ -67,7 +67,7 @@ s32 world_shop_run_fitting_room_checkout_prompt(void) {
                 return WORLD_SHOP_CHECKOUT_DONE;
             }
             if (g_world_shop_checkout_prompt_result == 1) {
-                g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             }
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf81c, 0);
             return WORLD_SHOP_CHECKOUT_PROMPT_OPEN;

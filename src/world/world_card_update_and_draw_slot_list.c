@@ -108,7 +108,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
             }
         } else if (input & PSX_PAD_CROSS) {
             if (g_world_card_list_scroll_velocity == 0) {
-                g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
+                g_sound_queued_effect_id = MAIN_SFX_CANCEL;
                 g_world_card_menu_step = WORLD_CARD_MENU_STEP_SELECT_CARD;
             }
         } else if (g_world_card_list_scroll_velocity == 0) {
@@ -122,7 +122,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
                 g_world_card_slot_cursor_row = i - 1;
             }
             if (i != g_world_card_slot_cursor_row) {
-                g_world_menu_sound_effect_id = MAIN_SFX_CURSOR_MOVE;
+                g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
             }
         }
         if (g_world_card_menu_step != WORLD_CARD_MENU_STEP_SELECT_SAVE) {

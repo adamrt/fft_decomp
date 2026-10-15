@@ -63,7 +63,7 @@ void world_card_run_save_step(s32 slot) {
                 bcopy(&g_world_load_work_buffer->summary, &g_main_card_save_slot_metadata[slot],
                     sizeof(card_save_summary_t));
                 world_card_update_save_slot_playtime(slot);
-                g_world_menu_sound_effect_id = MAIN_SFX_COMPLETE;
+                g_sound_queued_effect_id = MAIN_SFX_COMPLETE;
                 g_world_card_save_step_state = 0;
                 g_main_card_save_last_used_slot = slot;
                 return;
@@ -71,6 +71,6 @@ void world_card_run_save_step(s32 slot) {
         }
         g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
         g_world_card_save_failed = 1;
-        g_world_menu_sound_effect_id = MAIN_SFX_ERROR_MESSAGE;
+        g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
     }
 }

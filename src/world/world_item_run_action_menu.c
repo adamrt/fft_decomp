@@ -75,7 +75,7 @@ s8 world_item_run_action_menu(void) {
     }
     if (g_world_item_action_option_states[g_world_item_action_menu.selected_index] >= 0x1000
         && (g_menu_input_primary_repeat & PSX_PAD_CIRCLE)) {
-        g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+        g_sound_queued_effect_id = MAIN_SFX_INVALID;
     }
     item = g_world_menu_selection_results[3];
     selected = item;
@@ -112,11 +112,11 @@ s8 world_item_run_action_menu(void) {
             if (g_world_item_action_menu_initialized == selected) {
                 g_sound_suppressed = 1;
                 if (g_world_menu_selection_results[5] == 0) {
-                    g_world_menu_sound_effect_id = MAIN_SFX_UNEQUIP;
+                    g_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
                 } else if (g_world_menu_selection_results[5] == 1) {
-                    g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                    g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                 }
-                g_world_item_action_menu_initialized = g_world_menu_sound_effect_id != MAIN_SFX_NONE ? 100 : 1;
+                g_world_item_action_menu_initialized = g_sound_queued_effect_id != MAIN_SFX_NONE ? 100 : 1;
             }
             if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
                 return MENU_ITEM_LIST_STATE_ACTION;
@@ -144,7 +144,7 @@ s8 world_item_run_action_menu(void) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
-        result = world_menu_update_horizontal_selection_and_mark_change(
+        result = menu_update_horizontal_selection_and_mark_change(
             5, WORLD_MENU_CURSOR_ITEM_TAB, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
         if (result == g_world_item_menu_category) {
             return MENU_ITEM_LIST_STATE_ACTION;
@@ -153,7 +153,7 @@ s8 world_item_run_action_menu(void) {
         menu_set_selection_record(
             g_world_item_menu_category, g_world_menu_cursor_position, g_world_menu_scroll_offset, g_item_list_entries);
         g_world_item_menu_category = result;
-        world_item_build_category_list(g_world_formation_selected_unit_index, g_world_item_menu_category + 1,
+        world_item_build_category_list(g_unit_selected_index, g_world_item_menu_category + 1,
             g_world_item_menu_category != 4 ? g_world_item_menu_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
         world_menu_get_selection_record(g_world_item_menu_category, &x, &y, g_item_list_entries);

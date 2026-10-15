@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* screen */
 extern s32 g_option_menu_state;
@@ -73,8 +78,6 @@ extern menu_input_timing_profile_t g_option_input_repeat_timings[];
 
 /* threads */
 extern menu_entry_t g_option_menu_icon_thread_param;
-
-void option_thread_wait_forever(void);
 
 /* unit panels */
 extern RECT g_option_menu_entry_panel_rect;

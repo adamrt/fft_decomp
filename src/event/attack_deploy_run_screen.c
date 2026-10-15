@@ -489,7 +489,7 @@ ramza_placed:
                 thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)g_attack_character_status_frame_config, 0, 0);
-                thread_start(ATTACK_PROMPT_THREAD_SLOT_DETAIL_MARKER, attack_thread_wait_forever);
+                thread_start(ATTACK_PROMPT_THREAD_SLOT_DETAIL_MARKER, thread_wait_forever);
                 do {
                     thread_yield();
                     if (*input & PSX_PAD_SELECT) {

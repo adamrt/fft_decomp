@@ -64,7 +64,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
         gouraud_textured_quads, 0, 0, 0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas, draw_modes);
     running = 1;
     bunit_gfx_init_vram_and_start_fade();
-    bunit_menu_init_unit_list(g_bunit_unit_selected_index);
+    bunit_menu_init_unit_list(g_unit_selected_index);
     do {
         bunit_gfx_submit_frame_and_swap_buffers(0, 0);
         previous_mode = g_menu_input_lock_mode;
@@ -75,7 +75,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
             bunit_text_start_selection_thread(3);
         }
         if (g_bunit_help_screen_id != MENU_GRID_HELP_NONE) {
-            bunit_menu_update_node_cursor(g_bunit_unit_pointers[g_bunit_unit_selected_index]->uses_monster_skillset);
+            bunit_menu_update_node_cursor(g_bunit_unit_pointers[g_unit_selected_index]->uses_monster_skillset);
         }
         if (previous_mode != 0 && g_menu_input_lock_mode == 0) {
             text_restore_section_pointers();
@@ -99,21 +99,21 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
             g_menu_gfx_context->otag + 9, bunit_input_read_pad1_unless_locked(), g_menu_gfx_drawenv_y);
         sound_request = g_sound_pending_sfx_id;
         if (sound_request == MAIN_SFX_CURSOR_MOVE || sound_request == MAIN_SFX_CANCEL) {
-            g_bunit_sound_queued_effect_id = g_sound_pending_sfx_id;
+            g_sound_queued_effect_id = g_sound_pending_sfx_id;
         }
         if (sound_request < 0 || g_sound_suppressed != 0) {
             g_sound_pending_sfx_id = MAIN_SFX_NONE;
         }
         sound_id = g_sound_pending_sfx_id;
         if (sound_id == MAIN_SFX_NONE) {
-            sound_id = g_bunit_sound_queued_effect_id;
+            sound_id = g_sound_queued_effect_id;
         }
         if (sound_id == MAIN_SFX_ERROR_MESSAGE) {
             main_sound_play_sfx_find_channel(MAIN_SFX_ERROR_MESSAGE);
         } else if (sound_id != MAIN_SFX_NONE) {
             main_sound_play_sfx(sound_id);
         }
-        g_bunit_sound_queued_effect_id = MAIN_SFX_NONE;
+        g_sound_queued_effect_id = MAIN_SFX_NONE;
         g_sound_pending_sfx_id = MAIN_SFX_NONE;
     } while (running != 0);
     bunit_panel_toggle_equipment_and_numeric_editor_threads(0);

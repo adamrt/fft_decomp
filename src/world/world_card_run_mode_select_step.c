@@ -93,5 +93,5 @@ void world_card_run_mode_select_step(void) {
         g_world_card_selectable_slot_count = world_card_count_selectable_save_slots();
         return;
     }
-    g_world_menu_sound_effect_id = MAIN_SFX_ERROR_MESSAGE;
+    g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
 }

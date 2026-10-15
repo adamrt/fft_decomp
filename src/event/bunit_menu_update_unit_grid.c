@@ -77,13 +77,13 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                 g_bunit_unit_stat_mode = g_bunit_unit_stat_mode == MENU_UNIT_READOUT_HP ? MENU_UNIT_READOUT_BRAVE_FAITH
                                                                                         : g_bunit_unit_stat_mode - 1;
                 buttons &= ~PSX_PAD_R2;
-                g_bunit_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+                g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
             }
             if (buttons & PSX_PAD_R2) {
                 g_bunit_unit_stat_mode = g_bunit_unit_stat_mode == MENU_UNIT_READOUT_BRAVE_FAITH
                     ? MENU_UNIT_READOUT_HP
                     : g_bunit_unit_stat_mode + 1;
-                g_bunit_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+                g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
             }
         }
     }
@@ -98,12 +98,12 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
         if (buttons & PSX_PAD_CIRCLE) {
             if (g_bunit_unit_browse_enabled == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
                 g_bunit_unit_browse_enabled = 1;
-                g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             }
         } else if (buttons & PSX_PAD_CROSS) {
             if (g_bunit_unit_browse_enabled != 0) {
                 unit = 0;
-                g_bunit_sound_queued_effect_id = MAIN_SFX_CANCEL;
+                g_sound_queued_effect_id = MAIN_SFX_CANCEL;
                 g_bunit_unit_browse_enabled = 0;
             }
         }
@@ -115,25 +115,25 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
         && bunit_menu_is_unit_list_scroll_needed() == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
         && !(g_bunit_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))) {
-        g_bunit_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+        g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
         g_bunit_status_banner_enabled = g_bunit_status_banner_enabled == 0;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_bunit_help_screen_id == MENU_GRID_HELP_NONE
         && bunit_gfx_get_fade_state() == 0) {
         g_bunit_unit_grid_selected_cell = menu_update_wrapped_grid_selection(
             4, 5, g_bunit_unit_reorderable_count - 1, g_bunit_unit_grid_selected_cell, buttons);
-        g_bunit_unit_selected_index = g_bunit_unit_reorderable_indices[g_bunit_unit_grid_selected_cell];
+        g_unit_selected_index = g_bunit_unit_reorderable_indices[g_bunit_unit_grid_selected_cell];
     }
     bunit_menu_update_unit_list_scroll(&g_bunit_unit_list_scroll_step, &g_bunit_unit_list_page_offset);
     if (g_bunit_unit_browse_enabled != 0) {
         if (buttons & PSX_PAD_L1) {
-            g_bunit_unit_selected_index
-                = g_bunit_unit_selected_index == 0 ? g_bunit_unit_list_count - 1 : g_bunit_unit_selected_index - 1;
+            g_unit_selected_index
+                = g_unit_selected_index == 0 ? g_bunit_unit_list_count - 1 : g_unit_selected_index - 1;
         } else if (buttons & PSX_PAD_R1) {
-            g_bunit_unit_selected_index
-                = g_bunit_unit_selected_index != g_bunit_unit_list_count - 1 ? g_bunit_unit_selected_index + 1 : 0;
+            g_unit_selected_index
+                = g_unit_selected_index != g_bunit_unit_list_count - 1 ? g_unit_selected_index + 1 : 0;
         }
-        g_bunit_unit_grid_selected_cell = g_bunit_unit_list_index_map[g_bunit_unit_selected_index];
+        g_bunit_unit_grid_selected_cell = g_bunit_unit_list_index_map[g_unit_selected_index];
         bunit_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
             bunit_menu_is_active_or_transitioning() != 0 || g_bunit_help_screen_id != MENU_GRID_HELP_NONE,
             MAIN_SFX_PAGE_SWITCH);
@@ -159,8 +159,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
             bunit_menu_is_active_or_transitioning() != 0 || g_bunit_help_screen_id != MENU_GRID_HELP_NONE,
             MAIN_SFX_PAGE_SWITCH);
         bunit_menu_dispatch_with_override(menu, 0, 0);
-        menu_gfx_enqueue_textured_quad_list(
-            quads, 0, 0, g_bunit_menu_icon_texture_page, g_menu_text_clut_2_mode0, 0xB, 8);
+        menu_gfx_enqueue_textured_quad_list(quads, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_2_mode0, 0xB, 8);
         mode = g_bunit_unit_stat_mode;
         if (mode < 3) {
             row = mode;
@@ -173,7 +172,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
             col = 3;
         }
         menu_gfx_enqueue_textured_quad_list(
-            quads + row, 0, 0, g_bunit_menu_icon_texture_page, g_menu_text_clut_1_mode0, 0xC, col);
+            quads + row, 0, 0, g_menu_cursor_texture_page, g_menu_text_clut_1_mode0, 0xC, col);
     }
     row = 0;
     g_bunit_status_banner_at_bottom = bunit_menu_is_selected_unit_in_upper_rows(g_bunit_unit_list_page_offset);
@@ -220,7 +219,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     menu_gfx_enqueue_textured_quad(&rect,
                         ((u8*)g_bunit_unit_grid_label_tiles)[g_bunit_unit_stat_mode * 6 + 4],
                         ((u8*)g_bunit_unit_grid_label_tiles)[g_bunit_unit_stat_mode * 6 + 5], color, 0,
-                        g_bunit_menu_icon_texture_page, g_menu_alternate_number_clut, 8);
+                        g_menu_cursor_texture_page, g_menu_alternate_number_clut, 8);
                     g_bunit_unit_grid_max_stat_number.x = cell.x + 40;
                     g_bunit_unit_grid_max_stat_number.y = cell_y + 45;
                     g_bunit_unit_grid_max_stat_number.value = unit_index;
@@ -249,8 +248,7 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     rect.y = top + 8;
                     rect.w = 0x25;
                     rect.h = 3;
-                    menu_gfx_enqueue_textured_quad(
-                        &rect, 0xD8, 0xCA, color, 0, g_bunit_menu_icon_texture_page, clut, 7);
+                    menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, 7);
                     bar_points[0].x = g_bunit_unit_grid_gauge_offsets[0] + cell.x;
                     bar_points[0].y = g_bunit_unit_grid_gauge_offsets[1] + top + 8;
                     if (g_bunit_unit_max_stat_value != 0) {
@@ -276,14 +274,14 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     rect.w = g_bunit_unit_grid_label_tiles[3].w + 3;
                     rect.h = g_bunit_unit_grid_label_tiles[3].h + 1;
                     menu_gfx_enqueue_textured_quad(&rect, g_bunit_unit_grid_label_tiles[3].u,
-                        g_bunit_unit_grid_label_tiles[3].v, color, 0, g_bunit_menu_icon_texture_page,
+                        g_bunit_unit_grid_label_tiles[3].v, color, 0, g_menu_cursor_texture_page,
                         g_menu_alternate_number_clut, 8);
                     rect.x = cell.x + 26;
                     rect.y = label_y3;
                     rect.w = g_bunit_unit_grid_label_tiles[4].w + 2;
                     rect.h = g_bunit_unit_grid_label_tiles[4].h;
                     menu_gfx_enqueue_textured_quad(&rect, g_bunit_unit_grid_label_tiles[4].u,
-                        g_bunit_unit_grid_label_tiles[4].v, color, 0, g_bunit_menu_icon_texture_page,
+                        g_bunit_unit_grid_label_tiles[4].v, color, 0, g_menu_cursor_texture_page,
                         g_menu_alternate_number_clut, 8);
                     g_bunit_unit_grid_level_number.x = cell.x + 13;
                     g_bunit_unit_grid_level_number.y = upper_y3;
@@ -302,27 +300,27 @@ s32 bunit_menu_update_unit_grid(s16 allow_banner_toggle, s16 allow_browse, s16 s
                     rect.w = g_bunit_unit_grid_label_tiles[5].w;
                     rect.h = g_bunit_unit_grid_label_tiles[5].h;
                     menu_gfx_enqueue_textured_quad(&rect, g_bunit_unit_grid_label_tiles[5].u,
-                        g_bunit_unit_grid_label_tiles[5].v, color, 0, g_bunit_menu_icon_texture_page,
+                        g_bunit_unit_grid_label_tiles[5].v, color, 0, g_menu_cursor_texture_page,
                         g_menu_alternate_number_clut, 8);
                     rect.x += rect.w - 2;
                     rect.y += 5;
                     rect.w = 3;
                     rect.h = 3;
                     menu_gfx_enqueue_textured_quad(
-                        &rect, 0x3B, 0x15, color, 0, g_bunit_menu_icon_texture_page, g_menu_alternate_number_clut, 8);
+                        &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_menu_alternate_number_clut, 8);
                     rect.x = cell.x + 26;
                     rect.y = label_y4;
                     rect.w = g_bunit_unit_grid_label_tiles[7].w;
                     rect.h = g_bunit_unit_grid_label_tiles[7].h;
                     menu_gfx_enqueue_textured_quad(&rect, g_bunit_unit_grid_label_tiles[7].u,
-                        g_bunit_unit_grid_label_tiles[7].v, color, 0, g_bunit_menu_icon_texture_page,
+                        g_bunit_unit_grid_label_tiles[7].v, color, 0, g_menu_cursor_texture_page,
                         g_menu_alternate_number_clut, 8);
                     rect.x += rect.w;
                     rect.y += 5;
                     rect.w = 3;
                     rect.h = 3;
                     menu_gfx_enqueue_textured_quad(
-                        &rect, 0x3B, 0x15, color, 0, g_bunit_menu_icon_texture_page, g_menu_alternate_number_clut, 8);
+                        &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_menu_alternate_number_clut, 8);
                     g_bunit_unit_grid_brave_number.x = cell.x + 13;
                     g_bunit_unit_grid_brave_number_wide.y = g_bunit_unit_grid_brave_number.y = upper_y4;
                     g_bunit_unit_grid_brave_number_wide.value = g_bunit_unit_grid_brave_number.value = unit_index;

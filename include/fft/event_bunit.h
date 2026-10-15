@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* screen */
 extern u16 g_bunit_frame_arg;
@@ -115,7 +120,6 @@ extern s16 g_bunit_unit_max_stat_value;
 extern bunit_unit_t g_bunit_unit_records[];
 extern u8 g_bunit_unit_reorderable_count;
 extern u8 g_bunit_unit_reorderable_indices[];
-extern s16 g_bunit_unit_selected_index;
 extern oriented_quad_t g_bunit_unit_shadow_sprite;
 /* 16-bit field index, per sort key, into the 0x10C-byte formation record
  * built by bunit_unit_build_data_list. The name is provisional. */
@@ -142,12 +146,10 @@ extern s8 g_bunit_ability_list_confirm_prompt_state;
 extern s16 g_bunit_ability_list_job_name_row[];
 extern u8 g_bunit_ability_list_ready;
 
-s32 bunit_ability_build_list(s16 unit_index, s16 job_id, s32 ability_category, s16* ability_list, s32 mode);
 s32 bunit_ability_update_list_menu(void);
 
 /* job */
 extern u32 g_bunit_job_current_jp;
-extern s32 g_bunit_job_current_mastered;
 extern u32 g_bunit_job_current_total_jp;
 extern u8 g_bunit_job_list_initialized;
 
@@ -157,7 +159,6 @@ extern s16 g_bunit_job_selected_id;
 s32 bunit_job_build_unit_job_list(s32 unit_id, s16* job_ids, s32 unused_2);
 s32 bunit_job_calculate_current_jp(s32 index);
 s32 bunit_job_calculate_current_level(s32 index);
-s32 bunit_job_calculate_current_mastered(s32 index);
 s32 bunit_job_calculate_current_total_jp(s32 index);
 s32 bunit_job_get_base(s16 unit_id);
 s32 bunit_job_get_current_jp(s32 unused_row);
@@ -283,11 +284,6 @@ extern u8 g_bunit_menu_button_piece_starts[];
 extern s8 g_bunit_menu_button_press_timers[];
 extern clut_t g_bunit_menu_clut;
 extern s32 g_bunit_menu_current_menu; /* bunit_menu_e */
-/* Idle and active vertical bounce curves of (frame threshold, pixel offset)
- * byte pairs, shared by the animated and bouncing cursor renderers. */
-extern s8 g_bunit_menu_cursor_forward_offset_keyframes[];
-extern s8 g_bunit_menu_cursor_reverse_offset_keyframes[];
-extern u16 g_bunit_menu_icon_texture_page;
 extern u16 g_bunit_menu_list_cursor_anim_state;
 extern s16* g_bunit_menu_list_entries;
 extern s16 g_bunit_menu_list_entry_count;
@@ -323,7 +319,6 @@ extern u8 g_bunit_unit_list_triangle_menu_open;
 void bunit_menu_dispatch_with_override(menu_instruction_t* script, s32 state, s32 override);
 void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id);
 void bunit_menu_draw_scrollable_list(const menu_instruction_t* script);
-void bunit_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 void bunit_menu_init_and_draw_scrollable_list(
     s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void bunit_menu_init_and_draw_scrollable_list_simple(
@@ -344,8 +339,6 @@ void bunit_menu_scroll_list_by_page(bunit_menu_vertical_scroll_direction_e direc
 s32 bunit_menu_set_selection_value(u8 index, s16 value);
 void bunit_menu_update_and_draw_animated_cursor(point16_t* pos, u16* state, s32 mode);
 void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
-s32 bunit_menu_update_horizontal_selection_and_mark_change(
-    u16 entry_count, u8 selection_index, s32 input_mask, u8 changed_state);
 void bunit_menu_update_job(void);
 void bunit_menu_update_node_cursor(s16 mode);
 void bunit_menu_update_unit_browser(void);
@@ -490,10 +483,7 @@ enum {
     BUNIT_CMD_END = 0x1c,
 };
 
-extern menu_sprite_command_t g_bunit_cmd_row_quad;
-
 menu_instruction_t* bunit_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* bunit_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_set_otag_index_handler(menu_instruction_t* instruction);
 menu_instruction_t* bunit_cmd_set_semitrans_handler(menu_instruction_t* instruction);
@@ -529,7 +519,6 @@ extern u8 g_bunit_thread_status_snapshot[16];
 void bunit_menu_update_event_thread_state(void);
 
 /* sound */
-extern u8 g_bunit_sound_queued_effect_id; /* main_sfx_e */
 
 /* status */
 extern u8 g_bunit_status_banner_at_bottom;

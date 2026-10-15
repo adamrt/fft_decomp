@@ -42,6 +42,6 @@ void bunit_menu_scroll_list_by_page(bunit_menu_vertical_scroll_direction_e direc
         g_bunit_menu_list_selected_index = count - 1;
     }
     if (previous_base != g_menu_scroll_base_index) {
-        g_bunit_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
 }

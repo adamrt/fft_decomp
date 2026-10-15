@@ -38,7 +38,7 @@ s32 equip_menu_run_equip_mode(void) {
         g_equip_equip_item_preview_active = 0;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        g_equip_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         if (g_equip_equip_item_list_open == 0) {
             g_equip_equip_mode_initialized = 0;
             equip_menu_reset_selection_indices();
@@ -53,8 +53,8 @@ s32 equip_menu_run_equip_mode(void) {
             help_id = entry + 0x6800;
         }
         g_equip_text_help_message_id = help_id;
-        selected_slot = equip_menu_update_vertical_selection_and_mark_change(
-            5, 0, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
+        selected_slot
+            = menu_update_vertical_selection_and_mark_change(5, 0, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
         g_equip_equip_item_slot = selected_slot;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             unit = g_equip_unit_selected_index;
@@ -75,8 +75,8 @@ s32 equip_menu_run_equip_mode(void) {
             g_menu_row_callbacks[0].value = menu_get_entry_item_equipped_count;
             g_menu_row_callbacks[1].value = menu_get_entry_item_count;
             g_menu_row_callbacks[2].icon = menu_build_item_type_icon_source;
-            g_menu_row_callbacks[3].icon = equip_menu_get_entry_item_icon_source;
-            g_equip_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+            g_menu_row_callbacks[3].icon = menu_get_entry_item_icon_source;
+            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             g_equip_equip_item_previewed_cursor = -1;
         }
     } else {
@@ -97,12 +97,12 @@ s32 equip_menu_run_equip_mode(void) {
                     item_adjust_inventory_count(item_id, -1);
                     equip_unit_load_selected_data();
                     g_equip_equip_item_list_refresh = 1;
-                    g_equip_sound_queued_effect_id = MAIN_SFX_EQUIP;
+                    g_sound_queued_effect_id = MAIN_SFX_EQUIP;
                 } else {
-                    g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;
+                    g_sound_queued_effect_id = MAIN_SFX_INVALID;
                 }
             } else {
-                g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;
+                g_sound_queued_effect_id = MAIN_SFX_INVALID;
             }
         }
         if (g_equip_menu_list_entry_count != 0) {

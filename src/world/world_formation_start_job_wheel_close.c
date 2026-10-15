@@ -9,5 +9,5 @@ void world_formation_start_job_wheel_close(void) {
         g_world_job_wheel_closing = 1;
     }
     g_world_job_wheel_close_frame = 0;
-    g_world_job_wheel_unit_index = g_world_formation_selected_unit_index;
+    g_world_job_wheel_unit_index = g_unit_selected_index;
 }

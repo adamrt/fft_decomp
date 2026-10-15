@@ -20,7 +20,7 @@ void bunit_menu_update_unit_browser(void) {
     s8 slide;
     u8 value;
 
-    if (g_bunit_unit_selected_index != g_bunit_unit_comparison_index) {
+    if (g_unit_selected_index != g_bunit_unit_comparison_index) {
         if (g_bunit_status_banner_enabled != 0) {
             g_bunit_comparison_display_flags = BUNIT_REQUEST_FLAGS;
             BUNIT_REQUEST_FLAGS = 0;
@@ -56,7 +56,7 @@ void bunit_menu_update_unit_browser(void) {
         } else if ((g_menu_input_primary_repeat & PSX_PAD_LEFT) || (g_menu_input_secondary_repeat & PSX_PAD_L1)) {
             g_bunit_status_display_redraw_request = 2;
         } else {
-            g_bunit_status_display_redraw_request = index < g_bunit_unit_selected_index ? 1 : 2;
+            g_bunit_status_display_redraw_request = index < g_unit_selected_index ? 1 : 2;
         }
         return;
     }

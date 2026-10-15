@@ -46,11 +46,11 @@ void bunit_menu_update_and_draw_animated_cursor(point16_t* pos, u16* state, s32 
 
     active_bit = active;
     if (active_bit != 0) {
-        for (i = 0; g_bunit_menu_cursor_reverse_offset_keyframes[i] < timer; i += 2) { }
-        raw_offset = g_bunit_menu_cursor_reverse_offset_keyframes[i + 1];
+        for (i = 0; g_menu_cursor_reverse_offset_keyframes[i] < timer; i += 2) { }
+        raw_offset = g_menu_cursor_reverse_offset_keyframes[i + 1];
     } else {
-        for (i = 0; g_bunit_menu_cursor_forward_offset_keyframes[i] < timer; i += 2) { }
-        raw_offset = g_bunit_menu_cursor_forward_offset_keyframes[i + 1];
+        for (i = 0; g_menu_cursor_forward_offset_keyframes[i] < timer; i += 2) { }
+        raw_offset = g_menu_cursor_forward_offset_keyframes[i + 1];
     }
 
     offset = raw_offset;
@@ -80,7 +80,7 @@ void bunit_menu_update_and_draw_animated_cursor(point16_t* pos, u16* state, s32 
     rect.y = pos->y;
     rect.w = 0x10;
     rect.h = 0x10;
-    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_bunit_menu_icon_texture_page, cursor_clut, 0x3C);
+    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, cursor_clut, 0x3C);
     rect.x += 2;
     rect.y += 2;
     menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, shadow_clut, 0x3B);

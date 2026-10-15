@@ -32,7 +32,7 @@ s32 equip_menu_run_slot_item_browser(void) {
         g_menu_row_callbacks[0].value = menu_get_entry_item_equipped_count;
         g_menu_row_callbacks[1].value = menu_get_entry_item_count;
         g_menu_row_callbacks[2].icon = menu_build_item_type_icon_source;
-        g_menu_row_callbacks[3].icon = equip_menu_get_entry_item_icon_source;
+        g_menu_row_callbacks[3].icon = menu_get_entry_item_icon_source;
         g_menu_row_callbacks[4].value = equip_menu_get_preview_hp_bonus_display;
         g_menu_row_callbacks[5].value = equip_menu_get_preview_mp_bonus_display;
         g_menu_row_callbacks[6].value = equip_menu_get_preview_hp_bonus;
@@ -48,7 +48,7 @@ s32 equip_menu_run_slot_item_browser(void) {
         g_equip_slot_item_browser_initialized = 0;
         return MENU_ITEM_LIST_STATE_CLOSE;
     }
-    slot = equip_menu_update_horizontal_selection_and_mark_change(5, 2, input, MAIN_SFX_PAGE_SWITCH);
+    slot = menu_update_horizontal_selection_and_mark_change(5, 2, input, MAIN_SFX_PAGE_SWITCH);
     if (slot != g_equip_selected_slot) {
         equip_menu_set_selection_record(
             g_equip_selected_slot, g_equip_menu_selected_list_index, g_menu_scroll_base_index, g_item_list_entries);
@@ -64,12 +64,12 @@ s32 equip_menu_run_slot_item_browser(void) {
         equip_gfx_set_transition_frame(10);
     } else if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (g_equip_menu_list_entry_count != 0) {
-            g_equip_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             equip_menu_set_selection_record(
                 slot, g_equip_menu_selected_list_index, g_menu_scroll_base_index, g_item_list_entries);
             return MENU_ITEM_LIST_STATE_REARRANGE;
         }
-        g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;
+        g_sound_queued_effect_id = MAIN_SFX_INVALID;
     }
     if (g_equip_menu_selected_list_index != g_equip_slot_item_browser_previewed_index) {
         if (g_equip_menu_list_entry_count != 0) {

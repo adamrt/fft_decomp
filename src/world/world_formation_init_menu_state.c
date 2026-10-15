@@ -40,7 +40,7 @@ void world_formation_init_menu_state(void) {
     g_world_preview_stats_thread_params.y = 2;
     g_world_formation_triangle_menu.selected_index = 0;
     g_world_formation_current_menu = WORLD_FORMATION_MENU_UNIT_GRID;
-    g_world_formation_selected_unit_index = 0;
+    g_unit_selected_index = 0;
     g_world_formation_selected_unit_index_latch = 0;
     g_world_formation_unit_cycle_mode = 1;
     g_world_formation_unit_banner_enabled = 1;

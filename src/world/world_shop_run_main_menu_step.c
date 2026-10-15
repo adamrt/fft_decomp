@@ -22,7 +22,7 @@ void world_shop_run_main_menu_step(void) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_SELL_LIST;
         } else if (g_world_menu_selection_results[0] == 2) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_FITTING_ROOM;
-            g_world_formation_selected_unit_index = 0;
+            g_unit_selected_index = 0;
             world_formation_stage_selected_unit();
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xF818, 0);
         } else {

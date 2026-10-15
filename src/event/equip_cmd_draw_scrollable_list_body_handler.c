@@ -222,7 +222,7 @@ menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction
     }
     g_menu_list_row_mode = 0;
     if (previous_selected != g_equip_menu_selected_list_index) {
-        g_equip_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     return command;
 }

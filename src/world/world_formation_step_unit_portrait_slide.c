@@ -18,7 +18,7 @@ u8 world_formation_step_unit_portrait_slide(void) {
     pos.y = (remaining * from_y + step * to_y) / 24;
     g_world_formation_cursor_position.x = pos.x + 0x1c;
     g_world_formation_cursor_position.y = pos.y + 0x19;
-    world_formation_draw_unit_sprite(g_world_formation_selected_unit_index, &pos, 0, 0x32);
+    world_formation_draw_unit_sprite(g_unit_selected_index, &pos, 0, 0x32);
     g_world_formation_portrait_slide_frame++;
     if (g_world_formation_portrait_slide_frame == 24) {
         g_world_formation_portrait_slide_frame = 0;

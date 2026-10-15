@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* screen */
 extern u16 g_equip_remove_all_equipment_ids[];
@@ -123,16 +128,12 @@ enum {
 
 extern menu_entry_t* g_equip_item_action_active_menu;
 extern menu_entry_t g_equip_item_action_menu;
-/* The display order lists of the five item tabs: hands, headgear, body armor, accessories, other. */
-extern u8* g_equip_item_category_lists[];
-extern menu_icon_source_t g_equip_item_graphic_descriptor;
 extern u8 g_equip_item_inventory_totals[];
 extern u8 g_equip_item_list_has_multiple_entries;
 extern struct menu_status_panel_slot_storage g_equip_item_preview_stat_detail;
 extern u8 g_equip_item_type_icon_coords[][2];
 extern s16 g_equip_item_type_order[];
 extern menu_entry_t* g_equip_item_type_order_active_menu;
-extern s8* g_equip_item_type_order_lists[];
 extern u8 g_equip_item_type_order_names[];
 extern u16 g_equip_remove_item_cursor_anim[];
 extern s16 g_equip_remove_item_equipment[];
@@ -143,9 +144,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
 void equip_item_build_inventory_totals(void);
 s32 equip_item_get_type(s32 item_id);
 void equip_item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
-s32 equip_item_sort_list_by_category_order(s32 category_index, s16* list);
 void equip_item_sort_list_by_criteria(s32 mode, s16* list);
-void equip_item_store_category_list(s32 category_index, const s16* source);
 s32 equip_item_run_type_order_mode(void);
 
 /* rearrange */
@@ -309,7 +308,6 @@ void equip_menu_clear_selection_values(void);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
 void equip_menu_draw_item_status_list(s16 item_id);
 void equip_menu_draw_scrollable_list(const menu_instruction_t* script);
-menu_icon_source_t* equip_menu_get_entry_item_icon_source(s32 row);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
 s32 equip_menu_get_preview_hp_bonus_display(s32 unused_row);
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row);
@@ -323,7 +321,6 @@ void equip_menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scrol
 void equip_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 s32 equip_menu_init_selection_value(u8 index, s16 value);
 void equip_menu_load_images_and_reset_lists(void);
-void equip_menu_load_sort_key_list(s32 list_index, s16* destination);
 void equip_menu_reset_selection_indices(void);
 void equip_menu_reset_state_flags(void);
 void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
@@ -333,15 +330,9 @@ s32 equip_menu_run_slot_item_browser(void);
 void equip_menu_scroll_list_by_page(s32 direction, const menu_instruction_t* menu);
 void equip_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_index, s16* items);
 s32 equip_menu_set_selection_value(u8 index, s16 value);
-void equip_menu_store_sort_key_list(s32 list_index, const s16* source);
 s32 equip_menu_update_clear_all_equipment_prompt(void);
 s32 equip_menu_update_equipment(void);
-s32 equip_menu_update_horizontal_selection_and_mark_change(
-    s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
 s32 equip_menu_update_item_action_state(void);
-s32 equip_menu_update_vertical_selection_and_mark_change(
-    s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
-s16 equip_menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, s32 input_mask);
 
 /* help */
 extern u32 g_equip_help_text_table[];
@@ -436,7 +427,6 @@ enum {
     EQUIP_CMD_END = 0x19,
 };
 
-extern menu_sprite_command_t g_equip_cmd_row_sprite_command;
 extern s32 g_equip_cmd_stream_input;
 /* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
  * (in equip_item_run_type_order_mode) the item-type order menus. Each is
@@ -447,7 +437,6 @@ extern menu_entry_t g_equip_command_menu;
 menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
 void equip_cmd_run_stream(menu_instruction_t* instruction, s32 input);
@@ -492,7 +481,6 @@ extern menu_gradient_panel_prims_t g_equip_thread_indicator_packets[2][2];
 void equip_thread_wait_forever(void);
 
 /* sound */
-extern u8 g_equip_sound_queued_effect_id; /* main_sfx_e */
 
 extern u8 g_equip_sound_suppress_queued;
 

@@ -14,20 +14,20 @@ void world_formation_build_job_wheel_availability(void) {
     s32 id;
 
     g_world_job_wheel_job_count = world_job_build_unit_list(
-        g_world_formation_selected_unit_index, g_world_job_wheel_jobs, WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS);
+        g_unit_selected_index, g_world_job_wheel_jobs, WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS);
     for (i = 0; i < g_world_job_wheel_job_count; i++) {
-        unit = g_world_formation_selected_unit_index;
+        unit = g_unit_selected_index;
         entry = g_world_job_wheel_jobs[i];
         id = entry & WORLD_JOB_LIST_ENTRY_ID_MASK;
         if (id == g_world_unit_pointers[unit]->identity.job_id || !(entry & WORLD_JOB_LIST_ENTRY_UNAVAILABLE)) {
-            g_world_job_wheel_mastered_jobs[i] = world_ability_find_unit_abilities(unit, id, MENU_ABILITY_CATEGORY_ALL,
-                                                     0, WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED)
+            g_world_job_wheel_mastered_jobs[i] = ability_build_list_variant(unit, id, MENU_ABILITY_CATEGORY_ALL, 0,
+                                                     WORLD_ABILITY_LIST_MODE_COUNT_UNLEARNED)
                 == 0;
         } else {
             g_world_job_wheel_mastered_jobs[i] = 0;
         }
     }
-    if (g_world_unit_pointers[g_world_formation_selected_unit_index]->proposition_status != 0) {
+    if (g_world_unit_pointers[g_unit_selected_index]->proposition_status != 0) {
         g_world_job_wheel_job_count = 0;
     }
     g_world_job_wheel_cursor_index = 0;

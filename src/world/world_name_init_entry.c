@@ -25,7 +25,7 @@ void world_name_init_entry(const u8* name) {
         i++;
     }
     world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_CURSOR_LEFT);
-    g_world_menu_sound_effect_id = MAIN_SFX_NONE;
+    g_sound_queued_effect_id = MAIN_SFX_NONE;
     g_world_name_entry_state = 0;
     world_menu_open_name_entry_key_list();
     menu_set_vsync_mode_and_event_speed(2);

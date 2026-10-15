@@ -19,7 +19,7 @@ s8 world_item_run_sort_order_menu(void) {
     if (g_world_item_sort_order_initialized == 0) {
         g_world_item_category_icon_strip_a.selected_index = 0;
         g_world_item_category_icon_strip_b.selected_index = 0;
-        world_menu_load_sort_key_list(g_world_item_menu_category + 1, g_world_item_category_strip_text_ids);
+        menu_load_sort_key_list(g_world_item_menu_category + 1, g_world_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_world_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
@@ -52,7 +52,7 @@ s8 world_item_run_sort_order_menu(void) {
         }
         g_world_item_category_strip_text_ids[0] = selected;
         world_menu_reset_selection_results();
-        world_menu_store_sort_key_list(g_world_item_menu_category + 1, g_world_item_category_strip_text_ids);
+        menu_store_sort_key_list(g_world_item_menu_category + 1, g_world_item_category_strip_text_ids);
         i = 0;
         while ((text_ids[i] = g_world_item_category_strip_text_ids[i]) != -1) {
             text_ids[i] += 4;
@@ -60,10 +60,10 @@ s8 world_item_run_sort_order_menu(void) {
         }
         text_concatenate_entries(g_world_formation_menu_text_table, g_world_formation_menu_text_buffer, text_ids, 1);
         g_world_menu_text_redraw_request = 1;
-        world_item_build_category_list(g_world_formation_selected_unit_index, g_world_item_menu_category + 0x81,
+        world_item_build_category_list(g_unit_selected_index, g_world_item_menu_category + 0x81,
             g_world_item_menu_category != 4 ? g_world_item_menu_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
-        world_item_store_category_list(g_world_item_menu_category, g_item_list_entries);
+        item_store_category_list(g_world_item_menu_category, g_item_list_entries);
         world_menu_init_scrollable_list_core(
             g_item_list_entries, g_world_menu_cursor_position, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         world_menu_set_window_scale_step(10);

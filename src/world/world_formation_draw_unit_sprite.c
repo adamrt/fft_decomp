@@ -32,7 +32,7 @@ void world_formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* r
     sprite.w = sprite.source.w;
     sprite.h = sprite.source.h;
     if (g_world_unit_pointers[unit_index]->proposition_status != 0) {
-        if (unit_index == g_world_formation_selected_unit_index) {
+        if (unit_index == g_unit_selected_index) {
             backdrop_rgb = &g_world_formation_normal_sprite_color;
         } else {
             backdrop_rgb = world_menu_get_sprite_color();

@@ -90,7 +90,7 @@ void bunit_gfx_draw_unit_sprite_and_name_plate(s16 unit, s32 x, s32 y) {
         g_bunit_unit_dot_sprite.source.clut = 0x3F13;
     }
     g_bunit_unit_dot_sprite.source.tpage = GetTPage(0, 1, 0x3C0, 0x100);
-    if (unit == g_bunit_unit_selected_index) {
+    if (unit == g_unit_selected_index) {
         g_bunit_unit_dot_glow_timer += g_bunit_unit_dot_glow_direction * 2;
         if (g_bunit_unit_dot_glow_timer > 0x28) {
             g_bunit_unit_dot_glow_direction = -1;

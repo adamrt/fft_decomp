@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* screen */
 
@@ -98,7 +103,6 @@ extern s16 g_jobstts_menu_window_right_x;
 
 void jobstts_menu_clear_selection_values(void);
 void jobstts_menu_draw_scrollable_list(const menu_instruction_t* script);
-void jobstts_menu_get_selection_record(s32 index, s16* out_selected_index, s16* out_scroll_index, const s16* abilities);
 void jobstts_menu_init_and_draw_scrollable_list(
     s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void jobstts_menu_init_and_draw_scrollable_list_simple(

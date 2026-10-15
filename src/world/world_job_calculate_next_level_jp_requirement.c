@@ -9,7 +9,7 @@
 s32 world_job_calculate_next_level_jp_requirement(s32 index) {
     s32 level;
 
-    job_get_generic_index(g_world_menu_learn_unlocked_jobs[index]);
+    job_get_generic_index(g_menu_job_ids[index]);
     level = g_world_job_cached_level & 0xf;
     if (level >= UNIT_JOB_LEVEL_MAX) {
         /* The maximum job level has no next-level requirement. */

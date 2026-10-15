@@ -23,5 +23,10 @@ void item_remove_from_category_list_variant(s32 item_id, s32 category_index);
 extern s16 g_item_list_entries[];
 s32 item_get_equipped_count_variant(s32 item_entry);
 s32 item_adjust_inventory_count(s16 item_entry, s32 delta);
+s32 item_sort_list_by_category_order(s32 category_index, s16* list);
+extern u8* g_item_category_lists[];
+extern s8* g_item_type_order_lists[];
+void item_store_category_list(s32 category_index, const s16* source);
+extern menu_icon_source_t g_item_graphic_descriptor;
 
 #endif

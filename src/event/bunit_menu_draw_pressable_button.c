@@ -32,7 +32,7 @@ void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 b
         clut = g_menu_cursor_mode1_foreground_clut;
     } else if (pressed != 0) {
         g_bunit_menu_button_press_timers[slot] = 1;
-        g_bunit_sound_queued_effect_id = sound_id;
+        g_sound_queued_effect_id = sound_id;
     } else {
         phase = g_bunit_menu_button_press_timers[slot];
         if ((phase != 0) && (phase < 6 / speed)) {
@@ -51,7 +51,7 @@ void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 b
     entry = g_bunit_menu_button_piece_starts[slot];
     count = g_bunit_menu_button_piece_starts[slot + 1] - entry;
     desc.source.clut = clut;
-    desc.source.tpage = g_bunit_menu_icon_texture_page;
+    desc.source.tpage = g_menu_cursor_texture_page;
     if (count > 0) {
         do {
             menu_button_piece_t* sprite = &g_bunit_slot_sprite_entries[entry];

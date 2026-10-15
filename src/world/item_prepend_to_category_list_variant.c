@@ -8,7 +8,7 @@ void item_prepend_to_category_list_variant(s32 item_id, s32 list_index) {
     u8* list;
     s32 count;
 
-    list = g_world_item_sorted_lists[list_index];
+    list = g_item_category_lists[list_index];
     count = 0;
     while (list[count] != ITEM_ID_NONE) {
         count++;

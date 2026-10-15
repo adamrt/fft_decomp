@@ -32,6 +32,6 @@ void bunit_menu_update_event_thread_state(void) {
         g_menu_input_lock_mode = 0;
     }
     if (g_bunit_help_text_state == 1) {
-        g_bunit_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
     }
 }

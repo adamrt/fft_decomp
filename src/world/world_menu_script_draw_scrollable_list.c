@@ -210,7 +210,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
     }
     g_world_menu_use_scroll_position = 0;
     if (old_cursor != g_world_menu_cursor_position) {
-        g_world_menu_sound_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     return instruction;
 }

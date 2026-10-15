@@ -24,7 +24,7 @@ void world_formation_sort_roster(s32 index) {
     s32 lhs;
     s16* rec; /* Sort keys select signed 16-bit values within the unit record. */
 
-    keys = g_world_sort_key_lists[index];
+    keys = g_item_type_order_lists[index];
     for (count = g_world_formation_record_count - 1; count > 0; count--) {
         for (i = 0; i < count; i++) {
             k = 0;

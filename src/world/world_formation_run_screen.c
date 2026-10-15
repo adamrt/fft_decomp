@@ -74,8 +74,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                 world_menu_start_description_text_thread(DIALOG_POSITION_CENTER);
             }
             if (g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
-                world_menu_update_grid_cursor(
-                    g_world_unit_pointers[g_world_formation_selected_unit_index]->uses_monster_skillset);
+                world_menu_update_grid_cursor(g_world_unit_pointers[g_unit_selected_index]->uses_monster_skillset);
             }
             world_menu_set_palette_mode(g_menu_input_lock_mode);
             g_world_formation_menu_handlers[g_world_formation_current_menu]();

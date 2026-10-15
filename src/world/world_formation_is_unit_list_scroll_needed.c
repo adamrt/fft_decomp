@@ -11,19 +11,19 @@ s32 world_formation_is_unit_list_scroll_needed(void) {
     } else {
         switch (g_world_formation_scroll_position) {
         case -0x78:
-            if (g_world_formation_selected_unit_index < 8) {
+            if (g_unit_selected_index < 8) {
                 result = 1;
             }
             break;
         case -0x3C:
-            if (g_world_formation_selected_unit_index >= 0x10) {
+            if (g_unit_selected_index >= 0x10) {
                 result = 1;
-            } else if (g_world_formation_selected_unit_index < 4) {
+            } else if (g_unit_selected_index < 4) {
                 result = 1;
             }
             break;
         case 0:
-            if (g_world_formation_selected_unit_index >= 0xC) {
+            if (g_unit_selected_index >= 0xC) {
                 result = 1;
             }
             break;

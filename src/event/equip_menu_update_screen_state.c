@@ -39,7 +39,7 @@ void equip_menu_update_screen_state(void) {
         mode = *value_ptr;
         g_equip_text_help_message_id = g_equip_command_menu.selected_index + 0x1029;
         if (mode == 1) {
-            g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;
+            g_sound_queued_effect_id = MAIN_SFX_INVALID;
             equip_menu_reset_selection_indices();
         } else if (mode != -1) {
             thread_start(EQUIP_THREAD_SLOT_COMMAND_MENU_CHILD, equip_thread_wait_forever);

@@ -30,7 +30,7 @@ void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 
         clut = g_world_menu_clut_front_alt;
     } else if (pressed != 0) {
         g_world_menu_button_press_timers[index] = 1;
-        g_world_menu_sound_effect_id = sound_effect_id;
+        g_sound_queued_effect_id = sound_effect_id;
     } else if (g_world_menu_button_press_timers[index] != 0 && g_world_menu_button_press_timers[index] < 6 / speed) {
         g_world_menu_button_press_timers[index]++;
     } else {

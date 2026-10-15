@@ -48,7 +48,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
     }
     passes = count - 1;
     counts[0] = 0;
-    criteria = g_world_sort_key_lists[mode];
+    criteria = g_item_type_order_lists[mode];
     for (; passes > 0; passes--) {
         for (j = 0; j < passes; j++) {
             k = 0;

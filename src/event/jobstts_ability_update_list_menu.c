@@ -78,8 +78,7 @@ s32 jobstts_ability_update_list_menu(void) {
             g_jobstts_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         jobstts_ability_build_list(0, g_jobstts_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
-        jobstts_menu_get_selection_record(
-            g_menu_ability_category, &selected_index, &scroll_index, g_menu_ability_entries);
+        menu_get_selection_record(g_menu_ability_category, &selected_index, &scroll_index, g_menu_ability_entries);
         jobstts_menu_init_scrollable_list(
             g_menu_ability_entries, selected_index, scroll_index, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         jobstts_gfx_set_transition_frame(0xa);

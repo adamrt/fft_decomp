@@ -33,7 +33,7 @@ void bunit_gfx_draw_falloff_shaded_rows(s32 y) {
     }
 
     rect.clut = g_bunit_gfx_background_clut;
-    rect.tpage = g_bunit_menu_icon_texture_page;
+    rect.tpage = g_menu_cursor_texture_page;
     for (; rect.y < 0xF0; rect.y += 0x20, row++) {
         if (rect.y >= -0x20) {
             for (col = 0; col < 4; col++) {

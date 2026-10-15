@@ -99,7 +99,7 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
     if (g_script_input_suppression_frames != 0) {
         g_script_input_suppression_frames--;
     }
-    world_menu_draw_thread_status_indicators();
+    menu_draw_thread_status_indicators();
     g_world_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_world_menu_input_block_frames != 0) {

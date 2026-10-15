@@ -2,7 +2,7 @@
 #include "fft/thread.h"
 
 /* Park this event thread while allowing the scheduler to continue. */
-void attack_thread_wait_forever(void) {
+void thread_wait_forever(void) {
     while (1) {
         thread_yield();
     }

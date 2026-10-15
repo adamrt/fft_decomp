@@ -52,7 +52,7 @@ void world_name_update_entry_cursor(void) {
         cursor.y = 0x80;
     }
     if (g_world_name_entry_cursor_index != previous) {
-        g_world_menu_sound_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     world_menu_set_draw_priority(0x28);
     world_menu_draw_animated_cursor(&cursor, &g_world_name_entry_key_cursor_anim, g_menu_input_lock_mode);

@@ -13,7 +13,7 @@ s32 bunit_job_calculate_current_level(s32 index) {
 
     generic_job = job_get_generic_index(g_menu_job_ids[index]);
     job_level_index = generic_job >> 1;
-    packed_levels = g_bunit_unit_pointers[g_bunit_unit_selected_index]->job_levels[job_level_index];
+    packed_levels = g_bunit_unit_pointers[g_unit_selected_index]->job_levels[job_level_index];
 
     g_menu_job_current_level = packed_levels;
     if ((generic_job & 1) != 0) {

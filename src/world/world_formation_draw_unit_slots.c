@@ -21,7 +21,7 @@ void world_formation_draw_unit_slots(point16_t* positions, s32 shade) {
         if (positions[i].x < -0x1E || positions[i].y < -0x1E || positions[i].x >= 0x101 || positions[i].y >= 0xF1) {
             continue;
         }
-        if (i != g_world_formation_selected_unit_index) {
+        if (i != g_unit_selected_index) {
             if (g_world_unit_pointers[i]->proposition_status & WORLD_FORMATION_UNIT_PROPOSITION_LEAVING) {
                 palette = MENU_UNIT_READOUT_LEAVING;
             } else {

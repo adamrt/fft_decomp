@@ -279,5 +279,7 @@ extern menu_instruction_t* (*g_menu_cmd_handlers[])(menu_instruction_t* instruct
 menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
+extern menu_sprite_command_t g_menu_cmd_row_quad;
 
 #endif /* MENU_SCRIPT_H */

@@ -41,7 +41,7 @@ void equip_item_sort_list_by_criteria(s32 mode, s16* list) {
         return;
     }
     passes = count - 1;
-    criteria = g_equip_item_type_order_lists[mode];
+    criteria = g_item_type_order_lists[mode];
     for (; passes > 0; passes--) {
         for (j = 0; j < passes; j++) {
             k = 0;

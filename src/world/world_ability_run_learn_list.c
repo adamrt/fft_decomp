@@ -45,9 +45,9 @@ s32 world_ability_run_learn_list(void) {
         menu_clear_selection_record(11);
         menu_clear_selection_record(12);
         menu_clear_selection_record(13);
-        g_world_ability_category = world_menu_update_wrapped_horizontal_selection(4, WORLD_MENU_CURSOR_ABILITY_TAB, 0);
-        world_ability_find_unit_abilities(g_world_formation_selected_unit_index, g_world_learn_selected_job,
-            g_world_ability_category, g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
+        g_world_ability_category = menu_update_wrapped_horizontal_selection(4, WORLD_MENU_CURSOR_ABILITY_TAB, 0);
+        ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
+            g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
         world_menu_init_scrollable_list_core(
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         rect.x = 0x240;
@@ -72,28 +72,28 @@ s32 world_ability_run_learn_list(void) {
             if (g_menu_ability_entries[index] >> 14) {
                 world_text_show_message_and_play_sound(0xc009, MAIN_SFX_ERROR_MESSAGE);
             } else if (world_menu_is_learn_ability_learned(index) != 0) {
-                g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+                g_sound_queued_effect_id = MAIN_SFX_INVALID;
             } else {
                 g_world_learn_confirm_prompt_state
                     = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
-                g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                 g_world_learn_confirm_submenu.selected_index = 0;
                 g_sound_suppressed = 1;
             }
         } else if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             g_world_learn_ability_list_open = 0;
-            g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_world_formation_cursor_ot_override = 0;
             return MENU_JOB_LIST_STEP_JOBS;
         }
-        category = world_menu_update_horizontal_selection_and_mark_change(
+        category = menu_update_horizontal_selection_and_mark_change(
             4, WORLD_MENU_CURSOR_ABILITY_TAB, g_menu_input_newly_pressed, MAIN_SFX_PAGE_SWITCH);
         if (category != g_world_ability_category) {
             menu_set_selection_record(g_world_ability_category + 10, g_world_menu_cursor_position,
                 g_world_menu_scroll_offset, g_menu_ability_entries);
             g_world_ability_category = category;
-            world_ability_find_unit_abilities(g_world_formation_selected_unit_index, g_world_learn_selected_job,
-                g_world_ability_category, g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
+            ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
+                g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
             world_menu_get_selection_record(g_world_ability_category + 10, &x, &y, g_menu_ability_entries);
             world_menu_init_scrollable_list(
                 g_menu_ability_entries, x, y, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
@@ -104,18 +104,18 @@ s32 world_ability_run_learn_list(void) {
             = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, g_world_learn_confirm_menu);
         if (g_world_learn_confirm_prompt_state == 0) {
             if (g_world_menu_selection_results[5] == 0) {
-                world_ability_learn(g_world_formation_selected_unit_index, g_world_learn_selected_job,
+                world_ability_learn(g_unit_selected_index, g_world_learn_selected_job,
                     g_menu_ability_entries[g_world_menu_cursor_position]);
                 category = g_main_ability_data[g_menu_ability_entries[g_world_menu_cursor_position]].jp_cost;
-                g_world_unit_pointers[g_world_formation_selected_unit_index]
+                g_world_unit_pointers[g_unit_selected_index]
                     ->job_points.current.values[g_world_learn_selected_job_index] -= category;
                 main_sound_play_sfx_find_channel(MAIN_SFX_ABILITY_LEARNED);
             } else if (g_world_menu_selection_results[5] == 1) {
-                g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             }
             g_sound_suppressed = 0;
-            world_ability_find_unit_abilities(g_world_formation_selected_unit_index, g_world_learn_selected_job,
-                g_world_ability_category, g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
+            ability_build_list_variant(g_unit_selected_index, g_world_learn_selected_job, g_world_ability_category,
+                g_menu_ability_entries, WORLD_ABILITY_LIST_MODE_LEARN_MENU);
             world_menu_init_scrollable_list_core(g_menu_ability_entries, g_world_menu_cursor_position,
                 g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
             world_menu_set_window_scale_step(10);

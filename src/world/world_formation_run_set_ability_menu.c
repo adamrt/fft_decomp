@@ -28,9 +28,9 @@ s32 world_formation_run_set_ability_menu(void) {
     s16 selected;
     s32 busy;
 
-    if (g_world_set_ability_unit_index != g_world_formation_selected_unit_index) {
+    if (g_world_set_ability_unit_index != g_unit_selected_index) {
         g_world_set_ability_initialized = 0;
-        g_world_set_ability_unit_index = (u8)g_world_formation_selected_unit_index;
+        g_world_set_ability_unit_index = (u8)g_unit_selected_index;
     }
     if (g_world_set_ability_initialized == 0) {
         menu_clear_selection_records();
@@ -44,7 +44,7 @@ s32 world_formation_run_set_ability_menu(void) {
         g_world_set_ability_show_stat_preview = 0;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         if (g_world_set_ability_list_open == 0) {
             thread_resume(WORLD_THREAD_SLOT_UPPER_MENU);
             g_world_set_ability_initialized = 0;
@@ -53,7 +53,7 @@ s32 world_formation_run_set_ability_menu(void) {
         }
         g_world_set_ability_list_close_pending = 1;
     }
-    lock_state = world_formation_get_unit_lock(g_world_formation_selected_unit_index);
+    lock_state = world_formation_get_unit_lock(g_unit_selected_index);
     if (lock_state == WORLD_FORMATION_UNIT_UNLOCKED) {
         lock_state = 0;
     }
@@ -61,14 +61,14 @@ s32 world_formation_run_set_ability_menu(void) {
         world_menu_toggle_preview_stats_window(0);
         g_world_menu_description_text_id = 0;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-            g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+            g_sound_queued_effect_id = MAIN_SFX_INVALID;
             return 1;
         }
         return 1;
     }
     if (g_world_set_ability_list_open == 0) {
         slot = g_world_set_ability_slot;
-        current = g_world_unit_pointers[g_world_formation_selected_unit_index]->abilities.slots[slot];
+        current = g_world_unit_pointers[g_unit_selected_index]->abilities.slots[slot];
         g_world_formation_unit_cycle_mode = 2;
         g_world_menu_description_text_id = current;
         if (current == 0) {
@@ -78,20 +78,19 @@ s32 world_formation_run_set_ability_menu(void) {
         } else {
             g_world_menu_description_text_id = current + 0x9800;
         }
-        slot = world_menu_update_vertical_selection_and_mark_change(
+        slot = menu_update_vertical_selection_and_mark_change(
                    4, WORLD_MENU_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH)
             + 1;
         g_world_set_ability_slot = slot;
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-            g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+            g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             if (slot == 1) {
-                g_world_set_ability_entry_count
-                    = world_ability_find_unit_abilities(g_world_formation_selected_unit_index,
-                        g_world_unit_pointers[g_world_formation_selected_unit_index]->identity.job_id,
-                        MENU_ABILITY_CATEGORY_ACTION, g_item_list_entries, slot);
+                g_world_set_ability_entry_count = ability_build_list_variant(g_unit_selected_index,
+                    g_world_unit_pointers[g_unit_selected_index]->identity.job_id, MENU_ABILITY_CATEGORY_ACTION,
+                    g_item_list_entries, slot);
             } else {
-                g_world_set_ability_entry_count = world_ability_build_equippable_rsm_list(
-                    g_world_formation_selected_unit_index, slot - 1, g_item_list_entries);
+                g_world_set_ability_entry_count
+                    = world_ability_build_equippable_rsm_list(g_unit_selected_index, slot - 1, g_item_list_entries);
             }
             menu_set_vsync_mode_and_event_speed(2);
             g_world_formation_unit_cycle_mode = 1;
@@ -119,14 +118,13 @@ s32 world_formation_run_set_ability_menu(void) {
                 if (selected & ABILITY_LIST_ENTRY_DISABLED) {
                     world_text_show_message_and_play_sound(0xD81D, MAIN_SFX_ERROR_MESSAGE);
                 } else {
-                    value = world_ability_is_equip_support_change(g_world_formation_selected_unit_index, selected);
-                    world_formation_set_unit_ability_slot(g_world_formation_selected_unit_index,
-                        g_world_set_ability_slot, selected,
+                    value = world_ability_is_equip_support_change(g_unit_selected_index, selected);
+                    world_formation_set_unit_ability_slot(g_unit_selected_index, g_world_set_ability_slot, selected,
                         value
-                            | world_ability_is_equip_support_change(g_world_formation_selected_unit_index,
-                                g_world_unit_pointers[g_world_formation_selected_unit_index]
+                            | world_ability_is_equip_support_change(g_unit_selected_index,
+                                g_world_unit_pointers[g_unit_selected_index]
                                     ->abilities.slots[g_world_set_ability_slot]));
-                    g_world_menu_sound_effect_id = MAIN_SFX_EQUIP;
+                    g_sound_queued_effect_id = MAIN_SFX_EQUIP;
                     g_world_ability_menu_slots_changed = 1;
                     g_world_set_ability_list_close_pending = 1;
                     world_formation_stage_selected_unit();
@@ -138,7 +136,7 @@ s32 world_formation_run_set_ability_menu(void) {
                 if (g_world_set_ability_slot != 1) {
                     world_text_show_message_and_play_sound(0xC006, MAIN_SFX_ERROR_MESSAGE);
                 } else {
-                    g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+                    g_sound_queued_effect_id = MAIN_SFX_INVALID;
                 }
             }
         }
@@ -146,13 +144,11 @@ s32 world_formation_run_set_ability_menu(void) {
             g_world_set_ability_cursor = cursor;
             if ((g_item_list_entries[cursor] >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                     && g_item_list_entries[cursor] <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3)
-                || (u16)((u16)g_world_unit_pointers[g_world_formation_selected_unit_index]
-                             ->abilities.slots[g_world_set_ability_slot]
+                || (u16)((u16)g_world_unit_pointers[g_unit_selected_index]->abilities.slots[g_world_set_ability_slot]
                        - ABILITY_ID_MOVEMENT_MOVE_PLUS_1)
                     < 6) {
                 world_ability_find_stat_changes_due_to_equipped(&g_world_item_preview_stat_detail,
-                    g_world_unit_pointers[g_world_formation_selected_unit_index]
-                        ->abilities.slots[g_world_set_ability_slot],
+                    g_world_unit_pointers[g_unit_selected_index]->abilities.slots[g_world_set_ability_slot],
                     g_item_list_entries[g_world_menu_cursor_position]);
                 g_world_preview_stats_thread_params.redraw_request = 1;
                 g_world_set_ability_show_stat_preview = 1;

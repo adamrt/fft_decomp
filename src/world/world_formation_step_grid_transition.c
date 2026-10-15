@@ -27,7 +27,7 @@ s32 world_formation_step_grid_transition(s32 mode) {
         row_y = (i / 4) * 60 + 0x24;
         y = g_world_formation_scroll_position + row_y;
         x = (i % 4) * 62 + 6;
-        if (i == g_world_formation_selected_unit_index) {
+        if (i == g_unit_selected_index) {
             if (mode < 2) {
                 target_x = 0x8B;
                 target_y = 0x9E;

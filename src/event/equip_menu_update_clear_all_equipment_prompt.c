@@ -27,7 +27,7 @@ s32 equip_menu_update_clear_all_equipment_prompt(void) {
     }
     flags = g_menu_input_primary_repeat;
     if (flags & PSX_PAD_RIGHT) {
-        g_equip_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+        g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
         return 0;
     }
     if (flags & PSX_PAD_CIRCLE) {
@@ -40,9 +40,9 @@ s32 equip_menu_update_clear_all_equipment_prompt(void) {
         }
         equip_unit_load_selected_data();
         if (unequipped == 0) {
-            g_equip_sound_queued_effect_id = MAIN_SFX_INVALID;
+            g_sound_queued_effect_id = MAIN_SFX_INVALID;
         } else {
-            g_equip_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
+            g_sound_queued_effect_id = MAIN_SFX_UNEQUIP;
         }
         return 0;
     }

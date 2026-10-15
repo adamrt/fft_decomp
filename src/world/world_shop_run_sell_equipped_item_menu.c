@@ -35,13 +35,11 @@ void world_shop_run_sell_equipped_item_menu(void) {
                 g_world_shop_sell_equipped_result_shown = 0;
             }
         } else if (g_world_shop_sell_equipped_prompt_active == 0) {
-            g_world_shop_sell_equipped_slot
-                = world_menu_update_vertical_selection_and_mark_change(WORLD_EQUIPMENT_SLOT_COUNT,
-                    WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
-            if (g_world_unit_pointers[g_world_formation_selected_unit_index]->equipment[g_world_shop_sell_equipped_slot]
+            g_world_shop_sell_equipped_slot = menu_update_vertical_selection_and_mark_change(WORLD_EQUIPMENT_SLOT_COUNT,
+                WORLD_MENU_CURSOR_REMOVE_SLOT, g_menu_input_primary_repeat, MAIN_SFX_PAGE_SWITCH);
+            if (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot]
                 != ITEM_ID_NOTHING) {
-                text_id = (g_world_unit_pointers[g_world_formation_selected_unit_index]
-                                  ->equipment[g_world_shop_sell_equipped_slot]
+                text_id = (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot]
                               & WORLD_ITEM_ID_MASK)
                     + 0x6800;
             } else {
@@ -50,12 +48,11 @@ void world_shop_run_sell_equipped_item_menu(void) {
             input = g_menu_input_primary_repeat;
             g_world_menu_description_text_id = text_id;
             if (input & PSX_PAD_CIRCLE) {
-                item = g_world_unit_pointers[g_world_formation_selected_unit_index]
-                           ->equipment[g_world_shop_sell_equipped_slot];
+                item = g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot];
                 if (item == ITEM_ID_NOTHING || (item >> 15) != 0) {
-                    g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+                    g_sound_queued_effect_id = MAIN_SFX_INVALID;
                 } else {
-                    g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                    g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                     g_world_shop_sell_equipped_prompt_active = 1;
                     g_world_shop_sell_equipped_menu.selected_index = 0;
                     g_text_substitution_values[0] = world_item_get_half_price(item);
@@ -72,13 +69,13 @@ void world_shop_run_sell_equipped_item_menu(void) {
                 if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 0) {
                     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf811, 0);
                     world_shop_adjust_gil(g_text_substitution_values[0]);
-                    g_world_unit_pointers[g_world_formation_selected_unit_index]
-                        ->equipment[g_world_shop_sell_equipped_slot] = ITEM_ID_NOTHING;
+                    g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_sell_equipped_slot]
+                        = ITEM_ID_NOTHING;
                     world_formation_recalculate_selected_unit_stats();
-                    g_world_menu_sound_effect_id = MAIN_SFX_SHOP_TRANSACTION;
+                    g_sound_queued_effect_id = MAIN_SFX_SHOP_TRANSACTION;
                 } else {
                     if (g_world_menu_selection_results[WORLD_MENU_SELECTION_PROMPT_RESULT] == 1) {
-                        g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                     }
                     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, 0xf80a, 0);
                 }
@@ -86,7 +83,7 @@ void world_shop_run_sell_equipped_item_menu(void) {
             }
         }
         if (close != 0) {
-            g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_world_formation_unit_cycle_mode = 2;
             g_world_shop_sell_equipped_menu_open = 0;
             g_world_shop_menu_step = WORLD_SHOP_STEP_FITTING_ROOM;

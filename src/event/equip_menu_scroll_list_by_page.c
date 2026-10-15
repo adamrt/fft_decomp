@@ -38,6 +38,6 @@ void equip_menu_scroll_list_by_page(s32 direction, const menu_instruction_t* men
         g_equip_menu_selected_list_index = count - 1;
     }
     if (previous_base != g_menu_scroll_base_index) {
-        g_equip_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
 }

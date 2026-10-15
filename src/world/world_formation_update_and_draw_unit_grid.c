@@ -45,13 +45,13 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
                 ? g_world_formation_stat_display_mode - 1
                 : MENU_UNIT_READOUT_BRAVE_FAITH;
             input &= ~PSX_PAD_R2;
-            g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
+            g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
         }
         if (input & PSX_PAD_R2) {
             g_world_formation_stat_display_mode = g_world_formation_stat_display_mode != MENU_UNIT_READOUT_BRAVE_FAITH
                 ? g_world_formation_stat_display_mode + 1
                 : MENU_UNIT_READOUT_HP;
-            g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
+            g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
         }
     }
     enabled = 1;
@@ -61,15 +61,15 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             && world_formation_is_unit_list_scroll_needed() == 0) {
             if (input & PSX_PAD_CIRCLE) {
                 if (g_world_formation_unit_browse_enabled == 0) {
-                    if (g_world_unit_pointers[g_world_formation_selected_unit_index]->gender_flags & UNIT_FLAG_EGG) {
-                        g_world_menu_sound_effect_id = MAIN_SFX_INVALID;
+                    if (g_world_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
+                        g_sound_queued_effect_id = MAIN_SFX_INVALID;
                     } else if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
                         g_world_formation_unit_browse_enabled = 1;
-                        g_world_menu_sound_effect_id = MAIN_SFX_CONFIRM;
+                        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                     }
                 }
             } else if ((input & PSX_PAD_CROSS) && g_world_formation_unit_browse_enabled != 0) {
-                g_world_menu_sound_effect_id = MAIN_SFX_CANCEL;
+                g_sound_queued_effect_id = MAIN_SFX_CANCEL;
                 enabled = 0;
                 g_world_formation_unit_browse_enabled = 0;
                 menu_request_thread_stop(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
@@ -79,7 +79,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
         if (toggle_banner != 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0
             && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
             && world_formation_is_unit_list_scroll_needed() == 0 && (g_menu_input_primary_repeat & PSX_PAD_SQUARE)) {
-            g_world_menu_sound_effect_id = MAIN_SFX_PAGE_SWITCH;
+            g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
             g_world_formation_unit_banner_enabled = g_world_formation_unit_banner_enabled == 0;
         }
     }
@@ -88,8 +88,8 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0 && g_world_grid_menu_id == MENU_GRID_HELP_NONE
         && world_gfx_get_fade_state() == WORLD_FADE_STATE_NONE) {
-        g_world_formation_selected_unit_index = menu_update_wrapped_grid_selection(
-            4, 5, g_world_formation_unit_count - 1, g_world_formation_selected_unit_index, input);
+        g_unit_selected_index
+            = menu_update_wrapped_grid_selection(4, 5, g_world_formation_unit_count - 1, g_unit_selected_index, input);
     }
     world_formation_step_scroll_velocity(&g_world_formation_scroll_velocity, &g_world_formation_scroll_position);
     if (g_world_formation_banner_slide_step == 0 && world_input_get_lockout_timer() == 0 && enabled != 0
@@ -160,7 +160,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             }
             pos.position.x = col * 62 + 6;
             pos.position.y = y;
-            if (i == g_world_formation_selected_unit_index) {
+            if (i == g_unit_selected_index) {
                 g_world_formation_cursor_target.x = col * 62 + 0x22;
                 g_world_formation_cursor_target.y = y + 0x19;
             }
@@ -206,7 +206,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             g_world_formation_unit_dot_sprite.position.x = pos.position.x;
             g_world_formation_unit_dot_sprite.position.y = pos.position.y;
             g_world_formation_unit_dot_sprite.source.tpage = GetTPage(0, 1, 0x3c0, 0x100);
-            if (i == g_world_formation_selected_unit_index) {
+            if (i == g_unit_selected_index) {
                 g_world_formation_dot_glow_timer += g_world_formation_dot_glow_direction * 2;
                 if (g_world_formation_dot_glow_timer > 0x28) {
                     g_world_formation_dot_glow_direction = -1;

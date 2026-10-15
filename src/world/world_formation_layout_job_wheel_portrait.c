@@ -11,7 +11,7 @@ void world_formation_layout_job_wheel_portrait(void) {
     s16 x;
     s16 y;
 
-    world_formation_build_unit_graphic_entry(g_world_formation_selected_unit_index, &entry, 0);
+    world_formation_build_unit_graphic_entry(g_unit_selected_index, &entry, 0);
     x = 0x80 - (entry.w >> 1);
     y = 0x7b - (entry.h >> 1);
     g_world_job_wheel_portrait_quad.y = y;

@@ -595,7 +595,7 @@ extern s32 g_menu_indicator_state[2];
 extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
 
 void menu_draw_thread_status_indicators(void);
-s32 menu_thread_is_running(s32 thread_id);
+s32 menu_thread_is_running_variant(s32 thread_id);
 
 /* panel drawing */
 extern const u16 g_menu_draw_area_scale_percent[12];
@@ -2574,5 +2574,13 @@ s32 menu_get_entry_item_count(s32 row);
 s32 menu_get_entry_item_equipped_count(s32 row);
 void menu_close(void);
 void menu_clear_selection_records(void);
+s32 menu_update_horizontal_selection_and_mark_change(
+    u16 entry_count, u8 selection_index, s32 input_mask, u8 changed_state);
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+s16 menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, s32 input_mask);
+s32 menu_update_vertical_selection_and_mark_change(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
+void menu_store_sort_key_list(s32 list_index, const s16* source);
+void menu_load_sort_key_list(s32 list_index, s16* destination);
+menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
 
 #endif

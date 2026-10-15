@@ -17,7 +17,7 @@
  * the target's cursors are the loop optimizer's reduced induction variables,
  * set after the unit-pointer address is formed.
  */
-s32 world_ability_find_unit_abilities(s16 unit, s16 job, s32 kind, s16* out, s32 mode) {
+s32 ability_build_list_variant(s16 unit, s16 job, s32 kind, s16* out, s32 mode) {
     s32 skillset;
     s16 generic;
     s16* abilities;

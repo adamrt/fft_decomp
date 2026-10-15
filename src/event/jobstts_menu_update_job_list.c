@@ -14,7 +14,7 @@ s32 jobstts_menu_update_job_list(void) {
         g_jobstts_cmd_conditions[6] = jobstts_job_calculate_current_total_jp;
         g_jobstts_cmd_conditions[13] = jobstts_job_calculate_current_mastered;
         jobstts_job_build_unit_job_list(0, g_menu_job_ids, 0);
-        jobstts_menu_get_selection_record(4, &state[8], &state[9], g_menu_job_ids);
+        menu_get_selection_record(4, &state[8], &state[9], g_menu_job_ids);
         jobstts_menu_init_scrollable_list(
             g_menu_job_ids, state[8], state[9], g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
         g_jobstts_job_list_menu_initialized = 1;

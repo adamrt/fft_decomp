@@ -6,8 +6,8 @@
 s32 world_job_calculate_current_level(s32 index) {
     s32 job_index;
 
-    job_index = job_get_generic_index(g_world_menu_learn_unlocked_jobs[index]);
-    g_world_job_cached_level = g_world_unit_pointers[g_world_formation_selected_unit_index]->job_levels[job_index >> 1];
+    job_index = job_get_generic_index(g_menu_job_ids[index]);
+    g_world_job_cached_level = g_world_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
     if (job_index & 1) {
         g_world_job_cached_level = g_world_job_cached_level & 0xF;
     } else {

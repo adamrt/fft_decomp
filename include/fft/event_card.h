@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* save menus */
 /*
@@ -226,9 +231,6 @@ typedef enum card_save_menu_state {
     CARD_SAVE_MENU_CLOSING = 0xff /* fading out; no state handler runs */
 } card_save_menu_state_e;
 
-extern const s8 g_card_menu_cursor_forward_offset_keyframes[];
-extern const s8 g_card_menu_cursor_reverse_offset_keyframes[];
-extern u16 g_card_menu_cursor_texture_page;
 extern s32 g_card_menu_script_callback;
 extern s16 g_card_menu_selection_index;
 extern menu_window_rect_source_t* g_card_menu_window_rect_source;

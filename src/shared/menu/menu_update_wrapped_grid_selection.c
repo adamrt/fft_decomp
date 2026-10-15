@@ -63,7 +63,7 @@ s32 menu_update_wrapped_grid_selection(s32 columns, s32 rows, s32 last_index, s3
     }
 
     if (index != old_index) {
-        g_world_menu_sound_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
     return index;
 }

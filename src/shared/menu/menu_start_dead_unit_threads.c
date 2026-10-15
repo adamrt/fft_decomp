@@ -134,7 +134,7 @@ void menu_start_dead_unit_threads(void) {
             for (;;) {
                 thread_yield();
                 if (thread_is_running_asm_variant(g_thread_current_id - 3) != 0) {
-                    thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD, option_thread_wait_forever);
+                    thread_start(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD, thread_wait_forever);
                 } else {
                     thread_suspend(THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD);
                 }

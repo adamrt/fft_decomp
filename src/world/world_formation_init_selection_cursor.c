@@ -22,7 +22,7 @@ void world_formation_init_selection_cursor(s16 formation_index) {
     g_world_menu_script_callbacks[7].value = world_formation_get_unit_faith;
     g_world_formation_scroll_velocity = 0;
     D_801C833C = 0;
-    g_world_formation_selected_unit_index = formation_index;
+    g_unit_selected_index = formation_index;
     count = 0;
     world_formation_stage_selected_unit();
     do {

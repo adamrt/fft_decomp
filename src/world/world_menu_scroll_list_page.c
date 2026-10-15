@@ -31,6 +31,6 @@ void world_menu_scroll_list_page(s32 dir, menu_instruction_t* instruction) {
         g_world_menu_cursor_position = g_world_menu_option_count - 1;
     }
     if (old != g_world_menu_scroll_offset) {
-        g_world_menu_sound_effect_id = MAIN_SFX_CURSOR_MOVE;
+        g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }
 }

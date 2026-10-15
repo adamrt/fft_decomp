@@ -48,8 +48,8 @@ s32 bunit_ability_update_list_menu(void) {
         text_render_id_rows_to_vram(
             g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_bunit_ability_list_job_name_row, &rect, 0);
         g_menu_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
-        bunit_ability_build_list(
-            g_bunit_unit_selected_index, g_bunit_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
+        ability_build_list_variant(
+            g_unit_selected_index, g_bunit_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
         bunit_menu_init_scrollable_list_core(
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_bunit_ability_list_ready = 1;
@@ -62,23 +62,23 @@ s32 bunit_ability_update_list_menu(void) {
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_bunit_ability_list_ready = 0;
-        g_bunit_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         g_bunit_ability_list_ready = 0;
-        g_bunit_sound_queued_effect_id = MAIN_SFX_CONFIRM;
+        g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
-    category = bunit_menu_update_horizontal_selection_and_mark_change(
-        4, 0, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
+    category
+        = menu_update_horizontal_selection_and_mark_change(4, 0, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (category != g_menu_ability_category) {
         menu_set_selection_record(g_menu_ability_category + 10, g_bunit_menu_list_selected_index,
             g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
-        bunit_ability_build_list(
-            g_bunit_unit_selected_index, g_bunit_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
-        bunit_menu_get_selection_record(g_menu_ability_category + 10, &selected, &scroll, g_menu_ability_entries);
+        ability_build_list_variant(
+            g_unit_selected_index, g_bunit_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
+        menu_get_selection_record(g_menu_ability_category + 10, &selected, &scroll, g_menu_ability_entries);
         bunit_menu_init_scrollable_list(
             g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         bunit_gfx_set_transition_frame(10);

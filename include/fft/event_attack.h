@@ -7,7 +7,12 @@
 #include "fft/bits.h"
 #include "fft/card.h"
 #include "fft/file.h"
+#include "fft/gfx.h"
 #include "fft/item.h"
+#include "fft/job.h"
+#include "fft/sound.h"
+#include "fft/text.h"
+#include "fft/thread.h"
 
 /* screen */
 extern u8 g_attack_event_condition_blocks[];
@@ -383,8 +388,6 @@ typedef enum attack_prompt_thread_slot {
     ATTACK_PROMPT_THREAD_SLOT_CONFIRM_MENU = 4,       /* the menu that sets g_attack_deploy_confirm_result */
     ATTACK_PROMPT_THREAD_SLOT_DETAIL_MARKER = 13,     /* a wait-forever thread while the unit detail panels are open */
 } attack_prompt_thread_slot_e;
-
-void attack_thread_wait_forever(void);
 
 /* sound */
 void attack_sound_resync_scenario_music_and_apply_map_darkness(void);

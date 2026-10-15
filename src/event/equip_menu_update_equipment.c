@@ -40,7 +40,7 @@ s32 equip_menu_update_equipment(void) {
         thread_resume(EQUIP_THREAD_SLOT_COMMAND_MENU);
         g_equip_item_numeric_panel_params = 2;
         g_equip_item_numeric_panel_y = 2;
-        g_equip_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return 0;
     }
     if (g_equip_menu_substate == MENU_ITEM_LIST_STATE_BROWSE) {
