@@ -5,10 +5,10 @@
  * otherwise (THREAD_SLOT_FIRST_IDLE) the first idle slot from 1 up. With
  * every slot busy the calling thread exits, and the function has no return value
  * for that path. */
-s32 battle_thread_resolve_id(s32 requested_thread_id) {
+s32 thread_resolve_id(s32 requested_thread_id) {
     s32 i;
 
-    if (requested_thread_id < THREAD_SLOT_COUNT) {
+    if (requested_thread_id < THREAD_RESET_SLOT_COUNT) {
         return requested_thread_id;
     }
     i = 1;
@@ -17,6 +17,6 @@ s32 battle_thread_resolve_id(s32 requested_thread_id) {
             return i;
         }
         i++;
-    } while (i < THREAD_SLOT_COUNT);
+    } while (i < VARIANT_THREAD_TABLE_SLOT_COUNT);
     thread_exit_current();
 }

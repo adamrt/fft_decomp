@@ -16,12 +16,12 @@ void menu_free_memory(void* buffer_pointer) {
 
     if (buffer < (u32)g_main_heap_companion_overlay_load_address && buffer != -1) {
         invalid_buffer = -1;
-        grid_base = (buffer - (u32)g_battle_menu_buffer_arena) >> 8;
-        allocation_grid = g_battle_menu_buffer_allocation_map;
+        grid_base = (buffer - (u32)g_menu_buffer_arena) >> 8;
+        allocation_grid = g_menu_buffer_allocation_map;
         /* A separate page-count cursor preserves the native count-field base. */
-        allocation_size = &g_battle_menu_allocator_slot_records[0].page_count;
-        allocation = g_battle_menu_allocator_slot_records;
-        allocation_end = &g_battle_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT].page_count;
+        allocation_size = &g_menu_allocator_slot_records[0].page_count;
+        allocation = g_menu_allocator_slot_records;
+        allocation_end = &g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT].page_count;
         for (;;) {
             if ((u32)allocation->buffer == buffer) {
                 allocation->buffer = (u8*)invalid_buffer;

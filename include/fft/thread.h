@@ -42,10 +42,12 @@ typedef struct thread {
 } thread_t;
 typedef char thread_size_must_be_1024[(sizeof(thread_t) == 1024) ? 1 : -1];
 
-/* Reset loops clear sixteen 0x400-byte slots. WORLD also uses slot 16 for
- * tutorial text; the scheduler scans it, but reset does not clear it. */
+/* Reset loops clear sixteen 0x400-byte slots, and an explicit thread id is
+ * below sixteen. The table itself has VARIANT_THREAD_TABLE_SLOT_COUNT slots:
+ * 16 in BATTLE, 17 in WORLD, whose slot 16 runs tutorial text; the scheduler
+ * and the slot searches scan it, but reset does not clear it. */
 enum {
-    THREAD_SLOT_COUNT = 16,
+    THREAD_RESET_SLOT_COUNT = 16,
     THREAD_STRIDE = 1024,
     THREAD_ARRAY_BYTES = 16384,
     THREAD_LAST_WORD_OFFSET = 0x3ffc,
@@ -174,12 +176,9 @@ typedef enum thread_task {
 } thread_task_e;
 
 /* thread ids */
-s32 battle_thread_find_running_by_task(s32 task_id);
-s32 battle_thread_resolve_id(s32 requested_thread_id);
-s32 battle_thread_resolve_id_after_current(s32 requested_thread_id);
-s32 world_thread_find_running_by_task(s32 task_id);
-s32 world_thread_resolve_id(s32 requested_thread_id);
-s32 world_thread_resolve_id_after_current(s32 requested_thread_id);
+s32 thread_find_running_by_task(s32 task_id);
+s32 thread_resolve_id(s32 requested_thread_id);
+s32 thread_resolve_id_after_current(s32 requested_thread_id);
 
 /* task parameters */
 void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);

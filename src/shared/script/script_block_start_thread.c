@@ -80,7 +80,7 @@ void script_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_FACE_UNIT) {
             script_face_unit((const event_face_unit_parameters_t*)(script + 1), 1);
         } else if (script[0] == EVENT_OPCODE_SPRITE_MOVE || script[0] == EVENT_OPCODE_SPRITE_MOVE_BETA) {
-            thread_id = battle_thread_resolve_id_after_current(THREAD_SLOT_FIRST_IDLE);
+            thread_id = thread_resolve_id_after_current(THREAD_SLOT_FIRST_IDLE);
             if (script[0] == EVENT_OPCODE_SPRITE_MOVE) {
                 thread_start(thread_id, script_sprite_move);
             } else {

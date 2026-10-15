@@ -273,7 +273,6 @@ void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
 void world_script_update_tutorial_controller_input(void);
 s32 world_script_check_tutorial_event_slot(void);
-void world_script_waitspritemove_event_instruction(s32);
 
 /* sound */
 extern s16 g_world_sound_current_music_track_index;
@@ -1488,7 +1487,6 @@ extern glyph_blit_t g_world_text_message_box_state;
 extern s32 g_world_text_section_offsets[32];
 extern u8* g_world_text_section_pointer_backup[32];
 
-extern char g_world_text_wait_for_allocation_message[];
 extern u16 g_world_text_speaker_swap_unit_a;
 extern u16 g_world_text_speaker_swap_unit_b;
 extern s32 g_world_text_current_line;
@@ -1631,8 +1629,6 @@ enum {
     WORLD_MENU_SELECTION_PROMPT_RESULT = 4, /* yes/no prompt result (0 confirms) */
 };
 
-enum { WORLD_MENU_BUFFER_PAGE_COUNT = 112 };
-
 /* Index of a saved cursor in g_world_menu_cursor_positions, as the formation
  * and shop menus use them. */
 typedef enum world_menu_cursor {
@@ -1645,7 +1641,6 @@ typedef enum world_menu_cursor {
     WORLD_MENU_CURSOR_ABILITY_TAB = 8,
 } world_menu_cursor_e;
 
-extern u8 g_world_menu_buffer_allocation_map[WORLD_MENU_BUFFER_PAGE_COUNT];
 extern u16 g_world_menu_clut;
 extern u16 g_world_menu_clut_back;
 extern u16 g_world_menu_clut_back_alt;
@@ -1774,8 +1769,6 @@ extern world_menu_grid_cell_t g_world_grid_menu_shop_scrolled_cells[];
 extern world_menu_grid_cell_t* g_world_active_grid_menu_cells;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialized */
-extern menu_allocation_t g_world_menu_buffer_allocations[MENU_BUFFER_ALLOCATION_COUNT];
-extern u8 g_world_menu_buffer_arena[WORLD_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
 extern u8 g_world_menu_text_page_image[];
 extern u8 g_world_menu_window_frame_image[];
 extern s16 g_world_menu_at_list_primary_values[];
@@ -1931,7 +1924,6 @@ void world_menu_load_text_1c18(void);
 void world_menu_store_sort_key_list(s32 index, s16* source);
 s32 world_job_calculate_current_total_jp(s32 index);
 void world_menu_reset_selection_results(void);
-void world_menu_init_buffer_allocator(void);
 void world_menu_run_ability(void);
 s32 world_menu_run_best_fit_equipment(void);
 s32 world_menu_run_learn(void);

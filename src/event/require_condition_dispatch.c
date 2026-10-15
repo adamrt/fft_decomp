@@ -23,7 +23,7 @@ void require_condition_dispatch(void) {
     parameter = thread_get_current_parameter_2_variant();
     if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST)
         require_condition_show_general(parameter);
-    thread = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+    thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
 
     if (condition == EVENT_DISPLAY_CONDITION_SPECIAL_CASES) {
         thread_start(thread, require_condition_run_special_thread);

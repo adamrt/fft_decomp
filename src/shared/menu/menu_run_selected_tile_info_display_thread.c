@@ -44,10 +44,10 @@ void menu_run_selected_tile_info_display_thread(void) {
         /* The target loads the display height signed (lh). */
         i = menu_build_quad_pieces(g_map_selected_tile_data.display_height, page->quads) - 1;
         thread_yield();
-        if (battle_thread_find_running_by_task(THREAD_TASK_DARK_SCREEN) != 0) {
+        if (thread_find_running_by_task(THREAD_TASK_DARK_SCREEN) != 0) {
             continue;
         }
-        if (battle_thread_find_running_by_task(THREAD_TASK_DARK_SCREEN_HOLD) != 0) {
+        if (thread_find_running_by_task(THREAD_TASK_DARK_SCREEN_HOLD) != 0) {
             continue;
         }
         g_menu_hide_numeric_values = 0;

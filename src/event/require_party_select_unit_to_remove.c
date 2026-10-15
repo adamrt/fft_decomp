@@ -149,7 +149,7 @@ s32 require_party_select_unit_to_remove(void) {
             thread_yield();
             g_menu_input_controller = script_get_controller_input_pointer(0);
             if (*g_menu_input_controller & PSX_PAD_SELECT) {
-                helpmenu_thread = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+                helpmenu_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
                 thread_start(helpmenu_thread, require_overlay_run_helpmenu);
                 thread_wait_until_inactive(helpmenu_thread);
                 continue;

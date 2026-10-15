@@ -1670,8 +1670,14 @@ typedef struct menu_allocation {
 } menu_allocation_t;
 typedef char menu_allocation_size_must_be_8[(sizeof(menu_allocation_t) == 8) ? 1 : -1];
 /* BATTLE and WORLD each link their own allocator over their own arena. */
+/* The arena has VARIANT_MENU_BUFFER_PAGE_COUNT pages: 53 in BATTLE, 112 in WORLD. */
+extern u8 g_menu_buffer_allocation_map[];
+extern menu_allocation_t g_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
+extern u8 g_menu_buffer_arena[][MENU_BUFFER_PAGE_SIZE];
+
 void* menu_alloc_memory(s32 size);
 void menu_free_memory(void* buffer);
+void menu_init_buffer_allocator(void);
 void* menu_alloc_buffer(s32 bytes);
 
 /* input */

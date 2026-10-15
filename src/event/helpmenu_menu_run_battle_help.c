@@ -265,7 +265,7 @@ void helpmenu_menu_run_battle_help(void) {
     help_thread = &g_threads[help_thread_id];
     while (1) {
         if (help_thread->is_running == 0) {
-            if (battle_thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
             if (self->task_words[1] != 0) {
@@ -275,10 +275,10 @@ void helpmenu_menu_run_battle_help(void) {
             node = &navigation[menu_index];
             y = node->y;
             x = node->x;
-            if (battle_thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
                 y += 8;
             }
-            if (battle_thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
             input = *g_helpmenu_controller_state_ptr;
@@ -333,7 +333,7 @@ void helpmenu_menu_run_battle_help(void) {
                 menu_index = node->destination[help_id];
             }
         } else {
-            if (battle_thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
             if (self->task_words[1] == 0) {

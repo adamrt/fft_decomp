@@ -6,6 +6,7 @@ sha256: 7af579c7bcfd46f21f8d6886acb6aae156474dace667553e76079be7c7d6db94
 load: 0x80067000
 source_dir: src/battle
 profile: gcc-2.6.3_O2_aspsx-2.34
+defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 53, VARIANT_THREAD_TABLE_SLOT_COUNT: 16}
 
 functions:
   - {addr: 0x800683c0, size: 20, name: action_set_at_list_active, hash: 8a8a6eec590a8201}
@@ -726,8 +727,8 @@ functions:
   - {addr: 0x8012e9c0, size: 60, name: gfx_clear_texture_allocation_grid, hash: 87e3ef6c7408d4d1, source: src/shared/gfx/gfx_clear_texture_allocation_grid.c}
   - {addr: 0x8012e9fc, size: 660, name: gfx_alloc_texture_rect, hash: 172942b718e358b1, source: src/shared/gfx/gfx_alloc_texture_rect.c}
   - {addr: 0x8012ec90, size: 428, name: gfx_free_texture_rect, hash: 83a3ad5b7c6ecddd, source: src/shared/gfx/gfx_free_texture_rect.c}
-  - {addr: 0x8012ee3c, size: 116, name: battle_menu_init_buffer_allocator, hash: f80a02de661184d5}
-  - {addr: 0x8012eeb0, size: 380, name: menu_alloc_memory, hash: a333c97bf7b7ceb0}
+  - {addr: 0x8012ee3c, size: 116, name: menu_init_buffer_allocator, hash: f80a02de661184d5, source: src/shared/menu/menu_init_buffer_allocator.c}
+  - {addr: 0x8012eeb0, size: 380, name: menu_alloc_memory, hash: a333c97bf7b7ceb0, source: src/shared/menu/menu_alloc_memory.c}
   - {addr: 0x8012f02c, size: 32, name: menu_alloc_buffer, hash: 8dfe96e6bed1af08, source: src/shared/menu/menu_alloc_buffer.c}
   - {addr: 0x8012f04c, size: 192, name: menu_free_memory, hash: bf843d0680a0ad61, source: src/shared/menu/menu_free_memory.c}
   - {addr: 0x8012f10c, size: 596, name: menu_init_numeric_display_frame_primitives, hash: 793d75bdfee884f4, source: src/shared/menu/menu_init_numeric_display_frame_primitives.c}
@@ -799,9 +800,9 @@ functions:
   - {addr: 0x801370a4, size: 2796, name: menu_run_unit_editor_panel_thread, hash: 5a162d67ff0fb26d, source: src/shared/menu/menu_run_unit_editor_panel_thread.c}
   - {addr: 0x80137b90, size: 8, name: menu_noop_3, hash: 6d64edf91449c1b1, source: src/shared/menu/menu_noop_3.c}
   - {addr: 0x80137b98, size: 120, name: menu_can_accept_input, hash: f875053f5144ba32}
-  - {addr: 0x80137c10, size: 708, name: menu_handle_action, hash: 46aaa86ad0be68d8}
+  - {addr: 0x80137c10, size: 708, name: menu_handle_action, hash: 46aaa86ad0be68d8, source: src/shared/menu/menu_handle_action.c}
   - {addr: 0x80137ed4, size: 176, name: menu_step_wrapping_cursor_on_scroll_buttons, hash: 2d20ad44b74b2253, source: src/shared/menu/menu_step_wrapping_cursor_on_scroll_buttons.c}
-  - {addr: 0x80137f84, size: 272, name: menu_handle_cancel_input, hash: 5c56c2d632802940}
+  - {addr: 0x80137f84, size: 272, name: menu_handle_cancel_input, hash: 5c56c2d632802940, source: src/shared/menu/menu_handle_cancel_input.c}
   - {addr: 0x80138094, size: 224, name: menu_should_close_thread, hash: 3a3f5ddcc1501b24}
   - {addr: 0x80138174, size: 596, name: menu_build_window_sprites, hash: 14eb30841abcf4da}
   - {addr: 0x801383c8, size: 76, name: menu_select_sprite_clut, hash: 0a1e2175a3486b65, source: src/shared/menu/menu_select_sprite_clut.c}
@@ -985,7 +986,7 @@ functions:
   - {addr: 0x80146940, size: 1444, name: script_run_sprite_move, hash: 558aa0057a55a6d2, source: src/shared/script/script_run_sprite_move.c}
   - {addr: 0x80146ee4, size: 60, name: script_sprite_move, hash: 7decfeacb2be172a, source: src/shared/script/script_sprite_move.c}
   - {addr: 0x80146f20, size: 60, name: script_sprite_move_beta, hash: c9868578c779e0f8, source: src/shared/script/script_sprite_move_beta.c}
-  - {addr: 0x80146f5c, size: 192, name: script_waitspritemove_event_instruction, hash: 1432c177a10691bf}
+  - {addr: 0x80146f5c, size: 192, name: script_waitspritemove_event_instruction, hash: 1432c177a10691bf, source: src/shared/script/script_waitspritemove_event_instruction.c}
   - {addr: 0x8014701c, size: 32, name: script_copy_matrix, hash: cd687ad6c14b8e80, source: src/shared/script/script_copy_matrix.c}
   - {addr: 0x8014703c, size: 672, name: map_light_thread, hash: 21c64a562f0c9325, source: src/shared/map/map_light_thread.c}
   - {addr: 0x801472dc, size: 60, name: camera_store_yaw_band, hash: 0478745f54a2dc9f, source: src/shared/camera/camera_store_yaw_band.c}
@@ -1024,9 +1025,9 @@ functions:
   - {addr: 0x80149a54, size: 228, name: sound_run_background_fade_thread, hash: d2b85b17ab3025e0, source: src/shared/sound/sound_run_background_fade_thread.c}
   - {addr: 0x80149b38, size: 172, name: script_toggle_message_portrait_flip, hash: 6ddcfa9027a7d71d, source: src/shared/script/script_toggle_message_portrait_flip.c}
   - {addr: 0x80149be4, size: 8, name: script_opcode_74_event_instruction, hash: 6d64edf91449c1b1, source: src/shared/script/script_opcode_74_event_instruction.c}
-  - {addr: 0x80149bec, size: 92, name: battle_thread_resolve_id, hash: 17686d1630cf7426}
-  - {addr: 0x80149c48, size: 116, name: battle_thread_resolve_id_after_current, hash: 4f46f5d743b32d8e}
-  - {addr: 0x80149cbc, size: 140, name: battle_thread_find_running_by_task, hash: 3e4172d2ef22f4ec}
+  - {addr: 0x80149bec, size: 92, name: thread_resolve_id, hash: 17686d1630cf7426, source: src/shared/thread/thread_resolve_id.c}
+  - {addr: 0x80149c48, size: 116, name: thread_resolve_id_after_current, hash: 4f46f5d743b32d8e, source: src/shared/thread/thread_resolve_id_after_current.c}
+  - {addr: 0x80149cbc, size: 140, name: thread_find_running_by_task, hash: 3e4172d2ef22f4ec, source: src/shared/thread/thread_find_running_by_task.c}
   - {addr: 0x80149d48, size: 36, name: thread_set_current_task_id, hash: 7886a9c202b1848c, source: src/shared/thread/thread_set_current_task_id.c}
   - {addr: 0x80149d6c, size: 336, name: script_find_jump_target, hash: 422ae30d6a9b16a6, source: src/shared/script/script_find_jump_target.c}
   - {addr: 0x80149ebc, size: 84, name: script_find_instruction_byte_offset, hash: ac44e561bcf62111, source: src/shared/script/script_find_instruction_byte_offset.c}
@@ -2263,7 +2264,7 @@ data:
   - {addr: 0x8012cf44, name: map_queue_textured_quads}
   - {addr: 0x8012d2b4, name: map_queue_untextured_triangles}
   - {addr: 0x8012d568, name: map_queue_untextured_quads}
-  - {addr: 0x8012d87c, name: g_battle_text_wait_for_allocation_message}
+  - {addr: 0x8012d87c, name: g_text_wait_for_allocation_message}
   - {addr: 0x8012d8a0, name: g_text_decimal_format}
   - {addr: 0x8012d8a4, name: g_menu_wait_for_file_allocation_message}
   - {addr: 0x8012d8c0, name: g_script_pause_message}
@@ -2564,9 +2565,9 @@ data:
   - {addr: 0x8016eacc, name: g_menu_window_buffer_slots}
   - {addr: 0x8016eae4, name: g_gfx_free_rect_pixels}
   - {addr: 0x8016eaf4, name: g_gfx_free_rect_cells}
-  - {addr: 0x8016eb04, name: g_battle_menu_allocator_slot_records}
-  - {addr: 0x8016eb84, name: g_battle_menu_buffer_arena}
-  - {addr: 0x80172084, name: g_battle_menu_buffer_allocation_map}
+  - {addr: 0x8016eb04, name: g_menu_allocator_slot_records}
+  - {addr: 0x8016eb84, name: g_menu_buffer_arena}
+  - {addr: 0x80172084, name: g_menu_buffer_allocation_map}
   - {addr: 0x801720bc, name: g_text_player_name_buffer}
   - {addr: 0x801720d0, name: g_text_line_widths}
   - {addr: 0x801721d0, name: g_unit_runtime_coords}

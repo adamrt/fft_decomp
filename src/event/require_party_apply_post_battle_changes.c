@@ -160,7 +160,7 @@ void require_party_apply_post_battle_changes(void) {
                             break;
                         }
                         if (input & PSX_PAD_SELECT) {
-                            thread_id = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+                            thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
                             thread_start(thread_id, require_overlay_run_helpmenu);
                             thread_wait_until_inactive(thread_id);
                         }

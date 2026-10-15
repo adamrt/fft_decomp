@@ -90,7 +90,7 @@ void attack_deploy_run_select_menu(void) {
     parent = &g_threads[parent_id];
     while (1) {
         if (parent->is_running == 0) {
-            if (battle_thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
             g_menu_input_lock_mode = 0;
@@ -101,10 +101,10 @@ void attack_deploy_run_select_menu(void) {
             node = &nodes[selected];
             y = node->y;
             x = node->x;
-            if (battle_thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
                 y += 8;
             }
-            if (battle_thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
             buttons = *input;
@@ -164,7 +164,7 @@ void attack_deploy_run_select_menu(void) {
                 selected = node->destination[text_id];
             }
         } else {
-            if (battle_thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
             g_menu_input_lock_mode = 1;

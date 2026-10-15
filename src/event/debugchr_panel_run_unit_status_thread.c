@@ -177,7 +177,7 @@ void debugchr_panel_run_unit_status_thread(void) {
             panel->portrait.clut = 0x7FBD;
         }
         dimmed = 0;
-        if (battle_thread_find_running_by_task(THREAD_TASK_STATUS_PANEL) != 0) {
+        if (thread_find_running_by_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
         }
         if (thread->dimmed != 0) {

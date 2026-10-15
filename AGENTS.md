@@ -10,7 +10,11 @@ preserving every original byte.
   `make checksums` updates hashes, using original bytes.
 - `target/*.yaml` owns each function's address, size, compiler profile, hash and
   source binding. Preserve these contracts; shared sources still compile at
-  every original entrypoint with that entry's profile and bindings.
+  every original entrypoint with that entry's profile and bindings. A module's
+  `defines:` map holds the `VARIANT_` constants (passed as `-D`) that let one
+  source serve programs built with different values; only a trial-proven
+  constant goes there, never a behavioral difference, and headers never use
+  them.
 - Preserve retail bugs and ABI disagreements. Explain them briefly in source
   comments or `QUIRKS.md`.
 - Keep drafts, experiments, extracted files and generated output under ignored

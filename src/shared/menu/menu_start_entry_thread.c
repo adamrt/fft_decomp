@@ -15,7 +15,7 @@ void menu_start_entry_thread(void) {
         thread_exit_current();
     }
     camera_wait_until_idle();
-    while (battle_thread_find_running_by_task(THREAD_TASK_ATTACK_TARGET_STATS) != 0) {
+    while (thread_find_running_by_task(THREAD_TASK_ATTACK_TARGET_STATS) != 0) {
         thread_yield();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {

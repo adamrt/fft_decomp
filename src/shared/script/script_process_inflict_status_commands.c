@@ -30,7 +30,7 @@ void script_process_inflict_status_commands(void) {
                             & STATUS_BYTE_MASK(STATUS_ID_FLOAT))
                         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                             & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
-                        thread_id = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+                        thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
                         thread_start(thread_id, script_inflict_status_thread);
                         thread_set_parameters(
                             thread_id, (s32)((const u8*)g_script_event_block + instruction_offset + 1), 0, 0);

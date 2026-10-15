@@ -12,7 +12,7 @@ s32 script_load_next_event(void) {
     do {
         thread_yield();
         for (task_id = 4; task_id < 15; task_id++) {
-            if (battle_thread_find_running_by_task(task_id) != 0) {
+            if (thread_find_running_by_task(task_id) != 0) {
                 break;
             }
         }

@@ -143,7 +143,7 @@ void menu_display_hovered_unit_stats(
                 }
             }
         }
-        running = battle_thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
+        running = thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
         if (running != 0 && thread_is_running_asm_variant(running - 1) == 0) {
             running = 0;
         }

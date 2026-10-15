@@ -1077,6 +1077,7 @@ void script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 void script_inflict_status_thread(void);
 /* TeleportIn forwards the unit ID; the interpreter's second argument is unused. */
 void script_teleportin_event_instruction(s32 unit_id, s32 unused);
+void script_waitspritemove_event_instruction(s32 unit_id);
 void script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
 void script_blue_remove_all_enemy_units(void);
 void script_blue_remove_unit(s32 unit_id);

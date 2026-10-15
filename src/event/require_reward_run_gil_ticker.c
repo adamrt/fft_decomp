@@ -44,7 +44,7 @@ void require_reward_run_gil_ticker(void) {
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS,
         script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_require_reward_war_trophy_search_result.level_sum_money);
     money = g_require_reward_war_trophy_search_result.level_sum_money;
-    thread_id = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+    thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, require_condition_run_special_thread);
     thread_set_parameters(thread_id, 2, 0, 0);
     g_menu_input_controller = script_get_controller_input_pointer(0);

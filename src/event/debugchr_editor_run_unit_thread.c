@@ -129,7 +129,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 g_sound_pending_sfx_id = one;
                 sound_latched = 1;
             }
-            if (battle_thread_find_running_by_task(THREAD_TASK_RESUME) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_RESUME) != 0) {
                 g_debugchr_status_display_thread_params.style = one;
                 g_debugchr_numeric_editor_thread_params.style = one;
                 g_debugchr_character_status_frame_config.style = one;

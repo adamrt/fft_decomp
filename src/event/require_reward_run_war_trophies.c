@@ -40,7 +40,7 @@ void require_reward_run_war_trophies(void) {
         thread_exit_current();
     }
     prims = g_require_reward_war_trophy_primitives;
-    thread = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+    thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     last = 0;
     thread_start(thread, require_condition_run_special_thread);
     thread_set_parameters(thread, 4, 0, 0);

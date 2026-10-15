@@ -60,6 +60,5 @@ extern const char g_battle_text_heap_dp_format[];     /* "DP %x\n" */
 extern const char g_battle_text_heap_remain_format[]; /* "HEAP REMAIN %x MAX %x\n" */
 extern const char g_battle_text_heap_task_format[];   /* "TASK %d %x\n" */
 extern const char g_battle_text_min_heap_format[];    /* "MIN HEAP %x " */
-extern char g_battle_text_wait_for_allocation_message[];
 
 #endif

@@ -101,15 +101,6 @@ void battle_menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, 
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 
-/* buffer allocation */
-enum { BATTLE_MENU_BUFFER_PAGE_COUNT = 53 };
-
-extern menu_allocation_t g_battle_menu_allocator_slot_records[MENU_BUFFER_ALLOCATION_COUNT];
-extern u8 g_battle_menu_buffer_allocation_map[BATTLE_MENU_BUFFER_PAGE_COUNT];
-extern u8 g_battle_menu_buffer_arena[BATTLE_MENU_BUFFER_PAGE_COUNT][MENU_BUFFER_PAGE_SIZE];
-
-void battle_menu_init_buffer_allocator(void);
-
 /* overlay loading */
 
 /* threads */

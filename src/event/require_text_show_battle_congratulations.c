@@ -29,7 +29,7 @@ void require_text_show_battle_congratulations(void) {
     g_thread_call_target = (void (*)(void))main_sound_switch_music_track;
     thread_call_on_main_stack(1, 0x7f, 0);
 
-    thread_a = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+    thread_a = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_a, require_condition_run_special_thread);
     thread_set_parameters(thread_a, 1, 0, 0);
     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)
@@ -37,7 +37,7 @@ void require_text_show_battle_congratulations(void) {
     else
         thread_wait_frames(0x1e);
 
-    thread_b = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
+    thread_b = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_b, require_condition_run_special_thread);
     thread_set_parameters(thread_b, 7, 1, 0);
     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_FINAL_BATTLE_WON)

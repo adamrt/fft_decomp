@@ -26,10 +26,6 @@ s32 script_is_tutorial_event_slot(void);
 s32 script_add_ghost_unit_event_instruction(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 runtime_id, s32 flags);
 
-/* unit movement */
-
-void script_waitspritemove_event_instruction(s32 unit_id);
-
 /* unit statuses */
 
 /* camera */
