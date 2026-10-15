@@ -1,5 +1,5 @@
-/* Entd boot. Its start is an object boundary the read-only data layout places somewhere nearby; its end is a boundary
- * the binary proves. */
+/* Cd reset entd and vectors. Its start is an object boundary the read-only data layout places somewhere nearby; its end
+ * is a boundary the binary proves. */
 
 #include "fft/main.h"
 #include "fft/script.h"

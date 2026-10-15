@@ -11,9 +11,9 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
-  - {name: boot_and_entd, source: src/main/boot_and_entd.c}
+  - {name: boot_logos, source: src/main/boot_logos.c}
+  - {name: cd_reset_entd_and_vectors, source: src/main/cd_reset_entd_and_vectors.c}
   - {name: display_and_sound_requests, source: src/main/display_and_sound_requests.c}
-  - {name: entd_boot, source: src/main/entd_boot.c}
   - {name: file_cd_headers, source: src/main/file_cd_headers.c}
   - {name: game_loop_and_now_loading, source: src/main/game_loop_and_now_loading.c}
   - {name: heap_and_file_loading, source: src/main/heap_and_file_loading.c}
@@ -678,23 +678,23 @@ functions:
   - {addr: 0x800413a8, size: 196, name: main_gfx_add_now_loading_to_otag, hash: 5438e0eb0e7a80c7, unit: game_loop_and_now_loading}
   - {addr: 0x8004146c, size: 300, name: main_gfx_load_efc_fnt, hash: 02911c7008f10711, unit: game_loop_and_now_loading}
   - {addr: 0x80041598, size: 476, name: main_set_display_draw, hash: 8715c0b670c3f523, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x80041774, size: 284, name: main_boot_draw_squaresoft_logo, hash: 8a5c9395c78d9abc, unit: boot_and_entd}
-  - {addr: 0x80041890, size: 652, name: main_boot_build_and_draw_squaresoft_logo, hash: 429977c5de60ed46, unit: boot_and_entd, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80041b1c, size: 612, name: main_boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, unit: boot_and_entd, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80041d80, size: 280, name: main_boot_draw_sceap_logo, hash: bdee131a2f49829f, unit: boot_and_entd}
-  - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, unit: boot_and_entd, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
-  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, unit: boot_and_entd, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
-  - {addr: 0x800424c0, size: 72, name: main_file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, unit: entd_boot}
-  - {addr: 0x80042508, size: 124, name: main_gfx_load_zodiac_frame, hash: cece1a887e42aea4, unit: entd_boot, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
-  - {addr: 0x80042584, size: 268, name: main_boot_run_startup, hash: f89462346cd91dbc, unit: entd_boot}
-  - {addr: 0x80042690, size: 276, name: main_boot_reset_game_state, hash: 30bc9957e9902423, unit: entd_boot}
-  - {addr: 0x800427a4, size: 220, name: main_entd_open_file, hash: 2842b52d61b959ce, unit: entd_boot}
-  - {addr: 0x80042880, size: 176, name: main_entd_get_encounter, hash: 8eeb97f209cde10e, unit: entd_boot}
-  - {addr: 0x80042930, size: 224, name: main_entd_init_event_unit_data, hash: 93e02043901b5bc7, unit: entd_boot}
-  - {addr: 0x80042a10, size: 160, name: main_item_init_new_game_inventory, hash: 37d23fecd658ca21, unit: entd_boot}
-  - {addr: 0x80042ab0, size: 108, name: main_party_init_new_game, hash: f14ad7433eefb74c, unit: entd_boot}
-  - {addr: 0x80042b1c, size: 16, name: main_util_set_svector, hash: 694486283a46f5f8, unit: entd_boot}
-  - {addr: 0x80042b2c, size: 16, name: main_util_set_vector, hash: 28901a8f332a5d7a, unit: entd_boot}
+  - {addr: 0x80041774, size: 284, name: main_boot_draw_squaresoft_logo, hash: 8a5c9395c78d9abc, unit: boot_logos}
+  - {addr: 0x80041890, size: 652, name: main_boot_build_and_draw_squaresoft_logo, hash: 429977c5de60ed46, unit: boot_logos, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80041b1c, size: 612, name: main_boot_fade_out_squaresoft_logo, hash: a75b1f62cd2cc9b5, unit: boot_logos, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80041d80, size: 280, name: main_boot_draw_sceap_logo, hash: bdee131a2f49829f, unit: boot_logos}
+  - {addr: 0x80041e98, size: 1004, name: main_boot_build_and_draw_sceap_logo, hash: 34c0ed5f4b6c9b9f, unit: boot_logos, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
+  - {addr: 0x80042284, size: 572, name: main_gfx_reset_display, hash: f9ff37a175b62153, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
+  - {addr: 0x800424c0, size: 72, name: main_file_reset_cdrom_cpu_ram, hash: f6a52c31a19f52c7, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042508, size: 124, name: main_gfx_load_zodiac_frame, hash: cece1a887e42aea4, unit: cd_reset_entd_and_vectors, rodata: [{addr: 0x8004092c, size: 8, hash: 35e3f82be5641d60}]}
+  - {addr: 0x80042584, size: 268, name: main_boot_run_startup, hash: f89462346cd91dbc, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042690, size: 276, name: main_boot_reset_game_state, hash: 30bc9957e9902423, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x800427a4, size: 220, name: main_entd_open_file, hash: 2842b52d61b959ce, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042880, size: 176, name: main_entd_get_encounter, hash: 8eeb97f209cde10e, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042930, size: 224, name: main_entd_init_event_unit_data, hash: 93e02043901b5bc7, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042a10, size: 160, name: main_item_init_new_game_inventory, hash: 37d23fecd658ca21, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042ab0, size: 108, name: main_party_init_new_game, hash: f14ad7433eefb74c, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042b1c, size: 16, name: main_util_set_svector, hash: 694486283a46f5f8, unit: cd_reset_entd_and_vectors}
+  - {addr: 0x80042b2c, size: 16, name: main_util_set_vector, hash: 28901a8f332a5d7a, unit: cd_reset_entd_and_vectors}
   - {addr: 0x80042b3c, size: 476, name: main_set_display_draw_new_game, hash: 8715c0b670c3f523, source: src/main/main_set_display_draw.c, source_symbol: main_set_display_draw, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
   - {addr: 0x80042d18, size: 188, name: main_gfx_swap_display_area, hash: 18f2c8600c046389, unit: display_and_sound_requests}
   - {addr: 0x80042dd4, size: 904, name: main_gfx_fade_in_orbonne_monastery, hash: 1ce397677ccb4bb6, unit: display_and_sound_requests, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
