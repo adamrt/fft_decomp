@@ -16,7 +16,7 @@ units:
   - {name: main_job_unit, source: src/shared/job/main_job_unit.c}
   - {name: main_sound_play_sfx_unit, source: src/shared/sound/main_sound_play_sfx_unit.c}
   - {name: main_sound_unit, source: src/shared/sound/main_sound_unit.c}
-  - {name: main_u_unit, source: src/shared/unit/main_u_unit.c}
+  - {name: main_unit_calculate_palette_spritesheet_unit, source: src/shared/unit/main_unit_calculate_palette_spritesheet_unit.c}
   - {name: main_unit_increase_casualty_counters_unit, source: src/shared/status/main_unit_increase_casualty_counters_unit.c}
   - {name: main_unit_init_job_levels_unit, source: src/shared/unit/main_unit_init_job_levels_unit.c}
   - {name: main_unit_init_position_and_rewards_unit, source: src/shared/unit/main_unit_init_position_and_rewards_unit.c}
@@ -835,10 +835,10 @@ functions:
   - {addr: 0x8005dfd4, size: 68, name: main_unit_init_status_and_rewards, hash: ed3fe2370b8a89c1, unit: main_unit_init_job_levels_unit}
   - {addr: 0x8005e018, size: 56, name: main_ability_get_range, hash: b65e2074178b867e, unit: main_unit_init_job_levels_unit}
   - {addr: 0x8005e050, size: 56, name: main_ability_get_aoe, hash: 19fbd3e4b9bb0ee2, unit: main_unit_init_job_levels_unit}
-  - {addr: 0x8005e088, size: 68, name: main_unit_calculate_palette_spritesheet, hash: 3c5d71a05f0eb639, unit: main_u_unit}
-  - {addr: 0x8005e0cc, size: 84, name: main_util_roll_pass_fail, hash: 4ddcd1c53620c436, unit: main_u_unit}
-  - {addr: 0x8005e120, size: 144, name: main_unit_get_spritesheet_palette, hash: 77fff8afccf5df6b, unit: main_u_unit}
-  - {addr: 0x8005e1b0, size: 80, name: main_unit_has_status_in_set, hash: 8b0638eb283dca01, unit: main_u_unit}
+  - {addr: 0x8005e088, size: 68, name: main_unit_calculate_palette_spritesheet, hash: 3c5d71a05f0eb639, unit: main_unit_calculate_palette_spritesheet_unit}
+  - {addr: 0x8005e0cc, size: 84, name: main_util_roll_pass_fail, hash: 4ddcd1c53620c436, unit: main_unit_calculate_palette_spritesheet_unit}
+  - {addr: 0x8005e120, size: 144, name: main_unit_get_spritesheet_palette, hash: 77fff8afccf5df6b, unit: main_unit_calculate_palette_spritesheet_unit}
+  - {addr: 0x8005e1b0, size: 80, name: main_unit_has_status_in_set, hash: 8b0638eb283dca01, unit: main_unit_calculate_palette_spritesheet_unit}
   - {addr: 0x8005e200, size: 44, name: main_ability_get_known, hash: f03d26c875a93271}
   - {addr: 0x8005e22c, size: 40, name: main_util_copy_action_data, hash: 3a97060e78efbf69}
   - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/shared/memory/mem_copy_bytes_source_first.c, source_symbol: mem_copy_bytes_source_first}

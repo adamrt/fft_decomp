@@ -27,8 +27,8 @@ units:
   - {name: battle_gfx_is_spritesheet_id_loaded_unit, source: src/shared/gfx/battle_gfx_is_spritesheet_id_loaded_unit.c}
   - {name: battle_gfx_modify_vram_palette_unit, source: src/shared/map/battle_gfx_modify_vram_palette_unit.c}
   - {name: battle_gfx_reset_unit_graphic_trigger_unit, source: src/shared/gfx/battle_gfx_reset_unit_graphic_trigger_unit.c}
-  - {name: battle_gfx_s_unit, source: src/shared/gfx/battle_gfx_s_unit.c}
   - {name: battle_gfx_set_shadow_graphic_trigger_by_runtime_id_unit, source: src/battle/battle_gfx_set_shadow_graphic_trigger_by_runtime_id_unit.c}
+  - {name: battle_gfx_store_sprite_display_data_unit, source: src/shared/gfx/battle_gfx_store_sprite_display_data_unit.c}
   - {name: battle_gfx_unit, source: src/shared/gfx/battle_gfx_unit.c}
   - {name: battle_gfx_unpack_unit_seq_data_unit, source: src/shared/gfx/battle_gfx_unpack_unit_seq_data_unit.c}
   - {name: battle_gfx_update_unit_palettes_unit, source: src/battle/battle_gfx_update_unit_palettes_unit.c}
@@ -57,17 +57,17 @@ units:
   - {name: battle_unit_increment_or_decrement_height_mod_unit, source: src/shared/gfx/battle_unit_increment_or_decrement_height_mod_unit.c}
   - {name: battle_unit_init_party_member_battle_data_unit, source: src/shared/unit/battle_unit_init_party_member_battle_data_unit.c}
   - {name: battle_unit_init_unit, source: src/shared/gfx/battle_unit_init_unit.c}
-  - {name: battle_unit_set_m_unit, source: src/shared/unit/battle_unit_set_m_unit.c}
   - {name: battle_unit_set_real_coords_from_world_coords_unit, source: src/battle/battle_unit_set_real_coords_from_world_coords_unit.c}
   - {name: battle_unit_set_target_animation_by_runtime_id_unit, source: src/shared/unit/battle_unit_set_target_animation_by_runtime_id_unit.c}
   - {name: battle_unit_set_tile_position_with_mount_partner_unit, source: src/battle/battle_unit_set_tile_position_with_mount_partner_unit.c}
+  - {name: battle_unit_set_unit, source: src/shared/unit/battle_unit_set_unit.c}
   - {name: battle_unit_start_post_attack_animation_display_unit, source: src/battle/battle_unit_start_post_attack_animation_display_unit.c}
   - {name: battle_unit_store_animation_facing_unit, source: src/shared/unit/battle_unit_store_animation_facing_unit.c}
   - {name: battle_unit_unit, source: src/shared/unit/battle_unit_unit.c}
   - {name: battle_unit_update_display_unit, source: src/shared/unit/battle_unit_update_display_unit.c}
   - {name: battle_unit_update_float_and_jump_height_unit, source: src/shared/unit/battle_unit_update_float_and_jump_height_unit.c}
   - {name: battle_unit_update_graphics_by_runtime_id_unit, source: src/shared/unit/battle_unit_update_graphics_by_runtime_id_unit.c}
-  - {name: camera_c_unit, source: src/shared/camera/camera_c_unit.c}
+  - {name: camera_calculate_relative_offset_unit, source: src/shared/camera/camera_calculate_relative_offset_unit.c}
   - {name: camera_convert_unit_coords_by_runtime_id_unit, source: src/shared/camera/camera_convert_unit_coords_by_runtime_id_unit.c}
   - {name: camera_enable_map_pan_unit, source: src/shared/camera/camera_enable_map_pan_unit.c}
   - {name: camera_fusion_thread_unit, source: src/shared/camera/camera_fusion_thread_unit.c}
@@ -140,8 +140,8 @@ units:
   - {name: target_sort_list_unit, source: src/battle/target_sort_list_unit.c}
   - {name: text_is_spell_quote_exception_skillset_unit, source: src/shared/text/text_is_spell_quote_exception_skillset_unit.c}
   - {name: text_relocate_pointer_table_unit, source: src/shared/text/text_relocate_pointer_table_unit.c}
-  - {name: thread, source: src/shared/thread/thread.c}
   - {name: thread_wait_for_unit_view_panels_unit, source: src/shared/thread/thread_wait_for_unit_view_panels_unit.c}
+  - {name: thread_wait_frames_unit, source: src/shared/thread/thread_wait_frames_unit.c}
   - {name: unit_check_facing_relative_to_camera_unit, source: src/shared/unit/unit_check_facing_relative_to_camera_unit.c}
   - {name: unit_has_any_current_status_unit, source: src/shared/menu/unit_has_any_current_status_unit.c}
   - {name: unit_increase_blue_team_brave_by_10_unit, source: src/shared/script/unit_increase_blue_team_brave_by_10_unit.c}
@@ -454,15 +454,15 @@ functions:
   - {addr: 0x8007aed4, size: 52, name: battle_gfx_init_render_frame, hash: d24a94ce7e694637, unit: battle_gfx_init_render_state_unit}
   - {addr: 0x8007af08, size: 60, name: battle_gfx_increment_counter, hash: 81bb107d92b9ac66, unit: battle_gfx_init_render_state_unit}
   - {addr: 0x8007af44, size: 1448, name: battle_gfx_construct_polygon_data_for_units, hash: c38f2b2b6a57de76, unit: battle_gfx_init_render_state_unit}
-  - {addr: 0x8007b4ec, size: 68, name: battle_gfx_store_sprite_display_data, hash: 1410ef2b68b17887, unit: battle_gfx_s_unit}
-  - {addr: 0x8007b530, size: 36, name: battle_gfx_set_sprite_part_flip, hash: 292f3ddc521978ee, unit: battle_gfx_s_unit}
-  - {addr: 0x8007b554, size: 56, name: battle_gfx_set_sprite_part_semi_transparent, hash: 5df297d7f893d4c1, unit: battle_gfx_s_unit}
-  - {addr: 0x8007b58c, size: 252, name: camera_calculate_relative_offset, hash: 6c843adfb31e095b, unit: camera_c_unit}
-  - {addr: 0x8007b688, size: 32, name: camera_calculate_relative_offset_by_1, hash: 1483e20a4a5cdab2, unit: camera_c_unit}
-  - {addr: 0x8007b6a8, size: 32, name: camera_calculate_relative_offset_by_5, hash: 227c8f2b8ec9a15c, unit: camera_c_unit}
-  - {addr: 0x8007b6c8, size: 612, name: camera_convert_screen_coords_by_rotation, hash: abf1716f66203819, unit: camera_c_unit}
-  - {addr: 0x8007b92c, size: 32, name: camera_convert_screen_coords_modify_by_1, hash: b6326d0fd9490c00, unit: camera_c_unit}
-  - {addr: 0x8007b94c, size: 32, name: camera_convert_screen_coords_modify_by_5, hash: ae52a4c0b67848fb, unit: camera_c_unit}
+  - {addr: 0x8007b4ec, size: 68, name: battle_gfx_store_sprite_display_data, hash: 1410ef2b68b17887, unit: battle_gfx_store_sprite_display_data_unit}
+  - {addr: 0x8007b530, size: 36, name: battle_gfx_set_sprite_part_flip, hash: 292f3ddc521978ee, unit: battle_gfx_store_sprite_display_data_unit}
+  - {addr: 0x8007b554, size: 56, name: battle_gfx_set_sprite_part_semi_transparent, hash: 5df297d7f893d4c1, unit: battle_gfx_store_sprite_display_data_unit}
+  - {addr: 0x8007b58c, size: 252, name: camera_calculate_relative_offset, hash: 6c843adfb31e095b, unit: camera_calculate_relative_offset_unit}
+  - {addr: 0x8007b688, size: 32, name: camera_calculate_relative_offset_by_1, hash: 1483e20a4a5cdab2, unit: camera_calculate_relative_offset_unit}
+  - {addr: 0x8007b6a8, size: 32, name: camera_calculate_relative_offset_by_5, hash: 227c8f2b8ec9a15c, unit: camera_calculate_relative_offset_unit}
+  - {addr: 0x8007b6c8, size: 612, name: camera_convert_screen_coords_by_rotation, hash: abf1716f66203819, unit: camera_calculate_relative_offset_unit}
+  - {addr: 0x8007b92c, size: 32, name: camera_convert_screen_coords_modify_by_1, hash: b6326d0fd9490c00, unit: camera_calculate_relative_offset_unit}
+  - {addr: 0x8007b94c, size: 32, name: camera_convert_screen_coords_modify_by_5, hash: ae52a4c0b67848fb, unit: camera_calculate_relative_offset_unit}
   - {addr: 0x8007b96c, size: 100, name: battle_unit_copy_draw_coords, hash: f430112bc691272a, unit: battle_unit_copy_draw_coords_unit}
   - {addr: 0x8007b9d0, size: 2676, name: battle_gfx_calculate_sprite_shadow_from_tile_slope, hash: 3475e2d67a51ce4a, unit: battle_unit_copy_draw_coords_unit}
   - {addr: 0x8007c444, size: 968, name: target_calculate_cursor_tile_polygon, hash: bc44eec17053cffa, unit: battle_unit_copy_draw_coords_unit}
@@ -503,8 +503,8 @@ functions:
   - {addr: 0x80081ad0, size: 16, name: battle_gfx_get_effect_shp_data, hash: 8397fdd5c7f61d85, unit: battle_gfx_get_effect_shp_data_unit}
   - {addr: 0x80081ae0, size: 16, name: battle_gfx_get_effect_seq_data, hash: cbddd39cd666d6c9, unit: battle_gfx_get_effect_shp_data_unit}
   - {addr: 0x80081af0, size: 28, name: battle_gfx_get_spritesheet_flying_flag, hash: 2df78c259613ca35, unit: battle_gfx_get_effect_shp_data_unit}
-  - {addr: 0x80081b0c, size: 124, name: battle_unit_set_move_and_world_coords, hash: d9d1e81d43422381, unit: battle_unit_set_m_unit}
-  - {addr: 0x80081b88, size: 148, name: battle_unit_set_map_coords_after_death_dismount, hash: 05016104e1c28b23, unit: battle_unit_set_m_unit}
+  - {addr: 0x80081b0c, size: 124, name: battle_unit_set_move_and_world_coords, hash: d9d1e81d43422381, unit: battle_unit_set_unit}
+  - {addr: 0x80081b88, size: 148, name: battle_unit_set_map_coords_after_death_dismount, hash: 05016104e1c28b23, unit: battle_unit_set_unit}
   - {addr: 0x80081c1c, size: 68, name: battle_gfx_is_spritesheet_id_loaded, hash: aa489e10824df594, unit: battle_gfx_is_spritesheet_id_loaded_unit}
   - {addr: 0x80081c60, size: 244, name: battle_gfx_claim_spritesheet_slot, hash: 0441f983a951ca62, unit: battle_gfx_is_spritesheet_id_loaded_unit}
   - {addr: 0x80081d54, size: 956, name: battle_gfx_tint_unit_palette_for_weather_and_tile, hash: ddcee335cd1f0c8c, unit: battle_gfx_is_spritesheet_id_loaded_unit, rodata: [{addr: 0x80067e00, size: 92, hash: ed149fdad13bd852}]}
@@ -1209,16 +1209,16 @@ functions:
   - {addr: 0x8014c18c, size: 796, name: menu_build_window_image, hash: c553dd4a8afbd218, source: src/shared/menu/menu_build_window_image.c}
   - {addr: 0x8014c4a8, size: 688, name: menu_build_and_upload_window_frame_image_variant, hash: 99515c0e0a1f017c}
   - {addr: 0x8014c758, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/shared/menu/menu_build_window_image_row.c}
-  - {addr: 0x8014c858, size: 72, name: thread_wait_frames, hash: e33123533d666f71, unit: thread}
-  - {addr: 0x8014c8a0, size: 132, name: thread_start, hash: 72fa1891ea2b8656, unit: thread}
-  - {addr: 0x8014c924, size: 28, name: thread_resume, hash: 484df3941212a0b6, unit: thread}
-  - {addr: 0x8014c940, size: 24, name: thread_suspend, hash: 6647a9e0cd2b86e9, unit: thread}
-  - {addr: 0x8014c958, size: 60, name: thread_exit_current, hash: 23aa4a3549fe6cb7, unit: thread}
-  - {addr: 0x8014c994, size: 60, name: thread_reset_scheduler, hash: fa59753fb674e92c, unit: thread}
-  - {addr: 0x8014c9d0, size: 76, name: thread_wait_until_inactive, hash: 29370957c26343c7, unit: thread}
-  - {addr: 0x8014ca1c, size: 28, name: thread_is_running, hash: d10e3403d7fec970, unit: thread}
-  - {addr: 0x8014ca38, size: 32, name: thread_set_parameters, hash: 40bfd9d6b347f675, unit: thread}
-  - {addr: 0x8014ca58, size: 40, name: thread_set_four_parameters, hash: f24ec1f8ce5a962b, unit: thread}
+  - {addr: 0x8014c858, size: 72, name: thread_wait_frames, hash: e33123533d666f71, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c8a0, size: 132, name: thread_start, hash: 72fa1891ea2b8656, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c924, size: 28, name: thread_resume, hash: 484df3941212a0b6, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c940, size: 24, name: thread_suspend, hash: 6647a9e0cd2b86e9, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c958, size: 60, name: thread_exit_current, hash: 23aa4a3549fe6cb7, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c994, size: 60, name: thread_reset_scheduler, hash: fa59753fb674e92c, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c9d0, size: 76, name: thread_wait_until_inactive, hash: 29370957c26343c7, unit: thread_wait_frames_unit}
+  - {addr: 0x8014ca1c, size: 28, name: thread_is_running, hash: d10e3403d7fec970, unit: thread_wait_frames_unit}
+  - {addr: 0x8014ca38, size: 32, name: thread_set_parameters, hash: 40bfd9d6b347f675, unit: thread_wait_frames_unit}
+  - {addr: 0x8014ca58, size: 40, name: thread_set_four_parameters, hash: f24ec1f8ce5a962b, unit: thread_wait_frames_unit}
   - {addr: 0x8014cbb4, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, source: src/shared/thread/thread_get_current_global_pointer.c}
   - {addr: 0x8014cbc0, size: 52, name: thread_get_current_parameter_1_variant, hash: 4427bc41b35c9c1f}
   - {addr: 0x8014cbf4, size: 52, name: thread_get_current_parameter_2_variant, hash: 7ffeb5877d79f219}

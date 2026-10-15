@@ -61,7 +61,7 @@ units:
   - {name: world_gfx_load_wldface_to_frame_buffer_unit, source: src/shared/menu/world_gfx_load_wldface_to_frame_buffer_unit.c}
   - {name: world_gfx_unit, source: src/shared/gfx/world_gfx_unit.c}
   - {name: world_input_get_tutorial_buttons_unit, source: src/shared/script/world_input_get_tutorial_buttons_unit.c}
-  - {name: world_m_unit, source: src/shared/menu/world_m_unit.c}
+  - {name: world_menu_build_location_list_unit, source: src/shared/menu/world_menu_build_location_list_unit.c}
   - {name: world_menu_build_submenu_text_id_page_unit, source: src/shared/menu/world_menu_build_submenu_text_id_page_unit.c}
   - {name: world_menu_enable_alternate_main_palette_unit, source: src/shared/menu/world_menu_enable_alternate_main_palette_unit.c}
   - {name: world_menu_formation_icon_list_thread_unit, source: src/world/world_menu_formation_icon_list_thread_unit.c}
@@ -77,8 +77,8 @@ units:
   - {name: world_shop_run_obtain_gil_menu_unit, source: src/world/world_shop_run_obtain_gil_menu_unit.c}
   - {name: world_shop_run_screen_unit, source: src/world/world_shop_run_screen_unit.c}
   - {name: world_shop_unit, source: src/world/world_shop_unit.c}
-  - {name: world_t_unit, source: src/shared/text/world_t_unit.c}
   - {name: world_text_release_current_message_box_slot_unit, source: src/shared/text/world_text_release_current_message_box_slot_unit.c}
+  - {name: world_text_resume_printing_unit, source: src/shared/text/world_text_resume_printing_unit.c}
 
 libraries:
   - {id: libgs, addr: 0x800e0228, end: 0x800e1a98, kind: psyq, library: LIBGS}
@@ -525,8 +525,8 @@ functions:
   - {addr: 0x8010487c, size: 3460, name: menu_run_battle_help, hash: 19f312de2ac42e56, unit: menu_close_unit}
   - {addr: 0x80105600, size: 60, name: thread_find_first_running_menu_thread, hash: 93208e88bcfad087, unit: menu_close_unit}
   - {addr: 0x8010563c, size: 1992, name: menu_run_require_help, hash: c7cbab664bb5a1d5, unit: menu_close_unit}
-  - {addr: 0x80105e04, size: 376, name: world_menu_build_location_list, hash: 349237fd5e967325, unit: world_m_unit}
-  - {addr: 0x80105f7c, size: 240, name: world_map_confirm_destination, hash: 29b51b8a6bcdd2f0, unit: world_m_unit}
+  - {addr: 0x80105e04, size: 376, name: world_menu_build_location_list, hash: 349237fd5e967325, unit: world_menu_build_location_list_unit}
+  - {addr: 0x80105f7c, size: 240, name: world_map_confirm_destination, hash: 29b51b8a6bcdd2f0, unit: world_menu_build_location_list_unit}
   - {addr: 0x8010606c, size: 188, name: world_menu_build_submenu_text_id_page, hash: c3dd8076c43c73d6, unit: world_menu_build_submenu_text_id_page_unit}
   - {addr: 0x80106128, size: 16, name: world_menu_set_slot_4_cursor_index, hash: a87cff00f1d1a1dc, unit: world_menu_build_submenu_text_id_page_unit}
   - {addr: 0x80106138, size: 8, name: world_noop_80106138, hash: 6d64edf91449c1b1, unit: world_menu_build_submenu_text_id_page_unit}
@@ -541,10 +541,10 @@ functions:
   - {addr: 0x801067f0, size: 24, name: world_menu_take_and_clear_thread_result, hash: f911e25bccbe7ecc, unit: world_formation_restore_menu_after_core_exit_unit}
   - {addr: 0x80106808, size: 16, name: world_menu_get_event_state_flag, hash: 5aa3f020305cf4e4, unit: world_formation_restore_menu_after_core_exit_unit}
   - {addr: 0x80106818, size: 28, name: world_thread_request_stop, hash: c5d1a355242deb8b, unit: world_formation_restore_menu_after_core_exit_unit}
-  - {addr: 0x80106834, size: 52, name: world_text_resume_printing, hash: 48d03c8b58af46be, unit: world_t_unit}
-  - {addr: 0x80106868, size: 36, name: world_text_is_printing, hash: 9e115a06329f757e, unit: world_t_unit}
-  - {addr: 0x8010688c, size: 40, name: world_thread_idle_yield_forever, hash: cefbd84258a6fac2, unit: world_t_unit}
-  - {addr: 0x801068b4, size: 100, name: world_thread_start_idle_5_to_8, hash: aca299ba566aff9f, unit: world_t_unit}
+  - {addr: 0x80106834, size: 52, name: world_text_resume_printing, hash: 48d03c8b58af46be, unit: world_text_resume_printing_unit}
+  - {addr: 0x80106868, size: 36, name: world_text_is_printing, hash: 9e115a06329f757e, unit: world_text_resume_printing_unit}
+  - {addr: 0x8010688c, size: 40, name: world_thread_idle_yield_forever, hash: cefbd84258a6fac2, unit: world_text_resume_printing_unit}
+  - {addr: 0x801068b4, size: 100, name: world_thread_start_idle_5_to_8, hash: aca299ba566aff9f, unit: world_text_resume_printing_unit}
   - {addr: 0x80106918, size: 20, name: world_menu_enable_alternate_main_palette, hash: 8beb7cf112ba8150, unit: world_menu_enable_alternate_main_palette_unit}
   - {addr: 0x8010692c, size: 92, name: world_thread_stop_after_empty_slots_5_to_8, hash: 9e7da4d92655651f, unit: world_menu_enable_alternate_main_palette_unit}
   - {addr: 0x80106988, size: 16, name: world_menu_disable_alternate_main_palette, hash: f6cec9f0ffcc89d5, unit: world_menu_enable_alternate_main_palette_unit}
