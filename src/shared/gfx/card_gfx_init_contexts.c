@@ -17,7 +17,7 @@ void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 u
     s32 i;
 
     g_card_gfx_context_base = contexts;
-    g_menu_gfx_context = contexts;
+    g_card_gfx_context = contexts;
     for (i = 0; i < 2; i++) {
         g_card_gfx_context_base[i].otag = otags + g_gfx_otag_count * i;
         g_card_gfx_context_base[i].polygons = polygons + g_gfx_poly_ft4_capacity * i;
