@@ -111,6 +111,15 @@ func TestResolveUnitInstanceChecksOrderProfileAndRodata(t *testing.T) {
 		t.Fatalf("division-check member: %v %+v", err, checked)
 	}
 	m.function("unit_b").Profile = ""
+	// Two members sharing one literal declare the same range: one range in the unit.
+	shared := rodataSpec{Addr: 0x80066ff8, Size: 8, Hash: "0000000000000001"}
+	m.function("unit_a").Rodata = []rodataSpec{shared}
+	m.function("unit_b").Rodata = []rodataSpec{shared}
+	literal, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: "battle", Functions: []string{"unit_a", "unit_b"}})
+	if err != nil || len(literal.rodata) != 1 {
+		t.Fatalf("shared literal: %v %+v", err, literal)
+	}
+	m.function("unit_a").Rodata, m.function("unit_b").Rodata = nil, nil
 	alias, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: "battle", Functions: []string{"unit_e", "unit_f"}})
 	if err != nil {
 		t.Fatal(err)

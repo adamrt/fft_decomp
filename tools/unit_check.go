@@ -154,7 +154,20 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 		}
 		unit.members = append(unit.members, f)
 		unit.size += f.Size
-		unit.rodata = append(unit.rodata, f.Rodata...)
+		for _, span := range f.Rodata {
+			// Several members may share one literal (a constant in the
+			// object's read-only data): one range, declared once.
+			shared := false
+			for _, existing := range unit.rodata {
+				if existing == span {
+					shared = true
+					break
+				}
+			}
+			if !shared {
+				unit.rodata = append(unit.rodata, span)
+			}
+		}
 	}
 	unit.addr = unit.members[0].Addr
 	profileName, err := unitProfile(spec, m, unit.members)
