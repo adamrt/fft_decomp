@@ -233,11 +233,8 @@ menu_instruction_t* menu_cmd_set_draw_color_handler(menu_instruction_t* command)
 /* command dispatch */
 extern menu_callback_t g_menu_row_callbacks[16];
 extern s16 g_menu_list_row_mode;
-extern s16 g_menu_scroll_base_index;
 extern s16 g_menu_list_scroll_offset;
 extern s32 g_menu_list_row_index;
-
-void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 input, s32 mode);
 
 menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* command);
 menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* command);
@@ -280,6 +277,13 @@ menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_
 menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
+void menu_draw_scrollable_list(const menu_instruction_t* script);
+void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
+void menu_init_and_draw_scrollable_list(
+    s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
+void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 state, s32 override);
 extern menu_sprite_command_t g_menu_cmd_row_quad;
+void menu_init_and_draw_scrollable_list_simple(
+    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 
 #endif /* MENU_SCRIPT_H */

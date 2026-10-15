@@ -22,7 +22,7 @@ void require_overlay_run_helpmenu(void) {
     }
     menu_request_open_companion_executable(COMPANION_OVERLAY_HELPMENU);
     thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-    thread_start(thread_id, helpmenu_menu_run_require_help);
+    thread_start(thread_id, menu_run_require_help);
     thread_wait_until_inactive(thread_id);
     g_menu_panel_status_animation[0] = 0;
     g_menu_panel_status_animation[1] = 0;

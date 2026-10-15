@@ -78,39 +78,19 @@ typedef enum jobstts_page_scroll_direction {
 extern s32 g_jobstts_job_list_menu_initialized;
 
 extern u16 g_jobstts_menu_list_cursor_anim_state;
-extern s16* g_jobstts_menu_list_entries;
-extern s16 g_jobstts_menu_list_entry_count;
-extern u8 g_jobstts_menu_list_glyph_width;
-extern s8 g_jobstts_menu_list_redraw_pending;
-extern s16 g_jobstts_menu_list_row_group_count;
-extern s16 g_jobstts_menu_list_row_height;
 extern s32 g_jobstts_menu_list_row_index;
 extern s16 g_jobstts_menu_list_row_rendering;
-extern s8 g_jobstts_menu_list_scroll_direction; /* read with lb (jobstts_cmd_draw_scrollable_list_body_handler) */
 extern s16 g_jobstts_menu_list_scroll_entry_ids;
 extern s16 g_jobstts_menu_list_scroll_offset_y;
 extern u16 g_jobstts_menu_list_scroll_progress;
-extern s16 g_jobstts_menu_list_selected_index;
-extern u8 g_jobstts_menu_list_text_columns;
-extern u8* g_jobstts_menu_list_text_table;
-extern s16 g_jobstts_menu_list_visible_rows;
-extern u16 g_jobstts_menu_list_vram_width;
 extern u8 g_jobstts_menu_palette_image[];
-extern s16 g_jobstts_menu_scroll_base_index;
 extern u16 g_jobstts_menu_selection_values[];
 /* Window right edge; WORLD's twin stores it to g_world_menu_window_right_x. */
 extern s16 g_jobstts_menu_window_right_x;
 
 void jobstts_menu_clear_selection_values(void);
-void jobstts_menu_draw_scrollable_list(const menu_instruction_t* script);
-void jobstts_menu_init_and_draw_scrollable_list(
-    s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void jobstts_menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
-void jobstts_menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 void jobstts_menu_load_images_and_clear_selection(void);
-void jobstts_menu_scroll_list_by_page(jobstts_menu_page_scroll_direction_e direction, const menu_instruction_t* list);
 s32 jobstts_menu_update_job_list(void);
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 
@@ -243,7 +223,6 @@ enum {
 
 extern jobstts_condition_t g_jobstts_cmd_conditions[];
 extern jobstts_command_handler_t g_jobstts_cmd_handlers[22];
-extern s32 g_jobstts_cmd_stream_input;
 extern menu_window_command_t g_jobstts_cmd_window_interior_command;
 
 menu_instruction_t* jobstts_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
@@ -272,6 +251,5 @@ void jobstts_bits_init_primary_reader(const u8* data);
 extern u8 g_jobstts_text_thread_running_state;
 
 /* sound */
-extern u8 g_jobstts_sound_queued_effect_id; /* main_sfx_e */
 
 #endif

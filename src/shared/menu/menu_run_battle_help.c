@@ -1,17 +1,20 @@
+#include "fft/battle_menu.h"
+#include "fft/battle_text.h"
+#include "fft/battle_unit.h"
+#include "fft/event_helpmenu.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
-#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
 /* Opens help for the running menu's pending request, or runs the bouncing
  * help cursor over the navigation table for that menu or the unit view. */
-void world_menu_run_battle_help(void) {
+void menu_run_battle_help(void) {
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
     help_navigation_record_t* navigation;
@@ -48,34 +51,35 @@ void world_menu_run_battle_help(void) {
         thread_exit_current();
     }
     mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, sizeof(g_text_saved_pointers));
-    setup_banner = &g_world_help_active_banner;
-    setup_unit_data = &g_world_help_active_unit_data;
-    setup_billboard = &g_world_help_billboard;
-    setup_cursor_tile = &g_world_help_menu_cursor_tile;
+    setup_banner = &g_menu_help_active_banner;
+    setup_unit_data = &g_menu_help_active_unit_data;
+    setup_billboard = &g_menu_help_billboard;
+    setup_cursor_tile = &g_menu_help_menu_cursor_tile;
     g_text_section_pointers[HELP_TEXT_SECTION_UNIT_STATUS]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
     g_text_section_pointers[HELP_TEXT_SECTION_MENU_COMMANDS]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_MENU_COMMANDS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_MENU_COMMANDS];
     g_text_section_pointers[HELP_TEXT_SECTION_TERRAIN]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_TERRAIN];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_TERRAIN];
     g_text_section_pointers[HELP_TEXT_SECTION_JOBS]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_JOBS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_JOBS];
     g_text_section_pointers[HELP_TEXT_SECTION_ITEMS]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_ITEMS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_ITEMS];
     g_text_section_pointers[HELP_TEXT_SECTION_ABILITIES]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_ABILITIES];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_ABILITIES];
     g_text_section_pointers[HELP_TEXT_SECTION_SKILLSETS]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_SKILLSETS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_SKILLSETS];
     g_text_section_pointers[HELP_TEXT_SECTION_STATUSES]
-        = g_world_help_data_base + g_world_help_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
     self = &g_threads[g_thread_current_id];
     menu_copy_billboard_data_out(setup_banner, setup_unit_data, setup_billboard, setup_cursor_tile);
-    if ((g_menu_selected_unit_stat_summary.team_kind != 0) || (g_world_unit_join_screen_active != 0)) {
-        g_world_help_require_navigation[2].destination[2] = 7;
-        g_world_help_require_navigation[7].destination[3] = 2;
+    /* This fixed lower-menu 16-bit slot can contain another overlay's data. */
+    if ((g_menu_selected_unit_stat_summary.team_kind != 0) || (g_menu_post_battle_unit_changes_active != 0)) {
+        g_menu_help_require_navigation[2].destination[2] = 7;
+        g_menu_help_require_navigation[7].destination[3] = 2;
     }
     help_thread_id = thread_find_first_running_menu_thread();
-    g_world_help_controller_state_ptr = script_get_controller_input_pointer(0);
+    g_menu_help_controller_state_ptr = script_get_controller_input_pointer(0);
     menu_index = 0;
     for (quad_index = 0; quad_index < 2; quad_index++) {
         menu_init_default_poly_ft4(&cursor_quads[quad_index]);
@@ -100,7 +104,7 @@ void world_menu_run_battle_help(void) {
         }
         if (frame != 9) {
             if (g_menu_help_active_text_id_tables == (u16* const*)missing_value) {
-                g_menu_help_active_text_id_tables = g_world_help_menu_text_id_tables;
+                g_menu_help_active_text_id_tables = g_menu_help_menu_text_id_tables;
             }
             request_kind = request->select_text_table;
             if (request_kind != 0x10) {
@@ -111,13 +115,13 @@ void world_menu_run_battle_help(void) {
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                     thread_start(help_thread_id - 1, text_run_dialog_thread_variant);
                     thread_set_parameters(help_thread_id - 1, 0x3B, help_id, 0);
-                    *g_world_help_controller_state_ptr = 0;
+                    *g_menu_help_controller_state_ptr = 0;
                     thread_wait_frames(1);
                     menu_close();
                 } else if (request_kind == 4) {
                     help_id = g_menu_skillsets[request->selected_index];
                     if (help_id == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
                         menu_close();
                     }
@@ -126,7 +130,7 @@ void world_menu_run_battle_help(void) {
                     thread_start(help_thread_id - 1, text_run_dialog_thread_variant);
                     thread_set_parameters(help_thread_id - 1, 0x3B, help_id, 0);
                 } else if (request_kind == 0) {
-                    *g_world_help_controller_state_ptr = 0;
+                    *g_menu_help_controller_state_ptr = 0;
                     thread_wait_frames(1);
                     menu_close();
                 } else if (request_kind == 5) {
@@ -142,7 +146,7 @@ void world_menu_run_battle_help(void) {
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
                     if (help_id == 0) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
                         menu_close();
                     }
@@ -155,7 +159,7 @@ void world_menu_run_battle_help(void) {
                     help_id = layout->text_ids[0][request->selected_index];
                     help_id &= 0x7FF;
                     if (help_id == 0) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
                         menu_close();
                     }
@@ -175,7 +179,7 @@ void world_menu_run_battle_help(void) {
                     }
                     help_id &= 0x7FF;
                     if (help_id == 0) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
                         menu_close();
                     }
@@ -209,28 +213,28 @@ void world_menu_run_battle_help(void) {
                     thread_set_parameters(help_thread_id - 1, 0x3B, help_id, 0);
                 } else {
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
-                    g_world_help_topic_text_ids = g_menu_help_active_text_id_tables[request_kind];
+                    g_menu_help_topic_text_ids = g_menu_help_active_text_id_tables[request_kind];
                     thread_start(help_thread_id - 1, text_run_dialog_thread_variant);
                     thread_set_parameters(
-                        help_thread_id - 1, 0x3B, g_world_help_topic_text_ids[request->selected_index], 0);
+                        help_thread_id - 1, 0x3B, g_menu_help_topic_text_ids[request->selected_index], 0);
                 }
                 /* Wait for the text thread in the preceding slot. */
                 frame = help_thread_id;
                 do {
                     thread_wait_frames(1);
                 } while (g_threads[frame - 1].is_running != 0);
-                *g_world_help_controller_state_ptr = 0;
+                *g_menu_help_controller_state_ptr = 0;
                 thread_wait_frames(1);
                 menu_close();
             }
         } else {
-            *g_world_help_controller_state_ptr = 0;
+            *g_menu_help_controller_state_ptr = 0;
             thread_wait_frames(1);
             menu_close();
         }
     }
     if (help_thread_id < 9) {
-        navigation = g_world_help_require_navigation;
+        navigation = g_menu_help_require_navigation;
         help_thread_id -= 1;
     } else {
         view_mode = g_menu_unit_view_mode;
@@ -238,21 +242,21 @@ void world_menu_run_battle_help(void) {
             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread_variant);
             thread_set_parameters(
-                THREAD_SCREEN_SLOT_MESSAGE, 0x3B, g_world_help_menu_cursor_tile.surface_type + 0x5800, 0);
+                THREAD_SCREEN_SLOT_MESSAGE, 0x3B, g_menu_help_menu_cursor_tile.surface_type + 0x5800, 0);
             g_threads[THREAD_SCREEN_SLOT_MESSAGE].task_words[3] = -0x20;
             thread_wait_until_inactive(THREAD_SCREEN_SLOT_MESSAGE);
-            *g_world_help_controller_state_ptr = 0;
+            *g_menu_help_controller_state_ptr = 0;
             thread_wait_frames(1);
             menu_close();
         } else if (view_mode == UNIT_VIEW_MODE_HOVERED_UNIT) {
             /* Unreachable: the arm above already takes modes 1 and 2. */
-            navigation = g_world_help_terrain_navigation;
+            navigation = g_menu_help_terrain_navigation;
             help_thread_id = 2;
         } else if (view_mode == UNIT_VIEW_MODE_UNIT_SUMMARY) {
-            navigation = g_world_help_unit_box_navigation;
+            navigation = g_menu_help_unit_box_navigation;
             help_thread_id = 2;
         } else if (view_mode == UNIT_VIEW_MODE_RIGHT_UNIT) {
-            navigation = g_world_help_attack_preview_navigation;
+            navigation = g_menu_help_attack_preview_navigation;
             help_thread_id = 2;
         }
     }
@@ -276,7 +280,7 @@ void world_menu_run_battle_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
-            input = *g_world_help_controller_state_ptr;
+            input = *g_menu_help_controller_state_ptr;
             if (input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
@@ -284,21 +288,21 @@ void world_menu_run_battle_help(void) {
             if (input & PSX_PAD_CIRCLE) {
                 if (node->value != 0) {
                     help_id = node->help_base + *node->value;
-                    if (node->help_base == -0x6800 && g_world_help_billboard.state.generic_monster != 0) {
+                    if (node->help_base == -0x6800 && g_menu_help_billboard.state.generic_monster != 0) {
                         help_id = *node->value | 0x7800;
                         if ((*node->value & 0x7FF) == 0x7FF || (*node->value & 0x7FF) == 0) {
-                            *g_world_help_controller_state_ptr = 0;
+                            *g_menu_help_controller_state_ptr = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                             thread_start(help_thread_id, text_run_dialog_thread_variant);
                             thread_set_parameters(help_thread_id, 0x3B, help_id, 0);
                         }
                     } else if (node->help_base == 0x7800 && (u32)((u16)*node->value - 1) >= 0x301) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                     } else if (node->help_base == 0x6800 && (u32)((u16)*node->value - 1) >= 0x101) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                     } else if (node->help_base == -0x6800 && (u32)((u16)*node->value - 1) >= 0x101) {
-                        *g_world_help_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                     } else {
                         g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                         thread_start(help_thread_id, text_run_dialog_thread_variant);
@@ -388,7 +392,7 @@ void world_menu_run_battle_help(void) {
         thread_wait_frames(1);
         frame++;
     }
-    *g_world_help_controller_state_ptr = 0;
+    *g_menu_help_controller_state_ptr = 0;
     thread_wait_frames(1);
     menu_close();
 }

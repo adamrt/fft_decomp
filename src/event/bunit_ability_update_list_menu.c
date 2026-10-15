@@ -54,8 +54,8 @@ s32 bunit_ability_update_list_menu(void) {
             g_menu_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         g_bunit_ability_list_ready = 1;
     }
-    if (g_bunit_menu_list_entry_count == 0
-        || ((entry = g_menu_ability_entries[g_bunit_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
+    if (g_menu_list_entry_count == 0
+        || ((entry = g_menu_ability_entries[g_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
         g_bunit_text_selection_id = -1;
     } else {
         g_bunit_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
@@ -73,17 +73,17 @@ s32 bunit_ability_update_list_menu(void) {
     category
         = menu_update_horizontal_selection_and_mark_change(4, 0, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH);
     if (category != g_menu_ability_category) {
-        menu_set_selection_record(g_menu_ability_category + 10, g_bunit_menu_list_selected_index,
-            g_menu_scroll_base_index, g_menu_ability_entries);
+        menu_set_selection_record(
+            g_menu_ability_category + 10, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         ability_build_list_variant(
             g_unit_selected_index, g_bunit_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
         menu_get_selection_record(g_menu_ability_category + 10, &selected, &scroll, g_menu_ability_entries);
-        bunit_menu_init_scrollable_list(
+        menu_init_scrollable_list(
             g_menu_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         bunit_gfx_set_transition_frame(10);
     }
-    bunit_menu_dispatch_with_override(
+    menu_run_script_with_palette_mode(
         &g_bunit_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     rect.x = 0x26;
     rect.y = 0x2D;

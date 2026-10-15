@@ -66,16 +66,16 @@ s32 equip_menu_update_equipment(void) {
     }
     menu_run_script_with_palette_mode(&g_equip_equipment_render_commands, input, override);
     equip_menu_draw_equipment_slot_marker(0, g_menu_selected_slot, g_menu_input_lock_mode);
-    if (g_equip_menu_list_entry_count != 0) {
-        item_id = g_item_list_entries[g_equip_menu_selected_list_index];
+    if (g_menu_list_entry_count != 0) {
+        item_id = g_item_list_entries[g_menu_list_selected_index];
         if (item_id < ITEM_ID_THROWABLE_FIRST) {
             menu_draw_weapon_hand_icons(item_id);
         }
-        if (g_item_list_entries[g_equip_menu_selected_list_index] >= ITEM_ID_HEADGEAR_FIRST
-            && g_item_list_entries[g_equip_menu_selected_list_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
+        if (g_item_list_entries[g_menu_list_selected_index] >= ITEM_ID_HEADGEAR_FIRST
+            && g_item_list_entries[g_menu_list_selected_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
             menu_run_script_with_palette_mode(&g_equip_armor_bonus_render_commands, 0, 0);
         }
-        menu_draw_item_status_list(g_item_list_entries[g_equip_menu_selected_list_index]);
+        menu_draw_item_status_list(g_item_list_entries[g_menu_list_selected_index]);
     }
     return 1;
 }

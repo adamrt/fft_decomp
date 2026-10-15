@@ -42,10 +42,10 @@ menu_instruction_t* bunit_menu_script_draw_formatted_number(menu_instruction_t* 
         y = command->number.y;
     } else {
         row = g_menu_scroll_base_index + g_menu_list_row_index;
-        y = g_bunit_menu_list_row_height * g_menu_list_row_index + command->number.y - g_menu_list_scroll_offset;
+        y = g_menu_list_row_height * g_menu_list_row_index + command->number.y - g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             row--;
-            y -= g_bunit_menu_list_row_height;
+            y -= g_menu_list_row_height;
         }
     }
     if (getter != 0) {

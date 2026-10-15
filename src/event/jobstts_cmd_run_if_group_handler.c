@@ -13,7 +13,7 @@ menu_instruction_t* jobstts_cmd_run_if_group_handler(menu_instruction_t* data) {
     if (g_jobstts_menu_list_row_rendering == 0) {
         index = data->conditional.value;
     } else {
-        index = g_jobstts_menu_scroll_base_index + g_jobstts_menu_list_row_index;
+        index = g_menu_scroll_base_index + g_jobstts_menu_list_row_index;
         if (g_jobstts_menu_list_scroll_offset_y < 0) {
             index -= 1;
         }

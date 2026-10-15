@@ -9,9 +9,9 @@ void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags) {
     g_menu_gfx_semitransparency = 0;
     g_menu_cmd_stream_input = flags;
     g_gfx_otag_index_locked = 0;
-    if (instruction->header.opcode != BUNIT_CMD_END) {
+    if (instruction->header.opcode != VARIANT_MENU_CMD_END_OPCODE) {
         do {
             instruction = g_menu_cmd_handlers[instruction->header.opcode](instruction);
-        } while (instruction->header.opcode != BUNIT_CMD_END);
+        } while (instruction->header.opcode != VARIANT_MENU_CMD_END_OPCODE);
     }
 }

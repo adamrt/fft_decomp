@@ -9,8 +9,6 @@
 
 /* glyph rendering */
 
-void menu_text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
-
 s32 battle_text_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
 void battle_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 

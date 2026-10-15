@@ -15,10 +15,10 @@ menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* 
     if (g_menu_list_row_mode == 0) {
         y = cmd->tile.y;
     } else {
-        base = g_equip_menu_list_row_height * g_menu_list_row_index + cmd->tile.y;
+        base = g_menu_list_row_height * g_menu_list_row_index + cmd->tile.y;
         y = base + g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
-            y = y - g_equip_menu_list_row_height;
+            y = y - g_menu_list_row_height;
         }
     }
     rect.x = cmd->tile.x;

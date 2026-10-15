@@ -16,7 +16,7 @@ menu_instruction_t* jobstts_cmd_run_if_else_group_handler(menu_instruction_t* da
     if (g_jobstts_menu_list_row_rendering == 0) {
         arg = data->if_else.value;
     } else {
-        arg = g_jobstts_menu_scroll_base_index + g_jobstts_menu_list_row_index;
+        arg = g_menu_scroll_base_index + g_jobstts_menu_list_row_index;
         if (g_jobstts_menu_list_scroll_offset_y < 0) {
             arg--;
         }

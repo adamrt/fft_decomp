@@ -739,7 +739,9 @@ func renameConfigFunction(config *projectConfig, oldName, newName string, unify 
 			}
 		}
 		for _, symbol := range append(append([]symbolSpec(nil), m.Data...), m.Imports...) {
-			if symbol.Name == newName {
+			// A module may record another module's function as a data row (an
+			// overlay entry it calls by address); unifying keeps that name.
+			if symbol.Name == newName && (!unify || m.function(oldName) != nil) {
 				return "", "", fmt.Errorf("%s already names a symbol in %s", newName, m.ID)
 			}
 		}

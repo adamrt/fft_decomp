@@ -56,19 +56,19 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
         g_jobstts_active_page = jobstts_menu_update_job_list();
         if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             result = 0;
-            g_jobstts_sound_queued_effect_id = MAIN_SFX_CANCEL;
+            g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_jobstts_initialized = 0;
         }
     } else if (g_jobstts_active_page == MENU_JOB_LIST_STEP_ABILITIES) {
         g_jobstts_active_page = jobstts_ability_update_list_menu();
     } else {
         result = 0;
-        g_jobstts_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         g_jobstts_initialized = 0;
     }
-    if (g_jobstts_sound_queued_effect_id != MAIN_SFX_NONE) {
-        main_sound_play_sfx(g_jobstts_sound_queued_effect_id);
-        g_jobstts_sound_queued_effect_id = MAIN_SFX_NONE;
+    if (g_sound_queued_effect_id != MAIN_SFX_NONE) {
+        main_sound_play_sfx(g_sound_queued_effect_id);
+        g_sound_queued_effect_id = MAIN_SFX_NONE;
     }
     return result;
 }

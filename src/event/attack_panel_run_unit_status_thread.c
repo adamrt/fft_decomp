@@ -109,7 +109,7 @@ void attack_panel_run_unit_status_thread(void) {
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
-    if (g_battle_post_battle_unit_changes_active == 0) {
+    if (g_menu_post_battle_unit_changes_active == 0) {
         mem_copy_bytes_nonempty(
             g_attack_panel_editor_mode_cell, &g_attack_panel_editor_mode_cells[state->team_kind], 0xC);
     } else {
@@ -153,7 +153,7 @@ void attack_panel_run_unit_status_thread(void) {
         if (state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
-        if (g_battle_post_battle_unit_changes_active == 0) {
+        if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(
                 g_attack_panel_editor_mode_cell, &g_attack_panel_editor_mode_cells[state->team_kind], 0xC);
         } else {
@@ -372,7 +372,7 @@ void attack_panel_run_unit_status_thread(void) {
             value_pixels_b = value_pixels + 0x50;
             text_draw_large_number_glyphs_variant(unit_info->faith, 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], value_pixels_b);
-            if (g_battle_post_battle_unit_changes_active == 0) {
+            if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 value_pixels_c = value_pixels + 0xA0;
                 text_draw_large_number_glyphs_variant(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);

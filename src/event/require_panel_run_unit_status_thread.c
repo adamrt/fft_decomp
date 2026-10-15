@@ -101,7 +101,7 @@ void require_panel_run_unit_status_thread(void) {
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
-    if (g_battle_post_battle_unit_changes_active == 0) {
+    if (g_menu_post_battle_unit_changes_active == 0) {
         mem_copy_bytes_nonempty(
             g_require_panel_editor_mode_cell, &g_require_panel_editor_mode_cells[state->team_kind], 0xC);
     } else {
@@ -146,7 +146,7 @@ void require_panel_run_unit_status_thread(void) {
         if (state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
-        if (g_battle_post_battle_unit_changes_active == 0) {
+        if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(
                 g_require_panel_editor_mode_cell, &g_require_panel_editor_mode_cells[state->team_kind], 0xC);
         } else {
@@ -333,7 +333,7 @@ void require_panel_run_unit_status_thread(void) {
             small_text_image_2 = small_text_image + 0x50;
             text_draw_large_number_glyphs_variant(unit_data->faith, 0x202, small_text_image_2, text_position);
             LoadImage(&rects[4], (u32*)small_text_image_2);
-            if (g_battle_post_battle_unit_changes_active == 0) {
+            if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 small_text_image_3 = small_text_image + 0xA0;
                 text_draw_large_number_glyphs_variant(

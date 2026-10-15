@@ -10,7 +10,7 @@ menu_instruction_t* jobstts_cmd_draw_border_tiles_with_transition_clip(menu_inst
         s32 scale;
 
         if (g_jobstts_gfx_transition_frame < 3) {
-            g_jobstts_cmd_stream_input = 0;
+            g_menu_cmd_stream_input = 0;
         }
         scale = g_jobstts_gfx_transition_height_percent[g_jobstts_gfx_transition_frame];
         rect.w = 0x100;

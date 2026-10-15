@@ -51,12 +51,39 @@ func (p project) unifySymbolsCommand(args []string) error {
 			}
 		}
 	}
+	known := func(name string) bool {
+		for _, m := range config.Modules {
+			for index := range m.Functions {
+				if m.Functions[index].Name == name || m.Functions[index].sourceSymbol() == name {
+					return true
+				}
+			}
+			for _, list := range [][]symbolSpec{m.Data, m.Imports} {
+				for _, symbol := range list {
+					if symbol.Name == name {
+						return true
+					}
+				}
+			}
+			for _, override := range m.Overrides {
+				if override.Name == name {
+					return true
+				}
+			}
+		}
+		return false
+	}
 	renamed := 0
 	for _, old := range olds {
 		if err := validateRenameIdentifier(old); err != nil {
 			return err
 		}
 		if old == *newName {
+			continue
+		}
+		// A rerun after a partial unify meets names already renamed.
+		if !known(old) && known(*newName) {
+			fmt.Printf("symbols: %s is already gone; %s exists\n", old, *newName)
 			continue
 		}
 		if _, err := p.renameSymbolsUnify([]symbolRename{{old, *newName}}, function, *dryRun, true); err != nil {

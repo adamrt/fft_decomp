@@ -51,8 +51,8 @@ s32 jobstts_ability_update_list_menu(void) {
         g_jobstts_ability_list_initialized = 1;
     }
 
-    entry = g_menu_ability_entries[g_jobstts_menu_list_selected_index];
-    if (g_jobstts_menu_list_entry_count == 0) {
+    entry = g_menu_ability_entries[g_menu_list_selected_index];
+    if (g_menu_list_entry_count == 0) {
         g_jobstts_text_selection_id = -1;
     } else if (entry & ABILITY_LIST_ENTRY_HIDE_DETAILS) {
         g_jobstts_text_selection_id = -1;
@@ -63,26 +63,26 @@ s32 jobstts_ability_update_list_menu(void) {
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CROSS) {
         g_jobstts_ability_list_initialized = 0;
-        g_jobstts_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
     if (input & PSX_PAD_CIRCLE) {
         g_jobstts_ability_list_initialized = 0;
-        g_jobstts_sound_queued_effect_id = MAIN_SFX_CANCEL;
+        g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
 
     category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
     if (category != g_menu_ability_category) {
-        menu_set_selection_record(g_menu_ability_category, g_jobstts_menu_list_selected_index,
-            g_jobstts_menu_scroll_base_index, g_menu_ability_entries);
+        menu_set_selection_record(
+            g_menu_ability_category, g_menu_list_selected_index, g_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         jobstts_ability_build_list(0, g_jobstts_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);
         menu_get_selection_record(g_menu_ability_category, &selected_index, &scroll_index, g_menu_ability_entries);
-        jobstts_menu_init_scrollable_list(
+        menu_init_scrollable_list(
             g_menu_ability_entries, selected_index, scroll_index, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         jobstts_gfx_set_transition_frame(0xa);
-        g_jobstts_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
+        g_sound_queued_effect_id = MAIN_SFX_PAGE_SWITCH;
     }
     jobstts_cmd_run_stream_with_mode(
         &g_jobstts_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);

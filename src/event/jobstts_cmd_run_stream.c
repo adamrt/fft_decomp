@@ -10,7 +10,7 @@ void jobstts_cmd_run_stream(menu_instruction_t* instruction, s32 flags) {
     g_jobstts_gfx_otag_index_locked = 0;
     g_menu_gfx_otag_index = 0;
     g_jobstts_gfx_semitransparency = 0;
-    g_jobstts_cmd_stream_input = flags;
+    g_menu_cmd_stream_input = flags;
     while (instruction->header.opcode != JOBSTTS_CMD_END) {
         instruction = g_jobstts_cmd_handlers[instruction->header.opcode](instruction);
     }

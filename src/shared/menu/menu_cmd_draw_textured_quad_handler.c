@@ -12,9 +12,9 @@ menu_instruction_t* menu_cmd_draw_textured_quad_handler(menu_instruction_t* cmd)
     if (g_menu_list_row_mode == 0) {
         y = cmd->sprite.sprite.y;
     } else {
-        y = g_equip_menu_list_row_height * g_menu_list_row_index + cmd->sprite.sprite.y - g_menu_list_scroll_offset;
+        y = g_menu_list_row_height * g_menu_list_row_index + cmd->sprite.sprite.y - g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
-            y -= g_equip_menu_list_row_height;
+            y -= g_menu_list_row_height;
         }
     }
 

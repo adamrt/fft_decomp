@@ -306,7 +306,7 @@ load: 0x801bf000
 source_dir: src/event
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 14}
+defines: {VARIANT_MENU_CMD_END_OPCODE: 28, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_TEXT_ID_ROW_FORMAT: 231}
 
 functions:
   - {addr: 0x801bf204, size: 464, name: menu_build_scaled_draw_area_packets, hash: 6d2b5d586ec77661, source: src/shared/menu/menu_build_scaled_draw_area_packets.c}
@@ -393,9 +393,9 @@ functions:
   - {addr: 0x801c8408, size: 52, name: menu_set_vsync_mode_and_event_speed, hash: 33b6a2c8c1908b56, source: src/shared/menu/menu_set_vsync_mode_and_event_speed.c}
   - {addr: 0x801c843c, size: 32, name: menu_get_event_speed, hash: d1c5682dc9e305b3, source: src/shared/menu/menu_get_event_speed.c}
   - {addr: 0x801c845c, size: 212, name: bunit_menu_init_scrollable_list_core, hash: c2663ee9beede6f5}
-  - {addr: 0x801c8530, size: 52, name: bunit_menu_init_scrollable_list, hash: 2e929bd3e1d1a802}
+  - {addr: 0x801c8530, size: 52, name: menu_init_scrollable_list, hash: 2e929bd3e1d1a802, source: src/shared/menu/menu_init_scrollable_list.c}
   - {addr: 0x801c8564, size: 148, name: menu_cmd_run_stream, hash: 596b0013f79e045b, source: src/shared/menu/menu_cmd_run_stream.c}
-  - {addr: 0x801c85f8, size: 80, name: bunit_menu_dispatch_with_override, hash: 3eea69c59c091978}
+  - {addr: 0x801c85f8, size: 80, name: menu_run_script_with_palette_mode, hash: 3eea69c59c091978, source: src/shared/menu/menu_run_script_with_palette_mode.c}
   - {addr: 0x801c8648, size: 280, name: menu_cmd_run_if_group_handler, hash: 8839eaaea9e0dd88, source: src/shared/menu/menu_cmd_run_if_group_handler.c}
   - {addr: 0x801c8760, size: 396, name: menu_cmd_run_if_else_group_handler, hash: 874d29e34d6a2029, source: src/shared/menu/menu_cmd_run_if_else_group_handler.c}
   - {addr: 0x801c88ec, size: 256, name: menu_cmd_draw_textured_quad_handler, hash: c024a5e6a5fdac7d, source: src/shared/menu/menu_cmd_draw_textured_quad_handler.c}
@@ -415,9 +415,9 @@ functions:
   - {addr: 0x801c9cf4, size: 652, name: bunit_menu_update_and_draw_animated_cursor, hash: 48df7a46e058abc1, source: src/shared/menu/bunit_menu_update_and_draw_animated_cursor.c}
   - {addr: 0x801c9f80, size: 864, name: bunit_menu_update_and_draw_bouncing_cursor, hash: 8fec6593004c6ff0}
   - {addr: 0x801ca2e0, size: 108, name: menu_cmd_skip_group, hash: a7fc8159f10402de, source: src/shared/menu/menu_cmd_skip_group.c}
-  - {addr: 0x801ca34c, size: 672, name: bunit_menu_draw_scrollable_list, hash: c454dc9d46c8694d}
-  - {addr: 0x801ca5ec, size: 48, name: bunit_menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d}
-  - {addr: 0x801ca61c, size: 52, name: bunit_menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d}
+  - {addr: 0x801ca34c, size: 672, name: menu_draw_scrollable_list, hash: c454dc9d46c8694d, source: src/shared/menu/menu_draw_scrollable_list.c}
+  - {addr: 0x801ca5ec, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: b8eb15fde9cb581d, source: src/shared/menu/menu_init_and_draw_scrollable_list_simple.c}
+  - {addr: 0x801ca61c, size: 52, name: menu_init_and_draw_scrollable_list, hash: 35dc1f5825a6e10d, source: src/shared/menu/menu_init_and_draw_scrollable_list.c}
   - {addr: 0x801ca650, size: 2500, name: bunit_cmd_run_scrollable_list_handler, hash: 358544f0b74bb783}
   - {addr: 0x801cb014, size: 52, name: bunit_gfx_set_draw_color, hash: febb234714c08dd5}
   - {addr: 0x801cb048, size: 16, name: bunit_gfx_set_otag_index, hash: b8570cd4076e6ca3}
@@ -429,7 +429,7 @@ functions:
   - {addr: 0x801cb278, size: 16, name: bunit_gfx_get_transition_frame, hash: 198bb5d80e6a8297}
   - {addr: 0x801cb288, size: 56, name: menu_cmd_advance_window_scale_step_handler, hash: 02b5eb90d2b04757, source: src/shared/menu/menu_cmd_advance_window_scale_step_handler.c}
   - {addr: 0x801cb2c0, size: 16, name: menu_gfx_get_draw_color, hash: cd5c665fda37b57c, source: src/shared/menu/menu_gfx_get_draw_color.c}
-  - {addr: 0x801cb2d0, size: 320, name: bunit_menu_scroll_list_by_page, hash: 267e3c7bf3437203}
+  - {addr: 0x801cb2d0, size: 320, name: menu_scroll_list_by_page, hash: 267e3c7bf3437203, source: src/shared/menu/menu_scroll_list_by_page.c}
   - {addr: 0x801cb410, size: 284, name: bunit_input_read_page_scroll_direction, hash: c9c3ae74b59d1149}
   - {addr: 0x801cb52c, size: 308, name: menu_text_render_glyph_to_4bpp_image_variant, hash: 19147e4fe2464c4d, source: src/shared/menu/menu_text_render_glyph_to_4bpp_image_variant.c}
   - {addr: 0x801cb660, size: 92, name: menu_text_find_entry_by_index, hash: 01a8767dd4ceba70, source: src/shared/menu/menu_text_find_entry_by_index.c}
@@ -732,22 +732,22 @@ data:
   - {addr: 0x801ec8b0, name: g_menu_text_color}
   - {addr: 0x801ec8b4, name: g_menu_gfx_otag_index}
   - {addr: 0x801ec8b8, name: g_menu_cmd_stream_input}
-  - {addr: 0x801ec8bc, name: g_bunit_menu_list_visible_rows}
-  - {addr: 0x801ec8c0, name: g_bunit_menu_list_row_height}
-  - {addr: 0x801ec8c4, name: g_bunit_menu_list_row_group_count}
+  - {addr: 0x801ec8bc, name: g_menu_list_visible_rows}
+  - {addr: 0x801ec8c0, name: g_menu_list_row_height}
+  - {addr: 0x801ec8c4, name: g_menu_list_row_group_count}
   - {addr: 0x801ec8c8, name: g_menu_list_row_mode}
   - {addr: 0x801ec8cc, name: g_menu_gfx_semitransparency}
   - {addr: 0x801ec8d0, name: g_menu_window_right_x}
-  - {addr: 0x801ec8d4, name: g_bunit_menu_list_redraw_pending}
-  - {addr: 0x801ec8d8, name: g_bunit_menu_list_entries}
-  - {addr: 0x801ec8dc, name: g_bunit_menu_list_text_table}
+  - {addr: 0x801ec8d4, name: g_menu_list_redraw_pending}
+  - {addr: 0x801ec8d8, name: g_menu_list_entries}
+  - {addr: 0x801ec8dc, name: g_menu_list_text_table}
   - {addr: 0x801ec8e0, name: g_menu_gfx_texture_page}
   - {addr: 0x801ec8e4, name: g_menu_gfx_clut_id}
-  - {addr: 0x801ec8e8, name: g_bunit_menu_list_vram_width}
-  - {addr: 0x801ec8ec, name: g_bunit_menu_list_glyph_width}
-  - {addr: 0x801ec8f0, name: g_bunit_menu_list_text_columns}
+  - {addr: 0x801ec8e8, name: g_menu_list_vram_width}
+  - {addr: 0x801ec8ec, name: g_menu_list_glyph_width}
+  - {addr: 0x801ec8f0, name: g_menu_list_text_columns}
   - {addr: 0x801ec8f4, name: g_menu_use_alternate_palette}
-  - {addr: 0x801ec8f8, name: g_bunit_menu_list_scroll_direction}
+  - {addr: 0x801ec8f8, name: g_menu_list_scroll_direction}
   - {addr: 0x801ec8fc, name: g_gfx_otag_index_locked}
   - {addr: 0x801ec900, name: g_bunit_help_nodes}
   - {addr: 0x801ec900, name: g_bunit_help_nodes_reload}
@@ -809,7 +809,7 @@ data:
   - {addr: 0x801eca8c, name: g_bunit_gfx_sprite_8_capacity}
   - {addr: 0x801eca90, name: g_menu_gfx_drawenv_y}
   - {addr: 0x801eca94, name: g_menu_alternate_number_clut}
-  - {addr: 0x801eca98, name: g_bunit_menu_list_selected_index}
+  - {addr: 0x801eca98, name: g_menu_list_selected_index}
   - {addr: 0x801eca9c, name: g_bunit_gfx_sprite_16_capacity}
   - {addr: 0x801ecaa0, name: g_gfx_otag_count}
   - {addr: 0x801ecaa4, name: g_bunit_gfx_draw_area_capacity}
@@ -844,7 +844,7 @@ data:
   - {addr: 0x801ecb68, name: g_bunit_help_screen_id}
   - {addr: 0x801ecb6c, name: g_bunit_text_selection_id}
   - {addr: 0x801ecb70, name: g_menu_row_callbacks}
-  - {addr: 0x801ecbb0, name: g_bunit_menu_list_entry_count}
+  - {addr: 0x801ecbb0, name: g_menu_list_entry_count}
 
 imports:
   - {addr: 0x800222fc, name: memset}
@@ -853,7 +853,8 @@ overrides:
   - {function: gfx_build_portrait_transition_primitives, name: attack_gfx_build_portrait_poly_ft4, addr: 0x801bf434}
   - {function: gfx_build_portrait_transition_primitives, name: g_gfx_portrait_origin, addr: 0x801cea5c}
   - {function: gfx_build_portrait_transition_primitives, name: g_gfx_portrait_transition_offsets, addr: 0x801cecfc}
-  - {function: menu_cmd_draw_textured_quad_handler, name: g_equip_menu_list_row_height, addr: 0x801ec8c0}
+  - {function: menu_init_and_draw_scrollable_list_simple, name: menu_init_scrollable_list_core, addr: 0x801c845c}
+  - {function: menu_init_scrollable_list, name: menu_init_scrollable_list_core, addr: 0x801c845c}
   - {function: menu_text_render_glyph_to_4bpp_image_variant, name: bits_read_primary, addr: 0x801cbfe0}
   - {function: menu_text_render_glyph_to_4bpp_image_variant, name: card_bits_init_primary_reader, addr: 0x801cbfc4}
 ---
@@ -866,6 +867,7 @@ load: 0x801bf000
 source_dir: src/event
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 functions:
   - {addr: 0x801bf170, size: 56, name: card_save_clear_selection_indices, hash: 0309a94d3656604d, profile: gcc-2.6.3_O0_aspsx-2.34}
@@ -938,7 +940,7 @@ functions:
   - {addr: 0x801c6f50, size: 224, name: menu_text_start_or_poll_thread, hash: 77aa21d89789557e, source: src/shared/menu/menu_text_start_or_poll_thread.c}
   - {addr: 0x801c7030, size: 40, name: menu_request_thread_stop, hash: ea52b0a734b83ec7, source: src/shared/menu/menu_request_thread_stop.c}
   - {addr: 0x801c7058, size: 84, name: text_count_encoded_glyphs, hash: 913de49b8f13d563, source: src/shared/text/text_count_encoded_glyphs.c}
-  - {addr: 0x801c70ac, size: 264, name: menu_text_render_id_rows_to_vram, hash: b0397e2667e01217, source: src/shared/menu/menu_text_render_id_rows_to_vram.c}
+  - {addr: 0x801c70ac, size: 264, name: text_render_id_rows_to_vram, hash: b0397e2667e01217, source: src/shared/text/text_render_id_rows_to_vram.c}
   - {addr: 0x801c71b4, size: 40, name: menu_stop_managed_thread, hash: 966ee997927b0d37, source: src/shared/menu/menu_stop_managed_thread.c}
   - {addr: 0x801c71dc, size: 92, name: menu_stop_thread_and_wait, hash: e30c6fb66d27c973, source: src/shared/menu/menu_stop_thread_and_wait.c}
   - {addr: 0x801c7238, size: 156, name: menu_start_managed_thread, hash: c61eda6b69ac7d32, source: src/shared/menu/menu_start_managed_thread.c}
@@ -1302,7 +1304,7 @@ load: 0x801bf000
 source_dir: src/event
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 5}
+defines: {VARIANT_MENU_CMD_END_OPCODE: 25, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 functions:
   - {addr: 0x801bf004, size: 468, name: equip_menu_load_images_and_reset_lists, hash: ea3dbcc34294a976}
@@ -1409,7 +1411,7 @@ functions:
   - {addr: 0x801c8dac, size: 120, name: menu_text_start_thread_if_idle, hash: 87c0e98d46e6c909, source: src/shared/menu/menu_text_start_thread_if_idle.c}
   - {addr: 0x801c8e24, size: 208, name: text_concatenate_entries, hash: 3d0d184be7c8034b, source: src/shared/text/text_concatenate_entries.c}
   - {addr: 0x801c8ef4, size: 40, name: menu_request_thread_stop, hash: ea52b0a734b83ec7, source: src/shared/menu/menu_request_thread_stop.c}
-  - {addr: 0x801c8f1c, size: 264, name: menu_text_render_id_rows_to_vram, hash: c878461238dbc9ef, source: src/shared/menu/menu_text_render_id_rows_to_vram.c}
+  - {addr: 0x801c8f1c, size: 264, name: text_render_id_rows_to_vram, hash: c878461238dbc9ef, source: src/shared/text/text_render_id_rows_to_vram.c}
   - {addr: 0x801c9024, size: 40, name: menu_stop_managed_thread, hash: be4dbfe6e8168a66, source: src/shared/menu/menu_stop_managed_thread.c}
   - {addr: 0x801c904c, size: 156, name: menu_start_managed_thread, hash: 8a302f302bc0aafe, source: src/shared/menu/menu_start_managed_thread.c}
   - {addr: 0x801c90e8, size: 124, name: menu_text_start_help_thread, hash: 214e1e5f54bfe73c, source: src/shared/menu/menu_text_start_help_thread.c}
@@ -1437,9 +1439,9 @@ functions:
   - {addr: 0x801ca834, size: 48, name: gfx_store_image_and_wait, hash: 42b445a1713fca16, source: src/shared/gfx/gfx_store_image_and_wait.c}
   - {addr: 0x801ca864, size: 60, name: gfx_move_image_and_wait, hash: 2dee44c691484772, source: src/shared/gfx/gfx_move_image_and_wait.c}
   - {addr: 0x801ca8a0, size: 204, name: equip_menu_init_scrollable_list_core, hash: 4741aa86b1c1513e}
-  - {addr: 0x801ca96c, size: 52, name: equip_menu_init_scrollable_list, hash: 6a3f45c6b9c7fd8c}
-  - {addr: 0x801ca9a0, size: 52, name: equip_menu_init_and_draw_scrollable_list, hash: 503e07ba5c988426}
-  - {addr: 0x801ca9d4, size: 148, name: equip_cmd_run_stream, hash: 796e6e240ffcc397}
+  - {addr: 0x801ca96c, size: 52, name: menu_init_scrollable_list, hash: 6a3f45c6b9c7fd8c, source: src/shared/menu/menu_init_scrollable_list.c}
+  - {addr: 0x801ca9a0, size: 52, name: menu_init_and_draw_scrollable_list, hash: 503e07ba5c988426, source: src/shared/menu/menu_init_and_draw_scrollable_list.c}
+  - {addr: 0x801ca9d4, size: 148, name: menu_cmd_run_stream, hash: 796e6e240ffcc397, source: src/shared/menu/menu_cmd_run_stream.c}
   - {addr: 0x801caa68, size: 80, name: menu_run_script_with_palette_mode, hash: d3c4df2e5ae8c513, source: src/shared/menu/menu_run_script_with_palette_mode.c}
   - {addr: 0x801caab8, size: 280, name: menu_cmd_run_if_group_handler, hash: dc63cdd97deb4ab1, source: src/shared/menu/menu_cmd_run_if_group_handler.c}
   - {addr: 0x801cabd0, size: 396, name: menu_cmd_run_if_else_group_handler, hash: 41490b9b5d7a75e9, source: src/shared/menu/menu_cmd_run_if_else_group_handler.c}
@@ -1461,8 +1463,8 @@ functions:
   - {addr: 0x801cc17c, size: 428, name: equip_cmd_draw_right_aligned_number_handler, hash: 325db0fd2794a02d}
   - {addr: 0x801cc328, size: 660, name: menu_update_and_draw_animated_cursor, hash: 3938e60d49f17206, source: src/shared/menu/menu_update_and_draw_animated_cursor.c}
   - {addr: 0x801cc5bc, size: 108, name: menu_cmd_skip_group, hash: e3dba406e3887731, source: src/shared/menu/menu_cmd_skip_group.c}
-  - {addr: 0x801cc628, size: 672, name: equip_menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef}
-  - {addr: 0x801cc8c8, size: 48, name: equip_menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9}
+  - {addr: 0x801cc628, size: 672, name: menu_draw_scrollable_list, hash: b2d0e76db3f4d7ef, source: src/shared/menu/menu_draw_scrollable_list.c}
+  - {addr: 0x801cc8c8, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 822692f126a2bbf9, source: src/shared/menu/menu_init_and_draw_scrollable_list_simple.c}
   - {addr: 0x801cc8f8, size: 2492, name: equip_cmd_draw_scrollable_list_body_handler, hash: 94ee93a645f6dd65}
   - {addr: 0x801cd2b4, size: 44, name: gfx_set_draw_color, hash: 17666895092d599e, source: src/shared/gfx/gfx_set_draw_color.c}
   - {addr: 0x801cd2e0, size: 16, name: equip_gfx_set_otag_index, hash: bb1416428e2ecf6d}
@@ -1474,7 +1476,7 @@ functions:
   - {addr: 0x801cd510, size: 16, name: equip_gfx_get_transition_frame, hash: 9b3bf67680c26976}
   - {addr: 0x801cd520, size: 56, name: menu_cmd_advance_window_scale_step_handler, hash: 7d8e1868250a374c, source: src/shared/menu/menu_cmd_advance_window_scale_step_handler.c}
   - {addr: 0x801cd558, size: 16, name: menu_gfx_get_draw_color, hash: 428cf158b493c273, source: src/shared/menu/menu_gfx_get_draw_color.c}
-  - {addr: 0x801cd568, size: 320, name: equip_menu_scroll_list_by_page, hash: "8964502444949709"}
+  - {addr: 0x801cd568, size: 320, name: menu_scroll_list_by_page, hash: "8964502444949709", source: src/shared/menu/menu_scroll_list_by_page.c}
   - {addr: 0x801cd6a8, size: 284, name: equip_input_read_page_scroll_direction, hash: 2b43d6db87557730}
   - {addr: 0x801cd7c4, size: 308, name: equip_gfx_swap_context_and_clear_otag, hash: b80d2604b85f4811}
   - {addr: 0x801cd8f8, size: 392, name: equip_gfx_init_primitive_buffers, hash: 90b842a4cb363e79}
@@ -1705,23 +1707,23 @@ data:
   - {addr: 0x801e8ff4, name: g_equip_menu_list_scroll_progress}
   - {addr: 0x801e8ff8, name: g_menu_text_color}
   - {addr: 0x801e8ffc, name: g_menu_gfx_otag_index}
-  - {addr: 0x801e9000, name: g_equip_cmd_stream_input}
-  - {addr: 0x801e9004, name: g_equip_menu_list_visible_rows}
-  - {addr: 0x801e9008, name: g_equip_menu_list_row_height}
-  - {addr: 0x801e900c, name: g_equip_menu_list_row_group_count}
+  - {addr: 0x801e9000, name: g_menu_cmd_stream_input}
+  - {addr: 0x801e9004, name: g_menu_list_visible_rows}
+  - {addr: 0x801e9008, name: g_menu_list_row_height}
+  - {addr: 0x801e900c, name: g_menu_list_row_group_count}
   - {addr: 0x801e9010, name: g_menu_list_row_mode}
   - {addr: 0x801e9014, name: g_menu_gfx_semitransparency}
   - {addr: 0x801e9018, name: g_menu_window_right_x}
-  - {addr: 0x801e901c, name: g_equip_menu_list_redraw_pending}
-  - {addr: 0x801e9024, name: g_equip_menu_list_entries}
-  - {addr: 0x801e9028, name: g_equip_menu_list_text_table}
+  - {addr: 0x801e901c, name: g_menu_list_redraw_pending}
+  - {addr: 0x801e9024, name: g_menu_list_entries}
+  - {addr: 0x801e9028, name: g_menu_list_text_table}
   - {addr: 0x801e902c, name: g_menu_gfx_texture_page}
   - {addr: 0x801e9030, name: g_menu_gfx_clut_id}
-  - {addr: 0x801e9034, name: g_equip_menu_list_vram_width}
-  - {addr: 0x801e9038, name: g_equip_menu_list_glyph_width}
-  - {addr: 0x801e903c, name: g_equip_menu_list_text_columns}
+  - {addr: 0x801e9034, name: g_menu_list_vram_width}
+  - {addr: 0x801e9038, name: g_menu_list_glyph_width}
+  - {addr: 0x801e903c, name: g_menu_list_text_columns}
   - {addr: 0x801e9040, name: g_menu_use_alternate_palette}
-  - {addr: 0x801e9044, name: g_equip_menu_list_scroll_direction}
+  - {addr: 0x801e9044, name: g_menu_list_scroll_direction}
   - {addr: 0x801e9048, name: g_gfx_otag_index_locked}
   - {addr: 0x801e9052, name: g_gfx_tiled_rect}
   - {addr: 0x801e905c, name: g_bits_primary_cursor}
@@ -1762,7 +1764,7 @@ data:
   - {addr: 0x801e90e8, name: g_menu_gfx_drawenv_y}
   - {addr: 0x801e90ec, name: g_equip_menu_result_rows}
   - {addr: 0x801e90f4, name: g_menu_alternate_number_clut}
-  - {addr: 0x801e90f8, name: g_equip_menu_selected_list_index}
+  - {addr: 0x801e90f8, name: g_menu_list_selected_index}
   - {addr: 0x801e90fc, name: g_equip_gfx_sprite_16_capacity}
   - {addr: 0x801e9100, name: g_equip_gfx_otag_length}
   - {addr: 0x801e9104, name: g_equip_gfx_draw_area_capacity}
@@ -1796,7 +1798,7 @@ data:
   - {addr: 0x801e9308, name: g_equip_text_help_message_id}
   - {addr: 0x801e930c, name: g_menu_row_callbacks}
   - {addr: 0x801e934c, name: g_equip_gfx_current_ot}
-  - {addr: 0x801e9350, name: g_equip_menu_list_entry_count}
+  - {addr: 0x801e9350, name: g_menu_list_entry_count}
 
 imports:
   - {addr: 0x800222fc, name: memset}
@@ -1807,8 +1809,9 @@ overrides:
   - {function: gfx_build_portrait_transition_primitives, name: g_gfx_portrait_transition_offsets, addr: 0x801ce884}
   - {function: menu_cmd_draw_window_frame_handler, name: menu_cmd_draw_background_tiles_handler, addr: 0x801cb800}
   - {function: menu_cmd_set_zoomed_draw_area_handler, name: g_bunit_gfx_window_zoom_percent, addr: 0x801d8784}
-  - {function: menu_cmd_set_zoomed_draw_area_handler, name: g_menu_cmd_stream_input, addr: 0x801e9000}
   - {function: menu_draw_item_status_list, name: menu_gfx_enqueue_textured_quad, addr: 0x801c6598}
+  - {function: menu_init_and_draw_scrollable_list_simple, name: menu_init_scrollable_list_core, addr: 0x801ca8a0}
+  - {function: menu_init_scrollable_list, name: menu_init_scrollable_list_core, addr: 0x801ca8a0}
   - {function: menu_text_render_glyph_to_4bpp_image_variant, name: card_bits_init_primary_reader, addr: 0x801cdf50}
 ---
 module: event-etc
@@ -1849,25 +1852,25 @@ links: [battle]
 
 functions:
   - {addr: 0x801df000, size: 80, name: menu_close, hash: af74553ec4c059ff, source: src/shared/menu/menu_close.c}
-  - {addr: 0x801df050, size: 3460, name: helpmenu_menu_run_battle_help, hash: e2c1ec858fd1c5b6}
+  - {addr: 0x801df050, size: 3460, name: menu_run_battle_help, hash: e2c1ec858fd1c5b6, source: src/shared/menu/menu_run_battle_help.c}
   - {addr: 0x801dfdd4, size: 60, name: thread_find_first_running_menu_thread, hash: d0b478b250e3aa50, source: src/shared/thread/thread_find_first_running_menu_thread.c}
-  - {addr: 0x801dfe10, size: 1992, name: helpmenu_menu_run_require_help, hash: 271ef372178e62f2}
+  - {addr: 0x801dfe10, size: 1992, name: menu_run_require_help, hash: 271ef372178e62f2, source: src/shared/menu/menu_run_require_help.c}
 
 data:
-  - {addr: 0x801ce8fe, name: g_helpmenu_selected_unit_panel_mode}
-  - {addr: 0x801e05d8, name: g_helpmenu_menu_cursor_tile}
-  - {addr: 0x801e05e4, name: g_helpmenu_active_banner}
-  - {addr: 0x801e062c, name: g_helpmenu_active_unit_data}
-  - {addr: 0x801e064c, name: g_helpmenu_billboard}
-  - {addr: 0x801e06fc, name: g_helpmenu_view_mode_2_navigation}
-  - {addr: 0x801e078c, name: g_helpmenu_view_mode_4_navigation}
-  - {addr: 0x801e07fc, name: g_helpmenu_view_mode_3_navigation}
-  - {addr: 0x801e084c, name: g_helpmenu_require_navigation}
-  - {addr: 0x801e0ad4, name: g_helpmenu_menu_text_id_tables}
-  - {addr: 0x801e0b30, name: g_helpmenu_text_section_offsets}
-  - {addr: 0x801e0bb0, name: g_helpmenu_text_data}
-  - {addr: 0x801f74f8, name: g_helpmenu_controller_state_ptr}
-  - {addr: 0x801f74fc, name: g_helpmenu_current_text_ids}
+  - {addr: 0x801ce8fc, name: g_menu_selected_unit_stat_summary}
+  - {addr: 0x801e05d8, name: g_menu_help_menu_cursor_tile}
+  - {addr: 0x801e05e4, name: g_menu_help_active_banner}
+  - {addr: 0x801e062c, name: g_menu_help_active_unit_data}
+  - {addr: 0x801e064c, name: g_menu_help_billboard}
+  - {addr: 0x801e06fc, name: g_menu_help_terrain_navigation}
+  - {addr: 0x801e078c, name: g_menu_help_attack_preview_navigation}
+  - {addr: 0x801e07fc, name: g_menu_help_unit_box_navigation}
+  - {addr: 0x801e084c, name: g_menu_help_require_navigation}
+  - {addr: 0x801e0ad4, name: g_menu_help_menu_text_id_tables}
+  - {addr: 0x801e0b30, name: g_menu_help_text_section_offsets}
+  - {addr: 0x801e0bb0, name: g_menu_help_data_base}
+  - {addr: 0x801f74f8, name: g_menu_help_controller_state_ptr}
+  - {addr: 0x801f74fc, name: g_menu_help_topic_text_ids}
   - {addr: 0x801f7504, name: g_text_saved_pointers}
 ---
 module: event-jobstts
@@ -1879,7 +1882,7 @@ load: 0x801df000
 source_dir: src/event
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
-defines: {VARIANT_MENU_SELECTION_RECORD_COUNT: 5}
+defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_TEXT_ID_ROW_FORMAT: 231}
 
 functions:
   - {addr: 0x801df004, size: 404, name: jobstts_menu_load_images_and_clear_selection, hash: e786b01b51200874}
@@ -1939,8 +1942,8 @@ functions:
   - {addr: 0x801e1ff0, size: 48, name: gfx_load_image_and_wait, hash: be3db739ba4a6ec6, source: src/shared/gfx/gfx_load_image_and_wait.c}
   - {addr: 0x801e2020, size: 48, name: gfx_store_image_and_wait, hash: 42b445a1713fca16, source: src/shared/gfx/gfx_store_image_and_wait.c}
   - {addr: 0x801e2050, size: 196, name: jobstts_menu_init_scrollable_list_core, hash: cbed765f1b648634}
-  - {addr: 0x801e2114, size: 52, name: jobstts_menu_init_scrollable_list, hash: 486b8503d50e4e8e}
-  - {addr: 0x801e2148, size: 52, name: jobstts_menu_init_and_draw_scrollable_list, hash: 5f113e345c0f0da5}
+  - {addr: 0x801e2114, size: 52, name: menu_init_scrollable_list, hash: 486b8503d50e4e8e, source: src/shared/menu/menu_init_scrollable_list.c}
+  - {addr: 0x801e2148, size: 52, name: menu_init_and_draw_scrollable_list, hash: 5f113e345c0f0da5, source: src/shared/menu/menu_init_and_draw_scrollable_list.c}
   - {addr: 0x801e217c, size: 188, name: jobstts_cmd_run_stream, hash: 276770c4066d6467}
   - {addr: 0x801e2238, size: 68, name: jobstts_cmd_run_stream_with_mode, hash: 925ea4eee2a0c636}
   - {addr: 0x801e227c, size: 280, name: jobstts_cmd_run_if_group_handler, hash: 805a0f95f73a013b}
@@ -1957,8 +1960,8 @@ functions:
   - {addr: 0x801e30d8, size: 704, name: jobstts_cmd_draw_formatted_number_handler, hash: a7c4288fdb526bef}
   - {addr: 0x801e3398, size: 660, name: menu_update_and_draw_animated_cursor, hash: 1820d09644d45f32, source: src/shared/menu/menu_update_and_draw_animated_cursor.c}
   - {addr: 0x801e362c, size: 108, name: menu_cmd_skip_group, hash: 68ca8c4bcbe84a81, source: src/shared/menu/menu_cmd_skip_group.c}
-  - {addr: 0x801e3698, size: 672, name: jobstts_menu_draw_scrollable_list, hash: e44d487c3819b679}
-  - {addr: 0x801e3938, size: 48, name: jobstts_menu_init_and_draw_scrollable_list_simple, hash: 461e97c53dac7c63}
+  - {addr: 0x801e3698, size: 672, name: menu_draw_scrollable_list, hash: e44d487c3819b679, source: src/shared/menu/menu_draw_scrollable_list.c}
+  - {addr: 0x801e3938, size: 48, name: menu_init_and_draw_scrollable_list_simple, hash: 461e97c53dac7c63, source: src/shared/menu/menu_init_and_draw_scrollable_list_simple.c}
   - {addr: 0x801e3968, size: 2512, name: jobstts_cmd_draw_scrollable_list_body_handler, hash: 8765fb678224aca4}
   - {addr: 0x801e4338, size: 220, name: menu_set_palette_mode, hash: 48580046bd100f9b, source: src/shared/menu/menu_set_palette_mode.c}
   - {addr: 0x801e4414, size: 136, name: jobstts_cmd_release_otag_lock_handler, hash: 376bac94034d2252}
@@ -1966,7 +1969,7 @@ functions:
   - {addr: 0x801e4510, size: 92, name: menu_cmd_add_next_otag_draw_area_handler, hash: 24311d14e944847c, source: src/shared/menu/menu_cmd_add_next_otag_draw_area_handler.c}
   - {addr: 0x801e456c, size: 16, name: jobstts_gfx_set_transition_frame, hash: 379bc481db4f0729}
   - {addr: 0x801e457c, size: 16, name: jobstts_gfx_get_transition_frame, hash: 865935d79ad81c7d}
-  - {addr: 0x801e458c, size: 320, name: jobstts_menu_scroll_list_by_page, hash: 0fa518b015eb3a18}
+  - {addr: 0x801e458c, size: 320, name: menu_scroll_list_by_page, hash: 0fa518b015eb3a18, source: src/shared/menu/menu_scroll_list_by_page.c}
   - {addr: 0x801e46cc, size: 252, name: jobstts_input_read_page_scroll_direction, hash: c1ec59fe990bfe9e}
   - {addr: 0x801e47c8, size: 300, name: jobstts_gfx_swap_context_and_clear_otag, hash: f9d99e269fd4a17e}
   - {addr: 0x801e48f4, size: 252, name: jobstts_gfx_init_primitive_buffers, hash: 50311096d96fa683}
@@ -1979,7 +1982,7 @@ functions:
 
 data:
   - {addr: 0x801df000, name: g_jobstts_text_decimal_format}
-  - {addr: 0x801e5028, name: g_jobstts_sound_queued_effect_id}
+  - {addr: 0x801e5028, name: g_sound_queued_effect_id}
   - {addr: 0x801e502c, name: g_jobstts_menu_palette_image}
   - {addr: 0x801e522c, name: g_jobstts_active_page}
   - {addr: 0x801e522e, name: g_jobstts_initialized}
@@ -2050,27 +2053,27 @@ data:
   - {addr: 0x801fa6bc, name: g_jobstts_menu_list_scroll_progress}
   - {addr: 0x801fa6c0, name: g_menu_text_color}
   - {addr: 0x801fa6c4, name: g_menu_gfx_otag_index}
-  - {addr: 0x801fa6c8, name: g_jobstts_cmd_stream_input}
-  - {addr: 0x801fa6cc, name: g_jobstts_menu_list_visible_rows}
-  - {addr: 0x801fa6d0, name: g_jobstts_menu_list_row_height}
-  - {addr: 0x801fa6d4, name: g_jobstts_menu_list_row_group_count}
+  - {addr: 0x801fa6c8, name: g_menu_cmd_stream_input}
+  - {addr: 0x801fa6cc, name: g_menu_list_visible_rows}
+  - {addr: 0x801fa6d0, name: g_menu_list_row_height}
+  - {addr: 0x801fa6d4, name: g_menu_list_row_group_count}
   - {addr: 0x801fa6d8, name: g_jobstts_menu_list_row_rendering}
   - {addr: 0x801fa6dc, name: g_jobstts_gfx_semitransparency}
   - {addr: 0x801fa6e0, name: g_jobstts_menu_window_right_x}
-  - {addr: 0x801fa6e4, name: g_jobstts_menu_list_redraw_pending}
-  - {addr: 0x801fa6ec, name: g_jobstts_menu_list_entries}
-  - {addr: 0x801fa6f0, name: g_jobstts_menu_list_text_table}
+  - {addr: 0x801fa6e4, name: g_menu_list_redraw_pending}
+  - {addr: 0x801fa6ec, name: g_menu_list_entries}
+  - {addr: 0x801fa6f0, name: g_menu_list_text_table}
   - {addr: 0x801fa6f4, name: g_menu_gfx_texture_page}
   - {addr: 0x801fa6f8, name: g_menu_gfx_clut_id}
-  - {addr: 0x801fa6fc, name: g_jobstts_menu_list_vram_width}
-  - {addr: 0x801fa700, name: g_jobstts_menu_list_glyph_width}
-  - {addr: 0x801fa704, name: g_jobstts_menu_list_text_columns}
+  - {addr: 0x801fa6fc, name: g_menu_list_vram_width}
+  - {addr: 0x801fa700, name: g_menu_list_glyph_width}
+  - {addr: 0x801fa704, name: g_menu_list_text_columns}
   - {addr: 0x801fa708, name: g_menu_use_alternate_palette}
   - {addr: 0x801fa70c, name: g_jobstts_gfx_otag_index_locked}
-  - {addr: 0x801fa710, name: g_jobstts_menu_list_scroll_direction}
+  - {addr: 0x801fa710, name: g_menu_list_scroll_direction}
   - {addr: 0x801fa714, name: g_bits_primary_cursor}
   - {addr: 0x801fa718, name: g_bits_reader_2_stream}
-  - {addr: 0x801fa71c, name: g_jobstts_menu_list_entry_count}
+  - {addr: 0x801fa71c, name: g_menu_list_entry_count}
   - {addr: 0x801fa720, name: g_menu_input_newly_pressed}
   - {addr: 0x801fa724, name: g_jobstts_gfx_poly_f3_capacity}
   - {addr: 0x801fa728, name: g_jobstts_gfx_poly_g3_capacity}
@@ -2106,7 +2109,7 @@ data:
   - {addr: 0x801fa7a0, name: g_jobstts_gfx_sprite_8_capacity}
   - {addr: 0x801fa7a4, name: g_menu_gfx_drawenv_y}
   - {addr: 0x801fa7a8, name: g_menu_alternate_number_clut}
-  - {addr: 0x801fa7ac, name: g_jobstts_menu_list_selected_index}
+  - {addr: 0x801fa7ac, name: g_menu_list_selected_index}
   - {addr: 0x801fa7b0, name: g_jobstts_gfx_sprite_16_capacity}
   - {addr: 0x801fa7b4, name: g_jobstts_gfx_otag_length}
   - {addr: 0x801fa7b8, name: g_jobstts_gfx_draw_area_capacity}
@@ -2118,7 +2121,7 @@ data:
   - {addr: 0x801fa7d0, name: g_menu_gfx_context}
   - {addr: 0x801fa7d4, name: g_menu_input_primary_repeat}
   - {addr: 0x801fa7d8, name: g_jobstts_gfx_sprite_count}
-  - {addr: 0x801fa7dc, name: g_jobstts_menu_scroll_base_index}
+  - {addr: 0x801fa7dc, name: g_menu_scroll_base_index}
   - {addr: 0x801fa7e0, name: g_jobstts_gfx_tile_1_capacity}
   - {addr: 0x801fa7e4, name: g_menu_window_clut}
   - {addr: 0x801fa7e8, name: g_jobstts_gfx_tile_8_capacity}
@@ -2144,12 +2147,13 @@ overrides:
   - {function: menu_cmd_add_next_otag_draw_area_handler, name: g_gfx_otag_index_locked, addr: 0x801fa70c}
   - {function: menu_cmd_draw_background_tiles_handler, name: g_menu_atlas_texture_page, addr: 0x801eff70}
   - {function: menu_cmd_draw_background_tiles_handler, name: g_menu_gfx_semitransparency, addr: 0x801fa6dc}
-  - {function: menu_cmd_draw_textured_quad_handler, name: g_equip_menu_list_row_height, addr: 0x801fa6d0}
   - {function: menu_cmd_draw_textured_quad_handler, name: g_menu_gfx_semitransparency, addr: 0x801fa6dc}
   - {function: menu_cmd_draw_textured_quad_handler, name: g_menu_list_row_index, addr: 0x801eff6c}
   - {function: menu_cmd_draw_textured_quad_handler, name: g_menu_list_row_mode, addr: 0x801fa6d8}
   - {function: menu_cmd_draw_textured_quad_handler, name: g_menu_list_scroll_offset, addr: 0x801eff68}
   - {function: menu_cmd_set_draw_area_if_unlocked_handler, name: g_gfx_otag_index_locked, addr: 0x801fa70c}
+  - {function: menu_init_and_draw_scrollable_list_simple, name: menu_init_scrollable_list_core, addr: 0x801e2050}
+  - {function: menu_init_scrollable_list, name: menu_init_scrollable_list_core, addr: 0x801e2050}
   - {function: menu_text_render_glyph_to_4bpp_image_variant, name: card_bits_init_primary_reader, addr: 0x801e4e98}
   - {function: menu_text_start_help_thread, name: g_equip_help_text_table, addr: 0x801e5508}
   - {function: menu_text_start_help_thread, name: g_equip_text_help_message_id, addr: 0x801fa818}
@@ -2502,7 +2506,7 @@ data:
   - {addr: 0x801ddd84, name: g_require_reward_war_trophy_primitives}
 
 imports:
-  - {addr: 0x801dfe10, name: helpmenu_menu_run_require_help}
+  - {addr: 0x801dfe10, name: menu_run_require_help}
 
 overrides:
   - {function: gfx_build_gradient_grid_primitives, name: gfx_draw_or_append_gpu_primitive, addr: 0x8014a660}

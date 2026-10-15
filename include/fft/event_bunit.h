@@ -256,12 +256,6 @@ extern s32 g_bunit_numeric_editor_redraw_request;
 extern menu_status_thread_t g_bunit_numeric_editor_thread_params;
 
 /* menus */
-typedef enum bunit_vertical_scroll_direction {
-    BUNIT_VERTICAL_SCROLL_UP = -1,
-    BUNIT_VERTICAL_SCROLL_NONE = 0,
-    BUNIT_VERTICAL_SCROLL_DOWN = 1,
-    BUNIT_VERTICAL_SCROLL_WAIT = 2,
-} bunit_menu_vertical_scroll_direction_e;
 
 /* Display opcodes use .value for predicates and numbers, .icon for sprite sources. */
 enum { BUNIT_MENU_SELECTION_RECORD_COUNT = 14 };
@@ -285,21 +279,9 @@ extern s8 g_bunit_menu_button_press_timers[];
 extern clut_t g_bunit_menu_clut;
 extern s32 g_bunit_menu_current_menu; /* bunit_menu_e */
 extern u16 g_bunit_menu_list_cursor_anim_state;
-extern s16* g_bunit_menu_list_entries;
-extern s16 g_bunit_menu_list_entry_count;
 
-extern u8 g_bunit_menu_list_glyph_width;
-extern s8 g_bunit_menu_list_redraw_pending; /* read with lb (bunit_cmd_run_scrollable_list_handler) */
-extern s16 g_bunit_menu_list_row_group_count;
-extern s16 g_bunit_menu_list_row_height;
-extern s8 g_bunit_menu_list_scroll_direction; /* read with lb */
 extern s16 g_bunit_menu_list_scroll_entry_ids[];
 extern u16 g_bunit_menu_list_scroll_progress;
-extern s16 g_bunit_menu_list_selected_index;
-extern u8 g_bunit_menu_list_text_columns;
-extern u8* g_bunit_menu_list_text_table;
-extern s16 g_bunit_menu_list_visible_rows;
-extern u16 g_bunit_menu_list_vram_width;
 extern s16 g_bunit_menu_primary_result;
 extern menu_entry_t g_bunit_menu_reorder_list_desc[];
 extern s16 g_bunit_menu_reorder_list_entries[];
@@ -316,14 +298,7 @@ extern menu_button_piece_t g_bunit_slot_sprite_entries[];
 extern u8 g_bunit_text_menu_section[];
 extern u8 g_bunit_unit_list_triangle_menu_open;
 
-void bunit_menu_dispatch_with_override(menu_instruction_t* script, s32 state, s32 override);
 void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 busy, u16 sound_id);
-void bunit_menu_draw_scrollable_list(const menu_instruction_t* script);
-void bunit_menu_init_and_draw_scrollable_list(
-    s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void bunit_menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
-void bunit_menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 void bunit_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 void bunit_menu_init_unit_list(s32 unused_selected_index);
 s32 bunit_menu_is_active_or_transitioning(void);
@@ -335,7 +310,6 @@ s32 bunit_menu_run_job_list(void);
 void bunit_menu_run_reorder_list(void);
 s32 bunit_menu_run_unit_list_frame(void);
 menu_instruction_t* bunit_menu_script_draw_formatted_number(menu_instruction_t* instruction);
-void bunit_menu_scroll_list_by_page(bunit_menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 void bunit_menu_update_and_draw_animated_cursor(point16_t* pos, u16* state, s32 mode);
 void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 void bunit_menu_update_job(void);
@@ -470,7 +444,7 @@ extern u32 g_bunit_previous_input;
 
 s32 bunit_input_get_lock_timer(void);
 s32 bunit_input_read_pad1_unless_locked(void);
-bunit_menu_vertical_scroll_direction_e bunit_input_read_page_scroll_direction(void);
+menu_vertical_scroll_direction_e bunit_input_read_page_scroll_direction(void);
 void bunit_input_update_controller(void);
 void bunit_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
 void bunit_input_update_lock_timer(void);

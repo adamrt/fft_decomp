@@ -30,10 +30,10 @@ menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* 
         y = data->number.y;
     } else {
         arg = g_menu_scroll_base_index + g_menu_list_row_index;
-        y = ((g_equip_menu_list_row_height * g_menu_list_row_index) + data->number.y) - g_menu_list_scroll_offset;
+        y = ((g_menu_list_row_height * g_menu_list_row_index) + data->number.y) - g_menu_list_scroll_offset;
         if (g_menu_list_scroll_offset < 0) {
             arg -= 1;
-            y -= g_equip_menu_list_row_height;
+            y -= g_menu_list_row_height;
         }
     }
     value = callback(arg);

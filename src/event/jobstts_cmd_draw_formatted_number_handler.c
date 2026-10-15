@@ -25,12 +25,12 @@ menu_instruction_t* jobstts_cmd_draw_formatted_number_handler(menu_instruction_t
         arg = data->number.value;
         y = data->number.y;
     } else {
-        arg = g_jobstts_menu_scroll_base_index + g_jobstts_menu_list_row_index;
-        y = ((g_jobstts_menu_list_row_height * g_jobstts_menu_list_row_index) + data->number.y)
+        arg = g_menu_scroll_base_index + g_jobstts_menu_list_row_index;
+        y = ((g_menu_list_row_height * g_jobstts_menu_list_row_index) + data->number.y)
             - g_jobstts_menu_list_scroll_offset_y;
         if (g_jobstts_menu_list_scroll_offset_y < 0) {
             arg -= 1;
-            y -= g_jobstts_menu_list_row_height;
+            y -= g_menu_list_row_height;
         }
     }
 

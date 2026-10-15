@@ -35,25 +35,6 @@ extern s16 g_world_dead_unit_move_result; /* secondary (move) menu result */
 /* help */
 
 extern u16 g_world_help_portrait_clut_by_sheet_id[];
-/* Saved copies of the WORLD records menu_copy_billboard_data_out reads. */
-extern map_selected_tile_t g_world_help_menu_cursor_tile;
-extern menu_unit_status_record_t g_world_help_active_banner;
-extern menu_active_unit_t g_world_help_active_unit_data;
-
-/* Saved 0x40-byte unit editor fields, including the state record and its tail. */
-extern menu_status_panel_slot_storage_t g_world_help_billboard;
-extern help_navigation_record_t g_world_help_terrain_navigation[];
-extern help_navigation_record_t g_world_help_attack_preview_navigation[];
-extern help_navigation_record_t g_world_help_unit_box_navigation[];
-extern help_navigation_record_t g_world_help_require_navigation[];
-extern u16* const g_world_help_menu_text_id_tables[23];
-
-/* Help-file offsets of the text sections the help menus rebind, added to
- * g_world_help_data_base (HELPMENU twin at 0x801e0b30). */
-extern s32 g_world_help_text_section_offsets[32];
-extern u8 g_world_help_data_base[];
-extern u32* g_world_help_controller_state_ptr;
-extern u16* g_world_help_topic_text_ids;
 
 /* map */
 /* State of a screen request raised from the world map menu (the
@@ -293,7 +274,6 @@ void world_sound_dispatch_effect(void);
 extern menu_status_thread_t g_world_preview_stats_thread_params;
 
 /* status panel */
-void world_menu_run_battle_help(void);
 
 /* system */
 
@@ -1353,7 +1333,6 @@ extern menu_status_panel_buffer_t g_world_stat_preview_panel_frames[2];
 extern struct menu_status_panel_slot_storage g_world_selected_unit_stat_detail;
 extern const world_unit_monster_breed_entry_t g_world_unit_monster_breed_table[WORLD_MONSTER_BREED_ENTRY_COUNT];
 
-extern s32 g_world_unit_join_screen_active;
 extern menu_unit_status_identity_t g_world_selected_unit_identity;
 extern CVECTOR g_world_unit_panel_bar_colors[];
 extern menu_number_entry_t g_world_selected_unit_number_entries[];

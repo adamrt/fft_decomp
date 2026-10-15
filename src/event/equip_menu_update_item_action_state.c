@@ -8,7 +8,7 @@ s32 equip_menu_update_item_action_state(void) {
     menu_entry_t* menu;
 
     if (g_equip_item_action_menu_active == 0) {
-        if (g_equip_menu_list_entry_count == 0) {
+        if (g_menu_list_entry_count == 0) {
             return MENU_ITEM_LIST_STATE_BROWSE;
         }
         g_equip_item_action_menu.selected_index = 0;

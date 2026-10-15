@@ -263,20 +263,9 @@ extern s32 g_equip_menu_indicator_buffer_index[2];
 extern s32 g_equip_menu_indicator_edge_brightness[2];
 extern s32 g_equip_menu_indicator_state[2];
 extern u16 g_equip_menu_list_cursor_anim_state[];
-extern s16* g_equip_menu_list_entries;
-extern s16 g_equip_menu_list_entry_count;
 
-extern u8 g_equip_menu_list_glyph_width;
-extern s8 g_equip_menu_list_redraw_pending; /* read with lb (equip_cmd_draw_scrollable_list_body_handler) */
-extern s16 g_equip_menu_list_row_group_count;
-extern s16 g_equip_menu_list_row_height;
-extern s8 g_equip_menu_list_scroll_direction; /* -1/0/1; read with lb */
 extern s16 g_equip_menu_list_scroll_entry_ids;
 extern u16 g_equip_menu_list_scroll_progress;
-extern u8 g_equip_menu_list_text_columns;
-extern u8* g_equip_menu_list_text_table;
-extern s16 g_equip_menu_list_visible_rows;
-extern u16 g_equip_menu_list_vram_width;
 extern clut_t g_equip_menu_palette_image;
 extern s8 g_equip_menu_ready;
 
@@ -285,9 +274,6 @@ extern u8 g_equip_menu_screen_state;    /* equip_screen_state_e */
 extern void (*g_equip_menu_screen_state_handlers[])(void);
 
 extern oriented_quad_t g_equip_menu_secondary_slot_marker;
-/* Signed 16-bit value: EQUIP reads this state with lh at 0x801c4584,
- * 0x801c45bc, and 0x801c4614. */
-extern s16 g_equip_menu_selected_list_index;
 extern oriented_quad_t g_equip_menu_slot_marker_rects[];
 extern menu_instruction_t g_equip_menu_slot_marker_window;
 extern u8 g_equip_menu_slot_marker_x[];
@@ -300,15 +286,9 @@ extern menu_entry_t g_equip_type_order_menu_other_slots;
 s32 equip_item_run_rearrange_mode(void);
 void equip_menu_clear_selection_values(void);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
-void equip_menu_draw_scrollable_list(const menu_instruction_t* script);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row);
-void equip_menu_init_and_draw_scrollable_list(
-    s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void equip_menu_init_and_draw_scrollable_list_simple(
-    s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void equip_menu_init_screen(s32 battle_id);
-void equip_menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 void equip_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 void equip_menu_load_images_and_reset_lists(void);
 void equip_menu_reset_selection_indices(void);
@@ -317,7 +297,6 @@ void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scro
 s32 equip_menu_run_equip_mode(void);
 s32 equip_menu_run_remove_mode(void);
 s32 equip_menu_run_slot_item_browser(void);
-void equip_menu_scroll_list_by_page(s32 direction, const menu_instruction_t* menu);
 s32 equip_menu_update_clear_all_equipment_prompt(void);
 s32 equip_menu_update_equipment(void);
 s32 equip_menu_update_item_action_state(void);
@@ -415,7 +394,6 @@ enum {
     EQUIP_CMD_END = 0x19,
 };
 
-extern s32 g_equip_cmd_stream_input;
 /* EQUIP's 0x3c-byte menu records: the main commands, the item actions and
  * (in equip_item_run_type_order_mode) the item-type order menus. Each is
  * started through equip_thread_start_managed, which makes it the current
@@ -427,7 +405,6 @@ menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* instructi
 menu_instruction_t* equip_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
-void equip_cmd_run_stream(menu_instruction_t* instruction, s32 input);
 menu_instruction_t* equip_cmd_set_otag_index_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_set_semitrans_handler(menu_instruction_t* instruction);
 

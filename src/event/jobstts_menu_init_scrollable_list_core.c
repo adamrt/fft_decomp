@@ -6,20 +6,20 @@
  * its render state. The scroll base is reset only when the selected index
  * is 0. */
 void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table) {
-    g_jobstts_menu_list_entries = entries;
-    g_jobstts_menu_list_text_table = text_table;
+    g_menu_list_entries = entries;
+    g_menu_list_text_table = text_table;
     if (entries != 0) {
         s32 first = *entries;
-        g_jobstts_menu_list_entry_count = 0;
+        g_menu_list_entry_count = 0;
         if (first != -1) {
             do {
-                g_jobstts_menu_list_entry_count = g_jobstts_menu_list_entry_count + 1;
-            } while (entries[g_jobstts_menu_list_entry_count] != -1);
+                g_menu_list_entry_count = g_menu_list_entry_count + 1;
+            } while (entries[g_menu_list_entry_count] != -1);
         }
     }
-    g_jobstts_menu_list_selected_index = selected_index;
+    g_menu_list_selected_index = selected_index;
     if (selected_index == 0) {
-        g_jobstts_menu_scroll_base_index = 0;
+        g_menu_scroll_base_index = 0;
     }
     g_menu_text_color.r = 0x80;
     g_menu_text_color.g = 0x80;
@@ -27,6 +27,6 @@ void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8
     g_menu_gfx_otag_index = 0;
     g_jobstts_menu_list_row_rendering = 0;
     g_jobstts_menu_list_scroll_offset_y = 0;
-    g_jobstts_menu_list_redraw_pending = 1;
+    g_menu_list_redraw_pending = 1;
     g_jobstts_gfx_transition_frame = 0;
 }

@@ -12,7 +12,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void helpmenu_menu_run_require_help(void) {
+void menu_run_require_help(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shadow[2];
     thread_t* self;
@@ -47,35 +47,35 @@ void helpmenu_menu_run_require_help(void) {
     }
     mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, 0x80);
     g_text_section_pointers[HELP_TEXT_SECTION_UNIT_STATUS]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
     g_text_section_pointers[HELP_TEXT_SECTION_MENU_COMMANDS]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_MENU_COMMANDS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_MENU_COMMANDS];
     g_text_section_pointers[HELP_TEXT_SECTION_TERRAIN]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_TERRAIN];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_TERRAIN];
     g_text_section_pointers[HELP_TEXT_SECTION_JOBS]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_JOBS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_JOBS];
     g_text_section_pointers[HELP_TEXT_SECTION_ITEMS]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_ITEMS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_ITEMS];
     g_text_section_pointers[HELP_TEXT_SECTION_ABILITIES]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_ABILITIES];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_ABILITIES];
     g_text_section_pointers[HELP_TEXT_SECTION_SKILLSETS]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_SKILLSETS];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_SKILLSETS];
     g_text_section_pointers[HELP_TEXT_SECTION_STATUSES]
-        = g_helpmenu_text_data + g_helpmenu_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
+        = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
     self = &g_threads[g_thread_current_id];
-    menu_copy_billboard_data_out(
-        &g_helpmenu_active_banner, &g_helpmenu_active_unit_data, &g_helpmenu_billboard, &g_helpmenu_menu_cursor_tile);
-    if (g_helpmenu_selected_unit_panel_mode != 0 || g_battle_post_battle_unit_changes_active != 0) {
-        g_helpmenu_require_navigation[2].destination[2] = 7;
-        g_helpmenu_require_navigation[7].destination[3] = 2;
+    menu_copy_billboard_data_out(&g_menu_help_active_banner, &g_menu_help_active_unit_data, &g_menu_help_billboard,
+        &g_menu_help_menu_cursor_tile);
+    if (g_menu_selected_unit_stat_summary.team_kind != 0 || g_menu_post_battle_unit_changes_active != 0) {
+        g_menu_help_require_navigation[2].destination[2] = 7;
+        g_menu_help_require_navigation[7].destination[3] = 2;
     }
-    g_helpmenu_controller_state_ptr = script_get_controller_input_pointer(0);
+    g_menu_help_controller_state_ptr = script_get_controller_input_pointer(0);
     menu_index = 0;
-    g_helpmenu_require_navigation[0].x = 0xC4;
-    g_helpmenu_require_navigation[2].x = 0xE0;
-    g_helpmenu_require_navigation[0].destination[3] = 0;
-    g_helpmenu_require_navigation[3].destination[0] = 0;
-    navigation = g_helpmenu_require_navigation;
+    g_menu_help_require_navigation[0].x = 0xC4;
+    g_menu_help_require_navigation[2].x = 0xE0;
+    g_menu_help_require_navigation[0].destination[3] = 0;
+    g_menu_help_require_navigation[3].destination[0] = 0;
+    navigation = g_menu_help_require_navigation;
     text_thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     text_thread = &g_threads[text_thread_id];
     for (frame = 0;; frame++) {
@@ -96,7 +96,7 @@ void helpmenu_menu_run_require_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
-            input = *g_helpmenu_controller_state_ptr;
+            input = *g_menu_help_controller_state_ptr;
             if (input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
@@ -104,21 +104,21 @@ void helpmenu_menu_run_require_help(void) {
             if (input & PSX_PAD_CIRCLE) {
                 if (entry->value != 0) {
                     help_id = entry->help_base + *entry->value;
-                    if (entry->help_base == -0x6800 && g_helpmenu_billboard.state.generic_monster != 0) {
+                    if (entry->help_base == -0x6800 && g_menu_help_billboard.state.generic_monster != 0) {
                         help_id = *entry->value | 0x7800;
                         if ((*entry->value & 0x7FF) == 0x7FF || (*entry->value & 0x7FF) == 0) {
-                            *g_helpmenu_controller_state_ptr = 0;
+                            *g_menu_help_controller_state_ptr = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                             thread_start(text_thread_id, text_run_dialog_thread_variant);
                             thread_set_parameters(text_thread_id, 0x3B, help_id, 0);
                         }
                     } else if (entry->help_base == 0x7800 && (*(u16*)entry->value - 1) >= 0x301U) {
-                        *g_helpmenu_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                     } else if (entry->help_base == 0x6800 && (*(u16*)entry->value - 1) >= 0x101U) {
-                        *g_helpmenu_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                     } else if (entry->help_base == -0x6800 && (*(u16*)entry->value - 1) >= 0x101U) {
-                        *g_helpmenu_controller_state_ptr = 0;
+                        *g_menu_help_controller_state_ptr = 0;
                     } else {
                         g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
                         thread_start(text_thread_id, text_run_dialog_thread_variant);
@@ -217,7 +217,7 @@ void helpmenu_menu_run_require_help(void) {
         gfx_draw_or_append_gpu_primitive(&shadow[buffer]);
         thread_wait_frames(1);
     }
-    *g_helpmenu_controller_state_ptr = 0;
+    *g_menu_help_controller_state_ptr = 0;
     thread_wait_frames(1);
     menu_close();
 }

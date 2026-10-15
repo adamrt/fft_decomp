@@ -62,9 +62,9 @@ s32 equip_item_run_type_order_mode(void) {
             ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
         equip_menu_init_scrollable_list_core(
-            g_item_list_entries, g_equip_menu_selected_list_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+            g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         equip_gfx_set_transition_frame(10);
-        item_collect_stat_deltas_variant(g_item_list_entries[g_equip_menu_selected_list_index],
+        item_collect_stat_deltas_variant(g_item_list_entries[g_menu_list_selected_index],
             &g_menu_selected_unit_stat_summary, &g_equip_item_preview_stat_detail, 0);
         g_equip_item_numeric_panel_redraw = 1;
     }

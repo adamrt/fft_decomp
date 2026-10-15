@@ -2336,7 +2336,7 @@ data:
   - {addr: 0x80165fb8, name: g_sound_music_set_track_request}
   - {addr: 0x80165fbc, name: g_sound_suppressed}
   - {addr: 0x80165fc0, name: g_sound_music_volume_transition_request}
-  - {addr: 0x80165fc4, name: g_battle_post_battle_unit_changes_active}
+  - {addr: 0x80165fc4, name: g_menu_post_battle_unit_changes_active}
   - {addr: 0x80165fc8, name: g_sound_music_switch_request}
   - {addr: 0x80165fca, name: g_sound_music_unload_slot_request}
   - {addr: 0x80165fd4, name: g_sound_music_track_1_id}
@@ -2915,7 +2915,7 @@ imports:
   - {addr: 0x801ca664, name: require_reward_animate_bonus_image_burst}
   - {addr: 0x801cafd4, name: require_condition_dispatch}
   - {addr: 0x801d7000, name: small_text_init_battle_pointers}
-  - {addr: 0x801df050, name: helpmenu_menu_run_battle_help}
+  - {addr: 0x801df050, name: menu_run_battle_help}
   - {addr: 0x801df198, name: jobstts_entrypoint}
 
 overrides:

@@ -8,18 +8,18 @@
 void bunit_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table) {
     s32 first;
 
-    g_bunit_menu_list_entries = entries;
-    g_bunit_menu_list_text_table = text_table;
+    g_menu_list_entries = entries;
+    g_menu_list_text_table = text_table;
     if (entries != 0) {
         first = entries[0];
-        g_bunit_menu_list_entry_count = 0;
+        g_menu_list_entry_count = 0;
         if (first != -1) {
             do {
-                g_bunit_menu_list_entry_count = g_bunit_menu_list_entry_count + 1;
-            } while (entries[g_bunit_menu_list_entry_count] != -1);
+                g_menu_list_entry_count = g_menu_list_entry_count + 1;
+            } while (entries[g_menu_list_entry_count] != -1);
         }
     }
-    g_bunit_menu_list_selected_index = selected_index;
+    g_menu_list_selected_index = selected_index;
     if (selected_index == 0) {
         g_menu_scroll_base_index = 0;
     }
@@ -29,7 +29,7 @@ void bunit_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* 
     g_menu_gfx_otag_index = 0;
     g_menu_list_row_mode = 0;
     g_menu_list_scroll_offset = 0;
-    g_bunit_menu_list_redraw_pending = 1;
+    g_menu_list_redraw_pending = 1;
     g_gfx_transition_frame = 0;
     g_gfx_otag_index_locked = 0;
     g_bunit_input_page_scroll_disabled = 0;

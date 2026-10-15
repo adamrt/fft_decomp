@@ -11,5 +11,5 @@ void menu_run_help_menu_thread(void) {
     }
     menu_reserve_high_overlay(0x20000);
     menu_request_open_companion_executable(COMPANION_OVERLAY_HELPMENU);
-    helpmenu_menu_run_battle_help();
+    menu_run_battle_help();
 }

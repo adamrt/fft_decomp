@@ -117,7 +117,7 @@ void menu_run_unit_status_thread_variant(void) {
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
-    if (g_world_unit_join_screen_active == 0) {
+    if (g_menu_post_battle_unit_changes_active == 0) {
         mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6],
             &g_world_unit_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
     } else {
@@ -162,7 +162,7 @@ void menu_run_unit_status_thread_variant(void) {
         if (state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
-        if (g_world_unit_join_screen_active == 0) {
+        if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6],
                 &g_world_unit_summary_mode_row_params[state->team_kind], sizeof(image_load_parameters_t));
         } else {
@@ -386,7 +386,7 @@ void menu_run_unit_status_thread_variant(void) {
             menu_set_text_origin(0, 0);
             text_draw_large_number_glyphs_variant(identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
-            if (g_world_unit_join_screen_active == 0) {
+            if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 text_draw_large_number_glyphs_variant(
                     identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_text_state.pen);

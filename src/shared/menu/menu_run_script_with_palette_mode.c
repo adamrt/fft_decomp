@@ -10,5 +10,5 @@ void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 input, s3
         value = 0;
     }
     menu_set_palette_mode(mode);
-    equip_cmd_run_stream(script, value);
+    menu_cmd_run_stream(script, value);
 }

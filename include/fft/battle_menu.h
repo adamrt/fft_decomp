@@ -71,7 +71,6 @@ s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids
 extern s32 g_battle_formation_screen_active;
 /* The final two entries of g_menu_attack_caster_stats_setup. */
 extern menu_number_entry_t g_battle_menu_projected_value_panel[2];
-extern s32 g_battle_post_battle_unit_changes_active;
 
 /* status screen */
 extern s32 g_battle_menu_status_enabled;

@@ -108,7 +108,7 @@ void menu_run_unit_status_thread_variant(void) {
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
-    if (g_battle_post_battle_unit_changes_active == 0) {
+    if (g_menu_post_battle_unit_changes_active == 0) {
         mem_copy_bytes_nonempty(
             g_bunit_panel_editor_mode_cell, &g_bunit_panel_editor_mode_cells[state->team_kind], 0xC);
     } else {
@@ -153,7 +153,7 @@ void menu_run_unit_status_thread_variant(void) {
         if (state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
-        if (g_battle_post_battle_unit_changes_active == 0) {
+        if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(
                 g_bunit_panel_editor_mode_cell, &g_bunit_panel_editor_mode_cells[state->team_kind], 0xC);
         } else {
@@ -384,7 +384,7 @@ void menu_run_unit_status_thread_variant(void) {
             cur3 = render_b + 0x50;
             text_draw_large_number_glyphs_variant(scroll[3], 0x202, cur3, origin);
             LoadImage(&rects[4], (u32*)cur3);
-            if (g_battle_post_battle_unit_changes_active == 0) {
+            if (g_menu_post_battle_unit_changes_active == 0) {
                 unit_stats_t* stats;
                 menu_set_text_origin(0, 0);
                 stats = battle_unit_get_stats_from_battle_id(scroll[5]);

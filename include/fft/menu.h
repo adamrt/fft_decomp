@@ -2553,6 +2553,20 @@ void menu_draw_active_window_frames_variant(void);
 void menu_init_sprt_variant(SPRT* sprite);
 void menu_run_scrolling_ability_list_thread_variant(void);
 
+/* Page scroll direction of the overlay unit, item and job lists. */
+typedef enum menu_vertical_scroll_direction {
+    MENU_VERTICAL_SCROLL_UP = -1,
+    MENU_VERTICAL_SCROLL_NONE = 0,
+    MENU_VERTICAL_SCROLL_DOWN = 1,
+    MENU_VERTICAL_SCROLL_WAIT = 2,
+} menu_vertical_scroll_direction_e;
+
+/* Scrollable list core of the BUNIT, EQUIP and JOBSTTS overlays: three bodies
+ * that differ beyond their names (bunit_, equip_ and jobstts_
+ * menu_init_scrollable_list_core). The shared wrappers bind this name to the
+ * overlay's own body by override. */
+void menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
+
 /* unified */
 u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 extern u8 g_menu_render_buffer[];
@@ -2591,5 +2605,35 @@ s32 menu_get_preview_hp_bonus_display(s32 unused_row);
 extern menu_unit_status_record_t g_menu_selected_unit_stat_summary;
 s32 menu_get_preview_mp_bonus_display(s32 unused_row);
 s32 menu_init_selection_value(u8 index, s16 value);
+extern s32 g_menu_post_battle_unit_changes_active;
+extern s16 g_menu_list_row_group_count;
+extern s16 g_menu_list_row_height;
+extern s16 g_menu_list_visible_rows;
+extern u8 g_menu_list_glyph_width;
+extern u8 g_menu_list_text_columns;
+extern u16 g_menu_list_vram_width;
+extern s16 g_menu_list_entry_count;
+extern u8* g_menu_list_text_table;
+extern s16* g_menu_list_entries;
+extern s8 g_menu_list_scroll_direction; /* read with lb */
+extern s8 g_menu_list_redraw_pending;   /* read with lb (bunit_cmd_run_scrollable_list_handler) */
+extern s16 g_menu_list_selected_index;
+extern s16 g_menu_scroll_base_index;
+void menu_run_battle_help(void);
+extern menu_unit_status_record_t g_menu_help_active_banner;
+extern menu_active_unit_t g_menu_help_active_unit_data;
+extern menu_status_panel_slot_storage_t g_menu_help_billboard;
+extern map_selected_tile_t g_menu_help_menu_cursor_tile;
+extern u8 g_menu_help_data_base[];
+extern s32 g_menu_help_text_section_offsets[32];
+extern help_navigation_record_t g_menu_help_require_navigation[];
+extern u32* g_menu_help_controller_state_ptr;
+extern u16* const g_menu_help_menu_text_id_tables[23];
+extern u16* g_menu_help_topic_text_ids;
+extern help_navigation_record_t g_menu_help_terrain_navigation[];
+extern help_navigation_record_t g_menu_help_unit_box_navigation[];
+extern help_navigation_record_t g_menu_help_attack_preview_navigation[];
+void menu_run_require_help(void);
+void menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 
 #endif

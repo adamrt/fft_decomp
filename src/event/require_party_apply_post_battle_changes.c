@@ -43,7 +43,7 @@ void require_party_apply_post_battle_changes(void) {
     if (require_party_save_battle_units_and_find_join_candidates() == 0) {
         thread_exit_current();
     }
-    g_battle_post_battle_unit_changes_active = 1;
+    g_menu_post_battle_unit_changes_active = 1;
     thread_suspend(THREAD_SLOT_EVENT);
     mem_copy_bytes_nonempty(g_require_saved_thread_block, &g_threads[THREAD_SLOT_EVENT], 0x400);
 
@@ -232,7 +232,7 @@ void require_party_apply_post_battle_changes(void) {
                     } while (g_gfx_screen_fade < 0x100);
                     screen_fade_max = 0xff;
                     g_gfx_screen_fade = screen_fade_max;
-                    g_battle_post_battle_unit_changes_active = 0;
+                    g_menu_post_battle_unit_changes_active = 0;
                     removal_result = require_party_select_unit_to_remove();
                     /* The target loads *selected_unit_index_ptr at 0x514,
                      * above both global stores. GCC 2.6.3 emits a
@@ -240,7 +240,7 @@ void require_party_apply_post_battle_changes(void) {
                      * load has to be written above them. */
                     removal_unit_index = *selected_unit_index_ptr;
                     g_require_party_removal_result = removal_result;
-                    g_battle_post_battle_unit_changes_active = one;
+                    g_menu_post_battle_unit_changes_active = one;
 
                     battle_unit_get_stats_from_battle_id(removal_unit_index);
                     /* The target reads the index into v0 here and reloads it
@@ -315,7 +315,7 @@ void require_party_apply_post_battle_changes(void) {
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_UNIT_STATUS);
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
     thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-    g_battle_post_battle_unit_changes_active = 0;
+    g_menu_post_battle_unit_changes_active = 0;
     mem_copy_bytes_nonempty(&g_threads[THREAD_SLOT_EVENT], g_require_saved_thread_block, 0x400);
     g_menu_thread_menu_data = saved_menu_descriptor;
     thread_resume(THREAD_SLOT_EVENT);
