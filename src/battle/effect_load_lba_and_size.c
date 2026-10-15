@@ -1,8 +1,0 @@
-#include "fft/battle_effect.h"
-
-void effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
-    u32 stack_padding[2];
-
-    *lba = g_effect_disc_entries[effect_id].sector;
-    *byte_length = g_effect_disc_entries[effect_id].size;
-}
