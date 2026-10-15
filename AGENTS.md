@@ -40,9 +40,9 @@ preserving every original byte.
   named after what they hold. A file's leading comment briefly describes
   what the file holds.
 - `src/event/`: the event library (script interpreter, threads, dialog and
-  text, windows, sound queue) compiled into BATTLE and WORLD. `src/menu/`:
+  text, windows, sound queue) compiled into BATTLE and WORLD. `src/event/menu/`:
   the menu library compiled into WORLD and the EVENT overlays, as the small
-  objects the overlays link in two different orders. `src/menu/<overlay>/`:
+  objects the overlays link in two different orders. `src/event/<overlay>/`:
   each overlay's own code. `src/effect/`: the 26 routines the effect
   overlays link. `src/lib/psyq/<library>/` and `src/lib/suzuki/`:
   reconstructed linked libraries; keep established public names, signatures
