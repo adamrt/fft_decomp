@@ -1,3 +1,5 @@
+/* Formation input and unit stats. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/types.h"
@@ -22,4 +24,10 @@ void world_menu_update_thread_7_idle_countdown(void) {
     if (g_world_input_lockout_timer != 0) {
         menu_input_clear_state();
     }
+}
+
+/* Countdown maintained by 0x80113580; while it is non-zero the formation
+   screen's per-frame handler returns before reading controller input. */
+s32 world_input_get_lockout_timer(void) {
+    return g_world_input_lockout_timer;
 }

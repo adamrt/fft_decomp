@@ -1,4 +1,4 @@
-/* Level, EXP, Brave and Faith getters. */
+/* Formation. A small object between boundaries the binary proves. */
 
 #include "fft/world.h"
 

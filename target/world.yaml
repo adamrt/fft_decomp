@@ -14,21 +14,25 @@ units:
   - {name: card_file_transfer_retries, source: src/card/card_file_transfer_retries.c}
   - {name: card_io_bios_event_results, source: src/card/card_io_bios_event_results.c}
   - {name: card_io_hardware_event_results, source: src/card/card_io_hardware_event_results.c}
+  - {name: formation, source: src/world/formation.c}
   - {name: formation_display_init, source: src/world/formation_display_init.c}
   - {name: formation_get, source: src/world/formation_get.c}
+  - {name: formation_input, source: src/world/formation_input.c}
+  - {name: formation_input_and_unit_stats, source: src/world/formation_input_and_unit_stats.c}
   - {name: formation_menu, source: src/world/formation_menu.c}
   - {name: formation_menus_and_text, source: src/world/formation_menus_and_text.c}
   - {name: gfx_image_transfer_wait, source: src/gfx/gfx_image_transfer_wait.c}
   - {name: gfx_portrait_crossfade_primitives, source: src/gfx/gfx_portrait_crossfade_primitives.c}
   - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: memory_copies_and_nibbles, source: src/event/memory_copies_and_nibbles.c}
+  - {name: menu, source: src/world/menu.c}
   - {name: menu_ability_display_values, source: src/menu/menu_ability_display_values.c}
   - {name: menu_at_list_and_dead_unit_threads, source: src/menu/menu_at_list_and_dead_unit_threads.c}
   - {name: menu_attack_resources_and_dialogs, source: src/event/menu_attack_resources_and_dialogs.c}
-  - {name: menu_banner_and_stat_preview_toggles, source: src/menu/world/menu_banner_and_stat_preview_toggles.c}
   - {name: menu_entry_values, source: src/world/menu_entry_values.c}
   - {name: menu_equipment_row_counts_and_icons, source: src/menu/menu_equipment_row_counts_and_icons.c}
   - {name: menu_equipment_swap_stat_deltas, source: src/menu/menu_equipment_swap_stat_deltas.c}
+  - {name: menu_formation, source: src/world/menu_formation.c}
   - {name: menu_gfx_textured_quads, source: src/menu/menu_gfx_textured_quads.c}
   - {name: menu_help_overlay, source: src/menu/menu_help_overlay.c}
   - {name: menu_icons_windows_and_scripts, source: src/event/menu_icons_windows_and_scripts.c}
@@ -61,10 +65,8 @@ units:
   - {name: world_formation_equip_item_menus, source: src/menu/world/world_formation_equip_item_menus.c}
   - {name: world_formation_job_wheel, source: src/world/world_formation_job_wheel.c}
   - {name: world_formation_unit_grid_drawing, source: src/world/world_formation_unit_grid_drawing.c}
-  - {name: world_formation_unit_stat_getters, source: src/world/world_formation_unit_stat_getters.c}
   - {name: world_gfx_screen_fade, source: src/gfx/world/world_gfx_screen_fade.c}
   - {name: world_input_controller_polling, source: src/world/world_input_controller_polling.c}
-  - {name: world_menu_panel_thread_control, source: src/menu/world/world_menu_panel_thread_control.c}
   - {name: world_menu_script_blend_and_color, source: src/menu/world/world_menu_script_blend_and_color.c}
   - {name: world_menu_script_draw_opcodes, source: src/menu/world/world_menu_script_draw_opcodes.c}
   - {name: world_menu_stats_and_ability_toggles, source: src/menu/world/world_menu_stats_and_ability_toggles.c}
@@ -637,34 +639,34 @@ functions:
   - {addr: 0x80113478, size: 112, name: world_map_is_busy, hash: 09c2bf94c7f79101, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_display_init}
   - {addr: 0x801134e8, size: 88, name: world_text_show_message_and_play_sound, hash: f4355019c7b2ad8b, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_display_init}
   - {addr: 0x80113540, size: 64, name: world_formation_show_unit_message, hash: faa146ebb4a3f05f, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_display_init}
-  - {addr: 0x80113580, size: 136, name: world_menu_update_thread_7_idle_countdown, hash: 389745ef47daebf8, source: src/menu/world/world_menu_update_thread_7_idle_countdown.c}
-  - {addr: 0x80113608, size: 16, name: world_input_get_lockout_timer, hash: 6a0b74a2f27fae10}
-  - {addr: 0x80113618, size: 200, name: world_input_filter_menu, hash: c935cacdebe4befb, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x801136e0, size: 104, name: world_formation_step_unit_selection_slide, hash: 59374152ce46afa8, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80113748, size: 1676, name: world_formation_run_screen, hash: 59c8ead0459b32db, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80113dd4, size: 300, name: world_sound_dispatch_effect, hash: f6e9e7e952cb4493, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/sound/world/world_sound_dispatch_effect.c}
-  - {addr: 0x80113f00, size: 392, name: world_formation_init_menu_state, hash: 7e29a1534a367821, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80114088, size: 52, name: world_menu_reset_selection_results, hash: c90839a76394f4a5, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/world_menu_reset_selection_results.c}
-  - {addr: 0x801140bc, size: 1692, name: world_formation_process_frame, hash: 8a1d21ff46662df6, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80114758, size: 1136, name: world_formation_update_unit_selection, hash: ff9a951ef4b49382, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80114bc8, size: 388, name: world_formation_stage_selected_unit, hash: 62b0f0d0838db139, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80114d4c, size: 1100, name: world_shop_update_unit_selection, hash: fe69bad5f09d2f26, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x80115198, size: 712, name: world_formation_recalculate_selected_unit_stats, hash: 8537b0e65bf69f8c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {addr: 0x80113580, size: 136, name: world_menu_update_thread_7_idle_countdown, hash: 389745ef47daebf8, unit: formation_input_and_unit_stats}
+  - {addr: 0x80113608, size: 16, name: world_input_get_lockout_timer, hash: 6a0b74a2f27fae10, unit: formation_input_and_unit_stats}
+  - {addr: 0x80113618, size: 200, name: world_input_filter_menu, hash: c935cacdebe4befb, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x801136e0, size: 104, name: world_formation_step_unit_selection_slide, hash: 59374152ce46afa8, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80113748, size: 1676, name: world_formation_run_screen, hash: 59c8ead0459b32db, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80113dd4, size: 300, name: world_sound_dispatch_effect, hash: f6e9e7e952cb4493, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80113f00, size: 392, name: world_formation_init_menu_state, hash: 7e29a1534a367821, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80114088, size: 52, name: world_menu_reset_selection_results, hash: c90839a76394f4a5, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x801140bc, size: 1692, name: world_formation_process_frame, hash: 8a1d21ff46662df6, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80114758, size: 1136, name: world_formation_update_unit_selection, hash: ff9a951ef4b49382, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80114bc8, size: 388, name: world_formation_stage_selected_unit, hash: 62b0f0d0838db139, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80114d4c, size: 1100, name: world_shop_update_unit_selection, hash: fe69bad5f09d2f26, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
+  - {addr: 0x80115198, size: 712, name: world_formation_recalculate_selected_unit_stats, hash: 8537b0e65bf69f8c, profile: gcc-2.6.3_O1_aspsx-2.34, unit: formation_input}
   - {addr: 0x80115460, size: 100, name: menu_toggle_unit_status_thread, hash: 4aef2b35a80ac815, unit: menu_unit_status_thread_toggles}
   - {addr: 0x801154c4, size: 100, name: menu_toggle_comparison_status_thread, hash: ca8d2bb76a9ac247, unit: menu_unit_status_thread_toggles}
-  - {addr: 0x80115528, size: 148, name: menu_toggle_change_banner_panel_thread, hash: 1049e6746ae43ed5, profile: gcc-2.6.3_O1_aspsx-2.34, unit: menu_banner_and_stat_preview_toggles}
-  - {addr: 0x801155bc, size: 148, name: menu_toggle_stat_preview_panel_thread, hash: 61a5a8dafa4e409e, profile: gcc-2.6.3_O1_aspsx-2.34, unit: menu_banner_and_stat_preview_toggles}
+  - {addr: 0x80115528, size: 148, name: menu_toggle_change_banner_panel_thread, hash: 1049e6746ae43ed5, profile: gcc-2.6.3_O1_aspsx-2.34, unit: menu}
+  - {addr: 0x801155bc, size: 148, name: menu_toggle_stat_preview_panel_thread, hash: 61a5a8dafa4e409e, profile: gcc-2.6.3_O1_aspsx-2.34, unit: menu}
   - {addr: 0x80115650, size: 100, name: menu_toggle_numeric_editor_thread, hash: 771f1174540984c4, source: src/menu/menu_toggle_numeric_editor_thread.c}
   - {addr: 0x801156b4, size: 156, name: world_menu_toggle_preview_stats_window, hash: 88fb43527677df34, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_stats_and_ability_toggles}
   - {addr: 0x80115750, size: 156, name: world_menu_toggle_ability_panel_thread, hash: 6c48f97c5cbb8f4a, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_stats_and_ability_toggles}
-  - {addr: 0x801157ec, size: 140, name: world_menu_start_equipment_and_ability_panel_thread, hash: 73537ed8ef09deb4, unit: world_menu_panel_thread_control}
-  - {addr: 0x80115878, size: 76, name: world_menu_enable_all_order_entries, hash: ce717e1aa4bae479, unit: world_menu_panel_thread_control}
-  - {addr: 0x801158c4, size: 104, name: world_formation_stop_menu_threads, hash: 02ad132fa1c066b7, unit: world_menu_panel_thread_control}
+  - {addr: 0x801157ec, size: 140, name: world_menu_start_equipment_and_ability_panel_thread, hash: 73537ed8ef09deb4, unit: menu_formation}
+  - {addr: 0x80115878, size: 76, name: world_menu_enable_all_order_entries, hash: ce717e1aa4bae479, unit: menu_formation}
+  - {addr: 0x801158c4, size: 104, name: world_formation_stop_menu_threads, hash: 02ad132fa1c066b7, unit: menu_formation}
   - {addr: 0x8011592c, size: 128, name: world_get_formation_unit_stat_by_mode, hash: 2adbbff274ecbc12, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {addr: 0x801159ac, size: 32, name: world_formation_get_unit_level, hash: ff6790670fac78da, unit: world_formation_unit_stat_getters}
-  - {addr: 0x801159cc, size: 32, name: world_formation_get_unit_experience, hash: 42a86975cc653832, unit: world_formation_unit_stat_getters}
-  - {addr: 0x801159ec, size: 32, name: world_formation_get_unit_brave, hash: 231fb8ca59ac6cf9, unit: world_formation_unit_stat_getters}
-  - {addr: 0x80115a0c, size: 32, name: world_formation_get_unit_faith, hash: b657c1d6c291f974, unit: world_formation_unit_stat_getters}
+  - {addr: 0x801159ac, size: 32, name: world_formation_get_unit_level, hash: ff6790670fac78da, unit: formation}
+  - {addr: 0x801159cc, size: 32, name: world_formation_get_unit_experience, hash: 42a86975cc653832, unit: formation}
+  - {addr: 0x801159ec, size: 32, name: world_formation_get_unit_brave, hash: 231fb8ca59ac6cf9, unit: formation}
+  - {addr: 0x80115a0c, size: 32, name: world_formation_get_unit_faith, hash: b657c1d6c291f974, unit: formation}
   - {addr: 0x80115a2c, size: 52, name: world_formation_get_unit_egg_hatch_progress, hash: 99379491cd38630d, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {addr: 0x80115a60, size: 32, name: world_formation_get_unit_egg_hatch_total, hash: 6dd0893aee62b916, unit: world_formation_egg_total_and_grid_rows}
   - {addr: 0x80115a80, size: 240, name: world_formation_is_selected_unit_in_upper_rows, hash: 62ea61ae1891b697, unit: world_formation_egg_total_and_grid_rows}

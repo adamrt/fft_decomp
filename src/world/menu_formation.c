@@ -1,4 +1,4 @@
-/* Equipment/ability panel thread start, redraw requests and formation thread stops. */
+/* Menu formation. A small object between boundaries the binary proves. */
 
 #include "fft/thread.h"
 #include "fft/world.h"

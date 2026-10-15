@@ -1,4 +1,4 @@
-/* Change-banner and stat-preview panel thread toggles. */
+/* Menu. A small object between boundaries the binary proves. */
 
 #include "fft/thread.h"
 #include "fft/world.h"
