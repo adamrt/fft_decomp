@@ -35,20 +35,27 @@ preserving every original byte.
 
 ## Organization
 
-- `src/<subsystem>/`: all code of a subsystem (`menu`, `gfx`, `sound`, `text`,
-  `script`, `thread`, `camera`, `map`, `unit`, `item`, `job`, `card`, `file`,
-  `window`, `bits`, `memory`, `status`), one file per function or one unit
-  file, named after it. A bare subsystem prefix is a shared routine; a module
-  prefix (`battle_gfx_`, `wldcore_menu_`) is that program's own routine of the
-  subsystem. A `_variant` body that only one program links sits in that
-  program's subfolder, `src/<subsystem>/<module>/`. Register explicit `source:`
-  paths in each original module; preserve meaningful separate entries.
-- `src/<module>/`: program-specific code outside any subsystem (battle actions
-  and formulas, the world map opcodes, overlay screens). Each EVENT overlay
-  has its own `src/event/<overlay>/`.
-- `src/lib/psyq/<library>/` and `src/lib/suzuki/`: reconstructed linked libraries.
-  Keep established public names, signatures and original module bindings.
-- `include/fft/`: game module, subsystem and shared-type headers.
+- `src/<program>/` (`main`, `battle`, `world`, `wldcore`, `open`): each
+  program's own code as feature files of a few to a few dozen functions,
+  named after what they hold. A file's leading comment says what it is and
+  which of its edges the binary proves.
+- `src/event/`: the event library (script interpreter, threads, dialog and
+  text, windows, sound queue) compiled into BATTLE and WORLD. `src/menu/`:
+  the menu library compiled into WORLD and the EVENT overlays, as the small
+  objects the overlays link in two different orders. `src/menu/<overlay>/`:
+  each overlay's own code. `src/effect/`: the 26 routines the effect
+  overlays link. `src/lib/psyq/<library>/` and `src/lib/suzuki/`:
+  reconstructed linked libraries; keep established public names, signatures
+  and original module bindings.
+- Sharing is recorded in `target/*.yaml` (which modules compile a file),
+  never by folder. A shared file keeps its small per-program differences
+  under program macros; a per-program body too large for that lives in the
+  program's folder under the shared `_variant` name.
+- File boundaries come from evidence first: hand-written and library
+  objects, a change of compiler profile, jump-table alignment, read-only
+  data that is not contiguous. Where the binary is silent, cut by topic to
+  about 20 to 60 functions. A name prefix is never boundary evidence.
+- `include/fft/`: game program, library and shared-type headers.
   `include/psx/`: library and PS1 hardware interfaces. Library code never
   includes game headers.
 - `tools/`: Go build/check tooling. `tools/target.go` owns the original disc size
@@ -56,9 +63,8 @@ preserving every original byte.
 
 Put declarations in their owning header. Sources include their own declaration
 header and the focused headers for APIs they use. Group related declarations
-under short subsystem comments: types, globals, then functions. Leave blank
-lines between type blocks; subsystem headers include their own dependencies,
-not the module umbrella.
+under short comments: types, globals, then functions. Leave blank lines
+between type blocks; headers include their own dependencies.
 
 ## Code style
 
@@ -70,9 +76,10 @@ not the module umbrella.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
-- Use established module/subsystem prefixes and concise, behavior-based names.
-  A shared thing takes one subsystem name without a module prefix; a prefix
-  stays only on things one module has. The `_variant` suffix is reserved for a
+- Use concise, behavior-based names with a topic prefix (`camera_`,
+  `unit_`, `gfx_`) that says what a function does. A module prefix
+  (`battle_gfx_`, `wldcore_menu_`) marks a program's own routine and is
+  being retired now that folders carry ownership; do not add new ones. The `_variant` suffix is reserved for a
   function with more than one body under one shared name: bodies in several
   folders, or several conditional definitions in one shared file
   (check-config enforces it both ways); name other alternates by what
