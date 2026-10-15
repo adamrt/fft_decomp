@@ -182,9 +182,11 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	for i := 1; i < len(unit.rodata); i++ {
 		previous := unit.rodata[i-1]
 		end := previous.Addr + uint32(previous.Size)
-		// A jump table is aligned to 8 within its object, so up to 4 bytes
-		// of padding before an 8-aligned range is the compiler's own gap.
-		padding := unit.rodata[i].Addr >= end && unit.rodata[i].Addr-end < 8 && unit.rodata[i].Addr%8 == 0
+		// A hole shorter than 8 bytes is the compiler's own padding (a jump
+		// table aligns to 8 within its object; a literal may leave a
+		// 4-byte hole): the compile must reproduce it, which the section
+		// comparison verifies by total length and per-range hashes.
+		padding := unit.rodata[i].Addr >= end && unit.rodata[i].Addr-end < 8
 		if unit.rodata[i].Addr != end && !padding {
 			return nil, fmt.Errorf("%s: rodata ranges are not contiguous at 0x%08x", spec.name, unit.rodata[i].Addr)
 		}
