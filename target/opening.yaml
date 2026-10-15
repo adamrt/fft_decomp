@@ -12,6 +12,7 @@ links: [world]
 
 units:
   - {name: card_bios_events, source: src/world/card_bios_events.c}
+  - {name: card_checks, source: src/open/card_checks.c}
   - {name: card_hardware_events, source: src/world/card_hardware_events.c}
   - {name: file_wait, source: src/wldcore/file_wait.c}
   - {name: init, source: src/open/init.c}
@@ -153,10 +154,10 @@ functions:
   - {addr: 0x80070440, size: 192, name: card_io_poll_hardware_event_result, hash: c96ae6060b0e6c36, unit: card_hardware_events}
   - {addr: 0x80070500, size: 72, name: card_wait_for_hardware_event_variant, hash: d2aebf9256a22720, source: src/world/card_wait_for_hardware_event_variant.c}
   - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, source: src/world/card_io_consume_hardware_events.c}
-  - {addr: 0x800705a0, size: 140, name: card_get_info_with_retries_variant, hash: ba3559c7e03836a0}
-  - {addr: 0x8007062c, size: 188, name: card_poll_info_result_variant, hash: f6ce5450918332a3}
-  - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6}
-  - {addr: 0x8007077c, size: 124, name: open_card_check_slots, hash: b46039f85ab0f00d}
+  - {addr: 0x800705a0, size: 140, name: card_get_info_with_retries_variant, hash: ba3559c7e03836a0, unit: card_checks}
+  - {addr: 0x8007062c, size: 188, name: card_poll_info_result_variant, hash: f6ce5450918332a3, unit: card_checks}
+  - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6, unit: card_checks}
+  - {addr: 0x8007077c, size: 124, name: open_card_check_slots, hash: b46039f85ab0f00d, unit: card_checks}
   - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/lib/psyq/libpress/DecDCTReset.c}
   - {addr: 0x800734c4, size: 140, name: DecDCTGetEnv, hash: f9ac0843b00c34ec, source: src/lib/psyq/libpress/DecDCTGetEnv.c}
   - {addr: 0x80073550, size: 156, name: DecDCTPutEnv, hash: 110217b2c66870d3, source: src/lib/psyq/libpress/DecDCTPutEnv.c}

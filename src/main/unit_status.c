@@ -1,5 +1,6 @@
-/* Equipment quantity totals, position and rewards init, the highest order status effect, zodiac symbols, memory
- * zeroing, casualty counters and status changes. */
+/* A source-first byte copy (a second copy), equipment quantity totals, position and rewards init, the highest order
+ * status effect, zodiac symbols, memory zeroing, casualty counters, status changes, the last ability CT, the action
+ * state setter and the battle load exception handler. */
 
 #include "fft/battle_status.h"
 #include "fft/main.h"
@@ -8,10 +9,18 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
-/* Counts how many of `item_id` the player owns: the inventory stock plus the
- * copies equipped on roster units.  With `include_battle` set, deployed
- * roster units are skipped and the battle units on the player team (except
- * mimes) are counted instead. */
+/* The original wrote the body of main_mem_copy_bytes_source_first a second time as
+ * main_mem_copy_byte_data_source_first. */
+void main_mem_copy_byte_data_source_first(const void* source, void* destination, int count) {
+    const u8* src = source;
+    u8* dst = destination;
+    int i;
+
+    for (i = 0; i < count; i++) {
+        *dst++ = *src++;
+    }
+}
+
 s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
     s32 total;
     s32 i;
@@ -191,4 +200,70 @@ void main_status_store_current(unit_stats_t* unit) {
         unit->status_sets.current[status_set]
             = unit->status_sets.innate[status_set] | unit->inflicted_status[status_set];
     }
+}
+
+/* Charge time of the unit's last ability: the low seven bits of the ability
+ * record's CT byte. */
+void main_unit_copy_last_ability_ct(unit_stats_t* unit) {
+    unit->ability_ct = g_main_ability_range_data[unit->action_command.ability_id].ct & 0x7f;
+}
+
+void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
+    u8 old_status;
+    s32 battle_id;
+    u8 status;
+    u8 cleared;
+    s32 status_id;
+    u8 mask;
+    u8 changed;
+
+    old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
+    battle_id = unit->battle_id;
+    if (action_state == MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING) {
+        action_state = (old_status & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) << 3;
+    }
+    switch (action_state) {
+    case MAIN_UNIT_ACTION_STATE_NONE:
+        status = 0;
+        unit->charged_ability_ct = 0xff;
+        break;
+    case MAIN_UNIT_ACTION_STATE_CHARGING:
+        status = STATUS_BYTE_MASK(STATUS_ID_CHARGING);
+        break;
+    case MAIN_UNIT_ACTION_STATE_JUMPING:
+        status = STATUS_BYTE_MASK(STATUS_ID_JUMP);
+        break;
+    case MAIN_UNIT_ACTION_STATE_DEFENDING:
+        status = STATUS_BYTE_MASK(STATUS_ID_DEFENDING);
+        unit->charged_ability_ct = 0xff;
+        break;
+    case MAIN_UNIT_ACTION_STATE_PERFORMING:
+        status = STATUS_BYTE_MASK(STATUS_ID_PERFORMING);
+        main_unit_copy_last_ability_ct(unit);
+        unit->charged_ability_ct = unit->ability_ct;
+        break;
+    }
+    cleared = status
+        ^ (STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
+            | STATUS_BYTE_MASK(STATUS_ID_DEFENDING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
+    main_status_change_unit(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), status, MAIN_STATUS_ADD);
+    main_status_change_unit(unit, STATUS_BYTE_INDEX(STATUS_ID_CHARGING), cleared, MAIN_STATUS_REMOVE);
+
+    changed = old_status ^ unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
+    mask = STATUS_BYTE_MASK(STATUS_ID_CHARGING);
+    for (status_id = STATUS_HANDLER_INDEX(STATUS_ID_CHARGING); status_id <= STATUS_HANDLER_INDEX(STATUS_ID_PERFORMING);
+        status_id++) {
+        if (changed & mask) {
+            if ((old_status & mask) != 0) {
+                battle_status_enable_special_flags(status_id, 0, battle_id);
+            } else {
+                battle_status_enable_special_flags(status_id, 1, battle_id);
+            }
+        }
+        mask >>= 1;
+    }
+}
+
+void main_system_handle_battle_load_exception(s32 value) {
+    main_system_handle_malloc_exception(3, value);
 }

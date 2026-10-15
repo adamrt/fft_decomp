@@ -1,10 +1,21 @@
-/* Random equipment, job ability learning, RSM calculation, status init and CT, stat refresh, level up and growth, job
- * unlocks and levels, ability range and AOE, palettes and spritesheets. */
+/* The source-first byte copy, random equipment, job ability learning, RSM calculation, status init and CT, stat
+ * refresh, level up and growth, job unlocks and levels, ability range and AOE, palettes, spritesheets and action data
+ * copies. */
 
 #include "fft/battle_status.h"
 #include "fft/main.h"
 #include "fft/memory.h"
 #include "psx/types.h"
+
+void main_mem_copy_bytes_source_first(const void* source, void* destination, int count) {
+    const u8* src = source;
+    u8* dst = destination;
+    int i;
+
+    for (i = 0; i < count; i++) {
+        *dst++ = *src++;
+    }
+}
 
 s32 main_unit_calculate_random_equipment(
     unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {

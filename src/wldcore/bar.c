@@ -1,5 +1,5 @@
-/* The bar, including rumor and proposition lists, rumor and proposition detail levels, the accept confirmation and the
- * number panel level. */
+/* The bar, including the window publish slot, rumor and proposition lists, rumor and proposition detail levels, the
+ * accept confirmation and the number panel level. */
 
 #include "fft/script.h"
 #include "fft/thread.h"
@@ -7,13 +7,22 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Tears down the top window record: releases it, clears the two window system
- * flags, hands the current location id to wldcore_map_build_location_menu_entries, and wipes the
- * scratch buffer.
- *
- * The local pointer to g_wldcore_map_projection_state.marker.kind reproduces the target's
- * saved-register base: read directly, the global is re-materialised at each of
- * the two uses. */
+/* Sibling of the resetter at 0x8007cd78, differing only in the value stored
+ * into sequence. The record stores may alias `level`, so they invalidate
+ * the cached parameter loads and reproduce the target's
+ * reloads; `index` shares one address computation between the last two. */
+void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level) {
+    s32 index;
+
+    g_wldcore_window_records[level->main_window].palette = 10;
+    g_wldcore_window_records[level->side_window].palette = 6;
+    g_wldcore_window_render_records[level->frame_render].palette = 2;
+    g_wldcore_window_records[level->main_window].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_PRESS;
+    index = level->main_window;
+    g_wldcore_window_records[index].anim_counter = 0;
+    g_wldcore_window_records[index].frame_index = 0;
+}
+
 void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level) {
     s32* selected = &g_wldcore_map_projection_state.marker.kind;
     s32 i;
@@ -792,36 +801,4 @@ void wldcore_menu_push_number_panel_level(void) {
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_NUMBER_PANEL;
     g_wldcore_menu_stack_depth = record_index + 1;
-}
-
-/* Input step of a number-panel level that waits on WORLD thread 12: once the
- * thread finishes, the pending result (level->result) selects which resume
- * handler runs and two levels are popped. Otherwise cancel arms result -1 and
- * confirm arms result 1, publishing the entered number, and either restarts
- * thread 12. */
-void wldcore_menu_number_panel_wait_for_thread_step(wldcore_menu_panel_level_t* level) {
-    if (level->result != 0 && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        g_menu_blocked_buttons = 0;
-        g_wldcore_menu_ordering_table_offset = 1;
-        g_wldcore_window_render_record_count--;
-        g_wldcore_window_render_object_count--;
-        g_wldcore_menu_stack_depth -= 2;
-        if (level->result == 1) {
-            wldcore_proposition_push_dispatch_confirm_level();
-        } else {
-            wldcore_list_open_available_propositions();
-        }
-        return;
-    }
-    if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
-        wldcore_sound_play_effect(MAIN_SFX_CANCEL);
-        g_wldcore_context_value_display_mode = WLDCORE_VALUE_DISPLAY_FUNDS;
-        level->result = -1;
-        thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-    } else if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
-        wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
-        level->result = 1;
-        g_wldcore_proposition_dispatch_days = g_wldcore_active_menu_value;
-        thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
-    }
 }
