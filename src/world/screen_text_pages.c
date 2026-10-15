@@ -1,4 +1,4 @@
-/* Screen. A small object between boundaries the binary proves. */
+/* Text page redraws on scroll and AT list building for the screen. */
 
 #include "fft/gfx.h"
 #include "fft/memory.h"

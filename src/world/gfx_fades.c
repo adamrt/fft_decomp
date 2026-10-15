@@ -1,4 +1,4 @@
-/* Gfx fades. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Screen fade state, fade starts and per-tile fade updates. */
 
 #include "fft/world.h"
 #include "psx/libgpu.h"

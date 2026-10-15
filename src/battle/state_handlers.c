@@ -1,4 +1,5 @@
-/* State unit moving and map change. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* The state handlers from the move confirm menu through attack execution, target selection, turn changes, effects and
+ * map jump transitions. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

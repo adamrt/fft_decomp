@@ -1,4 +1,4 @@
-/* Tutorial category lists. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* Tutorial category input and the formation and mask 1 tutorial lists. */
 
 #include "fft/script.h"
 #include "fft/thread.h"

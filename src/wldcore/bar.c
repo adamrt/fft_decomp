@@ -1,5 +1,5 @@
-/* Bar rumors and proposition lists. Its start is a boundary the binary proves; its end is an object boundary the
- * jump-table alignment places somewhere nearby. */
+/* The bar, including rumor and proposition lists, rumor and proposition detail levels, the accept confirmation and the
+ * number panel level. */
 
 #include "fft/script.h"
 #include "fft/thread.h"

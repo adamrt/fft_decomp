@@ -1,4 +1,4 @@
-/* Gfx save. A small object between boundaries the binary proves. */
+/* The render ordering table and the save menu graphic thread. */
 
 #include "fft/battle_menu.h"
 #include "fft/event_card.h"

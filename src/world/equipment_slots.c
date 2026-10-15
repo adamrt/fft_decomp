@@ -1,5 +1,5 @@
-/* Shop quantities and equipment slots. Its start is a boundary the binary proves; its end is a boundary the binary
- * proves. */
+/* Poached item quantities, best fit equipment, equipping items to slots, equip checks, job changes, loadout validation
+ * and item category lists. */
 
 #include "fft/world.h"
 #include "psx/types.h"

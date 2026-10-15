@@ -1,5 +1,5 @@
-/* Map tiles and screen overlay. Its start is a cut chosen by topic; its end is an object boundary the read-only data
- * layout places somewhere nearby. */
+/* Battle state timing, tile lookups, map data load polling, map command dispatch, ENTD unit loading, the map init
+ * sequence and screen color modulation. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

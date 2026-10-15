@@ -1,5 +1,6 @@
-/* Menu unit status lists and text sections, one object of the library BATTLE and WORLD link in the same order; cuts
- * inside the library are chosen by topic. */
+/* Unit status lists, billboard data, text section pointer relocation, the dismiss and join script instructions, height
+ * display, sprite pages, hovered and preview unit stats, panel threads, input handling, window sprites and CLUT
+ * selection. */
 
 #include "fft/battle_action.h"
 #include "fft/battle_event.h"

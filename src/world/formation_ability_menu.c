@@ -1,4 +1,5 @@
-/* Formation ability menu. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The formation ability menu, including the idle thread, set, remove and clear-all abilities, learning and equip
+ * support changes. */
 
 #include "fft/thread.h"
 #include "fft/world.h"

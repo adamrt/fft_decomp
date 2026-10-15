@@ -1,5 +1,4 @@
-/* AI attack origins, target evaluation and action simulation, with the math ability table. Its start is a boundary the
- * binary proves. */
+/* AI attack origins, target evaluation and action simulation, with the math ability table. */
 
 #include "fft/battle_action.h"
 #include "fft/battle_ai.h"

@@ -1,4 +1,4 @@
-/* Editor. A small object between boundaries the binary proves. */
+/* The unit editor, including applying values to a battle unit, the unit thread and the session. */
 
 #include "fft/battle_menu.h"
 #include "fft/battle_script.h"

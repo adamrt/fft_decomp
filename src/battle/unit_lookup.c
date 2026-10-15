@@ -1,4 +1,5 @@
-/* Gfx unit palettes and shadows. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Deployment and game loop entry, unit lookups by tile, runtime id and battle id, SP2 spritesheet loading, sprite
+ * display init, polygon construction and camera relative offsets. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

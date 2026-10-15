@@ -1,4 +1,5 @@
-/* Unit heights actions and reactions. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Attack preparation, including height data, target maps, MP cost, reaction setup, ENTD unit loading and placement
+ * validation. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

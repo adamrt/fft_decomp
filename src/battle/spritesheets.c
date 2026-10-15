@@ -1,4 +1,5 @@
-/* Gfx post action text and unit sprites. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Post-action text animation, spritesheet SHP and SEQ lookups, spritesheet slot claims, unit palette tints and status
+ * bubble triggers. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

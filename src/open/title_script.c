@@ -1,5 +1,5 @@
-/* Music test menus and script opcodes. Its start is a boundary the binary proves; its end is a boundary the binary
- * proves. */
+/* Music test menus, text message controllers, title demo streams, transitions and crossfades, the opening script state,
+ * XA audio, the ending movie and the script opcodes. */
 
 #include "fft/menu.h"
 #include "fft/open.h"

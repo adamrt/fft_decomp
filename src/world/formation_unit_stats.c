@@ -1,4 +1,4 @@
-/* Formation. A small object between boundaries the binary proves. */
+/* Unit level, experience, brave and faith accessors. */
 
 #include "fft/world.h"
 

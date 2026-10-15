@@ -1,5 +1,5 @@
-/* Memory copies and nibbles, one object of the library BATTLE and WORLD link in the same order; cuts inside the library
- * are chosen by topic. */
+/* Byte copies, packed nibble access, 4bpp rect mirroring and pixel access, and window image and frame image building
+ * and upload. */
 
 #include "fft/battle.h"
 #include "fft/battle_menu.h"

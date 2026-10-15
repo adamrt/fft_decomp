@@ -1,4 +1,4 @@
-/* Formation display init. A small object between boundaries the binary proves. */
+/* Formation menu display init, unit list rebuilds, the map busy check and unit messages with sound. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"

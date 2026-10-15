@@ -1,4 +1,4 @@
-/* Fullscreen graphics. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Fullscreen graphics for the chapter title and game over screens. */
 
 #include "fft/battle_gfx.h"
 #include "fft/event_etc.h"

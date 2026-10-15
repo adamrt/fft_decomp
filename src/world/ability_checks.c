@@ -1,4 +1,4 @@
-/* Ability. A small object between boundaries the binary proves. */
+/* Secondary skillset listing and the Two Swords, Two Hands and Secret Hunt checks. */
 
 #include "fft/main.h"
 #include "fft/world.h"

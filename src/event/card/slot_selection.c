@@ -1,4 +1,4 @@
-/* Io. A small object between boundaries the binary proves. */
+/* The selected card slot. */
 
 #include "fft/event_card.h"
 #include "psx/types.h"

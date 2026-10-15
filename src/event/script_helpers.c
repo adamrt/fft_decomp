@@ -1,5 +1,6 @@
-/* Script unit helpers and modal sfx, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* Inflict status commands, unit animation and facing, music volume, screen overlay ramps, modal menu sound effects,
+ * camera angle helpers, event input, sprite and window buffer init, texture rect allocation and the menu buffer
+ * allocator. */
 
 #include "fft/battle_camera.h"
 #include "fft/battle_event.h"

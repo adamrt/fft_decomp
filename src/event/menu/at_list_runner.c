@@ -1,5 +1,4 @@
-/* Menu redraw text page on scroll set, an object of the menu library linked by OPTION, WORLD; its edges are where the
- * overlays' link orders diverge. */
+/* Text page redraws on scroll and the AT list runner. */
 
 #include "fft/battle_script.h"
 #include "fft/event_option.h"

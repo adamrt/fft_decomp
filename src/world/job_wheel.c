@@ -1,4 +1,5 @@
-/* Formation job wheel. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The job wheel, including the cursor job level, availability, the menu, sprites, job changes, open and close
+ * animations, the portrait and the job name. */
 
 #include "fft/gfx.h"
 #include "fft/main.h"

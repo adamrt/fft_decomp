@@ -1,4 +1,4 @@
-/* Deploy select and map title. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The deployment select menu, deployment strings, shaded panel strips and the map title graphic. */
 
 #include "fft/battle_script.h"
 #include "fft/event_attack.h"

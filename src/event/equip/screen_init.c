@@ -1,4 +1,4 @@
-/* Menu panel. A small object between boundaries the binary proves. */
+/* Image loading, screen init and the unit status and equipment thread toggles. */
 
 #include "fft/event_equip.h"
 #include "fft/gfx.h"

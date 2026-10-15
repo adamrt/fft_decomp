@@ -1,5 +1,5 @@
-/* Formation ability slots and gfx init. Its start is a boundary the binary proves; its end is a boundary the binary
- * proves. */
+/* Unit ability slots and locks, learning, unit graphic entries, roster lookups, unit copies, zodiac by date, monster
+ * breeding and packet buffer swaps. */
 
 #include "fft/main.h"
 #include "fft/script.h"

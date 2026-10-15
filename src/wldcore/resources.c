@@ -1,4 +1,5 @@
-/* Picture loading and fades. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* VRAM image streams, picture and background loading, message blocks, sound novel files, display rects, input repeat,
+ * render object visibility, screen fades, proposition rows and availability, the calendar and nine-bit records. */
 
 #include "fft/script.h"
 #include "fft/wldcore.h"

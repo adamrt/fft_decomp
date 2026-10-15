@@ -1,4 +1,5 @@
-/* File loading and birthday. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Title screen controllers, including file loading, the OPNTEX frame buffer, movie streams, the title menu, sound type,
+ * the new game transition and the birthday date and confirmation menus. */
 
 #include "fft/menu.h"
 #include "fft/open.h"

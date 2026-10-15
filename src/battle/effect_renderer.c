@@ -1,5 +1,5 @@
-/* The effect renderer: heap, sprite blocks, primitives, models and vector arithmetic. Its end is a boundary the binary
- * proves (an address gap). */
+/* The effect renderer, including the heap, sprite blocks, primitives, particle emitters, interpolation, models and
+ * vector arithmetic. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

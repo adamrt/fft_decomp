@@ -1,4 +1,4 @@
-/* Menu item. A small object between boundaries the binary proves. */
+/* Item action state, the type order mode and the equipment slot marker. */
 
 #include "fft/event_equip.h"
 #include "fft/menu.h"

@@ -1,5 +1,5 @@
-/* Tile data access and the core formulas: misses, evasion, zodiac, elements and the dance abilities. Its edges are cuts
- * chosen by topic. */
+/* Tile data access and the core formulas, including misses, evasion, zodiac, elements, XA and YA setup, supports and
+ * the dance abilities. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

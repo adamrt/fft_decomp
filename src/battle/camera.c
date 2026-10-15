@@ -1,5 +1,5 @@
-/* The battle camera: real-coordinate and zoom deltas (each written twice in the original), screen offset, zoom and
- * rotation. Both edges are cuts chosen by topic. */
+/* The battle camera, with saved state, deltas and animation steps for real coordinates, screen offset, zoom and
+ * rotation (the real-coordinate and zoom delta setters are written twice in the original). */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

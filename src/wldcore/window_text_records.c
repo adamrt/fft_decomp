@@ -1,5 +1,4 @@
-/* Text entries of window records, shared by the opening and the world map with their own record layouts. Both edges are
- * boundaries the binary proves. */
+/* Text entries of window records, shared by the opening and the world map with their own record layouts. */
 
 #include "fft/menu.h"
 #include "fft/open.h"

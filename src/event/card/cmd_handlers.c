@@ -1,4 +1,4 @@
-/* Cmd. A small object between boundaries the binary proves. */
+/* The textured quad and window frame command handlers. */
 
 #include "fft/event_card.h"
 #include "fft/menu.h"

@@ -1,4 +1,5 @@
-/* Unit stats and party. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Party slots and unit generation, raw stats, skillset abilities, item and job data pointers, job and battle data init
+ * from ENTD, RSM flags, actual stats, abilities and equipment. */
 
 #include "fft/battle_text.h"
 #include "fft/main.h"

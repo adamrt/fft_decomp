@@ -1,4 +1,4 @@
-/* Unit item. A small object between boundaries the binary proves. */
+/* Slot items, equip checks, slot validation and the filtered item list. */
 
 #include "fft/event_equip.h"
 

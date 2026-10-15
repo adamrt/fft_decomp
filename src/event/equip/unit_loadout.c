@@ -1,4 +1,4 @@
-/* Unit. A small object between boundaries the binary proves. */
+/* Two-handed weapon checks and unit data built from, loaded from and committed to stats. */
 
 #include "fft/event_equip.h"
 #include "psx/libc.h"

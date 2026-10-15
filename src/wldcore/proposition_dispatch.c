@@ -1,5 +1,5 @@
-/* Proposition dispatch and messages. Its start is an object boundary the jump-table alignment places somewhere nearby;
- * its end is a cut chosen by topic. */
+/* Proposition dispatch confirmation, daily counters, the send unit level and browser, completed propositions, report
+ * and result levels, and report speaker and message selection. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

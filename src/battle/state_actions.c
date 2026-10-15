@@ -1,4 +1,5 @@
-/* State action flow. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Charged action announcements, pre-attack animation, casting, target selection and display, animation speed halving,
+ * and the state handlers from the free cursor through unit moving. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

@@ -1,4 +1,5 @@
-/* Move pathing and target tiles. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* Movement range spreading and pathfinding, teleport chances, path encoding, and targeting panel ranges for abilities
+ * and weapons. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

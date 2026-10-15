@@ -1,5 +1,4 @@
-/* Action menus status and unit checks. Its start is a cut chosen by topic; its end is an object boundary the read-only
- * data layout places somewhere nearby. */
+/* Crystal and treasure generation, enemy level data, unit stat lookups and the unit action menu set. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

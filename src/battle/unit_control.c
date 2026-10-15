@@ -1,5 +1,5 @@
-/* Unit control by runtime id: map background color, animation and mounting setters, state flags. Its start is a cut
- * chosen by topic (the camera precedes). */
+/* Unit control by runtime id, including map background color, animation and facing setters, shadow triggers, map jump
+ * state starts, coordinate conversions and mounting. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

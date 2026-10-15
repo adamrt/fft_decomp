@@ -1,4 +1,4 @@
-/* Gfx item. A small object between boundaries the binary proves. */
+/* Textured quad submission and inventory totals. */
 
 #include "fft/event_equip.h"
 #include "fft/menu.h"

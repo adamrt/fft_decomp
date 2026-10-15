@@ -1,4 +1,5 @@
-/* Formation input. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* The formation screen, including the menu input filter, unit selection slides, the screen run, sound dispatch, menu
+ * state, frame processing and unit selection staging. */
 
 #include "fft/gfx.h"
 #include "fft/sound.h"

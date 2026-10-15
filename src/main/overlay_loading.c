@@ -1,4 +1,4 @@
-/* Zodiac and overlay loading. A small object between boundaries the binary proves. */
+/* The zodiac graphic, FRAME.BIN VRAM loading, the WORLD.BIN and WLDCORE.BIN opens and data loading from disc. */
 
 #include "fft/main.h"
 #include "fft/wldcore.h"

@@ -1,5 +1,5 @@
-/* Brave story levels. Its start is a cut chosen by topic; its end is an object boundary the jump-table alignment places
- * somewhere nearby. */
+/* Brave Story levels, including story events and their text, script variable lists and details, and tutorial topics and
+ * their text. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

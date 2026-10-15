@@ -1,4 +1,5 @@
-/* Formation menus and text. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Location lists, destination confirmation, submenu text pages, common graphics and text loading, thread results and
+ * control, palettes, the main menu threads, the card menu, and the formation open requests and screen dispatch. */
 
 #include "fft/gfx.h"
 #include "fft/memory.h"

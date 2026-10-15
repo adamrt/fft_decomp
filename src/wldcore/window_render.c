@@ -1,4 +1,5 @@
-/* Window render and map opcodes. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* VRAM render records, panel render threads, list cursor state, scrollable text windows, the sound queue, and the map
+ * script conditional and request opcodes. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

@@ -1,4 +1,4 @@
-/* Gfx input. A small object between boundaries the binary proves. */
+/* Page scroll input, context swaps, and primitive buffer and context init. */
 
 #include "fft/event_jobstts.h"
 #include "fft/menu.h"

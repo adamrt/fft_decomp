@@ -1,4 +1,5 @@
-/* Action menus and post action. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Idle action menus, the free cursor, the move and wait commands, facing changes, and post-action level-up and message
+ * reporting. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

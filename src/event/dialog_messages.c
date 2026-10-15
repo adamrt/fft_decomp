@@ -1,5 +1,5 @@
-/* Text display messages, one object of the library BATTLE and WORLD link in the same order; cuts inside the library are
- * chosen by topic. */
+/* Display message building, dialog input state, thread slot release, typewriter glyph drawing, format string ids and
+ * text measurement. */
 
 #include "fft/battle_menu.h"
 #include "fft/battle_text.h"

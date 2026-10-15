@@ -1,4 +1,4 @@
-/* At list and effect starts. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* AT list activation, team palette tints, secondary effect starts, post-action unit display and rider mounting. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

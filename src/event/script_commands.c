@@ -1,5 +1,6 @@
-/* Script sound camera and menus, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* Background sound threads, thread id resolution, script jump targets, conditions and variables, random seeds, text
+ * section pointers, controller input, GPU primitive submission, draw modes, image loading, and number and text entry
+ * display. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

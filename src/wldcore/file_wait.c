@@ -1,5 +1,4 @@
-/* Waiting for file loads, shared by the opening and the world map; the world map adds a blocking scratch load. Both
- * edges are boundaries the binary proves. */
+/* Waiting for file loads, shared by the opening and the world map; the world map adds a blocking scratch load. */
 
 #include "fft/menu.h"
 #include "fft/open.h"

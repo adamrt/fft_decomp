@@ -1,5 +1,5 @@
-/* Cd reset entd and vectors. Its start is an object boundary the read-only data layout places somewhere nearby; its end
- * is a boundary the binary proves. */
+/* CD-ROM and CPU RAM reset, the zodiac frame, startup and game state reset, ENTD files and encounters, new game
+ * inventory and party, and SVECTOR setting. */
 
 #include "fft/main.h"
 #include "fft/script.h"

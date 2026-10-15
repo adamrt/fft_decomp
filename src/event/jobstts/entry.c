@@ -1,4 +1,4 @@
-/* Menu entrypoint. A small object between boundaries the binary proves. */
+/* Image loading, selection reset and the JOBSTTS entrypoint. */
 
 #include "fft/event_jobstts.h"
 #include "fft/gfx.h"

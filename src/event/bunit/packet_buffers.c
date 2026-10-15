@@ -1,4 +1,4 @@
-/* Gfx. A small object between boundaries the binary proves. */
+/* Frame submission and packet buffer swaps and init. */
 
 #include "fft/event_bunit.h"
 #include "fft/gfx.h"

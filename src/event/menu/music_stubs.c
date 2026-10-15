@@ -1,5 +1,4 @@
-/* Sound wait for music stub, an object of the menu library linked by BATTLE, ATTACK, REQUIRE, WORLD; its edges are
- * where the overlays' link orders diverge. */
+/* The music wait stub and music track playback. */
 
 #include "fft/main.h"
 #include "fft/sound.h"

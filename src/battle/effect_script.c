@@ -1,5 +1,5 @@
-/* The effect script: section pointers, timing curves, script commands and timelines. Its edges are boundaries the
- * binary proves. */
+/* The effect script, including section pointers, timing curves, effect loading and playback, state records, timelines
+ * and the script commands. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

@@ -1,5 +1,5 @@
-/* Unit motion: cursor projection, fades, real and world coordinate conversions, teleport distortion and movement toward
- * targets. Its end is a cut chosen by topic (the camera follows). */
+/* Unit motion, including cursor projection, fades, real and world coordinate conversions, teleport distortion, jump
+ * arcs and movement toward targets. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

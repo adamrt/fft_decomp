@@ -1,4 +1,4 @@
-/* Menu script opcodes. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Menu script opcodes for conditionals, tiles, sprites, lines, window frames, tiled rectangles and CLUTs. */
 
 #include "fft/world.h"
 #include "psx/libgpu.h"

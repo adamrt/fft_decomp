@@ -37,8 +37,8 @@ preserving every original byte.
 
 - `src/<program>/` (`main`, `battle`, `world`, `wldcore`, `open`): each
   program's own code as feature files of a few to a few dozen functions,
-  named after what they hold. A file's leading comment says what it is and
-  which of its edges the binary proves.
+  named after what they hold. A file's leading comment briefly describes
+  what the file holds.
 - `src/event/`: the event library (script interpreter, threads, dialog and
   text, windows, sound queue) compiled into BATTLE and WORLD. `src/menu/`:
   the menu library compiled into WORLD and the EVENT overlays, as the small

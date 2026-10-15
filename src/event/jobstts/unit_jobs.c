@@ -1,4 +1,4 @@
-/* Unit job. A small object between boundaries the binary proves. */
+/* Unit job data copies and init, the base job and the unit job list. */
 
 #include "fft/event_jobstts.h"
 #include "fft/main.h"

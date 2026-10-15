@@ -1,4 +1,4 @@
-/* Card save files. A small object between boundaries the binary proves. */
+/* Save file and free block counts and the selected card probe. */
 
 #include "fft/world.h"
 #include "psx/types.h"

@@ -1,4 +1,5 @@
-/* Formation item menu. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The formation item menu, including equip, best fit, remove and remove-all, quantity discards and the selected unit HP
+ * bonus. */
 
 #include "fft/sound.h"
 #include "fft/thread.h"

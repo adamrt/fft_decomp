@@ -1,5 +1,4 @@
-/* Gfx set scaled poly ft4 8bpp set, an object of the menu library linked by ATTACK, CARD, DEBUGCHR, REQUIRE, MAIN,
- * WORLD; its edges are where the overlays' link orders diverge. */
+/* Scaled 8bpp POLY_FT4 setup and the zodiac primitives. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"

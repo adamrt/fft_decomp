@@ -1,5 +1,5 @@
-/* Action resolution: knockback and reactions, pre-formula setup, finalization and status changes. Its edges are cuts
- * chosen by topic. */
+/* Action resolution, including knockback, reaction checks, pre-formula setup, attack finalization and status changes.
+ */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

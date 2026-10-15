@@ -1,4 +1,5 @@
-/* Display and sound requests. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* Display swaps and fades, vsync, draw sync and CD callbacks, music loading, playback and parameters, tunes, and sound
+ * effects. */
 
 #include "fft/main.h"
 #include "psx/libgpu.h"

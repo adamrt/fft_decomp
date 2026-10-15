@@ -1,5 +1,5 @@
-/* Overlays drawn on units and tiles: the cursor polygon, shadows, status bubbles and action result numbers, with their
- * zoom curves. Its edges are cuts chosen by topic. */
+/* Overlays drawn on units and tiles, including the cursor polygon, world heights, shadows, direction arrows, status
+ * bubbles and action result numbers, with their zoom curves. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

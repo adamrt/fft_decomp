@@ -1,4 +1,5 @@
-/* Main loop and movies. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The main loop and ending cutscene, MDEC movie streaming and frame decoding, fade overlays, input repeat, new game
+ * party init and birthday zodiac conversion. */
 
 #include "fft/open.h"
 #include "psx/libcd.h"

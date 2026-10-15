@@ -1,4 +1,5 @@
-/* Move entry edges and camera turns. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* Unit path steps along tile edges, knockback and teleport steps, the free cursor, and camera pan, rotation, zoom, tilt
+ * and focus tracking. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

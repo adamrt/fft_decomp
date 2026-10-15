@@ -1,5 +1,4 @@
-/* Unit coords and return stubs, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* Unit map coordinate copies by runtime id and the missing unit stub. */
 
 #include "fft/battle_unit.h"
 #include "fft/script.h"

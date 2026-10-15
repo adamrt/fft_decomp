@@ -1,4 +1,4 @@
-/* Input. A small object between boundaries the binary proves. */
+/* Controller input, suppressed during fades. */
 
 #include "fft/event_card.h"
 #include "fft/menu.h"

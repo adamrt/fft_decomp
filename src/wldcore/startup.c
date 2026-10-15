@@ -1,4 +1,5 @@
-/* Startup and frame loop. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* WLDCORE entry, the frame gate, core and subsystem init, world frame drawing, the clip rect, world map state, loop
+ * finalization and the restored menu level. */
 
 #include "fft/script.h"
 #include "fft/wldcore.h"

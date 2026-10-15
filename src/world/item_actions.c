@@ -1,4 +1,4 @@
-/* Item menu. A small object between boundaries the binary proves. */
+/* The item action and sort order menus, units equipping the selected item, and the row window and cursor. */
 
 #include "fft/sound.h"
 #include "fft/thread.h"

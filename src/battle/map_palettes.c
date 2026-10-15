@@ -1,5 +1,5 @@
-/* Map palettes: color transitions, clut cycles, VRAM palettes and the deployment frame. Its start is a boundary the
- * binary proves (the merged read-only data would grow); its end is a boundary the binary proves. */
+/* Map palettes, including background gradient, ambient light and darkness transitions, CLUT cycles, VRAM palette
+ * uploads, unit palette modulation, and the deployment frame loop. */
 
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"

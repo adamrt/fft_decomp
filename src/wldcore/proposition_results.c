@@ -1,4 +1,5 @@
-/* Proposition results and sound novel levels. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Proposition participant messages, success and rewards, countdown and sequence messages, discovery announcements,
+ * active propositions and cancel confirmation, sound novel levels, unexplored lands and treasures. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

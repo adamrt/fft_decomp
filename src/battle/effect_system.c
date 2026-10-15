@@ -1,5 +1,5 @@
-/* The effect system: slots, camera keyframes, secondary effects and their handlers. Its start is a boundary the binary
- * proves. */
+/* The effect system, including camera keyframes, effect slots, projectile trajectories, secondary effects and their
+ * handlers. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

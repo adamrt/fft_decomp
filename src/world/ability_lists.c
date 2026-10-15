@@ -1,5 +1,5 @@
-/* Ability categories and inventory. Its start is a boundary the binary proves; its end is a boundary the binary proves.
- */
+/* Ability category checks, the learn and view ability lists, unit ordering, text entry waits, the dismiss unit step and
+ * gil adjustment. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

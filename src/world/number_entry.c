@@ -1,4 +1,5 @@
-/* Menu entry values. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Entry value announcement, clamped icon lists, entry cursor quads, the number, labeled number and text entry threads,
+ * signed numbers and entry chains. */
 
 #include "fft/gfx.h"
 #include "fft/memory.h"

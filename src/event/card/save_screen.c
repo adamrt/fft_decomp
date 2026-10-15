@@ -1,4 +1,5 @@
-/* Save screen. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The save screen, including slot selection, slot scans, writes, the save buffer, playtime, descriptions and the
+ * scrolling slot list. */
 
 #include "fft/battle_gfx.h"
 #include "fft/battle_script.h"

@@ -1,4 +1,5 @@
-/* Party rewards and conditions. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Rewards, including item and equipment overflow, post-battle changes, war trophies and bonus money, the gil ticker,
+ * POLY_GT4 arrays, condition display, the bonus image burst and the help menu overlay. */
 
 #include "fft/battle_gfx.h"
 #include "fft/battle_menu.h"

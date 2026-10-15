@@ -1,4 +1,4 @@
-/* Sound novel script and opcodes. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Sound novel saved state, script execution, pending sounds, the countdown timer and the sound novel opcodes. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

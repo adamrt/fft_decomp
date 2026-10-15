@@ -1,4 +1,4 @@
-/* Load sound. A small object between boundaries the binary proves. */
+/* Scenario conditionals, the music resync with map darkness, and marking other squads' units undeployable. */
 
 #include "fft/battle_script.h"
 #include "fft/event_attack.h"

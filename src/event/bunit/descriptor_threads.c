@@ -1,4 +1,5 @@
-/* Descriptor threads. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Descriptor threads, the selection thread, node cursor updates, the bits reader, controller input and event thread
+ * state. */
 
 #include "fft/event_bunit.h"
 #include "fft/menu.h"

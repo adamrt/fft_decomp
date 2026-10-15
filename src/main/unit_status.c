@@ -1,4 +1,5 @@
-/* Item quantities and status. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Equipment quantity totals, position and rewards init, the highest order status effect, zodiac symbols, memory
+ * zeroing, casualty counters and status changes. */
 
 #include "fft/battle_status.h"
 #include "fft/main.h"

@@ -1,4 +1,4 @@
-/* Input. A small object between boundaries the binary proves. */
+/* Controller reading and update. */
 
 #include "fft/world.h"
 #include "psx/pad.h"

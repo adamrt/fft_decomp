@@ -1,5 +1,5 @@
-/* Text cursor and backreferences, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* The dialog thread, including text cursor and backreference state, FNT values, entry lookup, digit counting, window
+ * quad tweens and the pause instruction. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

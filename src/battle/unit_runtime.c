@@ -1,5 +1,5 @@
-/* Unit state by runtime id: event offsets (written twice in the original), flags, evtchr VRAM and effect calls. Its end
- * is a boundary the binary proves. */
+/* Unit state by runtime id, including event offsets (written twice in the original), update suppression flags, id
+ * conversions, graphics loading, EVTCHR VRAM slots and effect starts. */
 
 #include "fft/battle_effect.h"
 #include "fft/battle_gfx.h"

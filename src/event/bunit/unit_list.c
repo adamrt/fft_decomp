@@ -1,4 +1,5 @@
-/* Unit list panels. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Unit list panels, including stat accessors, list scrolling, the pressable button, the unit grid, falloff shading, the
+ * rhombus cursor trail, sprite and name plates, and index lists. */
 
 #include "fft/event_bunit.h"
 #include "fft/menu.h"

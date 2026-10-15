@@ -1,4 +1,4 @@
-/* Screen state and previews. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Equip screen state, the equip and remove modes, the clear-all prompt and the preview HP bonus. */
 
 #include "fft/event_equip.h"
 #include "fft/menu.h"

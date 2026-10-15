@@ -1,5 +1,4 @@
-/* AI command building and action selection, with the recovery status table. Its end is a boundary the binary proves (a
- * call disagrees with the definition across it). */
+/* AI command building and action selection, with the recovery status table. */
 
 #include "fft/battle_ai.h"
 #include "fft/battle_map.h"

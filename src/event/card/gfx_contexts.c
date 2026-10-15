@@ -1,4 +1,4 @@
-/* Gfx. A small object between boundaries the binary proves. */
+/* Frame submission, primitive lists and graphics context init. */
 
 #include "fft/event_card.h"
 #include "fft/menu.h"

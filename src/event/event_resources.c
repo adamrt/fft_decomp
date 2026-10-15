@@ -1,5 +1,6 @@
-/* Menu icons windows and scripts, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* Icon primitives, the auto battle setting, ability preview AT lists, text columns, timed icon threads, panel fades,
+ * overlay reservation, companion file requests, display conditions, the dark screen and spell quote threads, and the
+ * openers for the option, BUNIT, help, JOBSTTS, EQUIP and DEBUGCHR menus. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

@@ -1,5 +1,5 @@
-/* Unit equipment jobs and abilities. Its start is a boundary the binary proves; its end is a boundary the binary
- * proves. */
+/* Random equipment, job ability learning, RSM calculation, status init and CT, stat refresh, level up and growth, job
+ * unlocks and levels, ability range and AOE, palettes and spritesheets. */
 
 #include "fft/battle_status.h"
 #include "fft/main.h"

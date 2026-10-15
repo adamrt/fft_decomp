@@ -1,4 +1,4 @@
-/* Map loading and weather sfx. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* Map data and mesh loading, mesh render record init, and weather sound effects. */
 
 #include "fft/battle.h"
 #include "fft/battle_map.h"

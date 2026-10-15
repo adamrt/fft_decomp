@@ -1,4 +1,5 @@
-/* Entry and panels. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* EQUIP entry, including the item numeric thread toggle, state flags, thread stops, selected unit data, selection
+ * indices and messages with sound. */
 
 #include "fft/event_equip.h"
 #include "fft/menu.h"

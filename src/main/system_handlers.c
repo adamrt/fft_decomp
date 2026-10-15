@@ -1,5 +1,4 @@
-/* System stubs and overlay returns. Its start is a boundary the binary proves; its end is a boundary the binary proves.
- */
+/* System report and exception handlers, ordering table access and swap, and save state and options init. */
 
 #include "fft/battle_gfx.h"
 #include "fft/main.h"

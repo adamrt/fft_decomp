@@ -1,4 +1,5 @@
-/* Congratulations and overlays. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Post-battle party changes, including congratulations text, brave and faith updates, low brave and high faith
+ * departures, join candidates, the bugged ready condition, selection waits and the JOBSTTS overlay open. */
 
 #include "fft/battle_menu.h"
 #include "fft/battle_script.h"

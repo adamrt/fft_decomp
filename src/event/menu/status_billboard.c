@@ -1,5 +1,4 @@
-/* Text fill field with terminators, an object of the menu library linked by BATTLE, DEBUGCHR, REQUIRE, WORLD; its edges
- * are where the overlays' link orders diverge. */
+/* Field filling with terminators, unit data copies to the status billboard and selected unit loading. */
 
 #include "fft/battle_action.h"
 #include "fft/battle_menu.h"

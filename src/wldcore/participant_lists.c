@@ -1,5 +1,5 @@
-/* Tutorial and proposition list levels. Its start is an object boundary the jump-table alignment places somewhere
- * nearby; its end is a boundary the binary proves. */
+/* Tint transitions, proposition categories and active propositions, participant lists and details, Brave Story
+ * propositions and attempt details, screen transitions and tutorial categories. */
 
 #include "fft/script.h"
 #include "fft/thread.h"

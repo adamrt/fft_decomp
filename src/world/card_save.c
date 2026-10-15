@@ -1,4 +1,5 @@
-/* Card save screens. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The memory card screen, including slot, mode, load and save steps, the save image, slot scans, playtime, descriptions
+ * and the slot list. */
 
 #include "fft/gfx.h"
 #include "fft/main.h"

@@ -1,5 +1,4 @@
-/* Thread parameters and globals, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* Thread accessors for the current global pointer, parameters 1 to 3 and running checks. */
 
 #include "fft/thread.h"
 

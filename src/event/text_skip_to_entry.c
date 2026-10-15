@@ -1,5 +1,4 @@
-/* Text, one object of the library BATTLE and WORLD link in the same order; cuts inside the library are chosen by topic.
- */
+/* Skipping forward through text to a numbered entry. */
 
 #include "fft/menu.h"
 #include "psx/types.h"

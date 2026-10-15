@@ -1,5 +1,6 @@
-/* Script unit instructions, one object of the library BATTLE and WORLD link in the same order; cuts inside the library
- * are chosen by topic. */
+/* Event execution and loading, s16 reads and writes, the camera and map light threads, darkness, earthquake, sprite
+ * moves, matrix copies, camera focus, unit filters, teleport, warp, rotation, staged status data, inflict status, stat
+ * changes and marching units. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

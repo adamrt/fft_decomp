@@ -1,4 +1,4 @@
-/* Status action and battle load exception. A small object between boundaries the binary proves. */
+/* The action state setter and the battle load exception handler. */
 
 #include "fft/battle_status.h"
 #include "fft/main.h"

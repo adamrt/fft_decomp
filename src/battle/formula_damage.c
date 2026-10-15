@@ -1,4 +1,5 @@
-/* Formulas 4. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Ability formulas for talk skills, physical stat reduction, PA and WP based damage, absorption and healing, level
+ * changes, dragon abilities and brave loss. */
 
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"

@@ -1,4 +1,5 @@
-/* Ramza checks and script flag lists. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* Ramza roster index and brave and faith checks, bit access, save completion percent, and the script flag list and
+ * detail levels. */
 
 #include "fft/script.h"
 #include "fft/thread.h"

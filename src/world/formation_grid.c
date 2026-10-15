@@ -1,4 +1,5 @@
-/* Formation screens. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The formation unit grid, including scrolling, the cursor, background tiles, the cursor trail, unit slots, grid
+ * transitions, portrait slides and unit and egg sprites. */
 
 #include "fft/thread.h"
 #include "fft/world.h"

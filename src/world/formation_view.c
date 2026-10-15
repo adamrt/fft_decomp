@@ -1,4 +1,4 @@
-/* Formation get. A small object between boundaries the binary proves. */
+/* The view zoom thread, the unit palette index, formation sprites and redraw requests. */
 
 #include "fft/script.h"
 #include "fft/thread.h"

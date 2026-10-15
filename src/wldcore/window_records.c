@@ -1,5 +1,5 @@
 /* Window record pools, dispatch, drawing and appending, shared by the opening and the world map with their own record
- * layouts (56 and 52 bytes). Both edges are boundaries the binary proves. */
+ * layouts (56 and 52 bytes). */
 
 #include "fft/gfx.h"
 #include "fft/open.h"

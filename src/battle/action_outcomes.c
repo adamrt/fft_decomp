@@ -1,4 +1,4 @@
-/* Ai simulation and last ability. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* AI simulation brackets, learn-on-hit, steal and war funds rewards, target list sorting and the last used ability. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

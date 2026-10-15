@@ -1,4 +1,5 @@
-/* Map dots routes and render records. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* Map dots, location menus, routes and path animation, route travel, projection motion and scrolling, random
+ * encounters, the location marker and camera, and render record images. */
 
 #include "fft/menu.h"
 #include "fft/script.h"

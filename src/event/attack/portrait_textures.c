@@ -1,4 +1,4 @@
-/* Gfx. A small object between boundaries the binary proves. */
+/* Party portrait textures and formation sprites. */
 
 #include "fft/battle_script.h"
 #include "fft/event_attack.h"

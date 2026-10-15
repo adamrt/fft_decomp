@@ -1,4 +1,4 @@
-/* Text return. A small object between boundaries the binary proves. */
+/* Battle text pointer init and a zero return. */
 
 #include "fft/event_small.h"
 #include "fft/script.h"

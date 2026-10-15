@@ -1,4 +1,4 @@
-/* Cmd menu. A small object between boundaries the binary proves. */
+/* The window frame command handler and border tiles with a transition clip. */
 
 #include "fft/event_jobstts.h"
 #include "fft/menu.h"

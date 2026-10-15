@@ -1,4 +1,4 @@
-/* Tutorial. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Tutorial buttons, tutorial start and the tutorial command handlers with highlight rings and quads. */
 
 #include "fft/thread.h"
 #include "fft/world.h"

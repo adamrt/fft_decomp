@@ -1,4 +1,4 @@
-/* File cd headers. A small object between boundaries the binary proves. */
+/* File header building, the CD-ROM pause and the CD subsystem reset. */
 
 #include "fft/main.h"
 #include "psx/libcd.h"

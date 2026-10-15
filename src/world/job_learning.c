@@ -1,4 +1,4 @@
-/* Job learning lists. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The learn job list, selected ability prompts and cached job level and JP lookups. */
 
 #include "fft/main.h"
 #include "fft/menu.h"

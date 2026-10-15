@@ -1,4 +1,5 @@
-/* Formulas 2. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Formula helpers for brave and speed changes, elemental and weather modifiers, faith, HP and MP absorption, undead
+ * reversal, status procs, equipment breaks, poach, catch, and hit and evade calculations. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

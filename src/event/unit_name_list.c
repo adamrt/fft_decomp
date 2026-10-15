@@ -1,5 +1,4 @@
-/* Return text, one object of the library BATTLE and WORLD link in the same order; cuts inside the library are chosen by
- * topic. */
+/* Two value return stubs and the unit name list. */
 
 #include "fft/menu.h"
 #include "fft/unit.h"

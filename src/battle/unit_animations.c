@@ -1,4 +1,5 @@
-/* Unit animation and palette updates. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Unit animation selection by action, status and mount, unit frame and SEQ script execution, spritesheet unpacking and
+ * VRAM loading, and the unit update loops. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

@@ -31,7 +31,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols unit", flag.ContinueOnError)
 	name := flags.String("name", "", "unit name")
 	source := flags.String("source", "", "merged source path under src/, such as src/event/thread.c")
-	comment := flags.String("comment", "", "leading file comment, such as what the file holds and which of its edges are proven")
+	comment := flags.String("comment", "", "leading file comment: a brief description of what the file holds")
 	ownRodata := flags.Bool("own-rodata", false, "define the read-only tables that lie among the members' literals inside the unit (one module only)")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {

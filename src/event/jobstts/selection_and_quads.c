@@ -1,4 +1,4 @@
-/* Menu gfx. A small object between boundaries the binary proves. */
+/* Wrapped horizontal selection and textured quad rects. */
 
 #include "fft/event_jobstts.h"
 #include "psx/pad.h"

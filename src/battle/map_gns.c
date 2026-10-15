@@ -1,4 +1,4 @@
-/* Map gns commands. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* GNS command application, GNS and move-find item loading, and file load starts. */
 
 #include "fft/battle_map.h"
 #include "fft/battle_script.h"

@@ -1,4 +1,4 @@
-/* Formation input and unit stats. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* The idle countdown and the input lockout timer. */
 
 #include "fft/thread.h"
 #include "fft/world.h"

@@ -1,4 +1,4 @@
-/* Shop. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* The shop, including the main, gil, purchase, sell, fitting room, best fit preview and fur shop menus and steps. */
 
 #include "fft/gfx.h"
 #include "fft/script.h"

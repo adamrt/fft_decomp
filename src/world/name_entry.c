@@ -1,4 +1,5 @@
-/* Name entry. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* The name entry keyboard, including frames, the key list, confirmed keys, the cursor, key application and the
+ * confirmation menu. */
 
 #include "fft/gfx.h"
 #include "fft/script.h"

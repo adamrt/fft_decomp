@@ -1,4 +1,4 @@
-/* Menu formation. A small object between boundaries the binary proves. */
+/* The equipment and ability panel thread, order entries and menu thread stops. */
 
 #include "fft/thread.h"
 #include "fft/world.h"

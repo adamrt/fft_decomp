@@ -1,4 +1,5 @@
-/* Entry and gfx init. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* BUNIT entry, including VRAM init and fade, the input lock timer, pad reading, menu results and the unit browser
+ * frame. */
 
 #include "fft/battle_gfx.h"
 #include "fft/event_bunit.h"

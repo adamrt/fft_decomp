@@ -1,4 +1,5 @@
-/* Text images and message box. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Text images at a fixed origin, message box slots and typewriter glyphs, quad flips, fixed-point lerps and window quad
+ * animations. */
 
 #include "fft/memory.h"
 #include "fft/menu.h"

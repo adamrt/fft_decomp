@@ -1,5 +1,5 @@
-/* Map lighting, tile colors and mesh rendering, with the weather and vector tables they own. Its end is a boundary the
- * binary proves (a literal shared out of text order). */
+/* Map lighting, tile background colors, mesh and weather rendering, texture animations and GNS resource dispatch, with
+ * the weather and vector tables they use. */
 
 #include "fft/battle.h"
 #include "fft/battle_camera.h"

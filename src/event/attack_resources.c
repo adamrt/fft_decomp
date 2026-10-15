@@ -1,5 +1,5 @@
-/* Menu attack resources and dialogs, one object of the library BATTLE and WORLD link in the same order; cuts inside the
- * library are chosen by topic. */
+/* Attack resources and threads, the unit view and mini menu threads, event speed, debug printing, the walk and effect
+ * script instructions, subsystem init and reset, selection records, skillset entries and the skill menu. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

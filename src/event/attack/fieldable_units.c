@@ -1,4 +1,4 @@
-/* Noop deploy. A small object between boundaries the binary proves. */
+/* A no-op and the search for fieldable units. */
 
 #include "fft/event_attack.h"
 #include "fft/script.h"

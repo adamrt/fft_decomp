@@ -1,4 +1,4 @@
-/* Text shop. A small object between boundaries the binary proves. */
+/* Shop background TIM loading, text section binding, resident data and tutorial file loading. */
 
 #include "fft/world.h"
 #include "psx/types.h"

@@ -1,5 +1,5 @@
-/* Menu skillsets and action lists. Its start is an object boundary the read-only data layout places somewhere nearby;
- * its end is a cut chosen by topic. */
+/* Skillset ability loading for the item, throw, math skill, elemental, monster skill, draw out and charge menus, and
+ * the AT list and turn order. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

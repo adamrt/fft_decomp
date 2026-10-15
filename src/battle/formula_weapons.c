@@ -1,4 +1,5 @@
-/* Formulas 3. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Ability formulas for magic accuracy, weapon and gun damage, magical damage and healing, quick, golem, CT zero, songs,
+ * dances, truth, draw out, break and steal. */
 
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"

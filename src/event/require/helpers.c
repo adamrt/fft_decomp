@@ -1,4 +1,5 @@
-/* Thread and fade helpers. A small object between boundaries the binary proves. */
+/* A 16-frame thread stop, the bio variable by unit class, bonus image loading, frame waits with skip and a 31-frame RGB
+ * fade. */
 
 #include "fft/battle_script.h"
 #include "fft/event_require.h"

@@ -1,4 +1,4 @@
-/* Card. A small object between boundaries the binary proves. */
+/* The selected card slot and the close stub. */
 
 #include "fft/world.h"
 #include "psx/types.h"

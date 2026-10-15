@@ -1,5 +1,5 @@
-/* Movement steps: the step-delta setters (each written twice in the original, for units and for floating units), step
- * starts, landing and tile edges. Its start and end are boundaries the binary proves. */
+/* Movement steps, including the step-delta setters (each written twice in the original, for units and for floating
+ * units), step starts, landing sounds and effects, displacement and tile edge updates. */
 
 #include "fft/battle.h"
 #include "fft/battle_effect.h"

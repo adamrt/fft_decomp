@@ -1,4 +1,4 @@
-/* Boot logos. Its start is a boundary the binary proves; its end is a cut chosen by topic. */
+/* The Squaresoft and SCE boot logos, their drawing and fade out. */
 
 #include "fft/main.h"
 #include "psx/libgpu.h"

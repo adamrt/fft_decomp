@@ -1,4 +1,5 @@
-/* Calendar and map tiles. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Calendar month and day, the captured world frame, the map tile atlas, tile projection and culling, and clamped
+ * scrolling. */
 
 #include "fft/wldcore.h"
 #include "psx/libetc.h"

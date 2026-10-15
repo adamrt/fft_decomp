@@ -1,4 +1,4 @@
-/* Unit records. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Unit records built from stats, the data list, sorting by order keys and copying between order lists. */
 
 #include "fft/event_bunit.h"
 #include "fft/main.h"

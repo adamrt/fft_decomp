@@ -1,4 +1,5 @@
-/* Init and frame. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* CD mix and volume, opening and ending movie init, frame VRAM page restore, screen environments and runtime state
+ * init. */
 
 #include "fft/open.h"
 #include "psx/libgpu.h"

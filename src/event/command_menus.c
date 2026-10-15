@@ -1,5 +1,5 @@
-/* Menu selection sfx and script threads, one object of the library BATTLE and WORLD link in the same order; cuts inside
- * the library are chosen by topic. */
+/* Command menu confirmation threads, action restrictions, selection resolution, system functions, scenario conditions,
+ * event input routing, the event frame and camera state in script variables. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"

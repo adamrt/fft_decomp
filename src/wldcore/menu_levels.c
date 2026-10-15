@@ -1,4 +1,5 @@
-/* Menu core and panels. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Value, cursor, number and date drawing, the world frame, level dispatch, and the root, map cursor, focus, path,
+ * visibility, entry, text, message, variable list, number panel, layout window and location menu levels. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"

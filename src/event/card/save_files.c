@@ -1,4 +1,4 @@
-/* Save files. A small object between boundaries the binary proves. */
+/* Save file enumeration, free block counts, card open, create and format, and the open with retries. */
 
 #include "fft/event_card.h"
 #include "psx/libapi.h"

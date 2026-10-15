@@ -1,4 +1,4 @@
-/* Item card and open overlays. A small object between boundaries the binary proves. */
+/* Item order tables, card event init and the OPEN.BIN main loop and ending calls. */
 
 #include "fft/main.h"
 #include "fft/open.h"

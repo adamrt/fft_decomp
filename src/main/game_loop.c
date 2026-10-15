@@ -1,4 +1,4 @@
-/* Game loop and now loading. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Game reset, the BATTLE.BIN entrypoint call, the main game loop, main, and the Now Loading message. */
 
 #include "fft/battle.h"
 #include "fft/main.h"

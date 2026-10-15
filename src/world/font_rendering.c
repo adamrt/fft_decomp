@@ -1,4 +1,5 @@
-/* Text font. A small object between boundaries the binary proves. */
+/* Text id list rendering to image rows, kerning into the command buffer, glyph image upload and entry advance by
+ * character count. */
 
 #include "fft/battle_text.h"
 #include "fft/gfx.h"

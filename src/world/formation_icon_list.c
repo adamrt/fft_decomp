@@ -1,4 +1,4 @@
-/* Formation menu. A small object between boundaries the binary proves. */
+/* The formation icon list thread, unit name strings, the display mode and the ordering table pointer. */
 
 #include "fft/memory.h"
 #include "fft/menu.h"

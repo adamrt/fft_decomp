@@ -1,4 +1,5 @@
-/* Deploy screen. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* The deployment screen, including roster tiles, navigation input, unit selection, cursor primitives, valid tiles, the
+ * render thread and portrait quads. */
 
 #include "fft/battle_gfx.h"
 #include "fft/battle_script.h"
