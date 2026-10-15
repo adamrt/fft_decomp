@@ -64,6 +64,7 @@ type unitFunction struct {
 	aligned     map[string]string // partner module -> partner function
 	positional  map[string]bool   // aligned by position between anchors only
 	unit        int
+	jumpAlign   int // addr mod 8 of the function's first jump table, -1 without one
 }
 
 type unitDataRow struct {
@@ -241,6 +242,11 @@ func (p project) analyzeModuleLayout(m *moduleSpec, resolver symbolResolver, ide
 	divisionCache map[string]bool, options unitsOptions) *unitModuleAnalysis {
 	an := &unitModuleAnalysis{m: m, byName: map[string]int{}, evidence: map[int][]unitEvidence{}}
 	an.functions = p.loadUnitFunctions(m, identCache, divisionCache, &an.diagnostics)
+	if image, err := p.readModuleImage(m); err == nil {
+		for i := range an.functions {
+			an.functions[i].jumpAlign = jumpTableAlignment(image, m, an.functions[i].f)
+		}
+	}
 	for i := range an.functions {
 		an.byName[an.functions[i].f.Name] = i
 	}
@@ -282,7 +288,7 @@ func (p project) loadUnitFunctions(m *moduleSpec, identCache map[string]map[stri
 	functions := make([]unitFunction, len(order))
 	for i, f := range order {
 		source := m.sourceOf(f)
-		fn := unitFunction{index: i, f: f, source: source, asm: f.Asm != "", aligned: map[string]string{}, positional: map[string]bool{}, unit: -1}
+		fn := unitFunction{index: i, f: f, source: source, asm: f.Asm != "", aligned: map[string]string{}, positional: map[string]bool{}, unit: -1, jumpAlign: -1}
 		fn.library = strings.HasPrefix(source, "src/lib/") || m.inLibraryRange(f.Addr)
 		fn.prefix = unitPrefix(f.Name)
 		fn.profile = m.profileOf(f)
@@ -667,6 +673,7 @@ func (an *unitModuleAnalysis) scoreAndFormUnits(options unitsOptions) {
 	for g := range an.groups {
 		group := &an.groups[g]
 		an.profileEvidence(group)
+		an.rodataAlignmentEvidence(group)
 		group.cuts = make([]unitCut, 0, group.last-group.first)
 		for i := group.first; i < group.last; i++ {
 			cut := unitCut{after: i}
@@ -679,7 +686,7 @@ func (an *unitModuleAnalysis) scoreAndFormUnits(options unitsOptions) {
 			for _, evidence := range cut.evidence {
 				cut.score += evidence.Weight
 				switch evidence.Kind {
-				case "asm_object", "library", "language_change":
+				case "asm_object", "library", "language_change", "rodata_object":
 					cut.certain = true
 				}
 			}

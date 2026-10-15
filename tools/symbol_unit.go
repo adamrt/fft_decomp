@@ -80,6 +80,11 @@ func (p project) unitSymbolsCommand(args []string) error {
 			if _, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID}); err != nil {
 				return err
 			}
+			if image, err := p.readModuleImage(m); err == nil {
+				if conflict := unitJumpTableConflict(image, m, members); conflict != "" {
+					return fmt.Errorf("%s: %s", m.ID, conflict)
+				}
+			}
 			if mergedSources == nil {
 				mergedSources, symbols = sources, functions
 			} else if strings.Join(sources, " ") != strings.Join(mergedSources, " ") {
