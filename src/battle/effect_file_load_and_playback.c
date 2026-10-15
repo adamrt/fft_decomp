@@ -427,7 +427,7 @@ s32 effect_update_stage(void) {
         menu_suppress_height_display();
         effect_init_palette(g_battle_ability_effect_id);
         g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
-        D_801BF000 = 0;
+        g_effect_unknown_801bf000 = 0;
         battle_state_reset_frame_pacing_timer();
         result = 1;
         break;

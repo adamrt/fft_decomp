@@ -240,6 +240,6 @@ extern u8 g_card_save_slot_selection_thread_state;
 extern u8 g_card_sound_queued_effect_id; /* main_sfx_e */
 
 /* unknown */
-extern u8 D_801ca964;
+extern u8 g_card_unknown_801ca964;
 
 #endif

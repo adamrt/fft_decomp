@@ -3036,7 +3036,7 @@ data:
   - {addr: 0x801bc0d8, name: g_battle_unknown_801bc0d8}
   - {addr: 0x801bc0dc, name: g_effect_sound_data_base}
   - {addr: 0x801bc0e0, name: g_effect_death_poof_states}
-  - {addr: 0x801bf000, name: D_801BF000}
+  - {addr: 0x801bf000, name: g_effect_unknown_801bf000}
   - {addr: 0x801bf004, name: g_effect_current_record_index}
   - {addr: 0x801bf00a, name: g_effect_free_list_node_head}
   - {addr: 0x801bf02c, name: g_effect_state_records}

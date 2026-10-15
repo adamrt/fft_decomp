@@ -307,6 +307,6 @@ extern menu_gradient_panel_prims_t g_equip_thread_indicator_packets[2][2];
 extern u8 g_equip_sound_suppress_queued;
 
 /* unknown */
-extern s16 D_801d86ac;
+extern s16 g_equip_unknown_801d86ac;
 
 #endif

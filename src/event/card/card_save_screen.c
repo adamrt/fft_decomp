@@ -344,7 +344,7 @@ void card_save_update_slot_write(s32 slot) {
     if (g_card_save_write_phase == 0) {
         g_card_save_write_phase = 1;
         g_card_save_write_failed = 0;
-        D_801ca964 = 0;
+        g_card_unknown_801ca964 = 0;
         card_save_build_buffer(slot);
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, g_card_save_in_progress_thread_descriptor);
         g_sound_suppressed = 1;

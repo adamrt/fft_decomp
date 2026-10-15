@@ -25,6 +25,7 @@ units:
   - {name: menu_help_overlay, source: src/menu/menu_help_overlay.c}
   - {name: menu_input_and_script_variables, source: src/menu/menu_input_and_script_variables.c}
   - {name: menu_modal_flag_and_sfx_queue, source: src/menu/menu_modal_flag_and_sfx_queue.c}
+  - {name: menu_page_scrolling, source: src/menu/world/menu_page_scrolling.c}
   - {name: menu_palette_init, source: src/menu/menu_palette_init.c}
   - {name: menu_panel_fade, source: src/menu/menu_panel_fade.c}
   - {name: menu_small_overlay_load, source: src/menu/menu_small_overlay_load.c}
@@ -75,6 +76,7 @@ units:
   - {name: world_menu_resource_loading, source: src/menu/world_menu_resource_loading.c}
   - {name: world_menu_script_draw_modes, source: src/menu/world_menu_script_draw_modes.c}
   - {name: world_menu_script_draw_opcodes, source: src/menu/world_menu_script_draw_opcodes.c}
+  - {name: world_menu_scrollable_list_layout, source: src/menu/world/world_menu_scrollable_list_layout.c}
   - {name: world_menu_submenu_pages, source: src/menu/world_menu_submenu_pages.c}
   - {name: world_name_entry_screen, source: src/world/world_name_entry_screen.c}
   - {name: world_script_tutorial_commands, source: src/script/world_script_tutorial_commands.c}
@@ -887,11 +889,11 @@ functions:
   - {addr: 0x801282dc, size: 704, name: menu_update_and_draw_sliding_cursor_variant, hash: aeed72995bce48d4, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_update_and_draw_sliding_cursor_variant.c}
   - {addr: 0x8012859c, size: 852, name: menu_update_and_draw_bouncing_cursor_variant, hash: 6230546a73c5da6f, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_update_and_draw_bouncing_cursor_variant.c}
   - {addr: 0x801288f0, size: 108, name: world_menu_skip_instruction_group, hash: 08c0e2d5768b4709, source: src/menu/world_menu_skip_instruction_group.c}
-  - {addr: 0x8012895c, size: 800, name: world_menu_load_scrollable_list_layout, hash: 32f66838c38db246, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world_menu_load_scrollable_list_layout.c}
-  - {addr: 0x80128c7c, size: 48, name: world_menu_init_and_load_scrollable_list, hash: 8ca660cbdd814a3b, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world_menu_init_and_load_scrollable_list.c}
-  - {addr: 0x80128cac, size: 52, name: menu_init_and_draw_scrollable_list_variant, hash: 63e8f995fd661aee, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_init_and_draw_scrollable_list_variant.c}
-  - {addr: 0x80128ce0, size: 2964, name: menu_cmd_draw_scrollable_list_body_handler_variant, hash: a229f784b447bedd, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_cmd_draw_scrollable_list_body_handler_variant.c}
-  - {addr: 0x80129874, size: 60, name: world_menu_set_sprite_color, hash: 15640358a165ed2d, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world_menu_set_sprite_color.c}
+  - {addr: 0x8012895c, size: 800, name: world_menu_load_scrollable_list_layout, hash: 32f66838c38db246, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_layout}
+  - {addr: 0x80128c7c, size: 48, name: world_menu_init_and_load_scrollable_list, hash: 8ca660cbdd814a3b, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_layout}
+  - {addr: 0x80128cac, size: 52, name: menu_init_and_draw_scrollable_list_variant, hash: 63e8f995fd661aee, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_layout}
+  - {addr: 0x80128ce0, size: 2964, name: menu_cmd_draw_scrollable_list_body_handler_variant, hash: a229f784b447bedd, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_layout}
+  - {addr: 0x80129874, size: 60, name: world_menu_set_sprite_color, hash: 15640358a165ed2d, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_layout}
   - {addr: 0x801298b0, size: 16, name: gfx_set_otag_index, hash: b01b36934974a06a, source: src/gfx/gfx_set_otag_index.c}
   - {addr: 0x801298c0, size: 264, name: world_menu_set_palette_mode, hash: 2d8a4bce38b1e631, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world_menu_set_palette_mode.c}
   - {addr: 0x801299c8, size: 104, name: world_menu_script_clear_temporary_draw_area, hash: dbf624436af6a957, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world_menu_script_clear_temporary_draw_area.c}
@@ -901,8 +903,8 @@ functions:
   - {addr: 0x80129b24, size: 16, name: menu_get_window_scale_step, hash: c135caf12190d2f9, source: src/menu/menu_get_window_scale_step.c}
   - {addr: 0x80129b34, size: 56, name: menu_cmd_advance_window_scale_step_handler, hash: 1258601e93a9f653, source: src/menu/menu_cmd_advance_window_scale_step_handler.c}
   - {addr: 0x80129b6c, size: 16, name: menu_gfx_get_draw_color_variant, hash: 3e15f7d69ea12f45, source: src/menu/world/menu_gfx_get_draw_color_variant.c}
-  - {addr: 0x80129b7c, size: 368, name: menu_scroll_list_by_page_variant, hash: 6d4d2dd3c505b695, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_scroll_list_by_page_variant.c}
-  - {addr: 0x80129cec, size: 352, name: menu_input_read_page_scroll_direction_variant, hash: c4407d3709b24d54, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_input_read_page_scroll_direction_variant.c}
+  - {addr: 0x80129b7c, size: 368, name: menu_scroll_list_by_page_variant, hash: 6d4d2dd3c505b695, profile: gcc-2.6.3_O1_aspsx-2.34, unit: menu_page_scrolling}
+  - {addr: 0x80129cec, size: 352, name: menu_input_read_page_scroll_direction_variant, hash: c4407d3709b24d54, profile: gcc-2.6.3_O1_aspsx-2.34, unit: menu_page_scrolling}
   - {addr: 0x80129e4c, size: 576, name: menu_text_render_glyph_to_4bpp_image_variant, hash: e04d67bb6ba765e7, source: src/menu/world/menu_text_render_glyph_to_4bpp_image_variant.c}
   - {addr: 0x8012a08c, size: 92, name: menu_text_find_entry_by_index, hash: 14da73aedbd3cca3, source: src/menu/menu_text_find_entry_by_index.c}
   - {addr: 0x8012a0e8, size: 648, name: menu_text_render_encoded_ids_to_image, hash: bcfd1f1135792a9c, source: src/menu/menu_text_render_encoded_ids_to_image.c}

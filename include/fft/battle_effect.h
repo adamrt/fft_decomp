@@ -2131,7 +2131,7 @@ void effect_step_emitter_timeline(
 
 /* scripts */
 /* Written by effect-script opcode 05; no game source reads it. */
-extern u16 D_801BF000;
+extern u16 g_effect_unknown_801bf000;
 extern effect_callback_t g_effect_callback_slots[];
 
 extern effect_script_result_e (*g_effect_instructions[120])(effect_record_t*);

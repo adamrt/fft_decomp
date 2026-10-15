@@ -1056,7 +1056,7 @@ data:
   - {addr: 0x801ca955, name: g_gfx_increasing_fade_active}
   - {addr: 0x801ca958, name: g_gfx_fade_rect}
   - {addr: 0x801ca960, name: g_card_save_write_failed}
-  - {addr: 0x801ca964, name: D_801ca964}
+  - {addr: 0x801ca964, name: g_card_unknown_801ca964}
   - {addr: 0x801ca968, name: g_card_save_buffer}
   - {addr: 0x801cc7e8, name: g_card_io_open_result}
   - {addr: 0x801cc7f0, name: g_card_save_format_prompt_active}
@@ -1610,7 +1610,7 @@ data:
   - {addr: 0x801cfbd8, name: g_help_text_table}
   - {addr: 0x801d86a8, name: g_menu_input_latched_button}
   - {addr: 0x801d86aa, name: g_menu_input_activation_timer}
-  - {addr: 0x801d86ac, name: D_801d86ac}
+  - {addr: 0x801d86ac, name: g_equip_unknown_801d86ac}
   - {addr: 0x801d86ae, name: g_text_thread_running_state}
   - {addr: 0x801d86af, name: g_input_lock_timer}
   - {addr: 0x801d86b0, name: g_menu_list_scroll_offset}

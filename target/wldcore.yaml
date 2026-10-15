@@ -55,6 +55,8 @@ units:
   - {name: wldcore_sound_audio_queue, source: src/sound/wldcore_sound_audio_queue.c}
   - {name: wldcore_sound_novel_script_runner, source: src/sound/wldcore_sound_novel_script_runner.c}
   - {name: wldcore_text_paged_window, source: src/text/wldcore_text_paged_window.c}
+  - {name: wldcore_window_image_records, source: src/window/wldcore/wldcore_window_image_records.c}
+  - {name: wldcore_window_panel_render, source: src/window/wldcore/wldcore_window_panel_render.c}
   - {name: wldcore_window_send_unit_slot_display, source: src/window/wldcore_window_send_unit_slot_display.c}
   - {name: wldcore_window_tint_transition, source: src/window/wldcore_window_tint_transition.c}
 
@@ -421,15 +423,15 @@ functions:
   - {addr: 0x8008f08c, size: 504, name: wldcore_map_roll_random_encounter, hash: 00cd3871e2ff7e81, unit: wldcore_map_route_travel}
   - {addr: 0x8008f284, size: 432, name: wldcore_map_init_location_marker_and_camera, hash: 2f51d47e4f36de8d, unit: wldcore_map_route_travel}
   - {addr: 0x8008f434, size: 224, name: wldcore_map_update_camera_direction_and_projection, hash: bed7c40ebe97aaf4, unit: wldcore_map_route_travel}
-  - {addr: 0x8008f514, size: 388, name: wldcore_window_build_render_record_image, hash: 5119c811a5da11ed, source: src/window/wldcore_window_build_render_record_image.c}
-  - {addr: 0x8008f698, size: 148, name: wldcore_window_transform_point_for_mode, hash: b712870430e662cb, source: src/window/wldcore_window_transform_point_for_mode.c}
-  - {addr: 0x8008f72c, size: 252, name: wldcore_window_load_image_record_to_vram, hash: 415234420b5b877b, source: src/window/wldcore_window_load_image_record_to_vram.c}
-  - {addr: 0x8008f828, size: 96, name: window_display_text_entry_variant, hash: 534645d5cf3aaa4a, source: src/window/wldcore/window_display_text_entry_variant.c}
-  - {addr: 0x8008f888, size: 88, name: wldcore_text_get_padded_dimensions, hash: 789af18accb6a0dc, source: src/text/wldcore_text_get_padded_dimensions.c}
-  - {addr: 0x8008f8e0, size: 220, name: window_init_text_record_variant, hash: 0e61d19ad6e8bbb6, source: src/window/wldcore/window_init_text_record_variant.c}
-  - {addr: 0x8008f9bc, size: 284, name: wldcore_window_init_vram_render_record, hash: 33e805bd9e9a05f8, source: src/window/wldcore_window_init_vram_render_record.c}
-  - {addr: 0x8008fad8, size: 80, name: wldcore_window_start_panel_render_thread, hash: f4a9effe6dc74c0a, source: src/window/wldcore_window_start_panel_render_thread.c}
-  - {addr: 0x8008fb28, size: 352, name: wldcore_window_init_panel_render_state, hash: ef26f45135e74ef5, source: src/window/wldcore_window_init_panel_render_state.c}
+  - {addr: 0x8008f514, size: 388, name: wldcore_window_build_render_record_image, hash: 5119c811a5da11ed, unit: wldcore_window_image_records}
+  - {addr: 0x8008f698, size: 148, name: wldcore_window_transform_point_for_mode, hash: b712870430e662cb, unit: wldcore_window_image_records}
+  - {addr: 0x8008f72c, size: 252, name: wldcore_window_load_image_record_to_vram, hash: 415234420b5b877b, unit: wldcore_window_image_records}
+  - {addr: 0x8008f828, size: 96, name: window_display_text_entry_variant, hash: 534645d5cf3aaa4a, unit: wldcore_window_image_records}
+  - {addr: 0x8008f888, size: 88, name: wldcore_text_get_padded_dimensions, hash: 789af18accb6a0dc, unit: wldcore_window_panel_render}
+  - {addr: 0x8008f8e0, size: 220, name: window_init_text_record_variant, hash: 0e61d19ad6e8bbb6, unit: wldcore_window_panel_render}
+  - {addr: 0x8008f9bc, size: 284, name: wldcore_window_init_vram_render_record, hash: 33e805bd9e9a05f8, unit: wldcore_window_panel_render}
+  - {addr: 0x8008fad8, size: 80, name: wldcore_window_start_panel_render_thread, hash: f4a9effe6dc74c0a, unit: wldcore_window_panel_render}
+  - {addr: 0x8008fb28, size: 352, name: wldcore_window_init_panel_render_state, hash: ef26f45135e74ef5, unit: wldcore_window_panel_render}
   - {addr: 0x8008fc88, size: 64, name: wldcore_list_store_cursor_state, hash: ed2c569ea1468ba2}
   - {addr: 0x8008fcc8, size: 192, name: wldcore_list_clamp_cursor_state, hash: 9061fdc2d690113e}
   - {addr: 0x8008fd88, size: 44, name: wldcore_list_clear_cursor_state, hash: a7a3eb5e83910bea}
