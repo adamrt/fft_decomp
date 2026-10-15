@@ -8,13 +8,6 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
-/* Run one event frame, then return whether the deployment thread (borrowed slot
- * 6) is still running. */
-s32 script_is_deployment_running(u32* ot, u32 buttons) {
-    script_run_event_frame_variant(ot, buttons);
-    return thread_is_running(THREAD_BORROWED_SLOT_DEPLOYMENT);
-}
-
 /*
  * Run one frame of the battle menu/event layer and return battle_menu_resolve_selection's
  * result. While event threads 6-8 run (thread 8 only when g_thread_contexts[8].task_id is not
@@ -54,27 +47,4 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
         script_set_event_speed_variant(g_menu_saved_animation_speed);
     }
     return result;
-}
-
-/* Fill g_map_selected_tile_data for the tile under the cursor, which the
- * tile information display shows: the surface type, the depth, the displayed
- * height in half-height units (height * 2 + slope half-height + depth * 2) and
- * the surface type's two bytes of g_main_terrain_tile_info_pairs. */
-void map_store_selected_tile_data(void) {
-    SVECTOR coords;
-    s16* surface_type;
-    s32 depth;
-
-    map_store_selected_tile_coordinates(&coords);
-    surface_type = &g_map_selected_tile_data.surface_type;
-    *surface_type = map_get_tile_data_value(MAP_TILE_DATA_SURFACE_TYPE, coords.vx, coords.vz, coords.vy) & 0xFF;
-    g_map_selected_tile_data.display_height
-        = map_get_tile_data_value(MAP_TILE_DATA_HALF_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF;
-    g_map_selected_tile_data.display_height
-        += (map_get_tile_data_value(MAP_TILE_DATA_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF) * 2;
-    depth = map_get_tile_data_value(MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
-    g_map_selected_tile_data.depth = depth;
-    g_map_selected_tile_data.display_height += depth * 2;
-    g_map_selected_tile_data._unknown_02 = g_main_terrain_tile_info_pairs[*surface_type][0];
-    g_map_selected_tile_data._unknown_04 = g_main_terrain_tile_info_pairs[*surface_type][1];
 }

@@ -11,7 +11,7 @@ import (
 
 func (p project) symbolsCommand(args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: tools symbols rename-function|rename-global|unify|share|move|unit ...")
+		return errors.New("usage: tools symbols rename-function|rename-global|unify|share|move|unit|split ...")
 	}
 	switch args[0] {
 	case "rename-function", "rename-global":
@@ -24,8 +24,10 @@ func (p project) symbolsCommand(args []string) error {
 		return p.moveSymbolsCommand(args[1:])
 	case "unit":
 		return p.unitSymbolsCommand(args[1:])
+	case "split":
+		return p.splitSymbolsCommand(args[1:])
 	default:
-		return fmt.Errorf("unknown symbols action %q; choose rename-function, rename-global, unify, share, move or unit", args[0])
+		return fmt.Errorf("unknown symbols action %q; choose rename-function, rename-global, unify, share, move, unit or split", args[0])
 	}
 }
 

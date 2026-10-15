@@ -16,7 +16,6 @@ units:
   - {name: wldcore_list_brave_story_panels, source: src/wldcore/wldcore_list_brave_story_panels.c}
   - {name: wldcore_list_brave_story_propositions, source: src/wldcore/wldcore_list_brave_story_propositions.c}
   - {name: wldcore_list_completed_propositions, source: src/wldcore/wldcore_list_completed_propositions.c}
-  - {name: wldcore_list_script_flags_01a4_01bb, source: src/wldcore/wldcore_list_script_flags_01a4_01bb.c}
   - {name: wldcore_list_tutorial_topics, source: src/wldcore/wldcore_list_tutorial_topics.c}
   - {name: wldcore_main_loop, source: src/wldcore/wldcore_main_loop.c}
   - {name: wldcore_map_location_dots, source: src/shared/map/wldcore_map_location_dots.c}
@@ -476,12 +475,12 @@ functions:
   - {addr: 0x800920e8, size: 96, name: wldcore_set_bit_value, hash: 56450a38fe0bff9f, unit: wldcore_bit_array_access}
   - {addr: 0x80092148, size: 56, name: wldcore_test_bit, hash: 822830daaa9c0843, unit: wldcore_bit_array_access}
   - {addr: 0x80092180, size: 136, name: wldcore_script_calculate_save_data_completion_percent, hash: 0ecc0e3f3f1d9117, unit: wldcore_bit_array_access}
-  - {addr: 0x80092208, size: 516, name: wldcore_list_open_script_flags_01a4_01bb, hash: 53ae90c287d3c5a4, unit: wldcore_list_script_flags_01a4_01bb}
-  - {addr: 0x8009240c, size: 20, name: wldcore_list_script_flags_restore_blocked_buttons, hash: 7e9ed99f23ab0769, unit: wldcore_list_script_flags_01a4_01bb}
-  - {addr: 0x80092420, size: 20, name: wldcore_list_script_flags_block_all_buttons, hash: 11034aa27eaa3095, unit: wldcore_list_script_flags_01a4_01bb}
-  - {addr: 0x80092434, size: 484, name: wldcore_list_handle_script_flags_01a4_01bb_input, hash: 3f569f76520bc273, unit: wldcore_list_script_flags_01a4_01bb}
-  - {addr: 0x80092618, size: 660, name: wldcore_menu_push_script_flag_01a4_detail_level, hash: 611be9a64cdbcc3a, unit: wldcore_list_script_flags_01a4_01bb}
-  - {addr: 0x800928ac, size: 600, name: wldcore_menu_close_script_flag_01a4_detail_level, hash: f5c8d454f1752f2f, unit: wldcore_list_script_flags_01a4_01bb}
+  - {addr: 0x80092208, size: 516, name: wldcore_list_open_script_flags_01a4_01bb, hash: 53ae90c287d3c5a4}
+  - {addr: 0x8009240c, size: 20, name: wldcore_list_script_flags_restore_blocked_buttons, hash: 7e9ed99f23ab0769}
+  - {addr: 0x80092420, size: 20, name: wldcore_list_script_flags_block_all_buttons, hash: 11034aa27eaa3095}
+  - {addr: 0x80092434, size: 484, name: wldcore_list_handle_script_flags_01a4_01bb_input, hash: 3f569f76520bc273}
+  - {addr: 0x80092618, size: 660, name: wldcore_menu_push_script_flag_01a4_detail_level, hash: 611be9a64cdbcc3a}
+  - {addr: 0x800928ac, size: 600, name: wldcore_menu_close_script_flag_01a4_detail_level, hash: f5c8d454f1752f2f}
   - {addr: 0x8009de1c, size: 720, name: wldcore_calendar_advance_days, hash: 3ddb67c3d1ca1de9}
 
 data:

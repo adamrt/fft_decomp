@@ -57,4 +57,23 @@ func TestUnitSymbolsCommandMergesContiguousEntries(t *testing.T) {
 	if err := p.moveSymbolsCommand([]string{"--dir", "src/shared/menu", "battle:menu_b1"}); err == nil || !strings.Contains(err.Error(), "within unit") {
 		t.Fatalf("move guard error = %v", err)
 	}
+	if err := p.splitSymbolsCommand([]string{"--unit", "menu_b"}); err != nil {
+		t.Fatal(err)
+	}
+	config, err = p.loadCheckedConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	battle = config.byID["battle"]
+	if battle.unit("menu_b") != nil || battle.function("menu_b1").Unit != "" || battle.sourceOf(battle.function("menu_b2")) != "src/battle/menu_b2.c" {
+		t.Fatalf("split left %+v / %+v", battle.Units, *battle.function("menu_b2"))
+	}
+	if _, err := os.Stat(filepath.Join(p.root, "src", "battle", "menu_b.c")); !os.IsNotExist(err) {
+		t.Fatal("unit file should be removed")
+	}
+	for _, name := range []string{"menu_b1", "menu_b2"} {
+		if err := validateSourceDefinition(p.root, "src/battle/"+name+".c", name); err != nil {
+			t.Fatal(err)
+		}
+	}
 }

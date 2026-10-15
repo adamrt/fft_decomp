@@ -1910,7 +1910,6 @@ defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 
 
 units:
   - {name: gfx_image_transfer_wait, source: src/shared/gfx/gfx_image_transfer_wait.c}
-  - {name: jobstts_menu_wrap_and_quad, source: src/shared/menu/jobstts_menu_wrap_and_quad.c}
   - {name: menu_ability_display_values, source: src/shared/menu/menu_ability_display_values.c}
   - {name: menu_ability_tab_predicates, source: src/shared/menu/menu_ability_tab_predicates.c}
   - {name: menu_gfx_textured_quads, source: src/shared/menu/menu_gfx_textured_quads.c}
@@ -1962,8 +1961,8 @@ functions:
   - {addr: 0x801e0ba8, size: 832, name: menu_input_update_controller, hash: bbe451779e50aed3, source: src/shared/menu/menu_input_update_controller.c}
   - {addr: 0x801e0ee8, size: 360, name: menu_input_update_with_message_state_variant, hash: 150bea20a0faa1ea}
   - {addr: 0x801e1050, size: 36, name: menu_clear_selection_values, hash: f714166590860d01, source: src/shared/menu/menu_clear_selection_values.c}
-  - {addr: 0x801e1074, size: 168, name: jobstts_menu_update_wrapped_horizontal_selection, hash: 5953cfbb7a4e9efe, unit: jobstts_menu_wrap_and_quad}
-  - {addr: 0x801e111c, size: 576, name: jobstts_gfx_enqueue_textured_quad_rect, hash: 5e19e9b09aeb355b, unit: jobstts_menu_wrap_and_quad}
+  - {addr: 0x801e1074, size: 168, name: jobstts_menu_update_wrapped_horizontal_selection, hash: 5953cfbb7a4e9efe, source: src/shared/menu/jobstts_menu_update_wrapped_horizontal_selection.c}
+  - {addr: 0x801e111c, size: 576, name: jobstts_gfx_enqueue_textured_quad_rect, hash: 5e19e9b09aeb355b, source: src/shared/menu/jobstts_gfx_enqueue_textured_quad_rect.c}
   - {addr: 0x801e135c, size: 632, name: menu_gfx_enqueue_textured_quad_list, hash: ab47c5a66b813d62, unit: menu_gfx_textured_quads}
   - {addr: 0x801e15d4, size: 532, name: menu_gfx_enqueue_textured_quad, hash: 3fe37b9682605fd7, unit: menu_gfx_textured_quads}
   - {addr: 0x801e17e8, size: 1056, name: jobstts_gfx_enqueue_oriented_textured_quad, hash: efbd76a3960a34a7, source: src/shared/gfx/jobstts_gfx_enqueue_oriented_textured_quad.c}
@@ -2269,7 +2268,6 @@ links: [battle]
 
 units:
   - {name: menu_window_threads, source: src/shared/menu/menu_window_threads.c}
-  - {name: require_bonus_image_and_waits, source: src/event/require/require_bonus_image_and_waits.c}
   - {name: require_post_battle_screen, source: src/event/require/require_post_battle_screen.c}
   - {name: sound_music_track_loading, source: src/shared/sound/sound_music_track_loading.c}
 
@@ -2308,11 +2306,11 @@ functions:
   - {addr: 0x801c32cc, size: 400, name: gfx_build_gradient_grid_primitives_variant, hash: 3b20668a6d03a172, source: src/shared/gfx/gfx_build_gradient_grid_primitives_variant.c}
   - {addr: 0x801c345c, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/shared/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
   - {addr: 0x801c372c, size: 692, name: menu_build_zodiac_primitives, hash: 0d33bf568d157774, source: src/shared/menu/menu_build_zodiac_primitives.c}
-  - {addr: 0x801c39e0, size: 40, name: require_thread_stop_after_16_frames, hash: 83373904c4781138, unit: require_bonus_image_and_waits}
-  - {addr: 0x801c3a08, size: 168, name: require_party_update_bio_variable_for_unit_class, hash: 39b2124bf596bf04, unit: require_bonus_image_and_waits}
-  - {addr: 0x801c3ab0, size: 244, name: require_reward_load_bonus_image, hash: 83bdf7ea18ea62c4, unit: require_bonus_image_and_waits}
-  - {addr: 0x801c3ba4, size: 108, name: require_input_wait_frames_or_skip, hash: 0a5f70e3ab9123be, unit: require_bonus_image_and_waits}
-  - {addr: 0x801c3c10, size: 248, name: require_gfx_fade_rgb_31_frames, hash: 72b0b45d367d072d, unit: require_bonus_image_and_waits}
+  - {addr: 0x801c39e0, size: 40, name: require_thread_stop_after_16_frames, hash: 83373904c4781138}
+  - {addr: 0x801c3a08, size: 168, name: require_party_update_bio_variable_for_unit_class, hash: 39b2124bf596bf04}
+  - {addr: 0x801c3ab0, size: 244, name: require_reward_load_bonus_image, hash: 83bdf7ea18ea62c4}
+  - {addr: 0x801c3ba4, size: 108, name: require_input_wait_frames_or_skip, hash: 0a5f70e3ab9123be}
+  - {addr: 0x801c3c10, size: 248, name: require_gfx_fade_rgb_31_frames, hash: 72b0b45d367d072d}
   - {addr: 0x801c3d08, size: 72, name: sound_wait_for_music_stub, hash: 5cf0df43ec1c1bac, unit: sound_music_track_loading}
   - {addr: 0x801c3d50, size: 168, name: sound_play_music_tracks, hash: 0794875f602ea289, unit: sound_music_track_loading}
   - {addr: 0x801c3df8, size: 428, name: require_text_show_battle_congratulations, hash: fc9664dd2c18d147, source: src/shared/text/require_text_show_battle_congratulations.c}

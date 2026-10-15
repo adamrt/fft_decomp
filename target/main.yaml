@@ -11,14 +11,11 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
-  - {name: main_gfx_ordering_tables, source: src/shared/gfx/main_gfx_ordering_tables.c}
   - {name: main_job_levels_and_unlocks, source: src/shared/job/main_job_levels_and_unlocks.c}
   - {name: main_sound_music_playback, source: src/shared/sound/main_sound_music_playback.c}
   - {name: main_sound_sfx_channels, source: src/shared/sound/main_sound_sfx_channels.c}
-  - {name: main_startup_init, source: src/main/main_startup_init.c}
   - {name: main_status_flag_changes, source: src/shared/status/main_status_flag_changes.c}
   - {name: main_unit_battle_init, source: src/shared/unit/main_unit_battle_init.c}
-  - {name: main_unit_entd_position_and_zodiac, source: src/shared/unit/main_unit_entd_position_and_zodiac.c}
   - {name: main_unit_spritesheet_palette, source: src/shared/unit/main_unit_spritesheet_palette.c}
 
 libraries:
@@ -751,10 +748,10 @@ functions:
   - {addr: 0x80044a00, size: 8, name: main_system_handle_malloc_exception, hash: 6d64edf91449c1b1}
   - {addr: 0x80044a08, size: 44, name: main_system_handle_error, hash: 0520ba9fd79942b9}
   - {addr: 0x80044a34, size: 44, name: main_system_handle_pointer_exception, hash: c49c56d6a872179f}
-  - {addr: 0x80044a60, size: 28, name: main_gfx_get_otag, hash: 0e1f986e004b6e64, unit: main_gfx_ordering_tables}
-  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b, unit: main_gfx_ordering_tables}
-  - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, unit: main_gfx_ordering_tables}
-  - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: main_gfx_ordering_tables}
+  - {addr: 0x80044a60, size: 28, name: main_gfx_get_otag, hash: 0e1f986e004b6e64, source: src/shared/gfx/main_gfx_get_otag.c}
+  - {addr: 0x80044a7c, size: 80, name: main_gfx_swap_and_clear_otag, hash: 676737da60ea151b, source: src/shared/gfx/main_gfx_swap_and_clear_otag.c}
+  - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, source: src/shared/gfx/main_save_init_state_and_options.c}
+  - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, source: src/shared/gfx/main_overlay_call_battle_return_zero.c}
   - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/shared/gfx/gfx_build_zodiac_sprite_polygon.c}
   - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, source: src/shared/menu/menu_build_zodiac_primitives.c}
   - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e, source: src/shared/gfx/main_gfx_call_build_zodiac_bin.c}
@@ -763,10 +760,10 @@ functions:
   - {addr: 0x80045234, size: 52, name: main_overlay_open_world_bin, hash: f0dc6ce1683e216e}
   - {addr: 0x80045268, size: 132, name: main_file_load_data_from_disc, hash: 061eb9238379898e, source: src/shared/file/main_file_load_data_from_disc.c}
   - {addr: 0x800452ec, size: 480, name: main_save_init_data_tables, hash: 13bfa79a2bc689e1, profile: gcc-2.6.3_O2_aspsx-2.21}
-  - {addr: 0x80045514, size: 524, name: main_item_init_order_tables, hash: d7bbcb00c4fad7e9, unit: main_startup_init}
-  - {addr: 0x80045720, size: 408, name: main_card_init_events, hash: c3df9151b2bf6647, unit: main_startup_init}
-  - {addr: 0x800458b8, size: 72, name: main_overlay_exec_open_bin_main_loop, hash: ec2d3c302ca9b1f1, unit: main_startup_init}
-  - {addr: 0x80045900, size: 60, name: main_overlay_exec_open_bin_ending, hash: 47240d2c7733c304, unit: main_startup_init}
+  - {addr: 0x80045514, size: 524, name: main_item_init_order_tables, hash: d7bbcb00c4fad7e9}
+  - {addr: 0x80045720, size: 408, name: main_card_init_events, hash: c3df9151b2bf6647}
+  - {addr: 0x800458b8, size: 72, name: main_overlay_exec_open_bin_main_loop, hash: ec2d3c302ca9b1f1}
+  - {addr: 0x80045900, size: 60, name: main_overlay_exec_open_bin_ending, hash: 47240d2c7733c304}
   - {addr: 0x80059854, size: 620, name: main_status_init_check_data, hash: c4a7f36df3f82f32, source: src/shared/status/main_status_init_check_data.c}
   - {addr: 0x80059ac0, size: 8, name: main_noop_80059ac0, hash: 6d64edf91449c1b1}
   - {addr: 0x80059ac8, size: 40, name: main_party_clear_all, hash: a26cc5df81715e07}
@@ -843,10 +840,10 @@ functions:
   - {addr: 0x8005e22c, size: 40, name: main_util_copy_action_data, hash: 3a97060e78efbf69}
   - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/shared/memory/mem_copy_bytes_source_first.c, source_symbol: mem_copy_bytes_source_first}
   - {addr: 0x8005e288, size: 496, name: main_item_get_total_equipment_quantity, hash: 3e5d96728559f2cd, source: src/shared/item/main_item_get_total_equipment_quantity.c}
-  - {addr: 0x8005e478, size: 112, name: main_unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: main_unit_entd_position_and_zodiac}
-  - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, unit: main_unit_entd_position_and_zodiac}
-  - {addr: 0x8005e5d8, size: 108, name: main_unit_calculate_zodiac_symbol, hash: 0042a97bca78c29a, unit: main_unit_entd_position_and_zodiac}
-  - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, unit: main_unit_entd_position_and_zodiac}
+  - {addr: 0x8005e478, size: 112, name: main_unit_init_position_and_rewards, hash: 9421b9d560e38650, source: src/shared/unit/main_unit_init_position_and_rewards.c}
+  - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, source: src/shared/unit/main_status_find_action_highest_order_effect.c}
+  - {addr: 0x8005e5d8, size: 108, name: main_unit_calculate_zodiac_symbol, hash: 0042a97bca78c29a, source: src/shared/unit/main_unit_calculate_zodiac_symbol.c}
+  - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, source: src/shared/unit/mem_zero.c}
   - {addr: 0x8005e670, size: 92, name: main_unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, unit: main_status_flag_changes}
   - {addr: 0x8005e6cc, size: 120, name: main_status_change_unit, hash: dc7a2bc945f89882, unit: main_status_flag_changes}
   - {addr: 0x8005e744, size: 52, name: main_status_store_current, hash: a213e350e165866b, unit: main_status_flag_changes}

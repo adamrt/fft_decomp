@@ -21,7 +21,6 @@ units:
   - {name: battle_gfx_cursor_and_unit_fade_out, source: src/shared/gfx/battle_gfx_cursor_and_unit_fade_out.c}
   - {name: battle_gfx_effect_sheet_tables, source: src/shared/gfx/battle_gfx_effect_sheet_tables.c}
   - {name: battle_gfx_event_unit_load, source: src/shared/gfx/battle_gfx_event_unit_load.c}
-  - {name: battle_gfx_event_unit_queries, source: src/shared/gfx/battle_gfx_event_unit_queries.c}
   - {name: battle_gfx_evtchr_vram_slots, source: src/shared/gfx/battle_gfx_evtchr_vram_slots.c}
   - {name: battle_gfx_float_and_status_bubble, source: src/shared/gfx/battle_gfx_float_and_status_bubble.c}
   - {name: battle_gfx_ground_height_and_cursor, source: src/shared/gfx/battle_gfx_ground_height_and_cursor.c}
@@ -67,11 +66,9 @@ units:
   - {name: battle_unit_facing_queries, source: src/shared/unit/battle_unit_facing_queries.c}
   - {name: battle_unit_list_lifecycle, source: src/shared/unit/battle_unit_list_lifecycle.c}
   - {name: battle_unit_projectile_hit_reaction, source: src/shared/unit/battle_unit_projectile_hit_reaction.c}
-  - {name: battle_unit_runtime_battle_ids, source: src/shared/unit/battle_unit_runtime_battle_ids.c}
   - {name: battle_unit_slope_geometry, source: src/shared/unit/battle_unit_slope_geometry.c}
   - {name: battle_unit_tile_snapping, source: src/shared/unit/battle_unit_tile_snapping.c}
   - {name: battle_unit_world_coords_queries, source: src/shared/unit/battle_unit_world_coords_queries.c}
-  - {name: camera_event_yaw_and_waits, source: src/shared/menu/camera_event_yaw_and_waits.c}
   - {name: camera_fusion_tracks, source: src/shared/camera/camera_fusion_tracks.c}
   - {name: camera_map_controls, source: src/shared/camera/camera_map_controls.c}
   - {name: camera_map_init, source: src/shared/camera/camera_map_init.c}
@@ -91,7 +88,6 @@ units:
   - {name: effect_secondary_handlers, source: src/battle/effect_secondary_handlers.c}
   - {name: effect_secondary_starters, source: src/battle/effect_secondary_starters.c}
   - {name: effect_slot_pools, source: src/battle/effect_slot_pools.c}
-  - {name: effect_unit_id_target_helpers, source: src/battle/effect_unit_id_target_helpers.c}
   - {name: effect_vector_add_and_wrap, source: src/battle/effect_vector_add_and_wrap.c}
   - {name: effect_vector_load_and_scale, source: src/battle/effect_vector_load_and_scale.c}
   - {name: formula_evade_zodiac_knockback, source: src/battle/formula_evade_zodiac_knockback.c}
@@ -127,10 +123,8 @@ units:
   - {name: script_bitset_and_unlockdate, source: src/shared/script/script_bitset_and_unlockdate.c}
   - {name: script_call_function_handlers, source: src/shared/script/script_call_function_handlers.c}
   - {name: script_camera_scene_threads, source: src/shared/script/script_camera_scene_threads.c}
-  - {name: script_event_frame, source: src/shared/script/script_event_frame.c}
   - {name: script_event_resource_loads, source: src/shared/script/script_event_resource_loads.c}
   - {name: script_event_state_reset, source: src/shared/unit/script_event_state_reset.c}
-  - {name: script_facing_sfx_and_thread_slots, source: src/shared/unit/script_facing_sfx_and_thread_slots.c}
   - {name: script_roster_instructions, source: src/shared/script/script_roster_instructions.c}
   - {name: script_unit_event_instructions, source: src/shared/script/script_unit_event_instructions.c}
   - {name: script_unit_facing_and_animation, source: src/shared/script/script_unit_facing_and_animation.c}
@@ -679,15 +673,15 @@ functions:
   - {addr: 0x8008cc80, size: 44, name: battle_unit_clear_horizontal_flip_flag, hash: 0b507514c13324ee, source: src/shared/unit/battle_unit_clear_horizontal_flip_flag.c}
   - {addr: 0x8008ccac, size: 60, name: battle_unit_set_palette_update_suppression, hash: a91da0e8755c6935, source: src/shared/unit/battle_unit_set_palette_update_suppression.c}
   - {addr: 0x8008cce8, size: 60, name: battle_unit_clear_palette_update_suppression, hash: d97699eaed0160d6, source: src/shared/unit/battle_unit_clear_palette_update_suppression.c}
-  - {addr: 0x8008cd24, size: 52, name: battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id, hash: 432660039643285a, unit: battle_unit_runtime_battle_ids}
-  - {addr: 0x8008cd58, size: 60, name: battle_unit_set_movement_effect_suppression, hash: 1345ae2b1ce7c73f, unit: battle_unit_runtime_battle_ids}
-  - {addr: 0x8008cd94, size: 60, name: battle_unit_clear_movement_effect_suppression, hash: c273bcb19407bccd, unit: battle_unit_runtime_battle_ids}
-  - {addr: 0x8008cdd0, size: 80, name: battle_unit_get_battle_id_by_runtime_id, hash: a7fb8478370afbe3, unit: battle_unit_runtime_battle_ids}
-  - {addr: 0x8008ce20, size: 88, name: battle_unit_get_runtime_id_by_battle_id, hash: 076e686bb291969a, unit: battle_unit_runtime_battle_ids}
-  - {addr: 0x8008ce78, size: 88, name: battle_gfx_get_spritesheet_vram_by_battle_id, hash: 2f471fd71e4e7c65, unit: battle_gfx_event_unit_queries}
-  - {addr: 0x8008ced0, size: 44, name: battle_unit_get_runtime_action_command_by_battle_id, hash: 9933c25c8ea3a0e5, unit: battle_gfx_event_unit_queries}
-  - {addr: 0x8008cefc, size: 64, name: move_is_unit_moving_by_runtime_id, hash: 730cfc06ddfa1b67, unit: battle_gfx_event_unit_queries}
-  - {addr: 0x8008cf3c, size: 60, name: battle_gfx_set_thrown_item_palette_by_runtime_id, hash: e8eb803a892bcb87, unit: battle_gfx_event_unit_queries}
+  - {addr: 0x8008cd24, size: 52, name: battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id, hash: 432660039643285a, source: src/shared/unit/battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id.c}
+  - {addr: 0x8008cd58, size: 60, name: battle_unit_set_movement_effect_suppression, hash: 1345ae2b1ce7c73f, source: src/shared/unit/battle_unit_set_movement_effect_suppression.c}
+  - {addr: 0x8008cd94, size: 60, name: battle_unit_clear_movement_effect_suppression, hash: c273bcb19407bccd, source: src/shared/unit/battle_unit_clear_movement_effect_suppression.c}
+  - {addr: 0x8008cdd0, size: 80, name: battle_unit_get_battle_id_by_runtime_id, hash: a7fb8478370afbe3, source: src/shared/unit/battle_unit_get_battle_id_by_runtime_id.c}
+  - {addr: 0x8008ce20, size: 88, name: battle_unit_get_runtime_id_by_battle_id, hash: 076e686bb291969a, source: src/shared/unit/battle_unit_get_runtime_id_by_battle_id.c}
+  - {addr: 0x8008ce78, size: 88, name: battle_gfx_get_spritesheet_vram_by_battle_id, hash: 2f471fd71e4e7c65, source: src/shared/gfx/battle_gfx_get_spritesheet_vram_by_battle_id.c}
+  - {addr: 0x8008ced0, size: 44, name: battle_unit_get_runtime_action_command_by_battle_id, hash: 9933c25c8ea3a0e5, source: src/shared/gfx/battle_unit_get_runtime_action_command_by_battle_id.c}
+  - {addr: 0x8008cefc, size: 64, name: move_is_unit_moving_by_runtime_id, hash: 730cfc06ddfa1b67, source: src/shared/gfx/move_is_unit_moving_by_runtime_id.c}
+  - {addr: 0x8008cf3c, size: 60, name: battle_gfx_set_thrown_item_palette_by_runtime_id, hash: e8eb803a892bcb87, source: src/shared/gfx/battle_gfx_set_thrown_item_palette_by_runtime_id.c}
   - {addr: 0x8008cf78, size: 228, name: script_add_ghost_unit_event_instruction, hash: 742dc31f4e52bd45, unit: battle_gfx_event_unit_load}
   - {addr: 0x8008d05c, size: 168, name: battle_gfx_load_unit_graphics_by_battle_id, hash: dcb30d626aa5871c, unit: battle_gfx_event_unit_load}
   - {addr: 0x8008d104, size: 52, name: battle_gfx_poll_unit_graphics_load, hash: ef06036bcd08dc52, unit: battle_gfx_event_unit_load}
@@ -732,10 +726,10 @@ functions:
   - {addr: 0x8008e0f0, size: 44, name: map_command_get_3d_object_state, hash: dc5288b2a3c6d65a, unit: map_tile_lookups_and_commands}
   - {addr: 0x8008e11c, size: 52, name: map_command_start_texture_animation, hash: 9a97847326c935f2, unit: map_tile_lookups_and_commands}
   - {addr: 0x8008e150, size: 44, name: map_command_get_texture_animation_active, hash: 1bc5d9a49e9941b9, unit: map_tile_lookups_and_commands}
-  - {addr: 0x8008e17c, size: 124, name: camera_is_active, hash: c12429f34da0186e, unit: effect_unit_id_target_helpers}
-  - {addr: 0x8008e1f8, size: 60, name: target_move_cursor_to_battle_id, hash: 7cce6d6e7e7829b6, unit: effect_unit_id_target_helpers}
-  - {addr: 0x8008e234, size: 148, name: effect_init_single_target_trajectory, hash: 1a211337679f715e, unit: effect_unit_id_target_helpers}
-  - {addr: 0x8008e2c8, size: 60, name: effect_set_secondary_teleport_by_runtime_id, hash: c7123af1fb409fd1, unit: effect_unit_id_target_helpers}
+  - {addr: 0x8008e17c, size: 124, name: camera_is_active, hash: c12429f34da0186e}
+  - {addr: 0x8008e1f8, size: 60, name: target_move_cursor_to_battle_id, hash: 7cce6d6e7e7829b6}
+  - {addr: 0x8008e234, size: 148, name: effect_init_single_target_trajectory, hash: 1a211337679f715e}
+  - {addr: 0x8008e2c8, size: 60, name: effect_set_secondary_teleport_by_runtime_id, hash: c7123af1fb409fd1}
   - {addr: 0x8008e304, size: 20, name: map_mark_data_load_complete, hash: bc8617c70c276fe9, unit: battle_state_frame_pacing}
   - {addr: 0x8008e318, size: 16, name: battle_state_get_frame_measurement, hash: 6b0292f4774a9c77, unit: battle_state_frame_pacing}
   - {addr: 0x8008e328, size: 32, name: battle_state_set_time_scale, hash: 8791e46386a76d81, unit: battle_state_frame_pacing}
@@ -845,14 +839,14 @@ functions:
   - {addr: 0x8012dd30, size: 20, name: sound_queue_sfx_cancel, hash: cc13a0fa61e77c81, unit: menu_modal_flag_and_sfx_queue}
   - {addr: 0x8012dd44, size: 20, name: sound_queue_sfx_cursor_move, hash: 0d96b1a9f196cc3f, unit: menu_modal_flag_and_sfx_queue}
   - {addr: 0x8012dd58, size: 20, name: sound_queue_sfx_invalid, hash: e0c92d85f77badd5, unit: menu_modal_flag_and_sfx_queue}
-  - {addr: 0x8012dd6c, size: 40, name: menu_run_invalid_choice_thread, hash: ee6f22f6b5675647, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012dd94, size: 48, name: camera_wait_until_idle, hash: c9beddd4e8635e8d, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012ddc4, size: 36, name: camera_normalize_yaw_angle, hash: d8594f5ae28d378e, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012dde8, size: 292, name: camera_init_tilt_and_zoom, hash: 2bfaf1895687be29, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012df0c, size: 52, name: camera_wrap_yaw_angle, hash: 40b97089558b718b, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012df40, size: 40, name: menu_get_selected_unit_stats, hash: 34ff5c65d4712d47, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012df68, size: 48, name: script_clamp_s32_to_range, hash: 5dad512952649360, unit: camera_event_yaw_and_waits}
-  - {addr: 0x8012df98, size: 504, name: script_update_event_input_state, hash: e554290105b145d9, unit: camera_event_yaw_and_waits}
+  - {addr: 0x8012dd6c, size: 40, name: menu_run_invalid_choice_thread, hash: ee6f22f6b5675647, source: src/shared/menu/menu_run_invalid_choice_thread.c}
+  - {addr: 0x8012dd94, size: 48, name: camera_wait_until_idle, hash: c9beddd4e8635e8d, source: src/shared/menu/camera_wait_until_idle.c}
+  - {addr: 0x8012ddc4, size: 36, name: camera_normalize_yaw_angle, hash: d8594f5ae28d378e, source: src/shared/menu/camera_normalize_yaw_angle.c}
+  - {addr: 0x8012dde8, size: 292, name: camera_init_tilt_and_zoom, hash: 2bfaf1895687be29, source: src/shared/menu/camera_init_tilt_and_zoom.c}
+  - {addr: 0x8012df0c, size: 52, name: camera_wrap_yaw_angle, hash: 40b97089558b718b, source: src/shared/menu/camera_wrap_yaw_angle.c}
+  - {addr: 0x8012df40, size: 40, name: menu_get_selected_unit_stats, hash: 34ff5c65d4712d47, source: src/shared/menu/menu_get_selected_unit_stats.c}
+  - {addr: 0x8012df68, size: 48, name: script_clamp_s32_to_range, hash: 5dad512952649360, source: src/shared/menu/script_clamp_s32_to_range.c}
+  - {addr: 0x8012df98, size: 504, name: script_update_event_input_state, hash: e554290105b145d9, source: src/shared/menu/script_update_event_input_state.c}
   - {addr: 0x8012e190, size: 8, name: menu_init_stub, hash: 6d64edf91449c1b1, source: src/shared/menu/menu_init_stub.c}
   - {addr: 0x8012e198, size: 172, name: menu_init_default_poly_ft4, hash: 2ae011af04ed842a, source: src/shared/menu/menu_init_default_poly_ft4.c}
   - {addr: 0x8012e244, size: 116, name: menu_init_sprt_variant, hash: 647a4b56f616f141}
@@ -1055,9 +1049,9 @@ functions:
   - {addr: 0x8013f3fc, size: 164, name: script_start_current_event_thread, hash: 4d813122369868cd, unit: script_event_state_reset}
   - {addr: 0x8013f4a0, size: 8, name: script_noop_8, hash: 6d64edf91449c1b1, unit: script_event_state_reset}
   - {addr: 0x8013f4a8, size: 80, name: script_reset_event_state, hash: cc154e81b79d8046, unit: script_event_state_reset}
-  - {addr: 0x8013f4f8, size: 40, name: script_is_deployment_running, hash: a5c397fe33bff892, unit: script_event_frame}
-  - {addr: 0x8013f520, size: 328, name: menu_update_menus_and_event_speed, hash: ec52451103685bc8, unit: script_event_frame}
-  - {addr: 0x8013f668, size: 260, name: map_store_selected_tile_data, hash: 407beefdbfb22c50, unit: script_event_frame}
+  - {addr: 0x8013f4f8, size: 40, name: script_is_deployment_running, hash: a5c397fe33bff892, source: src/shared/script/script_is_deployment_running.c}
+  - {addr: 0x8013f520, size: 328, name: menu_update_menus_and_event_speed, hash: ec52451103685bc8, source: src/shared/script/menu_update_menus_and_event_speed.c}
+  - {addr: 0x8013f668, size: 260, name: map_store_selected_tile_data, hash: 407beefdbfb22c50, source: src/shared/script/map_store_selected_tile_data.c}
   - {addr: 0x8013f76c, size: 64, name: menu_clear_entry_selections, hash: 46ac5994ee2ced8c, unit: menu_unit_selection_records}
   - {addr: 0x8013f7ac, size: 8, name: menu_noop_7, hash: 6d64edf91449c1b1, unit: menu_unit_selection_records}
   - {addr: 0x8013f7b4, size: 256, name: menu_restore_selection_for_selected_unit, hash: a409d984791f85bb, unit: menu_unit_selection_records}
@@ -1157,17 +1151,17 @@ functions:
   - {addr: 0x8014952c, size: 180, name: script_set_units_movement_effect_suppression, hash: ad56c0ea33915d4c, unit: script_unit_event_instructions}
   - {addr: 0x801495e0, size: 172, name: script_color_unit_event_instruction, hash: e5653129316a4e33, unit: script_unit_event_instructions}
   - {addr: 0x8014968c, size: 168, name: script_set_units_palette_update_suppression, hash: 406b68bd9d969db0, unit: script_unit_event_instructions}
-  - {addr: 0x80149734, size: 88, name: unit_check_facing_relative_to_camera, hash: f7c874232339e58e, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x8014978c, size: 368, name: script_face_tile, hash: 349c3977cc8bc891, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x801498fc, size: 176, name: script_waitrotateunit_and_waitrotateall_event_instruction, hash: 3ddb2ca1554cefe8, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x801499ac, size: 168, name: sound_run_background_sfx_thread, hash: 5840248306ebcf8a, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149a54, size: 228, name: sound_run_background_fade_thread, hash: d2b85b17ab3025e0, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149b38, size: 172, name: script_toggle_message_portrait_flip, hash: 6ddcfa9027a7d71d, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149be4, size: 8, name: script_opcode_74_event_instruction, hash: 6d64edf91449c1b1, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149bec, size: 92, name: thread_resolve_id, hash: 17686d1630cf7426, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149c48, size: 116, name: thread_resolve_id_after_current, hash: 4f46f5d743b32d8e, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149cbc, size: 140, name: thread_find_running_by_task, hash: 3e4172d2ef22f4ec, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x80149d48, size: 36, name: thread_set_current_task_id, hash: 7886a9c202b1848c, unit: script_facing_sfx_and_thread_slots}
+  - {addr: 0x80149734, size: 88, name: unit_check_facing_relative_to_camera, hash: f7c874232339e58e, source: src/shared/unit/unit_check_facing_relative_to_camera.c}
+  - {addr: 0x8014978c, size: 368, name: script_face_tile, hash: 349c3977cc8bc891, source: src/shared/unit/script_face_tile.c}
+  - {addr: 0x801498fc, size: 176, name: script_waitrotateunit_and_waitrotateall_event_instruction, hash: 3ddb2ca1554cefe8, source: src/shared/unit/script_waitrotateunit_and_waitrotateall_event_instruction.c}
+  - {addr: 0x801499ac, size: 168, name: sound_run_background_sfx_thread, hash: 5840248306ebcf8a, source: src/shared/unit/sound_run_background_sfx_thread.c}
+  - {addr: 0x80149a54, size: 228, name: sound_run_background_fade_thread, hash: d2b85b17ab3025e0, source: src/shared/unit/sound_run_background_fade_thread.c}
+  - {addr: 0x80149b38, size: 172, name: script_toggle_message_portrait_flip, hash: 6ddcfa9027a7d71d, source: src/shared/unit/script_toggle_message_portrait_flip.c}
+  - {addr: 0x80149be4, size: 8, name: script_opcode_74_event_instruction, hash: 6d64edf91449c1b1, source: src/shared/unit/script_opcode_74_event_instruction.c}
+  - {addr: 0x80149bec, size: 92, name: thread_resolve_id, hash: 17686d1630cf7426, source: src/shared/unit/thread_resolve_id.c}
+  - {addr: 0x80149c48, size: 116, name: thread_resolve_id_after_current, hash: 4f46f5d743b32d8e, source: src/shared/unit/thread_resolve_id_after_current.c}
+  - {addr: 0x80149cbc, size: 140, name: thread_find_running_by_task, hash: 3e4172d2ef22f4ec, source: src/shared/unit/thread_find_running_by_task.c}
+  - {addr: 0x80149d48, size: 36, name: thread_set_current_task_id, hash: 7886a9c202b1848c, source: src/shared/unit/thread_set_current_task_id.c}
   - {addr: 0x80149d6c, size: 336, name: script_find_jump_target, hash: 422ae30d6a9b16a6, unit: script_variable_commands}
   - {addr: 0x80149ebc, size: 84, name: script_find_instruction_byte_offset, hash: ac44e561bcf62111, unit: script_variable_commands}
   - {addr: 0x80149f10, size: 264, name: script_run_condition, hash: 56d22d399c4208fa, unit: script_variable_commands}

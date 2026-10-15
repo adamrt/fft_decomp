@@ -10,7 +10,6 @@ links: [wldcore, battle]
 defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 112, VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 1792, VARIANT_MENU_CHOICE_VRAM_X: 1536, VARIANT_MENU_CHOICE_WINDOW_CENTER_Y: 40, VARIANT_MENU_CHOICE_WINDOW_RIGHT_X: 116, VARIANT_MENU_CMD_END_OPCODE: 28, VARIANT_MENU_ITEM_CURSOR_DEPTH: 20, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16, VARIANT_THREAD_TABLE_SLOT_COUNT: 17}
 
 units:
-  - {name: camera_event_yaw_and_waits, source: src/shared/menu/camera_event_yaw_and_waits.c}
   - {name: camera_fusion_tracks, source: src/shared/camera/camera_fusion_tracks.c}
   - {name: gfx_image_transfer_wait, source: src/shared/gfx/gfx_image_transfer_wait.c}
   - {name: gfx_primitive_submission, source: src/shared/gfx/gfx_primitive_submission.c}
@@ -37,10 +36,8 @@ units:
   - {name: script_bitset_and_unlockdate, source: src/shared/script/script_bitset_and_unlockdate.c}
   - {name: script_call_function_handlers, source: src/shared/script/script_call_function_handlers.c}
   - {name: script_camera_scene_threads, source: src/shared/script/script_camera_scene_threads.c}
-  - {name: script_event_frame, source: src/shared/script/script_event_frame.c}
   - {name: script_event_resource_loads, source: src/shared/script/script_event_resource_loads.c}
   - {name: script_event_state_reset, source: src/shared/unit/script_event_state_reset.c}
-  - {name: script_facing_sfx_and_thread_slots, source: src/shared/unit/script_facing_sfx_and_thread_slots.c}
   - {name: script_roster_instructions, source: src/shared/script/script_roster_instructions.c}
   - {name: script_unit_event_instructions, source: src/shared/script/script_unit_event_instructions.c}
   - {name: script_unit_facing_and_animation, source: src/shared/script/script_unit_facing_and_animation.c}
@@ -122,14 +119,14 @@ functions:
   - {addr: 0x800e1ec4, size: 20, name: sound_queue_sfx_cancel, hash: 2e72a265e93b98c6, unit: menu_modal_flag_and_sfx_queue}
   - {addr: 0x800e1ed8, size: 20, name: sound_queue_sfx_cursor_move, hash: 7684f65afee83ab4, unit: menu_modal_flag_and_sfx_queue}
   - {addr: 0x800e1eec, size: 20, name: sound_queue_sfx_invalid, hash: 2cded14f2af8d448, unit: menu_modal_flag_and_sfx_queue}
-  - {addr: 0x800e1f00, size: 40, name: menu_run_invalid_choice_thread, hash: 673200a96478bd69, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e1f28, size: 48, name: camera_wait_until_idle, hash: fecdc06e231e4865, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e1f58, size: 36, name: camera_normalize_yaw_angle, hash: 4b9b57139167c4c5, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e1f7c, size: 292, name: camera_init_tilt_and_zoom, hash: b488293686882dcf, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e20a0, size: 52, name: camera_wrap_yaw_angle, hash: 2f0e82c3ed1fb39e, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e20d4, size: 40, name: menu_get_selected_unit_stats, hash: d8b03fa45f1ad5c5, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e20fc, size: 48, name: script_clamp_s32_to_range, hash: a979e7abbcee5781, unit: camera_event_yaw_and_waits}
-  - {addr: 0x800e212c, size: 612, name: script_update_event_input_state, hash: ec1118bb42efe382, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: camera_event_yaw_and_waits}
+  - {addr: 0x800e1f00, size: 40, name: menu_run_invalid_choice_thread, hash: 673200a96478bd69, source: src/shared/menu/menu_run_invalid_choice_thread.c}
+  - {addr: 0x800e1f28, size: 48, name: camera_wait_until_idle, hash: fecdc06e231e4865, source: src/shared/menu/camera_wait_until_idle.c}
+  - {addr: 0x800e1f58, size: 36, name: camera_normalize_yaw_angle, hash: 4b9b57139167c4c5, source: src/shared/menu/camera_normalize_yaw_angle.c}
+  - {addr: 0x800e1f7c, size: 292, name: camera_init_tilt_and_zoom, hash: b488293686882dcf, source: src/shared/menu/camera_init_tilt_and_zoom.c}
+  - {addr: 0x800e20a0, size: 52, name: camera_wrap_yaw_angle, hash: 2f0e82c3ed1fb39e, source: src/shared/menu/camera_wrap_yaw_angle.c}
+  - {addr: 0x800e20d4, size: 40, name: menu_get_selected_unit_stats, hash: d8b03fa45f1ad5c5, source: src/shared/menu/menu_get_selected_unit_stats.c}
+  - {addr: 0x800e20fc, size: 48, name: script_clamp_s32_to_range, hash: a979e7abbcee5781, source: src/shared/menu/script_clamp_s32_to_range.c}
+  - {addr: 0x800e212c, size: 612, name: script_update_event_input_state, hash: ec1118bb42efe382, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/menu/script_update_event_input_state.c}
   - {addr: 0x800e2390, size: 8, name: menu_init_stub, hash: 6d64edf91449c1b1, source: src/shared/menu/menu_init_stub.c}
   - {addr: 0x800e2398, size: 172, name: menu_init_default_poly_ft4, hash: 2ae011af04ed842a, source: src/shared/menu/menu_init_default_poly_ft4.c}
   - {addr: 0x800e2444, size: 116, name: menu_init_sprt_variant, hash: c767e8c38c70470e}
@@ -334,9 +331,9 @@ functions:
   - {addr: 0x800f2c74, size: 164, name: script_start_current_event_thread, hash: 764f02292c9b38c2, unit: script_event_state_reset}
   - {addr: 0x800f2d18, size: 8, name: script_noop_8, hash: 6d64edf91449c1b1, unit: script_event_state_reset}
   - {addr: 0x800f2d20, size: 80, name: script_reset_event_state, hash: de6bf31314f15ef6, unit: script_event_state_reset}
-  - {addr: 0x800f2d70, size: 40, name: script_is_deployment_running, hash: 0c31ced998da1feb, unit: script_event_frame}
-  - {addr: 0x800f2d98, size: 328, name: menu_update_menus_and_event_speed, hash: 2a50df3b6a1b8d8e, unit: script_event_frame}
-  - {addr: 0x800f2ee0, size: 260, name: map_store_selected_tile_data, hash: adad582c51dee948, unit: script_event_frame}
+  - {addr: 0x800f2d70, size: 40, name: script_is_deployment_running, hash: 0c31ced998da1feb, source: src/shared/script/script_is_deployment_running.c}
+  - {addr: 0x800f2d98, size: 328, name: menu_update_menus_and_event_speed, hash: 2a50df3b6a1b8d8e, source: src/shared/script/menu_update_menus_and_event_speed.c}
+  - {addr: 0x800f2ee0, size: 260, name: map_store_selected_tile_data, hash: adad582c51dee948, source: src/shared/script/map_store_selected_tile_data.c}
   - {addr: 0x800f2fe4, size: 64, name: menu_clear_entry_selections, hash: 25e5397d31b98e28, unit: menu_unit_selection_records}
   - {addr: 0x800f3024, size: 8, name: menu_noop_7, hash: 6d64edf91449c1b1, unit: menu_unit_selection_records}
   - {addr: 0x800f302c, size: 256, name: menu_restore_selection_for_selected_unit, hash: e03923895aa02ebd, unit: menu_unit_selection_records}
@@ -436,17 +433,17 @@ functions:
   - {addr: 0x800fc998, size: 180, name: script_set_units_movement_effect_suppression, hash: c2d8e271e578e487, unit: script_unit_event_instructions}
   - {addr: 0x800fca4c, size: 172, name: script_color_unit_event_instruction, hash: 991b6e8c7dc5117f, unit: script_unit_event_instructions}
   - {addr: 0x800fcaf8, size: 168, name: script_set_units_palette_update_suppression, hash: 0c1bb9735a0248cc, unit: script_unit_event_instructions}
-  - {addr: 0x800fcba0, size: 88, name: unit_check_facing_relative_to_camera, hash: ef44f6dacbae10fb, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fcbf8, size: 368, name: script_face_tile, hash: 96b76ce946c03c2e, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fcd68, size: 176, name: script_waitrotateunit_and_waitrotateall_event_instruction, hash: d8fa9c97f6edfaa2, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fce18, size: 168, name: sound_run_background_sfx_thread, hash: b51c4e253d5dea85, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fcec0, size: 264, name: sound_run_background_fade_thread, hash: 0180ab71574b16f7, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fcfc8, size: 172, name: script_toggle_message_portrait_flip, hash: ceb3971e4cedddbd, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fd074, size: 8, name: script_opcode_74_event_instruction, hash: 6d64edf91449c1b1, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fd07c, size: 92, name: thread_resolve_id, hash: 674eacc3bba8a117, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fd0d8, size: 116, name: thread_resolve_id_after_current, hash: a367ea7a7bcd9ae1, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fd14c, size: 140, name: thread_find_running_by_task, hash: e98782ca2e2a6940, unit: script_facing_sfx_and_thread_slots}
-  - {addr: 0x800fd1d8, size: 36, name: thread_set_current_task_id, hash: dd9e3f86ea659634, unit: script_facing_sfx_and_thread_slots}
+  - {addr: 0x800fcba0, size: 88, name: unit_check_facing_relative_to_camera, hash: ef44f6dacbae10fb, source: src/shared/unit/unit_check_facing_relative_to_camera.c}
+  - {addr: 0x800fcbf8, size: 368, name: script_face_tile, hash: 96b76ce946c03c2e, source: src/shared/unit/script_face_tile.c}
+  - {addr: 0x800fcd68, size: 176, name: script_waitrotateunit_and_waitrotateall_event_instruction, hash: d8fa9c97f6edfaa2, source: src/shared/unit/script_waitrotateunit_and_waitrotateall_event_instruction.c}
+  - {addr: 0x800fce18, size: 168, name: sound_run_background_sfx_thread, hash: b51c4e253d5dea85, source: src/shared/unit/sound_run_background_sfx_thread.c}
+  - {addr: 0x800fcec0, size: 264, name: sound_run_background_fade_thread, hash: 0180ab71574b16f7, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/unit/sound_run_background_fade_thread.c}
+  - {addr: 0x800fcfc8, size: 172, name: script_toggle_message_portrait_flip, hash: ceb3971e4cedddbd, source: src/shared/unit/script_toggle_message_portrait_flip.c}
+  - {addr: 0x800fd074, size: 8, name: script_opcode_74_event_instruction, hash: 6d64edf91449c1b1, source: src/shared/unit/script_opcode_74_event_instruction.c}
+  - {addr: 0x800fd07c, size: 92, name: thread_resolve_id, hash: 674eacc3bba8a117, source: src/shared/unit/thread_resolve_id.c}
+  - {addr: 0x800fd0d8, size: 116, name: thread_resolve_id_after_current, hash: a367ea7a7bcd9ae1, source: src/shared/unit/thread_resolve_id_after_current.c}
+  - {addr: 0x800fd14c, size: 140, name: thread_find_running_by_task, hash: e98782ca2e2a6940, source: src/shared/unit/thread_find_running_by_task.c}
+  - {addr: 0x800fd1d8, size: 36, name: thread_set_current_task_id, hash: dd9e3f86ea659634, source: src/shared/unit/thread_set_current_task_id.c}
   - {addr: 0x800fd1fc, size: 336, name: script_find_jump_target, hash: ab737fa84b87a290, unit: script_variable_commands}
   - {addr: 0x800fd34c, size: 84, name: script_find_instruction_byte_offset, hash: b757188c6a6e7586, unit: script_variable_commands}
   - {addr: 0x800fd3a0, size: 264, name: script_run_condition, hash: e36beb855569d28c, unit: script_variable_commands}
