@@ -19,33 +19,33 @@
 /* turn flags */
 extern u8 g_battle_player_unit_fallen;
 
-s32 status_calculate_turn_flags(const unit_stats_t* unit);
-s32 status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit);
-void status_disable_acting(unit_stats_t* unit);
-void status_enable_disable_acting(unit_stats_t* unit);
-s32 status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit);
+s32 battle_status_calculate_turn_flags(const unit_stats_t* unit);
+s32 battle_status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit);
+void battle_status_disable_acting(unit_stats_t* unit);
+void battle_status_enable_disable_acting(unit_stats_t* unit);
+s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit);
 
 /* infliction and removal */
-void status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id);
-s32 status_inflict_defending_to_battle_id(s32 unit_id);
-s32 status_init_special_flag_enabling(s32 unit_id);
-s32 status_modify_inflictions(s32 removal_only);
-s32 status_prepare_terrain_poison(unit_stats_t* unit);
-void status_reapply_active_flags(unit_stats_t* unit);
-void status_remove(void);
-s32 status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable);
-void status_remove_control(unit_stats_t* unit);
-s32 status_remove_transparent(unit_stats_t* unit);
-void status_remove_transparent_if_jump_used(unit_stats_t* unit);
-s32 status_resolve_unit_changes(s32 unit_id, s32 removal_only);
-void status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx);
-void status_store_for_current_attack(s32 unit_id, s32 removal_only);
+void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id);
+s32 battle_status_inflict_defending_to_battle_id(s32 unit_id);
+s32 battle_status_init_special_flag_enabling(s32 unit_id);
+s32 battle_status_modify_inflictions(s32 removal_only);
+s32 battle_status_prepare_terrain_poison(unit_stats_t* unit);
+void battle_status_reapply_active_flags(unit_stats_t* unit);
+void battle_status_remove(void);
+s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable);
+void battle_status_remove_control(unit_stats_t* unit);
+s32 battle_status_remove_transparent(unit_stats_t* unit);
+void battle_status_remove_transparent_if_jump_used(unit_stats_t* unit);
+s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only);
+void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx);
+void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only);
 
 /* upkeep */
-s32 status_apply_poison_and_regen(unit_stats_t* unit);
-void status_apply_unit_action_removal(unit_stats_t* unit);
-s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
-void status_update_expiring(s32 unit_id);
+s32 battle_status_apply_poison_and_regen(unit_stats_t* unit);
+void battle_status_apply_unit_action_removal(unit_stats_t* unit);
+s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
+void battle_status_update_expiring(s32 unit_id);
 
 /* graphics */
 extern u8 g_status_bubble_digit_u[24];
@@ -59,6 +59,6 @@ extern SVECTOR g_status_bubble_zoom;
 extern const u8 g_status_display_image_ids[STATUS_COUNT];
 extern s32 g_status_menu_open;
 
-s32 status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id);
+s32 battle_status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id);
 
 #endif

@@ -152,7 +152,7 @@ enum {
     JOBSTTS_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
 };
 
-menu_instruction_t* menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
+menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruction_t* instruction);
 

@@ -12,7 +12,7 @@ enum {
  * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
  * is not negated, so entering over a high side (slope height 2) moves the unit
  * down to the center. */
-void move_set_unit_step_delta_edge_to_center(
+void battle_move_set_unit_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 

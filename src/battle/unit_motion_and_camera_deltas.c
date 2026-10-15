@@ -20,7 +20,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-void target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
+void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
     map_tile_t* tile;
     long flag;
 
@@ -29,13 +29,14 @@ void target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, 
     SetTransMatrix(&g_camera_matrix);
     main_util_set_svector(position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
         g_battle_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
-    position->vy = map_calculate_slope_height(position, (u8)g_battle_cursor_z);
-    tile = map_get_tile_data_pointer((position->vx / MAP_TILE_SIZE), (position->vz / MAP_TILE_SIZE), g_battle_cursor_z);
+    position->vy = battle_map_calculate_slope_height(position, (u8)g_battle_cursor_z);
+    tile = battle_map_get_tile_data_pointer(
+        (position->vx / MAP_TILE_SIZE), (position->vz / MAP_TILE_SIZE), g_battle_cursor_z);
     position->vy -= tile->depth_half_height.depth * 12;
     if (tile->surface.depth_bias) {
-        camera_convert_screen_coords_modify_by_5(position, raised);
+        battle_camera_convert_screen_coords_modify_by_5(position, raised);
     } else {
-        camera_convert_screen_coords_modify_by_1(position, raised);
+        battle_camera_convert_screen_coords_modify_by_1(position, raised);
     }
     RotTrans(raised, projected, &flag);
     g_battle_cursor_screen_x = projected->vx;
@@ -46,7 +47,7 @@ void target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, 
  * Tile coordinate calculation with the cursor glow, used while an AT list is
  * active (see target_calculate_tile_coords_and_glow_from_at_list).
  */
-void target_calculate_tile_coords_with_cursor_glow(void) {
+void battle_target_calculate_tile_coords_with_cursor_glow(void) {
     SVECTOR secondary;
     SVECTOR tertiary;
     SVECTOR corner0;
@@ -58,13 +59,14 @@ void target_calculate_tile_coords_with_cursor_glow(void) {
     s32 result;
     map_tile_t* tile;
 
-    target_project_cursor_tile_to_screen(&primary, &secondary, &tertiary);
+    battle_target_project_cursor_tile_to_screen(&primary, &secondary, &tertiary);
     /* The projected z is the ordering-table depth for the cursor glow. */
     depth = primary.vz / 4;
     battle_gfx_draw_map_selection_cursor(&secondary, main_gfx_get_otag());
     /* The polygon routine reads the same three 16-bit values in renderer x, z, y order. */
-    result = target_calculate_cursor_tile_polygon(&secondary, g_battle_cursor_z, &corner0);
-    tile = map_get_tile_data_pointer(secondary.vx / MAP_TILE_SIZE, secondary.vz / MAP_TILE_SIZE, g_battle_cursor_z);
+    result = battle_target_calculate_cursor_tile_polygon(&secondary, g_battle_cursor_z, &corner0);
+    tile = battle_map_get_tile_data_pointer(
+        secondary.vx / MAP_TILE_SIZE, secondary.vz / MAP_TILE_SIZE, g_battle_cursor_z);
     battle_gfx_build_cursor_tile_glow(
         tile->flags.untargetable, result, &corner0, &corner1, &corner2, &corner3, main_gfx_get_otag() + depth);
 }
@@ -87,7 +89,7 @@ void battle_gfx_draw_wait_direction_unit(void) {
     unit = battle_unit_get_source();
     main_util_set_svector(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     RotTrans(&base, &transformed, &flag);
-    camera_convert_screen_coords_modify_by_1(&unit->world_coords, &raised);
+    battle_camera_convert_screen_coords_modify_by_1(&unit->world_coords, &raised);
     raised.vy -= 48;
     RotTrans(&raised, &transformed, &flag);
     depth = transformed.vz / 4;
@@ -194,7 +196,7 @@ s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit) {
  * Phase 0 replaces the frame count in distortion_timer with the per-frame step
  * and stores the destination height in distortion_target; phase 1 steps until the
  * unit reaches it, then snaps and ends the animation. */
-void move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
+void battle_move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
     s32 step;
     s32 target;
     s32 height;
@@ -228,7 +230,7 @@ void move_interpolate_height_toward_fixed_rise(battle_unit_t* unit) {
  * frame count in distortion_timer with the per-frame step; phase 1 steps while
  * the unit is above the ground, then snaps and ends the animation. A unit that
  * starts at or below the ground snaps on the first frame. */
-void move_interpolate_height_toward_resting_height(battle_unit_t* unit) {
+void battle_move_interpolate_height_toward_resting_height(battle_unit_t* unit) {
     s32 step;
     s32 z;
     s32 real_z;
@@ -291,8 +293,9 @@ void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height
                     * ONE;
                 tile_center.vx = unit->stats->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 tile_center.vz = unit->stats->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                velocity.vy = (map_calculate_slope_height(&tile_center, unit->stats->action_command.target_position.vy)
-                                  - unit->world_coords.vy)
+                velocity.vy
+                    = (battle_map_calculate_slope_height(&tile_center, unit->stats->action_command.target_position.vy)
+                          - unit->world_coords.vy)
                     * ONE;
             }
             velocity.vx /= timer;
@@ -327,7 +330,7 @@ void battle_unit_move_toward_action_target(battle_unit_t* unit, s32 allow_height
  * Phase 0 splits the remaining screen-to-tile distance into equal Q12 steps;
  * phase 1 applies them (height only when allow_height_change is set) and
  * snaps to the tile once the timer runs out. */
-void move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change) {
+void battle_move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change) {
     SVECTOR tile_center;
     VECTOR velocity;
     s32 timer;
@@ -342,7 +345,7 @@ void move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_cha
         velocity.vz = (unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2) - unit->world_coords.vz) * ONE;
         tile_center.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         tile_center.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        velocity.vy = (map_calculate_slope_height(&tile_center, unit->map_z) - unit->world_coords.vy) * ONE;
+        velocity.vy = (battle_map_calculate_slope_height(&tile_center, unit->map_z) - unit->world_coords.vy) * ONE;
         velocity.vx /= timer;
         velocity.vy /= timer;
         velocity.vz /= timer;
@@ -369,26 +372,26 @@ void move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_cha
 
 /* Distortion animation 0x04: move toward the action target in equal steps,
  * height included (battle_unit_move_toward_action_target). */
-void move_accelerate_unit_to_destination_with_height_change(battle_unit_t* unit) {
+void battle_move_accelerate_unit_to_destination_with_height_change(battle_unit_t* unit) {
     battle_unit_move_toward_action_target(unit, 1);
 }
 
 /* Distortion animation 0x05: move to the center of the unit's map tile in equal
  * steps, height included (move_step_unit_to_map_tile_center). */
-void move_step_unit_to_map_tile_center_with_height_change(battle_unit_t* unit) {
-    move_step_unit_to_map_tile_center(unit, 1);
+void battle_move_step_unit_to_map_tile_center_with_height_change(battle_unit_t* unit) {
+    battle_move_step_unit_to_map_tile_center(unit, 1);
 }
 
 /* Distortion animation 0x08: move toward the action target in equal steps without
  * changing height (battle_unit_move_toward_action_target). */
-void move_accelerate_unit_to_destination_no_height_change(battle_unit_t* unit) {
+void battle_move_accelerate_unit_to_destination_no_height_change(battle_unit_t* unit) {
     battle_unit_move_toward_action_target(unit, 0);
 }
 
 /* Distortion animation 0x09: move to the center of the unit's map tile without
  * changing height. */
-void move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit) {
-    move_step_unit_to_map_tile_center(unit, 0);
+void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit) {
+    battle_move_step_unit_to_map_tile_center(unit, 0);
 }
 
 /* Velocity and duration of a jump arc from `from` to `to`.
@@ -397,7 +400,7 @@ void move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit) {
  * sqrt(2 * gravity * height) / gravity frames: one over the height difference
  * plus 24, one over 24. `out->vy` is the negated speed of the first leg; x and
  * y (stored in vz) cover their distances evenly over the returned frame count. */
-s32 move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
+s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out) {
     s32 to_z;
     s32 from_z;
     s32 height;
@@ -430,7 +433,7 @@ s32 move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VEC
  * velocity to all three real coordinates for that many frames, the height speed
  * gaining g_move_jump_gravity each frame, and ends the animation where the
  * arc leaves the unit. */
-void move_animate_jump_arc_to_target(battle_unit_t* unit) {
+void battle_move_animate_jump_arc_to_target(battle_unit_t* unit) {
     SVECTOR target;
     /* The retail frame reserves eight bytes beyond the target vector. */
     u8 unused_target_tail[8];
@@ -452,9 +455,9 @@ void move_animate_jump_arc_to_target(battle_unit_t* unit) {
             } else {
                 target.vx = unit->stats->action_command.target_position.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 target.vz = unit->stats->action_command.target_position.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                target.vy = map_calculate_slope_height(&target, unit->stats->action_command.target_position.vy);
+                target.vy = battle_map_calculate_slope_height(&target, unit->stats->action_command.target_position.vy);
             }
-            timer = move_calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
+            timer = battle_move_calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
             unit->distortion_phase++;
         } else {
             unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
@@ -486,7 +489,7 @@ void move_animate_jump_arc_to_target(battle_unit_t* unit) {
  * g_move_jump_gravity each frame, then stops the horizontal motion. Phase
  * 2 keeps falling until the unit reaches the ground under it, snaps it to the
  * tile and ends the animation. */
-void move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
+void battle_move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
     /* Unreferenced 8-byte frame slot below the target point, like the one in
      * move_animate_jump_start; it puts `target` at sp+0x18. */
     SVECTOR unused_10;
@@ -501,7 +504,7 @@ void move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
         target.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         target.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         target.vy = battle_gfx_calculate_world_height_from_unit_tile(unit);
-        timer = move_calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
+        timer = battle_move_calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
         unit->distortion_phase++;
     case 1:
         if (timer > 0) {
@@ -554,7 +557,7 @@ void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit) {
  * the count runs out. `unused_10` reproduces an unreferenced 16-byte frame
  * slot below the velocity copy.
  */
-void move_animate_jump_start(battle_unit_t* unit) {
+void battle_move_animate_jump_start(battle_unit_t* unit) {
     VECTOR unused_10;
     VECTOR velocity;
     s32 timer;
@@ -608,7 +611,7 @@ void move_animate_jump_start(battle_unit_t* unit) {
  * During an event the unit is also centerd on its tile, but retail writes the
  * depth coordinate into real.vy instead of real.vz. The height then sits below
  * the ground on the next frame, so an event fall ends on its second frame. */
-void move_animate_fall_to_target_tile(battle_unit_t* unit) {
+void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {
     SVECTOR coords;
     /* Unreferenced 8-byte frame slot above `coords`; it puts `velocity` at
      * sp+0x20, matching the sibling distortion handlers. */
@@ -675,7 +678,7 @@ void move_animate_fall_to_target_tile(battle_unit_t* unit) {
 /* Fill the init record of a teleport effect: the unit is the caster and the only
  * target, and there are no spectators. Both teleport starters use it for every
  * unit, not only for Altima. */
-void effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data) {
+void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data) {
     u8 runtime_id;
     u8 repeated_runtime_id;
 
@@ -692,19 +695,19 @@ void effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init
 /* Start the departure effect of a teleport. Altima's two forms request their own
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-out sound, and the result is 0. */
-s32 effect_start_altima_teleport_departure(battle_unit_t* unit) {
+s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit) {
     effect_secondary_init_t teleport_data;
 
-    effect_init_altima_teleport_data(unit, &teleport_data);
+    battle_effect_init_altima_teleport_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM:
-        effect_set_ability_animation(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
+        battle_effect_set_ability_animation(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
         return 1;
     case BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM:
-        effect_set_ability_animation(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
+        battle_effect_set_ability_animation(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
         return 1;
     }
-    effect_set_secondary_teleport(unit);
+    battle_effect_set_secondary_teleport(unit);
     main_sound_play_sfx_find_channel(MAIN_SFX_TELEPORT_OUT);
     return 0;
 }
@@ -712,19 +715,19 @@ s32 effect_start_altima_teleport_departure(battle_unit_t* unit) {
 /* Start the arrival effect of a teleport. Altima's two forms request their own
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-in sound, and the result is 0. */
-s32 effect_start_altima_teleport_arrival(battle_unit_t* unit) {
+s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
     effect_secondary_init_t teleport_data;
 
-    effect_init_altima_teleport_data(unit, &teleport_data);
+    battle_effect_init_altima_teleport_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM:
-        effect_set_ability_animation(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
+        battle_effect_set_ability_animation(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
         return 1;
     case BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM:
-        effect_set_ability_animation(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
+        battle_effect_set_ability_animation(0, ABILITY_ID_ALTIMA_ARCH_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
         return 1;
     }
-    effect_set_secondary_teleport(unit);
+    battle_effect_set_secondary_teleport(unit);
     main_sound_play_sfx_find_channel(MAIN_SFX_TELEPORT_IN);
     return 0;
 }
@@ -734,10 +737,10 @@ s32 effect_start_altima_teleport_arrival(battle_unit_t* unit) {
  * the sprite switches to additive semi-transparency and a palette modulation of
  * +31 on each color component starts. The distortion moves to its next phase
  * with the timer at 0. */
-void effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
+void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM
         || unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM) {
-        effect_play();
+        battle_effect_play();
     }
     unit->sprite_display_flags = (unit->sprite_display_flags & ~BATTLE_SPRITE_DISPLAY_BLEND_MASK)
         | (BATTLE_SPRITE_DISPLAY_BLEND_ADD | BATTLE_SPRITE_DISPLAY_SEMI_TRANSPARENT);
@@ -751,14 +754,14 @@ void effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
  * palette is refreshed for the shadow mode of the tile it stands on and a palette
  * modulation of -31 on each color component starts. The distortion moves to its
  * next phase with the timer at 0. */
-void effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
+void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
     map_tile_t* tile;
 
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM
         || unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM) {
-        effect_play();
+        battle_effect_play();
     }
-    tile = map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     battle_gfx_check_tile_status_palette_mod(unit, tile->flags.shading, 1);
     battle_gfx_apply_unit_palette_modulation_to_units(MAP_COLOR_MODE_BASE, 0, unit->runtime_id, -31, -31, -31);
     unit->distortion_phase++;
@@ -778,15 +781,15 @@ s32 battle_unit_advance_altima_teleport_distortion(battle_unit_t* unit) {
     unit->distortion_timer++;
     switch (unit->distortion_phase) {
     case 0:
-        if (effect_start_altima_teleport_departure(unit) == 0) {
-            effect_start_altima_teleport_white_flash(unit);
+        if (battle_effect_start_altima_teleport_departure(unit) == 0) {
+            battle_effect_start_altima_teleport_white_flash(unit);
         }
         unit->distortion_phase++;
         break;
     case 1:
         /* The target passes no argument here. */
-        if (effect_init_data() == 0 && camera_is_active() == 0) {
-            effect_start_altima_teleport_white_flash(unit);
+        if (battle_effect_init_data() == 0 && battle_camera_is_active() == 0) {
+            battle_effect_start_altima_teleport_white_flash(unit);
         }
         break;
     case 2:
@@ -803,15 +806,15 @@ s32 battle_unit_advance_altima_teleport_distortion(battle_unit_t* unit) {
             unit->map_z = unit->movement.destination_z;
             battle_unit_set_real_coords_from_map_coords(unit);
             battle_unit_set_world_coords_from_real_coords(unit);
-            if (effect_start_altima_teleport_arrival(unit) == 0) {
-                effect_start_altima_teleport_fade_out(unit);
+            if (battle_effect_start_altima_teleport_arrival(unit) == 0) {
+                battle_effect_start_altima_teleport_fade_out(unit);
             }
             unit->distortion_phase++;
         }
         break;
     case 4:
-        if (effect_init_data() == 0 && camera_is_active() == 0) {
-            effect_start_altima_teleport_fade_out(unit);
+        if (battle_effect_init_data() == 0 && battle_camera_is_active() == 0) {
+            battle_effect_start_altima_teleport_fade_out(unit);
         }
         break;
     case 5:
@@ -911,7 +914,7 @@ void battle_unit_advance_slide_to_target_distortion(battle_unit_t* unit) {
  * Phase 3 falls to the ground, snaps the unit to the tile, shows the shadow,
  * clears BATTLE_UNIT_STATUS_JUMP_HEIGHT_ACTIVE and the semi-transparency bit, and
  * ends the animation. */
-void move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) {
+void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) {
     /* Unreferenced 8-byte frame slot below the target point, like the one in
      * move_animate_jump_arc_to_own_tile; it puts `target` at sp+0x20. */
     SVECTOR unused_18;
@@ -928,7 +931,7 @@ void move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) {
         target.vx = unit->map_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         target.vz = unit->map_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         target.vy = battle_gfx_calculate_world_height_from_unit_tile(unit);
-        timer = move_calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
+        timer = battle_move_calculate_jump_arc_velocity(&unit->world_coords, &target, &velocity);
         unit->shadow_graphic_trigger = 0;
         unit->sprite_display_flags |= BATTLE_SPRITE_DISPLAY_BLEND_ADD_QUARTER | BATTLE_SPRITE_DISPLAY_SEMI_TRANSPARENT;
         battle_gfx_apply_unit_palette_modulation_to_units(MAP_COLOR_MODE_BASE, 1, unit->runtime_id, -31, -31, -31);
@@ -990,7 +993,7 @@ void move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) {
  * plays sound 0x27 and ends the animation at once when the unit is already
  * high enough; the end of phase 1 only clears the animation id.
  */
-void move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
+void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
     VECTOR unused_10;
     VECTOR velocity;
     s32 timer;
@@ -1011,7 +1014,7 @@ void move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
         timer = speed / g_move_jump_gravity;
         velocity.vy = -speed;
         battle_gfx_init_position_vector_copies(unit);
-        sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
+        battle_sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
         unit->distortion_phase++;
     case 1:
         if (timer > 0) {
@@ -1042,26 +1045,26 @@ void battle_unit_dispatch_distortion_animation(battle_unit_t* unit) {
 
 /* Saves the camera position for camera_restore_current_real_coords (effect
  * script opcodes 09 and 0a). */
-void camera_save_current_real_coords(void) {
+void battle_camera_save_current_real_coords(void) {
     copyVector(&g_camera_saved_real_coords, &g_camera_current_real_coords);
 }
 
-void camera_restore_current_real_coords(void) {
+void battle_camera_restore_current_real_coords(void) {
     copyVector(&g_camera_current_real_coords, &g_camera_saved_real_coords);
 }
 
-VECTOR* camera_get_current_real_coords(void) {
+VECTOR* battle_camera_get_current_real_coords(void) {
     return &g_camera_current_real_coords;
 }
 
-void camera_set_current_real_coords(const VECTOR* coords) {
+void battle_camera_set_current_real_coords(const VECTOR* coords) {
     copyVector(&g_camera_current_real_coords, coords);
 }
 
 /* Starts a linear move of the camera position to `destination` (20.12) over
  * frame_count frames (divided by the animation speed), applied by
  * camera_update_real_coord_animation. No retail code calls it. */
-void camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
+void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
     s32 animation_frames;
 
     animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;

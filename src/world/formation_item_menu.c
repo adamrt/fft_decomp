@@ -92,7 +92,7 @@ void world_formation_item_menu(void) {
         running = thread_is_running(WORLD_THREAD_SLOT_UPPER_MENU);
         g_world_item_menu_initialized = running;
         if (running == 0) {
-            menu_toggle_change_banner_panel_thread(0);
+            world_menu_toggle_change_banner_panel_thread(0);
             roster_slot = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
             world_formation_build_record_list(0, g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
             g_unit_selected_index = world_formation_find_index_by_roster_slot(roster_slot);
@@ -289,7 +289,7 @@ s32 world_menu_run_best_fit_equipment(void) {
         g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
             g_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
         world_menu_toggle_preview_stats_window(1);
-        menu_toggle_stat_preview_panel_thread(1);
+        world_menu_toggle_stat_preview_panel_thread(1);
         g_menu_preview_stats_thread_params.redraw_request = 1;
         g_menu_status_display_thread_params.redraw_request = 1;
         thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
@@ -307,7 +307,7 @@ s32 world_menu_run_best_fit_equipment(void) {
         if (*choice == 1) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         }
-        menu_toggle_stat_preview_panel_thread(0);
+        world_menu_toggle_stat_preview_panel_thread(0);
         world_menu_toggle_preview_stats_window(0);
         g_menu_status_display_thread_params.redraw_request = 1;
         g_world_formation_unit_cycle_mode = 2;

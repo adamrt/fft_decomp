@@ -138,7 +138,7 @@ s32 main_unit_calculate_zodiac_symbol(u16 birthday) {
     return (u16)zodiac;
 }
 
-void mem_zero(void* destination, s32 count) {
+void main_mem_zero(void* destination, s32 count) {
     u8* dst = destination;
     s32 index = 0;
 

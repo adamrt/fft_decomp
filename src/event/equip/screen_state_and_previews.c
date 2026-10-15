@@ -129,7 +129,7 @@ s32 equip_menu_run_equip_mode(void) {
             g_equip_item_list_open = 1;
             g_equip_equipment_panel_style = 1;
             thread_suspend(EQUIP_THREAD_SLOT_COMMAND_MENU);
-            menu_restore_list_selection(
+            equip_menu_restore_list_selection(
                 g_equip_item_slot != 0 ? g_equip_item_slot - 1 : 0, &selected, &scroll, g_item_list_entries);
             menu_init_scrollable_list(
                 g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);

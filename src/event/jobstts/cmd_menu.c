@@ -130,7 +130,7 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
 }
 
 /* Draw the border tiles through a vertically expanding transition clip. */
-menu_instruction_t* menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* command) {
+menu_instruction_t* jobstts_menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* command) {
     menu_instruction_t* next;
     RECT rect;
 

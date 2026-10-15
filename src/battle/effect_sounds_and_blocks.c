@@ -14,7 +14,7 @@
  * three ids by its mode and the number of sounds it has played; 0 is no sound.
  *
  * Modes above 4 fall through with an unassigned result, as in the target. */
-s32 effect_select_sound_id(s32 channel) {
+s32 battle_effect_select_sound_id(s32 channel) {
     s32 count;
     s32 sound;
 
@@ -47,7 +47,7 @@ s32 effect_select_sound_id(s32 channel) {
     return sound;
 }
 
-effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t* record) {
+effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
     map_background_gradient_colors_t colors;
     effect_secondary_init_t init;
     effect_record_timeline_t* timeline;
@@ -86,7 +86,7 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     timeline->state.child.remaining.tracks.particle[i] = table->frame_start[1] - table->frame_start[0];
                     timeline->state.child.step.tracks.particle[i] = 0;
                     timeline->state.child.keyframe.tracks.particle[i]++;
-                    effect_run_keyframe_actions(table->action[1], target, record);
+                    battle_effect_run_keyframe_actions(table->action[1], target, record);
                 }
                 while (timeline->state.child.remaining.tracks.particle[i] == 0) {
                     k = timeline->state.child.keyframe.tracks.particle[i];
@@ -94,7 +94,7 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     timeline->state.child.remaining.tracks.particle[i]
                         = table->frame_start[k + 1] - table->frame_start[k];
                     timeline->state.child.step.tracks.particle[i] = 0;
-                    effect_run_keyframe_actions(table->action[k + 1], target, record);
+                    battle_effect_run_keyframe_actions(table->action[k + 1], target, record);
                 }
             }
             index = table->emitter[timeline->state.child.keyframe.tracks.particle[i] - 1];
@@ -109,7 +109,7 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     }
                     record->callbacks[slot](record->record_index, slot, index - 1, step);
                 } else {
-                    effect_spawn_emitter_particles(record->record_index, step, index - 1, 0);
+                    battle_effect_spawn_emitter_particles(record->record_index, step, index - 1, 0);
                 }
             }
             timeline->state.child.remaining.tracks.particle[i]--;
@@ -133,14 +133,15 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     red = track->color[index].r;
                     green = track->color[index].g;
                     blue = track->color[index].b;
-                    map_color_field(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
+                    battle_map_color_field(
+                        preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
                     for (i = 0; i < g_effect_context.spectator_count; i++) {
                         battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                             track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
                     }
                     if (!(g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                        map_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index],
-                            red * 8, green * 8, blue * 8);
+                        battle_map_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
+                            track->duration[index], red * 8, green * 8, blue * 8);
                     }
                 }
             }
@@ -222,9 +223,9 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     red = screen->color[index].r * 2;
                     green = screen->color[index].g * 2;
                     blue = screen->color[index].b * 2;
-                    map_modify_background_gradient(mode, screen->duration[index], red, green, blue);
+                    battle_map_modify_background_gradient(mode, screen->duration[index], red, green, blue);
                     if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                        map_start_darkness_blend(mode, screen->duration[index], red, green, blue);
+                        battle_map_start_darkness_blend(mode, screen->duration[index], red, green, blue);
                     }
                 } else {
                     colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = screen->color[index].r;
@@ -233,9 +234,10 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = screen->second_color[index].r;
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
-                    map_set_background_gradient(screen->duration[index], &colors);
+                    battle_map_set_background_gradient(screen->duration[index], &colors);
                     if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                        map_set_darkness_color(screen->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
+                        battle_map_set_darkness_color(
+                            screen->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                     }
                 }
             }
@@ -252,7 +254,7 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
                     timeline->state.child.remaining.tracks.sound[i] = sound->duration[index];
                     kind = sound->channel[index];
                     if (kind >= 2) {
-                        sound_index = effect_select_sound_id(kind - 2);
+                        sound_index = battle_effect_select_sound_id(kind - 2);
                         if (sound_index != 0) {
                             suzuki_sound_play_sfx(sound_index + g_effect_sound_data_base);
                         }
@@ -262,17 +264,17 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
             }
         }
         if (record->parent_index == 0) {
-            camera_start_effect_keyframe_moves(timeline->frame);
+            battle_camera_start_effect_keyframe_moves(timeline->frame);
         }
         if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
-            battle_state_set_time_scale(effect_get_animation_timing_curve_value(record));
+            battle_state_set_time_scale(battle_effect_get_animation_timing_curve_value(record));
         }
         timeline->frame++;
     } else {
         if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
             init.targets[EFFECT_CASTER_ENTRY] = g_effect_context.targets[EFFECT_CASTER_ENTRY];
             init.targets[0] = g_effect_context.targets[target];
-            effect_init_secondary(EFFECT_SECONDARY_ANIMATION_REFLECT, g_effect_timeline->spawn_delay, &init);
+            battle_effect_init_secondary(EFFECT_SECONDARY_ANIMATION_REFLECT, g_effect_timeline->spawn_delay, &init);
         }
         record->timeline.frame = g_effect_child_timeline->duration;
     }
@@ -286,7 +288,7 @@ effect_script_result_e effect_code_script_28_step_child_timeline(effect_record_t
  * caster entry instead of the whole target list; bits 0-2 register a callback
  * slot.
  */
-void effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) {
+void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) {
     s32 runtime_id;
     u16 animation;
     u16 slot;
@@ -367,7 +369,7 @@ void effect_run_keyframe_actions_all_targets(u16 flags, effect_record_t* state) 
  * told to destroy its work on the call made with two frames of the keyframe
  * left. index, remaining and step are the channel's keyframe, the frames left
  * in it and the frames it has run. */
-void effect_step_emitter_timeline(
+void battle_effect_step_emitter_timeline(
     effect_record_t* state, effect_keyframe_table_t* table, s16* index, s16* remaining, s16* step) {
     s16 k;
     s32 sel;
@@ -380,7 +382,7 @@ void effect_step_emitter_timeline(
             k = *index;
             *index = k + 1;
             /* Integer-first pointer addition preserves the native shared-address operands. */
-            effect_run_keyframe_actions_all_targets(*(k + 1 + table->action), state);
+            battle_effect_run_keyframe_actions_all_targets(*(k + 1 + table->action), state);
             *remaining = table->frame_start[k + 1] - table->frame_start[k];
             *step = 0;
             if (table->last_index < *index) {
@@ -399,7 +401,7 @@ void effect_step_emitter_timeline(
                     }
                     state->callbacks[slot](state->record_index, slot, emitter - 1, *step);
                 } else {
-                    effect_spawn_emitter_particles(state->record_index, *step, emitter - 1, 0);
+                    battle_effect_spawn_emitter_particles(state->record_index, *step, emitter - 1, 0);
                 }
                 *step = *step + 1;
             }
@@ -415,7 +417,7 @@ void effect_step_emitter_timeline(
  * caster) and, unless weather flag 2 is set, to the scaled map palette. The
  * loop counter reuses the frame-count variable, which keeps both in $s0 as in
  * the target. */
-void effect_advance_target_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
+void battle_effect_advance_target_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
     s32 i;
@@ -441,13 +443,14 @@ void effect_advance_target_palette_track(effect_palette_track_t* track, s16* key
                 red = track->color[index].r;
                 green = track->color[index].g;
                 blue = track->color[index].b;
-                map_color_field(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
+                battle_map_color_field(
+                    preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
                 for (i = 0; i < g_effect_context.spectator_count; i++) {
                     battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                         track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
                 }
                 if (!(g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
-                    map_start_darkness_blend(
+                    battle_map_start_darkness_blend(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red * 8, green * 8, blue * 8);
                 }
             }
@@ -458,7 +461,7 @@ void effect_advance_target_palette_track(effect_palette_track_t* track, s16* key
 
 /* Advance the caster color track one frame: an APPLY keyframe recolors the
  * caster. */
-void effect_advance_caster_palette_track(
+void battle_effect_advance_caster_palette_track(
     effect_palette_track_t* track, s16* keyframe, s16* remaining_frames, s32 caster_runtime_id) {
     s16 current;
     s32 index;
@@ -498,7 +501,8 @@ void effect_advance_caster_palette_track(
  *
  * The frame timer and the loop counter are separate locals here: the target
  * keeps the timer in $v0 and the counter in $s1. */
-void effect_advance_coord_target_palette_track(effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
+void battle_effect_advance_coord_target_palette_track(
+    effect_palette_track_t* track, s16* keyframe, s16* remaining_frames) {
     s16 current;
     s32 index;
     s32 i;
@@ -543,7 +547,8 @@ void effect_advance_coord_target_palette_track(effect_palette_track_t* track, s1
  * its doubled color (and the scaled palette when weather flag 2 is set);
  * otherwise both colors become the new gradient stops, with the first also
  * driving the darkness color under weather flag 2. */
-void effect_advance_map_background_track(effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
+void battle_effect_advance_map_background_track(
+    effect_background_track_t* track, s16* keyframe, s16* remaining_frames) {
     map_background_gradient_colors_t colors;
     s16 current;
     s32 index;
@@ -572,9 +577,9 @@ void effect_advance_map_background_track(effect_background_track_t* track, s16* 
                 red = track->color[index].r * 2;
                 green = track->color[index].g * 2;
                 blue = track->color[index].b * 2;
-                map_modify_background_gradient(mode, track->duration[index], red, green, blue);
+                battle_map_modify_background_gradient(mode, track->duration[index], red, green, blue);
                 if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                    map_start_darkness_blend(mode, track->duration[index], red, green, blue);
+                    battle_map_start_darkness_blend(mode, track->duration[index], red, green, blue);
                 }
             } else {
                 colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r = track->color[index].r;
@@ -583,9 +588,9 @@ void effect_advance_map_background_track(effect_background_track_t* track, s16* 
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = track->second_color[index].r;
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
-                map_set_background_gradient(track->duration[index], &colors);
+                battle_map_set_background_gradient(track->duration[index], &colors);
                 if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
-                    map_set_darkness_color(track->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
+                    battle_map_set_darkness_color(track->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                 }
             }
         }
@@ -601,7 +606,7 @@ void effect_advance_map_background_track(effect_background_track_t* track, s16* 
  * Sound ids are relative to g_effect_sound_data_base, the effect sound
  * section's id set by effect_load_sound_section.
  */
-void effect_advance_parent_sound_track(
+void battle_effect_advance_parent_sound_track(
     effect_sound_track_t* schedule, s16* entry_index, s16* countdown, u8* unused_sound_state) {
     s16 index = *entry_index;
     s32 effect_kind;
@@ -614,7 +619,7 @@ void effect_advance_parent_sound_track(
             effect_kind = schedule->channels[index];
 
             if (effect_kind >= 2) {
-                sound_index = effect_select_sound_id(effect_kind - 2);
+                sound_index = battle_effect_select_sound_id(effect_kind - 2);
 
                 if (sound_index != 0) {
                     suzuki_sound_play_sfx(g_effect_sound_data_base + sound_index);
@@ -634,7 +639,7 @@ void effect_advance_parent_sound_track(
  * target is started, spawn_delay frames apart. Phase 2 runs from
  * phase1_duration + (target_count - 1) * spawn_delay + child_duration. The
  * camera tracks advance every frame. */
-effect_script_result_e effect_code_script_29_step_parent_timeline(effect_record_t* record) {
+effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_record_t* record) {
     effect_record_timeline_t* timeline;
     s32 i;
     s16 child;
@@ -646,7 +651,8 @@ effect_script_result_e effect_code_script_29_step_parent_timeline(effect_record_
             && timeline->state.parent.spawned_count < g_effect_context.target_count) {
             const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
-            child = effect_start_script_record(record->script, instruction->immediate.value, record->record_index);
+            child
+                = battle_effect_start_script_record(record->script, instruction->immediate.value, record->record_index);
             g_effect_state_records[child].timeline.target_index = timeline->state.parent.spawned_count;
             timeline->state.parent.spawned_count++;
             timeline->state.parent.spawn_countdown += g_effect_timeline->spawn_delay;
@@ -654,101 +660,101 @@ effect_script_result_e effect_code_script_29_step_parent_timeline(effect_record_
         timeline->state.parent.spawn_countdown--;
     } else {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            effect_step_emitter_timeline(record, &g_effect_timeline->particle_channels[0][i],
+            battle_effect_step_emitter_timeline(record, &g_effect_timeline->particle_channels[0][i],
                 &timeline->state.parent.keyframe.tracks.particle[0][i],
                 &timeline->state.parent.remaining.tracks.particle[0][i],
                 &timeline->state.parent.step.tracks.particle[0][i]);
         }
-        effect_advance_target_palette_track(&g_effect_timeline->color_tracks[0].surroundings,
+        battle_effect_advance_target_palette_track(&g_effect_timeline->color_tracks[0].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[0],
             &timeline->state.parent.remaining.tracks.surroundings[0]);
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            effect_advance_caster_palette_track(&g_effect_timeline->color_tracks[0].caster,
+            battle_effect_advance_caster_palette_track(&g_effect_timeline->color_tracks[0].caster,
                 &timeline->state.parent.keyframe.tracks.caster[0], &timeline->state.parent.remaining.tracks.caster[0],
                 g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        effect_advance_coord_target_palette_track(&g_effect_timeline->color_tracks[0].target,
+        battle_effect_advance_coord_target_palette_track(&g_effect_timeline->color_tracks[0].target,
             &timeline->state.parent.keyframe.tracks.target[0], &timeline->state.parent.remaining.tracks.target[0]);
-        effect_advance_map_background_track(&g_effect_timeline->color_tracks[0].screen,
+        battle_effect_advance_map_background_track(&g_effect_timeline->color_tracks[0].screen,
             &timeline->state.parent.keyframe.tracks.screen[0], &timeline->state.parent.remaining.tracks.screen[0]);
-        effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][0],
+        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][0],
             &timeline->state.parent.keyframe.tracks.sound[0][0], &timeline->state.parent.remaining.tracks.sound[0][0],
             &timeline->state.parent.step.tracks._unknown_24[0][0][1]);
-        effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][1],
+        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][1],
             &timeline->state.parent.keyframe.tracks.sound[1][0], &timeline->state.parent.remaining.tracks.sound[1][0],
             &timeline->state.parent.step.tracks._unknown_24[1][0][1]);
-        effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][2],
+        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][2],
             &timeline->state.parent.keyframe.tracks.sound[2][0], &timeline->state.parent.remaining.tracks.sound[2][0],
             &timeline->state.parent.step.tracks._unknown_24[2][0][1]);
         if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
-            battle_state_set_time_scale(effect_get_timing_curve_value(record));
+            battle_state_set_time_scale(battle_effect_get_timing_curve_value(record));
         }
     }
     i = g_effect_timeline->phase1_duration + (g_effect_context.target_count - 1) * g_effect_timeline->spawn_delay
         + g_effect_timeline->child.duration;
     if (timeline->frame >= i) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            effect_step_emitter_timeline(record, &g_effect_timeline->particle_channels[1][i],
+            battle_effect_step_emitter_timeline(record, &g_effect_timeline->particle_channels[1][i],
                 &timeline->state.parent.keyframe.tracks.particle[1][i],
                 &timeline->state.parent.remaining.tracks.particle[1][i],
                 &timeline->state.parent.step.tracks.particle[1][i]);
         }
-        effect_advance_target_palette_track(&g_effect_timeline->color_tracks[1].surroundings,
+        battle_effect_advance_target_palette_track(&g_effect_timeline->color_tracks[1].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[1],
             &timeline->state.parent.remaining.tracks.surroundings[1]);
         if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            effect_advance_caster_palette_track(&g_effect_timeline->color_tracks[1].caster,
+            battle_effect_advance_caster_palette_track(&g_effect_timeline->color_tracks[1].caster,
                 &timeline->state.parent.keyframe.tracks.caster[1], &timeline->state.parent.remaining.tracks.caster[1],
                 g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        effect_advance_coord_target_palette_track(&g_effect_timeline->color_tracks[1].target,
+        battle_effect_advance_coord_target_palette_track(&g_effect_timeline->color_tracks[1].target,
             &timeline->state.parent.keyframe.tracks.target[1], &timeline->state.parent.remaining.tracks.target[1]);
-        effect_advance_map_background_track(&g_effect_timeline->color_tracks[1].screen,
+        battle_effect_advance_map_background_track(&g_effect_timeline->color_tracks[1].screen,
             &timeline->state.parent.keyframe.tracks.screen[1], &timeline->state.parent.remaining.tracks.screen[1]);
-        effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][0],
+        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][0],
             &timeline->state.parent.keyframe.tracks.sound[0][1], &timeline->state.parent.remaining.tracks.sound[0][1],
             &timeline->state.parent.step.tracks._unknown_24[0][1][1]);
-        effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][1],
+        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][1],
             &timeline->state.parent.keyframe.tracks.sound[1][1], &timeline->state.parent.remaining.tracks.sound[1][1],
             &timeline->state.parent.step.tracks._unknown_24[1][1][1]);
-        effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][2],
+        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][2],
             &timeline->state.parent.keyframe.tracks.sound[2][1], &timeline->state.parent.remaining.tracks.sound[2][1],
             &timeline->state.parent.step.tracks._unknown_24[2][1][1]);
     }
-    camera_advance_effect_tracks(timeline->frame);
+    battle_camera_advance_effect_tracks(timeline->frame);
     timeline->frame++;
     record->pc += 4;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
-effect_script_result_e effect_code_script_2a_reset_child_timeline(effect_record_t* record) {
-    effect_reset_child_timeline(record, 0);
+effect_script_result_e battle_effect_code_script_2a_reset_child_timeline(effect_record_t* record) {
+    battle_effect_reset_child_timeline(record, 0);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2b: clear the parent-timeline state (frame, spawn counters and
  * keyframe tracks) that opcode 29 steps. */
-effect_script_result_e effect_code_script_2b_reset_parent_timeline(effect_record_t* record) {
-    effect_reset_parent_timeline(record);
+effect_script_result_e battle_effect_code_script_2b_reset_parent_timeline(effect_record_t* record) {
+    battle_effect_reset_parent_timeline(record);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2c: nothing. */
-effect_script_result_e effect_code_script_2c_nop(effect_record_t* record) {
+effect_script_result_e battle_effect_code_script_2c_nop(effect_record_t* record) {
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Opcode 2d: nothing. */
-effect_script_result_e effect_code_script_2d_nop(effect_record_t* record) {
+effect_script_result_e battle_effect_code_script_2d_nop(effect_record_t* record) {
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
 /* Run until yield or abort; returns 1 on yield and 0 on abort. */
-s32 effect_run_block(s16 index) {
+s32 battle_effect_run_block(s16 index) {
     effect_record_t* rec;
     /* A narrow result preserves the retail sign extension before the tests. */
     s16 result;

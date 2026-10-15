@@ -546,7 +546,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_EFFECT_START) {
             do {
                 thread_yield();
-                g_thread_call_target = (void (*)(void))effect_try_init_data;
+                g_thread_call_target = (void (*)(void))battle_effect_try_init_data;
             } while (thread_call_on_main_stack() != 0);
         } else if (opcode == EVENT_OPCODE_EFFECT_END) {
             thread_start(thread_resolve_id(THREAD_SLOT_FIRST_IDLE), &script_play_effect_thread);
@@ -664,12 +664,12 @@ restart_script:
             mem_copy_bytes_nonempty(
                 &g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM], parameters + 3, 3);
             if (parameters[7] == 0) {
-                map_transition_and_store_background_gradient(parameters[6], &g_event_background_colors);
+                battle_map_transition_and_store_background_gradient(parameters[6], &g_event_background_colors);
             } else {
-                map_set_background_gradient(parameters[6], &g_event_background_colors);
+                battle_map_set_background_gradient(parameters[6], &g_event_background_colors);
             }
         } else if (opcode == EVENT_OPCODE_COLOR_BG_BETA) {
-            map_modify_background_gradient(
+            battle_map_modify_background_gradient(
                 parameters[0], parameters[4], ((s8)parameters[1]), ((s8)parameters[2]), ((s8)parameters[3]));
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_color_unit_event_instruction((const event_color_unit_parameters_t*)parameters);
@@ -678,15 +678,15 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_SUPPRESS_UNIT_PALETTE_UPDATES) {
             script_set_units_palette_update_suppression((u16)first_operand, 1);
         } else if (opcode == EVENT_OPCODE_COLOR_FIELD) {
-            map_color_field(
+            battle_map_color_field(
                 parameters[0], parameters[4], ((s8)parameters[1]), ((s8)parameters[2]), ((s8)parameters[3]));
         } else if (opcode == EVENT_OPCODE_STORE_MODIFIED_MAP_PALETTE) {
-            map_store_modified_palette_colors(0, 0, 1);
+            battle_map_store_modified_palette_colors(0, 0, 1);
         } else if (opcode == EVENT_OPCODE_SET_TILE_CAMERA_BLOCK) {
-            map_set_tile_data_value(
+            battle_map_set_tile_data_value(
                 MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, parameters[0], parameters[1], parameters[2], parameters[3]);
         } else if (opcode == EVENT_OPCODE_SET_TILE_HEIGHT) {
-            tile = map_get_tile_data_pointer(parameters[0], parameters[1], parameters[2]);
+            tile = battle_map_get_tile_data_pointer(parameters[0], parameters[1], parameters[2]);
             if ((tile->surface.type - MAP_SURFACE_GRASSLAND) >= 2U) {
                 tile->surface.type = MAP_SURFACE_STONE_FLOOR;
             }
@@ -818,8 +818,9 @@ restart_script:
                 }
             }
             if (ghost_runtime_id != EVENT_UNIT_SLOT_COUNT) {
-                script_add_ghost_unit_event_instruction(ghost_parameters[1], ghost_parameters[2], ghost_parameters[3],
-                    ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]], ghost_parameters[5]);
+                battle_script_add_ghost_unit_event_instruction(ghost_parameters[1], ghost_parameters[2],
+                    ghost_parameters[3], ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]],
+                    ghost_parameters[5]);
                 g_unit_graphics_load_pending = 1U;
             } else {
                 /* No free runtime slot: the instruction is retried at once,
@@ -957,14 +958,14 @@ restart_script:
                     = script_resolve_runtime_id(script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3));
                 if (arrow_shooter_runtime_id != EVENT_RUNTIME_ID_NONE) {
                     arrow_shooter_battle_id = battle_unit_get_battle_id_by_runtime_id(arrow_shooter_runtime_id);
-                    g_thread_call_target = (void (*)(void))effect_set_arrow_trajectory;
+                    g_thread_call_target = (void (*)(void))battle_effect_set_arrow_trajectory;
                     thread_call_on_main_stack(arrow_shooter_battle_id, &g_unit_scratch_coords, operand_1);
                 }
             }
         } else if (opcode == EVENT_OPCODE_MAP_FREEZE) {
-            map_freeze();
+            battle_map_freeze();
         } else if (opcode == EVENT_OPCODE_MAP_UNFREEZE) {
-            map_unfreeze();
+            battle_map_unfreeze();
         } else if (opcode == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
             script_unit_animation_rotate_event_instruction((const event_unit_anim_rotate_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_GRAPHIC_PRINT) {
@@ -1493,7 +1494,7 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_EFFECT_START) {
             do {
                 thread_yield();
-                g_thread_call_target = (void (*)(void))effect_try_init_data;
+                g_thread_call_target = (void (*)(void))battle_effect_try_init_data;
             } while (thread_call_on_main_stack() != 0);
         } else if (opcode == EVENT_OPCODE_EFFECT_END) {
             thread_start(thread_resolve_id(THREAD_SLOT_FIRST_IDLE), &script_play_effect_thread);
@@ -1610,12 +1611,12 @@ restart_event:
             mem_copy_bytes_nonempty(
                 &g_event_background_colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM], parameters + 3, 3);
             if (parameters[7] == 0) {
-                map_transition_and_store_background_gradient(parameters[6], &g_event_background_colors);
+                battle_map_transition_and_store_background_gradient(parameters[6], &g_event_background_colors);
             } else {
-                map_set_background_gradient(parameters[6], &g_event_background_colors);
+                battle_map_set_background_gradient(parameters[6], &g_event_background_colors);
             }
         } else if (opcode == EVENT_OPCODE_COLOR_BG_BETA) {
-            map_modify_background_gradient(
+            battle_map_modify_background_gradient(
                 parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
         } else if (opcode == EVENT_OPCODE_COLOR_UNIT) {
             script_color_unit_event_instruction((const event_color_unit_parameters_t*)parameters);
@@ -1624,15 +1625,15 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_SUPPRESS_UNIT_PALETTE_UPDATES) {
             script_set_units_palette_update_suppression((u16)first_operand, 1);
         } else if (opcode == EVENT_OPCODE_COLOR_FIELD) {
-            map_color_field(
+            battle_map_color_field(
                 parameters[0], parameters[4], (s8)(parameters)[1], (s8)(parameters)[2], (s8)(parameters)[3]);
         } else if (opcode == EVENT_OPCODE_STORE_MODIFIED_MAP_PALETTE) {
-            map_store_modified_palette_colors(0, 0, 1);
+            battle_map_store_modified_palette_colors(0, 0, 1);
         } else if (opcode == EVENT_OPCODE_SET_TILE_CAMERA_BLOCK) {
-            map_set_tile_data_value(
+            battle_map_set_tile_data_value(
                 MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, parameters[0], parameters[1], parameters[2], parameters[3]);
         } else if (opcode == EVENT_OPCODE_SET_TILE_HEIGHT) {
-            tile = map_get_tile_data_pointer(parameters[0], parameters[1], parameters[2]);
+            tile = battle_map_get_tile_data_pointer(parameters[0], parameters[1], parameters[2]);
             if ((tile->surface.type - MAP_SURFACE_GRASSLAND) >= 2U) {
                 tile->surface.type = MAP_SURFACE_STONE_FLOOR;
             }
@@ -1763,7 +1764,7 @@ restart_event:
                 }
             }
             if (ghost_runtime_id != EVENT_UNIT_SLOT_COUNT) {
-                script_add_ghost_unit_event_instruction(ghost_operands[1], ghost_operands[2], ghost_operands[3],
+                battle_script_add_ghost_unit_event_instruction(ghost_operands[1], ghost_operands[2], ghost_operands[3],
                     ghost_operands[4], first_operand, g_script_unit_slots[ghost_operands[0]], ghost_operands[5]);
                 g_unit_graphics_load_pending = 1U;
             } else {
@@ -1901,9 +1902,9 @@ restart_event:
                 }
             }
         } else if (opcode == EVENT_OPCODE_MAP_FREEZE) {
-            map_freeze();
+            battle_map_freeze();
         } else if (opcode == EVENT_OPCODE_MAP_UNFREEZE) {
-            map_unfreeze();
+            battle_map_unfreeze();
         } else if (opcode == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
             script_unit_animation_rotate_event_instruction((const event_unit_anim_rotate_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_GRAPHIC_PRINT) {
@@ -1978,12 +1979,12 @@ s32 unit_is_moving(s32 runtime_id) {
     s32 i;
 
     if (runtime_id != -1) {
-        if (move_is_unit_moving_by_runtime_id(runtime_id) != 0) {
+        if (battle_move_is_unit_moving_by_runtime_id(runtime_id) != 0) {
             return 1;
         }
     } else {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-            if ((battle_unit_has_runtime_id(i) != 0) && (move_is_unit_moving_by_runtime_id(i) != 0)) {
+            if ((battle_unit_has_runtime_id(i) != 0) && (battle_move_is_unit_moving_by_runtime_id(i) != 0)) {
                 return 1;
             }
         }
@@ -2199,7 +2200,7 @@ void script_map_darkness(void) {
 
     thread_set_current_task_id(THREAD_TASK_MAP_DARKNESS);
     parameters = (event_unit_color_t*)thread_get_current_parameter_1_variant();
-    map_start_ambient_light_blend(
+    battle_map_start_ambient_light_blend(
         parameters->mode, parameters->duration, parameters->rgb.r, parameters->rgb.g, parameters->rgb.b);
     thread_wait_frames(g_script_map_darkness_durations[parameters->duration]);
     thread_exit_current();
@@ -2516,7 +2517,7 @@ void map_light_thread(void) {
         translation.vz = (light_values.vectors.target.scale[2] - light_values.vectors.start.scale[2]) * step / frames
             + light_values.vectors.start.scale[2];
         ScaleMatrixL(&matrix, &translation);
-        map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &matrix, &rotation, 0);
+        battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_SET, &matrix, &rotation, 0);
         thread_wait_frames(1);
     }
     mem_copy_bytes_nonempty(&g_script_light_angles, &color, sizeof(g_script_light_angles));
@@ -2563,12 +2564,12 @@ s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b) {
     unit_copy_map_coords_by_runtime_id(runtime_id_a, &g_unit_scratch_coords);
     /* The raw result is assigned before it is masked: combine then knows
      * nothing about the mask's high bits and the loop test keeps its sll 16. */
-    mask = map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
+    mask = battle_map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
         g_unit_scratch_coords.vz, g_unit_scratch_coords.vy);
     mask &= 0xFF;
     unit_copy_map_coords_by_runtime_id(runtime_id_b, &g_unit_scratch_coords);
     mask = (mask
-               | map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
+               | battle_map_get_tile_data_value(MAP_TILE_DATA_FLAT_CAMERA_BLOCK_MASK, g_unit_scratch_coords.vx,
                    g_unit_scratch_coords.vz, g_unit_scratch_coords.vy))
         & 0xF;
     bit = 1;
@@ -2871,7 +2872,7 @@ void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
         return;
     }
     g_sound_pending_sfx_id = MAIN_SFX_TELEPORT_OUT;
-    g_thread_call_target = (void (*)(void))effect_set_secondary_teleport_by_runtime_id;
+    g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
     thread_call_on_main_stack(unit);
     idx = battle_unit_get_battle_id_by_runtime_id(unit);
     unit_set_animation(unit, BATTLE_UNIT_ANIMATION_RAISE_HANDS);
@@ -2889,7 +2890,7 @@ void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
 void script_teleportin_event_instruction(s32 unit_id, s32 unused) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-        g_thread_call_target = (void (*)(void))effect_set_secondary_teleport_by_runtime_id;
+        g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
         thread_call_on_main_stack(runtime_id);
     }
 }
@@ -3174,7 +3175,7 @@ void status_queue_current_status_graphics(s32 battle_id, s32 enabled) {
     s32 mask;
 
     stats = battle_unit_get_stats_from_battle_id(battle_id);
-    g_thread_call_target = (void (*)(void))status_queue_runtime_graphics_flag_change;
+    g_thread_call_target = (void (*)(void))battle_status_queue_runtime_graphics_flag_change;
     for (i = 0; i < STATUS_COUNT; i++) {
         mask = 0x80 >> (i % 8);
         if ((stats->status_sets.current[i / 8] & mask) != 0) {
@@ -3266,7 +3267,7 @@ s32 unit_save_staged_status_data(s32 battle_id) {
             stats->team_flags = stats->initial_team_flags;
         }
         /* WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
-        g_thread_call_target = (void (*)(void))status_apply_unit_action_removal;
+        g_thread_call_target = (void (*)(void))battle_status_apply_unit_action_removal;
         thread_call_on_main_stack(stats);
         g_unit_status_staging_data->state[battle_id] = UNIT_STATUS_STAGING_SAVED;
         return 1;
@@ -3309,7 +3310,7 @@ void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
         unit->team_flags = g_unit_status_staging_data->team_flags[battle_id];
         unit->death_counter = g_unit_status_staging_data->death_counter[battle_id];
         /* WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
-        g_thread_call_target = (void (*)(void))status_queue_runtime_graphics_flag_change;
+        g_thread_call_target = (void (*)(void))battle_status_queue_runtime_graphics_flag_change;
         for (i = 0; i < STATUS_COUNT; i++) {
             byte_index = i / 8;
             mask = 0x80 >> (i % 8);
@@ -3343,7 +3344,7 @@ void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
                 unit->action.status_changes.removal[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
                     |= STATUS_BYTE_MASK(STATUS_ID_DEAD);
             }
-            g_thread_call_target = (void (*)(void))status_resolve_unit_changes;
+            g_thread_call_target = (void (*)(void))battle_status_resolve_unit_changes;
             thread_call_on_main_stack(battle_id, 1);
         }
         if (!(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)]
@@ -3505,7 +3506,7 @@ void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 which, s
     } else {
         unit->action.status_changes.removal[byte] = bit;
     }
-    g_thread_call_target = (void (*)(void))status_resolve_unit_changes;
+    g_thread_call_target = (void (*)(void))battle_status_resolve_unit_changes;
     thread_call_on_main_stack(idx, removal_only);
 }
 

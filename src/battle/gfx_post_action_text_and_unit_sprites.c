@@ -88,7 +88,8 @@ void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* scr
         }
         unit->numeric_display.displays[0]->tpage = unit->numeric_display.displays[1]->tpage
             = unit->numeric_display.displays[2]->tpage = 0x3f;
-        map_modify_palette(MAP_COLOR_MODE_BASE, 2, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0, -31, -31, -31);
+        battle_map_modify_palette(
+            MAP_COLOR_MODE_BASE, 2, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0, -31, -31, -31);
         battle_gfx_set_sprite_part_semi_transparent(display_0, 0, 1);
         battle_gfx_set_sprite_part_semi_transparent(display_1, 0, 1);
         battle_gfx_set_sprite_part_semi_transparent(display_2, 0, 1);
@@ -303,10 +304,11 @@ void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 
 
     if (g_battle_gfx_spritesheet_slots[slot].spritesheet_id >= BATTLE_SPRITESHEET_ID_JOB_FIRST
         && g_battle_gfx_spritesheet_slots[slot].spritesheet_id <= BATTLE_SPRITESHEET_ID_STEEL_GIANT) {
-        map_load_palette_data(
+        battle_map_load_palette_data(
             &g_battle_gfx_spritesheet_slots[slot].clut[stored_palette + 8], MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
     } else {
-        map_load_palette_data(&g_battle_gfx_spritesheet_slots[slot].clut[8], MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
+        battle_map_load_palette_data(
+            &g_battle_gfx_spritesheet_slots[slot].clut[8], MAP_CLUT_ROW_UNITS_SECOND, clut_index, 0);
     }
 
     blue = 0;
@@ -428,24 +430,24 @@ void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 
 
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_CRYSTAL:
-        map_update_palette_from_other(g_battle_gfx_crystal_palettes[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
-            red, green, blue, final_value);
+        battle_map_update_palette_from_other(g_battle_gfx_crystal_palettes[stored_palette], MAP_CLUT_ROW_UNITS,
+            clut_index, 0, red, green, blue, final_value);
         break;
     case BATTLE_SPRITESHEET_ID_CHICKEN:
-        map_update_palette_from_other(g_battle_gfx_other_palettes.chicken[stored_palette], MAP_CLUT_ROW_UNITS,
+        battle_map_update_palette_from_other(g_battle_gfx_other_palettes.chicken[stored_palette], MAP_CLUT_ROW_UNITS,
             clut_index, 0, red, green, blue, final_value);
         break;
     case BATTLE_SPRITESHEET_ID_FROG:
-        map_update_palette_from_other(g_battle_gfx_frog_palettes[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
-            red, green, blue, final_value);
+        battle_map_update_palette_from_other(g_battle_gfx_frog_palettes[stored_palette], MAP_CLUT_ROW_UNITS, clut_index,
+            0, red, green, blue, final_value);
         break;
     case BATTLE_SPRITESHEET_ID_TREASURE:
-        map_update_palette_from_other(g_battle_gfx_treasure_palettes[stored_palette], MAP_CLUT_ROW_UNITS, clut_index, 0,
-            red, green, blue, final_value);
+        battle_map_update_palette_from_other(g_battle_gfx_treasure_palettes[stored_palette], MAP_CLUT_ROW_UNITS,
+            clut_index, 0, red, green, blue, final_value);
         break;
     default:
-        map_update_palette_from_other(g_battle_gfx_spritesheet_slots[slot].clut[stored_palette], MAP_CLUT_ROW_UNITS,
-            clut_index, 0, red, green, blue, final_value);
+        battle_map_update_palette_from_other(g_battle_gfx_spritesheet_slots[slot].clut[stored_palette],
+            MAP_CLUT_ROW_UNITS, clut_index, 0, red, green, blue, final_value);
         break;
     }
 }

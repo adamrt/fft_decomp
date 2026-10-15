@@ -139,7 +139,7 @@ void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
                 break;
             case BATTLE_SHP_TYPE1:
             case BATTLE_SHP_TYPE2:
-                if (map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z)->depth_half_height.depth) {
+                if (battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z)->depth_half_height.depth) {
                     switch (unit->animation.sequence_id >> 1) {
                     case BATTLE_UNIT_ANIMATION_DEAD:
                     case BATTLE_UNIT_ANIMATION_DEATH:
@@ -276,7 +276,7 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
     if (unit->status_bubble_timer & 0x10) {
         position.vy = y - 1;
     }
-    camera_convert_screen_coords_modify_by_1(&base, &raised);
+    battle_camera_convert_screen_coords_modify_by_1(&base, &raised);
     raised.vy += 12;
     RotTrans(&raised, &transformed, &flag);
     display = unit->status_bubble_display;
@@ -329,7 +329,7 @@ void battle_gfx_draw_unit_sprite_position_copies(battle_unit_t* unit) {
     s16 flags;
 
     for (i = 0; i < 6; i++) {
-        camera_update_matrices(
+        battle_camera_update_matrices(
             &g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
         SetRotMatrix(&g_camera_matrix);
         SetTransMatrix(&g_camera_matrix);

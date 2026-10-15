@@ -187,7 +187,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         phase_selector = geometry->textured_quad.scroll_curves.wave_y_phase_speed;
         EFFECT_READ_CURVE(row, column, phase_selector, frame);
-        effect_interpolate_emitter_spawn_spread(geometry, column, &spread);
+        battle_effect_interpolate_emitter_spawn_spread(geometry, column, &spread);
         work->wave_y_phase += spread.vx;
         work->wave_y_amplitude_phase += spread.vy;
         phase_selector = geometry->textured_quad.scroll_curves.wave_x_phase_speed;

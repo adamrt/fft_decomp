@@ -56,9 +56,9 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
         status_id++) {
         if (changed & mask) {
             if ((old_status & mask) != 0) {
-                status_enable_special_flags(status_id, 0, battle_id);
+                battle_status_enable_special_flags(status_id, 0, battle_id);
             } else {
-                status_enable_special_flags(status_id, 1, battle_id);
+                battle_status_enable_special_flags(status_id, 1, battle_id);
             }
         }
         mask >>= 1;

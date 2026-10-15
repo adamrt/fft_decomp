@@ -613,7 +613,7 @@ s32 menu_dispatch_system_function(
                         count++;
                     }
                 }
-                if ((action_check_battle_outcome() < 0 || count != 0)
+                if ((battle_action_check_battle_outcome() < 0 || count != 0)
                     && script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) == 0) {
                     if (option != 2) {
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
@@ -656,7 +656,7 @@ s32 menu_dispatch_system_function(
                         g_script_next_event_id = EVENT_ID_BATTLE_START;
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
-                } else if (action_check_battle_outcome() == 0) {
+                } else if (battle_action_check_battle_outcome() == 0) {
                     if (option != 2) {
                         menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
@@ -1054,7 +1054,7 @@ event_scenario_condition_result_e script_check_scenario_condition(
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_CASUALTIES_AT_MOST && id >= script_get_variable(EVENT_SCRIPT_VAR_CASUALTIES))
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && action_check_battle_outcome() == 0)
+    if (type == EVENT_SCENARIO_CONDITION_ENEMIES_DEFEATED && battle_action_check_battle_outcome() == 0)
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_UNIT_AT_TILE) {
         unit = unit_get_stats_by_unit_id(id);
@@ -1382,7 +1382,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         script_set_event_speed_variant(1);
         i = bunit_entrypoint(0, 0);
-        target_move_cursor_to_battle_id(i);
+        battle_target_move_cursor_to_battle_id(i);
         g_menu_selected_unit.battle_id = i;
         g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
@@ -1573,7 +1573,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_BUNIT) {
         script_set_event_speed_variant(1);
         i = bunit_entrypoint(0, 0);
-        target_move_cursor_to_battle_id(i);
+        battle_target_move_cursor_to_battle_id(i);
         g_menu_selected_unit.battle_id = i;
         g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_IDLE;
     } else if (g_menu_companion_overlay_state == COMPANION_OVERLAY_STATE_CARD_SAVE) {
@@ -1666,47 +1666,49 @@ void script_process_pending_requests_variant(void) {
         battle_state_start_change_map_jump_in(jump_in_duration);
     }
     if (g_battle_3d_object_use_request != 0) {
-        map_command_set_3d_object_state(g_battle_event_3d_object_id, g_battle_event_3d_object_state);
+        battle_map_command_set_3d_object_state(g_battle_event_3d_object_id, g_battle_event_3d_object_state);
         g_3d_object_wait_status = 1;
     }
     if (g_battle_field_object_use_request != 0) {
-        map_command_start_texture_animation(g_battle_event_map_command_83_arg1, g_battle_event_map_command_83_arg2);
+        battle_map_command_start_texture_animation(
+            g_battle_event_map_command_83_arg1, g_battle_event_map_command_83_arg2);
         g_field_object_wait_status = 1;
     }
     if (g_3d_object_wait_status != 0) {
-        g_3d_object_wait_status = map_command_get_3d_object_state(g_battle_event_3d_object_id);
+        g_3d_object_wait_status = battle_map_command_get_3d_object_state(g_battle_event_3d_object_id);
     }
     if (g_field_object_wait_status != 0) {
-        g_field_object_wait_status = map_command_get_texture_animation_active(g_battle_event_map_command_83_arg1);
+        g_field_object_wait_status
+            = battle_map_command_get_texture_animation_active(g_battle_event_map_command_83_arg1);
     }
     if (g_map_refresh_pending != 0) {
-        g_map_refresh_pending = map_load_alternate_mesh(3);
+        g_map_refresh_pending = battle_map_load_alternate_mesh(3);
     }
     reload_state = g_map_reload_state;
     if (reload_state == 1) {
-        if (map_start_data_load() == 0) {
+        if (battle_map_start_data_load() == 0) {
             g_map_reload_state = g_map_reload_state + 1;
         }
     } else if (reload_state == 2) {
-        if (map_poll_data_load() == 0) {
+        if (battle_map_poll_data_load() == 0) {
             g_map_reload_state = g_map_reload_state + 1;
         }
     }
     append_state = g_map_append_state;
     if ((append_state == 1) && (g_map_destruction_wait_state == 0)) {
-        map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_START_HELD);
+        battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_START_HELD);
         g_map_append_state = g_map_append_state + 1;
     } else if ((append_state == 2)
-        && (map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
+        && (battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
             == MAP_LOAD_RESULT_HELD)) {
         g_map_append_state = g_map_append_state + 1;
     }
     destruction_state = g_map_destruction_wait_state;
     if (destruction_state == 2) {
         g_map_destruction_wait_state = destruction_state + 1;
-        map_dispatch_map_data_command(MAP_DATA_COMMAND_RELEASE_GNS_HOLD, 1, 1, 1);
+        battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_RELEASE_GNS_HOLD, 1, 1, 1);
     } else if ((destruction_state == 3)
-        && (map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL) == 0)) {
+        && (battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL) == 0)) {
         g_map_destruction_wait_state = 0;
     }
     weather_request = g_event_weather_request;
@@ -1719,22 +1721,22 @@ void script_process_pending_requests_variant(void) {
             if (g_map_weather_flags & MAP_WEATHER_FLAG_SNOW) {
                 g_event_weather_request = weather_id + 5;
             }
-            map_run_weather_command(g_battle_event_weather_commands[g_event_weather_request].environment_id);
+            battle_map_run_weather_command(g_battle_event_weather_commands[g_event_weather_request].environment_id);
         }
     }
     time_of_day = g_event_pending_map_state;
     if (time_of_day != -1) {
         script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, time_of_day);
-        map_run_weather_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
+        battle_map_run_weather_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
     }
     effect_id = g_event_pending_effect_id;
     if (effect_id != -1) {
         if (g_event_effect_target_mode == EFFECT_START_ON_CASTER) {
             effect_target.runtime_id = g_battle_event_effect_target_runtime_id;
-            effect_start_new(effect_id, EFFECT_START_ON_CASTER, effect_target);
+            battle_effect_start_new(effect_id, EFFECT_START_ON_CASTER, effect_target);
         } else {
             effect_target.runtime_id = g_battle_event_effect_target_runtime_id;
-            effect_start_new(effect_id, EFFECT_START_ON_UNIT, effect_target);
+            battle_effect_start_new(effect_id, EFFECT_START_ON_UNIT, effect_target);
         }
     }
     if (g_unit_graphics_load_pending != 0) {
@@ -1812,16 +1814,16 @@ void script_process_pending_requests_variant(void) {
 void camera_load_state_from_script_variables_variant(void) {
     setVector(&g_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
-    camera_set_rotation(&g_camera_script_rotation);
+    battle_camera_set_rotation(&g_camera_script_rotation);
 
     setVector(&g_camera_script_vector, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM]);
-    camera_set_zoom(&g_camera_script_vector);
+    battle_camera_set_zoom(&g_camera_script_vector);
 
     g_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
     g_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
     g_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
-    camera_set_current_real_coords(&g_camera_script_vector);
+    battle_camera_set_current_real_coords(&g_camera_script_vector);
 }
 #endif
 
@@ -1842,19 +1844,19 @@ void camera_store_state_to_script_variables_variant(void) {
     VECTOR* zoom;
     VECTOR* coords;
 
-    rotation = camera_get_rotation();
+    rotation = battle_camera_get_rotation();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = rotation->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] = rotation->vy;
     g_camera_published_rotation_ptr = rotation;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL] = rotation->vz;
 
-    zoom = camera_get_zoom();
+    zoom = battle_camera_get_zoom();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vy;
     g_camera_published_coords_ptr = zoom;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vz;
 
-    coords = camera_get_current_real_coords();
+    coords = battle_camera_get_current_real_coords();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X] = coords->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z] = coords->vy - (g_camera_shake_z_offset * ONE);
     g_camera_published_coords_ptr = coords;

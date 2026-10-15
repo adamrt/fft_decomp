@@ -16,24 +16,24 @@
 #include "psx/types.h"
 
 /* Give the unit its move and its action back. Nothing in the game calls it. */
-void action_activate_move_act(unit_stats_t* unit) {
+void battle_action_activate_move_act(unit_stats_t* unit) {
     unit->movement_taken = 0;
     unit->action_taken = 0;
 }
 
-void map_copy_xy_coords_and_tile_data(u8* data) {
+void battle_map_copy_xy_coords_and_tile_data(u8* data) {
     g_map_max_x = *data++;
     g_map_max_y = *data++;
     memcpy(g_map_tile_data, data, 0x1000);
 }
 
-void map_load_move_find_item_data(map_move_find_item_data_t* map_data) {
+void battle_map_load_move_find_item_data(map_move_find_item_data_t* map_data) {
     g_battle_current_map_move_find_item_data = *map_data;
 }
 
 /* The tile at (x, y) of a layer, or 0 outside the map or for a layer other than 0
  * and 1. */
-map_tile_t* map_get_tile_data_pointer(s32 x, s32 y, u32 layer) {
+map_tile_t* battle_map_get_tile_data_pointer(s32 x, s32 y, u32 layer) {
     s32 max_x = g_map_max_x;
     s32 max_y = g_map_max_y;
     if (x < 0 || x >= max_x || y < 0 || y >= max_y || layer >= 2U) {
@@ -44,7 +44,7 @@ map_tile_t* map_get_tile_data_pointer(s32 x, s32 y, u32 layer) {
 
 /* Returns one packed field of the tile at (x, y, layer), or 0xff for an
  * unknown selector. The tile address is not bounds-checked. */
-s32 map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer) {
+s32 battle_map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer) {
     map_tile_t* tile;
 
     tile = &g_map_tile_data[(layer << 8) + y * g_map_max_x + x];
@@ -90,7 +90,7 @@ s32 map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 la
  * returns 0, at most 1000 times, and raises battle load exception 0x80 when it
  * never does. The callee always returns 0, so neither the retry nor the exception
  * can run. */
-s32 map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value) {
+s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value) {
     map_tile_t* tile;
     s32 attempts;
     s32 result;
@@ -140,7 +140,7 @@ s32 map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 la
         break;
     case 15:
         while (attempts < 1000) {
-            result = map_tile_data_15_stub();
+            result = battle_map_tile_data_15_stub();
             if (result == 0) {
                 break;
             }
@@ -159,13 +159,13 @@ s32 map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 la
 
 /* Selector 15 of map_set_tile_data_value retries this until it returns 0, which it does at
  * once. The 8-byte frame is one the retail build kept for an unreferenced local. */
-s32 map_tile_data_15_stub(void) {
+s32 battle_map_tile_data_15_stub(void) {
     char unused[8];
 
     return 0;
 }
 
-void formula_force_attack_miss(void) {
+void battle_formula_force_attack_miss(void) {
     g_action_target_data->hit = 0;
     g_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;
     /* The accuracy field is cleared as a 16-bit value (sh). */
@@ -173,13 +173,13 @@ void formula_force_attack_miss(void) {
 }
 
 /* Miss decided by the accuracy roll. */
-void formula_cause_action_miss(void) {
+void battle_formula_cause_action_miss(void) {
     g_action_target_data->hit = 0;
     g_action_target_data->miss_type = ACTION_MISS_TYPE_ACCURACY_MISS;
 }
 
 /* Dance/Song hit check: accuracy scaled by X%, then an X% roll to hit. */
-s32 formula_calculate_dance_song_hit(void) {
+s32 battle_formula_calculate_dance_song_hit(void) {
     action_data_t* action = g_action_target_data;
     u8 hit_percent = g_action_current_ability.range_data.x;
     s32 action_state = g_action_state;
@@ -188,7 +188,7 @@ s32 formula_calculate_dance_song_hit(void) {
     if (action_state != ACTION_STATE_EXECUTE || main_util_roll_pass_fail(100, hit_percent) == 0) {
         return 0;
     }
-    formula_cause_action_miss();
+    battle_formula_cause_action_miss();
     return 1;
 }
 
@@ -206,7 +206,7 @@ s32 formula_calculate_dance_song_hit(void) {
  * abs() is the builtin: its MIPS abssi2 pattern emits the target's
  * bgez/move/negu sequence. The coordinate stores are array elements so their
  * aggregate aliasing keeps the special-effect load after them. */
-void formula_calculate_knockback(void) {
+void battle_formula_calculate_knockback(void) {
     unit_stats_t* target;
     unit_stats_t* attacker;
     map_tile_t* tile;
@@ -263,7 +263,7 @@ void formula_calculate_knockback(void) {
             y--;
         }
     }
-    level = move_check_knockback_destination(direction, x, y);
+    level = battle_move_check_knockback_destination(direction, x, y);
     if (level < 0) {
         return;
     }
@@ -281,7 +281,7 @@ void formula_calculate_knockback(void) {
     if (surface == MAP_SURFACE_LAVA || surface == MAP_SURFACE_OBSTACLE) {
         return;
     }
-    if (!(move_get_effective_flags(g_action_target) & BATTLE_EFFECTIVE_MOVEMENT_FLY)) {
+    if (!(battle_move_get_effective_flags(g_action_target) & BATTLE_EFFECTIVE_MOVEMENT_FLY)) {
         g_action_current_ability.knockback_flags = BATTLE_KNOCKBACK_PENDING | BATTLE_KNOCKBACK_FALL_DAMAGE;
     } else if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
         & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG))) {
@@ -308,7 +308,7 @@ void formula_calculate_knockback(void) {
  * g_action_current_ability.knockback_fall_height and the ability target ID to
  * g_action_current_ability.post_action_target_id, and the destination
  * layer is returned; -1 means off-map, blocked or occupied. */
-s32 move_check_knockback_destination(s32 direction, s32 x, s32 y) {
+s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) {
     map_tile_t* tile;
     map_tile_t* lower;
     map_tile_t* upper;
@@ -343,7 +343,7 @@ s32 move_check_knockback_destination(s32 direction, s32 x, s32 y) {
         destination_shift = 6;
         break;
     }
-    tile = &g_map_tile_data[map_calculate_location(g_action_target)];
+    tile = &g_map_tile_data[battle_map_calculate_location(g_action_target)];
     height = TILE_EDGE_HEIGHT(tile, source_shift);
     index = y * g_map_max_x + x;
     upper_index = index + MAP_TILES_PER_LAYER;
@@ -385,7 +385,7 @@ s32 move_check_knockback_destination(s32 direction, s32 x, s32 y) {
     if (fall < 0) {
         return -1;
     }
-    if (target_find_unit_at_tile(x, y, level) != -1) {
+    if (battle_target_find_unit_at_tile(x, y, level) != -1) {
         return -1;
     }
     g_action_current_ability.knockback_fall_height = fall;
@@ -396,7 +396,7 @@ s32 move_check_knockback_destination(s32 direction, s32 x, s32 y) {
 /* One evade roll, made only when executing: evaded with numerator in
  * denominator odds. Records the miss type and the item that blocked; returns 1
  * when evaded. */
-s32 formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
+s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
     if (main_util_roll_pass_fail(denominator, numerator) != 0) {
         return 0;
     }
@@ -422,7 +422,7 @@ s32 formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type
  * Casting the attacker sign to its stored 4-bit domain preserves the target's
  * distinct comparison copy without a compiler constraint.
  */
-void formula_apply_zodiac_compatibility(void) {
+void battle_formula_apply_zodiac_compatibility(void) {
     unit_stats_t* attacker;
     unit_stats_t* target;
     u16 attacker_zodiac;
@@ -501,7 +501,7 @@ void formula_apply_zodiac_compatibility(void) {
  * frog turns into its removal. Removals always drop innate statuses and keep
  * only statuses the target has. Returns the sum of the remaining bytes, so 0
  * means nothing is left to inflict or remove. */
-s32 status_modify_inflictions(s32 removal_only) {
+s32 battle_status_modify_inflictions(s32 removal_only) {
     action_data_t* action;
     u8 inflicted;
     s32 immortal;
@@ -575,7 +575,7 @@ s32 status_modify_inflictions(s32 removal_only) {
 
 /* Cancel the action on this target: no hit, damage, accuracy or special
  * effect, and a pending weapon proc and knockback are dropped. */
-void formula_nullify_action(void) {
+void battle_formula_nullify_action(void) {
     action_data_t* target_data;
     action_data_t* target_data_reload;
 
@@ -588,13 +588,13 @@ void formula_nullify_action(void) {
     target_data->attack_accuracy = 0;
     target_data->special_effect = 0;
     target_data_reload->attack_type = 0;
-    formula_clear_nullify_flags();
-    action_clear_knockback_flag();
+    battle_formula_clear_nullify_flags();
+    battle_action_clear_knockback_flag();
 }
 
 /* Target affinities on the stored HP damage: absorb flags the action, nullify
  * cancels it, half halves, weak doubles. Half and weak both apply. */
-void formula_modify_damage_for_element(s32 element) {
+void battle_formula_modify_damage_for_element(s32 element) {
     u8 element_mask;
     unit_stats_t* unit;
     action_data_t* absorb_action;
@@ -610,7 +610,7 @@ void formula_modify_damage_for_element(s32 element) {
     }
     unit = g_action_target;
     if (unit->elemental_affinity[ELEMENTAL_AFFINITY_NULLIFY] & element_mask) {
-        formula_nullify_action();
+        battle_formula_nullify_action();
         return;
     }
     if (unit->elemental_affinity[ELEMENTAL_AFFINITY_HALF] & element_mask) {
@@ -644,7 +644,7 @@ void formula_modify_damage_for_element(s32 element) {
  *
  * Spelling the weapon half as a record pointer as well loses three
  * instructions. */
-void formula_store_physical_evade_values(void) {
+void battle_formula_store_physical_evade_values(void) {
     s32 weapon_guard;
     u8 weapon_flags;
     u8 shield_flags;
@@ -707,7 +707,7 @@ void formula_store_physical_evade_values(void) {
 
 /* Reset the base hit to 100 and load the target's accessory and shield
  * magic evades; monsters get no equipment evade. */
-void formula_store_magical_evade_values(void) {
+void battle_formula_store_magical_evade_values(void) {
     unit_stats_t* target;
     item_data_t* items;
     item_data_t* item;
@@ -740,26 +740,26 @@ void formula_store_magical_evade_values(void) {
 }
 
 /* Concentrate on the attacker: the target's four evades become 0. */
-void formula_calculate_concentrate(void) {
+void battle_formula_calculate_concentrate(void) {
     if (g_action_attacker->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_CONCENTRATE) {
-        mem_zero(&g_action_current_ability.accessory_evade, 4);
+        main_mem_zero(&g_action_current_ability.accessory_evade, 4);
     }
 }
 
 /* A Dark or Confused attacker halves the base hit, which doubles every evade.
  * Then the Transparent step. */
-void formula_calculate_dark_confuse(void) {
+void battle_formula_calculate_dark_confuse(void) {
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DARKNESS)]
         & (STATUS_BYTE_MASK(STATUS_ID_DARKNESS) | STATUS_BYTE_MASK(STATUS_ID_CONFUSION))) {
         u8* base_hit = &g_action_current_ability.base_hit;
         *base_hit = *base_hit >> 1;
     }
-    formula_calculate_transparent();
+    battle_formula_calculate_transparent();
 }
 
 /* Abandon: a target free to act halves the base hit, which doubles each of its
  * evades. */
-void formula_calculate_abandon(void) {
+void battle_formula_calculate_abandon(void) {
     u8* base_hit;
     if ((battle_unit_get_action_restriction(g_action_target) == BATTLE_UNIT_ACTION_RESTRICTION_NONE)
         && (g_action_target->ability_flags.reaction[3] & BATTLE_REACTION_SET_4_ABANDON)) {
@@ -772,7 +772,7 @@ void formula_calculate_abandon(void) {
 /* Target statuses on the evades: Don't Act, Sleep, Stop, Confusion, Charging
  * or Performing clear all four; Defending halves the base hit, which doubles
  * them. */
-void formula_apply_evasion_changes_due_to_statuses(void) {
+void battle_formula_apply_evasion_changes_due_to_statuses(void) {
     unit_stats_t* target;
     u8 flag;
     u8* base_hit;
@@ -792,7 +792,7 @@ void formula_apply_evasion_changes_due_to_statuses(void) {
         flag = 1;
     }
     if (flag) {
-        mem_zero(&g_action_current_ability.accessory_evade, 4);
+        main_mem_zero(&g_action_current_ability.accessory_evade, 4);
     }
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEFENDING)]
         & STATUS_BYTE_MASK(STATUS_ID_DEFENDING)) {
@@ -802,11 +802,11 @@ void formula_apply_evasion_changes_due_to_statuses(void) {
 }
 
 /* A Transparent attacker cannot be evaded: the four evades become 0. */
-void formula_calculate_transparent(void) {
+void battle_formula_calculate_transparent(void) {
     /* Status 3 bit 0x10: Transparent. */
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
         & STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT)) {
-        mem_zero(&g_action_current_ability.accessory_evade, 4);
+        main_mem_zero(&g_action_current_ability.accessory_evade, 4);
     }
 }
 
@@ -817,7 +817,7 @@ void formula_calculate_transparent(void) {
  * hit from the front when it faces either axis toward the attacker, and a
  * shared tile counts as the back. Side and back attacks clear class evade,
  * back attacks also both shield evades. */
-void formula_calculate_facing_evade(void) {
+void battle_formula_calculate_facing_evade(void) {
     s32 dx;
     s32 dy;
     u8 distance_x;
@@ -891,7 +891,7 @@ void formula_calculate_facing_evade(void) {
  * quarter when the weather variable is 3 or 4 (a storm, or a snowstorm on a
  * snow map). The variable is read as it is, not through
  * map_get_effective_weather. */
-void formula_apply_weather_effects_on_bows(void) {
+void battle_formula_apply_weather_effects_on_bows(void) {
     u8* base_hit;
     s32 weather;
     s32 time_of_day;
@@ -919,7 +919,7 @@ void formula_apply_weather_effects_on_bows(void) {
  * otherwise the accuracy becomes the product of the four (hit - evade)
  * percentages. The rolls then run accessory, right hand, left hand and
  * class evade, reporting the item that blocked. */
-void formula_calculate_final_hit_percent(void) {
+void battle_formula_calculate_final_hit_percent(void) {
     u8 hit;
     u8 accessory;
     u8 right;
@@ -944,8 +944,8 @@ void formula_calculate_final_hit_percent(void) {
                   * ((hit - evade) * 100 / hit) / 1000000)
             * g_action_target_data->attack_accuracy / 100;
     }
-    if (formula_calculate_attack_evaded(g_action_current_ability.accessory_evade, hit, ACTION_MISS_TYPE_ACCESSORY_EVADE,
-            g_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY])
+    if (battle_formula_calculate_attack_evaded(g_action_current_ability.accessory_evade, hit,
+            ACTION_MISS_TYPE_ACCESSORY_EVADE, g_action_target->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY])
         != 0) {
         return;
     }
@@ -953,7 +953,7 @@ void formula_calculate_final_hit_percent(void) {
     if (item == ITEM_ID_NONE) {
         item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD];
     }
-    if (formula_calculate_attack_evaded(
+    if (battle_formula_calculate_attack_evaded(
             g_action_current_ability.right_hand_evade, hit, ACTION_MISS_TYPE_RIGHT_HAND_EVADE, item)
         != 0) {
         return;
@@ -962,12 +962,12 @@ void formula_calculate_final_hit_percent(void) {
     if (item == ITEM_ID_NONE) {
         item = g_action_target->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD];
     }
-    if (formula_calculate_attack_evaded(
+    if (battle_formula_calculate_attack_evaded(
             g_action_current_ability.left_hand_evade, hit, ACTION_MISS_TYPE_LEFT_HAND_EVADE, item)
         != 0) {
         return;
     }
-    formula_calculate_attack_evaded(
+    battle_formula_calculate_attack_evaded(
         g_action_current_ability.class_evade, hit, ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD, ITEM_ID_NONE);
 }
 
@@ -979,7 +979,7 @@ void formula_calculate_final_hit_percent(void) {
  * MA; random PA; (PA + MA) / 2), leaving XA unchanged for other types.
  * The attacker's stats must be u8 locals for the (PA + MA) zero-extension.
  */
-void formula_calculate_base_xa(void) {
+void battle_formula_calculate_base_xa(void) {
     u8 type;
     u8 pa;
     u8 ma;
@@ -1014,14 +1014,14 @@ void formula_calculate_base_xa(void) {
     } else if (type == ITEM_TYPE_STAFF || type == ITEM_TYPE_STICK) {
         g_action_current_ability.xa = ma;
     } else if (type == ITEM_TYPE_AXE || type == ITEM_TYPE_HAMMER || type == ITEM_TYPE_BAG) {
-        g_action_current_ability.xa = pa * formula_get_random_0_7fff() / 0x8000 + 1;
+        g_action_current_ability.xa = pa * battle_formula_get_random_0_7fff() / 0x8000 + 1;
     } else if (type == ITEM_TYPE_INSTRUMENT || type == ITEM_TYPE_DICTIONARY || type == ITEM_TYPE_CLOTH) {
         g_action_current_ability.xa = (pa + ma) >> 1;
     }
 }
 
 /* XA = MA, YA = the ability's Y. */
-void formula_store_ma_and_y(void) {
+void battle_formula_store_ma_and_y(void) {
     s32 ma = g_action_attacker->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     s32 y = g_action_current_ability.range_data.y;
 
@@ -1030,28 +1030,28 @@ void formula_store_ma_and_y(void) {
 }
 
 /* XA = MA, YA = (MA + Y) / 2. */
-void formula_store_ma_and_ma_plus_y_divided_by_two(void) {
+void battle_formula_store_ma_and_ma_plus_y_divided_by_two(void) {
     g_action_current_ability.xa = g_action_attacker->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     g_action_current_ability.ya
         = (g_action_attacker->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK] + g_action_current_ability.range_data.y) >> 1;
 }
 
 /* XA = PA, YA = (PA + Y) / 2. */
-void formula_store_pa_and_pa_plus_y_divided_by_two(void) {
+void battle_formula_store_pa_and_pa_plus_y_divided_by_two(void) {
     g_action_current_ability.xa = g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     g_action_current_ability.ya
         = (g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK] + g_action_current_ability.range_data.y) >> 1;
 }
 
 /* XA = MA, YA = (PA + Y) / 2. */
-void formula_store_ma_and_pa_plus_y_divided_by_two(void) {
+void battle_formula_store_ma_and_pa_plus_y_divided_by_two(void) {
     g_action_current_ability.xa = g_action_attacker->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     g_action_current_ability.ya
         = (g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK] + g_action_current_ability.range_data.y) >> 1;
 }
 
 /* XA = MA, YA = the ability's X. */
-void formula_store_ma_and_x(void) {
+void battle_formula_store_ma_and_x(void) {
     s32 ma = g_action_attacker->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     s32 x = g_action_current_ability.range_data.x;
 
@@ -1060,7 +1060,7 @@ void formula_store_ma_and_x(void) {
 }
 
 /* XA = PA, YA = the ability's X. */
-void formula_store_pa_and_x(void) {
+void battle_formula_store_pa_and_x(void) {
     s32 pa = g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     s32 x = g_action_current_ability.range_data.x;
 
@@ -1069,7 +1069,7 @@ void formula_store_pa_and_x(void) {
 }
 
 /* XA = PA, YA = the weapon's power. */
-void formula_store_pa_and_weapon_power(void) {
+void battle_formula_store_pa_and_weapon_power(void) {
     s32 pa = g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     s32 weapon_power = g_action_current_ability.weapon_data.power;
 
@@ -1078,7 +1078,7 @@ void formula_store_pa_and_weapon_power(void) {
 }
 
 /* XA = PA, YA = the ability's Y. */
-void formula_store_pa_and_y(void) {
+void battle_formula_store_pa_and_y(void) {
     s32 pa = g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     s32 y = g_action_current_ability.range_data.y;
 
@@ -1087,7 +1087,7 @@ void formula_store_pa_and_y(void) {
 }
 
 /* XA = Speed, YA = the ability's X. */
-void formula_store_speed_and_x(void) {
+void battle_formula_store_speed_and_x(void) {
     s32 speed = g_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED];
     s32 x = g_action_current_ability.range_data.x;
 
@@ -1096,7 +1096,7 @@ void formula_store_speed_and_x(void) {
 }
 
 /* XA = PA, YA = the weapon's power + Y. */
-void formula_store_pa_and_weapon_power_plus_y(void) {
+void battle_formula_store_pa_and_weapon_power_plus_y(void) {
     s32 pa = g_action_attacker->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     s32 weapon_power = g_action_current_ability.weapon_data.power;
     s32 y = g_action_current_ability.range_data.y;
@@ -1107,7 +1107,7 @@ void formula_store_pa_and_weapon_power_plus_y(void) {
 
 /* XA and YA of formula 0x64 (Jump): XA = PA, or PA * 3/2 with a polearm; YA =
  * weapon power, or bare-handed XA * Brave / 100 (at least 1). */
-void formula_init_weapon_xa_ya(void) {
+void battle_formula_init_weapon_xa_ya(void) {
     u8 weapon_type = g_main_item_primary_data[g_action_current_ability.weapon_id].type;
 
     if (weapon_type == ITEM_TYPE_SPEAR) {
@@ -1127,13 +1127,13 @@ void formula_init_weapon_xa_ya(void) {
 }
 
 /* Add the Charge ability's power to XA (0 for every other action). */
-void formula_apply_charge(void) {
+void battle_formula_apply_charge(void) {
     g_action_current_ability.xa += g_action_current_ability.charge_power;
 }
 
 /* Strengthen step for weapon attacks: XA * 5/4 when the attacker strengthens
  * one of the weapon's elements. */
-void formula_apply_weapon_element_strengthen(void) {
+void battle_formula_apply_weapon_element_strengthen(void) {
     if (g_action_attacker->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN]
         & g_action_current_ability.weapon_data.element) {
         g_action_current_ability.xa = g_action_current_ability.xa * 5 / 4;
@@ -1142,7 +1142,7 @@ void formula_apply_weapon_element_strengthen(void) {
 
 /* Strengthen step: XA * 5/4 when the attacker strengthens one of the ability's
  * elements. */
-void formula_apply_elemental_strengthen(void) {
+void battle_formula_apply_elemental_strengthen(void) {
     if (g_action_attacker->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN]
         & g_action_current_ability.range_data.element) {
         g_action_current_ability.xa = g_action_current_ability.xa * 5 / 4;
@@ -1152,7 +1152,7 @@ void formula_apply_elemental_strengthen(void) {
 /* Attacker supports on XA, in order: Two Hands * 2 (active, on a weapon that
  * allows it and is not two-handed already), Attack Up * 4/3, Martial Arts *
  * 3/2 with no weapon (weapon id ITEM_ID_NOTHING). */
-void formula_apply_physical_attack_supports(void) {
+void battle_formula_apply_physical_attack_supports(void) {
     u8 weapon_characteristics = g_action_current_ability.weapon_data.flags;
 
     if (!(weapon_characteristics & WEAPON_FLAG_FORCED_TWO_HANDS)
@@ -1172,7 +1172,7 @@ void formula_apply_physical_attack_supports(void) {
 
 /* Attacker supports on XA for ability formulas: Attack Up * 4/3, then Martial
  * Arts * 3/2 when the weapon's item type is unarmed. No Two Hands step. */
-void formula_apply_attack_up_and_martial_arts(void) {
+void battle_formula_apply_attack_up_and_martial_arts(void) {
     if (g_action_attacker->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_ATTACK_UP) {
         g_action_current_ability.xa = g_action_current_ability.xa * 4 / 3;
     }
@@ -1190,14 +1190,14 @@ void formula_apply_attack_up_and_martial_arts(void) {
 }
 
 /* Magic Attack Up on the attacker: XA * 4/3. */
-void formula_apply_magic_attack_up(void) {
+void battle_formula_apply_magic_attack_up(void) {
     if (g_action_attacker->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_MAGIC_ATTACK_UP) {
         g_action_current_ability.xa = g_action_current_ability.xa * 4 / 3;
     }
 }
 
 /* Attacker statuses on XA: Berserk * 3/2; a Frog's XA is 1. */
-void formula_apply_attacker_berserk_frog(void) {
+void battle_formula_apply_attacker_berserk_frog(void) {
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
         & STATUS_BYTE_MASK(STATUS_ID_BERSERK)) {
         g_action_current_ability.xa = g_action_current_ability.xa * 3 / 2;
@@ -1208,7 +1208,7 @@ void formula_apply_attacker_berserk_frog(void) {
 }
 
 /* Defense Up on the target: XA * 2/3. */
-void formula_apply_defense_up(void) {
+void battle_formula_apply_defense_up(void) {
     /* Battle Stats 0x90 bit 0x08 is Defense Up. */
     if (g_action_target->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_DEFENSE_UP) {
         g_action_current_ability.xa = g_action_current_ability.xa * 2 / 3;
@@ -1216,7 +1216,7 @@ void formula_apply_defense_up(void) {
 }
 
 /* Magic Defense Up on the target: XA * 2/3. */
-void formula_apply_magic_defense_up(void) {
+void battle_formula_apply_magic_defense_up(void) {
     /* Battle Stats 0x90 bit 0x02 is Magic Defense Up. */
     if (g_action_target->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_MAGIC_DEFENSE_UP) {
         g_action_current_ability.xa = g_action_current_ability.xa * 2 / 3;
@@ -1225,7 +1225,7 @@ void formula_apply_magic_defense_up(void) {
 
 /* Target statuses on physical XA: Protect * 2/3; Sleep or Charging * 3/2;
  * Chicken or Frog * 3/2. */
-void formula_apply_target_xa_affecting_statuses(void) {
+void battle_formula_apply_target_xa_affecting_statuses(void) {
     unit_stats_t* target;
 
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PROTECT)]
@@ -1247,7 +1247,7 @@ void formula_apply_target_xa_affecting_statuses(void) {
 }
 
 /* Target statuses on magical XA: Shell * 2/3; Chicken or Frog * 3/2. */
-void formula_apply_target_magical_status_xa_modifiers(void) {
+void battle_formula_apply_target_magical_status_xa_modifiers(void) {
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SHELL)] & STATUS_BYTE_MASK(STATUS_ID_SHELL)) {
         g_action_current_ability.xa = g_action_current_ability.xa * 2 / 3;
     }
@@ -1259,20 +1259,20 @@ void formula_apply_target_magical_status_xa_modifiers(void) {
 
 /* Critical hit step: a 4 in 100 roll, never outside execution. XA gains
  * rnd(0..XA-1) and the target may be knocked back. */
-void formula_calculate_critical_hit(void) {
+void battle_formula_calculate_critical_hit(void) {
     s32 rnd;
     s16 base_xa;
-    if (formula_roll_random_at_least(0x64, 4) == 0) {
+    if (battle_formula_roll_random_at_least(0x64, 4) == 0) {
         g_action_target_data->critical = 1;
-        rnd = formula_get_random_0_7fff();
+        rnd = battle_formula_get_random_0_7fff();
         base_xa = g_action_current_ability.xa;
         g_action_current_ability.xa = base_xa + rnd * base_xa / 32768;
-        formula_calculate_knockback();
+        battle_formula_calculate_knockback();
     }
 }
 
 /* Sets the target's result to HP damage XA * YA. */
-void formula_store_xa_times_ya_damage(void) {
+void battle_formula_store_xa_times_ya_damage(void) {
     s16 damage;
     action_data_t* action;
 
@@ -1285,13 +1285,13 @@ void formula_store_xa_times_ya_damage(void) {
 /* Hit chance of the accuracy formulas: XA + YA, left in hp_damage for
  * formula_use_hp_damage_as_action_hit_percent. YA gets zodiac
  * compatibility here (the callers apply it to XA), except for Golem. */
-void formula_store_xa_plus_ya_status_damage(void) {
+void battle_formula_store_xa_plus_ya_status_damage(void) {
     u16 original_xa;
 
     if (g_action_current_ability.ability_id != ABILITY_ID_SUMMON_MAGIC_GOLEM) {
         original_xa = g_action_current_ability.xa;
         g_action_current_ability.xa = g_action_current_ability.ya;
-        formula_apply_zodiac_compatibility();
+        battle_formula_apply_zodiac_compatibility();
         g_action_current_ability.ya = g_action_current_ability.xa;
         g_action_current_ability.xa = original_xa;
     }
@@ -1299,7 +1299,7 @@ void formula_store_xa_plus_ya_status_damage(void) {
 }
 
 /* HP damage of Y% of the target's max HP, rounded up. */
-void formula_calculate_hp_percent_damage(void) {
+void battle_formula_calculate_hp_percent_damage(void) {
     action_data_t* action;
     s32 damage;
 
@@ -1310,7 +1310,7 @@ void formula_calculate_hp_percent_damage(void) {
 }
 
 /* MP damage of Y% of the target's max MP, rounded up. */
-void formula_calculate_mp_percent_damage(void) {
+void battle_formula_calculate_mp_percent_damage(void) {
     action_data_t* action;
     s32 damage;
 
@@ -1321,7 +1321,7 @@ void formula_calculate_mp_percent_damage(void) {
 }
 
 /* HP damage equal to the target's current HP - 1 (0 when it has none). */
-void formula_calculate_gravi2_damage(void) {
+void battle_formula_calculate_gravi2_damage(void) {
     unit_stats_t* target;
 
     target = g_action_target;
@@ -1335,7 +1335,7 @@ void formula_calculate_gravi2_damage(void) {
 
 /* Gil stolen: attacker Level * Speed, capped at the war funds when the target
  * is on team 0 (blue). Nothing to take is a miss. */
-void formula_calculate_stolen_gil(void) {
+void battle_formula_calculate_stolen_gil(void) {
     unit_stats_t* attacker;
     action_data_t* action;
     action_data_t* target_action;
@@ -1353,7 +1353,7 @@ void formula_calculate_stolen_gil(void) {
         }
     }
     if (amount == 0) {
-        formula_force_attack_miss();
+        battle_formula_force_attack_miss();
         return;
     }
     action = g_action_attacker_data;
@@ -1372,7 +1372,7 @@ void formula_calculate_stolen_gil(void) {
  *
  * The target's loss is encoded by adding 0x80 to the amount.
  */
-void formula_set_exp_stolen(void) {
+void battle_formula_set_exp_stolen(void) {
     u8 amount;
     u8 available_exp;
 
@@ -1385,7 +1385,7 @@ void formula_set_exp_stolen(void) {
         amount = available_exp;
     }
     if (amount == 0) {
-        formula_force_attack_miss();
+        battle_formula_force_attack_miss();
         return;
     }
     g_action_attacker_data->exp_change = amount;
@@ -1396,20 +1396,20 @@ void formula_set_exp_stolen(void) {
 }
 
 /* Formula 0x36: +PA (Y). */
-void formula_add_pa_y(void) {
+void battle_formula_add_pa_y(void) {
     g_action_target_data->pa_change = g_action_current_ability.range_data.y | ACTION_STAT_CHANGE_INCREASE;
     g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
 /* Damage XA * rnd(1..Y). When executing, the target is knocked back if a roll
  * of 0..(its Brave - 1) comes out under a roll of 0..(attacker Brave - 1). */
-void formula_apply_damage_and_knockback(void) {
+void battle_formula_apply_damage_and_knockback(void) {
     action_data_t* action;
     s32 damage;
     s32 roll;
     s32 state;
 
-    damage = (((formula_get_random_0_7fff() * g_action_current_ability.range_data.y) / 32768) + 1)
+    damage = (((battle_formula_get_random_0_7fff() * g_action_current_ability.range_data.y) / 32768) + 1)
         * (u16)g_action_current_ability.xa;
     action = g_action_target_data;
     action->attack_type = ACTION_TYPE_HP_DAMAGE;
@@ -1418,14 +1418,14 @@ void formula_apply_damage_and_knockback(void) {
     if (state != ACTION_STATE_EXECUTE) {
         return;
     }
-    roll = (formula_get_random_0_7fff() * g_action_attacker->brave) / 32768;
+    roll = (battle_formula_get_random_0_7fff() * g_action_attacker->brave) / 32768;
     if (main_util_roll_pass_fail(g_action_target->brave, roll) == 0) {
-        formula_calculate_knockback();
+        battle_formula_calculate_knockback();
     }
 }
 
 /* Effect of each song. XA + YA is MA + Y; the stat songs add 1. */
-void formula_apply_song_abilities(void) {
+void battle_formula_apply_song_abilities(void) {
     switch (g_action_current_ability.ability_id) {
     case ABILITY_ID_SONG_ANGEL_SONG:
         g_action_target_data->mp_healing = g_action_current_ability.xa + g_action_current_ability.ya;
@@ -1445,7 +1445,7 @@ void formula_apply_song_abilities(void) {
         g_action_target_data->ma_change = ACTION_STAT_CHANGE_INCREASE | 1;
         break;
     case ABILITY_ID_SONG_NAMELESS_SONG:
-        formula_apply_status_to_action();
+        battle_formula_apply_status_to_action();
         return;
     case ABILITY_ID_SONG_LAST_SONG:
         g_action_target_data->ct_change = ACTION_CT_CHANGE_QUICK;

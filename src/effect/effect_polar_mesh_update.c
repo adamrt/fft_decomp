@@ -120,7 +120,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
         }
 
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.center, work->frame);
-        effect_interpolate_emitter_spawn_position(entry, i, &scratch->center);
+        battle_effect_interpolate_emitter_spawn_position(entry, i, &scratch->center);
 
         selector = entry->polar_mesh.curve_bindings.velocity;
         EFFECT_READ_CURVE(j, i, selector, work->frame);

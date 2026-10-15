@@ -76,10 +76,13 @@ between type blocks; headers include their own dependencies.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
-- Use concise, behavior-based names with a topic prefix (`camera_`,
-  `unit_`, `gfx_`) that says what a function does. A module prefix
-  (`battle_gfx_`, `wldcore_menu_`) marks a program's own routine and is
-  being retired now that folders carry ownership; do not add new ones. The `_variant` suffix is reserved for a
+- Name functions by program, then topic, then behavior. A program's own
+  function carries its program token first (`battle_gfx_`, `battle_formula_`,
+  `world_shop_`, `wldcore_bar_`, `attack_deploy_`, `main_file_`); a library
+  function compiled into several programs carries only its topic (`script_`,
+  `thread_`, `text_`, `menu_`, `gfx_`, `card_`, `bits_`, `window_`), so a
+  bare prefix at a call site means shared code. Files carry no program
+  token; their folder says it. The `_variant` suffix is reserved for a
   function with more than one body under one shared name: bodies in several
   folders, or several conditional definitions in one shared file
   (check-config enforces it both ways); name other alternates by what

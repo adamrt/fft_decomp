@@ -318,7 +318,7 @@ void main_status_init_unit(unit_stats_t* unit) {
 /* Clear the timed-status CTs and start the death counter at 3, or at 0xff for
  * an immortal unit and for one with a save- or load-formation flag. */
 void main_status_init_ct(unit_stats_t* unit) {
-    mem_zero(unit->status_ct, sizeof(unit->status_ct));
+    main_mem_zero(unit->status_ct, sizeof(unit->status_ct));
     if ((unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL)
         || (unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION))) {
         unit->death_counter = 0xff;
@@ -399,10 +399,11 @@ void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_
     job = &g_main_job_data_pointer[unit->job_id];
     unit->move = job->move;
     unit->jump = job->jump & JOB_JUMP_VALUE_MASK;
-    mem_copy_bytes_source_first(
+    main_mem_copy_bytes_source_first(
         job->equipment_categories, unit->equipment_categories, sizeof(job->equipment_categories));
-    mem_copy_bytes_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
-    mem_copy_bytes_source_first(job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
+    main_mem_copy_bytes_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
+    main_mem_copy_bytes_source_first(
+        job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
     unit->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN] = 0;
     main_unit_enable_rsm_flags(unit);
     main_unit_calculate_move_jump(unit, 1);
@@ -444,9 +445,9 @@ void main_unit_update_stats_statuses_and_equipment(unit_stats_t* unit, s32 skip_
                 if (initializing != 0) {
                     main_status_set_ct(unit, i, 0);
                 }
-                status_enable_special_flags(status_id, 1, battle_id);
+                battle_status_enable_special_flags(status_id, 1, battle_id);
             } else {
-                status_enable_special_flags(status_id, 0, battle_id);
+                battle_status_enable_special_flags(status_id, 0, battle_id);
             }
         }
     }

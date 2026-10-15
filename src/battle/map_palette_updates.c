@@ -4,7 +4,7 @@
 #include "fft/battle_map.h"
 #include "psx/types.h"
 
-void map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors) {
+void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors) {
     s32 index;
     s16 green_for_packing;
     u32 blue_delta;
@@ -70,7 +70,7 @@ void map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, con
  * colors at once; another value starts a blend toward them and is kept as the
  * animation's mode (map_update_palette_colors_inner). Marks the rows for
  * upload. */
-void map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors) {
+void battle_map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors) {
     s32 index;
 
     if (update_all == 1) {
@@ -79,13 +79,13 @@ void map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 updat
         index = 0;
         current_colors = colors;
         while (index < MAP_CLUTS_PER_ROW) {
-            map_update_palette_colors_inner(mode, clut_row, index, *current_colors);
+            battle_map_update_palette_colors_inner(mode, clut_row, index, *current_colors);
             index++;
             current_colors++;
         }
         g_map_palette_state.upload_pending = 1;
     } else {
-        map_update_palette_colors_inner(mode, clut_row, clut_index, *colors);
+        battle_map_update_palette_colors_inner(mode, clut_row, clut_index, *colors);
         g_map_palette_state.upload_pending = 1;
     }
 }
@@ -94,12 +94,12 @@ void map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 updat
  * mirror as well, which makes them the base colors that the MAP_COLOR_MODE_BASE
  * modes and RESTORE of map_modify_palette start from: all 256 when
  * update_all is 1, otherwise the 16 of CLUT clut_index. */
-void map_update_and_store_palette_colors(
+void battle_map_update_and_store_palette_colors(
     s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors) {
     s32 index;
     const palette_t* colors_reg = colors;
 
-    map_update_palette_colors(mode, clut_row, clut_index, update_all, colors_reg);
+    battle_map_update_palette_colors(mode, clut_row, clut_index, update_all, colors_reg);
 
     /* The packed mirror is copied with native 16-bit loads and stores. */
     if (update_all == 1) {
@@ -129,7 +129,7 @@ void map_update_and_store_palette_colors(
     }
 }
 
-void map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_all) {
+void battle_map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_all) {
     if (store_all == 1) {
         u16* destination;
         u16* source;
@@ -170,7 +170,7 @@ void map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_a
  * The packed-color reads repeat `clut_index * MAP_CLUT_COLOR_COUNT + i` (no index local) and
  * the gray cases use case-local temporaries: both keep the target's loop
  * strength reduction and local register allocation. */
-void map_modify_palette(
+void battle_map_modify_palette(
     s32 command, s32 amount, s32 clut_row, s32 clut_index, s32 all_colors, s16 red, s16 green, s16 blue) {
     s32 i;
     s16 out_red;
@@ -504,7 +504,7 @@ void map_modify_palette(
  * zero. Indexing base[i]/color[i] (not advancing pointers) is required: a
  * pointer walk splits into biased givs.
  */
-void map_transition_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
+void battle_map_transition_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
     map_color_transition_channels_t* base;
     const CVECTOR* color;
     map_background_gradient_colors_t current;
@@ -548,14 +548,15 @@ void map_transition_background_gradient(s32 frame_duration, const map_background
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = base[1].red / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = base[1].green / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = base[1].blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
     }
 }
 
 /* Fade the background gradient to `colors` and make them the base pair that the
  * MAP_COLOR_MODE_BASE modes and RESTORE start from. */
-void map_transition_and_store_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
-    map_transition_background_gradient(frame_duration, colors);
+void battle_map_transition_and_store_background_gradient(
+    s32 frame_duration, const map_background_gradient_colors_t* colors) {
+    battle_map_transition_background_gradient(frame_duration, colors);
     g_map_background_gradient_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
     g_map_background_gradient_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
 }

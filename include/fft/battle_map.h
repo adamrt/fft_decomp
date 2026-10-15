@@ -201,7 +201,7 @@ typedef enum map_data_command {
 /* lighting and weather commands */
 /* Commands of map_light_matrix_command. A START queues its STEP in
  * g_map_light_transition_command, which the map draw loop issues every frame. */
-typedef enum map_light_matrix_command {
+typedef enum battle_map_light_matrix_command {
     MAP_LIGHT_MATRIX_COMMAND_SET = 0x5e,
     MAP_LIGHT_MATRIX_COMMAND_SAVE = 0x5f,
     MAP_LIGHT_MATRIX_COMMAND_RESTORE = 0x60,
@@ -280,7 +280,7 @@ typedef enum map_gns_load_phase {
 
 /* polygon and lighting commands */
 /* Commands of map_polygon_flag_command. */
-typedef enum map_polygon_flag_command {
+typedef enum battle_map_polygon_flag_command {
     MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE = 0x46,    /* copy LIT into LIT_ACTIVE on every polygon */
     MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE = 0x47,    /* clear LIT_ACTIVE everywhere */
     MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT = 0x94, /* repaint the polygons without LIT in the ambient color */
@@ -834,21 +834,21 @@ extern s32 g_map_loaded_id;
 extern RECT g_map_vram_load_rect;
 
 void map_data_load_complete_thread(void);
-s32 map_dispatch_gns_resource(u8 resource_type, map_resource_t* data);
-s32 map_start_data_load(void);
-s32 map_poll_data_load(void);
-void map_mark_data_load_complete(void);
-s32 map_step_init_sequence(s32 map_id, s32 step);
-s32 map_try_start_deep_dungeon_mesh_load(void);
-s32 map_load_data(s32 map_id, s32 command);
-s32 map_apply_gns_command(s32 phase, map_resource_t* record);
-s32 map_dispatch_map_data_command(map_data_command_e command, u32 index, s32 object_state, s32 flag);
-s16 map_is_gns_record_matching_state(s32 comparison, s16 record_state, s16 requested_state);
-void* map_start_file_load(
+s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data);
+s32 battle_map_start_data_load(void);
+s32 battle_map_poll_data_load(void);
+void battle_map_mark_data_load_complete(void);
+s32 battle_map_step_init_sequence(s32 map_id, s32 step);
+s32 battle_map_try_start_deep_dungeon_mesh_load(void);
+s32 battle_map_load_data(s32 map_id, s32 command);
+s32 battle_map_apply_gns_command(s32 phase, map_resource_t* record);
+s32 battle_map_dispatch_map_data_command(map_data_command_e command, u32 index, s32 object_state, s32 flag);
+s16 battle_map_is_gns_record_matching_state(s32 comparison, s16 record_state, s16 requested_state);
+void* battle_map_start_file_load(
     const char* unused_directory_path, const gns_load_info_t* load_info, void* destination, s32 unused_resource_type);
-map_state_record_t* map_load_saved_state_record(map_state_record_t* record);
-s32 map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running);
-s32 map_load_alternate_mesh(s32 palette_mode);
+map_state_record_t* battle_map_load_saved_state_record(map_state_record_t* record);
+s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running);
+s32 battle_map_load_alternate_mesh(s32 palette_mode);
 
 /* terrain and selection */
 extern u8 g_map_max_x;
@@ -863,31 +863,31 @@ extern map_tile_t* g_map_tile_data_ptr;
 extern u8 g_map_tile_depth;
 extern u8 g_map_tile_width;
 
-s32 map_calculate_location(const unit_stats_t* unit);
-s32 map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
-map_tile_t* map_get_tile_data_pointer(s32 x, s32 y, u32 layer);
-s32 map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value);
-map_tile_t* map_get_unit_tile_by_runtime_id(u32 runtime_id);
-void map_store_selected_tile_coordinates(SVECTOR* destination);
-s32 map_calculate_slope_height(const SVECTOR* coords, s32 map_z);
-s32 map_resolve_rotated_offset_layer(unit_stats_t*, s32, s32, s32, s32*, s32*, s32*);
-void map_store_max_coordinates(SVECTOR* destination);
+s32 battle_map_calculate_location(const unit_stats_t* unit);
+s32 battle_map_get_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer);
+map_tile_t* battle_map_get_tile_data_pointer(s32 x, s32 y, u32 layer);
+s32 battle_map_set_tile_data_value(map_tile_data_selector_e field, s32 x, s32 y, s32 layer, s32 value);
+map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id);
+void battle_map_store_selected_tile_coordinates(SVECTOR* destination);
+s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z);
+s32 battle_map_resolve_rotated_offset_layer(unit_stats_t*, s32, s32, s32, s32*, s32*, s32*);
+void battle_map_store_max_coordinates(SVECTOR* destination);
 
 /* A typed terrain parameter loses the first retail byte-cursor increment. */
-void map_copy_xy_coords_and_tile_data(u8* data);
-map_tile_t* map_get_tile_data_ptr_from_battle_id(u32 battle_id);
-map_tile_t* map_get_unit_tile_from_world_coords(u32 runtime_id);
+void battle_map_copy_xy_coords_and_tile_data(u8* data);
+map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
+map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
 
 /* items and traps */
 extern map_move_find_item_data_t g_map_move_find_item_data[MAP_ID_COUNT];
 extern map_move_find_item_data_t g_battle_current_map_move_find_item_data;
 extern move_found_item_t g_map_rare_item_result;
 
-s32 map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 mode);
-void map_load_move_find_item_data(map_move_find_item_data_t* map_data);
-move_found_item_t* map_determine_rare_common_item(unit_stats_t* unit);
-move_find_result_data_t* map_set_item_trap_data(s32 x, u8 y, u8 layer);
-gns_record_t* map_load_gns_and_move_find_items(s32 map_id);
+s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 mode);
+void battle_map_load_move_find_item_data(map_move_find_item_data_t* map_data);
+move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit);
+move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer);
+gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id);
 
 /* palettes */
 extern u16 g_map_palette_modified_colors[][MAP_CLUT_ROW_COLOR_COUNT]; /* [map_clut_row_e][color] */
@@ -899,23 +899,23 @@ extern s8 g_map_palette_blend_steps_8[MAP_PALETTE_DELTA_COUNT][MAP_PALETTE_FAST_
 extern u8 g_map_palette_pending;
 extern u8 g_map_pending_palette_data[0x200];
 
-void map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index);
-void map_init_palette_state(void);
-void map_reset_clut_cycles(void);
-s32 map_stop_clut_cycle(s32 handle);
-void map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_all);
-void map_modify_palette(
+void battle_map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index);
+void battle_map_init_palette_state(void);
+void battle_map_reset_clut_cycles(void);
+s32 battle_map_stop_clut_cycle(s32 handle);
+void battle_map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_all);
+void battle_map_modify_palette(
     s32 command, s32 amount, s32 clut_row, s32 clut_index, s32 all_colors, s16 red, s16 green, s16 blue);
-void map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors);
-void map_upload_clut_rows(void);
-void map_update_all_palettes_from_color_data(s32 mode, const clut_t color_data);
-void map_update_palette_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data);
-void map_update_and_store_palette_colors(
+void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors);
+void battle_map_upload_clut_rows(void);
+void battle_map_update_all_palettes_from_color_data(s32 mode, const clut_t color_data);
+void battle_map_update_palette_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data);
+void battle_map_update_and_store_palette_colors(
     s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
-void map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);
-void map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
-s32 map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color);
-void map_update_palette_from_other(
+void battle_map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all);
+void battle_map_update_palette_colors(s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
+s32 battle_map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color);
+void battle_map_update_palette_from_other(
     const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 preset, s16 red, s16 green, s16 blue, s32 final_value);
 
 /* lighting and colors */
@@ -961,36 +961,37 @@ extern CVECTOR g_map_saved_background_gradient_second;
 extern MATRIX g_map_saved_light_color_matrix; /* saved color matrix (command 0x5f/0x60) */
 extern MATRIX g_map_saved_light_matrix;       /* saved light matrix (command 0x5f/0x60) */
 
-void map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
-void map_init_ambient_light(void);
-void map_init_background_gradient(void);
-void map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth);
-void map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue);
+void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
+void battle_map_init_ambient_light(void);
+void battle_map_init_background_gradient(void);
+void battle_map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth);
+void battle_map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue);
 
 /* Only SET/GET define a result (stored RGB pointer, or null for SET while
  * disabled). Other command paths leave the target return register unspecified. */
-s32* map_control_gte_background_color(s32 command, s32 red, s32 green, s32 blue);
-void map_copy_background_color(void);
-void map_restore_background_color(void);
-rgb24_t* map_get_background_color(void);
-void map_set_background_color(s32 red, s32 green, s32 blue);
-void map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta);
-MATRIX* map_light_matrix_command(map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration);
-void map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
-void map_set_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
-void map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
-void map_set_darkness_color(s32 frame_duration, const CVECTOR* color);
-void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
-void map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
-void map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color);
-void map_transition_and_store_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
-void map_transition_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
-void map_transition_darkness_color(s32 frame_duration, const CVECTOR* color);
+s32* battle_map_control_gte_background_color(s32 command, s32 red, s32 green, s32 blue);
+void battle_map_copy_background_color(void);
+void battle_map_restore_background_color(void);
+rgb24_t* battle_map_get_background_color(void);
+void battle_map_set_background_color(s32 red, s32 green, s32 blue);
+void battle_map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta);
+MATRIX* battle_map_light_matrix_command(map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration);
+void battle_map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
+void battle_map_set_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
+void battle_map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
+void battle_map_set_darkness_color(s32 frame_duration, const CVECTOR* color);
+void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
+void battle_map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue);
+void battle_map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color);
+void battle_map_transition_and_store_background_gradient(
+    s32 frame_duration, const map_background_gradient_colors_t* colors);
+void battle_map_transition_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors);
+void battle_map_transition_darkness_color(s32 frame_duration, const CVECTOR* color);
 
 /* Map data, palette and mesh interfaces implemented in the battle overlay. */
-void map_init_darkness(void);
-void* map_light_state_command(map_light_command_e command, void* data);
-void map_set_light_matrices(MATRIX* first, MATRIX* second);
+void battle_map_init_darkness(void);
+void* battle_map_light_state_command(map_light_command_e command, void* data);
+void battle_map_set_light_matrices(MATRIX* first, MATRIX* second);
 
 /* mesh animation */
 extern map_mesh_part_t g_map_mesh_parts[9];
@@ -999,14 +1000,14 @@ extern map_mesh_instructions_t g_map_mesh_animation_instructions[9];
 extern s32 g_map_mesh_part_animation_states[];
 extern const map_mesh_geometry_t* g_map_mesh_part_geometry[9];
 
-s32 map_update_deep_dungeon_and_animation(void);
-void map_update_animations(void);
-void map_freeze(void);
-void map_unfreeze(void);
-s32 map_refresh_deep_dungeon(void);
-s32 map_command_get_3d_object_state(s32 value);
-s32 map_command_set_3d_object_state(s32 value_a, s32 value_b);
-void map_update_mesh_part_animations(void);
+s32 battle_map_update_deep_dungeon_and_animation(void);
+void battle_map_update_animations(void);
+void battle_map_freeze(void);
+void battle_map_unfreeze(void);
+s32 battle_map_refresh_deep_dungeon(void);
+s32 battle_map_command_get_3d_object_state(s32 value);
+s32 battle_map_command_set_3d_object_state(s32 value_a, s32 value_b);
+void battle_map_update_mesh_part_animations(void);
 
 /* texture animation */
 extern s32 g_map_texture_animation_cycle_handles[MAP_TEXTURE_ANIMATION_COUNT];
@@ -1019,9 +1020,9 @@ extern u8 g_map_texture_quarter_1_pending;
 extern u8 g_map_texture_quarter_2_pending;
 extern u8 g_map_texture_quarter_3_pending;
 
-s32 map_command_get_texture_animation_active(s32 value);
-s32 map_command_start_texture_animation(s32 value_a, s32 value_b);
-void map_update_texture_animations(void);
+s32 battle_map_command_get_texture_animation_active(s32 value);
+s32 battle_map_command_start_texture_animation(s32 value_a, s32 value_b);
+void battle_map_update_texture_animations(void);
 
 /* mesh rendering */
 extern gns_record_t g_map_selected_mesh_record;
@@ -1072,16 +1073,16 @@ extern s32 g_map_primary_textured_triangle_count;
 extern s32 g_map_primary_untextured_quad_count;
 extern s32 g_map_primary_untextured_triangle_count;
 
-s32 map_check_deep_dungeon_crystal_and_init_state(void);
-void map_polygon_flag_command(s32 command);
-void map_append_mesh_geometry(const map_mesh_geometry_t* geometry_data, map_mesh_part_t* metadata);
+s32 battle_map_check_deep_dungeon_crystal_and_init_state(void);
+void battle_map_polygon_flag_command(s32 command);
+void battle_map_append_mesh_geometry(const map_mesh_geometry_t* geometry_data, map_mesh_part_t* metadata);
 void map_queue_textured_quads(u32* otag, POLY_GT4* prims, s32 yaw, s32* unused_count);
 void map_queue_textured_triangles(u32* otag, POLY_GT3* prims, s32 yaw, s32* unused_count);
 void map_queue_untextured_quads(u32* otag, POLY_F4* prims, s32 yaw, s32* unused_count);
 void map_queue_untextured_triangles(u32* otag, POLY_F3* prims, s32 yaw, s32* unused_count);
-void map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data);
-s32 map_configure_effect_data_state(map_effect_data_command_e command);
-void map_reset_mesh_render_state(void);
+void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data);
+s32 battle_map_configure_effect_data_state(map_effect_data_command_e command);
+void battle_map_reset_mesh_render_state(void);
 
 /* weather */
 extern palette_t g_map_weather_particle_palette;
@@ -1107,14 +1108,14 @@ extern VECTOR g_map_weather_scale;
 extern s32 g_map_weather_sprite_scale;
 extern VECTOR g_map_weather_translation;
 
-s32 map_get_effective_weather(void);
-void map_set_command_0x96_duration(s32 id, s32 value);
-void map_draw_mesh_and_weather(MATRIX* camera_matrix);
-s32 map_stop_clut_cycles_and_weather_sfx(void);
-void map_run_weather_command(map_weather_command_e command);
+s32 battle_map_get_effective_weather(void);
+void battle_map_set_command_0x96_duration(s32 id, s32 value);
+void battle_map_draw_mesh_and_weather(MATRIX* camera_matrix);
+s32 battle_map_stop_clut_cycles_and_weather_sfx(void);
+void battle_map_run_weather_command(map_weather_command_e command);
 void battle_weather_randomize_from_calendar(void);
-void map_init_weather_particles(map_weather_command_e command);
+void battle_map_init_weather_particles(map_weather_command_e command);
 
-s32 map_tile_data_15_stub(void);
+s32 battle_map_tile_data_15_stub(void);
 
 #endif

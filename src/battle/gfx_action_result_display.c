@@ -325,7 +325,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
         break;
     }
 
-    map_load_palette_data(&g_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
+    battle_map_load_palette_data(&g_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
     return 1;
 }
 
@@ -588,7 +588,7 @@ s32 battle_gfx_build_next_special_action_result_display(battle_unit_t* unit) {
         break;
     }
 
-    map_load_palette_data(&g_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
+    battle_map_load_palette_data(&g_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
     return 1;
 }
 

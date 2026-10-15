@@ -19,20 +19,20 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
+void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
     s32 direction;
 
-    direction = move_get_direction(unit);
-    move_apply_unit_step_velocity(unit);
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
-        move_displace_unit_at_destination_tile(unit, direction);
+        battle_move_displace_unit_at_destination_tile(unit, direction);
     }
-    if (move_has_reached_destination_tile_entry_edge(direction, unit) != 0) {
+    if (battle_move_has_reached_destination_tile_entry_edge(direction, unit) != 0) {
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
         if (unit->world_coords.vy >= (s16)battle_gfx_calculate_world_height_from_world_coords(unit)) {
             unit->velocity.vy = 0;
-            move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
+            battle_move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
             unit->step_phase = g_move_float_to_center_phases[direction];
         }
     }
@@ -45,20 +45,21 @@ void move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
  * (height * 2 + slope half-height * edge value), clears the unit it stood on,
  * builds the velocity for the run of contiguous steps and enters the
  * FLY_TO_CENTER stage. */
-void move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
+void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
     s32 direction;
 
-    direction = move_get_direction(unit);
-    move_apply_unit_step_velocity(unit);
-    if (move_has_reached_current_tile_exit_edge(direction, unit) != 0) {
-        move_snap_axis_to_current_tile_exit_edge(direction, unit);
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
+    if (battle_move_has_reached_current_tile_exit_edge(direction, unit) != 0) {
+        battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
         g_move_current_edge_height = g_move_current_tile->height * 2
             + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
         unit->standing_on_battle_id_plus_one = 0;
         g_move_destination_edge_height = g_move_destination_tile->height * 2
             + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
-        move_set_velocity_for_contiguous_steps_with_final_tile_height(unit, &unit->path, &unit->current_path_step);
-        move_interpolate_partial(unit, unit->walk_speed);
+        battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
+            unit, &unit->path, &unit->current_path_step);
+        battle_move_interpolate_partial(unit, unit->walk_speed);
         unit->step_phase = MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH;
     }
 }
@@ -73,15 +74,15 @@ void move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
  * then snaps to the center, clears velocity, adopts the destination map
  * coordinates and sets shadow_dirty bit 0.
  */
-void move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {
+void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {
     s32 done;
     s32 direction;
     battle_unit_t* mount;
 
     done = 0;
-    direction = move_get_direction(unit);
-    move_apply_unit_step_velocity(unit);
-    if (move_has_reached_destination_tile_center(direction, unit) != 0) {
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
+    if (battle_move_has_reached_destination_tile_center(direction, unit) != 0) {
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
         g_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
@@ -103,7 +104,7 @@ void move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* un
         }
         if (done) {
             unit->velocity.vy = 0;
-            move_snap_axis_to_destination_tile_center(direction, unit);
+            battle_move_snap_axis_to_destination_tile_center(direction, unit);
             unit->velocity.vz = 0;
             unit->velocity.vx = 0;
             g_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
@@ -118,8 +119,8 @@ void move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* un
 /* Selects the slope bits of the two step tiles that face the movement
  * direction (top two bits of g_move_step_value) and stores them as the unit's
  * per-step scales; a rider or a g_move_step_value bit 0x10 step clears them. */
-void move_set_unit_step_slope_scales(battle_unit_t* unit) {
-    move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
+void battle_move_set_unit_step_slope_scales(battle_unit_t* unit) {
+    battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
     battle_gfx_check_tile_status_palette_mod(unit, g_move_destination_tile->flags.shading, 1);
     switch (g_move_step_value.direction) {
     case MOVE_STEP_DIRECTION_EAST:
@@ -151,7 +152,7 @@ void move_set_unit_step_slope_scales(battle_unit_t* unit) {
 
 /* Step handler of the TELEPORT_ANIMATION phase: once the animation countdown
  * reaches 0, end the path and keep its count in last_path_count. */
-void move_finalize_path_after_animation(battle_unit_t* unit) {
+void battle_move_finalize_path_after_animation(battle_unit_t* unit) {
     if (unit->animation.wait == 0) {
         unit->step_phase = MOVE_STEP_PHASE_NONE;
         unit->last_path_count = unit->path.count;
@@ -160,13 +161,13 @@ void move_finalize_path_after_animation(battle_unit_t* unit) {
 }
 
 /* Step handler of the TELEPORT_START phase. */
-void move_update_teleport_start(battle_unit_t* unit) {
-    move_start_teleport_animation(unit);
+void battle_move_update_teleport_start(battle_unit_t* unit) {
+    battle_move_start_teleport_animation(unit);
 }
 
 /* Called for the last step of a path: when the unit has a pending mount, set the
  * step's mount bit (0x10), which marks a step that ends on another unit. */
-void move_set_unit_path_flag(battle_unit_t* unit) {
+void battle_move_set_unit_path_flag(battle_unit_t* unit) {
     if (unit->path.pending_mount == 0) {
         return;
     }
@@ -187,12 +188,12 @@ void move_set_unit_path_flag(battle_unit_t* unit) {
  * movement_flags pick their own starters, and bit 2 of the step byte picks the
  * climb speed).
  */
-void move_update_path_step(battle_unit_t* unit) {
+void battle_move_update_path_step(battle_unit_t* unit) {
     u32 offset;
     u8 count;
     u8 flags;
 
-    move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
+    battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
     g_move_step_value = unit->current_path_step;
     switch (unit->step_phase) {
     case MOVE_STEP_PHASE_JUMP_START_SOUTH:
@@ -202,7 +203,7 @@ void move_update_path_step(battle_unit_t* unit) {
         if (unit->animation.wait == 0) {
             unit->step_phase++;
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_FALL, unit->facing, unit);
-            sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
+            battle_sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
             battle_unit_dismount_rider(unit);
         }
         break;
@@ -210,25 +211,25 @@ void move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_JUMP_LANDING_EAST:
     case MOVE_STEP_PHASE_JUMP_LANDING_NORTH:
     case MOVE_STEP_PHASE_JUMP_LANDING_WEST:
-        move_update_knockback_after_animation(unit);
+        battle_move_update_knockback_after_animation(unit);
         break;
     case MOVE_STEP_PHASE_JUMP_ASCENT_SOUTH:
     case MOVE_STEP_PHASE_JUMP_ASCENT_EAST:
     case MOVE_STEP_PHASE_JUMP_ASCENT_NORTH:
     case MOVE_STEP_PHASE_JUMP_ASCENT_WEST:
-        move_update_airborne_ascent_phase(unit);
+        battle_move_update_airborne_ascent_phase(unit);
         /* fallthrough */
     case MOVE_STEP_PHASE_JUMP_DESCENT_SOUTH:
     case MOVE_STEP_PHASE_JUMP_DESCENT_EAST:
     case MOVE_STEP_PHASE_JUMP_DESCENT_NORTH:
     case MOVE_STEP_PHASE_JUMP_DESCENT_WEST:
-        move_finish_unit_step_at_tile_edge(unit);
+        battle_move_finish_unit_step_at_tile_edge(unit);
         break;
     case MOVE_STEP_PHASE_FLOAT_JUMP_SOUTH:
     case MOVE_STEP_PHASE_FLOAT_JUMP_EAST:
     case MOVE_STEP_PHASE_FLOAT_JUMP_NORTH:
     case MOVE_STEP_PHASE_FLOAT_JUMP_WEST:
-        move_update_unit_step_to_destination_tile_entry_edge(unit);
+        battle_move_update_unit_step_to_destination_tile_entry_edge(unit);
         break;
     case MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
@@ -238,19 +239,19 @@ void move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST:
-        move_update_unit_step_to_destination_tile_center(unit);
+        battle_move_update_unit_step_to_destination_tile_center(unit);
         break;
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_SOUTH:
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_WEST:
-        move_update_float_step_to_destination_tile_center(unit);
+        battle_move_update_float_step_to_destination_tile_center(unit);
         break;
     case MOVE_STEP_PHASE_FLY_TO_CENTER_SOUTH:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_WEST:
-        move_update_unit_vertical_step_to_destination_tile_center(unit);
+        battle_move_update_unit_vertical_step_to_destination_tile_center(unit);
         break;
     case MOVE_STEP_PHASE_WALK_TO_EDGE_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_EDGE_EAST:
@@ -260,60 +261,60 @@ void move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_EAST:
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_WEST:
-        move_update_walking_step_at_tile_edge(unit);
+        battle_move_update_walking_step_at_tile_edge(unit);
         break;
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_SOUTH:
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_EAST:
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_WEST:
-        move_update_float_step_to_current_tile_exit_edge(unit);
+        battle_move_update_float_step_to_current_tile_exit_edge(unit);
         break;
     case MOVE_STEP_PHASE_FLY_TO_EDGE_SOUTH:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_EAST:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_WEST:
-        move_update_unit_step_to_current_tile_exit_edge(unit);
+        battle_move_update_unit_step_to_current_tile_exit_edge(unit);
         break;
     case MOVE_STEP_PHASE_TELEPORT_START:
-        move_update_teleport_start(unit);
+        battle_move_update_teleport_start(unit);
         break;
     case MOVE_STEP_PHASE_TELEPORT_ANIMATION:
-        move_finalize_path_after_animation(unit);
+        battle_move_finalize_path_after_animation(unit);
         break;
     }
     if (unit->step_phase == MOVE_STEP_PHASE_NONE) {
         count = unit->path.count;
         if (count == MOVE_PATH_TELEPORT) {
             battle_unit_dismount_rider_and_update_display(unit);
-            move_start_teleport_step(unit);
+            battle_move_start_teleport_step(unit);
         } else if (count == MOVE_PATH_TELEPORT_FAILED) {
             battle_unit_dismount_rider_and_update_display(unit);
-            move_start_teleport_step(unit);
+            battle_move_start_teleport_step(unit);
             unit->path.pending_mount = 0;
-            ai_init_selected_action();
+            battle_ai_init_selected_action();
         } else if (count == 0) {
             battle_unit_mount_onto_pending_mount(unit);
         } else if (unit->movement_path_offset < count) {
             if (unit->movement_path_offset == count - 1) {
-                move_set_unit_path_flag(unit);
+                battle_move_set_unit_path_flag(unit);
             }
             offset = unit->movement_path_offset;
             unit->movement_path_offset = offset + 1;
             unit->current_path_step = g_move_step_value = unit->path.data.steps[offset];
-            move_set_unit_step_slope_scales(unit);
+            battle_move_set_unit_step_slope_scales(unit);
             flags = unit->path.flags;
             if (flags & BATTLE_EFFECTIVE_MOVEMENT_FLY) {
-                move_start_fly_step(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_fly_step(unit, g_move_current_tile, g_move_destination_tile);
             } else if (flags & BATTLE_EFFECTIVE_MOVEMENT_FLOAT) {
-                move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
             } else {
                 switch (g_move_step_value.slow) {
                 case 0:
                     unit->step_speed = 0x2000;
-                    move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+                    battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
                     break;
                 case 1:
-                    move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
+                    battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
                     break;
                 }
             }
@@ -331,11 +332,11 @@ void move_update_path_step(battle_unit_t* unit) {
  * no step is active, the next path byte starts a new step, or the mount
  * animation coordinates are stored when the path is exhausted.
  */
-void move_update_knockback_step(battle_unit_t* unit) {
+void battle_move_update_knockback_step(battle_unit_t* unit) {
     u32 offset;
     s32 speed;
 
-    move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
+    battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
     g_move_step_value = unit->current_path_step;
     if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
         speed = unit->walk_speed;
@@ -345,31 +346,31 @@ void move_update_knockback_step(battle_unit_t* unit) {
         case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
         case MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH:
         case MOVE_STEP_PHASE_WALK_TO_CENTER_WEST:
-            move_update_unit_step_to_destination_tile_center(unit);
+            battle_move_update_unit_step_to_destination_tile_center(unit);
             break;
         case MOVE_STEP_PHASE_WALK_TO_EDGE_SOUTH:
         case MOVE_STEP_PHASE_WALK_TO_EDGE_EAST:
         case MOVE_STEP_PHASE_WALK_TO_EDGE_NORTH:
         case MOVE_STEP_PHASE_WALK_TO_EDGE_WEST:
-            move_update_walking_step_at_tile_edge(unit);
+            battle_move_update_walking_step_at_tile_edge(unit);
             break;
         case MOVE_STEP_PHASE_JUMP_LANDING_SOUTH:
         case MOVE_STEP_PHASE_JUMP_LANDING_EAST:
         case MOVE_STEP_PHASE_JUMP_LANDING_NORTH:
         case MOVE_STEP_PHASE_JUMP_LANDING_WEST:
-            move_update_knockback_after_animation(unit);
+            battle_move_update_knockback_after_animation(unit);
             break;
         case MOVE_STEP_PHASE_JUMP_ASCENT_SOUTH:
         case MOVE_STEP_PHASE_JUMP_ASCENT_EAST:
         case MOVE_STEP_PHASE_JUMP_ASCENT_NORTH:
         case MOVE_STEP_PHASE_JUMP_ASCENT_WEST:
-            move_update_airborne_ascent_phase(unit);
+            battle_move_update_airborne_ascent_phase(unit);
             /* fallthrough */
         case MOVE_STEP_PHASE_JUMP_DESCENT_SOUTH:
         case MOVE_STEP_PHASE_JUMP_DESCENT_EAST:
         case MOVE_STEP_PHASE_JUMP_DESCENT_NORTH:
         case MOVE_STEP_PHASE_JUMP_DESCENT_WEST:
-            move_finish_unit_step_at_tile_edge(unit);
+            battle_move_finish_unit_step_at_tile_edge(unit);
             break;
         }
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
@@ -381,16 +382,16 @@ void move_update_knockback_step(battle_unit_t* unit) {
         if (offset < unit->path.count) {
             unit->movement_path_offset = offset + 1;
             unit->current_path_step = g_move_step_value = unit->path.data.steps[offset];
-            move_set_unit_step_slope_scales(unit);
+            battle_move_set_unit_step_slope_scales(unit);
             unit->step_speed = 0x2000;
-            move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+            battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
         } else {
             battle_unit_store_coordinate_mount_animation_data(unit);
         }
     }
 }
 
-void move_init_knockback(battle_unit_t* unit) {
+void battle_move_init_knockback(battle_unit_t* unit) {
     u32* path_word = (u32*)&unit->path;
     u32 state;
     u32 knockback_state;
@@ -398,7 +399,7 @@ void move_init_knockback(battle_unit_t* unit) {
 
     unit->movement_path_offset = 0;
     unit->path.count = 1;
-    unit->path.flags = move_get_effective_flags(unit->stats);
+    unit->path.flags = battle_move_get_effective_flags(unit->stats);
 
     state = *path_word;
     state &= ~0x300;
@@ -410,7 +411,7 @@ void move_init_knockback(battle_unit_t* unit) {
     knockback_state = state & ~0x2000;
     knockback_state |= (unit->movement.destination_z & 1) << 13;
     *path_word = knockback_state;
-    direction = move_get_direction(unit);
+    direction = battle_move_get_direction(unit);
 
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
@@ -433,14 +434,14 @@ void move_init_knockback(battle_unit_t* unit) {
 /* Knockback: copy the destination tile that the attacker's record (src) holds for
  * its target into the target's (dst) movement destination and start the target's
  * one-step knockback path. */
-void move_transfer_target_coordinates(const battle_unit_t* src, battle_unit_t* dst) {
+void battle_move_transfer_target_coordinates(const battle_unit_t* src, battle_unit_t* dst) {
     dst->movement.destination_x = src->strike.target_new_x;
     dst->movement.destination_y = src->strike.target_new_y;
     dst->movement.destination_z = src->strike.target_new_map_level;
-    move_init_knockback(dst);
+    battle_move_init_knockback(dst);
 }
 
-s32 camera_get_input_direction(s32 source) {
+s32 battle_camera_get_input_direction(s32 source) {
     s32 direction;
     u32 input;
     u32 previous;
@@ -809,7 +810,7 @@ s32 camera_get_input_direction(s32 source) {
 
 /* Start the hovered-unit stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
-void target_store_cursor_unit_name_and_data(void) {
+void battle_target_store_cursor_unit_name_and_data(void) {
     battle_unit_t* unit;
     s32 mode;
     s32 unit_id;
@@ -827,7 +828,7 @@ void target_store_cursor_unit_name_and_data(void) {
 
 /* Start the right-side stats panel for the unit on the cursor tile, or the tile
  * info panel when the tile is empty. */
-void target_store_cursor_unit_as_preview_target(void) {
+void battle_target_store_cursor_unit_as_preview_target(void) {
     battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     battle_unit_get_source();
     if (unit != 0) {
@@ -840,7 +841,7 @@ void target_store_cursor_unit_as_preview_target(void) {
 /* Start the unit panels for a selected target tile: the attack preview for the
  * source unit against the unit on the cursor tile, or the source unit's own stats
  * when the tile is empty. */
-void target_store_cursor_casting_unit_name_and_data(void) {
+void battle_target_store_cursor_casting_unit_name_and_data(void) {
     battle_unit_t* target;
     battle_unit_t* source;
 
@@ -859,7 +860,7 @@ void target_store_cursor_casting_unit_name_and_data(void) {
  * When the cursor tile changes, the unit panels are refreshed for the current
  * game state: the cursor unit's panel in the free-cursor, close-move-help and
  * target-select states, the preview target's panel in the targeting-range state. */
-void target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit) {
+void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit) {
     s32 old_x;
     s32 old_z;
     s32 old_y;
@@ -868,7 +869,7 @@ void target_update_free_cursor_selection(const battle_unit_t* unit, const battle
     old_z = g_battle_cursor_z;
     old_y = g_battle_cursor_y;
     if (selected_unit != 0) {
-        target_move_cursor_to_unit(selected_unit);
+        battle_target_move_cursor_to_unit(selected_unit);
     } else {
         g_battle_cursor_x = unit->command_state.cursor.target_panel.vx;
         g_battle_cursor_z = unit->command_state.cursor.target_panel.vy;
@@ -879,10 +880,10 @@ void target_update_free_cursor_selection(const battle_unit_t* unit, const battle
         case BATTLE_GAME_STATE_FREE_CURSOR:
         case BATTLE_GAME_STATE_CLOSE_MOVE_HELP:
         case BATTLE_GAME_STATE_TARGET_SELECT:
-            target_store_cursor_unit_name_and_data();
+            battle_target_store_cursor_unit_name_and_data();
             break;
         case BATTLE_GAME_STATE_TARGETING_RANGE:
-            target_store_cursor_unit_as_preview_target();
+            battle_target_store_cursor_unit_as_preview_target();
             break;
         }
     }
@@ -902,7 +903,7 @@ void target_update_free_cursor_selection(const battle_unit_t* unit, const battle
  * allocates it before `direction`; without it the two swap s0 and s1. The
  * 32-bit option value is copied first so the loop note does not stop the load from
  * being scheduled into the prologue. */
-s32 target_move_cursor_by_input(void) {
+s32 battle_target_move_cursor_by_input(void) {
     game_options_t options;
     u32 delay;
     s32 direction;
@@ -928,10 +929,10 @@ s32 target_move_cursor_by_input(void) {
         }
     } while (0);
     direction = 0;
-    current = map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+    current = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (g_main_game_options.fields.multi_height_cursor_speed == 3) {
         if (g_main_input_pressed_buttons & PSX_PAD_START) {
-            if (!map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1)
+            if (!battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1)
                     ->flags.blocked) {
                 direction = 1;
                 g_battle_cursor_z ^= 1;
@@ -939,7 +940,8 @@ s32 target_move_cursor_by_input(void) {
         }
     } else if (g_battle_cursor_repeat_counter > delay) {
         g_battle_cursor_repeat_counter = 0;
-        if (!map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1)->flags.blocked) {
+        if (!battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1)
+                ->flags.blocked) {
             direction = 1;
             g_battle_cursor_z ^= 1;
         }
@@ -949,7 +951,7 @@ s32 target_move_cursor_by_input(void) {
         g_battle_cursor_previous_x = g_battle_cursor_x;
         g_battle_cursor_previous_z = g_battle_cursor_z;
         g_battle_cursor_previous_y = g_battle_cursor_y;
-        direction = camera_get_input_direction(CAMERA_INPUT_PRESSED);
+        direction = battle_camera_get_input_direction(CAMERA_INPUT_PRESSED);
         switch (direction) {
         case BATTLE_FACING_NORTH:
             g_battle_cursor_y++;
@@ -991,8 +993,8 @@ s32 target_move_cursor_by_input(void) {
         if ((u32)g_battle_cursor_y > g_map_max_y) {
             g_battle_cursor_y = 0;
         }
-        lower = map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-        upper = map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
+        lower = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+        upper = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
         if (lower->flags.blocked) {
             if (upper->flags.blocked) {
                 switch (direction) {
@@ -1051,10 +1053,10 @@ s32 target_move_cursor_by_input(void) {
         case BATTLE_GAME_STATE_FREE_CURSOR:
         case BATTLE_GAME_STATE_CLOSE_MOVE_HELP:
         case BATTLE_GAME_STATE_TARGET_SELECT:
-            target_store_cursor_unit_name_and_data();
+            battle_target_store_cursor_unit_name_and_data();
             break;
         case BATTLE_GAME_STATE_TARGETING_RANGE:
-            target_store_cursor_unit_as_preview_target();
+            battle_target_store_cursor_unit_as_preview_target();
             break;
         }
         return 1;
@@ -1062,12 +1064,12 @@ s32 target_move_cursor_by_input(void) {
     return 0;
 }
 
-void camera_enable_map_pan(void) {
+void battle_camera_enable_map_pan(void) {
     g_camera_map_pan_enabled = 1;
 }
 
 /* End free map panning: the camera follows the cursor tile again. */
-void camera_disable_map_pan(void) {
+void battle_camera_disable_map_pan(void) {
     g_camera_map_pan_enabled = 0;
 }
 
@@ -1080,12 +1082,12 @@ void camera_disable_map_pan(void) {
  * units in 20.12) per frame, diagonals both. The position is then clamped to four
  * tiles (0x70000) outside the map on every side: -0x70000 up to
  * g_map_max_x or g_map_max_y tiles of 0x1c000 plus 0x70000. */
-void camera_update_map_pan(void) {
+void battle_camera_update_map_pan(void) {
     s32* coord;
     s32 limit;
 
     if (g_camera_map_pan_enabled != 0) {
-        switch (camera_get_input_direction(CAMERA_INPUT_HELD)) {
+        switch (battle_camera_get_input_direction(CAMERA_INPUT_HELD)) {
         case BATTLE_FACING_NORTH:
             coord = &g_camera_current_real_coords.vz;
             *coord += 4 * ONE;
@@ -1146,7 +1148,7 @@ void camera_update_map_pan(void) {
 /* Set the destination of a left turn (falling yaw) and record the yaw it
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
-void camera_rotate_left(s32 target_angle) {
+void battle_camera_rotate_left(s32 target_angle) {
     g_battle_previous_camera_yaw = g_camera_render_state.vy & 0xfe00;
     g_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
@@ -1155,16 +1157,16 @@ void camera_rotate_left(s32 target_angle) {
 }
 
 /* Start a left turn to target_angle from the slowest speed. */
-void camera_start_rotation_left(s32 target_angle) {
+void battle_camera_start_rotation_left(s32 target_angle) {
     g_camera_rotation_action = CAMERA_ROTATION_LEFT;
     g_camera_rotation_increment = 1;
-    camera_rotate_left(target_angle);
+    battle_camera_rotate_left(target_angle);
 }
 
 /* Set the destination of a right turn (rising yaw) and record the yaw it
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
-void camera_rotate_right(s32 target_angle) {
+void battle_camera_rotate_right(s32 target_angle) {
     g_battle_previous_camera_yaw = g_camera_render_state.vy & 0xfe00;
     g_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
@@ -1173,21 +1175,21 @@ void camera_rotate_right(s32 target_angle) {
 }
 
 /* Start a right turn to target_angle from the slowest speed. */
-void camera_start_rotation_right(s32 target_angle) {
+void battle_camera_start_rotation_right(s32 target_angle) {
     g_camera_rotation_action = CAMERA_ROTATION_RIGHT;
     g_camera_rotation_increment = 1;
-    camera_rotate_right(target_angle);
+    battle_camera_rotate_right(target_angle);
 }
 
 /* Start an automatic turn of angle yaw units (0x400 is a quarter turn;
  * negative turns left) with its sound, unless a rotation is running. */
-void camera_request_rotation(s32 angle) {
+void battle_camera_request_rotation(s32 angle) {
     if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
         if (angle < 0) {
-            camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) + angle);
+            battle_camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) + angle);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_LEFT);
         } else {
-            camera_start_rotation_right((g_camera_render_state.vy & 0xFE00) + angle);
+            battle_camera_start_rotation_right((g_camera_render_state.vy & 0xFE00) + angle);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_RIGHT);
         }
     }
@@ -1195,14 +1197,14 @@ void camera_request_rotation(s32 angle) {
 
 /* L1 starts a quarter turn left and R1 one right, each with its sound, unless
  * a rotation is running. */
-void camera_handle_rotation_input(void) {
+void battle_camera_handle_rotation_input(void) {
     if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
         if (g_main_input_pressed_buttons & PSX_PAD_L1) {
-            camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) - 0x400);
+            battle_camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) - 0x400);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_LEFT);
         }
         if (g_main_input_pressed_buttons & PSX_PAD_R1) {
-            camera_start_rotation_right((g_camera_render_state.vy & 0xFE00) + 0x400);
+            battle_camera_start_rotation_right((g_camera_render_state.vy & 0xFE00) + 0x400);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_RIGHT);
         }
     }
@@ -1214,7 +1216,7 @@ void camera_handle_rotation_input(void) {
  * outside an event, the next quarter turn starts at the speed reached, and
  * otherwise the rotation ends: both rotate sounds stop and the stop sound
  * plays. */
-void camera_update_rotation(void) {
+void battle_camera_update_rotation(void) {
     s32 angle;
 
     if (g_camera_rotation_action == CAMERA_ROTATION_LEFT) {
@@ -1225,7 +1227,7 @@ void camera_update_rotation(void) {
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_L1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
-                    camera_rotate_left((angle & 0xFE0) - 0x400);
+                    battle_camera_rotate_left((angle & 0xFE0) - 0x400);
                 }
             } else {
                 g_camera_rotation_action = CAMERA_ROTATION_NONE;
@@ -1242,7 +1244,7 @@ void camera_update_rotation(void) {
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_R1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
-                    camera_rotate_left((angle & 0xFE0) + 0x400);
+                    battle_camera_rotate_left((angle & 0xFE0) + 0x400);
                 }
             } else {
                 g_camera_rotation_action = CAMERA_ROTATION_NONE;
@@ -1262,7 +1264,7 @@ void camera_update_rotation(void) {
 /* Start a zoom toward ONE (mode 0) or 0xc00 (mode 1) from whichever side the
  * scale is on. No retail code calls it; the L2 input goes through
  * camera_toggle_zoom. */
-void camera_zoom_map(s32 mode) {
+void battle_camera_zoom_map(s32 mode) {
     switch (mode) {
     case 0:
         if (g_camera_zoom.vx > ONE) {
@@ -1302,7 +1304,7 @@ void camera_zoom_map(s32 mode) {
 /* Toggle the battle map zoom between "in" (target=1, action=2) and
    "out" (target=4, action=4), playing the corresponding zoom SFX. Any
    other current zoom target is left alone. */
-void camera_toggle_zoom(void) {
+void battle_camera_toggle_zoom(void) {
     if (g_map_zoom_target == MAP_ZOOM_IN) {
         g_camera_zoom_action = CAMERA_STEP_DECREASE;
         g_map_zoom_target = MAP_ZOOM_OUT;
@@ -1316,10 +1318,10 @@ void camera_toggle_zoom(void) {
 }
 
 /* Toggles the zoom when L2 is newly pressed and no zoom is running. */
-void camera_update_zoom_input(void) {
+void battle_camera_update_zoom_input(void) {
     if (g_camera_zoom_action == CAMERA_STEP_NONE) {
         if ((g_main_input_pressed_buttons & PSX_PAD_L2) != 0) {
-            camera_toggle_zoom();
+            battle_camera_toggle_zoom();
         }
     }
 }
@@ -1327,7 +1329,7 @@ void camera_update_zoom_input(void) {
 /* Step the three zoom scales toward the zoom target, ONE zooming in or 0xc00
  * zooming out, by an increment that grows by four times the animation speed
  * each frame until it reaches 0x300. The zoom ends on the target. */
-void camera_update_zoom(void) {
+void battle_camera_update_zoom(void) {
     s32 increment;
     s32* zoom_ptr;
 
@@ -1384,7 +1386,7 @@ void camera_update_zoom(void) {
 /* Start a tilt toward the low pitch 0x12e (mode 0) or the high pitch 0x1c0
  * (mode 1) from whichever side the pitch is on. No retail code calls it; the
  * R2 input goes through camera_toggle_tilt. */
-void camera_handle_tilt_request(s32 mode) {
+void battle_camera_handle_tilt_request(s32 mode) {
     switch (mode) {
     case 0:
         if (g_camera_render_state.vx >= 0x12F) {
@@ -1416,7 +1418,7 @@ void camera_handle_tilt_request(s32 mode) {
 }
 
 /* Toggle the camera tilt and play its sound. */
-void camera_toggle_tilt(void) {
+void battle_camera_toggle_tilt(void) {
     s32 target;
 
     target = g_map_tilt_target;
@@ -1438,10 +1440,10 @@ void camera_toggle_tilt(void) {
 }
 
 /* Toggles the tilt when R2 is newly pressed and no tilt is running. */
-void camera_update_tilt_input(void) {
+void battle_camera_update_tilt_input(void) {
     if (g_camera_tilt_action == CAMERA_STEP_NONE) {
         if ((g_main_input_pressed_buttons & PSX_PAD_R2) != 0) {
-            camera_toggle_tilt();
+            battle_camera_toggle_tilt();
         }
     }
 }
@@ -1449,7 +1451,7 @@ void camera_update_tilt_input(void) {
 /* Step the pitch toward the tilt target, 0x1c0 (high) or 0x12e (low), from
  * either side, by an increment that grows by twice the animation speed each
  * frame until it passes 0x2f. The tilt ends on the target. */
-void camera_update_tilt(void) {
+void battle_camera_update_tilt(void) {
     s16 tilt;
 
     if (g_camera_tilt_action == CAMERA_STEP_INCREASE && g_map_tilt_target == g_camera_tilt_action) {
@@ -1494,7 +1496,7 @@ void camera_update_tilt(void) {
 
 /* Aims the camera step vector from the camera position at the acting unit: the
  * unit-length direction (ONE) with its height component multiplied by four. */
-void camera_calculate_acting_unit_vector_normal(void) {
+void battle_camera_calculate_acting_unit_vector_normal(void) {
     VECTOR delta;
     battle_unit_t* unit;
 
@@ -1508,8 +1510,8 @@ void camera_calculate_acting_unit_vector_normal(void) {
 
 /* The acting-unit camera step vector at double length, used when the unit is
  * outside the wider screen window. */
-void camera_shift_acting_unit_vector(void) {
-    camera_calculate_acting_unit_vector_normal();
+void battle_camera_shift_acting_unit_vector(void) {
+    battle_camera_calculate_acting_unit_vector_normal();
     g_camera_step_vector.vx *= 2;
     g_camera_step_vector.vy *= 2;
     g_camera_step_vector.vz *= 2;
@@ -1521,15 +1523,15 @@ void camera_shift_acting_unit_vector(void) {
  * units above the floor, negated because world Y points down. The focus
  * offset is normalized by VectorNormal into g_camera_step_vector and
  * tripled. Returns the negated tile height. */
-s32 camera_calculate_cursor_tile_vector_normal(void) {
+s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
     map_tile_t* tile;
     SVECTOR tile_position;
     VECTOR delta;
     s32 height;
     map_tile_depth_t depth;
 
-    tile = map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
-    map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
+    tile = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
+    battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
     depth = tile->depth_half_height;
     height = -((tile->height + depth.depth) * MAP_HEIGHT_STEP + depth.half_height * (MAP_HEIGHT_STEP / 2));
     main_util_set_svector(&tile_position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), height,
@@ -1546,8 +1548,8 @@ s32 camera_calculate_cursor_tile_vector_normal(void) {
 /* Doubles the cursor tile vector computed by
  * camera_calculate_cursor_tile_vector_normal and passes that routine's
  * result through; callers hand it to camera_step_focus_toward_cursor_tile. */
-s32 camera_scale_cursor_tile_vector(void) {
-    s32 result = camera_calculate_cursor_tile_vector_normal();
+s32 battle_camera_scale_cursor_tile_vector(void) {
+    s32 result = battle_camera_calculate_cursor_tile_vector_normal();
 
     g_camera_step_vector.vx *= 2;
     g_camera_step_vector.vy *= 2;
@@ -1591,7 +1593,7 @@ s32 camera_scale_cursor_tile_vector(void) {
  * The horizontal bounds are the center of the cursor tile (28 units per tile,
  * half a tile of bias); the caller supplies the height bound directly.
  */
-void camera_step_focus_toward_cursor_tile(s16 height) {
+void battle_camera_step_focus_toward_cursor_tile(s16 height) {
     CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vx, g_camera_step_vector.vx,
         g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
     CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vy, g_camera_step_vector.vy, height);
@@ -1606,7 +1608,7 @@ void camera_step_focus_toward_cursor_tile(s16 height) {
  * while it is still short of the target in the step's direction, and is set to
  * the target exactly when the step carries it past. Called for the acting unit
  * while it moves, chooses its wait direction or starts an attack animation. */
-void camera_step_real_coords_toward_target(const battle_unit_t* target) {
+void battle_camera_step_real_coords_toward_target(const battle_unit_t* target) {
     if (g_camera_step_vector.vx < 0) {
         if (g_camera_current_real_coords.vx / ONE > target->world_coords.vx) {
             g_camera_current_real_coords.vx += g_camera_step_vector.vx;
@@ -1674,7 +1676,7 @@ void camera_step_real_coords_toward_target(const battle_unit_t* target) {
  * spelled inverted with the clear-vector call as the function's last
  * statement. Written the natural way, the merged block lands mid-function
  * with an extra `j`. */
-void camera_update_vector_from_game_state(void) {
+void battle_camera_update_vector_from_game_state(void) {
     battle_unit_t* unit;
     s32 height;
 
@@ -1690,7 +1692,7 @@ void camera_update_vector_from_game_state(void) {
             return;
         }
         /* The scaling routine passes through the normal routine's height bound. */
-        camera_step_focus_toward_cursor_tile(camera_scale_cursor_tile_vector());
+        battle_camera_step_focus_toward_cursor_tile(battle_camera_scale_cursor_tile_vector());
         return;
     }
     if (g_battle_game_state == BATTLE_GAME_STATE_UNIT_MOVING || g_battle_game_state == BATTLE_GAME_STATE_WAIT_DIRECTION
@@ -1704,11 +1706,11 @@ void camera_update_vector_from_game_state(void) {
         }
         if (unit->camera_relative_x >= 0xA1 && unit->camera_relative_x < 0x160
             && unit->camera_relative_y - height >= 0x41 && unit->camera_relative_y < 0xB0) {
-            camera_calculate_acting_unit_vector_normal();
+            battle_camera_calculate_acting_unit_vector_normal();
         } else {
-            camera_shift_acting_unit_vector();
+            battle_camera_shift_acting_unit_vector();
         }
-        camera_step_real_coords_toward_target(unit);
+        battle_camera_step_real_coords_toward_target(unit);
         return;
     }
     if (g_battle_game_state >= BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT) {
@@ -1726,10 +1728,10 @@ void camera_update_vector_from_game_state(void) {
             || g_battle_cursor_screen_y - height < 0x51 || g_battle_cursor_screen_y >= 0xA0) {
             if (g_battle_cursor_screen_x >= 0xA1 && g_battle_cursor_screen_x < 0x160
                 && g_battle_cursor_screen_y - height >= 0x41 && g_battle_cursor_screen_y < 0xB0) {
-                camera_step_focus_toward_cursor_tile(camera_calculate_cursor_tile_vector_normal());
+                battle_camera_step_focus_toward_cursor_tile(battle_camera_calculate_cursor_tile_vector_normal());
             } else {
                 /* The scaling routine passes the normal routine's result through. */
-                camera_step_focus_toward_cursor_tile(camera_scale_cursor_tile_vector());
+                battle_camera_step_focus_toward_cursor_tile(battle_camera_scale_cursor_tile_vector());
             }
             return;
         }
@@ -1744,7 +1746,7 @@ void camera_update_vector_from_game_state(void) {
  * central window the vector is cleared; nearer the edge the unit tile normal
  * is used as is, otherwise doubled. The tile height left in $v0 by either
  * vector routine is passed on to camera_step_focus_toward_cursor_tile. */
-void camera_update_cursor_tile_vector(void) {
+void battle_camera_update_cursor_tile_vector(void) {
     battle_unit_t* unit;
     s32 height;
 
@@ -1762,22 +1764,22 @@ void camera_update_cursor_tile_vector(void) {
         }
         if (g_battle_cursor_screen_x >= 0xA1 && g_battle_cursor_screen_x < 0x160
             && g_battle_cursor_screen_y - height >= 0x41 && g_battle_cursor_screen_y < 0xB0) {
-            camera_step_focus_toward_cursor_tile(camera_calculate_cursor_tile_vector_normal());
+            battle_camera_step_focus_toward_cursor_tile(battle_camera_calculate_cursor_tile_vector_normal());
         } else {
             /* The scaling routine passes through the normal routine's height bound. */
-            camera_step_focus_toward_cursor_tile(camera_scale_cursor_tile_vector());
+            battle_camera_step_focus_toward_cursor_tile(battle_camera_scale_cursor_tile_vector());
         }
     }
 }
 
-void move_update_all_unit_paths(void) {
+void battle_move_update_all_unit_paths(void) {
     s32 i;
     battle_unit_t* unit;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
         unit = battle_unit_get_by_runtime_id(i);
         if (unit != 0 && unit->path.count != 0) {
-            move_update_path_step(unit);
+            battle_move_update_path_step(unit);
         }
     }
 }
@@ -1796,12 +1798,12 @@ void move_update_all_unit_paths(void) {
  * the casting unit's auto-battle target and when the action menus open for a
  * scripted turn. The `direction < 0` adjustment cannot run: the value is already
  * masked to 0..0xfff. */
-void camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
+void battle_camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
     s32 direction;
     u8 flags;
     map_tile_t* tile;
 
-    tile = map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     direction = (0 - g_camera_render_state.vy) & 0xFFF;
     if (direction < 0) {
         direction += 0x3FF;
@@ -1816,12 +1818,12 @@ void camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
     case 0:
         if (flags & MAP_TILE_CAMERA_BLOCK_NORTHWEST) {
             if (!(flags & MAP_TILE_CAMERA_BLOCK_NORTHEAST)) {
-                camera_request_rotation(0x400);
+                battle_camera_request_rotation(0x400);
             } else {
                 if (!(flags & MAP_TILE_CAMERA_BLOCK_SOUTHWEST)) {
-                    camera_request_rotation(-0x400);
+                    battle_camera_request_rotation(-0x400);
                 } else if (!(flags & MAP_TILE_CAMERA_BLOCK_SOUTHEAST)) {
-                    camera_request_rotation(0x800);
+                    battle_camera_request_rotation(0x800);
                 }
             }
         }
@@ -1829,12 +1831,12 @@ void camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
     case 1:
         if (flags & MAP_TILE_CAMERA_BLOCK_SOUTHWEST) {
             if (!(flags & MAP_TILE_CAMERA_BLOCK_NORTHWEST)) {
-                camera_request_rotation(0x400);
+                battle_camera_request_rotation(0x400);
             } else {
                 if (!(flags & MAP_TILE_CAMERA_BLOCK_SOUTHEAST)) {
-                    camera_request_rotation(-0x400);
+                    battle_camera_request_rotation(-0x400);
                 } else if (!(flags & MAP_TILE_CAMERA_BLOCK_NORTHEAST)) {
-                    camera_request_rotation(0x800);
+                    battle_camera_request_rotation(0x800);
                 }
             }
         }
@@ -1842,12 +1844,12 @@ void camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
     case 2:
         if (flags & MAP_TILE_CAMERA_BLOCK_SOUTHEAST) {
             if (!(flags & MAP_TILE_CAMERA_BLOCK_SOUTHWEST)) {
-                camera_request_rotation(0x400);
+                battle_camera_request_rotation(0x400);
             } else {
                 if (!(flags & MAP_TILE_CAMERA_BLOCK_NORTHEAST)) {
-                    camera_request_rotation(-0x400);
+                    battle_camera_request_rotation(-0x400);
                 } else if (!(flags & MAP_TILE_CAMERA_BLOCK_NORTHWEST)) {
-                    camera_request_rotation(0x800);
+                    battle_camera_request_rotation(0x800);
                 }
             }
         }
@@ -1855,12 +1857,12 @@ void camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) {
     case 3:
         if (flags & MAP_TILE_CAMERA_BLOCK_NORTHEAST) {
             if (!(flags & MAP_TILE_CAMERA_BLOCK_SOUTHEAST)) {
-                camera_request_rotation(0x400);
+                battle_camera_request_rotation(0x400);
             } else {
                 if (!(flags & MAP_TILE_CAMERA_BLOCK_NORTHWEST)) {
-                    camera_request_rotation(-0x400);
+                    battle_camera_request_rotation(-0x400);
                 } else if (!(flags & MAP_TILE_CAMERA_BLOCK_SOUTHWEST)) {
-                    camera_request_rotation(0x800);
+                    battle_camera_request_rotation(0x800);
                 }
             }
         }

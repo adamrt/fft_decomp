@@ -15,7 +15,7 @@
  * no Select or Start (mask 0xF0FF) while a help text is requested or
  * showing, or while the dismiss menu's message runs. */
 s32 world_input_filter_menu(void) {
-    s32 input = menu_input_read_tutorial_or_controller(0);
+    s32 input = world_menu_input_read_tutorial_or_controller(0);
 
     if (g_world_item_category_input_lock != 0 || g_world_unit_status_banner_active != 0
         || world_input_get_lockout_timer() != 0) {
@@ -535,7 +535,7 @@ void world_formation_update_unit_selection(void) {
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM
         || g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_EQUIP
         || g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_BEST_FIT) {
-        menu_toggle_change_banner_panel_thread(1);
+        world_menu_toggle_change_banner_panel_thread(1);
     } else if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ABILITY) {
         world_menu_toggle_ability_panel_thread(1);
     }
@@ -672,7 +672,7 @@ void world_shop_update_unit_selection(void) {
     if (g_world_shop_menu_step >= 20) {
         world_menu_start_equipment_and_ability_panel_thread(g_world_formation_unit_browse_enabled);
     } else {
-        menu_toggle_change_banner_panel_thread(g_world_formation_unit_browse_enabled);
+        world_menu_toggle_change_banner_panel_thread(g_world_formation_unit_browse_enabled);
     }
     menu_toggle_unit_status_thread(
         g_world_formation_unit_banner_enabled != 0 || g_world_formation_unit_browse_enabled != 0);

@@ -235,7 +235,7 @@ void menu_build_ability_preview_at_list(void) {
     action = &g_menu_selected_action;
     action->actor_id = g_menu_selected_unit.battle_id;
     stats = menu_get_selected_unit_stats();
-    g_thread_call_target = (void (*)(void))action_preview_at_list;
+    g_thread_call_target = (void (*)(void))battle_action_preview_at_list;
     turn = thread_call_on_main_stack(stats, action, work->entries);
     if (staged_item != 0) {
         work->entries[1].unit_code |= BATTLE_AT_ACTION_ENTRY;
@@ -1960,7 +1960,7 @@ void menu_open_option_dead_unit_panel(void) {
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */
 void menu_run_triangle_selection(void) {
     thread_set_current_task_id(THREAD_TASK_MINI_MENU);
-    while (camera_is_active() != 0 || g_menu_transition_state != 0) {
+    while (battle_camera_is_active() != 0 || g_menu_transition_state != 0) {
         thread_yield();
     }
     script_pulse_tutorial_wait_value(0xFE);
@@ -2497,7 +2497,7 @@ void menu_start_building_thread(void) {
     if (g_menu_modal_open != 0) {
         return;
     }
-    if (camera_is_active() != 0) {
+    if (battle_camera_is_active() != 0) {
         return;
     }
     if (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE) {
@@ -2541,7 +2541,7 @@ s32 map_return_zero_1(void) {
 /* Mark map-data loading complete after one yield, then exit after another. */
 void map_data_load_complete_thread(void) {
     thread_yield();
-    map_mark_data_load_complete();
+    battle_map_mark_data_load_complete();
     thread_yield();
     thread_exit_current();
 }

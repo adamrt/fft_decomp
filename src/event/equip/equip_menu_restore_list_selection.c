@@ -9,7 +9,7 @@
  * the cursor moves to the row that holds that id (low ten bits), keeping the
  * scroll base, or both reset to 0 when the id is gone.
  */
-void menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
+void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries) {
     s32 i;
     s32 found_end;
     s32 entry_id;

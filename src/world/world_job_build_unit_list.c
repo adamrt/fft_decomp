@@ -46,7 +46,7 @@ s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode) {
             } else if (unlocked != 0) {
                 jobs[count++] = job;
             } else if (mode == WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
-                && job_is_locked_for_all_units(job) == 0) {
+                && world_job_is_locked_for_all_units(job) == 0) {
                 jobs[count++] = job + WORLD_JOB_LIST_ENTRY_UNAVAILABLE;
             }
         }

@@ -183,7 +183,7 @@ void world_menu_run_view_abilities(void) {
         g_menu_status_display_thread_params.style = 1;
         g_menu_numeric_panel_params.style = 1;
         g_world_equipment_ability_panel_thread_params.style = 1;
-        menu_init_cursor_position(WORLD_MENU_CURSOR_ABILITY_TAB, 0);
+        world_menu_init_cursor_position(WORLD_MENU_CURSOR_ABILITY_TAB, 0);
         menu_clear_selection_records();
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
     }

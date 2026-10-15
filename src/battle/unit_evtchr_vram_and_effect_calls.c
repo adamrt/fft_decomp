@@ -45,7 +45,7 @@ s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* ti
         unit->facing = facing << 10;
         unit->world_coords.vx = tile->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         unit->world_coords.vz = tile->y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        unit->world_coords.vy = map_calculate_slope_height(&unit->world_coords, unit->map_z);
+        unit->world_coords.vy = battle_map_calculate_slope_height(&unit->world_coords, unit->map_z);
         unit->real.vx = unit->world_coords.vx * ONE;
         unit->real.vz = unit->world_coords.vz * ONE;
         unit->real.vy = unit->world_coords.vy * ONE;
@@ -199,7 +199,7 @@ action_command_t* battle_unit_get_runtime_action_command_by_battle_id(u32 battle
 
 /* 1 while the runtime unit still has a movement path. A missing unit raises pointer
  * exception 12 and reports 0. */
-s32 move_is_unit_moving_by_runtime_id(u32 runtime_id) {
+s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
 
     if (unit == 0) {
@@ -220,7 +220,7 @@ void battle_gfx_set_thrown_item_palette_by_runtime_id(u32 item_id, u32 runtime_i
     }
 }
 
-s32 script_add_ghost_unit_event_instruction(
+s32 battle_script_add_ghost_unit_event_instruction(
     s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id, s32 runtime_id, s32 flags) {
     s32 ret;
 
@@ -537,8 +537,9 @@ s32 battle_gfx_get_vram_slot_summary(battle_gfx_vram_slot_summary_t* summary) {
 /* Give a unit CLUT `clut_index` of a slot's EVTCHR block, and the one eight
  * after it as its second. */
 void battle_gfx_set_evtchr_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32 clut_index) {
-    map_load_palette_data(&g_battle_gfx_vram_slots[slot_index].clut[clut_index], MAP_CLUT_ROW_UNITS, runtime_id, 0);
-    map_load_palette_data(
+    battle_map_load_palette_data(
+        &g_battle_gfx_vram_slots[slot_index].clut[clut_index], MAP_CLUT_ROW_UNITS, runtime_id, 0);
+    battle_map_load_palette_data(
         &g_battle_gfx_vram_slots[slot_index].clut[clut_index + 8], MAP_CLUT_ROW_UNITS_SECOND, runtime_id, 0);
 }
 
@@ -597,7 +598,7 @@ s32 battle_gfx_get_unit_spritesheet_height_by_unit_id(u32 unit_id) {
     return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(unit_id & 0xffff));
 }
 
-void effect_start_basic_ability_animation(s32 ability_id) {
+void battle_effect_start_basic_ability_animation(s32 ability_id) {
     effect_secondary_init_t effect_data;
 
     effect_data.target_count = 1;
@@ -607,12 +608,12 @@ void effect_start_basic_ability_animation(s32 ability_id) {
     effect_data.targets[0].data.unit.runtime_id = 1;
     effect_data.targets[0].data.unit.result_animation = EFFECT_HIT_NORMAL;
     effect_data.spectator_count = 0;
-    effect_set_ability_animation(0, ability_id, &effect_data);
+    battle_effect_set_ability_animation(0, ability_id, &effect_data);
 }
 
 /* Starts an ability's effect outside an action, on a unit, on a tile or
  * on a unit that is also its caster. */
-void effect_start_new(s32 ability_id, s32 target_mode, effect_start_target_data_t target) {
+void battle_effect_start_new(s32 ability_id, s32 target_mode, effect_start_target_data_t target) {
     effect_secondary_init_t effect_data;
 
     effect_data.target_count = 1;
@@ -636,16 +637,16 @@ void effect_start_new(s32 ability_id, s32 target_mode, effect_start_target_data_
     }
 
     effect_data.spectator_count = 0;
-    effect_set_ability_animation(0, ability_id, &effect_data);
+    battle_effect_set_ability_animation(0, ability_id, &effect_data);
 }
 
 /* effect_init_data as a 0 or 1 result: the event script's EffectStart
  * instruction calls it on the main stack each frame until it returns 0. */
-s32 effect_try_init_data(void) {
+s32 battle_effect_try_init_data(void) {
     /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
-    return effect_init_data() != 0;
+    return battle_effect_init_data() != 0;
 }
 
-void effect_call_play(void) {
-    effect_play();
+void battle_effect_call_play(void) {
+    battle_effect_play();
 }

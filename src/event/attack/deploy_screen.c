@@ -704,7 +704,7 @@ ramza_placed:
             }
         }
     }
-    map_mark_data_load_complete();
+    battle_map_mark_data_load_complete();
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
     thread_start(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_show_title);
     thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);

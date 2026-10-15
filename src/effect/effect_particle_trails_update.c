@@ -116,9 +116,9 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 rotation.vy = facing_yaw;
                 RotMatrix(&rotation, &facing);
             }
-            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
                 EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &caster);
-            effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
                 target_index, &g_effect_context, &target);
 
             EFFECT_READ_CURVE(index, factor,
@@ -127,14 +127,14 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 entry->tentacle_mesh.particle_count_start, entry->tentacle_mesh.particle_count_end, factor);
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_SPAWN_POSITION_SHIFT), frame);
-            effect_interpolate_emitter_spawn_position(entry, factor, &origin);
+            battle_effect_interpolate_emitter_spawn_position(entry, factor, &origin);
             switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
             case EFFECT_EMITTER_ORIGIN_WORLD:
             case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
                 break;
             case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-                tile = map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz,
-                    g_effect_target_tile.data.tile.vy);
+                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
+                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
                 origin.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 origin.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 origin.vy -= tile->height * MAP_HEIGHT_STEP;
@@ -150,7 +150,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 origin.vz += target.vz;
                 break;
             case EFFECT_EMITTER_ORIGIN_MAP_CENTER:
-                map_store_max_coordinates(&map_max);
+                battle_map_store_max_coordinates(&map_max);
                 origin.vx += map_max.vx * (MAP_TILE_SIZE / 2);
                 origin.vz += map_max.vz * (MAP_TILE_SIZE / 2);
                 break;
@@ -158,7 +158,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
 
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_SPAWN_SPREAD_SHIFT), frame);
-            effect_interpolate_emitter_spawn_spread(entry, factor, &spread);
+            battle_effect_interpolate_emitter_spawn_spread(entry, factor, &spread);
             if (orient) {
                 SetRotMatrix(&facing);
                 rotation.vx = spread.vx;
@@ -183,11 +183,11 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT),
                 frame);
-            effect_interpolate_emitter_velocity_direction_spread(entry, factor, &direction_spread);
+            battle_effect_interpolate_emitter_velocity_direction_spread(entry, factor, &direction_spread);
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_VELOCITY_BASE_ANGLE_SHIFT),
                 frame);
-            effect_interpolate_emitter_velocity_base_angles(entry, factor, &base_angles);
+            battle_effect_interpolate_emitter_velocity_base_angles(entry, factor, &base_angles);
 
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(tip_bindings, EFFECT_TENTACLE_CURVE_TIP_OFFSET_SHIFT), frame);
@@ -202,7 +202,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             case EFFECT_EMITTER_HOMING_OFFSET_ALT:
                 break;
             case EFFECT_EMITTER_HOMING_MAP_CENTER:
-                map_store_max_coordinates(&tip_map_max);
+                battle_map_store_max_coordinates(&tip_map_max);
                 tip.vx += tip_map_max.vx * (MAP_TILE_SIZE / 2);
                 tip.vz += tip_map_max.vz * (MAP_TILE_SIZE / 2);
                 break;
@@ -217,8 +217,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 tip.vz += target.vz;
                 break;
             case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-                tile = map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz,
-                    g_effect_target_tile.data.tile.vy);
+                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
+                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
                 tip.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 tip.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 tip.vy -= tile->height * MAP_HEIGHT_STEP;
@@ -253,7 +253,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     }
                 }
 
-                len = effect_select_largest_magnitude_s16(spread.vx, spread.vy, spread.vz);
+                len = battle_effect_select_largest_magnitude_s16(spread.vx, spread.vy, spread.vz);
                 if (len != 0) {
                     rotation.vx = rand();
                     rotation.vy = rand();
@@ -276,7 +276,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     seg->position.vz = origin.vz * ONE;
                 }
 
-                len = effect_select_largest_magnitude_s16(tip_spread.vx, tip_spread.vy, tip_spread.vz);
+                len = battle_effect_select_largest_magnitude_s16(tip_spread.vx, tip_spread.vy, tip_spread.vz);
                 if (len != 0) {
                     rotation.vx = rand();
                     rotation.vy = rand();
@@ -374,9 +374,9 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             py = y >> 12;
             pz = z >> 12;
             if (index <= seg->length) {
-                seg->points[point].x = effect_interpolate_s32_cos(px, seg->tip.vx, seg->length, index);
-                seg->points[point].y = effect_interpolate_s32_cos(py, seg->tip.vy, seg->length, index);
-                seg->points[point].z = effect_interpolate_s32_cos(pz, seg->tip.vz, seg->length, index);
+                seg->points[point].x = battle_effect_interpolate_s32_cos(px, seg->tip.vx, seg->length, index);
+                seg->points[point].y = battle_effect_interpolate_s32_cos(py, seg->tip.vy, seg->length, index);
+                seg->points[point].z = battle_effect_interpolate_s32_cos(pz, seg->tip.vz, seg->length, index);
             } else {
                 seg->points[point].x = seg->tip.vx;
                 seg->points[point].y = seg->tip.vy;
@@ -396,12 +396,12 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             emitter.motion.position.y = seg->points[point].y * ONE;
             emitter.motion.position.z = seg->points[point].z * ONE;
             if (flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) {
-                effect_spawn_emitter_particles(
+                battle_effect_spawn_emitter_particles(
                     record->record_index, seg->head, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
             }
             if (seg->length + 16 == seg->head) {
                 if (flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
-                    effect_spawn_emitter_particles(
+                    battle_effect_spawn_emitter_particles(
                         record->record_index, seg->head, entry->tentacle_mesh.child_emitter_on_death, &emitter);
                 }
                 seg->active = 0;

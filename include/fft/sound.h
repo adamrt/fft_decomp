@@ -43,9 +43,9 @@ extern u8 g_sound_weapon_hit_sfx_ids[];
  * hit, and the hit a shield or Golem stops (sound_play_weapon_sfx). */
 extern u8 g_sound_weapon_swing_sfx_ids[];
 
-void sound_play_landing_sfx_by_surface_type(struct battle_unit* unit);
-void sound_play_movement_sfx(struct battle_unit* unit, s32 sound_id);
-void sound_play_weapon_sfx(struct battle_unit* unit, s32 hit);
+void battle_sound_play_landing_sfx_by_surface_type(struct battle_unit* unit);
+void battle_sound_play_movement_sfx(struct battle_unit* unit, s32 sound_id);
+void battle_sound_play_weapon_sfx(struct battle_unit* unit, s32 hit);
 
 /* weather */
 extern s32 g_sound_primary_weather_sfx_id;
@@ -53,8 +53,8 @@ extern s32 g_sound_secondary_weather_sfx_id;
 extern s32 g_sound_tertiary_weather_sfx_id;
 extern u8 g_sound_weather_sfx_enabled;
 
-void sound_start_weather_sfx(void);
-s32 sound_stop_weather_sfx(void);
+void battle_sound_start_weather_sfx(void);
+s32 battle_sound_stop_weather_sfx(void);
 
 /* threads */
 void sound_run_background_fade_thread(void);

@@ -15,25 +15,25 @@
 #include "psx/types.h"
 
 /* Enter AI action simulation, save the current attacker and clear Hamedo state. */
-void ai_begin_action_simulation(void) {
+void battle_ai_begin_action_simulation(void) {
     g_action_state = ACTION_STATE_AI_SIMULATION;
     g_action_hamedo_flag = 0;
-    mem_copy_byte_data_source_first(
+    main_mem_copy_byte_data_source_first(
         &g_action_current_attacker, &g_ai_current_attacker_backup, sizeof(g_action_current_attacker));
 }
 
 /* End an AI simulation: copy the saved current-attacker block back and return
  * the action state to execute. */
-void ai_end_action_simulation(void) {
+void battle_ai_end_action_simulation(void) {
     g_action_state = ACTION_STATE_EXECUTE;
-    mem_copy_byte_data_source_first(
+    main_mem_copy_byte_data_source_first(
         &g_ai_current_attacker_backup, &g_action_current_attacker, sizeof(g_action_current_attacker));
 }
 
 /* Current weather as seen by damage and movement rules: none when the map
  * ignores weather (indoors), otherwise the {3C} strength shifted into the
  * snow range when the map's snow flag is set. */
-s32 map_get_effective_weather(void) {
+s32 battle_map_get_effective_weather(void) {
     s32 weather;
     u32 flags;
 
@@ -195,13 +195,13 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
  * executing: previews and AI simulations change no display state.
  *
  * status_id is the status handler index (status id + 1). */
-void status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id) {
+void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id) {
     if (g_action_state == ACTION_STATE_EXECUTE) {
-        status_queue_runtime_graphics_flag_change(status_id, enabled, battle_id);
+        battle_status_queue_runtime_graphics_flag_change(status_id, enabled, battle_id);
     }
 }
 
-s32 action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) {
+s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) {
     u8 item_id;
 
     if (g_action_state != ACTION_STATE_EXECUTE) {
@@ -218,7 +218,7 @@ s32 action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) 
         return 0;
     }
     if (main_item_get_total_equipment_quantity(item_id, 1) >= 0x63) {
-        return action_add_war_funds(unit, 0, item_id);
+        return battle_action_add_war_funds(unit, 0, item_id);
     }
     g_main_item_quantities[item_id] += 1;
     return 0;
@@ -228,7 +228,7 @@ s32 action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) 
  * is given (action_increment_item_quantity_for_steal_break passes one
  * the stock is full of). Only for a unit on team 0 and only when executing;
  * the funds stay within 0..99,999,999. Returns the amount added. */
-s32 action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
+s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
     s32 value;
 
     if (g_action_state != ACTION_STATE_EXECUTE) {
@@ -253,7 +253,7 @@ s32 action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
 /* Apply an action result's EXP change when executing. Without bit 0x80 the
  * amount is gained: EXP saturates at 255 and the level-up check runs. With it
  * the low seven bits are lost, down to 0. */
-void action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
+void battle_action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
     s32 total;
     u8 capped;
     s16 reduced;
@@ -283,9 +283,9 @@ void action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
 }
 
 /* Resolve a unit's status changes with the action state set to preview (2). */
-void status_resolve_unit_changes_in_preview(s32 unit_id, s32 removal_only) {
+void battle_status_resolve_unit_changes_in_preview(s32 unit_id, s32 removal_only) {
     g_action_state = ACTION_STATE_PREVIEW;
-    status_resolve_unit_changes(unit_id, removal_only);
+    battle_status_resolve_unit_changes(unit_id, removal_only);
     g_action_state = ACTION_STATE_EXECUTE;
 }
 
@@ -296,7 +296,7 @@ void status_resolve_unit_changes_in_preview(s32 unit_id, s32 removal_only) {
  * gets its CT cleared and its special flags dropped, then the bits are cleared
  * from both the current and innate status sets.
  */
-void status_apply_unit_action_removal(unit_stats_t* unit) {
+void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
     s32 i;
     s32 battle_id;
     s32 idx;
@@ -312,7 +312,7 @@ void status_apply_unit_action_removal(unit_stats_t* unit) {
         mask = 0x80 >> (i & 7);
         if (g_action_target_data->status_changes.removal[idx] & mask) {
             main_status_set_ct(unit, i, 0);
-            status_enable_special_flags(STATUS_HANDLER_INDEX(i), 0, battle_id);
+            battle_status_enable_special_flags(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
@@ -321,7 +321,7 @@ void status_apply_unit_action_removal(unit_stats_t* unit) {
     }
 }
 
-void target_sort_list(s32 target_battle_id) {
+void battle_target_sort_list(s32 target_battle_id) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
@@ -336,7 +336,7 @@ void target_sort_list(s32 target_battle_id) {
 }
 
 /* Copy 16 target ids into the current ability's target list. */
-void action_store_target_ids(u8* src) {
+void battle_action_store_target_ids(u8* src) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
@@ -346,7 +346,7 @@ void action_store_target_ids(u8* src) {
 
 /* Copy the current ability's 16-entry target list to `out` and return how many
  * entries hold a unit (anything but 0xff). */
-s32 target_copy_ability_targets(u8* out) {
+s32 battle_target_copy_ability_targets(u8* out) {
     s32 count = 0;
     s32 i;
 
@@ -362,13 +362,13 @@ s32 target_copy_ability_targets(u8* out) {
 
 /* Store value in D_8019387C when unit_id is the acting unit of a primary
  * (non-reaction) action. */
-void action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
+void battle_action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
     if (g_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_battle_acting_unit_id) {
         g_battle_unknown_8019387c = value;
     }
 }
 
-s32 formula_get_random_0_7fff(void) {
+s32 battle_formula_get_random_0_7fff(void) {
     if (g_action_state != ACTION_STATE_EXECUTE) {
         return 0x4000;
     }
@@ -376,13 +376,13 @@ s32 formula_get_random_0_7fff(void) {
 }
 
 /* Return 1 when a random value in [0, limit) is at least threshold, otherwise 0. */
-s32 formula_roll_random_at_least(s32 limit, s32 threshold) {
-    return (formula_get_random_0_7fff() * limit) / 32768 >= threshold;
+s32 battle_formula_roll_random_at_least(s32 limit, s32 threshold) {
+    return (battle_formula_get_random_0_7fff() * limit) / 32768 >= threshold;
 }
 
 /* Empty. Called when the acting unit's own action has ended, with its stats and the quadrant
  * (0 to 3) its sprite faces. */
-void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing) {
+void battle_action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing) {
 }
 
 /* Record the acting unit's action for Mimes to copy: the action itself, the
@@ -390,7 +390,7 @@ void action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing
  *
  * A Mime's own action is not recorded. For a tile target only the low byte of
  * each coordinate is used. */
-void action_set_current_attacker_data(unit_stats_t* unit) {
+void battle_action_set_current_attacker_data(unit_stats_t* unit) {
     unit_stats_t* target;
     u8 x;
     u8 y;
@@ -425,7 +425,7 @@ void action_set_current_attacker_data(unit_stats_t* unit) {
  * assignments retain the target's evaluation order. The tile index and saved
  * action state share a temporary because their lifetimes do not overlap.
  */
-s32 action_set_mimic_ability(unit_stats_t* unit) {
+s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     /* A byte flag test retains the original compound-condition scheduling. */
     action_command_t action;
     action_command_t* current;
@@ -443,7 +443,7 @@ s32 action_set_mimic_ability(unit_stats_t* unit) {
     s32 facing;
 
     current = &g_action_current_attacker.action;
-    if (action_is_reaction_prevented(unit) != 0) {
+    if (battle_action_is_reaction_prevented(unit) != 0) {
         return 0;
     }
     if ((unit->team_flags & BATTLE_TEAM_MASK) != g_action_current_attacker.team) {
@@ -467,7 +467,7 @@ s32 action_set_mimic_ability(unit_stats_t* unit) {
     if (menu_type == ACTION_MENU_TYPE_JUMP) {
         direction |= 0x100;
     }
-    if (map_resolve_rotated_offset_layer(unit, g_action_current_attacker.target_delta_x,
+    if (battle_map_resolve_rotated_offset_layer(unit, g_action_current_attacker.target_delta_x,
             g_action_current_attacker.target_delta_y, direction, &x, &y, &z)
         != 0) {
         return -1;
@@ -483,7 +483,7 @@ s32 action_set_mimic_ability(unit_stats_t* unit) {
     action.target_id = unit_id;
     unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = weapon_id;
     unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = g_action_current_attacker.left_hand_weapon_id;
-    result = target_set_panels_for_action(&action);
+    result = battle_target_set_panels_for_action(&action);
     if (result == -1 || result == 3
         || (result < 2
             && !((*(u8*)&g_map_tile_data[saved_state = (z << 8) + (g_map_max_x * y) + x].ceiling_depth_and_marks)
@@ -494,7 +494,7 @@ s32 action_set_mimic_ability(unit_stats_t* unit) {
     }
     saved_state = g_action_state;
     g_action_state = ACTION_STATE_PREVIEW;
-    result = action_prepare_attack(&action, &unit->action_command, 1);
+    result = battle_action_prepare_attack(&action, &unit->action_command, 1);
     unit->charged_ability_ct = 0xff;
     main_status_change_unit(unit, 0,
         STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
@@ -517,7 +517,7 @@ s32 action_set_mimic_ability(unit_stats_t* unit) {
  * the destination by absolute height instead of by proximity to the reference
  * tile's height.
  */
-s32 map_resolve_rotated_offset_layer(
+s32 battle_map_resolve_rotated_offset_layer(
     unit_stats_t* unit, s32 dx, s32 dy, s32 flags, s32* out_x, s32* out_y, s32* out_flag) {
     map_tile_t* current;
     map_tile_t* lower;
@@ -557,7 +557,7 @@ s32 map_resolve_rotated_offset_layer(
     if (*out_y < 0 || *out_y >= g_map_max_y) {
         return -1;
     }
-    current = &g_map_tile_data[map_calculate_location(unit)];
+    current = &g_map_tile_data[battle_map_calculate_location(unit)];
     index = g_map_max_x * *out_y + *out_x;
     upper_index = index + 0x100;
     upper = &g_map_tile_data[upper_index];
@@ -612,6 +612,6 @@ s32 map_resolve_rotated_offset_layer(
 }
 
 /* Nothing in the game calls it. */
-s16 action_load_last_used_ability(void) {
+s16 battle_action_load_last_used_ability(void) {
     return g_battle_reaction_unit_last_ability_id;
 }

@@ -33,7 +33,7 @@
  *
  * Every caller also passes a second argument, which the routine never reads.
  */
-void target_set_tile_background_color(s32 mode, s32 unused) {
+void battle_target_set_tile_background_color(s32 mode, s32 unused) {
     s32 i;
     s16 other_state_a;
     s16 other_state_b;
@@ -54,8 +54,8 @@ void target_set_tile_background_color(s32 mode, s32 unused) {
         g_target_tile_mark_modes[0] = BATTLE_TILE_MARK_HIDE_MOVE;
         g_target_tile_mark_modes[1] = BATTLE_TILE_MARK_HIDE_RANGE;
         g_target_tile_mark_modes[2] = BATTLE_TILE_MARK_HIDE_TARGETS;
-        map_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
-        map_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT);
+        battle_map_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESET_ACTIVE);
+        battle_map_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_RESTORE_AMBIENT);
         g_target_tile_color_buffer = g_battle_gfx_current_render_buffer;
         break;
     case BATTLE_TILE_MARK_SHOW_MOVE:
@@ -117,7 +117,7 @@ void target_set_tile_background_color(s32 mode, s32 unused) {
         other_state_b = g_target_tile_mark_modes[2];
         if ((other_state_a | other_state_b) == 0
             || (other_state_a == BATTLE_TILE_MARK_HIDE_RANGE && other_state_b == BATTLE_TILE_MARK_HIDE_TARGETS)) {
-            map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
+            battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
         }
         break;
     case BATTLE_TILE_MARK_HIDE_MOVE:
@@ -240,7 +240,7 @@ void target_set_tile_background_color(s32 mode, s32 unused) {
         other_state_b = g_target_tile_mark_modes[2];
         if ((other_state_a | other_state_b) == 0
             || (other_state_a == BATTLE_TILE_MARK_HIDE_MOVE && other_state_b == BATTLE_TILE_MARK_HIDE_TARGETS)) {
-            map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
+            battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
         }
         break;
     case BATTLE_TILE_MARK_HIDE_RANGE:
@@ -363,7 +363,7 @@ void target_set_tile_background_color(s32 mode, s32 unused) {
         other_state_b = g_target_tile_mark_modes[1];
         if ((other_state_a | other_state_b) == 0
             || (other_state_a == BATTLE_TILE_MARK_HIDE_MOVE && other_state_b == BATTLE_TILE_MARK_HIDE_RANGE)) {
-            map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
+            battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, 10, 10, 10);
         }
         break;
     case BATTLE_TILE_MARK_HIDE_TARGETS:

@@ -18,14 +18,14 @@
 /* 1 when the unit, or its rider when it is a mount, is charging an attack of
  * the Charge skillset; with do_disable, status_disable_acting is called
  * on that unit. */
-s32 status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable) {
+s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable) {
     u8 mount_info;
 
     for (;;) {
         if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)] & STATUS_BYTE_MASK(STATUS_ID_CHARGING))
             && unit->charged_ability_ct != 0xFF && unit->action_command.skillset_id == SKILLSET_ID_CHARGE) {
             if (do_disable != 0) {
-                status_disable_acting(unit);
+                battle_status_disable_acting(unit);
             }
             return 1;
         }
@@ -39,7 +39,7 @@ s32 status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable) {
 }
 
 /* Clears the unit's Charging, Jump, Defending and Performing statuses (action state 0). */
-void status_disable_acting(unit_stats_t* unit) {
+void battle_status_disable_acting(unit_stats_t* unit) {
     main_status_set_action_state(unit, 0);
 }
 
@@ -47,18 +47,19 @@ void status_disable_acting(unit_stats_t* unit) {
  *
  * The rare item is chosen with a (100 - Brave)% chance; the tile is the
  * unit's x and position (y in the low byte, the layer in bit 15). */
-move_found_item_t* map_determine_rare_common_item(unit_stats_t* unit) {
+move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
     move_find_result_data_t* find_result;
     u8 item_id;
 
-    find_result = map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation);
+    find_result = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation);
     if (main_util_roll_pass_fail(0x64, 0x64 - unit->brave) == 0) {
         item_id = find_result->rare_item_id;
     } else {
         item_id = find_result->common_item_id;
     }
     g_map_rare_item_result.item_id = item_id;
-    map_calculate_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
+    battle_map_calculate_move_find_item_flag(
+        script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
     g_map_rare_item_result._unknown_00 = 0;
     return &g_map_rare_item_result;
 }
@@ -71,7 +72,7 @@ move_found_item_t* map_determine_rare_common_item(unit_stats_t* unit) {
  * 3 steel needle) unless the trap is disabled. The final flag
  * update must go through a pointer to keep the target's register address.
  */
-move_find_result_data_t* map_set_item_trap_data(s32 x, u8 y, u8 layer) {
+move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
     map_move_find_item_entry_t* tile;
     s32 unit;
     s32 i;
@@ -99,7 +100,8 @@ move_find_result_data_t* map_set_item_trap_data(s32 x, u8 y, u8 layer) {
     if (i != 4) {
         g_move_find_entry_index = i;
         if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
-            if (map_calculate_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0) != 0) {
+            if (battle_map_calculate_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0)
+                != 0) {
                 g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
                 g_move_find_rare_item_id = tile->rare_item_id;
                 g_move_find_common_item_id = tile->common_item_id;
@@ -129,7 +131,7 @@ move_find_result_data_t* map_set_item_trap_data(s32 x, u8 y, u8 layer) {
  *
  * Each flag byte holds two maps, four tiles each; the test returns 1 while the item is
  * still unfound. */
-s32 map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
+s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
     s32 byte_index;
     s32 bit;
 
@@ -189,7 +191,7 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
                 + mover->career.unlocked_jobs[2];
             mover_identity = mover->character_identity;
             crystal_identity = crystal->character_identity;
-            mem_zero(g_main_crystal_pickup_result.learned_abilities, 0x40);
+            main_mem_zero(g_main_crystal_pickup_result.learned_abilities, 0x40);
             for (job_index = UNIT_CAREER_JOB_INDEX_BASE; job_index < UNIT_LEARNED_ABILITY_JOB_COUNT; job_index++) {
                 for (j = 0; j < UNIT_LEARNED_ABILITY_BYTES_PER_JOB; j++) {
                     g_main_crystal_pickup_result.learned[job_index][j] = 0;
@@ -261,11 +263,11 @@ s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags) {
     u8* crystal_bits;
     u8* end;
 
-    action_clear_current_data(&unit->action);
+    battle_action_clear_current_data(&unit->action);
     unit->action.miss_type = ACTION_MISS_TYPE_CANCELED;
     unit->action.hit = 0;
     if (flags & BATTLE_CRYSTAL_TAKE_TREASURE) {
-        return action_increment_item_quantity_for_steal_break(unit, g_main_crystal_treasure_item_id);
+        return battle_action_increment_item_quantity_for_steal_break(unit, g_main_crystal_treasure_item_id);
     }
     if (flags & BATTLE_CRYSTAL_RESTORE_HP_MP) {
         unit->action.hit = 1;
@@ -511,7 +513,7 @@ void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) 
     }
 }
 
-void status_reapply_active_flags(unit_stats_t* unit) {
+void battle_status_reapply_active_flags(unit_stats_t* unit) {
     s32 i;
     s32 battle_id = unit->battle_id;
 
@@ -519,16 +521,16 @@ void status_reapply_active_flags(unit_stats_t* unit) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 0, battle_id);
+            battle_status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
-    mem_zero(unit->status_sets.innate, 0x1F);
-    mem_zero(unit->inflicted_status, STATUS_BYTE_COUNT);
+    main_mem_zero(unit->status_sets.innate, 0x1F);
+    main_mem_zero(unit->inflicted_status, STATUS_BYTE_COUNT);
 }
 
 /* Enable the renderer status flags for each of a unit's current statuses.
  * Returns -1 for an empty unit slot, otherwise 0. */
-s32 status_init_special_flag_enabling(s32 unit_id) {
+s32 battle_status_init_special_flag_enabling(s32 unit_id) {
     unit_stats_t* unit;
     s32 i;
 
@@ -540,7 +542,7 @@ s32 status_init_special_flag_enabling(s32 unit_id) {
         s32 byte_index = i / 8;
         s32 mask = 0x80 >> (i & 7);
         if (unit->status_sets.current[byte_index] & mask) {
-            status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 1, unit_id);
+            battle_status_queue_runtime_graphics_flag_change(STATUS_HANDLER_INDEX(i), 1, unit_id);
         }
     }
     return 0;
@@ -548,7 +550,7 @@ s32 status_init_special_flag_enabling(s32 unit_id) {
 
 /* Index of the unit's tile in g_map_tile_data: layer * 256 + y * map width
  * + x, with the layer in bit 15 of the packed position. */
-s32 map_calculate_location(const unit_stats_t* unit) {
+s32 battle_map_calculate_location(const unit_stats_t* unit) {
     u8 y = unit->position.y;
     u16 elevation = unit->position.higher_elevation;
     u8 x = unit->x;
@@ -685,7 +687,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
     if ((unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) != 0) {
         return BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
-    depth = g_map_tile_data[map_calculate_location(unit)].depth_half_height.depth;
+    depth = g_map_tile_data[battle_map_calculate_location(unit)].depth_half_height.depth;
     if (depth < 2) {
         return BATTLE_UNIT_ACTION_RESTRICTION_NONE;
     }
@@ -830,7 +832,7 @@ s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
 
 /* Count the AT-list entries that resolve before an action by battle_id
  * charging for ct; returns 0xff when no such position exists within 40. */
-u32 action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries) {
+u32 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const battle_at_entry_t* entries) {
     s32 count;
     if (g_battle_between_turn_resume_state == BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE && ct != 0) {
         ct += 1;

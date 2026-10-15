@@ -26,7 +26,7 @@
  * after the call. Testing depth & MAP_TILE_HALF_HEIGHT_MASK directly (rather
  * than masking depth in place) keeps the height load ahead of the depth load.
  */
-s32 target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad) {
+s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad) {
     map_tile_t* tile;
     /* Byte access retains the original packed load and field-extraction order. */
     s32 split;
@@ -36,7 +36,7 @@ s32 target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTO
     u8 slope;
 
     split = 0;
-    tile = map_get_tile_data_pointer((coords->vx / MAP_TILE_SIZE), (coords->vz / MAP_TILE_SIZE), layer);
+    tile = battle_map_get_tile_data_pointer((coords->vx / MAP_TILE_SIZE), (coords->vz / MAP_TILE_SIZE), layer);
     height = tile->height;
     depth = (*(u8*)&tile->depth_half_height);
     slope = tile->slope_type;
@@ -128,7 +128,7 @@ s32 target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTO
  * along X, Z, or whichever of the two the corner type selects. x and z are
  * the offsets of the point inside its 28-unit tile.
  */
-s32 map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
+s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
     s16 tile_pos[2];
     map_tile_t* tile;
     s32 half;
@@ -141,7 +141,7 @@ s32 map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
 
     tile_pos[0] = coords->vx / MAP_TILE_SIZE;
     tile_pos[1] = coords->vz / MAP_TILE_SIZE;
-    tile = map_get_tile_data_pointer(tile_pos[0], tile_pos[1], (u8)map_z);
+    tile = battle_map_get_tile_data_pointer(tile_pos[0], tile_pos[1], (u8)map_z);
     base = -(tile->height * MAP_HEIGHT_STEP);
     half = tile->depth_half_height.half_height;
     result = base;
@@ -256,11 +256,11 @@ s32 map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
     return result;
 }
 
-s32 move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile) {
+s32 battle_move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile) {
     s32 movement_flags;
 
     if (unit->stats != 0) {
-        movement_flags = move_get_effective_flags(unit->stats);
+        movement_flags = battle_move_get_effective_flags(unit->stats);
     } else {
         movement_flags = 0;
     }
@@ -302,17 +302,17 @@ s32 battle_gfx_calculate_world_height_from_coords(battle_unit_t* unit, const SVE
     if (unit->standing_on_battle_id_plus_one != 0) {
         battle_unit_calculate_height_data(&height, unit->standing_on_battle_id_plus_one - 1);
         if (height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
-            world_height = map_calculate_slope_height(coords, coords->vy & 0xff);
+            world_height = battle_map_calculate_slope_height(coords, coords->vy & 0xff);
         } else {
             world_height = -height.total_height / 2 * 12;
         }
     } else {
-        world_height = map_calculate_slope_height(coords, coords->vy & 0xff);
+        world_height = battle_map_calculate_slope_height(coords, coords->vy & 0xff);
     }
     if (unit->stats != 0) {
-        tile = map_get_tile_data_pointer(coords->vx / MAP_TILE_SIZE, coords->vz / MAP_TILE_SIZE, coords->vy);
+        tile = battle_map_get_tile_data_pointer(coords->vx / MAP_TILE_SIZE, coords->vz / MAP_TILE_SIZE, coords->vy);
         if (tile->depth_half_height.depth) {
-            flags = move_get_effective_flags(unit->stats);
+            flags = battle_move_get_effective_flags(unit->stats);
             sprite = unit->spritesheet_id;
             animation = unit->animation.sequence_id >> 1;
             if ((flags & BATTLE_EFFECTIVE_MOVEMENT_FLOAT) || (flags & BATTLE_EFFECTIVE_MOVEMENT_ON_WATER)) {
@@ -494,7 +494,7 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     prim->x3 = transformed.vx;
     prim->y3 = transformed.vy;
     prim->code |= 2;
-    tile = map_get_tile_data_pointer(
+    tile = battle_map_get_tile_data_pointer(
         (unit->world_coords.vx / MAP_TILE_SIZE), (unit->world_coords.vz / MAP_TILE_SIZE), unit->map_z);
     if (tile->depth_half_height.depth && -(tile->height + tile->depth_half_height.depth) * 12 < unit->world_coords.vy) {
         unit->shadow_counter += g_main_system_animation_speed;
@@ -539,22 +539,23 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
     }
     main_util_set_svector(&position, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx, 0,
         unit->world_coords.vz + unit->event_offset.vz + unit->seq_offset.vz);
-    position.vy = map_calculate_slope_height(&position, unit->map_z);
+    position.vy = battle_map_calculate_slope_height(&position, unit->map_z);
     if (unit->world_coords.vy >= position.vy) {
         packet = ot;
     } else {
-        tile = map_get_tile_data_pointer((position.vx / MAP_TILE_SIZE), (position.vz / MAP_TILE_SIZE), unit->map_z);
+        tile = battle_map_get_tile_data_pointer(
+            (position.vx / MAP_TILE_SIZE), (position.vz / MAP_TILE_SIZE), unit->map_z);
         position.vy -= tile->depth_half_height.depth * 12;
         if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
             if (tile->surface.depth_bias) {
-                camera_calculate_relative_offset_by_5(&position, &offset);
+                battle_camera_calculate_relative_offset_by_5(&position, &offset);
             } else {
-                camera_calculate_relative_offset_by_1(&position, &offset);
+                battle_camera_calculate_relative_offset_by_1(&position, &offset);
             }
         } else if (tile->surface.depth_bias) {
-            camera_convert_screen_coords_modify_by_5(&position, &offset);
+            battle_camera_convert_screen_coords_modify_by_5(&position, &offset);
         } else {
-            camera_convert_screen_coords_modify_by_1(&position, &offset);
+            battle_camera_convert_screen_coords_modify_by_1(&position, &offset);
         }
         SetRotMatrix(&g_camera_matrix);
         SetTransMatrix(&g_camera_matrix);
@@ -875,7 +876,7 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     prim->v0 = color;
     prim->v3 = 0x98;
     prim->v2 = 0x98;
-    camera_convert_screen_coords_modify_by_1(base, &screen);
+    battle_camera_convert_screen_coords_modify_by_1(base, &screen);
     RotTrans(&screen, &transformed, &flag);
     AddPrim(ot + (transformed.vz / 4), prim);
 }

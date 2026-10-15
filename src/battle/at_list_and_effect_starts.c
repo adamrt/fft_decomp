@@ -16,17 +16,17 @@
 #include "fft/sound.h"
 #include "psx/types.h"
 
-void action_set_at_list_active(void) {
+void battle_action_set_at_list_active(void) {
     g_action_at_list_active = 1;
 }
 
 /* Hide the map cursor and its tile glow: the flag is read only by
  * target_calculate_tile_coords_and_glow_from_at_list. */
-void action_clear_at_list_active(void) {
+void battle_action_clear_at_list_active(void) {
     g_action_at_list_active = 0;
 }
 
-void target_move_cursor_to_unit(const battle_unit_t* unit) {
+void battle_target_move_cursor_to_unit(const battle_unit_t* unit) {
     if (unit != 0) {
         g_battle_cursor_x = unit->map_x;
         g_battle_cursor_y = unit->map_y;
@@ -36,7 +36,7 @@ void target_move_cursor_to_unit(const battle_unit_t* unit) {
 
 /* Move the cursor to the target of the unit's stored action: the target tile, or
  * the tile of the target unit. */
-void target_move_cursor_to_action_target(const battle_unit_t* unit) {
+void battle_target_move_cursor_to_action_target(const battle_unit_t* unit) {
     unit_stats_t* bd;
 
     bd = unit->stats;
@@ -46,7 +46,7 @@ void target_move_cursor_to_action_target(const battle_unit_t* unit) {
         g_battle_cursor_y = unit->stats->action_command.target_position.vz;
         return;
     }
-    target_move_cursor_to_unit(battle_unit_get_by_battle_id(bd->action_command.target_id));
+    battle_target_move_cursor_to_unit(battle_unit_get_by_battle_id(bd->action_command.target_id));
 }
 
 void battle_gfx_update_unit_palettes(void) {
@@ -54,8 +54,8 @@ void battle_gfx_update_unit_palettes(void) {
 
     for (palette_index = 0; palette_index < 0x10; palette_index++) {
         if (g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].animations[palette_index].active != 0) {
-            map_modify_palette(MAP_COLOR_MODE_STOP_REPEAT, 4, MAP_CLUT_ROW_UNITS, palette_index, 0, 0, 0, 0);
-            map_modify_palette(MAP_COLOR_MODE_RESTORE, 4, MAP_CLUT_ROW_UNITS, palette_index, 0, 0, 0, 0);
+            battle_map_modify_palette(MAP_COLOR_MODE_STOP_REPEAT, 4, MAP_CLUT_ROW_UNITS, palette_index, 0, 0, 0, 0);
+            battle_map_modify_palette(MAP_COLOR_MODE_RESTORE, 4, MAP_CLUT_ROW_UNITS, palette_index, 0, 0, 0, 0);
         }
     }
 }
@@ -72,16 +72,20 @@ void battle_gfx_modify_palette_based_on_team(battle_unit_t* unit, s32 amount) {
     }
     switch ((unit->stats->team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT) {
     case BATTLE_TEAM_BLUE >> BATTLE_TEAM_SHIFT:
-        map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0, 0, 0x18);
+        battle_map_modify_palette(
+            MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0, 0, 0x18);
         break;
     case BATTLE_TEAM_RED >> BATTLE_TEAM_SHIFT:
-        map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0x10, 0, 0);
+        battle_map_modify_palette(
+            MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0x10, 0, 0);
         break;
     case BATTLE_TEAM_GREEN >> BATTLE_TEAM_SHIFT:
-        map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0, 0x10, 0);
+        battle_map_modify_palette(
+            MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0, 0x10, 0);
         break;
     default:
-        map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0, 0x10, 0x10);
+        battle_map_modify_palette(
+            MAP_COLOR_MODE_BASE_REPEAT, amount, MAP_CLUT_ROW_UNITS, unit->runtime_id, 0, 0, 0x10, 0x10);
         break;
     }
 }
@@ -95,7 +99,7 @@ void battle_gfx_tint_all_units_by_team(void) {
 }
 
 /* Advance the AT list cursor, wrapping after the list's 40 entries. */
-void action_increment_at_list_id(void) {
+void battle_action_increment_at_list_id(void) {
     g_action_at_list_id++;
     if (g_action_at_list_id >= BATTLE_AT_LIST_CAPACITY) {
         g_action_at_list_id = 0;
@@ -108,39 +112,39 @@ void action_increment_at_list_id(void) {
  * marks the tiles it will hit; a unit's turn moves the cursor to the unit and
  * removes the tile marks. The free cursor's Start button and the status-menu
  * request call it. The loop has no exit when every entry is empty. */
-void action_show_next_at_list_entry(void) {
+void battle_action_show_next_at_list_entry(void) {
     s32 id;
     battle_unit_t* unit;
 
     for (;;) {
-        id = action_calculate_at_list_and_get_specific_unit_id(g_action_at_list_id);
+        id = battle_action_calculate_at_list_and_get_specific_unit_id(g_action_at_list_id);
         if (id >= 0) {
             unit = battle_unit_get_by_battle_id(id & 0xFF);
             if ((id & 0x100) != 0) {
-                target_move_cursor_to_action_target(unit);
-                target_calculate_for_menu_types(&unit->stats->action_command);
-                target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
+                battle_target_move_cursor_to_action_target(unit);
+                battle_target_calculate_for_menu_types(&unit->stats->action_command);
+                battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
             } else {
-                target_move_cursor_to_unit(unit);
-                target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 0);
+                battle_target_move_cursor_to_unit(unit);
+                battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 0);
             }
             break;
         }
-        action_increment_at_list_id();
+        battle_action_increment_at_list_id();
     }
-    action_increment_at_list_id();
+    battle_action_increment_at_list_id();
 }
 
 /* Open the status menu once: mark it open and restart the AT list cursor at entry
  * 0. */
-void action_open_status_menu_at_list_start(void) {
+void battle_action_open_status_menu_at_list_start(void) {
     if (g_status_menu_open == 0) {
         g_status_menu_open = 1;
         g_action_at_list_id = 0;
     }
 }
 
-void action_clear_at_list_id(void) {
+void battle_action_clear_at_list_id(void) {
     g_action_at_list_id = 0;
 }
 
@@ -152,7 +156,7 @@ void battle_menu_clear_status_menu_state(void) {
 /* Fill an init record for a secondary effect that one unit both casts and
  * receives: the caster and the single target are the unit. Every other field of
  * the record is left as the caller's stack held it. */
-void effect_build_secondary_init(battle_unit_t* unit, effect_secondary_init_t* effect) {
+void battle_effect_build_secondary_init(battle_unit_t* unit, effect_secondary_init_t* effect) {
     effect->targets[EFFECT_CASTER_ENTRY].target_type = EFFECT_TARGET_TYPE_UNIT;
     effect->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id = unit->runtime_id;
     effect->target_count = 1;
@@ -166,7 +170,7 @@ void effect_build_secondary_init(battle_unit_t* unit, effect_secondary_init_t* e
  * derived from its action data. With no targets the first block instead holds
  * the cursor tile position. The record's target blocks form an array of up to
  * 16 entries starting at the header's first `target` block. */
-void effect_build_secondary_init_from_action(battle_unit_t* unit, effect_secondary_init_t* init) {
+void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, effect_secondary_init_t* init) {
     battle_unit_t* target;
     action_data_t* action;
     s32 i;
@@ -221,10 +225,10 @@ void effect_build_secondary_init_from_action(battle_unit_t* unit, effect_seconda
 /* Starts the weapon-hit secondary effect of the unit's action, in the element
  * of the used weapon; is_bow is 1 for the bow hardcoding path and 0
  * otherwise, and unused. */
-void effect_set_evade_type_data_and_weapon_element(battle_unit_t* unit, s32 is_bow) {
+void battle_effect_set_evade_type_data_and_weapon_element(battle_unit_t* unit, s32 is_bow) {
     effect_secondary_init_t secondary_init;
-    effect_build_secondary_init_from_action(unit, &secondary_init);
-    effect_init_weapon_hit_secondary(
+    battle_effect_build_secondary_init_from_action(unit, &secondary_init);
+    battle_effect_init_weapon_hit_secondary(
         g_main_item_weapon_data[unit->used_item_or_weapon_id].element, &secondary_init, is_bow);
 }
 
@@ -233,11 +237,11 @@ void effect_set_evade_type_data_and_weapon_element(battle_unit_t* unit, s32 is_b
  * anything else the animation of the equipped weapon's type (an arrow for
  * bows and crossbows, none for the rest). The target retains a redundant
  * Shuriken test before checking the complete Item/Throw span. */
-void effect_start_action_projectile_secondary(battle_unit_t* unit) {
+void battle_effect_start_action_projectile_secondary(battle_unit_t* unit) {
     effect_secondary_init_t secondary_init;
     u16 ability_id;
     u8 animation_id;
-    effect_build_secondary_init_from_action(unit, &secondary_init);
+    battle_effect_build_secondary_init_from_action(unit, &secondary_init);
     ability_id = unit->used_ability_id;
     if (ability_id == ABILITY_ID_BASIC_SKILL_THROW_STONE) {
         animation_id = EFFECT_SECONDARY_ANIMATION_THROWN_STONE;
@@ -249,7 +253,7 @@ void effect_start_action_projectile_secondary(battle_unit_t* unit) {
             animation_id = g_effect_weapon_projectile_animations[unit->equipped_weapon_type];
         }
     }
-    effect_init_projectile_secondary(animation_id, &secondary_init);
+    battle_effect_init_projectile_secondary(animation_id, &secondary_init);
 }
 
 /* Start a secondary effect on a unit as both its caster and its target, with the
@@ -259,41 +263,41 @@ void effect_start_action_projectile_secondary(battle_unit_t* unit) {
  * The init record is a stack local of which effect_build_secondary_init
  * sets five fields; effect_init_secondary copies the rest of its caster
  * and target blocks and its used_weapon_id as the stack left them. */
-void effect_set_secondary(battle_unit_t* unit, s32 effect_type) {
+void battle_effect_set_secondary(battle_unit_t* unit, s32 effect_type) {
     effect_secondary_init_t data;
 
-    effect_build_secondary_init(unit, &data);
+    battle_effect_build_secondary_init(unit, &data);
     if (unit->stats != 0) {
-        effect_init_secondary(effect_type, unit->stats->sprite_palette, &data);
+        battle_effect_init_secondary(effect_type, unit->stats->sprite_palette, &data);
     }
 }
 
-void effect_set_secondary_zodiac_poof(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_ZODIAC_POOF);
+void battle_effect_set_secondary_zodiac_poof(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_ZODIAC_POOF);
 }
 
-void effect_set_secondary_death_smoke(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_DEATH_SMOKE);
+void battle_effect_set_secondary_death_smoke(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_DEATH_SMOKE);
 }
 
-void effect_set_secondary_level_up(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_LEVEL_UP);
+void battle_effect_set_secondary_level_up(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_LEVEL_UP);
 }
 
-void effect_set_secondary_venom_trap(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_VENOM_TRAP);
+void battle_effect_set_secondary_venom_trap(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_VENOM_TRAP);
 }
 
-void effect_set_secondary_splash(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_SPLASH);
+void battle_effect_set_secondary_splash(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_SPLASH);
 }
 
-void effect_set_secondary_fall_dust(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_FALL_DUST);
+void battle_effect_set_secondary_fall_dust(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_FALL_DUST);
 }
 
-void effect_set_secondary_teleport(battle_unit_t* unit) {
-    effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_TELEPORT);
+void battle_effect_set_secondary_teleport(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_TELEPORT);
 }
 
 s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id) {
@@ -331,10 +335,10 @@ s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id) {
  * effect data. Does nothing when either unit is missing. */
 void battle_unit_set_bow_hardcoding(battle_unit_t* attacker, battle_unit_t* target) {
     if ((attacker != 0) && (target != 0)) {
-        sound_play_weapon_sfx(attacker, 1);
+        battle_sound_play_weapon_sfx(attacker, 1);
         battle_unit_set_target_animation_from_attack_type(attacker, target);
         battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
-        effect_set_evade_type_data_and_weapon_element(attacker, 1);
+        battle_effect_set_evade_type_data_and_weapon_element(attacker, 1);
     }
 }
 
@@ -359,7 +363,7 @@ void battle_unit_update_display(battle_unit_t* unit) {
     map_tile_t* tile;
 
     if (unit != 0) {
-        tile = map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+        tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
         unit->status_flags_1_4 &= ~unit->statuses_to_remove_1_4;
         unit->status_flags_5_6 &= ~unit->statuses_to_remove_5_6;
         unit->status_flags_1_4 |= unit->statuses_to_add_1_4;
@@ -404,7 +408,7 @@ void battle_unit_update_display_by_battle_id(u16 battle_id) {
  * Frog changes keeps its usable-ability list synchronized with the graphics
  * transition.
  */
-s32 status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id) {
+s32 battle_status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id) {
     battle_unit_t* unit;
 
     unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
@@ -422,7 +426,7 @@ s32 status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battl
         case STATUS_HANDLER_INDEX(STATUS_ID_FROG):
             unit->statuses_to_remove_5_6 |= BATTLE_UNIT_STATUS_FROG;
             unit->statuses_to_add_5_6 &= ~BATTLE_UNIT_STATUS_FROG;
-            ai_init_unit_abilities(battle_id);
+            battle_ai_init_unit_abilities(battle_id);
             return 1;
         case STATUS_HANDLER_INDEX(STATUS_ID_JUMP):
         case STATUS_HANDLER_INDEX(STATUS_ID_FLOAT):
@@ -454,7 +458,7 @@ s32 status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battl
         case STATUS_HANDLER_INDEX(STATUS_ID_FROG):
             unit->statuses_to_add_5_6 |= BATTLE_UNIT_STATUS_FROG;
             unit->statuses_to_remove_5_6 &= ~BATTLE_UNIT_STATUS_FROG;
-            ai_init_unit_abilities(battle_id);
+            battle_ai_init_unit_abilities(battle_id);
             return 1;
         case STATUS_HANDLER_INDEX(STATUS_ID_TREASURE):
             unit->statuses_to_add_5_6 |= BATTLE_UNIT_STATUS_TREASURE;
@@ -559,15 +563,15 @@ void battle_unit_dismount_rider_and_update_display(battle_unit_t* rider) {
  * result is twice the gap between that layer's underside (its height less its
  * ceiling depth) and a point 3 levels above this tile's surface. Otherwise it is
  * 0x40. */
-s32 move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
+s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
     map_tile_t* from;
     map_tile_t* to;
     s32 from_height;
     s32 to_height;
     s32 limit;
 
-    from = map_get_tile_data_pointer(x, y, layer);
-    to = map_get_tile_data_pointer(x, y, layer ^ 1);
+    from = battle_map_get_tile_data_pointer(x, y, layer);
+    to = battle_map_get_tile_data_pointer(x, y, layer ^ 1);
     if ((to->flags.blocked) == 0) {
         from_height = from->height + (from->depth_half_height.depth);
         to_height = to->height + (to->depth_half_height.depth);
@@ -584,7 +588,7 @@ s32 move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer) {
  * lower bound subtracts the layer step clearance from move_calculate_tile_layer_step_offset, the
  * upper bound is the tile surface height alone less 0x30.
  */
-s32 move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
+s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
     map_tile_t* tile;
     s32 clearance;
     s32 height;
@@ -592,8 +596,8 @@ s32 move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer) {
     s32 hi;
     map_tile_depth_t depth;
 
-    tile = map_get_tile_data_pointer(x, y, layer);
-    clearance = move_calculate_tile_layer_step_offset(x, y, layer);
+    tile = battle_map_get_tile_data_pointer(x, y, layer);
+    clearance = battle_move_calculate_tile_layer_step_offset(x, y, layer);
     depth = tile->depth_half_height;
     height = ((tile->height + depth.depth) * 2) + depth.half_height;
     lo = -(height + clearance) * 6;
@@ -627,7 +631,7 @@ enum {
  * The step code is copied to a 16-bit value before the switch: read through the
  * byte again, cse reuses the direction test's load and the reload is lost.
  */
-void move_set_velocity_for_contiguous_clamped_steps(
+void battle_move_set_velocity_for_contiguous_clamped_steps(
     battle_unit_t* unit, const battle_walk_path_t* path, const move_step_t* step) {
     VECTOR direction;
     const move_step_t* current;
@@ -642,7 +646,7 @@ void move_set_velocity_for_contiguous_clamped_steps(
     s32 end_z;
     s16 code;
 
-    map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     x = unit->map_x;
     y = unit->map_y;
     index = unit->movement_path_offset - 1;
@@ -678,7 +682,7 @@ void move_set_velocity_for_contiguous_clamped_steps(
             end_y = (y * MAP_TILE_SIZE) + MOVE_STEP_NEAR_EDGE;
             break;
         }
-        end_z = move_clamp_z_to_tile_headroom(start_z, x, y, current->higher);
+        end_z = battle_move_clamp_z_to_tile_headroom(start_z, x, y, current->higher);
         if (end_z != start_z) {
             break;
         }
@@ -707,7 +711,7 @@ enum {
  * The step code is copied to a 16-bit value before the switch, as in the clamped
  * twin: read through the byte again, cse reuses the direction test's load.
  */
-void move_set_velocity_for_contiguous_steps_with_final_tile_height(
+void battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
     battle_unit_t* unit, const battle_walk_path_t* path, const move_step_t* step) {
     VECTOR direction;
     map_tile_t* tile;
@@ -725,7 +729,7 @@ void move_set_velocity_for_contiguous_steps_with_final_tile_height(
     map_tile_depth_t depth;
     s16 code;
 
-    map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
     x = unit->map_x;
     y = unit->map_y;
     index = unit->movement_path_offset - 1;
@@ -763,11 +767,11 @@ void move_set_velocity_for_contiguous_steps_with_final_tile_height(
         }
         layer = current->higher;
         if (unit->movement_path_offset == path->count) {
-            tile = map_get_tile_data_pointer(x, y, layer);
+            tile = battle_map_get_tile_data_pointer(x, y, layer);
             depth = tile->depth_half_height;
             end_z = -(((tile->height + depth.depth) * 2) + depth.half_height) * MOVE_STEP_HEIGHT_SCALE;
         } else {
-            end_z = move_clamp_z_to_tile_headroom(start_z, x, y, layer);
+            end_z = battle_move_clamp_z_to_tile_headroom(start_z, x, y, layer);
         }
         if (end_z != start_z) {
             break;

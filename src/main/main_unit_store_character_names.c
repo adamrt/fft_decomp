@@ -86,14 +86,14 @@ void main_unit_store_character_names(unit_stats_t* unit) {
     } else {
         text = main_party_get_unit(unit->formation_index)->name;
     }
-    mem_copy_bytes_source_first(text, unit->name, sizeof(unit->name));
+    main_mem_copy_bytes_source_first(text, unit->name, sizeof(unit->name));
     text_id = unit->job_id | TEXT_ID_JOB_NAME_BASE;
-    mem_copy_bytes_source_first(prepare_text(text_id), unit->job_name, sizeof(unit->job_name));
+    main_mem_copy_bytes_source_first(prepare_text(text_id), unit->job_name, sizeof(unit->job_name));
     text_id = unit->primary_skillset | TEXT_ID_SKILLSET_NAME_BASE;
-    mem_copy_bytes_source_first(
+    main_mem_copy_bytes_source_first(
         prepare_text(text_id), unit->primary_skillset_name, sizeof(unit->primary_skillset_name));
     text_id = unit->secondary_skillset | TEXT_ID_SKILLSET_NAME_BASE;
-    mem_copy_bytes_source_first(
+    main_mem_copy_bytes_source_first(
         prepare_text(text_id), unit->secondary_skillset_name, sizeof(unit->secondary_skillset_name));
-    mem_zero(&unit->action.status_changes, sizeof(unit->action.status_changes));
+    main_mem_zero(&unit->action.status_changes, sizeof(unit->action.status_changes));
 }

@@ -815,7 +815,7 @@ functions:
   - {addr: 0x8005c8ec, size: 152, name: main_unit_calculate_move_jump, hash: bad416e1a3b09741, unit: unit_stats_and_party}
   - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007"}
   - {addr: 0x8005cbd0, size: 148, name: main_party_calculate_highest_level, hash: 149c03a50c0d50b6}
-  - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e}
+  - {addr: 0x8005cc64, size: 52, name: main_mem_copy_bytes_source_first, hash: 850c2fc16771314e}
   - {addr: 0x8005cc98, size: 476, name: main_unit_calculate_random_equipment, hash: 57273afe761c2134, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005ce74, size: 584, name: main_unit_learn_job_abilities, hash: 64efa860cd5766d5, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005d0bc, size: 776, name: main_unit_calculate_rsm, hash: 89c806b79390dc83, unit: unit_equipment_jobs_and_abilities}
@@ -846,12 +846,12 @@ functions:
   - {addr: 0x8005e1b0, size: 80, name: main_unit_has_status_in_set, hash: 8b0638eb283dca01, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005e200, size: 44, name: main_ability_get_known, hash: f03d26c875a93271, unit: unit_equipment_jobs_and_abilities}
   - {addr: 0x8005e22c, size: 40, name: main_util_copy_action_data, hash: 3a97060e78efbf69, unit: unit_equipment_jobs_and_abilities}
-  - {addr: 0x8005e254, size: 52, name: mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/main/mem_copy_bytes_source_first.c, source_symbol: mem_copy_bytes_source_first}
+  - {addr: 0x8005e254, size: 52, name: main_mem_copy_byte_data_source_first, hash: 850c2fc16771314e, source: src/main/main_mem_copy_bytes_source_first.c, source_symbol: main_mem_copy_bytes_source_first}
   - {addr: 0x8005e288, size: 496, name: main_item_get_total_equipment_quantity, hash: 3e5d96728559f2cd, unit: item_quantities_and_status}
   - {addr: 0x8005e478, size: 112, name: main_unit_init_position_and_rewards, hash: 9421b9d560e38650, unit: item_quantities_and_status}
   - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, unit: item_quantities_and_status}
   - {addr: 0x8005e5d8, size: 108, name: main_unit_calculate_zodiac_symbol, hash: 0042a97bca78c29a, unit: item_quantities_and_status}
-  - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, unit: item_quantities_and_status}
+  - {addr: 0x8005e644, size: 44, name: main_mem_zero, hash: 56f3e9bb00dabbd7, unit: item_quantities_and_status}
   - {addr: 0x8005e670, size: 92, name: main_unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, unit: item_quantities_and_status}
   - {addr: 0x8005e6cc, size: 120, name: main_status_change_unit, hash: dc7a2bc945f89882, unit: item_quantities_and_status}
   - {addr: 0x8005e744, size: 52, name: main_status_store_current, hash: a213e350e165866b, unit: item_quantities_and_status}
@@ -1389,7 +1389,7 @@ data:
   - {addr: 0x8006720c, name: open_system_run_ending_cutscene}
   - {addr: 0x800672f8, name: wldcore_entrypoint}
   - {addr: 0x80079a98, name: battle_state_run_game_loop}
-  - {addr: 0x80093170, name: map_color_field}
+  - {addr: 0x80093170, name: battle_map_color_field}
   - {addr: 0x800a778c, name: g_main_system_game_flow_state}
   - {addr: 0x800d0bbc, name: g_main_save_slot_buffer}
   - {addr: 0x800e6edc, name: world_text_find_entry}
@@ -1400,7 +1400,7 @@ data:
   - {addr: 0x8013b590, name: script_get_variable}
   - {addr: 0x8013b644, name: script_set_variable}
   - {addr: 0x8014a81c, name: script_return_zero_1}
-  - {addr: 0x8018e9bc, name: status_enable_special_flags}
+  - {addr: 0x8018e9bc, name: battle_status_enable_special_flags}
   - {addr: 0x801908cc, name: g_battle_unit_stats}
 
 overrides:

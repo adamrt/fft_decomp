@@ -126,7 +126,7 @@ void menu_copy_unit_data_to_status_billboard_variant(unit_stats_t* unit, menu_un
     output->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = unit->ct;
     output->list_index = 0;
     output->unit_count = 0;
-    g_thread_call_target = (void (*)(void))action_find_unit_turn_index;
+    g_thread_call_target = (void (*)(void))battle_action_find_unit_turn_index;
     output->list_index = thread_call_on_main_stack(unit);
     if (unit->has_turn != 0)
         output->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;

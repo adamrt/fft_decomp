@@ -14,7 +14,7 @@
  *
  * There is no default case: modes 11 and above use the uninitialized target
  * color, as the target does. */
-void map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
+void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 target_red;
@@ -136,14 +136,14 @@ void map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, 
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &current);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &current);
     }
 }
 
 /* Claim a free color rotation slot: the colors first_color..last_color of a
  * CLUT row rotate one place every frame_duration frames. Returns the slot index +
  * 1 as the handle, or 0 when all eight slots are in use. */
-s32 map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color) {
+s32 battle_map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 last_color) {
     s32 index;
     map_clut_cycle_state_t* state;
 
@@ -167,7 +167,7 @@ s32 map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_color, s32 
  * Retail clears the active byte at handle * 10, not (handle - 1) * 10: it stops
  * the slot after the handle's own, and handle 8 clears the byte that follows the
  * eight slots, the first of g_battle_gfx_cycled_deployed_palettes. */
-s32 map_stop_clut_cycle(s32 handle) {
+s32 battle_map_stop_clut_cycle(s32 handle) {
     if (handle >= 1 && handle <= MAP_CLUT_CYCLE_SLOT_COUNT) {
         g_map_clut_cycle_states[handle].active = 0;
         return 1;
@@ -179,7 +179,7 @@ s32 map_stop_clut_cycle(s32 handle) {
  * clearing their active bytes. The 32 texture animation rows of the map are not
  * touched. The byte-offset loop preserves the original address sequence;
  * indexed active fields add four bytes. */
-void map_reset_clut_cycles(void) {
+void battle_map_reset_clut_cycles(void) {
     s32 offset;
 
     offset = (MAP_CLUT_CYCLE_SLOT_COUNT - 1) * MAP_CLUT_CYCLE_SLOT_BYTE_COUNT;
@@ -197,7 +197,7 @@ void map_reset_clut_cycles(void) {
  * copies, which reproduces the target's separate stored and packed values
  * and the reloads of the component bytes. The components are indexed from a
  * pointer to the CLUT's first color so loop.c reduces one address giv, as in the target. */
-void map_update_animations(void) {
+void battle_map_update_animations(void) {
     map_palette_color_components_t saved_component;
     map_background_gradient_colors_t gradient;
     map_clut_cycle_state_t* state;
@@ -264,17 +264,17 @@ void map_update_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = channels[1].red / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = channels[1].green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = channels[1].blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &gradient);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &gradient);
         if (g_map_background_gradient_transition.period >= 4) {
             if (++g_map_background_gradient_transition.tick >= g_map_background_gradient_transition.period >> 2) {
                 g_map_background_gradient_transition.tick = 0;
                 if (++g_map_background_gradient_transition.phase >= 0x20) {
                     if (g_map_background_gradient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                        map_blend_background_gradient_color(
+                        battle_map_blend_background_gradient_color(
                             MAP_COLOR_MODE_RESTORE, g_map_background_gradient_transition.period, 0, 0, 0);
                         g_map_background_gradient_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
                     } else if (g_map_background_gradient_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        map_blend_background_gradient_color(MAP_COLOR_MODE_BASE_REPEAT,
+                        battle_map_blend_background_gradient_color(MAP_COLOR_MODE_BASE_REPEAT,
                             g_map_background_gradient_transition.period,
                             g_map_background_gradient_transition.repeat_color.r,
                             g_map_background_gradient_transition.repeat_color.g,
@@ -287,11 +287,11 @@ void map_update_animations(void) {
             }
         } else if (++g_map_background_gradient_transition.phase >= g_map_background_gradient_transition.period * 8) {
             if (g_map_background_gradient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                map_blend_background_gradient_color(
+                battle_map_blend_background_gradient_color(
                     MAP_COLOR_MODE_RESTORE, g_map_background_gradient_transition.period, 0, 0, 0);
                 g_map_background_gradient_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
             } else if (g_map_background_gradient_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                map_blend_background_gradient_color(MAP_COLOR_MODE_BASE_REPEAT,
+                battle_map_blend_background_gradient_color(MAP_COLOR_MODE_BASE_REPEAT,
                     g_map_background_gradient_transition.period, g_map_background_gradient_transition.repeat_color.r,
                     g_map_background_gradient_transition.repeat_color.g,
                     g_map_background_gradient_transition.repeat_color.b);
@@ -314,18 +314,18 @@ void map_update_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red_level / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g_map_ambient_light_transition.channels.green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = g_map_ambient_light_transition.channels.blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &gradient);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &gradient);
         if (g_map_ambient_light_transition.period >= 4) {
             if (++g_map_ambient_light_transition.tick >= g_map_ambient_light_transition.period >> 2) {
                 g_map_ambient_light_transition.tick = 0;
                 if (++g_map_ambient_light_transition.phase >= 0x20) {
                     if (g_map_ambient_light_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                        map_blend_ambient_light_color(
+                        battle_map_blend_ambient_light_color(
                             MAP_COLOR_MODE_RESTORE, g_map_ambient_light_transition.period, 0, 0, 0);
                         g_map_ambient_light_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
                     } else if (g_map_ambient_light_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        map_blend_ambient_light_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_ambient_light_transition.period,
-                            g_map_ambient_light_transition.repeat_color.r,
+                        battle_map_blend_ambient_light_color(MAP_COLOR_MODE_BASE_REPEAT,
+                            g_map_ambient_light_transition.period, g_map_ambient_light_transition.repeat_color.r,
                             g_map_ambient_light_transition.repeat_color.g,
                             g_map_ambient_light_transition.repeat_color.b);
                         g_map_ambient_light_transition.repeat = MAP_COLOR_REPEAT_TINTED;
@@ -336,10 +336,11 @@ void map_update_animations(void) {
             }
         } else if (++g_map_ambient_light_transition.phase >= g_map_ambient_light_transition.period * 8) {
             if (g_map_ambient_light_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                map_blend_ambient_light_color(MAP_COLOR_MODE_RESTORE, g_map_ambient_light_transition.period, 0, 0, 0);
+                battle_map_blend_ambient_light_color(
+                    MAP_COLOR_MODE_RESTORE, g_map_ambient_light_transition.period, 0, 0, 0);
                 g_map_ambient_light_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
             } else if (g_map_ambient_light_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                map_blend_ambient_light_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_ambient_light_transition.period,
+                battle_map_blend_ambient_light_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_ambient_light_transition.period,
                     g_map_ambient_light_transition.repeat_color.r, g_map_ambient_light_transition.repeat_color.g,
                     g_map_ambient_light_transition.repeat_color.b);
                 g_map_ambient_light_transition.repeat = MAP_COLOR_REPEAT_TINTED;
@@ -361,16 +362,17 @@ void map_update_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = red_level / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g_map_darkness_transition.channels.green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = g_map_darkness_transition.channels.blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &gradient);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &gradient);
         if (g_map_darkness_transition.period >= 4) {
             if (++g_map_darkness_transition.tick >= g_map_darkness_transition.period >> 2) {
                 g_map_darkness_transition.tick = 0;
                 if (++g_map_darkness_transition.phase >= 0x20) {
                     if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                        map_blend_darkness_color(MAP_COLOR_MODE_RESTORE, g_map_darkness_transition.period, 0, 0, 0);
+                        battle_map_blend_darkness_color(
+                            MAP_COLOR_MODE_RESTORE, g_map_darkness_transition.period, 0, 0, 0);
                         g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
                     } else if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        map_blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_darkness_transition.period,
+                        battle_map_blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_darkness_transition.period,
                             g_map_darkness_transition.repeat_color.r, g_map_darkness_transition.repeat_color.g,
                             g_map_darkness_transition.repeat_color.b);
                         g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
@@ -381,10 +383,10 @@ void map_update_animations(void) {
             }
         } else if (++g_map_darkness_transition.phase >= g_map_darkness_transition.period * 8) {
             if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
-                map_blend_darkness_color(MAP_COLOR_MODE_RESTORE, g_map_darkness_transition.period, 0, 0, 0);
+                battle_map_blend_darkness_color(MAP_COLOR_MODE_RESTORE, g_map_darkness_transition.period, 0, 0, 0);
                 g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_RESTORED;
             } else if (g_map_darkness_transition.repeat == MAP_COLOR_REPEAT_RESTORED) {
-                map_blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_darkness_transition.period,
+                battle_map_blend_darkness_color(MAP_COLOR_MODE_BASE_REPEAT, g_map_darkness_transition.period,
                     g_map_darkness_transition.repeat_color.r, g_map_darkness_transition.repeat_color.g,
                     g_map_darkness_transition.repeat_color.b);
                 g_map_darkness_transition.repeat = MAP_COLOR_REPEAT_TINTED;
@@ -436,12 +438,12 @@ void map_update_animations(void) {
                         if (++g_map_palette_state.clut_rows[i].animations[k].blend_step
                             >= MAP_PALETTE_BLEND_STEP_COUNT) {
                             if (g_map_palette_state.clut_rows[i].animations[k].repeat == MAP_COLOR_REPEAT_TINTED) {
-                                map_modify_palette(MAP_COLOR_MODE_RESTORE,
+                                battle_map_modify_palette(MAP_COLOR_MODE_RESTORE,
                                     g_map_palette_state.clut_rows[i].animations[k].mode, i, k, 0, 0, 0, 0);
                                 g_map_palette_state.clut_rows[i].animations[k].repeat = MAP_COLOR_REPEAT_RESTORED;
                             } else if (g_map_palette_state.clut_rows[i].animations[k].repeat
                                 == MAP_COLOR_REPEAT_RESTORED) {
-                                map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
+                                battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
                                     g_map_palette_state.clut_rows[i].animations[k].mode, i, k, 0,
                                     g_map_palette_state.clut_rows[i].animations[k].repeat_color.r,
                                     g_map_palette_state.clut_rows[i].animations[k].repeat_color.g,
@@ -476,11 +478,11 @@ void map_update_animations(void) {
                     if (++g_map_palette_state.clut_rows[i].animations[k].blend_step
                         >= MAP_PALETTE_FAST_BLEND_STEP_COUNT) {
                         if (g_map_palette_state.clut_rows[i].animations[k].repeat == MAP_COLOR_REPEAT_TINTED) {
-                            map_modify_palette(MAP_COLOR_MODE_RESTORE,
+                            battle_map_modify_palette(MAP_COLOR_MODE_RESTORE,
                                 g_map_palette_state.clut_rows[i].animations[k].mode, i, k, 0, 0, 0, 0);
                             g_map_palette_state.clut_rows[i].animations[k].repeat = MAP_COLOR_REPEAT_RESTORED;
                         } else if (g_map_palette_state.clut_rows[i].animations[k].repeat == MAP_COLOR_REPEAT_RESTORED) {
-                            map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
+                            battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
                                 g_map_palette_state.clut_rows[i].animations[k].mode, i, k, 0,
                                 g_map_palette_state.clut_rows[i].animations[k].repeat_color.r,
                                 g_map_palette_state.clut_rows[i].animations[k].repeat_color.g,
@@ -521,11 +523,11 @@ void map_update_animations(void) {
 
                     if (++g_map_palette_state.clut_rows[i].animations[0].blend_step >= MAP_PALETTE_BLEND_STEP_COUNT) {
                         if (g_map_palette_state.clut_rows[i].animations[0].repeat == MAP_COLOR_REPEAT_TINTED) {
-                            map_modify_palette(MAP_COLOR_MODE_RESTORE,
+                            battle_map_modify_palette(MAP_COLOR_MODE_RESTORE,
                                 g_map_palette_state.clut_rows[i].animations[0].mode, i, 0, 1, 0, 0, 0);
                             g_map_palette_state.clut_rows[i].animations[0].repeat = MAP_COLOR_REPEAT_RESTORED;
                         } else if (g_map_palette_state.clut_rows[i].animations[0].repeat == MAP_COLOR_REPEAT_RESTORED) {
-                            map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
+                            battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
                                 g_map_palette_state.clut_rows[i].animations[0].mode, i, 0, 1,
                                 g_map_palette_state.clut_rows[i].animations[0].repeat_color.r,
                                 g_map_palette_state.clut_rows[i].animations[0].repeat_color.g,
@@ -559,11 +561,11 @@ void map_update_animations(void) {
 
                 if (++g_map_palette_state.clut_rows[i].animations[0].blend_step >= MAP_PALETTE_FAST_BLEND_STEP_COUNT) {
                     if (g_map_palette_state.clut_rows[i].animations[0].repeat == MAP_COLOR_REPEAT_TINTED) {
-                        map_modify_palette(MAP_COLOR_MODE_RESTORE, g_map_palette_state.clut_rows[i].animations[0].mode,
-                            i, 0, 1, 0, 0, 0);
+                        battle_map_modify_palette(MAP_COLOR_MODE_RESTORE,
+                            g_map_palette_state.clut_rows[i].animations[0].mode, i, 0, 1, 0, 0, 0);
                         g_map_palette_state.clut_rows[i].animations[0].repeat = MAP_COLOR_REPEAT_RESTORED;
                     } else if (g_map_palette_state.clut_rows[i].animations[0].repeat == MAP_COLOR_REPEAT_RESTORED) {
-                        map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
+                        battle_map_modify_palette(MAP_COLOR_MODE_BASE_REPEAT,
                             g_map_palette_state.clut_rows[i].animations[0].mode, i, 0, 1,
                             g_map_palette_state.clut_rows[i].animations[0].repeat_color.r,
                             g_map_palette_state.clut_rows[i].animations[0].repeat_color.g,
@@ -589,7 +591,7 @@ void map_update_animations(void) {
 
 /* Stop the blend of CLUT clut_index of a row, or of all sixteen when stop_all is
  * 1. The colors stay as blended so far. */
-void map_stop_palette_animation(s32 clut_row, s32 clut_index, s32 stop_all) {
+void battle_map_stop_palette_animation(s32 clut_row, s32 clut_index, s32 stop_all) {
     s32 index;
 
     if (stop_all == 1) {
@@ -604,7 +606,7 @@ void map_stop_palette_animation(s32 clut_row, s32 clut_index, s32 stop_all) {
 /* Load the sixteen colors of one CLUT into a map CLUT row: the upload staging
  * (g_map_palette_modified_colors), the row's packed mirror, and its
  * decoded 5-bit components and alpha bit. */
-void map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index) {
+void battle_map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_index) {
     s32 color_index;
     s32 selected_clut;
     s32 i;
@@ -645,7 +647,7 @@ void map_extract_palette_colors(const palette_t palette, s32 clut_row, s32 clut_
  * sixteen CLUTs (256 colors) when load_all is 1, otherwise the sixteen colors
  * of CLUT clut_index. The blends of the loaded CLUTs stop. Nothing happens while
  * the row's updates are disabled. */
-void map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all) {
+void battle_map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_index, s32 load_all) {
     s32 clear_index;
     s32 i;
 
@@ -659,11 +661,11 @@ void map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 clut_ind
         }
 
         for (i = 0; i < MAP_CLUTS_PER_ROW; i++) {
-            map_extract_palette_colors(palettes[i], clut_row, i);
+            battle_map_extract_palette_colors(palettes[i], clut_row, i);
         }
     } else {
         g_map_palette_state.clut_rows[clut_row].animations[clut_index].active = 0;
-        map_extract_palette_colors(*palettes, clut_row, clut_index);
+        battle_map_extract_palette_colors(*palettes, clut_row, clut_index);
     }
 
     g_map_palette_state.upload_pending = 1;

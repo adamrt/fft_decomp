@@ -30,10 +30,10 @@ s32 battle_state_enter_effect_playback(void) {
     s32 previous_animation_speed;
 
     /* The target loads no argument; the parameter is the $a0 value unhandled states return. */
-    if (effect_init_data() != 0) {
+    if (battle_effect_init_data() != 0) {
         return 1;
     }
-    effect_play();
+    battle_effect_play();
     previous_state = g_battle_game_state;
     previous_animation_speed = g_main_system_animation_speed;
     g_battle_game_state = BATTLE_GAME_STATE_EFFECT;
@@ -83,77 +83,77 @@ s32 battle_state_set_animation_speed(s32 speed) {
     return -1;
 }
 
-void map_store_selected_tile_coordinates(SVECTOR* destination) {
+void battle_map_store_selected_tile_coordinates(SVECTOR* destination) {
     main_util_set_svector(destination, g_battle_cursor_x, g_battle_cursor_z, g_battle_cursor_y);
 }
 
 /* Write the map's width and depth in tiles to `destination` as (x, 0, z). */
-void map_store_max_coordinates(SVECTOR* destination) {
+void battle_map_store_max_coordinates(SVECTOR* destination) {
     main_util_set_svector(destination, g_map_max_x, 0, g_map_max_y);
 }
 
 /* The tile a unit stands on, by runtime id. The runtime record lookup is not checked:
  * an id without one is read through address 0. */
-map_tile_t* map_get_unit_tile_by_runtime_id(u32 runtime_id) {
+map_tile_t* battle_map_get_unit_tile_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
 
-    return map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    return battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
 }
 
 /* The tile a unit stands on, by battle id. The runtime record lookup is not checked:
  * an id without one is read through address 0. */
-map_tile_t* map_get_tile_data_ptr_from_battle_id(u32 battle_id) {
+map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id) {
     battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
 
-    return map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
+    return battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
 }
 
 /* The tile under a unit's integer world position (28 units per tile) on its map layer. */
-map_tile_t* map_get_unit_tile_from_world_coords(u32 runtime_id) {
+map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id) {
     battle_unit_t* unit;
 
     unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
-    return map_get_tile_data_pointer(
+    return battle_map_get_tile_data_pointer(
         unit->world_coords.vx / MAP_TILE_SIZE, unit->world_coords.vz / MAP_TILE_SIZE, unit->map_z);
 }
 
 /* Ask the map loader to load what the current map state needs. 1 when the load
  * started, 0 when a file read is still in progress. */
-s32 map_start_data_load(void) {
-    return map_load_data(g_map_id, MAP_LOAD_COMMAND_START) != 0;
+s32 battle_map_start_data_load(void) {
+    return battle_map_load_data(g_map_id, MAP_LOAD_COMMAND_START) != 0;
 }
 
 /* Advance the current map's load by one step. Nonzero while it is still loading. */
-s32 map_poll_data_load(void) {
-    return map_load_data(g_map_id, MAP_LOAD_COMMAND_POLL);
+s32 battle_map_poll_data_load(void) {
+    return battle_map_load_data(g_map_id, MAP_LOAD_COMMAND_POLL);
 }
 
 /* Event Use3DObject: start state row value_b of map mesh part value_a (map data
  * command 0x80, with flag 1). Always returns 1. */
-s32 map_command_set_3d_object_state(s32 value_a, s32 value_b) {
-    map_dispatch_map_data_command(MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, value_a, value_b, 1);
+s32 battle_map_command_set_3d_object_state(s32 value_a, s32 value_b) {
+    battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_SET_3D_OBJECT_STATE, value_a, value_b, 1);
     return 1;
 }
 
 /* Return the map mesh part's animation state; zero means its animation has ended. */
-s32 map_command_get_3d_object_state(s32 value) {
-    return map_dispatch_map_data_command(MAP_DATA_COMMAND_GET_3D_OBJECT_STATE, value, 1, 1);
+s32 battle_map_command_get_3d_object_state(s32 value) {
+    return battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_GET_3D_OBJECT_STATE, value, 1, 1);
 }
 
 /* Start map texture animation value_a from its first frame (map data command
  * 0x83). value_b goes in the object state argument, which that command does not
  * read. Always returns 1. */
-s32 map_command_start_texture_animation(s32 value_a, s32 value_b) {
-    map_dispatch_map_data_command(MAP_DATA_COMMAND_START_TEXTURE_ANIMATION, value_a, value_b, 1);
+s32 battle_map_command_start_texture_animation(s32 value_a, s32 value_b) {
+    battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_START_TEXTURE_ANIMATION, value_a, value_b, 1);
     return 1;
 }
 
 /* Return whether the map texture animation is still playing. */
-s32 map_command_get_texture_animation_active(s32 value) {
-    return map_dispatch_map_data_command(MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE, value, 1, 1);
+s32 battle_map_command_get_texture_animation_active(s32 value) {
+    return battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE, value, 1, 1);
 }
 
-s32 camera_is_active(void) {
+s32 battle_camera_is_active(void) {
     if (g_camera_step_vector.vx == 0 && g_camera_step_vector.vy == 0 && g_camera_step_vector.vz == 0
         && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
         && g_camera_zoom_action == CAMERA_STEP_NONE) {
@@ -164,12 +164,12 @@ s32 camera_is_active(void) {
 
 /* Move the cursor to the unit with this battle id. Returns 1 when the unit has
  * runtime data, otherwise 0 with the cursor unchanged. */
-s32 target_move_cursor_to_battle_id(u32 battle_id) {
+s32 battle_target_move_cursor_to_battle_id(u32 battle_id) {
     battle_unit_t* unit;
 
     unit = battle_unit_get_by_battle_id(battle_id & 0xFFFF);
     if (unit != 0) {
-        target_move_cursor_to_unit(unit);
+        battle_target_move_cursor_to_unit(unit);
         return 1;
     }
     return 0;
@@ -178,7 +178,7 @@ s32 target_move_cursor_to_battle_id(u32 battle_id) {
 /* Aim a projectile from one unit at another: set up the direct trajectory to the
  * target's tile and make the target the attacker's only target. Returns 1 when
  * both units exist. Nothing in the game calls it. */
-s32 effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) {
+s32 battle_effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) {
     battle_unit_t* attacker;
     battle_unit_t* target;
     SVECTOR target_position;
@@ -187,7 +187,7 @@ s32 effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) {
     target = battle_unit_get_by_battle_id(target_id);
     if (target != 0) {
         main_util_set_svector(&target_position, target->map_x, target->map_y, target->map_z);
-        effect_check_direct_trajectory_to_target(attacker_id, &target_position, target_id);
+        battle_effect_check_direct_trajectory_to_target(attacker_id, &target_position, target_id);
         if (attacker != 0) {
             attacker->strike.target_count = 1;
             attacker->strike.target_list[0] = target_id;
@@ -197,18 +197,18 @@ s32 effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) {
     return 0;
 }
 
-s32 effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
+s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit;
 
     unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
-        effect_set_secondary_teleport(unit);
+        battle_effect_set_secondary_teleport(unit);
         return 1;
     }
     return 0;
 }
 
-void map_mark_data_load_complete(void) {
+void battle_map_mark_data_load_complete(void) {
     g_map_data_load_complete = 1;
 }
 
@@ -232,7 +232,7 @@ void battle_state_clear_frame_pacing(void) {
     g_battle_frame_pacing = 0;
 }
 
-void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation) {
+void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation) {
     s32 tile_x;
     s32 tile_y;
 
@@ -243,14 +243,15 @@ void camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rota
     g_battle_cursor_x = tile_x;
     tile_y = g_camera_current_real_coords.vz / (MAP_TILE_SIZE * ONE);
     g_battle_cursor_y = tile_y;
-    g_camera_current_real_coords.vy = -map_get_tile_data_pointer(tile_x, tile_y, 0)->height * (MAP_HEIGHT_STEP * ONE);
+    g_camera_current_real_coords.vy
+        = -battle_map_get_tile_data_pointer(tile_x, tile_y, 0)->height * (MAP_HEIGHT_STEP * ONE);
 }
 
 /* Resets the camera for a new map: screen offset (0x100, 0xa0, 0x280), zoom ONE,
  * pitch 0x12e (the low tilt), yaw 0xe00, position at the origin, cursor on tile
  * (0, 0), no acting or casting unit, no rotation, tilt or zoom in progress and
  * directional panning off. */
-void camera_init_defaults(void) {
+void battle_camera_init_defaults(void) {
     main_util_set_vector(&g_camera_current_screen_offset, 0x100, 0xA0, 0x280);
     main_util_set_vector(&g_camera_zoom, ONE, ONE, ONE);
     main_util_set_svector(&g_camera_render_state, 0x12E, 0xE00, 0);
@@ -413,7 +414,7 @@ void battle_weather_randomize_from_calendar(void) {
  * finishes. `unused_18` reproduces the target's unreferenced frame slot at sp+0x18.
  *
  * Jump table: .rodata 0x80068260, 13 32-bit addresses. */
-s32 map_step_init_sequence(s32 map_id, s32 step) {
+s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
     s32 result;
     u8 unused_18[4];
 
@@ -422,9 +423,9 @@ s32 map_step_init_sequence(s32 map_id, s32 step) {
         /* No sound id is loaded: the callee receives map_id, still in $a0. */
         main_sound_stop_sfx(map_id);
         step++;
-        camera_init_defaults();
-        map_init_palette_state();
-        map_load_palette_data(&g_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
+        battle_camera_init_defaults();
+        battle_map_init_palette_state();
+        battle_map_load_palette_data(&g_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
         g_main_gfx_unit_graphics_load_queue.count = 0;
         menu_request_open_small();
         break;
@@ -434,12 +435,12 @@ s32 map_step_init_sequence(s32 map_id, s32 step) {
         }
         break;
     case 2:
-        if (map_load_data(map_id, MAP_LOAD_COMMAND_START) != 0) {
+        if (battle_map_load_data(map_id, MAP_LOAD_COMMAND_START) != 0) {
             step++;
         }
         break;
     case 3:
-        if (map_load_data(map_id, MAP_LOAD_COMMAND_POLL) == 0) {
+        if (battle_map_load_data(map_id, MAP_LOAD_COMMAND_POLL) == 0) {
             step++;
         }
         break;
@@ -485,14 +486,14 @@ s32 map_step_init_sequence(s32 map_id, s32 step) {
         step++;
         break;
     case 12:
-        sound_start_weather_sfx();
+        battle_sound_start_weather_sfx();
         /* Seed the three color fades from the colors the loaded map set. */
-        map_init_background_gradient();
-        map_init_ambient_light();
-        map_init_darkness();
-        map_upload_clut_rows();
-        action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RESET);
-        ai_init_workspace();
+        battle_map_init_background_gradient();
+        battle_map_init_ambient_light();
+        battle_map_init_darkness();
+        battle_map_upload_clut_rows();
+        battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RESET);
+        battle_ai_init_workspace();
         step++;
         break;
     }
@@ -503,7 +504,7 @@ s32 map_step_init_sequence(s32 map_id, s32 step) {
  *
  * Loader steps retain their current state while work is pending. The final
  * steps initialize scenario audio, map lighting, and AI state. */
-s32 map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running) {
+s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running) {
     s32 result;
     u8 unused_18[4];
 
@@ -512,25 +513,25 @@ s32 map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_
         /* Called with no argument: the callee receives map_id, still in $a0
          * (passing it explicitly changes the register allocation). */
         ((void (*)(void))main_sound_stop_sfx)();
-        camera_init_defaults();
-        map_init_palette_state();
+        battle_camera_init_defaults();
+        battle_map_init_palette_state();
         if (g_main_system_frontend_world_result == 1) {
             battle_weather_randomize_from_calendar();
         }
         step++;
-        map_load_palette_data(&g_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
+        battle_map_load_palette_data(&g_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
         g_main_gfx_unit_graphics_load_queue.count = 0;
         break;
     case 1:
         step++;
         break;
     case 2:
-        if (map_load_data(map_id, MAP_LOAD_COMMAND_START) != 0) {
+        if (battle_map_load_data(map_id, MAP_LOAD_COMMAND_START) != 0) {
             step++;
         }
         break;
     case 3:
-        if (map_load_data(map_id, MAP_LOAD_COMMAND_POLL) == 0) {
+        if (battle_map_load_data(map_id, MAP_LOAD_COMMAND_POLL) == 0) {
             step++;
         }
         break;
@@ -603,14 +604,14 @@ s32 map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_
         step++;
         break;
     case 12:
-        sound_start_weather_sfx();
+        battle_sound_start_weather_sfx();
         /* Seed the three color fades from the colors the loaded map set. */
-        map_init_background_gradient();
-        map_init_ambient_light();
-        map_init_darkness();
-        map_upload_clut_rows();
-        action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RESET);
-        ai_init_workspace();
+        battle_map_init_background_gradient();
+        battle_map_init_ambient_light();
+        battle_map_init_darkness();
+        battle_map_upload_clut_rows();
+        battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RESET);
+        battle_ai_init_workspace();
         step++;
         break;
     }

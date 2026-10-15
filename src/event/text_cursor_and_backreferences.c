@@ -887,7 +887,7 @@ end:
 
 #    define YIELD_OR_INPUT()                                                                                           \
         if (g_formation_screen_active != 0 && rec.box_type == DIALOG_BOX_TYPE_HELP) {                                  \
-            menu_input_update_dialog_state();                                                                          \
+            world_menu_input_update_dialog_state();                                                                    \
         } else {                                                                                                       \
             thread_yield();                                                                                            \
         }
@@ -971,7 +971,7 @@ void text_run_dialog_thread_variant(void) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
         if (thread->function_parameter_2 == 0x807) {
-            i = menu_get_party_unit_name_id();
+            i = world_menu_get_party_unit_name_id();
             if (i >= 0x2FF) {
                 i = 0x2FF;
             }
@@ -1885,7 +1885,7 @@ void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coords) {
 
     world_coords = battle_unit_get_world_coords_by_runtime_id(runtime_id);
     if (world_coords != (SVECTOR*)-1) {
-        camera_project_world_coords_to_screen(world_coords, screen_coords);
+        battle_camera_project_world_coords_to_screen(world_coords, screen_coords);
     }
 }
 

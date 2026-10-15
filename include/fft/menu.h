@@ -1798,7 +1798,7 @@ extern u16 g_menu_input_block_frames;
 void menu_set_text_origin(s32 x, s32 y);
 void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
 void menu_input_clear_state(void);
-void menu_input_update_dialog_state(void);
+void world_menu_input_update_dialog_state(void);
 
 /* list threads */
 extern u32* g_menu_input_controller;

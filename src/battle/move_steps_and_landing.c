@@ -13,7 +13,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-void move_interpolate_partial(battle_unit_t* unit, s32 scale) {
+void battle_move_interpolate_partial(battle_unit_t* unit, s32 scale) {
     unit->velocity.vx = (scale * unit->velocity.vx) / ONE;
     unit->velocity.vy = (scale * unit->velocity.vy) / ONE;
     unit->velocity.vz = (scale * unit->velocity.vz) / ONE;
@@ -21,7 +21,7 @@ void move_interpolate_partial(battle_unit_t* unit, s32 scale) {
 
 /* Starts the teleport animation and sets the step destination: the tile in the path bytes,
  * or the unit's own tile when the teleport failed. */
-void move_start_teleport_animation(battle_unit_t* unit) {
+void battle_move_start_teleport_animation(battle_unit_t* unit) {
     unit->step_phase = MOVE_STEP_PHASE_TELEPORT_ANIMATION;
     battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_TELEPORT, unit->facing, unit);
     if (unit->path.count == MOVE_PATH_TELEPORT) {
@@ -36,10 +36,10 @@ void move_start_teleport_animation(battle_unit_t* unit) {
 }
 
 /* Puts the unit in the TELEPORT_START step phase. The init record it builds is not used. */
-void move_start_teleport_step(battle_unit_t* unit) {
+void battle_move_start_teleport_step(battle_unit_t* unit) {
     effect_secondary_init_t data;
 
-    effect_build_secondary_init(unit, &data);
+    battle_effect_build_secondary_init(unit, &data);
     unit->step_phase = MOVE_STEP_PHASE_TELEPORT_START;
 }
 
@@ -48,7 +48,7 @@ void move_start_teleport_step(battle_unit_t* unit) {
  * The step byte's top two bits pick the direction, which sets the facing and
  * edge offset; its low two bits extend the destination tile coordinate. The
  * second tile argument is unused. */
-void move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     move_step_t current_step;
     move_step_t* step;
     s32 edge_height;
@@ -88,8 +88,8 @@ void move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const ma
     }
     unit->facing = facing;
     battle_unit_set_idle_animation_for_movement(unit);
-    move_set_float_step_delta_center_to_edge(unit, step, from, edge_height);
-    move_interpolate_partial(unit, unit->walk_speed);
+    battle_move_set_float_step_delta_center_to_edge(unit, step, from, edge_height);
+    battle_move_interpolate_partial(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -101,7 +101,7 @@ void move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const ma
  * extend the destination tile coordinate. A carried rider (mount state MOUNT)
  * takes animation 0x32 with the mount's facing. The caller also passes the
  * current and destination tiles, which this variant never reads. */
-void move_start_fly_step(
+void battle_move_start_fly_step(
     battle_unit_t* unit, const map_tile_t* unused_current_tile, const map_tile_t* unused_destination_tile) {
     move_step_t current_step;
     s32 facing;
@@ -147,8 +147,8 @@ void move_start_fly_step(
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_RIDING, unit->facing, rider);
         }
     }
-    move_set_velocity_for_contiguous_clamped_steps(unit, &unit->path, step);
-    move_interpolate_partial(unit, unit->walk_speed);
+    battle_move_set_velocity_for_contiguous_clamped_steps(unit, &unit->path, step);
+    battle_move_interpolate_partial(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -158,7 +158,7 @@ void move_start_fly_step(
  * two bits pick the direction, which sets the facing and edge offset; its low
  * two bits extend the destination tile coordinate. The switch has no default, so `facing` is unset
  * for a direction outside 0-3 (none exists), and game state 0x2d leaves the unit's facing unchanged. */
-void move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
+void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
     move_step_t* step;
     move_step_t current_step;
     s32 edge_height;
@@ -199,8 +199,8 @@ void move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map
         unit->facing = facing;
         battle_unit_set_idle_animation_for_movement(unit);
     }
-    move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
-    move_interpolate_partial(unit, unit->walk_speed);
+    battle_move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
+    battle_move_interpolate_partial(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -212,7 +212,8 @@ void move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map
  * destination tile coordinate. A carried rider (mount state MOUNT) takes
  * animation 0x32 with the mount's facing. The interpolation scale is
  * step_speed, the 0x2000 climb scale, rather than the walk speed. */
-void move_start_unit_step_at_climb_speed(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
+void battle_move_start_unit_step_at_climb_speed(
+    battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
     move_step_t current_step;
     move_step_t* step;
     s32 edge_height;
@@ -255,8 +256,8 @@ void move_start_unit_step_at_climb_speed(battle_unit_t* unit, const map_tile_t* 
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_RIDING, unit->facing, rider);
         }
     }
-    move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
-    move_interpolate_partial(unit, unit->step_speed);
+    battle_move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
+    battle_move_interpolate_partial(unit, unit->step_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -267,7 +268,7 @@ void move_start_unit_step_at_climb_speed(battle_unit_t* unit, const map_tile_t* 
  * jump (length 2+) uses animation 0x1e with a per-direction facing, while a
  * short hop dismounts any rider and toggles movement bit 27 to alternate the
  * 0x30/0x31 hop animation. */
-void move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to) {
+void battle_move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to) {
     u16 facings[4] = { BATTLE_FACING_EAST, BATTLE_FACING_WEST, BATTLE_FACING_SOUTH, BATTLE_FACING_NORTH };
     u8 next;
     u8 jump_phases[4] = { MOVE_STEP_PHASE_JUMP_START_EAST, MOVE_STEP_PHASE_JUMP_START_WEST,
@@ -337,7 +338,7 @@ void move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unused_fro
  * The step byte's top two bits give the direction, as in
  * move_start_unit_jump_step. `unused_10` reproduces an unreferenced
  * 16-byte frame slot below the height data. */
-void move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     VECTOR unused_10;
     battle_unit_height_data_t height_data;
     move_step_t* step;
@@ -405,7 +406,7 @@ void move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from
  *
  * Case bodies store the destination before clearing the other velocity axis;
  * that order gives the target's map_x/step load order. */
-void move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     s32 unused[4];
     battle_unit_height_data_t height_data;
     s32 rise;
@@ -487,7 +488,7 @@ void move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from,
  * in-place accumulation register; `rise_height` and `apex` keep the multiplication
  * order (term * 6 or 12 before gravity) that one folded expression reassociates.
  */
-void move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
+void battle_move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     move_step_t current_step;
     s32 rise;
     s32 frames;
@@ -573,7 +574,7 @@ void move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* fro
  *
  * The first switch repeats the layer test that the statement before it has just
  * made false, so its bodies never run. */
-void move_apply_unit_step_velocity(battle_unit_t* unit) {
+void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
     s16 tile[2];
     u8 layer;
     s16 ground_height;
@@ -597,9 +598,9 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
         if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
             && unit->map_z != unit->movement.destination_z) {
             layer = unit->map_z = unit->movement.destination_z;
-            move_set_unit_step_delta_edge_to_center(unit, &unit->current_path_step,
-                map_get_tile_data_pointer(tile[0], tile[1], layer), unit->destination_edge_height);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_set_unit_step_delta_edge_to_center(unit, &unit->current_path_step,
+                battle_map_get_tile_data_pointer(tile[0], tile[1], layer), unit->destination_edge_height);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         }
         break;
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_SOUTH:
@@ -609,9 +610,9 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
         if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
             && unit->map_z != unit->movement.destination_z) {
             layer = unit->map_z = unit->movement.destination_z;
-            move_set_unit_step_delta_edge_to_center(unit, &unit->current_path_step,
-                map_get_tile_data_pointer(tile[0], tile[1], layer), unit->destination_edge_height);
-            move_interpolate_partial(unit, unit->step_speed);
+            battle_move_set_unit_step_delta_edge_to_center(unit, &unit->current_path_step,
+                battle_map_get_tile_data_pointer(tile[0], tile[1], layer), unit->destination_edge_height);
+            battle_move_interpolate_partial(unit, unit->step_speed);
         }
         break;
     }
@@ -627,12 +628,12 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_WALK_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_WALK_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = map_get_tile_data_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         if ((-unit->real.vy / ONE) <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_set_unit_step_delta_center_to_edge(
+            battle_move_set_unit_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->current_edge_height);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         } else {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
@@ -653,15 +654,15 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = map_get_tile_data_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         if ((-unit->real.vy / ONE) <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             if (unit->step_speed <= 0x7FFF) {
                 unit->step_speed += g_move_jump_gravity;
             }
-            move_set_unit_step_delta_center_to_edge(
+            battle_move_set_unit_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->current_edge_height);
-            move_interpolate_partial(unit, unit->step_speed);
+            battle_move_interpolate_partial(unit, unit->step_speed);
         } else {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
@@ -682,12 +683,12 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = map_get_tile_data_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_set_unit_step_delta_edge_to_center(
+            battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         }
         if (-ground_height < (-unit->real.vy / ONE)) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
@@ -709,15 +710,15 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = map_get_tile_data_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             if (unit->step_speed <= 0x7FFF) {
                 unit->step_speed += g_move_jump_gravity;
             }
-            move_set_unit_step_delta_edge_to_center(
+            battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            move_interpolate_partial(unit, unit->step_speed);
+            battle_move_interpolate_partial(unit, unit->step_speed);
         }
         if ((-unit->real.vy / ONE) > -ground_height) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
@@ -762,13 +763,13 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLOAT_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = map_get_tile_data_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_set_float_step_delta_center_to_edge(
+            battle_move_set_float_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         } else {
             /* Shared with the next case: a duplicated branch does not merge. */
             goto accelerate;
@@ -780,13 +781,13 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLOAT_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_tile = map_get_tile_data_pointer(tile[0], tile[1], layer);
+        map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_set_float_step_delta_edge_to_center(
+            battle_move_set_float_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         } else {
         accelerate:
             /* Keeps depth live here, so it takes a0 and reorg leaves `move a0,s0` out of both landing tests. */
@@ -802,11 +803,11 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLY_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_get_tile_data_pointer(tile[0], tile[1], layer);
+        battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_set_velocity_for_contiguous_clamped_steps(unit, &unit->path, &unit->current_path_step);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_set_velocity_for_contiguous_clamped_steps(unit, &unit->path, &unit->current_path_step);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         }
         unit->shadow_dirty |= 1;
         break;
@@ -815,12 +816,13 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_WEST:
         unit->real.vy += unit->velocity.vy;
-        map_get_tile_data_pointer(tile[0], tile[1], layer);
+        battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
         depth = -unit->real.vy;
         if (depth / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
-            move_set_velocity_for_contiguous_steps_with_final_tile_height(unit, &unit->path, &unit->current_path_step);
-            move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
+                unit, &unit->path, &unit->current_path_step);
+            battle_move_interpolate_partial(unit, unit->walk_speed);
         }
         unit->shadow_dirty |= 1;
         break;
@@ -840,7 +842,7 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
 /* Play a sound on a free SFX channel pair unless the unit's motion flags suppress
  * its sounds. The unit sequence scripts, the jump and landing steps and the death
  * animations play their sounds through it. */
-void sound_play_movement_sfx(battle_unit_t* unit, s32 sound_id) {
+void battle_sound_play_movement_sfx(battle_unit_t* unit, s32 sound_id) {
     if ((unit->movement.suppress_sfx_and_landing_effects) == 0) {
         main_sound_play_sfx_find_channel(sound_id);
     }
@@ -851,14 +853,14 @@ void sound_play_movement_sfx(battle_unit_t* unit, s32 sound_id) {
  * water and marsh surfaces, MAIN_SFX_LAND_WOOD for wooden floor, tree and box,
  * and MAIN_SFX_LAND_DEFAULT otherwise. Nothing plays for a unit whose motion
  * flags suppress landing effects, or when the destination tile does not exist. */
-void sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
+void battle_sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 surface;
     s32 sfx;
 
     if (unit->movement.suppress_sfx_and_landing_effects)
         return;
-    tile = map_get_tile_data_pointer(
+    tile = battle_map_get_tile_data_pointer(
         unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
     if (tile == 0)
         return;
@@ -898,13 +900,13 @@ void sound_play_landing_sfx_by_surface_type(battle_unit_t* unit) {
  *
  * Nothing starts when the unit's 32-bit movement value carries
  * BATTLE_MOTION_FLAG_SUPPRESS_SFX_AND_LANDING_EFFECTS. */
-void effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
+void battle_effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
     map_tile_t* tile;
     s32 surface;
 
     if (unit->movement.suppress_sfx_and_landing_effects)
         return;
-    tile = map_get_tile_data_pointer(
+    tile = battle_map_get_tile_data_pointer(
         unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
     if (tile == 0)
         return;
@@ -936,7 +938,7 @@ void effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
     case MAP_SURFACE_IRON_PLATE:
     case MAP_SURFACE_TOMBSTONE:
     case MAP_SURFACE_COFFIN:
-        effect_set_secondary_fall_dust(unit);
+        battle_effect_set_secondary_fall_dust(unit);
         break;
     case MAP_SURFACE_SWAMP:
     case MAP_SURFACE_MARSH:
@@ -946,7 +948,7 @@ void effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
     case MAP_SURFACE_LAKE:
     case MAP_SURFACE_SEA:
     case MAP_SURFACE_WATERFALL:
-        effect_set_secondary_splash(unit);
+        battle_effect_set_secondary_splash(unit);
         break;
     }
 }
@@ -956,7 +958,8 @@ void effect_set_landing_secondary_by_surface_type(battle_unit_t* unit) {
  * one step away, as encoded by current_path_step: bits 6-7 select the axis and
  * sign, bit 5 selects the map layer and bits 0-1 add extra distance.
  */
-void move_get_current_and_destination_tiles(battle_unit_t* unit, map_tile_t** out_current, map_tile_t** out_target) {
+void battle_move_get_current_and_destination_tiles(
+    battle_unit_t* unit, map_tile_t** out_current, map_tile_t** out_target) {
     u8 movement;
     u32 flags;
     s32 dir;
@@ -969,7 +972,7 @@ void move_get_current_and_destination_tiles(battle_unit_t* unit, map_tile_t** ou
     layer = unit->map_z;
     /* The scalar snapshot preserves the direction switch and layer extraction registers. */
     movement = *(u8*)&unit->current_path_step;
-    *out_current = map_get_tile_data_pointer(x, y, layer);
+    *out_current = battle_map_get_tile_data_pointer(x, y, layer);
     flags = movement;
     dir = flags >> 6;
     switch (dir) {
@@ -1008,7 +1011,7 @@ void move_get_current_and_destination_tiles(battle_unit_t* unit, map_tile_t** ou
     default:
         return;
     }
-    *out_target = map_get_tile_data_pointer(x, y, layer);
+    *out_target = battle_map_get_tile_data_pointer(x, y, layer);
 }
 
 /* Settles a unit on its map tile when its knockback or path move ends, or once it
@@ -1036,7 +1039,7 @@ void battle_unit_store_coordinate_mount_animation_data(battle_unit_t* unit) {
     }
     battle_unit_set_move_and_world_coords(unit);
     battle_gfx_calculate_world_height_from_world_coords(unit);
-    target_move_cursor_to_unit(unit);
+    battle_target_move_cursor_to_unit(unit);
     unit->path.count = 0;
     battle_unit_set_animation_based_on_status(unit);
 }
@@ -1055,7 +1058,7 @@ void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
         other = battle_unit_get_by_battle_id(unit->path.pending_mount & BATTLE_PENDING_MOUNT_ID_MASK);
         if (other != 0) {
             battle_unit_mount_rider_onto_unit(unit, other);
-            sound_play_movement_sfx(unit, MAIN_SFX_LAND_DEFAULT);
+            battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_DEFAULT);
         }
         return;
     }
@@ -1082,7 +1085,7 @@ void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
  *
  * y is the map depth axis (world_coords.vz). Dead, crystal, treasure and jumping units
  * are left where they are. */
-void move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, s32 delta) {
+void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, s32 delta) {
     s16 axis;
     s16 screen_z;
 
@@ -1127,7 +1130,7 @@ void move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, 
  * center along direction. It is skipped while the mover's step before last
  * carries movement flag 0x10. The case order and per-case center temporaries
  * reproduce the target's cross-jumped tails. */
-void move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
+void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
     battle_unit_t* other;
     s32 dist;
     s32 x;
@@ -1168,7 +1171,7 @@ void move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
         dist = 7;
     }
     dist -= 7;
-    move_displace_unit_along_step_direction(other, x, y, -dist * 3 / 2);
+    battle_move_displace_unit_along_step_direction(other, x, y, -dist * 3 / 2);
 }
 
 /* Pushes a unit sharing the mover's destination tile aside, mirroring
@@ -1180,7 +1183,7 @@ void move_displace_overlapping_unit(battle_unit_t* unit, s32 direction) {
  * The case order and the reused `dist` temporary reproduce the target's
  * cross-jumped tails and its s1 allocation; spelling the second path index as
  * offset + base reproduces the offset-before-base address add. */
-void move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 direction) {
+void battle_move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 direction) {
     battle_unit_t* other;
     s32 dist;
     s32 x;
@@ -1252,13 +1255,13 @@ void move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 direction) 
             }
         }
     }
-    move_displace_unit_along_step_direction(other, x, y, dist);
+    battle_move_displace_unit_along_step_direction(other, x, y, dist);
 }
 
 /* Travel direction of the step in progress (move_direction_e), from the
  * unit's tile to its destination tile. A difference in y decides before one in x,
  * and the result is NORTH when the two tiles are the same. */
-move_direction_e move_get_direction(const battle_unit_t* unit) {
+move_direction_e battle_move_get_direction(const battle_unit_t* unit) {
     move_direction_e direction;
 
     if (unit->map_y < unit->movement.destination_y) {
@@ -1278,33 +1281,33 @@ move_direction_e move_get_direction(const battle_unit_t* unit) {
 /* Continue a jump step on the ground once the landing animation is over: restart
  * the step (at climb speed when the step byte's climb bit is set) and enter its
  * to-center stage for the direction of travel. */
-void move_advance_display_unit_step(battle_unit_t* unit) {
+void battle_move_advance_display_unit_step(battle_unit_t* unit) {
     s32 direction;
 
-    direction = move_get_direction(unit);
+    direction = battle_move_get_direction(unit);
     switch (g_move_step_value.climb) {
     case 0:
-        move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+        battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
         unit->step_phase = g_move_walk_to_center_phases[direction];
         break;
     case 1:
-        move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
+        battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
         unit->step_phase = g_move_climb_to_center_phases[direction];
         break;
     }
 }
 
 /* Runs the knockback step unless the unit is mid-way through animation 0x20. */
-void move_update_knockback_after_animation(battle_unit_t* unit) {
+void battle_move_update_knockback_after_animation(battle_unit_t* unit) {
     if (((unit->animation.sequence_id >> 1) != BATTLE_UNIT_ANIMATION_LAND) || (unit->animation.wait == 0)) {
-        move_advance_display_unit_step(unit);
+        battle_move_advance_display_unit_step(unit);
     }
 }
 
 /* Whether a walking unit has reached the near edge of its movement destination
  * tile in the given direction.  Tiles are 28 world units wide and the test
  * keeps a 7-unit margin. */
-s32 move_has_reached_destination_tile_entry_edge(s32 direction, battle_unit_t* unit) {
+s32 battle_move_has_reached_destination_tile_entry_edge(s32 direction, battle_unit_t* unit) {
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
         return unit->world_coords.vz >= ((unit->movement.destination_y * MAP_TILE_SIZE) + 7);
@@ -1322,19 +1325,19 @@ s32 move_has_reached_destination_tile_entry_edge(s32 direction, battle_unit_t* u
  * drops the horizontal velocity, and either starts the next step (walk or
  * climb) or lands the unit, playing the landing sound and terrain effect.
  */
-void move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
+void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     s32 direction;
     s16 target_z;
     map_tile_t* tile;
 
     battle_gfx_load_trap_and_unit_frame_parts(
         unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
-    direction = move_get_direction(unit);
-    move_apply_unit_step_velocity(unit);
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
-        move_displace_unit_at_destination_tile(unit, direction);
+        battle_move_displace_unit_at_destination_tile(unit, direction);
     }
-    if (move_has_reached_destination_tile_entry_edge(direction, unit) == 0) {
+    if (battle_move_has_reached_destination_tile_entry_edge(direction, unit) == 0) {
         return;
     }
     unit->velocity.vz = 0;
@@ -1349,15 +1352,15 @@ void move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
             unit->velocity.vy = 0;
             switch (g_move_step_value.climb) {
             case 0:
-                move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
                 unit->step_phase = g_move_walk_to_center_phases[direction];
                 break;
             case 1:
-                move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
                 unit->step_phase = g_move_climb_to_center_phases[direction];
                 break;
             }
-            tile = map_get_tile_data_pointer(
+            tile = battle_map_get_tile_data_pointer(
                 unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
             if (tile->depth_half_height.depth == 0) {
                 return;
@@ -1365,8 +1368,8 @@ void move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
             if (-unit->world_coords.vy >= (tile->height + tile->depth_half_height.depth) * 12) {
                 return;
             }
-            sound_play_landing_sfx_by_surface_type(unit);
-            effect_set_landing_secondary_by_surface_type(unit);
+            battle_sound_play_landing_sfx_by_surface_type(unit);
+            battle_effect_set_landing_secondary_by_surface_type(unit);
             return;
         }
         unit->velocity.vy = 0;
@@ -1376,11 +1379,11 @@ void move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
         }
         if (g_move_step_value.mount) {
-            sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
+            battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
             return;
         }
-        sound_play_landing_sfx_by_surface_type(unit);
-        effect_set_landing_secondary_by_surface_type(unit);
+        battle_sound_play_landing_sfx_by_surface_type(unit);
+        battle_effect_set_landing_secondary_by_surface_type(unit);
         return;
     }
     unit->velocity.vy = 0;
@@ -1390,25 +1393,25 @@ void move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
     }
     if (g_move_step_value.mount) {
-        sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
+        battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
         return;
     }
-    sound_play_landing_sfx_by_surface_type(unit);
-    effect_set_landing_secondary_by_surface_type(unit);
+    battle_sound_play_landing_sfx_by_surface_type(unit);
+    battle_effect_set_landing_secondary_by_surface_type(unit);
 }
 
 /* Advances a jumping unit's ascent. Once its vertical velocity is no longer
  * negative, the unit takes the destination level and, when step flag 0x10 is
  * set, records the unit standing on the destination tile (id plus one). */
-void move_update_airborne_ascent_phase(battle_unit_t* unit) {
+void battle_move_update_airborne_ascent_phase(battle_unit_t* unit) {
     battle_unit_t* occupant;
     s32 direction;
 
     battle_gfx_load_trap_and_unit_frame_parts(
         unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
-    direction = move_get_direction(unit);
+    direction = battle_move_get_direction(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
-        move_displace_overlapping_unit(unit, direction);
+        battle_move_displace_overlapping_unit(unit, direction);
     }
     if (unit->velocity.vy >= 0) {
         unit->step_phase = g_move_jump_descent_phases[direction];
@@ -1431,7 +1434,7 @@ void move_update_airborne_ascent_phase(battle_unit_t* unit) {
  * along the given facing.  Tile centers are 28 world units apart with a
  * half-tile offset of 14.
  */
-s32 move_has_reached_destination_tile_center(s32 direction, battle_unit_t* unit) {
+s32 battle_move_has_reached_destination_tile_center(s32 direction, battle_unit_t* unit) {
     switch (direction) {
     case MOVE_DIRECTION_NORTH:
         return unit->world_coords.vz >= unit->movement.destination_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
@@ -1451,7 +1454,7 @@ enum { TILE_EDGE_MARGIN = 7, REAL_COORD_SHIFT = 12 };
  * band of the tile it currently occupies, mirroring
  * move_snap_axis_to_destination_tile_center against map_x/map_y.
  */
-void move_snap_axis_to_current_tile_exit_edge(s32 direction, battle_unit_t* unit) {
+void battle_move_snap_axis_to_current_tile_exit_edge(s32 direction, battle_unit_t* unit) {
     s16 coordinate;
 
     switch (direction) {
@@ -1487,7 +1490,7 @@ enum {
  * of its movement destination tile: south/north (0, 2) set Y, west/east (1, 3)
  * set X.
  */
-void move_snap_axis_to_destination_tile_center(s32 direction, battle_unit_t* unit) {
+void battle_move_snap_axis_to_destination_tile_center(s32 direction, battle_unit_t* unit) {
     s16 coordinate;
 
     switch (direction) {

@@ -14,7 +14,7 @@
  * Check urgent statuses before the designated-target, enemy and ally passes.
  * Return -1 to suspend and 0 when selection completes.
  */
-s32 ai_select_action_recovery(void) {
+s32 battle_ai_select_action_recovery(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* acting = g_ai_data_base.acting_unit;
     u8 statuses[AI_RECOVERY_STATUS_COUNT];
@@ -45,7 +45,7 @@ s32 ai_select_action_recovery(void) {
     }
     g_ai_data_base.movement_scenario = 0;
 score_tiles:
-    if (ai_score_reachable_tiles() == -1) {
+    if (battle_ai_score_reachable_tiles() == -1) {
         ai->action_selection_phase = AI_RECOVERY_SELECTION_SCORE_TILES;
         return -1;
     }
@@ -53,17 +53,17 @@ score_tiles:
     if (((ai->unit_decisions[target].targeting_flags_2 >> 4) & (AI_TARGET_UNTARGETABLE >> 4))
         || ai->unit_decisions[target].enemy_flag) {
     retarget:
-        ai_select_peril_target();
+        battle_ai_select_peril_target();
         target = ai->acting_unit->auto_battle_target;
     }
-    ai_focus_on_target(target);
+    battle_ai_focus_on_target(target);
 movement:
-    if (ai_build_targeted_movement() == -1) {
+    if (battle_ai_build_targeted_movement() == -1) {
         ai->action_selection_phase = AI_RECOVERY_SELECTION_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 2;
-    ai_invert_target_priority();
+    battle_ai_invert_target_priority();
     ai->movement_scenario = 0;
     if (!g_ai_recovery_status_retry
         && !((ai->unit_decisions[target].targeting_flags_2 >> 6) & (AI_TARGET_DEAD_WITH_RERAISE >> 6))) {
@@ -73,7 +73,7 @@ movement:
                 = g_battle_unit_stats[target].status_sets.current[(status = statuses[g_ai_recovery_status_index]) >> 3];
             if (status_flags & (0x80 >> (status & 7))) {
             cancel_status:
-                result = ai_evaluate_status_cancellation(target, statuses[g_ai_recovery_status_index]);
+                result = battle_ai_evaluate_status_cancellation(target, statuses[g_ai_recovery_status_index]);
                 if (result == -1) {
                     ai->action_selection_phase = AI_RECOVERY_SELECTION_CANCEL_STATUS;
                     return -1;
@@ -93,7 +93,7 @@ movement:
     }
     ai->movement_scenario = 1;
 charging:
-    result = ai_evaluate_charging_movement();
+    result = battle_ai_evaluate_charging_movement();
     switch (result) {
     case -1:
         ai->action_selection_phase = AI_RECOVERY_SELECTION_CHARGING;
@@ -102,29 +102,29 @@ charging:
         return 0;
     }
     ai->movement_scenario = 0;
-    if (ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, target)) {
+    if (battle_ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, target)) {
     target_abilities:
-        if (ai_evaluate_ability_list() == -1) {
+        if (battle_ai_evaluate_ability_list() == -1) {
             ai->action_selection_phase = AI_RECOVERY_SELECTION_TARGET_ABILITIES;
             return -1;
         }
-        if (ai_select_action_ranked())
+        if (battle_ai_select_action_ranked())
             return 0;
     }
     ai->movement_scenario = 1;
-    if (ai_select_active_units(AI_UNIT_FILTER_ENEMIES, 0)) {
+    if (battle_ai_select_active_units(AI_UNIT_FILTER_ENEMIES, 0)) {
     enemy_abilities:
-        if (ai_evaluate_ability_list() == -1) {
+        if (battle_ai_evaluate_ability_list() == -1) {
             ai->action_selection_phase = AI_RECOVERY_SELECTION_ENEMY_ABILITIES;
             return -1;
         }
-        if (ai_select_action_ranked())
+        if (battle_ai_select_action_ranked())
             return 0;
     }
-    if (ai_select_active_units(AI_UNIT_FILTER_ALLIES, 0)) {
+    if (battle_ai_select_active_units(AI_UNIT_FILTER_ALLIES, 0)) {
     ally_abilities:
-        if (ai_evaluate_ability_list() != -1) {
-            if (ai_select_action_ranked())
+        if (battle_ai_evaluate_ability_list() != -1) {
+            if (battle_ai_select_action_ranked())
                 return 0;
         } else {
             ai->action_selection_phase = AI_RECOVERY_SELECTION_ALLY_ABILITIES;
@@ -132,7 +132,7 @@ charging:
         }
     }
     ai->movement_scenario = 2;
-    ai_select_action_fallback();
+    battle_ai_select_action_fallback();
     return 0;
 }
 
@@ -143,7 +143,7 @@ charging:
  * deliberately tests the transient Jump flag, preserving the shipped AI
  * quirk.
  */
-s32 ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
+s32 battle_ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_unit_decision_t* decision;
@@ -176,12 +176,12 @@ s32 ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
         break;
     }
 
-    if (ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, unit_id) != 0) {
+    if (battle_ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, unit_id) != 0) {
         for (ai->ability_counter = 0; ai->ability_counter < AI_ABILITY_LIST_COUNT; ai->ability_counter++) {
             entry = &ai->ability_lists[ai->acting_unit_compact_index][ai->ability_counter];
             if (entry->skillset == SKILLSET_ID_NONE)
                 break;
-            ai_load_ability_entry(entry);
+            battle_ai_load_ability_entry(entry);
             flags = ai->considered_ability.ai_flags.word;
             if (!(flags & AI_ABILITY_CANCEL_STATUS))
                 continue;
@@ -209,13 +209,13 @@ s32 ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
             g_ai_status_candidate_count++;
 
         evaluate_ability:
-            if (ai_evaluate_ability_outcome() == -1)
+            if (battle_ai_evaluate_ability_outcome() == -1)
                 return -1;
         }
     }
 
     if (ai->ranked_actions[0].rank.base_hit_percent != 0) {
-        mem_copy_u16_values(&ai->selected_action, &ai->ranked_actions[0], sizeof(ai_action_data_t));
+        battle_mem_copy_u16_values(&ai->selected_action, &ai->ranked_actions[0], sizeof(ai_action_data_t));
         return 2;
     }
     if (g_ai_status_candidate_count == 0)
@@ -233,7 +233,7 @@ s32 ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
  * the HP-recovery flag enables dead-with-Reraise, Critical and low-HP scoring.
  * Return 1 only when the best signed score exceeds 0x02000000.
  */
-s32 ai_select_peril_target(void) {
+s32 battle_ai_select_peril_target(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 best_score = 0;
     s32 i;
@@ -250,10 +250,10 @@ s32 ai_select_peril_target(void) {
         if (decision->enemy_flag) {
             continue;
         }
-        distance_score = 255 - ai_calculate_distance_between_units(ai->acting_unit, unit);
+        distance_score = 255 - battle_ai_calculate_distance_between_units(ai->acting_unit, unit);
         missing_hp = 128 - ((unit->hp << 7) / unit->max_hp);
         team_bits = unit->team_flags & BATTLE_TEAM_IMPORTANCE_MASK;
-        if (ai_can_cancel_current_status(unit, STATUS_ID_DEAD)
+        if (battle_ai_can_cancel_current_status(unit, STATUS_ID_DEAD)
             && (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE)) {
             status_score = 0x78;
         } else if ((ai->acting_unit_decision->targeting_flags_1 & AI_TARGETING_FLAG_1_CAN_HEAL_ALLIES)
@@ -261,13 +261,13 @@ s32 ai_select_peril_target(void) {
                 || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)]
                     & STATUS_BYTE_MASK(STATUS_ID_CRITICAL)))) {
             status_score = 0x77;
-        } else if (ai_can_cancel_current_status(unit, STATUS_ID_BLOOD_SUCK)) {
+        } else if (battle_ai_can_cancel_current_status(unit, STATUS_ID_BLOOD_SUCK)) {
             status_score = 0x76;
-        } else if (ai_can_cancel_current_status(unit, STATUS_ID_PETRIFY)) {
+        } else if (battle_ai_can_cancel_current_status(unit, STATUS_ID_PETRIFY)) {
             status_score = 0x75;
-        } else if (ai_can_cancel_current_status(unit, STATUS_ID_CONFUSION)) {
+        } else if (battle_ai_can_cancel_current_status(unit, STATUS_ID_CONFUSION)) {
             status_score = 0x74;
-        } else if (ai_can_cancel_current_status(unit, STATUS_ID_FROG)) {
+        } else if (battle_ai_can_cancel_current_status(unit, STATUS_ID_FROG)) {
             status_score = 0x73;
         } else {
             status_score = 0;
@@ -302,7 +302,7 @@ s32 ai_select_peril_target(void) {
  * Innate statuses are excluded. The cancellation mask aggregates the actor's
  * usable ability list; it does not describe only the considered ability.
  */
-s32 ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit) {
+s32 battle_ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit) {
     ai_data_t* ai = &g_ai_data_base;
     s32 byte_off;
     s32 bit;
@@ -327,15 +327,15 @@ s32 ai_can_cancel_current_status(const unit_stats_t* unit, s32 status_bit) {
 /* With an ally in peril, switch to the recovery policy and return -2.
  * Otherwise focus on the unit's auto-battle target and run the general search;
  * -1 suspends. */
-s32 ai_select_action_fading_life(void) {
+s32 battle_ai_select_action_fading_life(void) {
     if (g_ai_data_base.resume_pending == 0) {
-        if (ai_select_peril_target() != 0) {
+        if (battle_ai_select_peril_target() != 0) {
             g_ai_data_base.autobattle_setting = AI_AUTOBATTLE_RECOVERY;
             return -2;
         }
-        ai_focus_on_target(g_ai_data_base.acting_unit->auto_battle_target);
+        battle_ai_focus_on_target(g_ai_data_base.acting_unit->auto_battle_target);
     }
-    if (ai_select_action_general() == -1)
+    if (battle_ai_select_action_general() == -1)
         return -1;
     return 0;
 }
@@ -346,7 +346,7 @@ s32 ai_select_action_fading_life(void) {
  * Try abilities targeting the actor and an existing charge before the broader
  * ability pass. Return -1 to suspend and 0 when selection completes.
  */
-s32 ai_select_action_retreat(void) {
+s32 battle_ai_select_action_retreat(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_ability_entry_t* entry;
     s32 i, result;
@@ -364,25 +364,25 @@ s32 ai_select_action_retreat(void) {
             goto other_abilities;
         }
     }
-    ai_focus_on_target(ai_find_nearest_target(AI_NEAREST_HEALER_OR_CRYSTAL));
+    battle_ai_focus_on_target(battle_ai_find_nearest_target(AI_NEAREST_HEALER_OR_CRYSTAL));
 movement:
-    if (ai_run_cowardly_movement() == -1) {
+    if (battle_ai_run_cowardly_movement() == -1) {
         g_ai_retreat_stage = AI_RETREAT_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 1;
-    ai_invert_target_priority();
-    if (ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, ai->acting_unit_id)) {
+    battle_ai_invert_target_priority();
+    if (battle_ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, ai->acting_unit_id)) {
     self_abilities:
-        if (ai_evaluate_ability_list() == -1) {
+        if (battle_ai_evaluate_ability_list() == -1) {
             g_ai_retreat_stage = AI_RETREAT_SELF_ABILITIES;
             return -1;
         }
     }
-    if (ai_select_action_ranked())
+    if (battle_ai_select_action_ranked())
         return 0;
 charging:
-    result = ai_evaluate_charging_movement();
+    result = battle_ai_evaluate_charging_movement();
     switch (result) {
     case -1:
         g_ai_retreat_stage = AI_RETREAT_CHARGING;
@@ -394,28 +394,28 @@ charging:
         entry = &ai->ability_lists[ai->acting_unit_compact_index][i];
         if (entry->skillset == SKILLSET_ID_NONE)
             break;
-        ai_load_ability_entry(entry);
+        battle_ai_load_ability_entry(entry);
         /* The aligned skillset/usage pair preserves the target's LHU/SH. */
         if (g_main_action_menu_types_by_skillset[entry->skillset] == ACTION_MENU_TYPE_CHARGE)
             entry->usage.policy.usable = 0;
     }
-    if (ai_select_active_units(AI_UNIT_FILTER_ANY, 255)) {
+    if (battle_ai_select_active_units(AI_UNIT_FILTER_ANY, 255)) {
     other_abilities:
-        if (ai_evaluate_ability_list() == -1) {
+        if (battle_ai_evaluate_ability_list() == -1) {
             g_ai_retreat_stage = AI_RETREAT_OTHER_ABILITIES;
             return -1;
         }
-        if (ai_select_action_ranked())
+        if (battle_ai_select_action_ranked())
             return 0;
     }
-    ai_select_action_fallback();
+    battle_ai_select_action_fallback();
     return 0;
 }
 
 /* Score the reachable tiles, fill the distance grid for the decision's target,
  * and store the best destination as movement scenario 1. -1 suspends; the next
  * call resumes at the step that did. */
-s32 ai_run_cowardly_movement(void) {
+s32 battle_ai_run_cowardly_movement(void) {
     ai_data_t* ai = &g_ai_data_base;
     ai_cowardly_movement_stage_e state;
 
@@ -431,19 +431,19 @@ s32 ai_run_cowardly_movement(void) {
     }
     g_ai_data_base.movement_scenario = 0;
 score_tiles:
-    if (ai_score_reachable_tiles() == -1) {
+    if (battle_ai_score_reachable_tiles() == -1) {
         g_ai_cowardly_movement_stage = AI_COWARDLY_MOVEMENT_SCORE_TILES;
         return -1;
     }
 fill_target_distance:
-    if (ai_fill_target_distance_grid(&ai->acting_unit_decision->target) == -1) {
+    if (battle_ai_fill_target_distance_grid(&ai->acting_unit_decision->target) == -1) {
         g_ai_cowardly_movement_stage = AI_COWARDLY_MOVEMENT_TARGET_DISTANCE;
         return -1;
     }
-    ai_select_destination(0xff, AI_DESTINATION_PRIORITY_FIRST);
+    battle_ai_select_destination(0xff, AI_DESTINATION_PRIORITY_FIRST);
     ai->movement_scenario = 1;
     ai->candidate_coords[1] = ai->candidate_coords[0];
-    ai_set_candidate_and_actor_reachable_tiles();
+    battle_ai_set_candidate_and_actor_reachable_tiles();
     return 0;
 }
 
@@ -454,7 +454,7 @@ fill_target_distance:
  * acting unit's ID. Mode 5 admits crystals before ordinary targetability
  * checks, while mode 4 shares mode 0's Blood Suck exclusion.
  */
-s32 ai_find_nearest_target(ai_nearest_target_mode_e mode) {
+s32 battle_ai_find_nearest_target(ai_nearest_target_mode_e mode) {
     ai_data_t* ai = &g_ai_data_base;
     s32 nearest_distance = 0x7fffffff;
     s32 nearest_id = g_ai_data_base.acting_unit_id;
@@ -470,7 +470,7 @@ s32 ai_find_nearest_target(ai_nearest_target_mode_e mode) {
         if (mode != AI_NEAREST_HEALER_OR_CRYSTAL
             || !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)]
                 & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL))) {
-            if (ai_is_unit_untargetable(i))
+            if (battle_ai_is_unit_untargetable(i))
                 continue;
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)] & STATUS_BYTE_MASK(STATUS_ID_PETRIFY))
                 continue;
@@ -485,10 +485,10 @@ s32 ai_find_nearest_target(ai_nearest_target_mode_e mode) {
             case AI_NEAREST_IMMINENT_ENEMY:
                 if (!ai->targetability.live.unit_targetable[i])
                     continue;
-                if (ai_should_exclude_from_imminent_enemies(i))
+                if (battle_ai_should_exclude_from_imminent_enemies(i))
                     continue;
-                if (ai_calculate_distance_between_units(ai->acting_unit, unit) < 2
-                    && ai_calculate_height_difference_between_units(&ai->acting_unit_coords, unit) < -2)
+                if (battle_ai_calculate_distance_between_units(ai->acting_unit, unit) < 2
+                    && battle_ai_calculate_height_difference_between_units(&ai->acting_unit_coords, unit) < -2)
                     continue;
                 break;
             case AI_NEAREST_ENEMY:
@@ -507,7 +507,7 @@ s32 ai_find_nearest_target(ai_nearest_target_mode_e mode) {
                 break;
             }
         }
-        distance = ai_calculate_distance_between_units(ai->acting_unit, unit);
+        distance = battle_ai_calculate_distance_between_units(ai->acting_unit, unit);
         if (distance < nearest_distance) {
             nearest_distance = distance;
             nearest_id = i;
@@ -517,7 +517,7 @@ s32 ai_find_nearest_target(ai_nearest_target_mode_e mode) {
 }
 
 /* Distance in tiles along the map axes (|dx| + |dy|), ignoring height. */
-s32 ai_calculate_distance_between_units(const unit_stats_t* first, const unit_stats_t* second) {
+s32 battle_ai_calculate_distance_between_units(const unit_stats_t* first, const unit_stats_t* second) {
     s32 dx = first->x - second->x;
     s32 dy = first->position.y - second->position.y;
     if (dx < 0)
@@ -535,7 +535,7 @@ s32 ai_calculate_distance_between_units(const unit_stats_t* first, const unit_st
  * direct typed indexing introduces extra instructions. Field offsets come
  * from the shared workspace declaration.
  */
-void ai_set_candidate_and_actor_reachable_tiles(void) {
+void battle_ai_set_candidate_and_actor_reachable_tiles(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 row;
 
@@ -574,7 +574,7 @@ void ai_set_candidate_and_actor_reachable_tiles(void) {
 
 /* Reset the selected action to the candidate coordinates for the current
  * movement scenario; the Defend skillset marks a Defend when the unit has it. */
-void ai_select_action_fallback(void) {
+void battle_ai_select_action_fallback(void) {
     u8 scenario = g_ai_data_base.movement_scenario;
     unit_stats_t* unit = g_ai_data_base.acting_unit;
     u32 coords;
@@ -599,7 +599,7 @@ void ai_select_action_fallback(void) {
  * selected row, leaving zero-mask rows unchanged. Return -1 when the child
  * suspends through its out-parameter, or 0 after filling the grid.
  */
-s32 ai_fill_target_distance_grid(const ai_coords_t* target) {
+s32 battle_ai_fill_target_distance_grid(const ai_coords_t* target) {
     ai_data_t* ai = &g_ai_data_base;
     s32 suspended = 0;
     s32 use_manhattan;
@@ -617,8 +617,8 @@ s32 ai_fill_target_distance_grid(const ai_coords_t* target) {
             & (BATTLE_MOVEMENT_SET_2_TELEPORT | BATTLE_MOVEMENT_SET_2_TELEPORT_2))) {
         use_manhattan = 1;
     } else {
-        ai_propagate_target_movement(ai->acting_unit_id, target->fields.x, target->fields.y, target->fields.elevation,
-            ai->search_resume_flag, &suspended, 1);
+        battle_ai_propagate_target_movement(ai->acting_unit_id, target->fields.x, target->fields.y,
+            target->fields.elevation, ai->search_resume_flag, &suspended, 1);
         if (suspended != 0)
             return -1;
         ai->resume_pending = 0;
@@ -657,7 +657,7 @@ s32 ai_fill_target_distance_grid(const ai_coords_t* target) {
  * Only scenario-0 reachable tiles are updated; other cells remain unchanged.
  * The shared targetability list is rebuilt before scoring both map layers.
  */
-void ai_fill_foe_proximity_grid(void) {
+void battle_ai_fill_foe_proximity_grid(void) {
     ai_data_t* ai = &g_ai_data_base;
     s32 i;
     s32 level;
@@ -670,7 +670,7 @@ void ai_fill_foe_proximity_grid(void) {
 
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         ai->targetability.live.unit_targetable[i] = 0;
-        if (ai_check_target_type(i) == 0 && ai_should_exclude_from_imminent_enemies(i) == 0) {
+        if (battle_ai_check_target_type(i) == 0 && battle_ai_should_exclude_from_imminent_enemies(i) == 0) {
             ai->targetability.live.unit_targetable[i] = 1;
         }
     }
@@ -715,7 +715,7 @@ void ai_fill_foe_proximity_grid(void) {
  *
  * The unit must be an enemy that acts no later than the acting unit and will
  * no longer be disabled by Stop, Don't Act, Sleep, Chicken, or Charm then. */
-s32 ai_should_exclude_from_imminent_enemies(s32 unit_id) {
+s32 battle_ai_should_exclude_from_imminent_enemies(s32 unit_id) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     s32 limit;
@@ -724,13 +724,13 @@ s32 ai_should_exclude_from_imminent_enemies(s32 unit_id) {
         return 1;
     unit = &g_battle_unit_stats[unit_id];
     limit = ai->acting_unit_remaining_clockticks;
-    if (limit < ai_calculate_clockticks_until_unit_acts(unit)
-        || ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_STOP)
-        || ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_DONT_ACT)
-        || ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_SLEEP)
-        || ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_CHICKEN))
+    if (limit < battle_ai_calculate_clockticks_until_unit_acts(unit)
+        || battle_ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_STOP)
+        || battle_ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_DONT_ACT)
+        || battle_ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_SLEEP)
+        || battle_ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_CHICKEN))
         return 1;
-    return ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_CHARM) != 0;
+    return battle_ai_is_status_active_through_delay(ai->acting_unit_remaining_clockticks, unit, STATUS_ID_CHARM) != 0;
 }
 
 /*
@@ -740,7 +740,7 @@ s32 ai_should_exclude_from_imminent_enemies(s32 unit_id) {
  * Integer address stages preserve the target's addition order; direct typed
  * indexing changes the machine code. Each level has 18 rows of 16 tiles.
  */
-s32 ai_score_reachable_tiles(void) {
+s32 battle_ai_score_reachable_tiles(void) {
     s32 x, y, level;
     ai_data_t* ai = &g_ai_data_base;
     u32 row;
@@ -781,9 +781,9 @@ s32 ai_score_reachable_tiles(void) {
                         ai->current_action.coords.fields.x = x;
                         ai->current_action.coords.fields.y = y;
                         ai->current_action.coords.fields.elevation = level;
-                        ai_update_tile_pickup();
+                        battle_ai_update_tile_pickup();
                     evaluate_tile:
-                        if (ai_simulate_action_and_score() == -1) {
+                        if (battle_ai_simulate_action_and_score() == -1) {
                             /* Keep the current coordinates and uncommitted score. */
                             return -1;
                         }
@@ -802,7 +802,7 @@ s32 ai_score_reachable_tiles(void) {
         }
     }
     /* Restore the simulation unit's coordinates only after the whole scan completes. */
-    ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
     return 0;
 }
 
@@ -811,7 +811,7 @@ s32 ai_score_reachable_tiles(void) {
  * it never will: Speed 0, crystal, petrified, treasure, or dead without
  * Reraise (from its decision record). Don't Act and Don't Move are not looked
  * at. */
-s32 ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit) {
+s32 battle_ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit) {
     ai_data_t* ai;
     s32 speed;
     s32 ticks;
@@ -863,7 +863,7 @@ s32 ai_calculate_clockticks_until_unit_acts(const unit_stats_t* unit) {
  * argument-register scratch reproduces the target's a1/a2 allocation; callers
  * supply only the unit pointer.
  */
-s32 ai_calculate_clockticks_until_death_counter_expires(unit_stats_t* unit, s32 total, s32 speed) {
+s32 battle_ai_calculate_clockticks_until_death_counter_expires(unit_stats_t* unit, s32 total, s32 speed) {
     s32 counter;
     s32 ticks;
     s32 sum;
@@ -893,7 +893,7 @@ s32 ai_calculate_clockticks_until_death_counter_expires(unit_stats_t* unit, s32 
  *
  * Average maximum HP includes all present slots and is capped at 255.
  */
-void ai_init_workspace(void) {
+void battle_ai_init_workspace(void) {
     s32 i = 0;
     s32 present_count = 0;
     s32 total_max_hp = 0;
@@ -917,7 +917,7 @@ void ai_init_workspace(void) {
         ai->unit_compact_indices[i] = 0xff;
         if (g_battle_unit_stats[i].entd_slot != BATTLE_ENTD_SLOT_NONE) {
             ai->unit_compact_indices[i] = present_count;
-            ai_init_unit_abilities(i);
+            battle_ai_init_unit_abilities(i);
             present_count++;
             total_max_hp += g_battle_unit_stats[i].max_hp;
         }
@@ -946,7 +946,7 @@ void ai_init_workspace(void) {
  * Monster Skill-dependent entries count toward totals but not the MP,
  * Silence, or evasion numerators. Behavior updates depend on scenario flags.
  */
-void ai_init_unit_abilities(s32 unit_id) {
+void battle_ai_init_unit_abilities(s32 unit_id) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_unit_decision_t* decision;
@@ -960,7 +960,7 @@ void ai_init_unit_abilities(s32 unit_id) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE || ai->unit_compact_indices[unit_id] >= AI_COMPACT_UNIT_COUNT) {
         return;
     }
-    ai_build_unit_ability_list(unit_id);
+    battle_ai_build_unit_ability_list(unit_id);
     ability_count = 0;
     mp_count = 0;
     silence_count = 0;
@@ -973,7 +973,7 @@ void ai_init_unit_abilities(s32 unit_id) {
         if (entry->skillset == SKILLSET_ID_NONE) {
             break;
         }
-        ai_load_ability_entry(entry);
+        battle_ai_load_ability_entry(entry);
         ability_count++;
         /* The target reads and updates skillset/usage as one 16-bit value. */
         if (!entry->usage.policy.requires_monster_skill) {
@@ -1018,10 +1018,10 @@ void ai_init_unit_abilities(s32 unit_id) {
             }
         }
     }
-    decision->silence_mod = ai_calculate_ratio_times_4(ability_count, silence_count);
-    decision->mp_ability_mod = ai_calculate_ratio_times_4(ability_count, mp_count);
-    decision->evade_mod = ai_calculate_ratio_times_4(ability_count, evade_count);
-    mem_copy_bytes(&decision->flags, &unit->ai_flags, 5);
+    decision->silence_mod = battle_ai_calculate_ratio_times_4(ability_count, silence_count);
+    decision->mp_ability_mod = battle_ai_calculate_ratio_times_4(ability_count, mp_count);
+    decision->evade_mod = battle_ai_calculate_ratio_times_4(ability_count, evade_count);
+    battle_mem_copy_bytes(&decision->flags, &unit->ai_flags, 5);
     decision->target.fields.x = unit->ai_target_x;
     decision->target.fields.y = unit->ai_target_y;
     decision->target.fields.elevation = unit->ai_flags >> 7;
@@ -1059,7 +1059,7 @@ void ai_init_unit_abilities(s32 unit_id) {
 
 /* dividend * 4 / divisor, or 0 for a zero divisor: a share in quarters, such
  * as how many of a unit's abilities Silence stops. */
-s32 ai_calculate_ratio_times_4(s32 divisor, s32 dividend) {
+s32 battle_ai_calculate_ratio_times_4(s32 divisor, s32 dividend) {
     if (divisor == 0) {
         return 0;
     }
@@ -1081,7 +1081,7 @@ typedef char ai_ability_entry_byte_view_must_be_4[sizeof(ai_ability_entry_byte_v
  * Non-monster skillsets include Attack and a secondary skillset. Frog Attack
  * is appended for every unit; a terminator is written only if space remains.
  */
-void ai_build_unit_ability_list(s32 unit_id) {
+void battle_ai_build_unit_ability_list(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_data_t* ai = &g_ai_data_base;
     ai_weapon_data_t* weapon;
@@ -1100,8 +1100,10 @@ void ai_build_unit_ability_list(s32 unit_id) {
         weapon->fields.flags_3 |= AI_ABILITY_FLAG_3_PHYSICAL_ATTACK;
         weapon_flags = AI_WEAPON_FORMULA_NONE;
         if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
-            ai_store_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], &weapon_flags);
-            ai_store_weapon_attack_data(weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON], &weapon_flags);
+            battle_ai_store_weapon_attack_data(
+                weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON], &weapon_flags);
+            battle_ai_store_weapon_attack_data(
+                weapon, unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON], &weapon_flags);
         }
         switch (weapon_flags) {
         case AI_WEAPON_FORMULA_NONE:
@@ -1121,9 +1123,9 @@ void ai_build_unit_ability_list(s32 unit_id) {
         }
         count++;
     }
-    count = ai_add_usable_skillset_abilities(unit_id, unit->primary_skillset, count);
+    count = battle_ai_add_usable_skillset_abilities(unit_id, unit->primary_skillset, count);
     if (unit->primary_skillset < SKILLSET_ID_MONSTER_FIRST) {
-        count = ai_add_usable_skillset_abilities(unit_id, unit->secondary_skillset, count);
+        count = battle_ai_add_usable_skillset_abilities(unit_id, unit->secondary_skillset, count);
     }
     ai->ability_lists[list_id][count].skillset = SKILLSET_ID_FROG_ATTACK;
     ai->ability_lists[list_id][count].packed_id = (unit_id << AI_ABILITY_ENTRY_UNIT_SHIFT) + ABILITY_ID_FROG_ATTACK;
@@ -1142,7 +1144,7 @@ void ai_build_unit_ability_list(s32 unit_id) {
  * Range and weapon ID are replaced; elements and trajectory/formula flags
  * accumulate. Calling for the left hand last gives its range precedence.
  */
-void ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
+void battle_ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_out) {
     weapon_data_t* weapon;
     s32 flags;
     s32 formula;
@@ -1191,7 +1193,7 @@ void ai_store_weapon_attack_data(ai_weapon_data_t* out, s32 item_id, s32* flags_
  * there and GCC 2.6.3 keeps source block order. The per-loop temporaries,
  * ai as a local and the int max_mp reproduce the target's allocation, loop
  * set-up order and signed comparison. */
-s32 ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
+s32 battle_ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
     s32 jump_found;
     ai_data_t* ai;
     u16* abilities;
@@ -1217,7 +1219,7 @@ s32 ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
     menu = g_main_action_menu_types_by_skillset[skillset];
     list_id = ai->unit_compact_indices[unit_id];
     if (menu == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
-        if (ai_is_ability_known(unit_id, skillset, 0)) {
+        if (battle_ai_is_ability_known(unit_id, skillset, 0)) {
             unit_bits = unit_id << AI_ABILITY_ENTRY_UNIT_SHIFT;
             for (i = 0, slot = ai->ability_lists[list_id]; i < 3; i++) {
                 slot[count].skillset = skillset;
@@ -1225,7 +1227,7 @@ s32 ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
                 count++;
             }
         }
-        if (ai_is_ability_known(unit_id, skillset, 1)) {
+        if (battle_ai_is_ability_known(unit_id, skillset, 1)) {
             i = 0;
             unit_bits = unit_id << AI_ABILITY_ENTRY_UNIT_SHIFT;
             for (row = ai->ability_lists[list_id]; i < 3; i++) {
@@ -1235,7 +1237,7 @@ s32 ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
             }
         }
         for (i = 2; i < 12; i++) {
-            if (ai_is_ability_known(unit_id, skillset, i)) {
+            if (battle_ai_is_ability_known(unit_id, skillset, i)) {
                 entry = &ai->ability_lists[list_id][count];
                 count++;
                 entry->skillset = skillset;
@@ -1292,7 +1294,7 @@ s32 ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
                 }
             }
         }
-        if (!ai_is_ability_known(unit_id, skillset, i)) {
+        if (!battle_ai_is_ability_known(unit_id, skillset, i)) {
             continue;
         }
         if (skillset >= SKILLSET_ID_MONSTER_FIRST) {
@@ -1329,7 +1331,7 @@ s32 ai_add_usable_skillset_abilities(s32 unit_id, s32 skillset, s32 count) {
  * for monsters (every ability known) and for skillsets the unit does not own.
  * Job skillsets 5..23 map to learned_abilities rows 0..18; the unit's own
  * primary or base-job skillset maps to row 0. */
-s32 ai_is_ability_known(s32 unit_id, s32 skillset_id, s32 bit) {
+s32 battle_ai_is_ability_known(s32 unit_id, s32 skillset_id, s32 bit) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     s32 byte;
     u8* row;

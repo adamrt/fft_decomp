@@ -441,8 +441,8 @@ void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 s
 void gfx_set_draw_color_variant(const rgb24_t* color);
 void menu_run_unit_status_thread_variant(void);
 void gfx_set_otag_index(s32 value);
-s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
-void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
+s32 battle_gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
+void battle_gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 
 /* portrait transitions */
 

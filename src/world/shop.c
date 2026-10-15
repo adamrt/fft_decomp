@@ -200,7 +200,7 @@ void world_shop_run_main_menu_step(void) {
         menu_clear_selection_records();
         if (g_world_menu_selection_results[0] == 0) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_BUY_LIST;
-            g_world_shop_item_category = menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
+            g_world_shop_item_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
         } else if (g_world_menu_selection_results[0] == 1) {
             g_world_shop_menu_step = WORLD_SHOP_STEP_SELL_LIST;
         } else if (g_world_menu_selection_results[0] == 2) {
@@ -623,7 +623,7 @@ void world_shop_run_equip_candidate_step(void) {
         }
     }
     world_menu_toggle_preview_stats_window(g_world_shop_equip_candidate_preview_visible);
-    menu_toggle_stat_preview_panel_thread(g_world_shop_equip_candidate_preview_visible);
+    world_menu_toggle_stat_preview_panel_thread(g_world_shop_equip_candidate_preview_visible);
 }
 
 /* Menu callback: half price of the highlighted item, or 0 for an empty list.
@@ -646,7 +646,7 @@ s32 world_item_get_selected_half_price(s32 unused_row) {
 void world_shop_run_item_sell_list_step(void) {
     if (g_world_shop_sell_list_initialized == 0) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, world_menu_has_items(0) != 0 ? 0xF80C : 0xF80B, 0);
-        g_world_shop_item_category = menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
+        g_world_shop_item_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
         world_item_build_category_list(-1, g_world_shop_item_category + 1,
             g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);
@@ -1376,7 +1376,7 @@ void world_shop_run_best_fit_preview_step(void) {
             g_world_unit_pointers[g_unit_selected_index]->equipment, (u16*)g_item_preview_stat_detail.state.equipment);
         g_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(
             g_item_preview_stat_detail.state.equipment, world_ability_has_two_hands(g_unit_selected_index));
-        menu_toggle_stat_preview_panel_thread(1);
+        world_menu_toggle_stat_preview_panel_thread(1);
         world_menu_toggle_preview_stats_window(1);
         g_menu_status_display_thread_params.redraw_request = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
@@ -1392,7 +1392,7 @@ void world_shop_run_best_fit_preview_step(void) {
         if (g_world_menu_selection_results[5] == 1) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         }
-        menu_toggle_stat_preview_panel_thread(0);
+        world_menu_toggle_stat_preview_panel_thread(0);
         world_menu_toggle_preview_stats_window(0);
         g_menu_status_display_thread_params.redraw_request = 1;
         g_world_shop_best_fit_menu_open = 0;
@@ -1676,7 +1676,7 @@ void world_shop_run_fur_menu_step(void) {
         menu_clear_selection_records();
         if (g_world_menu_selection_results[0] == 0) {
             if (g_world_shop_fur_has_poached_stock != 0) {
-                g_world_shop_item_category = menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
+                g_world_shop_item_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
                 g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_BUY_LIST;
                 g_world_shop_fur_opened = 0;
             } else {
@@ -1725,7 +1725,7 @@ void world_shop_run_fur_sell_list_step(void) {
         message = world_menu_has_items(0) != 0 ? 0xf840 : 0xf845;
 
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, message, 0);
-        g_world_shop_item_category = menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
+        g_world_shop_item_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_SHOP_ITEM_TAB, 0);
         world_item_build_category_list(-1, g_world_shop_item_category + 1,
             g_world_shop_item_category != 4 ? g_world_shop_item_category + 1 : ITEM_LIST_FILTER_OTHER,
             g_item_list_entries, ITEM_LIST_MODE_ALL);

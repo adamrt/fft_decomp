@@ -20,7 +20,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-void move_return_to_previous_map_square(battle_unit_t* unit) {
+void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
     unit->map_x = unit->previous_map_x;
     unit->map_y = unit->previous_map_y;
     unit->map_z = unit->previous_map_z;
@@ -37,7 +37,7 @@ void move_return_to_previous_map_square(battle_unit_t* unit) {
 /* Cancel a move at the confirm prompt. The unit returns to its previous tile;
  * a mount takes its rider back with it, a unit that was riding is put back on
  * its mount, and a mount it climbed onto during the move is freed. */
-void move_undo_unit_move(battle_unit_t* unit) {
+void battle_move_undo_unit_move(battle_unit_t* unit) {
     battle_unit_t* other;
 
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
@@ -45,11 +45,11 @@ void move_undo_unit_move(battle_unit_t* unit) {
         other->mount_state = BATTLE_UNIT_MOUNT_STATE_NONE;
         battle_unit_update_display_by_runtime_id(other->runtime_id);
     }
-    move_return_to_previous_map_square(unit);
+    battle_move_return_to_previous_map_square(unit);
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
         other = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
         if (other != 0) {
-            move_return_to_previous_map_square(other);
+            battle_move_return_to_previous_map_square(other);
             battle_unit_update_display_by_runtime_id(other->runtime_id);
         }
     } else if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
@@ -97,13 +97,13 @@ void battle_unit_copy_rider_data_to_mount(battle_unit_t* unit, battle_unit_t* ri
         }
     }
     unit->turn_action_flags |= BATTLE_UNIT_TURN_ACTION_MOVED;
-    action_set_only_movement_taken(unit->stats->battle_id);
+    battle_action_set_only_movement_taken(unit->stats->battle_id);
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)
         && !(unit->path.flags & BATTLE_EFFECTIVE_MOVEMENT_TELEPORT)) {
         main_sound_play_sfx(MAIN_SFX_CONFIRM);
     }
     battle_gfx_update_unit_palettes();
-    move_init_post_movement_display();
+    battle_move_init_post_movement_display();
 }
 
 /* MoveConfirmMenu game-state handler. Command 7 keeps the move and finishes it.
@@ -129,7 +129,7 @@ void battle_state_handle_move_confirm_menu_state(void) {
             battle_unit_copy_rider_data_to_mount(source_unit, casting_unit);
             return;
         }
-        move_undo_unit_move(casting_unit);
+        battle_move_undo_unit_move(casting_unit);
         battle_gfx_update_unit_palettes();
         battle_menu_close_move_help();
         return;
@@ -152,12 +152,12 @@ void battle_state_handle_wait_menu_state(void) {
     switch (selected_command) {
     case 8:
     case 0xff:
-        if (action_check_change_of_turn(source_unit->stats->battle_id) != 1) {
+        if (battle_action_check_change_of_turn(source_unit->stats->battle_id) != 1) {
             battle_state_enter_after_command();
             return;
         }
     case 7:
-        action_choose_facing_for_wait();
+        battle_action_choose_facing_for_wait();
         return;
     }
 }
@@ -210,21 +210,21 @@ void battle_state_handle_wait_direction_state(void) {
     battle_gfx_update_status_bubbles_and_graphics();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
-        camera_handle_rotation_input();
-        camera_update_zoom_input();
-        camera_update_tilt_input();
+        battle_camera_handle_rotation_input();
+        battle_camera_update_zoom_input();
+        battle_camera_update_tilt_input();
         if ((g_main_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
             if (unit->stats != 0) {
-                action_end_turn(unit->stats->battle_id);
+                battle_action_end_turn(unit->stats->battle_id);
                 battle_unit_set_tile_position_with_mount_partner(unit);
             }
             main_sound_play_sfx(MAIN_SFX_CONFIRM);
-            action_check_between_turn_events();
+            battle_action_check_between_turn_events();
         } else if ((g_main_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
             battle_state_enter_after_command();
         }
         /* The target passes only the mode; the definition's second parameter is a matching device. */
-        facing = camera_get_input_direction(CAMERA_INPUT_PRESSED);
+        facing = battle_camera_get_input_direction(CAMERA_INPUT_PRESSED);
         if (facing != -1 && facing != g_battle_state_wait_direction_facing) {
             main_sound_play_sfx(MAIN_SFX_CURSOR_MOVE);
             g_battle_state_wait_direction_facing = facing;
@@ -250,10 +250,10 @@ void battle_state_handle_wait_direction_state(void) {
         frame_data = unit->state_frame_counter++;
         if (frame_data >= 0x1f) {
             if (unit->stats != 0) {
-                action_end_turn(unit->stats->battle_id);
+                battle_action_end_turn(unit->stats->battle_id);
                 battle_unit_set_tile_position_with_mount_partner(unit);
             }
-            action_check_between_turn_events();
+            battle_action_check_between_turn_events();
         }
     }
 }
@@ -277,7 +277,7 @@ void battle_state_handle_crystal_learn_state(void) {
     case 2:
         battle_unit_learn_from_crystal(source->stats, BATTLE_CRYSTAL_RESTORE_HP_MP);
         g_action_post_action = 1;
-        action_finalize_attack_and_flag_reactions(source->stats->battle_id);
+        battle_action_finalize_attack_and_flag_reactions(source->stats->battle_id);
         battle_gfx_prepare_post_action_display(source);
         battle_unit_update_display_by_runtime_id(source->runtime_id);
         break;
@@ -317,7 +317,7 @@ void battle_state_handle_crystal_learn_state(void) {
             return;
         }
         g_move_find_result &= ~MOVE_POST_EVENT_CRYSTAL_OR_TREASURE;
-        ai_init_selected_action();
+        battle_ai_init_selected_action();
     } else if (g_move_find_result & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
         g_action_post_action_display_phase += 1;
         if (g_action_post_action_display_phase >= 2) {
@@ -331,7 +331,7 @@ void battle_state_handle_crystal_learn_state(void) {
         g_move_find_result &= ~MOVE_POST_EVENT_ITEM_FOUND;
     } else if (g_move_find_result & MOVE_POST_EVENT_TRAP_TRIGGERED) {
         g_move_find_result &= ~MOVE_POST_EVENT_TRAP_TRIGGERED;
-        ai_init_selected_action();
+        battle_ai_init_selected_action();
         battle_unit_update_display_by_runtime_id(source->runtime_id);
     } else if (g_move_find_result & MOVE_POST_EVENT_CHARGING_CANCEL) {
         g_move_find_result &= ~MOVE_POST_EVENT_CHARGING_CANCEL;
@@ -342,7 +342,7 @@ void battle_state_handle_crystal_learn_state(void) {
     } else {
         return;
     }
-    move_start_next_post_movement_step();
+    battle_move_start_next_post_movement_step();
 }
 
 /* ActionExecuteSetup game-state handler: command 7 goes on to the range display
@@ -355,7 +355,7 @@ void battle_state_handle_action_execute_setup_state(void) {
     selected_command = menu_get_selected_command_address()->kind;
     switch (selected_command) {
     case 7:
-        target_set_boxes_red();
+        battle_target_set_boxes_red();
         return;
     case 8:
     case 0xff:
@@ -373,20 +373,20 @@ void battle_state_handle_targeting_range_state(void) {
     battle_state_handle_free_cursor_input();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
-        target_move_cursor_by_input();
-        camera_handle_rotation_input();
-        camera_update_zoom_input();
-        camera_update_tilt_input();
+        battle_target_move_cursor_by_input();
+        battle_camera_handle_rotation_input();
+        battle_camera_update_zoom_input();
+        battle_camera_update_tilt_input();
         if ((g_main_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
-            target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 2);
+            battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 2);
             battle_menu_open_active_unit_idle_action_menu();
             return;
         }
         if ((g_main_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
-            if ((map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z)
+            if ((battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z)
                         ->ceiling_depth_and_marks.ability_range)
                 != 0) {
-                target_select_tile();
+                battle_target_select_tile();
                 return;
             }
             battle_state_enter_target_out_of_range();
@@ -394,22 +394,22 @@ void battle_state_handle_targeting_range_state(void) {
     } else {
         switch (unit->command_state.ai.data.action.targeting_type) {
         case BATTLE_TARGETING_TYPE_TILE:
-            target_update_free_cursor_selection(unit, 0);
+            battle_target_update_free_cursor_selection(unit, 0);
             frame_data = unit->state_frame_counter++;
             if (frame_data >= 0x1f) {
-                map_get_tile_data_pointer(unit->command_state.cursor.target_panel.vx,
+                battle_map_get_tile_data_pointer(unit->command_state.cursor.target_panel.vx,
                     unit->command_state.cursor.target_panel.vz, unit->command_state.cursor.target_panel.vy);
-                target_select_tile();
+                battle_target_select_tile();
             }
             return;
         case BATTLE_TARGETING_TYPE_UNIT:
             target = battle_unit_get_by_battle_id(unit->command_state.ai.data.action.target_id);
             if (target != 0) {
-                target_update_free_cursor_selection(unit, target);
+                battle_target_update_free_cursor_selection(unit, target);
                 frame_data = unit->state_frame_counter++;
                 if (frame_data >= 0x1f) {
-                    map_get_tile_data_pointer(target->map_x, target->map_y, target->map_z);
-                    target_select_tile();
+                    battle_map_get_tile_data_pointer(target->map_x, target->map_y, target->map_z);
+                    battle_target_select_tile();
                 }
             } else {
                 battle_menu_set_next_script_action_menus();
@@ -428,7 +428,7 @@ void battle_state_handle_illegal_range_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
-        target_set_boxes_red();
+        battle_target_set_boxes_red();
     }
 }
 
@@ -438,7 +438,7 @@ void battle_state_handle_illegal_range_state(void) {
 void battle_state_handle_ability_preview_help_state(void) {
     if (menu_get_thread_activity_variant() != 2) {
         g_battle_menu_help_opening = 0;
-        camera_enable_map_pan();
+        battle_camera_enable_map_pan();
         g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING;
     }
     battle_state_handle_free_cursor_input();
@@ -459,24 +459,24 @@ void battle_state_handle_ability_preview_state(void) {
 
     unit = battle_unit_get_source();
     if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
-        camera_handle_rotation_input();
-        camera_update_zoom_input();
-        camera_update_tilt_input();
+        battle_camera_handle_rotation_input();
+        battle_camera_update_zoom_input();
+        battle_camera_update_tilt_input();
         if ((g_main_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
             g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
             battle_gfx_update_unit_palettes();
-            action_confirm();
+            battle_action_confirm();
         } else if ((g_main_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
             g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
-            target_set_tile_background_color(BATTLE_TILE_MARK_HIDE_TARGETS, 3);
+            battle_target_set_tile_background_color(BATTLE_TILE_MARK_HIDE_TARGETS, 3);
             if (unit->ability_preview_phase == TARGET_PANELS_NO_TARGETING) {
-                target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+                battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
                 battle_gfx_update_unit_palettes();
                 battle_menu_open_active_unit_idle_action_menu();
             } else {
-                target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+                battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
                 battle_gfx_update_unit_palettes();
-                target_set_boxes_red();
+                battle_target_set_boxes_red();
             }
         }
     } else {
@@ -485,7 +485,7 @@ void battle_state_handle_ability_preview_state(void) {
         if (frame_data >= 0x1f) {
             g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
             battle_gfx_update_unit_palettes();
-            action_confirm();
+            battle_action_confirm();
         }
     }
     battle_state_handle_free_cursor_input();
@@ -526,8 +526,8 @@ void battle_state_handle_confirm_action_state(void) {
             return;
         case 8:
         case 0xff:
-            target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
-            target_set_boxes_red();
+            battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+            battle_target_set_boxes_red();
             return;
         default:
             break;
@@ -542,8 +542,8 @@ void battle_state_handle_confirm_action_state(void) {
             return;
         case 8:
         case 0xff:
-            target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
-            target_set_boxes_red();
+            battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+            battle_target_set_boxes_red();
             return;
         default:
             break;
@@ -563,7 +563,7 @@ void battle_state_handle_pre_attack_animation_state(void) {
     if ((unit->animation.wait == 0 || unit->animation.restart_count != 0 || unit->state_frame_counter >= 0x3d)
         && (g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
         && g_camera_rotation_action == CAMERA_ROTATION_NONE) {
-        action_execute_ability();
+        battle_action_execute_ability();
     }
 }
 
@@ -600,7 +600,7 @@ void battle_state_handle_commence_attack_phase_state(void) {
     unit = battle_unit_get_source();
     if (unit->attack_phase_state == BATTLE_ATTACK_PREPARATION_JUMP) {
         if (unit->animation.wait == 0) {
-            action_set_only_action_taken(unit->stats->battle_id);
+            battle_action_set_only_action_taken(unit->stats->battle_id);
             battle_unit_update_post_command_animation_display(unit);
         }
     } else {
@@ -650,7 +650,7 @@ void battle_state_handle_open_sp2_files_state(void) {
         if (open_result == -1) {
             main_heap_free(g_battle_gfx_sp2_data);
             g_battle_gfx_sp2_data = 0;
-            action_set_damage_display_type_based_on_ability();
+            battle_action_set_damage_display_type_based_on_ability();
         } else if (open_result == 0) {
             main_heap_free(g_battle_gfx_sp2_data);
             g_battle_gfx_sp2_data = 0;
@@ -673,7 +673,7 @@ void battle_state_handle_open_sp2_files_state(void) {
                 image_rect_address->w = 0x40;
                 image_rect_address->h = 0x100;
                 LoadImage(image_rect_address, sp2_data);
-                action_set_damage_display_type_based_on_ability();
+                battle_action_set_damage_display_type_based_on_ability();
                 break;
             }
             counter++;
@@ -688,13 +688,13 @@ void battle_state_handle_open_sp2_files_state(void) {
  * (effect_init_data); when no work remains, resolve the strike and pick
  * the attacker's animation. */
 void battle_state_handle_start_effect_file_open_state(void) {
-    if (effect_init_data() != 0) {
+    if (battle_effect_init_data() != 0) {
         g_battle_state_animation_continue_check = 1;
     } else {
         g_battle_state_animation_continue_check = 0;
     }
     if (g_battle_state_animation_continue_check == 0) {
-        action_set_target_coords_and_attacker_anim();
+        battle_action_set_target_coords_and_attacker_anim();
     }
     battle_state_handle_free_cursor_input();
 }
@@ -706,7 +706,7 @@ void battle_state_handle_secondary_effect_state(void) {
 
     unit = battle_unit_get_casting();
     unit->state_frame_counter++;
-    action_set_item_throw_stone_ability_display();
+    battle_action_set_item_throw_stone_ability_display();
     battle_state_handle_free_cursor_input();
 }
 
@@ -742,14 +742,14 @@ void battle_state_update_action_execute_mode(void) {
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
-        camera_update_real_coord_animation();
-        camera_update_screen_offset_animation();
-        camera_update_zoom_animation();
-        camera_update_rotation_animation();
+        battle_camera_update_real_coord_animation();
+        battle_camera_update_screen_offset_animation();
+        battle_camera_update_zoom_animation();
+        battle_camera_update_rotation_animation();
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
-    target_calculate_tile_coords_and_glow_from_at_list();
+    battle_target_calculate_tile_coords_and_glow_from_at_list();
 
     unit = battle_unit_get_casting();
     /* The target reads the 16-bit value of g_main_system_animation_speed. */
@@ -758,7 +758,7 @@ void battle_state_update_action_execute_mode(void) {
         for (i = 0; i < unit->strike.target_count; i++) {
             target = battle_unit_get_by_battle_id(unit->strike.target_list[i]);
             if (target != 0) {
-                move_update_knockback_step(target);
+                battle_move_update_knockback_step(target);
                 g_battle_state_animation_continue_check |= target->step_phase;
             }
         }
@@ -766,9 +766,9 @@ void battle_state_update_action_execute_mode(void) {
 
     if (unit->used_ability_id != 0 && unit->used_ability_id != ABILITY_ID_KNOCKBACK
         && unit->used_ability_id != ABILITY_ID_BASIC_SKILL_THROW_STONE) {
-        if (effect_load_ability(unit->used_ability_id) != 0
+        if (battle_effect_load_ability(unit->used_ability_id) != 0
             || (unit->used_ability_id >= ABILITY_ID_CHARGE_FIRST && unit->used_ability_id < ABILITY_ID_MATH_FIRST)) {
-            camera_update_cursor_tile_vector();
+            battle_camera_update_cursor_tile_vector();
         }
         if (g_battle_state_animation_continue_check == 0 && unit->numeric_display.active == 0
             && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < 0x3cU)) {
@@ -779,7 +779,7 @@ void battle_state_update_action_execute_mode(void) {
                     if (target != 0) {
                         if (unit->used_ability_id >= ABILITY_ID_REACTION_FIRST
                             && unit->used_ability_id < ABILITY_ID_SUPPORT_FIRST) {
-                            if (effect_load_ability(unit->used_ability_id) != 0
+                            if (battle_effect_load_ability(unit->used_ability_id) != 0
                                 && g_battle_ability_animation_data[unit->used_ability_id].attack_animation
                                     != BATTLE_ATTACK_ANIMATION_USE_WEAPON) {
                                 /* Both arguments are runtime records overlaying the declared parameters. */
@@ -794,7 +794,7 @@ void battle_state_update_action_execute_mode(void) {
             battle_state_start_battle_message_display();
         }
     } else {
-        camera_update_cursor_tile_vector();
+        battle_camera_update_cursor_tile_vector();
         menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
         if (g_battle_state_animation_continue_check == 0 && unit->numeric_display.active == 0
             && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < 0x3cU)) {
@@ -826,7 +826,7 @@ void battle_state_handle_battle_message_display_state(void) {
         g_action_post_action = 1;
     }
     if (g_action_post_action != 0) {
-        action_show_caster_post_effect_messages();
+        battle_action_show_caster_post_effect_messages();
     }
 }
 
@@ -857,10 +857,11 @@ void battle_state_handle_resume_attack_phase_state(void) {
         g_action_post_action = 1;
     }
     unit = battle_unit_get_casting();
-    if (g_action_post_action != 0 && action_resume_attack_phase_control() == 0 && unit->numeric_display.active == 0) {
+    if (g_action_post_action != 0 && battle_action_resume_attack_phase_control() == 0
+        && unit->numeric_display.active == 0) {
         if (unit->strike.continue_attack != 0) {
             unit->continue_attack_count += 1;
-            action_set_damage_display_type_based_on_ability();
+            battle_action_set_damage_display_type_based_on_ability();
             return;
         }
         if (g_battle_gfx_sp2_data != 0) {
@@ -875,9 +876,9 @@ void battle_state_handle_resume_attack_phase_state(void) {
             }
             facing = (u32)facing >> 10;
             stats = unit->stats;
-            action_post_action_facing_stub(stats, facing & 0xff);
+            battle_action_post_action_facing_stub(stats, facing & 0xff);
         }
-        action_store_acting_unit_data(unit->stats);
+        battle_action_store_acting_unit_data(unit->stats);
         battle_unit_call_set_animation_based_on_status(unit);
         battle_unit_update_anim_display_for_all_targets(unit);
         battle_unit_get_source();
@@ -889,7 +890,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
                 return;
             }
         }
-        action_handle_post_action_xp_jp_ability();
+        battle_action_handle_post_action_xp_jp_ability();
     }
 }
 
@@ -929,7 +930,7 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
         if (g_action_post_action_display_phase >= 3) {
             g_action_post_action = 1;
         } else {
-            action_init_learn_ability_on_hit();
+            battle_action_init_learn_ability_on_hit();
         }
         break;
     }
@@ -958,12 +959,12 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     }
 }
 
-s32 map_update_deep_dungeon_and_animation(void) {
+s32 battle_map_update_deep_dungeon_and_animation(void) {
     s32 runtime_id;
 
     battle_state_handle_free_cursor_input();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
-    if (map_poll_data_load() != 0) {
+    if (battle_map_poll_data_load() != 0) {
         return 0;
     }
     for (runtime_id = 0; runtime_id < BATTLE_UNIT_RUNTIME_SLOT_COUNT; runtime_id++) {
@@ -981,15 +982,15 @@ s32 map_update_deep_dungeon_and_animation(void) {
 /* DeepDungeonMeshLoad game-state handler: when the Deep Dungeon map has loaded,
  * run the between-turn events. */
 void battle_state_handle_deep_dungeon_mesh_load_state(void) {
-    if (map_update_deep_dungeon_and_animation() != 0) {
-        action_check_between_turn_events();
+    if (battle_map_update_deep_dungeon_and_animation() != 0) {
+        battle_action_check_between_turn_events();
     }
 }
 
 /* DeepDungeonMeshFinish game-state handler: when the Deep Dungeon map has loaded,
  * enter the after-command state. */
 void battle_state_handle_deep_dungeon_mesh_finish_state(void) {
-    if (map_update_deep_dungeon_and_animation() != 0) {
+    if (battle_map_update_deep_dungeon_and_animation() != 0) {
         battle_state_enter_after_command();
     }
 }
@@ -1011,10 +1012,10 @@ void battle_state_handle_target_select_state(void) {
     battle_unit_t* caster;
     battle_unit_t* target;
 
-    camera_handle_rotation_input();
-    camera_update_zoom_input();
-    camera_update_tilt_input();
-    target_move_cursor_by_input();
+    battle_camera_handle_rotation_input();
+    battle_camera_update_zoom_input();
+    battle_camera_update_tilt_input();
+    battle_target_move_cursor_by_input();
     battle_state_handle_free_cursor_input();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if (g_main_input_pressed_buttons & PSX_PAD_CIRCLE) {
@@ -1038,11 +1039,11 @@ void battle_state_handle_target_select_state(void) {
         }
         battle_gfx_update_unit_palettes();
     } else if (g_main_input_pressed_buttons & PSX_PAD_CROSS) {
-        target_move_cursor_to_unit(battle_unit_get_casting());
+        battle_target_move_cursor_to_unit(battle_unit_get_casting());
         battle_gfx_update_unit_palettes();
         battle_menu_set_next_script_action_menus();
     } else if (g_main_input_pressed_buttons & PSX_PAD_TRIANGLE) {
-        target_move_cursor_to_unit(battle_unit_get_casting());
+        battle_target_move_cursor_to_unit(battle_unit_get_casting());
     }
 }
 
@@ -1073,7 +1074,7 @@ void battle_state_handle_target_select_confirm_state(void) {
         caster = battle_unit_get_casting();
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         menu_store_auto_battle_main_target_id(target->stats->battle_id, caster->stats->battle_id);
-        target_move_cursor_to_unit(caster);
+        battle_target_move_cursor_to_unit(caster);
         battle_menu_set_next_script_action_menus();
         break;
     case 8:
@@ -1111,7 +1112,7 @@ void battle_state_handle_target_display_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     flags = g_main_input_pressed_buttons;
     if ((flags & PSX_PAD_CIRCLE) || (flags & PSX_PAD_CROSS)) {
-        target_move_cursor_to_unit(battle_unit_get_casting());
+        battle_target_move_cursor_to_unit(battle_unit_get_casting());
         battle_menu_set_next_script_action_menus();
     }
 }
@@ -1164,23 +1165,23 @@ void battle_state_handle_jp_exp_gain_state(void) {
             && script_get_event_finish_operation() != 0) {
             g_battle_previous_game_state = g_battle_game_state;
             menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
-            action_set_casting_unit_id_ff();
+            battle_action_set_casting_unit_id_ff();
             return;
         }
-        action_check_between_turn_events();
+        battle_action_check_between_turn_events();
         return;
     }
-    if (action_check_change_of_turn(unit->stats->battle_id) == 1) {
+    if (battle_action_check_change_of_turn(unit->stats->battle_id) == 1) {
         /* unit_stats_t +0x16e holds the same 20-byte command payload. */
         unit->command_state.ai.data.action = unit->stats->action_command;
         unit->used_ability_id = unit->stats->action_command.ability_id;
         if (unit->attack_phase_state == BATTLE_ATTACK_PREPARATION_JUMP) {
             unit->attack_phase_state = BATTLE_ATTACK_PREPARATION_CHARGE;
             battle_gfx_reset_unit_graphic_trigger(unit->runtime_id);
-            action_check_between_turn_events();
+            battle_action_check_between_turn_events();
             return;
         }
-        action_choose_wait();
+        battle_action_choose_wait();
         return;
     }
     battle_menu_set_next_script_action_menus();
@@ -1242,7 +1243,7 @@ void battle_state_handle_status_execute_state(void) {
             unit = battle_unit_get_source();
             if (unit->numeric_display.active == 0) {
                 battle_unit_update_display_by_runtime_id(unit->runtime_id);
-                action_check_between_turn_events();
+                battle_action_check_between_turn_events();
             }
         }
     }
@@ -1258,10 +1259,10 @@ void battle_state_handle_effect_state(void) {
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
-        camera_update_real_coord_animation();
-        camera_update_screen_offset_animation();
-        camera_update_zoom_animation();
-        camera_update_rotation_animation();
+        battle_camera_update_real_coord_animation();
+        battle_camera_update_screen_offset_animation();
+        battle_camera_update_zoom_animation();
+        battle_camera_update_rotation_animation();
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
@@ -1285,11 +1286,11 @@ void battle_state_update_event_mode(void) {
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
-        camera_update_real_coord_animation();
-        camera_update_screen_offset_animation();
-        camera_update_zoom_animation();
-        camera_update_rotation_animation();
-        move_update_all_unit_paths();
+        battle_camera_update_real_coord_animation();
+        battle_camera_update_screen_offset_animation();
+        battle_camera_update_zoom_animation();
+        battle_camera_update_rotation_animation();
+        battle_move_update_all_unit_paths();
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
@@ -1297,8 +1298,8 @@ void battle_state_update_event_mode(void) {
     case 0:
         battle_gfx_init_evtchr_vram_slots();
         g_battle_menu_status_enabled = 1;
-        ai_init_workspace();
-        action_check_between_turn_events();
+        battle_ai_init_workspace();
+        battle_action_check_between_turn_events();
         break;
     case 9:
         battle_gfx_init_evtchr_vram_slots();
@@ -1334,7 +1335,7 @@ void battle_state_update_event_mode(void) {
 }
 
 void battle_state_stop_map_animations(void) {
-    map_stop_clut_cycles_and_weather_sfx();
+    battle_map_stop_clut_cycles_and_weather_sfx();
 }
 
 /* MapJumpingOut game-state handler: darken the screen by
@@ -1424,7 +1425,7 @@ void battle_state_handle_close_battle_state(void) {
 void battle_state_handle_map_init_state(void) {
     char unused[24]; /* unreferenced; sizes the target's 0x30-byte frame */
 
-    g_battle_state_map_init_step = map_step_init_sequence(g_map_id, g_battle_state_map_init_step);
+    g_battle_state_map_init_step = battle_map_step_init_sequence(g_map_id, g_battle_state_map_init_step);
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].r0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = 0xff;
@@ -1444,7 +1445,7 @@ void battle_state_handle_change_map_init_state(void) {
     s32 old_state;
     char unused[24]; /* unreferenced; sizes the target's 0x30-byte frame */
 
-    g_battle_state_map_init_step = map_step_init_sequence(g_map_id, g_battle_state_map_init_step);
+    g_battle_state_map_init_step = battle_map_step_init_sequence(g_map_id, g_battle_state_map_init_step);
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].r0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].g0 = 0xff;
     g_battle_screen_fade_polygons[g_main_gfx_screen_polarity].b0 = 0xff;
@@ -1498,11 +1499,11 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     if (g_battle_menu_status_screen_selected != 1) {
         battle_unit_update_and_animate_units();
         battle_gfx_update_screen_color_modulation_fade();
-        camera_update_real_coord_animation();
-        camera_update_screen_offset_animation();
-        camera_update_zoom_animation();
-        camera_update_rotation_animation();
-        move_update_all_unit_paths();
+        battle_camera_update_real_coord_animation();
+        battle_camera_update_screen_offset_animation();
+        battle_camera_update_zoom_animation();
+        battle_camera_update_rotation_animation();
+        battle_move_update_all_unit_paths();
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
@@ -1510,7 +1511,7 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     case 1:
         break;
     case 0:
-        action_check_between_turn_events();
+        battle_action_check_between_turn_events();
         break;
     case 9:
         battle_state_halve_animation_speed_and_queue_close(8, MAIN_GAME_FLOW_BATTLE);

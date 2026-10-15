@@ -77,7 +77,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->half_height = entry->polar_mesh.texture_height / 2;
 
         scratch->target_index = g_effect_state_records[state_index].timeline.target_index;
-        effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+        battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
             scratch->target_index, &g_effect_context, &scratch->position);
         scratch->unit_coords = battle_unit_get_event_offset_by_runtime_id(
             g_effect_context.targets[scratch->target_index].data.unit.runtime_id);
@@ -126,7 +126,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         }
 
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.center, work->frame);
-        effect_interpolate_emitter_spawn_position(entry, i, &scratch->center);
+        battle_effect_interpolate_emitter_spawn_position(entry, i, &scratch->center);
         scratch->center.vx += scratch->screen.vx;
         scratch->center.vy += scratch->screen.vy;
 

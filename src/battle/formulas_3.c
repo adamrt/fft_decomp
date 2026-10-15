@@ -7,32 +7,32 @@
 
 /* Hit chance F(XA+YA)% for magic on allies: Magic Attack Up and zodiac
  * compatibility, none of the target's defenses. Returns 1 on a miss. */
-s32 formula_calculate_friendly_magic_accuracy(void) {
-    formula_apply_magic_attack_up();
-    formula_apply_zodiac_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_calculate_faith();
-    formula_use_hp_damage_as_action_hit_percent();
+s32 battle_formula_calculate_friendly_magic_accuracy(void) {
+    battle_formula_apply_magic_attack_up();
+    battle_formula_apply_zodiac_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_calculate_faith();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
 
 /* XA * YA with Magic Attack Up and zodiac compatibility only: the healing
  * formulas ignore the target's defenses. */
-void formula_calculate_magical_xa_times_ya(void) {
-    formula_apply_magic_attack_up();
-    formula_apply_zodiac_compatibility();
-    formula_store_xa_times_ya_damage();
+void battle_formula_calculate_magical_xa_times_ya(void) {
+    battle_formula_apply_magic_attack_up();
+    battle_formula_apply_zodiac_compatibility();
+    battle_formula_store_xa_times_ya_damage();
 }
 
 /* Golem's hit chance: (MA with Magic Attack Up + X) * caster Faith / 100, the
  * Faith status counting as 100 and Innocent as 0. No zodiac compatibility and
  * no target Faith. Returns 1 on a miss. */
-s32 formula_calculate_golem_accuracy(void) {
+s32 battle_formula_calculate_golem_accuracy(void) {
     action_data_t* action;
 
-    formula_store_ma_and_x();
-    formula_apply_magic_attack_up();
-    formula_store_xa_plus_ya_status_damage();
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_magic_attack_up();
+    battle_formula_store_xa_plus_ya_status_damage();
     if ((g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)] & STATUS_BYTE_MASK(STATUS_ID_FAITH))
         != 0) {
         g_action_current_ability.attacker_faith = 0x64;
@@ -45,175 +45,175 @@ s32 formula_calculate_golem_accuracy(void) {
     action = g_action_target_data;
     /* The target reads hp_damage signed (lh). */
     action->hp_damage = action->hp_damage * g_action_current_ability.attacker_faith / 100;
-    formula_use_hp_damage_as_action_hit_percent();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
 
 /* Magical damage without Faith: elemental strengthen, magical modifiers, XA *
  * YA with weather and element, absorption, 19% status. */
-void formula_calculate_truth_magical_damage(void) {
-    formula_apply_elemental_strengthen();
-    formula_apply_magical_support_status_compatibility();
-    if (formula_calculate_elemental_xa_times_ya() == 0) {
-        formula_apply_elemental_absorption_and_status();
+void battle_formula_calculate_truth_magical_damage(void) {
+    battle_formula_apply_elemental_strengthen();
+    battle_formula_apply_magical_support_status_compatibility();
+    if (battle_formula_calculate_elemental_xa_times_ya() == 0) {
+        battle_formula_apply_elemental_absorption_and_status();
     }
 }
 
 /* Damage MA * (MA + Y) / 2 without Faith: stores XA and YA, then runs the magical
  * damage chain of formula_calculate_truth_magical_damage. */
-void formula_calculate_truth_damage(void) {
-    formula_store_ma_and_ma_plus_y_divided_by_two();
-    formula_calculate_truth_magical_damage();
+void battle_formula_calculate_truth_damage(void) {
+    battle_formula_store_ma_and_ma_plus_y_divided_by_two();
+    battle_formula_calculate_truth_magical_damage();
 }
 
 /* formula_calculate_magic_accuracy without the elemental strengthen. */
-s32 formula_calculate_magic_accuracy_no_elemental(void) {
-    formula_store_ma_and_x();
-    formula_apply_magical_support_status_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_calculate_faith();
-    formula_use_hp_damage_as_action_hit_percent();
+s32 battle_formula_calculate_magic_accuracy_no_elemental(void) {
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_magical_support_status_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_calculate_faith();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
 
 /* Hit chance F(MA+X)%: elemental strengthen and the magical modifiers on MA,
  * zodiac compatibility on both terms, then Faith. Returns 1 on a miss. */
-s32 formula_calculate_magic_accuracy(void) {
-    formula_store_ma_and_x();
-    formula_apply_elemental_strengthen();
-    formula_apply_magical_support_status_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_calculate_faith();
-    formula_use_hp_damage_as_action_hit_percent();
+s32 battle_formula_calculate_magic_accuracy(void) {
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_elemental_strengthen();
+    battle_formula_apply_magical_support_status_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_calculate_faith();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
 
 /* formula_calculate_magic_accuracy without the Faith step: hit (MA+X)%. */
-s32 formula_calculate_magic_accuracy_without_faith(void) {
-    formula_store_ma_and_x();
-    formula_apply_elemental_strengthen();
-    formula_apply_magical_support_status_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_use_hp_damage_as_action_hit_percent();
+s32 battle_formula_calculate_magic_accuracy_without_faith(void) {
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_elemental_strengthen();
+    battle_formula_apply_magical_support_status_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
 
 /* The physical modifiers on XA without the attacker supports: Berserk or Frog,
  * Defense Up, the target's statuses, zodiac compatibility. */
-void formula_apply_physical_status_support_compatibility(void) {
-    formula_apply_attacker_berserk_frog();
-    formula_apply_defense_up();
-    formula_apply_target_xa_affecting_statuses();
-    formula_apply_zodiac_compatibility();
+void battle_formula_apply_physical_status_support_compatibility(void) {
+    battle_formula_apply_attacker_berserk_frog();
+    battle_formula_apply_defense_up();
+    battle_formula_apply_target_xa_affecting_statuses();
+    battle_formula_apply_zodiac_compatibility();
 }
 
 /* Hit chance (XA+YA)% with Attack Up, Martial Arts, Berserk or Frog, Defense
  * Up, the target's statuses and zodiac compatibility on XA. Returns 1 on a
  * miss. */
-s32 formula_calculate_physical_status_accuracy(void) {
-    formula_apply_attack_up_and_martial_arts();
-    formula_apply_physical_status_support_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_use_hp_damage_as_action_hit_percent();
+s32 battle_formula_calculate_physical_status_accuracy(void) {
+    battle_formula_apply_attack_up_and_martial_arts();
+    battle_formula_apply_physical_status_support_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     return g_action_target_data->hit == 0;
 }
 
 /* Formula 0x01: weapon damage (XA * YA by weapon type) with the weapon's
  * element; physical evade; 19% status. */
-void formula_weapon_damage(void) {
-    if (formula_calculate_physical_evade() == 0) {
-        if (formula_calculate_weapon_damage() == 0) {
-            formula_apply_status();
+void battle_formula_weapon_damage(void) {
+    if (battle_formula_calculate_physical_evade() == 0) {
+        if (battle_formula_calculate_weapon_damage() == 0) {
+            battle_formula_apply_status();
         }
     }
 }
 
 /* Formula 0x02: as 0x01, but the 19% roll queues the weapon's proc ability on
  * the target instead of a status. */
-void formula_weapon_damage_with_proc(void) {
-    if (formula_calculate_physical_evade() == 0) {
-        if (formula_calculate_weapon_damage() == 0) {
-            formula_store_reaction_proc_id_and_target();
+void battle_formula_weapon_damage_with_proc(void) {
+    if (battle_formula_calculate_physical_evade() == 0) {
+        if (battle_formula_calculate_weapon_damage() == 0) {
+            battle_formula_store_reaction_proc_id_and_target();
         }
     }
 }
 
 /* Formula 0x03: gun damage (WP * WP); no evade roll, element or status. */
-void formula_gun_damage(void) {
+void battle_formula_gun_damage(void) {
     u16 weapon_power = g_action_current_ability.weapon_data.power;
 
     g_action_current_ability.xa = weapon_power;
     g_action_current_ability.ya = weapon_power;
-    formula_apply_charge();
-    formula_calculate_physical_damage();
+    battle_formula_apply_charge();
+    battle_formula_calculate_physical_damage();
 }
 
 /* Formula 0x04: magic gun. Casts the first, second or third spell of the gun's
  * element (60/30/10%); damage F(WP * that spell's Y) with its element; no
  * evade. */
-void formula_magic_gun(void) {
+void battle_formula_magic_gun(void) {
     u16 weapon_power;
     u16 ability_y;
 
-    formula_select_magic_gun_ability();
+    battle_formula_select_magic_gun_ability();
     weapon_power = g_action_current_ability.weapon_data.power;
     ability_y = g_action_current_ability.range_data.y;
     g_action_current_ability.xa = weapon_power;
     g_action_current_ability.ya = ability_y;
-    formula_apply_charge();
-    formula_apply_weapon_element_strengthen();
-    formula_apply_magical_support_status_compatibility();
-    if (formula_calculate_elemental_xa_times_ya() == 0) {
-        formula_calculate_faith();
-        formula_apply_elemental_absorption();
+    battle_formula_apply_charge();
+    battle_formula_apply_weapon_element_strengthen();
+    battle_formula_apply_magical_support_status_compatibility();
+    if (battle_formula_calculate_elemental_xa_times_ya() == 0) {
+        battle_formula_calculate_faith();
+        battle_formula_apply_elemental_absorption();
     }
 }
 
 /* Formula 0x05: weapon damage as 0x01 without the weapon's element and the bow
  * weather penalty; physical evade; 19% status. */
-void formula_weapon_damage_charge(void) {
-    if (formula_calculate_physical_evade_charge() == 0) {
-        formula_calculate_base_xa();
-        formula_apply_charge();
-        formula_calculate_physical_damage();
-        if (formula_roll_conditional_status_proc() == 0) {
-            formula_apply_status();
+void battle_formula_weapon_damage_charge(void) {
+    if (battle_formula_calculate_physical_evade_charge() == 0) {
+        battle_formula_calculate_base_xa();
+        battle_formula_apply_charge();
+        battle_formula_calculate_physical_damage();
+        if (battle_formula_roll_conditional_status_proc() == 0) {
+            battle_formula_apply_status();
         }
     }
 }
 
 /* Formula 0x06: weapon damage (XA * YA), absorbed by the attacker as HP
  * (reversed against undead); physical evade; no element. */
-void formula_weapon_absorb_hp(void) {
-    if (formula_calculate_physical_evade() == 0) {
-        formula_calculate_base_xa();
-        formula_apply_charge();
-        formula_calculate_physical_damage();
-        formula_apply_hp_absorption();
+void battle_formula_weapon_absorb_hp(void) {
+    if (battle_formula_calculate_physical_evade() == 0) {
+        battle_formula_calculate_base_xa();
+        battle_formula_apply_charge();
+        battle_formula_calculate_physical_damage();
+        battle_formula_apply_hp_absorption();
     }
 }
 
 /* Formula 0x07: heal weapon (XA * YA) HP (damage to undead); no evade. Zodiac
  * compatibility is applied twice. */
-void formula_weapon_heal(void) {
-    formula_calculate_base_xa();
-    formula_apply_zodiac_compatibility();
-    formula_apply_charge();
-    formula_apply_physical_xa_modifying_statuses_support();
-    formula_store_xa_times_ya_damage();
-    formula_apply_undead_reversal();
+void battle_formula_weapon_heal(void) {
+    battle_formula_calculate_base_xa();
+    battle_formula_apply_zodiac_compatibility();
+    battle_formula_apply_charge();
+    battle_formula_apply_physical_xa_modifying_statuses_support();
+    battle_formula_store_xa_times_ya_damage();
+    battle_formula_apply_undead_reversal();
 }
 
 /* Formula 0x08: damage F(MA * Y) with element; magic evade; 19% status. */
-void formula_magical_damage(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        formula_store_ma_and_y();
-        formula_apply_elemental_strengthen();
-        formula_apply_magical_support_status_compatibility();
-        if (formula_calculate_elemental_xa_times_ya() == 0) {
-            formula_calculate_faith();
-            if (formula_apply_elemental_absorption_and_status_proc() == 0) {
-                formula_apply_status();
+void battle_formula_magical_damage(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        battle_formula_store_ma_and_y();
+        battle_formula_apply_elemental_strengthen();
+        battle_formula_apply_magical_support_status_compatibility();
+        if (battle_formula_calculate_elemental_xa_times_ya() == 0) {
+            battle_formula_calculate_faith();
+            if (battle_formula_apply_elemental_absorption_and_status_proc() == 0) {
+                battle_formula_apply_status();
             }
         }
     }
@@ -221,15 +221,15 @@ void formula_magical_damage(void) {
 
 /* Formula 0x09: damage (Y)% of max HP with element, hit F(MA+X)%; magic evade;
  * 19% status. */
-void formula_magic_hp_percent_damage(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy() == 0) {
-            formula_calculate_hp_percent_damage();
-            formula_apply_weather_elemental_effects();
-            formula_apply_elemental();
+void battle_formula_magic_hp_percent_damage(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy() == 0) {
+            battle_formula_calculate_hp_percent_damage();
+            battle_formula_apply_weather_elemental_effects();
+            battle_formula_apply_elemental();
             if (g_action_target_data->hit != 0) {
-                if (formula_apply_elemental_absorption_and_status_proc() == 0) {
-                    formula_apply_status();
+                if (battle_formula_apply_elemental_absorption_and_status_proc() == 0) {
+                    battle_formula_apply_status();
                 }
             }
         }
@@ -237,45 +237,45 @@ void formula_magic_hp_percent_damage(void) {
 }
 
 /* Formula 0x0A: status, hit F(MA+X)%; magic evade. */
-void formula_hit_faith_ma_x_percent(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy() == 0) {
-            formula_apply_status_to_action();
+void battle_formula_hit_faith_ma_x_percent(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy() == 0) {
+            battle_formula_apply_status_to_action();
         }
     }
 }
 
 /* Formula 0x0B: status, hit F(MA+X)%; no evade, and none of the target's magic
  * defenses. */
-void formula_friendly_magic_accuracy(void) {
-    formula_store_ma_and_x();
-    formula_apply_elemental_strengthen();
-    if (formula_calculate_friendly_magic_accuracy() == 0) {
-        formula_apply_status_to_action();
+void battle_formula_friendly_magic_accuracy(void) {
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_elemental_strengthen();
+    if (battle_formula_calculate_friendly_magic_accuracy() == 0) {
+        battle_formula_apply_status_to_action();
     }
 }
 
 /* Formula 0x0C: heal F(MA * Y) HP (damage to undead). */
-void formula_magical_heal(void) {
-    formula_store_ma_and_y();
-    formula_apply_elemental_strengthen();
-    formula_calculate_magical_xa_times_ya();
-    formula_calculate_faith();
-    formula_apply_undead_reversal();
+void battle_formula_magical_heal(void) {
+    battle_formula_store_ma_and_y();
+    battle_formula_apply_elemental_strengthen();
+    battle_formula_calculate_magical_xa_times_ya();
+    battle_formula_calculate_faith();
+    battle_formula_apply_undead_reversal();
 }
 
 /* Formula 0x0D: heal (Y)% of max HP, hit F(MA+X)%. */
-void formula_heal_y_percent_faith(void) {
-    formula_store_ma_and_x();
-    formula_apply_elemental_strengthen();
-    if (formula_calculate_friendly_magic_accuracy() != 0) {
+void battle_formula_heal_y_percent_faith(void) {
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_elemental_strengthen();
+    if (battle_formula_calculate_friendly_magic_accuracy() != 0) {
         return;
     }
-    if (formula_apply_status_and_check_undead() == 0) {
+    if (battle_formula_apply_status_and_check_undead() == 0) {
         return;
     }
-    formula_calculate_hp_percent_damage();
-    formula_apply_undead_reversal();
+    battle_formula_calculate_hp_percent_damage();
+    battle_formula_apply_undead_reversal();
 }
 
 /* Formula 0x0E: damage (Y)% of max HP, hit F(MA+X)%; magic evade. The
@@ -284,76 +284,76 @@ void formula_heal_y_percent_faith(void) {
  *
  * 0x801938e6: set when the current target is undead, read by this formula to
  * skip the magic-defense stage. */
-void formula_damage_hp_percent_hit_faith_ma_x_percent(void) {
+void battle_formula_damage_hp_percent_hit_faith_ma_x_percent(void) {
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
         & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
         g_action_current_ability.target_is_undead = 1;
     } else {
         g_action_current_ability.target_is_undead = 0;
-        if (formula_calculate_magical_evade() != 0) {
+        if (battle_formula_calculate_magical_evade() != 0) {
             return;
         }
     }
-    formula_store_ma_and_x();
-    formula_apply_elemental_strengthen();
-    formula_apply_magic_attack_up();
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_elemental_strengthen();
+    battle_formula_apply_magic_attack_up();
     if (g_action_current_ability.target_is_undead == 0) {
-        formula_apply_magic_defense_up();
-        formula_apply_target_magical_status_xa_modifiers();
+        battle_formula_apply_magic_defense_up();
+        battle_formula_apply_target_magical_status_xa_modifiers();
     }
-    formula_apply_zodiac_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_calculate_faith();
-    formula_use_hp_damage_as_action_hit_percent();
+    battle_formula_apply_zodiac_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_calculate_faith();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit == 0) {
         return;
     }
-    if (formula_apply_status_and_check_undead() == 0) {
+    if (battle_formula_apply_status_and_check_undead() == 0) {
         return;
     }
-    formula_calculate_hp_percent_damage();
-    formula_apply_undead_absorb_attack();
+    battle_formula_calculate_hp_percent_damage();
+    battle_formula_apply_undead_absorb_attack();
 }
 
 /* Formula 0x0F: absorb (Y)% of max MP, hit F(MA+X)%. */
-void formula_absorb_mp_y_percent(void) {
-    if (formula_calculate_magical_evade() != 0 || formula_calculate_magic_accuracy_no_elemental() != 0) {
+void battle_formula_absorb_mp_y_percent(void) {
+    if (battle_formula_calculate_magical_evade() != 0 || battle_formula_calculate_magic_accuracy_no_elemental() != 0) {
         return;
     }
-    formula_calculate_mp_percent_damage();
+    battle_formula_calculate_mp_percent_damage();
     g_action_target_data->hp_damage = g_action_target_data->mp_damage;
-    formula_apply_mp_recovery();
+    battle_formula_apply_mp_recovery();
 }
 
 /* Formula 0x10: absorb (Y)% of max HP, hit F(MA+X)%; magic evade. */
-void formula_magic_hp_absorb(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy_no_elemental() == 0) {
-            formula_calculate_hp_percent_damage();
-            formula_apply_hp_absorption();
+void battle_formula_magic_hp_absorb(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy_no_elemental() == 0) {
+            battle_formula_calculate_hp_percent_damage();
+            battle_formula_apply_hp_absorption();
         }
     }
 }
 
 /* Formula 0x11: an empty handler in g_formula_handlers. */
-void formula_11_unused(void) {
+void battle_formula_11_unused(void) {
 }
 
 /* Formula 0x12: Quick, hit F(MA+X)%; no evade. */
-void formula_set_quick(void) {
-    formula_store_ma_and_x();
-    if (formula_calculate_friendly_magic_accuracy() == 0) {
-        formula_apply_quick_effect();
+void battle_formula_set_quick(void) {
+    battle_formula_store_ma_and_x();
+    if (battle_formula_calculate_friendly_magic_accuracy() == 0) {
+        battle_formula_apply_quick_effect();
     }
 }
 
 /* Formula 0x13: an empty handler in g_formula_handlers. */
-void formula_13_unused(void) {
+void battle_formula_13_unused(void) {
 }
 
 /* Formula 0x14: Golem, hit ((MA+X) * caster Faith / 100)%. */
-void formula_set_golem(void) {
-    if (formula_calculate_golem_accuracy() == 0) {
+void battle_formula_set_golem(void) {
+    if (battle_formula_calculate_golem_accuracy() == 0) {
         /* The 16-bit store clears all other special-effect flags. */
         g_action_target_data->special_effect = ACTION_SPECIAL_EFFECT_SET_GOLEM;
         g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
@@ -361,9 +361,9 @@ void formula_set_golem(void) {
 }
 
 /* Formula 0x15: CT to 0, hit F(MA+X)%; magic evade. */
-void formula_set_ct_zero(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy_no_elemental() == 0) {
+void battle_formula_set_ct_zero(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy_no_elemental() == 0) {
             g_action_target_data->ct_change = ACTION_CT_CHANGE_ZERO;
             g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
         }
@@ -372,13 +372,13 @@ void formula_set_ct_zero(void) {
 
 /* Formula 0x16: MP damage equal to the target's current MP, hit F(MA+X)%;
  * magic evade. */
-void formula_damage_mp_target_current_mp(void) {
+void battle_formula_damage_mp_target_current_mp(void) {
     unit_stats_t* target;
     action_data_t* action;
     u16 mp;
 
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy_no_elemental() == 0) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy_no_elemental() == 0) {
             target = g_action_target;
             action = g_action_target_data;
             mp = target->mp;
@@ -390,69 +390,69 @@ void formula_damage_mp_target_current_mp(void) {
 
 /* Formula 0x17: damage equal to the target's current HP - 1, hit F(MA+X)%;
  * magic evade. */
-void formula_damage_target_hp_minus_one(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy_no_elemental() == 0) {
-            formula_calculate_gravi2_damage();
+void battle_formula_damage_target_hp_minus_one(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy_no_elemental() == 0) {
+            battle_formula_calculate_gravi2_damage();
         }
     }
 }
 
 /* Formula 0x18: an empty handler in g_formula_handlers. */
-void formula_18_unused(void) {
+void battle_formula_18_unused(void) {
 }
 
 /* Formula 0x19: an empty handler in g_formula_handlers. */
-void formula_19_unused(void) {
+void battle_formula_19_unused(void) {
 }
 
 /* Formula 0x1A: -PA, -MA or -Speed (X) by ability, hit F(MA+Y)%; magic evade. */
-void formula_magical_stat_reduction(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        formula_store_ma_and_y();
-        formula_apply_elemental_strengthen();
-        formula_apply_magical_support_status_compatibility();
-        formula_store_xa_plus_ya_status_damage();
-        formula_calculate_faith();
-        formula_use_hp_damage_as_action_hit_percent();
+void battle_formula_magical_stat_reduction(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        battle_formula_store_ma_and_y();
+        battle_formula_apply_elemental_strengthen();
+        battle_formula_apply_magical_support_status_compatibility();
+        battle_formula_store_xa_plus_ya_status_damage();
+        battle_formula_calculate_faith();
+        battle_formula_use_hp_damage_as_action_hit_percent();
         if (g_action_target_data->hit == 0) {
             /* The target clears the bit in the special_effect 16-bit value. */
             g_action_target_data->special_effect &= ~ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT;
         } else {
-            formula_determine_reduced_stat();
+            battle_formula_determine_reduced_stat();
         }
     }
 }
 
 /* Formula 0x1B: MP damage (Y)% of max MP, hit F(MA+X)%; magic evade. */
-void formula_damage_mp_percent(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        if (formula_calculate_magic_accuracy() == 0) {
-            formula_calculate_mp_percent_damage();
+void battle_formula_damage_mp_percent(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        if (battle_formula_calculate_magic_accuracy() == 0) {
+            battle_formula_calculate_mp_percent_damage();
         }
     }
 }
 
 /* Formula 0x1C: song, hit X%: heal (MA + Y) MP or HP, +1 Speed, PA or MA,
  * status, or Quick by ability. Never hits a sleeping target. */
-void formula_song(void) {
-    formula_force_sleeping_target_miss();
+void battle_formula_song(void) {
+    battle_formula_force_sleeping_target_miss();
     if (g_action_target_data->hit != 0) {
-        if (formula_calculate_dance_song_hit() == 0) {
-            formula_store_ma_and_y();
-            formula_apply_song_abilities();
+        if (battle_formula_calculate_dance_song_hit() == 0) {
+            battle_formula_store_ma_and_y();
+            battle_formula_apply_song_abilities();
         }
     }
 }
 
 /* Formula 0x1D: dance, hit X%: (weapon XA + YA) MP or HP damage, -1 Speed, PA
  * or MA, status, or CT to 0 by ability. Never hits a sleeping target. */
-void formula_dance(void) {
-    formula_force_sleeping_target_miss();
+void battle_formula_dance(void) {
+    battle_formula_force_sleeping_target_miss();
     if (g_action_target_data->hit != 0) {
-        if (formula_calculate_dance_song_hit() == 0) {
-            formula_calculate_base_xa();
-            formula_apply_dance_abilities();
+        if (battle_formula_calculate_dance_song_hit() == 0) {
+            battle_formula_calculate_base_xa();
+            battle_formula_apply_dance_abilities();
         }
     }
 }
@@ -460,9 +460,9 @@ void formula_dance(void) {
 /* Formula 0x1E: damage ((MA + Y) / 2 * MA) with element; magic evade; 19%
  * status. Strikes rnd(1..X) times
  * (action_init_current_ability_strike_data). */
-void formula_multihit_truth_magic(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        formula_calculate_truth_damage();
+void battle_formula_multihit_truth_magic(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        battle_formula_calculate_truth_damage();
     }
 }
 
@@ -470,16 +470,16 @@ void formula_multihit_truth_magic(void) {
  * caster Faith) and (100 - target Faith) over 10000, the Faith status counting
  * as 0 and Innocent as 100; magic evade; 19% status. Strikes rnd(1..X) times
  * (action_init_current_ability_strike_data). */
-void formula_unfaith_magical_damage(void) {
+void battle_formula_unfaith_magical_damage(void) {
     action_data_t* action;
 
-    if (formula_calculate_magical_evade() != 0) {
+    if (battle_formula_calculate_magical_evade() != 0) {
         return;
     }
-    formula_store_ma_and_ma_plus_y_divided_by_two();
-    formula_apply_elemental_strengthen();
-    formula_apply_magical_support_status_compatibility();
-    if (formula_calculate_elemental_xa_times_ya() != 0) {
+    battle_formula_store_ma_and_ma_plus_y_divided_by_two();
+    battle_formula_apply_elemental_strengthen();
+    battle_formula_apply_magical_support_status_compatibility();
+    if (battle_formula_calculate_elemental_xa_times_ya() != 0) {
         return;
     }
     if (g_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FAITH)]
@@ -500,27 +500,27 @@ void formula_unfaith_magical_damage(void) {
     action = g_action_target_data;
     action->hp_damage = action->hp_damage * (100 - g_action_current_ability.target_faith)
         * (100 - g_action_current_ability.attacker_faith) / 10000;
-    if (formula_apply_elemental_absorption_and_status_proc() == 0) {
-        formula_apply_status();
+    if (battle_formula_apply_elemental_absorption_and_status_proc() == 0) {
+        battle_formula_apply_status();
     }
 }
 
 /* Formula 0x20: Draw Out damage (MA * Y) with element; no evade; 19% status;
  * katana break roll. */
-void formula_draw_out_damage(void) {
-    formula_calculate_katana_break_chance();
-    formula_store_ma_and_y();
-    formula_calculate_truth_magical_damage();
+void battle_formula_draw_out_damage(void) {
+    battle_formula_calculate_katana_break_chance();
+    battle_formula_store_ma_and_y();
+    battle_formula_calculate_truth_magical_damage();
 }
 
 /* Formula 0x21: Draw Out MP damage (MA * Y); katana break roll. */
-void formula_draw_out_mp_damage(void) {
+void battle_formula_draw_out_mp_damage(void) {
     s16 damage;
     action_data_t* action;
 
-    formula_calculate_katana_break_chance();
-    formula_store_ma_and_y();
-    formula_apply_magical_support_status_compatibility();
+    battle_formula_calculate_katana_break_chance();
+    battle_formula_store_ma_and_y();
+    battle_formula_apply_magical_support_status_compatibility();
     damage = g_action_current_ability.xa * g_action_current_ability.ya;
     action = g_action_target_data;
     action->attack_type = ACTION_TYPE_MP_DAMAGE;
@@ -528,51 +528,51 @@ void formula_draw_out_mp_damage(void) {
 }
 
 /* Formula 0x22: Draw Out status, 100%; katana break roll. */
-void formula_draw_out_status(void) {
-    formula_calculate_katana_break_chance();
-    formula_apply_status_to_action();
+void battle_formula_draw_out_status(void) {
+    battle_formula_calculate_katana_break_chance();
+    battle_formula_apply_status_to_action();
 }
 
 /* Formula 0x23: Draw Out heal (MA * Y) HP with no modifiers (damage to
  * undead); katana break roll. */
-void formula_draw_out_heal(void) {
-    formula_calculate_katana_break_chance();
-    formula_store_ma_and_y();
-    formula_store_xa_times_ya_damage();
-    formula_apply_undead_reversal();
+void battle_formula_draw_out_heal(void) {
+    battle_formula_calculate_katana_break_chance();
+    battle_formula_store_ma_and_y();
+    battle_formula_store_xa_times_ya_damage();
+    battle_formula_apply_undead_reversal();
 }
 
 /* Formula 0x24: damage ((PA + Y) / 2 * MA) with element; magic evade; 19%
  * status. */
-void formula_ma_pa_half_damage(void) {
-    if (formula_calculate_magical_evade() == 0) {
-        formula_store_ma_and_pa_plus_y_divided_by_two();
-        formula_calculate_truth_magical_damage();
+void battle_formula_ma_pa_half_damage(void) {
+    if (battle_formula_calculate_magical_evade() == 0) {
+        battle_formula_store_ma_and_pa_plus_y_divided_by_two();
+        battle_formula_calculate_truth_magical_damage();
     }
 }
 
 /* Formula 0x25: break the equipment the ability names, hit (PA+WP+Y)%;
  * physical evade; Maintenance blocks it. With nothing in that slot the action
  * becomes a plain attack. */
-void formula_break_equipped_hit_pa_wp_x_percent(void) {
+void battle_formula_break_equipped_hit_pa_wp_x_percent(void) {
     action_data_t* action;
 
-    if (formula_apply_steal_break_might_sword_hardcoding() != 0) {
+    if (battle_formula_apply_steal_break_might_sword_hardcoding() != 0) {
         g_action_current_ability.defaulted_to_attack = 1;
-        action_switch_ability_to_default_attack();
+        battle_action_switch_ability_to_default_attack();
         return;
     }
     g_action_current_ability.defaulted_to_attack = 0;
-    if (formula_calculate_physical_evade() != 0) {
+    if (battle_formula_calculate_physical_evade() != 0) {
         return;
     }
-    formula_store_pa_and_weapon_power_plus_y();
-    if (formula_calculate_physical_accuracy() != 0) {
+    battle_formula_store_pa_and_weapon_power_plus_y();
+    if (battle_formula_calculate_physical_accuracy() != 0) {
         /* The target writes the combined special-effect field as one 16-bit value. */
         g_action_target_data->special_effect = 0;
         return;
     }
-    formula_apply_maintenance();
+    battle_formula_apply_maintenance();
     action = g_action_target_data;
     if (action->hit != 0) {
         action->special_effect = ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT;
@@ -580,22 +580,22 @@ void formula_break_equipped_hit_pa_wp_x_percent(void) {
 }
 
 /* Formula 0x26: steal equipped item, hit (SP+X)%. */
-void formula_steal_equipment(void) {
+void battle_formula_steal_equipment(void) {
     action_data_t* action;
 
-    if (formula_apply_steal_break_might_sword_hardcoding() != 0) {
-        formula_nullify_action();
+    if (battle_formula_apply_steal_break_might_sword_hardcoding() != 0) {
+        battle_formula_nullify_action();
         g_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;
         return;
     }
-    if (formula_calculate_physical_evade() != 0) {
+    if (battle_formula_calculate_physical_evade() != 0) {
         return;
     }
-    formula_store_speed_and_x();
-    if (formula_calculate_physical_status_accuracy() != 0) {
+    battle_formula_store_speed_and_x();
+    if (battle_formula_calculate_physical_status_accuracy() != 0) {
         return;
     }
-    formula_apply_maintenance();
+    battle_formula_apply_maintenance();
     action = g_action_target_data;
     if (action->hit != 0) {
         /* The 16-bit store clears all other special-effect flags. */
@@ -604,45 +604,45 @@ void formula_steal_equipment(void) {
 }
 
 /* Formula 0x27: steal (Level * SP) gil, hit (SP+X)%; physical evade. */
-void formula_steal_gil(void) {
-    if (formula_calculate_physical_evade() == 0) {
-        formula_store_speed_and_x();
-        if (formula_calculate_physical_status_accuracy() == 0) {
-            formula_calculate_stolen_gil();
+void battle_formula_steal_gil(void) {
+    if (battle_formula_calculate_physical_evade() == 0) {
+        battle_formula_store_speed_and_x();
+        if (battle_formula_calculate_physical_status_accuracy() == 0) {
+            battle_formula_calculate_stolen_gil();
         }
     }
 }
 
 /* Formula 0x28: steal (SP + Y) EXP, at most 100 and at most what the target
  * has, hit (SP+X)%; physical evade. */
-void formula_steal_exp_hit_sp_x_percent(void) {
-    if (formula_calculate_physical_evade() == 0) {
-        formula_store_speed_and_x();
-        formula_apply_attack_up_and_martial_arts();
-        formula_apply_attacker_berserk_frog();
-        formula_apply_defense_up();
-        formula_apply_target_xa_affecting_statuses();
-        formula_apply_zodiac_compatibility();
-        formula_store_xa_plus_ya_status_damage();
-        formula_use_hp_damage_as_action_hit_percent();
+void battle_formula_steal_exp_hit_sp_x_percent(void) {
+    if (battle_formula_calculate_physical_evade() == 0) {
+        battle_formula_store_speed_and_x();
+        battle_formula_apply_attack_up_and_martial_arts();
+        battle_formula_apply_attacker_berserk_frog();
+        battle_formula_apply_defense_up();
+        battle_formula_apply_target_xa_affecting_statuses();
+        battle_formula_apply_zodiac_compatibility();
+        battle_formula_store_xa_plus_ya_status_damage();
+        battle_formula_use_hp_damage_as_action_hit_percent();
         if (g_action_target_data->hit != 0 || g_action_state != ACTION_STATE_EXECUTE) {
-            formula_set_exp_stolen();
+            battle_formula_set_exp_stolen();
         }
     }
 }
 
 /* Formula 0x29: opposite sex only, hit (MA+X)%. */
-void formula_opposite_sex_hit_ma_x_percent(void) {
-    formula_store_ma_and_x();
-    formula_apply_zodiac_compatibility();
-    formula_store_xa_plus_ya_status_damage();
-    formula_use_hp_damage_as_action_hit_percent();
+void battle_formula_opposite_sex_hit_ma_x_percent(void) {
+    battle_formula_store_ma_and_x();
+    battle_formula_apply_zodiac_compatibility();
+    battle_formula_store_xa_plus_ya_status_damage();
+    battle_formula_use_hp_damage_as_action_hit_percent();
     if (g_action_target_data->hit != 0) {
         if ((g_action_target->unit_flags & (UNIT_FLAG_MONSTER | UNIT_FLAG_FEMALE | UNIT_FLAG_MALE))
             == (g_action_attacker->unit_flags & (UNIT_FLAG_MONSTER | UNIT_FLAG_FEMALE | UNIT_FLAG_MALE))) {
-            formula_force_attack_miss();
+            battle_formula_force_attack_miss();
         } else {
-            formula_apply_status_to_action();
+            battle_formula_apply_status_to_action();
         }
     }
 }

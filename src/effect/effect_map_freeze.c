@@ -13,7 +13,7 @@ s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_in
     case EFFECT_CALLBACK_PHASE_IDLE:
         break;
     case EFFECT_CALLBACK_PHASE_INIT:
-        map_freeze();
+        battle_map_freeze();
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
     case EFFECT_CALLBACK_PHASE_UPDATE:

@@ -67,7 +67,7 @@ s32 battle_menu_get_unit_skillset_ability_data(
     } else if (unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_SHORT_CHARGE) {
         charge = 1;
     }
-    action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_ALL);
+    battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_ALL);
     if (unit->equipped_flags & BATTLE_UNIT_EQUIPPED_FLAG_MATERIA_BLADE) {
         materia_blade = 1;
     }
@@ -123,14 +123,14 @@ s32 battle_menu_get_unit_skillset_ability_data(
                     ct = 0;
                 }
             }
-            turns = action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
+            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = mp;
             ct_out[count] = ct;
             flags_out[count] = kind;
             turns_out[count] = turns;
         } else if (ability >= ABILITY_ID_CHARGE_FIRST && ability < ABILITY_ID_MATH_FIRST) {
             ct = (g_main_charge_ability_data - ABILITY_ID_CHARGE_FIRST)[ability].ct;
-            turns = action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
+            turns = battle_action_get_number_of_turns_to_resolve(unit_id, ct, at_list);
             mp_out[count] = 0;
             ct_out[count] = ct;
             flags_out[count] = 0;
@@ -265,7 +265,7 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
         if (found != 0 && (item->type_flags & ITEM_TYPE_FLAG_WEAPON) != 0
             && (g_main_item_weapon_data[item->secondary_data_id].flags & WEAPON_FLAG_THROWABLE) != 0) {
             item_id = i;
-            if (action_decrement_player_item_quantity(unit, item_id, 0) == 0) {
+            if (battle_action_decrement_player_item_quantity(unit, item_id, 0) == 0) {
                 *out = item_id;
                 out++;
                 count++;
@@ -408,7 +408,8 @@ u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset) {
     if (count == 0) {
         return 0;
     }
-    terrain_ability = g_main_terrain_geomancy_abilities[g_map_tile_data[map_calculate_location(unit)].surface.type];
+    terrain_ability
+        = g_main_terrain_geomancy_abilities[g_map_tile_data[battle_map_calculate_location(unit)].surface.type];
     for (i = 0; i < count; i++) {
         if (abilities[i] == terrain_ability) {
             return terrain_ability;
@@ -515,7 +516,7 @@ s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y
             unit_stats_t* unit = &g_battle_unit_stats[unit_index];
 
             if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE || unit->x != x || unit->position.y != y
-                || action_is_reaction_prevented(unit) != 0
+                || battle_action_is_reaction_prevented(unit) != 0
                 || !(unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_MONSTER_SKILL)
                 || ((unit->team_flags ^ unit_team_flags) & BATTLE_TEAM_MASK)) {
                 continue;
@@ -596,7 +597,7 @@ s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, 
         unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
 }
 
-s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
+s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
     unit_stats_t* unit;
     s32 result;
     s32 count;
@@ -625,7 +626,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             unit->ability_outcome = 0;
             unit->charged_ability_ct = 0xff;
         }
-        ai_end_action_simulation();
+        battle_ai_end_action_simulation();
         return 0xe000;
     }
     if (mode == BATTLE_BETWEEN_TURN_MODE_FIND_ACTIVE_UNIT) {
@@ -649,7 +650,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
         case BATTLE_BETWEEN_TURN_STATE_ADD_CT:
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 unit = &g_battle_unit_stats[i];
-                flags = status_calculate_turn_flags(unit);
+                flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags & BATTLE_TURN_STATUS_CT_FROZEN)) {
                     speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
                     if (flags & BATTLE_TURN_STATUS_SLOW) {
@@ -671,7 +672,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             best = 0xff;
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 unit = &g_battle_unit_stats[i];
-                flags = status_calculate_turn_flags(unit);
+                flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags & BATTLE_TURN_STATUS_CT_FROZEN)) {
                     if (max_ct < unit->ct) {
                         best = i;
@@ -690,7 +691,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 } else {
                     unit->ct = max_ct % UNIT_TURN_CT_THRESHOLD;
                 }
-                ret = status_build_upkeep_action(best, unit);
+                ret = battle_status_build_upkeep_action(best, unit);
                 if (ret != 0) {
                     result = best | BATTLE_TURN_EVENT_ACTION_RESULT;
                     if (ret & 1) {
@@ -700,7 +701,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
                         return result;
                     }
                 }
-                flags = status_calculate_turn_flags(unit);
+                flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags
                         & (BATTLE_TURN_STATUS_CT_FROZEN | BATTLE_TURN_STATUS_INCAPACITATED | BATTLE_TURN_STATUS_DEAD))
                     || ret == 2) {
@@ -724,7 +725,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             i = 0;
             do {
                 unit = &g_battle_unit_stats[i];
-                flags = status_calculate_turn_flags(unit);
+                flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags & BATTLE_TURN_STATUS_BLOCKS_WAIT_MENU_MASK)) {
                     value = unit->charged_ability_ct;
                     if (value != 0xff && value != 0) {
@@ -739,7 +740,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
         case BATTLE_BETWEEN_TURN_STATE_RESOLVE_CHARGE:
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 unit = &g_battle_unit_stats[i];
-                flags = status_calculate_turn_flags(unit);
+                flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags & BATTLE_TURN_STATUS_BLOCKS_WAIT_MENU_MASK) && unit->charged_ability_ct == 0) {
                     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                         & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
@@ -762,7 +763,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
-                    status_update_expiring(i);
+                    battle_status_update_expiring(i);
                 }
                 /* clang-format off */
             } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_COLLECT_PENDING_ACTIONS;
@@ -796,7 +797,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             max_ct = 0xfe;
             best = 0xff;
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                flags = status_calculate_turn_flags(&g_battle_unit_stats[i]);
+                flags = battle_status_calculate_turn_flags(&g_battle_unit_stats[i]);
                 if (!(flags & BATTLE_TURN_STATUS_CT_FROZEN)) {
                     if (max_ct < g_battle_unit_stats[i].ct) {
                         best = i;
@@ -827,10 +828,10 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     s32 unit_status;
                     s32 end_turn;
 
-                    unit_status = status_calculate_turn_flags(unit);
-                    end_turn = action_should_end_unit_turn(unit);
+                    unit_status = battle_status_calculate_turn_flags(unit);
+                    end_turn = battle_action_should_end_unit_turn(unit);
                     if ((unit_status & BATTLE_TURN_STATUS_CT_FROZEN) || end_turn != 0) {
-                        action_end_turn(i);
+                        battle_action_end_turn(i);
                         unit->has_turn = 0;
                     } else {
                         result = i | BATTLE_TURN_EVENT_UNIT_READY;
@@ -844,7 +845,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_TERRAIN_POISON;
             if (g_battle_turn_unit_id != -1) {
                 unit = &g_battle_unit_stats[g_battle_turn_unit_id];
-                if (status_apply_poison_and_regen(unit)) {
+                if (battle_status_apply_poison_and_regen(unit)) {
                     result = g_battle_turn_unit_id | BATTLE_TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -854,7 +855,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_REMOVE_TRANSPARENT;
             if (g_battle_turn_unit_id != -1) {
                 unit = &g_battle_unit_stats[g_battle_turn_unit_id];
-                if (status_prepare_terrain_poison(unit)) {
+                if (battle_status_prepare_terrain_poison(unit)) {
                     result = g_battle_turn_unit_id | BATTLE_TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -864,7 +865,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_MARK_MIMES;
             if (g_battle_turn_unit_id != -1) {
                 unit = &g_battle_unit_stats[g_battle_turn_unit_id];
-                if (status_remove_transparent(unit)) {
+                if (battle_status_remove_transparent(unit)) {
                     result = g_battle_turn_unit_id | BATTLE_TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -892,7 +893,7 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 unit = &g_battle_unit_stats[i];
                 if (g_battle_mimic_pending_flags[i] != 0 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
                     g_battle_mimic_pending_flags[i] = 0;
-                    ret = action_set_mimic_ability(unit);
+                    ret = battle_action_set_mimic_ability(unit);
                     if (ret == 1) {
                         result = i | BATTLE_TURN_EVENT_ABILITY_READY;
                         return result;
@@ -923,13 +924,13 @@ s32 action_run_between_turn_control(battle_between_turn_mode_e mode) {
  * runs out and the unit becomes a crystal or treasure, 3 when Death Sentence
  * expires on a unit that is not undead, and 0 when nothing happens.
  */
-s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
+s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     action_data_t* action = &unit->action;
     s32 roll;
     s32 mask;
     u8 counter;
 
-    action_clear_current_data(action);
+    battle_action_clear_current_data(action);
     roll = rand();
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
             & (STATUS_BYTE_MASK(STATUS_ID_DEAD) | STATUS_BYTE_MASK(STATUS_ID_UNDEAD)))
@@ -1011,7 +1012,7 @@ s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
  * a ridden mount; INCAPACITATED | DEAD for a dead unit; otherwise INCAPACITATED |
  * SLEEP for Sleep plus the HASTE and SLOW bits. The retail status data puts Sleep
  * in the freeze-CT set, which leaves the SLEEP result unreachable. */
-s32 status_calculate_turn_flags(const unit_stats_t* unit) {
+s32 battle_status_calculate_turn_flags(const unit_stats_t* unit) {
     s32 status1;
     s32 status4;
     s32 status5;
@@ -1047,7 +1048,7 @@ s32 status_calculate_turn_flags(const unit_stats_t* unit) {
  *
  * Returns -1 when the blue side is defeated, 0 when all opposing units are
  * defeated, and 1 while both sides can continue. */
-s32 action_check_battle_outcome(void) {
+s32 battle_action_check_battle_outcome(void) {
     s32 player_unit_count;
     s32 enemy_unit_count;
     s32 unit_index;
@@ -1104,7 +1105,7 @@ s32 action_check_battle_outcome(void) {
  *
  * Returns -1 for an empty slot, -3 for a unit that cannot act and -2 when the
  * unit is not on the list. */
-s32 action_find_unit_turn_index(const unit_stats_t* unit) {
+s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
     battle_at_entry_t at_list[BATTLE_AT_LIST_CAPACITY];
     s32 i;
     battle_at_entry_t* entry;
@@ -1112,10 +1113,10 @@ s32 action_find_unit_turn_index(const unit_stats_t* unit) {
 
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return -1;
-    if (status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0)
+    if (battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0)
         return -3;
     battle_id = unit->battle_id;
-    action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_TURNS_ONLY);
+    battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_TURNS_ONLY);
     for (i = 0; i < BATTLE_AT_LIST_CAPACITY; i++) {
         entry = &at_list[i];
         if ((entry->unit_code & BATTLE_AT_UNIT_ID_MASK) == (battle_id & 0xFF)) {
@@ -1129,12 +1130,12 @@ s32 action_find_unit_turn_index(const unit_stats_t* unit) {
  *
  * Returns -4 for an empty entry; a charged-action entry (bit 0x40) returns its
  * unit id plus 0x100. */
-s32 action_calculate_at_list_and_get_specific_unit_id(s32 at_index) {
+s32 battle_action_calculate_at_list_and_get_specific_unit_id(s32 at_index) {
     battle_at_entry_t at_list[BATTLE_AT_LIST_CAPACITY];
     u32 entry;
     u32 unit_id;
 
-    action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_ALL);
+    battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_ALL);
     entry = at_list[at_index].unit_code;
     unit_id = entry & BATTLE_AT_UNIT_ID_MASK;
     if (unit_id == BATTLE_AT_END_OF_LIST) {
@@ -1147,7 +1148,7 @@ s32 action_calculate_at_list_and_get_specific_unit_id(s32 at_index) {
 }
 
 /* Return 1 when the unit cannot participate in the AT list. */
-s32 status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit) {
+s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return 1;
     }
@@ -1170,7 +1171,7 @@ s32 status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_s
  * Runs the attack preparation for action in the preview state, rebuilds
  * at_list and counts the turns until the action resolves, then restores the
  * unit's action data, CT, move/act flags and statuses. */
-s32 action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list) {
+s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_at_entry_t* at_list) {
     action_command_t saved_action;
     action_command_t* action_data;
     s32 old_state;
@@ -1188,12 +1189,12 @@ s32 action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_
     old_action_taken = unit->action_taken;
     old_state = g_action_state;
     g_action_state = ACTION_STATE_PREVIEW;
-    if (action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE) {
+    if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE) {
         unit->charged_ability_ct = 0;
     }
-    turns = action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_PREVIEW);
+    turns = battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_PREVIEW);
     if (turns != -1) {
-        turns = action_get_number_of_turns_to_resolve(unit->battle_id, unit->charged_ability_ct, at_list) & 0xFF;
+        turns = battle_action_get_number_of_turns_to_resolve(unit->battle_id, unit->charged_ability_ct, at_list) & 0xFF;
     }
     g_action_state = old_state;
     unit->movement_taken = old_movement_taken;
@@ -1217,7 +1218,7 @@ s32 action_preview_at_list(unit_stats_t* unit, action_command_t* action, battle_
  * be a multi-set u32: a single-set shift temporary gets sched1's birth boost
  * and lands after the a1 load. The 0x50-byte array is the unreferenced frame
  * area the target reserves. */
-s32 action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode) {
+s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode) {
     unit_stats_t* unit;
     u8 unused[0x50];
     s32 placed;
@@ -1248,13 +1249,13 @@ s32 action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode
     if (mode != BATTLE_AT_LIST_MODE_ACTIONS_ONLY) {
         unit = battle_unit_find_active_data_pointer();
         if (unit != 0) {
-            action_sort_at_list(unit->battle_id, 0, 0, list);
+            battle_action_sort_at_list(unit->battle_id, 0, 0, list);
         }
     }
 
     for (slot = 0; slot < 0x15; slot++) {
         unit = &g_battle_unit_stats[slot];
-        if (status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0) {
+        if (battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0) {
             continue;
         }
 
@@ -1275,7 +1276,7 @@ s32 action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode
             if (value != 0 || unit->has_turn == 0 || mode != BATTLE_AT_LIST_MODE_PREVIEW) {
                 tick += phase_tick;
             }
-            placed += action_sort_at_list(slot, 1, (tick << 8) & 0xff00, list);
+            placed += battle_action_sort_at_list(slot, 1, (tick << 8) & 0xff00, list);
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                 & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
                 main_unit_copy_last_ability_ct(unit);
@@ -1286,7 +1287,7 @@ s32 action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode
                         break;
                     }
                     key <<= 8;
-                    placed += action_sort_at_list(slot, 1, key & 0xff00, list);
+                    placed += battle_action_sort_at_list(slot, 1, key & 0xff00, list);
                 }
             }
         }
@@ -1354,7 +1355,8 @@ s32 action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode
             remainder = ct;
             remainder %= UNIT_TURN_CT_THRESHOLD;
             ct = remainder;
-            added = action_sort_at_list(slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
+            added = battle_action_sort_at_list(
+                slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
             if (added == 0) {
                 break;
             }
@@ -1370,7 +1372,7 @@ s32 action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode
  * Mode 1 is a charged ability landing: battle ID + 0x40 with the ability id's
  * low byte in action_id_low, battle ID - 0x40 for an ability id of 0x100 or more, or
  * battle ID + 0x60 for Jump. Returns 1 when the entry was placed. */
-s32 action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list) {
+s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t* list) {
     unit_stats_t* unit;
     s32 i;
     s32 j;
@@ -1409,17 +1411,17 @@ s32 action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, battle_at_entry_t
     return i != BATTLE_AT_LIST_CAPACITY;
 }
 
-void action_set_only_action_taken(s32 unit_id) {
-    action_set_move_act_flags(unit_id, 0, 1);
+void battle_action_set_only_action_taken(s32 unit_id) {
+    battle_action_set_move_act_flags(unit_id, 0, 1);
 }
 
-void action_set_only_movement_taken(s32 unit_id) {
-    action_set_move_act_flags(unit_id, 1, 0);
+void battle_action_set_only_movement_taken(s32 unit_id) {
+    battle_action_set_move_act_flags(unit_id, 1, 0);
 }
 
 /* Mark the unit's move and/or action as taken and end its turn once nothing is
  * left to do. -1 for an absent unit, 1 when the turn ended, otherwise 0. */
-s32 action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
+s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
     unit_stats_t* unit;
     s32 ret;
     unit = &g_battle_unit_stats[idx];
@@ -1431,9 +1433,9 @@ s32 action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
     if (act_flag != 0) {
         unit->action_taken = 1;
     }
-    ret = action_should_end_unit_turn(unit);
+    ret = battle_action_should_end_unit_turn(unit);
     if (ret != 0) {
-        ret = action_end_turn(idx);
+        ret = battle_action_end_turn(idx);
     }
     return ret;
 }
@@ -1441,7 +1443,7 @@ s32 action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag) {
 /* End the unit's turn: CT gains 20 when it neither moved nor has Don't Move,
  * and 20 when it neither acted nor has Don't Act or Performing; the result is
  * capped at 60. Always returns 1. */
-s32 action_end_turn(s32 unit_id) {
+s32 battle_action_end_turn(s32 unit_id) {
     unit_stats_t* unit;
     u16 ct;
     u8 status4;
@@ -1475,7 +1477,7 @@ s32 action_end_turn(s32 unit_id) {
 }
 
 /* Returns whether a unit with no remaining move or action should end its turn. */
-s32 action_should_end_unit_turn(const unit_stats_t* unit) {
+s32 battle_action_should_end_unit_turn(const unit_stats_t* unit) {
     s32 cannot_act;
     u8 no_move;
     u8 no_action;
@@ -1494,23 +1496,23 @@ s32 action_should_end_unit_turn(const unit_stats_t* unit) {
 
 /* 1 when the unit's turn is over. A status that blocks turns
  * (status_calculate_turn_flags) ends it here. */
-s32 action_check_change_of_turn(s32 unit_id) {
+s32 battle_action_check_change_of_turn(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return 1;
     }
-    if (!(status_calculate_turn_flags(unit) & BATTLE_TURN_STATUS_BLOCKS_TURN_MASK)) {
+    if (!(battle_status_calculate_turn_flags(unit) & BATTLE_TURN_STATUS_BLOCKS_TURN_MASK)) {
         return unit->has_turn == 0;
     }
     unit->has_turn = 0;
     return 1;
 }
 
-void status_enable_disable_acting(unit_stats_t* unit) {
+void battle_status_enable_disable_acting(unit_stats_t* unit) {
     main_status_set_action_state(unit, 0);
 }
 
-s32 status_inflict_defending_to_battle_id(s32 unit_id) {
+s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
     main_status_set_action_state(&g_battle_unit_stats[unit_id], STATUS_HANDLER_INDEX(STATUS_ID_DEFENDING));
     return 0;
 }

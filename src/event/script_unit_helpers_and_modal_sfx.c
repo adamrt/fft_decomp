@@ -68,7 +68,7 @@ void unit_set_animation(s32 runtime_id, u32 animation) {
         battle_id = battle_unit_get_battle_id_by_runtime_id(runtime_id);
         if ((battle_id >= 0) && (animation < BATTLE_SEQUENCE_EVTCHR_SLOT_0)) {
             stats = battle_unit_get_stats_from_battle_id(battle_id);
-            depth = map_get_tile_data_value(
+            depth = battle_map_get_tile_data_value(
                 MAP_TILE_DATA_DEPTH, stats->x, stats->position.y, stats->position.higher_elevation);
             if ((stats->mount_info & BATTLE_MOUNT_INFO_ROLE_MASK) != 0) {
                 g_thread_call_target = (void (*)(void))battle_unit_set_status_animation_by_runtime_id;
@@ -202,7 +202,7 @@ void menu_run_invalid_choice_thread(void) {
 void camera_wait_until_idle(void) {
     do {
         thread_yield();
-    } while (camera_is_active() != 0);
+    } while (battle_camera_is_active() != 0);
 }
 
 /* Reduce the yaw script variable to one turn, preserving the original whole-turn addition. */

@@ -641,7 +641,7 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
         coordinates.x = parameters->x;
         coordinates.y = parameters->y;
         coordinates.layer = parameters->elevation;
-        move_start_unit_walk_to(id, &coordinates,
+        battle_move_start_unit_walk_to(id, &coordinates,
             MOVE_PATHFIND_IGNORE_TERRAIN_COST - parameters->terrain_cost_flag * MOVE_PATHFIND_IGNORE_TERRAIN_COST, 3,
             script_read_s16(parameters->speed_le));
     }
@@ -705,7 +705,7 @@ void script_waitwalk_event_instruction(s32 unit_id) {
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         do {
             thread_yield();
-        } while (move_is_unit_moving_by_runtime_id(runtime_id) != 0);
+        } while (battle_move_is_unit_moving_by_runtime_id(runtime_id) != 0);
     }
 }
 
@@ -726,7 +726,7 @@ void script_load_attack_graphics_event_instruction(void) {
 /* Plays the current effect through the inner-subroutine caller, then yields
  * to other threads until the animation continue check reports done. */
 void script_play_effect_and_wait(void) {
-    g_thread_call_target = effect_call_play;
+    g_thread_call_target = battle_effect_call_play;
     thread_call_on_main_stack();
 
     do {
@@ -958,11 +958,11 @@ void map_reset_script_light_transform_variant(void) {
 
     setVector(&g_script_light_angles, 0, 0, 0);
     setVector(&g_script_light_scale, ONE, ONE, ONE);
-    buffer = map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_LIGHT, buffer, buffer, 0);
+    buffer = battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_LIGHT, buffer, buffer, 0);
     mem_copy_bytes_nonempty(
         &g_script_light_base_direction_matrix, buffer, sizeof(g_script_light_base_direction_matrix));
     mem_copy_bytes_nonempty(&g_script_light_base_color_matrix,
-        map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_COLOR, buffer, buffer, 0),
+        battle_map_light_matrix_command(MAP_LIGHT_MATRIX_COMMAND_GET_COLOR, buffer, buffer, 0),
         sizeof(g_script_light_base_color_matrix));
 }
 #endif
@@ -1010,7 +1010,7 @@ void unit_update_facing_and_pending_animations(void) {
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++, state++) {
         if (battle_unit_has_runtime_id(i) != 0) {
             if (g_unit_pending_animation_ids[i] != 0) {
-                moving = move_is_unit_moving_by_runtime_id(i);
+                moving = battle_move_is_unit_moving_by_runtime_id(i);
                 if (moving == 0 && g_unit_was_moving_latch[i] != 0) {
                     unit_set_animation(i, g_unit_pending_animation_ids[i]);
                     g_unit_pending_animation_ids[i] = 0;
@@ -1150,14 +1150,14 @@ void map_store_selected_tile_data(void) {
     s16* surface_type;
     s32 depth;
 
-    map_store_selected_tile_coordinates(&coords);
+    battle_map_store_selected_tile_coordinates(&coords);
     surface_type = &g_map_selected_tile_data.surface_type;
-    *surface_type = map_get_tile_data_value(MAP_TILE_DATA_SURFACE_TYPE, coords.vx, coords.vz, coords.vy) & 0xFF;
+    *surface_type = battle_map_get_tile_data_value(MAP_TILE_DATA_SURFACE_TYPE, coords.vx, coords.vz, coords.vy) & 0xFF;
     g_map_selected_tile_data.display_height
-        = map_get_tile_data_value(MAP_TILE_DATA_HALF_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF;
+        = battle_map_get_tile_data_value(MAP_TILE_DATA_HALF_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF;
     g_map_selected_tile_data.display_height
-        += (map_get_tile_data_value(MAP_TILE_DATA_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF) * 2;
-    depth = map_get_tile_data_value(MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
+        += (battle_map_get_tile_data_value(MAP_TILE_DATA_HEIGHT, coords.vx, coords.vz, coords.vy) & 0xFF) * 2;
+    depth = battle_map_get_tile_data_value(MAP_TILE_DATA_DEPTH, coords.vx, coords.vz, coords.vy) & 0xFF;
     g_map_selected_tile_data.depth = depth;
     g_map_selected_tile_data.display_height += depth * 2;
     g_map_selected_tile_data._unknown_02 = g_main_terrain_tile_info_pairs[*surface_type][0];

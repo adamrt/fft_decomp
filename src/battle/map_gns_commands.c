@@ -20,7 +20,7 @@
  *
  * Only phase 2 does anything, and it is the only phase the map loader passes.
  * Always returns 0. */
-s32 map_apply_gns_command(s32 phase, map_resource_t* record) {
+s32 battle_map_apply_gns_command(s32 phase, map_resource_t* record) {
     char unused_zeroes[8] = { 0 };
     s32 unused_sizes[4] = { 0x1000, 0x1000, 0x1000, 0 };
     s32 requested_layout;
@@ -32,17 +32,17 @@ s32 map_apply_gns_command(s32 phase, map_resource_t* record) {
          * here, which keeps it out of a callee-saved register. */
         selected = record;
         if (selected->command.resource_type == GNS_COMMAND_SET_INDOOR) {
-            map_dispatch_gns_resource(GNS_COMMAND_SET_INDOOR, selected);
+            battle_map_dispatch_gns_resource(GNS_COMMAND_SET_INDOOR, selected);
         } else if (selected->command.resource_type == GNS_COMMAND_SET_OUTDOOR) {
-            map_dispatch_gns_resource(GNS_COMMAND_SET_OUTDOOR, selected);
+            battle_map_dispatch_gns_resource(GNS_COMMAND_SET_OUTDOOR, selected);
         } else if (selected->command.resource_type == GNS_COMMAND_CLEAR_SNOW) {
-            map_dispatch_gns_resource(GNS_COMMAND_CLEAR_SNOW, selected);
+            battle_map_dispatch_gns_resource(GNS_COMMAND_CLEAR_SNOW, selected);
         } else if (selected->command.resource_type == GNS_COMMAND_SET_SNOW) {
-            map_dispatch_gns_resource(GNS_COMMAND_SET_SNOW, selected);
+            battle_map_dispatch_gns_resource(GNS_COMMAND_SET_SNOW, selected);
         } else if (selected->command.resource_type == GNS_COMMAND_UNHANDLED_8A) {
-            map_dispatch_gns_resource(GNS_COMMAND_UNHANDLED_8A, selected);
+            battle_map_dispatch_gns_resource(GNS_COMMAND_UNHANDLED_8A, selected);
         } else if (selected->command.resource_type == GNS_COMMAND_SET_WEATHER_MODIFIER) {
-            map_dispatch_gns_resource(GNS_COMMAND_SET_WEATHER_MODIFIER, selected);
+            battle_map_dispatch_gns_resource(GNS_COMMAND_SET_WEATHER_MODIFIER, selected);
         } else {
             /*
              * Requested map state, packed like the file row's map_state: layout in
@@ -53,10 +53,10 @@ s32 map_apply_gns_command(s32 phase, map_resource_t* record) {
             requested_layout = script_get_variable(*(u8*)&selected->command.script_variable_id) & 0xfff;
             requested_layout_and_weather
                 = requested_layout | ((script_get_variable(EVENT_SCRIPT_VAR_WEATHER) & 7) << 12);
-            if (map_is_gns_record_matching_state(selected->command.map_state_comparison,
+            if (battle_map_is_gns_record_matching_state(selected->command.map_state_comparison,
                     *(u8*)&selected->command.map_state,
                     requested_layout_and_weather | ((script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY) & 1) << 15))) {
-                map_dispatch_gns_resource(selected->command.resource_type, selected);
+                battle_map_dispatch_gns_resource(selected->command.resource_type, selected);
             }
         }
         g_map_gns_record_cursor += selected->command.record_byte_length;
@@ -75,13 +75,13 @@ enum {
  *
  * Returns the GNS table when the read started and 0 when it could not start. A
  * map without a GNS sector returns whatever bzero left in $v0. */
-gns_record_t* map_load_gns_and_move_find_items(s32 map_id) {
+gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id) {
     u32 selected_map;
     gns_record_t* gns_records;
     u32 lba;
 
     selected_map = map_id & 0xffff;
-    map_load_move_find_item_data(&g_map_move_find_item_data[selected_map]);
+    battle_map_load_move_find_item_data(&g_map_move_find_item_data[selected_map]);
 
     gns_records = g_map_gns_records;
     bzero(gns_records, GNS_BUFFER_CLEAR_BYTES);
@@ -98,7 +98,7 @@ gns_record_t* map_load_gns_and_move_find_items(s32 map_id) {
 
 /* Start reading one map file into `destination`. Returns `destination` when
  * the read was started, 0 when the row names no file or the start failed. */
-void* map_start_file_load(
+void* battle_map_start_file_load(
     const char* unused_directory_path, const gns_load_info_t* load_info, void* destination, s32 unused_resource_type) {
     void* result;
 

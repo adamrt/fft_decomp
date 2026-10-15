@@ -36,7 +36,7 @@ void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_unit_t* 
     if (unit->auto_battle_setting != AI_AUTOBATTLE_MANUAL) {
         record->team_kind = 3;
     }
-    i = action_find_unit_turn_index(unit);
+    i = battle_action_find_unit_turn_index(unit);
     list_index = -1;
     if (i >= 0) {
         list_index = i + 1;

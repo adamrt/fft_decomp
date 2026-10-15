@@ -3,7 +3,7 @@
 
 /* Return the tutorial's scripted 16-bit button mask while a tutorial runs, pad 0
  * otherwise. The soft-reset combination resets the game. */
-s32 menu_input_read_tutorial_or_controller(s32 unused_0) {
+s32 world_menu_input_read_tutorial_or_controller(s32 unused_0) {
     u32 input;
 
     if (g_world_script_tutorial_id != 0) {

@@ -23,7 +23,7 @@ enum {
  * after scoring. Save/restore helpers preserve selected unit data, not the
  * whole AI workspace; resumed phases skip fresh action preparation.
  */
-s32 ai_simulate_action_and_score(void) {
+s32 battle_ai_simulate_action_and_score(void) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit;
     ai_unit_decision_t* decision;
@@ -39,7 +39,7 @@ s32 ai_simulate_action_and_score(void) {
     u32 below_cost;
 
     if (g_ai_data_base.resume_pending && g_ai_data_base.action_simulation_phase) {
-        ai_restore_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
+        battle_ai_restore_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
         /* Resume: re-enter the suspended turn-advance or scoring phase. */
         if (g_ai_data_base.action_simulation_phase == AI_SIMULATION_ADVANCE_TURNS)
             goto advance_turns;
@@ -50,7 +50,7 @@ s32 ai_simulate_action_and_score(void) {
         ai->action_simulation_phase = AI_SIMULATION_PREPARE_ACTION;
         return -1;
     }
-    ai_save_unit_state(AI_SNAPSHOT_BASELINE);
+    battle_ai_save_unit_state(AI_SNAPSHOT_BASELINE);
     ai->ability_processing_done = 0;
     /* Direct array iteration changes the bytes; retain a workspace-relative cursor. */
     for (unit_index = BATTLE_UNIT_SLOT_COUNT - 1, clear_cursor = (ai_data_t*)((u8*)ai + (BATTLE_UNIT_SLOT_COUNT - 1));
@@ -63,23 +63,23 @@ s32 ai_simulate_action_and_score(void) {
         if (ai->current_action.command.skillset_id != 0
             && ai->current_action.command.skillset_id != SKILLSET_ID_DEFEND) {
             action = &ai->current_action.command;
-            if (action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
-                && ai_simulate_action_hits(action) == 0) {
-                ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
+            if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
+                && battle_ai_simulate_action_hits(action) == 0) {
+                battle_ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
                 ai->resume_pending = 0;
                 return 0;
             }
             ai->acting_unit->action_taken = 1;
-            ai_simulate_movement_and_pickup();
+            battle_ai_simulate_movement_and_pickup();
         }
     } else {
-        ai_simulate_movement_and_pickup();
+        battle_ai_simulate_movement_and_pickup();
         if (ai->current_action.command.skillset_id != 0
             && ai->current_action.command.skillset_id != SKILLSET_ID_DEFEND) {
             action = &ai->current_action.command;
-            if (action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
-                && ai_simulate_action_hits(action) == 0) {
-                ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
+            if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE
+                && battle_ai_simulate_action_hits(action) == 0) {
+                battle_ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
                 ai->resume_pending = 0;
                 return 0;
             }
@@ -87,13 +87,13 @@ s32 ai_simulate_action_and_score(void) {
         }
     }
     if (ai->current_action.command.skillset_id == SKILLSET_ID_DEFEND) {
-        status_inflict_defending_to_battle_id(ai->acting_unit_id);
+        battle_status_inflict_defending_to_battle_id(ai->acting_unit_id);
         ai->current_action.rank.base_hit_percent = 100;
         ai->acting_unit->action_taken = 1;
     }
     if (ai->current_action.command.skillset_id == 0)
         ai->current_action.rank.base_hit_percent = 100;
-    action_end_turn(ai->acting_unit_id);
+    battle_action_end_turn(ai->acting_unit_id);
     ai->saved_between_turn_state = g_battle_between_turn_state;
     ai->saved_between_turn_resume_state = g_battle_between_turn_resume_state;
     ai->saved_turn_unit_id = g_battle_turn_unit_id;
@@ -101,23 +101,23 @@ s32 ai_simulate_action_and_score(void) {
     for (;;) {
     advance_turns:
         if (VSync(1) >= AI_TURN_SIMULATION_SCANLINE_LIMIT) {
-            ai_save_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
+            battle_ai_save_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
             ai->action_simulation_phase = AI_SIMULATION_ADVANCE_TURNS;
             return -1;
         }
         ai->simulated_turn_events++;
         if (ai->simulated_turn_events >= AI_SIMULATED_TURN_LIMIT)
             break;
-        unit_index = action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RUN);
+        unit_index = battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RUN);
         status = unit_index & 0xff00;
         unit_index &= 0xff;
         unit = &g_battle_unit_stats[unit_index];
         if (status == BATTLE_TURN_EVENT_NONE)
             break;
         if (status == BATTLE_TURN_EVENT_ACTION_RESULT) {
-            action_finalize_attack_and_flag_reactions(unit_index);
+            battle_action_finalize_attack_and_flag_reactions(unit_index);
         } else if (status == BATTLE_TURN_EVENT_ABILITY_READY) {
-            if (ai_simulate_action_hits(&unit->action_command) == 0) {
+            if (battle_ai_simulate_action_hits(&unit->action_command) == 0) {
                 g_battle_between_turn_state = ai->saved_between_turn_state;
                 g_battle_between_turn_resume_state = ai->saved_between_turn_resume_state;
                 g_battle_turn_unit_id = ai->saved_turn_unit_id;
@@ -130,7 +130,7 @@ s32 ai_simulate_action_and_score(void) {
             unit->inflicted_status[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)]
                 &= ~(STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_PERFORMING));
         } else if (status == BATTLE_TURN_EVENT_UNIT_READY) {
-            if (ai_is_unit_active_after_delay(0, unit_index))
+            if (battle_ai_is_unit_active_after_delay(0, unit_index))
                 ai->unit_acts_before_me[unit_index] = 1;
             unit->has_turn = 0;
         }
@@ -149,7 +149,7 @@ s32 ai_simulate_action_and_score(void) {
     g_battle_turn_unit_id = ai->saved_turn_unit_id;
 score_state:
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
-        ai_save_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
+        battle_ai_save_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
         ai->action_simulation_phase = AI_SIMULATION_SCORE_STATE;
         return -1;
     }
@@ -178,7 +178,7 @@ score_state:
                 decision->flags |= AI_DECISION_CONSIDERED;
         }
     } else {
-        ai_clear_current_action_decision();
+        battle_ai_clear_current_action_decision();
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             status = ai->unit_compact_indices[unit_index];
             if (status == 0xff)
@@ -269,12 +269,12 @@ score_state:
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_SHURIKEN
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_BALL)
             ai->current_action.rank.base_hit_percent >>= 1;
-        ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
+        battle_ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
         ai->resume_pending = 0;
         return 1;
     }
 finish_without_scoring:
-    ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
+    battle_ai_restore_unit_state(AI_SNAPSHOT_BASELINE);
     ai->resume_pending = 0;
     return 0;
 }
@@ -285,11 +285,11 @@ finish_without_scoring:
  * An unchanged 32-bit coordinate value skips all updates. Crystal recovery clears
  * Critical; a noncritical pickup adds priority unless the policy is Retreat.
  */
-void ai_simulate_movement_and_pickup(void) {
+void battle_ai_simulate_movement_and_pickup(void) {
     ai_data_t* ai = &g_ai_data_base;
 
     if (ai->current_action.coords.word != ai->acting_unit_coords.word) {
-        ai_move_temp_unit_to_coords(&ai->current_action.coords);
+        battle_ai_move_temp_unit_to_coords(&ai->current_action.coords);
         if (ai->tile_pickup_kind == AI_TILE_PICKUP_CRYSTAL) {
             ai->acting_unit->hp = ai->acting_unit->max_hp;
             ai->acting_unit->mp = ai->acting_unit->max_mp;
@@ -310,7 +310,7 @@ void ai_simulate_movement_and_pickup(void) {
 
 /* Mark the candidate action as not decided on: only the selected action ever
  * holds AI_ACTION_DECIDED (ai_build_command). */
-void ai_clear_current_action_decision(void) {
+void battle_ai_clear_current_action_decision(void) {
     g_ai_data_base.current_action.rank.decided = 0;
 }
 
@@ -321,7 +321,7 @@ void ai_clear_current_action_decision(void) {
  * The 0xff counter disables accounting; that path returns 1 without
  * requiring a valuable target. Counted entries are target/strike pairs.
  */
-s32 ai_simulate_action_hits(action_command_t* action) {
+s32 battle_ai_simulate_action_hits(action_command_t* action) {
     ai_data_t* ai;
     s32 base_hit;
     s32 cnt;
@@ -337,7 +337,7 @@ s32 ai_simulate_action_hits(action_command_t* action) {
             g_ai_data_base.valuable_target_hit = 0;
         }
     }
-    ai_simulate_strikes(action, 0);
+    battle_ai_simulate_strikes(action, 0);
     cnt = ai->hit_counter;
     if (cnt != 0xFF) {
         if (ai->valuable_target_hit == 0 || cnt == 0) {
@@ -355,7 +355,7 @@ s32 ai_simulate_action_hits(action_command_t* action) {
  * Hit accounting is disabled by counter 0xff; included target/strike pairs
  * can adjust priority and mark whether a valuable target was hit.
  */
-void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
+void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
     ai_data_t* ai = &g_ai_data_base;
     battle_strike_work_t work;
     s32 target_index;
@@ -366,7 +366,7 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
     s32 positive;
     s32 negative;
 
-    if (reaction_mode == 0 && action_init_current_data(action->actor_id) != 0) {
+    if (reaction_mode == 0 && battle_action_init_current_data(action->actor_id) != 0) {
         return;
     }
     behavior = &g_main_ability_data[action->ability_id].ai_flags;
@@ -380,7 +380,7 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
         }
     }
     do {
-        if (action_resolve_ability_strike(action->actor_id, &work) == 0 && work.target_count != 0) {
+        if (battle_action_resolve_ability_strike(action->actor_id, &work) == 0 && work.target_count != 0) {
             /* The target scans only for 0xff, without a count or 16-entry bound. */
             for (target_index = 0; work.target_list[target_index] != 0xff; target_index++) {
                 target_id = work.target_list[target_index];
@@ -389,7 +389,7 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
                     continue;
                 }
                 if (!(behavior->flags_2 & AI_ABILITY_FLAG_2_TARGET_MAP_TILES)) {
-                    if (ai_is_unit_untargetable(target_id) != 0) {
+                    if (battle_ai_is_unit_untargetable(target_id) != 0) {
                         continue;
                     }
                     if (action->targeting_type == BATTLE_TARGETING_TYPE_UNIT
@@ -402,7 +402,7 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
                         continue;
                     }
                 }
-                action_finalize_attack_and_flag_reactions(target_id);
+                battle_action_finalize_attack_and_flag_reactions(target_id);
                 if (ai->hit_counter == 0xff) {
                     continue;
                 }
@@ -426,7 +426,7 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
                 }
             }
         }
-        action_store_target_stats_pointer_data(action->actor_id);
+        battle_action_store_target_stats_pointer_data(action->actor_id);
     } while (work.continue_attack != 0);
     if (ai->hit_counter != 0xff && ai->ranked_origin_scan != 0) {
         if (ai->ability_effect_on_self == AI_ABILITY_EFFECT_USEFUL && self_hit != 0) {
@@ -435,12 +435,12 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
             ai->useful_on_caster_flag = 1;
         }
     }
-    action_store_acting_unit_data(&g_battle_unit_stats[action->actor_id]);
+    battle_action_store_acting_unit_data(&g_battle_unit_stats[action->actor_id]);
     if (reaction_mode == 0) {
         /* Reuse the finished loop counter's low 16 bits for the reaction ID. */
         while ((target_id = battle_reaction_prepare_next((s16*)&target_index)) != -1) {
             if (ai->unit_acts_before_me[target_id] == 0) {
-                ai_simulate_strikes(&g_battle_unit_stats[target_id].action_command, 1);
+                battle_ai_simulate_strikes(&g_battle_unit_stats[target_id].action_command, 1);
             }
         }
     }
@@ -453,7 +453,7 @@ void ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
  * non-baseline mode saves only the compact status record before restoring the
  * baseline identity, death counter, current status, and Death Sentence CT.
  */
-void ai_save_unit_state(ai_snapshot_mode_e mode) {
+void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
     ai_data_t* ai = &g_ai_data_base;
     ai_status_snapshot_t* status;
     ai_extended_snapshot_t* snapshot;
@@ -474,7 +474,7 @@ void ai_save_unit_state(ai_snapshot_mode_e mode) {
         }
         status->entd_slot = unit->entd_slot;
         status->death_counter = unit->death_counter;
-        mem_copy_bytes(status->current_status, unit->status_sets.current, sizeof(status->current_status));
+        battle_mem_copy_bytes(status->current_status, unit->status_sets.current, sizeof(status->current_status));
         if (mode != AI_SNAPSHOT_BASELINE) {
             status->death_sentence_ct = unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)];
             snapshot = &g_ai_unit_snapshots[id];
@@ -482,28 +482,28 @@ void ai_save_unit_state(ai_snapshot_mode_e mode) {
             unit->death_counter = snapshot->status.death_counter;
             unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)]
                 = snapshot->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)];
-            mem_copy_bytes(
+            battle_mem_copy_bytes(
                 unit->status_sets.current, snapshot->status.current_status, sizeof(snapshot->status.current_status));
         } else {
             snapshot = (ai_extended_snapshot_t*)status;
             snapshot->team_flags = unit->team_flags;
-            mem_copy_bytes(snapshot->status_ct, unit->status_ct, BATTLE_TIMED_STATUS_COUNT);
-            mem_copy_bytes(snapshot->equipment, unit->equipment, sizeof(snapshot->equipment));
+            battle_mem_copy_bytes(snapshot->status_ct, unit->status_ct, BATTLE_TIMED_STATUS_COUNT);
+            battle_mem_copy_bytes(snapshot->equipment, unit->equipment, sizeof(snapshot->equipment));
             snapshot->brave = unit->brave;
-            mem_copy_bytes(&snapshot->faith, &unit->faith, 4);
+            battle_mem_copy_bytes(&snapshot->faith, &unit->faith, 4);
             snapshot->mp = unit->mp;
-            mem_copy_bytes(snapshot->base_attributes, unit->base_attributes, 3);
-            mem_copy_bytes(snapshot->attributes, unit->attributes, 4);
-            mem_copy_bytes(&snapshot->x, &unit->x, 3);
+            battle_mem_copy_bytes(snapshot->base_attributes, unit->base_attributes, 3);
+            battle_mem_copy_bytes(snapshot->attributes, unit->attributes, 4);
+            battle_mem_copy_bytes(&snapshot->x, &unit->x, 3);
             snapshot->charged_ability_ct = unit->charged_ability_ct;
-            mem_copy_bytes(&snapshot->has_turn, &unit->has_turn, 3);
+            battle_mem_copy_bytes(&snapshot->has_turn, &unit->has_turn, 3);
             snapshot->mount_info = unit->mount_info;
-            mem_copy_bytes(&snapshot->auto_battle_setting, &unit->auto_battle_setting, 8);
-            mem_copy_u16_values(&ai->unit_action_records[id], &unit->action_command, 20);
+            battle_mem_copy_bytes(&snapshot->auto_battle_setting, &unit->auto_battle_setting, 8);
+            battle_mem_copy_u16_values(&ai->unit_action_records[id], &unit->action_command, 20);
         }
     }
     if (mode == AI_SNAPSHOT_BASELINE) {
-        mem_copy_bytes(ai->team_golem, g_battle_team_golem, sizeof(ai->team_golem));
+        battle_mem_copy_bytes(ai->team_golem, g_battle_team_golem, sizeof(ai->team_golem));
     }
 }
 
@@ -513,7 +513,7 @@ void ai_save_unit_state(ai_snapshot_mode_e mode) {
  * BASELINE restores selected baseline fields, action records, and team Golem
  * values. Any non-baseline mode restores only the compact status record.
  */
-void ai_restore_unit_state(ai_snapshot_mode_e mode) {
+void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
     ai_data_t* ai = &g_ai_data_base;
     ai_status_snapshot_t* status;
     ai_extended_snapshot_t* snapshot;
@@ -534,35 +534,35 @@ void ai_restore_unit_state(ai_snapshot_mode_e mode) {
         }
         unit->entd_slot = status->entd_slot;
         unit->death_counter = status->death_counter;
-        mem_copy_bytes(unit->status_sets.current, status->current_status, sizeof(status->current_status));
+        battle_mem_copy_bytes(unit->status_sets.current, status->current_status, sizeof(status->current_status));
         if (mode != AI_SNAPSHOT_BASELINE) {
             unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] = status->death_sentence_ct;
         } else {
             snapshot = (ai_extended_snapshot_t*)status;
             unit->team_flags = snapshot->team_flags;
-            mem_copy_bytes(unit->status_ct, snapshot->status_ct, BATTLE_TIMED_STATUS_COUNT);
-            mem_copy_bytes(unit->equipment, snapshot->equipment, sizeof(snapshot->equipment));
+            battle_mem_copy_bytes(unit->status_ct, snapshot->status_ct, BATTLE_TIMED_STATUS_COUNT);
+            battle_mem_copy_bytes(unit->equipment, snapshot->equipment, sizeof(snapshot->equipment));
             unit->brave = snapshot->brave;
-            mem_copy_bytes(&unit->faith, &snapshot->faith, 4);
+            battle_mem_copy_bytes(&unit->faith, &snapshot->faith, 4);
             unit->mp = snapshot->mp;
-            mem_copy_bytes(unit->base_attributes, snapshot->base_attributes, 3);
-            mem_copy_bytes(unit->attributes, snapshot->attributes, 4);
-            mem_copy_bytes(&unit->x, &snapshot->x, 3);
+            battle_mem_copy_bytes(unit->base_attributes, snapshot->base_attributes, 3);
+            battle_mem_copy_bytes(unit->attributes, snapshot->attributes, 4);
+            battle_mem_copy_bytes(&unit->x, &snapshot->x, 3);
             unit->charged_ability_ct = snapshot->charged_ability_ct;
-            mem_copy_bytes(&unit->has_turn, &snapshot->has_turn, 3);
+            battle_mem_copy_bytes(&unit->has_turn, &snapshot->has_turn, 3);
             unit->mount_info = snapshot->mount_info;
-            mem_copy_bytes(&unit->auto_battle_setting, &snapshot->auto_battle_setting, 8);
-            mem_copy_u16_values(&unit->action_command, &ai->unit_action_records[id], 20);
+            battle_mem_copy_bytes(&unit->auto_battle_setting, &snapshot->auto_battle_setting, 8);
+            battle_mem_copy_u16_values(&unit->action_command, &ai->unit_action_records[id], 20);
         }
     }
     if (mode == AI_SNAPSHOT_BASELINE) {
-        mem_copy_bytes(g_battle_team_golem, ai->team_golem, sizeof(ai->team_golem));
+        battle_mem_copy_bytes(g_battle_team_golem, ai->team_golem, sizeof(ai->team_golem));
     }
 }
 
 /* Keep in the target list only the units the considered ability is useful on.
  * Returns 1 while one is left. */
-s32 ai_filter_useful_targets(void) {
+s32 battle_ai_filter_useful_targets(void) {
     ai_data_t* ai;
     s32 result;
     s32 i;
@@ -571,7 +571,7 @@ s32 ai_filter_useful_targets(void) {
     ai = &g_ai_data_base;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
-            if (ai_classify_ability_effect(i, 1) == AI_ABILITY_EFFECT_USEFUL) {
+            if (battle_ai_classify_ability_effect(i, 1) == AI_ABILITY_EFFECT_USEFUL) {
                 result = 1;
             } else {
                 ai->targetability.live.unit_targetable[i] = 0;
@@ -587,7 +587,7 @@ s32 ai_filter_useful_targets(void) {
  * This is the acting side's heuristic, not the sign of HP damage or a success
  * guarantee. Nonzero check_reflect enables the timing-aware Reflect restriction.
  */
-ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
+ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
     ai_data_t* ai = &g_ai_data_base;
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_unit_decision_t* decision = &ai->unit_decisions[unit_id];
@@ -609,12 +609,12 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
             return AI_ABILITY_EFFECT_NONE;
     }
     if (check_reflect && (ai->considered_ability.ai_flags.word & AI_ABILITY_REFLECTABLE)
-        && ai_is_status_active_through_delay(ct, unit, STATUS_ID_REFLECT))
+        && battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_REFLECT))
         return AI_ABILITY_EFFECT_NONE;
     if ((ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTED_BY_FAITH)
-        && ai_is_status_active_through_delay(ct, unit, STATUS_ID_INNOCENT))
+        && battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_INNOCENT))
         return AI_ABILITY_EFFECT_NONE;
-    if (ai_is_status_active_through_delay(ct, unit, STATUS_ID_JUMP))
+    if (battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_JUMP))
         return AI_ABILITY_EFFECT_NONE;
 
     /* Death/revival timing determines which effects can still matter. */
@@ -625,14 +625,14 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
         i = 1;
     if (decision->targeting_flags_2 & AI_TARGET_DEAD_WITH_RERAISE) {
         s32 ability_ct = ai->considered_ability.ct;
-        if (ability_ct < ai_calculate_clockticks_until_unit_acts(unit))
+        if (ability_ct < battle_ai_calculate_clockticks_until_unit_acts(unit))
             return AI_ABILITY_EFFECT_NONE;
         if (i)
             return AI_ABILITY_EFFECT_NONE;
     }
     if (decision->targeting_flags_2 & AI_TARGET_DEAD_WITHOUT_RERAISE) {
         s32 ability_ct = ai->considered_ability.ct;
-        if (ai_calculate_clockticks_until_death_counter_expires(unit) < ability_ct)
+        if (battle_ai_calculate_clockticks_until_death_counter_expires(unit) < ability_ct)
             return AI_ABILITY_EFFECT_NONE;
         if (!i)
             return AI_ABILITY_EFFECT_NONE;
@@ -642,7 +642,7 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
             || !(ai->considered_ability.parameters.fields.status_infliction[STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)]
                 & STATUS_BYTE_MASK(STATUS_ID_PETRIFY))))
         return AI_ABILITY_EFFECT_NONE;
-    if (ai_is_status_active_through_delay(ct, unit, STATUS_ID_WALL)
+    if (battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_WALL)
         && (!(ai->considered_ability.ai_flags.word & AI_ABILITY_CANCEL_STATUS)
             || !(ai->considered_ability.parameters.fields.status_infliction[STATUS_BYTE_INDEX(STATUS_ID_WALL)]
                 & STATUS_BYTE_MASK(STATUS_ID_WALL))))
@@ -671,8 +671,8 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
             if (unit->elemental_affinity[ELEMENTAL_AFFINITY_ABSORB] & ai->considered_ability.element)
                 return AI_ABILITY_EFFECT_ADVERSE;
         } else {
-            if (ai_is_status_active_through_delay(ct, unit, STATUS_ID_CHARM)
-                && ai_can_status_cancellation_affect_turn(unit, STATUS_ID_CHARM))
+            if (battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_CHARM)
+                && battle_ai_can_status_cancellation_affect_turn(unit, STATUS_ID_CHARM))
                 i = 1;
             else
                 i = 0;
@@ -681,7 +681,7 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
                 if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
                     & STATUS_BYTE_MASK(STATUS_ID_CONFUSION))
                     return AI_ABILITY_EFFECT_USEFUL;
-                if (ai_is_status_active_through_delay(ct, unit, STATUS_ID_SLEEP))
+                if (battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_SLEEP))
                     return AI_ABILITY_EFFECT_USEFUL;
                 if (i)
                     return AI_ABILITY_EFFECT_USEFUL;
@@ -810,8 +810,8 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
                             s32 flag = 0x80 >> bit;
                             if (mask & flag) {
                                 status = i * 8 + bit;
-                                if (!ai_is_status_active_through_delay(ct, unit, status)
-                                    || !ai_can_status_cancellation_affect_turn(unit, status))
+                                if (!battle_ai_is_status_active_through_delay(ct, unit, status)
+                                    || !battle_ai_can_status_cancellation_affect_turn(unit, status))
                                     mask ^= flag;
                             }
                         }
@@ -855,7 +855,7 @@ ai_ability_effect_e ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
  * Equality counts as present. Jump uses its charged-ability timer; other
  * timed statuses use their duration unless the status is innate.
  */
-s32 ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id) {
+s32 battle_ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit, s32 status_id) {
     s32 byte_off;
 
     byte_off = status_id / 8;
@@ -887,9 +887,9 @@ s32 ai_is_status_active_through_delay(s32 delay, const unit_stats_t* unit, s32 s
  * Only Charm, Don't Move, and Don't Act are filtered; other IDs return true.
  * Equality counts as lasting through the turn. This does not test presence.
  */
-s32 ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status) {
+s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status) {
     if (status == STATUS_ID_CHARM || (status - STATUS_ID_DONT_MOVE) < 2U) {
-        if (ai_calculate_clockticks_until_unit_acts(unit) > unit->status_ct[STATUS_CT_INDEX(status)]) {
+        if (battle_ai_calculate_clockticks_until_unit_acts(unit) > unit->status_ct[STATUS_CT_INDEX(status)]) {
             return 0;
         }
     }
@@ -898,7 +898,7 @@ s32 ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status)
 
 /* For an enemy-targeting ability, drop from the target list each enemy that
  * will act before the ability lands. Returns 1 while a target is left. */
-s32 ai_exclude_enemies_acting_before_ct(void) {
+s32 battle_ai_exclude_enemies_acting_before_ct(void) {
     s32 result;
     s32 i;
     ai_data_t* ai;
@@ -913,7 +913,7 @@ s32 ai_exclude_enemies_acting_before_ct(void) {
         i++, walk = (ai_data_t*)((u8*)walk + sizeof(ai_unit_decision_t))) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
             if ((ai->considered_ability.ai_flags.word & AI_ABILITY_FLAG_1_TARGET_ENEMIES)
-                && (walk->unit_decisions[0].enemy_flag != 0) && (ai_can_unit_act_within_charge_time(i) != 0)) {
+                && (walk->unit_decisions[0].enemy_flag != 0) && (battle_ai_can_unit_act_within_charge_time(i) != 0)) {
                 ai->targetability.live.unit_targetable[i] = 0;
             } else {
                 result = 1;
@@ -925,16 +925,16 @@ s32 ai_exclude_enemies_acting_before_ct(void) {
 
 /* 1 when the unit gets a turn by the considered ability's charge deadline
  * and can act by then; 0 for an instant ability. */
-s32 ai_can_unit_act_within_charge_time(s32 unit_index) {
+s32 battle_ai_can_unit_act_within_charge_time(s32 unit_index) {
     s32 min_ct;
     u8 ct;
 
     ct = g_ai_data_base.considered_ability.ct;
     if (ct != 0) {
-        min_ct = ai_calculate_clockticks_until_unit_acts(&g_battle_unit_stats[unit_index]);
+        min_ct = battle_ai_calculate_clockticks_until_unit_acts(&g_battle_unit_stats[unit_index]);
         if (min_ct != 0x7FFFFFFF) {
             if (ct >= min_ct) {
-                return ai_is_unit_active_after_delay(ct, unit_index);
+                return battle_ai_is_unit_active_after_delay(ct, unit_index);
             }
         }
     }
@@ -944,7 +944,7 @@ s32 ai_can_unit_act_within_charge_time(s32 unit_index) {
 /* 1 when the unit can act limit clockticks from now: present, Speed above 0,
  * not crystal, petrified or treasure, with no Stop, Don't Move or Sleep that
  * lasts that long, and alive, or dead with Reraise and due a turn by then. */
-s32 ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
+s32 battle_ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
 
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
@@ -958,27 +958,27 @@ s32 ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)] & STATUS_BYTE_MASK(STATUS_ID_TREASURE))) {
         return 0;
     }
-    if (ai_is_status_active_through_delay(limit, unit, STATUS_ID_STOP) != 0) {
+    if (battle_ai_is_status_active_through_delay(limit, unit, STATUS_ID_STOP) != 0) {
         return 0;
     }
-    if (ai_is_status_active_through_delay(limit, unit, STATUS_ID_DONT_MOVE) != 0) {
+    if (battle_ai_is_status_active_through_delay(limit, unit, STATUS_ID_DONT_MOVE) != 0) {
         return 0;
     }
-    if (ai_is_status_active_through_delay(limit, unit, STATUS_ID_SLEEP) != 0) {
+    if (battle_ai_is_status_active_through_delay(limit, unit, STATUS_ID_SLEEP) != 0) {
         return 0;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD)) == 0) {
         return 1;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_RERAISE)] & STATUS_BYTE_MASK(STATUS_ID_RERAISE)) == 0
-        || limit < ai_calculate_clockticks_until_unit_acts(unit)) {
+        || limit < battle_ai_calculate_clockticks_until_unit_acts(unit)) {
         return 0;
     }
     return 1;
 }
 
 /* Position the temporary simulation unit at the supplied AI coordinates. */
-void ai_move_temp_unit_to_coords(const ai_coords_t* coord) {
+void battle_ai_move_temp_unit_to_coords(const ai_coords_t* coord) {
     g_ai_data_base.acting_unit->x = coord->fields.x;
     g_ai_data_base.acting_unit->position.y = coord->fields.y;
     g_ai_data_base.acting_unit->position.higher_elevation = coord->fields.elevation;
@@ -986,7 +986,7 @@ void ai_move_temp_unit_to_coords(const ai_coords_t* coord) {
 
 /* Pack a unit's tile as AI coordinates: x, y and the elevation bit (position
  * bit 15). */
-void ai_copy_unit_coordinates(s32 unit_idx, ai_coords_t* dst) {
+void battle_ai_copy_unit_coordinates(s32 unit_idx, ai_coords_t* dst) {
     dst->fields.x = g_battle_unit_stats[unit_idx].x;
     dst->fields.y = g_battle_unit_stats[unit_idx].position.y;
     dst->fields.elevation = g_battle_unit_stats[unit_idx].position.higher_elevation;

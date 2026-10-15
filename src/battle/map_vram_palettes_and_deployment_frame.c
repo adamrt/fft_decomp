@@ -196,17 +196,17 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
 /* Write one CLUT of a row from the colors at `source` with the red, green and
  * blue offsets added: battle_gfx_modify_vram_palette in MAP_COLOR_MODE_RESTORE, a
  * mode in which it neither halves nor grays the colors. */
-void map_update_palette_from_other(
+void battle_map_update_palette_from_other(
     const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 preset, s16 red, s16 green, s16 blue, s32 final_value) {
     battle_gfx_modify_vram_palette(
         MAP_COLOR_MODE_RESTORE, source, clut_row, clut_index, preset, red, green, blue, final_value);
 }
 
 /* Load the two map background gradient colors for the current map. */
-void map_init_background_gradient(void) {
+void battle_map_init_background_gradient(void) {
     map_background_gradient_colors_t* colors;
 
-    colors = map_light_state_command(MAP_LIGHT_COMMAND_GET_BACKGROUND_GRADIENT, colors);
+    colors = battle_map_light_state_command(MAP_LIGHT_COMMAND_GET_BACKGROUND_GRADIENT, colors);
     g_map_background_gradient_transition.colors[0] = colors->colors[MAP_BACKGROUND_GRADIENT_TOP];
     g_map_background_gradient_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
     g_map_background_gradient_transition.channels[0].red = colors->colors[MAP_BACKGROUND_GRADIENT_TOP].r << 16;
@@ -222,10 +222,10 @@ void map_init_background_gradient(void) {
  *
  * The unset `color` is passed as the command's data argument, which the GET
  * command does not read, and then receives the result. */
-void map_init_ambient_light(void) {
+void battle_map_init_ambient_light(void) {
     CVECTOR* color;
 
-    color = map_light_state_command(MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR, color);
+    color = battle_map_light_state_command(MAP_LIGHT_COMMAND_GET_AMBIENT_COLOR, color);
     g_map_ambient_light_color = *color;
     g_map_ambient_light_transition.channels.red = color->r << 16;
     g_map_ambient_light_transition.channels.green = color->g << 16;
@@ -237,10 +237,10 @@ void map_init_ambient_light(void) {
  *
  * The unset `color` is passed as the command's data argument, which the GET
  * command does not read, and then receives the result. */
-void map_init_darkness(void) {
+void battle_map_init_darkness(void) {
     CVECTOR* color;
 
-    color = map_light_state_command(MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR, color);
+    color = battle_map_light_state_command(MAP_LIGHT_COMMAND_GET_DARKNESS_COLOR, color);
     g_map_darkness_color = *color;
     g_map_darkness_transition.channels.red = color->r << 16;
     g_map_darkness_transition.channels.green = color->g << 16;
@@ -249,7 +249,7 @@ void map_init_darkness(void) {
 
 /* Upload the pending CLUT rows as one image to the lines below the rows, and
  * on the next call move them into place. */
-void map_upload_clut_rows(void) {
+void battle_map_upload_clut_rows(void) {
     RECT rectangle;
     s32* move_pending;
 
@@ -284,7 +284,7 @@ void map_upload_clut_rows(void) {
  * row's 256 colors as one under animation 0. The sprite, unit, unit shadow and
  * action result rows get 0 and blend each of their sixteen CLUTs on its own. Of
  * the stored deltas only the first color's red delta of each row is cleared. */
-void map_init_palette_state(void) {
+void battle_map_init_palette_state(void) {
     s32 clut_row;
     s32 animation_index;
 
@@ -310,24 +310,24 @@ void map_init_palette_state(void) {
     g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].enabled = 0;
     g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNIT_SHADOWS].enabled = 0;
     g_map_palette_state.clut_rows[MAP_CLUT_ROW_ACTION_RESULTS].enabled = 0;
-    map_reset_clut_cycles();
+    battle_map_reset_clut_cycles();
 }
 
-void map_freeze(void) {
-    map_dispatch_map_data_command(MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
+void battle_map_freeze(void) {
+    battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
 }
 
 /* Resume the map texture animations paused by map_freeze. */
-void map_unfreeze(void) {
-    map_dispatch_map_data_command(MAP_DATA_COMMAND_RESTORE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
+void battle_map_unfreeze(void) {
+    battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_RESTORE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
 }
 
 /* Event ColorField: tint or fade all 256 colors of the map CLUT row with
  * map_modify_palette. `first` is its color mode (map_color_mode_e) and
  * `second` its amount: 0 applies the colors at once, another value fades to
  * them. */
-void map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue) {
-    map_modify_palette(first, second, MAP_CLUT_ROW_MAP, 0, 1, red, green, blue);
+void battle_map_color_field(s32 first, s32 second, s16 red, s16 green, s16 blue) {
+    battle_map_modify_palette(first, second, MAP_CLUT_ROW_MAP, 0, 1, red, green, blue);
 }
 
 /* Tints one unit's two CLUTs through map_modify_palette; `preset_color` is
@@ -349,16 +349,16 @@ void battle_gfx_apply_unit_palette_modulation(
     }
 
     battle_unit_copy_draw_coords(&screen_coordinates, unit);
-    tile = map_get_tile_data_pointer(
+    tile = battle_map_get_tile_data_pointer(
         screen_coordinates.vx / MAP_TILE_SIZE, screen_coordinates.vz / MAP_TILE_SIZE, unit->map_z);
 
-    map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNITS, runtime_id, 0, red, green, blue);
+    battle_map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNITS, runtime_id, 0, red, green, blue);
 
     if (tile->depth_half_height.depth != 0
         && unit->world_coords.vy >= -(tile->height + tile->depth_half_height.depth) * 12) {
-        map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, red, green, blue);
+        battle_map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, red, green, blue);
     } else {
-        map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, -red, -green, -blue);
+        battle_map_modify_palette(preset_color, time, MAP_CLUT_ROW_UNIT_SHADOWS, runtime_id, 0, -red, -green, -blue);
     }
 }
 
@@ -377,57 +377,57 @@ void battle_gfx_apply_unit_palette_modulation_to_units(
     }
 }
 
-void map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
-    map_blend_background_gradient_color(mode, frame_duration, red, green, blue);
+void battle_map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
+    battle_map_blend_background_gradient_color(mode, frame_duration, red, green, blue);
 }
 
 /* map_blend_ambient_light_color with the color offsets narrowed to s16:
  * the entry event MapDarkness calls. */
-void map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
-    map_blend_ambient_light_color(mode, frame_duration, red, green, blue);
+void battle_map_start_ambient_light_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
+    battle_map_blend_ambient_light_color(mode, frame_duration, red, green, blue);
 }
 
 /* map_blend_darkness_color with the color offsets narrowed to s16. The
  * arguments are the mode, the frame duration and the red, green and blue offsets. */
-void map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth) {
-    map_blend_darkness_color(first, second, third, fourth, fifth);
+void battle_map_start_darkness_blend(s32 first, s32 second, s16 third, s16 fourth, s16 fifth) {
+    battle_map_blend_darkness_color(first, second, third, fourth, fifth);
 }
 
 /* map_update_palette_colors for all sixteen CLUTs of the map row. */
-void map_update_all_palettes_from_color_data(s32 mode, const clut_t color_data) {
-    map_update_palette_colors(mode, MAP_CLUT_ROW_MAP, 0, 1, color_data);
+void battle_map_update_all_palettes_from_color_data(s32 mode, const clut_t color_data) {
+    battle_map_update_palette_colors(mode, MAP_CLUT_ROW_MAP, 0, 1, color_data);
 }
 
 /* map_update_palette_colors for one CLUT of the unit row. A clut_index of
  * 16 or more applies the same sixteen colors to every unit CLUT. */
-void map_update_palette_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data) {
+void battle_map_update_palette_colors_by_index(s32 mode, s32 clut_index, const palette_t* color_data) {
     s32 index;
 
     if (clut_index >= MAP_CLUTS_PER_ROW) {
         for (index = 0; index < MAP_CLUTS_PER_ROW; index++) {
-            map_update_palette_colors(mode, MAP_CLUT_ROW_UNITS, index, 0, color_data);
+            battle_map_update_palette_colors(mode, MAP_CLUT_ROW_UNITS, index, 0, color_data);
         }
     } else {
-        map_update_palette_colors(mode, MAP_CLUT_ROW_UNITS, clut_index, 0, color_data);
+        battle_map_update_palette_colors(mode, MAP_CLUT_ROW_UNITS, clut_index, 0, color_data);
     }
 }
 
 /* Fade the background gradient to `colors` without changing the base pair, unlike
  * map_transition_and_store_background_gradient. */
-void map_set_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
-    map_transition_background_gradient(frame_duration, colors);
+void battle_map_set_background_gradient(s32 frame_duration, const map_background_gradient_colors_t* colors) {
+    battle_map_transition_background_gradient(frame_duration, colors);
 }
 
 /* Fade the ambient light to `color` without changing the base color, unlike
  * map_transition_and_store_ambient_light_color. */
-void map_set_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
-    map_transition_ambient_light_color(frame_duration, color);
+void battle_map_set_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
+    battle_map_transition_ambient_light_color(frame_duration, color);
 }
 
 /* Fade the map darkness to `color` without changing the base color, unlike
  * map_transition_and_store_darkness_color. */
-void map_set_darkness_color(s32 frame_duration, const CVECTOR* color) {
-    map_transition_darkness_color(frame_duration, color);
+void battle_map_set_darkness_color(s32 frame_duration, const CVECTOR* color) {
+    battle_map_transition_darkness_color(frame_duration, color);
 }
 
 s32 battle_state_update_controller_input(void) {

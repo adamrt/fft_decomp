@@ -11,7 +11,7 @@
  * lies below the center and a high side above it. VectorNormal reduces the vector
  * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
  * applies the walk speed with move_interpolate_partial. */
-void move_set_unit_step_delta_center_to_edge(
+void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
 

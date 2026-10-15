@@ -258,7 +258,7 @@ void attack_sound_resync_scenario_music_and_apply_map_darkness(void) {
         g_sound_music_track_2_id = g_battle_scenario_music_2_id;
     }
 
-    map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
+    battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &darkness);
     text_build_unit_name_list();
 }
 

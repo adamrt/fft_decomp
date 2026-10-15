@@ -15,8 +15,8 @@ void main_status_init_check_data(void) {
     int byte;
     u8 mask;
 
-    mem_zero(g_main_item_location_flags, sizeof(g_main_item_location_flags));
-    mem_zero(g_main_status_check_sets, sizeof(g_main_status_check_sets));
+    main_mem_zero(g_main_item_location_flags, sizeof(g_main_item_location_flags));
+    main_mem_zero(g_main_status_check_sets, sizeof(g_main_status_check_sets));
     for (status = 0; status < STATUS_COUNT; status++) {
         flags4 = g_main_status_effect_data[status].flags_1;
         flags5 = g_main_status_effect_data[status].flags_2;
@@ -154,12 +154,12 @@ s32 main_party_save_unit(unit_stats_t* unit, s32 allow_guest) {
     birthday = unit->birthday.birthday | (unit->birthday.zodiac << 12);
     party->birthday_day = birthday;
     party->zodiac = birthday >> 8;
-    mem_copy_byte_data_source_first(&unit->secondary_skillset, &party->secondary_skillset, 0x10);
+    main_mem_copy_byte_data_source_first(&unit->secondary_skillset, &party->secondary_skillset, 0x10);
     party->bravery = unit->original_brave;
     party->faith = unit->original_faith;
-    mem_copy_byte_data_source_first(unit->raw_stats, party->raw_stats, sizeof(party->raw_stats));
+    main_mem_copy_byte_data_source_first(unit->raw_stats, party->raw_stats, sizeof(party->raw_stats));
     /* The saved span includes the career record and following 16-byte name. */
-    mem_copy_byte_data_source_first(&unit->career, &party->career, sizeof(party->career) + sizeof(party->name));
+    main_mem_copy_byte_data_source_first(&unit->career, &party->career, sizeof(party->career) + sizeof(party->name));
     /* name_id is stored as two byte writes (lbu / lhu+srl), not one sh. */
     party->name_id.fields.index = unit->quote_name_id.value;
     party->name_id.fields.name_class = unit->quote_name_id.value >> 8;
@@ -341,11 +341,11 @@ void main_unit_generate_out_of_battle(party_unit_t* party, main_unit_generation_
         party->faith = (rand() * 31) / 0x8000 + 40;
     }
 
-    mem_zero(&party->secondary_skillset, 7);
+    main_mem_zero(&party->secondary_skillset, 7);
     main_unit_generate_party_base_raw_stats(party, unit_type);
     party->level = 1;
     party->experience = 0;
-    mem_zero(&party->career, sizeof(party->career));
+    main_mem_zero(&party->career, sizeof(party->career));
 
     gender = party->gender_flags;
     if (gender & (UNIT_FLAG_FEMALE | UNIT_FLAG_MALE)) {
@@ -405,7 +405,7 @@ void main_unit_generate_out_of_battle(party_unit_t* party, main_unit_generation_
     party->name_id.fields.index = name_id.fields.index;
     party->name_id.fields.name_class = name_id.fields.name_class;
     name_flags += name_id.fields.index;
-    mem_copy_bytes_source_first(world_text_find_entry(name_flags), party->name, sizeof(party->name));
+    main_mem_copy_bytes_source_first(world_text_find_entry(name_flags), party->name, sizeof(party->name));
     party->proposition_status = 0;
     party->egg_color = 0;
     if (unit_type == MAIN_UNIT_TYPE_RAMZA) {
@@ -457,7 +457,7 @@ void main_unit_generate_base_raw_stats(
 }
 
 void main_unit_copy_job_growths_and_multipliers(unit_stats_t* unit) {
-    mem_copy_byte_data_source_first(
+    main_mem_copy_byte_data_source_first(
         g_main_job_data_pointer[unit->job_id].stat_growths, unit->stat_growths, sizeof(unit->stat_growths));
 }
 
@@ -707,7 +707,7 @@ void main_unit_store_ramza_name_birthday_zodiac(unit_stats_t* unit) {
         }
         unit->birthday.birthday = party->birthday_day + (party->zodiac << 8);
         unit->birthday.zodiac = party->zodiac >> PARTY_ZODIAC_SHIFT;
-        mem_copy_byte_data_source_first(party->name, unit->name, sizeof(unit->name));
+        main_mem_copy_byte_data_source_first(party->name, unit->name, sizeof(unit->name));
         return;
     }
 }
@@ -902,24 +902,24 @@ void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* party) {
     unit->abilities.reaction = party->reaction_ability[0] + (party->reaction_ability[1] << 8);
     unit->abilities.support = party->support_ability[0] + (party->support_ability[1] << 8);
     unit->abilities.movement = party->movement_ability[0] + (party->movement_ability[1] << 8);
-    mem_copy_byte_data_source_first(party->equipment, unit->equipment, UNIT_EQUIPMENT_SLOT_COUNT);
+    main_mem_copy_byte_data_source_first(party->equipment, unit->equipment, UNIT_EQUIPMENT_SLOT_COUNT);
     unit->experience = party->experience;
     unit->level = party->level;
     unit->original_brave = unit->brave = party->bravery;
     unit->original_faith = unit->faith = party->faith;
-    mem_copy_byte_data_source_first(party->raw_stats, unit->raw_stats, sizeof(unit->raw_stats));
+    main_mem_copy_byte_data_source_first(party->raw_stats, unit->raw_stats, sizeof(unit->raw_stats));
     for (i = 0; i < UNIT_UNLOCKED_JOB_BYTE_COUNT; i++) {
         unit->career.unlocked_jobs[i] = party->career.unlocked_jobs[i];
     }
-    mem_copy_byte_data_source_first(
+    main_mem_copy_byte_data_source_first(
         party->career.learned_abilities, unit->career.learned_abilities, UNIT_LEARNED_ABILITY_BYTE_COUNT);
-    mem_copy_byte_data_source_first(party->career.job_levels, unit->career.job_levels, UNIT_JOB_LEVEL_BYTE_COUNT);
+    main_mem_copy_byte_data_source_first(party->career.job_levels, unit->career.job_levels, UNIT_JOB_LEVEL_BYTE_COUNT);
     /* Copy the adjacent current/total JP tables as their 80 serialized bytes. */
-    mem_copy_byte_data_source_first(
+    main_mem_copy_byte_data_source_first(
         &party->career.job_points, &unit->career.job_points, sizeof(unit->career.job_points));
-    mem_copy_byte_data_source_first(party->name, unit->name, sizeof(unit->name));
+    main_mem_copy_byte_data_source_first(party->name, unit->name, sizeof(unit->name));
     unit->quote_name_id.value = party->name_id.fields.index + (party->name_id.fields.name_class << 8);
-    mem_zero(&unit->ai_target_x, 7);
+    main_mem_zero(&unit->ai_target_x, 7);
 }
 
 /* Initialize packed job levels, unlocked jobs, and ENTD skillset overrides. */
@@ -932,7 +932,7 @@ void main_unit_calculate_jobs_and_skillsets_from_entd(unit_stats_t* unit, const 
     u16 skillset;
     u8 levels;
 
-    mem_zero(unit->career.job_levels, UNIT_JOB_LEVEL_BYTE_COUNT);
+    main_mem_zero(unit->career.job_levels, UNIT_JOB_LEVEL_BYTE_COUNT);
     unlocked = 0;
     if (!entd) {
         main_unit_copy_job_data(unit);
@@ -1065,10 +1065,10 @@ void main_unit_copy_job_data(unit_stats_t* unit) {
 
     job = g_main_job_data_pointer + unit->job_id;
     unit->primary_skillset = job->skillset;
-    mem_copy_byte_data_source_first(job->innate_abilities, unit->innate_abilities, sizeof(unit->innate_abilities));
-    mem_copy_byte_data_source_first(
+    main_mem_copy_byte_data_source_first(job->innate_abilities, unit->innate_abilities, sizeof(unit->innate_abilities));
+    main_mem_copy_byte_data_source_first(
         job->equipment_categories, unit->equipment_categories, sizeof(unit->equipment_categories));
-    mem_copy_byte_data_source_first(job->stat_growths, unit->stat_growths, sizeof(unit->stat_growths));
+    main_mem_copy_byte_data_source_first(job->stat_growths, unit->stat_growths, sizeof(unit->stat_growths));
     unit->move = job->move;
     unit->jump = job->jump & JOB_JUMP_VALUE_MASK;
     if (job->jump & JOB_JUMP_STEPPING_STONE) {
@@ -1076,7 +1076,7 @@ void main_unit_copy_job_data(unit_stats_t* unit) {
     } else {
         unit->position.stepping_stone = 0;
     }
-    mem_copy_byte_data_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
+    main_mem_copy_byte_data_source_first(&job->status_sets, &unit->status_sets, sizeof(job->status_sets));
 
     flag_a = unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL;
     flag_b = unit->unit_flags & (UNIT_FLAG_SAVE_FORMATION | UNIT_FLAG_LOAD_FORMATION);
@@ -1092,7 +1092,8 @@ void main_unit_copy_job_data(unit_stats_t* unit) {
         }
     }
 
-    mem_copy_byte_data_source_first(job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
+    main_mem_copy_byte_data_source_first(
+        job->elemental_affinity, unit->elemental_affinity, sizeof(job->elemental_affinity));
     unit->elemental_affinity[ELEMENTAL_AFFINITY_STRENGTHEN] = 0;
     unit->spritesheet_id = job->spritesheet_id;
     unit->job_portrait_palette = job->job_portrait_palette;
@@ -1105,7 +1106,7 @@ void main_unit_copy_job_data(unit_stats_t* unit) {
 void main_unit_enable_rsm_flags(unit_stats_t* unit) {
     s32 i;
 
-    mem_zero(&unit->ability_flags, sizeof(unit->ability_flags));
+    main_mem_zero(&unit->ability_flags, sizeof(unit->ability_flags));
     for (i = 0; i < 4; i++) {
         main_unit_set_rsm_flag(unit, unit->innate_abilities[i]);
     }
@@ -1253,7 +1254,7 @@ void main_unit_calculate_abilities(unit_stats_t* unit, entd_unit_t* entd) {
     u16 value;
 
     if (entd == 0) {
-        mem_zero(&unit->abilities, sizeof(unit->abilities));
+        main_mem_zero(&unit->abilities, sizeof(unit->abilities));
         return;
     }
 
@@ -1265,7 +1266,7 @@ void main_unit_calculate_abilities(unit_stats_t* unit, entd_unit_t* entd) {
     }
 
     if (gender & (UNIT_FLAG_MALE | UNIT_FLAG_FEMALE)) {
-        mem_zero(unit->career.learned_abilities, UNIT_LEARNED_ABILITY_BYTE_COUNT);
+        main_mem_zero(unit->career.learned_abilities, UNIT_LEARNED_ABILITY_BYTE_COUNT);
         for (i = 0; i < UNIT_JOB_LEVEL_BYTE_COUNT; i++) {
             byte = unit->career.job_levels[i];
             level = byte >> 4;
@@ -1540,7 +1541,7 @@ void main_unit_set_equipment_stats(unit_stats_t* unit) {
     item_evade_t* shield;
     weapon_data_t* weapon;
 
-    mem_zero(unit->equipment_stats, sizeof(unit->equipment_stats));
+    main_mem_zero(unit->equipment_stats, sizeof(unit->equipment_stats));
     unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE]
         = g_main_job_data_pointer[unit->job_id].class_evade;
     if (unit->unit_flags & UNIT_FLAG_MONSTER) {
@@ -1601,7 +1602,7 @@ void main_unit_set_equipment_attributes(unit_stats_t* unit, s32 level_up_check) 
     u8* source;
     u8* target;
 
-    mem_zero(unit->equipment_attributes, sizeof(unit->equipment_attributes));
+    main_mem_zero(unit->equipment_attributes, sizeof(unit->equipment_attributes));
     cap = UNIT_HP_MP_MAX;
     main_unit_calculate_actual_stats(unit, level_up_check + 1);
     unit->equipped_flags = 0;

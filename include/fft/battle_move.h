@@ -298,14 +298,14 @@ extern u8* g_move_terrain_costs_ptr;
 extern u8 g_move_terrain_cost;
 extern u8 g_move_weather_terrain_cost;
 
-u8 move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height);
-s32 move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer);
-move_effective_flags_e move_get_effective_flags(const unit_stats_t* unit);
-s32 move_get_support_flags(const unit_stats_t* unit);
-s32 move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile);
-u8 move_get_water_depth(battle_unit_t* unit);
-s32 move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer);
-s32 move_get_weather_terrain_cost(void);
+u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height);
+s32 battle_move_calculate_tile_layer_step_offset(s32 x, s32 y, u32 layer);
+move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit);
+s32 battle_move_get_support_flags(const unit_stats_t* unit);
+s32 battle_move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile);
+u8 battle_move_get_water_depth(battle_unit_t* unit);
+s32 battle_move_clamp_z_to_tile_headroom(s32 value, s32 x, s32 y, u32 layer);
+s32 battle_move_get_weather_terrain_cost(void);
 
 /* pathfinding */
 extern battle_unit_t* g_move_tile_occupant;
@@ -340,36 +340,36 @@ extern void (*g_move_spread_preset_table[])(void);
  * it in place. */
 extern battle_unit_height_data_t g_move_tile_occupant_height;
 
-battle_walk_path_t* move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x, s32 target_y,
-    u32 target_level, s32 initialize, s32* suspended, s32 check_budget);
-void move_calculate_pathing_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
+battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
+    s32 target_y, u32 target_level, s32 initialize, s32* suspended, s32 check_budget);
+void battle_move_calculate_pathing_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
     s32 target_level, s32 initialize, s32* suspended);
-void move_store_unit_movement_to_scratchpad(s32 unit_id);
-s32 move_set_reachable_tiles(s32 unit_id, s32 map_x, s32 map_y, s32 map_z);
-void move_set_tile_flags_for_pathfinding(s32 mode);
-void move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span);
-void move_apply_selected_candidate(move_spread_state_t* state);
-void move_calculate_spread(void);
-s32 move_check_spreading_tile_coordinates(void);
-void move_clear_enterable_flags_under_dead_or_jumping_units(void);
-s32 move_init_destination_geometry(s32 candidate);
-s32 move_init_source_geometry(s32 direction);
-s32 move_init_source_panel(s32 direction);
-void move_init_spread_scratch(void);
-battle_walk_path_t* move_calculate_walkto_pathing(
+void battle_move_store_unit_movement_to_scratchpad(s32 unit_id);
+s32 battle_move_set_reachable_tiles(s32 unit_id, s32 map_x, s32 map_y, s32 map_z);
+void battle_move_set_tile_flags_for_pathfinding(s32 mode);
+void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span);
+void battle_move_apply_selected_candidate(move_spread_state_t* state);
+void battle_move_calculate_spread(void);
+s32 battle_move_check_spreading_tile_coordinates(void);
+void battle_move_clear_enterable_flags_under_dead_or_jumping_units(void);
+s32 battle_move_init_destination_geometry(s32 candidate);
+s32 battle_move_init_source_geometry(s32 direction);
+s32 battle_move_init_source_panel(s32 direction);
+void battle_move_init_spread_scratch(void);
+battle_walk_path_t* battle_move_calculate_walkto_pathing(
     s32 a, s32 b, s32 x, s32 y, s32 z, s32 destination_x, s32 destination_y, s32 destination_z);
-s32 move_propagate_destination(s32 candidate, s32 extra_span);
-void move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span);
-void move_set_reachable_tile_flags(void);
-void move_set_spreading_tile_x_and_y_coordinates(void);
-void move_spread_to_neighbors(void);
-void move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void);
-s32 move_update_candidate(s32 extra_span);
-void move_check_and_spread_one_tile_around(void);
-void move_encode_path_steps(void);
-void move_set_unit_path_flag(battle_unit_t* unit);
-void move_spread_horizontal_jump(void);
-battle_walk_path_t* move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
+s32 battle_move_propagate_destination(s32 candidate, s32 extra_span);
+void battle_move_save_selected_candidate(s32 direction, s32 candidate, s32 extra_span);
+void battle_move_set_reachable_tile_flags(void);
+void battle_move_set_spreading_tile_x_and_y_coordinates(void);
+void battle_move_spread_to_neighbors(void);
+void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void);
+s32 battle_move_update_candidate(s32 extra_span);
+void battle_move_check_and_spread_one_tile_around(void);
+void battle_move_encode_path_steps(void);
+void battle_move_set_unit_path_flag(battle_unit_t* unit);
+void battle_move_spread_horizontal_jump(void);
+battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s32 elevation);
 
 /* steps and velocity */
 extern u8 g_move_current_edge_height;
@@ -391,83 +391,84 @@ extern map_tile_t* g_move_current_tile;
 extern map_tile_t* g_move_destination_tile;
 extern u8 g_move_jump_landing_phases[];
 
-s32 move_check_horizontal_jump(s32, u8, u8, u8);
-void move_set_unit_step_slope_scales(battle_unit_t* unit);
-void move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change);
-void move_undo_unit_move(battle_unit_t* unit);
-void move_set_velocity_for_contiguous_steps_with_final_tile_height(
+s32 battle_move_check_horizontal_jump(s32, u8, u8, u8);
+void battle_move_set_unit_step_slope_scales(battle_unit_t* unit);
+void battle_move_step_unit_to_map_tile_center(battle_unit_t* unit, s32 allow_height_change);
+void battle_move_undo_unit_move(battle_unit_t* unit);
+void battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
     battle_unit_t* unit, const battle_walk_path_t* path, const move_step_t* step);
-void move_apply_unit_step_velocity(battle_unit_t* unit);
-void move_finish_unit_step_at_tile_edge(battle_unit_t* unit);
-void move_update_walking_step_at_tile_edge(battle_unit_t* unit);
-void move_accelerate_unit_to_destination_with_height_change(battle_unit_t* unit);
-void move_accelerate_unit_to_destination_no_height_change(battle_unit_t* unit);
-void move_update_path_step(battle_unit_t* unit);
-void move_get_current_and_destination_tiles(
+void battle_move_apply_unit_step_velocity(battle_unit_t* unit);
+void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit);
+void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit);
+void battle_move_accelerate_unit_to_destination_with_height_change(battle_unit_t* unit);
+void battle_move_accelerate_unit_to_destination_no_height_change(battle_unit_t* unit);
+void battle_move_update_path_step(battle_unit_t* unit);
+void battle_move_get_current_and_destination_tiles(
     battle_unit_t* unit, map_tile_t** current_tile, map_tile_t** destination_tile);
-void move_advance_display_unit_step(battle_unit_t* unit);
-void move_finalize_path_after_animation(battle_unit_t* unit);
-s32 move_has_reached_current_tile_exit_edge(s32 direction, battle_unit_t* unit);
-s32 move_has_reached_destination_tile_center(s32 direction, battle_unit_t* unit);
-s32 move_has_reached_destination_tile_entry_edge(s32 direction, battle_unit_t* unit);
-s32 move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out);
+void battle_move_advance_display_unit_step(battle_unit_t* unit);
+void battle_move_finalize_path_after_animation(battle_unit_t* unit);
+s32 battle_move_has_reached_current_tile_exit_edge(s32 direction, battle_unit_t* unit);
+s32 battle_move_has_reached_destination_tile_center(s32 direction, battle_unit_t* unit);
+s32 battle_move_has_reached_destination_tile_entry_edge(s32 direction, battle_unit_t* unit);
+s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SVECTOR* to, VECTOR* out);
 
 /* Scales each velocity component by scale / ONE. */
-void move_interpolate_partial(battle_unit_t* unit, s32 scale);
-void move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to);
-void move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
-void move_start_unit_step_at_climb_speed(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to);
-s32 move_is_unit_moving_by_runtime_id(u32 runtime_id);
-void move_return_to_previous_map_square(battle_unit_t* unit);
-void move_snap_axis_to_current_tile_exit_edge(s32 direction, battle_unit_t* unit);
-void move_snap_axis_to_destination_tile_center(s32 direction, battle_unit_t* unit);
-s32 move_start_unit_walk_to(s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
-void move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit);
-void move_step_unit_to_map_tile_center_with_height_change(battle_unit_t* unit);
-void move_update_airborne_ascent_phase(battle_unit_t* unit);
-void move_update_unit_step_to_destination_tile_center(battle_unit_t* unit);
-move_direction_e move_get_direction(const battle_unit_t* unit);
-void move_set_unit_step_delta_center_to_edge(
+void battle_move_interpolate_partial(battle_unit_t* unit, s32 scale);
+void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to);
+void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
+void battle_move_start_unit_step_at_climb_speed(
+    battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to);
+s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id);
+void battle_move_return_to_previous_map_square(battle_unit_t* unit);
+void battle_move_snap_axis_to_current_tile_exit_edge(s32 direction, battle_unit_t* unit);
+void battle_move_snap_axis_to_destination_tile_center(s32 direction, battle_unit_t* unit);
+s32 battle_move_start_unit_walk_to(s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed);
+void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* unit);
+void battle_move_step_unit_to_map_tile_center_with_height_change(battle_unit_t* unit);
+void battle_move_update_airborne_ascent_phase(battle_unit_t* unit);
+void battle_move_update_unit_step_to_destination_tile_center(battle_unit_t* unit);
+move_direction_e battle_move_get_direction(const battle_unit_t* unit);
+void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height);
-void move_set_float_step_delta_center_to_edge(
+void battle_move_set_float_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height);
-void move_set_unit_step_delta_edge_to_center(
+void battle_move_set_unit_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height);
-void move_set_float_step_delta_edge_to_center(
+void battle_move_set_float_step_delta_edge_to_center(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height);
-void move_set_velocity_for_contiguous_clamped_steps(
+void battle_move_set_velocity_for_contiguous_clamped_steps(
     battle_unit_t* unit, const battle_walk_path_t* path, const move_step_t* step);
-void move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
-void move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
-void move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
-void move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to);
-void move_start_fly_step(
+void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
+void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
+void battle_move_start_float_climb_jump_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
+void battle_move_start_unit_jump_step(battle_unit_t* unit, const map_tile_t* unused_from, const map_tile_t* unused_to);
+void battle_move_start_fly_step(
     battle_unit_t* unit, const map_tile_t* unused_current_tile, const map_tile_t* unused_destination_tile);
-void move_transfer_target_coordinates(const battle_unit_t* src, battle_unit_t* dst);
-void move_update_all_unit_paths(void);
-void move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit);
-void move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit);
-void move_update_float_step_to_destination_tile_center(battle_unit_t* unit);
-void move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit);
-void move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit);
+void battle_move_transfer_target_coordinates(const battle_unit_t* src, battle_unit_t* dst);
+void battle_move_update_all_unit_paths(void);
+void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit);
+void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit);
+void battle_move_update_float_step_to_destination_tile_center(battle_unit_t* unit);
+void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit);
+void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit);
 
 /* teleport */
-s32 move_calculate_teleport_chances(void);
-void move_start_teleport_step(battle_unit_t* unit);
-void move_update_teleport_start(battle_unit_t* unit);
-void move_start_teleport_animation(battle_unit_t* unit);
+s32 battle_move_calculate_teleport_chances(void);
+void battle_move_start_teleport_step(battle_unit_t* unit);
+void battle_move_update_teleport_start(battle_unit_t* unit);
+void battle_move_start_teleport_animation(battle_unit_t* unit);
 
 /* knockback */
 extern s32 g_move_displacement_direction;
 
-void move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 direction);
-void move_displace_overlapping_unit(battle_unit_t* unit, s32 direction);
-void move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, s32 delta);
-void move_init_knockback(battle_unit_t* unit);
-void move_update_knockback_after_animation(battle_unit_t* unit);
-void move_apply_knockback(void);
-s32 move_check_knockback_destination(s32 direction, s32 x, s32 y);
-void move_update_knockback_step(battle_unit_t* unit);
+void battle_move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 direction);
+void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direction);
+void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, s32 x, s32 y, s32 delta);
+void battle_move_init_knockback(battle_unit_t* unit);
+void battle_move_update_knockback_after_animation(battle_unit_t* unit);
+void battle_move_apply_knockback(void);
+s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y);
+void battle_move_update_knockback_step(battle_unit_t* unit);
 
 /* post movement */
 /* Contiguous result bytes returned as move_find_result_data_t. Keep
@@ -486,8 +487,8 @@ extern s8 g_move_find_occupying_unit_id;
 /* Pending move_post_event_flags_e bits, dispatched in priority order. */
 extern s32 g_move_find_result;
 
-s32 move_start_next_post_movement_step(void);
-void move_init_post_movement_display(void);
-u32 move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit);
+s32 battle_move_start_next_post_movement_step(void);
+void battle_move_init_post_movement_display(void);
+u32 battle_move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit);
 
 #endif

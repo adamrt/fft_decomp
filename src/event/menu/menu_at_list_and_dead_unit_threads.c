@@ -215,7 +215,7 @@ void menu_init_at_list(menu_entry_t* menu) {
     s32 index;
     u8* text;
 
-    g_thread_call_target = (void (*)(void))action_calculate_at_list;
+    g_thread_call_target = (void (*)(void))battle_action_calculate_at_list;
     thread_call_on_main_stack(g_option_menu_at_list_descriptors, 0);
 
     for (index = 0; index < 0x100; index++) {

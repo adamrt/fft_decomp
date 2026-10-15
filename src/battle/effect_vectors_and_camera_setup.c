@@ -17,7 +17,7 @@ void battle_noop_801a8e74(void) {
 }
 
 /* Select the single object's relative sections and rewind its primitive stream. */
-s32 effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1) {
+s32 battle_effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1) {
     g_effect_model_object = resource->objects;
     /* TMD offsets are byte counts from the object table; word indexing keeps signed rounding. */
     g_effect_model_vertices = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
@@ -35,7 +35,7 @@ s32 effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1) {
  *
  * The 0x35/0x37 stream uses variable-length commands, so its index is a 32-bit-element
  * offset rather than a psyq_tmd_packet_t array index. */
-void effect_decode_next_model_command(effect_decoded_model_command_t* out) {
+void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out) {
     psyq_tmd_packet_t* command;
     s32 index;
     effect_decoded_model_command_t* dst;
@@ -98,7 +98,7 @@ void effect_decode_next_model_command(effect_decoded_model_command_t* out) {
  * add_depth is set lowers Y to the tile's own surface height. A tile target
  * uses the tile center (x * 28 + 14, y * 28 + 14) and takes its height
  * from the tile record, adding the slope depth when add_depth is set. */
-void effect_resolve_target_world_coords(
+void battle_effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out) {
     map_tile_t* tile;
 
@@ -108,14 +108,15 @@ void effect_resolve_target_world_coords(
                 coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
             if (add_depth != 0) {
                 s32 height;
-                tile = map_get_unit_tile_by_runtime_id(coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                tile = battle_map_get_unit_tile_by_runtime_id(
+                    coord_data->targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
                 height = -((tile->height + tile->depth_half_height.depth) * 12);
                 if (height < out->vy) {
                     out->vy = height;
                 }
             }
         } else {
-            tile = map_get_tile_data_pointer(coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx,
+            tile = battle_map_get_tile_data_pointer(coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx,
                 coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vz,
                 coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vy);
             out->vx = coord_data->targets[EFFECT_CASTER_ENTRY].data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
@@ -131,14 +132,14 @@ void effect_resolve_target_world_coords(
             *out = *battle_unit_get_world_coords_by_runtime_id(coord_data->targets[target_index].data.unit.runtime_id);
             if (add_depth != 0) {
                 s32 height;
-                tile = map_get_unit_tile_by_runtime_id(coord_data->targets[target_index].data.unit.runtime_id);
+                tile = battle_map_get_unit_tile_by_runtime_id(coord_data->targets[target_index].data.unit.runtime_id);
                 height = -((tile->height + tile->depth_half_height.depth) * 12);
                 if (height < out->vy) {
                     out->vy = height;
                 }
             }
         } else {
-            tile = map_get_tile_data_pointer(coord_data->targets[target_index].data.tile.vx,
+            tile = battle_map_get_tile_data_pointer(coord_data->targets[target_index].data.tile.vx,
                 coord_data->targets[target_index].data.tile.vz, coord_data->targets[target_index].data.tile.vy);
             out->vx = coord_data->targets[target_index].data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             out->vz = coord_data->targets[target_index].data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
@@ -152,89 +153,90 @@ void effect_resolve_target_world_coords(
 }
 
 /* Resolve a battle ID before calculating its integer world coordinates. */
-void effect_get_world_coords_by_battle_id(
+void battle_effect_get_world_coords_by_battle_id(
     s32 adjust_for_tile_height, u32 battle_id, effect_secondary_init_t* effect_coordinates, SVECTOR* destination) {
-    effect_resolve_target_world_coords(
+    battle_effect_resolve_target_world_coords(
         adjust_for_tile_height, battle_unit_get_runtime_id_by_battle_id(battle_id), effect_coordinates, destination);
 }
 
-void effect_load_vector(const vec3s16_t* src, VECTOR* dst) {
+void battle_effect_load_vector(const vec3s16_t* src, VECTOR* dst) {
     dst->vx = src->x;
     dst->vy = src->y;
     dst->vz = src->z;
 }
 
-void effect_load_svector(const vec3s16_t* src, SVECTOR* dst) {
+void battle_effect_load_svector(const vec3s16_t* src, SVECTOR* dst) {
     dst->vx = src->x;
     dst->vy = src->y;
     dst->vz = src->z;
 }
 
-void effect_shift_vector_right_12(const VECTOR* src, VECTOR* dst) {
+void battle_effect_shift_vector_right_12(const VECTOR* src, VECTOR* dst) {
     dst->vx = src->vx >> 12;
     dst->vy = src->vy >> 12;
     dst->vz = src->vz >> 12;
 }
 
 /* Convert integral vector components to 20.12 fixed point. */
-void effect_scale_vector_fixed12(const VECTOR* src, VECTOR* dst) {
+void battle_effect_scale_vector_fixed12(const VECTOR* src, VECTOR* dst) {
     dst->vx = src->vx * ONE;
     dst->vy = src->vy * ONE;
     dst->vz = src->vz * ONE;
 }
 
-void effect_mask_vector_low_12_bits(const SVECTOR* src, SVECTOR* dst) {
+void battle_effect_mask_vector_low_12_bits(const SVECTOR* src, SVECTOR* dst) {
     dst->vx = src->vx & 0xFFF;
     dst->vy = src->vy & 0xFFF;
     dst->vz = src->vz & 0xFFF;
 }
 
-void effect_add_vectors(const VECTOR* first, const VECTOR* second, VECTOR* out) {
+void battle_effect_add_vectors(const VECTOR* first, const VECTOR* second, VECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
 }
 
-void effect_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out) {
+void battle_effect_add_svectors(const SVECTOR* first, const SVECTOR* second, SVECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
 }
 
-void effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
+void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECTOR* second, VECTOR* out) {
     out->vx = first->vx + second->vx;
     out->vy = first->vy + second->vy;
     out->vz = first->vz + second->vz;
 }
 
-void effect_add_random_vector_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
+void battle_effect_add_random_vector_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
     u16 range;
 
     range = ranges->vx;
-    destination->vx = source->vx + effect_get_random_between_s16(-range, range);
+    destination->vx = source->vx + battle_effect_get_random_between_s16(-range, range);
 
     range = ranges->vy;
-    destination->vy = source->vy + effect_get_random_between_s16(-range, range);
+    destination->vy = source->vy + battle_effect_get_random_between_s16(-range, range);
 
     range = ranges->vz;
-    destination->vz = source->vz + effect_get_random_between_s16(-range, range);
+    destination->vz = source->vz + battle_effect_get_random_between_s16(-range, range);
 }
 
 /* Add random X/Z/Y offsets and convert each result to Q12 coordinates. */
-void effect_add_random_vector_offsets_and_store_q12(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
+void battle_effect_add_random_vector_offsets_and_store_q12(
+    const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
     u16 range;
 
     range = ranges->vx;
-    destination->vx = (source->vx + effect_get_random_between_s16(-range, range)) * ONE;
+    destination->vx = (source->vx + battle_effect_get_random_between_s16(-range, range)) * ONE;
 
     range = ranges->vy;
-    destination->vy = (source->vy + effect_get_random_between_s16(-range, range)) * ONE;
+    destination->vy = (source->vy + battle_effect_get_random_between_s16(-range, range)) * ONE;
 
     range = ranges->vz;
-    destination->vz = (source->vz + effect_get_random_between_s16(-range, range)) * ONE;
+    destination->vz = (source->vz + battle_effect_get_random_between_s16(-range, range)) * ONE;
 }
 
-void effect_add_vector_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out) {
+void battle_effect_add_vector_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out) {
     value->vx += delta->vx;
     out->vx = value->vx * ONE;
     value->vy += delta->vy;
@@ -244,17 +246,17 @@ void effect_add_vector_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR*
 }
 
 /* Add independent random offsets to three packed rotation components. */
-void effect_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination) {
+void battle_effect_add_random_rotation_offsets(const SVECTOR* source, const SVECTOR* ranges, SVECTOR* destination) {
     u16 range;
 
     range = ranges->vx;
-    destination->vx = source->vx + effect_get_random_between_s16(-range, range);
+    destination->vx = source->vx + battle_effect_get_random_between_s16(-range, range);
 
     range = ranges->vy;
-    destination->vy = source->vy + effect_get_random_between_s16(-range, range);
+    destination->vy = source->vy + battle_effect_get_random_between_s16(-range, range);
 
     range = ranges->vz;
-    destination->vz = source->vz + effect_get_random_between_s16(-range, range);
+    destination->vz = source->vz + battle_effect_get_random_between_s16(-range, range);
 }
 
 enum {
@@ -262,33 +264,33 @@ enum {
 };
 
 /* Add two effect rotations and wrap each axis to one Q12 revolution. */
-void effect_add_rotation_vectors_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out) {
+void battle_effect_add_rotation_vectors_mod_q12(const SVECTOR* first, const SVECTOR* second, SVECTOR* out) {
     out->vx = (first->vx + second->vx) & BATTLE_ROTATION_Q12_MASK;
     out->vy = (first->vy + second->vy) & BATTLE_ROTATION_Q12_MASK;
     out->vz = (first->vz + second->vz) & BATTLE_ROTATION_Q12_MASK;
 }
 
 /* Nothing in the game calls this or its three siblings for 4, 6 and 8. */
-void effect_add_2_to_halfword(u16* value) {
+void battle_effect_add_2_to_halfword(u16* value) {
     *value += 2;
 }
 
 /* Nothing in the game calls it (see effect_add_2_to_halfword). */
-void effect_add_4_to_halfword(u16* value) {
+void battle_effect_add_4_to_halfword(u16* value) {
     *value += 4;
 }
 
 /* Nothing in the game calls it (see effect_add_2_to_halfword). */
-void effect_add_6_to_halfword(u16* value) {
+void battle_effect_add_6_to_halfword(u16* value) {
     *value += 6;
 }
 
 /* Nothing in the game calls it (see effect_add_2_to_halfword). */
-void effect_add_8_to_halfword(u16* value) {
+void battle_effect_add_8_to_halfword(u16* value) {
     *value += 8;
 }
 
-void effect_add_vectors_to_svector(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
+void battle_effect_add_vectors_to_svector(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx + right->vx;
     result->vy = left->vy + right->vy;
     result->vz = left->vz + right->vz;
@@ -297,7 +299,7 @@ void effect_add_vectors_to_svector(const VECTOR* left, const VECTOR* right, SVEC
 /* Only the low 16 bits of each input component are read. */
 /* result = left + right rotated 270 degrees about Y (RotMatrixY convention:
  * x' = x cos + z sin, z' = -x sin + z cos), i.e. (x - rz, y + ry, z + rx). */
-void effect_add_vectors_to_svector_rot_y_270(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
+void battle_effect_add_vectors_to_svector_rot_y_270(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx - right->vz;
     result->vy = left->vy + right->vy;
     result->vz = left->vz + right->vx;
@@ -305,7 +307,7 @@ void effect_add_vectors_to_svector_rot_y_270(const VECTOR* left, const VECTOR* r
 
 /* Only the low 16 bits of each input component are read. */
 /* result = left + right rotated 180 degrees about Y, i.e. (x - rx, y + ry, z - rz). */
-void effect_add_vectors_to_svector_rot_y_180(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
+void battle_effect_add_vectors_to_svector_rot_y_180(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx - right->vx;
     result->vy = left->vy + right->vy;
     result->vz = left->vz - right->vz;
@@ -314,38 +316,38 @@ void effect_add_vectors_to_svector_rot_y_180(const VECTOR* left, const VECTOR* r
 /* Only the low 16 bits of each input component are read. */
 /* result = left + right rotated 90 degrees about Y (RotMatrixY convention:
  * x' = x cos + z sin, z' = -x sin + z cos), i.e. (x + rz, y + ry, z - rx). */
-void effect_add_vectors_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
+void battle_effect_add_vectors_to_svector_rot_y_90(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx + right->vz;
     result->vy = left->vy + right->vy;
     result->vz = left->vz - right->vx;
 }
 
-void effect_set_gravity(const vec3s32_t* src) {
+void battle_effect_set_gravity(const vec3s32_t* src) {
     g_effect_gravity = *src;
 }
 
-void effect_set_inertia_threshold(s32 threshold) {
+void battle_effect_set_inertia_threshold(s32 threshold) {
     g_effect_inertia_threshold = threshold;
 }
 
-void effect_save_gravity(void) {
+void battle_effect_save_gravity(void) {
     g_effect_saved_gravity = g_effect_gravity;
 }
 
-void effect_restore_gravity(void) {
+void battle_effect_restore_gravity(void) {
     g_effect_gravity = g_effect_saved_gravity;
 }
 
-void effect_save_inertia_threshold(void) {
+void battle_effect_save_inertia_threshold(void) {
     g_effect_saved_inertia_threshold = g_effect_inertia_threshold;
 }
 
-void effect_restore_inertia_threshold(void) {
+void battle_effect_restore_inertia_threshold(void) {
     g_effect_inertia_threshold = g_effect_saved_inertia_threshold;
 }
 
 /* Advance an effect slot's motion state by one frame. */
-void effect_step_motion(effect_motion_t* motion) {
+void battle_effect_step_motion(effect_motion_t* motion) {
     s32 unused[4]; /* The target reserves an unused 16-byte frame. */
 
     motion->position.x += motion->velocity.x;
@@ -378,7 +380,7 @@ void effect_step_motion(effect_motion_t* motion) {
  * 0x80 the target vector alone, and 0, or no curve, twice the target vector
  * less the step. The list parameter doubles as the next-node cursor: that
  * keeps both loop tests on it. */
-void effect_integrate_particle_motion(effect_work_record_t* list) {
+void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
     effect_work_record_t* node;
     effect_motion_t* motion;
     s32 weight;
@@ -448,7 +450,7 @@ void effect_integrate_particle_motion(effect_work_record_t* list) {
  * the free-list head.  The GetClut result is computed and discarded in the
  * target.
  */
-void effect_init_free_list(void) {
+void battle_effect_init_free_list(void) {
     s32 i;
 
     GetClut(0, 0x1f0);
@@ -474,7 +476,7 @@ void effect_init_free_list(void) {
  * The free list is not tested for exhaustion: with none free the sentinel node 0
  * would be handed out. There are as many nodes as work records, and
  * effect_alloc_work_record is the only caller. */
-effect_list_node_t* effect_alloc_list_node(s16 kind) {
+effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
     u16* free_head = &g_effect_free_list_node_head;
     u16* list_head = &g_effect_active_list_node_head;
     u16 index = *free_head;
@@ -486,7 +488,7 @@ effect_list_node_t* effect_alloc_list_node(s16 kind) {
     node->next = *list_head;
     node->prev = 0;
     *list_head = index;
-    node->sprite_block = effect_alloc_sprite_block(1);
+    node->sprite_block = battle_effect_alloc_sprite_block(1);
     node->screen_rotation_angle = 0;
     node->frame_timer = 0;
     node->sequence_data = 0;
@@ -499,11 +501,11 @@ effect_list_node_t* effect_alloc_list_node(s16 kind) {
     return node;
 }
 
-void effect_free_list_node(effect_list_node_t* node) {
+void battle_effect_free_list_node(effect_list_node_t* node) {
     u16* free_head;
 
     if (node->sprite_block != 0) {
-        effect_free_sprite_block(node->sprite_block);
+        battle_effect_free_sprite_block(node->sprite_block);
         node->sprite_block = 0;
     }
     if (node->prev != 0) {
@@ -521,7 +523,7 @@ void effect_free_list_node(effect_list_node_t* node) {
 /* Point a sprite animation node at parameter set animation_index and restart
  * it: clear the sequence position and hold time, store frame_group doubled and
  * set kind bit 0 to mark the frame dirty. */
-void effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index) {
+void battle_effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, s32 animation_index) {
     u8* sequences;
     u8* entry;
     s16 offset;
@@ -547,7 +549,7 @@ void effect_init_animation_sequence(effect_list_node_t* state, s32 frame_group, 
  * 0x83 adds a signed 8-bit x/y delta. kind bit 0 marks the frame dirty; bits
  * 1-2 select camera projection or a screen-space position, with or without
  * the camera zoom. The oversized frame is reproduced with unused locals. */
-void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue) {
+void battle_effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 green, s32 blue) {
     effect_list_node_t* node;
     SVECTOR input;
     SVECTOR unused_20;
@@ -607,8 +609,8 @@ void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 gr
             + g_effect_frame_data);
         count = frame->count;
         if (block->header.sprite_count != count) {
-            effect_free_sprite_block(block);
-            block = effect_alloc_sprite_block(count);
+            battle_effect_free_sprite_block(block);
+            block = battle_effect_alloc_sprite_block(count);
             node->sprite_block = block;
         }
         for (i = 0; i < count; i++) {
@@ -651,7 +653,7 @@ void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 gr
         }
         position.vx = output.vx;
         position.vy = output.vy;
-        effect_submit_sprite_to_ordering_table(
+        battle_effect_submit_sprite_to_ordering_table(
             node->sprite_block, &position, node->screen_rotation_angle, &g_camera_zoom, g_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_SCREEN_OFFSET:
@@ -664,7 +666,7 @@ void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 gr
         if (depth > EFFECT_SPRITE_OT_DEPTH_MAX) {
             depth = EFFECT_SPRITE_OT_DEPTH_MAX;
         }
-        effect_submit_sprite_to_ordering_table(
+        battle_effect_submit_sprite_to_ordering_table(
             node->sprite_block, &position, node->screen_rotation_angle, &g_camera_zoom, g_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_WORLD_UNSCALED:
@@ -698,7 +700,7 @@ void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 gr
         }
         position.vx = output.vx;
         position.vy = output.vy;
-        effect_submit_sprite_to_ordering_table(
+        battle_effect_submit_sprite_to_ordering_table(
             node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_SCREEN:
@@ -711,7 +713,7 @@ void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 gr
         if (depth > EFFECT_SPRITE_OT_DEPTH_MAX) {
             depth = EFFECT_SPRITE_OT_DEPTH_MAX;
         }
-        effect_submit_sprite_to_ordering_table(
+        battle_effect_submit_sprite_to_ordering_table(
             node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
         break;
     }
@@ -721,7 +723,7 @@ void effect_render_particle_sprite(effect_list_node_t* particle, s32 red, s32 gr
 enum { EFFECT_REPLACED_FLAGS_MASK = 0x0006 };
 
 /* Nothing in the game calls it. */
-void effect_replace_flags_0006(effect_flag_prefix_t* object, s32 value) {
+void battle_effect_replace_flags_0006(effect_flag_prefix_t* object, s32 value) {
     object->flags = (object->flags & ~EFFECT_REPLACED_FLAGS_MASK) | (value & EFFECT_REPLACED_FLAGS_MASK);
 }
 
@@ -731,12 +733,12 @@ void effect_replace_flags_0006(effect_flag_prefix_t* object, s32 value) {
  *
  * Returns 0 when the slot has finished: a positive life counts down and ends the
  * slot at 0; a negative life ends it on the frame the script wraps. */
-s32 effect_update_slot(s32 id) {
+s32 battle_effect_update_slot(s32 id) {
     effect_slot_t* slot = &g_effect_slots[id];
     s32 wrapped;
     s32 result;
 
-    effect_step_motion(&slot->motion);
+    battle_effect_step_motion(&slot->motion);
     wrapped = 0;
     if (--slot->hold <= 0) {
         slot->frame = slot->script->step[slot->step_index].frame;
@@ -747,7 +749,7 @@ s32 effect_update_slot(s32 id) {
             slot->step_index = 0;
         }
     }
-    effect_draw_billboard_sprite(slot);
+    battle_effect_draw_billboard_sprite(slot);
     result = 1;
     if (slot->life < 0) {
         result = wrapped == 0;
@@ -758,25 +760,25 @@ s32 effect_update_slot(s32 id) {
 }
 
 /* Four effect-pool/state initializers, called at effect setup and teardown. */
-void effect_reset_subsystems(void) {
-    effect_init_render_state();
-    effect_init_state_records();
-    effect_init_record_chain();
-    effect_init_free_list();
+void battle_effect_reset_subsystems(void) {
+    battle_effect_init_render_state();
+    battle_effect_init_state_records();
+    battle_effect_init_record_chain();
+    battle_effect_init_free_list();
 }
 
-void effect_copy_camera_angles_and_world_coords(void) {
+void battle_effect_copy_camera_angles_and_world_coords(void) {
     SVECTOR* rotation;
     VECTOR* coords;
 
-    rotation = camera_get_rotation();
+    rotation = battle_camera_get_rotation();
     g_effect_camera_rotation_saved.vx = g_effect_camera_rotation_start.vx = g_effect_camera_rotation_target.vx
         = g_effect_camera_rotation_current.vx = rotation->vx & 0xfff;
     g_effect_camera_rotation_saved.vy = g_effect_camera_rotation_start.vy = g_effect_camera_rotation_target.vy
         = g_effect_camera_rotation_current.vy = rotation->vy & 0xfff;
     g_effect_camera_rotation_saved.vz = g_effect_camera_rotation_start.vz = g_effect_camera_rotation_target.vz
         = g_effect_camera_rotation_current.vz = rotation->vz & 0xfff;
-    coords = camera_get_current_real_coords();
+    coords = battle_camera_get_current_real_coords();
     g_effect_camera_position_saved.vx = g_effect_camera_position_start.vx = g_effect_camera_position_target.vx
         = g_effect_camera_position_current.vx = coords->vx >> 12;
     g_effect_camera_position_saved.vy = g_effect_camera_position_start.vy = g_effect_camera_position_target.vy
@@ -784,16 +786,16 @@ void effect_copy_camera_angles_and_world_coords(void) {
     g_effect_camera_position_saved.vz = g_effect_camera_position_start.vz = g_effect_camera_position_target.vz
         = g_effect_camera_position_current.vz = coords->vz >> 12;
     g_effect_camera_zoom_saved = g_effect_camera_zoom_start = g_effect_camera_zoom_target = g_effect_camera_zoom_current
-        = *camera_get_zoom();
+        = *battle_camera_get_zoom();
 }
 
-void effect_init_camera_and_screen_data(void) {
+void battle_effect_init_camera_and_screen_data(void) {
     s32 pad[2];
     g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
     g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
     g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
     g_battle_unknown_801b8b1c = 0;
     g_battle_unknown_801b8b18 = 0;
-    effect_copy_camera_angles_and_world_coords();
+    battle_effect_copy_camera_angles_and_world_coords();
     (void)pad;
 }

@@ -12,7 +12,7 @@ s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unuse
     case EFFECT_CALLBACK_PHASE_IDLE:
         break;
     case EFFECT_CALLBACK_PHASE_INIT:
-        map_dispatch_map_data_command(MAP_DATA_COMMAND_RELEASE_GNS_HOLD, 1, 1, 1);
+        battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_RELEASE_GNS_HOLD, 1, 1, 1);
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
     case EFFECT_CALLBACK_PHASE_UPDATE:

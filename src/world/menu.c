@@ -4,7 +4,7 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-void menu_toggle_change_banner_panel_thread(s32 enable) {
+void world_menu_toggle_change_banner_panel_thread(s32 enable) {
     s32 state = enable;
 
     if (state != 0) {
@@ -27,7 +27,7 @@ void menu_toggle_change_banner_panel_thread(s32 enable) {
 /* Starts thread 9 on world_menu_equipment_panel_thread (parameter g_world_stat_preview_panel_thread_params) when
  * `enable` is set and neither of the g_world_status_display_thread_params.flags 0x60 bits is set; stops it otherwise.
  * g_world_change_banner_panel_thread_params.style records the normalized enable state. */
-void menu_toggle_stat_preview_panel_thread(s32 enable) {
+void world_menu_toggle_stat_preview_panel_thread(s32 enable) {
     if (enable != 0) {
         if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
             && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {

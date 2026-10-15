@@ -10,7 +10,7 @@
  * Each grayscale case needs its own block-scoped gray: one function-scope
  * variable spans four blocks, becomes a global pseudo and swaps $v0/$v1 in
  * the division, which also defeats the target's cross-jumped case tails. */
-void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
+void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     map_background_gradient_colors_t current;
     s32 target_red;
@@ -144,13 +144,13 @@ void map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, 
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].r = channels[1].red / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = channels[1].green / 0x10000;
         current.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = channels[1].blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &current);
     }
 }
 
 /* Start a fade of the ambient light toward color over frame_duration * 8
  * frames, or apply it at once when frame_duration is zero. */
-void map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
+void battle_map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
     s32 red;
@@ -189,13 +189,13 @@ void map_transition_ambient_light_color(s32 frame_duration, const CVECTOR* color
         current.r = channels->red / 0x10000;
         current.g = channels->green / 0x10000;
         current.b = channels->blue / 0x10000;
-        map_light_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &current);
+        battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &current);
     }
 }
 
 /* Fade the ambient light to `color` and make it the base color that the
  * MAP_COLOR_MODE_BASE modes and RESTORE start from. */
-void map_transition_and_store_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
-    map_transition_ambient_light_color(frame_duration, color);
+void battle_map_transition_and_store_ambient_light_color(s32 frame_duration, const CVECTOR* color) {
+    battle_map_transition_ambient_light_color(frame_duration, color);
     g_map_ambient_light_color = *color;
 }

@@ -10,7 +10,7 @@
 /* Makes the attacker's own action result remove Transparent when its last
  * skillset is Jump and it carries Transparent as an inflicted status. Also points
  * g_action_attacker_data at the attacker's result. */
-void status_remove_transparent_if_jump_used(unit_stats_t* unit) {
+void battle_status_remove_transparent_if_jump_used(unit_stats_t* unit) {
     action_data_t* action = &g_action_attacker_action_data;
     g_action_attacker_data = action;
     /* Inflicted status byte 2 bit 0x10 is Transparent. */
@@ -27,8 +27,8 @@ void status_remove_transparent_if_jump_used(unit_stats_t* unit) {
 /* Apply the ability's status. Returns 1 when it changes something or the
  * target is undead; otherwise the action is canceled as a forced failure and
  * 0 returned. */
-s32 formula_apply_status_and_check_undead(void) {
-    formula_apply_status();
+s32 battle_formula_apply_status_and_check_undead(void) {
+    battle_formula_apply_status();
     if (g_action_target_data->attack_type & ACTION_TYPE_STATUS_CHANGE) {
         return 1;
     }
@@ -36,7 +36,7 @@ s32 formula_apply_status_and_check_undead(void) {
         & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
         return 1;
     }
-    formula_nullify_action();
+    battle_formula_nullify_action();
     g_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;
     return 0;
 }
@@ -45,7 +45,7 @@ s32 formula_apply_status_and_check_undead(void) {
  * Attack, then restore the attacker's skillset and ability and the strike
  * counter. It ends with the current ability's weapon_proc_pending and reaction_id
  * cleared. */
-void action_switch_ability_to_default_attack(void) {
+void battle_action_switch_ability_to_default_attack(void) {
     unit_stats_t* unit;
     unit_stats_t* u2;
     unit_stats_t* u3;
@@ -60,7 +60,7 @@ void action_switch_ability_to_default_attack(void) {
     u2 = g_action_attacker;
     saved_ability = unit->action_command.ability_id;
     u2->action_command.ability_id = 0;
-    action_run_pre_formula_setup(&u2->action_command, g_action_current_ability.target_id);
+    battle_action_run_pre_formula_setup(&u2->action_command, g_action_current_ability.target_id);
     u3 = g_action_attacker;
     g_action_current_ability.strike_counter = saved_strike_counter;
     u3->action_command.ability_id = saved_ability;
@@ -71,9 +71,9 @@ void action_switch_ability_to_default_attack(void) {
 
 /* Reset the result records of the current target and the current attacker; the
  * attacker's starts as not hit. */
-void action_clear_data(void) {
-    action_clear_current_data(g_action_target_data);
-    action_clear_current_data(g_action_attacker_data);
+void battle_action_clear_data(void) {
+    battle_action_clear_current_data(g_action_target_data);
+    battle_action_clear_current_data(g_action_attacker_data);
     g_action_attacker_data->hit = 0;
 }
 
@@ -81,14 +81,14 @@ void action_clear_data(void) {
  * that is not a crystal, dead or petrified takes (fall height / 2 - Jump) *
  * MaxHP / 10 fall damage when that is positive, at most 999; a flying one
  * takes none. */
-void move_apply_knockback(void) {
+void battle_move_apply_knockback(void) {
     u8* flags;
     unit_stats_t* unit;
     action_data_t* action;
     s32 amount;
     s32 diff;
 
-    action_clear_data();
+    battle_action_clear_data();
     flags = &g_action_current_ability.knockback_flags;
     *flags &= BATTLE_KNOCKBACK_KIND_MASK;
     g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
@@ -122,7 +122,7 @@ void move_apply_knockback(void) {
  * The Damage Split case chains the damage store so the value reaches `healing` through
  * the target record; storing it there first is what orders the three global
  * pointer loads the way the target emits them. */
-s32 action_perform_reaction_ability(void) {
+s32 battle_action_perform_reaction_ability(void) {
     s16 ability_id;
     u8 attack_type;
     s32 healing;
@@ -138,7 +138,7 @@ s32 action_perform_reaction_ability(void) {
         == 1) {
         return 0;
     }
-    action_clear_data();
+    battle_action_clear_data();
     switch (g_battle_current_reaction_ability_id) {
     case ABILITY_ID_REACTION_PA_SAVE:
         g_action_target_data->pa_change = 0x81;
@@ -152,28 +152,28 @@ s32 action_perform_reaction_ability(void) {
     case ABILITY_ID_REACTION_SUNKEN_STATE:
         g_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_TRANSPARENT)]
             = STATUS_BYTE_MASK(STATUS_ID_TRANSPARENT);
-        if (status_modify_inflictions(0) != 0) {
+        if (battle_status_modify_inflictions(0) != 0) {
             attack_type = ACTION_TYPE_STATUS_CHANGE;
         }
         break;
     case ABILITY_ID_REACTION_CAUTION:
         g_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_DEFENDING)]
             = STATUS_BYTE_MASK(STATUS_ID_DEFENDING);
-        if (status_modify_inflictions(0) != 0) {
+        if (battle_status_modify_inflictions(0) != 0) {
             attack_type = ACTION_TYPE_STATUS_CHANGE;
         }
         break;
     case ABILITY_ID_REACTION_DRAGON_SPIRIT:
         g_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_RERAISE)]
             = STATUS_BYTE_MASK(STATUS_ID_RERAISE);
-        if (status_modify_inflictions(0) != 0) {
+        if (battle_status_modify_inflictions(0) != 0) {
             attack_type = ACTION_TYPE_STATUS_CHANGE;
         }
         break;
     case ABILITY_ID_REACTION_REGENERATOR:
         g_action_target_data->status_changes.infliction[STATUS_BYTE_INDEX(STATUS_ID_REGEN)]
             = STATUS_BYTE_MASK(STATUS_ID_REGEN);
-        if (status_modify_inflictions(0) != 0) {
+        if (battle_status_modify_inflictions(0) != 0) {
             attack_type = ACTION_TYPE_STATUS_CHANGE;
         }
         break;
@@ -227,7 +227,7 @@ s32 action_perform_reaction_ability(void) {
         return -1;
     }
     g_action_target_data->attack_type = attack_type;
-    action_finalize_target_current_action();
+    battle_action_finalize_target_current_action();
     if (g_action_target_data->special_effect != 0) {
         g_action_target_data->attack_type |= ACTION_TYPE_PSEUDO_STATUS;
     }

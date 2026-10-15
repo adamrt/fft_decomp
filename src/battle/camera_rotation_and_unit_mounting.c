@@ -11,26 +11,26 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-void camera_save_rotation(void) {
+void battle_camera_save_rotation(void) {
     copyVector(&g_camera_rotation_backup, &g_camera_render_state);
 }
 
-void camera_restore_rotation(void) {
+void battle_camera_restore_rotation(void) {
     copyVector(&g_camera_render_state, &g_camera_rotation_backup);
 }
 
-SVECTOR* camera_get_rotation(void) {
+SVECTOR* battle_camera_get_rotation(void) {
     return &g_camera_render_state;
 }
 
-void camera_set_rotation(const SVECTOR* rotation) {
+void battle_camera_set_rotation(const SVECTOR* rotation) {
     copyVector(&g_camera_render_state, rotation);
 }
 
 /* Starts a linear turn of all three camera angles to the one value
  * *destination_value over frame_count frames (divided by the animation speed),
  * applied by camera_update_rotation_animation. No retail code calls it. */
-void camera_set_rotation_delta_from_value(const s16* destination_value, s32 frame_count) {
+void battle_camera_set_rotation_delta_from_value(const s16* destination_value, s32 frame_count) {
     s32 animation_frames;
     s32 delta_x;
 
@@ -45,7 +45,7 @@ void camera_set_rotation_delta_from_value(const s16* destination_value, s32 fram
 
 /* Starts a linear turn of the camera angles by values[0..2] over frame_count
  * frames (divided by the animation speed). No retail code calls it. */
-void camera_set_rotation_delta_from_values(const s16* values, s32 frame_count) {
+void battle_camera_set_rotation_delta_from_values(const s16* values, s32 frame_count) {
     s32 animation_frames;
     s32 value_x;
 
@@ -60,7 +60,7 @@ void camera_set_rotation_delta_from_values(const s16* values, s32 frame_count) {
 /* Advances the camera-angle move by one frame while its countdown runs. Only the
  * uncalled camera_set_rotation_delta_* routines start the countdown, so
  * nothing moves in retail. */
-void camera_update_rotation_animation(void) {
+void battle_camera_update_rotation_animation(void) {
     if (g_camera_rotation_countdown != 0) {
         g_camera_rotation_countdown--;
         g_camera_render_state.vx += g_camera_rotation_delta.vx;
@@ -69,30 +69,30 @@ void camera_update_rotation_animation(void) {
     }
 }
 
-void map_copy_background_color(void) {
+void battle_map_copy_background_color(void) {
     /* Component copies retain the original byte loads and separate addresses. */
     g_map_background_color_backup.r = g_map_background_color.r;
     g_map_background_color_backup.g = g_map_background_color.g;
     g_map_background_color_backup.b = g_map_background_color.b;
 }
 
-void map_restore_background_color(void) {
+void battle_map_restore_background_color(void) {
     g_map_background_color.r = g_map_background_color_backup.r;
     g_map_background_color.g = g_map_background_color_backup.g;
     g_map_background_color.b = g_map_background_color_backup.b;
-    map_control_gte_background_color(
+    battle_map_control_gte_background_color(
         BATTLE_BACKGROUND_COLOR_SET, g_map_background_color.r, g_map_background_color.g, g_map_background_color.b);
 }
 
-rgb24_t* map_get_background_color(void) {
+rgb24_t* battle_map_get_background_color(void) {
     return &g_map_background_color;
 }
 
-void map_set_background_color(s32 red, s32 green, s32 blue) {
+void battle_map_set_background_color(s32 red, s32 green, s32 blue) {
     g_map_background_color.r = red;
     g_map_background_color.g = green;
     g_map_background_color.b = blue;
-    map_control_gte_background_color(
+    battle_map_control_gte_background_color(
         BATTLE_BACKGROUND_COLOR_SET, g_map_background_color.r, g_map_background_color.g, g_map_background_color.b);
 }
 
@@ -100,7 +100,7 @@ void map_set_background_color(s32 red, s32 green, s32 blue) {
  *
  * A component whose tested delta is negative (`current + delta < current`)
  * becomes 0xff instead. The retail routine tests green with red_delta. */
-void map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
+void battle_map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
     if (g_map_background_color.r + red_delta < g_map_background_color.r) {
         g_map_background_color.r = 0xff;
     } else {
@@ -116,7 +116,7 @@ void map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta)
     } else {
         g_map_background_color.b += blue_delta;
     }
-    map_control_gte_background_color(
+    battle_map_control_gte_background_color(
         BATTLE_BACKGROUND_COLOR_SET, g_map_background_color.r, g_map_background_color.g, g_map_background_color.b);
 }
 
@@ -391,7 +391,8 @@ s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* 
 
     unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
     if (unit != 0) {
-        map_get_tile_data_pointer(unit->stats->x, unit->stats->position.y, unit->stats->position.higher_elevation);
+        battle_map_get_tile_data_pointer(
+            unit->stats->x, unit->stats->position.y, unit->stats->position.higher_elevation);
         coords->vx = unit->stats->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         coords->vz = unit->stats->position.y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         coords->vy = battle_gfx_calculate_world_height_from_battle_tile(unit);
@@ -400,17 +401,19 @@ s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* 
     return 0;
 }
 
-void camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
-    camera_convert_screen_coords_modify_by_1(battle_unit_get_world_coords_by_runtime_id(runtime_id & 0xffff), coords);
+void battle_camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
+    battle_camera_convert_screen_coords_modify_by_1(
+        battle_unit_get_world_coords_by_runtime_id(runtime_id & 0xffff), coords);
 }
 
 /* Projects a world position to screen x and y. Rebuilds the camera matrices first
  * and leaves them loaded in the GTE. */
-void camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords) {
+void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR* screen_coords) {
     VECTOR transformed_coords;
     s32 result;
 
-    camera_update_matrices(&g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
+    battle_camera_update_matrices(
+        &g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
     RotTrans(world_coords, &transformed_coords, &result);
@@ -436,13 +439,14 @@ s32 battle_unit_get_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
 }
 
 /* Path a unit to a destination tile and start it walking at the given speed. */
-s32 move_start_unit_walk_to(s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
+s32 battle_move_start_unit_walk_to(
+    s32 runtime_id, map_tile_coordinates_t* destination, s32 flags, s32 jump, s32 speed) {
     battle_unit_t* unit;
     battle_walk_path_t* path;
 
     unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
     if (unit != 0) {
-        path = move_calculate_walkto_pathing(
+        path = battle_move_calculate_walkto_pathing(
             flags, jump, unit->map_x, unit->map_y, unit->map_z, destination->x, destination->y, destination->layer);
         if (path != 0) {
             unit->path = *path;

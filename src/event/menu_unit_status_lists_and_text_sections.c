@@ -1064,7 +1064,7 @@ void menu_preview_attack_caster_stats(void) {
         || action->skillset_id == SKILLSET_ID_EQUIP_CHANGE) {
         g_menu_preview_target_action = 0;
     } else {
-        g_thread_call_target = (void (*)(void))action_calculate_projected_effect;
+        g_thread_call_target = (void (*)(void))battle_action_calculate_projected_effect;
         thread_call_on_main_stack(attacker, target, action);
         g_menu_preview_target_action = &target->action;
     }

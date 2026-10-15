@@ -33,7 +33,7 @@ void mem_copy_bytes_nonempty(void* destination, const void* source, s32 count) {
 }
 
 #ifdef FFT_BATTLE
-s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride) {
+s32 battle_gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride) {
     s32 mask;
     s32 value;
 
@@ -58,7 +58,7 @@ s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride) {
  * which is dead there because `data` has already been copied out of it, so the
  * parity has to be assigned to `mask` rather than tested inline; a fresh local
  * or an inline `if (!(index & 1))` puts the `andi` in the return register. */
-void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value) {
+void battle_gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value) {
     s32 mask;
     u8* destination;
 
@@ -87,12 +87,12 @@ void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region) {
 
     for (row = 0; row < region->rect.h; row++) {
         for (col = 0; col < region->rect.w / 2; col++) {
-            value = gfx_read_packed_nibble(data, region->rect.x + col, region->rect.y + row, region->stride);
+            value = battle_gfx_read_packed_nibble(data, region->rect.x + col, region->rect.y + row, region->stride);
             offset = 1;
-            gfx_write_packed_nibble(data, region->rect.x + col, region->rect.y + row, region->stride,
-                gfx_read_packed_nibble(
+            battle_gfx_write_packed_nibble(data, region->rect.x + col, region->rect.y + row, region->stride,
+                battle_gfx_read_packed_nibble(
                     data, region->rect.x + region->rect.w - (col + offset), region->rect.y + row, region->stride));
-            gfx_write_packed_nibble(
+            battle_gfx_write_packed_nibble(
                 data, region->rect.x + region->rect.w - (col + offset), region->rect.y + row, region->stride, value);
         }
     }

@@ -5,22 +5,22 @@
 #include "fft/main.h"
 #include "psx/libgpu.h"
 
-void camera_save_screen_offset(void) {
+void battle_camera_save_screen_offset(void) {
     copyVector(&g_camera_saved_screen_offset, &g_camera_current_screen_offset);
 }
 
 /* No retail code calls it. */
-void camera_restore_screen_offset(void) {
+void battle_camera_restore_screen_offset(void) {
     copyVector(&g_camera_current_screen_offset, &g_camera_saved_screen_offset);
 }
 
 /* No retail code calls it. */
-VECTOR* camera_get_screen_offset(void) {
+VECTOR* battle_camera_get_screen_offset(void) {
     return &g_camera_current_screen_offset;
 }
 
 /* No retail code calls it. */
-void camera_set_screen_offset(const VECTOR* coords) {
+void battle_camera_set_screen_offset(const VECTOR* coords) {
     copyVector(&g_camera_current_screen_offset, coords);
 }
 
@@ -30,7 +30,7 @@ void camera_set_screen_offset(const VECTOR* coords) {
  *
  * The per-frame step is stored in g_camera_real_coord_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
-void camera_start_screen_offset_move_uniform(const s32* destination_value, s32 frame_count) {
+void battle_camera_start_screen_offset_move_uniform(const s32* destination_value, s32 frame_count) {
     s32 animation_frames;
     s32 current_x;
     s32 current_z;
@@ -55,7 +55,7 @@ void camera_start_screen_offset_move_uniform(const s32* destination_value, s32 f
  *
  * The per-frame step is stored in g_camera_real_coord_delta, the vector
  * the camera-position move also uses. No retail code calls it. */
-void camera_start_screen_offset_move_relative(const VECTOR* values, s32 frame_count) {
+void battle_camera_start_screen_offset_move_relative(const VECTOR* values, s32 frame_count) {
     s32 animation_frames;
 
     animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
@@ -70,7 +70,7 @@ void camera_start_screen_offset_move_relative(const VECTOR* values, s32 frame_co
 /* Advances the screen-offset move by one frame while its countdown runs. Only the
  * uncalled camera_set_offset_screen_coord_delta_* routines start the
  * countdown, so nothing moves in retail. */
-void camera_update_screen_offset_animation(void) {
+void battle_camera_update_screen_offset_animation(void) {
     s32 fixed_x;
     s32 fixed_z;
     s32 fixed_y;
@@ -89,26 +89,26 @@ void camera_update_screen_offset_animation(void) {
 
 /* Saves the camera zoom for camera_restore_zoom (effect script opcodes 0f
  * and 24). */
-void camera_save_zoom(void) {
+void battle_camera_save_zoom(void) {
     copyVector(&g_camera_zoom_backup, &g_camera_zoom);
 }
 
-void camera_restore_zoom(void) {
+void battle_camera_restore_zoom(void) {
     copyVector(&g_camera_zoom, &g_camera_zoom_backup);
 }
 
-VECTOR* camera_get_zoom(void) {
+VECTOR* battle_camera_get_zoom(void) {
     return &g_camera_zoom;
 }
 
-void camera_set_zoom(const VECTOR* zoom) {
+void battle_camera_set_zoom(const VECTOR* zoom) {
     copyVector(&g_camera_zoom, zoom);
 }
 
 /* Starts a linear change of all three zoom scales to the one value
  * *destination_value over frame_count frames (divided by the animation speed),
  * applied by camera_update_zoom_animation. No retail code calls it. */
-void camera_set_zoom_delta_from_value(const s32* destination_value, s32 frame_count) {
+void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 frame_count) {
     s32 animation_frames;
     s32 delta_x;
 

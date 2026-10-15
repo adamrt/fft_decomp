@@ -21,7 +21,7 @@
  * the g_map_polygon_flag_clear_countdown countdown whose expiry issues it. The flag field is s16
  * (the bit 15 tests load it with `lh`).
  */
-void map_polygon_flag_command(s32 command) {
+void battle_map_polygon_flag_command(s32 command) {
     s32 i;
 
     switch (command) {
@@ -95,7 +95,7 @@ void map_polygon_flag_command(s32 command) {
  * Each backup copy rereads the working field; a chained assignment assigns the
  * loop pointers to different registers.
  */
-void map_set_light_matrices(MATRIX* first, MATRIX* second) {
+void battle_map_set_light_matrices(MATRIX* first, MATRIX* second) {
     s32 i;
     s32 j;
 
@@ -127,7 +127,7 @@ void map_set_light_matrices(MATRIX* first, MATRIX* second) {
  *
  * DISABLE, RESTORE and a command with no case return the unset `result`. Every
  * caller issues SET and ignores the result. */
-s32* map_control_gte_background_color(s32 command, s32 value_1, s32 value_2, s32 value_3) {
+s32* battle_map_control_gte_background_color(s32 command, s32 value_1, s32 value_2, s32 value_3) {
     /* Left unset on the DISABLE, RESTORE and default paths. */
     s32* result;
 
@@ -174,7 +174,8 @@ s32* map_control_gte_background_color(s32 command, s32 value_1, s32 value_2, s32
  * Commands 0x5e-0x60 and 0x66-0x69 return the uninitialized result, like
  * map_light_state_command.
  */
-MATRIX* map_light_matrix_command(map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration) {
+MATRIX* battle_map_light_matrix_command(
+    map_light_matrix_command_e command, MATRIX* color, MATRIX* light, s32 duration) {
     MATRIX* result;
     s32 i;
     s32 j;
@@ -275,7 +276,7 @@ MATRIX* map_light_matrix_command(map_light_matrix_command_e command, MATRIX* col
  *
  * Only the GET arms assign `result`; the others return it uninitialized, as
  * the target does. */
-void* map_light_state_command(map_light_command_e command, void* data) {
+void* battle_map_light_state_command(map_light_command_e command, void* data) {
     void* result;
 
     switch (command) {
@@ -347,7 +348,7 @@ void* map_light_state_command(map_light_command_e command, void* data) {
 
 /* Queue the map mesh parts and weather particles for one frame, then apply or
  * restore the targeting and movement tile colors. */
-void map_draw_mesh_and_weather(MATRIX* camera) {
+void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     MATRIX light_rotation;
     MATRIX light_matrix;
     MATRIX effect_matrix;
@@ -382,8 +383,8 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
     AddPrim(g_battle_gfx_current_render_buffer->otag + 0x17F, &g_battle_gfx_current_render_buffer->overlay_modes[1]);
     AddPrim(g_battle_gfx_current_render_buffer->otag + 0x17F, &g_battle_gfx_current_render_buffer->overlay);
     AddPrim(g_battle_gfx_current_render_buffer->otag + 0x17F, &g_battle_gfx_current_render_buffer->overlay_modes[0]);
-    map_update_texture_animations();
-    map_update_mesh_part_animations();
+    battle_map_update_texture_animations();
+    battle_map_update_mesh_part_animations();
     if (g_map_lightning_mode != MAP_LIGHTNING_OFF && g_sound_weather_sfx_enabled != 0) {
         if (rand() % 480 == 0) {
             g_map_lightning_state.timer = 60;
@@ -411,9 +412,9 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
                 - g_map_lightning_state.base_colors[1].g * remaining / 60 + remaining * 112 / 60;
             g_map_lightning_state.colors[1].b = g_map_lightning_state.base_colors[1].b
                 - g_map_lightning_state.base_colors[1].b * remaining / 60 + remaining * 96 / 60;
-            map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &g_map_lightning_state.colors[0]);
+            battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &g_map_lightning_state.colors[0]);
         } else {
-            map_light_state_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
+            battle_map_light_state_command(MAP_LIGHT_COMMAND_RESTORE_BACKGROUND_GRADIENT, 0);
             if (g_map_lightning_mode == MAP_LIGHTNING_ONCE) {
                 g_map_lightning_mode = MAP_LIGHTNING_OFF;
             }
@@ -428,7 +429,8 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
         }
     }
     if (g_map_light_transition_command != 0) {
-        map_light_matrix_command(g_map_light_transition_command, &g_map_light_color_matrix, &g_map_light_matrix, 0);
+        battle_map_light_matrix_command(
+            g_map_light_transition_command, &g_map_light_color_matrix, &g_map_light_matrix, 0);
     }
     g_battle_gfx_current_render_buffer->overlay.r0
         = g_map_background_gradient_colors.colors[MAP_BACKGROUND_GRADIENT_TOP].r;
@@ -458,7 +460,7 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
     SetLightMatrix(&g_map_local_light_matrix);
     if (g_map_polygon_flag_clear_countdown != 0) {
         if (--g_map_polygon_flag_clear_countdown == 0) {
-            map_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE);
+            battle_map_polygon_flag_command(MAP_POLYGON_FLAG_COMMAND_CLEAR_ACTIVE);
         }
     }
     SetRotMatrix(camera);
@@ -745,7 +747,7 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
             }
         }
         if (g_map_command_0x96_frame == g_map_command_0x96_duration) {
-            map_run_weather_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
+            battle_map_run_weather_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
             g_map_weather_scale.vx = ONE;
             g_map_weather_scale.vy = ONE;
             g_map_weather_scale.vz = ONE;
@@ -1076,8 +1078,9 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
         }
         g_target_tile_mark_modes[0] = BATTLE_TILE_MARK_NONE;
         if ((g_target_tile_mark_modes[1] | g_target_tile_mark_modes[2]) == 0) {
-            map_modify_palette(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
-            map_modify_palette(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
+            battle_map_modify_palette(
+                MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
+            battle_map_modify_palette(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
     }
     if (g_target_tile_mark_modes[1] == BATTLE_TILE_MARK_HIDE_RANGE) {
@@ -1089,8 +1092,9 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
         }
         g_target_tile_mark_modes[1] = BATTLE_TILE_MARK_NONE;
         if ((g_target_tile_mark_modes[0] | g_target_tile_mark_modes[2]) == 0) {
-            map_modify_palette(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
-            map_modify_palette(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
+            battle_map_modify_palette(
+                MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
+            battle_map_modify_palette(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
     }
     if (g_target_tile_mark_modes[2] == BATTLE_TILE_MARK_HIDE_TARGETS) {
@@ -1123,8 +1127,9 @@ void map_draw_mesh_and_weather(MATRIX* camera) {
         }
         g_target_tile_mark_modes[2] = BATTLE_TILE_MARK_NONE;
         if ((g_target_tile_mark_modes[0] | g_target_tile_mark_modes[1]) == 0) {
-            map_modify_palette(MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
-            map_modify_palette(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
+            battle_map_modify_palette(
+                MAP_COLOR_MODE_STOP_REPEAT, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
+            battle_map_modify_palette(MAP_COLOR_MODE_RESTORE, 8, MAP_CLUT_ROW_MARKED_TILES, 0, 1, -0x20, -0x20, -0x20);
         }
     }
 }

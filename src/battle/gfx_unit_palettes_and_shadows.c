@@ -22,12 +22,12 @@
 void battle_gfx_extract_deployed_unit_palettes(void) {
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    map_load_palette_data(&g_battle_deployed_unit_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
-    map_load_palette_data(&g_battle_deployed_unit_palettes[1], MAP_CLUT_ROW_SPRITES, 2, 0);
-    map_load_palette_data(&g_battle_gfx_wait_direction_arrow_palette, MAP_CLUT_ROW_SPRITES, 3, 0);
-    map_load_palette_data(&g_battle_gfx_map_selection_cursor_palette, MAP_CLUT_ROW_SPRITES, 4, 0);
-    map_load_palette_data(&g_battle_gfx_shadow_palette, MAP_CLUT_ROW_SPRITES, 5, 0);
-    map_load_palette_data(&g_battle_gfx_status_bubble_palette, MAP_CLUT_ROW_SPRITES, 7, 0);
+    battle_map_load_palette_data(&g_battle_deployed_unit_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
+    battle_map_load_palette_data(&g_battle_deployed_unit_palettes[1], MAP_CLUT_ROW_SPRITES, 2, 0);
+    battle_map_load_palette_data(&g_battle_gfx_wait_direction_arrow_palette, MAP_CLUT_ROW_SPRITES, 3, 0);
+    battle_map_load_palette_data(&g_battle_gfx_map_selection_cursor_palette, MAP_CLUT_ROW_SPRITES, 4, 0);
+    battle_map_load_palette_data(&g_battle_gfx_shadow_palette, MAP_CLUT_ROW_SPRITES, 5, 0);
+    battle_map_load_palette_data(&g_battle_gfx_status_bubble_palette, MAP_CLUT_ROW_SPRITES, 7, 0);
 }
 
 /* Empty. battle_state_run_deployment calls it each frame while the map is still being set up. */
@@ -109,11 +109,11 @@ void battle_state_run_deployment(void) {
         } else {
             main_gfx_add_now_loading_to_otag(main_gfx_get_otag());
         }
-        g_battle_state_map_init_step = map_init_units_sprites_event_and_music(map_id, g_battle_state_map_init_step,
-            script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
+        g_battle_state_map_init_step = battle_map_init_units_sprites_event_and_music(map_id,
+            g_battle_state_map_init_step, script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
         if (g_battle_state_map_init_step == 0xd) {
             battle_gfx_extract_deployed_unit_palettes();
-            action_set_casting_unit_id_ff_and_init();
+            battle_action_set_casting_unit_id_ff_and_init();
             g_battle_screen_fade_intensity = fade;
             /* Not `break`: jump optimization would move this exit block
              * past the loop end, which the target keeps inline. */
@@ -169,7 +169,7 @@ void battle_state_run_game_loop(void) {
 
     battle_gfx_init_render_buffers();
     battle_gfx_init_render_state();
-    effect_init_system();
+    battle_effect_init_system();
 
     /* A reverse slot-index loop changes the reset's original bytes. */
     init_offset = 0x196b0;
@@ -191,7 +191,7 @@ void battle_state_run_game_loop(void) {
             battle_gfx_init_render_frame();
             SetGeomScreen(0x200);
             main_gfx_swap_and_clear_otag();
-            camera_update_vector_from_game_state();
+            battle_camera_update_vector_from_game_state();
 
             camera_component = -camera_fixed->vx;
             if (camera_component < 0) {
@@ -202,10 +202,10 @@ void battle_state_run_game_loop(void) {
             camera_integer->vy = camera_component / ONE;
             camera_integer->vz = -camera_fixed->vz / ONE;
 
-            camera_update_matrices(
+            battle_camera_update_matrices(
                 &g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
-            map_draw_mesh_and_weather(&g_camera_matrix);
-            if (effect_update_cycle() != 0) {
+            battle_map_draw_mesh_and_weather(&g_camera_matrix);
+            if (battle_effect_update_cycle() != 0) {
                 g_battle_state_animation_continue_check = 2;
             } else {
                 g_battle_state_animation_continue_check = 0;
@@ -392,11 +392,11 @@ void battle_state_run_game_loop(void) {
                 break;
             }
 
-            camera_update_map_pan();
-            camera_update_rotation();
-            camera_update_zoom();
-            camera_update_tilt();
-            map_update_animations();
+            battle_camera_update_map_pan();
+            battle_camera_update_rotation();
+            battle_camera_update_zoom();
+            battle_camera_update_tilt();
+            battle_map_update_animations();
             main_sound_update_tunes();
 
             if (g_battle_game_state == BATTLE_GAME_STATE_CLOSE_BATTLE) {
@@ -405,7 +405,7 @@ void battle_state_run_game_loop(void) {
             main_file_poll_load(&g_main_file_cd_state);
             g_main_gfx_screen_polarity = !g_main_gfx_screen_polarity;
             g_frame_counter++;
-            map_upload_clut_rows();
+            battle_map_upload_clut_rows();
             frame_measurement = battle_state_sync_frame(main_gfx_get_otag() + 0x17f);
             g_main_system_battle_frame_hsync_count = frame_measurement;
             i = 0;
@@ -1132,7 +1132,7 @@ void battle_gfx_set_sprite_part_semi_transparent(
     }
 }
 
-void camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset) {
+void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset) {
     u16 x;
     u16 z;
 
@@ -1167,14 +1167,14 @@ void camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32
 
 /* camera_calculate_relative_offset with offset 1: the depth point of a stepping unit on a
  * tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void camera_calculate_relative_offset_by_1(const SVECTOR* input, SVECTOR* output) {
-    camera_calculate_relative_offset(input, output, 1);
+void battle_camera_calculate_relative_offset_by_1(const SVECTOR* input, SVECTOR* output) {
+    battle_camera_calculate_relative_offset(input, output, 1);
 }
 
 /* camera_calculate_relative_offset with offset 5: the depth point of a stepping unit on a
  * tile with MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output) {
-    camera_calculate_relative_offset(input, output, 5);
+void battle_camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output) {
+    battle_camera_calculate_relative_offset(input, output, 5);
 }
 
 /*
@@ -1189,7 +1189,7 @@ void camera_calculate_relative_offset_by_5(const SVECTOR* input, SVECTOR* output
  * far_edge temporaries keep the target's add-then-subtract order; written
  * inline, GCC re-associates them into a longer sequence.
  */
-void camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset) {
+void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* output, s32 offset) {
     s32 yaw;
 
     output->vy = input->vy - 0xb;
@@ -1227,14 +1227,14 @@ void camera_convert_screen_coords_by_rotation(const SVECTOR* input, SVECTOR* out
 
 /* camera_convert_screen_coords_by_rotation with offset 1: the depth point of a standing unit,
  * a cursor or a bubble on a tile without MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination) {
-    camera_convert_screen_coords_by_rotation(screen, destination, 1);
+void battle_camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination) {
+    battle_camera_convert_screen_coords_by_rotation(screen, destination, 1);
 }
 
 /* camera_convert_screen_coords_by_rotation with offset 5: the depth point on a tile with
  * MAP_TILE_SURFACE_FLAG_DEPTH_BIAS. */
-void camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVECTOR* destination) {
-    camera_convert_screen_coords_by_rotation(screen, destination, 5);
+void battle_camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVECTOR* destination) {
+    battle_camera_convert_screen_coords_by_rotation(screen, destination, 5);
 }
 
 void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* unit) {
@@ -1277,7 +1277,7 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
 
     layer = unit->map_z;
     battle_unit_copy_draw_coords(&coords, unit);
-    tile = map_get_tile_data_pointer((coords.vx / MAP_TILE_SIZE), (coords.vz / MAP_TILE_SIZE), layer);
+    tile = battle_map_get_tile_data_pointer((coords.vx / MAP_TILE_SIZE), (coords.vz / MAP_TILE_SIZE), layer);
     depth = tile->depth_half_height;
     height = tile->height + depth.depth;
     slope_type = tile->slope_type;

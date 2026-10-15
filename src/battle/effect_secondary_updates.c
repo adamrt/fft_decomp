@@ -38,7 +38,7 @@ void battle_noop_801b0ff4(void) {
  * step or a positive height ends the flight. Phase 3 returns 0. An unknown
  * phase returns `result` uninitialized, as the target returns $s6 unwritten.
  */
-s32 effect_arrow_arc_secondary_handler(void) {
+s32 battle_effect_arrow_arc_secondary_handler(void) {
     SVECTOR rotation;
     VECTOR delta;
     VECTOR position;
@@ -72,7 +72,7 @@ s32 effect_arrow_arc_secondary_handler(void) {
         g_effect_arrow_arc_height = g_effect_arc_trajectory_height;
         g_effect_arrow_arc_launch_angle = ratan2(g_effect_arc_trajectory_height, ONE);
         g_effect_arrow_arc_distance = 0;
-        velocity = effect_calculate_launch_velocity() >> 8;
+        velocity = battle_effect_calculate_launch_velocity() >> 8;
         g_effect_arrow_arc_distance_step = (rcos(g_effect_arrow_arc_launch_angle) * velocity) >> 4;
         g_effect_projectile_step_count = g_effect_trajectory_step_count;
         rotation.vz = 0;
@@ -95,10 +95,10 @@ s32 effect_arrow_arc_secondary_handler(void) {
         }
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        previous = -effect_calculate_arc_trajectory_term(g_effect_arrow_arc_height, g_effect_arrow_arc_distance);
+        previous = -battle_effect_calculate_arc_trajectory_term(g_effect_arrow_arc_height, g_effect_arrow_arc_distance);
         g_effect_arrow_arc_distance += g_effect_arrow_arc_distance_step;
-        term = -effect_calculate_arc_trajectory_term(g_effect_arrow_arc_height, g_effect_arrow_arc_distance);
-        next = -effect_calculate_arc_trajectory_term(
+        term = -battle_effect_calculate_arc_trajectory_term(g_effect_arrow_arc_height, g_effect_arrow_arc_distance);
+        next = -battle_effect_calculate_arc_trajectory_term(
             g_effect_arrow_arc_height, g_effect_arrow_arc_distance + g_effect_arrow_arc_distance_step);
         setVector(
             &angles, 0, g_effect_arrow_arc_yaw, ratan2(next - previous, g_effect_arrow_arc_distance_step * 2) + 0x400);
@@ -122,7 +122,7 @@ s32 effect_arrow_arc_secondary_handler(void) {
         spin.vz = 0;
         spin.vy = 0;
         spin.vx = 0;
-        effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
+        battle_effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
         if (g_effect_projectile_step_count == 2 && g_effect_trajectory_hit_unit_id != -1
             && g_effect_current_secondary->target_count != 0) {
             battle_unit_call_bow_hardcoding_by_runtime_id(g_effect_current_secondary->caster.data.unit.runtime_id,
@@ -133,7 +133,7 @@ s32 effect_arrow_arc_secondary_handler(void) {
             flags = g_effect_current_secondary->target.record.data.unit.result_animation;
             if (flags == EFFECT_HIT_MISSED || flags - 4 < 2U || g_effect_trajectory_hit_unit_id == -1) {
                 g_battle_unknown_801b8b98 = 0x80000000;
-                effect_end_secondary_on_current_unit();
+                battle_effect_end_secondary_on_current_unit();
             }
         }
         result = 1;
@@ -157,7 +157,7 @@ typedef struct effect_burst_state {
 
 /* Secondary effect function 0x02 in g_effect_secondary_handlers: the burst of a weapon
  * hit (EFFECT_SECONDARY_ANIMATION_WEAPON_HIT). */
-s32 effect_weapon_hit_secondary_handler(void) {
+s32 battle_effect_weapon_hit_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_burst_state_t* state;
     effect_slot_t* slot;
@@ -196,7 +196,7 @@ s32 effect_weapon_hit_secondary_handler(void) {
         }
         result = 1;
         g_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        effect_copy_camera_angles_and_world_coords();
+        battle_effect_copy_camera_angles_and_world_coords();
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         state = effect->allocation;
@@ -223,14 +223,14 @@ s32 effect_weapon_hit_secondary_handler(void) {
                             break;
                         }
                     }
-                    state->ids_a[j] = effect_alloc_slot();
+                    state->ids_a[j] = battle_effect_alloc_slot();
                     if (state->ids_a[j] == 0) {
                         break;
                     }
                     slot = &g_effect_slots[state->ids_a[j]];
-                    slot->life = effect_spawn_particle_motion(
+                    slot->life = battle_effect_spawn_particle_motion(
                         &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_WEAPON_HIT_A], &slot->motion);
-                    effect_init_trap_animation(EFFECT_PARTICLE_GROUP_WEAPON_HIT_A,
+                    battle_effect_init_trap_animation(EFFECT_PARTICLE_GROUP_WEAPON_HIT_A,
                         g_effect_current_secondary->parameter + MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 0), slot);
                     state->count_a++;
                     if (state->count_a == 8) {
@@ -245,13 +245,14 @@ s32 effect_weapon_hit_secondary_handler(void) {
                             break;
                         }
                     }
-                    state->ids_b[j] = effect_alloc_slot();
+                    state->ids_b[j] = battle_effect_alloc_slot();
                     if (state->ids_b[j] == 0) {
                         break;
                     }
                     slot = &g_effect_slots[state->ids_b[j]];
-                    slot->life = effect_spawn_particle_motion(&g_effect_trap_particle_configs[group], &slot->motion);
-                    effect_init_trap_animation(
+                    slot->life
+                        = battle_effect_spawn_particle_motion(&g_effect_trap_particle_configs[group], &slot->motion);
+                    battle_effect_init_trap_animation(
                         EFFECT_PARTICLE_GROUP_WEAPON_HIT_B, MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 10), slot);
                     slot->color.r = slot->color.g = slot->color.b = 0xff;
                     state->count_b++;
@@ -263,45 +264,46 @@ s32 effect_weapon_hit_secondary_handler(void) {
         }
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
         for (i = 0; i < 8; i++) {
             id = state->ids_a[i];
-            if (id != 0 && effect_update_slot(id) == 0) {
-                effect_free_slot(id);
+            if (id != 0 && battle_effect_update_slot(id) == 0) {
+                battle_effect_free_slot(id);
                 state->ids_a[i] = 0;
                 state->count_a--;
             }
         }
         for (i = 0; i < 16; i++) {
             id = state->ids_b[i];
-            if (id != 0 && effect_update_slot(id) == 0) {
-                effect_free_slot(id);
+            if (id != 0 && battle_effect_update_slot(id) == 0) {
+                battle_effect_free_slot(id);
                 state->ids_b[i] = 0;
                 state->count_b--;
             }
         }
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         if (g_effect_current_secondary->target.record.data.unit.result_animation == EFFECT_HIT_CRITICAL) {
             if (state->frame == 0) {
                 zoom.vx = zoom.vy = zoom.vz = -0x80;
-                camera_execute_zoom_command(EFFECT_CAMERA_SOURCE_SAVED | EFFECT_CAMERA_MODE_COSINE, 0, 2, &zoom);
+                battle_camera_execute_zoom_command(EFFECT_CAMERA_SOURCE_SAVED | EFFECT_CAMERA_MODE_COSINE, 0, 2, &zoom);
             }
             if (state->frame == 2) {
                 zoom.vx = zoom.vy = zoom.vz = 0x2e4;
-                camera_execute_zoom_command(EFFECT_CAMERA_SOURCE_SAVED | EFFECT_CAMERA_MODE_COSINE, 0, 2, &zoom);
+                battle_camera_execute_zoom_command(EFFECT_CAMERA_SOURCE_SAVED | EFFECT_CAMERA_MODE_COSINE, 0, 2, &zoom);
             }
             if (state->frame == 4) {
                 zoom.vx = zoom.vy = zoom.vz = 0;
-                camera_execute_zoom_command(EFFECT_CAMERA_SOURCE_SAVED | EFFECT_CAMERA_MODE_COSINE, 0, 12, &zoom);
+                battle_camera_execute_zoom_command(
+                    EFFECT_CAMERA_SOURCE_SAVED | EFFECT_CAMERA_MODE_COSINE, 0, 12, &zoom);
                 offset.vx = offset.vy = offset.vz = 4;
-                camera_execute_position_command(
+                battle_camera_execute_position_command(
                     EFFECT_CAMERA_SOURCE_GIVEN | EFFECT_CAMERA_MODE_SHAKE_DECAYING, 0, 9, &offset);
             }
         }
@@ -326,7 +328,7 @@ s32 effect_weapon_hit_secondary_handler(void) {
  * live and the timer has passed the group's spawn_start_frame, finish_timer
  * counts up; the handler returns 0 on the frame after that begins, and 1 until
  * then. */
-s32 effect_golem_secondary_handler(void) {
+s32 battle_effect_golem_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_secondary_data_t* current;
     s32 unused[6];
@@ -345,19 +347,19 @@ s32 effect_golem_secondary_handler(void) {
         effect->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(EFFECT_PARTICLE_GROUP_GOLEM, 13);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_GOLEM, 13);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_GOLEM);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_GOLEM);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         current = g_effect_current_secondary;
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
@@ -382,7 +384,7 @@ s32 effect_golem_secondary_handler(void) {
  * the 0xffffff mask's loop lifetime short enough for loop.c to leave it in the
  * inner loop, and getaddr's extra mask reference gives it priority over the
  * 0xff000000 mask in local allocation (a1 versus a2 in the target). */
-s32 effect_spell_charge_secondary_handler(void) {
+s32 battle_effect_spell_charge_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_charge_state_t* state;
     SVECTOR in;
@@ -417,7 +419,7 @@ s32 effect_spell_charge_secondary_handler(void) {
     switch (effect->phase) {
     case EFFECT_SECONDARY_PHASE_INITIALIZING:
         index = g_effect_secondary_animations[effect->animation_id].parameter;
-        g_effect_current_secondary->parameter = effect_get_element_index(effect->parameter);
+        g_effect_current_secondary->parameter = battle_effect_get_element_index(effect->parameter);
         g_effect_secondary_state.charge.speed = g_effect_charge_line_params[index].speed;
         g_effect_secondary_state.charge.spread_range = g_effect_charge_line_params[index].spread_range;
         g_effect_secondary_state.charge.spread_offset = g_effect_charge_line_params[index].spread_offset;
@@ -473,7 +475,7 @@ s32 effect_spell_charge_secondary_handler(void) {
             && rand() % g_effect_secondary_state.charge.spawn_interval == 0) {
             for (i = 0; i < 16; i++) {
                 if (state->trails[i].slot_id == 0) {
-                    j = state->trails[i].slot_id = effect_alloc_slot();
+                    j = state->trails[i].slot_id = battle_effect_alloc_slot();
                     if (j == 0) {
                         break;
                     }
@@ -502,14 +504,14 @@ s32 effect_spell_charge_secondary_handler(void) {
                         break;
                     }
                 }
-                state->ids_b[j] = effect_alloc_slot();
+                state->ids_b[j] = battle_effect_alloc_slot();
                 if (state->ids_b[j] == 0) {
                     break;
                 }
                 slot = &g_effect_slots[state->ids_b[j]];
-                slot->life = effect_spawn_particle_motion(
+                slot->life = battle_effect_spawn_particle_motion(
                     &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE], &slot->motion);
-                effect_init_trap_animation(
+                battle_effect_init_trap_animation(
                     EFFECT_PARTICLE_GROUP_SPELL_CHARGE, MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 15), slot);
                 state->count.particles++;
                 if (state->count.particles == 14) {
@@ -519,20 +521,20 @@ s32 effect_spell_charge_secondary_handler(void) {
         }
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         for (i = 0; i < 2; i++) {
             j = state->ids_a[i];
-            if (j != 0 && effect_update_slot(j) == 0) {
-                effect_free_slot(j);
+            if (j != 0 && battle_effect_update_slot(j) == 0) {
+                battle_effect_free_slot(j);
                 state->ids_a[i] = 0;
                 state->count.auxiliary_particles--;
             }
         }
         for (i = 0; i < 14; i++) {
             j = state->ids_b[i];
-            if (j != 0 && effect_update_slot(j) == 0) {
-                effect_free_slot(j);
+            if (j != 0 && battle_effect_update_slot(j) == 0) {
+                battle_effect_free_slot(j);
                 state->ids_b[i] = 0;
                 state->count.particles--;
             }
@@ -552,10 +554,10 @@ s32 effect_spell_charge_secondary_handler(void) {
                 head = age % 7;
                 if (age <= state->duration) {
                     state->trails[i].points[head].vx
-                        = effect_interpolate_s32_cos(x >> 12, state->x, state->duration, age);
+                        = battle_effect_interpolate_s32_cos(x >> 12, state->x, state->duration, age);
                     fade = 6;
                     state->trails[i].points[head].vy
-                        = effect_interpolate_s32_cos(y >> 12, state->y, state->duration, age);
+                        = battle_effect_interpolate_s32_cos(y >> 12, state->y, state->duration, age);
                 } else {
                     state->trails[i].points[head].vx = state->x;
                     state->trails[i].points[head].vy = state->y;
@@ -598,7 +600,7 @@ s32 effect_spell_charge_secondary_handler(void) {
                     }
                 }
                 if (state->trails[i].age >= state->duration + 7) {
-                    effect_free_slot(j);
+                    battle_effect_free_slot(j);
                     state->trails[i].slot_id = 0;
                     state->count.trails--;
                 }
@@ -622,7 +624,7 @@ s32 effect_spell_charge_secondary_handler(void) {
  * secondary animation that only steps its state so that a null animation can
  * finish cleanly.  Returns 1 to keep animating, 0 to stop.
  */
-s32 effect_null_secondary_handler(void) {
+s32 battle_effect_null_secondary_handler(void) {
     s32 result;
 
     /* Preserve the target's unsigned phase-dispatch comparison. */
@@ -649,7 +651,7 @@ s32 effect_null_secondary_handler(void) {
  * gravity of (0, ONE, 0) until finish_timer reaches 1. Returns 1 to keep
  * animating.
  */
-s32 effect_red_orbs_secondary_handler(void) {
+s32 battle_effect_red_orbs_secondary_handler(void) {
     effect_secondary_data_t* effect;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
     vec3s32_t gravity;
@@ -668,19 +670,19 @@ s32 effect_red_orbs_secondary_handler(void) {
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(EFFECT_PARTICLE_GROUP_RED_ORBS, 11);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_RED_ORBS, 11);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_RED_ORBS);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_RED_ORBS);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         effect = g_effect_current_secondary;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
@@ -706,7 +708,7 @@ s32 battle_noop_801b2968(void) {
  * shape: initialize, then step the effect slots with a gravity of
  * (0, ONE, 0) until finish_timer reaches 1. Returns 1 to keep animating.
  */
-s32 effect_fall_dust_secondary_handler(void) {
+s32 battle_effect_fall_dust_secondary_handler(void) {
     effect_secondary_data_t* effect;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
     vec3s32_t gravity;
@@ -723,19 +725,19 @@ s32 effect_fall_dust_secondary_handler(void) {
         g_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(EFFECT_PARTICLE_GROUP_FALL_DUST, 9);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_FALL_DUST, 9);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_FALL_DUST);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_FALL_DUST);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         effect = g_effect_current_secondary;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
@@ -756,7 +758,7 @@ s32 effect_fall_dust_secondary_handler(void) {
  * surface of the target's tile, 12 units per height and depth step above the
  * target's screen z. Returns 1 to keep animating.
  */
-s32 effect_splash_secondary_handler(void) {
+s32 battle_effect_splash_secondary_handler(void) {
     effect_secondary_data_t* effect;
     map_tile_t* tile;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
@@ -774,24 +776,25 @@ s32 effect_splash_secondary_handler(void) {
         g_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        tile = map_get_unit_tile_from_world_coords(g_effect_current_secondary->target.record.data.unit.runtime_id);
+        tile = battle_map_get_unit_tile_from_world_coords(
+            g_effect_current_secondary->target.record.data.unit.runtime_id);
         g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPLASH].position.y
             = -((tile->height + tile->depth_half_height.depth) * 12)
             - battle_unit_get_world_coords_by_runtime_id(g_effect_current_secondary->target.record.data.unit.runtime_id)
                   ->vy;
-        effect_start_group(EFFECT_PARTICLE_GROUP_SPLASH, 11);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_SPLASH, 11);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_SPLASH);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_SPLASH);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         effect = g_effect_current_secondary;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
@@ -824,7 +827,7 @@ s32 battle_noop_801b2c04(void) {
  * gravity of (0, ONE, 0) until finish_timer reaches 1. Returns 1 to keep
  * animating.
  */
-s32 effect_venom_trap_secondary_handler(void) {
+s32 battle_effect_venom_trap_secondary_handler(void) {
     effect_secondary_data_t* effect;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
     vec3s32_t gravity;
@@ -843,19 +846,19 @@ s32 effect_venom_trap_secondary_handler(void) {
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(EFFECT_PARTICLE_GROUP_VENOM_TRAP, 12);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_VENOM_TRAP, 12);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_VENOM_TRAP);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_VENOM_TRAP);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         effect = g_effect_current_secondary;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
@@ -875,7 +878,7 @@ s32 effect_venom_trap_secondary_handler(void) {
  * handler's shape but seeds group 5's position_y with -8 and lowers it by 3 per
  * executing frame instead of playing a sound. Returns 1 to keep animating.
  */
-s32 effect_level_up_secondary_handler(void) {
+s32 battle_effect_level_up_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_secondary_data_t* current;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
@@ -895,7 +898,7 @@ s32 effect_level_up_secondary_handler(void) {
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(EFFECT_PARTICLE_GROUP_LEVEL_UP, 11);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_LEVEL_UP, 11);
         {
             /* Addressing through a pointer keeps the target lui/addiu pair. */
             s16* rise = &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_LEVEL_UP].position.y;
@@ -903,16 +906,16 @@ s32 effect_level_up_secondary_handler(void) {
         }
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_LEVEL_UP);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_LEVEL_UP);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         current = g_effect_current_secondary;
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
@@ -947,7 +950,7 @@ enum {
  * result is `passthrough`, whatever the caller left in the second argument
  * register.
  */
-s32 effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) {
+s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) {
     effect_secondary_data_t* effect;
     effect_death_poof_state_t* state;
     s32 unused[6]; /* Reserves the target's 0x58-byte frame. */
@@ -987,15 +990,15 @@ s32 effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) {
                         break;
                     }
                 }
-                id = effect_alloc_slot();
+                id = battle_effect_alloc_slot();
                 state->ids[i] = id;
                 if (state->ids[i] == 0) {
                     break;
                 }
                 slot = &g_effect_slots[state->ids[i]];
-                slot->life = effect_spawn_particle_motion(
+                slot->life = battle_effect_spawn_particle_motion(
                     &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_DEATH_POOF], &slot->motion);
-                effect_init_trap_animation(EFFECT_PARTICLE_GROUP_DEATH_POOF, EFFECT_TRAP_CLUT, slot);
+                battle_effect_init_trap_animation(EFFECT_PARTICLE_GROUP_DEATH_POOF, EFFECT_TRAP_CLUT, slot);
                 state->count++;
                 if (state->count == EFFECT_TRAP_SLOT_COUNT) {
                     break;
@@ -1008,23 +1011,23 @@ s32 effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough) {
         effect_secondary_data_t* current;
         u8 id;
 
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
         for (i = 0; i < EFFECT_TRAP_SLOT_COUNT; i++) {
             id = state->ids[i];
-            if (id != 0 && effect_update_slot(id) == 0) {
-                effect_free_slot(id);
+            if (id != 0 && battle_effect_update_slot(id) == 0) {
+                battle_effect_free_slot(id);
                 state->ids[i] = 0;
                 state->count--;
             }
         }
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         current = g_effect_current_secondary;
         current->timer = current->timer + 1;
         result = state->finish_timer != 1;
@@ -1054,7 +1057,7 @@ enum {
  * indexed by the effect's parameter, the caster's sprite palette. It follows
  * the same phase structure as the death-poof secondary handler.
  */
-s32 effect_zodiac_poof_secondary_handler(void) {
+s32 battle_effect_zodiac_poof_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_trap_state_24_t* state;
     effect_slot_t* slot;
@@ -1094,15 +1097,15 @@ s32 effect_zodiac_poof_secondary_handler(void) {
                         break;
                     }
                 }
-                id = effect_alloc_slot();
+                id = battle_effect_alloc_slot();
                 state->ids[i] = id;
                 if (state->ids[i] == 0) {
                     break;
                 }
                 slot = &g_effect_slots[state->ids[i]];
-                slot->life = effect_spawn_particle_motion(
+                slot->life = battle_effect_spawn_particle_motion(
                     &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_ZODIAC_POOF], &slot->motion);
-                effect_init_trap_animation(
+                battle_effect_init_trap_animation(
                     EFFECT_PARTICLE_GROUP_ZODIAC_POOF, clut_index + MAP_CLUT(MAP_CLUT_ROW_WEAPONS, 0), slot);
                 state->count++;
                 if (state->count == EFFECT_TRAP3_SLOT_COUNT) {
@@ -1112,23 +1115,23 @@ s32 effect_zodiac_poof_secondary_handler(void) {
         }
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
         for (spawned = 0; spawned < EFFECT_TRAP3_SLOT_COUNT; spawned++) {
             id = state->ids[spawned];
-            if (id != 0 && effect_update_slot(id) == 0) {
-                effect_free_slot(id);
+            if (id != 0 && battle_effect_update_slot(id) == 0) {
+                battle_effect_free_slot(id);
                 state->ids[spawned] = 0;
                 state->count--;
             }
         }
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         {
             effect_secondary_data_t* current_effect;
 
@@ -1158,7 +1161,7 @@ s32 effect_zodiac_poof_secondary_handler(void) {
  * subscript, each to its own variable: a separate statement or a folded
  * `timer - 1 - span` changes the order and association of the index
  * arithmetic. spin_timer keeps the timer load at full width (lh). */
-s32 effect_reflect_secondary_handler(void) {
+s32 battle_effect_reflect_secondary_handler(void) {
     effect_secondary_data_t* effect;
     s32 unused[2];
     VECTOR delta;
@@ -1253,7 +1256,7 @@ s32 effect_reflect_secondary_handler(void) {
         spin.vx = 0;
         spin_timer = g_effect_current_secondary->timer;
         spin.vz = spin_timer << 7;
-        effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
+        battle_effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
         effect = g_effect_current_secondary;
         effect->timer++;
         if (span + 4 < effect->timer) {
@@ -1274,7 +1277,7 @@ s32 effect_reflect_secondary_handler(void) {
  * shape: initialize, then step the effect slots with a gravity of
  * (0, ONE, 0) until finish_timer reaches 1. Returns 1 to keep animating.
  */
-s32 effect_teleport_secondary_handler(void) {
+s32 battle_effect_teleport_secondary_handler(void) {
     effect_secondary_data_t* effect;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
     vec3s32_t gravity;
@@ -1291,19 +1294,19 @@ s32 effect_teleport_secondary_handler(void) {
         g_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(EFFECT_PARTICLE_GROUP_TELEPORT, 11);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_TELEPORT, 11);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(EFFECT_PARTICLE_GROUP_TELEPORT);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_TELEPORT);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         effect = g_effect_current_secondary;
         finish_timer = effect->finish_timer;
         result = finish_timer != 1;
@@ -1342,7 +1345,7 @@ s32 effect_teleport_secondary_handler(void) {
  * g_effect_projectile_spin_passes is the count of frames left. result is
  * unset for a phase outside 1-3, and scale and spin for a model other than the
  * arrow or the stone. */
-s32 effect_linear_projectile_secondary_handler(void) {
+s32 battle_effect_linear_projectile_secondary_handler(void) {
     s32 unused[2];
     VECTOR delta;
     VECTOR position;
@@ -1411,7 +1414,7 @@ s32 effect_linear_projectile_secondary_handler(void) {
                 }
             } else {
                 gfx_set_item_icon_sprite(&sprite, item);
-                g_effect_current_secondary->slot_ids[0] = effect_alloc_slot();
+                g_effect_current_secondary->slot_ids[0] = battle_effect_alloc_slot();
                 slot = &g_effect_slots[g_effect_current_secondary->slot_ids[0]];
                 dst = &slot->quads[1];
                 SetPolyFT4(&slot->quads[0]);
@@ -1432,7 +1435,7 @@ s32 effect_linear_projectile_secondary_handler(void) {
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
         g_effect_projectile_progress += g_effect_projectile_speed;
-        effect_find_projectile_xyz_along_trajectory(
+        battle_effect_find_projectile_xyz_along_trajectory(
             &g_effect_projectile_delta, g_effect_projectile_length, g_effect_projectile_progress, &position);
         setVector(&position, g_effect_trajectory_origin.vx + position.vx, g_effect_trajectory_origin.vy + position.vy,
             g_effect_trajectory_origin.vz + position.vz);
@@ -1458,7 +1461,7 @@ s32 effect_linear_projectile_secondary_handler(void) {
                 scale.vx = 0xc0;
                 setVector(&spin, 0, g_effect_projectile_spin_passes * 256, g_effect_projectile_spin_passes * 128);
             }
-            effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
+            battle_effect_draw_projectile_model(&spin, &position, &angles, &scale, parameter);
         } else {
             item = g_effect_current_secondary->used_weapon_id;
             if (item >= ITEM_ID_SHURIKEN && item <= ITEM_ID_YAGYU_DARKNESS) {
@@ -1468,9 +1471,9 @@ s32 effect_linear_projectile_secondary_handler(void) {
                 spin.vy = 0;
                 spin.vx = 0;
                 spin.vz = -(g_effect_projectile_spin_passes * 256);
-                effect_draw_projectile_model(&spin, &position, &angles, &scale, EFFECT_MODEL_SHURIKEN);
+                battle_effect_draw_projectile_model(&spin, &position, &angles, &scale, EFFECT_MODEL_SHURIKEN);
             } else {
-                effect_draw_item_drop_sprite(&position, item, 0);
+                battle_effect_draw_item_drop_sprite(&position, item, 0);
             }
         }
         if (g_effect_projectile_spin_passes == 2 && g_effect_trajectory_hit_unit_id != -1) {
@@ -1487,21 +1490,21 @@ s32 effect_linear_projectile_secondary_handler(void) {
         }
         if (g_effect_projectile_spin_passes == 0) {
             if (g_effect_current_secondary->slot_ids[0] != 0) {
-                effect_free_slot(g_effect_current_secondary->slot_ids[0]);
+                battle_effect_free_slot(g_effect_current_secondary->slot_ids[0]);
                 g_effect_current_secondary->slot_ids[0] = 0;
             }
             if (g_effect_current_secondary->target.record.target_type == EFFECT_TARGET_TYPE_UNIT
                 && g_effect_current_secondary->target.record.data.unit.result_animation != EFFECT_HIT_MISSED
                 && g_effect_current_secondary->target.record.data.unit.result_animation != EFFECT_HIT_NO_EFFECT) {
-                effect_play();
+                battle_effect_play();
                 battle_state_set_animation_speed(2);
-            } else if (effect_get_playback_phase() == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+            } else if (battle_effect_get_playback_phase() == EFFECT_PLAYBACK_PHASE_REQUESTED) {
                 if (g_effect_current_secondary->target_count != 0) {
                     battle_unit_call_bow_hardcoding_by_runtime_id(
                         g_effect_current_secondary->caster.data.unit.runtime_id,
                         g_effect_current_secondary->target.record.data.unit.runtime_id);
                 }
-                effect_cancel_playback_request();
+                battle_effect_cancel_playback_request();
             }
             g_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_FINALIZING;
         }
@@ -1520,7 +1523,7 @@ s32 effect_linear_projectile_secondary_handler(void) {
  * handler, but its particle group is held in a variable, so its spawn_start_frame lookup
  * is an indexed table read. Returns 1 to keep animating.
  */
-s32 effect_equip_break_secondary_handler(void) {
+s32 battle_effect_equip_break_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_secondary_data_t* current;
     vec3s32_t gravity;
@@ -1540,19 +1543,19 @@ s32 effect_equip_break_secondary_handler(void) {
         effect->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        effect_start_group(group, 10);
+        battle_effect_start_group(group, 10);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
-        effect_save_inertia_threshold();
-        effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+        battle_effect_save_inertia_threshold();
+        battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
         gravity.x = 0;
         gravity.y = ONE;
-        effect_save_gravity();
-        effect_set_gravity(&gravity);
-        effect_update_active_slots(group);
-        effect_restore_inertia_threshold();
-        effect_restore_gravity();
+        battle_effect_save_gravity();
+        battle_effect_set_gravity(&gravity);
+        battle_effect_update_active_slots(group);
+        battle_effect_restore_inertia_threshold();
+        battle_effect_restore_gravity();
         current = g_effect_current_secondary;
         finish_timer = current->finish_timer;
         result = finish_timer != 1;
@@ -1581,7 +1584,7 @@ enum {
  * passes 60 the slots are freed and sound 0x21 is paused. Returns 1 while the
  * effect runs.
  */
-s32 effect_summon_charge_secondary_handler(void) {
+s32 battle_effect_summon_charge_secondary_handler(void) {
     effect_secondary_data_t* effect;
     effect_ring_state_t* state;
     effect_slot_t* slot;
@@ -1601,7 +1604,7 @@ s32 effect_summon_charge_secondary_handler(void) {
         state->radius = 0;
         state->angle_step = 0;
         state->angle = 0;
-        effect_resolve_target_world_coords(0, EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &state->center);
+        battle_effect_resolve_target_world_coords(0, EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &state->center);
         state->brightness = 0;
         state->center.vy -= 24;
         for (i = 0; i < 3; i++) {
@@ -1610,12 +1613,12 @@ s32 effect_summon_charge_secondary_handler(void) {
             }
         }
         for (i = 0; i < EFFECT_RING_SLOT_COUNT; i++) {
-            j = g_effect_current_secondary->slot_ids[i] = effect_alloc_slot();
+            j = g_effect_current_secondary->slot_ids[i] = battle_effect_alloc_slot();
             if (j != 0) {
                 slot = &g_effect_slots[j];
-                slot->life = effect_spawn_particle_motion(
+                slot->life = battle_effect_spawn_particle_motion(
                     &g_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SUMMON_CHARGE], &slot->motion);
-                effect_init_trap_animation(EFFECT_PARTICLE_GROUP_SUMMON_CHARGE, EFFECT_RING_CLUT, slot);
+                battle_effect_init_trap_animation(EFFECT_PARTICLE_GROUP_SUMMON_CHARGE, EFFECT_RING_CLUT, slot);
             }
         }
         g_effect_current_secondary->timer = 0;
@@ -1674,7 +1677,7 @@ s32 effect_summon_charge_secondary_handler(void) {
                     slot->motion.position.x = (state->center.vx + state->points[i][k].vx) * ONE;
                     slot->motion.position.y = (state->center.vy + state->points[i][k].vy) * ONE;
                     slot->motion.position.z = (state->center.vz + state->points[i][k].vz) * ONE;
-                    effect_update_slot(g_effect_current_secondary->slot_ids[i * 10 + j]);
+                    battle_effect_update_slot(g_effect_current_secondary->slot_ids[i * 10 + j]);
                 }
                 k++;
                 if (k == 10) {
@@ -1689,7 +1692,7 @@ s32 effect_summon_charge_secondary_handler(void) {
         if (g_effect_current_secondary->finish_timer >= 61) {
             for (i = 0; i < EFFECT_RING_SLOT_COUNT; i++) {
                 if (g_effect_current_secondary->slot_ids[i] != 0) {
-                    effect_free_slot(g_effect_current_secondary->slot_ids[i]);
+                    battle_effect_free_slot(g_effect_current_secondary->slot_ids[i]);
                     g_effect_current_secondary->slot_ids[i] = 0;
                 }
             }
@@ -1708,7 +1711,7 @@ s32 effect_summon_charge_secondary_handler(void) {
  *
  * Before the handlers run it takes this frame's ordering table and flips the
  * buffer index their double-buffered primitives use. */
-s32 effect_update_secondary_effects(void) {
+s32 battle_effect_update_secondary_effects(void) {
     effect_secondary_data_t* effect;
     u32 previous_slot_id;
 
@@ -1724,7 +1727,7 @@ s32 effect_update_secondary_effects(void) {
         g_effect_current_secondary = effect;
         previous_slot_id = effect->previous_slot_id;
         if (g_effect_secondary_handlers[effect->function_id]() == 0) {
-            effect_remove_secondary(g_effect_current_slot_id);
+            battle_effect_remove_secondary(g_effect_current_slot_id);
         }
         g_effect_current_slot_id = previous_slot_id;
     } while (previous_slot_id != 0);
