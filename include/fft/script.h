@@ -1191,7 +1191,7 @@ void script_process_pending_requests_variant(void);
 void script_set_event_speed_variant(s32 speed);
 void script_update_event_input_state(u32 buttons);
 
-/* unified */
+/* shared between programs */
 extern u16 g_3d_object_wait_status; /* 0x8016606e */
 extern s16 g_event_effect_target_mode;
 extern s16 g_event_effect_target_x;

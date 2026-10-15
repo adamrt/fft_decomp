@@ -18,4 +18,8 @@ s32 card_get_info_with_retries_variant(s32 port, s32 retry_limit);
 /* state */
 extern u8 g_card_info_pending;
 
+/* unified */
+void card_set_slot(s32 slot);
+s32 card_poll_info_result_variant(void);
+
 #endif

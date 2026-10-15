@@ -116,7 +116,7 @@ void world_card_update_slot_scan(void) {
     }
 
     if (g_world_card_probe_result == CARD_IO_RESULT_NEW_CARD) {
-        if (world_card_check_selected() > CARD_IO_RESULT_COMPLETE) {
+        if (card_poll_info_result_variant() > CARD_IO_RESULT_COMPLETE) {
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
             g_world_card_slot_scan_active = 0;
@@ -138,7 +138,7 @@ void world_card_update_slot_scan(void) {
     }
 
     if (g_world_card_probe_result == CARD_IO_RESULT_ERROR || g_world_card_probe_result == CARD_IO_RESULT_TIMEOUT) {
-        result = world_card_check_selected();
+        result = card_poll_info_result_variant();
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_access_error_message);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
             menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);

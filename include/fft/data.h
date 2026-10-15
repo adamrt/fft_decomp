@@ -1767,7 +1767,7 @@ typedef enum status_effect_flags_2 {
     STATUS_EFFECT_FLAG_2_PREVENT_REACTION = 0x80,
 } status_effect_flags_2_e;
 
-/* unified */
+/* shared between programs */
 extern job_data_t* g_formation_job_data;
 
 #endif

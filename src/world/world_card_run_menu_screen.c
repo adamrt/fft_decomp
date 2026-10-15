@@ -103,7 +103,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
             world_card_run_save_step(g_world_card_active_slot);
         } else if (step == WORLD_CARD_MENU_STEP_LEAVE) {
             main_sound_set_current_music_target(0, 0xf0);
-            while (world_card_check_selected() == CARD_IO_RESULT_PENDING) { }
+            while (card_poll_info_result_variant() == CARD_IO_RESULT_PENDING) { }
             world_gfx_start_increasing_fade();
             g_world_card_menu_step = WORLD_CARD_MENU_STEP_LEFT;
         }

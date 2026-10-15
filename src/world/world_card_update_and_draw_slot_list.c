@@ -32,7 +32,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
                 input = 0;
             }
         }
-        if (world_card_check_selected() > CARD_IO_RESULT_COMPLETE) {
+        if (card_poll_info_result_variant() > CARD_IO_RESULT_COMPLETE) {
             if (world_card_wait_for_selected_status(3) != CARD_IO_RESULT_COMPLETE) {
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);

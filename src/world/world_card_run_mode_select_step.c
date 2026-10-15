@@ -21,7 +21,7 @@ void world_card_run_mode_select_step(void) {
     s32 i;
     s32 all;
 
-    if (world_card_check_selected() > CARD_IO_RESULT_COMPLETE) {
+    if (card_poll_info_result_variant() > CARD_IO_RESULT_COMPLETE) {
         g_world_card_pending_message = 0;
         g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
         menu_stop_thread_and_wait(WORLD_THREAD_SLOT_UPPER_MENU);

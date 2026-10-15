@@ -6,7 +6,7 @@
  * request is issued again when card status bit 0 is set with no event. A result
  * other than complete is checked again with two blocking attempts, and error is
  * reported as timeout. */
-s32 open_card_poll_info_result(void) {
+s32 card_poll_info_result_variant(void) {
     s32 status;
     s32 result;
 

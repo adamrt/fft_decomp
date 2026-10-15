@@ -926,7 +926,7 @@ functions:
   - {addr: 0x80131778, size: 2656, name: world_card_update_and_draw_slot_list, hash: 7c6c2d3ac3e6060d}
   - {addr: 0x801321d8, size: 268, name: world_card_scroll_menu_list, hash: 1c9bd38de9fedffd}
   - {addr: 0x801322e4, size: 720, name: world_card_build_save_file_header, hash: 75dc49ff256755d5}
-  - {addr: 0x801325b4, size: 16, name: world_card_set_selected_slot, hash: 8e9eef48eb3a3f03}
+  - {addr: 0x801325b4, size: 16, name: card_set_slot, hash: 8e9eef48eb3a3f03, source: src/shared/card/card_set_slot.c}
   - {addr: 0x801325c4, size: 16, name: world_card_get_selected_slot, hash: 8d33fa5b18f710e8}
   - {addr: 0x801325d4, size: 8, name: world_card_close_stub, hash: 6d64edf91449c1b1}
   - {addr: 0x801325dc, size: 40, name: card_io_consume_all_events, hash: d50e65e30401bfa0, source: src/shared/card/card_io_consume_all_events.c}
@@ -939,7 +939,7 @@ functions:
   - {addr: 0x801328c4, size: 140, name: card_get_info_with_retries_variant, hash: db96017ced25904c}
   - {addr: 0x80132950, size: 148, name: world_card_load_with_retries, hash: 6e6c44664a65aece}
   - {addr: 0x801329e4, size: 180, name: card_io_create_new_with_retries, hash: f3bd49bc815f1c09, source: src/shared/card/card_io_create_new_with_retries.c}
-  - {addr: 0x80132a98, size: 184, name: world_card_check_selected, hash: d75737862b2d266a}
+  - {addr: 0x80132a98, size: 184, name: card_poll_info_result_variant, hash: d75737862b2d266a}
   - {addr: 0x80132b50, size: 112, name: world_card_wait_for_selected_status, hash: 381a35bd373a81e5}
   - {addr: 0x80132bc0, size: 208, name: world_card_count_save_files, hash: 480d8f033ffe2e0d, rodata: [{addr: 0x800e0200, size: 38, hash: d30f492629781067}]}
   - {addr: 0x80132c90, size: 92, name: world_card_count_free_blocks, hash: abd32f626085421e}

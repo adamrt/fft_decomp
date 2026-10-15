@@ -143,7 +143,7 @@ functions:
   - {addr: 0x80070500, size: 72, name: card_wait_for_hardware_event_variant, hash: d2aebf9256a22720, source: src/shared/card/card_wait_for_hardware_event_variant.c}
   - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, source: src/shared/card/card_io_consume_hardware_events.c}
   - {addr: 0x800705a0, size: 140, name: card_get_info_with_retries_variant, hash: ba3559c7e03836a0}
-  - {addr: 0x8007062c, size: 188, name: open_card_poll_info_result, hash: f6ce5450918332a3}
+  - {addr: 0x8007062c, size: 188, name: card_poll_info_result_variant, hash: f6ce5450918332a3}
   - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6}
   - {addr: 0x8007077c, size: 124, name: open_card_check_slots, hash: b46039f85ab0f00d}
   - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/lib/psyq/libpress/DecDCTReset.c}

@@ -12,7 +12,7 @@ s32 world_card_wait_for_selected_status(s32 attempts) {
 
     for (i = 0; i < attempts; i++) {
         do {
-            status = world_card_check_selected();
+            status = card_poll_info_result_variant();
         } while (status == CARD_IO_RESULT_PENDING);
         if (status == CARD_IO_RESULT_COMPLETE) {
             break;

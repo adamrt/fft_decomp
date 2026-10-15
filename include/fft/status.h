@@ -10,7 +10,7 @@
 void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
 void status_inflict_by_event_unit_id(s32 event_unit_id, s32 status, s32 inflict, s32 less_strict_removal);
 
-/* unified */
+/* shared between programs */
 extern s32 g_status_display_redraw_request;
 
 #endif

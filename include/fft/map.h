@@ -399,7 +399,7 @@ s32 map_return_zero_1(void);
 /* per-module bodies: each module links its own copy under the shared name. */
 void map_reset_script_light_transform_variant(void);
 
-/* unified */
+/* shared between programs */
 extern map_background_gradient_colors_t g_event_background_colors;
 
 #endif

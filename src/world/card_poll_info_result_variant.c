@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 /* Issue _card_info on the selected slot once, then poll for its result. */
-s32 world_card_check_selected(void) {
+s32 card_poll_info_result_variant(void) {
     s32 busy;
     s32 result;
 

@@ -31,7 +31,7 @@ void world_card_run_slot_select_step(void) {
                 g_main_card_save_last_used_slot = CARD_SAVE_LAST_USED_SLOT_NONE;
             }
             g_main_card_save_selected_slot = *selected;
-            world_card_set_selected_slot(slot);
+            card_set_slot(slot);
             g_world_card_menu_step = WORLD_CARD_MENU_STEP_SCANNING;
         }
     }

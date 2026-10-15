@@ -17,9 +17,7 @@
 
 /* card */
 s32 open_card_check_slots(void);
-s32 open_card_poll_info_result(void);
 s32 open_card_poll_info_until_stable(s32 retry_limit);
-void card_set_slot(u8 slot);
 
 /* file */
 extern s32 g_open_file_current_openbk_image_id;
