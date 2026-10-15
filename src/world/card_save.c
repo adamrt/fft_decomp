@@ -1,5 +1,5 @@
-/* The memory card screen, including slot, mode, load and save steps, the save image, slot scans, playtime, descriptions
- * and the slot list. */
+/* Controller reading and update, input with message state, and the memory card screen, including slot, mode, load and
+ * save steps, the save image, slot scans, playtime, descriptions and the slot list. */
 
 #include "fft/gfx.h"
 #include "fft/main.h"
@@ -12,17 +12,165 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+s32 world_input_read_controller(s32 unused) {
+    return PadRead(0);
+}
+
 /*
- * Run the WORLD memory-card screen until its fade-out completes.
+ * Publish newly pressed buttons and two repeat rates for WORLD menus.
  *
- * Publishes the packet-pool counts for this screen, binds both packet buffers
- * onto a stack-resident pool block, plays the card-screen music and steps the
- * card menu state machine once per frame. Returns g_world_card_menu_result.
- *
- * The count stores keep their source order: the 30 and 10 counts are shared
- * constants whose overlapping lifetimes put the 10 in $t0, and sched2 then
- * hoists only the $v0 stores.
+ * The 0x10 input uses a separate edge latch. Other inputs share CARD's
+ * activation delay, single-button latch, and repeat-counter logic. Counter
+ * slots 4..11 are skipped; those buttons use only the newly pressed mask.
  */
+void world_input_update_controller(void) {
+    s16 bit;
+    s32 index;
+    u32 current_input;
+    u32 filtered_input;
+    s32* counter_base;
+    u32 speed, initial_delay, secondary_repeat_period, repeat_period;
+    speed = menu_get_event_speed();
+    initial_delay = g_main_input_repeat_initial_delay / speed;
+    repeat_period = g_main_input_repeat_period / speed;
+    secondary_repeat_period = g_main_input_secondary_repeat_period / speed;
+    current_input = world_input_read_controller(0);
+    if (current_input & PSX_PAD_TRIANGLE) {
+        if (g_world_input_triangle_latch != 0) {
+            menu_input_clear_state();
+        } else {
+            g_world_input_triangle_latch = 1;
+            g_menu_input_newly_pressed = PSX_PAD_TRIANGLE;
+            g_menu_input_secondary_repeat = PSX_PAD_TRIANGLE;
+            g_menu_input_primary_repeat = PSX_PAD_TRIANGLE;
+        }
+    } else {
+        g_world_input_triangle_latch = 0;
+        if (current_input & g_world_input_latched_button) {
+            current_input &= g_world_input_latched_button;
+        } else if (current_input == 0) {
+            g_world_input_latched_button = 0;
+            g_input_activation_timer += speed;
+        } else {
+            if (g_input_activation_timer < 4) {
+                if (current_input & PSX_PAD_DPAD_MASK) {
+                    current_input &= PSX_PAD_DPAD_MASK;
+                    g_input_activation_timer = 10;
+                }
+            }
+            if (g_input_activation_timer >= 4) {
+                g_input_activation_timer = 0;
+                for (index = 0; index < 16; index++) {
+                    bit = 1U << index;
+                    if (current_input & bit) {
+                        current_input &= bit;
+                        g_world_input_latched_button = bit;
+                    }
+                }
+            } else {
+                current_input = 0;
+                g_world_input_latched_button = 0;
+            }
+        }
+        filtered_input = current_input;
+        if (g_input_activation_timer >= 10) {
+            g_input_activation_timer = 10;
+        }
+        g_menu_input_newly_pressed = filtered_input;
+        for (index = 0; index < 16; index++) {
+            s32 mask = 1U << index;
+
+            if (mask & g_menu_input_newly_pressed) {
+                if (mask & g_world_input_previous) {
+                    g_menu_input_newly_pressed &= ~mask;
+                } else {
+                    g_world_input_previous |= mask;
+                }
+            } else {
+                g_world_input_previous &= ~mask;
+            }
+        }
+        counter_base = g_input_repeat_counters;
+        for (index = 0; index < 16; index++) {
+            if (index == 4) {
+                index = 12;
+            }
+            if (current_input & (1U << index)) {
+                counter_base[index]++;
+            } else {
+                counter_base[index] = 0;
+            }
+            if ((counter_base[index] >= initial_delay && counter_base[index] % repeat_period != 0)
+                || (counter_base[index] >= 2 && counter_base[index] < initial_delay)) {
+                current_input &= ~(1U << index);
+            }
+            if (counter_base[index] >= initial_delay) {
+                current_input |= 1U << (index + 16);
+            }
+            if ((counter_base[index] >= initial_delay && counter_base[index] % secondary_repeat_period != 0)
+                || (counter_base[index] >= 2 && counter_base[index] < initial_delay << 1)) {
+                filtered_input &= ~(1U << index);
+            }
+        }
+        current_input &= 0xf00ff00f;
+        filtered_input &= 0xf00ff00f;
+        current_input |= g_menu_input_newly_pressed & 0x0ff0;
+        filtered_input |= g_menu_input_newly_pressed & 0x0ff0;
+        g_menu_input_primary_repeat = current_input;
+        g_menu_input_secondary_repeat = filtered_input;
+    }
+    g_world_input_primary_repeat_latched = g_menu_input_primary_repeat;
+    g_world_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
+}
+
+/* The original wrote the body of menu_input_update_with_message_state_variant a second time as
+ * world_card_input_update_with_message_state. */
+/*
+ * Per-frame input update of the formation, shop and name-entry screens.
+ *
+ * Reads the pad (through the tutorial input reader), then clears the 32-bit input masks during steps 1..3 of the
+ * window scale animation, while the text thread runs or a help screen is
+ * open, on the frame the text ends and during a screen fade. The text phase
+ * goes 1 on the first frame of a text task (which queues the window-open
+ * sound), 2 after it and 0 otherwise. When the text thread is not running
+ * the task-active flag and the held-loop sound release are cleared.
+ */
+void world_card_input_update_with_message_state(void) {
+    s32 running = 0;
+    s32 step;
+    u8 value;
+
+    world_input_update_controller();
+    step = menu_get_window_scale_step();
+    if (step >= 1 && step <= 3) {
+        menu_input_clear_state();
+    } else {
+        running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
+        if (running != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE) {
+            menu_input_clear_state();
+            if (running != 0 && g_menu_input_lock_mode != 0) {
+                value = 1;
+                if (g_world_input_blocked_state != 0) {
+                    value = 2;
+                }
+                g_world_input_blocked_state = value;
+            } else {
+                g_world_input_blocked_state = 0;
+            }
+        } else if (g_world_input_blocked_state != 0 || world_gfx_get_fade_state() != WORLD_FADE_STATE_NONE) {
+            g_world_input_blocked_state = 0;
+            menu_input_clear_state();
+        }
+    }
+    if (running == 0) {
+        g_menu_input_lock_mode = 0;
+        g_world_sound_release_held_loop = 0;
+    }
+    if (g_world_input_blocked_state == 1) {
+        g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
+    }
+}
+
 s32 world_card_run_menu_screen(s32 mode_select_enabled) {
     POLY_FT4 textured_quads[2 * 600];
     TILE tiles[2 * 10];

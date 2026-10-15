@@ -1,12 +1,55 @@
-/* Save file and free block counts and the selected card probe. */
+/* Card info polling, operation result waits, save file and free block counts and the selected card probe. */
 
+#include "fft/main.h"
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Counts the save files on the selected memory card into `dir`: every
- * FFT save when `all` is nonzero, otherwise only the BISLPS-00700FF7*
- * entries.  strcpy is left to the compiler builtin so the prefix copy is
- * expanded inline as the target shows. */
+/* Issue _card_info on the selected slot once, then poll for its result. */
+s32 card_poll_info_result_variant(void) {
+    s32 busy;
+    s32 result;
+
+    if (g_card_info_pending == 0) {
+        _card_info(g_card_slot * 0x10);
+        g_card_info_pending = 1;
+    }
+    busy = _card_status(g_card_slot) & 1;
+    result = card_io_poll_bios_event_result();
+    if (busy != 0 && result == CARD_IO_RESULT_PENDING) {
+        result = CARD_IO_RESULT_TIMEOUT;
+    }
+    if (result >= CARD_IO_RESULT_COMPLETE) {
+        g_card_info_pending = 0;
+        if (result > CARD_IO_RESULT_COMPLETE) {
+            result = card_get_info_with_retries_variant(g_card_slot * 0x10, 2);
+        }
+    }
+    if (result == CARD_IO_RESULT_ERROR) {
+        result = CARD_IO_RESULT_TIMEOUT;
+    }
+    return result;
+}
+
+/* Poll the selected memory card until it reports a settled state.
+ *
+ * Each attempt retries while the result is pending. Returns the first
+ * non-complete status, or the last status once `attempts` settled polls have
+ * completed. */
+s32 card_io_wait_operation_result_variant(s32 attempts) {
+    s32 i;
+    s32 status;
+
+    for (i = 0; i < attempts; i++) {
+        do {
+            status = card_poll_info_result_variant();
+        } while (status == CARD_IO_RESULT_PENDING);
+        if (status == CARD_IO_RESULT_COMPLETE) {
+            break;
+        }
+    }
+    return status;
+}
+
 s32 world_card_count_save_files(DIRENTRY* dir, s32 all) {
     char path[128];
     s32 count;

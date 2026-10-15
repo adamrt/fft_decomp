@@ -1,8 +1,12 @@
-/* WORLD variants of list page scrolling and its repeating up/down input. */
+/* The draw color and page scroll input. */
 
 #include "fft/world.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+
+rgb24_t* menu_gfx_get_draw_color_variant(void) {
+    return &g_world_menu_sprite_color;
+}
 
 void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e dir, const menu_instruction_t* instruction) {
     s32 old;

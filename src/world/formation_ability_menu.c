@@ -1,6 +1,7 @@
-/* The formation ability menu, including the idle thread, set, remove and clear-all abilities, learning and equip
- * support changes. */
+/* The formation ability menu, including the idle thread, set, remove and clear-all abilities, learning, equip support
+ * changes, and job level, learn JP and total JP calculations. */
 
+#include "fft/main.h"
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/libc.h"
@@ -535,4 +536,38 @@ s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id) {
 
 s32 world_thread_is_task_active(s32 unused_0) {
     return g_menu_input_lock_mode;
+}
+
+/* Job level of the selected unit in the Learn Abilities menu's `index`th
+ * unlocked job; levels are packed two per byte (odd jobs in the low nibble). */
+s32 job_calculate_current_level_variant(s32 index) {
+    s32 job_index;
+
+    job_index = job_get_generic_index(g_menu_job_ids[index]);
+    g_menu_job_current_level = g_world_unit_pointers[g_unit_selected_index]->job_levels[job_index >> 1];
+    if (job_index & 1) {
+        g_menu_job_current_level = g_menu_job_current_level & 0xF;
+    } else {
+        g_menu_job_current_level = g_menu_job_current_level >> 4;
+    }
+    return g_menu_job_current_level;
+}
+
+/* JP the selected unit has in the Learn Abilities menu's `index`th unlocked job. */
+s32 world_menu_get_learn_job_jp(s32 index) {
+    s32 job_index;
+
+    job_index = job_get_generic_index(g_menu_job_ids[index]);
+    return g_world_unit_pointers[g_unit_selected_index]->job_points.current.values[job_index];
+}
+
+/* Caches and returns the selected unit's total JP for the Learn Abilities
+ * menu's `index`th unlocked job; the job list's menu script reads it as a
+ * number callback. */
+s32 job_calculate_current_total_jp_variant(s32 index) {
+    s32 job_index;
+
+    job_index = job_get_generic_index(g_menu_job_ids[index]);
+    return g_world_job_cached_total_jp
+        = g_world_unit_pointers[g_unit_selected_index]->job_points.total.values[job_index];
 }

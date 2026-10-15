@@ -1,11 +1,90 @@
-/* Poached item quantities, best fit equipment, equipping items to slots, equip checks, job changes, loadout validation
- * and item category lists. */
+/* Item availability, prices and counts, poached item quantities, best fit equipment, equipping items to slots, equip
+ * checks, job changes, loadout validation and item category lists. */
 
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Adjust a Fur Shop poached-item quantity, with the target's ten-bit index
- * mask and saturating byte range. */
+/* Test for inventory or equipment entries in the current menu.
+ *
+ * Mode 0 combines both sources, mode 1 selects inventory, and other modes select equipment.
+ */
+s32 world_menu_has_items(s32 mode) {
+    s32 has_inventory;
+    s32 has_equipment;
+    s32 i;
+    s32 slot;
+
+    has_inventory = 0;
+    has_equipment = 0;
+    for (i = 1; i < ITEM_ID_END; i++) {
+        if (g_main_item_quantities[i]) {
+            has_inventory = 1;
+            break;
+        }
+    }
+    for (i = 0; i < g_world_formation_record_count; i++) {
+        for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_COUNT; slot++) {
+            if (g_world_unit_pointers[i]->equipment[slot]) {
+                has_equipment = 1;
+                break;
+            }
+        }
+    }
+    if (mode == 0) {
+        return has_equipment || has_inventory;
+    }
+    if (mode == 1) {
+        return has_inventory;
+    }
+    return has_equipment;
+}
+
+s32 world_item_get_price(s16 item_id) {
+    return g_main_item_primary_data[item_id & WORLD_ITEM_ID_MASK].price;
+}
+
+/* Return half of the item-table price, clamped to at least 1. */
+s32 world_item_get_half_price(s16 item_id) {
+    u32 value = g_main_item_primary_data[item_id & WORLD_ITEM_ID_MASK].price >> 1;
+
+    if (value == 0) {
+        value = 1;
+    }
+    return value;
+}
+
+/* Count copies of an item equipped across the active formation records.
+ *
+ * The comparison uses the stored 16-bit equipment value as-is; only the requested
+ * ID is masked. */
+s32 item_get_equipped_count_variant(s32 item_id) {
+    s32 count;
+    s32 unit_index;
+    s32 slot;
+    world_unit_t* unit;
+
+    count = 0;
+    item_id &= WORLD_ITEM_ID_MASK;
+    for (unit_index = 0; unit_index < g_world_formation_record_count; unit_index++) {
+        unit = g_world_unit_pointers[unit_index];
+        for (slot = 0; slot < WORLD_EQUIPMENT_SLOT_COUNT; slot++) {
+            if (unit->equipment[slot] == item_id) {
+                count++;
+            }
+        }
+        /* The target reloads the record count on every pass although nothing
+         * in the loop stores; without this the load is hoisted. */
+        __asm__("" : : : "memory");
+    }
+    return count;
+}
+
+/* Inventory quantity plus the copies equipped by the party. */
+s32 item_get_total_count_variant(s16 item_id) {
+    item_id &= WORLD_ITEM_ID_MASK;
+    return item_adjust_inventory_count(item_id, 0) + item_get_equipped_count_variant(item_id);
+}
+
 s32 world_shop_adjust_poached_item_quantity(s16 index, s32 delta) {
     s32 slot = index & WORLD_ITEM_ID_MASK;
     s32 value = g_main_item_poached_quantities[slot] + delta;
