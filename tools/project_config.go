@@ -75,6 +75,7 @@ type functionSpec struct {
 type unitDef struct {
 	Name   string
 	Source string
+	Rodata []rodataSpec // read-only tables the unit defines between its functions' literals
 }
 
 type rodataSpec struct {
@@ -228,6 +229,29 @@ func (m *moduleSpec) sourceOf(f *functionSpec) string {
 }
 
 // unit returns the module's unit definition of that name.
+// renderRodataRanges writes read-only ranges as the inline YAML list items.
+func renderRodataRanges(ranges []rodataSpec) string {
+	items := make([]string, len(ranges))
+	for index, rodata := range ranges {
+		text := fmt.Sprintf("addr: 0x%08x, size: %d", rodata.Addr, rodata.Size)
+		if rodata.Hash != "" {
+			text += ", hash: " + yamlText(rodata.Hash)
+		}
+		items[index] = "{" + text + "}"
+	}
+	return strings.Join(items, ", ")
+}
+
+// dataAt returns the module's data row at an address, or nil.
+func (m *moduleSpec) dataAt(addr uint32) *symbolSpec {
+	for index := range m.Data {
+		if m.Data[index].Addr == addr {
+			return &m.Data[index]
+		}
+	}
+	return nil
+}
+
 func (m *moduleSpec) unit(name string) *unitDef {
 	for index := range m.Units {
 		if m.Units[index].Name == name {
@@ -380,8 +404,9 @@ type functionYAML struct {
 }
 
 type unitYAML struct {
-	Name   string `yaml:"name"`
-	Source string `yaml:"source"`
+	Name   string       `yaml:"name"`
+	Source string       `yaml:"source"`
+	Rodata []rodataYAML `yaml:"rodata"`
 }
 
 type rodataYAML struct {
@@ -432,7 +457,12 @@ func parseModuleConfig(data []byte) (*moduleSpec, error) {
 		module.Defines = append(module.Defines, defineSpec{Name: name, Value: value})
 	}
 	for _, item := range file.Units {
-		module.Units = append(module.Units, unitDef(item))
+		unit := unitDef{Name: item.Name, Source: item.Source}
+		for _, rodata := range item.Rodata {
+			unit.Rodata = append(unit.Rodata, rodataSpec(rodata))
+		}
+		sort.SliceStable(unit.Rodata, func(i, j int) bool { return unit.Rodata[i].Addr < unit.Rodata[j].Addr })
+		module.Units = append(module.Units, unit)
 	}
 	for _, item := range file.Libraries {
 		module.Libraries = append(module.Libraries, librarySpec(item))
@@ -554,7 +584,11 @@ func renderModuleConfig(m *moduleSpec) []byte {
 	}
 	section("units", len(m.Units), func(index int) string {
 		item := m.Units[index]
-		return fmt.Sprintf("name: %s, source: %s", yamlText(item.Name), yamlText(item.Source))
+		text := fmt.Sprintf("name: %s, source: %s", yamlText(item.Name), yamlText(item.Source))
+		if len(item.Rodata) > 0 {
+			text += ", rodata: [" + renderRodataRanges(item.Rodata) + "]"
+		}
+		return text
 	})
 	section("libraries", len(m.Libraries), func(index int) string {
 		item := m.Libraries[index]
@@ -582,15 +616,7 @@ func renderModuleConfig(m *moduleSpec) []byte {
 			fields = append(fields, "asm: "+yamlText(item.Asm))
 		}
 		if len(item.Rodata) > 0 {
-			ranges := make([]string, len(item.Rodata))
-			for rodataIndex, rodata := range item.Rodata {
-				text := fmt.Sprintf("addr: 0x%08x, size: %d", rodata.Addr, rodata.Size)
-				if rodata.Hash != "" {
-					text += ", hash: " + yamlText(rodata.Hash)
-				}
-				ranges[rodataIndex] = "{" + text + "}"
-			}
-			fields = append(fields, "rodata: ["+strings.Join(ranges, ", ")+"]")
+			fields = append(fields, "rodata: ["+renderRodataRanges(item.Rodata)+"]")
 		}
 		return strings.Join(fields, ", ")
 	})
@@ -848,6 +874,17 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 			if len(members) == 0 {
 				fail("%s has no member functions", where)
 				continue
+			}
+			for _, rodata := range unit.Rodata {
+				if rodata.Size <= 0 || !m.contains(rodata.Addr, rodata.Size) {
+					fail("%s: owned rodata 0x%08x lies outside the module image", where, rodata.Addr)
+				}
+				if !validHash(rodata.Hash) {
+					fail("%s: owned rodata 0x%08x has no valid hash", where, rodata.Addr)
+				}
+				if m.dataAt(rodata.Addr) == nil {
+					fail("%s: owned rodata 0x%08x names no data row of the module", where, rodata.Addr)
+				}
 			}
 			if _, err := projectPath(p.root, unit.Source, "unit source"); err != nil {
 				fail("%s: %v", where, err)

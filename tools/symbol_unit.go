@@ -32,6 +32,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 	name := flags.String("name", "", "unit name")
 	source := flags.String("source", "", "merged source path under src/, such as src/event/thread.c")
 	comment := flags.String("comment", "", "leading file comment, such as what the file holds and which of its edges are proven")
+	ownRodata := flags.Bool("own-rodata", false, "define the read-only tables that lie among the members' literals inside the unit (one module only)")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err
@@ -183,7 +184,22 @@ func (p project) unitSymbolsCommand(args []string) error {
 				}
 			}
 		}
-		text, conditional := renderUnitSource(order, merged, bodies, bodyModules)
+		var owned []rodataSpec
+		var fillers map[string]string // member name -> filler text emitted after that member
+		if *ownRodata {
+			if len(order) != 1 {
+				return errors.New("--own-rodata applies to a unit of one module")
+			}
+			image, err := p.readModuleImage(order[0])
+			if err != nil {
+				return fmt.Errorf("--own-rodata needs the module image: %w", err)
+			}
+			owned, fillers, err = ownedRodataTables(image, order[0], byModule[order[0]])
+			if err != nil {
+				return err
+			}
+		}
+		text, conditional := renderUnitSource(order, merged, bodies, bodyModules, fillers)
 		if *comment != "" {
 			if strings.Contains(*comment, "*/") {
 				return errors.New("--comment must not contain */")
@@ -194,6 +210,12 @@ func (p project) unitSymbolsCommand(args []string) error {
 			if err := validateUnitSourceDataFor(m, clean, text, members[m]); err != nil {
 				return err
 			}
+			if len(owned) > 0 {
+				functions := members[m]
+				if _, err := resolveUnitInstance(config, &unitSpec{name: *name, source: clean, functions: functions, rodata: owned}, unitInstanceYAML{Module: m.ID}); err != nil {
+					return err
+				}
+			}
 		}
 		for _, m := range order {
 			var kept []unitDef
@@ -202,7 +224,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 					kept = append(kept, unit)
 				}
 			}
-			m.Units = append(kept, unitDef{Name: *name, Source: clean})
+			m.Units = append(kept, unitDef{Name: *name, Source: clean, Rodata: owned})
 			for _, f := range byModule[m] {
 				f.Unit = *name
 				f.Source = ""
@@ -405,7 +427,7 @@ func mergeMemberOrders(lists [][]string) ([]string, error) {
 // in those modules' program macros; a member with several bodies gets one
 // wrapped block per body, in module order. Returns the text and how many
 // members sit under conditionals.
-func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]map[string]*unitMemberBody, bodyModules map[string]map[string][]*moduleSpec) ([]byte, int) {
+func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]map[string]*unitMemberBody, bodyModules map[string]map[string][]*moduleSpec, fillers map[string]string) ([]byte, int) {
 	moduleIndex := map[*moduleSpec]int{}
 	for index, m := range order {
 		moduleIndex[m] = index
@@ -449,10 +471,129 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 			}
 			blocks = append(blocks, guard+"\n"+body.text+"\n#endif")
 		}
+		if filler := fillers[name]; filler != "" {
+			blocks = append(blocks, filler)
+		}
 	}
 	text := strings.Join(blocks, "\n\n") + "\n"
 	if len(includes) > 0 {
 		text = strings.Join(includes, "\n") + "\n\n" + text
 	}
 	return []byte(text), conditional
+}
+
+// ownedRodataTables finds the module's data rows that lie among the members'
+// read-only ranges and are covered by none of them: the object's own tables.
+// Each becomes a range the unit declares and a byte-exact filler definition
+// emitted after the last member whose literals precede it. A table's size
+// runs to the next data row or member range. The filler keeps the original
+// bytes under a derived name; a later pass can turn it into the typed
+// definition and drop the header's extern.
+func ownedRodataTables(image []byte, m *moduleSpec, members []*functionSpec) ([]rodataSpec, map[string]string, error) {
+	type span struct {
+		start, end uint32
+		member     string
+	}
+	var spans []span
+	for _, f := range members {
+		for _, r := range f.Rodata {
+			spans = append(spans, span{r.Addr, r.Addr + uint32(r.Size), f.Name})
+		}
+	}
+	if len(spans) == 0 {
+		return nil, nil, nil
+	}
+	sort.Slice(spans, func(i, j int) bool { return spans[i].start < spans[j].start })
+	lo, hi := spans[0].start, spans[len(spans)-1].end
+	var rowAddrs []uint32
+	for _, row := range m.Data {
+		rowAddrs = append(rowAddrs, row.Addr)
+	}
+	sort.Slice(rowAddrs, func(i, j int) bool { return rowAddrs[i] < rowAddrs[j] })
+	covered := func(addr uint32) bool {
+		for _, sp := range spans {
+			if sp.start <= addr && addr < sp.end {
+				return true
+			}
+		}
+		return false
+	}
+	nextBoundary := func(addr uint32) uint32 {
+		next := hi
+		for _, sp := range spans {
+			if sp.start > addr && sp.start < next {
+				next = sp.start
+			}
+		}
+		for _, row := range rowAddrs {
+			if row > addr && row < next {
+				next = row
+			}
+		}
+		return next
+	}
+	var owned []rodataSpec
+	fillers := map[string]string{}
+	for _, addr := range rowAddrs {
+		if addr < lo || addr >= hi || covered(addr) {
+			continue
+		}
+		end := nextBoundary(addr)
+		size := int(end - addr)
+		offset := m.offset(addr)
+		if offset < 0 || offset+size > len(image) {
+			return nil, nil, fmt.Errorf("table at 0x%08x lies outside the image", addr)
+		}
+		bytes := image[offset : offset+size]
+		row := m.dataAt(addr)
+		owned = append(owned, rodataSpec{Addr: addr, Size: size, Hash: shortHash(bytes)})
+		// emit after the last member whose literal ends at or before the table
+		after := ""
+		for _, sp := range spans {
+			if sp.end <= addr {
+				after = sp.member
+			}
+		}
+		if after == "" {
+			return nil, nil, fmt.Errorf("table %s at 0x%08x precedes every member literal", row.Name, addr)
+		}
+		fillers[after] += renderRodataFiller(row.Name, addr, bytes)
+	}
+	return owned, fillers, nil
+}
+
+// renderRodataFiller writes a table's original bytes as a static const
+// array sized and aligned like the original (words when 4-aligned and a
+// multiple of 4, else halfwords, else bytes).
+func renderRodataFiller(name string, addr uint32, bytes []byte) string {
+	var out strings.Builder
+	fmt.Fprintf(&out, "/* %s: read-only table of this object (%d bytes at 0x%08x), kept byte for byte\n * until it is written as its typed definition. */\n", name, len(bytes), addr)
+	switch {
+	case addr%4 == 0 && len(bytes)%4 == 0:
+		fmt.Fprintf(&out, "static const u32 %s_rodata[%d] = {", name, len(bytes)/4)
+		for i := 0; i < len(bytes); i += 4 {
+			if i%32 == 0 {
+				out.WriteString("\n   ")
+			}
+			fmt.Fprintf(&out, " 0x%08x,", uint32(bytes[i])|uint32(bytes[i+1])<<8|uint32(bytes[i+2])<<16|uint32(bytes[i+3])<<24)
+		}
+	case addr%2 == 0 && len(bytes)%2 == 0:
+		fmt.Fprintf(&out, "static const u16 %s_rodata[%d] = {", name, len(bytes)/2)
+		for i := 0; i < len(bytes); i += 2 {
+			if i%32 == 0 {
+				out.WriteString("\n   ")
+			}
+			fmt.Fprintf(&out, " 0x%04x,", uint32(bytes[i])|uint32(bytes[i+1])<<8)
+		}
+	default:
+		fmt.Fprintf(&out, "static const u8 %s_rodata[%d] = {", name, len(bytes))
+		for i := 0; i < len(bytes); i++ {
+			if i%16 == 0 {
+				out.WriteString("\n   ")
+			}
+			fmt.Fprintf(&out, " 0x%02x,", bytes[i])
+		}
+	}
+	out.WriteString("\n};")
+	return out.String()
 }

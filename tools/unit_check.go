@@ -22,6 +22,7 @@ type unitSpecYAML struct {
 	Name      string             `yaml:"name"`
 	Source    string             `yaml:"source"`
 	Functions []string           `yaml:"functions"`
+	Rodata    []rodataYAML       `yaml:"rodata"`
 	Instances []unitInstanceYAML `yaml:"instances"`
 }
 
@@ -37,6 +38,7 @@ type unitSpec struct {
 	name      string
 	source    string // project-relative, under build/
 	functions []string
+	rodata    []rodataSpec // tables the unit defines itself
 	instances []unitInstanceYAML
 }
 
@@ -60,6 +62,9 @@ func parseUnitSpec(path string, data []byte) (*unitSpec, error) {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	spec := &unitSpec{name: file.Name, source: file.Source, functions: file.Functions, instances: file.Instances}
+	for _, rodata := range file.Rodata {
+		spec.rodata = append(spec.rodata, rodataSpec(rodata))
+	}
 	if spec.name == "" {
 		spec.name = strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 	}
@@ -172,6 +177,10 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 			}
 		}
 	}
+	// Tables the unit defines itself sit among its functions' literals.
+	for _, span := range spec.rodata {
+		unit.rodata = append(unit.rodata, span)
+	}
 	unit.addr = unit.members[0].Addr
 	profileName, err := unitProfile(spec, m, unit.members)
 	if err != nil {
@@ -209,7 +218,7 @@ func (m *moduleSpec) unitInstance(config *projectConfig, name string) (*unitInst
 	for _, f := range m.unitMembers(name) {
 		functions = append(functions, f.Name)
 	}
-	spec := &unitSpec{name: unit.Name, source: unit.Source, functions: functions}
+	spec := &unitSpec{name: unit.Name, source: unit.Source, functions: functions, rodata: unit.Rodata}
 	return resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID})
 }
 

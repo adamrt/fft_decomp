@@ -44,6 +44,9 @@ func (p project) splitSymbolsCommand(args []string) error {
 			}
 			source = unit.Source
 			owners = append(owners, m)
+			if len(unit.Rodata) > 0 {
+				return fmt.Errorf("unit %s owns read-only tables; split it by hand", *name)
+			}
 			var names []string
 			for _, f := range m.unitMembers(*name) {
 				names = append(names, f.Name)

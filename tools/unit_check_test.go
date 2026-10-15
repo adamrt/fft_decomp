@@ -348,3 +348,65 @@ func TestUnitCompileMatchesSeparateCompilesAndResolvesInternalCalls(t *testing.T
 		t.Fatalf("grown first body: %v", err)
 	}
 }
+
+func TestUnitOwnedRodataRoundTripsAndJoinsTheRanges(t *testing.T) {
+	p := unitsTestProject(t)
+	if err := p.unitSymbolsCommand([]string{"--name", "menu_b", "--source", "src/battle/menu_b.c", "battle:menu_b1", "battle:menu_b2"}); err != nil {
+		t.Fatal(err)
+	}
+	config, err := p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	battle := config.byID["battle"]
+	battle.function("menu_b1").Rodata = []rodataSpec{{Addr: 0x80067100, Size: 8, Hash: "0000000000000001"}}
+	battle.function("menu_b2").Rodata = []rodataSpec{{Addr: 0x80067110, Size: 8, Hash: "0000000000000002"}}
+	battle.Data = append(battle.Data, symbolSpec{Addr: 0x80067108, Name: "g_b_table"})
+	battle.unit("menu_b").Rodata = []rodataSpec{{Addr: 0x80067108, Size: 8, Hash: "0000000000000003"}}
+	rendered := string(renderModuleConfig(battle))
+	if !strings.Contains(rendered, "{name: menu_b, source: src/battle/menu_b.c, rodata: [{addr: 0x80067108, size: 8, hash: \"0000000000000003\"}]}") {
+		t.Fatalf("rendered units:\n%s", rendered)
+	}
+	for path, data := range renderConfigFiles(config) {
+		if err := os.WriteFile(filepath.Join(p.root, filepath.FromSlash(path)), data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	config, err = p.loadProjectConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	battle = config.byID["battle"]
+	if len(battle.unit("menu_b").Rodata) != 1 || battle.unit("menu_b").Rodata[0].Addr != 0x80067108 {
+		t.Fatalf("parsed unit rodata: %+v", battle.unit("menu_b"))
+	}
+	unit, err := battle.unitInstance(config, "menu_b")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(unit.rodata) != 3 || unit.rodata[1].Addr != 0x80067108 {
+		t.Fatalf("joined ranges: %+v", unit.rodata)
+	}
+	// The owned table must be a data row of the module.
+	var kept []symbolSpec
+	for _, row := range battle.Data {
+		if row.Name != "g_b_table" {
+			kept = append(kept, row)
+		}
+	}
+	battle.Data = kept
+	for path, data := range renderConfigFiles(config) {
+		if err := os.WriteFile(filepath.Join(p.root, filepath.FromSlash(path)), data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := p.loadCheckedConfig(); err == nil || !strings.Contains(err.Error(), "names no data row") {
+		t.Fatalf("checked config error = %v", err)
+	}
+	if err := p.splitSymbolsCommand([]string{"--unit", "menu_b"}); err == nil || !strings.Contains(err.Error(), "owns read-only tables") {
+		t.Fatalf("split guard error = %v", err)
+	}
+	if text := renderRodataFiller("g_x", 0x80067108, []byte{1, 0, 0, 0, 2, 0, 0, 0}); !strings.Contains(text, "static const u32 g_x_rodata[2] = {") || !strings.Contains(text, "0x00000001, 0x00000002") {
+		t.Fatalf("filler:\n%s", text)
+	}
+}
