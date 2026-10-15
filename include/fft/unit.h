@@ -541,8 +541,10 @@ enum {
     ZODIAC_SIGN_ORDINARY_COUNT = 12,
     ZODIAC_SIGN_COUNT = 13,
 };
-s32 unit_birthday_calculate_day_of_year(s32 month, s32 day);
+
 extern u8 g_unit_birthday_month_lengths[12];
+
+s32 unit_birthday_calculate_day_of_year(s32 month, s32 day);
 
 /* status */
 /* SCUS 0x8005b5dc copies these three consecutive sets as one 15-byte block.

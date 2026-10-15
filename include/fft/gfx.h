@@ -299,6 +299,7 @@ typedef struct scaled_draw_area_pair {
     DR_AREA areas[2]; /* 0x00 */
     RECT rects[2];    /* 0x18 */
 } scaled_draw_area_pair_t;
+
 typedef char scaled_draw_area_pair_size_must_be_40[sizeof(scaled_draw_area_pair_t) == 40 ? 1 : -1];
 
 void gfx_build_scaled_draw_area_pair_swapped(
@@ -337,6 +338,7 @@ typedef struct menu_gfx_context {
     DISPENV disp_env;                     /* 0xc0 */
     u8 _unused_d4[0x18];                  /* 0xd4 */
 } menu_gfx_context_t;
+
 typedef char menu_gfx_context_size_must_be_236[(sizeof(menu_gfx_context_t) == 236) ? 1 : -1];
 
 /* Full-screen fade primitive pair: a TILE followed by the DR_MODE that
@@ -345,42 +347,17 @@ typedef struct fade_overlay {
     TILE tile;    /* 0x00 */
     DR_MODE mode; /* 0x10 */
 } fade_overlay_t;
+
 typedef char fade_overlay_size_must_be_28[(sizeof(fade_overlay_t) == 28) ? 1 : -1];
 
 /* Gray level the screen-covering fade tile subtracts: 0 is clear, 255 is black. */
 extern s32 g_gfx_screen_fade;
-
-void gfx_ramp_screen_overlay_intensity_to_max(void);
-void gfx_ramp_screen_overlay_intensity_to_zero(void);
-void gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page);
-void gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
-void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
-
-void gfx_set_formation_icon_uv(POLY_FT4* poly, s32 index);
-void gfx_set_clut_rect_from_id(RECT* rect, u16 clut_id);
-void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
-void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page, const RECT* position,
-    const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
-void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
-    const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
-
-void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness);
-void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly);
-void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
 extern RECT g_gfx_tiled_rect;
-void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
-    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
 extern u16 g_gfx_poly_g4_count;
 extern u16 g_gfx_tile_count;
 extern u16 g_gfx_otag_count;
 extern s8 g_gfx_otag_index_locked;
 extern RECT g_gfx_draw_area;
-void gfx_set_draw_color_variant(const rgb24_t* color);
-void menu_run_unit_status_thread_variant(void);
-void gfx_set_otag_index(s32 value);
-s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
-void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 extern point16_t g_editor_numeric_geometry[];
 extern image_load_parameters_t g_editor_numeric_texture[];
 extern oriented_quad_t g_gfx_blank_cell_rect;
@@ -442,6 +419,30 @@ extern s16 g_gfx_tile_1_count;
 extern s16 g_gfx_tile_8_count;
 extern image_load_parameters_t g_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_menu_single_icon_image_params[5];
+
+void gfx_ramp_screen_overlay_intensity_to_max(void);
+void gfx_ramp_screen_overlay_intensity_to_zero(void);
+void gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page);
+void gfx_set_draw_mode_from_origin(DR_MODE* mode, const point16_t* origin);
+void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level);
+void gfx_set_formation_icon_uv(POLY_FT4* poly, s32 index);
+void gfx_set_clut_rect_from_id(RECT* rect, u16 clut_id);
+void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle);
+void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page, const RECT* position,
+    const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base);
+void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, const RECT* position,
+    const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
+void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness);
+void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly);
+void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
+void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
+    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
+void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
+void gfx_set_draw_color_variant(const rgb24_t* color);
+void menu_run_unit_status_thread_variant(void);
+void gfx_set_otag_index(s32 value);
+s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
+void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 
 /* portrait transitions */
 
@@ -514,13 +515,14 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region);
 
 /* fades */
-s32 gfx_update_increasing_fade(void);
 extern u8 g_gfx_increasing_fade_active;
 extern s16 g_gfx_fade_intensity;
 extern RECT g_gfx_fade_rect[];
 extern rgb24_t g_gfx_fade_color;
-s32 gfx_update_decreasing_fade(void);
 extern u8 g_gfx_decreasing_fade_active;
+
+s32 gfx_update_increasing_fade(void);
+s32 gfx_update_decreasing_fade(void);
 void gfx_start_decreasing_fade(void);
 
 /* fades */

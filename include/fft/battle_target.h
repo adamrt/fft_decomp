@@ -102,6 +102,8 @@ s32 target_set_panels_for_action(const action_command_t* action);
 s32 target_set_weapon_attack_panels(const action_command_t* source);
 
 /* eligibility and reflection */
+extern s32 g_battle_sort_targets_nearest_first;
+
 s32 target_apply_reflect(unit_stats_t* unit);
 void target_apply_unit_team_eligibility(s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff);
 void target_check_moldball_virus_depth(s16 ability_id);
@@ -110,8 +112,6 @@ s32 target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_index);
 s32 target_validate_height_overlap(s32 attacker_id, s32 target_x, s32 target_y, s32 target_elevation, s32 target_id);
 s32 target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 elevation, s32 target_id);
 s32 target_validate_weapon_target(const action_command_t* source);
-
-extern s32 g_battle_sort_targets_nearest_first;
 
 /* target lists */
 extern u8 g_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];

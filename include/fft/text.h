@@ -37,13 +37,14 @@ s32 menu_text_render_glyph_to_4bpp_image_variant(
     s32 glyph_id, u8* image, const battle_text_image_position_t* position, s32 style);
 
 /* rendering */
+extern u8* g_text_saved_pointers[32];
+extern glyph_blit_t g_text_glyph_source;
+
 void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
     u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
 void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
 void text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
-extern u8* g_text_saved_pointers[32];
 void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
-extern glyph_blit_t g_text_glyph_source;
 
 /* rendering */
 extern glyph_blit_t g_text_glyph_dest;

@@ -1061,6 +1061,7 @@ void script_report_missing_unit_stub(s32 unused_unit_id);
 
 /* unit instructions */
 extern u16 g_script_unit_face_slot_order[];
+extern map_tile_coordinates_t g_script_warp_coords;
 
 void script_change_stats(const event_change_stats_parameters_t* parameters);
 void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
@@ -1072,6 +1073,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters);
 void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
 void script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 void script_inflict_status_thread(void);
+
 /* TeleportIn forwards the unit ID; the interpreter's second argument is unused. */
 void script_teleportin_event_instruction(s32 unit_id, s32 unused);
 void script_waitspritemove_event_instruction(s32 unit_id);
@@ -1082,9 +1084,7 @@ void script_jump_event_instruction(const event_jump_parameters_t* parameters);
 void script_resetpalette_event_instruction(const event_unit_parameters_t* parameters);
 void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_t* parameters);
 void script_walkto_event_instruction(const event_walk_to_parameters_t* parameters);
-
 void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters);
-extern map_tile_coordinates_t g_script_warp_coords;
 void script_warp_unit(const event_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 void script_add_unit_stub(void);
