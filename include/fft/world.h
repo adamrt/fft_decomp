@@ -172,19 +172,12 @@ u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1);
 void world_name_update_entry_cursor(void);
 
 /* options */
-extern menu_input_timing_profile_t g_world_option_input_timing_profiles[];
 extern menu_text_layout_t g_world_option_menu_entry_table;
-extern s32 g_world_option_menu_text_widths[];    /* option menu text-image width, per option */
-extern s32 g_world_option_menu_entry_counts[];   /* option menu entry count, per option */
-extern s32 g_world_option_menu_first_text_ids[]; /* first text id of the option's entries */
-extern menu_entry_t g_world_option_menu_icon_thread_param;
 extern RECT g_world_options_menu_window_rect;
 extern RECT g_world_options_menu_title_rect;
 extern RECT g_world_options_menu_value_rect;
 extern options_menu_page_t g_world_options_menu_pages[2];
-extern menu_icon_record_t g_world_option_picker_icon_records[2];
 void world_menu_run_game_options(void);
-void world_menu_run_option_choice(void);
 
 /* screen */
 
@@ -279,8 +272,6 @@ extern s32 g_menu_companion_executable_lbas[];    /* 0x80156388, indexed by requ
 extern s32 g_menu_companion_executable_sizes[];   /* 0x801563c8 */
 extern s32 g_menu_companion_executable_offsets[]; /* 0x80156408, relative to the overlay load address */
 extern s32 g_menu_companion_executable_loading;   /* 0x801564cc */
-extern s32 g_world_game_option_original_values[14];
-extern s32 g_world_game_option_values[14];
 void world_game_reset(void);
 void world_card_close_stub(void);
 
@@ -1564,7 +1555,6 @@ extern image_load_parameters_t g_world_menu_icon_strip_image_params[];
  * the arrow placement used by kind 0x10. */
 extern image_load_parameters_t g_world_menu_single_icon_image_params[];
 
-extern menu_text_layout_t g_world_menu_at_list_entry_table;
 extern s16 g_world_menu_open_entry_index;
 extern world_menu_thread_group_t g_world_menu_thread_groups[];
 extern s32 g_world_menu_thread_group_parameter;

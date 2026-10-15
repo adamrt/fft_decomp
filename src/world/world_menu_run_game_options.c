@@ -234,7 +234,7 @@ void world_menu_run_game_options(void) {
                 if (menu_can_accept_input_variant() != 0) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
-                    thread_start(g_thread_current_id - 1, world_menu_run_option_choice);
+                    thread_start(g_thread_current_id - 1, menu_run_option_choice);
                     thread_set_parameters(g_thread_current_id - 1, index, 0, 0);
                 }
             }
@@ -247,8 +247,8 @@ void world_menu_run_game_options(void) {
             menu_clear_render_buffer(buffer, 0x1E0);
             g_menu_text_state.pen.stride = 0x3C;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(g_world_option_menu_first_text_ids[index] + g_world_game_option_values[index],
-                buffer, &g_menu_text_state.pen);
+            menu_display_text_entry(
+                g_menu_option_value_text_id_bases[index] + g_menu_option_values[index], buffer, &g_menu_text_state.pen);
             LoadImage(&g_world_options_menu_value_rect, (u32*)buffer);
         }
         thread_yield();
@@ -327,34 +327,30 @@ void world_menu_run_game_options(void) {
         gfx_draw_or_append_gpu_primitive(&page->text_mode);
         gfx_draw_or_append_gpu_primitive(&page->value_area.areas[0]);
         g_thread_call_target = (void (*)(void))suzuki_sound_set_type;
-        g_main_game_options.fields.cursor_movement = g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT];
-        g_main_game_options.fields.cursor_repeat_speed = g_world_game_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
+        g_main_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
+        g_main_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
         g_main_game_options.fields.multi_height_cursor_speed
-            = g_world_game_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
+            = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
         g_main_game_options.fields.finger_cursor_repeat_speed
-            = g_world_game_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
-        g_main_game_options.fields.message_display_speed
-            = g_world_game_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
-        g_main_game_options.fields.navigation_messages = g_world_game_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
-        g_main_game_options.fields.ability_names = g_world_game_option_values[GAME_OPTION_ABILITY_NAMES];
-        g_main_game_options.fields.effect_messages = g_world_game_option_values[GAME_OPTION_EFFECT_MESSAGES];
-        g_main_game_options.fields.display_gained_exp_jp
-            = g_world_game_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
-        g_main_game_options.fields.target_flashing = g_world_game_option_values[GAME_OPTION_TARGET_FLASHING];
-        g_main_game_options.fields.show_unequippable_items
-            = g_world_game_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
-        g_main_game_options.fields.max_equip_at_job_change
-            = g_world_game_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
-        g_main_game_options.fields.sound_mode = g_world_game_option_values[GAME_OPTION_SOUND_MODE];
-        thread_call_on_main_stack(g_world_game_option_values[GAME_OPTION_SOUND_MODE]);
+            = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
+        g_main_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
+        g_main_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
+        g_main_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
+        g_main_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
+        g_main_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
+        g_main_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
+        g_main_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
+        g_main_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
+        g_main_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
+        thread_call_on_main_stack(g_menu_option_values[GAME_OPTION_SOUND_MODE]);
         i++;
         column = g_main_game_options.fields.finger_cursor_repeat_speed;
-        g_main_input_repeat_initial_delay = g_world_option_input_timing_profiles[column].initial_delay;
-        g_main_input_repeat_period = g_world_option_input_timing_profiles[column].repeat_period;
-        g_main_input_secondary_repeat_period = g_world_option_input_timing_profiles[column].secondary_repeat_period;
-        g_main_menu_scroll_accel_delay = g_world_option_input_timing_profiles[column].scroll_accel_delay;
-        g_main_menu_scroll_slow_step = g_world_option_input_timing_profiles[column].scroll_slow_step;
-        g_main_menu_scroll_fast_step = g_world_option_input_timing_profiles[column].scroll_fast_step;
+        g_main_input_repeat_initial_delay = g_menu_option_input_repeat_timings[column].initial_delay;
+        g_main_input_repeat_period = g_menu_option_input_repeat_timings[column].repeat_period;
+        g_main_input_secondary_repeat_period = g_menu_option_input_repeat_timings[column].secondary_repeat_period;
+        g_main_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[column].scroll_accel_delay;
+        g_main_menu_scroll_slow_step = g_menu_option_input_repeat_timings[column].scroll_slow_step;
+        g_main_menu_scroll_fast_step = g_menu_option_input_repeat_timings[column].scroll_fast_step;
     }
     menu_free_memory(buffer);
     gfx_free_texture_rect(&g_world_options_menu_title_rect);

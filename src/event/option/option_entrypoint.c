@@ -10,24 +10,24 @@ void option_entrypoint(s32 menu_type) {
     s32 index;
     game_options_fields_t options = g_main_game_options.fields;
 
-    g_option_current_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
-    g_option_current_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
-    g_option_current_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
-    g_option_current_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED] = options.finger_cursor_repeat_speed;
-    g_option_current_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED] = options.message_display_speed;
-    g_option_current_values[GAME_OPTION_NAVIGATION_MESSAGES] = options.navigation_messages;
-    g_option_current_values[GAME_OPTION_ABILITY_NAMES] = options.ability_names;
-    g_option_current_values[GAME_OPTION_EFFECT_MESSAGES] = options.effect_messages;
-    g_option_current_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP] = options.display_gained_exp_jp;
-    g_option_current_values[GAME_OPTION_TARGET_FLASHING] = options.target_flashing;
-    g_option_current_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
-    g_option_current_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
-    g_option_current_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
-    g_option_current_values[GAME_OPTION_UNCHANGED] = 1;
+    g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
+    g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;
+    g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED] = options.multi_height_cursor_speed;
+    g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED] = options.finger_cursor_repeat_speed;
+    g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED] = options.message_display_speed;
+    g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES] = options.navigation_messages;
+    g_menu_option_values[GAME_OPTION_ABILITY_NAMES] = options.ability_names;
+    g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES] = options.effect_messages;
+    g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP] = options.display_gained_exp_jp;
+    g_menu_option_values[GAME_OPTION_TARGET_FLASHING] = options.target_flashing;
+    g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS] = options.show_unequippable_items;
+    g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE] = options.max_equip_at_job_change;
+    g_menu_option_values[GAME_OPTION_SOUND_MODE] = options.sound_mode;
+    g_menu_option_values[GAME_OPTION_UNCHANGED] = 1;
 
     for (index = 0; index < GAME_OPTION_COUNT; index++) {
-        if (g_option_current_values[index] != g_option_reference_values[index]) {
-            g_option_current_values[GAME_OPTION_UNCHANGED] = 0;
+        if (g_menu_option_values[index] != g_menu_option_reference_values[index]) {
+            g_menu_option_values[GAME_OPTION_UNCHANGED] = 0;
         }
     }
 
@@ -58,7 +58,7 @@ void option_entrypoint(s32 menu_type) {
     }
     if (menu_type == OPTION_MENU_AT_LIST) {
         script_pulse_tutorial_wait_value(0xf9);
-        menu_start_at_list_thread_variant();
+        menu_start_at_list_thread();
     }
     if (menu_type == OPTION_MENU_DEAD_UNIT) {
         menu_start_dead_unit_threads();

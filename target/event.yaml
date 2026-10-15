@@ -2151,6 +2151,7 @@ load: 0x801bf000
 source_dir: src/event/option
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
+defines: {VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 256, VARIANT_MENU_CHOICE_VRAM_X: 448, VARIANT_MENU_CHOICE_WINDOW_CENTER_Y: 160, VARIANT_MENU_CHOICE_WINDOW_RIGHT_X: 368}
 
 functions:
   - {addr: 0x801bf000, size: 480, name: menu_draw_text_columns, hash: dff47199f4742289, source: src/shared/menu/menu_draw_text_columns.c}
@@ -2167,30 +2168,28 @@ functions:
   - {addr: 0x801c0e80, size: 1644, name: menu_start_dead_unit_threads, hash: d96dca0d02aaa010, source: src/shared/menu/menu_start_dead_unit_threads.c}
   - {addr: 0x801c14ec, size: 808, name: menu_init_at_list, hash: 0e222271dd330fe9, source: src/shared/menu/menu_init_at_list.c}
   - {addr: 0x801c1814, size: 328, name: menu_at_list_select_unit_thread, hash: 2d768b550d19a17f, source: src/shared/menu/menu_at_list_select_unit_thread.c}
-  - {addr: 0x801c195c, size: 224, name: menu_start_at_list_thread_variant, hash: 5bf5050f008c2b98}
+  - {addr: 0x801c195c, size: 224, name: menu_start_at_list_thread, hash: 5bf5050f008c2b98, source: src/shared/menu/menu_start_at_list_thread.c}
   - {addr: 0x801c1a3c, size: 640, name: option_entrypoint, hash: 8f7b254e0391baa2}
   - {addr: 0x801c1cbc, size: 4384, name: option_menu_run_game_options, hash: 3180807fdb0707d1, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {addr: 0x801c2ddc, size: 1652, name: option_menu_run_choice, hash: d496c0741c324433}
+  - {addr: 0x801c2ddc, size: 1652, name: menu_run_option_choice, hash: d496c0741c324433, source: src/shared/menu/menu_run_option_choice.c}
 
 data:
-  - {addr: 0x801c3450, name: g_option_input_repeat_timings}
+  - {addr: 0x801c3450, name: g_menu_option_input_repeat_timings}
   - {addr: 0x801c347c, name: g_menu_draw_area_template}
   - {addr: 0x801c3490, name: g_menu_thin_panel_texture_windows}
   - {addr: 0x801c34c8, name: g_menu_panel_texture_windows}
   - {addr: 0x801c3514, name: g_menu_draw_area_scale_percent}
   - {addr: 0x801c3580, name: g_option_menu_entry_table}
-  - {addr: 0x801c35ac, name: g_option_menu_at_list_entry_table}
+  - {addr: 0x801c35ac, name: g_menu_at_list_entry_table}
   - {addr: 0x801c35d8, name: g_option_dead_unit_menu_entries}
   - {addr: 0x801c3628, name: g_option_dead_unit_menu}
   - {addr: 0x801c38ac, name: g_menu_at_list_state}
-  - {addr: 0x801c38dc, name: g_option_menu_at_list_entry_table_pointer}
-  - {addr: 0x801c38e6, name: g_option_menu_at_list_menu_type}
-  - {addr: 0x801c3924, name: g_option_reference_values}
-  - {addr: 0x801c395c, name: g_option_current_values}
-  - {addr: 0x801c3994, name: g_option_choice_window_widths}
-  - {addr: 0x801c39cc, name: g_option_choice_counts}
-  - {addr: 0x801c3a04, name: g_option_value_text_id_bases}
-  - {addr: 0x801c3a3c, name: g_option_menu_icon_thread_param}
+  - {addr: 0x801c3924, name: g_menu_option_reference_values}
+  - {addr: 0x801c395c, name: g_menu_option_values}
+  - {addr: 0x801c3994, name: g_menu_option_choice_widths}
+  - {addr: 0x801c39cc, name: g_menu_option_choice_counts}
+  - {addr: 0x801c3a04, name: g_menu_option_value_text_id_bases}
+  - {addr: 0x801c3a3c, name: g_menu_option_icon_thread_param}
   - {addr: 0x801c3a78, name: g_option_dead_unit_controller_input}
   - {addr: 0x801c3a7c, name: g_menu_render_buffer}
   - {addr: 0x801c9a7c, name: g_option_at_list_pages}
@@ -2210,7 +2209,7 @@ data:
   - {addr: 0x801cbc4c, name: g_option_menu_title_image_rect}
   - {addr: 0x801cbc54, name: g_option_menu_value_image_rect}
   - {addr: 0x801cbc5c, name: g_option_menu_pages}
-  - {addr: 0x801cbf7c, name: g_option_picker_icon_records}
+  - {addr: 0x801cbf7c, name: g_menu_option_picker_icon_records}
   - {addr: 0x801cc074, name: g_menu_scratch_buffer}
 
 overrides:

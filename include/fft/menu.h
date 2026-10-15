@@ -2668,10 +2668,20 @@ s32 menu_run_job_list_variant(void);
 void menu_input_update_with_message_state_variant(void);
 s32 menu_update_equipment_variant(void);
 void menu_run_at_list_variant(void);
-void menu_start_at_list_thread_variant(void);
+void menu_start_at_list_thread(void);
 void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
 
 /* unified */
 void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode);
+extern menu_text_layout_t g_menu_at_list_entry_table[1];
+extern menu_entry_t g_menu_option_icon_thread_param;
+extern s32 g_menu_option_choice_widths[];
+extern s32 g_menu_option_choice_counts[];
+extern s32 g_menu_option_values[GAME_OPTION_UNCHANGED + 1];
+extern s32 g_menu_option_value_text_id_bases[];
+extern menu_icon_record_t g_menu_option_picker_icon_records[2];
+extern s32 g_menu_option_reference_values[];
+extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];
+void menu_run_option_choice(void);
 
 #endif

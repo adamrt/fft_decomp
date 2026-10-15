@@ -28,7 +28,7 @@
  * sound mode is applied on the main stack and the input-repeat timing is
  * reloaded from the finger-cursor speed profile.
  */
-void world_menu_run_option_choice(void) {
+void menu_run_option_choice(void) {
     RECT rect;
     u32* input;
     thread_t* thread;
@@ -45,48 +45,51 @@ void world_menu_run_option_choice(void) {
     script_get_controller_input_pointer(1);
     thread = &g_threads[g_thread_current_id];
     kind = thread->function_parameter_1;
-    thread->function_parameter_1 = (s32)&g_world_option_menu_icon_thread_param;
-    param = &g_world_option_menu_icon_thread_param;
-    width = g_world_option_menu_text_widths[kind];
+    thread->function_parameter_1 = (s32)&g_menu_option_icon_thread_param;
+    param = &g_menu_option_icon_thread_param;
+    width = g_menu_option_choice_widths[kind];
     if (width & 3) {
         width += 2;
     }
-    height = g_world_option_menu_entry_counts[kind] * 16 + 16;
+    height = g_menu_option_choice_counts[kind] * 16 + 16;
     buffer = menu_build_and_upload_window_frame_image_variant(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     thread_wait_frames(1);
     g_menu_text_state.pen.stride = width;
-    for (i = 0; i < g_world_option_menu_entry_counts[kind]; i++) {
+    for (i = 0; i < g_menu_option_choice_counts[kind]; i++) {
         menu_set_text_origin(8, i * 16 + 8);
-        if (i == g_world_game_option_values[kind]) {
+        if (i == g_menu_option_values[kind]) {
             g_menu_text_palette_offset = 8;
         }
-        menu_display_text_entry(i + g_world_option_menu_first_text_ids[kind], buffer, &g_menu_text_state.pen);
+        menu_display_text_entry(i + g_menu_option_value_text_id_bases[kind], buffer, &g_menu_text_state.pen);
         g_menu_text_palette_offset = 0;
     }
     /* Dead store: allocation device, see the file header. */
     if (height <= 0) {
         cursor = 0;
     }
-    param->window.x = 0x74 - width;
-    param->window.y = 0x28 - (height >> 1);
+    /* Window placement and VRAM staging origin differ per program: OPTION
+     * (over the battle screen) uses 368/160 and 448/256, WORLD 116/40 and
+     * 1536/1792. */
+    param->window.x = VARIANT_MENU_CHOICE_WINDOW_RIGHT_X - width;
+    param->window.y = VARIANT_MENU_CHOICE_WINDOW_CENTER_Y - (height >> 1);
     param->inner_width = param->window.w = param->text_image.width = width;
     param->inner_height = param->window.h = param->text_image.height = height;
-    param->vram_origin.x = 0x600;
-    param->vram_origin.y = 0x700 - height;
+    param->vram_origin.x = VARIANT_MENU_CHOICE_VRAM_X;
+    param->vram_origin.y = VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y - height;
     if (kind == GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED) {
         param->vram_origin.x = 0x1AE;
     }
     param->text_image.width -= 4;
-    menu_build_window_sprites_variant(&rect, param, &g_world_option_picker_icon_records[0]);
-    mem_copy_bytes_nonempty(&g_world_option_picker_icon_records[1], &g_world_option_picker_icon_records[0],
-        sizeof(g_world_option_picker_icon_records[1]));
+    menu_build_window_sprites_variant(&rect, param, &g_menu_option_picker_icon_records[0]);
+    mem_copy_bytes_nonempty(&g_menu_option_picker_icon_records[1], &g_menu_option_picker_icon_records[0],
+        sizeof(g_menu_option_picker_icon_records[1]));
     LoadImage(&rect, buffer);
     menu_free_memory(buffer);
     thread_wait_frames(1);
-    cursor = g_world_game_option_values[kind];
+    cursor = g_menu_option_values[kind];
     for (width = 0;; width++) {
         menu_should_close_thread_variant(input);
-        record = &g_world_option_picker_icon_records[width & 1].base;
+        record = &g_menu_option_picker_icon_records[width & 1].base;
         if (menu_can_accept_input_variant()) {
             if (*input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
@@ -102,14 +105,14 @@ void world_menu_run_option_choice(void) {
                             record = 0;
                         }
                         for (; i < GAME_OPTION_COUNT; i++) {
-                            g_world_game_option_values[i] = g_world_game_option_original_values[i];
+                            g_menu_option_values[i] = g_menu_option_reference_values[i];
                         }
-                        g_world_game_option_values[kind] = cursor;
+                        g_menu_option_values[kind] = cursor;
                         break;
                     }
                 } else {
-                    g_world_game_option_values[kind] = cursor;
-                    g_world_game_option_values[GAME_OPTION_UNCHANGED] = 0;
+                    g_menu_option_values[kind] = cursor;
+                    g_menu_option_values[GAME_OPTION_UNCHANGED] = 0;
                     break;
                 }
             }
@@ -118,13 +121,13 @@ void world_menu_run_option_choice(void) {
                 if (cursor != 0) {
                     cursor--;
                 } else {
-                    cursor = g_world_option_menu_entry_counts[kind] - 1;
+                    cursor = g_menu_option_choice_counts[kind] - 1;
                 }
                 g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
             }
             if (*input & PSX_PAD_DOWN) {
                 *input = 0;
-                if (cursor == g_world_option_menu_entry_counts[kind] - 1) {
+                if (cursor == g_menu_option_choice_counts[kind] - 1) {
                     cursor = 0;
                 } else {
                     cursor++;
@@ -137,32 +140,29 @@ void world_menu_run_option_choice(void) {
         menu_submit_icon_primitives(record);
         thread_wait_frames(1);
     }
-    g_main_game_options.fields.cursor_movement = g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT];
-    g_main_game_options.fields.cursor_repeat_speed = g_world_game_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
-    g_main_game_options.fields.multi_height_cursor_speed
-        = g_world_game_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
+    g_main_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
+    g_main_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
+    g_main_game_options.fields.multi_height_cursor_speed = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
     g_main_game_options.fields.finger_cursor_repeat_speed
-        = g_world_game_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
-    g_main_game_options.fields.message_display_speed = g_world_game_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
-    g_main_game_options.fields.navigation_messages = g_world_game_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
-    g_main_game_options.fields.ability_names = g_world_game_option_values[GAME_OPTION_ABILITY_NAMES];
-    g_main_game_options.fields.effect_messages = g_world_game_option_values[GAME_OPTION_EFFECT_MESSAGES];
-    g_main_game_options.fields.display_gained_exp_jp = g_world_game_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
-    g_main_game_options.fields.target_flashing = g_world_game_option_values[GAME_OPTION_TARGET_FLASHING];
-    g_main_game_options.fields.show_unequippable_items
-        = g_world_game_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
-    g_main_game_options.fields.max_equip_at_job_change
-        = g_world_game_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
-    g_main_game_options.fields.sound_mode = g_world_game_option_values[GAME_OPTION_SOUND_MODE];
+        = g_menu_option_values[GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED];
+    g_main_game_options.fields.message_display_speed = g_menu_option_values[GAME_OPTION_MESSAGE_DISPLAY_SPEED];
+    g_main_game_options.fields.navigation_messages = g_menu_option_values[GAME_OPTION_NAVIGATION_MESSAGES];
+    g_main_game_options.fields.ability_names = g_menu_option_values[GAME_OPTION_ABILITY_NAMES];
+    g_main_game_options.fields.effect_messages = g_menu_option_values[GAME_OPTION_EFFECT_MESSAGES];
+    g_main_game_options.fields.display_gained_exp_jp = g_menu_option_values[GAME_OPTION_DISPLAY_GAINED_EXP_JP];
+    g_main_game_options.fields.target_flashing = g_menu_option_values[GAME_OPTION_TARGET_FLASHING];
+    g_main_game_options.fields.show_unequippable_items = g_menu_option_values[GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS];
+    g_main_game_options.fields.max_equip_at_job_change = g_menu_option_values[GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE];
+    g_main_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
     g_thread_call_target = (void (*)(void))suzuki_sound_set_type;
-    thread_call_on_main_stack(g_world_game_option_values[GAME_OPTION_SOUND_MODE]);
+    thread_call_on_main_stack(g_menu_option_values[GAME_OPTION_SOUND_MODE]);
     width = g_main_game_options.fields.finger_cursor_repeat_speed;
-    g_main_input_repeat_initial_delay = g_world_option_input_timing_profiles[width].initial_delay;
-    g_main_input_repeat_period = g_world_option_input_timing_profiles[width].repeat_period;
-    g_main_input_secondary_repeat_period = g_world_option_input_timing_profiles[width].secondary_repeat_period;
-    g_main_menu_scroll_accel_delay = g_world_option_input_timing_profiles[width].scroll_accel_delay;
-    g_main_menu_scroll_slow_step = g_world_option_input_timing_profiles[width].scroll_slow_step;
-    g_main_menu_scroll_fast_step = g_world_option_input_timing_profiles[width].scroll_fast_step;
+    g_main_input_repeat_initial_delay = g_menu_option_input_repeat_timings[width].initial_delay;
+    g_main_input_repeat_period = g_menu_option_input_repeat_timings[width].repeat_period;
+    g_main_input_secondary_repeat_period = g_menu_option_input_repeat_timings[width].secondary_repeat_period;
+    g_main_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[width].scroll_accel_delay;
+    g_main_menu_scroll_slow_step = g_menu_option_input_repeat_timings[width].scroll_slow_step;
+    g_main_menu_scroll_fast_step = g_menu_option_input_repeat_timings[width].scroll_fast_step;
     *input = 0;
     thread_wait_frames(1);
     thread_exit_current();
