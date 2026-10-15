@@ -27,6 +27,7 @@ units:
   - {name: wldcore_map_scroll_and_input_repeat, source: src/wldcore/wldcore_map_scroll_and_input_repeat.c}
   - {name: wldcore_menu_levels, source: src/shared/menu/wldcore_menu_levels.c}
   - {name: wldcore_menu_participant_levels, source: src/shared/menu/wldcore_menu_participant_levels.c}
+  - {name: wldcore_menu_screen_transition, source: src/shared/menu/wldcore_menu_screen_transition.c}
   - {name: wldcore_menu_sound_novel_levels, source: src/shared/menu/wldcore_menu_sound_novel_levels.c}
   - {name: wldcore_menu_yes_no_and_number_panels, source: src/shared/menu/wldcore_menu_yes_no_and_number_panels.c}
   - {name: wldcore_nine_bit_date_records, source: src/wldcore/wldcore_nine_bit_date_records.c}
@@ -311,10 +312,10 @@ functions:
   - {addr: 0x80087da0, size: 516, name: wldcore_list_handle_brave_story_propositions_input, hash: d0220aeec018bc1e, unit: wldcore_list_brave_story_propositions}
   - {addr: 0x80087fa4, size: 476, name: wldcore_menu_push_proposition_attempt_detail_level, hash: c9cc9c865ac2e396, source: src/shared/menu/wldcore_menu_push_proposition_attempt_detail_level.c}
   - {addr: 0x80088180, size: 392, name: wldcore_menu_wait_brave_story_text_then_pop_level, hash: b3f0c6a8cf2e5f9d, source: src/shared/menu/wldcore_menu_wait_brave_story_text_then_pop_level.c}
-  - {addr: 0x80088308, size: 988, name: wldcore_menu_push_screen_transition_level, hash: a54f6808fc360853, source: src/shared/menu/wldcore_menu_push_screen_transition_level.c, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
-  - {addr: 0x800886e4, size: 916, name: wldcore_window_close_parent_list_all_windows, hash: 70bf9f0c22a63d0e, source: src/shared/window/wldcore_window_close_parent_list_all_windows.c}
-  - {addr: 0x80088a78, size: 536, name: wldcore_window_close_parent_list_frame_windows, hash: e3ce1fa1e0ef9392, source: src/shared/window/wldcore_window_close_parent_list_frame_windows.c}
-  - {addr: 0x80088c90, size: 1120, name: wldcore_menu_step_screen_transition_level, hash: 22416fb257542db2, source: src/shared/menu/wldcore_menu_step_screen_transition_level.c, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
+  - {addr: 0x80088308, size: 988, name: wldcore_menu_push_screen_transition_level, hash: a54f6808fc360853, unit: wldcore_menu_screen_transition, rodata: [{addr: 0x80067210, size: 76, hash: 6c899961871ac5b9}]}
+  - {addr: 0x800886e4, size: 916, name: wldcore_window_close_parent_list_all_windows, hash: 70bf9f0c22a63d0e, unit: wldcore_menu_screen_transition}
+  - {addr: 0x80088a78, size: 536, name: wldcore_window_close_parent_list_frame_windows, hash: e3ce1fa1e0ef9392, unit: wldcore_menu_screen_transition}
+  - {addr: 0x80088c90, size: 1120, name: wldcore_menu_step_screen_transition_level, hash: 22416fb257542db2, unit: wldcore_menu_screen_transition, rodata: [{addr: 0x80067260, size: 76, hash: 0d9e2f6b8eb3d913}]}
   - {addr: 0x800890f0, size: 1100, name: wldcore_list_open_tutorial_categories, hash: 61d22220966e7b4d}
   - {addr: 0x8008953c, size: 392, name: wldcore_list_build_tutorial_category_panel_image, hash: 6e7e170a9de6189f}
   - {addr: 0x800896c4, size: 236, name: wldcore_window_clear_layout_states_and_queue_msg_b8dd, hash: 1fe1a6d4d29bc858, source: src/shared/window/wldcore_window_clear_layout_states_and_queue_msg_b8dd.c}

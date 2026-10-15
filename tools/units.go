@@ -657,6 +657,10 @@ func (an *unitModuleAnalysis) profileEvidence(group *unitGroup) {
 				if cuts > 1 {
 					kind, weight = kind+"_interval", 1
 					detail += fmt.Sprintf(" (somewhere across %d cuts)", cuts)
+				} else if prior.base != fn.base {
+					// Adjacent functions built with different optimization,
+					// assembler or small-data settings were different compiles.
+					kind, weight = "profile_object", 6
 				}
 				for cut := previous; cut < i; cut++ {
 					an.evidence[cut] = append(an.evidence[cut], unitEvidence{kind, weight, detail})
@@ -686,7 +690,7 @@ func (an *unitModuleAnalysis) scoreAndFormUnits(options unitsOptions) {
 			for _, evidence := range cut.evidence {
 				cut.score += evidence.Weight
 				switch evidence.Kind {
-				case "asm_object", "library", "language_change", "rodata_object":
+				case "asm_object", "library", "language_change", "rodata_object", "profile_object":
 					cut.certain = true
 				}
 			}

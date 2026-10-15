@@ -168,7 +168,11 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	sort.Slice(unit.rodata, func(i, j int) bool { return unit.rodata[i].Addr < unit.rodata[j].Addr })
 	for i := 1; i < len(unit.rodata); i++ {
 		previous := unit.rodata[i-1]
-		if unit.rodata[i].Addr != previous.Addr+uint32(previous.Size) {
+		end := previous.Addr + uint32(previous.Size)
+		// A jump table is aligned to 8 within its object, so up to 4 bytes
+		// of padding before an 8-aligned range is the compiler's own gap.
+		padding := unit.rodata[i].Addr >= end && unit.rodata[i].Addr-end < 8 && unit.rodata[i].Addr%8 == 0
+		if unit.rodata[i].Addr != end && !padding {
 			return nil, fmt.Errorf("%s: rodata ranges are not contiguous at 0x%08x", spec.name, unit.rodata[i].Addr)
 		}
 	}
@@ -420,10 +424,8 @@ func compareUnitSections(unit *unitInstance, sections map[string][]byte) ([]unit
 	}
 	if len(unit.rodata) > 0 {
 		data := sections[".rodata"]
-		total := 0
-		for _, rodata := range unit.rodata {
-			total += rodata.Size
-		}
+		last := unit.rodata[len(unit.rodata)-1]
+		total := int(last.Addr + uint32(last.Size) - unit.rodata[0].Addr)
 		if len(data) != total {
 			problems = append(problems, fmt.Sprintf("compiled .rodata is %d bytes, the declared ranges cover %d", len(data), total))
 		} else {

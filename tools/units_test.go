@@ -181,7 +181,7 @@ func TestUnitEvidenceFromProfilesCallsDataAndAlignment(t *testing.T) {
 	battle, world := analyses["battle"], analyses["world"]
 	cut := unitCutAfter(t, battle, "menu_a4")
 	kinds := evidenceKinds(cut)
-	if kinds["profile_run"] != 3 || kinds["call_locality"] != 1 || kinds["alignment_divergence"] != 3 {
+	if kinds["profile_object"] != 6 || kinds["call_locality"] != 1 || kinds["alignment_divergence"] != 3 {
 		t.Fatalf("evidence after menu_a4 = %v", kinds)
 	}
 	if cut.confidence != "high" {
