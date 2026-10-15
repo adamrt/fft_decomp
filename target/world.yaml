@@ -11,7 +11,7 @@ defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 112, VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y
 
 units:
   - {name: camera_fusion_tracks, source: src/shared/camera/camera_fusion_tracks.c}
-  - {name: card_file_read_with_retries_unit, source: src/shared/card/card_file_read_with_retries_unit.c}
+  - {name: card_file_transfer_retries, source: src/shared/card/card_file_transfer_retries.c}
   - {name: gfx_image_transfer_wait, source: src/shared/gfx/gfx_image_transfer_wait.c}
   - {name: gfx_primitive_submission, source: src/shared/gfx/gfx_primitive_submission.c}
   - {name: gfx_texture_page_draw_modes, source: src/shared/gfx/gfx_texture_page_draw_modes.c}
@@ -1020,8 +1020,8 @@ functions:
   - {addr: 0x8013300c, size: 332, name: world_card_write_buffer_to_file, hash: 75ec899066d27cbf, source: src/shared/card/world_card_write_buffer_to_file.c}
   - {addr: 0x80133158, size: 164, name: world_card_delete_file, hash: 480eee05ca386e82, source: src/shared/card/world_card_delete_file.c, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
   - {addr: 0x801331fc, size: 268, name: world_card_read_file_chunked, hash: a65131d6e19dba38, source: src/shared/card/world_card_read_file_chunked.c}
-  - {addr: 0x80133308, size: 184, name: card_file_read_with_retries, hash: b11f28aec9ab5da2, unit: card_file_read_with_retries_unit}
-  - {addr: 0x801333c0, size: 184, name: card_file_write_with_retries, hash: 719ef687bd08afda, unit: card_file_read_with_retries_unit}
+  - {addr: 0x80133308, size: 184, name: card_file_read_with_retries, hash: b11f28aec9ab5da2, unit: card_file_transfer_retries}
+  - {addr: 0x801333c0, size: 184, name: card_file_write_with_retries, hash: 719ef687bd08afda, unit: card_file_transfer_retries}
   - {addr: 0x80133478, size: 1952, name: world_shop_run_screen, hash: 5736dcb2cff8e5e1, unit: world_shop_screen_main_menu}
   - {addr: 0x80133c18, size: 8, name: world_shop_menu_noop_callback, hash: 6d64edf91449c1b1, unit: world_shop_screen_main_menu}
   - {addr: 0x80133c20, size: 272, name: world_shop_run_main_menu_step, hash: 1e59afdc0b2e03d6, unit: world_shop_screen_main_menu}

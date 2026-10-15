@@ -2,40 +2,6 @@
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 
-/* Save the active menu position in a persistent cursor slot. */
-void wldcore_list_store_cursor_state(s32 index) {
-    g_wldcore_menu_cursor_states[index].selected_index = g_wldcore_window_panel_render_state.selected_index;
-    g_wldcore_menu_cursor_states[index].scroll_offset = g_wldcore_window_panel_render_state.select_text_table;
-}
-
-/* Clamp a saved cursor slot to the current list and restore it as active. */
-void wldcore_list_clamp_cursor_state(s32 index, s32 count, s32 visible) {
-    s32 end;
-
-    if (count < g_wldcore_menu_cursor_states[index].selected_index + 1) {
-        g_wldcore_menu_cursor_states[index].selected_index = count - 1;
-        g_wldcore_menu_cursor_states[index].scroll_offset = count - visible;
-    }
-    end = g_wldcore_menu_cursor_states[index].scroll_offset;
-    end += visible;
-    if (count - end < 0) {
-        g_wldcore_menu_cursor_states[index].scroll_offset = count - visible;
-    }
-    {
-        s32 value;
-
-        value = g_wldcore_menu_cursor_states[index].selected_index;
-        g_wldcore_window_panel_render_state.selected_index = value;
-        value = g_wldcore_menu_cursor_states[index].scroll_offset;
-        g_wldcore_window_panel_render_state.select_text_table = value;
-    }
-}
-
-void wldcore_list_clear_cursor_state(s32 index) {
-    g_wldcore_menu_cursor_states[index].scroll_offset = 0;
-    g_wldcore_menu_cursor_states[index].selected_index = 0;
-}
-
 /* Initialize and start a numeric panel renderer.
  *
  * The packed 32-bit value supplies two displayed 16-bit values; their magnitude selects
@@ -101,8 +67,4 @@ void wldcore_window_init_number_panel_render_thread(s32 thread_id, u32 packed_va
     g_wldcore_window_panel_render_state.select_text_table = 0;
     thread_start(thread_id, world_menu_labeled_number_entry_thread);
     thread_set_parameters(thread_id, (s32)&g_wldcore_window_panel_render_state, 0, 0);
-}
-
-/* The on_change callback of the number panel's value range: nothing to do. */
-void wldcore_window_number_panel_noop_callback(void) {
 }

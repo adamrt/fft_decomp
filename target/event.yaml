@@ -880,7 +880,7 @@ links: [battle]
 defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
 
 units:
-  - {name: card_file_read_with_retries_unit, source: src/shared/card/card_file_read_with_retries_unit.c}
+  - {name: card_file_transfer_retries, source: src/shared/card/card_file_transfer_retries.c}
   - {name: card_save_screen, source: src/event/card/card_save_screen.c}
   - {name: gfx_image_transfer_wait, source: src/shared/gfx/gfx_image_transfer_wait.c}
   - {name: gfx_screen_fade, source: src/shared/gfx/gfx_screen_fade.c}
@@ -932,8 +932,8 @@ functions:
   - {addr: 0x801c4eec, size: 204, name: card_file_seek_with_retries, hash: 5513bda3c8478b59, profile: gcc-2.6.3_O0_aspsx-2.34, source: src/shared/card/card_file_seek_with_retries.c}
   - {addr: 0x801c4fb8, size: 684, name: card_file_write_buffer, hash: 66315f155df10733, profile: gcc-2.6.3_O0_aspsx-2.34, source: src/shared/file/card_file_write_buffer.c}
   - {addr: 0x801c5264, size: 276, name: card_file_delete_selected_with_retries, hash: 98a020db69d65c10, profile: gcc-2.6.3_O0_aspsx-2.34, source: src/shared/file/card_file_delete_selected_with_retries.c}
-  - {addr: 0x801c5378, size: 336, name: card_file_read_with_retries, hash: f5e8826fc23a26c9, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_file_read_with_retries_unit}
-  - {addr: 0x801c54c8, size: 336, name: card_file_write_with_retries, hash: 26895f5b5e42b5a9, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_file_read_with_retries_unit}
+  - {addr: 0x801c5378, size: 336, name: card_file_read_with_retries, hash: f5e8826fc23a26c9, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_file_transfer_retries}
+  - {addr: 0x801c54c8, size: 336, name: card_file_write_with_retries, hash: 26895f5b5e42b5a9, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_file_transfer_retries}
   - {addr: 0x801c5618, size: 268, name: card_gfx_submit_frame_and_swap_buffers, hash: a0c3f91dfab11c0a, source: src/shared/gfx/card_gfx_submit_frame_and_swap_buffers.c}
   - {addr: 0x801c5724, size: 188, name: card_gfx_init_primitive_lists, hash: 5281de40b6d6fde6, source: src/shared/gfx/card_gfx_init_primitive_lists.c}
   - {addr: 0x801c57e0, size: 464, name: card_gfx_init_contexts, hash: 17d58bd69695ffbe, source: src/shared/gfx/card_gfx_init_contexts.c}

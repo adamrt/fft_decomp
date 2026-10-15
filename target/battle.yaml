@@ -58,48 +58,39 @@ units:
   - {name: battle_unit_animation_by_runtime_id, source: src/shared/unit/battle_unit_animation_by_runtime_id.c}
   - {name: battle_unit_animation_request, source: src/shared/unit/battle_unit_animation_request.c}
   - {name: battle_unit_animation_selection, source: src/shared/unit/battle_unit_animation_selection.c}
-  - {name: battle_unit_clear_horizontal_flip_flag_unit, source: src/shared/unit/battle_unit_clear_horizontal_flip_flag_unit.c}
   - {name: battle_unit_crystal_treasure, source: src/shared/unit/battle_unit_crystal_treasure.c}
   - {name: battle_unit_display_status_refresh, source: src/shared/unit/battle_unit_display_status_refresh.c}
   - {name: battle_unit_distortion_animations, source: src/battle/battle_unit_distortion_animations.c}
   - {name: battle_unit_entd_deployment, source: src/shared/unit/battle_unit_entd_deployment.c}
   - {name: battle_unit_exp_jp_rewards, source: src/shared/unit/battle_unit_exp_jp_rewards.c}
+  - {name: battle_unit_facing_and_flip_flags, source: src/shared/unit/battle_unit_facing_and_flip_flags.c}
   - {name: battle_unit_facing_queries, source: src/shared/unit/battle_unit_facing_queries.c}
-  - {name: battle_unit_has_runtime_id_unit, source: src/shared/unit/battle_unit_has_runtime_id_unit.c}
   - {name: battle_unit_list_lifecycle, source: src/shared/unit/battle_unit_list_lifecycle.c}
-  - {name: battle_unit_prepare_rider_dismount_unit, source: src/shared/unit/battle_unit_prepare_rider_dismount_unit.c}
+  - {name: battle_unit_palette_and_flip_flags, source: src/shared/unit/battle_unit_palette_and_flip_flags.c}
   - {name: battle_unit_projectile_hit_reaction, source: src/shared/unit/battle_unit_projectile_hit_reaction.c}
-  - {name: battle_unit_set_movement_effect_suppression_unit, source: src/shared/unit/battle_unit_set_movement_effect_suppression_unit.c}
+  - {name: battle_unit_rider_mount_dismount, source: src/shared/unit/battle_unit_rider_mount_dismount.c}
   - {name: battle_unit_slope_geometry, source: src/shared/unit/battle_unit_slope_geometry.c}
   - {name: battle_unit_tile_snapping, source: src/shared/unit/battle_unit_tile_snapping.c}
   - {name: battle_unit_world_coords_queries, source: src/shared/unit/battle_unit_world_coords_queries.c}
+  - {name: camera_effect_keyframe_tracks, source: src/shared/camera/camera_effect_keyframe_tracks.c}
   - {name: camera_fusion_tracks, source: src/shared/camera/camera_fusion_tracks.c}
   - {name: camera_map_controls, source: src/shared/camera/camera_map_controls.c}
   - {name: camera_map_init, source: src/shared/camera/camera_map_init.c}
   - {name: camera_real_coords_backup, source: src/shared/camera/camera_real_coords_backup.c}
   - {name: camera_rotation_state, source: src/shared/camera/camera_rotation_state.c}
-  - {name: camera_save_screen_offset_unit, source: src/shared/camera/camera_save_screen_offset_unit.c}
-  - {name: camera_start_screen_offset_move_uniform_unit, source: src/shared/camera/camera_start_screen_offset_move_uniform_unit.c}
+  - {name: camera_screen_offset_state, source: src/shared/camera/camera_screen_offset_state.c}
   - {name: camera_tile_depth_offsets, source: src/shared/camera/camera_tile_depth_offsets.c}
   - {name: camera_world_projection, source: src/shared/camera/camera_world_projection.c}
   - {name: effect_ability_effect_start, source: src/battle/effect_ability_effect_start.c}
-  - {name: effect_code_script_02_spawn_child_unit, source: src/battle/effect_code_script_02_spawn_child_unit.c}
-  - {name: effect_code_script_06_register_native_callback_unit, source: src/battle/effect_code_script_06_register_native_callback_unit.c}
-  - {name: effect_code_script_0a_restore_camera_position_unit, source: src/battle/effect_code_script_0a_restore_camera_position_unit.c}
-  - {name: effect_code_script_0e_set_camera_zoom_unit, source: src/battle/effect_code_script_0e_set_camera_zoom_unit.c}
-  - {name: effect_code_script_12_jump_if_counter_at_least_unit, source: src/battle/effect_code_script_12_jump_if_counter_at_least_unit.c}
-  - {name: effect_code_script_16_jump_if_work_count_equal_unit, source: src/battle/effect_code_script_16_jump_if_work_count_equal_unit.c}
-  - {name: effect_code_script_1a_jump_if_child_active_unit, source: src/battle/effect_code_script_1a_jump_if_child_active_unit.c}
-  - {name: effect_code_script_1e_jump_after_total_duration_unit, source: src/battle/effect_code_script_1e_jump_after_total_duration_unit.c}
-  - {name: effect_code_script_22_add_immediate_to_selected_counter_unit, source: src/battle/effect_code_script_22_add_immediate_to_selected_counter_unit.c}
-  - {name: effect_code_script_26_spawn_emitter_particles_unit, source: src/battle/effect_code_script_26_spawn_emitter_particles_unit.c}
-  - {name: effect_code_script_28_step_child_timeline_unit, source: src/battle/effect_code_script_28_step_child_timeline_unit.c}
-  - {name: effect_code_script_2e_invalid_unit, source: src/battle/effect_code_script_2e_invalid_unit.c}
+  - {name: effect_code_script_camera_rotation, source: src/battle/effect_code_script_camera_rotation.c}
+  - {name: effect_code_script_child_lifecycle, source: src/battle/effect_code_script_child_lifecycle.c}
+  - {name: effect_code_script_child_state_jumps, source: src/battle/effect_code_script_child_state_jumps.c}
+  - {name: effect_code_script_count_jumps, source: src/battle/effect_code_script_count_jumps.c}
+  - {name: effect_code_script_counter_compare_jumps, source: src/battle/effect_code_script_counter_compare_jumps.c}
+  - {name: effect_code_script_jumps_and_invalid, source: src/battle/effect_code_script_jumps_and_invalid.c}
   - {name: effect_code_script_timeline_resets, source: src/battle/effect_code_script_timeline_resets.c}
-  - {name: effect_find_next_keyframe_unit, source: src/shared/camera/effect_find_next_keyframe_unit.c}
+  - {name: effect_file_load_and_playback, source: src/battle/effect_file_load_and_playback.c}
   - {name: effect_gravity_settings, source: src/battle/effect_gravity_settings.c}
-  - {name: effect_init_palette_unit, source: src/battle/effect_init_palette_unit.c}
-  - {name: effect_init_state_records_unit, source: src/battle/effect_init_state_records_unit.c}
   - {name: effect_model_and_target_coords, source: src/battle/effect_model_and_target_coords.c}
   - {name: effect_particle_motion_nodes, source: src/battle/effect_particle_motion_nodes.c}
   - {name: effect_random_vector_offsets, source: src/battle/effect_random_vector_offsets.c}
@@ -109,6 +100,8 @@ units:
   - {name: effect_secondary_handlers, source: src/battle/effect_secondary_handlers.c}
   - {name: effect_secondary_starters, source: src/battle/effect_secondary_starters.c}
   - {name: effect_slot_pools, source: src/battle/effect_slot_pools.c}
+  - {name: effect_state_record_pool, source: src/battle/effect_state_record_pool.c}
+  - {name: effect_timeline_track_stepping, source: src/battle/effect_timeline_track_stepping.c}
   - {name: effect_vector_add_and_wrap, source: src/battle/effect_vector_add_and_wrap.c}
   - {name: effect_vector_load_and_scale, source: src/battle/effect_vector_load_and_scale.c}
   - {name: formula_evade_zodiac_knockback, source: src/battle/formula_evade_zodiac_knockback.c}
@@ -119,11 +112,11 @@ units:
   - {name: map_background_color, source: src/shared/map/map_background_color.c}
   - {name: map_color_blends, source: src/shared/map/map_color_blends.c}
   - {name: map_freeze_and_palette_tints, source: src/shared/map/map_freeze_and_palette_tints.c}
+  - {name: map_palette_color_updates, source: src/shared/map/map_palette_color_updates.c}
   - {name: map_palette_rows, source: src/shared/map/map_palette_rows.c}
-  - {name: map_store_modified_palette_colors_unit, source: src/shared/map/map_store_modified_palette_colors_unit.c}
+  - {name: map_palette_tint_and_gradient_fade, source: src/shared/map/map_palette_tint_and_gradient_fade.c}
   - {name: map_tile_data_access, source: src/shared/map/map_tile_data_access.c}
   - {name: map_tile_lookups_and_commands, source: src/shared/map/map_tile_lookups_and_commands.c}
-  - {name: map_update_palette_colors_inner_unit, source: src/shared/map/map_update_palette_colors_inner_unit.c}
   - {name: menu_action_confirm_threads, source: src/shared/sound/menu_action_confirm_threads.c}
   - {name: menu_allocator_and_numeric_frame, source: src/shared/menu/menu_allocator_and_numeric_frame.c}
   - {name: menu_companion_overlay_requests, source: src/shared/menu/menu_companion_overlay_requests.c}
@@ -139,7 +132,7 @@ units:
   - {name: menu_unit_selection_records, source: src/shared/menu/menu_unit_selection_records.c}
   - {name: menu_window_quad_animation, source: src/shared/gfx/menu_window_quad_animation.c}
   - {name: move_effective_flags_and_preview, source: src/battle/move_effective_flags_and_preview.c}
-  - {name: move_init_knockback_unit, source: src/battle/move_init_knockback_unit.c}
+  - {name: move_knockback_setup, source: src/battle/move_knockback_setup.c}
   - {name: move_pathfinding, source: src/battle/move_pathfinding.c}
   - {name: move_paths_and_event_handoff, source: src/battle/move_paths_and_event_handoff.c}
   - {name: move_post_move_find_item, source: src/shared/map/move_post_move_find_item.c}
@@ -256,8 +249,8 @@ functions:
   - {addr: 0x8006d7e4, size: 52, name: move_set_unit_path_flag, hash: 38155cf490199903}
   - {addr: 0x8006d818, size: 760, name: move_update_path_step, hash: b29a63102e5f39f5, rodata: [{addr: 0x800673d8, size: 240, hash: 21cc62ff87566718}]}
   - {addr: 0x8006db10, size: 380, name: move_update_knockback_step, hash: b975e682f5d674cc, rodata: [{addr: 0x800674c8, size: 128, hash: c46d9825fe87f609}]}
-  - {addr: 0x8006dc8c, size: 288, name: move_init_knockback, hash: b34366cb9ab1493b, unit: move_init_knockback_unit}
-  - {addr: 0x8006ddac, size: 64, name: move_transfer_target_coordinates, hash: 6d8765992e04a9a9, unit: move_init_knockback_unit}
+  - {addr: 0x8006dc8c, size: 288, name: move_init_knockback, hash: b34366cb9ab1493b, unit: move_knockback_setup}
+  - {addr: 0x8006ddac, size: 64, name: move_transfer_target_coordinates, hash: 6d8765992e04a9a9, unit: move_knockback_setup}
   - {addr: 0x8006ddec, size: 1904, name: camera_get_input_direction, hash: e05f5aa2ab12948a, unit: target_free_cursor_input}
   - {addr: 0x8006e55c, size: 100, name: target_store_cursor_unit_name_and_data, hash: b6444da65f91a1d7, unit: target_free_cursor_input}
   - {addr: 0x8006e5c0, size: 116, name: target_store_cursor_unit_as_preview_target, hash: cf1646ac56c4b41b, unit: target_free_cursor_input}
@@ -629,15 +622,15 @@ functions:
   - {addr: 0x8008b338, size: 148, name: camera_set_real_coord_delta_from_destination, hash: abe756829f2d9f31, source: src/shared/camera/camera_set_real_coord_delta_from_destination.c}
   - {addr: 0x8008b3cc, size: 116, name: camera_set_real_coord_delta_from_values, hash: 65001faab3c7464b, source: src/shared/camera/camera_set_real_coord_delta_from_values.c}
   - {addr: 0x8008b440, size: 120, name: camera_update_real_coord_animation, hash: 84697252f7c9cdc4, source: src/shared/camera/camera_update_real_coord_animation.c}
-  - {addr: 0x8008b4b8, size: 56, name: camera_save_screen_offset, hash: cf7553f0e127d510, unit: camera_save_screen_offset_unit}
-  - {addr: 0x8008b4f0, size: 56, name: camera_restore_screen_offset, hash: 6cb6fb28912c6cdc, unit: camera_save_screen_offset_unit}
-  - {addr: 0x8008b528, size: 16, name: camera_get_screen_offset, hash: b81de340ddcadb3e, unit: camera_save_screen_offset_unit}
-  - {addr: 0x8008b538, size: 44, name: camera_set_screen_offset, hash: 041960da2d84ac91, unit: camera_save_screen_offset_unit}
-  - {addr: 0x8008b564, size: 200, name: camera_start_screen_offset_move_uniform, hash: 32b4fa375bad9b89, unit: camera_start_screen_offset_move_uniform_unit}
-  - {addr: 0x8008b62c, size: 184, name: camera_start_screen_offset_move_relative, hash: ba9ca55599dc87a1, unit: camera_start_screen_offset_move_uniform_unit}
-  - {addr: 0x8008b6e4, size: 208, name: camera_update_screen_offset_animation, hash: 9c780252eb0861a7, unit: camera_start_screen_offset_move_uniform_unit}
-  - {addr: 0x8008b7b4, size: 56, name: camera_save_zoom, hash: 9e1808980161cca4, unit: camera_start_screen_offset_move_uniform_unit}
-  - {addr: 0x8008b7ec, size: 56, name: camera_restore_zoom, hash: 38080472a9e656a3, unit: camera_start_screen_offset_move_uniform_unit}
+  - {addr: 0x8008b4b8, size: 56, name: camera_save_screen_offset, hash: cf7553f0e127d510, unit: camera_screen_offset_state}
+  - {addr: 0x8008b4f0, size: 56, name: camera_restore_screen_offset, hash: 6cb6fb28912c6cdc, unit: camera_screen_offset_state}
+  - {addr: 0x8008b528, size: 16, name: camera_get_screen_offset, hash: b81de340ddcadb3e, unit: camera_screen_offset_state}
+  - {addr: 0x8008b538, size: 44, name: camera_set_screen_offset, hash: 041960da2d84ac91, unit: camera_screen_offset_state}
+  - {addr: 0x8008b564, size: 200, name: camera_start_screen_offset_move_uniform, hash: 32b4fa375bad9b89, source: src/shared/camera/camera_start_screen_offset_move_uniform.c}
+  - {addr: 0x8008b62c, size: 184, name: camera_start_screen_offset_move_relative, hash: ba9ca55599dc87a1, source: src/shared/camera/camera_start_screen_offset_move_relative.c}
+  - {addr: 0x8008b6e4, size: 208, name: camera_update_screen_offset_animation, hash: 9c780252eb0861a7, source: src/shared/camera/camera_update_screen_offset_animation.c}
+  - {addr: 0x8008b7b4, size: 56, name: camera_save_zoom, hash: 9e1808980161cca4, source: src/shared/camera/camera_save_zoom.c}
+  - {addr: 0x8008b7ec, size: 56, name: camera_restore_zoom, hash: 38080472a9e656a3, source: src/shared/camera/camera_restore_zoom.c}
   - {addr: 0x8008b824, size: 16, name: camera_get_zoom, hash: f818d7eb175daeb0, source: src/shared/camera/camera_get_zoom.c}
   - {addr: 0x8008b834, size: 44, name: camera_set_zoom, hash: 997b6c1f8a81dbd7, source: src/shared/camera/camera_set_zoom.c}
   - {addr: 0x8008b860, size: 148, name: camera_set_zoom_delta_from_value, hash: dcce3478f5e41fb8, source: src/shared/camera/camera_set_zoom_delta_from_value.c}
@@ -684,24 +677,24 @@ functions:
   - {addr: 0x8008c550, size: 152, name: camera_project_world_coords_to_screen, hash: f485eb40b2cdb8cf, unit: camera_world_projection}
   - {addr: 0x8008c5e8, size: 124, name: battle_unit_get_map_coords_by_runtime_id, hash: 181fd797759b9fbf, unit: camera_world_projection}
   - {addr: 0x8008c664, size: 360, name: move_start_unit_walk_to, hash: ba93e4c07cc705a5, unit: camera_world_projection}
-  - {addr: 0x8008c7cc, size: 280, name: battle_unit_prepare_rider_dismount, hash: db39375d33c662a9, unit: battle_unit_prepare_rider_dismount_unit}
-  - {addr: 0x8008c8e4, size: 92, name: battle_unit_mount_by_runtime_ids, hash: 9a343375417f3209, unit: battle_unit_prepare_rider_dismount_unit}
+  - {addr: 0x8008c7cc, size: 280, name: battle_unit_prepare_rider_dismount, hash: db39375d33c662a9, unit: battle_unit_rider_mount_dismount}
+  - {addr: 0x8008c8e4, size: 92, name: battle_unit_mount_by_runtime_ids, hash: 9a343375417f3209, unit: battle_unit_rider_mount_dismount}
   - {addr: 0x8008c940, size: 132, name: battle_unit_add_event_offset_by_runtime_id_unused, hash: 493d784ed1d983b8, source: src/shared/unit/battle_unit_add_event_offset_by_runtime_id.c, source_symbol: battle_unit_add_event_offset_by_runtime_id}
   - {addr: 0x8008c9c4, size: 132, name: battle_unit_add_event_offset_by_runtime_id, hash: 3e04eb8aa78e5d6a, source: src/shared/unit/battle_unit_add_event_offset_by_runtime_id.c}
   - {addr: 0x8008ca48, size: 52, name: battle_unit_get_event_offset_by_runtime_id, hash: dda54d06ce7c4f0d, source: src/shared/unit/battle_unit_get_event_offset_by_runtime_id.c}
   - {addr: 0x8008ca7c, size: 312, name: battle_unit_place_in_new_location, hash: 3aa051ec1d7b87ff, source: src/shared/unit/battle_unit_place_in_new_location.c}
-  - {addr: 0x8008cbb4, size: 36, name: battle_unit_has_runtime_id, hash: c4f802b7a57a883d, unit: battle_unit_has_runtime_id_unit}
-  - {addr: 0x8008cbd8, size: 60, name: battle_unit_set_facing_update_suppression, hash: a39dab7321ea587c, unit: battle_unit_has_runtime_id_unit}
-  - {addr: 0x8008cc14, size: 60, name: battle_unit_clear_facing_update_suppression, hash: 2b97abf02d6aa24f, unit: battle_unit_has_runtime_id_unit}
-  - {addr: 0x8008cc50, size: 48, name: battle_unit_set_horizontal_flip_flag, hash: 5923905a4d4e1344, unit: battle_unit_has_runtime_id_unit}
-  - {addr: 0x8008cc80, size: 44, name: battle_unit_clear_horizontal_flip_flag, hash: 0b507514c13324ee, unit: battle_unit_clear_horizontal_flip_flag_unit}
-  - {addr: 0x8008ccac, size: 60, name: battle_unit_set_palette_update_suppression, hash: a91da0e8755c6935, unit: battle_unit_clear_horizontal_flip_flag_unit}
-  - {addr: 0x8008cce8, size: 60, name: battle_unit_clear_palette_update_suppression, hash: d97699eaed0160d6, unit: battle_unit_clear_horizontal_flip_flag_unit}
-  - {addr: 0x8008cd24, size: 52, name: battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id, hash: 432660039643285a, unit: battle_unit_clear_horizontal_flip_flag_unit}
-  - {addr: 0x8008cd58, size: 60, name: battle_unit_set_movement_effect_suppression, hash: 1345ae2b1ce7c73f, unit: battle_unit_set_movement_effect_suppression_unit}
-  - {addr: 0x8008cd94, size: 60, name: battle_unit_clear_movement_effect_suppression, hash: c273bcb19407bccd, unit: battle_unit_set_movement_effect_suppression_unit}
-  - {addr: 0x8008cdd0, size: 80, name: battle_unit_get_battle_id_by_runtime_id, hash: a7fb8478370afbe3, unit: battle_unit_set_movement_effect_suppression_unit}
-  - {addr: 0x8008ce20, size: 88, name: battle_unit_get_runtime_id_by_battle_id, hash: 076e686bb291969a, unit: battle_unit_set_movement_effect_suppression_unit}
+  - {addr: 0x8008cbb4, size: 36, name: battle_unit_has_runtime_id, hash: c4f802b7a57a883d, unit: battle_unit_facing_and_flip_flags}
+  - {addr: 0x8008cbd8, size: 60, name: battle_unit_set_facing_update_suppression, hash: a39dab7321ea587c, unit: battle_unit_facing_and_flip_flags}
+  - {addr: 0x8008cc14, size: 60, name: battle_unit_clear_facing_update_suppression, hash: 2b97abf02d6aa24f, unit: battle_unit_facing_and_flip_flags}
+  - {addr: 0x8008cc50, size: 48, name: battle_unit_set_horizontal_flip_flag, hash: 5923905a4d4e1344, unit: battle_unit_facing_and_flip_flags}
+  - {addr: 0x8008cc80, size: 44, name: battle_unit_clear_horizontal_flip_flag, hash: 0b507514c13324ee, unit: battle_unit_palette_and_flip_flags}
+  - {addr: 0x8008ccac, size: 60, name: battle_unit_set_palette_update_suppression, hash: a91da0e8755c6935, unit: battle_unit_palette_and_flip_flags}
+  - {addr: 0x8008cce8, size: 60, name: battle_unit_clear_palette_update_suppression, hash: d97699eaed0160d6, unit: battle_unit_palette_and_flip_flags}
+  - {addr: 0x8008cd24, size: 52, name: battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id, hash: 432660039643285a, unit: battle_unit_palette_and_flip_flags}
+  - {addr: 0x8008cd58, size: 60, name: battle_unit_set_movement_effect_suppression, hash: 1345ae2b1ce7c73f, source: src/shared/unit/battle_unit_set_movement_effect_suppression.c}
+  - {addr: 0x8008cd94, size: 60, name: battle_unit_clear_movement_effect_suppression, hash: c273bcb19407bccd, source: src/shared/unit/battle_unit_clear_movement_effect_suppression.c}
+  - {addr: 0x8008cdd0, size: 80, name: battle_unit_get_battle_id_by_runtime_id, hash: a7fb8478370afbe3, source: src/shared/unit/battle_unit_get_battle_id_by_runtime_id.c}
+  - {addr: 0x8008ce20, size: 88, name: battle_unit_get_runtime_id_by_battle_id, hash: 076e686bb291969a, source: src/shared/unit/battle_unit_get_runtime_id_by_battle_id.c}
   - {addr: 0x8008ce78, size: 88, name: battle_gfx_get_spritesheet_vram_by_battle_id, hash: 2f471fd71e4e7c65, source: src/shared/gfx/battle_gfx_get_spritesheet_vram_by_battle_id.c}
   - {addr: 0x8008ced0, size: 44, name: battle_unit_get_runtime_action_command_by_battle_id, hash: 9933c25c8ea3a0e5, source: src/shared/gfx/battle_unit_get_runtime_action_command_by_battle_id.c}
   - {addr: 0x8008cefc, size: 64, name: move_is_unit_moving_by_runtime_id, hash: 730cfc06ddfa1b67, source: src/shared/gfx/move_is_unit_moving_by_runtime_id.c}
@@ -773,13 +766,13 @@ functions:
   - {addr: 0x8008efb4, size: 380, name: battle_gfx_start_screen_color_modulation_fade, hash: 9f81148b82764d34, unit: battle_gfx_screen_color}
   - {addr: 0x8008f130, size: 216, name: battle_gfx_update_screen_color_modulation_fade, hash: fbbba96ddbce1e60, unit: battle_gfx_screen_color}
   - {addr: 0x8008f208, size: 280, name: battle_gfx_draw_screen_color_modulation_overlay, hash: f9393c8efdc975fa, unit: battle_gfx_screen_color}
-  - {addr: 0x8008f320, size: 376, name: map_update_palette_colors_inner, hash: 57be6d1bd1f97cb2, unit: map_update_palette_colors_inner_unit}
-  - {addr: 0x8008f498, size: 164, name: map_update_palette_colors, hash: e941bb76dabb2e46, unit: map_update_palette_colors_inner_unit}
-  - {addr: 0x8008f53c, size: 256, name: map_update_and_store_palette_colors, hash: c59982ff42a360ae, unit: map_update_palette_colors_inner_unit}
-  - {addr: 0x8008f63c, size: 212, name: map_store_modified_palette_colors, hash: 7a59cfb02d7348db, unit: map_store_modified_palette_colors_unit}
-  - {addr: 0x8008f710, size: 2360, name: map_modify_palette, hash: 952322ce378002ab, unit: map_store_modified_palette_colors_unit, rodata: [{addr: 0x800682cc, size: 92, hash: 1f2d5e6cb9bda470}]}
-  - {addr: 0x80090048, size: 432, name: map_transition_background_gradient, hash: 3d215be8ac38b343, unit: map_store_modified_palette_colors_unit}
-  - {addr: 0x800901f8, size: 96, name: map_transition_and_store_background_gradient, hash: 8b77da98ae7ce633, unit: map_store_modified_palette_colors_unit}
+  - {addr: 0x8008f320, size: 376, name: map_update_palette_colors_inner, hash: 57be6d1bd1f97cb2, unit: map_palette_color_updates}
+  - {addr: 0x8008f498, size: 164, name: map_update_palette_colors, hash: e941bb76dabb2e46, unit: map_palette_color_updates}
+  - {addr: 0x8008f53c, size: 256, name: map_update_and_store_palette_colors, hash: c59982ff42a360ae, unit: map_palette_color_updates}
+  - {addr: 0x8008f63c, size: 212, name: map_store_modified_palette_colors, hash: 7a59cfb02d7348db, unit: map_palette_tint_and_gradient_fade}
+  - {addr: 0x8008f710, size: 2360, name: map_modify_palette, hash: 952322ce378002ab, unit: map_palette_tint_and_gradient_fade, rodata: [{addr: 0x800682cc, size: 92, hash: 1f2d5e6cb9bda470}]}
+  - {addr: 0x80090048, size: 432, name: map_transition_background_gradient, hash: 3d215be8ac38b343, unit: map_palette_tint_and_gradient_fade}
+  - {addr: 0x800901f8, size: 96, name: map_transition_and_store_background_gradient, hash: 8b77da98ae7ce633, unit: map_palette_tint_and_gradient_fade}
   - {addr: 0x80090258, size: 1092, name: map_blend_background_gradient_color, hash: 965e9295c610abc6, source: src/shared/map/map_blend_background_gradient_color.c, rodata: [{addr: 0x8006832c, size: 44, hash: 058e0380de183714}]}
   - {addr: 0x8009069c, size: 352, name: map_transition_ambient_light_color, hash: 80d9b47d216ef8f8, source: src/shared/map/map_transition_ambient_light_color.c}
   - {addr: 0x800907fc, size: 68, name: map_transition_and_store_ambient_light_color, hash: a3441eebd9ceb505, source: src/shared/map/map_transition_and_store_ambient_light_color.c}
@@ -1816,93 +1809,93 @@ functions:
   - {addr: 0x8019f15c, size: 252, name: ai_is_unit_active_after_delay, hash: 29a269f2d8d039d9}
   - {addr: 0x8019f258, size: 76, name: ai_move_temp_unit_to_coords, hash: fdfc6e3602be5eaa}
   - {addr: 0x8019f2a4, size: 80, name: ai_copy_unit_coordinates, hash: d3bcb934c81bc288}
-  - {addr: 0x801a0e80, size: 240, name: effect_init_palette, hash: 1d6f93304257f025, unit: effect_init_palette_unit}
-  - {addr: 0x801a0f70, size: 24, name: effect_reset_frame_data_pointer, hash: 13715001bae01404, unit: effect_init_palette_unit}
-  - {addr: 0x801a0f88, size: 24, name: effect_reset_animation_sequences_pointer, hash: cb86d720d9867a1c, unit: effect_init_palette_unit}
-  - {addr: 0x801a0fa0, size: 56, name: effect_set_frame_data_pointer, hash: f1593d52e83883b0, unit: effect_init_palette_unit}
-  - {addr: 0x801a0fd8, size: 56, name: effect_set_animation_sequences_pointer, hash: 48e729288781ed5a, unit: effect_init_palette_unit}
-  - {addr: 0x801a1010, size: 52, name: effect_set_script_pointer, hash: f6dad6e6bcb583b3, unit: effect_init_palette_unit}
-  - {addr: 0x801a1044, size: 52, name: effect_set_animation_curve_data_pointer, hash: 014ccf35d272debf, unit: effect_init_palette_unit}
-  - {addr: 0x801a1078, size: 52, name: effect_set_particle_system_data_pointer, hash: eda68de41875f2c8, unit: effect_init_palette_unit}
-  - {addr: 0x801a10ac, size: 64, name: effect_set_timeline_pointers, hash: 7d105561d675678e, unit: effect_init_palette_unit}
-  - {addr: 0x801a10ec, size: 172, name: effect_load_sound_section, hash: 49f99b0b0995b894, unit: effect_init_palette_unit}
-  - {addr: 0x801a1198, size: 52, name: effect_init_flags_section_pointer, hash: 1ee6dedcd927e26c, unit: effect_init_palette_unit}
-  - {addr: 0x801a11cc, size: 52, name: effect_set_timing_curves_pointer, hash: 6eb5ff276045c96e, unit: effect_init_palette_unit}
-  - {addr: 0x801a1200, size: 68, name: effect_get_timing_curve_value, hash: 593c1814534b2238, unit: effect_init_palette_unit}
-  - {addr: 0x801a1244, size: 68, name: effect_get_animation_timing_curve_value, hash: eb504d572534c851, unit: effect_init_palette_unit}
-  - {addr: 0x801a1288, size: 28, name: effect_get_native_callback, hash: 8dc94b536cc6f119, unit: effect_init_palette_unit}
-  - {addr: 0x801a12a4, size: 56, name: effect_load_lba_and_size, hash: 5d4f02505ab0b9a7, unit: effect_init_palette_unit}
-  - {addr: 0x801a12dc, size: 40, name: effect_report_stub_return_zero, hash: 155dc8be5b11cf02, unit: effect_init_palette_unit}
-  - {addr: 0x801a1304, size: 36, name: effect_report_stub, hash: 64066c40b8e49544, unit: effect_init_palette_unit}
-  - {addr: 0x801a1328, size: 36, name: battle_noop_801a1328, hash: ce21b17e4c70afea, unit: effect_init_palette_unit}
-  - {addr: 0x801a134c, size: 112, name: effect_load_data, hash: 23752bb8f5907c16, unit: effect_init_palette_unit}
-  - {addr: 0x801a13bc, size: 504, name: effect_init_data, hash: 516c2b8423f5a618, unit: effect_init_palette_unit}
-  - {addr: 0x801a15b4, size: 608, name: effect_set_ability_animation, hash: cca6d1ac2c1bd30d, unit: effect_init_palette_unit}
-  - {addr: 0x801a1814, size: 64, name: effect_load_ability, hash: 2bdaff51f5a994c3, unit: effect_init_palette_unit}
-  - {addr: 0x801a1854, size: 44, name: effect_is_item_ability, hash: 2a81a9ea4b02932f, unit: effect_init_palette_unit}
-  - {addr: 0x801a1880, size: 36, name: effect_play, hash: 3df6c329f5a06bd1, unit: effect_init_palette_unit}
-  - {addr: 0x801a18a4, size: 36, name: effect_cancel_playback_request, hash: de41dd98979d7742, unit: effect_init_palette_unit}
-  - {addr: 0x801a18c8, size: 16, name: effect_get_playback_phase, hash: c836a45912dff7a5, unit: effect_init_palette_unit}
-  - {addr: 0x801a18d8, size: 872, name: effect_update_stage, hash: 934d9569effc7e18, unit: effect_init_palette_unit, rodata: [{addr: 0x801a0dc4, size: 28, hash: a0d27eb5fd714357}]}
-  - {addr: 0x801a1c40, size: 80, name: effect_update_cycle, hash: b560438b479930c0, unit: effect_init_palette_unit}
-  - {addr: 0x801a1c90, size: 152, name: effect_init_state_records, hash: 49c6a44e091e28f1, unit: effect_init_state_records_unit}
-  - {addr: 0x801a1d28, size: 116, name: effect_alloc_state_record, hash: c95c3403842af848, unit: effect_init_state_records_unit}
-  - {addr: 0x801a1d9c, size: 744, name: effect_free_state_record, hash: b524a4c661e30e18, unit: effect_init_state_records_unit}
-  - {addr: 0x801a2084, size: 48, name: effect_reset_child_timeline, hash: 0ad936a96063f148, unit: effect_init_state_records_unit}
-  - {addr: 0x801a20b4, size: 52, name: effect_reset_parent_timeline, hash: 03c1d9d6cad10a8b, unit: effect_init_state_records_unit}
-  - {addr: 0x801a20e8, size: 300, name: effect_start_script_record, hash: 84b0afe0893a5bcb, unit: effect_init_state_records_unit}
-  - {addr: 0x801a2214, size: 36, name: effect_code_script_2e_invalid, hash: 9a05f811d43dbaa2, unit: effect_code_script_2e_invalid_unit}
-  - {addr: 0x801a2238, size: 36, name: effect_code_script_00_jump_and_yield, hash: f233869ff43ef607, unit: effect_code_script_2e_invalid_unit}
-  - {addr: 0x801a225c, size: 36, name: effect_code_script_01_jump, hash: 569026d460dcf42e, unit: effect_code_script_2e_invalid_unit}
-  - {addr: 0x801a2280, size: 120, name: effect_code_script_02_spawn_child, hash: d0656a03cb2087da, unit: effect_code_script_02_spawn_child_unit}
-  - {addr: 0x801a22f8, size: 116, name: effect_code_script_03_free_child, hash: d68f7d898624c4c1, unit: effect_code_script_02_spawn_child_unit}
-  - {addr: 0x801a236c, size: 8, name: effect_code_script_04_end, hash: f18765a01ea52b11, unit: effect_code_script_02_spawn_child_unit}
-  - {addr: 0x801a2374, size: 52, name: effect_code_script_05_store_high_nibble, hash: c6a1f85feec7346c, unit: effect_code_script_02_spawn_child_unit}
-  - {addr: 0x801a23a8, size: 108, name: effect_code_script_06_register_native_callback, hash: d4da56f3747f1563, unit: effect_code_script_06_register_native_callback_unit}
-  - {addr: 0x801a2414, size: 116, name: effect_code_script_07_call_native_callback, hash: dd81440b7deba0ff, unit: effect_code_script_06_register_native_callback_unit}
-  - {addr: 0x801a2488, size: 156, name: effect_code_script_08_set_camera_position, hash: 139322917cda0310, unit: effect_code_script_06_register_native_callback_unit}
-  - {addr: 0x801a2524, size: 60, name: effect_code_script_09_save_camera_position, hash: 5744d530fed1329b, unit: effect_code_script_06_register_native_callback_unit}
-  - {addr: 0x801a2560, size: 60, name: effect_code_script_0a_restore_camera_position, hash: 5f41f020954b0f96, unit: effect_code_script_0a_restore_camera_position_unit}
-  - {addr: 0x801a259c, size: 144, name: effect_code_script_0b_set_camera_rotation, hash: d539f2faf90462f2, unit: effect_code_script_0a_restore_camera_position_unit}
-  - {addr: 0x801a262c, size: 60, name: effect_code_script_0c_save_camera_rotation, hash: 75a417325cb4b853, unit: effect_code_script_0a_restore_camera_position_unit}
-  - {addr: 0x801a2668, size: 60, name: effect_code_script_0d_restore_camera_rotation, hash: c00b81a51049f298, unit: effect_code_script_0a_restore_camera_position_unit}
-  - {addr: 0x801a26a4, size: 144, name: effect_code_script_0e_set_camera_zoom, hash: 235e3dd70af864b5, unit: effect_code_script_0e_set_camera_zoom_unit}
-  - {addr: 0x801a2734, size: 60, name: effect_code_script_0f_save_camera_zoom, hash: 8b0ff254791d4c01, unit: effect_code_script_0e_set_camera_zoom_unit}
-  - {addr: 0x801a2770, size: 64, name: effect_code_script_10_set_selected_counter, hash: 871e0a25270c66b5, unit: effect_code_script_0e_set_camera_zoom_unit}
-  - {addr: 0x801a27b0, size: 96, name: effect_code_script_11_jump_if_counter_equal, hash: 85074ed7dd58d18c, unit: effect_code_script_0e_set_camera_zoom_unit}
-  - {addr: 0x801a2810, size: 96, name: effect_code_script_12_jump_if_counter_at_least, hash: 7723927f211a7c5f, unit: effect_code_script_12_jump_if_counter_at_least_unit}
-  - {addr: 0x801a2870, size: 100, name: effect_code_script_13_jump_if_counter_greater, hash: fc26751aaafde182, unit: effect_code_script_12_jump_if_counter_at_least_unit}
-  - {addr: 0x801a28d4, size: 100, name: effect_code_script_14_jump_if_counter_at_most, hash: de56254019d6033a, unit: effect_code_script_12_jump_if_counter_at_least_unit}
-  - {addr: 0x801a2938, size: 96, name: effect_code_script_15_jump_if_counter_less, hash: 2eb8d2df7c4248a4, unit: effect_code_script_12_jump_if_counter_at_least_unit}
-  - {addr: 0x801a2998, size: 72, name: effect_code_script_16_jump_if_work_count_equal, hash: 2572daa07e9953d5, unit: effect_code_script_16_jump_if_work_count_equal_unit}
-  - {addr: 0x801a29e0, size: 76, name: effect_code_script_17_jump_if_work_count_greater, hash: ea5946be00d17da0, unit: effect_code_script_16_jump_if_work_count_equal_unit}
-  - {addr: 0x801a2a2c, size: 80, name: effect_code_script_18_jump_if_work_count_less, hash: 958b3bb80afd7729, unit: effect_code_script_16_jump_if_work_count_equal_unit}
-  - {addr: 0x801a2a7c, size: 156, name: effect_code_script_19_jump_if_child_count_equal, hash: 3a9817cd88488c22, unit: effect_code_script_16_jump_if_work_count_equal_unit}
-  - {addr: 0x801a2b18, size: 88, name: effect_code_script_1a_jump_if_child_active, hash: fb9e87eec1aa8ec3, unit: effect_code_script_1a_jump_if_child_active_unit}
-  - {addr: 0x801a2b70, size: 88, name: effect_code_script_1b_jump_if_child_inactive, hash: 266f375272fa061e, unit: effect_code_script_1a_jump_if_child_active_unit}
-  - {addr: 0x801a2bc8, size: 96, name: effect_code_script_1c_jump_if_counter_not_equal, hash: a095f3c61366dd0c, unit: effect_code_script_1a_jump_if_child_active_unit}
-  - {addr: 0x801a2c28, size: 84, name: effect_code_script_1d_jump_after_child_timeline_duration, hash: 660d7b1ff3cc4dfd, unit: effect_code_script_1a_jump_if_child_active_unit}
-  - {addr: 0x801a2c7c, size: 128, name: effect_code_script_1e_jump_after_total_duration, hash: f89316001a9e7ecd, unit: effect_code_script_1e_jump_after_total_duration_unit}
-  - {addr: 0x801a2cfc, size: 76, name: effect_code_script_1f_jump_if_target_count_equal, hash: eac3f542ce4dd0e9, unit: effect_code_script_1e_jump_after_total_duration_unit}
-  - {addr: 0x801a2d48, size: 76, name: effect_code_script_20_increment_selected_counter, hash: c4a8680d0e5222e9, unit: effect_code_script_1e_jump_after_total_duration_unit}
-  - {addr: 0x801a2d94, size: 76, name: effect_code_script_21_decrement_selected_counter, hash: 4bac17979fd57fe0, unit: effect_code_script_1e_jump_after_total_duration_unit}
-  - {addr: 0x801a2de0, size: 76, name: effect_code_script_22_add_immediate_to_selected_counter, hash: 579270f3a7a2958b, unit: effect_code_script_22_add_immediate_to_selected_counter_unit}
-  - {addr: 0x801a2e2c, size: 76, name: effect_code_script_23_subtract_immediate_from_selected_counter, hash: ba22a57ab0100cca, unit: effect_code_script_22_add_immediate_to_selected_counter_unit}
-  - {addr: 0x801a2e78, size: 60, name: effect_code_script_24_restore_camera_zoom, hash: f8695ddaac5f1224, unit: effect_code_script_22_add_immediate_to_selected_counter_unit}
-  - {addr: 0x801a2eb4, size: 568, name: effect_code_script_25_update_all_particles, hash: bf734b3d3ac80f8a, unit: effect_code_script_22_add_immediate_to_selected_counter_unit}
-  - {addr: 0x801a30ec, size: 92, name: effect_code_script_26_spawn_emitter_particles, hash: 2f2c51d9a3b92dc4, unit: effect_code_script_26_spawn_emitter_particles_unit}
-  - {addr: 0x801a3148, size: 96, name: effect_code_script_27_init_particle_physics, hash: 78df44b5c79e1f5f, unit: effect_code_script_26_spawn_emitter_particles_unit}
-  - {addr: 0x801a31a8, size: 320, name: effect_run_keyframe_actions, hash: b7e020980624ef07, unit: effect_code_script_26_spawn_emitter_particles_unit}
-  - {addr: 0x801a32e8, size: 288, name: effect_select_sound_id, hash: 1820d00c0dfe6418, unit: effect_code_script_26_spawn_emitter_particles_unit, rodata: [{addr: 0x801a0de4, size: 20, hash: 76ff2c565a251630}]}
-  - {addr: 0x801a3408, size: 2344, name: effect_code_script_28_step_child_timeline, hash: cdb99c322deefad1, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a3d30, size: 720, name: effect_run_keyframe_actions_all_targets, hash: a57d117d58db42cb, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a4000, size: 416, name: effect_step_emitter_timeline, hash: ee6a260b3ab1bd63, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a41a0, size: 460, name: effect_advance_target_palette_track, hash: 0511bb1b84c7ca31, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a436c, size: 224, name: effect_advance_caster_palette_track, hash: e9ab0f209986c571, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a444c, size: 380, name: effect_advance_coord_target_palette_track, hash: d1c5ae8a48534ad1, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a45c8, size: 452, name: effect_advance_map_background_track, hash: de1f40d7fb806740, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a478c, size: 172, name: effect_advance_parent_sound_track, hash: 60a15ffc1a7abb5d, unit: effect_code_script_28_step_child_timeline_unit}
-  - {addr: 0x801a4838, size: 1036, name: effect_code_script_29_step_parent_timeline, hash: 620d6f5c0c928ca2, unit: effect_code_script_28_step_child_timeline_unit}
+  - {addr: 0x801a0e80, size: 240, name: effect_init_palette, hash: 1d6f93304257f025, unit: effect_file_load_and_playback}
+  - {addr: 0x801a0f70, size: 24, name: effect_reset_frame_data_pointer, hash: 13715001bae01404, unit: effect_file_load_and_playback}
+  - {addr: 0x801a0f88, size: 24, name: effect_reset_animation_sequences_pointer, hash: cb86d720d9867a1c, unit: effect_file_load_and_playback}
+  - {addr: 0x801a0fa0, size: 56, name: effect_set_frame_data_pointer, hash: f1593d52e83883b0, unit: effect_file_load_and_playback}
+  - {addr: 0x801a0fd8, size: 56, name: effect_set_animation_sequences_pointer, hash: 48e729288781ed5a, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1010, size: 52, name: effect_set_script_pointer, hash: f6dad6e6bcb583b3, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1044, size: 52, name: effect_set_animation_curve_data_pointer, hash: 014ccf35d272debf, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1078, size: 52, name: effect_set_particle_system_data_pointer, hash: eda68de41875f2c8, unit: effect_file_load_and_playback}
+  - {addr: 0x801a10ac, size: 64, name: effect_set_timeline_pointers, hash: 7d105561d675678e, unit: effect_file_load_and_playback}
+  - {addr: 0x801a10ec, size: 172, name: effect_load_sound_section, hash: 49f99b0b0995b894, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1198, size: 52, name: effect_init_flags_section_pointer, hash: 1ee6dedcd927e26c, unit: effect_file_load_and_playback}
+  - {addr: 0x801a11cc, size: 52, name: effect_set_timing_curves_pointer, hash: 6eb5ff276045c96e, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1200, size: 68, name: effect_get_timing_curve_value, hash: 593c1814534b2238, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1244, size: 68, name: effect_get_animation_timing_curve_value, hash: eb504d572534c851, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1288, size: 28, name: effect_get_native_callback, hash: 8dc94b536cc6f119, unit: effect_file_load_and_playback}
+  - {addr: 0x801a12a4, size: 56, name: effect_load_lba_and_size, hash: 5d4f02505ab0b9a7, unit: effect_file_load_and_playback}
+  - {addr: 0x801a12dc, size: 40, name: effect_report_stub_return_zero, hash: 155dc8be5b11cf02, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1304, size: 36, name: effect_report_stub, hash: 64066c40b8e49544, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1328, size: 36, name: battle_noop_801a1328, hash: ce21b17e4c70afea, unit: effect_file_load_and_playback}
+  - {addr: 0x801a134c, size: 112, name: effect_load_data, hash: 23752bb8f5907c16, unit: effect_file_load_and_playback}
+  - {addr: 0x801a13bc, size: 504, name: effect_init_data, hash: 516c2b8423f5a618, unit: effect_file_load_and_playback}
+  - {addr: 0x801a15b4, size: 608, name: effect_set_ability_animation, hash: cca6d1ac2c1bd30d, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1814, size: 64, name: effect_load_ability, hash: 2bdaff51f5a994c3, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1854, size: 44, name: effect_is_item_ability, hash: 2a81a9ea4b02932f, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1880, size: 36, name: effect_play, hash: 3df6c329f5a06bd1, unit: effect_file_load_and_playback}
+  - {addr: 0x801a18a4, size: 36, name: effect_cancel_playback_request, hash: de41dd98979d7742, unit: effect_file_load_and_playback}
+  - {addr: 0x801a18c8, size: 16, name: effect_get_playback_phase, hash: c836a45912dff7a5, unit: effect_file_load_and_playback}
+  - {addr: 0x801a18d8, size: 872, name: effect_update_stage, hash: 934d9569effc7e18, unit: effect_file_load_and_playback, rodata: [{addr: 0x801a0dc4, size: 28, hash: a0d27eb5fd714357}]}
+  - {addr: 0x801a1c40, size: 80, name: effect_update_cycle, hash: b560438b479930c0, unit: effect_file_load_and_playback}
+  - {addr: 0x801a1c90, size: 152, name: effect_init_state_records, hash: 49c6a44e091e28f1, unit: effect_state_record_pool}
+  - {addr: 0x801a1d28, size: 116, name: effect_alloc_state_record, hash: c95c3403842af848, unit: effect_state_record_pool}
+  - {addr: 0x801a1d9c, size: 744, name: effect_free_state_record, hash: b524a4c661e30e18, unit: effect_state_record_pool}
+  - {addr: 0x801a2084, size: 48, name: effect_reset_child_timeline, hash: 0ad936a96063f148, unit: effect_state_record_pool}
+  - {addr: 0x801a20b4, size: 52, name: effect_reset_parent_timeline, hash: 03c1d9d6cad10a8b, unit: effect_state_record_pool}
+  - {addr: 0x801a20e8, size: 300, name: effect_start_script_record, hash: 84b0afe0893a5bcb, unit: effect_state_record_pool}
+  - {addr: 0x801a2214, size: 36, name: effect_code_script_2e_invalid, hash: 9a05f811d43dbaa2, unit: effect_code_script_jumps_and_invalid}
+  - {addr: 0x801a2238, size: 36, name: effect_code_script_00_jump_and_yield, hash: f233869ff43ef607, unit: effect_code_script_jumps_and_invalid}
+  - {addr: 0x801a225c, size: 36, name: effect_code_script_01_jump, hash: 569026d460dcf42e, unit: effect_code_script_jumps_and_invalid}
+  - {addr: 0x801a2280, size: 120, name: effect_code_script_02_spawn_child, hash: d0656a03cb2087da, unit: effect_code_script_child_lifecycle}
+  - {addr: 0x801a22f8, size: 116, name: effect_code_script_03_free_child, hash: d68f7d898624c4c1, unit: effect_code_script_child_lifecycle}
+  - {addr: 0x801a236c, size: 8, name: effect_code_script_04_end, hash: f18765a01ea52b11, unit: effect_code_script_child_lifecycle}
+  - {addr: 0x801a2374, size: 52, name: effect_code_script_05_store_high_nibble, hash: c6a1f85feec7346c, unit: effect_code_script_child_lifecycle}
+  - {addr: 0x801a23a8, size: 108, name: effect_code_script_06_register_native_callback, hash: d4da56f3747f1563}
+  - {addr: 0x801a2414, size: 116, name: effect_code_script_07_call_native_callback, hash: dd81440b7deba0ff}
+  - {addr: 0x801a2488, size: 156, name: effect_code_script_08_set_camera_position, hash: 139322917cda0310}
+  - {addr: 0x801a2524, size: 60, name: effect_code_script_09_save_camera_position, hash: 5744d530fed1329b}
+  - {addr: 0x801a2560, size: 60, name: effect_code_script_0a_restore_camera_position, hash: 5f41f020954b0f96, unit: effect_code_script_camera_rotation}
+  - {addr: 0x801a259c, size: 144, name: effect_code_script_0b_set_camera_rotation, hash: d539f2faf90462f2, unit: effect_code_script_camera_rotation}
+  - {addr: 0x801a262c, size: 60, name: effect_code_script_0c_save_camera_rotation, hash: 75a417325cb4b853, unit: effect_code_script_camera_rotation}
+  - {addr: 0x801a2668, size: 60, name: effect_code_script_0d_restore_camera_rotation, hash: c00b81a51049f298, unit: effect_code_script_camera_rotation}
+  - {addr: 0x801a26a4, size: 144, name: effect_code_script_0e_set_camera_zoom, hash: 235e3dd70af864b5}
+  - {addr: 0x801a2734, size: 60, name: effect_code_script_0f_save_camera_zoom, hash: 8b0ff254791d4c01}
+  - {addr: 0x801a2770, size: 64, name: effect_code_script_10_set_selected_counter, hash: 871e0a25270c66b5}
+  - {addr: 0x801a27b0, size: 96, name: effect_code_script_11_jump_if_counter_equal, hash: 85074ed7dd58d18c}
+  - {addr: 0x801a2810, size: 96, name: effect_code_script_12_jump_if_counter_at_least, hash: 7723927f211a7c5f, unit: effect_code_script_counter_compare_jumps}
+  - {addr: 0x801a2870, size: 100, name: effect_code_script_13_jump_if_counter_greater, hash: fc26751aaafde182, unit: effect_code_script_counter_compare_jumps}
+  - {addr: 0x801a28d4, size: 100, name: effect_code_script_14_jump_if_counter_at_most, hash: de56254019d6033a, unit: effect_code_script_counter_compare_jumps}
+  - {addr: 0x801a2938, size: 96, name: effect_code_script_15_jump_if_counter_less, hash: 2eb8d2df7c4248a4, unit: effect_code_script_counter_compare_jumps}
+  - {addr: 0x801a2998, size: 72, name: effect_code_script_16_jump_if_work_count_equal, hash: 2572daa07e9953d5, unit: effect_code_script_count_jumps}
+  - {addr: 0x801a29e0, size: 76, name: effect_code_script_17_jump_if_work_count_greater, hash: ea5946be00d17da0, unit: effect_code_script_count_jumps}
+  - {addr: 0x801a2a2c, size: 80, name: effect_code_script_18_jump_if_work_count_less, hash: 958b3bb80afd7729, unit: effect_code_script_count_jumps}
+  - {addr: 0x801a2a7c, size: 156, name: effect_code_script_19_jump_if_child_count_equal, hash: 3a9817cd88488c22, unit: effect_code_script_count_jumps}
+  - {addr: 0x801a2b18, size: 88, name: effect_code_script_1a_jump_if_child_active, hash: fb9e87eec1aa8ec3, unit: effect_code_script_child_state_jumps}
+  - {addr: 0x801a2b70, size: 88, name: effect_code_script_1b_jump_if_child_inactive, hash: 266f375272fa061e, unit: effect_code_script_child_state_jumps}
+  - {addr: 0x801a2bc8, size: 96, name: effect_code_script_1c_jump_if_counter_not_equal, hash: a095f3c61366dd0c, unit: effect_code_script_child_state_jumps}
+  - {addr: 0x801a2c28, size: 84, name: effect_code_script_1d_jump_after_child_timeline_duration, hash: 660d7b1ff3cc4dfd, unit: effect_code_script_child_state_jumps}
+  - {addr: 0x801a2c7c, size: 128, name: effect_code_script_1e_jump_after_total_duration, hash: f89316001a9e7ecd}
+  - {addr: 0x801a2cfc, size: 76, name: effect_code_script_1f_jump_if_target_count_equal, hash: eac3f542ce4dd0e9}
+  - {addr: 0x801a2d48, size: 76, name: effect_code_script_20_increment_selected_counter, hash: c4a8680d0e5222e9}
+  - {addr: 0x801a2d94, size: 76, name: effect_code_script_21_decrement_selected_counter, hash: 4bac17979fd57fe0}
+  - {addr: 0x801a2de0, size: 76, name: effect_code_script_22_add_immediate_to_selected_counter, hash: 579270f3a7a2958b}
+  - {addr: 0x801a2e2c, size: 76, name: effect_code_script_23_subtract_immediate_from_selected_counter, hash: ba22a57ab0100cca}
+  - {addr: 0x801a2e78, size: 60, name: effect_code_script_24_restore_camera_zoom, hash: f8695ddaac5f1224}
+  - {addr: 0x801a2eb4, size: 568, name: effect_code_script_25_update_all_particles, hash: bf734b3d3ac80f8a}
+  - {addr: 0x801a30ec, size: 92, name: effect_code_script_26_spawn_emitter_particles, hash: 2f2c51d9a3b92dc4}
+  - {addr: 0x801a3148, size: 96, name: effect_code_script_27_init_particle_physics, hash: 78df44b5c79e1f5f}
+  - {addr: 0x801a31a8, size: 320, name: effect_run_keyframe_actions, hash: b7e020980624ef07}
+  - {addr: 0x801a32e8, size: 288, name: effect_select_sound_id, hash: 1820d00c0dfe6418, rodata: [{addr: 0x801a0de4, size: 20, hash: 76ff2c565a251630}]}
+  - {addr: 0x801a3408, size: 2344, name: effect_code_script_28_step_child_timeline, hash: cdb99c322deefad1, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a3d30, size: 720, name: effect_run_keyframe_actions_all_targets, hash: a57d117d58db42cb, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a4000, size: 416, name: effect_step_emitter_timeline, hash: ee6a260b3ab1bd63, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a41a0, size: 460, name: effect_advance_target_palette_track, hash: 0511bb1b84c7ca31, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a436c, size: 224, name: effect_advance_caster_palette_track, hash: e9ab0f209986c571, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a444c, size: 380, name: effect_advance_coord_target_palette_track, hash: d1c5ae8a48534ad1, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a45c8, size: 452, name: effect_advance_map_background_track, hash: de1f40d7fb806740, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a478c, size: 172, name: effect_advance_parent_sound_track, hash: 60a15ffc1a7abb5d, unit: effect_timeline_track_stepping}
+  - {addr: 0x801a4838, size: 1036, name: effect_code_script_29_step_parent_timeline, hash: 620d6f5c0c928ca2, unit: effect_timeline_track_stepping}
   - {addr: 0x801a4c44, size: 64, name: effect_code_script_2a_reset_child_timeline, hash: 76d3217748072b9d, unit: effect_code_script_timeline_resets}
   - {addr: 0x801a4c84, size: 60, name: effect_code_script_2b_reset_parent_timeline, hash: e712c206103a78f5, unit: effect_code_script_timeline_resets}
   - {addr: 0x801a4cc0, size: 24, name: effect_code_script_2c_nop, hash: 22fd7fee2a6fcbc5, unit: effect_code_script_timeline_resets}
@@ -2005,10 +1998,10 @@ functions:
   - {addr: 0x801ab1d4, size: 956, name: camera_execute_position_command, hash: a1c17cab2928efde, source: src/shared/camera/camera_execute_position_command.c}
   - {addr: 0x801ab590, size: 404, name: camera_execute_zoom_command, hash: f104ab5dea4cdedf, source: src/shared/camera/camera_execute_zoom_command.c}
   - {addr: 0x801ab724, size: 4916, name: camera_update_effect_rotation_and_zoom, hash: 1d6aa50dce4d4673, source: src/shared/camera/camera_update_effect_rotation_and_zoom.c}
-  - {addr: 0x801aca58, size: 176, name: effect_find_next_keyframe, hash: d113dd42bd0ab345, unit: effect_find_next_keyframe_unit}
-  - {addr: 0x801acb08, size: 1160, name: camera_find_active_keyframe, hash: 82c130a9804bf41d, unit: effect_find_next_keyframe_unit}
-  - {addr: 0x801acf90, size: 520, name: camera_start_effect_keyframe_moves, hash: c9c942a3435cd14b, unit: effect_find_next_keyframe_unit}
-  - {addr: 0x801ad198, size: 1172, name: camera_advance_effect_tracks, hash: 11d5529e54fbaefe, unit: effect_find_next_keyframe_unit}
+  - {addr: 0x801aca58, size: 176, name: effect_find_next_keyframe, hash: d113dd42bd0ab345, unit: camera_effect_keyframe_tracks}
+  - {addr: 0x801acb08, size: 1160, name: camera_find_active_keyframe, hash: 82c130a9804bf41d, unit: camera_effect_keyframe_tracks}
+  - {addr: 0x801acf90, size: 520, name: camera_start_effect_keyframe_moves, hash: c9c942a3435cd14b, unit: camera_effect_keyframe_tracks}
+  - {addr: 0x801ad198, size: 1172, name: camera_advance_effect_tracks, hash: 11d5529e54fbaefe, unit: camera_effect_keyframe_tracks}
   - {addr: 0x801ad62c, size: 508, name: effect_init_system, hash: a6c8471ee71be765, unit: effect_slot_pools}
   - {addr: 0x801ad828, size: 284, name: effect_allocate_secondary_slot, hash: dad3d88dc513a4c6, unit: effect_slot_pools}
   - {addr: 0x801ad944, size: 412, name: effect_remove_secondary, hash: 99f64dbdd1fbef82, unit: effect_slot_pools}
