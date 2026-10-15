@@ -559,10 +559,16 @@ type compilerProfile struct {
 	expandDiv bool
 }
 
+// runInDir runs a tool, passing its output through; a failure's error also
+// carries the tool's diagnostics so a batch can report them per item.
 func runInDir(dir string, arguments ...string) error {
 	cmd := exec.Command(arguments[0], arguments[1:]...)
-	cmd.Dir, cmd.Stdout, cmd.Stderr = dir, os.Stdout, os.Stderr
+	var stderr bytes.Buffer
+	cmd.Dir, cmd.Stdout, cmd.Stderr = dir, os.Stdout, io.MultiWriter(os.Stderr, &stderr)
 	if err := cmd.Run(); err != nil {
+		if diagnostics := bytes.TrimSpace(stderr.Bytes()); len(diagnostics) > 0 {
+			return fmt.Errorf("%s: %w\n%s", arguments[0], err, diagnostics)
+		}
 		return fmt.Errorf("%s: %w", arguments[0], err)
 	}
 	return nil

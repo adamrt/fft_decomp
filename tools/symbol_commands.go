@@ -11,13 +11,17 @@ import (
 
 func (p project) symbolsCommand(args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: tools symbols rename-function|rename-global ...")
+		return errors.New("usage: tools symbols rename-function|rename-global|unify|share ...")
 	}
 	switch args[0] {
 	case "rename-function", "rename-global":
 		return p.renameSymbolCommand(args[0], args[1:])
+	case "unify":
+		return p.unifySymbolsCommand(args[1:])
+	case "share":
+		return p.shareSymbolsCommand(args[1:])
 	default:
-		return fmt.Errorf("unknown symbols action %q; choose rename-function or rename-global", args[0])
+		return fmt.Errorf("unknown symbols action %q; choose rename-function, rename-global, unify or share", args[0])
 	}
 }
 

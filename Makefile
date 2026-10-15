@@ -132,7 +132,7 @@ twins: image ## Group byte-equivalent functions across modules under consistent 
 	@$(TOOLS) twins $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: symbols
-symbols: image ## Rename a symbol: ACTION=rename-function|rename-global ARGS="--old A --new B"
+symbols: image ## Symbol edits: ACTION=rename-function|rename-global ARGS="--old A --new B"; ACTION=unify ARGS="--new N --header fft/x.h OLD..."; ACTION=share ARGS="--to src/shared/x/n.c MODULE:ENTRY..."
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }
 	@$(TOOLS) symbols "$(ACTION)" $(ARGS)
 

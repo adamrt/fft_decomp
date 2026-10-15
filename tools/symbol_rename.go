@@ -258,6 +258,13 @@ type sourceIdentifierBatchPlan struct {
 }
 
 func planSourceIdentifierRenames(root string, renames []sourceIdentifierRename) (sourceIdentifierBatchPlan, error) {
+	return planSourceIdentifierRenamesUnify(root, renames, false)
+}
+
+// planSourceIdentifierRenamesUnify is planSourceIdentifierRenames that, when
+// unify is set, lets the old and new names both have definitions as long as
+// they lie in different module folders: per-module bodies under one name.
+func planSourceIdentifierRenamesUnify(root string, renames []sourceIdentifierRename, unify bool) (sourceIdentifierBatchPlan, error) {
 	plan := sourceIdentifierBatchPlan{
 		changes:       make(map[string]sourceTextChange),
 		references:    make([]map[string]bool, len(renames)),
@@ -330,9 +337,21 @@ func planSourceIdentifierRenames(root string, renames []sourceIdentifierRename) 
 		}
 	}
 	for index, rename := range renames {
-		if len(plan.oldDefinition[index]) != 0 && len(plan.newDefinition[index]) != 0 {
-			return sourceIdentifierBatchPlan{}, fmt.Errorf("source definitions collide: %s and %s", rename.oldName, rename.newName)
+		if len(plan.oldDefinition[index]) == 0 || len(plan.newDefinition[index]) == 0 {
+			continue
 		}
+		if unify {
+			collide := false
+			for _, old := range plan.oldDefinition[index] {
+				for _, current := range plan.newDefinition[index] {
+					collide = collide || filepath.Dir(old) == filepath.Dir(current)
+				}
+			}
+			if !collide {
+				continue
+			}
+		}
+		return sourceIdentifierBatchPlan{}, fmt.Errorf("source definitions collide: %s and %s", rename.oldName, rename.newName)
 	}
 	return plan, nil
 }
@@ -609,6 +628,13 @@ type symbolRename struct {
 // configuration and every source under src/ and include/. A function
 // definition rename also moves its source file to <dir>/<new>.c.
 func (p project) renameSymbols(renames []symbolRename, function, dryRun bool) (result symbolMutationResult, err error) {
+	return p.renameSymbolsUnify(renames, function, dryRun, false)
+}
+
+// renameSymbolsUnify is renameSymbols that, when unify is set, lets the new
+// name already exist in modules the old name is absent from: the rename
+// then gives one shared name to per-module copies.
+func (p project) renameSymbolsUnify(renames []symbolRename, function, dryRun, unify bool) (result symbolMutationResult, err error) {
 	seen := make(map[string]bool)
 	for _, rename := range renames {
 		if err := validateRenameIdentifier(rename.oldName); err != nil {
@@ -631,7 +657,7 @@ func (p project) renameSymbols(renames []symbolRename, function, dryRun bool) (r
 		var moves []move
 		for _, rename := range renames {
 			if function {
-				from, to, err := renameConfigFunction(config, rename.oldName, rename.newName)
+				from, to, err := renameConfigFunction(config, rename.oldName, rename.newName, unify)
 				if err != nil {
 					return err
 				}
@@ -646,12 +672,12 @@ func (p project) renameSymbols(renames []symbolRename, function, dryRun bool) (r
 		for index, rename := range renames {
 			identifierRenames[index] = sourceIdentifierRename{rename.oldName, rename.newName}
 		}
-		sources, err := planSourceIdentifierRenames(p.root, identifierRenames)
+		sources, err := planSourceIdentifierRenamesUnify(p.root, identifierRenames, unify)
 		if err != nil {
 			return err
 		}
 		for index := range renames {
-			if function && len(sources.newDefinition[index]) != 0 {
+			if function && len(sources.newDefinition[index]) != 0 && !unify {
 				return fmt.Errorf("function definition already exists: %s", sources.newDefinition[index][0])
 			}
 		}
@@ -701,12 +727,16 @@ func (p project) renameSymbols(renames []symbolRename, function, dryRun bool) (r
 
 // renameConfigFunction keeps entry-only renames separate from source-definition
 // renames. A definition rename updates every owner and moves its shared source.
-func renameConfigFunction(config *projectConfig, oldName, newName string) (string, string, error) {
+func renameConfigFunction(config *projectConfig, oldName, newName string, unify bool) (string, string, error) {
 	from, to := "", ""
 	found := false
 	for _, m := range config.Modules {
-		if m.function(newName) != nil {
-			return "", "", fmt.Errorf("function already exists: %s", newName)
+		if existing := m.function(newName); existing != nil {
+			// Unifying lets another module already use the name; the same
+			// module holding both names is a real collision.
+			if !unify || m.function(oldName) != nil {
+				return "", "", fmt.Errorf("function already exists: %s", newName)
+			}
 		}
 		for _, symbol := range append(append([]symbolSpec(nil), m.Data...), m.Imports...) {
 			if symbol.Name == newName {

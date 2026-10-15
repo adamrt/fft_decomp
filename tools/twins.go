@@ -805,6 +805,20 @@ func (p project) twinTrials(config *projectConfig, reportPath string, ids []stri
 	return specs, nil
 }
 
+// moduleHeader names the umbrella header that declares a module's own
+// symbols, which a twin trial prepends so substituted names resolve.
+func moduleHeader(id string) string {
+	switch {
+	case id == "opening":
+		return "fft/open.h"
+	case strings.HasPrefix(id, "event-"):
+		return "fft/event_" + strings.TrimPrefix(id, "event-") + ".h"
+	case strings.HasPrefix(id, "effect-"):
+		return "fft/effect.h"
+	}
+	return "fft/" + id + ".h"
+}
+
 func twinGroupTrials(config *projectConfig, group twinsGroup) []trialSpec {
 	var specs []trialSpec
 	// The rename rows are keyed like memberKeys: module, or module:name.
@@ -839,7 +853,8 @@ func twinGroupTrials(config *projectConfig, group twinsGroup) []trialSpec {
 				}
 			}
 			specs = append(specs, trialSpec{Module: to.Module, Entry: to.Name, Source: from.Source, Symbol: symbol, Subst: subst,
-				Label: fmt.Sprintf("%s %s %s <- %s:%s", group.ID, to.Module, to.Name, from.Module, from.Name)})
+				Includes: []string{moduleHeader(to.Module)},
+				Label:    fmt.Sprintf("%s %s %s <- %s:%s", group.ID, to.Module, to.Name, from.Module, from.Name)})
 		}
 	}
 	// One trial per (source, entry) pair.

@@ -33,6 +33,9 @@ type trialSpec struct {
 	Subst map[string]string `yaml:"subst,omitempty"`
 	// Defines are VARIANT_ values for this compile, over the module's own.
 	Defines map[string]string `yaml:"defines,omitempty"`
+	// Includes are headers prepended to the copy, such as the entry's module
+	// header that declares the substituted names.
+	Includes []string `yaml:"includes,omitempty"`
 	// Label names the trial in reports; empty means "<module> <entry> <- <source>".
 	Label string `yaml:"label,omitempty"`
 }
@@ -72,6 +75,11 @@ func (spec trialSpec) validate() error {
 	for name, value := range spec.Defines {
 		if !validSymbol(name) || !strings.HasPrefix(name, definePrefix) || !validDefineValue(value) {
 			return fmt.Errorf("trial %q: define %s=%s is not a VARIANT_ name with an integer value", spec.label(), name, value)
+		}
+	}
+	for _, header := range spec.Includes {
+		if strings.ContainsAny(header, "\"\\\n") || !strings.HasSuffix(header, ".h") {
+			return fmt.Errorf("trial %q: include %q is not a header path", spec.label(), header)
 		}
 	}
 	return nil
@@ -189,6 +197,13 @@ func (p project) runTrial(config *projectConfig, resolver symbolResolver, images
 		symbol = renamed
 	}
 	data = substituteIdentifiers(data, spec.Subst)
+	if len(spec.Includes) > 0 {
+		var prefix strings.Builder
+		for _, header := range spec.Includes {
+			fmt.Fprintf(&prefix, "#include %q\n", header)
+		}
+		data = append([]byte(prefix.String()), data...)
+	}
 	workDir := p.trialWorkDir(spec, index)
 	if err := os.MkdirAll(workDir, 0o755); err != nil {
 		result.Error = err.Error()
@@ -368,9 +383,10 @@ func (p project) trialCommand(args []string) error {
 	report := flags.String("report", "build/analysis/twins/twins.yaml", "twins report for --twins")
 	out := flags.String("out", "", "write the results as YAML under build/")
 	show := flags.Int("show", 4, "differing instructions to print per trial")
-	var substFlags, defineFlags repeatedFlag
+	var substFlags, defineFlags, includeFlags repeatedFlag
 	flags.Var(&substFlags, "subst", "OLD=NEW identifier substitution (repeatable)")
 	flags.Var(&defineFlags, "define", "VARIANT_NAME=VALUE for this compile (repeatable)")
+	flags.Var(&includeFlags, "include", "header to prepend to the copy, such as fft/world.h (repeatable)")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -408,7 +424,7 @@ func (p project) trialCommand(args []string) error {
 		if err != nil {
 			return err
 		}
-		spec := trialSpec{Module: *module, Entry: *entry, Source: *source, Symbol: *symbol, Subst: subst, Defines: defines}
+		spec := trialSpec{Module: *module, Entry: *entry, Source: *source, Symbol: *symbol, Subst: subst, Defines: defines, Includes: includeFlags}
 		if err := spec.validate(); err != nil {
 			return err
 		}
