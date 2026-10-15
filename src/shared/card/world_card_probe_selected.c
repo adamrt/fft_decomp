@@ -3,7 +3,7 @@
 
 /* Check the selected memory card and normalize failures to timeout. */
 s32 world_card_probe_selected(void) {
-    s32 result = world_card_wait_for_selected_status(10);
+    s32 result = card_io_wait_operation_result_variant(10);
 
     if (result == CARD_IO_RESULT_NEW_CARD) {
         if (card_io_create_new_with_retries(g_card_slot * 0x10, 10) != CARD_IO_RESULT_COMPLETE) {

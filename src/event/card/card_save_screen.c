@@ -584,7 +584,7 @@ void card_save_update_slot_scan(void) {
     if (g_card_save_slot_scan_active == 0) {
         menu_input_clear_state();
         if (g_main_card_save_last_used_slot < 0x10) {
-            result = card_io_wait_operation_result(5);
+            result = card_io_wait_operation_result_variant(5);
             if (result == CARD_IO_RESULT_COMPLETE) {
                 g_card_save_slot_scan_index = 0;
                 while (g_card_save_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
@@ -908,7 +908,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         }
         row = card_io_poll_operation_result();
         if (row > CARD_IO_RESULT_COMPLETE) {
-            if (card_io_wait_operation_result(3) != CARD_IO_RESULT_COMPLETE) {
+            if (card_io_wait_operation_result_variant(3) != CARD_IO_RESULT_COMPLETE) {
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU_CHILD);
                 g_card_save_overwrite_prompt_active = 0;

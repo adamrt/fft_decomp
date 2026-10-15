@@ -22,4 +22,7 @@ extern u8 g_card_info_pending;
 void card_set_slot(s32 slot);
 s32 card_poll_info_result_variant(void);
 
+/* unified */
+s32 card_io_wait_operation_result_variant(s32 retry_limit);
+
 #endif

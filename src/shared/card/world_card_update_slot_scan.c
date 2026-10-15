@@ -43,7 +43,7 @@ void world_card_update_slot_scan(void) {
     if (g_world_card_slot_scan_active == 0) {
         menu_input_clear_state();
         if (g_main_card_save_last_used_slot < 0x10) {
-            if (world_card_wait_for_selected_status(5) == CARD_IO_RESULT_COMPLETE) {
+            if (card_io_wait_operation_result_variant(5) == CARD_IO_RESULT_COMPLETE) {
                 g_world_card_slot_scan_index = 0;
                 while (g_world_card_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
                     if (g_main_card_save_slot_file_states[g_world_card_slot_scan_index] >= 0) {

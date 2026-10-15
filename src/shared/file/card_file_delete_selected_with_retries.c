@@ -20,7 +20,7 @@ s32 card_file_delete_selected_with_retries(const char* filename) {
     strcat(path, filename);
 
     for (i = 0; i < 10; i++) {
-        if (card_io_wait_operation_result(10) != CARD_IO_RESULT_COMPLETE) {
+        if (card_io_wait_operation_result_variant(10) != CARD_IO_RESULT_COMPLETE) {
             return 0;
         }
         result = erase(path);

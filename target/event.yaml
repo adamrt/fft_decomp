@@ -904,7 +904,7 @@ functions:
   - {addr: 0x801c447c, size: 212, name: card_io_load_with_retries, hash: 6dfa7ffea75b5fd9, profile: gcc-2.6.3_O0_aspsx-2.34}
   - {addr: 0x801c4550, size: 260, name: card_io_create_new_with_retries, hash: 8609d7bd3b3fc054, profile: gcc-2.6.3_O0_aspsx-2.34, source: src/shared/card/card_io_create_new_with_retries.c}
   - {addr: 0x801c4654, size: 296, name: card_io_poll_operation_result, hash: 7dcc7e43e91a981c, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {addr: 0x801c477c, size: 188, name: card_io_wait_operation_result, hash: 3b0dcd32d1f1f06e, profile: gcc-2.6.3_O0_aspsx-2.34}
+  - {addr: 0x801c477c, size: 188, name: card_io_wait_operation_result_variant, hash: 3b0dcd32d1f1f06e, profile: gcc-2.6.3_O0_aspsx-2.34}
   - {addr: 0x801c4838, size: 332, name: card_file_enumerate_saves, hash: 778a5a68dcafa7fc, profile: gcc-2.6.3_O0_aspsx-2.34, source: src/shared/file/card_file_enumerate_saves.c}
   - {addr: 0x801c4984, size: 308, name: card_file_count_free_blocks, hash: 28fc8e05262732fe, profile: gcc-2.6.3_O0_aspsx-2.34, source: src/shared/file/card_file_count_free_blocks.c}
   - {addr: 0x801c4ab8, size: 252, name: card_io_open_or_create_selected_card, hash: 1ed8b4b736cbd106, profile: gcc-2.6.3_O0_aspsx-2.34}

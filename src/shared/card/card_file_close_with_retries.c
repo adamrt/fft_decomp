@@ -11,7 +11,7 @@ s32 card_file_close_with_retries(s32 descriptor) {
     s32 close_result;
 
     for (i = 0; i < 10; i++) {
-        wait_success = card_io_wait_operation_result(10) == CARD_IO_RESULT_COMPLETE;
+        wait_success = card_io_wait_operation_result_variant(10) == CARD_IO_RESULT_COMPLETE;
         close_result = close(descriptor);
         if (close_result == descriptor) {
             break;

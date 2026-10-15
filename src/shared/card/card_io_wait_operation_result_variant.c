@@ -6,7 +6,7 @@
  * Each attempt retries while the result is pending. Returns the first
  * non-complete status, or the last status once `attempts` settled polls have
  * completed. */
-s32 world_card_wait_for_selected_status(s32 attempts) {
+s32 card_io_wait_operation_result_variant(s32 attempts) {
     s32 i;
     s32 status;
 

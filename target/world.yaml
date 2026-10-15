@@ -1017,7 +1017,7 @@ functions:
   - {addr: 0x80132950, size: 148, name: world_card_load_with_retries, hash: 6e6c44664a65aece, source: src/shared/card/world_card_load_with_retries.c}
   - {addr: 0x801329e4, size: 180, name: card_io_create_new_with_retries, hash: f3bd49bc815f1c09, source: src/shared/card/card_io_create_new_with_retries.c}
   - {addr: 0x80132a98, size: 184, name: card_poll_info_result_variant, hash: d75737862b2d266a}
-  - {addr: 0x80132b50, size: 112, name: world_card_wait_for_selected_status, hash: 381a35bd373a81e5, source: src/shared/card/world_card_wait_for_selected_status.c}
+  - {addr: 0x80132b50, size: 112, name: card_io_wait_operation_result_variant, hash: 381a35bd373a81e5, source: src/shared/card/card_io_wait_operation_result_variant.c}
   - {addr: 0x80132bc0, size: 208, name: world_card_count_save_files, hash: 480d8f033ffe2e0d, source: src/shared/card/world_card_count_save_files.c, rodata: [{addr: 0x800e0200, size: 38, hash: d30f492629781067}]}
   - {addr: 0x80132c90, size: 92, name: world_card_count_free_blocks, hash: abd32f626085421e, source: src/shared/card/world_card_count_free_blocks.c}
   - {addr: 0x80132cec, size: 140, name: world_card_probe_selected, hash: fd1ba4ef33a5ac76, source: src/shared/card/world_card_probe_selected.c}
@@ -2423,10 +2423,7 @@ imports:
   - {addr: 0x801df198, name: jobstts_entrypoint}
 
 overrides:
-  - {function: card_file_close_with_retries, name: card_io_wait_operation_result, addr: 0x80132b50}
   - {function: card_file_close_with_retries, name: g_card_file_open_descriptor, addr: 0x80194fd8}
-  - {function: card_file_seek_with_retries, name: card_io_wait_operation_result, addr: 0x80132b50}
-  - {function: card_io_create_new_with_retries, name: card_io_wait_operation_result, addr: 0x80132b50}
   - {function: gfx_enqueue_line_f2, name: g_equip_gfx_line_f2_count, addr: 0x801cd198}
   - {function: menu_build_scaled_draw_area_packets, name: g_menu_draw_area_scale_percent, addr: 0x8018ae74}
   - {function: menu_build_zodiac_primitives, name: g_menu_draw_area_template, addr: 0x8016e44c}

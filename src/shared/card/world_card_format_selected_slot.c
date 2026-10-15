@@ -9,7 +9,7 @@
 s32 world_card_format_selected_slot(void) {
     char name[8];
 
-    if (world_card_wait_for_selected_status(10) > CARD_IO_RESULT_COMPLETE) {
+    if (card_io_wait_operation_result_variant(10) > CARD_IO_RESULT_COMPLETE) {
         return 0;
     }
     if (g_card_slot == 0) {

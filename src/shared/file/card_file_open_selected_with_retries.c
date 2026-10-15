@@ -31,7 +31,7 @@ s32 card_file_open_selected_with_retries(const char* filename, s32 mode) {
     strcat(path, filename);
 
     while (i < 40) {
-        result = card_io_wait_operation_result(10);
+        result = card_io_wait_operation_result_variant(10);
         if (result != CARD_IO_RESULT_COMPLETE) {
             return -2;
         }

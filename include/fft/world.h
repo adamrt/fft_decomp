@@ -1766,7 +1766,6 @@ void world_card_update_and_draw_slot_list(s32 input);
 void world_card_update_menu_request(void);
 void world_card_update_save_slot_playtime(s32 slot);
 void world_card_update_slot_scan(void);
-s32 world_card_wait_for_selected_status(s32 attempts);
 s32 card_file_write_with_retries(s32 descriptor, const void* source, s32 size);
 void world_card_build_save_image(s32 slot);
 s32 card_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);

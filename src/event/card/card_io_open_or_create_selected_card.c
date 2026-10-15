@@ -6,7 +6,7 @@
  * CARD_IO_RESULT_NEW_CARD (the load still reports a new, unformatted card)
  * or CARD_IO_RESULT_TIMEOUT for any failure. */
 s32 card_io_open_or_create_selected_card(void) {
-    s32 result = card_io_wait_operation_result(10);
+    s32 result = card_io_wait_operation_result_variant(10);
 
     if (result == CARD_IO_RESULT_NEW_CARD) {
         result = card_io_create_new_with_retries(g_card_io_selected_slot << 4, 10);

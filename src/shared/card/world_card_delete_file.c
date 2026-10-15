@@ -15,7 +15,7 @@ s32 world_card_delete_file(const char* name) {
     }
     strcat(path, name);
     for (i = 0; i < 10; i++) {
-        if (world_card_wait_for_selected_status(10) != CARD_IO_RESULT_COMPLETE) {
+        if (card_io_wait_operation_result_variant(10) != CARD_IO_RESULT_COMPLETE) {
             return 0;
         }
         result = erase(path);

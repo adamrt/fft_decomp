@@ -8,7 +8,7 @@ s32 card_io_format_selected_slot(void) {
     s32 result;
     char path[8];
 
-    result = card_io_wait_operation_result(10);
+    result = card_io_wait_operation_result_variant(10);
     if (result > CARD_IO_RESULT_COMPLETE)
         return 0;
     if (g_card_io_selected_slot == 0)

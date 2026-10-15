@@ -3,7 +3,7 @@
 
 /* Run the card status poll to a result, repeating it up to `retry_limit`
  * times until it reports completion. Returns the last result. */
-s32 card_io_wait_operation_result(s32 retry_limit) {
+s32 card_io_wait_operation_result_variant(s32 retry_limit) {
     s32 result;
     s32 i = 0;
 
