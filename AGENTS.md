@@ -24,7 +24,8 @@ preserving every original byte.
   `#ifdef FFT_X` only as the minimal difference a trial proved in every
   module that compiles the file, with a one-line comment saying what the
   other program does. Sources test only `FFT_` and `VARIANT_` names in
-  conditionals; headers test neither.
+  conditionals; a header may test `FFT_` names (a record laid out per
+  program) but never `VARIANT_` names.
 - Preserve retail bugs and ABI disagreements. Explain them briefly in source
   comments or `QUIRKS.md`.
 - Keep drafts, experiments, extracted files and generated output under ignored

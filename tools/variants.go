@@ -21,9 +21,10 @@ const variantSuffix = "_variant"
 var preprocessorDefine = regexp.MustCompile(`(?m)^[ \t]*#[ \t]*define[ \t]+((?:VARIANT_|FFT_)[A-Za-z0-9_]*)`)
 
 // conditionalProblems checks the conditional directives of one file: a
-// source may test only the program macros (FFT_) and VARIANT_ names, and a
-// header may test neither, since every module includes it. Include guards
-// and other names are fine in headers.
+// source may test only the program macros (FFT_) and VARIANT_ names; a
+// header may test program macros (a record laid out per program) but never
+// VARIANT_ names, since every module includes it. Include guards and other
+// names are fine in headers.
 func conditionalProblems(path string, data []byte, knownMacros map[string]bool, header bool) []string {
 	var problems []string
 	lines := strings.Split(string(data), "\n")
@@ -49,8 +50,10 @@ func conditionalProblems(path string, data []byte, knownMacros map[string]bool, 
 			variant := strings.HasPrefix(name, definePrefix)
 			switch {
 			case definedHere[name] && !program && !variant:
-			case header && (program || variant):
-				problems = append(problems, fmt.Sprintf("%s:%d tests %s; headers may not test program macros or VARIANT_ names (every module includes them)", path, number+1, name))
+			case header && variant:
+				problems = append(problems, fmt.Sprintf("%s:%d tests %s; headers may not test VARIANT_ names (every module includes them)", path, number+1, name))
+			case header && program && !knownMacros[name]:
+				problems = append(problems, fmt.Sprintf("%s:%d tests %s, which names no module or module family", path, number+1, name))
 			case header:
 			case program && !knownMacros[name]:
 				problems = append(problems, fmt.Sprintf("%s:%d tests %s, which names no module or module family", path, number+1, name))

@@ -30,11 +30,12 @@ func (p project) unitSymbolsCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols unit", flag.ContinueOnError)
 	name := flags.String("name", "", "unit name")
 	source := flags.String("source", "", "merged source path under src/, such as src/event/thread.c")
+	comment := flags.String("comment", "", "leading file comment, such as what the file holds and which of its edges are proven")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	usage := errors.New("usage: tools symbols unit --name NAME --source src/DIR/NAME.c [--dry-run] MODULE:ENTRY...")
+	usage := errors.New("usage: tools symbols unit --name NAME --source src/DIR/NAME.c [--comment TEXT] [--dry-run] MODULE:ENTRY...")
 	if *name == "" || *source == "" || flags.NArg() == 0 {
 		return usage
 	}
@@ -177,6 +178,12 @@ func (p project) unitSymbolsCommand(args []string) error {
 			}
 		}
 		text, conditional := renderUnitSource(order, merged, bodies, bodyModules)
+		if *comment != "" {
+			if strings.Contains(*comment, "*/") {
+				return errors.New("--comment must not contain */")
+			}
+			text = append([]byte("/* "+strings.TrimSpace(*comment)+" */\n\n"), text...)
+		}
 		for _, m := range order {
 			if err := validateUnitSourceDataFor(m, clean, text, members[m]); err != nil {
 				return err

@@ -170,7 +170,7 @@ func TestModuleMacrosAndConditionalRules(t *testing.T) {
 	}
 	header := "#ifndef X_H\n#define X_H\n#ifdef FFT_BATTLE\n#endif\n#if VARIANT_X\n#endif\n#endif\n"
 	problems = conditionalProblems("include/x.h", []byte(header), known, true)
-	if len(problems) != 2 || !strings.Contains(problems[0], "tests FFT_BATTLE; headers may not") || !strings.Contains(problems[1], "tests VARIANT_X; headers may not") {
+	if len(problems) != 1 || !strings.Contains(problems[0], "tests VARIANT_X; headers may not") {
 		t.Fatalf("header problems = %v", problems)
 	}
 	if match := preprocessorDefine.FindSubmatch([]byte("#define FFT_BATTLE 1\n")); match == nil {
