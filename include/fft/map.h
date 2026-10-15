@@ -400,4 +400,7 @@ void map_reset_script_light_transform(void);
 /* shared between programs */
 extern map_background_gradient_colors_t g_event_background_colors;
 
+/* shared with the per-program event interpreter and dialog thread */
+void map_wait_for_refresh(void);
+
 #endif

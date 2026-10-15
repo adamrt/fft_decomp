@@ -11,4 +11,7 @@
 /* shared between programs */
 extern s32 g_status_display_redraw_request;
 
+/* shared with the per-program event interpreter and dialog thread */
+void status_queue_current_status_graphics(s32 battle_id, s32 enabled);
+
 #endif

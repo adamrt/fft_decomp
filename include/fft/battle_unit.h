@@ -1295,4 +1295,7 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
 /* unit views */
 extern image_load_parameters_t g_battle_unit_summary_portrait_image_params;
 
+/* shared with the per-program event interpreter and dialog thread */
+s32 unit_is_moving(s32 runtime_id);
+
 #endif

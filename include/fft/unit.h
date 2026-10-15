@@ -1220,4 +1220,8 @@ SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void unit_set_animation(s32 runtime_id, u32 animation);
 
+/* shared with the per-program event interpreter and dialog thread */
+void unit_clear_status_staging_data(void);
+void unit_update_staged_status_data(u16 unit_id, u16 restore);
+
 #endif

@@ -20,8 +20,9 @@ units:
   - {name: camera, source: src/battle/camera.c}
   - {name: command_menus, source: src/event/command_menus.c}
   - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
+  - {name: dialog_cursor, source: src/event/dialog_cursor.c}
+  - {name: dialog_helpers, source: src/event/dialog_helpers.c}
   - {name: dialog_messages, source: src/event/dialog_messages.c}
-  - {name: dialog_thread, source: src/event/dialog_thread.c}
   - {name: effect_renderer, source: src/battle/effect_renderer.c}
   - {name: effect_script, source: src/battle/effect_script.c}
   - {name: effect_system, source: src/battle/effect_system.c}
@@ -797,20 +798,20 @@ functions:
   - {addr: 0x8013018c, size: 1180, name: text_measure_pixels, hash: 92c6053117958c19, unit: dialog_messages}
   - {addr: 0x80130628, size: 240, name: menu_render_text_image_at_record_origin, hash: 458d39111bad80dd, unit: dialog_messages}
   - {addr: 0x80130718, size: 188, name: text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/event/text_advance_cursor_with_backreferences.c}
-  - {addr: 0x801307d4, size: 160, name: text_advance_cursor_with_separate_backreference_state, hash: 267aa40059dcef97, unit: dialog_thread}
-  - {addr: 0x80130874, size: 76, name: text_print_fnt_value_and_next, hash: 32702a6e63eea736, unit: dialog_thread}
-  - {addr: 0x801308c0, size: 8036, name: text_run_dialog_thread_variant, hash: c934521a2b7c294a, unit: dialog_thread}
-  - {addr: 0x80132824, size: 56, name: text_find_entry, hash: cec167648bea266e, unit: dialog_thread}
-  - {addr: 0x8013285c, size: 80, name: text_count_decimal_digits, hash: 46d4e97a0aca8ebf, unit: dialog_thread}
-  - {addr: 0x801328ac, size: 104, name: gfx_flip_poly_ft4_uv_if_negative, hash: 7fda2865d42a6dd6, unit: dialog_thread}
-  - {addr: 0x80132914, size: 688, name: menu_animate_window_quad_crop, hash: 4493016da3417713, unit: dialog_thread}
-  - {addr: 0x80132bc4, size: 652, name: menu_tween_window_quads, hash: 51a61972e26b9d06, unit: dialog_thread}
-  - {addr: 0x80132e50, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_thread}
-  - {addr: 0x80132e74, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 9ae491a067b74ea5, unit: dialog_thread}
-  - {addr: 0x80132f9c, size: 84, name: script_pause_event_instruction, hash: 87298c6e69d92c6c, unit: dialog_thread}
-  - {addr: 0x80132ff0, size: 88, name: unit_copy_world_coords_to_scratch, hash: 0a61ba2db8f7e33b, unit: dialog_thread}
-  - {addr: 0x80133048, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, unit: dialog_thread}
-  - {addr: 0x80133088, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, unit: dialog_thread}
+  - {addr: 0x801307d4, size: 160, name: text_advance_cursor_with_separate_backreference_state, hash: 267aa40059dcef97, unit: dialog_cursor}
+  - {addr: 0x80130874, size: 76, name: text_print_fnt_value_and_next, hash: 32702a6e63eea736, unit: dialog_cursor}
+  - {addr: 0x801308c0, size: 8036, name: text_run_dialog_thread_variant, hash: c934521a2b7c294a}
+  - {addr: 0x80132824, size: 56, name: text_find_entry, hash: cec167648bea266e, unit: dialog_helpers}
+  - {addr: 0x8013285c, size: 80, name: text_count_decimal_digits, hash: 46d4e97a0aca8ebf, unit: dialog_helpers}
+  - {addr: 0x801328ac, size: 104, name: gfx_flip_poly_ft4_uv_if_negative, hash: 7fda2865d42a6dd6, unit: dialog_helpers}
+  - {addr: 0x80132914, size: 688, name: menu_animate_window_quad_crop, hash: 4493016da3417713, unit: dialog_helpers}
+  - {addr: 0x80132bc4, size: 652, name: menu_tween_window_quads, hash: 51a61972e26b9d06, unit: dialog_helpers}
+  - {addr: 0x80132e50, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_helpers}
+  - {addr: 0x80132e74, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 9ae491a067b74ea5, unit: dialog_helpers}
+  - {addr: 0x80132f9c, size: 84, name: script_pause_event_instruction, hash: 87298c6e69d92c6c, unit: dialog_helpers}
+  - {addr: 0x80132ff0, size: 88, name: unit_copy_world_coords_to_scratch, hash: 0a61ba2db8f7e33b, unit: dialog_helpers}
+  - {addr: 0x80133048, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, unit: dialog_helpers}
+  - {addr: 0x80133088, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, unit: dialog_helpers}
   - {addr: 0x801330e4, size: 76, name: unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/event/unit_copy_world_coords_to_vector.c}
   - {addr: 0x80133130, size: 32, name: unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb, unit: event_unit_lookup}
   - {addr: 0x80133150, size: 8, name: script_report_missing_unit_stub, hash: 6d64edf91449c1b1, unit: event_unit_lookup}
@@ -1024,8 +1025,8 @@ functions:
   - {addr: 0x80143b68, size: 24, name: map_get_weather, hash: d20bef566195fa38, unit: command_menus}
   - {addr: 0x80143b80, size: 40, name: script_run_next_event, hash: 5f28a3f8beb0666a, source: src/event/script_run_next_event.c}
   - {addr: 0x80143ba8, size: 40, name: script_run_next_event_unused, hash: 5f28a3f8beb0666a, source: src/event/script_run_next_event.c, source_symbol: script_run_next_event}
-  - {addr: 0x80143bd0, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1, unit: script_interpreter}
-  - {addr: 0x80143bd8, size: 9120, name: script_execute_event_variant, hash: f5e240270b084a49, unit: script_interpreter}
+  - {addr: 0x80143bd0, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1, source: src/event/script_add_unit_stub.c}
+  - {addr: 0x80143bd8, size: 9120, name: script_execute_event_variant, hash: f5e240270b084a49}
   - {addr: 0x80145f78, size: 140, name: script_load_next_event, hash: 86e825112a99969c, unit: script_interpreter}
   - {addr: 0x80146004, size: 116, name: unit_is_moving, hash: eddabf1eb74277bd, unit: script_interpreter}
   - {addr: 0x80146078, size: 28, name: script_read_s16, hash: 7f613d531c790362, unit: script_interpreter}

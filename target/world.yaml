@@ -18,8 +18,9 @@ units:
   - {name: card_io, source: src/event/menu/card_io.c}
   - {name: card_save, source: src/world/card_save.c}
   - {name: command_menus, source: src/event/command_menus.c}
+  - {name: dialog_cursor, source: src/event/dialog_cursor.c}
+  - {name: dialog_helpers, source: src/event/dialog_helpers.c}
   - {name: dialog_messages, source: src/event/dialog_messages.c}
-  - {name: dialog_thread, source: src/event/dialog_thread.c}
   - {name: draw_areas, source: src/world/draw_areas.c}
   - {name: equipment_menus, source: src/world/equipment_menus.c}
   - {name: equipment_rows, source: src/event/menu/equipment_rows.c}
@@ -169,20 +170,20 @@ functions:
   - {addr: 0x800e4668, size: 1180, name: text_measure_pixels, hash: 899223b71ed0424b, unit: dialog_messages}
   - {addr: 0x800e4b04, size: 240, name: menu_render_text_image_at_record_origin, hash: 410b378a04558e03, unit: dialog_messages}
   - {addr: 0x800e4bf4, size: 188, name: text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/event/text_advance_cursor_with_backreferences.c}
-  - {addr: 0x800e4cb0, size: 160, name: text_advance_cursor_with_separate_backreference_state, hash: 267aa40059dcef97, unit: dialog_thread}
-  - {addr: 0x800e4d50, size: 76, name: text_print_fnt_value_and_next, hash: 9128d74441ddfc53, unit: dialog_thread}
-  - {addr: 0x800e4d9c, size: 8512, name: text_run_dialog_thread_variant, hash: c1dab33e925f6e10, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: dialog_thread}
-  - {addr: 0x800e6edc, size: 56, name: text_find_entry, hash: 1a029dac5097e38c, unit: dialog_thread}
-  - {addr: 0x800e6f14, size: 80, name: text_count_decimal_digits, hash: 46d4e97a0aca8ebf, unit: dialog_thread}
-  - {addr: 0x800e6f64, size: 104, name: gfx_flip_poly_ft4_uv_if_negative, hash: 1a53cbbc201168a1, unit: dialog_thread}
-  - {addr: 0x800e6fcc, size: 688, name: menu_animate_window_quad_crop, hash: 81c3085397b8c764, unit: dialog_thread}
-  - {addr: 0x800e727c, size: 652, name: menu_tween_window_quads, hash: 60b84c3c9ba59ec3, unit: dialog_thread}
-  - {addr: 0x800e7508, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_thread}
-  - {addr: 0x800e752c, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 18c92e7328405f4d, unit: dialog_thread}
-  - {addr: 0x800e7654, size: 84, name: script_pause_event_instruction, hash: c8f0977405c464dd, unit: dialog_thread}
-  - {addr: 0x800e76a8, size: 88, name: unit_copy_world_coords_to_scratch, hash: 2a62d55b05ed841c, unit: dialog_thread}
-  - {addr: 0x800e7700, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, unit: dialog_thread}
-  - {addr: 0x800e7740, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, unit: dialog_thread}
+  - {addr: 0x800e4cb0, size: 160, name: text_advance_cursor_with_separate_backreference_state, hash: 267aa40059dcef97, unit: dialog_cursor}
+  - {addr: 0x800e4d50, size: 76, name: text_print_fnt_value_and_next, hash: 9128d74441ddfc53, unit: dialog_cursor}
+  - {addr: 0x800e4d9c, size: 8512, name: text_run_dialog_thread_variant, hash: c1dab33e925f6e10, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x800e6edc, size: 56, name: text_find_entry, hash: 1a029dac5097e38c, unit: dialog_helpers}
+  - {addr: 0x800e6f14, size: 80, name: text_count_decimal_digits, hash: 46d4e97a0aca8ebf, unit: dialog_helpers}
+  - {addr: 0x800e6f64, size: 104, name: gfx_flip_poly_ft4_uv_if_negative, hash: 1a53cbbc201168a1, unit: dialog_helpers}
+  - {addr: 0x800e6fcc, size: 688, name: menu_animate_window_quad_crop, hash: 81c3085397b8c764, unit: dialog_helpers}
+  - {addr: 0x800e727c, size: 652, name: menu_tween_window_quads, hash: 60b84c3c9ba59ec3, unit: dialog_helpers}
+  - {addr: 0x800e7508, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_helpers}
+  - {addr: 0x800e752c, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 18c92e7328405f4d, unit: dialog_helpers}
+  - {addr: 0x800e7654, size: 84, name: script_pause_event_instruction, hash: c8f0977405c464dd, unit: dialog_helpers}
+  - {addr: 0x800e76a8, size: 88, name: unit_copy_world_coords_to_scratch, hash: 2a62d55b05ed841c, unit: dialog_helpers}
+  - {addr: 0x800e7700, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, unit: dialog_helpers}
+  - {addr: 0x800e7740, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, unit: dialog_helpers}
   - {addr: 0x800e779c, size: 76, name: unit_copy_world_coords_to_vector, hash: 0db0657e68cb43ea, source: src/event/unit_copy_world_coords_to_vector.c}
   - {addr: 0x800e77e8, size: 32, name: unit_copy_map_coords_by_runtime_id, hash: b293d475560aeacb, unit: event_unit_lookup}
   - {addr: 0x800e7808, size: 8, name: script_report_missing_unit_stub, hash: 6d64edf91449c1b1, unit: event_unit_lookup}
@@ -397,8 +398,8 @@ functions:
   - {addr: 0x800f6eb0, size: 24, name: map_get_weather, hash: 81566a90318e897e, unit: command_menus}
   - {addr: 0x800f6ec8, size: 40, name: script_run_next_event, hash: 7bcd75fff235e2a0, source: src/event/script_run_next_event.c}
   - {addr: 0x800f6ef0, size: 40, name: script_run_next_event_unused, hash: 7bcd75fff235e2a0, source: src/event/script_run_next_event.c, source_symbol: script_run_next_event}
-  - {addr: 0x800f6f18, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1, unit: script_interpreter}
-  - {addr: 0x800f6f20, size: 9088, name: script_execute_event_variant, hash: 21ced132f429744a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: script_interpreter}
+  - {addr: 0x800f6f18, size: 8, name: script_add_unit_stub, hash: 6d64edf91449c1b1, source: src/event/script_add_unit_stub.c}
+  - {addr: 0x800f6f20, size: 9088, name: script_execute_event_variant, hash: 21ced132f429744a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x800f92a0, size: 140, name: script_load_next_event, hash: d45e2f3e6f0fd4c5, unit: script_interpreter}
   - {addr: 0x800f932c, size: 116, name: unit_is_moving, hash: ed75e6a8a8e26ab2, unit: script_interpreter}
   - {addr: 0x800f93a0, size: 28, name: script_read_s16, hash: 7f613d531c790362, unit: script_interpreter}

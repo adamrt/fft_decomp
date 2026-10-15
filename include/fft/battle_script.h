@@ -31,4 +31,7 @@ s32 battle_script_add_ghost_unit_event_instruction(
 
 /* frame hooks */
 
+/* shared with the per-program event interpreter and dialog thread */
+void script_earthquake_start(void);
+
 #endif

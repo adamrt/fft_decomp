@@ -33,4 +33,7 @@ s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 /* per-module bodies: each module links its own copy under the shared name. */
 void camera_store_state_to_script_variables(void);
 
+/* shared with the per-program event interpreter and dialog thread */
+void camera_thread(void);
+
 #endif
