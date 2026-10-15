@@ -1,10 +1,12 @@
+#include "fft/battle_text.h"
 #include "fft/world.h"
 #include "psx/types.h"
 
 /* Decodes glyph `glyph` from the packed 2bpp font into a 4bpp image at
  * `image`, using target x/y and a row stride of w 16-bit values, adding `palette * 4`
  * to every non-zero pixel. Returns the glyph's advance width. */
-s32 world_text_decode_font_glyph_to_4bpp(s32 glyph, u8* image, RECT* target, s32 palette) {
+s32 menu_text_render_glyph_to_4bpp_image_variant(
+    s32 glyph, u8* image, const battle_text_image_position_t* target, s32 palette) {
     s32 row;
     s32 col;
     u8* dst;
@@ -13,11 +15,11 @@ s32 world_text_decode_font_glyph_to_4bpp(s32 glyph, u8* image, RECT* target, s32
     u8 byte;
 
     font = g_text_glyph_bitmap_data;
-    world_bit_cursor_set_primary(font + glyph * TEXT_GLYPH_BYTES);
+    bits_init_primary_reader_variant(font + glyph * TEXT_GLYPH_BYTES);
     row = 0;
     if ((target->x & 1) == 0) {
         for (; row < 14; row++) {
-            dst = image + (target->w << 1) * (target->y + row) + (target->x >> 1);
+            dst = image + (target->row_stride << 1) * (target->y + row) + (target->x >> 1);
             for (col = 0; col < 5; col++) {
                 pixel = bits_read_primary(2);
                 if (pixel != 0) {
@@ -34,7 +36,7 @@ s32 world_text_decode_font_glyph_to_4bpp(s32 glyph, u8* image, RECT* target, s32
         }
     } else {
         for (; row < 14; row++) {
-            dst = image + (target->w << 1) * (target->y + row) + (target->x >> 1);
+            dst = image + (target->row_stride << 1) * (target->y + row) + (target->x >> 1);
             pixel = bits_read_primary(2);
             if (pixel != 0) {
                 pixel += palette * 4;

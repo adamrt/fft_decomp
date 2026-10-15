@@ -114,7 +114,7 @@ s32 equip_menu_run_equip_mode(void) {
                     g_equip_equip_item_preview_active = 1;
                     g_equip_item_numeric_panel_redraw = result;
                     item_calculate_equipment_swap_stat_delta(&g_equip_item_preview_stat_detail,
-                        &g_equip_selected_unit_stat_summary, g_equip_unit_data[g_equip_unit_selected_index]->equipment,
+                        &g_menu_selected_unit_stat_summary, g_equip_unit_data[g_equip_unit_selected_index]->equipment,
                         g_equip_unit_data[1]->equipment);
                     bcopy(
                         g_equip_unit_data[g_equip_unit_selected_index]->equipment, g_equip_unit_data[1]->equipment, 10);
@@ -132,7 +132,7 @@ s32 equip_menu_run_equip_mode(void) {
         g_equip_equip_item_preview_active = 0;
         g_equip_unit_status_panel_redraw = 1;
         thread_resume(EQUIP_THREAD_SLOT_COMMAND_MENU);
-        equip_menu_set_selection_record(g_equip_equip_item_slot != 0 ? g_equip_equip_item_slot - 1 : 0,
+        menu_set_selection_record(g_equip_equip_item_slot != 0 ? g_equip_equip_item_slot - 1 : 0,
             g_equip_menu_selected_list_index, g_menu_scroll_base_index, g_item_list_entries);
         g_equip_equip_item_list_refresh = 0;
     }

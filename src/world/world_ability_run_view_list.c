@@ -27,14 +27,14 @@ s32 world_ability_run_view_list(void) {
         g_world_menu_script_callbacks[4].value = menu_ability_is_non_action_learned;
         g_world_menu_script_callbacks[5].value = world_job_get_cached_skillset_empty_flag;
         g_world_menu_script_callbacks[6].value = world_menu_is_learn_ability_learned;
-        g_world_menu_script_callbacks[7].value = world_ability_get_mp_cost_display_value;
-        g_world_menu_script_callbacks[8].value = world_ability_get_ct_display_value;
+        g_world_menu_script_callbacks[7].value = menu_ability_get_mp_cost_display_value;
+        g_world_menu_script_callbacks[8].value = menu_ability_get_ct_display_value;
         g_world_menu_script_callbacks[9].value = menu_ability_get_jp_cost_display_value;
         g_world_menu_script_callbacks[10].value = world_ability_is_category_movement;
         g_world_menu_script_callbacks[11].value = world_ability_is_category_support;
         g_world_menu_script_callbacks[12].value = world_ability_is_category_reaction;
         g_world_menu_script_callbacks[13].value = world_ability_is_category_action;
-        g_world_menu_script_callbacks[14].value = world_ability_is_non_action_unlearned;
+        g_world_menu_script_callbacks[14].value = menu_ability_is_non_action_unlearned;
         g_world_view_abilities_confirm_prompt_state = 0;
         g_world_menu_script_callbacks[15].value = world_ability_is_selected_action_type;
         menu_clear_selection_record(10);

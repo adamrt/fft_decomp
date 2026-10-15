@@ -13,7 +13,7 @@ s32 world_gfx_update_fade_in_tile(void) {
         return 0;
     }
     if (g_world_gfx_fade_decreasing != 0) {
-        g_world_gfx_fade_intensity -= world_gfx_get_vsync_mode_or_one() * 0x10;
+        g_world_gfx_fade_intensity -= menu_get_event_speed() * 0x10;
         if (g_world_gfx_fade_intensity <= 0) {
             g_world_gfx_fade_decreasing = 0;
             running = 0;

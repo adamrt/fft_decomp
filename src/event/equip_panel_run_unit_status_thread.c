@@ -79,7 +79,7 @@ void equip_panel_run_unit_status_thread(void) {
         small_text_image = g_equip_panel_selected_large_number_image;
         name_image = g_equip_panel_selected_name_image;
         numeric_entries = g_equip_panel_selected_numeric_entries;
-        state = &g_equip_selected_unit_stat_summary;
+        state = &g_menu_selected_unit_stat_summary;
         unit_data = &g_equip_panel_selected_unit_data;
         portrait_rect = &g_equip_panel_selected_portrait_rect;
         panel_base = panel;

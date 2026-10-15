@@ -3,7 +3,7 @@
 /* Prepend an item to the selected category list.
  *
  * The existing entries and their terminator move one byte to the right. */
-void item_prepend_to_category_list_variant(s32 item_id, s32 category_index) {
+void item_prepend_to_category_list(s32 item_id, s32 category_index) {
     u8* list;
     s32 i;
 

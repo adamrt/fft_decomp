@@ -46,7 +46,7 @@ void world_formation_draw_graphics_below_sprite(
             rect.w = g_world_formation_label_tiles[mode].w;
             rect.h = g_world_formation_label_tiles[mode].h;
             menu_gfx_enqueue_textured_quad(&rect, g_world_formation_label_tiles[mode].u,
-                g_world_formation_label_tiles[mode].v, color, 0, g_world_menu_icon_tpage,
+                g_world_formation_label_tiles[mode].v, color, 0, g_menu_cursor_texture_page,
                 g_world_menu_alternate_number_clut, priority);
             num_x = x + 40;
             num_y = y + 45;
@@ -84,7 +84,7 @@ void world_formation_draw_graphics_below_sprite(
             rect.y = top + 8;
             rect.w = 0x25;
             rect.h = 3;
-            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_world_menu_icon_tpage, clut, priority - 1);
+            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0xCA, color, 0, g_menu_cursor_texture_page, clut, priority - 1);
             xy[0].x = g_world_formation_gauge_bar_offsets[0] + x;
             xy[0].y = g_world_formation_gauge_bar_offsets[1] + top + 8;
             xy[3].x = xy[1].x = 0x20;
@@ -106,14 +106,14 @@ void world_formation_draw_graphics_below_sprite(
             rect.w = g_world_formation_label_tiles[3].w + 3;
             rect.h = g_world_formation_label_tiles[3].h + 1;
             menu_gfx_enqueue_textured_quad(&rect, g_world_formation_label_tiles[3].u,
-                g_world_formation_label_tiles[3].v, color, 0, g_world_menu_icon_tpage,
+                g_world_formation_label_tiles[3].v, color, 0, g_menu_cursor_texture_page,
                 g_world_menu_alternate_number_clut, priority);
             rect.x = x + 26;
             rect.y = label_y;
             rect.w = g_world_formation_label_tiles[4].w + 2;
             rect.h = g_world_formation_label_tiles[4].h;
             menu_gfx_enqueue_textured_quad(&rect, g_world_formation_label_tiles[4].u,
-                g_world_formation_label_tiles[4].v, color, 0, g_world_menu_icon_tpage,
+                g_world_formation_label_tiles[4].v, color, 0, g_menu_cursor_texture_page,
                 g_world_menu_alternate_number_clut, priority);
             num_x = x + 13;
             num_y = y40;
@@ -142,27 +142,27 @@ void world_formation_draw_graphics_below_sprite(
             rect.w = g_world_formation_label_tiles[5].w;
             rect.h = g_world_formation_label_tiles[5].h;
             menu_gfx_enqueue_textured_quad(&rect, g_world_formation_label_tiles[5].u,
-                g_world_formation_label_tiles[5].v, color, 0, g_world_menu_icon_tpage,
+                g_world_formation_label_tiles[5].v, color, 0, g_menu_cursor_texture_page,
                 g_world_menu_alternate_number_clut, priority);
             rect.x += rect.w - 2;
             rect.y += 5;
             rect.w = 3;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(
-                &rect, 0x3B, 0x15, color, 0, g_world_menu_icon_tpage, g_world_menu_alternate_number_clut, priority);
+                &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_world_menu_alternate_number_clut, priority);
             rect.x = x + 26;
             rect.y = label_y;
             rect.w = g_world_formation_label_tiles[7].w;
             rect.h = g_world_formation_label_tiles[7].h;
             menu_gfx_enqueue_textured_quad(&rect, g_world_formation_label_tiles[7].u,
-                g_world_formation_label_tiles[7].v, color, 0, g_world_menu_icon_tpage,
+                g_world_formation_label_tiles[7].v, color, 0, g_menu_cursor_texture_page,
                 g_world_menu_alternate_number_clut, priority);
             rect.x += rect.w;
             rect.y += 5;
             rect.w = 3;
             rect.h = 3;
             menu_gfx_enqueue_textured_quad(
-                &rect, 0x3B, 0x15, color, 0, g_world_menu_icon_tpage, g_world_menu_alternate_number_clut, priority);
+                &rect, 0x3B, 0x15, color, 0, g_menu_cursor_texture_page, g_world_menu_alternate_number_clut, priority);
             num_x = x + 13;
             if (world_coords_fit_in_byte(num_x - 3, (s16)y40)) {
                 g_world_formation_brave_number.x = num_x;

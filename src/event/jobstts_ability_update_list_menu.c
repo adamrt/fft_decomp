@@ -74,7 +74,7 @@ s32 jobstts_ability_update_list_menu(void) {
 
     category = jobstts_menu_update_wrapped_horizontal_selection(4, 5, g_menu_input_secondary_repeat);
     if (category != g_menu_ability_category) {
-        jobstts_menu_set_selection_record(g_menu_ability_category, g_jobstts_menu_list_selected_index,
+        menu_set_selection_record(g_menu_ability_category, g_jobstts_menu_list_selected_index,
             g_jobstts_menu_scroll_base_index, g_menu_ability_entries);
         g_menu_ability_category = category;
         jobstts_ability_build_list(0, g_jobstts_job_selected_id, g_menu_ability_category, g_menu_ability_entries, 0);

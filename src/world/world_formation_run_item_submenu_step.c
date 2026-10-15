@@ -36,7 +36,7 @@ s32 world_formation_run_item_submenu_step(void) {
 
     if (g_world_item_submenu_initialized == 0) {
         g_world_item_submenu_initialized = 1;
-        g_world_item_menu_category = world_menu_init_cursor_position(WORLD_MENU_CURSOR_ITEM_TAB, 0);
+        g_menu_selected_slot = world_menu_init_cursor_position(WORLD_MENU_CURSOR_ITEM_TAB, 0);
         thread_suspend(WORLD_THREAD_SLOT_UPPER_MENU);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_UNIT_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
@@ -94,7 +94,7 @@ s32 world_formation_run_item_submenu_step(void) {
         busy = 1;
     }
     menu_run_script_with_palette_mode(&g_world_item_list_window_script, input, busy);
-    world_menu_draw_row_window_and_cursor(0, g_world_item_menu_category, busy);
+    world_menu_draw_row_window_and_cursor(0, g_menu_selected_slot, busy);
     if (g_world_menu_option_count != 0) {
         if (g_item_list_entries[g_world_menu_cursor_position] < ITEM_ID_THROWABLE_FIRST) {
             menu_draw_weapon_hand_icons(g_item_list_entries[g_world_menu_cursor_position]);
@@ -103,7 +103,7 @@ s32 world_formation_run_item_submenu_step(void) {
             && g_item_list_entries[g_world_menu_cursor_position] < ITEM_ID_ACCESSORY_FIRST) {
             menu_run_script_with_palette_mode(&g_world_item_hp_mp_bonus_window_script, 0, 0);
         }
-        world_item_build_status_list_polygons(g_item_list_entries[g_world_menu_cursor_position]);
+        menu_draw_item_status_list(g_item_list_entries[g_world_menu_cursor_position]);
     }
     return 1;
 }

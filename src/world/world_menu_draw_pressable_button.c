@@ -44,7 +44,7 @@ void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 
     piece_index = g_world_menu_button_piece_starts[index];
     count = g_world_menu_button_piece_starts[index + 1] - piece_index;
     sprite.source.clut = clut;
-    sprite.source.tpage = g_world_menu_icon_tpage;
+    sprite.source.tpage = g_menu_cursor_texture_page;
     for (i = 0; i < count; i++) {
         piece = &g_world_menu_button_pieces[piece_index];
         sprite.position.x = x + piece->x_offset;

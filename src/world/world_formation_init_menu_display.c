@@ -73,7 +73,7 @@ void world_formation_init_menu_display(void) {
     g_world_menu_description_text_id = 0;
     world_menu_init_scrollable_list_core(0, 0, 0);
     world_gfx_start_decreasing_fade();
-    world_menu_clear_cursor_positions();
+    menu_clear_selection_values();
     g_world_formation_unit_cycle_mode = 0;
     world_menu_reset_selection_results();
     world_text_bind_section_data(WORLD_TEXT_DATA_SKILLSET_NAMES);

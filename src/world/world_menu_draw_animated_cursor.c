@@ -41,7 +41,7 @@ void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode) 
     }
     frame = *state;
     frame &= 0x7F;
-    frame *= world_gfx_get_vsync_mode_or_one();
+    frame *= menu_get_event_speed();
     state_mode = alternate;
     if (state_mode != 0) {
         if (frame >= 0x25) {
@@ -59,7 +59,7 @@ void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode) 
         bob = g_world_menu_cursor_bob_thresholds[index + 1];
     }
     x_offset = bob;
-    frame += world_gfx_get_vsync_mode_or_one();
+    frame += menu_get_event_speed();
     state_mode = alternate;
     if (state_mode != 0) {
         if (frame < 0x25) {
@@ -81,7 +81,7 @@ void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode) 
     rect.y = position->y;
     rect.w = 0x10;
     rect.h = 0x10;
-    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_world_menu_icon_tpage, front_clut, g_menu_gfx_otag_index);
+    menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, g_menu_cursor_texture_page, front_clut, g_menu_gfx_otag_index);
     rect.x += 2;
     rect.y += 2;
     menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, back_clut, g_menu_gfx_otag_index);

@@ -21,7 +21,7 @@ void world_formation_stage_selected_unit(void) {
         = units[index]->status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
     units[index]->status.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
         = units[index]->status.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
-    bcopy(&units[index]->status, &g_world_selected_unit_stat_summary, sizeof(menu_unit_status_record_t));
+    bcopy(&units[index]->status, &g_menu_selected_unit_stat_summary, sizeof(menu_unit_status_record_t));
     bcopy(
         &units[g_unit_selected_index]->identity, &g_world_selected_unit_identity, sizeof(menu_unit_status_identity_t));
     bcopy(&units[g_unit_selected_index]->move, &g_world_selected_unit_stat_detail, 0x40);

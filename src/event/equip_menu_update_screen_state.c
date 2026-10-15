@@ -44,9 +44,9 @@ void equip_menu_update_screen_state(void) {
         } else if (mode != -1) {
             thread_start(EQUIP_THREAD_SLOT_COMMAND_MENU_CHILD, equip_thread_wait_forever);
             g_equip_menu_screen_state = *value_ptr + EQUIP_SCREEN_STATE_EQUIP;
-            equip_menu_set_selection_value(0, 0);
-            equip_menu_set_selection_value(1, 0);
-            equip_menu_set_selection_value(2, 0);
+            menu_set_selection_value(0, 0);
+            menu_set_selection_value(1, 0);
+            menu_set_selection_value(2, 0);
             equip_menu_reset_selection_indices();
         }
         g_equip_menu_thread_running = thread_is_running(EQUIP_THREAD_SLOT_COMMAND_MENU);

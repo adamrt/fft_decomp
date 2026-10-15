@@ -42,7 +42,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
         }
         return instruction;
     }
-    speed = world_gfx_get_vsync_mode_or_one();
+    speed = menu_get_event_speed();
     g_world_menu_use_scroll_position = 1;
     if (g_world_menu_list_layout_pending != 0) {
         world_menu_load_scrollable_list_layout(instruction);
@@ -163,7 +163,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.arrow_up_y;
             rect.w = 8;
             rect.h = 0x10;
-            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_menu_gfx_semitransparency, g_world_menu_icon_tpage,
+            menu_gfx_enqueue_textured_quad(&rect, 0xD8, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_world_menu_clut_front, g_menu_gfx_otag_index);
         }
         if (g_world_menu_scroll_offset < g_world_menu_option_count - g_world_menu_list_visible_rows) {
@@ -171,7 +171,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = instruction->list.arrow_down_y;
             rect.w = 8;
             rect.h = 0x10;
-            menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_menu_gfx_semitransparency, g_world_menu_icon_tpage,
+            menu_gfx_enqueue_textured_quad(&rect, 0xE0, 0, 0, g_menu_gfx_semitransparency, g_menu_cursor_texture_page,
                 g_world_menu_clut_front, g_menu_gfx_otag_index);
         }
         if (g_world_menu_option_count > g_world_menu_list_visible_rows) {
@@ -182,8 +182,8 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
             rect.y = i;
             rect.w = 8;
             rect.h = 8;
-            menu_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_menu_gfx_semitransparency, g_world_menu_icon_tpage,
-                g_world_menu_clut_front, g_menu_gfx_otag_index);
+            menu_gfx_enqueue_textured_quad(&rect, 0x10, 0x10, 0, g_menu_gfx_semitransparency,
+                g_menu_cursor_texture_page, g_world_menu_clut_front, g_menu_gfx_otag_index);
         }
     }
     if (instruction->list.show_cursor != 0) {

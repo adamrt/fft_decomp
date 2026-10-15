@@ -26,7 +26,7 @@ s32 world_input_read_menu_scroll_repeat(void) {
         } else {
             g_world_menu_scroll_hold_counter = 0;
         }
-        value = world_gfx_get_vsync_mode_or_one();
+        value = menu_get_event_speed();
         delay = g_main_input_repeat_initial_delay / value;
         repeat = g_main_input_secondary_repeat_period / value;
         counter = g_world_menu_scroll_hold_counter;

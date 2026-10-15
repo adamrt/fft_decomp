@@ -17,7 +17,7 @@ s32 world_menu_run_best_fit_equipment(void) {
     if (g_world_item_best_remove_initialized == 0) {
         g_world_best_fit_confirm_menu.selected_index = 0;
         world_unit_build_best_fit_equipment(g_unit_selected_index, g_world_item_preview_stat_detail.state.equipment);
-        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_world_selected_unit_stat_summary,
+        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
             g_world_unit_pointers[g_unit_selected_index]->equipment,
             (u16*)g_world_item_preview_stat_detail.state.equipment);
         g_world_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(

@@ -78,7 +78,7 @@ void menu_run_unit_status_thread_variant(void) {
         number_images = &g_world_selected_unit_number_text_images;
         name_image = g_world_selected_unit_name_text_image;
         entries = g_world_selected_unit_number_entries;
-        state = &g_world_selected_unit_stat_summary;
+        state = &g_menu_selected_unit_stat_summary;
         identity = &g_world_selected_unit_identity;
         transition = &g_world_selected_unit_portrait_rect;
         status_base = status;
@@ -345,7 +345,7 @@ void menu_run_unit_status_thread_variant(void) {
         status->sprites[6].v0 = (cell / 7) * 0x14 + 0x2A;
         if ((frame == 0) || (display->work != 0)) {
             /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
-            menu_copy_billboard_data_in(&g_world_selected_unit_stat_summary,
+            menu_copy_billboard_data_in(&g_menu_selected_unit_stat_summary,
                 (const menu_active_unit_t*)&g_world_selected_unit_identity, &g_world_selected_unit_stat_detail);
             if (state->list_index < 0) {
                 entries[6].format = 0xC00;

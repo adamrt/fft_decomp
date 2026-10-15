@@ -35,7 +35,8 @@ void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bou
             col = 0;
             colors2 = &ids[k];
             for (; col < 8; col++) {
-                position.x += menu_text_render_glyph_to_4bpp_image(glyph, image, &position, (*colors2 >> 14) | style);
+                position.x
+                    += menu_text_render_glyph_to_4bpp_image_variant(glyph, image, &position, (*colors2 >> 14) | style);
             }
         } else {
             text = menu_text_find_entry_by_index(font, ids[k] & 0xFFF, 2);
@@ -53,8 +54,8 @@ void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bou
                             code &= 0xF;
                             code = code * TEXT_GLYPHS_PER_PREFIX + *text++;
                         }
-                        position.x
-                            += menu_text_render_glyph_to_4bpp_image(code, image, &position, (*colors >> 14) | style);
+                        position.x += menu_text_render_glyph_to_4bpp_image_variant(
+                            code, image, &position, (*colors >> 14) | style);
                     } else if (code == TEXT_SPACE) {
                         position.x += 4;
                     } else if (code == TEXT_SET_X_POSITION) {

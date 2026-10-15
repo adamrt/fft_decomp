@@ -17,8 +17,7 @@ void world_formation_update_job_wheel_state(void) {
             step = g_world_job_wheel_open_frame;
             g_world_job_wheel_unit_index = g_unit_selected_index;
             world_formation_build_job_wheel_availability();
-            g_world_job_wheel_open_frame
-                = step + g_main_input_secondary_repeat_period / world_gfx_get_vsync_mode_or_one();
+            g_world_job_wheel_open_frame = step + g_main_input_secondary_repeat_period / menu_get_event_speed();
             if (g_world_job_wheel_open_frame >= 0x11) {
                 g_world_job_wheel_open_frame = 0x10;
             }

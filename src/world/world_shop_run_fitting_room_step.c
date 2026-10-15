@@ -80,8 +80,8 @@ void world_shop_run_fitting_room_step(void) {
                     g_world_shop_menu_step = WORLD_SHOP_STEP_FITTING_ROOM_CHECKOUT;
                 }
             }
-            world_menu_set_cursor_position(WORLD_MENU_CURSOR_REMOVE_SLOT, 0);
-            world_menu_set_cursor_position(WORLD_MENU_CURSOR_EQUIP_SLOT, 0);
+            menu_init_selection_value(WORLD_MENU_CURSOR_REMOVE_SLOT, 0);
+            menu_init_selection_value(WORLD_MENU_CURSOR_EQUIP_SLOT, 0);
         }
     }
     if (g_world_shop_cost_window_visible != 0) {

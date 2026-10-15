@@ -141,7 +141,7 @@ void world_card_update_slot_scan(void) {
         result = world_card_check_selected();
         menu_start_or_poll_thread(THREAD_SCREEN_SLOT_MENU, &g_world_card_access_error_message);
         if ((g_menu_input_primary_repeat & PSX_PAD_CROSS) != 0 || (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) != 0) {
-            world_menu_stop_thread(THREAD_SCREEN_SLOT_MENU);
+            menu_stop_managed_thread(THREAD_SCREEN_SLOT_MENU);
             g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_world_card_error_message_closing = 1;
         } else if (result == CARD_IO_RESULT_NEW_CARD || result == CARD_IO_RESULT_COMPLETE) {

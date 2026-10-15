@@ -21,7 +21,7 @@ void wldcore_unit_build_status_panel_data(s32 party_index) {
         return;
     }
     unit = &g_wldcore_status_unit;
-    gauges = &g_world_selected_unit_stat_summary;
+    gauges = &g_menu_selected_unit_stat_summary;
     identity = &g_world_selected_unit_identity;
     detail = &g_world_selected_unit_stat_detail.state;
     gauges->team_kind = 0;

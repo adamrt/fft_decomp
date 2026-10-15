@@ -17,9 +17,9 @@ void item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_storage_t* 
     menu_unit_status_record_t* summary_total, const u16* from_items, const u16* to_items);
 void item_rebuild_category_list(s32 category);
 s32 item_get_total_count_variant(s16 item_id);
-s32 item_is_in_category_list_variant(s32 item_id, s32 category_index);
-void item_prepend_to_category_list_variant(s32 item_id, s32 category_index);
-void item_remove_from_category_list_variant(s32 item_id, s32 category_index);
+s32 item_is_in_category_list(s32 item_id, s32 category_index);
+void item_prepend_to_category_list(s32 item_id, s32 category_index);
+void item_remove_from_category_list(s32 item_id, s32 category_index);
 extern s16 g_item_list_entries[];
 s32 item_get_equipped_count_variant(s32 item_entry);
 s32 item_adjust_inventory_count(s16 item_entry, s32 delta);
@@ -28,5 +28,6 @@ extern u8* g_item_category_lists[];
 extern s8* g_item_type_order_lists[];
 void item_store_category_list(s32 category_index, const s16* source);
 extern menu_icon_source_t g_item_graphic_descriptor;
+s32 item_get_type(s32 item_id);
 
 #endif

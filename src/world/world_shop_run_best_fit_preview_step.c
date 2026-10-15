@@ -94,7 +94,7 @@ void world_shop_run_best_fit_preview_step(void) {
         g_world_item_preview_stat_detail.state.equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY]
             = g_world_unit_pointers[g_unit_selected_index]->equipment[WORLD_EQUIPMENT_SLOT_ACCESSORY];
         bcopy(staged, g_world_unit_pointers[g_unit_selected_index]->equipment, sizeof(staged));
-        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_world_selected_unit_stat_summary,
+        item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,
             g_world_unit_pointers[g_unit_selected_index]->equipment,
             (u16*)g_world_item_preview_stat_detail.state.equipment);
         g_world_item_preview_stat_detail.state.two_hands = unit_is_two_handing_weapon(

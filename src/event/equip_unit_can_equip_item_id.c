@@ -14,8 +14,8 @@ s32 equip_unit_can_equip_item_id(s16 unit_index, s16 item_entry) {
     if (item_get_menu_category(item_id) == ITEM_MENU_CATEGORY_OTHER) {
         return EQUIP_SLOT_ITEM_CANNOT_EQUIP;
     }
-    equip_bits_init_primary_reader(g_equip_unit_data[unit_index]->equipment_categories);
-    bits_read_primary(equip_item_get_type(item_id));
+    bits_init_primary_reader_variant(g_equip_unit_data[unit_index]->equipment_categories);
+    bits_read_primary(item_get_type(item_id));
     if (bits_read_primary(1) == 0) {
         result = EQUIP_SLOT_ITEM_CANNOT_EQUIP;
     } else {

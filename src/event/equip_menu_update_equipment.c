@@ -18,7 +18,7 @@ s32 equip_menu_update_equipment(void) {
 
     if (g_equip_menu_ready == 0) {
         g_equip_menu_ready = 1;
-        g_equip_selected_slot = equip_menu_init_selection_value(2, 0);
+        g_menu_selected_slot = menu_init_selection_value(2, 0);
         thread_suspend(EQUIP_THREAD_SLOT_COMMAND_MENU);
         menu_request_thread_stop(EQUIP_THREAD_SLOT_UNIT_STATUS);
         menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
@@ -65,7 +65,7 @@ s32 equip_menu_update_equipment(void) {
         override = 1;
     }
     menu_run_script_with_palette_mode(&g_equip_equipment_render_commands, input, override);
-    equip_menu_draw_equipment_slot_marker(0, g_equip_selected_slot, g_menu_input_lock_mode);
+    equip_menu_draw_equipment_slot_marker(0, g_menu_selected_slot, g_menu_input_lock_mode);
     if (g_equip_menu_list_entry_count != 0) {
         item_id = g_item_list_entries[g_equip_menu_selected_list_index];
         if (item_id < ITEM_ID_THROWABLE_FIRST) {
@@ -75,7 +75,7 @@ s32 equip_menu_update_equipment(void) {
             && g_item_list_entries[g_equip_menu_selected_list_index] <= ITEM_ID_ACCESSORY_FIRST - 1) {
             menu_run_script_with_palette_mode(&g_equip_armor_bonus_render_commands, 0, 0);
         }
-        equip_menu_draw_item_status_list(g_item_list_entries[g_equip_menu_selected_list_index]);
+        menu_draw_item_status_list(g_item_list_entries[g_equip_menu_selected_list_index]);
     }
     return 1;
 }

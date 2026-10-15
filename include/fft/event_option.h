@@ -67,10 +67,8 @@ void option_menu_window_frame_thread(void);
 
 /* text */
 extern glyph_blit_t g_option_text_glyph_dest;
-extern glyph_blit_t g_option_text_glyph_source;
 
 void option_text_set_blit_destination(s16 destination_x, s16 destination_y);
-void option_text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
 
 /* input */
 extern u32* g_option_dead_unit_controller_input;

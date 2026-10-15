@@ -16,7 +16,7 @@ void world_script_update_tutorial_controller_input(void) {
     u32 filtered_input;
     u32* counter_base;
     u32 speed, initial_delay, secondary_repeat_period, repeat_period;
-    speed = world_gfx_get_vsync_mode_or_one();
+    speed = menu_get_event_speed();
     initial_delay = g_main_input_repeat_initial_delay / speed;
     repeat_period = g_main_input_repeat_period / speed;
     secondary_repeat_period = g_main_input_secondary_repeat_period / speed + 2;

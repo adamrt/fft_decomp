@@ -39,7 +39,7 @@ void world_formation_draw_background_tiles(s32 y, s32 unused_1) {
         y += 0x20;
     }
     rect.clut = g_world_menu_background_clut;
-    rect.tpage = g_world_menu_icon_tpage;
+    rect.tpage = g_menu_cursor_texture_page;
     for (; rect.y < 0xF0; draw_row++) {
         tiles = g_world_formation_background_tiles;
         if (rect.y >= -0x20) {

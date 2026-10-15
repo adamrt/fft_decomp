@@ -116,7 +116,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             MENU_PRESSABLE_BUTTON_R2, 0xc2, value, input & PSX_PAD_R2, row, MAIN_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(window, 0, 0);
         menu_gfx_enqueue_textured_quad_list(
-            cells, 0, 0, g_world_menu_icon_tpage, g_world_menu_palette_clut_normal, 0xb, 8);
+            cells, 0, 0, g_menu_cursor_texture_page, g_world_menu_palette_clut_normal, 0xb, 8);
         if (g_world_formation_stat_display_mode < 3) {
             row = g_world_formation_stat_display_mode;
             col = 1;
@@ -128,7 +128,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             col = 3;
         }
         menu_gfx_enqueue_textured_quad_list(
-            &cells[row], 0, 0, g_world_menu_icon_tpage, g_world_menu_alternate_number_clut_normal, 0xc, col);
+            &cells[row], 0, 0, g_menu_cursor_texture_page, g_world_menu_alternate_number_clut_normal, 0xc, col);
     }
     if (toggle_banner != 0) {
         g_world_formation_unit_banner_at_bottom

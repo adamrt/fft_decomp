@@ -20,7 +20,7 @@ void equip_unit_load_selected_data(void) {
         unit->gauges[MENU_UNIT_STATUS_GAUGE_MP].value = unit->gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
     }
 
-    bcopy(g_equip_unit_data[g_equip_unit_selected_index], &g_equip_selected_unit_stat_summary, 0x22);
+    bcopy(g_equip_unit_data[g_equip_unit_selected_index], &g_menu_selected_unit_stat_summary, 0x22);
     bcopy(&g_equip_unit_data[g_equip_unit_selected_index]->identity, &g_equip_panel_selected_unit_data,
         sizeof(menu_unit_status_identity_t));
     bcopy(&g_equip_unit_data[g_equip_unit_selected_index]->move, &g_menu_status_panel_fields, 0x40);

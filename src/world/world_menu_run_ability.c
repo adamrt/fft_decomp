@@ -93,10 +93,10 @@ void world_menu_run_ability(void) {
                 g_world_formation_current_menu = *selection + WORLD_FORMATION_MENU_ABILITY_SET;
                 if (g_world_formation_current_menu != WORLD_FORMATION_MENU_ABILITY_LEARN) {
                     thread_start(WORLD_THREAD_SLOT_UPPER_MENU_CHILD, world_formation_ability_menu_idle_thread);
-                    world_menu_set_cursor_position(WORLD_MENU_CURSOR_SET_ABILITY_SLOT, 0);
-                    world_menu_set_cursor_position(WORLD_MENU_CURSOR_REMOVE_ABILITY_SLOT, 0);
+                    menu_init_selection_value(WORLD_MENU_CURSOR_SET_ABILITY_SLOT, 0);
+                    menu_init_selection_value(WORLD_MENU_CURSOR_REMOVE_ABILITY_SLOT, 0);
                 } else {
-                    world_menu_stop_thread(WORLD_THREAD_SLOT_UPPER_MENU);
+                    menu_stop_managed_thread(WORLD_THREAD_SLOT_UPPER_MENU);
                 }
             } else {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;

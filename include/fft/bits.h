@@ -16,5 +16,7 @@ s32 bits_read_secondary(s32 count);
 extern u8 g_bits_reader_2_reset;
 extern s32 g_bits_reader_2_index;
 extern u8* g_bits_reader_2_stream;
+void bits_init_primary_reader_variant(const u8* data);
+void bits_init_secondary_reader_variant(const u8* data);
 
 #endif

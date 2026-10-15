@@ -70,5 +70,5 @@ void bunit_gfx_init_vram_and_start_fade(void) {
     gfx_load_image_and_wait(&rect, block);
     g_bunit_text_selection_id = 0;
     g_bunit_help_screen_id = MENU_GRID_HELP_NONE;
-    bunit_gfx_start_decreasing_fade();
+    gfx_start_decreasing_fade();
 }

@@ -21,7 +21,7 @@ s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode) {
     s32 unlocked;
 
     count = 0;
-    world_bit_cursor_set_primary(g_world_unit_pointers[unit_index]->unlocked_jobs);
+    bits_init_primary_reader_variant(g_world_unit_pointers[unit_index]->unlocked_jobs);
     job = world_job_get_base(unit_index);
     if (mode == WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
         && job == g_world_unit_pointers[unit_index]->identity.job_id) {

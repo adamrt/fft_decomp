@@ -111,7 +111,6 @@ void jobstts_menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scr
 void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 void jobstts_menu_load_images_and_clear_selection(void);
 void jobstts_menu_scroll_list_by_page(jobstts_menu_page_scroll_direction_e direction, const menu_instruction_t* list);
-void jobstts_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_index, s16* abilities);
 s32 jobstts_menu_update_job_list(void);
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 

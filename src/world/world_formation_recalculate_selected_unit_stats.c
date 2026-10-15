@@ -59,7 +59,7 @@ void world_formation_recalculate_selected_unit_stats(void) {
     bcopy(g_world_unit_pointers[g_unit_selected_index]->equipment, record.equipment, sizeof(record.equipment));
     record.two_handed = unit_is_two_handing_weapon(
         (s16*)record.equipment, record.support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS);
-    bcopy(&record.status, &g_world_selected_unit_stat_summary, sizeof(menu_unit_status_record_t));
+    bcopy(&record.status, &g_menu_selected_unit_stat_summary, sizeof(menu_unit_status_record_t));
     bcopy(&record.identity, &g_world_selected_unit_identity, sizeof(menu_unit_status_identity_t));
     bcopy(&record.move, &g_world_selected_unit_stat_detail, 0x40);
     item_sum_equipment_stat_details(

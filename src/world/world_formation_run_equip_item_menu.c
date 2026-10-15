@@ -116,7 +116,7 @@ s32 world_formation_run_equip_item_menu(void) {
                 g_world_equip_item_preview_active = 1;
                 g_world_preview_stats_thread_params.redraw_request = 1;
                 item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail,
-                    &g_world_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
+                    &g_menu_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
                     g_world_formation_temp_unit->equipment);
                 bcopy(g_world_unit_pointers[g_unit_selected_index]->equipment, g_world_formation_temp_unit->equipment,
                     10);

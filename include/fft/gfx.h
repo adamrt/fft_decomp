@@ -459,5 +459,6 @@ extern s8 g_gfx_otag_index_locked;
 extern s8 g_gfx_transition_frame;
 extern RECT g_gfx_draw_area;
 void gfx_set_draw_color(const rgb24_t* color);
+void gfx_start_decreasing_fade(void);
 
 #endif

@@ -74,7 +74,7 @@ void world_shop_run_equip_candidate_step(void) {
                 bcopy(g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment,
                     g_world_item_preview_stat_detail.state.equipment, 10);
                 item_calculate_equipment_swap_stat_delta(&g_world_item_preview_stat_detail,
-                    &g_world_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
+                    &g_menu_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
                     g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment);
                 g_world_item_preview_stat_detail.state.two_hands
                     = unit_is_two_handing_weapon(g_world_item_preview_stat_detail.state.equipment,

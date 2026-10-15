@@ -15,7 +15,7 @@
 void option_menu_thin_window_frame_thread(void) {
     RECT texture;
     menu_panel_frame_t* prim = g_option_menu_panel_frames;
-    s32* source_stride = &g_option_text_glyph_source.stride;
+    s32* source_stride = &g_text_glyph_source.stride;
     s32* dest_stride = &g_option_text_glyph_dest.stride;
     /* The menu thread's first parameter. Only its leading window rectangle is
        used; every read in the target is an lhu. */
@@ -41,18 +41,18 @@ void option_menu_thin_window_frame_thread(void) {
     *source_stride = 0x100;
     *dest_stride = 0x80;
 
-    option_text_set_blit_source_rect(8, 8, 0x20, 0x10);
+    text_set_blit_source_rect(8, 8, 0x20, 0x10);
     option_text_set_blit_destination(0, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_option_text_glyph_source, &g_option_text_glyph_dest);
-    option_text_set_blit_source_rect(0, 8, 8, 0x10);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_option_text_glyph_dest);
+    text_set_blit_source_rect(0, 8, 8, 0x10);
     option_text_set_blit_destination(0x20, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_option_text_glyph_source, &g_option_text_glyph_dest);
-    option_text_set_blit_source_rect(0, 0, 0x28, 8);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_option_text_glyph_dest);
+    text_set_blit_source_rect(0, 0, 0x28, 8);
     option_text_set_blit_destination(0x28, 0);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_option_text_glyph_source, &g_option_text_glyph_dest);
-    option_text_set_blit_source_rect(0, 0x18, 0x28, 8);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_option_text_glyph_dest);
+    text_set_blit_source_rect(0, 0x18, 0x28, 8);
     option_text_set_blit_destination(0x28, 8);
-    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_option_text_glyph_source, &g_option_text_glyph_dest);
+    text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_glyph_source, &g_option_text_glyph_dest);
 
     LoadImage(&texture, (u32*)pixels);
     menu_init_sprite_array(prim->sprites, 9, 0x7c3c);

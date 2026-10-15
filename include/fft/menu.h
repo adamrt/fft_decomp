@@ -2582,5 +2582,14 @@ s32 menu_update_vertical_selection_and_mark_change(s32 entry_count, s32 selectio
 void menu_store_sort_key_list(s32 list_index, const s16* source);
 void menu_load_sort_key_list(s32 list_index, s16* destination);
 menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
+void menu_draw_item_status_list(s16 item_id);
+extern u8 g_menu_selected_slot;
+extern RECT g_menu_status_display_image_rects[];
+void menu_clear_selection_values(void);
+s32 menu_set_selection_value(u8 index, s16 value);
+s32 menu_get_preview_hp_bonus_display(s32 unused_row);
+extern menu_unit_status_record_t g_menu_selected_unit_stat_summary;
+s32 menu_get_preview_mp_bonus_display(s32 unused_row);
+s32 menu_init_selection_value(u8 index, s16 value);
 
 #endif

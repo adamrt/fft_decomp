@@ -194,7 +194,6 @@ void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 u
 void card_gfx_init_primitive_lists(card_graphics_context_t* lists);
 void card_gfx_set_otag_index(s32 value);
 void card_gfx_set_render_otag(u32* otag);
-void card_gfx_start_decreasing_fade(void);
 void card_gfx_start_increasing_fade(void);
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
 

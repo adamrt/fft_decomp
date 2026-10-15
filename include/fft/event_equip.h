@@ -83,7 +83,6 @@ typedef struct equip_unit_data {
 } equip_unit_data_t;
 typedef char equip_unit_data_size_must_be_122[(sizeof(equip_unit_data_t) == 122) ? 1 : -1];
 
-extern menu_unit_status_record_t g_equip_selected_unit_stat_summary;
 extern s8 g_equip_unit_banner_enabled;
 /* Provisional: the 0x7A-byte preview records for the selected unit (index 0)
  * and its compare slot (index 1); several callers view one as raw bytes. */
@@ -142,7 +141,6 @@ extern s8 g_equip_remove_item_previewed_slot;
 
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 void equip_item_build_inventory_totals(void);
-s32 equip_item_get_type(s32 item_id);
 void equip_item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
 void equip_item_sort_list_by_criteria(s32 mode, s16* list);
 s32 equip_item_run_type_order_mode(void);
@@ -155,7 +153,6 @@ extern u16 g_equip_rearrange_picked_scroll;
 extern s16 g_equip_rearrange_preview_cursor;
 
 /* slot */
-extern u8 g_equip_selected_slot;
 /* One-shot entry flag for this mode. */
 extern s8 g_equip_slot_item_browser_initialized;
 /* List index whose stat preview was last built; -1 forces a rebuild. */
@@ -208,9 +205,6 @@ extern image_load_parameters_t g_equip_panel_sprite_cells[];
 /* RECT[1] (right panel) of g_menu_status_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
  * GCC derive the table base from this address and changes equip_panel_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
-/* Status image rects, the EQUIP.OUT copy of WORLD's
- * g_world_status_display_image_rects (0x8018cf68). */
-extern RECT g_equip_status_display_image_rects[];
 extern u8 g_equip_status_label_image[];
 extern RECT g_equip_status_label_image_rect;
 extern s32 g_equip_unit_status_panel_flags;
@@ -306,12 +300,9 @@ extern menu_entry_t g_equip_type_order_menu_other_slots;
 s32 equip_item_run_rearrange_mode(void);
 void equip_menu_clear_selection_values(void);
 void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
-void equip_menu_draw_item_status_list(s16 item_id);
 void equip_menu_draw_scrollable_list(const menu_instruction_t* script);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
-s32 equip_menu_get_preview_hp_bonus_display(s32 unused_row);
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row);
-s32 equip_menu_get_preview_mp_bonus_display(s32 unused_row);
 void equip_menu_init_and_draw_scrollable_list(
     s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
 void equip_menu_init_and_draw_scrollable_list_simple(
@@ -319,7 +310,6 @@ void equip_menu_init_and_draw_scrollable_list_simple(
 void equip_menu_init_screen(s32 battle_id);
 void equip_menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 void equip_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
-s32 equip_menu_init_selection_value(u8 index, s16 value);
 void equip_menu_load_images_and_reset_lists(void);
 void equip_menu_reset_selection_indices(void);
 void equip_menu_reset_state_flags(void);
@@ -328,8 +318,6 @@ s32 equip_menu_run_equip_mode(void);
 s32 equip_menu_run_remove_mode(void);
 s32 equip_menu_run_slot_item_browser(void);
 void equip_menu_scroll_list_by_page(s32 direction, const menu_instruction_t* menu);
-void equip_menu_set_selection_record(s32 index, s32 selected_index, s32 scroll_index, s16* items);
-s32 equip_menu_set_selection_value(u8 index, s16 value);
 s32 equip_menu_update_clear_all_equipment_prompt(void);
 s32 equip_menu_update_equipment(void);
 s32 equip_menu_update_item_action_state(void);
@@ -453,9 +441,6 @@ extern u8 g_equip_text_restore_pending;
 void equip_text_show_message_with_sound(s32 message_id, s32 sound_id);
 
 /* bit streams */
-
-void equip_bits_init_primary_reader(const u8* data);
-void equip_bits_init_secondary_reader(const u8* data);
 
 /* threads */
 /* Slots of the equip screen's own threads. The WORLD formation screen runs

@@ -113,11 +113,11 @@ void world_card_build_save_image(s32 slot) {
     bcopy(g_main_active_propositions, g_world_load_work_buffer->active_propositions,
         sizeof(g_world_load_work_buffer->active_propositions));
 
-    world_bit_cursor_set_primary(g_world_load_work_buffer->parity_bits);
+    bits_init_primary_reader_variant(g_world_load_work_buffer->parity_bits);
     block = (u8*)g_world_load_work_buffer;
     for (i = 0; i >= 0 && i < 0x3c; i++) {
         parity = 0;
-        world_bit_cursor_set_secondary(block);
+        bits_init_secondary_reader_variant(block);
         for (j = 0; j < 0x400; j++) {
             parity += bits_read_secondary(1);
         }
