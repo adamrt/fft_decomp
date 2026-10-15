@@ -78,10 +78,7 @@ typedef enum jobstts_page_scroll_direction {
 extern s32 g_jobstts_job_list_menu_initialized;
 
 extern u16 g_jobstts_menu_list_cursor_anim_state;
-extern s32 g_jobstts_menu_list_row_index;
-extern s16 g_jobstts_menu_list_row_rendering;
 extern s16 g_jobstts_menu_list_scroll_entry_ids;
-extern s16 g_jobstts_menu_list_scroll_offset_y;
 extern u16 g_jobstts_menu_list_scroll_progress;
 extern u8 g_jobstts_menu_palette_image[];
 extern u16 g_jobstts_menu_selection_values[];
@@ -221,8 +218,6 @@ enum {
     JOBSTTS_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
 };
 
-extern jobstts_condition_t g_jobstts_cmd_conditions[];
-extern jobstts_command_handler_t g_jobstts_cmd_handlers[22];
 extern menu_window_command_t g_jobstts_cmd_window_interior_command;
 
 menu_instruction_t* jobstts_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
@@ -230,8 +225,6 @@ menu_instruction_t* jobstts_cmd_draw_formatted_number_handler(menu_instruction_t
 menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_cmd_run_if_else_group_handler(menu_instruction_t* instruction);
-menu_instruction_t* jobstts_cmd_run_if_group_handler(menu_instruction_t* instruction);
 void jobstts_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
 void jobstts_cmd_run_stream_with_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
 menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruction_t* instruction);

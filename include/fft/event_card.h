@@ -172,19 +172,12 @@ extern rgb24_t g_card_gfx_fade_overlay_color;
 extern RECT g_card_gfx_fullscreen_fade_rect;
 extern POLY_FT4 g_card_gfx_poly_ft4_buffers[];
 extern u16 g_card_gfx_poly_ft4_capacity;
-extern u16 g_card_gfx_poly_ft4_count;
 extern u32* g_card_gfx_render_otag;
 /* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
 extern POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30];
 extern u16 g_card_gfx_texture_page;
 extern u16 g_card_gfx_tile_capacity;
 
-void card_gfx_enqueue_oriented_textured_quad(
-    const oriented_quad_t* descriptor, const rgb24_t* color, s32 orientation, s32 semitrans, s32 otag_index);
-void card_gfx_enqueue_textured_quad(
-    const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans, u16 texture_page, u16 clut, s32 otag_index);
-void card_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const rgb24_t* color, s32 semitrans,
-    u16 texture_page, u16 clut, s32 otag_index, s32 count);
 rgb24_t* card_gfx_get_draw_color(void);
 s32 card_gfx_get_fade_state(void);
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,

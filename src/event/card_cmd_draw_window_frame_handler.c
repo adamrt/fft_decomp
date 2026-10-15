@@ -70,53 +70,53 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     rect.y = top;
     rect.w = 5;
     rect.h = 9;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, u_left, v_top, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 9;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 9;
-        card_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, u_middle, v_top, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 9;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, u_right - 5, v_top, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
 
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     rect.x = left + (5 + partial_width) + full_columns * 16;
     rect.y = top + 9;
     rect.w = 5;
     rect.h = partial_height;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     for (row = 0; row < full_rows; row++) {
         rect.x = left;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
-        card_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 2, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
         rect.x = left + (5 + partial_width) + full_columns * 16;
         rect.y = top + (9 + partial_height) + row * 16;
         rect.w = 5;
         rect.h = 16;
-        card_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     }
 
@@ -138,27 +138,27 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     rect.y = top;
     rect.w = 5;
     rect.h = 7;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, u_left, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     rect.x = left + 5;
     rect.y = top;
     rect.w = partial_width;
     rect.h = 7;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     for (column = 0; column < full_columns; column++) {
         rect.x = left + (5 + partial_width) + column * 16;
         rect.y = top;
         rect.w = 16;
         rect.h = 7;
-        card_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, u_middle, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     }
     rect.x = left + (5 + partial_width) + column * 16;
     rect.y = top;
     rect.w = 5;
     rect.h = 7;
-    card_gfx_enqueue_textured_quad(
+    menu_gfx_enqueue_textured_quad(
         &rect, u_right - 5, v_bottom - 7, 0, g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, priority);
     command = (menu_window_command_t*)((u8*)command + command->length);
     return command;

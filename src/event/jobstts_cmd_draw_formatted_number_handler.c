@@ -20,15 +20,14 @@ menu_instruction_t* jobstts_cmd_draw_formatted_number_handler(menu_instruction_t
     s32 cell;
     u16 clut;
 
-    condition = g_jobstts_cmd_conditions[data->number.getter];
-    if (g_jobstts_menu_list_row_rendering == 0) {
+    condition = g_menu_row_callbacks[data->number.getter].value;
+    if (g_menu_list_row_mode == 0) {
         arg = data->number.value;
         y = data->number.y;
     } else {
-        arg = g_menu_scroll_base_index + g_jobstts_menu_list_row_index;
-        y = ((g_menu_list_row_height * g_jobstts_menu_list_row_index) + data->number.y)
-            - g_jobstts_menu_list_scroll_offset_y;
-        if (g_jobstts_menu_list_scroll_offset_y < 0) {
+        arg = g_menu_scroll_base_index + g_menu_list_row_index;
+        y = ((g_menu_list_row_height * g_menu_list_row_index) + data->number.y) - g_menu_list_scroll_offset;
+        if (g_menu_list_scroll_offset < 0) {
             arg -= 1;
             y -= g_menu_list_row_height;
         }

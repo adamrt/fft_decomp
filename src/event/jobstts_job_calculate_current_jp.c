@@ -3,7 +3,7 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-/* Also returns the value: callers read it through g_jobstts_cmd_conditions. */
+/* Also returns the value: callers read it through g_menu_row_callbacks. */
 s32 jobstts_job_calculate_current_jp(s32 index) {
     s32 generic_job = job_get_generic_index(g_menu_job_ids[index]);
 

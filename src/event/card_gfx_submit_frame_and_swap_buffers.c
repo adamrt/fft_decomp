@@ -15,7 +15,7 @@ void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag) {
     card_graphics_context_t* context;
 
     main_system_frame_stub();
-    g_card_gfx_poly_ft4_count = 0;
+    g_menu_gfx_poly_ft4_count = 0;
     g_gfx_tile_count = 0;
     while (DrawSync(1) != 0) { }
     VSync(g_menu_event_speed);

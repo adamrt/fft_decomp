@@ -16,22 +16,22 @@ s32 jobstts_ability_update_list_menu(void) {
     s32 input;
 
     if (g_jobstts_ability_list_initialized == 0) {
-        g_jobstts_cmd_conditions[0] = menu_job_get_current_level;
-        g_jobstts_cmd_conditions[1] = jobstts_job_get_current_total_jp;
-        g_jobstts_cmd_conditions[2] = menu_job_get_next_level_jp_requirement;
-        g_jobstts_cmd_conditions[3] = jobstts_job_get_current_jp;
-        g_jobstts_cmd_conditions[4] = menu_ability_is_non_action_learned;
-        g_jobstts_cmd_conditions[5] = jobstts_job_is_current_mastered;
-        g_jobstts_cmd_conditions[6] = menu_ability_is_learned;
-        g_jobstts_cmd_conditions[7] = menu_ability_get_mp_cost_display_value;
-        g_jobstts_cmd_conditions[8] = menu_ability_get_ct_display_value;
-        g_jobstts_cmd_conditions[9] = menu_ability_get_jp_cost_display_value;
-        g_jobstts_cmd_conditions[10] = menu_ability_is_movement_tab;
-        g_jobstts_cmd_conditions[11] = menu_ability_is_support_tab;
-        g_jobstts_cmd_conditions[12] = menu_ability_is_reaction_tab;
-        g_jobstts_cmd_conditions[13] = menu_ability_is_action_tab;
-        g_jobstts_cmd_conditions[14] = menu_ability_is_non_action_unlearned;
-        g_jobstts_cmd_conditions[15] = menu_ability_is_action;
+        g_menu_row_callbacks[0].value = menu_job_get_current_level;
+        g_menu_row_callbacks[1].value = jobstts_job_get_current_total_jp;
+        g_menu_row_callbacks[2].value = menu_job_get_next_level_jp_requirement;
+        g_menu_row_callbacks[3].value = jobstts_job_get_current_jp;
+        g_menu_row_callbacks[4].value = menu_ability_is_non_action_learned;
+        g_menu_row_callbacks[5].value = jobstts_job_is_current_mastered;
+        g_menu_row_callbacks[6].value = menu_ability_is_learned;
+        g_menu_row_callbacks[7].value = menu_ability_get_mp_cost_display_value;
+        g_menu_row_callbacks[8].value = menu_ability_get_ct_display_value;
+        g_menu_row_callbacks[9].value = menu_ability_get_jp_cost_display_value;
+        g_menu_row_callbacks[10].value = menu_ability_is_movement_tab;
+        g_menu_row_callbacks[11].value = menu_ability_is_support_tab;
+        g_menu_row_callbacks[12].value = menu_ability_is_reaction_tab;
+        g_menu_row_callbacks[13].value = menu_ability_is_action_tab;
+        g_menu_row_callbacks[14].value = menu_ability_is_non_action_unlearned;
+        g_menu_row_callbacks[15].value = menu_ability_is_action;
         menu_clear_selection_record(MENU_ABILITY_CATEGORY_ACTION);
         menu_clear_selection_record(MENU_ABILITY_CATEGORY_REACTION);
         menu_clear_selection_record(MENU_ABILITY_CATEGORY_SUPPORT);

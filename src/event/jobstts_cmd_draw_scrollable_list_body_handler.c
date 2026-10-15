@@ -46,7 +46,7 @@ menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instructi
         }
         return command;
     }
-    g_jobstts_menu_list_row_rendering = 1;
+    g_menu_list_row_mode = 1;
     previous = g_menu_list_selected_index;
     if (g_menu_list_redraw_pending != 0) {
         menu_draw_scrollable_list(command);
@@ -105,13 +105,13 @@ menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instructi
     }
     if (g_menu_list_scroll_direction < 0) {
         if (g_jobstts_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_jobstts_menu_list_scroll_offset_y -= g_main_menu_scroll_fast_step * speed;
+            g_menu_list_scroll_offset -= g_main_menu_scroll_fast_step * speed;
         } else {
             g_jobstts_menu_list_scroll_progress += speed;
-            g_jobstts_menu_list_scroll_offset_y -= g_main_menu_scroll_slow_step * speed;
+            g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * speed;
         }
-        if ((-g_menu_list_row_height) >= g_jobstts_menu_list_scroll_offset_y) {
-            g_jobstts_menu_list_scroll_offset_y = 0;
+        if ((-g_menu_list_row_height) >= g_menu_list_scroll_offset) {
+            g_menu_list_scroll_offset = 0;
             g_menu_list_scroll_direction = 0;
             g_menu_list_selected_index -= 1;
             g_menu_scroll_base_index = g_menu_list_selected_index;
@@ -130,13 +130,13 @@ menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instructi
         }
     } else if (g_menu_list_scroll_direction > 0) {
         if (g_jobstts_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
-            g_jobstts_menu_list_scroll_offset_y += g_main_menu_scroll_fast_step * speed;
+            g_menu_list_scroll_offset += g_main_menu_scroll_fast_step * speed;
         } else {
             g_jobstts_menu_list_scroll_progress += speed;
-            g_jobstts_menu_list_scroll_offset_y += g_main_menu_scroll_slow_step * speed;
+            g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * speed;
         }
-        if (g_jobstts_menu_list_scroll_offset_y >= g_menu_list_row_height) {
-            g_jobstts_menu_list_scroll_offset_y = 0;
+        if (g_menu_list_scroll_offset >= g_menu_list_row_height) {
+            g_menu_list_scroll_offset = 0;
             g_menu_list_scroll_direction = 0;
             g_menu_scroll_base_index++;
             g_menu_list_selected_index++;
@@ -150,12 +150,12 @@ menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instructi
         }
     }
     if (g_menu_list_text_table != 0) {
-        if (g_jobstts_menu_list_scroll_offset_y != 0) {
+        if (g_menu_list_scroll_offset != 0) {
             rect.x = command->list.x;
             rect.y = command->list.y - 5;
             rect.w = g_menu_list_vram_width * 4;
             rect.h = (g_menu_list_row_height * g_menu_list_visible_rows) + 0xa;
-            menu_gfx_enqueue_textured_quad(&rect, 0, g_jobstts_menu_list_scroll_offset_y + 0x2b, 0,
+            menu_gfx_enqueue_textured_quad(&rect, 0, g_menu_list_scroll_offset + 0x2b, 0,
                 g_jobstts_gfx_semitransparency, g_jobstts_gfx_background_texture_page, g_menu_window_clut,
                 g_menu_gfx_otag_index);
         } else {
@@ -206,24 +206,23 @@ menu_instruction_t* jobstts_cmd_draw_scrollable_list_body_handler(menu_instructi
         }
     }
     command = menu_next_instruction(command);
-    g_jobstts_menu_list_row_index = 0;
+    g_menu_list_row_index = 0;
     total = g_menu_list_visible_rows + 1;
-    if (g_jobstts_menu_list_scroll_offset_y == 0) {
+    if (g_menu_list_scroll_offset == 0) {
         total = g_menu_list_visible_rows;
     }
     start = command;
     for (i = 0; i < total; i++) {
-        if (((g_menu_scroll_base_index + i) > (g_menu_list_entry_count - 1))
-            && (g_jobstts_menu_list_scroll_offset_y == 0)) {
+        if (((g_menu_scroll_base_index + i) > (g_menu_list_entry_count - 1)) && (g_menu_list_scroll_offset == 0)) {
             break;
         }
         command = start;
         for (j = 0; j < g_menu_list_row_group_count; j++) {
-            command = g_jobstts_cmd_handlers[command->header.opcode](command);
+            command = g_menu_cmd_handlers[command->header.opcode](command);
         }
-        g_jobstts_menu_list_row_index += 1;
+        g_menu_list_row_index += 1;
     }
-    g_jobstts_menu_list_row_rendering = 0;
+    g_menu_list_row_mode = 0;
     if (previous != g_menu_list_selected_index) {
         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
     }

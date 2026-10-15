@@ -8,11 +8,11 @@ s32 jobstts_menu_update_job_list(void) {
     s32 input;
 
     if (g_jobstts_job_list_menu_initialized == 0) {
-        g_jobstts_cmd_conditions[0] = jobstts_job_calculate_current_level;
-        g_jobstts_cmd_conditions[2] = jobstts_job_calculate_current_jp;
-        g_jobstts_cmd_conditions[5] = menu_job_calculate_next_level_jp_requirement;
-        g_jobstts_cmd_conditions[6] = jobstts_job_calculate_current_total_jp;
-        g_jobstts_cmd_conditions[13] = jobstts_job_calculate_current_mastered;
+        g_menu_row_callbacks[0].value = jobstts_job_calculate_current_level;
+        g_menu_row_callbacks[2].value = jobstts_job_calculate_current_jp;
+        g_menu_row_callbacks[5].value = menu_job_calculate_next_level_jp_requirement;
+        g_menu_row_callbacks[6].value = jobstts_job_calculate_current_total_jp;
+        g_menu_row_callbacks[13].value = jobstts_job_calculate_current_mastered;
         jobstts_job_build_unit_job_list(0, g_menu_job_ids, 0);
         menu_get_selection_record(4, &state[8], &state[9], g_menu_job_ids);
         menu_init_scrollable_list(g_menu_job_ids, state[8], state[9], g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);

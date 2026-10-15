@@ -129,13 +129,13 @@ void card_save_update_and_draw_slot_list(u16 input) {
         g_card_save_slot_quads[4].position.y = g_card_save_slot_quads[4].position.y + 1;
         g_card_save_slot_quads[1].position.y++;
         if (g_card_save_slot_quads[0].position.y >= 0 && g_card_save_slot_quads[0].position.y < 241) {
-            card_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_card_save_slot_quads[0], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            card_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_card_save_slot_quads[1], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            card_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_card_save_slot_quads[3], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
-            card_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_card_save_slot_quads[4], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             card_gfx_set_otag_index(11);
             g_card_save_slot_number_commands[0].number.y = g_card_save_slot_quads[0].position.y;
@@ -144,7 +144,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         }
         g_card_save_slot_quads[2].position.y = g_card_save_slot_quads[0].position.y;
         if (g_card_save_slot_quads[2].position.y >= 0 && g_card_save_slot_quads[2].position.y < 241) {
-            card_gfx_enqueue_oriented_textured_quad(
+            menu_gfx_enqueue_oriented_textured_quad(
                 &g_card_save_slot_quads[2], card_gfx_get_draw_color(), TEXTURE_UV_FLIP_NONE, 0, 11);
             g_card_save_slot_number_commands[3].number.y = g_card_save_slot_number_commands[2].number.y
                 = g_card_save_slot_number_commands[1].number.y = g_card_save_slot_quads[0].position.y;
@@ -179,7 +179,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
             texture_page = GetTPage(0, 0, 0x180, 0);
             source_v = (index - 11) * 0x20 + 0x60;
         }
-        card_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_menu_window_clut, 11);
+        menu_gfx_enqueue_textured_quad(&rect, 0, source_v, 0, 0, texture_page, g_menu_window_clut, 11);
     }
 
     card_gfx_set_otag_index(15);
@@ -203,7 +203,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         rect.y = 0x20;
         rect.w = 8;
         rect.h = 0x10;
-        card_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 0xd8, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
     if (g_card_save_occupied_slot_count - g_card_save_list_top_row >= 5) {
@@ -211,7 +211,7 @@ void card_save_update_and_draw_slot_list(u16 input) {
         rect.y = 0xba;
         rect.w = 8;
         rect.h = 0x10;
-        card_gfx_enqueue_textured_quad(
+        menu_gfx_enqueue_textured_quad(
             &rect, 0xe0, 0, 0, 0, g_menu_cursor_texture_page, g_menu_cursor_mode0_foreground_clut, 15);
     }
 }

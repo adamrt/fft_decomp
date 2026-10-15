@@ -25,8 +25,8 @@ void jobstts_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8
     g_menu_text_color.g = 0x80;
     g_menu_text_color.b = 0x80;
     g_menu_gfx_otag_index = 0;
-    g_jobstts_menu_list_row_rendering = 0;
-    g_jobstts_menu_list_scroll_offset_y = 0;
+    g_menu_list_row_mode = 0;
+    g_menu_list_scroll_offset = 0;
     g_menu_list_redraw_pending = 1;
     g_jobstts_gfx_transition_frame = 0;
 }

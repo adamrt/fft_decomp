@@ -39,7 +39,7 @@ menu_draw_number_command_t* card_cmd_draw_decimal_number_handler(menu_draw_numbe
             pos += 1;
         }
         if (command->style < 2) {
-            card_gfx_enqueue_textured_quad(&glyph.rect, glyph.u + (glyph.w * digit), glyph.v, color,
+            menu_gfx_enqueue_textured_quad(&glyph.rect, glyph.u + (glyph.w * digit), glyph.v, color,
                 g_menu_gfx_semitransparency, g_menu_atlas_texture_page, clut, g_menu_gfx_otag_index);
         }
     }
