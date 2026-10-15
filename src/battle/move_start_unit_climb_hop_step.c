@@ -60,7 +60,7 @@ void move_start_unit_climb_hop_step(battle_unit_t* unit, const map_tile_t* from,
         /* Without this reorg moves this case's `li a0,0xe000` into the
          * `beq a1,3` delay slot, where the target keeps a nop; an asm insn
          * stops fill_slots_from_thread's scan (stop_search_p). */
-        __asm__ volatile("");
+        __asm__("");
         unit->step_phase = MOVE_STEP_PHASE_JUMP_ASCENT_NORTH;
         unit->facing = BATTLE_FACING_NORTH;
         next = unit->map_y + 1;

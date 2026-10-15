@@ -244,7 +244,7 @@ void move_apply_unit_step_velocity(battle_unit_t* unit) {
         } else {
         accelerate:
             /* Keeps depth live here, so it takes a0 and reorg leaves `move a0,s0` out of both landing tests. */
-            __asm__ volatile("" : : "r"(depth));
+            __asm__("" : : "r"(depth));
             if (unit->velocity.vy < 0x2000) {
                 unit->velocity.vy += g_move_jump_gravity;
             }

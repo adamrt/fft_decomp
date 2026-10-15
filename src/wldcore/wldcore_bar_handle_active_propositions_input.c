@@ -34,7 +34,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         level->panel.result = 0;
         /* Scheduling barrier: keeps the store ahead of the cursor argument. */
-        __asm__ volatile("");
+        __asm__("");
         wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_PROPOSITIONS);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);
@@ -49,7 +49,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
             wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
             level->panel.result = 1;
             /* Scheduling barrier: keeps the store ahead of the cursor argument. */
-            __asm__ volatile("");
+            __asm__("");
             wldcore_list_store_cursor_state(WLDCORE_CURSOR_SLOT_PROPOSITIONS);
             g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
             thread_set_parameters(WLDCORE_THREAD_SLOT_WINDOW_PANEL, 0, 0, 1);

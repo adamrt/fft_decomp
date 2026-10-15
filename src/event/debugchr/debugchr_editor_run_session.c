@@ -177,7 +177,7 @@ loop_outer:
             }
             g_debugchr_editor_fields[15].destination[0] = mark;
             /* Keeps the `li v0,2` for the redraw store below the byte store. */
-            __asm__ volatile("");
+            __asm__("");
             g_debugchr_status_display_thread_params.redraw_request = 2;
             g_debugchr_numeric_editor_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
