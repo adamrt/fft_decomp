@@ -239,7 +239,6 @@ extern u8 g_card_save_menu_state; /* card_save_menu_state_e */
 
 extern DIRENTRY* g_card_save_menu_work_buffer;
 
-void card_menu_update_and_draw_animated_cursor(const point16_t* position, u16* animation_state, s32 mode);
 void card_save_init_menu_graphics(void);
 void card_save_init_menu_state(void);
 void card_save_run_menu_graphic_thread(void);

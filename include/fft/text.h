@@ -33,12 +33,12 @@ void text_draw_large_number_glyphs_variant(s32 value, s32 digits, u8* pixels, gl
 void text_init_section_pointers_variant(void);
 void text_run_dialog_thread_variant(void);
 void text_run_spell_quote_thread_variant(void);
-
-/* unified */
-void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
-    u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
 s32 menu_text_render_glyph_to_4bpp_image_variant(
     s32 glyph_id, u8* image, const battle_text_image_position_t* position, s32 style);
+
+/* rendering */
+void menu_text_render_encoded_ids_to_image(u8* image, battle_menu_text_image_bounds_t* rect, s32 unused, s32 max_chars,
+    u8* font, s16* ids, s32 count, s16 glyph, s32 unused_flags);
 void text_concatenate_entries(const u8* text_table, u8* out, s16* list, s32 separate);
 void text_render_id_rows_to_vram(u8* text_table, s16* list, RECT* rect, s32 style);
 extern u8* g_text_saved_pointers[32];

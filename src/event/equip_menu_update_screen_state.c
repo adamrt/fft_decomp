@@ -42,7 +42,7 @@ void equip_menu_update_screen_state(void) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
             equip_menu_reset_selection_indices();
         } else if (mode != -1) {
-            thread_start(EQUIP_THREAD_SLOT_COMMAND_MENU_CHILD, equip_thread_wait_forever);
+            thread_start(EQUIP_THREAD_SLOT_COMMAND_MENU_CHILD, thread_wait_forever_by_frames);
             g_equip_menu_screen_state = *value_ptr + EQUIP_SCREEN_STATE_EQUIP;
             menu_set_selection_value(0, 0);
             menu_set_selection_value(1, 0);

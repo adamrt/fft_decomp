@@ -86,7 +86,7 @@ void world_formation_item_menu(void) {
         selection = &g_world_menu_selection_results[1];
         if (*selection != -1) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
-            thread_start(WORLD_THREAD_SLOT_UPPER_MENU_CHILD, world_formation_item_menu_idle_thread);
+            thread_start(WORLD_THREAD_SLOT_UPPER_MENU_CHILD, thread_wait_forever_by_frames);
             g_world_formation_current_menu = *selection + WORLD_FORMATION_MENU_ITEM_EQUIP;
             menu_init_selection_value(WORLD_MENU_CURSOR_EQUIP_SLOT, 0);
             menu_init_selection_value(WORLD_MENU_CURSOR_REMOVE_SLOT, 0);

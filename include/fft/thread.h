@@ -179,6 +179,7 @@ typedef enum thread_task {
 s32 thread_find_running_by_task(s32 task_id);
 s32 thread_resolve_id(s32 requested_thread_id);
 s32 thread_resolve_id_after_current(s32 requested_thread_id);
+s32 thread_find_first_running_menu_thread(void);
 
 /* task parameters */
 void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
@@ -207,6 +208,8 @@ void thread_yield(void);
 void thread_wait_frames(s32 count);
 void thread_wait_until_inactive(s32 thread_id);
 void thread_wait_for_unit_view_panels(void);
+void thread_wait_forever(void);
+void thread_wait_forever_by_frames(void);
 
 /* context capture */
 /* Named relocations preserve the assembled helpers' $at load sequence. */
@@ -226,9 +229,5 @@ void* thread_get_current_global_pointer(void);
  * The argument list stays unspecified because callback signatures differ. */
 extern void (*g_thread_call_target)(void);
 s32 thread_call_on_main_stack();
-
-/* unified */
-s32 thread_find_first_running_menu_thread(void);
-void thread_wait_forever(void);
 
 #endif

@@ -5,9 +5,11 @@
 
 #include "psx/types.h"
 
-/* unified */
+/* event waits */
 s32 card_wait_for_bios_event(void);
-extern u8 g_card_slot;
 s32 card_wait_for_hardware_event(void);
+
+/* state */
+extern u8 g_card_slot;
 
 #endif

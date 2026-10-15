@@ -309,7 +309,6 @@ enum {
 extern u8 g_world_thread_status_snapshot[16];
 
 void world_text_release_current_message_box_slot(void);
-void world_formation_item_menu_idle_thread(void);
 void world_formation_ability_menu_idle_thread(void);
 void world_thread_idle_yield_forever(void);
 s32 world_thread_is_task_active(s32 unused_0);

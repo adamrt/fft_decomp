@@ -541,6 +541,8 @@ enum {
     ZODIAC_SIGN_ORDINARY_COUNT = 12,
     ZODIAC_SIGN_COUNT = 13,
 };
+s32 unit_birthday_calculate_day_of_year(s32 month, s32 day);
+extern u8 g_unit_birthday_month_lengths[12];
 
 /* status */
 /* SCUS 0x8005b5dc copies these three consecutive sets as one 15-byte block.
@@ -1180,6 +1182,7 @@ typedef enum unit_flags {
     UNIT_FLAG_FEMALE = 0x40,
     UNIT_FLAG_MALE = 0x80,
 } unit_flags_e;
+extern s16 g_unit_selected_index;
 
 /* animation */
 /* unit_animation_state_t.rotate_mode: how the facing nibble steps toward target_facing. */
@@ -1217,10 +1220,5 @@ s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
 SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
 void unit_set_animation(s32 runtime_id, u32 animation);
-
-/* unified */
-s32 unit_birthday_calculate_day_of_year(s32 month, s32 day);
-extern u8 g_unit_birthday_month_lengths[12];
-extern s16 g_unit_selected_index;
 
 #endif

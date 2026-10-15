@@ -440,8 +440,6 @@ extern u8 g_equip_text_thread_running_state;
 extern u8 g_equip_thread_idle_stop_pending;
 extern menu_gradient_panel_prims_t g_equip_thread_indicator_packets[2][2];
 
-void equip_thread_wait_forever(void);
-
 /* sound */
 
 extern u8 g_equip_sound_suppress_queued;

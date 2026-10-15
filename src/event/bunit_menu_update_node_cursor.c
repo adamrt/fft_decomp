@@ -92,6 +92,6 @@ void bunit_menu_update_node_cursor(s16 mode) {
     } else {
         pos.x = x - 2;
         pos.y = y + 6;
-        bunit_menu_update_and_draw_animated_cursor(&pos, &g_bunit_help_cursor_anim_state, running);
+        menu_update_and_draw_sliding_cursor(&pos, &g_bunit_help_cursor_anim_state, running);
     }
 }

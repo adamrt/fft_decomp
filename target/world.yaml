@@ -646,7 +646,7 @@ functions:
   - {addr: 0x8011a684, size: 244, name: world_formation_layout_job_wheel_portrait, hash: 6b20b398ac425f37}
   - {addr: 0x8011a778, size: 264, name: world_formation_build_job_wheel_job_name, hash: de83300daa37b39e}
   - {addr: 0x8011a880, size: 212, name: world_menu_select_stat_gauge_level, hash: 51273e24192e0e6b}
-  - {addr: 0x8011a954, size: 40, name: world_formation_item_menu_idle_thread, hash: 38437c674ba18e54, source: src/shared/thread/equip_thread_wait_forever.c, source_symbol: equip_thread_wait_forever}
+  - {addr: 0x8011a954, size: 40, name: thread_wait_forever_by_frames, hash: 38437c674ba18e54, source: src/shared/thread/thread_wait_forever_by_frames.c}
   - {addr: 0x8011a97c, size: 92, name: menu_get_entry_item_count, hash: af8f5961adbfba37, source: src/shared/menu/menu_get_entry_item_count.c}
   - {addr: 0x8011a9d8, size: 92, name: menu_get_entry_item_equipped_count, hash: 49c6e60b38d5b05d, source: src/shared/menu/menu_get_entry_item_equipped_count.c}
   - {addr: 0x8011aa34, size: 112, name: menu_build_item_type_icon_source, hash: fc1261165929b61f, source: src/shared/menu/menu_build_item_type_icon_source.c}

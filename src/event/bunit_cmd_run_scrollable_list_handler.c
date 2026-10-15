@@ -196,7 +196,7 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        bunit_menu_update_and_draw_animated_cursor(
+        menu_update_and_draw_sliding_cursor(
             &marker, &g_bunit_menu_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);

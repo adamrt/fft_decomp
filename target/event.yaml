@@ -412,7 +412,7 @@ functions:
   - {addr: 0x801c9700, size: 24, name: bunit_cmd_set_otag_index_handler, hash: e3a66bb32067285c}
   - {addr: 0x801c9718, size: 1076, name: bunit_menu_script_draw_formatted_number, hash: a52fa763ae07e832}
   - {addr: 0x801c9b4c, size: 424, name: bunit_cmd_draw_right_aligned_number_handler, hash: fbd03bb0cdf31870}
-  - {addr: 0x801c9cf4, size: 652, name: bunit_menu_update_and_draw_animated_cursor, hash: 48df7a46e058abc1, source: src/shared/menu/bunit_menu_update_and_draw_animated_cursor.c}
+  - {addr: 0x801c9cf4, size: 652, name: menu_update_and_draw_sliding_cursor, hash: 48df7a46e058abc1, source: src/shared/menu/menu_update_and_draw_sliding_cursor.c}
   - {addr: 0x801c9f80, size: 864, name: bunit_menu_update_and_draw_bouncing_cursor, hash: 8fec6593004c6ff0}
   - {addr: 0x801ca2e0, size: 108, name: menu_cmd_skip_group, hash: a7fc8159f10402de, source: src/shared/menu/menu_cmd_skip_group.c}
   - {addr: 0x801ca34c, size: 672, name: menu_draw_scrollable_list, hash: c454dc9d46c8694d, source: src/shared/menu/menu_draw_scrollable_list.c}
@@ -928,7 +928,7 @@ functions:
   - {addr: 0x801c6510, size: 84, name: card_cmd_set_tpage_handler, hash: c033f758528baa4e}
   - {addr: 0x801c6564, size: 24, name: card_cmd_set_otag_index_handler, hash: 866b1fe58b80beba}
   - {addr: 0x801c657c, size: 400, name: card_cmd_draw_decimal_number_handler, hash: 86de3729d1341209}
-  - {addr: 0x801c670c, size: 652, name: card_menu_update_and_draw_animated_cursor, hash: d2bf3388d465f9d3, source: src/shared/menu/bunit_menu_update_and_draw_animated_cursor.c, source_symbol: bunit_menu_update_and_draw_animated_cursor}
+  - {addr: 0x801c670c, size: 652, name: menu_update_and_draw_sliding_cursor, hash: d2bf3388d465f9d3, source: src/shared/menu/menu_update_and_draw_sliding_cursor.c}
   - {addr: 0x801c6998, size: 44, name: gfx_set_draw_color, hash: 56f9f1312189e13e, source: src/shared/gfx/gfx_set_draw_color.c}
   - {addr: 0x801c69c4, size: 16, name: card_gfx_set_otag_index, hash: e32615753d53f066}
   - {addr: 0x801c69d4, size: 220, name: menu_set_palette_mode, hash: 54dc2b565735014d, source: src/shared/menu/menu_set_palette_mode.c}
@@ -1121,9 +1121,9 @@ imports:
   - {addr: 0x800222fc, name: memset}
 
 overrides:
-  - {function: card_menu_update_and_draw_animated_cursor, name: menu_gfx_enqueue_textured_quad, addr: 0x801c7d04}
   - {function: gfx_enqueue_tile, name: g_menu_gfx_context, addr: 0x801d9294}
   - {function: menu_cmd_draw_tiled_rectangle_handler, name: menu_gfx_enqueue_textured_quad, addr: 0x801c7d04}
+  - {function: menu_update_and_draw_sliding_cursor, name: menu_gfx_enqueue_textured_quad, addr: 0x801c7d04}
 ---
 module: event-debugchr
 file: EVENT/DEBUGCHR.OUT
@@ -1349,7 +1349,7 @@ functions:
   - {addr: 0x801c3c00, size: 8, name: equip_input_update_event_state, hash: 6d64edf91449c1b1}
   - {addr: 0x801c3c08, size: 28, name: menu_thread_is_running_variant, hash: d10e3403d7fec970, source: src/shared/menu/menu_thread_is_running_variant.c}
   - {addr: 0x801c3c24, size: 1240, name: equip_menu_draw_thread_status_indicators, hash: a9a11aad5290e5d4}
-  - {addr: 0x801c40fc, size: 40, name: equip_thread_wait_forever, hash: 23983331f707d2fa, source: src/shared/thread/equip_thread_wait_forever.c}
+  - {addr: 0x801c40fc, size: 40, name: thread_wait_forever_by_frames, hash: 23983331f707d2fa, source: src/shared/thread/thread_wait_forever_by_frames.c}
   - {addr: 0x801c4124, size: 92, name: menu_get_entry_item_count, hash: 7c0e3a55d7cefb73, source: src/shared/menu/menu_get_entry_item_count.c}
   - {addr: 0x801c4180, size: 92, name: menu_get_entry_item_equipped_count, hash: 3ace587681cacb49, source: src/shared/menu/menu_get_entry_item_equipped_count.c}
   - {addr: 0x801c41dc, size: 112, name: menu_build_item_type_icon_source, hash: 2fa08886d4146b72, source: src/shared/menu/menu_build_item_type_icon_source.c}

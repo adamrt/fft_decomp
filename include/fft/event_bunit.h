@@ -310,7 +310,6 @@ s32 bunit_menu_run_job_list(void);
 void bunit_menu_run_reorder_list(void);
 s32 bunit_menu_run_unit_list_frame(void);
 menu_instruction_t* bunit_menu_script_draw_formatted_number(menu_instruction_t* instruction);
-void bunit_menu_update_and_draw_animated_cursor(point16_t* pos, u16* state, s32 mode);
 void bunit_menu_update_and_draw_bouncing_cursor(point16_t* pos, u16* state, s32 mode);
 void bunit_menu_update_job(void);
 void bunit_menu_update_node_cursor(s16 mode);

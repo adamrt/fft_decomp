@@ -821,6 +821,7 @@ typedef struct menu_palette_slot {
     u8 _padding_ec[0x14];                 /* preserves the 0x100-byte allocation stride */
 } menu_palette_slot_t;
 typedef char menu_palette_slot_size_must_be_256[(sizeof(menu_palette_slot_t) == 256) ? 1 : -1];
+extern u8 g_menu_render_buffer[];
 
 /* menu entries */
 /* Provisional: record reached through menu_entry_t::context.
@@ -919,6 +920,9 @@ static inline s16* menu_entry_result(menu_entry_t* entry) {
 
 void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
 void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short);
+s32 menu_get_entry_item_count(s32 row);
+s32 menu_get_entry_item_equipped_count(s32 row);
+void menu_draw_item_status_list(s16 item_id);
 
 /* menu text */
 /* menu_text_layout_t.mode[]: what a column of the layout draws. */
@@ -1109,6 +1113,7 @@ extern u16 g_menu_height_display_suppressed;
 void menu_enable_height_display(void);
 void menu_suppress_height_display(void);
 void menu_run_selected_tile_info_display_thread(void);
+u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 
 /* primitive queues */
 extern rgb24_t g_menu_text_color;
@@ -1452,6 +1457,7 @@ typedef enum battle_system_function_id {
     BATTLE_SYSTEM_FUNCTION_ARITHMETICKS_ANNOUNCEMENT = 44,
     BATTLE_SYSTEM_FUNCTION_POST_ACTION_RESULT = 50,
 } battle_system_function_id_e;
+void menu_close(void);
 
 /* companion overlays */
 /* Companion overlay requests: index into the overlay LBA, size and load offset
@@ -1615,6 +1621,17 @@ void menu_reset_unit_records_wrapper(void);
 void menu_restore_selection_for_selected_unit(s32 menu_id);
 void menu_run_skillset_thread(void);
 void menu_select_unit_action_slots_thread(void);
+void menu_clear_selection_record(s32 index);
+/* The record count differs per module (14 in BUNIT). */
+extern menu_selection_record_t g_menu_selection_records[];
+void menu_clear_selection_records(void);
+void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+void menu_store_sort_key_list(s32 list_index, const s16* source);
+void menu_load_sort_key_list(s32 list_index, s16* destination);
+extern u8 g_menu_selected_slot;
+void menu_clear_selection_values(void);
+s32 menu_set_selection_value(u8 index, s16 value);
+s32 menu_init_selection_value(u8 index, s16 value);
 
 /* horizontal selection */
 extern s16 g_menu_selection_values[];
@@ -1645,6 +1662,10 @@ extern u16 g_menu_anything_ability_id;
 extern s32 g_menu_dead_unit_action;
 extern s32 g_menu_dead_unit_result;
 s32 menu_resolve_selection(void);
+s32 menu_update_horizontal_selection_and_mark_change(
+    u16 entry_count, u8 selection_index, s32 input_mask, u8 changed_state);
+s16 menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, s32 input_mask);
+s32 menu_update_vertical_selection_and_mark_change(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
 
 /* memory */
 /* Both menu arenas track sixteen allocations in 256-byte pages. */
@@ -1767,6 +1788,8 @@ extern menu_text_state_t g_menu_text_state;
 extern s32 g_menu_text_palette_offset;
 
 void menu_set_text_origin(s32 x, s32 y);
+void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
+void menu_input_clear_state(void);
 
 /* list threads */
 extern u32* g_menu_input_controller;
@@ -1781,6 +1804,14 @@ void menu_icon_list_thread(void);
 void menu_icon_strip_thread(void);
 void menu_icon_timed_thread(void);
 void menu_text_entry_wait_thread(void);
+void menu_stop_thread_and_wait(s32 thread_id);
+void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
+void menu_toggle_comparison_status_thread(s32 enable);
+extern menu_status_thread_t g_menu_comparison_display_thread_params;
+void menu_toggle_unit_status_thread(s32 enable);
+extern menu_status_thread_t g_menu_status_display_thread_params;
+void menu_toggle_numeric_editor_thread(s32 enable);
+extern menu_status_thread_t g_menu_numeric_panel_params;
 
 /* options */
 /*
@@ -1900,6 +1931,7 @@ extern s8 g_menu_cursor_reverse_offset_keyframes[];
 extern u16 g_menu_cursor_texture_page;
 
 void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s32 mode);
+void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode);
 
 /* input and palette state */
 extern u16 g_menu_active_clut_back;
@@ -2445,6 +2477,7 @@ extern u16* const* g_menu_help_active_text_id_tables;
 extern menu_glyph_sheet_t g_menu_glyph_image_data;
 extern s32 g_menu_formation_display_mode;
 extern game_options_t g_menu_saved_game_options;
+extern s32 g_menu_post_battle_unit_changes_active;
 
 /* text data */
 extern char g_text_reading_character_message[]; /* "reading charactor%d \n" */
@@ -2521,6 +2554,10 @@ extern u16 g_menu_unit_status_quad_clut_pairs[][2];
 extern image_load_parameters_t* g_menu_unit_status_quad_image_params_by_mode[];
 extern u16 g_menu_unit_status_sprite_clut_pairs[][2];
 extern image_load_parameters_t* g_menu_unit_status_sprite_image_params_by_mode[];
+extern RECT g_menu_status_display_image_rects[];
+s32 menu_get_preview_hp_bonus_display(s32 unused_row);
+extern menu_unit_status_record_t g_menu_selected_unit_stat_summary;
+s32 menu_get_preview_mp_bonus_display(s32 unused_row);
 
 /* glyph rendering */
 extern glyph_blit_t g_text_large_number_glyph_rect; /* glyph source rectangle in the large number font */
@@ -2552,6 +2589,7 @@ void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8
 void menu_draw_active_window_frames_variant(void);
 void menu_init_sprt_variant(SPRT* sprite);
 void menu_run_scrolling_ability_list_thread_variant(void);
+void menu_run_unit_status_thread_variant(void);
 
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {
@@ -2567,45 +2605,7 @@ typedef enum menu_vertical_scroll_direction {
  * overlay's own body by override. */
 void menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 
-/* unified */
-u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
-extern u8 g_menu_render_buffer[];
-void menu_clear_selection_record(s32 index);
-/* The record count differs per module (14 in BUNIT). */
-extern menu_selection_record_t g_menu_selection_records[];
-void menu_stop_thread_and_wait(s32 thread_id);
-void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
-void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
-void menu_toggle_comparison_status_thread(s32 enable);
-void menu_run_unit_status_thread_variant(void);
-extern menu_status_thread_t g_menu_comparison_display_thread_params;
-void menu_toggle_unit_status_thread(s32 enable);
-extern menu_status_thread_t g_menu_status_display_thread_params;
-void menu_toggle_numeric_editor_thread(s32 enable);
-extern menu_status_thread_t g_menu_numeric_panel_params;
-void menu_input_clear_state(void);
-s32 menu_get_entry_item_count(s32 row);
-s32 menu_get_entry_item_equipped_count(s32 row);
-void menu_close(void);
-void menu_clear_selection_records(void);
-s32 menu_update_horizontal_selection_and_mark_change(
-    u16 entry_count, u8 selection_index, s32 input_mask, u8 changed_state);
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
-s16 menu_update_wrapped_vertical_selection(u16 entry_count, u8 selection_index, s32 input_mask);
-s32 menu_update_vertical_selection_and_mark_change(s32 entry_count, s32 selection_index, s32 input_mask, s8 sound_id);
-void menu_store_sort_key_list(s32 list_index, const s16* source);
-void menu_load_sort_key_list(s32 list_index, s16* destination);
-menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
-void menu_draw_item_status_list(s16 item_id);
-extern u8 g_menu_selected_slot;
-extern RECT g_menu_status_display_image_rects[];
-void menu_clear_selection_values(void);
-s32 menu_set_selection_value(u8 index, s16 value);
-s32 menu_get_preview_hp_bonus_display(s32 unused_row);
-extern menu_unit_status_record_t g_menu_selected_unit_stat_summary;
-s32 menu_get_preview_mp_bonus_display(s32 unused_row);
-s32 menu_init_selection_value(u8 index, s16 value);
-extern s32 g_menu_post_battle_unit_changes_active;
+/* scrollable lists */
 extern s16 g_menu_list_row_group_count;
 extern s16 g_menu_list_row_height;
 extern s16 g_menu_list_visible_rows;
@@ -2619,6 +2619,9 @@ extern s8 g_menu_list_scroll_direction; /* read with lb */
 extern s8 g_menu_list_redraw_pending;   /* read with lb (bunit_cmd_run_scrollable_list_handler) */
 extern s16 g_menu_list_selected_index;
 extern s16 g_menu_scroll_base_index;
+void menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+
+/* help menus */
 void menu_run_battle_help(void);
 extern menu_unit_status_record_t g_menu_help_active_banner;
 extern menu_active_unit_t g_menu_help_active_unit_data;
@@ -2634,6 +2637,8 @@ extern help_navigation_record_t g_menu_help_terrain_navigation[];
 extern help_navigation_record_t g_menu_help_unit_box_navigation[];
 extern help_navigation_record_t g_menu_help_attack_preview_navigation[];
 void menu_run_require_help(void);
-void menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+
+/* entry item icons */
+menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
 
 #endif

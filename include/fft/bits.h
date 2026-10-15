@@ -5,18 +5,20 @@
 
 #include "psx/types.h"
 
-/* unified */
+/* readers and writers */
 u32 bits_read_primary(s32 count);
+void bits_write_primary(s32 value);
+s32 bits_read_secondary(s32 count);
+void bits_init_primary_reader_variant(const u8* data);
+void bits_init_secondary_reader_variant(const u8* data);
+
+/* stream state */
 extern u8 g_bits_primary_reset;
 extern s32 g_bits_reader_1_index;
 extern u8* g_bits_primary_cursor;
-void bits_write_primary(s32 value);
 extern s32 g_bits_writer_1_index;
-s32 bits_read_secondary(s32 count);
 extern u8 g_bits_reader_2_reset;
 extern s32 g_bits_reader_2_index;
 extern u8* g_bits_reader_2_stream;
-void bits_init_primary_reader_variant(const u8* data);
-void bits_init_secondary_reader_variant(const u8* data);
 
 #endif

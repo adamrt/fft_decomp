@@ -5,7 +5,7 @@
 /* Advances the animated cursor at `pos` and draws it, sliding horizontally,
  * with its semi-transparent shadow. `mode` bit 0 starts the reverse curve;
  * mode 0 cancels it. */
-void bunit_menu_update_and_draw_animated_cursor(point16_t* pos, u16* state, s32 mode) {
+void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     s32 active;
     s32 active_bit;

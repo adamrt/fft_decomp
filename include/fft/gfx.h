@@ -367,6 +367,17 @@ void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, cons
 void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness);
 void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
 void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
+extern RECT g_gfx_tiled_rect;
+void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
+    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
+void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
+extern u16 g_gfx_poly_g4_count;
+extern u16 g_gfx_tile_count;
+extern u16 g_gfx_otag_count;
+extern s8 g_gfx_otag_index_locked;
+extern s8 g_gfx_transition_frame;
+extern RECT g_gfx_draw_area;
+void gfx_set_draw_color(const rgb24_t* color);
 
 /* portrait transitions */
 extern RECT g_gfx_portrait_origin;
@@ -440,25 +451,14 @@ void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 /* per-module bodies: each module links its own copy under the shared name. */
 void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region);
 
-/* unified */
-extern RECT g_gfx_tiled_rect;
-void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
-    sprite_sheet_frame_t* sprite_rect, point16_t* scale, const sprite_draw_offset_t* offset);
-void gfx_enqueue_gouraud_quad(const upoint16_t* pts, const rgb24_t* color, s32 semi, s32 idx);
-extern u16 g_gfx_poly_g4_count;
-extern u16 g_gfx_tile_count;
+/* fades */
 s32 gfx_update_increasing_fade(void);
 extern u8 g_gfx_increasing_fade_active;
 extern s16 g_gfx_fade_intensity;
-extern u16 g_gfx_otag_count;
 extern RECT g_gfx_fade_rect[];
 extern rgb24_t g_gfx_fade_color;
 s32 gfx_update_decreasing_fade(void);
 extern u8 g_gfx_decreasing_fade_active;
-extern s8 g_gfx_otag_index_locked;
-extern s8 g_gfx_transition_frame;
-extern RECT g_gfx_draw_area;
-void gfx_set_draw_color(const rgb24_t* color);
 void gfx_start_decreasing_fade(void);
 
 #endif

@@ -34,6 +34,7 @@ void sound_queue_sfx_confirm(void);
 void sound_queue_sfx_confirm_unless_restoring(void);
 void sound_queue_sfx_cursor_move(void);
 void sound_queue_sfx_invalid(void);
+extern u8 g_sound_queued_effect_id; /* main_sfx_e */
 
 /* unit effects */
 extern u8 g_sound_shield_deflect_sfx_ids[];
@@ -58,8 +59,5 @@ s32 sound_stop_weather_sfx(void);
 /* threads */
 void sound_run_background_fade_thread(void);
 void sound_run_background_sfx_thread(void);
-
-/* unified */
-extern u8 g_sound_queued_effect_id; /* main_sfx_e */
 
 #endif
