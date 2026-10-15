@@ -15,16 +15,9 @@ units:
   - {name: at_list_runner, source: src/event/menu/at_list_runner.c}
   - {name: at_list_threads, source: src/event/menu/at_list_threads.c}
   - {name: attack_resources, source: src/event/attack_resources.c}
-  - {name: card_bios_events, source: src/world/card_bios_events.c}
-  - {name: card_file_io, source: src/world/card_file_io.c}
-  - {name: card_file_seek, source: src/world/card_file_seek.c}
-  - {name: card_file_transfer, source: src/world/card_file_transfer.c}
-  - {name: card_hardware_events, source: src/world/card_hardware_events.c}
-  - {name: card_load, source: src/world/card_load.c}
-  - {name: card_open, source: src/world/card_open.c}
+  - {name: card_files, source: src/event/menu/card_files.c}
+  - {name: card_io, source: src/event/menu/card_io.c}
   - {name: card_save, source: src/world/card_save.c}
-  - {name: card_save_files, source: src/world/card_save_files.c}
-  - {name: card_slot, source: src/world/card_slot.c}
   - {name: command_menus, source: src/event/command_menus.c}
   - {name: dialog_messages, source: src/event/dialog_messages.c}
   - {name: dialog_thread, source: src/event/dialog_thread.c}
@@ -1013,33 +1006,33 @@ functions:
   - {addr: 0x80131778, size: 2656, name: world_card_update_and_draw_slot_list, hash: 7c6c2d3ac3e6060d, unit: card_save}
   - {addr: 0x801321d8, size: 268, name: world_card_scroll_menu_list, hash: 1c9bd38de9fedffd, unit: card_save}
   - {addr: 0x801322e4, size: 720, name: world_card_build_save_file_header, hash: 75dc49ff256755d5, unit: card_save}
-  - {addr: 0x801325b4, size: 16, name: card_set_slot, hash: 8e9eef48eb3a3f03}
-  - {addr: 0x801325c4, size: 16, name: world_card_get_selected_slot, hash: 8d33fa5b18f710e8, unit: card_slot}
-  - {addr: 0x801325d4, size: 8, name: world_card_close_stub, hash: 6d64edf91449c1b1, unit: card_slot}
-  - {addr: 0x801325dc, size: 40, name: card_io_consume_all_events, hash: d50e65e30401bfa0, unit: card_bios_events}
-  - {addr: 0x80132604, size: 192, name: card_io_poll_bios_event_result, hash: a218caae57cebc0c, unit: card_bios_events}
-  - {addr: 0x801326c4, size: 72, name: card_wait_for_bios_event_variant, hash: 7293c9920879ff4f}
-  - {addr: 0x8013270c, size: 88, name: card_io_consume_bios_events, hash: bd2def49b8e92c22, unit: card_hardware_events}
-  - {addr: 0x80132764, size: 192, name: card_io_poll_hardware_event_result, hash: 04e2550b4a630150, unit: card_hardware_events}
-  - {addr: 0x80132824, size: 72, name: card_wait_for_hardware_event_variant, hash: 7ee571b3a42d0cd1}
-  - {addr: 0x8013286c, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d}
-  - {addr: 0x801328c4, size: 140, name: card_get_info_with_retries_variant, hash: db96017ced25904c, unit: card_load}
-  - {addr: 0x80132950, size: 148, name: world_card_load_with_retries, hash: 6e6c44664a65aece, unit: card_load}
-  - {addr: 0x801329e4, size: 180, name: card_io_create_new_with_retries, hash: f3bd49bc815f1c09}
-  - {addr: 0x80132a98, size: 184, name: card_poll_info_result_variant, hash: d75737862b2d266a, unit: card_save_files}
-  - {addr: 0x80132b50, size: 112, name: card_io_wait_operation_result_variant, hash: 381a35bd373a81e5, unit: card_save_files}
-  - {addr: 0x80132bc0, size: 208, name: world_card_count_save_files, hash: 480d8f033ffe2e0d, unit: card_save_files, rodata: [{addr: 0x800e0200, size: 38, hash: d30f492629781067}]}
-  - {addr: 0x80132c90, size: 92, name: world_card_count_free_blocks, hash: abd32f626085421e, unit: card_save_files}
-  - {addr: 0x80132cec, size: 140, name: world_card_probe_selected, hash: fd1ba4ef33a5ac76, unit: card_save_files}
-  - {addr: 0x80132d78, size: 140, name: world_card_format_selected_slot, hash: fc8bd6f16ed20c2f, unit: card_open, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
-  - {addr: 0x80132e04, size: 260, name: world_card_open_file_with_retries, hash: 9d895ae8c601b333, unit: card_open, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
-  - {addr: 0x80132f08, size: 116, name: card_file_close_with_retries, hash: bfe541496e43698c, unit: card_file_seek}
-  - {addr: 0x80132f7c, size: 144, name: card_file_seek_with_retries, hash: 6444b4e18e6e6f0e, unit: card_file_seek}
-  - {addr: 0x8013300c, size: 332, name: world_card_write_buffer_to_file, hash: 75ec899066d27cbf, unit: card_file_io}
-  - {addr: 0x80133158, size: 164, name: world_card_delete_file, hash: 480eee05ca386e82, unit: card_file_io, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
-  - {addr: 0x801331fc, size: 268, name: world_card_read_file_chunked, hash: a65131d6e19dba38, unit: card_file_io}
-  - {addr: 0x80133308, size: 184, name: card_file_read_with_retries, hash: b11f28aec9ab5da2, unit: card_file_transfer}
-  - {addr: 0x801333c0, size: 184, name: card_file_write_with_retries, hash: 719ef687bd08afda, unit: card_file_transfer}
+  - {addr: 0x801325b4, size: 16, name: card_set_slot, hash: 8e9eef48eb3a3f03, unit: card_io}
+  - {addr: 0x801325c4, size: 16, name: world_card_get_selected_slot, hash: 8d33fa5b18f710e8, unit: card_io}
+  - {addr: 0x801325d4, size: 8, name: world_card_close_stub, hash: 6d64edf91449c1b1, unit: card_io}
+  - {addr: 0x801325dc, size: 40, name: card_io_consume_all_events, hash: d50e65e30401bfa0, unit: card_io}
+  - {addr: 0x80132604, size: 192, name: card_io_poll_bios_event_result, hash: a218caae57cebc0c, unit: card_io}
+  - {addr: 0x801326c4, size: 72, name: card_wait_for_bios_event_variant, hash: 7293c9920879ff4f, unit: card_io}
+  - {addr: 0x8013270c, size: 88, name: card_io_consume_bios_events, hash: bd2def49b8e92c22, unit: card_io}
+  - {addr: 0x80132764, size: 192, name: card_io_poll_hardware_event_result, hash: 04e2550b4a630150, unit: card_io}
+  - {addr: 0x80132824, size: 72, name: card_wait_for_hardware_event_variant, hash: 7ee571b3a42d0cd1, unit: card_io}
+  - {addr: 0x8013286c, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, unit: card_io}
+  - {addr: 0x801328c4, size: 140, name: card_get_info_with_retries_variant, hash: db96017ced25904c, unit: card_io}
+  - {addr: 0x80132950, size: 148, name: world_card_load_with_retries, hash: 6e6c44664a65aece, unit: card_io}
+  - {addr: 0x801329e4, size: 180, name: card_io_create_new_with_retries, hash: f3bd49bc815f1c09, unit: card_io}
+  - {addr: 0x80132a98, size: 184, name: card_poll_info_result_variant, hash: d75737862b2d266a, unit: card_io}
+  - {addr: 0x80132b50, size: 112, name: card_io_wait_operation_result_variant, hash: 381a35bd373a81e5, unit: card_io}
+  - {addr: 0x80132bc0, size: 208, name: world_card_count_save_files, hash: 480d8f033ffe2e0d, unit: card_io, rodata: [{addr: 0x800e0200, size: 38, hash: d30f492629781067}]}
+  - {addr: 0x80132c90, size: 92, name: world_card_count_free_blocks, hash: abd32f626085421e, unit: card_io}
+  - {addr: 0x80132cec, size: 140, name: world_card_probe_selected, hash: fd1ba4ef33a5ac76, unit: card_io}
+  - {addr: 0x80132d78, size: 140, name: world_card_format_selected_slot, hash: fc8bd6f16ed20c2f, unit: card_files, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
+  - {addr: 0x80132e04, size: 260, name: world_card_open_file_with_retries, hash: 9d895ae8c601b333, unit: card_files, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
+  - {addr: 0x80132f08, size: 116, name: card_file_close_with_retries, hash: bfe541496e43698c, unit: card_files}
+  - {addr: 0x80132f7c, size: 144, name: card_file_seek_with_retries, hash: 6444b4e18e6e6f0e, unit: card_files}
+  - {addr: 0x8013300c, size: 332, name: world_card_write_buffer_to_file, hash: 75ec899066d27cbf, unit: card_files}
+  - {addr: 0x80133158, size: 164, name: world_card_delete_file, hash: 480eee05ca386e82, unit: card_files, rodata: [{addr: 0x800e0200, size: 14, hash: 1b58a377a03f3eaf}]}
+  - {addr: 0x801331fc, size: 268, name: world_card_read_file_chunked, hash: a65131d6e19dba38, unit: card_files}
+  - {addr: 0x80133308, size: 184, name: card_file_read_with_retries, hash: b11f28aec9ab5da2, unit: card_files}
+  - {addr: 0x801333c0, size: 184, name: card_file_write_with_retries, hash: 719ef687bd08afda, unit: card_files}
   - {addr: 0x80133478, size: 1952, name: world_shop_run_screen, hash: 5736dcb2cff8e5e1, unit: shop}
   - {addr: 0x80133c18, size: 8, name: world_shop_menu_noop_callback, hash: 6d64edf91449c1b1, unit: shop}
   - {addr: 0x80133c20, size: 272, name: world_shop_run_main_menu_step, hash: 1e59afdc0b2e03d6, unit: shop}
