@@ -186,7 +186,7 @@ s32 menu_dispatch_system_function(
         menu_start_system_function_thread(value);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_SPELL_QUOTE) {
         g_text_spell_quote_last_ability_id = action->ability_id & ABILITY_ID_MASK;
-        thread_start(THREAD_SLOT_SYSTEM_FUNCTION, text_run_spell_quote_thread);
+        thread_start(THREAD_SLOT_SYSTEM_FUNCTION, text_run_spell_quote_thread_variant);
         thread_set_parameters(THREAD_SLOT_SYSTEM_FUNCTION, unit_id, g_text_spell_quote_last_ability_id, 0);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_ABILITY_ANNOUNCEMENT) {
         text_set_message_duration_frames(0x3C);

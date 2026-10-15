@@ -22,7 +22,7 @@ void world_input_update_menu_state(void) {
     thread_yield();
     input = PadRead(1);
     if (input == 0
-        || (world_script_check_tutorial_event_slot() != 0
+        || (script_is_tutorial_event_slot_variant() != 0
             && (script_get_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS) & 0x5000))) {
         g_script_event_initial_repeat_counter = 0;
         g_script_event_repeat_counter = 0;

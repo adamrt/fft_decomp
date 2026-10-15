@@ -7,5 +7,5 @@ void world_script_set_vsync_mode_and_event_speed(s32 value) {
     if (value == 0) {
         value = 1;
     }
-    world_script_set_event_speed(value);
+    script_set_event_speed_variant(value);
 }

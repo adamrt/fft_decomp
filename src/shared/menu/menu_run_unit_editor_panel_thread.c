@@ -207,7 +207,7 @@ void menu_run_unit_editor_panel_thread(void) {
         } else {
             menu_init_primitive_colors_dimmed(frame_record->palette);
         }
-        if (menu_can_accept_input() != 0) {
+        if (menu_can_accept_input_variant() != 0) {
             if (g_script_event_input & PSX_PAD_CROSS) {
                 thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
                 break;
@@ -260,6 +260,6 @@ void menu_run_unit_editor_panel_thread(void) {
     g_thread_contexts[THREAD_SLOT_TILE_INFO_PANEL].task_id = THREAD_TASK_TILE_INFO_PANEL;
     g_menu_overlay_state = 0;
     battle_menu_leave_status_screen_selection();
-    battle_menu_build_idle_action_menu(g_menu_current_id);
+    menu_build_idle_action_menu_variant(g_menu_current_id);
     thread_exit_current();
 }

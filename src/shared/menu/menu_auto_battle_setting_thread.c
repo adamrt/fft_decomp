@@ -40,7 +40,7 @@ void menu_auto_battle_setting_thread(void) {
         cursor = 4;
     }
     previous = cursor;
-    menu_build_window_sprites(&rect, param, &records[0]);
+    menu_build_window_sprites_variant(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
     fresh = 0;
     i = 0;
@@ -48,7 +48,7 @@ void menu_auto_battle_setting_thread(void) {
     for (;; i++) {
         record = &records[i & 1];
         if (i == 0 || (g_script_event_input & PSX_PAD_CIRCLE)) {
-            buffer = battle_menu_build_and_upload_window_frame_image(
+            buffer = menu_build_and_upload_window_frame_image_variant(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running_variant() == 0) || i == 0) {
                 selected = cursor;
@@ -64,7 +64,7 @@ void menu_auto_battle_setting_thread(void) {
                     after = battle_menu_get_id_based_on_mount_moveable_actable(g_menu_selected_unit.battle_id);
                     if (before != after) {
                         thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
-                        battle_menu_build_idle_action_menu(after);
+                        menu_build_idle_action_menu_variant(after);
                     }
                 } else {
                     color[0] = 4;
@@ -101,7 +101,7 @@ void menu_auto_battle_setting_thread(void) {
             fresh = 0;
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
             break;
         }
         menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);

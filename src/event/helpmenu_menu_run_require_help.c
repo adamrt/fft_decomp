@@ -110,7 +110,7 @@ void helpmenu_menu_run_require_help(void) {
                             *g_helpmenu_controller_state_ptr = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
-                            thread_start(text_thread_id, battle_text_run_dialog_thread);
+                            thread_start(text_thread_id, text_run_dialog_thread_variant);
                             thread_set_parameters(text_thread_id, 0x3B, help_id, 0);
                         }
                     } else if (entry->help_base == 0x7800 && (*(u16*)entry->value - 1) >= 0x301U) {
@@ -121,13 +121,13 @@ void helpmenu_menu_run_require_help(void) {
                         *g_helpmenu_controller_state_ptr = 0;
                     } else {
                         g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
-                        thread_start(text_thread_id, battle_text_run_dialog_thread);
+                        thread_start(text_thread_id, text_run_dialog_thread_variant);
                         thread_set_parameters(text_thread_id, 0x3B, help_id, 0);
                     }
                 } else {
                     help_id = entry->help_base;
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
-                    thread_start(text_thread_id, battle_text_run_dialog_thread);
+                    thread_start(text_thread_id, text_run_dialog_thread_variant);
                     thread_set_parameters(text_thread_id, 0x3B, help_id, 0);
                 }
             } else if (input & PSX_PAD_DPAD_MASK) {

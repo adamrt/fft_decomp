@@ -4,7 +4,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* WORLD twin of script_update_event_input_state: while the event thread
+/* WORLD twin of script_update_event_input_state_variant: while the event thread
  * (0x10) is current, latch the pad state and derive the new-press mask with
  * the shared initial/repeat/secondary key-repeat delays. */
 void world_script_update_event_input_state(void) {

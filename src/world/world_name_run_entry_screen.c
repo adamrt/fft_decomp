@@ -139,7 +139,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
             g_world_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
         menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_world_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
-        menu_draw_active_window_frames();
+        menu_draw_active_window_frames_variant();
         world_input_update_event_state(
             g_menu_gfx_context->otag + 63, PadRead(0), g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
         value = g_world_name_entry_state;

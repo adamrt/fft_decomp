@@ -437,4 +437,7 @@ extern s16 g_gfx_item_icon_clut_base_y;
 
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id);
 
+/* per-module bodies: each module links its own copy under the shared name. */
+void gfx_mirror_4bpp_rect_variant(u8* data, const glyph_blit_t* region);
+
 #endif

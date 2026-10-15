@@ -21,7 +21,7 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
         return;
     }
     silent = 0;
-    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input() != 0) {
+    if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input_variant() != 0) {
         if (g_thread_contexts[g_thread_current_id].task_words[1] == 0) {
             g_thread_contexts[g_thread_current_id].task_words[1] = 2;
             g_thread_contexts[g_thread_current_id].task_words[0] = 0;

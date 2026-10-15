@@ -27,5 +27,5 @@ void battle_menu_open_non_active_unit_idle_action_menu(void) {
             menu_id = BATTLE_MENU_ID_OTHER_UNIT_INSPECT;
         }
     }
-    battle_menu_build_idle_action_menu(menu_id);
+    menu_build_idle_action_menu_variant(menu_id);
 }

@@ -13,7 +13,7 @@ void open_controller_start_text_message(s32 parameter, s32 run_followup) {
         text_relocate_pointer_table(g_open_text_section_offsets);
     }
 
-    thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_character_handling_thread);
+    thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread_variant);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, parameter, 0);
 
     {

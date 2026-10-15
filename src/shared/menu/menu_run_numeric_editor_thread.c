@@ -53,7 +53,7 @@ void menu_run_numeric_editor_thread(void) {
     i = 0;
     descriptor = g_attack_editor_numeric_texture;
     for (; i < 18; i++) {
-        battle_menu_init_semitransparent_sprt(&buffer->sprites[i]);
+        menu_init_sprt_variant(&buffer->sprites[i]);
         gfx_init_image_loading(&buffer->sprites[i], g_attack_editor_numeric_geometry,
             &g_attack_editor_numeric_table.texture_rect, descriptor);
         descriptor++;

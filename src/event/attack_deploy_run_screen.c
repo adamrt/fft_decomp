@@ -53,7 +53,7 @@ void attack_deploy_run_screen(void) {
     thread_yield();
     g_attack_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_attack_deploy_current_squad_data = &g_attack_deploy_squad_data[g_attack_deploy_current_squad_id];
-    script_set_event_speed(1);
+    script_set_event_speed_variant(1);
     g_gfx_screen_fade = 0xff;
     thread_yield();
     g_attack_deploy_grid_slide_y = 0x9c;
@@ -473,7 +473,7 @@ ramza_placed:
             attack_deploy_handle_roster_navigation_input();
             if (*input & PSX_PAD_SQUARE) {
                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
-                script_set_event_speed(2);
+                script_set_event_speed_variant(2);
                 if (g_attack_panel_status_animation[2] < 2) {
                     g_attack_panel_status_animation[2] = 1;
                 }
@@ -504,7 +504,7 @@ ramza_placed:
                 thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
                 thread_wait_until_inactive(THREAD_SCREEN_SLOT_NUMERIC_EDITOR);
                 thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
-                script_set_event_speed(1);
+                script_set_event_speed_variant(1);
             }
             if (*input & PSX_PAD_TRIANGLE) {
                 if (g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
@@ -656,7 +656,7 @@ ramza_placed:
     thread_set_parameters(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
     thread_wait_frames(3);
     g_gfx_screen_fade = 0;
-    script_set_event_speed(1);
+    script_set_event_speed_variant(1);
     main_sound_unload_scenario_music_and_tunes();
     thread_exit_current();
 }

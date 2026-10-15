@@ -28,7 +28,7 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     for (i = 3; i >= 0; i--) {
         g_menu_pending_selection[i] = fill;
     }
-    script_run_event_frame(otag, controller_input);
+    script_run_event_frame_variant(otag, controller_input);
     menu_update_panel_fade();
     result = menu_resolve_selection();
     if ((thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0
@@ -38,11 +38,11 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
         if (g_menu_animation_speed_forced == 0) {
             g_menu_animation_speed_forced = 1;
             g_menu_saved_animation_speed = battle_state_get_animation_speed();
-            script_set_event_speed(2);
+            script_set_event_speed_variant(2);
         }
     } else if (g_menu_animation_speed_forced == 1) {
         g_menu_animation_speed_forced = 0;
-        script_set_event_speed(g_menu_saved_animation_speed);
+        script_set_event_speed_variant(g_menu_saved_animation_speed);
     }
     return result;
 }

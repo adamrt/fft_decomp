@@ -7,7 +7,7 @@ void menu_init_sprite_array(SPRT* sprites, s32 count, s32 clut) {
     s32 index;
 
     for (index = 0; index < count; index++) {
-        battle_menu_init_semitransparent_sprt(sprites);
+        menu_init_sprt_variant(sprites);
         sprites->clut = clut;
         sprites++;
     }

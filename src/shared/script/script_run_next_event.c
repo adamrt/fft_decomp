@@ -4,5 +4,5 @@
  * script_start_current_event_thread: load the selected event and interpret it. */
 void script_run_next_event(void) {
     script_load_next_event();
-    script_execute_event();
+    script_execute_event_variant();
 }

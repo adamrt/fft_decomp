@@ -21,7 +21,6 @@ extern u8 g_battle_menu_idle_action_entry_labels[];
 extern ai_command_t g_menu_selected_command;
 extern action_command_t g_menu_selected_action;
 
-void battle_menu_build_idle_action_menu(s32 menu_id);
 s32 battle_menu_build_unit_action_menus(s32 unit_id, u8* entries, u8* empty, u8* menu_types);
 void battle_menu_close_move_help(void);
 void battle_menu_dispatch_idle_action_menu(void);
@@ -74,8 +73,6 @@ extern s32 g_battle_formation_screen_active;
 extern menu_number_entry_t g_battle_menu_projected_value_panel[2];
 extern s32 g_battle_post_battle_unit_changes_active;
 
-void battle_menu_build_unit_portrait_poly(POLY_FT4* poly, u32 battle_id);
-
 /* status screen */
 extern s32 g_battle_menu_status_enabled;
 extern s32 g_battle_menu_status_requested;
@@ -90,13 +87,9 @@ extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][
 extern image_load_parameters_t g_battle_menu_icon_strip_image_params[20];
 extern image_load_parameters_t g_battle_menu_single_icon_image_params[5];
 
-u8* battle_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
-void battle_menu_init_semitransparent_sprt(SPRT* sprite);
-
 /* text rendering */
 extern s32 g_battle_menu_text_section_offsets[];
 
-void battle_menu_display_text(u32 text_id, u8* image, glyph_blit_t* origin, u8* text);
 void battle_menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);

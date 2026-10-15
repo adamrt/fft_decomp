@@ -35,9 +35,9 @@ void menu_icon_timed_thread(void) {
     i = 0;
     param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     menu_size_entry_to_text(param, &width, &height, &pad, 1);
-    menu_build_window_sprites(&rect, param, &records[0]);
+    menu_build_window_sprites_variant(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
-    buffer = battle_menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_and_upload_window_frame_image_variant(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
     menu_set_text_origin(pad + 8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
@@ -52,7 +52,7 @@ void menu_icon_timed_thread(void) {
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;
         }
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
             break;
         }
         if (unset >= 0) {

@@ -4,6 +4,7 @@
 /* Battle and event-overlay text buffers, glyph rendering and messages. */
 
 #include "fft/menu.h"
+#include "fft/text.h"
 #include "fft/unit.h"
 
 /* glyph rendering */
@@ -48,8 +49,6 @@ extern s32 g_battle_text_awaiting_input;
 extern s32 g_battle_text_current_line;
 extern u16 g_battle_text_speaker_swap_unit_a;
 extern u16 g_battle_text_speaker_swap_unit_b;
-
-void battle_text_run_dialog_thread(void);
 
 /* typewriter entrypoint */
 

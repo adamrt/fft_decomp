@@ -6,6 +6,7 @@
 #include "fft/camera.h"
 #include "fft/main.h"
 #include "fft/status.h"
+#include "fft/text.h"
 #include "psx/libgs.h"
 
 /* dead unit */
@@ -203,7 +204,7 @@ extern RECT g_world_screen_clear_rect;
 extern fade_overlay_t g_world_screen_tint_tiles[]; /* one tint tile per packet buffer */
 
 /* script */
-/* Operand pairs that one WORLD script_execute_event opcode stores together;
+/* Operand pairs that one WORLD script_execute_event_variant opcode stores together;
  * each second 16-bit value sits off a 32-bit alignment boundary in WORLD bss, so each pair is
  * one object. */
 typedef struct world_event_command_args {
@@ -267,12 +268,10 @@ void world_script_handle_tutorial_command_wait(void);
 void world_script_handle_tutorial_command_wait_for_button(void);
 void world_script_handle_tutorial_command_wait_for_message(void);
 void world_script_handle_tutorial_command_wait_time(void);
-void world_script_set_event_speed(s32 speed);
 void world_script_set_vsync_mode_and_event_speed(s32 value);
 void world_script_start_tutorial(s32 index);
 void world_input_update_event_state(u32* otag, u32 input, s32 frame_arg);
 void world_script_update_tutorial_controller_input(void);
-s32 world_script_check_tutorial_event_slot(void);
 
 /* sound */
 extern s16 g_world_sound_current_music_track_index;
@@ -317,9 +316,6 @@ void world_bit_cursor_set_primary(u8* ptr);
 void world_bit_cursor_set_secondary(const u8* ptr);
 void world_bits_write_primary(u8 bit);
 void world_game_reset(void);
-void world_map_reset_script_light_transform(void);
-void world_camera_load_state_from_script_variables(void);
-void world_camera_store_state_to_script_variables(void);
 void world_card_close_stub(void);
 
 /* thread */
@@ -615,7 +611,7 @@ typedef char wldcore_window_xy_size_must_be_36[sizeof(wldcore_window_xy_t) == 36
 extern menu_status_panel_buffer_t g_world_change_banner_panel_frames[2];
 
 /* Scenario interpreter interfaces shared by the BATTLE and WORLD
- * script_execute_event bodies. Signatures are as the interpreters bind them;
+ * script_execute_event_variant bodies. Signatures are as the interpreters bind them;
  * unverified names stay provisional. */
 extern s16 g_world_3d_object_use_request;
 extern u16 g_world_3d_object_wait_status;
@@ -739,7 +735,6 @@ void world_gfx_init_menu_tile_and_line_primitives(menu_status_panel_buffer_t* me
 void world_panel_gfx_init_scaled_draw_area_packets(scaled_draw_area_pair_t* pair);
 void world_gfx_set_blit_dest_position(s32 x, s32 y);
 void world_gfx_set_fade_disabled(u8 disabled);
-void world_gfx_set_portrait_poly_texture(POLY_FT4* poly, s32 code);
 
 s32 world_gfx_get_fade_state(void);
 void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
@@ -1553,7 +1548,6 @@ s32 world_text_measure_entry_pixel_width(const u8* entry);
 void world_menu_close_help_menu(void);
 void world_text_resume_printing(s32 thread_id);
 void world_text_show_message_and_play_sound(s32 message_id, s32 sound_id);
-void world_text_character_handling_thread(void);
 
 /* menu context */
 /* Ordinary outfitter screens use a town's world_location_id_e. These values
@@ -1852,7 +1846,6 @@ void world_draw_menu_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u
 void world_menu_labeled_number_entry_thread(void);
 void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffers, RECT* to_main, RECT* to_icon);
-void world_menu_build_idle_action_stub(s32 unused_menu_id);
 
 void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 void world_screen_menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
@@ -1877,7 +1870,6 @@ s32 world_menu_run_unit_status_banner_countdown(s32 message_id, s32 frames);
 void world_menu_scroll_list_page(s32 dir, menu_instruction_t* instruction);
 void world_menu_add_gradient_line_primitive(point16_t* endpoints, rgb24_t* colors, s32 semi_trans, s32 ot_index);
 void world_menu_announce_entry_value_thread(void);
-u8* world_menu_build_and_upload_window_frame_image(s32 width, s32 height, RECT* rect, s32 mode);
 void world_menu_resize_parent_entry_to_digits(void);
 void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 s32 world_menu_build_window_frame_image(s32 width, s32 height, u16* destination);
@@ -1886,7 +1878,6 @@ void world_menu_clear_cursor_positions(void);
 void world_menu_configure_status_panel_primitive_colors(
     menu_status_panel_buffer_t* primitives, const menu_status_thread_t* state);
 
-void world_menu_display_text(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text);
 void world_menu_draw_animated_cursor(point16_t* position, u16* state, s32 mode);
 void world_menu_draw_animated_vertical_cursor(point16_t* position, u16* state, s32 mode);
 void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode);
@@ -1977,7 +1968,6 @@ void world_menu_load_sort_key_list(s32 index, s16* out);
 void world_menu_window_frame_thread(void);
 void world_menu_set_slot_4_cursor_index(s32 index);
 s32 world_menu_get_thread_activity(void);
-void world_menu_init_sprite(SPRT* sprite);
 
 s16 world_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 

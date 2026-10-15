@@ -25,7 +25,7 @@ void menu_open_debugchr_unit_editor(void) {
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;
-        world_menu_build_idle_action_stub(g_menu_current_id);
+        menu_build_idle_action_menu_variant(g_menu_current_id);
         menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, *unit_index, *unit_index);
         menu_clear_modal_open();
         battle_menu_leave_status_screen_selection();

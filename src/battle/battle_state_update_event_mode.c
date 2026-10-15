@@ -26,7 +26,7 @@ void battle_state_update_event_mode(void) {
     }
     battle_gfx_update_status_bubbles_and_graphics();
     battle_gfx_draw_screen_color_modulation_overlay();
-    switch (script_run_event_frame(main_gfx_get_otag(), g_main_input_current_buttons)) {
+    switch (script_run_event_frame_variant(main_gfx_get_otag(), g_main_input_current_buttons)) {
     case 0:
         battle_gfx_init_evtchr_vram_slots();
         g_battle_menu_status_enabled = 1;

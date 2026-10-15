@@ -132,7 +132,7 @@ typedef enum menu_window_icon_flags {
  * Event ChangeDialog scans records 0, 2 and 4, compares +0x14 with operand 0,
  * and checks the thread at +0x04 for task 0x33. For DisplayMessage, the text
  * threads store the dialog type's box nibble (& 0x70), the portrait unit and
- * the scroll state, and battle/menu_draw_active_window_frames read
+ * the scroll state, and battle/menu_draw_active_window_frames_variant read
  * them. */
 typedef struct menu_window_buffer {
     s32 active;             /* 0x00: 1 once the text thread has built the window; the frame
@@ -174,7 +174,6 @@ void menu_reset_window_buffer_slots(void);
 void menu_release_window_buffer_pair(menu_window_buffer_t* buffer);
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
 /* BATTLE and WORLD each link their own body. */
-void menu_draw_active_window_frames(void);
 void menu_select_sprite_clut(void* packet);
 void menu_select_icon_sprite_clut(SPRT* slot);
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
@@ -621,8 +620,6 @@ void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const 
     s32 lower_half, const menu_status_thread_t* thread);
 void menu_build_status_group_primitives(POLY_FT4* poly);
 void menu_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
-s32 menu_display_projected_action_effect(
-    POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
 /* menu commands */
@@ -874,7 +871,7 @@ typedef struct menu_entry {
     void (*thread_entry)(void);  /* 0x28 */
     s16 header_id;               /* 0x2c: menu header; text-thread parameter (world_menu_text_entry_thread); the
                                     icon threads read it signed as the icon kind: 0x10 arrow, 0..4 single
-                                    icon, 5..15 four-piece icon (menu_build_window_sprites) */
+                                    icon, 5..15 four-piece icon (menu_build_window_sprites_variant) */
     u8 _padding_2e[2];           /* aligns context */
     /* 0x30: context interpreted by the menu thread. Text threads use menu_text_binding_t
      * here, the list threads a menu_text_layout_t, the number threads a
@@ -910,10 +907,8 @@ extern s32 g_menu_help_open;
 extern s32 g_menu_building_thread_started;
 void menu_start_building_thread(void);
 /* BATTLE and WORLD each link their own bodies of the next four. */
-s32 menu_can_accept_input(void);
 void menu_handle_action(menu_entry_t* entry, s32 row_index);
 void menu_handle_cancel_input(menu_entry_t* context);
-s32 menu_should_close_thread(u32* input);
 void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* bounds, s32* cursor);
 void menu_record_selection_for_selected_unit(void);
 void menu_clear_entry_selections(void);
@@ -1006,7 +1001,7 @@ typedef struct menu_input_timing_profile {
 } menu_input_timing_profile_t;
 
 /* A text layout followed by the first visible row, as bound to a scrolling
- * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread and the AT list
+ * list's menu_entry_t::context (menu_run_scrolling_ability_list_thread_variant and the AT list
  * built by menu_build_ability_preview_at_list). */
 typedef struct menu_scroll_text_layout {
     menu_text_layout_t columns; /* 0x00 */
@@ -1066,7 +1061,7 @@ typedef struct menu_text_row {
     u8 _unused_04;
 } menu_text_row_t;
 
-/* Provisional: the 0x7c-byte icon record menu_build_window_sprites fills.
+/* Provisional: the 0x7c-byte icon record menu_build_window_sprites_variant fills.
  * Its head is exactly menu_icon_sprites_t; the three borrowed icon
  * sprites at +0x68 and the two state words at +0x74/+0x78 are what that builder
  * adds. */
@@ -1077,10 +1072,8 @@ typedef struct menu_icon_record {
     s32 _unknown_78;          /* 0x78 */
 } menu_icon_record_t;
 
-void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
-
 /* Provisional: one of the two 0x134-byte packet pages a scrolling text list
- * alternates between frames (menu_run_scrolling_ability_list_thread at 0x801a3d58,
+ * alternates between frames (menu_run_scrolling_ability_list_thread_variant at 0x801a3d58,
  * world_build_at_list at 0x801ac6b4, world_screen_build_at_list at 0x801bfda4). */
 typedef struct menu_list_page {
     SPRT frame;                         /* 0x00: text image / cursor frame */
@@ -1193,7 +1186,6 @@ void menu_init_at_list(menu_entry_t* entry);
 void menu_build_ability_preview_at_list(void);
 void menu_preview_ability_turn_at_list(void);
 /* BATTLE and WORLD each link their own body. */
-void menu_run_scrolling_ability_list_thread(void);
 
 /* skillset selection */
 extern s32 g_menu_selected_skill_ct;
@@ -2256,7 +2248,6 @@ extern s32 g_menu_text_active_key;
 void menu_text_start_help_thread(s32 thread_data);
 void menu_text_start_thread_if_idle(s32 thread_id, s32 first, s32 second, s32 third);
 s32 menu_text_start_or_poll_thread(s32 thread_id, s32 parameter_0, s32 key, s32 parameter_2, s32 y_offset);
-void text_run_spell_quote_thread(void);
 
 /* menu bitstreams */
 /* Read-only secondary stream; CARD uses it to count save-buffer parity bits. */
@@ -2298,7 +2289,6 @@ extern s32 g_menu_text_param_24;
 void text_print_fnt_value_and_next(s32 value);
 void text_relocate_pointer_table(const u32* offsets);
 /* BATTLE and WORLD each link their own body. */
-void text_init_section_pointers(void);
 void text_build_unit_name_list(void);
 void text_build_display_message(s32 offset, s32 flags, s32* out_width);
 s32 text_is_spell_quote_exception_skillset(s32 skillset_id);
@@ -2546,9 +2536,7 @@ extern glyph_blit_t g_text_large_number_glyph_rect; /* glyph source rectangle in
 void menu_clear_render_buffer(void* buffer, u32 bytes);
 void text_render_glyph_to_4bpp_image(const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
 void text_blit_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
-void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 /* The caller leaves 0x16f in $a1, but the body never reads $a1. */
-void gfx_mirror_4bpp_rect(u8* data, const glyph_blit_t* region);
 
 /* unreferenced stubs, neutral names */
 void menu_noop_1(void);
@@ -2558,5 +2546,19 @@ void menu_noop_4(void);
 void menu_noop_5(void);
 void menu_noop_6(void);
 void menu_noop_7(void);
+
+/* per-module bodies: each module links its own copy under the shared name. */
+s32 menu_can_accept_input_variant(void);
+s32 menu_display_projected_action_effect_variant(
+    POLY_FT4* prim, const point16_t* base_load, const RECT* base_screen, image_load_parameters_t* params);
+s32 menu_should_close_thread_variant(u32* input);
+u8* menu_build_and_upload_window_frame_image_variant(s32 width, s32 height, RECT* rect, s32 mode);
+void menu_build_idle_action_menu_variant(s32 unused_menu_id);
+void menu_build_unit_portrait_poly_variant(POLY_FT4* poly, s32 id);
+void menu_build_window_sprites_variant(RECT* rect, menu_entry_t* param, menu_icon_record_t* record);
+void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8* text);
+void menu_draw_active_window_frames_variant(void);
+void menu_init_sprt_variant(SPRT* sprite);
+void menu_run_scrolling_ability_list_thread_variant(void);
 
 #endif

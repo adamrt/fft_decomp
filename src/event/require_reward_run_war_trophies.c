@@ -53,7 +53,7 @@ void require_reward_run_war_trophies(void) {
         for (i = 0; i < 16; i++) {
             menu_init_default_poly_ft4(&buffer->quads[i]);
         }
-        battle_menu_init_semitransparent_sprt(&buffer->banner);
+        menu_init_sprt_variant(&buffer->banner);
         prims->banner.x0 = 0x88;
         prims->banner.y0 = 0x78;
         prims->banner.u0 = 8;
@@ -79,7 +79,7 @@ void require_reward_run_war_trophies(void) {
                 if (last == g_require_reward_war_trophy_entry_count || (row != 0 && (row & 7) == 0)) {
                     break;
                 }
-                image = battle_menu_build_and_upload_window_frame_image(
+                image = menu_build_and_upload_window_frame_image_variant(
                     0x50, 0x10, &g_require_reward_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
                 menu_clear_render_buffer(image, 0x280);
                 g_menu_text_state.pen.stride = 0x50;

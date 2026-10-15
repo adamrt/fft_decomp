@@ -778,6 +778,7 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 		fail("%v", err)
 	}
 	problems = append(problems, validateDefines(p.root, config)...)
+	problems = append(problems, validateVariantNames(config)...)
 	if len(problems) > 0 {
 		if len(problems) > 40 {
 			problems = append(problems[:40], fmt.Sprintf("... and %d more", len(problems)-40))

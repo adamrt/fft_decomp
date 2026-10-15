@@ -70,20 +70,20 @@ void menu_run_unit_summary_panel_thread(void) {
     menu_clear_render_buffer(digits, sizeof(*digits));
     *stride = 0x10;
     menu_set_text_origin(0, 0);
-    text_draw_large_number_glyphs(g_menu_selected_unit.brave, 0x202, digits->brave, origin);
+    text_draw_large_number_glyphs_variant(g_menu_selected_unit.brave, 0x202, digits->brave, origin);
     LoadImage(&rects[1], (u32*)digits->brave);
     menu_set_text_origin(0, 0);
-    text_draw_large_number_glyphs(g_menu_selected_unit.faith, 0x202, digits->faith, origin);
+    text_draw_large_number_glyphs_variant(g_menu_selected_unit.faith, 0x202, digits->faith, origin);
     LoadImage(&rects[2], (u32*)digits->faith);
     menu_set_text_origin(0, 0);
     if (g_main_debug_display_enabled != 0) {
-        text_draw_large_number_glyphs(g_menu_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
+        text_draw_large_number_glyphs_variant(g_menu_selected_unit.battle_id, 0x4002, digits->roster_slot, origin);
     } else if (g_menu_selected_unit.battle_id >= 0x10) {
         value = unit->formation_index;
         if (value == 0xFF) {
             value = 0;
         }
-        text_draw_large_number_glyphs(value + 1, 0x4002, digits->roster_slot, origin);
+        text_draw_large_number_glyphs_variant(value + 1, 0x4002, digits->roster_slot, origin);
     }
     LoadImage(&rects[3], (u32*)digits->roster_slot);
     frames[0].sprites[6].clut = 0x7C3C;

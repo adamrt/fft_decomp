@@ -81,7 +81,7 @@ void world_main_menu_text_window_thread(void) {
         record = &records[i & 1];
         phase = i & 0x1F;
         if (phase == 0) {
-            buffer = world_menu_build_and_upload_window_frame_image(
+            buffer = menu_build_and_upload_window_frame_image_variant(
                 entry->inner_width, entry->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_text_state.pen.stride = entry->inner_width;
             menu_set_text_origin(10, 8);

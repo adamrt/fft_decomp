@@ -33,4 +33,8 @@ extern s32 g_camera_wrap_yaw_pending;
 s32 mul_div_s64(s32 a, s32 b, s32 c);
 s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 
+/* per-module bodies: each module links its own copy under the shared name. */
+void camera_load_state_from_script_variables_variant(void);
+void camera_store_state_to_script_variables_variant(void);
+
 #endif

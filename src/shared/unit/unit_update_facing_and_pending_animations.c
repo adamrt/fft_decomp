@@ -6,7 +6,7 @@
  * and step each rotating unit one facing (of 16) toward its target, after its
  * delay and once every frames_per_step frames. The shortest mode turns
  * whichever way is nearer; the other two modes always increment or decrement.
- * Nothing calls it in WORLD, where its caller script_process_pending_requests
+ * Nothing calls it in WORLD, where its caller script_process_pending_requests_variant
  * is empty. */
 void unit_update_facing_and_pending_animations(void) {
     s32 i;

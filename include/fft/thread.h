@@ -199,11 +199,6 @@ void thread_reset_scheduler(void);
 /* per-module bodies: each module links its own copy under the shared name.
  * The accessors are original assembly that differs only in the address add
  * (addu in BATTLE, trapping add in WORLD). */
-s32 thread_get_current_parameter_1_variant(void);
-s32 thread_get_current_parameter_2_variant(void);
-s32 thread_get_current_parameter_3_variant(void);
-s32 thread_is_previous_running_variant(void);
-s32 thread_is_running_asm_variant(s32 thread_id);
 
 /* scheduling */
 /* Yield to the next active context in the resident scene scheduler.

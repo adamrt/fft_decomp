@@ -11,7 +11,6 @@
 
 /* Returns the event result that the battle state handlers switch on;
  * proven by 0x80078fb4 and 0x800785ac, which both consume it. */
-void script_set_event_speed(s32 speed);
 
 /* input */
 extern u32 g_script_saved_event_input;
@@ -19,8 +18,6 @@ extern u32 g_script_saved_event_input;
 void script_route_event_input(void);
 
 /* conditions */
-
-s32 script_is_tutorial_event_slot(void);
 
 /* unit creation and removal */
 s32 script_add_ghost_unit_event_instruction(

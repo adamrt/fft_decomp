@@ -22,9 +22,9 @@ void menu_run_icon_selection_loop(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    menu_build_window_sprites(&rect, param, record);
+    menu_build_window_sprites_variant(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = battle_menu_build_and_upload_window_frame_image(
+    buffer = menu_build_and_upload_window_frame_image_variant(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
@@ -45,7 +45,7 @@ void menu_run_icon_selection_loop(void) {
             records[0]._unknown_78 = 0;
             records[1]._unknown_78 = 0;
         }
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
             break;
         }
         menu_handle_action(param, cursor);

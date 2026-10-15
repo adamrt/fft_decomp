@@ -26,7 +26,7 @@ void menu_icon_list_thread(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    menu_build_window_sprites(&rect, state, record);
+    menu_build_window_sprites_variant(&rect, state, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     fresh = 0;
     redraw = state->context;
@@ -34,7 +34,7 @@ void menu_icon_list_thread(void) {
     for (i = 0;; i++) {
         if (*redraw == 1) {
             *redraw = 0;
-            buffer = battle_menu_build_and_upload_window_frame_image(
+            buffer = menu_build_and_upload_window_frame_image_variant(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             fresh = 1;
             g_menu_text_state.pen.stride = state->inner_width;
@@ -50,7 +50,7 @@ void menu_icon_list_thread(void) {
             fresh = 0;
         }
         state->selected_index = cursor;
-        if (menu_should_close_thread(g_menu_input_controller) != 0) {
+        if (menu_should_close_thread_variant(g_menu_input_controller) != 0) {
             break;
         }
         menu_step_wrapping_cursor_on_scroll_buttons(state, &cursor);

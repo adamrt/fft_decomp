@@ -41,7 +41,7 @@ void menu_run_numeric_display_panel_thread(void) {
     thread_wait_frames(1);
     menu_free_memory(number_images);
     for (i = 0; i < 18; i++) {
-        battle_menu_init_semitransparent_sprt(&record->sprites[i]);
+        menu_init_sprt_variant(&record->sprites[i]);
         gfx_init_image_loading(&record->sprites[i], &g_menu_texture_origin, &g_menu_numeric_display_frame_rect,
             &g_menu_numeric_display_image_params[i]);
     }

@@ -205,7 +205,7 @@ extern s32 g_attack_map_title_palette_rect;
 extern POLY_GT4 g_attack_map_title_sprites[2][4];
 
 /* Scenario interpreter interfaces shared by the BATTLE and WORLD
- * script_execute_event bodies. Signatures are as the interpreters bind them;
+ * script_execute_event_variant bodies. Signatures are as the interpreters bind them;
  * unverified names stay provisional. */
 void attack_map_load_title_graphic(void);
 void attack_map_show_title(void);

@@ -39,7 +39,7 @@ void equip_menu_text_entry_wait_thread(void) {
     *input = PSX_PAD_CIRCLE;
     menu_handle_action(thread, 0);
 
-    thread_start(child_id, battle_text_run_dialog_thread);
+    thread_start(child_id, text_run_dialog_thread_variant);
     thread_set_four_parameters(child_id, header_id, text_id, task_arg, task_arg);
     thread_wait_until_inactive(g_thread_current_id - 1);
     thread_wait_until_inactive(child_id);

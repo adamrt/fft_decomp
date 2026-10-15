@@ -97,7 +97,7 @@ void menu_display_hovered_unit_stats(
             gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
             page->quads[frame].clut = 0x7CBC;
         }
-        menu_display_projected_action_effect(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
+        menu_display_projected_action_effect_variant(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
     } else if (mode == UNIT_STATS_PANEL_ATTACK_TARGET) {
         for (frame = 0; frame < 2; frame++, params++) {
             gfx_init_image_loading(&page->quads[frame], &g_menu_texture_origin, frame_rect, params);
@@ -148,7 +148,7 @@ void menu_display_hovered_unit_stats(
             running = 0;
         }
         page = &g_menu_unit_status_panel_pages[g_menu_unit_status_first_page_by_mode[mode] + (frame & 1)];
-        battle_menu_build_unit_portrait_poly(&page->portrait, unit_id);
+        menu_build_unit_portrait_poly_variant(&page->portrait, unit_id);
         if (running != 0) {
             setRGB0(&page->portrait, 0x40, 0x50, 0x70);
         } else {

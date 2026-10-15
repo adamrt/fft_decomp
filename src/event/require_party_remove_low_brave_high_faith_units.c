@@ -35,7 +35,7 @@ void require_party_remove_low_brave_high_faith_units(void) {
         s32 unit_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
         s32 message_thread;
         g_text_substitution_values[0] = g_require_party_affected_battle_unit_indices[i];
-        thread_start(unit_thread, battle_text_run_dialog_thread);
+        thread_start(unit_thread, text_run_dialog_thread_variant);
         thread_set_parameters(unit_thread, 0x1b, g_require_party_affected_unit_message_ids[i],
             g_require_party_affected_unit_message_args[i]);
         unit = battle_unit_get_stats_from_battle_id(g_require_party_affected_battle_unit_indices[i]);

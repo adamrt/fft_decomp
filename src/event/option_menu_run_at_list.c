@@ -73,13 +73,13 @@ void option_menu_run_at_list(void) {
         g_option_at_list_pages[i].icons.icons[0] = &icons0[i];
         g_option_at_list_pages[i].icons.icons[1] = &icons1[i];
         g_option_at_list_pages[i].icons.icons[2] = &icons2[i];
-        menu_build_window_sprites(&image_rect, entry, &g_option_at_list_pages[i].icons);
+        menu_build_window_sprites_variant(&image_rect, entry, &g_option_at_list_pages[i].icons);
     }
     menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
-        battle_menu_init_semitransparent_sprt(&page->arrows[i]);
+        menu_init_sprt_variant(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
         page->arrows[i].w = 8;
         page->arrows[i].h = 0x10;
@@ -90,13 +90,13 @@ void option_menu_run_at_list(void) {
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
-    battle_menu_init_semitransparent_sprt(&page->thumb);
+    menu_init_sprt_variant(&page->thumb);
     page->thumb.u0 = 0x10;
     page->thumb.v0 = 0x10;
     page->thumb.w = 8;
     page->thumb.h = 8;
     page->thumb.clut = 0x7D7C;
-    battle_menu_init_semitransparent_sprt(&page->frame);
+    menu_init_sprt_variant(&page->frame);
     gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, &image_parameters);
     menu_init_sprite_array(page->arrow_marks, 2, 0x7C3C);
     page->arrow_marks[0].w = 6;
@@ -142,7 +142,7 @@ void option_menu_run_at_list(void) {
         } else {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
         }
-        if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
+        if (delta == 0 && menu_can_accept_input_variant() != 0 && i != 0) {
             /* Dead store (column is reinitialized before use); only the reload
              * of layout for this branch survives in the target. */
             if (layout == 0) {
@@ -221,12 +221,12 @@ void option_menu_run_at_list(void) {
         if (redraw_pending != 0) {
             redraw_pending = 0;
         }
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (delta == 0 && menu_can_accept_input_variant() != 0) {
             redraw_pending = (s32)option_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
         entry->selected_index = cursor + row_offset;
-        if (menu_should_close_thread(input) != 0) {
+        if (menu_should_close_thread_variant(input) != 0) {
             break;
         }
         if (delta == 0) {
@@ -259,7 +259,7 @@ void option_menu_run_at_list(void) {
         } else {
             frame->clut = 0x7FFC;
         }
-        if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
+        if (layout->hidden_rows != 0 && menu_can_accept_input_variant() != 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);

@@ -16,7 +16,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
     if (!(g_script_event_input & PSX_PAD_CROSS)) {
         return;
     }
-    if (menu_can_accept_input() == 0) {
+    if (menu_can_accept_input_variant() == 0) {
         return;
     }
     count = context->thread_count;

@@ -59,7 +59,7 @@ void menu_select_unit_action_slots_thread(void) {
         g_thread_call_target = menu_build_ability_list;
         thread_call_on_main_stack(i);
         script_pulse_tutorial_wait_value(0xFB);
-        menu_run_scrolling_ability_list_thread();
+        menu_run_scrolling_ability_list_thread_variant();
         slot->selected_index = g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index;
         slot->scroll_offset = g_menu_ability_layout.row_offset;
         if (menu != ACTION_MENU_TYPE_ARITHMETICKS) {

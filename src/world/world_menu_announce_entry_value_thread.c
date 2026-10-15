@@ -47,7 +47,7 @@ void world_menu_announce_entry_value_thread(void) {
     }
     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
     thread_set_parameters(g_thread_current_id, 0x3F, value, 0);
-    world_text_character_handling_thread();
+    text_run_dialog_thread_variant();
     g_world_formation_menu_new_buttons = 0;
     g_menu_input_lock_mode = 0;
     script_load_event_input_state(&g_world_formation_menu_input_state);

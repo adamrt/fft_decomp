@@ -25,5 +25,5 @@ void world_menu_build_submenu_text_id_page(void) {
         g_world_menu_submenu_page_layout.columns.row_count = 7;
         g_world_menu_submenu_page_layout.columns.hidden_rows = count - 7;
     }
-    menu_run_scrolling_ability_list_thread();
+    menu_run_scrolling_ability_list_thread_variant();
 }

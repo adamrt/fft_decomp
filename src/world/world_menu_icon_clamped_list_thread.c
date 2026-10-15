@@ -28,9 +28,9 @@ void world_menu_icon_clamped_list_thread(void) {
     if (cursor == -1) {
         cursor = 0;
     }
-    menu_build_window_sprites(&rect, param, record);
+    menu_build_window_sprites_variant(&rect, param, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
-    buffer = world_menu_build_and_upload_window_frame_image(
+    buffer = menu_build_and_upload_window_frame_image_variant(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     menu_set_text_origin(8, 9);
@@ -44,7 +44,7 @@ void world_menu_icon_clamped_list_thread(void) {
             menu_free_memory(buffer);
         }
         param->selected_index = cursor;
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
             break;
         }
         if (thread_is_previous_running_variant() == 0) {

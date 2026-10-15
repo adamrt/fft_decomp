@@ -19,7 +19,7 @@ void menu_start_entry_thread(void) {
         thread_yield();
     }
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-        if (script_is_tutorial_event_slot() != 0) {
+        if (script_is_tutorial_event_slot_variant() != 0) {
             g_menu_input_mode = MENU_INPUT_TUTORIAL;
             script_set_variable(
                 EVENT_SCRIPT_VAR_CURRENT_EVENT, script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) + 1);

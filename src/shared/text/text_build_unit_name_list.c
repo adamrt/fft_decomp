@@ -14,7 +14,7 @@ void text_build_unit_name_list(void) {
     unit_stats_t* unit;
     s32 length;
 
-    text_init_section_pointers();
+    text_init_section_pointers_variant();
     unit_id = 0;
     output = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     for (; unit_id < BATTLE_UNIT_SLOT_COUNT; unit_id++) {

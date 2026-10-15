@@ -18,13 +18,13 @@ void menu_icon_strip_thread(void) {
     input = 0;
     state = (menu_entry_t*)thread_get_current_parameter_1_variant();
     record = &records[0];
-    menu_build_window_sprites(&rect, state, record);
+    menu_build_window_sprites_variant(&rect, state, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));
     fresh = 1;
     for (i = 0;; i++) {
         if (i % 7 == 0) {
             fresh = 1;
-            buffer = battle_menu_build_and_upload_window_frame_image(
+            buffer = menu_build_and_upload_window_frame_image_variant(
                 state->inner_width, state->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             menu_set_text_origin(8, 9);
             g_menu_text_state.pen.stride = state->inner_width;
@@ -36,7 +36,7 @@ void menu_icon_strip_thread(void) {
             menu_free_memory(buffer);
             fresh = 0;
         }
-        if (menu_should_close_thread(&input) != 0) {
+        if (menu_should_close_thread_variant(&input) != 0) {
             break;
         }
         record = &records[i & 1];

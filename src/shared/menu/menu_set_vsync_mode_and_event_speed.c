@@ -7,5 +7,5 @@ void menu_set_vsync_mode_and_event_speed(s32 speed) {
     if (speed == 0) {
         speed = 1;
     }
-    script_set_event_speed(speed);
+    script_set_event_speed_variant(speed);
 }

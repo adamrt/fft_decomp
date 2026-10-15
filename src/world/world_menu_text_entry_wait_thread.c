@@ -31,7 +31,7 @@ void world_menu_text_entry_wait_thread(void) {
     third = task->speaker_id;
     *g_world_input_frame_controller_input = PSX_PAD_CIRCLE;
     menu_handle_action(param, 0);
-    thread_start(thread_id, world_text_character_handling_thread);
+    thread_start(thread_id, text_run_dialog_thread_variant);
     thread_set_four_parameters(thread_id, first, second, third, third);
     thread_wait_until_inactive(g_thread_current_id - 1);
     thread_wait_until_inactive(thread_id);

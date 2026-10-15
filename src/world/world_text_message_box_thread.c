@@ -124,7 +124,7 @@ void world_text_message_box_thread(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
     } else {
-        world_menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
+        menu_build_and_upload_window_frame_image_variant(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
     }
     if (g_world_formation_screen_active != 0) {
         x -= 0x100;
@@ -192,7 +192,7 @@ void world_text_message_box_thread(void) {
             if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                 menu_build_and_upload_window_image(rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
             } else {
-                world_menu_build_and_upload_window_frame_image(
+                menu_build_and_upload_window_frame_image_variant(
                     rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
             }
             delay = 1;
@@ -311,7 +311,7 @@ void world_text_message_box_thread(void) {
                     menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
                 } else {
-                    world_menu_build_and_upload_window_frame_image(
+                    menu_build_and_upload_window_frame_image_variant(
                         rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
                 }
                 cursor_y = y - 0x10;

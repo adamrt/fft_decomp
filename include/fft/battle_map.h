@@ -848,7 +848,7 @@ void* map_start_file_load(
     const char* unused_directory_path, const gns_load_info_t* load_info, void* destination, s32 unused_resource_type);
 map_state_record_t* map_load_saved_state_record(map_state_record_t* record);
 s32 map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running);
-s32 map_load_mesh_variant(s32 palette_mode);
+s32 map_load_alternate_mesh(s32 palette_mode);
 
 /* terrain and selection */
 extern u8 g_map_max_x;
@@ -991,7 +991,6 @@ void map_transition_darkness_color(s32 frame_duration, const CVECTOR* color);
 void map_init_darkness(void);
 void* map_light_state_command(map_light_command_e command, void* data);
 void map_set_light_matrices(MATRIX* first, MATRIX* second);
-void map_reset_script_light_transform(void);
 
 /* mesh animation */
 extern map_mesh_part_t g_map_mesh_parts[9];

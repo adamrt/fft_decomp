@@ -46,7 +46,7 @@ void world_menu_labeled_number_entry_thread(void) {
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
-    menu_build_window_sprites(&rect, param, &record);
+    menu_build_window_sprites_variant(&rect, param, &record);
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&cursor_quads[i]);
         SetSemiTrans(&cursor_quads[i], 0);
@@ -74,7 +74,7 @@ void world_menu_labeled_number_entry_thread(void) {
         shadow_quads[i].v3 = 0x10;
     }
     digit = 0;
-    buffer = world_menu_build_and_upload_window_frame_image(
+    buffer = menu_build_and_upload_window_frame_image_variant(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = param->inner_width;
     text_measure_pixels(&label_size[0], &label_size[1], text_find_entry(param->text_id));
@@ -94,7 +94,7 @@ void world_menu_labeled_number_entry_thread(void) {
             menu_free_memory(buffer);
             redraw = 0;
         }
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
             break;
         }
         input = *g_world_menu_list_controller_input;
@@ -136,7 +136,7 @@ void world_menu_labeled_number_entry_thread(void) {
             }
         }
         if (redraw == 1) {
-            buffer = world_menu_build_and_upload_window_frame_image(
+            buffer = menu_build_and_upload_window_frame_image_variant(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
             g_menu_text_state.pen.stride = param->inner_width;
             text_measure(&label_size[0], &label_size[1], text_find_entry(param->text_id));

@@ -21,7 +21,7 @@ void open_menu_start_music_test_controller(void) {
         g_open_music_test_list_entry_flags[i] = 0;
     }
 
-    world_script_set_event_speed(1);
+    script_set_event_speed_variant(1);
     g_open_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     /* The same 4 is stored twice, as the formation OT index and as OPEN_MUSIC_TEST_STEP_OPEN; the local
      * keeps it in a saved register across the fade-out call instead of being rematerialized. */

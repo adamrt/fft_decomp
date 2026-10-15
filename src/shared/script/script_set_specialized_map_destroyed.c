@@ -2,7 +2,7 @@
 #include "fft/script.h"
 
 /* Advance the map-destruction wait state from 1 (armed when a map append
- * finishes) to 2. script_process_pending_requests then releases the held
+ * finishes) to 2. script_process_pending_requests_variant then releases the held
  * GNS data and polls the map load, returning the state to 0 when the load ends.
  * Any other state is left alone. */
 void script_set_specialized_map_destroyed(void) {

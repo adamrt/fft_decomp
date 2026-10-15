@@ -182,8 +182,6 @@ extern VECTOR g_camera_script_vector;
 void camera_execute_angle_command(s32 command, s32 target, s32 duration, const SVECTOR* angles);
 void camera_execute_position_command(s32 command, s32 target, s32 duration, const VECTOR* offset);
 void camera_execute_zoom_command(s32 command, s32 unused, s32 duration, const VECTOR* zoom);
-void camera_load_state_from_script_variables(void);
-void camera_store_state_to_script_variables(void);
 
 /* effect tracks */
 void camera_advance_effect_tracks(s16 frame);

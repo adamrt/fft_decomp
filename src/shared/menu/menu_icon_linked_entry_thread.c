@@ -25,7 +25,7 @@ void menu_icon_linked_entry_thread(void) {
 
     param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     menu_size_entry_to_text(param, &width, &height, &pad, 0);
-    menu_build_window_sprites(&rect, param, &records[0]);
+    menu_build_window_sprites_variant(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
     parent = param->row_actions[0];
     if (parent >= 0) {
@@ -36,7 +36,7 @@ void menu_icon_linked_entry_thread(void) {
         thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[parent].thread_entry);
         thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[parent], 0, 0);
     }
-    buffer = battle_menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
+    buffer = menu_build_and_upload_window_frame_image_variant(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
     menu_set_text_origin(8, 9);
     menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
@@ -46,7 +46,7 @@ void menu_icon_linked_entry_thread(void) {
         if (i == 0) {
             menu_free_memory(buffer);
         }
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
             break;
         }
         if (parent >= 0) {

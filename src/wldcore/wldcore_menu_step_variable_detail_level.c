@@ -63,7 +63,7 @@ void wldcore_menu_step_variable_detail_level(wldcore_menu_variable_detail_level_
         value = script_get_variable(EVENT_SCRIPT_VAR_DIALOG_PORTRAIT);
         render_index = level->render_index;
         if (value != 0xFF) {
-            world_gfx_set_portrait_poly_texture(&portrait, value);
+            menu_build_unit_portrait_poly_variant(&portrait, value);
             page_x = 0x280;
             g_wldcore_window_render_records[render_index].clut.x = ((value / 40) << 6) + ((value % 4) * 0x10 + page_x);
             g_wldcore_window_render_records[render_index].clut.y = ((value % 40) / 4) + 0x1F0;

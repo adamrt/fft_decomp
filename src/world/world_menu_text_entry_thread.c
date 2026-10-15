@@ -25,13 +25,13 @@ void world_menu_text_entry_thread(void) {
     binding = entry->context;
     text_thread = binding->text_thread_id;
     speaker_id = binding->speaker_id;
-    thread_start(text_thread, world_text_character_handling_thread);
+    thread_start(text_thread, text_run_dialog_thread_variant);
     thread_set_parameters(text_thread, second, text_id, speaker_id);
     thread_wait_until_inactive(text_thread);
     *g_world_menu_list_controller_input = PSX_PAD_CIRCLE;
     while (1) {
         menu_handle_action(entry, 0);
-        if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
+        if (menu_should_close_thread_variant(g_world_menu_list_controller_input) != 0) {
             break;
         }
         if ((thread - 1)->function_parameter_3 != 0) {

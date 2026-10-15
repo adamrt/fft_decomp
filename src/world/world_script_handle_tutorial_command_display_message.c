@@ -11,7 +11,7 @@
  * and the target adds the bias to the low byte first. */
 /* Address-of operand fields preserves the -O0 byte-address steps. */
 void world_script_handle_tutorial_command_display_message(void) {
-    thread_start(WORLD_THREAD_SLOT_TUTORIAL_TEXT, world_text_character_handling_thread);
+    thread_start(WORLD_THREAD_SLOT_TUTORIAL_TEXT, text_run_dialog_thread_variant);
     thread_set_parameters(WORLD_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
         (s32)((u8*)(*(&((world_tutorial_message_instruction_t*)g_world_script_tutorial_command_ptr)->text_id_le[1])
                   * 0x100)

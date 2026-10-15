@@ -11,7 +11,7 @@ void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 un
     u16 x;
     s32 mode;
 
-    world_menu_init_sprite(sprite);
+    menu_init_sprt_variant(sprite);
     sprite->clut = 0x7D7C;
     mode = entry->header_id;
     if (mode == 1) {
@@ -38,7 +38,7 @@ void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 un
         }
     }
     sprite++;
-    world_menu_init_sprite(sprite);
+    menu_init_sprt_variant(sprite);
     sprite->w = 0x10;
     sprite->h = 0x10;
     sprite->clut = 0x7D7C;

@@ -62,6 +62,6 @@ void world_gfx_set_party_unit_portrait_poly_texture(s32 roster_slot, POLY_FT4* p
         sprite |= job->job_portrait_palette << 10;
     }
     if ((sprite & CLUT_SUPPRESS_MASK) == 0) {
-        world_gfx_set_portrait_poly_texture(poly, sprite);
+        menu_build_unit_portrait_poly_variant(poly, sprite);
     }
 }

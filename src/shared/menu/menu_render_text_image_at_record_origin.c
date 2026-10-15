@@ -15,7 +15,7 @@ void menu_render_text_image_at_record_origin(text_dialog_record_t* record) {
             record->buffer = menu_build_window_image(
                 record->width, record->height, &record->rect, record->dialog_type, record->tail_offset, 1);
         } else {
-            record->buffer = battle_menu_build_and_upload_window_frame_image(
+            record->buffer = menu_build_and_upload_window_frame_image_variant(
                 record->width, record->height, &record->rect, MENU_WINDOW_FRAME_BUILD);
         }
         g_menu_text_state.pen.rect.x = record->origin_x;

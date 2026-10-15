@@ -13,7 +13,7 @@ void menu_input_thread(void) {
     g_sound_suppressed = 1;
     while (1) {
         thread_yield();
-        if (menu_should_close_thread(&g_script_event_input) != 0) {
+        if (menu_should_close_thread_variant(&g_script_event_input) != 0) {
             break;
         }
         menu_handle_action(menu, 0);

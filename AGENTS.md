@@ -52,8 +52,12 @@ not the module umbrella.
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
 - Use established module/subsystem prefixes and concise, behavior-based names.
-  Prefer `subsystem_verb_noun_variant` where natural. Preserve game terminology
-  and evidence-based unknown names rather than guessing.
+  A shared thing takes one subsystem name without a module prefix; a prefix
+  stays only on things one module has. The `_variant` suffix is reserved for a
+  function whose body each module links separately under the shared name
+  (check-config enforces it both ways); name other alternates by what
+  distinguishes them. Preserve game terminology and evidence-based unknown
+  names rather than guessing.
 - Use snake_case, `_t` for struct typedefs, `_e` for enum typedefs, uppercase
   enumerators, and `_init_`. Use decimal for counts/ordinary enum values and
   hex for flags and encoded values. Header guards have no `FFT_` prefix.

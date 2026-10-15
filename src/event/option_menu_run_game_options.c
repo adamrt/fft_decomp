@@ -71,7 +71,7 @@ void option_menu_run_game_options(void) {
     image_parameters.y_screen_offset = 0xA;
     image_parameters.width = entry->window.w - 0x20;
     image_parameters.height = entry->window.h - 0xE;
-    menu_build_window_sprites(&image_rect, entry, &page->icons);
+    menu_build_window_sprites_variant(&image_rect, entry, &page->icons);
     buffer = menu_alloc_memory(0x1E0);
     g_option_menu_pages[0].icons.base.sprites[3].y0 -= 2;
     clear.x = entry->vram_origin.x;
@@ -89,7 +89,7 @@ void option_menu_run_game_options(void) {
         &texture_window);
     arrow = page->arrows;
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
-        battle_menu_init_semitransparent_sprt(&arrow[i]);
+        menu_init_sprt_variant(&arrow[i]);
         page->arrows[i].clut = 0x7D7C;
         arrow[i].w = 8;
         arrow[i].h = 0x10;
@@ -102,13 +102,13 @@ void option_menu_run_game_options(void) {
     }
     base = g_option_menu_pages;
     base->arrows[0].y0 += 4;
-    battle_menu_init_semitransparent_sprt(&base->thumb);
+    menu_init_sprt_variant(&base->thumb);
     base->thumb.u0 = 0x10;
     base->thumb.v0 = 0x10;
     base->thumb.w = 8;
     base->thumb.h = 8;
     base->thumb.clut = 0x7D7C;
-    battle_menu_init_semitransparent_sprt(&base->frame);
+    menu_init_sprt_variant(&base->frame);
     gfx_init_image_loading(&base->frame, &entry->vram_origin, &entry->window, &image_parameters);
     menu_init_sprite_array(base->arrow_marks, 2, 0x7C3C);
     base->arrow_marks[0].w = 6;
@@ -136,9 +136,9 @@ void option_menu_run_game_options(void) {
     thread_wait_frames(1);
     menu_init_scaled_draw_area_packets(&page->title_area);
     menu_init_scaled_draw_area_packets(&page->value_area);
-    battle_menu_init_semitransparent_sprt(&base->title);
+    menu_init_sprt_variant(&base->title);
     text_configure_sprite_vram(&g_option_menu_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
-    image = battle_menu_build_and_upload_window_frame_image(
+    image = menu_build_and_upload_window_frame_image_variant(
         entry->inner_width, 0x2C, &g_option_menu_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
     base->title.x0 = entry->window.x;
     base->title.y0 = entry->window.y + entry->window.h + 1;
@@ -158,7 +158,7 @@ void option_menu_run_game_options(void) {
     g_option_menu_entry_panel_rect.y -= 2;
     thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_menu_entry_panel_rect, 0, 0);
     thread_yield();
-    battle_menu_init_semitransparent_sprt(&base->value);
+    menu_init_sprt_variant(&base->value);
     text_configure_sprite_vram(&g_option_menu_value_image_rect, 0x3C, 0x10, &base->value, 0);
     base->value.x0 = entry->window.x + 0x5C;
     base->value.y0 = entry->window.y + entry->window.h + 0xF;
@@ -170,7 +170,7 @@ void option_menu_run_game_options(void) {
     mem_copy_bytes_nonempty(&base[1], base, sizeof(options_menu_page_t));
     for (;;) {
         page = &g_option_menu_pages[i & 1];
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (delta == 0 && menu_can_accept_input_variant() != 0) {
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
                     cursor--;
@@ -224,7 +224,7 @@ void option_menu_run_game_options(void) {
             }
             if (*input0 & PSX_PAD_CIRCLE) {
                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
-                if (menu_can_accept_input() != 0) {
+                if (menu_can_accept_input_variant() != 0) {
                     *input0 = 0;
                     index = cursor + row_offset + delta;
                     thread_start(g_thread_current_id - 1, option_menu_run_choice);
@@ -245,10 +245,10 @@ void option_menu_run_game_options(void) {
             LoadImage(&g_option_menu_value_image_rect, (u32*)buffer);
         }
         thread_yield();
-        if (menu_should_close_thread(input0) != 0) {
+        if (menu_should_close_thread_variant(input0) != 0) {
             break;
         }
-        if (delta == 0 && menu_can_accept_input() != 0) {
+        if (delta == 0 && menu_can_accept_input_variant() != 0) {
             option_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
             ClearImage(&clear, 0, 0, 0);
         }
@@ -286,7 +286,7 @@ void option_menu_run_game_options(void) {
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[1]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[2]);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.draw_mode);
-        if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
+        if (layout->hidden_rows != 0 && menu_can_accept_input_variant() != 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);

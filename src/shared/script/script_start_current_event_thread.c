@@ -16,8 +16,8 @@ void script_start_current_event_thread(void) {
     unit_reset_animation_states();
     g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_NORMAL;
     if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
-        camera_store_state_to_script_variables();
-        map_reset_script_light_transform();
+        camera_store_state_to_script_variables_variant();
+        map_reset_script_light_transform_variant();
         g_camera_position_locked = 0;
         g_camera_speed_curve = 0;
     }

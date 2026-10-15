@@ -10,7 +10,7 @@ void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel) {
     s32 max;
     s32 cur;
 
-    if (menu_can_accept_input() != 0) {
+    if (menu_can_accept_input_variant() != 0) {
         if (g_script_event_input & PSX_PAD_UP) {
             selection = *sel;
             if (selection == 0) {

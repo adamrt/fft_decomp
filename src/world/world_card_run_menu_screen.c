@@ -109,7 +109,7 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
         }
         world_formation_set_ordering_table_pointer(g_menu_gfx_context->otag + 1);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 60;
-        menu_draw_active_window_frames();
+        menu_draw_active_window_frames_variant();
         buttons = PadRead(0) & PSX_PAD_DPAD_MASK;
         buttons |= g_world_input_newly_pressed & 0xfff;
         if (thread_is_running(THREAD_SCREEN_SLOT_TEXT) == 0 && thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) == 0

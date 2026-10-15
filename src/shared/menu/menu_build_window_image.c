@@ -84,7 +84,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
         text_blit_glyph(
             g_menu_glyph_sheet->pixels, (u8*)buf, &g_menu_window_sprite_glyph, &g_menu_window_sprite_position);
         if (i != 0) {
-            gfx_mirror_4bpp_rect((u8*)buf, &g_menu_window_sprite_position);
+            gfx_mirror_4bpp_rect_variant((u8*)buf, &g_menu_window_sprite_position);
         }
     }
     if (keep != 0) {
