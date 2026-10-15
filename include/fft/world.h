@@ -708,8 +708,6 @@ enum {
 /* The one mode world_job_build_unit_list tests; its callers also pass 0 and 1. */
 enum { WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS = 2 };
 
-extern s32 g_world_job_cached_level;
-extern s32 g_world_job_cached_level_jp_requirement;
 extern s32 g_world_job_cached_total_jp;
 extern s16 g_world_job_wheel_job_count;
 extern s16 g_world_job_wheel_name_text;
@@ -783,7 +781,6 @@ s32 world_job_get_cached_level_jp_requirement(s32 unused_row);
 s32 world_job_get_cached_skillset_empty_flag(s32 unused_row);
 s32 world_job_get_cached_total_jp(s32 unused_row);
 s32 world_job_get_selected_unit_job_points_entry(s32 unused_row);
-s32 world_job_calculate_next_level_jp_requirement(s32 index);
 s32 world_job_is_locked_for_all_units(s16 job_id);
 
 /* panel */
@@ -1959,8 +1956,6 @@ s32 card_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
 s32 world_card_write_buffer_to_file(const char* filename, const card_save_buffer_t* source, u32 size, s32 create_file);
 
 /* item */
-/* Texture origins of the item-type icons. */
-extern uv8_t g_world_item_type_icon_origins[];
 
 extern oriented_quad_t g_world_item_category_tab_cursor_sprite;
 extern struct menu_status_panel_slot_storage g_world_item_preview_stat_detail;
@@ -2027,7 +2022,6 @@ s32 world_item_get_equip_candidate_marker(s32 unit_index);
 s32 world_item_get_half_price(s16 item_id);
 s32 world_item_get_price(s16 item_id);
 s32 world_item_get_selected_half_price(s32 unused_row);
-void world_item_get_type_icon_rect(s32 type, menu_icon_source_t* out);
 
 s8 world_item_run_action_menu(void);
 s32 world_item_run_category_menu(void);

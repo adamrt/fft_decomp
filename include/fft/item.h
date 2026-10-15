@@ -32,4 +32,8 @@ extern u8* g_item_category_lists[];
 extern s8* g_item_type_order_lists[];
 extern menu_icon_source_t g_item_graphic_descriptor;
 
+/* unified */
+extern uv8_t g_item_type_icon_origins[];
+void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
+
 #endif

@@ -682,7 +682,7 @@ functions:
   - {addr: 0x8011ee88, size: 128, name: world_job_calculate_current_level, hash: 6f83eb9a67a84b05}
   - {addr: 0x8011ef08, size: 88, name: world_menu_get_learn_job_jp, hash: 70ac82eff2c3e789}
   - {addr: 0x8011ef60, size: 96, name: world_job_calculate_current_total_jp, hash: f02d25a82a1e5bf3}
-  - {addr: 0x8011efc0, size: 128, name: world_job_calculate_next_level_jp_requirement, hash: 934847bcaf8b232a}
+  - {addr: 0x8011efc0, size: 128, name: menu_job_calculate_next_level_jp_requirement, hash: 934847bcaf8b232a, source: src/shared/menu/menu_job_calculate_next_level_jp_requirement.c}
   - {addr: 0x8011f040, size: 80, name: job_calculate_current_mastered, hash: 13d6053a0d977809, source: src/shared/job/job_calculate_current_mastered.c}
   - {addr: 0x8011f090, size: 580, name: world_menu_run_learn_job_list, hash: c3934fa3ca089972}
   - {addr: 0x8011f2d4, size: 72, name: world_menu_build_selected_ability_prompt, hash: 9fb82a8479d230b5}
@@ -768,7 +768,7 @@ functions:
   - {addr: 0x80124c54, size: 704, name: world_item_build_category_list, hash: 4b7869eaf2c81375}
   - {addr: 0x80124f14, size: 188, name: world_item_select_equipment_slot, hash: 6b569c10e8467857}
   - {addr: 0x80124fd0, size: 36, name: item_get_type, hash: 0d110fc92f07954c, source: src/shared/item/item_get_type.c}
-  - {addr: 0x80124ff4, size: 56, name: world_item_get_type_icon_rect, hash: 9ef0f46a205c2a75}
+  - {addr: 0x80124ff4, size: 56, name: item_get_type_icon_rect, hash: 9ef0f46a205c2a75, source: src/shared/item/item_get_type_icon_rect.c}
   - {addr: 0x8012502c, size: 840, name: world_shop_build_item_list, hash: 3c7eed74a2651422}
   - {addr: 0x80125374, size: 96, name: item_get_menu_category, hash: 391fa191bda064e6, source: src/shared/item/item_get_menu_category.c}
   - {addr: 0x801253d4, size: 364, name: world_formation_set_unit_ability_slot, hash: fc8aca691a77add1}
@@ -1615,7 +1615,7 @@ data:
   - {addr: 0x8018d7d8, name: g_item_category_lists}
   - {addr: 0x8018d7ec, name: g_world_best_fit_slot_categories}
   - {addr: 0x8018d7f4, name: g_world_fitting_room_best_fit_slot_categories}
-  - {addr: 0x8018d7fc, name: g_world_item_type_icon_origins}
+  - {addr: 0x8018d7fc, name: g_item_type_icon_origins}
   - {addr: 0x8018d844, name: g_world_shop_item_availability}
   - {addr: 0x8018da44, name: g_world_formation_graphic_entries}
   - {addr: 0x8018de34, name: g_world_formation_generic_human_graphic_index_table}
@@ -2048,9 +2048,9 @@ data:
   - {addr: 0x801c8564, name: g_world_learn_selected_job_index}
   - {addr: 0x801c8568, name: g_menu_job_ids}
   - {addr: 0x801c8594, name: g_menu_ability_entries}
-  - {addr: 0x801c85c8, name: g_world_job_cached_level}
+  - {addr: 0x801c85c8, name: g_menu_job_current_level}
   - {addr: 0x801c85cc, name: g_world_job_cached_total_jp}
-  - {addr: 0x801c85d0, name: g_world_job_cached_level_jp_requirement}
+  - {addr: 0x801c85d0, name: g_menu_job_next_level_jp_requirement}
   - {addr: 0x801c85d4, name: g_job_current_mastered}
   - {addr: 0x801c85d8, name: g_menu_ability_type}
   - {addr: 0x801c85dc, name: g_menu_selected_ability_secondary_data}
@@ -2353,7 +2353,6 @@ overrides:
   - {function: card_io_create_new_with_retries, name: card_io_wait_operation_result, addr: 0x80132b50}
   - {function: gfx_build_portrait_transition_primitives, name: attack_gfx_build_portrait_poly_ft4, addr: 0x8010cab0}
   - {function: gfx_enqueue_line_f2, name: g_equip_gfx_line_f2_count, addr: 0x801cd198}
-  - {function: menu_build_item_type_icon_source, name: equip_item_get_type_icon_rect, addr: 0x80124ff4}
   - {function: menu_build_item_type_icon_source, name: g_menu_palette_clut, addr: 0x801cd1bc}
   - {function: menu_build_scaled_draw_area_packets, name: g_menu_draw_area_scale_percent, addr: 0x8018ae74}
   - {function: menu_init_at_list, name: g_option_dead_unit_menu_flags, addr: 0x801ad544}

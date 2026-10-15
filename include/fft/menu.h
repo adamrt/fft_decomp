@@ -71,9 +71,9 @@ s32 menu_ability_get_jp_cost_display_value(s32 index);
 s32 menu_ability_is_learned(s32 index);
 
 /* job level callbacks */
-extern s16 g_menu_job_ids[];
 extern s32 g_menu_job_current_level;
 extern u32 g_menu_job_next_level_jp_requirement;
+extern s16 g_menu_job_ids[];
 
 s32 menu_job_calculate_next_level_jp_requirement(s32 index);
 s32 menu_job_get_current_level(s32 unused_row);

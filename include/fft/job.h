@@ -14,4 +14,6 @@ s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category,
 /* state */
 extern s32 g_job_current_mastered;
 
+/* unified */
+
 #endif

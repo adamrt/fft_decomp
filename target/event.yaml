@@ -1401,7 +1401,7 @@ functions:
   - {addr: 0x801c83d0, size: 508, name: equip_unit_validate_slot_item, hash: c59e53327bd83cef}
   - {addr: 0x801c85cc, size: 660, name: equip_item_build_filtered_list, hash: 5e8f73b6dff92b4a}
   - {addr: 0x801c8860, size: 36, name: item_get_type, hash: 0d110fc92f07954c, source: src/shared/item/item_get_type.c}
-  - {addr: 0x801c8884, size: 56, name: equip_item_get_type_icon_rect, hash: 1b6bfb5cb4770f34}
+  - {addr: 0x801c8884, size: 56, name: item_get_type_icon_rect, hash: 1b6bfb5cb4770f34, source: src/shared/item/item_get_type_icon_rect.c}
   - {addr: 0x801c88bc, size: 96, name: item_get_menu_category, hash: 234911d51d5b0f1c, source: src/shared/item/item_get_menu_category.c}
   - {addr: 0x801c891c, size: 48, name: equip_unit_copy_data_to_compare_slot, hash: 7721b3f4a2b21f57}
   - {addr: 0x801c894c, size: 36, name: equip_unit_has_two_swords, hash: 1dd41e4a0efc124e}
@@ -1603,7 +1603,7 @@ data:
   - {addr: 0x801cf9ec, name: g_menu_status_display_image_rects}
   - {addr: 0x801cfb44, name: g_item_type_order_lists}
   - {addr: 0x801cfb5c, name: g_item_category_lists}
-  - {addr: 0x801cfb70, name: g_equip_item_type_icon_coords}
+  - {addr: 0x801cfb70, name: g_item_type_icon_origins}
   - {addr: 0x801cfbb8, name: g_equip_text_message_thread_active}
   - {addr: 0x801cfbd4, name: g_menu_managed_thread_state}
   - {addr: 0x801cfbd8, name: g_equip_help_text_table}

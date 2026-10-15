@@ -130,7 +130,6 @@ extern menu_entry_t g_equip_item_action_menu;
 extern u8 g_equip_item_inventory_totals[];
 extern u8 g_equip_item_list_has_multiple_entries;
 extern struct menu_status_panel_slot_storage g_equip_item_preview_stat_detail;
-extern u8 g_equip_item_type_icon_coords[][2];
 extern s16 g_equip_item_type_order[];
 extern menu_entry_t* g_equip_item_type_order_active_menu;
 extern u8 g_equip_item_type_order_names[];
@@ -141,7 +140,6 @@ extern s8 g_equip_remove_item_previewed_slot;
 
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 void equip_item_build_inventory_totals(void);
-void equip_item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
 void equip_item_sort_list_by_criteria(s32 mode, s16* list);
 s32 equip_item_run_type_order_mode(void);
 

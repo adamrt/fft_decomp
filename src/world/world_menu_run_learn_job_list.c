@@ -17,7 +17,7 @@ s32 world_menu_run_learn_job_list(void) {
         world_job_build_unit_list(g_unit_selected_index, g_menu_job_ids, 0);
         g_world_menu_script_callbacks[0].value = world_job_calculate_current_level;
         g_world_menu_script_callbacks[2].value = world_menu_get_learn_job_jp;
-        g_world_menu_script_callbacks[5].value = world_job_calculate_next_level_jp_requirement;
+        g_world_menu_script_callbacks[5].value = menu_job_calculate_next_level_jp_requirement;
         g_world_menu_script_callbacks[6].value = world_job_calculate_current_total_jp;
         g_world_menu_script_callbacks[13].value = job_calculate_current_mastered;
         world_menu_get_selection_record(9, &x, &y, g_menu_job_ids);
@@ -39,7 +39,7 @@ s32 world_menu_run_learn_job_list(void) {
             world_job_calculate_current_level(g_world_menu_cursor_position);
             world_menu_get_learn_job_jp(g_world_menu_cursor_position);
             world_job_calculate_current_total_jp(g_world_menu_cursor_position);
-            world_job_calculate_next_level_jp_requirement(g_world_menu_cursor_position);
+            menu_job_calculate_next_level_jp_requirement(g_world_menu_cursor_position);
             menu_set_selection_record(9, g_world_menu_cursor_position, g_world_menu_scroll_offset, g_menu_job_ids);
             g_world_learn_job_list_initialized = 0;
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
