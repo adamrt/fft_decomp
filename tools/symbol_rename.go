@@ -840,11 +840,17 @@ var includeDirectiveLine = regexp.MustCompile(`^[ \t]*#[ \t]*include\b`)
 // a comment or a literal, where a symbol that is also an English word (load,
 // build, poll, main) would rewrite the prose.
 func replaceIdentifierOutsideIncludes(pattern *regexp.Regexp, source, replacement []byte) []byte {
+	return rewriteCodeOutsideIncludes(source, func(code []byte) []byte { return pattern.ReplaceAll(code, replacement) })
+}
+
+// rewriteCodeOutsideIncludes applies rewrite to every run of code text,
+// passing include lines, comments and literals through unchanged.
+func rewriteCodeOutsideIncludes(source []byte, rewrite func([]byte) []byte) []byte {
 	var output []byte
 	code := make([]byte, 0, len(source))
 	flush := func() {
 		if len(code) > 0 {
-			output = append(output, pattern.ReplaceAll(code, replacement)...)
+			output = append(output, rewrite(code)...)
 			code = code[:0]
 		}
 	}

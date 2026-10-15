@@ -123,6 +123,14 @@ unit-check: image ## Compile a merged translation-unit candidate and compare eac
 	@test -n "$(SPEC)" || { echo "SPEC is required: make unit-check SPEC=build/units/<unit>.yaml [MODULE=<id>] [ARGS=--merge]"; exit 2; }
 	@$(TOOLS) unit-check --spec="$(SPEC)" $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
+.PHONY: trial
+trial: image ## Compile a candidate source at an entry and report the match or first difference (MODULE=x ENTRY=f SOURCE=path ARGS="--subst OLD=NEW --define VARIANT_X=N", or BATCH=build/x.yaml, or TWINS=t0001)
+	@$(TOOLS) trial $(if $(strip $(BATCH)),--batch="$(BATCH)") $(if $(strip $(TWINS)),--twins="$(TWINS)") $(if $(strip $(MODULE)),--module="$(MODULE)") $(if $(strip $(ENTRY)),--entry="$(ENTRY)") $(if $(strip $(SOURCE)),--source="$(SOURCE)") $(ARGS)
+
+.PHONY: twins
+twins: image ## Group byte-equivalent functions across modules under consistent renames into build/analysis/twins (MODULE=x, ARGS="...")
+	@$(TOOLS) twins $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
+
 .PHONY: symbols
 symbols: image ## Rename a symbol: ACTION=rename-function|rename-global ARGS="--old A --new B"
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }
