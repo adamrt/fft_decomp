@@ -1182,18 +1182,18 @@ extern u16 g_field_object_wait_status; /* 0x80166070 */
 
 /* shared with the per-program event interpreter and dialog thread */
 void map_light_thread(void);
-void script_color_screen_thread(void);
-void script_map_darkness(void);
 void script_add_unit_stub(void);
 void script_blue_remove_all_enemy_units(void);
 void script_blue_remove_unit(s32 unit_id);
 void script_change_stats(const event_change_stats_parameters_t* parameters);
+void script_color_screen_thread(void);
 void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters);
 void script_face_tile(const event_face_tile_parameters_t* parameters);
+void script_map_darkness(void);
 void script_march_units(const event_march_parameters_t* parameters);
 void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters);
 void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable);
 void script_teleportin_event_instruction(s32 unit_id, s32 unused);
-void script_teleportout_event_instruction(s32 unit_id, s32 remove_unit);
+void script_teleportout_event_instruction(s32 unit_id, s32 remove);
 
 #endif

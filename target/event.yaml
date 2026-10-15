@@ -2218,13 +2218,12 @@ links: [battle]
 defines: {VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 256, VARIANT_MENU_CHOICE_VRAM_X: 448, VARIANT_MENU_CHOICE_WINDOW_CENTER_Y: 160, VARIANT_MENU_CHOICE_WINDOW_RIGHT_X: 368}
 
 units:
-  - {name: at_list_runner, source: src/event/menu/at_list_runner.c}
   - {name: at_list_threads, source: src/event/menu/at_list_threads.c}
 
 functions:
   - {addr: 0x801bf000, size: 480, name: menu_draw_text_columns, hash: dff47199f4742289, source: src/event/menu/menu_draw_text_columns.c}
-  - {addr: 0x801bf1e0, size: 636, name: menu_redraw_text_page_on_scroll, hash: 61145072288429ea, unit: at_list_runner}
-  - {addr: 0x801bf45c, size: 3172, name: menu_run_at_list_variant, hash: f7232e2ba35ab622, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: at_list_runner}
+  - {addr: 0x801bf1e0, size: 636, name: menu_redraw_text_page_on_scroll, hash: 61145072288429ea, source: src/event/menu/menu_redraw_text_page_on_scroll.c}
+  - {addr: 0x801bf45c, size: 3172, name: menu_run_at_list_variant, hash: f7232e2ba35ab622, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801c00c0, size: 40, name: text_set_blit_source_rect, hash: f4a7a9d08a0373d4, source: src/event/menu/text_set_blit_source_rect.c}
   - {addr: 0x801c00e8, size: 24, name: text_set_blit_destination, hash: 957437a4742bb43c, source: src/event/menu/text_set_blit_destination.c}
   - {addr: 0x801c0100, size: 464, name: menu_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996, source: src/event/menu/menu_build_scaled_draw_area_packets.c}

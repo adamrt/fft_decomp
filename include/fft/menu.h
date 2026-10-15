@@ -2754,6 +2754,9 @@ extern s16 g_remove_item_equipment[5];
 /* shared with the per-program event interpreter and dialog thread */
 u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor);
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to);
+void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
+void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
+void menu_preview_ability_turn_at_list(void);
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table);
 void text_print_fnt_value_and_next(s32 value);
 

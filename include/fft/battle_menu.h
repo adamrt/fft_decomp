@@ -84,4 +84,8 @@ extern image_load_parameters_t g_battle_menu_attack_caster_quad_image_params[2][
 
 /* threads */
 
+/* shared with the per-program event interpreter and dialog thread */
+u8* battle_menu_redraw_text_page_on_scroll_in_rect(
+    menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
+
 #endif

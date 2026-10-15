@@ -1912,4 +1912,8 @@ extern u8 D_801CD0EC;
 extern u8 D_801CD0F4;
 
 extern s16 g_world_formation_record_count; /* 0x801c8634 */
+                                           /* shared with the per-program event interpreter and dialog thread */
+u8* world_menu_redraw_text_page_on_scroll_in_rect(
+    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);
+
 #endif
