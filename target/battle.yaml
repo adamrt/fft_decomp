@@ -140,8 +140,8 @@ units:
   - {name: target_sort_list_unit, source: src/battle/target_sort_list_unit.c}
   - {name: text_is_spell_quote_exception_skillset_unit, source: src/shared/text/text_is_spell_quote_exception_skillset_unit.c}
   - {name: text_relocate_pointer_table_unit, source: src/shared/text/text_relocate_pointer_table_unit.c}
+  - {name: thread, source: src/shared/thread/thread.c}
   - {name: thread_wait_for_unit_view_panels_unit, source: src/shared/thread/thread_wait_for_unit_view_panels_unit.c}
-  - {name: thread_wait_frames_unit, source: src/shared/thread/thread_wait_frames_unit.c}
   - {name: unit_check_facing_relative_to_camera_unit, source: src/shared/unit/unit_check_facing_relative_to_camera_unit.c}
   - {name: unit_has_any_current_status_unit, source: src/shared/menu/unit_has_any_current_status_unit.c}
   - {name: unit_increase_blue_team_brave_by_10_unit, source: src/shared/script/unit_increase_blue_team_brave_by_10_unit.c}
@@ -1209,16 +1209,16 @@ functions:
   - {addr: 0x8014c18c, size: 796, name: menu_build_window_image, hash: c553dd4a8afbd218, source: src/shared/menu/menu_build_window_image.c}
   - {addr: 0x8014c4a8, size: 688, name: menu_build_and_upload_window_frame_image_variant, hash: 99515c0e0a1f017c}
   - {addr: 0x8014c758, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/shared/menu/menu_build_window_image_row.c}
-  - {addr: 0x8014c858, size: 72, name: thread_wait_frames, hash: e33123533d666f71, unit: thread_wait_frames_unit}
-  - {addr: 0x8014c8a0, size: 132, name: thread_start, hash: 72fa1891ea2b8656, unit: thread_wait_frames_unit}
-  - {addr: 0x8014c924, size: 28, name: thread_resume, hash: 484df3941212a0b6, unit: thread_wait_frames_unit}
-  - {addr: 0x8014c940, size: 24, name: thread_suspend, hash: 6647a9e0cd2b86e9, unit: thread_wait_frames_unit}
-  - {addr: 0x8014c958, size: 60, name: thread_exit_current, hash: 23aa4a3549fe6cb7, unit: thread_wait_frames_unit}
-  - {addr: 0x8014c994, size: 60, name: thread_reset_scheduler, hash: fa59753fb674e92c, unit: thread_wait_frames_unit}
-  - {addr: 0x8014c9d0, size: 76, name: thread_wait_until_inactive, hash: 29370957c26343c7, unit: thread_wait_frames_unit}
-  - {addr: 0x8014ca1c, size: 28, name: thread_is_running, hash: d10e3403d7fec970, unit: thread_wait_frames_unit}
-  - {addr: 0x8014ca38, size: 32, name: thread_set_parameters, hash: 40bfd9d6b347f675, unit: thread_wait_frames_unit}
-  - {addr: 0x8014ca58, size: 40, name: thread_set_four_parameters, hash: f24ec1f8ce5a962b, unit: thread_wait_frames_unit}
+  - {addr: 0x8014c858, size: 72, name: thread_wait_frames, hash: e33123533d666f71, unit: thread}
+  - {addr: 0x8014c8a0, size: 132, name: thread_start, hash: 72fa1891ea2b8656, unit: thread}
+  - {addr: 0x8014c924, size: 28, name: thread_resume, hash: 484df3941212a0b6, unit: thread}
+  - {addr: 0x8014c940, size: 24, name: thread_suspend, hash: 6647a9e0cd2b86e9, unit: thread}
+  - {addr: 0x8014c958, size: 60, name: thread_exit_current, hash: 23aa4a3549fe6cb7, unit: thread}
+  - {addr: 0x8014c994, size: 60, name: thread_reset_scheduler, hash: fa59753fb674e92c, unit: thread}
+  - {addr: 0x8014c9d0, size: 76, name: thread_wait_until_inactive, hash: 29370957c26343c7, unit: thread}
+  - {addr: 0x8014ca1c, size: 28, name: thread_is_running, hash: d10e3403d7fec970, unit: thread}
+  - {addr: 0x8014ca38, size: 32, name: thread_set_parameters, hash: 40bfd9d6b347f675, unit: thread}
+  - {addr: 0x8014ca58, size: 40, name: thread_set_four_parameters, hash: f24ec1f8ce5a962b, unit: thread}
   - {addr: 0x8014cbb4, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, source: src/shared/thread/thread_get_current_global_pointer.c}
   - {addr: 0x8014cbc0, size: 52, name: thread_get_current_parameter_1_variant, hash: 4427bc41b35c9c1f}
   - {addr: 0x8014cbf4, size: 52, name: thread_get_current_parameter_2_variant, hash: 7ffeb5877d79f219}
