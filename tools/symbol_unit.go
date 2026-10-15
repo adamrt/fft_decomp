@@ -282,13 +282,8 @@ func readUnitPieces(root string, m *moduleSpec, unitName string) (unitPieces, er
 	if err != nil {
 		return unitPieces{}, err
 	}
-	for number, line := range strings.Split(string(data), "\n") {
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "#") {
-			if word, _ := directiveWord(trimmed); conditionalDirectives[word] {
-				return unitPieces{}, fmt.Errorf("%s:%d: unit %s has program conditionals; split it by hand before merging", unit.Source, number+1, unitName)
-			}
-		}
+	if number := programConditionalLine(string(data)); number > 0 {
+		return unitPieces{}, fmt.Errorf("%s:%d: unit %s has program conditionals; split it by hand before merging", unit.Source, number, unitName)
 	}
 	var names []string
 	for _, f := range m.unitMembers(unitName) {

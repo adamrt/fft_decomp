@@ -319,3 +319,21 @@ func (p *conditionalParser) parseUnary() (int64, error) {
 		return value, nil
 	}
 }
+
+// programConditionalLine returns the 1-based line of the first conditional
+// directive that tests a program macro or a VARIANT_ name, or 0. A guard such
+// as `#ifndef NULL` tests neither and is ordinary text.
+func programConditionalLine(source string) int {
+	for index, line := range strings.Split(source, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		for _, name := range conditionalIdentifiers(trimmed) {
+			if strings.HasPrefix(name, moduleMacroPrefix) || strings.HasPrefix(name, definePrefix) {
+				return index + 1
+			}
+		}
+	}
+	return 0
+}
