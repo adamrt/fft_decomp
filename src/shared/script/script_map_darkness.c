@@ -11,7 +11,7 @@ void script_map_darkness(void) {
     event_unit_color_t* parameters;
 
     thread_set_current_task_id(THREAD_TASK_MAP_DARKNESS);
-    parameters = (event_unit_color_t*)battle_thread_get_current_parameter_1();
+    parameters = (event_unit_color_t*)thread_get_current_parameter_1_variant();
     map_start_ambient_light_blend(
         parameters->mode, parameters->duration, parameters->rgb.r, parameters->rgb.g, parameters->rgb.b);
     thread_wait_frames(g_script_map_darkness_durations[parameters->duration]);

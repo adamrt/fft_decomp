@@ -69,7 +69,7 @@ void menu_handle_action(menu_entry_t* menu, s32 selected_option) {
             g_thread_contexts[thread_id].function_parameter_3 = 1;
             if (thread_id == 8) {
                 for (j = 0; j < action; j++) {
-                    if (battle_thread_is_running_asm(8 - j) != 0) {
+                    if (thread_is_running_asm_variant(8 - j) != 0) {
                         g_menu_pending_selection[j]
                             = ((menu_entry_t*)g_thread_contexts[8 - j].function_parameter_1)->selected_index;
                     }

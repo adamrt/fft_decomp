@@ -34,7 +34,7 @@ void world_main_menu_text_window_thread(void) {
     s16 target;
     s32 x;
 
-    entry = (menu_entry_t*)world_thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
     record = records;
     gfx_set_draw_mode_from_origin(&record->text_draw_mode, &entry->vram_origin);
     gfx_set_draw_mode_for_texture_page(&record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
@@ -101,7 +101,7 @@ void world_main_menu_text_window_thread(void) {
         if (phase == 0) {
             menu_free_memory(buffer);
         }
-        if (world_thread_get_current_parameter_3() != 0) {
+        if (thread_get_current_parameter_3_variant() != 0) {
             break;
         }
         if (g_world_menu_use_alternate_main_palette != 0) {

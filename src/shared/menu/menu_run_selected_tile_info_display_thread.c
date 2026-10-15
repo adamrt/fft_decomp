@@ -51,7 +51,7 @@ void menu_run_selected_tile_info_display_thread(void) {
             continue;
         }
         g_menu_hide_numeric_values = 0;
-        if (battle_thread_get_current_parameter_3() != 0) {
+        if (thread_get_current_parameter_3_variant() != 0) {
             break;
         }
         for (j = i; j >= 0; j--) {

@@ -10,7 +10,7 @@ void menu_select_sprite_clut(void* packet) {
     s32 clut;
     texture_primitive_t* primitive = packet;
 
-    if (battle_thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
         clut = 0x7D3C;
     } else {
         clut = 0x7C3C;

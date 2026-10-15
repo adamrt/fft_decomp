@@ -55,10 +55,10 @@ void menu_run_numeric_display_panel_thread(void) {
         record = &records[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &record->draw_areas, &g_menu_numeric_display_panel_texture_window, frame, g_main_gfx_screen_polarity);
-        if (battle_thread_get_current_parameter_3() != 0) {
+        if (thread_get_current_parameter_3_variant() != 0) {
             break;
         }
-        if (battle_thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
+        if (thread_is_running_asm_variant(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
             for (i = 17; i >= 0; i--) {
                 record->sprites[i].clut = 0x7D3C;
             }

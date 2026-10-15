@@ -6,7 +6,7 @@
 
 /* Decode saved option fields and dispatch the requested option-menu mode. */
 void option_entrypoint(s32 menu_type) {
-    menu_entry_t* menu = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1_variant();
     s32 index;
     game_options_fields_t options = g_main_game_options.fields;
 

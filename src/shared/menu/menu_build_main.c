@@ -9,7 +9,7 @@ void menu_build_main(void) {
     menu_unit_selection_record_t* record;
     s32 unit_id;
 
-    parameter = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
     unit_id = g_menu_selected_unit.battle_id;
     record = &g_menu_unit_selection_records[unit_id];
     /* A nonzero second parameter makes the icon loop return here instead of exiting. */

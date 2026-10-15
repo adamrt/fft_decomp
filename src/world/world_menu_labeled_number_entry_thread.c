@@ -152,7 +152,7 @@ void world_menu_labeled_number_entry_thread(void) {
         world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
         menu_select_sprite_clut(cursor_quad);
         menu_select_sprite_clut(shadow_quad);
-        if (world_thread_is_previous_running() == 0) {
+        if (thread_is_previous_running_variant() == 0) {
             cursor_quad->clut = 0x7D7C;
             shadow_quad->clut = 0x7DBC;
         } else {

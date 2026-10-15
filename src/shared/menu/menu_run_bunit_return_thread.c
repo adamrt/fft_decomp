@@ -11,7 +11,7 @@ void menu_run_bunit_return_thread(void) {
     g_menu_transition_state = 4;
     do {
         thread_yield();
-    } while (world_thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0);
+    } while (thread_is_running_asm_variant(THREAD_SLOT_MENU_GRANDCHILD) != 0);
 
     g_menu_companion_overlay_state = COMPANION_OVERLAY_STATE_BUNIT;
     g_menu_help_open = 0;

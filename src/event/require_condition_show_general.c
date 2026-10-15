@@ -107,7 +107,7 @@ void require_condition_show_general(s32 hold_frames) {
     colors = g_require_condition_general_vertex_colors;
     tpage = g_require_condition_general_tpages;
     condition = 0;
-    require_reward_load_bonus_image(battle_thread_get_current_parameter_1() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
+    require_reward_load_bonus_image(thread_get_current_parameter_1_variant() - EVENT_DISPLAY_CONDITION_GENERAL_FIRST);
     {
         u8* parameters = &range[condition];
 

@@ -12,7 +12,7 @@ s32 battle_thread_resolve_id_after_current(s32 requested_thread_id) {
     i = g_thread_current_id + 1;
     if (i < THREAD_SLOT_COUNT) {
         do {
-            if (battle_thread_is_running_asm(i) == 0) {
+            if (thread_is_running_asm_variant(i) == 0) {
                 return i;
             }
             i++;

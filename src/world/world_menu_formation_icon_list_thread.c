@@ -18,7 +18,7 @@ void world_menu_formation_icon_list_thread(void) {
     s32 i;
     menu_icon_sprites_t* record;
 
-    param = (menu_entry_t*)world_thread_get_current_parameter_1();
+    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     record = &records[0].base;
     cursor = param->selected_index;
     if (cursor == -1) {
@@ -49,7 +49,7 @@ void world_menu_formation_icon_list_thread(void) {
         if (menu_should_close_thread(&g_world_formation_menu_input_state.new_buttons) != 0) {
             break;
         }
-        if (world_thread_is_previous_running() == 0) {
+        if (thread_is_previous_running_variant() == 0) {
             menu_step_wrapping_cursor_on_scroll_buttons(param, &cursor);
             menu_handle_action(param, cursor);
             menu_handle_cancel_input(param);

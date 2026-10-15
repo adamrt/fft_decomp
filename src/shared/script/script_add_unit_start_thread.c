@@ -25,7 +25,7 @@ void script_add_unit_start_thread(void) {
 
     g_thread_contexts[g_thread_current_id].task_id = THREAD_TASK_ADD_UNIT;
     slot = 0;
-    script = (const u8*)battle_thread_get_current_parameter_1();
+    script = (const u8*)thread_get_current_parameter_1_variant();
     while (1) {
         unit_id = script_read_s16(script + 1);
         opcode = script[0];

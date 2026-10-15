@@ -16,8 +16,8 @@ void world_menu_start_at_list_thread(void) {
     thread_set_parameters(g_thread_current_id - 2, (s32)list, 0, 0);
     do {
         thread_yield();
-    } while (world_thread_is_running_asm(g_thread_current_id - 2) != 0
-        || world_thread_is_running_asm(g_thread_current_id - 3) != 0);
+    } while (thread_is_running_asm_variant(g_thread_current_id - 2) != 0
+        || thread_is_running_asm_variant(g_thread_current_id - 3) != 0);
     g_menu_thread_menu_data = saved;
     thread_exit_current();
 }

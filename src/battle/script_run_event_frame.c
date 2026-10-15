@@ -51,7 +51,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
 
     if (g_script_threads_idle != 0) {
         for (i = 1; i < 16; i++) {
-            if (battle_thread_is_running_asm(i) != 0) {
+            if (thread_is_running_asm_variant(i) != 0) {
                 break;
             }
         }
@@ -149,11 +149,11 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < 16; i++) {
-        g_battle_event_thread_status_snapshot[i] = battle_thread_is_running_asm(i);
+        g_battle_event_thread_status_snapshot[i] = thread_is_running_asm_variant(i);
     }
     thread_yield();
     for (i = 1; i < 16; i++) {
-        if (g_battle_event_thread_status_snapshot[i] != battle_thread_is_running_asm(i)) {
+        if (g_battle_event_thread_status_snapshot[i] != thread_is_running_asm_variant(i)) {
             g_script_input_suppression_frames = 5;
         }
     }
@@ -199,7 +199,7 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
         return 0;
     }
     for (i = 1; i < 16; i++) {
-        if (battle_thread_is_running_asm(i) != 0) {
+        if (thread_is_running_asm_variant(i) != 0) {
             break;
         }
     }

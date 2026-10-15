@@ -66,7 +66,7 @@ void attack_deploy_run_select_menu(void) {
         right[i].tpage = GetTPage(0, 2, 0x3c0, 0x100);
         right[i].clut = 0x7dbc;
     }
-    if (battle_thread_get_current_parameter_1() != 0) {
+    if (thread_get_current_parameter_1_variant() != 0) {
         g_attack_deploy_select_menu_nodes[5].destination[1] = 5;
         g_attack_deploy_select_menu_nodes[9].destination[1] = 9;
         g_attack_deploy_select_menu_nodes[10].destination[1] = 10;

@@ -9,7 +9,7 @@
 void menu_input_thread(void) {
     menu_entry_t* menu;
 
-    menu = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    menu = (menu_entry_t*)thread_get_current_parameter_1_variant();
     g_sound_suppressed = 1;
     while (1) {
         thread_yield();
@@ -21,7 +21,7 @@ void menu_input_thread(void) {
     }
     thread_yield();
     g_sound_suppressed = 0;
-    if (battle_thread_get_current_parameter_2() == 0) {
+    if (thread_get_current_parameter_2_variant() == 0) {
         thread_exit_current();
     }
 }

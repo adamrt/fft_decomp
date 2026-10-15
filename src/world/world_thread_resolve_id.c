@@ -11,7 +11,7 @@ s32 world_thread_resolve_id(s32 thread_id) {
     }
 
     for (index = 1; index < 17; index++) {
-        if (world_thread_is_running_asm(index) == 0) {
+        if (thread_is_running_asm_variant(index) == 0) {
             return index;
         }
     }

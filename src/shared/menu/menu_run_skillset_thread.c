@@ -28,7 +28,7 @@ void menu_run_skillset_thread(void) {
         }
         for (;;) {
             thread_yield();
-            if (world_thread_is_running_asm(g_thread_current_id - 1) == 0) {
+            if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
                 thread_exit_current();
             }
         }

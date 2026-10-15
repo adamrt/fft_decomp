@@ -23,7 +23,7 @@ void menu_icon_linked_entry_thread(void) {
     s16 height;
     s32 pad;
 
-    param = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     menu_size_entry_to_text(param, &width, &height, &pad, 0);
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
@@ -64,7 +64,7 @@ void menu_icon_linked_entry_thread(void) {
     }
     g_sound_suppressed = 0;
     thread_yield();
-    if (battle_thread_get_current_parameter_2() == 0) {
+    if (thread_get_current_parameter_2_variant() == 0) {
         thread_exit_current();
     }
 }

@@ -39,7 +39,7 @@ s32 menu_dispatch_system_function(
             }
             return MENU_SYSTEM_DISPATCH_DONE;
         } else if (option != 1) {
-            if (battle_thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
+            if (thread_is_running_asm_variant(THREAD_SLOT_EVENT) != 0) {
                 main_system_report_stub(7, 3);
                 if (option != 2) {
                     menu_start_system_function_thread(BATTLE_SYSTEM_FUNCTION_CLOSE);

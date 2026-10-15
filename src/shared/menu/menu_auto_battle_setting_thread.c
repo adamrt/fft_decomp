@@ -25,7 +25,7 @@ void menu_auto_battle_setting_thread(void) {
     s16* color;
     menu_icon_record_t* record;
 
-    param = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     cursor = param->selected_index;
     stats = menu_get_selected_unit_stats();
     if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
@@ -50,7 +50,7 @@ void menu_auto_battle_setting_thread(void) {
         if (i == 0 || (g_script_event_input & PSX_PAD_CIRCLE)) {
             buffer = battle_menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
-            if (((g_script_event_input & PSX_PAD_CIRCLE) && battle_thread_is_previous_running() == 0) || i == 0) {
+            if (((g_script_event_input & PSX_PAD_CIRCLE) && thread_is_previous_running_variant() == 0) || i == 0) {
                 selected = cursor;
                 if (selected == 0) {
                     before = battle_menu_get_id_based_on_mount_moveable_actable(g_menu_selected_unit.battle_id);

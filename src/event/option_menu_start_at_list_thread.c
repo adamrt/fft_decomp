@@ -15,8 +15,8 @@ void option_menu_start_at_list_thread(void) {
 
     do {
         thread_yield();
-    } while (battle_thread_is_running_asm(g_thread_current_id - 2) != 0
-        || battle_thread_is_running_asm(g_thread_current_id - 3) != 0);
+    } while (thread_is_running_asm_variant(g_thread_current_id - 2) != 0
+        || thread_is_running_asm_variant(g_thread_current_id - 3) != 0);
 
     g_menu_thread_menu_data = previous_menu_descriptor;
     thread_exit_current();

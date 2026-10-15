@@ -32,8 +32,8 @@ void require_condition_run_special_thread(void) {
 
     table = g_require_condition_special_quad_ranges;
     color_table = g_require_condition_special_vertex_colors;
-    parameter_index = battle_thread_get_current_parameter_1();
-    use_small_array = battle_thread_get_current_parameter_2();
+    parameter_index = thread_get_current_parameter_1_variant();
+    use_small_array = thread_get_current_parameter_2_variant();
     {
         u8* parameters = &g_require_condition_special_quad_ranges[parameter_index];
 
@@ -64,10 +64,10 @@ void require_condition_run_special_thread(void) {
     /* Parameter 3 selects the next phase at any frame: 2 jumps from the
        fade-in past the hold loop to the fade-out, 1 ends the thread. */
     while (scale < 0x80) {
-        if (battle_thread_get_current_parameter_3() == 2) {
+        if (thread_get_current_parameter_3_variant() == 2) {
             goto fade_out;
         }
-        if (battle_thread_get_current_parameter_3() == 1) {
+        if (thread_get_current_parameter_3_variant() == 1) {
             goto done;
         }
         buffer ^= 1;
@@ -92,10 +92,10 @@ void require_condition_run_special_thread(void) {
         scale += 8;
     }
     for (;;) {
-        if (battle_thread_get_current_parameter_3() == 2) {
+        if (thread_get_current_parameter_3_variant() == 2) {
             break;
         }
-        if (battle_thread_get_current_parameter_3() == 1) {
+        if (thread_get_current_parameter_3_variant() == 1) {
             goto done;
         }
         buffer ^= 1;
@@ -121,7 +121,7 @@ void require_condition_run_special_thread(void) {
 fade_out:
     scale = 0x80;
     do {
-        if (battle_thread_get_current_parameter_3() == 1) {
+        if (thread_get_current_parameter_3_variant() == 1) {
             break;
         }
         buffer ^= 1;

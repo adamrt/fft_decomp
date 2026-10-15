@@ -55,7 +55,7 @@ void require_reward_animate_bonus_image_burst(void) {
         require_reward_load_bonus_image(1);
     }
     /* Named operand loads fold the three native cursor advances. */
-    params = battle_thread_get_current_parameter_2();
+    params = thread_get_current_parameter_2_variant();
     params++;
     mode = *params;
     params++;

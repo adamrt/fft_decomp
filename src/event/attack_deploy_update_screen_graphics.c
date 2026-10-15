@@ -44,7 +44,7 @@ void attack_deploy_update_screen_graphics(void) {
         for (i = 0; i < 9; i++) {
             off = parity * sizeof(g_attack_deploy_text_polys[0]) + i * sizeof(POLY_FT4);
             if ((g_attack_deploy_current_squad_data->unit_limit - g_attack_deploy_deployed_unit_count - 1 < 0 && i >= 6)
-                || battle_thread_get_current_parameter_3() != 0) {
+                || thread_get_current_parameter_3_variant() != 0) {
                 if (g_attack_deploy_current_squad_data->unit_limit - g_attack_deploy_deployed_unit_count - 1 < 0) {
                     g_attack_deploy_text_graphic_params[7].x_load = 0xd0;
                 }
@@ -81,7 +81,7 @@ void attack_deploy_update_screen_graphics(void) {
             gfx_draw_or_append_gpu_primitive(&g_attack_deploy_text_polys[parity][i]);
         }
         thread_yield();
-        if (battle_thread_get_current_parameter_3() == 0) {
+        if (thread_get_current_parameter_3_variant() == 0) {
             continue;
         }
         for (i = 8; i >= 0; i--) {

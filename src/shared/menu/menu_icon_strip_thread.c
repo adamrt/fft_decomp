@@ -16,7 +16,7 @@ void menu_icon_strip_thread(void) {
     menu_icon_record_t* record;
 
     input = 0;
-    state = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    state = (menu_entry_t*)thread_get_current_parameter_1_variant();
     record = &records[0];
     menu_build_window_sprites(&rect, state, record);
     mem_copy_bytes_nonempty(&records[1], record, sizeof(records[1]));

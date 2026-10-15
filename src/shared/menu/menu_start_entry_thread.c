@@ -7,7 +7,7 @@
 #include "fft/thread.h"
 
 void menu_start_entry_thread(void) {
-    s32 menu_id = battle_thread_get_current_parameter_1();
+    s32 menu_id = thread_get_current_parameter_1_variant();
     s32 count;
 
     thread_wait_until_inactive(THREAD_SLOT_MENU);

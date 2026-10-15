@@ -16,7 +16,7 @@ void menu_run_icon_selection_loop(void) {
     s32 i;
     menu_icon_record_t* record;
 
-    param = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     record = &records[0];
     cursor = param->selected_index;
     if (cursor == -1) {
@@ -54,7 +54,7 @@ void menu_run_icon_selection_loop(void) {
         menu_submit_icon_primitives(&record->base);
     }
     thread_yield();
-    if (battle_thread_get_current_parameter_2() == 0) {
+    if (thread_get_current_parameter_2_variant() == 0) {
         thread_exit_current();
     }
 }

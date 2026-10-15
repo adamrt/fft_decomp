@@ -23,7 +23,7 @@ void camera_fusion_thread(void) {
 
     thread_set_current_task_id(THREAD_TASK_CAMERA);
     tracks = menu_alloc_memory(sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
-    script = (u8*)battle_thread_get_current_parameter_1();
+    script = (u8*)thread_get_current_parameter_1_variant();
     menu_clear_render_buffer(tracks, sizeof(camera_track_t) * EVENT_CAMERA_COMPONENT_COUNT);
 
     /* One key per CAMERA instruction up to the end marker, plus the starting key. */

@@ -5,7 +5,7 @@
 void menu_wait_thread(void) {
     menu_entry_t* menu;
 
-    menu = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    menu = (menu_entry_t*)thread_get_current_parameter_1_variant();
     g_menu_wait_row_actions[0] = -2;
     g_menu_wait_row_actions[1] = -2;
     menu_confirm_action_silently(menu);

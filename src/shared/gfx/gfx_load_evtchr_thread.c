@@ -13,8 +13,8 @@ void gfx_load_evtchr_thread(void) {
     s32 block;
     evtchr_file_record_t* buffer;
 
-    parameter = battle_thread_get_current_parameter_1();
-    block = battle_thread_get_current_parameter_2();
+    parameter = thread_get_current_parameter_1_variant();
+    block = thread_get_current_parameter_2_variant();
     thread_set_current_task_id(THREAD_TASK_LOAD_EVTCHR);
     buffer = main_heap_alloc(0x7800);
     do {

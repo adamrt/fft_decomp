@@ -12,8 +12,8 @@
  * only when event input is not suppressed, no option menu is open, the camera is
  * idle, no companion overlay is running and the building slot is free. */
 void menu_start_building_thread(void) {
-    if (battle_thread_is_running_asm(THREAD_SLOT_MENU) != 0
-        || battle_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0
+        || thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
         if (g_menu_current_id != BATTLE_MENU_ID_MINI_MENU) {
             g_menu_building_thread_started = 1;
         }
@@ -30,7 +30,7 @@ void menu_start_building_thread(void) {
     if (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE) {
         return;
     }
-    if (battle_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
         return;
     }
     g_menu_help_open = 1;

@@ -10,7 +10,7 @@ void attack_map_show_title(void) {
     s32 buffer;
     s32 width;
 
-    step = battle_thread_get_current_parameter_3();
+    step = thread_get_current_parameter_3_variant();
     buffer = 0;
     if (step == 0) {
         step = 1;

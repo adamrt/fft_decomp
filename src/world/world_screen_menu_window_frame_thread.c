@@ -31,7 +31,7 @@ void world_screen_menu_window_frame_thread(void) {
     s32 index;
     s32 frame;
 
-    menu = (urect16_t*)world_thread_get_current_parameter_1();
+    menu = (urect16_t*)thread_get_current_parameter_1_variant();
     pixels = menu_alloc_memory(0x400);
 
     menu_clear_render_buffer(pixels, 0x400);
@@ -129,12 +129,12 @@ void world_screen_menu_window_frame_thread(void) {
         &g_menu_scratch_buffer.panel_frames[1], &g_menu_scratch_buffer.panel_frames[0], sizeof(menu_panel_frame_t));
 
     frame = 0;
-    while (world_thread_get_current_parameter_3() == 0) {
+    while (thread_get_current_parameter_3_variant() == 0) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &prim->draw_areas, (const RECT*)menu, frame, g_active_graphics_buffer_index);
         texture_u = 0x7d3c;
-        if (world_thread_get_current_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_get_current_parameter_2_variant() == 0 && g_menu_input_lock_mode == 0) {
             texture_u = 0x7c3c;
         }
         for (index = 8; index >= 0; index--) {

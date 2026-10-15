@@ -15,7 +15,7 @@ s32 world_thread_resolve_id_after_current(s32 thread_id) {
         thread_exit_current();
     } else {
         do {
-            if (world_thread_is_running_asm(index) == 0) {
+            if (thread_is_running_asm_variant(index) == 0) {
                 return index;
             }
             index++;

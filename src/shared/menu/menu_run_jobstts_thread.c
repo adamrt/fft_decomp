@@ -8,10 +8,10 @@
 
 /* Run the job-status overlay while its state is nonzero. */
 void menu_run_jobstts_thread(void) {
-    if (battle_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
         thread_exit_current();
     }
-    if (battle_thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_EVENT) != 0) {
         thread_exit_current();
     }
     menu_set_modal_open();

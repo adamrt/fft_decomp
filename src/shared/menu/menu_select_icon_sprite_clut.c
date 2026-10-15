@@ -8,7 +8,7 @@
 void menu_select_icon_sprite_clut(SPRT* sprite) {
     s32 clut;
 
-    if (battle_thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+    if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
         clut = 0x7c7c;
     } else {
         clut = 0x7cbc;

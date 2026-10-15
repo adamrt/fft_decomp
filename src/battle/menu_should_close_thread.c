@@ -20,13 +20,13 @@ s32 menu_should_close_thread(u32* input) {
     i = 0;
     task_state = 3;
     for (; i < 16; i++) {
-        if (i != g_thread_current_id && battle_thread_is_running_asm(i) != 0
+        if (i != g_thread_current_id && thread_is_running_asm_variant(i) != 0
             && g_thread_contexts[i].task_id == task_state) {
             *input = 0;
             break;
         }
     }
-    if (i == 16 && battle_thread_get_current_parameter_3() != 0) {
+    if (i == 16 && thread_get_current_parameter_3_variant() != 0) {
         return 1;
     }
     return 0;

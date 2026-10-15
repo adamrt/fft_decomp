@@ -21,7 +21,7 @@ void menu_run_system_function_thread(void) {
     }
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
-        while (battle_thread_is_running_asm(THREAD_SLOT_EVENT) != 0) {
+        while (thread_is_running_asm_variant(THREAD_SLOT_EVENT) != 0) {
             if (g_thread_contexts[THREAD_SLOT_EVENT].task_id == THREAD_TASK_EXECUTE_EVENT) {
                 thread_exit_current();
             }

@@ -26,7 +26,7 @@ void menu_start_unit_view_thread(s32 mode, s32 unit_a, s32 unit_b) {
         g_menu_comparison_battle_id = unit_b;
         g_menu_comparison_unit_status.unit_index = unit_b;
     }
-    if (battle_thread_is_running_asm(THREAD_SLOT_UNIT_VIEW) == 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_UNIT_VIEW) == 0) {
         thread_start(THREAD_SLOT_UNIT_VIEW, menu_run_unit_view_supervisor_thread);
     }
     thread_set_parameters(THREAD_SLOT_UNIT_VIEW, mode, 0, 0);

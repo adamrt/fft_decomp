@@ -148,7 +148,7 @@ void world_menu_ability_panel_thread(void) {
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
         thread_yield();
-        if (world_thread_get_current_parameter_3() != 0) {
+        if (thread_get_current_parameter_3_variant() != 0) {
             break;
         }
         frame++;

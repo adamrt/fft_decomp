@@ -184,12 +184,6 @@ s32 world_thread_resolve_id_after_current(s32 requested_thread_id);
 /* task parameters */
 void thread_set_parameters(s32 thread_id, s32 first, s32 second, s32 third);
 void thread_set_four_parameters(s32 thread_id, s32 first, s32 second, s32 third, s32 fourth);
-s32 battle_thread_get_current_parameter_1(void);
-s32 battle_thread_get_current_parameter_2(void);
-s32 battle_thread_get_current_parameter_3(void);
-s32 world_thread_get_current_parameter_1(void);
-s32 world_thread_get_current_parameter_2(void);
-s32 world_thread_get_current_parameter_3(void);
 
 /* task state */
 s32 thread_get_current_task_id(void);
@@ -200,12 +194,17 @@ void thread_start(s32 thread_id, void (*function)(void));
 void thread_resume(s32 thread_id);
 void thread_suspend(s32 thread_id);
 void thread_exit_current(void);
-s32 battle_thread_is_previous_running(void);
 s32 thread_is_running(s32 thread_id);
-s32 battle_thread_is_running_asm(s32 thread_id);
 void thread_reset_scheduler(void);
-s32 world_thread_is_previous_running(void);
-s32 world_thread_is_running_asm(s32 thread_id);
+
+/* per-module bodies: each module links its own copy under the shared name.
+ * The accessors are original assembly that differs only in the address add
+ * (addu in BATTLE, trapping add in WORLD). */
+s32 thread_get_current_parameter_1_variant(void);
+s32 thread_get_current_parameter_2_variant(void);
+s32 thread_get_current_parameter_3_variant(void);
+s32 thread_is_previous_running_variant(void);
+s32 thread_is_running_asm_variant(s32 thread_id);
 
 /* scheduling */
 /* Yield to the next active context in the resident scene scheduler.

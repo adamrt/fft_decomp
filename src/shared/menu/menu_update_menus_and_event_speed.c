@@ -31,10 +31,10 @@ s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     script_run_event_frame(otag, controller_input);
     menu_update_panel_fade();
     result = menu_resolve_selection();
-    if ((battle_thread_is_running_asm(THREAD_SLOT_MENU) != 0
+    if ((thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0
             && g_thread_contexts[THREAD_SLOT_MENU].task_id != THREAD_TASK_MINI_MENU)
-        || battle_thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0
-        || battle_thread_is_running_asm(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
+        || thread_is_running_asm_variant(THREAD_SLOT_MENU_CHILD) != 0
+        || thread_is_running_asm_variant(THREAD_SLOT_MENU_GRANDCHILD) != 0) {
         if (g_menu_animation_speed_forced == 0) {
             g_menu_animation_speed_forced = 1;
             g_menu_saved_animation_speed = battle_state_get_animation_speed();

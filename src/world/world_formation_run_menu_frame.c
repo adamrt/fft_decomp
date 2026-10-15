@@ -124,13 +124,13 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     }
 
     for (thread_id = 1; thread_id < 16; thread_id++) {
-        g_world_formation_thread_status_snapshot[thread_id] = world_thread_is_running_asm(thread_id);
+        g_world_formation_thread_status_snapshot[thread_id] = thread_is_running_asm_variant(thread_id);
     }
 
     thread_yield();
     for (thread_id = 1; thread_id < 16; thread_id++) {
         status = g_world_formation_thread_status_snapshot[thread_id];
-        if (status != world_thread_is_running_asm(thread_id)) {
+        if (status != thread_is_running_asm_variant(thread_id)) {
             g_script_input_suppression_frames = 5;
         }
     }

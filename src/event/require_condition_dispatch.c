@@ -19,8 +19,8 @@ void require_condition_dispatch(void) {
     s32 thread;
 
     thread_set_current_task_id(THREAD_TASK_CONDITION_DISPATCH);
-    condition = battle_thread_get_current_parameter_1();
-    parameter = battle_thread_get_current_parameter_2();
+    condition = thread_get_current_parameter_1_variant();
+    parameter = thread_get_current_parameter_2_variant();
     if (condition >= EVENT_DISPLAY_CONDITION_GENERAL_FIRST)
         require_condition_show_general(parameter);
     thread = battle_thread_resolve_id(THREAD_SLOT_FIRST_IDLE);

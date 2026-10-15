@@ -16,13 +16,13 @@ s32 battle_menu_is_still_building(void) {
     if (g_menu_transition_state != 0) {
         return g_menu_transition_state;
     }
-    if (battle_thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
         return 2;
     }
     i = 4;
     do {
         if (i != 3) {
-            if (battle_thread_is_running_asm(i) != 0) {
+            if (thread_is_running_asm_variant(i) != 0) {
                 break;
             }
         }

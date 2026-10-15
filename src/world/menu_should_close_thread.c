@@ -14,7 +14,7 @@ s32 menu_should_close_thread(u32* input) {
 
     if (g_thread_contexts[THREAD_SCREEN_SLOT_TEXT].is_running == 0 && menu_can_accept_input() != 0
         && (*input & PSX_PAD_SELECT)) {
-        parameter = (menu_entry_t*)world_thread_get_current_parameter_1();
+        parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
         if (parameter->select_text_table != 0) {
             if (g_script_input_suppression_frames == 0) {
                 thread_start(THREAD_SCREEN_SLOT_TEXT, world_menu_announce_entry_value_thread);
@@ -29,13 +29,13 @@ s32 menu_should_close_thread(u32* input) {
         return 0;
     }
     for (i = 0; i < 17; i++) {
-        if (i != g_thread_current_id && world_thread_is_running_asm(i) != 0
+        if (i != g_thread_current_id && thread_is_running_asm_variant(i) != 0
             && g_thread_contexts[i].task_id == THREAD_TASK_STOP_REQUEST) {
             *input = 0;
             break;
         }
     }
-    if (i == 17 && world_thread_get_current_parameter_3() != 0) {
+    if (i == 17 && thread_get_current_parameter_3_variant() != 0) {
         return 1;
     }
     return 0;

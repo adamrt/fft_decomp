@@ -16,7 +16,7 @@ void script_block_start_thread(void) {
     s32 thread_id;
 
     g_thread_contexts[g_thread_current_id].task_id = THREAD_TASK_EVENT_BLOCK;
-    script = (u8*)battle_thread_get_current_parameter_1();
+    script = (u8*)thread_get_current_parameter_1_variant();
     parameters = script + 1;
     while (script[0] != EVENT_OPCODE_BLOCK_END) {
         first_halfword = script_read_s16(parameters);

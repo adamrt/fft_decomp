@@ -4,10 +4,10 @@
 
 /* Start the mini menu when its slots are idle and menus are active. */
 void menu_start_mini_menu_display_thread(void) {
-    if (battle_thread_is_running_asm(THREAD_SLOT_MENU) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_MENU) != 0) {
         return;
     }
-    if (battle_thread_is_running_asm(THREAD_SLOT_MENU_CHILD) != 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_MENU_CHILD) != 0) {
         return;
     }
     if (g_menu_overlay_state != 0) {

@@ -53,7 +53,7 @@ void option_menu_run_at_list(void) {
     input2 = script_get_controller_input_pointer(1);
     row_offset = 0;
     cursor = 0;
-    entry = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
     layout = entry->context;
     entry->window.h = layout->row_count * 16 + 0x1C;
     entry->inner_height = layout->row_count * 16 + 0x1C;
@@ -137,7 +137,7 @@ void option_menu_run_at_list(void) {
     for (;;) {
         page = &g_option_at_list_pages[i & 1];
         frame = &page->frame;
-        if (battle_thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
+        if (thread_is_previous_running_variant() != 0 && g_menu_input_lock_mode == 0) {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
         } else {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
@@ -254,7 +254,7 @@ void option_menu_run_at_list(void) {
             }
         }
         frame->v0 = ring * 16 + accum - 2;
-        if (battle_thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+        if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;

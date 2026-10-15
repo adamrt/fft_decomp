@@ -23,7 +23,7 @@ void world_menu_update_entry_cursor_quads(
             thread->task_words[1] = 2;
             thread->task_words[0] = 0;
         }
-        if (world_thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_is_previous_running_variant() == 0 && g_menu_input_lock_mode == 0) {
             if (thread->task_words[1] != 0 && thread->task_words[0] >= 0x1B) {
                 thread->task_words[1] = 0;
                 thread->task_words[0] = 0;

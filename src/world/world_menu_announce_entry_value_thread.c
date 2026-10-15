@@ -16,7 +16,7 @@ void world_menu_announce_entry_value_thread(void) {
     s32 value;
     s32 next;
 
-    entry = (menu_entry_t*)world_thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
     kind = entry->select_text_table;
     if (kind == 2 || kind == -1) {
         next = g_thread_current_id + 1;

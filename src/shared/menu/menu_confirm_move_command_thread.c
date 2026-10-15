@@ -14,7 +14,7 @@ void menu_confirm_move_command_thread(void) {
     menu_entry_t* entry;
     s32 menu;
 
-    entry = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
     stored_actions = &g_menu_confirm_stored_unit_row_actions;
     *stored_actions = -2;
     if (menu_get_selected_unit_stats()->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_MOVE)]

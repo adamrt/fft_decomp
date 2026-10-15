@@ -107,7 +107,7 @@ void menu_run_unit_summary_panel_thread(void) {
         }
         value = (g_main_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
         for (i = 0; i < g_script_event_speed; i++) {
-            if (battle_thread_get_current_parameter_3() != 0) {
+            if (thread_get_current_parameter_3_variant() != 0) {
                 slide += 0x1E;
                 if (slide > 0x80) {
                     /* Leaves both the step loop and the frame loop. */
@@ -153,7 +153,7 @@ void menu_run_unit_summary_panel_thread(void) {
         SetDrawOffset(&frame_record->draw_offset_b, (u16*)&frame_record->offset_b);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_b);
         value = battle_thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
-        if (value != 0 && battle_thread_is_running_asm(value - 1) == 0) {
+        if (value != 0 && thread_is_running_asm_variant(value - 1) == 0) {
             value = 0;
         }
         if (value != 0) {

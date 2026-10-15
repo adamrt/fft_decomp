@@ -22,7 +22,7 @@ void world_menu_icon_clamped_list_thread(void) {
     menu_icon_sprites_t* sprites;
 
     g_world_menu_list_controller_input = script_get_controller_input_pointer(0);
-    param = (menu_entry_t*)world_thread_get_current_parameter_1();
+    param = (menu_entry_t*)thread_get_current_parameter_1_variant();
     cursor = param->selected_index;
     record = &records[0];
     if (cursor == -1) {
@@ -47,7 +47,7 @@ void world_menu_icon_clamped_list_thread(void) {
         if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
-        if (world_thread_is_previous_running() == 0) {
+        if (thread_is_previous_running_variant() == 0) {
             if ((*g_world_menu_list_controller_input & PSX_PAD_UP) && cursor != 0) {
                 cursor--;
             }

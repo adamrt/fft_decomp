@@ -1080,11 +1080,11 @@ functions:
   - {addr: 0x8014ca38, size: 32, name: thread_set_parameters, hash: 40bfd9d6b347f675, source: src/shared/thread/thread_set_parameters.c}
   - {addr: 0x8014ca58, size: 40, name: thread_set_four_parameters, hash: f24ec1f8ce5a962b, source: src/shared/thread/thread_set_four_parameters.c}
   - {addr: 0x8014cbb4, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, source: src/shared/thread/thread_get_current_global_pointer.c}
-  - {addr: 0x8014cbc0, size: 52, name: battle_thread_get_current_parameter_1, hash: 4427bc41b35c9c1f}
-  - {addr: 0x8014cbf4, size: 52, name: battle_thread_get_current_parameter_2, hash: 7ffeb5877d79f219}
-  - {addr: 0x8014cc28, size: 52, name: battle_thread_get_current_parameter_3, hash: d1fc2dccdda1feee}
-  - {addr: 0x8014cc5c, size: 56, name: battle_thread_is_previous_running, hash: f14ee857209e40f9}
-  - {addr: 0x8014cc94, size: 36, name: battle_thread_is_running_asm, hash: 1057a9f27abe5a5a}
+  - {addr: 0x8014cbc0, size: 52, name: thread_get_current_parameter_1_variant, hash: 4427bc41b35c9c1f}
+  - {addr: 0x8014cbf4, size: 52, name: thread_get_current_parameter_2_variant, hash: 7ffeb5877d79f219}
+  - {addr: 0x8014cc28, size: 52, name: thread_get_current_parameter_3_variant, hash: d1fc2dccdda1feee}
+  - {addr: 0x8014cc5c, size: 56, name: thread_is_previous_running_variant, hash: f14ee857209e40f9}
+  - {addr: 0x8014cc94, size: 36, name: thread_is_running_asm_variant, hash: 1057a9f27abe5a5a}
   - {addr: 0x8014ce78, size: 60, name: text_skip_to_entry, hash: 90cff8271922ef07, source: src/shared/text/text_skip_to_entry.c}
   - {addr: 0x80174370, size: 88, name: move_get_weather_terrain_cost, hash: 93bdb40ee3440793}
   - {addr: 0x801743c8, size: 104, name: battle_unit_get_chocobo_mount_state, hash: 7fbe3284351b693c}
@@ -2927,8 +2927,6 @@ overrides:
   - {function: menu_init_numeric_display_frame_primitives, name: world_menu_init_sprite, addr: 0x8012e244}
   - {function: menu_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80165ecc}
   - {function: menu_open_debugchr_unit_editor, name: world_menu_build_idle_action_stub, addr: 0x8013cf58}
-  - {function: menu_run_bunit_return_thread, name: world_thread_is_running_asm, addr: 0x8014cc94}
-  - {function: menu_run_skillset_thread, name: world_thread_is_running_asm, addr: 0x8014cc94}
   - {function: move_update_float_step_to_destination_tile_center, name: move_displace_unit_at_destination_tile, addr: 0x8006be8c}
 
 regions:

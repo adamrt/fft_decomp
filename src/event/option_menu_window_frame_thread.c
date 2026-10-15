@@ -30,7 +30,7 @@ void option_menu_window_frame_thread(void) {
     s32 index;
     s32 frame;
 
-    menu = battle_thread_get_current_parameter_1();
+    menu = thread_get_current_parameter_1_variant();
 
     menu_clear_render_buffer(g_option_menu_panel_pixels, 0x400);
     texture.w = 0x80;
@@ -134,7 +134,7 @@ void option_menu_window_frame_thread(void) {
     mem_copy_bytes_nonempty(&g_option_menu_panel_frames[1], &g_option_menu_panel_frames[0], sizeof(menu_panel_frame_t));
 
     frame = 0;
-    while (battle_thread_get_current_parameter_3() == 0) {
+    while (thread_get_current_parameter_3_variant() == 0) {
         prim = &g_option_menu_panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &prim->draw_areas, (const RECT*)menu, frame, g_main_gfx_screen_polarity);
@@ -143,7 +143,7 @@ void option_menu_window_frame_thread(void) {
            is dead. A separate local is allocated a different callee-saved
            register and does not reproduce the target. */
         texture_u = 0x7d3c;
-        if (battle_thread_get_current_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
+        if (thread_get_current_parameter_2_variant() == 0 && g_menu_input_lock_mode == 0) {
             texture_u = 0x7c3c;
         }
         for (index = 8; index >= 0; index--) {

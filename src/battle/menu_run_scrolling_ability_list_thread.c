@@ -82,7 +82,7 @@ void menu_run_scrolling_ability_list_thread(void) {
     }
     toggle = 0;
     g_battle_menu_scroll_list_depth++;
-    entry = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
@@ -199,7 +199,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                     (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST], 0, 0);
                 column = 0;
                 while (1) {
-                    if (battle_thread_is_running_asm(g_thread_current_id - 1) == 0) {
+                    if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
                         LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)(saved_clut + 48));
                         break;
                     }
@@ -347,13 +347,13 @@ void menu_run_scrolling_ability_list_thread(void) {
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         menu_select_icon_sprite_clut(page->icons.icons[1]);
         menu_select_icon_sprite_clut(page->icons.icons[2]);
-        if (battle_thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
+        if (thread_is_previous_running_variant() != 0 || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;
         }
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
-        if (layout->columns.hidden_rows != 0 && battle_thread_is_previous_running() == 0) {
+        if (layout->columns.hidden_rows != 0 && thread_is_previous_running_variant() == 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[0]);
@@ -439,7 +439,7 @@ void menu_run_scrolling_ability_list_thread(void) {
     }
     thread_yield();
     g_battle_menu_scroll_list_depth--;
-    if (battle_thread_get_current_parameter_2() == 0) {
+    if (thread_get_current_parameter_2_variant() == 0) {
         thread_exit_current();
     }
 }

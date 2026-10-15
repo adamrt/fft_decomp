@@ -21,7 +21,7 @@ void sound_run_background_sfx_thread(void) {
     s32 resource = SUZUKI_SOUND_ID(MAIN_SOUND_RESOURCE_ENV, 0);
 
     thread_set_current_task_id(THREAD_TASK_BG_SOUND);
-    request = (event_background_sound_parameters_t*)battle_thread_get_current_parameter_1();
+    request = (event_background_sound_parameters_t*)thread_get_current_parameter_1_variant();
     find_channel = request->find_channel;
     sound_id = request->sound_id;
     if (find_channel != 0) {

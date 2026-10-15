@@ -18,7 +18,7 @@ void debugchr_menu_icon_strip_thread(void) {
     s32 redraw;
     u8* render;
     s32 frame_parity;
-    menu_entry_t* state = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    menu_entry_t* state = (menu_entry_t*)thread_get_current_parameter_1_variant();
 
     frame_pair = frames;
     menu_build_window_sprites(&rect, state, frame_pair);

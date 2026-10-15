@@ -152,7 +152,7 @@ void menu_run_numeric_editor_frame_thread(void) {
             gfx_draw_or_append_gpu_primitive(&buffer->portrait);
         }
         thread_yield();
-        if (battle_thread_get_current_parameter_3() != 0) {
+        if (thread_get_current_parameter_3_variant() != 0) {
             break;
         }
     }

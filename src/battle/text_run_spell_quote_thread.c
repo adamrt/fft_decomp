@@ -29,7 +29,7 @@ void text_run_spell_quote_thread(void) {
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     thread_wait_frames(3);
     window_mode = 0x11;
-    id = battle_thread_get_current_parameter_1();
+    id = thread_get_current_parameter_1_variant();
     g_text_substitution_values[0] = id;
     g_text_substitution_values[1] = id;
     g_text_substitution_values[2] = id;
@@ -39,7 +39,7 @@ void text_run_spell_quote_thread(void) {
     if (screen_coords.vy < 0x80) {
         window_mode = 0x12;
     }
-    message_id = battle_thread_get_current_parameter_2() | 0xA800;
+    message_id = thread_get_current_parameter_2_variant() | 0xA800;
     g_menu_companion_data_file_buffer = main_heap_alloc(0x4000);
     menu_request_open_companion_data_file(BATTLE_COMPANION_FILE_SPELL_MES);
     g_text_section_pointers[TEXT_SECTION_UNIT_MESSAGE] = g_menu_companion_data_file_buffer;

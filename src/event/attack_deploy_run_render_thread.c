@@ -109,7 +109,7 @@ void attack_deploy_run_render_thread(void) {
         g_attack_deploy_render_buffers[frame & 1].screen_position.y = offset_y;
         SetDrawOffset(&g_attack_deploy_render_buffers[frame & 1].screen_offset,
             (u16*)&g_attack_deploy_render_buffers[frame & 1].screen_position);
-        if (battle_thread_get_current_parameter_3() != 0) {
+        if (thread_get_current_parameter_3_variant() != 0) {
             break;
         }
         if (g_attack_deploy_tiles_only_mode == 0) {

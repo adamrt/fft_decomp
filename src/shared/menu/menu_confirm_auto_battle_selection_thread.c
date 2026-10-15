@@ -7,7 +7,7 @@ void menu_confirm_auto_battle_selection_thread(void) {
     s32 menu;
     menu_entry_t* parameter;
 
-    parameter = (menu_entry_t*)battle_thread_get_current_parameter_1();
+    parameter = (menu_entry_t*)thread_get_current_parameter_1_variant();
     attacker = menu_get_selected_unit_stats();
     menu = g_menu_thread_menu_data[BATTLE_MENU_ID_AUTO_BATTLE].selected_index;
     if (menu == 3) {

@@ -29,7 +29,7 @@ void sound_run_background_fade_thread(void) {
 
     thread_set_current_task_id(THREAD_TASK_BG_SOUND);
     step = 0;
-    request = (event_background_sound_parameters_t*)battle_thread_get_current_parameter_1();
+    request = (event_background_sound_parameters_t*)thread_get_current_parameter_1_variant();
     sound_id = request->sound_id;
     volume_from = request->volume_from;
     steps = request->frames;

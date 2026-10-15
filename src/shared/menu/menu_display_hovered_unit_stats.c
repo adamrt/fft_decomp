@@ -121,7 +121,7 @@ void menu_display_hovered_unit_stats(
             text_loaded = 0;
         }
         for (i = 0; i < g_script_event_speed; i++) {
-            if (battle_thread_get_current_parameter_3() != 0) {
+            if (thread_get_current_parameter_3_variant() != 0) {
                 if (mode == UNIT_STATS_PANEL_HOVERED_UNIT
                     && g_thread_contexts[THREAD_SLOT_RIGHT_UNIT_STATS].task_id == THREAD_TASK_ATTACK_CASTER_STATS) {
                     /* Both exits leave the step loop and the frame loop. */
@@ -144,7 +144,7 @@ void menu_display_hovered_unit_stats(
             }
         }
         running = battle_thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
-        if (running != 0 && battle_thread_is_running_asm(running - 1) == 0) {
+        if (running != 0 && thread_is_running_asm_variant(running - 1) == 0) {
             running = 0;
         }
         page = &g_menu_unit_status_panel_pages[g_menu_unit_status_first_page_by_mode[mode] + (frame & 1)];

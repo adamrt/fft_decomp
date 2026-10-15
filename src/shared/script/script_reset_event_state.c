@@ -8,7 +8,7 @@
  * camera/light reset hooks and clear camera interpolation and position lock. */
 void script_reset_event_state(void) {
     unit_reset_animation_states();
-    if (battle_thread_is_running_asm(THREAD_SLOT_EVENT) == 0) {
+    if (thread_is_running_asm_variant(THREAD_SLOT_EVENT) == 0) {
         camera_store_state_to_script_variables();
         map_reset_script_light_transform();
         g_camera_speed_curve = 0;

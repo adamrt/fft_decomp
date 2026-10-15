@@ -26,8 +26,8 @@ void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade,
     s32 edge;
     s32 height;
 
-    x = battle_thread_get_current_parameter_1();
-    y = battle_thread_get_current_parameter_2();
+    x = thread_get_current_parameter_1_variant();
+    y = thread_get_current_parameter_2_variant();
     poly = polys;
     height = 0x14;
     for (row = 0; row < 2; row++) {

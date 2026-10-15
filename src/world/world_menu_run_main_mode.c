@@ -16,7 +16,7 @@ void world_menu_run_main_mode(s32 mode) {
     s32 i;
     s32 last_mode;
 
-    entry = (menu_entry_t*)world_thread_get_current_parameter_1();
+    entry = (menu_entry_t*)thread_get_current_parameter_1_variant();
     options = g_main_game_options.fields;
     g_world_game_option_values[GAME_OPTION_CURSOR_MOVEMENT] = options.cursor_movement;
     g_world_game_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED] = options.cursor_repeat_speed;

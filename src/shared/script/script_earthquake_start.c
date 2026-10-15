@@ -11,7 +11,7 @@ void script_earthquake_start(void) {
     s32 second_counter;
 
     thread_set_current_task_id(THREAD_TASK_EARTHQUAKE);
-    parameters = (event_earthquake_parameters_t*)battle_thread_get_current_parameter_1();
+    parameters = (event_earthquake_parameters_t*)thread_get_current_parameter_1_variant();
     first_counter = 0;
     second_counter = 0;
     for (;;) {

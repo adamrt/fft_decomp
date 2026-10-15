@@ -70,13 +70,13 @@ void world_text_message_box_thread(void) {
     value_index = 0;
     script_variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     g_world_menu_event_state_flag = 0;
-    param = world_thread_get_current_parameter_1();
+    param = thread_get_current_parameter_1_variant();
     rec.box_type = param & 0x70;
     rec.dialog_type = param;
     rec.position = param & 3;
     rec.options = param & 0xC;
-    text = text_find_entry(world_thread_get_current_parameter_2());
-    base_entry = text_find_entry(world_thread_get_current_parameter_2() & 0xF800);
+    text = text_find_entry(thread_get_current_parameter_2_variant());
+    base_entry = text_find_entry(thread_get_current_parameter_2_variant() & 0xF800);
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         rec.mark = 0x12;
         rec.lines = 3;
@@ -105,7 +105,7 @@ void world_text_message_box_thread(void) {
     right = x + half_w - 6;
     bottom = y + half_h - 2;
     win = menu_alloc_window_buffer_pair();
-    win->message_id = world_thread_get_current_parameter_2();
+    win->message_id = thread_get_current_parameter_2_variant();
     if (text[0] == TEXT_SET_PORTRAIT) {
         win[0].portrait_code = text[1];
         win[1].portrait_code = text[1];
@@ -116,8 +116,8 @@ void world_text_message_box_thread(void) {
     }
     win[0].is_message_box = 1;
     win[1].is_message_box = 1;
-    rec.text = world_thread_get_current_parameter_2();
-    message = world_thread_get_current_parameter_2();
+    rec.text = thread_get_current_parameter_2_variant();
+    message = thread_get_current_parameter_2_variant();
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
@@ -177,13 +177,13 @@ void world_text_message_box_thread(void) {
     while (1) {
         no_value = 0xFFFF;
         code = *text;
-        if (world_thread_get_current_parameter_2() != message) {
-            if ((world_thread_get_current_parameter_2() & no_value) != no_value) {
-                while (base_entry != text_find_entry(world_thread_get_current_parameter_2() & 0xF800)) {
+        if (thread_get_current_parameter_2_variant() != message) {
+            if ((thread_get_current_parameter_2_variant() & no_value) != no_value) {
+                while (base_entry != text_find_entry(thread_get_current_parameter_2_variant() & 0xF800)) {
                     thread_yield();
                 }
             }
-            message = world_thread_get_current_parameter_2();
+            message = thread_get_current_parameter_2_variant();
             if ((message & no_value) == no_value) {
                 g_world_menu_event_state_flag = 0;
                 break;
@@ -255,7 +255,7 @@ void world_text_message_box_thread(void) {
                 if (no_wait == 0) {
                     for (i = 0;; i += g_script_event_speed) {
                         thread_yield();
-                        if (world_thread_get_current_parameter_2() != message) {
+                        if (thread_get_current_parameter_2_variant() != message) {
                             break;
                         }
                         if (code == TEXT_PAGE_BREAK) {
@@ -304,7 +304,7 @@ void world_text_message_box_thread(void) {
                 if (code == TEXT_PAGE_BREAK) {
                     continue;
                 }
-                if (world_thread_get_current_parameter_2() != message) {
+                if (thread_get_current_parameter_2_variant() != message) {
                     continue;
                 }
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
