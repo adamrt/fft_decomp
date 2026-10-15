@@ -9,8 +9,8 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
 units:
+  - {name: deploy_menu, source: src/event/attack/deploy_menu.c}
   - {name: deploy_screen, source: src/event/attack/deploy_screen.c}
-  - {name: deploy_select_and_map_title, source: src/event/attack/deploy_select_and_map_title.c}
   - {name: file_load_sync, source: src/event/menu/file_load_sync.c}
   - {name: gfx, source: src/event/attack/gfx.c}
   - {name: gfx_portrait_crossfade_primitives, source: src/event/menu/gfx_portrait_crossfade_primitives.c}
@@ -93,12 +93,12 @@ functions:
   - {addr: 0x801c80d0, size: 1224, name: attack_gfx_prepare_party_portrait_textures, hash: 2d30846164855c52, unit: gfx}
   - {addr: 0x801c8598, size: 1648, name: attack_gfx_prepare_formation_sprites, hash: a2000c973e9a87b8, unit: gfx}
   - {addr: 0x801c8c08, size: 232, name: gfx_set_formation_icon_uv, hash: 353eab0a41a1e1a6, unit: gfx_set_formation_icon_uv}
-  - {addr: 0x801c8cf0, size: 1876, name: attack_deploy_run_select_menu, hash: 76d0198aad839707, unit: deploy_select_and_map_title}
-  - {addr: 0x801c9444, size: 68, name: attack_text_init_battle_pointers, hash: 161ea8f59be23883, unit: deploy_select_and_map_title}
-  - {addr: 0x801c9488, size: 1188, name: attack_text_build_deployment_strings, hash: 686fb6c3f5cef1eb, unit: deploy_select_and_map_title}
-  - {addr: 0x801c992c, size: 1084, name: attack_gfx_build_shaded_panel_strips, hash: 92517fde5ecb3707, unit: deploy_select_and_map_title}
-  - {addr: 0x801c9d68, size: 344, name: attack_map_show_title, hash: 01e9c8201ecae757, unit: deploy_select_and_map_title}
-  - {addr: 0x801c9ec0, size: 204, name: attack_map_load_title_graphic, hash: 75a50e555b3e77a7, unit: deploy_select_and_map_title}
+  - {addr: 0x801c8cf0, size: 1876, name: attack_deploy_run_select_menu, hash: 76d0198aad839707, unit: deploy_menu}
+  - {addr: 0x801c9444, size: 68, name: attack_text_init_battle_pointers, hash: 161ea8f59be23883, unit: deploy_menu}
+  - {addr: 0x801c9488, size: 1188, name: attack_text_build_deployment_strings, hash: 686fb6c3f5cef1eb, unit: deploy_menu}
+  - {addr: 0x801c992c, size: 1084, name: attack_gfx_build_shaded_panel_strips, hash: 92517fde5ecb3707, unit: deploy_menu}
+  - {addr: 0x801c9d68, size: 344, name: attack_map_show_title, hash: 01e9c8201ecae757, unit: deploy_menu}
+  - {addr: 0x801c9ec0, size: 204, name: attack_map_load_title_graphic, hash: 75a50e555b3e77a7, unit: deploy_menu}
 
 data:
   - {addr: 0x801bf000, name: g_attack_map_darkness_color}

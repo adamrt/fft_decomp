@@ -23,13 +23,13 @@ func (p project) symbolsCommand(args []string) error {
 	case "move":
 		return p.moveSymbolsCommand(args[1:])
 	case "rename-unit":
-		return p.renameUnitCommand(args)
+		return p.renameUnitCommand(args[1:])
 	case "unit":
 		return p.unitSymbolsCommand(args[1:])
 	case "split":
 		return p.splitSymbolsCommand(args[1:])
 	default:
-		return fmt.Errorf("unknown symbols action %q; choose rename-function, rename-global, unify, share, move, unit or split", args[0])
+		return fmt.Errorf("unknown symbols action %q; choose rename-function, rename-global, unify, share, move, unit, rename-unit or split", args[0])
 	}
 }
 
