@@ -25,9 +25,9 @@ void menu_input_update_with_message_state_variant(void) {
             g_menu_input_newly_pressed = 0;
             g_menu_input_primary_repeat = 0;
             g_menu_input_secondary_repeat = 0;
-            g_jobstts_text_thread_running_state = (g_jobstts_text_thread_running_state != 0) ? 2 : 1;
-        } else if (g_jobstts_text_thread_running_state != 0) {
-            g_jobstts_text_thread_running_state = 0;
+            g_text_thread_running_state = (g_text_thread_running_state != 0) ? 2 : 1;
+        } else if (g_text_thread_running_state != 0) {
+            g_text_thread_running_state = 0;
             g_menu_input_newly_pressed = 0;
             g_menu_input_primary_repeat = 0;
             g_menu_input_secondary_repeat = 0;
@@ -37,19 +37,19 @@ void menu_input_update_with_message_state_variant(void) {
         g_menu_input_primary_repeat = 0;
         g_menu_input_secondary_repeat = 0;
     }
-    if (g_jobstts_input_lock_timer != 0) {
-        g_jobstts_input_lock_timer--;
+    if (g_input_lock_timer != 0) {
+        g_input_lock_timer--;
         g_menu_input_primary_repeat &= ~PSX_PAD_L2;
         g_menu_input_secondary_repeat &= ~PSX_PAD_L2;
         g_menu_input_newly_pressed &= ~PSX_PAD_L2;
     }
     if (g_menu_input_primary_repeat != 0) {
-        g_jobstts_input_lock_timer = 5;
+        g_input_lock_timer = 5;
     }
     if (running == 0) {
         g_menu_input_lock_mode = 0;
     }
-    if (g_jobstts_text_thread_running_state == 1) {
+    if (g_text_thread_running_state == 1) {
         g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
     }
 }

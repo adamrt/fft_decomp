@@ -53,7 +53,7 @@ void wldcore_menu_push_sound_novel_quit_level(void) {
         = g_wldcore_window_render_records[index].base.y + 0xE;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].save_confirm.second_window].position.x
         = g_wldcore_window_render_records[index].base.x + 4;
-    g_wldcore_menu_blocked_buttons = -1;
+    g_menu_blocked_buttons = -1;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].save_confirm.second_window].position.y
         = g_wldcore_window_render_records[index].base.y - 2;
     g_wldcore_menu_stack_depth = depth + 1;

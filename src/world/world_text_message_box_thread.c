@@ -126,7 +126,7 @@ void world_text_message_box_thread(void) {
     } else {
         menu_build_and_upload_window_frame_image_variant(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
     }
-    if (g_world_formation_screen_active != 0) {
+    if (g_formation_screen_active != 0) {
         x -= 0x100;
         y -= 0x78;
         right -= 0x100;

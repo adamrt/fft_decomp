@@ -18,8 +18,6 @@
 
 /* dead unit */
 
-extern menu_text_layout_t g_world_dead_unit_menu_entries;
-extern menu_entry_t g_world_dead_unit_menu[DEAD_UNIT_MENU_ENTRY_COUNT];
 extern RECT g_world_screen_menu_thin_panel_texture_windows[7];
 
 /* One libgpu texture window per DR_MODE packet (the seven RECTs after
@@ -27,7 +25,6 @@ extern RECT g_world_screen_menu_thin_panel_texture_windows[7];
  * window's w/h; world_screen_menu_window_frame_thread fills in the runtime x/y.
  * Indexing the array reproduces the target's symbol-plus-byte-offset addressing. */
 extern RECT g_world_screen_menu_panel_texture_windows[7];
-extern u32* g_world_dead_unit_controller_input;
 extern s16 g_world_dead_unit_menu_flags[512];
 extern s16 g_world_dead_unit_menu_result; /* primary menu result */
 extern s16 g_world_dead_unit_move_result; /* secondary (move) menu result */
@@ -203,33 +200,17 @@ extern u8 g_world_script_tutorial_id;
 extern u16 g_world_script_tutorial_shift_command_bit;
 extern s16 g_world_script_tutorial_wait_time_remaining;
 extern s16 g_world_script_tutorial_wait_timer;
-extern s16 g_world_event_effect_target_x;
-extern s16 g_world_event_effect_target_y;
 extern u16 g_world_script_tutorial_latched_button;
 extern u8 g_world_script_tutorial_activation_timer;
 extern s16 g_world_script_tutorial_buttons;
 extern s32 g_world_script_saved_event_input;
-extern s16 g_world_event_map_jump_in_request;
-extern u8 g_world_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
 extern u32 g_world_script_tutorial_repeat_counters[16];
 extern u16 g_world_script_tutorial_previous_input;
 extern u8* g_world_script_tutorial_command_ptr;
 extern s16 g_world_event_effect_target_runtime_id;
-extern s16 g_world_event_effect_target_mode;
 extern world_event_command_args_t g_world_event_map_command_80_args;
 extern world_event_command_args_t g_world_event_map_command_83_args;
 extern world_event_music_switch_t g_world_event_music_switch;
-extern s16 g_world_event_pending_effect_id;
-extern s32 g_world_event_pending_evtchr_save_slot;
-extern s32 g_world_event_pending_loaded_evtchr_clear_slot;
-extern s16 g_world_event_pending_map_jump_out_2_id;
-extern s16 g_world_event_pending_map_jump_out_id;
-extern s16 g_world_event_pending_map_state;
-extern s32 g_world_event_pending_reserved_vram_release_slot;
-extern s32 g_world_event_pending_saved_evtchr_clear_slot;
-extern s32 g_world_event_pending_unit_vram_copy;
-extern s16 g_world_event_weather_request;
-extern map_background_gradient_colors_t g_world_event_background_colors;
 void world_script_handle_tutorial_command_highlight_ring(void);
 void world_script_advance_tutorial_highlight_brightness(void);
 void script_earthquake_start(void);
@@ -288,9 +269,6 @@ enum {
     WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME = 15,
 };
 
-/* Running-state snapshot used while updating event input. */
-extern u8 g_world_thread_status_snapshot[16];
-
 void world_text_release_current_message_box_slot(void);
 void world_formation_ability_menu_idle_thread(void);
 void world_thread_idle_yield_forever(void);
@@ -302,7 +280,6 @@ void world_thread_request_stop(s32 thread_id);
 
 /* turn */
 
-extern menu_list_page_t g_world_at_list_pages[2];
 void world_screen_build_at_list(void);
 
 /* ability */
@@ -390,36 +367,13 @@ extern image_load_parameters_t g_world_equipment_panel_sprite_params_3[19];
 extern image_load_parameters_t g_world_equipment_panel_icon_params[WORLD_EQUIPMENT_SLOT_COUNT];
 extern menu_status_thread_t g_world_equipment_ability_panel_thread_params;
 extern s8 g_world_equip_menu_initialized;
-extern menu_instruction_t g_world_equip_item_menu_script;
-extern s8 g_world_equip_item_slot;
-extern s8 g_world_equip_item_list_refresh;
-extern s8 g_world_equip_item_preview_active;
 extern u16 g_world_equip_item_cursor_anim;
 extern point16_t g_world_equip_item_cursor_point;
 extern u16 g_world_remove_all_equipment_ids[WORLD_EQUIPMENT_SLOT_COUNT];
 extern point16_t g_world_remove_all_equipment_cursor_point;
-extern s8 g_world_equip_item_list_open;
-extern s16 g_world_equip_item_previewed_cursor;
-extern s8 g_world_remove_all_equipment_prompt_active;
 extern volatile u16 g_world_remove_all_equipment_blink_counter;
 
 /* editor */
-
-extern point16_t g_world_editor_numeric_geometry[];
-extern battle_menu_status_panel_numeric_geometry_t g_world_editor_numeric_table;
-extern RECT g_world_editor_numeric_entries_a;
-extern RECT g_world_editor_numeric_entries_b;
-extern RECT g_world_editor_numeric_entries_c;
-extern RECT g_world_editor_numeric_entries_d;
-extern RECT g_world_editor_numeric_entries_e;
-extern RECT g_world_editor_numeric_entries_f;
-extern image_load_parameters_t g_world_editor_numeric_texture[];
-extern menu_number_entry_t g_world_editor_numeric_descriptor_a[];
-extern menu_number_entry_t g_world_editor_numeric_descriptor_b[];
-extern menu_status_panel_numeric_buffer_t g_world_editor_numeric_state_a[2];
-extern menu_status_panel_numeric_buffer_t g_world_editor_numeric_state_b[2];
-extern menu_unit_stat_number_images_t g_world_editor_numeric_text_a;
-extern menu_unit_stat_number_images_t g_world_editor_numeric_text_b;
 
 /* comparison */
 extern menu_unit_status_record_t g_world_comparison_unit_stat_summary;
@@ -542,7 +496,6 @@ extern menu_status_panel_buffer_t g_world_change_banner_panel_frames[2];
  * script_execute_event_variant bodies. Signatures are as the interpreters bind them;
  * unverified names stay provisional. */
 extern s16 g_world_3d_object_use_request;
-extern u16 g_world_3d_object_wait_status;
 extern u8 g_world_gfx_fade_decreasing;
 extern u8 g_world_gfx_fade_disabled;
 extern u8 g_world_gfx_fade_increasing;
@@ -578,15 +531,10 @@ extern u8 g_world_change_banner_text_image[];
 
 /* Fade tile RGB channels, set to equal levels by the fade updaters. */
 extern rgb24_t g_world_fade_tile_color;
-extern u16 g_world_gfx_flat_line_capacity; /* +0x24 line count */
-extern u16 g_world_gfx_line_f3_capacity;
+extern u16 g_world_gfx_flat_line_capacity;     /* +0x24 line count */
 extern u16 g_world_gfx_gradient_line_capacity; /* gradient line count */
 extern u16 g_world_gfx_line_g3_capacity;
-extern u16 g_world_gfx_line_f4_capacity;
-extern u16 g_world_gfx_line_g4_capacity;
-extern u16 g_world_gfx_poly_ft3_capacity;
 extern u16 g_world_gfx_flat_line_count;
-extern u16 g_world_gfx_poly_gt3_capacity;
 extern u16 g_world_gfx_textured_quad_capacity; /* textured quad count */
 extern u16 g_world_gfx_line_f3_count;
 extern u16 g_world_gfx_gradient_line_count;
@@ -596,41 +544,30 @@ extern u16 g_world_gfx_line_f4_count;
 extern u16 g_world_gfx_line_g4_count;
 extern u16 g_world_gfx_poly_ft3_count;
 extern u16 g_world_gfx_poly_gt3_count;
-extern u16 g_world_gfx_sprite_8_capacity;
 extern u16 g_world_gfx_draw_buffer_clip_y;
 
-extern u16 g_world_gfx_sprite_16_capacity;
 extern u16 g_world_ot_length;
 
 /* Volatile: world_gfx_init_double_packet_buffers must read the draw-area count
  * after the draw-move count, as the target does. */
 extern volatile u16 g_world_gfx_draw_area_capacity;
 extern u16 g_world_gfx_draw_area_count;
-extern u16 g_world_gfx_draw_mode_capacity;
-extern u16 g_world_gfx_tile_capacity; /* tile count */
 
 /* Draw move count; volatile for the same read order as g_world_gfx_draw_area_capacity. */
 extern volatile u16 g_world_gfx_draw_move_capacity;
 extern u16 g_world_gfx_sprite_count;
-extern u16 g_world_gfx_tile_1_capacity;
-extern u16 g_world_gfx_tile_8_capacity;
 extern u16 g_world_gfx_tile_1_count;
 extern u16 g_world_gfx_tile_8_count;
 extern menu_gfx_context_t* g_world_gfx_packet_buffers;
 extern u16 g_world_gfx_sprite_8_count;
 
-extern u16 g_world_gfx_tile_16_capacity;
 extern u16 g_world_gfx_tile_16_count;
 extern u16 g_world_gfx_sprite_16_count;
 
-extern u16 g_world_gfx_poly_f3_capacity;
-extern u16 g_world_gfx_poly_g3_capacity;
-extern u16 g_world_gfx_poly_f4_capacity;
 extern u16 g_world_gfx_gradient_quad_capacity; /* gradient quad count */
 extern u16 g_world_gfx_poly_f3_count;
 extern u16 g_world_gfx_poly_g3_count;
 extern u16 g_world_gfx_poly_f4_count;
-extern u16 g_world_gfx_sprite_capacity;
 extern s32 g_active_graphics_buffer_index;
 
 void gfx_add_draw_area_primitive(RECT* rect, s32 otag_index);
@@ -759,10 +696,6 @@ s32 job_is_locked_for_all_units(s16 job_id);
 
 /* panel */
 
-extern s16 g_world_panel_slide_up_y[];
-extern point16_t g_world_panel_item_icon_texture[];
-extern s16 g_world_panel_slide_down_y[];
-
 /* tutorial */
 
 /* Serialized tutorial commands; opcode selects the operand record. */
@@ -840,7 +773,6 @@ void world_script_draw_tutorial_highlight_quads(s32 brightness);
 void world_script_load_tutorial_files(s32 index, world_tutorial_state_t* record);
 
 /* input */
-extern u8 g_world_input_activation_timer;
 extern menu_input_state_t g_world_input_frame_state;
 extern u32 g_world_input_frame_current;
 extern u32 g_world_input_frame_initial_repeat_counter;
@@ -854,7 +786,6 @@ extern u32 g_world_input_frame_secondary_repeat_counter;
  * check instead of reusing the first load. */
 extern volatile u8 g_world_input_lockout_timer;
 extern u16 g_world_input_previous, g_world_input_latched_button;
-extern s32 g_world_input_repeat_counters[16];
 extern u32 g_world_input_primary_repeat;
 extern menu_input_timing_profile_t g_world_input_timing_profiles[];
 extern u8 g_world_input_triangle_latched;
@@ -1074,7 +1005,6 @@ extern u8 g_world_formation_unit_browse_enabled;
 extern const u8 g_world_month_lengths[WORLD_MONTH_LENGTH_TABLE_COUNT];
 extern const world_zodiac_date_limit_t g_world_zodiac_date_limits[WORLD_ZODIAC_DATE_LIMIT_COUNT];
 extern void (*g_world_formation_menu_handlers[])(void);
-extern s32 g_world_formation_screen_active;
 extern s16 g_world_formation_open_request_state;   /* world_screen_request_state_e */
 extern u32 g_world_formation_menu_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
 extern s32 g_world_formation_name_string_revision;
@@ -1083,8 +1013,6 @@ extern zodiac_draw_context_t g_world_formation_view;
 /* Portrait code per sprite set: low byte is the portrait index. */
 extern u16 g_world_formation_sprite_by_portrait[];
 
-/* Remaps the monster portrait indices, 0x3f and above; indexed from 0x3f. */
-extern u8 g_world_monster_formation_sprite_table[20];
 extern u8 g_world_formation_menu_text_table[];
 extern clut_t g_world_formation_menu_palettes;
 extern rgb24_t g_world_formation_saved_sprite_color;
@@ -1371,10 +1299,6 @@ extern text_glyph_state_t g_world_text_message_box_glyph;
 extern glyph_blit_t g_world_text_message_box_state;
 extern s32 g_world_text_section_offsets[32];
 
-extern u16 g_world_text_speaker_swap_unit_a;
-extern u16 g_world_text_speaker_swap_unit_b;
-extern s32 g_world_text_current_line;
-
 extern s16 g_world_fixed_number_panel_request_state;
 extern s32 g_world_text_message_box_digit_divisors[];
 extern s32 g_world_text_message_box_slot_threads[3];
@@ -1539,7 +1463,6 @@ extern s32 g_world_menu_use_alternate_main_palette;
 extern u8 g_world_menu_use_alternate_palette;
 extern s16 g_world_menu_use_scroll_position;
 extern s32 g_world_menu_scrolling_list_depth;
-extern u16 g_world_menu_input_block_frames;
 
 /* Four image-load parameter blocks per icon kind, for kinds 5..15. */
 extern image_load_parameters_t g_world_menu_icon_strip_image_params[];
@@ -1578,8 +1501,6 @@ extern s32 g_world_menu_number_entry_digit_steps[];
 /* Per-piece 4.12 fixed-point x/y scale; a negative factor flips that axis. */
 extern menu_button_piece_t g_world_menu_button_pieces[];
 extern point16_t g_world_menu_button_piece_scales[];
-extern u8 g_world_menu_button_piece_starts[];
-extern s8 g_world_menu_button_press_timers[];
 extern u16 g_world_menu_window_tpage;
 extern u16 g_world_menu_palette_clut_normal;
 extern u16 g_world_menu_palette_clut_alt;
@@ -1587,7 +1508,6 @@ extern u16 g_world_menu_alternate_number_clut_alt;
 extern u16 g_world_menu_alternate_number_clut_normal;
 extern u16 g_world_menu_disabled_number_clut_normal;
 extern u16 g_world_menu_disabled_number_clut_alt;
-extern u16 g_world_menu_button_clut;
 extern u16 g_world_menu_hp_gauge_clut;
 extern u16 g_world_menu_mp_gauge_clut;
 extern u16 g_world_menu_ct_gauge_clut;
@@ -1612,9 +1532,6 @@ extern world_menu_grid_cell_t g_world_grid_menu_shop_scrolled_cells[];
 extern world_menu_grid_cell_t* g_world_active_grid_menu_cells;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialized */
-extern s16 g_world_menu_at_list_primary_values[];
-extern s16 g_world_menu_at_list_secondary_values[];
-extern s16 g_world_menu_at_list_indices[];
 extern s16 g_world_menu_at_list_flags[256];
 extern battle_at_entry_t g_world_action_target_list_slots[BATTLE_AT_LIST_CAPACITY];
 extern s16 g_world_menu_submenu_page_row_text_ids[];
@@ -1637,7 +1554,6 @@ extern s8 g_world_menu_music_slot; /* formation music slot */
 extern u16 g_world_menu_window_clut;
 extern u16 g_world_menu_active_clut_front;
 extern u16 g_world_menu_active_clut_back;
-extern menu_window_rect_source_t* g_world_menu_window_rect_source;
 
 /* Result slot per menu (-1 while none); world_menu_reset_selection_results clears all 16. */
 extern s16 g_world_menu_selection_results[16];
@@ -1771,7 +1687,6 @@ typedef enum world_card_menu_step {
 } world_card_menu_step_e;
 
 extern card_save_buffer_t* g_world_load_work_buffer;
-extern u8 g_world_card_info_pending;
 extern s16 g_world_card_list_scroll_velocity;
 extern u8 g_world_card_menu_step; /* world_card_menu_step_e */
 extern s32 g_world_card_open_descriptor;
@@ -1926,7 +1841,6 @@ extern oriented_quad_t g_world_item_category_tab_sprites[];       /* 20-byte qua
 extern u8 g_world_item_category_tab_x[];                          /* per-row base x */
 extern u8 g_world_item_category_input_lock;
 extern u8 g_world_item_menu_saved_browse_enabled;
-extern s8 g_world_remove_item_previewed_slot;
 extern s16 g_world_remove_item_equipment[WORLD_EQUIPMENT_SLOT_COUNT];
 extern s8 g_world_item_category_previewed_cursor;
 extern s16 g_world_item_category_strip_text_ids[]; /* option text ids of the active strip, -1 terminated */
@@ -2173,9 +2087,6 @@ u32* world_shop_load_background_tim(s32 index);
 
 /* other */
 extern s16 g_world_field_object_use_request;
-extern u16 g_world_field_object_wait_status;
-extern u16 g_world_frame_arg;
-extern s32 g_world_frame_counter;
 extern s16 g_world_debug_variable_list_request_state;
 extern s32 g_world_preview_stats_window_active;
 extern s8 g_world_dismiss_unit_prompt_running;

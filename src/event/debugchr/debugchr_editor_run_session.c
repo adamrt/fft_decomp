@@ -80,7 +80,7 @@ void debugchr_editor_run_session(void) {
         if (g_debugchr_editor_unit_ids[i] != 0) {
             g_debugchr_panel_selected_unit_data.battle_id = i;
             g_debugchr_panel_selected_unit_data.name_id = i;
-            g_debugchr_panel_selected_billboard.unit_index = i;
+            g_panel_selected_billboard.unit_index = i;
             menu_load_selected_unit_variant();
             g_debugchr_editor_selected_unit_slot = i;
             break;
@@ -143,7 +143,7 @@ loop_outer:
             unit_index = g_debugchr_editor_selected_unit_slot;
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
-            g_debugchr_panel_selected_billboard.unit_index = unit_index;
+            g_panel_selected_billboard.unit_index = unit_index;
             menu_load_selected_unit_variant();
             if (g_menu_status_panel_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
@@ -168,7 +168,7 @@ loop_outer:
             unit_index = g_debugchr_editor_selected_unit_slot;
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
-            g_debugchr_panel_selected_billboard.unit_index = unit_index;
+            g_panel_selected_billboard.unit_index = unit_index;
             menu_load_selected_unit_variant();
             if (g_menu_status_panel_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);

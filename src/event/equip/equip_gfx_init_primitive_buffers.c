@@ -9,18 +9,18 @@
 void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context) {
     s32 i;
 
-    for (i = 0; i < g_equip_gfx_line_f2_capacity; i++) {
+    for (i = 0; i < g_gfx_line_f2_capacity; i++) {
         SetLineF2(&context->flat_lines[i]);
     }
-    for (i = 0; i < g_equip_gfx_poly_f4_capacity; i++) {
+    for (i = 0; i < g_gfx_poly_f4_capacity; i++) {
         SetPolyF4(&context->flat_quads[i]);
         SetShadeTex(&context->flat_quads[i], 0);
     }
-    for (i = 0; i < g_equip_gfx_poly_ft4_capacity; i++) {
+    for (i = 0; i < g_gfx_poly_ft4_capacity; i++) {
         SetPolyFT4(&context->textured_quads[i]);
         SetShadeTex(&context->textured_quads[i], 0);
     }
-    for (i = 0; i < g_equip_gfx_tile_capacity; i++) {
+    for (i = 0; i < g_gfx_tile_capacity; i++) {
         SetTile(&context->tiles[i]);
     }
     for (i = 0; i < g_equip_gfx_draw_move_capacity; i++) {

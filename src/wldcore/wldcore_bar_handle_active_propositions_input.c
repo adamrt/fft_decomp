@@ -18,7 +18,7 @@ void wldcore_bar_handle_active_propositions_input(wldcore_menu_stack_record_t* l
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         g_wldcore_menu_ordering_table_offset = 1;
-        g_wldcore_menu_blocked_buttons = 0;
+        g_menu_blocked_buttons = 0;
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_menu_stack_depth--;
         if (level->panel.result != 0) {

@@ -9,33 +9,32 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     u32* result;
 
     if (g_jobstts_initialized == 0) {
-        g_jobstts_gfx_otag_length = 0x40;
-        g_jobstts_gfx_poly_ft4_capacity = 0x1f4;
+        g_gfx_otag_length = 0x40;
+        g_gfx_poly_ft4_capacity = 0x1f4;
         g_jobstts_gfx_draw_move_capacity = 0x14;
         g_jobstts_gfx_draw_area_capacity = 0xa;
-        g_jobstts_gfx_poly_f3_capacity = 0;
-        g_jobstts_gfx_poly_ft3_capacity = 0;
-        g_jobstts_gfx_poly_f4_capacity = 0;
-        g_jobstts_gfx_poly_g3_capacity = 0;
-        g_jobstts_gfx_poly_gt3_capacity = 0;
-        g_jobstts_gfx_poly_g4_capacity = 0;
-        g_jobstts_gfx_poly_gt4_capacity = 0;
-        g_jobstts_gfx_line_f2_capacity = 0;
-        g_jobstts_gfx_line_f3_capacity = 0;
-        g_jobstts_gfx_line_f4_capacity = 0;
+        g_gfx_poly_f3_capacity = 0;
+        g_gfx_poly_ft3_capacity = 0;
+        g_gfx_poly_f4_capacity = 0;
+        g_gfx_poly_g3_capacity = 0;
+        g_gfx_poly_gt3_capacity = 0;
+        g_gfx_poly_g4_capacity = 0;
+        g_gfx_poly_gt4_capacity = 0;
+        g_gfx_line_f2_capacity = 0;
+        g_gfx_line_f3_capacity = 0;
+        g_gfx_line_f4_capacity = 0;
         g_jobstts_gfx_line_g2_capacity = 0;
         g_jobstts_gfx_line_g3_capacity = 0;
-        g_jobstts_gfx_line_g4_capacity = 0;
-        g_jobstts_gfx_tile_capacity = 0;
-        g_jobstts_gfx_tile_1_capacity = 0;
-        g_jobstts_gfx_tile_8_capacity = 0;
-        g_jobstts_gfx_tile_16_capacity = 0;
-        g_jobstts_gfx_sprite_capacity = 0;
-        g_jobstts_gfx_sprite_8_capacity = 0;
-        g_jobstts_gfx_sprite_16_capacity = 0;
-        jobstts_gfx_init_contexts(g_jobstts_gfx_contexts, g_jobstts_gfx_otag_buffer, 0, 0, 0,
-            g_jobstts_gfx_poly_ft4_buffer, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            g_jobstts_gfx_draw_move_buffer, g_jobstts_gfx_draw_area_buffer);
+        g_gfx_line_g4_capacity = 0;
+        g_gfx_tile_capacity = 0;
+        g_gfx_tile_1_capacity = 0;
+        g_gfx_tile_8_capacity = 0;
+        g_gfx_tile_16_capacity = 0;
+        g_gfx_sprite_capacity = 0;
+        g_gfx_sprite_8_capacity = 0;
+        g_gfx_sprite_16_capacity = 0;
+        jobstts_gfx_init_contexts(g_jobstts_gfx_contexts, g_gfx_otag_buffer, 0, 0, 0, g_gfx_poly_ft4_buffer, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, g_gfx_draw_move_buffer, g_gfx_draw_area_buffer);
         jobstts_menu_load_images_and_clear_selection();
         jobstts_unit_init_job_data(unit);
         menu_clear_selection_records();

@@ -39,7 +39,7 @@ void bunit_menu_run_reorder_list(void) {
         g_bunit_menu_current_menu = BUNIT_MENU_UNIT_LIST;
     }
 
-    g_bunit_text_selection_id = g_bunit_menu_reorder_list_entries[g_bunit_menu_reorder_list_index] + 0x1002;
+    g_text_selection_id = g_bunit_menu_reorder_list_entries[g_bunit_menu_reorder_list_index] + 0x1002;
     result = g_bunit_menu_reorder_result;
     if (result != -1) {
         sel = result;

@@ -8,5 +8,5 @@ void battle_state_handle_free_cursor_help_state(void) {
         battle_state_set_free_cursor();
     }
     battle_state_handle_free_cursor_input();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }

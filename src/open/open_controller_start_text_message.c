@@ -18,9 +18,9 @@ void open_controller_start_text_message(s32 parameter, s32 run_followup) {
 
     {
         s32 controller = g_open_current_controller_index;
-        s32 saved_blocked_buttons = g_open_menu_blocked_buttons;
+        s32 saved_blocked_buttons = g_menu_blocked_buttons;
 
-        g_open_menu_blocked_buttons = -1;
+        g_menu_blocked_buttons = -1;
         g_open_controller_records_next[controller].text_message.saved_blocked_buttons = saved_blocked_buttons;
     }
     main_sound_play_sfx(MAIN_SFX_WINDOW_OPEN);

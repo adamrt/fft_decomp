@@ -14,7 +14,7 @@ void wldcore_menu_finish_close_request(wldcore_menu_message_level_t* level) {
         g_wldcore_displayed_numeric_value_tertiary = g_main_system_play_time_seconds;
     }
     if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
-        g_wldcore_menu_blocked_buttons = level->saved_blocked_buttons;
+        g_menu_blocked_buttons = level->saved_blocked_buttons;
         g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth - 1;
         wldcore_menu_dispatch_resume_handler();
         if (level->reload_text != 0) {

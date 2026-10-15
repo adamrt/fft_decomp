@@ -32,12 +32,12 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     priority = g_menu_gfx_otag_index;
     clut = g_menu_palette_clut;
     if (command->rectangle_source == 2) {
-        left = g_card_menu_window_rect_source->rect.x - 5;
-        top = g_card_menu_window_rect_source->rect.y - 9;
-        full_columns = g_card_menu_window_rect_source->rect.w / 16;
-        partial_width = g_card_menu_window_rect_source->rect.w % 16;
-        full_rows = g_card_menu_window_rect_source->rect.h / 16;
-        partial_height = g_card_menu_window_rect_source->rect.h % 16;
+        left = g_menu_window_rect_source->rect.x - 5;
+        top = g_menu_window_rect_source->rect.y - 9;
+        full_columns = g_menu_window_rect_source->rect.w / 16;
+        partial_width = g_menu_window_rect_source->rect.w % 16;
+        full_rows = g_menu_window_rect_source->rect.h / 16;
+        partial_height = g_menu_window_rect_source->rect.h % 16;
     } else {
         u8 width;
         u8 height;
@@ -50,7 +50,7 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
         full_rows = height >> 4;
         partial_height = height & 15;
     }
-    g_card_cmd_window_interior_command.rectangle_source = command->rectangle_source;
+    g_cmd_window_interior_command.rectangle_source = command->rectangle_source;
     g_card_menu_window_right_x = command->width + left + 5;
     v_top = 2;
     if (command->rectangle_source == 1) {
@@ -121,17 +121,17 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
     }
 
     if (command->rectangle_source == 2) {
-        g_gfx_tiled_rect.x = g_card_menu_window_rect_source->rect.x;
-        g_gfx_tiled_rect.y = g_card_menu_window_rect_source->rect.y;
-        g_gfx_tiled_rect.w = g_card_menu_window_rect_source->rect.w;
-        g_gfx_tiled_rect.h = g_card_menu_window_rect_source->rect.h;
+        g_gfx_tiled_rect.x = g_menu_window_rect_source->rect.x;
+        g_gfx_tiled_rect.y = g_menu_window_rect_source->rect.y;
+        g_gfx_tiled_rect.w = g_menu_window_rect_source->rect.w;
+        g_gfx_tiled_rect.h = g_menu_window_rect_source->rect.h;
     } else {
-        g_card_cmd_window_interior_command.x = command->x;
-        g_card_cmd_window_interior_command.y = command->y;
-        g_card_cmd_window_interior_command.width = command->width;
-        g_card_cmd_window_interior_command.height = command->height;
+        g_cmd_window_interior_command.x = command->x;
+        g_cmd_window_interior_command.y = command->y;
+        g_cmd_window_interior_command.width = command->width;
+        g_cmd_window_interior_command.height = command->height;
     }
-    menu_cmd_draw_tiled_rectangle_handler(&g_card_cmd_window_interior_command);
+    menu_cmd_draw_tiled_rectangle_handler(&g_cmd_window_interior_command);
 
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;

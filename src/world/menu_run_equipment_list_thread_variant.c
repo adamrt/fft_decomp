@@ -76,20 +76,20 @@ void menu_run_equipment_list_thread_variant(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_init_image_loading(&screen->sprites[i], g_world_editor_numeric_geometry,
-                    &g_world_equipment_panel_origin, &g_world_equipment_panel_sprite_params_0[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
+                    &g_world_equipment_panel_sprite_params_0[i]);
             }
             if (mode == 1) {
-                gfx_init_image_loading(&screen->sprites[i], g_world_editor_numeric_geometry,
-                    &g_world_equipment_panel_origin, &g_world_equipment_panel_sprite_params_1[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
+                    &g_world_equipment_panel_sprite_params_1[i]);
             }
             if (mode == 2) {
-                gfx_init_image_loading(&screen->sprites[i], g_world_editor_numeric_geometry,
-                    &g_world_equipment_panel_origin, &g_world_equipment_panel_sprite_params_2[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
+                    &g_world_equipment_panel_sprite_params_2[i]);
             }
             if (mode == 3) {
-                gfx_init_image_loading(&screen->sprites[i], g_world_editor_numeric_geometry,
-                    &g_world_equipment_panel_origin, &g_world_equipment_panel_sprite_params_3[i]);
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, &g_world_equipment_panel_origin,
+                    &g_world_equipment_panel_sprite_params_3[i]);
             }
         }
         if (frame == 0 || thread->redraw_request == 1) {
@@ -112,8 +112,8 @@ void menu_run_equipment_list_thread_variant(void) {
         screen->sprites[13].u0 = u;
         menu_init_sprite_array(&screen->sprites[19], WORLD_EQUIPMENT_SLOT_COUNT, 0x7cfc);
         for (i = 0; i < WORLD_EQUIPMENT_SLOT_COUNT; i++) {
-            gfx_init_image_loading(&screen->sprites[19 + i], g_world_panel_item_icon_texture,
-                &g_world_equipment_panel_origin, &g_world_equipment_panel_icon_params[i]);
+            gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture, &g_world_equipment_panel_origin,
+                &g_world_equipment_panel_icon_params[i]);
             id = state->equipment[i];
             if ((id & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], id);
@@ -124,14 +124,14 @@ void menu_run_equipment_list_thread_variant(void) {
         screen->sprites[12].u0 = u;
         screen->sprites[13].u0 = u;
         screen->draw_offsets[0].position.x = thread->x - 0x80;
-        g_world_gfx_draw_area_y = g_world_frame_arg != 0xf0 ? 0xf0 : 0;
+        g_world_gfx_draw_area_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->y + g_world_gfx_draw_area_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_world_gfx_draw_area_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_world_equipment_panel_draw_area, frame, g_world_frame_arg, thread);
+            &screen->portrait, &g_world_equipment_panel_draw_area, frame, g_frame_arg, thread);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);

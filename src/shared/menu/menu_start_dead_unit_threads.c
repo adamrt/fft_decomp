@@ -20,10 +20,10 @@ void menu_start_dead_unit_threads(void) {
 
     /* Publish the menu before its local copy and selector store.
      * Reordering them changes address CSE. */
-    g_menu_thread_menu_data = g_option_dead_unit_menu;
-    menu = g_option_dead_unit_menu;
-    g_option_dead_unit_menu[DEAD_UNIT_MENU_LIST].select_text_table = 5;
-    g_option_dead_unit_menu[DEAD_UNIT_MENU_LIST].context = &g_option_dead_unit_menu_entries;
+    g_menu_thread_menu_data = g_dead_unit_menu;
+    menu = g_dead_unit_menu;
+    g_dead_unit_menu[DEAD_UNIT_MENU_LIST].select_text_table = 5;
+    g_dead_unit_menu[DEAD_UNIT_MENU_LIST].context = &g_dead_unit_menu_entries;
 
     for (index = 0x1ff; index >= 0; index--) {
         g_option_dead_unit_menu_flags[index] = 0;
@@ -44,7 +44,7 @@ void menu_start_dead_unit_threads(void) {
                  * the pair into a strength-reduced giv. */
                 s32 value = bit_index + TEXT_ID_ABILITY_NAME_BASE;
 
-                g_option_menu_at_list_primary_values[value_count++] = byte_index * 8 + value;
+                g_menu_at_list_primary_values[value_count++] = byte_index * 8 + value;
             }
             mask *= 2;
         }
@@ -141,8 +141,8 @@ void menu_start_dead_unit_threads(void) {
                 if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
                     break;
                 }
-                g_option_dead_unit_controller_input = script_get_controller_input_pointer(0);
-                if ((*g_option_dead_unit_controller_input & PSX_PAD_SELECT) != 0) {
+                g_dead_unit_controller_input = script_get_controller_input_pointer(0);
+                if ((*g_dead_unit_controller_input & PSX_PAD_SELECT) != 0) {
                     menu_start_building_thread();
                 }
             }

@@ -28,28 +28,28 @@ void bunit_menu_draw_pressable_button(s16 slot, s16 x, s16 y, s16 pressed, s16 b
 
     speed = menu_get_event_speed();
     if (busy != 0) {
-        g_bunit_menu_button_press_timers[slot] = 0;
+        g_menu_button_press_timers[slot] = 0;
         clut = g_menu_cursor_mode1_foreground_clut;
     } else if (pressed != 0) {
-        g_bunit_menu_button_press_timers[slot] = 1;
+        g_menu_button_press_timers[slot] = 1;
         g_sound_queued_effect_id = sound_id;
     } else {
-        phase = g_bunit_menu_button_press_timers[slot];
+        phase = g_menu_button_press_timers[slot];
         if ((phase != 0) && (phase < 6 / speed)) {
-            g_bunit_menu_button_press_timers[slot] = g_bunit_menu_button_press_timers[slot] + 1;
+            g_menu_button_press_timers[slot] = g_menu_button_press_timers[slot] + 1;
         } else {
             clut = g_menu_cursor_mode0_foreground_clut;
-            g_bunit_menu_button_press_timers[slot] = 0;
+            g_menu_button_press_timers[slot] = 0;
         }
     }
 
     i = 0;
-    if (g_bunit_menu_button_press_timers[slot] != 0) {
+    if (g_menu_button_press_timers[slot] != 0) {
         y += 1;
-        clut = g_bunit_menu_button_clut;
+        clut = g_menu_button_clut;
     }
-    entry = g_bunit_menu_button_piece_starts[slot];
-    count = g_bunit_menu_button_piece_starts[slot + 1] - entry;
+    entry = g_menu_button_piece_starts[slot];
+    count = g_menu_button_piece_starts[slot + 1] - entry;
     desc.source.clut = clut;
     desc.source.tpage = g_menu_cursor_texture_page;
     if (count > 0) {

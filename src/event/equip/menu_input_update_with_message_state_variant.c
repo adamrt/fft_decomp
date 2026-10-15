@@ -28,33 +28,33 @@ void menu_input_update_with_message_state_variant(void) {
         running = thread_is_running(THREAD_SCREEN_SLOT_TEXT);
         if (running != 0) {
             menu_input_clear_state();
-            if (g_equip_text_thread_running_state != 0) {
+            if (g_text_thread_running_state != 0) {
                 state = 2;
             } else {
                 state = 1;
             }
-            g_equip_text_thread_running_state = state;
+            g_text_thread_running_state = state;
         } else {
-            g_equip_text_thread_running_state = 0;
+            g_text_thread_running_state = 0;
         }
     }
 
-    delay = g_equip_input_lock_timer;
+    delay = g_input_lock_timer;
     if (delay != 0) {
-        g_equip_input_lock_timer = delay - 1;
+        g_input_lock_timer = delay - 1;
         g_menu_input_primary_repeat &= ~PSX_PAD_L2;
         g_menu_input_secondary_repeat &= ~PSX_PAD_L2;
         g_menu_input_newly_pressed &= ~PSX_PAD_L2;
     }
     if (g_menu_input_primary_repeat != 0) {
-        g_equip_input_lock_timer = 5;
+        g_input_lock_timer = 5;
     }
     if (running == 0) {
         g_equip_text_message_thread_active = 0;
         g_menu_input_lock_mode = 0;
         g_equip_sound_suppress_queued = 0;
     }
-    if (g_equip_text_thread_running_state == 1) {
+    if (g_text_thread_running_state == 1) {
         g_sound_queued_effect_id = MAIN_SFX_WINDOW_OPEN;
     }
 }

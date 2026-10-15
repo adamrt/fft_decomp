@@ -56,9 +56,9 @@ s32 menu_update_equipment_variant(void) {
     input = 0;
     if (g_equip_menu_substate < 2) {
         input = g_menu_input_primary_repeat;
-        g_equip_input_page_scroll_disabled = 0;
+        g_input_page_scroll_disabled = 0;
     } else {
-        g_equip_input_page_scroll_disabled = 1;
+        g_input_page_scroll_disabled = 1;
     }
     override = 0;
     if (g_menu_input_lock_mode != 0 || thread_is_running(2) != 0) {

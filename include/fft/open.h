@@ -16,7 +16,6 @@
 #include "psx/libpress.h"
 
 /* card */
-extern u8 g_open_card_info_pending;
 s32 open_card_check_slots(void);
 s32 open_card_poll_info_result(void);
 s32 open_card_poll_info_until_stable(s32 retry_limit);
@@ -35,7 +34,6 @@ void open_file_load_sound_menu_textures(void);
 s32 open_file_get_cd_sync_state_delta(void);
 
 /* input */
-extern u32 g_open_input_current_buttons;
 extern s32 g_open_input_left_repeat_counter;
 extern s32 g_open_input_right_repeat_counter;
 extern s32 g_open_input_directional_repeat_initial_delay;
@@ -45,7 +43,6 @@ extern s32 g_open_input_down_repeat_counter;
 /* Volatile: open_menu_handle_sound_type_input reloads it (lui/lw) for every
  * test; readers that test it twice from one load take a local copy. */
 extern volatile u32 g_open_input_new_button_presses;
-extern u32 g_open_input_polled_buttons;
 extern u32 g_open_input_previous_buttons;
 extern s32 g_open_input_up_repeat_counter;
 u32 open_input_update_repeat(u32 buttons);
@@ -354,8 +351,6 @@ void open_birthday_restore_date_menu(open_birthday_date_state_t* menu);
 
 /* menu */
 
-/* Pad buttons withheld from the WORLD menu frame (open_menu_update_world_formation); -1 blocks all. */
-extern s32 g_open_menu_blocked_buttons;
 extern s32 g_open_menu_formation_otag_index;
 
 void open_menu_update_world_formation(void);

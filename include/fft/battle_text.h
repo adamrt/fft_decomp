@@ -21,9 +21,6 @@ u8* battle_text_find_entry(u32 text_id);
 
 /* messages */
 extern s32 g_battle_text_awaiting_input;
-extern s32 g_battle_text_current_line;
-extern u16 g_battle_text_speaker_swap_unit_a;
-extern u16 g_battle_text_speaker_swap_unit_b;
 
 /* typewriter entrypoint */
 

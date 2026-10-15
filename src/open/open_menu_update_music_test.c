@@ -22,7 +22,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
     if (state->blink_frames != 0 && ++state->blink_frames >= 10) {
         state->blink_frames = 0;
         world_formation_set_display_mode(0);
-        g_open_menu_blocked_buttons ^= PSX_PAD_UP | PSX_PAD_DOWN;
+        g_menu_blocked_buttons ^= PSX_PAD_UP | PSX_PAD_DOWN;
     }
 
     if (state->step == OPEN_MUSIC_TEST_STEP_OPEN) {
@@ -78,7 +78,7 @@ void open_menu_update_music_test(open_controller_record_t* record) {
         if (buttons & PSX_PAD_CIRCLE) {
             world_formation_set_display_mode(1);
             state->blink_frames = 1;
-            g_open_menu_blocked_buttons |= PSX_PAD_UP | PSX_PAD_DOWN;
+            g_menu_blocked_buttons |= PSX_PAD_UP | PSX_PAD_DOWN;
             if (state->music_id != 0) {
                 state->delay = 0x20;
                 main_sound_set_current_music_target(0, 0x78);

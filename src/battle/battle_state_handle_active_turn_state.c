@@ -11,5 +11,5 @@ void battle_state_handle_active_turn_state(void) {
         battle_menu_open_mini_menu();
     }
     battle_state_handle_free_cursor_input();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }

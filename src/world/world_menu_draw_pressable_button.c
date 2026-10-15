@@ -26,23 +26,23 @@ void world_menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 
         speed = 1;
     }
     if (disabled != 0) {
-        g_world_menu_button_press_timers[index] = 0;
+        g_menu_button_press_timers[index] = 0;
         clut = g_menu_cursor_mode1_foreground_clut;
     } else if (pressed != 0) {
-        g_world_menu_button_press_timers[index] = 1;
+        g_menu_button_press_timers[index] = 1;
         g_sound_queued_effect_id = sound_effect_id;
-    } else if (g_world_menu_button_press_timers[index] != 0 && g_world_menu_button_press_timers[index] < 6 / speed) {
-        g_world_menu_button_press_timers[index]++;
+    } else if (g_menu_button_press_timers[index] != 0 && g_menu_button_press_timers[index] < 6 / speed) {
+        g_menu_button_press_timers[index]++;
     } else {
         clut = g_menu_cursor_mode0_foreground_clut;
-        g_world_menu_button_press_timers[index] = 0;
+        g_menu_button_press_timers[index] = 0;
     }
-    if (g_world_menu_button_press_timers[index] != 0) {
+    if (g_menu_button_press_timers[index] != 0) {
         y++;
-        clut = g_world_menu_button_clut;
+        clut = g_menu_button_clut;
     }
-    piece_index = g_world_menu_button_piece_starts[index];
-    count = g_world_menu_button_piece_starts[index + 1] - piece_index;
+    piece_index = g_menu_button_piece_starts[index];
+    count = g_menu_button_piece_starts[index + 1] - piece_index;
     sprite.source.clut = clut;
     sprite.source.tpage = g_menu_cursor_texture_page;
     for (i = 0; i < count; i++) {

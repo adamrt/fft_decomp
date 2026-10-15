@@ -48,4 +48,12 @@ extern glyph_blit_t g_text_glyph_source;
 /* rendering */
 extern glyph_blit_t g_text_glyph_dest;
 
+/* rendering */
+extern s32 g_text_current_line;
+extern u8 g_text_data[];
+extern s32 g_text_selection_id;
+extern u16 g_text_speaker_swap_unit_a;
+extern u16 g_text_speaker_swap_unit_b;
+extern u8 g_text_thread_running_state;
+
 #endif

@@ -16,7 +16,7 @@
 void card_save_run_menu_graphic_thread(void) {
     s32 frame;
 
-    if (g_battle_formation_screen_active != 0) {
+    if (g_formation_screen_active != 0) {
         g_card_input_display_state.offset.position.x = 0;
         g_card_input_display_state.offset.position.y = 8;
     } else {

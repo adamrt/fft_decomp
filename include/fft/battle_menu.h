@@ -12,7 +12,6 @@ extern s32 g_battle_menu_help_opening;
 void battle_menu_clear_status_menu_state(void);
 
 /* input and selection */
-extern u16 g_battle_menu_input_block_frames;
 
 /* action menus */
 extern u8 g_battle_menu_idle_action_entry_labels[];
@@ -68,7 +67,6 @@ s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 
 /* unit panels */
-extern s32 g_battle_formation_screen_active;
 /* The final two entries of g_menu_attack_caster_stats_setup. */
 extern menu_number_entry_t g_battle_menu_projected_value_panel[2];
 

@@ -32,7 +32,7 @@ void wldcore_init_world_map_state(void) {
     g_wldcore_map_zoom_motion.flags = 0;
     g_wldcore_random_battle_squad_id = 0;
     g_wldcore_random_battle_entd_id = 0;
-    g_wldcore_menu_blocked_buttons = 0;
+    g_menu_blocked_buttons = 0;
     g_main_system_flags
         = (g_main_system_flags
               & (MAIN_SYSTEM_FLAG_RESTART | MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY | MAIN_SYSTEM_FLAG_TITLE_TUTORIAL

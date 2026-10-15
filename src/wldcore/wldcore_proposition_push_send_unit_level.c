@@ -195,7 +195,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.right_arrow = index;
     {
         point32_t* position = &g_wldcore_window_records[index].position;
-        g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
+        g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
         g_wldcore_window_records[index].priority = 9;
         g_wldcore_window_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
         position->x = 0x60;

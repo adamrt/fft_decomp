@@ -78,7 +78,7 @@ void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data) {
             battle_gfx_run_unit_seq_script(unit, &unit->animation, 1);
             unit->requested_animation = 0;
             battle_gfx_release_unit_vram_slot(unit);
-        } else if (unit->requested_animation >= 12 || (unit->runtime_id & 3) == g_battle_frame_counter % 4
+        } else if (unit->requested_animation >= 12 || (unit->runtime_id & 3) == g_frame_counter % 4
             || (unit->movement.force_animation_update)) {
             /* An animation below 11 waits for the unit's frame in four. */
             ok = 1;

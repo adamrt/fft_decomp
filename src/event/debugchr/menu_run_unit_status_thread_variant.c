@@ -73,28 +73,28 @@ void menu_run_unit_status_thread_variant(void) {
     thread_id = g_thread_current_id;
     thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
-        panel = g_debugchr_panel_selected_packets;
-        editor = g_debugchr_panel_selected_editor_packets;
-        number_pixels = g_debugchr_panel_selected_number_image;
-        value_pixels = g_debugchr_panel_selected_large_number_image;
-        name_pixels = g_debugchr_panel_selected_name_image;
-        number_entries = g_debugchr_panel_selected_numeric_entries;
-        state = &g_debugchr_panel_selected_billboard;
+        panel = g_panel_selected_packets;
+        editor = g_panel_selected_editor_packets;
+        number_pixels = g_panel_selected_number_image;
+        value_pixels = g_panel_selected_large_number_image;
+        name_pixels = g_panel_selected_name_image;
+        number_entries = g_panel_selected_numeric_entries;
+        state = &g_panel_selected_billboard;
         unit_info = &g_debugchr_panel_selected_unit_data;
-        transition = &g_debugchr_panel_selected_portrait_rect;
+        transition = &g_panel_selected_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_palettes = g_debugchr_panel_selected_portrait_palettes;
     } else {
-        panel = g_debugchr_panel_comparison_packets;
-        editor = g_debugchr_panel_comparison_editor_packets;
-        number_pixels = g_debugchr_panel_comparison_number_image;
-        value_pixels = g_debugchr_panel_comparison_large_number_image;
-        name_pixels = g_debugchr_panel_comparison_name_image;
-        number_entries = g_debugchr_panel_comparison_numeric_entries;
-        state = &g_debugchr_panel_comparison_billboard;
+        panel = g_panel_comparison_packets;
+        editor = g_panel_comparison_editor_packets;
+        number_pixels = g_panel_comparison_number_image;
+        value_pixels = g_panel_comparison_large_number_image;
+        name_pixels = g_panel_comparison_name_image;
+        number_entries = g_panel_comparison_numeric_entries;
+        state = &g_panel_comparison_billboard;
         unit_info = &g_debugchr_panel_comparison_unit_data;
-        transition = &g_debugchr_panel_comparison_portrait_rect;
+        transition = &g_panel_comparison_portrait_rect;
         panel_base = panel;
         editor_base = editor;
         portrait_palettes = g_debugchr_panel_comparison_portrait_palettes;
@@ -113,25 +113,24 @@ void menu_run_unit_status_thread_variant(void) {
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &editor->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
         gfx_init_image_loading(&editor->value_sprites[frame], g_menu_status_panel_numeric_geometry,
-            &g_menu_portrait_origin, &g_debugchr_panel_editor_value_cells[frame]);
+            &g_menu_portrait_origin, &g_panel_editor_value_cells[frame]);
     }
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
     if (g_menu_post_battle_unit_changes_active == 0) {
-        mem_copy_bytes_nonempty(
-            g_debugchr_panel_editor_mode_cell, &g_debugchr_panel_editor_mode_cells[state->team_kind], 0xC);
+        mem_copy_bytes_nonempty(g_panel_editor_mode_cell, &g_panel_editor_mode_cells[state->team_kind], 0xC);
     } else {
-        mem_copy_bytes_nonempty(g_debugchr_panel_editor_mode_cell, g_debugchr_panel_editor_mode_cells, 0xC);
+        mem_copy_bytes_nonempty(g_panel_editor_mode_cell, g_panel_editor_mode_cells, 0xC);
     }
     for (frame = 0; frame < 7; frame++) {
         gfx_init_image_loading(&editor->label_sprites[frame], g_menu_status_panel_numeric_geometry,
-            &g_menu_portrait_origin, &g_debugchr_panel_editor_label_cells[frame]);
+            &g_menu_portrait_origin, &g_panel_editor_label_cells[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_init_numeric_display_frame_primitives(&g_debugchr_panel_frame_rect, &panel->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_panel_frame_rect, &panel->numeric_frame);
     panel_sprites = &panel->sprites[0];
     menu_init_sprite_array(panel_sprites, 7, 0x7C3C);
     menu_init_default_poly_ft4(&panel->portrait);
@@ -140,11 +139,11 @@ void menu_run_unit_status_thread_variant(void) {
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &panel->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &panel->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&panel->sprites[frame], g_menu_status_panel_numeric_geometry,
-            &g_debugchr_panel_frame_rect, &g_debugchr_panel_sprite_cells[frame]);
+        gfx_init_image_loading(&panel->sprites[frame], g_menu_status_panel_numeric_geometry, &g_panel_frame_rect,
+            &g_panel_sprite_cells[frame]);
     }
-    gfx_init_image_loading(&panel->portrait, g_menu_status_panel_numeric_geometry, &g_debugchr_panel_frame_rect,
-        g_debugchr_panel_portrait_cell);
+    gfx_init_image_loading(
+        &panel->portrait, g_menu_status_panel_numeric_geometry, &g_panel_frame_rect, g_panel_portrait_cell);
     if (state->team_kind == 1) {
         panel->portrait.clut = 0x7FFD;
     } else {
@@ -164,13 +163,12 @@ void menu_run_unit_status_thread_variant(void) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
         if (g_menu_post_battle_unit_changes_active == 0) {
-            mem_copy_bytes_nonempty(
-                g_debugchr_panel_editor_mode_cell, &g_debugchr_panel_editor_mode_cells[state->team_kind], 0xC);
+            mem_copy_bytes_nonempty(g_panel_editor_mode_cell, &g_panel_editor_mode_cells[state->team_kind], 0xC);
         } else {
-            mem_copy_bytes_nonempty(g_debugchr_panel_editor_mode_cell, g_debugchr_panel_editor_mode_cells, 0xC);
+            mem_copy_bytes_nonempty(g_panel_editor_mode_cell, g_panel_editor_mode_cells, 0xC);
         }
         gfx_init_image_loading(&editor->label_sprites[6], g_menu_status_panel_numeric_geometry, &g_menu_portrait_origin,
-            g_debugchr_panel_editor_mode_cell);
+            g_panel_editor_mode_cell);
         if (state->team_kind == 1) {
             panel->portrait.clut = 0x7FFD;
         } else {
@@ -184,10 +182,10 @@ void menu_run_unit_status_thread_variant(void) {
             dimmed = 1;
         }
         for (i = 0; i < 4; i++) {
-            editor->value_sprites[i].clut = g_debugchr_panel_editor_value_cluts[i][dimmed];
+            editor->value_sprites[i].clut = g_panel_editor_value_cluts[i][dimmed];
         }
         for (i = 0; i < 7; i++) {
-            editor->label_sprites[i].clut = g_debugchr_panel_editor_label_cluts[i][dimmed];
+            editor->label_sprites[i].clut = g_panel_editor_label_cluts[i][dimmed];
         }
         i = 0;
         do {
@@ -239,7 +237,7 @@ void menu_run_unit_status_thread_variant(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                thread->shake_y = g_debugchr_panel_slide_down_y[shake];
+                thread->shake_y = g_panel_slide_down_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -248,7 +246,7 @@ void menu_run_unit_status_thread_variant(void) {
                     thread->flags = thread->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                thread->shake_y = g_debugchr_panel_slide_up_y[shake];
+                thread->shake_y = g_panel_slide_up_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -306,7 +304,7 @@ void menu_run_unit_status_thread_variant(void) {
             CVECTOR* color;
             menu_unit_status_gauge_t* bar;
 
-            color = g_debugchr_panel_gauge_bar_colors;
+            color = g_panel_gauge_bar_colors;
             bar = state->gauges;
             for (i = 0; i < 3; i++) {
                 s32 x0;

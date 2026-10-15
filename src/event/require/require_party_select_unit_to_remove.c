@@ -83,9 +83,9 @@ s32 require_party_select_unit_to_remove(void) {
         break;
     }
     menu_copy_billboard_data_in(&g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
-    g_require_status_display_redraw_request = 1;
-    g_require_numeric_editor_redraw_request = 1;
-    g_require_character_status_redraw_request = 1;
+    g_status_display_redraw_request = 1;
+    g_numeric_editor_redraw_request = 1;
+    g_character_status_redraw_request = 1;
     thread_yield();
     thread_start(REQUIRE_THREAD_SLOT_TRANSITION, require_gfx_run_suspended_thread_transition);
     thread_set_parameters(REQUIRE_THREAD_SLOT_TRANSITION, 0, 0, 0);
@@ -161,9 +161,9 @@ s32 require_party_select_unit_to_remove(void) {
                         selected_party_index = 0;
                     if (g_require_party_removable_flags[selected_party_index] != 0) {
                         g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
-                        g_require_status_display_redraw_request = should_restore;
-                        g_require_numeric_editor_redraw_request = should_restore;
-                        g_require_character_status_redraw_request = should_restore;
+                        g_status_display_redraw_request = should_restore;
+                        g_numeric_editor_redraw_request = should_restore;
+                        g_character_status_redraw_request = should_restore;
                         require_editor_load_party_unit(1, selected_party_index);
                         REQUIRE_MOVE_PARTY_PORTRAIT(
                             selected_party_index, portrait_rect, portrait_destination, palette_rect);
@@ -180,9 +180,9 @@ s32 require_party_select_unit_to_remove(void) {
                         selected_party_index = 0x13;
                 } while (g_require_party_removable_flags[selected_party_index] == 0);
                 g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
-                g_require_status_display_redraw_request = 2;
-                g_require_numeric_editor_redraw_request = should_restore;
-                g_require_character_status_redraw_request = should_restore;
+                g_status_display_redraw_request = 2;
+                g_numeric_editor_redraw_request = should_restore;
+                g_character_status_redraw_request = should_restore;
                 require_editor_load_party_unit(1, selected_party_index);
                 REQUIRE_MOVE_PARTY_PORTRAIT(selected_party_index, portrait_rect, portrait_destination, palette_rect);
                 menu_copy_billboard_data_in(

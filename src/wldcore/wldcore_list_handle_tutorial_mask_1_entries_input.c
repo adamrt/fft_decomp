@@ -35,7 +35,7 @@ void wldcore_list_handle_tutorial_mask_1_entries_input(wldcore_menu_panel_level_
             return;
         }
         g_wldcore_menu_ordering_table_offset = 1;
-        g_wldcore_menu_blocked_buttons = 0;
+        g_menu_blocked_buttons = 0;
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_menu_stack_depth--;
         wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_TUTORIAL_MASK_1_ENTRIES);

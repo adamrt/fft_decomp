@@ -99,7 +99,7 @@ void wldcore_menu_push_sound_novel_level(s32 argument) {
 
     suzuki_sound_append_resource(g_wldcore_sound_novel_sound_resource);
     wldcore_sound_novel_restore_saved_state(bar_render);
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
+    g_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
     g_wldcore_menu_ordering_table_offset = 9;
     g_wldcore_screen_fade_state.priorities[0] = 8;
     g_wldcore_screen_fade_state.flags[1] |= WLDCORE_SCREEN_FADE_BOX_VISIBLE;

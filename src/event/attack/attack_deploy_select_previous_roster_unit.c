@@ -25,8 +25,8 @@ void attack_deploy_select_previous_roster_unit(void) {
     attack_editor_load_party_unit(1, g_attack_deploy_selected_roster_index);
     g_attack_deploy_roster_navigation_direction = 2;
     g_attack_status_display_thread_params = 0;
-    g_attack_numeric_editor_redraw_request = 1;
-    g_attack_character_status_redraw_request = 1;
+    g_numeric_editor_redraw_request = 1;
+    g_character_status_redraw_request = 1;
     g_attack_deploy_selected_unit_deployed
         = attack_deploy_is_roster_unit_deployed(g_attack_deploy_selected_roster_index);
     thread_yield();

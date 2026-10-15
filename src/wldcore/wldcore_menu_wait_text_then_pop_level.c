@@ -13,8 +13,8 @@ void wldcore_menu_wait_text_then_pop_level(wldcore_menu_message_level_t* level) 
     if (wldcore_text_is_window_finished(&g_wldcore_scrollable_text_window) != 0) {
         return;
     }
-    g_wldcore_input_current_buttons = 0;
-    g_wldcore_menu_blocked_buttons = level->saved_blocked_buttons;
+    g_input_current_buttons = 0;
+    g_menu_blocked_buttons = level->saved_blocked_buttons;
     g_wldcore_window_record_count -= 1;
     g_wldcore_window_render_object_count -= 1;
     g_wldcore_menu_stack_depth -= 1;

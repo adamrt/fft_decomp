@@ -10,7 +10,7 @@
 void world_formation_view_zoom_thread(void) {
     s32 frame;
 
-    if (g_world_formation_screen_active != 0) {
+    if (g_formation_screen_active != 0) {
         g_world_formation_view.offset.position.x = 0;
         g_world_formation_view.offset.position.y = 8;
     } else {

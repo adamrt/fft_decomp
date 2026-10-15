@@ -19,7 +19,7 @@ s32 menu_run_job_list_variant(void) {
         g_jobstts_job_list_menu_initialized = 1;
     }
 
-    g_jobstts_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
+    g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CIRCLE) {
         g_jobstts_job_selected_id = g_menu_job_ids[g_menu_list_selected_index];

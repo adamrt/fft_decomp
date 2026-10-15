@@ -22,8 +22,8 @@ void wldcore_menu_push_message_level(s32 text, s32 reload_text) {
         thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x33, text, 0);
     }
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.saved_blocked_buttons
-        = g_wldcore_menu_blocked_buttons;
-    g_wldcore_menu_blocked_buttons = -1;
+        = g_menu_blocked_buttons;
+    g_menu_blocked_buttons = -1;
     wldcore_sound_play_effect(MAIN_SFX_WINDOW_OPEN);
     index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[index].message._unknown_0c = 8;

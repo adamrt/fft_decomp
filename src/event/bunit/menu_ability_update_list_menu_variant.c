@@ -56,9 +56,9 @@ s32 menu_ability_update_list_menu_variant(void) {
     }
     if (g_menu_list_entry_count == 0
         || ((entry = g_menu_ability_entries[g_menu_list_selected_index]) & ABILITY_LIST_ENTRY_HIDE_DETAILS)) {
-        g_bunit_text_selection_id = -1;
+        g_text_selection_id = -1;
     } else {
-        g_bunit_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
+        g_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + 0x7800;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_bunit_ability_list_ready = 0;

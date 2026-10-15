@@ -24,10 +24,10 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     u16 maximum_mp;
     menu_unit_status_record_t* gauges;
 
-    main_unit_init_job_data(&g_attack_editor_party_unit_stats, party_index, 0);
-    editor = &g_attack_editor_unit_fields.state;
-    unit = &g_attack_editor_party_unit_stats;
-    gauges = &g_attack_panel_selected_billboard;
+    main_unit_init_job_data(&g_editor_party_unit_stats, party_index, 0);
+    editor = &g_editor_unit_fields.state;
+    unit = &g_editor_party_unit_stats;
+    gauges = &g_panel_selected_billboard;
 
     g_attack_panel_selected_unit_data.name_id = party_index;
     g_attack_panel_selected_unit_data.battle_id = party_index;
@@ -42,27 +42,27 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     if (!(unit->initial_team_flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
         gauges->team_kind = 2;
     }
-    g_attack_panel_selected_billboard.list_index = 0;
-    g_attack_panel_selected_billboard.unit_count = 0;
-    g_attack_panel_selected_billboard.unit_index = party_index + 0x200;
-    g_attack_panel_selected_billboard.level = unit->level;
-    g_attack_panel_selected_billboard.experience = unit->experience;
+    g_panel_selected_billboard.list_index = 0;
+    g_panel_selected_billboard.unit_count = 0;
+    g_panel_selected_billboard.unit_index = party_index + 0x200;
+    g_panel_selected_billboard.level = unit->level;
+    g_panel_selected_billboard.experience = unit->experience;
     maximum_hp = unit->max_hp;
-    g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
+    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
     if (maximum_hp == 0) {
-        g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
+        g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp + 1;
     }
-    g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
-        = g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
+    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].value
+        = g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max;
     maximum_mp = unit->max_mp;
-    g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
+    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp;
     if (maximum_mp == 0) {
-        g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
+        g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max = maximum_mp + 1;
     }
-    g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
-        = g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
-    g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
-    g_attack_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
+    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].value
+        = g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_MP].max;
+    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].max = UNIT_TURN_CT_THRESHOLD;
+    g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
 
     editor->move = unit->move;
     editor->speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
@@ -122,11 +122,11 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-            g_attack_editor_primary_skillset_name[0] = 0xfe;
+            g_editor_primary_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_attack_editor_secondary_skillset_name[1] = 0xfe;
+            g_editor_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;

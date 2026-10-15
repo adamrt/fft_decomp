@@ -77,7 +77,7 @@ void wldcore_list_open_rumors(void) {
         return;
     }
     g_wldcore_menu_ordering_table_offset = 9;
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
+    g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_RUMORS;
     g_wldcore_menu_stack_depth = record_index + 1;

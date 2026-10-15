@@ -337,7 +337,6 @@ extern u8 g_main_input_repeat_period;
 extern u8 g_main_input_secondary_repeat_period;
 extern s32 g_main_input_pressed_buttons;
 extern s32 g_main_input_previous_buttons;
-extern u32 g_main_input_current_buttons;
 extern u32 g_main_input_released_buttons;
 extern u32 g_main_input_pressed_copy_0;
 extern u32 g_main_input_pressed_copy_1;

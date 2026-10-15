@@ -17,7 +17,7 @@ menu_instruction_t* menu_cmd_set_zoomed_draw_area_handler(menu_instruction_t* co
         if (frame < 3) {
             g_menu_cmd_stream_input = 0;
         }
-        scale = g_bunit_gfx_window_zoom_percent[frame];
+        scale = g_gfx_window_zoom_percent[frame];
         area.w = command->window.width * scale / 100;
         area.h = command->window.height * scale / 100;
         area.x = command->window.x + (command->window.width >> 1) - (area.w >> 1);

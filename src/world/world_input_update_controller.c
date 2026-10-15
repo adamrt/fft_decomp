@@ -35,16 +35,16 @@ void world_input_update_controller(void) {
             current_input &= g_world_input_latched_button;
         } else if (current_input == 0) {
             g_world_input_latched_button = 0;
-            g_world_input_activation_timer += speed;
+            g_input_activation_timer += speed;
         } else {
-            if (g_world_input_activation_timer < 4) {
+            if (g_input_activation_timer < 4) {
                 if (current_input & PSX_PAD_DPAD_MASK) {
                     current_input &= PSX_PAD_DPAD_MASK;
-                    g_world_input_activation_timer = 10;
+                    g_input_activation_timer = 10;
                 }
             }
-            if (g_world_input_activation_timer >= 4) {
-                g_world_input_activation_timer = 0;
+            if (g_input_activation_timer >= 4) {
+                g_input_activation_timer = 0;
                 for (index = 0; index < 16; index++) {
                     bit = 1U << index;
                     if (current_input & bit) {
@@ -58,8 +58,8 @@ void world_input_update_controller(void) {
             }
         }
         filtered_input = current_input;
-        if (g_world_input_activation_timer >= 10) {
-            g_world_input_activation_timer = 10;
+        if (g_input_activation_timer >= 10) {
+            g_input_activation_timer = 10;
         }
         g_menu_input_newly_pressed = filtered_input;
         for (index = 0; index < 16; index++) {
@@ -75,7 +75,7 @@ void world_input_update_controller(void) {
                 g_world_input_previous &= ~mask;
             }
         }
-        counter_base = g_world_input_repeat_counters;
+        counter_base = g_input_repeat_counters;
         for (index = 0; index < 16; index++) {
             if (index == 4) {
                 index = 12;

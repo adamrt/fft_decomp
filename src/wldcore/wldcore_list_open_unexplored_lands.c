@@ -36,7 +36,7 @@ void wldcore_list_open_unexplored_lands(void) {
     wldcore_window_start_panel_render_thread(WLDCORE_THREAD_SLOT_WINDOW_PANEL,
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count, &layout, &origin);
     record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
+    g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_UNEXPLORED_LANDS;
     g_wldcore_menu_stack_depth = record_index + 1;
 }

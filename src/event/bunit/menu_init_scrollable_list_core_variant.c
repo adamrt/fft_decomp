@@ -32,5 +32,5 @@ void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_ind
     g_menu_list_redraw_pending = 1;
     g_gfx_transition_frame = 0;
     g_gfx_otag_index_locked = 0;
-    g_bunit_input_page_scroll_disabled = 0;
+    g_input_page_scroll_disabled = 0;
 }

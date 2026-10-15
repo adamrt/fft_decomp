@@ -19,7 +19,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
             level->delay = 3;
             g_main_system_flags |= MAIN_SYSTEM_FLAG_FADING | MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
         }
-        g_wldcore_menu_blocked_buttons = -1;
+        g_menu_blocked_buttons = -1;
         return;
     }
     if (level->delay != 0) {
@@ -29,7 +29,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         }
         return;
     }
-    g_wldcore_menu_blocked_buttons = 0;
+    g_menu_blocked_buttons = 0;
     if (menu_get_thread_activity_variant() != 0) {
         return;
     }

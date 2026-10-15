@@ -15,7 +15,7 @@ void battle_state_handle_menu_to_targeting_state(void) {
     u16 frame;
 
     battle_state_handle_free_cursor_input();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     unit = battle_unit_get_source();
     if (unit->state_frame_counter >= 31 && !unit->command_ready) {
         g_main_system_animation_speed = 2;

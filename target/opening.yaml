@@ -188,7 +188,7 @@ data:
   - {addr: 0x80073fd4, name: g_open_music_test_music_ids}
   - {addr: 0x80074034, name: g_open_opcode_handlers}
   - {addr: 0x80074074, name: g_card_slot}
-  - {addr: 0x80074075, name: g_open_card_info_pending}
+  - {addr: 0x80074075, name: g_card_info_pending}
   - {addr: 0x80074078, name: g_psyq_press_quant_table}
   - {addr: 0x800740fc, name: g_psyq_press_scale_table}
   - {addr: 0x80074180, name: g_psyq_press_dma_in_madr}
@@ -204,7 +204,7 @@ data:
   - {addr: 0x800745bc, name: g_psyq_press_dc_chroma_table}
   - {addr: 0x800749bc, name: g_psyq_press_ac_primary_table}
   - {addr: 0x800849bc, name: g_psyq_press_ac_secondary_table}
-  - {addr: 0x800851bc, name: g_open_input_current_buttons}
+  - {addr: 0x800851bc, name: g_input_current_buttons}
   - {addr: 0x800851c0, name: g_open_gfx_screen_environments}
   - {addr: 0x800852a0, name: g_open_gfx_next_render_record_36}
   - {addr: 0x800852a4, name: g_open_gfx_opntex_data}
@@ -225,7 +225,7 @@ data:
   - {addr: 0x80085578, name: g_open_music_test_list_state}
   - {addr: 0x800855a4, name: g_open_input_new_button_presses}
   - {addr: 0x800855a8, name: g_open_file_destination}
-  - {addr: 0x800855ac, name: g_open_input_polled_buttons}
+  - {addr: 0x800855ac, name: g_input_polled_buttons}
   - {addr: 0x800855b4, name: g_open_gfx_transition}
   - {addr: 0x800855ec, name: g_open_menu_formation_otag_index}
   - {addr: 0x800855f0, name: g_open_title_demo_movie_index}
@@ -249,7 +249,7 @@ data:
   - {addr: 0x8008642c, name: g_open_input_right_repeat_counter}
   - {addr: 0x80086430, name: g_open_birthday_title_image}
   - {addr: 0x80087030, name: g_open_birthday_window_image}
-  - {addr: 0x8008e430, name: g_open_menu_blocked_buttons}
+  - {addr: 0x8008e430, name: g_menu_blocked_buttons}
   - {addr: 0x8008e434, name: g_open_music_test_list_entries}
   - {addr: 0x8008e534, name: g_open_movie_end_frame}
   - {addr: 0x8008e538, name: g_open_movie_width}

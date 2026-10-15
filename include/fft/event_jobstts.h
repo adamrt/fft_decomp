@@ -70,7 +70,6 @@ extern s32 g_jobstts_job_list_menu_initialized;
 
 extern u16 g_jobstts_menu_list_cursor_anim_state;
 extern s16 g_jobstts_menu_list_scroll_entry_ids;
-extern u16 g_jobstts_menu_list_scroll_progress;
 extern u8 g_jobstts_menu_palette_image[];
 /* Window right edge; WORLD's twin stores it to g_world_menu_window_right_x. */
 extern s16 g_jobstts_menu_window_right_x;
@@ -79,7 +78,6 @@ void jobstts_menu_load_images_and_clear_selection(void);
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons);
 
 /* help */
-extern u32 g_jobstts_help_text_table[];
 
 /* graphics */
 /* Per-buffer primitive-pool pointers used by JOBSTTS.OUT's renderer. */
@@ -116,56 +114,32 @@ extern u16 g_jobstts_gfx_background_texture_page;
 extern jobstts_gfx_context_t* g_jobstts_gfx_context_base;
 extern jobstts_gfx_context_t g_jobstts_gfx_contexts[];
 extern RECT g_jobstts_gfx_draw_area;
-extern DR_AREA g_jobstts_gfx_draw_area_buffer[];
 extern u16 g_jobstts_gfx_draw_area_capacity;
-extern DR_MOVE g_jobstts_gfx_draw_move_buffer[];
 extern u16 g_jobstts_gfx_draw_move_capacity;
-extern u16 g_jobstts_gfx_line_f2_capacity;
 extern s16 g_jobstts_gfx_line_f2_count;
 
-extern u16 g_jobstts_gfx_line_f3_capacity;
 extern s16 g_jobstts_gfx_line_f3_count;
 
-extern u16 g_jobstts_gfx_line_f4_capacity;
 extern s16 g_jobstts_gfx_line_f4_count;
 extern volatile u16 g_jobstts_gfx_line_g2_capacity; /* LINE_G2 capacity; load order matters in 0x801e49f0 */
 extern s16 g_jobstts_gfx_line_g2_count;
 extern volatile u16 g_jobstts_gfx_line_g3_capacity; /* LINE_G3 capacity; load order matters in 0x801e49f0 */
 extern s16 g_jobstts_gfx_line_g3_count;
-extern u16 g_jobstts_gfx_line_g4_capacity;
 extern s16 g_jobstts_gfx_line_g4_count;
-extern u32 g_jobstts_gfx_otag_buffer[];
 extern s8 g_jobstts_gfx_otag_index_locked;
-extern u16 g_jobstts_gfx_otag_length;
-extern u16 g_jobstts_gfx_poly_f3_capacity;
 extern s16 g_jobstts_gfx_poly_f3_count;
-extern u16 g_jobstts_gfx_poly_f4_capacity;
 extern s16 g_jobstts_gfx_poly_f4_count;
-extern u16 g_jobstts_gfx_poly_ft3_capacity;
 extern s16 g_jobstts_gfx_poly_ft3_count;
-extern POLY_FT4 g_jobstts_gfx_poly_ft4_buffer[];
-extern u16 g_jobstts_gfx_poly_ft4_capacity;
-extern u16 g_jobstts_gfx_poly_g3_capacity;
 extern s16 g_jobstts_gfx_poly_g3_count;
-extern u16 g_jobstts_gfx_poly_g4_capacity;
 extern s16 g_jobstts_gfx_poly_g4_count;
-extern u16 g_jobstts_gfx_poly_gt3_capacity;
 extern s16 g_jobstts_gfx_poly_gt3_count;
-extern u16 g_jobstts_gfx_poly_gt4_capacity;
 extern s16 g_jobstts_gfx_poly_gt4_count;
-extern u16 g_jobstts_gfx_sprite_16_capacity;
 extern s16 g_jobstts_gfx_sprite_16_count;
-extern u16 g_jobstts_gfx_sprite_8_capacity;
 extern s16 g_jobstts_gfx_sprite_8_count;
-extern u16 g_jobstts_gfx_sprite_capacity;
 extern s16 g_jobstts_gfx_sprite_count;
-extern u16 g_jobstts_gfx_tile_16_capacity;
 extern s16 g_jobstts_gfx_tile_16_count;
-extern u16 g_jobstts_gfx_tile_1_capacity;
 extern s16 g_jobstts_gfx_tile_1_count;
-extern u16 g_jobstts_gfx_tile_8_capacity;
 extern s16 g_jobstts_gfx_tile_8_count;
-extern u16 g_jobstts_gfx_tile_capacity;
 extern s16 g_jobstts_gfx_tile_count;
 extern s16 g_jobstts_gfx_transition_height_percent[];
 
@@ -182,8 +156,6 @@ void jobstts_gfx_init_primitive_buffers(jobstts_gfx_context_t* context);
 void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */
-extern u8 g_jobstts_input_lock_timer;
-extern u16 g_jobstts_input_page_scroll_hold_frames;
 
 jobstts_menu_page_scroll_direction_e jobstts_input_read_page_scroll_direction(void);
 
@@ -200,8 +172,6 @@ enum {
     JOBSTTS_LIST_COMMAND_VISIBLE_ROWS_INDEX = 6,
 };
 
-extern menu_window_command_t g_jobstts_cmd_window_interior_command;
-
 menu_instruction_t* menu_cmd_draw_border_tiles_with_transition_clip(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* instruction);
 menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruction_t* instruction);
@@ -210,12 +180,10 @@ menu_instruction_t* jobstts_cmd_set_otag_index_if_unlocked_handler(menu_instruct
 /* The "%d" literal that JOBSTTS.OUT keeps at overlay file offset 0, i.e. the
  * three data bytes ahead of the first function. */
 extern const char g_jobstts_text_decimal_format[];
-extern s32 g_jobstts_text_selection_id;
 
 /* bit streams */
 
 /* threads */
-extern u8 g_jobstts_text_thread_running_state;
 
 /* sound */
 

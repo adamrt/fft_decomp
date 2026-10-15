@@ -21,8 +21,8 @@ void debugchr_editor_apply_values_to_battle_unit(s32 unit_id) {
     unit->hp = g_debugchr_editor_values[0];
     unit->mp = g_debugchr_editor_values[3];
     unit->ct = g_debugchr_editor_values[6];
-    unit->level = g_debugchr_panel_selected_billboard.level;
-    unit->experience = g_debugchr_panel_selected_billboard.experience;
+    unit->level = g_panel_selected_billboard.level;
+    unit->experience = g_panel_selected_billboard.experience;
     /* 16-bit objects (the loader stores sh); this function reads only the
      * low byte, and the lvalue form emits the target's bare lbu. */
     unit->brave = g_debugchr_panel_selected_unit_data.brave;

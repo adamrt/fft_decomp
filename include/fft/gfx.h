@@ -378,6 +378,51 @@ extern s8 g_gfx_otag_index_locked;
 extern RECT g_gfx_draw_area;
 void gfx_set_draw_color_variant(const rgb24_t* color);
 void menu_run_unit_status_thread_variant(void);
+void gfx_set_otag_index(s32 value);
+s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
+void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
+extern point16_t g_editor_numeric_geometry[];
+extern image_load_parameters_t g_editor_numeric_texture[];
+extern oriented_quad_t g_gfx_blank_cell_rect;
+extern DR_AREA g_gfx_draw_area_buffer[];
+extern u16 g_gfx_draw_mode_capacity;
+extern DR_MOVE g_gfx_draw_move_buffer[];
+extern u16 g_gfx_draw_offset_y;
+extern u16 g_gfx_line_f2_capacity;
+extern u16 g_gfx_line_f3_capacity;
+extern u16 g_gfx_line_f4_capacity;
+extern u16 g_gfx_line_g4_capacity;
+extern u32 g_gfx_otag_buffer[];
+extern u16 g_gfx_otag_length;
+extern u16 g_gfx_poly_f3_capacity;
+extern u16 g_gfx_poly_f4_capacity;
+extern u16 g_gfx_poly_ft3_capacity;
+extern POLY_FT4 g_gfx_poly_ft4_buffer[];
+extern u16 g_gfx_poly_ft4_capacity;
+extern u16 g_gfx_poly_g3_capacity;
+extern u16 g_gfx_poly_g4_capacity;
+extern u16 g_gfx_poly_gt3_capacity;
+extern u16 g_gfx_poly_gt4_capacity;
+extern u16 g_gfx_sprite_16_capacity;
+extern u16 g_gfx_sprite_8_capacity;
+extern u16 g_gfx_sprite_capacity;
+extern u16 g_gfx_tile_16_capacity;
+extern u16 g_gfx_tile_1_capacity;
+extern u16 g_gfx_tile_8_capacity;
+extern u16 g_gfx_tile_capacity;
+extern s16 g_gfx_window_zoom_percent[];
+extern image_load_parameters_t g_panel_editor_label_cells[];
+extern image_load_parameters_t g_panel_editor_mode_cell[];
+extern image_load_parameters_t g_panel_editor_mode_cells[];
+extern image_load_parameters_t g_panel_editor_value_cells[];
+extern image_load_parameters_t g_panel_item_icon_layouts[];
+extern point16_t g_panel_item_icon_texture[];
+extern image_load_parameters_t g_panel_label_layouts_mode0[];
+extern image_load_parameters_t g_panel_label_layouts_mode1[];
+extern image_load_parameters_t g_panel_label_layouts_mode2[];
+extern image_load_parameters_t g_panel_label_layouts_mode3[];
+extern image_load_parameters_t g_panel_portrait_cell[];
+extern image_load_parameters_t g_panel_sprite_cells[];
 
 /* portrait transitions */
 extern RECT g_gfx_portrait_origin;
@@ -464,10 +509,5 @@ void gfx_start_decreasing_fade(void);
 /* fades */
 s32 gfx_get_fade_state(void);
 void gfx_start_increasing_fade(void);
-
-/* unified */
-void gfx_set_otag_index(s32 value);
-s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
-void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 
 #endif

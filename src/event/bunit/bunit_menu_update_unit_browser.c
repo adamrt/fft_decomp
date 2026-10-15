@@ -25,7 +25,7 @@ void bunit_menu_update_unit_browser(void) {
             g_bunit_comparison_display_flags = BUNIT_REQUEST_FLAGS;
             BUNIT_REQUEST_FLAGS = 0;
             if (g_bunit_status_banner_at_bottom_latch != g_bunit_status_banner_at_bottom) {
-                bcopy(g_bunit_unit_pointers[g_bunit_unit_comparison_index], &g_bunit_panel_comparison_billboard, 0x22);
+                bcopy(g_bunit_unit_pointers[g_bunit_unit_comparison_index], &g_panel_comparison_billboard, 0x22);
                 bcopy(&g_bunit_unit_pointers[g_bunit_unit_comparison_index]->name_index,
                     g_bunit_panel_comparison_unit_data, 0xE);
                 menu_toggle_comparison_status_thread(1);
@@ -52,11 +52,11 @@ void bunit_menu_update_unit_browser(void) {
         index = g_bunit_unit_comparison_index;
         bunit_unit_copy_selected_data();
         if ((g_menu_input_primary_repeat & PSX_PAD_RIGHT) || (g_menu_input_secondary_repeat & PSX_PAD_R1)) {
-            g_bunit_status_display_redraw_request = 1;
+            g_status_display_redraw_request = 1;
         } else if ((g_menu_input_primary_repeat & PSX_PAD_LEFT) || (g_menu_input_secondary_repeat & PSX_PAD_L1)) {
-            g_bunit_status_display_redraw_request = 2;
+            g_status_display_redraw_request = 2;
         } else {
-            g_bunit_status_display_redraw_request = index < g_unit_selected_index ? 1 : 2;
+            g_status_display_redraw_request = index < g_unit_selected_index ? 1 : 2;
         }
         return;
     }

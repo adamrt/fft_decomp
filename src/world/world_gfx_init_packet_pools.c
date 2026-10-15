@@ -25,7 +25,7 @@ void world_gfx_init_packet_pools(menu_gfx_context_t* buffer) {
     for (i = 0; i < g_world_gfx_gradient_line_capacity; i++) {
         SetLineG2(&buffer->gouraud_lines[i]);
     }
-    for (i = 0; i < g_world_gfx_tile_capacity; i++) {
+    for (i = 0; i < g_gfx_tile_capacity; i++) {
         SetTile(&buffer->tiles[i]);
     }
     for (i = 0; i < g_world_gfx_draw_move_capacity; i++) {

@@ -21,7 +21,7 @@ s32 equip_item_run_type_order_mode(void) {
         for (i = 0; (names[i] = g_equip_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
-        text_concatenate_entries(g_equip_text_data, g_equip_item_type_order_names, names, 1);
+        text_concatenate_entries(g_text_data, g_equip_item_type_order_names, names, 1);
         g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
         g_equip_type_order_ready = 1;
     }
@@ -54,7 +54,7 @@ s32 equip_item_run_type_order_mode(void) {
         for (i = 0; (names[i] = g_equip_item_type_order[i]) != -1; i++) {
             names[i] += 3;
         }
-        text_concatenate_entries(g_equip_text_data, g_equip_item_type_order_names, names, 1);
+        text_concatenate_entries(g_text_data, g_equip_item_type_order_names, names, 1);
         category = g_menu_selected_slot;
         g_equip_menu_text_redraw_flag = 1;
         equip_item_build_filtered_list(g_equip_unit_selected_index, category + 0x81,

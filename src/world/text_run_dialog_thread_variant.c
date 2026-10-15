@@ -23,7 +23,7 @@
     }
 
 #define YIELD_OR_INPUT()                                                                                               \
-    if (g_world_formation_screen_active != 0 && rec.box_type == DIALOG_BOX_TYPE_HELP) {                                \
+    if (g_formation_screen_active != 0 && rec.box_type == DIALOG_BOX_TYPE_HELP) {                                      \
         menu_input_update_dialog_state();                                                                              \
     } else {                                                                                                           \
         thread_yield();                                                                                                \
@@ -104,7 +104,7 @@ void text_run_dialog_thread_variant(void) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
     }
-    if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 0) {
+    if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 0) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
         if (thread->function_parameter_2 == 0x807) {
@@ -119,8 +119,8 @@ void text_run_dialog_thread_variant(void) {
             rec.portrait = g_menu_selected_unit.battle_id;
         }
     }
-    if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 1) {
-        g_menu_input_lock_mode = g_world_formation_screen_active;
+    if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 1) {
+        g_menu_input_lock_mode = g_formation_screen_active;
     }
     if (rec.dialog_type & 0x10) {
         if (party_name_request == 0) {
@@ -205,10 +205,10 @@ void text_run_dialog_thread_variant(void) {
         rec.tail_offset = 0;
         rec.x = g_unit_scratch_coords.vx - center - 4;
         if (rec.position == 0) {
-            if (thread_get_current_parameter_3_variant() == g_world_text_speaker_swap_unit_a) {
-                value = g_world_text_speaker_swap_unit_b;
-            } else if (thread_get_current_parameter_3_variant() == g_world_text_speaker_swap_unit_b) {
-                value = g_world_text_speaker_swap_unit_a;
+            if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_a) {
+                value = g_text_speaker_swap_unit_b;
+            } else if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_b) {
+                value = g_text_speaker_swap_unit_a;
             }
             unit_project_to_screen(script_resolve_runtime_id(value), &g_world_text_partner_screen_coords);
             if (g_unit_scratch_coords.vy < 0 || g_world_text_partner_screen_coords.vy < g_unit_scratch_coords.vy) {
@@ -306,7 +306,7 @@ void text_run_dialog_thread_variant(void) {
         rec.last_line = rec.lines;
         menu_render_text_image_at_record_origin(&rec);
     }
-    if (g_world_formation_screen_active != 0) {
+    if (g_formation_screen_active != 0) {
         right -= 0x100;
         bottom -= 0x78;
         rec.x -= 0x100;
@@ -405,7 +405,7 @@ void text_run_dialog_thread_variant(void) {
     column = 0;
     rec.color = 0;
     rec.line = 0;
-    g_world_text_current_line = 0;
+    g_text_current_line = 0;
     /* Both arms are identical, as in the BATTLE twin whose first arm centers
      * the line; the split keeps the preceding stores ahead of these loads. */
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
@@ -840,12 +840,11 @@ end:
     gfx_free_texture_rect(&rec.rect);
     menu_release_current_thread_slot();
     YIELD_OR_INPUT();
-    if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_world_formation_screen_active == 1) {
+    if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 1) {
         g_menu_input_lock_mode = 0;
     }
     if (((rec.box_type == DIALOG_BOX_TYPE_HELP || party_name_request != 0) && rec.options == 0xC)
-        || ((rec.box_type == DIALOG_BOX_TYPE_HELP || party_name_request != 0)
-            && g_world_formation_screen_active == 0)) {
+        || ((rec.box_type == DIALOG_BOX_TYPE_HELP || party_name_request != 0) && g_formation_screen_active == 0)) {
         text_restore_section_pointers();
     }
     if (g_thread_current_id != THREAD_SCREEN_SLOT_TEXT || rec.options != 0xC) {

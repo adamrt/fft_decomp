@@ -33,7 +33,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
             if (thread_is_running(WLDCORE_THREAD_SLOT_MESSAGE) != 0) {
                 return;
             }
-            g_wldcore_menu_blocked_buttons = 0;
+            g_menu_blocked_buttons = 0;
             g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
             wldcore_gfx_prepare_play_time_display();
             fade = &g_wldcore_screen_fade_state;
@@ -59,13 +59,13 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
     }
 
     if (wldcore_script_run_until_yield() != 0) {
-        if (g_wldcore_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1)) {
-            if (g_wldcore_input_current_buttons & PSX_PAD_L1) {
+        if (g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1)) {
+            if (g_input_current_buttons & PSX_PAD_L1) {
                 if (g_wldcore_active_saved_record.brightness < 0xFF) {
                     g_wldcore_active_saved_record.brightness++;
                 }
             }
-            if (g_wldcore_input_current_buttons & PSX_PAD_R1) {
+            if (g_input_current_buttons & PSX_PAD_R1) {
                 brightness = &g_wldcore_active_saved_record.brightness;
                 if (*brightness != 0) {
                     (*brightness)--;
@@ -113,7 +113,7 @@ void wldcore_menu_step_sound_novel_level(wldcore_menu_sound_novel_level_t* level
                 wldcore_menu_push_sound_novel_quit_level();
                 return;
             }
-            if ((g_wldcore_input_current_buttons & PSX_PAD_SQUARE)
+            if ((g_input_current_buttons & PSX_PAD_SQUARE)
                 && (g_wldcore_active_saved_record.state_flags & WLDCORE_OPCODE_STATE_PARENT_WINDOWS_VISIBLE)
                 && g_wldcore_active_saved_record.text_history_3 != -1) {
                 g_wldcore_window_records[level->right_window].sequence

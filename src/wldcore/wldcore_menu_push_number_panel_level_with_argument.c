@@ -7,7 +7,7 @@ void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 val
     point32_t origin;
     s32 record_index;
 
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
+    g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS;
     g_wldcore_menu_ordering_table_offset = 2;
     g_wldcore_active_menu_value = value;
     origin.x = 0x20;

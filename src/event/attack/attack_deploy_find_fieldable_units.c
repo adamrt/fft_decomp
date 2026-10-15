@@ -26,9 +26,8 @@ void attack_deploy_find_fieldable_units(void) {
     party_unit_t* party_unit;
 
     name_cursor = g_text_section_pointers[TEXT_SECTION_PARTY_UNIT_NAMES];
-    g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES]
-        = g_attack_text_data + g_attack_text_roster_unit_names_offset;
-    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_attack_text_data + g_attack_text_job_names_offset;
+    g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES] = g_text_data + g_attack_text_roster_unit_names_offset;
+    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_text_data + g_attack_text_job_names_offset;
     g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES_COPY] = g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES];
     g_attack_deploy_fieldable_unit_count = 0;
 

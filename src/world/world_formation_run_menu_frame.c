@@ -107,7 +107,7 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     if (g_world_fixed_number_panel_request_state != 0) {
         g_world_formation_menu_new_buttons = 0;
     }
-    g_world_formation_screen_active = 1;
+    g_formation_screen_active = 1;
     world_formation_update_open_request();
     world_formation_update_world_map_root_request();
     world_card_update_menu_request();
@@ -140,7 +140,7 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     if (g_menu_companion_executable_request_index != 0) {
         g_menu_companion_executable_request_index = 0;
     }
-    g_world_frame_counter++;
+    g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
     if (g_sound_pending_sfx_id != -1) {
         main_sound_play_sfx_find_channel(g_sound_pending_sfx_id);
@@ -149,8 +149,8 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, g_menu_pending_selection[1]);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_DESTINATION;
     }
-    if (g_world_menu_input_block_frames != 0) {
-        g_world_menu_input_block_frames--;
+    if (g_menu_input_block_frames != 0) {
+        g_menu_input_block_frames--;
     }
     return g_menu_pending_selection[0];
 }

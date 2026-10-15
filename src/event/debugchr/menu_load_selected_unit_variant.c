@@ -38,13 +38,13 @@ void menu_load_selected_unit_variant(void) {
     unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_comparison_unit_data.battle_id);
     editor = &g_menu_status_panel_fields.state;
     if (unit != 0) {
-        menu_copy_unit_data_to_status_billboard_variant(unit, &g_debugchr_panel_comparison_billboard);
+        menu_copy_unit_data_to_status_billboard_variant(unit, &g_panel_comparison_billboard);
     }
 
     unit = battle_unit_get_stats_from_battle_id(g_debugchr_panel_selected_unit_data.battle_id);
     if (unit == 0)
         return;
-    menu_copy_unit_data_to_status_billboard_variant(unit, &g_debugchr_panel_selected_billboard);
+    menu_copy_unit_data_to_status_billboard_variant(unit, &g_panel_selected_billboard);
 
     g_debugchr_panel_selected_unit_data.job_id = unit->job_id;
     g_debugchr_panel_selected_unit_data.brave = unit->brave;
@@ -123,11 +123,11 @@ void menu_load_selected_unit_variant(void) {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
-            g_debugchr_editor_primary_skillset_name[0] = 0xfe;
+            g_editor_primary_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
         editor->ability_ids[1] = field_value;
         if (field_value == 0)
-            g_debugchr_editor_secondary_skillset_name[1] = 0xfe;
+            g_editor_secondary_skillset_name[1] = 0xfe;
         editor->ability_ids[2] = unit->abilities.reaction;
         editor->ability_ids[3] = unit->abilities.support;
         editor->ability_ids[4] = unit->abilities.movement;
@@ -161,12 +161,12 @@ void menu_load_selected_unit_variant(void) {
 
     text_fill_field_with_terminators(g_debugchr_editor_unit_name);
     text_fill_field_with_terminators(g_debugchr_editor_job_name);
-    text_fill_field_with_terminators(g_debugchr_editor_primary_skillset_name);
-    text_fill_field_with_terminators(g_debugchr_editor_secondary_skillset_name);
+    text_fill_field_with_terminators(g_editor_primary_skillset_name);
+    text_fill_field_with_terminators(g_editor_secondary_skillset_name);
     /* The editor uses 16-byte windows at each text destination, including
      * the two eight-byte skillset names; preserve those target copy lengths. */
     mem_copy_bytes_nonempty(g_debugchr_editor_unit_name, unit->name, 0x10);
     mem_copy_bytes_nonempty(g_debugchr_editor_job_name, unit->job_name, 0x10);
-    mem_copy_bytes_nonempty(g_debugchr_editor_primary_skillset_name, unit->primary_skillset_name, 0x10);
-    mem_copy_bytes_nonempty(g_debugchr_editor_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_editor_primary_skillset_name, unit->primary_skillset_name, 0x10);
+    mem_copy_bytes_nonempty(g_editor_secondary_skillset_name, unit->secondary_skillset_name, 0x10);
 }

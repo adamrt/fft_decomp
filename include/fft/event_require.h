@@ -15,7 +15,6 @@
 #include "fft/thread.h"
 
 /* post battle */
-extern job_data_t* g_require_formation_job_data;
 extern menu_entry_t g_require_join_menu_descriptor[];
 extern u8 g_require_work[];
 
@@ -184,81 +183,26 @@ s32 require_reward_get_war_trophy_entry_offset(s32 value, s32 index);
 void require_reward_load_bonus_image(s32 image_id);
 
 /* character status */
-extern RECT g_require_character_status_draw_area_rect;
 extern menu_status_thread_t g_require_character_status_frame_config;
 extern RECT g_require_character_status_frame_rect[];
 /* The scalar x alias preserves the retail transition-store scheduling. */
 extern s32 g_require_character_status_origin_x;
-extern s32 g_require_character_status_redraw_request;
 
 /* unit panels */
-extern menu_status_panel_editor_packet_t g_require_panel_comparison_editor_packets[2];
-extern u8 g_require_panel_comparison_large_number_image[];
-extern u8 g_require_panel_comparison_name_image[];
-extern u8 g_require_panel_comparison_number_image[];
-extern menu_number_entry_t g_require_panel_comparison_numeric_entries[];
-extern menu_status_panel_packet_t g_require_panel_comparison_packets[2];
 extern palette_t g_require_panel_comparison_portrait_palettes[2];
-extern RECT g_require_panel_comparison_portrait_rect;
 extern s32 g_require_panel_dim_a;
 extern s32 g_require_panel_dim_b;
 extern s32 g_require_panel_dim_c;
-extern image_load_parameters_t g_require_panel_editor_label_cells[];
-extern u16 g_require_panel_editor_label_cluts[][2];
-extern image_load_parameters_t g_require_panel_editor_mode_cell[];
-extern image_load_parameters_t g_require_panel_editor_mode_cells[];
-extern image_load_parameters_t g_require_panel_editor_value_cells[];
-extern u16 g_require_panel_editor_value_cluts[][2];
-extern RECT g_require_panel_frame_rect;
-extern menu_status_panel_buffer_t g_require_panel_frames_a[];
-extern CVECTOR g_require_panel_gauge_bar_colors[];
-extern image_load_parameters_t g_require_panel_item_icon_layouts[];
-extern point16_t g_require_panel_item_icon_texture[];
-extern image_load_parameters_t g_require_panel_label_layouts_mode0[];
-extern image_load_parameters_t g_require_panel_label_layouts_mode1[];
-extern image_load_parameters_t g_require_panel_label_layouts_mode2[];
-extern image_load_parameters_t g_require_panel_label_layouts_mode3[];
-extern RECT g_require_panel_origin_offsets[];
-extern image_load_parameters_t g_require_panel_portrait_cell[];
-extern menu_status_panel_editor_packet_t g_require_panel_selected_editor_packets[2];
-extern u8 g_require_panel_selected_large_number_image[];
-extern u8 g_require_panel_selected_name_image[];
-extern u8 g_require_panel_selected_number_image[];
-extern menu_number_entry_t g_require_panel_selected_numeric_entries[];
-extern menu_status_panel_packet_t g_require_panel_selected_packets[2];
 extern palette_t g_require_panel_selected_portrait_palettes[2];
-extern RECT g_require_panel_selected_portrait_rect;
-extern image_load_parameters_t g_require_panel_sprite_cells[];
-extern u8 g_require_panel_text_image_a[];
-extern u8 g_require_panel_text_image_b[];
-extern RECT g_require_panel_text_upload_rect_a;
-extern RECT g_require_panel_text_upload_rect_b;
 /* The scalar x alias preserves the retail transition-store scheduling. */
 extern s32 g_require_status_display_origin_x;
-extern s32 g_require_status_display_redraw_request;
 extern menu_status_thread_t g_require_status_display_thread_params;
 
 void require_panel_set_transition_value(s32 value);
 
 /* numeric editor */
-extern menu_number_entry_t g_require_editor_numeric_descriptor_a[];
-extern menu_number_entry_t g_require_editor_numeric_descriptor_b[];
-extern RECT g_require_editor_numeric_entries_a;
-extern RECT g_require_editor_numeric_entries_b;
-extern RECT g_require_editor_numeric_entries_c;
-extern RECT g_require_editor_numeric_entries_d;
-extern RECT g_require_editor_numeric_entries_e;
-extern RECT g_require_editor_numeric_entries_f;
-extern point16_t g_require_editor_numeric_geometry[];
-extern menu_status_panel_numeric_buffer_t g_require_editor_numeric_state[2];
-extern battle_menu_status_panel_numeric_geometry_t g_require_editor_numeric_table;
-extern menu_unit_stat_number_images_t g_require_editor_numeric_text_a;
-extern menu_unit_stat_number_images_t g_require_editor_numeric_text_b;
-extern image_load_parameters_t g_require_editor_numeric_texture[];
-extern struct unit_stats g_require_editor_party_unit_stats;
 /* The scalar x alias preserves the retail transition-store scheduling. */
 extern s32 g_require_numeric_editor_origin_x;
-extern s32 g_require_numeric_editor_redraw_request;
 extern menu_status_thread_t g_require_numeric_editor_thread_params;
 
 void require_editor_load_party_unit(s32 unused, s32 party_index);
@@ -273,17 +217,9 @@ void require_menu_wait_selection_threads(void);
 /* portraits */
 extern u8 g_require_portrait_cell_pixels[];
 extern RECT g_require_portrait_cell_rect;
-extern u16 g_require_portrait_index_by_sprite_set[];
 extern RECT g_require_portrait_palette_rect;
-extern RECT g_require_portrait_sheet_rect_0;
-extern RECT g_require_portrait_sheet_rect_1;
-extern RECT g_require_portrait_sheet_rect_2;
-extern RECT g_require_portrait_sheet_rect_3;
-extern RECT g_require_special_portrait_palette_rect;
-extern RECT g_require_special_portrait_rect;
 
 /* graphics */
-extern u16 g_require_gfx_draw_offset_y;
 extern u8 g_require_gfx_fade_rgb[3];
 extern u8 g_require_gfx_formation_sprite_groups[][3];
 extern POLY_FT4 g_require_gfx_poly_ft4_buffers[2][30];
@@ -309,7 +245,6 @@ typedef enum require_text_section {
     REQUIRE_TEXT_SECTION_DISMISS_UNIT_REPLIES = 3,   /* what a unit turned away or dismissed says */
 } require_text_section_e;
 
-extern u8 g_require_text_data[];
 extern s32 g_require_text_section_offsets[32];
 extern char g_require_text_wait_for_file_allocation_message[];
 

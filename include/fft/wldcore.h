@@ -33,9 +33,7 @@ void wldcore_file_seek_to_battle_bin(void);
 
 void wldcore_load_scratch_data_blocking(void);
 /* input */
-extern u32 g_wldcore_input_current_buttons;
 extern u32 g_wldcore_input_new_button_presses;
-extern u32 g_wldcore_input_polled_buttons;
 extern u32 g_wldcore_input_previous_buttons;
 extern s32 g_wldcore_input_repeat_counter_up;
 extern s32 g_wldcore_input_repeat_counter_down;
@@ -1975,9 +1973,6 @@ extern menu_cursor_state_t g_wldcore_menu_cursor_states[];
 /* libgs sprite sorted by wldcore_draw_close_indicator_if_pending through
  * GsSortSprite (0x800e0480). */
 extern GsSPRITE g_wldcore_menu_indicator_sprite;
-/* Pad buttons withheld from the WORLD menu frame (wldcore_menu_run_world_frame passes its
- * complement to world_formation_set_menu_allowed_buttons); -1 blocks all. */
-extern s32 g_wldcore_menu_blocked_buttons;
 extern s32 g_wldcore_menu_stack_depth;
 extern wldcore_menu_stack_record_t g_wldcore_menu_stack_records[];
 extern wldcore_menu_stack_record_t g_wldcore_menu_stack_records_next[];

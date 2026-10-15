@@ -519,7 +519,7 @@ data:
   - {addr: 0x8009f2c0, name: g_wldcore_map_projection_view}
   - {addr: 0x8009f2d0, name: g_wldcore_map_projection_scale}
   - {addr: 0x8009f2e0, name: g_wldcore_map_projection_rotation}
-  - {addr: 0x8009f2e8, name: g_wldcore_input_current_buttons}
+  - {addr: 0x8009f2e8, name: g_input_current_buttons}
   - {addr: 0x8009f2ec, name: g_wldcore_selected_proposition_row}
   - {addr: 0x8009f31c, name: g_wldcore_gfx_world_primitive_buffers}
   - {addr: 0x800bb31c, name: g_wldcore_window_panel_render_state}
@@ -529,7 +529,7 @@ data:
   - {addr: 0x800bb38c, name: g_wldcore_calendar_display_x}
   - {addr: 0x800bb390, name: g_wldcore_calendar_display_y}
   - {addr: 0x800bb394, name: g_wldcore_window_panel_label_state}
-  - {addr: 0x800bb3c0, name: g_wldcore_menu_blocked_buttons}
+  - {addr: 0x800bb3c0, name: g_menu_blocked_buttons}
   - {addr: 0x800bb3c4, name: g_wldcore_gfx_aux_ordering_tables}
   - {addr: 0x800bb3ec, name: g_wldcore_menu_ordering_table_offset}
   - {addr: 0x800bb3f0, name: g_wldcore_list_row_flags}
@@ -559,7 +559,7 @@ data:
   - {addr: 0x800c7310, name: g_wldcore_input_repeat_counter_right}
   - {addr: 0x800c7314, name: g_wldcore_input_repeat_counter_r1}
   - {addr: 0x800c7318, name: g_wldcore_input_repeat_counter_l1}
-  - {addr: 0x800c731c, name: g_wldcore_input_polled_buttons}
+  - {addr: 0x800c731c, name: g_input_polled_buttons}
   - {addr: 0x800c7320, name: g_wldcore_map_projected_tiles}
   - {addr: 0x800c87d8, name: g_wldcore_window_image_buffer}
   - {addr: 0x800c8fd8, name: g_wldcore_proposition_detail_image_buffer}

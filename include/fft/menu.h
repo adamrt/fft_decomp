@@ -1791,6 +1791,9 @@ extern s32 g_menu_text_palette_offset;
 void menu_set_text_origin(s32 x, s32 y);
 void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
 void menu_input_clear_state(void);
+extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];
+void menu_input_update_dialog_state(void);
+extern u16 g_menu_input_block_frames;
 
 /* list threads */
 extern u32* g_menu_input_controller;
@@ -2671,8 +2674,11 @@ void menu_run_at_list_variant(void);
 void menu_start_at_list_thread(void);
 void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
 
-/* unified */
+/* per-module bodies: each module links its own copy under the shared name. */
 void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode);
+void menu_run_game_options_variant(void);
+
+/* other */
 extern menu_text_layout_t g_menu_at_list_entry_table[1];
 extern menu_entry_t g_menu_option_icon_thread_param;
 extern s32 g_menu_option_choice_widths[];
@@ -2681,14 +2687,107 @@ extern s32 g_menu_option_values[GAME_OPTION_UNCHANGED + 1];
 extern s32 g_menu_option_value_text_id_bases[];
 extern menu_icon_record_t g_menu_option_picker_icon_records[2];
 extern s32 g_menu_option_reference_values[];
-extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];
 void menu_run_option_choice(void);
-void menu_input_update_dialog_state(void);
 extern options_menu_page_t g_menu_option_pages[2];
 extern menu_text_layout_t g_menu_option_entry_table[1];
 extern RECT g_menu_option_title_image_rect;
 extern RECT g_menu_option_entry_panel_rect;
 extern RECT g_menu_option_value_image_rect;
-void menu_run_game_options_variant(void);
+
+/* other */
+extern menu_list_page_t g_at_list_pages[2];
+extern RECT g_character_status_draw_area_rect;
+extern s32 g_character_status_redraw_request;
+extern u32* g_dead_unit_controller_input;
+extern menu_entry_t g_dead_unit_menu[DEAD_UNIT_MENU_ENTRY_COUNT];
+extern menu_text_layout_t g_dead_unit_menu_entries;
+extern menu_number_entry_t g_editor_numeric_descriptor_a[];
+extern menu_number_entry_t g_editor_numeric_descriptor_b[];
+extern RECT g_editor_numeric_entries_a;
+extern RECT g_editor_numeric_entries_b;
+extern RECT g_editor_numeric_entries_c;
+extern RECT g_editor_numeric_entries_d;
+extern RECT g_editor_numeric_entries_e;
+extern RECT g_editor_numeric_entries_f;
+extern menu_status_panel_numeric_buffer_t g_editor_numeric_state[2];
+extern menu_status_panel_numeric_buffer_t g_editor_numeric_state_a[2];
+extern menu_status_panel_numeric_buffer_t g_editor_numeric_state_b[2];
+extern battle_menu_status_panel_numeric_geometry_t g_editor_numeric_table;
+extern menu_unit_stat_number_images_t g_editor_numeric_text_a;
+extern menu_unit_stat_number_images_t g_editor_numeric_text_b;
+extern struct unit_stats g_editor_party_unit_stats;
+extern u8 g_editor_primary_skillset_name[];
+extern u8 g_editor_secondary_skillset_name[];
+extern menu_status_panel_slot_storage_t g_editor_unit_fields;
+extern s32 g_formation_screen_active;
+extern u16 g_frame_arg;
+extern s32 g_frame_counter;
+extern u8 g_input_activation_timer;
+extern u32* g_input_controller;
+extern u32 g_input_current;
+extern u32 g_input_current_buttons;
+extern u32 g_input_event;
+extern u32 g_input_initial_repeat_counter;
+extern u8 g_input_lock_timer;
+extern u8 g_input_page_scroll_disabled;
+extern u16 g_input_page_scroll_hold_frames;
+extern u32 g_input_polled_buttons;
+extern u32 g_input_repeat_counter;
+extern s32 g_input_repeat_counters[16];
+extern u32 g_input_secondary_repeat_counter;
+extern s16 g_menu_at_list_indices[];
+extern s16 g_menu_at_list_primary_values[];
+extern s16 g_menu_at_list_secondary_values[];
+extern s32 g_menu_blocked_buttons;
+extern u16 g_menu_button_clut;
+extern u8 g_menu_button_piece_starts[];
+extern s8 g_menu_button_press_timers[];
+extern menu_window_rect_source_t* g_menu_window_rect_source;
+extern u8 g_monster_formation_sprite_table[20]; /* indexed by sprite code - 0x3f */
+extern s32 g_numeric_editor_redraw_request;
+extern menu_unit_status_record_t g_panel_comparison_billboard;
+extern menu_status_panel_editor_packet_t g_panel_comparison_editor_packets[2];
+extern u8 g_panel_comparison_large_number_image[];
+extern u8 g_panel_comparison_name_image[];
+extern u8 g_panel_comparison_number_image[];
+extern menu_number_entry_t g_panel_comparison_numeric_entries[];
+extern menu_status_panel_packet_t g_panel_comparison_packets[2];
+extern RECT g_panel_comparison_portrait_rect;
+extern u16 g_panel_editor_label_cluts[][2];
+extern u16 g_panel_editor_value_cluts[][2];
+extern RECT g_panel_frame_rect;
+extern menu_status_panel_buffer_t g_panel_frames_a[];
+extern CVECTOR g_panel_gauge_bar_colors[];
+extern RECT g_panel_origin_offsets[];
+extern menu_unit_status_record_t g_panel_selected_billboard;
+extern menu_status_panel_editor_packet_t g_panel_selected_editor_packets[2];
+extern u8 g_panel_selected_large_number_image[];
+extern u8 g_panel_selected_name_image[];
+extern u8 g_panel_selected_number_image[];
+extern menu_number_entry_t g_panel_selected_numeric_entries[];
+extern menu_status_panel_packet_t g_panel_selected_packets[2];
+extern RECT g_panel_selected_portrait_rect;
+extern s16 g_panel_slide_down_y[];
+extern s16 g_panel_slide_up_y[];
+extern u8 g_panel_text_image_a[];
+extern u8 g_panel_text_image_b[];
+extern RECT g_panel_text_upload_rect_a;
+extern RECT g_panel_text_upload_rect_b;
+extern u16 g_portrait_index_by_sprite_set[];
+extern RECT g_portrait_sheet_rect_0;
+extern RECT g_portrait_sheet_rect_1;
+extern RECT g_portrait_sheet_rect_2;
+extern RECT g_portrait_sheet_rect_3;
+extern u32 g_previous_input;
+extern s8 g_remove_all_equipment_prompt_active;
+extern s8 g_remove_item_previewed_slot;
+extern RECT g_special_portrait_palette_rect;
+extern RECT g_special_portrait_rect;
+
+/* help menus */
+extern u32 g_help_text_table[];
+
+/* scrollable lists */
+extern u16 g_menu_list_scroll_progress;
 
 #endif

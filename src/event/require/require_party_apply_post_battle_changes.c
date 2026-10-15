@@ -47,7 +47,7 @@ void require_party_apply_post_battle_changes(void) {
     thread_suspend(THREAD_SLOT_EVENT);
     mem_copy_bytes_nonempty(g_require_saved_thread_block, &g_threads[THREAD_SLOT_EVENT], 0x400);
 
-    text_data = g_require_text_data;
+    text_data = g_text_data;
     g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_WARNINGS] = text_data + g_require_text_section_offsets[1];
     g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
         = text_data + g_require_text_section_offsets[2];
@@ -122,9 +122,9 @@ void require_party_apply_post_battle_changes(void) {
                 menu_copy_billboard_data_in(
                     &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
                 index_value = *unit_index_ptr;
-                g_require_status_display_redraw_request = one;
-                g_require_numeric_editor_redraw_request = one;
-                g_require_character_status_redraw_request = one;
+                g_status_display_redraw_request = one;
+                g_numeric_editor_redraw_request = one;
+                g_character_status_redraw_request = one;
                 g_menu_selected_unit_status.unit_index = index_value;
                 thread_yield();
             }
@@ -251,9 +251,9 @@ void require_party_apply_post_battle_changes(void) {
                     unit_display_data->name_id = display_index;
                     menu_load_selected_unit_variant();
                     index_value = *selected_unit_index_ptr;
-                    g_require_status_display_redraw_request = one;
-                    g_require_numeric_editor_redraw_request = one;
-                    g_require_character_status_redraw_request = one;
+                    g_status_display_redraw_request = one;
+                    g_numeric_editor_redraw_request = one;
+                    g_character_status_redraw_request = one;
                     g_menu_selected_unit_status.unit_index = index_value;
                     if (g_require_party_removal_result == 0) {
                         require_panel_set_transition_value(1);

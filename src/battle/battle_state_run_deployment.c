@@ -81,7 +81,7 @@ void battle_state_run_deployment(void) {
             main_gfx_add_now_loading_to_otag(main_gfx_get_otag());
         }
         g_battle_state_map_init_step = map_init_units_sprites_event_and_music(map_id, g_battle_state_map_init_step,
-            script_is_deployment_running(main_gfx_get_otag(), g_main_input_current_buttons));
+            script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
         if (g_battle_state_map_init_step == 0xd) {
             battle_gfx_extract_deployed_unit_palettes();
             action_set_casting_unit_id_ff_and_init();

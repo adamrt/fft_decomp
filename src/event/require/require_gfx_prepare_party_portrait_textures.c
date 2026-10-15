@@ -34,10 +34,10 @@ void require_gfx_prepare_party_portrait_textures(void) {
         g_thread_call_target = (void (*)(void))main_file_load_checked_to_address;
         thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE, file);
     } else {
-        StoreImage(&g_require_portrait_sheet_rect_0, (u32*)file[0].pixels);
-        StoreImage(&g_require_portrait_sheet_rect_1, (u32*)file[1].pixels);
-        StoreImage(&g_require_portrait_sheet_rect_2, (u32*)file[2].pixels);
-        StoreImage(&g_require_portrait_sheet_rect_3, (u32*)file[3].pixels);
+        StoreImage(&g_portrait_sheet_rect_0, (u32*)file[0].pixels);
+        StoreImage(&g_portrait_sheet_rect_1, (u32*)file[1].pixels);
+        StoreImage(&g_portrait_sheet_rect_2, (u32*)file[2].pixels);
+        StoreImage(&g_portrait_sheet_rect_3, (u32*)file[3].pixels);
         DrawSync(0);
     }
     for (i = 0; i < 0x15; i++) {
@@ -61,8 +61,8 @@ void require_gfx_prepare_party_portrait_textures(void) {
                     value = base + 0x5f;
                 }
             } else {
-                g_require_formation_job_data = main_job_get_data_pointer(unit->job_id);
-                value = g_require_formation_job_data->spritesheet_id;
+                g_formation_job_data = main_job_get_data_pointer(unit->job_id);
+                value = g_formation_job_data->spritesheet_id;
             }
             job_id = unit->job_id;
             if (job_id == JOB_ID_BARD) {
@@ -72,12 +72,12 @@ void require_gfx_prepare_party_portrait_textures(void) {
                 value = 0x83;
             }
         }
-        value = g_require_portrait_index_by_sprite_set[value];
+        value = g_portrait_index_by_sprite_set[value];
         if (unit->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
             value = 0;
         }
         if (unit->sprite_set == CHARACTER_IDENTITY_MONSTER) {
-            value |= g_require_formation_job_data->job_portrait_palette << 10;
+            value |= g_formation_job_data->job_portrait_palette << 10;
         }
         cell = value & 0xff;
         palette = (value & 0xc00) >> 10;
@@ -103,8 +103,8 @@ void require_gfx_prepare_party_portrait_textures(void) {
             }
             src += 0x80;
         }
-        LoadImage(i == 20 ? &g_require_special_portrait_rect : &g_require_portrait_cell_rect,
-            (u32*)g_require_portrait_cell_pixels);
+        LoadImage(
+            i == 20 ? &g_special_portrait_rect : &g_require_portrait_cell_rect, (u32*)g_require_portrait_cell_pixels);
         g_require_portrait_palette_rect.x = (i % 3) * 0x10 + 0x100;
         g_require_portrait_palette_rect.y = i / 3;
         g_require_portrait_palette_rect.w = 0x10;
@@ -123,7 +123,7 @@ void require_gfx_prepare_party_portrait_textures(void) {
         pal_offset = value * 0x100 + 0xf000 + col * 0x40 >> 1;
         /* Palette member indexing changes the native offset calculation and allocation. */
         if (i == 20) {
-            LoadImage(&g_require_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
+            LoadImage(&g_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         } else {
             LoadImage(&g_require_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         }

@@ -19,9 +19,9 @@ void require_editor_load_party_unit(s32 unused, s32 party_index) {
     u16 maximum_mp;
     menu_unit_status_record_t* gauges;
 
-    main_unit_init_job_data(&g_require_editor_party_unit_stats, party_index, 0);
+    main_unit_init_job_data(&g_editor_party_unit_stats, party_index, 0);
     editor = &g_menu_selected_unit_fields.state;
-    unit = &g_require_editor_party_unit_stats;
+    unit = &g_editor_party_unit_stats;
     gauges = &g_menu_selected_unit_status;
 
     g_menu_selected_unit.name_id = party_index;

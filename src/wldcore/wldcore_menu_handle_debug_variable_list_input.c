@@ -41,13 +41,13 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
         return;
     }
     if (wldcore_input_update_repeat(PSX_PAD_UP) != 0) {
-        if (g_wldcore_input_current_buttons & PSX_PAD_TRIANGLE) {
+        if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->first_variable < 0x64) {
                 level->first_variable = 0;
             } else {
                 level->first_variable -= 0x64;
             }
-        } else if (g_wldcore_input_current_buttons & PSX_PAD_SQUARE) {
+        } else if (g_input_current_buttons & PSX_PAD_SQUARE) {
             if (level->first_variable == 0) {
                 level->first_variable = 0x3fc;
             } else {
@@ -62,13 +62,13 @@ void wldcore_menu_handle_debug_variable_list_input(wldcore_menu_variable_list_le
             goto move_cursor;
         }
     } else if (wldcore_input_update_repeat(PSX_PAD_DOWN) != 0) {
-        if (g_wldcore_input_current_buttons & PSX_PAD_TRIANGLE) {
+        if (g_input_current_buttons & PSX_PAD_TRIANGLE) {
             if (level->first_variable + 0x64 < 0x3fd) {
                 level->first_variable += 0x64;
             } else {
                 level->first_variable = 0x3fc;
             }
-        } else if (g_wldcore_input_current_buttons & PSX_PAD_SQUARE) {
+        } else if (g_input_current_buttons & PSX_PAD_SQUARE) {
             if (level->first_variable == 0x3fc) {
                 level->first_variable = 0;
             } else {

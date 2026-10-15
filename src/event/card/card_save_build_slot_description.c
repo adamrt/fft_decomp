@@ -17,7 +17,7 @@ void card_save_build_slot_description(s32 mode, u8* destination) {
     const u8* source;
 
     if (mode == 1) {
-        source = menu_text_find_entry_by_index(g_card_text_data, 14, 1);
+        source = menu_text_find_entry_by_index(g_text_data, 14, 1);
         while ((*destination++ = *source++) != 0xfe) { }
     } else if (mode == 0) {
         index = 0;
@@ -35,7 +35,7 @@ void card_save_build_slot_description(s32 mode, u8* destination) {
 
         *destination++ = 0xe7;
         *destination++ = 0xac;
-        source = menu_text_find_entry_by_index(g_card_text_data, 13, 1);
+        source = menu_text_find_entry_by_index(g_text_data, 13, 1);
         while (*source != 0xfe) {
             *destination++ = *source++;
         }
@@ -43,7 +43,7 @@ void card_save_build_slot_description(s32 mode, u8* destination) {
         *destination++ = g_card_save_buffer_pointer->summary.level / 10;
         *destination++ = g_card_save_buffer_pointer->summary.level % 10;
         *destination++ = 0xfe;
-        source = menu_text_find_entry_by_index(g_card_text_data, g_card_save_buffer_pointer->summary.date.month, 1);
+        source = menu_text_find_entry_by_index(g_text_data, g_card_save_buffer_pointer->summary.date.month, 1);
         while (*source != 0xfe) {
             *destination++ = *source++;
         }

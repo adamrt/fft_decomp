@@ -45,7 +45,7 @@ void menu_run_at_list_variant(void) {
     s32 arrow_y;
     s32 span;
 
-    page = g_world_at_list_pages;
+    page = g_at_list_pages;
     timer = 0;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);
@@ -68,10 +68,10 @@ void menu_run_at_list_variant(void) {
     texture_window.w = 0x100;
     texture_window.h = 0x100;
     for (i = 0; i < 2; i++) {
-        g_world_at_list_pages[i].icons.icons[0] = &icons0[i];
-        g_world_at_list_pages[i].icons.icons[1] = &icons1[i];
-        g_world_at_list_pages[i].icons.icons[2] = &icons2[i];
-        menu_build_window_sprites_variant(&image_rect, entry, &g_world_at_list_pages[i].icons);
+        g_at_list_pages[i].icons.icons[0] = &icons0[i];
+        g_at_list_pages[i].icons.icons[1] = &icons1[i];
+        g_at_list_pages[i].icons.icons[2] = &icons2[i];
+        menu_build_window_sprites_variant(&image_rect, entry, &g_at_list_pages[i].icons);
     }
     menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
@@ -125,11 +125,11 @@ void menu_run_at_list_variant(void) {
     clear.y = ((image_rect.y - 2) & 0xFF) + (image_rect.y & 0xFF00);
     clear.w = image_rect.w;
     ClearImage(&clear, 0, 0, 0);
-    mem_copy_bytes_nonempty(&g_world_at_list_pages[1], g_world_at_list_pages, sizeof(menu_list_page_t));
+    mem_copy_bytes_nonempty(&g_at_list_pages[1], g_at_list_pages, sizeof(menu_list_page_t));
     for (i = 0; i < 2; i++) {
-        g_world_at_list_pages[i].icons.icons[0] = &icons0[i];
-        g_world_at_list_pages[i].icons.icons[1] = &icons1[i];
-        g_world_at_list_pages[i].icons.icons[2] = &icons2[i];
+        g_at_list_pages[i].icons.icons[0] = &icons0[i];
+        g_at_list_pages[i].icons.icons[1] = &icons1[i];
+        g_at_list_pages[i].icons.icons[2] = &icons2[i];
     }
     delta = 0;
     accum = 0;
@@ -137,7 +137,7 @@ void menu_run_at_list_variant(void) {
     i = 0;
     *input1 = 0;
     for (;;) {
-        page = &g_world_at_list_pages[i & 1];
+        page = &g_at_list_pages[i & 1];
         frame = &page->frame;
         if (thread_is_previous_running_variant() != 0 && g_menu_input_lock_mode == 0) {
             thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 1, 0);

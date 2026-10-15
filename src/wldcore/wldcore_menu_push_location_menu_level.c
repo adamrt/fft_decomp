@@ -167,7 +167,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     }
 
     depth = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
+    g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_stack_records_next[depth].location_list.delay = 8;
     g_main_system_flags |= MAIN_SYSTEM_FLAG_FREEZE_ANIMATION;
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_LOCATION_MENU;

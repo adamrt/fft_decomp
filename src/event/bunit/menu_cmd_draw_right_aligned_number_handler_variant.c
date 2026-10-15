@@ -20,11 +20,11 @@ menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_inst
     y = cmd->number.y;
     blanks = cmd->number.width - count;
     count = cmd->number.width - blanks;
-    g_bunit_gfx_blank_cell_rect.position.y = y + 4;
+    g_gfx_blank_cell_rect.position.y = y + 4;
     for (i = blanks - 1; i != -1; i--) {
-        g_bunit_gfx_blank_cell_rect.position.x = x;
+        g_gfx_blank_cell_rect.position.x = x;
         menu_gfx_enqueue_oriented_textured_quad(
-            &g_bunit_gfx_blank_cell_rect, 0, TEXTURE_UV_FLIP_NONE, 0, g_menu_gfx_otag_index);
+            &g_gfx_blank_cell_rect, 0, TEXTURE_UV_FLIP_NONE, 0, g_menu_gfx_otag_index);
         x += 8;
     }
     glyph_rect.x = x;

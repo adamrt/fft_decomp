@@ -59,7 +59,7 @@ void wldcore_menu_handle_participant_detail_input(wldcore_menu_participant_level
         wldcore_menu_push_layout_window_level();
         return;
     }
-    if (!(g_wldcore_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1))) {
+    if (!(g_input_current_buttons & (PSX_PAD_L1 | PSX_PAD_R1))) {
         g_wldcore_window_records[level->left_window].sequence = WLDCORE_ANIM_SEQUENCE_L1_BUTTON;
         g_wldcore_window_records[level->right_window].sequence = WLDCORE_ANIM_SEQUENCE_R1_BUTTON;
         g_wldcore_window_records[level->left_window].frame_index

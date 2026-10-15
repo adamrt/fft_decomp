@@ -171,7 +171,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
         goto finish;
     }
 
-    if (!(g_wldcore_input_current_buttons & PSX_PAD_SQUARE)) {
+    if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {
         if (level->map_cursor.wide_view != 0) {
             level->map_cursor.wide_view = 0;
             g_wldcore_window_records[level->map_cursor.alt_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
@@ -191,7 +191,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
 
 scroll:
     if (level->map_cursor.wide_view == 0) {
-        held = g_wldcore_input_current_buttons;
+        held = g_input_current_buttons;
         if (held & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
             if (held & PSX_PAD_LEFT) {
                 wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_x, -1);
@@ -201,7 +201,7 @@ scroll:
         } else {
             wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_x, 0);
         }
-        held = g_wldcore_input_current_buttons;
+        held = g_input_current_buttons;
         if (held & (PSX_PAD_UP | PSX_PAD_DOWN)) {
             if (held & PSX_PAD_UP) {
                 wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_y, -1);
@@ -249,7 +249,7 @@ scroll:
             g_wldcore_window_records[level->map_cursor.window_index].position.y = 0x68;
         }
     } else {
-        held = g_wldcore_input_current_buttons;
+        held = g_input_current_buttons;
         if (held & PSX_PAD_DPAD_MASK) {
             amount.y = 0;
             amount.x = 0;

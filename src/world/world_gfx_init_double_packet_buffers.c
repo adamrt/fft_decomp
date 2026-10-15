@@ -22,10 +22,10 @@ void world_gfx_init_double_packet_buffers(menu_gfx_context_t* buffers, u32* otag
             = textured_gradient_quads + g_world_gfx_textured_gradient_quad_capacity * i;
         g_world_gfx_packet_buffers[i].flat_lines = flat_lines + g_world_gfx_flat_line_capacity * i;
         g_world_gfx_packet_buffers[i].gouraud_lines = gradient_lines + g_world_gfx_gradient_line_capacity * i;
-        g_world_gfx_packet_buffers[i].tiles = tiles + g_world_gfx_tile_capacity * i;
+        g_world_gfx_packet_buffers[i].tiles = tiles + g_gfx_tile_capacity * i;
         g_world_gfx_packet_buffers[i].draw_moves = draw_moves + g_world_gfx_draw_move_capacity * i;
         g_world_gfx_packet_buffers[i].draw_areas = draw_areas + g_world_gfx_draw_area_capacity * i;
-        g_world_gfx_packet_buffers[i].draw_modes = draw_modes + g_world_gfx_draw_mode_capacity * i;
+        g_world_gfx_packet_buffers[i].draw_modes = draw_modes + g_gfx_draw_mode_capacity * i;
         world_gfx_init_packet_pools(&g_world_gfx_packet_buffers[i]);
         SetDefDrawEnv(&g_world_gfx_packet_buffers[i].draw_env, 0, i * 240, 255, 240);
         SetDefDispEnv(&g_world_gfx_packet_buffers[i].disp_env, 0, i == 0 ? 240 : 0, 255, 240);

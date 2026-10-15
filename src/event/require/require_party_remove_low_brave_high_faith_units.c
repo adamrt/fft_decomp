@@ -18,12 +18,12 @@ void require_party_remove_low_brave_high_faith_units(void) {
     if (require_party_find_low_brave_high_faith_departures() == 0)
         thread_exit_current();
     g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_WARNINGS]
-        = g_require_text_data + g_require_text_section_offsets[1];
+        = g_text_data + g_require_text_section_offsets[1];
     g_text_section_pointers[REQUIRE_TEXT_SECTION_BRAVE_FAITH_DEPARTURES]
-        = g_require_text_data + g_require_text_section_offsets[2];
+        = g_text_data + g_require_text_section_offsets[2];
     g_text_section_pointers[REQUIRE_TEXT_SECTION_DISMISS_UNIT_REPLIES]
-        = g_require_text_data + g_require_text_section_offsets[3];
-    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_require_text_data + g_require_text_section_offsets[4];
+        = g_text_data + g_require_text_section_offsets[3];
+    g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = g_text_data + g_require_text_section_offsets[4];
     thread_yield();
     main_thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(main_thread, require_condition_run_special_thread);

@@ -39,10 +39,10 @@ void attack_gfx_prepare_party_portrait_textures(void) {
             thread_call_on_main_stack(DISC_SECTOR_EVENT_WLDFACE_BIN, MENU_WLDFACE_FILE_SIZE, file);
         }
     } else {
-        StoreImage(&g_attack_portrait_sheet_rect_0, (u32*)file[0].pixels);
-        StoreImage(&g_attack_portrait_sheet_rect_1, (u32*)file[1].pixels);
-        StoreImage(&g_attack_portrait_sheet_rect_2, (u32*)file[2].pixels);
-        StoreImage(&g_attack_portrait_sheet_rect_3, (u32*)file[3].pixels);
+        StoreImage(&g_portrait_sheet_rect_0, (u32*)file[0].pixels);
+        StoreImage(&g_portrait_sheet_rect_1, (u32*)file[1].pixels);
+        StoreImage(&g_portrait_sheet_rect_2, (u32*)file[2].pixels);
+        StoreImage(&g_portrait_sheet_rect_3, (u32*)file[3].pixels);
         DrawSync(0);
     }
     for (i = 0; i < 0x15; i++) {
@@ -69,8 +69,8 @@ void attack_gfx_prepare_party_portrait_textures(void) {
                         value = base + 0x5f;
                     }
                 } else {
-                    g_attack_formation_job_data = main_job_get_data_pointer(unit->job_id);
-                    value = g_attack_formation_job_data->spritesheet_id;
+                    g_formation_job_data = main_job_get_data_pointer(unit->job_id);
+                    value = g_formation_job_data->spritesheet_id;
                 }
                 job_id = unit->job_id;
                 if (job_id == JOB_ID_BARD) {
@@ -80,12 +80,12 @@ void attack_gfx_prepare_party_portrait_textures(void) {
                     value = 0x83;
                 }
             }
-            value = g_attack_portrait_index_by_sprite_set[value];
+            value = g_portrait_index_by_sprite_set[value];
             if (unit->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
                 value = 0;
             }
             if (unit->sprite_set == CHARACTER_IDENTITY_MONSTER) {
-                value |= g_attack_formation_job_data->job_portrait_palette << 10;
+                value |= g_formation_job_data->job_portrait_palette << 10;
             }
         }
         cell = value & 0xff;
@@ -115,8 +115,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         if (j <= 0) {
             j = 0;
         }
-        LoadImage(i == 20 ? &g_attack_special_portrait_rect : &g_attack_portrait_upload_rect,
-            (u32*)g_attack_portrait_staging);
+        LoadImage(i == 20 ? &g_special_portrait_rect : &g_attack_portrait_upload_rect, (u32*)g_attack_portrait_staging);
         g_attack_portrait_palette_upload_rect.x = (i % 3) * 0x10 + 0x100;
         g_attack_portrait_palette_upload_rect.y = i / 3;
         g_attack_portrait_palette_upload_rect.w = 0x10;
@@ -135,7 +134,7 @@ void attack_gfx_prepare_party_portrait_textures(void) {
         pal_offset = value * 0x100 + 0xf000 + col * 0x40 >> 1;
         /* Palette member indexing changes the native offset calculation and allocation. */
         if (i == 20) {
-            LoadImage(&g_attack_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
+            LoadImage(&g_special_portrait_palette_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         } else {
             LoadImage(&g_attack_portrait_palette_upload_rect, (u32*)((u8*)&file[sheet] + pal_offset));
         }

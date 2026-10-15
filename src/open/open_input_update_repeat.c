@@ -24,7 +24,7 @@ u32 open_input_update_repeat(u32 buttons) {
     }
 
     if ((buttons & PSX_PAD_UP) != 0) {
-        if ((g_open_input_current_buttons & PSX_PAD_UP) != 0) {
+        if ((g_input_current_buttons & PSX_PAD_UP) != 0) {
             s32* up_counter = &g_open_input_up_repeat_counter;
 
             if (g_open_input_directional_repeat_initial_delay < (*up_counter = next = *up_counter + 1)) {
@@ -37,7 +37,7 @@ u32 open_input_update_repeat(u32 buttons) {
     }
 
     if ((buttons & PSX_PAD_DOWN) != 0) {
-        if ((g_open_input_current_buttons & PSX_PAD_DOWN) != 0) {
+        if ((g_input_current_buttons & PSX_PAD_DOWN) != 0) {
             s32* down_counter = &g_open_input_down_repeat_counter;
             s32 old_counter;
             s32 down_next;

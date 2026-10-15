@@ -51,7 +51,7 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
         fade = level->fade_out;
         g_wldcore_screen_fade_state.boxes[0].b = fade;
         if (level->fade_out <= 0) {
-            g_wldcore_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
+            g_menu_blocked_buttons = PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
             g_wldcore_screen_fade_state.flags[0] ^= WLDCORE_SCREEN_FADE_BOX_VISIBLE;
             g_wldcore_window_record_count -= 2;
             g_wldcore_window_render_record_count--;
@@ -93,7 +93,7 @@ void wldcore_menu_step_sound_novel_quit_level(wldcore_menu_save_confirm_level_t*
         g_wldcore_screen_fade_state.flags[0] |= WLDCORE_SCREEN_FADE_OUT;
         first = g_wldcore_sound_novel_text_history_0;
         g_wldcore_sound_novel_text_history_0 = -1;
-        g_wldcore_menu_blocked_buttons = 0;
+        g_menu_blocked_buttons = 0;
         g_wldcore_sound_novel_countdown_frames = 0;
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_sound_novel_text_history_3 = g_wldcore_sound_novel_text_history_2;

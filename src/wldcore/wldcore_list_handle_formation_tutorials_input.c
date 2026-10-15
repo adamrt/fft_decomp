@@ -16,7 +16,7 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
             world_menu_set_brightness(0x80, 0x80, 0x80);
             world_formation_run_screen_for_menu_index(*selected);
             g_wldcore_menu_ordering_table_offset = 1;
-            g_wldcore_menu_blocked_buttons = 0;
+            g_menu_blocked_buttons = 0;
             g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED | MAIN_SYSTEM_FLAG_DISPLAY_OFF;
             g_wldcore_menu_stack_depth--;
             wldcore_menu_push_screen_transition_level(WLDCORE_MENU_LEVEL_FORMATION_TUTORIALS, 0, 0);
@@ -36,7 +36,7 @@ void wldcore_list_handle_formation_tutorials_input(wldcore_menu_panel_level_t* l
             return;
         }
         g_wldcore_menu_ordering_table_offset = 1;
-        g_wldcore_menu_blocked_buttons = 0;
+        g_menu_blocked_buttons = 0;
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         g_wldcore_menu_stack_depth--;
         wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_FORMATION_TUTORIALS);

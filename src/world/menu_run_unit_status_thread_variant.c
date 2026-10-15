@@ -111,7 +111,7 @@ void menu_run_unit_status_thread_variant(void) {
     text_configure_sprite_vram(&rects[0], 0x38, 0x28, &summary->value_sprites[0], 2);
     text_configure_sprite_vram(&rects[1], 0x60, 0x10, &summary->value_sprites[1], 2);
     for (frame = 0; frame < 4; frame++) {
-        gfx_init_image_loading(&summary->value_sprites[frame], g_world_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&summary->value_sprites[frame], g_editor_numeric_geometry, &g_gfx_portrait_origin,
             &g_world_unit_summary_value_sprite_params[frame]);
     }
     if (state->team_kind >= 4) {
@@ -125,7 +125,7 @@ void menu_run_unit_status_thread_variant(void) {
             sizeof(image_load_parameters_t));
     }
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&summary->label_sprites[frame], g_world_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&summary->label_sprites[frame], g_editor_numeric_geometry, &g_gfx_portrait_origin,
             &g_world_unit_summary_label_sprite_params[frame]);
     }
     mem_copy_bytes_nonempty(summary + 1, summary, sizeof(menu_status_panel_editor_packet_t));
@@ -139,10 +139,10 @@ void menu_run_unit_status_thread_variant(void) {
     text_configure_sprite_vram(&rects[4], 0x10, 0xA, &status->sprites[2], 0);
     text_configure_sprite_vram(&rects[5], 0x10, 0xA, &status->sprites[3], 0);
     for (frame = 0; frame < 7; frame++) {
-        gfx_init_image_loading(&status->sprites[frame], g_world_editor_numeric_geometry,
-            &g_world_unit_status_panel_origin, &g_world_unit_status_sprite_params[frame]);
+        gfx_init_image_loading(&status->sprites[frame], g_editor_numeric_geometry, &g_world_unit_status_panel_origin,
+            &g_world_unit_status_sprite_params[frame]);
     }
-    gfx_init_image_loading(&status->portrait, g_world_editor_numeric_geometry, &g_world_unit_status_panel_origin,
+    gfx_init_image_loading(&status->portrait, g_editor_numeric_geometry, &g_world_unit_status_panel_origin,
         &g_world_unit_status_portrait_params);
     if (state->team_kind == 1) {
         status->portrait.clut = 0x7FFD;
@@ -169,7 +169,7 @@ void menu_run_unit_status_thread_variant(void) {
             mem_copy_bytes_nonempty(&g_world_unit_summary_label_sprite_params[6], g_world_unit_summary_mode_row_params,
                 sizeof(image_load_parameters_t));
         }
-        gfx_init_image_loading(&summary->label_sprites[6], g_world_editor_numeric_geometry, &g_gfx_portrait_origin,
+        gfx_init_image_loading(&summary->label_sprites[6], g_editor_numeric_geometry, &g_gfx_portrait_origin,
             &g_world_unit_summary_label_sprite_params[6]);
         if (state->team_kind == 1) {
             status->portrait.clut = 0x7FFD;
@@ -226,7 +226,7 @@ void menu_run_unit_status_thread_variant(void) {
         } else {
             setRGB0(&status->portrait, 0x80, 0x80, 0x80);
         }
-        g_world_gfx_draw_area_y = (g_world_frame_arg != 0xF0) ? 0xF0 : 0;
+        g_world_gfx_draw_area_y = (g_frame_arg != 0xF0) ? 0xF0 : 0;
         if ((display->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
             shake = 1;
         }
@@ -237,7 +237,7 @@ void menu_run_unit_status_thread_variant(void) {
         }
         if (shake != 0) {
             if (shake < 0xA) {
-                display->shake_y = g_world_panel_slide_down_y[shake];
+                display->shake_y = g_panel_slide_down_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }
@@ -246,7 +246,7 @@ void menu_run_unit_status_thread_variant(void) {
                     display->flags = display->flags & MENU_STATUS_PANEL_HIDDEN;
                 }
             } else if (shake >= 0xB) {
-                display->shake_y = g_world_panel_slide_up_y[shake];
+                display->shake_y = g_panel_slide_up_y[shake];
                 if (frame & 1) {
                     shake += 1;
                 }

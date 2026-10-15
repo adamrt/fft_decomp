@@ -78,8 +78,8 @@ void attack_gfx_prepare_formation_sprites(void) {
                     code = base + 0x5F;
                 }
             } else {
-                g_attack_formation_job_data = main_job_get_data_pointer(party->job_id);
-                code = g_attack_formation_job_data->spritesheet_id;
+                g_formation_job_data = main_job_get_data_pointer(party->job_id);
+                code = g_formation_job_data->spritesheet_id;
             }
             if (party->job_id == JOB_ID_BARD) {
                 code = 0x82;
@@ -90,19 +90,19 @@ void attack_gfx_prepare_formation_sprites(void) {
         } else {
             code = party->sprite_set;
         }
-        code = g_attack_portrait_index_by_sprite_set[code];
+        code = g_portrait_index_by_sprite_set[code];
         if (party->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
             code = 0;
         }
         if (party->sprite_set == CHARACTER_IDENTITY_MONSTER) {
-            code |= g_attack_formation_job_data->job_portrait_palette << 10;
+            code |= g_formation_job_data->job_portrait_palette << 10;
         }
         code &= 0xFF;
         if (code == 0x18) {
             portrait = -1;
             code = 0x4C;
         } else if (code >= 0x3F) {
-            code = g_attack_monster_formation_sprite_table[code - 0x3F];
+            code = g_monster_formation_sprite_table[code - 0x3F];
             portrait = code;
         } else {
             portrait = code;
@@ -170,7 +170,7 @@ void attack_gfx_prepare_formation_sprites(void) {
             code = 0x7A;
         } else if (code >= 0x3E) {
             product = (code - 0x3E) * 3;
-            palette_base = g_attack_formation_job_data->job_portrait_palette + 0x3E;
+            palette_base = g_formation_job_data->job_portrait_palette + 0x3E;
             code = product + palette_base;
         }
         row = code / 4;

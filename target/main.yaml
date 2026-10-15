@@ -1195,7 +1195,7 @@ data:
   - {addr: 0x800454cc, name: g_main_brave_story_ages_source}
   - {addr: 0x8004593c, name: _ramsize}
   - {addr: 0x80045940, name: _stacksize}
-  - {addr: 0x80045944, name: g_main_input_current_buttons}
+  - {addr: 0x80045944, name: g_input_current_buttons}
   - {addr: 0x80045948, name: g_main_input_previous_buttons}
   - {addr: 0x8004594c, name: g_main_input_pressed_buttons}
   - {addr: 0x80045950, name: g_main_input_released_buttons}
@@ -1215,7 +1215,7 @@ data:
   - {addr: 0x80045988, name: g_main_system_battle_frame_hsync_count_max}
   - {addr: 0x8004598c, name: g_battle_frame_pacing_timer}
   - {addr: 0x80045990, name: g_battle_frame_pacing_suppressed}
-  - {addr: 0x80045994, name: g_battle_frame_counter}
+  - {addr: 0x80045994, name: g_frame_counter}
   - {addr: 0x80045998, name: g_battle_frame_pacing}
   - {addr: 0x8004599c, name: g_main_sound_weather_sfx_id}
   - {addr: 0x800459a0, name: g_main_deployed_unit_map_coordinates}

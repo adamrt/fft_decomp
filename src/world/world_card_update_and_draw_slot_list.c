@@ -132,7 +132,7 @@ void world_card_update_and_draw_slot_list(s32 input) {
     }
 
     world_card_scroll_menu_list(g_world_card_slot_cursor_row);
-    g_world_menu_window_rect_source = &g_world_card_slot_window;
+    g_menu_window_rect_source = &g_world_card_slot_window;
     busy = g_world_card_menu_step != WORLD_CARD_MENU_STEP_SELECT_SAVE;
     for (i = 0, row = 0; i < 15; i++, row++) {
         if (g_world_card_save_mode != 0) {

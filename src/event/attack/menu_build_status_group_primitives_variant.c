@@ -43,7 +43,7 @@ void menu_build_status_group_primitives_variant(POLY_FT4* poly) {
             menu_init_default_poly_ft4(poly);
             index = first + count - cell;
             g_menu_draw_area_template.y += *g_attack_panel_status_y_offsets[entry];
-            gfx_set_scaled_poly_ft4_4bpp(poly, g_attack_editor_numeric_geometry, &g_menu_draw_area_template,
+            gfx_set_scaled_poly_ft4_4bpp(poly, g_editor_numeric_geometry, &g_menu_draw_area_template,
                 &g_attack_panel_status_uv_rects[index], &g_attack_panel_status_scales[index],
                 &g_attack_panel_status_offsets[entry]);
             g_menu_draw_area_template.y -= *g_attack_panel_status_y_offsets[entry];

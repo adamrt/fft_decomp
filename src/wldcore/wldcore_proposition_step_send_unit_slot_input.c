@@ -44,7 +44,7 @@ void wldcore_proposition_step_send_unit_slot_input(wldcore_menu_send_unit_level_
         g_wldcore_window_render_records[level->portrait_frame].flags |= WORLD_RENDER_RECORD_HIDDEN;
         g_wldcore_window_records[level->portrait_window].flags |= WORLD_RENDER_RECORD_HIDDEN;
         g_wldcore_window_records[level->cursor_window].flags |= WORLD_RENDER_RECORD_HIDDEN;
-        g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
+        g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT;
         level->mode = WLDCORE_SEND_UNIT_MODE_SELECT;
         return;
     }

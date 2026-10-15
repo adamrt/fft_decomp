@@ -9,7 +9,7 @@
  * thread 12. */
 void wldcore_menu_number_panel_wait_for_thread_step(wldcore_menu_panel_level_t* level) {
     if (level->result != 0 && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
-        g_wldcore_menu_blocked_buttons = 0;
+        g_menu_blocked_buttons = 0;
         g_wldcore_menu_ordering_table_offset = 1;
         g_wldcore_window_render_record_count--;
         g_wldcore_window_render_object_count--;

@@ -41,10 +41,10 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
     g_world_gfx_textured_gradient_quad_capacity = 0x3C;
     g_world_gfx_flat_line_capacity = 0xA;
     g_world_gfx_gradient_line_capacity = 0x82;
-    g_world_gfx_tile_capacity = 0x1E;
+    g_gfx_tile_capacity = 0x1E;
     g_world_gfx_draw_move_capacity = 0x1E;
     g_world_gfx_draw_area_capacity = 0x1E;
-    g_world_gfx_draw_mode_capacity = 0x1E;
+    g_gfx_draw_mode_capacity = 0x1E;
     world_gfx_init_double_packet_buffers(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads,
         textured_gradient_quads, flat_lines, 0, 0, gradient_lines, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves,
         draw_areas, draw_modes);

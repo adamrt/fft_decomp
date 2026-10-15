@@ -8,7 +8,7 @@ void wldcore_menu_push_entry_window_level(void) {
     s32 depth;
     s32* counter;
 
-    g_wldcore_menu_blocked_buttons = -1;
+    g_menu_blocked_buttons = -1;
     world_menu_open_entry_window(4, -0x30, -0x38);
     g_wldcore_context_value_display_mode = 1;
     g_wldcore_displayed_numeric_value = script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS);

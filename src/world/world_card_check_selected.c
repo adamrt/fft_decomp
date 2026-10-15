@@ -7,9 +7,9 @@ s32 world_card_check_selected(void) {
     s32 busy;
     s32 result;
 
-    if (g_world_card_info_pending == 0) {
+    if (g_card_info_pending == 0) {
         _card_info(g_card_slot * 0x10);
-        g_world_card_info_pending = 1;
+        g_card_info_pending = 1;
     }
     busy = _card_status(g_card_slot) & 1;
     result = card_io_poll_bios_event_result();
@@ -17,7 +17,7 @@ s32 world_card_check_selected(void) {
         result = CARD_IO_RESULT_TIMEOUT;
     }
     if (result >= CARD_IO_RESULT_COMPLETE) {
-        g_world_card_info_pending = 0;
+        g_card_info_pending = 0;
         if (result > CARD_IO_RESULT_COMPLETE) {
             result = card_get_info_with_retries_variant(g_card_slot * 0x10, 2);
         }

@@ -21,7 +21,7 @@ void battle_state_handle_close_move_help_state(void) {
     source = battle_unit_get_source();
     casting = battle_unit_get_casting();
     battle_state_handle_free_cursor_input();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if (source->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {
         target_move_cursor_by_input();
         camera_handle_rotation_input();

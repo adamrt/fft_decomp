@@ -106,23 +106,23 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         g_map_append_state = 0;
         g_map_destruction_wait_state = 1;
     }
-    g_battle_event_pending_map_jump_out_id = -1;
-    g_battle_event_weather_request = -1;
-    g_battle_event_pending_map_state = -1;
-    g_battle_event_pending_map_jump_out_2_id = -1;
-    g_battle_event_pending_effect_id = -1;
+    g_event_pending_map_jump_out_id = -1;
+    g_event_weather_request = -1;
+    g_event_pending_map_state = -1;
+    g_event_pending_map_jump_out_2_id = -1;
+    g_event_pending_effect_id = -1;
     g_script_pending_loaded_evtchr_slot = -1;
-    g_battle_event_pending_evtchr_save_slot = -1;
-    g_battle_event_pending_saved_evtchr_clear_slot = -1;
-    g_battle_event_pending_loaded_evtchr_clear_slot = -1;
-    g_battle_event_pending_unit_vram_copy = -1;
-    g_battle_event_pending_reserved_vram_release_slot = -1;
+    g_event_pending_evtchr_save_slot = -1;
+    g_event_pending_saved_evtchr_clear_slot = -1;
+    g_event_pending_loaded_evtchr_clear_slot = -1;
+    g_event_pending_unit_vram_copy = -1;
+    g_event_pending_reserved_vram_release_slot = -1;
     g_sound_pending_sfx_id = -1;
     g_sound_music_volume_transition_request = -1;
     g_sound_music_set_track_request = -1;
     g_sound_music_switch_request = -1;
     g_sound_music_unload_slot_request = -1;
-    g_battle_event_map_jump_in_request = 0;
+    g_event_map_jump_in_request = 0;
     g_battle_3d_object_use_request = 0;
     g_battle_field_object_use_request = 0;
 
@@ -150,11 +150,11 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
         g_script_input_suppression_frames = 5;
     }
     for (i = 1; i < 16; i++) {
-        g_battle_event_thread_status_snapshot[i] = thread_is_running_asm_variant(i);
+        g_event_thread_status_snapshot[i] = thread_is_running_asm_variant(i);
     }
     thread_yield();
     for (i = 1; i < 16; i++) {
-        if (g_battle_event_thread_status_snapshot[i] != thread_is_running_asm_variant(i)) {
+        if (g_event_thread_status_snapshot[i] != thread_is_running_asm_variant(i)) {
             g_script_input_suppression_frames = 5;
         }
     }
@@ -164,8 +164,8 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     camera_load_state_from_script_variables_variant();
     g_battle_event_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
-    if (g_battle_menu_input_block_frames != 0) {
-        g_battle_menu_input_block_frames--;
+    if (g_menu_input_block_frames != 0) {
+        g_menu_input_block_frames--;
     }
     script_frame_after_threads_stub();
     if (g_script_frame_result_override != 0) {

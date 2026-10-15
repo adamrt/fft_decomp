@@ -48,7 +48,7 @@ void wldcore_list_open_script_flags_01a4_01bb(void) {
         .flags |= WORLD_RENDER_RECORD_HIDDEN;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
     record_index = g_wldcore_menu_stack_depth;
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
+    g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_ordering_table_offset = 9;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_SCRIPT_FLAGS_01A4_01BB;
     g_wldcore_menu_stack_depth = record_index + 1;

@@ -82,8 +82,8 @@ void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
     wldcore_sound_play_effect(MAIN_SFX_WINDOW_OPEN);
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.saved_blocked_buttons
-        = g_wldcore_menu_blocked_buttons;
-    g_wldcore_menu_blocked_buttons = -1;
+        = g_menu_blocked_buttons;
+    g_menu_blocked_buttons = -1;
     g_wldcore_menu_stack_types[g_wldcore_menu_stack_depth + 1] = WLDCORE_MENU_LEVEL_TEXT_WINDOW;
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }

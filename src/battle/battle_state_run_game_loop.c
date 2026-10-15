@@ -251,7 +251,7 @@ void battle_state_run_game_loop(void) {
             }
             main_file_poll_load(&g_main_file_cd_state);
             g_main_gfx_screen_polarity = !g_main_gfx_screen_polarity;
-            g_battle_frame_counter++;
+            g_frame_counter++;
             map_upload_clut_rows();
             frame_measurement = battle_state_sync_frame(main_gfx_get_otag() + 0x17f);
             g_main_system_battle_frame_hsync_count = frame_measurement;

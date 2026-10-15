@@ -169,12 +169,10 @@ extern u16 g_card_gfx_drawenv_y;
 extern rgb24_t g_card_gfx_fade_overlay_color;
 extern RECT g_card_gfx_fullscreen_fade_rect;
 extern POLY_FT4 g_card_gfx_poly_ft4_buffers[];
-extern u16 g_card_gfx_poly_ft4_capacity;
 extern u32* g_card_gfx_render_otag;
 /* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
 extern POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30];
 extern u16 g_card_gfx_texture_page;
-extern u16 g_card_gfx_tile_capacity;
 
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
@@ -185,18 +183,9 @@ void card_gfx_set_render_otag(u32* otag);
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
 
 /* input */
-extern u8 g_card_input_activation_timer;
-extern u32* g_card_input_controller;
-extern u32 g_card_input_current;
 extern zodiac_draw_context_t g_card_input_display_state;
-extern u32 g_card_input_event;
-extern u32 g_card_input_initial_repeat_counter;
 extern u16 g_card_input_latched_button;
 extern u16 g_card_input_previous;
-extern u32 g_card_input_repeat_counter;
-extern s32 g_card_input_repeat_counters[16];
-extern u32 g_card_input_secondary_repeat_counter;
-extern u32 g_card_previous_input;
 extern u8 g_card_save_list_input_armed;
 
 void card_input_update_controller(void);
@@ -219,7 +208,6 @@ typedef enum card_save_menu_state {
 
 extern s32 g_card_menu_script_callback;
 extern s16 g_card_menu_selection_index;
-extern menu_window_rect_source_t* g_card_menu_window_rect_source;
 extern s16 g_card_menu_window_right_x;
 extern clut_t g_card_save_menu_clut;
 extern u8 g_card_save_menu_state; /* card_save_menu_state_e */
@@ -231,7 +219,6 @@ void card_save_init_menu_state(void);
 void card_save_run_menu_graphic_thread(void);
 
 /* menu commands */
-extern menu_window_command_t g_card_cmd_window_interior_command;
 
 menu_draw_number_command_t* card_cmd_draw_decimal_number_handler(menu_draw_number_command_t* command);
 menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t* command);
@@ -239,7 +226,6 @@ menu_window_command_t* card_cmd_draw_window_frame_handler(menu_window_command_t*
 /* text */
 extern s16 g_card_save_slot_text_row_ids[];
 extern const u8 g_card_text_command_help[];
-extern u8 g_card_text_data[];
 extern const char g_card_text_decimal_format[];
 extern const u8 g_card_text_job_name[];
 extern const u8 g_card_text_location_name[];
@@ -251,7 +237,6 @@ extern menu_entry_t g_card_save_failure_thread_descriptor[];
 extern menu_entry_t g_card_save_in_progress_thread_descriptor[];
 extern u8 g_card_save_initial_prompt_thread_state;
 extern u8 g_card_save_slot_selection_thread_state;
-extern u8 g_card_thread_status_snapshot[16];
 
 /* sound */
 extern u8 g_card_sound_queued_effect_id; /* main_sfx_e */

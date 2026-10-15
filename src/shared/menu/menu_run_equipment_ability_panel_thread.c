@@ -27,7 +27,7 @@ void menu_run_equipment_ability_panel_thread(void) {
     g_menu_input_controller = script_get_controller_input_pointer(0);
     screen = g_bunit_character_status_frames;
     base = g_bunit_character_status_frames;
-    state = &g_bunit_editor_unit_fields.state;
+    state = &g_editor_unit_fields.state;
     menu_init_numeric_display_frame_primitives(&g_bunit_character_status_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
@@ -57,19 +57,19 @@ void menu_run_equipment_ability_panel_thread(void) {
         }
         for (i = 0; i < 19; i++) {
             if (mode == 0) {
-                gfx_init_image_loading(&screen->sprites[i], g_bunit_editor_numeric_geometry,
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
                     &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode0[i]);
             }
             if (mode == 1) {
-                gfx_init_image_loading(&screen->sprites[i], g_bunit_editor_numeric_geometry,
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
                     &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode1[i]);
             }
             if (mode == 2) {
-                gfx_init_image_loading(&screen->sprites[i], g_bunit_editor_numeric_geometry,
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
                     &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode2[i]);
             }
             if (mode == 3) {
-                gfx_init_image_loading(&screen->sprites[i], g_bunit_editor_numeric_geometry,
+                gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry,
                     &g_bunit_character_status_sprite_origin, &g_bunit_character_status_layout_mode3[i]);
             }
         }
@@ -120,7 +120,7 @@ void menu_run_equipment_ability_panel_thread(void) {
             thread->redraw_request = 0;
         }
         for (i = 0; i < 5; i++) {
-            gfx_init_image_loading(&screen->sprites[19 + i], g_bunit_panel_item_icon_texture,
+            gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture,
                 &g_bunit_character_status_frame_rect, &g_bunit_character_status_item_icon_layout[i]);
             if ((state->equipment[i] & ITEM_ID_MASK) != ITEM_ID_NONE) {
                 gfx_set_item_icon_sprite(&screen->sprites[19 + i], state->equipment[i]);
@@ -130,14 +130,14 @@ void menu_run_equipment_ability_panel_thread(void) {
                 (screen->sprites + i)[19].x0 = -0x200;
             }
         }
-        g_bunit_gfx_draw_offset_y = g_bunit_frame_arg != 0xf0 ? 0xf0 : 0;
+        g_gfx_draw_offset_y = g_frame_arg != 0xf0 ? 0xf0 : 0;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_bunit_character_status_draw_area_rect, frame, g_bunit_frame_arg, thread);
+            &screen->portrait, &g_character_status_draw_area_rect, frame, g_frame_arg, thread);
         screen->draw_offsets[0].position.x = thread->x - 0x80;
-        screen->draw_offsets[0].position.y = thread->y + g_bunit_gfx_draw_offset_y;
+        screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);
         screen->draw_offsets[1].position.x = -0x80;
-        screen->draw_offsets[1].position.y = g_bunit_gfx_draw_offset_y;
+        screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);

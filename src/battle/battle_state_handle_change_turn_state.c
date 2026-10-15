@@ -12,7 +12,7 @@ void battle_state_handle_change_turn_state(void) {
     s32 type;
 
     battle_state_handle_free_cursor_input();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     command = menu_get_selected_command_address()->kind;
     if (command >= 7) {
         if (command < 9) {

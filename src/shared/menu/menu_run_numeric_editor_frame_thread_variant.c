@@ -33,33 +33,33 @@ void menu_run_numeric_editor_frame_thread_variant(void) {
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0) + 1;
     if (g_thread_current_id == THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
-        buffer = g_bunit_editor_numeric_state_a;
+        buffer = g_editor_numeric_state_a;
         buffers = buffer;
-        number_images = &g_bunit_editor_numeric_text_a;
-        upload_a = &g_bunit_editor_numeric_entries_a;
-        upload_b = &g_bunit_editor_numeric_entries_b;
-        upload_c = &g_bunit_editor_numeric_entries_c;
-        entries = g_bunit_editor_numeric_descriptor_a;
+        number_images = &g_editor_numeric_text_a;
+        upload_a = &g_editor_numeric_entries_a;
+        upload_b = &g_editor_numeric_entries_b;
+        upload_c = &g_editor_numeric_entries_c;
+        entries = g_editor_numeric_descriptor_a;
     } else {
-        buffer = g_bunit_editor_numeric_state_b;
+        buffer = g_editor_numeric_state_b;
         buffers = buffer;
-        number_images = &g_bunit_editor_numeric_text_b;
-        upload_a = &g_bunit_editor_numeric_entries_d;
-        upload_b = &g_bunit_editor_numeric_entries_e;
-        upload_c = &g_bunit_editor_numeric_entries_f;
-        entries = g_bunit_editor_numeric_descriptor_b;
+        number_images = &g_editor_numeric_text_b;
+        upload_a = &g_editor_numeric_entries_d;
+        upload_b = &g_editor_numeric_entries_e;
+        upload_c = &g_editor_numeric_entries_f;
+        entries = g_editor_numeric_descriptor_b;
     }
     gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[0], MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[1], MENU_TEXTURE_PAGE_TEXT_IMAGES);
     gfx_set_draw_mode_for_texture_page(&buffer->draw_modes[2], MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
-    menu_init_numeric_display_frame_primitives(&g_bunit_editor_numeric_table.texture_rect, &buffer->numeric_frame);
+    menu_init_numeric_display_frame_primitives(&g_editor_numeric_table.texture_rect, &buffer->numeric_frame);
     menu_init_scaled_draw_area_packets(&buffer->portrait);
     i = 0;
-    descriptor = g_bunit_editor_numeric_texture;
+    descriptor = g_editor_numeric_texture;
     for (; i < 18; i++) {
         menu_init_sprt_variant(&buffer->sprites[i]);
-        gfx_init_image_loading(&buffer->sprites[i], g_bunit_editor_numeric_geometry,
-            &g_bunit_editor_numeric_table.texture_rect, descriptor);
+        gfx_init_image_loading(
+            &buffer->sprites[i], g_editor_numeric_geometry, &g_editor_numeric_table.texture_rect, descriptor);
         descriptor++;
     }
     if (g_thread_current_id != THREAD_SCREEN_SLOT_NUMERIC_EDITOR) {
@@ -99,16 +99,16 @@ void menu_run_numeric_editor_frame_thread_variant(void) {
             LoadImage(upload_b, (u32*)number_images->weapons);
             LoadImage(upload_c, (u32*)number_images->combat);
         }
-        field_y = g_bunit_frame_arg;
+        field_y = g_frame_arg;
         use_offset = field_y != 0xF0;
-        g_bunit_gfx_draw_offset_y = -use_offset & 0xF0;
+        g_gfx_draw_offset_y = -use_offset & 0xF0;
         menu_build_scaled_draw_area_packets(
-            &buffer->portrait, &g_bunit_editor_numeric_table.draw_area_rect, frame, field_y, thread);
+            &buffer->portrait, &g_editor_numeric_table.draw_area_rect, frame, field_y, thread);
         buffer->draw_offsets[0].position.x = thread->x - 0x80;
-        buffer->draw_offsets[0].position.y = thread->y + g_bunit_gfx_draw_offset_y;
+        buffer->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[0].packet, (u16*)&buffer->draw_offsets[0].position);
         buffer->draw_offsets[1].position.x = -0x80;
-        buffer->draw_offsets[1].position.y = g_bunit_gfx_draw_offset_y;
+        buffer->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&buffer->draw_offsets[1].packet, (u16*)&buffer->draw_offsets[1].position);
         if (thread->style == 1 || g_menu_input_lock_mode == 1) {
             for (i = 17; i >= 0; i--) {

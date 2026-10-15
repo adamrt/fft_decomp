@@ -46,7 +46,7 @@ void menu_init_at_list(menu_entry_t* menu) {
             break;
         }
 
-        g_option_menu_at_list_indices[index] = index + 1;
+        g_menu_at_list_indices[index] = index + 1;
         unit = battle_unit_get_stats_from_battle_id(
             g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_UNIT_ID_MASK);
         if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
@@ -70,23 +70,23 @@ void menu_init_at_list(menu_entry_t* menu) {
         *text++ = 0xfe;
 
         if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
-            g_option_menu_at_list_secondary_values[entry_count] = index - 0x800;
+            g_menu_at_list_secondary_values[entry_count] = index - 0x800;
         } else {
-            g_option_menu_at_list_primary_values[entry_count] = index - 0x800;
+            g_menu_at_list_primary_values[entry_count] = index - 0x800;
         }
 
         if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ACTION_ENTRY) == 0) {
-            g_option_menu_at_list_secondary_values[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
+            g_menu_at_list_secondary_values[entry_count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
             has_special_entry = 1;
             if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_JUMP) != 0) {
-                g_option_menu_at_list_primary_values[entry_count] = 0xb012;
+                g_menu_at_list_primary_values[entry_count] = 0xb012;
             } else {
                 s32 value = g_option_menu_at_list_descriptors[index].action_id_low;
                 if ((g_option_menu_at_list_descriptors[index].unit_code & BATTLE_AT_ABILITY_ID_HIGH_BIT) != 0) {
                     value += 0x100;
                 }
-                g_option_menu_at_list_primary_values[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;
+                g_menu_at_list_primary_values[entry_count] = value + TEXT_ID_ABILITY_NAME_BASE;
             }
         }
 

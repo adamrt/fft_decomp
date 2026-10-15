@@ -32,7 +32,7 @@ s32 bunit_menu_run_unit_list_frame(void) {
             return 0;
         }
         if (g_bunit_unit_list_triangle_menu_open != 0) {
-            g_bunit_text_selection_id = g_bunit_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
+            g_text_selection_id = g_bunit_unit_list_triangle_menu.selected_index != 0 ? 0x1001 : 0x1000;
             if ((g_bunit_unit_list_triangle_menu_open
                     = bunit_menu_run_descriptor_thread(BUNIT_THREAD_SLOT_MENU, &g_bunit_unit_list_triangle_menu))
                 == 0) {
@@ -57,12 +57,12 @@ s32 bunit_menu_run_unit_list_frame(void) {
             return 1;
         }
         if (g_bunit_unit_browse_enabled != 0) {
-            g_bunit_text_selection_id = MENU_GRID_HELP_UNIT_BROWSE;
+            g_text_selection_id = MENU_GRID_HELP_UNIT_BROWSE;
         } else if (g_bunit_status_banner_enabled != 0) {
-            g_bunit_text_selection_id
+            g_text_selection_id
                 = g_bunit_status_banner_at_bottom != 0 ? MENU_GRID_HELP_BANNER_BOTTOM : MENU_GRID_HELP_BANNER_TOP;
         } else {
-            g_bunit_text_selection_id = 0;
+            g_text_selection_id = 0;
         }
         if (bunit_input_get_lock_timer() != 0) {
             return 1;

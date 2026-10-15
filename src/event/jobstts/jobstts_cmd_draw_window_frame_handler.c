@@ -90,11 +90,11 @@ menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* co
             &rect, 0x1A, 8, 0, g_menu_gfx_semitransparency, g_jobstts_gfx_background_texture_page, clut, priority);
     }
 
-    g_jobstts_cmd_window_interior_command.x = command->window.x;
-    g_jobstts_cmd_window_interior_command.y = command->window.y;
-    g_jobstts_cmd_window_interior_command.width = command->window.width;
-    g_jobstts_cmd_window_interior_command.height = command->window.height;
-    menu_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_jobstts_cmd_window_interior_command);
+    g_cmd_window_interior_command.x = command->window.x;
+    g_cmd_window_interior_command.y = command->window.y;
+    g_cmd_window_interior_command.width = command->window.width;
+    g_cmd_window_interior_command.height = command->window.height;
+    menu_cmd_draw_background_tiles_handler((menu_instruction_t*)&g_cmd_window_interior_command);
 
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;

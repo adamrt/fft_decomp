@@ -26,9 +26,9 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
     s32 status;
 
     g_gfx_current_otag_entry = otag;
-    g_world_frame_arg = frame_arg;
+    g_frame_arg = frame_arg;
     g_menu_input_controller = script_get_controller_input_pointer(0);
-    g_world_formation_screen_active = 0;
+    g_formation_screen_active = 0;
     if (input == 0) {
         g_world_input_frame_initial_repeat_counter = 0;
         g_world_input_frame_repeat_counter = 0;
@@ -85,12 +85,12 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
     }
 
     for (thread_id = 1; thread_id < 16; thread_id++) {
-        g_world_thread_status_snapshot[thread_id] = thread_is_running_asm_variant(thread_id);
+        g_thread_status_snapshot[thread_id] = thread_is_running_asm_variant(thread_id);
     }
 
     thread_yield();
     for (thread_id = 1; thread_id < 16; thread_id++) {
-        status = g_world_thread_status_snapshot[thread_id];
+        status = g_thread_status_snapshot[thread_id];
         if (status != thread_is_running_asm_variant(thread_id)) {
             g_script_input_suppression_frames = 5;
         }
@@ -100,9 +100,9 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
         g_script_input_suppression_frames--;
     }
     menu_draw_thread_status_indicators_variant();
-    g_world_frame_counter++;
+    g_frame_counter++;
     g_menu_packet_buffer_index = (g_menu_packet_buffer_index + 1) & 1;
-    if (g_world_menu_input_block_frames != 0) {
-        g_world_menu_input_block_frames--;
+    if (g_menu_input_block_frames != 0) {
+        g_menu_input_block_frames--;
     }
 }

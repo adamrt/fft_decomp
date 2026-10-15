@@ -31,12 +31,12 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     priority = g_menu_gfx_otag_index;
     clut = g_world_menu_palette_clut;
     if (instruction->window.rectangle_source == 2) {
-        left = g_world_menu_window_rect_source->rect.x - 5;
-        top = g_world_menu_window_rect_source->rect.y - 9;
-        full_columns = g_world_menu_window_rect_source->rect.w / 16;
-        partial_width = g_world_menu_window_rect_source->rect.w % 16;
-        full_rows = g_world_menu_window_rect_source->rect.h / 16;
-        partial_height = g_world_menu_window_rect_source->rect.h % 16;
+        left = g_menu_window_rect_source->rect.x - 5;
+        top = g_menu_window_rect_source->rect.y - 9;
+        full_columns = g_menu_window_rect_source->rect.w / 16;
+        partial_width = g_menu_window_rect_source->rect.w % 16;
+        full_rows = g_menu_window_rect_source->rect.h / 16;
+        partial_height = g_menu_window_rect_source->rect.h % 16;
     } else {
         u8 width;
         u8 height;
@@ -120,10 +120,10 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     }
 
     if (instruction->window.rectangle_source == 2) {
-        g_world_menu_window_rect.x = g_world_menu_window_rect_source->rect.x;
-        g_world_menu_window_rect.y = g_world_menu_window_rect_source->rect.y;
-        g_world_menu_window_rect.w = g_world_menu_window_rect_source->rect.w;
-        g_world_menu_window_rect.h = g_world_menu_window_rect_source->rect.h;
+        g_world_menu_window_rect.x = g_menu_window_rect_source->rect.x;
+        g_world_menu_window_rect.y = g_menu_window_rect_source->rect.y;
+        g_world_menu_window_rect.w = g_menu_window_rect_source->rect.w;
+        g_world_menu_window_rect.h = g_menu_window_rect_source->rect.h;
     } else {
         g_world_menu_window_interior_command.x = instruction->window.x;
         g_world_menu_window_interior_command.y = instruction->window.y;

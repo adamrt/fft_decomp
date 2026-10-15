@@ -32,16 +32,16 @@ void card_input_update_controller(void) {
         current_input &= g_card_input_latched_button;
     } else if (current_input == 0) {
         g_card_input_latched_button = 0;
-        g_card_input_activation_timer += speed;
+        g_input_activation_timer += speed;
     } else {
-        if (g_card_input_activation_timer < 4) {
+        if (g_input_activation_timer < 4) {
             if (current_input & (PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT)) {
                 current_input &= PSX_PAD_UP | PSX_PAD_RIGHT | PSX_PAD_DOWN | PSX_PAD_LEFT;
-                g_card_input_activation_timer = 10;
+                g_input_activation_timer = 10;
             }
         }
-        if (g_card_input_activation_timer >= 4) {
-            g_card_input_activation_timer = 0;
+        if (g_input_activation_timer >= 4) {
+            g_input_activation_timer = 0;
             for (index = 0; index < 16; index++) {
                 bit = 1 << index;
                 if (current_input & bit) {
@@ -55,8 +55,8 @@ void card_input_update_controller(void) {
         }
     }
     filtered_input = current_input;
-    if (g_card_input_activation_timer >= 10) {
-        g_card_input_activation_timer = 10;
+    if (g_input_activation_timer >= 10) {
+        g_input_activation_timer = 10;
     }
     g_menu_input_newly_pressed = filtered_input;
     for (index = 0; index < 16; index++) {
@@ -72,7 +72,7 @@ void card_input_update_controller(void) {
             g_card_input_previous &= ~mask;
         }
     }
-    counter_base = g_card_input_repeat_counters;
+    counter_base = g_input_repeat_counters;
     for (index = 0; index < 16; index++) {
         if (index == 4) {
             index = 12;

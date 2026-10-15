@@ -44,7 +44,7 @@ void bunit_menu_update_node_cursor(s16 mode) {
         flags = g_bunit_input_primary_repeat;
         node_index = g_bunit_help_node_index;
         if (flags & PSX_PAD_CROSS) {
-            g_bunit_text_selection_id = g_bunit_help_screen_id;
+            g_text_selection_id = g_bunit_help_screen_id;
             g_bunit_help_screen_id = MENU_GRID_HELP_NONE;
             g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_bunit_help_cursor_initialized = 0;
@@ -55,7 +55,7 @@ void bunit_menu_update_node_cursor(s16 mode) {
             }
             if ((g_bunit_help_node_index_reload - 0x12) >= 0xAU || text_id != 0) {
                 /* The target zero-extends help_base here (lhu): a -0x6800 base adds 0x9800. */
-                g_bunit_text_selection_id
+                g_text_selection_id
                     = text_id + (u16)g_bunit_help_nodes_reload[g_bunit_help_node_index_reload_2].help_base;
                 bunit_text_start_selection_thread(3);
             }
@@ -68,7 +68,7 @@ void bunit_menu_update_node_cursor(s16 mode) {
         } else if (flags & PSX_PAD_LEFT) {
             node_index = g_bunit_help_nodes[node_index].destination[3];
         }
-        if (g_bunit_panel_selected_billboard.team_kind != 0) {
+        if (g_panel_selected_billboard.team_kind != 0) {
             if (g_bunit_help_node_index == 2 && node_index == 6) {
                 node_index = 7;
             }

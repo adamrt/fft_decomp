@@ -31,7 +31,7 @@ s32 menu_run_job_list_variant(void) {
         g_bunit_job_list_initialized = 1;
     }
 
-    g_bunit_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
+    g_text_selection_id = g_menu_job_ids[g_menu_list_selected_index] + 0x6000;
     mask = g_menu_input_primary_repeat;
     if (mask & PSX_PAD_CROSS) {
         menu_set_vsync_mode_and_event_speed(0);

@@ -38,5 +38,5 @@ void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
         buffer++;
     }
     g_menu_gfx_context = buffer;
-    ClearOTag(&buffer->otag[first_otag], g_equip_gfx_otag_length - first_otag);
+    ClearOTag(&buffer->otag[first_otag], g_gfx_otag_length - first_otag);
 }

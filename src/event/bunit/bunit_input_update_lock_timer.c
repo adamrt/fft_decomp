@@ -15,14 +15,14 @@ void bunit_input_update_lock_timer(void) {
     } else if (bunit_menu_is_unit_list_scroll_needed() != 0) {
         timer = 0xA;
     } else {
-        timer = g_bunit_input_lock_timer;
+        timer = g_input_lock_timer;
         if (timer == 0) {
             return;
         }
         timer -= 1;
     }
-    g_bunit_input_lock_timer = timer;
-    if (g_bunit_input_lock_timer != 0) {
+    g_input_lock_timer = timer;
+    if (g_input_lock_timer != 0) {
         g_menu_input_newly_pressed = 0;
         g_menu_input_secondary_repeat = 0;
         g_menu_input_primary_repeat = 0;

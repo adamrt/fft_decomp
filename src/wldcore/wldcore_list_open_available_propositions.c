@@ -81,7 +81,7 @@ void wldcore_list_open_available_propositions(void) {
     }
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_ordering_table_offset = 9;
-    g_wldcore_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
+    g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
     g_wldcore_menu_stack_records_next[record_index].panel.result = 0;
     g_wldcore_menu_stack_types[record_index + 1] = WLDCORE_MENU_LEVEL_AVAILABLE_PROPOSITIONS;
     g_wldcore_menu_stack_depth = record_index + 1;

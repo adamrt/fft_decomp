@@ -66,5 +66,5 @@ void jobstts_menu_load_images_and_clear_selection(void) {
     gfx_load_image_and_wait(&rect, &palette[4]);
 
     menu_clear_selection_values();
-    g_jobstts_text_selection_id = 0;
+    g_text_selection_id = 0;
 }

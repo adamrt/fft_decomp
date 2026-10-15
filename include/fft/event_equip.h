@@ -16,7 +16,6 @@
 
 /* screen */
 extern u16 g_equip_remove_all_equipment_ids[];
-extern s8 g_equip_remove_all_equipment_prompt_active;
 extern s8 g_equip_remove_mode_initialized;
 extern s8 g_equip_type_order_ready;
 
@@ -107,11 +106,6 @@ equip_item_slot_result_e equip_unit_validate_slot_item(s16 unit_index, s16 slot,
 
 /* equipment selection */
 extern u16 g_equip_equip_item_cursor_anim[];
-extern s8 g_equip_equip_item_list_open;
-extern s8 g_equip_equip_item_list_refresh;
-extern s8 g_equip_equip_item_preview_active;
-extern s16 g_equip_equip_item_previewed_cursor;
-extern s8 g_equip_equip_item_slot;
 extern s8 g_equip_equip_mode_initialized;
 
 /* equipment display */
@@ -134,7 +128,6 @@ extern u8 g_equip_item_type_order_names[];
 extern u16 g_equip_remove_item_cursor_anim[];
 extern s16 g_equip_remove_item_equipment[];
 extern point16_t g_equip_remove_item_marker_rect;
-extern s8 g_equip_remove_item_previewed_slot;
 
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 void equip_item_build_inventory_totals(void);
@@ -156,38 +149,11 @@ extern s32 g_equip_equipment_panel_redraw;
 extern s32 g_equip_equipment_panel_style;
 extern s32 g_equip_numeric_panel_redraw;
 extern s32 g_equip_numeric_panel_style;
-extern menu_unit_status_record_t g_equip_panel_comparison_billboard;
-extern menu_status_panel_editor_packet_t g_equip_panel_comparison_editor_packets[2];
-extern u8 g_equip_panel_comparison_large_number_image[];
-extern u8 g_equip_panel_comparison_name_image[];
-extern u8 g_equip_panel_comparison_number_image[];
-extern menu_number_entry_t g_equip_panel_comparison_numeric_entries[];
-extern menu_status_panel_packet_t g_equip_panel_comparison_packets[2];
 extern palette_t g_equip_panel_comparison_portrait_palettes[2];
-extern RECT g_equip_panel_comparison_portrait_rect;
 extern menu_unit_status_identity_t g_equip_panel_comparison_unit_data;
-extern image_load_parameters_t g_equip_panel_editor_label_cells[];
-extern u16 g_equip_panel_editor_label_cluts[][2];
-extern image_load_parameters_t g_equip_panel_editor_mode_cell[];
-extern image_load_parameters_t g_equip_panel_editor_mode_cells[];
-extern image_load_parameters_t g_equip_panel_editor_value_cells[];
-extern u16 g_equip_panel_editor_value_cluts[][2];
-extern RECT g_equip_panel_frame_rect;
 extern menu_status_panel_buffer_t g_equip_panel_frames_b[];
-extern CVECTOR g_equip_panel_gauge_bar_colors[];
-extern image_load_parameters_t g_equip_panel_portrait_cell[];
-extern menu_status_panel_editor_packet_t g_equip_panel_selected_editor_packets[2];
-extern u8 g_equip_panel_selected_large_number_image[];
-extern u8 g_equip_panel_selected_name_image[];
-extern u8 g_equip_panel_selected_number_image[];
-extern menu_number_entry_t g_equip_panel_selected_numeric_entries[];
-extern menu_status_panel_packet_t g_equip_panel_selected_packets[2];
 extern palette_t g_equip_panel_selected_portrait_palettes[2];
-extern RECT g_equip_panel_selected_portrait_rect;
 extern menu_unit_status_identity_t g_equip_panel_selected_unit_data;
-extern s16 g_equip_panel_slide_down_y[];
-extern s16 g_equip_panel_slide_up_y[];
-extern image_load_parameters_t g_equip_panel_sprite_cells[];
 /* RECT[1] (right panel) of g_menu_status_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
  * GCC derive the table base from this address and changes equip_panel_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
@@ -202,22 +168,6 @@ void equip_panel_toggle_item_numeric_thread(s32 enable);
 void equip_panel_toggle_unit_status_thread(s32 enable);
 
 /* numeric editor */
-extern menu_number_entry_t g_equip_editor_numeric_descriptor_a[];
-extern menu_number_entry_t g_equip_editor_numeric_descriptor_b[];
-extern RECT g_equip_editor_numeric_entries_a;
-extern RECT g_equip_editor_numeric_entries_b;
-extern RECT g_equip_editor_numeric_entries_c;
-extern RECT g_equip_editor_numeric_entries_d;
-extern RECT g_equip_editor_numeric_entries_e;
-extern RECT g_equip_editor_numeric_entries_f;
-extern menu_status_panel_numeric_buffer_t g_equip_editor_numeric_state_a[2];
-extern menu_status_panel_numeric_buffer_t g_equip_editor_numeric_state_b[2];
-/* Per-thread-slot window rect, upload rects, sprite descriptors and number
- * entries; the first set belongs to thread 12. */
-extern battle_menu_status_panel_numeric_geometry_t g_equip_editor_numeric_table;
-extern menu_unit_stat_number_images_t g_equip_editor_numeric_text_a;
-extern menu_unit_stat_number_images_t g_equip_editor_numeric_text_b;
-extern image_load_parameters_t g_equip_editor_numeric_texture[];
 
 /* menus */
 /* g_equip_menu_screen_state: the index of the screen's handler in
@@ -234,7 +184,6 @@ typedef enum equip_screen_state {
 } equip_screen_state_e;
 typedef s32 (*equip_row_callback_t)(s32 row);
 
-extern menu_instruction_t g_equip_equip_item_menu_script;
 extern s8 g_equip_item_action_menu_active;
 extern menu_entry_t g_equip_item_action_menu_single_item;
 extern point16_t g_equip_menu_clear_all_prompt_draw_params;
@@ -249,7 +198,6 @@ extern s32 g_equip_menu_indicator_state[2];
 extern u16 g_equip_menu_list_cursor_anim_state[];
 
 extern s16 g_equip_menu_list_scroll_entry_ids;
-extern u16 g_equip_menu_list_scroll_progress;
 extern clut_t g_equip_menu_palette_image;
 extern s8 g_equip_menu_ready;
 
@@ -281,70 +229,39 @@ s32 equip_menu_update_clear_all_equipment_prompt(void);
 s32 equip_menu_update_item_action_state(void);
 
 /* help */
-extern u32 g_equip_help_text_table[];
 
 /* graphics */
-/* The scratch marker rect this routine drives; uncataloged, but the same
- * descriptor equip_menu_draw_equipment_slot_marker feeds to the oriented quad
- * enqueue. */
-extern oriented_quad_t g_equip_gfx_blank_cell_rect;
 extern menu_gfx_context_t* g_equip_gfx_context_base;
 extern menu_gfx_context_t g_equip_gfx_contexts[];
 extern u32* g_equip_gfx_current_ot;
-extern DR_AREA g_equip_gfx_draw_area_buffer[];
 extern u16 g_equip_gfx_draw_area_capacity;
 extern DR_MODE g_equip_gfx_draw_mode_buffer[];
-extern u16 g_equip_gfx_draw_mode_capacity;
-extern DR_MOVE g_equip_gfx_draw_move_buffer[];
 extern u16 g_equip_gfx_draw_move_capacity;
 extern LINE_F2 g_equip_gfx_line_f2_buffer[];
-extern u16 g_equip_gfx_line_f2_capacity;
 extern u16 g_equip_gfx_line_f2_count;
 
-extern u16 g_equip_gfx_line_f3_capacity;
 extern u16 g_equip_gfx_line_f3_count;
 
-extern u16 g_equip_gfx_line_f4_capacity;
 extern u16 g_equip_gfx_line_f4_count;
 extern volatile u16 g_equip_gfx_line_g2_capacity; /* LINE_G2 capacity; load order matters in 0x801cda80 */
 extern u16 g_equip_gfx_line_g2_count;
 extern volatile u16 g_equip_gfx_line_g3_capacity; /* LINE_G3 capacity; load order matters in 0x801cda80 */
 extern u16 g_equip_gfx_line_g3_count;
-extern u16 g_equip_gfx_line_g4_capacity;
 extern u16 g_equip_gfx_line_g4_count;
-extern u32 g_equip_gfx_otag_buffer[];
-extern u16 g_equip_gfx_otag_length;
-extern u16 g_equip_gfx_poly_f3_capacity;
 extern u16 g_equip_gfx_poly_f3_count;
-extern u16 g_equip_gfx_poly_f4_capacity;
 extern u16 g_equip_gfx_poly_f4_count;
-extern u16 g_equip_gfx_poly_ft3_capacity;
 extern u16 g_equip_gfx_poly_ft3_count;
-extern POLY_FT4 g_equip_gfx_poly_ft4_buffer[];
-extern u16 g_equip_gfx_poly_ft4_capacity;
-extern u16 g_equip_gfx_poly_g3_capacity;
 extern u16 g_equip_gfx_poly_g3_count;
-extern u16 g_equip_gfx_poly_g4_capacity;
 extern u16 g_equip_gfx_poly_g4_count;
-extern u16 g_equip_gfx_poly_gt3_capacity;
 extern u16 g_equip_gfx_poly_gt3_count;
-extern u16 g_equip_gfx_poly_gt4_capacity;
 extern u16 g_equip_gfx_poly_gt4_count;
-extern u16 g_equip_gfx_sprite_16_capacity;
 extern u16 g_equip_gfx_sprite_16_count;
-extern u16 g_equip_gfx_sprite_8_capacity;
 extern u16 g_equip_gfx_sprite_8_count;
-extern u16 g_equip_gfx_sprite_capacity;
 extern u16 g_equip_gfx_sprite_count;
-extern u16 g_equip_gfx_tile_16_capacity;
 extern u16 g_equip_gfx_tile_16_count;
-extern u16 g_equip_gfx_tile_1_capacity;
 extern u16 g_equip_gfx_tile_1_count;
-extern u16 g_equip_gfx_tile_8_capacity;
 extern u16 g_equip_gfx_tile_8_count;
 extern TILE g_equip_gfx_tile_buffer[];
-extern u16 g_equip_gfx_tile_capacity;
-extern s16 g_equip_gfx_window_zoom_percent[];
 
 void equip_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 unused_priority);
@@ -357,9 +274,6 @@ void equip_gfx_init_primitive_buffers(menu_gfx_context_t* context);
 void equip_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */
-extern u8 g_equip_input_lock_timer;
-extern u8 g_equip_input_page_scroll_disabled;
-extern u16 g_equip_input_page_scroll_hold_frames;
 
 s32 equip_input_read_page_scroll_direction(void);
 
@@ -379,7 +293,6 @@ menu_instruction_t* menu_cmd_draw_line_f2_handler(menu_instruction_t* instructio
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
 
 /* text */
-extern u8 g_equip_text_data[];
 /* The "%d" format string at the head of the overlay. */
 extern const char g_equip_text_decimal_format[];
 extern u8 g_equip_text_restore_pending;
@@ -405,7 +318,6 @@ typedef enum equip_thread_slot {
 extern s32 g_equip_item_numeric_thread_enabled;
 extern s8 g_equip_menu_thread_running;
 extern s16 g_equip_text_message_thread_active;
-extern u8 g_equip_text_thread_running_state;
 extern u8 g_equip_thread_idle_stop_pending;
 extern menu_gradient_panel_prims_t g_equip_thread_indicator_packets[2][2];
 

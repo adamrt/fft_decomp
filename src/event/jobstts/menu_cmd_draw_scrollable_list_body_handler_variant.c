@@ -99,15 +99,15 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
                     g_menu_list_selected_index += 1;
                 }
             } else {
-                g_jobstts_menu_list_scroll_progress = 0;
+                g_menu_list_scroll_progress = 0;
             }
         }
     }
     if (g_menu_list_scroll_direction < 0) {
-        if (g_jobstts_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
+        if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
             g_menu_list_scroll_offset -= g_main_menu_scroll_fast_step * speed;
         } else {
-            g_jobstts_menu_list_scroll_progress += speed;
+            g_menu_list_scroll_progress += speed;
             g_menu_list_scroll_offset -= g_main_menu_scroll_slow_step * speed;
         }
         if ((-g_menu_list_row_height) >= g_menu_list_scroll_offset) {
@@ -129,10 +129,10 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
             }
         }
     } else if (g_menu_list_scroll_direction > 0) {
-        if (g_jobstts_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
+        if (g_menu_list_scroll_progress >= g_main_menu_scroll_accel_delay) {
             g_menu_list_scroll_offset += g_main_menu_scroll_fast_step * speed;
         } else {
-            g_jobstts_menu_list_scroll_progress += speed;
+            g_menu_list_scroll_progress += speed;
             g_menu_list_scroll_offset += g_main_menu_scroll_slow_step * speed;
         }
         if (g_menu_list_scroll_offset >= g_menu_list_row_height) {

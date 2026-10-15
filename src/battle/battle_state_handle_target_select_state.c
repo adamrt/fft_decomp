@@ -19,7 +19,7 @@ void battle_state_handle_target_select_state(void) {
     camera_update_tilt_input();
     target_move_cursor_by_input();
     battle_state_handle_free_cursor_input();
-    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_main_input_current_buttons);
+    menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     if (g_main_input_pressed_buttons & PSX_PAD_CIRCLE) {
         caster = battle_unit_get_casting();
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);

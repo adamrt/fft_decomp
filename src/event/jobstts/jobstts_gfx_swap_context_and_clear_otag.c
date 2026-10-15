@@ -37,5 +37,5 @@ void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused) {
         context++;
     }
     g_menu_gfx_context = context;
-    ClearOTag(&context->otag[first_otag], g_jobstts_gfx_otag_length - first_otag);
+    ClearOTag(&context->otag[first_otag], g_gfx_otag_length - first_otag);
 }

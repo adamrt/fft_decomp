@@ -28,7 +28,7 @@ s32 wldcore_text_is_window_finished(wldcore_text_scrollable_window_t* state) {
         return 1;
     }
     if (state->scroll_state == WLDCORE_TEXT_SCROLL_MANUAL) {
-        if ((g_wldcore_input_current_buttons & PSX_PAD_SQUARE) == 0) {
+        if ((g_input_current_buttons & PSX_PAD_SQUARE) == 0) {
             state->scroll_state = WLDCORE_TEXT_SCROLL_RETURN;
             state->scroll_timer = 0;
             g_wldcore_window_records[state->middle_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;

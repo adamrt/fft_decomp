@@ -102,7 +102,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
     g_wldcore_menu_stack_records_next[top].sound_novel_history.newest_text_id = *newest;
     g_wldcore_menu_stack_records_next[top].sound_novel_history.text_ids[0] = newest[-1];
     g_wldcore_menu_stack_records_next[top].sound_novel_history.text_ids[1] = newest[-2];
-    g_wldcore_menu_blocked_buttons = -1;
+    g_menu_blocked_buttons = -1;
     g_wldcore_menu_stack_records_next[top].sound_novel_history.text_ids[2] = newest[-3];
     if (g_wldcore_menu_stack_records_next[top].sound_novel_history.text_ids[0] == -1) {
         g_wldcore_window_records[g_wldcore_menu_stack_records_next[top].sound_novel_history.upper_window].flags

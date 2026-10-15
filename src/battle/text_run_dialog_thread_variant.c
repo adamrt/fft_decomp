@@ -149,10 +149,10 @@ void text_run_dialog_thread_variant(void) {
         rec.tail_offset = 0;
         rec.x = g_unit_scratch_coords.vx - center - 4;
         if (rec.position == 0) {
-            if (thread_get_current_parameter_3_variant() == g_battle_text_speaker_swap_unit_a) {
-                value = g_battle_text_speaker_swap_unit_b;
-            } else if (thread_get_current_parameter_3_variant() == g_battle_text_speaker_swap_unit_b) {
-                value = g_battle_text_speaker_swap_unit_a;
+            if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_a) {
+                value = g_text_speaker_swap_unit_b;
+            } else if (thread_get_current_parameter_3_variant() == g_text_speaker_swap_unit_b) {
+                value = g_text_speaker_swap_unit_a;
             }
             unit_project_to_screen(script_resolve_runtime_id(value), &g_camera_script_rotation);
             if (g_unit_scratch_coords.vy < 0 || g_camera_script_rotation.vy < g_unit_scratch_coords.vy) {
@@ -345,7 +345,7 @@ void text_run_dialog_thread_variant(void) {
     column = 0;
     rec.color = 0;
     rec.line = 0;
-    g_battle_text_current_line = 0;
+    g_text_current_line = 0;
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_MALAK_REVIVED)
@@ -576,8 +576,8 @@ void text_run_dialog_thread_variant(void) {
                     cursor_x = rec.x;
                 } else {
                     u32 line_width;
-                    g_battle_text_current_line++;
-                    line_width = g_text_line_widths[g_battle_text_current_line] + 0x18;
+                    g_text_current_line++;
+                    line_width = g_text_line_widths[g_text_current_line] + 0x18;
                     cursor_x = rec.x + ((rec.width - line_width) >> 1);
                 }
                 if (cursor_x & 3) {

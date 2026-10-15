@@ -190,7 +190,6 @@ s32 battle_state_update_controller_input(void);
 void battle_state_update_event_mode(void);
 
 /* frame timing */
-extern s32 g_battle_frame_counter;
 extern s32 g_battle_frame_pacing;
 extern s32 g_battle_frame_pacing_suppressed;
 extern s32 g_battle_frame_pacing_timer;
