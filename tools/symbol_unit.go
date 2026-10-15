@@ -85,8 +85,13 @@ func (p project) unitSymbolsCommand(args []string) error {
 		absorbed := map[string]*unitDef{} // "module:unit" -> def
 		unitTexts := map[string]unitPieces{}
 		for _, m := range order {
-			if m.unit(*name) != nil {
-				return fmt.Errorf("%s already has a unit %s", m.ID, *name)
+			if existing := m.unit(*name); existing != nil {
+				// The name may be reused when that unit is absorbed whole.
+				for _, member := range m.unitMembers(*name) {
+					if !listed[m.ID+":"+member.Name] {
+						return fmt.Errorf("%s already has a unit %s", m.ID, *name)
+					}
+				}
 			}
 			for _, f := range byModule[m] {
 				if f.Unit == "" {
