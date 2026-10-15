@@ -18,6 +18,7 @@ func TestCommandDispatchRejectsUnknownSelections(t *testing.T) {
 		{name: "permute", run: func() error { return p.permuteCommand([]string{"--module=unknown", "battle_helper"}) }, want: "unknown module"},
 		{name: "symbols", run: func() error { return p.symbolsCommand([]string{"sort"}) }, want: "unknown symbols action"},
 		{name: "units", run: func() error { return p.unitsCommand([]string{"--module=unknown"}) }, want: "unknown module"},
+		{name: "placement", run: func() error { return p.placementCommand([]string{"--module=unknown"}) }, want: "unknown module"},
 		{name: "unit-check", run: func() error { return p.unitCheckCommand([]string{"--spec=build/units/nowhere.yaml"}) }, want: "no such file"},
 	}
 	for _, test := range tests {

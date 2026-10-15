@@ -127,12 +127,16 @@ unit-check: image ## Compile a merged translation-unit candidate and compare eac
 trial: image ## Compile a candidate source at an entry and report the match or first difference (MODULE=x ENTRY=f SOURCE=path ARGS="--subst OLD=NEW --define VARIANT_X=N", or BATCH=build/x.yaml, or TWINS=t0001)
 	@$(TOOLS) trial $(if $(strip $(BATCH)),--batch="$(BATCH)") $(if $(strip $(TWINS)),--twins="$(TWINS)") $(if $(strip $(MODULE)),--module="$(MODULE)") $(if $(strip $(ENTRY)),--entry="$(ENTRY)") $(if $(strip $(SOURCE)),--source="$(SOURCE)") $(ARGS)
 
+.PHONY: placement
+placement: image ## Report module-folder functions that link order places in a shared subsystem into build/analysis/placement (MODULE=x, ARGS="...")
+	@$(TOOLS) placement $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
+
 .PHONY: twins
 twins: image ## Group byte-equivalent functions across modules under consistent renames into build/analysis/twins (MODULE=x, ARGS="...")
 	@$(TOOLS) twins $(if $(strip $(MODULE)),--module="$(MODULE)") $(ARGS)
 
 .PHONY: symbols
-symbols: image ## Symbol edits: ACTION=rename-function|rename-global ARGS="--old A --new B"; ACTION=unify ARGS="--new N --header fft/x.h OLD..."; ACTION=share ARGS="--to src/shared/x/n.c MODULE:ENTRY..."
+symbols: image ## Symbol edits: ACTION=rename-function|rename-global ARGS="--old A --new B"; ACTION=unify ARGS="--new N --header fft/x.h OLD..."; ACTION=share ARGS="--to src/shared/x/n.c MODULE:ENTRY..."; ACTION=move ARGS="--dir src/shared/x MODULE:ENTRY..."
 	@test -n "$(ACTION)" || { echo "ACTION is required: rename-function or rename-global"; exit 2; }
 	@$(TOOLS) symbols "$(ACTION)" $(ARGS)
 

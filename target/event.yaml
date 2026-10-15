@@ -4,7 +4,7 @@ lba: 2448
 size: 125956
 sha256: c5ee1f3b67a82fdf0e93566460134d11338914ca8d38ddc12a4225464c8d0121
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/attack
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
@@ -47,7 +47,7 @@ functions:
   - {addr: 0x801c3ca8, size: 148, name: attack_deploy_mark_other_squad_units_undeployable, hash: 5cd7505bb7bab58e}
   - {addr: 0x801c3d3c, size: 80, name: attack_deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568}
   - {addr: 0x801c3d8c, size: 40, name: thread_wait_forever, hash: 1784b8534b53f3ba, source: src/shared/thread/thread_wait_forever.c}
-  - {addr: 0x801c3db4, size: 80, name: attack_deploy_has_roster_id_on_tiles, hash: 5d2d6845961ff568, source: src/event/attack_deploy_is_roster_unit_deployed.c, source_symbol: attack_deploy_is_roster_unit_deployed}
+  - {addr: 0x801c3db4, size: 80, name: attack_deploy_has_roster_id_on_tiles, hash: 5d2d6845961ff568, source: src/event/attack/attack_deploy_is_roster_unit_deployed.c, source_symbol: attack_deploy_is_roster_unit_deployed}
   - {addr: 0x801c3e04, size: 88, name: attack_deploy_remove_roster_unit_from_tiles, hash: 784067ef9c2286de}
   - {addr: 0x801c3e5c, size: 112, name: attack_deploy_swap_roster_unit_tile, hash: c3797b6bdb461354}
   - {addr: 0x801c3ecc, size: 120, name: attack_deploy_reset_tables, hash: 695c7064518fcce4}
@@ -304,7 +304,7 @@ lba: 2832
 size: 187316
 sha256: d07efb36a128913ebe9c40355250c34117deef634f9c4371b527381d8f9237da
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/bunit
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 28, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16, VARIANT_TEXT_ID_ROW_FORMAT: 231}
@@ -865,7 +865,7 @@ lba: 2768
 size: 107260
 sha256: c1d269962e0753398c392eef9c9953b17a2c178651cee9b9c3ec5de0eef32173
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/card
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 defines: {VARIANT_TEXT_ID_ROW_FORMAT: 235}
@@ -1133,7 +1133,7 @@ lba: 2512
 size: 64756
 sha256: cd25a1a9790eba822df3846240772db11aa5af75e41d5857583fa62472cc09a0
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/debugchr
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
@@ -1303,7 +1303,7 @@ lba: 2640
 size: 172884
 sha256: 4e4f15b739c078c300bb6a65725c334651a175e4c8872f46b14b0bd6d993cd62
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/equip
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 25, VARIANT_MENU_ITEM_CURSOR_DEPTH: 31, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 4, VARIANT_TEXT_ID_ROW_FORMAT: 235}
@@ -1820,7 +1820,7 @@ lba: 2576
 size: 7548
 sha256: a4270c901d47ec76b3a0fdab8dbf0a106693ce0ccaab0cade7ef3edd5aa4e20e
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/etc
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
@@ -1846,7 +1846,7 @@ lba: 2256
 size: 99716
 sha256: f0cae89e84229dfe6b43be319f66f49bf8c80e861ffa3a1d91feb651b5c5d2f7
 load: 0x801df000
-source_dir: src/event
+source_dir: src/event/helpmenu
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
@@ -1879,7 +1879,7 @@ lba: 2384
 size: 112732
 sha256: f931c997144a2d6d8e3e54d6d465929ea3858148412a2bd6184b2ce9254ce694
 load: 0x801df000
-source_dir: src/event
+source_dir: src/event/jobstts
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 defines: {VARIANT_MENU_CMD_END_OPCODE: 22, VARIANT_MENU_SELECTION_RECORD_COUNT: 5, VARIANT_MENU_SELECTION_VALUE_COUNT: 8, VARIANT_TEXT_ID_ROW_FORMAT: 231}
@@ -2162,7 +2162,7 @@ lba: 2128
 size: 54508
 sha256: 0fcd32324e54e67549cb1ad9666a1e3fca953b1ef33592377eebe11b952e71e8
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/option
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
@@ -2239,7 +2239,7 @@ lba: 2192
 size: 127684
 sha256: 97112c50c0b037b2cb5c9d93ae9e2a7506b582c5edbd86a1debfb7ab8e777630
 load: 0x801bf000
-source_dir: src/event
+source_dir: src/event/require
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
@@ -2550,7 +2550,7 @@ lba: 2000
 size: 7891
 sha256: 09e0892d94aacee21dcb3f0d3c154745dbc3b9de21c6de2df602d0560fbe260f
 load: 0x801d7000
-source_dir: src/event
+source_dir: src/event/small
 profile: gcc-2.6.3_O2_aspsx-2.34
 links: [battle]
 
