@@ -1,6 +1,0 @@
-#include "fft/battle_formula.h"
-
-/* Formula 0x3E: damage equal to the target's current HP - 1 (0 when it has none). */
-void formula_damage_target_hp_minus_one_always_hit(void) {
-    formula_calculate_gravi2_damage();
-}

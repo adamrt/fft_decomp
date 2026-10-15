@@ -1,0 +1,122 @@
+/* Camera screen offset and zoom. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+
+#include "fft/battle.h"
+#include "fft/battle_camera.h"
+#include "fft/main.h"
+#include "psx/libgpu.h"
+
+void camera_save_screen_offset(void) {
+    copyVector(&g_camera_saved_screen_offset, &g_camera_current_screen_offset);
+}
+
+/* No retail code calls it. */
+void camera_restore_screen_offset(void) {
+    copyVector(&g_camera_current_screen_offset, &g_camera_saved_screen_offset);
+}
+
+/* No retail code calls it. */
+VECTOR* camera_get_screen_offset(void) {
+    return &g_camera_current_screen_offset;
+}
+
+/* No retail code calls it. */
+void camera_set_screen_offset(const VECTOR* coords) {
+    copyVector(&g_camera_current_screen_offset, coords);
+}
+
+/* Starts a linear move of all three screen-offset components to the one value
+ * *destination_value over frame_count frames (divided by the animation speed).
+ * camera_update_screen_offset_animation applies it.
+ *
+ * The per-frame step is stored in g_camera_real_coord_delta, the vector
+ * the camera-position move also uses. No retail code calls it. */
+void camera_start_screen_offset_move_uniform(const s32* destination_value, s32 frame_count) {
+    s32 animation_frames;
+    s32 current_x;
+    s32 current_z;
+    s32 current_y;
+    s32 delta_x;
+
+    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    current_x = g_camera_current_screen_offset.vx;
+    current_z = g_camera_current_screen_offset.vy;
+    current_y = g_camera_current_screen_offset.vz;
+    setVector(&g_camera_screen_offset_fixed, current_x * ONE, current_z * ONE, current_y * ONE);
+    delta_x = *destination_value - current_x;
+    g_camera_screen_offset_countdown = animation_frames;
+    animation_frames = g_camera_screen_offset_countdown;
+    setVector(&g_camera_real_coord_delta, (delta_x * ONE) / animation_frames,
+        ((*destination_value - current_z) * ONE) / animation_frames,
+        ((*destination_value - current_y) * ONE) / animation_frames);
+}
+
+/* Starts a linear move of the screen offset by the vector `values` over
+ * frame_count frames (divided by the animation speed).
+ *
+ * The per-frame step is stored in g_camera_real_coord_delta, the vector
+ * the camera-position move also uses. No retail code calls it. */
+void camera_start_screen_offset_move_relative(const VECTOR* values, s32 frame_count) {
+    s32 animation_frames;
+
+    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    setVector(&g_camera_screen_offset_fixed, g_camera_current_screen_offset.vx * ONE,
+        g_camera_current_screen_offset.vy * ONE, g_camera_current_screen_offset.vz * ONE);
+    g_camera_screen_offset_countdown = animation_frames;
+    animation_frames = g_camera_screen_offset_countdown;
+    setVector(&g_camera_real_coord_delta, (values->vx * ONE) / animation_frames, (values->vy * ONE) / animation_frames,
+        (values->vz * ONE) / animation_frames);
+}
+
+/* Advances the screen-offset move by one frame while its countdown runs. Only the
+ * uncalled camera_set_offset_screen_coord_delta_* routines start the
+ * countdown, so nothing moves in retail. */
+void camera_update_screen_offset_animation(void) {
+    s32 fixed_x;
+    s32 fixed_z;
+    s32 fixed_y;
+
+    if (g_camera_screen_offset_countdown != 0) {
+        fixed_x = g_camera_screen_offset_fixed.vx + g_camera_real_coord_delta.vx;
+        g_camera_screen_offset_fixed.vx = fixed_x;
+        fixed_z = g_camera_screen_offset_fixed.vy + g_camera_real_coord_delta.vy;
+        fixed_y = g_camera_screen_offset_fixed.vz + g_camera_real_coord_delta.vz;
+        g_camera_screen_offset_fixed.vy = fixed_z;
+        g_camera_screen_offset_fixed.vz = fixed_y;
+        setVector(&g_camera_current_screen_offset, fixed_x / ONE, fixed_z / ONE, fixed_y / ONE);
+        g_camera_screen_offset_countdown--;
+    }
+}
+
+/* Saves the camera zoom for camera_restore_zoom (effect script opcodes 0f
+ * and 24). */
+void camera_save_zoom(void) {
+    copyVector(&g_camera_zoom_backup, &g_camera_zoom);
+}
+
+void camera_restore_zoom(void) {
+    copyVector(&g_camera_zoom, &g_camera_zoom_backup);
+}
+
+VECTOR* camera_get_zoom(void) {
+    return &g_camera_zoom;
+}
+
+void camera_set_zoom(const VECTOR* zoom) {
+    copyVector(&g_camera_zoom, zoom);
+}
+
+/* Starts a linear change of all three zoom scales to the one value
+ * *destination_value over frame_count frames (divided by the animation speed),
+ * applied by camera_update_zoom_animation. No retail code calls it. */
+void camera_set_zoom_delta_from_value(const s32* destination_value, s32 frame_count) {
+    s32 animation_frames;
+    s32 delta_x;
+
+    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
+    delta_x = *destination_value - g_camera_zoom.vx;
+    g_camera_zoom_countdown = animation_frames;
+    animation_frames = g_camera_zoom_countdown;
+    setVector(&g_camera_zoom_delta, delta_x / animation_frames,
+        (*destination_value - g_camera_zoom.vy) / animation_frames,
+        (*destination_value - g_camera_zoom.vz) / animation_frames);
+}
