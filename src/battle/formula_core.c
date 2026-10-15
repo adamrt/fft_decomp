@@ -1,4 +1,5 @@
-/* Tile data and formulas 1. Its start is a cut chosen by topic; its end is a cut chosen by topic. */
+/* Tile data access and the core formulas: misses, evasion, zodiac, elements and the dance abilities. Its edges are cuts
+ * chosen by topic. */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"
@@ -15,7 +16,6 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
-/* Give the unit its move and its action back. Nothing in the game calls it. */
 void battle_action_activate_move_act(unit_stats_t* unit) {
     unit->movement_taken = 0;
     unit->action_taken = 0;
@@ -1449,6 +1449,37 @@ void battle_formula_apply_song_abilities(void) {
         return;
     case ABILITY_ID_SONG_LAST_SONG:
         g_action_target_data->ct_change = ACTION_CT_CHANGE_QUICK;
+        break;
+    }
+    g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
+}
+
+/* Effect of each dance. XA + YA is the weapon's XA plus its power
+ * (formula_calculate_base_xa); the stat dances take 1. */
+void battle_formula_apply_dance_abilities(void) {
+    switch (g_action_current_ability.ability_id) {
+    case ABILITY_ID_DANCE_WITCH_HUNT:
+        g_action_target_data->mp_damage = g_action_current_ability.xa + g_action_current_ability.ya;
+        g_action_target_data->attack_type = ACTION_TYPE_MP_DAMAGE;
+        return;
+    case ABILITY_ID_DANCE_WIZNAIBUS:
+        g_action_target_data->hp_damage = g_action_current_ability.xa + g_action_current_ability.ya;
+        g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
+        return;
+    case ABILITY_ID_DANCE_SLOW_DANCE:
+        g_action_target_data->sp_change = 1;
+        break;
+    case ABILITY_ID_DANCE_POLKA_POLKA:
+        g_action_target_data->pa_change = 1;
+        break;
+    case ABILITY_ID_DANCE_DISILLUSION:
+        g_action_target_data->ma_change = 1;
+        break;
+    case ABILITY_ID_DANCE_NAMELESS_DANCE:
+        battle_formula_apply_status_to_action();
+        return;
+    case ABILITY_ID_DANCE_LAST_DANCE:
+        g_action_target_data->ct_change = ACTION_CT_CHANGE_ZERO;
         break;
     }
     g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;

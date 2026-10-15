@@ -1,4 +1,5 @@
-/* Move steps and landing. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
+/* Movement steps: the step-delta setters (each written twice in the original, for units and for floating units), step
+ * starts, landing and tile edges. Its start and end are boundaries the binary proves. */
 
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
@@ -12,6 +13,160 @@
 #include "fft/sound.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
+
+/* Set the unit's per-frame velocity for the first half of a step, from the tile
+ * center to its exit edge.
+ *
+ * The direction vector is 28 along the axis the step byte's top two bits select
+ * and (edge_height - 1) * the tile's slope half-height * 6 in height, negated
+ * because height is negative upward. edge_height is the slope_type height
+ * of the side crossed (0 low, 1 sloping, 2 high), so a low side
+ * lies below the center and a high side above it. VectorNormal reduces the vector
+ * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
+ * applies the walk speed with move_interpolate_partial. */
+void battle_move_set_unit_step_delta_center_to_edge(
+    battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
+    VECTOR direction;
+
+    direction.vy = -((edge_height - 1) * tile->depth_half_height.half_height * (MAP_HEIGHT_STEP / 2));
+    switch (step->direction) {
+    case MOVE_STEP_DIRECTION_EAST:
+        direction.vx = MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_WEST:
+        direction.vx = -MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_SOUTH:
+        direction.vx = 0;
+        direction.vz = -MAP_TILE_SIZE;
+        break;
+    case MOVE_STEP_DIRECTION_NORTH:
+        direction.vx = 0;
+        direction.vz = MAP_TILE_SIZE;
+        break;
+    }
+    VectorNormal(&direction, &unit->velocity);
+    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+}
+
+enum {
+    MOVE_STEP_HEIGHT_SCALE = 6,
+};
+
+/* Set the unit's per-frame velocity for the second half of a step, from the entry
+ * edge of a tile to its center.
+ *
+ * The mirror of move_set_unit_step_delta_center_to_edge: the height part
+ * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
+ * is not negated, so entering over a high side (slope height 2) moves the unit
+ * down to the center. */
+void battle_move_set_unit_step_delta_edge_to_center(
+    battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
+    VECTOR direction;
+
+    direction.vy = (edge_height - 1) * tile->depth_half_height.half_height * MOVE_STEP_HEIGHT_SCALE;
+    switch (step->direction) {
+    case MOVE_STEP_DIRECTION_EAST:
+        direction.vx = MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_WEST:
+        direction.vx = -MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_SOUTH:
+        direction.vx = 0;
+        direction.vz = -MAP_TILE_SIZE;
+        break;
+    case MOVE_STEP_DIRECTION_NORTH:
+        direction.vx = 0;
+        direction.vz = MAP_TILE_SIZE;
+        break;
+    }
+    VectorNormal(&direction, &unit->velocity);
+    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+}
+
+/* Set the unit's per-frame velocity for the first half of a step, from the tile
+ * center to its exit edge.
+ *
+ * The direction vector is 28 along the axis the step byte's top two bits select
+ * and (edge_height - 1) * the tile's slope half-height * 6 in height, negated
+ * because height is negative upward. edge_height is the slope_type height
+ * of the side crossed (0 low, 1 sloping, 2 high), so a low side
+ * lies below the center and a high side above it. VectorNormal reduces the vector
+ * to unit length (ONE) and g_main_system_animation_speed scales it; the caller
+ * applies the walk speed with move_interpolate_partial. */
+void battle_move_set_float_step_delta_center_to_edge(
+    battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
+    VECTOR direction;
+
+    direction.vy = -((edge_height - 1) * tile->depth_half_height.half_height * (MAP_HEIGHT_STEP / 2));
+    switch (step->direction) {
+    case MOVE_STEP_DIRECTION_EAST:
+        direction.vx = MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_WEST:
+        direction.vx = -MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_SOUTH:
+        direction.vx = 0;
+        direction.vz = -MAP_TILE_SIZE;
+        break;
+    case MOVE_STEP_DIRECTION_NORTH:
+        direction.vx = 0;
+        direction.vz = MAP_TILE_SIZE;
+        break;
+    }
+    VectorNormal(&direction, &unit->velocity);
+    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+}
+
+/* Set the unit's per-frame velocity for the second half of a step, from the entry
+ * edge of a tile to its center.
+ *
+ * The mirror of move_set_unit_step_delta_center_to_edge: the height part
+ * of the direction vector, (edge_height - 1) * the tile's slope half-height * 6,
+ * is not negated, so entering over a high side (slope height 2) moves the unit
+ * down to the center. */
+void battle_move_set_float_step_delta_edge_to_center(
+    battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
+    VECTOR direction;
+
+    direction.vy = (edge_height - 1) * tile->depth_half_height.half_height * MOVE_STEP_HEIGHT_SCALE;
+    switch (step->direction) {
+    case MOVE_STEP_DIRECTION_EAST:
+        direction.vx = MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_WEST:
+        direction.vx = -MAP_TILE_SIZE;
+        direction.vz = 0;
+        break;
+    case MOVE_STEP_DIRECTION_SOUTH:
+        direction.vx = 0;
+        direction.vz = -MAP_TILE_SIZE;
+        break;
+    case MOVE_STEP_DIRECTION_NORTH:
+        direction.vx = 0;
+        direction.vz = MAP_TILE_SIZE;
+        break;
+    }
+    VectorNormal(&direction, &unit->velocity);
+    unit->velocity.vx = unit->velocity.vx * g_main_system_animation_speed;
+    unit->velocity.vy = unit->velocity.vy * g_main_system_animation_speed;
+    unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
+}
 
 void battle_move_interpolate_partial(battle_unit_t* unit, s32 scale) {
     unit->velocity.vx = (scale * unit->velocity.vx) / ONE;
@@ -1506,5 +1661,207 @@ void battle_move_snap_axis_to_destination_tile_center(s32 direction, battle_unit
         unit->world_coords.vx = coordinate;
         unit->real.vx = coordinate << REAL_COORD_SHIFT;
         return;
+    }
+}
+
+/* Step handler of the WALK_TO_CENTER and CLIMB_TO_CENTER stages (and of the
+ * knockback step): advance the unit one frame toward the center of its
+ * destination tile.
+ *
+ * Outside events it pushes aside a unit on the destination tile. At the center
+ * the horizontal motion stops; once the unit is also down at the ground height
+ * there, it takes the destination tile as its map position and the step ends. */
+void battle_move_update_unit_step_to_destination_tile_center(battle_unit_t* unit) {
+    s32 direction;
+    s16 screen_z;
+
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
+    if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
+        battle_move_displace_unit_at_destination_tile(unit, direction);
+    }
+    if (battle_move_has_reached_destination_tile_center(direction, unit) != 0) {
+        battle_move_snap_axis_to_destination_tile_center(direction, unit);
+        unit->velocity.vz = 0;
+        unit->velocity.vx = 0;
+        screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
+        g_move_target_screen_z = screen_z;
+        if (unit->world_coords.vy >= screen_z) {
+            unit->map_x = unit->movement.destination_x;
+            unit->map_y = unit->movement.destination_y;
+            unit->velocity.vy = 0;
+            unit->real.vy = g_move_target_screen_z * ONE;
+            unit->world_coords.vy = unit->real.vy / ONE;
+            unit->step_phase = MOVE_STEP_PHASE_NONE;
+            unit->shadow_dirty |= 1;
+        }
+    }
+}
+
+s32 battle_move_has_reached_current_tile_exit_edge(s32 direction, battle_unit_t* unit) {
+    switch (direction) {
+    case MOVE_DIRECTION_NORTH:
+        return unit->world_coords.vz >= (((unit->map_y + 1) * MAP_TILE_SIZE) - 7);
+    case MOVE_DIRECTION_SOUTH:
+        return ((unit->map_y * MAP_TILE_SIZE) + 7) >= unit->world_coords.vz;
+    case MOVE_DIRECTION_WEST:
+        return ((unit->map_x * MAP_TILE_SIZE) + 7) >= unit->world_coords.vx;
+    case MOVE_DIRECTION_EAST:
+        return unit->world_coords.vx >= (((unit->map_x + 1) * MAP_TILE_SIZE) - 7);
+    }
+}
+
+/* Per-frame movement step for a unit walking between two tiles.
+ *
+ * Once the unit reaches the exit edge of the tile it occupies, the step is
+ * re-planned: a jumping unit (step value bits 0-1) restarts a jump step, and
+ * otherwise the edge heights of the current and destination tiles are recomputed
+ * from the tile height/depth pair scaled by the unit's per-step scales, taking
+ * a mount's walking height into account when one is present and float/fly slope
+ * otherwise.  A height difference of at most one step starts an ordinary step
+ * (the WALK_TO_CENTER phase) or a climb-speed step (CLIMB_TO_CENTER); up to seven
+ * starts move_start_unit_climb_hop_step, and anything higher
+ * move_start_unit_climb_jump_step. */
+void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
+    s32 direction;
+    u8 rider;
+
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
+    if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
+        battle_move_displace_overlapping_unit(unit, direction);
+    }
+    if (battle_move_has_reached_current_tile_exit_edge(direction, unit) == 0) {
+        return;
+    }
+    battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
+    if (g_move_step_value.length == 0) {
+        rider = unit->standing_on_battle_id_plus_one;
+        if (rider != 0) {
+            battle_unit_calculate_height_data(&g_move_tile_occupant_height, rider - 1);
+            if (g_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
+                g_move_current_edge_height = g_move_current_tile->height * 2
+                    + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+            } else {
+                g_move_current_edge_height = g_move_tile_occupant_height.total_height;
+            }
+        } else {
+            g_move_current_edge_height = g_move_current_tile->height * 2
+                + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+            g_move_current_edge_height += battle_move_calculate_water_lift(unit, g_move_current_tile);
+        }
+
+        if (g_move_step_value.mount) {
+            g_move_tile_occupant = battle_unit_find_runtime_at_tile(
+                unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
+            unit->standing_on_battle_id_plus_one = g_move_tile_occupant->stats->battle_id + 1;
+            battle_unit_calculate_height_data(&g_move_tile_occupant_height, g_move_tile_occupant->stats->battle_id);
+            if (g_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
+                g_move_destination_edge_height = g_move_destination_tile->height * 2
+                    + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            } else {
+                g_move_destination_edge_height = g_move_tile_occupant_height.total_height;
+            }
+        } else {
+            unit->standing_on_battle_id_plus_one = 0;
+            g_move_destination_edge_height = g_move_destination_tile->height * 2
+                + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            g_move_current_edge_height += battle_move_calculate_water_lift(unit, g_move_destination_tile);
+        }
+
+        if (g_move_current_edge_height + 1 >= g_move_destination_edge_height) {
+            battle_unit_dismount_rider_and_update_display(unit);
+            switch (g_move_step_value.climb) {
+            case 0:
+                battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+                unit->step_phase = MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH;
+                return;
+            case 1:
+                battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
+                unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH;
+                return;
+            }
+            return;
+        }
+
+        if (g_move_current_edge_height + 7 >= g_move_destination_edge_height) {
+            battle_unit_dismount_rider(unit);
+            unit->step_speed = 0x2000;
+            battle_move_start_unit_climb_hop_step(unit, g_move_current_tile, g_move_destination_tile);
+            unit->standing_on_battle_id_plus_one = 0;
+            return;
+        }
+        unit->step_speed = 0x2000;
+        battle_move_start_unit_climb_jump_step(unit, g_move_current_tile, g_move_destination_tile);
+        unit->standing_on_battle_id_plus_one = 0;
+    } else {
+        unit->step_speed = 0x2000;
+        battle_move_start_unit_jump_step(unit, g_move_current_tile, g_move_destination_tile);
+        unit->standing_on_battle_id_plus_one = 0;
+    }
+}
+
+/*
+ * Advance a unit toward its current tile's exit edge; on reaching it, compare
+ * the scaled heights of both step records and either continue into the next
+ * tile or, when the next tile is more than one step higher, start the
+ * 0x2000 vertical-motion path through move_start_unit_climb_jump_step_2.
+ */
+void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit) {
+    s32 direction;
+
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
+    if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
+        battle_move_displace_overlapping_unit(unit, direction);
+    }
+    if (battle_move_has_reached_current_tile_exit_edge(direction, unit) != 0) {
+        battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
+        g_move_current_edge_height = g_move_current_tile->height * 2
+            + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+        unit->standing_on_battle_id_plus_one = 0;
+        g_move_destination_edge_height = g_move_destination_tile->height * 2
+            + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+        if (g_move_current_edge_height + 1 >= g_move_destination_edge_height) {
+            battle_move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
+            unit->step_phase = g_move_float_to_center_phases[direction];
+        } else {
+            unit->step_speed = 0x2000;
+            battle_move_start_float_climb_jump_step(unit, g_move_current_tile, g_move_destination_tile);
+        }
+    }
+}
+
+/* Step handler of the WALK_TO_CENTER and CLIMB_TO_CENTER stages (and of the
+ * knockback step): advance the unit one frame toward the center of its
+ * destination tile.
+ *
+ * Outside events it pushes aside a unit on the destination tile. At the center
+ * the horizontal motion stops; once the unit is also down at the ground height
+ * there, it takes the destination tile as its map position and the step ends. */
+void battle_move_update_float_step_to_destination_tile_center(battle_unit_t* unit) {
+    s32 direction;
+    s16 screen_z;
+
+    direction = battle_move_get_direction(unit);
+    battle_move_apply_unit_step_velocity(unit);
+    if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
+        battle_move_displace_overlapping_unit(unit, direction);
+    }
+    if (battle_move_has_reached_destination_tile_center(direction, unit) != 0) {
+        battle_move_snap_axis_to_destination_tile_center(direction, unit);
+        unit->velocity.vz = 0;
+        unit->velocity.vx = 0;
+        screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
+        g_move_target_screen_z = screen_z;
+        if (unit->world_coords.vy >= screen_z) {
+            unit->map_x = unit->movement.destination_x;
+            unit->map_y = unit->movement.destination_y;
+            unit->velocity.vy = 0;
+            unit->real.vy = g_move_target_screen_z * ONE;
+            unit->world_coords.vy = unit->real.vy / ONE;
+            unit->step_phase = MOVE_STEP_PHASE_NONE;
+            unit->shadow_dirty |= 1;
+        }
     }
 }

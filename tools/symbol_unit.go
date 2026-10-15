@@ -116,8 +116,30 @@ func (p project) unitSymbolsCommand(args []string) error {
 				unitTexts[unitSource] = pieces
 			}
 		}
+		// The path may be reused when it belongs to a unit absorbed whole.
 		if _, err := os.Stat(filepath.Join(p.root, filepath.FromSlash(clean))); err == nil {
-			return fmt.Errorf("%s already exists", clean)
+			if _, absorbedPath := unitTexts[clean]; !absorbedPath {
+				return fmt.Errorf("%s already exists", clean)
+			}
+		}
+		// Tables the unit will define sit among the members' literals; they
+		// must be known before the read-only ranges are checked for contiguity.
+		var owned []rodataSpec
+		var fillers map[string]string // member name -> filler text emitted after that member
+		if *ownRodata {
+			if len(order) != 1 {
+				return errors.New("--own-rodata applies to a unit of one module")
+			}
+			image, err := p.readModuleImage(order[0])
+			if err != nil {
+				return fmt.Errorf("--own-rodata needs the module image: %w", err)
+			}
+			list := byModule[order[0]]
+			sort.Slice(list, func(i, j int) bool { return list[i].Addr < list[j].Addr })
+			owned, fillers, err = ownedRodataTables(image, order[0], list)
+			if err != nil {
+				return err
+			}
 		}
 		// Per-module member lists in address order, checked for contiguity,
 		// profile agreement and jump-table alignment.
@@ -129,7 +151,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 			for _, f := range list {
 				functions = append(functions, f.Name)
 			}
-			spec := &unitSpec{name: *name, source: clean, functions: functions}
+			spec := &unitSpec{name: *name, source: clean, functions: functions, rodata: owned}
 			if _, err := resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID}); err != nil {
 				return err
 			}
@@ -184,21 +206,6 @@ func (p project) unitSymbolsCommand(args []string) error {
 				}
 			}
 		}
-		var owned []rodataSpec
-		var fillers map[string]string // member name -> filler text emitted after that member
-		if *ownRodata {
-			if len(order) != 1 {
-				return errors.New("--own-rodata applies to a unit of one module")
-			}
-			image, err := p.readModuleImage(order[0])
-			if err != nil {
-				return fmt.Errorf("--own-rodata needs the module image: %w", err)
-			}
-			owned, fillers, err = ownedRodataTables(image, order[0], byModule[order[0]])
-			if err != nil {
-				return err
-			}
-		}
 		text, conditional := renderUnitSource(order, merged, bodies, bodyModules, fillers)
 		if *comment != "" {
 			if strings.Contains(*comment, "*/") {
@@ -210,12 +217,6 @@ func (p project) unitSymbolsCommand(args []string) error {
 			if err := validateUnitSourceDataFor(m, clean, text, members[m]); err != nil {
 				return err
 			}
-			if len(owned) > 0 {
-				functions := members[m]
-				if _, err := resolveUnitInstance(config, &unitSpec{name: *name, source: clean, functions: functions, rodata: owned}, unitInstanceYAML{Module: m.ID}); err != nil {
-					return err
-				}
-			}
 		}
 		for _, m := range order {
 			var kept []unitDef
@@ -225,10 +226,25 @@ func (p project) unitSymbolsCommand(args []string) error {
 				}
 			}
 			m.Units = append(kept, unitDef{Name: *name, Source: clean, Rodata: owned})
+			aliases := map[string]bool{}
 			for _, f := range byModule[m] {
+				if f.SourceSymbol != "" {
+					aliases[f.Name] = true
+				}
 				f.Unit = *name
 				f.Source = ""
 				f.SourceSymbol = ""
+			}
+			// A materialized duplicate names its symbols directly; the
+			// override rows that rebound them for the alias entry are spent.
+			if len(aliases) > 0 {
+				var overrides []overrideSpec
+				for _, override := range m.Overrides {
+					if !aliases[override.Function] {
+						overrides = append(overrides, override)
+					}
+				}
+				m.Overrides = overrides
 			}
 		}
 		stillUsed := map[string]bool{}
@@ -241,7 +257,16 @@ func (p project) unitSymbolsCommand(args []string) error {
 		if err := os.MkdirAll(filepath.Dir(filepath.Join(p.root, filepath.FromSlash(clean))), 0o755); err != nil {
 			return err
 		}
-		if err := transaction.addCreation(filepath.Join(p.root, filepath.FromSlash(clean)), text, 0o644); err != nil {
+		if _, reused := unitTexts[clean]; reused {
+			full := filepath.Join(p.root, filepath.FromSlash(clean))
+			info, original, err := readRegularSymbolFile(full)
+			if err != nil {
+				return err
+			}
+			if err := transaction.addExistingSnapshot(full, original, text, info.Mode()); err != nil {
+				return err
+			}
+		} else if err := transaction.addCreation(filepath.Join(p.root, filepath.FromSlash(clean)), text, 0o644); err != nil {
 			return err
 		}
 		var oldFiles []string
@@ -249,7 +274,9 @@ func (p project) unitSymbolsCommand(args []string) error {
 			oldFiles = append(oldFiles, file)
 		}
 		for file := range unitTexts {
-			oldFiles = append(oldFiles, file)
+			if file != clean {
+				oldFiles = append(oldFiles, file)
+			}
 		}
 		sort.Strings(oldFiles)
 		removed := 0
@@ -342,8 +369,31 @@ func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]un
 		if err != nil {
 			return nil, err
 		}
-		pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(f.SourceSymbol) + `\b`)
-		return &unitMemberBody{key: body.key + "@" + f.Name, includes: body.includes, text: pattern.ReplaceAllString(body.text, f.Name)}, nil
+		text := regexp.MustCompile(`\b`+regexp.QuoteMeta(f.SourceSymbol)+`\b`).ReplaceAllString(body.text, f.Name)
+		// The alias entry's override rows rebind names to other symbols; the
+		// duplicate names those symbols directly, so one object needs no
+		// per-member binding.
+		for _, override := range m.Overrides {
+			if override.Function != f.Name {
+				continue
+			}
+			replacement := ""
+			if row := m.dataAt(override.Addr); row != nil {
+				replacement = row.Name
+			} else {
+				for index := range m.Functions {
+					if m.Functions[index].Addr == override.Addr {
+						replacement = m.Functions[index].Name
+						break
+					}
+				}
+			}
+			if replacement == "" {
+				return nil, fmt.Errorf("%s: alias %s binds %s to 0x%08x, which names no symbol of the module", m.ID, f.Name, override.Name, override.Addr)
+			}
+			text = regexp.MustCompile(`\b`+regexp.QuoteMeta(override.Name)+`\b`).ReplaceAllString(text, replacement)
+		}
+		return &unitMemberBody{key: body.key + "@" + f.Name, includes: body.includes, text: text}, nil
 	}
 	if f.Unit != "" {
 		unit := m.unit(f.Unit)
@@ -444,6 +494,7 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 	}
 	var blocks []string
 	conditional := 0
+	seenConstant := map[string]bool{}
 	for _, name := range merged {
 		keys := make([]string, 0, len(bodies[name]))
 		for key := range bodies[name] {
@@ -456,8 +507,9 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 			body := bodies[name][key]
 			addIncludes(body.includes)
 			modules := bodyModules[name][key]
+			text := dropRepeatedConstants(body.text, seenConstant)
 			if len(keys) == 1 && len(modules) == len(order) {
-				blocks = append(blocks, body.text)
+				blocks = append(blocks, text)
 				continue
 			}
 			conditional++
@@ -469,7 +521,7 @@ func renderUnitSource(order []*moduleSpec, merged []string, bodies map[string]ma
 			if len(modules) == 1 {
 				guard = "#ifdef " + moduleMacro(modules[0].ID)
 			}
-			blocks = append(blocks, guard+"\n"+body.text+"\n#endif")
+			blocks = append(blocks, guard+"\n"+text+"\n#endif")
 		}
 		if filler := fillers[name]; filler != "" {
 			blocks = append(blocks, filler)
@@ -596,4 +648,20 @@ func renderRodataFiller(name string, addr uint32, bytes []byte) string {
 	}
 	out.WriteString("\n};")
 	return out.String()
+}
+
+// dropRepeatedConstants removes file-scope `#define` lines and `enum {...};`
+// statements whose text already appeared in an earlier member: several
+// per-function files carried the same local constant, which one object
+// defines once.
+func dropRepeatedConstants(text string, seen map[string]bool) string {
+	pattern := regexp.MustCompile(`(?ms)^(?:#define[^\n]*|enum\s*\{[^}]*\}\s*;)[ \t]*\n?`)
+	return pattern.ReplaceAllStringFunc(text, func(statement string) string {
+		key := strings.TrimSpace(statement)
+		if seen[key] {
+			return ""
+		}
+		seen[key] = true
+		return statement
+	})
 }

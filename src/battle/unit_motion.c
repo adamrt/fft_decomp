@@ -1,4 +1,5 @@
-/* Unit motion and camera deltas. Its start is a cut chosen by topic; its end is a boundary the binary proves. */
+/* Unit motion: cursor projection, fades, real and world coordinate conversions, teleport distortion and movement toward
+ * targets. Its end is a cut chosen by topic (the camera follows). */
 
 #include "fft/battle.h"
 #include "fft/battle_action.h"
@@ -1041,36 +1042,4 @@ void battle_unit_dispatch_distortion_animation(battle_unit_t* unit) {
             main_system_handle_error(MAIN_SYSTEM_ERROR_DISTORTION_ANIMATION);
         }
     }
-}
-
-/* Saves the camera position for camera_restore_current_real_coords (effect
- * script opcodes 09 and 0a). */
-void battle_camera_save_current_real_coords(void) {
-    copyVector(&g_camera_saved_real_coords, &g_camera_current_real_coords);
-}
-
-void battle_camera_restore_current_real_coords(void) {
-    copyVector(&g_camera_current_real_coords, &g_camera_saved_real_coords);
-}
-
-VECTOR* battle_camera_get_current_real_coords(void) {
-    return &g_camera_current_real_coords;
-}
-
-void battle_camera_set_current_real_coords(const VECTOR* coords) {
-    copyVector(&g_camera_current_real_coords, coords);
-}
-
-/* Starts a linear move of the camera position to `destination` (20.12) over
- * frame_count frames (divided by the animation speed), applied by
- * camera_update_real_coord_animation. No retail code calls it. */
-void battle_camera_set_real_coord_delta_from_destination(const VECTOR* destination, s32 frame_count) {
-    s32 animation_frames;
-
-    animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
-    g_camera_real_coord_countdown = animation_frames;
-    animation_frames = g_camera_real_coord_countdown;
-    setVector(&g_camera_real_coord_delta, (destination->vx - g_camera_current_real_coords.vx) / animation_frames,
-        (destination->vy - g_camera_current_real_coords.vy) / animation_frames,
-        (destination->vz - g_camera_current_real_coords.vz) / animation_frames);
 }
