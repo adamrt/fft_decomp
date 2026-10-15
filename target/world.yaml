@@ -29,6 +29,7 @@ units:
   - {name: menu_page_scroll_input, source: src/menu/world/menu_page_scroll_input.c}
   - {name: menu_panel_colors_and_decimal_text, source: src/menu/menu_panel_colors_and_decimal_text.c}
   - {name: menu_preview_bonus_displays, source: src/menu/menu_preview_bonus_displays.c}
+  - {name: menu_redraw_text_page_on_scroll_set, source: src/menu/menu_redraw_text_page_on_scroll_set.c}
   - {name: menu_selection_records, source: src/menu/menu_selection_records.c}
   - {name: menu_selection_sfx_and_script_threads, source: src/event/menu_selection_sfx_and_script_threads.c}
   - {name: menu_text_id_list_rendering, source: src/menu/menu_text_id_list_rendering.c}
@@ -494,8 +495,8 @@ functions:
   - {addr: 0x80100164, size: 36, name: thread_is_running_asm_variant, hash: d9c5668fe09910ef, unit: thread_parameters_and_globals}
   - {addr: 0x80100348, size: 60, name: text_skip_to_entry, hash: 90cff8271922ef07, unit: text}
   - {addr: 0x80100430, size: 480, name: menu_draw_text_columns, hash: ea0c5d112530bb05, source: src/menu/menu_draw_text_columns.c}
-  - {addr: 0x80100610, size: 636, name: menu_redraw_text_page_on_scroll, hash: 327edc74c76a57e0, source: src/menu/menu_redraw_text_page_on_scroll.c}
-  - {addr: 0x8010088c, size: 3184, name: menu_run_at_list_variant, hash: 632132e7dd8d11d5, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/menu/world/menu_run_at_list_variant.c}
+  - {addr: 0x80100610, size: 636, name: menu_redraw_text_page_on_scroll, hash: 327edc74c76a57e0, unit: menu_redraw_text_page_on_scroll_set}
+  - {addr: 0x8010088c, size: 3184, name: menu_run_at_list_variant, hash: 632132e7dd8d11d5, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: menu_redraw_text_page_on_scroll_set}
   - {addr: 0x801014fc, size: 40, name: world_gfx_set_image_blit_source_rect, hash: 8c3c61992650378d, source: src/gfx/world/world_gfx_set_image_blit_source_rect.c}
   - {addr: 0x80101524, size: 24, name: text_set_blit_destination, hash: f57d9a174ce12b8e, source: src/text/text_set_blit_destination.c}
   - {addr: 0x8010153c, size: 464, name: world_option_gfx_build_scaled_draw_area_packets, hash: c493e8c86806a8b3}
