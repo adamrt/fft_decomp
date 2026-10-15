@@ -202,3 +202,29 @@ func TestUnitSymbolsCommandAbsorbsUnitsAndWrapsModuleBodies(t *testing.T) {
 		t.Fatalf("inconsistent order error = %v", err)
 	}
 }
+
+func TestRenameUnitCommandMovesTheFileAndRebindsMembers(t *testing.T) {
+	p := unitsTestProject(t)
+	if err := p.unitSymbolsCommand([]string{"--name", "menu_a_head", "--source", "src/menu/menu_a_head.c", "battle:menu_a1", "battle:menu_a2", "world:menu_a1", "world:menu_a2"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.renameUnitCommand([]string{"--unit", "menu_a_head", "--name", "menu_openers"}); err != nil {
+		t.Fatal(err)
+	}
+	config, err := p.loadCheckedConfig()
+	if err != nil {
+		t.Fatalf("checked config: %v", err)
+	}
+	for _, id := range []string{"battle", "world"} {
+		m := config.byID[id]
+		if m.unit("menu_a_head") != nil || m.unit("menu_openers") == nil || m.unit("menu_openers").Source != "src/menu/menu_openers.c" || m.function("menu_a1").Unit != "menu_openers" {
+			t.Fatalf("%s: %+v %+v", id, m.Units, *m.function("menu_a1"))
+		}
+	}
+	if _, err := os.Stat(filepath.Join(p.root, "src", "menu", "menu_a_head.c")); !os.IsNotExist(err) {
+		t.Fatal("old file should be gone")
+	}
+	if err := p.renameUnitCommand([]string{"--unit", "nowhere", "--name", "x"}); err == nil || !strings.Contains(err.Error(), "no module has a unit") {
+		t.Fatalf("missing unit error = %v", err)
+	}
+}

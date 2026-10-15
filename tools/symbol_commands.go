@@ -11,7 +11,7 @@ import (
 
 func (p project) symbolsCommand(args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: tools symbols rename-function|rename-global|unify|share|move|unit|split ...")
+		return errors.New("usage: tools symbols rename-function|rename-global|unify|share|move|unit|rename-unit|split ...")
 	}
 	switch args[0] {
 	case "rename-function", "rename-global":
@@ -22,6 +22,8 @@ func (p project) symbolsCommand(args []string) error {
 		return p.shareSymbolsCommand(args[1:])
 	case "move":
 		return p.moveSymbolsCommand(args[1:])
+	case "rename-unit":
+		return p.renameUnitCommand(args)
 	case "unit":
 		return p.unitSymbolsCommand(args[1:])
 	case "split":
