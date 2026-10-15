@@ -2,7 +2,7 @@
 
 /* Empty both render record pools and the pointer list. Every record gets its
  * layout flag, ordering-table entry 8 and the neutral color 0x80. */
-void open_gfx_init_render_buffers(void) {
+void window_init_record_pools_variant(void) {
     s32 i;
     CVECTOR* color;
 

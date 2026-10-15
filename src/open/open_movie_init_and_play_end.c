@@ -18,6 +18,6 @@ void open_movie_init_and_play_end(void) {
     g_open_system_vsync_mode = 0;
     open_file_load_end_movie_graphics();
     open_gfx_init_screen_environments(1);
-    open_gfx_init_render_buffers();
+    window_init_record_pools_variant();
     open_movie_play_end();
 }

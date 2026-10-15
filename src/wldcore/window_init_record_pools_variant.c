@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Reset both world-map window pools and their allocation counters. */
-void wldcore_window_init_record_pools(void) {
+void window_init_record_pools_variant(void) {
     /* Member pointers preserve the separate color and CLUT address walks. */
     CVECTOR* color;
     point32_t* clut;

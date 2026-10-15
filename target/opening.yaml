@@ -45,7 +45,7 @@ functions:
   - {addr: 0x800687ac, size: 832, name: open_gfx_init_screen_environments, hash: 00685f629e5f306d}
   - {addr: 0x80068aec, size: 136, name: open_system_init_runtime_state, hash: 1795eb2597584b2e}
   - {addr: 0x80068b74, size: 60, name: open_gfx_clear_and_draw_current_frame, hash: 22d70e319b6161e8}
-  - {addr: 0x80068bb0, size: 224, name: open_gfx_init_render_buffers, hash: 39decc2065a64d27}
+  - {addr: 0x80068bb0, size: 224, name: window_init_record_pools_variant, hash: 39decc2065a64d27}
   - {addr: 0x80068c90, size: 64, name: open_gfx_clear_current_otag, hash: 7dbb971d4cb43ee9}
   - {addr: 0x80068cd0, size: 176, name: window_dispatch_record_list_variant, hash: a3a591bbfb26047c}
   - {addr: 0x80068d80, size: 1164, name: open_gfx_draw_animated_render_record, hash: d2445b3917e77445}

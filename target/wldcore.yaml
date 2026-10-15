@@ -62,7 +62,7 @@ functions:
   - {addr: 0x8006abc8, size: 64, name: wldcore_map_apply_clamped_scroll, hash: d7be6cf7b2797cc0}
   - {addr: 0x8006ac08, size: 144, name: wldcore_map_apply_clamped_horizontal_scroll, hash: c3019786556de6da}
   - {addr: 0x8006ac98, size: 144, name: wldcore_map_apply_clamped_vertical_scroll, hash: d77a7b8dc971843f}
-  - {addr: 0x8006ad28, size: 248, name: wldcore_window_init_record_pools, hash: e025d61aca5111d9}
+  - {addr: 0x8006ad28, size: 248, name: window_init_record_pools_variant, hash: e025d61aca5111d9}
   - {addr: 0x8006ae20, size: 176, name: window_dispatch_record_list_variant, hash: a7e465f544089ca3}
   - {addr: 0x8006aed0, size: 924, name: wldcore_gfx_draw_animated_display_object, hash: 370928c0ecd01289}
   - {addr: 0x8006b26c, size: 500, name: wldcore_gfx_draw_display_object_sprite, hash: 3a72d1b76b19a115}

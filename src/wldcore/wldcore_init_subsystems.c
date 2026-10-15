@@ -8,7 +8,7 @@ void wldcore_init_subsystems(void) {
     wldcore_input_init_repeat_state();
     wldcore_load_scratch_data_blocking();
     wldcore_gfx_init_subsystem();
-    wldcore_window_init_record_pools();
+    window_init_record_pools_variant();
     wldcore_map_init_tile_atlas();
     wldcore_load_formation_unit_name_and_face();
     wldcore_map_color_and_draw_dots();

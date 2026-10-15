@@ -2009,7 +2009,6 @@ extern void (*g_wldcore_menu_publish_handlers[])(wldcore_menu_stack_record_t*);
 extern void (*g_wldcore_menu_resume_handlers[])(wldcore_menu_stack_record_t*);
 extern struct world_menu_number_range g_wldcore_window_panel_number_state;
 extern s32 g_wldcore_menu_root_window_index;
-void wldcore_window_init_record_pools(void);
 void wldcore_window_build_yes_no_panel(point32_t origin);
 void wldcore_menu_push_location_menu_level(s32 menu);
 void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level);
