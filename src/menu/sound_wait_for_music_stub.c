@@ -1,4 +1,5 @@
-/* Music wait stub and slot loading with VSync waits. */
+/* Sound wait for music stub, an object of the menu library linked by BATTLE, ATTACK, REQUIRE, WORLD; its edges are
+ * where the overlays' link orders diverge. */
 
 #include "fft/main.h"
 #include "fft/sound.h"

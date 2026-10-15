@@ -1,5 +1,3 @@
-/* Scrollable list layout load, init and the WORLD init-and-draw variant. */
-
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
@@ -60,21 +58,4 @@ void world_menu_load_scrollable_list_layout(menu_instruction_t* script) {
     }
     g_world_menu_list_scroll_direction = 0;
     g_world_menu_list_layout_pending = 0;
-}
-
-/* Initialize the list state, then load its visible entries from the menu
- * definition. */
-void world_menu_init_and_load_scrollable_list(
-    const s16* values, s32 selected_index, u8* text_table, menu_instruction_t* script) {
-    menu_init_scrollable_list_core_variant(values, selected_index, text_table);
-    world_menu_load_scrollable_list_layout(script);
-}
-
-/* Built at -O1: the unscheduled prologue (sw ra, sw s0, lw s0) is the -O1 signature shared by the
- * neighboring menu-script handlers. */
-
-void menu_init_and_draw_scrollable_list_variant(
-    const s16* values, s32 value, s32 selected, u8* text_table, const menu_instruction_t* script) {
-    menu_init_scrollable_list(values, value, selected, text_table);
-    world_menu_load_scrollable_list_layout(script);
 }

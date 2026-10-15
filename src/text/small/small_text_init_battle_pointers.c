@@ -1,5 +1,3 @@
-/* SMALL.OUT text section binding and its zero stub. */
-
 #include "fft/event_small.h"
 #include "fft/script.h"
 #include "psx/types.h"
@@ -13,8 +11,4 @@ void small_text_init_battle_pointers(void) {
     g_text_section_pointers[TEXT_SECTION_JOB_NAMES] = string_data + g_small_text_name_section_offsets.job_names;
     g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES_COPY] = g_text_section_pointers[TEXT_SECTION_SKILLSET_NAMES];
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
-}
-
-s32 small_return_zero(void) {
-    return 0;
 }

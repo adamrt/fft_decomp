@@ -39,10 +39,11 @@ units:
   - {name: script_sound_camera_and_menus, source: src/event/script_sound_camera_and_menus.c}
   - {name: script_unit_helpers_and_modal_sfx, source: src/event/script_unit_helpers_and_modal_sfx.c}
   - {name: script_unit_instructions, source: src/event/script_unit_instructions.c}
-  - {name: sound_music_track_loading, source: src/sound/sound_music_track_loading.c}
+  - {name: sound_wait_for_music_stub, source: src/menu/sound_wait_for_music_stub.c}
   - {name: text, source: src/event/text.c}
   - {name: text_cursor_and_backreferences, source: src/event/text_cursor_and_backreferences.c}
   - {name: text_display_messages, source: src/event/text_display_messages.c}
+  - {name: text_fill_field_with_terminators, source: src/menu/text_fill_field_with_terminators.c}
   - {name: thread, source: src/event/thread.c}
   - {name: thread_parameters_and_globals, source: src/event/thread_parameters_and_globals.c}
   - {name: unit_coords_and_return_stubs, source: src/event/unit_coords_and_return_stubs.c}
@@ -62,7 +63,6 @@ units:
   - {name: world_menu_panel_thread_control, source: src/menu/world/world_menu_panel_thread_control.c}
   - {name: world_menu_script_blend_and_color, source: src/menu/world/world_menu_script_blend_and_color.c}
   - {name: world_menu_script_draw_opcodes, source: src/menu/world/world_menu_script_draw_opcodes.c}
-  - {name: world_menu_scrollable_list_setup, source: src/menu/world/world_menu_scrollable_list_setup.c}
   - {name: world_menu_setup_and_screen_requests, source: src/world/world_menu_setup_and_screen_requests.c}
   - {name: world_menu_stats_and_ability_toggles, source: src/menu/world/world_menu_stats_and_ability_toggles.c}
   - {name: world_menu_submenu_pages, source: src/menu/world/world_menu_submenu_pages.c}
@@ -172,9 +172,9 @@ functions:
   - {addr: 0x800e7b4c, size: 8, name: world_return_parameter_1, hash: cc2f57dc1c5c5ee3, unit: return_text}
   - {addr: 0x800e7b54, size: 8, name: world_return_argument_800e7b54, hash: cc2f57dc1c5c5ee3, unit: return_text}
   - {addr: 0x800e7b5c, size: 196, name: text_build_unit_name_list, hash: 9a9afb823d5db8ad, unit: return_text}
-  - {addr: 0x800e7c20, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, source: src/text/text_fill_field_with_terminators.c}
-  - {addr: 0x800e7c40, size: 396, name: menu_copy_unit_data_to_status_billboard_variant, hash: 9b61737b18a8d657, source: src/menu/world/menu_copy_unit_data_to_status_billboard_variant.c}
-  - {addr: 0x800e7dcc, size: 1348, name: menu_load_selected_unit_variant, hash: f635c99de88e0baf, source: src/menu/menu_load_selected_unit_variant.c}
+  - {addr: 0x800e7c20, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, unit: text_fill_field_with_terminators}
+  - {addr: 0x800e7c40, size: 396, name: menu_copy_unit_data_to_status_billboard_variant, hash: 9b61737b18a8d657, unit: text_fill_field_with_terminators}
+  - {addr: 0x800e7dcc, size: 1348, name: menu_load_selected_unit_variant, hash: f635c99de88e0baf, unit: text_fill_field_with_terminators}
   - {addr: 0x800e8310, size: 84, name: unit_has_any_current_status, hash: f4242604b8850c34, unit: menu_unit_status_lists_and_text_sections}
   - {addr: 0x800e8364, size: 516, name: menu_build_unit_status_list, hash: 97f6760c5281c86d, unit: menu_unit_status_lists_and_text_sections}
   - {addr: 0x800e8568, size: 136, name: menu_copy_billboard_data_out, hash: d14feb4432c303f8, unit: menu_unit_status_lists_and_text_sections}
@@ -282,8 +282,8 @@ functions:
   - {addr: 0x800f0b08, size: 84, name: menu_poll_small_load, hash: beff675275d527cf, unit: menu_icons_windows_and_scripts}
   - {addr: 0x800f0b5c, size: 8, name: map_return_zero_1, hash: 207819bf4ebe3078, unit: menu_icons_windows_and_scripts}
   - {addr: 0x800f0b64, size: 56, name: map_data_load_complete_thread, hash: 9d186db038b3c37d, unit: menu_icons_windows_and_scripts}
-  - {addr: 0x800f0b9c, size: 72, name: sound_wait_for_music_stub, hash: ae5d718d414b6204, unit: sound_music_track_loading}
-  - {addr: 0x800f0be4, size: 168, name: sound_play_music_tracks, hash: 99f338e7d1920b8b, unit: sound_music_track_loading}
+  - {addr: 0x800f0b9c, size: 72, name: sound_wait_for_music_stub, hash: ae5d718d414b6204, unit: sound_wait_for_music_stub}
+  - {addr: 0x800f0be4, size: 168, name: sound_play_music_tracks, hash: 99f338e7d1920b8b, unit: sound_wait_for_music_stub}
   - {addr: 0x800f0c8c, size: 444, name: menu_init_attack_resources_and_threads, hash: 1ae51b2896ef360b, unit: menu_attack_resources_and_dialogs}
   - {addr: 0x800f0e48, size: 156, name: menu_start_mini_menu_display_thread, hash: fbc523628be16282, unit: menu_attack_resources_and_dialogs}
   - {addr: 0x800f0ee4, size: 92, name: menu_get_thread_activity_variant, hash: fb4093ac614ce6a0, unit: menu_attack_resources_and_dialogs}
@@ -871,9 +871,9 @@ functions:
   - {addr: 0x801282dc, size: 704, name: menu_update_and_draw_sliding_cursor_variant, hash: aeed72995bce48d4, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_update_and_draw_sliding_cursor_variant.c}
   - {addr: 0x8012859c, size: 852, name: menu_update_and_draw_bouncing_cursor_variant, hash: 6230546a73c5da6f, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_update_and_draw_bouncing_cursor_variant.c}
   - {addr: 0x801288f0, size: 108, name: world_menu_skip_instruction_group, hash: 08c0e2d5768b4709, source: src/menu/world/world_menu_skip_instruction_group.c}
-  - {addr: 0x8012895c, size: 800, name: world_menu_load_scrollable_list_layout, hash: 32f66838c38db246, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_setup}
-  - {addr: 0x80128c7c, size: 48, name: world_menu_init_and_load_scrollable_list, hash: 8ca660cbdd814a3b, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_setup}
-  - {addr: 0x80128cac, size: 52, name: menu_init_and_draw_scrollable_list_variant, hash: 63e8f995fd661aee, profile: gcc-2.6.3_O1_aspsx-2.34, unit: world_menu_scrollable_list_setup}
+  - {addr: 0x8012895c, size: 800, name: world_menu_load_scrollable_list_layout, hash: 32f66838c38db246, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/world_menu_load_scrollable_list_layout.c}
+  - {addr: 0x80128c7c, size: 48, name: world_menu_init_and_load_scrollable_list, hash: 8ca660cbdd814a3b, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/world_menu_init_and_load_scrollable_list.c}
+  - {addr: 0x80128cac, size: 52, name: menu_init_and_draw_scrollable_list_variant, hash: 63e8f995fd661aee, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_init_and_draw_scrollable_list_variant.c}
   - {addr: 0x80128ce0, size: 2964, name: menu_cmd_draw_scrollable_list_body_handler_variant, hash: a229f784b447bedd, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/menu_cmd_draw_scrollable_list_body_handler_variant.c}
   - {addr: 0x80129874, size: 60, name: world_menu_set_sprite_color, hash: 15640358a165ed2d, profile: gcc-2.6.3_O1_aspsx-2.34, source: src/menu/world/world_menu_set_sprite_color.c}
   - {addr: 0x801298b0, size: 16, name: gfx_set_otag_index, hash: b01b36934974a06a, source: src/gfx/gfx_set_otag_index.c}

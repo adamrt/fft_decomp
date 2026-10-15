@@ -57,7 +57,7 @@ units:
   - {name: script_sound_camera_and_menus, source: src/event/script_sound_camera_and_menus.c}
   - {name: script_unit_helpers_and_modal_sfx, source: src/event/script_unit_helpers_and_modal_sfx.c}
   - {name: script_unit_instructions, source: src/event/script_unit_instructions.c}
-  - {name: sound_music_track_loading, source: src/sound/sound_music_track_loading.c}
+  - {name: sound_wait_for_music_stub, source: src/menu/sound_wait_for_music_stub.c}
   - {name: state_action_flow, source: src/battle/state_action_flow.c}
   - {name: state_unit_moving_and_map_change, source: src/battle/state_unit_moving_and_map_change.c}
   - {name: status_transparent_and_charging, source: src/battle/status_transparent_and_charging.c}
@@ -65,6 +65,7 @@ units:
   - {name: text, source: src/event/text.c}
   - {name: text_cursor_and_backreferences, source: src/event/text_cursor_and_backreferences.c}
   - {name: text_display_messages, source: src/event/text_display_messages.c}
+  - {name: text_fill_field_with_terminators, source: src/menu/text_fill_field_with_terminators.c}
   - {name: thread, source: src/event/thread.c}
   - {name: thread_parameters_and_globals, source: src/event/thread_parameters_and_globals.c}
   - {name: tile_data_and_formulas_1, source: src/battle/tile_data_and_formulas_1.c}
@@ -831,9 +832,9 @@ functions:
   - {addr: 0x80133158, size: 828, name: script_resolve_runtime_id, hash: 0dc0e1d2249ad0d7, unit: unit_coords_and_return_stubs}
   - {addr: 0x80133494, size: 16, name: battle_return_argument_80133494, hash: ce4ad88e7603b293}
   - {addr: 0x801334a4, size: 196, name: text_build_unit_name_list, hash: 9e89b0033e7a7acd, unit: return_text}
-  - {addr: 0x80133568, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, source: src/text/text_fill_field_with_terminators.c}
-  - {addr: 0x80133588, size: 460, name: menu_copy_unit_data_to_status_billboard_variant, hash: dc13403e0a243847, source: src/menu/menu_copy_unit_data_to_status_billboard_variant.c}
-  - {addr: 0x80133754, size: 1348, name: menu_load_selected_unit_variant, hash: 30054c92a903e0bd, source: src/menu/menu_load_selected_unit_variant.c}
+  - {addr: 0x80133568, size: 32, name: text_fill_field_with_terminators, hash: 5eaa92c4790153fd, unit: text_fill_field_with_terminators}
+  - {addr: 0x80133588, size: 460, name: menu_copy_unit_data_to_status_billboard_variant, hash: dc13403e0a243847, unit: text_fill_field_with_terminators}
+  - {addr: 0x80133754, size: 1348, name: menu_load_selected_unit_variant, hash: 30054c92a903e0bd, unit: text_fill_field_with_terminators}
   - {addr: 0x80133c98, size: 84, name: unit_has_any_current_status, hash: 9d1f779a473099b3, unit: menu_unit_status_lists_and_text_sections}
   - {addr: 0x80133cec, size: 516, name: menu_build_unit_status_list, hash: 640d7ce85b1f418f, unit: menu_unit_status_lists_and_text_sections}
   - {addr: 0x80133ef0, size: 136, name: menu_copy_billboard_data_out, hash: 0da597fa0f8b8b55, unit: menu_unit_status_lists_and_text_sections}
@@ -941,8 +942,8 @@ functions:
   - {addr: 0x8013d19c, size: 84, name: menu_poll_small_load, hash: 4db3a15d03401224, unit: menu_icons_windows_and_scripts}
   - {addr: 0x8013d1f0, size: 8, name: map_return_zero_1, hash: 207819bf4ebe3078, unit: menu_icons_windows_and_scripts}
   - {addr: 0x8013d1f8, size: 56, name: map_data_load_complete_thread, hash: f5d13c78756c2b83, unit: menu_icons_windows_and_scripts}
-  - {addr: 0x8013d230, size: 72, name: sound_wait_for_music_stub, hash: 5cf0df43ec1c1bac, unit: sound_music_track_loading}
-  - {addr: 0x8013d278, size: 168, name: sound_play_music_tracks, hash: 5321f20b1e27a914, unit: sound_music_track_loading}
+  - {addr: 0x8013d230, size: 72, name: sound_wait_for_music_stub, hash: 5cf0df43ec1c1bac, unit: sound_wait_for_music_stub}
+  - {addr: 0x8013d278, size: 168, name: sound_play_music_tracks, hash: 5321f20b1e27a914, unit: sound_wait_for_music_stub}
   - {addr: 0x8013d320, size: 444, name: menu_init_attack_resources_and_threads, hash: 289c47ca11bfc49a, unit: menu_attack_resources_and_dialogs}
   - {addr: 0x8013d4dc, size: 156, name: menu_start_mini_menu_display_thread, hash: 4ab206190a2c9ff0, unit: menu_attack_resources_and_dialogs}
   - {addr: 0x8013d578, size: 152, name: menu_get_thread_activity_variant, hash: f35ea38564647bad, unit: menu_attack_resources_and_dialogs}
