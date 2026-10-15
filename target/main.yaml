@@ -16,6 +16,7 @@ units:
   - {name: display_and_sound_requests, source: src/main/display_and_sound_requests.c}
   - {name: file_cd_headers, source: src/main/file_cd_headers.c}
   - {name: game_loop_and_now_loading, source: src/main/game_loop_and_now_loading.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: heap_and_file_loading, source: src/main/heap_and_file_loading.c}
   - {name: item_card_and_open_overlays, source: src/main/item_card_and_open_overlays.c}
   - {name: item_quantities_and_status, source: src/main/item_quantities_and_status.c}
@@ -760,7 +761,7 @@ functions:
   - {addr: 0x80044acc, size: 156, name: main_save_init_state_and_options, hash: 57c6eff374a797aa, unit: system_stubs_and_overlay_returns}
   - {addr: 0x80044b68, size: 56, name: main_overlay_call_battle_return_zero, hash: b6dd21cc43c9dca5, unit: system_stubs_and_overlay_returns}
   - {addr: 0x80044ba0, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/gfx/gfx_build_zodiac_sprite_polygon.c}
-  - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, source: src/menu/menu_build_zodiac_primitives.c}
+  - {addr: 0x80044e80, size: 692, name: menu_build_zodiac_primitives, hash: 26ab908a528421ce, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x80045134, size: 32, name: main_gfx_call_build_zodiac_bin, hash: 3e5255b795ac3b4e, unit: zodiac_and_overlay_loading}
   - {addr: 0x80045154, size: 120, name: main_gfx_load_frame_bin_into_vram, hash: 3d0e02e92a4b71b7, unit: zodiac_and_overlay_loading}
   - {addr: 0x800451cc, size: 104, name: main_overlay_open_world_and_wldcore, hash: 9de0809817ea03b9, unit: zodiac_and_overlay_loading}

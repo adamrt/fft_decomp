@@ -16,6 +16,7 @@ units:
   - {name: card_io_hardware_event_results, source: src/card/card_io_hardware_event_results.c}
   - {name: gfx_image_transfer_wait, source: src/gfx/gfx_image_transfer_wait.c}
   - {name: gfx_portrait_crossfade_primitives, source: src/gfx/gfx_portrait_crossfade_primitives.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: memory_copies_and_nibbles, source: src/event/memory_copies_and_nibbles.c}
   - {name: menu_ability_display_values, source: src/menu/menu_ability_display_values.c}
   - {name: menu_at_list_and_dead_unit_threads, source: src/menu/menu_at_list_and_dead_unit_threads.c}
@@ -574,8 +575,8 @@ functions:
   - {addr: 0x80108920, size: 216, name: world_text_generate_formation_unit_name_string, hash: 96223aeecf91b09d, unit: world_formation_icon_list_display}
   - {addr: 0x801089f8, size: 16, name: world_formation_set_display_mode, hash: 47216740e98df636, unit: world_formation_icon_list_display}
   - {addr: 0x80108a08, size: 16, name: world_formation_set_ordering_table_pointer, hash: 268b8898cf44a43e, unit: world_formation_icon_list_display}
-  - {addr: 0x80108a18, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
-  - {addr: 0x80108ce8, size: 692, name: menu_build_zodiac_primitives, hash: 49ec660645c9bf7d, source: src/menu/menu_build_zodiac_primitives.c}
+  - {addr: 0x80108a18, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: gfx_set_scaled_poly_ft4_8bpp_set}
+  - {addr: 0x80108ce8, size: 692, name: menu_build_zodiac_primitives, hash: 49ec660645c9bf7d, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x80108f9c, size: 300, name: world_formation_view_zoom_thread, hash: deadf06fec1c0bd0, unit: world_formation_sprite_and_zoom}
   - {addr: 0x801090c8, size: 384, name: world_formation_get_unit_palette_index, hash: 340716a4d002e911, unit: world_formation_sprite_and_zoom}
   - {addr: 0x80109248, size: 272, name: world_get_party_unit_formation_sprite, hash: d3e3b468e663ce32, unit: world_formation_sprite_and_zoom}
@@ -583,7 +584,7 @@ functions:
   - {addr: 0x80109374, size: 480, name: world_screen_menu_draw_text_columns, hash: 6aa494fcc042d443, source: src/menu/menu_draw_text_columns.c, source_symbol: menu_draw_text_columns}
   - {addr: 0x80109554, size: 648, name: world_screen_menu_redraw_text_page_on_scroll, hash: c3e620bbb56ea16d, unit: world_screen_scrolling_text_list}
   - {addr: 0x801097dc, size: 3236, name: world_screen_build_at_list, hash: fbd15105f39ab67f, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: world_screen_scrolling_text_list}
-  - {addr: 0x8010a480, size: 40, name: text_set_blit_source_rect, hash: 9b7f8b6f740c2815, source: src/text/text_set_blit_source_rect.c}
+  - {addr: 0x8010a480, size: 40, name: text_set_blit_source_rect, hash: 9b7f8b6f740c2815, source: src/menu/text_set_blit_source_rect.c}
   - {addr: 0x8010a4a8, size: 24, name: world_gfx_set_blit_dest_position, hash: 573a5fe65290d88d, source: src/text/text_set_blit_destination.c, source_symbol: text_set_blit_destination}
   - {addr: 0x8010a4c0, size: 464, name: world_screen_gfx_build_scaled_draw_area_packets, hash: a51f79f9dce9dafc}
   - {addr: 0x8010a690, size: 52, name: world_screen_gfx_init_scaled_draw_area_packets, hash: 5daaf3af4a8fceaa, source: src/menu/menu_init_scaled_draw_area_packets.c, source_symbol: menu_init_scaled_draw_area_packets}

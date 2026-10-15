@@ -13,6 +13,7 @@ units:
   - {name: file_load_sync, source: src/menu/file_load_sync.c}
   - {name: gfx_portrait_crossfade_primitives, source: src/gfx/gfx_portrait_crossfade_primitives.c}
   - {name: gfx_set_formation_icon_uv, source: src/menu/gfx_set_formation_icon_uv.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: menu_panel_colors_and_decimal_text, source: src/menu/menu_panel_colors_and_decimal_text.c}
   - {name: sound_wait_for_music_stub, source: src/menu/sound_wait_for_music_stub.c}
 
@@ -44,7 +45,7 @@ functions:
   - {addr: 0x801c265c, size: 740, name: menu_build_status_group_primitives_variant, hash: e865f008b1735c29, source: src/menu/attack/menu_build_status_group_primitives_variant.c}
   - {addr: 0x801c2940, size: 412, name: gfx_build_gradient_grid_primitives_variant, hash: c1250559a6268b13, source: src/gfx/attack/gfx_build_gradient_grid_primitives_variant.c}
   - {addr: 0x801c2adc, size: 736, name: gfx_build_zodiac_sprite_polygon, hash: 37eac014a0b6e39f, source: src/gfx/gfx_build_zodiac_sprite_polygon.c}
-  - {addr: 0x801c2dbc, size: 692, name: menu_build_zodiac_primitives, hash: 919ae95c336b4817, source: src/menu/menu_build_zodiac_primitives.c}
+  - {addr: 0x801c2dbc, size: 692, name: menu_build_zodiac_primitives, hash: 919ae95c336b4817, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x801c3070, size: 8, name: attack_noop_801c3070, hash: 6d64edf91449c1b1, unit: attack_roster_prep_and_unaligned_load}
   - {addr: 0x801c3078, size: 816, name: attack_deploy_find_fieldable_units, hash: 498671a5a9fc34c9, unit: attack_roster_prep_and_unaligned_load}
   - {addr: 0x801c33a8, size: 28, name: attack_load_unaligned_s16, hash: 7f613d531c790362, unit: attack_roster_prep_and_unaligned_load}
@@ -882,6 +883,7 @@ units:
   - {name: card_save_screen, source: src/event/card/card_save_screen.c}
   - {name: gfx_image_transfer_wait, source: src/gfx/gfx_image_transfer_wait.c}
   - {name: gfx_screen_fade, source: src/gfx/gfx_screen_fade.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: menu_gfx_textured_quads, source: src/menu/menu_gfx_textured_quads.c}
   - {name: menu_text_id_list_rendering, source: src/menu/menu_text_id_list_rendering.c}
 
@@ -903,8 +905,8 @@ functions:
   - {addr: 0x801c1fc8, size: 3392, name: card_save_update_and_draw_slot_list, hash: e26df89b1acc9c61, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_screen}
   - {addr: 0x801c2d08, size: 416, name: card_save_update_slot_scroll, hash: 07553e7d79ca258a, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_screen}
   - {addr: 0x801c2ea8, size: 1568, name: card_save_build_file_header, hash: 1f7a34d4f23fd2e5, profile: gcc-2.6.3_O0_aspsx-2.34, unit: card_save_screen}
-  - {addr: 0x801c34c8, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
-  - {addr: 0x801c3798, size: 692, name: menu_build_zodiac_primitives, hash: 34043b3fe18fd9cf, source: src/menu/menu_build_zodiac_primitives.c}
+  - {addr: 0x801c34c8, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: gfx_set_scaled_poly_ft4_8bpp_set}
+  - {addr: 0x801c3798, size: 692, name: menu_build_zodiac_primitives, hash: 34043b3fe18fd9cf, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x801c3a4c, size: 896, name: menu_input_update_event_state_variant, hash: cf38d088504d874f, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/menu/card/menu_input_update_event_state_variant.c}
   - {addr: 0x801c3dcc, size: 16, name: card_gfx_set_render_otag, hash: 9eb022e91cab3006, source: src/gfx/card/card_gfx_set_render_otag.c}
   - {addr: 0x801c3ddc, size: 296, name: card_save_run_menu_graphic_thread, hash: 88afd9c80e51af44}
@@ -1154,6 +1156,7 @@ links: [battle]
 
 units:
   - {name: gfx_portrait_crossfade_primitives, source: src/gfx/gfx_portrait_crossfade_primitives.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: menu_panel_colors_and_decimal_text, source: src/menu/menu_panel_colors_and_decimal_text.c}
   - {name: menu_window_threads, source: src/menu/menu_window_threads.c}
   - {name: text_fill_field_with_terminators, source: src/menu/text_fill_field_with_terminators.c}
@@ -1191,8 +1194,8 @@ functions:
   - {addr: 0x801c3034, size: 580, name: gfx_set_scaled_poly_ft4_4bpp, hash: f989278e90fdce7c, source: src/gfx/gfx_set_scaled_poly_ft4_4bpp.c}
   - {addr: 0x801c3278, size: 700, name: menu_build_status_group_primitives_variant, hash: ab6f9af67d5cf2a8, source: src/menu/menu_build_status_group_primitives_variant.c}
   - {addr: 0x801c3534, size: 400, name: gfx_build_gradient_grid_primitives_variant, hash: 57acda65df169872, source: src/gfx/gfx_build_gradient_grid_primitives_variant.c}
-  - {addr: 0x801c36c4, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
-  - {addr: 0x801c3994, size: 692, name: menu_build_zodiac_primitives, hash: 73434c5bdf08700a, source: src/menu/menu_build_zodiac_primitives.c}
+  - {addr: 0x801c36c4, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: gfx_set_scaled_poly_ft4_8bpp_set}
+  - {addr: 0x801c3994, size: 692, name: menu_build_zodiac_primitives, hash: 73434c5bdf08700a, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x801c3c48, size: 316, name: debugchr_editor_apply_values_to_battle_unit, hash: 1ccc2cc747f36f75}
   - {addr: 0x801c3d84, size: 1544, name: debugchr_editor_run_unit_thread, hash: 609e3c9ca09a8630}
   - {addr: 0x801c438c, size: 3768, name: debugchr_editor_run_session, hash: 358e46ce9946d944}
@@ -2205,7 +2208,7 @@ functions:
   - {addr: 0x801bf000, size: 480, name: menu_draw_text_columns, hash: dff47199f4742289, source: src/menu/menu_draw_text_columns.c}
   - {addr: 0x801bf1e0, size: 636, name: menu_redraw_text_page_on_scroll, hash: 61145072288429ea, unit: menu_redraw_text_page_on_scroll_set}
   - {addr: 0x801bf45c, size: 3172, name: menu_run_at_list_variant, hash: f7232e2ba35ab622, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: menu_redraw_text_page_on_scroll_set}
-  - {addr: 0x801c00c0, size: 40, name: text_set_blit_source_rect, hash: f4a7a9d08a0373d4, source: src/text/text_set_blit_source_rect.c}
+  - {addr: 0x801c00c0, size: 40, name: text_set_blit_source_rect, hash: f4a7a9d08a0373d4, source: src/menu/text_set_blit_source_rect.c}
   - {addr: 0x801c00e8, size: 24, name: text_set_blit_destination, hash: 957437a4742bb43c, source: src/text/text_set_blit_destination.c}
   - {addr: 0x801c0100, size: 464, name: menu_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996, source: src/menu/menu_build_scaled_draw_area_packets.c}
   - {addr: 0x801c02d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 21b5509e73189129, source: src/menu/menu_init_scaled_draw_area_packets.c}
@@ -2280,6 +2283,7 @@ units:
   - {name: file_load_sync, source: src/menu/file_load_sync.c}
   - {name: gfx_portrait_crossfade_primitives, source: src/gfx/gfx_portrait_crossfade_primitives.c}
   - {name: gfx_set_formation_icon_uv, source: src/menu/gfx_set_formation_icon_uv.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: menu_panel_colors_and_decimal_text, source: src/menu/menu_panel_colors_and_decimal_text.c}
   - {name: menu_window_threads, source: src/menu/menu_window_threads.c}
   - {name: sound_wait_for_music_stub, source: src/menu/sound_wait_for_music_stub.c}
@@ -2318,8 +2322,8 @@ functions:
   - {addr: 0x801c2dcc, size: 580, name: gfx_set_scaled_poly_ft4_4bpp, hash: f989278e90fdce7c, source: src/gfx/gfx_set_scaled_poly_ft4_4bpp.c}
   - {addr: 0x801c3010, size: 700, name: menu_build_status_group_primitives_variant, hash: 61b10189a9c6f7fc, source: src/menu/menu_build_status_group_primitives_variant.c}
   - {addr: 0x801c32cc, size: 400, name: gfx_build_gradient_grid_primitives_variant, hash: 3b20668a6d03a172, source: src/gfx/gfx_build_gradient_grid_primitives_variant.c}
-  - {addr: 0x801c345c, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, source: src/gfx/gfx_set_scaled_poly_ft4_8bpp.c}
-  - {addr: 0x801c372c, size: 692, name: menu_build_zodiac_primitives, hash: 0d33bf568d157774, source: src/menu/menu_build_zodiac_primitives.c}
+  - {addr: 0x801c345c, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: gfx_set_scaled_poly_ft4_8bpp_set}
+  - {addr: 0x801c372c, size: 692, name: menu_build_zodiac_primitives, hash: 0d33bf568d157774, unit: gfx_set_scaled_poly_ft4_8bpp_set}
   - {addr: 0x801c39e0, size: 40, name: require_thread_stop_after_16_frames, hash: 83373904c4781138}
   - {addr: 0x801c3a08, size: 168, name: require_party_update_bio_variable_for_unit_class, hash: 39b2124bf596bf04}
   - {addr: 0x801c3ab0, size: 244, name: require_reward_load_bonus_image, hash: 83bdf7ea18ea62c4}
