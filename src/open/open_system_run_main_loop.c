@@ -35,7 +35,7 @@ s32 open_system_run_main_loop(s32 skip_movie) {
             graphics_buffer_index = g_active_graphics_buffer_index;
             /* index * 64 + base: the retail addu sums the offset first. */
             current_otag = (u32*)(graphics_buffer_index * OPEN_OTAG_BUFFER_BYTES + (u32)otag_0);
-            open_gfx_draw_render_record_pointer_list(
+            window_dispatch_record_list_variant(
                 current_otag, g_open_gfx_render_record_pointers, g_open_gfx_render_record_pointer_count);
 
             graphics_buffer_index = g_active_graphics_buffer_index;

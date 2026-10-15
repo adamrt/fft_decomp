@@ -63,11 +63,11 @@ functions:
   - {addr: 0x8006ac08, size: 144, name: wldcore_map_apply_clamped_horizontal_scroll, hash: c3019786556de6da}
   - {addr: 0x8006ac98, size: 144, name: wldcore_map_apply_clamped_vertical_scroll, hash: d77a7b8dc971843f}
   - {addr: 0x8006ad28, size: 248, name: wldcore_window_init_record_pools, hash: e025d61aca5111d9}
-  - {addr: 0x8006ae20, size: 176, name: wldcore_dispatch_display_object_list, hash: a7e465f544089ca3}
+  - {addr: 0x8006ae20, size: 176, name: window_dispatch_record_list_variant, hash: a7e465f544089ca3}
   - {addr: 0x8006aed0, size: 924, name: wldcore_gfx_draw_animated_display_object, hash: 370928c0ecd01289}
   - {addr: 0x8006b26c, size: 500, name: wldcore_gfx_draw_display_object_sprite, hash: 3a72d1b76b19a115}
-  - {addr: 0x8006b460, size: 232, name: wldcore_window_append_record_and_reset_color, hash: 9d472c712e7475fd}
-  - {addr: 0x8006b548, size: 304, name: wldcore_window_append_render_record_and_reset_color, hash: 8b95487b55821e0b}
+  - {addr: 0x8006b460, size: 232, name: window_append_animated_record_variant, hash: 9d472c712e7475fd}
+  - {addr: 0x8006b548, size: 304, name: window_append_record_variant, hash: 8b95487b55821e0b}
   - {addr: 0x8006b678, size: 276, name: gfx_calculate_scaled_rectangle, hash: 63903852735eac70, source: src/shared/gfx/gfx_calculate_scaled_rectangle.c}
   - {addr: 0x8006b78c, size: 840, name: wldcore_gfx_draw_context_value_display, hash: a64c4fe093eb72d2, rodata: [{addr: 0x80067020, size: 20, hash: ec1dbbcbf2752505}]}
   - {addr: 0x8006bad4, size: 244, name: wldcore_gfx_draw_cursor_sprite_and_underline, hash: 477515410b583ab3}
@@ -375,9 +375,9 @@ functions:
   - {addr: 0x8008f514, size: 388, name: wldcore_window_build_render_record_image, hash: 5119c811a5da11ed}
   - {addr: 0x8008f698, size: 148, name: wldcore_window_transform_point_for_mode, hash: b712870430e662cb}
   - {addr: 0x8008f72c, size: 252, name: wldcore_window_load_image_record_to_vram, hash: 415234420b5b877b}
-  - {addr: 0x8008f828, size: 96, name: wldcore_menu_display_text_entry, hash: 534645d5cf3aaa4a}
+  - {addr: 0x8008f828, size: 96, name: window_display_text_entry_variant, hash: 534645d5cf3aaa4a}
   - {addr: 0x8008f888, size: 88, name: wldcore_text_get_padded_dimensions, hash: 789af18accb6a0dc}
-  - {addr: 0x8008f8e0, size: 220, name: wldcore_window_init_render_record_image, hash: 0e61d19ad6e8bbb6}
+  - {addr: 0x8008f8e0, size: 220, name: window_init_text_record_variant, hash: 0e61d19ad6e8bbb6}
   - {addr: 0x8008f9bc, size: 284, name: wldcore_window_init_vram_render_record, hash: 33e805bd9e9a05f8}
   - {addr: 0x8008fad8, size: 80, name: wldcore_window_start_panel_render_thread, hash: f4a9effe6dc74c0a}
   - {addr: 0x8008fb28, size: 352, name: wldcore_window_init_panel_render_state, hash: ef26f45135e74ef5}

@@ -26,8 +26,8 @@ void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_panel_t*
     point.x = 8;
     point.y = 8;
     for (i = 0; i < panel->row_count; i++) {
-        wldcore_menu_display_text_entry(index, panel->text_ids[i] + WLDCORE_TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST, point,
-            g_wldcore_window_image_buffer);
+        window_display_text_entry_variant(index, panel->text_ids[i] + WLDCORE_TEXT_ID_TUTORIAL_CATEGORY_ROW_FIRST,
+            point, g_wldcore_window_image_buffer);
         point.y += 0x10;
     }
     wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);

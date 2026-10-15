@@ -12,6 +12,7 @@
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/window.h"
 #include "fft/world.h"
 
 /* calendar */
@@ -418,7 +419,6 @@ void wldcore_gfx_draw_context_value_display(GsOT* ot);
 void wldcore_gfx_draw_display_object_sprite(struct wldcore_window_render_record* object, GsOT* ot);
 void wldcore_gfx_draw_calendar_date(GsOT* ot);
 void wldcore_clear_screen_and_set_map_clip_rect(s32 mode);
-void wldcore_dispatch_display_object_list(GsOT* ot, void** list, s32 count);
 void wldcore_fade_draw_screen_overlays(void);
 void wldcore_fade_start_screen(s32 flags, s32 duration);
 void wldcore_gfx_clear_vram_and_scratch(s32 clear_scratch);
@@ -2037,7 +2037,6 @@ void wldcore_window_clear_layout_states_and_queue_msg_b8dd(wldcore_menu_stack_re
 void wldcore_window_finalize_record_and_stop_task(wldcore_menu_stack_record_t* level);
 void wldcore_menu_resume_root_level(wldcore_menu_stack_record_t* level);
 
-void wldcore_menu_display_text_entry(s32 index, s32 text_id, point32_t point, u32* buffer);
 void wldcore_menu_push_message_level(s32 text, s32 reload_text);
 void wldcore_menu_push_fixed_number_panel_level(void);
 void wldcore_menu_push_number_panel_level_with_argument(s32 variable_id, s32 value);
@@ -2047,9 +2046,6 @@ void wldcore_menu_restore_level_on_world_entry(void);
 void wldcore_menu_run_world_frame(GsOT* context);
 void wldcore_menu_show_next_sequence_message(wldcore_menu_countdown_t* countdown);
 
-/* Both return the appended record's index. */
-s32 wldcore_window_append_record_and_reset_color(void** queue, s32* count);
-s32 wldcore_window_append_render_record_and_reset_color(void** queue, s32* count);
 void wldcore_window_apply_layout(wldcore_window_layout_request_t* request);
 
 void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
@@ -2064,8 +2060,6 @@ void wldcore_window_init_panel_render_state(
     s32 unused, s32 extent, wldcore_window_panel_layout_t* layout, point32_t* origin);
 
 void wldcore_window_init_record(s32 index, s32 priority, s32 sequence);
-
-void wldcore_window_init_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, s32 text_id, u32* image);
 
 void wldcore_window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 flags);
 

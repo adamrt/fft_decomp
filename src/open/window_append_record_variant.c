@@ -2,7 +2,7 @@
 
 /* Appends the next free 56-byte render record to `list`, resets it and
  * returns its pool index. */
-s32 open_gfx_append_window_record(void** list, s32* count) {
+s32 window_append_record_variant(void** list, s32* count) {
     list[*count] = &g_open_gfx_render_records_56[g_open_gfx_next_render_record_56];
     g_open_gfx_render_records_56[g_open_gfx_next_render_record_56].flags &= ~(WORLD_RENDER_RECORD_8BIT_CLUT
         | WORLD_RENDER_RECORD_BLANK | WORLD_RENDER_RECORD_HIDDEN | WORLD_RENDER_RECORD_SEMI_TRANSPARENT);

@@ -14,7 +14,7 @@ void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < g_wldcore_proposition_send_unit_count; i++) {
-        wldcore_menu_display_text_entry(
+        window_display_text_entry_variant(
             index, g_wldcore_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
     }

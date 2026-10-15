@@ -186,7 +186,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         if (level->phase == 0) {
             picture = &g_wldcore_proposition_report.reward_type;
             if (*picture == WLDCORE_PROPOSITION_REWARD_TREASURE) {
-                record = wldcore_window_append_render_record_and_reset_color(
+                record = window_append_record_variant(
                     g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 level->render_index = record;
                 GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
@@ -208,13 +208,13 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
                     base->y = -(image.ph >> 1) + 0x1A;
                 }
 
-                record = wldcore_window_append_render_record_and_reset_color(
+                record = window_append_record_variant(
                     g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 bounds.x = 0;
                 bounds.y = 0x70;
                 bounds.w = 0x8C;
                 bounds.h = 0x8C;
-                wldcore_window_init_render_record_image(record, bounds, 0, 0, g_wldcore_window_image_buffer);
+                window_init_text_record_variant(record, bounds, 0, 0, g_wldcore_window_image_buffer);
                 g_wldcore_window_render_records[record].priority = 9;
                 {
                     point32_t* base = &g_wldcore_window_render_records[record].base;
@@ -224,7 +224,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
                 wldcore_sound_play_effect(MAIN_SFX_COMPLETE);
             }
             if (*picture == WLDCORE_PROPOSITION_REWARD_UNEXPLORED_LAND) {
-                record = wldcore_window_append_render_record_and_reset_color(
+                record = window_append_record_variant(
                     g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 level->render_index = record;
                 GsGetTimInfo(g_wldcore_picture_buffer + 1, &image);
@@ -246,13 +246,13 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
                     base->y = -(image.ph >> 1);
                 }
 
-                record = wldcore_window_append_render_record_and_reset_color(
+                record = window_append_record_variant(
                     g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
                 bounds.x = 0;
                 bounds.y = 0x80;
                 bounds.w = 0x88;
                 bounds.h = 0x5A;
-                wldcore_window_init_render_record_image(record, bounds, 0, 0, g_wldcore_window_image_buffer);
+                window_init_text_record_variant(record, bounds, 0, 0, g_wldcore_window_image_buffer);
                 g_wldcore_window_render_records[record].priority = 9;
                 {
                     point32_t* base = &g_wldcore_window_render_records[record].base;

@@ -5,7 +5,7 @@
  * 56-byte one. Nothing is drawn while
  * OPEN_SYSTEM_RUNTIME_FLAG_RENDER_RECORDS_HIDDEN is set, which no code in
  * OPEN.BIN does. */
-void open_gfx_draw_render_record_pointer_list(u32* otag, void** records, s32 count) {
+void window_dispatch_record_list_variant(GsOT* otag, void** records, s32 count) {
     s32 i;
     void* record;
     u32* flags_word;

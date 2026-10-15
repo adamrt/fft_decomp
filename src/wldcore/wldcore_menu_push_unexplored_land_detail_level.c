@@ -38,8 +38,7 @@ void wldcore_menu_push_unexplored_land_detail_level(s32 value) {
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
     wldcore_proposition_load_picture_data_set(g_wldcore_unexplored_land_picture_sets[value]);
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN;
     base = &g_wldcore_window_render_records[index].base;

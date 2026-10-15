@@ -103,7 +103,7 @@ void wldcore_map_init_tile_atlas(void) {
         }
     }
 
-    map_window_index = wldcore_window_append_record_and_reset_color(
+    map_window_index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_map_window_index = map_window_index;
     g_wldcore_window_records[map_window_index].sequence = WLDCORE_ANIM_SEQUENCE_MAP_FRAME;
@@ -115,7 +115,7 @@ void wldcore_map_init_tile_atlas(void) {
     rec->anim_counter = 0;
     g_wldcore_window_records[map_window_index].frame_index = 0;
 
-    menu_window_index = wldcore_window_append_record_and_reset_color(
+    menu_window_index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_types[0] = menu_window_index;
     g_wldcore_window_records[menu_window_index].sequence = WLDCORE_ANIM_SEQUENCE_ROOT_MENU_FRAME;

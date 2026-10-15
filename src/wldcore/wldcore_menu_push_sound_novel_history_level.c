@@ -40,7 +40,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
 
     windows = g_wldcore_window_records;
     positions = (wldcore_window_xy_t*)&windows->position.x;
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_history.upper_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_HISTORY_UPPER;
@@ -50,7 +50,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
     positions[index].x = 0;
     positions[index].y = -0x6A;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_history.lower_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_HISTORY_LOWER;
@@ -61,8 +61,7 @@ void wldcore_menu_push_sound_novel_history_level(void) {
     positions[index].x = 0;
     positions[index].y = 0x5E;
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel_history.render_index = index;
     bounds.w = 0xF8;
     bounds.h = 0xB0;

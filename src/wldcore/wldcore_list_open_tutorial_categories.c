@@ -21,7 +21,7 @@ void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset) {
         g_main_tutorial_progress_masks[0] = 0;
     }
 
-    window_index = wldcore_window_append_record_and_reset_color(
+    window_index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.main_window = window_index;
     g_wldcore_window_records[window_index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
@@ -29,7 +29,7 @@ void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset) {
     g_wldcore_window_records[window_index].anim_counter = 0;
     g_wldcore_window_records[window_index].frame_index = 0;
 
-    window_index = wldcore_window_append_record_and_reset_color(
+    window_index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.side_window = window_index;
     g_wldcore_window_records[window_index].sequence = WLDCORE_ANIM_SEQUENCE_LIST_SIDE_LABEL;
@@ -47,8 +47,7 @@ void wldcore_list_open_tutorial_categories(s32 selected_entry, s32 reset) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entry_count = 4;
 
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.frame_render
-        = wldcore_window_append_render_record_and_reset_color(
-            g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+        = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     wldcore_list_build_tutorial_category_panel_image(
         &g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].text_list);
 

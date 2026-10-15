@@ -31,7 +31,7 @@ void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
         .flags |= WORLD_RENDER_RECORD_HIDDEN;
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CALL_BACK_PROMPT, 0);
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_cancel_confirm.cursor_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
@@ -39,7 +39,7 @@ void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_cancel_confirm.frame_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CHOICE_PANEL_HEADER;
@@ -47,14 +47,13 @@ void wldcore_proposition_push_cancel_confirm_level(s32 proposition) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_cancel_confirm.choice_render = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
-    wldcore_window_init_render_record_image(index, bounds, 0, WLDCORE_TEXT_ID_OK_NO, g_wldcore_window_image_buffer);
+    window_init_text_record_variant(index, bounds, 0, WLDCORE_TEXT_ID_OK_NO, g_wldcore_window_image_buffer);
     base = &g_wldcore_window_render_records[index].base;
     depth = g_wldcore_menu_stack_depth;
     g_wldcore_window_render_records[index].priority = 8;

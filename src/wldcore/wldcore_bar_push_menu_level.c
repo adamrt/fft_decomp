@@ -25,14 +25,13 @@ void wldcore_bar_push_menu_level(void) {
     thread_start(WLDCORE_THREAD_SLOT_MESSAGE, world_text_message_box_thread);
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BAR_WELCOME, 0);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.first_window
-        = wldcore_window_append_record_and_reset_color(
+        = window_append_animated_record_variant(
             g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.second_window
-        = wldcore_window_append_record_and_reset_color(
+        = window_append_animated_record_variant(
             g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_pair_render.render_index
-        = wldcore_window_append_render_record_and_reset_color(
-            g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+        = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     wldcore_bar_build_menu_rows(&g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window);
     record_index = g_wldcore_menu_stack_depth;
     g_wldcore_menu_stack_records_next[record_index].window_pair_render.panel_rows = 0;

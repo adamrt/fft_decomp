@@ -58,7 +58,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.mode = 0;
     g_main_system_flags = flags;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.cursor_window = index;
     records = g_wldcore_window_records;
@@ -81,8 +81,8 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
         LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
         LoadClut(image.clut, image.cx, image.cy);
 
-        index = wldcore_window_append_render_record_and_reset_color(
-            g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+        index
+            = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.frame_render = index;
         bounds.x = image.px;
         bounds.y = image.py;
@@ -97,7 +97,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
         base->y = -0x4C;
         g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_POP_IN;
 
-        index = wldcore_window_append_record_and_reset_color(
+        index = window_append_animated_record_variant(
             g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.label_window = index;
         g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_LOCATION_PICTURE_BORDER;

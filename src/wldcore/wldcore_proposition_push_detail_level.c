@@ -34,14 +34,13 @@ void wldcore_proposition_push_detail_level(s32 value) {
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_PROPOSITION_ABOUT, 0);
     }
     wldcore_unpack_proposition_row(g_wldcore_selected_proposition_row, value);
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].window_render.render_index = index;
     bounds.y = 0x60;
     bounds.w = 0xF4;
     bounds.h = 0x80;
     bounds.x = 0;
-    wldcore_window_init_render_record_image(
+    window_init_text_record_variant(
         index, bounds, 0, value + TEXT_ID_WORLD_MESSAGE_BASE, g_wldcore_window_image_buffer);
     base = &g_wldcore_window_render_records[index].base;
     g_wldcore_window_render_records[index].priority = 9;

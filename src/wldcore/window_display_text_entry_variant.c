@@ -2,7 +2,7 @@
 
 /* `point` is passed by value: GCC spills the two 32-bit register values to their
  * home slots before narrowing them into the origin record. */
-void wldcore_menu_display_text_entry(s32 index, s32 text_id, point32_t point, u32* buffer) {
+void window_display_text_entry_variant(s32 index, s32 text_id, point32_t point, u32* buffer) {
     glyph_blit_t origin;
 
     origin.rect.x = point.x;

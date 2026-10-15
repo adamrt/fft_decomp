@@ -30,8 +30,7 @@ void wldcore_list_build_proposition_detail_panel_image(
     point32_t* base;
 
     panel_text = &g_wldcore_selected_proposition_row[0].name_text;
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     level->proposition_detail_panel.render_index = index;
     text_measure_pixels(
         &text_width, &text_rows, text_find_entry(*panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1)));
@@ -47,22 +46,22 @@ void wldcore_list_build_proposition_detail_panel_image(
     wldcore_window_build_render_record_image(index, bounds, coordinate_mode, g_wldcore_proposition_detail_image_buffer);
     point.x = 8;
     point.y = text_rows * 0x10 + 8;
-    wldcore_menu_display_text_entry(
+    window_display_text_entry_variant(
         index, WLDCORE_TEXT_ID_JOB_CONDITION_LABELS, point, g_wldcore_proposition_detail_image_buffer);
     point.x = 8;
     point.y = 8;
-    wldcore_menu_display_text_entry(
+    window_display_text_entry_variant(
         index, WLDCORE_TEXT_ID_JOB_CONTENTS_LABEL, point, g_wldcore_proposition_detail_image_buffer);
     point.x = 0x44;
     point.y = 8;
-    wldcore_menu_display_text_entry(index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point,
+    window_display_text_entry_variant(index, *panel_text + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point,
         g_wldcore_proposition_detail_image_buffer);
     for (i = 0; i < g_main_active_propositions[proposition].participant_count; i++) {
         s32 row = i + 2;
 
         point.x = 0x3C;
         point.y = (text_rows + row) * 0x10 + 8;
-        wldcore_menu_display_text_entry(index,
+        window_display_text_entry_variant(index,
             g_main_active_propositions[proposition].participant_indices[i] | TEXT_ID_UNIT_NAME_BASE, point,
             g_wldcore_proposition_detail_image_buffer);
     }

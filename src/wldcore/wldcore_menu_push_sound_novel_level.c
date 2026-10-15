@@ -36,10 +36,10 @@ void wldcore_menu_push_sound_novel_level(s32 argument) {
     wldcore_gfx_clear_vram_and_scratch(1);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.message = argument;
 
-    bar_render = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    bar_render
+        = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.left_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_START_BUTTON;
@@ -53,7 +53,7 @@ void wldcore_menu_push_sound_novel_level(s32 argument) {
     pos1->y = 0x60;
     g_wldcore_window_records[index].palette = 0xA;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.right_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_SQUARE_BUTTON;
@@ -67,8 +67,7 @@ void wldcore_menu_push_sound_novel_level(s32 argument) {
     pos2->y = 0x60;
     g_wldcore_window_records[index].palette = 0xA;
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.render_index = index;
     bounds.x = 0x1E4;
     bounds.y = 0x1E8;
@@ -83,7 +82,7 @@ void wldcore_menu_push_sound_novel_level(s32 argument) {
     g_wldcore_window_render_records[index].priority = 8;
     g_wldcore_window_render_records[index].flags |= WORLD_RENDER_RECORD_HIDDEN | WORLD_RENDER_RECORD_UNTINTED;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].sound_novel.overlay_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_SOUND_NOVEL_OVERLAY;

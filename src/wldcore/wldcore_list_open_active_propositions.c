@@ -51,7 +51,7 @@ void wldcore_list_open_active_propositions(void) {
             .flags |= WORLD_RENDER_RECORD_POP_IN;
     }
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.cursor_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
@@ -60,7 +60,7 @@ void wldcore_list_open_active_propositions(void) {
     g_wldcore_window_records[index].frame_index = 0;
 
     i = 0;
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.title_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_PROPOSITION_TITLE_LABEL;
@@ -68,7 +68,7 @@ void wldcore_list_open_active_propositions(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.count_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_PROPOSITION_COUNT_LABEL;
@@ -76,7 +76,7 @@ void wldcore_list_open_active_propositions(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.days_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_PROPOSITION_DAYS_LABEL;
@@ -93,8 +93,7 @@ void wldcore_list_open_active_propositions(void) {
     }
 
     i = 0;
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.render_index = index;
     bounds.y = 0x40;
     bounds.x = 0;
@@ -110,7 +109,7 @@ void wldcore_list_open_active_propositions(void) {
     point.x = 8;
     point.y = 8;
     while (i < g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.entry_count) {
-        wldcore_menu_display_text_entry(index,
+        window_display_text_entry_variant(index,
             g_main_active_propositions[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
                                            .proposition_list.entries[i]]
                     .proposition_id
@@ -128,7 +127,7 @@ void wldcore_list_open_active_propositions(void) {
             = g_main_active_propositions[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
                                              .proposition_list.entries[i]]
                   .participant_count;
-        wldcore_menu_display_text_entry(index, WLDCORE_TEXT_ID_VALUE, point, g_wldcore_window_image_buffer);
+        window_display_text_entry_variant(index, WLDCORE_TEXT_ID_VALUE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
         i++;
     }
@@ -140,7 +139,7 @@ void wldcore_list_open_active_propositions(void) {
         s32 entry = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.entries[i];
         g_text_substitution_values[0]
             = g_main_active_propositions[entry].assigned_days - g_main_active_propositions[entry].elapsed_days;
-        wldcore_menu_display_text_entry(index, WLDCORE_TEXT_ID_TWO_DIGIT_VALUE, point, g_wldcore_window_image_buffer);
+        window_display_text_entry_variant(index, WLDCORE_TEXT_ID_TWO_DIGIT_VALUE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
         i++;
     }

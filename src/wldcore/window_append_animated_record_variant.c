@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* Attach the current window record to the caller's list and reset its color. */
-s32 wldcore_window_append_record_and_reset_color(void** queue, s32* count) {
+s32 window_append_animated_record_variant(void** queue, s32* count) {
     CVECTOR* color;
 
     queue[*count] = &g_wldcore_window_records[g_wldcore_window_record_count];

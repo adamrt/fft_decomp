@@ -14,7 +14,7 @@ void wldcore_menu_push_layout_window_level(void) {
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window.saved_state
         = g_wldcore_menu_ordering_table_offset;
     g_wldcore_menu_ordering_table_offset = 1;
-    window = wldcore_window_append_record_and_reset_color(
+    window = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].layout_window.window_index = window;
     g_wldcore_window_records[window].sequence = WLDCORE_ANIM_SEQUENCE_LAYOUT_CURSOR_IDLE;

@@ -23,7 +23,7 @@ void wldcore_menu_push_brave_story_level(void) {
 
     g_main_system_flags = g_main_system_flags & ~MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.main_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
@@ -31,7 +31,7 @@ void wldcore_menu_push_brave_story_level(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.upper_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_BRAVE_STORY_MARKER;
@@ -39,7 +39,7 @@ void wldcore_menu_push_brave_story_level(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.lower_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_BRAVE_STORY_MARKER;
@@ -47,7 +47,7 @@ void wldcore_menu_push_brave_story_level(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.side_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_LIST_SIDE_LABEL;
@@ -58,8 +58,7 @@ void wldcore_menu_push_brave_story_level(void) {
     i = 0;
     wldcore_menu_build_brave_story_entries();
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.frame_render = index;
     bounds.x = 0;
     bounds.y = 0;
@@ -77,7 +76,7 @@ void wldcore_menu_push_brave_story_level(void) {
     point.x = 8;
     point.y = 8;
     for (; i < g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entry_count; i++) {
-        wldcore_menu_display_text_entry(index,
+        window_display_text_entry_variant(index,
             g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entries[i]
                 + WLDCORE_TEXT_ID_BRAVE_STORY_ROW_FIRST,
             point, g_wldcore_window_image_buffer);
@@ -85,8 +84,7 @@ void wldcore_menu_push_brave_story_level(void) {
     }
     wldcore_window_load_image_record_to_vram(index, g_wldcore_window_image_buffer);
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.content_render = index;
     value = script_get_variable(EVENT_SCRIPT_VAR_INJURED);
     if (value >= 10000) {
@@ -102,7 +100,7 @@ void wldcore_menu_push_brave_story_level(void) {
     bounds.y = 0x40;
     bounds.w = 0x5C;
     bounds.h = 0x30;
-    wldcore_window_init_render_record_image(
+    window_init_text_record_variant(
         index, bounds, 0, WLDCORE_TEXT_ID_INJURED_CASUALTIES, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 0xA;
     {

@@ -16,7 +16,7 @@ void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     open_render_record_56_position_t* translation;
     s32* substitution;
 
-    index = open_gfx_append_window_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    index = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     menu->window_record_56 = index;
     quad.x = 0;
     quad.y = 0x40;
@@ -31,12 +31,12 @@ void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     position.y = 8;
     substitution = g_text_substitution_values;
     *substitution = text_id;
-    open_birthday_draw_menu_text_entry(index, 0xB801, position, g_open_birthday_window_image);
+    window_display_text_entry_variant(index, 0xB801, position, g_open_birthday_window_image);
 
     position.x = 0x30;
     position.y = 8;
     *substitution = menu->day;
-    open_birthday_draw_menu_text_entry(index, 0xB802, position, g_open_birthday_window_image);
+    window_display_text_entry_variant(index, 0xB802, position, g_open_birthday_window_image);
 
     open_birthday_load_window_image(index, (u32*)g_open_birthday_window_image);
 

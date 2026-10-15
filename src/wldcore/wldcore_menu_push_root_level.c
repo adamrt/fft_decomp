@@ -15,7 +15,7 @@ void wldcore_menu_push_root_level(void) {
     s32 depth;
     s32 level;
 
-    window_index = wldcore_window_append_record_and_reset_color(
+    window_index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
 
     /* Taken from the record array: naming g_wldcore_window_record_positions here changes the
@@ -32,7 +32,7 @@ void wldcore_menu_push_root_level(void) {
     records[window_index].anim_counter = 0;
     g_wldcore_window_records[window_index].frame_index = 0;
 
-    window_index = wldcore_window_append_record_and_reset_color(
+    window_index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     depth = g_wldcore_menu_stack_depth;
     g_wldcore_context_value_display_mode = WLDCORE_VALUE_DISPLAY_FUNDS;

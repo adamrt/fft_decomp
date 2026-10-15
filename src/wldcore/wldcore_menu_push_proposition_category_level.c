@@ -21,7 +21,7 @@ void wldcore_menu_push_proposition_category_level(void) {
     s32 depth;
     s32 value;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.main_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
@@ -48,8 +48,7 @@ void wldcore_menu_push_proposition_category_level(void) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entry_count++;
     }
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.side_window = index;
     bounds.x = 0x80;
     bounds.y = 0x80;
@@ -64,7 +63,7 @@ void wldcore_menu_push_proposition_category_level(void) {
     point.x = 8;
     point.y = 8;
     for (i = 0; i < g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entry_count; i++) {
-        wldcore_menu_display_text_entry(index,
+        window_display_text_entry_variant(index,
             g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.entries[i]
                 + WLDCORE_TEXT_ID_PROPOSITION_CATEGORY_ROW_FIRST,
             point, g_wldcore_window_image_buffer);

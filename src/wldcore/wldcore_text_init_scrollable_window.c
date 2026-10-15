@@ -24,24 +24,24 @@ void wldcore_text_init_scrollable_window(wldcore_text_scrollable_window_t* state
     s32 columns;
     s32 last_page_row;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->left_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_PAGE_PROMPT);
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->middle_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_SCROLL_UP);
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->right_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_SCROLL_DOWN);
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->lower_window_index = index;
     wldcore_window_init_record(index, state->priority, WLDCORE_ANIM_SEQUENCE_TEXT_SCROLL_THUMB);
-    render_index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    render_index
+        = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     state->render_record_index = render_index;
     g_wldcore_window_render_records[render_index].flags |= WORLD_RENDER_RECORD_POP_IN;
     g_wldcore_window_render_records[state->render_record_index].priority = state->priority;

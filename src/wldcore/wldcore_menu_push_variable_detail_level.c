@@ -17,8 +17,7 @@ void wldcore_menu_push_variable_detail_level(s32 value) {
     variable = value >> 4;
     wldcore_load_message_block_if_changed(variable / 16 + 6);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.value = value;
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].variable_detail.render_index = index;
     g_wldcore_window_render_records[index].flags
         = (g_wldcore_window_render_records[index].flags & ~WORLD_RENDER_RECORD_8BIT_CLUT) | WORLD_RENDER_RECORD_HIDDEN;

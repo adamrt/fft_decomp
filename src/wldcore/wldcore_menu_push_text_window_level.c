@@ -38,7 +38,7 @@ void wldcore_menu_push_text_window_level(s32 text, s32 reload_text) {
         text_relocate_pointer_table(g_open_text_section_offsets);
     }
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].message.window_index = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_MESSAGE_LABEL;

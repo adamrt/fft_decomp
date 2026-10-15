@@ -27,7 +27,7 @@ void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].participant.proposition = proposition;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].participant.participant = participant;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].participant.left_window = index;
     g_wldcore_window_records[index].priority = 8;
@@ -39,7 +39,7 @@ void wldcore_menu_push_participant_detail_level(s32 proposition, s32 participant
     window1->anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].participant.right_window = index;
     g_wldcore_window_records[index].priority = 8;

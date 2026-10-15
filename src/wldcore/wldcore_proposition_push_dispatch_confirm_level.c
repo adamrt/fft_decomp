@@ -27,7 +27,7 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
 
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CONFIRM_CONDITIONS, 0);
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].choice_panel.cursor_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CURSOR_IDLE;
@@ -35,7 +35,7 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_record_and_reset_color(
+    index = window_append_animated_record_variant(
         g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].list_window.upper_window = index;
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_CHOICE_PANEL_HEADER;
@@ -43,21 +43,19 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].choice_panel.render_index = index;
     bounds.x = 0x80;
     bounds.w = 0x28;
     bounds.h = 0x30;
     bounds.y = 0;
-    wldcore_window_init_render_record_image(index, bounds, 0, WLDCORE_TEXT_ID_OK_NO, g_wldcore_window_image_buffer);
+    window_init_text_record_variant(index, bounds, 0, WLDCORE_TEXT_ID_OK_NO, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[index].priority = 8;
     position = &g_wldcore_window_render_records[index].base;
     position->x = 0x48;
     position->y = 0x20;
 
-    index = wldcore_window_append_render_record_and_reset_color(
-        g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
+    index = window_append_record_variant(g_wldcore_window_render_object_queue, &g_wldcore_window_render_object_count);
     /* The summary panel's render record index lands in the 32-bit row field, which is cleared below. */
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].choice_panel.row = index;
     location = &g_wldcore_selected_proposition_row[0].name_text;
@@ -73,21 +71,21 @@ void wldcore_proposition_push_dispatch_confirm_level(void) {
     wldcore_window_build_render_record_image(index, bounds, 0, &g_wldcore_window_image_buffer[0x200]);
     point.x = 8;
     point.y = size[1] * 0x10 + 8;
-    wldcore_menu_display_text_entry(
+    window_display_text_entry_variant(
         index, WLDCORE_TEXT_ID_JOB_CONDITION_LABELS, point, &g_wldcore_window_image_buffer[0x200]);
     point.x = 8;
     point.y = 8;
-    wldcore_menu_display_text_entry(
+    window_display_text_entry_variant(
         index, WLDCORE_TEXT_ID_JOB_CONTENTS_LABEL, point, &g_wldcore_window_image_buffer[0x200]);
     point.x = 0x44;
     point.y = 8;
-    wldcore_menu_display_text_entry(
+    window_display_text_entry_variant(
         index, *location + (TEXT_ID_PROPOSITION_JOB_CONTENTS_BASE - 1), point, &g_wldcore_window_image_buffer[0x200]);
     for (i = 0; i < g_wldcore_proposition_send_unit_count; i++) {
         point.x = 0x3C;
         line = i + 2;
         point.y = (size[1] + line) * 0x10 + 8;
-        wldcore_menu_display_text_entry(index, g_wldcore_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point,
+        window_display_text_entry_variant(index, g_wldcore_proposition_send_units[i] + TEXT_ID_UNIT_NAME_BASE, point,
             &g_wldcore_window_image_buffer[0x200]);
     }
     wldcore_window_load_image_record_to_vram(index, &g_wldcore_window_image_buffer[0x200]);

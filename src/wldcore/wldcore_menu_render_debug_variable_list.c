@@ -47,7 +47,8 @@ void wldcore_menu_render_debug_variable_list(wldcore_menu_variable_list_level_t*
             g_text_substitution_values[0] = variable;
             text_id = 0x25;
         }
-        wldcore_menu_display_text_entry(index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_wldcore_window_image_buffer);
+        window_display_text_entry_variant(
+            index, text_id | TEXT_ID_WORLD_MENU_BASE, point, g_wldcore_window_image_buffer);
         point.y += 0x10;
         variable++;
     }

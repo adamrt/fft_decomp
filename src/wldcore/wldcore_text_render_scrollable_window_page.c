@@ -46,7 +46,7 @@ void wldcore_text_render_scrollable_window_page(wldcore_text_scrollable_window_t
     }
     point.x = 8;
     point.y = 8;
-    wldcore_menu_display_text_entry(state->render_record_index, state->text_id, point, g_wldcore_window_image_buffer);
+    window_display_text_entry_variant(state->render_record_index, state->text_id, point, g_wldcore_window_image_buffer);
     wldcore_window_load_image_record_to_vram(state->render_record_index, g_wldcore_window_image_buffer);
     g_wldcore_window_render_records[state->render_record_index].base = state->base;
 }

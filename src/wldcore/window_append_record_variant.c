@@ -5,7 +5,7 @@
  *
  * Sibling of wldcore_window_append_record_and_reset_color, which performs the same append for the 36-byte
  * window records. */
-s32 wldcore_window_append_render_record_and_reset_color(void** queue, s32* count) {
+s32 window_append_record_variant(void** queue, s32* count) {
     CVECTOR* color;
 
     queue[*count] = &g_wldcore_window_render_records[g_wldcore_window_render_record_count];

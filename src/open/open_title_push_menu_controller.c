@@ -40,7 +40,7 @@ void open_title_push_menu_controller(s32 argument) {
     LoadImage(&rect, g_open_file_destination);
     DrawSync(0);
 
-    record = open_gfx_append_animated_render_record(
+    record = window_append_animated_record_variant(
         g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     entry = g_open_gfx_render_records_36;
     records = entry;
@@ -55,7 +55,7 @@ void open_title_push_menu_controller(s32 argument) {
     positions[record].y = 0x64;
 
     for (i = 0, y = 0x1e; i < 4; i++) {
-        record = open_gfx_append_animated_render_record(
+        record = window_append_animated_record_variant(
             g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
         g_open_title_menu_states[g_open_current_controller_index].records_36[i + 1] = record;
         g_open_gfx_render_records_36[record].sequence = i + 3;
@@ -67,7 +67,7 @@ void open_title_push_menu_controller(s32 argument) {
         positions[record].x = -0x18;
     }
 
-    record = open_gfx_append_animated_render_record(
+    record = window_append_animated_record_variant(
         g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_title_menu_states[g_open_current_controller_index].cursor_record_36 = record;
     entry = &g_open_gfx_render_records_36[record];

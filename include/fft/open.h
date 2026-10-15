@@ -12,6 +12,7 @@
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"
+#include "fft/window.h"
 #include "fft/world.h"
 #include "psx/libpress.h"
 
@@ -339,8 +340,6 @@ void open_birthday_build_confirmation_menu(open_birthday_date_state_t* state);
 void open_birthday_build_menu_text(open_birthday_date_state_t* menu);
 void open_birthday_convert_date_to_zodiac(s32* month, s32* day);
 
-void open_birthday_draw_menu_text_entry(s32 record_index, s32 combined_text_index, point32_t position, u8* image);
-
 void open_birthday_load_window_image(s32 record_index, u32* image);
 void open_birthday_push_confirmation_controller(void);
 
@@ -409,7 +408,6 @@ typedef struct open_font_metrics {
 extern s32 g_open_text_section_offsets[];
 s32 open_text_decode_hex_digit(s32 character);
 void open_text_measure_menu_image(s32 combined_text_index, size32_t* dimensions);
-void open_text_init_menu_render_record(s32 record_index, RECT quad, s32 depth, s32 combined_text_index, u8* image);
 
 /* script */
 typedef enum open_script_dispatch_flag {
@@ -683,13 +681,10 @@ void open_gfx_draw_animated_render_record(world_animated_render_record_t* actor,
 void open_gfx_draw_window_record(open_render_record_56_t* record, u32* ot);
 s32 open_gfx_update_transition_sequence(void);
 void open_gfx_draw_transition_line_strips(s32 intensity);
-s32 open_gfx_append_animated_render_record(void** list, s32* count);
-s32 open_gfx_append_window_record(void** list, s32* count);
 void open_gfx_restore_frame_vram_page(void);
 void open_gfx_clear_and_draw_current_frame(void);
 void open_gfx_clear_current_otag(void);
 void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index);
-void open_gfx_draw_render_record_pointer_list(u32* otag, void** records, s32 count);
 void open_gfx_show_four_render_records(open_title_controller_t* title);
 void open_gfx_init_render_buffers(void);
 void open_gfx_init_screen_environments(s32 clear_first);

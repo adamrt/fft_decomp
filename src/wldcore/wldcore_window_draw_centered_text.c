@@ -21,7 +21,7 @@ void wldcore_window_draw_centered_text(s32 window_index, s32 text_id) {
         g_wldcore_window_image_buffer[i] = 0;
     }
     if (text_id != 0) {
-        wldcore_menu_display_text_entry(window_index, text_id, point, g_wldcore_window_image_buffer);
+        window_display_text_entry_variant(window_index, text_id, point, g_wldcore_window_image_buffer);
     }
     wldcore_window_load_image_record_to_vram(window_index, g_wldcore_window_image_buffer);
     script_set_variable(EVENT_SCRIPT_VAR_PENDING_SOUND_EFFECT, 0);

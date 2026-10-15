@@ -25,7 +25,7 @@ void open_birthday_push_date_controller(void) {
     s32 half_width;
     open_render_record_56_position_t* position;
 
-    record = open_gfx_append_animated_render_record(
+    record = window_append_animated_record_variant(
         g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_date.cursor_record_36 = record;
     g_open_gfx_render_records_36[record].sequence = 0xC;
@@ -33,13 +33,13 @@ void open_birthday_push_date_controller(void) {
     g_open_gfx_render_records_36[record].anim_counter = 0;
     g_open_gfx_render_records_36[record].frame_index = 0;
 
-    record = open_gfx_append_window_record(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
+    record = window_append_record_variant(g_open_gfx_render_record_pointers, &g_open_gfx_render_record_pointer_count);
     g_open_controller_records_next[g_open_current_controller_index].birthday_date.title_record_56 = record;
     quad.x = 0;
     quad.y = 0;
     quad.w = 0x80;
     quad.h = 0x40;
-    open_text_init_menu_render_record(record, quad, 0, 0xB800, g_open_birthday_title_image);
+    window_init_text_record_variant(record, quad, 0, 0xB800, g_open_birthday_title_image);
     position = g_open_gfx_record_translation;
     position += record;
     half_width = quad.w / 2;
