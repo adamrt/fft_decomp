@@ -1,10 +1,10 @@
-#include "fft/unit.h"
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/sound.h"
+#include "fft/unit.h"
 
 /* Returns 1 when any current status byte is set; missing battle IDs remain unchecked. */
 s32 unit_has_any_current_status(s32 battle_id) {

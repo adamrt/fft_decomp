@@ -1,6 +1,6 @@
-#include "fft/unit.h"
 #include "fft/battle_script.h"
 #include "fft/battle_unit.h"
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* Visit every blue-team slot, including empty ones; the byte addition precedes the cap. */
