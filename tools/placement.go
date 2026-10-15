@@ -216,9 +216,15 @@ func sharedSubsystemTokens(root string) (map[string]string, map[string]string, e
 	return tokens, folderToken, nil
 }
 
+// sharedSubsystemOf names the subsystem folder of a shared source. A
+// module-prefixed file under src/shared is one program's own routine of the
+// subsystem, not a shared body, so it is not counted as shared evidence.
 func sharedSubsystemOf(source string) string {
 	parts := strings.Split(source, "/")
 	if len(parts) > 3 && parts[0] == "src" && parts[1] == "shared" {
+		if token := strings.SplitN(parts[len(parts)-1], "_", 2)[0]; unitModuleTokens[token] {
+			return ""
+		}
 		return parts[2]
 	}
 	return ""

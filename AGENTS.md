@@ -24,12 +24,14 @@ preserving every original byte.
 
 ## Organization
 
-- `src/<module>/`: module-specific code under the module prefix, one file per
-  function, named after it. Each EVENT overlay has its own
-  `src/event/<overlay>/`. A `_variant` body stays beside its module.
-- `src/shared/<subsystem>/`: subsystem code under the subsystem prefix, whether
-  one program links it or several. Register explicit `source:` paths in each
-  original module; preserve meaningful separate entries.
+- `src/shared/<subsystem>/`: all code of a subsystem, one file per function,
+  named after it. A bare subsystem prefix is a shared routine; a module
+  prefix (`battle_gfx_`, `wldcore_menu_`) is that program's own routine of the
+  subsystem. Register explicit `source:` paths in each original module;
+  preserve meaningful separate entries.
+- `src/<module>/`: program-specific code outside any subsystem (battle actions
+  and formulas, the world map opcodes, overlay screens) and the module's
+  `_variant` bodies. Each EVENT overlay has its own `src/event/<overlay>/`.
 - `src/lib/psyq/<library>/` and `src/lib/suzuki/`: reconstructed linked libraries.
   Keep established public names, signatures and original module bindings.
 - `include/fft/`: game module, subsystem and shared-type headers.
