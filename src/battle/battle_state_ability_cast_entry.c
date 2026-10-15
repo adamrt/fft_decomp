@@ -1,3 +1,5 @@
+/* SP2 open, pre-attack animation and action-cast entries plus ability execution. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

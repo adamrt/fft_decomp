@@ -11,11 +11,11 @@
 
 /*
  * Options-menu thread started by world_menu_run_main_mode (mode 0) with
- * entry->context = &g_world_option_menu_entry_table.
+ * entry->context = &g_menu_option_entry_table.
  *
  * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread_variant, shows the
- * selected option's value text (g_world_option_menu_first_text_ids[i] + g_world_game_option_values[i]),
- * starts world_menu_run_option_choice on confirm, and each frame packs the option
+ * selected option's value text (g_menu_option_value_text_id_bases[i] + g_menu_option_values[i]),
+ * starts menu_run_option_choice on confirm, and each frame packs the option
  * values back into g_main_game_options, applies the sound mode on the main
  * stack and reloads the input-repeat timings for the finger-cursor speed.
  *

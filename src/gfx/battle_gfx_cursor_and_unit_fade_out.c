@@ -1,3 +1,5 @@
+/* Cursor tile projection, wait-direction draw and unit fade-out. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_gfx.h"

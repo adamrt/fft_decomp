@@ -1,3 +1,5 @@
+/* Menu script conditionals, draw commands, frames and CLUT/tpage. */
+
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

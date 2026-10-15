@@ -1,3 +1,5 @@
+/* Camera placement from GNS records, defaults and the load descriptor append. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

@@ -1,3 +1,5 @@
+/* Timeline reset opcodes, nops and the block runner. */
+
 #include "fft/battle_effect.h"
 
 /* Opcode 2a: clear the child-timeline state (target, frame and keyframe

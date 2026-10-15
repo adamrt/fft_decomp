@@ -1,3 +1,5 @@
+/* Name entry keyboard, cursor, keys and confirmation. */
+
 #include "fft/gfx.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

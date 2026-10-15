@@ -1,3 +1,5 @@
+/* Jump targets, conditions, variable commands and the RNG. */
+
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"

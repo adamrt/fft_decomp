@@ -1,3 +1,5 @@
+/* EXP/JP rewards, job levels, unlocks and the relocation tile search. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
 #include "fft/battle_target.h"

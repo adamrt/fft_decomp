@@ -1,3 +1,5 @@
+/* High overlay reservation and companion executable/data requests. */
+
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/script.h"

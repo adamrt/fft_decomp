@@ -1,3 +1,5 @@
+/* Unit animation/facing setters and volume scaling. */
+
 #include "fft/battle_event.h"
 #include "fft/battle_map.h"
 #include "fft/battle_script.h"

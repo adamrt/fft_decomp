@@ -1,3 +1,5 @@
+/* Music slot loading, switching, volume and tunes. */
+
 #include "fft/main.h"
 #include "psx/types.h"
 

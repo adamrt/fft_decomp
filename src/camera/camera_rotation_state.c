@@ -1,3 +1,5 @@
+/* Rotation save/restore, get/set and the timed angle move. */
+
 #include "fft/battle_camera.h"
 #include "fft/main.h"
 #include "psx/libgpu.h"

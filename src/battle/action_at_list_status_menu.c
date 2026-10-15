@@ -1,3 +1,5 @@
+/* Status-menu AT list browsing with the team tints it uses. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

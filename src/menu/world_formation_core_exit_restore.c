@@ -1,3 +1,5 @@
+/* Restore after WLDCORE exit with thread result/state helpers. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/world.h"

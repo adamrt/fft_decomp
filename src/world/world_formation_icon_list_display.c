@@ -1,3 +1,5 @@
+/* Icon list thread, roster names, display mode and otag pointer. */
+
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/thread.h"

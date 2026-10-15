@@ -1,6 +1,6 @@
 #include "fft/event_equip.h"
 
-/* Sort a -1 terminated item list in place (EQUIP twin of world_item_sort_id_list).
+/* Sort a -1 terminated item list in place (EQUIP twin of item_sort_id_list_variant).
  *
  * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed, then the rest
  * are bubble-sorted by the signed-byte criterion list

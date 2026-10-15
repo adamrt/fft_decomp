@@ -1,3 +1,5 @@
+/* End-of-move flags, support benefits and Move-Find Item. */
+
 #include "fft/battle.h"
 #include "fft/battle_map.h"
 #include "fft/battle_move.h"

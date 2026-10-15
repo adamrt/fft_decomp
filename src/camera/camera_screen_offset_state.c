@@ -1,3 +1,5 @@
+/* Screen offset save, restore, get and set, none called in retail. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 

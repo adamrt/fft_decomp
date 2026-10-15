@@ -1,3 +1,5 @@
+/* Ability target list edits and copies. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_target.h"
@@ -49,6 +51,6 @@ s32 target_copy_ability_targets(u8* out) {
  * (non-reaction) action. */
 void action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
     if (g_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_battle_acting_unit_id) {
-        D_8019387C = value;
+        g_battle_unknown_8019387c = value;
     }
 }

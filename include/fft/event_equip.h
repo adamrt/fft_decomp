@@ -152,7 +152,7 @@ extern menu_unit_status_identity_t g_equip_panel_comparison_unit_data;
 extern menu_status_panel_buffer_t g_equip_panel_frames_b[];
 extern palette_t g_equip_panel_selected_portrait_palettes[2];
 extern menu_unit_status_identity_t g_equip_panel_selected_unit_data;
-/* RECT[1] (right panel) of g_menu_status_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
+/* RECT[1] (right panel) of g_panel_origin_offsets. Kept as its own symbol: spelling it as an element lets
  * GCC derive the table base from this address and changes equip_panel_run_ability_list_thread. */
 extern RECT g_equip_right_panel_frame_rect;
 extern u8 g_equip_status_label_image[];

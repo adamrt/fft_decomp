@@ -7,10 +7,10 @@
 #include "psx/types.h"
 
 /* Scrollable-list body command; EQUIP copy of JOBSTTS jobstts_cmd_draw_scrollable_list_body_handler and BUNIT
- * bunit_cmd_run_scrollable_list_handler without the event-speed multiplier.
+ * menu_cmd_draw_scrollable_list_body_handler_variant without the event-speed multiplier.
  *
  * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's world_menu_script_draw_scrollable_list
+ * referenced). The scroll-down path follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant
  * spelling; its `(s16)` row-height cast adds the other 8 bytes of frame and
  * keeps the row count in a register of its own.
  */

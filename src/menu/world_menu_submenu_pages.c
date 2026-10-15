@@ -1,3 +1,5 @@
+/* Sub-menu text-id page and slot 4 cursor. */
+
 #include "fft/world.h"
 #include "psx/types.h"
 

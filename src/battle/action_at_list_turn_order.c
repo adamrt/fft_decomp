@@ -1,3 +1,5 @@
+/* Between-turn state machine, AT list build/sort and turn-end bookkeeping. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_status.h"

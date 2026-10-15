@@ -1,3 +1,5 @@
+/* Menu selection resolution and system function dispatch. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

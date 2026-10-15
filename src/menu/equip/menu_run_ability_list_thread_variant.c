@@ -13,7 +13,7 @@
 
 /* Two-column ability panel thread (task 0x3b); EQUIP twin of WORLD
  * world_menu_ability_panel_thread. Thread 10 draws the unit editor stats into the first
- * frame pair, other threads draw g_equip_item_preview_stat_detail into the second. */
+ * frame pair, other threads draw g_item_preview_stat_detail into the second. */
 void menu_run_ability_list_thread_variant(void) {
     menu_status_thread_t offset;
     s32 u;
@@ -48,7 +48,7 @@ void menu_run_ability_list_thread_variant(void) {
     menu_init_numeric_display_frame_primitives(&g_equip_right_panel_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
-    /* The tile/line fixups must read g_menu_status_panel_origin_offsets as an array
+    /* The tile/line fixups must read g_panel_origin_offsets as an array
      * element: a cast of a u8[] view folds the loop's y reads to absolute
      * addresses instead of the target's pointer-relative loads. */
     screen->tiles[1].x0 += g_panel_origin_offsets[0].x;

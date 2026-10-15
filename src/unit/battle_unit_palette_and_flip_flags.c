@@ -1,3 +1,5 @@
+/* By-runtime-id palette-update suppression, the ResetPalette tint reload and the flip clear. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_unit.h"
 #include "psx/types.h"

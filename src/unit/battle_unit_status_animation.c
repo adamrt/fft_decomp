@@ -1,3 +1,5 @@
+/* Status-driven animation and spritesheet changes of units. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

@@ -63,7 +63,7 @@ typedef struct menu_draw_number_command {
 
 /* Variable-length list command (0x10) in the menu display stream: the layout
  * world_menu_load_scrollable_list_layout reads and the placement
- * world_menu_script_draw_scrollable_list draws with. */
+ * menu_cmd_draw_scrollable_list_body_handler_variant draws with. */
 typedef struct menu_list_record {
     u8 opcode;          /* 0x00: 0x10 = list layout */
     u8 length;          /* 0x01: byte length of this record */

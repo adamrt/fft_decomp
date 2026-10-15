@@ -1,3 +1,5 @@
+/* Gravity and inertia threshold setters with save/restore. */
+
 #include "fft/battle_effect.h"
 
 void effect_set_gravity(const vec3s32_t* src) {

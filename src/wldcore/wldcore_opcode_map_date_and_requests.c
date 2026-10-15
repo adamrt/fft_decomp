@@ -1,3 +1,5 @@
+/* Date/casualty conditions, LoadEvent/Choice requests and SetVar. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

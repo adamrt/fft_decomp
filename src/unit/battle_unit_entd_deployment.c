@@ -1,3 +1,5 @@
+/* ENTD loading, deployment placement and slot existence changes. */
+
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

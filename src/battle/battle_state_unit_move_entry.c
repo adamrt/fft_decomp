@@ -1,3 +1,5 @@
+/* Unit-moving setup, previous-state save and move confirm. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

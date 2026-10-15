@@ -1,3 +1,5 @@
+/* Background color save, restore, get, set and adjust. */
+
 #include "fft/battle_map.h"
 #include "psx/types.h"
 

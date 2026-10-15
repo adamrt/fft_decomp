@@ -1,3 +1,5 @@
+/* Branches on saved bits and local flags. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

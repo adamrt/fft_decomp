@@ -1,3 +1,5 @@
+/* Blend draw mode and sprite color script commands. */
+
 #include "fft/world.h"
 #include "psx/libgpu.h"
 

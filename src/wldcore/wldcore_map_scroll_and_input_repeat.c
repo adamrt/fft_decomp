@@ -1,3 +1,5 @@
+/* Scroll axis speed, input repeat and render object visibility. */
+
 #include "fft/wldcore.h"
 #include "psx/pad.h"
 #include "psx/types.h"

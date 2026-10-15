@@ -1,3 +1,5 @@
+/* SMALL.OUT text section binding. */
+
 #include "fft/event_small.h"
 #include "fft/script.h"
 #include "psx/types.h"

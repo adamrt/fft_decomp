@@ -1,3 +1,5 @@
+/* Panel fade tiles and the screen fade overlay. */
+
 #include "fft/battle_menu.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"

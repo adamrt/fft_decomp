@@ -1,3 +1,5 @@
+/* Stolen/broken items, war funds, stolen EXP and the status removals they trigger. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_status.h"
 #include "fft/main.h"

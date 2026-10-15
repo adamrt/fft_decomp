@@ -1,3 +1,5 @@
+/* Angle wrap and vector additions. */
+
 #include "fft/battle_effect.h"
 #include "psx/libgte.h"
 

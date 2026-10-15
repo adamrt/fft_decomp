@@ -1,3 +1,5 @@
+/* Snap to tile and the death dismount relocation. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_unit.h"
 

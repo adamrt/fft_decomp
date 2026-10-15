@@ -1,3 +1,6 @@
+/* Effect file section pointers, palette/texture/sound upload, the load state machine, ability selection and the
+ * playback frame. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
@@ -339,7 +342,7 @@ void effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init
         g_effect_sound_call_counts[1] = 0;
         g_effect_sound_call_counts[0] = 0;
         g_effect_context = *source;
-        D_801BC0D4 = 0;
+        g_battle_unknown_801bc0d4 = 0;
         return;
     }
 

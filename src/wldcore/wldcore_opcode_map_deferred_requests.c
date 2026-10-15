@@ -1,3 +1,5 @@
+/* Text, deep dungeon, SetVar2 and DrawPath requests. */
+
 #include "fft/wldcore.h"
 
 /* Stage the text ID consumed by the deferred world-script text request. */

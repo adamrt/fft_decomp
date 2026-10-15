@@ -1,3 +1,5 @@
+/* Camera position save/restore with the distortion dispatch. */
+
 #include "fft/battle_camera.h"
 #include "fft/battle_unit.h"
 

@@ -1,3 +1,5 @@
+/* Wait-direction, crystal-learn and action-execute-setup handlers. */
+
 #include "fft/battle.h"
 #include "fft/battle_target.h"
 #include "fft/battle_unit.h"

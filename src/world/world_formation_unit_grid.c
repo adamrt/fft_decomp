@@ -1,3 +1,5 @@
+/* The formation unit grid: cursor, scrolling, slots, sprites. */
+
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"

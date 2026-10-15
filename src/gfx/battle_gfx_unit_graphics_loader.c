@@ -1,3 +1,5 @@
+/* Unit record init and the queued SHP/SEQ/SPR graphics loader. */
+
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

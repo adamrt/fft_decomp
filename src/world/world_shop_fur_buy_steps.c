@@ -1,3 +1,5 @@
+/* Half-price value and the fur shop buy steps. */
+
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"

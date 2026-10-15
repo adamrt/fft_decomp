@@ -1,3 +1,5 @@
+/* Overlay screen fade state and steps. */
+
 #include "fft/event_bunit.h"
 #include "fft/event_card.h"
 #include "fft/menu.h"

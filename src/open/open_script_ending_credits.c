@@ -1,3 +1,5 @@
+/* Ending script state, text records, XA audio and opcodes. */
+
 #include "fft/open.h"
 #include "psx/libcd.h"
 #include "psx/libgpu.h"

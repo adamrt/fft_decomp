@@ -1,3 +1,5 @@
+/* Brave Story proposition list level. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

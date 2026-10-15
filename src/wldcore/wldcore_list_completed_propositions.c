@@ -1,3 +1,5 @@
+/* Completed proposition list level. */
+
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"

@@ -1,3 +1,5 @@
+/* Display setup, unit list rebuild, busy test and messages. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/thread.h"

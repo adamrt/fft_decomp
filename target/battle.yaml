@@ -2230,8 +2230,8 @@ data:
   - {addr: 0x800a77b0, name: g_camera_current_screen_offset}
   - {addr: 0x800a77c0, name: g_map_background_color_backup}
   - {addr: 0x800a77c4, name: g_battle_gfx_vram_slots}
-  - {addr: 0x800b628c, name: D_800b628c}
-  - {addr: 0x800b6290, name: D_800b6290}
+  - {addr: 0x800b628c, name: g_battle_unknown_800b628c}
+  - {addr: 0x800b6290, name: g_battle_unknown_800b6290}
   - {addr: 0x800b6294, name: g_battle_gfx_weapon_clut}
   - {addr: 0x800b6494, name: g_battle_gfx_trail_clut}
   - {addr: 0x800b6694, name: g_battle_previous_camera_yaw}
@@ -2330,7 +2330,7 @@ data:
   - {addr: 0x800f5e74, name: g_map_move_find_item_data}
   - {addr: 0x800f6674, name: g_map_back_color_disabled}
   - {addr: 0x800f6678, name: g_map_mesh_load_state}
-  - {addr: 0x800f668c, name: D_800F668C}
+  - {addr: 0x800f668c, name: g_battle_unknown_800f668c}
   - {addr: 0x800f6690, name: g_map_light_transition_start_light_matrix}
   - {addr: 0x800f66b0, name: g_map_light_transition_target_light_matrix}
   - {addr: 0x800f66d0, name: g_map_light_transition_start_color_matrix}
@@ -2363,8 +2363,8 @@ data:
   - {addr: 0x800f6d4c, name: g_map_saved_texture_animation_modes}
   - {addr: 0x800f6d94, name: g_map_camera_matrix}
   - {addr: 0x800f6db4, name: g_map_texture_animation_moves}
-  - {addr: 0x800f70b4, name: D_800F70B4}
-  - {addr: 0x800f78e8, name: D_800F78E8}
+  - {addr: 0x800f70b4, name: g_battle_unknown_800f70b4}
+  - {addr: 0x800f78e8, name: g_battle_unknown_800f78e8}
   - {addr: 0x800f7980, name: g_map_mesh_last_render_buffer}
   - {addr: 0x800f7984, name: g_map_textured_triangle_render_record_count}
   - {addr: 0x800f7988, name: g_map_textured_quad_render_record_count}
@@ -2785,7 +2785,7 @@ data:
   - {addr: 0x8018f4f0, name: g_move_frontier_flags_ptr}
   - {addr: 0x8018f4f4, name: g_battle_relocated_unit_count}
   - {addr: 0x8018f4f8, name: g_battle_sort_targets_nearest_first}
-  - {addr: 0x8018f4fc, name: D_8018F4FC}
+  - {addr: 0x8018f4fc, name: g_battle_unknown_8018f4fc}
   - {addr: 0x8018f500, name: g_move_spread_preset_table}
   - {addr: 0x8018f510, name: g_move_reachable_tiles_valid}
   - {addr: 0x8018f514, name: g_move_reachable_unit_id}
@@ -2844,7 +2844,7 @@ data:
   - {addr: 0x80193860, name: g_action_canceled_statuses}
   - {addr: 0x80193868, name: g_target_ability_targets_list}
   - {addr: 0x80193878, name: g_battle_distribute_target_count}
-  - {addr: 0x8019387c, name: D_8019387C}
+  - {addr: 0x8019387c, name: g_battle_unknown_8019387c}
   - {addr: 0x80193880, name: g_battle_relocated_unit_coords}
   - {addr: 0x80193898, name: g_battle_player_unit_fallen}
   - {addr: 0x8019389c, name: g_action_current_attacker}
@@ -2956,8 +2956,8 @@ data:
   - {addr: 0x801b8ae8, name: g_effect_camera_zoom_target}
   - {addr: 0x801b8af8, name: g_effect_camera_zoom_current}
   - {addr: 0x801b8b08, name: g_effect_camera_zoom_saved}
-  - {addr: 0x801b8b18, name: D_801B8B18}
-  - {addr: 0x801b8b1c, name: D_801B8B1C}
+  - {addr: 0x801b8b18, name: g_battle_unknown_801b8b18}
+  - {addr: 0x801b8b1c, name: g_battle_unknown_801b8b1c}
   - {addr: 0x801b8b24, name: g_effect_arrow_arc_distance}
   - {addr: 0x801b8b28, name: g_effect_arrow_arc_yaw}
   - {addr: 0x801b8b2c, name: g_effect_arrow_arc_caster_relative_yaw}
@@ -2976,7 +2976,7 @@ data:
   - {addr: 0x801b8b7c, name: g_effect_trajectory_step}
   - {addr: 0x801b8b8c, name: g_effect_trajectory_position}
   - {addr: 0x801b8b94, name: g_effect_trajectory_tile_flags}
-  - {addr: 0x801b8b98, name: D_801B8B98}
+  - {addr: 0x801b8b98, name: g_battle_unknown_801b8b98}
   - {addr: 0x801b8b9c, name: g_effect_secondary_data}
   - {addr: 0x801b9130, name: g_effect_secondary_active_tail}
   - {addr: 0x801b9134, name: g_effect_secondary_free_head}
@@ -2994,7 +2994,7 @@ data:
   - {addr: 0x801b9270, name: g_effect_free_work_record_head}
   - {addr: 0x801b9274, name: g_effect_sprite_count_peak}
   - {addr: 0x801b9278, name: g_effect_slots}
-  - {addr: 0x801bacc4, name: D_801BACC4}
+  - {addr: 0x801bacc4, name: g_battle_unknown_801bacc4}
   - {addr: 0x801bacc8, name: g_effect_flags_section}
   - {addr: 0x801baccc, name: g_effect_emitter_matrix}
   - {addr: 0x801bacec, name: g_effect_projectile_matrix}
@@ -3028,12 +3028,12 @@ data:
   - {addr: 0x801bc098, name: g_effect_current_secondary}
   - {addr: 0x801bc09c, name: g_effect_matrix}
   - {addr: 0x801bc0c0, name: g_effect_sprite_count}
-  - {addr: 0x801bc0c4, name: D_801BC0C4}
+  - {addr: 0x801bc0c4, name: g_battle_unknown_801bc0c4}
   - {addr: 0x801bc0c8, name: g_effect_timeline}
   - {addr: 0x801bc0cc, name: g_effect_polygon_depth_data}
   - {addr: 0x801bc0d0, name: g_effect_slot_free_head}
-  - {addr: 0x801bc0d4, name: D_801BC0D4}
-  - {addr: 0x801bc0d8, name: D_801BC0D8}
+  - {addr: 0x801bc0d4, name: g_battle_unknown_801bc0d4}
+  - {addr: 0x801bc0d8, name: g_battle_unknown_801bc0d8}
   - {addr: 0x801bc0dc, name: g_effect_sound_data_base}
   - {addr: 0x801bc0e0, name: g_effect_death_poof_states}
   - {addr: 0x801bf000, name: D_801BF000}

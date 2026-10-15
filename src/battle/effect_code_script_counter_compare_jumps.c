@@ -1,3 +1,5 @@
+/* Opcodes 12-15: jumps on a selected counter being at least, greater, at most or less than an immediate. */
+
 #include "fft/battle_effect.h"
 
 /* Opcode 12: jump to the offset in the third 16-bit value when the counter

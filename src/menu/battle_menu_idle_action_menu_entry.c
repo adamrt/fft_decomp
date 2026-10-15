@@ -1,3 +1,5 @@
+/* Idle action menu openers and the status-execute/highlight entries. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

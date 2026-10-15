@@ -1,3 +1,5 @@
+/* Action state clear, Defending and the removal/move-act helpers. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_status.h"
 #include "fft/battle_unit.h"

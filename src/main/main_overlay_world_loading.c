@@ -1,3 +1,5 @@
+/* Loading WORLD and WLDCORE overlays and disc data. */
+
 #include "fft/main.h"
 #include "fft/wldcore.h"
 

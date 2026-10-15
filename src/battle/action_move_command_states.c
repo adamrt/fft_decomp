@@ -1,3 +1,5 @@
+/* Active-turn entry and the move command's state entries and help prompts. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

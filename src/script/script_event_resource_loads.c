@@ -1,3 +1,5 @@
+/* ETC graphic, portraits, EVTCHR and event block loads. */
+
 #include "fft/battle.h"
 #include "fft/battle_event.h"
 #include "fft/battle_gfx.h"

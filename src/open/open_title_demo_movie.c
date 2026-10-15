@@ -1,3 +1,5 @@
+/* Title demo movie and New Game exit controllers. */
+
 #include "fft/open.h"
 #include "psx/pad.h"
 

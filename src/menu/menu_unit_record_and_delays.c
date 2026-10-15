@@ -1,3 +1,5 @@
+/* Unit record reset and mini-menu delay threads. */
+
 #include "fft/battle_menu.h"
 #include "fft/main.h"
 #include "fft/menu.h"

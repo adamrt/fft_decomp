@@ -1,3 +1,5 @@
+/* Facing quadrant/nibble getters and the facing-based animation restarts. */
+
 #include "fft/battle.h"
 #include "fft/battle_unit.h"
 #include "psx/types.h"

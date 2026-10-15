@@ -1,3 +1,5 @@
+/* Camera fusion thread and track stepping. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_menu.h"

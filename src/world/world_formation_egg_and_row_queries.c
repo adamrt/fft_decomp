@@ -1,3 +1,5 @@
+/* Egg hatch total and upper-row selection queries. */
+
 #include "fft/world.h"
 #include "psx/types.h"
 

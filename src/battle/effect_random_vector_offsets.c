@@ -1,3 +1,5 @@
+/* Random offsets on vectors and rotations. */
+
 #include "fft/battle_effect.h"
 
 /* Add an independent signed random offset to each X/Z/Y component. */

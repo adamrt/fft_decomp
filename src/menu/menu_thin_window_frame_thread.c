@@ -2,7 +2,7 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 /*
- * WORLD copy of the EVENT OPTION window frame thread (option_menu_thin_window_frame_thread,
+ * WORLD copy of the EVENT OPTION window frame thread (menu_thin_window_frame_thread,
  * byte-identical apart from addresses). Layout notes below are the OPTION
  * twin's; the WORLD helpers are the same routines.
  */

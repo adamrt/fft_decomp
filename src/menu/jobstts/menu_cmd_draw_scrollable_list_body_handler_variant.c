@@ -13,9 +13,9 @@
  * scrollbar thumb and the selection marker, then replays the per-row command
  * group once per visible row, plus one while a scroll offset is in effect.
  * An empty list skips its row command groups. JOBSTTS copy of
- * EQUIP's equip_cmd_draw_scrollable_list_body_handler and BUNIT's bunit_cmd_run_scrollable_list_handler with an
- * event-speed multiplier. The unused arrays reproduce the target's frame: it references only rect (0x20) and marker
- * (0x38). The scroll-down path follows WORLD's world_menu_script_draw_scrollable_list spelling.
+ * EQUIP's equip_cmd_draw_scrollable_list_body_handler and BUNIT's menu_cmd_draw_scrollable_list_body_handler_variant
+ * with an event-speed multiplier. The unused arrays reproduce the target's frame: it references only rect (0x20) and
+ * marker (0x38). The scroll-down path follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant spelling.
  */
 menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {
     RECT rect;

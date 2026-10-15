@@ -1,3 +1,5 @@
+/* Set or blend one CLUT or a whole map palette row, immediately or staged, with the base-color store. */
+
 #include "fft/battle_map.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Evade roll, zodiac scaling, knockback check and status filtering. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"
 #include "fft/battle_map.h"

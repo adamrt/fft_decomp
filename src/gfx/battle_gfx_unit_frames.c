@@ -1,3 +1,5 @@
+/* Loading, shifting and animating unit sprite frames and weapon effects. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

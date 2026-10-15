@@ -1,3 +1,5 @@
+/* Map CLUT row writes, upload and the gradient/ambient/darkness seeds. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "psx/types.h"

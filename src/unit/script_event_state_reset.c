@@ -1,3 +1,5 @@
+/* Animation state reset and event thread start/reset. */
+
 #include "fft/battle_camera.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

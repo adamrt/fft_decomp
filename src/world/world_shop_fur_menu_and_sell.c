@@ -1,3 +1,5 @@
+/* Fur shop menu and sell steps. */
+
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"

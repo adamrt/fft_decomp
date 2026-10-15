@@ -1,3 +1,5 @@
+/* Target panels, validation and attack preparation. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_effect.h"

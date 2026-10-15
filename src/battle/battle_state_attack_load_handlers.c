@@ -1,3 +1,5 @@
+/* Announcement, SP2 load, effect-file open and secondary-effect handlers. */
+
 #include "fft/battle.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* After-command entry, level-up reports and the post-movement steps. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

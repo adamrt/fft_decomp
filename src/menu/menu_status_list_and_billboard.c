@@ -1,3 +1,5 @@
+/* Status list building and billboard data copies. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"

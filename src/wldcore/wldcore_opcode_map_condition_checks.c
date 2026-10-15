@@ -1,3 +1,5 @@
+/* Var, HasUnit, Gil and Date conditions with operand skips. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

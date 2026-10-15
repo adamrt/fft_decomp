@@ -1,3 +1,5 @@
+/* Effective move flags, Move-EXP/JP amount and projected effect preview. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"

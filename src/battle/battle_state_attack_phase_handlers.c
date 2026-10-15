@@ -1,3 +1,5 @@
+/* Confirm-action, pre-attack, action-cast and commence-attack handlers. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_target.h"

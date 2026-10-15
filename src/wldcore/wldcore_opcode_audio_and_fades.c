@@ -1,3 +1,5 @@
+/* Sound mode, compare branches, music/screen fades and countdown. */
+
 #include "fft/wldcore.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

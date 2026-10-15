@@ -1,3 +1,5 @@
+/* SP2 attack sheet open, slot invalidation and nibble-RLE decompression. */
+
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 #include "psx/types.h"

@@ -1,3 +1,5 @@
+/* ErasePath, Draw/EraseLocation and focus. */
+
 #include "fft/wldcore.h"
 
 /* Stage the two operands for a deferred ErasePath request.

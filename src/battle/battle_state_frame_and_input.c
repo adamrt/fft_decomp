@@ -1,3 +1,5 @@
+/* Pad reading, deployment display setup and frame sync. */
+
 #include "fft/battle.h"
 #include "fft/battle_script.h"
 #include "fft/script.h"

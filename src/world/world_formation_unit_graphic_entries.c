@@ -1,3 +1,5 @@
+/* Ability learn plus formation portrait entries and temp copy. */
+
 #include "fft/main.h"
 #include "fft/world.h"
 #include "psx/libc.h"

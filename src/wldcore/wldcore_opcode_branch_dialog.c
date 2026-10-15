@@ -1,3 +1,5 @@
+/* Section branch and dialog-option branches. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

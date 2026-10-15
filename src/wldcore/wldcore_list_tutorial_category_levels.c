@@ -1,3 +1,5 @@
+/* Tutorial category list step, the formation tutorial list level and the mask-1 entry list open. */
+
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"

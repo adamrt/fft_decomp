@@ -7,7 +7,7 @@
  * nothing. D_800F668C receives 0x95 and no code reads it. */
 void map_set_command_0x96_duration(s32 id, s32 value) {
     if (id == MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM) {
-        D_800F668C = 0x95;
+        g_battle_unknown_800f668c = 0x95;
         g_map_command_0x96_duration = value;
         g_map_command_0x96_frame = 0;
         g_map_weather_effect_mode = MAP_WEATHER_EFFECT_TIMED_PARTICLE_TRANSFORM;

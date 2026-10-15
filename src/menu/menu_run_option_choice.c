@@ -23,7 +23,7 @@
  * replaced by the icon parameter block. The entries are drawn with the stored
  * value highlighted; up/down wrap the cursor, circle stores it and cross
  * cancels. For option index 13 circle only accepts entry 1, which restores
- * g_world_game_option_original_values; any other option clears value 13.
+ * g_menu_option_reference_values; any other option clears value 13.
  * On exit the thirteen values are packed back into g_main_game_options, the
  * sound mode is applied on the main stack and the input-repeat timing is
  * reloaded from the finger-cursor speed profile.

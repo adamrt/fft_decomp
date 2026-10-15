@@ -1,3 +1,5 @@
+/* WLDFACE, common graphics and menu text loading. */
+
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"

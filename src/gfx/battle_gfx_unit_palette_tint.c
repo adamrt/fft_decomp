@@ -1,3 +1,5 @@
+/* VRAM slot claim and the weather/tile/status palette tints of units. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

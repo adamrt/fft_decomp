@@ -1,3 +1,5 @@
+/* Commence-attack entry and the target tile selection starts. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

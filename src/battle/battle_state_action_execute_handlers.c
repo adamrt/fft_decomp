@@ -1,3 +1,5 @@
+/* Action-execute, message display, resume attack and learn-on-hit handlers. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_gfx.h"

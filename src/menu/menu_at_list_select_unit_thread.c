@@ -4,7 +4,7 @@
 /* Thread body: pauses the four worker threads after this one, yields until
  * g_menu_at_list_selection_finished is raised (keeping the g_menu_transition_state timeout 100 ahead of
  * g_menu_at_list_state.selected_index), then resets the state, waits for threads 13..10, points
- * g_text_section_pointers[TEXT_SECTION_AT_LIST] at g_world_menu_at_list_text, resumes the worker threads and
+ * g_text_section_pointers[TEXT_SECTION_AT_LIST] at g_menu_at_list_text, resumes the worker threads and
  * stops itself. */
 void menu_at_list_select_unit_thread(void) {
     g_menu_modal_open = 1;

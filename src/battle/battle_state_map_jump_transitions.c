@@ -1,3 +1,5 @@
+/* Map jump-out/jump-in and close-battle state starts, with the shadow triggers. */
+
 #include "fft/battle.h"
 #include "fft/battle_gfx.h"
 #include "psx/types.h"

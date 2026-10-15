@@ -1,3 +1,5 @@
+/* Entry chain threads, text entry thread and digit resize. */
+
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"

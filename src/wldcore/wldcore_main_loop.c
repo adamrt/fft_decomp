@@ -1,3 +1,5 @@
+/* Entrypoint, init, frame draw and exit handling. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/libetc.h"

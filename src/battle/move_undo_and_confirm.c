@@ -1,3 +1,5 @@
+/* Move undo and the move/wait confirm handlers. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_gfx.h"

@@ -31,9 +31,9 @@ void map_reset_mesh_render_state(void) {
     g_map_gns_dispatch_held = 0;
     for (i = 0; i < 150; i++) {
         for (j = 0; j < 14; j++) {
-            D_800F70B4[i][j] = 0;
+            g_battle_unknown_800f70b4[i][j] = 0;
         }
-        D_800F78E8[i] = 0;
+        g_battle_unknown_800f78e8[i] = 0;
     }
     for (i = 0; i < GNS_RESOURCE_TABLE_COUNT; i++) {
         bzero(g_map_loaded_gns_records[i].load_info.bytes, sizeof(gns_load_info_t));

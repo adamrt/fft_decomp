@@ -1,3 +1,5 @@
+/* Render record setup, music test and text message controllers. */
+
 #include "fft/open.h"
 #include "fft/thread.h"
 #include "psx/pad.h"

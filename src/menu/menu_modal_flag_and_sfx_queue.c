@@ -1,3 +1,5 @@
+/* Modal flag and the four queued menu sounds. */
+
 #include "fft/battle_menu.h"
 #include "fft/main.h"
 #include "fft/sound.h"

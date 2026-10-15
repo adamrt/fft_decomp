@@ -1,3 +1,5 @@
+/* Ability category tab tests. */
+
 #include "fft/menu.h"
 
 /* The action-ability tab is category zero. */

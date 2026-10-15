@@ -1,3 +1,5 @@
+/* Window quad crop/tween with its lerps and the pause instruction. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/script.h"

@@ -1,3 +1,5 @@
+/* Knocked-back unit's movement record and the destination transfer from the attacker's record. */
+
 #include "fft/battle_move.h"
 
 /*

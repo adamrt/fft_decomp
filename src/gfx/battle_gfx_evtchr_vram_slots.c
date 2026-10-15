@@ -1,3 +1,5 @@
+/* Unit hide/remove plus EVTCHR slot unpack, save, release and frame lookups. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "fft/battle_unit.h"

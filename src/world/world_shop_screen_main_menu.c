@@ -1,3 +1,5 @@
+/* Shop screen loop, main menu step and exit fade. */
+
 #include "fft/gfx.h"
 #include "fft/script.h"
 #include "fft/thread.h"

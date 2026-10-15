@@ -1,3 +1,5 @@
+/* Alternate palette, scroll/brightness settings and main text window thread. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"

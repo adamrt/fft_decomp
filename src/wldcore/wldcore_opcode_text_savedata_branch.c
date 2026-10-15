@@ -1,3 +1,5 @@
+/* Text thread start, random branch and save-data bit branches. */
+
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

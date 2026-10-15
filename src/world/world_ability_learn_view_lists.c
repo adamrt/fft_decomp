@@ -1,3 +1,5 @@
+/* Category tests and the learn/view ability lists. */
+
 #include "fft/menu.h"
 #include "fft/sound.h"
 #include "fft/world.h"

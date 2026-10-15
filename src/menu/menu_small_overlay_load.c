@@ -1,3 +1,5 @@
+/* SMALL.OUT request and map data load thread. */
+
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/event_small.h"

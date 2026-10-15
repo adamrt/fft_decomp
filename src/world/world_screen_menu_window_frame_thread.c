@@ -2,7 +2,7 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 /*
- * WORLD copy of the EVENT OPTION window frame thread (option_menu_window_frame_thread,
+ * WORLD copy of the EVENT OPTION window frame thread (menu_window_frame_thread,
  * byte-identical apart from addresses): the variant that allocates its scratch
  * pixel buffer, using the second WORLD blit descriptors and setters (as
  * world_screen_menu_thin_window_frame_thread) and its own texture-window table. Layout

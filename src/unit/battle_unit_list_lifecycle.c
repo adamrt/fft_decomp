@@ -1,3 +1,5 @@
+/* Runtime record removal, clear, fade-out removal and per-frame animate. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"

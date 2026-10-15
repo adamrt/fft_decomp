@@ -1,3 +1,5 @@
+/* Tutorial topic list, text level and proposition category level. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

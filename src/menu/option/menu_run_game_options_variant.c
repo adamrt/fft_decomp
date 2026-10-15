@@ -11,7 +11,7 @@
 #include "psx/types.h"
 
 /*
- * Options-menu thread, the OPTION twin of world_menu_run_game_options (same code,
+ * Options-menu thread, the OPTION twin of menu_run_game_options_variant (same code,
  * globals and callees rebound) without its g_world_menu_thread_result stores.
  *
  * The do/while (0) around the thread lookup is a scheduling barrier: its

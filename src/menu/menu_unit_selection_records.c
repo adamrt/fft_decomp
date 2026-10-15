@@ -1,3 +1,5 @@
+/* Per-unit remembered menu rows. */
+
 #include "fft/battle_menu.h"
 #include "fft/menu.h"
 #include "fft/world.h"

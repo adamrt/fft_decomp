@@ -1,3 +1,5 @@
+/* Silent confirm, wait/move confirm threads and action restrictions. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_menu.h"

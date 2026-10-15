@@ -1,3 +1,5 @@
+/* Proposition yes/no confirmation panel and the days number-panel level with its thread wait. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

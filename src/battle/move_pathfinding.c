@@ -1,3 +1,5 @@
+/* Reachable tiles, spread, jumps and path building. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_ai.h"
@@ -214,7 +216,7 @@ void move_store_unit_movement_to_scratchpad(s32 unit_id) {
         config->can_ride = 0;
     }
     team = unit->initial_team_flags;
-    config->_unknown_1a = D_8018F4FC;
+    config->_unknown_1a = g_battle_unknown_8018f4fc;
     mount = MOVE_RECORD_NONE;
     for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
         record[i].unit_id_flags = mount;
@@ -1884,7 +1886,7 @@ battle_walk_path_t* move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u3
         config->move = MOVE_PATHFIND_RANGE;
         config->can_ride = 0;
         g_move_pathing_team = 0;
-        config->_unknown_1a = D_8018F4FC;
+        config->_unknown_1a = g_battle_unknown_8018f4fc;
         empty_flags = MOVE_RECORD_NONE;
         for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
             records[i].unit_id_flags = empty_flags;

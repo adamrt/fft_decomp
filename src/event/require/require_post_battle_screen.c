@@ -1,3 +1,5 @@
+/* Party changes, war trophies, gil ticker and condition display. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_script.h"
@@ -682,7 +684,7 @@ void require_party_apply_post_battle_changes(void) {
             /* The removal retry re-enters the selection loop and the
              * not-joining retry re-enters the removal loop from outside, so
              * loop.c treats both loops as having multiple entries and hoists
-             * nothing out of them (the g_require_panel_selected_billboard.unit_index address stays in the
+             * nothing out of them (the g_menu_selected_unit_status.unit_index address stays in the
              * remove path), while flow still weights their references by
              * depth. The not-joining retry repeats the selected-unit
              * assignment; jump2 cross-jumps it into this one, so the
@@ -2171,7 +2173,7 @@ void require_condition_dispatch(void) {
 
 /* Thread body that runs the HELPMENU overlay from the REQUIRE screen: waits
  * until 0x10000 bytes can be reserved at the high overlay address, loads the
- * overlay and runs helpmenu_menu_run_require_help in the first idle slot,
+ * overlay and runs menu_run_require_help in the first idle slot,
  * with the panel's two animation flags set while it runs. */
 void require_overlay_run_helpmenu(void) {
     s32 thread_id;

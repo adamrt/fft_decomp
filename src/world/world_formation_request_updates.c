@@ -1,3 +1,5 @@
+/* Screen request steppers, thread group supervisor and menu frame. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/script.h"

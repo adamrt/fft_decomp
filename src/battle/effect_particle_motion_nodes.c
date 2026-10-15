@@ -1,3 +1,5 @@
+/* Slot motion, particle integration, list nodes and frame scripts. */
+
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
 #include "psx/libgpu.h"

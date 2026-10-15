@@ -1,3 +1,5 @@
+/* Weapon, ability, idle, movement and status animation selection. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_effect.h"

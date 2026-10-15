@@ -4,8 +4,8 @@
 #include "fft/world.h"
 #include "psx/types.h"
 
-/* Options-menu values: g_world_game_option_values holds the 13 options unpacked from
- * g_main_game_options plus an all-unchanged flag at [13]; g_world_game_option_original_values holds the
+/* Options-menu values: g_menu_option_values holds the 13 options unpacked from
+ * g_main_game_options plus an all-unchanged flag at [13]; g_menu_option_reference_values holds the
  * values they are compared against. */
 
 /* Unpacks the configured options into the options-menu value table, then runs

@@ -1,3 +1,5 @@
+/* Pending status masks applied to the display state. */
+
 #include "fft/battle.h"
 #include "fft/battle_ai.h"
 #include "fft/battle_gfx.h"

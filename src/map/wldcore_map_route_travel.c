@@ -1,3 +1,5 @@
+/* Routes, path animation, travel, projection motion and encounters. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/libetc.h"

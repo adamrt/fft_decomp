@@ -1,3 +1,5 @@
+/* Runtime-id existence test, facing-update suppression for event instructions and the flip set. */
+
 #include "fft/battle_unit.h"
 #include "psx/types.h"
 

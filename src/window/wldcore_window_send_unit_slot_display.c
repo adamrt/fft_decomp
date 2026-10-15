@@ -1,3 +1,5 @@
+/* Send-unit slot rows, portrait record, slot input step and the unit panel thread start. */
+
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/libgpu.h"

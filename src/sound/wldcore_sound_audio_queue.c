@@ -1,3 +1,5 @@
+/* Audio command FIFO. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Proposition confirm level, detail panel and sound novel push. */
+
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

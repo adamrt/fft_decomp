@@ -1,3 +1,5 @@
+/* Button blocking and the input step of the tutorial mask-1 entry list. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

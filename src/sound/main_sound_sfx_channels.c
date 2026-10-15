@@ -1,3 +1,5 @@
+/* SFX channel playback, background sounds and stops. */
+
 #include "fft/main.h"
 
 /* Plays a sound on SFX channels 6-7 at the highest priority, replacing

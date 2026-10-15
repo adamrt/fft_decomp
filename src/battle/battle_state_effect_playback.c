@@ -1,3 +1,5 @@
+/* Effect playback entry, continue check and frame pacing reset. */
+
 #include "fft/battle.h"
 #include "psx/types.h"
 

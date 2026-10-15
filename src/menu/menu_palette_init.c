@@ -1,3 +1,5 @@
+/* Menu palette colors and companion data file load. */
+
 #include "fft/battle_menu.h"
 #include "fft/battle_text.h"
 #include "fft/memory.h"

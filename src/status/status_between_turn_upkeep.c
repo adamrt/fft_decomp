@@ -1,3 +1,5 @@
+/* Poison/regen, Transparent loss, expiring statuses and terrain poison. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
 #include "fft/battle_status.h"

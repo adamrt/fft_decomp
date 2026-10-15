@@ -1,3 +1,5 @@
+/* Move range display and mini-menu openers. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_menu.h"

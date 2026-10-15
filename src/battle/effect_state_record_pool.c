@@ -1,3 +1,5 @@
+/* Effect record pool with its free list, timeline resets and the script record start. */
+
 #include "fft/battle.h"
 #include "fft/battle_effect.h"
 

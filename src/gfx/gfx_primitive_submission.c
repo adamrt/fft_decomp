@@ -1,3 +1,5 @@
+/* Immediate/deferred primitive submission with two text origin setters. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/types.h"

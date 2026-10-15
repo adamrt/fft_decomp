@@ -1,3 +1,5 @@
+/* Targeting panel spread, weapon/ability ranges and publication. */
+
 #include "fft/battle.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"

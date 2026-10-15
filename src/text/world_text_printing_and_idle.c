@@ -1,3 +1,5 @@
+/* Text resume/printing and idle thread parking. */
+
 #include "fft/thread.h"
 #include "fft/world.h"
 

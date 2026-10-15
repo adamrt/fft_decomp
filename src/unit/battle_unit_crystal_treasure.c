@@ -1,3 +1,5 @@
+/* Crystal/treasure pickup, slot lookups by identity and war trophies. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_unit.h"

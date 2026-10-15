@@ -1,3 +1,5 @@
+/* Proposition rows, availability and the daily calendar advance. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

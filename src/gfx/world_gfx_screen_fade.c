@@ -1,3 +1,5 @@
+/* World screen fade state and tiles. */
+
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

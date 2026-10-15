@@ -1,3 +1,5 @@
+/* Menu level stack with the root, map, text, number and location levels. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/open.h"

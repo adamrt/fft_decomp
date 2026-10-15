@@ -1,3 +1,5 @@
+/* Dismiss, silent join and date advance. */
+
 #include "fft/battle_unit.h"
 #include "fft/main.h"
 #include "fft/script.h"

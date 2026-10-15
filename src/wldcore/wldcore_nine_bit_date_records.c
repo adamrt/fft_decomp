@@ -1,3 +1,5 @@
+/* Party unit access, nine-bit date records and VRAM clear. */
+
 #include "fft/wldcore.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

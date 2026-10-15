@@ -1,3 +1,5 @@
+/* Opcodes 0a-0d: camera position restore and the rotation set, save and restore. */
+
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
 #include "psx/libgpu.h"

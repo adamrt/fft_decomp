@@ -1,3 +1,5 @@
+/* Job levels, battle state reset, status init and ability range/AoE. */
+
 #include "fft/main.h"
 #include "psx/types.h"
 

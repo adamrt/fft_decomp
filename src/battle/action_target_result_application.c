@@ -1,3 +1,5 @@
+/* Applies a prepared result to one target: equipment loss, stat changes, earned EXP. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_unit.h"
 #include "fft/memory.h"

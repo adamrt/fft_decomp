@@ -1,3 +1,5 @@
+/* Sound novel state restore, interpreter loop, sounds and countdown. */
+
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/thread.h"

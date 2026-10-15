@@ -1,3 +1,5 @@
+/* The cooperative thread table: waits, start, resume, suspend, exit and parameters. */
+
 #include "fft/thread.h"
 #include "psx/types.h"
 

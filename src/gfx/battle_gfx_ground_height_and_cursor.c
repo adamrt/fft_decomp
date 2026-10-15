@@ -1,3 +1,5 @@
+/* World height under units, shadows, cursor glow and wait arrows. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_gfx.h"

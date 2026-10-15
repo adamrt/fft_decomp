@@ -1,3 +1,5 @@
+/* Event unit graphics load and activation. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_script.h"
 #include "fft/battle_unit.h"

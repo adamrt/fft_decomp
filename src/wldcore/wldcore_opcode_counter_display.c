@@ -1,3 +1,5 @@
+/* Counter set/add/subtract and the value display. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

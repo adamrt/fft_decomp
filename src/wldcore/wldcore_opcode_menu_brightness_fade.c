@@ -1,3 +1,5 @@
+/* Brightness, choice delta, fade wait and operand history. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

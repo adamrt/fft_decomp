@@ -1,3 +1,5 @@
+/* Ability effect starts outside an action. */
+
 #include "fft/battle_effect.h"
 #include "psx/types.h"
 

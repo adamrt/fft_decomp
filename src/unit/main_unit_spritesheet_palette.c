@@ -1,3 +1,5 @@
+/* Spritesheet/palette resolution with roll and status-set tests. */
+
 #include "fft/main.h"
 
 u8 main_unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette) {

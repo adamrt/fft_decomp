@@ -10,7 +10,7 @@
  * Moves the cursor on Up/Down (bits 0x10000000 and 0x40000000 of the script
  * input, the held-repeat flags of Up and Down, keep a scroll going without
  * moving the cursor) and pages through
- * world_menu_scroll_list_page. Moving past the first or last visible row
+ * menu_scroll_list_by_page_variant. Moving past the first or last visible row
  * starts a one-row scroll: the newly exposed row is rendered into the list's
  * VRAM strip at x 0x240, the pixel offset advances by the slow step until the
  * repeat timer reaches g_main_menu_scroll_accel_delay and by the fast step

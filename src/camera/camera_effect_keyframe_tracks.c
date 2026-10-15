@@ -1,3 +1,5 @@
+/* Effect camera keyframe search and the per-frame rotation/position/zoom track starts for both timelines. */
+
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
 #include "psx/types.h"

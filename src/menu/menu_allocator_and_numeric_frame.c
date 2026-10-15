@@ -1,3 +1,5 @@
+/* Menu page allocator and numeric display frame primitives. */
+
 #include "fft/battle_menu.h"
 #include "fft/gfx.h"
 #include "fft/main.h"

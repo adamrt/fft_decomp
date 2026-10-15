@@ -1,3 +1,5 @@
+/* World-to-screen projection with unit tile and walk-to helpers. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_move.h"

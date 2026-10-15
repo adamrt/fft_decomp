@@ -1,3 +1,5 @@
+/* Battle heap, effect render state, work records, emitters and interpolation. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
@@ -146,7 +148,7 @@ void battle_heap_print_stats(void) {
         g_battle_heap_min_largest_free = largest;
     }
     FntPrint(g_battle_text_min_heap_format, g_battle_heap_min_largest_free * 8);
-    FntPrint(g_battle_text_heap_dp_format, D_801BACC4 * 4 + D_801BC0D8);
+    FntPrint(g_battle_text_heap_dp_format, g_battle_unknown_801bacc4 * 4 + g_battle_unknown_801bc0d8);
     for (owner = 0; owner < 16; owner++) {
         used = 0;
         for (node = g_battle_heap_owner_lists[owner].head; node != 0; node = node->next) {
@@ -446,7 +448,7 @@ void effect_init_record_chain(void) {
     records = battle_heap_alloc_block(EFFECT_WORK_RECORD_CAPACITY * sizeof(effect_work_record_t), 0);
     g_effect_work_records = records;
     g_effect_free_work_record_head = records;
-    D_801BC0C4 = 0;
+    g_battle_unknown_801bc0c4 = 0;
     records[0].prev = 0;
     records[0].next = &records[1];
     for (index = 1; index < EFFECT_WORK_RECORD_CAPACITY - 1; index++) {

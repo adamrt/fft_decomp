@@ -1,3 +1,5 @@
+/* Unit filters, warp/face/rotate, status staging and palette instructions. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

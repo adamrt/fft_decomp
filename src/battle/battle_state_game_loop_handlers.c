@@ -1,3 +1,5 @@
+/* Target/turn/map/close handlers, deployment, the game loop and unit finders. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

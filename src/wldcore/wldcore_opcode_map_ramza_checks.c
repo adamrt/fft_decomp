@@ -1,3 +1,5 @@
+/* Ramza Brave/Faith conditions. */
+
 #include "fft/wldcore.h"
 
 /* Reject the MCBrave>= condition when Ramza's Brave is below the operand. */

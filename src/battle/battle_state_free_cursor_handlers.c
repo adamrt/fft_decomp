@@ -1,3 +1,5 @@
+/* Free cursor, menu and move state handlers. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

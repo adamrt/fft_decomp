@@ -1,3 +1,5 @@
+/* Opcodes 02-05: child record spawn and free, script end and the unread nibble store. */
+
 #include "fft/battle_effect.h"
 
 /* Opcode 02: start a child record on this script at the offset in the second

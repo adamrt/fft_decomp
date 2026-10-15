@@ -1,3 +1,5 @@
+/* Text section pointer table relocation and backup. */
+
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "psx/types.h"

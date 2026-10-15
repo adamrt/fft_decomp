@@ -1,3 +1,5 @@
+/* Buy, sell, equip candidate and fitting room steps. */
+
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"

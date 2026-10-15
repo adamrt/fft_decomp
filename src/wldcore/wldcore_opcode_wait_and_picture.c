@@ -1,3 +1,5 @@
+/* Frame wait, picture load/hide and parent window visibility. */
+
 #include "fft/wldcore.h"
 #include "psx/libgs.h"
 #include "psx/types.h"

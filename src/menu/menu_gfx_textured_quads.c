@@ -1,3 +1,5 @@
+/* POLY_FT4 quad enqueue, single and list. */
+
 #include "fft/menu.h"
 
 /* Takes one POLY_FT4 from the pool per sprite cell, fills it as a w x h quad

@@ -1,3 +1,5 @@
+/* Opcodes 00-01 jump (with and without yield) and the 2e-77 invalid-opcode report. */
+
 #include "fft/battle_effect.h"
 #include "fft/main.h"
 

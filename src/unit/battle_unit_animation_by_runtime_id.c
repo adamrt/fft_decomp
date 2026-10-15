@@ -1,3 +1,5 @@
+/* Animation requests addressed by runtime id. */
+
 #include "fft/battle_unit.h"
 #include "psx/types.h"
 

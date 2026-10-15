@@ -1,3 +1,5 @@
+/* Unexplored lands, treasures, story events and variable lists. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

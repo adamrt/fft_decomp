@@ -1,3 +1,5 @@
+/* Cursor quads, number entry threads and signed number draw. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"

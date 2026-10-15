@@ -1,3 +1,5 @@
+/* New-game prologue transition and crossfade. */
+
 #include "fft/open.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

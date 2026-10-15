@@ -1,3 +1,5 @@
+/* Cursor/unit tile lookups, data load and map object commands. */
+
 #include "fft/battle.h"
 #include "fft/battle_map.h"
 #include "psx/types.h"

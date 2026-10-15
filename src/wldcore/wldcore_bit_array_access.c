@@ -1,3 +1,5 @@
+/* Bit set/test and save completion percent. */
+
 #include "fft/wldcore.h"
 
 /* Assign one bit without changing the rest of its 32-bit storage value. */

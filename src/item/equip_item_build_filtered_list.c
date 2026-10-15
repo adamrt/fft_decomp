@@ -6,7 +6,7 @@
  * with EQUIP_ITEM_LIST_ENTRY_UNEQUIPPABLE, and 2 omits them; filter 1 is
  * promoted to 2 when Show Unequippable is not On. `sort_mode` 1-5 with a
  * category list index below 5 uses that category order list; anything else falls back to
- * equip_item_sort_list_by_criteria. Returns the number of listed items.
+ * item_sort_id_list_variant. Returns the number of listed items.
  */
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter) {
     s32 count;

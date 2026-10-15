@@ -1,3 +1,5 @@
+/* Effect slot and secondary record pools and secondary init. */
+
 #include "fft/battle_effect.h"
 #include "fft/main.h"
 #include "psx/types.h"

@@ -1,3 +1,5 @@
+/* Vector add with 0/90/180/270 degree Y rotations. */
+
 #include "fft/battle_effect.h"
 #include "psx/libgte.h"
 

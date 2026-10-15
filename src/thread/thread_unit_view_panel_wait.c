@@ -1,3 +1,5 @@
+/* Unit view panel wait with script stubs. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "psx/types.h"

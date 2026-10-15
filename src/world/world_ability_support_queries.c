@@ -1,3 +1,5 @@
+/* Secondary skillsets and Two Swords/Two Hands/Secret Hunt tests. */
+
 #include "fft/main.h"
 #include "fft/world.h"
 

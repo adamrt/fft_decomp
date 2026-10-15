@@ -1,3 +1,5 @@
+/* Two CallFunction bodies: Brave +10 and paired-unit warp. */
+
 #include "fft/battle_script.h"
 #include "fft/battle_unit.h"
 #include "fft/unit.h"

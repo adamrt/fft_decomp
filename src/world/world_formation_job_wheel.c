@@ -1,3 +1,5 @@
+/* The job wheel menu, its animation and job change. */
+
 #include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/world.h"

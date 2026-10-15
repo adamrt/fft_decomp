@@ -1,3 +1,5 @@
+/* Chapter title and game-over graphic display. */
+
 #include "fft/battle_gfx.h"
 #include "fft/event_etc.h"
 #include "fft/gfx.h"

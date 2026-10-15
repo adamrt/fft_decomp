@@ -1,3 +1,5 @@
+/* Music slot loading with VSync waits. */
+
 #include "fft/main.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

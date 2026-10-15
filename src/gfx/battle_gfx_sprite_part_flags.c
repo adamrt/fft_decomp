@@ -1,3 +1,5 @@
+/* Sprite part placement, flip and semi-transparency bits. */
+
 #include "fft/battle_gfx.h"
 
 /* Set part `index` of a sprite display: its place, the rectangle of the

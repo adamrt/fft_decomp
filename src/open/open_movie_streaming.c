@@ -1,3 +1,5 @@
+/* OPEN.BIN loops and the STR/MDEC movie stream. */
+
 #include "fft/open.h"
 #include "psx/libcd.h"
 #include "psx/pad.h"

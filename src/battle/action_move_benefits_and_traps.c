@@ -1,3 +1,5 @@
+/* Tile traps, movement-ability benefits and the EXP/JP/level gains they yield. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"

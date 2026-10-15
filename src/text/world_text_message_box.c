@@ -1,3 +1,5 @@
+/* Message box slot, glyph draw, quad animation and thread. */
+
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"

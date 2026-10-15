@@ -1,3 +1,5 @@
+/* ENTD loading, weather and the map initialization sequence. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_map.h"

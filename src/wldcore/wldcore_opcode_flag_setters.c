@@ -1,3 +1,5 @@
+/* Saved bit and local flag set/clear. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

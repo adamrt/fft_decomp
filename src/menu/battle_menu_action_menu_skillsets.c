@@ -1,3 +1,5 @@
+/* Action menu ids and the per-menu-type skillset/ability loaders. */
+
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"

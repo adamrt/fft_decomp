@@ -1,3 +1,5 @@
+/* Target reaction animation and the bow-hardcoding projectile hit. */
+
 #include "fft/battle_effect.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_unit.h"

@@ -10,7 +10,7 @@
  * jobstts_cmd_draw_scrollable_list_body_handler is the same command).
  *
  * The padding arrays reproduce the target's frame (only rect and marker are
- * referenced). The scroll-down path follows WORLD's world_menu_script_draw_scrollable_list
+ * referenced). The scroll-down path follows WORLD's menu_cmd_draw_scrollable_list_body_handler_variant
  * spelling.
  */
 menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* command) {

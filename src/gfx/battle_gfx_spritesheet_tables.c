@@ -1,3 +1,5 @@
+/* Unit and weapon SHP/SEQ tables by spritesheet id. */
+
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 

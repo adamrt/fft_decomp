@@ -1,3 +1,5 @@
+/* Job level and unlock bitset computation. */
+
 #include "fft/main.h"
 #include "psx/types.h"
 

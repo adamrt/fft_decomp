@@ -1,3 +1,5 @@
+/* Rumor detail text level and the town's available-proposition list level with its handlers. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

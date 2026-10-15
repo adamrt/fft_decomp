@@ -1,3 +1,5 @@
+/* AT-list cursor visibility and cursor moves to a unit or its action target. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_target.h"

@@ -1,3 +1,5 @@
+/* Projectile models, trajectories and the secondary-effect handler table. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
@@ -1183,7 +1185,7 @@ s32 effect_arrow_arc_secondary_handler(void) {
             g_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_FINALIZING;
             flags = g_effect_current_secondary->target.record.data.unit.result_animation;
             if (flags == EFFECT_HIT_MISSED || flags - 4 < 2U || g_effect_trajectory_hit_unit_id == -1) {
-                D_801B8B98 = 0x80000000;
+                g_battle_unknown_801b8b98 = 0x80000000;
                 effect_end_secondary_on_current_unit();
             }
         }

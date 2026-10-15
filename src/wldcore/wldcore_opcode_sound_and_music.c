@@ -1,3 +1,5 @@
+/* Pending delta publish, sound/music play and music change. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

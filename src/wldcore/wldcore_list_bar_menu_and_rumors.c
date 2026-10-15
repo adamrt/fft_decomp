@@ -1,3 +1,5 @@
+/* Town bar menu input step and the rumors list level with its button and input handlers. */
+
 #include "fft/script.h"
 #include "fft/thread.h"
 #include "fft/wldcore.h"

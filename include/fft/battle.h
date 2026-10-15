@@ -276,23 +276,23 @@ extern SVECTOR g_unit_scratch_coords;
 s32 battle_return_one(s32 unused_runtime_id);
 
 /* unnamed */
-extern s32 D_800F668C;
+extern s32 g_battle_unknown_800f668c;
 /* Write-only: zeroed with the map render state and never read anywhere on
  * the disc. The 150 x 14-byte shape suggests per-instruction parameter
  * storage (an event opcode takes at most 14 parameters), but no code proves
  * it, so the names stay provisional. */
-extern u8 D_800F70B4[150][14];
-extern u8 D_800F78E8[150];
-extern s16 D_800b628c;
-extern s16 D_800b6290;
-extern u8 D_8018F4FC;
-extern u8 D_8019387C;
-extern s32 D_801B8B18;
-extern s32 D_801B8B1C;
-extern s32 D_801B8B98;
-extern s32 D_801BACC4;
-extern s32 D_801BC0C4;
-extern s32 D_801BC0D4;
-extern s32 D_801BC0D8;
+extern u8 g_battle_unknown_800f70b4[150][14];
+extern u8 g_battle_unknown_800f78e8[150];
+extern s16 g_battle_unknown_800b628c;
+extern s16 g_battle_unknown_800b6290;
+extern u8 g_battle_unknown_8018f4fc;
+extern u8 g_battle_unknown_8019387c;
+extern s32 g_battle_unknown_801b8b18;
+extern s32 g_battle_unknown_801b8b1c;
+extern s32 g_battle_unknown_801b8b98;
+extern s32 g_battle_unknown_801bacc4;
+extern s32 g_battle_unknown_801bc0c4;
+extern s32 g_battle_unknown_801bc0d4;
+extern s32 g_battle_unknown_801bc0d8;
 
 #endif

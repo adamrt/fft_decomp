@@ -1,3 +1,5 @@
+/* Help menu thread tail and runners. */
+
 #include "fft/battle_menu.h"
 #include "fft/battle_script.h"
 #include "fft/battle_text.h"

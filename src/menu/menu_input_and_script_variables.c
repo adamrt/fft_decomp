@@ -1,3 +1,5 @@
+/* Silent confirm thread with script variable get/set. */
+
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"

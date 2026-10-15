@@ -1,3 +1,5 @@
+/* Scenario check, free cursor return, Deep Dungeon reload and between-turn events. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_camera.h"

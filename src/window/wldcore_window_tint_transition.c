@@ -1,3 +1,5 @@
+/* Tint transition and the proposition category/active list entry. */
+
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"

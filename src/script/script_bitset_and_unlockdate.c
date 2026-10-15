@@ -1,3 +1,5 @@
+/* Bitset flag assign and UnlockDate. */
+
 #include "fft/script.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Packed nibble read and write. */
+
 #include "fft/battle_text.h"
 #include "psx/types.h"
 

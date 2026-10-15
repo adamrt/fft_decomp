@@ -1,3 +1,5 @@
+/* Vector loads and 20.12 conversions. */
+
 #include "fft/battle_effect.h"
 #include "psx/libgte.h"
 

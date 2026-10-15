@@ -1,3 +1,5 @@
+/* Status-set changes, action state bits and casualty counters. */
+
 #include "fft/battle_status.h"
 #include "fft/main.h"
 #include "fft/script.h"

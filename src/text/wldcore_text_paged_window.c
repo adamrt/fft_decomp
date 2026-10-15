@@ -1,3 +1,6 @@
+/* Paged text window open, per-frame handler, page render, page prompt and scroll indicators
+ * (wldcore_text_scrollable_window is a struct tag). */
+
 #include "fft/menu.h"
 #include "fft/wldcore.h"
 #include "psx/pad.h"

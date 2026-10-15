@@ -1,3 +1,5 @@
+/* Six-copy sprite position trail and the item display icon. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_gfx.h"

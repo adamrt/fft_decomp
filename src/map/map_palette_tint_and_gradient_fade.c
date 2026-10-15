@@ -1,3 +1,5 @@
+/* CLUT row tint with its base-color store and the background gradient fades. */
+
 #include "fft/battle_map.h"
 #include "psx/types.h"
 

@@ -1,3 +1,5 @@
+/* Screen color-modulation save, fade and overlay. */
+
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 

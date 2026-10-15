@@ -1,3 +1,5 @@
+/* S16 entries of the gradient, ambient and darkness blends. */
+
 #include "fft/battle_map.h"
 #include "psx/types.h"
 

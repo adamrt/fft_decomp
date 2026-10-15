@@ -354,7 +354,7 @@ typedef struct menu_unit_status_identity {
     s16 brave;       /* 0x04 */
     s16 faith;       /* 0x06 */
     s16 zodiac;      /* 0x08 */
-    s16 roster_slot; /* 0x0a: party slot (world_menu_get_party_unit_name_id); shown as value + 1 */
+    s16 roster_slot; /* 0x0a: party slot (menu_get_party_unit_name_id); shown as value + 1 */
     u8 _unused_0c[2];
 } menu_unit_status_identity_t;
 typedef char menu_unit_status_identity_size_must_be_14[sizeof(menu_unit_status_identity_t) == 14 ? 1 : -1];
@@ -420,7 +420,7 @@ typedef char menu_unit_status_gauge_size_must_be_6[(sizeof(menu_unit_status_gaug
  * 0x8013a31c / 0x8013a340 and formation records at 0x8018aa98 / 0x8018aabc,
  * and each overlay's pair of panel billboards (all
  * 0x24 apart). The *_copy_unit_data_to_status_billboard builders (and
- * require_panel_copy_stats_to_gauges, wldcore_unit_build_status_panel_data)
+ * menu_copy_unit_data_to_status_billboard_variant, wldcore_unit_build_status_panel_data)
  * fill the first 0x1e bytes, *_menu_display_hovered_unit_stats and the
  * *_render_unit_status_panel_thread editors draw it, and
  * menu_copy_billboard_data_out saves the banner whole as 0x22 bytes.
@@ -698,7 +698,7 @@ typedef enum option_menu_type {
     OPTION_MENU_DEAD_UNIT = 2, /* crystal and treasure panel */
 } option_menu_type_e;
 
-/* A key in the list *_item_sort_id_list / equip_item_sort_list_by_criteria
+/* A key in the list *_item_sort_id_list / item_sort_id_list_variant
  * sorts by (g_world_sort_key_lists, g_equip_item_type_order_lists); -1 ends
  * the list. TYPE sorts ascending, the others descending. */
 typedef enum item_sort_key {
@@ -736,7 +736,7 @@ typedef enum item_list_mode {
 } item_list_mode_e;
 
 /* The grid help cursor over a unit's status display. A value above the text
- * ids in the pending description id (g_world_menu_description_text_id,
+ * ids in the pending description id (g_text_selection_id,
  * g_bunit_text_selection_id) selects one; it is latched in
  * g_world_grid_menu_id / g_bunit_help_screen_id instead of showing a
  * description. */
@@ -2613,7 +2613,7 @@ extern s16 g_menu_list_entry_count;
 extern u8* g_menu_list_text_table;
 extern s16* g_menu_list_entries;
 extern s8 g_menu_list_scroll_direction; /* read with lb */
-extern s8 g_menu_list_redraw_pending;   /* read with lb (bunit_cmd_run_scrollable_list_handler) */
+extern s8 g_menu_list_redraw_pending;   /* read with lb (menu_cmd_draw_scrollable_list_body_handler_variant) */
 extern s16 g_menu_list_selected_index;
 extern s16 g_menu_scroll_base_index;
 void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);

@@ -1,3 +1,5 @@
+/* Screen fade start, step, tint and overlay boxes. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

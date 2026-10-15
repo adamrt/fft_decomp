@@ -1,3 +1,5 @@
+/* Animation request with facing, normal and forced. */
+
 #include "fft/battle_unit.h"
 
 /* Request an animation and set the facing: battle_gfx_update_and_animate_unit_wep_eff

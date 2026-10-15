@@ -1,3 +1,5 @@
+/* Map dot build, projection, pulse, hit test and location entries. */
+
 #include "fft/script.h"
 #include "fft/wldcore.h"
 #include "psx/libgte.h"

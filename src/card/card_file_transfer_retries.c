@@ -1,3 +1,5 @@
+/* Memory card file read and write, each retried up to ten times after a short transfer. */
+
 #include "fft/event_card.h"
 #include "psx/libapi.h"
 

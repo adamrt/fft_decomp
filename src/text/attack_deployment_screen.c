@@ -1,3 +1,5 @@
+/* Deployment select menu, roster text, shaded panel strips and map title. */
+
 #include "fft/battle_script.h"
 #include "fft/event_attack.h"
 #include "fft/gfx.h"

@@ -1,3 +1,5 @@
+/* Entry value announce and clamped icon list threads. */
+
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"

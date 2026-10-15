@@ -1,3 +1,5 @@
+/* File header builders and CD-ROM subsystem reset. */
+
 #include "fft/main.h"
 #include "psx/libcd.h"
 

@@ -1,3 +1,5 @@
+/* Effect SHP/SEQ tables and the flying-idle sheet flag. */
+
 #include "fft/battle_gfx.h"
 #include "psx/types.h"
 

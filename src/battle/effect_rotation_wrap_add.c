@@ -1,3 +1,5 @@
+/* Rotation add with wrap plus the unused halfword adders. */
+
 #include "fft/battle_effect.h"
 #include "psx/types.h"
 

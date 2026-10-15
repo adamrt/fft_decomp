@@ -1,3 +1,5 @@
+/* Script/section end, nop, text thread and background set. */
+
 #include "fft/thread.h"
 #include "fft/wldcore.h"
 #include "psx/types.h"

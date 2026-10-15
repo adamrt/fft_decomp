@@ -1,3 +1,5 @@
+/* Status resolution, control loss, AI simulation and learn-on-hit. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_ai.h"

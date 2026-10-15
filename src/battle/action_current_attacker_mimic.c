@@ -1,3 +1,5 @@
+/* Random rolls, current-attacker record and Mime reactions. */
+
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_formula.h"

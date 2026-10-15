@@ -1,3 +1,5 @@
+/* Opcodes 16-19: jumps on the particle work count and the occupied child count. */
+
 #include "fft/battle_effect.h"
 
 /* Opcode 16: jump to the offset in the third 16-bit value when the record has as

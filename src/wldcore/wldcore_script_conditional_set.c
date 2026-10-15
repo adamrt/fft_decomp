@@ -1,3 +1,5 @@
+/* Conditional set walker with nop/skip opcodes. */
+
 #include "fft/wldcore.h"
 #include "psx/types.h"
 

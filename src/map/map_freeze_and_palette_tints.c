@@ -1,3 +1,5 @@
+/* Texture animation freeze and ColorField/unit palette modulation. */
+
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "psx/types.h"

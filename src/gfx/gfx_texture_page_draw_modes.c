@@ -1,3 +1,5 @@
+/* Draw modes from texture-page origins plus script stubs. */
+
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/script.h"

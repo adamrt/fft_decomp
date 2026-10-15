@@ -1,3 +1,5 @@
+/* Unit status and comparison panel thread toggles. */
+
 #include "fft/event_bunit.h"
 #include "fft/thread.h"
 #include "psx/types.h"

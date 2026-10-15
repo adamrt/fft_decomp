@@ -1,3 +1,5 @@
+/* Opcodes 1a-1d: jumps on child slot occupancy, counter inequality and the child timeline's end. */
+
 #include "fft/battle_effect.h"
 
 /* Opcode 1a: jump to the offset in the second 16-bit value when the child slot

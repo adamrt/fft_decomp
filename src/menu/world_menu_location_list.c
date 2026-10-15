@@ -1,3 +1,5 @@
+/* Visible location list and destination confirm. */
+
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"

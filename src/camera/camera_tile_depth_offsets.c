@@ -1,3 +1,5 @@
+/* Yaw-relative tile offsets and screen-to-grid snaps for depth points. */
+
 #include "fft/battle_camera.h"
 #include "psx/types.h"
 

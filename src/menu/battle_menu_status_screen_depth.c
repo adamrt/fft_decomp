@@ -1,3 +1,5 @@
+/* Status-screen open count and the animation speed accessors. */
+
 #include "fft/battle.h"
 #include "fft/battle_menu.h"
 #include "psx/types.h"

@@ -1,3 +1,5 @@
+/* Formation ability menu dispatch, set/remove/learn menus. */
+
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/libc.h"

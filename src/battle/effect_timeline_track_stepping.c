@@ -1,3 +1,5 @@
+/* Child and parent timeline step opcodes with the emitter, palette, background and sound track advancers. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"

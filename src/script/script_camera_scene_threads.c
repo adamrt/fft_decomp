@@ -1,3 +1,5 @@
+/* Camera, darkness, earthquake, sprite move, light and focus threads. */
+
 #include "fft/battle.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_gfx.h"

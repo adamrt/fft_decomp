@@ -1,3 +1,5 @@
+/* Tutorial start, command step and command handlers. */
+
 #include "fft/thread.h"
 #include "fft/world.h"
 #include "psx/libc.h"
