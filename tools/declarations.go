@@ -24,6 +24,7 @@ type scannedDeclaration struct {
 	signature  []string // rendered type; '@' stands for the name, parameter lists are one segment
 	line       int
 	definition bool
+	static     bool // file-local: never compared across files
 }
 
 type declarationSite struct {
@@ -295,11 +296,19 @@ func recordTypedefTag(statement []cToken, tags map[string]string) {
 // parseDeclaratorList splits `T a, *b, c[2]` on top-level commas. Later
 // declarators inherit the specifier of the first.
 func parseDeclaratorList(statement []cToken, definition bool) []scannedDeclaration {
+	static := false
+	var external []cToken
 	for _, token := range statement {
-		if token.text == "static" || token.text == "typedef" {
+		switch token.text {
+		case "typedef":
 			return nil
+		case "static":
+			static = true
+		default:
+			external = append(external, token)
 		}
 	}
+	statement = external
 	parts := splitTopLevel(statement, ",")
 	specifier, begin, implicit := parseDeclarationSpecifier(parts[0])
 	architecturalRegister := false
@@ -334,6 +343,7 @@ func parseDeclaratorList(statement []cToken, definition bool) []scannedDeclarati
 			signature:  signature,
 			line:       part[0].start, // converted to a line number by the caller
 			definition: definition,
+			static:     static,
 		})
 	}
 	return declarations
@@ -691,6 +701,9 @@ func collectDeclarationGroups(root string, dirs []string) ([]declarationGroup, e
 				tags[tag] = alias
 			}
 			for _, declaration := range declarations {
+				if declaration.static {
+					continue
+				}
 				sitesBySymbol[declaration.symbol] = append(sitesBySymbol[declaration.symbol], declarationSite{
 					path:       relative,
 					line:       declaration.line,

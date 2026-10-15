@@ -168,6 +168,9 @@ func TestUnitLinkerBindingsAndScript(t *testing.T) {
 	if script != want {
 		t.Fatalf("script:\n%s\nwant:\n%s", script, want)
 	}
+	if skipped := unitLinkerScriptSkipping(unit, bindings, true, map[string]bool{"unit_b": true}); strings.Contains(skipped, "ASSERT(unit_b") || !strings.Contains(skipped, "ASSERT(unit_a") {
+		t.Fatalf("static member still asserted:\n%s", skipped)
+	}
 	if plain := unitLinkerScript(unit, bindings, false); strings.Contains(plain, "ASSERT") {
 		t.Fatal("diagnostic script must not assert")
 	}

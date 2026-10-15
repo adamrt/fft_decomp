@@ -124,7 +124,7 @@ func sourceDefinitionSymbol(data []byte) (string, error) {
 	}
 	var definitions []string
 	for _, declaration := range declarations {
-		if declaration.definition && functionDeclarationSignature(declaration.signature) {
+		if declaration.definition && !declaration.static && functionDeclarationSignature(declaration.signature) {
 			definitions = append(definitions, declaration.symbol)
 		}
 	}

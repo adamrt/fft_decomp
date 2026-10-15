@@ -305,6 +305,13 @@ func unitLinkerBindings(resolver symbolResolver, unit *unitInstance, used map[st
 // addresses and, when assert is set, requires every member to begin at its
 // original entry.
 func unitLinkerScript(unit *unitInstance, bindings map[string]uint32, assert bool) string {
+	return unitLinkerScriptSkipping(unit, bindings, assert, nil)
+}
+
+// unitLinkerScriptSkipping is unitLinkerScript without assertions for the
+// named members: a static member is a local symbol the script cannot see,
+// and the section comparison still checks its bytes at its address.
+func unitLinkerScriptSkipping(unit *unitInstance, bindings map[string]uint32, assert bool, static map[string]bool) string {
 	names := make([]string, 0, len(bindings))
 	for name := range bindings {
 		names = append(names, name)
@@ -327,10 +334,42 @@ func unitLinkerScript(unit *unitInstance, bindings map[string]uint32, assert boo
 	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n")
 	if assert {
 		for _, f := range unit.members {
+			if static[f.Name] {
+				continue
+			}
 			fmt.Fprintf(&script, "ASSERT(%s == 0x%08x, \"%s must begin at 0x%08x\");\n", f.Name, f.Addr, f.Name, f.Addr)
 		}
 	}
 	return script.String()
+}
+
+// unitStaticMembers names the members the source defines static, as the
+// module sees the file.
+func unitStaticMembers(unit *unitInstance, source string) (map[string]bool, error) {
+	data, err := os.ReadFile(source)
+	if err != nil {
+		return nil, err
+	}
+	active, err := activeConditionalText(string(data), unit.module.macros())
+	if err != nil {
+		return nil, err
+	}
+	declarations, _, err := scanFileScopeDeclarations(active)
+	if err != nil {
+		return nil, err
+	}
+	members := map[string]bool{}
+	for _, f := range unit.members {
+		members[f.Name] = true
+	}
+	static := map[string]bool{}
+	for _, declaration := range declarations {
+		// A static prototype before a plain definition makes it static too.
+		if declaration.static && members[declaration.symbol] && functionDeclarationSignature(declaration.signature) {
+			static[declaration.symbol] = true
+		}
+	}
+	return static, nil
 }
 
 // compileUnitInstance runs the historical pipeline on the merged source for
@@ -344,7 +383,11 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 	if err != nil {
 		return nil, err
 	}
-	script := unitLinkerScript(unit, bindings, true)
+	static, err := unitStaticMembers(unit, source)
+	if err != nil {
+		return nil, err
+	}
+	script := unitLinkerScriptSkipping(unit, bindings, true, static)
 	linker, err := writeLinkerScript(workDir, unit.module.ID, script)
 	if err != nil {
 		return nil, err
@@ -363,7 +406,7 @@ func (p project) compileUnitInstance(resolver symbolResolver, unit *unitInstance
 			undefined[name] = struct{}{}
 		}
 		if expanded, bindErr := unitLinkerBindings(resolver, unit, undefined); bindErr == nil {
-			if rescript := unitLinkerScript(unit, expanded, true); rescript != script {
+			if rescript := unitLinkerScriptSkipping(unit, expanded, true, static); rescript != script {
 				if _, writeErr := writeLinkerScript(workDir, unit.module.ID, rescript); writeErr == nil {
 					if sections, retryErr := p.compileHistoricalSections(source, linker, buildDir, unit.profile, defines...); retryErr == nil {
 						return sections, nil
@@ -547,9 +590,15 @@ func validateUnitSourceData(source string, data []byte, symbols []string) error 
 	if err != nil {
 		return fmt.Errorf("%s: %w", source, err)
 	}
+	expected := map[string]bool{}
+	for _, symbol := range symbols {
+		expected[symbol] = true
+	}
 	var definitions []string
 	for _, declaration := range declarations {
-		if declaration.definition && functionDeclarationSignature(declaration.signature) {
+		// A static member is a function the original object kept private; a
+		// static non-member is an inlined helper that emits no code of its own.
+		if declaration.definition && functionDeclarationSignature(declaration.signature) && (!declaration.static || expected[declaration.symbol]) {
 			definitions = append(definitions, declaration.symbol)
 		}
 	}

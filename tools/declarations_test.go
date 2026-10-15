@@ -64,6 +64,14 @@ void body(void) {
 `
 	var got []string
 	for _, declaration := range scanOne(t, source) {
+		// A static declaration is scanned (a unit may keep a member private)
+		// but marked, and it never binds a linker symbol.
+		if declaration.static {
+			if declaration.symbol != "g_local" {
+				t.Fatalf("unexpected static declaration %+v", declaration)
+			}
+			continue
+		}
 		got = append(got, declaration.symbol+"="+strings.Join(declaration.signature, " "))
 	}
 	want := []string{"g_a=u8 @", "g_b=u8 * @", "g_c=u8 @ []", "body=void @ (void)"}
@@ -160,5 +168,35 @@ func TestValidateDeclarationsRequiresNoConflicts(t *testing.T) {
 	writeTestFile(t, filepath.Join(root, "src", "world", "c.c"), []byte("extern u8 g_flags;\n"))
 	if err := validateDeclarations(root); err != nil {
 		t.Fatalf("resolved tree: %v", err)
+	}
+}
+
+func TestStaticDefinitionsAreScannedButNotCompared(t *testing.T) {
+	declarations := scanOne(t, "static s32 helper(s32 x) { return x; }\ns32 user(void) { return helper(1); }\n")
+	if len(declarations) != 2 || declarations[0].symbol != "helper" || !declarations[0].static || !declarations[0].definition || declarations[1].static {
+		t.Fatalf("declarations = %+v", declarations)
+	}
+	if err := validateUnitSourceData("x.c", []byte("static s32 helper(s32 x);\ns32 user(void) { return helper(1); }\nstatic s32 helper(s32 x) { return x; }\n"), []string{"user", "helper"}); err != nil {
+		t.Fatalf("static member rejected: %v", err)
+	}
+	if err := validateUnitSourceData("x.c", []byte("static inline s32 twice(s32 x) { return x * 2; }\ns32 user(void) { return twice(1); }\n"), []string{"user"}); err != nil {
+		t.Fatalf("inlined static helper counted: %v", err)
+	}
+	if _, err := sourceDefinitionSymbol([]byte("static s32 helper(void) { return 1; }\ns32 only(void) { return helper(); }\n")); err != nil {
+		t.Fatalf("static helper counted as public: %v", err)
+	}
+	p := testProject(t, map[string]string{
+		"include/fft/a.h": "s32 shared(void);\n",
+		"src/main/a.c":    "#include \"fft/a.h\"\nstatic s32 local(void) { return 1; }\ns32 shared(void) { return local(); }\n",
+		"src/main/b.c":    "static u8 local(void) { return 2; }\n",
+	})
+	groups, err := collectDeclarationGroups(p.root, declarationScanDirs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, group := range groups {
+		if group.symbol == "local" {
+			t.Fatalf("static symbols compared across files: %+v", group)
+		}
 	}
 }
