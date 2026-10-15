@@ -24,10 +24,12 @@ preserving every original byte.
 
 ## Organization
 
-- `src/<module>/`: module-specific code, one file per function, named after it.
-  Each EVENT overlay has its own `src/event/<overlay>/`.
-- `src/shared/<subsystem>/`: proven shared implementations. Register explicit
-  `source:` paths in each original module; preserve meaningful separate entries.
+- `src/<module>/`: module-specific code under the module prefix, one file per
+  function, named after it. Each EVENT overlay has its own
+  `src/event/<overlay>/`. A `_variant` body stays beside its module.
+- `src/shared/<subsystem>/`: subsystem code under the subsystem prefix, whether
+  one program links it or several. Register explicit `source:` paths in each
+  original module; preserve meaningful separate entries.
 - `src/lib/psyq/<library>/` and `src/lib/suzuki/`: reconstructed linked libraries.
   Keep established public names, signatures and original module bindings.
 - `include/fft/`: game module, subsystem and shared-type headers.
