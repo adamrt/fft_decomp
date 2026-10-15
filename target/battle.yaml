@@ -57,7 +57,7 @@ units:
   - {name: script_sound_camera_and_menus, source: src/event/script_sound_camera_and_menus.c}
   - {name: script_unit_helpers_and_modal_sfx, source: src/event/script_unit_helpers_and_modal_sfx.c}
   - {name: script_unit_instructions, source: src/event/script_unit_instructions.c}
-  - {name: sound_wait_for_music_stub, source: src/menu/sound_wait_for_music_stub.c}
+  - {name: sound_wait_for_music_stub, source: src/event/menu/sound_wait_for_music_stub.c}
   - {name: state_action_flow, source: src/battle/state_action_flow.c}
   - {name: state_unit_moving_and_map_change, source: src/battle/state_unit_moving_and_map_change.c}
   - {name: status_transparent_and_charging, source: src/battle/status_transparent_and_charging.c}
@@ -65,7 +65,7 @@ units:
   - {name: text, source: src/event/text.c}
   - {name: text_cursor_and_backreferences, source: src/event/text_cursor_and_backreferences.c}
   - {name: text_display_messages, source: src/event/text_display_messages.c}
-  - {name: text_fill_field_with_terminators, source: src/menu/text_fill_field_with_terminators.c}
+  - {name: text_fill_field_with_terminators, source: src/event/menu/text_fill_field_with_terminators.c}
   - {name: thread, source: src/event/thread.c}
   - {name: thread_parameters_and_globals, source: src/event/thread_parameters_and_globals.c}
   - {name: tile_data_and_formulas_1, source: src/battle/tile_data_and_formulas_1.c}
@@ -881,7 +881,7 @@ functions:
   - {addr: 0x8013871c, size: 80, name: menu_copy_sprite_position_uv_and_size, hash: 568fb2d3912cb994, unit: menu_unit_status_lists_and_text_sections}
   - {addr: 0x8013876c, size: 416, name: menu_zoom_cursor_frame, hash: 509e692236432dd6, unit: menu_unit_status_lists_and_text_sections}
   - {addr: 0x8013890c, size: 464, name: gfx_build_scaled_draw_area_pair_swapped, hash: 43ec57d8623a1604, unit: menu_unit_status_lists_and_text_sections}
-  - {addr: 0x80138adc, size: 52, name: menu_init_scaled_draw_area_packets, hash: fd9d7a1158be224d, source: src/menu/menu_init_scaled_draw_area_packets.c}
+  - {addr: 0x80138adc, size: 52, name: menu_init_scaled_draw_area_packets, hash: fd9d7a1158be224d, source: src/event/menu/menu_init_scaled_draw_area_packets.c}
   - {addr: 0x80138b10, size: 84, name: menu_submit_icon_primitives, hash: 3abc0aee8fb45d44, unit: menu_icons_windows_and_scripts}
   - {addr: 0x80138b64, size: 884, name: menu_auto_battle_setting_thread, hash: abb41eaee69c7fdf, unit: menu_icons_windows_and_scripts}
   - {addr: 0x80138ed8, size: 484, name: menu_run_icon_selection_loop, hash: 8cfe22df483b0535, unit: menu_icons_windows_and_scripts}
@@ -1137,7 +1137,7 @@ functions:
   - {addr: 0x8014c164, size: 40, name: menu_build_and_upload_window_image, hash: e90647c567bcb102, unit: memory_copies_and_nibbles}
   - {addr: 0x8014c18c, size: 796, name: menu_build_window_image, hash: c553dd4a8afbd218, unit: memory_copies_and_nibbles}
   - {addr: 0x8014c4a8, size: 688, name: menu_build_and_upload_window_frame_image_variant, hash: 99515c0e0a1f017c, unit: memory_copies_and_nibbles}
-  - {addr: 0x8014c758, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/menu/menu_build_window_image_row.c}
+  - {addr: 0x8014c758, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/event/menu/menu_build_window_image_row.c}
   - {addr: 0x8014c858, size: 72, name: thread_wait_frames, hash: e33123533d666f71, unit: thread}
   - {addr: 0x8014c8a0, size: 132, name: thread_start, hash: 72fa1891ea2b8656, unit: thread}
   - {addr: 0x8014c924, size: 28, name: thread_resume, hash: 484df3941212a0b6, unit: thread}

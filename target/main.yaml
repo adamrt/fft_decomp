@@ -16,7 +16,7 @@ units:
   - {name: display_and_sound_requests, source: src/main/display_and_sound_requests.c}
   - {name: file_cd_headers, source: src/main/file_cd_headers.c}
   - {name: game_loop_and_now_loading, source: src/main/game_loop_and_now_loading.c}
-  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
+  - {name: gfx_set_scaled_poly_ft4_8bpp_set, source: src/event/menu/gfx_set_scaled_poly_ft4_8bpp_set.c}
   - {name: heap_and_file_loading, source: src/main/heap_and_file_loading.c}
   - {name: item_card_and_open_overlays, source: src/main/item_card_and_open_overlays.c}
   - {name: item_quantities_and_status, source: src/main/item_quantities_and_status.c}
