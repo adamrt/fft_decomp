@@ -145,9 +145,33 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 		workBase = filepath.Join(p.root, "build", "work")
 	}
 	workDir := filepath.Join(workBase, "modules", m.ID)
+	// A job is one per-function compile (index >= 0) or one unit compile
+	// (index < 0 names m.Units[-index-1]); a unit's members take its slices.
+	indexOf := map[string]int{}
+	for index := range m.Functions {
+		indexOf[m.Functions[index].Name] = index
+	}
+	var queue []int
+	unitSelected := map[string]bool{}
+	for index := range m.Functions {
+		f := &m.Functions[index]
+		if only != nil && !only[f.Name] {
+			continue
+		}
+		if f.Unit != "" {
+			unitSelected[f.Unit] = true
+			continue
+		}
+		queue = append(queue, index)
+	}
+	for unitIndex := range m.Units {
+		if unitSelected[m.Units[unitIndex].Name] {
+			queue = append(queue, -unitIndex-1)
+		}
+	}
 	work := make(chan int)
 	var workers sync.WaitGroup
-	for range min(jobs, len(m.Functions)) {
+	for range min(jobs, max(len(queue), 1)) {
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
@@ -157,22 +181,68 @@ func (p project) compileModule(config *projectConfig, resolver symbolResolver, m
 				if compileSlots != nil {
 					compileSlots <- struct{}{}
 				}
-				results[index].sections, results[index].err = p.compileFunction(resolver, m, &m.Functions[index], workDir)
+				if index >= 0 {
+					results[index].sections, results[index].err = p.compileFunction(resolver, m, &m.Functions[index], workDir)
+					p.progress.step()
+				} else {
+					p.compileUnit(config, resolver, m, &m.Units[-index-1], workDir, results, indexOf)
+				}
 				if compileSlots != nil {
 					<-compileSlots
 				}
-				p.progress.step()
 			}
 		}()
 	}
-	for index := range m.Functions {
-		if only == nil || only[m.Functions[index].Name] {
-			work <- index
-		}
+	for _, index := range queue {
+		work <- index
 	}
 	close(work)
 	workers.Wait()
 	return results, nil
+}
+
+// compileUnit compiles one configured unit once and hands each member its
+// slice of the merged sections, or the unit's error.
+func (p project) compileUnit(config *projectConfig, resolver symbolResolver, m *moduleSpec, unit *unitDef, workDir string, results []compiledFunction, indexOf map[string]int) {
+	members := m.unitMembers(unit.Name)
+	setError := func(err error) {
+		for _, f := range members {
+			results[indexOf[f.Name]].err = fmt.Errorf("unit %s: %w", unit.Name, err)
+			p.progress.step()
+		}
+	}
+	instance, err := m.unitInstance(config, unit.Name)
+	if err != nil {
+		setError(err)
+		return
+	}
+	source := filepath.Join(p.root, filepath.FromSlash(unit.Source))
+	sections, err := p.compileUnitInstance(resolver, instance, source, filepath.Join(workDir, "units", unit.Name))
+	if err != nil {
+		setError(err)
+		return
+	}
+	memberResults, problems := compareUnitSections(instance, sections)
+	if len(problems) > 0 {
+		setError(errors.New(strings.Join(problems, "; ")))
+		return
+	}
+	text := sections[".text"]
+	for _, result := range memberResults {
+		f := result.f
+		offset := int(f.Addr - instance.addr)
+		slices := map[string][]byte{".text": text[offset : offset+f.Size]}
+		if len(f.Rodata) > 0 {
+			var rodata []byte
+			for _, span := range f.Rodata {
+				start := int(span.Addr - instance.rodata[0].Addr)
+				rodata = append(rodata, sections[".rodata"][start:start+span.Size]...)
+			}
+			slices[".rodata"] = rodata
+		}
+		results[indexOf[f.Name]].sections = slices
+		p.progress.step()
+	}
 }
 
 // functionLinker returns f's source path and the linker script that binds the

@@ -752,6 +752,11 @@ func renameConfigFunction(config *projectConfig, oldName, newName string, unify 
 			}
 			if f.sourceSymbol() == oldName {
 				found = true
+				if f.Unit != "" {
+					// A unit member's file holds its siblings too; the body is
+					// renamed in place and the file keeps the unit's name.
+					continue
+				}
 				source := m.sourceOf(f)
 				if from != "" && source != from {
 					return "", "", fmt.Errorf("%s has different sources in different modules; rename it manually", oldName)

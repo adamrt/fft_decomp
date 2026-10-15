@@ -9,6 +9,9 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 links: [wldcore, battle]
 defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 112, VARIANT_MENU_CHOICE_VRAM_BOTTOM_Y: 1792, VARIANT_MENU_CHOICE_VRAM_X: 1536, VARIANT_MENU_CHOICE_WINDOW_CENTER_Y: 40, VARIANT_MENU_CHOICE_WINDOW_RIGHT_X: 116, VARIANT_MENU_CMD_END_OPCODE: 28, VARIANT_MENU_ITEM_CURSOR_DEPTH: 20, VARIANT_MENU_SELECTION_RECORD_COUNT: 14, VARIANT_MENU_SELECTION_VALUE_COUNT: 16, VARIANT_THREAD_TABLE_SLOT_COUNT: 17}
 
+units:
+  - {name: thread, source: src/shared/thread/thread.c}
+
 libraries:
   - {id: libgs, addr: 0x800e0228, end: 0x800e1a98, kind: psyq, library: LIBGS}
 
@@ -415,16 +418,16 @@ functions:
   - {addr: 0x800ff690, size: 796, name: menu_build_window_image, hash: af5f5261b59f0b0d, source: src/shared/menu/menu_build_window_image.c}
   - {addr: 0x800ff9ac, size: 636, name: menu_build_and_upload_window_frame_image_variant, hash: 36ce56e38867d038}
   - {addr: 0x800ffc28, size: 256, name: menu_build_window_image_row, hash: 03b43cffa473c30c, source: src/shared/menu/menu_build_window_image_row.c}
-  - {addr: 0x800ffd28, size: 72, name: thread_wait_frames, hash: 2658b0e5a2a82790, source: src/shared/thread/thread_wait_frames.c}
-  - {addr: 0x800ffd70, size: 132, name: thread_start, hash: 8e70b68deed7c2a0, source: src/shared/thread/thread_start.c}
-  - {addr: 0x800ffdf4, size: 28, name: thread_resume, hash: 5db3a5c21e753da8, source: src/shared/thread/thread_resume.c}
-  - {addr: 0x800ffe10, size: 24, name: thread_suspend, hash: 9450e432778af0a6, source: src/shared/thread/thread_suspend.c}
-  - {addr: 0x800ffe28, size: 60, name: thread_exit_current, hash: ff52c9c9f91306dd, source: src/shared/thread/thread_exit_current.c}
-  - {addr: 0x800ffe64, size: 60, name: thread_reset_scheduler, hash: d888f2276d3f66e7, source: src/shared/thread/thread_reset_scheduler.c}
-  - {addr: 0x800ffea0, size: 76, name: thread_wait_until_inactive, hash: 17872da1aa0db52d, source: src/shared/thread/thread_wait_until_inactive.c}
-  - {addr: 0x800ffeec, size: 28, name: thread_is_running, hash: 22d1fa2a224de3cd, source: src/shared/thread/thread_is_running.c}
-  - {addr: 0x800fff08, size: 32, name: thread_set_parameters, hash: 9a58f319d509b5e5, source: src/shared/thread/thread_set_parameters.c}
-  - {addr: 0x800fff28, size: 40, name: thread_set_four_parameters, hash: 5d14fd3dbdba4502, source: src/shared/thread/thread_set_four_parameters.c}
+  - {addr: 0x800ffd28, size: 72, name: thread_wait_frames, hash: 2658b0e5a2a82790, unit: thread}
+  - {addr: 0x800ffd70, size: 132, name: thread_start, hash: 8e70b68deed7c2a0, unit: thread}
+  - {addr: 0x800ffdf4, size: 28, name: thread_resume, hash: 5db3a5c21e753da8, unit: thread}
+  - {addr: 0x800ffe10, size: 24, name: thread_suspend, hash: 9450e432778af0a6, unit: thread}
+  - {addr: 0x800ffe28, size: 60, name: thread_exit_current, hash: ff52c9c9f91306dd, unit: thread}
+  - {addr: 0x800ffe64, size: 60, name: thread_reset_scheduler, hash: d888f2276d3f66e7, unit: thread}
+  - {addr: 0x800ffea0, size: 76, name: thread_wait_until_inactive, hash: 17872da1aa0db52d, unit: thread}
+  - {addr: 0x800ffeec, size: 28, name: thread_is_running, hash: 22d1fa2a224de3cd, unit: thread}
+  - {addr: 0x800fff08, size: 32, name: thread_set_parameters, hash: 9a58f319d509b5e5, unit: thread}
+  - {addr: 0x800fff28, size: 40, name: thread_set_four_parameters, hash: 5d14fd3dbdba4502, unit: thread}
   - {addr: 0x80100084, size: 12, name: thread_get_current_global_pointer, hash: 153190eb0d500e3a, source: src/shared/thread/thread_get_current_global_pointer.c}
   - {addr: 0x80100090, size: 52, name: thread_get_current_parameter_1_variant, hash: 6e27c290b74e8721}
   - {addr: 0x801000c4, size: 52, name: thread_get_current_parameter_2_variant, hash: 520e69329eb48696}

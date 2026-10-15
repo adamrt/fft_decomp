@@ -51,6 +51,9 @@ func (p project) moveSymbolsCommand(args []string) error {
 			if f.Asm != "" {
 				return fmt.Errorf("%s:%s is assembly", m.ID, entry)
 			}
+			if f.Unit != "" {
+				return fmt.Errorf("%s:%s is compiled within unit %s", m.ID, entry, f.Unit)
+			}
 			from := m.sourceOf(f)
 			if filepath.ToSlash(filepath.Dir(from)) == clean {
 				return fmt.Errorf("%s is already under %s", from, clean)

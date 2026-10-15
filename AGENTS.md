@@ -11,6 +11,10 @@ preserving every original byte.
 - `target/*.yaml` owns each function's address, size, compiler profile, hash and
   source binding. Preserve these contracts; shared sources still compile at
   every original entrypoint with that entry's profile and bindings. A module's
+  `units:` list names merged sources (original translation units) compiled
+  once per module; a member row carries `unit:` instead of `source:`, members
+  follow one another in address order, and the file defines exactly those
+  functions in that order. A module's
   `defines:` map holds the `VARIANT_` constants (passed as `-D`) that let one
   source serve programs built with different values; only a trial-proven
   constant goes there, never a behavioral difference, and headers never use
@@ -94,6 +98,7 @@ make build                       # rebuild the byte-identical disc
 make diff FUNC=f [MODULE=x]       # inspect one original-byte mismatch
 make library-diff ARGS="..."      # measure a scratch library candidate
 make compile-commands            # refresh editor metadata after source moves
+make symbols ACTION=unit ARGS="--name N --source src/x/N.c M:E..."  # merge entries into a unit
 ```
 
 `MODULE` accepts module IDs, overlay aliases, lists, `event` or `effect`.

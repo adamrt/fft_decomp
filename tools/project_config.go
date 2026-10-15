@@ -45,6 +45,7 @@ type moduleSpec struct {
 	Profile   string       // default compiler profile of the module's functions
 	Links     []string     // modules resident alongside this one, searched after it
 	Defines   []defineSpec // VARIANT_ macros passed as -D flags to every compile of this module
+	Units     []unitDef    // merged sources whose member functions carry unit: instead of source:
 	Libraries []librarySpec
 	Functions []functionSpec
 	Data      []symbolSpec
@@ -64,7 +65,16 @@ type functionSpec struct {
 	Source       string // empty: <source_dir>/<name>.c, or .s when Asm is set
 	SourceSymbol string // empty: Name; C definition compiled separately for this entry
 	Asm          string // why this function is standalone assembly
+	Unit         string // the module unit this function is compiled within (then Source is the unit's)
 	Rodata       []rodataSpec
+}
+
+// unitDef is one original translation unit: a merged source, compiled once
+// per module, whose public functions are the member rows naming it, in
+// address order.
+type unitDef struct {
+	Name   string
+	Source string
 }
 
 type rodataSpec struct {
@@ -168,10 +178,37 @@ func (m *moduleSpec) defaultSource(f *functionSpec) string {
 
 // sourceOf returns the function's source path relative to the project root.
 func (m *moduleSpec) sourceOf(f *functionSpec) string {
+	if f.Unit != "" {
+		if unit := m.unit(f.Unit); unit != nil {
+			return unit.Source
+		}
+		return ""
+	}
 	if f.Source != "" {
 		return f.Source
 	}
 	return m.defaultSource(f)
+}
+
+// unit returns the module's unit definition of that name.
+func (m *moduleSpec) unit(name string) *unitDef {
+	for index := range m.Units {
+		if m.Units[index].Name == name {
+			return &m.Units[index]
+		}
+	}
+	return nil
+}
+
+// unitMembers returns the functions compiled within the unit, in address order.
+func (m *moduleSpec) unitMembers(name string) []*functionSpec {
+	var members []*functionSpec
+	for index := range m.Functions {
+		if m.Functions[index].Unit == name {
+			members = append(members, &m.Functions[index])
+		}
+	}
+	return members
 }
 
 // regionOverlapping returns the first region overlapping [start, end).
@@ -283,6 +320,7 @@ type moduleFileYAML struct {
 	Profile   string            `yaml:"profile"`
 	Links     []string          `yaml:"links"`
 	Defines   map[string]string `yaml:"defines"`
+	Units     []unitYAML        `yaml:"units"`
 	Libraries []libraryYAML     `yaml:"libraries"`
 	Functions []functionYAML    `yaml:"functions"`
 	Data      []symbolYAML      `yaml:"data"`
@@ -300,7 +338,13 @@ type functionYAML struct {
 	Source       string       `yaml:"source"`
 	SourceSymbol string       `yaml:"source_symbol"`
 	Asm          string       `yaml:"asm"`
+	Unit         string       `yaml:"unit"`
 	Rodata       []rodataYAML `yaml:"rodata"`
+}
+
+type unitYAML struct {
+	Name   string `yaml:"name"`
+	Source string `yaml:"source"`
 }
 
 type rodataYAML struct {
@@ -350,13 +394,16 @@ func parseModuleConfig(data []byte) (*moduleSpec, error) {
 	for name, value := range file.Defines {
 		module.Defines = append(module.Defines, defineSpec{Name: name, Value: value})
 	}
+	for _, item := range file.Units {
+		module.Units = append(module.Units, unitDef(item))
+	}
 	for _, item := range file.Libraries {
 		module.Libraries = append(module.Libraries, librarySpec(item))
 	}
 	for _, item := range file.Functions {
 		function := functionSpec{
 			Addr: item.Addr, Size: item.Size, Name: item.Name, Hash: item.Hash,
-			Profile: item.Profile, Source: item.Source, SourceSymbol: item.SourceSymbol, Asm: item.Asm,
+			Profile: item.Profile, Source: item.Source, SourceSymbol: item.SourceSymbol, Asm: item.Asm, Unit: item.Unit,
 		}
 		for _, rodata := range item.Rodata {
 			function.Rodata = append(function.Rodata, rodataSpec(rodata))
@@ -400,12 +447,13 @@ func (m *moduleSpec) normalize() {
 		if function.SourceSymbol == function.Name {
 			function.SourceSymbol = ""
 		}
-		if function.Source == m.defaultSource(function) {
+		if function.Unit != "" || function.Source == m.defaultSource(function) {
 			function.Source = ""
 		}
 		sort.SliceStable(function.Rodata, func(i, j int) bool { return function.Rodata[i].Addr < function.Rodata[j].Addr })
 	}
 	sort.SliceStable(m.Functions, func(i, j int) bool { return m.Functions[i].Addr < m.Functions[j].Addr })
+	sort.SliceStable(m.Units, func(i, j int) bool { return m.Units[i].Name < m.Units[j].Name })
 	sortSymbols(m.Data)
 	sortSymbols(m.Imports)
 	sort.SliceStable(m.Overrides, func(i, j int) bool {
@@ -467,6 +515,10 @@ func renderModuleConfig(m *moduleSpec) []byte {
 			fmt.Fprintf(&out, "  - {%s}\n", row(index))
 		}
 	}
+	section("units", len(m.Units), func(index int) string {
+		item := m.Units[index]
+		return fmt.Sprintf("name: %s, source: %s", yamlText(item.Name), yamlText(item.Source))
+	})
 	section("libraries", len(m.Libraries), func(index int) string {
 		item := m.Libraries[index]
 		return fmt.Sprintf("id: %s, addr: 0x%08x, end: 0x%08x, kind: %s, library: %s", yamlText(item.ID), item.Addr, item.End, yamlText(item.Kind), yamlText(item.Library))
@@ -479,6 +531,9 @@ func renderModuleConfig(m *moduleSpec) []byte {
 		}
 		if item.Profile != "" {
 			fields = append(fields, "profile: "+yamlText(item.Profile))
+		}
+		if item.Unit != "" {
+			fields = append(fields, "unit: "+yamlText(item.Unit))
 		}
 		if item.Source != "" {
 			fields = append(fields, "source: "+yamlText(item.Source))
@@ -672,6 +727,7 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 			names[name] = what
 		}
 		moduleSources := make(map[string]string)
+		unitSources := make(map[string]bool)
 		var previousEnd uint64
 		for index := range m.Functions {
 			f := &m.Functions[index]
@@ -691,6 +747,15 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 				fail("%s uses unknown profile %q", where, m.profileOf(f))
 			}
 			source := m.sourceOf(f)
+			if f.Unit != "" {
+				if m.unit(f.Unit) == nil {
+					fail("%s: unit %q is not defined in units", where, f.Unit)
+				}
+				if f.Source != "" || f.SourceSymbol != "" || f.Asm != "" {
+					fail("%s: a unit member carries no source, source_symbol or asm", where)
+				}
+				unitSources[source] = true
+			}
 			if f.Asm != "" {
 				if m.ID != mainModuleID || filepath.Ext(source) != ".s" || uint64(f.Addr)+uint64(f.Size) > mainAssemblyLimit {
 					fail("%s: assembly requires a .s source in a main startup/ABI range below 0x%08x", where, mainAssemblyLimit)
@@ -706,14 +771,16 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 			if !validSymbol(sourceSymbol) {
 				fail("%s: invalid source_symbol %q", where, sourceSymbol)
 			}
-			if previous := sourceSymbols[source]; previous != "" && previous != sourceSymbol {
+			if previous := sourceSymbols[source]; f.Unit == "" && previous != "" && previous != sourceSymbol {
 				fail("%s: source %s has conflicting definition symbols %s and %s", where, source, previous, sourceSymbol)
 			}
-			sourceSymbols[source] = sourceSymbol
+			if f.Unit == "" {
+				sourceSymbols[source] = sourceSymbol
+			}
 			if f.SourceSymbol != "" && f.Asm != "" {
 				fail("%s: source_symbol requires a C source", where)
 			}
-			if (f.SourceSymbol != "" || moduleSources[source] != "") && f.Asm == "" && sourceErr == nil && !checkedDefinitions[source] {
+			if f.Unit == "" && (f.SourceSymbol != "" || moduleSources[source] != "") && f.Asm == "" && sourceErr == nil && !checkedDefinitions[source] {
 				checkedDefinitions[source] = true
 				if err := validateSourceDefinition(p.root, source, sourceSymbol); err != nil {
 					fail("%s: %v", where, err)
@@ -729,6 +796,40 @@ func (p project) validateProjectConfig(config *projectConfig) error {
 					fail("%s: rodata 0x%08x has no valid hash; run `make checksums`", where, rodata.Addr)
 				}
 			}
+		}
+		seenUnits := make(map[string]bool)
+		for _, unit := range m.Units {
+			where := fmt.Sprintf("%s: unit %s", label, unit.Name)
+			if !validSymbol(unit.Name) || seenUnits[unit.Name] {
+				fail("%s has an invalid or duplicate name", where)
+			}
+			seenUnits[unit.Name] = true
+			if filepath.Ext(unit.Source) != ".c" || !strings.HasPrefix(unit.Source, "src/") {
+				fail("%s: source must be a .c file under src/", where)
+			}
+			members := m.unitMembers(unit.Name)
+			if len(members) == 0 {
+				fail("%s has no member functions", where)
+				continue
+			}
+			if _, err := projectPath(p.root, unit.Source, "unit source"); err != nil {
+				fail("%s: %v", where, err)
+				continue
+			}
+			if _, err := m.unitInstance(config, unit.Name); err != nil {
+				fail("%s: %v", where, err)
+				continue
+			}
+			symbols := make([]string, len(members))
+			for index, f := range members {
+				symbols[index] = f.Name
+			}
+			if err := validateUnitSource(p.root, unit.Source, symbols); err != nil {
+				fail("%s: %v", where, err)
+			}
+		}
+		for source := range unitSources {
+			sources[source] = true
 		}
 		for _, symbol := range m.Data {
 			claim(symbol.Name, "data")

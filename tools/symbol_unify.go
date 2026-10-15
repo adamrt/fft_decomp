@@ -398,6 +398,9 @@ func (p project) shareSymbolsCommand(args []string) error {
 			if f.Asm != "" {
 				return member{}, fmt.Errorf("%s:%s is assembly", m.ID, entry)
 			}
+			if f.Unit != "" {
+				return member{}, fmt.Errorf("%s:%s is compiled within unit %s", m.ID, entry, f.Unit)
+			}
 			return member{m, f}, nil
 		}
 		var members []member

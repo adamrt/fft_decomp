@@ -175,6 +175,22 @@ func resolveUnitInstance(config *projectConfig, spec *unitSpec, instance unitIns
 	return unit, nil
 }
 
+// unitInstance resolves one of the module's configured units: its members
+// are the rows naming it, in address order, and they must follow one
+// another, share a profile class and declare contiguous read-only data.
+func (m *moduleSpec) unitInstance(config *projectConfig, name string) (*unitInstance, error) {
+	unit := m.unit(name)
+	if unit == nil {
+		return nil, fmt.Errorf("%s has no unit %s", m.ID, name)
+	}
+	var functions []string
+	for _, f := range m.unitMembers(name) {
+		functions = append(functions, f.Name)
+	}
+	spec := &unitSpec{name: unit.Name, source: unit.Source, functions: functions}
+	return resolveUnitInstance(config, spec, unitInstanceYAML{Module: m.ID})
+}
+
 // unitProfile is the one profile a unit instance compiles with. Members may
 // differ only in division checks: that flag belonged to the whole build, and
 // a function without a division compiles identically either way, so the
@@ -467,6 +483,11 @@ func validateUnitSource(root, source string, symbols []string) error {
 	if err != nil {
 		return err
 	}
+	return validateUnitSourceData(source, data, symbols)
+}
+
+// validateUnitSourceData checks merged source text before it is written.
+func validateUnitSourceData(source string, data []byte, symbols []string) error {
 	declarations, _, err := scanFileScopeDeclarations(string(data))
 	if err != nil {
 		return fmt.Errorf("%s: %w", source, err)
