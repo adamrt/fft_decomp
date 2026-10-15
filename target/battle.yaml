@@ -1063,8 +1063,8 @@ functions:
   - {addr: 0x8014b394, size: 1684, name: menu_display_text_variant, hash: 80dbacaf4e422774}
   - {addr: 0x8014ba28, size: 188, name: menu_text_advance_cursor_with_backreferences, hash: ecd0d27b4b25d3f0, source: src/shared/text/text_advance_cursor_with_backreferences.c, source_symbol: text_advance_cursor_with_backreferences}
   - {addr: 0x8014bf54, size: 40, name: mem_copy_bytes_nonempty, hash: 73eb033d6e800062, source: src/shared/memory/mem_copy_bytes_nonempty.c}
-  - {addr: 0x8014bf7c, size: 72, name: battle_text_read_packed_nibble, hash: ae6f7bc884e8a41c}
-  - {addr: 0x8014bfc4, size: 80, name: battle_write_packed_nibble, hash: b50d2f23553363d9}
+  - {addr: 0x8014bf7c, size: 72, name: gfx_read_packed_nibble, hash: ae6f7bc884e8a41c, source: src/shared/gfx/gfx_read_packed_nibble.c}
+  - {addr: 0x8014bfc4, size: 80, name: gfx_write_packed_nibble, hash: b50d2f23553363d9, source: src/shared/gfx/gfx_write_packed_nibble.c}
   - {addr: 0x8014c014, size: 336, name: gfx_mirror_4bpp_rect_variant, hash: d8749608f8fcb5ed}
   - {addr: 0x8014c164, size: 40, name: menu_build_and_upload_window_image, hash: e90647c567bcb102, source: src/shared/menu/menu_build_and_upload_window_image.c}
   - {addr: 0x8014c18c, size: 796, name: menu_build_window_image, hash: c553dd4a8afbd218, source: src/shared/menu/menu_build_window_image.c}

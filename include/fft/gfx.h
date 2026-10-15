@@ -467,5 +467,7 @@ void gfx_start_increasing_fade(void);
 
 /* unified */
 void gfx_set_otag_index(s32 value);
+s32 gfx_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
+void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
 
 #endif

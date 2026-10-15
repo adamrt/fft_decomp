@@ -1,24 +1,29 @@
-#include "fft/battle_script.h"
-#include "fft/event_option.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/sound.h"
 #include "fft/thread.h"
+#include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 
 /*
- * Options-menu thread, the OPTION twin of world_menu_run_game_options (same code,
- * globals and callees rebound) without its g_world_menu_thread_result stores.
+ * Options-menu thread started by world_menu_run_main_mode (mode 0) with
+ * entry->context = &g_world_option_menu_entry_table.
+ *
+ * Scrolls the two-column option list like menu_run_scrolling_ability_list_thread_variant, shows the
+ * selected option's value text (g_world_option_menu_first_text_ids[i] + g_world_game_option_values[i]),
+ * starts world_menu_run_option_choice on confirm, and each frame packs the option
+ * values back into g_main_game_options, applies the sound mode on the main
+ * stack and reloads the input-repeat timings for the finger-cursor speed.
  *
  * The do/while (0) around the thread lookup is a scheduling barrier: its
  * loop notes keep the input-1 spill and the entry load ahead of the
  * row-count loads, as in the target.
  */
-void option_menu_run_game_options(void) {
+void menu_run_game_options_variant(void) {
     image_load_parameters_t image_parameters;
     RECT image_rect;
     RECT clear;
@@ -54,14 +59,15 @@ void option_menu_run_game_options(void) {
     row_offset = 0;
     ring = 0;
     cursor = 0;
+    g_world_menu_thread_result = 1;
     input0 = script_get_controller_input_pointer(0);
     input1 = script_get_controller_input_pointer(1);
     do {
         thread = &g_threads[g_thread_current_id];
         entry = (menu_entry_t*)thread->function_parameter_1;
     } while (0);
-    page = g_option_menu_pages;
-    layout = g_option_menu_entry_table;
+    page = g_menu_option_pages;
+    layout = g_menu_option_entry_table;
     entry->window.h = layout->row_count * 16 + 0x10;
     entry->inner_height = layout->row_count * 16 + 0x10;
     entry->text_image.height = layout->row_count * 16 + 0x10;
@@ -73,7 +79,7 @@ void option_menu_run_game_options(void) {
     image_parameters.height = entry->window.h - 0xE;
     menu_build_window_sprites_variant(&image_rect, entry, &page->icons);
     buffer = menu_alloc_memory(0x1E0);
-    g_option_menu_pages[0].icons.base.sprites[3].y0 -= 2;
+    g_menu_option_pages[0].icons.base.sprites[3].y0 -= 2;
     clear.x = entry->vram_origin.x;
     clear.y = 0xFE;
     clear.w = (s16)image_parameters.width / 4;
@@ -100,7 +106,7 @@ void option_menu_run_game_options(void) {
         arrow[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
-    base = g_option_menu_pages;
+    base = g_menu_option_pages;
     base->arrows[0].y0 += 4;
     menu_init_sprt_variant(&base->thumb);
     base->thumb.u0 = 0x10;
@@ -137,39 +143,39 @@ void option_menu_run_game_options(void) {
     menu_init_scaled_draw_area_packets(&page->title_area);
     menu_init_scaled_draw_area_packets(&page->value_area);
     menu_init_sprt_variant(&base->title);
-    text_configure_sprite_vram(&g_option_menu_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
+    text_configure_sprite_vram(&g_menu_option_title_image_rect, entry->inner_width, 0x2C, &base->title, 0);
     image = menu_build_and_upload_window_frame_image_variant(
-        entry->inner_width, 0x2C, &g_option_menu_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
+        entry->inner_width, 0x2C, &g_menu_option_title_image_rect, MENU_WINDOW_FRAME_ALTERNATE_BUILD);
     base->title.x0 = entry->window.x;
     base->title.y0 = entry->window.y + entry->window.h + 1;
     g_menu_text_state.pen.stride = entry->inner_width;
     menu_set_text_origin(0x18, 0xE);
     menu_display_text_entry(0x502B, image, &g_menu_text_state.pen);
-    LoadImage(&g_option_menu_title_image_rect, (u32*)image);
+    LoadImage(&g_menu_option_title_image_rect, (u32*)image);
     thread_wait_frames(1);
     menu_free_memory(image);
     value_rect.x = base->title.x0;
     value_rect.y = base->title.y0;
     value_rect.w = base->title.w;
     value_rect.h = base->title.h;
-    mem_copy_bytes_nonempty(&g_option_menu_entry_panel_rect, &entry->window.x, 8);
+    mem_copy_bytes_nonempty(&g_menu_option_entry_panel_rect, &entry->window.x, sizeof(g_menu_option_entry_panel_rect));
     thread_start(g_thread_current_id + 1, menu_window_frame_thread);
-    g_option_menu_entry_panel_rect.h += 0xC;
-    g_option_menu_entry_panel_rect.y -= 2;
-    thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_menu_entry_panel_rect, 0, 0);
+    g_menu_option_entry_panel_rect.h += 0xC;
+    g_menu_option_entry_panel_rect.y -= 2;
+    thread_set_parameters(g_thread_current_id + 1, (s32)&g_menu_option_entry_panel_rect, 0, 0);
     thread_yield();
     menu_init_sprt_variant(&base->value);
-    text_configure_sprite_vram(&g_option_menu_value_image_rect, 0x3C, 0x10, &base->value, 0);
+    text_configure_sprite_vram(&g_menu_option_value_image_rect, 0x3C, 0x10, &base->value, 0);
     base->value.x0 = entry->window.x + 0x5C;
     base->value.y0 = entry->window.y + entry->window.h + 0xF;
     menu_clear_render_buffer(buffer, 0x1E0);
     g_menu_text_state.pen.stride = 0x3C;
     menu_set_text_origin(0, 0);
     menu_display_text_entry(0x5021, buffer, &g_menu_text_state.pen);
-    LoadImage(&g_option_menu_value_image_rect, (u32*)buffer);
+    LoadImage(&g_menu_option_value_image_rect, (u32*)buffer);
     mem_copy_bytes_nonempty(&base[1], base, sizeof(options_menu_page_t));
     for (;;) {
-        page = &g_option_menu_pages[i & 1];
+        page = &g_menu_option_pages[i & 1];
         if (delta == 0 && menu_can_accept_input_variant() != 0) {
             if ((*input0 & PSX_PAD_UP) && (!(*input1 & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
@@ -242,7 +248,7 @@ void option_menu_run_game_options(void) {
             menu_set_text_origin(0, 0);
             menu_display_text_entry(
                 g_menu_option_value_text_id_bases[index] + g_menu_option_values[index], buffer, &g_menu_text_state.pen);
-            LoadImage(&g_option_menu_value_image_rect, (u32*)buffer);
+            LoadImage(&g_menu_option_value_image_rect, (u32*)buffer);
         }
         thread_yield();
         if (menu_should_close_thread_variant(input0) != 0) {
@@ -307,8 +313,8 @@ void option_menu_run_game_options(void) {
         } else {
             thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 1, 0);
         }
-        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_main_gfx_screen_polarity);
-        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_main_gfx_screen_polarity);
+        gfx_build_scaled_draw_area_pair_swapped(&page->title_area, &entry->window, i, g_active_graphics_buffer_index);
+        gfx_build_scaled_draw_area_pair_swapped(&page->value_area, &value_rect, i, g_active_graphics_buffer_index);
         gfx_draw_or_append_gpu_primitive(&page->title_area.areas[1]);
         gfx_draw_or_append_gpu_primitive(&page->icon_mode);
         gfx_draw_or_append_gpu_primitive(frame);
@@ -346,9 +352,10 @@ void option_menu_run_game_options(void) {
         g_main_menu_scroll_fast_step = g_menu_option_input_repeat_timings[column].scroll_fast_step;
     }
     menu_free_memory(buffer);
-    gfx_free_texture_rect(&g_option_menu_title_image_rect);
-    gfx_free_texture_rect(&g_option_menu_value_image_rect);
+    gfx_free_texture_rect(&g_menu_option_title_image_rect);
+    gfx_free_texture_rect(&g_menu_option_value_image_rect);
     thread_wait_frames(1);
+    g_world_menu_thread_result = 2;
     thread_set_parameters(g_thread_current_id + 1, 0, 0, 1);
     thread_exit_current();
 }

@@ -90,7 +90,7 @@ s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16*
     if (list_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(list_index, entries);
     } else {
-        world_item_sort_id_list(sort_mode & 0xF, entries);
+        item_sort_id_list_variant(sort_mode & 0xF, entries);
     }
     return count;
 }

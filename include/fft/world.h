@@ -172,12 +172,6 @@ u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1);
 void world_name_update_entry_cursor(void);
 
 /* options */
-extern menu_text_layout_t g_world_option_menu_entry_table;
-extern RECT g_world_options_menu_window_rect;
-extern RECT g_world_options_menu_title_rect;
-extern RECT g_world_options_menu_value_rect;
-extern options_menu_page_t g_world_options_menu_pages[2];
-void world_menu_run_game_options(void);
 
 /* screen */
 
@@ -874,7 +868,6 @@ s32 world_input_get_tutorial_buttons(void);
 s32 world_input_read_controller(s32 unused);
 s32 menu_input_read_tutorial_or_controller(s32 unused_0);
 void world_input_update_controller(void);
-void world_input_update_menu_state(void);
 
 /* formation */
 
@@ -1957,7 +1950,6 @@ s8 world_item_run_action_menu(void);
 s8 world_item_run_sort_order_menu(void);
 world_unit_equipment_slot_e world_item_select_equipment_slot(s16 unit_index, s32 item_id);
 s32 world_item_show_units_equipping_selected(void);
-void world_item_sort_id_list(s32 mode, s16* list);
 
 /* shop */
 /* Two-byte shop availability mask, stored most significant byte first: bit

@@ -81,7 +81,7 @@ functions:
   - {addr: 0x800e3618, size: 136, name: menu_init_primitive_colors_normal, hash: 0eafa6c1e9a53c86, source: src/shared/menu/menu_init_primitive_colors_normal.c}
   - {addr: 0x800e36a0, size: 140, name: menu_init_primitive_colors_dimmed, hash: ed7ffbf13272f8dc, source: src/shared/menu/menu_init_primitive_colors_dimmed.c}
   - {addr: 0x800e372c, size: 380, name: text_build_display_message, hash: 340aa3e43d90fd1d, source: src/shared/text/text_build_display_message.c}
-  - {addr: 0x800e38a8, size: 656, name: world_input_update_menu_state, hash: 13af0965fdb71ad6, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x800e38a8, size: 656, name: menu_input_update_dialog_state, hash: 13af0965fdb71ad6, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, source: src/shared/menu/menu_input_update_dialog_state.c}
   - {addr: 0x800e3b38, size: 84, name: menu_release_current_thread_slot, hash: 83ddde4c1bebdfdd, source: src/shared/menu/menu_release_current_thread_slot.c}
   - {addr: 0x800e3b8c, size: 36, name: thread_get_current_task_id, hash: 3cea094e5efaa530, source: src/shared/thread/thread_get_current_task_id.c}
   - {addr: 0x800e3bb0, size: 1612, name: text_draw_glyph_with_typewriter_delay, hash: 998b0c534e9802dc, source: src/shared/text/text_draw_glyph_with_typewriter_delay.c}
@@ -448,7 +448,7 @@ functions:
   - {addr: 0x80102c50, size: 328, name: menu_at_list_select_unit_thread, hash: 9767ee804f9e3394, source: src/shared/menu/menu_at_list_select_unit_thread.c}
   - {addr: 0x80102d98, size: 224, name: menu_start_at_list_thread, hash: c8919ff036b5a45b, source: src/shared/menu/menu_start_at_list_thread.c}
   - {addr: 0x80102e78, size: 520, name: world_menu_run_main_mode, hash: c6870290bae10381}
-  - {addr: 0x80103080, size: 4408, name: world_menu_run_game_options, hash: cc716f3bf7078b8c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x80103080, size: 4408, name: menu_run_game_options_variant, hash: cc716f3bf7078b8c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801041b8, size: 1652, name: menu_run_option_choice, hash: c92a8d3ef7a62251, source: src/shared/menu/menu_run_option_choice.c}
   - {addr: 0x8010482c, size: 80, name: menu_close, hash: 6d0bc77451aa653a, source: src/shared/menu/menu_close.c}
   - {addr: 0x8010487c, size: 3460, name: menu_run_battle_help, hash: 19f312de2ac42e56, source: src/shared/menu/menu_run_battle_help.c}
@@ -721,7 +721,7 @@ functions:
   - {addr: 0x801210e8, size: 464, name: world_formation_build_record_list, hash: 93fb6fa91f4fa5c9}
   - {addr: 0x801212b8, size: 688, name: world_formation_save_records_to_party, hash: c0932d02a682df31}
   - {addr: 0x80121568, size: 236, name: item_get_ranking_value, hash: c162face50932c06, source: src/shared/item/item_get_ranking_value.c}
-  - {addr: 0x80121654, size: 1548, name: world_item_sort_id_list, hash: cadb2570fbcc2eab}
+  - {addr: 0x80121654, size: 1548, name: item_sort_id_list_variant, hash: cadb2570fbcc2eab}
   - {addr: 0x80121c60, size: 872, name: world_formation_sort_roster, hash: 81bb011ed79bb2fb}
   - {addr: 0x80121fc8, size: 88, name: menu_load_sort_key_list, hash: e9c6e09b68b8a95e, source: src/shared/menu/menu_load_sort_key_list.c}
   - {addr: 0x80122020, size: 96, name: menu_store_sort_key_list, hash: baa6b7f2ddd835f6, source: src/shared/menu/menu_store_sort_key_list.c}
@@ -1270,7 +1270,7 @@ data:
   - {addr: 0x80156ca0, name: g_menu_thin_panel_texture_windows}
   - {addr: 0x80156cd8, name: g_menu_panel_texture_windows}
   - {addr: 0x80156d24, name: g_world_gfx_draw_area_scale_percent}
-  - {addr: 0x80156d90, name: g_world_option_menu_entry_table}
+  - {addr: 0x80156d90, name: g_menu_option_entry_table}
   - {addr: 0x80156dbc, name: g_menu_at_list_entry_table}
   - {addr: 0x80156de8, name: g_world_dead_unit_menu_entries}
   - {addr: 0x80156e38, name: g_world_dead_unit_menu}
@@ -1920,7 +1920,7 @@ data:
   - {addr: 0x801ac91c, name: g_world_gfx_image_blit_source}
   - {addr: 0x801ac92c, name: g_world_gfx_image_blit_destination}
   - {addr: 0x801ac93c, name: g_menu_window_frame_image}
-  - {addr: 0x801acd3c, name: g_world_options_menu_window_rect}
+  - {addr: 0x801acd3c, name: g_menu_option_entry_panel_rect}
   - {addr: 0x801acd44, name: g_world_menu_at_list_primary_values}
   - {addr: 0x801ad144, name: g_world_menu_at_list_secondary_values}
   - {addr: 0x801ad344, name: g_world_menu_at_list_indices}
@@ -1930,9 +1930,9 @@ data:
   - {addr: 0x801adb50, name: g_world_dead_unit_move_result}
   - {addr: 0x801ae334, name: g_world_action_target_list_slots}
   - {addr: 0x801ae3d4, name: g_menu_at_list_text}
-  - {addr: 0x801ae884, name: g_world_options_menu_title_rect}
-  - {addr: 0x801ae88c, name: g_world_options_menu_value_rect}
-  - {addr: 0x801ae894, name: g_world_options_menu_pages}
+  - {addr: 0x801ae884, name: g_menu_option_title_image_rect}
+  - {addr: 0x801ae88c, name: g_menu_option_value_image_rect}
+  - {addr: 0x801ae894, name: g_menu_option_pages}
   - {addr: 0x801aebb4, name: g_menu_option_picker_icon_records}
   - {addr: 0x801aecb4, name: g_menu_help_controller_state_ptr}
   - {addr: 0x801aecb8, name: g_menu_help_topic_text_ids}

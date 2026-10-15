@@ -24,7 +24,7 @@
 
 #define YIELD_OR_INPUT()                                                                                               \
     if (g_world_formation_screen_active != 0 && rec.box_type == DIALOG_BOX_TYPE_HELP) {                                \
-        world_input_update_menu_state();                                                                               \
+        menu_input_update_dialog_state();                                                                              \
     } else {                                                                                                           \
         thread_yield();                                                                                                \
     }

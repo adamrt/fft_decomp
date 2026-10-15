@@ -47,4 +47,7 @@ void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
 s32 item_run_rearrange_mode(void);
 s32 item_run_category_menu_variant(void);
 
+/* unified */
+void item_sort_id_list_variant(s32 mode, s16* list);
+
 #endif

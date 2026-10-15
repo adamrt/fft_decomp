@@ -21,8 +21,6 @@ void option_entrypoint(s32 menu_type);
 
 /* game options */
 
-void option_menu_run_game_options(void);
-
 /* at list */
 extern menu_list_page_t g_option_at_list_pages[2];
 extern battle_at_entry_t g_option_menu_at_list_descriptors[BATTLE_AT_LIST_CAPACITY];
@@ -41,10 +39,6 @@ extern s16 g_option_dead_unit_primary_result;
 extern s16 g_option_dead_unit_secondary_result;
 
 /* menus */
-extern menu_text_layout_t g_option_menu_entry_table[1];
-extern options_menu_page_t g_option_menu_pages[2];
-extern RECT g_option_menu_title_image_rect;
-extern RECT g_option_menu_value_image_rect;
 
 /* graphics */
 
@@ -58,6 +52,5 @@ extern u32* g_option_dead_unit_controller_input;
 /* threads */
 
 /* unit panels */
-extern RECT g_option_menu_entry_panel_rect;
 
 #endif

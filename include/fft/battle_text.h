@@ -9,9 +9,6 @@
 
 /* glyph rendering */
 
-s32 battle_text_read_packed_nibble(const u8* data, s32 index, s32 row, s32 stride);
-void battle_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value);
-
 /* numbers */
 
 /* text sections */

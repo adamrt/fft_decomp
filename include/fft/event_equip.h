@@ -138,7 +138,6 @@ extern s8 g_equip_remove_item_previewed_slot;
 
 s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
 void equip_item_build_inventory_totals(void);
-void equip_item_sort_list_by_criteria(s32 mode, s16* list);
 s32 equip_item_run_type_order_mode(void);
 
 /* rearrange */

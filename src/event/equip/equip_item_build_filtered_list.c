@@ -84,7 +84,7 @@ s32 equip_item_build_filtered_list(s16 unit_index, s16 sort_mode, s8 category, s
     if (category_index < 5 && sort_mode >= 1 && sort_mode < 6) {
         count = item_sort_list_by_category_order(category_index, list);
     } else {
-        equip_item_sort_list_by_criteria(sort_mode & 0xF, list);
+        item_sort_id_list_variant(sort_mode & 0xF, list);
     }
     return count;
 }

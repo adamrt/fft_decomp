@@ -2683,5 +2683,12 @@ extern menu_icon_record_t g_menu_option_picker_icon_records[2];
 extern s32 g_menu_option_reference_values[];
 extern menu_input_timing_profile_t g_menu_option_input_repeat_timings[];
 void menu_run_option_choice(void);
+void menu_input_update_dialog_state(void);
+extern options_menu_page_t g_menu_option_pages[2];
+extern menu_text_layout_t g_menu_option_entry_table[1];
+extern RECT g_menu_option_title_image_rect;
+extern RECT g_menu_option_entry_panel_rect;
+extern RECT g_menu_option_value_image_rect;
+void menu_run_game_options_variant(void);
 
 #endif

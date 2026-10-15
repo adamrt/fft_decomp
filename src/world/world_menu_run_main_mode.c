@@ -44,9 +44,9 @@ void world_menu_run_main_mode(s32 mode) {
     last_mode = OPTION_MENU_DEAD_UNIT;
     if (mode == OPTION_MENU_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(0xFD);
-        thread_start(g_thread_current_id - 1, world_menu_run_game_options);
+        thread_start(g_thread_current_id - 1, menu_run_game_options_variant);
         entry->select_text_table = 1;
-        entry->context = &g_world_option_menu_entry_table;
+        entry->context = &g_menu_option_entry_table;
         thread_set_parameters(g_thread_current_id - 1, (s32)entry, 0, 0);
         thread_wait_until_inactive(g_thread_current_id - 1);
         thread_exit_current();

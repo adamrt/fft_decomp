@@ -9,7 +9,7 @@
  * the shared initial/repeat/secondary key-repeat delays. During a tutorial
  * with `EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS` bits 0x5000 set the
  * repeat counters restart. */
-void world_input_update_menu_state(void) {
+void menu_input_update_dialog_state(void) {
     u32 input;
     s32 initial_delay;
     s32 repeat_delay;

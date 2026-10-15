@@ -1,37 +1,37 @@
-#include "fft/world.h"
+#include "fft/event_equip.h"
 
-/* Sort a -1 terminated item-id list in place for a shop or equipment menu.
+/* Sort a -1 terminated item list in place (EQUIP twin of world_item_sort_id_list).
  *
- * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed first. The rest
- * are bubble-sorted by the signed-byte key list g_world_sort_key_lists[mode] (-1 ends
- * it): 0 item type (0x13 ranks as 100, ascending), 1 price, 2 ranking value
- * (a shield compared with a non-shield ranks 0), 3 physical evade, 4 magic
- * evade, 5 owned plus equipped count; keys other than 0 sort descending.
- * The magic-evade key reads 0 for the left weapon but the weapon's evade for
- * the right one; the target has this asymmetry. */
-void world_item_sort_id_list(s32 mode, s16* list) {
-    s8 counts[0x100];
-    s32 count;
-    s32 i;
+ * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed, then the rest
+ * are bubble-sorted by the signed-byte criterion list
+ * g_equip_item_type_order_lists[mode] (negative ends it): 0 item type (0x13
+ * ranks as 100, ascending), 1 price, 2 ranking value (a shield compared with a
+ * non-shield ranks 0), 3 physical evade, 4 magic evade, 5 owned count; keys
+ * other than 0 sort descending. The magic-evade key reads 0 for the left
+ * weapon but the weapon's evade for the right one, as in the target.
+ * `diff *= -1` keeps the negation in int on the sign-extended difference, and
+ * the offset-first address sum keeps the target's addu operand order. */
+void item_sort_id_list_variant(s32 mode, s16* list) {
+    s16 count;
+    s16* entry;
     s32 j;
     s32 passes;
     s32 k;
+    s16 item_a;
+    s16 item_b;
     s8* criteria;
-    s32 criterion;
-    s32 id;
-    s32 item_a;
-    s32 item_b;
+    s16 criterion;
     s32 key_a;
     s32 key_b;
-    s32 diff;
+    s16 diff;
 
     count = 0;
     while (list[count] != -1) {
-        id = list[count] & 0x3ff;
-        if (id == 0 || id >= ITEM_ID_END) {
-            j = count;
-            while ((list[j] = list[j + 1]) != -1) {
-                j++;
+        entry = (s16*)(count * 2 + (s32)list);
+        item_a = *entry & 0x3ff;
+        if (item_a == 0 || item_a >= ITEM_ID_END) {
+            while ((*entry = entry[1]) != -1) {
+                entry++;
             }
         } else {
             count++;
@@ -40,21 +40,14 @@ void world_item_sort_id_list(s32 mode, s16* list) {
     if (count < 2) {
         return;
     }
-    memset(counts, 0, 0x100);
-    for (j = 0; j < g_world_formation_record_count; j++) {
-        for (i = 0; i < 5; i++) {
-            counts[g_world_unit_pointers[j]->equipment[i]]++;
-        }
-    }
     passes = count - 1;
-    counts[0] = 0;
     criteria = g_item_type_order_lists[mode];
     for (; passes > 0; passes--) {
         for (j = 0; j < passes; j++) {
             k = 0;
+            criterion = criteria[k];
             item_a = list[j] & 0x3ff;
             item_b = list[j + 1] & 0x3ff;
-            criterion = criteria[k];
             while (criterion >= 0) {
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_a = g_main_item_primary_data[item_a].type;
@@ -89,7 +82,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                         key_a = 0;
                     }
                 } else if (criterion == ITEM_SORT_KEY_HELD_COUNT) {
-                    key_a = item_adjust_inventory_count(item_a, 0) + counts[item_a];
+                    key_a = item_get_total_count_variant(item_a);
                 }
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_b = g_main_item_primary_data[item_b].type;
@@ -124,7 +117,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                         key_b = 0;
                     }
                 } else {
-                    key_b = item_adjust_inventory_count(item_b, 0) + counts[item_b];
+                    key_b = item_get_total_count_variant(item_b);
                 }
                 k++;
                 if (criterion == ITEM_SORT_KEY_RANKING) {
@@ -149,7 +142,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
                 criterion = criteria[k];
             }
             if (criterion == ITEM_SORT_KEY_TYPE) {
-                diff = -diff;
+                diff *= -1;
             }
             if (diff >= 0) {
                 diff = list[j];

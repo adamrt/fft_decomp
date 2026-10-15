@@ -78,7 +78,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
                 list[length++] = (second < ITEM_ID_THROWABLE_FIRST) ? second : ITEM_ID_NOTHING;
             }
             list[length] = -1;
-            world_item_sort_id_list(7, list);
+            item_sort_id_list_variant(7, list);
             if (world_ability_has_two_hands(unit_index)) {
                 for (i = 0; list[i] != -1; i++) {
                     s16 item_id = list[i];
@@ -118,12 +118,12 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
                 if (second >= ITEM_ID_THROWABLE_FIRST)
                     list[length++] = second;
                 list[length] = -1;
-                world_item_sort_id_list(7, list);
+                item_sort_id_list_variant(7, list);
             }
         } else {
             list[length++] = g_world_unit_pointers[unit_index]->equipment[slot] & WORLD_ITEM_ID_MASK;
             list[length] = -1;
-            world_item_sort_id_list(7, list);
+            item_sort_id_list_variant(7, list);
         }
         if (list[0] <= ITEM_ID_NOTHING)
             out[slot] = ITEM_ID_NOTHING;

@@ -7,7 +7,7 @@
  * which is dead there because `data` has already been copied out of it, so the
  * parity has to be assigned to `mask` rather than tested inline; a fresh local
  * or an inline `if (!(index & 1))` puts the `andi` in the return register. */
-void battle_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value) {
+void gfx_write_packed_nibble(u8* data, s32 index, s32 row, s32 stride, s32 value) {
     s32 mask;
     u8* destination;
 

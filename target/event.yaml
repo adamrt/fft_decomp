@@ -1376,7 +1376,7 @@ functions:
   - {addr: 0x801c6ca0, size: 276, name: equip_unit_load_data_from_stats, hash: e23d868f93ea3956}
   - {addr: 0x801c6db4, size: 600, name: equip_unit_commit_loadout_to_stats, hash: 83c2cd7ae34a8020}
   - {addr: 0x801c700c, size: 236, name: item_get_ranking_value, hash: 182f2f01a7256fdd, source: src/shared/item/item_get_ranking_value.c}
-  - {addr: 0x801c70f8, size: 1492, name: equip_item_sort_list_by_criteria, hash: 34f1458a5685682d}
+  - {addr: 0x801c70f8, size: 1492, name: item_sort_id_list_variant, hash: 34f1458a5685682d}
   - {addr: 0x801c76cc, size: 88, name: menu_load_sort_key_list, hash: 680fa5ae6e9a89b3, source: src/shared/menu/menu_load_sort_key_list.c}
   - {addr: 0x801c7724, size: 96, name: menu_store_sort_key_list, hash: 8b8d7d3c8a2297aa, source: src/shared/menu/menu_store_sort_key_list.c}
   - {addr: 0x801c7784, size: 88, name: item_store_category_list, hash: 48c40016f726fb75, source: src/shared/item/item_store_category_list.c}
@@ -2170,7 +2170,7 @@ functions:
   - {addr: 0x801c1814, size: 328, name: menu_at_list_select_unit_thread, hash: 2d768b550d19a17f, source: src/shared/menu/menu_at_list_select_unit_thread.c}
   - {addr: 0x801c195c, size: 224, name: menu_start_at_list_thread, hash: 5bf5050f008c2b98, source: src/shared/menu/menu_start_at_list_thread.c}
   - {addr: 0x801c1a3c, size: 640, name: option_entrypoint, hash: 8f7b254e0391baa2}
-  - {addr: 0x801c1cbc, size: 4384, name: option_menu_run_game_options, hash: 3180807fdb0707d1, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {addr: 0x801c1cbc, size: 4384, name: menu_run_game_options_variant, hash: 3180807fdb0707d1, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801c2ddc, size: 1652, name: menu_run_option_choice, hash: d496c0741c324433, source: src/shared/menu/menu_run_option_choice.c}
 
 data:
@@ -2179,7 +2179,7 @@ data:
   - {addr: 0x801c3490, name: g_menu_thin_panel_texture_windows}
   - {addr: 0x801c34c8, name: g_menu_panel_texture_windows}
   - {addr: 0x801c3514, name: g_menu_draw_area_scale_percent}
-  - {addr: 0x801c3580, name: g_option_menu_entry_table}
+  - {addr: 0x801c3580, name: g_menu_option_entry_table}
   - {addr: 0x801c35ac, name: g_menu_at_list_entry_table}
   - {addr: 0x801c35d8, name: g_option_dead_unit_menu_entries}
   - {addr: 0x801c3628, name: g_option_dead_unit_menu}
@@ -2196,7 +2196,7 @@ data:
   - {addr: 0x801c9ce4, name: g_text_glyph_source}
   - {addr: 0x801c9cf4, name: g_text_glyph_dest}
   - {addr: 0x801c9d04, name: g_menu_window_frame_image}
-  - {addr: 0x801ca104, name: g_option_menu_entry_panel_rect}
+  - {addr: 0x801ca104, name: g_menu_option_entry_panel_rect}
   - {addr: 0x801ca10c, name: g_option_menu_at_list_primary_values}
   - {addr: 0x801ca50c, name: g_option_menu_at_list_secondary_values}
   - {addr: 0x801ca70c, name: g_option_menu_at_list_indices}
@@ -2206,17 +2206,17 @@ data:
   - {addr: 0x801caf18, name: g_option_dead_unit_secondary_result}
   - {addr: 0x801cb6fc, name: g_option_menu_at_list_descriptors}
   - {addr: 0x801cb79c, name: g_menu_at_list_text}
-  - {addr: 0x801cbc4c, name: g_option_menu_title_image_rect}
-  - {addr: 0x801cbc54, name: g_option_menu_value_image_rect}
-  - {addr: 0x801cbc5c, name: g_option_menu_pages}
+  - {addr: 0x801cbc4c, name: g_menu_option_title_image_rect}
+  - {addr: 0x801cbc54, name: g_menu_option_value_image_rect}
+  - {addr: 0x801cbc5c, name: g_menu_option_pages}
   - {addr: 0x801cbf7c, name: g_menu_option_picker_icon_records}
   - {addr: 0x801cc074, name: g_menu_scratch_buffer}
 
 overrides:
   - {function: menu_run_at_list_variant, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
+  - {function: menu_run_game_options_variant, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
   - {function: menu_thin_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
   - {function: menu_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
-  - {function: option_menu_run_game_options, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
 ---
 module: event-require
 file: EVENT/REQUIRE.OUT
