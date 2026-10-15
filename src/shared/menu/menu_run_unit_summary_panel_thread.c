@@ -32,7 +32,7 @@ void menu_run_unit_summary_panel_thread(void) {
     speed = 0x16;
     slide = 0x84;
     digits = &g_menu_unit_summary_digit_images;
-    menu_load_selected_unit();
+    menu_load_selected_unit_variant();
     unit = menu_get_selected_unit_stats();
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
     sprite = frames[0].sprites;

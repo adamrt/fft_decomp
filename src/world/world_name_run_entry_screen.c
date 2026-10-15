@@ -67,7 +67,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
     world_name_init_entry(list);
     g_world_name_entry_last_state = -1;
     world_gfx_set_fade_disabled(1);
-    world_input_update_with_message_state();
+    menu_input_update_with_message_state_variant();
     while (g_world_name_entry_state != 0xFF) {
         world_gfx_update_fade_in_tile();
         main_system_frame_stub();
@@ -113,7 +113,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         gfx_load_image_and_wait(&g_world_name_entry_screen_image_rect, image);
         DrawOTag(otag);
         ClearOTag(g_menu_gfx_context->otag, g_world_ot_length);
-        world_input_update_with_message_state();
+        menu_input_update_with_message_state_variant();
         busy = world_map_is_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
@@ -132,12 +132,13 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         cursor.x = value;
         world_menu_set_draw_priority(0x28);
         world_menu_draw_animated_vertical_cursor(&cursor, &g_world_name_entry_text_cursor_anim, busy);
-        menu_run_script_with_palette_mode(&g_world_name_entry_display_script, 0, busy);
+        menu_run_script_with_palette_mode_variant(&g_world_name_entry_display_script, 0, busy);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_L1, 0x37, 0x50, g_menu_input_primary_repeat & PSX_PAD_L1, busy, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R1, 0xB1, 0x50, g_menu_input_primary_repeat & PSX_PAD_R1, busy, MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(&g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
+        menu_run_script_with_palette_mode_variant(
+            &g_world_name_entry_keyboard_script, g_menu_input_primary_repeat, busy);
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames_variant();
         menu_input_update_event_state_variant(

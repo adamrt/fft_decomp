@@ -58,7 +58,7 @@ void option_entrypoint(s32 menu_type) {
     }
     if (menu_type == OPTION_MENU_AT_LIST) {
         script_pulse_tutorial_wait_value(0xf9);
-        option_menu_start_at_list_thread();
+        menu_start_at_list_thread_variant();
     }
     if (menu_type == OPTION_MENU_DEAD_UNIT) {
         menu_start_dead_unit_threads();

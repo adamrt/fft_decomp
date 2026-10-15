@@ -6,8 +6,8 @@
 #include "psx/types.h"
 
 /* event waits */
-s32 card_wait_for_bios_event(void);
-s32 card_wait_for_hardware_event(void);
+s32 card_wait_for_bios_event_variant(void);
+s32 card_wait_for_hardware_event_variant(void);
 
 /* state */
 extern u8 g_card_slot;

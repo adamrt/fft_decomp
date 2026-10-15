@@ -15,11 +15,11 @@ void menu_preview_attack_target_stats(void) {
     saved = g_menu_selected_unit.battle_id;
     /* The target loads the preview unit id unsigned (lhu). */
     g_menu_selected_unit.battle_id = g_menu_comparison_unit_data.battle_id;
-    menu_load_selected_unit();
+    menu_load_selected_unit_variant();
     g_menu_selected_unit.battle_id = saved;
     g_menu_comparison_unit_fields.state.generic_monster = g_menu_selected_unit_fields.state.generic_monster;
     g_menu_comparison_unit_fields.state.ability_ids[2] = g_menu_selected_unit_fields.state.ability_ids[2];
-    menu_load_selected_unit();
+    menu_load_selected_unit_variant();
     menu_display_hovered_unit_stats(&g_menu_attack_target_stats_rect, UNIT_STATS_PANEL_ATTACK_TARGET,
         g_menu_attack_target_stats_setup, &g_menu_comparison_unit_status);
 }

@@ -215,7 +215,7 @@ extern RECT g_menu_portrait_palette_rect;
 
 /* Unreferenced in both scenes: uploads one EVTFACE.BIN portrait and its palettes. */
 void menu_load_portrait_image(s32 portrait_id);
-void menu_build_unflagged_portrait_poly(s32 portrait_id, POLY_FT4* poly);
+void menu_build_portrait_poly_variant(s32 portrait_id, POLY_FT4* poly);
 
 /* status panels */
 /* Battle menu status and character-editor panel records. The EVENT overlays
@@ -564,7 +564,7 @@ void menu_run_status_panel_thread(void);
 void menu_run_equipment_ability_panel_thread(void);
 void menu_run_numeric_editor_thread(void);
 void menu_run_numeric_editor_frame_thread_variant(void);
-void menu_load_selected_unit(void);
+void menu_load_selected_unit_variant(void);
 void menu_refresh_hovered_unit_stats_display(void);
 void menu_refresh_right_unit_stats_display(void);
 void menu_run_unit_summary_panel_thread(void);
@@ -596,7 +596,7 @@ extern s32 g_menu_indicator_packet_index[2];
 extern s32 g_menu_indicator_state[2];
 extern menu_gradient_panel_prims_t g_menu_thread_indicator_packets[2][2];
 
-void menu_draw_thread_status_indicators(void);
+void menu_draw_thread_status_indicators_variant(void);
 s32 menu_thread_is_running_variant(s32 thread_id);
 
 /* panel drawing */
@@ -618,7 +618,7 @@ extern sprite_sheet_frame_t g_menu_panel_status_uv_rects[];
 extern const u16 g_menu_panel_status_y_offsets[];
 void menu_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread);
-void menu_build_status_group_primitives(POLY_FT4* poly);
+void menu_build_status_group_primitives_variant(POLY_FT4* poly);
 void menu_build_zodiac_primitives(zodiac_draw_context_t* context, POLY_FT4* poly);
 void menu_init_scaled_draw_area_packets(scaled_draw_area_pair_t* data);
 
@@ -1121,7 +1121,6 @@ u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* ren
 extern rgb24_t g_menu_text_color;
 extern menu_gfx_context_t* g_menu_gfx_context;
 extern s16 g_menu_gfx_otag_index;
-extern s16 g_menu_gfx_semitransparency;
 extern u16 g_menu_atlas_texture_page;
 extern u16 g_menu_gfx_poly_ft4_count;
 extern u16 g_menu_gfx_poly_gt4_count;
@@ -1130,7 +1129,7 @@ extern u16 g_menu_gfx_draw_area_count;
 extern u16 g_menu_gfx_draw_move_count;
 extern u16 g_menu_gfx_drawenv_y;
 
-rgb24_t* menu_gfx_get_draw_color(void);
+rgb24_t* menu_gfx_get_draw_color_variant(void);
 void menu_gfx_enqueue_draw_area(RECT* rect, s32 idx);
 
 void menu_gfx_enqueue_draw_mode_variant(s32 dfe, s32 dtd, s32 tpage, RECT* tw, s32 idx);
@@ -1627,7 +1626,7 @@ void menu_clear_selection_record(s32 index);
 /* The record count differs per module (14 in BUNIT). */
 extern menu_selection_record_t g_menu_selection_records[];
 void menu_clear_selection_records(void);
-void menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
+void menu_get_selection_record_variant(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 void menu_store_sort_key_list(s32 list_index, const s16* source);
 void menu_load_sort_key_list(s32 list_index, s16* destination);
 extern u8 g_menu_selected_slot;
@@ -1816,6 +1815,8 @@ void menu_toggle_numeric_editor_thread(s32 enable);
 extern menu_status_thread_t g_menu_numeric_panel_params;
 extern menu_status_thread_t g_menu_preview_stats_thread_params;
 extern menu_entry_t g_menu_at_list_state;
+void menu_thin_window_frame_thread(void);
+void menu_window_frame_thread(void);
 
 /* options */
 /*
@@ -2593,7 +2594,6 @@ void menu_display_text_variant(s32 text_id, u8* pixels, glyph_blit_t* origin, u8
 void menu_draw_active_window_frames_variant(void);
 void menu_init_sprt_variant(SPRT* sprite);
 void menu_run_scrolling_ability_list_thread_variant(void);
-void menu_run_unit_status_thread_variant(void);
 
 /* Page scroll direction of the overlay unit, item and job lists. */
 typedef enum menu_vertical_scroll_direction {
@@ -2607,7 +2607,6 @@ typedef enum menu_vertical_scroll_direction {
  * that differ beyond their names (bunit_, equip_ and jobstts_
  * menu_init_scrollable_list_core). The shared wrappers bind this name to the
  * overlay's own body by override. */
-void menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 
 /* scrollable lists */
 extern s16 g_menu_list_row_group_count;
@@ -2623,7 +2622,7 @@ extern s8 g_menu_list_scroll_direction; /* read with lb */
 extern s8 g_menu_list_redraw_pending;   /* read with lb (bunit_cmd_run_scrollable_list_handler) */
 extern s16 g_menu_list_selected_index;
 extern s16 g_menu_scroll_base_index;
-void menu_init_scrollable_list(s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
 
 /* help menus */
 void menu_run_battle_help(void);
@@ -2645,14 +2644,31 @@ void menu_run_require_help(void);
 /* entry item icons */
 menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
 
-/* unified */
+/* other */
+extern s8 g_gfx_transition_frame;
+extern s16 g_menu_gfx_semitransparency;
 extern RECT g_menu_thin_panel_texture_windows[7];
 extern RECT g_menu_panel_texture_windows[7];
 extern u8 g_menu_window_frame_image[];
-void menu_thin_window_frame_thread(void);
-void menu_window_frame_thread(void);
-extern s32 g_menu_help_message_text_id;
 void menu_set_window_scale_step(s32 value);
 extern u8 g_menu_at_list_text[];
+s32 menu_get_window_scale_step(void);
+
+/* help menus */
+extern s32 g_menu_help_message_text_id;
+
+/* per-module bodies: each module links its own copy under the shared name. */
+void menu_draw_text_columns_narrow_variant(menu_entry_t* entry, s32* row_offset, u8* buffer);
+s32 menu_get_thread_activity_variant(void);
+void menu_run_ability_list_thread_variant(void);
+void menu_run_equipment_list_thread_variant(void);
+s32 menu_ability_update_list_menu_variant(void);
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction_variant(void);
+s32 menu_run_job_list_variant(void);
+void menu_input_update_with_message_state_variant(void);
+s32 menu_update_equipment_variant(void);
+void menu_run_at_list_variant(void);
+void menu_start_at_list_thread_variant(void);
+void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_index, u8* text_table);
 
 #endif

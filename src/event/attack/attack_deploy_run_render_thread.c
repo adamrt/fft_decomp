@@ -113,7 +113,7 @@ void attack_deploy_run_render_thread(void) {
             break;
         }
         if (g_attack_deploy_tiles_only_mode == 0) {
-            attack_gfx_build_status_group_primitives(g_attack_deploy_render_buffers[frame & 1].status);
+            menu_build_status_group_primitives_variant(g_attack_deploy_render_buffers[frame & 1].status);
         }
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].screen_offset);
         attack_deploy_update_cursor_primitives(frame, &g_attack_deploy_render_buffers[frame & 1]);

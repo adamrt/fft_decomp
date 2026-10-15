@@ -30,7 +30,7 @@ void wldcore_menu_step_return_level(wldcore_menu_return_level_t* level) {
         return;
     }
     g_wldcore_menu_blocked_buttons = 0;
-    if (world_menu_get_thread_activity() != 0) {
+    if (menu_get_thread_activity_variant() != 0) {
         return;
     }
     wldcore_input_init_repeat_state();

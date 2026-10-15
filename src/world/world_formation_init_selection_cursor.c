@@ -11,7 +11,7 @@ void world_formation_init_selection_cursor(s16 formation_index) {
     s32 count;
     s16 x;
 
-    world_menu_init_scrollable_list_core(0, 0, 0);
+    menu_init_scrollable_list_core_variant(0, 0, 0);
     g_world_menu_script_callbacks[0].value = world_get_formation_unit_stat_by_mode;
     g_world_menu_script_callbacks[1].value = world_get_formation_unit_stat_by_mode;
     g_world_menu_script_callbacks[2].value = world_formation_get_unit_egg_hatch_progress;

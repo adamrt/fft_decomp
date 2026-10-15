@@ -63,7 +63,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             if (world_script_handle_tutorial_command() == 0) {
                 break;
             }
-            world_input_update_with_message_state();
+            menu_input_update_with_message_state_variant();
             if (g_world_unit_status_banner_active != 0) {
                 world_menu_run_unit_status_banner_countdown(0, 0);
                 menu_input_clear_state();

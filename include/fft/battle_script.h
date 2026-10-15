@@ -15,8 +15,6 @@
 /* input */
 extern u32 g_script_saved_event_input;
 
-void script_route_event_input(void);
-
 /* conditions */
 
 /* unit creation and removal */
@@ -29,8 +27,6 @@ s32 script_add_ghost_unit_event_instruction(
 void script_earthquake_start(void);
 
 /* map and lighting */
-
-void script_dark_screen_thread(void);
 
 /* graphics and messages */
 

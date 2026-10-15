@@ -42,7 +42,7 @@ void world_shop_run_item_sell_confirm_step(void) {
         g_world_shop_sell_message_wait = 1;
     }
     world_menu_switch_item_category(0);
-    menu_run_script_with_palette_mode(
+    menu_run_script_with_palette_mode_variant(
         &g_world_shop_sell_list_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     world_shop_run_obtain_gil_menu();
 }

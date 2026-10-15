@@ -35,7 +35,7 @@ void world_formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* r
         if (unit_index == g_unit_selected_index) {
             backdrop_rgb = &g_world_formation_normal_sprite_color;
         } else {
-            backdrop_rgb = world_menu_get_sprite_color();
+            backdrop_rgb = menu_gfx_get_draw_color_variant();
         }
         world_formation_draw_graphics_below_sprite(unit_index,
             g_world_unit_pointers[unit_index]->proposition_status == WORLD_FORMATION_UNIT_PROPOSITION_LEAVING

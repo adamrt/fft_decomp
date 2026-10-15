@@ -32,9 +32,8 @@ extern u8* g_item_category_lists[];
 extern s8* g_item_type_order_lists[];
 extern menu_icon_source_t g_item_graphic_descriptor;
 
-/* unified */
+/* tables */
 extern uv8_t g_item_type_icon_origins[];
-void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
 extern s8 g_item_rearrange_initialized;
 extern s16 g_item_rearrange_picked_cursor;
 extern s16 g_item_rearrange_preview_cursor;
@@ -42,6 +41,10 @@ extern u16 g_item_rearrange_picked_scroll;
 extern u8 g_item_rearrange_anim_frame;
 extern menu_entry_t g_item_action_menu;
 extern struct menu_status_panel_slot_storage g_item_preview_stat_detail;
+
+/* categories and counts */
+void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
 s32 item_run_rearrange_mode(void);
+s32 item_run_category_menu_variant(void);
 
 #endif

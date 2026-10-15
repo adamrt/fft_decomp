@@ -28,7 +28,7 @@ s32 equip_entrypoint(s32 unit, u32* otag) {
         changed = message_idle;
     }
     g_equip_text_restore_pending = changed;
-    equip_input_update_with_message_state();
+    menu_input_update_with_message_state_variant();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         menu_text_start_help_thread(3);
     }

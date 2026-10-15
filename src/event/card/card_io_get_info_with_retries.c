@@ -10,7 +10,7 @@ s32 card_io_get_info_with_retries(s32 port, s32 retry_limit) {
 
     for (i = 0; i < retry_limit; i++) {
         if (_card_info(port) == 1) {
-            result = card_io_wait_bios_event_result();
+            result = card_wait_for_bios_event_variant();
             if (result == CARD_IO_RESULT_COMPLETE)
                 break;
         } else {

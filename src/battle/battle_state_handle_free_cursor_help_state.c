@@ -3,7 +3,7 @@
 /* FreeCursorHelp game-state handler: when the help window has gone, return to the
  * free cursor. */
 void battle_state_handle_free_cursor_help_state(void) {
-    if (battle_menu_is_still_building() != 2) {
+    if (menu_get_thread_activity_variant() != 2) {
         g_battle_menu_help_opening = 0;
         battle_state_set_free_cursor();
     }

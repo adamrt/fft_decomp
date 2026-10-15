@@ -114,8 +114,6 @@ s32 card_io_load_with_retries(s32 port, s32 retry_limit);
 s32 card_io_open_or_create_selected_card(void);
 s32 card_io_poll_operation_result(void);
 void card_io_set_selected_slot(s32 value);
-s32 card_io_wait_bios_event_result(void);
-s32 card_io_wait_hardware_event_result(void);
 s32 card_io_wait_operation_result(s32 retry_limit);
 
 /* files */
@@ -179,7 +177,6 @@ extern u16 g_card_gfx_texture_page;
 extern u16 g_card_gfx_tile_capacity;
 
 rgb24_t* card_gfx_get_draw_color(void);
-s32 card_gfx_get_fade_state(void);
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,
     s32 unused_12, s32 unused_13, s32 unused_14, s32 unused_15, TILE* tiles, s32 unused_17, s32 unused_18,
@@ -187,7 +184,6 @@ void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 u
 void card_gfx_init_primitive_lists(card_graphics_context_t* lists);
 void card_gfx_set_otag_index(s32 value);
 void card_gfx_set_render_otag(u32* otag);
-void card_gfx_start_increasing_fade(void);
 void card_gfx_submit_frame_and_swap_buffers(s32 first_otag, s32 draw_otag);
 
 /* input */
@@ -251,8 +247,6 @@ extern const u8 g_card_text_job_name[];
 extern const u8 g_card_text_location_name[];
 
 /* bit streams */
-
-void card_bits_init_primary_reader(const u8* data);
 
 /* threads */
 extern menu_entry_t g_card_save_failure_thread_descriptor[];

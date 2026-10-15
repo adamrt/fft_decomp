@@ -7,7 +7,7 @@
 void battle_state_handle_mini_menu_state(void) {
     s32 menu_result;
 
-    menu_result = battle_menu_is_still_building();
+    menu_result = menu_get_thread_activity_variant();
     if (g_main_input_pressed_buttons & PSX_PAD_SELECT) {
         battle_menu_open_mini_menu_help();
     } else if (menu_result == 0) {

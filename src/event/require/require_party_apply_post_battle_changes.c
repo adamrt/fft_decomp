@@ -64,7 +64,7 @@ void require_party_apply_post_battle_changes(void) {
     battle_unit_get_stats_from_battle_id(*initial_unit_index_ptr);
     g_menu_selected_unit.battle_id = *initial_unit_index_ptr;
     initial_unit_data->name_id = *initial_unit_index_ptr;
-    menu_load_selected_unit();
+    menu_load_selected_unit_variant();
     g_menu_selected_unit_status.unit_index = *initial_unit_index_ptr;
 
     /* `affected_index < count` (not `count > 0`): combine folds the known
@@ -95,7 +95,7 @@ void require_party_apply_post_battle_changes(void) {
              * call slot on reorg's second pass. */
             transition = 0;
             if (affected_index == 0) {
-                thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, require_panel_run_unit_status_thread);
+                thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
                 thread_set_parameters(
                     THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_require_status_display_thread_params, 0, 0);
                 thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, menu_run_numeric_editor_thread);
@@ -118,7 +118,7 @@ void require_party_apply_post_battle_changes(void) {
                 index_value = *unit_index_ptr;
                 unit_display_data->battle_id = index_value;
                 unit_display_data->name_id = index_value;
-                menu_load_selected_unit();
+                menu_load_selected_unit_variant();
                 menu_copy_billboard_data_in(
                     &g_menu_selected_unit_status, unit_display_data, &g_menu_selected_unit_fields);
                 index_value = *unit_index_ptr;
@@ -249,7 +249,7 @@ void require_party_apply_post_battle_changes(void) {
                     display_index = *selected_unit_index_ptr;
                     unit_display_data->battle_id = display_index;
                     unit_display_data->name_id = display_index;
-                    menu_load_selected_unit();
+                    menu_load_selected_unit_variant();
                     index_value = *selected_unit_index_ptr;
                     g_require_status_display_redraw_request = one;
                     g_require_numeric_editor_redraw_request = one;

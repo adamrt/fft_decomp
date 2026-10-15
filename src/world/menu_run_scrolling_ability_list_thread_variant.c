@@ -136,7 +136,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         row_offset = 0;
         cursor = 0;
     }
-    world_draw_menu_text_columns_narrow(entry, &row_offset, buffer);
+    menu_draw_text_columns_narrow_variant(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
     image_rect.x = window.rect.x / 4 + entry->vram_origin.x;

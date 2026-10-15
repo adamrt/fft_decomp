@@ -45,7 +45,6 @@ extern u8 g_debugchr_editor_unit_name[];
 extern s16 g_debugchr_editor_values[];
 
 void debugchr_editor_apply_values_to_battle_unit(s32 unit_id);
-void debugchr_editor_load_selected_unit(void);
 void debugchr_editor_run_unit_thread(s32 unit_id);
 void debugchr_editor_run_session(void);
 
@@ -86,8 +85,6 @@ extern s16 g_debugchr_panel_slide_down_y[];
 extern s16 g_debugchr_panel_slide_up_y[];
 extern image_load_parameters_t g_debugchr_panel_sprite_cells[];
 extern menu_status_thread_t g_debugchr_status_display_thread_params;
-
-void debugchr_panel_run_unit_status_thread(void);
 
 /* numeric editor */
 extern menu_number_entry_t g_debugchr_editor_numeric_descriptor_a[];

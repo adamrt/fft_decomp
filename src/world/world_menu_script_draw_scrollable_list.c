@@ -49,7 +49,7 @@ menu_instruction_t* world_menu_script_draw_scrollable_list(menu_instruction_t* i
     }
     old_cursor = g_menu_list_selected_index;
     if (g_world_menu_list_scroll_direction == 0) {
-        i = world_input_read_menu_scroll_repeat();
+        i = menu_input_read_page_scroll_direction_variant();
         if (i != 0) {
             if (i != 2) {
                 world_menu_scroll_list_page(i, instruction);

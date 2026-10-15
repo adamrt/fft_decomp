@@ -288,7 +288,6 @@ extern s32 g_attack_status_display_offset_y[];
 extern s32 g_attack_status_display_thread_params;
 
 void attack_gfx_build_shaded_panel_strips(POLY_GT4* polys, s32 width, s32 shade, s32 reverse);
-void attack_panel_run_unit_status_thread(void);
 
 /* numeric editor */
 /* Five name ids and five ability/skillset ids of the unit loaded into the
@@ -328,8 +327,6 @@ extern POLY_FT4 g_attack_gfx_frame_ft4[];
 /* Map darkness uses RGB and ignores the fourth byte. */
 extern const CVECTOR g_attack_map_darkness_color;
 
-void attack_gfx_build_portrait_poly_ft4(s32 portrait_id, POLY_FT4* poly);
-void attack_gfx_build_status_group_primitives(POLY_FT4* poly);
 void attack_gfx_init_frame_ft4_array(void);
 
 /* portraits */

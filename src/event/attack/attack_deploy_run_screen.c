@@ -83,7 +83,7 @@ ramza_placed:
     thread_start(ATTACK_THREAD_SLOT_DEPLOY_RENDER, attack_deploy_run_render_thread);
     thread_set_parameters(ATTACK_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
     attack_deploy_select_unit_for_stats_display();
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, attack_panel_run_unit_status_thread);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_attack_status_display_thread_params, 0, 0);
     transition = 0;
     for (g_attack_deploy_current_squad = 0;

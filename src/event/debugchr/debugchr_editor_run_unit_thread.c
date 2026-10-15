@@ -68,7 +68,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         g_debugchr_panel_selected_unit_data.name_id = comparison_id;
         g_debugchr_panel_selected_billboard.unit_index = type_id;
     }
-    debugchr_editor_load_selected_unit();
+    menu_load_selected_unit_variant();
     g_debugchr_editor_selected_unit_slot = 0;
 
     /* The template store is repeated in both arms: jump2 cross-jumps the
@@ -94,7 +94,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         *refresh_a = 0;
         *refresh_b = 0;
         *refresh_c = 0;
-        thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, debugchr_panel_run_unit_status_thread);
+        thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
         thread_set_parameters(
             THREAD_SCREEN_SLOT_UNIT_STATUS, (u8*)refresh_a - offsetof(menu_status_thread_t, style), 0, 0);
         thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, debugchr_editor_run_numeric_thread);
@@ -121,7 +121,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             s32 render_offset;
             render_offset = (frame & 1) * sizeof(g_debugchr_gfx_render_buffers[0]);
             /* Typed polygon indexing reverses the ADDU operands. */
-            menu_build_status_group_primitives((POLY_FT4*)(render_offset + (s32)render_buffers));
+            menu_build_status_group_primitives_variant((POLY_FT4*)(render_offset + (s32)render_buffers));
         }
 
         if (thread_is_running_asm_variant(THREAD_SLOT_MENU_BUILDING) != 0) {
@@ -177,7 +177,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                         s32 render_offset;
                         render_offset = (frame & 1) * sizeof(g_debugchr_gfx_render_buffers[0]);
                         /* Typed polygon indexing reverses the ADDU operands. */
-                        menu_build_status_group_primitives((POLY_FT4*)(render_offset + (s32)render_buffers));
+                        menu_build_status_group_primitives_variant((POLY_FT4*)(render_offset + (s32)render_buffers));
                     }
                     if (thread_is_running_asm_variant(g_thread_current_id - 1) == 0) {
                         break;
@@ -208,7 +208,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 = *chosen_unit;
             unit_type_ptr = &g_debugchr_panel_selected_billboard.unit_index;
             *unit_type_ptr = *chosen_unit;
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
             menu_copy_billboard_data_in(&g_debugchr_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
                 &g_menu_status_panel_fields);
@@ -231,7 +231,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 = *chosen_unit;
             unit_type_ptr = &g_debugchr_panel_selected_billboard.unit_index;
             *unit_type_ptr = *chosen_unit;
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
             menu_copy_billboard_data_in(&g_debugchr_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
                 &g_menu_status_panel_fields);
@@ -256,7 +256,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 / sizeof(*selected_unit_ptr);
         *comparison_ptr = g_debugchr_editor_unit_ids[0];
         *unit_type_id_ptr = g_debugchr_editor_unit_ids[0];
-        debugchr_editor_load_selected_unit();
+        menu_load_selected_unit_variant();
         menu_copy_billboard_data_in(
             &g_debugchr_panel_selected_billboard, &g_debugchr_panel_selected_unit_data, &g_menu_status_panel_fields);
     }

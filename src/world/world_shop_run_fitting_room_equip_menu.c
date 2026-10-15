@@ -65,9 +65,8 @@ void world_shop_run_fitting_room_equip_menu(void) {
             if (g_world_shop_fitting_equip_slot != 0) {
                 slot = g_world_shop_fitting_equip_slot - 1;
             }
-            world_menu_get_selection_record(slot, &x, &y, g_item_list_entries);
-            world_menu_init_scrollable_list(
-                g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+            menu_get_selection_record_variant(slot, &x, &y, g_item_list_entries);
+            menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
             g_world_menu_script_callbacks[0].value = menu_get_entry_item_equipped_count;
             g_world_menu_script_callbacks[1].value = menu_get_entry_item_count;
             g_world_menu_script_callbacks[2].icon = menu_build_item_type_icon_source;
@@ -119,7 +118,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
             }
             g_menu_status_display_thread_params.redraw_request = 1;
         }
-        menu_run_script_with_palette_mode(
+        menu_run_script_with_palette_mode_variant(
             &g_world_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, world_map_is_busy());
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
             ? (g_item_list_entries[g_menu_list_selected_index] & WORLD_ITEM_ID_MASK) + 0x6800

@@ -239,7 +239,6 @@ extern s32 g_require_status_display_redraw_request;
 extern menu_status_thread_t g_require_status_display_thread_params;
 
 void require_panel_set_transition_value(s32 value);
-void require_panel_run_unit_status_thread(void);
 
 /* numeric editor */
 extern menu_number_entry_t g_require_editor_numeric_descriptor_a[];
@@ -292,7 +291,6 @@ extern POLY_GT4 g_require_gfx_poly_gt4_array_32[];
 extern POLY_GT4 g_require_gfx_poly_gt4_array_8[];
 extern POLY_GT4 g_require_gfx_poly_gt4_buffers[2][40];
 
-void require_gfx_build_portrait_poly_ft4(s32 flags, POLY_FT4* output);
 void require_gfx_build_scaled_draw_area_packets(scaled_draw_area_pair_t* packet, const RECT* source, s32 scale_index,
     s32 lower_half, const menu_status_thread_t* thread);
 void require_gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);

@@ -49,7 +49,7 @@ menu_instruction_t* bunit_cmd_run_scrollable_list_handler(menu_instruction_t* co
     }
     previous_selected = g_menu_list_selected_index;
     if (g_menu_list_scroll_direction == 0) {
-        j = bunit_input_read_page_scroll_direction();
+        j = menu_input_read_page_scroll_direction_variant();
         if (j != 0) {
             if (j != 2) {
                 menu_scroll_list_by_page(j, command);

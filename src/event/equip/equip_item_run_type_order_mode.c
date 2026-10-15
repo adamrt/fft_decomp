@@ -61,7 +61,7 @@ s32 equip_item_run_type_order_mode(void) {
             g_menu_selected_slot != EQUIP_SLOT_ACCESSORY ? category + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
         item_store_category_list(g_menu_selected_slot, g_item_list_entries);
-        equip_menu_init_scrollable_list_core(
+        menu_init_scrollable_list_core_variant(
             g_item_list_entries, g_menu_list_selected_index, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
         item_collect_stat_deltas_variant(g_item_list_entries[g_menu_list_selected_index],

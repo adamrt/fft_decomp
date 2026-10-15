@@ -42,7 +42,7 @@ void world_shop_run_fur_buy_confirm_step(void) {
         g_world_shop_fur_purchase_message_wait = 1;
     }
     world_menu_switch_item_category(0);
-    menu_run_script_with_palette_mode(
+    menu_run_script_with_palette_mode_variant(
         &g_world_shop_fur_purchase_menu_script, 0, thread_is_running(THREAD_SCREEN_SLOT_TEXT));
     world_menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_SHOP_LIST_TRIANGLE, 0xBA, 0x4C, 0, 1, MAIN_SFX_CONFIRM);
     world_shop_run_obtain_gil_menu();

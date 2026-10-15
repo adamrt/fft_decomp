@@ -51,15 +51,15 @@ type placementMember struct {
 	Module   string `yaml:"module"`
 	Function string `yaml:"function"`
 	Size     int    `yaml:"size"`
-	Hash     string `yaml:"hash"`
 	Source   string `yaml:"source"`
+	Body     string `yaml:"body"`
 	Folder   string `yaml:"folder"`
 	Note     string `yaml:"note,omitempty"`
 }
 
 // placementFamily proposes one name for counterpart bodies: a share when
-// every body has one hash, otherwise a _variant name with one body per
-// folder (equal bodies may still share one file).
+// the twins comparison finds one body, otherwise a _variant name with one
+// body per folder (twin bodies still share one file).
 type placementFamily struct {
 	ID        string            `yaml:"id"`
 	Name      string            `yaml:"name"`
@@ -278,7 +278,17 @@ func (p project) placementCommand(args []string) error {
 		report := p.placementReport(analyses[m.ID], options, tokens, folderToken, taken)
 		reports[m.ID] = &report
 	}
-	families := placementFamilies(config, analyses, reports, tokens)
+	twinClass := map[string]string{}
+	if twins, err := p.findTwins(config, twinsOptions{minBytes: 8, maxNear: 6}); err != nil {
+		fmt.Fprintf(p.stdout(), "placement: twins unavailable (%v); families compare sources only\n", err)
+	} else {
+		for _, group := range twins.Groups {
+			for _, member := range group.Members {
+				twinClass[member.Module+":"+member.Name] = group.ID
+			}
+		}
+	}
+	families := placementFamilies(config, analyses, reports, twinClass)
 	var selectedReports []placementReport
 	for _, m := range selected {
 		report := reports[m.ID]
@@ -391,9 +401,10 @@ func (p project) placementReport(an *unitModuleAnalysis, options placementOption
 
 // placementFamilies joins counterpart bodies across modules: functions the
 // object sequences align, rows that would take one name, and rows whose new
-// name an existing definition holds. A family with one hash is a share; one
-// with several is a _variant name with a body per folder.
-func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAnalysis, reports map[string]*placementReport, tokens map[string]string) []placementFamily {
+// name an existing definition holds. Members with one source, or in one
+// twins group, are one body. A family with one body is a share; one with
+// several is a _variant name with a body per folder.
+func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAnalysis, reports map[string]*placementReport, twinClass map[string]string) []placementFamily {
 	type node struct {
 		module string
 		fn     *unitFunction
@@ -478,16 +489,38 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 			continue
 		}
 		sort.Strings(keys)
-		sources := map[string]bool{}
-		hashes := map[string][]string{}
+		// Body classes: one source, or one twins group, is one body.
+		class := map[string]string{}
+		classOf := func(key string) string {
+			item := nodes[key]
+			if group := twinClass[key]; group != "" {
+				return "twins:" + group
+			}
+			return "source:" + item.fn.source
+		}
+		for _, key := range keys {
+			class[key] = classOf(key)
+		}
+		// A twins group and a plain source can name the same body.
+		for _, key := range keys {
+			if group := twinClass[key]; group != "" {
+				for _, other := range keys {
+					if twinClass[other] == "" && nodes[other].fn.source == nodes[key].fn.source {
+						class[other] = class[key]
+					}
+				}
+			}
+		}
+		bodies := map[string][]string{}
+		for _, key := range keys {
+			bodies[class[key]] = append(bodies[class[key]], key)
+		}
 		candidates := 0
 		subsystems := map[string]int{}
 		newNames := map[string]int{}
 		variantName, sharedName := "", ""
 		for _, key := range keys {
 			item := nodes[key]
-			sources[item.fn.source] = true
-			hashes[item.fn.f.Hash] = append(hashes[item.fn.f.Hash], key)
 			symbol := item.fn.f.sourceSymbol()
 			if strings.HasSuffix(symbol, variantSuffix) && variantName == "" {
 				variantName = symbol
@@ -506,14 +539,14 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 				}
 			}
 		}
-		if candidates == 0 || len(sources) < 2 {
+		if candidates == 0 || len(bodies) < 1 {
 			continue
 		}
 		family := placementFamily{ID: fmt.Sprintf("f%03d", len(families)+1), Apply: true}
 		family.Subsystem, _ = mostCommonCount(subsystems)
 		common, _ := mostCommonCount(newNames)
 		switch {
-		case len(hashes) == 1:
+		case len(bodies) == 1:
 			family.Kind = "share"
 			family.Name = common
 			if sharedName != "" {
@@ -534,23 +567,53 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 			family.Name, family.Apply, family.Note = "?", false, "no name to propose"
 		}
 		shared := "src/shared/" + family.Subsystem
+		bodyIDs := map[string]string{}
+		folderOf := map[string]string{}
 		claimed := map[string]string{}
 		for _, key := range keys {
-			item := nodes[key]
-			member := placementMember{Module: item.module, Function: item.fn.f.Name, Size: item.fn.f.Size, Hash: item.fn.f.Hash, Source: item.fn.source}
-			member.Folder = filepath.ToSlash(filepath.Dir(item.fn.source))
-			if len(hashes[item.fn.f.Hash]) > 1 || family.Kind == "share" {
-				member.Folder = shared
+			id := class[key]
+			if bodyIDs[id] != "" {
+				continue
 			}
-			if other, taken := claimed[member.Folder]; taken && other != item.fn.f.Hash {
-				member.Folder = filepath.ToSlash(filepath.Dir(item.fn.source))
-				if other, taken := claimed[member.Folder]; taken && other != item.fn.f.Hash {
-					member.Note = "another body already sits in " + member.Folder
-					family.Apply = false
+			bodyIDs[id] = fmt.Sprintf("b%d", len(bodyIDs)+1)
+			folder := ""
+			modules := map[string]bool{}
+			for _, member := range bodies[id] {
+				modules[nodes[member].module] = true
+				if sub := sharedSubsystemOf(nodes[member].fn.source); sub != "" {
+					folder = "src/shared/" + sub
 				}
 			}
-			claimed[member.Folder] = item.fn.f.Hash
+			if folder == "" && (len(modules) > 1 || family.Kind == "share") {
+				folder = shared
+			}
+			if folder == "" {
+				folder = filepath.ToSlash(filepath.Dir(nodes[bodies[id][0]].fn.source))
+			}
+			if other, taken := claimed[folder]; taken && other != id {
+				family.Apply = false
+				family.Note = appendNote(family.Note, "two bodies would sit in "+folder)
+			}
+			claimed[folder] = id
+			folderOf[id] = folder
+		}
+		for _, key := range keys {
+			item := nodes[key]
+			id := class[key]
+			member := placementMember{Module: item.module, Function: item.fn.f.Name, Size: item.fn.f.Size, Source: item.fn.source,
+				Body: bodyIDs[id], Folder: folderOf[id]}
 			family.Members = append(family.Members, member)
+		}
+		if len(bodies) == 1 && len(keys) > 1 {
+			single := true
+			for _, key := range keys {
+				if nodes[key].fn.source != nodes[keys[0]].fn.source {
+					single = false
+				}
+			}
+			if single {
+				continue
+			}
 		}
 		families = append(families, family)
 		for _, key := range keys {
@@ -561,6 +624,16 @@ func placementFamilies(config *projectConfig, analyses map[string]*unitModuleAna
 		}
 	}
 	return families
+}
+
+func appendNote(existing, note string) string {
+	if existing == "" {
+		return note
+	}
+	if strings.Contains(existing, note) {
+		return existing
+	}
+	return existing + "; " + note
 }
 
 func groupKeys(groups map[string][]string) map[string]int {
@@ -629,12 +702,12 @@ func renderPlacementMarkdown(reports []placementReport, families []placementFami
 	}
 	if len(families) > 0 {
 		out.WriteString("\n## Families\n\nCounterpart bodies the object sequences align or that would take one name. `share` families\n")
-		out.WriteString("have one hash; `variant` families take one `_variant` name with a body per folder.\n\n")
+		out.WriteString("are one body by the twins comparison; `variant` families take one `_variant` name with a body per folder.\n\n")
 		out.WriteString("| id | kind | name | members | apply | note |\n|---|---|---|---|---|---|\n")
 		for _, family := range families {
 			var members []string
 			for _, member := range family.Members {
-				members = append(members, fmt.Sprintf("%s:%s (%d B, %s)", member.Module, member.Function, member.Size, member.Folder))
+				members = append(members, fmt.Sprintf("%s:%s (%d B, %s, %s)", member.Module, member.Function, member.Size, member.Body, member.Folder))
 			}
 			fmt.Fprintf(&out, "| %s | %s | %s | %s | %t | %s |\n", family.ID, family.Kind, family.Name, strings.Join(members, "; "), family.Apply, family.Note)
 		}

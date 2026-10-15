@@ -91,7 +91,7 @@ void card_save_build_buffer(s32 slot) {
     bcopy(g_main_active_propositions, g_card_save_buffer_pointer->active_propositions,
         sizeof(g_card_save_buffer_pointer->active_propositions));
 
-    card_bits_init_primary_reader(g_card_save_buffer_pointer->parity_bits);
+    bits_init_primary_reader_variant(g_card_save_buffer_pointer->parity_bits);
     block = (u8*)g_card_save_buffer_pointer;
     for (i = 0; (u32)i < CARD_SAVE_PARITY_BLOCK_COUNT; i++) {
         parity = 0;

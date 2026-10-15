@@ -31,19 +31,19 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
     }
 
     if (*transition == 0) {
-        attack_gfx_build_portrait_poly_ft4(*first_portrait, poly);
+        menu_build_portrait_poly_variant(*first_portrait, poly);
         return;
     }
     if (*transition == 1) {
-        attack_gfx_build_portrait_poly_ft4(*second_portrait, poly);
+        menu_build_portrait_poly_variant(*second_portrait, poly);
         *transition += 1;
         return;
     }
     if (*transition < 4) {
-        attack_gfx_build_portrait_poly_ft4(*second_portrait, poly);
+        menu_build_portrait_poly_variant(*second_portrait, poly);
         gfx_set_clut_rect_from_id(&second_rect, poly->clut);
         poly++;
-        attack_gfx_build_portrait_poly_ft4(*first_portrait, poly);
+        menu_build_portrait_poly_variant(*first_portrait, poly);
         gfx_set_clut_rect_from_id(&first_rect, poly->clut);
         StoreImage(&first_rect, (u32*)palettes[0]);
         StoreImage(&second_rect, (u32*)palettes[1]);
@@ -61,7 +61,7 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         }
 
         i = *transition - 4;
-        attack_gfx_build_portrait_poly_ft4(*second_portrait, poly);
+        menu_build_portrait_poly_variant(*second_portrait, poly);
         if (direction == 1) {
             gfx_clip_portrait_poly_from_right(poly, g_gfx_portrait_transition_offsets[i]);
         } else {
@@ -69,7 +69,7 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         }
         poly++;
 
-        attack_gfx_build_portrait_poly_ft4(*first_portrait, poly);
+        menu_build_portrait_poly_variant(*first_portrait, poly);
         if (direction == 1) {
             gfx_clip_portrait_poly_from_left(poly, 0x1f - g_gfx_portrait_transition_offsets[i]);
         } else {
@@ -77,7 +77,7 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         }
         poly++;
 
-        attack_gfx_build_portrait_poly_ft4(*second_portrait, poly);
+        menu_build_portrait_poly_variant(*second_portrait, poly);
         poly->tpage = (poly->tpage & 0xff9f) | 0x20;
         poly->clut = GetClut(second_rect.x, second_rect.y);
         SetShadeTex(poly, 0);
@@ -89,7 +89,7 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         }
         poly++;
 
-        attack_gfx_build_portrait_poly_ft4(*first_portrait, poly);
+        menu_build_portrait_poly_variant(*first_portrait, poly);
         poly->tpage = (poly->tpage & 0xff9f) | 0x20;
         poly->clut = GetClut(first_rect.x, first_rect.y);
         SetShadeTex(poly, 0);

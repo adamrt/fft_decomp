@@ -644,7 +644,7 @@ restart_event:
         } else if (opcode == EVENT_OPCODE_DARK_SCREEN) {
             g_menu_hide_numeric_values = 0;
             operand_1 = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
-            thread_start(operand_1, &world_script_dark_screen_thread);
+            thread_start(operand_1, &script_dark_screen_thread_variant);
             thread_set_parameters(operand_1, 0, (s32)parameters, 0);
         } else if (opcode == EVENT_OPCODE_REMOVE_DARK_SCREEN) {
             operand_1 = thread_find_running_by_task(THREAD_TASK_DARK_SCREEN_HOLD);

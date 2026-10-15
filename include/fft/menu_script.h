@@ -239,14 +239,19 @@ extern s32 g_menu_list_row_index;
 menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* command);
 menu_instruction_t* menu_cmd_run_if_else_group_handler(menu_instruction_t* command);
 menu_window_command_t* menu_cmd_draw_tiled_rectangle_handler(menu_window_command_t* command);
-void menu_cmd_run_stream(menu_instruction_t* instruction, s32 flags);
+void menu_cmd_run_stream_variant(menu_instruction_t* instruction, s32 flags);
 extern u32 g_menu_cmd_stream_input;
 extern menu_instruction_t* (*g_menu_cmd_handlers[])(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_advance_window_scale_step_handler(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_enqueue_draw_mode_handler(menu_instruction_t* instruction);
-menu_instruction_t* menu_cmd_release_otag_lock_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_release_otag_lock_handler_variant(menu_instruction_t* instruction);
 menu_instruction_t* menu_cmd_draw_row_callback_quad_handler(menu_instruction_t* instruction);
 extern menu_sprite_command_t g_menu_cmd_row_quad;
+menu_instruction_t* menu_cmd_draw_right_aligned_number_handler_variant(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_set_otag_index_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_set_semitrans_handler(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_formatted_number_handler_variant(menu_instruction_t* instruction);
+menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_instruction_t* instruction);
 
 /* palette commands */
 menu_instruction_t* menu_cmd_set_clut_handler(menu_instruction_t* command);
@@ -282,8 +287,10 @@ void menu_draw_scrollable_list(const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
 void menu_init_and_draw_scrollable_list(
     s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table, const menu_instruction_t* script);
-void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 state, s32 override);
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
+
+menu_instruction_t* menu_script_draw_formatted_number_variant(menu_instruction_t* instruction);
+void menu_run_script_with_palette_mode_variant(menu_instruction_t* script, s32 flags, s32 event_mode);
 
 #endif /* MENU_SCRIPT_H */

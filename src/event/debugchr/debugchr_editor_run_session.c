@@ -81,12 +81,12 @@ void debugchr_editor_run_session(void) {
             g_debugchr_panel_selected_unit_data.battle_id = i;
             g_debugchr_panel_selected_unit_data.name_id = i;
             g_debugchr_panel_selected_billboard.unit_index = i;
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
             g_debugchr_editor_selected_unit_slot = i;
             break;
         }
     }
-    debugchr_editor_load_selected_unit();
+    menu_load_selected_unit_variant();
     g_debugchr_editor_selected_unit_slot = 0;
     if (g_menu_status_panel_fields.state.generic_monster != 0) {
         mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
@@ -98,7 +98,7 @@ void debugchr_editor_run_session(void) {
     g_debugchr_status_display_thread_params.style = 0;
     g_debugchr_numeric_editor_thread_params.style = 0;
     g_debugchr_character_status_frame_config.style = 0;
-    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, debugchr_panel_run_unit_status_thread);
+    thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_debugchr_status_display_thread_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, debugchr_editor_run_numeric_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_debugchr_numeric_editor_thread_params, 0, 0);
@@ -116,7 +116,7 @@ loop_outer:
         /* Removing the tied use changes the marker and menu-pointer allocation. */
         __asm__("" : "=r"(mark) : "0"(mark));
         thread_yield();
-        menu_build_status_group_primitives(g_debugchr_gfx_render_buffers[i & 1]);
+        menu_build_status_group_primitives_variant(g_debugchr_gfx_render_buffers[i & 1]);
         input = script_get_controller_input_pointer(0);
         g_menu_input_controller = input;
         buttons = *input;
@@ -144,7 +144,7 @@ loop_outer:
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
             g_debugchr_panel_selected_billboard.unit_index = unit_index;
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
             if (g_menu_status_panel_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
             } else {
@@ -169,7 +169,7 @@ loop_outer:
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
             g_debugchr_panel_selected_billboard.unit_index = unit_index;
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
             if (g_menu_status_panel_fields.state.generic_monster != 0) {
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_special, 0xA8);
             } else {
@@ -211,12 +211,12 @@ editor:
             }
             g_debugchr_editor_field_edit_active = 0;
             debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
         } else if (keys & PSX_PAD_CIRCLE) {
             if (g_debugchr_editor_field_edit_active == 1) {
                 g_debugchr_editor_field_edit_active = 0;
                 debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
-                debugchr_editor_load_selected_unit();
+                menu_load_selected_unit_variant();
             } else {
                 g_debugchr_editor_field_edit_active = 1;
             }
@@ -225,7 +225,7 @@ editor:
             && (*g_menu_input_controller & PSX_PAD_TRIANGLE)) {
             *g_debugchr_editor_current_field->value = 0;
             debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
-            debugchr_editor_load_selected_unit();
+            menu_load_selected_unit_variant();
             g_debugchr_status_display_thread_params.redraw_request = 1;
             g_debugchr_numeric_editor_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
@@ -286,7 +286,7 @@ editor:
                                 *g_debugchr_editor_current_field->value += 1;
                             }
                             debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
-                            debugchr_editor_load_selected_unit();
+                            menu_load_selected_unit_variant();
                         }
                     }
                 } else {
@@ -324,7 +324,7 @@ editor:
                                 *g_debugchr_editor_current_field->value -= 1;
                             }
                             debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
-                            debugchr_editor_load_selected_unit();
+                            menu_load_selected_unit_variant();
                         }
                     }
                 }

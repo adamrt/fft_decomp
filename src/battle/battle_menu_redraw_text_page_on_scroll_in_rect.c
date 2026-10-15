@@ -69,7 +69,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
                 buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
             }
             menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
-            battle_menu_draw_text_columns_narrow(entry, row_offset, buffer);
+            menu_draw_text_columns_narrow_variant(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);
             mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));

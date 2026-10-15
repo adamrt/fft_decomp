@@ -6,7 +6,7 @@
 void battle_state_handle_action_help_menu_state(void) {
     battle_unit_t* unit;
 
-    if (battle_menu_is_still_building() != 2) {
+    if (menu_get_thread_activity_variant() != 2) {
         g_battle_menu_help_opening = 0;
         unit = battle_unit_get_casting();
         if (unit != 0) {

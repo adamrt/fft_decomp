@@ -89,14 +89,11 @@ extern image_load_parameters_t g_battle_menu_single_icon_image_params[5];
 /* text rendering */
 extern s32 g_battle_menu_text_section_offsets[];
 
-void battle_menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 
 /* overlay loading */
 
 /* threads */
-
-s32 battle_menu_is_still_building(void);
 
 #endif

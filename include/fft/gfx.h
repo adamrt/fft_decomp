@@ -365,7 +365,7 @@ void gfx_set_scaled_poly_ft4_8bpp(POLY_FT4* poly, const point16_t* texture, cons
     const sprite_sheet_frame_t* uv_rect, const point16_t* scale, const sprite_draw_offset_t* offset);
 
 void gfx_set_primitive_brightness(P_TAG* primitive, s32 brightness);
-void gfx_build_gradient_grid_primitives(POLY_GT4* poly);
+void gfx_build_gradient_grid_primitives_variant(POLY_GT4* poly);
 void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction);
 extern RECT g_gfx_tiled_rect;
 void gfx_build_zodiac_sprite_polygon(POLY_FT4* poly, point16_t* texture_page, const RECT* position,
@@ -375,9 +375,9 @@ extern u16 g_gfx_poly_g4_count;
 extern u16 g_gfx_tile_count;
 extern u16 g_gfx_otag_count;
 extern s8 g_gfx_otag_index_locked;
-extern s8 g_gfx_transition_frame;
 extern RECT g_gfx_draw_area;
-void gfx_set_draw_color(const rgb24_t* color);
+void gfx_set_draw_color_variant(const rgb24_t* color);
+void menu_run_unit_status_thread_variant(void);
 
 /* portrait transitions */
 extern RECT g_gfx_portrait_origin;
@@ -460,5 +460,9 @@ extern rgb24_t g_gfx_fade_color;
 s32 gfx_update_decreasing_fade(void);
 extern u8 g_gfx_decreasing_fade_active;
 void gfx_start_decreasing_fade(void);
+
+/* fades */
+s32 gfx_get_fade_state(void);
+void gfx_start_increasing_fade(void);
 
 #endif

@@ -156,8 +156,8 @@ s8 world_item_run_action_menu(void) {
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
-        world_menu_get_selection_record(g_menu_selected_slot, &x, &y, g_item_list_entries);
-        world_menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
+        menu_get_selection_record_variant(g_menu_selected_slot, &x, &y, g_item_list_entries);
+        menu_init_scrollable_list(g_item_list_entries, x, y, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
         menu_set_window_scale_step(10);
         if (g_menu_list_entry_count != 0) {
             result = g_item_list_entries[g_menu_list_selected_index];

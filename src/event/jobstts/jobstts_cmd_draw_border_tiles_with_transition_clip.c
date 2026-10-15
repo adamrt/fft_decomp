@@ -6,13 +6,13 @@ menu_instruction_t* jobstts_cmd_draw_border_tiles_with_transition_clip(menu_inst
     menu_instruction_t* next;
     RECT rect;
 
-    if (g_jobstts_gfx_transition_frame < 8) {
+    if (g_gfx_transition_frame < 8) {
         s32 scale;
 
-        if (g_jobstts_gfx_transition_frame < 3) {
+        if (g_gfx_transition_frame < 3) {
             g_menu_cmd_stream_input = 0;
         }
-        scale = g_jobstts_gfx_transition_height_percent[g_jobstts_gfx_transition_frame];
+        scale = g_jobstts_gfx_transition_height_percent[g_gfx_transition_frame];
         rect.w = 0x100;
         rect.h = (command->window.height * scale) / 100;
         rect.x = 0;

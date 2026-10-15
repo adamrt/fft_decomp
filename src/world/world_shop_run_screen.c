@@ -110,7 +110,7 @@ void world_shop_run_screen(s32 shop_type) {
     g_world_formation_unit_banner_enabled = 0;
     while (g_world_shop_menu_step != WORLD_SHOP_STEP_EXIT) {
         world_gfx_present_frame_and_swap_packet_buffer(0, 0);
-        world_input_update_with_message_state();
+        menu_input_update_with_message_state_variant();
         world_menu_update_thread_7_idle_countdown();
         world_gfx_update_fade_in_tile();
         if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {

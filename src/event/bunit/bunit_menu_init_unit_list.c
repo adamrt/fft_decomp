@@ -10,7 +10,7 @@
 void bunit_menu_init_unit_list(s32 unused_selected_index) {
     s32 ret;
 
-    bunit_menu_init_scrollable_list_core(0, 0, 0);
+    menu_init_scrollable_list_core_variant(0, 0, 0);
     g_menu_row_callbacks[0].value = bunit_unit_get_current_stat;
     g_menu_row_callbacks[1].value = bunit_unit_get_max_stat;
     g_menu_row_callbacks[4].value = bunit_unit_get_level;

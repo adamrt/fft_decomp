@@ -11,7 +11,7 @@ void world_name_init_entry(const u8* name) {
     g_world_name_entry_list_cursor = 1;
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_message_box_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x21, 0xC015, 0);
-    world_menu_init_scrollable_list_core(0, 0, 0);
+    menu_init_scrollable_list_core_variant(0, 0, 0);
     g_menu_list_selected_index = 1;
     world_text_bind_section_data(WORLD_TEXT_DATA_NAME_ENTRY_KEYBOARD);
     g_text_section_pointers[WORLD_TEXT_SECTION_NAME_ENTRY_KEYS] = g_world_text_name_entry_keys_data;

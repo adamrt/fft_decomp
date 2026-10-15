@@ -5,7 +5,7 @@
  * (battle_menu_is_still_building returns something other than 2), return to the
  * ability preview with map panning. */
 void battle_state_handle_ability_preview_help_state(void) {
-    if (battle_menu_is_still_building() != 2) {
+    if (menu_get_thread_activity_variant() != 2) {
         g_battle_menu_help_opening = 0;
         camera_enable_map_pan();
         g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING;

@@ -45,7 +45,7 @@ extern u8* g_text_saved_pointers[32];
 void text_set_blit_source_rect(s16 source_x, s16 source_y, s16 width, s16 height);
 extern glyph_blit_t g_text_glyph_source;
 
-/* unified */
+/* rendering */
 extern glyph_blit_t g_text_glyph_dest;
 
 #endif

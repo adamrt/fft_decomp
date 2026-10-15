@@ -114,7 +114,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             MENU_PRESSABLE_BUTTON_L2, 0x26, value, input & PSX_PAD_L2, row, MAIN_SFX_PAGE_SWITCH);
         world_menu_draw_pressable_button(
             MENU_PRESSABLE_BUTTON_R2, 0xc2, value, input & PSX_PAD_R2, row, MAIN_SFX_PAGE_SWITCH);
-        menu_run_script_with_palette_mode(window, 0, 0);
+        menu_run_script_with_palette_mode_variant(window, 0, 0);
         menu_gfx_enqueue_textured_quad_list(
             cells, 0, 0, g_menu_cursor_texture_page, g_world_menu_palette_clut_normal, 0xb, 8);
         if (g_world_formation_stat_display_mode < 3) {
@@ -139,7 +139,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     y = 0x24 + g_world_formation_scroll_position + g_world_formation_scroll_velocity;
     world_menu_set_draw_priority(8);
     i = 0;
-    color = world_menu_get_sprite_color();
+    color = menu_gfx_get_draw_color_variant();
     g_world_formation_saved_sprite_color.r = color->r;
     g_world_formation_saved_sprite_color.g = color->g;
     g_world_formation_saved_sprite_color.b = color->b;

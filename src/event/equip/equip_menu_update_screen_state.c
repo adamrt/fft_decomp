@@ -63,7 +63,7 @@ void equip_menu_update_screen_state(void) {
         result = equip_menu_run_remove_mode();
         break;
     case EQUIP_SCREEN_STATE_ITEM_LIST:
-        result = equip_menu_update_equipment();
+        result = menu_update_equipment_variant();
         break;
     }
     if (result == 0) {

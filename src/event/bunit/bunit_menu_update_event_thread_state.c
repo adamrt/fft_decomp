@@ -23,7 +23,7 @@ void bunit_menu_update_event_thread_state(void) {
         } else {
             g_bunit_help_text_state = 0;
         }
-    } else if (g_bunit_help_text_state != 0 || bunit_gfx_get_fade_state() != 0) {
+    } else if (g_bunit_help_text_state != 0 || gfx_get_fade_state() != 0) {
         g_bunit_help_text_state = 0;
         menu_input_clear_state();
     }

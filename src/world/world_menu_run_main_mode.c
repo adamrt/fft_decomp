@@ -53,7 +53,7 @@ void world_menu_run_main_mode(s32 mode) {
     }
     if (mode == OPTION_MENU_AT_LIST) {
         script_pulse_tutorial_wait_value(0xF9);
-        world_menu_start_at_list_thread();
+        menu_start_at_list_thread_variant();
     }
     if (mode == last_mode) {
         menu_start_dead_unit_threads();

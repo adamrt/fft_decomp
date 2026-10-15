@@ -3,7 +3,7 @@
 
 /* Reload the unit and redraw its status panel; a negative list index draws dashes. */
 void menu_refresh_right_unit_stats_display(void) {
-    menu_load_selected_unit();
+    menu_load_selected_unit_variant();
     g_menu_right_unit_stats_setup[6].format = 2;
     if (g_menu_comparison_unit_status.list_index < 0) {
         g_menu_right_unit_stats_setup[6].format = 0x0c00;

@@ -116,7 +116,7 @@ void world_formation_item_menu(void) {
         done = world_menu_run_remove_item();
         break;
     case WORLD_FORMATION_MENU_ITEM_LIST:
-        done = world_formation_run_item_submenu_step();
+        done = menu_update_equipment_variant();
         break;
     }
     if (done == 0) {

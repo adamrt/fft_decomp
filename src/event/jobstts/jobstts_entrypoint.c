@@ -44,7 +44,7 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     jobstts_gfx_swap_context_and_clear_otag(0, -1);
     result = g_menu_gfx_context->otag;
     g_jobstts_previous_event_mode = g_menu_input_lock_mode;
-    jobstts_input_update_with_message_state();
+    menu_input_update_with_message_state_variant();
     if (g_menu_input_primary_repeat & PSX_PAD_SELECT) {
         menu_text_start_help_thread(3);
     }
@@ -53,14 +53,14 @@ u32* jobstts_entrypoint(s32 unit, void* unused_otag) {
     }
     menu_set_palette_mode(g_menu_input_lock_mode);
     if (g_jobstts_active_page == MENU_JOB_LIST_STEP_JOBS) {
-        g_jobstts_active_page = jobstts_menu_update_job_list();
+        g_jobstts_active_page = menu_run_job_list_variant();
         if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
             result = 0;
             g_sound_queued_effect_id = MAIN_SFX_CANCEL;
             g_jobstts_initialized = 0;
         }
     } else if (g_jobstts_active_page == MENU_JOB_LIST_STEP_ABILITIES) {
-        g_jobstts_active_page = jobstts_ability_update_list_menu();
+        g_jobstts_active_page = menu_ability_update_list_menu_variant();
     } else {
         result = 0;
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;

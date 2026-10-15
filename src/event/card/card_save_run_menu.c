@@ -80,7 +80,7 @@ void card_save_run_menu(s32 unused) {
             || g_card_save_menu_state == CARD_SAVE_MENU_LEAVE_ALT) {
             main_sound_set_current_music_target(0, 0xf0);
             while (card_io_poll_operation_result() == CARD_IO_RESULT_PENDING) { }
-            card_gfx_start_increasing_fade();
+            gfx_start_increasing_fade();
             g_card_save_menu_state = CARD_SAVE_MENU_CLOSING;
         }
 

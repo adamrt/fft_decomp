@@ -43,9 +43,6 @@ extern s16 g_option_menu_at_list_indices[];
 extern s16 g_option_menu_at_list_primary_values[];
 extern s16 g_option_menu_at_list_secondary_values[];
 
-void option_menu_run_at_list(void);
-void option_menu_start_at_list_thread(void);
-
 /* dead unit */
 extern menu_entry_t g_option_dead_unit_menu[DEAD_UNIT_MENU_ENTRY_COUNT];
 extern menu_text_layout_t g_option_dead_unit_menu_entries;

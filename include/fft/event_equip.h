@@ -198,11 +198,9 @@ extern s32 g_equip_unit_status_panel_flags;
 extern u8 g_equip_unit_status_panel_params[];
 extern s32 g_equip_unit_status_panel_redraw;
 
-void equip_panel_run_equipment_list_thread(void);
 void equip_panel_toggle_equipment_threads(s32 enable);
 void equip_panel_toggle_item_numeric_thread(s32 enable);
 void equip_panel_toggle_unit_status_thread(s32 enable);
-void equip_panel_run_unit_status_thread(void);
 
 /* numeric editor */
 extern menu_number_entry_t g_equip_editor_numeric_descriptor_a[];
@@ -274,16 +272,13 @@ void equip_menu_draw_equipment_slot_marker(s32 unused, s32 slot, s32 override);
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row);
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row);
 void equip_menu_init_screen(s32 battle_id);
-void equip_menu_init_scrollable_list_core(s16* entries, s32 selected_index, u8* text_table);
 void equip_menu_load_images_and_reset_lists(void);
 void equip_menu_reset_selection_indices(void);
 void equip_menu_reset_state_flags(void);
 void equip_menu_restore_list_selection(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 s32 equip_menu_run_equip_mode(void);
 s32 equip_menu_run_remove_mode(void);
-s32 equip_menu_run_slot_item_browser(void);
 s32 equip_menu_update_clear_all_equipment_prompt(void);
-s32 equip_menu_update_equipment(void);
 s32 equip_menu_update_item_action_state(void);
 
 /* help */
@@ -354,7 +349,6 @@ extern s16 g_equip_gfx_window_zoom_percent[];
 
 void equip_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 unused_priority);
-s32 equip_gfx_get_transition_frame(void);
 void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,
     POLY_GT4* poly_gt4, LINE_F2* line_f2, LINE_F3* line_f3, LINE_F4* line_f4, LINE_G2* line_g2, LINE_G3* line_g3,
@@ -370,7 +364,6 @@ extern u8 g_equip_input_page_scroll_disabled;
 extern u16 g_equip_input_page_scroll_hold_frames;
 
 s32 equip_input_read_page_scroll_direction(void);
-void equip_input_update_with_message_state(void);
 
 /* menu commands */
 /* The opcode that ends an EQUIP menu display stream. */
@@ -384,13 +377,8 @@ enum {
  * g_menu_thread_menu_data. */
 extern menu_entry_t g_equip_command_menu;
 
-menu_instruction_t* equip_cmd_draw_formatted_number_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_line_f2_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_draw_right_aligned_number_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_draw_scrollable_list_body_handler(menu_instruction_t* instruction);
 menu_instruction_t* equip_cmd_draw_translucent_tile_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_set_otag_index_handler(menu_instruction_t* instruction);
-menu_instruction_t* equip_cmd_set_semitrans_handler(menu_instruction_t* instruction);
 
 /* text */
 extern u8 g_equip_text_data[];

@@ -20,7 +20,7 @@ s32 world_menu_run_learn(void) {
     if (g_world_learn_menu_step == MENU_JOB_LIST_STEP_JOBS) {
         result = world_menu_run_learn_job_list();
         if (result == MENU_JOB_LIST_STEP_ABILITIES) {
-            world_menu_init_scrollable_list_core(0, 0, 0);
+            menu_init_scrollable_list_core_variant(0, 0, 0);
             g_world_learn_menu_step = MENU_JOB_LIST_STEP_ABILITIES;
         } else if (result == MENU_JOB_LIST_STEP_CLOSE) {
             g_world_learn_menu_initialized = 0;
