@@ -1,7 +1,7 @@
 /* Gfx. A small object between boundaries the binary proves. */
 
-#include "fft/gfx.h"
 #include "fft/event_bunit.h"
+#include "fft/gfx.h"
 #include "fft/menu.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"

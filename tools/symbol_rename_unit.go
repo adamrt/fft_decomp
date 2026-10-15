@@ -15,12 +15,13 @@ func (p project) renameUnitCommand(args []string) error {
 	flags := flag.NewFlagSet("symbols rename-unit", flag.ContinueOnError)
 	oldName := flags.String("unit", "", "unit name")
 	newName := flags.String("name", "", "new unit name; the file becomes <folder>/<name>.c")
+	only := flags.String("source", "", "rename only the unit with this source path (unit names are per module; two modules may each have one)")
 	dryRun := flags.Bool("dry-run", false, "validate and report without writing")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	if *oldName == "" || *newName == "" || flags.NArg() != 0 {
-		return errors.New("usage: tools symbols rename-unit --unit OLD --name NEW [--dry-run]")
+		return errors.New("usage: tools symbols rename-unit --unit OLD --name NEW [--source src/x/OLD.c] [--dry-run]")
 	}
 	if err := validateRenameIdentifier(*newName); err != nil {
 		return err
@@ -38,7 +39,7 @@ func (p project) renameUnitCommand(args []string) error {
 		var owners []*moduleSpec
 		for _, m := range config.Modules {
 			unit := m.unit(*oldName)
-			if unit == nil {
+			if unit == nil || (*only != "" && unit.Source != *only) {
 				continue
 			}
 			if source != "" && unit.Source != source {
