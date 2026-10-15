@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -68,8 +69,8 @@ func (p project) unitSymbolsCommand(args []string) error {
 			if f == nil {
 				return fmt.Errorf("no function %s in %s", entry, m.ID)
 			}
-			if f.Asm != "" || f.SourceSymbol != "" {
-				return fmt.Errorf("%s:%s must be a C definition (not assembly or an alias)", m.ID, entry)
+			if f.Asm != "" {
+				return fmt.Errorf("%s:%s must be a C definition, not assembly", m.ID, entry)
 			}
 			if listed[m.ID+":"+f.Name] {
 				return fmt.Errorf("%s:%s is listed twice", m.ID, entry)
@@ -205,6 +206,7 @@ func (p project) unitSymbolsCommand(args []string) error {
 			for _, f := range byModule[m] {
 				f.Unit = *name
 				f.Source = ""
+				f.SourceSymbol = ""
 			}
 		}
 		stillUsed := map[string]bool{}
@@ -305,8 +307,22 @@ func readUnitPieces(root string, m *moduleSpec, unitName string) (unitPieces, er
 	return result, nil
 }
 
-// memberBody reads one member's text as module m compiles it.
+// memberBody reads one member's text as module m compiles it. An alias
+// entry takes its target's body with the function name replaced: the
+// original object held that duplicate under the alias's name.
 func memberBody(root string, m *moduleSpec, f *functionSpec, units map[string]unitPieces) (*unitMemberBody, error) {
+	if f.SourceSymbol != "" {
+		target := m.function(f.SourceSymbol)
+		if target == nil {
+			return nil, fmt.Errorf("%s: alias %s names no function %s", m.ID, f.Name, f.SourceSymbol)
+		}
+		body, err := memberBody(root, m, target, units)
+		if err != nil {
+			return nil, err
+		}
+		pattern := regexp.MustCompile(`\b` + regexp.QuoteMeta(f.SourceSymbol) + `\b`)
+		return &unitMemberBody{key: body.key + "@" + f.Name, includes: body.includes, text: pattern.ReplaceAllString(body.text, f.Name)}, nil
+	}
 	if f.Unit != "" {
 		unit := m.unit(f.Unit)
 		pieces := units[unit.Source]

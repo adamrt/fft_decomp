@@ -116,10 +116,13 @@ type unitInstance struct {
 	rodata  []rodataSpec
 }
 
+// symbols lists the definitions the unit source must hold, one per member
+// in order. An alias entry (source_symbol) becomes its own definition inside
+// a unit: the original object held the duplicate body under that name.
 func (unit *unitInstance) symbols() []string {
 	symbols := make([]string, 0, len(unit.members))
 	for _, f := range unit.members {
-		symbols = append(symbols, f.sourceSymbol())
+		symbols = append(symbols, f.Name)
 	}
 	return symbols
 }
@@ -275,7 +278,7 @@ func unitLinkerBindings(resolver symbolResolver, unit *unitInstance, used map[st
 		// Module resolution of a member's own symbol can reach another
 		// module (an aliased entry is not named after its definition), but
 		// the object defines it; only an override can disagree.
-		symbol := f.sourceSymbol()
+		symbol := f.Name
 		if addr, ok := bindings[symbol]; ok && owner[symbol] != "" && addr != f.Addr {
 			return nil, fmt.Errorf("%s binds unit member %s to 0x%08x, but it is at 0x%08x", owner[symbol], symbol, addr, f.Addr)
 		}
@@ -313,7 +316,7 @@ func unitLinkerScript(unit *unitInstance, bindings map[string]uint32, assert boo
 	script.WriteString("  /DISCARD/ : { *(.reginfo) *(.pdr) *(.comment) *(.gnu.attributes) }\n}\n")
 	if assert {
 		for _, f := range unit.members {
-			fmt.Fprintf(&script, "ASSERT(%s == 0x%08x, \"%s must begin at 0x%08x\");\n", f.sourceSymbol(), f.Addr, f.sourceSymbol(), f.Addr)
+			fmt.Fprintf(&script, "ASSERT(%s == 0x%08x, \"%s must begin at 0x%08x\");\n", f.Name, f.Addr, f.Name, f.Addr)
 		}
 	}
 	return script.String()
@@ -394,12 +397,12 @@ func (p project) unitPlacementReport(unit *unitInstance, bindings map[string]uin
 	}
 	var lines []string
 	for _, f := range unit.members {
-		addr, ok := placed[f.sourceSymbol()]
+		addr, ok := placed[f.Name]
 		switch {
 		case !ok:
-			lines = append(lines, fmt.Sprintf("  %s: not defined by the merged object", f.sourceSymbol()))
+			lines = append(lines, fmt.Sprintf("  %s: not defined by the merged object", f.Name))
 		case addr != uint64(f.Addr):
-			lines = append(lines, fmt.Sprintf("  %s: placed at 0x%08x, expected 0x%08x (%+d bytes)", f.sourceSymbol(), addr, f.Addr, int64(addr)-int64(f.Addr)))
+			lines = append(lines, fmt.Sprintf("  %s: placed at 0x%08x, expected 0x%08x (%+d bytes)", f.Name, addr, f.Addr, int64(addr)-int64(f.Addr)))
 		}
 	}
 	if len(lines) == 0 {
