@@ -568,7 +568,6 @@ extern u8 g_world_gfx_fade_decreasing;
 extern u8 g_world_gfx_fade_disabled;
 extern u8 g_world_gfx_fade_increasing;
 extern s16 g_world_gfx_fade_intensity;
-extern glyph_blit_t g_world_gfx_image_blit_destination;
 extern glyph_blit_t g_world_gfx_image_blit_source;
 extern RECT g_world_gfx_temporary_draw_area;
 extern u16 g_world_gfx_draw_area_scale_percent[];
@@ -680,7 +679,7 @@ s32 world_gfx_get_fade_state(void);
 void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll_base_index, s16* entries);
 void world_gfx_load_wldface_to_frame_buffer(void);
 void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_otag);
-void world_gfx_set_image_blit_destination_origin(s16 x, s16 y);
+void text_set_blit_destination(s16 x, s16 y);
 void world_gfx_set_image_blit_source_rect(s16 x, s16 y, s16 width, s16 height);
 void world_gfx_start_decreasing_fade(void);
 void world_gfx_start_increasing_fade(void);
@@ -1437,7 +1436,6 @@ extern SVECTOR g_unit_scratch_coords;
 extern s32 g_world_text_substitution_values_backup[32]; /* 32-bit substitution values saved around the text calls */
 extern menu_list_page_t g_world_text_list_pages[2];
 
-extern glyph_blit_t g_world_text_glyph_dest;
 extern RECT g_world_text_message_box_vram_rect;
 extern u8 g_world_text_message_box_glyph_images[3][8][84];
 extern u8 g_world_text_message_box_previous_images[3][84];
@@ -1596,8 +1594,6 @@ extern image_load_parameters_t g_world_menu_icon_strip_image_params[];
  * the arrow placement used by kind 0x10. */
 extern image_load_parameters_t g_world_menu_single_icon_image_params[];
 
-extern RECT g_world_menu_thin_panel_texture_windows[7];
-extern RECT g_world_menu_panel_texture_windows[7];
 extern menu_text_layout_t g_world_menu_at_list_entry_table;
 extern menu_entry_t g_world_menu_at_list_state;
 extern s16 g_world_menu_open_entry_index;
@@ -1664,7 +1660,6 @@ extern world_menu_grid_cell_t g_world_grid_menu_shop_scrolled_cells[];
 extern world_menu_grid_cell_t* g_world_active_grid_menu_cells;
 extern u16 g_world_grid_menu_cursor_anim; /* grid cursor animation state */
 extern u8 g_world_grid_menu_initialized;  /* grid menu initialized */
-extern u8 g_world_menu_window_frame_image[];
 extern s16 g_world_menu_at_list_primary_values[];
 extern s16 g_world_menu_at_list_secondary_values[];
 extern s16 g_world_menu_at_list_indices[];
@@ -1830,7 +1825,6 @@ void world_menu_update_entry_cursor_quads(
 void world_menu_update_grid_cursor(s16 alternate);
 
 void world_menu_update_thread_7_idle_countdown(void);
-void world_menu_window_frame_thread(void);
 void world_menu_set_slot_4_cursor_index(s32 index);
 s32 world_menu_get_thread_activity(void);
 

@@ -112,7 +112,7 @@ void world_build_at_list(void) {
     buffer = g_menu_render_buffer;
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
-    thread_start(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, world_menu_window_frame_thread);
+    thread_start(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, menu_window_frame_thread);
     thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
     row_offset = entry->select_text_table;
     cursor = entry->selected_index - row_offset;

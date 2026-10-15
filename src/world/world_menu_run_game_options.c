@@ -160,7 +160,7 @@ void world_menu_run_game_options(void) {
     value_rect.h = base->title.h;
     mem_copy_bytes_nonempty(
         &g_world_options_menu_window_rect, &entry->window.x, sizeof(g_world_options_menu_window_rect));
-    thread_start(g_thread_current_id + 1, world_menu_window_frame_thread);
+    thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     g_world_options_menu_window_rect.h += 0xC;
     g_world_options_menu_window_rect.y -= 2;
     thread_set_parameters(g_thread_current_id + 1, (s32)&g_world_options_menu_window_rect, 0, 0);

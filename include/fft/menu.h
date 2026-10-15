@@ -2641,4 +2641,11 @@ void menu_run_require_help(void);
 /* entry item icons */
 menu_icon_source_t* menu_get_entry_item_icon_source(s32 row);
 
+/* unified */
+extern RECT g_menu_thin_panel_texture_windows[7];
+extern RECT g_menu_panel_texture_windows[7];
+extern u8 g_menu_window_frame_image[];
+void menu_thin_window_frame_thread(void);
+void menu_window_frame_thread(void);
+
 #endif

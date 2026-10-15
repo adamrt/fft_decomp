@@ -2173,11 +2173,11 @@ functions:
   - {addr: 0x801bf1e0, size: 636, name: menu_redraw_text_page_on_scroll, hash: 61145072288429ea, source: src/shared/menu/menu_redraw_text_page_on_scroll.c}
   - {addr: 0x801bf45c, size: 3172, name: option_menu_run_at_list, hash: f7232e2ba35ab622, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801c00c0, size: 40, name: text_set_blit_source_rect, hash: f4a7a9d08a0373d4, source: src/shared/text/text_set_blit_source_rect.c}
-  - {addr: 0x801c00e8, size: 24, name: option_text_set_blit_destination, hash: 957437a4742bb43c}
+  - {addr: 0x801c00e8, size: 24, name: text_set_blit_destination, hash: 957437a4742bb43c, source: src/shared/text/text_set_blit_destination.c}
   - {addr: 0x801c0100, size: 464, name: menu_build_scaled_draw_area_packets, hash: 868f2e1fad3c6996, source: src/shared/menu/menu_build_scaled_draw_area_packets.c}
   - {addr: 0x801c02d0, size: 52, name: menu_init_scaled_draw_area_packets, hash: 21b5509e73189129, source: src/shared/menu/menu_init_scaled_draw_area_packets.c}
-  - {addr: 0x801c0304, size: 1424, name: option_menu_window_frame_thread, hash: 445eed2f2625ac87}
-  - {addr: 0x801c0894, size: 1436, name: option_menu_thin_window_frame_thread, hash: 43c0e695459c989f}
+  - {addr: 0x801c0304, size: 1424, name: menu_window_frame_thread, hash: 445eed2f2625ac87, source: src/shared/menu/menu_window_frame_thread.c}
+  - {addr: 0x801c0894, size: 1436, name: menu_thin_window_frame_thread, hash: 43c0e695459c989f, source: src/shared/menu/menu_thin_window_frame_thread.c}
   - {addr: 0x801c0e30, size: 40, name: thread_wait_forever, hash: 19480d7e83b49e1f, source: src/shared/thread/thread_wait_forever.c}
   - {addr: 0x801c0e58, size: 40, name: thread_stop_after_yield, hash: fbcd24ded43d67df, source: src/shared/thread/thread_stop_after_yield.c}
   - {addr: 0x801c0e80, size: 1644, name: menu_start_dead_unit_threads, hash: d96dca0d02aaa010, source: src/shared/menu/menu_start_dead_unit_threads.c}
@@ -2191,8 +2191,8 @@ functions:
 data:
   - {addr: 0x801c3450, name: g_option_input_repeat_timings}
   - {addr: 0x801c347c, name: g_menu_draw_area_template}
-  - {addr: 0x801c3490, name: g_option_menu_thin_panel_texture_windows}
-  - {addr: 0x801c34c8, name: g_option_menu_panel_texture_windows}
+  - {addr: 0x801c3490, name: g_menu_thin_panel_texture_windows}
+  - {addr: 0x801c34c8, name: g_menu_panel_texture_windows}
   - {addr: 0x801c3514, name: g_menu_draw_area_scale_percent}
   - {addr: 0x801c3580, name: g_option_menu_entry_table}
   - {addr: 0x801c35ac, name: g_option_menu_at_list_entry_table}
@@ -2212,8 +2212,8 @@ data:
   - {addr: 0x801c3a7c, name: g_menu_render_buffer}
   - {addr: 0x801c9a7c, name: g_option_at_list_pages}
   - {addr: 0x801c9ce4, name: g_text_glyph_source}
-  - {addr: 0x801c9cf4, name: g_option_text_glyph_dest}
-  - {addr: 0x801c9d04, name: g_option_menu_panel_pixels}
+  - {addr: 0x801c9cf4, name: g_text_glyph_dest}
+  - {addr: 0x801c9d04, name: g_menu_window_frame_image}
   - {addr: 0x801ca104, name: g_option_menu_entry_panel_rect}
   - {addr: 0x801ca10c, name: g_option_menu_at_list_primary_values}
   - {addr: 0x801ca50c, name: g_option_menu_at_list_secondary_values}
@@ -2228,13 +2228,13 @@ data:
   - {addr: 0x801cbc54, name: g_option_menu_value_image_rect}
   - {addr: 0x801cbc5c, name: g_option_menu_pages}
   - {addr: 0x801cbf7c, name: g_option_picker_icon_records}
-  - {addr: 0x801cc074, name: g_option_menu_panel_frames}
+  - {addr: 0x801cc074, name: g_menu_scratch_buffer}
 
 overrides:
+  - {function: menu_thin_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
+  - {function: menu_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
   - {function: option_menu_run_at_list, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
   - {function: option_menu_run_game_options, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
-  - {function: option_menu_thin_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
-  - {function: option_menu_window_frame_thread, name: menu_init_scaled_draw_area_packets, addr: 0x80138adc}
 ---
 module: event-require
 file: EVENT/REQUIRE.OUT

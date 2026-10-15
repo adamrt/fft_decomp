@@ -436,11 +436,11 @@ functions:
   - {addr: 0x80100610, size: 636, name: menu_redraw_text_page_on_scroll, hash: 327edc74c76a57e0, source: src/shared/menu/menu_redraw_text_page_on_scroll.c}
   - {addr: 0x8010088c, size: 3184, name: world_build_at_list, hash: 632132e7dd8d11d5, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x801014fc, size: 40, name: world_gfx_set_image_blit_source_rect, hash: 8c3c61992650378d}
-  - {addr: 0x80101524, size: 24, name: world_gfx_set_image_blit_destination_origin, hash: f57d9a174ce12b8e}
+  - {addr: 0x80101524, size: 24, name: text_set_blit_destination, hash: f57d9a174ce12b8e, source: src/shared/text/text_set_blit_destination.c}
   - {addr: 0x8010153c, size: 464, name: world_option_gfx_build_scaled_draw_area_packets, hash: c493e8c86806a8b3}
   - {addr: 0x8010170c, size: 52, name: world_option_gfx_init_scaled_draw_area_packets, hash: babbe0634130c090, source: src/shared/menu/menu_init_scaled_draw_area_packets.c, source_symbol: menu_init_scaled_draw_area_packets}
-  - {addr: 0x80101740, size: 1424, name: world_menu_window_frame_thread, hash: 2f0fa75a8ad2ccd3}
-  - {addr: 0x80101cd0, size: 1436, name: world_menu_thin_window_frame_thread, hash: 96f16acf0efe9d12}
+  - {addr: 0x80101740, size: 1424, name: menu_window_frame_thread, hash: 2f0fa75a8ad2ccd3, source: src/shared/menu/menu_window_frame_thread.c}
+  - {addr: 0x80101cd0, size: 1436, name: menu_thin_window_frame_thread, hash: 96f16acf0efe9d12, source: src/shared/menu/menu_thin_window_frame_thread.c}
   - {addr: 0x8010226c, size: 40, name: world_thread_yield_forever, hash: ea714444aa8272b8}
   - {addr: 0x80102294, size: 40, name: thread_stop_after_yield, hash: f772d01efefb807c, source: src/shared/thread/thread_stop_after_yield.c}
   - {addr: 0x801022bc, size: 1644, name: menu_start_dead_unit_threads, hash: 349e8c6a75055eaf, source: src/shared/menu/menu_start_dead_unit_threads.c}
@@ -522,11 +522,11 @@ functions:
   - {addr: 0x80109554, size: 648, name: world_screen_menu_redraw_text_page_on_scroll, hash: c3e620bbb56ea16d}
   - {addr: 0x801097dc, size: 3236, name: world_screen_build_at_list, hash: fbd15105f39ab67f, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {addr: 0x8010a480, size: 40, name: text_set_blit_source_rect, hash: 9b7f8b6f740c2815, source: src/shared/text/text_set_blit_source_rect.c}
-  - {addr: 0x8010a4a8, size: 24, name: world_gfx_set_blit_dest_position, hash: 573a5fe65290d88d}
+  - {addr: 0x8010a4a8, size: 24, name: world_gfx_set_blit_dest_position, hash: 573a5fe65290d88d, source: src/shared/text/text_set_blit_destination.c, source_symbol: text_set_blit_destination}
   - {addr: 0x8010a4c0, size: 464, name: world_screen_gfx_build_scaled_draw_area_packets, hash: a51f79f9dce9dafc}
   - {addr: 0x8010a690, size: 52, name: world_screen_gfx_init_scaled_draw_area_packets, hash: 5daaf3af4a8fceaa, source: src/shared/menu/menu_init_scaled_draw_area_packets.c, source_symbol: menu_init_scaled_draw_area_packets}
   - {addr: 0x8010a6c4, size: 1444, name: world_screen_menu_window_frame_thread, hash: ed4c0f0ead7f4d22}
-  - {addr: 0x8010ac68, size: 1436, name: world_screen_menu_thin_window_frame_thread, hash: 82f4d7b2eeb33719, source: src/world/world_menu_thin_window_frame_thread.c, source_symbol: world_menu_thin_window_frame_thread}
+  - {addr: 0x8010ac68, size: 1436, name: world_screen_menu_thin_window_frame_thread, hash: 82f4d7b2eeb33719, source: src/shared/menu/menu_thin_window_frame_thread.c, source_symbol: menu_thin_window_frame_thread}
   - {addr: 0x8010b204, size: 316, name: world_menu_announce_entry_value_thread, hash: e5790e55f67d3488}
   - {addr: 0x8010b340, size: 524, name: world_menu_icon_clamped_list_thread, hash: fa08b37eaa55bd09}
   - {addr: 0x8010b54c, size: 668, name: world_menu_update_entry_cursor_quads, hash: 1d2cb7868df1af49}
@@ -1267,8 +1267,8 @@ data:
   - {addr: 0x80156c50, name: g_menu_window_sprite_position}
   - {addr: 0x80156c60, name: g_world_option_input_timing_profiles}
   - {addr: 0x80156c8c, name: g_world_option_gfx_draw_area_template}
-  - {addr: 0x80156ca0, name: g_world_menu_thin_panel_texture_windows}
-  - {addr: 0x80156cd8, name: g_world_menu_panel_texture_windows}
+  - {addr: 0x80156ca0, name: g_menu_thin_panel_texture_windows}
+  - {addr: 0x80156cd8, name: g_menu_panel_texture_windows}
   - {addr: 0x80156d24, name: g_world_gfx_draw_area_scale_percent}
   - {addr: 0x80156d90, name: g_world_option_menu_entry_table}
   - {addr: 0x80156dbc, name: g_world_menu_at_list_entry_table}
@@ -1919,7 +1919,7 @@ data:
   - {addr: 0x801ac6b4, name: g_world_at_list_pages}
   - {addr: 0x801ac91c, name: g_world_gfx_image_blit_source}
   - {addr: 0x801ac92c, name: g_world_gfx_image_blit_destination}
-  - {addr: 0x801ac93c, name: g_world_menu_window_frame_image}
+  - {addr: 0x801ac93c, name: g_menu_window_frame_image}
   - {addr: 0x801acd3c, name: g_world_options_menu_window_rect}
   - {addr: 0x801acd44, name: g_world_menu_at_list_primary_values}
   - {addr: 0x801ad144, name: g_world_menu_at_list_secondary_values}
@@ -1953,7 +1953,7 @@ data:
   - {addr: 0x801bf444, name: g_world_formation_view_quads}
   - {addr: 0x801bfda4, name: g_world_text_list_pages}
   - {addr: 0x801c000c, name: g_text_glyph_source}
-  - {addr: 0x801c001c, name: g_world_text_glyph_dest}
+  - {addr: 0x801c001c, name: g_text_glyph_dest}
   - {addr: 0x801c002c, name: g_world_menu_list_controller_input}
   - {addr: 0x801c0030, name: g_menu_thread_indicator_packets}
   - {addr: 0x801c0520, name: g_world_frame_arg}
@@ -2415,16 +2415,22 @@ overrides:
   - {function: menu_start_dead_unit_threads, name: g_option_menu_at_list_primary_values, addr: 0x801acd44}
   - {function: menu_start_dead_unit_threads, name: option_menu_run_at_list, addr: 0x8010088c}
   - {function: menu_start_dead_unit_threads, name: thread_wait_forever, addr: 0x8010226c}
-  - {function: text_set_blit_source_rect, name: g_world_gfx_image_blit_source, addr: 0x801c000c}
+  - {function: menu_thin_window_frame_thread, name: g_main_gfx_screen_polarity, addr: 0x8004e5bc}
+  - {function: menu_thin_window_frame_thread, name: g_text_glyph_dest, addr: 0x801ac92c}
+  - {function: menu_thin_window_frame_thread, name: g_text_glyph_source, addr: 0x801ac91c}
+  - {function: menu_thin_window_frame_thread, name: text_set_blit_source_rect, addr: 0x801014fc}
+  - {function: menu_window_frame_thread, name: g_main_gfx_screen_polarity, addr: 0x8004e5bc}
+  - {function: menu_window_frame_thread, name: g_text_glyph_dest, addr: 0x801ac92c}
+  - {function: menu_window_frame_thread, name: g_text_glyph_source, addr: 0x801ac91c}
+  - {function: menu_window_frame_thread, name: text_set_blit_source_rect, addr: 0x801014fc}
+  - {function: text_set_blit_destination, name: g_text_glyph_dest, addr: 0x801ac92c}
   - {function: world_card_input_update_with_message_state, name: g_world_text_task_phase, addr: 0x80193dec}
   - {function: world_card_input_update_with_message_state, name: world_script_update_tutorial_controller_input, addr: 0x8012ebf0}
   - {function: world_option_gfx_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x80156c8c}
   - {function: world_screen_gfx_init_scaled_draw_area_packets, name: g_menu_draw_area_template, addr: 0x8016e44c}
-  - {function: world_screen_menu_thin_window_frame_thread, name: g_world_gfx_image_blit_destination, addr: 0x801c001c}
-  - {function: world_screen_menu_thin_window_frame_thread, name: g_world_gfx_image_blit_source, addr: 0x801c000c}
-  - {function: world_screen_menu_thin_window_frame_thread, name: g_world_menu_thin_panel_texture_windows, addr: 0x8018a330}
-  - {function: world_screen_menu_thin_window_frame_thread, name: world_gfx_set_image_blit_destination_origin, addr: 0x8010a4a8}
-  - {function: world_screen_menu_thin_window_frame_thread, name: world_gfx_set_image_blit_source_rect, addr: 0x8010a480}
+  - {function: world_screen_menu_thin_window_frame_thread, name: g_main_gfx_screen_polarity, addr: 0x8004e5bc}
+  - {function: world_screen_menu_thin_window_frame_thread, name: g_menu_thin_panel_texture_windows, addr: 0x8018a330}
+  - {function: world_screen_menu_thin_window_frame_thread, name: text_set_blit_destination, addr: 0x8010a4a8}
 
 regions:
   - {addr: 0x800feff0, end: 0x800ff284, kind: handwritten, why: "handwritten scratchpad-frame blitter helper"}

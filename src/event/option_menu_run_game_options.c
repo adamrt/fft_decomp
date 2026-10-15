@@ -153,7 +153,7 @@ void option_menu_run_game_options(void) {
     value_rect.w = base->title.w;
     value_rect.h = base->title.h;
     mem_copy_bytes_nonempty(&g_option_menu_entry_panel_rect, &entry->window.x, 8);
-    thread_start(g_thread_current_id + 1, option_menu_window_frame_thread);
+    thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     g_option_menu_entry_panel_rect.h += 0xC;
     g_option_menu_entry_panel_rect.y -= 2;
     thread_set_parameters(g_thread_current_id + 1, (s32)&g_option_menu_entry_panel_rect, 0, 0);

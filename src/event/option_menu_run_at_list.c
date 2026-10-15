@@ -114,7 +114,7 @@ void option_menu_run_at_list(void) {
     buffer = g_menu_render_buffer;
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
-    thread_start(g_thread_current_id + 1, option_menu_window_frame_thread);
+    thread_start(g_thread_current_id + 1, menu_window_frame_thread);
     thread_set_parameters(g_thread_current_id + 1, (s32)&entry->window.x, 0, 0);
     menu_draw_text_columns(entry, &row_offset, buffer);
     ring = 0;

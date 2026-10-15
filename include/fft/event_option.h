@@ -61,14 +61,11 @@ extern u16 g_option_menu_transition_duration;
 extern s16 g_option_menu_transition_timer;
 extern RECT g_option_menu_value_image_rect;
 
-void option_menu_window_frame_thread(void);
-
 /* graphics */
 
 /* text */
-extern glyph_blit_t g_option_text_glyph_dest;
 
-void option_text_set_blit_destination(s16 destination_x, s16 destination_y);
+void text_set_blit_destination(s16 destination_x, s16 destination_y);
 
 /* input */
 extern u32* g_option_dead_unit_controller_input;
@@ -79,14 +76,5 @@ extern menu_entry_t g_option_menu_icon_thread_param;
 
 /* unit panels */
 extern RECT g_option_menu_entry_panel_rect;
-extern menu_panel_frame_t g_option_menu_panel_frames[2];
-extern u8 g_option_menu_panel_pixels[];
-/* One libgpu texture window per window frame DR_MODE packet. The static
- * tables already hold each window's w/h (0x10x0x10, 8x0x10, 0x10x8 and two
- * full 0x100x0x100 windows); the panels fill in only the runtime x/y.
- * Indexing the array is what reproduces the target's symbol-plus-byte-offset
- * addressing. */
-extern RECT g_option_menu_panel_texture_windows[7];
-extern RECT g_option_menu_thin_panel_texture_windows[7];
 
 #endif
