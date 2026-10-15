@@ -426,13 +426,10 @@ func (p project) trialCommand(args []string) error {
 		counts[result.Status]++
 	}
 	if *out != "" {
-		path, err := projectPath(p.root, *out, "trial output")
-		if err != nil {
-			return err
-		}
-		if !strings.HasPrefix(filepath.ToSlash(*out), "build/") {
+		if !strings.HasPrefix(filepath.ToSlash(filepath.Clean(*out)), "build/") {
 			return fmt.Errorf("trial output must lie under build/: %s", *out)
 		}
+		path := filepath.Join(p.root, filepath.FromSlash(filepath.Clean(*out)))
 		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 			return err
 		}
