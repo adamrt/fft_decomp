@@ -11,12 +11,10 @@ source_dir: src/main
 profile: gcc-2.6.3_O2_aspsx-2.34
 
 units:
+  - {name: file_cd_headers, source: src/main/file_cd_headers.c}
+  - {name: game_loop_and_now_loading, source: src/main/game_loop_and_now_loading.c}
   - {name: main_ability_known_and_action_copy, source: src/main/main_ability_known_and_action_copy.c}
-  - {name: main_file_load_descriptor_and_cd_reset, source: src/file/main/main_file_load_descriptor_and_cd_reset.c}
-  - {name: main_game_loop_and_now_loading, source: src/main/main_game_loop_and_now_loading.c}
   - {name: main_overlay_world_loading, source: src/main/main_overlay_world_loading.c}
-  - {name: main_status_flag_changes, source: src/status/main/main_status_flag_changes.c}
-  - {name: main_unit_build_and_party_roster, source: src/unit/main/main_unit_build_and_party_roster.c}
   - {name: main_unit_spritesheet_palette, source: src/unit/main/main_unit_spritesheet_palette.c}
   - {name: main_unit_stats_levels_and_jobs, source: src/unit/main/main_unit_stats_levels_and_jobs.c}
 
@@ -37,12 +35,12 @@ functions:
   - {addr: 0x80010b40, size: 104, name: __do_global_dtors, hash: 30e458972df14eda, source: src/lib/psyq/crt/__do_global_dtors.c}
   - {addr: 0x80011bb0, size: 16, name: main_system_store_stack_pointer, hash: 972f7e917252ee42}
   - {addr: 0x80011bc0, size: 16, name: main_restore_game_loop_stack_pointer, hash: 8b9c9cab30efada8, asm: "Stack-replacing ABI tail transfer to main_system_run_game_loop; ordinary C cannot assign sp."}
-  - {addr: 0x80011bd0, size: 36, name: main_file_build_header_nnl, hash: 323354187cbfd5ba, unit: main_file_load_descriptor_and_cd_reset}
-  - {addr: 0x80011bf4, size: 484, name: main_file_build_header, hash: 2289317868ab7dd4, unit: main_file_load_descriptor_and_cd_reset}
-  - {addr: 0x80011dd8, size: 64, name: main_file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: main_file_load_descriptor_and_cd_reset}
-  - {addr: 0x80011e18, size: 32, name: main_file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: main_file_load_descriptor_and_cd_reset}
-  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, source: src/file/main/main_file_poll_load.c, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
-  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5, source: src/gfx/main/main_gfx_draw_now_loading_message.c}
+  - {addr: 0x80011bd0, size: 36, name: main_file_build_header_nnl, hash: 323354187cbfd5ba, unit: file_cd_headers}
+  - {addr: 0x80011bf4, size: 484, name: main_file_build_header, hash: 2289317868ab7dd4, unit: file_cd_headers}
+  - {addr: 0x80011dd8, size: 64, name: main_file_reset_pause_cdrom, hash: 5c3ad6653948cd8e, unit: file_cd_headers}
+  - {addr: 0x80011e18, size: 32, name: main_file_reset_cd_subsystems, hash: c344f4d9ad5576c9, unit: file_cd_headers}
+  - {addr: 0x80011e38, size: 488, name: main_file_poll_load, hash: ca5b82052b8097de, profile: gcc-2.6.3_O2_aspsx-2.21, rodata: [{addr: 0x80010014, size: 28, hash: 9b7ef4304058db91}]}
+  - {addr: 0x80012020, size: 212, name: main_gfx_draw_now_loading_message, hash: dd193b96065424a5}
   - {addr: 0x800120f4, size: 120, name: suzuki_smd_create_music, hash: d51ce846ff988935, source: src/lib/suzuki/suzuki_smd_create_music.c}
   - {addr: 0x8001216c, size: 96, name: suzuki_smd_unload_music, hash: b1f952085d1aa481, source: src/lib/suzuki/suzuki_smd_unload_music.c}
   - {addr: 0x800121cc, size: 8, name: suzuki_noop_800121cc, hash: 6d64edf91449c1b1, source: src/lib/suzuki/suzuki_noop_800121cc.c}
@@ -662,16 +660,16 @@ functions:
   - {addr: 0x800289d4, size: 108, name: _patch_card2, hash: fe97d372338458dc, source: src/lib/psyq/libcard/_patch_card2.c}
   - {addr: 0x80028a40, size: 24, name: psyq_card_long_delay, hash: 3ab55a0f1f416982, source: src/lib/psyq/libcard/psyq_card_long_delay.c}
   - {addr: 0x80028a64, size: 104, name: psyq_card_restore_exception_prefix, hash: 1f518d7271104687, source: src/lib/psyq/libcard/psyq_card_restore_exception_prefix.c}
-  - {addr: 0x80040934, size: 64, name: main_system_stop_display_and_audio_for_game_reset, hash: c64016389ec5e4a0, unit: main_game_loop_and_now_loading}
-  - {addr: 0x80040974, size: 48, name: main_system_reset_game, hash: 561bc72b9357246b, unit: main_game_loop_and_now_loading}
-  - {addr: 0x800409a4, size: 32, name: main_overlay_call_battle_entrypoint, hash: c58eafc808ea8434, unit: main_game_loop_and_now_loading}
-  - {addr: 0x800409c4, size: 60, name: main_overlay_exec_battle_bin, hash: 9f332892998856cc, unit: main_game_loop_and_now_loading}
-  - {addr: 0x80040a00, size: 392, name: main_system_run_game_loop, hash: a21b6246c7cbd252, unit: main_game_loop_and_now_loading}
-  - {addr: 0x80040b88, size: 80, name: main, hash: 5c256ef1eae8d688, unit: main_game_loop_and_now_loading}
-  - {addr: 0x80040bd8, size: 1964, name: main_gfx_build_now_loading, hash: 15501d7711e0aeea, unit: main_game_loop_and_now_loading}
-  - {addr: 0x80041384, size: 36, name: main_gfx_build_now_loading_center, hash: c119ee540bd1e857, unit: main_game_loop_and_now_loading}
-  - {addr: 0x800413a8, size: 196, name: main_gfx_add_now_loading_to_otag, hash: 5438e0eb0e7a80c7, unit: main_game_loop_and_now_loading}
-  - {addr: 0x8004146c, size: 300, name: main_gfx_load_efc_fnt, hash: 02911c7008f10711, unit: main_game_loop_and_now_loading}
+  - {addr: 0x80040934, size: 64, name: main_system_stop_display_and_audio_for_game_reset, hash: c64016389ec5e4a0, unit: game_loop_and_now_loading}
+  - {addr: 0x80040974, size: 48, name: main_system_reset_game, hash: 561bc72b9357246b, unit: game_loop_and_now_loading}
+  - {addr: 0x800409a4, size: 32, name: main_overlay_call_battle_entrypoint, hash: c58eafc808ea8434, unit: game_loop_and_now_loading}
+  - {addr: 0x800409c4, size: 60, name: main_overlay_exec_battle_bin, hash: 9f332892998856cc, unit: game_loop_and_now_loading}
+  - {addr: 0x80040a00, size: 392, name: main_system_run_game_loop, hash: a21b6246c7cbd252, unit: game_loop_and_now_loading}
+  - {addr: 0x80040b88, size: 80, name: main, hash: 5c256ef1eae8d688, unit: game_loop_and_now_loading}
+  - {addr: 0x80040bd8, size: 1964, name: main_gfx_build_now_loading, hash: 15501d7711e0aeea, unit: game_loop_and_now_loading}
+  - {addr: 0x80041384, size: 36, name: main_gfx_build_now_loading_center, hash: c119ee540bd1e857, unit: game_loop_and_now_loading}
+  - {addr: 0x800413a8, size: 196, name: main_gfx_add_now_loading_to_otag, hash: 5438e0eb0e7a80c7, unit: game_loop_and_now_loading}
+  - {addr: 0x8004146c, size: 300, name: main_gfx_load_efc_fnt, hash: 02911c7008f10711, unit: game_loop_and_now_loading}
   - {addr: 0x80041598, size: 476, name: main_set_display_draw, hash: 8715c0b670c3f523, rodata: [{addr: 0x8004091c, size: 8, hash: b6d79f3197c64574}]}
   - {addr: 0x80041774, size: 284, name: main_boot_draw_squaresoft_logo, hash: 8a5c9395c78d9abc}
   - {addr: 0x80041890, size: 652, name: main_boot_build_and_draw_squaresoft_logo, hash: 429977c5de60ed46, rodata: [{addr: 0x80040924, size: 8, hash: af5570f5a1810b7a}]}
@@ -766,49 +764,49 @@ functions:
   - {addr: 0x80045720, size: 408, name: main_card_init_events, hash: c3df9151b2bf6647}
   - {addr: 0x800458b8, size: 72, name: main_overlay_exec_open_bin_main_loop, hash: ec2d3c302ca9b1f1}
   - {addr: 0x80045900, size: 60, name: main_overlay_exec_open_bin_ending, hash: 47240d2c7733c304}
-  - {addr: 0x80059854, size: 620, name: main_status_init_check_data, hash: c4a7f36df3f82f32, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059ac0, size: 8, name: main_noop_80059ac0, hash: 6d64edf91449c1b1, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059ac8, size: 40, name: main_party_clear_all, hash: a26cc5df81715e07, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059af0, size: 40, name: main_party_get_unit, hash: 1d19410c46f4c04e, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059b18, size: 152, name: main_unit_init, hash: 1462a0da6719f387, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059bb0, size: 428, name: main_party_save_unit, hash: 3462bca0bc65c7dd, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059d5c, size: 188, name: main_party_find_free_slot, hash: c3e5d4aff4ee2bd5, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059e18, size: 188, name: main_party_create_monster_egg, hash: cb42f8827ff55f42, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059ed4, size: 192, name: main_party_generate_unit, hash: a5e82d4160e0f240, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059f94, size: 76, name: main_party_find_slot_by_sprite_set, hash: 47dfec5aba810bc2, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059fe0, size: 28, name: main_party_remove_unit, hash: a2e47287f74e0e3c, unit: main_unit_build_and_party_roster}
-  - {addr: 0x80059ffc, size: 996, name: main_unit_generate_out_of_battle, hash: 6fd3606d364422a6, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a3e0, size: 32, name: main_unit_generate_party_base_raw_stats, hash: 5eec620572779a5c, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a400, size: 72, name: main_unit_generate_raw_stats, hash: 3a24de7ee784f8fb, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a448, size: 216, name: main_unit_generate_base_raw_stats, hash: 756a8d1bcbfc1980, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a520, size: 72, name: main_unit_copy_job_growths_and_multipliers, hash: 364c7c7d0237a485, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a568, size: 208, name: main_ability_get_id_from_skillset, hash: d3a8257d5b2a02d2, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a638, size: 244, name: main_ability_store_skillset_abilities, hash: c19fcfb3e8de3d11, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a72c, size: 344, name: main_ability_calculate_pointers_and_type, hash: efb4851817eeef88, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a884, size: 32, name: main_item_get_data_pointer, hash: bf988aefe1ea3d13, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a8a4, size: 48, name: main_job_get_data_pointer, hash: 510f01261d300e5f, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a8d4, size: 224, name: main_unit_init_job_data, hash: ae487841a96c8018, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005a9b4, size: 332, name: main_unit_init_for_battle, hash: cf0a846da8422d88, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005ab00, size: 72, name: main_unit_apply_equipment_move_jump_and_name, hash: 8c7f887045198aea, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005ab48, size: 212, name: main_unit_store_ramza_name_birthday_zodiac, hash: bcd6fe831cbd8c6e, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005ac1c, size: 1052, name: main_unit_calculate_entd_data, hash: 3d79228140d99399, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b038, size: 152, name: main_unit_init_job_data_from_entd, hash: eea8ec3957bb934a, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b0d0, size: 484, name: main_unit_init_battle_data, hash: 557d774ff311c66c, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b2b4, size: 588, name: main_unit_calculate_jobs_and_skillsets_from_entd, hash: 82aa3022b3183bb2, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b500, size: 220, name: main_job_get_random_unlocked, hash: b6d4c187979987c2, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b5dc, size: 452, name: main_unit_copy_job_data, hash: 1bcef74070bd921e, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b7a0, size: 140, name: main_unit_enable_rsm_flags, hash: cc4808dfe49cd9ec, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b82c, size: 84, name: main_unit_set_rsm_flag, hash: e08afa389f906d8d, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005b880, size: 496, name: main_unit_calculate_actual_stats, hash: 0715763bb40a644e, unit: main_unit_build_and_party_roster, rodata: [{addr: 0x80059818, size: 20, hash: 7d8dcfa94afb51b6}]}
-  - {addr: 0x8005ba70, size: 832, name: main_unit_calculate_abilities, hash: 7cf7a5b87413e65c, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005bdb0, size: 64, name: main_unit_store_monster_equipment, hash: f05ae65f8fd22982, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005bdf0, size: 1164, name: main_unit_calculate_entd_equipment, hash: 3c68c7196313eb38, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005c27c, size: 284, name: main_unit_set_equippable_items, hash: a0da56e8a072742e, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005c398, size: 560, name: main_unit_set_equipment_stats, hash: 8bbdcd34209f742e, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005c5c8, size: 804, name: main_unit_set_equipment_attributes, hash: 692a362c43589a84, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005c8ec, size: 152, name: main_unit_calculate_move_jump, hash: bad416e1a3b09741, unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007", unit: main_unit_build_and_party_roster}
-  - {addr: 0x8005cbd0, size: 148, name: main_party_calculate_highest_level, hash: 149c03a50c0d50b6, unit: main_unit_build_and_party_roster}
+  - {addr: 0x80059854, size: 620, name: main_status_init_check_data, hash: c4a7f36df3f82f32, source: src/unit/main/main_status_init_check_data.c}
+  - {addr: 0x80059ac0, size: 8, name: main_noop_80059ac0, hash: 6d64edf91449c1b1, source: src/unit/main/main_noop_80059ac0.c}
+  - {addr: 0x80059ac8, size: 40, name: main_party_clear_all, hash: a26cc5df81715e07, source: src/unit/main/main_party_clear_all.c}
+  - {addr: 0x80059af0, size: 40, name: main_party_get_unit, hash: 1d19410c46f4c04e, source: src/unit/main/main_party_get_unit.c}
+  - {addr: 0x80059b18, size: 152, name: main_unit_init, hash: 1462a0da6719f387, source: src/unit/main/main_unit_init.c}
+  - {addr: 0x80059bb0, size: 428, name: main_party_save_unit, hash: 3462bca0bc65c7dd, source: src/unit/main/main_party_save_unit.c}
+  - {addr: 0x80059d5c, size: 188, name: main_party_find_free_slot, hash: c3e5d4aff4ee2bd5, source: src/unit/main/main_party_find_free_slot.c}
+  - {addr: 0x80059e18, size: 188, name: main_party_create_monster_egg, hash: cb42f8827ff55f42, source: src/unit/main/main_party_create_monster_egg.c}
+  - {addr: 0x80059ed4, size: 192, name: main_party_generate_unit, hash: a5e82d4160e0f240, source: src/unit/main/main_party_generate_unit.c}
+  - {addr: 0x80059f94, size: 76, name: main_party_find_slot_by_sprite_set, hash: 47dfec5aba810bc2, source: src/unit/main/main_party_find_slot_by_sprite_set.c}
+  - {addr: 0x80059fe0, size: 28, name: main_party_remove_unit, hash: a2e47287f74e0e3c, source: src/unit/main/main_party_remove_unit.c}
+  - {addr: 0x80059ffc, size: 996, name: main_unit_generate_out_of_battle, hash: 6fd3606d364422a6, source: src/unit/main/main_unit_generate_out_of_battle.c}
+  - {addr: 0x8005a3e0, size: 32, name: main_unit_generate_party_base_raw_stats, hash: 5eec620572779a5c, source: src/unit/main/main_unit_generate_party_base_raw_stats.c}
+  - {addr: 0x8005a400, size: 72, name: main_unit_generate_raw_stats, hash: 3a24de7ee784f8fb, source: src/unit/main/main_unit_generate_raw_stats.c}
+  - {addr: 0x8005a448, size: 216, name: main_unit_generate_base_raw_stats, hash: 756a8d1bcbfc1980, source: src/unit/main/main_unit_generate_base_raw_stats.c}
+  - {addr: 0x8005a520, size: 72, name: main_unit_copy_job_growths_and_multipliers, hash: 364c7c7d0237a485, source: src/unit/main/main_unit_copy_job_growths_and_multipliers.c}
+  - {addr: 0x8005a568, size: 208, name: main_ability_get_id_from_skillset, hash: d3a8257d5b2a02d2, source: src/unit/main/main_ability_get_id_from_skillset.c}
+  - {addr: 0x8005a638, size: 244, name: main_ability_store_skillset_abilities, hash: c19fcfb3e8de3d11, source: src/unit/main/main_ability_store_skillset_abilities.c}
+  - {addr: 0x8005a72c, size: 344, name: main_ability_calculate_pointers_and_type, hash: efb4851817eeef88, source: src/unit/main/main_ability_calculate_pointers_and_type.c}
+  - {addr: 0x8005a884, size: 32, name: main_item_get_data_pointer, hash: bf988aefe1ea3d13, source: src/unit/main/main_item_get_data_pointer.c}
+  - {addr: 0x8005a8a4, size: 48, name: main_job_get_data_pointer, hash: 510f01261d300e5f, source: src/unit/main/main_job_get_data_pointer.c}
+  - {addr: 0x8005a8d4, size: 224, name: main_unit_init_job_data, hash: ae487841a96c8018, source: src/unit/main/main_unit_init_job_data.c}
+  - {addr: 0x8005a9b4, size: 332, name: main_unit_init_for_battle, hash: cf0a846da8422d88, source: src/unit/main/main_unit_init_for_battle.c}
+  - {addr: 0x8005ab00, size: 72, name: main_unit_apply_equipment_move_jump_and_name, hash: 8c7f887045198aea, source: src/unit/main/main_unit_apply_equipment_move_jump_and_name.c}
+  - {addr: 0x8005ab48, size: 212, name: main_unit_store_ramza_name_birthday_zodiac, hash: bcd6fe831cbd8c6e, source: src/unit/main/main_unit_store_ramza_name_birthday_zodiac.c}
+  - {addr: 0x8005ac1c, size: 1052, name: main_unit_calculate_entd_data, hash: 3d79228140d99399, source: src/unit/main/main_unit_calculate_entd_data.c}
+  - {addr: 0x8005b038, size: 152, name: main_unit_init_job_data_from_entd, hash: eea8ec3957bb934a, source: src/unit/main/main_unit_init_job_data_from_entd.c}
+  - {addr: 0x8005b0d0, size: 484, name: main_unit_init_battle_data, hash: 557d774ff311c66c, source: src/unit/main/main_unit_init_battle_data.c}
+  - {addr: 0x8005b2b4, size: 588, name: main_unit_calculate_jobs_and_skillsets_from_entd, hash: 82aa3022b3183bb2, source: src/unit/main/main_unit_calculate_jobs_and_skillsets_from_entd.c}
+  - {addr: 0x8005b500, size: 220, name: main_job_get_random_unlocked, hash: b6d4c187979987c2, source: src/unit/main/main_job_get_random_unlocked.c}
+  - {addr: 0x8005b5dc, size: 452, name: main_unit_copy_job_data, hash: 1bcef74070bd921e, source: src/unit/main/main_unit_copy_job_data.c}
+  - {addr: 0x8005b7a0, size: 140, name: main_unit_enable_rsm_flags, hash: cc4808dfe49cd9ec, source: src/unit/main/main_unit_enable_rsm_flags.c}
+  - {addr: 0x8005b82c, size: 84, name: main_unit_set_rsm_flag, hash: e08afa389f906d8d, source: src/unit/main/main_unit_set_rsm_flag.c}
+  - {addr: 0x8005b880, size: 496, name: main_unit_calculate_actual_stats, hash: 0715763bb40a644e, source: src/unit/main/main_unit_calculate_actual_stats.c, rodata: [{addr: 0x80059818, size: 20, hash: 7d8dcfa94afb51b6}]}
+  - {addr: 0x8005ba70, size: 832, name: main_unit_calculate_abilities, hash: 7cf7a5b87413e65c, source: src/unit/main/main_unit_calculate_abilities.c}
+  - {addr: 0x8005bdb0, size: 64, name: main_unit_store_monster_equipment, hash: f05ae65f8fd22982, source: src/unit/main/main_unit_store_monster_equipment.c}
+  - {addr: 0x8005bdf0, size: 1164, name: main_unit_calculate_entd_equipment, hash: 3c68c7196313eb38, source: src/unit/main/main_unit_calculate_entd_equipment.c}
+  - {addr: 0x8005c27c, size: 284, name: main_unit_set_equippable_items, hash: a0da56e8a072742e, source: src/unit/main/main_unit_set_equippable_items.c}
+  - {addr: 0x8005c398, size: 560, name: main_unit_set_equipment_stats, hash: 8bbdcd34209f742e, source: src/unit/main/main_unit_set_equipment_stats.c}
+  - {addr: 0x8005c5c8, size: 804, name: main_unit_set_equipment_attributes, hash: 692a362c43589a84, source: src/unit/main/main_unit_set_equipment_attributes.c}
+  - {addr: 0x8005c8ec, size: 152, name: main_unit_calculate_move_jump, hash: bad416e1a3b09741, source: src/unit/main/main_unit_calculate_move_jump.c}
+  - {addr: 0x8005c984, size: 588, name: main_unit_store_character_names, hash: "5127461766844007", source: src/unit/main/main_unit_store_character_names.c}
+  - {addr: 0x8005cbd0, size: 148, name: main_party_calculate_highest_level, hash: 149c03a50c0d50b6, source: src/unit/main/main_party_calculate_highest_level.c}
   - {addr: 0x8005cc64, size: 52, name: mem_copy_bytes_source_first, hash: 850c2fc16771314e, source: src/memory/mem_copy_bytes_source_first.c}
   - {addr: 0x8005cc98, size: 476, name: main_unit_calculate_random_equipment, hash: 57273afe761c2134, unit: main_unit_stats_levels_and_jobs}
   - {addr: 0x8005ce74, size: 584, name: main_unit_learn_job_abilities, hash: 64efa860cd5766d5, unit: main_unit_stats_levels_and_jobs}
@@ -846,12 +844,12 @@ functions:
   - {addr: 0x8005e4e8, size: 240, name: main_status_find_action_highest_order_effect, hash: f0565f5aed12ad4b, source: src/unit/main/main_status_find_action_highest_order_effect.c}
   - {addr: 0x8005e5d8, size: 108, name: main_unit_calculate_zodiac_symbol, hash: 0042a97bca78c29a, source: src/unit/main/main_unit_calculate_zodiac_symbol.c}
   - {addr: 0x8005e644, size: 44, name: mem_zero, hash: 56f3e9bb00dabbd7, source: src/unit/main/mem_zero.c}
-  - {addr: 0x8005e670, size: 92, name: main_unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, unit: main_status_flag_changes}
-  - {addr: 0x8005e6cc, size: 120, name: main_status_change_unit, hash: dc7a2bc945f89882, unit: main_status_flag_changes}
-  - {addr: 0x8005e744, size: 52, name: main_status_store_current, hash: a213e350e165866b, unit: main_status_flag_changes}
-  - {addr: 0x8005e778, size: 48, name: main_unit_copy_last_ability_ct, hash: "3904255598531e38", unit: main_status_flag_changes}
-  - {addr: 0x8005e7a8, size: 320, name: main_status_set_action_state, hash: a518a597cf1ee626, unit: main_status_flag_changes, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
-  - {addr: 0x8005e8e8, size: 36, name: main_system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, unit: main_status_flag_changes}
+  - {addr: 0x8005e670, size: 92, name: main_unit_increase_casualty_counters, hash: 42b35d6ac1f3c89f, source: src/status/main/main_unit_increase_casualty_counters.c}
+  - {addr: 0x8005e6cc, size: 120, name: main_status_change_unit, hash: dc7a2bc945f89882, source: src/status/main/main_status_change_unit.c}
+  - {addr: 0x8005e744, size: 52, name: main_status_store_current, hash: a213e350e165866b, source: src/status/main/main_status_store_current.c}
+  - {addr: 0x8005e778, size: 48, name: main_unit_copy_last_ability_ct, hash: "3904255598531e38", source: src/status/main/main_unit_copy_last_ability_ct.c}
+  - {addr: 0x8005e7a8, size: 320, name: main_status_set_action_state, hash: a518a597cf1ee626, source: src/status/main/main_status_set_action_state.c, rodata: [{addr: 0x80059830, size: 36, hash: d297e0f6906b441c}]}
+  - {addr: 0x8005e8e8, size: 36, name: main_system_handle_battle_load_exception, hash: a531e47d7cc2ef0f, source: src/status/main/main_system_handle_battle_load_exception.c}
 
 data:
   - {addr: 0x00000000, name: g_psyq_crt_constructor_count}

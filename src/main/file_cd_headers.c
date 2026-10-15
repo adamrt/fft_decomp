@@ -1,4 +1,4 @@
-/* Load descriptor header builders and the CD-ROM pause/reset. */
+/* File cd headers. A small object between boundaries the binary proves. */
 
 #include "fft/main.h"
 #include "psx/libcd.h"

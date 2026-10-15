@@ -1,59 +1,7 @@
-/* Casualty counters, status-set changes, action state bits, last ability CT and the battle load exception. */
-
 #include "fft/battle_status.h"
 #include "fft/main.h"
 #include "fft/script.h"
 #include "psx/types.h"
-
-void main_unit_increase_casualty_counters(unit_stats_t* unit) {
-    s32 id;
-    s32 count;
-
-    id = (unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE ? EVENT_SCRIPT_VAR_INJURED
-                                                                           : EVENT_SCRIPT_VAR_CASUALTIES;
-    count = script_get_variable(id);
-    if (count < 0x270F) {
-        count++;
-    }
-    script_set_variable(id, count);
-}
-
-/* Add, remove, or replace a status-set flag and refresh the unit's current status. */
-void main_status_change_unit(unit_stats_t* unit, s32 status_byte_index, u8 status_flag, s32 change_type) {
-    u8 updated;
-
-    /* An enum selector removes the native signed range test. */
-    switch (change_type) {
-    case MAIN_STATUS_ADD:
-        updated = unit->inflicted_status[status_byte_index] | status_flag;
-        break;
-    case MAIN_STATUS_REMOVE:
-        updated = unit->inflicted_status[status_byte_index] & ~status_flag;
-        break;
-    case MAIN_STATUS_REPLACE:
-        updated = status_flag;
-        break;
-    }
-
-    unit->inflicted_status[status_byte_index] = updated;
-    unit->status_sets.current[status_byte_index] = updated | unit->status_sets.innate[status_byte_index];
-}
-
-/* Recompute the current status set as innate | inflicted. */
-void main_status_store_current(unit_stats_t* unit) {
-    s32 status_set;
-
-    for (status_set = 0; status_set < STATUS_BYTE_COUNT; status_set++) {
-        unit->status_sets.current[status_set]
-            = unit->status_sets.innate[status_set] | unit->inflicted_status[status_set];
-    }
-}
-
-/* Charge time of the unit's last ability: the low seven bits of the ability
- * record's CT byte. */
-void main_unit_copy_last_ability_ct(unit_stats_t* unit) {
-    unit->ability_ct = g_main_ability_range_data[unit->action_command.ability_id].ct & 0x7f;
-}
 
 /* Sets the unit's charging/jump/defending/performing status bit for
  * `action_state` (clearing the other three) and notifies the battle status
@@ -113,8 +61,4 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
         }
         mask >>= 1;
     }
-}
-
-void main_system_handle_battle_load_exception(s32 value) {
-    main_system_handle_malloc_exception(3, value);
 }

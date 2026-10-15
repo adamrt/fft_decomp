@@ -1,4 +1,4 @@
-/* Entry, game loop, soft reset, BATTLE.BIN exec and the Now Loading message. */
+/* Game loop and now loading. Its start is a boundary the binary proves; its end is a boundary the binary proves. */
 
 #include "fft/battle.h"
 #include "fft/main.h"

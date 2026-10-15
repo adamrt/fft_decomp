@@ -1,0 +1,172 @@
+#include "fft/battle_text.h"
+#include "fft/main.h"
+#include "fft/memory.h"
+#include "fft/unit.h"
+#include "fft/world.h"
+#include "psx/libc.h"
+#include "psx/types.h"
+
+/* Fill a battle unit's seven equipment slots from its ENTD record, rolling a
+ * random item for each slot the record marks ENTD_VALUE_RANDOM.
+ *
+ * A monster takes main_unit_store_monster_equipment instead. The random right
+ * hand tries, in order, a Two Hands weapon, a Two Swords weapon, then the type of
+ * each Equip weapon support the unit has (sword, katana, crossbow, spear, axe,
+ * gun), then any weapon. The left hand is emptied when the right-hand weapon
+ * needs both hands or the unit has Two Hands; otherwise it rolls a Two Swords
+ * weapon, then a shield if the unit can equip one. Either hand's item goes to
+ * that hand's weapon or shield slot by its kind. Head and body prefer a helmet or
+ * armor when the support test passes, then any headgear or body armor. A roll
+ * that finds nothing leaves the slot empty, and item 0 is stored as ITEM_ID_NONE.
+ *
+ * The body-armor preference tests Equip Shield, not Equip Armor. */
+void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* entd) {
+    u8 item;
+    u8 flags;
+    s32 i;
+
+    if (unit->unit_flags & UNIT_FLAG_MONSTER) {
+        main_unit_store_monster_equipment(unit, entd);
+        return;
+    }
+
+    /* Right hand */
+    item = entd->equipment[ENTD_EQUIPMENT_SLOT_RIGHT_HAND];
+    flags = unit->ability_flags.support[2];
+    if (item == ENTD_VALUE_RANDOM) {
+        if (flags & BATTLE_SUPPORT_SET_3_TWO_HANDS) {
+            item = main_unit_calculate_random_equipment(
+                unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_HANDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
+        }
+        if (item == ENTD_VALUE_RANDOM && (flags & BATTLE_SUPPORT_SET_3_TWO_SWORDS)) {
+            item = main_unit_calculate_random_equipment(
+                unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
+        }
+    }
+    flags = unit->ability_flags.support[0];
+    if (item == ENTD_VALUE_RANDOM) {
+        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SWORD) {
+            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SWORD);
+        }
+        if (item == ENTD_VALUE_RANDOM) {
+            if (flags & BATTLE_SUPPORT_SET_1_EQUIP_KATANA) {
+                item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_KATANA);
+            }
+            if (item == ENTD_VALUE_RANDOM) {
+                if (flags & BATTLE_SUPPORT_SET_1_EQUIP_CROSSBOW) {
+                    item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_CROSSBOW);
+                }
+                if (item == ENTD_VALUE_RANDOM) {
+                    if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SPEAR) {
+                        item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_SPEAR);
+                    }
+                    if (item == ENTD_VALUE_RANDOM) {
+                        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_AXE) {
+                            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_AXE);
+                        }
+                        if (item == ENTD_VALUE_RANDOM) {
+                            if (flags & BATTLE_SUPPORT_SET_1_EQUIP_GUN) {
+                                item = main_unit_calculate_random_equipment(
+                                    unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_GUN);
+                            }
+                            if (item == ENTD_VALUE_RANDOM) {
+                                item = main_unit_calculate_random_equipment(
+                                    unit, ITEM_TYPE_FLAG_WEAPON, 0, ITEM_TYPE_FILTER_ANY);
+                                if (item == ENTD_VALUE_RANDOM) {
+                                    item = ITEM_ID_NONE;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (g_main_item_primary_data[item].type_flags & ITEM_TYPE_FLAG_SHIELD) {
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = item;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
+    } else {
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = item;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
+    }
+
+    /* Left hand */
+    item = entd->equipment[ENTD_EQUIPMENT_SLOT_LEFT_HAND];
+    if (unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
+        && ((g_main_item_weapon_data[g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
+                                         .secondary_data_id]
+                    .flags
+                & WEAPON_FLAG_FORCED_TWO_HANDS)
+            || (unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS))) {
+        item = ITEM_ID_NONE;
+    }
+    flags = unit->ability_flags.support[2];
+    if (item == ENTD_VALUE_RANDOM && (flags & BATTLE_SUPPORT_SET_3_TWO_SWORDS)) {
+        item = main_unit_calculate_random_equipment(
+            unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
+    }
+    flags = unit->equipment_categories[EQUIPPABLE_ITEM_TYPE_BYTE_INDEX(ITEM_TYPE_SHIELD)];
+    if (item == ENTD_VALUE_RANDOM) {
+        if (flags & EQUIPPABLE_ITEM_TYPE_BYTE_MASK(ITEM_TYPE_SHIELD)) {
+            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_SHIELD, 0, ITEM_TYPE_FILTER_ANY);
+        } else {
+            item = ITEM_ID_NONE;
+        }
+    }
+    if (g_main_item_primary_data[item].type_flags & ITEM_TYPE_FLAG_WEAPON) {
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = item;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
+    } else {
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = item;
+        unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
+    }
+
+    /* Head */
+    item = entd->equipment[ENTD_EQUIPMENT_SLOT_HEAD];
+    flags = unit->ability_flags.support[0];
+    if (item == ENTD_VALUE_RANDOM) {
+        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_ARMOR) {
+            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_HELMET);
+        }
+        if (item == ENTD_VALUE_RANDOM) {
+            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_HEADGEAR, 0, ITEM_TYPE_FILTER_ANY);
+            if (item == ENTD_VALUE_RANDOM) {
+                item = ITEM_ID_NONE;
+            }
+        }
+    }
+    unit->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = item;
+
+    /* Body */
+    item = entd->equipment[ENTD_EQUIPMENT_SLOT_BODY];
+    if (item == ENTD_VALUE_RANDOM) {
+        /* The target reuses Equip Shield here while requesting random Armor;
+         * preserve this native equipment-generation quirk. */
+        if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SHIELD) {
+            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_ARMOR);
+        }
+        if (item == ENTD_VALUE_RANDOM) {
+            item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_BODY_ARMOR, 0, ITEM_TYPE_FILTER_ANY);
+            if (item == ENTD_VALUE_RANDOM) {
+                item = ITEM_ID_NONE;
+            }
+        }
+    }
+    unit->equipment[UNIT_EQUIPMENT_SLOT_BODY] = item;
+
+    /* Accessory */
+    item = entd->equipment[ENTD_EQUIPMENT_SLOT_ACCESSORY];
+    if (item == ENTD_VALUE_RANDOM) {
+        item = main_unit_calculate_random_equipment(unit, ITEM_TYPE_FLAG_ACCESSORY, 0, ITEM_TYPE_FILTER_ANY);
+        if (item == ENTD_VALUE_RANDOM) {
+            item = ITEM_ID_NONE;
+        }
+    }
+    unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY] = item;
+
+    for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
+        if (unit->equipment[i] == ITEM_ID_NOTHING) {
+            unit->equipment[i] = ITEM_ID_NONE;
+        }
+    }
+}
