@@ -15,7 +15,7 @@ units:
   - {name: action_preparation, source: src/battle/action_preparation.c}
   - {name: action_resolution, source: src/battle/action_resolution.c}
   - {name: ai_commands, source: src/battle/ai_commands.c, rodata: [{addr: 0x80193d70, size: 8, hash: 14bca7e1bfd5b8a9}]}
-  - {name: ai_origins, source: src/battle/ai_origins.c, rodata: [{addr: 0x80193dd4, size: 12, hash: a1dd1afa9d59d502}]}
+  - {name: ai_origins, source: src/battle/ai_origins.c, rodata: [{addr: 0x80193dd4, size: 12, hash: a1dd1afa9d59d502}], data: [{addr: 0x8019f308, size: 80, hash: 296c781af2dde231}]}
   - {name: attack_resources, source: src/event/attack_resources.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}]}
   - {name: camera, source: src/battle/camera.c}
   - {name: command_menus, source: src/event/command_menus.c}
@@ -59,7 +59,7 @@ units:
   - {name: unit_lookup, source: src/battle/unit_lookup.c}
   - {name: unit_motion, source: src/battle/unit_motion.c}
   - {name: unit_name_list, source: src/event/unit_name_list.c}
-  - {name: unit_overlays, source: src/battle/unit_overlays.c, rodata: [{addr: 0x800677f8, size: 24, hash: eb05bd6b6bfe587c}, {addr: 0x80067830, size: 8, hash: cc7419b17cc27ab3}]}
+  - {name: unit_overlays, source: src/battle/unit_overlays.c, rodata: [{addr: 0x800677f8, size: 24, hash: eb05bd6b6bfe587c}, {addr: 0x80067830, size: 8, hash: cc7419b17cc27ab3}], data: [{addr: 0x800949dc, size: 24, hash: 2af3cad2dfddc130}, {addr: 0x800949f4, size: 24, hash: 65d77a45a2612b88}, {addr: 0x80094a0c, size: 24, hash: ca780de6daf75aec}, {addr: 0x80094a24, size: 24, hash: e4e8dec7578128c7}]}
   - {name: unit_runtime, source: src/battle/unit_runtime.c}
   - {name: unit_status_lists, source: src/event/unit_status_lists.c, data: [{addr: 0x80168d0c, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x80168d44, size: 76, hash: ec0d1125a0b03828}]}
   - {name: window_images, source: src/event/window_images.c}

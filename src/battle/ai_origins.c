@@ -21,6 +21,11 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+/* Signed scoring weights, indexed by status ID. */
+static s16 g_battle_ai_status_priority_weights[STATUS_COUNT]
+    = { 0, -192, -192, -39, 0, 0, 0, 0, -116, -231, -64, -64, -90, -116, 0, -192, -7, 12, 51, 38, -39, -26, -52, -32,
+          -26, 25, 25, 25, 19, -39, -90, 64, 6, -7, -64, -39, -39, -64, 25, -103 }; /* 0x8019f308..0x8019f357 */
+
 static void battle_ai_build_monster_skill_tile_mask(void);
 static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 radius);
 static s32 battle_ai_can_status_cancellation_affect_turn(const unit_stats_t* unit, s32 status);

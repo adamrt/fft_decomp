@@ -805,8 +805,6 @@ typedef enum ai_tile_pickup_kind {
     AI_TILE_PICKUP_TREASURE = 2,
 } ai_tile_pickup_kind_e;
 
-/* Signed scoring weights, indexed by status ID. */
-extern s16 g_battle_ai_status_priority_weights[STATUS_COUNT]; /* 0x8019f308..0x8019f357 */
 /* Unit snapshots share the scratchpad-save arena used during movement propagation. */
 extern ai_extended_snapshot_t g_battle_ai_unit_snapshot_storage[];
 extern ai_extended_snapshot_t* g_battle_ai_unit_snapshots; /* 0x8019f3c0 */

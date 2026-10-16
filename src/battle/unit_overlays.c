@@ -24,6 +24,22 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Texture coordinates for the status bubble graphics, indexed by status bubble
+ * id (0x800949dc/0x800949f4) and by a counter digit (0x80094a0c/0x80094a24).
+ * Each table holds 24 bytes; the pairs are read together as one u/v. */
+static u8 g_battle_status_bubble_u[24]
+    = { 0, 16, 30, 44, 58, 72, 86, 100, 114, 128, 142, 0, 16, 30, 44, 58, 72, 86, 100, 86, 0, 0, 0, 0 };
+
+static u8 g_battle_status_bubble_v[24] = { 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 176, 188, 188, 188, 188,
+    188, 188, 188, 188, 200, 176, 0, 0, 0 };
+
+/* graphics */
+static u8 g_battle_status_bubble_digit_u[24]
+    = { 142, 128, 114, 100, 86, 142, 128, 142, 128, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static u8 g_battle_status_bubble_digit_v[24]
+    = { 200, 200, 200, 200, 200, 188, 188, 176, 176, 176, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 /* Build the four corners of the cursor quad over the tile under coords on map layer `layer`, at
  * the tile surface and following its slope. Returns 0 for a planar quad, 1 when a corner slope
  * creases it along the v0-v3 diagonal, 2 along v1-v2. */
