@@ -8,6 +8,8 @@
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/world.h"
+#include "fft/world_menu.h"
+#include "fft/world_text.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"
 #include "psx/types.h"

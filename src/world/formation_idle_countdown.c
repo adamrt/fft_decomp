@@ -2,7 +2,7 @@
 
 #include "fft/menu.h"
 #include "fft/thread.h"
-#include "fft/world.h"
+#include "fft/world_script.h"
 #include "psx/types.h"
 
 /* Count the timer at g_world_input_lockout_timer down while thread 7 is idle; reset it to 10

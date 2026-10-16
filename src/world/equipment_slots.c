@@ -8,6 +8,10 @@
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
+#include "fft/world_item.h"
+#include "fft/world_menu.h"
+#include "fft/world_shop.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

@@ -6,6 +6,9 @@
 #include "fft/sound.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
+#include "fft/world_menu.h"
+#include "fft/world_text.h"
 #include "psx/pad.h"
 #include "psx/types.h"
 

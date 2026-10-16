@@ -5,6 +5,8 @@
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
+#include "fft/world_text.h"
 #include "psx/types.h"
 
 /* Ramza's sprite sets and guest roster slots cannot be

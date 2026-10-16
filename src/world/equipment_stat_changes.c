@@ -3,7 +3,6 @@
 #include "fft/data.h"
 #include "fft/main.h"
 #include "fft/menu.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /*

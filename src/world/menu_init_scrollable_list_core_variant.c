@@ -1,7 +1,7 @@
 #include "fft/gfx.h"
 #include "fft/menu.h"
 #include "fft/menu_script.h"
-#include "fft/world.h"
+#include "fft/world_menu.h"
 #include "psx/types.h"
 
 /* Initialize a -1 terminated scrollable list and reset its rendering state. */

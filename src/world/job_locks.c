@@ -5,6 +5,7 @@
 #include "fft/main.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
 #include "psx/types.h"
 
 /* The job that heads a unit's job list: a monster's own job, Squire for a

@@ -29,6 +29,8 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_menu.h"
+#include "fft/world_script.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"

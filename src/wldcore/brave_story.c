@@ -9,6 +9,7 @@
 #include "fft/window.h"
 #include "fft/wldcore.h"
 #include "fft/world.h"
+#include "fft/world_menu.h"
 #include "psx/libgpu.h"
 #include "psx/libgs.h"
 #include "psx/libgte.h"

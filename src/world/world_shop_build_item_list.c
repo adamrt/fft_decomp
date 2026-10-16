@@ -4,6 +4,8 @@
 #include "fft/menu.h"
 #include "fft/script.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
+#include "fft/world_shop.h"
 #include "psx/types.h"
 
 /* Build the item list offered by a normal or poachers' den shop.

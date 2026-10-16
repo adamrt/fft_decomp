@@ -5,6 +5,7 @@
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

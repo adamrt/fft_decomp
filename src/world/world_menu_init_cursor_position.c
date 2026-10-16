@@ -1,5 +1,4 @@
 #include "fft/menu.h"
-#include "fft/world.h"
 #include "psx/types.h"
 
 /* The same routine as menu_init_selection_value, compiled twice. The list steps call this copy

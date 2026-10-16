@@ -3,6 +3,7 @@
 #include "fft/menu.h"
 #include "fft/thread.h"
 #include "fft/world.h"
+#include "fft/world_menu.h"
 #include "psx/types.h"
 
 void world_menu_toggle_change_banner_panel_thread(s32 enable) {

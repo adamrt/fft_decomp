@@ -1,4 +1,4 @@
-#include "fft/world.h"
+#include "fft/world_gfx.h"
 #include "psx/types.h"
 
 /* Set the source rectangle used by the WORLD image blitter. */

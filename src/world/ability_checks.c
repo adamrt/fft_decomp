@@ -7,6 +7,7 @@
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
 #include "psx/types.h"
 
 static s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {

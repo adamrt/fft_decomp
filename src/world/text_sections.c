@@ -3,6 +3,9 @@
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/world.h"
+#include "fft/world_script.h"
+#include "fft/world_shop.h"
+#include "fft/world_text.h"
 #include "psx/types.h"
 
 /* Load shop background image `index` to the heap; the table holds a sector

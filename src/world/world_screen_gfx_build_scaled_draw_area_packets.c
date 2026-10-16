@@ -1,7 +1,7 @@
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/script.h"
-#include "fft/world.h"
+#include "fft/world_menu.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 

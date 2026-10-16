@@ -1,6 +1,6 @@
 #include "fft/main.h"
 #include "fft/unit.h"
-#include "fft/world.h"
+#include "fft/world_menu.h"
 #include "psx/types.h"
 
 /* Returns the name index combined with its name class. */

@@ -9,6 +9,8 @@
 #include "fft/unit.h"
 #include "fft/wldcore.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
+#include "fft/world_menu.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

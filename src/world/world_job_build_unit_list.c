@@ -3,6 +3,7 @@
 #include "fft/main.h"
 #include "fft/unit.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
 #include "psx/types.h"
 
 /* Declared s32 here: the target uses the returned register without the

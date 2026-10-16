@@ -7,6 +7,8 @@
 #include "fft/unit.h"
 #include "fft/window.h"
 #include "fft/world.h"
+#include "fft/world_formation.h"
+#include "fft/world_text.h"
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

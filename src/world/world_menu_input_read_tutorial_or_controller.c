@@ -1,5 +1,7 @@
 #include "fft/main.h"
 #include "fft/world.h"
+#include "fft/world_card.h"
+#include "fft/world_script.h"
 #include "psx/libetc.h"
 #include "psx/types.h"
 

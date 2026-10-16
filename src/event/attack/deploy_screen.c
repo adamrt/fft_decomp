@@ -12,7 +12,7 @@
 #include "fft/sound.h"
 #include "fft/thread.h"
 #include "fft/unit.h"
-#include "fft/world.h"
+#include "fft/world_shop.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/pad.h"

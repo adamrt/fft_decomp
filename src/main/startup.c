@@ -5,7 +5,7 @@
 #include "fft/main.h"
 #include "fft/script.h"
 #include "fft/unit.h"
-#include "fft/world.h"
+#include "fft/world_menu.h"
 #include "psx/libapi.h"
 #include "psx/libc.h"
 #include "psx/libcd.h"
