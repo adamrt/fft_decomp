@@ -55,14 +55,19 @@ preserving every original byte.
   objects, a change of compiler profile, jump-table alignment, read-only
   data that is not contiguous. Where the binary is silent, cut by topic to
   about 20 to 60 functions. A name prefix is never boundary evidence.
-- `include/fft/`: game program, library and shared-type headers.
-  `include/psx/`: library and PS1 hardware interfaces. Library code never
-  includes game headers.
+- `include/fft/`: game program, library and shared-type headers. A program's
+  declarations live in topic headers (`world_shop.h`, `wldcore_map.h`,
+  `main_sound.h`, `menu_panel.h`); the base header (`world.h`) keeps the
+  types and declarations several topics share. `include/psx/`: library and
+  PS1 hardware interfaces. Library code never includes game headers.
 - `tools/`: Go build/check tooling. `tools/target.go` owns the original disc size
   and hash. `QUIRKS.md` records unusual behavior worth preserving.
 
 Put declarations in their owning header. Sources include their own declaration
-header and the focused headers for APIs they use. Group related declarations
+header and the focused headers for APIs they use, in every program that
+compiles them; an include only one program needs sits under that program's
+`#ifdef FFT_X`. A header starts with its guard, then a one-line description,
+then its includes. Group related declarations
 under short comments: types, globals, then functions. Leave blank lines
 between type blocks; headers include their own dependencies.
 
