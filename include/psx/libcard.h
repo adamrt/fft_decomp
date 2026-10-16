@@ -9,12 +9,14 @@ void _patch_card(void);
 void _patch_card2(void);
 void psyq_card_restore_exception_prefix(void);
 
-/* BIOS supplies the live v1 base; its absolute value is not assumed here. */
+/* The BIOS supplies the live v1 base. At the hardware I/O base the two words
+ * read are the controller port status (JOY_STAT) and the interrupt mask
+ * (I_MASK). */
 typedef struct {
-    u8 _unknown_0000[0x1044];
-    u32 _unknown_1044;
-    u8 _unknown_1048[0x2c];
-    u32 _unknown_1074;
+    u8 _unused_0000[0x1044];
+    u32 joy_status; /* 0x1044 */
+    u8 _unused_1048[0x2c];
+    u32 interrupt_mask; /* 0x1074 */
 } psyq_card_interrupt_view_t;
 
 typedef struct {

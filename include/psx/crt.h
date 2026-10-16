@@ -5,7 +5,7 @@
 
 typedef void (*psyq_crt_handler_t)(void);
 typedef struct {
-    u32 _unknown_00;
+    u32 _padding_00; /* rounds the 12 saved bytes up to a 16-byte frame */
     u32 saved_s0;
     u32 saved_s1;
     void* saved_ra;
