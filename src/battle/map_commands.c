@@ -45,9 +45,9 @@ s32 battle_state_enter_effect_playback(void) {
     g_battle_game_state = BATTLE_GAME_STATE_EFFECT;
     g_main_system_animation_speed = 2;
     g_battle_gfx_screen_color_modulation_fade_frames = 0;
-    g_camera_screen_offset_countdown = 0;
-    g_camera_rotation_countdown = 0;
-    g_camera_zoom_countdown = 0;
+    g_battle_camera_screen_offset_countdown = 0;
+    g_battle_camera_rotation_countdown = 0;
+    g_battle_camera_zoom_countdown = 0;
     g_battle_previous_game_state = previous_state;
     g_main_saved_animation_speed = previous_animation_speed;
     return 0;
@@ -95,7 +95,7 @@ void battle_map_store_selected_tile_coordinates(SVECTOR* destination) {
 
 /* Write the map's width and depth in tiles to `destination` as (x, 0, z). */
 void battle_map_store_max_coordinates(SVECTOR* destination) {
-    main_util_set_svector(destination, g_map_max_x, 0, g_map_max_y);
+    main_util_set_svector(destination, g_battle_map_max_x, 0, g_battle_map_max_y);
 }
 
 /* The tile a unit stands on, by runtime id. The runtime record lookup is not checked:
@@ -126,12 +126,12 @@ map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id) {
 /* Ask the map loader to load what the current map state needs. 1 when the load
  * started, 0 when a file read is still in progress. */
 s32 battle_map_start_data_load(void) {
-    return battle_map_load_data(g_map_id, MAP_LOAD_COMMAND_START) != 0;
+    return battle_map_load_data(g_battle_map_id, MAP_LOAD_COMMAND_START) != 0;
 }
 
 /* Advance the current map's load by one step. Nonzero while it is still loading. */
 s32 battle_map_poll_data_load(void) {
-    return battle_map_load_data(g_map_id, MAP_LOAD_COMMAND_POLL);
+    return battle_map_load_data(g_battle_map_id, MAP_LOAD_COMMAND_POLL);
 }
 
 /* Event Use3DObject: start state row value_b of map mesh part value_a (map data
@@ -160,9 +160,9 @@ s32 battle_map_command_get_texture_animation_active(s32 value) {
 }
 
 s32 battle_camera_is_active(void) {
-    if (g_camera_step_vector.vx == 0 && g_camera_step_vector.vy == 0 && g_camera_step_vector.vz == 0
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
-        && g_camera_zoom_action == CAMERA_STEP_NONE) {
+    if (g_battle_camera_step_vector.vx == 0 && g_battle_camera_step_vector.vy == 0
+        && g_battle_camera_step_vector.vz == 0 && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE
+        && g_battle_camera_tilt_action == CAMERA_STEP_NONE && g_battle_camera_zoom_action == CAMERA_STEP_NONE) {
         return 0;
     }
     return 1;
@@ -215,7 +215,7 @@ s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
 }
 
 void battle_map_mark_data_load_complete(void) {
-    g_map_data_load_complete = 1;
+    g_battle_map_data_load_complete = 1;
 }
 
 /* Returns the hsync count battle_state_sync_frame measured for the last frame. No
@@ -242,14 +242,15 @@ void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTO
     s32 tile_x;
     s32 tile_y;
 
-    main_util_set_vector(&g_camera_current_real_coords, -coords->vx * ONE, -coords->vy * ONE, -coords->vz * ONE);
-    main_util_set_svector(&g_camera_render_state, rotation->vx & 0x1fff, rotation->vy & 0x1fff, rotation->vz & 0x1fff);
+    main_util_set_vector(&g_battle_camera_current_real_coords, -coords->vx * ONE, -coords->vy * ONE, -coords->vz * ONE);
+    main_util_set_svector(
+        &g_battle_camera_render_state, rotation->vx & 0x1fff, rotation->vy & 0x1fff, rotation->vz & 0x1fff);
     g_battle_cursor_z = 0;
-    tile_x = g_camera_current_real_coords.vx / (MAP_TILE_SIZE * ONE);
+    tile_x = g_battle_camera_current_real_coords.vx / (MAP_TILE_SIZE * ONE);
     g_battle_cursor_x = tile_x;
-    tile_y = g_camera_current_real_coords.vz / (MAP_TILE_SIZE * ONE);
+    tile_y = g_battle_camera_current_real_coords.vz / (MAP_TILE_SIZE * ONE);
     g_battle_cursor_y = tile_y;
-    g_camera_current_real_coords.vy
+    g_battle_camera_current_real_coords.vy
         = -battle_map_get_tile_data_pointer(tile_x, tile_y, 0)->height * (MAP_HEIGHT_STEP * ONE);
 }
 
@@ -258,22 +259,22 @@ void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTO
  * (0, 0), no acting or casting unit, no rotation, tilt or zoom in progress and
  * directional panning off. */
 static void battle_camera_init_defaults(void) {
-    main_util_set_vector(&g_camera_current_screen_offset, 0x100, 0xA0, 0x280);
-    main_util_set_vector(&g_camera_zoom, ONE, ONE, ONE);
-    main_util_set_svector(&g_camera_render_state, 0x12E, 0xE00, 0);
-    main_util_set_vector(&g_camera_current_real_coords, 0, 0, 0);
+    main_util_set_vector(&g_battle_camera_current_screen_offset, 0x100, 0xA0, 0x280);
+    main_util_set_vector(&g_battle_camera_zoom, ONE, ONE, ONE);
+    main_util_set_svector(&g_battle_camera_render_state, 0x12E, 0xE00, 0);
+    main_util_set_vector(&g_battle_camera_current_real_coords, 0, 0, 0);
 
     g_battle_casting_runtime_id = 0xFF;
     g_battle_unit_source_runtime_id = 0xFF;
     g_battle_cursor_y = 0;
     g_battle_cursor_z = 0;
     g_battle_cursor_x = 0;
-    g_camera_rotation_action = CAMERA_ROTATION_NONE;
-    g_camera_zoom_action = CAMERA_STEP_NONE;
-    g_map_zoom_target = MAP_ZOOM_IN;
-    g_camera_tilt_action = CAMERA_STEP_NONE;
-    g_map_tilt_target = MAP_TILT_LOW;
-    g_camera_map_pan_enabled = 0;
+    g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
+    g_battle_camera_zoom_action = CAMERA_STEP_NONE;
+    g_battle_map_zoom_target = MAP_ZOOM_IN;
+    g_battle_camera_tilt_action = CAMERA_STEP_NONE;
+    g_battle_map_tilt_target = MAP_TILT_LOW;
+    g_battle_camera_map_pan_enabled = 0;
 }
 
 /* Appends one unit to the graphics load queue that
@@ -331,8 +332,8 @@ static s32 battle_unit_select_and_open_entd(void) {
         *current_event_id = (rand() * 5) / 0x8000 + 75;
     } else if (selection_mode == BATTLE_ENTD_SELECTION_RANDOM_1_TO_59) {
         *current_event_id = (rand() * 59) / 0x8000 + 1;
-    } else if ((selection_mode == BATTLE_ENTD_SELECTION_MAP_ID) && (g_map_id != 0)) {
-        *current_event_id = g_map_id;
+    } else if ((selection_mode == BATTLE_ENTD_SELECTION_MAP_ID) && (g_battle_map_id != 0)) {
+        *current_event_id = g_battle_map_id;
     }
 
     return main_entd_open_file();
@@ -431,7 +432,7 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
         step++;
         battle_camera_init_defaults();
         battle_map_init_palette_state();
-        battle_map_load_palette_data(&g_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
+        battle_map_load_palette_data(&g_battle_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
         g_main_gfx_unit_graphics_load_queue.count = 0;
         menu_request_open_small();
         break;
@@ -525,7 +526,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
             battle_weather_randomize_from_calendar();
         }
         step++;
-        battle_map_load_palette_data(&g_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
+        battle_map_load_palette_data(&g_battle_map_weather_particle_palette, MAP_CLUT_ROW_SPRITES, 0, 0);
         g_main_gfx_unit_graphics_load_queue.count = 0;
         break;
     case 1:
@@ -578,7 +579,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
         }
         break;
     case 8:
-        if (g_map_data_load_complete != 0) {
+        if (g_battle_map_data_load_complete != 0) {
             step++;
             battle_gfx_init_deployment_and_reset_unit_graphics_state();
             g_battle_deployment_skipped = 0;

@@ -443,7 +443,7 @@ static void battle_move_start_unit_jump_step(
 
     /* Copy the byte to retain narrow loads of the packed step fields. */
     current_step = unit->current_path_step;
-    unit->velocity.vy = -g_move_jump_gravity
+    unit->velocity.vy = -g_battle_move_jump_gravity
         * (((current_step.length * (MAP_TILE_SIZE * ONE)) + (MAP_TILE_SIZE * ONE / 2)) / (6 * ONE));
     step = &unit->current_path_step;
     current_step = unit->current_path_step;
@@ -519,11 +519,11 @@ static void battle_move_start_unit_climb_jump_step(battle_unit_t* unit, const ma
     }
     /* Grouping each constant with the gravity term keeps the target's order
      * (scale, then multiply by gravity); the flat spelling scales gravity first. */
-    speed
-        = SquareRoot12((height - -unit->world_coords.vy / 6 + (step->length + 1) * 2) * (6 * g_move_jump_gravity) * 2);
-    time = speed / g_move_jump_gravity;
+    speed = SquareRoot12(
+        (height - -unit->world_coords.vy / 6 + (step->length + 1) * 2) * (6 * g_battle_move_jump_gravity) * 2);
+    time = speed / g_battle_move_jump_gravity;
     unit->velocity.vy = -speed;
-    time += SquareRoot12((step->length + 1) * (12 * g_move_jump_gravity) * 2) / g_move_jump_gravity;
+    time += SquareRoot12((step->length + 1) * (12 * g_battle_move_jump_gravity) * 2) / g_battle_move_jump_gravity;
     switch (step->direction) {
     case MOVE_STEP_DIRECTION_EAST:
         unit->step_phase = MOVE_STEP_PHASE_JUMP_START_EAST;
@@ -588,9 +588,9 @@ static void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map
         height = to->height * 2 + to->depth_half_height.half_height * unit->destination_edge_height;
     }
     rise_height = (height - -unit->world_coords.vy / 6) * 6 + 1;
-    rise = SquareRoot12(rise_height * g_move_jump_gravity * 2);
+    rise = SquareRoot12(rise_height * g_battle_move_jump_gravity * 2);
     unit->velocity.vy = -rise;
-    frames = rise / g_move_jump_gravity;
+    frames = rise / g_battle_move_jump_gravity;
     switch (step->direction) {
     case MOVE_STEP_DIRECTION_EAST:
         unit->step_phase = MOVE_STEP_PHASE_JUMP_ASCENT_EAST;
@@ -667,12 +667,12 @@ static void battle_move_start_float_climb_jump_step(battle_unit_t* unit, const m
     current_step = unit->current_path_step;
     height += (current_step.length + 1) * 2;
     rise_height = height * 6;
-    rise = SquareRoot12(rise_height * g_move_jump_gravity * 2);
-    frames = rise / g_move_jump_gravity;
+    rise = SquareRoot12(rise_height * g_battle_move_jump_gravity * 2);
+    frames = rise / g_battle_move_jump_gravity;
     unit->velocity.vy = -rise;
     current_step = unit->current_path_step;
     apex = (current_step.length + 1) * 12;
-    frames += SquareRoot12(apex * g_move_jump_gravity * 2) / g_move_jump_gravity;
+    frames += SquareRoot12(apex * g_battle_move_jump_gravity * 2) / g_battle_move_jump_gravity;
     /* The byte copy prevents a wider direction load. */
     current_step = unit->current_path_step;
     switch (current_step.direction) {
@@ -723,7 +723,7 @@ static void battle_move_start_float_climb_jump_step(battle_unit_t* unit, const m
  * Y heights under the unit and at its destination, including rider adjustments. Per stage:
  * - walk and climb, to the edge or to the center: at or below the ground the unit
  *   snaps onto it and the horizontal delta is rebuilt for the slope (the climb
- *   stages first raise step_speed by g_move_jump_gravity, up to 0x7fff).
+ *   stages first raise step_speed by g_battle_move_jump_gravity, up to 0x7fff).
  *   Above the ground it snaps when less than 6 units up, otherwise it gains
  *   gravity; 0x2a units or more above the ground (the destination's ground in
  *   the to-center stages) turns the step into a jump, with the fall animation
@@ -800,7 +800,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
             } else if (unit->velocity.vy <= 0x7FFF) {
-                unit->velocity.vy += g_move_jump_gravity;
+                unit->velocity.vy += g_battle_move_jump_gravity;
             }
             if (-unit->real.vy / ONE >= -ground_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_ASCENT_NORTH;
@@ -820,7 +820,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         if ((-unit->real.vy / ONE) <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             if (unit->step_speed <= 0x7FFF) {
-                unit->step_speed += g_move_jump_gravity;
+                unit->step_speed += g_battle_move_jump_gravity;
             }
             battle_move_set_unit_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->current_edge_height);
@@ -829,7 +829,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
             } else if (unit->velocity.vy <= 0x7FFF) {
-                unit->velocity.vy += g_move_jump_gravity;
+                unit->velocity.vy += g_battle_move_jump_gravity;
             }
             if (-unit->real.vy / ONE >= -ground_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_ASCENT_NORTH;
@@ -856,7 +856,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
             } else if (unit->velocity.vy <= 0x7FFF) {
-                unit->velocity.vy += g_move_jump_gravity;
+                unit->velocity.vy += g_battle_move_jump_gravity;
             }
             if (-unit->real.vy / ONE >= -destination_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_DESCENT_NORTH;
@@ -876,7 +876,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             if (unit->step_speed <= 0x7FFF) {
-                unit->step_speed += g_move_jump_gravity;
+                unit->step_speed += g_battle_move_jump_gravity;
             }
             battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
@@ -886,7 +886,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
             } else if (unit->velocity.vy <= 0x7FFF) {
-                unit->velocity.vy += g_move_jump_gravity;
+                unit->velocity.vy += g_battle_move_jump_gravity;
             }
             if (-unit->real.vy / ONE >= -destination_height + 0x2A) {
                 unit->step_phase = MOVE_STEP_PHASE_JUMP_DESCENT_NORTH;
@@ -910,7 +910,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLOAT_JUMP_NORTH:
     case MOVE_STEP_PHASE_FLOAT_JUMP_WEST:
         if (unit->velocity.vy <= 0x7FFF) {
-            unit->velocity.vy += g_move_jump_gravity;
+            unit->velocity.vy += g_battle_move_jump_gravity;
         }
         unit->real.vy += unit->velocity.vy;
         if (unit->velocity.vy > 0) {
@@ -955,7 +955,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             /* Keeps depth live here, so it takes a0 and reorg leaves `move a0,s0` out of both landing tests. */
             __asm__("" : : "r"(depth));
             if (unit->velocity.vy < 0x2000) {
-                unit->velocity.vy += g_move_jump_gravity;
+                unit->velocity.vy += g_battle_move_jump_gravity;
             }
         }
         unit->shadow_dirty |= 1;
@@ -1242,7 +1242,7 @@ void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
 }
 
 /* Place a unit that shares a tile with a mover delta world units from the point
- * (x, y) along g_move_displacement_direction, at the ground height there,
+ * (x, y) along g_battle_move_displacement_direction, at the ground height there,
  * and mark its shadow for redrawing.
  *
  * y is the map depth axis (world_coords.vz). Dead, crystal, treasure and jumping units
@@ -1258,7 +1258,7 @@ static void battle_move_displace_unit_along_step_direction(battle_unit_t* unit, 
         != 0) {
         return;
     }
-    switch (g_move_displacement_direction) {
+    switch (g_battle_move_displacement_direction) {
     case MOVE_DIRECTION_SOUTH:
         axis = y - delta;
         unit->world_coords.vz = axis;
@@ -1339,7 +1339,7 @@ static void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direc
 /* Pushes a unit sharing the mover's destination tile aside, mirroring
  * move_displace_overlapping_unit but keyed on the pending step's
  * destination tile instead of the unit's current map square.  The trailing
- * loop only advances the shared direction counter g_move_displacement_direction; it has no other
+ * loop only advances the shared direction counter g_battle_move_displacement_direction; it has no other
  * effect.
  *
  * The case order and the reused `dist` temporary reproduce the target's
@@ -1406,13 +1406,16 @@ void battle_move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 dire
         next = MOVE_DIRECTION_NORTH;
         break;
     }
-    for (g_move_displacement_direction = 0; g_move_displacement_direction < 4; g_move_displacement_direction++) {
+    for (g_battle_move_displacement_direction = 0; g_battle_move_displacement_direction < 4;
+        g_battle_move_displacement_direction++) {
         if (direction == next) {
-            if ((g_move_displacement_direction != next) && (g_move_displacement_direction != (next ^ 2))) {
+            if ((g_battle_move_displacement_direction != next)
+                && (g_battle_move_displacement_direction != (next ^ 2))) {
                 break;
             }
         } else {
-            if ((g_move_displacement_direction != (direction ^ 2)) && (g_move_displacement_direction != (next ^ 2))) {
+            if ((g_battle_move_displacement_direction != (direction ^ 2))
+                && (g_battle_move_displacement_direction != (next ^ 2))) {
                 break;
             }
         }
@@ -1447,14 +1450,14 @@ static void battle_move_advance_display_unit_step(battle_unit_t* unit) {
     s32 direction;
 
     direction = battle_move_get_direction(unit);
-    switch (g_move_step_value.climb) {
+    switch (g_battle_move_step_value.climb) {
     case 0:
-        battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
-        unit->step_phase = g_move_walk_to_center_phases[direction];
+        battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
+        unit->step_phase = g_battle_move_walk_to_center_phases[direction];
         break;
     case 1:
-        battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
-        unit->step_phase = g_move_climb_to_center_phases[direction];
+        battle_move_start_unit_step_at_climb_speed(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
+        unit->step_phase = g_battle_move_climb_to_center_phases[direction];
         break;
     }
 }
@@ -1505,21 +1508,22 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     unit->velocity.vz = 0;
     unit->velocity.vx = 0;
     target_z = battle_gfx_calculate_world_height_from_world_coords(unit);
-    g_move_target_screen_z = target_z;
+    g_battle_move_target_screen_z = target_z;
     if (unit->world_coords.vy < target_z) {
         return;
     }
     if (((unit->animation.sequence_id >> 1) - BATTLE_UNIT_ANIMATION_HOP) < 2U) {
         if (unit->velocity.vy < 0x6000) {
             unit->velocity.vy = 0;
-            switch (g_move_step_value.climb) {
+            switch (g_battle_move_step_value.climb) {
             case 0:
-                battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
-                unit->step_phase = g_move_walk_to_center_phases[direction];
+                battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
+                unit->step_phase = g_battle_move_walk_to_center_phases[direction];
                 break;
             case 1:
-                battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
-                unit->step_phase = g_move_climb_to_center_phases[direction];
+                battle_move_start_unit_step_at_climb_speed(
+                    unit, g_battle_move_current_tile, g_battle_move_destination_tile);
+                unit->step_phase = g_battle_move_climb_to_center_phases[direction];
                 break;
             }
             tile = battle_map_get_tile_data_pointer(
@@ -1536,11 +1540,11 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
         }
         unit->velocity.vy = 0;
         unit->state_frame_counter = 2;
-        unit->step_phase = g_move_jump_landing_phases[direction];
+        unit->step_phase = g_battle_move_jump_landing_phases[direction];
         if (g_battle_game_state != BATTLE_GAME_STATE_ACTION_EXECUTE) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
         }
-        if (g_move_step_value.mount) {
+        if (g_battle_move_step_value.mount) {
             battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
             return;
         }
@@ -1550,11 +1554,11 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     }
     unit->velocity.vy = 0;
     unit->state_frame_counter = 2;
-    unit->step_phase = g_move_jump_landing_phases[direction];
+    unit->step_phase = g_battle_move_jump_landing_phases[direction];
     if (g_battle_game_state != BATTLE_GAME_STATE_ACTION_EXECUTE) {
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
     }
-    if (g_move_step_value.mount) {
+    if (g_battle_move_step_value.mount) {
         battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
         return;
     }
@@ -1576,12 +1580,12 @@ void battle_move_update_airborne_ascent_phase(battle_unit_t* unit) {
         battle_move_displace_overlapping_unit(unit, direction);
     }
     if (unit->velocity.vy >= 0) {
-        unit->step_phase = g_move_jump_descent_phases[direction];
+        unit->step_phase = g_battle_move_jump_descent_phases[direction];
         unit->map_z = unit->movement.destination_z;
-        if (g_move_step_value.mount) {
+        if (g_battle_move_step_value.mount) {
             occupant = battle_unit_find_runtime_at_tile(
                 unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
-            g_move_tile_occupant = occupant;
+            g_battle_move_tile_occupant = occupant;
             if (occupant != 0) {
                 unit->standing_on_battle_id_plus_one = occupant->stats->battle_id + 1;
                 return;
@@ -1692,12 +1696,12 @@ void battle_move_update_unit_step_to_destination_tile_center(battle_unit_t* unit
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
         screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
-        g_move_target_screen_z = screen_z;
+        g_battle_move_target_screen_z = screen_z;
         if (unit->world_coords.vy >= screen_z) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
             unit->velocity.vy = 0;
-            unit->real.vy = g_move_target_screen_z * ONE;
+            unit->real.vy = g_battle_move_target_screen_z * ONE;
             unit->world_coords.vy = unit->real.vy / ONE;
             unit->step_phase = MOVE_STEP_PHASE_NONE;
             unit->shadow_dirty |= 1;
@@ -1742,68 +1746,70 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
         return;
     }
     battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
-    if (g_move_step_value.length == 0) {
+    if (g_battle_move_step_value.length == 0) {
         rider = unit->standing_on_battle_id_plus_one;
         if (rider != 0) {
-            battle_unit_calculate_height_data(&g_move_tile_occupant_height, rider - 1);
-            if (g_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
-                g_move_current_edge_height = g_move_current_tile->height * 2
-                    + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+            battle_unit_calculate_height_data(&g_battle_move_tile_occupant_height, rider - 1);
+            if (g_battle_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
+                g_battle_move_current_edge_height = g_battle_move_current_tile->height * 2
+                    + g_battle_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
             } else {
-                g_move_current_edge_height = g_move_tile_occupant_height.total_height;
+                g_battle_move_current_edge_height = g_battle_move_tile_occupant_height.total_height;
             }
         } else {
-            g_move_current_edge_height = g_move_current_tile->height * 2
-                + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
-            g_move_current_edge_height += battle_move_calculate_water_lift(unit, g_move_current_tile);
+            g_battle_move_current_edge_height = g_battle_move_current_tile->height * 2
+                + g_battle_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+            g_battle_move_current_edge_height += battle_move_calculate_water_lift(unit, g_battle_move_current_tile);
         }
 
-        if (g_move_step_value.mount) {
-            g_move_tile_occupant = battle_unit_find_runtime_at_tile(
+        if (g_battle_move_step_value.mount) {
+            g_battle_move_tile_occupant = battle_unit_find_runtime_at_tile(
                 unit->movement.destination_x, unit->movement.destination_y, unit->movement.destination_z);
-            unit->standing_on_battle_id_plus_one = g_move_tile_occupant->stats->battle_id + 1;
-            battle_unit_calculate_height_data(&g_move_tile_occupant_height, g_move_tile_occupant->stats->battle_id);
-            if (g_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
-                g_move_destination_edge_height = g_move_destination_tile->height * 2
-                    + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            unit->standing_on_battle_id_plus_one = g_battle_move_tile_occupant->stats->battle_id + 1;
+            battle_unit_calculate_height_data(
+                &g_battle_move_tile_occupant_height, g_battle_move_tile_occupant->stats->battle_id);
+            if (g_battle_move_tile_occupant_height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
+                g_battle_move_destination_edge_height = g_battle_move_destination_tile->height * 2
+                    + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
             } else {
-                g_move_destination_edge_height = g_move_tile_occupant_height.total_height;
+                g_battle_move_destination_edge_height = g_battle_move_tile_occupant_height.total_height;
             }
         } else {
             unit->standing_on_battle_id_plus_one = 0;
-            g_move_destination_edge_height = g_move_destination_tile->height * 2
-                + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
-            g_move_current_edge_height += battle_move_calculate_water_lift(unit, g_move_destination_tile);
+            g_battle_move_destination_edge_height = g_battle_move_destination_tile->height * 2
+                + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            g_battle_move_current_edge_height += battle_move_calculate_water_lift(unit, g_battle_move_destination_tile);
         }
 
-        if (g_move_current_edge_height + 1 >= g_move_destination_edge_height) {
+        if (g_battle_move_current_edge_height + 1 >= g_battle_move_destination_edge_height) {
             battle_unit_dismount_rider_and_update_display(unit);
-            switch (g_move_step_value.climb) {
+            switch (g_battle_move_step_value.climb) {
             case 0:
-                battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
                 unit->step_phase = MOVE_STEP_PHASE_WALK_TO_CENTER_NORTH;
                 return;
             case 1:
-                battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_unit_step_at_climb_speed(
+                    unit, g_battle_move_current_tile, g_battle_move_destination_tile);
                 unit->step_phase = MOVE_STEP_PHASE_CLIMB_TO_CENTER_NORTH;
                 return;
             }
             return;
         }
 
-        if (g_move_current_edge_height + 7 >= g_move_destination_edge_height) {
+        if (g_battle_move_current_edge_height + 7 >= g_battle_move_destination_edge_height) {
             battle_unit_dismount_rider(unit);
             unit->step_speed = 0x2000;
-            battle_move_start_unit_climb_hop_step(unit, g_move_current_tile, g_move_destination_tile);
+            battle_move_start_unit_climb_hop_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
             unit->standing_on_battle_id_plus_one = 0;
             return;
         }
         unit->step_speed = 0x2000;
-        battle_move_start_unit_climb_jump_step(unit, g_move_current_tile, g_move_destination_tile);
+        battle_move_start_unit_climb_jump_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
         unit->standing_on_battle_id_plus_one = 0;
     } else {
         unit->step_speed = 0x2000;
-        battle_move_start_unit_jump_step(unit, g_move_current_tile, g_move_destination_tile);
+        battle_move_start_unit_jump_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
         unit->standing_on_battle_id_plus_one = 0;
     }
 }
@@ -1824,17 +1830,17 @@ void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit
     }
     if (battle_move_has_reached_current_tile_exit_edge(direction, unit) != 0) {
         battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
-        g_move_current_edge_height = g_move_current_tile->height * 2
-            + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+        g_battle_move_current_edge_height = g_battle_move_current_tile->height * 2
+            + g_battle_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
         unit->standing_on_battle_id_plus_one = 0;
-        g_move_destination_edge_height = g_move_destination_tile->height * 2
-            + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
-        if (g_move_current_edge_height + 1 >= g_move_destination_edge_height) {
-            battle_move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
-            unit->step_phase = g_move_float_to_center_phases[direction];
+        g_battle_move_destination_edge_height = g_battle_move_destination_tile->height * 2
+            + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+        if (g_battle_move_current_edge_height + 1 >= g_battle_move_destination_edge_height) {
+            battle_move_start_float_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
+            unit->step_phase = g_battle_move_float_to_center_phases[direction];
         } else {
             unit->step_speed = 0x2000;
-            battle_move_start_float_climb_jump_step(unit, g_move_current_tile, g_move_destination_tile);
+            battle_move_start_float_climb_jump_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
         }
     }
 }
@@ -1862,12 +1868,12 @@ void battle_move_update_float_step_to_destination_tile_center(battle_unit_t* uni
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
         screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
-        g_move_target_screen_z = screen_z;
+        g_battle_move_target_screen_z = screen_z;
         if (unit->world_coords.vy >= screen_z) {
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
             unit->velocity.vy = 0;
-            unit->real.vy = g_move_target_screen_z * ONE;
+            unit->real.vy = g_battle_move_target_screen_z * ONE;
             unit->world_coords.vy = unit->real.vy / ONE;
             unit->step_phase = MOVE_STEP_PHASE_NONE;
             unit->shadow_dirty |= 1;

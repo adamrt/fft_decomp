@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* Apply one command record that follows the resource rows of a map's GNS file and
- * step g_map_gns_record_cursor past it.
+ * step g_battle_map_gns_record_cursor past it.
  *
  * The indoor, outdoor, snow, 0x8a and weather-modifier commands always run. Any
  * other command runs only when the requested map state compares with the record's
@@ -60,7 +60,7 @@ s32 battle_map_apply_gns_command(s32 phase, map_resource_t* record) {
                 battle_map_dispatch_gns_resource(selected->command.resource_type, selected);
             }
         }
-        g_map_gns_record_cursor += selected->command.record_byte_length;
+        g_battle_map_gns_record_cursor += selected->command.record_byte_length;
     }
     return 0;
 }
@@ -82,14 +82,14 @@ gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id) {
     u32 lba;
 
     selected_map = map_id & 0xffff;
-    battle_map_load_move_find_item_data(&g_map_move_find_item_data[selected_map]);
+    battle_map_load_move_find_item_data(&g_battle_map_move_find_item_data[selected_map]);
 
-    gns_records = g_map_gns_records;
+    gns_records = g_battle_map_gns_records;
     bzero(gns_records, GNS_BUFFER_CLEAR_BYTES);
 
-    lba = g_map_gns_lba[selected_map];
+    lba = g_battle_map_gns_lba[selected_map];
     if (lba != 0) {
-        if (main_file_call_build_header(lba, GNS_INITIAL_LOAD_BYTES, g_map_data_load_buffer) != 0) {
+        if (main_file_call_build_header(lba, GNS_INITIAL_LOAD_BYTES, g_battle_map_data_load_buffer) != 0) {
             return 0;
         }
         return gns_records;

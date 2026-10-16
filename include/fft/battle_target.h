@@ -50,7 +50,7 @@ typedef enum target_panels {
 } target_panels_e;
 
 /* highlight types */
-/* target_set_tile_background_color modes and the g_target_tile_mark_modes states:
+/* target_set_tile_background_color modes and the g_battle_target_tile_mark_modes states:
  * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
  * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
  * other buffer and leaves the layer SHOWN or NONE. */
@@ -68,11 +68,11 @@ typedef enum battle_tile_mark_mode {
 } battle_tile_mark_mode_e;
 
 /* range panels */
-extern target_panel_t g_target_panel_data[MAP_TILE_COUNT];
+extern target_panel_t g_battle_target_panel_data[MAP_TILE_COUNT];
 
-/* Second name of g_target_panel_data, unsized: 512 map panels followed
+/* Second name of g_battle_target_panel_data, unsized: 512 map panels followed
  * by 16 auxiliary panels, all initialized at 0x80174e84. */
-extern target_panel_t g_target_panels[MAP_TILE_COUNT];
+extern target_panel_t g_battle_target_panels[MAP_TILE_COUNT];
 
 void battle_target_clear_panel_data(void);
 void battle_target_clear_panel_spread_flags(void);
@@ -90,7 +90,7 @@ s32 battle_target_is_unit_untargetable_and_store_tile(s32 unit_id, s32* tile_ind
 s32 battle_target_validate_weapon_target(const action_command_t* source);
 
 /* target lists */
-extern u8 g_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
+extern u8 g_battle_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT];
 
 s32 battle_target_copy_ability_targets(u8* out);
 void battle_target_sort_list(s32 target_battle_id);
@@ -108,10 +108,10 @@ void battle_target_store_cursor_unit_name_and_data(void);
 void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit);
 
 /* tile highlights */
-extern u16 g_target_color_tile_x;
-extern s16 g_target_color_tile_y;
-extern s16 g_target_tile_mark_modes[3]; /* battle_tile_mark_mode_e, one per tile mark */
-extern battle_render_buffer_t* g_target_tile_color_buffer;
+extern u16 g_battle_target_color_tile_x;
+extern s16 g_battle_target_color_tile_y;
+extern s16 g_battle_target_tile_mark_modes[3]; /* battle_tile_mark_mode_e, one per tile mark */
+extern battle_render_buffer_t* g_battle_target_tile_color_buffer;
 
 s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad);
 void battle_target_calculate_tile_coords_and_glow_from_at_list(void);

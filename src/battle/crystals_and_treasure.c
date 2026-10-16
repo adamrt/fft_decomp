@@ -65,11 +65,11 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
     } else {
         item_id = find_result->common_item_id;
     }
-    g_map_rare_item_result.item_id = item_id;
+    g_battle_map_rare_item_result.item_id = item_id;
     battle_map_calculate_move_find_item_flag(
         script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
-    g_map_rare_item_result._unknown_00 = 0;
-    return &g_map_rare_item_result;
+    g_battle_map_rare_item_result._unknown_00 = 0;
+    return &g_battle_map_rare_item_result;
 }
 
 /*
@@ -88,7 +88,7 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
     u8* result;
 
     trap = BATTLE_TRAP_ID_NONE;
-    g_move_find_result_flags = 0;
+    g_battle_move_find_result_flags = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = battle_unit_find_at_tile((u8)x, y, layer, BATTLE_UNIT_TILE_FILTER_TRANSPARENT);
         if (unit >= 0) {
@@ -96,8 +96,8 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
         }
     }
     if (i != BATTLE_UNIT_SLOT_COUNT) {
-        g_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
-        g_move_find_occupying_unit_id = unit;
+        g_battle_move_find_result_flags = MOVE_FIND_RESULT_OCCUPIED;
+        g_battle_move_find_occupying_unit_id = unit;
     }
     for (i = 0; i < 4; i++) {
         tile = &g_battle_current_map_move_find_item_data.entries[i];
@@ -106,13 +106,13 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
         }
     }
     if (i != 4) {
-        g_move_find_entry_index = i;
+        g_battle_move_find_entry_index = i;
         if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
             if (battle_map_calculate_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0)
                 != 0) {
-                g_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
-                g_move_find_rare_item_id = tile->rare_item_id;
-                g_move_find_common_item_id = tile->common_item_id;
+                g_battle_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
+                g_battle_move_find_rare_item_id = tile->rare_item_id;
+                g_battle_move_find_common_item_id = tile->common_item_id;
             }
         }
         if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_TRAP)) {
@@ -126,13 +126,13 @@ move_find_result_data_t* battle_map_set_item_trap_data(s32 x, u8 y, u8 layer) {
                 trap = BATTLE_TRAP_ID_STEEL_NEEDLE;
             }
             if (trap != BATTLE_TRAP_ID_NONE) {
-                result = &g_move_find_result_flags;
-                g_move_find_trap_id = trap;
+                result = &g_battle_move_find_result_flags;
+                g_battle_move_find_trap_id = trap;
                 *result |= MOVE_FIND_RESULT_TRAP;
             }
         }
     }
-    return &g_move_find_tile_result;
+    return &g_battle_move_find_tile_result;
 }
 
 /* Test (save == 0) or set the found flag of one of a map's four move-find item tiles.
@@ -318,7 +318,7 @@ static u8 battle_unit_generate_treasure(unit_stats_t* unit) {
     s32 i;
     u32 item_id;
 
-    if (g_action_state != ACTION_STATE_EXECUTE) {
+    if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return;
     }
 
@@ -556,13 +556,13 @@ s32 battle_status_init_special_flag_enabling(s32 unit_id) {
     return 0;
 }
 
-/* Index of the unit's tile in g_map_tile_data: layer * 256 + y * map width
+/* Index of the unit's tile in g_battle_map_tile_data: layer * 256 + y * map width
  * + x, with the layer in bit 15 of the packed position. */
 s32 battle_map_calculate_location(const unit_stats_t* unit) {
     u8 y = unit->position.y;
     u16 elevation = unit->position.higher_elevation;
     u8 x = unit->x;
-    return (elevation << 8) + (y * g_map_max_x) + x;
+    return (elevation << 8) + (y * g_battle_map_max_x) + x;
 }
 
 /* The battle stats of an occupied unit slot, or 0 for an empty slot or an id past
@@ -695,7 +695,7 @@ battle_unit_action_restriction_e battle_unit_get_action_restriction(const unit_s
     if ((unit->mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT) != 0) {
         return BATTLE_UNIT_ACTION_RESTRICTION_CANNOT_ACT;
     }
-    depth = g_map_tile_data[battle_map_calculate_location(unit)].depth_half_height.depth;
+    depth = g_battle_map_tile_data[battle_map_calculate_location(unit)].depth_half_height.depth;
     if (depth < 2) {
         return BATTLE_UNIT_ACTION_RESTRICTION_NONE;
     }

@@ -142,7 +142,7 @@ s32 battle_formula_roll_random_at_least(s32 limit, s32 threshold);
 void battle_formula_store_reaction_proc_id_and_target(void);
 
 /* formula handlers */
-extern void (*g_formula_handlers[])(void); /* by formula id less 1: formula 0 has no handler */
+extern void (*g_battle_formula_handlers[])(void); /* by formula id less 1: formula 0 has no handler */
 
 void battle_formula_weapon_damage(void);
 void battle_formula_weapon_damage_with_proc(void);

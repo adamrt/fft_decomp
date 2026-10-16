@@ -46,7 +46,7 @@ void option_entrypoint(s32 menu_type) {
     }
 
     g_menu_modal_open = 0;
-    g_option_menu_state = 0;
+    g_battle_option_menu_state = 0;
     if (menu_type == OPTION_MENU_GAME_OPTIONS) {
         s32 child_thread;
 

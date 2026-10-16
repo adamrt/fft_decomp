@@ -157,8 +157,8 @@ void text_run_dialog_thread_variant(void) {
             } else if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_b) {
                 value = g_text_speaker_swap_unit_a;
             }
-            unit_project_to_screen(script_resolve_runtime_id(value), &g_camera_script_rotation);
-            if (g_unit_scratch_coords.vy < 0 || g_camera_script_rotation.vy < g_unit_scratch_coords.vy) {
+            unit_project_to_screen(script_resolve_runtime_id(value), &g_battle_camera_script_rotation);
+            if (g_unit_scratch_coords.vy < 0 || g_battle_camera_script_rotation.vy < g_unit_scratch_coords.vy) {
                 rec.position = 2;
             } else {
                 rec.position = 1;

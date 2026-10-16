@@ -1119,8 +1119,8 @@ s16 script_read_s16(const void* source);
 /* debug */
 extern const char g_script_pause_message[];
 extern s16 g_script_debug_paused;
-extern s16 g_script_opcode_dc_value;       /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
-extern s16 g_world_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
+extern s16 g_battle_script_opcode_dc_value; /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
+extern s16 g_world_script_opcode_dc_value;  /* EVENT_OPCODE_UNKNOWN_DC stores 13; nothing reads it */
 
 void script_pause_event_instruction(void);
 void script_print_debug_message(void);

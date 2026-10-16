@@ -472,8 +472,8 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         battle_gfx_calculate_sprite_shadow_from_tile_slope(unit);
         unit->shadow_dirty ^= 1;
     }
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     prim = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
     corners = unit->shadow_quad;
     ((P_TAG*)prim)->len = 9;
@@ -554,8 +554,8 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
         } else {
             battle_camera_convert_screen_coords_modify_by_1(&position, &offset);
         }
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_camera_matrix);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_camera_matrix);
         RotTrans(&offset, &transformed, &flag);
         depth = transformed.vz / 4;
         packet = main_gfx_get_otag() + depth;
@@ -584,8 +584,8 @@ void battle_gfx_build_cursor_tile_glow(
     POLY_FT3* tri_a_glow;
     POLY_FT3* tri_b_glow;
 
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     switch (shape) {
     case 0:
         quad = g_battle_gfx_sprite_prim_pool + battle_gfx_increment_counter();
@@ -811,7 +811,7 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     }
     unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (unit != 0) {
-        scaled = g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height * g_camera_zoom.vy;
+        scaled = g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height * g_battle_camera_zoom.vy;
         height = (scaled / ONE) + 0x18;
     } else {
         height = 0x3c;
@@ -819,39 +819,39 @@ void battle_gfx_draw_map_selection_cursor(SVECTOR* base, u32* ot) {
     base->vy -= height - bob[g_battle_gfx_selection_cursor_bob_frame];
     RotTrans(base, &transformed, &flag);
 
-    half_width = g_camera_zoom.vx;
+    half_width = g_battle_camera_zoom.vx;
     if (half_width < 0) {
         half_width += 0x1ff;
     }
     prim->x0 = transformed.vx - (half_width >> 9);
     {
-        s32 zoom_height = g_camera_zoom.vy * 12;
+        s32 zoom_height = g_battle_camera_zoom.vy * 12;
         prim->y0 = transformed.vy - (zoom_height / ONE);
     }
-    half_width = g_camera_zoom.vx;
+    half_width = g_battle_camera_zoom.vx;
     if (half_width < 0) {
         half_width += 0x1ff;
     }
     prim->x1 = transformed.vx + (half_width >> 9);
     {
-        s32 zoom_height = g_camera_zoom.vy * 12;
+        s32 zoom_height = g_battle_camera_zoom.vy * 12;
         prim->y1 = transformed.vy - (zoom_height / ONE);
     }
-    half_width = g_camera_zoom.vx;
+    half_width = g_battle_camera_zoom.vx;
     if (half_width < 0) {
         half_width += 0x1ff;
     }
     prim->x2 = transformed.vx - (half_width >> 9);
     {
-        s32 zoom_height = g_camera_zoom.vy * 12;
+        s32 zoom_height = g_battle_camera_zoom.vy * 12;
         prim->y2 = transformed.vy + (zoom_height / ONE);
     }
-    half_width = g_camera_zoom.vx;
+    half_width = g_battle_camera_zoom.vx;
     if (half_width < 0) {
         half_width += 0x1ff;
     }
     prim->x3 = transformed.vx + (half_width >> 9);
-    half_height = g_camera_zoom.vy * 12;
+    half_height = g_battle_camera_zoom.vy * 12;
     if (half_height < 0) {
         half_height += 0xfff;
     }
@@ -1137,7 +1137,7 @@ static void battle_gfx_determine_status_bubble_parameters(battle_unit_t* unit) {
     }
 }
 
-/* g_status_bubble_zoom: read-only table of this object (8 bytes at 0x80067830), kept byte for byte
+/* g_battle_status_bubble_zoom: read-only table of this object (8 bytes at 0x80067830), kept byte for byte
  * until it is written as its typed definition. */
 static const u32 g_status_bubble_zoom_rodata[2] = {
     0x10001000,
@@ -1155,7 +1155,7 @@ static const u32 g_status_bubble_zoom_rodata[2] = {
  */
 void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_screen_coords) {
     SVECTOR position;
-    SVECTOR zoom = g_status_bubble_zoom;
+    SVECTOR zoom = g_battle_status_bubble_zoom;
     VECTOR transformed;
     SVECTOR base;
     SVECTOR raised;
@@ -1187,18 +1187,18 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
     } else if (bubble_id == 0) {
         table_index = unit->stats->death_counter;
         if (unit->status_flags_1_4 & BATTLE_UNIT_STATUS_RERAISE) {
-            display->parts[0].u = g_status_bubble_u[10];
-            flag_row = g_status_bubble_v[10];
+            display->parts[0].u = g_battle_status_bubble_u[10];
+            flag_row = g_battle_status_bubble_v[10];
             display->parts[0].v = flag_row;
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = flag_row + 12;
             }
         } else if (table_index != 0xFF) {
-            display->parts[0].u = g_status_bubble_digit_u[table_index];
-            display->parts[0].v = g_status_bubble_digit_v[table_index];
+            display->parts[0].u = g_battle_status_bubble_digit_u[table_index];
+            display->parts[0].v = g_battle_status_bubble_digit_v[table_index];
         } else {
-            display->parts[0].u = g_status_bubble_u[0];
-            default_row = g_status_bubble_v[0];
+            display->parts[0].u = g_battle_status_bubble_u[0];
+            default_row = g_battle_status_bubble_v[0];
             display->parts[0].v = default_row;
             if (unit->status_bubble_alternate_row != 0) {
                 display->parts[0].v = default_row + 12;
@@ -1206,11 +1206,11 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
         }
     } else if (bubble_id == 20) {
         table_index = unit->stats->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)] & 3;
-        display->parts[0].u = g_status_bubble_digit_u[table_index];
-        display->parts[0].v = g_status_bubble_digit_v[table_index];
+        display->parts[0].u = g_battle_status_bubble_digit_u[table_index];
+        display->parts[0].v = g_battle_status_bubble_digit_v[table_index];
     } else {
-        display->parts[0].u = g_status_bubble_u[bubble_id];
-        row = g_status_bubble_v[bubble_id];
+        display->parts[0].u = g_battle_status_bubble_u[bubble_id];
+        row = g_battle_status_bubble_v[bubble_id];
         display->parts[0].v = row;
         if (bubble_id == 9 || bubble_id == 10) {
             if (unit->status_bubble_alternate_row != 0) {
@@ -1219,8 +1219,8 @@ void battle_gfx_draw_status_bubble(battle_unit_t* unit, const DVECTOR* unused_sc
         }
     }
 
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     main_util_set_svector(&base, unit->world_coords.vx + unit->event_offset.vx,
         unit->world_coords.vy + unit->event_offset.vy + unit->status_bubble_y,
         unit->world_coords.vz + unit->event_offset.vz);
@@ -1284,17 +1284,17 @@ void battle_gfx_draw_unit_sprite_position_copies(battle_unit_t* unit) {
     s16 flags;
 
     for (i = 0; i < 6; i++) {
-        battle_camera_update_matrices(
-            &g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_camera_matrix);
+        battle_camera_update_matrices(&g_battle_camera_matrix, &g_battle_camera_render_state,
+            &g_battle_camera_current_screen_offset, &g_battle_camera_zoom);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_camera_matrix);
         RotTrans(&unit->position_copies[i], &transformed, &flag);
         depth = transformed.vz / 4;
         position.vx = transformed.vx;
         position.vy = transformed.vy;
         flags = ((unit->horizontal_flip_flag ^ unit->sprite_display_flags) & ~BATTLE_SPRITE_DISPLAY_BLEND_MASK)
             | BATTLE_SPRITE_DISPLAY_SEMI_TRANSPARENT;
-        copyVector(&zoom, &g_camera_zoom);
+        copyVector(&zoom, &g_battle_camera_zoom);
         display = unit->animation.display;
         battle_gfx_construct_polygon_data_for_units(
             display, display->part_count, 0, &position, 0, flags, &zoom, main_gfx_get_otag() + depth);
@@ -1371,37 +1371,37 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     display = &unit->numeric_display;
 
     if ((flags & ACTION_DISPLAY_NUMERIC_FLAGS_MASK) != 0) {
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_HP_DAMAGE] = stats->action.hp_damage;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_HP_HEALING] = stats->action.hp_healing;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_MP_DAMAGE] = stats->action.mp_damage;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_MP_HEALING] = stats->action.mp_healing;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_HP_DAMAGE] = stats->action.hp_damage;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_HP_HEALING] = stats->action.hp_healing;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MP_DAMAGE] = stats->action.mp_damage;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MP_HEALING] = stats->action.mp_healing;
         change = stats->action.sp_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_SPEED_GAIN] = change;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_SPEED_DAMAGE] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_SPEED_GAIN] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_SPEED_DAMAGE] = change;
         change = stats->action.ct_change & 0x7f;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_CT_GAIN] = change;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_CT_DAMAGE] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_CT_GAIN] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_CT_DAMAGE] = change;
         change = stats->action.brave_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_BRAVE_GAIN] = change;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_BRAVE_DAMAGE] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_BRAVE_GAIN] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_BRAVE_DAMAGE] = change;
         change = stats->action.faith_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_FAITH_GAIN] = change;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_FAITH_DAMAGE] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_FAITH_GAIN] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_FAITH_DAMAGE] = change;
         flag = 1;
         change = stats->action.pa_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_PA_GAIN] = change;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_PA_DAMAGE] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_PA_GAIN] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_PA_DAMAGE] = change;
         index = 0;
         change = stats->action.ma_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_MA_GAIN] = change;
-        g_action_display_values[BATTLE_NUMERIC_DISPLAY_MA_DAMAGE] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MA_GAIN] = change;
+        g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MA_DAMAGE] = change;
 
         scan_flags = unit->action_display_flags;
         while (index < ACTION_DISPLAY_VALUE_COUNT) {
             if ((flag & scan_flags) != 0) {
                 flags = index;
-                display->value = g_action_display_values[flags];
-                display->selector = g_action_display_numeric_selectors[flags];
+                display->value = g_battle_action_display_values[flags];
+                display->selector = g_battle_action_display_numeric_selectors[flags];
                 index = unit->action_display_flags;
                 unit->action_display_flags = ~flag & index;
                 break;
@@ -1630,9 +1630,9 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     case BATTLE_NUMERIC_DISPLAY_STATUS_INFLICTED:
     case BATTLE_NUMERIC_DISPLAY_STATUS_REMOVED:
         result = status;
-        battle_gfx_store_sprite_display_data(display_2, 0, -21, -32, g_action_display_image_rects[result].u,
-            g_action_display_image_rects[result].v, g_action_display_image_rects[result].width,
-            (g_action_display_image_rects + result)->height, 0);
+        battle_gfx_store_sprite_display_data(display_2, 0, -21, -32, g_battle_action_display_image_rects[result].u,
+            g_battle_action_display_image_rects[result].v, g_battle_action_display_image_rects[result].width,
+            (g_battle_action_display_image_rects + result)->height, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_LEVEL_DOWN:
         battle_gfx_store_sprite_display_data(display_1, 0, -7, 16, 0xb0, 0x30, 8, 16, 0);
@@ -1643,17 +1643,17 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
         battle_gfx_store_sprite_display_data(display_2, 0, 0, -32, 0xb4, 0xc1, 0x0e, 0x0a, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_STOLEN:
-        image = &g_action_display_image_rects[ACTION_DISPLAY_IMAGE_STOLEN];
+        image = &g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_STOLEN];
         battle_gfx_store_sprite_display_data(
             display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_BROKEN:
-        image = &g_action_display_image_rects[ACTION_DISPLAY_IMAGE_BROKEN];
+        image = &g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_BROKEN];
         battle_gfx_store_sprite_display_data(
             display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_QUICK:
-        image = &g_action_display_image_rects[ACTION_DISPLAY_IMAGE_QUICK];
+        image = &g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_QUICK];
         battle_gfx_store_sprite_display_data(
             display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
@@ -1663,7 +1663,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
         break;
     }
 
-    battle_map_load_palette_data(&g_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
+    battle_map_load_palette_data(&g_battle_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
     return 1;
 }
 
@@ -1769,13 +1769,13 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
                     bit = 0x80 >> j;
                     if (count < ACTION_STATUS_DISPLAY_CAPACITY) {
                         if (action->status_changes.infliction[i] & bit) {
-                            image = g_action_status_display_image_ids[i][j];
+                            image = g_battle_action_status_display_image_ids[i][j];
                             unit->status_display_image_list[count] = image;
                             if (image != 0) {
                                 unit->status_display_image_count++;
                             }
                         } else if (action->status_changes.removal[i] & bit) {
-                            image = g_action_status_display_image_ids[i][j];
+                            image = g_battle_action_status_display_image_ids[i][j];
                             unit->status_display_image_list[count] = image;
                             if (image != 0) {
                                 unit->status_display_image_list[unit->status_display_image_count]
@@ -1926,7 +1926,7 @@ s32 battle_gfx_build_next_special_action_result_display(battle_unit_t* unit) {
         break;
     }
 
-    battle_map_load_palette_data(&g_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
+    battle_map_load_palette_data(&g_battle_action_result_palette, MAP_CLUT_ROW_ACTION_RESULTS, unit->runtime_id, 0);
     return 1;
 }
 

@@ -93,8 +93,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
     s32 pz;
     s32 wrap;
 
-    record = &g_effect_state_records[state_index];
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->tentacle_mesh.placement_flags;
     flags = entry->tentacle_mesh.flags;
     ot = main_gfx_get_otag();
@@ -153,7 +153,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             == 0) {
             SetTransMatrix(&work->matrix);
             orient = (flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
-            caster_target = &g_effect_context.targets[EFFECT_CASTER_ENTRY];
+            caster_target = &g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
             if (caster_target->target_type == EFFECT_TARGET_TYPE_UNIT) {
                 facing_yaw
                     = ((battle_unit_get_facing_quadrant_by_runtime_id(caster_target->data.unit.runtime_id) + 1) & 3)
@@ -163,10 +163,12 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 rotation.vy = facing_yaw;
                 RotMatrix(&rotation, &facing);
             }
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &caster);
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                target_index, &g_effect_context, &target);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
+                &g_battle_effect_context, &caster);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index,
+                &g_battle_effect_context, &target);
 
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(tip_bindings, EFFECT_TENTACLE_CURVE_PARTICLE_COUNT_SHIFT), frame);
@@ -180,10 +182,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
                 break;
             case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-                origin.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                origin.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                    g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+                origin.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                origin.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 origin.vy -= tile->height * MAP_HEIGHT_STEP;
                 break;
             case EFFECT_EMITTER_ORIGIN_CASTER:
@@ -217,7 +219,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             index = effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_RADIAL_SPEED_SHIFT);
             index--;
             if (index != -1) {
-                factor = g_effect_animation_curve_data->curves[index][frame];
+                factor = g_battle_effect_animation_curve_data->curves[index][frame];
                 speed_min = battle_lerp_fixed8(
                     entry->tentacle_mesh.radial_speed_start.min, entry->tentacle_mesh.radial_speed_end.min, factor);
                 speed_max = battle_lerp_fixed8(
@@ -264,10 +266,10 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 tip.vz += target.vz;
                 break;
             case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-                tip.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                tip.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                    g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+                tip.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tip.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 tip.vy -= tile->height * MAP_HEIGHT_STEP;
                 break;
             }
@@ -422,13 +424,13 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 seg->frame_timer = entry->tentacle_mesh.frame_delay;
             }
             if (entry->tentacle_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-                red = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
+                red = g_battle_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
                     (entry->tentacle_mesh.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][seg->head];
                 factor = (entry->tentacle_mesh.color_curves & 0xfff);
                 green
-                    = g_effect_animation_curve_data
+                    = g_battle_effect_animation_curve_data
                           ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_GREEN_SHIFT)][seg->head];
-                blue = g_effect_animation_curve_data
+                blue = g_battle_effect_animation_curve_data
                            ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_BLUE_SHIFT)][seg->head];
             } else {
                 red = green = blue = EFFECT_COLOR_NEUTRAL;
@@ -481,8 +483,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             v = entry->tentacle_mesh.texture_v + seg->frame * height;
             quad = &seg->quads[work->buffer][0];
             offset_quad = &seg->quads[work->buffer + 2][0];
-            SetRotMatrix(&g_camera_matrix);
-            SetTransMatrix(&g_camera_matrix);
+            SetRotMatrix(&g_battle_camera_matrix);
+            SetTransMatrix(&g_battle_camera_matrix);
             rotation.vx = seg->points[point_index].x;
             rotation.vy = seg->points[point_index].y;
             rotation.vz = seg->points[point_index].z;

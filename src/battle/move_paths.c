@@ -35,8 +35,8 @@ static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_u
         unit->velocity.vx = 0;
         if (unit->world_coords.vy >= (s16)battle_gfx_calculate_world_height_from_world_coords(unit)) {
             unit->velocity.vy = 0;
-            battle_move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
-            unit->step_phase = g_move_float_to_center_phases[direction];
+            battle_move_start_float_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
+            unit->step_phase = g_battle_move_float_to_center_phases[direction];
         }
     }
 }
@@ -55,11 +55,11 @@ static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t
     battle_move_apply_unit_step_velocity(unit);
     if (battle_move_has_reached_current_tile_exit_edge(direction, unit) != 0) {
         battle_move_snap_axis_to_current_tile_exit_edge(direction, unit);
-        g_move_current_edge_height = g_move_current_tile->height * 2
-            + g_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
+        g_battle_move_current_edge_height = g_battle_move_current_tile->height * 2
+            + g_battle_move_current_tile->depth_half_height.half_height * unit->current_edge_height;
         unit->standing_on_battle_id_plus_one = 0;
-        g_move_destination_edge_height = g_move_destination_tile->height * 2
-            + g_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+        g_battle_move_destination_edge_height = g_battle_move_destination_tile->height * 2
+            + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
         battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
             unit, &unit->path, &unit->current_path_step);
         battle_move_interpolate_partial(unit, unit->walk_speed);
@@ -88,18 +88,18 @@ static void battle_move_update_unit_vertical_step_to_destination_tile_center(bat
     if (battle_move_has_reached_destination_tile_center(direction, unit) != 0) {
         unit->velocity.vz = 0;
         unit->velocity.vx = 0;
-        g_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
+        g_battle_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
         if (unit->movement_path_offset == unit->path.count && (unit->path.pending_mount & BATTLE_PENDING_MOUNT_SET)) {
             mount = battle_unit_get_by_battle_id(unit->path.pending_mount & BATTLE_PENDING_MOUNT_ID_MASK);
             if (mount != 0) {
-                g_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(mount) - 10;
+                g_battle_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(mount) - 10;
             }
         }
         if (unit->velocity.vy > 0) {
-            if (unit->world_coords.vy >= g_move_target_screen_z) {
+            if (unit->world_coords.vy >= g_battle_move_target_screen_z) {
                 done = 1;
             }
-        } else if (unit->world_coords.vy <= g_move_target_screen_z) {
+        } else if (unit->world_coords.vy <= g_battle_move_target_screen_z) {
             done = 1;
         }
         if (unit->movement_path_offset != unit->path.count) {
@@ -110,7 +110,7 @@ static void battle_move_update_unit_vertical_step_to_destination_tile_center(bat
             battle_move_snap_axis_to_destination_tile_center(direction, unit);
             unit->velocity.vz = 0;
             unit->velocity.vx = 0;
-            g_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
+            g_battle_move_target_screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
             unit->step_phase = MOVE_STEP_PHASE_NONE;
             unit->map_x = unit->movement.destination_x;
             unit->map_y = unit->movement.destination_y;
@@ -120,36 +120,40 @@ static void battle_move_update_unit_vertical_step_to_destination_tile_center(bat
 }
 
 /* Selects the slope bits of the two step tiles that face the movement
- * direction (top two bits of g_move_step_value) and stores them as the unit's
- * per-step scales; a rider or a g_move_step_value bit 0x10 step clears them. */
+ * direction (top two bits of g_battle_move_step_value) and stores them as the unit's
+ * per-step scales; a rider or a g_battle_move_step_value bit 0x10 step clears them. */
 static void battle_move_set_unit_step_slope_scales(battle_unit_t* unit) {
-    battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
-    battle_gfx_check_tile_status_palette_mod(unit, g_move_destination_tile->flags.shading, 1);
-    switch (g_move_step_value.direction) {
+    battle_move_get_current_and_destination_tiles(unit, &g_battle_move_current_tile, &g_battle_move_destination_tile);
+    battle_gfx_check_tile_status_palette_mod(unit, g_battle_move_destination_tile->flags.shading, 1);
+    switch (g_battle_move_step_value.direction) {
     case MOVE_STEP_DIRECTION_EAST:
-        unit->destination_edge_height = g_move_destination_edge_height
-            = (g_move_destination_tile->slope_type & 0xC) >> 2;
-        unit->current_edge_height = g_move_current_edge_height = g_move_current_tile->slope_type & 3;
+        unit->destination_edge_height = g_battle_move_destination_edge_height
+            = (g_battle_move_destination_tile->slope_type & 0xC) >> 2;
+        unit->current_edge_height = g_battle_move_current_edge_height = g_battle_move_current_tile->slope_type & 3;
         break;
     case MOVE_STEP_DIRECTION_WEST:
-        unit->destination_edge_height = g_move_destination_edge_height = g_move_destination_tile->slope_type & 3;
-        unit->current_edge_height = g_move_current_edge_height = (g_move_current_tile->slope_type & 0xC) >> 2;
+        unit->destination_edge_height = g_battle_move_destination_edge_height
+            = g_battle_move_destination_tile->slope_type & 3;
+        unit->current_edge_height = g_battle_move_current_edge_height
+            = (g_battle_move_current_tile->slope_type & 0xC) >> 2;
         break;
     case MOVE_STEP_DIRECTION_SOUTH:
-        unit->destination_edge_height = g_move_destination_edge_height = g_move_destination_tile->slope_type >> 6;
-        unit->current_edge_height = g_move_current_edge_height = (g_move_current_tile->slope_type & 0x30) >> 4;
+        unit->destination_edge_height = g_battle_move_destination_edge_height
+            = g_battle_move_destination_tile->slope_type >> 6;
+        unit->current_edge_height = g_battle_move_current_edge_height
+            = (g_battle_move_current_tile->slope_type & 0x30) >> 4;
         break;
     case MOVE_STEP_DIRECTION_NORTH:
-        unit->destination_edge_height = g_move_destination_edge_height
-            = (g_move_destination_tile->slope_type & 0x30) >> 4;
-        unit->current_edge_height = g_move_current_edge_height = g_move_current_tile->slope_type >> 6;
+        unit->destination_edge_height = g_battle_move_destination_edge_height
+            = (g_battle_move_destination_tile->slope_type & 0x30) >> 4;
+        unit->current_edge_height = g_battle_move_current_edge_height = g_battle_move_current_tile->slope_type >> 6;
         break;
     }
     if (unit->standing_on_battle_id_plus_one != 0) {
-        unit->current_edge_height = g_move_current_edge_height = 0;
+        unit->current_edge_height = g_battle_move_current_edge_height = 0;
     }
-    if (g_move_step_value.mount) {
-        unit->destination_edge_height = g_move_destination_edge_height = 0;
+    if (g_battle_move_step_value.mount) {
+        unit->destination_edge_height = g_battle_move_destination_edge_height = 0;
     }
 }
 
@@ -196,8 +200,8 @@ void battle_move_update_path_step(battle_unit_t* unit) {
     u8 count;
     u8 flags;
 
-    battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
-    g_move_step_value = unit->current_path_step;
+    battle_move_get_current_and_destination_tiles(unit, &g_battle_move_current_tile, &g_battle_move_destination_tile);
+    g_battle_move_step_value = unit->current_path_step;
     switch (unit->step_phase) {
     case MOVE_STEP_PHASE_JUMP_START_SOUTH:
     case MOVE_STEP_PHASE_JUMP_START_EAST:
@@ -303,21 +307,22 @@ void battle_move_update_path_step(battle_unit_t* unit) {
             }
             offset = unit->movement_path_offset;
             unit->movement_path_offset = offset + 1;
-            unit->current_path_step = g_move_step_value = unit->path.data.steps[offset];
+            unit->current_path_step = g_battle_move_step_value = unit->path.data.steps[offset];
             battle_move_set_unit_step_slope_scales(unit);
             flags = unit->path.flags;
             if (flags & BATTLE_EFFECTIVE_MOVEMENT_FLY) {
-                battle_move_start_fly_step(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_fly_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
             } else if (flags & BATTLE_EFFECTIVE_MOVEMENT_FLOAT) {
-                battle_move_start_float_step(unit, g_move_current_tile, g_move_destination_tile);
+                battle_move_start_float_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
             } else {
-                switch (g_move_step_value.slow) {
+                switch (g_battle_move_step_value.slow) {
                 case 0:
                     unit->step_speed = 0x2000;
-                    battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+                    battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
                     break;
                 case 1:
-                    battle_move_start_unit_step_at_climb_speed(unit, g_move_current_tile, g_move_destination_tile);
+                    battle_move_start_unit_step_at_climb_speed(
+                        unit, g_battle_move_current_tile, g_battle_move_destination_tile);
                     break;
                 }
             }
@@ -339,8 +344,8 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
     u32 offset;
     s32 speed;
 
-    battle_move_get_current_and_destination_tiles(unit, &g_move_current_tile, &g_move_destination_tile);
-    g_move_step_value = unit->current_path_step;
+    battle_move_get_current_and_destination_tiles(unit, &g_battle_move_current_tile, &g_battle_move_destination_tile);
+    g_battle_move_step_value = unit->current_path_step;
     if (unit->step_phase != MOVE_STEP_PHASE_NONE) {
         speed = unit->walk_speed;
         unit->walk_speed = (speed > ONE) ? speed / 4 * 3 : ONE;
@@ -384,10 +389,10 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
         offset = unit->movement_path_offset;
         if (offset < unit->path.count) {
             unit->movement_path_offset = offset + 1;
-            unit->current_path_step = g_move_step_value = unit->path.data.steps[offset];
+            unit->current_path_step = g_battle_move_step_value = unit->path.data.steps[offset];
             battle_move_set_unit_step_slope_scales(unit);
             unit->step_speed = 0x2000;
-            battle_move_start_unit_step(unit, g_move_current_tile, g_move_destination_tile);
+            battle_move_start_unit_step(unit, g_battle_move_current_tile, g_battle_move_destination_tile);
         } else {
             battle_unit_store_coordinate_mount_animation_data(unit);
         }
@@ -564,7 +569,7 @@ s32 battle_camera_get_input_direction(s32 source) {
 
     switch (g_battle_cursor_input_mode) {
     case BATTLE_CURSOR_INPUT_OPTION_A:
-        switch (g_camera_render_state.vy & 0xC00) {
+        switch (g_battle_camera_render_state.vy & 0xC00) {
         case BATTLE_FACING_SOUTH:
             if ((input & (PSX_PAD_UP | PSX_PAD_RIGHT)) == (PSX_PAD_UP | PSX_PAD_RIGHT)) {
                 direction = BATTLE_FACING_NORTH_EAST;
@@ -644,7 +649,7 @@ s32 battle_camera_get_input_direction(s32 source) {
         }
         break;
     case BATTLE_CURSOR_INPUT_OPTION_B:
-        switch (g_camera_render_state.vy & 0xC00) {
+        switch (g_battle_camera_render_state.vy & 0xC00) {
         case BATTLE_FACING_SOUTH:
             if ((input & (PSX_PAD_UP | PSX_PAD_RIGHT)) == (PSX_PAD_UP | PSX_PAD_RIGHT)) {
                 direction = BATTLE_FACING_NORTH_WEST;
@@ -724,7 +729,7 @@ s32 battle_camera_get_input_direction(s32 source) {
         }
         break;
     case BATTLE_CURSOR_INPUT_FREE_CURSOR:
-        switch (g_camera_render_state.vy & 0xC00) {
+        switch (g_battle_camera_render_state.vy & 0xC00) {
         case BATTLE_FACING_SOUTH:
             if ((input & (PSX_PAD_UP | PSX_PAD_RIGHT)) == (PSX_PAD_UP | PSX_PAD_RIGHT)) {
                 direction = BATTLE_FACING_NORTH;
@@ -985,15 +990,15 @@ s32 battle_target_move_cursor_by_input(void) {
             g_battle_cursor_x--;
             break;
         }
-        if (g_battle_cursor_x == g_map_max_x) {
+        if (g_battle_cursor_x == g_battle_map_max_x) {
             g_battle_cursor_x--;
-        } else if ((u32)g_battle_cursor_x > g_map_max_x) {
+        } else if ((u32)g_battle_cursor_x > g_battle_map_max_x) {
             g_battle_cursor_x = 0;
         }
-        if (g_battle_cursor_y == g_map_max_y) {
-            g_battle_cursor_y = g_map_max_y - 1;
+        if (g_battle_cursor_y == g_battle_map_max_y) {
+            g_battle_cursor_y = g_battle_map_max_y - 1;
         }
-        if ((u32)g_battle_cursor_y > g_map_max_y) {
+        if ((u32)g_battle_cursor_y > g_battle_map_max_y) {
             g_battle_cursor_y = 0;
         }
         lower = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
@@ -1068,83 +1073,83 @@ s32 battle_target_move_cursor_by_input(void) {
 }
 
 void battle_camera_enable_map_pan(void) {
-    g_camera_map_pan_enabled = 1;
+    g_battle_camera_map_pan_enabled = 1;
 }
 
 /* End free map panning: the camera follows the cursor tile again. */
 void battle_camera_disable_map_pan(void) {
-    g_camera_map_pan_enabled = 0;
+    g_battle_camera_map_pan_enabled = 0;
 }
 
 /* Pans the camera with the directional buttons, once per frame of the battle
- * loop, while g_camera_map_pan_enabled is set (the states that put the
+ * loop, while g_battle_camera_map_pan_enabled is set (the states that put the
  * buttons in free-cursor mode: unit highlighting, move-area display and ability
  * preview).
  *
  * Each held direction moves the x or map-depth coordinate by 0x4000 (four world
  * units in 20.12) per frame, diagonals both. The position is then clamped to four
  * tiles (0x70000) outside the map on every side: -0x70000 up to
- * g_map_max_x or g_map_max_y tiles of 0x1c000 plus 0x70000. */
+ * g_battle_map_max_x or g_battle_map_max_y tiles of 0x1c000 plus 0x70000. */
 void battle_camera_update_map_pan(void) {
     s32* coord;
     s32 limit;
 
-    if (g_camera_map_pan_enabled != 0) {
+    if (g_battle_camera_map_pan_enabled != 0) {
         switch (battle_camera_get_input_direction(CAMERA_INPUT_HELD)) {
         case BATTLE_FACING_NORTH:
-            coord = &g_camera_current_real_coords.vz;
+            coord = &g_battle_camera_current_real_coords.vz;
             *coord += 4 * ONE;
             break;
         case BATTLE_FACING_SOUTH:
-            coord = &g_camera_current_real_coords.vz;
+            coord = &g_battle_camera_current_real_coords.vz;
             *coord -= 4 * ONE;
             break;
         case BATTLE_FACING_WEST:
-            coord = &g_camera_current_real_coords.vx;
+            coord = &g_battle_camera_current_real_coords.vx;
             *coord -= 4 * ONE;
             break;
         case BATTLE_FACING_EAST:
-            coord = &g_camera_current_real_coords.vx;
+            coord = &g_battle_camera_current_real_coords.vx;
             *coord += 4 * ONE;
             break;
         case BATTLE_FACING_NORTH_EAST: {
-            s32* y = &g_camera_current_real_coords.vz;
+            s32* y = &g_battle_camera_current_real_coords.vz;
             *y += 4 * ONE;
-            g_camera_current_real_coords.vx += 4 * ONE;
+            g_battle_camera_current_real_coords.vx += 4 * ONE;
             break;
         }
         case BATTLE_FACING_NORTH_WEST: {
-            s32* y = &g_camera_current_real_coords.vz;
+            s32* y = &g_battle_camera_current_real_coords.vz;
             *y += 4 * ONE;
-            g_camera_current_real_coords.vx -= 4 * ONE;
+            g_battle_camera_current_real_coords.vx -= 4 * ONE;
             break;
         }
         case BATTLE_FACING_SOUTH_EAST: {
-            s32* y = &g_camera_current_real_coords.vz;
+            s32* y = &g_battle_camera_current_real_coords.vz;
             *y -= 4 * ONE;
-            g_camera_current_real_coords.vx += 4 * ONE;
+            g_battle_camera_current_real_coords.vx += 4 * ONE;
             break;
         }
         case BATTLE_FACING_SOUTH_WEST: {
-            s32* y = &g_camera_current_real_coords.vz;
+            s32* y = &g_battle_camera_current_real_coords.vz;
             *y -= 4 * ONE;
-            g_camera_current_real_coords.vx -= 4 * ONE;
+            g_battle_camera_current_real_coords.vx -= 4 * ONE;
             break;
         }
         }
         {
-            s32* x = &g_camera_current_real_coords.vx;
-            limit = (g_map_max_x * (MAP_TILE_SIZE * ONE)) + 4 * MAP_TILE_SIZE * ONE;
+            s32* x = &g_battle_camera_current_real_coords.vx;
+            limit = (g_battle_map_max_x * (MAP_TILE_SIZE * ONE)) + 4 * MAP_TILE_SIZE * ONE;
             if (limit < *x)
                 *x = limit;
             if (*x < -(4 * MAP_TILE_SIZE * ONE))
                 *x = -(4 * MAP_TILE_SIZE * ONE);
         }
-        limit = (g_map_max_y * (MAP_TILE_SIZE * ONE)) + 4 * MAP_TILE_SIZE * ONE;
-        if (limit < g_camera_current_real_coords.vz)
-            g_camera_current_real_coords.vz = limit;
-        if (g_camera_current_real_coords.vz < -(4 * MAP_TILE_SIZE * ONE))
-            g_camera_current_real_coords.vz = -(4 * MAP_TILE_SIZE * ONE);
+        limit = (g_battle_map_max_y * (MAP_TILE_SIZE * ONE)) + 4 * MAP_TILE_SIZE * ONE;
+        if (limit < g_battle_camera_current_real_coords.vz)
+            g_battle_camera_current_real_coords.vz = limit;
+        if (g_battle_camera_current_real_coords.vz < -(4 * MAP_TILE_SIZE * ONE))
+            g_battle_camera_current_real_coords.vz = -(4 * MAP_TILE_SIZE * ONE);
     }
 }
 
@@ -1152,17 +1157,17 @@ void battle_camera_update_map_pan(void) {
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
 static void battle_camera_rotate_left(s32 target_angle) {
-    g_battle_previous_camera_yaw = g_camera_render_state.vy & 0xfe00;
-    g_camera_yaw_target = target_angle;
+    g_battle_previous_camera_yaw = g_battle_camera_render_state.vy & 0xfe00;
+    g_battle_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
-        g_camera_yaw_target = target_angle + 0x200;
+        g_battle_camera_yaw_target = target_angle + 0x200;
     }
 }
 
 /* Start a left turn to target_angle from the slowest speed. */
 static void battle_camera_start_rotation_left(s32 target_angle) {
-    g_camera_rotation_action = CAMERA_ROTATION_LEFT;
-    g_camera_rotation_increment = 1;
+    g_battle_camera_rotation_action = CAMERA_ROTATION_LEFT;
+    g_battle_camera_rotation_increment = 1;
     battle_camera_rotate_left(target_angle);
 }
 
@@ -1170,29 +1175,29 @@ static void battle_camera_start_rotation_left(s32 target_angle) {
  * leaves. A destination on a map axis (a multiple of 0x400) is moved 0x200
  * back, so the camera always comes to rest on a diagonal. */
 static void battle_camera_rotate_right(s32 target_angle) {
-    g_battle_previous_camera_yaw = g_camera_render_state.vy & 0xfe00;
-    g_camera_yaw_target = target_angle;
+    g_battle_previous_camera_yaw = g_battle_camera_render_state.vy & 0xfe00;
+    g_battle_camera_yaw_target = target_angle;
     if ((target_angle & 0x3ff) == 0) {
-        g_camera_yaw_target = target_angle - 0x200;
+        g_battle_camera_yaw_target = target_angle - 0x200;
     }
 }
 
 /* Start a right turn to target_angle from the slowest speed. */
 static void battle_camera_start_rotation_right(s32 target_angle) {
-    g_camera_rotation_action = CAMERA_ROTATION_RIGHT;
-    g_camera_rotation_increment = 1;
+    g_battle_camera_rotation_action = CAMERA_ROTATION_RIGHT;
+    g_battle_camera_rotation_increment = 1;
     battle_camera_rotate_right(target_angle);
 }
 
 /* Start an automatic turn of angle yaw units (0x400 is a quarter turn;
  * negative turns left) with its sound, unless a rotation is running. */
 static void battle_camera_request_rotation(s32 angle) {
-    if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
+    if (g_battle_camera_rotation_action == CAMERA_ROTATION_NONE) {
         if (angle < 0) {
-            battle_camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) + angle);
+            battle_camera_start_rotation_left((g_battle_camera_render_state.vy & 0xFE00) + angle);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_LEFT);
         } else {
-            battle_camera_start_rotation_right((g_camera_render_state.vy & 0xFE00) + angle);
+            battle_camera_start_rotation_right((g_battle_camera_render_state.vy & 0xFE00) + angle);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_RIGHT);
         }
     }
@@ -1201,13 +1206,13 @@ static void battle_camera_request_rotation(s32 angle) {
 /* L1 starts a quarter turn left and R1 one right, each with its sound, unless
  * a rotation is running. */
 void battle_camera_handle_rotation_input(void) {
-    if (g_camera_rotation_action == CAMERA_ROTATION_NONE) {
+    if (g_battle_camera_rotation_action == CAMERA_ROTATION_NONE) {
         if (g_main_input_pressed_buttons & PSX_PAD_L1) {
-            battle_camera_start_rotation_left((g_camera_render_state.vy & 0xFE00) - 0x400);
+            battle_camera_start_rotation_left((g_battle_camera_render_state.vy & 0xFE00) - 0x400);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_LEFT);
         }
         if (g_main_input_pressed_buttons & PSX_PAD_R1) {
-            battle_camera_start_rotation_right((g_camera_render_state.vy & 0xFE00) + 0x400);
+            battle_camera_start_rotation_right((g_battle_camera_render_state.vy & 0xFE00) + 0x400);
             main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_RIGHT);
         }
     }
@@ -1222,35 +1227,35 @@ void battle_camera_handle_rotation_input(void) {
 void battle_camera_update_rotation(void) {
     s32 angle;
 
-    if (g_camera_rotation_action == CAMERA_ROTATION_LEFT) {
-        s16* yaw = &g_camera_render_state.vy;
-        *yaw -= g_camera_rotation_increment;
-        if (*yaw <= g_camera_yaw_target) {
-            angle = (u16)g_camera_yaw_target & 0xFFF;
+    if (g_battle_camera_rotation_action == CAMERA_ROTATION_LEFT) {
+        s16* yaw = &g_battle_camera_render_state.vy;
+        *yaw -= g_battle_camera_rotation_increment;
+        if (*yaw <= g_battle_camera_yaw_target) {
+            angle = (u16)g_battle_camera_yaw_target & 0xFFF;
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_L1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
                     battle_camera_rotate_left((angle & 0xFE0) - 0x400);
                 }
             } else {
-                g_camera_rotation_action = CAMERA_ROTATION_NONE;
+                g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
                 main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_RIGHT);
                 main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_LEFT);
                 main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_STOP);
             }
         }
-    } else if (g_camera_rotation_action == CAMERA_ROTATION_RIGHT) {
-        s16* yaw = &g_camera_render_state.vy;
-        *yaw += g_camera_rotation_increment;
-        if (*yaw >= g_camera_yaw_target) {
-            angle = (u16)g_camera_yaw_target & 0xFFF;
+    } else if (g_battle_camera_rotation_action == CAMERA_ROTATION_RIGHT) {
+        s16* yaw = &g_battle_camera_render_state.vy;
+        *yaw += g_battle_camera_rotation_increment;
+        if (*yaw >= g_battle_camera_yaw_target) {
+            angle = (u16)g_battle_camera_yaw_target & 0xFFF;
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_R1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
                     battle_camera_rotate_left((angle & 0xFE0) + 0x400);
                 }
             } else {
-                g_camera_rotation_action = CAMERA_ROTATION_NONE;
+                g_battle_camera_rotation_action = CAMERA_ROTATION_NONE;
                 main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_RIGHT);
                 main_sound_stop_sfx(MAIN_SFX_CAMERA_ROTATE_LEFT);
                 main_sound_play_sfx_find_channel(MAIN_SFX_CAMERA_ROTATE_STOP);
@@ -1259,8 +1264,8 @@ void battle_camera_update_rotation(void) {
     } else {
         return;
     }
-    if (g_camera_rotation_increment < 0x30) {
-        g_camera_rotation_increment = (g_main_system_animation_speed * 2) + g_camera_rotation_increment;
+    if (g_battle_camera_rotation_increment < 0x30) {
+        g_battle_camera_rotation_increment = (g_main_system_animation_speed * 2) + g_battle_camera_rotation_increment;
     }
 }
 
@@ -1270,33 +1275,33 @@ void battle_camera_update_rotation(void) {
 void battle_camera_zoom_map(s32 mode) {
     switch (mode) {
     case 0:
-        if (g_camera_zoom.vx > ONE) {
-            g_map_zoom_target = MAP_ZOOM_IN;
-            g_camera_zoom_action = CAMERA_STEP_DECREASE;
-            g_camera_zoom_increment = 4;
+        if (g_battle_camera_zoom.vx > ONE) {
+            g_battle_map_zoom_target = MAP_ZOOM_IN;
+            g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
+            g_battle_camera_zoom_increment = 4;
             main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_OUT);
             return;
         }
-        if (g_camera_zoom.vx < ONE) {
-            g_map_zoom_target = MAP_ZOOM_IN;
-            g_camera_zoom_action = CAMERA_STEP_INCREASE;
-            g_camera_zoom_increment = 4;
+        if (g_battle_camera_zoom.vx < ONE) {
+            g_battle_map_zoom_target = MAP_ZOOM_IN;
+            g_battle_camera_zoom_action = CAMERA_STEP_INCREASE;
+            g_battle_camera_zoom_increment = 4;
             main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_IN);
             return;
         }
         return;
     case 1:
-        if (g_camera_zoom.vx > 0xC00) {
-            g_map_zoom_target = MAP_ZOOM_OUT;
-            g_camera_zoom_action = CAMERA_STEP_DECREASE;
-            g_camera_zoom_increment = 4;
+        if (g_battle_camera_zoom.vx > 0xC00) {
+            g_battle_map_zoom_target = MAP_ZOOM_OUT;
+            g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
+            g_battle_camera_zoom_increment = 4;
             main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_OUT);
             return;
         }
-        if (g_camera_zoom.vx < 0xC00) {
-            g_map_zoom_target = MAP_ZOOM_OUT;
-            g_camera_zoom_action = CAMERA_STEP_INCREASE;
-            g_camera_zoom_increment = 4;
+        if (g_battle_camera_zoom.vx < 0xC00) {
+            g_battle_map_zoom_target = MAP_ZOOM_OUT;
+            g_battle_camera_zoom_action = CAMERA_STEP_INCREASE;
+            g_battle_camera_zoom_increment = 4;
             main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_IN);
             return;
         }
@@ -1308,21 +1313,21 @@ void battle_camera_zoom_map(s32 mode) {
    "out" (target=4, action=4), playing the corresponding zoom SFX. Any
    other current zoom target is left alone. */
 static void battle_camera_toggle_zoom(void) {
-    if (g_map_zoom_target == MAP_ZOOM_IN) {
-        g_camera_zoom_action = CAMERA_STEP_DECREASE;
-        g_map_zoom_target = MAP_ZOOM_OUT;
+    if (g_battle_map_zoom_target == MAP_ZOOM_IN) {
+        g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
+        g_battle_map_zoom_target = MAP_ZOOM_OUT;
         main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_OUT);
-    } else if (g_map_zoom_target == MAP_ZOOM_OUT) {
-        g_map_zoom_target = MAP_ZOOM_IN;
-        g_camera_zoom_action = CAMERA_STEP_INCREASE;
+    } else if (g_battle_map_zoom_target == MAP_ZOOM_OUT) {
+        g_battle_map_zoom_target = MAP_ZOOM_IN;
+        g_battle_camera_zoom_action = CAMERA_STEP_INCREASE;
         main_sound_play_sfx(MAIN_SFX_CAMERA_ZOOM_IN);
     }
-    g_camera_zoom_increment = 4;
+    g_battle_camera_zoom_increment = 4;
 }
 
 /* Toggles the zoom when L2 is newly pressed and no zoom is running. */
 void battle_camera_update_zoom_input(void) {
-    if (g_camera_zoom_action == CAMERA_STEP_NONE) {
+    if (g_battle_camera_zoom_action == CAMERA_STEP_NONE) {
         if ((g_main_input_pressed_buttons & PSX_PAD_L2) != 0) {
             battle_camera_toggle_zoom();
         }
@@ -1336,53 +1341,54 @@ void battle_camera_update_zoom(void) {
     s32 increment;
     s32* zoom_ptr;
 
-    if (g_camera_zoom_action == CAMERA_STEP_INCREASE && g_map_zoom_target == MAP_ZOOM_IN) {
+    if (g_battle_camera_zoom_action == CAMERA_STEP_INCREASE && g_battle_map_zoom_target == MAP_ZOOM_IN) {
         s32 zoom;
         s32 below;
         s32 pan_x;
         s32 pan_y;
 
-        zoom_ptr = &g_camera_zoom.vx;
+        zoom_ptr = &g_battle_camera_zoom.vx;
         zoom = *zoom_ptr;
-        increment = g_camera_zoom_increment;
+        increment = g_battle_camera_zoom_increment;
         zoom = zoom + increment;
         *zoom_ptr = zoom;
         below = zoom < ONE;
-        pan_x = g_camera_zoom.vy;
-        pan_y = g_camera_zoom.vz;
+        pan_x = g_battle_camera_zoom.vy;
+        pan_y = g_battle_camera_zoom.vz;
         pan_x = pan_x + increment;
         pan_y = pan_y + increment;
-        g_camera_zoom.vy = pan_x;
-        g_camera_zoom.vz = pan_y;
+        g_battle_camera_zoom.vy = pan_x;
+        g_battle_camera_zoom.vz = pan_y;
         if (!below) {
-            g_camera_zoom_action = CAMERA_STEP_NONE;
-            g_camera_zoom.vz = ONE;
-            g_camera_zoom.vy = ONE;
+            g_battle_camera_zoom_action = CAMERA_STEP_NONE;
+            g_battle_camera_zoom.vz = ONE;
+            g_battle_camera_zoom.vy = ONE;
             *zoom_ptr = ONE;
         }
-    } else if (g_camera_zoom_action == CAMERA_STEP_DECREASE && g_map_zoom_target == g_camera_zoom_action) {
+    } else if (g_battle_camera_zoom_action == CAMERA_STEP_DECREASE
+        && g_battle_map_zoom_target == g_battle_camera_zoom_action) {
         s32 zoom;
         s32 below;
 
-        zoom_ptr = &g_camera_zoom.vx;
+        zoom_ptr = &g_battle_camera_zoom.vx;
         zoom = *zoom_ptr;
-        increment = g_camera_zoom_increment;
+        increment = g_battle_camera_zoom_increment;
         zoom = zoom - increment;
         *zoom_ptr = zoom;
         below = zoom < 0xC01;
-        g_camera_zoom.vy -= increment;
-        g_camera_zoom.vz -= increment;
+        g_battle_camera_zoom.vy -= increment;
+        g_battle_camera_zoom.vz -= increment;
         if (below) {
-            g_camera_zoom_action = CAMERA_STEP_NONE;
-            g_camera_zoom.vz = 0xC00;
-            g_camera_zoom.vy = 0xC00;
+            g_battle_camera_zoom_action = CAMERA_STEP_NONE;
+            g_battle_camera_zoom.vz = 0xC00;
+            g_battle_camera_zoom.vy = 0xC00;
             *zoom_ptr = 0xC00;
         }
     } else {
         return;
     }
     if (increment < 0x300) {
-        g_camera_zoom_increment = g_main_system_animation_speed * 4 + increment;
+        g_battle_camera_zoom_increment = g_main_system_animation_speed * 4 + increment;
     }
 }
 
@@ -1392,28 +1398,28 @@ void battle_camera_update_zoom(void) {
 void battle_camera_handle_tilt_request(s32 mode) {
     switch (mode) {
     case 0:
-        if (g_camera_render_state.vx >= 0x12F) {
-            g_map_tilt_target = MAP_TILT_LOW;
-            g_camera_tilt_action = CAMERA_STEP_DECREASE;
-            g_camera_tilt_increment = 1;
+        if (g_battle_camera_render_state.vx >= 0x12F) {
+            g_battle_map_tilt_target = MAP_TILT_LOW;
+            g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
+            g_battle_camera_tilt_increment = 1;
             main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
-        } else if (g_camera_render_state.vx < 0x12E) {
-            g_map_tilt_target = MAP_TILT_LOW;
-            g_camera_tilt_action = CAMERA_STEP_INCREASE;
-            g_camera_tilt_increment = 1;
+        } else if (g_battle_camera_render_state.vx < 0x12E) {
+            g_battle_map_tilt_target = MAP_TILT_LOW;
+            g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
+            g_battle_camera_tilt_increment = 1;
             main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
         }
         break;
     case 1:
-        if (g_camera_render_state.vx >= 0x1C1) {
-            g_map_tilt_target = MAP_TILT_HIGH;
-            g_camera_tilt_action = CAMERA_STEP_DECREASE;
-            g_camera_tilt_increment = mode;
+        if (g_battle_camera_render_state.vx >= 0x1C1) {
+            g_battle_map_tilt_target = MAP_TILT_HIGH;
+            g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
+            g_battle_camera_tilt_increment = mode;
             main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
-        } else if (g_camera_render_state.vx < 0x1C0) {
-            g_camera_tilt_action = CAMERA_STEP_INCREASE;
-            g_map_tilt_target = MAP_TILT_HIGH;
-            g_camera_tilt_increment = mode;
+        } else if (g_battle_camera_render_state.vx < 0x1C0) {
+            g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
+            g_battle_map_tilt_target = MAP_TILT_HIGH;
+            g_battle_camera_tilt_increment = mode;
             main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
         }
         break;
@@ -1424,27 +1430,27 @@ void battle_camera_handle_tilt_request(s32 mode) {
 static void battle_camera_toggle_tilt(void) {
     s32 target;
 
-    target = g_map_tilt_target;
+    target = g_battle_map_tilt_target;
     if (target == MAP_TILT_LOW) {
-        g_camera_tilt_action = CAMERA_STEP_INCREASE;
-        g_map_tilt_target = MAP_TILT_HIGH;
+        g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
+        g_battle_map_tilt_target = MAP_TILT_HIGH;
     } else if (target == MAP_TILT_HIGH) {
-        g_map_tilt_target = MAP_TILT_LOW;
-        g_camera_tilt_action = CAMERA_STEP_DECREASE;
+        g_battle_map_tilt_target = MAP_TILT_LOW;
+        g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
     } else if (target == 3) {
-        g_camera_tilt_action = CAMERA_STEP_DECREASE;
-        g_map_tilt_target = 4;
+        g_battle_camera_tilt_action = CAMERA_STEP_DECREASE;
+        g_battle_map_tilt_target = 4;
     } else if (target == 4) {
-        g_map_tilt_target = MAP_TILT_LOW;
-        g_camera_tilt_action = CAMERA_STEP_INCREASE;
+        g_battle_map_tilt_target = MAP_TILT_LOW;
+        g_battle_camera_tilt_action = CAMERA_STEP_INCREASE;
     }
-    g_camera_tilt_increment = 1;
+    g_battle_camera_tilt_increment = 1;
     main_sound_play_sfx(MAIN_SFX_CAMERA_TILT);
 }
 
 /* Toggles the tilt when R2 is newly pressed and no tilt is running. */
 void battle_camera_update_tilt_input(void) {
-    if (g_camera_tilt_action == CAMERA_STEP_NONE) {
+    if (g_battle_camera_tilt_action == CAMERA_STEP_NONE) {
         if ((g_main_input_pressed_buttons & PSX_PAD_R2) != 0) {
             battle_camera_toggle_tilt();
         }
@@ -1457,43 +1463,44 @@ void battle_camera_update_tilt_input(void) {
 void battle_camera_update_tilt(void) {
     s16 tilt;
 
-    if (g_camera_tilt_action == CAMERA_STEP_INCREASE && g_map_tilt_target == g_camera_tilt_action) {
-        s16* state = &g_camera_render_state.vx;
-        tilt = *state + g_camera_tilt_increment;
+    if (g_battle_camera_tilt_action == CAMERA_STEP_INCREASE
+        && g_battle_map_tilt_target == g_battle_camera_tilt_action) {
+        s16* state = &g_battle_camera_render_state.vx;
+        tilt = *state + g_battle_camera_tilt_increment;
         *state = tilt;
         if (tilt >= 0x1C0) {
-            g_camera_tilt_action = CAMERA_STEP_NONE;
+            g_battle_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x1C0;
         }
-    } else if (g_camera_tilt_action == CAMERA_STEP_DECREASE && g_map_tilt_target == MAP_TILT_LOW) {
-        s16* state = &g_camera_render_state.vx;
-        tilt = *state - g_camera_tilt_increment;
+    } else if (g_battle_camera_tilt_action == CAMERA_STEP_DECREASE && g_battle_map_tilt_target == MAP_TILT_LOW) {
+        s16* state = &g_battle_camera_render_state.vx;
+        tilt = *state - g_battle_camera_tilt_increment;
         *state = tilt;
         if (tilt < 0x12F) {
-            g_camera_tilt_action = CAMERA_STEP_NONE;
+            g_battle_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x12E;
         }
-    } else if (g_camera_tilt_action == CAMERA_STEP_DECREASE && g_map_tilt_target == MAP_TILT_HIGH) {
-        s16* state = &g_camera_render_state.vx;
-        tilt = *state - g_camera_tilt_increment;
+    } else if (g_battle_camera_tilt_action == CAMERA_STEP_DECREASE && g_battle_map_tilt_target == MAP_TILT_HIGH) {
+        s16* state = &g_battle_camera_render_state.vx;
+        tilt = *state - g_battle_camera_tilt_increment;
         *state = tilt;
         if (tilt < 0x1C1) {
-            g_camera_tilt_action = CAMERA_STEP_NONE;
+            g_battle_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x1C0;
         }
-    } else if (g_camera_tilt_action == CAMERA_STEP_INCREASE && g_map_tilt_target == MAP_TILT_LOW) {
-        s16* state = &g_camera_render_state.vx;
-        tilt = *state + g_camera_tilt_increment;
+    } else if (g_battle_camera_tilt_action == CAMERA_STEP_INCREASE && g_battle_map_tilt_target == MAP_TILT_LOW) {
+        s16* state = &g_battle_camera_render_state.vx;
+        tilt = *state + g_battle_camera_tilt_increment;
         *state = tilt;
         if (tilt >= 0x12E) {
-            g_camera_tilt_action = CAMERA_STEP_NONE;
+            g_battle_camera_tilt_action = CAMERA_STEP_NONE;
             *state = 0x12E;
         }
     } else {
         return;
     }
-    if (g_camera_tilt_increment < 0x30) {
-        g_camera_tilt_increment += g_main_system_animation_speed * 2;
+    if (g_battle_camera_tilt_increment < 0x30) {
+        g_battle_camera_tilt_increment += g_main_system_animation_speed * 2;
     }
 }
 
@@ -1504,27 +1511,27 @@ static void battle_camera_calculate_acting_unit_vector_normal(void) {
     battle_unit_t* unit;
 
     unit = battle_unit_get_source();
-    setVector(&delta, unit->world_coords.vx - g_camera_current_real_coords.vx / ONE,
-        unit->world_coords.vy - g_camera_current_real_coords.vy / ONE,
-        unit->world_coords.vz - g_camera_current_real_coords.vz / ONE);
-    VectorNormal(&delta, &g_camera_step_vector);
-    g_camera_step_vector.vy = g_camera_step_vector.vy << 2;
+    setVector(&delta, unit->world_coords.vx - g_battle_camera_current_real_coords.vx / ONE,
+        unit->world_coords.vy - g_battle_camera_current_real_coords.vy / ONE,
+        unit->world_coords.vz - g_battle_camera_current_real_coords.vz / ONE);
+    VectorNormal(&delta, &g_battle_camera_step_vector);
+    g_battle_camera_step_vector.vy = g_battle_camera_step_vector.vy << 2;
 }
 
 /* The acting-unit camera step vector at double length, used when the unit is
  * outside the wider screen window. */
 static void battle_camera_shift_acting_unit_vector(void) {
     battle_camera_calculate_acting_unit_vector_normal();
-    g_camera_step_vector.vx *= 2;
-    g_camera_step_vector.vy *= 2;
-    g_camera_step_vector.vz *= 2;
+    g_battle_camera_step_vector.vx *= 2;
+    g_battle_camera_step_vector.vy *= 2;
+    g_battle_camera_step_vector.vz *= 2;
 }
 
 /* Aim the camera vector from the current camera focus at the cursor tile.
  *
  * The tile surface height is (height + depth) * 12 + half-height * 6 world
  * units above the floor, negated because world Y points down. The focus
- * offset is normalized by VectorNormal into g_camera_step_vector and
+ * offset is normalized by VectorNormal into g_battle_camera_step_vector and
  * tripled. Returns the negated tile height. */
 static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
     map_tile_t* tile;
@@ -1539,12 +1546,13 @@ static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
     height = -((tile->height + depth.depth) * MAP_HEIGHT_STEP + depth.half_height * (MAP_HEIGHT_STEP / 2));
     main_util_set_svector(&tile_position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), height,
         g_battle_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
-    setVector(&delta, tile_position.vx - g_camera_current_real_coords.vx / ONE,
-        height - g_camera_current_real_coords.vy / ONE, tile_position.vz - g_camera_current_real_coords.vz / ONE);
-    VectorNormal(&delta, &g_camera_step_vector);
-    g_camera_step_vector.vx *= 3;
-    g_camera_step_vector.vy *= 3;
-    g_camera_step_vector.vz *= 3;
+    setVector(&delta, tile_position.vx - g_battle_camera_current_real_coords.vx / ONE,
+        height - g_battle_camera_current_real_coords.vy / ONE,
+        tile_position.vz - g_battle_camera_current_real_coords.vz / ONE);
+    VectorNormal(&delta, &g_battle_camera_step_vector);
+    g_battle_camera_step_vector.vx *= 3;
+    g_battle_camera_step_vector.vy *= 3;
+    g_battle_camera_step_vector.vz *= 3;
     return height;
 }
 
@@ -1554,9 +1562,9 @@ static s32 battle_camera_calculate_cursor_tile_vector_normal(void) {
 static s32 battle_camera_scale_cursor_tile_vector(void) {
     s32 result = battle_camera_calculate_cursor_tile_vector_normal();
 
-    g_camera_step_vector.vx *= 2;
-    g_camera_step_vector.vy *= 2;
-    g_camera_step_vector.vz *= 2;
+    g_battle_camera_step_vector.vx *= 2;
+    g_battle_camera_step_vector.vy *= 2;
+    g_battle_camera_step_vector.vz *= 2;
     return result;
 }
 
@@ -1597,64 +1605,64 @@ static s32 battle_camera_scale_cursor_tile_vector(void) {
  * half a tile of bias); the caller supplies the height bound directly.
  */
 static void battle_camera_step_focus_toward_cursor_tile(s16 height) {
-    CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vx, g_camera_step_vector.vx,
+    CAMERA_STEP_TOWARD(&g_battle_camera_current_real_coords.vx, g_battle_camera_step_vector.vx,
         g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
-    CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vy, g_camera_step_vector.vy, height);
-    CAMERA_STEP_TOWARD(&g_camera_current_real_coords.vz, g_camera_step_vector.vz,
+    CAMERA_STEP_TOWARD(&g_battle_camera_current_real_coords.vy, g_battle_camera_step_vector.vy, height);
+    CAMERA_STEP_TOWARD(&g_battle_camera_current_real_coords.vz, g_battle_camera_step_vector.vz,
         g_battle_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
 }
 
-/* Moves the camera position by this frame's step vector (g_camera_step_vector)
+/* Moves the camera position by this frame's step vector (g_battle_camera_step_vector)
  * toward the unit's position without passing it.
  *
- * Each component of g_camera_current_real_coords (20.12) advances only
+ * Each component of g_battle_camera_current_real_coords (20.12) advances only
  * while it is still short of the target in the step's direction, and is set to
  * the target exactly when the step carries it past. Called for the acting unit
  * while it moves, chooses its wait direction or starts an attack animation. */
 static void battle_camera_step_real_coords_toward_target(const battle_unit_t* target) {
-    if (g_camera_step_vector.vx < 0) {
-        if (g_camera_current_real_coords.vx / ONE > target->world_coords.vx) {
-            g_camera_current_real_coords.vx += g_camera_step_vector.vx;
-            if (g_camera_current_real_coords.vx / ONE < target->world_coords.vx) {
-                g_camera_current_real_coords.vx = target->world_coords.vx * ONE;
+    if (g_battle_camera_step_vector.vx < 0) {
+        if (g_battle_camera_current_real_coords.vx / ONE > target->world_coords.vx) {
+            g_battle_camera_current_real_coords.vx += g_battle_camera_step_vector.vx;
+            if (g_battle_camera_current_real_coords.vx / ONE < target->world_coords.vx) {
+                g_battle_camera_current_real_coords.vx = target->world_coords.vx * ONE;
             }
         }
     } else {
-        if (g_camera_current_real_coords.vx / ONE < target->world_coords.vx) {
-            g_camera_current_real_coords.vx += g_camera_step_vector.vx;
-            if (g_camera_current_real_coords.vx / ONE > target->world_coords.vx) {
-                g_camera_current_real_coords.vx = target->world_coords.vx * ONE;
+        if (g_battle_camera_current_real_coords.vx / ONE < target->world_coords.vx) {
+            g_battle_camera_current_real_coords.vx += g_battle_camera_step_vector.vx;
+            if (g_battle_camera_current_real_coords.vx / ONE > target->world_coords.vx) {
+                g_battle_camera_current_real_coords.vx = target->world_coords.vx * ONE;
             }
         }
     }
-    if (g_camera_step_vector.vy < 0) {
-        if (g_camera_current_real_coords.vy / ONE > target->world_coords.vy) {
-            g_camera_current_real_coords.vy += g_camera_step_vector.vy;
-            if (g_camera_current_real_coords.vy / ONE < target->world_coords.vy) {
-                g_camera_current_real_coords.vy = target->world_coords.vy * ONE;
+    if (g_battle_camera_step_vector.vy < 0) {
+        if (g_battle_camera_current_real_coords.vy / ONE > target->world_coords.vy) {
+            g_battle_camera_current_real_coords.vy += g_battle_camera_step_vector.vy;
+            if (g_battle_camera_current_real_coords.vy / ONE < target->world_coords.vy) {
+                g_battle_camera_current_real_coords.vy = target->world_coords.vy * ONE;
             }
         }
     } else {
-        if (g_camera_current_real_coords.vy / ONE < target->world_coords.vy) {
-            g_camera_current_real_coords.vy += g_camera_step_vector.vy;
-            if (g_camera_current_real_coords.vy / ONE > target->world_coords.vy) {
-                g_camera_current_real_coords.vy = target->world_coords.vy * ONE;
+        if (g_battle_camera_current_real_coords.vy / ONE < target->world_coords.vy) {
+            g_battle_camera_current_real_coords.vy += g_battle_camera_step_vector.vy;
+            if (g_battle_camera_current_real_coords.vy / ONE > target->world_coords.vy) {
+                g_battle_camera_current_real_coords.vy = target->world_coords.vy * ONE;
             }
         }
     }
-    if (g_camera_step_vector.vz < 0) {
-        if (g_camera_current_real_coords.vz / ONE > target->world_coords.vz) {
-            g_camera_current_real_coords.vz += g_camera_step_vector.vz;
-            if (g_camera_current_real_coords.vz / ONE < target->world_coords.vz) {
-                g_camera_current_real_coords.vz = target->world_coords.vz * ONE;
+    if (g_battle_camera_step_vector.vz < 0) {
+        if (g_battle_camera_current_real_coords.vz / ONE > target->world_coords.vz) {
+            g_battle_camera_current_real_coords.vz += g_battle_camera_step_vector.vz;
+            if (g_battle_camera_current_real_coords.vz / ONE < target->world_coords.vz) {
+                g_battle_camera_current_real_coords.vz = target->world_coords.vz * ONE;
             }
         }
     } else {
-        if (g_camera_current_real_coords.vz / ONE < target->world_coords.vz) {
+        if (g_battle_camera_current_real_coords.vz / ONE < target->world_coords.vz) {
             /* Retail quirk: only this positive map-depth step doubles the component. */
-            g_camera_current_real_coords.vz += g_camera_step_vector.vz * 2;
-            if (g_camera_current_real_coords.vz / ONE > target->world_coords.vz) {
-                g_camera_current_real_coords.vz = target->world_coords.vz * ONE;
+            g_battle_camera_current_real_coords.vz += g_battle_camera_step_vector.vz * 2;
+            if (g_battle_camera_current_real_coords.vz / ONE > target->world_coords.vz) {
+                g_battle_camera_current_real_coords.vz = target->world_coords.vz * ONE;
             }
         }
     }
@@ -1687,11 +1695,12 @@ void battle_camera_update_vector_from_game_state(void) {
         unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         height = 0;
         if (unit != 0) {
-            height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
+            height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_battle_camera_zoom.vy
+                / ONE;
         }
         if (g_battle_cursor_screen_x >= 0xF9 && g_battle_cursor_screen_x < 0x108
             && g_battle_cursor_screen_y - height >= 0xA1 && g_battle_cursor_screen_y < 0xB0) {
-            main_util_set_vector(&g_camera_step_vector, 0, 0, 0);
+            main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
             return;
         }
         /* The scaling routine passes through the normal routine's height bound. */
@@ -1701,10 +1710,11 @@ void battle_camera_update_vector_from_game_state(void) {
     if (g_battle_game_state == BATTLE_GAME_STATE_UNIT_MOVING || g_battle_game_state == BATTLE_GAME_STATE_WAIT_DIRECTION
         || g_battle_game_state == BATTLE_GAME_STATE_PRE_ATTACK_ANIMATION) {
         unit = battle_unit_get_source();
-        height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
+        height
+            = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_battle_camera_zoom.vy / ONE;
         if (unit->camera_relative_x >= 0xB1 && unit->camera_relative_x < 0x150
             && unit->camera_relative_y - height >= 0x51 && unit->camera_relative_y < 0xA0) {
-            main_util_set_vector(&g_camera_step_vector, 0, 0, 0);
+            main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
             return;
         }
         if (unit->camera_relative_x >= 0xA1 && unit->camera_relative_x < 0x160
@@ -1717,15 +1727,16 @@ void battle_camera_update_vector_from_game_state(void) {
         return;
     }
     if (g_battle_game_state >= BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT) {
-        main_util_set_vector(&g_camera_step_vector, 0, 0, 0);
+        main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
         return;
     }
-    if (g_camera_zoom_action == CAMERA_STEP_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_camera_map_pan_enabled == 0) {
+    if (g_battle_camera_zoom_action == CAMERA_STEP_NONE && g_battle_camera_tilt_action == CAMERA_STEP_NONE
+        && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_camera_map_pan_enabled == 0) {
         unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         height = 0;
         if (unit != 0) {
-            height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
+            height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_battle_camera_zoom.vy
+                / ONE;
         }
         if (g_battle_cursor_screen_x < 0xB1 || g_battle_cursor_screen_x >= 0x150
             || g_battle_cursor_screen_y - height < 0x51 || g_battle_cursor_screen_y >= 0xA0) {
@@ -1738,13 +1749,13 @@ void battle_camera_update_vector_from_game_state(void) {
             }
             return;
         }
-        main_util_set_vector(&g_camera_step_vector, 0, 0, 0);
+        main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
     }
 }
 
 /* Refresh the cursor-tile camera vector while the map camera is idle.
  *
- * The cursor unit's sprite height (scaled by g_camera_zoom.vy, 4.12 fixed point)
+ * The cursor unit's sprite height (scaled by g_battle_camera_zoom.vy, 4.12 fixed point)
  * offsets the cursor's screen position (g_battle_cursor_screen_x, g_battle_cursor_screen_y). Inside the
  * central window the vector is cleared; nearer the edge the unit tile normal
  * is used as is, otherwise doubled. The tile height left in $v0 by either
@@ -1753,16 +1764,17 @@ void battle_camera_update_cursor_tile_vector(void) {
     battle_unit_t* unit;
     s32 height;
 
-    if (g_camera_zoom_action == CAMERA_STEP_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_camera_map_pan_enabled == 0) {
+    if (g_battle_camera_zoom_action == CAMERA_STEP_NONE && g_battle_camera_tilt_action == CAMERA_STEP_NONE
+        && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_camera_map_pan_enabled == 0) {
         unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         height = 0;
         if (unit != 0) {
-            height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_camera_zoom.vy / ONE;
+            height = (g_battle_gfx_spritesheet_data[unit->spritesheet_id].graphic_height >> 1) * g_battle_camera_zoom.vy
+                / ONE;
         }
         if (g_battle_cursor_screen_x >= 0xB1 && g_battle_cursor_screen_x < 0x150
             && g_battle_cursor_screen_y - height >= 0x51 && g_battle_cursor_screen_y < 0xA0) {
-            main_util_set_vector(&g_camera_step_vector, 0, 0, 0);
+            main_util_set_vector(&g_battle_camera_step_vector, 0, 0, 0);
             return;
         }
         if (g_battle_cursor_screen_x >= 0xA1 && g_battle_cursor_screen_x < 0x160
@@ -1807,12 +1819,12 @@ void battle_camera_rotate_when_unit_tile_not_visible(const battle_unit_t* unit) 
     map_tile_t* tile;
 
     tile = battle_map_get_tile_data_pointer(unit->map_x, unit->map_y, unit->map_z);
-    direction = (0 - g_camera_render_state.vy) & 0xFFF;
+    direction = (0 - g_battle_camera_render_state.vy) & 0xFFF;
     if (direction < 0) {
         direction += 0x3FF;
     }
     direction >>= 0xA;
-    if (g_camera_render_state.vx >= CAMERA_PITCH_STEEP_MASK_THRESHOLD) {
+    if (g_battle_camera_render_state.vx >= CAMERA_PITCH_STEEP_MASK_THRESHOLD) {
         flags = tile->camera_block_masks >> MAP_TILE_CAMERA_BLOCK_STEEP_SHIFT;
     } else {
         flags = tile->camera_block_masks & MAP_TILE_CAMERA_BLOCK_DIRECTION_MASK;

@@ -13,18 +13,18 @@
  * Monster Talk, a monster; Finger Guard can cancel it. */
 void battle_formula_talk_skill_hit_ma_x_percent(void) {
     battle_formula_force_sleeping_target_miss();
-    if ((g_action_target->unit_flags & UNIT_FLAG_MONSTER)
-        && !(g_action_attacker->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_MONSTER_TALK)) {
+    if ((g_battle_action_target->unit_flags & UNIT_FLAG_MONSTER)
+        && !(g_battle_action_attacker->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_MONSTER_TALK)) {
         battle_formula_force_attack_miss();
     }
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_finger_guard();
-        if (g_action_target_data->hit != 0) {
+        if (g_battle_action_target_data->hit != 0) {
             battle_formula_store_ma_and_x();
             battle_formula_apply_zodiac_compatibility();
             battle_formula_store_xa_plus_ya_status_damage();
             battle_formula_use_hp_damage_as_action_hit_percent();
-            if (g_action_target_data->hit != 0) {
+            if (g_battle_action_target_data->hit != 0) {
                 battle_formula_apply_talk_skill();
             }
         }
@@ -59,7 +59,7 @@ void battle_formula_damage_pa_times_wp_plus_y_status(void) {
         battle_formula_apply_weapon_element_strengthen();
         battle_formula_calculate_physical_damage();
         battle_formula_modify_elemental_damage();
-        if (g_action_target_data->hit != 0) {
+        if (g_battle_action_target_data->hit != 0) {
             battle_formula_apply_elemental_absorption();
             battle_formula_apply_status();
         }
@@ -77,11 +77,11 @@ void battle_formula_break_equipped_damage_pa_times_wp(void) {
     }
     if (battle_formula_apply_steal_break_might_sword_hardcoding() != 0) {
         battle_formula_nullify_action();
-        g_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;
+        g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;
         return;
     }
     battle_formula_apply_maintenance();
-    action = g_action_target_data;
+    action = g_battle_action_target_data;
     if (action->hit == 0) {
         return;
     }
@@ -91,7 +91,7 @@ void battle_formula_break_equipped_damage_pa_times_wp(void) {
     battle_formula_apply_weapon_element_strengthen();
     battle_formula_calculate_physical_damage();
     battle_formula_modify_elemental_damage();
-    if (g_action_target_data->hit == 0) {
+    if (g_battle_action_target_data->hit == 0) {
         return;
     }
     battle_formula_apply_elemental_absorption();
@@ -127,7 +127,7 @@ void battle_formula_damage_pa_plus_y_half_times_pa(void) {
         battle_formula_store_xa_times_ya_damage();
         battle_formula_apply_weather_elemental_effects();
         battle_formula_apply_elemental();
-        if (g_action_target_data->hit != 0) {
+        if (g_battle_action_target_data->hit != 0) {
             battle_formula_apply_elemental_absorption();
             if (battle_formula_roll_conditional_status_proc() == 0) {
                 battle_formula_apply_status();
@@ -150,9 +150,9 @@ void battle_formula_damage_random_x_times_pa_plus_y_half_times_pa(void) {
     battle_formula_calculate_critical_hit();
     battle_formula_store_xa_plus_ya_status_damage();
     rnd = battle_formula_get_random_0_7fff();
-    mult = &g_action_current_ability.random_damage_factor;
-    *mult = (rnd * g_action_current_ability.range_data.x) / 32768 + 1;
-    action = g_action_target_data;
+    mult = &g_battle_action_current_ability.random_damage_factor;
+    *mult = (rnd * g_battle_action_current_ability.range_data.x) / 32768 + 1;
+    action = g_battle_action_target_data;
     /* The target loads hp_damage signed (lh) here; keep the cast and the
        multiplier deref separated so `* *` never reads as a comment. */
     action->hp_damage = action->hp_damage * (*mult);
@@ -167,7 +167,7 @@ void battle_formula_hit_pa_x_percent(void) {
     battle_formula_apply_zodiac_compatibility();
     battle_formula_store_xa_plus_ya_status_damage();
     battle_formula_use_hp_damage_as_action_hit_percent();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
     }
 }
@@ -181,7 +181,7 @@ void battle_formula_heal_pa_times_y_and_mp(void) {
     battle_formula_apply_attack_up_and_martial_arts();
     battle_formula_apply_zodiac_compatibility();
     battle_formula_store_xa_times_ya_damage();
-    action = g_action_target_data;
+    action = g_battle_action_target_data;
     amount = action->hp_damage;
     action->hp_damage = 0;
     action->hp_healing = amount;
@@ -197,7 +197,7 @@ void battle_formula_heal_y_percent_hit_pa_x_percent(void) {
     battle_formula_apply_zodiac_compatibility();
     battle_formula_store_xa_plus_ya_status_damage();
     battle_formula_use_hp_damage_as_action_hit_percent();
-    if (g_action_target_data->hit != 0 && battle_formula_apply_status_and_check_undead() != 0) {
+    if (g_battle_action_target_data->hit != 0 && battle_formula_apply_status_and_check_undead() != 0) {
         battle_formula_calculate_hp_percent_damage();
         battle_formula_apply_undead_reversal();
     }
@@ -234,7 +234,7 @@ void battle_formula_hit_sp_x_percent(void) {
     battle_formula_apply_physical_xa_modifying_statuses_support();
     battle_formula_store_xa_plus_ya_status_damage();
     battle_formula_use_hp_damage_as_action_hit_percent();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
     }
 }
@@ -245,8 +245,8 @@ void battle_formula_undead_hit_sp_x_percent(void) {
     battle_formula_apply_physical_xa_modifying_statuses_support();
     battle_formula_store_xa_plus_ya_status_damage();
     battle_formula_use_hp_damage_as_action_hit_percent();
-    if (g_action_target_data->hit != 0) {
-        if ((g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
+    if (g_battle_action_target_data->hit != 0) {
+        if ((g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
                 & STATUS_BYTE_MASK(STATUS_ID_UNDEAD))
             == 0) {
             battle_formula_force_attack_miss();
@@ -259,7 +259,7 @@ void battle_formula_undead_hit_sp_x_percent(void) {
 /* Formula 0x41: hit (MA+X)%; forced miss when caster and target share a zodiac sign. */
 void battle_formula_hit_ma_x_percent_miss_same_zodiac(void) {
     if (battle_formula_calculate_magic_accuracy_without_faith() == 0) {
-        if (g_action_target->birthday.zodiac == g_action_attacker->birthday.zodiac) {
+        if (g_battle_action_target->birthday.zodiac == g_battle_action_attacker->birthday.zodiac) {
             battle_formula_force_attack_miss();
         } else {
             battle_formula_apply_status_to_action();
@@ -274,19 +274,19 @@ void battle_formula_damage_pa_times_y_damage_caster_pa_times_y_over_x(void) {
 
     battle_formula_store_pa_and_y();
     battle_formula_apply_zodiac_compatibility();
-    damage = g_action_current_ability.xa * g_action_current_ability.ya;
+    damage = g_battle_action_current_ability.xa * g_battle_action_current_ability.ya;
     /* Cast-pointer stores: as struct members GCC sinks them past the
      * following scalar global loads; the target keeps source order. */
-    g_action_target_data->hp_damage = damage;
-    damage = damage / g_action_current_ability.range_data.x;
-    action = g_action_attacker_data;
+    g_battle_action_target_data->hp_damage = damage;
+    damage = damage / g_battle_action_current_ability.range_data.x;
+    action = g_battle_action_attacker_data;
     action->hit = 1;
     action->hp_damage = damage;
-    g_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
-    g_action_attacker_data->attack_type = ACTION_TYPE_HP_DAMAGE;
+    g_battle_action_target_data->attack_type = ACTION_TYPE_HP_DAMAGE;
+    g_battle_action_attacker_data->attack_type = ACTION_TYPE_HP_DAMAGE;
 }
 
-/* Formula 0x46: an empty handler in g_formula_handlers. */
+/* Formula 0x46: an empty handler in g_battle_formula_handlers. */
 void battle_formula_46_unused(void) {
 }
 
@@ -299,7 +299,8 @@ void battle_formula_absorb_hp_y_percent_status(void) {
 
 /* Formula 0x48: heal (Z * 10) HP. */
 void battle_formula_heal_z_times_ten(void) {
-    g_action_target_data->hp_damage = g_main_item_secondary_data[g_action_current_ability.used_item_id].z * 10;
+    g_battle_action_target_data->hp_damage
+        = g_main_item_secondary_data[g_battle_action_current_ability.used_item_id].z * 10;
     battle_formula_apply_undead_reversal();
 }
 
@@ -322,12 +323,13 @@ void battle_formula_heal_random_one_to_z_add_status(void) {
 
     if (battle_formula_apply_status_and_check_undead() == 0)
         return;
-    unit = g_action_target;
+    unit = g_battle_action_target;
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)] & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) != 0) {
-        g_action_target_data->hp_damage = unit->hp;
+        g_battle_action_target_data->hp_damage = unit->hp;
     } else {
-        g_action_target_data->hp_damage
-            = (battle_formula_get_random_0_7fff() * g_main_item_secondary_data[g_action_current_ability.used_item_id].z)
+        g_battle_action_target_data->hp_damage
+            = (battle_formula_get_random_0_7fff()
+                  * g_main_item_secondary_data[g_battle_action_current_ability.used_item_id].z)
                 / 32768
             + 1;
     }
@@ -391,26 +393,26 @@ void battle_formula_hit_ma_x_percent_no_evade(void) {
     battle_formula_apply_zodiac_compatibility();
     battle_formula_store_xa_plus_ya_status_damage();
     battle_formula_use_hp_damage_as_action_hit_percent();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
     }
 }
 
 /* Formula 0x52: damage (CasMaxHP - CasCurHP), 100% status; caster in AoE takes its own current HP as damage. */
 void battle_formula_damage_caster_missing_hp_self_sacrifice(void) {
-    if (g_action_target != g_action_attacker) {
-        unit_stats_t* caster = g_action_attacker;
-        action_data_t* action = g_action_target_data;
+    if (g_battle_action_target != g_battle_action_attacker) {
+        unit_stats_t* caster = g_battle_action_attacker;
+        action_data_t* action = g_battle_action_target_data;
 
         action->hp_damage = caster->max_hp - caster->hp;
         action->attack_type = ACTION_TYPE_HP_DAMAGE;
     } else {
-        action_data_t* action = g_action_target_data;
+        action_data_t* action = g_battle_action_target_data;
 
-        action->hp_damage = g_action_target->hp;
+        action->hp_damage = g_battle_action_target->hp;
         action->attack_type = ACTION_TYPE_HP_DAMAGE;
     }
-    if (g_action_target != g_action_attacker) {
+    if (g_battle_action_target != g_battle_action_attacker) {
         battle_formula_apply_status();
     }
 }
@@ -426,7 +428,7 @@ void battle_formula_damage_y_percent_hit_ma_x_percent(void) {
     battle_formula_calculate_hp_percent_damage();
     battle_formula_apply_weather_elemental_effects();
     battle_formula_apply_elemental();
-    if (g_action_target_data->hit != 0 && battle_formula_apply_elemental_absorption_and_status_proc() == 0) {
+    if (g_battle_action_target_data->hit != 0 && battle_formula_apply_elemental_absorption_and_status_proc() == 0) {
         battle_formula_apply_status();
     }
 }
@@ -443,8 +445,9 @@ void battle_formula_lower_pa_y(void) {
     if (battle_formula_calculate_magical_evade() != 0 || battle_formula_calculate_magic_accuracy_without_faith() != 0) {
         return;
     }
-    g_action_target_data->pa_change = g_action_current_ability.range_data.y & ACTION_STAT_CHANGE_VALUE_MASK;
-    g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
+    g_battle_action_target_data->pa_change
+        = g_battle_action_current_ability.range_data.y & ACTION_STAT_CHANGE_VALUE_MASK;
+    g_battle_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
 /* Formula 0x56: -MA (Y), hit (MA+X)%. */
@@ -452,8 +455,9 @@ void battle_formula_lower_ma_y(void) {
     if (battle_formula_calculate_magical_evade() != 0 || battle_formula_calculate_magic_accuracy_without_faith() != 0) {
         return;
     }
-    g_action_target_data->ma_change = g_action_current_ability.range_data.y & ACTION_STAT_CHANGE_VALUE_MASK;
-    g_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
+    g_battle_action_target_data->ma_change
+        = g_battle_action_current_ability.range_data.y & ACTION_STAT_CHANGE_VALUE_MASK;
+    g_battle_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;
 }
 
 /* Formula 0x57: +1 level (a miss at level 99) and the ability's status on the
@@ -468,25 +472,25 @@ void battle_formula_raise_level_by_one_add_status_on_caster(void) {
 
     battle_formula_apply_full_hp_mp_heal();
     battle_formula_apply_undead_reversal();
-    if (g_action_target->level >= UNIT_LEVEL_MAX) {
-        g_action_target_data->attack_type = 0;
+    if (g_battle_action_target->level >= UNIT_LEVEL_MAX) {
+        g_battle_action_target_data->attack_type = 0;
         battle_formula_force_attack_miss();
         return;
     }
-    action = g_action_target_data;
+    action = g_battle_action_target_data;
     action->attack_type = ACTION_TYPE_PSEUDO_STATUS;
-    saved_unit = g_action_target;
-    saved_action = g_action_target_data;
-    attacker = g_action_attacker;
-    attacker_action = g_action_attacker_data;
+    saved_unit = g_battle_action_target;
+    saved_action = g_battle_action_target_data;
+    attacker = g_battle_action_attacker;
+    attacker_action = g_battle_action_attacker_data;
     /* The target writes the combined special-effect field as one 16-bit value. */
     action->special_effect = ACTION_SPECIAL_EFFECT_LEVEL_UP;
-    g_action_target = attacker;
-    g_action_target_data = attacker_action;
+    g_battle_action_target = attacker;
+    g_battle_action_target_data = attacker_action;
     attacker_action->hit = 1;
     battle_formula_apply_status_to_action();
-    g_action_target = saved_unit;
-    g_action_target_data = saved_action;
+    g_battle_action_target = saved_unit;
+    g_battle_action_target_data = saved_action;
 }
 
 /* Formula 0x58 "Set Morbol: Hit(MA+X)%". */
@@ -503,10 +507,10 @@ void battle_formula_set_morbol(void) {
     battle_formula_apply_zodiac_compatibility();
     battle_formula_store_xa_plus_ya_status_damage();
     battle_formula_use_hp_damage_as_action_hit_percent();
-    action = g_action_target_data;
+    action = g_battle_action_target_data;
     if (action->hit == 0)
         return;
-    target = g_action_target;
+    target = g_battle_action_target;
     if (!(target->team_flags & BATTLE_TEAM_FLAG_IMMORTAL) && target->mount_info == 0
         && target->character_identity >= CHARACTER_IDENTITY_GENERIC_MALE
         && target->character_identity <= CHARACTER_IDENTITY_MONSTER
@@ -525,10 +529,10 @@ void battle_formula_lower_level_by_one(void) {
 
     if (battle_formula_calculate_magical_evade() == 0) {
         if (battle_formula_calculate_magic_accuracy_without_faith() == 0) {
-            if (g_action_target->level < 2) {
+            if (g_battle_action_target->level < 2) {
                 battle_formula_force_attack_miss();
             }
-            action = g_action_target_data;
+            action = g_battle_action_target_data;
             /* The target writes the combined special-effect field as one 16-bit value. */
             action->special_effect = ACTION_SPECIAL_EFFECT_LEVEL_DOWN;
             action->attack_type = ACTION_TYPE_PSEUDO_STATUS;
@@ -539,7 +543,7 @@ void battle_formula_lower_level_by_one(void) {
 /* Formula 0x5A: status, 100%; dragons only (formula_check_dragon). */
 void battle_formula_dragon_hit_100(void) {
     battle_formula_check_dragon();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_status_to_action();
     }
 }
@@ -548,7 +552,7 @@ void battle_formula_dragon_hit_100(void) {
  * twice that (formula 0x3C), then 100% status. Y is not read. */
 void battle_formula_dragon_heal_y_percent_add_status(void) {
     battle_formula_check_dragon();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_3c_damage_caster_max_hp_one_fifth_heal_target_two_fifths();
         battle_formula_apply_status();
     }
@@ -557,7 +561,7 @@ void battle_formula_dragon_heal_y_percent_add_status(void) {
 /* Formula 0x5C: +Brave (X), +PA/MA/Speed (Y); dragons only. */
 void battle_formula_dragon_brave_x_stats_y(void) {
     battle_formula_check_dragon();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_add_brave_x_stats_y();
     }
 }
@@ -565,7 +569,7 @@ void battle_formula_dragon_brave_x_stats_y(void) {
 /* Formula 0x5D: Quick; dragons only. */
 void battle_formula_dragon_set_quick(void) {
     battle_formula_check_dragon();
-    if (g_action_target_data->hit != 0) {
+    if (g_battle_action_target_data->hit != 0) {
         battle_formula_apply_quick_effect();
     }
 }
@@ -611,18 +615,18 @@ void battle_formula_lower_brave_y_without_faith(void) {
  * Catch, then physical evade. */
 void battle_formula_damage_sp_times_wp(void) {
     battle_formula_apply_catch();
-    if (g_action_target_data->hit == 0) {
+    if (g_battle_action_target_data->hit == 0) {
         return;
     }
     if (battle_formula_calculate_physical_evade() != 0) {
         return;
     }
-    g_action_current_ability.xa = g_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED];
-    g_action_current_ability.ya = g_action_current_ability.weapon_data.power;
+    g_battle_action_current_ability.xa = g_battle_action_attacker->attributes[UNIT_ATTRIBUTE_SPEED];
+    g_battle_action_current_ability.ya = g_battle_action_current_ability.weapon_data.power;
     battle_formula_apply_physical_status_support_compatibility();
     battle_formula_store_xa_times_ya_damage();
     battle_formula_modify_elemental_damage();
-    if (g_action_target_data->hit == 0) {
+    if (g_battle_action_target_data->hit == 0) {
         return;
     }
     battle_formula_apply_elemental_absorption();

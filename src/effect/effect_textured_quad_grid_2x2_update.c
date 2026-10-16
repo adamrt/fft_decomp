@@ -52,8 +52,8 @@ s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s3
     u8 u;
     u8 v;
 
-    record = &g_effect_state_records[state_index];
-    geometry = &g_effect_geometry_table->entries[emitter_index].textured_quad;
+    record = &g_battle_effect_state_records[state_index];
+    geometry = &g_battle_effect_geometry_table->entries[emitter_index].textured_quad;
     ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
@@ -123,11 +123,11 @@ s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s3
         blue = EFFECT_COLOR_NEUTRAL;
         if (geometry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             row = (geometry->color_curves & 0xfff);
-            red = g_effect_animation_curve_data
+            red = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
-            green = g_effect_animation_curve_data
+            green = g_battle_effect_animation_curve_data
                         ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];
-            blue = g_effect_animation_curve_data
+            blue = g_battle_effect_animation_curve_data
                        ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_BLUE_SHIFT)][work->frame];
         } else {
             green = EFFECT_COLOR_NEUTRAL;

@@ -247,7 +247,7 @@ restart_script:
                 }
             }
             if (operand_1 == EVENT_CALL_FUNCTION_PLAY_ALTIMA_MUSIC) {
-                g_sound_music_track_index = 0;
+                g_battle_sound_music_track_index = 0;
                 g_sound_music_track_1_id = MAIN_MUSIC_ALTIMA;
                 g_sound_music_track_2_id = 0;
                 sound_play_music_tracks(MAIN_MUSIC_ALTIMA, MAIN_MUSIC_NONE);
@@ -389,7 +389,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_UNKNOWN_D8) {
         } else if (opcode == EVENT_OPCODE_BACK_TARGET_BARRIER) {
         } else if (opcode == EVENT_OPCODE_UNKNOWN_DC) {
-            g_script_opcode_dc_value = 0xD;
+            g_battle_script_opcode_dc_value = 0xD;
         }
         /* ---- Dialogue and portraits ---- */
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
@@ -501,15 +501,15 @@ restart_script:
             thread_wait_frames(2);
             map_wait_for_refresh();
         } else if (opcode == EVENT_OPCODE_RELOAD_MAP_STATE) {
-            g_map_reload_state = 1;
+            g_battle_map_reload_state = 1;
             do {
                 thread_yield();
-            } while (g_map_reload_state != 0);
+            } while (g_battle_map_reload_state != 0);
         } else if (opcode == EVENT_OPCODE_APPEND_MAP_STATE) {
-            g_map_append_state = 1;
+            g_battle_map_append_state = 1;
             do {
                 thread_yield();
-            } while (g_map_append_state != 0);
+            } while (g_battle_map_append_state != 0);
         } else if (opcode == EVENT_OPCODE_PAUSE) {
             script_pause_event_instruction();
         } else if (opcode == EVENT_OPCODE_RESUME_WAITING_DIALOG) {
@@ -728,7 +728,7 @@ restart_script:
             thread_start(operand_1, &sound_run_background_fade_thread);
             thread_set_parameters(operand_1, (s32)parameters, 0, 0);
         } else if (opcode == EVENT_OPCODE_SWITCH_TRACK) {
-            g_sound_music_switch_request = operand_1;
+            g_battle_sound_music_switch_request = operand_1;
             g_battle_event_music_switch_volume = operand_2;
             g_battle_event_music_switch_fade = operand_3;
             thread_yield();
@@ -736,10 +736,10 @@ restart_script:
             /* Matching limitation: target sllv masks its count to five bits.
              * An explicit &31 adds an instruction with GCC 2.6.3, so counts
              * above 31 remain undefined in C; no script restriction is proven. */
-            g_sound_music_volume_transition_request = operand_2 << (operand_1 + 0x10);
+            g_battle_sound_music_volume_transition_request = operand_2 << (operand_1 + 0x10);
             thread_yield();
         } else if (opcode == EVENT_OPCODE_END_TRACK) {
-            g_sound_music_unload_slot_request = operand_1;
+            g_battle_sound_music_unload_slot_request = operand_1;
             thread_yield();
         }
         /* ---- EVTCHR and reserved VRAM slots ---- */

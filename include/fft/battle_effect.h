@@ -58,7 +58,7 @@ enum {
     EFFECT_TARGET_INDEX_CASTER = -1,
 };
 
-/* Ten-byte target records at g_effect_context.targets (0x801bad10).
+/* Ten-byte target records at g_battle_effect_context.targets (0x801bad10).
  * Unit targets store a runtime id at 0x02; tile targets reuse that 16-bit value for X
  * and carry map Z/Y at 0x04/0x06. Entry EFFECT_CASTER_ENTRY is the
  * caster. */
@@ -76,18 +76,18 @@ typedef char effect_target_size_must_be_10[(sizeof(effect_target_t) == 10) ? 1 :
 
 /* secondary effects */
 /* One running secondary effect: a 0x54-byte record of
- * g_effect_secondary_data (0x801b8b9c), ids 1-16 with record 0 the
+ * g_battle_effect_secondary_data (0x801b8b9c), ids 1-16 with record 0 the
  * sentinel. The secondary effects are the ones resident in BATTLE.BIN (weapon
  * hits, projectiles, the charges, the level-up and so on): each is an
- * animation id run by its handler of g_effect_secondary_handlers
+ * animation id run by its handler of g_battle_effect_secondary_handlers
  * through the phases of effect_secondary_phase_e. Records chain by id.
  * The particles a handler draws are effect slots (effect_slot_t), a
  * separate pool, whose ids it keeps in slot_ids or in its own state. */
 typedef struct effect_secondary_data {
     u8 previous_slot_id; /* 0x00; the record before it on the active chain, or the next free record */
     u8 next_slot_id;     /* 0x01 */
-    u8 own_slot_id;      /* 0x02; index of this record in g_effect_secondary_data */
-    u8 function_id;      /* 0x03; index of its handler in g_effect_secondary_handlers */
+    u8 own_slot_id;      /* 0x02; index of this record in g_battle_effect_secondary_data */
+    u8 function_id;      /* 0x03; index of its handler in g_battle_effect_secondary_handlers */
     u16 animation_id;    /* 0x04; effect_secondary_animation_id_e */
     /* 0x06; the animation's own: the charge's element mask, then its effect_element_index_e; the
      * weapon hit's element index; the caster's sprite palette; the frames a reflect shield stays */
@@ -117,14 +117,14 @@ typedef struct effect_secondary_data {
 typedef char effect_secondary_data_size_must_be_84[(sizeof(effect_secondary_data_t) == 84) ? 1 : -1];
 
 /* Complete 0xc8-byte effect context: built on the stack for secondary effects
- * and copied whole to g_effect_context for the ability effect. */
+ * and copied whole to g_battle_effect_context for the ability effect. */
 typedef struct effect_secondary_init {
     u16 target_count;   /* 0x00; effect targets: one child record each, spawn_delay apart */
     u8 spectator_count; /* 0x02; entries in spectator_ids */
     u8 math_skill_flag; /* 0x03; enables the effect flags' spawn_delay_override */
     effect_target_t targets[EFFECT_TARGET_COUNT_MAX + 1]; /* 0x04; caster at EFFECT_CASTER_ENTRY */
     /* 0xae; living units that are neither targets nor the caster; also accessed
-     * through the separately bound g_effect_palette_target_runtime_ids. */
+     * through the separately bound g_battle_effect_palette_target_runtime_ids. */
     u8 spectator_ids[14];
     effect_target_t target_tile; /* 0xbc; post-action destination tile */
     u16 used_weapon_id;          /* 0xc6 */
@@ -151,7 +151,7 @@ enum { EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC = -1 };
 
 /* Four-byte records at 0x801b84dc indexed by animation id
  * (effect_secondary_animation_id_e); byte 0 selects the
- * g_effect_secondary_handlers handler. */
+ * g_battle_effect_secondary_handlers handler. */
 typedef struct effect_secondary_animation {
     u8 function_id; /* 0x00 */
     u8 _padding_01; /* 0x01; aligns parameter */
@@ -171,7 +171,7 @@ typedef struct battle_post_effect_msg {
     s32 value;         /* 0x04 reported amount */
 } battle_post_effect_msg_t;
 
-/* The projectile models of g_effect_model_files. */
+/* The projectile models of g_battle_effect_model_files. */
 typedef enum effect_model {
     EFFECT_MODEL_ARROW = 0,
     EFFECT_MODEL_STONE = 1,
@@ -343,7 +343,7 @@ typedef struct effect_child_sound_track {
 } effect_child_sound_track_t;
 
 /* The child timeline, eight bytes into the timeline section
- * (g_effect_child_timeline): its duration and its channels.
+ * (g_battle_effect_child_timeline): its duration and its channels.
  * effect_timeline_t names the section's other parts. */
 typedef struct effect_child_timeline {
     u16 _unused_000;
@@ -391,7 +391,7 @@ enum {
 };
 
 /* What battle_effect_get_element_index makes of an element mask: the position of its first element in
- * g_effect_element_masks, 0 for no element. It picks the CLUT of the weapon hit and
+ * g_battle_effect_element_masks, 0 for no element. It picks the CLUT of the weapon hit and
  * spell charge particles and the effect of a thrown ball. */
 typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_NONE = 0,
@@ -405,7 +405,7 @@ typedef enum effect_element_index {
     EFFECT_ELEMENT_INDEX_LIGHTNING = 8,
 } effect_element_index_e;
 
-/* g_effect_load_state: the steps of battle_effect_init_data, which loads the ability's effect file
+/* g_battle_effect_load_state: the steps of battle_effect_init_data, which loads the ability's effect file
  * while its charge secondary effect plays. */
 typedef enum effect_load_state {
     EFFECT_LOAD_START = 0,            /* start reading the file */
@@ -414,7 +414,7 @@ typedef enum effect_load_state {
     EFFECT_LOAD_ENDING_SECONDARY = 3, /* wait for the charge secondary effect to end */
 } effect_load_state_e;
 
-/* g_effect_playback_phase: the stages of battle_effect_update_stage. */
+/* g_battle_effect_playback_phase: the stages of battle_effect_update_stage. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,
     EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_play */
@@ -434,7 +434,7 @@ enum {
     EFFECT_MODEL_COMMAND_G4 = 0x39,
 };
 
-/* Index into g_effect_trap_particle_configs: the particle groups of the secondary effect
+/* Index into g_battle_effect_trap_particle_configs: the particle groups of the secondary effect
  * handlers, named after the handler that spawns each. */
 typedef enum effect_particle_group {
     /* battle_effect_weapon_hit_secondary_handler: its first slot set */
@@ -456,10 +456,10 @@ typedef enum effect_particle_group {
     EFFECT_PARTICLE_GROUP_GOLEM = 16,
 } effect_particle_group_e;
 
-/* Index into g_effect_secondary_animations: the secondary effects resident in BATTLE.BIN. Those
+/* Index into g_battle_effect_secondary_animations: the secondary effects resident in BATTLE.BIN. Those
  * the code does not start by number come from two tables: the weapon type's projectile
- * (g_effect_weapon_projectile_animations) and the ability's charge animation set
- * (g_effect_secondary_by_charge_animation). */
+ * (g_battle_effect_weapon_projectile_animations) and the ability's charge animation set
+ * (g_battle_effect_secondary_by_charge_animation). */
 typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_NONE = 0,
     EFFECT_SECONDARY_ANIMATION_BOW_ARROW = 1,       /* bows: the arrow model on an arc */
@@ -482,18 +482,18 @@ typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_EQUIP_BREAK = 18, /* abilities 0x8a-0x91 */
     EFFECT_SECONDARY_ANIMATION_TELEPORT = 19,
     EFFECT_SECONDARY_ANIMATION_GOLEM = 20,
-    /* the null handler; g_effect_ending_secondary_function_id is this record's function byte */
+    /* the null handler; g_battle_effect_ending_secondary_function_id is this record's function byte */
     EFFECT_SECONDARY_ANIMATION_ENDING = 21,
 } effect_secondary_animation_id_e;
 
 /* One particle group of the secondary effects: a 0x2e-byte record of
- * g_effect_trap_particle_configs. Its leading bytes schedule the
+ * g_battle_effect_trap_particle_configs. Its leading bytes schedule the
  * group's effect slots (battle_effect_start_group); the rest is a fixed
  * emitter, from which battle_effect_spawn_particle_motion draws each slot's
  * motion as the effect file emitter does a particle's. */
 /* particle motion */
 typedef struct effect_emitter_values {
-    u8 trap_animation;      /* 0x00; trap groups: index into g_effect_trap_animation_data */
+    u8 trap_animation;      /* 0x00; trap groups: index into g_battle_effect_trap_animation_data */
     u8 _unused_01;          /* 0x01 */
     u8 spawn_start_frame;   /* 0x02; trap groups */
     u8 spawn_end_frame;     /* 0x03; trap groups */
@@ -655,7 +655,7 @@ typedef struct effect_sound_track {
  * (opcode 28 on the root record) runs only the child timeline, once.
  *
  * The child timeline's channels are the effect_child_timeline_t that
- * g_effect_child_timeline addresses at 0x008; its camera table is the
+ * g_battle_effect_child_timeline addresses at 0x008; its camera table is the
  * 17-keyframe one at 0x6b2, laid out like effect_camera_keyframes_21_t. Each
  * phase has five particle channels, three sound tracks, four color tracks
  * and a 21-keyframe camera table. */
@@ -729,7 +729,7 @@ typedef char effect_palette_section_size_must_be_1028[sizeof(effect_palette_sect
 
 /* script */
 /* An effect script instruction starts with a 16-bit header, its opcode in the low nine bits
- * (g_effect_instructions holds 120 handlers; retail scripts stay below
+ * (g_battle_effect_instructions holds 120 handlers; retail scripts stay below
  * 2e) and small operands in the bits above, followed by up to three operand
  * 16-bit values. Script offsets are bytes from the start of the script. */
 enum { EFFECT_SCRIPT_OPCODE_MASK = 0x1ff };
@@ -823,7 +823,7 @@ typedef struct effect_sound_channel {
 
 /* Effect flags section at header[0x18] of an effect file. The engine loads
  * flags as a 32-bit value and tests single bits; spawn_delay_override replaces the
- * timeline's spawn_delay only while g_effect_context.math_skill_flag is
+ * timeline's spawn_delay only while g_battle_effect_context.math_skill_flag is
  * set. */
 typedef struct effect_flags_section {
     u32 flags;                          /* 0x00; EFFECT_FLAG_* bits */
@@ -855,7 +855,7 @@ typedef enum effect_callback_phase {
  * every handler adds half the map geometry width and depth there. */
 typedef enum effect_emitter_origin {
     EFFECT_EMITTER_ORIGIN_WORLD = 0x000,
-    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_effect_target_tile */
+    EFFECT_EMITTER_ORIGIN_CURSOR_TILE = 0x200, /* center of g_battle_effect_target_tile */
     EFFECT_EMITTER_ORIGIN_CASTER = 0x400,
     EFFECT_EMITTER_ORIGIN_TARGET = 0x600,
     EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE = 0x800, /* position of the spawning work record */
@@ -926,7 +926,7 @@ typedef enum effect_camera_source {
 
 enum { EFFECT_CAMERA_SOURCE_MASK = 0x1e0 };
 
-/* Bits 0x1e00 of an effect timeline camera command, kept in g_effect_camera_rotation_mode,
+/* Bits 0x1e00 of an effect timeline camera command, kept in g_battle_effect_camera_rotation_mode,
  * _position_mode and _zoom_mode while the move runs: how the track goes from its start to its
  * target over the command's duration. */
 typedef enum effect_camera_mode {
@@ -954,7 +954,7 @@ enum {
     EFFECT_SPRITE_OT_DEPTH_MAX = 382, /* the farthest depth of a particle sprite */
 };
 
-/* primitive_type of battle_effect_alloc_primitive: an index into g_effect_primitive_sizes. */
+/* primitive_type of battle_effect_alloc_primitive: an index into g_battle_effect_primitive_sizes. */
 typedef enum effect_primitive_type {
     EFFECT_PRIMITIVE_FT4 = 0,
     EFFECT_PRIMITIVE_DR_MODE = 1,
@@ -1195,8 +1195,8 @@ typedef char effect_sequence_instruction_size_must_be_5[sizeof(effect_sequence_i
 /* particle records */
 /* 0x24-byte sprite node at 0x801c00a4: the animated sprite of one particle
  * (effect_work_record_t.data). Links are node indexes into that array; node 0
- * is the sentinel. g_effect_active_list_node_head is the list head and
- * g_effect_free_list_node_head the free-list head. */
+ * is the sentinel. g_battle_effect_active_list_node_head is the list head and
+ * g_battle_effect_free_list_node_head the free-list head. */
 typedef struct effect_list_node {
     u16 prev;                  /* 0x00 */
     u16 next;                  /* 0x02 */
@@ -1227,8 +1227,8 @@ typedef char assert_effect_list_node_size[sizeof(effect_list_node_t) == 36 ? 1 :
  * particle (effect_work_record_t +0x08), stepped once a frame by
  * battle_effect_step_motion and battle_effect_integrate_particle_motion:
  * position gains velocity; velocity keeps (inertia -
- * g_effect_inertia_threshold) / inertia of itself, gains
- * acceleration * ONE / inertia and gains g_effect_gravity scaled by
+ * g_battle_effect_inertia_threshold) / inertia of itself, gains
+ * acceleration * ONE / inertia and gains g_battle_effect_gravity scaled by
  * weight (4.12 fixed point); acceleration gains acceleration_step. */
 typedef struct effect_motion {
     s16 inertia;                 /* 0x00 */
@@ -1273,7 +1273,7 @@ enum {
     EFFECT_WORK_RECORD_CAPACITY = 256,
 };
 
-/* One running effect script: a 0xf8-byte record of g_effect_state_records.
+/* One running effect script: a 0xf8-byte record of g_battle_effect_state_records.
  * The root record runs the effect file's script from its start; the parent
  * timeline (opcode 29) starts one child record per effect target, and opcode
  * 02 starts a child the script keeps track of. Record 0 is the list sentinel,
@@ -1325,8 +1325,8 @@ typedef struct effect_anim_script {
 typedef char effect_anim_script_prefix_size_must_be_2[sizeof(effect_anim_script_t) == 2 ? 1 : -1];
 
 /* 0xcc-byte effect slots at 0x801b9278, chained through the leading next/prev
- * byte pair; slot 0 is the null sentinel. g_effect_active_slot_head heads the active chain
- * and g_effect_slot_free_head the free chain. RGB and the frame byte
+ * byte pair; slot 0 is the null sentinel. g_battle_effect_active_slot_head heads the active chain
+ * and g_battle_effect_slot_free_head the free chain. RGB and the frame byte
  * are copied together by the billboard renderer; battle_effect_init_trap_animation resets
  * the color and writes the 16-bit values at 0x88 and 0x8e. */
 
@@ -1868,7 +1868,7 @@ typedef char assert_effect_geometry_record_size[sizeof(effect_geometry_record_t)
 typedef struct effect_geometry_table {
     u16 _unused_00;        /* 2, or 1 in seven shipped files */
     u16 entry_count;       /* 0x02 */
-    vec3s32_t gravity;     /* 0x04: copied to g_effect_gravity by effect script opcode 0x27 */
+    vec3s32_t gravity;     /* 0x04: copied to g_battle_effect_gravity by effect script opcode 0x27 */
     s32 inertia_threshold; /* 0x10: passed to battle_effect_set_inertia_threshold by opcode 0x27 */
     /* One 0xc4-byte record per emitter or mesh. The slots keep their curve
      * bindings, but each native EFFECT renderer gives them its own meanings,
@@ -1910,7 +1910,7 @@ typedef char effect_animation_curve_table_size_must_be_4[(sizeof(effect_animatio
     {                                                                                                                  \
         index = (binding);                                                                                             \
         if (--index != -1) {                                                                                           \
-            result = g_effect_animation_curve_data->curves[index][frame];                                              \
+            result = g_battle_effect_animation_curve_data->curves[index][frame];                                       \
         } else {                                                                                                       \
             result = 0;                                                                                                \
         }                                                                                                              \
@@ -1918,14 +1918,14 @@ typedef char effect_animation_curve_table_size_must_be_4[(sizeof(effect_animatio
 
 /* loading and playback */
 /* Action/reaction ability IDs index directly; event IDs map after those rows. */
-extern s16 g_effect_ability_files[];
-extern effect_file_header_t* g_effect_data_ptrs[EFFECT_FILE_ID_COUNT];
-extern file_extent_t g_effect_disc_entries[EFFECT_FILE_ID_COUNT];
+extern s16 g_battle_effect_ability_files[];
+extern effect_file_header_t* g_battle_effect_data_ptrs[EFFECT_FILE_ID_COUNT];
+extern file_extent_t g_battle_effect_disc_entries[EFFECT_FILE_ID_COUNT];
 
-extern const effect_flags_section_t* g_effect_flags_section;
-extern s16 g_effect_load_countdown;
-extern u8 g_effect_load_state;      /* effect_load_state_e */
-extern s32 g_effect_playback_phase; /* effect_playback_phase_e */
+extern const effect_flags_section_t* g_battle_effect_flags_section;
+extern s16 g_battle_effect_load_countdown;
+extern u8 g_battle_effect_load_state;      /* effect_load_state_e */
+extern s32 g_battle_effect_playback_phase; /* effect_playback_phase_e */
 
 void battle_effect_call_play(void);
 void battle_effect_cancel_playback_request(void);
@@ -1943,42 +1943,42 @@ s32 battle_effect_try_init_data(void);
 s32 battle_effect_update_cycle(void);
 
 /* secondary effects */
-extern u16 g_effect_secondary_active_tail;
-extern s32 g_effect_buffer_index;
+extern u16 g_battle_effect_secondary_active_tail;
+extern s32 g_battle_effect_buffer_index;
 
-extern DVECTOR g_effect_charge_line_direction_offsets[];
-extern u8 g_effect_charge_line_fade_levels[];
-extern effect_charge_params_t g_effect_charge_line_params[2];
-extern struct effect_secondary_data* g_effect_current_secondary;
-extern u32 g_effect_current_slot_id;
-extern effect_death_poof_state_t g_effect_death_poof_states[];
-extern u8 g_effect_ending_secondary_function_id; /* function byte to store; 5 = nothing */
-extern u16 g_effect_secondary_free_head;
-extern u32* g_effect_polygon_depth_data;
-extern effect_secondary_animation_t g_effect_secondary_animations[];
+extern DVECTOR g_battle_effect_charge_line_direction_offsets[];
+extern u8 g_battle_effect_charge_line_fade_levels[];
+extern effect_charge_params_t g_battle_effect_charge_line_params[2];
+extern struct effect_secondary_data* g_battle_effect_current_secondary;
+extern u32 g_battle_effect_current_slot_id;
+extern effect_death_poof_state_t g_battle_effect_death_poof_states[];
+extern u8 g_battle_effect_ending_secondary_function_id; /* function byte to store; 5 = nothing */
+extern u16 g_battle_effect_secondary_free_head;
+extern u32* g_battle_effect_polygon_depth_data;
+extern effect_secondary_animation_t g_battle_effect_secondary_animations[];
 /* Secondary-animation id per charge animation set, indexed by the low 16 bits of the
  * caller's packed argument. */
-extern u8 g_effect_secondary_by_charge_animation[];
-extern effect_secondary_data_t g_effect_secondary_data[];
-extern effect_secondary_callback_t g_effect_secondary_handlers[23];
-extern effect_secondary_state_t g_effect_secondary_state;
+extern u8 g_battle_effect_secondary_by_charge_animation[];
+extern effect_secondary_data_t g_battle_effect_secondary_data[];
+extern effect_secondary_callback_t g_battle_effect_secondary_handlers[23];
+extern effect_secondary_state_t g_battle_effect_secondary_state;
 
 /* Brightness (out of 128) of each of a summon-charge ring's ten slots, newest point first. */
-extern u8 g_effect_summon_ring_brightness[];
-extern u8 g_effect_charge_secondary_id; /* id of the charge secondary effect started with the ability; 0 none */
+extern u8 g_battle_effect_summon_ring_brightness[];
+extern u8 g_battle_effect_charge_secondary_id; /* id of the charge secondary effect started with the ability; 0 none */
 /* Per-group trap emitter records (0x801b8564, stride 0x2e). The secondary-effect
  * handlers spawn while spawn_start_frame <= timer < spawn_end_frame and finish
  * once timer passes spawn_start_frame with no live slots;
  * battle_effect_update_active_slots walks count active slots. The level-up
  * handler seeds group 5's position.y with -8, then lowers it by 3 per frame. */
-extern effect_emitter_values_t g_effect_trap_particle_configs[17];
+extern effect_emitter_values_t g_battle_effect_trap_particle_configs[17];
 
 /* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
  * crossbows, NONE for the rest. */
-extern u8 g_effect_weapon_projectile_animations[];
+extern u8 g_battle_effect_weapon_projectile_animations[];
 /* CLUT of the zodiac poof's particles, an index in the weapons row, for each
  * sprite palette (the secondary effect's parameter). */
-extern u8 g_effect_zodiac_poof_animations[];
+extern u8 g_battle_effect_zodiac_poof_animations[];
 
 s32 battle_noop_801b2968(void);
 s32 battle_noop_801b2bfc(void);
@@ -2022,11 +2022,11 @@ s32 battle_effect_weapon_hit_secondary_handler(void);
 s32 battle_effect_zodiac_poof_secondary_handler(void);
 
 /* targets */
-extern effect_secondary_init_t g_effect_context;
-extern u8 g_effect_palette_target_runtime_ids[];
+extern effect_secondary_init_t g_battle_effect_context;
+extern u8 g_battle_effect_palette_target_runtime_ids[];
 /* Tile target of the current effect: emitter origin CURSOR_TILE, homing CURSOR_TILE and camera source
  * CURSOR_TILE. */
-extern effect_target_t g_effect_target_tile;
+extern effect_target_t g_battle_effect_target_tile;
 
 void battle_effect_build_secondary_init(struct battle_unit* unit, struct effect_secondary_init* effect);
 void battle_effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
@@ -2036,36 +2036,36 @@ void battle_effect_resolve_target_world_coords(
     s32 add_depth, s32 target_index, effect_secondary_init_t* coord_data, SVECTOR* out);
 
 /* elements */
-extern u8 g_effect_element_masks[];
+extern u8 g_battle_effect_element_masks[];
 
 s32 battle_effect_get_element_index(s32 elements);
 
 /* projectiles */
-extern s32 g_effect_arc_trajectory_height;
-extern s16 g_effect_arctan_angle_mod;
-extern s16 g_effect_arrow_arc_caster_relative_yaw;
-extern s32 g_effect_arrow_arc_distance;
-extern s32 g_effect_arrow_arc_distance_step;
-extern s32 g_effect_arrow_arc_height;
-extern s16 g_effect_arrow_arc_launch_angle;
-extern s32 g_effect_arrow_arc_length;
-extern u16 g_effect_arrow_arc_yaw;
-extern VECTOR g_effect_projectile_delta;
-extern s32 g_effect_projectile_length;
-extern s32 g_effect_projectile_progress;
-extern s32 g_effect_projectile_speed;
-extern s16 g_effect_projectile_spin_passes;
-extern s16 g_effect_projectile_step_count;
-extern SVECTOR g_effect_trajectory_destination;
-extern s32 g_effect_trajectory_hit_unit_id;
-extern SVECTOR g_effect_trajectory_origin;
-extern SVECTOR g_effect_trajectory_position; /* final projectile position */
-extern s32 g_effect_trajectory_source_id;
-extern VECTOR g_effect_trajectory_step; /* last step's movement */
-extern s32 g_effect_trajectory_step_count;
-extern map_tile_coordinates_t g_effect_trajectory_tile;
+extern s32 g_battle_effect_arc_trajectory_height;
+extern s16 g_battle_effect_arctan_angle_mod;
+extern s16 g_battle_effect_arrow_arc_caster_relative_yaw;
+extern s32 g_battle_effect_arrow_arc_distance;
+extern s32 g_battle_effect_arrow_arc_distance_step;
+extern s32 g_battle_effect_arrow_arc_height;
+extern s16 g_battle_effect_arrow_arc_launch_angle;
+extern s32 g_battle_effect_arrow_arc_length;
+extern u16 g_battle_effect_arrow_arc_yaw;
+extern VECTOR g_battle_effect_projectile_delta;
+extern s32 g_battle_effect_projectile_length;
+extern s32 g_battle_effect_projectile_progress;
+extern s32 g_battle_effect_projectile_speed;
+extern s16 g_battle_effect_projectile_spin_passes;
+extern s16 g_battle_effect_projectile_step_count;
+extern SVECTOR g_battle_effect_trajectory_destination;
+extern s32 g_battle_effect_trajectory_hit_unit_id;
+extern SVECTOR g_battle_effect_trajectory_origin;
+extern SVECTOR g_battle_effect_trajectory_position; /* final projectile position */
+extern s32 g_battle_effect_trajectory_source_id;
+extern VECTOR g_battle_effect_trajectory_step; /* last step's movement */
+extern s32 g_battle_effect_trajectory_step_count;
+extern map_tile_coordinates_t g_battle_effect_trajectory_tile;
 
-extern s32 g_effect_trajectory_tile_flags;
+extern s32 g_battle_effect_trajectory_tile_flags;
 
 s32 battle_effect_check_arc_trajectory_between_units(u8 source_id, u8 target_id);
 s32 battle_effect_check_direct_trajectory_between_units(u8 source_id, u8 target_id);
@@ -2075,48 +2075,48 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
 void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id);
 
 /* models */
-extern s32 g_effect_model_command_word_offset;
-extern psyq_tmd_packet_t* g_effect_model_commands;
-extern psyq_tmd_header_t* g_effect_model_files[];
-extern SVECTOR* g_effect_model_normals;
-extern psyq_tmd_object_t* g_effect_model_object;
-extern SVECTOR* g_effect_model_vertices;
-extern MATRIX g_effect_projectile_matrix;
+extern s32 g_battle_effect_model_command_word_offset;
+extern psyq_tmd_packet_t* g_battle_effect_model_commands;
+extern psyq_tmd_header_t* g_battle_effect_model_files[];
+extern SVECTOR* g_battle_effect_model_normals;
+extern psyq_tmd_object_t* g_battle_effect_model_object;
+extern SVECTOR* g_battle_effect_model_vertices;
+extern MATRIX g_battle_effect_projectile_matrix;
 
 void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out);
 s32 battle_effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1);
 
 /* timelines */
-extern effect_child_timeline_t* g_effect_child_timeline;
-extern effect_timeline_t* g_effect_timeline;
-extern const effect_timing_curves_t* g_effect_timing_curves;
+extern effect_child_timeline_t* g_battle_effect_child_timeline;
+extern effect_timeline_t* g_battle_effect_timeline;
+extern const effect_timing_curves_t* g_battle_effect_timing_curves;
 
 /* scripts */
 /* Written by effect-script opcode 05; no game source reads it. */
-extern u16 g_effect_unknown_801bf000;
-extern effect_callback_t g_effect_callback_slots[];
+extern u16 g_battle_effect_unknown_801bf000;
+extern effect_callback_t g_battle_effect_callback_slots[];
 
-extern effect_script_result_e (*g_effect_instructions[120])(effect_record_t*);
-extern effect_callback_t g_effect_native_callbacks[EFFECT_NATIVE_CALLBACK_COUNT];
-extern const u8* g_effect_script;
+extern effect_script_result_e (*g_battle_effect_instructions[120])(effect_record_t*);
+extern effect_callback_t g_battle_effect_native_callbacks[EFFECT_NATIVE_CALLBACK_COUNT];
+extern const u8* g_battle_effect_script;
 
 effect_script_result_e battle_effect_code_script_04_end(effect_record_t* unused_record);
 effect_script_result_e battle_effect_code_script_2e_invalid(effect_record_t* unused_record);
 
 /* particle motion */
-extern const effect_animation_curve_table_t* g_effect_animation_curve_data;
-extern MATRIX g_effect_emitter_matrix;
-extern const effect_geometry_table_t* g_effect_geometry_table;
+extern const effect_animation_curve_table_t* g_battle_effect_animation_curve_data;
+extern MATRIX g_battle_effect_emitter_matrix;
+extern const effect_geometry_table_t* g_battle_effect_geometry_table;
 /* Particle gravity; secondary handlers save it while using (0, ONE, 0). */
-extern vec3s32_t g_effect_gravity;
-extern s32 g_effect_gravity_modifier;
-extern s32 g_effect_gravity_scale;
-extern s32 g_effect_inertia_threshold;
+extern vec3s32_t g_battle_effect_gravity;
+extern s32 g_battle_effect_gravity_modifier;
+extern s32 g_battle_effect_gravity_scale;
+extern s32 g_battle_effect_inertia_threshold;
 /* Vertex work allocated by Banish/Altima and filled by the map renderer. */
-extern VECTOR* g_effect_map_vertices;
-extern MATRIX g_effect_particle_heading_matrix;
-extern vec3s32_t g_effect_saved_gravity;
-extern s32 g_effect_saved_inertia_threshold;
+extern VECTOR* g_battle_effect_map_vertices;
+extern MATRIX g_battle_effect_particle_heading_matrix;
+extern vec3s32_t g_battle_effect_saved_gravity;
+extern s32 g_battle_effect_saved_inertia_threshold;
 
 void battle_effect_integrate_particle_motion(effect_work_record_t* list);
 void battle_effect_interpolate_emitter_spawn_position(const effect_geometry_record_t* source, s32 factor, VECTOR* out);
@@ -2141,27 +2141,27 @@ s32 battle_effect_spawn_emitter_particles(s16 record_index, s32 frame, s32 emitt
 s32 battle_effect_spawn_particle_motion(effect_emitter_values_t* values, effect_motion_t* motion);
 
 /* particle pools */
-extern u16 g_effect_active_list_node_head;
-extern u8 g_effect_active_slot_head;
+extern u16 g_battle_effect_active_list_node_head;
+extern u8 g_battle_effect_active_slot_head;
 /* Unsigned 16-bit indexes: BATTLE list traversal loads these with lhu. */
-extern s16 g_effect_allocated_record_head;
-extern u16 g_effect_available_record_head;
-extern s16 g_effect_current_record_index;
-extern u16 g_effect_free_list_node_head;
-extern effect_work_record_t* g_effect_free_work_record_head;
-extern effect_list_node_t g_effect_list_nodes[EFFECT_SPRITE_NODE_CAPACITY + 1];
-extern s16 g_effect_root_record_index;
-extern u8 g_effect_slot_free_head;
-extern effect_slot_t g_effect_slots[];
-extern s32 g_effect_sprite_count;
-extern s32 g_effect_sprite_count_peak;
-extern effect_record_t g_effect_state_records[EFFECT_STATE_RECORD_CAPACITY + 1];
-extern s32 g_effect_work_record_count;
-extern s32 g_effect_work_record_peak;
-/* Effect work pool: g_effect_work_records is the 256-record allocation, g_effect_free_work_record_head
- * the free-chain head, g_effect_work_record_count the in-use count and g_effect_work_record_peak its
+extern s16 g_battle_effect_allocated_record_head;
+extern u16 g_battle_effect_available_record_head;
+extern s16 g_battle_effect_current_record_index;
+extern u16 g_battle_effect_free_list_node_head;
+extern effect_work_record_t* g_battle_effect_free_work_record_head;
+extern effect_list_node_t g_battle_effect_list_nodes[EFFECT_SPRITE_NODE_CAPACITY + 1];
+extern s16 g_battle_effect_root_record_index;
+extern u8 g_battle_effect_slot_free_head;
+extern effect_slot_t g_battle_effect_slots[];
+extern s32 g_battle_effect_sprite_count;
+extern s32 g_battle_effect_sprite_count_peak;
+extern effect_record_t g_battle_effect_state_records[EFFECT_STATE_RECORD_CAPACITY + 1];
+extern s32 g_battle_effect_work_record_count;
+extern s32 g_battle_effect_work_record_peak;
+/* Effect work pool: g_battle_effect_work_records is the 256-record allocation, g_battle_effect_free_work_record_head
+ * the free-chain head, g_battle_effect_work_record_count the in-use count and g_battle_effect_work_record_peak its
  * peak. */
-extern effect_work_record_t* g_effect_work_records;
+extern effect_work_record_t* g_battle_effect_work_records;
 
 void battle_effect_free_work_record(s16 record_index, effect_work_record_t* work);
 effect_work_record_t* battle_effect_get_list_node(s16 record_index, s16 requested_index);
@@ -2169,10 +2169,10 @@ void battle_effect_init_state_records(void);
 s32 battle_effect_update_slot(s32 id);
 
 /* sprite animation */
-extern u8* g_effect_animation_sequences;
-extern u8* g_effect_animation_sequences_start;
-extern u8* g_effect_frame_data;
-extern u8* g_effect_frame_data_start;
+extern u8* g_battle_effect_animation_sequences;
+extern u8* g_battle_effect_animation_sequences_start;
+extern u8* g_battle_effect_frame_data;
+extern u8* g_battle_effect_frame_data_start;
 /* Self-relative animation script table: each 16-bit value is a byte offset from
  * the table's own base to a effect_anim_script_t. Declared as bytes
  * because both uses are byte-based -- the stored pointer is the table's own
@@ -2180,71 +2180,72 @@ extern u8* g_effect_frame_data_start;
  * at the use site. Declaring it `u16[]` and casting the symbol to `u8*` for
  * the address instead reserves an unused 8-byte frame in
  * battle_effect_init_trap_animation. */
-extern u8 g_effect_trap_animation_data[];
-extern effect_sprite_section_t g_effect_trap_frame_data;
-extern effect_sprite_section_t* g_effect_trap_frame_data_ptr;
+extern u8 g_battle_effect_trap_animation_data[];
+extern effect_sprite_section_t g_battle_effect_trap_frame_data;
+extern effect_sprite_section_t* g_battle_effect_trap_frame_data_ptr;
 
 /* particle rendering */
 /* Four-byte alignment preserves the original 32-bit copies into x/y. */
-extern SVECTOR g_effect_corner_bottom_left __attribute__((aligned(4)));
-extern SVECTOR g_effect_corner_bottom_right __attribute__((aligned(4)));
-extern SVECTOR g_effect_corner_top_left __attribute__((aligned(4)));
-extern SVECTOR g_effect_corner_top_right __attribute__((aligned(4)));
-extern s32 g_effect_frame_parity;
-extern s32 g_effect_frame_start_prim_buffer_offset;
-extern MATRIX g_effect_matrix; /* 0x801bc09c */
+extern SVECTOR g_battle_effect_corner_bottom_left __attribute__((aligned(4)));
+extern SVECTOR g_battle_effect_corner_bottom_right __attribute__((aligned(4)));
+extern SVECTOR g_battle_effect_corner_top_left __attribute__((aligned(4)));
+extern SVECTOR g_battle_effect_corner_top_right __attribute__((aligned(4)));
+extern s32 g_battle_effect_frame_parity;
+extern s32 g_battle_effect_frame_start_prim_buffer_offset;
+extern MATRIX g_battle_effect_matrix; /* 0x801bc09c */
 
-extern u32* g_effect_otag;
+extern u32* g_battle_effect_otag;
 /* Work-kind handlers, indexed by kind_flags >> 12. The int return type is
  * load-bearing even though the result is ignored: the value-returning call is
  * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end
  * of its block, and the pc update is allocated $3 as in the target. */
-extern s32 (*g_effect_particle_render_handlers[])(effect_record_t* record, effect_work_record_t* work);
+extern s32 (*g_battle_effect_particle_render_handlers[])(effect_record_t* record, effect_work_record_t* work);
 
-extern u8* g_effect_prim_buffer;
-extern s32 g_effect_prim_buffer_offset;
-extern s32 g_effect_primitive_sizes[3];
+extern u8* g_battle_effect_prim_buffer;
+extern s32 g_battle_effect_prim_buffer_offset;
+extern s32 g_battle_effect_primitive_sizes[3];
 
 s32 battle_effect_get_prim_buffer_offset(void);
 void battle_effect_reset_render_state(void);
 void battle_effect_start_render_frame(void);
 
 /* camera */
-extern VECTOR g_effect_camera_position_current;
-extern s32 g_effect_camera_position_duration;
-extern s32 g_effect_camera_position_frame;
-extern u32 g_effect_camera_position_mode;
-extern VECTOR g_effect_camera_position_saved;
-extern VECTOR g_effect_camera_position_start;
-extern VECTOR g_effect_camera_position_target;
-extern SVECTOR g_effect_camera_rotation_current;
-extern s32 g_effect_camera_rotation_duration; /* angle track duration */
-extern s32 g_effect_camera_rotation_frame;    /* angle track counter; reset by battle_camera_execute_angle_command */
-extern u32 g_effect_camera_rotation_mode;
-extern SVECTOR g_effect_camera_rotation_saved;
-extern SVECTOR g_effect_camera_rotation_start;
-extern SVECTOR g_effect_camera_rotation_target;
-extern VECTOR g_effect_camera_zoom_current;
-extern s32 g_effect_camera_zoom_duration;
-extern s32 g_effect_camera_zoom_frame;
-extern u32 g_effect_camera_zoom_mode;
-extern VECTOR g_effect_camera_zoom_saved;
-extern VECTOR g_effect_camera_zoom_start;
-extern VECTOR g_effect_camera_zoom_target;
+extern VECTOR g_battle_effect_camera_position_current;
+extern s32 g_battle_effect_camera_position_duration;
+extern s32 g_battle_effect_camera_position_frame;
+extern u32 g_battle_effect_camera_position_mode;
+extern VECTOR g_battle_effect_camera_position_saved;
+extern VECTOR g_battle_effect_camera_position_start;
+extern VECTOR g_battle_effect_camera_position_target;
+extern SVECTOR g_battle_effect_camera_rotation_current;
+extern s32 g_battle_effect_camera_rotation_duration; /* angle track duration */
+extern s32
+    g_battle_effect_camera_rotation_frame; /* angle track counter; reset by battle_camera_execute_angle_command */
+extern u32 g_battle_effect_camera_rotation_mode;
+extern SVECTOR g_battle_effect_camera_rotation_saved;
+extern SVECTOR g_battle_effect_camera_rotation_start;
+extern SVECTOR g_battle_effect_camera_rotation_target;
+extern VECTOR g_battle_effect_camera_zoom_current;
+extern s32 g_battle_effect_camera_zoom_duration;
+extern s32 g_battle_effect_camera_zoom_frame;
+extern u32 g_battle_effect_camera_zoom_mode;
+extern VECTOR g_battle_effect_camera_zoom_saved;
+extern VECTOR g_battle_effect_camera_zoom_start;
+extern VECTOR g_battle_effect_camera_zoom_target;
 
 void battle_effect_copy_camera_angles_and_world_coords(void);
 void battle_effect_init_camera_and_screen_data(void);
 
 /* palettes */
-extern effect_palette_section_t* g_effect_palette_ptr;
+extern effect_palette_section_t* g_battle_effect_palette_ptr;
 /* Six RGB byte triples, packed into both CLUT images as 15-bit colors. */
-extern rgb24_t g_effect_reflect_palette_colors[6];
-extern rgb24_t g_effect_trap_colors[];
+extern rgb24_t g_battle_effect_reflect_palette_colors[6];
+extern rgb24_t g_battle_effect_trap_colors[];
 
 /* sound */
-extern u8 g_effect_sound_call_counts[]; /* per-channel call counts */
-extern s32 g_effect_sound_data_base;
-extern struct suzuki_sound_resource* g_effect_sound_section_ptr;
+extern u8 g_battle_effect_sound_call_counts[]; /* per-channel call counts */
+extern s32 g_battle_effect_sound_data_base;
+extern struct suzuki_sound_resource* g_battle_effect_sound_section_ptr;
 
 /* math */
 s32 battle_lerp_fixed8(s32 start, s32 end, s32 factor);

@@ -69,9 +69,9 @@ static void battle_state_run_deployment(void) {
     }
     g_battle_deployment_skipped = menu_init_attack_resources_and_threads();
     main_gfx_build_now_loading_center(g_battle_deployment_skipped);
-    map_id = g_map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
+    map_id = g_battle_map_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP);
     g_battle_state_map_init_step = 0;
-    g_map_data_load_complete = 0;
+    g_battle_map_data_load_complete = 0;
 
     SetPolyF4(&g_battle_screen_fade_polygons[0]);
     setRGB0(&g_battle_screen_fade_polygons[0], 0, 0, 0);
@@ -191,8 +191,8 @@ void battle_state_run_game_loop(void) {
         init_offset -= 0x32d6;
     } while (init_offset >= 0);
 
-    camera_integer = &g_camera_integer_coords;
-    camera_fixed = &g_camera_current_real_coords;
+    camera_integer = &g_battle_camera_integer_coords;
+    camera_fixed = &g_battle_camera_current_real_coords;
 
     do {
         battle_state_run_deployment();
@@ -215,9 +215,9 @@ void battle_state_run_game_loop(void) {
             camera_integer->vy = camera_component / ONE;
             camera_integer->vz = -camera_fixed->vz / ONE;
 
-            battle_camera_update_matrices(
-                &g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
-            battle_map_draw_mesh_and_weather(&g_camera_matrix);
+            battle_camera_update_matrices(&g_battle_camera_matrix, &g_battle_camera_render_state,
+                &g_battle_camera_current_screen_offset, &g_battle_camera_zoom);
+            battle_map_draw_mesh_and_weather(&g_battle_camera_matrix);
             if (battle_effect_update_cycle() != 0) {
                 g_battle_state_animation_continue_check = 2;
             } else {
@@ -1105,8 +1105,9 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
         prim->v0 = prim->v1 = part->v;
         prim->v2 = prim->v3 = prim->v0 + part->height;
         if (flags & BATTLE_SPRITE_DISPLAY_NEARER) {
-            if ((g_camera_render_state.vx & 0xfff) < 0x400) {
-                addPrim(ot - ((g_camera_render_state.vx & 0xfff) - 0x12e) * g_camera_zoom.vz / 368640 - 1, prim);
+            if ((g_battle_camera_render_state.vx & 0xfff) < 0x400) {
+                addPrim(ot - ((g_battle_camera_render_state.vx & 0xfff) - 0x12e) * g_battle_camera_zoom.vz / 368640 - 1,
+                    prim);
             } else {
                 addPrim(ot, prim);
             }
@@ -1150,7 +1151,7 @@ static void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTO
     u16 z;
 
     output->vy = input->vy - 0xc;
-    switch (g_camera_render_state.vy & 0xc00) {
+    switch (g_battle_camera_render_state.vy & 0xc00) {
     case 0:
         x = input->vx + 0xe;
         output->vx = x - offset;
@@ -1206,7 +1207,7 @@ static void battle_camera_convert_screen_coords_by_rotation(const SVECTOR* input
     s32 yaw;
 
     output->vy = input->vy - 0xb;
-    yaw = g_camera_render_state.vy & 0xc00;
+    yaw = g_battle_camera_render_state.vy & 0xc00;
 
     switch (yaw) {
     case 0: {

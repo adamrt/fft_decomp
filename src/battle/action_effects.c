@@ -22,13 +22,13 @@
 #include "psx/types.h"
 
 void battle_action_set_at_list_active(void) {
-    g_action_at_list_active = 1;
+    g_battle_action_at_list_active = 1;
 }
 
 /* Hide the map cursor and its tile glow: the flag is read only by
  * target_calculate_tile_coords_and_glow_from_at_list. */
 void battle_action_clear_at_list_active(void) {
-    g_action_at_list_active = 0;
+    g_battle_action_at_list_active = 0;
 }
 
 void battle_target_move_cursor_to_unit(const battle_unit_t* unit) {
@@ -58,7 +58,7 @@ void battle_gfx_update_unit_palettes(void) {
     s32 palette_index;
 
     for (palette_index = 0; palette_index < MAP_CLUTS_PER_ROW; palette_index++) {
-        if (g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].animations[palette_index].active != 0) {
+        if (g_battle_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].animations[palette_index].active != 0) {
             battle_map_modify_palette(MAP_COLOR_MODE_STOP_REPEAT, 4, MAP_CLUT_ROW_UNITS, palette_index, 0, 0, 0, 0);
             battle_map_modify_palette(MAP_COLOR_MODE_RESTORE, 4, MAP_CLUT_ROW_UNITS, palette_index, 0, 0, 0, 0);
         }
@@ -105,9 +105,9 @@ void battle_gfx_tint_all_units_by_team(void) {
 
 /* Advance the AT list cursor, wrapping after the list's 40 entries. */
 static void battle_action_increment_at_list_id(void) {
-    g_action_at_list_id++;
-    if (g_action_at_list_id >= BATTLE_AT_LIST_CAPACITY) {
-        g_action_at_list_id = 0;
+    g_battle_action_at_list_id++;
+    if (g_battle_action_at_list_id >= BATTLE_AT_LIST_CAPACITY) {
+        g_battle_action_at_list_id = 0;
     }
 }
 
@@ -122,7 +122,7 @@ void battle_action_show_next_at_list_entry(void) {
     battle_unit_t* unit;
 
     for (;;) {
-        id = battle_action_get_at_list_entry_unit_id(g_action_at_list_id);
+        id = battle_action_get_at_list_entry_unit_id(g_battle_action_at_list_id);
         if (id >= 0) {
             unit = battle_unit_get_by_battle_id(id & 0xFF);
             if ((id & 0x100) != 0) {
@@ -143,19 +143,19 @@ void battle_action_show_next_at_list_entry(void) {
 /* Open the status menu once: mark it open and restart the AT list cursor at entry
  * 0. */
 void battle_action_open_status_menu_at_list_start(void) {
-    if (g_status_menu_open == 0) {
-        g_status_menu_open = 1;
-        g_action_at_list_id = 0;
+    if (g_battle_status_menu_open == 0) {
+        g_battle_status_menu_open = 1;
+        g_battle_action_at_list_id = 0;
     }
 }
 
 void battle_action_clear_at_list_id(void) {
-    g_action_at_list_id = 0;
+    g_battle_action_at_list_id = 0;
 }
 
 void battle_menu_clear_status_menu_state(void) {
     g_battle_menu_status_requested = 0;
-    g_status_menu_open = 0;
+    g_battle_status_menu_open = 0;
 }
 
 /* Fill an init record for a secondary effect that one unit both casts and
@@ -255,7 +255,7 @@ void battle_effect_start_action_projectile_secondary(battle_unit_t* unit) {
         if ((ability_id != ABILITY_ID_THROW_SHURIKEN)
             && ((u32)(unit->used_ability_id - ABILITY_ID_ITEM_FIRST)
                 >= (ABILITY_ID_JUMP_FIRST - ABILITY_ID_ITEM_FIRST))) {
-            animation_id = g_effect_weapon_projectile_animations[unit->equipped_weapon_type];
+            animation_id = g_battle_effect_weapon_projectile_animations[unit->equipped_weapon_type];
         }
     }
     battle_effect_init_projectile_secondary(animation_id, &secondary_init);

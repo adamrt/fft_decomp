@@ -52,11 +52,11 @@ void battle_action_set_casting_unit_id_ff_and_init(void) {
 s32 battle_state_try_enter_scenario_event(battle_unit_t* unit) {
     s32 result;
 
-    if (g_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY
-        || g_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
+    if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY
+        || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
         result = menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, unit->stats->battle_id, 0, 1);
-    } else if (g_action_turn_event_type == BATTLE_TURN_EVENT_ABILITY_READY
-        || g_action_turn_event_type == BATTLE_TURN_EVENT_ACTION_RESULT) {
+    } else if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ABILITY_READY
+        || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_ACTION_RESULT) {
         result = menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 2, unit->stats->battle_id, 0, 1);
         if (result == MENU_SYSTEM_DISPATCH_EVENT && script_get_event_finish_operation() != 0) {
             if (unit->spritesheet_id < BATTLE_SPRITESHEET_ID_RAMZA_END) {
@@ -117,7 +117,7 @@ void battle_menu_set_next_script_action_menus(void) {
     battle_unit_store_entd_flags_without_control_flag(casting_unit);
     if (battle_state_try_enter_scenario_event(unit) == 0) {
         g_battle_game_state = BATTLE_GAME_STATE_OPEN_ACTION_MENUS;
-        g_action_post_action = 0;
+        g_battle_action_post_action = 0;
         battle_camera_rotate_when_unit_tile_not_visible(casting_unit);
     }
 }
@@ -159,7 +159,7 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
     s32 previous_count;
 
     if (g_main_system_frontend_world_result == 4) {
-        if (g_map_deep_dungeon_load_in_progress == 0) {
+        if (g_battle_map_deep_dungeon_load_in_progress == 0) {
             crystal_count = battle_unit_count_crystals();
             if (crystal_count >= 5) {
                 crystal_count = 4;
@@ -168,13 +168,13 @@ static s32 battle_map_check_deep_dungeon_crystal_and_init_state(void) {
             if (crystal_count != previous_count) {
                 script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, crystal_count);
                 if (battle_map_start_data_load() != 0) {
-                    g_map_deep_dungeon_load_in_progress = 1;
+                    g_battle_map_deep_dungeon_load_in_progress = 1;
                 } else {
                     script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_CRYSTAL_COUNT, previous_count);
                 }
             }
         }
-        return g_map_deep_dungeon_load_in_progress;
+        return g_battle_map_deep_dungeon_load_in_progress;
     }
     return 0;
 }
@@ -205,7 +205,7 @@ static s32 battle_map_refresh_deep_dungeon(void) {
 
 /* Resolves the queued in-between-turn event (mimic, ability cast, traps).
  *
- * The 32-bit queue value's second byte selects the action type (g_action_turn_event_type) and its
+ * The 32-bit queue value's second byte selects the action type (g_battle_action_turn_event_type) and its
  * low byte the unit; BATTLE_TURN_EVENT_NONE means nothing is queued. Unit- and
  * ability-ready events resolve an ability, while action-result events dispatch
  * the queued per-unit result. The meaning of 0x400 remains uncertain. */
@@ -216,8 +216,8 @@ static void battle_action_run_between_turn_events(void) {
 
     action = battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RUN);
     runtime_id = action & 0xff;
-    g_action_turn_event_type = action & 0xff00;
-    if (g_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
+    g_battle_action_turn_event_type = action & 0xff00;
+    if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
         return;
     }
     unit = battle_unit_get_by_battle_id(runtime_id);
@@ -226,7 +226,7 @@ static void battle_action_run_between_turn_events(void) {
     } else {
         main_system_handle_pointer_exception(12);
     }
-    switch (g_action_turn_event_type) {
+    switch (g_battle_action_turn_event_type) {
     case BATTLE_TURN_EVENT_UNIT_READY:
     case BATTLE_TURN_EVENT_ABILITY_READY:
         battle_unit_draw_and_activate_by_runtime_id(unit->runtime_id);
@@ -259,7 +259,7 @@ static void battle_action_run_between_turn_events(void) {
     unit = battle_unit_get_source();
     if (unit != 0) {
         unit->turn_action_flags = 0;
-        if (g_action_turn_event_type != BATTLE_TURN_EVENT_UNKNOWN_0400) {
+        if (g_battle_action_turn_event_type != BATTLE_TURN_EVENT_UNKNOWN_0400) {
             battle_target_move_cursor_to_unit(unit);
         }
     }
@@ -285,7 +285,7 @@ void battle_action_check_between_turn_events(void) {
         menu_reset_unit_record(unit->stats->battle_id);
         battle_unit_store_entd_flags_without_control_flag(unit);
         if (g_battle_menu_status_requested != 0 && !(unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED)
-            && g_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY) {
+            && g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY) {
             battle_unit_update_display_by_runtime_id(unit->runtime_id);
             main_sound_play_sfx(MAIN_SFX_STATUS_MENU_REQUEST);
             battle_action_open_status_menu_at_list_start();
@@ -293,9 +293,9 @@ void battle_action_check_between_turn_events(void) {
             battle_menu_set_next_script_action_menus();
             return;
         }
-        g_action_post_action = 0;
-        if (g_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY
-            || g_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
+        g_battle_action_post_action = 0;
+        if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_UNIT_READY
+            || g_battle_action_turn_event_type == BATTLE_TURN_EVENT_NONE) {
             battle_unit_update_display_by_runtime_id(unit->runtime_id);
         }
         if (battle_state_try_enter_scenario_event(unit) == 0) {
@@ -320,8 +320,8 @@ void battle_state_enter_status_execute(void) {
     g_battle_game_state = BATTLE_GAME_STATE_STATUS_EXECUTE;
     unit = battle_unit_get_source();
     battle_action_clear_at_list_active();
-    g_action_post_action = 0;
-    if (g_action_turn_event_type == BATTLE_TURN_EVENT_MIME) {
+    g_battle_action_post_action = 0;
+    if (g_battle_action_turn_event_type == BATTLE_TURN_EVENT_MIME) {
         text_set_message_duration_frames(0x3C);
         menu_init_system_function(
             BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0x183A, unit->stats->battle_id, unit->stats->battle_id, 1);
@@ -388,7 +388,7 @@ void battle_menu_open_active_unit_idle_action_menu(void) {
 }
 
 /* Opens the non-active-unit idle action menu for the unit under the cursor;
- * g_status_menu_open switches menu ids 0xf/0x10 to 0x11/0x12. */
+ * g_battle_status_menu_open switches menu ids 0xf/0x10 to 0x11/0x12. */
 void battle_menu_open_non_active_unit_idle_action_menu(void) {
     battle_unit_t* runtime;
     unit_stats_t* unit;
@@ -403,7 +403,7 @@ void battle_menu_open_non_active_unit_idle_action_menu(void) {
     g_battle_game_state = BATTLE_GAME_STATE_IDLING_ACTION_MENUS;
     menu_start_unit_view_thread(UNIT_VIEW_MODE_UNIT_SUMMARY, unit->battle_id, 0);
     menu_id = battle_menu_get_id_based_on_mount_moveable_actable(runtime->stats->battle_id);
-    if (g_status_menu_open != 0) {
+    if (g_battle_status_menu_open != 0) {
         if (menu_id == BATTLE_MENU_ID_PLAYER_UNIT) {
             menu_id = BATTLE_MENU_ID_PLAYER_UNIT_INSPECT;
         } else if (menu_id == BATTLE_MENU_ID_OTHER_UNIT) {
@@ -427,7 +427,7 @@ void battle_menu_dispatch_idle_action_menu(void) {
         return;
     }
     g_battle_casting_runtime_id = unit->runtime_id;
-    if (g_status_menu_open == 0 && unit->runtime_id == g_battle_unit_source_runtime_id) {
+    if (g_battle_status_menu_open == 0 && unit->runtime_id == g_battle_unit_source_runtime_id) {
         if ((unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
             battle_menu_open_active_unit_idle_action_menu();
         } else {
@@ -697,7 +697,7 @@ void battle_menu_open_move_confirm(void) {
 void battle_state_enter_after_command(void) {
     g_main_system_animation_speed = 1;
     g_battle_game_state = BATTLE_GAME_STATE_AFTER_COMMAND;
-    g_action_post_action = 0;
+    g_battle_action_post_action = 0;
     battle_target_move_cursor_to_unit(battle_unit_get_source());
     menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CLOSE, 0, 0, 0, 0);
 }
@@ -776,7 +776,7 @@ static s32 battle_action_report_job_level_up(battle_unit_t* unit) {
     return 0;
 }
 
-/* Starts the next post-action step selected by g_move_find_result.
+/* Starts the next post-action step selected by g_battle_move_find_result.
  *
  * Handles, in priority order, the crystal/treasure pickup (bit 0x1), the
  * EXP/JP and level-up reports (0x2), a found rare/common item (0x4), a tile
@@ -797,9 +797,9 @@ s32 battle_move_start_next_post_movement_step(void) {
     casting = battle_unit_get_casting();
     menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
     g_battle_game_state = BATTLE_GAME_STATE_CRYSTAL_LEARN;
-    g_action_post_action = 0;
+    g_battle_action_post_action = 0;
     casting->state_frame_counter = 0;
-    if (g_move_find_result & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
+    if (g_battle_move_find_result & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
         target = battle_unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z);
         item = menu_get_dead_unit_selection(source->stats->battle_id);
         if (item == -1) {
@@ -842,8 +842,8 @@ s32 battle_move_start_next_post_movement_step(void) {
         main_sound_play_sfx_find_channel(MAIN_SFX_COMPLETE);
         return 1;
     }
-    if (g_move_find_result & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
-        switch (g_action_post_action_display_phase) {
+    if (g_battle_move_find_result & MOVE_POST_EVENT_MOVEMENT_BENEFIT) {
+        switch (g_battle_action_post_action_display_phase) {
         case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
             battle_action_init_movement_ability_benefit(casting->stats);
             battle_unit_build_gained_exp_jp_level_job_level(casting->stats, &casting->strike.action_rewards);
@@ -857,21 +857,21 @@ s32 battle_move_start_next_post_movement_step(void) {
         }
         return 1;
     }
-    if (g_move_find_result & MOVE_POST_EVENT_ITEM_FOUND) {
-        g_move_find_display_item = *battle_map_determine_rare_common_item(casting->stats);
-        battle_gfx_store_item_display_data(source, g_move_find_display_item.item_id);
+    if (g_battle_move_find_result & MOVE_POST_EVENT_ITEM_FOUND) {
+        g_battle_move_find_display_item = *battle_map_determine_rare_common_item(casting->stats);
+        battle_gfx_store_item_display_data(source, g_battle_move_find_display_item.item_id);
         battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_FOUND_ITEM, source->facing, source);
         if (!(source->team_flags & BATTLE_TEAM_MASK)) {
-            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_move_find_display_item.item_id,
-                source->stats->battle_id, 0, 1);
+            menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM,
+                g_battle_move_find_display_item.item_id, source->stats->battle_id, 0, 1);
             main_sound_play_tune(MAIN_SOUND_TUNE_ITEM_FOUND);
             return 1;
         }
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_move_find_display_item.item_id,
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM, g_battle_move_find_display_item.item_id,
             source->stats->battle_id, 0, 0);
         return 1;
     }
-    if (g_move_find_result & MOVE_POST_EVENT_TRAP_TRIGGERED) {
+    if (g_battle_move_find_result & MOVE_POST_EVENT_TRAP_TRIGGERED) {
         trap = battle_action_apply_tile_trap(casting->stats);
         if ((source->pending_attack_result = battle_action_finalize_attack_and_flag_reactions(source->stats->battle_id))
             == -1) {
@@ -885,18 +885,18 @@ s32 battle_move_start_next_post_movement_step(void) {
         battle_ai_record_triggered_trap_coords(casting->map_x, casting->map_z, casting->map_y);
         return 1;
     }
-    if (g_move_find_result & MOVE_POST_EVENT_CHARGING_CANCEL) {
+    if (g_battle_move_find_result & MOVE_POST_EVENT_CHARGING_CANCEL) {
         battle_status_remove_charging_ability_ct(casting->stats, 1);
         menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         return 1;
     }
-    if (g_move_find_result & MOVE_POST_EVENT_SOURCE_DISPLAY) {
+    if (g_battle_move_find_result & MOVE_POST_EVENT_SOURCE_DISPLAY) {
         menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         battle_gfx_prepare_post_action_display_by_runtime_id(source->runtime_id);
         battle_unit_update_display_by_runtime_id(source->runtime_id);
         return 1;
     }
-    if (g_move_find_result & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
+    if (g_battle_move_find_result & MOVE_POST_EVENT_MOUNT_STATUS_CHANGE) {
         menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_CRYSTAL_OR_TREASURE, 0, source->stats->battle_id, 0, 0);
         if (source->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
             target = battle_unit_get_by_runtime_id(source->mount_partner_runtime_id);
@@ -919,7 +919,7 @@ s32 battle_move_start_next_post_movement_step(void) {
  * steps.
  *
  * move_set_target_for_mounted_unit_and_find_item builds the step flags in
- * g_move_find_result (0 for a unit without battle data), and the
+ * g_battle_move_find_result (0 for a unit without battle data), and the
  * post-action display starts at the level-up report. When any step is pending the
  * map cursor and its tile glow are hidden. */
 void battle_move_init_post_movement_display(void) {
@@ -928,13 +928,13 @@ void battle_move_init_post_movement_display(void) {
     battle_camera_disable_map_pan();
     stats = battle_unit_get_casting()->stats;
     if (stats != 0) {
-        g_move_find_result = battle_move_set_target_for_mounted_unit_and_find_item(stats);
+        g_battle_move_find_result = battle_move_set_target_for_mounted_unit_and_find_item(stats);
     } else {
-        g_move_find_result = 0;
+        g_battle_move_find_result = 0;
     }
-    g_action_post_action_display_phase = BATTLE_POST_ACTION_DISPLAY_LEVEL_UP;
+    g_battle_action_post_action_display_phase = BATTLE_POST_ACTION_DISPLAY_LEVEL_UP;
     battle_move_start_next_post_movement_step();
-    if (g_move_find_result != 0) {
+    if (g_battle_move_find_result != 0) {
         battle_action_clear_at_list_active();
     }
     g_battle_state_animation_continue_check = 0;
@@ -1264,13 +1264,14 @@ s32 battle_action_resume_attack_phase_control(void) {
     g_battle_game_state = BATTLE_GAME_STATE_RESUME_ATTACK_PHASE;
     g_main_system_animation_speed = 1;
     battle_unit_get_casting();
-    idx = g_action_post_effect_msg_counter;
+    idx = g_battle_action_post_effect_msg_counter;
     if (idx != 0) {
         idx -= 1;
-        g_action_post_effect_msg_counter = idx;
-        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_POST_ACTION_RESULT, g_action_post_effect_msgs[idx].code,
-            g_action_post_effect_msgs[idx].unit, g_action_post_effect_msgs[idx].value, 1);
-        g_action_post_action = 0;
+        g_battle_action_post_effect_msg_counter = idx;
+        menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_POST_ACTION_RESULT,
+            g_battle_action_post_effect_msgs[idx].code, g_battle_action_post_effect_msgs[idx].unit,
+            g_battle_action_post_effect_msgs[idx].value, 1);
+        g_battle_action_post_action = 0;
         return 1;
     }
     return 0;
@@ -1281,8 +1282,8 @@ s32 battle_action_resume_attack_phase_control(void) {
  *
  * Walks the 11 reportable outcomes recorded in the unit's
  * action_data_t and appends one 8-byte record per outcome to the
- * queue at g_action_post_effect_msgs: message code at +0, the acting unit's runtime ID at +1,
- * and the reported value at +4. g_action_post_effect_msg_counter is
+ * queue at g_battle_action_post_effect_msgs: message code at +0, the acting unit's runtime ID at +1,
+ * and the reported value at +4. g_battle_action_post_effect_msg_counter is
  * the record count, drained by action_resume_attack_phase_control.
  *
  * The 11-way dispatch really is a jump table in the target (at 0x80067548),
@@ -1300,7 +1301,7 @@ static void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* run
     if (runtime->stats == 0) {
         return;
     }
-    if (g_action_post_effect_msg_counter >= 0x10) {
+    if (g_battle_action_post_effect_msg_counter >= 0x10) {
         return;
     }
     action = &runtime->stats->action;
@@ -1313,75 +1314,76 @@ static void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* run
         switch (i) {
         case 0:
             if (action->sp_change != 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x28;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->sp_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x28;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->sp_change;
                 queued = 1;
             }
             break;
         case 1:
             if (action->ct_change != 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x27;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->ct_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x27;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->ct_change;
                 queued = 1;
             }
             break;
         case 2:
             if (action->brave_change != 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x29;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->brave_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x29;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->brave_change;
                 queued = 1;
             }
             break;
         case 3:
             if (action->faith_change != 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x2a;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->faith_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2a;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->faith_change;
                 queued = 1;
             }
             break;
         case 4:
             if (action->pa_change != 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x2b;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->pa_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2b;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->pa_change;
                 queued = 1;
             }
             break;
         case 5:
             if (action->ma_change != 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x2c;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->ma_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2c;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->ma_change;
                 queued = 1;
             }
             break;
         case 6:
             if (action->gil_change > 0) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x2e;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->gil_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2e;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->gil_change;
                 queued = 1;
             }
             break;
         case 7:
             if (action->exp_change & 0x80) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x2f;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->exp_change;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2f;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->exp_change;
                 queued = 1;
             }
             break;
         case 8:
             if (action->special_effect & (ACTION_SPECIAL_EFFECT_LEVEL_UP | ACTION_SPECIAL_EFFECT_LEVEL_DOWN)) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x2d;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->special_effect;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x2d;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value
+                    = action->special_effect;
                 queued = 1;
             }
             break;
         case 9:
             if (action->special_effect
                 & (ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT | ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN)) {
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x1d;
-                off = g_action_post_effect_msg_counter;
-                g_action_post_effect_msgs[off].value = action->item_lost;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x1d;
+                off = g_battle_action_post_effect_msg_counter;
+                g_battle_action_post_effect_msgs[off].value = action->item_lost;
                 if (action->special_effect & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN) {
-                    g_action_post_effect_msgs[off].value = action->item_lost | 0x8000;
+                    g_battle_action_post_effect_msgs[off].value = action->item_lost | 0x8000;
                 }
                 queued = 1;
             }
@@ -1389,14 +1391,14 @@ static void battle_action_queue_post_effect_messages_for_unit(battle_unit_t* run
         case 10:
             if (action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM) {
                 queued = 1;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].code = 0x1c;
-                g_action_post_effect_msgs[g_action_post_effect_msg_counter].value = action->item_lost;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].code = 0x1c;
+                g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].value = action->item_lost;
             }
             break;
         }
         if (queued != 0) {
-            g_action_post_effect_msgs[g_action_post_effect_msg_counter].unit = runtime->stats->battle_id;
-            g_action_post_effect_msg_counter += 1;
+            g_battle_action_post_effect_msgs[g_battle_action_post_effect_msg_counter].unit = runtime->stats->battle_id;
+            g_battle_action_post_effect_msg_counter += 1;
         }
     }
 }
@@ -1407,7 +1409,7 @@ static void battle_action_build_targets_post_action_message(void) {
     battle_unit_t* base;
     s32 i;
 
-    g_action_post_effect_msg_counter = 0;
+    g_battle_action_post_effect_msg_counter = 0;
     base = battle_unit_get_casting();
     for (i = 0; i < base->strike.target_count; i++) {
         battle_action_queue_post_effect_messages_for_unit(battle_unit_get_by_battle_id(base->strike.target_list[i]));
@@ -1423,7 +1425,7 @@ void battle_action_show_caster_post_effect_messages(void) {
     unit = battle_unit_get_casting();
     battle_action_queue_post_effect_messages_for_unit(unit);
     if (g_main_game_options.fields.effect_messages != GAME_OPTION_ON) {
-        g_action_post_effect_msg_counter = 0;
+        g_battle_action_post_effect_msg_counter = 0;
     }
     if (battle_action_resume_attack_phase_control() == 0) {
         menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
@@ -1460,7 +1462,7 @@ void battle_state_start_battle_message_display(void) {
 
     g_battle_game_state = BATTLE_GAME_STATE_BATTLE_MESSAGE_DISPLAY;
     g_main_system_animation_speed = 1;
-    g_action_post_action = 0;
+    g_battle_action_post_action = 0;
     unit = battle_unit_get_casting();
     battle_action_build_targets_post_action_message();
     battle_unit_update_attack_result_animation(unit);
@@ -1521,7 +1523,7 @@ void battle_action_init_learn_ability_on_hit(void) {
     unit = battle_unit_get_source();
     menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_EFFECT_MESSAGE, 0, unit->stats->battle_id, 0, 0);
     text_set_message_duration_frames(0x1E);
-    switch (g_action_post_action_display_phase) {
+    switch (g_battle_action_post_action_display_phase) {
     case BATTLE_POST_ACTION_DISPLAY_LEVEL_UP:
         battle_action_report_level_up(unit);
         break;
@@ -1529,15 +1531,16 @@ void battle_action_init_learn_ability_on_hit(void) {
         battle_action_report_job_level_up(unit);
         break;
     case BATTLE_POST_ACTION_DISPLAY_LEARN_ON_HIT:
-        g_action_learn_on_hit_unit_id = battle_ability_find_learn_on_hit_unit(unit->stats->battle_id, &ability_id);
-        if (g_action_learn_on_hit_unit_id != -1) {
-            learner = battle_unit_get_by_battle_id(g_action_learn_on_hit_unit_id);
+        g_battle_action_learn_on_hit_unit_id
+            = battle_ability_find_learn_on_hit_unit(unit->stats->battle_id, &ability_id);
+        if (g_battle_action_learn_on_hit_unit_id != -1) {
+            learner = battle_unit_get_by_battle_id(g_battle_action_learn_on_hit_unit_id);
             menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_ABILITY_LEARNED, ability_id, unit->stats->battle_id, 0,
                 learner->stats->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
             battle_target_move_cursor_to_unit(learner);
             battle_action_set_at_list_active();
         } else {
-            g_action_post_action_display_phase++;
+            g_battle_action_post_action_display_phase++;
         }
         break;
     }
@@ -1564,9 +1567,9 @@ void battle_action_handle_post_action_xp_jp_ability(void) {
         }
     }
     battle_gfx_init_earned_exp_jp_display(unit);
-    g_action_post_action_display_phase = BATTLE_POST_ACTION_DISPLAY_LEVEL_UP;
+    g_battle_action_post_action_display_phase = BATTLE_POST_ACTION_DISPLAY_LEVEL_UP;
     battle_target_move_cursor_to_unit(unit);
     battle_action_init_learn_ability_on_hit();
-    g_action_post_action = 0;
+    g_battle_action_post_action = 0;
     g_battle_state_animation_continue_check = 0;
 }

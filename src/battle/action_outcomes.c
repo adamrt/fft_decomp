@@ -22,18 +22,18 @@
 
 /* Enter AI action simulation, save the current attacker and clear Hamedo state. */
 void battle_ai_begin_action_simulation(void) {
-    g_action_state = ACTION_STATE_AI_SIMULATION;
-    g_action_hamedo_flag = 0;
-    main_mem_copy_byte_data_source_first(
-        &g_action_current_attacker, &g_ai_current_attacker_backup, sizeof(g_action_current_attacker));
+    g_battle_action_state = ACTION_STATE_AI_SIMULATION;
+    g_battle_action_hamedo_flag = 0;
+    main_mem_copy_byte_data_source_first(&g_battle_action_current_attacker, &g_battle_ai_current_attacker_backup,
+        sizeof(g_battle_action_current_attacker));
 }
 
 /* End an AI simulation: copy the saved current-attacker block back and return
  * the action state to execute. */
 void battle_ai_end_action_simulation(void) {
-    g_action_state = ACTION_STATE_EXECUTE;
-    main_mem_copy_byte_data_source_first(
-        &g_ai_current_attacker_backup, &g_action_current_attacker, sizeof(g_action_current_attacker));
+    g_battle_action_state = ACTION_STATE_EXECUTE;
+    main_mem_copy_byte_data_source_first(&g_battle_ai_current_attacker_backup, &g_battle_action_current_attacker,
+        sizeof(g_battle_action_current_attacker));
 }
 
 /* Current weather as seen by damage and movement rules: none when the map
@@ -44,7 +44,7 @@ s32 battle_map_get_effective_weather(void) {
     u32 flags;
 
     weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
-    flags = g_map_weather_flags;
+    flags = g_battle_map_weather_flags;
     if (flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
         return BATTLE_WEATHER_NONE;
     }
@@ -85,7 +85,7 @@ s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     s32 k;
     u8 skillset;
 
-    if (g_action_hamedo_flag != 0) {
+    if (g_battle_action_hamedo_flag != 0) {
         return -1;
     }
     if (g_battle_acting_unit_used_ability_id == 0) {
@@ -202,7 +202,7 @@ void battle_unit_learn_used_ability(unit_stats_t* unit) {
  *
  * status_id is the status handler index (status id + 1). */
 void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_id) {
-    if (g_action_state == ACTION_STATE_EXECUTE) {
+    if (g_battle_action_state == ACTION_STATE_EXECUTE) {
         battle_status_queue_runtime_graphics_flag_change(status_id, enabled, battle_id);
     }
 }
@@ -210,7 +210,7 @@ void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_i
 s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) {
     u8 item_id;
 
-    if (g_action_state != ACTION_STATE_EXECUTE) {
+    if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
     if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE) {
@@ -237,7 +237,7 @@ s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8
 s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id) {
     s32 value;
 
-    if (g_action_state != ACTION_STATE_EXECUTE) {
+    if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0;
     }
     if (unit->team_flags & BATTLE_TEAM_MASK) {
@@ -264,7 +264,7 @@ void battle_action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
     u8 capped;
     s16 reduced;
 
-    if (g_action_state != ACTION_STATE_EXECUTE) {
+    if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return;
     }
     if ((amount & 0x80) == 0) {
@@ -276,7 +276,7 @@ void battle_action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
         unit->experience = capped;
         if (main_unit_check_level_up(unit) != 0) {
             if (unit->battle_id == g_battle_acting_unit_id) {
-                g_action_current_ability.level_gained_flag = 1;
+                g_battle_action_current_ability.level_gained_flag = 1;
             }
         }
     } else {
@@ -290,9 +290,9 @@ void battle_action_handle_steal_exp(unit_stats_t* unit, u8 amount) {
 
 /* Resolve a unit's status changes with the action state set to preview (2). */
 void battle_status_resolve_unit_changes_in_preview(s32 unit_id, s32 removal_only) {
-    g_action_state = ACTION_STATE_PREVIEW;
+    g_battle_action_state = ACTION_STATE_PREVIEW;
     battle_status_resolve_unit_changes(unit_id, removal_only);
-    g_action_state = ACTION_STATE_EXECUTE;
+    g_battle_action_state = ACTION_STATE_EXECUTE;
 }
 
 /*
@@ -308,22 +308,22 @@ void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
     s32 idx;
     s32 mask;
 
-    g_action_target_data = &unit->action;
+    g_battle_action_target_data = &unit->action;
     battle_id = unit->battle_id;
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-        g_action_target_data->status_changes.removal[i] &= unit->status_sets.current[i];
+        g_battle_action_target_data->status_changes.removal[i] &= unit->status_sets.current[i];
     }
     for (i = 0; i < STATUS_COUNT; i++) {
         idx = i / 8;
         mask = 0x80 >> (i & 7);
-        if (g_action_target_data->status_changes.removal[idx] & mask) {
+        if (g_battle_action_target_data->status_changes.removal[idx] & mask) {
             main_status_set_ct(unit, i, 0);
             battle_status_enable_special_flags(STATUS_HANDLER_INDEX(i), 0, battle_id);
         }
     }
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-        unit->status_sets.current[i] &= ~g_action_target_data->status_changes.removal[i];
-        unit->status_sets.innate[i] &= ~g_action_target_data->status_changes.removal[i];
+        unit->status_sets.current[i] &= ~g_battle_action_target_data->status_changes.removal[i];
+        unit->status_sets.innate[i] &= ~g_battle_action_target_data->status_changes.removal[i];
     }
 }
 
@@ -331,11 +331,11 @@ void battle_target_sort_list(s32 target_battle_id) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
-        if (g_target_ability_targets_list[i] == (target_battle_id & 0xFF)) {
+        if (g_battle_target_ability_targets_list[i] == (target_battle_id & 0xFF)) {
             for (; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT - 1; i++) {
-                g_target_ability_targets_list[i] = g_target_ability_targets_list[i + 1];
+                g_battle_target_ability_targets_list[i] = g_battle_target_ability_targets_list[i + 1];
             }
-            g_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT - 1] = 0xFF;
+            g_battle_target_ability_targets_list[BATTLE_UNIT_RUNTIME_SLOT_COUNT - 1] = 0xFF;
             return;
         }
     }
@@ -346,7 +346,7 @@ void battle_action_store_target_ids(u8* src) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
-        g_target_ability_targets_list[i] = src[i];
+        g_battle_target_ability_targets_list[i] = src[i];
     }
 }
 
@@ -357,7 +357,7 @@ s32 battle_target_copy_ability_targets(u8* out) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
-        u8 target_id = g_target_ability_targets_list[i];
+        u8 target_id = g_battle_target_ability_targets_list[i];
         *out++ = target_id;
         if (target_id != 0xFF) {
             count++;
@@ -369,13 +369,13 @@ s32 battle_target_copy_ability_targets(u8* out) {
 /* Store value in D_8019387C when unit_id is the acting unit of a primary
  * (non-reaction) action. */
 void battle_action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
-    if (g_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_battle_acting_unit_id) {
+    if (g_battle_action_context == ACTION_CONTEXT_PRIMARY && unit_id == g_battle_acting_unit_id) {
         g_battle_unknown_8019387c = value;
     }
 }
 
 s32 battle_formula_get_random_0_7fff(void) {
-    if (g_action_state != ACTION_STATE_EXECUTE) {
+    if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0x4000;
     }
     return rand();
@@ -404,7 +404,7 @@ void battle_action_set_current_attacker_data(unit_stats_t* unit) {
     if (unit->job_id == JOB_ID_MIME) {
         return;
     }
-    main_util_copy_action_data(&unit->action_command, &g_action_current_attacker.action);
+    main_util_copy_action_data(&unit->action_command, &g_battle_action_current_attacker.action);
     if (unit->action_command.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
         target = &g_battle_unit_stats[unit->action_command.target_id];
         x = target->x;
@@ -414,13 +414,13 @@ void battle_action_set_current_attacker_data(unit_stats_t* unit) {
         x = unit->action_command.target_position.vx;
         y = unit->action_command.target_position.vz;
     }
-    g_action_current_attacker.target_delta_x = x - unit->x;
-    g_action_current_attacker.target_delta_y = y - unit->position.y;
-    g_action_current_attacker.facing = unit->position.facing;
-    g_action_current_attacker.team = unit->team_flags & BATTLE_TEAM_MASK;
-    g_action_current_attacker.right_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
-    g_action_current_attacker.left_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
-    g_action_current_attacker.mimic_pending = 1;
+    g_battle_action_current_attacker.target_delta_x = x - unit->x;
+    g_battle_action_current_attacker.target_delta_y = y - unit->position.y;
+    g_battle_action_current_attacker.facing = unit->position.facing;
+    g_battle_action_current_attacker.team = unit->team_flags & BATTLE_TEAM_MASK;
+    g_battle_action_current_attacker.right_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
+    g_battle_action_current_attacker.left_hand_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
+    g_battle_action_current_attacker.mimic_pending = 1;
 }
 
 /* Builds and previews a reaction using the current attacker's action and weapons.
@@ -448,11 +448,11 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     s32 ability_id;
     s32 facing;
 
-    current = &g_action_current_attacker.action;
+    current = &g_battle_action_current_attacker.action;
     if (battle_action_is_reaction_prevented(unit) != 0) {
         return 0;
     }
-    if ((unit->team_flags & BATTLE_TEAM_MASK) != g_action_current_attacker.team) {
+    if ((unit->team_flags & BATTLE_TEAM_MASK) != g_battle_action_current_attacker.team) {
         return 0;
     }
     if (unit->battle_id == current->actor_id) {
@@ -460,7 +460,7 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     }
     menu_type = g_main_action_menu_types_by_skillset[current->skillset_id];
     /* The target loads the ability id signed (lh). */
-    ability_id = g_action_current_attacker.action.ability_id;
+    ability_id = g_battle_action_current_attacker.action.ability_id;
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_ARITHMETICKS
         || menu_type == ACTION_MENU_TYPE_MONSTER) {
         if (g_main_ability_range_data[ability_id].flags_3 & ABILITY_SECONDARY_FLAG_3_CANNOT_MIMIC) {
@@ -468,13 +468,13 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
         }
     }
     facing = unit->position.facing;
-    attacker_facing = g_action_current_attacker.facing - 4;
+    attacker_facing = g_battle_action_current_attacker.facing - 4;
     direction = facing - attacker_facing;
     if (menu_type == ACTION_MENU_TYPE_JUMP) {
         direction |= 0x100;
     }
-    if (battle_map_resolve_rotated_offset_layer(unit, g_action_current_attacker.target_delta_x,
-            g_action_current_attacker.target_delta_y, direction, &x, &y, &z)
+    if (battle_map_resolve_rotated_offset_layer(unit, g_battle_action_current_attacker.target_delta_x,
+            g_battle_action_current_attacker.target_delta_y, direction, &x, &y, &z)
         != 0) {
         return -1;
     }
@@ -484,29 +484,30 @@ s32 battle_action_set_mimic_ability(unit_stats_t* unit) {
     unit_id = unit->battle_id;
     action.target_position.vx = x;
     action.target_position.vy = z;
-    weapon_id = g_action_current_attacker.right_hand_weapon_id;
+    weapon_id = g_battle_action_current_attacker.right_hand_weapon_id;
     action.target_position.vz = y;
     action.target_id = unit_id;
     unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = weapon_id;
-    unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = g_action_current_attacker.left_hand_weapon_id;
+    unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = g_battle_action_current_attacker.left_hand_weapon_id;
     result = battle_target_set_panels_for_action(&action);
     if (result == -1 || result == 3
         || (result < 2
-            && !((*(u8*)&g_map_tile_data[saved_state = (z << 8) + (g_map_max_x * y) + x].ceiling_depth_and_marks)
+            && !((*(u8*)&g_battle_map_tile_data[saved_state = (z << 8) + (g_battle_map_max_x * y) + x]
+                         .ceiling_depth_and_marks)
                 & MAP_TILE_FLAG_ABILITY_RANGE))) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
         unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
         return -1;
     }
-    saved_state = g_action_state;
-    g_action_state = ACTION_STATE_PREVIEW;
+    saved_state = g_battle_action_state;
+    g_battle_action_state = ACTION_STATE_PREVIEW;
     result = battle_action_prepare_attack(&action, &unit->action_command, 1);
     unit->charged_ability_ct = 0xff;
     main_status_change_unit(unit, 0,
         STATUS_BYTE_MASK(STATUS_ID_CHARGING) | STATUS_BYTE_MASK(STATUS_ID_JUMP)
             | STATUS_BYTE_MASK(STATUS_ID_PERFORMING),
         MAIN_STATUS_REMOVE);
-    g_action_state = saved_state;
+    g_battle_action_state = saved_state;
     if (result < 0) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
         unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
@@ -557,17 +558,17 @@ s32 battle_map_resolve_rotated_offset_layer(
     }
     *out_x = unit->x + dx;
     *out_y = unit->position.y + dy;
-    if (*out_x < 0 || *out_x >= g_map_max_x) {
+    if (*out_x < 0 || *out_x >= g_battle_map_max_x) {
         return -1;
     }
-    if (*out_y < 0 || *out_y >= g_map_max_y) {
+    if (*out_y < 0 || *out_y >= g_battle_map_max_y) {
         return -1;
     }
-    current = &g_map_tile_data[battle_map_calculate_location(unit)];
-    index = g_map_max_x * *out_y + *out_x;
+    current = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
+    index = g_battle_map_max_x * *out_y + *out_x;
     upper_index = index + 0x100;
-    upper = &g_map_tile_data[upper_index];
-    lower = &g_map_tile_data[index];
+    upper = &g_battle_map_tile_data[upper_index];
+    lower = &g_battle_map_tile_data[index];
     upper_value = upper->flags.blocked;
     if ((lower->flags.blocked) != 0) {
         if (upper_value != 0) {

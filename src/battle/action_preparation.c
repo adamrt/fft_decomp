@@ -96,7 +96,7 @@ battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_
         else
             height.unit_height = offset + 6;
         flags = unit->ability_flags.movement[2];
-        tile = &g_map_tile_data[battle_map_calculate_location(unit)];
+        tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
         tile_height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK);
         depth = (*(u8*)&tile->depth_half_height) >> MAP_TILE_DEPTH_SHIFT;
         level = tile_height;
@@ -142,7 +142,7 @@ s32 battle_action_call_attack_preparation_at_preview(action_command_t* command) 
 
     unit = &g_battle_unit_stats[command->actor_id];
     result = battle_action_prepare_attack(command, &unit->action_command, 1);
-    if (result == BATTLE_ATTACK_PREPARATION_IMMEDIATE && g_action_context == ACTION_CONTEXT_PRIMARY) {
+    if (result == BATTLE_ATTACK_PREPARATION_IMMEDIATE && g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         battle_status_enable_disable_acting(unit);
     }
     return result;
@@ -323,7 +323,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
     if (phase != 0) {
         unit->charged_ability_ct = ct;
         if (phase & 1) {
-            if (g_action_context != ACTION_CONTEXT_PRIMARY) {
+            if (g_battle_action_context != ACTION_CONTEXT_PRIMARY) {
                 return ct == 0;
             }
             unit->action_taken = 1;
@@ -369,7 +369,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
         if (always_one == 0) {
             return 0;
         }
-        if (g_action_state != ACTION_STATE_EXECUTE) {
+        if (g_battle_action_state != ACTION_STATE_EXECUTE) {
             return 0;
         }
         g_main_item_quantities[idx] = qty - 1;
@@ -382,7 +382,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
  * and set up the first strike.
  *
  * Returns 0 when the action can run, -1 for an empty unit slot, 6 when Hamedo
- * pre-empted the action (g_action_hamedo_flag set), or the nonzero
+ * pre-empted the action (g_battle_action_hamedo_flag set), or the nonzero
  * rejection code of action_check_and_consume_mp; on those failures only
  * the acting-unit data is stored. */
 s32 battle_action_init_current_data(s32 id) {
@@ -393,12 +393,12 @@ s32 battle_action_init_current_data(s32 id) {
     u16 ability;
 
     g_battle_acting_unit_id = -1;
-    g_action_context = ACTION_CONTEXT_PRIMARY;
+    g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     if (id >= BATTLE_UNIT_SLOT_COUNT
         || (unit = &g_battle_unit_stats[id], base = g_battle_unit_stats, unit->entd_slot == BATTLE_ENTD_SLOT_NONE)) {
         return -1;
     }
-    if (g_action_hamedo_flag != 0) {
+    if (g_battle_action_hamedo_flag != 0) {
         battle_action_store_acting_unit_data(unit);
         return 6;
     }
@@ -573,7 +573,7 @@ static s32 battle_target_calculate_map_for_action(const action_command_t* action
     } else {
         result = battle_target_calculate_for_menu_types(action);
         if (result != -1 && (flags_2 & ABILITY_SECONDARY_FLAG_2_RANDOM_FIRE)
-            && g_action_state == ACTION_STATE_EXECUTE) {
+            && g_battle_action_state == ACTION_STATE_EXECUTE) {
             battle_target_select_random_tile_for_random_fire_abilities();
         }
     }
@@ -600,7 +600,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
 
     g_battle_sort_targets_nearest_first = 0;
     g_battle_relocated_unit_count = 0;
-    g_action_current_ability.random_fire_flag = 0;
+    g_battle_action_current_ability.random_fire_flag = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         targets[i] = 0xff;
     }
@@ -611,14 +611,14 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
     battle_action_clear_current_data(&attacker->action);
     attacker->action.hit = 0;
     attacker->action.miss_type = ACTION_MISS_TYPE_CANCELED;
-    battle_action_clear_current_data(&g_action_attacker_action_data);
-    g_action_attacker_action_data.hit = 0;
+    battle_action_clear_current_data(&g_battle_action_attacker_action_data);
+    g_battle_action_attacker_action_data.hit = 0;
     work->knockback_flags = 0;
     work->post_action_message = BATTLE_POST_ACTION_MESSAGE_NONE;
     work->math_skill_flag = 0;
     work->reaction_ability_id = 0;
     reaction_targeted = 0;
-    if (g_action_context != ACTION_CONTEXT_PRIMARY) {
+    if (g_battle_action_context != ACTION_CONTEXT_PRIMARY) {
         work->reaction_ability_id = g_battle_current_reaction_ability_id;
         if (battle_action_build_reaction_targets(battle_id, work, &count, targets)) {
             if (g_battle_current_reaction_ability_id == ABILITY_ID_REACTION_REFLECT) {
@@ -637,88 +637,88 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
             work->continue_attack = 0;
             return -1;
         }
-        if (g_action_current_ability.post_action_target_id < BATTLE_UNIT_SLOT_COUNT
-            && (g_action_current_ability.weapon_proc_pending != 0
-                || (g_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING))) {
+        if (g_battle_action_current_ability.post_action_target_id < BATTLE_UNIT_SLOT_COUNT
+            && (g_battle_action_current_ability.weapon_proc_pending != 0
+                || (g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING))) {
             battle_target_disable_green_panel_flags();
             count = 1;
-            targets[0] = g_action_current_ability.post_action_target_id;
+            targets[0] = g_battle_action_current_ability.post_action_target_id;
             for (i = 1; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
                 targets[i] = 0xff;
             }
-            tile = &g_map_tile_data[battle_map_calculate_location(
-                &g_battle_unit_stats[g_action_current_ability.post_action_target_id])];
+            tile = &g_battle_map_tile_data[battle_map_calculate_location(
+                &g_battle_unit_stats[g_battle_action_current_ability.post_action_target_id])];
             tile->ceiling_depth_and_marks.targeted = 1;
         }
         count = battle_target_list_units_on_panels(targets, attacker);
     }
-    g_action_current_ability.target_count = count;
+    g_battle_action_current_ability.target_count = count;
     battle_action_store_target_ids(targets);
     battle_action_store_used_weapon(&attacker->action_command);
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         target_id = targets[i];
         if (target_id != 0xff) {
-            g_action_current_ability.defaulted_to_attack = 0;
+            g_battle_action_current_ability.defaulted_to_attack = 0;
             battle_action_run_pre_formula_setup(&attacker->action_command, target_id);
         }
     }
     battle_status_remove_transparent_if_jump_used(attacker);
     count = battle_target_copy_ability_targets(work->target_list);
     work->target_count = count;
-    g_action_current_ability.target_count = count;
-    if (g_action_context == ACTION_CONTEXT_PRIMARY) {
-        g_action_current_ability.can_earn_exp_jp = 1;
+    g_battle_action_current_ability.target_count = count;
+    if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
+        g_battle_action_current_ability.can_earn_exp_jp = 1;
     }
     work->can_earn_experience = 0;
     battle_action_finalize_draw_out_katana_result(attacker, work, count);
     work->actor_id = battle_id;
-    work->used_weapon_id = g_action_current_ability.weapon_id;
+    work->used_weapon_id = g_battle_action_current_ability.weapon_id;
     work->reaction_occurred = 0;
-    work->current_hit_number = g_action_current_ability.strike_counter;
+    work->current_hit_number = g_battle_action_current_ability.strike_counter;
     battle_target_set_coordinates_for_ability(attacker, work);
     if (count == 0) {
-        g_action_current_ability.strike_counter++;
+        g_battle_action_current_ability.strike_counter++;
         work->last_attack_id = attacker->action_command.ability_id;
         work->reaction_id = 0;
         if (!(flags_3 & ABILITY_SECONDARY_FLAG_3_ANIMATE_ON_MISS)) {
             work->skip_empty_tile_effect = 1;
         }
-        if (g_action_current_ability.strike_counter < g_action_current_ability.strike_count) {
+        if (g_battle_action_current_ability.strike_counter < g_battle_action_current_ability.strike_count) {
             work->continue_attack = 1;
         } else {
             work->continue_attack = 0;
         }
         return 1;
     }
-    work->post_action_message = g_action_current_ability.post_action_message;
+    work->post_action_message = g_battle_action_current_ability.post_action_message;
     work->skip_empty_tile_effect = 0;
-    reaction_id = g_action_current_ability.reaction_id;
-    if (reaction_id != 0 && g_action_current_ability.weapon_proc_pending == 0) {
+    reaction_id = g_battle_action_current_ability.reaction_id;
+    if (reaction_id != 0 && g_battle_action_current_ability.weapon_proc_pending == 0) {
         work->last_attack_id = reaction_id;
         work->reaction_occurred = 1;
-    } else if (g_action_current_ability.defaulted_to_attack != 0) {
+    } else if (g_battle_action_current_ability.defaulted_to_attack != 0) {
         work->last_attack_id = 0;
     } else {
         work->last_attack_id = attacker->action_command.ability_id;
     }
-    work->reaction_id = g_action_current_ability.reaction_id;
-    if (g_action_current_ability.knockback_flags != 0) {
-        work->knockback_flags = g_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_KIND_MASK;
-        work->target_new_x = g_action_current_ability.target_new_x;
-        work->target_new_y = g_action_current_ability.target_new_y;
-        work->target_new_map_level = g_action_current_ability.target_new_elevation;
+    work->reaction_id = g_battle_action_current_ability.reaction_id;
+    if (g_battle_action_current_ability.knockback_flags != 0) {
+        work->knockback_flags = g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_KIND_MASK;
+        work->target_new_x = g_battle_action_current_ability.target_new_x;
+        work->target_new_y = g_battle_action_current_ability.target_new_y;
+        work->target_new_map_level = g_battle_action_current_ability.target_new_elevation;
     }
-    if (g_action_current_ability.weapon_proc_pending != 0
-        || (g_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING)) {
+    if (g_battle_action_current_ability.weapon_proc_pending != 0
+        || (g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING)) {
         work->continue_attack = 1;
     } else {
-        if (g_action_current_ability.knockback_flags != 0) {
+        if (g_battle_action_current_ability.knockback_flags != 0) {
             work->reaction_occurred = 1;
             work->skip_empty_tile_effect = 1;
             work->last_attack_id = ABILITY_ID_KNOCKBACK;
         }
-        g_action_current_ability.strike_counter++;
-        if (g_action_current_ability.strike_counter < g_action_current_ability.strike_count) {
+        g_battle_action_current_ability.strike_counter++;
+        if (g_battle_action_current_ability.strike_counter < g_battle_action_current_ability.strike_count) {
             work->continue_attack = 1;
         } else {
             work->continue_attack = 0;
@@ -734,10 +734,10 @@ static void battle_target_set_coordinates_for_ability(const unit_stats_t* acting
     unit_stats_t* target;
 
     out->skip_empty_tile_effect = 0;
-    if (g_action_current_ability.random_fire_flag != 0) {
-        out->target_new_x = g_action_current_ability.target_new_x;
-        out->target_new_y = g_action_current_ability.target_new_y;
-        out->target_new_map_level = g_action_current_ability.target_new_elevation;
+    if (g_battle_action_current_ability.random_fire_flag != 0) {
+        out->target_new_x = g_battle_action_current_ability.target_new_x;
+        out->target_new_y = g_battle_action_current_ability.target_new_y;
+        out->target_new_map_level = g_battle_action_current_ability.target_new_elevation;
     } else if (acting->action_command.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
         target = &g_battle_unit_stats[acting->action_command.target_id];
         out->target_new_x = target->x;
@@ -765,11 +765,12 @@ static void battle_action_finalize_draw_out_katana_result(
     if (attacker->job_id == JOB_ID_MIME)
         return;
     if ((hit_count & 0xFF) == 0
-        || ((flags = g_action_attacker_action_data.special_effect) & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN)
+        || ((flags = g_battle_action_attacker_action_data.special_effect)
+               & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN)
             != 0) {
-        g_action_attacker_action_data.special_effect = ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN;
-        g_action_attacker_action_data.attack_type = ACTION_TYPE_PSEUDO_STATUS;
-        g_action_attacker_action_data.hit = 1;
+        g_battle_action_attacker_action_data.special_effect = ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN;
+        g_battle_action_attacker_action_data.attack_type = ACTION_TYPE_PSEUDO_STATUS;
+        g_battle_action_attacker_action_data.hit = 1;
         return;
     }
     if (flags & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_BROKEN) {
@@ -782,7 +783,7 @@ static void battle_action_finalize_draw_out_katana_result(
  * resolves: reset the strike counter, elemental and knockback scratch, clear
  * the experience/level-up flags when no action context is live, latch the
  * unit's two weapon slots, and decide how many strikes the action gets
- * (g_action_current_ability.strike_count). Two-swords and the 0x20 ability flag are what allow a second
+ * (g_battle_action_current_ability.strike_count). Two-swords and the 0x20 ability flag are what allow a second
  * strike; menu type 2 (item) only records the consumed item.
  *
  * The `ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST` guard is the target's own: the
@@ -803,30 +804,30 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
     u8 support;
     u8 left_hand;
 
-    g_action_current_ability.strike_count = 1;
-    g_action_current_ability.strike_counter = 0;
-    g_action_current_ability.weapon_proc_pending = 0;
-    g_action_current_ability.knockback_flags = 0;
+    g_battle_action_current_ability.strike_count = 1;
+    g_battle_action_current_ability.strike_counter = 0;
+    g_battle_action_current_ability.weapon_proc_pending = 0;
+    g_battle_action_current_ability.knockback_flags = 0;
     weapon_kind = 0;
-    if (g_action_context == ACTION_CONTEXT_PRIMARY) {
-        g_action_current_ability.can_earn_exp_jp = 0;
-        g_action_current_ability.earned_experience = 0;
-        g_action_current_ability.level_gained_flag = 0;
-        g_action_current_ability.job_level_gained_flag = 0;
+    if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
+        g_battle_action_current_ability.can_earn_exp_jp = 0;
+        g_battle_action_current_ability.earned_experience = 0;
+        g_battle_action_current_ability.level_gained_flag = 0;
+        g_battle_action_current_ability.job_level_gained_flag = 0;
     }
 
     menu_type = g_main_action_menu_types_by_skillset[unit->action_command.skillset_id];
     g_battle_loaded_ability_flags_1 = 0;
-    g_action_current_ability.primary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
-    g_action_current_ability.secondary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
-    if (g_action_current_ability.primary_weapon_id == ITEM_ID_NONE) {
+    g_battle_action_current_ability.primary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
+    g_battle_action_current_ability.secondary_weapon_id = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
+    if (g_battle_action_current_ability.primary_weapon_id == ITEM_ID_NONE) {
         left_hand = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
-        g_action_current_ability.secondary_weapon_id = ITEM_ID_NONE;
-        g_action_current_ability.primary_weapon_id = left_hand;
+        g_battle_action_current_ability.secondary_weapon_id = ITEM_ID_NONE;
+        g_battle_action_current_ability.primary_weapon_id = left_hand;
     }
 
     if (menu_type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
-        g_action_current_ability.primary_weapon_id = unit->action_command.item_or_equipment;
+        g_battle_action_current_ability.primary_weapon_id = unit->action_command.item_or_equipment;
         return;
     }
 
@@ -840,13 +841,13 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
         }
         if (weapon_kind == ABILITY_FORMULA_MULTIHIT_TRUTH_MAGIC
             || weapon_kind == ABILITY_FORMULA_UNFAITH_MAGICAL_DAMAGE) {
-            if (g_action_state == ACTION_STATE_EXECUTE) {
-                g_action_current_ability.strike_count = ((chance * rand()) / 32768) + 1;
+            if (g_battle_action_state == ACTION_STATE_EXECUTE) {
+                g_battle_action_current_ability.strike_count = ((chance * rand()) / 32768) + 1;
                 return;
             }
         }
         if (weapon_kind == ABILITY_FORMULA_DAMAGE_MA_PLUS_Y_HALF_TIMES_MA) {
-            g_action_current_ability.strike_count = chance + 1;
+            g_battle_action_current_ability.strike_count = chance + 1;
             return;
         }
     }
@@ -863,16 +864,16 @@ static void battle_action_init_current_ability_strike_data(unit_stats_t* unit) {
     support = unit->ability_flags.support[2];
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG))
         || (unit->unit_flags & UNIT_FLAG_MONSTER)) {
-        g_action_current_ability.primary_weapon_id = ITEM_ID_NONE;
-        g_action_current_ability.secondary_weapon_id = ITEM_ID_NONE;
+        g_battle_action_current_ability.primary_weapon_id = ITEM_ID_NONE;
+        g_battle_action_current_ability.secondary_weapon_id = ITEM_ID_NONE;
     }
 
-    if ((g_action_current_ability.primary_weapon_id == ITEM_ID_NONE
-            && g_action_current_ability.secondary_weapon_id == ITEM_ID_NONE)
-        || (g_action_current_ability.primary_weapon_id != ITEM_ID_NONE
-            && g_action_current_ability.secondary_weapon_id != ITEM_ID_NONE)) {
+    if ((g_battle_action_current_ability.primary_weapon_id == ITEM_ID_NONE
+            && g_battle_action_current_ability.secondary_weapon_id == ITEM_ID_NONE)
+        || (g_battle_action_current_ability.primary_weapon_id != ITEM_ID_NONE
+            && g_battle_action_current_ability.secondary_weapon_id != ITEM_ID_NONE)) {
         if (support & 1) {
-            g_action_current_ability.strike_count = 2;
+            g_battle_action_current_ability.strike_count = 2;
         }
     }
 }
@@ -897,28 +898,28 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
 
     count = 0;
     for (i = 0; i < MAP_TILE_COUNT; i++) {
-        tile_data = &g_map_tile_data[i];
+        tile_data = &g_battle_map_tile_data[i];
         if (i == 0x100) {
             lower_count = count;
         }
         marks = tile_data->ceiling_depth_and_marks;
         if (marks.targeted) {
             tile_data->ceiling_depth_and_marks.targeted = 0;
-            panel = &g_target_panels[count];
+            panel = &g_battle_target_panels[count];
             count++;
             panel->mark = i;
         }
     }
     index = rand() * count / 32768;
-    tile = g_target_panels[index].mark;
+    tile = g_battle_target_panels[index].mark;
     if (index >= lower_count) {
         tile += 0x100;
     }
-    g_map_tile_data[tile].ceiling_depth_and_marks.targeted = 1;
-    g_action_current_ability.random_fire_flag = 1;
-    g_action_current_ability.target_new_elevation = tile / 256;
-    g_action_current_ability.target_new_y = (tile & 0xFF) / g_map_max_x;
-    g_action_current_ability.target_new_x = (tile & 0xFF) % g_map_max_x;
+    g_battle_map_tile_data[tile].ceiling_depth_and_marks.targeted = 1;
+    g_battle_action_current_ability.random_fire_flag = 1;
+    g_battle_action_current_ability.target_new_elevation = tile / 256;
+    g_battle_action_current_ability.target_new_y = (tile & 0xFF) / g_battle_map_max_x;
+    g_battle_action_current_ability.target_new_x = (tile & 0xFF) % g_battle_map_max_x;
     battle_target_clear_panel_spread_flags();
 }
 
@@ -950,7 +951,7 @@ static s32 battle_target_list_units_on_panels(u8* list, const unit_stats_t* orig
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE && battle_target_is_unit_untargetable_and_store_tile(i, &tile) == 0
-            && ((*(u8*)&g_map_tile_data[tile].ceiling_depth_and_marks) & MAP_TILE_FLAG_TARGETED)) {
+            && ((*(u8*)&g_battle_map_tile_data[tile].ceiling_depth_and_marks) & MAP_TILE_FLAG_TARGETED)) {
             if (g_battle_sort_targets_nearest_first != 0) {
                 dx = x - unit->x;
                 if (dx < 0) {
@@ -1001,8 +1002,8 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
 
     ability_id = unit->action_command.ability_id;
     menu = g_main_action_menu_types_by_skillset[unit->action_command.skillset_id];
-    g_action_current_ability.mp_cost = 0;
-    if (g_action_context == ACTION_CONTEXT_PRIMARY)
+    g_battle_action_current_ability.mp_cost = 0;
+    if (g_battle_action_context == ACTION_CONTEXT_PRIMARY)
         main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING);
     result = battle_unit_get_action_restriction(unit);
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DONT_ACT)] & STATUS_BYTE_MASK(STATUS_ID_DONT_ACT))
@@ -1025,13 +1026,13 @@ static s32 battle_action_check_and_consume_mp(unit_stats_t* unit) {
             cost = ability->mp_cost;
             if (unit->ability_flags.support[1] & BATTLE_SUPPORT_SET_2_HALF_MP)
                 cost >>= 1;
-            g_action_current_ability.mp_cost = cost;
+            g_battle_action_current_ability.mp_cost = cost;
             /* A signed member view retains the target store-before-load order;
              * casting the unsigned value hoists the MP load and loses a nop. */
             mp = unit->mp;
             if (mp < cost)
                 return 3;
-            if (g_action_state != ACTION_STATE_PREVIEW)
+            if (g_battle_action_state != ACTION_STATE_PREVIEW)
                 unit->mp = mp - cost;
         }
     }
@@ -1048,17 +1049,17 @@ void battle_action_store_acting_unit_data(unit_stats_t* unit) {
     if (unit->job_id == JOB_ID_MIME) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE; /* right hand */
         unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;  /* left hand */
-    } else if (g_action_context == ACTION_CONTEXT_PRIMARY) {
-        g_action_current_attacker.facing = unit->position.facing;
+    } else if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
+        g_battle_action_current_attacker.facing = unit->position.facing;
     }
 
-    if (g_action_context == ACTION_CONTEXT_PRIMARY) {
+    if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         g_battle_acting_unit_x = unit->x;
         g_battle_acting_unit_y = unit->position.y;
         g_battle_acting_unit_elevation = unit->position.higher_elevation;
     } else {
-        main_util_copy_action_data(&g_action_saved_command, &unit->action_command);
-        g_action_context = ACTION_CONTEXT_PRIMARY;
+        main_util_copy_action_data(&g_battle_action_saved_command, &unit->action_command);
+        g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     }
 }
 
@@ -1086,11 +1087,11 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
 
     unit_filters = filters;
 
-    if (x < 0 || x >= g_map_max_x || y < 0 || y >= g_map_max_y || level >= 2) {
+    if (x < 0 || x >= g_battle_map_max_x || y < 0 || y >= g_battle_map_max_y || level >= 2) {
         return -2;
     }
 
-    tile = &g_map_tile_data[(level << 8) + y * g_map_max_x + x];
+    tile = &g_battle_map_tile_data[(level << 8) + y * g_battle_map_max_x + x];
     if (((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK)) {
         return -2;
     }
@@ -1141,7 +1142,7 @@ s32 battle_unit_find_at_tile(s32 x, s32 y, u32 level, s32 filters) {
 /* Clear the range and the mark of all 512 targeting panels. */
 void battle_target_clear_panel_data(void) {
     s32 i = 0;
-    target_panel_t* panel = g_target_panel_data;
+    target_panel_t* panel = g_battle_target_panel_data;
     for (; i < 512; i++) {
         panel->remaining_range = 0;
         panel->mark = 0;
@@ -1177,7 +1178,7 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
 
     unit = &g_battle_unit_stats[id];
     base = g_battle_unit_stats;
-    g_action_hamedo_flag = 0;
+    g_battle_action_hamedo_flag = 0;
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
@@ -1233,8 +1234,8 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
         return -1;
     }
 
-    g_action_context = count;
-    main_util_copy_action_data(action, &g_action_saved_command);
+    g_battle_action_context = count;
+    main_util_copy_action_data(action, &g_battle_action_saved_command);
     g_battle_current_reaction_ability_id = ABILITY_ID_REACTION_HAMEDO;
     g_battle_acting_unit_id = id;
     target->action_command.actor_id = tid;
@@ -1242,14 +1243,14 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability) 
         && battle_action_check_and_consume_mp(target) == 0) {
         battle_action_init_current_ability_strike_data(target);
         *out_ability = g_battle_current_reaction_ability_id;
-        g_action_hamedo_flag = count;
+        g_battle_action_hamedo_flag = count;
         if (unit->job_id == JOB_ID_MIME) {
             unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
             unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = ITEM_ID_NONE;
         }
         return tid;
     }
-    main_util_copy_action_data(&g_action_saved_command, action);
+    main_util_copy_action_data(&g_battle_action_saved_command, action);
     return -1;
 }
 
@@ -1287,7 +1288,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
     }
     i = 0;
     do {
-        g_action_context = ACTION_CONTEXT_PRIMARY;
+        g_battle_action_context = ACTION_CONTEXT_PRIMARY;
         if (i != g_battle_acting_unit_id) {
             unit = &g_battle_unit_stats[i];
             action = &unit->action_command;
@@ -1295,11 +1296,11 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
                 reaction_prevented = battle_action_is_reaction_prevented(unit);
                 ability = unit->action.reaction_id;
-                if (((reaction_prevented == 0 && g_action_state != ACTION_STATE_AI_SIMULATION)
+                if (((reaction_prevented == 0 && g_battle_action_state != ACTION_STATE_AI_SIMULATION)
                         || ability == ABILITY_ID_REACTION_REFLECT)
                     && ability != 0) {
-                    g_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
-                    main_util_copy_action_data(action, &g_action_saved_command);
+                    g_battle_action_context = ACTION_CONTEXT_REACTION_OR_SIMULATION;
+                    main_util_copy_action_data(action, &g_battle_action_saved_command);
                     g_battle_current_reaction_ability_id = ability;
                     action->actor_id = i;
                     action->skillset_id = 0;
@@ -1335,7 +1336,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                     case ABILITY_ID_REACTION_COUNTER_FLOOD:
                         outcome = (battle_action_store_counter_ability(unit, SKILLSET_ID_ELEMENTAL,
                                        g_main_terrain_geomancy_abilities
-                                           [g_map_tile_data[battle_map_calculate_location(unit)].surface.type],
+                                           [g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type],
                                        0)
                                       == 0)
                             * 2;
@@ -1378,20 +1379,20 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         outcome = BATTLE_REACTION_OUTCOME_NONE;
                     }
                     if (outcome == BATTLE_REACTION_OUTCOME_NONE) {
-                        main_util_copy_action_data(&g_action_saved_command, action);
+                        main_util_copy_action_data(&g_battle_action_saved_command, action);
                         i++;
                         continue;
                     }
                     if (outcome >= 1 && outcome <= 3) {
                         battle_action_init_current_ability_strike_data(unit);
                     } else {
-                        g_action_current_ability.strike_count = 1;
-                        g_action_current_ability.strike_counter = 0;
-                        g_action_current_ability.weapon_proc_pending = 0;
-                        g_action_current_ability.knockback_flags = 0;
-                        g_action_current_ability.primary_weapon_id
+                        g_battle_action_current_ability.strike_count = 1;
+                        g_battle_action_current_ability.strike_counter = 0;
+                        g_battle_action_current_ability.weapon_proc_pending = 0;
+                        g_battle_action_current_ability.knockback_flags = 0;
+                        g_battle_action_current_ability.primary_weapon_id
                             = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON];
-                        g_action_current_ability.secondary_weapon_id
+                        g_battle_action_current_ability.secondary_weapon_id
                             = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
                         action->skillset_id = 0;
                         action->targeting_type = 5;
@@ -1412,7 +1413,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
         }
         i++;
     } while (i < 21);
-    g_action_context = ACTION_CONTEXT_PRIMARY;
+    g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     *out_ability = 0;
     return -1;
 }
@@ -1474,7 +1475,7 @@ static s32 battle_action_store_counter_ability(
         if (result == -1 || result == 2 || result == 3) {
             return -1;
         }
-        if (((*(u8*)&g_map_tile_data[battle_map_calculate_location(acting_unit)].ceiling_depth_and_marks)
+        if (((*(u8*)&g_battle_map_tile_data[battle_map_calculate_location(acting_unit)].ceiling_depth_and_marks)
                 & MAP_TILE_FLAG_ABILITY_RANGE)
             == 0) {
             return -2;
@@ -1535,10 +1536,10 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
     display->level_for_display = 0;
     display->job_level_for_display = 0;
 
-    if (g_action_hamedo_flag != 0) {
+    if (g_battle_action_hamedo_flag != 0) {
         return -1;
     }
-    if (g_action_current_ability.can_earn_exp_jp == 0) {
+    if (g_battle_action_current_ability.can_earn_exp_jp == 0) {
         return 0;
     }
 
@@ -1555,16 +1556,16 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
         return -1;
     }
 
-    experience = unit->experience + g_action_current_ability.earned_experience;
+    experience = unit->experience + g_battle_action_current_ability.earned_experience;
     old_level = unit->level;
     if (experience >= 0x100) {
         experience = 0xff;
     }
     unit->experience = experience;
-    if (main_unit_check_level_up(unit) != 0 || g_action_current_ability.level_gained_flag != 0) {
+    if (main_unit_check_level_up(unit) != 0 || g_battle_action_current_ability.level_gained_flag != 0) {
         display->level_for_display = unit->level;
     }
-    display->earned_experience = g_action_current_ability.earned_experience;
+    display->earned_experience = g_battle_action_current_ability.earned_experience;
 
     if (unit->unit_flags & UNIT_FLAG_MONSTER) {
         return 0;
@@ -1575,7 +1576,7 @@ s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* di
     job_component = old_job_level * 2;
     level_component = (old_level >> 2) + 8;
     jp = job_component + level_component;
-    if (g_action_current_ability.earned_experience == 0) {
+    if (g_battle_action_current_ability.earned_experience == 0) {
         jp = 0;
     }
 
@@ -1734,14 +1735,14 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
     origin_x = unit->x;
     origin_y = unit->position.y;
     for (n = 0x1ff * sizeof(target_panel_t); n >= 0; n -= sizeof(target_panel_t)) {
-        ((target_panel_t*)((u8*)g_target_panels + n))->unit_record_index = 0;
+        ((target_panel_t*)((u8*)g_battle_target_panels + n))->unit_record_index = 0;
     }
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         unit = &g_battle_unit_stats[i];
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
             index = battle_map_calculate_location(unit);
-            panel = &g_target_panels[index];
-            tile = &g_map_tile_data[index];
+            panel = &g_battle_target_panels[index];
+            tile = &g_battle_map_tile_data[index];
             if (i == unit_index) {
                 height = tile->height * 2 + tile->depth_half_height.half_height;
                 low = height - 10;
@@ -1755,9 +1756,9 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
         }
     }
     for (i = 0; i < g_battle_relocated_unit_count; i++) {
-        index = g_battle_relocated_unit_coords[i].elevation * 256 + g_battle_relocated_unit_coords[i].y * g_map_max_x
-            + g_battle_relocated_unit_coords[i].x;
-        panel = &g_target_panels[index];
+        index = g_battle_relocated_unit_coords[i].elevation * 256
+            + g_battle_relocated_unit_coords[i].y * g_battle_map_max_x + g_battle_relocated_unit_coords[i].x;
+        panel = &g_battle_target_panels[index];
         panel->unit_record_index = 1;
     }
     for (pass = 0; pass < 2; pass++) {
@@ -1768,7 +1769,7 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
         for (i = 1; i < limit; i++) {
             for (dx = -i; dx <= i; dx++) {
                 x = origin_x + dx;
-                if (x < 0 || x >= g_map_max_x) {
+                if (x < 0 || x >= g_battle_map_max_x) {
                     continue;
                 }
                 if (dx > 0) {
@@ -1779,11 +1780,11 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
                 side = -1;
                 found_x = x;
                 for (y = origin_y - dy; side < 2; side += 2) {
-                    if (y >= 0 && y < g_map_max_y) {
+                    if (y >= 0 && y < g_battle_map_max_y) {
                         found_y = y;
                         for (level = 0; level < 2; level++) {
-                            index = level * 256 + g_map_max_x * y + x;
-                            tile = &g_map_tile_data[index];
+                            index = level * 256 + g_battle_map_max_x * y + x;
+                            tile = &g_battle_map_tile_data[index];
                             depth = (*(u8*)&tile->depth_half_height);
                             if (tile->depth_half_height.depth >= 3) {
                                 continue;
@@ -1799,7 +1800,7 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
                             if (flags.untargetable) {
                                 continue;
                             }
-                            if (g_target_panels[index].unit_record_index != 0) {
+                            if (g_battle_target_panels[index].unit_record_index != 0) {
                                 continue;
                             }
                             surface = tile->surface.type;
@@ -1883,10 +1884,10 @@ move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit)
 }
 
 /* Amount Move-Get EXP or Move-Get JP gives: the number of steps walked
- * (g_move_path.count), rnd(1..Move) for a teleport and 1 for a failed one,
+ * (g_battle_move_path.count), rnd(1..Move) for a teleport and 1 for a failed one,
  * at most 99. */
 u8 battle_unit_calculate_move_exp_jp_up_to_earn(const unit_stats_t* unit) {
-    u8 amount = g_move_path.count;
+    u8 amount = g_battle_move_path.count;
 
     if (amount == 0xFE) {
         amount = (rand() * unit->move) / 0x8000 + 1;
@@ -1911,39 +1912,40 @@ s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_
     s32 saved_action_state;
     s32 saved_action_context;
 
-    main_util_copy_action_data(&attacker->action_command, &g_action_saved_command);
+    main_util_copy_action_data(&attacker->action_command, &g_battle_action_saved_command);
     main_util_copy_action_data(command, &attacker->action_command);
     battle_action_init_current_ability_strike_data(attacker);
-    saved_action_state = g_action_state;
-    g_action_state = ACTION_STATE_PREVIEW;
+    saved_action_state = g_battle_action_state;
+    g_battle_action_state = ACTION_STATE_PREVIEW;
     if (!(g_battle_loaded_ability_flags_1 & ABILITY_SECONDARY_FLAG_1_AUTO)) {
         result = battle_target_calculate_map_for_action(command, &flags_3);
-        if (result != -1 && !g_map_tile_data[battle_map_calculate_location(target)].ceiling_depth_and_marks.targeted) {
+        if (result != -1
+            && !g_battle_map_tile_data[battle_map_calculate_location(target)].ceiling_depth_and_marks.targeted) {
             result = -1;
         }
         if (result == -1) {
             battle_action_clear_current_data(&target->action);
             target->action.hit = 0;
             target->action.attack_accuracy = 0;
-            g_action_state = saved_action_state;
-            main_util_copy_action_data(&g_action_saved_command, &attacker->action_command);
+            g_battle_action_state = saved_action_state;
+            main_util_copy_action_data(&g_battle_action_saved_command, &attacker->action_command);
             return 0;
         }
     }
-    saved_action_context = g_action_context;
-    g_action_current_ability.defaulted_to_attack = 0;
-    g_action_context = ACTION_CONTEXT_PRIMARY;
+    saved_action_context = g_battle_action_context;
+    g_battle_action_current_ability.defaulted_to_attack = 0;
+    g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     target->action.reaction_id = 0;
     battle_action_run_pre_formula_setup(&attacker->action_command, target->battle_id);
-    g_action_context = saved_action_context;
-    g_action_state = saved_action_state;
-    main_util_copy_action_data(&g_action_saved_command, &attacker->action_command);
+    g_battle_action_context = saved_action_context;
+    g_battle_action_state = saved_action_state;
+    main_util_copy_action_data(&g_battle_action_saved_command, &attacker->action_command);
     return 0;
 }
 
 /* The Elemental ability that the surface type of the unit's tile selects. */
 s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit) {
-    return g_main_terrain_geomancy_abilities[g_map_tile_data[battle_map_calculate_location(unit)].surface.type];
+    return g_main_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
 }
 
 s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index) {
@@ -2084,13 +2086,13 @@ static s32 battle_unit_validate_placement(s32 unit_idx) {
     x = unit->x;
     y = unit->position.y;
     higher_elevation = unit->position.higher_elevation;
-    if (x >= g_map_max_x) {
+    if (x >= g_battle_map_max_x) {
         return -1;
     }
-    if (y >= g_map_max_y) {
+    if (y >= g_battle_map_max_y) {
         return -1;
     }
-    tile = &g_map_tile_data[battle_map_calculate_location(unit)];
+    tile = &g_battle_map_tile_data[battle_map_calculate_location(unit)];
     if (((*(u8*)&tile->flags) & MAP_TILE_COLLISION_MASK)) {
         return -1;
     }
@@ -2343,7 +2345,7 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
         has_rider = 1;
     }
 
-    tile_flags = g_map_tile_data[(level << 8) + y * g_map_max_x + x].flags;
+    tile_flags = g_battle_map_tile_data[(level << 8) + y * g_battle_map_max_x + x].flags;
     if (tile_flags.blocked) {
         return -1;
     }
@@ -2396,15 +2398,15 @@ u32 battle_move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit) {
         target = unit;
     } else {
         target = &g_battle_unit_stats[unit->mount_info & BATTLE_MOUNT_INFO_PARTNER_ID_MASK];
-        g_action_target = target;
-        g_action_target_data = &target->action;
+        g_battle_action_target = target;
+        g_battle_action_target_data = &target->action;
         battle_action_clear_current_data(&target->action);
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
-            g_action_target_data->status_changes.removal[i]
+            g_battle_action_target_data->status_changes.removal[i]
                 = g_main_status_check_sets[MAIN_STATUS_CHECK_SET_MOUNT_REMOVAL][i];
         }
         if (battle_status_modify_inflictions(0) != 0) {
-            g_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
+            g_battle_action_target_data->attack_type = ACTION_TYPE_STATUS_CHANGE;
             battle_status_resolve_unit_changes(target->battle_id, 0);
             flags |= MOVE_POST_EVENT_MOUNT_STATUS_CHANGE;
         }

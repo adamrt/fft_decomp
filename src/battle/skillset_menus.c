@@ -421,7 +421,7 @@ u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset) {
         return 0;
     }
     terrain_ability
-        = g_main_terrain_geomancy_abilities[g_map_tile_data[battle_map_calculate_location(unit)].surface.type];
+        = g_main_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
     for (i = 0; i < count; i++) {
         if (abilities[i] == terrain_ability) {
             return terrain_ability;
@@ -514,11 +514,11 @@ static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x
     s32 unit_team_flags;
 
     unit_team_flags = team_flags;
-    if (x < 0 || x >= g_map_max_x) {
+    if (x < 0 || x >= g_battle_map_max_x) {
         return 0;
     }
     if (y >= 0) {
-        if (y >= g_map_max_y) {
+        if (y >= g_battle_map_max_y) {
             return 0;
         }
 
@@ -630,7 +630,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
         for (i = BATTLE_TEAM_COUNT - 1; i >= 0; i--) {
             g_battle_team_golem[i] = 0;
         }
-        g_action_current_attacker.mimic_pending = 0;
+        g_battle_action_current_attacker.mimic_pending = 0;
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
             unit = &g_battle_unit_stats[i];
             unit->ct = 0;
@@ -884,7 +884,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             }
             break;
         case BATTLE_BETWEEN_TURN_STATE_MARK_MIMES:
-            if (g_action_current_attacker.mimic_pending != 0) {
+            if (g_battle_action_current_attacker.mimic_pending != 0) {
                 i = 0;
                 do {
                     unit = &g_battle_unit_stats[i];
@@ -900,7 +900,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             }
             break;
         case BATTLE_BETWEEN_TURN_STATE_RUN_MIMES:
-            g_action_current_attacker.mimic_pending = 0;
+            g_battle_action_current_attacker.mimic_pending = 0;
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 unit = &g_battle_unit_stats[i];
                 if (g_battle_mimic_pending_flags[i] != 0 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
@@ -955,7 +955,7 @@ static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
         return 2;
     }
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD))
-        && g_action_state == ACTION_STATE_EXECUTE) {
+        && g_battle_action_state == ACTION_STATE_EXECUTE) {
         if (unit->team_flags & BATTLE_TEAM_FLAG_IMMORTAL) {
             return 0;
         }
@@ -1199,8 +1199,8 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     old_inflicted_status = unit->inflicted_status[0];
     old_movement_taken = unit->movement_taken;
     old_action_taken = unit->action_taken;
-    old_state = g_action_state;
-    g_action_state = ACTION_STATE_PREVIEW;
+    old_state = g_battle_action_state;
+    g_battle_action_state = ACTION_STATE_PREVIEW;
     if (battle_action_call_attack_preparation_at_preview(action) == BATTLE_ATTACK_PREPARATION_IMMEDIATE) {
         unit->charged_ability_ct = 0;
     }
@@ -1208,7 +1208,7 @@ s32 battle_action_preview_at_list(unit_stats_t* unit, action_command_t* action, 
     if (turns != -1) {
         turns = battle_action_get_number_of_turns_to_resolve(unit->battle_id, unit->charged_ability_ct, at_list) & 0xFF;
     }
-    g_action_state = old_state;
+    g_battle_action_state = old_state;
     unit->movement_taken = old_movement_taken;
     unit->action_taken = old_action_taken;
     unit->inflicted_status[0] = old_inflicted_status;

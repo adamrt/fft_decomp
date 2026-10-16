@@ -102,7 +102,7 @@ typedef struct ai_wait_facing_work {
  * viability array.
  */
 s32 battle_ai_choose_wait_facing(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_wait_facing_work_t work;
     s32 direction;
     s32 target_id;
@@ -117,9 +117,9 @@ s32 battle_ai_choose_wait_facing(void) {
     battle_ai_copy_unit_coordinates(ai->acting_unit_id, &ai->acting_unit_coords);
     for (direction = 0; direction < AI_CARDINAL_DIRECTION_COUNT; direction++) {
         work.target_coords.fields.x
-            = ai->acting_unit_coords.fields.x + g_ai_facing_tile_offsets.by_direction[direction][0];
+            = ai->acting_unit_coords.fields.x + g_battle_ai_facing_tile_offsets.by_direction[direction][0];
         work.target_coords.fields.y
-            = ai->acting_unit_coords.fields.y + g_ai_facing_tile_offsets.by_direction[direction][1];
+            = ai->acting_unit_coords.fields.y + g_battle_ai_facing_tile_offsets.by_direction[direction][1];
         work.target_coords.fields.elevation = 0;
         if (battle_ai_is_facing_tile_blocked(&ai->acting_unit_coords, &work.target_coords) != 0) {
             work.viability.by_direction[direction] = 0;
@@ -166,7 +166,7 @@ s32 battle_ai_choose_wait_facing(void) {
  */
 static s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_coords_t* target) {
     u8 x = target->fields.x;
-    u8 width = g_ai_data_base.map_max_x;
+    u8 width = g_battle_ai_data_base.map_max_x;
     u8 y;
     map_tile_t* tile;
 
@@ -174,11 +174,11 @@ static s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_
         return 1;
     }
     y = target->fields.y;
-    if (y >= g_ai_data_base.map_max_y || (tile = &g_map_tile_data[y * width + x])->flags.blocked) {
+    if (y >= g_battle_ai_data_base.map_max_y || (tile = &g_battle_map_tile_data[y * width + x])->flags.blocked) {
         return 1;
     }
     return tile->height
-        - g_map_tile_data[(source->fields.elevation * MAP_TILES_PER_LAYER) + source->fields.y * width
+        - g_battle_map_tile_data[(source->fields.elevation * MAP_TILES_PER_LAYER) + source->fields.y * width
             + source->fields.x]
               .height
         >= 3;
@@ -186,7 +186,7 @@ static s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_
 
 /* Target 0x8019ae30. */
 void battle_ai_init_selected_action(void) {
-    battle_ai_reset_action_ranking_fields(&g_ai_data_base.selected_action);
+    battle_ai_reset_action_ranking_fields(&g_battle_ai_data_base.selected_action);
 }
 
 /*
@@ -196,13 +196,13 @@ void battle_ai_init_selected_action(void) {
  * list is full. Equality includes all four bytes; x == 0xff marks an empty slot.
  */
 void battle_ai_record_triggered_trap_coords(s32 x, s32 y, s32 level) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
 
-    g_ai_data_base.considered_unit_coords.fields.x = x;
-    g_ai_data_base.considered_unit_coords.fields.y = y;
-    g_ai_data_base.considered_unit_coords.fields.elevation = level;
-    g_ai_data_base.considered_unit_coords.fields.zero = 0;
+    g_battle_ai_data_base.considered_unit_coords.fields.x = x;
+    g_battle_ai_data_base.considered_unit_coords.fields.y = y;
+    g_battle_ai_data_base.considered_unit_coords.fields.elevation = level;
+    g_battle_ai_data_base.considered_unit_coords.fields.zero = 0;
     battle_ai_init_selected_action();
     for (i = 0; i < AI_KNOWN_TRAP_COUNT; i++) {
         if (ai->known_trap_coords[i].fields.x == 0xff) {
@@ -228,11 +228,11 @@ s32 battle_ai_is_pathfinding_budget_exhausted(void) {
  * Suspended target searches resume without reinitializing the candidate.
  */
 s32 battle_ai_evaluate_ability_outcome(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
-    if (g_ai_data_base.resume_pending) {
+    if (g_battle_ai_data_base.resume_pending) {
         /* Resume: each state re-enters the evaluation step that suspended. */
-        switch (g_ai_data_base.outcome_evaluation_state) {
+        switch (g_battle_ai_data_base.outcome_evaluation_state) {
         case AI_ABILITY_EVALUATION_REFLECTED_TARGETS:
             goto evaluate_reflected_targets;
         case AI_ABILITY_EVALUATION_SELF_TARGET_RANGE:
@@ -373,7 +373,7 @@ s32 battle_ai_evaluate_ability_outcome(void) {
     return 0;
 }
 
-/* g_ai_math_extra_known_ability_ids: read-only table of this object (12 bytes at 0x80193dd4), kept byte for byte
+/* g_battle_ai_math_extra_known_ability_ids: read-only table of this object (12 bytes at 0x80193dd4), kept byte for byte
  * until it is written as its typed definition. */
 static const u32 g_ai_math_extra_known_ability_ids_rodata[3] = {
     0x10050201,
@@ -388,32 +388,32 @@ static const u32 g_ai_math_extra_known_ability_ids_rodata[3] = {
  * restore the actor coordinates and submit the action to the ranked list.
  */
 static s32 battle_ai_evaluate_self_target_origins(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_tile_mask_mode_e mode;
 
-    if (g_ai_data_base.resume_pending) {
+    if (g_battle_ai_data_base.resume_pending) {
         /* Resume: re-enter the step that suspended. */
-        if (g_ai_self_target_origin_stage == 0)
+        if (g_battle_ai_self_target_origin_stage == 0)
             goto evaluate_map;
         goto evaluate_targets;
     }
-    g_ai_data_base.targetability.live.target_setting_flags &= ~AI_TARGET_SETTING_CONSUME_EVALUATED_ORIGINS;
-    g_ai_data_base.current_action.coords = ai->candidate_coords[g_ai_data_base.movement_scenario];
+    g_battle_ai_data_base.targetability.live.target_setting_flags &= ~AI_TARGET_SETTING_CONSUME_EVALUATED_ORIGINS;
+    g_battle_ai_data_base.current_action.coords = ai->candidate_coords[g_battle_ai_data_base.movement_scenario];
     battle_ai_update_tile_pickup();
-    if ((g_ai_data_base.considered_ability.ai_flags.word & AI_ABILITY_FOLLOW_TARGET)
-        && !(g_main_ability_range_data[g_ai_data_base.considered_ability.ability_id].flags_1
+    if ((g_battle_ai_data_base.considered_ability.ai_flags.word & AI_ABILITY_FOLLOW_TARGET)
+        && !(g_main_ability_range_data[g_battle_ai_data_base.considered_ability.ability_id].flags_1
             & ABILITY_SECONDARY_FLAG_1_CANNOT_TARGET_SELF)) {
-        g_ai_data_base.current_action.act_before_move = 1;
-        g_ai_data_base.current_action.command.targeting_type = BATTLE_TARGETING_TYPE_UNIT;
-        g_ai_data_base.current_action.command.target_id = g_ai_data_base.acting_unit_id;
+        g_battle_ai_data_base.current_action.act_before_move = 1;
+        g_battle_ai_data_base.current_action.command.targeting_type = BATTLE_TARGETING_TYPE_UNIT;
+        g_battle_ai_data_base.current_action.command.target_id = g_battle_ai_data_base.acting_unit_id;
     evaluate_map:
         if (battle_ai_evaluate_cast_origins() == -1) {
-            g_ai_self_target_origin_stage = 0;
+            g_battle_ai_self_target_origin_stage = 0;
             return -1;
         }
     }
     ai->current_action.command.targeting_type = BATTLE_TARGETING_TYPE_TILE;
-    g_ai_self_target_origin_stage = 0;
+    g_battle_ai_self_target_origin_stage = 0;
     ai->current_action.act_before_move = 1;
     /* The 32-bit view of the first member keeps this load after the phase store.
      * Direct .word or whole-union assignment changes target scheduling. */
@@ -428,14 +428,14 @@ prepare_origin:
     evaluate_targets:
         if (battle_ai_evaluate_target_tiles() == -1) {
             /* A first-origin suspension skips the moved-origin pass on resume. */
-            g_ai_self_target_origin_stage = 1;
+            g_battle_ai_self_target_origin_stage = 1;
             return -1;
         }
     }
-    if (g_ai_self_target_origin_stage == 0) {
+    if (g_battle_ai_self_target_origin_stage == 0) {
         ai->current_action.act_before_move = 0;
         ai->considered_unit_coords = ai->current_action.coords;
-        g_ai_self_target_origin_stage++;
+        g_battle_ai_self_target_origin_stage++;
         /* A goto retry, not a loop: GCC's loop pass would move the suspend
          * exit out of line. */
         goto prepare_origin;
@@ -452,15 +452,15 @@ prepare_origin:
  * directly to its terrain check; this is not a complete ability-use test.
  */
 s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
     s32 dx;
     s32 dy;
     s32 height;
     unit_stats_t* unit;
 
-    if (g_ai_data_base.water_penalty) {
-        s32 depth = g_map_tile_data[coords->fields.y * g_ai_data_base.map_max_x + coords->fields.x
+    if (g_battle_ai_data_base.water_penalty) {
+        s32 depth = g_battle_map_tile_data[coords->fields.y * g_battle_ai_data_base.map_max_x + coords->fields.x
             + (coords->fields.elevation * MAP_TILES_PER_LAYER)]
                         .depth_half_height.depth;
         if (depth >= 2)
@@ -507,11 +507,11 @@ s32 battle_ai_calculate_height_difference_between_units(const ai_coords_t* coord
     s32 h1;
     s32 h2;
 
-    tile = &g_map_tile_data[unit->position.higher_elevation * MAP_TILES_PER_LAYER
-        + unit->position.y * g_ai_data_base.map_max_x + unit->x];
+    tile = &g_battle_map_tile_data[unit->position.higher_elevation * MAP_TILES_PER_LAYER
+        + unit->position.y * g_battle_ai_data_base.map_max_x + unit->x];
     h1 = tile->height * 2 + tile->depth_half_height.half_height;
-    tile = &g_map_tile_data[(coords->fields.elevation * MAP_TILES_PER_LAYER)
-        + coords->fields.y * g_ai_data_base.map_max_x + coords->fields.x];
+    tile = &g_battle_map_tile_data[(coords->fields.elevation * MAP_TILES_PER_LAYER)
+        + coords->fields.y * g_battle_ai_data_base.map_max_x + coords->fields.x];
     h2 = tile->height * 2 + tile->depth_half_height.half_height;
     return (h1 - h2) / 2;
 }
@@ -526,11 +526,11 @@ static s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
     u32 tile_type;
     u32 ability_terrain;
 
-    tile_id = (coords->fields.elevation * MAP_TILES_PER_LAYER) + coords->fields.y * g_ai_data_base.map_max_x
+    tile_id = (coords->fields.elevation * MAP_TILES_PER_LAYER) + coords->fields.y * g_battle_ai_data_base.map_max_x
         + coords->fields.x;
-    tile_type = g_map_tile_data[tile_id].surface.type;
+    tile_type = g_battle_map_tile_data[tile_id].surface.type;
     ability_terrain = g_main_terrain_geomancy_abilities[tile_type];
-    return ability_terrain == g_ai_data_base.considered_ability.ability_id;
+    return ability_terrain == g_battle_ai_data_base.considered_ability.ability_id;
 }
 
 /*
@@ -542,18 +542,18 @@ static s32 battle_ai_can_use_geomancy(const ai_coords_t* coords) {
  * on resume; later target iterations can therefore use the caller's s2.
  */
 static s32 battle_ai_evaluate_reflected_target_origins(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* reflector;
     ai_unit_decision_t* decision;
     ai_tile_mask_mode_e mode;
     s32 ct;
 
-    if (g_ai_data_base.resume_pending) {
+    if (g_battle_ai_data_base.resume_pending) {
         /* Resume: the target jumps into the middle of the origin loop. */
         goto evaluate_targets;
     }
-    g_ai_data_base.current_action.reflected_action = 1;
-    g_ai_data_base.targetability.live.target_setting_flags &= ~AI_TARGET_SETTING_CONSUME_EVALUATED_ORIGINS;
+    g_battle_ai_data_base.current_action.reflected_action = 1;
+    g_battle_ai_data_base.targetability.live.target_setting_flags &= ~AI_TARGET_SETTING_CONSUME_EVALUATED_ORIGINS;
     for (ai->reflector_unit_index = 0; ai->reflector_unit_index < BATTLE_UNIT_SLOT_COUNT; ai->reflector_unit_index++) {
         reflector = &g_battle_unit_stats[ai->reflector_unit_index];
         decision = &ai->unit_decisions[ai->reflector_unit_index];
@@ -630,21 +630,21 @@ static s32 battle_ai_evaluate_reflected_target_origins(void) {
 
 /* Classify the crystal or treasure occupant of the current action tile. */
 void battle_ai_update_tile_pickup(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 unit_id;
     unit_stats_t* unit;
 
-    g_ai_data_base.tile_pickup_kind = AI_TILE_PICKUP_NONE;
+    g_battle_ai_data_base.tile_pickup_kind = AI_TILE_PICKUP_NONE;
     unit_id = battle_ai_find_unit_at_coordinates(&ai->current_action.coords);
     if (unit_id != BATTLE_UNIT_ID_NONE) {
         unit = &g_battle_unit_stats[unit_id];
         if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRYSTAL)] & STATUS_BYTE_MASK(STATUS_ID_CRYSTAL)) {
-                g_ai_data_base.tile_pickup_kind = AI_TILE_PICKUP_CRYSTAL;
+                g_battle_ai_data_base.tile_pickup_kind = AI_TILE_PICKUP_CRYSTAL;
             }
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_TREASURE)]
                 & STATUS_BYTE_MASK(STATUS_ID_TREASURE)) {
-                g_ai_data_base.tile_pickup_kind = AI_TILE_PICKUP_TREASURE;
+                g_battle_ai_data_base.tile_pickup_kind = AI_TILE_PICKUP_TREASURE;
             }
         }
     }
@@ -658,36 +658,38 @@ void battle_ai_update_tile_pickup(void) {
  */
 static s32 battle_ai_evaluate_math_targets(void) {
     u8 special_abilities[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
     s32 unit;
 
-    memcpy(special_abilities, g_ai_math_extra_known_ability_ids, sizeof(special_abilities));
-    if (g_ai_data_base.resume_pending)
+    memcpy(special_abilities, g_battle_ai_math_extra_known_ability_ids, sizeof(special_abilities));
+    if (g_battle_ai_data_base.resume_pending)
         goto evaluate_priority; /* resume inside the multiplier loop */
     if (!battle_ai_is_ability_origin_allowed(&ai->acting_unit_coords))
         return 0;
-    g_ai_data_base.current_action.act_before_move = 1;
-    for (g_ai_math_skillset_index = 0; g_ai_math_skillset_index < AI_MATH_SOURCE_SKILLSET_COUNT;
-        g_ai_math_skillset_index++) {
-        g_ai_math_skillset_id = g_ai_math_source_skillsets[g_ai_math_skillset_index];
-        g_ai_math_ability_list
-            = main_ability_store_skillset_abilities(g_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
-        for (g_ai_math_ability_index = 0; g_ai_math_ability_index < HUMAN_SKILLSET_ACTION_SLOT_COUNT;
-            g_ai_math_ability_index++) {
+    g_battle_ai_data_base.current_action.act_before_move = 1;
+    for (g_battle_ai_math_skillset_index = 0; g_battle_ai_math_skillset_index < AI_MATH_SOURCE_SKILLSET_COUNT;
+        g_battle_ai_math_skillset_index++) {
+        g_battle_ai_math_skillset_id = g_battle_ai_math_source_skillsets[g_battle_ai_math_skillset_index];
+        g_battle_ai_math_ability_list
+            = main_ability_store_skillset_abilities(g_battle_ai_math_skillset_id, SKILLSET_ABILITY_FILTER_ACTION);
+        for (g_battle_ai_math_ability_index = 0; g_battle_ai_math_ability_index < HUMAN_SKILLSET_ACTION_SLOT_COUNT;
+            g_battle_ai_math_ability_index++) {
             /* Math targeting reads only the low byte of each 16-bit ID. */
-            ai->math_ability_id = g_ai_math_ability_list[g_ai_math_ability_index];
+            ai->math_ability_id = g_battle_ai_math_ability_list[g_battle_ai_math_ability_index];
             if (ai->math_ability_id == 0)
                 continue;
             if (!(g_main_ability_range_data[ai->math_ability_id].flags_3
                     & ABILITY_SECONDARY_FLAG_3_CALCULATOR_ELIGIBLE))
                 continue;
-            if (!battle_ai_is_ability_known(ai->acting_unit_id, g_ai_math_skillset_id, g_ai_math_ability_index))
+            if (!battle_ai_is_ability_known(
+                    ai->acting_unit_id, g_battle_ai_math_skillset_id, g_battle_ai_math_ability_index))
                 continue;
             /* The extra known-bit call's result is ignored. */
             for (i = 0; i < AI_MATH_EXTRA_KNOWN_ABILITY_COUNT; i++) {
                 if (ai->math_ability_id == special_abilities[i])
-                    battle_ai_is_ability_known(ai->acting_unit_id, g_ai_math_skillset_id, g_ai_math_ability_index + 1);
+                    battle_ai_is_ability_known(
+                        ai->acting_unit_id, g_battle_ai_math_skillset_id, g_battle_ai_math_ability_index + 1);
             }
             battle_mem_copy_u16_values(
                 &ai->considered_ability.ai_flags, &g_main_ability_data[ai->math_ability_id].ai_flags, 4);
@@ -736,22 +738,22 @@ static s32 battle_ai_evaluate_math_targets(void) {
  * reloads its full row mask on resume and continues at its saved x index.
  */
 static s32 battle_ai_evaluate_movement_origins(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 row;
 
-    if (g_ai_data_base.resume_pending) {
+    if (g_battle_ai_data_base.resume_pending) {
         /* Resume: re-enter the step that suspended. */
-        if (g_ai_data_base.highest_priority_state == AI_ORIGIN_EVALUATION_PREPARE)
+        if (g_battle_ai_data_base.highest_priority_state == AI_ORIGIN_EVALUATION_PREPARE)
             goto begin_evaluation;
-        if (g_ai_data_base.highest_priority_state == AI_ORIGIN_EVALUATION_RANKED)
+        if (g_battle_ai_data_base.highest_priority_state == AI_ORIGIN_EVALUATION_RANKED)
             goto evaluate_ranked_origin;
-        row = ai->movable_tiles[g_ai_data_base.map_level_counter][g_ai_data_base.y_counter];
+        row = ai->movable_tiles[g_battle_ai_data_base.map_level_counter][g_battle_ai_data_base.y_counter];
         goto evaluate_scanned_origin;
     }
-    row = ai->targetability.live.unit_targetable[g_ai_data_base.acting_unit_id];
-    ai->targetability.live.unit_targetable[g_ai_data_base.acting_unit_id] = 0;
+    row = ai->targetability.live.unit_targetable[g_battle_ai_data_base.acting_unit_id];
+    ai->targetability.live.unit_targetable[g_battle_ai_data_base.acting_unit_id] = 0;
     battle_ai_build_attack_origin_masks();
-    ai->targetability.live.unit_targetable[g_ai_data_base.acting_unit_id] = row;
+    ai->targetability.live.unit_targetable[g_battle_ai_data_base.acting_unit_id] = row;
 begin_evaluation:
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
         ai->highest_priority_state = AI_ORIGIN_EVALUATION_PREPARE;
@@ -818,12 +820,12 @@ begin_evaluation:
 static void battle_ai_finalize_action_destination(void) {
     ai_data_t* ai;
 
-    ai = &g_ai_data_base;
-    if (g_ai_data_base.current_action.coords.word != g_ai_data_base.acting_unit_coords.word) {
-        g_ai_data_base.current_action.act_before_move = 0;
+    ai = &g_battle_ai_data_base;
+    if (g_battle_ai_data_base.current_action.coords.word != g_battle_ai_data_base.acting_unit_coords.word) {
+        g_battle_ai_data_base.current_action.act_before_move = 0;
     } else {
-        g_ai_data_base.current_action.act_before_move = 1;
-        g_ai_data_base.current_action.coords = ai->candidate_coords[g_ai_data_base.movement_scenario];
+        g_battle_ai_data_base.current_action.act_before_move = 1;
+        g_battle_ai_data_base.current_action.coords = ai->candidate_coords[g_battle_ai_data_base.movement_scenario];
     }
     battle_ai_update_tile_pickup();
 }
@@ -835,7 +837,7 @@ static void battle_ai_finalize_action_destination(void) {
  * Requires a consistent nonempty movable mask/count; there is no empty guard.
  */
 static void battle_ai_take_next_movement_origin(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 best_key = 0x7fffffff;
     s32 x, y, level;
     s32 key;
@@ -869,7 +871,7 @@ static void battle_ai_take_next_movement_origin(void) {
 
 /* Build attack-origin and movable tile masks for the considered ability. */
 void battle_ai_build_attack_origin_masks(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
     s32 j;
     s32 x;
@@ -915,7 +917,7 @@ void battle_ai_build_attack_origin_masks(void) {
                 for (x = 0; x < ai->map_max_x; x++) {
                     if ((unit_id << x) & 0x8000) {
                         if (ai->water_penalty
-                            && (depth = g_map_tile_data[j * ai->map_max_x + x + (i * MAP_TILES_PER_LAYER)]
+                            && (depth = g_battle_map_tile_data[j * ai->map_max_x + x + (i * MAP_TILES_PER_LAYER)]
                                        .depth_half_height.depth)
                                 >= 2) {
                             ai->movable_tiles[i][j] ^= 0x8000 >> x;
@@ -986,7 +988,7 @@ void battle_ai_build_attack_origin_masks(void) {
  * The lookup is unchecked.
  */
 static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 radius) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
     s32 x;
     s32 y;
@@ -994,14 +996,14 @@ static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 r
     /* Preserve the target's signed mode dispatch. */
     switch ((s32)mode) {
     case AI_TILE_MASK_RANGE:
-        radius = g_ai_data_base.considered_ability.parameters.fields.range;
+        radius = g_battle_ai_data_base.considered_ability.parameters.fields.range;
         break;
     case AI_TILE_MASK_AOE:
-        radius = g_ai_data_base.considered_ability.parameters.fields.aoe;
+        radius = g_battle_ai_data_base.considered_ability.parameters.fields.aoe;
         break;
     case AI_TILE_MASK_RANGE_PLUS_AOE:
-        radius = g_ai_data_base.considered_ability.parameters.fields.range
-            + g_ai_data_base.considered_ability.parameters.fields.aoe;
+        radius = g_battle_ai_data_base.considered_ability.parameters.fields.range
+            + g_battle_ai_data_base.considered_ability.parameters.fields.aoe;
         break;
     }
     if (radius >= 16) {
@@ -1019,17 +1021,17 @@ static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 r
         if (y - i < 0)
             break;
         if (x < 8)
-            ai->targetable_tiles[0][y - i] = g_ai_range_row_masks[radius - i] << (7 - x);
+            ai->targetable_tiles[0][y - i] = g_battle_ai_range_row_masks[radius - i] << (7 - x);
         else
-            ai->targetable_tiles[0][y - i] = g_ai_range_row_masks[radius - i] >> (x - 7);
+            ai->targetable_tiles[0][y - i] = g_battle_ai_range_row_masks[radius - i] >> (x - 7);
     }
     for (i = 1; i <= radius; i++) {
         if (y + i >= ai->map_max_y)
             break;
         if (x < 8)
-            ai->targetable_tiles[0][y + i] = g_ai_range_row_masks[radius - i] << (7 - x);
+            ai->targetable_tiles[0][y + i] = g_battle_ai_range_row_masks[radius - i] << (7 - x);
         else
-            ai->targetable_tiles[0][y + i] = g_ai_range_row_masks[radius - i] >> (x - 7);
+            ai->targetable_tiles[0][y + i] = g_battle_ai_range_row_masks[radius - i] >> (x - 7);
     }
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_LINEAR_TRAJECTORY) {
         for (y = 0; y < ai->map_max_y; y++) {
@@ -1055,7 +1057,7 @@ static void battle_ai_build_targetable_tile_mask(ai_tile_mask_mode_e mode, s32 r
  * Tile base heights must differ by at most 2; slope and depth are ignored.
  */
 static void battle_ai_build_monster_skill_tile_mask(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
     s32 i;
     s32 direction;
@@ -1080,19 +1082,21 @@ static void battle_ai_build_monster_skill_tile_mask(void) {
             continue;
         if (main_unit_has_status_in_set(unit, MAIN_STATUS_CHECK_SET_PREVENT_REACTION))
             continue;
-        height = g_map_tile_data[unit->position.higher_elevation * MAP_TILES_PER_LAYER
+        height = g_battle_map_tile_data[unit->position.higher_elevation * MAP_TILES_PER_LAYER
             + unit->position.y * ai->map_max_x + unit->x]
                      .height;
         for (direction = 0; direction < AI_CARDINAL_DIRECTION_COUNT; direction++) {
-            x = unit->x + g_ai_facing_tile_offsets.by_direction[direction][0];
+            x = unit->x + g_battle_ai_facing_tile_offsets.by_direction[direction][0];
             if (x < 0 || x >= ai->map_max_x)
                 continue;
-            y = unit->position.y + g_ai_facing_tile_offsets.by_direction[direction][1];
+            y = unit->position.y + g_battle_ai_facing_tile_offsets.by_direction[direction][1];
             if (y < 0 || y >= ai->map_max_y)
                 continue;
             for (level = 0; level <= 0; level++) {
-                if ((g_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height) >= -2
-                    && (g_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height) <= 2) {
+                if ((g_battle_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height)
+                        >= -2
+                    && (g_battle_map_tile_data[(level * MAP_TILES_PER_LAYER) + y * ai->map_max_x + x].height - height)
+                        <= 2) {
                     /* A typed level-row pointer folds the field offset into
                      * the induction value. Preserve the target's AI-base
                      * cursor with a member-derived displacement. */
@@ -1113,7 +1117,7 @@ static void battle_ai_build_monster_skill_tile_mask(void) {
  * suspends this pass; 0 ends it. Coordinate restoration belongs to callers.
  */
 static s32 battle_ai_evaluate_target_tiles(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 x, y, level;
     u16 row;
     ai_coords_t* origin;
@@ -1125,10 +1129,10 @@ static s32 battle_ai_evaluate_target_tiles(void) {
     u32 level_address;
     u8 target_id;
 
-    if (g_ai_data_base.resume_pending && g_ai_data_base.search_resume_flag) {
-        x = (u16)g_ai_data_base.current_action.command.target_position.vx;
-        level = (u16)g_ai_data_base.current_action.command.target_position.vy;
-        y = (u16)g_ai_data_base.current_action.command.target_position.vz;
+    if (g_battle_ai_data_base.resume_pending && g_battle_ai_data_base.search_resume_flag) {
+        x = (u16)g_battle_ai_data_base.current_action.command.target_position.vx;
+        level = (u16)g_battle_ai_data_base.current_action.command.target_position.vy;
+        y = (u16)g_battle_ai_data_base.current_action.command.target_position.vz;
         row = ai->targetable_tiles[level][y];
         goto evaluate_priority;
     }
@@ -1146,10 +1150,10 @@ static s32 battle_ai_evaluate_target_tiles(void) {
         if (battle_target_set_panels_for_action(&ai->current_action.command) == TARGET_PANELS_NONE)
             return 0;
     } else {
-        tile = g_map_tile_data;
+        tile = g_battle_map_tile_data;
         for (i = 0; i < MAP_TILE_COUNT; i++, tile++)
             tile->ceiling_depth_and_marks.ability_range = 0;
-        g_map_tile_data[origin->fields.y * ai->map_max_x + origin->fields.x
+        g_battle_map_tile_data[origin->fields.y * ai->map_max_x + origin->fields.x
             + (origin->fields.elevation * MAP_TILES_PER_LAYER)]
             .ceiling_depth_and_marks.ability_range = 1;
     }
@@ -1168,7 +1172,7 @@ static s32 battle_ai_evaluate_target_tiles(void) {
                     /* Keep the membership test and update in one working mask. */
                     tile_mask = row << x;
                     if (tile_mask & 0x8000) {
-                        if (g_map_tile_data[y * ai->map_max_x + x + (level * MAP_TILES_PER_LAYER)]
+                        if (g_battle_map_tile_data[y * ai->map_max_x + x + (level * MAP_TILES_PER_LAYER)]
                                 .ceiling_depth_and_marks.ability_range) {
                             tile_mask = 0x8000;
                             target_rows[y] |= tile_mask >> x;
@@ -1240,7 +1244,7 @@ static s32 battle_ai_evaluate_target_tiles(void) {
 /* Index of the first present unit standing on the current action's target
  * panel, or BATTLE_UNIT_ID_NONE if none. */
 static s32 battle_ai_find_unit_on_target_panel(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
     unit_stats_t* unit;
     u16 x;
@@ -1286,7 +1290,7 @@ s32 battle_ai_find_unit_at_coordinates(const ai_coords_t* coords) {
 /* Simulate and score the current action and keep it as the best when it
  * outranks the best so far. -1 suspends; otherwise 0. */
 s32 battle_ai_evaluate_current_action(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     s32 result = battle_ai_simulate_action_and_score();
 
     if (result == -1) {
@@ -1315,7 +1319,7 @@ enum {
  * whole AI workspace; resumed phases skip fresh action preparation.
  */
 s32 battle_ai_simulate_action_and_score(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
     ai_unit_decision_t* decision;
     action_command_t* action;
@@ -1329,12 +1333,12 @@ s32 battle_ai_simulate_action_and_score(void) {
     s32 score;
     u32 below_cost;
 
-    if (g_ai_data_base.resume_pending && g_ai_data_base.action_simulation_phase) {
+    if (g_battle_ai_data_base.resume_pending && g_battle_ai_data_base.action_simulation_phase) {
         battle_ai_restore_unit_state(AI_SNAPSHOT_SIMULATED_STATUS);
         /* Resume: re-enter the suspended turn-advance or scoring phase. */
-        if (g_ai_data_base.action_simulation_phase == AI_SIMULATION_ADVANCE_TURNS)
+        if (g_battle_ai_data_base.action_simulation_phase == AI_SIMULATION_ADVANCE_TURNS)
             goto advance_turns;
-        if (g_ai_data_base.action_simulation_phase == AI_SIMULATION_SCORE_STATE)
+        if (g_battle_ai_data_base.action_simulation_phase == AI_SIMULATION_SCORE_STATE)
             goto score_state;
     }
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
@@ -1486,7 +1490,7 @@ score_state:
                 if (!((unit->status_sets.current[status / 8] << (status % 8)) & 0x80))
                     continue;
                 /* Indexing the s16 table changes register allocation; retain the byte cursor. */
-                weight = *(s16*)((u8*)g_ai_status_priority_weights + weight_offset);
+                weight = *(s16*)((u8*)g_battle_ai_status_priority_weights + weight_offset);
                 if (((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
                          & (STATUS_BYTE_MASK(STATUS_ID_CONFUSION) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)))
                         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARM)]
@@ -1527,7 +1531,7 @@ score_state:
             if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
                 for (equipment_slot = 0; equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT; equipment_slot++) {
                     if (unit->equipment[equipment_slot]
-                        == g_ai_unit_snapshots[ai->unit_compact_indices[unit_index]].equipment[equipment_slot])
+                        == g_battle_ai_unit_snapshots[ai->unit_compact_indices[unit_index]].equipment[equipment_slot])
                         score += AI_EQUIPMENT_SCORE;
                 }
             }
@@ -1577,7 +1581,7 @@ finish_without_scoring:
  * Critical; a noncritical pickup adds priority unless the policy is Retreat.
  */
 static void battle_ai_simulate_movement_and_pickup(void) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
 
     if (ai->current_action.coords.word != ai->acting_unit_coords.word) {
         battle_ai_move_temp_unit_to_coords(&ai->current_action.coords);
@@ -1602,7 +1606,7 @@ static void battle_ai_simulate_movement_and_pickup(void) {
 /* Mark the candidate action as not decided on: only the selected action ever
  * holds AI_ACTION_DECIDED (ai_build_command). */
 static void battle_ai_clear_current_action_decision(void) {
-    g_ai_data_base.current_action.rank.decided = 0;
+    g_battle_ai_data_base.current_action.rank.decided = 0;
 }
 
 /*
@@ -1617,15 +1621,15 @@ static s32 battle_ai_simulate_action_hits(action_command_t* action) {
     s32 base_hit;
     s32 cnt;
 
-    ai = &g_ai_data_base;
-    g_ai_data_base.hit_counter = 0xFF;
-    if (action->actor_id == g_ai_data_base.acting_unit_id) {
-        base_hit = g_ai_data_base.current_action.rank.base_hit_percent;
-        g_ai_data_base.ability_processing_done = 1;
+    ai = &g_battle_ai_data_base;
+    g_battle_ai_data_base.hit_counter = 0xFF;
+    if (action->actor_id == g_battle_ai_data_base.acting_unit_id) {
+        base_hit = g_battle_ai_data_base.current_action.rank.base_hit_percent;
+        g_battle_ai_data_base.ability_processing_done = 1;
         if (base_hit == 0xFF) {
-            g_ai_data_base.hit_counter = 0;
-            g_ai_data_base.total_hit_percent = 0;
-            g_ai_data_base.valuable_target_hit = 0;
+            g_battle_ai_data_base.hit_counter = 0;
+            g_battle_ai_data_base.total_hit_percent = 0;
+            g_battle_ai_data_base.valuable_target_hit = 0;
         }
     }
     battle_ai_simulate_strikes(action, 0);
@@ -1647,7 +1651,7 @@ static s32 battle_ai_simulate_action_hits(action_command_t* action) {
  * can adjust priority and mark whether a valuable target was hit.
  */
 static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mode) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     battle_strike_work_t work;
     s32 target_index;
     s32 target_id;
@@ -1661,7 +1665,7 @@ static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mo
         return;
     }
     behavior = &g_main_ability_data[action->ability_id].ai_flags;
-    if (g_ai_data_base.hit_counter != 0xff) {
+    if (g_battle_ai_data_base.hit_counter != 0xff) {
         self_hit = 0;
         positive = 0;
         negative = 1;
@@ -1745,7 +1749,7 @@ static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mo
  * baseline identity, death counter, current status, and Death Sentence CT.
  */
 static void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_status_snapshot_t* status;
     ai_extended_snapshot_t* snapshot;
     unit_stats_t* unit;
@@ -1761,14 +1765,14 @@ static void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
         if (mode != AI_SNAPSHOT_BASELINE) {
             status = &ai->unit_status_records[id];
         } else {
-            status = &g_ai_unit_snapshots[id].status;
+            status = &g_battle_ai_unit_snapshots[id].status;
         }
         status->entd_slot = unit->entd_slot;
         status->death_counter = unit->death_counter;
         battle_mem_copy_bytes(status->current_status, unit->status_sets.current, sizeof(status->current_status));
         if (mode != AI_SNAPSHOT_BASELINE) {
             status->death_sentence_ct = unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)];
-            snapshot = &g_ai_unit_snapshots[id];
+            snapshot = &g_battle_ai_unit_snapshots[id];
             unit->entd_slot = snapshot->status.entd_slot;
             unit->death_counter = snapshot->status.death_counter;
             unit->status_ct[STATUS_CT_INDEX(STATUS_ID_DEATH_SENTENCE)]
@@ -1805,7 +1809,7 @@ static void battle_ai_save_unit_state(ai_snapshot_mode_e mode) {
  * values. Any non-baseline mode restores only the compact status record.
  */
 static void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     ai_status_snapshot_t* status;
     ai_extended_snapshot_t* snapshot;
     unit_stats_t* unit;
@@ -1821,7 +1825,7 @@ static void battle_ai_restore_unit_state(ai_snapshot_mode_e mode) {
         if (mode != AI_SNAPSHOT_BASELINE) {
             status = &ai->unit_status_records[id];
         } else {
-            status = &g_ai_unit_snapshots[id].status;
+            status = &g_battle_ai_unit_snapshots[id].status;
         }
         unit->entd_slot = status->entd_slot;
         unit->death_counter = status->death_counter;
@@ -1859,7 +1863,7 @@ static s32 battle_ai_filter_useful_targets(void) {
     s32 i;
 
     result = 0;
-    ai = &g_ai_data_base;
+    ai = &g_battle_ai_data_base;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (ai->targetability.live.unit_targetable[i] != 0) {
             if (battle_ai_classify_ability_effect(i, 1) == AI_ABILITY_EFFECT_USEFUL) {
@@ -1879,17 +1883,17 @@ static s32 battle_ai_filter_useful_targets(void) {
  * guarantee. Nonzero check_reflect enables the timing-aware Reflect restriction.
  */
 ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_reflect) {
-    ai_data_t* ai = &g_ai_data_base;
+    ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     ai_unit_decision_t* decision = &ai->unit_decisions[unit_id];
-    s32 ct = g_ai_data_base.considered_ability.ct;
+    s32 ct = g_battle_ai_data_base.considered_ability.ct;
     s32 i;
     s32 bit;
     s32 mask;
     s32 status;
     s16 ability_id;
 
-    if ((g_ai_data_base.considered_ability.ai_flags.word & AI_ABILITY_ENEMIES_ONLY) && !decision->enemy_flag)
+    if ((g_battle_ai_data_base.considered_ability.ai_flags.word & AI_ABILITY_ENEMIES_ONLY) && !decision->enemy_flag)
         return AI_ABILITY_EFFECT_NONE;
     if ((ai->considered_ability.ai_flags.word & AI_ABILITY_ALLIES_ONLY) && decision->enemy_flag)
         return AI_ABILITY_EFFECT_NONE;
@@ -2196,7 +2200,7 @@ static s32 battle_ai_exclude_enemies_acting_before_ct(void) {
     ai_data_t* walk;
 
     result = 0;
-    ai = &g_ai_data_base;
+    ai = &g_battle_ai_data_base;
     /* The target walks a pointer that starts at the block base and steps by
      * sizeof(ai_unit_decision_t), reaching unit_decisions[i].enemy_flag as a
      * 0x1834 displacement; a pointer started at unit_decisions adds an addiu. */
@@ -2220,7 +2224,7 @@ static s32 battle_ai_can_unit_act_within_charge_time(s32 unit_index) {
     s32 min_ct;
     u8 ct;
 
-    ct = g_ai_data_base.considered_ability.ct;
+    ct = g_battle_ai_data_base.considered_ability.ct;
     if (ct != 0) {
         min_ct = battle_ai_calculate_clockticks_until_unit_acts(&g_battle_unit_stats[unit_index]);
         if (min_ct != 0x7FFFFFFF) {
@@ -2270,9 +2274,9 @@ static s32 battle_ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
 
 /* Position the temporary simulation unit at the supplied AI coordinates. */
 void battle_ai_move_temp_unit_to_coords(const ai_coords_t* coord) {
-    g_ai_data_base.acting_unit->x = coord->fields.x;
-    g_ai_data_base.acting_unit->position.y = coord->fields.y;
-    g_ai_data_base.acting_unit->position.higher_elevation = coord->fields.elevation;
+    g_battle_ai_data_base.acting_unit->x = coord->fields.x;
+    g_battle_ai_data_base.acting_unit->position.y = coord->fields.y;
+    g_battle_ai_data_base.acting_unit->position.higher_elevation = coord->fields.elevation;
 }
 
 /* Pack a unit's tile as AI coordinates: x, y and the elevation bit (position

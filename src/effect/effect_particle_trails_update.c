@@ -65,8 +65,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
     s32 pz;
     s32 wrap;
 
-    record = &g_effect_state_records[state_index];
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->tentacle_mesh.placement_flags;
     flags = entry->tentacle_mesh.flags;
 
@@ -106,7 +106,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             == 0) {
             SetTransMatrix(&work->matrix);
             orient = (flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
-            caster_target = &g_effect_context.targets[EFFECT_CASTER_ENTRY];
+            caster_target = &g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
             if (caster_target->target_type == EFFECT_TARGET_TYPE_UNIT) {
                 facing_yaw
                     = ((battle_unit_get_facing_quadrant_by_runtime_id(caster_target->data.unit.runtime_id) + 1) & 3)
@@ -116,10 +116,12 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 rotation.vy = facing_yaw;
                 RotMatrix(&rotation, &facing);
             }
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &caster);
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                target_index, &g_effect_context, &target);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
+                &g_battle_effect_context, &caster);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index,
+                &g_battle_effect_context, &target);
 
             EFFECT_READ_CURVE(index, factor,
                 effect_get_cached_curve_binding(tip_bindings, EFFECT_TENTACLE_CURVE_PARTICLE_COUNT_SHIFT), frame);
@@ -133,10 +135,10 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
                 break;
             case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-                origin.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                origin.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                    g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+                origin.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                origin.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 origin.vy -= tile->height * MAP_HEIGHT_STEP;
                 break;
             case EFFECT_EMITTER_ORIGIN_CASTER:
@@ -170,7 +172,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             index = effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_RADIAL_SPEED_SHIFT);
             index--;
             if (index != -1) {
-                factor = g_effect_animation_curve_data->curves[index][frame];
+                factor = g_battle_effect_animation_curve_data->curves[index][frame];
                 speed_min = battle_lerp_fixed8(
                     entry->tentacle_mesh.radial_speed_start.min, entry->tentacle_mesh.radial_speed_end.min, factor);
                 speed_max = battle_lerp_fixed8(
@@ -217,10 +219,10 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 tip.vz += target.vz;
                 break;
             case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-                tip.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                tip.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                    g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+                tip.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tip.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 tip.vy -= tile->height * MAP_HEIGHT_STEP;
                 break;
             }

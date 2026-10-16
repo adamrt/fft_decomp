@@ -34,7 +34,7 @@ typedef enum battle_seq_opcode {
     BATTLE_SEQ_OP_HIDE_ITEM = 0xc3,
     BATTLE_SEQ_OP_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
     BATTLE_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (battle_gfx_init_item_get_rendering) */
-    BATTLE_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_action_post_action is 0 */
+    BATTLE_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_action_post_action is 0 */
     BATTLE_SEQ_OP_UNKNOWN_C7 = 0xc7,        /* two operands */
     BATTLE_SEQ_OP_UNKNOWN_C8 = 0xc8,        /* two operands */
     BATTLE_SEQ_OP_UNKNOWN_C9 = 0xc9,        /* two operands */
@@ -726,7 +726,7 @@ typedef struct battle_strike_work {
     u8 target_new_map_level;
     u8 used_weapon_id;
     s16 reaction_ability_id; /* 0x20; runtime 0x1ac */
-    /* 0x22; runtime 0x1ae. g_action_current_ability.knockback_flags & 0x7f, stored with
+    /* 0x22; runtime 0x1ae. g_battle_action_current_ability.knockback_flags & 0x7f, stored with
      * the knockback destination. */
     u8 knockback_flags;
     u8 can_earn_experience;
@@ -799,8 +799,8 @@ typedef struct battle_unit {
     s32 distortion_timer;              /* 0x08c; frames left: the second operand of BATTLE_SEQ_OP_START_DISTORTION */
     s32 distortion_target;             /* 0x090; target real.vy or frame threshold of the distortion step */
     u16 previous_facing;               /* 0x094 */
-    u8 destination_edge_height;        /* 0x096; destination slope corner, as g_move_destination_edge_height */
-    u8 current_edge_height;            /* 0x097; current slope corner, as g_move_current_edge_height */
+    u8 destination_edge_height;        /* 0x096; destination slope corner, as g_battle_move_destination_edge_height */
+    u8 current_edge_height;            /* 0x097; current slope corner, as g_battle_move_current_edge_height */
     u32 movement_path_offset;          /* 0x098; index of the next packed path step */
     battle_walk_path_t path;           /* 0x09c..0x11b */
     move_step_t current_path_step;     /* 0x11c; path step byte being executed */

@@ -32,8 +32,8 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
     u32 brightness;
 
     scratch = (effect_anchored_polar_mesh_scratch_t*)getScratchAddr(0);
-    record = &g_effect_state_records[state_index];
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
@@ -77,16 +77,17 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->half_width = entry->polar_mesh.texture_width / 2;
         scratch->half_height = entry->polar_mesh.texture_height / 2;
 
-        scratch->target_index = g_effect_state_records[state_index].timeline.target_index;
-        battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-            scratch->target_index, &g_effect_context, &scratch->position);
+        scratch->target_index = g_battle_effect_state_records[state_index].timeline.target_index;
+        battle_effect_resolve_target_world_coords(
+            g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, scratch->target_index,
+            &g_battle_effect_context, &scratch->position);
         scratch->unit_coords = battle_unit_get_event_offset_by_runtime_id(
-            g_effect_context.targets[scratch->target_index].data.unit.runtime_id);
+            g_battle_effect_context.targets[scratch->target_index].data.unit.runtime_id);
         scratch->position.vx += scratch->unit_coords->vx;
         scratch->position.vy += scratch->unit_coords->vy;
         scratch->position.vz += scratch->unit_coords->vz;
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_camera_matrix);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_camera_matrix);
         RotTrans(&scratch->position, &scratch->screen, &scratch->screen.pad);
 
         selector = entry->polar_mesh.curve_bindings.radius;
@@ -170,13 +171,13 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
 
         if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             j = (entry->polar_mesh.color_curves & 0xfff);
-            scratch->red_factor = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
+            scratch->red_factor = g_battle_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
                 (entry->polar_mesh.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
             scratch->green_factor
-                = g_effect_animation_curve_data
+                = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(j, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];
             scratch->blue_factor
-                = g_effect_animation_curve_data
+                = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(j, EFFECT_COLOR_CURVE_BLUE_SHIFT)][work->frame];
         } else {
             scratch->blue_factor = EFFECT_COLOR_NEUTRAL;

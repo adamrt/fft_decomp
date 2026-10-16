@@ -32,9 +32,9 @@ static void battle_effect_init_palette(s16 index) {
     s32 raw_size;
     s32 height;
 
-    base = g_effect_data_ptrs[index];
+    base = g_battle_effect_data_ptrs[index];
     data = (effect_palette_section_t*)((u8*)base + base->palette_and_texture);
-    g_effect_palette_ptr = data;
+    g_battle_effect_palette_ptr = data;
     battle_map_load_palette_data(data->primary_clut, MAP_CLUT_ROW_EFFECT, 0, 1);
     battle_map_load_palette_data(data->secondary_clut, MAP_CLUT_ROW_EFFECT_SECOND, 0, 1);
     raw_size = data->image_size[0] + (data->image_size[1] << 8);
@@ -60,58 +60,59 @@ static void battle_effect_init_palette(s16 index) {
 }
 
 static void battle_effect_reset_frame_data_pointer(void) {
-    g_effect_frame_data = g_effect_frame_data_start;
+    g_battle_effect_frame_data = g_battle_effect_frame_data_start;
 }
 
 static void battle_effect_reset_animation_sequences_pointer(void) {
-    g_effect_animation_sequences = g_effect_animation_sequences_start;
+    g_battle_effect_animation_sequences = g_battle_effect_animation_sequences_start;
 }
 
 static void battle_effect_set_frame_data_pointer(s16 effect_id) {
     effect_file_header_t* header;
     effect_sprite_section_t* section;
 
-    header = g_effect_data_ptrs[effect_id];
+    header = g_battle_effect_data_ptrs[effect_id];
     section = (effect_sprite_section_t*)((u8*)header + header->frame_data);
-    g_effect_frame_data = (u8*)section->groups;
+    g_battle_effect_frame_data = (u8*)section->groups;
 }
 
 static void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
-    header = g_effect_data_ptrs[effect_id];
-    g_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
+    header = g_battle_effect_data_ptrs[effect_id];
+    g_battle_effect_animation_sequences = (u8*)header + header->animation_sequences + 4;
 }
 
 static void battle_effect_set_script_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
-    header = g_effect_data_ptrs[effect_id];
-    g_effect_script = (const u8*)header + header->script;
+    header = g_battle_effect_data_ptrs[effect_id];
+    g_battle_effect_script = (const u8*)header + header->script;
 }
 
 static void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
-    header = g_effect_data_ptrs[effect_id];
-    g_effect_animation_curve_data = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
+    header = g_battle_effect_data_ptrs[effect_id];
+    g_battle_effect_animation_curve_data
+        = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
 }
 
 static void battle_effect_set_particle_system_data_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
-    header = g_effect_data_ptrs[effect_id];
-    g_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
+    header = g_battle_effect_data_ptrs[effect_id];
+    g_battle_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
 }
 
 static void battle_effect_set_timeline_pointers(s16 effect_id) {
     effect_file_header_t* header;
     effect_timeline_t* timeline;
 
-    header = g_effect_data_ptrs[effect_id];
+    header = g_battle_effect_data_ptrs[effect_id];
     timeline = (effect_timeline_t*)((u8*)header + header->timeline);
-    g_effect_timeline = timeline;
-    g_effect_child_timeline = &timeline->child;
+    g_battle_effect_timeline = timeline;
+    g_battle_effect_child_timeline = &timeline->child;
 }
 
 /* Replace the effect sounds: unregister the sound resource of the previous effect
@@ -121,35 +122,35 @@ static void battle_effect_load_sound_section(s16 index) {
     effect_file_header_t* base;
     s32 offset;
 
-    if (g_effect_sound_section_ptr != 0) {
-        suzuki_sound_remove_resource(g_effect_sound_section_ptr);
+    if (g_battle_effect_sound_section_ptr != 0) {
+        suzuki_sound_remove_resource(g_battle_effect_sound_section_ptr);
     }
 
-    base = g_effect_data_ptrs[index];
+    base = g_battle_effect_data_ptrs[index];
     offset = base->sound_section;
     if (offset != 0) {
-        g_effect_sound_section_ptr = (suzuki_sound_resource_t*)((u8*)base + offset);
-        suzuki_sound_append_resource(g_effect_sound_section_ptr);
-        g_effect_sound_data_base = SUZUKI_SOUND_ID(g_effect_sound_section_ptr->id, 0);
+        g_battle_effect_sound_section_ptr = (suzuki_sound_resource_t*)((u8*)base + offset);
+        suzuki_sound_append_resource(g_battle_effect_sound_section_ptr);
+        g_battle_effect_sound_data_base = SUZUKI_SOUND_ID(g_battle_effect_sound_section_ptr->id, 0);
     } else {
-        g_effect_sound_section_ptr = 0;
-        g_effect_sound_data_base = 0;
+        g_battle_effect_sound_section_ptr = 0;
+        g_battle_effect_sound_data_base = 0;
     }
 }
 
 static void battle_effect_init_flags_section_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
-    header = g_effect_data_ptrs[effect_id];
-    g_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
+    header = g_battle_effect_data_ptrs[effect_id];
+    g_battle_effect_flags_section = (const effect_flags_section_t*)((u8*)header + header->flags_section);
 }
 
 /* A zero section offset binds the pointer to the file header. */
 static void battle_effect_set_timing_curves_pointer(s16 effect_id) {
     effect_file_header_t* header;
 
-    header = g_effect_data_ptrs[effect_id];
-    g_effect_timing_curves = (const effect_timing_curves_t*)((u8*)header + header->timing_curves);
+    header = g_battle_effect_data_ptrs[effect_id];
+    g_battle_effect_timing_curves = (const effect_timing_curves_t*)((u8*)header + header->timing_curves);
 }
 
 /* Time scale of the parent timeline's frame record->timeline.frame: one of the
@@ -162,7 +163,7 @@ static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
 
     packed_index = record->timeline.frame;
     offset = packed_index / 2;
-    packed_value = g_effect_timing_curves->parent_timeline[offset];
+    packed_value = g_battle_effect_timing_curves->parent_timeline[offset];
     if (packed_index & 1) {
         packed_value >>= 4;
     }
@@ -179,7 +180,7 @@ static s32 battle_effect_get_animation_timing_curve_value(effect_record_t* recor
 
     packed_index = record->timeline.frame;
     offset = packed_index / 2;
-    packed_value = g_effect_timing_curves->child_timeline[offset];
+    packed_value = g_battle_effect_timing_curves->child_timeline[offset];
     if (packed_index & 1) {
         packed_value >>= 4;
     }
@@ -188,14 +189,14 @@ static s32 battle_effect_get_animation_timing_curve_value(effect_record_t* recor
 
 /* Look up a native overlay callback by its resident catalog index. */
 static effect_callback_t battle_effect_get_native_callback(s16 callback_id) {
-    return g_effect_native_callbacks[callback_id];
+    return g_battle_effect_native_callbacks[callback_id];
 }
 
 static void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
-    *lba = g_effect_disc_entries[effect_id].sector;
-    *byte_length = g_effect_disc_entries[effect_id].size;
+    *lba = g_battle_effect_disc_entries[effect_id].sector;
+    *byte_length = g_battle_effect_disc_entries[effect_id].size;
 }
 
 /* Report an effect stub and return zero. */
@@ -249,12 +250,12 @@ s32 battle_effect_init_data(void) {
 
     destination = g_main_heap_companion_overlay_load_address + 0x3500;
     if (g_battle_ability_effect_id >= 0) {
-        switch (g_effect_load_state) {
+        switch (g_battle_effect_load_state) {
         case EFFECT_LOAD_START:
-            if (g_effect_charge_secondary_id != 0) {
-                g_effect_load_countdown = 60;
+            if (g_battle_effect_charge_secondary_id != 0) {
+                g_battle_effect_load_countdown = 60;
             } else {
-                g_effect_load_countdown = 0;
+                g_battle_effect_load_countdown = 0;
             }
             battle_effect_load_lba_and_size(g_battle_ability_effect_id, &lba, &byte_length);
             if (byte_length == 0) {
@@ -263,39 +264,40 @@ s32 battle_effect_init_data(void) {
             }
             result = main_file_call_build_header(lba, byte_length, destination);
             if (result == 0) {
-                g_effect_load_state = EFFECT_LOAD_READING;
+                g_battle_effect_load_state = EFFECT_LOAD_READING;
                 result = 1;
             }
             break;
         case EFFECT_LOAD_READING:
             result = main_file_is_still_loading();
             if (result == 0) {
-                g_effect_load_state = EFFECT_LOAD_COUNTDOWN;
+                g_battle_effect_load_state = EFFECT_LOAD_COUNTDOWN;
                 result = 1;
             }
             break;
         case EFFECT_LOAD_COUNTDOWN:
-            if (g_effect_load_countdown != 0) {
+            if (g_battle_effect_load_countdown != 0) {
                 result = 1;
                 break;
             }
-            if (g_effect_charge_secondary_id != 0) {
-                battle_effect_finalize_secondary(g_effect_charge_secondary_id);
+            if (g_battle_effect_charge_secondary_id != 0) {
+                battle_effect_finalize_secondary(g_battle_effect_charge_secondary_id);
             }
-            g_effect_load_state = EFFECT_LOAD_ENDING_SECONDARY;
+            g_battle_effect_load_state = EFFECT_LOAD_ENDING_SECONDARY;
             battle_effect_init_flags_section_pointer(g_battle_ability_effect_id);
             /* An `lw` of the section's leading 32-bit value, not a byte test. */
-            if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
+            if (g_battle_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
                 main_sound_set_current_music_volume(0x40, 0xF0);
             }
             result = 1;
             break;
         case EFFECT_LOAD_ENDING_SECONDARY:
-            result = battle_effect_get_secondary_phase(g_effect_charge_secondary_id) != EFFECT_SECONDARY_PHASE_ENDED;
+            result = battle_effect_get_secondary_phase(g_battle_effect_charge_secondary_id)
+                != EFFECT_SECONDARY_PHASE_ENDED;
             break;
         }
-        if (g_effect_load_countdown > 0) {
-            g_effect_load_countdown--;
+        if (g_battle_effect_load_countdown > 0) {
+            g_battle_effect_load_countdown--;
         }
         return result != 0;
     }
@@ -314,7 +316,7 @@ s32 battle_effect_init_data(void) {
  * ability ranges are started, and nothing is retained.
  */
 void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init_t* source) {
-    g_effect_load_state = EFFECT_LOAD_START;
+    g_battle_effect_load_state = EFFECT_LOAD_START;
     if (ability < ABILITY_ID_COUNT) {
         if (ability == ABILITY_ID_THROW_BALL) {
             s32 ball = battle_effect_get_element_index(packed >> 16);
@@ -325,27 +327,28 @@ void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_seconda
             else if (ball == EFFECT_ELEMENT_INDEX_LIGHTNING)
                 g_battle_ability_effect_id = EFFECT_FILE_BOLT;
         } else {
-            g_battle_ability_effect_id = g_effect_ability_files[ability];
+            g_battle_ability_effect_id = g_battle_effect_ability_files[ability];
         }
     } else {
         /* Event IDs continue after the action/reaction ability rows. */
-        g_battle_ability_effect_id = g_effect_ability_files[ability - ABILITY_ID_COUNT + ABILITY_ID_SUPPORT_FIRST];
+        g_battle_ability_effect_id
+            = g_battle_effect_ability_files[ability - ABILITY_ID_COUNT + ABILITY_ID_SUPPORT_FIRST];
     }
 
     if (g_battle_ability_effect_id >= 0) {
         g_battle_ability_effect_id &= EFFECT_ABILITY_FILE_MASK;
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
-        if (g_effect_secondary_by_charge_animation[packed & 0xffff] != 0) {
-            g_effect_charge_secondary_id = battle_effect_init_secondary(
-                g_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
+        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_REQUESTED;
+        if (g_battle_effect_secondary_by_charge_animation[packed & 0xffff] != 0) {
+            g_battle_effect_charge_secondary_id = battle_effect_init_secondary(
+                g_battle_effect_secondary_by_charge_animation[packed & 0xffff], packed >> 16, source);
         } else {
-            g_effect_charge_secondary_id = 0;
+            g_battle_effect_charge_secondary_id = 0;
         }
-        g_effect_sound_call_counts[3] = 0;
-        g_effect_sound_call_counts[2] = 0;
-        g_effect_sound_call_counts[1] = 0;
-        g_effect_sound_call_counts[0] = 0;
-        g_effect_context = *source;
+        g_battle_effect_sound_call_counts[3] = 0;
+        g_battle_effect_sound_call_counts[2] = 0;
+        g_battle_effect_sound_call_counts[1] = 0;
+        g_battle_effect_sound_call_counts[0] = 0;
+        g_battle_effect_context = *source;
         g_battle_unknown_801bc0d4 = 0;
         return;
     }
@@ -369,17 +372,17 @@ u32 battle_effect_load_ability(s32 ability_id) {
     if (ability_id == ABILITY_ID_BASIC_SKILL_ACCUMULATE) {
         result = 0;
     } else {
-        result = g_effect_ability_files[ability_id] < 0;
+        result = g_battle_effect_ability_files[ability_id] < 0;
     }
     return result;
 }
 
-/* 1 when the ability's entry in g_effect_ability_files carries
+/* 1 when the ability's entry in g_battle_effect_ability_files carries
  * EFFECT_ABILITY_FLAG_ITEM. A negative entry (an ability without an effect
  * file) is complemented before the test. */
 s32 battle_effect_is_item_ability(s32 ability_id) {
     s32 entry;
-    entry = g_effect_ability_files[ability_id];
+    entry = g_battle_effect_ability_files[ability_id];
     if (entry < 0) {
         entry = ~entry;
     }
@@ -389,20 +392,20 @@ s32 battle_effect_is_item_ability(s32 ability_id) {
 /* Releases a requested effect: battle_effect_update_stage starts it on its
  * next frame. */
 void battle_effect_play(void) {
-    if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
+    if (g_battle_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_INIT_PALETTE;
     }
 }
 
 /* Drops a requested effect that has not been released. */
 void battle_effect_cancel_playback_request(void) {
-    if (g_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+    if (g_battle_effect_playback_phase == EFFECT_PLAYBACK_PHASE_REQUESTED) {
+        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
     }
 }
 
 s32 battle_effect_get_playback_phase(void) {
-    return g_effect_playback_phase;
+    return g_battle_effect_playback_phase;
 }
 
 /* Runs the loaded effect file one frame and returns 1 while it plays.
@@ -418,8 +421,8 @@ static s32 battle_effect_update_stage(void) {
     s32 id;
     s32 next;
 
-    id = g_effect_allocated_record_head;
-    switch (g_effect_playback_phase) {
+    id = g_battle_effect_allocated_record_head;
+    switch (g_battle_effect_playback_phase) {
     case EFFECT_PLAYBACK_PHASE_IDLE:
         result = 0;
         break;
@@ -430,14 +433,14 @@ static s32 battle_effect_update_stage(void) {
         battle_map_freeze();
         menu_suppress_height_display();
         battle_effect_init_palette(g_battle_ability_effect_id);
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
-        g_effect_unknown_801bf000 = 0;
+        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_START_SCRIPT;
+        g_battle_effect_unknown_801bf000 = 0;
         battle_state_reset_frame_pacing_timer();
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_START_SCRIPT:
-        battle_heap_init(
-            (battle_heap_node_t*)g_effect_palette_ptr, g_battle_heap_end_address - (u32)g_effect_palette_ptr);
+        battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
+            g_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_copy_camera_angles_and_world_coords();
         battle_state_clear_frame_pacing();
@@ -450,56 +453,56 @@ static s32 battle_effect_update_stage(void) {
         battle_effect_load_sound_section(g_battle_ability_effect_id);
         battle_effect_init_flags_section_pointer(g_battle_ability_effect_id);
         battle_effect_set_timing_curves_pointer(g_battle_ability_effect_id);
-        if (g_effect_context.math_skill_flag != 0) {
-            if (g_effect_flags_section->spawn_delay_override != 0) {
-                g_effect_timeline->spawn_delay = g_effect_flags_section->spawn_delay_override;
+        if (g_battle_effect_context.math_skill_flag != 0) {
+            if (g_battle_effect_flags_section->spawn_delay_override != 0) {
+                g_battle_effect_timeline->spawn_delay = g_battle_effect_flags_section->spawn_delay_override;
             } else {
-                g_effect_timeline->spawn_delay = 100;
+                g_battle_effect_timeline->spawn_delay = 100;
             }
         }
-        g_effect_root_record_index = battle_effect_start_script_record(g_effect_script, 0, 0);
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
+        g_battle_effect_root_record_index = battle_effect_start_script_record(g_battle_effect_script, 0, 0);
+        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
         battle_map_configure_effect_data_state(MAP_EFFECT_DATA_BEGIN);
         result = 1;
         break;
     case EFFECT_PLAYBACK_PHASE_RUNNING:
-        g_effect_otag = main_gfx_get_otag();
+        g_battle_effect_otag = main_gfx_get_otag();
         battle_effect_start_render_frame();
         while (id != 0) {
-            next = g_effect_state_records[id].next_index;
-            g_effect_current_record_index = id;
-            g_effect_state_records[id].frame_counter++;
+            next = g_battle_effect_state_records[id].next_index;
+            g_battle_effect_current_record_index = id;
+            g_battle_effect_state_records[id].frame_counter++;
             if (battle_effect_run_block(id) == 0) {
                 battle_effect_free_state_record(id);
             }
             id = next;
         }
-        if (g_effect_allocated_record_head != 0) {
+        if (g_battle_effect_allocated_record_head != 0) {
             result = 1;
         } else {
-            if (g_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
+            if (g_battle_effect_flags_section->flags & EFFECT_FLAG_QUIET_MUSIC) {
                 main_sound_set_current_music_volume_timed(0x78);
             }
-            if (g_effect_sound_section_ptr != 0) {
-                suzuki_sound_remove_resource(g_effect_sound_section_ptr);
-                g_effect_sound_section_ptr = 0;
+            if (g_battle_effect_sound_section_ptr != 0) {
+                suzuki_sound_remove_resource(g_battle_effect_sound_section_ptr);
+                g_battle_effect_sound_section_ptr = 0;
             }
             battle_map_configure_effect_data_state(MAP_EFFECT_DATA_END);
             battle_map_unfreeze();
             menu_enable_height_display();
             battle_state_clear_frame_pacing();
-            g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+            g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
             result = 0;
         }
         break;
     case EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT:
-        battle_heap_init(
-            (battle_heap_node_t*)g_effect_palette_ptr, g_battle_heap_end_address - (u32)g_effect_palette_ptr);
+        battle_heap_init((battle_heap_node_t*)g_battle_effect_palette_ptr,
+            g_battle_heap_end_address - (u32)g_battle_effect_palette_ptr);
         battle_effect_reset_subsystems();
         battle_effect_reset_frame_data_pointer();
         battle_effect_reset_animation_sequences_pointer();
-        g_effect_root_record_index = battle_effect_start_script_record(g_effect_script, 0, 0);
-        g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
+        g_battle_effect_root_record_index = battle_effect_start_script_record(g_battle_effect_script, 0, 0);
+        g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_RUNNING;
         return 1;
     }
     return result;
@@ -524,18 +527,18 @@ s32 battle_effect_update_cycle(void) {
 void battle_effect_init_state_records(void) {
     s32 i;
 
-    g_effect_state_records[0].next_index = 0;
-    g_effect_available_record_head = 1;
+    g_battle_effect_state_records[0].next_index = 0;
+    g_battle_effect_available_record_head = 1;
     for (i = 1; i < EFFECT_STATE_RECORD_CAPACITY; i++) {
-        g_effect_state_records[i].record_index = i;
-        g_effect_state_records[i].next_index = i + 1;
-        g_effect_state_records[i].last_native_callback = 0;
+        g_battle_effect_state_records[i].record_index = i;
+        g_battle_effect_state_records[i].next_index = i + 1;
+        g_battle_effect_state_records[i].last_native_callback = 0;
     }
-    g_effect_state_records[i].next_index = 0;
-    g_effect_state_records[i].record_index = i;
-    g_effect_allocated_record_head = 0;
-    g_effect_current_record_index = 0;
-    g_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
+    g_battle_effect_state_records[i].next_index = 0;
+    g_battle_effect_state_records[i].record_index = i;
+    g_battle_effect_allocated_record_head = 0;
+    g_battle_effect_current_record_index = 0;
+    g_battle_effect_playback_phase = EFFECT_PLAYBACK_PHASE_IDLE;
 }
 
 /* Allocate one effect record and link it into the in-use list. */
@@ -546,15 +549,15 @@ static s16 battle_effect_alloc_state_record(void) {
     u16 next_available;
     u16 next_allocated;
 
-    available = &g_effect_available_record_head;
+    available = &g_battle_effect_available_record_head;
     index = *available;
-    next_available = g_effect_state_records[index].next_index;
-    allocated = &g_effect_allocated_record_head;
+    next_available = g_battle_effect_state_records[index].next_index;
+    allocated = &g_battle_effect_allocated_record_head;
     next_allocated = *allocated;
     *available = next_available;
-    g_effect_state_records[index].next_index = next_allocated;
+    g_battle_effect_state_records[index].next_index = next_allocated;
     *allocated = index;
-    g_effect_state_records[index].flags |= EFFECT_RECORD_FLAG_ALLOCATED;
+    g_battle_effect_state_records[index].flags |= EFFECT_RECORD_FLAG_ALLOCATED;
     return index;
 }
 
@@ -574,46 +577,46 @@ static void battle_effect_free_state_record(s16 record_index) {
     s16 parent;
     s16 cur;
 
-    particle = work = g_effect_state_records[record_index].work_head;
-    head = g_effect_allocated_record_head;
+    particle = work = g_battle_effect_state_records[record_index].work_head;
+    head = g_battle_effect_allocated_record_head;
     while (work != 0) {
         battle_effect_free_work_record(record_index, particle);
         particle = work = work->next;
     }
     for (i = 0; i < EFFECT_RECORD_CALLBACK_SLOT_COUNT; i++) {
-        if (g_effect_state_records[record_index].work_slots[i] != 0) {
-            battle_heap_free_block(g_effect_state_records[record_index].work_slots[i]);
-            g_effect_state_records[record_index].work_slots[i] = 0;
+        if (g_battle_effect_state_records[record_index].work_slots[i] != 0) {
+            battle_heap_free_block(g_battle_effect_state_records[record_index].work_slots[i]);
+            g_battle_effect_state_records[record_index].work_slots[i] = 0;
         }
-        g_effect_state_records[record_index].callbacks[i] = 0;
+        g_battle_effect_state_records[record_index].callbacks[i] = 0;
     }
-    parent = g_effect_state_records[record_index].parent_index;
-    if (parent != 0 && (g_effect_state_records[parent].flags & EFFECT_RECORD_FLAG_ALLOCATED)) {
+    parent = g_battle_effect_state_records[record_index].parent_index;
+    if (parent != 0 && (g_battle_effect_state_records[parent].flags & EFFECT_RECORD_FLAG_ALLOCATED)) {
         for (i = 0; i < EFFECT_SCRIPT_CHILD_SLOT_COUNT; i++) {
-            if (g_effect_state_records[parent].child_indices[i] == record_index) {
-                g_effect_state_records[parent].child_indices[i] = 0;
+            if (g_battle_effect_state_records[parent].child_indices[i] == record_index) {
+                g_battle_effect_state_records[parent].child_indices[i] = 0;
             }
         }
     }
     if (head == record_index) {
         u16* available;
 
-        g_effect_allocated_record_head = g_effect_state_records[record_index].next_index;
-        available = &g_effect_available_record_head;
-        g_effect_state_records[record_index].next_index = *available;
+        g_battle_effect_allocated_record_head = g_battle_effect_state_records[record_index].next_index;
+        available = &g_battle_effect_available_record_head;
+        g_battle_effect_state_records[record_index].next_index = *available;
         *available = head;
     } else {
         u16* available_after_unlink;
 
-        while ((cur = g_effect_state_records[head].next_index) != record_index) {
+        while ((cur = g_battle_effect_state_records[head].next_index) != record_index) {
             head = cur;
         }
-        g_effect_state_records[head].next_index = g_effect_state_records[cur].next_index;
-        available_after_unlink = &g_effect_available_record_head;
-        g_effect_state_records[cur].next_index = *available_after_unlink;
+        g_battle_effect_state_records[head].next_index = g_battle_effect_state_records[cur].next_index;
+        available_after_unlink = &g_battle_effect_available_record_head;
+        g_battle_effect_state_records[cur].next_index = *available_after_unlink;
         *available_after_unlink = cur;
     }
-    g_effect_state_records[record_index].flags &= ~EFFECT_RECORD_FLAG_ALLOCATED;
+    g_battle_effect_state_records[record_index].flags &= ~EFFECT_RECORD_FLAG_ALLOCATED;
 }
 
 /* Clears a record's child-timeline state and sets the effect target it plays
@@ -655,7 +658,7 @@ static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16
     if (index == 0) {
         return 0;
     }
-    record = &g_effect_state_records[index];
+    record = &g_battle_effect_state_records[index];
     record->parent_index = parent_index;
     record->script = script;
     record->pc = start_pc;
@@ -705,7 +708,7 @@ effect_script_result_e battle_effect_code_script_02_spawn_child(effect_record_t*
     parameters = instruction->header.parameters;
     slot = parameters.child.slot;
     child = battle_effect_start_script_record(
-        record->script, instruction->immediate.value, g_effect_current_record_index);
+        record->script, instruction->immediate.value, g_battle_effect_current_record_index);
     if (slot < EFFECT_SCRIPT_CHILD_SLOT_COUNT) {
         record->child_indices[slot] = child;
     }
@@ -737,7 +740,7 @@ effect_script_result_e battle_effect_code_script_05_store_high_nibble(effect_rec
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
     effect_script_parameters_t parameters = instruction->header.parameters;
-    g_effect_unknown_801bf000 = parameters.opcode_05.high_nibble;
+    g_battle_effect_unknown_801bf000 = parameters.opcode_05.high_nibble;
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -749,7 +752,7 @@ effect_script_result_e battle_effect_code_script_06_register_native_callback(eff
     const effect_script_instruction_t* command = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = command->header.parameters;
     u32 slot = parameters.callback.slot;
-    g_effect_callback_slots[slot] = battle_effect_get_native_callback(command->immediate.value);
+    g_battle_effect_callback_slots[slot] = battle_effect_get_native_callback(command->immediate.value);
     record->pc += 4;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1031,7 +1034,7 @@ effect_script_result_e battle_effect_code_script_1c_jump_if_counter_not_equal(ef
  * timeline frame reaches the child timeline's duration; otherwise step over
  * the 4-byte instruction. */
 effect_script_result_e battle_effect_code_script_1d_jump_after_child_timeline_duration(effect_record_t* record) {
-    if (record->timeline.frame >= g_effect_child_timeline->duration) {
+    if (record->timeline.frame >= g_battle_effect_child_timeline->duration) {
         const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
         record->pc = instruction->immediate.value;
@@ -1048,9 +1051,9 @@ effect_script_result_e battle_effect_code_script_1d_jump_after_child_timeline_du
 effect_script_result_e battle_effect_code_script_1e_jump_after_total_duration(effect_record_t* record) {
     effect_timeline_t* timing;
 
-    timing = g_effect_timeline;
+    timing = g_battle_effect_timeline;
     if (record->timeline.frame >= timing->phase1_duration + timing->phase2_duration
-            + (g_effect_context.target_count - 1) * timing->spawn_delay + timing->child.duration) {
+            + (g_battle_effect_context.target_count - 1) * timing->spawn_delay + timing->child.duration) {
         const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
         record->pc = instruction->immediate.value;
@@ -1065,7 +1068,7 @@ effect_script_result_e battle_effect_code_script_1e_jump_after_total_duration(ef
 effect_script_result_e battle_effect_code_script_1f_jump_if_target_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
-    if (g_effect_context.target_count == parameters.targets.count) {
+    if (g_battle_effect_context.target_count == parameters.targets.count) {
         record->pc = instruction->immediate.value;
     } else {
         record->pc += 4;
@@ -1151,8 +1154,8 @@ effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_
     effect_work_record_t* work;
 
     work = record->work_head;
-    gte_SetRotMatrix(&g_camera_matrix);
-    gte_SetTransMatrix(&g_camera_matrix);
+    gte_SetRotMatrix(&g_battle_camera_matrix);
+    gte_SetTransMatrix(&g_battle_camera_matrix);
     battle_effect_integrate_particle_motion(record->work_head);
 
     for (;;) {
@@ -1180,7 +1183,7 @@ effect_script_result_e battle_effect_code_script_25_update_all_particles(effect_
             }
         }
 
-        g_effect_particle_render_handlers[(u16)node->kind_flags >> 12](record, node);
+        g_battle_effect_particle_render_handlers[(u16)node->kind_flags >> 12](record, node);
 
         if ((node->flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) == EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_1
             || (node->flags & EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK) == EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MODE_2) {
@@ -1239,8 +1242,8 @@ effect_script_result_e battle_effect_code_script_26_spawn_emitter_particles(effe
 /* Opcode 27: take the gravity vector and the inertia threshold from the
  * effect file's particle-system section. */
 effect_script_result_e battle_effect_code_script_27_init_particle_physics(effect_record_t* record) {
-    battle_effect_set_gravity(&g_effect_geometry_table->gravity);
-    battle_effect_set_inertia_threshold(g_effect_geometry_table->inertia_threshold);
+    battle_effect_set_gravity(&g_battle_effect_geometry_table->gravity);
+    battle_effect_set_inertia_threshold(g_battle_effect_geometry_table->inertia_threshold);
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
@@ -1257,13 +1260,13 @@ static void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_reco
 
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
         runtime_id = -1;
-        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
+        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            runtime_id = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
         }
     } else {
         runtime_id = -1;
-        if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_effect_context.targets[target].data.unit.runtime_id;
+        if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            runtime_id = g_battle_effect_context.targets[target].data.unit.runtime_id;
         }
     }
     if ((flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) && runtime_id != -1) {
@@ -1282,7 +1285,7 @@ static void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_reco
     if (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) {
         slot = (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) - 1;
         state->callback_phase[slot] = EFFECT_CALLBACK_PHASE_INIT;
-        state->callbacks[slot] = g_effect_callback_slots[slot];
+        state->callbacks[slot] = g_battle_effect_callback_slots[slot];
     }
 }
 
@@ -1290,30 +1293,30 @@ static s32 battle_effect_select_sound_id(s32 channel) {
     s32 count;
     s32 sound;
 
-    count = g_effect_sound_call_counts[channel]++;
-    switch (g_effect_flags_section->channels[channel].mode) {
+    count = g_battle_effect_sound_call_counts[channel]++;
+    switch (g_battle_effect_flags_section->channels[channel].mode) {
     case EFFECT_SOUND_MODE_FIRST:
-        sound = g_effect_flags_section->channels[channel].sound_ids[0];
+        sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];
         break;
     case EFFECT_SOUND_MODE_ALTERNATE:
-        sound = g_effect_flags_section->channels[channel].sound_ids[count & 1];
+        sound = g_battle_effect_flags_section->channels[channel].sound_ids[count & 1];
         break;
     case EFFECT_SOUND_MODE_FIRST_THEN_SECOND:
         if (count == 0) {
-            sound = g_effect_flags_section->channels[channel].sound_ids[0];
+            sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];
         } else {
-            sound = g_effect_flags_section->channels[channel].sound_ids[1];
+            sound = g_battle_effect_flags_section->channels[channel].sound_ids[1];
         }
         break;
     case EFFECT_SOUND_MODE_FIRST_THEN_ALTERNATE:
         if (count != 0) {
-            sound = g_effect_flags_section->channels[channel].sound_ids[1 + (count & 1)];
+            sound = g_battle_effect_flags_section->channels[channel].sound_ids[1 + (count & 1)];
         } else {
-            sound = g_effect_flags_section->channels[channel].sound_ids[0];
+            sound = g_battle_effect_flags_section->channels[channel].sound_ids[0];
         }
         break;
     case EFFECT_SOUND_MODE_CYCLE:
-        sound = g_effect_flags_section->channels[channel].sound_ids[count % 3];
+        sound = g_battle_effect_flags_section->channels[channel].sound_ids[count % 3];
         break;
     }
     return sound;
@@ -1350,9 +1353,9 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
 
     target = record->timeline.target_index;
     timeline = &record->timeline;
-    if (g_effect_context.targets[target].data.unit.result_animation != EFFECT_HIT_REFLECTED) {
+    if (g_battle_effect_context.targets[target].data.unit.result_animation != EFFECT_HIT_REFLECTED) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            table = &g_effect_child_timeline->particle[i];
+            table = &g_battle_effect_child_timeline->particle[i];
             if (timeline->state.child.remaining.tracks.particle[i] == 0) {
                 if (timeline->state.child.keyframe.tracks.particle[i] == 0) {
                     timeline->state.child.remaining.tracks.particle[i] = table->frame_start[1] - table->frame_start[0];
@@ -1387,7 +1390,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
             timeline->state.child.remaining.tracks.particle[i]--;
         }
 
-        track = &g_effect_child_timeline->surroundings;
+        track = &g_battle_effect_child_timeline->surroundings;
         units_keyframe = timeline->state.child.keyframe.tracks.surroundings;
         if (units_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.surroundings == 0) {
@@ -1407,11 +1410,11 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     blue = track->color[index].b;
                     battle_map_color_field(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
-                    for (i = 0; i < g_effect_context.spectator_count; i++) {
+                    for (i = 0; i < g_battle_effect_context.spectator_count; i++) {
                         battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
+                            track->duration[index], g_battle_effect_palette_target_runtime_ids[i], red, green, blue);
                     }
-                    if (!(g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                    if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
                         battle_map_start_darkness_blend(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
                             track->duration[index], red * 8, green * 8, blue * 8);
                     }
@@ -1420,7 +1423,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
             timeline->state.child.remaining.tracks.surroundings--;
         }
 
-        track = &g_effect_child_timeline->caster;
+        track = &g_battle_effect_child_timeline->caster;
         caster_keyframe = timeline->state.child.keyframe.tracks.caster;
         if (caster_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.caster == 0) {
@@ -1438,17 +1441,18 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     red = track->color[index].r;
                     green = track->color[index].g;
                     blue = track->color[index].b;
-                    if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
                         battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id,
-                            red, green, blue);
+                            track->duration[index],
+                            g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id, red, green,
+                            blue);
                     }
                 }
             }
             timeline->state.child.remaining.tracks.caster--;
         }
 
-        track = &g_effect_child_timeline->target;
+        track = &g_battle_effect_child_timeline->target;
         target_keyframe = timeline->state.child.keyframe.tracks.target;
         if (target_keyframe < track->count - 1) {
             if (timeline->state.child.remaining.tracks.target == 0) {
@@ -1466,17 +1470,17 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     red = track->color[index].r;
                     green = track->color[index].g;
                     blue = track->color[index].b;
-                    if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
                         battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_context.targets[target].data.unit.runtime_id, red, green,
-                            blue);
+                            track->duration[index], g_battle_effect_context.targets[target].data.unit.runtime_id, red,
+                            green, blue);
                     }
                 }
             }
             timeline->state.child.remaining.tracks.target--;
         }
 
-        screen = &g_effect_child_timeline->screen;
+        screen = &g_battle_effect_child_timeline->screen;
         screen_keyframe = timeline->state.child.keyframe.tracks.screen;
         if (screen_keyframe < screen->count - 1) {
             if (timeline->state.child.remaining.tracks.screen == 0) {
@@ -1496,7 +1500,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     green = screen->color[index].g * 2;
                     blue = screen->color[index].b * 2;
                     battle_map_modify_background_gradient(mode, screen->duration[index], red, green, blue);
-                    if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
                         battle_map_start_darkness_blend(mode, screen->duration[index], red, green, blue);
                     }
                 } else {
@@ -1507,7 +1511,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = screen->second_color[index].g;
                     colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = screen->second_color[index].b;
                     battle_map_set_background_gradient(screen->duration[index], &colors);
-                    if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                    if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
                         battle_map_set_darkness_color(
                             screen->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                     }
@@ -1517,7 +1521,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         }
 
         for (i = 0; i < EFFECT_SOUND_TRACK_COUNT; i++) {
-            sound = &g_effect_child_timeline->sound[i];
+            sound = &g_battle_effect_child_timeline->sound[i];
             sound_keyframe = timeline->state.child.keyframe.tracks.sound[i];
             if (sound_keyframe < sound->count) {
                 if (timeline->state.child.remaining.tracks.sound[i] == 0) {
@@ -1528,7 +1532,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     if (kind >= 2) {
                         sound_index = battle_effect_select_sound_id(kind - 2);
                         if (sound_index != 0) {
-                            suzuki_sound_play_sfx(sound_index + g_effect_sound_data_base);
+                            suzuki_sound_play_sfx(sound_index + g_battle_effect_sound_data_base);
                         }
                     }
                 }
@@ -1538,17 +1542,18 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         if (record->parent_index == 0) {
             battle_camera_start_effect_keyframe_moves(timeline->frame);
         }
-        if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
+        if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
             battle_state_set_time_scale(battle_effect_get_animation_timing_curve_value(record));
         }
         timeline->frame++;
     } else {
-        if (g_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            init.targets[EFFECT_CASTER_ENTRY] = g_effect_context.targets[EFFECT_CASTER_ENTRY];
-            init.targets[0] = g_effect_context.targets[target];
-            battle_effect_init_secondary(EFFECT_SECONDARY_ANIMATION_REFLECT, g_effect_timeline->spawn_delay, &init);
+        if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            init.targets[EFFECT_CASTER_ENTRY] = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
+            init.targets[0] = g_battle_effect_context.targets[target];
+            battle_effect_init_secondary(
+                EFFECT_SECONDARY_ANIMATION_REFLECT, g_battle_effect_timeline->spawn_delay, &init);
         }
-        record->timeline.frame = g_effect_child_timeline->duration;
+        record->timeline.frame = g_battle_effect_child_timeline->duration;
     }
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
@@ -1568,8 +1573,8 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
 
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_CASTER_ONLY) {
         runtime_id = -1;
-        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            runtime_id = g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
+        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            runtime_id = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id;
         }
     }
     if (flags & EFFECT_KEYFRAME_ACTION_FLAG_POST_ACTION_DISPLAY) {
@@ -1578,10 +1583,10 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
                 battle_gfx_prepare_post_action_display_by_runtime_id(runtime_id);
             }
         } else {
-            for (i = 0; i < g_effect_context.target_count; i++) {
-                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            for (i = 0; i < g_battle_effect_context.target_count; i++) {
+                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
                     battle_gfx_prepare_post_action_display_by_runtime_id(
-                        g_effect_context.targets[i].data.unit.runtime_id);
+                        g_battle_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }
@@ -1592,9 +1597,9 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
                 battle_unit_update_display_by_runtime_id(runtime_id);
             }
         } else {
-            for (i = 0; i < g_effect_context.target_count; i++) {
-                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    battle_unit_update_display_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
+            for (i = 0; i < g_battle_effect_context.target_count; i++) {
+                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    battle_unit_update_display_by_runtime_id(g_battle_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }
@@ -1605,9 +1610,10 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
                 battle_unit_set_target_animation_by_runtime_id(runtime_id);
             }
         } else {
-            for (i = 0; i < g_effect_context.target_count; i++) {
-                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
-                    battle_unit_set_target_animation_by_runtime_id(g_effect_context.targets[i].data.unit.runtime_id);
+            for (i = 0; i < g_battle_effect_context.target_count; i++) {
+                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                    battle_unit_set_target_animation_by_runtime_id(
+                        g_battle_effect_context.targets[i].data.unit.runtime_id);
                 }
             }
         }
@@ -1619,10 +1625,10 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
                 battle_unit_set_specific_animation_by_runtime_id(runtime_id, animation);
             }
         } else {
-            for (i = 0; i < g_effect_context.target_count; i++) {
-                if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            for (i = 0; i < g_battle_effect_context.target_count; i++) {
+                if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
                     battle_unit_set_specific_animation_by_runtime_id(
-                        g_effect_context.targets[i].data.unit.runtime_id, animation);
+                        g_battle_effect_context.targets[i].data.unit.runtime_id, animation);
                 }
             }
         }
@@ -1630,7 +1636,7 @@ static void battle_effect_run_keyframe_actions_all_targets(u16 flags, effect_rec
     if (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) {
         slot = (flags & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK) - 1;
         state->callback_phase[slot] = EFFECT_CALLBACK_PHASE_INIT;
-        state->callbacks[slot] = g_effect_callback_slots[slot];
+        state->callbacks[slot] = g_battle_effect_callback_slots[slot];
     }
 }
 
@@ -1718,11 +1724,11 @@ static void battle_effect_advance_target_palette_track(
                 blue = track->color[index].b;
                 battle_map_color_field(
                     preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red, green, blue);
-                for (i = 0; i < g_effect_context.spectator_count; i++) {
+                for (i = 0; i < g_battle_effect_context.spectator_count; i++) {
                     battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                        track->duration[index], g_effect_palette_target_runtime_ids[i], red, green, blue);
+                        track->duration[index], g_battle_effect_palette_target_runtime_ids[i], red, green, blue);
                 }
-                if (!(g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
+                if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
                     battle_map_start_darkness_blend(
                         preset & EFFECT_COLOR_KEYFRAME_MODE_MASK, track->duration[index], red * 8, green * 8, blue * 8);
                 }
@@ -1802,10 +1808,11 @@ static void battle_effect_advance_coord_target_palette_track(
                 red = track->color[index].r;
                 green = track->color[index].g;
                 blue = track->color[index].b;
-                for (i = 0; i < g_effect_context.target_count; i++) {
-                    if (g_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
+                for (i = 0; i < g_battle_effect_context.target_count; i++) {
+                    if (g_battle_effect_context.targets[i].target_type == EFFECT_TARGET_TYPE_UNIT) {
                         battle_gfx_apply_unit_palette_modulation_to_units(preset & EFFECT_COLOR_KEYFRAME_MODE_MASK,
-                            track->duration[index], g_effect_context.targets[i].data.unit.runtime_id, red, green, blue);
+                            track->duration[index], g_battle_effect_context.targets[i].data.unit.runtime_id, red, green,
+                            blue);
                     }
                 }
             }
@@ -1851,7 +1858,7 @@ static void battle_effect_advance_map_background_track(
                 green = track->color[index].g * 2;
                 blue = track->color[index].b * 2;
                 battle_map_modify_background_gradient(mode, track->duration[index], red, green, blue);
-                if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
                     battle_map_start_darkness_blend(mode, track->duration[index], red, green, blue);
                 }
             } else {
@@ -1862,7 +1869,7 @@ static void battle_effect_advance_map_background_track(
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = track->second_color[index].g;
                 colors.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = track->second_color[index].b;
                 battle_map_set_background_gradient(track->duration[index], &colors);
-                if (g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
+                if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
                     battle_map_set_darkness_color(track->duration[index], &colors.colors[MAP_BACKGROUND_GRADIENT_TOP]);
                 }
             }
@@ -1876,7 +1883,7 @@ static void battle_effect_advance_map_background_track(
  * track holds nine 16-bit durations at 0x00, nine channel bytes at 0x12
  * (0 and 1 none, otherwise a sound channel of the flags section + 2) and its
  * entry count at 0x1c; entering an entry plays the channel's next sound.
- * Sound ids are relative to g_effect_sound_data_base, the effect sound
+ * Sound ids are relative to g_battle_effect_sound_data_base, the effect sound
  * section's id set by battle_effect_load_sound_section.
  */
 static void battle_effect_advance_parent_sound_track(
@@ -1895,7 +1902,7 @@ static void battle_effect_advance_parent_sound_track(
                 sound_index = battle_effect_select_sound_id(effect_kind - 2);
 
                 if (sound_index != 0) {
-                    suzuki_sound_play_sfx(g_effect_sound_data_base + sound_index);
+                    suzuki_sound_play_sfx(g_battle_effect_sound_data_base + sound_index);
                 }
             }
         }
@@ -1919,78 +1926,79 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
     u8 unused_stack[16]; /* Unread locals that size the target's 0x48-byte frame. */
 
     timeline = &record->timeline;
-    if (timeline->frame >= g_effect_timeline->phase1_duration) {
+    if (timeline->frame >= g_battle_effect_timeline->phase1_duration) {
         while (timeline->state.parent.spawn_countdown == 0
-            && timeline->state.parent.spawned_count < g_effect_context.target_count) {
+            && timeline->state.parent.spawned_count < g_battle_effect_context.target_count) {
             const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
 
             child
                 = battle_effect_start_script_record(record->script, instruction->immediate.value, record->record_index);
-            g_effect_state_records[child].timeline.target_index = timeline->state.parent.spawned_count;
+            g_battle_effect_state_records[child].timeline.target_index = timeline->state.parent.spawned_count;
             timeline->state.parent.spawned_count++;
-            timeline->state.parent.spawn_countdown += g_effect_timeline->spawn_delay;
+            timeline->state.parent.spawn_countdown += g_battle_effect_timeline->spawn_delay;
         }
         timeline->state.parent.spawn_countdown--;
     } else {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            battle_effect_step_emitter_timeline(record, &g_effect_timeline->particle_channels[0][i],
+            battle_effect_step_emitter_timeline(record, &g_battle_effect_timeline->particle_channels[0][i],
                 &timeline->state.parent.keyframe.tracks.particle[0][i],
                 &timeline->state.parent.remaining.tracks.particle[0][i],
                 &timeline->state.parent.step.tracks.particle[0][i]);
         }
-        battle_effect_advance_target_palette_track(&g_effect_timeline->color_tracks[0].surroundings,
+        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[0].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[0],
             &timeline->state.parent.remaining.tracks.surroundings[0]);
-        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            battle_effect_advance_caster_palette_track(&g_effect_timeline->color_tracks[0].caster,
+        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            battle_effect_advance_caster_palette_track(&g_battle_effect_timeline->color_tracks[0].caster,
                 &timeline->state.parent.keyframe.tracks.caster[0], &timeline->state.parent.remaining.tracks.caster[0],
-                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        battle_effect_advance_coord_target_palette_track(&g_effect_timeline->color_tracks[0].target,
+        battle_effect_advance_coord_target_palette_track(&g_battle_effect_timeline->color_tracks[0].target,
             &timeline->state.parent.keyframe.tracks.target[0], &timeline->state.parent.remaining.tracks.target[0]);
-        battle_effect_advance_map_background_track(&g_effect_timeline->color_tracks[0].screen,
+        battle_effect_advance_map_background_track(&g_battle_effect_timeline->color_tracks[0].screen,
             &timeline->state.parent.keyframe.tracks.screen[0], &timeline->state.parent.remaining.tracks.screen[0]);
-        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][0],
+        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][0],
             &timeline->state.parent.keyframe.tracks.sound[0][0], &timeline->state.parent.remaining.tracks.sound[0][0],
             &timeline->state.parent.step.tracks._unknown_24[0][0][1]);
-        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][1],
+        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][1],
             &timeline->state.parent.keyframe.tracks.sound[1][0], &timeline->state.parent.remaining.tracks.sound[1][0],
             &timeline->state.parent.step.tracks._unknown_24[1][0][1]);
-        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[0][2],
+        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[0][2],
             &timeline->state.parent.keyframe.tracks.sound[2][0], &timeline->state.parent.remaining.tracks.sound[2][0],
             &timeline->state.parent.step.tracks._unknown_24[2][0][1]);
-        if (g_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
+        if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_PHASE1) {
             battle_state_set_time_scale(battle_effect_get_timing_curve_value(record));
         }
     }
-    i = g_effect_timeline->phase1_duration + (g_effect_context.target_count - 1) * g_effect_timeline->spawn_delay
-        + g_effect_timeline->child.duration;
+    i = g_battle_effect_timeline->phase1_duration
+        + (g_battle_effect_context.target_count - 1) * g_battle_effect_timeline->spawn_delay
+        + g_battle_effect_timeline->child.duration;
     if (timeline->frame >= i) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
-            battle_effect_step_emitter_timeline(record, &g_effect_timeline->particle_channels[1][i],
+            battle_effect_step_emitter_timeline(record, &g_battle_effect_timeline->particle_channels[1][i],
                 &timeline->state.parent.keyframe.tracks.particle[1][i],
                 &timeline->state.parent.remaining.tracks.particle[1][i],
                 &timeline->state.parent.step.tracks.particle[1][i]);
         }
-        battle_effect_advance_target_palette_track(&g_effect_timeline->color_tracks[1].surroundings,
+        battle_effect_advance_target_palette_track(&g_battle_effect_timeline->color_tracks[1].surroundings,
             &timeline->state.parent.keyframe.tracks.surroundings[1],
             &timeline->state.parent.remaining.tracks.surroundings[1]);
-        if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
-            battle_effect_advance_caster_palette_track(&g_effect_timeline->color_tracks[1].caster,
+        if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+            battle_effect_advance_caster_palette_track(&g_battle_effect_timeline->color_tracks[1].caster,
                 &timeline->state.parent.keyframe.tracks.caster[1], &timeline->state.parent.remaining.tracks.caster[1],
-                g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
         }
-        battle_effect_advance_coord_target_palette_track(&g_effect_timeline->color_tracks[1].target,
+        battle_effect_advance_coord_target_palette_track(&g_battle_effect_timeline->color_tracks[1].target,
             &timeline->state.parent.keyframe.tracks.target[1], &timeline->state.parent.remaining.tracks.target[1]);
-        battle_effect_advance_map_background_track(&g_effect_timeline->color_tracks[1].screen,
+        battle_effect_advance_map_background_track(&g_battle_effect_timeline->color_tracks[1].screen,
             &timeline->state.parent.keyframe.tracks.screen[1], &timeline->state.parent.remaining.tracks.screen[1]);
-        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][0],
+        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][0],
             &timeline->state.parent.keyframe.tracks.sound[0][1], &timeline->state.parent.remaining.tracks.sound[0][1],
             &timeline->state.parent.step.tracks._unknown_24[0][1][1]);
-        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][1],
+        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][1],
             &timeline->state.parent.keyframe.tracks.sound[1][1], &timeline->state.parent.remaining.tracks.sound[1][1],
             &timeline->state.parent.step.tracks._unknown_24[1][1][1]);
-        battle_effect_advance_parent_sound_track(&g_effect_timeline->sound_tracks[1][2],
+        battle_effect_advance_parent_sound_track(&g_battle_effect_timeline->sound_tracks[1][2],
             &timeline->state.parent.keyframe.tracks.sound[2][1], &timeline->state.parent.remaining.tracks.sound[2][1],
             &timeline->state.parent.step.tracks._unknown_24[2][1][1]);
     }
@@ -2032,9 +2040,9 @@ static s32 battle_effect_run_block(s16 index) {
     /* A narrow result preserves the retail sign extension before the tests. */
     s16 result;
 
-    rec = &g_effect_state_records[index];
+    rec = &g_battle_effect_state_records[index];
     for (;;) {
-        result = g_effect_instructions[effect_get_current_script_header(rec) & EFFECT_SCRIPT_OPCODE_MASK](rec);
+        result = g_battle_effect_instructions[effect_get_current_script_header(rec) & EFFECT_SCRIPT_OPCODE_MASK](rec);
         if (result == EFFECT_SCRIPT_RESULT_ABORT) {
             return 0;
         }

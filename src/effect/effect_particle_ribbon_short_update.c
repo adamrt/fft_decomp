@@ -103,8 +103,8 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
     map_tile_t* tile;
     effect_target_t* caster_target;
 
-    record = &g_effect_state_records[state_index];
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->particle_ribbon.placement_flags;
     flags = entry->particle_ribbon.flags;
     ot = main_gfx_get_otag();
@@ -164,20 +164,22 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
             == 0) {
             SetTransMatrix(&work->matrix);
             rotate = (flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
-            caster_target = &g_effect_context.targets[EFFECT_CASTER_ENTRY];
+            caster_target = &g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
             if (caster_target->target_type == EFFECT_TARGET_TYPE_UNIT) {
                 quadrant = battle_unit_get_facing_quadrant_by_runtime_id(
-                    g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
+                    g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id);
                 quadrant = ((quadrant + 1) & 3) << 10;
                 vector.vz = 0;
                 vector.vx = 0;
                 vector.vy = quadrant;
                 RotMatrix(&vector, &facing);
             }
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &caster);
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                target_index, &g_effect_context, &target);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
+                &g_battle_effect_context, &caster);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index,
+                &g_battle_effect_context, &target);
 
             EFFECT_READ_CURVE(j, factor,
                 effect_get_cached_curve_binding(target_bindings, EFFECT_PARTICLE_RIBBON_CURVE_PARTICLE_COUNT_SHIFT),
@@ -193,10 +195,10 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
             case EFFECT_EMITTER_ORIGIN_WORLD:
                 break;
             case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-                origin.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                origin.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                    g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+                origin.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                origin.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 origin.vy -= tile->height * MAP_HEIGHT_STEP;
                 break;
             case EFFECT_EMITTER_ORIGIN_CASTER:
@@ -233,7 +235,7 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
             j = effect_get_cached_curve_binding(spawn_bindings, EFFECT_PARTICLE_RIBBON_CURVE_RADIAL_SPEED_SHIFT);
             j--;
             if (j != -1) {
-                factor = g_effect_animation_curve_data->curves[j][frame];
+                factor = g_battle_effect_animation_curve_data->curves[j][frame];
                 speed_min = battle_lerp_fixed8(
                     entry->particle_ribbon.radial_speed_start.min, entry->particle_ribbon.radial_speed_end.min, factor);
                 speed_max = battle_lerp_fixed8(
@@ -283,10 +285,10 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
                 target_base.vz += target.vz;
                 break;
             case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-                tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                    g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-                target_base.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-                target_base.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                    g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+                target_base.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+                target_base.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
                 target_base.vy -= tile->height * MAP_HEIGHT_STEP;
                 break;
             }
@@ -450,12 +452,12 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
             }
             if (entry->particle_ribbon.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
                 factor = (entry->particle_ribbon.color_curves & 0xfff);
-                red = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
+                red = g_battle_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
                     (entry->particle_ribbon.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][slot->age];
                 green
-                    = g_effect_animation_curve_data
+                    = g_battle_effect_animation_curve_data
                           ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_GREEN_SHIFT)][slot->age];
-                blue = g_effect_animation_curve_data
+                blue = g_battle_effect_animation_curve_data
                            ->curves[effect_get_cached_curve_binding(factor, EFFECT_COLOR_CURVE_BLUE_SHIFT)][slot->age];
             } else {
                 blue = EFFECT_COLOR_NEUTRAL;
@@ -503,8 +505,8 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
             }
             v = entry->particle_ribbon.texture_v + slot->frame * height;
             quad = &slot->quads[work->buffer][0];
-            SetRotMatrix(&g_camera_matrix);
-            SetTransMatrix(&g_camera_matrix);
+            SetRotMatrix(&g_battle_camera_matrix);
+            SetTransMatrix(&g_battle_camera_matrix);
             vector.vx = slot->trail[index].x;
             vector.vy = slot->trail[index].y;
             vector.vz = slot->trail[index].z;

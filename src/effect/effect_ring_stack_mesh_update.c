@@ -74,8 +74,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
     u32 red;
     map_tile_t* tile;
 
-    record = &g_effect_state_records[state_index];
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     placement = entry->radial_mesh.placement_flags;
     ot = main_gfx_get_otag();
 
@@ -115,29 +115,31 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
-        target_index = g_effect_state_records[state_index].timeline.target_index;
+        target_index = g_battle_effect_state_records[state_index].timeline.target_index;
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
         battle_effect_interpolate_emitter_spawn_position(entry, j, &origin);
         switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
         case EFFECT_EMITTER_ORIGIN_WORLD:
             break;
         case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-            tile = battle_map_get_tile_data_pointer(g_effect_target_tile.data.tile.vx,
-                g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
-            origin.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+                g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
+            origin.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             origin.vy -= tile->height * MAP_HEIGHT_STEP;
-            origin.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+            origin.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
             break;
         case EFFECT_EMITTER_ORIGIN_CASTER:
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &vertex);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
+                &g_battle_effect_context, &vertex);
             origin.vx += vertex.vx;
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
             break;
         case EFFECT_EMITTER_ORIGIN_TARGET:
-            battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-                target_index, &g_effect_context, &vertex);
+            battle_effect_resolve_target_world_coords(
+                g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index,
+                &g_battle_effect_context, &vertex);
             origin.vx += vertex.vx;
             origin.vy += vertex.vy;
             origin.vz += vertex.vz;
@@ -214,8 +216,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         work->radius_speed += growth_step.vx;
         work->radius_offset += growth.vx + work->radius_speed;
 
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_camera_matrix);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_camera_matrix);
         origin_x = origin.vx;
         buffer = work->buffer;
         origin_y = origin.vy;
@@ -354,11 +356,11 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         blue = EFFECT_COLOR_NEUTRAL;
         if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             k = (entry->radial_mesh.color_curves & 0xfff);
-            red = g_effect_animation_curve_data
+            red = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_RED_SHIFT)][frame];
-            green = g_effect_animation_curve_data
+            green = g_battle_effect_animation_curve_data
                         ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_GREEN_SHIFT)][frame];
-            blue = g_effect_animation_curve_data
+            blue = g_battle_effect_animation_curve_data
                        ->curves[effect_get_cached_curve_binding(k, EFFECT_COLOR_CURVE_BLUE_SHIFT)][frame];
         } else {
             green = EFFECT_COLOR_NEUTRAL;

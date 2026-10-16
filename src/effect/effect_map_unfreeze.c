@@ -8,7 +8,7 @@ s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_
     s16 state_index = record_index;
     effect_record_t* record;
 
-    record = &g_effect_state_records[state_index];
+    record = &g_battle_effect_state_records[state_index];
 
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:

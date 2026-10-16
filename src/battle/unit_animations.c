@@ -46,7 +46,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
     }
     switch (hit) {
     case 0:
-        battle_sound_play_movement_sfx(unit, g_sound_weapon_swing_sfx_ids[weapon_type]);
+        battle_sound_play_movement_sfx(unit, g_battle_sound_weapon_swing_sfx_ids[weapon_type]);
         break;
     case 1:
         for (i = 0; i < unit->strike.target_count; i++) {
@@ -58,7 +58,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
             case ACTION_MISS_TYPE_GOLEM_GUARD:
-                battle_sound_play_movement_sfx(unit, g_sound_shield_deflect_sfx_ids[weapon_type]);
+                battle_sound_play_movement_sfx(unit, g_battle_sound_shield_deflect_sfx_ids[weapon_type]);
                 break;
             case ACTION_MISS_TYPE_ACCESSORY_EVADE:
             case ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD:
@@ -75,7 +75,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
                 if (target->stats->action.critical != 0) {
                     battle_sound_play_movement_sfx(unit, MAIN_SFX_CRITICAL_HIT);
                 } else {
-                    battle_sound_play_movement_sfx(unit, g_sound_weapon_hit_sfx_ids[weapon_type]);
+                    battle_sound_play_movement_sfx(unit, g_battle_sound_weapon_hit_sfx_ids[weapon_type]);
                 }
                 break;
             }
@@ -1534,7 +1534,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 unit->item_display_active = 0;
                 break;
             case BATTLE_SEQ_OP_WAIT_FOR_INPUT:
-                if (g_action_post_action == 0) {
+                if (g_battle_action_post_action == 0) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
                 } else {
@@ -1997,7 +1997,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
     if (unit->position_copies_active != 0) {
         battle_gfx_shift_and_fill_position_copies(unit);
     }
-    direction = (g_camera_render_state.vy + unit->facing) & 0xfff;
+    direction = (g_battle_camera_render_state.vy + unit->facing) & 0xfff;
     quadrant = direction / 1024;
     sixteenth = direction / 256;
     if (unit->requested_animation != 0) {
@@ -2280,7 +2280,7 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
         && unit->spritesheet_id != BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM) {
         return;
     }
-    copyVector(&zoom, &g_camera_zoom);
+    copyVector(&zoom, &g_battle_camera_zoom);
     flags = unit->horizontal_flip_flag ^ unit->sprite_display_flags;
     row = unit->layer_priority;
     if (unit->animation.trigger == 0) {
@@ -2376,8 +2376,8 @@ void battle_gfx_update_all_unit_rotation_and_vectors(void) {
     map_tile_t* tile;
     move_effective_flags_e movement_flags;
 
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
 
     unit = g_battle_unit_list_head;
     while (unit != 0) {
@@ -2452,9 +2452,9 @@ void battle_gfx_update_status_bubbles_and_graphics(void) {
     case BATTLE_GAME_STATE_TARGETING_RANGE:
     case BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING:
     case BATTLE_GAME_STATE_CONFIRM_ACTION:
-        if (g_camera_zoom_action == CAMERA_STEP_NONE && g_camera_tilt_action == CAMERA_STEP_NONE
-            && g_camera_rotation_action == CAMERA_ROTATION_NONE
-            && !(g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz)) {
+        if (g_battle_camera_zoom_action == CAMERA_STEP_NONE && g_battle_camera_tilt_action == CAMERA_STEP_NONE
+            && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE
+            && !(g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz)) {
             if (g_battle_gfx_status_bubble_delay != 0) {
                 g_battle_gfx_status_bubble_delay -= g_main_system_animation_speed;
                 if (g_battle_gfx_status_bubble_delay <= 0) {
@@ -2525,7 +2525,7 @@ static s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
     if (phase == BATTLE_UNIT_FADE_OUT_NONE) {
         return 0;
     }
-    if (g_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].animations[unit->runtime_id].active != 0) {
+    if (g_battle_map_palette_state.clut_rows[MAP_CLUT_ROW_UNITS].animations[unit->runtime_id].active != 0) {
         return 0;
     }
     switch (phase) {

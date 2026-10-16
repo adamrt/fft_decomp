@@ -15,29 +15,29 @@
 
 void battle_map_copy_background_color(void) {
     /* Component copies retain the original byte loads and separate addresses. */
-    g_map_background_color_backup.r = g_map_background_color.r;
-    g_map_background_color_backup.g = g_map_background_color.g;
-    g_map_background_color_backup.b = g_map_background_color.b;
+    g_battle_map_background_color_backup.r = g_battle_map_background_color.r;
+    g_battle_map_background_color_backup.g = g_battle_map_background_color.g;
+    g_battle_map_background_color_backup.b = g_battle_map_background_color.b;
 }
 
 void battle_map_restore_background_color(void) {
-    g_map_background_color.r = g_map_background_color_backup.r;
-    g_map_background_color.g = g_map_background_color_backup.g;
-    g_map_background_color.b = g_map_background_color_backup.b;
-    battle_map_control_gte_background_color(
-        BATTLE_BACKGROUND_COLOR_SET, g_map_background_color.r, g_map_background_color.g, g_map_background_color.b);
+    g_battle_map_background_color.r = g_battle_map_background_color_backup.r;
+    g_battle_map_background_color.g = g_battle_map_background_color_backup.g;
+    g_battle_map_background_color.b = g_battle_map_background_color_backup.b;
+    battle_map_control_gte_background_color(BATTLE_BACKGROUND_COLOR_SET, g_battle_map_background_color.r,
+        g_battle_map_background_color.g, g_battle_map_background_color.b);
 }
 
 rgb24_t* battle_map_get_background_color(void) {
-    return &g_map_background_color;
+    return &g_battle_map_background_color;
 }
 
 void battle_map_set_background_color(s32 red, s32 green, s32 blue) {
-    g_map_background_color.r = red;
-    g_map_background_color.g = green;
-    g_map_background_color.b = blue;
-    battle_map_control_gte_background_color(
-        BATTLE_BACKGROUND_COLOR_SET, g_map_background_color.r, g_map_background_color.g, g_map_background_color.b);
+    g_battle_map_background_color.r = red;
+    g_battle_map_background_color.g = green;
+    g_battle_map_background_color.b = blue;
+    battle_map_control_gte_background_color(BATTLE_BACKGROUND_COLOR_SET, g_battle_map_background_color.r,
+        g_battle_map_background_color.g, g_battle_map_background_color.b);
 }
 
 /* Add per-component deltas to the map background color and apply it.
@@ -45,23 +45,23 @@ void battle_map_set_background_color(s32 red, s32 green, s32 blue) {
  * A component whose tested delta is negative (`current + delta < current`)
  * becomes 0xff instead. The retail routine tests green with red_delta. */
 void battle_map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue_delta) {
-    if (g_map_background_color.r + red_delta < g_map_background_color.r) {
-        g_map_background_color.r = 0xff;
+    if (g_battle_map_background_color.r + red_delta < g_battle_map_background_color.r) {
+        g_battle_map_background_color.r = 0xff;
     } else {
-        g_map_background_color.r += red_delta;
+        g_battle_map_background_color.r += red_delta;
     }
-    if (g_map_background_color.g + red_delta < g_map_background_color.g) {
-        g_map_background_color.g = 0xff;
+    if (g_battle_map_background_color.g + red_delta < g_battle_map_background_color.g) {
+        g_battle_map_background_color.g = 0xff;
     } else {
-        g_map_background_color.g += green_delta;
+        g_battle_map_background_color.g += green_delta;
     }
-    if (g_map_background_color.b + blue_delta < g_map_background_color.b) {
-        g_map_background_color.b = 0xff;
+    if (g_battle_map_background_color.b + blue_delta < g_battle_map_background_color.b) {
+        g_battle_map_background_color.b = 0xff;
     } else {
-        g_map_background_color.b += blue_delta;
+        g_battle_map_background_color.b += blue_delta;
     }
-    battle_map_control_gte_background_color(
-        BATTLE_BACKGROUND_COLOR_SET, g_map_background_color.r, g_map_background_color.g, g_map_background_color.b);
+    battle_map_control_gte_background_color(BATTLE_BACKGROUND_COLOR_SET, g_battle_map_background_color.r,
+        g_battle_map_background_color.g, g_battle_map_background_color.b);
 }
 
 void battle_unit_update_graphics_by_runtime_id(u32 runtime_id) {
@@ -255,7 +255,7 @@ s32 battle_gfx_clear_shadow_graphic_trigger_by_runtime_id(u32 runtime_id) {
  * screen darkens by 0x100 / duration per frame (a duration of 0 takes one frame),
  * the map loads, the screen fades back in and the saved state resumes. */
 void battle_state_start_map_jump_out(s32 map_id, s32 duration) {
-    g_map_id = map_id;
+    g_battle_map_id = map_id;
     g_battle_previous_game_state = g_battle_game_state;
     g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_OUT;
     g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
@@ -266,7 +266,7 @@ void battle_state_start_map_jump_out(s32 map_id, s32 duration) {
  * one frame), the map loads, and the saved state resumes behind a black screen
  * until battle_state_start_change_map_jump_in fades it in. */
 void battle_state_start_change_map_jump_out(s32 map_id, s32 duration) {
-    g_map_id = map_id;
+    g_battle_map_id = map_id;
     g_battle_previous_game_state = g_battle_game_state;
     g_battle_game_state = BATTLE_GAME_STATE_MAP_JUMPING_OUT_2;
     g_battle_state_screen_fade_step = duration != 0 ? 0x100 / duration : 0x100;
@@ -356,10 +356,10 @@ void battle_camera_project_world_coords_to_screen(SVECTOR* world_coords, SVECTOR
     VECTOR transformed_coords;
     s32 result;
 
-    battle_camera_update_matrices(
-        &g_camera_matrix, &g_camera_render_state, &g_camera_current_screen_offset, &g_camera_zoom);
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    battle_camera_update_matrices(&g_battle_camera_matrix, &g_battle_camera_render_state,
+        &g_battle_camera_current_screen_offset, &g_battle_camera_zoom);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     RotTrans(world_coords, &transformed_coords, &result);
     screen_coords->vx = transformed_coords.vx;
     screen_coords->vy = transformed_coords.vy;

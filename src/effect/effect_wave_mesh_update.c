@@ -52,8 +52,8 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     u8 v;
 
     scratch = (effect_wave_mesh_scratch_t*)getScratchAddr(0);
-    record = &g_effect_state_records[state_index];
-    geometry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    geometry = &g_battle_effect_geometry_table->entries[emitter_index];
     ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
@@ -125,11 +125,11 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
         if (geometry->textured_quad.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             row = (geometry->textured_quad.color_curves & 0xfff);
-            red = g_effect_animation_curve_data
+            red = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
-            green = g_effect_animation_curve_data
+            green = g_battle_effect_animation_curve_data
                         ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];
-            blue = g_effect_animation_curve_data
+            blue = g_battle_effect_animation_curve_data
                        ->curves[effect_get_cached_curve_binding(row, EFFECT_COLOR_CURVE_BLUE_SHIFT)][work->frame];
         } else {
             blue = EFFECT_COLOR_NEUTRAL;

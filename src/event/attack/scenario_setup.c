@@ -238,10 +238,10 @@ void attack_scenario_restore_music_and_darkness(void) {
     scenario = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
     if (g_script_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
         if (g_sound_music_track_1_id == 0 && g_sound_music_track_2_id == 0) {
-            g_sound_music_track_index = 0;
+            g_battle_sound_music_track_index = 0;
             sound_play_music_tracks(g_battle_scenario_music_1_id, g_battle_scenario_music_2_id);
         } else {
-            if (g_sound_music_track_index == 0) {
+            if (g_battle_sound_music_track_index == 0) {
                 playing = g_sound_music_track_1_id;
                 replacement = g_battle_scenario_music_1_id;
             } else {
@@ -250,13 +250,13 @@ void attack_scenario_restore_music_and_darkness(void) {
             }
 
             if (playing != g_battle_scenario_music_1_id && playing != g_battle_scenario_music_2_id) {
-                g_sound_music_track_index = 0;
+                g_battle_sound_music_track_index = 0;
                 sound_play_music_tracks(g_battle_scenario_music_1_id, g_battle_scenario_music_2_id);
             } else {
                 g_thread_call_target = (void (*)(void))main_sound_unload_scenario_mus;
-                thread_call_on_main_stack((g_sound_music_track_index ^ 1) + 1);
+                thread_call_on_main_stack((g_battle_sound_music_track_index ^ 1) + 1);
                 g_thread_call_target = (void (*)(void))main_sound_open_and_play_music;
-                thread_call_on_main_stack(replacement, (g_sound_music_track_index ^ 1) + 1);
+                thread_call_on_main_stack(replacement, (g_battle_sound_music_track_index ^ 1) + 1);
                 sound_wait_for_music_stub();
             }
         }

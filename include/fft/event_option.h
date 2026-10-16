@@ -7,7 +7,7 @@
 #include "psx/types.h"
 
 /* screen */
-extern s32 g_option_menu_state;
+extern s32 g_battle_option_menu_state;
 
 void option_entrypoint(s32 menu_type);
 

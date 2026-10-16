@@ -11,7 +11,7 @@
  * proven by 0x80078fb4 and 0x800785ac, which both consume it. */
 
 /* input */
-extern u32 g_script_saved_event_input;
+extern u32 g_battle_script_saved_event_input;
 
 /* conditions */
 

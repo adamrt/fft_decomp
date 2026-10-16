@@ -1161,12 +1161,12 @@ static void script_route_event_input_variant(void) {
         return;
     }
     if (g_script_event_input == 0) {
-        g_script_saved_event_input = 0;
+        g_battle_script_saved_event_input = 0;
     }
     if (g_thread_contexts[thread].task_id == THREAD_TASK_RESUME) {
         g_script_event_input = g_script_unfiltered_controller_input;
     } else {
-        g_script_event_input = g_script_saved_event_input;
+        g_script_event_input = g_battle_script_saved_event_input;
     }
 }
 #endif
@@ -1325,14 +1325,14 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     if (g_menu_input_mode == MENU_INPUT_TUTORIAL) {
         g_script_unfiltered_controller_input = g_script_event_input;
         script_apply_input_overrides(&g_script_event_input);
-        g_script_saved_event_input = g_script_event_input;
+        g_battle_script_saved_event_input = g_script_event_input;
         script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
     }
-    if (g_map_reload_state >= 3) {
-        g_map_reload_state = 0;
+    if (g_battle_map_reload_state >= 3) {
+        g_battle_map_reload_state = 0;
     }
-    if (g_map_append_state >= 3) {
-        g_map_append_state = 0;
+    if (g_battle_map_append_state >= 3) {
+        g_battle_map_append_state = 0;
         g_map_destruction_wait_state = 1;
     }
     g_event_pending_map_jump_out_id = -1;
@@ -1347,10 +1347,10 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     g_event_pending_unit_vram_copy = -1;
     g_event_pending_reserved_vram_release_slot = -1;
     g_sound_pending_sfx_id = -1;
-    g_sound_music_volume_transition_request = -1;
-    g_sound_music_set_track_request = -1;
-    g_sound_music_switch_request = -1;
-    g_sound_music_unload_slot_request = -1;
+    g_battle_sound_music_volume_transition_request = -1;
+    g_battle_sound_music_set_track_request = -1;
+    g_battle_sound_music_switch_request = -1;
+    g_battle_sound_music_unload_slot_request = -1;
     g_event_map_jump_in_request = 0;
     g_battle_3d_object_use_request = 0;
     g_battle_field_object_use_request = 0;
@@ -1708,24 +1708,24 @@ static void script_process_pending_requests(void) {
     if (g_map_refresh_pending != 0) {
         g_map_refresh_pending = battle_map_load_alternate_mesh(3);
     }
-    reload_state = g_map_reload_state;
+    reload_state = g_battle_map_reload_state;
     if (reload_state == 1) {
         if (battle_map_start_data_load() == 0) {
-            g_map_reload_state = g_map_reload_state + 1;
+            g_battle_map_reload_state = g_battle_map_reload_state + 1;
         }
     } else if (reload_state == 2) {
         if (battle_map_poll_data_load() == 0) {
-            g_map_reload_state = g_map_reload_state + 1;
+            g_battle_map_reload_state = g_battle_map_reload_state + 1;
         }
     }
-    append_state = g_map_append_state;
+    append_state = g_battle_map_append_state;
     if ((append_state == 1) && (g_map_destruction_wait_state == 0)) {
         battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_START_HELD);
-        g_map_append_state = g_map_append_state + 1;
+        g_battle_map_append_state = g_battle_map_append_state + 1;
     } else if ((append_state == 2)
         && (battle_map_load_data(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), MAP_LOAD_COMMAND_POLL_HELD)
             == MAP_LOAD_RESULT_HELD)) {
-        g_map_append_state = g_map_append_state + 1;
+        g_battle_map_append_state = g_battle_map_append_state + 1;
     }
     destruction_state = g_map_destruction_wait_state;
     if (destruction_state == 2) {
@@ -1742,7 +1742,7 @@ static void script_process_pending_requests(void) {
             g_event_weather_request = -1;
         } else {
             g_event_weather_request = weather_id;
-            if (g_map_weather_flags & MAP_WEATHER_FLAG_SNOW) {
+            if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_SNOW) {
                 g_event_weather_request = weather_id + 5;
             }
             battle_map_run_weather_command(g_battle_event_weather_commands[g_event_weather_request].environment_id);
@@ -1795,29 +1795,29 @@ static void script_process_pending_requests(void) {
         if (sfx_id != -1) {
             main_sound_play_sfx(sfx_id);
         }
-        if (g_sound_music_switch_request >= 0) {
+        if (g_battle_sound_music_switch_request >= 0) {
             main_sound_stop_current_music();
-            g_sound_music_track_index = g_sound_music_track_index ^ 1;
-            if (g_sound_music_track_index == 0) {
+            g_battle_sound_music_track_index = g_battle_sound_music_track_index ^ 1;
+            if (g_battle_sound_music_track_index == 0) {
                 music_track_id = g_sound_music_track_1_id;
             } else {
                 music_track_id = g_sound_music_track_2_id;
             }
             if (music_track_id != 0) {
-                main_sound_switch_music_track(g_sound_music_track_index + 1,
+                main_sound_switch_music_track(g_battle_sound_music_track_index + 1,
                     script_scale_music_volume(g_battle_event_music_switch_volume),
                     g_battle_event_music_switch_fade * 4);
             }
         }
-        if (g_sound_music_unload_slot_request >= 0) {
+        if (g_battle_sound_music_unload_slot_request >= 0) {
             main_sound_stop_current_music();
-            main_sound_unload_scenario_mus(g_sound_music_unload_slot_request);
+            main_sound_unload_scenario_mus(g_battle_sound_music_unload_slot_request);
         }
-        if (g_sound_music_set_track_request != -1) {
+        if (g_battle_sound_music_set_track_request != -1) {
             main_sound_unload_current_scenario_music();
-            main_sound_set_current_music_track(g_sound_music_set_track_request);
+            main_sound_set_current_music_track(g_battle_sound_music_set_track_request);
         }
-        volume_transition = g_sound_music_volume_transition_request;
+        volume_transition = g_battle_sound_music_volume_transition_request;
         if (volume_transition != -1U) {
             main_sound_set_current_music_target(volume_transition & 0xFFFF, (volume_transition >> 0xE) & 0x3FFC);
         }
@@ -1830,18 +1830,18 @@ static void script_process_pending_requests(void) {
  * no camera, so its copy is empty. */
 static void camera_load_state_from_script_variables(void) {
 #ifdef FFT_BATTLE
-    setVector(&g_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
+    setVector(&g_battle_camera_script_rotation, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL]);
-    battle_camera_set_rotation(&g_camera_script_rotation);
+    battle_camera_set_rotation(&g_battle_camera_script_rotation);
 
-    setVector(&g_camera_script_vector, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM],
+    setVector(&g_battle_camera_script_vector, g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM],
         g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM], g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM]);
-    battle_camera_set_zoom(&g_camera_script_vector);
+    battle_camera_set_zoom(&g_battle_camera_script_vector);
 
-    g_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
-    g_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
-    g_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
-    battle_camera_set_current_real_coords(&g_camera_script_vector);
+    g_battle_camera_script_vector.vx = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X];
+    g_battle_camera_script_vector.vy = (g_camera_shake_z_offset * ONE) + g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z];
+    g_battle_camera_script_vector.vz = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y];
+    battle_camera_set_current_real_coords(&g_battle_camera_script_vector);
 #endif
 }
 
@@ -1859,19 +1859,19 @@ void camera_store_state_to_script_variables(void) {
     rotation = battle_camera_get_rotation();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT] = rotation->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] = rotation->vy;
-    g_camera_published_rotation_ptr = rotation;
+    g_battle_camera_published_rotation_ptr = rotation;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ROLL] = rotation->vz;
 
     zoom = battle_camera_get_zoom();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vy;
-    g_camera_published_coords_ptr = zoom;
+    g_battle_camera_published_coords_ptr = zoom;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_ZOOM] = zoom->vz;
 
     coords = battle_camera_get_current_real_coords();
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_X] = coords->vx;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Z] = coords->vy - (g_camera_shake_z_offset * ONE);
-    g_camera_published_coords_ptr = coords;
+    g_battle_camera_published_coords_ptr = coords;
     g_camera_shake_z_offset = 0;
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_Y] = coords->vz;
 #endif

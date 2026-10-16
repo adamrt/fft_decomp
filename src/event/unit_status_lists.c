@@ -545,19 +545,19 @@ static s32 menu_display_projected_action_effect(
         image = ACTION_DISPLAY_IMAGE_QUICK;
         value = 0;
         panel[0].kind = 2;
-        *label_x = *label_x - g_action_display_image_rects[ACTION_DISPLAY_IMAGE_QUICK].width + 8;
+        *label_x = *label_x - g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_QUICK].width + 8;
     } else if ((g_menu_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
         && (g_menu_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_STEAL_ITEM)) {
         image = ACTION_DISPLAY_IMAGE_STOLEN;
         value = 0;
         panel[0].kind = 2;
-        *label_x = *label_x - g_action_display_image_rects[ACTION_DISPLAY_IMAGE_STOLEN].width + 8;
+        *label_x = *label_x - g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_STOLEN].width + 8;
     } else if ((g_menu_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
         && (g_menu_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_BREAK_EQUIPMENT)) {
         image = ACTION_DISPLAY_IMAGE_BROKEN;
         value = 0;
         panel[0].kind = 2;
-        *label_x = *label_x - g_action_display_image_rects[ACTION_DISPLAY_IMAGE_BROKEN].width + 8;
+        *label_x = *label_x - g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_BROKEN].width + 8;
     } else if (g_menu_preview_target_action->attack_type & ACTION_TYPE_STATUS_CHANGE) {
         g_thread_call_target = (void (*)(void))main_status_find_action_highest_order_effect;
         image = thread_call_on_main_stack(g_menu_preview_target_action);
@@ -570,7 +570,7 @@ static s32 menu_display_projected_action_effect(
                 extra = 0x1e;
             }
             image &= MAIN_ACTION_STATUS_RESULT_INDEX_MASK;
-            image = g_status_display_image_ids[image - 1];
+            image = g_battle_status_display_image_ids[image - 1];
             /* Duplicated store: it keeps the state write in its own block
              * ahead of the label arithmetic, as in the target. */
             if (image == 0) {
@@ -579,7 +579,7 @@ static s32 menu_display_projected_action_effect(
             } else {
                 panel[0].kind = 2;
             }
-            width = g_action_display_image_rects[image].width;
+            width = g_battle_action_display_image_rects[image].width;
             x = *label_x - width;
             value = 0;
             *label_x = x + 8;
@@ -643,7 +643,7 @@ static s32 menu_display_projected_action_effect(
 
     g_menu_selected_unit_status.projected_display_value = value;
     if (image != ACTION_DISPLAY_IMAGE_NONE && (image != 0 || show_empty != 0)) {
-        rect = &g_action_display_image_rects[image];
+        rect = &g_battle_action_display_image_rects[image];
         params->x_load = rect->u;
         params->y_load = rect->v;
         params->width = rect->width;
@@ -662,7 +662,7 @@ static s32 menu_display_projected_action_effect(
         prim++;
         params++;
         prim->clut = 0x7d7c;
-        rect = &g_action_display_image_rects[extra];
+        rect = &g_battle_action_display_image_rects[extra];
         params->x_load = rect->u;
         params->y_load = rect->v;
         params->width = rect->width;
@@ -684,9 +684,9 @@ static s32 menu_display_projected_action_effect(
                 setRGB0(prim, 0xbe, 0x28, 0xa);
             }
             image &= MAIN_ACTION_STATUS_RESULT_INDEX_MASK;
-            image = g_status_display_image_ids[image - 1];
+            image = g_battle_status_display_image_ids[image - 1];
             if (image != ACTION_DISPLAY_IMAGE_NONE && image != ACTION_DISPLAY_IMAGE_INVITE) {
-                rect = &g_action_display_image_rects[image];
+                rect = &g_battle_action_display_image_rects[image];
                 params->x_load = rect->u;
                 params->y_load = rect->v;
                 params->width = rect->width;

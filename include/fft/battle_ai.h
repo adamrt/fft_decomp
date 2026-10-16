@@ -534,7 +534,7 @@ typedef char ai_data_size_must_be_6600[(sizeof(ai_data_t) == 6600) ? 1 : -1];
 
 /* workspace */
 /* BATTLE-resident workspace; EVENT, EFFECT and WORLD overlays also use its pointer. */
-extern ai_data_t g_ai_data_base;
+extern ai_data_t g_battle_ai_data_base;
 extern ai_data_t* g_ai_workspace;        /* 0x8019f3ac */
 extern event_work_t* g_ai_workspace_ptr; /* pointer cell reloaded per subsystem */
 
@@ -580,7 +580,7 @@ typedef enum ai_command_build_stage {
     AI_COMMAND_BUILD_CHOOSE_ACTION = 2,
 } ai_command_build_stage_e;
 
-extern ai_command_t g_ai_command_history[2]; /* 0x801a0d94, 0x801a0dac */
+extern ai_command_t g_battle_ai_command_history[2]; /* 0x801a0d94, 0x801a0dac */
 
 s32 battle_ai_build_command(s32 unit_id, ai_command_t* command);
 
@@ -635,10 +635,10 @@ enum {
     AI_RECOVERY_STATUS_COUNT = 3,
 };
 
-extern u8 g_ai_recovery_status_ids[AI_RECOVERY_STATUS_COUNT];
-extern s32 g_ai_recovery_status_index; /* 0x8019f380; status-list cursor preserved for resume */
-extern s32 g_ai_recovery_status_retry; /* 0x8019f37c; skip status pass after one failed attempt */
-extern s32 g_ai_retreat_stage;         /* 0x8019f390; ai_retreat_stage_e */
+extern u8 g_battle_ai_recovery_status_ids[AI_RECOVERY_STATUS_COUNT];
+extern s32 g_battle_ai_recovery_status_index; /* 0x8019f380; status-list cursor preserved for resume */
+extern s32 g_battle_ai_recovery_status_retry; /* 0x8019f37c; skip status pass after one failed attempt */
+extern s32 g_battle_ai_retreat_stage;         /* 0x8019f390; ai_retreat_stage_e */
 
 /* ability lists */
 void battle_ai_init_unit_abilities(s32 unit_id);
@@ -696,8 +696,8 @@ typedef enum ai_destination_order {
     AI_DESTINATION_DISTANCE_FIRST = 1,
 } ai_destination_order_e;
 
-extern ai_cowardly_movement_stage_e g_ai_cowardly_movement_stage;
-extern s32 g_ai_propagation_resume_pass;
+extern ai_cowardly_movement_stage_e g_battle_ai_cowardly_movement_stage;
+extern s32 g_battle_ai_propagation_resume_pass;
 
 s32 battle_ai_is_pathfinding_budget_exhausted(void);
 s32 battle_ai_propagate_target_movement(
@@ -712,7 +712,7 @@ typedef enum ai_tile_mask_mode {
     AI_TILE_MASK_EXPLICIT = 3,
 } ai_tile_mask_mode_e;
 
-extern u16 g_ai_range_row_masks[];
+extern u16 g_battle_ai_range_row_masks[];
 
 void battle_ai_build_attack_origin_masks(void);
 s32 battle_ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
@@ -751,25 +751,25 @@ typedef enum ai_charging_stage {
     AI_CHARGING_WITHOUT_CHARGE = 2,
 } ai_charging_stage_e;
 
-extern s32 g_ai_self_target_origin_stage;
+extern s32 g_battle_ai_self_target_origin_stage;
 
 s32 battle_ai_evaluate_ability_outcome(void);
 s32 battle_ai_evaluate_cast_origins(void);
 s32 battle_ai_evaluate_current_action(void);
 
 /* math skill */
-extern s32 g_ai_math_ability_index;
-extern u16* g_ai_math_ability_list; /* borrowed from main's temporary skillset list */
-extern u8 g_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
-extern s32 g_ai_math_skillset_id;
-extern s32 g_ai_math_skillset_index;
-extern u8 g_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
+extern s32 g_battle_ai_math_ability_index;
+extern u16* g_battle_ai_math_ability_list; /* borrowed from main's temporary skillset list */
+extern u8 g_battle_ai_math_extra_known_ability_ids[AI_MATH_EXTRA_KNOWN_ABILITY_COUNT];
+extern s32 g_battle_ai_math_skillset_id;
+extern s32 g_battle_ai_math_skillset_index;
+extern u8 g_battle_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
 
 /* status cancellation */
 /* Cancellation-search accounting survives suspension. */
-extern s32 g_ai_status_candidate_count;
-extern s32 g_ai_status_insufficient_mp;
-extern s32 g_ai_status_sufficient_mp;
+extern s32 g_battle_ai_status_candidate_count;
+extern s32 g_battle_ai_status_insufficient_mp;
+extern s32 g_battle_ai_status_sufficient_mp;
 
 /* action ranking */
 typedef enum ai_rank_order {
@@ -804,10 +804,10 @@ typedef enum ai_tile_pickup_kind {
 } ai_tile_pickup_kind_e;
 
 /* Signed scoring weights, indexed by status ID. */
-extern s16 g_ai_status_priority_weights[STATUS_COUNT]; /* 0x8019f308..0x8019f357 */
+extern s16 g_battle_ai_status_priority_weights[STATUS_COUNT]; /* 0x8019f308..0x8019f357 */
 /* Unit snapshots share the scratchpad-save arena used during movement propagation. */
-extern ai_extended_snapshot_t g_ai_unit_snapshot_storage[];
-extern ai_extended_snapshot_t* g_ai_unit_snapshots; /* 0x8019f3c0 */
+extern ai_extended_snapshot_t g_battle_ai_unit_snapshot_storage[];
+extern ai_extended_snapshot_t* g_battle_ai_unit_snapshots; /* 0x8019f3c0 */
 
 void battle_ai_begin_action_simulation(void);
 void battle_ai_end_action_simulation(void);
@@ -835,7 +835,7 @@ typedef struct ai_facing_tile_offsets {
     u8 by_direction[AI_CARDINAL_DIRECTION_COUNT][2];
 } ai_facing_tile_offsets_t;
 
-extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets; /* 0x8019f358 */
+extern ai_facing_tile_offsets_t g_battle_ai_facing_tile_offsets; /* 0x8019f358 */
 
 s32 battle_ai_choose_wait_facing(void);
 ai_direction_e battle_ai_find_direction_of_target(const ai_coords_t* target, const ai_coords_t* origin);

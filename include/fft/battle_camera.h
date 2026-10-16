@@ -14,10 +14,10 @@ enum {
     CAMERA_PITCH_STEEP_MASK_THRESHOLD = 0x178,
 };
 
-extern MATRIX g_camera_matrix;
+extern MATRIX g_battle_camera_matrix;
 /* Base of the large render-state records; low offsets overlap camera/GPU fields.
  * .vx is the camera pitch and .vy its yaw. */
-extern SVECTOR g_camera_render_state;
+extern SVECTOR g_battle_camera_render_state;
 
 void battle_camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
 void battle_camera_convert_screen_coords_modify_by_1(const SVECTOR* screen, SVECTOR* destination);
@@ -46,7 +46,7 @@ typedef enum battle_cursor_input_mode {
 extern s32 g_battle_cursor_input_mode;
 extern s32 g_battle_cursor_input_mode_saved;
 /* Held directions pan the map instead of following the cursor tile. */
-extern s32 g_camera_map_pan_enabled;
+extern s32 g_battle_camera_map_pan_enabled;
 
 void battle_camera_disable_map_pan(void);
 void battle_camera_enable_map_pan(void);
@@ -57,12 +57,12 @@ void battle_camera_update_tilt_input(void);
 void battle_camera_update_zoom_input(void);
 
 /* position */
-extern VECTOR g_camera_current_real_coords;
-extern SVECTOR g_camera_integer_coords;
-extern u16 g_camera_real_coord_countdown;
-extern VECTOR g_camera_real_coord_delta;
-extern VECTOR g_camera_saved_real_coords;
-extern VECTOR g_camera_step_vector;
+extern VECTOR g_battle_camera_current_real_coords;
+extern SVECTOR g_battle_camera_integer_coords;
+extern u16 g_battle_camera_real_coord_countdown;
+extern VECTOR g_battle_camera_real_coord_delta;
+extern VECTOR g_battle_camera_saved_real_coords;
+extern VECTOR g_battle_camera_step_vector;
 
 VECTOR* battle_camera_get_current_real_coords(void);
 s32 battle_camera_is_active(void);
@@ -75,10 +75,10 @@ void battle_camera_update_real_coord_animation(void);
 void battle_camera_update_vector_from_game_state(void);
 
 /* screen offset */
-extern VECTOR g_camera_current_screen_offset;
-extern VECTOR g_camera_saved_screen_offset;
-extern u16 g_camera_screen_offset_countdown;
-extern VECTOR g_camera_screen_offset_fixed;
+extern VECTOR g_battle_camera_current_screen_offset;
+extern VECTOR g_battle_camera_saved_screen_offset;
+extern u16 g_battle_camera_screen_offset_countdown;
+extern VECTOR g_battle_camera_screen_offset_fixed;
 
 VECTOR* battle_camera_get_screen_offset(void);
 void battle_camera_restore_screen_offset(void);
@@ -89,7 +89,7 @@ void battle_camera_start_screen_offset_move_uniform(const s32* destination_value
 void battle_camera_update_screen_offset_animation(void);
 
 /* rotation */
-/* g_camera_rotation_action. */
+/* g_battle_camera_rotation_action. */
 typedef enum camera_rotation_action {
     CAMERA_ROTATION_NONE = 0,
     CAMERA_ROTATION_LEFT = 1,  /* the yaw falls to its destination */
@@ -98,14 +98,14 @@ typedef enum camera_rotation_action {
 
 extern s32 g_battle_previous_camera_yaw;
 /* Maps a camera quadrant index to its map-tile camera-block direction. */
-extern u8 g_camera_quadrant_block_directions[4];
-extern camera_rotation_action_e g_camera_rotation_action;
-extern SVECTOR g_camera_rotation_backup;
-extern u16 g_camera_rotation_countdown;
-extern SVECTOR g_camera_rotation_delta;
-extern s32 g_camera_rotation_increment;
+extern u8 g_battle_camera_quadrant_block_directions[4];
+extern camera_rotation_action_e g_battle_camera_rotation_action;
+extern SVECTOR g_battle_camera_rotation_backup;
+extern u16 g_battle_camera_rotation_countdown;
+extern SVECTOR g_battle_camera_rotation_delta;
+extern s32 g_battle_camera_rotation_increment;
 extern s32 g_camera_yaw_band;
-extern s32 g_camera_yaw_target;
+extern s32 g_battle_camera_yaw_target;
 
 SVECTOR* battle_camera_get_rotation(void);
 void battle_camera_restore_rotation(void);
@@ -116,39 +116,39 @@ void battle_camera_update_rotation(void);
 void battle_camera_update_rotation_animation(void);
 
 /* tilt */
-/* g_camera_tilt_action and g_camera_zoom_action: the move in progress towards
- * g_map_tilt_target or g_map_zoom_target. */
+/* g_battle_camera_tilt_action and g_battle_camera_zoom_action: the move in progress towards
+ * g_battle_map_tilt_target or g_battle_map_zoom_target. */
 typedef enum camera_step_action {
     CAMERA_STEP_NONE = 0,
     CAMERA_STEP_INCREASE = 2, /* tilt up; zoom in */
     CAMERA_STEP_DECREASE = 4, /* tilt down; zoom out */
 } camera_step_action_e;
 
-/* g_map_tilt_target values the tilt code tests; the target is a tilt band plus one, and
+/* g_battle_map_tilt_target values the tilt code tests; the target is a tilt band plus one, and
  * bands 3 and 4 have no pitch here. */
 enum {
     MAP_TILT_LOW = 1,  /* pitch 0x12e */
     MAP_TILT_HIGH = 2, /* pitch 0x1c0 */
 };
 
-extern camera_step_action_e g_camera_tilt_action;
-extern s32 g_camera_tilt_increment;
+extern camera_step_action_e g_battle_camera_tilt_action;
+extern s32 g_battle_camera_tilt_increment;
 
 void battle_camera_update_tilt(void);
 
 /* zoom */
-/* g_map_zoom_target. */
+/* g_battle_map_zoom_target. */
 enum {
     MAP_ZOOM_IN = 1,  /* scale ONE */
     MAP_ZOOM_OUT = 4, /* scale 0xc00 */
 };
 
-extern VECTOR g_camera_zoom;
-extern camera_step_action_e g_camera_zoom_action;
-extern VECTOR g_camera_zoom_backup;
-extern u16 g_camera_zoom_countdown;
-extern VECTOR g_camera_zoom_delta;
-extern s32 g_camera_zoom_increment;
+extern VECTOR g_battle_camera_zoom;
+extern camera_step_action_e g_battle_camera_zoom_action;
+extern VECTOR g_battle_camera_zoom_backup;
+extern u16 g_battle_camera_zoom_countdown;
+extern VECTOR g_battle_camera_zoom_delta;
+extern s32 g_battle_camera_zoom_increment;
 
 VECTOR* battle_camera_get_zoom(void);
 void battle_camera_restore_zoom(void);
@@ -158,11 +158,11 @@ void battle_camera_update_zoom(void);
 void battle_camera_update_zoom_animation(void);
 
 /* scripted motion */
-extern VECTOR* g_camera_published_coords_ptr;
-extern SVECTOR* g_camera_published_rotation_ptr;
-extern SVECTOR g_camera_script_rotation;
+extern VECTOR* g_battle_camera_published_coords_ptr;
+extern SVECTOR* g_battle_camera_published_rotation_ptr;
+extern SVECTOR g_battle_camera_script_rotation;
 extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
-extern VECTOR g_camera_script_vector;
+extern VECTOR g_battle_camera_script_vector;
 
 /* effect tracks */
 void battle_camera_advance_effect_tracks(s16 frame);

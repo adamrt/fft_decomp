@@ -638,7 +638,7 @@ typedef enum ability_secondary_flags_4 {
 } ability_secondary_flags_4_e;
 
 /* One-based formula IDs of abilities, weapons and items: BATTLE resolves an
- * action through g_formula_handlers[id - 1]. Only IDs tested by the
+ * action through g_battle_formula_handlers[id - 1]. Only IDs tested by the
  * code are named, after their handlers. */
 typedef enum ability_formula {
     ABILITY_FORMULA_WEAPON_DAMAGE = 1, /* also stands in for 0 and for ids past the table */

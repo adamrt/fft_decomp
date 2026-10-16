@@ -24,9 +24,9 @@
  * table's alignment relative to the original rodata. */
 void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* screen_coords) {
     SVECTOR position;
-    SVECTOR zoom_0 = g_status_bubble_zoom;
-    SVECTOR zoom_1 = g_status_bubble_zoom;
-    SVECTOR zoom_2 = g_status_bubble_zoom;
+    SVECTOR zoom_0 = g_battle_status_bubble_zoom;
+    SVECTOR zoom_1 = g_battle_status_bubble_zoom;
+    SVECTOR zoom_2 = g_battle_status_bubble_zoom;
     s16 scale_0[21];
     s16 scale_1[21];
     s16 scale_2[21];
@@ -329,7 +329,7 @@ void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 
     }
 
     {
-        const s32* weather_flags = &g_map_weather_flags;
+        const s32* weather_flags = &g_battle_map_weather_flags;
 
         if (!(*weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
             weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
@@ -418,7 +418,7 @@ void battle_gfx_tint_unit_palette_for_weather_and_tile(battle_unit_t* unit, s32 
     }
 
     screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
-    if (!(g_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) && screen_z - 0x30 > unit->world_coords.vy) {
+    if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) && screen_z - 0x30 > unit->world_coords.vy) {
         blue = 0;
         green = 0;
         red = 0;

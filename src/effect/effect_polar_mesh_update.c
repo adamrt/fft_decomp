@@ -38,8 +38,8 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
     u32 brightness;
 
     scratch = (effect_polar_mesh_scratch_t*)getScratchAddr(0);
-    record = &g_effect_state_records[state_index];
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    record = &g_battle_effect_state_records[state_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     ot = main_gfx_get_otag();
 
     switch (record->callback_phase[callback_slot]) {
@@ -163,13 +163,13 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
 
         if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             j = (entry->polar_mesh.color_curves & 0xfff);
-            scratch->red_factor = g_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
+            scratch->red_factor = g_battle_effect_animation_curve_data->curves[effect_get_cached_curve_binding(
                 (entry->polar_mesh.color_curves & 0xfff), EFFECT_COLOR_CURVE_RED_SHIFT)][work->frame];
             scratch->green_factor
-                = g_effect_animation_curve_data
+                = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(j, EFFECT_COLOR_CURVE_GREEN_SHIFT)][work->frame];
             scratch->blue_factor
-                = g_effect_animation_curve_data
+                = g_battle_effect_animation_curve_data
                       ->curves[effect_get_cached_curve_binding(j, EFFECT_COLOR_CURVE_BLUE_SHIFT)][work->frame];
         } else {
             scratch->blue_factor = EFFECT_COLOR_NEUTRAL;

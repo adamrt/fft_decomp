@@ -115,7 +115,7 @@ static void battle_effect_store_targets_and_display_types(s32 ability, battle_un
     init.spectator_count = spectators;
     init.math_skill_flag = block->math_skill_flag;
     init.used_weapon_id = block->used_weapon_id;
-    if (block->last_attack_id == 0 || block->reaction_occurred != 0 || g_action_phase != ACTION_PHASE_ACTING_UNIT
+    if (block->last_attack_id == 0 || block->reaction_occurred != 0 || g_battle_action_phase != ACTION_PHASE_ACTING_UNIT
         || (unit->used_item_or_weapon_id - ITEM_ID_BLAZE_GUN) < 2U
         || (item = unit->used_item_or_weapon_id) == ITEM_ID_BLAST_GUN) {
         packed = 0;
@@ -147,7 +147,7 @@ s32 battle_state_announce_next_charged_action(void) {
 
     unit = battle_unit_get_source();
     do {
-        switch (g_action_phase) {
+        switch (g_battle_action_phase) {
         case ACTION_PHASE_PRE_ACTION:
             result = battle_reaction_prepare_hamedo_for_pending_action(unit->stats->battle_id, &command.ability_id);
             if (result != -1) {
@@ -160,7 +160,7 @@ s32 battle_state_announce_next_charged_action(void) {
                 ability_id = command.ability_id;
                 result = 0;
                 actor->continue_attack_count = 0;
-                g_action_post_action = 0;
+                g_battle_action_post_action = 0;
                 actor->sp2_ability_id = ability_id;
                 actor->used_ability_id = ability_id;
             }
@@ -173,7 +173,7 @@ s32 battle_state_announce_next_charged_action(void) {
                 text_select_ability_announcement(&unit->stats->action_command, unit->stats->battle_id, 1);
                 ability_id = unit->command_state.ai.data.action.ability_id;
                 unit->continue_attack_count = 0;
-                g_action_post_action = 0;
+                g_battle_action_post_action = 0;
                 unit->sp2_ability_id = ability_id;
                 unit->used_ability_id = ability_id;
             } else {
@@ -199,7 +199,7 @@ s32 battle_state_announce_next_charged_action(void) {
                 ability_id = command.ability_id;
                 result = 0;
                 actor->continue_attack_count = 0;
-                g_action_post_action = 0;
+                g_battle_action_post_action = 0;
                 actor->sp2_ability_id = ability_id;
                 actor->used_ability_id = ability_id;
             }
@@ -208,8 +208,8 @@ s32 battle_state_announce_next_charged_action(void) {
         if (result != -1) {
             return 1;
         }
-        g_action_phase = g_action_phase + 1;
-    } while (g_action_phase < ACTION_PHASE_COUNT);
+        g_battle_action_phase = g_battle_action_phase + 1;
+    } while (g_battle_action_phase < ACTION_PHASE_COUNT);
     return 0;
 }
 
@@ -253,7 +253,7 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
         }
     }
 
-    if (g_action_phase == ACTION_PHASE_ACTING_UNIT) {
+    if (g_battle_action_phase == ACTION_PHASE_ACTING_UNIT) {
         if (unit->used_ability_id != 0 && !IS_ELEMENTAL_GUN(unit->used_item_or_weapon_id)
             && action->reaction_occurred == 0) {
             battle_unit_select_attack_animation_for_ability(unit, battle_unit_get_by_battle_id(action->target_list[0]));
@@ -357,7 +357,7 @@ void battle_state_enter_action_cast(void) {
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ACTION_CAST;
-    g_action_post_action = 0;
+    g_battle_action_post_action = 0;
     unit = battle_unit_get_source();
     if (battle_state_try_enter_scenario_event(unit) == 0) {
         g_battle_game_state = BATTLE_GAME_STATE_ACTION_CAST;
@@ -387,7 +387,7 @@ void battle_action_execute_ability(void) {
     case BATTLE_ATTACK_PREPARATION_JUMP:
         battle_camera_disable_map_pan();
         g_battle_game_state = BATTLE_GAME_STATE_COMMENCE_ATTACK_PHASE;
-        g_action_post_action = 0;
+        g_battle_action_post_action = 0;
         unit->turn_action_flags |= BATTLE_UNIT_TURN_ACTION_ACTED;
         if (g_battle_ability_animation_data[unit->used_ability_id].charge_animation_set_id != 0) {
             battle_unit_start_ability_charge_hold_animation(unit);
@@ -697,7 +697,7 @@ static void battle_state_enter_target_display_start(void) {
     menu_start_unit_view_thread(UNIT_VIEW_MODE_TILE_INFO, 0xFF, 0xFF);
     menu_init_system_function(
         BATTLE_MENU_SYSTEM_COMMAND_TARGETING_PROMPT, 0, battle_unit_get_casting()->stats->battle_id, 0, 1);
-    g_action_post_action = 0;
+    g_battle_action_post_action = 0;
     battle_action_set_at_list_active();
 }
 
@@ -758,7 +758,7 @@ void battle_target_calculate_tile_coords_and_glow_from_at_list(void) {
     SVECTOR tertiary;
     VECTOR primary;
 
-    if (g_action_at_list_active != 0) {
+    if (g_battle_action_at_list_active != 0) {
         battle_target_calculate_tile_coords_with_cursor_glow();
         return;
     }
@@ -769,7 +769,7 @@ void battle_target_calculate_tile_coords_and_glow_from_at_list(void) {
  *
  * Projects the units, animates them unless the status screen owns the frame,
  * updates the status bubbles and unit graphics, and projects the cursor tile,
- * drawing the map cursor and tile glow while g_action_at_list_active is
+ * drawing the map cursor and tile glow while g_battle_action_at_list_active is
  * set. */
 void battle_state_handle_free_cursor_input(void) {
     battle_gfx_update_all_unit_rotation_and_vectors();
@@ -867,10 +867,10 @@ void battle_state_handle_open_action_menus_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= 7 && (selected_command < 9 || selected_command == 0xff)) {
-        g_action_post_action = 1;
+        g_battle_action_post_action = 1;
     }
-    if ((g_camera_step_vector.vx | g_camera_step_vector.vy | g_camera_step_vector.vz) == 0
-        && g_camera_rotation_action == CAMERA_ROTATION_NONE && g_action_post_action != 0) {
+    if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0
+        && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_action_post_action != 0) {
         battle_menu_dispatch_idle_action_menu();
     }
 }

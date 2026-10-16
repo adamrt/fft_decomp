@@ -172,42 +172,42 @@ void battle_heap_print_stats(void) {
  * The rotation terms form the identity matrix's third row and column. Every
  * corner starts at the same screen depth before an effect supplies geometry. */
 static void battle_effect_init_render_state(void) {
-    g_effect_matrix.m[2][2] = ONE;
-    g_effect_frame_parity = 0;
-    g_effect_matrix.m[2][1] = 0;
-    g_effect_matrix.m[2][0] = 0;
-    g_effect_matrix.m[1][2] = 0;
-    g_effect_matrix.m[0][2] = 0;
-    g_effect_matrix.t[2] = 0;
-    g_effect_corner_bottom_right.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_corner_bottom_left.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_corner_top_right.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_corner_top_left.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_prim_buffer_offset = 0;
-    g_effect_frame_start_prim_buffer_offset = 0;
-    g_effect_prim_buffer = battle_heap_alloc_block(EFFECT_PRIMITIVE_BUFFER_SIZE, 0);
-    g_effect_sprite_count_peak = 0;
-    g_effect_sprite_count = 0;
+    g_battle_effect_matrix.m[2][2] = ONE;
+    g_battle_effect_frame_parity = 0;
+    g_battle_effect_matrix.m[2][1] = 0;
+    g_battle_effect_matrix.m[2][0] = 0;
+    g_battle_effect_matrix.m[1][2] = 0;
+    g_battle_effect_matrix.m[0][2] = 0;
+    g_battle_effect_matrix.t[2] = 0;
+    g_battle_effect_corner_bottom_right.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_corner_bottom_left.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_corner_top_right.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_corner_top_left.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_prim_buffer_offset = 0;
+    g_battle_effect_frame_start_prim_buffer_offset = 0;
+    g_battle_effect_prim_buffer = battle_heap_alloc_block(EFFECT_PRIMITIVE_BUFFER_SIZE, 0);
+    g_battle_effect_sprite_count_peak = 0;
+    g_battle_effect_sprite_count = 0;
 }
 
 /* The subset of battle_effect_init_render_state that does not touch the
  * prim buffer or the sprite counters. */
 void battle_effect_reset_render_state(void) {
-    g_effect_matrix.m[2][2] = ONE;
-    g_effect_matrix.m[2][1] = 0;
-    g_effect_matrix.m[2][0] = 0;
-    g_effect_matrix.m[1][2] = 0;
-    g_effect_matrix.m[0][2] = 0;
-    g_effect_matrix.t[2] = 0;
-    g_effect_corner_bottom_right.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_corner_bottom_left.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_corner_top_right.vz = EFFECT_CORNER_Z_DEFAULT;
-    g_effect_corner_top_left.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_matrix.m[2][2] = ONE;
+    g_battle_effect_matrix.m[2][1] = 0;
+    g_battle_effect_matrix.m[2][0] = 0;
+    g_battle_effect_matrix.m[1][2] = 0;
+    g_battle_effect_matrix.m[0][2] = 0;
+    g_battle_effect_matrix.t[2] = 0;
+    g_battle_effect_corner_bottom_right.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_corner_bottom_left.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_corner_top_right.vz = EFFECT_CORNER_Z_DEFAULT;
+    g_battle_effect_corner_top_left.vz = EFFECT_CORNER_Z_DEFAULT;
 }
 
 /* Nothing in the game calls it. */
 s32 battle_effect_get_prim_buffer_offset(void) {
-    return g_effect_prim_buffer_offset;
+    return g_battle_effect_prim_buffer_offset;
 }
 
 /* Allocate the variable-length sprite block for one effect frame.
@@ -223,17 +223,17 @@ static effect_sprite_block_t* battle_effect_alloc_sprite_block(u8 sprite_count) 
     block->header.color.b = EFFECT_COLOR_NEUTRAL;
     block->header.color.g = EFFECT_COLOR_NEUTRAL;
     block->header.color.r = EFFECT_COLOR_NEUTRAL;
-    total_count = g_effect_sprite_count + sprite_count;
-    g_effect_sprite_count = total_count;
-    if (g_effect_sprite_count_peak < total_count) {
-        g_effect_sprite_count_peak = total_count;
+    total_count = g_battle_effect_sprite_count + sprite_count;
+    g_battle_effect_sprite_count = total_count;
+    if (g_battle_effect_sprite_count_peak < total_count) {
+        g_battle_effect_sprite_count_peak = total_count;
     }
     return block;
 }
 
 /* Release an effect-frame sprite block and update the live sprite count. */
 static void battle_effect_free_sprite_block(effect_sprite_block_t* block) {
-    g_effect_sprite_count -= block->header.sprite_count;
+    g_battle_effect_sprite_count -= block->header.sprite_count;
     battle_heap_free_block(block);
 }
 
@@ -243,8 +243,8 @@ static void battle_effect_free_sprite_block(effect_sprite_block_t* block) {
  * the frame's transient primitives can be reclaimed together. */
 void battle_effect_start_render_frame(void) {
     SetGeomOffset(0, 0);
-    g_effect_frame_parity = 1 - g_effect_frame_parity;
-    g_effect_frame_start_prim_buffer_offset = g_effect_prim_buffer_offset;
+    g_battle_effect_frame_parity = 1 - g_battle_effect_frame_parity;
+    g_battle_effect_frame_start_prim_buffer_offset = g_battle_effect_prim_buffer_offset;
 }
 
 /* Allocate one typed primitive from the effect renderer's circular arena.
@@ -258,23 +258,23 @@ static void* battle_effect_alloc_primitive(effect_primitive_type_e primitive_typ
     register s32 size_byte_offset __asm__("$2");
     s32 remaining;
 
-    offset = g_effect_prim_buffer_offset;
+    offset = g_battle_effect_prim_buffer_offset;
     /* Preserve the arena offset load before indexing the size table. */
     __asm__("" : "=r"(offset) : "0"(offset));
     size_byte_offset = primitive_type << 2;
     /* Byte indexing keeps the table address in $v0 before the size load. */
-    size = *(s32*)((u8*)g_effect_primitive_sizes + size_byte_offset);
+    size = *(s32*)((u8*)g_battle_effect_primitive_sizes + size_byte_offset);
     /* Keep the size load ahead of the buffer-limit constant. */
     __asm__("" : "=r"(size) : "0"(size));
     remaining = EFFECT_PRIMITIVE_BUFFER_SIZE - offset;
     if (remaining < size) {
-        g_effect_prim_buffer_offset = size;
+        g_battle_effect_prim_buffer_offset = size;
         offset = 0;
     } else {
         remaining = size + offset;
-        g_effect_prim_buffer_offset = remaining;
+        g_battle_effect_prim_buffer_offset = remaining;
     }
-    return g_effect_prim_buffer + offset;
+    return g_battle_effect_prim_buffer + offset;
 }
 
 /* Queues a multi-part effect sprite at a screen position: brackets the parts
@@ -296,33 +296,34 @@ static void battle_effect_submit_sprite_to_ordering_table(
     draw_mode = battle_effect_alloc_primitive(EFFECT_PRIMITIVE_DR_MODE);
     SetDrawMode(draw_mode, 1, 1, 1, 0);
     addPrim(ot, draw_mode);
-    g_effect_matrix.t[0] = position->vx;
-    g_effect_matrix.t[1] = position->vy;
+    g_battle_effect_matrix.t[0] = position->vx;
+    g_battle_effect_matrix.t[1] = position->vy;
     cosine = rcos(angle);
     sine = rsin(angle);
     if (zoom != 0) {
-        g_effect_matrix.m[0][0] = (cosine * zoom->vx) >> 12;
-        g_effect_matrix.m[1][1] = (cosine * zoom->vy) >> 12;
-        g_effect_matrix.m[0][1] = (-sine * zoom->vy) >> 12;
-        g_effect_matrix.m[1][0] = (sine * zoom->vx) >> 12;
+        g_battle_effect_matrix.m[0][0] = (cosine * zoom->vx) >> 12;
+        g_battle_effect_matrix.m[1][1] = (cosine * zoom->vy) >> 12;
+        g_battle_effect_matrix.m[0][1] = (-sine * zoom->vy) >> 12;
+        g_battle_effect_matrix.m[1][0] = (sine * zoom->vx) >> 12;
     } else {
-        g_effect_matrix.m[1][0] = sine;
-        g_effect_matrix.m[1][1] = cosine;
-        g_effect_matrix.m[0][0] = cosine;
-        g_effect_matrix.m[0][1] = -sine;
+        g_battle_effect_matrix.m[1][0] = sine;
+        g_battle_effect_matrix.m[1][1] = cosine;
+        g_battle_effect_matrix.m[0][0] = cosine;
+        g_battle_effect_matrix.m[0][1] = -sine;
     }
-    SetRotMatrix(&g_effect_matrix);
-    SetTransMatrix(&g_effect_matrix);
+    SetRotMatrix(&g_battle_effect_matrix);
+    SetTransMatrix(&g_battle_effect_matrix);
     for (i = 0; i < set->header.sprite_count; i++) {
         frame = set->frames[i];
         code = 0x2c;
         /* Copy x/y while retaining the GTE input's z. */
-        memcpy(&g_effect_corner_top_left, &frame->corners[0], sizeof(frame->corners[0]));
-        memcpy(&g_effect_corner_top_right, &frame->corners[1], sizeof(frame->corners[1]));
-        memcpy(&g_effect_corner_bottom_left, &frame->corners[2], sizeof(frame->corners[2]));
-        gte_ldv3_split(&g_effect_corner_top_left, &g_effect_corner_top_right, &g_effect_corner_bottom_left);
+        memcpy(&g_battle_effect_corner_top_left, &frame->corners[0], sizeof(frame->corners[0]));
+        memcpy(&g_battle_effect_corner_top_right, &frame->corners[1], sizeof(frame->corners[1]));
+        memcpy(&g_battle_effect_corner_bottom_left, &frame->corners[2], sizeof(frame->corners[2]));
+        gte_ldv3_split(
+            &g_battle_effect_corner_top_left, &g_battle_effect_corner_top_right, &g_battle_effect_corner_bottom_left);
         gte_rtpt_split();
-        memcpy(&g_effect_corner_bottom_right, &frame->corners[3], sizeof(frame->corners[3]));
+        memcpy(&g_battle_effect_corner_bottom_right, &frame->corners[3], sizeof(frame->corners[3]));
         quad = battle_effect_alloc_primitive(EFFECT_PRIMITIVE_FT4);
         /* The fourth copied byte is the part count; code overwrites it. */
         memcpy(&quad->r0, &set->header, sizeof(set->header));
@@ -332,7 +333,7 @@ static void battle_effect_submit_sprite_to_ordering_table(
             quad->code = 0x2e;
         }
         gte_stsxy3_split(&quad->x0, &quad->x1, &quad->x2);
-        gte_ldv0_split(&g_effect_corner_bottom_right);
+        gte_ldv0_split(&g_battle_effect_corner_bottom_right);
         gte_rtps_split();
         quad->tpage = frame->tpage;
         value = frame->flags & EFFECT_SPRITE_PART_CLUT_MASK;
@@ -378,8 +379,8 @@ static void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
     u8 right;
     u8 bottom;
 
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     setVector(&local, slot->motion.position.x >> 12, slot->motion.position.y >> 12, slot->motion.position.z >> 12);
     RotTrans(&local, &position, &position.pad);
     depth = (position.vz >> 2) - 8;
@@ -389,36 +390,36 @@ static void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
     if (depth >= EFFECT_OT_DEPTH_LIMIT) {
         depth = EFFECT_OT_DEPTH_MAX;
     }
-    g_effect_matrix.t[0] = position.vx;
-    g_effect_matrix.t[1] = position.vy;
+    g_battle_effect_matrix.t[0] = position.vx;
+    g_battle_effect_matrix.t[1] = position.vy;
     cosine = rcos(slot->angle);
     sine = rsin(slot->angle);
-    zoom = g_camera_zoom.vx;
-    scale_y = g_camera_zoom.vy;
-    g_effect_matrix.m[0][0] = (cosine * zoom) >> 12;
-    g_effect_matrix.m[1][1] = (cosine * scale_y) >> 12;
-    g_effect_matrix.m[0][1] = (-sine * scale_y) >> 12;
-    g_effect_matrix.m[1][0] = (sine * zoom) >> 12;
-    SetRotMatrix(&g_effect_matrix);
-    SetTransMatrix(&g_effect_matrix);
+    zoom = g_battle_camera_zoom.vx;
+    scale_y = g_battle_camera_zoom.vy;
+    g_battle_effect_matrix.m[0][0] = (cosine * zoom) >> 12;
+    g_battle_effect_matrix.m[1][1] = (cosine * scale_y) >> 12;
+    g_battle_effect_matrix.m[0][1] = (-sine * scale_y) >> 12;
+    g_battle_effect_matrix.m[1][0] = (sine * zoom) >> 12;
+    SetRotMatrix(&g_battle_effect_matrix);
+    SetTransMatrix(&g_battle_effect_matrix);
 
-    frame_group = g_effect_trap_frame_data.groups;
+    frame_group = g_battle_effect_trap_frame_data.groups;
     offset = *(u16*)((u8*)frame_group + (slot->frame * 2 + frame_group->frame_table_offset));
-    prim = &slot->quads[g_effect_buffer_index];
+    prim = &slot->quads[g_battle_effect_buffer_index];
     /* Copy RGB and the frame byte; the packet header overwrites that last byte. */
     memcpy(&prim->r0, &slot->color.r, sizeof(CVECTOR));
     setPolyFT4(prim);
     frame = (effect_sprite_frameset_t*)((u8*)frame_group + offset);
     setSemiTrans(prim, frame->flags & EFFECT_SPRITE_PART_FLAG_SEMI_TRANSPARENT);
     /* Copy x/y while retaining the GTE input's z. */
-    memcpy(&g_effect_corner_top_left, &frame->parts[0].corners[0], sizeof(frame->parts[0].corners[0]));
-    memcpy(&g_effect_corner_top_right, &frame->parts[0].corners[1], sizeof(frame->parts[0].corners[1]));
-    memcpy(&g_effect_corner_bottom_left, &frame->parts[0].corners[2], sizeof(frame->parts[0].corners[2]));
-    memcpy(&g_effect_corner_bottom_right, &frame->parts[0].corners[3], sizeof(frame->parts[0].corners[3]));
+    memcpy(&g_battle_effect_corner_top_left, &frame->parts[0].corners[0], sizeof(frame->parts[0].corners[0]));
+    memcpy(&g_battle_effect_corner_top_right, &frame->parts[0].corners[1], sizeof(frame->parts[0].corners[1]));
+    memcpy(&g_battle_effect_corner_bottom_left, &frame->parts[0].corners[2], sizeof(frame->parts[0].corners[2]));
+    memcpy(&g_battle_effect_corner_bottom_right, &frame->parts[0].corners[3], sizeof(frame->parts[0].corners[3]));
     /* The GTE returns each x/y pair as one packed 32-bit value. */
-    RotTransPers3(&g_effect_corner_top_left, &g_effect_corner_top_right, &g_effect_corner_bottom_left, (s32*)&prim->x0,
-        (s32*)&prim->x1, (s32*)&prim->x2, &sxy, &flag);
-    RotTransPers(&g_effect_corner_bottom_right, (s32*)&prim->x3, &sxy, &flag);
+    RotTransPers3(&g_battle_effect_corner_top_left, &g_battle_effect_corner_top_right,
+        &g_battle_effect_corner_bottom_left, (s32*)&prim->x0, (s32*)&prim->x1, (s32*)&prim->x2, &sxy, &flag);
+    RotTransPers(&g_battle_effect_corner_bottom_right, (s32*)&prim->x3, &sxy, &flag);
     prim->tpage = (frame->flags & EFFECT_SPRITE_PART_TPAGE_MODE_MASK) | 8;
     prim->clut = slot->clut;
     corner_u = frame->parts[0].u;
@@ -433,11 +434,11 @@ static void battle_effect_draw_billboard_sprite(effect_slot_t* slot) {
     bottom = corner_v + frame->parts[0].height;
     prim->v3 = bottom;
     prim->v2 = bottom;
-    SetDrawMode(&slot->modes[g_effect_buffer_index][0], 1, 1, 1, 0);
-    AddPrim(&g_effect_polygon_depth_data[depth], &slot->modes[g_effect_buffer_index][0]);
-    AddPrim(&g_effect_polygon_depth_data[depth], prim);
-    SetDrawMode(&slot->modes[g_effect_buffer_index][1], 1, 0, 1, 0);
-    AddPrim(&g_effect_polygon_depth_data[depth], &slot->modes[g_effect_buffer_index][1]);
+    SetDrawMode(&slot->modes[g_battle_effect_buffer_index][0], 1, 1, 1, 0);
+    AddPrim(&g_battle_effect_polygon_depth_data[depth], &slot->modes[g_battle_effect_buffer_index][0]);
+    AddPrim(&g_battle_effect_polygon_depth_data[depth], prim);
+    SetDrawMode(&slot->modes[g_battle_effect_buffer_index][1], 1, 0, 1, 0);
+    AddPrim(&g_battle_effect_polygon_depth_data[depth], &slot->modes[g_battle_effect_buffer_index][1]);
 }
 
 /* Allocate the 256 effect work records and chain them all into the free list.
@@ -446,26 +447,26 @@ static void battle_effect_init_record_chain(void) {
     s32 index;
     effect_work_record_t* records;
 
-    g_effect_particle_heading_matrix.t[2] = 0;
-    g_effect_particle_heading_matrix.t[1] = 0;
-    g_effect_particle_heading_matrix.t[0] = 0;
-    g_effect_emitter_matrix.t[2] = 0;
-    g_effect_emitter_matrix.t[1] = 0;
-    g_effect_emitter_matrix.t[0] = 0;
+    g_battle_effect_particle_heading_matrix.t[2] = 0;
+    g_battle_effect_particle_heading_matrix.t[1] = 0;
+    g_battle_effect_particle_heading_matrix.t[0] = 0;
+    g_battle_effect_emitter_matrix.t[2] = 0;
+    g_battle_effect_emitter_matrix.t[1] = 0;
+    g_battle_effect_emitter_matrix.t[0] = 0;
     records = battle_heap_alloc_block(EFFECT_WORK_RECORD_CAPACITY * sizeof(effect_work_record_t), 0);
-    g_effect_work_records = records;
-    g_effect_free_work_record_head = records;
+    g_battle_effect_work_records = records;
+    g_battle_effect_free_work_record_head = records;
     g_battle_unknown_801bc0c4 = 0;
     records[0].prev = 0;
     records[0].next = &records[1];
     for (index = 1; index < EFFECT_WORK_RECORD_CAPACITY - 1; index++) {
-        g_effect_work_records[index].next = &g_effect_work_records[index + 1];
-        g_effect_work_records[index].prev = &g_effect_work_records[index - 1];
+        g_battle_effect_work_records[index].next = &g_battle_effect_work_records[index + 1];
+        g_battle_effect_work_records[index].prev = &g_battle_effect_work_records[index - 1];
     }
-    g_effect_work_record_peak = 0;
-    g_effect_work_record_count = 0;
-    g_effect_work_records[index].prev = &g_effect_work_records[index - 1];
-    g_effect_work_records[index].next = 0;
+    g_battle_effect_work_record_peak = 0;
+    g_battle_effect_work_record_count = 0;
+    g_battle_effect_work_records[index].prev = &g_battle_effect_work_records[index - 1];
+    g_battle_effect_work_records[index].next = 0;
 }
 
 /*
@@ -474,22 +475,22 @@ static void battle_effect_init_record_chain(void) {
  *
  * Bits 12-15 of kind select the effect list node type allocated as the
  * record's data (0x0000-0x3000 map to list kinds 0, 2, 4 and 6); other kinds
- * get no data. g_effect_work_record_peak tracks the peak number of records in use.
+ * get no data. g_battle_effect_work_record_peak tracks the peak number of records in use.
  */
 static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s16 kind) {
     effect_work_record_t* work;
     effect_record_t* owner;
 
-    work = g_effect_free_work_record_head;
-    g_effect_work_record_count++;
-    owner = &g_effect_state_records[record_index];
-    if (g_effect_work_record_peak < g_effect_work_record_count) {
-        g_effect_work_record_peak = g_effect_work_record_count;
+    work = g_battle_effect_free_work_record_head;
+    g_battle_effect_work_record_count++;
+    owner = &g_battle_effect_state_records[record_index];
+    if (g_battle_effect_work_record_peak < g_battle_effect_work_record_count) {
+        g_battle_effect_work_record_peak = g_battle_effect_work_record_count;
     }
     if (work == 0) {
         main_system_report_stub(1, 0x3E);
     }
-    g_effect_free_work_record_head = work->next;
+    g_battle_effect_free_work_record_head = work->next;
     switch (kind & EFFECT_WORK_KIND_MASK) {
     case EFFECT_WORK_KIND_SPRITE_WORLD:
         work->data = battle_effect_alloc_list_node(EFFECT_LIST_NODE_WORLD);
@@ -519,7 +520,7 @@ static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s
 void battle_effect_free_work_record(s16 record_index, effect_work_record_t* work) {
     effect_record_t* owner;
 
-    owner = &g_effect_state_records[record_index];
+    owner = &g_battle_effect_state_records[record_index];
     if (work->next != 0) {
         work->next->prev = work->prev;
     }
@@ -540,9 +541,9 @@ void battle_effect_free_work_record(s16 record_index, effect_work_record_t* work
         battle_heap_free_block(work->data);
         break;
     }
-    work->next = g_effect_free_work_record_head;
-    g_effect_free_work_record_head = work;
-    g_effect_work_record_count--;
+    work->next = g_battle_effect_free_work_record_head;
+    g_battle_effect_free_work_record_head = work;
+    g_battle_effect_work_record_count--;
 }
 
 /* Copy a work record's position, heading, and color onto its list node.
@@ -559,8 +560,8 @@ void battle_effect_update_node_from_work(s16 record_index, effect_work_record_t*
     work->data->y = work->motion.position.y >> 12;
     work->data->z = work->motion.position.z >> 12;
     if (work->kind_flags & EFFECT_EMITTER_ORIENT_TO_VELOCITY) {
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_effect_particle_heading_matrix);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_effect_particle_heading_matrix);
         setVector(&direction, work->motion.velocity.x >> 3, work->motion.velocity.y >> 3, work->motion.velocity.z >> 3);
         /* The 32-bit flag value lands in the output vector's 32-bit pad field; the target frame
          * has no separate flag slot. */
@@ -569,9 +570,9 @@ void battle_effect_update_node_from_work(s16 record_index, effect_work_record_t*
     }
     if (work->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
         battle_effect_render_particle_sprite(work->data,
-            g_effect_animation_curve_data->curves[work->color_curves.r][work->curve_frame],
-            g_effect_animation_curve_data->curves[work->color_curves.g][work->curve_frame],
-            g_effect_animation_curve_data->curves[work->color_curves.b][work->curve_frame]);
+            g_battle_effect_animation_curve_data->curves[work->color_curves.r][work->curve_frame],
+            g_battle_effect_animation_curve_data->curves[work->color_curves.g][work->curve_frame],
+            g_battle_effect_animation_curve_data->curves[work->color_curves.b][work->curve_frame]);
     } else {
         battle_effect_render_particle_sprite(work->data, 0x80, 0x80, 0x80);
     }
@@ -587,7 +588,7 @@ void battle_noop_801a6018(void) {
  * it.  Note the retail loop walks work_count links, not requested_index, so
  * the returned node is always the same for a given record. */
 effect_work_record_t* battle_effect_get_list_node(s16 record_index, s16 requested_index) {
-    effect_record_t* record = &g_effect_state_records[record_index];
+    effect_record_t* record = &g_battle_effect_state_records[record_index];
     effect_work_record_t* node = 0;
     s16 node_count;
     s16 i;
@@ -672,7 +673,7 @@ s32 battle_effect_spawn_emitter_particles(
     u8 color_b;
     map_tile_t* tile;
 
-    entry = &g_effect_geometry_table->entries[emitter_index];
+    entry = &g_battle_effect_geometry_table->entries[emitter_index];
     time = frame;
     frame = frame % EFFECT_ANIMATION_CURVE_FRAMES;
     placement_flags = entry->emitter.placement_flags;
@@ -682,7 +683,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT & 0xf;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -691,14 +692,14 @@ s32 battle_effect_spawn_emitter_particles(
         return;
     }
 
-    SetTransMatrix(&g_effect_emitter_matrix);
-    target_index = g_effect_state_records[record_index].timeline.target_index;
+    SetTransMatrix(&g_battle_effect_emitter_matrix);
+    target_index = g_battle_effect_state_records[record_index].timeline.target_index;
     rotate = (behavior_flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
-    battle_effect_resolve_target_world_coords(g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
-        EFFECT_TARGET_INDEX_CASTER, &g_effect_context, &caster);
-    if (g_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
+    battle_effect_resolve_target_world_coords(g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+        EFFECT_TARGET_INDEX_CASTER, &g_battle_effect_context, &caster);
+    if (g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].target_type == EFFECT_TARGET_TYPE_UNIT) {
         facing = ((battle_unit_get_facing_quadrant_by_runtime_id(
-                       g_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id)
+                       g_battle_effect_context.targets[EFFECT_CASTER_ENTRY].data.unit.runtime_id)
                       + 1)
                      & 3)
             << 10;
@@ -707,20 +708,21 @@ s32 battle_effect_spawn_emitter_particles(
         rotation.vy = facing;
         RotMatrix(&rotation, &matrix);
     }
-    battle_effect_resolve_target_world_coords(
-        g_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, target_index, &g_effect_context, &target);
-    if (g_effect_context.targets[target_index].target_type == EFFECT_TARGET_TYPE_UNIT) {
-        battle_unit_get_facing_quadrant_by_runtime_id(g_effect_context.targets[target_index].data.unit.runtime_id);
-        unit_coords
-            = battle_unit_get_event_offset_by_runtime_id(g_effect_context.targets[target_index].data.unit.runtime_id);
+    battle_effect_resolve_target_world_coords(g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST,
+        target_index, &g_battle_effect_context, &target);
+    if (g_battle_effect_context.targets[target_index].target_type == EFFECT_TARGET_TYPE_UNIT) {
+        battle_unit_get_facing_quadrant_by_runtime_id(
+            g_battle_effect_context.targets[target_index].data.unit.runtime_id);
+        unit_coords = battle_unit_get_event_offset_by_runtime_id(
+            g_battle_effect_context.targets[target_index].data.unit.runtime_id);
     }
-    tile = battle_map_get_tile_data_pointer(
-        g_effect_target_tile.data.tile.vx, g_effect_target_tile.data.tile.vz, g_effect_target_tile.data.tile.vy);
+    tile = battle_map_get_tile_data_pointer(g_battle_effect_target_tile.data.tile.vx,
+        g_battle_effect_target_tile.data.tile.vz, g_battle_effect_target_tile.data.tile.vy);
 
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT & 0xf;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -738,7 +740,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.spawn_bindings.position;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -752,8 +754,8 @@ s32 battle_effect_spawn_emitter_particles(
     case EFFECT_EMITTER_ORIGIN_WORLD:
         break;
     case EFFECT_EMITTER_ORIGIN_CURSOR_TILE:
-        spawn.vx += g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        spawn.vz += g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        spawn.vx += g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        spawn.vz += g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         spawn.vy -= tile->height * 12;
         break;
     case EFFECT_EMITTER_ORIGIN_CASTER:
@@ -785,7 +787,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = selector;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -808,8 +810,8 @@ s32 battle_effect_spawn_emitter_particles(
         for (i = 0; i < count; i++) {
             if (scale != 0) {
                 setVector(&rotation, rand(), rand(), rand());
-                RotMatrix(&rotation, &g_effect_emitter_matrix);
-                SetRotMatrix(&g_effect_emitter_matrix);
+                RotMatrix(&rotation, &g_battle_effect_emitter_matrix);
+                SetRotMatrix(&g_battle_effect_emitter_matrix);
                 rotation.vx = scale;
                 rotation.vz = 0;
                 rotation.vy = 0;
@@ -829,7 +831,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.spawn_bindings.radial_speed;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
         speed_min
             = battle_lerp_fixed8(entry->emitter.radial_speed_start.min, entry->emitter.radial_speed_end.min, factor);
         speed_max
@@ -842,7 +844,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = selector;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
         angle_spread.vx = battle_lerp_fixed8(
             entry->emitter.spawn.velocity_spread_start.x, entry->emitter.spawn.velocity_spread_end.x, factor);
         angle_spread.vy = battle_lerp_fixed8(
@@ -857,7 +859,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = selector;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -870,8 +872,8 @@ s32 battle_effect_spawn_emitter_particles(
             setVector(&rotation, angle.vx + RANDOM_BETWEEN(angle_spread.vx, -angle_spread.vx),
                 angle.vy + RANDOM_BETWEEN(angle_spread.vy, -angle_spread.vy),
                 angle.vz + RANDOM_BETWEEN(angle_spread.vz, -angle_spread.vz));
-            RotMatrix(&rotation, &g_effect_emitter_matrix);
-            SetRotMatrix(&g_effect_emitter_matrix);
+            RotMatrix(&rotation, &g_battle_effect_emitter_matrix);
+            SetRotMatrix(&g_battle_effect_emitter_matrix);
             rotation.vz = 0;
             rotation.vx = 0;
             rotation.vy = RANDOM_BETWEEN(speed_min, speed_max);
@@ -887,8 +889,8 @@ s32 battle_effect_spawn_emitter_particles(
             setVector(&rotation, angle.vx + RANDOM_BETWEEN(angle_spread.vx, -angle_spread.vx),
                 angle.vy + RANDOM_BETWEEN(angle_spread.vy, -angle_spread.vy),
                 angle.vz + RANDOM_BETWEEN(angle_spread.vz, -angle_spread.vz));
-            RotMatrix(&rotation, &g_effect_emitter_matrix);
-            SetRotMatrix(&g_effect_emitter_matrix);
+            RotMatrix(&rotation, &g_battle_effect_emitter_matrix);
+            SetRotMatrix(&g_battle_effect_emitter_matrix);
             rotation.vz = 0;
             rotation.vx = 0;
             rotation.vy = RANDOM_BETWEEN(speed_min, speed_max);
@@ -927,7 +929,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_ACCELERATION_SHIFT & 0xf;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -953,7 +955,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_ACCELERATION_STEP_SHIFT & 0xf;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -990,7 +992,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = inertia_binding;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -1002,7 +1004,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = discarded_selector;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -1012,7 +1014,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = weight_binding;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -1021,7 +1023,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_LIFETIME_SHIFT & 0xf;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -1038,7 +1040,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_TARGET_OFFSET_SHIFT & 0xf;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -1085,8 +1087,8 @@ s32 battle_effect_spawn_emitter_particles(
         }
         break;
     case EFFECT_EMITTER_HOMING_CURSOR_TILE:
-        tile_anchor.vx = g_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
-        tile_anchor.vz = g_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        tile_anchor.vx = g_battle_effect_target_tile.data.tile.vx * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
+        tile_anchor.vz = g_battle_effect_target_tile.data.tile.vz * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
         tile_anchor.vy = -(tile->height * 12);
         for (i = 0; i < count; i++) {
             particle->target.x = tile_anchor.vx + target_offset.vx;
@@ -1100,7 +1102,7 @@ s32 battle_effect_spawn_emitter_particles(
     curve = entry->emitter.motion_curve_selectors >> EFFECT_EMITTER_CURVE_HOMING_STRENGTH_SHIFT & 3;
     curve--;
     if (curve != -1) {
-        factor = g_effect_animation_curve_data->curves[curve][frame];
+        factor = g_battle_effect_animation_curve_data->curves[curve][frame];
     } else {
         factor = 0;
     }
@@ -1170,18 +1172,18 @@ s32 battle_effect_spawn_particle_motion(effect_emitter_values_t* values, effect_
     s16 speed_max;
     s16 speed;
 
-    init.targets[EFFECT_CASTER_ENTRY] = g_effect_current_secondary->caster;
+    init.targets[EFFECT_CASTER_ENTRY] = g_battle_effect_current_secondary->caster;
     battle_effect_resolve_target_world_coords(0, EFFECT_TARGET_INDEX_CASTER, &init, &origin);
-    init.targets[0] = g_effect_current_secondary->target.record;
+    init.targets[0] = g_battle_effect_current_secondary->target.record;
     battle_effect_resolve_target_world_coords(0, 0, &init, &target);
     oriented = 0;
-    SetTransMatrix(&g_effect_projectile_matrix);
+    SetTransMatrix(&g_battle_effect_projectile_matrix);
     if ((values->motion_flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING) {
         oriented = 1;
-        anchor_angle.vy
-            = ((battle_unit_get_facing_quadrant_by_runtime_id(g_effect_current_secondary->caster.data.unit.runtime_id)
-                   + 1)
-                  & 3)
+        anchor_angle.vy = ((battle_unit_get_facing_quadrant_by_runtime_id(
+                                g_battle_effect_current_secondary->caster.data.unit.runtime_id)
+                               + 1)
+                              & 3)
             << 10;
         anchor_angle.vz = 0;
         anchor_angle.vx = 0;
@@ -1515,13 +1517,13 @@ void battle_noop_801a8e74(void) {
 
 /* Select the single object's relative sections and rewind its primitive stream. */
 s32 battle_effect_init_model_sections(psyq_tmd_header_t* resource, s32 unused_1) {
-    g_effect_model_object = resource->objects;
+    g_battle_effect_model_object = resource->objects;
     /* TMD offsets are byte counts from the object table; word indexing keeps signed rounding. */
-    g_effect_model_vertices = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
-    g_effect_model_normals = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].normal_offset / 4];
-    g_effect_model_commands
+    g_battle_effect_model_vertices = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].vertex_offset / 4];
+    g_battle_effect_model_normals = (SVECTOR*)&((u32*)resource->objects)[(s32)resource->objects[0].normal_offset / 4];
+    g_battle_effect_model_commands
         = (psyq_tmd_packet_t*)&((u32*)resource->objects)[(s32)resource->objects[0].primitive_offset / 4];
-    g_effect_model_command_word_offset = 0;
+    g_battle_effect_model_command_word_offset = 0;
     return resource->objects[0].primitive_count;
 }
 
@@ -1539,8 +1541,8 @@ void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out
     u32 header;
 
     dst = out;
-    index = g_effect_model_command_word_offset;
-    command = (psyq_tmd_packet_t*)((u8*)g_effect_model_commands + index * sizeof(u32));
+    index = g_battle_effect_model_command_word_offset;
+    command = (psyq_tmd_packet_t*)((u8*)g_battle_effect_model_commands + index * sizeof(u32));
     header = command->id;
     memcpy(&out->header, &command->id, sizeof(out->header));
     /* Struct assignments use unaligned copies; memcpy preserves the 32-bit transfers.
@@ -1554,7 +1556,7 @@ void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out
         memcpy(&out->vertices.pairs[0], &command->g4.v0, sizeof(out->vertices.pairs[0]));
         /* A 32-bit load preserves the native delay-slot store; memcpy reschedules it. */
         out->vertices.pairs[1] = *(u32*)&command->g4.v2;
-        g_effect_model_command_word_offset = index + 7;
+        g_battle_effect_model_command_word_offset = index + 7;
         break;
     case EFFECT_MODEL_COMMAND_G3:
         memcpy(&out->colors[0], &command->g3.r0, sizeof(out->colors[0]));
@@ -1563,13 +1565,13 @@ void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out
         memcpy(&out->vertices.pairs[0], &command->g3.v0, sizeof(out->vertices.pairs[0]));
         /* A 32-bit load preserves the native delay-slot store; memcpy reschedules it. */
         out->vertices.pairs[1] = *(u32*)&command->g3.v2;
-        g_effect_model_command_word_offset = index + 6;
+        g_battle_effect_model_command_word_offset = index + 6;
         break;
     case EFFECT_MODEL_COMMAND_GT3_35:
     case EFFECT_MODEL_COMMAND_GT3_37: {
         psyq_tmd_packet_t* extended;
-        extended
-            = (psyq_tmd_packet_t*)((u8*)g_effect_model_commands + g_effect_model_command_word_offset * sizeof(u32));
+        extended = (psyq_tmd_packet_t*)((u8*)g_battle_effect_model_commands
+            + g_battle_effect_model_command_word_offset * sizeof(u32));
         memcpy(&dst->colors[0], &extended->gt3.r0, sizeof(dst->colors[0]));
         memcpy(&dst->colors[1], &extended->gt3.r1, sizeof(dst->colors[1]));
         memcpy(&dst->colors[2], &extended->gt3.r2, sizeof(dst->colors[2]));
@@ -1580,11 +1582,11 @@ void battle_effect_decode_next_model_command(effect_decoded_model_command_t* out
         memcpy(&out->texture.uv[0], &extended->gt3.tu0, sizeof(out->texture.uv[0]));
         memcpy(&out->texture.uv[1], &extended->gt3.tu1, sizeof(out->texture.uv[1]));
         memcpy(&out->texture.uv[2], &extended->gt3.tu2, sizeof(out->texture.uv[2]));
-        g_effect_model_command_word_offset += 9;
+        g_battle_effect_model_command_word_offset += 9;
         break;
     }
     default:
-        g_effect_model_command_word_offset += out->header.word_count + 1;
+        g_battle_effect_model_command_word_offset += out->header.word_count + 1;
         break;
     }
 }
@@ -1820,27 +1822,27 @@ void battle_effect_add_vectors_to_svector_rot_y_90(const VECTOR* left, const VEC
 }
 
 void battle_effect_set_gravity(const vec3s32_t* src) {
-    g_effect_gravity = *src;
+    g_battle_effect_gravity = *src;
 }
 
 void battle_effect_set_inertia_threshold(s32 threshold) {
-    g_effect_inertia_threshold = threshold;
+    g_battle_effect_inertia_threshold = threshold;
 }
 
 void battle_effect_save_gravity(void) {
-    g_effect_saved_gravity = g_effect_gravity;
+    g_battle_effect_saved_gravity = g_battle_effect_gravity;
 }
 
 void battle_effect_restore_gravity(void) {
-    g_effect_gravity = g_effect_saved_gravity;
+    g_battle_effect_gravity = g_battle_effect_saved_gravity;
 }
 
 void battle_effect_save_inertia_threshold(void) {
-    g_effect_saved_inertia_threshold = g_effect_inertia_threshold;
+    g_battle_effect_saved_inertia_threshold = g_battle_effect_inertia_threshold;
 }
 
 void battle_effect_restore_inertia_threshold(void) {
-    g_effect_inertia_threshold = g_effect_saved_inertia_threshold;
+    g_battle_effect_inertia_threshold = g_battle_effect_saved_inertia_threshold;
 }
 
 /* Advance an effect slot's motion state by one frame. */
@@ -1851,17 +1853,17 @@ static void battle_effect_step_motion(effect_motion_t* motion) {
     motion->position.y += motion->velocity.y;
     motion->position.z += motion->velocity.z;
     motion->velocity.x
-        = ((motion->inertia - g_effect_inertia_threshold) * motion->velocity.x + (motion->acceleration.x * ONE))
+        = ((motion->inertia - g_battle_effect_inertia_threshold) * motion->velocity.x + (motion->acceleration.x * ONE))
             / motion->inertia
-        + ((motion->weight * g_effect_gravity.x) >> 12);
+        + ((motion->weight * g_battle_effect_gravity.x) >> 12);
     motion->velocity.y
-        = ((motion->inertia - g_effect_inertia_threshold) * motion->velocity.y + (motion->acceleration.y * ONE))
+        = ((motion->inertia - g_battle_effect_inertia_threshold) * motion->velocity.y + (motion->acceleration.y * ONE))
             / motion->inertia
-        + ((motion->weight * g_effect_gravity.y) >> 12);
+        + ((motion->weight * g_battle_effect_gravity.y) >> 12);
     motion->velocity.z
-        = ((motion->inertia - g_effect_inertia_threshold) * motion->velocity.z + (motion->acceleration.z * ONE))
+        = ((motion->inertia - g_battle_effect_inertia_threshold) * motion->velocity.z + (motion->acceleration.z * ONE))
             / motion->inertia
-        + ((motion->weight * g_effect_gravity.z) >> 12);
+        + ((motion->weight * g_battle_effect_gravity.z) >> 12);
     motion->acceleration.x += motion->acceleration_step.x;
     motion->acceleration.y += motion->acceleration_step.y;
     motion->acceleration.z += motion->acceleration_step.z;
@@ -1889,10 +1891,10 @@ void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
     s32 gravity_y;
     s32 gravity_z;
 
-    threshold = g_effect_inertia_threshold;
-    gravity_x = g_effect_gravity.x;
-    gravity_y = g_effect_gravity.y;
-    gravity_z = g_effect_gravity.z;
+    threshold = g_battle_effect_inertia_threshold;
+    gravity_x = g_battle_effect_gravity.x;
+    gravity_y = g_battle_effect_gravity.y;
+    gravity_z = g_battle_effect_gravity.z;
 
     node = list;
     while (list != 0) {
@@ -1917,7 +1919,7 @@ void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
             track = node->homing_curve_selector;
             track--;
             if (track != -1) {
-                strength = g_effect_animation_curve_data->curves[track][node->curve_frame] - 0x80;
+                strength = g_battle_effect_animation_curve_data->curves[track][node->curve_frame] - 0x80;
             } else {
                 strength = -0x80;
             }
@@ -1943,7 +1945,7 @@ void battle_effect_integrate_particle_motion(effect_work_record_t* list) {
 
 /*
  * Rebuilds the effect-node free list: node 0 is the list sentinel, nodes
- * 1..256 are chained through next with 256 terminating, and g_effect_free_list_node_head holds
+ * 1..256 are chained through next with 256 terminating, and g_battle_effect_free_list_node_head holds
  * the free-list head.  The GetClut result is computed and discarded in the
  * target.
  */
@@ -1952,18 +1954,18 @@ static void battle_effect_init_free_list(void) {
 
     GetClut(0, 0x1f0);
 
-    g_effect_list_nodes[0].next = 0;
-    g_effect_list_nodes[0].prev = 0;
-    g_effect_free_list_node_head = 1;
+    g_battle_effect_list_nodes[0].next = 0;
+    g_battle_effect_list_nodes[0].prev = 0;
+    g_battle_effect_free_list_node_head = 1;
     for (i = 1; i < EFFECT_SPRITE_NODE_CAPACITY; i++) {
-        g_effect_list_nodes[i].index = i;
-        g_effect_list_nodes[i].prev = i - 1;
-        g_effect_list_nodes[i].next = i + 1;
+        g_battle_effect_list_nodes[i].index = i;
+        g_battle_effect_list_nodes[i].prev = i - 1;
+        g_battle_effect_list_nodes[i].next = i + 1;
     }
-    g_effect_list_nodes[i].prev = i - 1;
-    g_effect_list_nodes[i].next = 0;
-    g_effect_list_nodes[i].index = i;
-    g_effect_active_list_node_head = 0;
+    g_battle_effect_list_nodes[i].prev = i - 1;
+    g_battle_effect_list_nodes[i].next = 0;
+    g_battle_effect_list_nodes[i].index = i;
+    g_battle_effect_active_list_node_head = 0;
 }
 
 /* Take a sprite node from the free list, push it on the head of the active list
@@ -1974,14 +1976,14 @@ static void battle_effect_init_free_list(void) {
  * would be handed out. There are as many nodes as work records, and
  * battle_effect_alloc_work_record is the only caller. */
 static effect_list_node_t* battle_effect_alloc_list_node(s16 kind) {
-    u16* free_head = &g_effect_free_list_node_head;
-    u16* list_head = &g_effect_active_list_node_head;
+    u16* free_head = &g_battle_effect_free_list_node_head;
+    u16* list_head = &g_battle_effect_active_list_node_head;
     u16 index = *free_head;
-    effect_list_node_t* node = &g_effect_list_nodes[index];
+    effect_list_node_t* node = &g_battle_effect_list_nodes[index];
 
     *free_head = node->next;
-    g_effect_list_nodes[node->next].prev = 0;
-    g_effect_list_nodes[*list_head].prev = index;
+    g_battle_effect_list_nodes[node->next].prev = 0;
+    g_battle_effect_list_nodes[*list_head].prev = index;
     node->next = *list_head;
     node->prev = 0;
     *list_head = index;
@@ -2006,12 +2008,12 @@ static void battle_effect_free_list_node(effect_list_node_t* node) {
         node->sprite_block = 0;
     }
     if (node->prev != 0) {
-        g_effect_list_nodes[node->prev].next = node->next;
+        g_battle_effect_list_nodes[node->prev].next = node->next;
     } else {
-        g_effect_active_list_node_head = node->next;
+        g_battle_effect_active_list_node_head = node->next;
     }
-    g_effect_list_nodes[node->next].prev = node->prev;
-    free_head = &g_effect_free_list_node_head;
+    g_battle_effect_list_nodes[node->next].prev = node->prev;
+    free_head = &g_battle_effect_free_list_node_head;
     node->next = *free_head;
     node->prev = 0;
     *free_head = node->index;
@@ -2026,7 +2028,7 @@ static void battle_effect_init_animation_sequence(effect_list_node_t* state, s32
     s16 offset;
     u16 flags;
 
-    sequences = g_effect_animation_sequences;
+    sequences = g_battle_effect_animation_sequences;
     /* Integer addresses preserve the offset/base operand order at both additions. */
     entry = (u8*)((s16)animation_index * 2 + (s32)sequences);
     flags = state->kind | EFFECT_LIST_NODE_FRAME_CHANGED;
@@ -2100,10 +2102,10 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
     }
     if (node->kind & EFFECT_LIST_NODE_FRAME_CHANGED) {
         frame_table_offset
-            = ((effect_sprite_group_t*)(g_effect_frame_data + node->frame_group_offset))->frame_table_offset;
-        frame = (effect_sprite_frameset_t*)(*(u16*)(g_effect_frame_data
+            = ((effect_sprite_group_t*)(g_battle_effect_frame_data + node->frame_group_offset))->frame_table_offset;
+        frame = (effect_sprite_frameset_t*)(*(u16*)(g_battle_effect_frame_data
                                                 + (node->sprite_frame_index * 2 + frame_table_offset))
-            + g_effect_frame_data);
+            + g_battle_effect_frame_data);
         count = frame->count;
         if (block->header.sprite_count != count) {
             battle_effect_free_sprite_block(block);
@@ -2120,8 +2122,8 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
     block->header.color.b = blue;
     switch (node->kind & EFFECT_LIST_NODE_PLACEMENT_MASK) {
     case EFFECT_LIST_NODE_WORLD:
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_camera_matrix);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_camera_matrix);
         setVector(&input, node->x + node->sprite_offset_x, node->y + node->sprite_offset_y, node->z);
         RotTrans(&input, &output, &output.pad);
         depth = output.vz >> 2;
@@ -2150,12 +2152,12 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
         }
         position.vx = output.vx;
         position.vy = output.vy;
-        battle_effect_submit_sprite_to_ordering_table(
-            node->sprite_block, &position, node->screen_rotation_angle, &g_camera_zoom, g_effect_otag + depth);
+        battle_effect_submit_sprite_to_ordering_table(node->sprite_block, &position, node->screen_rotation_angle,
+            &g_battle_camera_zoom, g_battle_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_SCREEN_OFFSET:
-        position.vx = node->x + node->sprite_offset_x + g_camera_matrix.t[0];
-        position.vy = node->y + node->sprite_offset_y + g_camera_matrix.t[1];
+        position.vx = node->x + node->sprite_offset_x + g_battle_camera_matrix.t[0];
+        position.vy = node->y + node->sprite_offset_y + g_battle_camera_matrix.t[1];
         depth = node->z;
         if (depth < 0) {
             depth = 0;
@@ -2163,12 +2165,12 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
         if (depth > EFFECT_SPRITE_OT_DEPTH_MAX) {
             depth = EFFECT_SPRITE_OT_DEPTH_MAX;
         }
-        battle_effect_submit_sprite_to_ordering_table(
-            node->sprite_block, &position, node->screen_rotation_angle, &g_camera_zoom, g_effect_otag + depth);
+        battle_effect_submit_sprite_to_ordering_table(node->sprite_block, &position, node->screen_rotation_angle,
+            &g_battle_camera_zoom, g_battle_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_WORLD_UNSCALED:
-        SetRotMatrix(&g_camera_matrix);
-        SetTransMatrix(&g_camera_matrix);
+        SetRotMatrix(&g_battle_camera_matrix);
+        SetTransMatrix(&g_battle_camera_matrix);
         setVector(&input, node->x + node->sprite_offset_x, node->y + node->sprite_offset_y, node->z);
         RotTrans(&input, &output, &output.pad);
         depth = output.vz >> 2;
@@ -2198,7 +2200,7 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
         position.vx = output.vx;
         position.vy = output.vy;
         battle_effect_submit_sprite_to_ordering_table(
-            node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
+            node->sprite_block, &position, node->screen_rotation_angle, 0, g_battle_effect_otag + depth);
         break;
     case EFFECT_LIST_NODE_SCREEN:
         position.vx = node->x + node->sprite_offset_x;
@@ -2211,7 +2213,7 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
             depth = EFFECT_SPRITE_OT_DEPTH_MAX;
         }
         battle_effect_submit_sprite_to_ordering_table(
-            node->sprite_block, &position, node->screen_rotation_angle, 0, g_effect_otag + depth);
+            node->sprite_block, &position, node->screen_rotation_angle, 0, g_battle_effect_otag + depth);
         break;
     }
 }
@@ -2231,7 +2233,7 @@ void battle_effect_replace_flags_0006(effect_flag_prefix_t* object, s32 value) {
  * Returns 0 when the slot has finished: a positive life counts down and ends the
  * slot at 0; a negative life ends it on the frame the script wraps. */
 s32 battle_effect_update_slot(s32 id) {
-    effect_slot_t* slot = &g_effect_slots[id];
+    effect_slot_t* slot = &g_battle_effect_slots[id];
     s32 wrapped;
     s32 result;
 
@@ -2269,28 +2271,28 @@ void battle_effect_copy_camera_angles_and_world_coords(void) {
     VECTOR* coords;
 
     rotation = battle_camera_get_rotation();
-    g_effect_camera_rotation_saved.vx = g_effect_camera_rotation_start.vx = g_effect_camera_rotation_target.vx
-        = g_effect_camera_rotation_current.vx = rotation->vx & 0xfff;
-    g_effect_camera_rotation_saved.vy = g_effect_camera_rotation_start.vy = g_effect_camera_rotation_target.vy
-        = g_effect_camera_rotation_current.vy = rotation->vy & 0xfff;
-    g_effect_camera_rotation_saved.vz = g_effect_camera_rotation_start.vz = g_effect_camera_rotation_target.vz
-        = g_effect_camera_rotation_current.vz = rotation->vz & 0xfff;
+    g_battle_effect_camera_rotation_saved.vx = g_battle_effect_camera_rotation_start.vx
+        = g_battle_effect_camera_rotation_target.vx = g_battle_effect_camera_rotation_current.vx = rotation->vx & 0xfff;
+    g_battle_effect_camera_rotation_saved.vy = g_battle_effect_camera_rotation_start.vy
+        = g_battle_effect_camera_rotation_target.vy = g_battle_effect_camera_rotation_current.vy = rotation->vy & 0xfff;
+    g_battle_effect_camera_rotation_saved.vz = g_battle_effect_camera_rotation_start.vz
+        = g_battle_effect_camera_rotation_target.vz = g_battle_effect_camera_rotation_current.vz = rotation->vz & 0xfff;
     coords = battle_camera_get_current_real_coords();
-    g_effect_camera_position_saved.vx = g_effect_camera_position_start.vx = g_effect_camera_position_target.vx
-        = g_effect_camera_position_current.vx = coords->vx >> 12;
-    g_effect_camera_position_saved.vy = g_effect_camera_position_start.vy = g_effect_camera_position_target.vy
-        = g_effect_camera_position_current.vy = coords->vy >> 12;
-    g_effect_camera_position_saved.vz = g_effect_camera_position_start.vz = g_effect_camera_position_target.vz
-        = g_effect_camera_position_current.vz = coords->vz >> 12;
-    g_effect_camera_zoom_saved = g_effect_camera_zoom_start = g_effect_camera_zoom_target = g_effect_camera_zoom_current
-        = *battle_camera_get_zoom();
+    g_battle_effect_camera_position_saved.vx = g_battle_effect_camera_position_start.vx
+        = g_battle_effect_camera_position_target.vx = g_battle_effect_camera_position_current.vx = coords->vx >> 12;
+    g_battle_effect_camera_position_saved.vy = g_battle_effect_camera_position_start.vy
+        = g_battle_effect_camera_position_target.vy = g_battle_effect_camera_position_current.vy = coords->vy >> 12;
+    g_battle_effect_camera_position_saved.vz = g_battle_effect_camera_position_start.vz
+        = g_battle_effect_camera_position_target.vz = g_battle_effect_camera_position_current.vz = coords->vz >> 12;
+    g_battle_effect_camera_zoom_saved = g_battle_effect_camera_zoom_start = g_battle_effect_camera_zoom_target
+        = g_battle_effect_camera_zoom_current = *battle_camera_get_zoom();
 }
 
 void battle_effect_init_camera_and_screen_data(void) {
     s32 pad[2];
-    g_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
-    g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
-    g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
+    g_battle_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
+    g_battle_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
+    g_battle_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
     g_battle_unknown_801b8b1c = 0;
     g_battle_unknown_801b8b18 = 0;
     battle_effect_copy_camera_angles_and_world_coords();

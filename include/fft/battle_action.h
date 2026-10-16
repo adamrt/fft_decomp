@@ -116,7 +116,7 @@ typedef enum action_state {
     ACTION_STATE_PREVIEW = 2,
 } action_state_e;
 
-/* g_action_phase: which unit's action the attack phase is announcing. */
+/* g_battle_action_phase: which unit's action the attack phase is announcing. */
 typedef enum action_phase {
     ACTION_PHASE_PRE_ACTION = 0,    /* a reaction that pre-empts the pending action (Hamedo) */
     ACTION_PHASE_ACTING_UNIT = 1,   /* the acting unit's own action */
@@ -418,7 +418,7 @@ typedef enum battle_attack_preparation {
     BATTLE_ATTACK_PREPARATION_JUMP = 3,
 } battle_attack_preparation_e;
 
-/* g_action_post_action_display_phase: the reports shown one after another once an action
+/* g_battle_action_post_action_display_phase: the reports shown one after another once an action
  * has resolved. The post-movement reports use the first two. */
 typedef enum battle_post_action_display_phase {
     BATTLE_POST_ACTION_DISPLAY_LEVEL_UP = 0,
@@ -427,7 +427,7 @@ typedef enum battle_post_action_display_phase {
 } battle_post_action_display_phase_e;
 
 /* turns */
-extern s32 g_action_turn_event_type;
+extern s32 g_battle_action_turn_event_type;
 extern u8 g_battle_acting_unit_elevation;
 extern s32 g_battle_acting_unit_id;
 extern u8 g_battle_acting_unit_x;
@@ -446,8 +446,8 @@ s32 battle_action_end_turn(s32 unit_id);
 s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode);
 
 /* active time list */
-extern s32 g_action_at_list_active;
-extern s32 g_action_at_list_id;
+extern s32 g_battle_action_at_list_active;
+extern s32 g_battle_action_at_list_id;
 
 s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode);
 s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
@@ -474,17 +474,17 @@ void battle_action_set_casting_unit_id_ff_and_init(void);
 void battle_action_switch_ability_to_default_attack(void);
 
 /* strikes */
-extern unit_stats_t* g_action_attacker;
-extern action_data_t g_action_attacker_action_data;
-extern action_data_t* g_action_attacker_data;
-extern u8 g_action_canceled_statuses[];
-extern action_context_e g_action_context;
-extern battle_current_ability_t g_action_current_ability;
-extern s32 g_action_phase;
-extern action_command_t g_action_saved_command;
-extern action_state_e g_action_state;
-extern unit_stats_t* g_action_target;
-extern action_data_t* g_action_target_data;
+extern unit_stats_t* g_battle_action_attacker;
+extern action_data_t g_battle_action_attacker_action_data;
+extern action_data_t* g_battle_action_attacker_data;
+extern u8 g_battle_action_canceled_statuses[];
+extern action_context_e g_battle_action_context;
+extern battle_current_ability_t g_battle_action_current_ability;
+extern s32 g_battle_action_phase;
+extern action_command_t g_battle_action_saved_command;
+extern action_state_e g_battle_action_state;
+extern unit_stats_t* g_battle_action_target;
+extern action_data_t* g_battle_action_target_data;
 extern s16 g_battle_acting_unit_used_ability_id;
 extern s32 g_battle_casting_runtime_id;
 /* Golem barrier HP per team, shared by action resolution and AI snapshots. */
@@ -508,11 +508,11 @@ s32 battle_action_store_target_stats_pointer_data(s32 unit_id);
 void battle_action_store_used_weapon(action_command_t* action);
 
 /* reactions */
-extern s32 g_action_hamedo_flag;
-extern s32 g_action_post_effect_msg_counter;
+extern s32 g_battle_action_hamedo_flag;
+extern s32 g_battle_action_post_effect_msg_counter;
 extern s16 g_battle_current_reaction_ability_id;
 extern s32 g_battle_distribute_target_count;
-/* Separate link name for g_action_saved_command.ability_id. */
+/* Separate link name for g_battle_action_saved_command.ability_id. */
 extern s16 g_battle_reaction_unit_last_ability_id;
 
 s32 battle_action_calculate_chance_to_react(const unit_stats_t* unit);
@@ -523,23 +523,23 @@ s32 battle_reaction_prepare_hamedo_for_pending_action(s32 id, s16* out_ability);
 s32 battle_reaction_prepare_next(s16* reaction_id);
 
 /* mimic */
-extern battle_current_attacker_data_t g_action_current_attacker;
-extern battle_current_attacker_data_t g_ai_current_attacker_backup;
+extern battle_current_attacker_data_t g_battle_action_current_attacker;
+extern battle_current_attacker_data_t g_battle_ai_current_attacker_backup;
 
 void battle_action_set_current_attacker_data(unit_stats_t* unit);
 s32 battle_action_set_mimic_ability(unit_stats_t* unit);
 
 /* results and rewards */
-extern action_display_image_rect_t g_action_display_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
-extern const u8 g_action_display_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
-extern u16 g_action_display_values[ACTION_DISPLAY_VALUE_COUNT];
-extern s32 g_action_learn_on_hit_unit_id;
-extern s32 g_action_post_action;
-extern s32 g_action_post_action_display_phase; /* battle_post_action_display_phase_e */
-extern battle_post_effect_msg_t g_action_post_effect_msgs[];
-extern const palette_t g_action_result_palette;
+extern action_display_image_rect_t g_battle_action_display_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
+extern const u8 g_battle_action_display_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
+extern u16 g_battle_action_display_values[ACTION_DISPLAY_VALUE_COUNT];
+extern s32 g_battle_action_learn_on_hit_unit_id;
+extern s32 g_battle_action_post_action;
+extern s32 g_battle_action_post_action_display_phase; /* battle_post_action_display_phase_e */
+extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[];
+extern const palette_t g_battle_action_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */
-extern u8 g_action_status_display_image_ids[STATUS_BYTE_COUNT][8];
+extern u8 g_battle_action_status_display_image_ids[STATUS_BYTE_COUNT][8];
 extern u8 g_battle_mimic_pending_flags[21];
 
 s32 battle_action_add_war_funds(unit_stats_t* unit, s32 total, u8 item_id);

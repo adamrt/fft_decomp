@@ -25,8 +25,8 @@ void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* pos
     long flag;
 
     battle_gfx_update_unit_palette_animation();
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     main_util_set_svector(position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
         g_battle_cursor_y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2));
     position->vy = battle_map_calculate_slope_height(position, (u8)g_battle_cursor_z);
@@ -84,8 +84,8 @@ void battle_gfx_draw_wait_direction_unit(void) {
     s32 depth;
     u32* ot;
 
-    SetRotMatrix(&g_camera_matrix);
-    SetTransMatrix(&g_camera_matrix);
+    SetRotMatrix(&g_battle_camera_matrix);
+    SetTransMatrix(&g_battle_camera_matrix);
     unit = battle_unit_get_source();
     main_util_set_svector(&base, unit->world_coords.vx, unit->world_coords.vy, unit->world_coords.vz);
     RotTrans(&base, &transformed, &flag);
@@ -396,7 +396,7 @@ void battle_move_step_unit_to_map_tile_center_no_height_change(battle_unit_t* un
 
 /* Velocity and duration of a jump arc from `from` to `to`.
  *
- * The arc has two legs under g_move_jump_gravity, each taking
+ * The arc has two legs under g_battle_move_jump_gravity, each taking
  * sqrt(2 * gravity * height) / gravity frames: one over the height difference
  * plus 24, one over 24. `out->vy` is the negated speed of the first leg; x and
  * y (stored in vz) cover their distances evenly over the returned frame count. */
@@ -410,14 +410,14 @@ static s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SV
     to_z = to->vy;
     from_z = from->vy;
     height = from_z - to_z + 24;
-    height = height * g_move_jump_gravity;
+    height = height * g_battle_move_jump_gravity;
     speed = SquareRoot12(height * 2);
-    frames = speed / g_move_jump_gravity;
+    frames = speed / g_battle_move_jump_gravity;
     out->vy = -speed;
     height = 24;
-    height = g_move_jump_gravity * height;
+    height = g_battle_move_jump_gravity * height;
     speed = SquareRoot12(height * 2);
-    frames += speed / g_move_jump_gravity;
+    frames += speed / g_battle_move_jump_gravity;
     out->vx = ((to->vx - from->vx) * ONE) / frames;
     out->vz = ((to->vz - from->vz) * ONE) / frames;
     return frames;
@@ -431,7 +431,7 @@ static s32 battle_move_calculate_jump_arc_velocity(const SVECTOR* from, const SV
  * move_calculate_jump_arc_velocity for the velocity and frame count; a
  * unit without battle data ends the animation instead. Phase 1 applies the
  * velocity to all three real coordinates for that many frames, the height speed
- * gaining g_move_jump_gravity each frame, and ends the animation where the
+ * gaining g_battle_move_jump_gravity each frame, and ends the animation where the
  * arc leaves the unit. */
 void battle_move_animate_jump_arc_to_target(battle_unit_t* unit) {
     SVECTOR target;
@@ -468,7 +468,7 @@ void battle_move_animate_jump_arc_to_target(battle_unit_t* unit) {
             unit->real.vx += velocity.vx;
             unit->real.vy += velocity.vy;
             unit->real.vz += velocity.vz;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
         }
@@ -486,7 +486,7 @@ void battle_move_animate_jump_arc_to_target(battle_unit_t* unit) {
  * Phase 0 asks move_calculate_jump_arc_velocity for the velocity and frame
  * count from the current screen position to the tile center at ground height.
  * Phase 1 applies the velocity for that many frames, the height speed gaining
- * g_move_jump_gravity each frame, then stops the horizontal motion. Phase
+ * g_battle_move_jump_gravity each frame, then stops the horizontal motion. Phase
  * 2 keeps falling until the unit reaches the ground under it, snaps it to the
  * tile and ends the animation. */
 void battle_move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
@@ -511,7 +511,7 @@ void battle_move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
             unit->real.vx += velocity.vx;
             unit->real.vy += velocity.vy;
             unit->real.vz += velocity.vz;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             velocity.vz = 0;
             velocity.vx = 0;
@@ -525,7 +525,7 @@ void battle_move_animate_jump_arc_to_own_tile(battle_unit_t* unit) {
         target.vy = battle_gfx_calculate_world_height_from_world_coords(unit);
         if (unit->world_coords.vy < target.vy) {
             unit->real.vy += velocity.vy;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             battle_unit_set_real_coords_from_map_coords(unit);
             unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
@@ -553,7 +553,7 @@ void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit) {
  *
  * Phase 0 picks an initial rise speed of sqrt(2 * gravity * (0x120 - screen
  * z)) and the matching frame count; phase 1 then applies the velocity to the
- * height each frame, decelerating by g_move_jump_gravity, and ends the animation when
+ * height each frame, decelerating by g_battle_move_jump_gravity, and ends the animation when
  * the count runs out. `unused_10` reproduces an unreferenced 16-byte frame
  * slot below the velocity copy.
  */
@@ -568,8 +568,8 @@ void battle_move_animate_jump_start(battle_unit_t* unit) {
     switch (unit->distortion_phase) {
     case 0:
         speed = SquareRoot12(
-            (-battle_gfx_calculate_world_height_from_world_coords(unit) + 0x120) * g_move_jump_gravity * 2);
-        timer = speed / g_move_jump_gravity;
+            (-battle_gfx_calculate_world_height_from_world_coords(unit) + 0x120) * g_battle_move_jump_gravity * 2);
+        timer = speed / g_battle_move_jump_gravity;
         velocity.vy = -speed;
         battle_gfx_init_position_vector_copies(unit);
         unit->status_flags_5_6 |= BATTLE_UNIT_STATUS_JUMP_HEIGHT_ACTIVE;
@@ -577,7 +577,7 @@ void battle_move_animate_jump_start(battle_unit_t* unit) {
     case 1:
         if (timer > 0) {
             unit->real.vy += velocity.vy;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             unit->position_copies_active = 0;
             unit->shadow_graphic_trigger = 0;
@@ -600,12 +600,12 @@ void battle_move_animate_jump_start(battle_unit_t* unit) {
 /* Distortion animation 0x0d: drop the unit straight down until it reaches the
  * ground.
  *
- * Phase 0 sets the fall speed to g_move_jump_gravity, starts the six
+ * Phase 0 sets the fall speed to g_battle_move_jump_gravity, starts the six
  * position copies that draw the sprite's trail and shows the shadow. Phase 1
  * takes the landing height each frame: during an event the ground under the
  * unit's own tile, otherwise the ground under the first target's tile, or under
  * the action target tile when the unit has no target. Above that height the unit
- * falls and gains g_move_jump_gravity per frame; on reaching it the unit
+ * falls and gains g_battle_move_jump_gravity per frame; on reaching it the unit
  * snaps to it, the position copies stop and the animation ends.
  *
  * During an event the unit is also centerd on its tile, but retail writes the
@@ -627,7 +627,7 @@ void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {
     velocity = unit->velocity;
     switch (unit->distortion_phase) {
     case 0:
-        velocity.vy = g_move_jump_gravity;
+        velocity.vy = g_battle_move_jump_gravity;
         battle_gfx_init_position_vector_copies(unit);
         unit->shadow_graphic_trigger = 1;
         unit->distortion_phase++;
@@ -662,7 +662,7 @@ void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {
         }
         if (unit->world_coords.vy < coords.vy) {
             unit->real.vy += velocity.vy;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             unit->real.vy = coords.vy * ONE;
             unit->position_copies_active = 0;
@@ -942,7 +942,7 @@ void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) 
             unit->real.vx += velocity.vx;
             unit->real.vy += velocity.vy;
             unit->real.vz += velocity.vz;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             battle_gfx_apply_unit_palette_modulation_to_units(MAP_COLOR_MODE_RESTORE, 1, unit->runtime_id, 0, 0, 0);
             unit->distortion_phase++;
@@ -954,7 +954,7 @@ void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) 
             unit->real.vx += velocity.vx;
             unit->real.vy += velocity.vy;
             unit->real.vz += velocity.vz;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             velocity.vz = 0;
             velocity.vx = 0;
@@ -968,7 +968,7 @@ void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) 
         target.vy = battle_gfx_calculate_world_height_from_world_coords(unit);
         if (unit->world_coords.vy < target.vy) {
             unit->real.vy += velocity.vy;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             battle_unit_set_real_coords_from_map_coords(unit);
             unit->shadow_graphic_trigger = 1;
@@ -989,7 +989,7 @@ void battle_move_animate_jump_arc_to_target_tile_with_fade(battle_unit_t* unit) 
  *
  * Like move_animate_jump_start, phase 0 picks a rise speed of
  * sqrt(2 * gravity * (0x120 - screen z)) and a frame count, and phase 1
- * applies it to the height, decelerating by g_move_jump_gravity. Here phase 0 also
+ * applies it to the height, decelerating by g_battle_move_jump_gravity. Here phase 0 also
  * plays sound 0x27 and ends the animation at once when the unit is already
  * high enough; the end of phase 1 only clears the animation id.
  */
@@ -1010,8 +1010,8 @@ void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
             unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
             break;
         }
-        speed = SquareRoot12(height * g_move_jump_gravity * 2);
-        timer = speed / g_move_jump_gravity;
+        speed = SquareRoot12(height * g_battle_move_jump_gravity * 2);
+        timer = speed / g_battle_move_jump_gravity;
         velocity.vy = -speed;
         battle_gfx_init_position_vector_copies(unit);
         battle_sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
@@ -1019,7 +1019,7 @@ void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
     case 1:
         if (timer > 0) {
             unit->real.vy += velocity.vy;
-            velocity.vy += g_move_jump_gravity;
+            velocity.vy += g_battle_move_jump_gravity;
         } else {
             unit->distortion_animation_id = BATTLE_DISTORTION_ANIMATION_NONE;
         }

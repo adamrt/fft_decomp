@@ -731,7 +731,7 @@ ramza_placed:
     thread_start(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_show_title);
     thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
     thread_wait_until_inactive(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS);
-    g_sound_music_volume_transition_request = 0x1e0000;
+    g_battle_sound_music_volume_transition_request = 0x1e0000;
     thread_wait_frames(0x20);
     g_gfx_screen_fade = 0;
     do {
