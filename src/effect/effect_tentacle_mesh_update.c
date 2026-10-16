@@ -146,7 +146,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
         spawn_bindings = entry->tentacle_mesh.spawn_curve_bindings;
         frame %= EFFECT_ANIMATION_CURVE_FRAMES;
         EFFECT_READ_CURVE(index, factor,
-            effect_get_cached_curve_binding(tip_bindings, EFFECT_TENTACLE_CURVE_SPAWN_INTERVAL_SHIFT), frame);
+            effect_get_cached_curve_binding(tip_bindings, EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT), frame);
         if (i
                 % battle_lerp_fixed8(
                     entry->tentacle_mesh.spawn_interval_start, entry->tentacle_mesh.spawn_interval_end, factor)
@@ -171,11 +171,11 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 &g_battle_effect_context, &target);
 
             EFFECT_READ_CURVE(index, factor,
-                effect_get_cached_curve_binding(tip_bindings, EFFECT_TENTACLE_CURVE_PARTICLE_COUNT_SHIFT), frame);
+                effect_get_cached_curve_binding(tip_bindings, EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT), frame);
             count = battle_lerp_fixed8(
                 entry->tentacle_mesh.particle_count_start, entry->tentacle_mesh.particle_count_end, factor);
             EFFECT_READ_CURVE(index, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_SPAWN_POSITION_SHIFT), frame);
+                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT), frame);
             battle_effect_interpolate_emitter_spawn_position(entry, factor, &origin);
             switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
             case EFFECT_EMITTER_ORIGIN_WORLD:
@@ -206,7 +206,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             }
 
             EFFECT_READ_CURVE(index, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_SPAWN_SPREAD_SHIFT), frame);
+                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_SPAWN_SPREAD_SHIFT), frame);
             battle_effect_interpolate_emitter_spawn_spread(entry, factor, &spread);
             if (orient) {
                 SetRotMatrix(&facing);
@@ -216,7 +216,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 RotTrans(&rotation, &spread, &out.pad);
             }
 
-            index = effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_RADIAL_SPEED_SHIFT);
+            index = effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT);
             index--;
             if (index != -1) {
                 factor = g_battle_effect_animation_curve_data->curves[index][frame];
@@ -230,12 +230,11 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             }
 
             EFFECT_READ_CURVE(index, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT),
+                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT),
                 frame);
             battle_effect_interpolate_emitter_velocity_direction_spread(entry, factor, &direction_spread);
             EFFECT_READ_CURVE(index, factor,
-                effect_get_cached_curve_binding(spawn_bindings, EFFECT_TENTACLE_CURVE_VELOCITY_BASE_ANGLE_SHIFT),
-                frame);
+                effect_get_cached_curve_binding(spawn_bindings, EFFECT_SPAWN_CURVE_VELOCITY_BASE_ANGLE_SHIFT), frame);
             battle_effect_interpolate_emitter_velocity_base_angles(entry, factor, &base_angles);
 
             EFFECT_READ_CURVE(index, factor,

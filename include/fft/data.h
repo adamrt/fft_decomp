@@ -799,11 +799,14 @@ enum {
     ITEM_TYPE_FILTER_ANY = 255,
 };
 
-enum {
-    ITEM_ATTRIBUTE_PHYSICAL_ATTACK = 0,
-    ITEM_ATTRIBUTE_MAGICAL_ATTACK = 1,
-    ITEM_ATTRIBUTE_SPEED = 2,
-};
+/* Physical attack, magic attack and speed, in the order units and item
+ * attribute records store them. */
+typedef enum unit_attribute_index {
+    UNIT_ATTRIBUTE_PHYSICAL_ATTACK = 0,
+    UNIT_ATTRIBUTE_MAGIC_ATTACK = 1,
+    UNIT_ATTRIBUTE_SPEED = 2,
+    UNIT_ATTRIBUTE_COUNT = 3,
+} unit_attribute_index_e;
 
 /* Item categories stored in item_data_t.type and in the four-byte job/unit
  * equippable-type set.  The table layout starts at 0x80062eb8. A name is the
@@ -1288,17 +1291,17 @@ typedef char initial_status_sets_size_must_be_15[(sizeof(initial_status_sets_t) 
  * to battle units; WORLD 0x80122f9c reads the same first five bytes for
  * equipment previews. */
 typedef struct item_attribute {
-    u8 attributes[3];                  /* 0x00; ITEM_ATTRIBUTE_* indices */
-    u8 move;                           /* 0x03 */
-    u8 jump;                           /* 0x04 */
-    initial_status_sets_t status_sets; /* 0x05 */
-    u8 elemental_affinity[5];          /* 0x14; elemental_affinity_index_e */
+    u8 attributes[UNIT_ATTRIBUTE_COUNT]; /* 0x00; unit_attribute_index_e */
+    u8 move;                             /* 0x03 */
+    u8 jump;                             /* 0x04 */
+    initial_status_sets_t status_sets;   /* 0x05 */
+    u8 elemental_affinity[5];            /* 0x14; elemental_affinity_index_e */
 } item_attribute_t;
 typedef char item_attribute_size_must_be_25[(sizeof(item_attribute_t) == 25) ? 1 : -1];
 
 /* Flat byte view of item attributes used by the status-icon renderers. */
 typedef struct main_item_attribute_flat {
-    u8 attributes[3];
+    u8 attributes[UNIT_ATTRIBUTE_COUNT];
     u8 move;
     u8 jump;
     u8 innate[5];

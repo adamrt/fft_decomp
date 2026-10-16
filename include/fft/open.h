@@ -351,13 +351,6 @@ extern suzuki_music_t* g_open_music_test_sound_handle; /* handle of the playing 
 
 void open_menu_start_music_test_controller(void);
 
-/* sound */
-typedef enum game_sound_mode {
-    GAME_SOUND_MODE_MONO = 0,
-    GAME_SOUND_MODE_STEREO = 1,
-    GAME_SOUND_MODE_WIDE = 2,
-} game_sound_mode_e;
-
 /* Fades the CD audio in at the given mix level (suzuki_sound_put_type), or out when it is 0. */
 void open_sound_set_cd_mix_and_volume(s32 cd_mix_level, s32 duration);
 

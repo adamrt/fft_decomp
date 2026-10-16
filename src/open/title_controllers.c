@@ -677,8 +677,8 @@ void open_menu_handle_sound_type_input(open_controller_record_t* record) {
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_open_gfx_render_records_36[render_record].palette = 0;
         menu->sound_mode_selection -= 1;
-        if (menu->sound_mode_selection < GAME_SOUND_MODE_MONO) {
-            menu->sound_mode_selection = GAME_SOUND_MODE_WIDE;
+        if (menu->sound_mode_selection < SUZUKI_SOUND_TYPE_MONO) {
+            menu->sound_mode_selection = SUZUKI_SOUND_TYPE_WIDE;
         }
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_open_gfx_render_records_36[render_record].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
@@ -689,8 +689,8 @@ void open_menu_handle_sound_type_input(open_controller_record_t* record) {
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_open_gfx_render_records_36[render_record].palette = 0;
         menu->sound_mode_selection += 1;
-        if (menu->sound_mode_selection > GAME_SOUND_MODE_WIDE) {
-            menu->sound_mode_selection = GAME_SOUND_MODE_MONO;
+        if (menu->sound_mode_selection > SUZUKI_SOUND_TYPE_WIDE) {
+            menu->sound_mode_selection = SUZUKI_SOUND_TYPE_MONO;
         }
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
         g_open_gfx_render_records_36[render_record].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;

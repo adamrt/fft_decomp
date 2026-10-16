@@ -885,7 +885,7 @@ void script_add_unit_start_thread(void) {
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             unit = battle_unit_find_stats_by_entd_unit_id(unit_id, &index);
             if (index == -2 || index >= 0) {
-                for (slot = 0; slot < EVENT_UNIT_SLOT_COUNT; slot++) {
+                for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
                     if (battle_unit_get_stats_from_battle_id(slot) == unit) {
                         break;
                     }

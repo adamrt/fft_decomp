@@ -764,14 +764,6 @@ enum {
     UNIT_TURN_CT_THRESHOLD = 100,
 };
 
-/* Calculated battle attributes use PA, MA, Speed order. */
-typedef enum unit_attribute_index {
-    UNIT_ATTRIBUTE_PHYSICAL_ATTACK = 0,
-    UNIT_ATTRIBUTE_MAGIC_ATTACK = 1,
-    UNIT_ATTRIBUTE_SPEED = 2,
-    UNIT_ATTRIBUTE_COUNT = 3,
-} unit_attribute_index_e;
-
 typedef enum battle_unit_equipment_stat_index {
     BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER = 0,
     BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER = 1,

@@ -50,9 +50,9 @@ void item_collect_stat_deltas_variant(
                 = g_main_item_accessory_data[g_main_item_primary_data[item_id].secondary_data_id].magic_evade;
         }
         detail->state.move = g_main_item_attributes[attribute].move;
-        detail->state.speed = g_main_item_attributes[attribute].attributes[ITEM_ATTRIBUTE_SPEED];
+        detail->state.speed = g_main_item_attributes[attribute].attributes[UNIT_ATTRIBUTE_SPEED];
         detail->state.jump = g_main_item_attributes[attribute].jump;
-        detail->state.physical_attack = g_main_item_attributes[attribute].attributes[ITEM_ATTRIBUTE_PHYSICAL_ATTACK];
-        detail->state.magical_attack = g_main_item_attributes[attribute].attributes[ITEM_ATTRIBUTE_MAGICAL_ATTACK];
+        detail->state.physical_attack = g_main_item_attributes[attribute].attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
+        detail->state.magical_attack = g_main_item_attributes[attribute].attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     }
 }

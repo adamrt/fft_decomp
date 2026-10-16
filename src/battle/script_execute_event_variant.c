@@ -282,7 +282,7 @@ restart_script:
                         }
                     }
                     region_runtime_id += 1;
-                } while (region_runtime_id < EVENT_UNIT_SLOT_COUNT);
+                } while (region_runtime_id < BATTLE_UNIT_SLOT_COUNT);
             }
             if (operand_1 == EVENT_CALL_FUNCTION_COPY_UNIT_2_POSITION_AND_FACING_TO_UNIT_8_AND_RELOAD_GRAPHICS) {
                 unit = battle_unit_get_stats_from_battle_id(1);
@@ -354,7 +354,7 @@ restart_script:
             work_index = 0;
             battle_unit_snap_all_facings_to_quadrants();
             unit_update_staged_status_data(0, 1);
-            for (; work_index < EVENT_UNIT_SLOT_COUNT; work_index++) {
+            for (; work_index < BATTLE_UNIT_SLOT_COUNT; work_index++) {
                 if (battle_unit_has_runtime_id(work_index) != 0) {
                     operand_1 = battle_unit_get_battle_id_by_runtime_id(work_index);
                     if (operand_1 >= 0) {
@@ -805,13 +805,13 @@ restart_script:
             do {
                 ghost_runtime_id -= 1;
             } while (ghost_runtime_id >= 0);
-            for (ghost_runtime_id = 0; ghost_runtime_id < EVENT_UNIT_SLOT_COUNT; ghost_runtime_id++) {
+            for (ghost_runtime_id = 0; ghost_runtime_id < BATTLE_UNIT_SLOT_COUNT; ghost_runtime_id++) {
                 if (battle_unit_has_runtime_id(ghost_runtime_id) == 0) {
                     g_script_unit_slots[ghost_parameters[0]] = ghost_runtime_id;
                     break;
                 }
             }
-            if (ghost_runtime_id != EVENT_UNIT_SLOT_COUNT) {
+            if (ghost_runtime_id != BATTLE_UNIT_SLOT_COUNT) {
                 battle_script_add_ghost_unit_event_instruction(ghost_parameters[1], ghost_parameters[2],
                     ghost_parameters[3], ghost_parameters[4], first_operand, g_script_unit_slots[ghost_parameters[0]],
                     ghost_parameters[5]);
@@ -826,7 +826,7 @@ restart_script:
             script_add_unit_stub();
             added_unit = battle_unit_find_stats_by_entd_unit_id(first_operand, &added_unit_state);
             if ((added_unit_state == -2) || (added_unit_state >= 0)) {
-                for (added_battle_id = 0; added_battle_id < EVENT_UNIT_SLOT_COUNT; added_battle_id++) {
+                for (added_battle_id = 0; added_battle_id < BATTLE_UNIT_SLOT_COUNT; added_battle_id++) {
                     if (battle_unit_get_stats_from_battle_id(added_battle_id) == added_unit)
                         break;
                 }

@@ -1395,6 +1395,16 @@ typedef struct effect_emitter_spawn_curve_bindings {
 typedef char
     effect_emitter_spawn_curve_bindings_size_must_be_4[sizeof(effect_emitter_spawn_curve_bindings_t) == 4 ? 1 : -1];
 
+/* The same fields as bit positions, for the native renderers that read the
+ * word as a signed integer (effect_get_cached_curve_binding). */
+enum {
+    EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT = 0,
+    EFFECT_SPAWN_CURVE_SPAWN_SPREAD_SHIFT = 4,
+    EFFECT_SPAWN_CURVE_VELOCITY_BASE_ANGLE_SHIFT = 8,
+    EFFECT_SPAWN_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT = 12,
+    EFFECT_SPAWN_CURVE_RADIAL_SPEED_SHIFT = 28,
+};
+
 /* Minimum and maximum components of a particle-motion vector. */
 typedef struct effect_xyz_min_max {
     ranges16_t x;
@@ -1530,20 +1540,10 @@ typedef struct effect_textured_quad_geometry_view {
 typedef char
     assert_effect_textured_quad_geometry_view_size[sizeof(effect_textured_quad_geometry_view_t) == 196 ? 1 : -1];
 
-enum {
-    EFFECT_PARTICLE_RIBBON_CURVE_SPAWN_POSITION_SHIFT = 0,
-    EFFECT_PARTICLE_RIBBON_CURVE_SPAWN_SPREAD_SHIFT = 4,
-    EFFECT_PARTICLE_RIBBON_CURVE_VELOCITY_BASE_ANGLE_SHIFT = 8,
-    EFFECT_PARTICLE_RIBBON_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT = 12,
-    EFFECT_PARTICLE_RIBBON_CURVE_RADIAL_SPEED_SHIFT = 28,
-};
-
+/* The ribbon binds target spread at bit 4 of motion_curve_selectors, where the
+ * emitter binds acceleration step; its other curves keep the emitter's places. */
 enum {
     EFFECT_PARTICLE_RIBBON_CURVE_TARGET_SPREAD_SHIFT = 4,
-    EFFECT_PARTICLE_RIBBON_CURVE_LIFETIME_SHIFT = 8,
-    EFFECT_PARTICLE_RIBBON_CURVE_TARGET_OFFSET_SHIFT = 12,
-    EFFECT_PARTICLE_RIBBON_CURVE_PARTICLE_COUNT_SHIFT = 20,
-    EFFECT_PARTICLE_RIBBON_CURVE_SPAWN_INTERVAL_SHIFT = 24,
 };
 
 /* This renderer's view of one effect_geometry_entry_t. */
@@ -1765,20 +1765,12 @@ typedef struct effect_radial_mesh_geometry {
 } effect_radial_mesh_geometry_t;
 typedef char assert_effect_radial_mesh_geometry_size[sizeof(effect_radial_mesh_geometry_t) == 196 ? 1 : -1];
 
-enum {
-    EFFECT_TENTACLE_CURVE_SPAWN_POSITION_SHIFT = 0,
-    EFFECT_TENTACLE_CURVE_SPAWN_SPREAD_SHIFT = 4,
-    EFFECT_TENTACLE_CURVE_VELOCITY_BASE_ANGLE_SHIFT = 8,
-    EFFECT_TENTACLE_CURVE_VELOCITY_DIRECTION_SPREAD_SHIFT = 12,
-    EFFECT_TENTACLE_CURVE_RADIAL_SPEED_SHIFT = 28,
-};
-
+/* The tentacle reads bits 4 to 15 of motion_curve_selectors as its tip's
+ * curves; particle count and spawn interval keep the emitter's places. */
 enum {
     EFFECT_TENTACLE_CURVE_TIP_SPREAD_SHIFT = 4,
     EFFECT_TENTACLE_CURVE_TRAVEL_DURATION_SHIFT = 8,
     EFFECT_TENTACLE_CURVE_TIP_OFFSET_SHIFT = 12,
-    EFFECT_TENTACLE_CURVE_PARTICLE_COUNT_SHIFT = 20,
-    EFFECT_TENTACLE_CURVE_SPAWN_INTERVAL_SHIFT = 24,
 };
 
 /* Segment renderers reuse the particle emitter's spawn parameters;

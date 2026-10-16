@@ -15,8 +15,6 @@ enum {
     EVENT_BLOCK_BYTES = 8192,
     EVENT_BLOCK_SECTORS = 4,
     EVENT_OPCODE_COUNT = 256,
-    /* Number of simulation unit slots an interpreter scans by runtime id. */
-    EVENT_UNIT_SLOT_COUNT = BATTLE_UNIT_SLOT_COUNT,
     /* External unit-id selectors used by scenario commands. */
     EVENT_UNIT_SELECTOR_SLOT_FIRST = 0x64,
     EVENT_UNIT_SELECTOR_SLOT_COUNT = 4,

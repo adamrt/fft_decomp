@@ -53,11 +53,6 @@ s32 jobstts_job_build_unit_job_list(u8 unit_id, s16* job_ids, s32 unused);
 /* menus */
 /* Unsigned here where the other overlays keep signed values. */
 extern u16 g_jobstts_menu_selection_values[];
-typedef enum jobstts_page_scroll_direction {
-    JOBSTTS_PAGE_SCROLL_UP = -1,
-    JOBSTTS_PAGE_SCROLL_NONE = 0,
-    JOBSTTS_PAGE_SCROLL_DOWN = 1,
-} jobstts_menu_page_scroll_direction_e;
 
 extern s32 g_jobstts_job_list_menu_initialized;
 
@@ -129,7 +124,7 @@ void jobstts_gfx_swap_context_and_clear_otag(s32 first_otag, s32 unused);
 
 /* input */
 
-jobstts_menu_page_scroll_direction_e jobstts_input_read_page_scroll_direction(void);
+menu_vertical_scroll_direction_e jobstts_input_read_page_scroll_direction(void);
 
 /* menu commands */
 /* Render-command stream callbacks: every handler consumes and returns a
