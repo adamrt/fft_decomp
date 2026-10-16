@@ -1,4 +1,4 @@
-/* Map lighting, tile background colors, mesh and weather rendering, texture animations and GNS resource dispatch, with
+/* Map lighting, tile-mark colors, mesh and weather rendering, texture animations and GNS resource dispatch, with
  * the weather and vector tables they use. */
 
 #include "fft/battle_camera.h"
@@ -1057,7 +1057,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
         g_battle_map_ambient_restored_buffer = 0;
     }
 
-    /* battle_target_set_tile_background_color recolors one render buffer; a SHOW it leaves is
+    /* battle_target_set_tile_mark_colors recolors one render buffer; a SHOW it leaves is
      * repeated here once on this frame's buffer, the other of the pair, then marked shown. */
     g_battle_map_tile_data_ptr = g_battle_map_tile_data;
     if (g_battle_target_tile_mark_modes[0] == BATTLE_TILE_MARK_SHOW_MOVE) {
@@ -1222,7 +1222,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     }
 
     /* A HIDE copies the CLUTs, and some colors, back from the buffer
-     * battle_target_set_tile_background_color restored. */
+     * battle_target_set_tile_mark_colors restored. */
     if (g_battle_target_tile_mark_modes[0] == BATTLE_TILE_MARK_HIDE_MOVE) {
         for (i = 0; i < g_battle_map_mesh_parts[0].textured_triangle_count; i++) {
             GT3(i).clut = SAVED_GT3(i).clut;
@@ -1312,7 +1312,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
  * HIDE restores them (a hidden target tile in range turns red again) and NONE restores every
  * polygon. The first layer shown starts the marked-tiles palette pulse; the second argument is
  * unused. */
-void battle_target_set_tile_background_color(s32 mode, s32 unused) {
+void battle_target_set_tile_mark_colors(s32 mode, s32 unused) {
     s32 i;
     s16 other_state_a;
     s16 other_state_b;
@@ -3493,7 +3493,7 @@ s32 battle_map_dispatch_gns_resource(u8 resource_type, map_resource_t* data) {
         map_terrain_resource_t* terrain = &data->terrain;
         g_battle_map_tile_width = terrain->width;
         g_battle_map_tile_depth = terrain->depth;
-        battle_map_copy_xy_coords_and_tile_data(data->bytes);
+        battle_map_copy_size_and_tile_data(data->bytes);
         break;
     }
     case MAP_RESOURCE_STATE_RECORDS:

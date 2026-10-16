@@ -28,12 +28,12 @@
 
 /* Project the center of the cursor tile, at its surface height less any water depth, to the screen
  * and store the cursor's screen x and y. `position` receives the tile point and `raised` its depth
- * point. It first advances the unit palette animation. */
+ * point. It first cycles the tile glow palettes. */
 void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
     map_tile_t* tile;
     long flag;
 
-    battle_gfx_update_unit_palette_animation();
+    battle_gfx_cycle_tile_glow_palettes();
     SetRotMatrix(&g_battle_camera_matrix);
     SetTransMatrix(&g_battle_camera_matrix);
     main_util_set_svector(position, g_battle_cursor_x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2), 0,
@@ -55,7 +55,7 @@ void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* pos
 /* Project the cursor tile and draw the map cursor over it with the glow quad on the tile surface;
  * battle_target_update_cursor calls it while g_battle_target_cursor_visible is set. The tile's
  * untargetable flag picks the glow's palette. */
-void battle_target_calculate_tile_coords_with_cursor_glow(void) {
+void battle_target_draw_cursor_with_tile_glow(void) {
     SVECTOR position;
     SVECTOR raised;
     SVECTOR corner0;
@@ -175,7 +175,7 @@ void battle_unit_distortion_animation_none(void) {
  * Falls off the end: the original returns int, so $v0 stays live at the exit and the
  * dispatch branch's delay slot is left empty. Nothing reads the result: the distortion
  * dispatcher calls its handlers as void. */
-s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit) {
+s32 battle_unit_animate_scale_pulse(battle_unit_t* unit) {
     s32 angle;
     s32 stretch;
 
@@ -684,7 +684,7 @@ void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {
 /* Fill the init record of a teleport effect: the unit is the caster and the only
  * target, and there are no spectators. Both teleport starters use it for every
  * unit, not only for Altima. */
-static void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data) {
+static void battle_effect_init_teleport_data(battle_unit_t* unit, effect_secondary_init_t* teleport_data) {
     u8 runtime_id;
     u8 repeated_runtime_id;
 
@@ -701,10 +701,10 @@ static void battle_effect_init_altima_teleport_data(battle_unit_t* unit, effect_
 /* Start the departure effect of a teleport. Altima's two forms request their own
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-out sound, and the result is 0. */
-static s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit) {
+static s32 battle_effect_start_teleport_departure(battle_unit_t* unit) {
     effect_secondary_init_t teleport_data;
 
-    battle_effect_init_altima_teleport_data(unit, &teleport_data);
+    battle_effect_init_teleport_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM:
         battle_effect_set_ability_animation(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_DEPARTURE, &teleport_data);
@@ -721,10 +721,10 @@ static s32 battle_effect_start_altima_teleport_departure(battle_unit_t* unit) {
 /* Start the arrival effect of a teleport. Altima's two forms request their own
  * ability effect and the result is 1; any other unit gets the teleport secondary
  * effect and the teleport-in sound, and the result is 0. */
-static s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
+static s32 battle_effect_start_teleport_arrival(battle_unit_t* unit) {
     effect_secondary_init_t teleport_data;
 
-    battle_effect_init_altima_teleport_data(unit, &teleport_data);
+    battle_effect_init_teleport_data(unit, &teleport_data);
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM:
         battle_effect_set_ability_animation(0, ABILITY_ID_ALTIMA_HOLY_ANGEL_TELEPORT_ARRIVAL, &teleport_data);
@@ -739,11 +739,11 @@ static s32 battle_effect_start_altima_teleport_arrival(battle_unit_t* unit) {
 }
 
 /* Teleport distortion: begin the departure flash. Altima's forms release the
- * ability effect that battle_effect_start_altima_teleport_departure requested;
+ * ability effect that battle_effect_start_teleport_departure requested;
  * the sprite switches to additive semi-transparency and a palette modulation of
  * +31 on each color component starts. The distortion moves to its next phase
  * with the timer at 0. */
-static void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit) {
+static void battle_effect_start_teleport_white_flash(battle_unit_t* unit) {
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM
         || unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_SECOND_FORM) {
         battle_effect_play();
@@ -756,11 +756,11 @@ static void battle_effect_start_altima_teleport_white_flash(battle_unit_t* unit)
 }
 
 /* Teleport distortion: begin the arrival. Altima's forms release the ability
- * effect that battle_effect_start_altima_teleport_arrival requested; the unit's
+ * effect that battle_effect_start_teleport_arrival requested; the unit's
  * palette is refreshed for the shadow mode of the tile it stands on and a palette
  * modulation of -31 on each color component starts. The distortion moves to its
  * next phase with the timer at 0. */
-static void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
+static void battle_effect_start_teleport_fade_out(battle_unit_t* unit) {
     map_tile_t* tile;
 
     if (unit->spritesheet_id == BATTLE_SPRITESHEET_ID_ALTIMA_FIRST_FORM
@@ -774,7 +774,7 @@ static void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
     unit->distortion_timer = 0;
 }
 
-/* Altima teleport distortion animation: advance one frame of the eight-step
+/* Distortion animation 14 (TELEPORT), for every unit: advance one frame of the eight-step
  * warp-out / warp-in sequence.
  *
  * Jump table: .rodata 0x80068208, 8 32-bit addresses.
@@ -783,19 +783,19 @@ static void battle_effect_start_altima_teleport_fade_out(battle_unit_t* unit) {
  * epilogue is what leaves the switch range check's delay slot empty, matching
  * the target.  Nothing reads the result: the distortion dispatcher calls its
  * handlers as void. */
-s32 battle_unit_advance_altima_teleport_distortion(battle_unit_t* unit) {
+s32 battle_unit_advance_teleport_distortion(battle_unit_t* unit) {
     unit->distortion_timer++;
     switch (unit->distortion_phase) {
     case 0:
-        if (battle_effect_start_altima_teleport_departure(unit) == 0) {
-            battle_effect_start_altima_teleport_white_flash(unit);
+        if (battle_effect_start_teleport_departure(unit) == 0) {
+            battle_effect_start_teleport_white_flash(unit);
         }
         unit->distortion_phase++;
         break;
     case 1:
         /* The target passes no argument here. */
         if (battle_effect_update_file_load() == 0 && battle_camera_is_active() == 0) {
-            battle_effect_start_altima_teleport_white_flash(unit);
+            battle_effect_start_teleport_white_flash(unit);
         }
         break;
     case 2:
@@ -812,15 +812,15 @@ s32 battle_unit_advance_altima_teleport_distortion(battle_unit_t* unit) {
             unit->map_z = unit->movement.destination_z;
             battle_unit_set_real_coords_from_map_coords(unit);
             battle_unit_set_world_coords_from_real_coords(unit);
-            if (battle_effect_start_altima_teleport_arrival(unit) == 0) {
-                battle_effect_start_altima_teleport_fade_out(unit);
+            if (battle_effect_start_teleport_arrival(unit) == 0) {
+                battle_effect_start_teleport_fade_out(unit);
             }
             unit->distortion_phase++;
         }
         break;
     case 4:
         if (battle_effect_update_file_load() == 0 && battle_camera_is_active() == 0) {
-            battle_effect_start_altima_teleport_fade_out(unit);
+            battle_effect_start_teleport_fade_out(unit);
         }
         break;
     case 5:
@@ -1020,7 +1020,7 @@ void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
         timer = speed / g_battle_move_jump_gravity;
         velocity.vy = -speed;
         battle_gfx_init_position_vector_copies(unit);
-        battle_sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
+        battle_sound_play_unit_sfx(unit, MAIN_SFX_JUMP);
         unit->distortion_phase++;
     case 1:
         if (timer > 0) {

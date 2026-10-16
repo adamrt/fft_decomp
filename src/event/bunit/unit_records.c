@@ -21,7 +21,7 @@ static bunit_unit_t g_bunit_unit_records[21] = { 0 };
 
 /* Builds a BUNIT unit-data record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
- * only when battle_menu_init_monster_skill_check passes) or the equipment and
+ * only when battle_menu_count_monster_skill_supporters passes) or the equipment and
  * ability slots, and copies the job and ability tables with JP capped at 9999.
  *
  * BUNIT twin of world_formation_build_unit_record. `count` indexes the output
@@ -124,7 +124,7 @@ static void bunit_unit_build_record_from_stats(const unit_stats_t* unit, bunit_u
             found = 0;
             if (i == 3) {
                 if (abilities[3] != 0) {
-                    found = battle_menu_init_monster_skill_check(unit) != 0;
+                    found = battle_menu_count_monster_skill_supporters(unit) != 0;
                 }
             } else if (abilities[i] != 0) {
                 found = 1;

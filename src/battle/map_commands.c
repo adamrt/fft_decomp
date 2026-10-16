@@ -234,7 +234,7 @@ s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
     return 0;
 }
 
-/* Release step 8 of battle_map_init_units_sprites_event_and_music, which waits for this flag
+/* Release step 8 of battle_map_step_deployment_init_sequence, which waits for this flag
  * before setting up deployment graphics. The deployment screen sets it after placing units, and
  * map_skip_deployment_thread when deployment is skipped. */
 void battle_deployment_mark_finished(void) {
@@ -550,7 +550,7 @@ s32 battle_map_step_init_sequence(s32 map_id, s32 step) {
  * releases it (battle_deployment_mark_finished), and at step 10 waits for
  * deployment to end before restoring the scenario music and darkness. Loader
  * steps retain their current state while work is pending. */
-s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running) {
+s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running) {
     s32 result;
     u8 unused_18[4];
 

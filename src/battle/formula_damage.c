@@ -652,7 +652,7 @@ void battle_formula_damage_sp_times_wp(void) {
 /* Formula 0x64: damage (PA * WP); with a spear (PA * 3/2 * WP); bare-handed
  * (PA * (PA * Brave / 100)). No evade roll here. */
 void battle_formula_damage_pa_times_wp(void) {
-    battle_formula_init_weapon_xa_ya();
+    battle_formula_store_jump_xa_ya();
     battle_formula_apply_physical_modifiers_without_supports();
     battle_formula_store_xa_times_ya_damage();
 }

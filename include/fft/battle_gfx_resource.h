@@ -292,7 +292,7 @@ extern battle_gfx_spritesheet_data_t g_battle_gfx_spritesheet_data[BATTLE_SPRITE
 
 u32 battle_gfx_get_spritesheet_flying_flag(u32 spritesheet_id);
 s32 battle_gfx_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id);
-s32 battle_gfx_get_unit_spritesheet_height_by_unit_id(u32 unit_id);
+s32 battle_gfx_get_unit_spritesheet_height_by_battle_id(u32 battle_id);
 s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id);
 
 /* frame and sequence tables */
@@ -366,11 +366,11 @@ typedef struct battle_gfx_evtchr_shp {
  * target access uses a 0x7564-byte stride.
  */
 typedef struct battle_gfx_vram_slot {
-    u32 owner;                 /* 0x0000; runtime id with owner flags, or battle_gfx_vram_slot_owner_marker_e marker */
-    u32 image_buffer_state;    /* 0x0004; upload countdown or battle_gfx_vram_slot_buffer_marker_e marker */
-    u32 evtchr_load_state;     /* 0x0008; set to 0 free, 1 a unit's attack image, 3 an EVTCHR block; never read */
-    RECT image_rect;           /* 0x000c */
-    battle_gfx_unit_seq_t seq; /* 0x0014 */
+    u32 owner;              /* 0x0000; runtime id with owner flags, or battle_gfx_vram_slot_owner_marker_e marker */
+    u32 image_buffer_state; /* 0x0004; upload countdown or battle_gfx_vram_slot_buffer_marker_e marker */
+    u32 evtchr_load_state;  /* 0x0008; set to 0 free, 1 a unit's attack image, 3 an EVTCHR block; never read */
+    RECT image_rect;        /* 0x000c */
+    battle_gfx_evtchr_seq_t seq; /* 0x0014 */
     battle_gfx_evtchr_shp_t shp; /* 0x051c */
     clut_t clut;                 /* 0x0f64; filled by battle_gfx_set_evtchr_palette_by_runtime_id */
     u8 image_data[0x6400];       /* 0x1164 */

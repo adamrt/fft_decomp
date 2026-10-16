@@ -131,16 +131,16 @@ s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id) {
 }
 
 /* Faces a unit in a direction given in quarter turns and restarts its animation
- * with that facing, as battle_unit_set_animation_from_facing_nibble does for
+ * with that facing, as battle_unit_set_facing_nibble_by_runtime_id does for
  * sixteenths. No retail code calls it. */
-s32 battle_unit_set_animation_from_facing_hint(u32 runtime_id, s32 facing_hint) {
+s32 battle_unit_set_facing_quadrant_by_runtime_id(u32 runtime_id, s32 facing_quadrant) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     s32 animation;
     s16 facing;
 
     if (unit != 0) {
         animation = unit->animation.sequence_id >> 1;
-        facing = facing_hint << 10;
+        facing = facing_quadrant << 10;
         unit->facing = facing;
         if (animation < BATTLE_UNIT_ANIMATION_IDLE) {
             animation = BATTLE_UNIT_ANIMATION_STAND;
@@ -187,7 +187,7 @@ s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id) {
 /* Faces a unit in a direction given in sixteenths of a turn and restarts its
  * current animation with that facing; an animation below idle becomes standing.
  * Returns the runtime id, or -1 when no record has it. */
-s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibble) {
+s32 battle_unit_set_facing_nibble_by_runtime_id(u32 runtime_id, s32 facing_nibble) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     s32 animation;
     s16 facing;

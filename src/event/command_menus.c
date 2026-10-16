@@ -594,14 +594,14 @@ s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, 
     return menu_dispatch_system_function(type, option, unit_id, parameter, enabled, action);
 }
 
-/* Run battle_unit_generate_crystal_or_treasure for the unit on the main stack,
+/* Run battle_unit_resolve_crystal_pickup for the unit on the main stack,
  * keep its record in g_menu_crystal_pickup_context and return the treasure item for
  * CRYSTAL_PICKUP_TREASURE, otherwise -1. */
 s32 menu_resolve_crystal_pickup(s32 battle_id) {
     unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     crystal_pickup_result_t* result;
 
-    g_thread_call_target = (void (*)(void))battle_unit_generate_crystal_or_treasure;
+    g_thread_call_target = (void (*)(void))battle_unit_resolve_crystal_pickup;
     result = (crystal_pickup_result_t*)thread_call_on_main_stack(stats);
     g_menu_crystal_pickup_context = result;
     if (result->result == CRYSTAL_PICKUP_NONE || result->result == CRYSTAL_PICKUP_NOTHING) {

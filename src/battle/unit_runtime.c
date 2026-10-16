@@ -177,7 +177,7 @@ void battle_gfx_reset_unit_palette_by_runtime_id(u32 runtime_id) {
     }
 }
 
-/* Silence a unit's movement sounds and landing effects (battle_sound_play_movement_sfx and the
+/* Silence a unit's sounds and landing effects (battle_sound_play_unit_sfx and the
  * landing handlers check it). */
 void battle_unit_set_movement_effect_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
@@ -187,7 +187,7 @@ void battle_unit_set_movement_effect_suppression(u32 runtime_id) {
     }
 }
 
-/* Restore a unit's movement sounds and landing effects; the counterpart of
+/* Restore a unit's sounds and landing effects; the counterpart of
  * battle_unit_set_movement_effect_suppression. */
 void battle_unit_clear_movement_effect_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
@@ -301,7 +301,7 @@ s32 battle_script_opcode_47_add_ghost_unit(
 
 /* Restarts the unit graphics loader with one descriptor, for a unit an event adds
  * during the battle: the unit is put on the field
- * (battle_unit_set_enemy_level_data_by_battle_id) and queued at its map position
+ * (battle_unit_put_on_field) and queued at its map position
  * and facing with its sheet and palette, the caller's flags and runtime id 0xff,
  * which takes the first free runtime slot. Always returns 1. */
 s32 battle_gfx_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {
@@ -313,7 +313,7 @@ s32 battle_gfx_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {
     g_battle_gfx_unit_graphics_load_state.index = 0;
     g_battle_gfx_unit_graphics_load_state.buffer = 0;
     unit = battle_unit_get_stats_from_battle_id(battle_id);
-    battle_unit_set_enemy_level_data_by_battle_id(battle_id);
+    battle_unit_put_on_field(battle_id);
     battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
         unit->position.facing, unit->spritesheet_id, unit->job_portrait_palette, 0xFF, unit, flags);
     return 1;
@@ -332,7 +332,7 @@ s32 battle_gfx_poll_unit_graphics_load(void) {
 }
 
 /* Makes a unit visible: enables its drawing, triggers its sprite graphic and,
- * when it has battle stats, runs battle_unit_set_enemy_level_data_by_battle_id.
+ * when it has battle stats, puts it on the field (battle_unit_put_on_field).
  * Returns 0 when no record has the runtime id. */
 s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
@@ -343,7 +343,7 @@ s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id) {
         unit->draw_enabled = 1;
         unit->animation.trigger = 1;
         if (stats != 0) {
-            battle_unit_set_enemy_level_data_by_battle_id(stats->battle_id);
+            battle_unit_put_on_field(stats->battle_id);
         }
         return 1;
     }
@@ -353,7 +353,7 @@ s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id) {
 /* Hides a unit: disables its drawing and sprite trigger, undoing
  * battle_unit_draw_and_activate_by_runtime_id (Erase event instruction). Returns 0 when no record
  * has the runtime id. */
-s32 battle_gfx_reset_unit_graphic_trigger(u32 runtime_id) {
+s32 battle_gfx_hide_unit_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
@@ -370,7 +370,7 @@ void battle_gfx_hide_jumping_units(void) {
 
     while (unit != 0) {
         if ((unit->status_flags_5_6 & BATTLE_UNIT_STATUS_JUMP) != 0) {
-            battle_gfx_reset_unit_graphic_trigger(unit->runtime_id);
+            battle_gfx_hide_unit_by_runtime_id(unit->runtime_id);
         }
         unit = unit->previous;
     }
@@ -663,8 +663,8 @@ s32 battle_gfx_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id) {
 
 /* The sprite height of the unit with this battle id, 0 when it is absent, dead,
  * crystal or treasure. */
-s32 battle_gfx_get_unit_spritesheet_height_by_unit_id(u32 unit_id) {
-    return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(unit_id));
+s32 battle_gfx_get_unit_spritesheet_height_by_battle_id(u32 battle_id) {
+    return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(battle_id));
 }
 
 /* Start an ability's effect cast by runtime unit 0 on runtime unit 1 with a normal hit. No retail

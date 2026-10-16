@@ -128,13 +128,13 @@ void unit_set_facing(s32 runtime_id, s32 facing) {
         if (battle_id >= 0) {
             stats = battle_unit_get_stats_from_battle_id(battle_id);
             if (stats->mount_info != 0) {
-                battle_unit_set_animation_from_facing_nibble(
+                battle_unit_set_facing_nibble_by_runtime_id(
                     battle_unit_get_runtime_id_by_battle_id(stats->mount_info & UNIT_MOUNT_INFO_PARTNER_ID_MASK),
                     facing & 0xFFFF);
             }
         }
     }
-    battle_unit_set_animation_from_facing_nibble(runtime_id, facing & 0xFFFF);
+    battle_unit_set_facing_nibble_by_runtime_id(runtime_id, facing & 0xFFFF);
 }
 
 /* Map script volume 0..96 to driver volume 0..127; values above 96 saturate. */

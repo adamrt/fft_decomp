@@ -41,7 +41,7 @@ static s32 battle_ai_filter_reachable_tiles_by_target_distance(s32 distance_limi
 static void battle_ai_focus_on_target(s32 unit_id);
 static void battle_ai_init_acting_unit_data(void);
 static void battle_ai_init_target_consideration(void);
-static void battle_ai_invert_target_priority(void);
+static void battle_ai_seed_move_baseline(void);
 static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry);
 static s32 battle_ai_refresh_unit_decision_flags(void);
 static s32 battle_ai_run_cowardly_movement(void);
@@ -169,7 +169,7 @@ s32 battle_ai_build_command(s32 unit_id, ai_command_t* command) {
 preserve:
     ai->movement_taken = ai->acting_unit->movement_taken;
     ai->action_taken = ai->acting_unit->action_taken;
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     /* Shift the two-entry command history: the previous command moves to entry 0
      * and this one becomes entry 1. */
     battle_mem_copy_u16_values(&g_battle_ai_command_history[0], &g_battle_ai_command_history[1], sizeof(ai_command_t));
@@ -1127,7 +1127,7 @@ static s32 battle_ai_select_action_initial(void) {
         battle_ai_reset_action_ranking_fields(&ai->ranked_actions[result]);
     battle_ai_reset_action_ranking_fields(&ai->current_action);
     battle_ai_reset_action_ranking_fields(&ai->best_action);
-    battle_ai_reset_action_ranking_fields(&ai->inverted_priority_action);
+    battle_ai_reset_action_ranking_fields(&ai->move_baseline_action);
     battle_ai_reset_action_ranking_fields(&ai->selected_action);
     battle_ai_fill_foe_proximity_grid();
 status_action:
@@ -1286,7 +1286,7 @@ evaluate_movement:
         return -1;
     }
     ai->movement_scenario = 0;
-    battle_ai_invert_target_priority();
+    battle_ai_seed_move_baseline();
     ai->movement_scenario = 1;
 evaluate_charging:
     charging_result = battle_ai_evaluate_charging_movement();
@@ -1318,7 +1318,7 @@ evaluate_charging:
  * A focused enemy uses enemy_ability_min_reach; a focused ally uses ally_ability_min_reach.
  * Without a focused target, use Move. The caller consumes the full register.
  */
-static s32 battle_ai_get_movement_range(void) {
+static s32 battle_ai_get_target_reach(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
     ai_unit_decision_t* acting = g_battle_ai_data_base.acting_unit_decision;
     if (acting->flags & AI_DECISION_FOCUS_TARGET) {
@@ -1341,7 +1341,7 @@ enum {
 #define AI_TILE_PRIORITY_OFFSET ((u32) & ((ai_data_t*)0)->tile_priority)
 
 /*
- * Seed the inverted-priority action, the baseline a ranked action must beat
+ * Seed the move-only baseline action, which a ranked action must beat
  * (battle_ai_insert_ranked_action), with 100% hit and the score of simply
  * moving to the scenario's candidate tile.
  *
@@ -1350,24 +1350,24 @@ enum {
  * grid is 16 columns x 18 rows of 16-bit values per map level, read as the
  * stored unsigned pattern before the negation.
  */
-static void battle_ai_invert_target_priority(void) {
+static void battle_ai_seed_move_baseline(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
     ai_coords_t* coords;
     u8* level_row;
     u8 scenario = g_battle_ai_data_base.movement_scenario;
     u32 row;
 
-    g_battle_ai_data_base.inverted_priority_action.rank.decided = 0;
-    g_battle_ai_data_base.inverted_priority_action.rank.base_hit_percent = AI_BASE_HIT_PERCENT;
+    g_battle_ai_data_base.move_baseline_action.rank.decided = 0;
+    g_battle_ai_data_base.move_baseline_action.rank.base_hit_percent = AI_BASE_HIT_PERCENT;
     coords = &ai->candidate_coords[scenario];
     level_row = (u8*)ai + coords->fields.elevation * AI_TILE_LEVEL_BYTE_STRIDE + AI_TILE_PRIORITY_OFFSET;
     row = coords->fields.y * AI_TILE_ROW_BYTE_STRIDE + (u32)level_row;
-    g_battle_ai_data_base.inverted_priority_action.rank.priority = -*(u16*)(coords->fields.x * 2 + row);
+    g_battle_ai_data_base.move_baseline_action.rank.priority = -*(u16*)(coords->fields.x * 2 + row);
 }
 
 /* Workspace aliases preserve the target's separate entry address loads. */
-extern s32 g_battle_ai_target_in_range;             /* 1 for range >= distance or charging; 0 otherwise. */
-extern s32 g_battle_ai_closest_ability_range;       /* Movement range, possibly halved before tile selection. */
+extern s32 g_battle_ai_target_in_range; /* 1 for range >= distance or charging; 0 otherwise. */
+extern s32 g_battle_ai_target_reach;    /* battle_ai_get_target_reach's reach, possibly halved before tile selection. */
 extern s32 g_battle_ai_movement_unit_index;         /* Reused unit/row loop index or Stay Near occupant ID. */
 extern s32 g_battle_ai_target_distance;             /* Target-distance byte at the acting unit's tile. */
 extern s32 g_battle_ai_stay_near_destination_fixed; /* 1 after a reachable Stay Near destination is fixed. */
@@ -1376,7 +1376,7 @@ extern s32 g_battle_ai_stay_near_destination_fixed; /* 1 after a reachable Stay 
  * destinations.
  *
  * Scenario 0 holds every reachable tile. When the decision's target is within
- * reach of the unit's tile (battle_ai_get_movement_range), scenario 1 keeps
+ * reach of the unit's tile (battle_ai_get_target_reach), scenario 1 keeps
  * every reachable tile and candidate 1 is the best-scoring one; a free,
  * reachable stay-near tile is instead taken as is. Otherwise scenario 1 keeps
  * the tiles closer to the target and candidate 1 is the best-scoring tile
@@ -1436,11 +1436,10 @@ static s32 battle_ai_build_movement_scenarios(void) {
     g_battle_ai_target_distance
         = ai->tile_target_distance[ai->acting_unit_coords.fields.elevation][ai->acting_unit_coords.fields.y]
                                   [ai->acting_unit_coords.fields.x];
-    g_battle_ai_closest_ability_range = battle_ai_get_movement_range();
+    g_battle_ai_target_reach = battle_ai_get_target_reach();
     limit = g_battle_ai_target_distance;
     g_battle_ai_stay_near_destination_fixed = 0;
-    if (g_battle_ai_closest_ability_range >= limit
-        || (decision->targeting_flags_1 & AI_TARGETING_FLAG_1_REFLECTED_ACTION)) {
+    if (g_battle_ai_target_reach >= limit || (decision->targeting_flags_1 & AI_TARGETING_FLAG_1_REFLECTED_ACTION)) {
         g_battle_ai_target_in_range = 1;
         if ((decision->flags & AI_DECISION_STAY_NEAR_COORDINATES)
             && ((g_battle_ai_movement_unit_index = battle_ai_find_unit_at_coordinates(&decision->target))
@@ -1468,8 +1467,8 @@ score_tiles:
             battle_ai_select_destination(0x7fffffff, AI_DESTINATION_PRIORITY_FIRST);
         } else {
             if (ai->acting_unit_team && rand() % 7 == 0)
-                g_battle_ai_closest_ability_range /= 2;
-            battle_ai_select_destination_with_nearest_fallback(g_battle_ai_closest_ability_range);
+                g_battle_ai_target_reach /= 2;
+            battle_ai_select_destination_with_nearest_fallback(g_battle_ai_target_reach);
         }
     }
     /* Scenario 2: the reachable tiles outside scenario 1. The XOR is that
@@ -1790,7 +1789,7 @@ void battle_ai_insert_ranked_action(void) {
     s32 i;
     s32 j;
 
-    if (battle_ai_compare_target_priority_and_hit_rate(&ai->best_action.rank, &ai->inverted_priority_action.rank)
+    if (battle_ai_compare_target_priority_and_hit_rate(&ai->best_action.rank, &ai->move_baseline_action.rank)
         == AI_RANK_ABOVE) {
         if (battle_ai_is_action_higher_ranked(&ai->best_action, &ai->ranked_actions[AI_RANKED_ACTION_COUNT - 1])) {
             for (i = 0; i < AI_RANKED_ACTION_COUNT; i++) {
@@ -2128,11 +2127,11 @@ static s32 battle_ai_calculate_ability_range(void) {
     u32 level_address;
     char unused[24]; /* the target's frame reserves 24 bytes nothing uses */
 
-    battle_ai_move_temp_unit_to_coords(&ai->current_action.coords);
+    battle_ai_move_acting_unit_to_coords(&ai->current_action.coords);
     count = 0;
     if (ai->considered_ability.parameters.fields.range != 0) {
         if (battle_target_set_panels_for_action(&ai->current_action.command) == TARGET_PANELS_NONE) {
-            battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+            battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
             return 0;
         }
     } else {
@@ -2172,7 +2171,7 @@ static s32 battle_ai_calculate_ability_range(void) {
             }
         }
     }
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     return count;
 }
 
@@ -2461,7 +2460,7 @@ movement:
         return -1;
     }
     ai->movement_scenario = 2;
-    battle_ai_invert_target_priority();
+    battle_ai_seed_move_baseline();
     ai->movement_scenario = 0;
 charging:
     result = battle_ai_evaluate_charging_movement();
@@ -2521,7 +2520,7 @@ static s32 battle_ai_build_targeted_movement(void) {
     } else if (battle_ai_fill_target_distance_grid(&ai->acting_unit_decision->target) == -1) {
         return -1;
     }
-    range = battle_ai_get_movement_range();
+    range = battle_ai_get_target_reach();
     /* Direct typed level indexing reverses the two address-building instructions
      * at +0xbc/+0xc0. Stage only the level base; retain the real member offset
      * and typed row/column indexing for the byte-exact match. */
@@ -2612,7 +2611,7 @@ movement:
         return -1;
     }
     ai->movement_scenario = 2;
-    battle_ai_invert_target_priority();
+    battle_ai_seed_move_baseline();
     ai->movement_scenario = 0;
     if (!g_battle_ai_protect_allies_status_retry
         && !((ai->unit_decisions[target].targeting_flags_2 >> 6) & (AI_TARGET_DEAD_WITH_RERAISE >> 6))) {
@@ -2931,7 +2930,7 @@ movement:
         return -1;
     }
     ai->movement_scenario = 1;
-    battle_ai_invert_target_priority();
+    battle_ai_seed_move_baseline();
     if (battle_ai_select_active_units(AI_UNIT_FILTER_SPECIFIC, ai->acting_unit_id)) {
     self_abilities:
         if (battle_ai_evaluate_ability_list() == -1) {
@@ -3050,7 +3049,7 @@ s32 battle_ai_find_nearest_target(ai_nearest_target_mode_e mode) {
                 if (battle_ai_should_exclude_from_imminent_enemies(i))
                     continue;
                 if (battle_ai_calculate_distance_between_units(ai->acting_unit, unit) < 2
-                    && battle_ai_calculate_height_difference_between_units(&ai->acting_unit_coords, unit) < -2)
+                    && battle_ai_calculate_height_difference(&ai->acting_unit_coords, unit) < -2)
                     continue;
                 break;
             case AI_NEAREST_ENEMY:
@@ -3365,7 +3364,7 @@ static s32 battle_ai_score_reachable_tiles(void) {
         }
     }
     /* Restore the simulation unit's coordinates only after the whole scan completes. */
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     return 0;
 }
 

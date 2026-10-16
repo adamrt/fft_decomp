@@ -86,10 +86,10 @@ void battle_target_show_cursor(void);
 void battle_target_show_attack_preview_panel(void);
 void battle_target_show_right_unit_panel(void);
 void battle_target_show_hovered_unit_panel(void);
-void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit);
+void battle_target_move_cursor_to_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit);
 
 /* tile highlights */
-/* battle_target_set_tile_background_color modes and the g_battle_target_tile_mark_modes states:
+/* battle_target_set_tile_mark_colors modes and the g_battle_target_tile_mark_modes states:
  * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
  * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
  * other buffer and leaves the layer SHOWN or NONE. */
@@ -113,8 +113,8 @@ extern battle_render_buffer_t* g_battle_target_tile_color_buffer;
 
 s32 battle_target_begin_tile_selection(void);
 s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad);
-void battle_target_calculate_tile_coords_with_cursor_glow(void);
-void battle_target_set_tile_background_color(s32 mode, s32 unused);
+void battle_target_draw_cursor_with_tile_glow(void);
+void battle_target_set_tile_mark_colors(s32 mode, s32 unused);
 void battle_target_show_move_range_in_free_cursor(void);
 void battle_target_update_cursor(void);
 

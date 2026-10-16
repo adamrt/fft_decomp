@@ -1055,7 +1055,7 @@ enum {
  * g_menu_building_thread_started is set (it is cleared here either way) or
  * menu_id is MENU_COMMAND_ID_NONE.
  *
- * g_battle_menu_idle_action_entry_labels holds two window x bytes per entry, each
+ * g_battle_menu_idle_action_window_x holds two window x bytes per entry, each
  * 0x80 less than the screen x; the second is used when the unit's projected x is
  * 0x101 or more, and a zero byte leaves the entry's x unchanged. WORLD only
  * clears the menu-building-started flag and does not read the menu id. */
@@ -1064,7 +1064,7 @@ void menu_build_idle_action_menu(s32 menu_id) {
     SVECTOR screen_position;
     s32 i;
     s32 column;
-    u8* label_table;
+    u8* window_x_table;
     menu_entry_t* entry;
     s16* selected_index;
 
@@ -1077,16 +1077,16 @@ void menu_build_idle_action_menu(s32 menu_id) {
                 battle_unit_get_runtime_id_by_battle_id(g_menu_selected_unit.battle_id), &screen_position);
             i = 0;
             entry = g_menu_thread_menu_data;
-            label_table = g_battle_menu_idle_action_entry_labels;
+            window_x_table = g_battle_menu_idle_action_window_x;
             /* Two window x bytes per entry; a projected x of 0x101 or more uses the second. */
             column = screen_position.vx >= 0x101;
             do {
                 /* The offset-plus-base integer sum is byte-required (addu operand order). */
-                u8* label = (u8*)(column + (u32)label_table);
+                u8* window_x = (u8*)(column + (u32)window_x_table);
 
                 column += 2;
-                if (*label != 0) {
-                    entry->window.x = *label + 0x80;
+                if (*window_x != 0) {
+                    entry->window.x = *window_x + 0x80;
                 }
                 i += 1;
                 entry += 1;

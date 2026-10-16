@@ -651,7 +651,7 @@ s32 battle_map_resolve_rotated_offset_layer(
     return 0;
 }
 
-/* Return g_battle_reaction_unit_last_ability_id. Nothing in the game calls it. */
+/* Return g_battle_action_saved_ability_id. Nothing in the game calls it. */
 s16 battle_action_load_last_used_ability(void) {
-    return g_battle_reaction_unit_last_ability_id;
+    return g_battle_action_saved_ability_id;
 }

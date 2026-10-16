@@ -93,7 +93,7 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
     }
     switch (hit) {
     case 0:
-        battle_sound_play_movement_sfx(unit, g_battle_sound_weapon_swing_sfx_ids[weapon_type]);
+        battle_sound_play_unit_sfx(unit, g_battle_sound_weapon_swing_sfx_ids[weapon_type]);
         break;
     case 1:
         for (i = 0; i < unit->strike.target_count; i++) {
@@ -105,14 +105,14 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
             case ACTION_MISS_TYPE_RIGHT_HAND_EVADE:
             case ACTION_MISS_TYPE_LEFT_HAND_EVADE:
             case ACTION_MISS_TYPE_GOLEM_GUARD:
-                battle_sound_play_movement_sfx(unit, g_battle_sound_shield_deflect_sfx_ids[weapon_type]);
+                battle_sound_play_unit_sfx(unit, g_battle_sound_shield_deflect_sfx_ids[weapon_type]);
                 break;
             case ACTION_MISS_TYPE_ACCESSORY_EVADE:
             case ACTION_MISS_TYPE_CLASS_EVADE_OR_ARROW_GUARD:
             case ACTION_MISS_TYPE_FORCED_FAILURE:
             case ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD:
             case ACTION_MISS_TYPE_CATCH:
-                battle_sound_play_movement_sfx(unit, MAIN_SFX_ERROR_MESSAGE);
+                battle_sound_play_unit_sfx(unit, MAIN_SFX_ERROR_MESSAGE);
                 break;
             case ACTION_MISS_TYPE_NULLIFIED:
             case ACTION_MISS_TYPE_ACCURACY_MISS:
@@ -120,9 +120,9 @@ void battle_sound_play_weapon_sfx(battle_unit_t* unit, s32 hit) {
                 break;
             default:
                 if (target->stats->action.critical != 0) {
-                    battle_sound_play_movement_sfx(unit, MAIN_SFX_CRITICAL_HIT);
+                    battle_sound_play_unit_sfx(unit, MAIN_SFX_CRITICAL_HIT);
                 } else {
-                    battle_sound_play_movement_sfx(unit, g_battle_sound_weapon_hit_sfx_ids[weapon_type]);
+                    battle_sound_play_unit_sfx(unit, g_battle_sound_weapon_hit_sfx_ids[weapon_type]);
                 }
                 break;
             }
@@ -602,11 +602,11 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
             stats = unit->stats;
             if (stats != 0) {
                 if (stats->unit_flags & UNIT_FLAG_MALE) {
-                    battle_sound_play_movement_sfx(unit, MAIN_SFX_DEATH_MALE);
+                    battle_sound_play_unit_sfx(unit, MAIN_SFX_DEATH_MALE);
                 } else if (stats->unit_flags & UNIT_FLAG_FEMALE) {
-                    battle_sound_play_movement_sfx(unit, MAIN_SFX_DEATH_FEMALE);
+                    battle_sound_play_unit_sfx(unit, MAIN_SFX_DEATH_FEMALE);
                 } else if (stats->unit_flags & UNIT_FLAG_MONSTER) {
-                    battle_sound_play_movement_sfx(unit, MAIN_SFX_DEATH_MONSTER);
+                    battle_sound_play_unit_sfx(unit, MAIN_SFX_DEATH_MONSTER);
                 }
             }
         }
@@ -725,8 +725,7 @@ void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_ef
             unit->spritesheet_id = spritesheet_id;
             battle_gfx_tint_unit_palette(unit, tile_effect_level, 1);
             battle_unit_set_status_animation(unit);
-            battle_gfx_load_trap_and_unit_frame_parts(
-                unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+            battle_gfx_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
         }
     } else if (unit->spritesheet_id != g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].spritesheet_id) {
         unit->special_graphic_y_offset = 0;
@@ -736,8 +735,7 @@ void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_ef
         unit->spritesheet_id = original_id;
         battle_gfx_check_tile_status_palette_mod(unit, tile_effect_level, 1);
         battle_unit_set_status_animation(unit);
-        battle_gfx_load_trap_and_unit_frame_parts(
-            unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+        battle_gfx_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
 }
 
@@ -1140,8 +1138,7 @@ static void battle_gfx_select_unit_shp_frame(battle_unit_t* unit, battle_unit_an
  * A 48x48 part from a spritesheet slot ends the frame: it is stored as two
  * 48x24 halves, the upper one flagged to draw nearer the camera. The two
  * Altima sheets keep theirs whole. */
-void battle_gfx_load_trap_and_unit_frame_parts(
-    battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame, u16 sequence_id) {
+void battle_gfx_load_unit_frame(battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame, u16 sequence_id) {
     battle_gfx_unit_shp_frame_tables_t* frame_table;
     battle_gfx_source_frame_t* frame_data;
     battle_gfx_sprite_display_data_t* display;
@@ -1401,7 +1398,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                     unit->seq_offset.vz = 0;
                     unit->seq_offset.vy = 0;
                     unit->seq_offset.vx = 0;
-                    battle_gfx_load_trap_and_unit_frame_parts(unit, state, frame, sequence_id);
+                    battle_gfx_load_unit_frame(unit, state, frame, sequence_id);
                 }
                 state->wait = 0;
                 return;
@@ -1476,7 +1473,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 break;
             case BATTLE_SEQ_OP_PLAY_SOUND:
                 value = seq->sequences[index][pos++];
-                battle_sound_play_movement_sfx(unit, value);
+                battle_sound_play_unit_sfx(unit, value);
                 break;
             case BATTLE_SEQ_OP_MOVE_UNIT_RL:
                 battle_unit_shift_right_or_left(unit, seq->sequences[index][pos++]);
@@ -1586,7 +1583,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 unit->item_display_active = 0;
                 break;
             case BATTLE_SEQ_OP_WAIT_FOR_INPUT:
-                if (g_battle_action_post_action == 0) {
+                if (g_battle_state_window_closed == 0) {
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
                 } else {
@@ -1605,8 +1602,8 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 }
                 break;
             case BATTLE_SEQ_OP_SET_ITEM_POSITION:
-                unit->item_get_x_offset = seq->sequences[index][pos++];
-                unit->item_get_y_offset = seq->sequences[index][pos++];
+                unit->item_display_x_offset = seq->sequences[index][pos++];
+                unit->item_display_y_offset = seq->sequences[index][pos++];
                 break;
             case BATTLE_SEQ_OP_START_DISTORTION:
                 /* The operand stores the id less 2, so a script cannot start NONE or the scale pulse. */
@@ -1662,7 +1659,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
             } else {
                 pos++;
             }
-            battle_gfx_load_trap_and_unit_frame_parts(unit, state, frame, sequence_id);
+            battle_gfx_load_unit_frame(unit, state, frame, sequence_id);
             state->script_pos = pos;
             state->frame = frame;
             state->sequence_id = sequence_id;
@@ -1676,8 +1673,7 @@ static void battle_gfx_load_casting_unit_graphics(void) {
     battle_unit_t* unit = battle_unit_get_casting();
 
     if (unit != 0) {
-        battle_gfx_load_trap_and_unit_frame_parts(
-            unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+        battle_gfx_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
 }
 
@@ -1791,7 +1787,7 @@ static void battle_gfx_run_wep_eff_seq_script(
                 break;
             case BATTLE_SEQ_OP_PLAY_SOUND:
                 value = seq[sequence_id][pos++];
-                battle_sound_play_movement_sfx(unit, value);
+                battle_sound_play_unit_sfx(unit, value);
                 break;
             case BATTLE_SEQ_OP_SET_WAIT_BIAS:
                 sprite->wait_bias = (s8)seq[sequence_id][pos++];
@@ -2150,8 +2146,8 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                                             other->seq_offset.vz = 0;
                                             other->seq_offset.vy = 0;
                                             other->seq_offset.vx = 0;
-                                            battle_gfx_load_trap_and_unit_frame_parts(other, &other->animation,
-                                                other->animation.frame, other->animation.sequence_id);
+                                            battle_gfx_load_unit_frame(other, &other->animation, other->animation.frame,
+                                                other->animation.sequence_id);
                                             ok = 1;
                                             unit->animation.wait = 0;
                                             battle_gfx_load_unit_into_evtchr_slot(unit, 1, 1);
@@ -2373,7 +2369,7 @@ static void battle_gfx_draw_unit_sprite_layers(battle_unit_t* unit) {
         return;
     }
     if (unit->item_display_active) {
-        battle_gfx_init_item_get_rendering(unit);
+        battle_gfx_draw_item_display(unit);
     }
     if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
         if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
@@ -2612,7 +2608,7 @@ void battle_unit_clear_all(void) {
  *
  * FLASH starts the fade to black and moves to DARKEN. DARKEN then disables the
  * battle unit slot, removes the runtime record and returns 1; for the source unit it
- * only resets the graphic trigger. Every other path returns 0. */
+ * only hides the unit. Every other path returns 0. */
 static s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
     u8 phase = unit->fade_out_phase;
 
@@ -2637,7 +2633,7 @@ static s32 battle_unit_update_fade_out_removal(battle_unit_t* unit) {
             battle_unit_remove(unit);
             return 1;
         }
-        battle_gfx_reset_unit_graphic_trigger(unit->runtime_id);
+        battle_gfx_hide_unit_by_runtime_id(unit->runtime_id);
         return 0;
     }
     return 0;
@@ -3652,46 +3648,46 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
     return (g_battle_gfx_unit_graphics_load_state.index < g_main_gfx_unit_graphics_load_queue.count) ? result : 0;
 }
 
-/* Cycles the colors of the two deployed-unit palettes (sprite CLUTs 1 and 2).
+/* Cycles the colors of the two cursor tile glow palettes (sprite CLUTs 1 and 2).
  *
  * Every fourth animation tick the offset advances through 0..14 and the palettes
  * are uploaded again with colors 1..15 rotated down by that many places; color
  * 0 stays in place, and offset 0 uploads the palettes as stored. */
-void battle_gfx_update_unit_palette_animation(void) {
+void battle_gfx_cycle_tile_glow_palettes(void) {
     s32 dst;
     s32 src;
     palette_t* palettes;
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    g_battle_unit_palette_animation_timer += g_main_system_vsync_interval;
-    if (g_battle_unit_palette_animation_timer >= 4) {
-        g_battle_unit_palette_animation_timer = 0;
-        g_battle_unit_palette_animation_offset++;
-        if (g_battle_unit_palette_animation_offset >= 15) {
-            g_battle_unit_palette_animation_offset = 0;
+    g_battle_gfx_tile_glow_cycle_timer += g_main_system_vsync_interval;
+    if (g_battle_gfx_tile_glow_cycle_timer >= 4) {
+        g_battle_gfx_tile_glow_cycle_timer = 0;
+        g_battle_gfx_tile_glow_cycle_offset++;
+        if (g_battle_gfx_tile_glow_cycle_offset >= 15) {
+            g_battle_gfx_tile_glow_cycle_offset = 0;
         }
-        if (g_battle_unit_palette_animation_offset != 0) {
+        if (g_battle_gfx_tile_glow_cycle_offset != 0) {
             /* Bytewise rotation retains the native stores and first-color 16-bit load. */
             /* dst before src: the reverse order changes the copy loop registers. */
             dst = 2;
-            src = g_battle_unit_palette_animation_offset * 2 + 2;
-            ((u8*)g_battle_gfx_cycled_deployed_palettes[0])[0] = ((u8*)g_battle_deployed_unit_palettes)[0];
-            ((u8*)g_battle_gfx_cycled_deployed_palettes[0])[1] = ((u8*)g_battle_deployed_unit_palettes)[1];
-            ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[0] = *(u16*)&g_battle_deployed_unit_palettes[1][0];
-            ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[1] = ((u8*)g_battle_deployed_unit_palettes[1])[1];
+            src = g_battle_gfx_tile_glow_cycle_offset * 2 + 2;
+            ((u8*)g_battle_gfx_cycled_tile_glow_palettes[0])[0] = ((u8*)g_battle_gfx_tile_glow_palettes)[0];
+            ((u8*)g_battle_gfx_cycled_tile_glow_palettes[0])[1] = ((u8*)g_battle_gfx_tile_glow_palettes)[1];
+            ((u8*)g_battle_gfx_cycled_tile_glow_palettes[1])[0] = *(u16*)&g_battle_gfx_tile_glow_palettes[1][0];
+            ((u8*)g_battle_gfx_cycled_tile_glow_palettes[1])[1] = ((u8*)g_battle_gfx_tile_glow_palettes[1])[1];
             /* Colors offset + 1..15 move down to 1.., and colors 1..offset wrap to the top. */
             for (; src < 32; src++, dst++) {
-                ((u8*)g_battle_gfx_cycled_deployed_palettes[0])[dst] = ((u8*)g_battle_deployed_unit_palettes)[src];
-                ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[dst] = ((u8*)g_battle_deployed_unit_palettes[1])[src];
+                ((u8*)g_battle_gfx_cycled_tile_glow_palettes[0])[dst] = ((u8*)g_battle_gfx_tile_glow_palettes)[src];
+                ((u8*)g_battle_gfx_cycled_tile_glow_palettes[1])[dst] = ((u8*)g_battle_gfx_tile_glow_palettes[1])[src];
             }
-            for (src = 2, dst = 32 - g_battle_unit_palette_animation_offset * 2;
-                src < g_battle_unit_palette_animation_offset * 2 + 2; src++, dst++) {
-                ((u8*)g_battle_gfx_cycled_deployed_palettes[0])[dst] = ((u8*)g_battle_deployed_unit_palettes)[src];
-                ((u8*)g_battle_gfx_cycled_deployed_palettes[1])[dst] = ((u8*)g_battle_deployed_unit_palettes[1])[src];
+            for (src = 2, dst = 32 - g_battle_gfx_tile_glow_cycle_offset * 2;
+                src < g_battle_gfx_tile_glow_cycle_offset * 2 + 2; src++, dst++) {
+                ((u8*)g_battle_gfx_cycled_tile_glow_palettes[0])[dst] = ((u8*)g_battle_gfx_tile_glow_palettes)[src];
+                ((u8*)g_battle_gfx_cycled_tile_glow_palettes[1])[dst] = ((u8*)g_battle_gfx_tile_glow_palettes[1])[src];
             }
-            palettes = g_battle_gfx_cycled_deployed_palettes;
+            palettes = g_battle_gfx_cycled_tile_glow_palettes;
         } else {
-            palettes = g_battle_deployed_unit_palettes;
+            palettes = g_battle_gfx_tile_glow_palettes;
         }
         battle_map_load_palette_data(palettes, MAP_CLUT_ROW_SPRITES, 1, 0);
         battle_map_load_palette_data(palettes + 1, MAP_CLUT_ROW_SPRITES, 2, 0);

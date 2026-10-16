@@ -266,7 +266,7 @@ restart_script:
                 thread_yield();
                 thread_yield();
             }
-            if (operand_1 == EVENT_CALL_FUNCTION_RESET_BETHLA_REGION_UNIT_GRAPHICS) {
+            if (operand_1 == EVENT_CALL_FUNCTION_HIDE_BETHLA_REGION_UNITS) {
                 /* The region is two tile rectangles: x 0..3, y 0..10 and x 4..6, y 2..7. */
                 region_runtime_id = 0;
                 do {
@@ -275,10 +275,10 @@ restart_script:
                         if (operand_1 != -1U) {
                             unit = battle_unit_get_stats_from_battle_id(operand_1);
                             if ((unit->x < 4U) && (unit->position.y < 0xBU)) {
-                                battle_gfx_reset_unit_graphic_trigger(region_runtime_id);
+                                battle_gfx_hide_unit_by_runtime_id(region_runtime_id);
                             }
                             if (((unit->x - 4) < 3U) && ((unit->position.y - 2) < 6U)) {
-                                battle_gfx_reset_unit_graphic_trigger(region_runtime_id);
+                                battle_gfx_hide_unit_by_runtime_id(region_runtime_id);
                             }
                         }
                     }
@@ -793,7 +793,7 @@ restart_script:
                     operand_1 = battle_unit_get_battle_id_by_runtime_id(removed_runtime_id);
                     battle_unit_remove_by_runtime_id(removed_runtime_id);
                     if (operand_1 >= 0) {
-                        battle_unit_set_cannot_exist(operand_1);
+                        battle_unit_set_off_field(operand_1);
                     }
                 }
             }
@@ -810,7 +810,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_ERASE) {
             erased_runtime_id = script_resolve_runtime_id(first_operand);
             if (erased_runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_reset_unit_graphic_trigger(erased_runtime_id);
+                battle_gfx_hide_unit_by_runtime_id(erased_runtime_id);
             }
         } else if (opcode == EVENT_OPCODE_ADD_GHOST_UNIT) {
             ghost_parameters = (u8*)g_script_event_block + instruction_offset + 3;

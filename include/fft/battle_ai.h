@@ -163,7 +163,7 @@ typedef struct ai_action_rank {
 typedef char ai_action_rank_size_must_be_4[(sizeof(ai_action_rank_t) == 4) ? 1 : -1];
 
 /* One considered or recorded action. ai_data_t holds the current one, the best so far, eight
- * ranked outcomes, an inverted-priority scratch copy and the selected one. */
+ * ranked outcomes, the move-only baseline and the selected one. */
 typedef struct ai_action_data {
     u8 act_before_move;  /* 0x00; 1: act from the current tile, then move; 0: move to coords first */
     u8 reflected_action; /* 0x01; set while evaluating reflected-origin candidates */
@@ -360,7 +360,7 @@ typedef struct ai_data {
     ai_action_data_t current_action;                                                           /* 0x0014 */
     ai_action_data_t best_action;                                                              /* 0x0034 */
     ai_action_data_t ranked_actions[AI_RANKED_ACTION_COUNT];                                   /* 0x0054 */
-    ai_action_data_t inverted_priority_action;                                                 /* 0x0154 */
+    ai_action_data_t move_baseline_action;                                                     /* 0x0154 */
     u8 tile_foe_proximity[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT];   /* 0x0174; level/y/x */
     u8 tile_target_distance[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT]; /* 0x03b4; level/y/x */
     s16 tile_priority[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT][AI_GRID_COLUMN_COUNT];       /* 0x05f4; level/y/x */

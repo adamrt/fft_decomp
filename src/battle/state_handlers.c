@@ -38,7 +38,7 @@
 /* Put the unit back where it was before its move: restore its tile, facing, mount link and
  * standing-on id from the previous_* fields, re-register the tile in its battle stats and restart
  * its current animation. */
-static void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
+static void battle_move_restore_previous_state(battle_unit_t* unit) {
     unit->map_x = unit->previous_map_x;
     unit->map_y = unit->previous_map_y;
     unit->map_z = unit->previous_map_z;
@@ -63,11 +63,11 @@ static void battle_move_undo_unit_move(battle_unit_t* unit) {
         other->mount_state = BATTLE_UNIT_MOUNT_STATE_NONE;
         battle_unit_update_display_by_runtime_id(other->runtime_id);
     }
-    battle_move_return_to_previous_map_square(unit);
+    battle_move_restore_previous_state(unit);
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
         other = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
         if (other != 0) {
-            battle_move_return_to_previous_map_square(other);
+            battle_move_restore_previous_state(other);
             battle_unit_update_display_by_runtime_id(other->runtime_id);
         }
     } else if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_RIDER) {
@@ -89,7 +89,7 @@ static void battle_move_undo_unit_move(battle_unit_t* unit) {
  * tile and, when it carries a rider (mount state MOUNT), the rider takes its
  * tile, destination, and real and world position raised 10 units (0xa000 in
  * Q12). Then the acting unit's move is marked taken and the post-movement
- * display starts.
+ * steps start.
  */
 static void battle_move_confirm_unit_move(battle_unit_t* unit, battle_unit_t* moved) {
     battle_unit_t* rider;
@@ -119,7 +119,7 @@ static void battle_move_confirm_unit_move(battle_unit_t* unit, battle_unit_t* mo
         main_sound_play_sfx(MAIN_SFX_CONFIRM);
     }
     battle_gfx_restore_unit_palettes();
-    battle_move_init_post_movement_display();
+    battle_move_start_post_movement_steps();
 }
 
 /* MoveConfirmMenu game-state handler. YES keeps the move and finishes it. NO or UNRESOLVED_FF
@@ -173,7 +173,7 @@ void battle_state_handle_wait_menu_state(void) {
             return;
         }
     case AI_COMMAND_PROMPT_YES:
-        battle_action_choose_facing_for_wait();
+        battle_state_enter_wait_direction();
         return;
     }
 }
@@ -236,7 +236,7 @@ void battle_state_handle_wait_direction_state(void) {
                 battle_unit_set_tile_position_with_mount_partner(unit);
             }
             main_sound_play_sfx(MAIN_SFX_CONFIRM);
-            battle_action_check_between_turn_events();
+            battle_action_start_next_turn_event();
         } else if ((g_main_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
             battle_state_enter_after_command();
         }
@@ -246,21 +246,21 @@ void battle_state_handle_wait_direction_state(void) {
             main_sound_play_sfx(MAIN_SFX_CURSOR_MOVE);
             g_battle_state_wait_direction_facing = facing;
         }
-        battle_unit_decide_facing_direction(unit, facing);
+        battle_unit_set_cardinal_facing(unit, facing);
         if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
             mounted_unit = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
             if (mounted_unit != 0) {
-                battle_unit_decide_facing_direction(mounted_unit, facing);
+                battle_unit_set_cardinal_facing(mounted_unit, facing);
             }
         }
     } else {
         facing_hint = unit->command_state.cursor.facing_hint;
         if (facing_hint < 4) {
-            battle_unit_decide_facing_direction(unit, facing_hint * BATTLE_FACING_QUARTER_TURN);
+            battle_unit_set_cardinal_facing(unit, facing_hint * BATTLE_FACING_QUARTER_TURN);
             if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_NONE) {
                 mounted_unit = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
                 if (mounted_unit != 0) {
-                    battle_unit_decide_facing_direction(
+                    battle_unit_set_cardinal_facing(
                         mounted_unit, unit->command_state.cursor.facing_hint * BATTLE_FACING_QUARTER_TURN);
                 }
             }
@@ -271,7 +271,7 @@ void battle_state_handle_wait_direction_state(void) {
                 battle_action_end_turn(unit->stats->battle_id);
                 battle_unit_set_tile_position_with_mount_partner(unit);
             }
-            battle_action_check_between_turn_events();
+            battle_action_start_next_turn_event();
         }
     }
 }
@@ -279,7 +279,7 @@ void battle_state_handle_wait_direction_state(void) {
 /*
  * CrystalLearn game-state handler: apply the crystal or treasure choice
  * (0, LEARN_ABILITIES and TAKE_TREASURE pass their value to
- * battle_unit_learn_from_crystal, RESTORE_HP_MP restores HP and MP and
+ * battle_unit_apply_crystal_choice, RESTORE_HP_MP restores HP and MP and
  * finalizes the action, and the prompt answers only close). Then, once no effect is pending, the casting unit's
  * frame counter has reached 0x1f and no numeric display shows, work on the first
  * pending post-movement event of g_battle_move_post_move_events, clearing it once
@@ -298,8 +298,8 @@ void battle_state_handle_crystal_learn_state(void) {
     casting = battle_unit_get_casting();
     switch ((s32)command->kind) {
     case BATTLE_CRYSTAL_RESTORE_HP_MP:
-        battle_unit_learn_from_crystal(source->stats, BATTLE_CRYSTAL_RESTORE_HP_MP);
-        g_battle_action_post_action = 1;
+        battle_unit_apply_crystal_choice(source->stats, BATTLE_CRYSTAL_RESTORE_HP_MP);
+        g_battle_state_window_closed = 1;
         battle_action_apply_target_result(source->stats->battle_id);
         battle_gfx_prepare_post_action_display(source);
         battle_unit_update_display_by_runtime_id(source->runtime_id);
@@ -307,17 +307,17 @@ void battle_state_handle_crystal_learn_state(void) {
     case 0:
     case BATTLE_CRYSTAL_LEARN_ABILITIES:
     case BATTLE_CRYSTAL_TAKE_TREASURE:
-        battle_unit_learn_from_crystal(source->stats, command->kind);
-        g_battle_action_post_action = 1;
+        battle_unit_apply_crystal_choice(source->stats, command->kind);
+        g_battle_state_window_closed = 1;
         break;
     case AI_COMMAND_PROMPT_YES:
     case AI_COMMAND_PROMPT_NO:
     case AI_COMMAND_UNRESOLVED_FF:
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
         break;
     }
 
-    if (g_battle_action_post_action == 0) {
+    if (g_battle_state_window_closed == 0) {
         return;
     }
     if (g_battle_state_animation_continue_check != 0) {
@@ -406,7 +406,7 @@ void battle_state_handle_targeting_range_state(void) {
         battle_camera_update_zoom_input();
         battle_camera_update_tilt_input();
         if ((g_main_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
-            battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 2);
+            battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_NONE, 2);
             battle_menu_open_active_unit_idle_action_menu();
             return;
         }
@@ -422,7 +422,7 @@ void battle_state_handle_targeting_range_state(void) {
     } else {
         switch (unit->command_state.ai.data.action.targeting_type) {
         case BATTLE_TARGETING_TYPE_TILE:
-            battle_target_update_free_cursor_selection(unit, 0);
+            battle_target_move_cursor_to_selection(unit, 0);
             frame = unit->state_frame_counter++;
             if (frame >= 0x1f) {
                 /* This lookup and the one below discard their result. */
@@ -434,14 +434,14 @@ void battle_state_handle_targeting_range_state(void) {
         case BATTLE_TARGETING_TYPE_UNIT:
             target = battle_unit_get_by_battle_id(unit->command_state.ai.data.action.target_id);
             if (target != 0) {
-                battle_target_update_free_cursor_selection(unit, target);
+                battle_target_move_cursor_to_selection(unit, target);
                 frame = unit->state_frame_counter++;
                 if (frame >= 0x1f) {
                     battle_map_get_tile_data_pointer(target->map_x, target->map_y, target->map_z);
                     battle_target_select_tile();
                 }
             } else {
-                battle_menu_set_next_script_action_menus();
+                battle_state_enter_open_action_menus();
             }
             break;
         }
@@ -467,7 +467,7 @@ void battle_state_handle_illegal_range_state(void) {
  * ability preview with map panning. */
 void battle_state_handle_ability_preview_help_state(void) {
     if (menu_get_thread_activity() != 2) {
-        g_battle_menu_help_opening = 0;
+        g_battle_menu_help_active = 0;
         battle_camera_enable_map_pan();
         g_battle_game_state = BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING;
     }
@@ -479,7 +479,7 @@ void battle_state_handle_ability_preview_help_state(void) {
  * marked and the unit confirms or backs out.
  *
  * For a player-controlled unit circle restores the cursor input mode and opens
- * the confirmation prompt (battle_action_confirm). Cross clears the target marks
+ * the confirmation prompt (battle_state_enter_confirm_action). Cross clears the target marks
  * and returns to the idle action menu when the ability has no target choice,
  * otherwise to the range display (battle_target_begin_tile_selection). An AI-controlled
  * unit confirms by itself once its state frame counter reaches 0x1f. */
@@ -494,16 +494,16 @@ void battle_state_handle_ability_preview_state(void) {
         if ((g_main_input_pressed_buttons & PSX_PAD_CIRCLE) != 0) {
             g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
             battle_gfx_restore_unit_palettes();
-            battle_action_confirm();
+            battle_state_enter_confirm_action();
         } else if ((g_main_input_pressed_buttons & PSX_PAD_CROSS) != 0) {
             g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
-            battle_target_set_tile_background_color(BATTLE_TILE_MARK_HIDE_TARGETS, 3);
+            battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_HIDE_TARGETS, 3);
             if (unit->ability_preview_phase == TARGET_PANELS_NO_TARGETING) {
-                battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+                battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_NONE, 3);
                 battle_gfx_restore_unit_palettes();
                 battle_menu_open_active_unit_idle_action_menu();
             } else {
-                battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+                battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_NONE, 3);
                 battle_gfx_restore_unit_palettes();
                 battle_target_begin_tile_selection();
             }
@@ -514,7 +514,7 @@ void battle_state_handle_ability_preview_state(void) {
         if (frame >= 0x1f) {
             g_battle_cursor_input_mode = g_battle_cursor_input_mode_saved;
             battle_gfx_restore_unit_palettes();
-            battle_action_confirm();
+            battle_state_enter_confirm_action();
         }
     }
     battle_state_update_units();
@@ -561,7 +561,7 @@ void battle_state_handle_confirm_action_state(void) {
             return;
         case AI_COMMAND_PROMPT_NO:
         case AI_COMMAND_UNRESOLVED_FF:
-            battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+            battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_NONE, 3);
             battle_target_begin_tile_selection();
             return;
         default:
@@ -577,7 +577,7 @@ void battle_state_handle_confirm_action_state(void) {
             return;
         case AI_COMMAND_PROMPT_NO:
         case AI_COMMAND_UNRESOLVED_FF:
-            battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 3);
+            battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_NONE, 3);
             battle_target_begin_tile_selection();
             return;
         default:
@@ -610,15 +610,15 @@ void battle_state_handle_action_cast_state(void) {
     battle_state_update_units();
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
     selected_command = menu_get_selected_command_address()->kind;
-    /* Any prompt answer marks the action as finished (the same test as the
+    /* Any prompt answer marks the window closed (the same test as the
      * BATTLE_MESSAGE_DISPLAY handler). */
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
     }
     /* Wait for the camera to settle before handing the action data over. */
     if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0
-        && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_action_post_action != 0) {
+        && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE && g_battle_state_window_closed != 0) {
         battle_state_enter_commence_attack_phase();
     }
 }
@@ -640,7 +640,7 @@ void battle_state_handle_commence_attack_phase_state(void) {
         }
     } else {
         g_battle_action_phase = ACTION_PHASE_PRE_ACTION;
-        battle_state_announce_next_charged_action();
+        battle_state_announce_next_action();
     }
 }
 
@@ -863,9 +863,9 @@ void battle_state_handle_battle_message_display_state(void) {
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
     }
-    if (g_battle_action_post_action != 0) {
+    if (g_battle_state_window_closed != 0) {
         battle_action_show_caster_post_effect_messages();
     }
 }
@@ -893,10 +893,10 @@ void battle_state_handle_resume_attack_phase_state(void) {
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
     }
     unit = battle_unit_get_casting();
-    if (g_battle_action_post_action != 0 && battle_action_show_next_effect_message() == 0
+    if (g_battle_state_window_closed != 0 && battle_action_show_next_effect_message() == 0
         && unit->numeric_display.active == 0) {
         if (unit->strike.continue_attack != 0) {
             unit->continue_attack_count += 1;
@@ -928,7 +928,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
             if (g_battle_action_phase != ACTION_PHASE_REACTING_UNIT) {
                 g_battle_action_phase += 1;
             }
-            if (battle_state_announce_next_charged_action() != 0) {
+            if (battle_state_announce_next_action() != 0) {
                 return;
             }
         }
@@ -969,13 +969,13 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     case AI_COMMAND_UNRESOLVED_FF:
         g_battle_action_post_action_display_phase += 1;
         if (g_battle_action_post_action_display_phase >= 3) {
-            g_battle_action_post_action = 1;
+            g_battle_state_window_closed = 1;
         } else {
-            battle_action_init_learn_ability_on_hit();
+            battle_state_enter_learn_ability_on_hit();
         }
         break;
     }
-    if (g_battle_action_post_action != 0 && g_battle_state_animation_continue_check == 0) {
+    if (g_battle_state_window_closed != 0 && g_battle_state_animation_continue_check == 0) {
         i = 0;
         if (casting_unit->numeric_display.active == 0) {
             target_count = casting_unit->strike.target_count;
@@ -1025,7 +1025,7 @@ static s32 battle_map_update_deep_dungeon_and_animation(void) {
  * run the between-turn events. */
 void battle_state_handle_deep_dungeon_mesh_load_state(void) {
     if (battle_map_update_deep_dungeon_and_animation() != 0) {
-        battle_action_check_between_turn_events();
+        battle_action_start_next_turn_event();
     }
 }
 
@@ -1089,7 +1089,7 @@ void battle_state_handle_target_select_state(void) {
     } else if (g_main_input_pressed_buttons & PSX_PAD_CROSS) {
         battle_target_move_cursor_to_unit(battle_unit_get_casting());
         battle_gfx_restore_unit_palettes();
-        battle_menu_set_next_script_action_menus();
+        battle_state_enter_open_action_menus();
     } else if (g_main_input_pressed_buttons & PSX_PAD_TRIANGLE) {
         battle_target_move_cursor_to_unit(battle_unit_get_casting());
     }
@@ -1124,7 +1124,7 @@ void battle_state_handle_target_select_confirm_state(void) {
         target = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         menu_store_auto_battle_main_target_id(target->stats->battle_id, caster->stats->battle_id);
         battle_target_move_cursor_to_unit(caster);
-        battle_menu_set_next_script_action_menus();
+        battle_state_enter_open_action_menus();
         break;
     case AI_COMMAND_PROMPT_NO:
     case AI_COMMAND_UNRESOLVED_FF:
@@ -1143,11 +1143,11 @@ void battle_state_handle_target_display_start_state(void) {
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
     }
     if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0) {
         if (g_battle_camera_rotation_action == CAMERA_ROTATION_NONE) {
-            if (g_battle_action_post_action != 0) {
+            if (g_battle_state_window_closed != 0) {
                 battle_state_enter_target_display();
             }
         }
@@ -1164,7 +1164,7 @@ void battle_state_handle_target_display_state(void) {
     buttons = g_main_input_pressed_buttons;
     if ((buttons & PSX_PAD_CIRCLE) || (buttons & PSX_PAD_CROSS)) {
         battle_target_move_cursor_to_unit(battle_unit_get_casting());
-        battle_menu_set_next_script_action_menus();
+        battle_state_enter_open_action_menus();
     }
 }
 
@@ -1181,9 +1181,9 @@ void battle_state_handle_after_command_state(void) {
     unit = battle_unit_get_source();
     command = command_address->kind;
     if (command >= AI_COMMAND_PROMPT_YES && (command <= AI_COMMAND_PROMPT_NO || command == AI_COMMAND_UNRESOLVED_FF)) {
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
     }
-    if ((g_battle_action_post_action != 0) && (unit->numeric_display.active == 0)) {
+    if ((g_battle_state_window_closed != 0) && (unit->numeric_display.active == 0)) {
         battle_state_enter_continue_turn();
     }
 }
@@ -1221,7 +1221,7 @@ void battle_state_handle_continue_turn_state(void) {
             battle_state_enter_event();
             return;
         }
-        battle_action_check_between_turn_events();
+        battle_action_start_next_turn_event();
         return;
     }
     if (battle_action_check_change_of_turn(unit->stats->battle_id) == 1) {
@@ -1230,14 +1230,14 @@ void battle_state_handle_continue_turn_state(void) {
         unit->used_ability_id = unit->stats->action_command.ability_id;
         if (unit->attack_phase_state == BATTLE_ATTACK_PREPARATION_JUMP) {
             unit->attack_phase_state = BATTLE_ATTACK_PREPARATION_CHARGE;
-            battle_gfx_reset_unit_graphic_trigger(unit->runtime_id);
-            battle_action_check_between_turn_events();
+            battle_gfx_hide_unit_by_runtime_id(unit->runtime_id);
+            battle_action_start_next_turn_event();
             return;
         }
-        battle_action_choose_wait();
+        battle_state_enter_wait_menu();
         return;
     }
-    battle_menu_set_next_script_action_menus();
+    battle_state_enter_open_action_menus();
 }
 
 /* ChangeTurn game-state handler. Once the menu layer reports an answer (the message closed) and the
@@ -1253,12 +1253,12 @@ void battle_state_handle_change_turn_state(void) {
     command = menu_get_selected_command_address()->kind;
     if (command >= AI_COMMAND_PROMPT_YES) {
         if (command <= AI_COMMAND_PROMPT_NO) {
-            g_battle_action_post_action = 1;
+            g_battle_state_window_closed = 1;
         } else if (command == AI_COMMAND_UNRESOLVED_FF) {
-            g_battle_action_post_action = 1;
+            g_battle_state_window_closed = 1;
         }
     }
-    if (g_battle_action_post_action != 0) {
+    if (g_battle_state_window_closed != 0) {
         if ((g_battle_camera_step_vector.vx | g_battle_camera_step_vector.vy | g_battle_camera_step_vector.vz) == 0) {
             if (g_battle_camera_rotation_action == CAMERA_ROTATION_NONE) {
                 battle_unit_get_source(); /* result unused */
@@ -1271,7 +1271,7 @@ void battle_state_handle_change_turn_state(void) {
                     battle_state_enter_status_execute();
                     return;
                 }
-                battle_menu_set_next_script_action_menus();
+                battle_state_enter_open_action_menus();
             }
         }
     }
@@ -1289,14 +1289,14 @@ void battle_state_handle_status_execute_state(void) {
     selected_command = menu_get_selected_command_address()->kind;
     if (selected_command >= AI_COMMAND_PROMPT_YES
         && (selected_command <= AI_COMMAND_PROMPT_NO || selected_command == AI_COMMAND_UNRESOLVED_FF)) {
-        g_battle_action_post_action = 1;
+        g_battle_state_window_closed = 1;
     }
-    if (g_battle_action_post_action != 0) {
+    if (g_battle_state_window_closed != 0) {
         if (g_battle_state_animation_continue_check == 0) {
             unit = battle_unit_get_source();
             if (unit->numeric_display.active == 0) {
                 battle_unit_update_display_by_runtime_id(unit->runtime_id);
-                battle_action_check_between_turn_events();
+                battle_action_start_next_turn_event();
             }
         }
     }
@@ -1357,7 +1357,7 @@ void battle_state_update_event_mode(void) {
         battle_gfx_init_evtchr_vram_slots();
         g_battle_menu_status_enabled = 1;
         battle_ai_init_workspace();
-        battle_action_check_between_turn_events();
+        battle_action_start_next_turn_event();
         break;
     case SCRIPT_EVENT_FRAME_TO_WORLD:
         battle_gfx_init_evtchr_vram_slots();
@@ -1573,7 +1573,7 @@ void battle_state_handle_change_map_jumping_in_state(void) {
     case SCRIPT_EVENT_FRAME_RUNNING:
         break;
     case SCRIPT_EVENT_FRAME_NO_FINISH:
-        battle_action_check_between_turn_events();
+        battle_action_start_next_turn_event();
         break;
     case SCRIPT_EVENT_FRAME_TO_WORLD:
         battle_state_enter_close_battle(8, MAIN_GAME_FLOW_BATTLE);

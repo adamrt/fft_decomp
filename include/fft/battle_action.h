@@ -79,10 +79,10 @@ extern s32 g_battle_state_wait_direction_facing;
 extern s32 g_battle_turn_unit_id;
 
 s32 battle_action_check_battle_outcome(void);
-void battle_action_check_between_turn_events(void);
+void battle_action_start_next_turn_event(void);
 s32 battle_action_check_change_of_turn(s32 unit_id);
-void battle_action_choose_facing_for_wait(void);
-void battle_action_choose_wait(void);
+void battle_state_enter_wait_direction(void);
+void battle_state_enter_wait_menu(void);
 s32 battle_action_end_turn(s32 unit_id);
 s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode);
 void battle_action_set_only_action_taken(s32 unit_id);
@@ -106,12 +106,12 @@ enum {
 };
 
 extern s32 g_battle_target_cursor_visible;
-extern s32 g_battle_action_at_list_id;
+extern s32 g_battle_action_at_list_cursor;
 
 s32 battle_action_calculate_at_list(at_entry_t* list, battle_at_list_mode_e mode);
 s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
 s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
-void battle_action_clear_at_list_id(void);
+void battle_action_clear_at_list_cursor(void);
 void battle_action_show_at_list_entry(s32 at_index);
 u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const at_entry_t* entries);
 void battle_action_open_status_menu_at_list_start(void);
@@ -130,9 +130,9 @@ typedef enum battle_attack_preparation {
 
 void battle_action_call_attack_preparation(action_command_t* action);
 s32 battle_action_commit_attack_preparation(action_command_t* command);
-void battle_action_confirm(void);
+void battle_state_enter_confirm_action(void);
 s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit);
-void battle_action_handle_move_command(void);
+void battle_state_enter_unit_move(void);
 s32 battle_action_prepare_attack(action_command_t* source, action_command_t* dest, s32 phase);
 void battle_state_enter_event_at_battle_start(void);
 void battle_action_switch_ability_to_default_attack(void);
@@ -235,7 +235,7 @@ enum { ACTION_PHASE_COUNT = 3 };
 /* g_battle_action_current_ability: the attacker/target pair, weapons, formula
  * inputs and results of the strike being resolved, with copies of the ability's
  * secondary data, the weapon's data and the status-infliction record that
- * battle_action_run_pre_formula_setup loads. */
+ * battle_action_calculate_target_result loads. */
 typedef struct battle_current_ability {
     u8 attacker_id;                             /* 0x00 */
     u8 target_id;                               /* 0x01 */
@@ -343,11 +343,11 @@ void battle_action_finalize_target_current_action(void);
 s32 battle_action_init_current_data(s32 unit_id);
 s32 battle_action_apply_target_result(s32 battle_id);
 s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* work);
-s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 target_id);
+s32 battle_action_calculate_target_result(const action_command_t* source, u8 target_id);
 void battle_action_apply_strike_results(void);
 void battle_action_store_acting_unit_data(unit_stats_t* unit);
 void battle_action_store_target_ids(u8* src);
-s32 battle_action_store_target_stats_pointer_data(s32 unit_id);
+s32 battle_action_apply_attacker_result(s32 unit_id);
 void battle_action_store_used_weapon(action_command_t* action);
 
 /* reactions */
@@ -364,7 +364,7 @@ typedef enum battle_reaction_behavior_flag {
 extern s32 g_battle_action_hamedo_flag;
 extern s16 g_battle_current_reaction_ability_id;
 /* Separate link name for g_battle_action_saved_command.ability_id. */
-extern s16 g_battle_reaction_unit_last_ability_id;
+extern s16 g_battle_action_saved_ability_id;
 
 s32 battle_action_fails_reaction_roll(const unit_stats_t* unit);
 s32 battle_action_is_reaction_blocked(const unit_stats_t* unit);
@@ -581,14 +581,14 @@ extern action_display_image_rect_t g_battle_action_display_image_rects[ACTION_DI
 extern const u8 g_battle_action_display_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
 extern u16 g_battle_action_display_values[ACTION_DISPLAY_VALUE_COUNT];
 extern s32 g_battle_action_learn_on_hit_unit_id;
-extern s32 g_battle_action_post_action;
+extern s32 g_battle_state_window_closed;
 extern s32 g_battle_action_post_action_display_phase; /* battle_post_action_display_phase_e */
 extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[BATTLE_POST_EFFECT_MSG_CAPACITY];
 extern const palette_t g_battle_action_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */
 extern u8 g_battle_action_status_display_image_ids[STATUS_BYTE_COUNT][8];
 
-void battle_action_init_learn_ability_on_hit(void);
+void battle_state_enter_learn_ability_on_hit(void);
 void battle_action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
 void battle_action_show_caster_post_effect_messages(void);
 s32 battle_action_show_next_effect_message(void);

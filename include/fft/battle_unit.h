@@ -226,7 +226,7 @@ typedef struct battle_unit {
     s32 pending_attack_result; /* 0x180: attack result code; -1 signals death */
     /* Death-by-dismount destination (unit runtime record 0x184/0x186/
      * 0x188); battle_unit_dismount_dead_rider copies them to
-     * map_x/map_z/map_y.  battle_unit_update_attack_result_animation passes &dismount. */
+     * map_x/map_z/map_y.  battle_unit_apply_attack_result passes &dismount. */
     map_tile_coordinates_t dismount; /* 0x184 */
     u8 _unused_18a[2];
     battle_strike_work_t strike; /* 0x18c..0x1b3; current action targets, result and rewards */
@@ -256,12 +256,12 @@ typedef struct battle_unit {
     action_result_display_t numeric_display; /* 0x2bc..0x2cf */
     u8 item_display_active;                  /* 0x2d0; BATTLE_SEQ_OP_SHOW_ITEM: draw item_display */
     u8 _unused_2d1;                          /* 0x2d1 */
-    s8 item_get_x_offset;                    /* 0x2d2; BATTLE_SEQ_OP_SET_ITEM_POSITION, in pixels */
-    s8 item_get_y_offset;                    /* 0x2d3 */
+    s8 item_display_x_offset;                /* 0x2d2; BATTLE_SEQ_OP_SET_ITEM_POSITION, in pixels */
+    s8 item_display_y_offset;                /* 0x2d3 */
     u8 _unused_2d4[4];
     battle_gfx_sprite_display_data_t* item_display; /* 0x2d8; item/Equip display pointer */
     /* Status bubble (0x2dc..0x2e7);
-     * battle_gfx_update_status_bubble_graphic_trigger sets the flag and clears
+     * battle_gfx_update_status_bubble_active sets the flag and clears
      * the timer with a 16-bit store, so the timer is declared u16. */
     u8 status_bubble_active;                                 /* 0x2dc */
     u8 status_bubble_id;                                     /* 0x2dd; battle_status_bubble_e */
@@ -410,7 +410,7 @@ battle_unit_t* battle_unit_get_source(void);
 s32 battle_unit_has_runtime_id(u32 runtime_id);
 s32 battle_unit_move_to_head(u32 runtime_id);
 s32 battle_unit_remove_by_runtime_id(u32 runtime_id);
-s32 battle_unit_set_cannot_exist(s32 battle_id);
+s32 battle_unit_set_off_field(s32 battle_id);
 unit_stats_t* battle_unit_find_active_data_pointer(void);
 action_command_t* battle_unit_get_action_command_by_battle_id(s32 battle_id);
 action_command_t* battle_unit_get_runtime_action_command_by_battle_id(u32 battle_id);

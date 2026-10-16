@@ -27,7 +27,7 @@ extern u8 g_battle_sound_weapon_swing_sfx_ids[];
 extern u8 g_battle_sound_weapon_hit_sfx_ids[];
 extern u8 g_battle_sound_shield_deflect_sfx_ids[];
 
-void battle_sound_play_movement_sfx(struct battle_unit* unit, s32 sound_id);
+void battle_sound_play_unit_sfx(struct battle_unit* unit, s32 sound_id);
 void battle_sound_play_weapon_sfx(struct battle_unit* unit, s32 hit);
 
 /* weather */

@@ -32,8 +32,8 @@
 static void battle_move_apply_selected_candidate(move_spread_state_t* state);
 static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s32 x, s32 y, u32 level, s32 target_x,
     s32 target_y, u32 target_level, s32 initialize, s32* suspended, s32 check_budget);
-static void battle_move_calculate_spread(void);
-static s32 battle_move_calculate_teleport_chances(void);
+static void battle_move_spread_horizontal_jumps(void);
+static s32 battle_move_roll_teleport(void);
 static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift, u8 exit_height);
 static void battle_move_check_and_spread_one_tile_around(void);
 static void battle_move_check_occupied_tile_standing_height(s32 record_index, s32 extra_span);
@@ -1277,7 +1277,7 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
             move_flags = &g_battle_move_effective_flags;
             *move_flags |= BATTLE_EFFECTIVE_MOVEMENT_SILENT_WALK;
         }
-        if (battle_move_calculate_teleport_chances() != 0) {
+        if (battle_move_roll_teleport() != 0) {
             g_battle_move_path.count = MOVE_PATH_TELEPORT;
             g_battle_move_path.data.teleport.x = x;
             g_battle_move_path.data.teleport.y = y;
@@ -1331,7 +1331,7 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
             state->outer_count = 4;
             continue;
         }
-        battle_move_calculate_spread();
+        battle_move_spread_horizontal_jumps();
         current = state->candidate_remaining_range;
         if (current != previous) {
             state->outer_count = 4;
@@ -1344,7 +1344,7 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
             if (previous != current) {
                 continue;
             }
-            battle_move_calculate_spread();
+            battle_move_spread_horizontal_jumps();
             if (state->candidate_remaining_range != previous) {
                 continue;
             }
@@ -1357,7 +1357,7 @@ battle_walk_path_t* battle_move_build_path_to_tile(s32 unit_id, s32 x, s32 y, s3
 
 /* 1 when the teleport succeeds: always with Teleport 2, otherwise it fails
  * with a 10 in 100 chance per tile of distance beyond Move. */
-static s32 battle_move_calculate_teleport_chances(void) {
+static s32 battle_move_roll_teleport(void) {
     move_pathfind_scratch_t* ctx = g_battle_move_config_ptr;
     s32 dy, dx;
 
@@ -1768,7 +1768,7 @@ static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
  * jump_half + 1 tiles away, provided every tile in between can be jumped over
  * at the landing height (battle_move_check_horizontal_jump). The best
  * candidate is saved and, outside AI propagation, applied to the spread state. */
-static void battle_move_calculate_spread(void) {
+static void battle_move_spread_horizontal_jumps(void) {
     move_pathfind_scratch_t* config = g_battle_move_config_ptr;
     move_spread_state_t* state = g_battle_move_scratch_pad_ptr;
     s32 outer_index;
@@ -2120,7 +2120,7 @@ static battle_walk_path_t* battle_move_calculate_pathing(s32 flags, s32 jump, s3
         }
         battle_move_spread_to_neighbors();
         if (state->candidate_remaining_range == g_battle_move_pathing_scratch) {
-            battle_move_calculate_spread();
+            battle_move_spread_horizontal_jumps();
             if (state->candidate_remaining_range == g_battle_move_pathing_scratch) {
                 return 0;
             }
@@ -2223,7 +2223,7 @@ s32 battle_ai_propagate_target_movement(
                             battle_move_spread_to_neighbors();
                             if (!config->fly_or_teleport) {
                                 state->source_unit_record_flag = 0;
-                                battle_move_calculate_spread();
+                                battle_move_spread_horizontal_jumps();
                             }
                         }
                     }

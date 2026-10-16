@@ -131,7 +131,7 @@ typedef enum move_tile_flags_mode {
 
 /* Shared movement work state reached through g_battle_move_scratch_pad_ptr.
  *
- * battle_ai_propagate_target_movement and the jump spreading of battle_move_calculate_spread
+ * battle_ai_propagate_target_movement and the jump spreading of battle_move_spread_horizontal_jumps
  * use the same base. Coordinate 16-bit values have both signed and unsigned readers; cast
  * explicitly for signed comparisons. This is a verified prefix, not a claim
  * about the allocation's full size.
@@ -328,7 +328,7 @@ s32 battle_move_has_reached_destination_tile_center(s32 direction, battle_unit_t
 s32 battle_move_has_reached_destination_tile_entry_edge(s32 direction, battle_unit_t* unit);
 
 /* Scales each velocity component by scale / ONE. */
-void battle_move_interpolate_partial(battle_unit_t* unit, s32 scale);
+void battle_move_scale_velocity(battle_unit_t* unit, s32 scale);
 void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to);
 void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to);
 void battle_move_start_unit_step_at_climb_speed(
@@ -360,7 +360,7 @@ extern s32 g_battle_move_displacement_direction;
 
 void battle_move_displace_unit_at_destination_tile(battle_unit_t* unit, s32 direction);
 void battle_move_start_knockback(const battle_unit_t* src, battle_unit_t* dst);
-void battle_move_update_knockback_after_animation(battle_unit_t* unit);
+void battle_move_update_jump_landing(battle_unit_t* unit);
 void battle_move_update_knockback_step(battle_unit_t* unit);
 
 /* post movement */
@@ -430,7 +430,7 @@ extern s8 g_battle_move_find_occupying_unit_id;
 extern s32 g_battle_move_post_move_events;
 
 s32 battle_move_start_next_post_movement_step(void);
-void battle_move_init_post_movement_display(void);
+void battle_move_start_post_movement_steps(void);
 u32 battle_move_get_post_move_events(unit_stats_t* unit);
 
 #endif

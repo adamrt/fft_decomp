@@ -1009,7 +1009,7 @@ void script_opcode_94_teleport_out(s32 unit_id, s32 remove) {
     battle_gfx_start_event_unit_fade_out(unit, 2, -0x1F, -0x1F, -0x1F);
     thread_wait_frames(0x3C);
     if (remove != 0) {
-        battle_unit_set_cannot_exist(idx);
+        battle_unit_set_off_field(idx);
     }
 }
 
@@ -1492,7 +1492,7 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
  * selects (one unit or a unit group), under player input only.
  *
  * With restore clear, each unit is snapshotted and, when saved, its graphics are
- * refreshed on the main stack; the jumping-unit graphic triggers are reset at
+ * refreshed on the main stack; the jumping units are hidden at
  * the end. Otherwise the snapshot is replayed through
  * unit_apply_staged_status_data. Removing Jump or Float from any unit adds a
  * 40-frame wait, and removing Jump adds another. */

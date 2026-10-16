@@ -1,4 +1,5 @@
-/* Action resolution, including knockback, reaction checks, pre-formula setup, attack finalization and status changes.
+/* Action resolution, including knockback, reaction checks, target result calculation, attack finalization and status
+ * changes.
  */
 
 #include "fft/battle_action.h"
@@ -45,9 +46,9 @@ static s32 battle_action_remove_broken_or_stolen_equipment(void);
 static void battle_action_set_target_variables(unit_stats_t* unit);
 static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit);
 static void battle_status_store_ability_cancellations(void);
-static void battle_status_remove_control(unit_stats_t* unit);
+static void battle_status_update_control(unit_stats_t* unit);
 static void battle_status_apply_action_removals(s32 unit_idx);
-static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only);
+static void battle_status_apply_action_inflictions(s32 unit_id, s32 removal_only);
 static s32 battle_unit_apply_level_up_down_ability(void);
 static s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min);
 static void battle_unit_update_attacker_earned_experience(s32 outcome);
@@ -86,7 +87,7 @@ s32 battle_formula_apply_status_and_check_undead(void) {
     return 0;
 }
 
-/* Re-run the pre-formula setup against the current target as a plain weapon
+/* Recalculate the current target's result as a plain weapon
  * Attack, then restore the attacker's skillset and ability and the strike
  * counter. It ends with the current ability's weapon_proc_pending and reaction_id
  * cleared. */
@@ -103,7 +104,7 @@ void battle_action_switch_ability_to_default_attack(void) {
     attacker = g_battle_action_attacker;
     saved_ability = unit->action_command.ability_id;
     attacker->action_command.ability_id = 0;
-    battle_action_run_pre_formula_setup(&attacker->action_command, g_battle_action_current_ability.target_id);
+    battle_action_calculate_target_result(&attacker->action_command, g_battle_action_current_ability.target_id);
     attacker_after = g_battle_action_attacker;
     g_battle_action_current_ability.strike_counter = saved_strike_counter;
     attacker_after->action_command.ability_id = saved_ability;
@@ -332,14 +333,15 @@ void battle_action_store_used_weapon(action_command_t* action) {
  * which changes this function's code. */
 extern battle_current_ability_t g_battle_action_current_ability_view;
 
-/* Pre-formula setup: load the current ability, weapon and item data for one
- * attacker/target pair and run the formula handler.
+/* Calculate one target's action result: load the current ability, weapon and
+ * item data for the attacker/target pair, run the evasion reactions and the
+ * formula handler, and finalize the result.
  *
  * Returns 1 when the target was already missed before the formula (reflect,
  * Blade Grasp, Arrow Guard) and 0 otherwise, including the reaction and
  * knockback early exits. id holds a weapon or item id, then a status-infliction
  * index. */
-s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 target_id) {
+s32 battle_action_calculate_target_result(const action_command_t* source, u8 target_id) {
     action_command_t action;
     weapon_data_t* weapon;
     ability_secondary_data_t* ability;
@@ -546,7 +548,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
 }
 
 /* For an ability whose status infliction type is cancel, copy its status bytes
- * to g_battle_action_canceled_statuses. Run during the pre-formula setup. */
+ * to g_battle_action_canceled_statuses. Run while calculating a target result. */
 static void battle_status_store_ability_cancellations(void) {
     s32 i;
 
@@ -867,7 +869,7 @@ s32 battle_action_apply_target_result(s32 battle_id) {
     }
 
     if ((g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_KNOCKBACK)
-        && battle_status_remove_charging_ability_ct(g_battle_action_target, 0) != 0) {
+        && battle_status_check_charging_charge(g_battle_action_target, 0) != 0) {
         g_battle_action_target_data->status_changes.removal[0] |= STATUS_MASK(CHARGING);
         g_battle_action_target->charged_ability_ct = 0xff;
     }
@@ -1554,13 +1556,13 @@ static void battle_unit_update_attacker_earned_experience(s32 outcome) {
     }
 }
 
-/* Apply the prepared action result to one target: make the unit the current
+/* Apply the attacker's own action result to its unit: make the unit the current
  * target, copy the result in g_battle_action_attacker_action_data into its
  * action record and apply it with battle_action_apply_target_result.
  *
  * Returns that routine's result, or -1 for an invalid or empty slot. A result
  * that is not a hit is marked as canceled. */
-s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {
+s32 battle_action_apply_attacker_result(s32 unit_id) {
     unit_stats_t* stats = &g_battle_unit_stats[unit_id];
     action_data_t* action;
     s32 result;
@@ -1898,7 +1900,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
     g_battle_action_target_data = &g_battle_unit_stats[unit_id].action;
     battle_status_modify_inflictions(removal_only);
     battle_status_apply_action_removals(unit_id);
-    battle_status_store_for_current_attack(unit_id, removal_only);
+    battle_status_apply_action_inflictions(unit_id, removal_only);
     if (g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
         & STATUS_BYTE_MASK(STATUS_ID_DEAD)) {
         g_battle_action_target->hp = 0;
@@ -1908,7 +1910,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
                 | STATUS_BYTE_MASK(STATUS_ID_PERFORMING)))) {
         g_battle_action_target->charged_ability_ct = 0xFF;
     }
-    battle_status_remove_control(g_battle_action_target);
+    battle_status_update_control(g_battle_action_target);
     main_mem_copy_byte_data_source_first(&saved, &g_battle_action_target_data->status_changes, sizeof(saved));
     return 0;
 }
@@ -1917,7 +1919,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
  * player control; without them the control bit comes back from the initial
  * team flags. Without Charm the team bits come back from the initial team as
  * well. */
-static void battle_status_remove_control(unit_stats_t* unit) {
+static void battle_status_update_control(unit_stats_t* unit) {
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
             & (STATUS_BYTE_MASK(STATUS_ID_CONFUSION) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)))
         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
@@ -1965,7 +1967,7 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
  * that started on the blue team and becomes Crystal or Dead sets
  * g_battle_player_unit_fallen, which voids the battle's level bonus money.
  * Ends by storing the unit's current statuses. */
-static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only) {
+static void battle_status_apply_action_inflictions(s32 unit_id, s32 removal_only) {
     s32 i;
     s32 j;
     s32 byte;

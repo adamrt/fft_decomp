@@ -1170,7 +1170,7 @@ s32 battle_map_start_clut_cycle(s32 frame_duration, s32 clut_row, s32 first_colo
  *
  * Retail clears the active byte at handle * 10, not (handle - 1) * 10: it stops
  * the slot after the handle's own, and handle 8 clears the byte that follows the
- * eight slots, the first of g_battle_gfx_cycled_deployed_palettes. */
+ * eight slots, the first of g_battle_gfx_cycled_tile_glow_palettes. */
 s32 battle_map_stop_clut_cycle(s32 handle) {
     if (handle >= 1 && handle <= MAP_CLUT_CYCLE_SLOT_COUNT) {
         g_battle_map_clut_cycle_states[handle].active = 0;
@@ -1719,8 +1719,8 @@ void battle_map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 c
  * Each nonzero color takes the offsets added to itself, its half or its gray (mode), clamped to
  * 0..31 and kept from becoming transparent black. The results become the row's base colors;
  * final_value also stages them for upload and sets the components of CLUTs that are not blending. */
-void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
-    s16 red, s16 green, s16 blue, s32 final_value) {
+void battle_map_modify_palette_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
+    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value) {
     s32 i;
     s32 index;
     u16 color;
@@ -1905,11 +1905,11 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
 
 /* Write one CLUT of a row (the whole row when all_colors is 1; retail callers pass 0)
  * from the colors at `source` with the red, green and blue offsets added:
- * battle_gfx_modify_vram_palette in MAP_COLOR_MODE_RESTORE, a mode in which it
+ * battle_map_modify_palette_from_other in MAP_COLOR_MODE_RESTORE, a mode in which it
  * neither halves nor grays the colors. */
 void battle_map_update_palette_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
     s16 red, s16 green, s16 blue, s32 final_value) {
-    battle_gfx_modify_vram_palette(
+    battle_map_modify_palette_from_other(
         MAP_COLOR_MODE_RESTORE, source, clut_row, clut_index, all_colors, red, green, blue, final_value);
 }
 

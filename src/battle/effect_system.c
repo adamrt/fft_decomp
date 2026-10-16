@@ -355,7 +355,7 @@ static void battle_camera_execute_zoom_command(s32 command, s32 unused, s32 dura
  * Each track's 32-bit mode (g_battle_effect_camera_rotation_mode, _position_mode and _zoom_mode: bits 0x1e00 of the
  * timeline command) selects an interpolation between the start and target values over the track duration; the mode
  * clears once the counter reaches the duration. */
-void battle_camera_update_effect_rotation_and_zoom(void) {
+void battle_camera_update_effect_tracks(void) {
     VECTOR position;
     VECTOR delta;
     SVECTOR rotation;
@@ -947,7 +947,7 @@ void battle_camera_start_effect_keyframe_moves(s16 frame) {
  * from the table battle_camera_find_active_keyframe reports (phase 1, child
  * or phase 2). The three-table form of
  * battle_camera_start_effect_keyframe_moves. */
-void battle_camera_advance_effect_tracks(s16 frame) {
+void battle_camera_start_parent_effect_keyframe_moves(s16 frame) {
     SVECTOR rotation;
     VECTOR vector;
     s32 index;
@@ -1066,7 +1066,7 @@ void battle_effect_init_system(void) {
         }
     }
     battle_effect_reset_render_state();
-    battle_effect_init_camera_and_screen_data();
+    battle_effect_init_camera();
 }
 
 /* Take a secondary effect record from the free chain and append it to the active
@@ -1575,12 +1575,12 @@ static void battle_effect_draw_projectile_model(
 }
 
 /*
- * Queues the item-drop sprite for the current secondary effect: projects the
+ * Queues the thrown item's icon for the current secondary effect: projects the
  * effect origin to find its OT depth, builds a rotated and camera-scaled 2D
  * matrix from the sprite angle, and transforms the four quad corners into the
  * slot's double-buffered primitive before adding it to the ordering table.
  */
-static void battle_effect_draw_item_drop_sprite(VECTOR* origin, s32 item_id, s32 angle) {
+static void battle_effect_draw_thrown_item_sprite(VECTOR* origin, s32 item_id, s32 angle) {
     SPRT sprite;
     SVECTOR local;
     VECTOR position;
@@ -1770,7 +1770,7 @@ static s32 battle_effect_calculate_launch_velocity(void) {
  * and is not a mount carrying a rider, with its tile center and height and its
  * sprite height, into a record at the start of the scratchpad returned via `out`.
  */
-static void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, effect_obstacle_unit_list_t** out) {
+static void battle_effect_list_obstacle_units(s32 first, s32 second, effect_obstacle_unit_list_t** out) {
     SVECTOR position;
     unit_stats_t* unit;
     s32 i;
@@ -1787,7 +1787,7 @@ static void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, 
             (*out)->battle_ids[slot] = unit->entd_slot;
             battle_unit_get_tile_center_and_height_by_battle_id(unit->entd_slot, &position);
             (*out)->positions[slot] = position;
-            (*out)->sprite_heights[slot] = battle_gfx_get_unit_spritesheet_height_by_unit_id(unit->entd_slot);
+            (*out)->sprite_heights[slot] = battle_gfx_get_unit_spritesheet_height_by_battle_id(unit->entd_slot);
         }
     }
 }
@@ -1944,9 +1944,9 @@ s32 battle_effect_check_arc_trajectory_between_units(u8 source_id, u8 target_id)
 
     query.source.unit_id = source_id;
     query.target.unit_id = target_id;
-    query.source.height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
-    query.target.height = battle_gfx_get_unit_spritesheet_height_by_unit_id(target_id);
-    battle_effect_list_valid_unit_targeting_data(source_id, target_id, &obstacles);
+    query.source.height = battle_gfx_get_unit_spritesheet_height_by_battle_id(source_id) * 2 / 3;
+    query.target.height = battle_gfx_get_unit_spritesheet_height_by_battle_id(target_id);
+    battle_effect_list_obstacle_units(source_id, target_id, &obstacles);
     battle_unit_get_tile_center_and_height_by_battle_id(source_id, &query.source.position);
     query.source.position.vy -= query.source.height;
     battle_unit_get_tile_center_and_height_by_battle_id(target_id, &query.target.position);
@@ -2007,13 +2007,13 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
     g_battle_effect_trajectory_source_id = source_id;
     query.source.unit_id = source_id;
     query.target.unit_id = target_id;
-    query.source.height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
+    query.source.height = battle_gfx_get_unit_spritesheet_height_by_battle_id(source_id) * 2 / 3;
     if (target_id != -1) {
-        query.target.height = battle_gfx_get_unit_spritesheet_height_by_unit_id(target_id);
+        query.target.height = battle_gfx_get_unit_spritesheet_height_by_battle_id(target_id);
     } else {
         query.target.height = 0;
     }
-    battle_effect_list_valid_unit_targeting_data(source_id, -1, &obstacles);
+    battle_effect_list_obstacle_units(source_id, -1, &obstacles);
     battle_unit_get_tile_center_and_height_by_battle_id(source_id, &g_battle_effect_trajectory_origin);
     g_battle_effect_trajectory_origin.vy -= query.source.height;
     if (target_id == -1) {
@@ -2199,12 +2199,12 @@ s32 battle_effect_check_direct_trajectory_between_units(u8 source_id, u8 target_
     s32 source_height;
     s32 target_height;
 
-    source_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
-    target_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(target_id) * 2 / 3;
+    source_height = battle_gfx_get_unit_spritesheet_height_by_battle_id(source_id) * 2 / 3;
+    target_height = battle_gfx_get_unit_spritesheet_height_by_battle_id(target_id) * 2 / 3;
     if (target_height == 0) {
         target_height = 12;
     }
-    battle_effect_list_valid_unit_targeting_data(source_id, target_id, &obstacles);
+    battle_effect_list_obstacle_units(source_id, target_id, &obstacles);
     battle_unit_get_tile_center_and_height_by_battle_id(source_id, &origin);
     origin.vy -= source_height;
     battle_unit_get_tile_center_and_height_by_battle_id(target_id, &destination);
@@ -2236,14 +2236,14 @@ s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile
     s32 target_height;
 
     g_battle_effect_trajectory_source_id = source_id;
-    source_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
+    source_height = battle_gfx_get_unit_spritesheet_height_by_battle_id(source_id) * 2 / 3;
     if (target_id != -1) {
-        target_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(target_id) * 2 / 3;
+        target_height = battle_gfx_get_unit_spritesheet_height_by_battle_id(target_id) * 2 / 3;
         if (target_height == 0) {
             target_height = 12;
         }
     }
-    battle_effect_list_valid_unit_targeting_data(source_id, -1, &obstacles);
+    battle_effect_list_obstacle_units(source_id, -1, &obstacles);
     battle_unit_get_tile_center_and_height_by_battle_id(source_id, &g_battle_effect_trajectory_origin);
     g_battle_effect_trajectory_origin.vy -= source_height;
     if (target_id == -1) {
@@ -2279,11 +2279,11 @@ s32 battle_effect_check_direct_trajectory_to_target(s32 source_id, SVECTOR* tile
 void battle_effect_set_arrow_trajectory(s32 source_id, SVECTOR* tile_position, s32 target_id) {
     VECTOR delta;
     map_tile_t* tile;
-    s32 source_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(source_id) * 2 / 3;
+    s32 source_height = battle_gfx_get_unit_spritesheet_height_by_battle_id(source_id) * 2 / 3;
     s32 target_height;
 
     if (target_id != -1) {
-        target_height = battle_gfx_get_unit_spritesheet_height_by_unit_id(target_id) * 3 / 4;
+        target_height = battle_gfx_get_unit_spritesheet_height_by_battle_id(target_id) * 3 / 4;
     }
     battle_unit_get_tile_center_and_height_by_battle_id(source_id, &g_battle_effect_trajectory_origin);
     g_battle_effect_trajectory_origin.vy -= source_height;
@@ -3275,13 +3275,13 @@ s32 battle_effect_unused_0b_secondary_handler(void) {
 }
 
 /*
- * Secondary effect function 0x0c (Venom Trap) in g_battle_effect_secondary_handlers.
+ * Secondary effect function 0x0c (Trap) in g_battle_effect_secondary_handlers, for every trap kind.
  * It shares the golem handler's
  * shape: initialize and play sound 0x22, then step the effect slots with a
  * gravity of (0, ONE, 0) until finish_timer reaches 1. Returns 1 to keep
  * animating.
  */
-s32 battle_effect_venom_trap_secondary_handler(void) {
+s32 battle_effect_trap_secondary_handler(void) {
     effect_secondary_data_t* effect;
     s32 unused[6]; /* Reserves the target's 0x48-byte frame. */
     vec3s32_t gravity;
@@ -3296,11 +3296,11 @@ s32 battle_effect_venom_trap_secondary_handler(void) {
         effect->timer = 0;
         effect->finish_timer = 0;
         effect->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
-        suzuki_sound_play_sfx(MAIN_SFX_VENOM_TRAP);
+        suzuki_sound_play_sfx(MAIN_SFX_TRAP);
         result = 1;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
-        battle_effect_start_group(EFFECT_PARTICLE_GROUP_VENOM_TRAP, 12);
+        battle_effect_start_group(EFFECT_PARTICLE_GROUP_TRAP, 12);
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
         battle_effect_save_inertia_threshold();
@@ -3310,7 +3310,7 @@ s32 battle_effect_venom_trap_secondary_handler(void) {
         gravity.y = ONE;
         battle_effect_save_gravity();
         battle_effect_set_gravity(&gravity);
-        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_VENOM_TRAP);
+        battle_effect_update_active_slots(EFFECT_PARTICLE_GROUP_TRAP);
         battle_effect_restore_inertia_threshold();
         battle_effect_restore_gravity();
         effect = g_battle_effect_current_secondary;
@@ -3318,8 +3318,7 @@ s32 battle_effect_venom_trap_secondary_handler(void) {
         result = finish_timer != 1;
         effect->timer = effect->timer + 1;
         if (effect->active_count == 0
-            && effect->timer
-                > g_battle_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_VENOM_TRAP].spawn_start_frame) {
+            && effect->timer > g_battle_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_TRAP].spawn_start_frame) {
             effect->finish_timer = finish_timer + 1;
         }
         break;
@@ -3329,7 +3328,7 @@ s32 battle_effect_venom_trap_secondary_handler(void) {
 
 /*
  * Secondary effect function 0x0d (Level Up) in g_battle_effect_secondary_handlers.
- * It shares the venom trap
+ * It shares the trap
  * handler's shape but seeds group 5's position_y with -8 and lowers it by 3 per
  * executing frame instead of playing a sound. Returns 1 to keep animating.
  */
@@ -3944,7 +3943,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                 spin.vz = -(g_battle_effect_projectile_spin_passes * 256);
                 battle_effect_draw_projectile_model(&spin, &position, &angles, &scale, EFFECT_MODEL_SHURIKEN);
             } else {
-                battle_effect_draw_item_drop_sprite(&position, item, 0);
+                battle_effect_draw_thrown_item_sprite(&position, item, 0);
             }
         }
 
@@ -3994,7 +3993,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
 
 /*
  * Secondary effect function 0x15 (Equip Break) in g_battle_effect_secondary_handlers.
- * Same shape as the venom trap
+ * Same shape as the trap
  * handler, but its particle group is held in a variable, so its spawn_start_frame lookup
  * is an indexed table read. Returns 1 to keep animating.
  */
@@ -4193,19 +4192,19 @@ s32 battle_effect_update_secondary_effects(void) {
 
     g_battle_effect_polygon_depth_data = main_gfx_get_otag();
     g_battle_effect_buffer_index = 1 - g_battle_effect_buffer_index;
-    g_battle_effect_current_slot_id = g_battle_effect_secondary_active_tail;
+    g_battle_effect_current_secondary_id = g_battle_effect_secondary_active_tail;
     if (g_battle_effect_secondary_active_tail == 0) {
         return 0;
     }
 
     do {
-        effect = &g_battle_effect_secondary_data[g_battle_effect_current_slot_id];
+        effect = &g_battle_effect_secondary_data[g_battle_effect_current_secondary_id];
         g_battle_effect_current_secondary = effect;
         previous_slot_id = effect->previous_slot_id;
         if (g_battle_effect_secondary_handlers[effect->function_id]() == 0) {
-            battle_effect_remove_secondary(g_battle_effect_current_slot_id);
+            battle_effect_remove_secondary(g_battle_effect_current_secondary_id);
         }
-        g_battle_effect_current_slot_id = previous_slot_id;
+        g_battle_effect_current_secondary_id = previous_slot_id;
     } while (previous_slot_id != 0);
 
     return 1;

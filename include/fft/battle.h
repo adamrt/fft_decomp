@@ -162,9 +162,9 @@ void battle_state_handle_change_map_jumping_in_state(void);
 void battle_state_handle_close_battle_state(void);
 
 /* state transitions */
-/* Each sets up a state and switches g_battle_game_state to it; battle_state_announce_next_charged_action
- * only when a charged action is due. */
-s32 battle_state_announce_next_charged_action(void);
+/* Each sets up a state and switches g_battle_game_state to it; battle_state_announce_next_action
+ * only when a Hamedo, action or reaction is due. */
+s32 battle_state_announce_next_action(void);
 void battle_state_enter_action_cast(void);
 void battle_state_enter_action_execute(void);
 void battle_state_enter_targeting_prompt(void);
@@ -201,7 +201,7 @@ s32 battle_state_set_vsync_interval(s32 speed);
 void battle_state_set_min_vsync_interval(s32 value);
 
 /* deployment */
-extern palette_t g_battle_deployed_unit_palettes[2];
+extern palette_t g_battle_gfx_tile_glow_palettes[2];
 extern const RECT g_battle_deployment_clear_rect;
 extern s32 g_battle_deployment_skipped;
 /* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the

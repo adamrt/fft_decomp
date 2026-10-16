@@ -290,7 +290,7 @@ void menu_load_selected_unit(void) {
 
         /* The fourth ability (index 3) stays only when the monster skill check passes; the
          * check runs on the main stack. */
-        g_thread_call_target = battle_menu_init_monster_skill_check;
+        g_thread_call_target = battle_menu_count_monster_skill_supporters;
         if (thread_call_on_main_stack(unit) == 0)
             editor->ability_ids[3] = 0;
 
@@ -369,7 +369,7 @@ void menu_load_selected_unit(void) {
  * attack, 16/17 shield and accessory magic evade, 18..22 the equipped items
  * (-1 for none) and 23..27 the ability rows (-1 for none): both skillsets,
  * reaction, support and movement, or a monster's skillset abilities packed to
- * the front, the fourth kept only while battle_menu_init_monster_skill_check
+ * the front, the fourth kept only while battle_menu_count_monster_skill_supporters
  * allows it.
  *
  * An empty secondary skillset marks byte 1 of its name buffer, not byte 0,
@@ -462,7 +462,7 @@ void menu_load_selected_unit(void) {
 
         /* The fourth ability (index 3) stays only when the monster skill check passes; the
          * check runs on the main stack. */
-        g_thread_call_target = battle_menu_init_monster_skill_check;
+        g_thread_call_target = battle_menu_count_monster_skill_supporters;
         if (thread_call_on_main_stack(unit) == 0)
             editor->ability_ids[3] = 0;
 

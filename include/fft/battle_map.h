@@ -32,7 +32,7 @@ s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z);
 s32 battle_map_resolve_rotated_offset_layer(unit_stats_t*, s32, s32, s32, s32*, s32*, s32*);
 void battle_map_store_max_coordinates(SVECTOR* destination);
 /* A typed terrain parameter loses the first retail byte-cursor increment. */
-void battle_map_copy_xy_coords_and_tile_data(u8* data);
+void battle_map_copy_size_and_tile_data(u8* data);
 map_tile_t* battle_map_get_tile_data_ptr_from_battle_id(u32 battle_id);
 map_tile_t* battle_map_get_unit_tile_from_world_coords(u32 runtime_id);
 

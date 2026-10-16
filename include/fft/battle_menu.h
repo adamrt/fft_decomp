@@ -13,11 +13,10 @@
 #include "psx/types.h"
 
 /* menu state */
-extern s32 g_battle_menu_help_opening;
-extern s32 g_battle_option_menu_state; /* cleared when the option overlay opens; nothing reads it */
+extern s32 g_battle_menu_help_active;
 
 /* action menus */
-extern u8 g_battle_menu_idle_action_entry_labels[];
+extern u8 g_battle_menu_idle_action_window_x[];
 /* The selected command: its kind, then the action command staged for
  * battle_action_preview_at_list. Both scenes alias the action at +4 under its own name. */
 extern ai_command_t g_menu_selected_command;
@@ -33,12 +32,12 @@ void battle_menu_open_active_unit_idle_action_menu(void);
 void battle_menu_open_free_cursor_help(void);
 void battle_menu_open_free_cursor_mini_menu(void);
 void battle_menu_open_help(void);
-void battle_menu_open_illegal_move_help(void);
+void battle_state_enter_illegal_move_menu(void);
 void battle_menu_open_mini_menu(void);
 void battle_menu_open_mini_menu_help(void);
 void battle_menu_open_move_confirm(void);
 void battle_menu_open_non_active_unit_idle_action_menu(void);
-void battle_menu_set_next_script_action_menus(void);
+void battle_state_enter_open_action_menus(void);
 
 /* ability lists */
 /* The CLUT the outermost scrolling ability list saves, derives four more from and blinks while it
@@ -52,14 +51,14 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
 s32 battle_menu_collect_draw_out_katanas(s32 unit_id, u8 skillset, u8* out_item_ids);
 s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* out, s32 unused, u8* flags_out);
 s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out);
-s32 battle_menu_display_item_inventory_ability(s32 unit_id, s32 skillset, u8* out_item_ids);
+s32 battle_menu_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
 s32 battle_menu_get_unit_skillset_ability_data(
     s32 unit_id, u8 skillset, s16* ability_ids, u8* mp_out, u8* ct_out, s32 unused, u8* flags_out, u8* turns_out);
-s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit);
+s32 battle_menu_count_monster_skill_supporters(const unit_stats_t* unit);
 s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, u8* ability_ct, u8* turns);
 s32 battle_menu_load_draw_out_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);
-u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset);
-s32 battle_menu_load_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
+u16 battle_menu_get_elemental_ability(s32 unit_id, u8 skillset);
+s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids);
 s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids);
 s32 battle_menu_load_throw_abilities(s32 unit_id, s32 skillset, u8* out_item_ids);

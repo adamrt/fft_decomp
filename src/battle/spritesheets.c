@@ -489,24 +489,24 @@ static void battle_gfx_modify_unit_palette(battle_unit_t* unit, s32 mode, s32 cl
     palette = unit->stored_palette;
     switch (sheet) {
     case BATTLE_SPRITESHEET_ID_CRYSTAL:
-        battle_gfx_modify_vram_palette(mode, g_battle_gfx_crystal_palettes[palette], clut_row, clut_index, all_colors,
-            red, green, blue, final_value);
+        battle_map_modify_palette_from_other(mode, g_battle_gfx_crystal_palettes[palette], clut_row, clut_index,
+            all_colors, red, green, blue, final_value);
         break;
     case BATTLE_SPRITESHEET_ID_CHICKEN:
-        battle_gfx_modify_vram_palette(mode, g_battle_gfx_other_palettes.chicken[palette], clut_row, clut_index,
+        battle_map_modify_palette_from_other(mode, g_battle_gfx_other_palettes.chicken[palette], clut_row, clut_index,
             all_colors, red, green, blue, final_value);
         break;
     case BATTLE_SPRITESHEET_ID_FROG:
-        battle_gfx_modify_vram_palette(
+        battle_map_modify_palette_from_other(
             mode, g_battle_gfx_frog_palettes[palette], clut_row, clut_index, all_colors, red, green, blue, final_value);
         break;
     case BATTLE_SPRITESHEET_ID_TREASURE:
-        battle_gfx_modify_vram_palette(mode, g_battle_gfx_treasure_palettes[palette], clut_row, clut_index, all_colors,
-            red, green, blue, final_value);
+        battle_map_modify_palette_from_other(mode, g_battle_gfx_treasure_palettes[palette], clut_row, clut_index,
+            all_colors, red, green, blue, final_value);
         break;
     default:
-        battle_gfx_modify_vram_palette(mode, g_battle_gfx_spritesheet_slots[slot].clut[palette], clut_row, clut_index,
-            all_colors, red, green, blue, final_value);
+        battle_map_modify_palette_from_other(mode, g_battle_gfx_spritesheet_slots[slot].clut[palette], clut_row,
+            clut_index, all_colors, red, green, blue, final_value);
         break;
     }
 }
@@ -578,7 +578,7 @@ void battle_gfx_check_tile_status_palette_mod(battle_unit_t* unit, s32 tile_effe
 /* Enables the status bubble, restarting its timer, for a unit with a status that
  * shows a bubble (BATTLE_UNIT_STATUS_BUBBLE_MASK) and for the acting unit;
  * disables it for any other unit. */
-void battle_gfx_update_status_bubble_graphic_trigger(battle_unit_t* unit) {
+void battle_gfx_update_status_bubble_active(battle_unit_t* unit) {
     if ((unit->status_flags_1_4 & BATTLE_UNIT_STATUS_BUBBLE_MASK) != 0
         || unit->runtime_id == g_battle_unit_source_runtime_id) {
         unit->status_bubble_active = 1;

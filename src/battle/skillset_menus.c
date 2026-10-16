@@ -23,7 +23,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static u8 g_battle_mimic_pending_flags[21] = { 0 };
+static u8 g_battle_between_turn_pending_flags[21] = { 0 };
 
 static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag);
 static s32 battle_action_should_end_unit_turn(const unit_stats_t* unit);
@@ -167,10 +167,10 @@ s32 battle_menu_get_unit_skillset_ability_data(
     return count;
 }
 
-/* Load the unit's Item skillset entries through battle_menu_load_item_abilities and return the
+/* Load the unit's Item skillset entries through battle_menu_collect_item_abilities and return the
  * low byte of its result (the entry count). */
-s32 battle_menu_display_item_inventory_ability(s32 unit_id, s32 skillset, u8* out_item_ids) {
-    return battle_menu_load_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
+s32 battle_menu_load_item_abilities(s32 unit_id, s32 skillset, u8* out_item_ids) {
+    return battle_menu_collect_item_abilities(unit_id, skillset & 0xFF, out_item_ids) & 0xFF;
 }
 
 /*
@@ -184,7 +184,7 @@ s32 battle_menu_display_item_inventory_ability(s32 unit_id, s32 skillset, u8* ou
  * masked `id + 0xfe90` sum the range test already holds (the two differ only
  * above bit 15); spelled as one expression it is one instruction short.
  */
-s32 battle_menu_load_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
+s32 battle_menu_collect_item_abilities(s32 unit_id, u8 skillset, u8* out_item_ids) {
     unit_stats_t* unit;
     u16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -412,7 +412,7 @@ s32 battle_menu_collect_calculator_abilities(s32 unit_id, u8 skillset, s16* out)
 
 /* Return the Elemental (Geomancy) ability for the surface under the unit when
  * the unit knows and can use it, otherwise 0. */
-u16 battle_menu_load_elemental_abilities(s32 unit_id, u8 skillset) {
+u16 battle_menu_get_elemental_ability(s32 unit_id, u8 skillset) {
     unit_stats_t* unit;
     s16 abilities[0x14];
     u8 mp_costs[0x18];
@@ -485,7 +485,7 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
         *out = ability;
         out++;
     }
-    if (battle_menu_init_monster_skill_check(unit) != 0) {
+    if (battle_menu_count_monster_skill_supporters(unit) != 0) {
         count = MONSTER_SKILLSET_ABILITY_COUNT;
     }
     for (i = 0; i < count; i++) {
@@ -503,7 +503,7 @@ s32 battle_menu_collect_monster_skill_abilities(s32 unit_id, u8 skillset, s16* o
 /* Monster Skill check: the number of the four tiles adjacent to the unit that
  * hold a same-team Monster Skill supporter within 5 of the unit's total
  * height. Returns 0 for an empty slot. */
-s32 battle_menu_init_monster_skill_check(const unit_stats_t* unit) {
+s32 battle_menu_count_monster_skill_supporters(const unit_stats_t* unit) {
     battle_unit_height_data_t height_data;
     s32 team;
     s32 x;
@@ -825,16 +825,16 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             /* clang-format on */
             break;
         case BATTLE_BETWEEN_TURN_STATE_COLLECT_PENDING_ACTIONS:
-            /* The Mime flags double here as the list of units whose expiring
-             * statuses left an action result to apply. */
+            /* The pending flags list the units whose expiring statuses left an
+             * action result to apply; MARK_MIMES reuses them for Mimes. */
             i = 0;
             do {
                 unit = &g_battle_unit_stats[i];
-                g_battle_mimic_pending_flags[i] = 0;
+                g_battle_between_turn_pending_flags[i] = 0;
                 if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE
                     && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)]
                         & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
-                    g_battle_mimic_pending_flags[i] = unit->action.attack_type;
+                    g_battle_between_turn_pending_flags[i] = unit->action.attack_type;
                 }
                 /* clang-format off */
             } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_RUN_PENDING_ACTIONS;
@@ -842,8 +842,8 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             break;
         case BATTLE_BETWEEN_TURN_STATE_RUN_PENDING_ACTIONS:
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-                if (g_battle_mimic_pending_flags[i] != 0) {
-                    g_battle_mimic_pending_flags[i] = 0;
+                if (g_battle_between_turn_pending_flags[i] != 0) {
+                    g_battle_between_turn_pending_flags[i] = 0;
                     result = i | BATTLE_TURN_EVENT_ACTION_RESULT;
                     return result;
                 }
@@ -938,9 +938,9 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 i = 0;
                 do {
                     unit = &g_battle_unit_stats[i];
-                    g_battle_mimic_pending_flags[i] = 0;
+                    g_battle_between_turn_pending_flags[i] = 0;
                     if (unit->job_id == JOB_ID_MIME && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
-                        g_battle_mimic_pending_flags[i] = 1;
+                        g_battle_between_turn_pending_flags[i] = 1;
                     }
                     /* clang-format off */
                 } while (++i < BATTLE_UNIT_SLOT_COUNT); g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_RUN_MIMES;
@@ -953,8 +953,8 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             g_battle_action_current_attacker.mimic_pending = 0;
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
                 unit = &g_battle_unit_stats[i];
-                if (g_battle_mimic_pending_flags[i] != 0 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
-                    g_battle_mimic_pending_flags[i] = 0;
+                if (g_battle_between_turn_pending_flags[i] != 0 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
+                    g_battle_between_turn_pending_flags[i] = 0;
                     ret = battle_action_set_mimic_ability(unit);
                     if (ret == 1) {
                         result = i | BATTLE_TURN_EVENT_ABILITY_READY;
@@ -1605,8 +1605,8 @@ s32 battle_action_check_change_of_turn(s32 unit_id) {
 }
 
 /* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
- * (action state none). Same body as crystals_and_treasure.c's static battle_status_disable_acting. */
-void battle_status_enable_disable_acting(unit_stats_t* unit) {
+ * (action state none). Same body as crystals_and_treasure.c's static battle_status_cancel_charge. */
+void battle_status_clear_action_state(unit_stats_t* unit) {
     main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_NONE);
 }
 

@@ -18,7 +18,7 @@ typedef enum crystal_pickup_kind {
     CRYSTAL_PICKUP_TREASURE = 0x4,
 } crystal_pickup_kind_e;
 
-/* Crystal/treasure pickup result (g_main_crystal_pickup_result) that battle_unit_generate_crystal_or_treasure
+/* Crystal/treasure pickup result (g_main_crystal_pickup_result) that battle_unit_resolve_crystal_pickup
  * builds on the main thread stack and returns; each program keeps the pointer in g_menu_crystal_pickup_context. The
  * crystal pickup panels pick their variant from `result` and show `treasure_item`. */
 typedef struct crystal_pickup_result {
@@ -32,7 +32,7 @@ typedef struct crystal_pickup_result {
 
 extern crystal_pickup_result_t* g_menu_crystal_pickup_context;
 
-/* Runs battle_unit_generate_crystal_or_treasure for the unit on the main stack, keeps the result in
+/* Runs battle_unit_resolve_crystal_pickup for the unit on the main stack, keeps the result in
  * g_menu_crystal_pickup_context and returns the treasure item when there is one, otherwise -1. */
 s32 menu_resolve_crystal_pickup(s32 battle_id);
 

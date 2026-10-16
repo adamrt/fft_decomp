@@ -192,7 +192,7 @@ static s32 battle_effect_get_timing_curve_value(effect_record_t* record) {
 /* Time scale of the child timeline's frame record->timeline.frame: one of the
  * 4-bit values the effect file's timing-curve section packs two to a byte, low
  * nibble first. */
-static s32 battle_effect_get_animation_timing_curve_value(effect_record_t* record) {
+static s32 battle_effect_get_child_timing_curve_value(effect_record_t* record) {
     s16 packed_index = record->timeline.frame;
     s32 offset = packed_index / 2;
     s32 packed_value = g_battle_effect_timing_curves->child_timeline[offset];
@@ -235,10 +235,12 @@ void battle_effect_report_0x320_2(void) {
     main_system_report_stub(1, 0x320);
 }
 
-/* Start loading the effect file of g_battle_ability_effect_id; an effect whose
- * file has no size is replaced by the Cure effect. Nothing in the game calls it:
- * battle_effect_update_file_load does the same in its first state. */
-void battle_effect_load_data(void) {
+/* Seek the CD to the effect file of g_battle_ability_effect_id: the read request
+ * has no destination, so the loader only seeks. An effect whose file has no size
+ * is replaced by the Cure effect, as in battle_effect_update_file_load's first
+ * state, which requests the same file with a destination. Nothing in the game
+ * calls it. */
+void battle_effect_seek_file(void) {
     s32 lba;
     s32 byte_length;
 
@@ -534,7 +536,7 @@ s32 battle_effect_update_cycle(void) {
     s32 stage_result = battle_effect_update_stage();
     s32 related_result = battle_effect_update_secondary_effects();
 
-    battle_camera_update_effect_rotation_and_zoom();
+    battle_camera_update_effect_tracks();
 
     if (stage_result != 0 || related_result != 0) {
         return 1;
@@ -1588,7 +1590,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
             battle_camera_start_effect_keyframe_moves(timeline->frame);
         }
         if (g_battle_effect_flags_section->flags & EFFECT_FLAG_TIMING_CURVE_CHILD) {
-            battle_state_set_min_vsync_interval(battle_effect_get_animation_timing_curve_value(record));
+            battle_state_set_min_vsync_interval(battle_effect_get_child_timing_curve_value(record));
         }
         timeline->frame++;
     } else {
@@ -2050,7 +2052,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
             &timeline->state.parent.keyframe.tracks.sound[2][1], &timeline->state.parent.remaining.tracks.sound[2][1],
             &timeline->state.parent.step.tracks.sound[2][1][1]);
     }
-    battle_camera_advance_effect_tracks(timeline->frame);
+    battle_camera_start_parent_effect_keyframe_moves(timeline->frame);
     timeline->frame++;
     record->pc += 4;
     return EFFECT_SCRIPT_RESULT_CONTINUE;

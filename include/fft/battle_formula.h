@@ -126,7 +126,7 @@ void battle_formula_apply_finger_guard(void);
 void battle_formula_apply_maintenance(void);
 s32 battle_formula_select_targeted_equipment(void);
 void battle_formula_calculate_katana_break_chance(void);
-void battle_formula_init_weapon_xa_ya(void);
+void battle_formula_store_jump_xa_ya(void);
 void battle_formula_select_magic_gun_ability(void);
 void battle_formula_store_pa_and_weapon_power(void);
 void battle_formula_store_pa_and_weapon_power_plus_y(void);

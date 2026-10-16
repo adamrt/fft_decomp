@@ -51,7 +51,7 @@ void battle_action_activate_move_act(unit_stats_t* unit) {
 
 /* Load a terrain chunk: the map's x and y size from its first two bytes, then both 256-tile layers
  * into g_battle_map_tile_data. */
-void battle_map_copy_xy_coords_and_tile_data(u8* data) {
+void battle_map_copy_size_and_tile_data(u8* data) {
     g_battle_map_max_x = *data++;
     g_battle_map_max_y = *data++;
     memcpy(g_battle_map_tile_data, data, sizeof(g_battle_map_tile_data));
@@ -1157,7 +1157,7 @@ void battle_formula_store_pa_and_weapon_power_plus_y(void) {
 
 /* XA and YA of formula 0x64 (Jump): XA = PA, or PA * 3/2 with a spear; YA =
  * weapon power, or bare-handed XA * Brave / 100 (at least 1). */
-void battle_formula_init_weapon_xa_ya(void) {
+void battle_formula_store_jump_xa_ya(void) {
     u8 weapon_type = g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type;
 
     if (weapon_type == ITEM_TYPE_SPEAR) {

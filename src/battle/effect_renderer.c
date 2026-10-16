@@ -2255,7 +2255,7 @@ void battle_effect_seed_camera_tracks(void) {
 
 /* Set the effect camera's rotation, position and zoom tracks idle, clear two unknown globals and
  * reseed the tracks from the battle camera. */
-void battle_effect_init_camera_and_screen_data(void) {
+void battle_effect_init_camera(void) {
     s32 pad[2];
     g_battle_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
     g_battle_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;

@@ -153,7 +153,7 @@ s32 battle_action_commit_attack_preparation(action_command_t* command) {
     s32 result = battle_action_prepare_attack(command, &unit->action_command, 1);
 
     if (result == BATTLE_ATTACK_PREPARATION_IMMEDIATE && g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
-        battle_status_enable_disable_acting(unit);
+        battle_status_clear_action_state(unit);
     }
     return result;
 }
@@ -709,7 +709,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
         target_id = targets[i];
         if (target_id != 0xff) {
             g_battle_action_current_ability.defaulted_to_attack = 0;
-            battle_action_run_pre_formula_setup(&attacker->action_command, target_id);
+            battle_action_calculate_target_result(&attacker->action_command, target_id);
         }
     }
 
@@ -2044,7 +2044,7 @@ s32 battle_action_calculate_projected_effect(unit_stats_t* attacker, unit_stats_
     g_battle_action_current_ability.defaulted_to_attack = 0;
     g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     target->action.reaction_id = 0;
-    battle_action_run_pre_formula_setup(&attacker->action_command, target->battle_id);
+    battle_action_calculate_target_result(&attacker->action_command, target->battle_id);
     g_battle_action_context = saved_action_context;
     g_battle_action_state = saved_action_state;
     main_util_copy_action_data(&g_battle_action_saved_command, &attacker->action_command);
@@ -2343,7 +2343,7 @@ void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode) {
             status = 1;
         } else {
             status = 0;
-            battle_unit_set_enemy_level_data(unit);
+            battle_unit_count_enemy_level(unit);
         }
         battle_gfx_queue_unit_graphics_load(unit->x, unit->position.y, unit->position.higher_elevation,
             unit->position.facing, spritesheet_id, palette_id, unit_id, unit, status);
@@ -2405,7 +2405,7 @@ s32 battle_unit_disable_remove(s32 battle_id) {
  *
  * Returns 0, also for a unit already present, or -1 when the slot is empty in any
  * state other than off-field. */
-s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id) {
+s32 battle_unit_put_on_field(u32 battle_id) {
     unit_stats_t* stats = &g_battle_unit_stats[battle_id];
 
     if (stats->entd_slot != BATTLE_ENTD_SLOT_NONE)
@@ -2415,14 +2415,14 @@ s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id) {
     stats->entd_slot = battle_id;
     stats->existence = UNIT_EXISTENCE_ACTIVE;
     if (stats->team_flags & UNIT_TEAM_MASK) {
-        battle_unit_set_enemy_level_data(stats);
+        battle_unit_count_enemy_level(stats);
     }
     return 0;
 }
 
 /* Empty a unit slot and mark it off the field (defined but not placed). Always
  * returns 0. */
-s32 battle_unit_set_cannot_exist(s32 battle_id) {
+s32 battle_unit_set_off_field(s32 battle_id) {
     unit_stats_t* unit = &g_battle_unit_stats[battle_id];
 
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
@@ -2432,7 +2432,7 @@ s32 battle_unit_set_cannot_exist(s32 battle_id) {
 
 /* Empty a unit slot and set its existence to pending removal, without testing
  * whether the unit is present. No retail code calls it. */
-s32 battle_unit_erase_pending_party_removal(s32 unit_id) {
+s32 battle_unit_set_pending_removal(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
 
     unit->entd_slot = BATTLE_ENTD_SLOT_NONE;
@@ -2540,7 +2540,7 @@ u32 battle_move_get_post_move_events(unit_stats_t* unit) {
     } else if (tile->flags & MOVE_FIND_RESULT_TRAP) {
         flags |= MOVE_POST_EVENT_TRAP_TRIGGERED;
     }
-    if (battle_status_remove_charging_ability_ct(unit, 0) != 0) {
+    if (battle_status_check_charging_charge(unit, 0) != 0) {
         flags |= MOVE_POST_EVENT_CHARGING_CANCEL;
     }
     flags |= battle_move_get_movement_ability_events(unit);

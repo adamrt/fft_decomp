@@ -136,8 +136,8 @@ void battle_unit_set_target_animation(battle_unit_t* attacker, battle_unit_t* ta
 s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id);
 
 /* animation */
-extern s32 g_battle_unit_palette_animation_offset;
-extern s32 g_battle_unit_palette_animation_timer;
+extern s32 g_battle_gfx_tile_glow_cycle_offset;
+extern s32 g_battle_gfx_tile_glow_cycle_timer;
 extern s8 g_battle_unit_float_bob_offsets[24];
 
 void battle_unit_set_status_animation(battle_unit_t* unit);
@@ -149,7 +149,7 @@ void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id);
 void battle_unit_set_walk_animation(battle_unit_t* unit);
 void battle_unit_set_level_up_animation(battle_unit_t* unit);
 void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animation);
-s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibble);
+s32 battle_unit_set_facing_nibble_by_runtime_id(u32 runtime_id, s32 facing_nibble);
 void battle_unit_store_animation_facing(u32 animation, s32 facing, battle_unit_t* unit);
 void battle_unit_force_animation_facing(s32 animation, s32 facing, battle_unit_t* unit);
 void battle_unit_update_and_animate_units(void);
@@ -193,12 +193,12 @@ extern battle_distortion_animation_handler_t
     g_battle_unit_distortion_animation_handlers[BATTLE_DISTORTION_ANIMATION_COUNT];
 
 void battle_unit_dispatch_distortion_animation(battle_unit_t* unit);
-s32 battle_unit_animate_teleport_distortion(battle_unit_t* unit);
+s32 battle_unit_animate_scale_pulse(battle_unit_t* unit);
 void battle_unit_clear_distortion_animation_id_10(battle_unit_t* unit);
 void battle_unit_clear_distortion_animation_id_11(battle_unit_t* unit);
 
 /* facing */
-void battle_unit_decide_facing_direction(battle_unit_t* unit, s32 facing);
+void battle_unit_set_cardinal_facing(battle_unit_t* unit, s32 facing);
 void battle_unit_face_toward_cursor(battle_unit_t* unit);
 void battle_unit_face_towards_action_target(battle_unit_t* unit, battle_unit_t* target);
 s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id);

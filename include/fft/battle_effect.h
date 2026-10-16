@@ -57,7 +57,7 @@ typedef struct effect_target {
 typedef char effect_target_size_must_be_10[(sizeof(effect_target_t) == 10) ? 1 : -1];
 
 /* result_animation of a target in an effect init record. The records built by
- * battle_effect_store_targets_and_display_types use the first four; the weapon-hit
+ * battle_effect_start_for_action use the first four; the weapon-hit
  * records (battle_effect_build_secondary_init_from_action) use all but REFLECTED. */
 typedef enum effect_hit_result {
     EFFECT_HIT_NORMAL = 0,

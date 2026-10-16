@@ -1344,20 +1344,20 @@ void battle_gfx_store_item_display_data(battle_unit_t* unit, u32 item_id) {
         unit->item_display, 0, (16 - data.w) / 2 - 8, (16 - data.h) / 2 - 8, data.u0, data.v0, data.w, data.h, 0);
 }
 
-/* Queues the unit's item icon at its item-get offset from the unit's screen
+/* Queues the unit's item icon at its item display offset from the unit's screen
  * position, at the unit's ordering-table depth and scale ONE. The x offset is
  * negated unless the sprite is flipped horizontally. */
-void battle_gfx_init_item_get_rendering(battle_unit_t* unit) {
+void battle_gfx_draw_item_display(battle_unit_t* unit) {
     SVECTOR position;
     SVECTOR zoom;
     u32* otag;
 
     if ((unit->sprite_display_flags & BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP) != 0) {
-        position.vx = unit->item_get_x_offset;
+        position.vx = unit->item_display_x_offset;
     } else {
-        position.vx = -unit->item_get_x_offset;
+        position.vx = -unit->item_display_x_offset;
     }
-    position.vy = unit->item_get_y_offset;
+    position.vy = unit->item_display_y_offset;
     position.vx += unit->camera_relative_x;
     position.vy += unit->camera_relative_y;
     main_util_set_svector(&zoom, ONE, ONE, ONE);

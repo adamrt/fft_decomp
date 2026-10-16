@@ -49,7 +49,7 @@ enum {
 };
 
 /* One frame of an SHP file: a 2-byte header followed by 4-byte parts
- * (battle_gfx_load_trap_and_unit_frame_parts). */
+ * (battle_gfx_load_unit_frame). */
 typedef struct battle_gfx_source_frame {
     /* Bits 0-2 are the part count minus one, bits 3-7 index the rotation
      * table g_battle_gfx_sprite_y_rotations. */
@@ -102,8 +102,8 @@ typedef enum battle_seq_opcode {
     BATTLE_SEQ_OP_NOP = 0xc2,
     BATTLE_SEQ_OP_HIDE_ITEM = 0xc3,
     BATTLE_SEQ_OP_SET_ITEM_POSITION = 0xc4, /* x, y: signed offsets of the item sprite from the unit */
-    BATTLE_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (battle_gfx_init_item_get_rendering) */
-    BATTLE_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_action_post_action is 0 */
+    BATTLE_SEQ_OP_SHOW_ITEM = 0xc5,         /* draw the unit's item display (battle_gfx_draw_item_display) */
+    BATTLE_SEQ_OP_WAIT_FOR_INPUT = 0xc6,    /* offset: jump while g_battle_state_window_closed is 0 */
     BATTLE_SEQ_OP_UNKNOWN_C7 = 0xc7,        /* two operands */
     BATTLE_SEQ_OP_UNKNOWN_C8 = 0xc8,        /* two operands */
     BATTLE_SEQ_OP_UNKNOWN_C9 = 0xc9,        /* two operands */
@@ -190,12 +190,12 @@ typedef char
 
 /* An EVTCHR slot's fixed SEQ storage. Its 32-bit header fields are unset and unread;
  * its 0x40 pointers refer into the slot's own 0x400 bytes. */
-typedef struct battle_gfx_unit_seq {
+typedef struct battle_gfx_evtchr_seq {
     battle_gfx_unit_seq_table_t header; /* 0x000 */
     u8* sequences[0x40];                /* 0x008 */
     u8 sequence_data[0x400];            /* 0x108 */
-} battle_gfx_unit_seq_t;
-typedef char battle_gfx_unit_seq_size_must_be_1288[sizeof(battle_gfx_unit_seq_t) == 1288 ? 1 : -1];
+} battle_gfx_evtchr_seq_t;
+typedef char battle_gfx_evtchr_seq_size_must_be_1288[sizeof(battle_gfx_evtchr_seq_t) == 1288 ? 1 : -1];
 
 /* Native WEP/EFF storage pairs the SHP frame table with its SEQ pointers. */
 typedef struct battle_gfx_wep_eff_graphics {

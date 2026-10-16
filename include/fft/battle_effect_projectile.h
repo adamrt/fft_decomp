@@ -36,7 +36,7 @@ typedef struct battle_arc_query {
 } battle_arc_query_t;
 
 /* Unit list built in the scratchpad at 0x1f800000 by
- * battle_effect_list_valid_unit_targeting_data and read by the
+ * battle_effect_list_obstacle_units and read by the
  * obstacle tests. */
 typedef struct effect_obstacle_unit_list {
     s32 count;                                  /* 0x00 */

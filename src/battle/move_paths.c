@@ -33,7 +33,7 @@ static s32 g_battle_cursor_previous_y = 0; /* cursor Y before this step */
 /* Step handler of the FLOAT_JUMP phases: carry a floating unit to the entry edge of its
  * destination tile, where its horizontal motion stops; once it has come down to the tile's height,
  * start the float step into the matching FLOAT_TO_CENTER phase. */
-static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
+static void battle_move_update_float_jump_step(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
 
     battle_move_apply_unit_step_velocity(unit);
@@ -58,7 +58,7 @@ static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_u
  * (height * 2 + slope half-height * edge value), clears the unit it stood on,
  * builds the velocity for the run of contiguous steps and enters the
  * FLY_TO_CENTER stage. */
-static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t* unit) {
+static void battle_move_update_fly_step_to_current_tile_exit_edge(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
 
     battle_move_apply_unit_step_velocity(unit);
@@ -71,13 +71,13 @@ static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t
             + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
         battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
             unit, &unit->path, &unit->current_path_step);
-        battle_move_interpolate_partial(unit, unit->walk_speed);
+        battle_move_scale_velocity(unit, unit->walk_speed);
         unit->step_phase = MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH;
     }
 }
 
 /*
- * Advance a unit's final vertical step onto its destination tile center.
+ * Step handler of the FLY_TO_CENTER stages: advance a flying unit onto its destination tile center.
  *
  * Once the tile center is reached, the target height is the tile's screen Z,
  * or 10 above the mount's when the path is complete and pending_mount bit 0x80
@@ -86,7 +86,7 @@ static void battle_move_update_unit_step_to_current_tile_exit_edge(battle_unit_t
  * then snaps to the center, clears velocity, adopts the destination map
  * coordinates and sets shadow_dirty bit 0.
  */
-static void battle_move_update_unit_vertical_step_to_destination_tile_center(battle_unit_t* unit) {
+static void battle_move_update_fly_step_to_destination_tile_center(battle_unit_t* unit) {
     s32 done = 0;
     s32 direction = battle_move_get_direction(unit);
     battle_unit_t* mount;
@@ -186,7 +186,7 @@ static void battle_move_update_teleport_start(battle_unit_t* unit) {
 
 /* Called for the last step of a path: when the unit has a pending mount, set the
  * step's mount bit (0x10), which marks a step that ends on another unit. */
-static void battle_move_set_unit_path_flag(battle_unit_t* unit) {
+static void battle_move_set_step_mount_flag(battle_unit_t* unit) {
     if (unit->path.pending_mount == 0) {
         return;
     }
@@ -222,7 +222,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
         if (unit->animation.wait == 0) {
             unit->step_phase++;
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_FALL, unit->facing, unit);
-            battle_sound_play_movement_sfx(unit, MAIN_SFX_JUMP);
+            battle_sound_play_unit_sfx(unit, MAIN_SFX_JUMP);
             battle_unit_dismount_rider(unit);
         }
         break;
@@ -230,7 +230,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_JUMP_LANDING_EAST:
     case MOVE_STEP_PHASE_JUMP_LANDING_NORTH:
     case MOVE_STEP_PHASE_JUMP_LANDING_WEST:
-        battle_move_update_knockback_after_animation(unit);
+        battle_move_update_jump_landing(unit);
         break;
     case MOVE_STEP_PHASE_JUMP_ASCENT_SOUTH:
     case MOVE_STEP_PHASE_JUMP_ASCENT_EAST:
@@ -248,7 +248,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLOAT_JUMP_EAST:
     case MOVE_STEP_PHASE_FLOAT_JUMP_NORTH:
     case MOVE_STEP_PHASE_FLOAT_JUMP_WEST:
-        battle_move_update_unit_step_to_destination_tile_entry_edge(unit);
+        battle_move_update_float_jump_step(unit);
         break;
     case MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
@@ -270,7 +270,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLY_TO_CENTER_EAST:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_CENTER_WEST:
-        battle_move_update_unit_vertical_step_to_destination_tile_center(unit);
+        battle_move_update_fly_step_to_destination_tile_center(unit);
         break;
     case MOVE_STEP_PHASE_WALK_TO_EDGE_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_EDGE_EAST:
@@ -292,7 +292,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
     case MOVE_STEP_PHASE_FLY_TO_EDGE_EAST:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_NORTH:
     case MOVE_STEP_PHASE_FLY_TO_EDGE_WEST:
-        battle_move_update_unit_step_to_current_tile_exit_edge(unit);
+        battle_move_update_fly_step_to_current_tile_exit_edge(unit);
         break;
     case MOVE_STEP_PHASE_TELEPORT_START:
         battle_move_update_teleport_start(unit);
@@ -317,7 +317,7 @@ void battle_move_update_path_step(battle_unit_t* unit) {
             battle_unit_mount_onto_pending_mount(unit);
         } else if (unit->movement_path_offset < count) {
             if (unit->movement_path_offset == count - 1) {
-                battle_move_set_unit_path_flag(unit);
+                battle_move_set_step_mount_flag(unit);
             }
 
             /* Take the next step and start it with the starter for the movement type. */
@@ -382,7 +382,7 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
         case MOVE_STEP_PHASE_JUMP_LANDING_EAST:
         case MOVE_STEP_PHASE_JUMP_LANDING_NORTH:
         case MOVE_STEP_PHASE_JUMP_LANDING_WEST:
-            battle_move_update_knockback_after_animation(unit);
+            battle_move_update_jump_landing(unit);
             break;
         case MOVE_STEP_PHASE_JUMP_ASCENT_SOUTH:
         case MOVE_STEP_PHASE_JUMP_ASCENT_EAST:
@@ -903,7 +903,7 @@ void battle_target_show_attack_preview_panel(void) {
  * When the cursor tile changes, the unit panels are refreshed for the current
  * game state: the cursor unit's panel in the free-cursor, select-move-tile and
  * target-select states, the preview target's panel in the targeting-range state. */
-void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit) {
+void battle_target_move_cursor_to_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit) {
     s32 old_x = g_battle_cursor_x;
     s32 old_z = g_battle_cursor_z;
     s32 old_y = g_battle_cursor_y;

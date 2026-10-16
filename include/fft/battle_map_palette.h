@@ -8,7 +8,7 @@
 
 /* color modes */
 /* Map color-transition commands: the source color and treatment of RGB offsets.
- * battle_gfx_modify_vram_palette honors modes 5-7; every other value adds the
+ * battle_map_modify_palette_from_other honors modes 5-7; every other value adds the
  * offsets to its supplied colors, including RESTORE. */
 typedef enum map_color_mode {
     MAP_COLOR_MODE_CURRENT = 0,           /* the color in transition plus the offsets */
@@ -38,7 +38,7 @@ typedef enum map_color_repeat {
 typedef enum map_clut_row {
     MAP_CLUT_ROW_MAP = 0,
     MAP_CLUT_ROW_MARKED_TILES = 1, /* the map's CLUTs for the polygons of marked tiles */
-    MAP_CLUT_ROW_SPRITES = 2,      /* weather particles, deploy portraits, arrow, cursor, shadow, status bubble */
+    MAP_CLUT_ROW_SPRITES = 2,      /* weather particles, cursor tile glow, arrow, cursor, shadow, status bubble */
     MAP_CLUT_ROW_UNITS = 3,        /* one CLUT per unit, as in rows 4 to 7 and 10 */
     MAP_CLUT_ROW_UNIT_SHADOWS = 4,
     MAP_CLUT_ROW_ITEM_A = 5, /* the two palettes of the item a unit holds or throws */

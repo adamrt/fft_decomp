@@ -165,10 +165,10 @@ extern u16 g_camera_script_variable_indices[EVENT_CAMERA_COMPONENT_COUNT];
 extern VECTOR g_battle_camera_script_vector;
 
 /* effect tracks */
-void battle_camera_advance_effect_tracks(s16 frame);
+void battle_camera_start_parent_effect_keyframe_moves(s16 frame);
 void battle_camera_get_step_depth_point_unbiased(const SVECTOR* input, SVECTOR* output);
 void battle_camera_get_step_depth_point_biased(const SVECTOR* input, SVECTOR* output);
 void battle_camera_start_effect_keyframe_moves(s16 frame);
-void battle_camera_update_effect_rotation_and_zoom(void);
+void battle_camera_update_effect_tracks(void);
 
 #endif

@@ -484,7 +484,7 @@ prepare_origin:
          * exit out of line. */
         goto prepare_origin;
     }
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     battle_ai_insert_ranked_action();
     return 0;
 }
@@ -533,7 +533,7 @@ s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
             if (dy < 0)
                 dy = -dy;
             if (dx + dy < 2) {
-                height = battle_ai_calculate_height_difference_between_units(coords, unit);
+                height = battle_ai_calculate_height_difference(coords, unit);
                 if (height >= -2 && height <= 2)
                     return 1;
             }
@@ -549,7 +549,7 @@ s32 battle_ai_is_ability_origin_allowed(const ai_coords_t* coords) {
  * Return their signed half-height difference divided by 2, truncating
  * toward 0. unit body height and water depth are not included.
  */
-s32 battle_ai_calculate_height_difference_between_units(const ai_coords_t* coords, const unit_stats_t* unit) {
+s32 battle_ai_calculate_height_difference(const ai_coords_t* coords, const unit_stats_t* unit) {
     map_tile_t* tile;
     s32 h1;
     s32 h2;
@@ -676,7 +676,7 @@ static s32 battle_ai_evaluate_reflected_target_origins(void) {
             }
         }
     }
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     ai->current_action.reflected_action = 0;
     battle_ai_insert_ranked_action();
     return 0;
@@ -780,7 +780,7 @@ static s32 battle_ai_evaluate_math_targets(void) {
             battle_ai_insert_ranked_action();
         }
     }
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     return 0;
 }
 
@@ -865,7 +865,7 @@ begin_evaluation:
             ai->map_level_counter++;
         } while (ai->map_level_counter < MAP_TERRAIN_LAYER_COUNT);
     }
-    battle_ai_move_temp_unit_to_coords(&ai->acting_unit_coords);
+    battle_ai_move_acting_unit_to_coords(&ai->acting_unit_coords);
     return 0;
 }
 
@@ -1222,7 +1222,7 @@ static s32 battle_ai_evaluate_target_tiles(void) {
         origin = &ai->acting_unit_coords;
     else
         origin = &ai->current_action.coords;
-    battle_ai_move_temp_unit_to_coords(origin);
+    battle_ai_move_acting_unit_to_coords(origin);
     if (ai->considered_ability.parameters.fields.range) {
         if (battle_target_set_panels_for_action(&ai->current_action.command) == TARGET_PANELS_NONE)
             return 0;
@@ -1704,7 +1704,7 @@ static void battle_ai_simulate_movement_and_pickup(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
 
     if (ai->current_action.coords.word != ai->acting_unit_coords.word) {
-        battle_ai_move_temp_unit_to_coords(&ai->current_action.coords);
+        battle_ai_move_acting_unit_to_coords(&ai->current_action.coords);
         if (ai->tile_pickup_kind == AI_TILE_PICKUP_CRYSTAL) {
             ai->acting_unit->hp = ai->acting_unit->max_hp;
             ai->acting_unit->mp = ai->acting_unit->max_mp;
@@ -1843,7 +1843,7 @@ static void battle_ai_simulate_strikes(action_command_t* action, s32 reaction_mo
                 }
             }
         }
-        battle_action_store_target_stats_pointer_data(action->actor_id);
+        battle_action_apply_attacker_result(action->actor_id);
     } while (work.continue_attack != 0);
     if (ai->hit_counter != 0xff && ai->ranked_origin_scan != 0) {
         if (ai->ability_effect_on_self == AI_ABILITY_EFFECT_USEFUL && self_hit != 0) {
@@ -2404,8 +2404,9 @@ static s32 battle_ai_is_unit_active_after_delay(s32 limit, s32 unit_id) {
     return 1;
 }
 
-/* Position the temporary simulation unit at the supplied AI coordinates. */
-void battle_ai_move_temp_unit_to_coords(const ai_coords_t* coord) {
+/* Place the acting unit's own record at the supplied AI coordinates; the AI passes
+ * acting_unit_coords to put it back. */
+void battle_ai_move_acting_unit_to_coords(const ai_coords_t* coord) {
     g_battle_ai_data_base.acting_unit->x = coord->fields.x;
     g_battle_ai_data_base.acting_unit->position.y = coord->fields.y;
     g_battle_ai_data_base.acting_unit->position.higher_elevation = coord->fields.elevation;

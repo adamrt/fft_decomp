@@ -351,6 +351,6 @@ extern VECTOR g_battle_effect_camera_zoom_start;
 extern VECTOR g_battle_effect_camera_zoom_target;
 
 void battle_effect_seed_camera_tracks(void);
-void battle_effect_init_camera_and_screen_data(void);
+void battle_effect_init_camera(void);
 
 #endif

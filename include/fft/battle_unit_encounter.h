@@ -26,17 +26,17 @@ extern s32 g_battle_unit_entd_spritesheet_count;
 
 unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battle_id);
 void battle_unit_load_entd_units(entd_encounter_t* entd_data, s32 mode);
-s32 battle_unit_set_enemy_level_data_by_battle_id(u32 battle_id);
+s32 battle_unit_put_on_field(u32 battle_id);
 s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index);
 s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* tile, s32 facing);
-void battle_unit_set_enemy_level_data(unit_stats_t* unit);
+void battle_unit_count_enemy_level(unit_stats_t* unit);
 s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* destination);
 s32 battle_unit_build_deployed_units_data(unit_deployment_coordinates_t* formation, s32 unused_1);
 void battle_unit_init_deployed_units_data_for_debug_red_team(unit_deployment_coordinates_t* formation, s32 unused_1);
 void battle_unit_store_entd_flags_without_control_flag(battle_unit_t* unit);
 
 /* progression and pickups */
-/* battle_unit_learn_from_crystal flags. */
+/* battle_unit_apply_crystal_choice flags. */
 enum {
     BATTLE_CRYSTAL_LEARN_ABILITIES = 0x1,
     BATTLE_CRYSTAL_RESTORE_HP_MP = 0x2,
@@ -65,9 +65,9 @@ void battle_unit_learn_used_ability(unit_stats_t* unit);
 void battle_unit_transform_into_morbol(unit_stats_t* unit);
 s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* display);
 s32 battle_unit_build_action_rewards(unit_stats_t* unit, action_reward_display_t* rewards);
-s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags);
+s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags);
 s32 battle_unit_load_job_level(unit_stats_t* unit, s32 job_id, s32* out_slot);
 s32 battle_unit_add_job_jp(s32 unit_index, s32 jp, s32 team, s32 slot);
-crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover);
+crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover);
 
 #endif

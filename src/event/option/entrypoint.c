@@ -1,7 +1,6 @@
 /* The options overlay entry, loading the saved options and starting the game options, AT list or crystal pickup menus.
  */
 
-#include "fft/battle_menu.h"
 #include "fft/event_option.h"
 #include "fft/main.h"
 #include "fft/menu.h"
@@ -10,6 +9,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_option.h"
 #include "fft/script.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/types.h"
 
@@ -60,7 +60,7 @@ void option_entrypoint(s32 menu_type) {
     }
 
     g_menu_modal_open = 0;
-    g_battle_option_menu_state = 0;
+    g_menu_hide_numeric_values = 0;
     if (menu_type == MENU_OPTION_TYPE_GAME_OPTIONS) {
         script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_GAME_OPTIONS);
         thread_start(g_thread_current_id - 1, option_menu_run_game_options);

@@ -32,7 +32,7 @@ static u8 g_battle_move_jump_landing_phases[4] = { 20, 24, 28, 32 };
  * of the side crossed (0 low, 1 sloping, 2 high), so a low side
  * lies below the center and a high side above it. VectorNormal reduces the vector
  * to unit length (ONE) and g_main_system_vsync_interval scales it; the caller
- * applies the walk speed with battle_move_interpolate_partial. */
+ * applies the walk speed with battle_move_scale_velocity. */
 static void battle_move_set_unit_step_delta_center_to_edge(
     battle_unit_t* unit, const move_step_t* step, const map_tile_t* tile, s32 edge_height) {
     VECTOR direction;
@@ -162,7 +162,7 @@ static void battle_move_set_float_step_delta_edge_to_center(
 
 /* Scale the unit's per-frame velocity by a 4.12 factor: callers pass the walk speed, or the step
  * speed for climb-speed steps. */
-void battle_move_interpolate_partial(battle_unit_t* unit, s32 scale) {
+void battle_move_scale_velocity(battle_unit_t* unit, s32 scale) {
     unit->velocity.vx = (scale * unit->velocity.vx) / ONE;
     unit->velocity.vy = (scale * unit->velocity.vy) / ONE;
     unit->velocity.vz = (scale * unit->velocity.vz) / ONE;
@@ -239,7 +239,7 @@ void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, c
     unit->facing = facing;
     battle_unit_set_walk_animation(unit);
     battle_move_set_float_step_delta_center_to_edge(unit, step, from, edge_height);
-    battle_move_interpolate_partial(unit, unit->walk_speed);
+    battle_move_scale_velocity(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -297,7 +297,7 @@ void battle_move_start_fly_step(
         }
     }
     battle_move_set_velocity_for_contiguous_clamped_steps(unit, &unit->path, step);
-    battle_move_interpolate_partial(unit, unit->walk_speed);
+    battle_move_scale_velocity(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -350,7 +350,7 @@ void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, co
         battle_unit_set_walk_animation(unit);
     }
     battle_move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
-    battle_move_interpolate_partial(unit, unit->walk_speed);
+    battle_move_scale_velocity(unit, unit->walk_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -407,7 +407,7 @@ void battle_move_start_unit_step_at_climb_speed(
         }
     }
     battle_move_set_unit_step_delta_center_to_edge(unit, step, from, edge_height);
-    battle_move_interpolate_partial(unit, unit->step_speed);
+    battle_move_scale_velocity(unit, unit->step_speed);
     unit->movement.destination_z = step->higher;
 }
 
@@ -762,7 +762,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
             battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         }
         break;
     case MOVE_STEP_PHASE_CLIMB_TO_CENTER_SOUTH:
@@ -775,7 +775,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
             battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            battle_move_interpolate_partial(unit, unit->step_speed);
+            battle_move_scale_velocity(unit, unit->step_speed);
         }
         break;
     }
@@ -800,7 +800,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             unit->real.vy = ground_height * ONE;
             battle_move_set_unit_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->current_edge_height);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         } else {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
@@ -829,7 +829,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             }
             battle_move_set_unit_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->current_edge_height);
-            battle_move_interpolate_partial(unit, unit->step_speed);
+            battle_move_scale_velocity(unit, unit->step_speed);
         } else {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
                 unit->real.vy = ground_height * ONE;
@@ -855,7 +855,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             unit->real.vy = ground_height * ONE;
             battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         }
         if (-ground_height < (-unit->real.vy / ONE)) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
@@ -885,7 +885,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             }
             battle_move_set_unit_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            battle_move_interpolate_partial(unit, unit->step_speed);
+            battle_move_scale_velocity(unit, unit->step_speed);
         }
         if ((-unit->real.vy / ONE) > -ground_height) {
             if ((-unit->real.vy / ONE) < -ground_height + 6) {
@@ -936,7 +936,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             unit->real.vy = ground_height * ONE;
             battle_move_set_float_step_delta_center_to_edge(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         } else {
             /* Shared with the next case: a duplicated branch does not merge. */
             goto accelerate;
@@ -954,7 +954,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             unit->real.vy = ground_height * ONE;
             battle_move_set_float_step_delta_edge_to_center(
                 unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         } else {
         accelerate:
             /* Keeps depth live here, so it takes a0 and reorg leaves `move a0,s0` out of both landing tests. */
@@ -974,7 +974,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         if (-unit->real.vy / ONE <= -ground_height) {
             unit->real.vy = ground_height * ONE;
             battle_move_set_velocity_for_contiguous_clamped_steps(unit, &unit->path, &unit->current_path_step);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         }
         unit->shadow_dirty |= 1;
         break;
@@ -989,7 +989,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
             unit->real.vy = ground_height * ONE;
             battle_move_set_velocity_for_contiguous_steps_with_final_tile_height(
                 unit, &unit->path, &unit->current_path_step);
-            battle_move_interpolate_partial(unit, unit->walk_speed);
+            battle_move_scale_velocity(unit, unit->walk_speed);
         }
         unit->shadow_dirty |= 1;
         break;
@@ -1011,7 +1011,7 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
 /* Play a sound on a free SFX channel pair unless the unit's motion flags suppress
  * its sounds. The unit sequence scripts, the jump and landing steps and the death
  * animations play their sounds through it. */
-void battle_sound_play_movement_sfx(battle_unit_t* unit, s32 sound_id) {
+void battle_sound_play_unit_sfx(battle_unit_t* unit, s32 sound_id) {
     if ((unit->movement.suppress_sfx_and_landing_effects) == 0) {
         main_sound_play_sfx_find_channel(sound_id);
     }
@@ -1227,7 +1227,7 @@ void battle_unit_mount_onto_pending_mount(battle_unit_t* unit) {
         other = battle_unit_get_by_battle_id(unit->path.pending_mount & BATTLE_PENDING_MOUNT_ID_MASK);
         if (other != 0) {
             battle_unit_mount_rider_onto_unit(unit, other);
-            battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_DEFAULT);
+            battle_sound_play_unit_sfx(unit, MAIN_SFX_LAND_DEFAULT);
         }
         return;
     }
@@ -1456,7 +1456,7 @@ move_direction_e battle_move_get_direction(const battle_unit_t* unit) {
 /* Continue a jump step on the ground once the landing animation is over: restart
  * the step (at climb speed when the step byte's climb bit is set) and enter its
  * to-center stage for the direction of travel. */
-static void battle_move_advance_display_unit_step(battle_unit_t* unit) {
+static void battle_move_resume_step_to_center(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
 
     switch (g_battle_move_step_value.climb) {
@@ -1473,9 +1473,9 @@ static void battle_move_advance_display_unit_step(battle_unit_t* unit) {
 
 /* Step handler of the JUMP_LANDING phases: once BATTLE_UNIT_ANIMATION_LAND has
  * run out (or another animation plays), continue the step toward the tile center. */
-void battle_move_update_knockback_after_animation(battle_unit_t* unit) {
+void battle_move_update_jump_landing(battle_unit_t* unit) {
     if (((unit->animation.sequence_id >> 1) != BATTLE_UNIT_ANIMATION_LAND) || (unit->animation.wait == 0)) {
-        battle_move_advance_display_unit_step(unit);
+        battle_move_resume_step_to_center(unit);
     }
 }
 
@@ -1512,8 +1512,7 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
     s16 target_z;
     map_tile_t* tile;
 
-    battle_gfx_load_trap_and_unit_frame_parts(
-        unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+    battle_gfx_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     direction = battle_move_get_direction(unit);
     battle_move_apply_unit_step_velocity(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
@@ -1563,7 +1562,7 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
         }
         if (g_battle_move_step_value.mount) {
-            battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
+            battle_sound_play_unit_sfx(unit, MAIN_SFX_LAND_SOFT);
             return;
         }
         battle_sound_play_landing_sfx_by_surface_type(unit);
@@ -1577,7 +1576,7 @@ void battle_move_finish_unit_step_at_tile_edge(battle_unit_t* unit) {
         battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_LAND, unit->facing, unit);
     }
     if (g_battle_move_step_value.mount) {
-        battle_sound_play_movement_sfx(unit, MAIN_SFX_LAND_SOFT);
+        battle_sound_play_unit_sfx(unit, MAIN_SFX_LAND_SOFT);
         return;
     }
     battle_sound_play_landing_sfx_by_surface_type(unit);
@@ -1592,8 +1591,7 @@ void battle_move_update_airborne_ascent_phase(battle_unit_t* unit) {
     battle_unit_t* occupant;
     s32 direction;
 
-    battle_gfx_load_trap_and_unit_frame_parts(
-        unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
+    battle_gfx_load_unit_frame(unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     direction = battle_move_get_direction(unit);
     if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
         battle_move_displace_overlapping_unit(unit, direction);

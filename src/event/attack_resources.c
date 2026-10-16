@@ -855,7 +855,7 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_ERASE) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
-                battle_gfx_reset_unit_graphic_trigger(runtime_id);
+                battle_gfx_hide_unit_by_runtime_id(runtime_id);
             }
         } else if (script[0] == EVENT_OPCODE_DRAW) {
             runtime_id = script_resolve_runtime_id(first_halfword);
@@ -1421,7 +1421,7 @@ static void menu_build_ability_list(s32 mode) {
         mem_copy_bytes_nonempty(g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.ct, 0x50);
     }
     if (type == ACTION_MENU_TYPE_ITEM_INVENTORY) {
-        battle_menu_display_item_inventory_ability(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
+        battle_menu_load_item_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);
     }
     if (type == ACTION_MENU_TYPE_WEAPON_INVENTORY) {
         battle_menu_load_throw_abilities(unit_index, skillset, g_ai_workspace_ptr->ability_list.mp_costs);

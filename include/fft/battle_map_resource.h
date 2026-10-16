@@ -289,7 +289,7 @@ s32 battle_map_apply_gns_command(s32 phase, map_resource_t* record);
 s16 battle_map_is_gns_record_matching_state(s32 comparison, s16 record_state, s16 requested_state);
 void* battle_map_start_file_load(
     const char* unused_directory_path, const gns_load_info_t* load_info, void* destination, s32 unused_resource_type);
-s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 deployment_running);
+s32 battle_map_step_deployment_init_sequence(s32 map_id, s32 step, s32 deployment_running);
 s32 battle_map_load_alternate_mesh(s32 palette_mode);
 gns_record_t* battle_map_load_gns_and_move_find_items(s32 map_id);
 

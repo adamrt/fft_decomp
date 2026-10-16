@@ -101,7 +101,7 @@ typedef enum effect_secondary_animation_id {
     EFFECT_SECONDARY_ANIMATION_ZODIAC_POOF = 11,
     EFFECT_SECONDARY_ANIMATION_DEATH_SMOKE = 12,
     EFFECT_SECONDARY_ANIMATION_LEVEL_UP = 13,
-    EFFECT_SECONDARY_ANIMATION_VENOM_TRAP = 14,
+    EFFECT_SECONDARY_ANIMATION_TRAP = 14,
     EFFECT_SECONDARY_ANIMATION_SPLASH = 15,
     EFFECT_SECONDARY_ANIMATION_THROWN_ITEM = 16, /* Item and Throw: the item's graphic or the shuriken model */
     EFFECT_SECONDARY_ANIMATION_RED_ORBS = 17,    /* the Charge abilities and Accumulate */
@@ -171,7 +171,7 @@ typedef enum effect_particle_group {
     EFFECT_PARTICLE_GROUP_LEVEL_UP = 5,
     EFFECT_PARTICLE_GROUP_FALL_DUST = 6,
     EFFECT_PARTICLE_GROUP_SPLASH = 7,
-    EFFECT_PARTICLE_GROUP_VENOM_TRAP = 8,
+    EFFECT_PARTICLE_GROUP_TRAP = 8,
     EFFECT_PARTICLE_GROUP_WEAPON_HIT_B_MISSED = 9, /* the second slot set of a missed hit */
     EFFECT_PARTICLE_GROUP_RED_ORBS = 10,
     EFFECT_PARTICLE_GROUP_EQUIP_BREAK = 11,
@@ -264,7 +264,7 @@ typedef struct effect_slot {
 typedef char assert_effect_slot_size[sizeof(effect_slot_t) == 204 ? 1 : -1];
 
 extern u8 g_battle_effect_active_slot_head;
-extern u32 g_battle_effect_current_slot_id;
+extern u32 g_battle_effect_current_secondary_id;
 extern u8 g_battle_effect_slot_free_head;
 extern effect_slot_t g_battle_effect_slots[];
 /* Self-relative animation script table: each 16-bit value is a byte offset from
@@ -402,7 +402,7 @@ s32 battle_effect_splash_secondary_handler(void);
 s32 battle_effect_summon_charge_secondary_handler(void);
 s32 battle_effect_teleport_secondary_handler(void);
 s32 battle_effect_update_death_poof_secondary(s32 unused_arg0, s32 passthrough);
-s32 battle_effect_venom_trap_secondary_handler(void);
+s32 battle_effect_trap_secondary_handler(void);
 s32 battle_effect_weapon_hit_secondary_handler(void);
 s32 battle_effect_zodiac_poof_secondary_handler(void);
 
@@ -419,7 +419,7 @@ void battle_effect_set_secondary_level_up(struct battle_unit* unit);
 void battle_effect_set_secondary_splash(struct battle_unit* unit);
 void battle_effect_set_secondary_teleport(struct battle_unit* unit);
 s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id);
-void battle_effect_set_secondary_venom_trap(battle_unit_t* unit);
+void battle_effect_set_secondary_trap(battle_unit_t* unit);
 void battle_effect_set_secondary_zodiac_poof(battle_unit_t* unit);
 
 #endif

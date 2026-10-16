@@ -298,7 +298,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   0x20000-byte buffer.
 - `battle_camera_toggle_tilt`: from tilt target 3 it starts a decrease toward
   target 4, which `battle_camera_update_tilt` has no branch to finish.
-- `battle_action_run_pre_formula_setup`: both tests bound the default
+- `battle_action_calculate_target_result`: both tests bound the default
   ability class at `ABILITY_ID_ITEM_FIRST + 1`, so the Potion ability indexes
   `g_main_ability_range_data` one record past its end, which is the bytes of
   `g_main_item_ability_item_ids`. The other callers bound it at
@@ -369,7 +369,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `battle_map_stop_clut_cycle` clears the active byte of slot `handle`,
   but `battle_map_start_clut_cycle` returns slot + 1: it stops the slot
   after the handle's own, and handle 8 clears the byte after the eight slots,
-  the first of `g_battle_gfx_cycled_deployed_palettes`.
+  the first of `g_battle_gfx_cycled_tile_glow_palettes`.
 - `battle_gfx_queue_unit_graphics_load` writes its record before it
   tests the count, which stops at 16: a seventeenth append lands one past the
   16-entry queue, on the head of `g_main_zodiac_primitives`.
@@ -426,7 +426,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `wldcore_menu_step_unexplored_land_detail_level` wait, in their LOAD phase,
   on the render record named by 32-bit field at level offset 0x08 (`saved_record_index`). Their
   pushes never set it: it holds what the last level at that stack depth left.
-- `battle_effect_set_secondary` (fall dust, splash, level up, venom trap,
+- `battle_effect_set_secondary` (fall dust, splash, level up, trap,
   zodiac poof, death smoke, teleport) builds its init record in a local of
   which `battle_effect_build_secondary_init` sets five fields;
   `battle_effect_init_secondary` copies the rest of the two ten-byte blocks and
@@ -531,7 +531,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   `battle_map_set_tile_data_value` retries `battle_map_tile_data_15_stub`,
   which returns 0 at once, up to 1000 times before load exception 0x80.
   `battle_gfx_run_unit_seq_script`, `battle_gfx_run_wep_eff_seq_script` and
-  `battle_gfx_load_trap_and_unit_frame_parts` test sequence and frame pointers
+  `battle_gfx_load_unit_frame` test sequence and frame pointers
   for -1, which the unpackers replace with the start of the data, and the last
   tests a three-bit part count plus one for `> 8`. The weapon interpreter's
   own bounds (`sequence_id > 0x100`, `frame > 0x200`) admit the index one past
@@ -686,7 +686,7 @@ written that way.
   16-bit value at address `0x10`.
 - `menu_animate_window_quad_crop` passes an uninitialized
   source (a stale `$s5`) to `menu_zoom_cursor_frame`, which never reads it.
-- `battle_map_init_units_sprites_event_and_music` and
+- `battle_map_step_deployment_init_sequence` and
   `battle_map_step_init_sequence` call `main_sound_stop_sfx` without its sound
   id: step 0 passes `map_id`, still in `$a0`; step 11 passes whatever
   `main_sound_unload_current_scenario_music` left there.
@@ -737,8 +737,8 @@ written that way.
   left in `$v0`.
 - `battle_effect_spawn_emitter_particles` has an `s32` result it never sets
   and no caller reads.
-- `battle_unit_animate_teleport_distortion` and
-  `battle_unit_advance_altima_teleport_distortion` fall through without an
+- `battle_unit_animate_scale_pulse` and
+  `battle_unit_advance_teleport_distortion` fall through without an
   `s32` result; the animation dispatcher ignores their results.
 - `thread_resolve_id` and `thread_resolve_id_after_current` fall
   off their end after `thread_exit_current()`, like the WORLD twins.
@@ -985,7 +985,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `map_slope_type_e` (0x10 in MAP017.10, MAP043.9 and MAP078.9, 0x46 in
   MAP036.46, 0x01 in MAP045.7), and the terrain chunks of 37 maps arrive with
   mark bits already set in tile byte 5, which
-  `battle_map_copy_xy_coords_and_tile_data` copies as they are. Tile flag 0x80
+  `battle_map_copy_size_and_tile_data` copies as they are. Tile flag 0x80
   (`cannot_stop`), which `battle_move_set_reachable_tile_flags` tests, is set
   in no terrain chunk, and tile byte 1 is 0 in all of them.
 - `g_battle_map_directory_path` is the string `C:\FFTIMG\MAP\GNS\`; every map
@@ -1116,7 +1116,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   is read from the operand.
 - `battle_map_get_move_find_result` repeats the same `battle_unit_find_at_tile`
   call up to 21 times: its occupant loop never uses the counter.
-- `battle_action_check_between_turn_events` calls
+- `battle_action_start_next_turn_event` calls
   `battle_unit_store_entd_flags_without_control_flag` twice, around
   `menu_reset_unit_record`, which leaves team flags alone; the first call
   reads `unit->stats` before the null test that guards the second.

@@ -1,4 +1,4 @@
-/* Crystal and treasure generation, enemy level data, unit stat lookups and the unit action menu set. */
+/* Crystal and treasure pickups, enemy level statistics, unit stat lookups and the unit action menu set. */
 
 #include "fft/battle_action.h"
 #include "fft/battle_map.h"
@@ -25,24 +25,24 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save);
+static s32 battle_map_test_or_set_move_find_item_flag(s32 map_id, s32 tile_index, s32 save);
 static menu_command_id_e battle_menu_get_unit_action_menu_id(const unit_stats_t* unit);
 static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu);
-static void battle_status_disable_acting(unit_stats_t* unit);
+static void battle_status_cancel_charge(unit_stats_t* unit);
 static u8 battle_unit_generate_treasure(unit_stats_t* unit);
 
 /* 1 when the unit, or its rider when it is a mount, is charging an attack of
- * the Charge skillset; with do_disable that unit's charge is also canceled
- * (battle_status_disable_acting). A move or a knockback cancels a Charge
+ * the Charge skillset; with cancel set, that unit's charge is also canceled
+ * (battle_status_cancel_charge). A move or a knockback cancels a Charge
  * through this test. */
-s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable) {
+s32 battle_status_check_charging_charge(unit_stats_t* unit, s32 cancel) {
     u8 mount_info;
 
     for (;;) {
         if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)] & STATUS_BYTE_MASK(STATUS_ID_CHARGING))
             && unit->charged_ability_ct != 0xFF && unit->action_command.skillset_id == SKILLSET_ID_CHARGE) {
-            if (do_disable != 0) {
-                battle_status_disable_acting(unit);
+            if (cancel != 0) {
+                battle_status_cancel_charge(unit);
             }
             return 1;
         }
@@ -56,7 +56,7 @@ s32 battle_status_remove_charging_ability_ct(unit_stats_t* unit, s32 do_disable)
 }
 
 /* Clears the unit's Charging, Jump, Defending and Performing statuses (action state none). */
-static void battle_status_disable_acting(unit_stats_t* unit) {
+static void battle_status_cancel_charge(unit_stats_t* unit) {
     main_status_set_action_state(unit, MAIN_UNIT_ACTION_STATE_NONE);
 }
 
@@ -74,7 +74,7 @@ move_found_item_t* battle_map_determine_rare_common_item(unit_stats_t* unit) {
         item_id = find_result->common_item_id;
     }
     g_battle_map_rare_item_result.item_id = item_id;
-    battle_map_calculate_move_find_item_flag(
+    battle_map_test_or_set_move_find_item_flag(
         script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), find_result->entry_index, 1);
     g_battle_map_rare_item_result._unknown_00 = 0;
     return &g_battle_map_rare_item_result;
@@ -118,7 +118,7 @@ move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer) 
     if (i != 4) {
         g_battle_move_find_entry_index = i;
         if (!(tile->flags & MAP_MOVE_FIND_ENTRY_NO_ITEM)) {
-            if (battle_map_calculate_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0)
+            if (battle_map_test_or_set_move_find_item_flag(script_get_variable(EVENT_SCRIPT_VAR_CURRENT_MAP), i, 0)
                 != 0) {
                 g_battle_move_find_result_flags |= MOVE_FIND_RESULT_ITEM;
                 g_battle_move_find_rare_item_id = tile->rare_item_id;
@@ -149,7 +149,7 @@ move_find_result_data_t* battle_map_get_move_find_result(s32 x, u8 y, u8 layer) 
  *
  * Each flag byte holds two maps, four tiles each, MSB first with the even map in
  * the high nibble; the test returns 1 while the item is still unfound. */
-static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
+static s32 battle_map_test_or_set_move_find_item_flag(s32 map_id, s32 tile_index, s32 save) {
     s32 byte_index = map_id / 2;
     s32 bit = 0x80 >> (((map_id & 1) * 4) + tile_index);
 
@@ -165,7 +165,7 @@ static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, 
  * when neither unit is a monster, each action ability the crystal knows and the mover does not (in
  * the mover's unlocked jobs, and the special job only for the same character) is learned on a roll
  * against its learn rate, adding LEARNED when any is. */
-crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover) {
+crystal_pickup_result_t* battle_unit_resolve_crystal_pickup(unit_stats_t* mover) {
     u8 gained[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 known[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 offered[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
@@ -280,7 +280,7 @@ crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* 
  * that heals the missing HP and MP. LEARN_ABILITIES ORs
  * g_main_crystal_learnable_abilities into the unit's learned-ability bits. These
  * return 0. */
-s32 battle_unit_learn_from_crystal(unit_stats_t* unit, s32 flags) {
+s32 battle_unit_apply_crystal_choice(unit_stats_t* unit, s32 flags) {
     s32 i;
     u8* dst;
     u8* src;
@@ -482,7 +482,7 @@ unit_stats_t* battle_unit_find_stats_by_entd_unit_id(s32 unit_id, s32* out_battl
 
 /* Count a unit of any team but blue into the enemy level statistics: its level
  * is added to g_battle_enemy_level_sum and raises g_battle_highest_enemy_level. */
-void battle_unit_set_enemy_level_data(unit_stats_t* unit) {
+void battle_unit_count_enemy_level(unit_stats_t* unit) {
     u8 level;
 
     if (unit->team_flags & UNIT_TEAM_MASK) {
@@ -833,7 +833,7 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
         return battle_menu_get_unit_skillset_ability_data(
             unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
-        return battle_menu_load_item_abilities(unit_id, skillset, items);
+        return battle_menu_collect_item_abilities(unit_id, skillset, items);
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
         return battle_menu_collect_throwable_items(unit_id, skillset, items);
     case ACTION_MENU_TYPE_ARITHMETICKS:
@@ -846,7 +846,7 @@ static s32 battle_menu_load_skillset(s32 unit_id, u8 skillset, u8 menu) {
         }
         return result;
     case ACTION_MENU_TYPE_ELEMENTS:
-        return battle_menu_load_elemental_abilities(unit_id, skillset);
+        return battle_menu_get_elemental_ability(unit_id, skillset);
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
         return battle_menu_collect_draw_out_katanas(unit_id, skillset, items);
     case ACTION_MENU_TYPE_CHARGE:

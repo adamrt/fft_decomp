@@ -125,10 +125,10 @@ void battle_gfx_tint_all_units_by_team(void) {
 }
 
 /* Advance the AT list cursor, wrapping after the list's 40 entries. */
-static void battle_action_increment_at_list_id(void) {
-    g_battle_action_at_list_id++;
-    if (g_battle_action_at_list_id >= AT_LIST_CAPACITY) {
-        g_battle_action_at_list_id = 0;
+static void battle_action_increment_at_list_cursor(void) {
+    g_battle_action_at_list_cursor++;
+    if (g_battle_action_at_list_cursor >= AT_LIST_CAPACITY) {
+        g_battle_action_at_list_cursor = 0;
     }
 }
 
@@ -143,22 +143,22 @@ void battle_action_show_next_at_list_entry(void) {
     battle_unit_t* unit;
 
     for (;;) {
-        id = battle_action_get_at_list_entry_unit_id(g_battle_action_at_list_id);
+        id = battle_action_get_at_list_entry_unit_id(g_battle_action_at_list_cursor);
         if (id >= 0) {
             unit = battle_unit_get_by_battle_id(id & BATTLE_AT_LIST_ENTRY_BATTLE_ID_MASK);
             if ((id & BATTLE_AT_LIST_ENTRY_CHARGED_ACTION) != 0) {
                 battle_target_move_cursor_to_action_target(unit);
                 battle_target_calculate_for_menu_types(&unit->stats->action_command);
-                battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
+                battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_SHOW_TARGETS, 3);
             } else {
                 battle_target_move_cursor_to_unit(unit);
-                battle_target_set_tile_background_color(BATTLE_TILE_MARK_NONE, 0);
+                battle_target_set_tile_mark_colors(BATTLE_TILE_MARK_NONE, 0);
             }
             break;
         }
-        battle_action_increment_at_list_id();
+        battle_action_increment_at_list_cursor();
     }
-    battle_action_increment_at_list_id();
+    battle_action_increment_at_list_cursor();
 }
 
 /* Open the status menu once: mark it open and restart the AT list cursor at entry
@@ -166,14 +166,14 @@ void battle_action_show_next_at_list_entry(void) {
 void battle_action_open_status_menu_at_list_start(void) {
     if (g_battle_status_menu_open == 0) {
         g_battle_status_menu_open = 1;
-        g_battle_action_at_list_id = 0;
+        g_battle_action_at_list_cursor = 0;
     }
 }
 
 /* Restart the AT list cursor at entry 0, so the free cursor's next Start press shows the first
  * entry. */
-void battle_action_clear_at_list_id(void) {
-    g_battle_action_at_list_id = 0;
+void battle_action_clear_at_list_cursor(void) {
+    g_battle_action_at_list_cursor = 0;
 }
 
 /* Drop a pending status-menu request (Triangle during a unit's turn the player does not control)
@@ -322,8 +322,8 @@ void battle_effect_set_secondary_level_up(battle_unit_t* unit) {
 
 /* Start the trap effect on a unit that stepped on a tile trap; every trap kind uses
  * this one effect. */
-void battle_effect_set_secondary_venom_trap(battle_unit_t* unit) {
-    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_VENOM_TRAP);
+void battle_effect_set_secondary_trap(battle_unit_t* unit) {
+    battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_TRAP);
 }
 
 /* Start the splash of a unit landing in swamp, marsh or open water. */
@@ -417,7 +417,7 @@ static void battle_unit_update_display(battle_unit_t* unit) {
         unit->status_flags_5_6 |= unit->statuses_to_add_5_6;
         battle_unit_dismount_dead_rider(unit);
         battle_gfx_update_sprite_transparency_flag(unit);
-        battle_gfx_update_status_bubble_graphic_trigger(unit);
+        battle_gfx_update_status_bubble_active(unit);
         if (g_battle_state_animation_continue_check != 0) {
             battle_gfx_check_tile_status_palette_mod(unit, tile->flags.shading, 0);
         } else {

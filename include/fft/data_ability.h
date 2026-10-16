@@ -674,7 +674,7 @@ enum {
 
 /* Default-ability secondary records, g_main_ability_range_data.
  * main_ability_get_range uses the 14-byte stride and the range;
- * battle_action_run_pre_formula_setup reads flags_1,
+ * battle_action_calculate_target_result reads flags_1,
  * battle_ai_classify_ability_effect reads flags_2, and
  * battle_ai_load_ability_entry copies the element, CT and AoE into the
  * considered AI ability. Other bytes stay provisional. */

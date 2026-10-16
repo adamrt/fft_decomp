@@ -77,11 +77,10 @@ void battle_gfx_draw_unit_sprite_position_copies(battle_unit_t* unit);
 battle_gfx_source_frame_t* battle_gfx_get_unit_sprite_frame_and_vram_ids(
     u32 runtime_id, battle_unit_sprite_query_t* out);
 void battle_gfx_hide_jumping_units(void);
-void battle_gfx_init_item_get_rendering(struct battle_unit* unit);
+void battle_gfx_draw_item_display(struct battle_unit* unit);
 void battle_gfx_init_position_vector_copies(struct battle_unit* unit);
-void battle_gfx_load_trap_and_unit_frame_parts(
-    battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame, u16 sequence_id);
-s32 battle_gfx_reset_unit_graphic_trigger(u32 runtime_id);
+void battle_gfx_load_unit_frame(battle_unit_t* unit, battle_unit_anim_state_t* state, u16 frame, u16 sequence_id);
+s32 battle_gfx_hide_unit_by_runtime_id(u32 runtime_id);
 void battle_gfx_shift_and_fill_position_copies(struct battle_unit* unit);
 void battle_gfx_store_item_display_data(struct battle_unit* unit, u32 item_id);
 void battle_gfx_update_sprite_transparency_flag(struct battle_unit* unit);
@@ -115,7 +114,7 @@ typedef struct battle_gfx_other_palettes {
 typedef char battle_gfx_other_palettes_size_must_be_672[sizeof(battle_gfx_other_palettes_t) == 672 ? 1 : -1];
 
 extern palette_t g_battle_gfx_crystal_palettes[6];
-extern palette_t g_battle_gfx_cycled_deployed_palettes[2];
+extern palette_t g_battle_gfx_cycled_tile_glow_palettes[2];
 extern clut_t g_battle_gfx_trail_clut;
 extern palette_t g_battle_gfx_frog_palettes[5];
 extern clut_t g_battle_gfx_weapon_clut; /* the first 0x200 bytes of WEP.SPR */
@@ -129,8 +128,8 @@ void battle_gfx_start_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green
 void battle_gfx_start_unit_fade_out_red(s32 runtime_id);
 void battle_gfx_start_event_unit_fade_out(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
 void battle_gfx_modify_palette_based_on_team(struct battle_unit* unit, s32 amount);
-void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
-    s16 red, s16 green, s16 blue, s32 final_value);
+void battle_map_modify_palette_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
+    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value);
 void battle_gfx_set_evtchr_palette_by_runtime_id(s32 runtime_id, s32 slot_index, s32 clut_index);
 void battle_gfx_set_thrown_item_graphic_palette(s32 item_id, battle_unit_t* unit);
 void battle_gfx_set_thrown_item_palette_by_runtime_id(u32 item_id, u32 runtime_id);
@@ -138,7 +137,7 @@ void battle_gfx_apply_unit_palette_modulation_to_units(
     s32 mode, s32 amount, s32 runtime_id, s16 red, s16 green, s16 blue);
 void battle_gfx_tint_all_units_by_team(void);
 void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_value);
-void battle_gfx_update_unit_palette_animation(void);
+void battle_gfx_cycle_tile_glow_palettes(void);
 void battle_gfx_restore_unit_palettes(void);
 
 /* result and status displays */
@@ -153,7 +152,7 @@ typedef enum battle_status_bubble {
     BATTLE_STATUS_BUBBLE_COUNT = 22,
 } battle_status_bubble_e;
 
-extern MATRIX g_battle_gfx_numeric_display_matrix;
+extern MATRIX g_battle_gfx_sprite_display_matrix;
 extern s32 g_battle_gfx_status_bubble_delay;
 extern palette_t g_battle_gfx_status_bubble_palette;
 /* Status flag shown by each status bubble before SOURCE_UNIT. DEAD and DEATH_SENTENCE hold 0 and are
@@ -178,7 +177,7 @@ void battle_gfx_update_float_height_and_status_bubble(battle_unit_t* unit);
 battle_gfx_sprite_display_data_t* battle_gfx_init_status_bubble_sprite_display(s32 unit_index);
 void battle_gfx_prepare_post_action_display(battle_unit_t* unit);
 s32 battle_gfx_prepare_post_action_display_by_runtime_id(s32 runtime_id);
-void battle_gfx_update_status_bubble_graphic_trigger(struct battle_unit* unit);
+void battle_gfx_update_status_bubble_active(struct battle_unit* unit);
 void battle_gfx_update_status_bubbles_and_graphics(void);
 
 /* cursors */

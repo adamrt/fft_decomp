@@ -41,14 +41,14 @@ static SVECTOR g_battle_gte_rtps_vxy0 = { 0 };
 static void battle_gfx_init_render_frame(void);
 static void battle_gfx_init_render_state(void);
 
-/* Uploads the fixed CLUTs of the sprite row: 1 and 2 the deployed-unit palettes,
+/* Uploads the fixed CLUTs of the sprite row: 1 and 2 the cursor tile glow palettes,
  * 3 the wait-direction arrow, 4 the map selection cursor, 5 the shadow and 7 the
  * status bubble. */
-static void battle_gfx_extract_deployed_unit_palettes(void) {
+static void battle_gfx_load_fixed_sprite_cluts(void) {
     RECT rect; /* never used; retail reserves its 8 bytes */
 
-    battle_map_load_palette_data(&g_battle_deployed_unit_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
-    battle_map_load_palette_data(&g_battle_deployed_unit_palettes[1], MAP_CLUT_ROW_SPRITES, 2, 0);
+    battle_map_load_palette_data(&g_battle_gfx_tile_glow_palettes[0], MAP_CLUT_ROW_SPRITES, 1, 0);
+    battle_map_load_palette_data(&g_battle_gfx_tile_glow_palettes[1], MAP_CLUT_ROW_SPRITES, 2, 0);
     battle_map_load_palette_data(&g_battle_gfx_wait_direction_arrow_palette, MAP_CLUT_ROW_SPRITES, 3, 0);
     battle_map_load_palette_data(&g_battle_gfx_map_selection_cursor_palette, MAP_CLUT_ROW_SPRITES, 4, 0);
     battle_map_load_palette_data(&g_battle_gfx_shadow_palette, MAP_CLUT_ROW_SPRITES, 5, 0);
@@ -143,10 +143,10 @@ static void battle_state_run_deployment(void) {
         } else {
             main_gfx_add_now_loading_to_otag(main_gfx_get_otag());
         }
-        g_battle_state_map_init_step = battle_map_init_units_sprites_event_and_music(map_id,
-            g_battle_state_map_init_step, script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
+        g_battle_state_map_init_step = battle_map_step_deployment_init_sequence(map_id, g_battle_state_map_init_step,
+            script_is_deployment_running(main_gfx_get_otag(), g_input_current_buttons));
         if (g_battle_state_map_init_step == 0xd) {
-            battle_gfx_extract_deployed_unit_palettes();
+            battle_gfx_load_fixed_sprite_cluts();
             battle_state_enter_event_at_battle_start();
             g_battle_screen_fade_intensity = fade;
             /* Not `break`: jump optimization would move this exit block
@@ -899,19 +899,19 @@ void battle_gfx_decompress_attack_spritesheet(const u8* source, u8* destination)
 }
 
 /* Reset the unit sprite renderer at battle start: the identity third row and column of
- * the numeric display matrix, depth 0x200 in the GTE projection inputs, the frame
+ * the sprite display matrix, depth 0x200 in the GTE projection inputs, the frame
  * counters, and the sprite primitive pool, which begins just past the unit slots. */
 static void battle_gfx_init_render_state(void) {
-    g_battle_gfx_numeric_display_matrix.m[2][2] = ONE;
+    g_battle_gfx_sprite_display_matrix.m[2][2] = ONE;
     g_battle_gte_rtps_vxy0.vz = 0x200;
     g_battle_gte_rtpt_vxy2.vz = 0x200;
     g_battle_gte_rtpt_vxy1.vz = 0x200;
     g_battle_gte_rtpt_vxy0.vz = 0x200;
-    g_battle_gfx_numeric_display_matrix.m[2][1] = 0;
-    g_battle_gfx_numeric_display_matrix.m[2][0] = 0;
-    g_battle_gfx_numeric_display_matrix.m[1][2] = 0;
-    g_battle_gfx_numeric_display_matrix.m[0][2] = 0;
-    g_battle_gfx_numeric_display_matrix.t[2] = 0;
+    g_battle_gfx_sprite_display_matrix.m[2][1] = 0;
+    g_battle_gfx_sprite_display_matrix.m[2][0] = 0;
+    g_battle_gfx_sprite_display_matrix.m[1][2] = 0;
+    g_battle_gfx_sprite_display_matrix.m[0][2] = 0;
+    g_battle_gfx_sprite_display_matrix.t[2] = 0;
     g_battle_gfx_sprite_prim_index = 0;
     g_battle_gfx_frame_start_sprite_prim_index = 0;
     g_battle_gfx_unread_2 = 0;
@@ -1081,15 +1081,15 @@ void battle_gfx_construct_polygon_data_for_units(battle_gfx_sprite_display_data_
     s16 sine;
 
     cosine = rcos(angle + display->rotation);
-    g_battle_gfx_numeric_display_matrix.m[0][0] = ((cosine * scale->vx) >> 12) * display->scale_x >> 12;
-    g_battle_gfx_numeric_display_matrix.m[1][1] = ((cosine * scale->vy) >> 12) * display->scale_y >> 12;
+    g_battle_gfx_sprite_display_matrix.m[0][0] = ((cosine * scale->vx) >> 12) * display->scale_x >> 12;
+    g_battle_gfx_sprite_display_matrix.m[1][1] = ((cosine * scale->vy) >> 12) * display->scale_y >> 12;
     sine = rsin(angle + display->rotation);
-    g_battle_gfx_numeric_display_matrix.m[0][1] = ((-sine * scale->vy) >> 12) * display->scale_y >> 12;
-    g_battle_gfx_numeric_display_matrix.m[1][0] = ((sine * scale->vx) >> 12) * display->scale_x >> 12;
-    g_battle_gfx_numeric_display_matrix.t[0] = position->vx;
-    g_battle_gfx_numeric_display_matrix.t[1] = position->vy;
-    SetRotMatrix(&g_battle_gfx_numeric_display_matrix);
-    SetTransMatrix(&g_battle_gfx_numeric_display_matrix);
+    g_battle_gfx_sprite_display_matrix.m[0][1] = ((-sine * scale->vy) >> 12) * display->scale_y >> 12;
+    g_battle_gfx_sprite_display_matrix.m[1][0] = ((sine * scale->vx) >> 12) * display->scale_x >> 12;
+    g_battle_gfx_sprite_display_matrix.t[0] = position->vx;
+    g_battle_gfx_sprite_display_matrix.t[1] = position->vy;
+    SetRotMatrix(&g_battle_gfx_sprite_display_matrix);
+    SetTransMatrix(&g_battle_gfx_sprite_display_matrix);
     for (i = start; i < end; i++) {
         part = &display->parts[i];
         flags = part->flags;
