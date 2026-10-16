@@ -42,6 +42,7 @@ void menu_draw_thread_status_indicators_variant(void) {
             }
         }
     }
+    /* Both requests jump past the fade-out updates; an if/else-if/else form adds two instructions. */
     if (active != 0) {
         if ((display->y == 0x90) && !(display->flags & MENU_STATUS_PANEL_HIDDEN)) {
             g_menu_indicator_state[0] = MENU_INDICATOR_STATE_FADING_OUT;

@@ -961,6 +961,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         goto weapon_flags;
     case ACTION_MENU_TYPE_CHARGE:
         ai->considered_ability.ct = g_main_charge_ability_data[ability_id - ABILITY_ID_CHARGE_FIRST].ct;
+        /* Placing this case above ATTACK to fall through reorders the blocks. */
         goto attack;
     case ACTION_MENU_TYPE_ARITHMETICKS: {
         u32 status_cursor;
@@ -1003,6 +1004,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
             ai->considered_ability.parameters.fields.range = secondary->range;
             ai->considered_ability.parameters.fields.aoe = secondary->aoe;
         }
+        /* Folding this test into the CT adjustment's condition adds instructions. */
         if (secondary->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE)
             goto copy_status;
     }
@@ -1810,7 +1812,7 @@ static s32 battle_ai_select_action_status(void) {
         /* Movement-only selection leaves the other action fields unchanged. */
         ai->selected_action.command.skillset_id = 0;
         ai->selected_action.coords = coords;
-        goto success;
+        goto success; /* a direct return 1 here adds an instruction */
     }
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)] & STATUS_BYTE_MASK(STATUS_ID_CONFUSION)) {
         if (battle_ai_select_active_units(AI_UNIT_FILTER_ANY, 255)) {
@@ -1966,7 +1968,7 @@ static s32 battle_ai_select_action_random(void) {
         } while (0);
     }
     return 0;
-selected: /* shared success tail */
+selected: /* shared success tail; a copy at each site adds an instruction */
     battle_mem_copy_u16_values(&ai->selected_action, &ai->current_action, sizeof(ai_action_data_t));
     return 1;
 }

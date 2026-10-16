@@ -1655,9 +1655,12 @@ static void require_condition_show_general(s32 hold_frames) {
         thread_yield();
         input = script_get_controller_input_pointer(0);
         g_menu_input_controller = input;
-        /* Circle skips the remaining phases to the shared exit. */
-        if (*input & PSX_PAD_CIRCLE)
-            goto done;
+        /* Circle skips the remaining phases and ends the thread. */
+        if (*input & PSX_PAD_CIRCLE) {
+            thread_yield();
+            thread_exit_current();
+            return;
+        }
         buffer = (buffer + 1) & 1;
         if (frame >= 9) {
             for (index = 5; index >= 3; index--) {
@@ -1699,8 +1702,11 @@ static void require_condition_show_general(s32 hold_frames) {
             thread_yield();
             input = script_get_controller_input_pointer(0);
             g_menu_input_controller = input;
-            if (*input & PSX_PAD_CIRCLE)
-                goto done;
+            if (*input & PSX_PAD_CIRCLE) {
+                thread_yield();
+                thread_exit_current();
+                return;
+            }
             buffer = (buffer + 1) & 1;
             for (index = quad_count - 1; index >= 0; index--) {
                 POLY_GT4* poly = &g_require_gfx_poly_gt4_buffers[buffer][index];
@@ -1731,7 +1737,6 @@ static void require_condition_show_general(s32 hold_frames) {
         hide_offset += 8;
         frame++;
     } while (frame < 0xa);
-done:
     thread_yield();
     thread_exit_current();
 }
@@ -1803,7 +1808,9 @@ void require_condition_run_special_thread(void) {
             goto fade_out;
         }
         if (thread_get_current_parameter_3() == 1) {
-            goto done;
+            thread_yield();
+            thread_exit_current();
+            return;
         }
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
@@ -1831,7 +1838,9 @@ void require_condition_run_special_thread(void) {
             break;
         }
         if (thread_get_current_parameter_3() == 1) {
-            goto done;
+            thread_yield();
+            thread_exit_current();
+            return;
         }
         buffer ^= 1;
         for (quad_index = 0; quad_index < quad_count; quad_index++) {
@@ -1880,7 +1889,6 @@ fade_out:
         thread_yield();
         scale -= 0xc;
     } while (scale >= 0x30);
-done:
     thread_yield();
     thread_exit_current();
 }
