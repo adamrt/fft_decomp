@@ -648,7 +648,8 @@ restart_script:
             }
             g_thread_contexts[operand_1].function_parameter_1 = (s32)parameters;
             g_thread_contexts[operand_1].task_id = THREAD_TASK_SPRITE_MOVE;
-            g_thread_contexts[operand_1].task_words[0] = script_resolve_runtime_id(first_operand);
+            g_thread_contexts[operand_1].task_words[SPRITE_MOVE_THREAD_WORD_RUNTIME_ID]
+                = script_resolve_runtime_id(first_operand);
         } else if (opcode == EVENT_OPCODE_WAIT_SPRITE_MOVE) {
             script_opcode_wait_sprite_move(first_operand);
         } else if (opcode == EVENT_OPCODE_MAP_LIGHT) {

@@ -1785,9 +1785,9 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
     }
     silent = 0;
     if ((g_script_event_input & PSX_PAD_CIRCLE) && menu_can_accept_input() != 0) {
-        if (g_thread_contexts[g_thread_current_id].task_words[1] == 0) {
-            g_thread_contexts[g_thread_current_id].task_words[1] = 2;
-            g_thread_contexts[g_thread_current_id].task_words[0] = 0;
+        if (g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
+            g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+            g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }
         row_actions = entry->row_actions;
         target = ((s32)row_actions >= -0xf && (s32)row_actions <= -1) ? (s32)row_actions : row_actions[row_index];
@@ -2081,7 +2081,7 @@ void menu_select_icon_cluts(menu_icon_sprites_t* frame) {
  * The two signed threshold tables produce the idle and active cursor curves. */
 s32 menu_get_cursor_bob_offset(s32 mode) {
     menu_cursor_bob_entry_t* entry;
-    s32 counter = g_thread_contexts[g_thread_current_id].task_words[0];
+    s32 counter = g_thread_contexts[g_thread_current_id].task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER];
     s32 threshold;
 
     if (mode == 0) {
@@ -2110,9 +2110,9 @@ s32 menu_get_cursor_bob_offset(s32 mode) {
 
 /* Position the icon-list cursor sprites and animate the highlighted icon.
  *
- * The current thread's 32-bit values at 0x50/0x54 hold the highlight timer and phase:
- * the phase restarts at 2 while input is blocked and clears once the timer
- * reaches 27 frames. The cursor sprites follow the selected row. */
+ * The current thread's cursor bob task words hold the timer and the active
+ * flag: the flag restarts at 2 while input is blocked and clears once the
+ * timer reaches 27. The cursor sprites follow the selected row. */
 void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* record, s32 frame, s32 cursor) {
     thread_t* thread = &g_threads[g_thread_current_id];
     s32 x;
@@ -2120,24 +2120,25 @@ void menu_update_icon_cursor_sprites(menu_entry_t* param, menu_icon_sprites_t* r
 
     if (cursor >= 0) {
         if (g_menu_formation_display_mode == 1) {
-            thread->task_words[1] = 2;
-            thread->task_words[0] = 0;
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }
         if (thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
-            if (thread->task_words[1] != 0 && thread->task_words[0] >= 0x1B) {
-                thread->task_words[1] = 0;
-                thread->task_words[0] = 0;
+            if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0
+                && thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] >= 0x1B) {
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
-        } else if (thread->task_words[1] == 0) {
-            thread->task_words[1] = 2;
-            thread->task_words[0] = 0;
+        } else if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }
-        if (thread->task_words[1] != 0) {
+        if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             x = menu_get_cursor_bob_offset(1);
         } else {
             x = menu_get_cursor_bob_offset(0);
         }
-        thread->task_words[0] += g_script_event_speed;
+        thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         x -= 12;
         y = cursor * 16 + 10;
         record->sprites[1].x0 = param->window.x + x;

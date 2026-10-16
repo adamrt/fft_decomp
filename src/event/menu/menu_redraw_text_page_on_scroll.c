@@ -32,7 +32,8 @@ u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* ren
         return 0;
     }
 
-    if (((*secondary_input & PSX_PAD_SQUARE) == 0) && (g_threads[g_thread_current_id].task_words[4] == 0)) {
+    if (((*secondary_input & PSX_PAD_SQUARE) == 0)
+        && (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] == 0)) {
         return 0;
     }
 
@@ -50,9 +51,9 @@ u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* ren
         }
         changed = 1;
         g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
-    } else if (g_threads[g_thread_current_id].task_words[4] != 0) {
+    } else if (g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0) {
         changed = 1;
-        g_threads[g_thread_current_id].task_words[4] = 0;
+        g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 0;
     }
 
     if (changed == 0) {

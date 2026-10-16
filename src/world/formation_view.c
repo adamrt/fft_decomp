@@ -159,7 +159,7 @@ s32 world_get_party_unit_formation_sprite(s32 party_index) {
     return formation_sprite;
 }
 
-/* Set a thread's 32-bit task field 4, its redraw request. */
+/* Ask the scrolling text list thread in thread_id to redraw its page. */
 void world_thread_request_redraw(s32 thread_id) {
-    g_threads[thread_id].task_words[4] = 1;
+    g_threads[thread_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] = 1;
 }

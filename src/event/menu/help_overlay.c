@@ -262,7 +262,7 @@ void menu_run_battle_help(void) {
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread_variant);
             thread_set_parameters(
                 THREAD_SCREEN_SLOT_MESSAGE, 0x3B, g_menu_help_menu_cursor_tile.surface_type + 0x5800, 0);
-            g_threads[THREAD_SCREEN_SLOT_MESSAGE].task_words[3] = -0x20;
+            g_threads[THREAD_SCREEN_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = -0x20;
             thread_wait_until_inactive(THREAD_SCREEN_SLOT_MESSAGE);
             *g_menu_help_controller_state_ptr = 0;
             thread_wait_frames(1);
@@ -286,9 +286,9 @@ void menu_run_battle_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
-            if (self->task_words[1] != 0) {
-                self->task_words[1] = 0;
-                self->task_words[0] = 0;
+            if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
             node = &navigation[menu_index];
             y = node->y;
@@ -354,17 +354,17 @@ void menu_run_battle_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
-            if (self->task_words[1] == 0) {
-                self->task_words[1] = 2;
-                self->task_words[0] = 0;
+            if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
         }
-        if (self->task_words[1] != 0) {
+        if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             bob = menu_get_cursor_bob_offset(1);
         } else {
             bob = menu_get_cursor_bob_offset(0);
         }
-        self->task_words[0] += g_script_event_speed;
+        self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
         buffer = frame & 1;
         if (node->vertical_cursor != 0) {
@@ -399,7 +399,7 @@ void menu_run_battle_help(void) {
             setXY4(shadow_quads + buffer, x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2, x + shadow_offset,
                 y + 0x12, x + shadow_offset + 0x10, y + 0x12);
         }
-        if (self->task_words[1] != 0) {
+        if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             cursor_quads[buffer].clut = 0x7DFC;
             shadow_quads[buffer].clut = 0x7E3C;
         } else {
@@ -501,9 +501,9 @@ void menu_run_require_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
-            if (self->task_words[1] != 0) {
-                self->task_words[1] = 0;
-                self->task_words[0] = 0;
+            if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
             entry = &navigation[menu_index];
             y = entry->y;
@@ -569,17 +569,17 @@ void menu_run_require_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
-            if (self->task_words[1] == 0) {
-                self->task_words[1] = 2;
-                self->task_words[0] = 0;
+            if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+                self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
         }
-        if (self->task_words[1] != 0) {
+        if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             bob = menu_get_cursor_bob_offset(1);
         } else {
             bob = menu_get_cursor_bob_offset(0);
         }
-        self->task_words[0] += g_script_event_speed;
+        self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
         buffer = frame & 1;
         if (entry->vertical_cursor != 0) {
@@ -624,7 +624,7 @@ void menu_run_require_help(void) {
             shadow_x = x + 2 + bob;
             setXYWH(&shadow[buffer], shadow_x, y + 2, 16, 16);
         }
-        if (self->task_words[1] != 0) {
+        if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             cursor[buffer].clut = 0x7DFC;
             shadow[buffer].clut = 0x7E3C;
         } else {

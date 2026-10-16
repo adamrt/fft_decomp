@@ -141,24 +141,25 @@ static void world_menu_update_entry_cursor_quads(
 
     if (cursor >= 0) {
         if (g_menu_formation_display_mode == 1) {
-            thread->task_words[1] = 2;
-            thread->task_words[0] = 0;
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }
         if (thread_is_previous_running() == 0 && g_menu_input_lock_mode == 0) {
-            if (thread->task_words[1] != 0 && thread->task_words[0] >= 0x1B) {
-                thread->task_words[1] = 0;
-                thread->task_words[0] = 0;
+            if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0
+                && thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] >= 0x1B) {
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
-        } else if (thread->task_words[1] == 0) {
-            thread->task_words[1] = 2;
-            thread->task_words[0] = 0;
+        } else if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+            thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
         }
-        if (thread->task_words[1] != 0) {
+        if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             y = menu_get_cursor_bob_offset(1);
         } else {
             y = menu_get_cursor_bob_offset(0);
         }
-        thread->task_words[0] += g_script_event_speed;
+        thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         x = -(cursor + 1) * 6;
         y -= 0x17;
         setXY4(quad, entry->window.x + (entry->inner_width + x) - 0x13, entry->window.y - y + 4,

@@ -7,6 +7,7 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/menu_text.h"
+#include "fft/text.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -216,7 +217,7 @@ u8* menu_build_window_image(s32 width, s32 height, RECT* rect, s32 mode, s32 tai
             g_menu_window_sprite_position.rect.y = 0;
         }
         g_menu_window_sprite_position.stride = words * 4;
-        i = g_threads[g_thread_current_id].task_words[5] & 0xF0;
+        i = g_threads[g_thread_current_id].task_words[DIALOG_THREAD_WORD_WINDOW_OPTIONS] & 0xF0;
         if (i != 0) {
             if ((mode & DIALOG_TYPE_POSITION_MASK) == 1) {
                 g_menu_window_sprite_position.rect.x -= 0x10;

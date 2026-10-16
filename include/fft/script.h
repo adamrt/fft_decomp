@@ -1077,6 +1077,11 @@ void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 void script_opcode_unknown_74(const u8* unused_parameters);
 void script_toggle_message_portrait_flip(const u8* parameters);
 void script_opcode_portrait_col(s32 portrait_id);
+/* Task words of a sprite-move thread. The SpriteMove instruction and the
+ * thread itself store the moving unit's runtime id; WaitSpriteMove matches it. */
+enum {
+    SPRITE_MOVE_THREAD_WORD_RUNTIME_ID = 0,
+};
 void script_sprite_move(void);
 void script_sprite_move_beta(void);
 

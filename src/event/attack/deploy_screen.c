@@ -1473,7 +1473,7 @@ static void attack_deploy_update_cursor_primitives(s32 frame, attack_deploy_rend
     s32 i;
     u8(*tiles)[5];
 
-    thread->task_words[0] += g_script_event_speed;
+    thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
     mem_copy_bytes_nonempty(
         &g_attack_deploy_cursor_clut[1], &g_attack_deploy_cursor_palette_cycle[0][1 + (frame / 4) % 14], 0x1e);
     g_attack_deploy_cursor_clut[0].red = g_attack_deploy_cursor_clut[0].green = g_attack_deploy_cursor_clut[0].blue

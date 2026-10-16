@@ -83,9 +83,9 @@ void attack_deploy_run_select_menu(void) {
                 g_menu_input_lock_mode = 0;
             }
             g_menu_input_lock_mode = 0;
-            if (thread->task_words[1] != 0) {
-                thread->task_words[1] = 0;
-                thread->task_words[0] = 0;
+            if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
             node = &nodes[selected];
             y = node->y;
@@ -157,17 +157,17 @@ void attack_deploy_run_select_menu(void) {
                 g_menu_input_lock_mode = 1;
             }
             g_menu_input_lock_mode = 1;
-            if (thread->task_words[1] == 0) {
-                thread->task_words[1] = 2;
-                thread->task_words[0] = 0;
+            if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] == 0) {
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 2;
+                thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
         }
-        if (thread->task_words[1] != 0) {
+        if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             bob = menu_get_cursor_bob_offset(1);
         } else {
             bob = menu_get_cursor_bob_offset(0);
         }
-        thread->task_words[0] += g_script_event_speed;
+        thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
         buffer = i & 1;
         if (node->vertical_cursor != 0) {
@@ -235,7 +235,7 @@ void attack_deploy_run_select_menu(void) {
             (right + buffer)->x3 = x + shadow_offset + 0x10;
             (right + buffer)->y3 = y + 0x12;
         }
-        if (thread->task_words[1] != 0) {
+        if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             left[buffer].clut = 0x7dfc;
             right[buffer].clut = 0x7e3c;
         } else {

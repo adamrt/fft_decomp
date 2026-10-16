@@ -651,6 +651,13 @@ typedef char menu_cursor_bob_entry_size_must_be_2[sizeof(menu_cursor_bob_entry_t
 extern menu_cursor_bob_entry_t g_menu_cursor_bob_thresholds[];
 extern menu_cursor_bob_entry_t g_menu_cursor_bob_active_thresholds[];
 
+/* Task words of a thread that bobs a menu cursor: menu_get_cursor_bob_offset
+ * reads the timer, which the thread advances by g_script_event_speed each
+ * frame and resets whenever it sets or clears the active flag. */
+enum {
+    MENU_CURSOR_THREAD_WORD_BOB_TIMER = 0,
+    MENU_CURSOR_THREAD_WORD_BOB_ACTIVE = 1, /* 2 after a press or while input is elsewhere: the active curve */
+};
 s32 menu_get_cursor_bob_offset(s32 mode);
 
 /* menu drawing */
@@ -935,6 +942,12 @@ extern u16 g_menu_height_display_suppressed;
 void menu_enable_height_display(void);
 void menu_suppress_height_display(void);
 void menu_run_selected_tile_info_display_thread(void);
+/* Task words of a scrolling text list thread: its *_redraw_text_page_on_scroll
+ * helper redraws the page once and clears the request, which
+ * world_thread_request_redraw sets. */
+enum {
+    MENU_LIST_THREAD_WORD_REDRAW_REQUEST = 4,
+};
 u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
 
 /* primitive queues */

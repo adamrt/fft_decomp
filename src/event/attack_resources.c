@@ -844,7 +844,8 @@ void script_block_start_thread(void) {
             }
             g_thread_contexts[thread_id].function_parameter_1 = (s32)(script + 1);
             g_thread_contexts[thread_id].task_id = THREAD_TASK_SPRITE_MOVE;
-            g_thread_contexts[thread_id].task_words[0] = script_resolve_runtime_id(first_halfword);
+            g_thread_contexts[thread_id].task_words[SPRITE_MOVE_THREAD_WORD_RUNTIME_ID]
+                = script_resolve_runtime_id(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_SPRITE_MOVE) {
             script_opcode_wait_sprite_move(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_UNIT) {

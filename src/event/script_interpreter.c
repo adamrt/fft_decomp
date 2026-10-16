@@ -396,7 +396,7 @@ static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s3
     if (runtime_id == EVENT_RUNTIME_ID_NONE) {
         return;
     }
-    g_thread_contexts[g_thread_current_id].task_words[0] = runtime_id;
+    g_thread_contexts[g_thread_current_id].task_words[SPRITE_MOVE_THREAD_WORD_RUNTIME_ID] = runtime_id;
     coords = battle_unit_get_event_offset_by_runtime_id(runtime_id);
     parameters += sizeof(arg->unit_id_le);
     pos[0][0] = coords->vx;
@@ -522,7 +522,7 @@ void script_opcode_wait_sprite_move(s32 unit_id) {
     for (;;) {
         for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
             if (thread_is_running_asm(i) != 0 && g_thread_contexts[i].task_id == THREAD_TASK_SPRITE_MOVE
-                && g_thread_contexts[i].task_words[0] == runtime_id) {
+                && g_thread_contexts[i].task_words[SPRITE_MOVE_THREAD_WORD_RUNTIME_ID] == runtime_id) {
                 break;
             }
         }

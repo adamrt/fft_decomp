@@ -22,7 +22,7 @@ s32 menu_text_start_or_poll_thread(s32 thread_id, s32 parameter_0, s32 key, s32 
         thread_start(thread_id, text_run_dialog_thread_variant);
         thread_set_parameters(thread_id, parameter_0, key, parameter_2);
         g_menu_text_active_key = key;
-        g_threads[thread_id].task_words[3] = y_offset;
+        g_threads[thread_id].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = y_offset;
         return 1;
     }
     return status;

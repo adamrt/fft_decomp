@@ -11,10 +11,10 @@
  * both index slots with thread_id << 10 and start SP/FP at slot + 0x3f0.
  * The parameter stores at BATTLE 0x8014ca38 and WORLD's corresponding
  * three/four-parameter helpers establish full 32-bit payload values.
- * The seven 32-bit task values at 0x50 are zeroed by thread_start; each task gives them its own meaning: menu
- * blink/icon cursor threads use [0] timer and [1] state, event unit/sprite-move threads keep the unit id in [0], and
- * DisplayMessage text threads use [2] x offset, [3] y offset, [4] arrow offset, [5] opening type and [6] width
- * override. The scheduler saves s0-s7 and k0/k1 before the GP, SP, FP and return address. */
+ * The seven 32-bit task values at 0x50 are zeroed by thread_start; each task gives them its own meaning, named
+ * beside its thread functions: DIALOG_THREAD_WORD_* (text.h), SPRITE_MOVE_THREAD_WORD_* (script.h), and the
+ * menu cursor bob and scrolling text list words MENU_CURSOR_THREAD_WORD_* and MENU_LIST_THREAD_WORD_* (menu.h).
+ * The scheduler saves s0-s7 and k0/k1 before the GP, SP, FP and return address. */
 typedef struct thread {
     s32 function_parameter_1;   /* 0x00 */
     s32 function_parameter_2;   /* 0x04 */
