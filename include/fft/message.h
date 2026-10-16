@@ -7,6 +7,8 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
+struct action_command;
+
 /* dialog */
 extern u16 g_message_speaker_swap_unit_a;
 extern u16 g_message_speaker_swap_unit_b;
@@ -60,9 +62,5 @@ extern u8 g_message_block_buffer[];
 extern s32 g_message_block_loaded; /* the block in g_message_block_buffer */
 
 void message_block_load_if_changed(s32 block);
-
-/* debug text */
-/* The debug line menu_alloc_memory prints while it waits for free pages. */
-extern char g_message_wait_for_allocation_message[];
 
 #endif

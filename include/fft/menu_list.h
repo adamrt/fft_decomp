@@ -28,6 +28,7 @@ void menu_stop_managed_thread(s32 thread_id);
 void menu_stop_thread_and_wait(s32 thread_id);
 void menu_start_or_poll_thread(s32 thread_id, menu_entry_t* descriptor);
 s32 menu_thread_is_running(s32 thread_id);
+void menu_wait_selection_threads(void);
 
 /* Empty; menu_init_subsystems calls it between the palette and text setup and the subsystem reset. */
 void menu_init_stub(void);
@@ -85,6 +86,9 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer);
 
 /* Applies scroll input, rebuilds the entry's text image and uploads the rows that changed. */
 u8* menu_redraw_text_page_on_scroll(menu_entry_t* menu, s32* first_row, s32* render_pending, s32* unused_cursor);
+
+/* Shared with the per-program event interpreter and dialog thread. */
+u8* menu_redraw_text_page_on_scroll_in_rect(menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area);
 
 /* list pages */
 /* One of the two 0x134-byte packet pages a scrolling text list alternates between frames

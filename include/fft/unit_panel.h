@@ -110,12 +110,6 @@ void unit_panel_load_party_unit(s32 unused, s32 party_index);
  * participant detail level draws. */
 void unit_panel_build_unit_data(s32 party_index);
 
-/* status list */
-/* Text ids of the unit's current statuses in the status panel's two columns, filled by
- * status_screen_build_status_list. */
-extern s16 g_unit_panel_status_left_text_ids[20];
-extern s16 g_unit_panel_status_right_text_ids[20];
-
 /* panel threads */
 /* Parameter block of the task-0x3b status panel threads (WORLD's formation
  * panels and the overlays' character status and numeric panel threads): the
@@ -226,10 +220,6 @@ extern point16_t g_unit_panel_panel_status_scales[];
 extern const point16_t g_unit_panel_panel_status_texture;
 extern sprite_sheet_frame_t g_unit_panel_panel_status_uv_rects[];
 extern const u16 g_unit_panel_panel_status_y_offsets[];
-
-/* Status image rectangles, indexed by status id, that item_draw_status_list draws in the item detail panel's status
- * column. */
-extern RECT g_unit_panel_status_display_image_rects[];
 
 void unit_panel_build_status_groups(POLY_FT4* poly);
 

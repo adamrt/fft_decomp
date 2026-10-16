@@ -2,7 +2,6 @@
  * zero-padded number. */
 
 #include "fft/gfx.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_script.h"
 #include "fft/save.h"

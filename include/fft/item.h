@@ -6,9 +6,11 @@
 
 #include "fft/gfx.h"
 #include "fft/job.h"
+#include "fft/menu.h"
 #include "fft/status.h"
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
+#include "psx/libgpu.h"
 #include "psx/types.h"
 
 /* item types */
@@ -495,6 +497,9 @@ typedef struct item_attribute_flat {
     u8 elemental_affinity[5];
 } item_attribute_flat_t;
 
+/* Poach yields the rare item 31 times in 256. */
+enum { ITEM_POACH_RARE_ITEM_CHANCE = 31 };
+
 /* Common and rare Fur Shop items obtained by poaching one monster job. */
 typedef struct item_poach {
     u8 common_item;
@@ -635,9 +640,8 @@ typedef enum item_sort_key {
     ITEM_SORT_KEY_HELD_COUNT = 5, /* inventory plus equipped copies */
 } item_sort_key_e;
 
-/* g_item_type_order_tables: seven independent signed-byte order lists.
- * item_init_order_tables establishes capacities 12/8/8/8/8/8/8 with -1
- * terminators; member categories remain unproven. */
+/* Seven signed-byte sort-key lists, each ending in -1: order_0 serves
+ * BUNIT's Unit List, order_1 serves Formation, and order_2..6 serve items. */
 typedef struct item_type_order_tables {
     s8 order_0[12];
     s8 order_1[8];
@@ -660,7 +664,9 @@ extern u8 g_item_type_order_4[5];
 extern u8 g_item_type_order_5[7];
 extern u8 g_item_type_order_6[5];
 
-/* Each category's sort key order (item_sort_key_e), packed bytes ending in -1. */
+/* Packed sort-key orders ending in -1. WORLD slot 0 points to Formation's
+ * order_1 (formation_sort_key_e); EQUIP slot 0 is null. Slots 1..5 in both
+ * programs point to order_2..6 (item_sort_key_e). */
 extern s8* g_item_type_order_lists[];
 
 void item_init_order_tables(void);
@@ -681,11 +687,24 @@ void item_collect_stat_deltas(s16 raw_item, unit_panel_summary_t* summary, unit_
 /* The texture origin of each item type's 12x12 icon, read by item_get_type_icon_rect. */
 extern uv8_t g_item_type_icon_origins[];
 
+/* Status image rectangles, indexed by status id, that item_draw_status_list draws in the item detail panel's status
+ * column. */
+extern RECT g_unit_panel_status_display_image_rects[];
+
+/* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_get_type_icon_rect gives the
+ * texture cell of an item type's 12x12 icon. */
+void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
+void item_build_icon_source(menu_icon_source_t* output, u32 item_id);
+menu_icon_source_t* item_build_type_icon_source(s32 index);
+
 /* A weapon's hand marks on the item panel: two-handed, or the Two Hands and Two Swords marks it allows. */
 void item_draw_weapon_hand_icons(s16 weapon_id);
 
 /* The item detail panel's status column. */
 void item_draw_status_list(s16 item_id);
+
+/* item action menu */
+extern menu_entry_t g_item_action_menu;
 
 /* rearranging */
 /* The item screens' rearrange mode: pick an item up and move it within its category list. */

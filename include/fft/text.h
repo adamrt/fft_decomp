@@ -11,8 +11,6 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-struct action_command;
-
 /* font */
 /* The font, EVENT/FONT.BIN: 2200 glyphs of 14 rows of 10 two-bit pixels. A
  * byte from TEXT_EXTENDED_GLYPH_PREFIX_FIRST selects a page of glyphs and
@@ -197,6 +195,9 @@ extern u8 g_text_data[];
 void text_init_section_pointers(void);
 void text_save_section_pointers(void);
 void text_restore_section_pointers(void);
+
+/* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
+u8* battle_text_find_entry(u32 text_id);
 u8* text_find_entry(u32 text_id);
 const u8* text_skip_to_entry(const u8* text, s32 entry_index);
 const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2);

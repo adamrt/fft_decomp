@@ -1,7 +1,6 @@
 /* The job list menu, recording the chosen job. */
 
 #include "fft/help.h"
-#include "fft/job.h"
 #include "fft/job_list.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"

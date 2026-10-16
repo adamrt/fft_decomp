@@ -1,9 +1,10 @@
-/* Storing a working item type order list in its packed table. */
+/* Storing a working sort-key order in its packed table. */
 
 #include "fft/item.h"
 #include "psx/types.h"
 
-/* Store the overlay's working item-type order in its packed table.
+/* Store a working sort-key order in its packed table. WORLD slot 0 holds
+ * Formation keys; slots 1..5 hold item keys.
  *
  * The source uses s16 entries terminated by -1; only each entry's low byte is
  * written. */

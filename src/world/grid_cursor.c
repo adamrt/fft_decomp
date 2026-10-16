@@ -6,6 +6,7 @@
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/message.h"

@@ -130,9 +130,12 @@ void battle_map_palette_update_and_store_colors(
     s32 mode, s32 clut_row, s32 clut_index, s32 update_all, const palette_t* colors);
 void battle_map_palette_update_from_other(const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 all_colors,
     s16 red, s16 green, s16 blue, s32 final_value);
+void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
+    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value);
 void battle_map_palette_store_modified_colors(s32 clut_row, s32 clut_index, s32 store_all);
 void battle_map_palette_modify(
     s32 command, s32 amount, s32 clut_row, s32 clut_index, s32 all_colors, s16 red, s16 green, s16 blue);
+void battle_map_color_field(s32 mode, s32 amount, s16 red, s16 green, s16 blue);
 void battle_map_update_color_animations(void);
 void battle_map_clut_upload_rows(void);
 

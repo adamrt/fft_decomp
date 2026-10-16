@@ -139,4 +139,11 @@ extern u8 g_weather_sfx_enabled;
 void weather_start_sfx(void);
 s32 weather_stop_sfx(void); /* the result is indeterminate; no caller reads it */
 
+/* palette modifier encoding */
+/* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
+enum {
+    BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7,
+    BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f,
+};
+
 #endif

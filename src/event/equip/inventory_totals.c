@@ -3,7 +3,6 @@
 #include "fft/equipment.h"
 #include "fft/gfx.h"
 #include "fft/item.h"
-#include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/party.h"
 #include "fft/unit.h"

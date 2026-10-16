@@ -150,8 +150,9 @@ extern s32 g_brave_story_propositions_saved_cursor[];
 void brave_story_handle_participant_list_input(menu_stack_record_t* level);
 
 /* level window state */
-/* The window state of menu levels. The resume handlers take the stack record and read the view its level type
- * selects; the rest dim, tint or restore the windows of one kind of level. */
+/* Dim, tint or restore the windows of a menu level. The advancing-list and
+ * participant resume handlers take the full stack record; the proposition
+ * handlers take its window state. */
 void brave_story_suspend_level(menu_stack_window_level_t* state);
 void brave_story_resume_propositions_level(menu_stack_window_level_t* level);
 void brave_story_suspend_propositions_level(menu_stack_window_level_t* level);

@@ -8,7 +8,6 @@
 #include "fft/text.h"
 #include "fft/unit.h"
 #include "fft/unit_party.h"
-#include "fft/unit_runtime.h"
 #include "psx/types.h"
 
 static s32 g_deploy_text_roster_unit_names_offset = 1;

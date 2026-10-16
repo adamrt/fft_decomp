@@ -5,12 +5,9 @@
  * models with their polygon buffers. */
 
 #include "fft/gfx.h"
-#include "fft/projectile.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
-
-typedef char projectile_obstacle_unit_list_size_must_be_280[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
 
 /* arrow arc */
 /* Flight state of effect_secondary_arrow_arc_handler, set in its first phase from the traced trajectory
@@ -24,6 +21,9 @@ extern s32 g_effect_arrow_arc_distance;
 extern s32 g_effect_arrow_arc_distance_step;
 extern s16 g_effect_projectile_step_count;
 extern MATRIX g_effect_projectile_matrix;
+
+/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
+extern s32 g_effect_arrow_miss_marker;
 
 /* straight flight */
 /* Flight state of effect_secondary_linear_projectile_handler: the origin-to-destination offset and its length, the

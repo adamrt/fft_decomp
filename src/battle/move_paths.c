@@ -11,6 +11,7 @@
 #include "fft/memory.h"
 #include "fft/move.h"
 #include "fft/move_step.h"
+#include "fft/option.h"
 #include "fft/sound.h"
 #include "fft/sprite.h"
 #include "fft/sprite_sheet.h"

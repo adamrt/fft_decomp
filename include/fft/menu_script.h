@@ -270,7 +270,6 @@ extern u32 g_menu_script_input;
 void menu_script_run(menu_instruction_t* instruction, s32 flags);
 void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 flags, s32 event_mode);
 menu_instruction_t* menu_script_skip_group(menu_instruction_t* command);
-
 static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* instruction) {
     return (menu_instruction_t*)((u8*)instruction + instruction->header.length);
 }
@@ -278,6 +277,10 @@ static inline menu_instruction_t* menu_next_instruction(menu_instruction_t* inst
 static inline const menu_instruction_t* menu_next_const_instruction(const menu_instruction_t* instruction) {
     return (const menu_instruction_t*)((const u8*)instruction + instruction->header.length);
 }
+
+/* instruction drawing */
+menu_draw_number_command_t* menu_draw_decimal_number(menu_draw_number_command_t* command);
+menu_window_command_t* menu_draw_window_frame(menu_window_command_t* command);
 
 /* opcode handlers */
 extern menu_sprite_command_t g_menu_script_quad_command;
@@ -314,16 +317,6 @@ menu_instruction_t* menu_opcode_15_repeat_draw_area(menu_instruction_t* instruct
 menu_instruction_t* menu_opcode_16_advance_window_scale_step(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_17_draw_right_aligned_number(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_18_add_blend_draw_mode(menu_instruction_t* instruction);
-
-/* WORLD's display-script command handlers (the declarations above are the shared ones). The CARD and JOBSTTS
- * overlays call menu_opcode_00_draw_window_frame directly. */
-menu_instruction_t* menu_opcode_00_draw_window_frame(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_01_if_group(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_02_if_else_group(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_09_set_fixed_clut(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0a_set_clut(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0b_set_draw_color(menu_instruction_t* instruction);
-menu_instruction_t* menu_opcode_0c_set_texture_page(menu_instruction_t* instruction);
 menu_instruction_t* menu_opcode_14_set_draw_area(menu_instruction_t* instruction);
 
 /* scrollable lists */
@@ -368,5 +361,6 @@ void menu_init_and_draw_scrollable_list(
 void menu_init_and_draw_scrollable_list_simple(
     s16* entries, s32 selected_index, u8* text_table, const menu_instruction_t* script);
 void menu_scroll_list_by_page(menu_vertical_scroll_direction_e direction, const menu_instruction_t* list);
+menu_vertical_scroll_direction_e menu_input_read_page_scroll_direction(void);
 
 #endif

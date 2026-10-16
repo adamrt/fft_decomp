@@ -10,7 +10,6 @@
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/reaction.h"
-#include "fft/script.h"
 #include "fft/skillset.h"
 #include "fft/status.h"
 #include "fft/turn.h"

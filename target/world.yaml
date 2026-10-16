@@ -1416,7 +1416,6 @@ data:
   - {addr: 0x8017403c, name: g_command_skillset_disabled_flags}
   - {addr: 0x80174048, name: g_ai_workspace_ptr}
   - {addr: 0x8017404c, name: g_menu_skillset_types}
-  - {addr: 0x80182430, name: unit_has_adjacent_monster_skill_support}
   - {addr: 0x80189c4c, name: g_screen_wldface_vram_rects}
   - {addr: 0x80189c54, name: g_screen_wldface_vram_rect_1}
   - {addr: 0x80189c5c, name: g_screen_wldface_vram_rect_2}
@@ -1736,7 +1735,6 @@ data:
   - {addr: 0x8018e050, name: g_screen_number_blank_sprite}
   - {addr: 0x8018e064, name: g_screen_cursor_bob_thresholds}
   - {addr: 0x8018e070, name: g_screen_cursor_bob_active_thresholds}
-  - {addr: 0x8018e07c, name: resolve_unit_status_changes}
   - {addr: 0x8018e084, name: g_screen_vertical_cursor_quad}
   - {addr: 0x8018e0a8, name: g_screen_list_row_text_ids}
   - {addr: 0x8018e0ac, name: g_screen_list_cursor_anim}

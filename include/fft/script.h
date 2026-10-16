@@ -6,12 +6,12 @@
  * bytecode is in script_instruction.h and the script variables in script_variable.h. */
 
 #include "fft/battle_map.h"
+#include "fft/command.h"
 #include "fft/gfx.h"
-#include "fft/menu.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
 #include "fft/script_instruction.h"
-#include "fft/unit.h"
+#include "fft/unit_event.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 
@@ -83,9 +83,6 @@ extern u16 g_script_frame_result_override;
 extern s16 g_scenario_event_active;
 extern s16 g_script_threads_idle;
 extern u8 g_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
-
-/* The script variables: 32-bit values first (event_script_variable_id_e), then the packed flags. */
-extern s32 g_script_variable_storage[0x100];
 
 void script_run_next_event(void);
 void script_run_next_event_unused(void);
@@ -323,9 +320,6 @@ extern u16 g_event_map_command_83_arg2;
  * sound.h. */
 extern u16 g_event_music_switch_fade;   /* the consumer multiplies it by 4 */
 extern u16 g_event_music_switch_volume; /* scaled 0..96 to 0..127 */
-
-s32 event_try_enter_scenario(unit_t* unit);
-s32 event_check_battle_outcome(void);
 
 /* WORLD event state */
 /* Operand pairs that one WORLD script_execute_event opcode stores together;

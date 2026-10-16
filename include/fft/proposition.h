@@ -6,7 +6,6 @@
  * announcement. */
 
 #include "fft/menu_stack.h"
-#include "fft/window.h"
 #include "psx/types.h"
 
 /* active propositions */

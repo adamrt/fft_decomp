@@ -815,6 +815,5 @@ void ability_learn_used(unit_stats_t* unit);
 /* EQUIP builds both checks; WORLD builds its own ability_has_two_swords. */
 s32 ability_has_two_hands(s16 unit_index);
 s32 ability_has_two_swords(s16 unit_index);
-s32 ability_has_two_swords(s16 unit_id);
 
 #endif

@@ -14,7 +14,6 @@
 #include "fft/sprite_sheet.h"
 #include "fft/system.h"
 #include "fft/unit.h"
-#include "fft/unit_list.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

@@ -1,7 +1,8 @@
-/* Item order tables, card event init and the OPEN.BIN main loop and ending calls. */
+/* Unit and item sort orders, card event init and the OPEN.BIN main loop and ending calls. */
 
 #include "fft/ending.h"
 #include "fft/file.h"
+#include "fft/formation.h"
 #include "fft/item.h"
 #include "fft/memcard.h"
 #include "fft/memory.h"
@@ -12,8 +13,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Reset the seven item-type order lists to their default sequences (each ended by -1), empty the
- * weapon, helmet, armor, accessory and item page orders and zero the poached item counts. */
+/* Reset the Unit List, Formation and five item sort orders to their default -1-terminated
+ * sequences, empty the weapon, helmet, armor, accessory and item page orders, and zero the
+ * poached item counts. */
 void item_init_order_tables(void) {
     g_item_type_order_tables.order_0[0] = 0;
     g_item_type_order_tables.order_0[1] = 1;
@@ -27,42 +29,42 @@ void item_init_order_tables(void) {
     g_item_type_order_tables.order_0[9] = 9;
     g_item_type_order_tables.order_0[10] = 10;
     g_item_type_order_tables.order_0[11] = -1;
-    g_item_type_order_tables.order_1[0] = 0;
-    g_item_type_order_tables.order_1[1] = 1;
-    g_item_type_order_tables.order_1[2] = 2;
-    g_item_type_order_tables.order_1[3] = 4;
-    g_item_type_order_tables.order_1[4] = 5;
-    g_item_type_order_tables.order_1[5] = 7;
-    g_item_type_order_tables.order_1[6] = 9;
+    g_item_type_order_tables.order_1[0] = FORMATION_SORT_KEY_NUMBER;
+    g_item_type_order_tables.order_1[1] = FORMATION_SORT_KEY_LEVEL;
+    g_item_type_order_tables.order_1[2] = FORMATION_SORT_KEY_JOB;
+    g_item_type_order_tables.order_1[3] = FORMATION_SORT_KEY_BRAVE;
+    g_item_type_order_tables.order_1[4] = FORMATION_SORT_KEY_FAITH;
+    g_item_type_order_tables.order_1[5] = FORMATION_SORT_KEY_MAX_HP;
+    g_item_type_order_tables.order_1[6] = FORMATION_SORT_KEY_MAX_MP;
     g_item_type_order_tables.order_1[7] = -1;
-    g_item_type_order_tables.order_2[0] = 0;
-    g_item_type_order_tables.order_2[1] = 1;
-    g_item_type_order_tables.order_2[2] = 2;
-    g_item_type_order_tables.order_2[3] = 3;
-    g_item_type_order_tables.order_2[4] = 4;
-    g_item_type_order_tables.order_2[5] = 5;
+    g_item_type_order_tables.order_2[0] = ITEM_SORT_KEY_TYPE;
+    g_item_type_order_tables.order_2[1] = ITEM_SORT_KEY_PRICE;
+    g_item_type_order_tables.order_2[2] = ITEM_SORT_KEY_RANKING;
+    g_item_type_order_tables.order_2[3] = ITEM_SORT_KEY_PHYSICAL_EVADE;
+    g_item_type_order_tables.order_2[4] = ITEM_SORT_KEY_MAGIC_EVADE;
+    g_item_type_order_tables.order_2[5] = ITEM_SORT_KEY_HELD_COUNT;
     g_item_type_order_tables.order_2[6] = -1;
-    g_item_type_order_tables.order_3[0] = 0;
-    g_item_type_order_tables.order_3[1] = 1;
-    g_item_type_order_tables.order_3[2] = 2;
-    g_item_type_order_tables.order_3[3] = 5;
+    g_item_type_order_tables.order_3[0] = ITEM_SORT_KEY_TYPE;
+    g_item_type_order_tables.order_3[1] = ITEM_SORT_KEY_PRICE;
+    g_item_type_order_tables.order_3[2] = ITEM_SORT_KEY_RANKING;
+    g_item_type_order_tables.order_3[3] = ITEM_SORT_KEY_HELD_COUNT;
     g_item_type_order_tables.order_3[4] = -1;
-    g_item_type_order_tables.order_4[0] = 0;
-    g_item_type_order_tables.order_4[1] = 1;
-    g_item_type_order_tables.order_4[2] = 2;
-    g_item_type_order_tables.order_4[3] = 5;
+    g_item_type_order_tables.order_4[0] = ITEM_SORT_KEY_TYPE;
+    g_item_type_order_tables.order_4[1] = ITEM_SORT_KEY_PRICE;
+    g_item_type_order_tables.order_4[2] = ITEM_SORT_KEY_RANKING;
+    g_item_type_order_tables.order_4[3] = ITEM_SORT_KEY_HELD_COUNT;
     g_item_type_order_tables.order_4[4] = -1;
-    g_item_type_order_tables.order_5[0] = 0;
-    g_item_type_order_tables.order_5[1] = 1;
-    g_item_type_order_tables.order_5[2] = 2;
-    g_item_type_order_tables.order_5[3] = 3;
-    g_item_type_order_tables.order_5[4] = 4;
-    g_item_type_order_tables.order_5[5] = 5;
+    g_item_type_order_tables.order_5[0] = ITEM_SORT_KEY_TYPE;
+    g_item_type_order_tables.order_5[1] = ITEM_SORT_KEY_PRICE;
+    g_item_type_order_tables.order_5[2] = ITEM_SORT_KEY_RANKING;
+    g_item_type_order_tables.order_5[3] = ITEM_SORT_KEY_PHYSICAL_EVADE;
+    g_item_type_order_tables.order_5[4] = ITEM_SORT_KEY_MAGIC_EVADE;
+    g_item_type_order_tables.order_5[5] = ITEM_SORT_KEY_HELD_COUNT;
     g_item_type_order_tables.order_5[6] = -1;
-    g_item_type_order_tables.order_6[0] = 0;
-    g_item_type_order_tables.order_6[1] = 1;
-    g_item_type_order_tables.order_6[2] = 2;
-    g_item_type_order_tables.order_6[3] = 5;
+    g_item_type_order_tables.order_6[0] = ITEM_SORT_KEY_TYPE;
+    g_item_type_order_tables.order_6[1] = ITEM_SORT_KEY_PRICE;
+    g_item_type_order_tables.order_6[2] = ITEM_SORT_KEY_RANKING;
+    g_item_type_order_tables.order_6[3] = ITEM_SORT_KEY_HELD_COUNT;
     g_item_type_order_tables.order_6[4] = -1;
     g_item_weapon_page_order[0] = ITEM_ID_NONE;
     g_item_helmet_page_order[0] = ITEM_ID_NONE;

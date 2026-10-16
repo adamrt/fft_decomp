@@ -2,10 +2,9 @@
 #define UNIT_H
 
 /* Unit records: the battle stats record every program builds and the types it shares with the ENTD entries
- * (unit_entd.h) and party records (unit_party.h), the event library's status staging, facing and unit lookups, BATTLE's
- * unit heights and displays, and MAIN's unit graphics queue, unit generation and stat building. */
+ * (unit_entd.h) and party records (unit_party.h), unit height and motion records, and MAIN's unit graphics queue,
+ * unit generation and stat building. */
 
-#include "fft/gfx.h"
 #include "fft/job.h"
 #include "fft/status.h"
 #include "psx/libgte.h"
@@ -637,82 +636,6 @@ typedef enum unit_ability_outcome {
     UNIT_ABILITY_OUTCOME_LEARN_CHECKED = 0x04, /* the learn-on-hit pass consumed AFFECTED */
 } unit_ability_outcome_e;
 
-/* WORLD's name for the address of BATTLE's skillset_monster_count_supporters (0x80182430); nothing calls it by this
- * name. */
-s32 unit_has_adjacent_monster_skill_support(struct unit_stats* unit);
-
-/* event status staging */
-/* Shared event snapshot for all 21 simulation slots. unit_save_staged_status_data
- * writes the saved fields; unit_apply_staged_status_data restores them and
- * applies intervening status differences through BATTLE callbacks. */
-typedef struct unit_status_staging {
-    u8 innate[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];
-    u8 current[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];    /* 0x069 */
-    u8 inflicted[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];  /* 0x0d2 */
-    u8 removed[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];    /* 0x13b */
-    u8 added[UNIT_SLOT_COUNT][STATUS_BYTE_COUNT];      /* 0x1a4 */
-    u8 status_ct[UNIT_SLOT_COUNT][STATUS_TIMED_COUNT]; /* 0x20d */
-    u8 charged_ability_ct[UNIT_SLOT_COUNT];            /* 0x35d */
-    u8 death_counter[UNIT_SLOT_COUNT];                 /* 0x372 */
-    u8 team_flags[UNIT_SLOT_COUNT];                    /* 0x387 */
-    u8 state[UNIT_SLOT_COUNT];                         /* 0x39c; 0 not staged, 1 saved, 2 restored */
-    u8 inflict_status_mode[UNIT_SLOT_COUNT];           /* 0x3b1; unit_inflict_status_mode_e */
-    u16 hp[UNIT_SLOT_COUNT];                           /* 0x3c6 */
-    u16 jump_float_flags;                              /* 0x3f0; UNIT_STATUS_STAGING_*_REMOVED */
-} unit_status_staging_t;
-typedef char unit_status_staging_size_must_be_1010[sizeof(unit_status_staging_t) == 1010 ? 1 : -1];
-
-extern unit_status_staging_t* g_unit_status_staging_data;
-
-s32 unit_save_staged_status_data(s32 battle_id);
-void unit_clear_status_staging_data(void);
-void unit_update_staged_status_data(u16 unit_id, u16 restore);
-
-/* event facing and animation */
-/* Per-unit facing/animation state written by the event interpreters and
- * advanced every frame by unit_update_facing_and_pending_animations.
- * Seven bytes per unit, 21 units. */
-typedef struct unit_animation_state {
-    u8 target_facing;
-    u8 rotate_mode;     /* unit_rotate_mode_e */
-    u8 frames_per_step; /* facing steps once step_counter reaches this */
-    u8 step_counter;
-    u8 rotating;       /* nonzero while stepping toward target_facing */
-    u8 initial_facing; /* facing captured when animation states reset (0xff when
-                          absent); RotateUnit direction 0x14 rotates back to it */
-    u8 delay;          /* frames to wait before the first step */
-} unit_animation_state_t;
-typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) == 7 ? 1 : -1];
-
-extern u16 g_unit_graphics_load_pending;                 /* unit graphics load result: 0 done, 1 pending */
-extern unit_animation_state_t g_unit_animation_states[]; /* event-script rotation state for each runtime unit slot */
-
-/* WalkToAnim: requested animation applied after movement stops; 0 means none. */
-extern u16 g_unit_pending_animation_ids[];
-extern u16 g_unit_was_moving_latch[]; /* a unit with a pending animation was moving on the last update */
-
-void unit_update_facing_and_pending_animations(void);
-void unit_set_animation(s32 runtime_id, u32 animation);
-void unit_set_facing(s32 runtime_id, s32 facing);
-s32 unit_check_facing_relative_to_camera(s32 event_unit_id);
-s32 unit_is_moving(s32 runtime_id);
-
-/* The unit-ready test script_wait_for_unit_ready polls: always 1, so the wait never yields. */
-s32 unit_is_ready(s32 unused_runtime_id);
-
-/* event unit lookups */
-extern SVECTOR g_unit_runtime_coords; /* the position unit_copy_world_coords_to_scratch returns */
-extern SVECTOR g_unit_scratch_coords; /* a unit's map coordinates or projected screen position */
-
-s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id);
-SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id);
-void unit_copy_world_coords(u32 runtime_id, SVECTOR* world_coords);
-void unit_copy_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
-void unit_project_to_screen(u32 runtime_id, SVECTOR* screen_coordinates);
-void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords);
-s32 unit_has_any_current_status(s32 battle_id);
-void unit_increase_blue_team_brave_by_10(void);
-
 /* unit heights (BATTLE) */
 /* Seven result bytes; assigning elevation preserves the unassigned high bit. */
 typedef struct unit_height_data {
@@ -727,15 +650,6 @@ typedef struct unit_height_data {
 } unit_height_data_t;
 typedef char unit_height_data_size_must_be_7[sizeof(unit_height_data_t) == 7 ? 1 : -1];
 
-s32 unit_height_calculate_from_battle_tile(struct unit* unit);
-s32 unit_height_calculate_from_tile(struct unit* unit);
-s32 unit_height_calculate_from_move_destination(struct unit* unit);
-s32 unit_height_calculate_with_caller_coords(struct unit* unit, const SVECTOR* coords);
-
-/* The definition returns an s16, but an s16 prototype makes the callers re-extend the result;
- * keep s32. */
-s32 unit_height_calculate_from_world_coords(struct unit* unit);
-
 /* unit display (BATTLE) */
 /* Masks of the motion flags in the 32-bit view of unit_t.movement (move_destination_t),
  * whose high byte is runtime-unit +0x83. */
@@ -748,22 +662,6 @@ typedef enum unit_motion_flags {
     UNIT_MOTION_FLAG_FORCE_ANIMATION_UPDATE = 0x20000000, /* set with each stored animation request */
 } unit_motion_flags_e;
 
-extern palette_t g_unit_facing_wait_arrow_palette;
-
-/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
- * the highlighted arrow. */
-extern u32 g_unit_facing_wait_arrow_blink_timer;
-
-void unit_hide_all_jumping(void);
-s32 unit_hide_by_runtime_id(u32 runtime_id);
-void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
-void unit_fade_out_start_red(s32 runtime_id);
-void unit_fade_out_start_for_event(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
-void unit_update_float_height_and_status_bubble(unit_t* unit);
-void unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
-void unit_facing_draw_wait_direction(void);
-void unit_play_sfx(struct unit* unit, s32 sound_id);
-
 /* action state (BATTLE) */
 /* Tile coordinates stored in teleport paths and relocation reservations. */
 typedef struct move_tile_coordinates {
@@ -772,13 +670,6 @@ typedef struct move_tile_coordinates {
     u8 elevation;
 } move_tile_coordinates_t;
 typedef char move_tile_coordinates_size_must_be_3[(sizeof(move_tile_coordinates_t) == 3) ? 1 : -1];
-
-extern s32 g_unit_casting_runtime_id;
-
-/* Count and coordinates of the tiles already handed out as dismount
- * destinations this action. */
-extern s32 g_unit_relocated_count;
-extern move_tile_coordinates_t g_unit_relocated_coords[];
 
 /* unit graphics queue */
 /* One queued unit: where it stands, how it faces and which graphics it uses. */
@@ -860,15 +751,6 @@ void unit_apply_level_growth(unit_stats_t* unit, s32 level_down);
 void unit_increase_casualty_counters(unit_stats_t* unit);
 
 /* menus and panels */
-/* The mode argument of unit_view_stats_panel_thread, the one thread body of the four unit stats panels: which panel
- * the thread draws; each value has one caller. The panel slides in, redraws each frame and slides out on the stop
- * request. */
-typedef enum unit_stats_panel {
-    UNIT_STATS_PANEL_HOVERED_UNIT = 0,  /* unit_view_refresh_hovered_stats */
-    UNIT_STATS_PANEL_ATTACK_CASTER = 1, /* unit_view_preview_caster_stats */
-    UNIT_STATS_PANEL_ATTACK_TARGET = 2, /* unit_view_preview_target_stats; shows the reaction ability name */
-    UNIT_STATS_PANEL_RIGHT_UNIT = 3,    /* unit_view_refresh_right_stats */
-} unit_stats_panel_e;
 
 extern s16 g_unit_selected_index; /* the unit the unit-list screens have selected */
 

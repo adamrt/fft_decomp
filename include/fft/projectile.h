@@ -40,6 +40,7 @@ typedef struct projectile_obstacle_unit_list {
     u8 _padding_c2[2];                   /* 0xc2; aligns the sprite heights */
     s32 sprite_heights[UNIT_SLOT_COUNT]; /* 0xc4 */
 } projectile_obstacle_unit_list_t;
+typedef char projectile_obstacle_unit_list_size_must_be_280[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
 
 extern s32 g_projectile_gravity_modifier;
 extern s32 g_projectile_gravity_scale;

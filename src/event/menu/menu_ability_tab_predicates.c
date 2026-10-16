@@ -1,7 +1,6 @@
 /* Ability category tab tests. */
 
 #include "fft/ability_list.h"
-#include "fft/job.h"
 #include "psx/types.h"
 
 /* Row callback: return whether the ability list shows the action category; the row is ignored. */

@@ -1,9 +1,9 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-/* Window render records, the display objects OPEN and WLDCORE build their windows and text from (each program links its
- * own revision: 56-byte image records in OPEN, 52-byte in WLDCORE), and WLDCORE's window animations, display-object
- * queues, paged text window, panels and window-owning menu levels. */
+/* Window render records, the display objects OPEN and WLDCORE build their windows and text from (each program
+ * links its own revision: 56-byte image records in OPEN, 52-byte in WLDCORE), and WLDCORE's window animations,
+ * display-object queues, paged text window and panels. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -171,6 +171,8 @@ void window_init_vram_record(
     s32 record_index, point16_t vram_position, point16_t image_size, point32_t clut_position, u32 flags);
 void window_init_frame_record(s32 record_index, RECT quad, s32 depth, u16* image);
 void window_load_record_image(s32 record_index, u32* image);
+
+/* OPEN and WLDCORE each build their own body. */
 void window_measure_text_image(s32 combined_text_index, size32_t* dimensions);
 
 /* window animations (WLDCORE) */
@@ -260,7 +262,6 @@ void window_init_vram_render_record(s32 index, RECT bounds, point32_t clut, s32 
 void window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
 void window_load_render_record_image(s32 index, u32* image);
 void window_draw_centered_text(s32 window_index, s32 text_id);
-void window_measure_text_image(s32 text_id, size32_t* output);
 
 /* display object queues */
 /* The display objects window_dispatch_record_list draws each frame. Every entry points at the leading flags of a
@@ -340,29 +341,5 @@ void window_build_yes_no_panel(point32_t origin);
 void window_init_panel_state(s32 unused, s32 extent, window_panel_layout_t* layout, point32_t* origin);
 void window_start_panel_thread(s32 thread_id, s32 extent, window_panel_layout_t* layout, point32_t* origin);
 void window_start_number_panel_thread(s32 thread_id, u32 packed_values, s32 text_id, point32_t* origin);
-
-/* menu levels */
-/* A window record and a render record handled together (proposition_suspend_detail_level). */
-typedef struct window_render_pair {
-    s32 window_index;
-    s32 render_index;
-} window_render_pair_t;
-
-/* A level owning two window records; sound_novel_opcode_0c_set_parent_windows_visible toggles both records'
- * DISPLAY_OBJECT_HIDDEN. */
-typedef struct window_pair_level {
-    s32 first_window;
-    s32 second_window; /* 0x04 */
-} window_pair_level_t;
-
-/* A level owning two window records and a render record: bar_push_level pushes it as MENU_STACK_LEVEL_BAR.
- * tutorial_push_topic_level hides all three (DISPLAY_OBJECT_HIDDEN) and tutorial_wait_topic_then_pop shows them
- * again. */
-typedef struct window_pair_render_level {
-    s32 first_window;
-    s32 second_window; /* 0x04 */
-    s32 render_index;  /* 0x08 */
-    s32 panel_rows;    /* 0x0c; cleared by bar_push_level */
-} window_pair_render_level_t;
 
 #endif

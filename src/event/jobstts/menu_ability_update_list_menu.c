@@ -2,7 +2,6 @@
 
 #include "fft/ability_list.h"
 #include "fft/help.h"
-#include "fft/job.h"
 #include "fft/job_list.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"

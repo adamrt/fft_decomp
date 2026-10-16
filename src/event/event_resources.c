@@ -39,6 +39,7 @@
 #include "fft/tutorial.h"
 #include "fft/unit.h"
 #include "fft/unit_editor.h"
+#include "fft/unit_event.h"
 #include "fft/unit_list.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"

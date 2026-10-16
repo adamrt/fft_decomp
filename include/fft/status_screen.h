@@ -74,6 +74,11 @@ void status_screen_numbers_thread(void);
 extern menu_scroll_text_layout_t g_status_screen_status_list_layout;
 extern u16 g_status_screen_status_list_row_actions[8];
 
+/* Text ids of the unit's current statuses in the status panel's two columns, filled by
+ * status_screen_build_status_list. */
+extern s16 g_unit_panel_status_left_text_ids[20];
+extern s16 g_unit_panel_status_right_text_ids[20];
+
 void status_screen_build_status_list(void);
 
 /* overlay screens */

@@ -139,7 +139,7 @@ typedef enum effect_camera_mode {
     EFFECT_CAMERA_MODE_IDLE = 0x0000,
     EFFECT_CAMERA_MODE_SNAP = 0x0200,
     EFFECT_CAMERA_MODE_COSINE = 0x0400,
-    EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK = 0x0600,
+    EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK = 0x0600, /* one full cosine cycle: start to target and back */
     EFFECT_CAMERA_MODE_LINEAR = 0x0800,
     EFFECT_CAMERA_MODE_ADD_ACCELERATING = 0x0a00, /* add a step that grows from 0 to the target */
     EFFECT_CAMERA_MODE_ADD = 0x0c00,              /* add the target every frame */
@@ -351,5 +351,14 @@ extern VECTOR g_effect_camera_zoom_saved;
 
 void effect_camera_init(void);
 void effect_camera_seed_tracks(void);
+
+/* camera playback */
+/* Cleared with the effect camera modes; nothing reads them. */
+extern s32 g_effect_camera_unread_1;
+extern s32 g_effect_camera_unread_2;
+
+void effect_camera_start_parent_keyframe_moves(s16 frame);
+void effect_camera_start_child_keyframe_moves(s16 frame);
+void effect_camera_update_tracks(void);
 
 #endif

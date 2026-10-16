@@ -3,7 +3,6 @@
 
 #include "fft/after_battle.h"
 #include "fft/file.h"
-#include "fft/gfx.h"
 #include "fft/input.h"
 #include "fft/memory.h"
 #include "fft/menu_input.h"

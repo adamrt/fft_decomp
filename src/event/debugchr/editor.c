@@ -1,6 +1,7 @@
 /* The debug unit editor and the mounted unit's status screen: applying values to a battle unit, the unit thread and
  * the session. */
 
+#include "fft/command.h"
 #include "fft/gfx.h"
 #include "fft/gfx_primitive.h"
 #include "fft/help.h"
@@ -15,6 +16,7 @@
 #include "fft/thread.h"
 #include "fft/unit.h"
 #include "fft/unit_editor.h"
+#include "fft/unit_event.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_runtime.h"
 #include "psx/libetc.h"

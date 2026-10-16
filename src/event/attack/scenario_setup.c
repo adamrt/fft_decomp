@@ -14,7 +14,6 @@
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/unit_party.h"
-#include "fft/unit_runtime.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

@@ -29,6 +29,13 @@ s32 formation_ability_has_secret_hunt(s32 unit_id);
 s32 formation_ability_has_two_hands(s16 unit_id);
 
 /* ability menu */
+/* Command texts chosen by formation_unit_lock_e and whether the unit is a Mime. */
+enum {
+    FORMATION_ABILITY_MENU_TEXT_UNLOCKED = 0xd80b,
+    FORMATION_ABILITY_MENU_TEXT_LOCKED = 0xd80c,
+    FORMATION_ABILITY_MENU_TEXT_MIME = 0xd80d,
+};
+
 extern s16 g_formation_ability_category; /* menu_ability_category_e */
 extern menu_entry_t g_formation_ability_menu;
 extern s8 g_formation_ability_menu_initialized;

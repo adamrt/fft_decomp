@@ -3,6 +3,7 @@
 #include "fft/ability_list.h"
 #include "fft/ai.h"
 #include "fft/at_list.h"
+#include "fft/command.h"
 #include "fft/gfx.h"
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"

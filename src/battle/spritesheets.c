@@ -1,7 +1,6 @@
 /* Post-action text animation, spritesheet SHP and SEQ lookups, spritesheet slot claims, unit palette tints and status
  * bubble triggers. */
 
-#include "fft/action.h"
 #include "fft/animation.h"
 #include "fft/battle_map.h"
 #include "fft/battle_map_palette.h"

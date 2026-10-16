@@ -55,6 +55,7 @@ extern effect_work_record_t* g_effect_work_records;
 extern effect_work_record_t* g_effect_free_work_record_head;
 extern s32 g_effect_work_record_count;
 extern s32 g_effect_work_record_peak;
+extern s32 g_effect_work_records_unread; /* cleared when the effect work-record chain is built; nothing reads it */
 
 /* Sprite-node pool: the nodes (node 0 the sentinel), the active and free list heads, and the sprite parts held in
  * the nodes' sprite blocks with their peak. */
@@ -108,9 +109,19 @@ extern SVECTOR g_effect_corner_bottom_right __attribute__((aligned(4)));
  * a second set of $2, so sched1 no longer boosts the final `$2 = 1` to the end
  * of its block, and the pc update is allocated $3 as in the target. */
 extern s32 (*g_effect_particle_render_handlers[])(effect_record_t* record, effect_work_record_t* work);
-
 void effect_render_start_frame(void);
 void effect_render_reset_state(void);
 s32 effect_render_get_prim_buffer_offset(void);
+
+/* flag prefix */
+/* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.
+ * Neither the full record nor the individual bit meanings are known. */
+typedef struct effect_flag_prefix {
+    u8 _unused_00[6];
+    u16 flags;
+} effect_flag_prefix_t;
+typedef char effect_flag_prefix_size_must_be_8[(sizeof(effect_flag_prefix_t) == 8) ? 1 : -1];
+
+void effect_replace_flags_0006(struct effect_flag_prefix* object, s32 value);
 
 #endif

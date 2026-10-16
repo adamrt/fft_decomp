@@ -491,6 +491,7 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Serpentarius, skipping the floor of 1 at its end: an XA already cut to 0 (a
   Frog's XA of 1 against Defense Up or Protect) stays 0, and the hit deals 0
   damage where any other sign pair deals 1 * YA.
+- DEBUGCHR also serves the normal mounted-unit Status screen. That path keeps `g_debug_unit_editor_active` clear; the editor sets it. The editor is registered as battle menu entry 44 (`MENU_COMMAND_ID_DEBUG_UNIT_EDITOR`), but no C caller or retail menu-row action selects that entry. The mode flag does not enable access to it, and `g_debug_display_enabled` controls diagnostics separately.
 - DEBUGCHR's unit editor (`debug_unit_editor_run`) lets the job, the five
   equipment slots (Triangle empties one) and the five skillset and ability
   slots be changed, but `debug_unit_editor_apply_values` writes

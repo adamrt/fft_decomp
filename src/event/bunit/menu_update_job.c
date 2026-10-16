@@ -1,7 +1,6 @@
 /* The per-frame handler of the unit list's job page and the chosen job's ability list. */
 
 #include "fft/ability_list.h"
-#include "fft/job.h"
 #include "fft/job_list.h"
 #include "fft/menu_input.h"
 #include "fft/menu_selection.h"

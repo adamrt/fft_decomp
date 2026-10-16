@@ -198,4 +198,18 @@ extern s32 g_camera_cross_product_overflow; /* set by the Q12 cross product on o
 s32 mul_div_s64(s32 a, s32 b, s32 c);
 s32 fixed_cross_product_q12(s32 a, s32 b, s32 c, s32 d);
 
+/* tilt and zoom bands */
+/* g_camera_tilt_target values the tilt code tests; the target is a tilt band plus one, and
+ * bands 3 and 4 have no pitch here. */
+enum {
+    BATTLE_MAP_TILT_LOW = 1,  /* pitch 0x12e */
+    BATTLE_MAP_TILT_HIGH = 2, /* pitch 0x1c0 */
+};
+
+/* g_camera_zoom_target values. */
+enum {
+    BATTLE_MAP_ZOOM_IN = 1,  /* scale ONE */
+    BATTLE_MAP_ZOOM_OUT = 4, /* scale 0xc00 */
+};
+
 #endif

@@ -11,7 +11,6 @@
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_script.h"
-#include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
@@ -291,9 +290,5 @@ void unit_list_start_text_thread(s32 thread_data);
 extern const u8* g_unit_list_bits_cursor;
 extern s32 g_unit_list_bits_index;
 extern u8 g_unit_list_bits_reader_reset;
-
-/* live units (BATTLE) */
-/* The live units, chained through unit_t.previous. */
-extern unit_t* g_unit_list_head;
 
 #endif

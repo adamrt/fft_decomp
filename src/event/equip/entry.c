@@ -2,6 +2,7 @@
  * indices and messages with sound. */
 
 #include "fft/equipment.h"
+#include "fft/help.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"

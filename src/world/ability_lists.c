@@ -8,6 +8,7 @@
 #include "fft/help.h"
 #include "fft/item.h"
 #include "fft/job.h"
+#include "fft/job_list.h"
 #include "fft/menu.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
@@ -344,10 +345,10 @@ void formation_order_menu(void) {
 
     if (g_formation_order_open == 0) {
         item_load_type_order(0, g_formation_order_entries);
-        for (index = 0; index < 7; index++) {
+        for (index = 0; index < FORMATION_SORT_KEY_COUNT; index++) {
             option_ids[index] = g_formation_order_entries[index] + 14;
         }
-        option_ids[7] = -1;
+        option_ids[FORMATION_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_formation_menu_text_table, g_formation_menu_text_buffer, option_ids, 1);
         g_formation_unit_banner_enabled = 0;
         g_formation_order_saved_browse_enabled = g_formation_unit_browse_enabled;
@@ -375,10 +376,10 @@ void formation_order_menu(void) {
         }
         g_formation_order_entries[0] = selected_entry;
         screen_reset_selection_results();
-        for (index = 0; index < 7; index++) {
+        for (index = 0; index < FORMATION_SORT_KEY_COUNT; index++) {
             option_ids[index] = g_formation_order_entries[index] + 14;
         }
-        option_ids[7] = -1;
+        option_ids[FORMATION_SORT_KEY_COUNT] = -1;
         text_concatenate_entries(g_formation_menu_text_table, g_formation_menu_text_buffer, option_ids, 1);
         g_screen_text_redraw_request = 1;
         item_store_type_order(0, g_formation_order_entries);

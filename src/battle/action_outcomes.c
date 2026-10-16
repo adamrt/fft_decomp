@@ -2,7 +2,6 @@
 
 #include "fft/ability.h"
 #include "fft/action.h"
-#include "fft/ai.h"
 #include "fft/ai_decision.h"
 #include "fft/battle_map.h"
 #include "fft/command.h"

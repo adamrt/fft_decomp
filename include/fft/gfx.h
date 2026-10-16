@@ -369,8 +369,6 @@ extern POLY_GT4 g_gfx_poly_gt4_buffers[2][40];
 extern POLY_GT4 g_gfx_poly_gt4_array_32[];
 extern POLY_GT4 g_gfx_poly_gt4_array_8[];
 
-void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
-
 /* overlay fade */
 /* gfx_overlay_fade_t.flags. */
 typedef enum gfx_overlay_fade_flag {

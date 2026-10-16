@@ -134,6 +134,8 @@ extern s16 g_after_battle_message_menu_result;
 extern u8 g_after_battle_gfx_fade_rgb[3];
 extern u8 g_after_battle_gfx_formation_sprite_groups[][3];
 
+void gfx_fade_rgb_31_frames(s32 target_0, s32 target_1, s32 target_2);
+
 /* text */
 /* Sections of REQUIRE's text file, whose offset table sits 0x80 bytes before
  * g_text_data with offsets relative to it. The after-battle routines bind

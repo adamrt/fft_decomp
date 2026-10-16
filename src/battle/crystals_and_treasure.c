@@ -9,7 +9,6 @@
 #include "fft/item.h"
 #include "fft/job.h"
 #include "fft/memory.h"
-#include "fft/menu.h"
 #include "fft/move.h"
 #include "fft/party.h"
 #include "fft/reward.h"

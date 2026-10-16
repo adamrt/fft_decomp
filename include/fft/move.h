@@ -84,15 +84,6 @@ enum {
     MOVE_PENDING_MOUNT_SET = 0x80,
 };
 
-/* Travel direction of the step in progress, as move_step_get_direction derives it from the
- * unit's tile and its destination tile. */
-typedef enum move_direction {
-    MOVE_DIRECTION_SOUTH = 0, /* -y */
-    MOVE_DIRECTION_EAST = 1,  /* +x */
-    MOVE_DIRECTION_NORTH = 2, /* +y */
-    MOVE_DIRECTION_WEST = 3,  /* -x */
-} move_direction_e;
-
 /* movement classes and terrain */
 /* Ordered class selection in move_spread_store_unit_to_scratchpad, not movement ability
  * flags or the separate cost-table selector. Water names describe standing

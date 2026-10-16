@@ -16,7 +16,6 @@
 #include "fft/screen.h"
 #include "fft/script.h"
 #include "fft/sound.h"
-#include "fft/state.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/tutorial.h"

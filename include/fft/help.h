@@ -105,4 +105,7 @@ void help_run_battle(void);
 /* The help menu over the REQUIRE screen. */
 void help_run_after_battle(void);
 
+/* Starts the help text thread for the pending help message: binds the help text and locks the menu input. */
+void menu_text_start_help_thread(s32 thread_data);
+
 #endif

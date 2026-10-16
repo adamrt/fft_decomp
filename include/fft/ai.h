@@ -5,7 +5,6 @@
  * memory copy helpers. */
 
 #include "fft/ability.h"
-#include "fft/action.h"
 #include "fft/battle_map.h"
 #include "fft/script.h"
 #include "fft/status.h"
@@ -490,10 +489,6 @@ extern ai_data_t* g_ai_workspace;
 extern event_work_t* g_ai_workspace_ptr; /* pointer cell reloaded per subsystem */
 
 void ai_init_workspace(void);
-
-/* simulation */
-/* The copy of g_action_mimic_attacker that ai_simulate_begin saves and ai_simulate_end restores. */
-extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
 
 /* memory helpers */
 /* Copy forward using a signed destination-end address; nonpositive counts do nothing. */

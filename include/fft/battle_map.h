@@ -4,7 +4,6 @@
 /* The battle map: map ids, the terrain tiles and their lookups, the terrain tables, the selected tile, tile marks,
  * background gradient colors, the map data commands and title card, and the event library's map routines. */
 
-#include "fft/gfx.h"
 #include "fft/render.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
@@ -476,40 +475,6 @@ typedef struct battle_map_background_gradient_colors {
 typedef char battle_map_background_gradient_colors_size_must_be_8[(sizeof(battle_map_background_gradient_colors_t) == 8)
         ? 1
         : -1];
-
-/* colors */
-/* Commands of battle_map_light_control_back_color, which stores RGB and controls the GTE
- * background color. */
-typedef enum battle_map_light_back_color_command {
-    BATTLE_MAP_LIGHT_BACK_COLOR_SET = 9,
-    BATTLE_MAP_LIGHT_BACK_COLOR_GET = 10,
-    BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE = 11,
-    BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
-} battle_map_light_back_color_command_e;
-
-void battle_map_palette_modify_from_other(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index,
-    s32 all_colors, s16 red, s16 green, s16 blue, s32 final_value);
-
-/* weather */
-/* The signed palette modifier shares the 32-bit value above its seven low flag bits. */
-enum {
-    BATTLE_MAP_WEATHER_MODIFIER_SHIFT = 7,
-    BATTLE_MAP_WEATHER_LOW_FLAGS_MASK = 0x7f,
-};
-
-/* camera tilt and zoom */
-/* g_camera_tilt_target values the tilt code tests; the target is a tilt band plus one, and
- * bands 3 and 4 have no pitch here. */
-enum {
-    BATTLE_MAP_TILT_LOW = 1,  /* pitch 0x12e */
-    BATTLE_MAP_TILT_HIGH = 2, /* pitch 0x1c0 */
-};
-
-/* g_camera_zoom_target values. */
-enum {
-    BATTLE_MAP_ZOOM_IN = 1,  /* scale ONE */
-    BATTLE_MAP_ZOOM_OUT = 4, /* scale 0xc00 */
-};
 
 /* map data commands */
 /* Commands of battle_map_dispatch_data_command, which switches on command

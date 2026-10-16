@@ -11,14 +11,11 @@
 #include "psx/types.h"
 
 /* item menu */
-/* Command texts of the formation's Item and Ability menus, chosen by the
+/* Command texts of the Formation Item menu, chosen by the
  * selected unit's formation_unit_lock_e. */
 enum {
     FORMATION_ITEM_MENU_TEXT_UNLOCKED = 0xd801,
     FORMATION_ITEM_MENU_TEXT_LOCKED = 0xd802,
-    FORMATION_ABILITY_MENU_TEXT_UNLOCKED = 0xd80b,
-    FORMATION_ABILITY_MENU_TEXT_LOCKED = 0xd80c,
-    FORMATION_ABILITY_MENU_TEXT_MIME = 0xd80d,
 };
 
 extern s8 g_formation_item_menu_mode; /* menu_item_list_state_e */

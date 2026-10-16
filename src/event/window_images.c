@@ -1,6 +1,7 @@
 /* Byte copies, packed nibble access, 4bpp rect mirroring and pixel access, and window image and frame image building
  * and upload. */
 
+#include "fft/command.h"
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"

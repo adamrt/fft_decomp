@@ -251,6 +251,9 @@ extern s32* g_script_variables;
 /* Suppress recursive write filtering while getters use comparison variable 0. */
 extern u8 g_script_variable_write_guard;
 
+/* The script variables: 32-bit values first (event_script_variable_id_e), then the packed flags. */
+extern s32 g_script_variable_storage[0x100];
+
 void script_set_variable(s32 variable_id, s32 value);
 void script_run_condition(event_opcode_e opcode);
 

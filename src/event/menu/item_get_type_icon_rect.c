@@ -1,6 +1,5 @@
 /* The texture cell of an item type's 12x12 icon. */
 
-#include "fft/equipment.h"
 #include "fft/item.h"
 #include "fft/menu.h"
 #include "psx/types.h"

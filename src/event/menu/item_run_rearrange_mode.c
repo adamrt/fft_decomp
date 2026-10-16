@@ -1,6 +1,5 @@
 /* The item list's rearrange mode, swapping a picked entry with the entry under the cursor. */
 
-#include "fft/equipment.h"
 #include "fft/help.h"
 #include "fft/item.h"
 #include "fft/menu.h"

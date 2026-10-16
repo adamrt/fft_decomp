@@ -19,7 +19,6 @@
 #include "fft/menu_input.h"
 #include "fft/menu_window.h"
 #include "fft/option.h"
-#include "fft/state.h"
 #include "fft/thread.h"
 #include "psx/libgpu.h"
 #include "psx/pad.h"

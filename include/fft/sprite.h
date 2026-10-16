@@ -270,8 +270,6 @@ typedef struct sprite_unit_query {
     s16 graphic_y_offset; /* 0x06 */
 } sprite_unit_query_t;
 
-extern s32 g_sprite_unit_graphics_load_complete;
-
 void sprite_frame_load_unit(unit_t* unit, struct animation_state* state, u16 frame, u16 sequence_id);
 sprite_frame_t* sprite_get_unit_frame_and_vram_ids(u32 runtime_id, sprite_unit_query_t* out);
 void sprite_set_horizontal_flip_flag(u32 runtime_id);

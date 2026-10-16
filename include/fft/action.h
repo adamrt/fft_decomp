@@ -1,12 +1,11 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-/* Acting with an ability or attack: preparing it, resolving each strike against its targets, the action result fields,
- * Mimic, the result displays and effect messages, and the weapon sounds. */
+/* Acting with an ability or attack: preparing it, resolving each strike against its targets, the action result
+ * fields, Mimic, effect messages and weapon sounds. */
 
 #include "fft/ability.h"
 #include "fft/item.h"
-#include "fft/sprite.h"
 #include "fft/status.h"
 #include "fft/unit.h"
 #include "psx/types.h"
@@ -14,35 +13,6 @@
 struct action_data;
 
 /* preparation */
-/* Per-skillset menu behavior (g_command_menu_types_by_skillset). Values select specialized
- * inventory, targeting, and ability-loading paths; they are not menu command
- * opcodes. */
-typedef enum action_menu_type {
-    ACTION_MENU_TYPE_DEFAULT = 0,
-    ACTION_MENU_TYPE_ITEM_INVENTORY = 1,
-    ACTION_MENU_TYPE_WEAPON_INVENTORY = 2,
-    ACTION_MENU_TYPE_ARITHMETICKS = 3,
-    ACTION_MENU_TYPE_ELEMENTS = 4,
-    ACTION_MENU_TYPE_BLANK_05 = 5,
-    ACTION_MENU_TYPE_MONSTER = 6,
-    ACTION_MENU_TYPE_KATANA_INVENTORY = 7,
-    ACTION_MENU_TYPE_ATTACK = 8,
-    ACTION_MENU_TYPE_JUMP = 9,
-    ACTION_MENU_TYPE_CHARGE = 10,
-    ACTION_MENU_TYPE_DEFEND = 11,
-    ACTION_MENU_TYPE_CHANGE_EQUIPMENT = 12,
-    ACTION_MENU_TYPE_UNKNOWN_0D = 13,
-    ACTION_MENU_TYPE_BLANK_0E = 14,
-    ACTION_MENU_TYPE_UNKNOWN_0F = 15,
-    ACTION_MENU_TYPE_COUNT = 16,
-} action_menu_type_e;
-
-/* Contextual skillset IDs synthesized by the action menu. The value 0xbc is
- * also an ordinary monster skillset when it comes from a monster unit. */
-typedef enum action_menu_pseudo_skillset {
-    ACTION_MENU_PSEUDO_SKILLSET_ANYTHING = 188,
-} action_menu_pseudo_skillset_e;
-
 /* Result of action_prepare, kept in unit_t.attack_phase_state. */
 typedef enum action_preparation {
     ACTION_PREPARATION_INVALID = -1,
@@ -131,16 +101,8 @@ enum {
     ACTION_EXP_CHANGE_LOSS = 0x80,
 };
 
-/* Action result limits: HP and MP damage and healing stop at 999. The EXP an
- * action earns starts at 10 for a success or 20 divided by the KO count for a
- * kill, and ends within 1..99. Poach yields the rare item 31 times in 256. */
-enum {
-    ACTION_VALUE_MAX = 999,
-    REWARD_EXP_SUCCESS_BASE = 10,
-    REWARD_EXP_KILL_BASE = 20,
-    REWARD_EXP_MAX = 99,
-    ITEM_POACH_RARE_ITEM_CHANCE = 31,
-};
+/* HP and MP damage and healing stop at 999. */
+enum { ACTION_VALUE_MAX = 999 };
 
 void action_clear_current_data(action_data_t* action);
 void action_finalize_target_result(void);
@@ -358,132 +320,6 @@ extern action_mimic_attacker_t g_action_mimic_attacker;
 
 void action_mimic_record(unit_stats_t* unit);
 s32 action_mimic_set_ability(unit_stats_t* unit);
-
-/* result displays */
-/* Pending post-action displays are queued as one little-endian 32-bit value in runtime
- * Unit Data 0x1b8..0x1bb. result_build_next_display and
- * result_build_next_special_display consume one bit at a time in ascending
- * order. */
-typedef enum action_display_flag {
-    ACTION_DISPLAY_FLAG_HP_DAMAGE = 0x00000001,
-    ACTION_DISPLAY_FLAG_HP_HEALING = 0x00000002,
-    ACTION_DISPLAY_FLAG_MP_DAMAGE = 0x00000004,
-    ACTION_DISPLAY_FLAG_MP_HEALING = 0x00000008,
-    ACTION_DISPLAY_FLAG_SPEED_DAMAGE = 0x00000010,
-    ACTION_DISPLAY_FLAG_SPEED_GAIN = 0x00000020,
-    ACTION_DISPLAY_FLAG_CT_DAMAGE = 0x00000040,
-    ACTION_DISPLAY_FLAG_CT_GAIN = 0x00000080,
-    ACTION_DISPLAY_FLAG_BRAVE_DAMAGE = 0x00000100,
-    ACTION_DISPLAY_FLAG_BRAVE_GAIN = 0x00000200,
-    ACTION_DISPLAY_FLAG_FAITH_DAMAGE = 0x00000400,
-    ACTION_DISPLAY_FLAG_FAITH_GAIN = 0x00000800,
-    ACTION_DISPLAY_FLAG_PA_DAMAGE = 0x00001000,
-    ACTION_DISPLAY_FLAG_PA_GAIN = 0x00002000,
-    ACTION_DISPLAY_FLAG_MA_DAMAGE = 0x00004000,
-    ACTION_DISPLAY_FLAG_MA_GAIN = 0x00008000,
-    ACTION_DISPLAY_FLAG_LEVEL_DOWN = 0x00010000,
-    ACTION_DISPLAY_FLAG_LEVEL_UP = 0x00020000,
-    ACTION_DISPLAY_FLAG_STOLEN = 0x00040000,
-    ACTION_DISPLAY_FLAG_BROKEN = 0x00080000,
-    ACTION_DISPLAY_FLAG_QUICK = 0x00100000,
-    ACTION_DISPLAY_FLAG_CT_ZERO = 0x00200000,
-    ACTION_DISPLAY_FLAG_MISSED = 0x00400000,
-    ACTION_DISPLAY_FLAG_GUARDED = 0x00800000,
-    ACTION_DISPLAY_FLAG_CAUGHT = 0x01000000,
-    ACTION_DISPLAY_FLAG_GAINED_EXP = 0x02000000,
-    ACTION_DISPLAY_FLAG_GAINED_JP = 0x04000000,
-    ACTION_DISPLAY_FLAG_NO_TARGET = 0x08000000,
-    ACTION_DISPLAY_FLAG_SILENCED = 0x10000000,
-    ACTION_DISPLAY_FLAG_NO_MP = 0x20000000,
-} action_display_flag_e;
-
-/* Numeric values correspond to the first sixteen action display flags. */
-enum {
-    ACTION_DISPLAY_VALUE_COUNT = 16,
-    ACTION_DISPLAY_NUMERIC_FLAGS_MASK = 0x0000ffff,
-};
-
-/* Image IDs used by the projected-action display. These index the 49-entry
- * g_result_image_rects; they are not battle status IDs. */
-typedef enum action_display_image_id {
-    ACTION_DISPLAY_IMAGE_DEAD = 0,
-    ACTION_DISPLAY_IMAGE_UNDEAD = 1,
-    ACTION_DISPLAY_IMAGE_PETRIFY = 2,
-    ACTION_DISPLAY_IMAGE_INVITE = 3,
-    ACTION_DISPLAY_IMAGE_DARKNESS = 4,
-    ACTION_DISPLAY_IMAGE_CONFUSION = 5,
-    ACTION_DISPLAY_IMAGE_SILENCE = 6,
-    ACTION_DISPLAY_IMAGE_BLOOD_SUCK = 7,
-    ACTION_DISPLAY_IMAGE_OIL = 8,
-    ACTION_DISPLAY_IMAGE_FLOAT = 9,
-    ACTION_DISPLAY_IMAGE_RERAISE = 10,
-    ACTION_DISPLAY_IMAGE_TRANSPARENT = 11,
-    ACTION_DISPLAY_IMAGE_BERSERK = 12,
-    ACTION_DISPLAY_IMAGE_POISON = 13,
-    ACTION_DISPLAY_IMAGE_REGEN = 14,
-    ACTION_DISPLAY_IMAGE_PROTECT = 15,
-    ACTION_DISPLAY_IMAGE_SHELL = 16,
-    ACTION_DISPLAY_IMAGE_HASTE = 17,
-    ACTION_DISPLAY_IMAGE_SLOW = 18,
-    ACTION_DISPLAY_IMAGE_STOP = 19,
-    ACTION_DISPLAY_IMAGE_FAITH = 20,
-    ACTION_DISPLAY_IMAGE_INNOCENT = 21,
-    ACTION_DISPLAY_IMAGE_CHARM = 22,
-    ACTION_DISPLAY_IMAGE_SLEEP = 23,
-    ACTION_DISPLAY_IMAGE_DONT_MOVE = 24,
-    ACTION_DISPLAY_IMAGE_DONT_ACT = 25,
-    ACTION_DISPLAY_IMAGE_REFLECT = 26,
-    ACTION_DISPLAY_IMAGE_DEATH_SENTENCE = 27,
-    ACTION_DISPLAY_IMAGE_STOLEN = 28,
-    ACTION_DISPLAY_IMAGE_BROKEN = 29,
-    ACTION_DISPLAY_IMAGE_QUICK = 36,
-    ACTION_DISPLAY_IMAGE_HP = 37,
-    ACTION_DISPLAY_IMAGE_MP = 38,
-    ACTION_DISPLAY_IMAGE_CT = 39,
-    ACTION_DISPLAY_IMAGE_SPEED = 40,
-    ACTION_DISPLAY_IMAGE_BRAVE = 41,
-    ACTION_DISPLAY_IMAGE_FAITH_STAT = 42,
-    ACTION_DISPLAY_IMAGE_PHYSICAL_ATTACK = 43,
-    ACTION_DISPLAY_IMAGE_MAGICAL_ATTACK = 44,
-    ACTION_DISPLAY_IMAGE_LEVEL = 45,
-    ACTION_DISPLAY_IMAGE_GIL = 46,
-    ACTION_DISPLAY_IMAGE_EXP = 47,
-    ACTION_DISPLAY_IMAGE_FROG = 48,
-    ACTION_DISPLAY_IMAGE_NONE = 255,
-} action_display_image_id_e;
-
-enum { ACTION_DISPLAY_IMAGE_COUNT = ACTION_DISPLAY_IMAGE_FROG + 1 };
-
-typedef struct action_display_image_rect {
-    u8 u;
-    u8 v;
-    u8 width;
-    u8 height;
-} action_display_image_rect_t;
-typedef char action_display_image_rect_size_must_be_4[(sizeof(action_display_image_rect_t) == 4) ? 1 : -1];
-
-/* Packed image IDs in the action-result status list. */
-enum {
-    ACTION_STATUS_DISPLAY_IMAGE_MASK = 0x7f,
-    ACTION_STATUS_DISPLAY_REMOVAL = 0x80,
-};
-
-/* Entries of unit_t.status_display_image_list. */
-enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
-
-/* Block view of the numeric display fields at runtime unit data 0x2bc..0x2cf,
- * taken as one pointer by the action result display builders
- * (result_build_next_display, result_build_next_special_display
- * and result_animate_text). */
-typedef struct action_result_display {
-    u8 active;                     /* 0x00 */
-    u8 _padding_01;                /* 0x01; aligns selector */
-    u16 selector;                  /* 0x02; result_display_selector_e */
-    u16 value;                     /* 0x04 */
-    u16 progress;                  /* 0x06 */
-    sprite_display_t* displays[3]; /* 0x08 */
-} action_result_display_t;
-typedef char action_result_display_size_must_be_20[(sizeof(action_result_display_t) == 20) ? 1 : -1];
 
 /* effect messages */
 /* Queue of post-action "effect message" popups (g_action_messages), filled by

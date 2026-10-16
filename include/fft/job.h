@@ -1,8 +1,8 @@
 #ifndef JOB_H
 #define JOB_H
 
-/* Jobs: the job records and ids, the career a unit keeps for the generic jobs (unlocks, learned abilities, levels and
- * JP), the job lookups and level, JP and unlock calculations, and the steps and tabs of the job and ability menus. */
+/* Jobs: the job records and ids, the career a unit keeps for the generic jobs (unlocks, learned abilities, levels
+ * and JP), and the job lookups and level, JP and unlock calculations. */
 
 #include "fft/status.h"
 #include "psx/types.h"
@@ -366,40 +366,5 @@ s32 job_find_first_for_skillset(s32 skillset);
 s32 job_get_generic_index(s32 job_id);
 s32 job_get_skillset(s32 job_id);
 s32 job_is_special_monster(s32 job_id);
-
-/* job and ability menus */
-/* Step of the job list menus (WORLD learn and view-abilities menus, BUNIT job menu, the JOBSTTS page); each list's
- * handler returns the next step. In JOBSTTS, JOBS is job_list_run, ABILITIES is ability_list_update and CLOSE makes
- * status_screen_entrypoint close the screen. */
-typedef enum menu_job_list_step {
-    MENU_JOB_LIST_STEP_CLOSE = -1,
-    MENU_JOB_LIST_STEP_JOBS = 0,
-    MENU_JOB_LIST_STEP_ABILITIES = 1,
-} menu_job_list_step_e;
-
-/* Ability list tab of the WORLD, BUNIT and JOBSTTS ability menus
- * (g_formation_ability_category and g_ability_list_ability_category) and the kind
- * argument of their list builders. */
-typedef enum menu_ability_category {
-    MENU_ABILITY_CATEGORY_ACTION = 0,
-    MENU_ABILITY_CATEGORY_REACTION = 1,
-    MENU_ABILITY_CATEGORY_SUPPORT = 2,
-    MENU_ABILITY_CATEGORY_MOVEMENT = 3,
-    MENU_ABILITY_CATEGORY_ALL = 15, /* the list builders take any other value as all */
-} menu_ability_category_e;
-
-/* What ability_list_build lists: every ability of the job, the learned
- * ones, the learn menu's rows, or only a count of the unlearned ones. */
-typedef enum ability_list_mode {
-    ABILITY_LIST_MODE_VIEW_ALL = 0,
-    ABILITY_LIST_MODE_LEARNED_ONLY = 1,
-    ABILITY_LIST_MODE_LEARN_MENU = 2,
-    ABILITY_LIST_MODE_COUNT_UNLEARNED = 3,
-} ability_list_mode_e;
-
-/* The JP, total JP and mastery the job list calculators last cached for the row being drawn. */
-extern u32 g_job_current_jp;
-extern u32 g_job_current_total_jp;
-extern s32 g_job_current_mastered;
 
 #endif

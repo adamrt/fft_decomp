@@ -43,6 +43,8 @@ typedef union effect_start_target_data {
 } effect_start_target_data_t;
 typedef char effect_start_target_data_size_must_be_4[sizeof(effect_start_target_data_t) == 4 ? 1 : -1];
 
+extern s16 g_effect_id;              /* file id (EFFECT/E###.BIN) of the requested effect */
+extern s32 g_effect_request_unread;  /* cleared when an ability effect is requested; nothing reads it */
 extern s16 g_effect_ability_files[]; /* action/reaction ability ids index directly; event ids map after those rows */
 extern file_extent_t g_effect_file_disc_entries[EFFECT_FILE_ID_COUNT];
 extern effect_file_header_t* g_effect_file_data_ptrs[EFFECT_FILE_ID_COUNT];
@@ -91,16 +93,5 @@ extern u16 g_effect_script_opcode_05_value; /* written by effect-script opcode 0
 
 effect_script_result_e effect_script_opcode_04_end(effect_record_t* unused_record);
 effect_script_result_e effect_script_opcode_2e_invalid(effect_record_t* unused_record);
-
-/* flag prefix */
-/* Verified prefix only: effect_replace_flags_0006 reads and writes a 16-bit value at +6.
- * Neither the full record nor the individual bit meanings are known. */
-typedef struct effect_flag_prefix {
-    u8 _unused_00[6];
-    u16 flags;
-} effect_flag_prefix_t;
-typedef char effect_flag_prefix_size_must_be_8[(sizeof(effect_flag_prefix_t) == 8) ? 1 : -1];
-
-void effect_replace_flags_0006(struct effect_flag_prefix* object, s32 value);
 
 #endif

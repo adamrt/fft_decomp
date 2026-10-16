@@ -122,9 +122,9 @@ void sound_novel_opcode_1c_start_pending_value_transition(void);
 void sound_novel_opcode_1e_apply_counter_delta(void);
 
 /* text history */
-/* Unsigned views of g_sound_novel_reading.text_history_0..3 for the
- * two history shifters, which load them with lhu; the record keeps s16 for
- * the -1 stores of sound_novel_reset_reading. */
+/* Views of g_sound_novel_reading.text_history_0..3 for the history shifters.
+ * The first stays signed for its -1 sentinel; the other three are loaded
+ * unsigned. The record keeps s16 for sound_novel_reset_reading. */
 extern s16 g_sound_novel_history_0;
 extern u16 g_sound_novel_history_1;
 extern u16 g_sound_novel_history_2;

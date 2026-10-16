@@ -9,6 +9,15 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+/* Travel direction of the step in progress, as move_step_get_direction derives it from the
+ * unit's tile and its destination tile. */
+typedef enum move_direction {
+    MOVE_DIRECTION_SOUTH = 0, /* -y */
+    MOVE_DIRECTION_EAST = 1,  /* +x */
+    MOVE_DIRECTION_NORTH = 2, /* +y */
+    MOVE_DIRECTION_WEST = 3,  /* -x */
+} move_direction_e;
+
 /* unit_t.step_phase: the stage of the movement step in progress. Every stage has one
  * value per move_direction_e direction, in that order. The handlers dispatch on the stage and
  * take the direction from the unit's coordinates, and the stores that change stage in the middle of

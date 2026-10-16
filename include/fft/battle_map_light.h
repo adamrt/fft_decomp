@@ -128,9 +128,16 @@ void battle_map_background_transition_and_store(
 void battle_map_ambient_start_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
 void battle_map_darkness_start_blend(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue);
 void battle_map_darkness_set(s32 frame_duration, const CVECTOR* color);
-void battle_map_color_field(s32 mode, s32 amount, s16 red, s16 green, s16 blue);
 
 /* back color */
+/* Commands of battle_map_light_control_back_color, which stores RGB and controls the GTE
+ * background color. */
+typedef enum battle_map_light_back_color_command {
+    BATTLE_MAP_LIGHT_BACK_COLOR_SET = 9,
+    BATTLE_MAP_LIGHT_BACK_COLOR_GET = 10,
+    BATTLE_MAP_LIGHT_BACK_COLOR_DISABLE = 11,
+    BATTLE_MAP_LIGHT_BACK_COLOR_RESTORE = 12
+} battle_map_light_back_color_command_e;
 extern s32 g_battle_map_back_color_red;
 extern s32 g_battle_map_back_color_green;
 extern s32 g_battle_map_back_color_blue;

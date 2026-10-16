@@ -13,10 +13,6 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* playback */
-extern s16 g_effect_id;             /* file id (EFFECT/E###.BIN) of the requested effect */
-extern s32 g_effect_request_unread; /* cleared when an ability effect is requested; nothing reads it */
-
 /* callbacks */
 /* Native effect handlers receive the record, callback slot, emitter and frame. Individual handlers narrow the record
  * index or ignore unused arguments. Effect script opcode 06 puts a handler in one of the callback slots, and a
@@ -107,9 +103,6 @@ extern u8 g_effect_palette_target_runtime_ids[];
 /* Tile target of the current effect: emitter origin CURSOR_TILE, homing CURSOR_TILE and camera source
  * CURSOR_TILE. */
 extern effect_target_t g_effect_target_tile;
-
-/* Provisional: 0x80000000 when an arrow arc ends without a hit; nothing reads it. */
-extern s32 g_effect_arrow_miss_marker;
 
 void effect_copy_unit_world_coords_to_vector(u32 runtime_id, VECTOR* destination);
 void effect_get_world_coords_by_battle_id(
@@ -214,8 +207,6 @@ typedef struct effect_work_record {
 } effect_work_record_t;
 typedef char effect_work_record_size_must_be_88[sizeof(effect_work_record_t) == 88 ? 1 : -1];
 
-extern s32 g_effect_work_records_unread; /* cleared when the effect work-record chain is built; nothing reads it */
-
 /* script records */
 /* The effect_record_t.flags bits. */
 enum { EFFECT_RECORD_FLAG_ALLOCATED = 0x1 };
@@ -296,15 +287,6 @@ void effect_interpolate_vector_q13_cos_out_and_back(
 
 /* start + (end - start) * factor / 256, the division an arithmetic shift. */
 s32 effect_lerp_q8(s32 start, s32 end, s32 factor);
-
-/* camera */
-/* Cleared with the effect camera modes; nothing reads them. */
-extern s32 g_effect_camera_unread_1;
-extern s32 g_effect_camera_unread_2;
-
-void effect_camera_start_parent_keyframe_moves(s16 frame);
-void effect_camera_start_child_keyframe_moves(s16 frame);
-void effect_camera_update_tracks(void);
 
 /* map control */
 s32 effect_map_freeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame);
@@ -526,9 +508,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
  * follows the build's grid size. */
 extern u32 g_effect_textured_quad_grid_4x4_brightness_table[][5];
 
-s32 effect_textured_quad_grid_2x2_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
-s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s32 emitter_index, s32 frame);
 
 /* ring and tube meshes */
 enum {

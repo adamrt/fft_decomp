@@ -1,9 +1,10 @@
 #ifndef STATE_H
 #define STATE_H
 
-/* BATTLE's game state machine: the frame loop, the handler and entry function of each game state, the map jumps and the
- * battle's close, and the game options word. */
+/* BATTLE's game state machine: the frame loop, the handler and entry function of each game state, map jumps,
+ * battle outcomes and the battle's close. */
 
+#include "fft/unit.h"
 #include "psx/types.h"
 
 /* game state */
@@ -206,107 +207,9 @@ void state_enter_close_battle_to_world(s32 duration);
 /* Queues CLOSE_BATTLE; the callers always pass transition step 8. */
 void state_enter_close_battle(s32 transition_step, s32 close_flow_state);
 
-/* text lookup */
-/* MAIN selects the BATTLE address of text_find_entry through this existing alias. */
-u8* battle_text_find_entry(u32 text_id);
+/* event outcomes and scenarios */
 
-/* game options */
-/* The live options word is g_game_options. The options screen unpacks its fields in menu order. Toggle
- * settings encode On as 0 and Off as 1; the paired high bit participates in the menu's Customize/Initialize
- * state. */
-enum {
-    GAME_OPTIONS_NAVIGATION_MESSAGES_MASK = 0x00018000,
-    GAME_OPTIONS_MAX_EQUIP_AT_JOB_CHANGE_MASK = 0x60000000,
-    GAME_OPTIONS_NAVIGATION_MESSAGES_OFF_BITS = 0x00008000,
-};
-
-typedef enum game_option_index {
-    GAME_OPTION_CURSOR_MOVEMENT = 0,
-    GAME_OPTION_CURSOR_REPEAT_SPEED = 1,
-    GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED = 2,
-    GAME_OPTION_FINGER_CURSOR_REPEAT_SPEED = 3,
-    GAME_OPTION_MESSAGE_DISPLAY_SPEED = 4,
-    GAME_OPTION_NAVIGATION_MESSAGES = 5,
-    GAME_OPTION_ABILITY_NAMES = 6,
-    GAME_OPTION_EFFECT_MESSAGES = 7,
-    GAME_OPTION_DISPLAY_GAINED_EXP_JP = 8,
-    GAME_OPTION_TARGET_FLASHING = 9,
-    GAME_OPTION_SHOW_UNEQUIPPABLE_ITEMS = 10,
-    GAME_OPTION_MAX_EQUIP_AT_JOB_CHANGE = 11,
-    GAME_OPTION_SOUND_MODE = 12,
-    GAME_OPTION_COUNT = 13,
-    GAME_OPTION_UNCHANGED = 13,
-} game_option_index_e;
-
-typedef enum game_option_toggle {
-    GAME_OPTION_ON = 0,
-    GAME_OPTION_OFF = 1,
-} game_option_toggle_e;
-
-typedef enum game_cursor_movement {
-    GAME_CURSOR_MOVEMENT_TYPE_A = 0,
-    GAME_CURSOR_MOVEMENT_TYPE_B = 1,
-} game_cursor_movement_e;
-
-typedef enum game_cursor_repeat_speed {
-    GAME_CURSOR_REPEAT_SPEED_FAST = 0,
-    GAME_CURSOR_REPEAT_SPEED_REGULAR = 1,
-    GAME_CURSOR_REPEAT_SPEED_SLOW = 2,
-} game_cursor_repeat_speed_e;
-
-typedef enum game_multi_height_cursor_speed {
-    GAME_MULTI_HEIGHT_CURSOR_SPEED_FAST = 0,
-    GAME_MULTI_HEIGHT_CURSOR_SPEED_REGULAR = 1,
-    GAME_MULTI_HEIGHT_CURSOR_SPEED_SLOW = 2,
-    GAME_MULTI_HEIGHT_CURSOR_SPEED_STOP = 3,
-} game_multi_height_cursor_speed_e;
-
-typedef enum game_finger_cursor_repeat_speed {
-    GAME_FINGER_CURSOR_REPEAT_SPEED_FASTEST = 0,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_FASTER = 1,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_FAST = 2,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_REGULAR = 3,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_SLOW = 4,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_SLOWER = 5,
-    GAME_FINGER_CURSOR_REPEAT_SPEED_SLOWEST = 6,
-} game_finger_cursor_repeat_speed_e;
-
-typedef enum game_message_display_speed {
-    GAME_MESSAGE_DISPLAY_SPEED_FAST = 0,
-    GAME_MESSAGE_DISPLAY_SPEED_REGULAR = 1,
-    GAME_MESSAGE_DISPLAY_SPEED_SLOW = 2,
-} game_message_display_speed_e;
-
-typedef struct game_options_fields {
-    u32 cursor_movement : 3;
-    u32 cursor_repeat_speed : 3;
-    u32 multi_height_cursor_speed : 3;
-    u32 finger_cursor_repeat_speed : 3;
-    u32 message_display_speed : 3;
-    u32 navigation_messages : 2;
-    u32 ability_names : 2;
-    u32 effect_messages : 2;
-    u32 sound_mode : 2; /* suzuki_sound_type_e */
-    u32 show_unequippable_items : 2;
-    u32 display_gained_exp_jp : 2;
-    u32 target_flashing : 2;
-    u32 max_equip_at_job_change : 2;
-    u32 _unused_03_bit7 : 1;
-} game_options_fields_t;
-
-/* The reset loads and stores this four-byte record as a scalar; a struct copy
- * moves the defaults load ahead of the input-timing stores. */
-typedef union game_options {
-    u32 value;
-    game_options_fields_t fields;
-} game_options_t;
-typedef char game_options_size_must_be_4[sizeof(game_options_t) == 4 ? 1 : -1];
-
-extern game_options_t g_game_options;
-extern game_options_t g_game_options_defaults;
-
-/* The player's options, saved while a tutorial event forces its own and restored when it ends. BATTLE and WORLD each
- * define it. */
-extern game_options_t g_game_options_saved;
+s32 event_check_battle_outcome(void);
+s32 event_try_enter_scenario(unit_t* unit);
 
 #endif

@@ -4,6 +4,7 @@
 /* How the battle AI decides a turn: action selection, targets, movement, ability evaluation, ranking, simulation and
  * facing. Each pass may suspend on its frame budget and resume next frame from the stage it saved in the workspace. */
 
+#include "fft/action.h"
 #include "fft/ai.h"
 #include "fft/battle_map.h"
 #include "fft/status.h"
@@ -302,5 +303,9 @@ extern ai_facing_tile_offsets_t g_ai_facing_tile_offsets;
 
 s32 ai_facing_choose_for_wait(void);
 ai_direction_e ai_facing_find_target_direction(const ai_coords_t* target, const ai_coords_t* origin);
+
+/* mimic simulation */
+/* The copy of g_action_mimic_attacker that ai_simulate_begin saves and ai_simulate_end restores. */
+extern action_mimic_attacker_t g_ai_mimic_attacker_backup;
 
 #endif

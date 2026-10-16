@@ -8,6 +8,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+struct menu_icon_source;
+
 /* primitives */
 extern point16_t g_menu_texture_origin; /* VRAM origin for menu image placement */
 
@@ -61,6 +63,10 @@ void menu_gfx_enqueue_oriented_textured_quad(
     const oriented_quad_t* descriptor, const rgb24_t* color, s32 orientation, s32 semitrans, s32 otag_index);
 void menu_gfx_enqueue_textured_quad(
     const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans, u16 texture_page, u16 clut, s32 otag_index);
+void menu_gfx_enqueue_textured_quad_current_ot(const RECT* rect, s32 u, s32 v, const rgb24_t* color, s32 semitrans,
+    u16 texture_page, u16 clut, s32 unused_priority);
+void menu_gfx_enqueue_textured_quad_rect(
+    RECT* rect, struct menu_icon_source* tex, rgb24_t* color, s32 semitrans, s32 ot_index);
 
 /* Draws count cells at one ordering-table entry; a null color leaves the texture unshaded. */
 void menu_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const rgb24_t* color, s32 semitrans,

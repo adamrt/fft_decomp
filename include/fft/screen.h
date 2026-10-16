@@ -32,7 +32,6 @@ enum {
     SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15,
 };
 
-s32 menu_input_get_lock_mode(s32 unused_0);
 void screen_thread_yield_forever(void);
 void screen_thread_request_redraw(s32 thread_id);
 void screen_thread_request_stop(s32 thread_id);
@@ -60,7 +59,6 @@ void screen_reset_context(void);
 void screen_set_allowed_buttons(u32 mask);
 s32 screen_is_busy(void);
 void screen_reset_game(void);
-void resolve_unit_status_changes(void);
 
 /* controller input */
 extern menu_input_state_t g_screen_input_frame_state;

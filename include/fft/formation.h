@@ -14,7 +14,6 @@
 #include "fft/unit.h"
 #include "fft/unit_panel.h"
 #include "fft/unit_party.h"
-#include "fft/zodiac.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
@@ -380,6 +379,21 @@ void formation_dismiss(s16 formation_idx);
 void formation_dismiss_menu(void);
 
 /* order */
+/* Order Unit keys select both a record field and its menu text. The gaps are
+ * not selectable criteria. Number sorts by roster slot ascending; the others
+ * sort descending. */
+typedef enum formation_sort_key {
+    FORMATION_SORT_KEY_NUMBER = 0,
+    FORMATION_SORT_KEY_LEVEL = 1,
+    FORMATION_SORT_KEY_JOB = 2,
+    FORMATION_SORT_KEY_BRAVE = 4,
+    FORMATION_SORT_KEY_FAITH = 5,
+    FORMATION_SORT_KEY_MAX_HP = 7,
+    FORMATION_SORT_KEY_MAX_MP = 9,
+} formation_sort_key_e;
+
+enum { FORMATION_SORT_KEY_COUNT = 7 };
+
 extern menu_entry_t g_formation_order_menu;
 extern u8 g_formation_order_saved_browse_enabled;
 extern s8 g_formation_order_open;
@@ -396,7 +410,11 @@ typedef enum breeding_rarity {
     BREEDING_RARITY_RARE = 3,
 } breeding_rarity_e;
 
-enum { BREEDING_RARITY_COUNT = 3 };
+enum {
+    BREEDING_RARITY_COUNT = 3,
+    BREEDING_MONTH_COUNT = 13,
+    BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1,
+};
 
 /* Provisional: the breeding entry of a monster job (JOB_ID_CHOCOBO on): the hatch-day range and the three offspring
  * jobs by rarity class (breeding_update). */

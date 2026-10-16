@@ -1,7 +1,6 @@
 /* AI command building and action selection, with the recovery status table. */
 
 #include "fft/ability.h"
-#include "fft/action.h"
 #include "fft/ai.h"
 #include "fft/ai_command.h"
 #include "fft/ai_decision.h"

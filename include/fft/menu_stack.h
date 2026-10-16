@@ -89,7 +89,6 @@ extern s32 g_menu_stack_types_next[];
 extern void (*g_menu_stack_idle_handlers[])(menu_stack_record_t*);
 extern void (*g_menu_stack_suspend_handlers[])(menu_stack_record_t*);
 extern void (*g_menu_stack_resume_handlers[])(menu_stack_record_t*);
-
 void menu_stack_reset(void);
 void menu_stack_dispatch_idle(void);
 void menu_stack_dispatch_suspend(void);
@@ -170,6 +169,30 @@ typedef struct menu_stack_window_level {
 void menu_stack_push_message_level(s32 text, s32 reload_text);
 void menu_stack_push_text_window_level(s32 text, s32 reload_text);
 void menu_stack_push_scrollable_text_level(s32 text_id);
+
+/* menu levels */
+/* A window record and a render record handled together (proposition_suspend_detail_level). */
+typedef struct window_render_pair {
+    s32 window_index;
+    s32 render_index;
+} window_render_pair_t;
+
+/* A level owning two window records; sound_novel_opcode_0c_set_parent_windows_visible toggles both records'
+ * DISPLAY_OBJECT_HIDDEN. */
+typedef struct window_pair_level {
+    s32 first_window;
+    s32 second_window; /* 0x04 */
+} window_pair_level_t;
+
+/* A level owning two window records and a render record: bar_push_level pushes it as MENU_STACK_LEVEL_BAR.
+ * tutorial_push_topic_level hides all three (DISPLAY_OBJECT_HIDDEN) and tutorial_wait_topic_then_pop shows them
+ * again. */
+typedef struct window_pair_render_level {
+    s32 first_window;
+    s32 second_window; /* 0x04 */
+    s32 render_index;  /* 0x08 */
+    s32 panel_rows;    /* 0x0c; cleared by bar_push_level */
+} window_pair_render_level_t;
 
 /* remembered cursors */
 /* Slots of g_menu_stack_cursor_states: the remembered row of each list. */

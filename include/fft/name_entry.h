@@ -9,9 +9,15 @@
 #include "psx/types.h"
 
 /* screen */
+typedef enum name_entry_state {
+    NAME_ENTRY_STATE_EDITING = 0,
+    NAME_ENTRY_STATE_CONFIRMATION = 1,
+    NAME_ENTRY_STATE_FINISHED = 0xff,
+} name_entry_state_e;
+
 extern void (*g_name_entry_state_handlers[])(void);
-extern u8 g_name_entry_state;
-extern u8 g_name_entry_saved_state;
+extern u8 g_name_entry_state;       /* name_entry_state_e */
+extern u8 g_name_entry_saved_state; /* name_entry_state_e */
 extern s8 g_name_entry_started;
 extern s8 g_name_entry_last_state;          /* last drawn name-entry state */
 extern s8 g_name_entry_keyboard_last_state; /* last drawn state */

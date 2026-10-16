@@ -186,15 +186,8 @@ menu_icon_source_t* equipment_get_row_icon_source(s32 row);
 s32 equipment_get_row_item_count(s32 row);
 s32 equipment_get_row_equipped_count(s32 row);
 
-/* item icons */
-/* Item and item-type icons as menu_icon_source_t, for the icon row callbacks; item_get_type_icon_rect gives the
- * texture cell of an item type's 12x12 icon. */
-void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);
-void item_build_icon_source(menu_icon_source_t* output, u32 item_id);
-menu_icon_source_t* item_build_type_icon_source(s32 index);
-
 /* item actions */
-extern menu_entry_t g_item_action_menu;
+
 extern s8 g_equipment_item_action_menu_active;
 extern menu_entry_t* g_equipment_item_action_active_menu;
 extern menu_entry_t g_equipment_item_action_menu_single_item;

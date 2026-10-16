@@ -27,6 +27,8 @@ extern u16 g_menu_modal_open;
 /* Frames left before menu input is accepted again; the frame update counts it down. */
 extern u16 g_menu_input_block_frames;
 
+/* Returns the input-lock mode; the argument is ignored. */
+s32 menu_input_get_lock_mode(s32 unused_0);
 void menu_set_modal_open(void);
 void menu_clear_modal_open(void);
 
@@ -74,6 +76,7 @@ extern s32 g_menu_blocked_buttons;
 
 void menu_input_update_controller(void);
 void menu_input_clear_state(void);
+void menu_input_update_with_message_state(void);
 
 /* repeat timing */
 /* Six-byte row selected by the finger cursor repeat speed option (game options bits 9-11). The first three
@@ -86,6 +89,11 @@ typedef struct menu_input_timing_profile {
     u8 scroll_slow_step;   /* copied to g_menu_scroll_slow_step */
     u8 scroll_fast_step;   /* copied to g_menu_scroll_fast_step */
 } menu_input_timing_profile_t;
+
+extern u8 g_menu_scroll_unread_setting; /* set to 1 with the input repeat timings; never read */
+extern u8 g_menu_scroll_accel_delay;
+extern u8 g_menu_scroll_slow_step;
+extern u8 g_menu_scroll_fast_step;
 
 /* pressable buttons */
 /* The index argument of WORLD's menu_draw_pressable_button and BUNIT's unit_list_draw_pressable_button: an on-screen
@@ -115,5 +123,7 @@ extern u16 g_menu_button_clut;
 /* Each button's first piece; the next button's start ends it. */
 extern u8 g_menu_button_piece_starts[];
 extern s8 g_menu_button_press_timers[];
+
+void menu_draw_pressable_button(s16 index, s32 x, s16 y, s16 pressed, s16 disabled, u16 sound_effect_id);
 
 #endif

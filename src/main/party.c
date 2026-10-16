@@ -10,7 +10,6 @@
 #include "fft/memory.h"
 #include "fft/screen.h"
 #include "fft/skillset.h"
-#include "fft/state.h"
 #include "fft/status.h"
 #include "fft/text.h"
 #include "fft/unit.h"

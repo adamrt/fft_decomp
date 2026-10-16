@@ -1,6 +1,5 @@
 /* The item action and sort order menus, units equipping the selected item, and the row window and cursor. */
 
-#include "fft/equipment.h"
 #include "fft/formation.h"
 #include "fft/formation_item.h"
 #include "fft/gfx.h"

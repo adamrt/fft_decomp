@@ -8,6 +8,7 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Indexed by formation_sort_key_e; unselectable keys retain their retail entries. */
 static s8 g_formation_sort_field_indices[12] = { 22, 0, 18, 0, 19, 20, 0, 8, 0, 11, 0, 14 };
 
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
@@ -181,7 +182,8 @@ void item_sort_id_list(s32 mode, s16* list) {
 }
 
 /*
- * Sort the formation roster order by the key list selected by `index`,
+ * Sort the formation roster order by the formation_sort_key_e list selected by `index`
+ * (the Order Unit menu uses index 0, which points to order_1),
  * then move eggs to the end in descending record-index order
  * and rebuild the unit pointer table.
  *
@@ -216,7 +218,7 @@ void formation_sort_roster(s32 index) {
                 diff = swap - lhs;
                 k++;
             } while (diff == 0);
-            if (keys[k - 1] != 0) {
+            if (keys[k - 1] != FORMATION_SORT_KEY_NUMBER) {
                 diff = -diff;
             }
             if (diff < 0) {

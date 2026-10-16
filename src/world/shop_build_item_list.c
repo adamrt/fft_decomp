@@ -2,10 +2,10 @@
 
 #include "fft/equipment.h"
 #include "fft/item.h"
+#include "fft/option.h"
 #include "fft/screen.h"
 #include "fft/script_variable.h"
 #include "fft/shop.h"
-#include "fft/state.h"
 #include "psx/types.h"
 
 /* Build the -1 terminated item list offered by a normal shop or the Fur Shop

@@ -12,7 +12,6 @@
 #include "fft/system.h"
 #include "fft/tutorial.h"
 #include "fft/unit_panel.h"
-#include "fft/window.h"
 #include "fft/world_map.h"
 #include "psx/types.h"
 

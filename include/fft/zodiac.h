@@ -5,7 +5,6 @@
 
 #include "fft/calendar.h"
 #include "fft/gfx.h"
-#include "fft/job.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
@@ -30,12 +29,7 @@ typedef struct zodiac_date_limit {
 } zodiac_date_limit_t;
 typedef char zodiac_date_limit_size_must_be_3[(sizeof(zodiac_date_limit_t) == 3) ? 1 : -1];
 
-/* Table sizes; the breeding table has one entry per monster job. */
-enum {
-    ZODIAC_DATE_LIMIT_COUNT = 13,
-    BREEDING_MONTH_COUNT = 13,
-    BREEDING_ENTRY_COUNT = JOB_ID_TIAMAT - JOB_ID_CHOCOBO + 1,
-};
+enum { ZODIAC_DATE_LIMIT_COUNT = 13 };
 
 extern const u16 g_zodiac_day_limits[ZODIAC_SIGN_ORDINARY_COUNT];
 extern const zodiac_date_limit_t g_zodiac_date_limits[ZODIAC_DATE_LIMIT_COUNT];

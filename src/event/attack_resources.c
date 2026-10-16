@@ -2,7 +2,6 @@
  * script instructions, subsystem init and reset, selection records, skillset entries and the skill menu. */
 
 #include "fft/ability_list.h"
-#include "fft/action.h"
 #include "fft/ai.h"
 #include "fft/ai_command.h"
 #include "fft/at_list.h"
@@ -30,6 +29,7 @@
 #include "fft/menu_window.h"
 #include "fft/move.h"
 #include "fft/music.h"
+#include "fft/option.h"
 #include "fft/overlay.h"
 #include "fft/portrait.h"
 #include "fft/script.h"

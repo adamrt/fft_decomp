@@ -9,6 +9,14 @@
 #include "psx/types.h"
 
 /* action rewards */
+/* EXP starts at 10 for a success or 20 divided by the KO count for a kill,
+ * and ends within 1..99. */
+enum {
+    REWARD_EXP_SUCCESS_BASE = 10,
+    REWARD_EXP_KILL_BASE = 20,
+    REWARD_EXP_MAX = 99,
+};
+
 /* g_reward_report_phase: the reports shown one after another once an action
  * has resolved. The post-movement reports use the first two. */
 typedef enum reward_report_phase {

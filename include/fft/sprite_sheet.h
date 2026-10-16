@@ -516,4 +516,6 @@ s32 sprite_open_sp2_file(unit_t* unit, u32* destination);
 void sprite_decompress_attack_image(const u8* source, u8* destination);
 s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot);
 
+extern s32 g_sprite_unit_graphics_load_complete;
+
 #endif

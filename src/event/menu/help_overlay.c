@@ -1,7 +1,6 @@
 /* Menu close, battle/require help runners and the first running menu thread. */
 
 #include "fft/ability.h"
-#include "fft/action.h"
 #include "fft/battle_map.h"
 #include "fft/command.h"
 #include "fft/gfx_primitive.h"

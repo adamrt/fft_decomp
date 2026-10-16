@@ -7,6 +7,7 @@
 #include "fft/menu.h"
 #include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
+#include "fft/menu_input.h"
 #include "fft/menu_script.h"
 #include "fft/menu_window.h"
 #include "fft/screen.h"

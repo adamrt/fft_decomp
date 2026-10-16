@@ -1,7 +1,6 @@
 /* Whether a listed job's skillset has no ability left to learn for the selected unit, cached for row callbacks. */
 
 #include "fft/ability_list.h"
-#include "fft/job.h"
 #include "fft/job_list.h"
 #include "fft/unit.h"
 #include "psx/types.h"

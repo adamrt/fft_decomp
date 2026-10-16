@@ -7,6 +7,7 @@
 #include "fft/gfx_image.h"
 #include "fft/gfx_primitive.h"
 #include "fft/menu.h"
+#include "fft/menu_cursor.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
@@ -33,7 +34,7 @@ static void name_entry_update_cursor(void);
  * steps). The first call, once the message box is idle, starts editing the name at `list`;
  * later calls apply L1/R1 (cursor) and Square (delete), run the current entry state's handler
  * and draw the name, its cursor, the shoulder buttons and the keyboard. Returns 0 while
- * editing and the encoded name once the state reaches 0xFF (done). */
+ * editing and the encoded name once the state reaches NAME_ENTRY_STATE_FINISHED. */
 u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
     point16_t cursor;
     s32 busy;
@@ -46,7 +47,7 @@ u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
         }
         return 0;
     }
-    if (g_name_entry_state != 0xFF) {
+    if (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
         busy = screen_is_busy();
         if (busy == 0) {
             if (g_menu_input_primary_repeat & PSX_PAD_L1) {
@@ -80,7 +81,7 @@ u8* name_entry_keyboard_frame(const u8* list, s32 unused_1) {
 }
 
 /*
- * Run the WORLD name-entry screen until its state reaches 0xFF.
+ * Run the WORLD name-entry screen until the name is confirmed.
  *
  * Starts editing the name at `list`, binds both packet buffers onto a
  * stack-resident pool block, then each frame presents the previous ordering
@@ -142,7 +143,7 @@ u8* name_entry_run_screen(const u8* list, u32* image) {
     g_name_entry_last_state = -1;
     screen_fade_set_disabled(1);
     menu_input_update_with_message_state();
-    while (g_name_entry_state != 0xFF) {
+    while (g_name_entry_state != NAME_ENTRY_STATE_FINISHED) {
         screen_fade_update_in();
         system_frame_stub();
         g_gfx_poly_f3_count = 0;
@@ -263,7 +264,7 @@ static void name_entry_open_key_list(void) {
  *
  * Row 0 selects special keys; other rows decode a character from the key
  * table. Encoded 0xfe is submitted as 0xfa. Cross or Start, or special key 5,
- * opens the confirmation (state 1), remembering the current state to return
+ * opens the confirmation menu, remembering the current state to return
  * to. Other state and sound requests are left for the surrounding menu
  * handlers.
  */
@@ -283,7 +284,7 @@ void name_entry_handle_keys(void) {
     g_name_entry_confirm_message_shown = 0;
     if ((g_menu_input_primary_repeat & (PSX_PAD_CROSS | PSX_PAD_START)) && g_name_entry_input_delay >= 10) {
         previous = g_name_entry_state;
-        g_name_entry_state = 1;
+        g_name_entry_state = NAME_ENTRY_STATE_CONFIRMATION;
         g_name_entry_saved_state = previous;
     } else {
         g_name_entry_confirm_message_shown = 1;
@@ -293,7 +294,7 @@ void name_entry_handle_keys(void) {
         if (g_name_entry_list_cursor == 0) {
             if (g_name_entry_cursor_index == 5) {
                 previous = g_name_entry_state;
-                g_name_entry_state = 1;
+                g_name_entry_state = NAME_ENTRY_STATE_CONFIRMATION;
                 g_name_entry_confirm_message_shown = 0;
                 g_name_entry_saved_state = previous;
             } else {
@@ -446,7 +447,7 @@ static void name_entry_apply_key(s16 key) {
  *
  * Names use 0xfe termination and contain at most 16 encoded bytes. Canceling
  * restores the empty-buffer marker if the original name was substituted.
- * Confirmation waits for the prompt thread to finish before reporting 0xff.
+ * Confirmation waits for the prompt thread to finish before marking entry finished.
  */
 void name_entry_confirm_menu(void) {
     s32 count;
@@ -485,7 +486,7 @@ void name_entry_confirm_menu(void) {
     if (g_name_entry_confirm_finished != 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_MESSAGE) == 0) {
             g_name_entry_confirm_initialized = 0;
-            g_name_entry_state = 0xff;
+            g_name_entry_state = NAME_ENTRY_STATE_FINISHED;
             g_screen_prompt_active = 0;
         }
     } else if (menu_start_managed_thread(SCREEN_THREAD_SLOT_UPPER_MENU, &g_name_entry_confirm_menu) == 0) {
@@ -527,7 +528,7 @@ static void name_entry_init(const u8* name) {
     /* A cursor move at slot 0 changes nothing but kerns and uploads the name. */
     name_entry_apply_key(NAME_ENTRY_KEY_CURSOR_LEFT);
     g_sound_queued_effect_id = SOUND_SFX_NONE;
-    g_name_entry_state = 0;
+    g_name_entry_state = NAME_ENTRY_STATE_EDITING;
     name_entry_open_key_list();
     menu_set_vsync_mode_and_event_speed(2);
 }

@@ -5,7 +5,7 @@
 #include "fft/equipment.h"
 #include "fft/item.h"
 #include "fft/menu.h"
-#include "fft/state.h"
+#include "fft/option.h"
 #include "psx/types.h"
 
 static equipment_slot_result_e equipment_validate_slot_item(s16 unit, s16 slot, s32 item_id);

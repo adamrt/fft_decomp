@@ -1689,25 +1689,25 @@ void script_opcode_83_change_stats(const event_change_stats_parameters_t* parame
 
 /*
  * UnitAnim event instruction.  Parameters: 0x00 unit id
- * (16-bit value), 0x02 animation id (16-bit value), 0x04 move-flag mode (0 unset,
- * 1 flip). Units are selected as script_prepare_unit_filter describes.
+ * (16-bit value), 0x02 animation id (16-bit value), 0x04 facing-update mode (0 allow,
+ * 1 suppress; other values leave it unchanged). Units are selected as script_prepare_unit_filter describes.
  */
 void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;
     s32 animation;
-    s32 move_flag_mode;
+    s32 facing_update_mode;
 
     if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
     for (unit_index = 0; unit_index < UNIT_SLOT_COUNT; unit_index++) {
         if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
-            move_flag_mode = parameters->facing_update_mode;
-            if (move_flag_mode == 0) {
+            facing_update_mode = parameters->facing_update_mode;
+            if (facing_update_mode == 0) {
                 unit_clear_facing_update_suppression(unit_id);
-            } else if (move_flag_mode == 1) {
+            } else if (facing_update_mode == 1) {
                 unit_set_facing_update_suppression(unit_id);
             }
             animation = script_read_s16(parameters->animation_le);

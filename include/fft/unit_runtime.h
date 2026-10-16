@@ -8,7 +8,9 @@
 #include "fft/ai_command.h"
 #include "fft/animation.h"
 #include "fft/battle_map.h"
+#include "fft/gfx.h"
 #include "fft/move.h"
+#include "fft/result.h"
 #include "fft/sprite.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
@@ -296,6 +298,8 @@ typedef enum unit_character_slot {
     UNIT_CHARACTER_SLOT_ABSENT = -5,
 } unit_character_slot_e;
 
+/* The live units, chained through unit_t.previous. */
+extern unit_t* g_unit_list_head;
 extern unit_t g_units[UNIT_RUNTIME_SLOT_COUNT];    /* the live units, indexed by runtime id */
 extern unit_stats_t g_unit_stats[UNIT_SLOT_COUNT]; /* indexed by battle id (unit_stats_t.battle_id) */
 extern unit_slot_state_t g_unit_slot_states[];
@@ -306,6 +310,9 @@ unit_t* unit_get_by_battle_id(u16 battle_id);
 s32 unit_get_runtime_id_by_battle_id(u32 battle_id);
 s32 unit_get_battle_id_by_runtime_id(u32 runtime_id);
 s32 unit_has_runtime_id(u32 runtime_id);
+
+/* The unit-ready test script_wait_for_unit_ready polls: always 1, so the wait never yields. */
+s32 unit_is_ready(s32 unused_runtime_id);
 unit_stats_t* unit_get_stats(u32 battle_id);
 unit_stats_t* unit_get_present_stats(u32 battle_id);
 unit_stats_t* unit_find_active(void);
@@ -347,6 +354,14 @@ unit_t* unit_find_runtime_at_tile(s32 map_x, s32 map_y, s32 map_z);
 unit_t* unit_find_selectable_at_tile(s32 map_x, s32 map_y, s32 map_z);
 unit_t* unit_find_other_chocobo_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
 unit_height_data_t* unit_calculate_height_data(unit_height_data_t* out, s32 unit_id);
+s32 unit_height_calculate_from_battle_tile(struct unit* unit);
+s32 unit_height_calculate_from_tile(struct unit* unit);
+s32 unit_height_calculate_from_move_destination(struct unit* unit);
+s32 unit_height_calculate_with_caller_coords(struct unit* unit, const SVECTOR* coords);
+
+/* The definition returns an s16, but an s16 prototype makes the callers re-extend the result;
+ * keep s32. */
+s32 unit_height_calculate_from_world_coords(struct unit* unit);
 
 /* mounts and statuses */
 /* Result of unit_mount_get_chocobo_state. */
@@ -442,14 +457,6 @@ SVECTOR* unit_get_event_offset_by_runtime_id(u32 runtime_id);
 s32 unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount);
 
 /* encounters and deployment */
-/* g_encounter_selection_mode: which ENTD unit_entd_select_and_open opens. */
-typedef enum unit_entd_selection {
-    UNIT_ENTD_SELECTION_SCRIPT_VARIABLE = 0, /* EVENT_SCRIPT_VAR_CURRENT_ENTD */
-    UNIT_ENTD_SELECTION_ENTD_250 = 1,
-    UNIT_ENTD_SELECTION_RANDOM_75_TO_79 = 2,
-    UNIT_ENTD_SELECTION_RANDOM_1_TO_59 = 3,
-    UNIT_ENTD_SELECTION_MAP_ID = 4, /* the map's own id when it is not 0 */
-} unit_entd_selection_e;
 
 extern s16 g_unit_entd_spritesheet_ids[];
 extern s32 g_unit_entd_spritesheet_count;
@@ -466,5 +473,30 @@ s32 unit_count_crystals(void);
 unit_t* unit_get_crystal_or_treasure_at_map_coords(s32 map_x, s32 map_y, s32 map_z);
 void unit_apply_poach_morbol_transformation(unit_t* unit);
 void unit_transform_into_morbol(unit_stats_t* unit);
+
+/* visibility and facing arrows */
+extern palette_t g_unit_facing_wait_arrow_palette;
+
+/* Advanced by g_system_vsync_interval once per call and sampled with bit 5 to blink
+ * the highlighted arrow. */
+extern u32 g_unit_facing_wait_arrow_blink_timer;
+
+void unit_hide_all_jumping(void);
+s32 unit_hide_by_runtime_id(u32 runtime_id);
+void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
+void unit_fade_out_start_red(s32 runtime_id);
+void unit_fade_out_start_for_event(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue);
+void unit_update_float_height_and_status_bubble(unit_t* unit);
+void unit_facing_draw_wait_arrows(SVECTOR* vector, u32* ot);
+void unit_facing_draw_wait_direction(void);
+void unit_play_sfx(struct unit* unit, s32 sound_id);
+
+/* action relocation */
+extern s32 g_unit_casting_runtime_id;
+
+/* Count and coordinates of the tiles already handed out as dismount
+ * destinations this action. */
+extern s32 g_unit_relocated_count;
+extern move_tile_coordinates_t g_unit_relocated_coords[];
 
 #endif
