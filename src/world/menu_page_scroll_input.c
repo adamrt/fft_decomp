@@ -30,7 +30,7 @@ void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e dir, cons
         if (g_menu_scroll_base_index < 0) {
             g_menu_scroll_base_index = 0;
         }
-    } else if (dir == 1) {
+    } else if (dir == MENU_VERTICAL_SCROLL_DOWN) {
         g_menu_scroll_base_index += menu->list.visible_rows;
         /* `dir` is 1 here. */
         if (g_menu_list_entry_count - (g_menu_scroll_base_index + dir) < menu->list.visible_rows) {

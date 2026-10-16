@@ -1323,7 +1323,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                         } else {
                             action->skillset_id = 1;
-                            action->targeting_type = 5;
+                            action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
                         }
                         break;
                     case ABILITY_ID_REACTION_COUNTER_MAGIC:
@@ -1355,7 +1355,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         action->skillset_id = 6;
                         /* Auto-Potion updates only the low byte of the 16-bit item/equipment field. */
                         *(u8*)&action->item_or_equipment = result;
-                        action->targeting_type = 5;
+                        action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
                         action->target_id = i;
                         action->target_position.vx = unit->x;
                         action->target_position.vz = unit->position.y;
@@ -1400,7 +1400,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         g_battle_action_current_ability.secondary_weapon_id
                             = unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON];
                         action->skillset_id = 0;
-                        action->targeting_type = 5;
+                        action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
                         action->target_id = i;
                         if (g_battle_current_reaction_ability_id == ABILITY_ID_REACTION_DAMAGE_SPLIT) {
                             action->target_id = g_battle_acting_unit_id;

@@ -2947,7 +2947,7 @@ static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 
     unit->shadow_dirty = 1;
     unit->shadow_counter = 0;
     unit->numeric_display.active = 0;
-    unit->numeric_display.selector = 0;
+    unit->numeric_display.selector = BATTLE_NUMERIC_DISPLAY_HP_DAMAGE;
     unit->numeric_display.progress = 0;
     unit->numeric_display.displays[0] = battle_gfx_init_numeric_sprite_display(runtime_id, 0);
     unit->numeric_display.displays[1] = battle_gfx_init_numeric_sprite_display(runtime_id, 1);

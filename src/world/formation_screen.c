@@ -142,8 +142,9 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             }
             world_menu_set_palette_mode(g_menu_input_lock_mode);
             g_world_formation_menu_handlers[g_world_formation_current_menu]();
-            if (g_world_formation_current_menu == WORLD_FORMATION_MENU_UNIT_GRID || g_world_formation_current_menu == 4
-                || g_world_formation_current_menu == 5) {
+            if (g_world_formation_current_menu == WORLD_FORMATION_MENU_UNIT_GRID
+                || g_world_formation_current_menu == WORLD_FORMATION_MENU_DISMISS_UNIT
+                || g_world_formation_current_menu == WORLD_FORMATION_MENU_ORDER_UNIT) {
                 world_formation_update_and_draw_unit_grid(1,
                     g_world_formation_current_menu == WORLD_FORMATION_MENU_UNIT_GRID,
                     g_world_formation_current_menu == WORLD_FORMATION_MENU_UNIT_GRID,

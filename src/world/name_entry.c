@@ -214,7 +214,7 @@ u8* world_name_run_entry_screen(const u8* list, u32* image) {
         if (value != g_world_name_entry_last_state) {
             g_world_name_entry_last_state = value;
         }
-        if (g_sound_pending_sfx_id == 2 || g_sound_pending_sfx_id == 3) {
+        if (g_sound_pending_sfx_id == MAIN_SFX_CANCEL || g_sound_pending_sfx_id == MAIN_SFX_CURSOR_MOVE) {
             g_sound_queued_effect_id = g_sound_pending_sfx_id;
         }
         if (g_sound_pending_sfx_id < 0 || g_sound_suppressed != 0) {
