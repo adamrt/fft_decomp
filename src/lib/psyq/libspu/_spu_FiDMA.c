@@ -3,6 +3,9 @@
 
 #include "psx/libapi.h"
 
+/* SPU DMA completion handler (installed by SpuStart): after a write it waits a few register
+ * cycles, clears the transfer mode, then calls _spu_transferCallback or, with none set, delivers
+ * the HwSPU EvSpCOMP event. */
 void _spu_FiDMA(void) {
     u32 wait;
     if (g_psyq_spu_dma_direction == 0) {

@@ -11,6 +11,9 @@ enum {
 };
 
 #define CD_DMA_CHANNELS ((volatile psyq_dma_channel_t*)0x1f801080)
+/* Start a DMA on channel into destination (blocks of words): wait for the channel to be free, set
+ * or clear its completion interrupt, enable it in the DMA priority register, wait for CD data to
+ * be ready, then write control to start it. */
 void dma_execute(s32 channel, u32* destination, u32 blocks, u32 words, u32 control, u8 enable_irq, s32 unused) {
     s32 polls = 0;
     /* Volatile retains the native stack stores of both register readbacks. */

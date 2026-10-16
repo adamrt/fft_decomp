@@ -1,6 +1,8 @@
 /* SCUS_942.21 0x80019f88..0x8001a013. */
 #include "psx/libspu.h"
 
+/* _SpuIsInAllocateArea for an address in SPU units; SpuSetReverb, SpuSetReverbModeParam and
+ * SpuClearReverbWorkArea test the reverb work-area start with it. */
 s32 _SpuIsInAllocateArea_(u32 address) {
     s32 index;
     u32 start;

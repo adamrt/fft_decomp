@@ -24,6 +24,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Return g_battle_state_animation_continue_check, nonzero while the action's effect is still
+ * loading or playing; script_play_effect_and_wait polls it on the main stack. */
 s32 battle_state_get_animation_continue_check(void) {
     return g_battle_state_animation_continue_check;
 }
@@ -62,6 +64,9 @@ void battle_state_reset_frame_pacing_timer(void) {
     g_battle_frame_pacing_timer = 0;
 }
 
+/* Count one more entry into the status screen (the DEBUGCHR unit editor). While the count is
+ * exactly 1 the battle state handlers stop animating the units and the camera;
+ * battle_menu_leave_status_screen_selection resets it. */
 void battle_menu_enter_status_screen_selection(void) {
     if (g_battle_menu_status_screen_selected != 0) {
         g_battle_menu_status_screen_selected++;
@@ -75,6 +80,8 @@ void battle_menu_leave_status_screen_selection(void) {
     g_battle_menu_status_screen_selected = 0;
 }
 
+/* Return g_main_system_animation_speed, the vertical blanks per frame (1, or 2 during effects and
+ * events); event waits divide their frame counts by it. */
 s32 battle_state_get_animation_speed(void) {
     return g_main_system_animation_speed;
 }
@@ -89,6 +96,7 @@ s32 battle_state_set_animation_speed(s32 speed) {
     return -1;
 }
 
+/* Write the cursor tile to `destination` as (x, map level, y). */
 void battle_map_store_selected_tile_coordinates(SVECTOR* destination) {
     main_util_set_svector(destination, g_battle_cursor_x, g_battle_cursor_z, g_battle_cursor_y);
 }
@@ -158,6 +166,8 @@ s32 battle_map_command_get_texture_animation_active(s32 value) {
     return battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_GET_TEXTURE_ANIMATION_ACTIVE, value, 1, 1);
 }
 
+/* Nonzero while the camera moves: a pan step, a rotation, a tilt or a zoom is in progress. Event
+ * code waits for it to return 0. */
 s32 battle_camera_is_active(void) {
     if (g_battle_camera_step_vector.vx == 0 && g_battle_camera_step_vector.vy == 0
         && g_battle_camera_step_vector.vz == 0 && g_battle_camera_rotation_action == CAMERA_ROTATION_NONE
@@ -199,6 +209,8 @@ s32 battle_effect_init_single_target_trajectory(u32 attacker_id, u32 target_id) 
     return 0;
 }
 
+/* battle_effect_set_secondary_teleport for a runtime id, for the event TeleportOut and TeleportIn
+ * instructions. Returns 1, or 0 when the id has no unit. */
 s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -209,6 +221,9 @@ s32 battle_effect_set_secondary_teleport_by_runtime_id(u32 runtime_id) {
     return 0;
 }
 
+/* Release step 8 of battle_map_init_units_sprites_event_and_music, which waits for this flag
+ * before setting up deployment graphics. The deployment screen sets it after placing units, and
+ * map_data_load_complete_thread when deployment is skipped. */
 void battle_map_mark_data_load_complete(void) {
     g_battle_map_data_load_complete = 1;
 }
@@ -233,6 +248,9 @@ void battle_state_clear_frame_pacing(void) {
     g_battle_frame_pacing = 0;
 }
 
+/* Apply a GNS camera command: aim the camera at the negated integer position (in 20.12) with the
+ * rotation masked to 13 bits, put the cursor on the tile below at level 0, and set the camera
+ * height from that tile. */
 void battle_camera_set_focus_and_cursor_tile(const SVECTOR* coords, const SVECTOR* rotation) {
     s32 tile_x;
     s32 tile_y;
@@ -619,6 +637,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
     return step;
 }
 
+/* No retail code calls it. */
 void battle_gfx_clear_screen_color_modulation(void) {
     g_battle_gfx_screen_color_modulation.b = 0;
     g_battle_gfx_screen_color_modulation.g = 0;

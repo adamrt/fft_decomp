@@ -1,6 +1,10 @@
 /* SCUS_942.21 0x80020840..0x80020a63. */
 #include "psx/libcd.h"
 #include "psx/libetc.h"
+/* CdRead's data-ready handler: copy each sector into the next buffer slot (for 512-word reads
+ * first checking the header position against the expected sector), restart the read from the
+ * beginning on an error, and once all sectors are in or the timeout passes restore the caller's
+ * callbacks, pause, and report CdlComplete or CdlDiskError to the CdRead callback. */
 void cb_read(u8 event, u8* result) {
     u32 sector_header[3];
     if (event == CdlDataReady) {

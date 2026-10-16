@@ -15,6 +15,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* Wait for drawing to finish, blank the display, then shut down the Suzuki sound driver and the
+ * SPU before a reset or a program switch. */
 static void main_system_stop_display_and_audio_for_game_reset(void) {
     DrawSync(0);
     DrawSync(0);
@@ -210,6 +212,9 @@ void main_gfx_add_now_loading_to_otag(u32* otag) {
 /* Low immediate byte of FntLoad's CLUT-Y addiu instruction. */
 extern u8 g_psyq_gpu_font_clut_y_offset_immediate;
 
+/* Install EFC_FNT.TIM as the debug print font: load the built-in font at VRAM (0x280, 0) with its
+ * CLUT moved to row 0x7f, overwrite both with EFC_FNT.TIM (retrying until it reads) and open a
+ * 512-character print stream at (0x88, 0x10) as the dump font. */
 void main_gfx_load_efc_fnt(void) {
     TIM_IMAGE image;
     u32* data;
@@ -264,6 +269,9 @@ void main_set_display_draw(int width, int height, int projection, u8 red, u8 gre
     PutDrawEnv(&g_main_gfx_draw_envs[g_main_gfx_screen_polarity]);
 }
 
+/* Present one frame of the Squaresoft logo fade: swap the display buffers after VSync, upload the
+ * 180x16 logo at (70, 112) of the new draw buffer and draw the caller's fade list over it. Returns
+ * VSync's result. */
 static int main_boot_draw_squaresoft_logo(u32* otag, u32* image) {
     RECT destination;
     int elapsed;

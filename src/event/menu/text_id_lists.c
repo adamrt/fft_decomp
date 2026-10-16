@@ -4,6 +4,9 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
+/* Skip count text entries and return the start of the next one: each entry ends with a 0xFE or
+ * 0xFF byte, and the byte after an extended-glyph prefix is skipped so it is never taken for a
+ * terminator. */
 const u8* menu_text_find_entry_by_index(const u8* data, s16 count, s32 unused_2) {
     while (count != 0) {
         u8 value = *data++;

@@ -4,6 +4,7 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
+/* Wait count frames by yielding count times. */
 void thread_wait_frames(s32 count) {
     s32 i;
 
@@ -33,10 +34,12 @@ void thread_start(s32 thread_id, void (*function)(void)) {
     thread->task_words[6] = 0;
 }
 
+/* Mark a slot running again; a suspended thread continues where it last yielded. */
 void thread_resume(s32 thread_id) {
     g_threads[thread_id].is_running = 1;
 }
 
+/* Stop scheduling a slot without resetting it; thread_resume continues it. */
 void thread_suspend(s32 thread_id) {
     g_threads[thread_id].is_running = 0;
 }
@@ -76,6 +79,9 @@ s32 thread_is_running(s32 thread_id) {
     return g_threads[thread_id].is_running;
 }
 
+/* Store parameters 1-3 in a slot's record, which the thread reads with
+ * thread_get_current_parameter_1..3. thread_start keeps them, and callers also use it to pass new
+ * values to a running thread. */
 void thread_set_parameters(s32 thread_id, s32 parameter_1, s32 parameter_2, s32 parameter_3) {
     thread_t* thread = &g_threads[thread_id];
     thread->function_parameter_1 = parameter_1;
@@ -83,6 +89,8 @@ void thread_set_parameters(s32 thread_id, s32 parameter_1, s32 parameter_2, s32 
     thread->function_parameter_3 = parameter_3;
 }
 
+/* Store parameters 1-4 in a slot's record. thread_start clears parameter 4, so callers set them
+ * after starting the thread. */
 void thread_set_four_parameters(s32 slot, s32 first, s32 second, s32 third, s32 fourth) {
     thread_t* thread = &g_threads[slot];
     thread->function_parameter_1 = first;

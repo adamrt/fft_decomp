@@ -34,6 +34,8 @@ s32 text_count_decimal_digits(s32 value) {
     return digits;
 }
 
+/* For a negative direction, mirror the quad's texture: swap u0/u1 and u2/u3, or the matching v
+ * values when the texture runs vertically (u0 == u1). */
 void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction) {
     u8 temp;
 
@@ -158,6 +160,9 @@ void script_opcode_pause(void) {
     } while ((g_script_event_input & (PSX_PAD_SELECT | PSX_PAD_CROSS | PSX_PAD_CIRCLE)) == 0);
 }
 
+/* Copy a unit's integer world position into the shared g_unit_runtime_coords and return it. Like
+ * unit_copy_world_coords it tests for -1, but a missing unit returns 0, so the copy then reads
+ * address 0. */
 SVECTOR* unit_copy_world_coords_to_scratch(u32 runtime_id) {
     SVECTOR* source = battle_unit_get_world_coords_by_runtime_id(runtime_id);
     SVECTOR* dest;

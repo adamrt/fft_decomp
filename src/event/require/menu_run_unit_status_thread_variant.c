@@ -19,6 +19,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Thread task 0x39: the character editor and status panels, REQUIRE's body. Same doubled packets
+ * as the other bodies, without the shake offsets, the bar division and the zodiac branch. (Move
+ * the existing note that sits between the #include lines, lines 5-8, here; the file also lacks a
+ * leading file comment.). */
 void menu_run_unit_status_thread_variant(void) {
     RECT rects[6];
     s32 anim_state;

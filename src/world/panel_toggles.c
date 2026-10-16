@@ -8,6 +8,8 @@
 #include "fft/world_menu.h"
 #include "psx/types.h"
 
+/* Open or close the equipment-change panel and its numeric editor; opening waits while the status
+ * panel slides. */
 void world_menu_toggle_change_banner_panel_thread(s32 enable) {
     s32 state = enable;
 

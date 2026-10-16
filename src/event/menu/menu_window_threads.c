@@ -11,6 +11,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Thread body for a simple menu window: draw its text into the frame (again whenever the entry's
+ * redraw flag is set), then move a wrapping cursor, act on confirm and cancel and animate the
+ * cursor icon until the menu closes. */
 void menu_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];

@@ -83,6 +83,8 @@ void main_status_init_check_data(void) {
 void main_noop_80059ac0(void) {
 }
 
+/* Mark all 20 roster slots empty (party_id = PARTY_ID_NONE); the rest of each record is left as
+ * is. */
 void main_party_clear_all(void) {
     s32 i;
 
@@ -91,6 +93,8 @@ void main_party_clear_all(void) {
     }
 }
 
+/* Return the roster record at party_index, or NULL at or past PARTY_ROSTER_SLOT_COUNT (negative
+ * indexes are not rejected). */
 party_unit_t* main_party_get_unit(s32 party_index) {
     return party_index < PARTY_ROSTER_SLOT_COUNT ? &g_main_party_units[party_index] : 0;
 }
@@ -276,6 +280,7 @@ s32 main_party_generate_unit(main_unit_generation_type_e unit_type) {
     return -1;
 }
 
+/* Return the first occupied roster slot whose sprite set matches, or -1. */
 static s32 main_party_find_slot_by_sprite_set(s32 sprite_set) {
     s32 party_index = 0;
     s32 empty_party_id = PARTY_ID_NONE;
@@ -290,6 +295,7 @@ static s32 main_party_find_slot_by_sprite_set(s32 sprite_set) {
     return -1;
 }
 
+/* Free a roster slot by marking its party_id empty; the record's other bytes are kept. */
 void main_party_remove_unit(u32 index) {
     g_main_party_units[index].party_id = PARTY_ID_NONE;
 }
@@ -477,6 +483,7 @@ static void main_unit_generate_base_raw_stats(
     } while (index < UNIT_RAW_STAT_COUNT);
 }
 
+/* Copy the current job's growth and multiplier pairs for HP, MP, Speed, PA and MA into the unit. */
 static void main_unit_copy_job_growths_and_multipliers(unit_stats_t* unit) {
     main_mem_copy_byte_data_source_first(
         g_main_job_data_pointer[unit->job_id].stat_growths, unit->stat_growths, sizeof(unit->stat_growths));
@@ -614,10 +621,12 @@ s32 main_ability_calculate_pointers_and_type(
     return ABILITY_TYPE_MOVEMENT;
 }
 
+/* Return an item's primary data record; the id is masked to its low byte, so it never fails. */
 item_data_t* main_item_get_data_pointer(s32 item_id) {
     return &g_main_item_primary_data[item_id & ITEM_ID_MASK];
 }
 
+/* Return a job's data record, or NULL for ids at or past JOB_ID_COUNT. */
 job_data_t* main_job_get_data_pointer(s32 job_id) {
     if (job_id < JOB_ID_COUNT) {
         return &g_main_job_data[job_id];

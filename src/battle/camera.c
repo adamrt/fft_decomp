@@ -62,6 +62,7 @@ void battle_camera_update_real_coord_animation(void) {
     }
 }
 
+/* No retail code calls it. */
 void battle_camera_save_screen_offset(void) {
     copyVector(&g_battle_camera_saved_screen_offset, &g_battle_camera_current_screen_offset);
 }
@@ -198,6 +199,7 @@ void battle_camera_update_zoom_animation(void) {
     }
 }
 
+/* Saves the camera rotation for battle_camera_restore_rotation (effect script opcodes 0c and 0d). */
 void battle_camera_save_rotation(void) {
     copyVector(&g_battle_camera_rotation_backup, &g_battle_camera_render_state);
 }

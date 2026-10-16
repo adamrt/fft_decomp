@@ -634,6 +634,7 @@ static void require_overlay_open_jobstts(void) {
     thread_exit_current();
 }
 
+/* Run require_overlay_open_jobstts in thread slot 6, wait for it, and exit. Nothing references it. */
 void require_overlay_open_jobstts_thread(void) {
     thread_start(6, require_overlay_open_jobstts);
     thread_wait_until_inactive(6);

@@ -21,6 +21,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Show the map cursor and its tile glow again; the counterpart of
+ * battle_action_clear_at_list_active. */
 void battle_action_set_at_list_active(void) {
     g_battle_action_at_list_active = 1;
 }
@@ -94,6 +96,8 @@ void battle_gfx_modify_palette_based_on_team(battle_unit_t* unit, s32 amount) {
     }
 }
 
+/* Pulse every unit's palette in its team color (battle_gfx_modify_palette_based_on_team): the free
+ * cursor's Square highlight and the target-flashing option of the ability preview. */
 void battle_gfx_tint_all_units_by_team(void) {
     s32 i;
 
@@ -148,10 +152,14 @@ void battle_action_open_status_menu_at_list_start(void) {
     }
 }
 
+/* Restart the AT list cursor at entry 0, so the free cursor's next Start press shows the first
+ * entry. */
 void battle_action_clear_at_list_id(void) {
     g_battle_action_at_list_id = 0;
 }
 
+/* Drop a pending status-menu request (Triangle during a unit's turn the player does not control)
+ * and mark the status menu closed. */
 void battle_menu_clear_status_menu_state(void) {
     g_battle_menu_status_requested = 0;
     g_battle_status_menu_open = 0;
@@ -304,6 +312,8 @@ void battle_effect_set_secondary_teleport(battle_unit_t* unit) {
     battle_effect_set_secondary(unit, EFFECT_SECONDARY_ANIMATION_TELEPORT);
 }
 
+/* Start the reaction animation of the unit with this runtime id to the casting unit's action, for
+ * effect keyframe actions. Always returns 1. */
 s32 battle_unit_set_target_animation_by_runtime_id(s32 runtime_id) {
     battle_unit_t* target = battle_unit_get_by_runtime_id(runtime_id);
     battle_unit_t* caster = battle_unit_get_casting();
@@ -363,6 +373,10 @@ void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_i
     battle_unit_set_bow_hardcoding(attacker, target);
 }
 
+/* Apply a unit's queued status changes (removals, then additions) and refresh everything that
+ * shows them: position after death or dismount, transparency, status bubble, tile and status
+ * palette, transformations, status animations, spritesheet and float height. Then clear the queues
+ * and the item display flag. */
 static void battle_unit_update_display(battle_unit_t* unit) {
     map_tile_t* tile;
 
@@ -393,6 +407,7 @@ static void battle_unit_update_display(battle_unit_t* unit) {
     }
 }
 
+/* battle_unit_update_display for the unit with this runtime id; an id without a unit does nothing. */
 void battle_unit_update_display_by_runtime_id(s32 runtime_id) {
     battle_unit_update_display(battle_unit_get_by_runtime_id(runtime_id));
 }

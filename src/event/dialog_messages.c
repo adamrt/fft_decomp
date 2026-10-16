@@ -152,10 +152,15 @@ void menu_release_current_thread_slot(void) {
     }
 }
 
+/* The running thread's task id; loops that may be cut short poll it for THREAD_TASK_STOP_REQUEST. */
 s32 thread_get_current_task_id(void) {
     return g_thread_contexts[g_thread_current_id].task_id;
 }
 
+/* Draw the glyph in g_text_typewriter_glyph straight into VRAM at the pen position through one of
+ * three per-thread staging slots, then pace the message: delay 0 waits for the draw, 2 or more
+ * waits that many steps per glyph, and 1 follows the message speed option (Circle held or Fast
+ * shows 8 glyphs per wait). Queues the text sound unless muted. */
 void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
     s32 slot;
     s32 i;

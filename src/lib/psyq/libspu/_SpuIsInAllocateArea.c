@@ -1,6 +1,8 @@
 /* SCUS_942.21 0x80019f08..0x80019f87. */
 #include "psx/libspu.h"
 
+/* Return 1 when an allocated SPU block reaches into the range from byte address up to the top of
+ * SPU RAM (a reverb work area), else 0; 0 also before SpuInitMalloc. */
 s32 _SpuIsInAllocateArea(u32 address) {
     s32 index;
     u32 start;

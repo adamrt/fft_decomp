@@ -18,6 +18,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Page a three-column text screen while Square is held: Up and Down move by a page within the
+ * hidden rows, and a pending redraw request also counts. When anything changed, redraw the columns
+ * into a new image, upload it and return it; otherwise return 0. */
 static u8* world_screen_menu_redraw_text_page_on_scroll(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused_cursor) {
     menu_text_layout_t* layout = entry->context;

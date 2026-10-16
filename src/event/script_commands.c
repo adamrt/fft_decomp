@@ -188,10 +188,15 @@ s32 thread_find_running_by_task(s32 task_id) {
     return 0;
 }
 
+/* Tag the running thread with task_id, the value thread_find_running_by_task looks up. */
 void thread_set_current_task_id(s32 task_id) {
     g_thread_contexts[g_thread_current_id].task_id = task_id;
 }
 
+/* Find a jump's target and return the offset after its two bytes. For BackTarget it scans from the
+ * event start to limit_offset and keeps the last matching BackTarget not followed by a barrier
+ * (0xd9) or a same-id ForwardTarget; otherwise it scans forward from limit_offset to EventEnd for
+ * target_opcode or alternate_opcode. With no target the thread exits. */
 s32 script_find_jump_target(s32 limit_offset, event_opcode_e target_opcode, s32 alternate_opcode, s32 target_id) {
     u8* base;
     s32 offset;
@@ -507,6 +512,8 @@ void text_init_section_pointers(void) {
     } while (index < TEXT_RELOCATED_SECTION_COUNT);
 }
 
+/* Return a pointer to the event input's newly pressed buttons, or to its held buttons when
+ * use_current is nonzero. */
 u32* script_get_controller_input_pointer(s32 use_current) {
     u32* result = &g_script_event_input;
     if (use_current != 0) {
@@ -527,6 +534,8 @@ void script_load_event_input_state(const menu_input_state_t* saved) {
     g_script_event_secondary_repeat_counter = saved->secondary_repeat_counter;
 }
 
+/* Draw a GPU primitive at once with DrawPrim when immediate drawing is on, otherwise link it into
+ * the current ordering-table entry. */
 void gfx_draw_or_append_gpu_primitive(void* primitive) {
     if (g_gfx_draw_primitives_immediately != 0) {
         DrawPrim(primitive);
@@ -556,6 +565,8 @@ void menu_set_text_origin(s32 x, s32 y) {
     g_menu_text_state.pen.rect.y = y;
 }
 
+/* Set a draw mode whose texture page is the VRAM area of the given menu texture page
+ * (menu_texture_page_e); any page above 3 selects the item icon page at (896, 288). */
 void gfx_set_draw_mode_for_texture_page(DR_MODE* mode, s32 page) {
     if (page == MENU_TEXTURE_PAGE_FRAME) {
         SetDrawMode(mode, 0, 0, GetTPage(0, 0, 0x3c0, 0x100), &g_gfx_texture_window);
@@ -594,6 +605,9 @@ void script_noop_10(void) {
 void script_frame_after_requests_stub(void) {
 }
 
+/* Point a sprite (SPRT) or textured quad (POLY_FT4) at an image: texture source from parameters
+ * relative to base_load, screen rectangle relative to base_screen. A negative x_load keeps the
+ * primitive's texture fields and moves it only. */
 void gfx_init_image_loading(
     void* primitive, const point16_t* base_load, const RECT* base_screen, const image_load_parameters_t* parameters) {
     int texture_column;
@@ -628,6 +642,9 @@ void gfx_init_image_loading(
         base_screen->y + parameters->y_screen_offset + parameters->height);
 }
 
+/* Draw count positioned number entries into an image buffer: kind 0 with
+ * text_draw_large_number_glyphs_variant, kind 1 with menu_draw_number_glyphs; other kinds draw
+ * nothing. */
 void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
     s32 i;
 
@@ -658,6 +675,10 @@ void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_
     g_menu_text_palette_offset = 0;
 }
 
+/* Draw value as exactly (digits & 0xff) digits, zero-padded and right to left, 7 pixels apart from
+ * the menu glyph sheet. The high byte adds marks: 0x1000 a leading glyph, 0x400 or 0x800 a sign
+ * glyph before the digits, and 0xc00 two dashes in place of the number. Hidden numeric values draw
+ * a placeholder per digit; the pen ends after the last digit. */
 void menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;

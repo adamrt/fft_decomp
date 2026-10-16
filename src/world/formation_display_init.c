@@ -17,6 +17,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Set up the formation screen's display: reset the menu context, clear the screen (except when
+ * entering from name entry), upload the menu glyph sheet, palettes and status label image, and
+ * copy two window-frame palettes into VRAM row 510 with colors 4, 8 and 12 cleared. */
 void world_formation_init_menu_display(void) {
     RECT rect;
     palette_t palette;

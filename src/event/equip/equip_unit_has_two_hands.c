@@ -2,6 +2,8 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+/* Return nonzero when the unit has the Two Hands support ability set. Nothing in EQUIP.OUT calls
+ * it. */
 s32 equip_unit_has_two_hands(s16 unit_id) {
     return g_equip_unit_data[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS;
 }

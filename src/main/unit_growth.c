@@ -27,6 +27,9 @@ void main_mem_copy_bytes_source_first(const void* source, void* destination, int
     }
 }
 
+/* Pick a random non-rare item for one equipment slot (item_type_flag) that the unit can equip at
+ * its level, optionally limited to one item type and to weapons with a flag in weapon_flag_mask.
+ * Returns ENTD_VALUE_RANDOM when nothing fits. */
 s32 main_unit_calculate_random_equipment(
     unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
     u8 candidates[128];
@@ -621,6 +624,10 @@ s32 main_status_set_ct(unit_stats_t* unit, s32 status_id, s32 removing) {
     return 0;
 }
 
+/* Compute a unit's unlocked-job bitset (Squire in bit 23, always set) from its packed job levels:
+ * a job unlocks when every level nibble meets its g_main_job_unlock_requirements row. The other
+ * sex's Bard or Dancer level counts as maxed for the check, then that job is masked out; a monster
+ * unlocks nothing. */
 u32 main_job_calculate_unlocked(const u8* packed_job_levels, u32 gender_flags) {
     u8 levels[UNIT_CAREER_JOB_COUNT];
     s32 unlock_bit;
@@ -761,6 +768,8 @@ u32 main_job_calculate_level(u16 job_jp) {
     return job_level;
 }
 
+/* Pack each pair of job levels from the jobs' total JP: the first job of a pair in the high
+ * nibble, the second in the low. */
 void main_unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels) {
     s32 i;
     s32 level;
@@ -771,6 +780,8 @@ void main_unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels) {
     }
 }
 
+/* Clear the per-battle unit state: manual auto-battle with no target, CT 0, no active turn or
+ * ability outcome, no charging ability (0xff), not mounted and no KOs. */
 void main_unit_reset_battle_state(unit_stats_t* unit) {
     unit->auto_battle_setting = AI_AUTOBATTLE_MANUAL;
     unit->auto_battle_target = 0;
@@ -811,6 +822,8 @@ u32 main_ability_get_aoe(u32 ability_id) {
     return index < ABILITY_ID_ITEM_FIRST ? g_main_ability_range_data[index].aoe : 0;
 }
 
+/* Resolve the unit's spritesheet and palette (main_unit_get_spritesheet_palette), store both in
+ * the unit and return the spritesheet id. */
 u8 main_unit_calculate_palette_spritesheet(unit_stats_t* unit, u8* palette) {
     u8 spritesheet = main_unit_get_spritesheet_palette(unit, palette);
 
@@ -865,6 +878,7 @@ static u8 main_unit_get_spritesheet_palette(const unit_stats_t* unit, u8* palett
     return sprite_set;
 }
 
+/* Return 1 when the unit currently has any status in one row of g_main_status_check_sets, else 0. */
 s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_e status_set_index) {
     const u8* status_set = g_main_status_check_sets[0];
     s32 index = 0;

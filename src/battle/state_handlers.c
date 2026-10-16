@@ -26,6 +26,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Put the unit back where it was before its move: restore its tile, facing, mount link and
+ * standing-on id from the previous_* fields, re-register the tile in its battle stats and restart
+ * its current animation. */
 static void battle_move_return_to_previous_map_square(battle_unit_t* unit) {
     unit->map_x = unit->previous_map_x;
     unit->map_y = unit->previous_map_y;
@@ -167,6 +170,8 @@ void battle_state_handle_wait_menu_state(void) {
     }
 }
 
+/* Write the unit's tile and facing back to its battle stats; a unit with a mount partner also
+ * gives the partner its facing and the same tile. */
 static void battle_unit_set_tile_position_with_mount_partner(battle_unit_t* unit) {
     battle_unit_t* mounted_unit;
 
@@ -368,6 +373,11 @@ void battle_state_handle_action_execute_setup_state(void) {
     }
 }
 
+/* TargetingRange game-state handler: the ability's range is shown and its target tile chosen. A
+ * player-controlled unit moves the cursor and camera; cross returns to the idle action menu,
+ * circle selects the tile when it is in range and otherwise enters the illegal-range state. An AI
+ * unit moves the cursor to its stored target tile or unit and selects it once its state frame
+ * counter reaches 0x1f; a missing target unit reopens the action menus. */
 void battle_state_handle_targeting_range_state(void) {
     u16 frame_data;
     battle_unit_t* unit = battle_unit_get_source();
@@ -494,6 +504,10 @@ void battle_state_handle_ability_preview_state(void) {
     menu_update_menus_and_event_speed(main_gfx_get_otag(), g_input_current_buttons);
 }
 
+/* ConfirmAction game-state handler. For a player-controlled unit, command 5 aims the action at the
+ * cursor tile, and 6 or 7 at the unit on it (the tile when it is empty); both store the cursor
+ * tile and start the pre-attack animation. 8 or 0xff clears the marks and returns to the range
+ * display. An AI unit starts the pre-attack animation on 5-7. */
 void battle_state_handle_confirm_action_state(void) {
     battle_unit_t* unit;
     ai_command_t* selected_command_address;
@@ -611,6 +625,8 @@ void battle_state_handle_commence_attack_phase_state(void) {
     }
 }
 
+/* ActionAnnouncement game-state handler: when the announcement message closes (command 7, 8 or
+ * 0xff), enter the OpenSp2Files state. */
 void battle_state_handle_action_announcement_state(void) {
     s32 selected_command;
 
@@ -710,6 +726,8 @@ void battle_state_handle_secondary_effect_state(void) {
     battle_state_handle_free_cursor_input();
 }
 
+/* Start the target's reaction animation for the attacker's attack and prepare its post-action
+ * display; nothing happens when either unit is missing. */
 static void battle_unit_start_post_attack_animation_display(battle_unit_t* attacker, battle_unit_t* target) {
     if (attacker != 0 && target != 0) {
         battle_unit_set_target_animation_from_attack_type(attacker, target);
@@ -960,6 +978,9 @@ void battle_state_handle_learn_ability_on_hit_state(void) {
     }
 }
 
+/* Frame step shared by the two Deep Dungeon mesh states: run the unit and menu update and, once
+ * the map data has loaded, refresh every unit's display, clear
+ * g_battle_map_deep_dungeon_load_in_progress and return 1. Returns 0 while the load continues. */
 static s32 battle_map_update_deep_dungeon_and_animation(void) {
     s32 runtime_id;
 
@@ -1009,6 +1030,11 @@ void battle_state_handle_target_select_start_state(void) {
     }
 }
 
+/* TargetSelect game-state handler: the player picks the auto-battle target with the cursor. Circle
+ * confirms the unit on the tile when it suits the choice (an enemy for the targeted choice, an
+ * ally for the recovery choice) and denies it otherwise or on an empty tile; cross moves the
+ * cursor back to the casting unit and reopens the action menus, and triangle only moves the cursor
+ * back. */
 void battle_state_handle_target_select_state(void) {
     battle_unit_t* caster;
     battle_unit_t* target;
@@ -1335,6 +1361,8 @@ void battle_state_update_event_mode(void) {
     }
 }
 
+/* Stop the map's palette cycles and weather sound; every path that leaves a map calls it just
+ * before battle_unit_clear_all. */
 void battle_state_stop_map_animations(void) {
     battle_map_stop_clut_cycles_and_weather_sfx();
 }

@@ -17,6 +17,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Run the deployment screen's field-help cursor: the D-pad moves a bobbing hand between the status
+ * panel's fields, Circle opens the help text for the field under it in the parent thread's slot,
+ * and Cross closes it. Input waits while that help text is open. */
 void attack_deploy_run_select_menu(void) {
     POLY_FT4 left[2];
     POLY_FT4 right[2];

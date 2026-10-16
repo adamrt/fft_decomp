@@ -126,6 +126,8 @@ void world_menu_icon_clamped_list_thread(void) {
     thread_exit_current();
 }
 
+/* Place a number entry's bobbing digit cursor and its shadow over digit cursor (counted from the
+ * right edge), freezing the bob while input belongs to another thread. */
 static void world_menu_update_entry_cursor_quads(
     menu_entry_t* entry, POLY_FT4* quad, POLY_FT4* shadow, s32 unused, s32 cursor) {
     thread_t* thread = &g_threads[g_thread_current_id];
@@ -516,6 +518,9 @@ static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph
     }
 }
 
+/* Reopen a chain of menu entries, each in the thread slot below the previous one, following each
+ * entry's selected row action until a number-entry window is started or the action is not a menu
+ * index. */
 void world_menu_start_entry_chain_threads(u32 index, s32 thread) {
     menu_entry_t* entry;
 

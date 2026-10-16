@@ -1,6 +1,8 @@
 /* LIBGPU 800257c8-80025824. */
 #include "psx/libgpu.h"
 
+/* Build the GP0 draw-mode command from a texture page and the draw-to-display and dither flags, in
+ * the bit layout of the detected GPU type. */
 u32 get_mode(int dfe, int dtd, u16 tpage) {
     /* The volatile view preserves separate graph-type address construction. */
     volatile psyq_gpu_environment_t* environment = &g_psyq_gpu_environment;

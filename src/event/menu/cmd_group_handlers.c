@@ -4,6 +4,8 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
+/* Menu script command: run the next count commands when the row predicate holds, otherwise skip
+ * them. The predicate gets the command's literal row, or the current list row in list mode. */
 menu_instruction_t* menu_cmd_run_if_group_handler(menu_instruction_t* cmd) {
     s32 (*callback)(s32);
     s32 count;

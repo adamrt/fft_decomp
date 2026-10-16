@@ -73,6 +73,8 @@ s32 world_formation_get_unit_lock(s32 unit_id) {
     return WORLD_FORMATION_UNIT_UNLOCKED;
 }
 
+/* Mark an ability learned for a job: find its position in the job's skillset list and set that
+ * bit, most significant first, in the unit's learned-ability bytes for the job. */
 void world_ability_learn(s16 unit_id, s16 job_id, s16 ability_id) {
     s32 skillset = job_get_skillset(job_id);
     s16 generic_job = job_get_generic_index(job_id);

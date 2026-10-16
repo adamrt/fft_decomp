@@ -13,6 +13,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* WORLD's simple menu window thread: like menu_icon_list_thread, but it reads the formation
+ * screen's input, ignores input while the previous thread runs and tints the window with the world
+ * menu color. */
 void world_menu_formation_icon_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
@@ -103,10 +106,12 @@ void world_text_generate_formation_unit_name_string(void) {
     g_world_formation_name_string_revision = g_world_formation_name_string_revision + 1;
 }
 
+/* Set the formation display mode; the title script switches it between 0 and 1. */
 void world_formation_set_display_mode(s32 mode) {
     g_menu_formation_display_mode = mode;
 }
 
+/* Set the ordering table the formation view zoom thread draws into. */
 void world_formation_set_ordering_table_pointer(u32* ordering_table) {
     g_world_formation_ordering_table = ordering_table;
 }

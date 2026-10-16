@@ -1,4 +1,7 @@
 #include "psx/libetc.h"
+/* Take over interrupt handling: mask and acknowledge every IRQ, set the default DMA priorities,
+ * hook trapIntr into the BIOS through a jump buffer with its own stack, start the VBlank and DMA
+ * dispatchers and leave the critical section. Returns 0 when already started. */
 psyq_interrupt_state_t* startIntr(void) {
     if (g_psyq_etc_interrupt_state.initialized)
         return 0;

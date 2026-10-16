@@ -1,6 +1,7 @@
 /* LIBGPU 800258f0-800259bc. */
 #include "psx/libgpu.h"
 
+/* Build the GP0 drawing-area bottom-right command for (x, y), clamped to VRAM. */
 u32 get_ce(s16 x, s16 y) {
     extern volatile psyq_gpu_environment_t
         g_psyq_gpu_environment; /* An unqualified RAM view removes the native clamp sign-extension steps. */

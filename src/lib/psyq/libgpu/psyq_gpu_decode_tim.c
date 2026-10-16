@@ -1,6 +1,8 @@
 /* LIBGPU 80027308-80027428. */
 #include "psx/libgpu.h"
 
+/* Parse a TIM at tim into image: mode, the CLUT block when the mode has one, and the pixel block.
+ * Returns the TIM's length in words, or -1 for a bad id word. */
 int psyq_gpu_decode_tim(u32* tim, TIM_IMAGE* image) {
     /* One 32-bit cursor preserves the retail allocation; a separate block pointer adds a copy. */
     int palette_words;

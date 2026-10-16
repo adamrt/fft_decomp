@@ -174,6 +174,8 @@ static void battle_move_set_float_step_delta_edge_to_center(
     unit->velocity.vz = unit->velocity.vz * g_main_system_animation_speed;
 }
 
+/* Scale the unit's per-frame velocity by a 4.12 factor: callers pass the walk speed, or the step
+ * speed for climb-speed steps. */
 void battle_move_interpolate_partial(battle_unit_t* unit, s32 scale) {
     unit->velocity.vx = (scale * unit->velocity.vx) / ONE;
     unit->velocity.vy = (scale * unit->velocity.vy) / ONE;
@@ -1703,6 +1705,8 @@ void battle_move_update_unit_step_to_destination_tile_center(battle_unit_t* unit
     }
 }
 
+/* Whether a moving unit has come within 7 units of the far edge of the tile it occupies in
+ * direction (move_direction_e). */
 s32 battle_move_has_reached_current_tile_exit_edge(s32 direction, battle_unit_t* unit) {
     switch (direction) {
     case MOVE_DIRECTION_NORTH:

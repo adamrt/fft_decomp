@@ -2,6 +2,8 @@
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 
+/* Clear the CD callbacks and status bytes and install callback on the CD-ROM interrupt (CdReset
+ * mode 2). */
 void CD_initintr(void) {
     CD_cbready = 0;
     CD_cbsync = 0;

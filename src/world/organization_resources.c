@@ -97,6 +97,8 @@ void world_map_confirm_destination(void) {
     thread_exit_current();
 }
 
+/* Build the text-id rows of the submenu page picked in menu entry 9 (seven rows shown, the rest
+ * scroll) and run the scrolling list. */
 void world_menu_build_submenu_text_id_page(void) {
     s32 selection = g_menu_thread_menu_data[9].selected_index;
     s32 count = g_world_menu_submenu_page_counts[selection];
@@ -121,6 +123,7 @@ void world_menu_set_slot_4_cursor_index(s32 index) {
     g_world_menu_default_entries[4].selected_index = index;
 }
 
+/* Empty and unreferenced. */
 void world_noop_80106138(void) {
 }
 
@@ -188,6 +191,7 @@ void world_menu_set_default_entry_0_text_values(u32 text_index, u32 value) {
     g_world_menu_default_entry_0_text_values[1] = value;
 }
 
+/* Set the value shown in default menu entry 1's text and clear the second value. */
 void world_menu_set_default_entry_1_text_values(s32 value) {
     g_world_menu_default_entry_1_text_values[0] = value;
     g_world_menu_default_entry_1_text_values[1] = 0;
@@ -293,6 +297,9 @@ void world_menu_load_text_1bd8(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SECONDARY_SQUAD_ID, 1);
 }
 
+/* Return from WLDCORE to the formation screen: unload the scenario music, reload the face text,
+ * restore the input repeat timings from the cursor-speed option, run the formation screen, then
+ * resume the event saved for the return and clear the pending scenario. */
 void world_formation_restore_menu_after_core_exit(void) {
     s32 profile;
 
@@ -325,6 +332,7 @@ void world_formation_restore_menu_after_core_exit(void) {
     }
 }
 
+/* Return the menu thread result and clear it. */
 s32 world_menu_take_and_clear_thread_result(void) {
     s32 result = g_world_menu_thread_result;
 
@@ -332,6 +340,8 @@ s32 world_menu_take_and_clear_thread_result(void) {
     return result;
 }
 
+/* Return 1 while a WORLD dialog waits on the player (a centered box at its confirm prompt, or a
+ * choice list); WLDCORE checks it before moving on. */
 s32 world_menu_get_event_state_flag(void) {
     return g_world_menu_event_state_flag;
 }
@@ -344,6 +354,8 @@ void world_thread_request_stop(s32 thread_id) {
     thread->task_id = THREAD_TASK_STOP_REQUEST;
 }
 
+/* Let a dialog thread that is waiting for more text continue: switch its task to resume and set
+ * its parameter 2 to 0xFFFF. */
 void world_text_resume_printing(s32 thread_id) {
     thread_t* thread = &g_threads[thread_id];
 
@@ -380,6 +392,7 @@ void world_thread_start_idle_5_to_8(void) {
     }
 }
 
+/* Draw the main menu text window with its dimmed palette. */
 void world_menu_enable_alternate_main_palette(void) {
     g_world_menu_use_alternate_main_palette = 1;
 }
@@ -397,6 +410,7 @@ void world_thread_stop_after_empty_slots_5_to_8(void) {
     }
 }
 
+/* Draw the main menu text window with its normal palette again. */
 void world_menu_disable_alternate_main_palette(void) {
     g_world_menu_use_alternate_main_palette = 0;
 }
@@ -415,11 +429,13 @@ void world_formation_reset_menu_context(void) {
     g_menu_text_palette_offset = 0;
 }
 
+/* Set the scroll direction and distance that decide where the main menu's second window slides. */
 void world_menu_set_main_scroll_parameters(s32 direction, s32 threshold) {
     g_world_menu_main_scroll_direction = direction;
     g_world_menu_main_scroll_threshold = threshold;
 }
 
+/* Set the color the WORLD menus tint their sprites with (0x80 each is neutral). */
 void world_menu_set_brightness(s32 red, s32 green, s32 blue) {
     g_world_menu_color_red = red;
     g_world_menu_color_green = green;
@@ -569,6 +585,7 @@ void world_main_menu_text_window_thread(void) {
     thread_exit_current();
 }
 
+/* Thread body that opens the game options screen through world_menu_run_main_mode. */
 static void world_menu_run_main_mode_0_thread(void) {
     world_menu_run_main_mode(OPTION_MENU_GAME_OPTIONS);
 }
@@ -651,10 +668,14 @@ static void world_formation_save_and_set_system_flags(void) {
         | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
 }
 
+/* Restore the system flags saved before the formation screen opened. */
 static void world_formation_restore_saved_system_flags(void) {
     g_main_system_flags = g_world_formation_saved_system_flags;
 }
 
+/* Debug battle setup thread: add 3 to the system flags, select the world debug battle style, clear
+ * the event, map arrangement, weather and time variables, and make the number entered in the menu
+ * the next map. */
 void world_script_reset_event_variables_thread(void) {
     g_main_system_flags += 3;
     script_set_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE, 1);
@@ -723,6 +744,8 @@ static void world_formation_update_open_request(void) {
     }
 }
 
+/* Run the formation screen opened on the given menu (index + 1), with the menu context reset
+ * before and after, then clear the screen request and restore the default menu entries. */
 void world_formation_run_screen_for_menu_index(s32 menu_index) {
     world_formation_reset_menu_context();
     world_formation_run_screen(menu_index + 1, 0);
@@ -1014,6 +1037,7 @@ static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2],
     sprite->clut = 0x7D7C;
 }
 
+/* Set which buttons the formation menu accepts. */
 void world_formation_set_menu_allowed_buttons(u32 mask) {
     g_world_formation_menu_allowed_buttons = mask;
 }

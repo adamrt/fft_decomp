@@ -1,6 +1,9 @@
 /* LIBETC 8001e614-8001e798; DMA completion dispatch and error diagnosis. */
 #include "psx/libetc.h"
 
+/* DMA IRQ handler: acknowledge each channel's completion flag and run its callback until none is
+ * pending; on a bus error, or a master flag with no channel flag, print the DMA interrupt register
+ * and every channel's address. */
 void trapIntrDMA(void) {
     s32 channel;
     u32 pending = (*g_psyq_etc_dma_dicr >> PSYQ_DMA_IRQ_FLAG_SHIFT) & PSYQ_DMA_IRQ_CHANNEL_MASK;

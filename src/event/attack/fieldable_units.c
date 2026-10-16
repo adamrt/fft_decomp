@@ -10,6 +10,7 @@
 #include "fft/unit.h"
 #include "psx/types.h"
 
+/* Empty and unreferenced. */
 void attack_noop_801c3070(void) {
 }
 

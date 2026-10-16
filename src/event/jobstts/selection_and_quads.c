@@ -7,6 +7,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Step selection value index left or right on the D-pad, wrapping within count, and return it. */
 s32 jobstts_menu_update_wrapped_horizontal_selection(u16 count, u8 index, s32 buttons) {
     if (buttons & PSX_PAD_LEFT) {
         g_jobstts_menu_selection_values[index]

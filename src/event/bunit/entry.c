@@ -122,6 +122,7 @@ static void bunit_input_update_lock_timer(void) {
     }
 }
 
+/* Return the input lock timer; nonzero means input is still ignored. */
 s32 bunit_input_get_lock_timer(void) {
     return g_input_lock_timer;
 }
@@ -150,6 +151,9 @@ static s32 bunit_input_read_pad1_unless_locked(void) {
 extern u16 g_bunit_gfx_line_g2_capacity;
 extern u16 g_bunit_gfx_line_g3_capacity;
 
+/* BUNIT.OUT entry: set up stack-allocated primitive pools and double packet buffers, then run the
+ * unit list (or job menu) frame by frame, playing the queued menu sound each frame, until the list
+ * closes. Returns the chosen battle unit. */
 s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     POLY_FT4 textured_quads[1000];
     POLY_G4 gouraud_quads[60];
@@ -253,6 +257,7 @@ s32 bunit_entrypoint(s32 unused_unit, void* unused_otag) {
     return g_bunit_selected_battle_id;
 }
 
+/* Clear the unit list's primary and reorder results to -1 (nothing chosen). */
 void bunit_menu_reset_results(void) {
     g_bunit_menu_primary_result = -1;
     g_bunit_menu_reorder_result = -1;

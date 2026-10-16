@@ -27,12 +27,15 @@ void battle_action_activate_move_act(unit_stats_t* unit) {
     unit->action_taken = 0;
 }
 
+/* Load a terrain chunk: the map's x and y size from its first two bytes, then both 256-tile layers
+ * (0x1000 bytes) into g_battle_map_tile_data. */
 void battle_map_copy_xy_coords_and_tile_data(u8* data) {
     g_battle_map_max_x = *data++;
     g_battle_map_max_y = *data++;
     memcpy(g_battle_map_tile_data, data, 0x1000);
 }
 
+/* Copy a map's four move-find item tiles into g_battle_current_map_move_find_item_data. */
 void battle_map_load_move_find_item_data(map_move_find_item_data_t* map_data) {
     g_battle_current_map_move_find_item_data = *map_data;
 }
@@ -168,6 +171,9 @@ static s32 battle_map_tile_data_15_stub(void) {
     return 0;
 }
 
+/* Fail the action on this target outright: no hit, the forced-failure miss type and 0 accuracy.
+ * Used when an ability cannot work on the target (nothing to steal, wrong target type, level
+ * limit). */
 void battle_formula_force_attack_miss(void) {
     g_battle_action_target_data->hit = 0;
     g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_FORCED_FAILURE;

@@ -57,6 +57,7 @@ static s32 menu_dispatch_system_function(
 static event_scenario_condition_result_e script_check_scenario_condition(
     event_scenario_condition_e type, s32 id, s32 value, s32 tile_y, s32 elevation);
 
+/* Queue the confirm sound unless a menu restore is replaying selections. */
 static void sound_queue_sfx_confirm_unless_restoring(void) {
     if (g_menu_restore_pending == 0) {
         g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
@@ -178,6 +179,10 @@ void menu_check_action_restrictions(void) {
     }
 }
 
+/* Check a chosen action-menu row before it opens. With check_unit, deep water, Frog or the menu's
+ * own restriction shows its message, plays the invalid sound and ends the thread; an Arithmeticks
+ * row shows navigation message 0x8009 - value. A row with no message and a negative action mode is
+ * confirmed at once without sound. */
 void menu_check_action_slot_restrictions(s32 menu, s32 value, s32 check_unit) {
     s32 mode;
     s32 message;
@@ -309,6 +314,9 @@ void menu_validate_skill_selection_thread(void) {
     thread_exit_current();
 }
 
+/* 1 when the skillset is in g_text_spell_quote_exception_skillsets (ended by SKILLSET_ID_NONE).
+ * text_select_ability_announcement shows no spell quote and no ability name for such skillsets,
+ * except Item and Throw, whose names still show. */
 static s32 text_is_spell_quote_exception_skillset(s32 skillset_id) {
     s32 i;
     s32 found = 0;

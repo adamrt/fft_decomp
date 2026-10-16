@@ -8,6 +8,8 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
+/* Thread body that never ends, waiting one frame at a time; it holds a thread slot until another
+ * thread stops it. */
 void thread_wait_forever_by_frames(void) {
     for (;;) {
         thread_wait_frames(1);

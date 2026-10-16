@@ -1,6 +1,9 @@
 /* LIBETC 8001e1e8-8001e33c; callback replacement and BIOS clear policy. */
 #include "psx/libetc.h"
 
+/* Install or remove the callback of IRQ slot and update the IRQ mask; for VBlank and the three
+ * timers it also tells the BIOS to acknowledge those interrupts itself only while no callback is
+ * set. Returns the previous callback. */
 psyq_interrupt_callback_t setIntr(s32 slot, psyq_interrupt_callback_t callback) {
     psyq_interrupt_callback_t old = g_psyq_etc_interrupt_state.callbacks[slot];
     s32 saved_mask;

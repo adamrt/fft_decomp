@@ -1511,6 +1511,12 @@ static s32 battle_action_select_auto_potion_item(unit_stats_t* unit) {
     return -1;
 }
 
+/* Award the current action's EXP and JP to a unit and fill display with the gains and any new
+ * level or job level. EXP is capped at 255 and may level the unit up. Non-monsters earn JP = 8 + 2
+ * * JobLv + Lv/4 (Lv before this action's level-up; none when the action earned no EXP), x3/2 with
+ * Gained JP Up; other units whose original team matches the actor's current team get JP/4 (before
+ * the bonus) in the actor's job. Returns -1 when the unit cannot earn (Hamedo, absent, Crystal,
+ * Dead, Petrify, Treasure). */
 s32 battle_unit_apply_action_rewards(s32 unit_index, action_reward_display_t* display) {
     s32 job_slot;
     unit_stats_t* unit;
@@ -1824,6 +1830,9 @@ s32 battle_unit_find_relocation_tile(s32 unit_index, map_tile_coordinates_t* des
     return -1;
 }
 
+/* Combine a unit's movement abilities and statuses into its effective movement mode: Float status
+ * counts as Float, Chicken and Frog cancel Fly. Fly or Teleport is kept alongside Float, Float
+ * drops the water modes, and Silent Walk always carries over. */
 move_effective_flags_e battle_move_get_effective_flags(const unit_stats_t* unit) {
     u8 flags;
     s32 movement_abilities_2;
@@ -1941,6 +1950,9 @@ s32 battle_action_get_elemental_ability_id(const unit_stats_t* unit) {
     return g_main_terrain_geomancy_abilities[g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type];
 }
 
+/* Build battle slot unit_index from the party member the current deployment row names: rebuild it
+ * from the party record, then clear its war trophy and bonus money and initialize its statuses. -1
+ * when that party slot is unavailable; the first two parameters are unused. */
 s32 battle_unit_init_party_member_battle_data(s32 unused0, s32 unused1, s32 unit_index) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_index];
     s32 formation_id = g_main_unit_deployed_coords->party_id;
@@ -2370,6 +2382,10 @@ s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing
     return 0;
 }
 
+/* Collect the post-movement event flags (move_post_event_flags_e) for a unit that just moved: a
+ * crystal or treasure on its tile; for a rider, the mount-removal statuses applied to its mount; a
+ * Move-Find Item find (the mount's ability when riding) or else a trap; a canceled Charge; and the
+ * Move-HP/MP Up and Move-Get EXP/JP flags. */
 u32 battle_move_set_target_for_mounted_unit_and_find_item(unit_stats_t* unit) {
     unit_stats_t* target;
     u32 flags;

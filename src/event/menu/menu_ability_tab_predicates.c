@@ -4,6 +4,7 @@
 #include "fft/menu_panel.h"
 #include "psx/types.h"
 
+/* Row callback: return whether the ability list shows the action category; the row is ignored. */
 s32 menu_ability_is_action_tab(s32 unused_row) {
     return g_menu_ability_category == MENU_ABILITY_CATEGORY_ACTION;
 }

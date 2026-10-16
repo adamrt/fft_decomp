@@ -2,6 +2,10 @@
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 
+/* Issue a CD command after the previous one completes. Unless asynchronous, wait for the
+ * controller's first response and copy it to result; also caches the CdlSetloc position and, on
+ * success, the CdlSetmode mode. Returns 0, -1 on a disk error or timeout, -2 for missing
+ * parameters. */
 s32 CD_cw(u8 command, const u8* parameter, u8* result, s32 asynchronous) {
     s32 index;
     if (CD_debug > 1)

@@ -1,6 +1,7 @@
 /* LIBGPU 800259bc-80025a04. */
 #include "psx/libgpu.h"
 
+/* Build the GP0 draw-offset command for (x, y). */
 u32 get_ofs(s16 x, s16 y) {
     /* The volatile view preserves separate graph-type address construction. */
     volatile psyq_gpu_environment_t* environment = &g_psyq_gpu_environment;

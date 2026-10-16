@@ -113,6 +113,7 @@ void menu_input_update_event_state_variant(u32* otag, u32 input, s32 frame_arg) 
     }
 }
 
+/* Return whether a thread slot is running. */
 s32 menu_thread_is_running_variant(s32 thread_id) {
     thread_t* thread = &g_threads[thread_id];
 

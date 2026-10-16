@@ -1,6 +1,8 @@
 /* LIBGPU 80025a04-80025a88. */
 #include "psx/libgpu.h"
 
+/* Build the GP0 texture-window command from rect in 8-pixel units (the mask comes from the negated
+ * width and height); 0 for no rect. */
 u32 get_tw(RECT* rect) {
     /* Scalar locals remove the native stack stores and reloads of these command components. */
     struct {

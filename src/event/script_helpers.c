@@ -125,6 +125,8 @@ s32 script_scale_music_volume(s32 volume) {
     return volume;
 }
 
+/* Fade the screen in: lower g_gfx_screen_fade from 255 by 4 per frame, yielding once per step, and
+ * end on 0. */
 void gfx_ramp_screen_overlay_intensity_to_zero(void) {
     g_gfx_screen_fade = 0xFF;
     do {
@@ -155,6 +157,8 @@ s32 script_is_tutorial_event_slot(void) {
 #endif
 }
 
+/* The battle id of the unit an event unit id resolves to, or 2000 when it resolves to no runtime
+ * unit or one without battle stats. */
 s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     s32 runtime_id = script_resolve_runtime_id(event_unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -166,6 +170,8 @@ s32 unit_get_battle_id_by_event_unit_id(s32 event_unit_id) {
     return 0x7D0;
 }
 
+/* Set the flag that menu_clear_modal_open clears: the companion overlay openers (OPTION.OUT and
+ * the others) call it before loading their executable. */
 void menu_set_modal_open(void) {
     g_menu_modal_open = 1;
 }
@@ -177,18 +183,22 @@ void menu_clear_modal_open(void) {
     g_menu_modal_open = 0;
 }
 
+/* Queue the confirm sound; the frame update plays the pending effect. */
 void sound_queue_sfx_confirm(void) {
     g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
 }
 
+/* Queue the cancel sound; the frame update plays the pending effect. */
 void sound_queue_sfx_cancel(void) {
     g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
 }
 
+/* Queue the cursor-move sound; the frame update plays the pending effect. */
 void sound_queue_sfx_cursor_move(void) {
     g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
 }
 
+/* Queue the invalid-choice sound; the frame update plays the pending effect. */
 void sound_queue_sfx_invalid(void) {
     g_sound_pending_sfx_id = MAIN_SFX_INVALID;
 }
@@ -363,6 +373,7 @@ void script_update_event_input_state(u32 input) {
     }
 }
 
+/* Empty in BATTLE and WORLD; no source calls it. */
 void menu_init_stub(void) {
 }
 
@@ -397,6 +408,7 @@ void menu_init_sprt(SPRT* sprite) {
     SetSemiTrans(sprite, 1);
 }
 
+/* menu_init_sprt for count consecutive sprites, each then given clut. */
 void menu_init_sprite_array(SPRT* sprites, s32 count, s32 clut) {
     s32 index;
 
@@ -501,6 +513,9 @@ static void menu_clear_window_buffer_pair_by_thread(s32 thread_id) {
 #endif
 }
 
+/* Release a pair handed out by menu_alloc_window_buffer_pair: free both slots and mark both
+ * records inactive and unowned. -1 is ignored; a pointer that is not a pair's first record stops
+ * the current thread. */
 void menu_release_window_buffer_pair(menu_window_buffer_t* buffer) {
     s32 slot;
     menu_window_buffer_t* empty;
@@ -648,6 +663,7 @@ void menu_draw_active_window_frames(void) {
     }
 }
 
+/* Free every cell of the 16 x 15 texture allocation grid that gfx_alloc_texture_rect claims from. */
 void gfx_clear_texture_allocation_grid(void) {
     s32 row;
     s32 column;
@@ -757,6 +773,8 @@ void gfx_free_texture_rect(RECT* rect) {
     }
 }
 
+/* Reset the menu arena allocator: every allocation slot unused (-1), every arena page free, and
+ * the three typewriter glyph slots unowned. */
 void menu_init_buffer_allocator(void) {
     s32 fill;
     s32 slot;

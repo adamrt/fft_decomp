@@ -5,6 +5,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Queue count textured quads from a sprite cell list at one ordering-table entry, all with the
+ * same CLUT, texture page and blending, and shaded with color when it is not null. Screen x is
+ * offset by 0x80. */
 void menu_gfx_enqueue_textured_quad_list(const menu_sprite_cell_t* quads, const rgb24_t* color, s32 semitrans,
     u16 texture_page, u16 clut, s32 otag_index, s32 count) {
     POLY_FT4* poly;

@@ -1,5 +1,7 @@
 /* LIBGPU 80025b5c-80025c44. */
 #include "psx/libgpu.h"
+/* Clear count ordering-table entries at ot with the OTC DMA channel, which links each entry to the
+ * one below it starting from the last; waits for it. Returns count, or -1 on timeout. */
 int _otc(u32* ot, int count) {
     u32* position = ot;
     int final_offset;

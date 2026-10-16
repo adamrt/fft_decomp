@@ -5,6 +5,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* text_advance_cursor_with_backreferences with the remaining run length and return cursor passed
+ * separately instead of in a text_reader_state_t. */
 u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor) {
     text_backref_t* backref;
     s32 remaining = *remaining_bytes;

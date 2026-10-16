@@ -516,6 +516,7 @@ static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_
     return i;
 }
 
+/* Redraw the send-unit list window: the empty frame, then one name row per unit chosen so far. */
 static void wldcore_window_draw_text_rows(wldcore_menu_send_unit_level_t* level) {
     point32_t point;
     s32 index = level->list_frame.render_index;
@@ -653,6 +654,9 @@ static void wldcore_start_core_background_threads(s32 party_index) {
     g_main_system_flags |= MAIN_SYSTEM_FLAG_UNIT_PANEL_THREADS;
 }
 
+/* Status view of the send-unit level: once the panel threads stop it opens the unit's status
+ * screens; L1 and R1 page through the candidates with wraparound, Select opens the layout window,
+ * Circle or Cross close the view and return to 'So, who you wanna send?'. */
 static void wldcore_proposition_step_send_unit_browser(wldcore_menu_send_unit_level_t* level) {
     u32 buttons;
     s32 selected;
@@ -950,6 +954,8 @@ void wldcore_menu_step_send_unit_level(wldcore_menu_send_unit_level_t* level) {
     world_thread_request_redraw(WLDCORE_THREAD_SLOT_WINDOW_PANEL);
 }
 
+/* Open the job report list: accepted jobs that have returned to this town, under 'Good job. You
+ * came back from these jobs.'; with none, rebuild the bar rows and resume the bar. */
 void wldcore_list_open_completed_propositions(void) {
     point32_t origin;
     wldcore_window_panel_layout_t layout;
@@ -1028,6 +1034,8 @@ void wldcore_list_completed_propositions_restore_prompt(void) {
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_JOBS_RETURNED, 0);
 }
 
+/* Withhold every button from the WORLD menu frame while a level opened from the job report list
+ * runs. */
 void wldcore_list_completed_propositions_block_all_buttons(wldcore_menu_stack_record_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }

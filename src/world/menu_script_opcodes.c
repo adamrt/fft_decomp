@@ -18,6 +18,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Menu script command: run the next count commands when the row predicate holds, otherwise skip
+ * them. The predicate gets the command's literal value, or the current list row while the list
+ * uses its scroll position. */
 menu_instruction_t* world_menu_script_conditional(menu_instruction_t* script) {
     menu_instruction_t* instruction = script;
     s32 (*predicate)(s32) = g_world_menu_script_callbacks[instruction->conditional.predicate].value;
@@ -500,6 +503,8 @@ menu_instruction_t* world_menu_script_set_semi_trans(menu_instruction_t* instruc
     return menu_next_instruction(instruction);
 }
 
+/* Menu script command: queue a draw-mode packet that selects the command's blend rate at the
+ * current ordering-table slot, then continue with the next command. */
 menu_instruction_t* world_menu_script_add_blend_draw_mode(menu_instruction_t* instruction) {
     menu_gfx_enqueue_draw_mode_variant(
         0, 0, GetTPage(0, instruction->blend.blend_rate, 0x100, 0), 0, g_menu_gfx_otag_index);
@@ -914,6 +919,9 @@ static menu_instruction_t* world_menu_skip_instruction_group(menu_instruction_t*
     return instruction;
 }
 
+/* Find the scrollable-list command in a menu script, load its row and column layout, clamp the
+ * selection and scroll base to the list, and render the visible rows' text into the list image in
+ * VRAM. */
 void world_menu_load_scrollable_list_layout(menu_instruction_t* script) {
     RECT rect;
     s16 text_ids[20];
@@ -1198,6 +1206,7 @@ menu_instruction_t* menu_cmd_draw_scrollable_list_body_handler_variant(menu_inst
     return command;
 }
 
+/* Set the WORLD menu sprite color from an RGB triple; a null color leaves it unchanged. */
 void world_menu_set_sprite_color(const rgb24_t* src) {
     if (src != 0) {
         g_world_menu_sprite_color.r = src->r;

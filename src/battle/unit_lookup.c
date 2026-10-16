@@ -465,6 +465,9 @@ void battle_state_run_game_loop(void) {
     VSync(0);
 }
 
+/* The runtime record of the casting unit (g_battle_casting_runtime_id), or 0. It is the source
+ * unit except while a reaction or Hamedo counter resolves, or while a rider's mount takes its
+ * move. */
 battle_unit_t* battle_unit_get_casting(void) {
     battle_unit_t* unit;
 
@@ -476,6 +479,8 @@ battle_unit_t* battle_unit_get_casting(void) {
     return 0;
 }
 
+/* The runtime record of the source unit, whose turn or queued between-turn event is being resolved
+ * (g_battle_unit_source_runtime_id), or 0. */
 battle_unit_t* battle_unit_get_source(void) {
     battle_unit_t* unit = g_battle_unit_list_head;
     s32 source_id;
@@ -681,6 +686,7 @@ battle_unit_t* battle_unit_get_by_battle_id(u16 battle_id) {
     return 0;
 }
 
+/* Count the runtime records drawn with the crystal sprite sheet. */
 s32 battle_unit_count_crystals(void) {
     battle_unit_t* unit;
     s32 count = 0;
@@ -719,6 +725,9 @@ s32 battle_unit_move_to_head(u32 runtime_id) {
     return 0;
 }
 
+/* Start reading the SP2 file that holds the attack animation of the unit's SP2 ability into
+ * destination. Worker 8 uses its own file table, indexed from animation 0x73. Returns -1 when the
+ * animation is in the SP1 range or has no file, else whether the read was queued. */
 s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
     s32 spritesheet_id;
     u8 animation_id;
@@ -1131,6 +1140,8 @@ void battle_gfx_set_sprite_part_semi_transparent(
     }
 }
 
+/* Move a point half a tile (14 units) on x and z, with signs set by the camera yaw quadrant, back
+ * by `offset` on both, and 12 units up: the depth point of a stepping unit. */
 static void battle_camera_calculate_relative_offset(const SVECTOR* input, SVECTOR* output, s32 offset) {
     u16 x;
     u16 z;
@@ -1236,6 +1247,8 @@ void battle_camera_convert_screen_coords_modify_by_5(const SVECTOR* screen, SVEC
     battle_camera_convert_screen_coords_by_rotation(screen, destination, 5);
 }
 
+/* The unit's draw position: its world coordinates plus its event and SEQ offsets, with the float
+ * bob added to y. */
 void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* unit) {
     /* float_bob_offset is read signed (lh) here. */
     main_util_set_svector(destination, unit->world_coords.vx + unit->event_offset.vx + unit->seq_offset.vx,

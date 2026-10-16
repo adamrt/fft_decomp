@@ -5,6 +5,7 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
+/* Open the unit status panel thread if it is not already running, or with enable 0 ask it to stop. */
 void menu_toggle_unit_status_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_UNIT_STATUS) == 0) {

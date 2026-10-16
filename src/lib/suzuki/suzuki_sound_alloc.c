@@ -1,6 +1,9 @@
 /* SCUS_942.21 0x80014278..0x80014357. */
 #include "psx/suzuki.h"
 
+/* First fit in the driver heap: find the first gap after a block (before the next block or the
+ * heap end) that holds a 16-byte header plus size rounded up to 16, link a new block there and
+ * return its zeroed payload; 0 when nothing fits. */
 void* suzuki_sound_alloc(u32 size) {
     suzuki_heap_block_t* block = g_suzuki_sound_heap_blocks;
     suzuki_heap_block_t* allocated;

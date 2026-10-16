@@ -9,6 +9,8 @@
 static void menu_subtract_scaled_stat_preview(menu_status_panel_slot_storage_t* out,
     const menu_status_panel_slot_storage_t* scaled, const menu_status_panel_slot_storage_t* base, s32 scale);
 
+/* Compute the stat changes of swapping item_before for item_after in a slot: the HP and MP bonus
+ * differences into delta and the equipment-detail differences into output. */
 void menu_calculate_swap_stat_delta(menu_status_panel_slot_storage_t* output, menu_unit_status_record_t* delta,
     s16 item_before, s16 item_after, s32 slot) {
     menu_unit_status_record_t summary_before;

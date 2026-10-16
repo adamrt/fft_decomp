@@ -342,10 +342,12 @@ static s32 equip_menu_update_clear_all_equipment_prompt(void) {
     return 1;
 }
 
+/* Row callback: return the previewed HP bonus of the selected unit; the row is ignored. */
 s32 equip_menu_get_preview_hp_bonus(s32 unused_row) {
     return g_menu_selected_unit_stat_summary.gauges[MENU_UNIT_STATUS_GAUGE_HP].bonus;
 }
 
+/* Row callback: return the previewed MP bonus of the selected unit; the row is ignored. */
 s32 equip_menu_get_preview_mp_bonus(s32 unused_row) {
     return g_menu_selected_unit_stat_summary.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;
 }

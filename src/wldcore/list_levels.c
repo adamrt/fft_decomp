@@ -349,6 +349,8 @@ static void wldcore_list_open_active_propositions(void) {
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_ACTIVE_PROPOSITIONS;
 }
 
+/* Resume handler of the active-proposition list: restore the palettes of its four windows and
+ * render record and idle the cursor, undoing wldcore_window_set_layout_states. */
 void wldcore_window_clear_layout_states(wldcore_menu_stack_record_t* level) {
     g_wldcore_window_records[level->proposition_list.cursor_window].palette
         = g_wldcore_window_records[level->proposition_list.title_window].palette
@@ -1060,6 +1062,9 @@ void wldcore_menu_wait_brave_story_text_then_pop_level(void) {
     wldcore_list_open_brave_story_propositions();
 }
 
+/* Push a screen transition into `screen` (a menu level type): clear the map, hide date, marker and
+ * value, fade in, do that screen's setup (music, list, message block), clear the scratch buffer
+ * and start the zoom thread; param_a and param_b are kept for the new screen. */
 void wldcore_menu_push_screen_transition_level(s32 screen, s32 param_a, s32 param_b) {
     u32* clear;
     s32 count;
@@ -1438,6 +1443,9 @@ void wldcore_window_publish_slot_b8dd(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[index].frame_index = 0;
 }
 
+/* Input step of the tutorial category menu: Circle opens the formation tutorials, the mask-1
+ * entries or the topics (or leaves); Cross or Leave shows the parting prompt and fades out, back
+ * to the title when opened from there; Select shows the row's help; Up and Down wrap. */
 void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_level_t* level) {
     u32 buttons;
     s32* selected_entry;
@@ -1602,6 +1610,8 @@ static void wldcore_list_open_formation_tutorials(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
+/* Resume handler of the formation tutorials list: block Circle, Cross and Select from the WORLD
+ * menu frame again. */
 void wldcore_list_formation_tutorials_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
@@ -1710,10 +1720,14 @@ static void wldcore_list_open_tutorial_mask_1_entries(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
+/* Resume handler of the mask-1 tutorial list: block Circle, Cross and Select from the WORLD menu
+ * frame again. */
 void wldcore_list_tutorial_mask_1_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }
 
+/* Withhold every button from the WORLD menu frame while a level opened from the mask-1 tutorial
+ * list runs. */
 void wldcore_list_tutorial_mask_1_block_all_buttons(wldcore_menu_panel_level_t* unused_level) {
     g_menu_blocked_buttons = -1;
 }

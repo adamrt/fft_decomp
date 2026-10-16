@@ -13,6 +13,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Save the map's ambient (GTE back) color for battle_map_restore_background_color. */
 void battle_map_copy_background_color(void) {
     /* Component copies retain the original byte loads and separate addresses. */
     g_battle_map_background_color_backup.r = g_battle_map_background_color.r;
@@ -20,6 +21,7 @@ void battle_map_copy_background_color(void) {
     g_battle_map_background_color_backup.b = g_battle_map_background_color.b;
 }
 
+/* Reload the saved ambient color and load it into the GTE back color. */
 void battle_map_restore_background_color(void) {
     g_battle_map_background_color.r = g_battle_map_background_color_backup.r;
     g_battle_map_background_color.g = g_battle_map_background_color_backup.g;
@@ -32,6 +34,8 @@ rgb24_t* battle_map_get_background_color(void) {
     return &g_battle_map_background_color;
 }
 
+/* Set the map's ambient color and load it into the GTE back color; the GTE load is skipped while
+ * the back color is disabled. */
 void battle_map_set_background_color(s32 red, s32 green, s32 blue) {
     g_battle_map_background_color.r = red;
     g_battle_map_background_color.g = green;
@@ -64,10 +68,14 @@ void battle_map_adjust_background_color(s16 red_delta, s16 green_delta, s16 blue
         g_battle_map_background_color.g, g_battle_map_background_color.b);
 }
 
+/* battle_unit_update_display_by_runtime_id as a g_thread_call_target: event threads run it on the
+ * main stack. */
 void battle_unit_update_graphics_by_runtime_id(u32 runtime_id) {
     battle_unit_update_display_by_runtime_id(runtime_id);
 }
 
+/* battle_unit_set_animation_based_on_mounted_state by runtime id; event threads run it on the main
+ * stack. */
 void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_animation_based_on_mounted_state(battle_unit_get_by_runtime_id(runtime_id));
 }
@@ -78,6 +86,7 @@ void battle_unit_set_movement_idle_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_idle_animation_for_movement(battle_unit_get_by_runtime_id(runtime_id));
 }
 
+/* battle_unit_set_animation_based_on_status by runtime id, for event scripts. */
 void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_animation_based_on_status(battle_unit_get_by_runtime_id(runtime_id));
 }
@@ -99,6 +108,8 @@ void battle_unit_store_camera_facing_animation_for_all(u32 animation) {
     }
 }
 
+/* The unit-ready test that script_wait_for_unit_ready polls. It ignores the unit and always
+ * reports ready, so that wait never yields. */
 s32 battle_return_one(s32 unused_runtime_id) {
     return 1;
 }
@@ -200,6 +211,7 @@ s16 battle_unit_get_camera_facing_sixteenth_by_runtime_id(u32 runtime_id) {
     return -1;
 }
 
+/* Round every unit's facing to the nearest of the four directions. */
 void battle_unit_snap_all_facings_to_quadrants(void) {
     battle_unit_t* unit = g_battle_unit_list_head;
     s32 facing;
@@ -221,6 +233,7 @@ void battle_unit_snap_all_facings_to_quadrants(void) {
     }
 }
 
+/* Shows a unit's shadow (UnitShadow event instruction). Returns 0 when no unit has the runtime id. */
 s32 battle_gfx_set_shadow_graphic_trigger_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -282,6 +295,7 @@ void battle_state_start_close_battle(s32 duration) {
     g_main_system_game_flow_state = MAIN_GAME_FLOW_WORLD;
 }
 
+/* The number of records in the runtime unit list. No retail code calls it. */
 s32 battle_unit_count(void) {
     s32 count = 0;
     battle_unit_t* unit = g_battle_unit_list_head;
@@ -336,6 +350,8 @@ s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* 
     return 0;
 }
 
+/* The depth point (battle_camera_convert_screen_coords_modify_by_1) of a unit's world position. A
+ * missing unit is not checked. No retail code calls it. */
 void battle_camera_convert_unit_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
     battle_camera_convert_screen_coords_modify_by_1(
         battle_unit_get_world_coords_by_runtime_id(runtime_id & 0xffff), coords);
@@ -397,6 +413,9 @@ s32 battle_move_start_unit_walk_to(
     return 0;
 }
 
+/* Start a unit on a one-step path: a jump of jump_length extra tiles in `direction` on its own
+ * layer, at full speed. The Jump event instruction uses it. A missing unit raises pointer
+ * exception 12 and returns 0. */
 s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_length) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 

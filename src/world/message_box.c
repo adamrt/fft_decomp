@@ -465,6 +465,8 @@ void menu_run_unit_status_thread_variant(void) {
     thread_exit_current();
 }
 
+/* Render a message box's lines into its window image with the pen at (8, 8) and upload it; a
+ * portrait box builds its tailed window image first, and centered boxes are skipped. */
 static void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* record) {
     if (record->box_type != DIALOG_BOX_TYPE_CENTERED) {
         if (record->box_type == DIALOG_BOX_TYPE_PORTRAIT) {
@@ -486,6 +488,7 @@ static void world_menu_render_text_image_at_fixed_origin(text_dialog_record_t* r
     }
 }
 
+/* Free the message box text slot owned by the current thread, if any, and reset its glyph counter. */
 static void world_text_release_current_message_box_slot(void) {
     s32 i;
 

@@ -263,6 +263,9 @@ void wldcore_reset_game_if_special_keycode_is_pressed(void) {
     }
 }
 
+/* Step one map scroll axis: direction 1 or -1 accelerates `value` by `step` up to +/-`limit`,
+ * direction 0 decays it toward zero by `decay`; `output` is the 8.8 value's whole part, truncated
+ * toward zero. */
 void wldcore_map_update_scroll_axis_speed(wldcore_axis_state_t* axis, s32 direction) {
     switch (direction) {
     case 1:
@@ -304,6 +307,8 @@ void wldcore_map_update_scroll_axis_speed(wldcore_axis_state_t* axis, s32 direct
     }
 }
 
+/* Clear the six auto-repeat counters and copy the repeat delay and periods from MAIN's input
+ * settings. */
 void wldcore_input_init_repeat_state(void) {
     g_wldcore_input_repeat_counter_l1 = 0;
     g_wldcore_input_repeat_counter_r1 = 0;
@@ -445,6 +450,9 @@ void wldcore_window_set_render_objects_visible(s32 clear) {
     }
 }
 
+/* Start a screen fade of `duration` frames unless the current fade already has the same direction
+ * (WLDCORE_SCREEN_FADE_OUT bit); START_MUSIC also queues the world map theme with a fade-in,
+ * STOP_MUSIC fades the music out and unloads it. */
 void wldcore_fade_start_screen(s32 flags, s32 duration) {
     if ((g_wldcore_screen_fade_state.flags[0] & WLDCORE_SCREEN_FADE_OUT) != (flags & WLDCORE_SCREEN_FADE_OUT)) {
         g_wldcore_screen_fade_state.flags[0] = flags | WLDCORE_SCREEN_FADE_RUNNING;
@@ -584,6 +592,8 @@ void wldcore_fade_draw_screen_overlays(void) {
     }
 }
 
+/* Return the address of proposition data record `record`: the data block starts with a table of
+ * byte offsets from its own start. */
 void* wldcore_proposition_get_data_pointer(wldcore_proposition_data_record_e record) {
     return (u8*)g_wldcore_proposition_data_base + g_wldcore_proposition_data_base[record];
 }
@@ -751,6 +761,7 @@ static void wldcore_advance_brave_story_birthdays(void) {
     }
 }
 
+/* WLDCORE's wrapper for main_party_get_unit: the roster record of slot `party_index`. */
 party_unit_t* wldcore_get_party_unit(s32 party_index) {
     return main_party_get_unit(party_index);
 }

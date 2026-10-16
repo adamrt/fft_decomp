@@ -144,6 +144,7 @@ void bunit_menu_update_node_cursor(s16 mode) {
     }
 }
 
+/* Start the bit reader on a new data stream. */
 void bunit_bits_init_reader(const u8* data) {
     g_bunit_bits_reader_reset = 1;
     g_bunit_bits_cursor = data;

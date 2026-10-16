@@ -63,6 +63,7 @@ s32 main_heap_free_smd(void* ptr) {
     return 1;
 }
 
+/* Mark every page of the music (SMD) heap free. */
 void main_heap_clear_smd_allocator_table(void) {
     int index = MAIN_HEAP_SMD_PAGE_COUNT - 1;
     u8* entry = &g_main_heap_smd_allocator_table[MAIN_HEAP_SMD_PAGE_COUNT - 1];
@@ -184,6 +185,7 @@ s32 main_heap_free(void* pointer) {
     return 0;
 }
 
+/* Mark every page of the game heap free; startup and each later game reset call it. */
 void main_heap_clear_game_allocator_table(void) {
     int index = MAIN_HEAP_GAME_PAGE_COUNT - 1;
     u8* entry = &g_main_heap_game_allocator_table[MAIN_HEAP_GAME_PAGE_COUNT - 1];
@@ -202,6 +204,8 @@ s32 main_file_call_build_header(s32 sector, u32 size, void* destination) {
     return main_file_build_header_nnl(&g_main_file_cd_state, sector, size >> 11, destination);
 }
 
+/* Return the shared CD descriptor's load state: nonzero while a read through g_main_file_cd_state
+ * is in progress. */
 int main_file_is_still_loading(void) {
     return g_main_file_still_loading;
 }
@@ -282,6 +286,8 @@ void* main_file_load_to_address(int sector, unsigned int size, void* destination
     return destination;
 }
 
+/* Blocking main_file_load_to_address that reports MAIN_SYSTEM_ERROR_FILE_LOAD on a null result;
+ * since that loader returns destination, only a null destination trips it. */
 void* main_file_load_checked_to_address(int sector, int size, void* destination) {
     void* result = main_file_load_to_address(sector, size, destination);
 
@@ -291,6 +297,8 @@ void* main_file_load_checked_to_address(int sector, int size, void* destination)
     return result;
 }
 
+/* Blocking load into a new game-heap block that also reports MAIN_SYSTEM_ERROR_FILE_LOAD when no
+ * block was free (main_file_load_to_heap has already reported MAIN_SYSTEM_ERROR_HEAP_ALLOC). */
 void* main_file_load_checked_to_heap(int sector, int size) {
     void* result = main_file_load_to_heap(sector, size);
 
@@ -300,6 +308,7 @@ void* main_file_load_checked_to_heap(int sector, int size) {
     return result;
 }
 
+/* Free a game-heap block through main_heap_free, dropping its result. */
 void main_heap_call_free(void* pointer) {
     main_heap_free(pointer);
 }

@@ -205,6 +205,9 @@ void battle_status_enable_special_flags(s32 status_id, s32 enabled, s32 battle_i
     }
 }
 
+/* Give a player-team unit one of item (Steal, Catch, an unbroken Draw Out katana, a treasure
+ * chest): with 99 already in stock, the item becomes a quarter of its price in war funds instead.
+ * Items 0 and 0xFF, other teams and non-executing states do nothing. */
 s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8 item) {
     u8 item_id;
 
@@ -325,6 +328,8 @@ void battle_status_apply_unit_action_removal(unit_stats_t* unit) {
     }
 }
 
+/* Remove a unit from the current ability's target list, shifting later entries down and filling
+ * the freed last slot with 0xFF. */
 void battle_target_sort_list(s32 target_battle_id) {
     s32 i;
 
@@ -372,6 +377,8 @@ void battle_action_store_8019387c_if_not_reacting(s32 unit_id, s8 value) {
     }
 }
 
+/* Random value 0..0x7FFF for the formulas while the action executes; previews and AI simulations
+ * get the midpoint 0x4000, so projected results use an average roll. */
 s32 battle_formula_get_random_0_7fff(void) {
     if (g_battle_action_state != ACTION_STATE_EXECUTE) {
         return 0x4000;

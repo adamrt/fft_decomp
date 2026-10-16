@@ -39,6 +39,8 @@ static void main_set_display_draw_new_game(int width, int height, int projection
     PutDrawEnv(&g_main_gfx_draw_envs[g_main_gfx_screen_polarity]);
 }
 
+/* Present one frame for the Orbonne caption fades: swap the display buffers after VSync, draw otag
+ * and flush the debug print stream. Returns VSync's result. */
 static int main_gfx_swap_display_area(u32* otag) {
     /* Matching constraint: the retail function reserves one unused RECT. */
     RECT matching_stack_space;
@@ -417,6 +419,8 @@ int main_sound_set_current_music_target(int volume, int time) {
     return 0;
 }
 
+/* Change the current music's tempo scale to value over time ticks; returns 0 when no music is
+ * current. Nothing in the tree calls it. */
 int main_sound_set_current_music_tempo_scale_timed(int value, int time) {
     if (g_main_sound_music.state.current_music != 0) {
         suzuki_smd_set_tempo_scale(g_main_sound_music.state.current_music, value, time);
@@ -425,6 +429,8 @@ int main_sound_set_current_music_tempo_scale_timed(int value, int time) {
     return 0;
 }
 
+/* Shift the current music's pitch to value over time ticks; returns 0 when no music is current.
+ * Nothing in the tree calls it. */
 int main_sound_set_current_music_pitch_shift_timed(int value, int time) {
     if (g_main_sound_music.state.current_music != 0) {
         suzuki_smd_set_pitch_shift(g_main_sound_music.state.current_music, value, time);
@@ -433,6 +439,8 @@ int main_sound_set_current_music_pitch_shift_timed(int value, int time) {
     return 0;
 }
 
+/* Shift the current music's balance to value over time ticks; returns 0 when no music is current.
+ * Nothing in the tree calls it. */
 int main_sound_set_current_music_balance_shift_timed(int value, int time) {
     if (g_main_sound_music.state.current_music != 0) {
         suzuki_smd_set_balance_shift(g_main_sound_music.state.current_music, value, time);
@@ -516,6 +524,8 @@ s32 main_sound_update_tunes(void) {
     return 0;
 }
 
+/* Stop the current music, unload both scenario music slots and cancel a pending tune or silence a
+ * playing one at once. */
 void main_sound_unload_scenario_music_and_tunes(void) {
     main_sound_stop_current_music();
     main_sound_unload_scenario_mus(1);
@@ -523,10 +533,12 @@ void main_sound_unload_scenario_music_and_tunes(void) {
     main_sound_set_tune_volume(0);
 }
 
+/* Return the music record loaded in slot (slots count from 1; an unloaded slot holds 0). */
 suzuki_music_t* main_sound_get_music_handle(int slot) {
     return g_main_sound_music.slots.music[slot - 1];
 }
 
+/* Stop the current music and unload the slot it played from. */
 void main_sound_unload_current_scenario_music(void) {
     int slot = g_main_sound_music.state.current_slot;
 
@@ -551,6 +563,8 @@ void main_sound_set_current_music_track(int music_id) {
     }
 }
 
+/* Play a sound effect on the fixed SFX channels 6-7 (suzuki_sound_play_direct_sfx), which channel
+ * stealing never takes; menus use it for their confirm, cancel and cursor sounds. */
 void main_sound_play_sfx(int sound_id) {
     suzuki_sound_play_direct_sfx(sound_id);
 }

@@ -5,6 +5,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Return the active screen fades as bits: 1 while fading in (decreasing), 2 while fading out
+ * (increasing), 0 when neither runs. */
 s32 gfx_get_fade_state(void) {
     s32 second = g_gfx_increasing_fade_active;
     s32 first = g_gfx_decreasing_fade_active;

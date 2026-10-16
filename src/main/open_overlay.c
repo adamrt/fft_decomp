@@ -10,6 +10,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Reset the seven item-type order lists to their default sequences (each ended by -1), empty the
+ * weapon, helmet, armor, accessory and item page orders and zero the poached item counts. */
 void main_item_init_order_tables(void) {
     g_main_item_type_order_tables.order_0[0] = 0;
     g_main_item_type_order_tables.order_0[1] = 1;
@@ -98,11 +100,14 @@ void main_card_init_events(void) {
     g_main_card_bios_events_opened = 1;
 }
 
+/* Load OPEN.BIN into the low overlay area and run its main loop; mode 1 skips the opening movie.
+ * Returns OPEN.BIN's result, 0 meaning go straight into BATTLE.BIN. */
 int main_overlay_exec_open_bin_main_loop(int mode) {
     main_file_load_checked_to_address(DISC_SECTOR_OPEN_OPEN_BIN, 0x36800, g_main_heap_low_overlay_load_address);
     return open_system_run_main_loop(mode);
 }
 
+/* Load OPEN.BIN into the low overlay area and play its ending cutscene. */
 void main_overlay_exec_open_bin_ending(void) {
     main_file_load_checked_to_address(DISC_SECTOR_OPEN_OPEN_BIN, 0x36800, g_main_heap_low_overlay_load_address);
     open_system_run_ending_cutscene();

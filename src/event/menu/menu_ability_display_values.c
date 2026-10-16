@@ -6,6 +6,8 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
+/* Row callback for ability lists: look up the listed ability (caching its data for the panel) and
+ * return 1 when it is not an action ability and its entry carries no disabled bits. */
 s32 menu_ability_is_non_action_learned(s32 index) {
     s16* entries = g_menu_ability_entries;
     s16* entry = &entries[index];

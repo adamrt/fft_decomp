@@ -322,6 +322,8 @@ void battle_action_start_next_strike_display(void) {
     battle_effect_store_targets_and_display_types(ability, unit);
 }
 
+/* Enter the OpenSp2Files game state at full animation speed, with no SP2 buffer yet, so its
+ * handler starts a fresh load. */
 void battle_state_enter_open_sp2_files(void) {
     g_main_system_animation_speed = 1;
     g_battle_game_state = BATTLE_GAME_STATE_OPEN_SP2_FILES;
@@ -400,6 +402,9 @@ void battle_action_execute_ability(void) {
     battle_unit_update_post_command_animation_display(unit);
 }
 
+/* Enter the commence-attack phase for the source unit: copy the action command stored in its
+ * battle stats into its runtime action, mark it acted and start the charge-hold animation when it
+ * uses an ability. */
 void battle_state_enter_commence_attack_phase(void) {
     unit_stats_t* stats;
     battle_unit_t* unit;
@@ -529,6 +534,10 @@ s32 battle_target_set_boxes_red(void) {
     return unit->ability_preview_phase;
 }
 
+/* Enter the ConfirmAction state and open the action-confirm prompt for the source unit. The prompt
+ * option depends on how the target is chosen and on whether a unit stands on the cursor tile: 1
+ * for a unit an ability can follow, 4 for a unit under a tile-only ability, 3 for a unit with a
+ * self-centered action, 2 for an empty tile and 0 otherwise. */
 void battle_action_confirm(void) {
     battle_unit_t* unit;
     battle_unit_t* target;
@@ -749,6 +758,8 @@ void battle_state_halve_animation_speed_and_queue_close(s32 transition_step, s32
     g_main_system_game_flow_state = close_flow_state;
 }
 
+/* Project the cursor tile to the screen; while g_battle_action_at_list_active is set, also draw
+ * the map cursor and its tile glow. */
 void battle_target_calculate_tile_coords_and_glow_from_at_list(void) {
     SVECTOR secondary;
     SVECTOR tertiary;

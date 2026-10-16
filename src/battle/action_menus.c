@@ -49,6 +49,10 @@ void battle_action_set_casting_unit_id_ff_and_init(void) {
     menu_init_system_function(BATTLE_MENU_SYSTEM_COMMAND_SCENARIO_CHECK, 0, 0xff, 0, 1);
 }
 
+/* Run the scenario check for the unit's turn event. A unit-ready or empty event may start a
+ * scenario event (option 0); an ability-ready or action-result event only tests (option 2) and
+ * starts the pending event when it has a finish operation and the unit is not Ramza. Returns 1,
+ * after saving the game state and handing the battle to the event, when one started. */
 s32 battle_state_try_enter_scenario_event(battle_unit_t* unit) {
     s32 result;
 
@@ -138,6 +142,7 @@ void battle_state_set_free_cursor(void) {
     }
 }
 
+/* Select in the free cursor: enter the free-cursor help state and start building the help window. */
 void battle_menu_open_free_cursor_help(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_FREE_CURSOR_HELP;
@@ -309,6 +314,10 @@ void battle_action_check_between_turn_events(void) {
     }
 }
 
+/* Enter the status-execute state for the source unit. A Mime turn event shows effect message
+ * 0x183a for one second and kneels the unit; otherwise a queued Crystal or Treasure transformation
+ * shows message 0x183d or 0x183c for three seconds (any other result closes the window), and the
+ * unit's queued statuses and post-action display are applied. */
 void battle_state_enter_status_execute(void) {
     battle_unit_t* unit;
     u32 statuses;
@@ -434,6 +443,7 @@ void battle_menu_dispatch_idle_action_menu(void) {
     }
 }
 
+/* Select in the idle action menus: enter the action-help state and start building the help window. */
 void battle_menu_open_help(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ACTION_HELP_MENU;
@@ -441,6 +451,9 @@ void battle_menu_open_help(void) {
     menu_start_building_thread();
 }
 
+/* Cross on a unit in the free cursor: show the casting unit's reachable tiles and enter the
+ * display-move-area state with map panning, saving the cursor input mode for the Cross press that
+ * ends it. */
 void battle_target_show_move_range_in_free_cursor(void) {
     battle_unit_t* unit;
     unit_stats_t* stats;
@@ -458,6 +471,8 @@ void battle_target_show_move_range_in_free_cursor(void) {
     main_sound_play_sfx(MAIN_SFX_CONFIRM);
 }
 
+/* Triangle in the free cursor, or the end of the mini-menu help: enter the mini-menu state and
+ * start the mini menu. */
 void battle_menu_open_free_cursor_mini_menu(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MINI_MENU;
@@ -474,6 +489,7 @@ void battle_menu_open_mini_menu(void) {
     menu_finish_at_list_selection();
 }
 
+/* Select in the mini menu: enter the mini-menu help state and start building the help window. */
 void battle_menu_open_mini_menu_help(void) {
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_MINI_MENU_HELP;
@@ -565,6 +581,10 @@ void battle_menu_open_illegal_move_help(void) {
         unit->team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED);
 }
 
+/* Enter the unit-moving-setup state for the chosen destination and start the source unit's move
+ * feedback: confirm a pending mount (option 1) or a step onto a crystal (option 4), otherwise
+ * close (option 0). A teleport (path count 0xfe or 0xff, the u8 count + 2 < 2 test) asks for move
+ * confirmation instead when navigation messages are on. */
 void battle_state_enter_unit_moving_setup(void) {
     battle_unit_t* src;
     battle_unit_t* cast;
@@ -690,6 +710,8 @@ void battle_menu_open_move_confirm(void) {
     }
 }
 
+/* Enter the after-command state at animation speed 1: clear the post-action flag, put the cursor
+ * back on the source unit and close the system function window. */
 void battle_state_enter_after_command(void) {
     g_main_system_animation_speed = 1;
     g_battle_game_state = BATTLE_GAME_STATE_AFTER_COMMAND;
@@ -934,6 +956,8 @@ void battle_move_init_post_movement_display(void) {
     g_battle_state_animation_continue_check = 0;
 }
 
+/* Enter the wait-direction state for the source unit, starting from its current facing. A rider
+ * first turns to its mount's facing; an AI unit picks its wait facing now. */
 void battle_action_choose_facing_for_wait(void) {
     battle_unit_t* mounted_unit;
     battle_unit_t* unit;

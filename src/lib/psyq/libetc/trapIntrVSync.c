@@ -1,5 +1,6 @@
 #include "psx/libetc.h"
 
+/* VBlank IRQ handler: count Vcount and run each installed VBlank callback in slot order. */
 void trapIntrVSync(void) {
     s32 slot = 0;
     psyq_interrupt_callback_t callback;

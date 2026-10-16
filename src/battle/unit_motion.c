@@ -20,6 +20,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Project the center of the cursor tile, at its surface height less any water depth, to the screen
+ * and store the cursor's screen x and y. `position` receives the tile point and `raised` its depth
+ * point. It first advances the unit palette animation. */
 void battle_target_project_cursor_tile_to_screen(VECTOR* projected, SVECTOR* position, SVECTOR* raised) {
     map_tile_t* tile;
     long flag;
@@ -125,6 +128,7 @@ void battle_gfx_start_unit_fade_out_red(s32 runtime_id) {
     battle_gfx_start_unit_fade_out(runtime_id, 4, 0x1F, 0, 0);
 }
 
+/* Sets the 20.12 fixed-point position from the integer world position. */
 void battle_unit_set_real_coords_from_world_coords(battle_unit_t* unit) {
     unit->real.vx = unit->world_coords.vx * ONE;
     unit->real.vy = unit->world_coords.vy * ONE;
@@ -1017,6 +1021,9 @@ void battle_move_animate_jump_rise_with_sfx(battle_unit_t* unit) {
     unit->distortion_timer = timer;
 }
 
+/* Run one frame of the unit's distortion animation from
+ * g_battle_unit_distortion_animation_handlers. An id past the table reports
+ * MAIN_SYSTEM_ERROR_DISTORTION_ANIMATION. */
 void battle_unit_dispatch_distortion_animation(battle_unit_t* unit) {
     u32 distortion_id = unit->distortion_animation_id;
 

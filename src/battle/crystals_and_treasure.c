@@ -149,6 +149,11 @@ static s32 battle_map_calculate_move_find_item_flag(s32 map_id, s32 tile_index, 
     return 1;
 }
 
+/* Resolve what a moving unit picks up on its tile into g_main_crystal_pickup_result: -1 with no
+ * crystal or treasure there; 4 and a generated item for a treasure; otherwise 2 for a crystal, and
+ * when neither unit is a monster, each action ability the crystal knows and the mover does not (in
+ * the mover's unlocked jobs, and the special job only for the same character) is learned on a roll
+ * against its learn rate, setting bit 0 when any is. */
 crystal_pickup_result_t* battle_unit_generate_crystal_or_treasure(unit_stats_t* mover) {
     u8 gained[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
     u8 known[UNIT_LEARNED_ABILITY_BYTES_PER_JOB];
@@ -515,6 +520,9 @@ void battle_unit_find_war_trophies_and_bonus_money(battle_war_result_t* result) 
     }
 }
 
+/* Strip a unit of every status: queue each current status's display flag off, then zero the
+ * innate, immunity and current sets with the 16 status CTs that follow them (one 0x1F-byte clear
+ * from status_sets) and the inflicted statuses. Used before a Morbol transformation. */
 void battle_status_reapply_active_flags(unit_stats_t* unit) {
     s32 i;
     s32 battle_id = unit->battle_id;

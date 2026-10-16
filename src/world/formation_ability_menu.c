@@ -553,6 +553,8 @@ static s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id) {
     return ability_id == ABILITY_ID_SUPPORT_TWO_SWORDS;
 }
 
+/* Return the menu input lock mode; nonzero while another window holds the input. The argument is
+ * ignored. */
 s32 world_thread_is_task_active(s32 unused_0) {
     return g_menu_input_lock_mode;
 }

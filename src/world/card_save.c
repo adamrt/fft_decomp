@@ -206,6 +206,9 @@ static void world_card_input_update_with_message_state(void) {
     }
 }
 
+/* Run the memory card save/load screen to completion on its own stack-allocated primitive pools
+ * and return its result. mode_select_enabled is 1 when opened from the world map and 0 from the
+ * title screen. */
 s32 world_card_run_menu_screen(s32 mode_select_enabled) {
     POLY_FT4 textured_quads[2 * 600];
     TILE tiles[2 * 10];

@@ -108,6 +108,8 @@ static void card_input_update_controller(void) {
     g_menu_input_secondary_repeat = filtered_input;
 }
 
+/* Read the controller, then drop this frame's presses and repeats while a screen fade is in
+ * progress. */
 void card_input_update_suppressed_during_fade(void) {
     card_input_update_controller();
     if (gfx_get_fade_state() != 0) {

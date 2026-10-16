@@ -3,6 +3,7 @@
 
 #include "psx/libetc.h"
 
+/* Install callback as the completion handler of DMA channel 4 (SPU). */
 void _SpuDataCallback(void (*callback)(void)) {
     DMACallback(4, callback);
 }

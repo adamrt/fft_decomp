@@ -206,6 +206,9 @@ static void open_movie_update_stream_frame(void) {
     }
 }
 
+/* Stop the movie stream: wait for drawing, remove the MDEC output callback, release the CD ring,
+ * pause the CD audio when pause_cd_audio is set, and clear
+ * OPEN_SYSTEM_RUNTIME_FLAG_MOVIE_STREAMING. */
 void open_movie_stop_stream(s32 pause_cd_audio) {
     DrawSync(0);
     DecDCToutCallback(0);

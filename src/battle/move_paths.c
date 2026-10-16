@@ -22,6 +22,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Step handler of the FLOAT_JUMP phases: carry a floating unit to the entry edge of its
+ * destination tile, where its horizontal motion stops; once it has come down to the tile's height,
+ * start the float step into the matching FLOAT_TO_CENTER phase. */
 static void battle_move_update_unit_step_to_destination_tile_entry_edge(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
 
@@ -395,6 +398,9 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
     }
 }
 
+/* Give a knocked-back unit a one-step path to its destination: a plain step in the travel
+ * direction with the destination level as its elevation bit, at walk speed 0x8000 (four times the
+ * usual 0x2000), which battle_move_update_knockback_step then slows. */
 static void battle_move_init_knockback(battle_unit_t* unit) {
     u32* path_word = (u32*)&unit->path;
     u32 state;
@@ -445,6 +451,10 @@ void battle_move_transfer_target_coordinates(const battle_unit_t* src, battle_un
     battle_move_init_knockback(dst);
 }
 
+/* Map the directional buttons to a map direction (battle facing, diagonals included) for the
+ * camera's yaw quadrant and the cursor input mode. source picks held, newly pressed (repeating at
+ * the cursor repeat speed) or released buttons; returns -1 for no direction or when a face button,
+ * Select or Start was just pressed. */
 s32 battle_camera_get_input_direction(s32 source) {
     s32 direction = -1;
     u32 input;
@@ -1061,6 +1071,8 @@ s32 battle_target_move_cursor_by_input(void) {
     return 0;
 }
 
+/* Start free map panning: held directions move the camera (battle_camera_update_map_pan) and the
+ * camera stops following the cursor tile. */
 void battle_camera_enable_map_pan(void) {
     g_battle_camera_map_pan_enabled = 1;
 }
@@ -1773,6 +1785,8 @@ void battle_camera_update_cursor_tile_vector(void) {
     }
 }
 
+/* Advance the movement of each runtime unit that has a path. Runs every frame of event mode and of
+ * the change-map jump-in state. */
 void battle_move_update_all_unit_paths(void) {
     s32 i;
     battle_unit_t* unit;

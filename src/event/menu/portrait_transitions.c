@@ -7,6 +7,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Narrow a portrait quad by amount pixels from its right edge, moving its texture start to keep
+ * the image aligned (along v for a rotated texture). */
 static void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount) {
     if (poly->u0 != poly->u1) {
         poly->u0 += amount;

@@ -1,6 +1,9 @@
 /* LIBETC 8001e000-8001e1e8; IRQ acknowledgement and callback dispatch. */
 #include "psx/libetc.h"
 
+/* Interrupt entry: acknowledge and dispatch each pending, unmasked IRQ that has a callback,
+ * repeating until none remains; complain after PSYQ_ETC_UNHANDLED_IRQ_LIMIT unhandled entries,
+ * then return from the exception. */
 void trapIntr(void) {
     s32 slot;
     u16 pending;

@@ -606,6 +606,11 @@ s32 battle_menu_load_charge_skillset(s32 unit_id, s32 skillset, s16* abilities, 
         unit_id, skillset, abilities, mp_costs, ability_ct, 0, ability_flags, turns);
 }
 
+/* The clocktick loop between turns. RESET clears every unit's CT and turn state; FIND_ACTIVE_UNIT
+ * returns 0xd000 | the first unit not Dead, Crystal, Jumping, Petrified or Treasure (0xdf00 if
+ * none). Otherwise it steps the between-turn states (CT gain, the 100-CT pick, charge and status
+ * countdowns, poison and regen, mimes) until one yields a battle_turn_event_e | unit id, giving up
+ * with BATTLE_TURN_EVENT_NONE after 1201 steps. */
 s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
     unit_stats_t* unit;
     s32 result = 0;
@@ -1415,10 +1420,14 @@ static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, bat
     return i != BATTLE_AT_LIST_CAPACITY;
 }
 
+/* Mark the unit's action as taken (its move flag is left as is) and end its turn if nothing is
+ * left to do. */
 void battle_action_set_only_action_taken(s32 unit_id) {
     battle_action_set_move_act_flags(unit_id, 0, 1);
 }
 
+/* Mark the unit's move as taken (its action flag is left as is) and end its turn if nothing is
+ * left to do. */
 void battle_action_set_only_movement_taken(s32 unit_id) {
     battle_action_set_move_act_flags(unit_id, 1, 0);
 }
@@ -1509,10 +1518,14 @@ s32 battle_action_check_change_of_turn(s32 unit_id) {
     return 1;
 }
 
+/* End the unit's Charging, Jump, Defending and Performing statuses and drop its charged ability
+ * (action state none). Same body as crystals_and_treasure.c's static battle_status_disable_acting. */
 void battle_status_enable_disable_acting(unit_stats_t* unit) {
     main_status_set_action_state(unit, 0);
 }
 
+/* Put the unit in the Defending action state, which ends Charging, Jump and Performing and drops
+ * any charged ability. Used by the Defend command and the AI's simulation of it; always returns 0. */
 s32 battle_status_inflict_defending_to_battle_id(s32 unit_id) {
     main_status_set_action_state(&g_battle_unit_stats[unit_id], STATUS_HANDLER_INDEX(STATUS_ID_DEFENDING));
     return 0;

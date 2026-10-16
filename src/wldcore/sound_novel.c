@@ -132,6 +132,8 @@ void wldcore_sound_novel_restore_saved_state(s32 render_record) {
     }
 }
 
+/* Reset the selected sound novel's saved record so the next reading starts from the beginning; the
+ * argument is unused. */
 void wldcore_reset_selected_saved_record(s32 unused) {
     wldcore_reset_saved_record_fields(&g_main_saved_records[g_wldcore_saved_record_index]);
 }
@@ -389,6 +391,7 @@ static s32 wldcore_sound_novel_update_countdown_timer(void) {
     return 0;
 }
 
+/* Sound-novel opcode 0x00: end the script; wldcore_script_run_until_yield then returns 0. */
 void wldcore_opcode_end_script(void) {
     u16* flags = &g_wldcore_active_saved_record.state_flags;
 
@@ -401,6 +404,7 @@ void wldcore_opcode_end_section(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_BRANCH | WLDCORE_OPCODE_STATE_YIELD;
 }
 
+/* Sound-novel opcode 0x02: do nothing and fetch the next instruction. */
 void wldcore_opcode_nop(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
@@ -453,11 +457,14 @@ void wldcore_opcode_load_background_set(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x06: branch to the section in instruction byte 1. */
 void wldcore_opcode_branch_to_section(void) {
     g_wldcore_active_saved_record.section = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     g_wldcore_state_flags |= WLDCORE_OPCODE_STATE_BRANCH;
 }
 
+/* Sound-novel opcode 0x07: branch to the section in byte 1 when the chosen dialog option equals
+ * byte 2. */
 void wldcore_opcode_branch_if_dialog_option_equal(void) {
     wldcore_opcode_branch_if_dialog_option(1);
 }
@@ -479,10 +486,14 @@ static void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal) {
     }
 }
 
+/* Sound-novel opcode 0x08: branch to the section in byte 1 when the chosen dialog option differs
+ * from byte 2. */
 void wldcore_opcode_branch_if_dialog_option_not_equal(void) {
     wldcore_opcode_branch_if_dialog_option(0);
 }
 
+/* Sound-novel opcode 0x09: yield every frame until the frame counter passes byte 1, then fetch the
+ * next instruction (byte 1 + 2 frames in all). */
 void wldcore_opcode_wait_frames(void) {
     u16 flags = g_wldcore_active_saved_record.state_flags;
     u16 updated = flags | WLDCORE_OPCODE_STATE_YIELD;
@@ -574,6 +585,8 @@ void wldcore_opcode_set_parent_windows_visible(void) {
     g_wldcore_opcode_state.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x0D: show message byte 1 of the novel's text in the message thread and
+ * record it, without the history push of opcode 0x03. */
 void wldcore_opcode_start_text_thread(void) {
     s32 operand = (u8)(g_wldcore_active_saved_record.instruction >> 8);
 
@@ -602,6 +615,9 @@ void wldcore_opcode_branch_to_random_section(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_BRANCH;
 }
 
+/* Sound-novel opcode 0x0F: branch to the section in byte 3 when section byte 2 of novel byte 1 has
+ * been reached, i.e. bit (byte 1 << 8 | byte 2) of g_main_saved_data_bits that
+ * wldcore_script_run_until_yield sets on each branch. */
 void wldcore_opcode_branch_if_savedata_bit_set(void) {
     wldcore_opcode_branch_if_savedata_bit(1);
 }
@@ -623,10 +639,14 @@ static void wldcore_opcode_branch_if_savedata_bit(s32 expected) {
     g_wldcore_active_saved_record.state_flags = flags;
 }
 
+/* Sound-novel opcode 0x10: branch to the section in byte 3 when section byte 2 of novel byte 1 has
+ * not been reached. */
 void wldcore_opcode_branch_if_savedata_bit_clear(void) {
     wldcore_opcode_branch_if_savedata_bit(0);
 }
 
+/* Sound-novel opcode 0x11: branch to the section in byte 2 when saved flag byte 1
+ * (g_main_secondary_saved_data_bits) is set. */
 void wldcore_opcode_branch_if_saved_bit_set(void) {
     wldcore_opcode_branch_if_saved_bit(1);
 }
@@ -649,10 +669,13 @@ static void wldcore_opcode_branch_if_saved_bit(s32 expected) {
     g_wldcore_active_saved_record.state_flags = flags;
 }
 
+/* Sound-novel opcode 0x12: branch to the section in byte 2 when saved flag byte 1 is clear. */
 void wldcore_opcode_branch_if_saved_bit_clear(void) {
     wldcore_opcode_branch_if_saved_bit(0);
 }
 
+/* Sound-novel opcode 0x13: branch to the section in byte 2 when local flag byte 1 is set; the
+ * local flags are cleared whenever a reading starts or resumes. */
 void wldcore_opcode_branch_if_local_flag_set(void) {
     wldcore_opcode_branch_if_local_flag(1);
 }
@@ -674,30 +697,36 @@ static void wldcore_opcode_branch_if_local_flag(s32 expected) {
     g_wldcore_active_saved_record.state_flags = flags;
 }
 
+/* Sound-novel opcode 0x14: branch to the section in byte 2 when local flag byte 1 is clear. */
 void wldcore_opcode_branch_if_local_flag_clear(void) {
     wldcore_opcode_branch_if_local_flag(0);
 }
 
+/* Sound-novel opcode 0x15: set saved flag byte 1 (g_main_secondary_saved_data_bits). */
 void wldcore_opcode_set_saved_bit(void) {
     wldcore_set_bit_value(g_main_secondary_saved_data_bits, (u8)(g_wldcore_active_saved_record.instruction >> 8), 1);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x16: clear saved flag byte 1. */
 void wldcore_opcode_clear_saved_bit(void) {
     wldcore_set_bit_value(g_main_secondary_saved_data_bits, (u8)(g_wldcore_active_saved_record.instruction >> 8), 0);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x17: set local flag byte 1 (kept only for the current reading). */
 void wldcore_opcode_set_local_flag(void) {
     wldcore_set_bit_value(g_wldcore_sound_novel_local_flags, (u8)(g_wldcore_active_saved_record.instruction >> 8), 1);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x18: clear local flag byte 1. */
 void wldcore_opcode_clear_local_flag(void) {
     wldcore_set_bit_value(g_wldcore_sound_novel_local_flags, (u8)(g_wldcore_active_saved_record.instruction >> 8), 0);
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x19: set the record's counter to the 16-bit operand in bytes 1-2. */
 void wldcore_opcode_set_counter(void) {
     g_wldcore_active_saved_record.counter = (g_wldcore_opcode_state.instruction << 8) >> 16;
     g_wldcore_state_flags |= WLDCORE_OPCODE_STATE_FETCH;
@@ -744,6 +773,8 @@ void wldcore_opcode_hide_value_display(void) {
         | WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x1E: add the counter delta to the counter, clamp it to 0..0xFFFF, clear the
+ * delta and show the counter in the value display. */
 void wldcore_opcode_apply_pending_delta_and_clamp_value(void) {
     s32 delta;
     s32* value = &g_wldcore_active_saved_record.counter;
@@ -761,11 +792,13 @@ void wldcore_opcode_apply_pending_delta_and_clamp_value(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x1F: play sound effect byte 1 on a free channel. */
 void wldcore_opcode_play_sound(void) {
     main_sound_play_sfx_find_channel((u8)(g_wldcore_active_saved_record.instruction >> 8));
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x20: switch the novel's music to track byte 1. */
 void wldcore_opcode_play_music(void) {
     wldcore_sound_change_scenario_music((u8)(g_wldcore_active_saved_record.instruction >> 8));
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
@@ -797,6 +830,8 @@ static void wldcore_sound_change_scenario_music(s32 music_id) {
     g_wldcore_audio_queue.current_slot = slot;
 }
 
+/* Sound-novel opcode 0x21: set the record's sound mode to byte 1; in mode 1 the pending-music
+ * script variable also changes the track, mode 0 plays only effects and weather sounds. */
 void wldcore_opcode_set_sound_mode(void) {
     g_wldcore_active_saved_record.sound_mode = (u8)(g_wldcore_active_saved_record.instruction >> 8);
     g_wldcore_state_flags |= WLDCORE_OPCODE_STATE_FETCH;
@@ -1092,6 +1127,7 @@ void wldcore_opcode_stop_pending_music(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
+/* Sound-novel opcode 0x32: set WORLD's menu brightness to red, green and blue bytes 1-3. */
 void wldcore_opcode_set_menu_brightness(void) {
     world_menu_set_brightness((u8)(g_wldcore_active_saved_record.instruction >> 8),
         (u8)(g_wldcore_active_saved_record.instruction >> 16), (g_wldcore_active_saved_record.instruction >> 24));

@@ -11,6 +11,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Thread body that waits 16 frames and exits. Nothing references it. */
 void require_thread_stop_after_16_frames(void) {
     thread_wait_frames(0x10);
     require_thread_exit_current();

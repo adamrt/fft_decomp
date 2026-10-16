@@ -28,6 +28,9 @@ void main_gfx_load_frame_bin_into_vram(void) {
     main_heap_call_free(frame);
 }
 
+/* Load WLDCORE.BIN into the low overlay area with the Now Loading screen and, when load_world is
+ * set, WORLD.BIN at the world overlay address, then run WLDCORE's entry point and return its
+ * result. */
 s32 main_overlay_open_world_and_wldcore(s32 load_world) {
     main_file_load_data_from_disc(
         DISC_SECTOR_WORLD_WLDCORE_BIN, 0xDC, g_main_heap_low_overlay_load_address, MAIN_FILE_LOADING_DISPLAY_INIT);

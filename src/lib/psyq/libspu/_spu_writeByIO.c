@@ -3,6 +3,8 @@
 
 #include "psx/libc.h"
 
+/* Write size bytes to SPU RAM at _spu_tsa through the data FIFO, PSYQ_SPU_FIFO_CHUNK_BYTES at a
+ * time, waiting for each manual transfer; a stalled wait only prints a message. */
 void _spu_writeByIO(const u16* source, u32 size) {
     u16 status;
     u16 control;

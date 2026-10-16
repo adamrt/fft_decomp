@@ -125,6 +125,7 @@ void wldcore_list_clamp_cursor_state(s32 index, s32 count, s32 visible) {
     }
 }
 
+/* Reset persistent cursor slot `index` to the first row. */
 void wldcore_list_clear_cursor_state(s32 index) {
     g_wldcore_menu_cursor_states[index].scroll_offset = 0;
     g_wldcore_menu_cursor_states[index].selected_index = 0;
@@ -448,6 +449,7 @@ static void wldcore_text_update_scroll_indicators(wldcore_text_scrollable_window
     }
 }
 
+/* Play sound effect `sound_id` (WLDCORE's wrapper for main_sound_play_sfx). */
 void wldcore_sound_play_effect(s32 sound_id) {
     main_sound_play_sfx(sound_id);
 }

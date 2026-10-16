@@ -3,6 +3,10 @@
 
 #include "psx/libc.h"
 
+/* Reset the SPU: enable its DMA channel, silence and stop it, key every voice off and clear reverb
+ * and the key queue. A cold start (hot 0) also zeroes each voice and the noise, LFO, CD and
+ * external inputs, uploads a 16-byte block at SPU address 0x200 that every voice is pointed at,
+ * and keys all voices on then off. Ends with the SPU enabled (control 0xc000). */
 s32 _spu_init(s32 hot) {
     u32 wait;
     s32 i;

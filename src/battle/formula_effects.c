@@ -343,6 +343,7 @@ void battle_formula_apply_mp_recovery(void) {
     }
 }
 
+/* Turn the stored HP damage into MP healing on the target (formula 0x54 heals MA * Y MP this way). */
 void battle_formula_convert_hp_damage_to_mp_recovery(void) {
     action_data_t* action = g_battle_action_target_data;
     u16 hp_damage;
@@ -391,6 +392,7 @@ void battle_formula_check_dragon(void) {
     }
 }
 
+/* Force a miss when the target is asleep. Talk skills, songs and dances run this first. */
 void battle_formula_force_sleeping_target_miss(void) {
     if ((g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_SLEEP)]
             & STATUS_BYTE_MASK(STATUS_ID_SLEEP))
@@ -474,6 +476,7 @@ void battle_formula_select_magic_gun_ability(void) {
         sizeof(g_battle_action_current_ability.range_data));
 }
 
+/* Quick: fill the target's CT (ACTION_CT_CHANGE_QUICK) as a pseudo-status change. */
 void battle_formula_apply_quick_effect(void) {
     g_battle_action_target_data->ct_change = ACTION_CT_CHANGE_QUICK;
     g_battle_action_target_data->attack_type = ACTION_TYPE_PSEUDO_STATUS;

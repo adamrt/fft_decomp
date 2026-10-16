@@ -490,6 +490,9 @@ s32 wldcore_proposition_find_preferred_job_unit(void) {
     return 0;
 }
 
+/* Push the discovery announcement for a treasure or unexplored-land milestone: the first milestone
+ * shows four messages from the kind's first one, each later milestone a single message (first + 2
+ * + rank). */
 void wldcore_menu_push_countdown_level(void) {
     s32 count = wldcore_get_completion_milestone_rank();
 
@@ -617,6 +620,8 @@ void wldcore_map_step_discovery_announcement(wldcore_menu_countdown_t* countdown
     }
 }
 
+/* Open the bar's in-progress list: every accepted job that has not returned, recalled ones marked,
+ * under 'These jobs're in progress.'; up to six rows. */
 void wldcore_list_open_propositions(void) {
     point32_t origin;
     wldcore_window_panel_layout_t layout;
@@ -1058,6 +1063,8 @@ static void wldcore_menu_push_sound_novel_level(s32 argument) {
     wldcore_fade_start_screen(0, 0x10);
 }
 
+/* Resume handler of the sound novel level: reload the saved background set, show the picture again
+ * (and the side windows when the script left them visible) and resume the message thread. */
 void wldcore_window_reload_data_set_and_resume_thread14(wldcore_menu_stack_record_t* level) {
     s16 set = g_wldcore_active_saved_record.background_set;
 
@@ -1757,6 +1764,8 @@ static void wldcore_window_draw_indexed_text(wldcore_menu_sound_novel_history_le
     }
 }
 
+/* Open the Brave Story list of unexplored lands found so far (their script flags set), up to eight
+ * rows. */
 void wldcore_list_open_unexplored_lands(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
@@ -2061,6 +2070,8 @@ void wldcore_list_treasures_restore_prompt(void) {
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_INTRO, 0);
 }
 
+/* Withhold every button from the WORLD menu frame while a level opened from the treasures list
+ * runs. */
 void wldcore_list_treasures_block_all_buttons(void) {
     g_menu_blocked_buttons = -1;
 }

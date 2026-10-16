@@ -8,6 +8,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* main_file_build_header with the Now Loading message turned off (NNL: no Now Loading); returns
+ * its result. */
 int main_file_build_header_nnl(main_file_load_descriptor_t* header, int sector, int sectors, void* destination) {
     return main_file_build_header(header, sector, sectors, destination, MAIN_FILE_LOADING_DISPLAY_OFF);
 }
@@ -58,6 +60,8 @@ s32 main_file_build_header(
     return 0;
 }
 
+/* Mark the load descriptor idle, flush pending CD commands, retry CdlPause until the drive accepts
+ * it, then wait three vertical blanks. */
 void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state) {
     state->state = MAIN_FILE_LOAD_STATE_IDLE;
     CdFlush();
@@ -65,6 +69,8 @@ void main_file_reset_pause_cdrom(main_file_load_descriptor_t* state) {
     VSync(3);
 }
 
+/* Reset the CD-ROM library (CdReset(0)); main_file_poll_load calls it before retrying a failed
+ * seek or a stalled read. */
 void main_file_reset_cd_subsystems(void) {
     CdReset(0);
 }

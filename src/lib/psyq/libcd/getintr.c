@@ -10,6 +10,10 @@ static __inline__ void cd_copy_result(u8* destination, const volatile u8* source
         *output++ = *input++;
 }
 
+/* Read and acknowledge one CD controller interrupt: copy up to 8 response bytes, update CD_status
+ * (counting lid openings in CD_nopen) and record the sync or ready result. Returns 0 for none or
+ * unknown, 1 while the command still awaits completion, 2 when it finished, 4 for data ready or
+ * data end, 6 for a disk error. */
 s32 getintr(void) {
     /* Volatile keeps the stack interrupt byte and separate status-mask calculation. */
     volatile u8 interrupt;

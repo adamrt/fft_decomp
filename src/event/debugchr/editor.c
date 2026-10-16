@@ -310,6 +310,10 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
 /* Ordinary indexing changes the ADDU operand order at the primitive bases. */
 #define PRIM_AT(base, index) ((POLY_FT4*)((s32)((index) * sizeof(POLY_FT4)) - -(s32)(base)))
 
+/* Run the debug unit editor: open the status, numeric editor and character panels for the selected
+ * battle unit, page between units with R1 and L1, move between fields with the D-pad and edit
+ * their values, writing each change back to the battle unit. Cross closes the panels and ends the
+ * session. */
 void debugchr_editor_run_session(void) {
     s32 battle_id;
     help_navigation_record_t* field;

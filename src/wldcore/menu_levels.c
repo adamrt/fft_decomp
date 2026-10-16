@@ -368,6 +368,8 @@ void wldcore_proposition_submit_marker_request(GsOT* ot) {
     wldcore_gfx_draw_animated_display_object(&request, ot);
 }
 
+/* Init step: load WORLD's menu text and unit portraits, build the formation unit name strings,
+ * then apply and clear any day advance pending in EVENT_SCRIPT_VAR_DATE_ADVANCE. */
 void wldcore_load_formation_unit_name_and_face(void) {
     s32 value;
 
@@ -426,18 +428,24 @@ void wldcore_menu_reset_window_list_and_store_origin(void) {
         = g_wldcore_map_projection_state.marker.render.position.y - 4;
 }
 
+/* Run the per-frame handler of the menu level on top of the stack, passing its level record. */
 void wldcore_menu_dispatch_idle_handler(void) {
     s32 index = g_wldcore_menu_stack_depth;
 
     g_wldcore_menu_idle_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
+/* Run the resume handler of the level now on top of the stack after the level above it closed:
+ * list levels restore their prompt and blocked buttons, window levels their palettes and cursor. */
 void wldcore_menu_dispatch_resume_handler(void) {
     s32 index = g_wldcore_menu_stack_depth;
 
     g_wldcore_menu_resume_handlers[g_wldcore_menu_stack_types[index]](&g_wldcore_menu_stack_records[index]);
 }
 
+/* Run the top level's publish handler, called just before another level opens over it: list levels
+ * withhold every button, window levels dim their windows (palettes 10, 6, 2 and the pressed
+ * cursor). The resume handler undoes it. */
 void wldcore_menu_dispatch_publish_handler(void) {
     s32 index = g_wldcore_menu_stack_depth;
 
@@ -2273,6 +2281,9 @@ static void wldcore_bar_push_menu_level(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
+/* Fill the bar menu: Rumors always, Propositions once EVENT_SCRIPT_VAR_PROPOSITIONS_ENABLED is
+ * set, the job report while jobs have returned to this town, the in-progress list while some
+ * accepted job has not returned, then Leave; draw the rows into the frame window. */
 void wldcore_bar_build_menu_rows(wldcore_menu_list_window_level_t* level) {
     s32 index;
     point32_t point;

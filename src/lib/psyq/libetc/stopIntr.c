@@ -1,4 +1,7 @@
 #include "psx/libetc.h"
+/* Suspend libetc interrupt handling: inside a critical section save the IRQ mask and DMA
+ * priorities, mask every IRQ, clear every DMA channel's enable bit and unhook from the BIOS.
+ * Returns the state, or 0 when not started; restartIntr undoes it. */
 psyq_interrupt_state_t* stopIntr(void) {
     if (!g_psyq_etc_interrupt_state.initialized)
         return 0;

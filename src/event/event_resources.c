@@ -34,6 +34,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Set the frame budget of the next timed message (menu_icon_timed_thread); adding 0x100 also holds
+ * off cancel until it runs out. */
 void text_set_message_duration_frames(u16 frames) {
     g_text_message_duration_frames = frames;
 }
@@ -198,6 +200,8 @@ void menu_icon_linked_entry_thread(void) {
     }
 }
 
+/* Menu thread with nothing to draw: with menu sounds muted, handle Circle on row 0 and cancel each
+ * frame until the menu should close. */
 void menu_input_thread(void) {
     menu_entry_t* menu = (menu_entry_t*)thread_get_current_parameter_1();
 
@@ -264,6 +268,9 @@ void script_set_variable(s32 variable_id, s32 value) {
     *g_script_variables = saved_current_variable;
 }
 
+/* Build both buffers' panel fade primitives: a black semi-transparent 256 x 50 center tile at
+ * (128, 172) with nine one-line tiles above and below it for the graded edges that
+ * menu_update_panel_fade animates. */
 void menu_init_panel_fade_tiles(void) {
     menu_gradient_panel_prims_t* frame = &g_menu_panel_fade_frames[0];
     s32 i;
@@ -374,6 +381,8 @@ void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level) {
     }
 }
 
+/* Reserve size bytes of the main heap at the high overlay load address, yielding until that block
+ * is free (with a wait message when the debug font is on). */
 static void menu_reserve_high_overlay(u32 size) {
     while (1) {
         if (main_heap_reserve_at(g_main_heap_high_overlay_load_address, size)
@@ -387,6 +396,7 @@ static void menu_reserve_high_overlay(u32 size) {
     }
 }
 
+/* Free the block menu_reserve_high_overlay reserved. */
 static void menu_free_high_overlay(void) {
     main_heap_free(g_main_heap_high_overlay_load_address);
 }
@@ -504,6 +514,7 @@ void text_run_spell_quote_thread(void) {
 #endif
 }
 
+/* Thread entry: load OPTION.OUT and open its game options menu. */
 void menu_open_option_game_options(void) {
     menu_set_modal_open();
     menu_request_open_companion_executable(COMPANION_OVERLAY_OPTION);
@@ -730,6 +741,7 @@ void menu_open_debugchr(void) {
     thread_exit_current();
 }
 
+/* Thread body of the ShowGraphic event instruction: load the ETC overlay and show its graphic. */
 void script_show_graphic(void) {
     thread_set_current_task_id(THREAD_TASK_SHOW_GRAPHIC);
     menu_request_open_companion_executable(COMPANION_OVERLAY_ETC);
@@ -849,6 +861,8 @@ void script_load_event(s32 id) {
     }
 }
 
+/* Copy a normal and a dimmed menu palette (16 colors each) into g_menu_palette_colors, which the
+ * panel frame lines take their colors from. */
 void menu_set_palette_colors(const menu_palette_pair_t* source) {
     rgba5551_t* destination = g_menu_palette_colors.colors;
 
@@ -856,6 +870,7 @@ void menu_set_palette_colors(const menu_palette_pair_t* source) {
     mem_copy_bytes_nonempty(destination + PALETTE_COLOR_COUNT, source->colors + PALETTE_COLOR_COUNT, sizeof(palette_t));
 }
 
+/* Load the default menu palettes and rebuild the text section pointers. */
 void menu_init_palette_and_text(s32 unused_0) {
     menu_set_palette_colors(&g_menu_default_palette_colors);
     text_init_section_pointers();
@@ -912,6 +927,7 @@ void menu_open_companion_executable(void) {
     }
 }
 
+/* Call menu_reset_unit_records; nothing in BATTLE or WORLD calls this wrapper. */
 void menu_reset_unit_records_wrapper(void) {
     menu_reset_unit_records();
 }
@@ -1044,6 +1060,10 @@ void menu_build_idle_action_menu(s32 menu_id) {
 #endif
 }
 
+/* Open the help menu on the menu-building thread slot unless input is held off, a modal overlay is
+ * open, the camera moves, a companion overlay is busy or that slot runs. While a menu other than
+ * the mini menu is up it also sets g_menu_building_thread_started, so the next idle action menu is
+ * skipped. */
 void menu_start_building_thread(void) {
     if (thread_is_running_asm(THREAD_SLOT_MENU) != 0 || thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
         if (g_menu_current_id != BATTLE_MENU_ID_MINI_MENU) {
@@ -1070,6 +1090,8 @@ void menu_start_building_thread(void) {
     thread_set_parameters(THREAD_SLOT_MENU_BUILDING, 0, 0, 0);
 }
 
+/* Request SMALL.OUT as the companion executable without waiting; menu_poll_small_load drives the
+ * load during map initialization. */
 void menu_request_open_small(void) {
     g_menu_companion_executable_request_index = COMPANION_OVERLAY_SMALL;
 }

@@ -1,5 +1,7 @@
 #include "psx/libetc.h"
 
+/* Install or remove a DMA channel's completion callback and enable or disable that channel's
+ * interrupt (keeping the master enable on). Returns the previous callback. */
 psyq_interrupt_callback_t setIntrDMA(s32 channel, psyq_interrupt_callback_t callback) {
     psyq_interrupt_callback_t previous = g_psyq_etc_dma_callbacks[channel];
     if (callback != previous) {

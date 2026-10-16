@@ -22,6 +22,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* World position of a tile's center (x, layer, y in the SVECTOR): x and z are tile * 28 + 14 and y
+ * is the tile surface, -(height * 12), without the depth. */
 static void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTOR* out) {
     map_tile_t* tile = battle_map_get_tile_data_pointer(in->vx, in->vz, in->vy);
 
@@ -754,6 +756,10 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
     }
 }
 
+/* Find the first child-table camera keyframe whose command moves a track in mask and whose end
+ * frame is still ahead of frame; report its index and end frame and return 1. Returns 0 at or past
+ * the child duration, or when none is left. The single-table form of
+ * battle_camera_find_active_keyframe, with no target in the end frame's high half. */
 static s32 battle_effect_find_next_keyframe(s16 frame, s16 mask, s32* out_index, s32* out_frame) {
     effect_timeline_t* data = g_battle_effect_timeline;
     s32 i;
@@ -991,6 +997,9 @@ void battle_camera_advance_effect_tracks(s16 frame) {
     }
 }
 
+/* Reset the effect system for a battle: the effect slot chains (slot 0 the sentinel, 1-32 free),
+ * the 16 secondary effect records (all on the free chain, their slot lists empty), the projectile
+ * matrix translation, the render state and the effect camera. */
 void battle_effect_init_system(void) {
     s32 i;
     s32 j;
@@ -1114,10 +1123,13 @@ static void battle_effect_remove_secondary(u8 id) {
     main_system_report_stub(1, 0x67);
 }
 
+/* Return the phase of secondary effect record secondary_id; ENDED once the record has been
+ * removed. */
 effect_secondary_phase_e battle_effect_get_secondary_phase(u8 secondary_id) {
     return g_battle_effect_secondary_data[secondary_id].phase;
 }
 
+/* Ask secondary effect secondary_id to wind down: its handler runs the FINALIZING phase next. */
 void battle_effect_finalize_secondary(u8 secondary_id) {
     g_battle_effect_secondary_data[secondary_id].phase = EFFECT_SECONDARY_PHASE_FINALIZING;
 }
@@ -1722,6 +1734,9 @@ static void battle_effect_find_projectile_xyz_along_trajectory(const VECTOR* src
     dst->vz = (progress * src->vz) >> 12;
 }
 
+/* Launch speed of every arcing projectile: SquareRoot12 of g_battle_effect_gravity_modifier times
+ * g_battle_effect_gravity_scale. With the retail values (0xa8000 and 0x53a) it is a constant,
+ * about 7.4 in Q12. */
 static s32 battle_effect_calculate_launch_velocity(void) {
     return SquareRoot12((g_battle_effect_gravity_modifier * g_battle_effect_gravity_scale) >> 12);
 }
@@ -2339,6 +2354,8 @@ static void battle_effect_update_active_slots(s32 group) {
     }
 }
 
+/* Secondary effect function 0x00 in g_battle_effect_secondary_handlers: returns 0, so a record
+ * with no function is removed on its first update. */
 s32 battle_return_zero_801b0fec(void) {
     return 0;
 }

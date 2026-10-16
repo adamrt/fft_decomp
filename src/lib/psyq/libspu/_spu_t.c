@@ -2,6 +2,9 @@
 #include "psx/libspu.h"
 #include "psx/stdarg.h"
 
+/* One step of an SPU DMA transfer, chosen by operation: set the transfer address (a byte address),
+ * select write or read mode, or start the DMA of a buffer whose byte size is rounded up to 64-byte
+ * blocks. Returns -2 when the SPU does not acknowledge in time, else 0. */
 s32 _spu_t(s32 operation, ...) {
     va_list arguments;
     u32 wait;

@@ -66,18 +66,22 @@ static s32 bunit_unit_get_current_stat(s32 unit_index) {
     return g_bunit_unit_current_stat_value;
 }
 
+/* Return the level of the unit in this unit list slot. */
 static s32 bunit_unit_get_level(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->level;
 }
 
+/* Return the experience of the unit in this unit list slot. */
 static s32 bunit_unit_get_experience(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->experience;
 }
 
+/* Return the Brave of the unit in this unit list slot. */
 static s32 bunit_unit_get_brave(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->brave;
 }
 
+/* Return the Faith of the unit in this unit list slot. */
 static s32 bunit_unit_get_faith(s32 unit_id) {
     return g_bunit_unit_pointers[unit_id]->faith;
 }

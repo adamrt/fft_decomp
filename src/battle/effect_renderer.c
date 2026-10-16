@@ -569,6 +569,7 @@ void battle_effect_update_node_from_work(s16 record_index, effect_work_record_t*
     }
 }
 
+/* Empty. Nothing in the game calls it or battle_noop_801a6018. */
 void battle_noop_801a6010(void) {
 }
 
@@ -1281,6 +1282,8 @@ static void battle_effect_interpolate_s16(s16 from, s16 to, s32 t, s16* out) {
     *out = from + (((to - from) * t) / (2 * ONE));
 }
 
+/* Interpolate each component with battle_effect_interpolate_s16: t runs from 0 at from to 2 * ONE
+ * at to. */
 static void battle_effect_interpolate_svector(const SVECTOR* from, const SVECTOR* to, s32 t, SVECTOR* out) {
     battle_effect_interpolate_s16(from->vx, to->vx, t, &out->vx);
     battle_effect_interpolate_s16(from->vy, to->vy, t, &out->vy);
@@ -1309,10 +1312,12 @@ void battle_effect_interpolate_svector_linear(
     battle_effect_interpolate_svector(from, to, (current << 13) / duration, out);
 }
 
+/* The 32-bit counterpart of battle_effect_interpolate_s16: t runs from 0 at from to 2 * ONE at to. */
 static void battle_effect_lerp_component_q13(s32 from, s32 to, s32 t, s32* out) {
     *out = from + (to - from) * t / (2 * ONE);
 }
 
+/* Interpolate each VECTOR component with battle_effect_lerp_component_q13. */
 static void battle_effect_interpolate_vector_q13(const VECTOR* from, const VECTOR* to, s32 t, VECTOR* out) {
     battle_effect_lerp_component_q13(from->vx, to->vx, t, &out->vx);
     battle_effect_lerp_component_q13(from->vy, to->vy, t, &out->vy);
@@ -1356,6 +1361,8 @@ static s32 battle_lerp_fixed8_and_store(s32 start, s32 end, s32 factor, s32* out
     return result;
 }
 
+/* Lerp the emitter's spawn position from its start to its end triple by an animation-curve factor
+ * (256 = end) into out. */
 void battle_effect_interpolate_emitter_spawn_position(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
 
@@ -1367,6 +1374,8 @@ void battle_effect_interpolate_emitter_spawn_position(const effect_geometry_reco
         entry->spawn.spawn_position_start.z, entry->spawn.spawn_position_end.z, factor, &out->vz);
 }
 
+/* Lerp the emitter's spawn spread (the random offset range around the spawn position) from its
+ * start to its end triple by an animation-curve factor (256 = end) into out. */
 void battle_effect_interpolate_emitter_spawn_spread(const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
 
@@ -1375,6 +1384,8 @@ void battle_effect_interpolate_emitter_spawn_spread(const effect_geometry_record
     battle_lerp_fixed8_and_store(entry->spawn.spawn_spread_start.z, entry->spawn.spawn_spread_end.z, factor, &out->vz);
 }
 
+/* Lerp the emitter's velocity base angles from their start to their end triple by an animation-
+ * curve factor (256 = end) into out. */
 void battle_effect_interpolate_emitter_velocity_base_angles(
     const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
@@ -1387,6 +1398,8 @@ void battle_effect_interpolate_emitter_velocity_base_angles(
         entry->spawn.velocity_base_angle_start.z, entry->spawn.velocity_base_angle_end.z, factor, &out->vz);
 }
 
+/* Lerp the emitter's velocity direction spread (the random cone around the base angles) from its
+ * start to its end triple by an animation-curve factor (256 = end) into out. */
 void battle_effect_interpolate_emitter_velocity_direction_spread(
     const effect_geometry_record_t* source, s32 factor, VECTOR* out) {
     const effect_geometry_entry_t* entry = &source->emitter;
@@ -1579,6 +1592,8 @@ void battle_effect_load_svector(const vec3s16_t* src, SVECTOR* dst) {
     dst->vz = src->z;
 }
 
+/* Convert 20.12 fixed-point components to whole units, rounding down; the inverse of
+ * battle_effect_scale_vector_fixed12. */
 void battle_effect_shift_vector_right_12(const VECTOR* src, VECTOR* dst) {
     dst->vx = src->vx >> 12;
     dst->vy = src->vy >> 12;
@@ -1592,6 +1607,7 @@ void battle_effect_scale_vector_fixed12(const VECTOR* src, VECTOR* dst) {
     dst->vz = src->vz * ONE;
 }
 
+/* Wrap each angle to one turn (0-0xfff). */
 void battle_effect_mask_vector_low_12_bits(const SVECTOR* src, SVECTOR* dst) {
     dst->vx = src->vx & 0xFFF;
     dst->vy = src->vy & 0xFFF;
@@ -1616,6 +1632,8 @@ static void battle_effect_add_svector_to_vector(const SVECTOR* first, const VECT
     out->vz = first->vz + second->vz;
 }
 
+/* Add to each component a random offset in [-range, range), range being the low 16 bits of the
+ * matching component of ranges. The effect camera shake modes jitter the zoom with it. */
 void battle_effect_add_random_vector_offsets(const VECTOR* source, const VECTOR* ranges, VECTOR* destination) {
     u16 range = ranges->vx;
 
@@ -1643,6 +1661,7 @@ void battle_effect_add_random_vector_offsets_and_store_q12(
     destination->vz = (source->vz + battle_effect_get_random_between_s16(-range, range)) * ONE;
 }
 
+/* Add delta into value and store the sum in 20.12 fixed point in out. */
 void battle_effect_add_vector_and_store_q12(const VECTOR* delta, VECTOR* value, VECTOR* out) {
     value->vx += delta->vx;
     out->vx = value->vx * ONE;
@@ -1696,6 +1715,8 @@ void battle_effect_add_8_to_halfword(u16* value) {
     *value += 8;
 }
 
+/* result = left + right, truncated to 16 bits per component; the unrotated form of the
+ * rot_y_90/180/270 variants below. */
 void battle_effect_add_vectors_to_svector(const VECTOR* left, const VECTOR* right, SVECTOR* result) {
     result->vx = left->vx + right->vx;
     result->vy = left->vy + right->vy;
@@ -1728,14 +1749,20 @@ void battle_effect_add_vectors_to_svector_rot_y_90(const VECTOR* left, const VEC
     result->vz = left->vz - right->vx;
 }
 
+/* Set the gravity vector that every motion step adds to a particle's velocity, scaled by the
+ * particle's weight. The effect script loads it from the particle-system header. */
 void battle_effect_set_gravity(const vec3s32_t* src) {
     g_battle_effect_gravity = *src;
 }
 
+/* Set the damping term of particle motion: each step keeps (inertia - threshold) / inertia of a
+ * particle's velocity. */
 void battle_effect_set_inertia_threshold(s32 threshold) {
     g_battle_effect_inertia_threshold = threshold;
 }
 
+/* Save the gravity for battle_effect_restore_gravity: secondary-effect handlers set their own
+ * gravity around their slot updates. */
 void battle_effect_save_gravity(void) {
     g_battle_effect_saved_gravity = g_battle_effect_gravity;
 }
@@ -1744,6 +1771,8 @@ void battle_effect_restore_gravity(void) {
     g_battle_effect_gravity = g_battle_effect_saved_gravity;
 }
 
+/* Save the damping term for battle_effect_restore_inertia_threshold; secondary-effect handlers set
+ * their own around their slot updates. */
 void battle_effect_save_inertia_threshold(void) {
     g_battle_effect_saved_inertia_threshold = g_battle_effect_inertia_threshold;
 }
@@ -2167,6 +2196,8 @@ void battle_effect_reset_subsystems(void) {
     battle_effect_init_free_list();
 }
 
+/* Seed the effect camera's current, target, start and saved values from the battle camera: its
+ * rotation wrapped to one turn, its position in whole units (real coordinates >> 12) and its zoom. */
 void battle_effect_copy_camera_angles_and_world_coords(void) {
     SVECTOR* rotation = battle_camera_get_rotation();
     VECTOR* coords;
@@ -2188,6 +2219,8 @@ void battle_effect_copy_camera_angles_and_world_coords(void) {
         = g_battle_effect_camera_zoom_current = *battle_camera_get_zoom();
 }
 
+/* Set the effect camera's rotation, position and zoom tracks idle, clear two unknown globals and
+ * reseed the tracks from the battle camera. */
 void battle_effect_init_camera_and_screen_data(void) {
     s32 pad[2];
     g_battle_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;

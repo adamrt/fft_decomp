@@ -6,10 +6,13 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* battle_unit_get_map_coords_by_runtime_id without its result: the unit's tile as x, z, y. */
 void unit_copy_map_coords_by_runtime_id(u32 runtime_id, SVECTOR* coords) {
     battle_unit_get_map_coords_by_runtime_id(runtime_id, coords);
 }
 
+/* Empty. script_resolve_runtime_id passes it each unit id it cannot resolve before returning
+ * EVENT_RUNTIME_ID_NONE. */
 static void script_report_missing_unit_stub(s32 unused_unit_id) {
 }
 

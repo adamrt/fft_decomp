@@ -68,6 +68,8 @@ void world_menu_toggle_ability_panel_thread(s32 enable) {
     }
 }
 
+/* With enabled set, open the equipment/ability panel (unless the status panel is sliding or a
+ * panel thread already runs) and the numeric editor; enabled 0 does nothing. */
 void world_menu_start_equipment_and_ability_panel_thread(s32 enabled) {
     if (enabled == 0) {
         return;
@@ -127,18 +129,22 @@ static s32 world_get_formation_unit_stat_by_mode(s32 unit_index) {
     return value;
 }
 
+/* Menu callback: return the formation unit's level. */
 static s32 world_formation_get_unit_level(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->status.level;
 }
 
+/* Menu callback: return the formation unit's experience. */
 static s32 world_formation_get_unit_experience(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->status.experience;
 }
 
+/* Menu callback: return the formation unit's Brave. */
 static s32 world_formation_get_unit_brave(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->identity.brave;
 }
 
+/* Menu callback: return the formation unit's Faith. */
 static s32 world_formation_get_unit_faith(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->identity.faith;
 }
@@ -151,6 +157,8 @@ static s32 world_formation_get_unit_egg_hatch_progress(s32 unit_id) {
     return (unit->birthday >> 4) - low;
 }
 
+/* Menu callback: return an egg's total hatch time, kept in the high nibble of its birthday byte
+ * (the low nibble counts down). */
 static s32 world_formation_get_unit_egg_hatch_total(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->birthday >> 4;
 }
@@ -192,6 +200,8 @@ static s32 world_formation_is_selected_unit_in_upper_rows(s32 scroll_position) {
     return result;
 }
 
+/* Step the unit grid's page scroll: at rest, start moving 4 pixels per frame toward the page that
+ * holds the selected unit; while moving, accelerate by 4 and settle on the next 60-pixel page. */
 static void world_formation_step_scroll_velocity(s8* velocity, s8* position) {
     s8 next;
 
@@ -376,6 +386,8 @@ void world_formation_init_selection_cursor(s16 formation_index) {
     world_formation_reset_slots_and_frame_tpages();
 }
 
+/* Place the grid cursor on a formation slot, show HP under the units, and enable the unit banner
+ * at the top or bottom where it last was. */
 void world_formation_init_cursor_and_scroll_state(s32 formation_index) {
     world_formation_init_selection_cursor(formation_index);
     g_world_formation_stat_display_mode = MENU_UNIT_READOUT_HP;

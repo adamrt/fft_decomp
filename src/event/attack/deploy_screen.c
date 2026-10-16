@@ -761,6 +761,7 @@ unit_deployment_coordinates_t* attack_deploy_get_coordinate_slots(void) {
     return coordinate_slots;
 }
 
+/* Return 0. Nothing calls it. */
 s32 attack_return_zero(void) {
     return 0;
 }
@@ -981,6 +982,7 @@ static void attack_deploy_select_next_roster_unit(void) {
     thread_exit_current();
 }
 
+/* Empty and unreferenced. */
 void attack_noop_801c61dc(void) {
 }
 
@@ -1108,19 +1110,24 @@ static void attack_deploy_build_menu_cursor_primitives(
     }
 }
 
+/* Mark whether the deployment grid cell at (column, row) accepts a unit. Nothing calls it. */
 void attack_deploy_set_valid_tile(s32 column, s32 row, u8 is_valid) {
     g_attack_deploy_valid_tiles[row][column] = is_valid;
 }
 
+/* Return whether the deployment grid cell at (column, row) accepts a unit. Nothing calls it. */
 u8 attack_deploy_get_valid_tile(s32 column, s32 row) {
     return g_attack_deploy_valid_tiles[row][column];
 }
 
+/* Move the first deployment cursor to (column, row). Nothing calls it. */
 void attack_deploy_set_cursor_tile(s32 column, s32 row) {
     g_attack_deploy_cursor_column[0] = column;
     g_attack_deploy_cursor_row[0] = row;
 }
 
+/* Choose which of the three places the tiles-only view draws its arrow (0, 1 or 2). Nothing calls
+ * it; attack_deploy_init_valid_tiles resets the mode to 0. */
 void attack_deploy_set_arrow_position_mode(s32 mode) {
     g_attack_deploy_arrow_position_mode = mode;
 }
@@ -1635,10 +1642,12 @@ static void attack_deploy_update_screen_graphics(void) {
     thread_exit_current();
 }
 
+/* Call attack_gfx_prepare_formation_sprites. */
 void attack_gfx_build_formation_sprites(void) {
     attack_gfx_prepare_formation_sprites();
 }
 
+/* Call attack_gfx_prepare_party_portrait_textures. */
 void attack_gfx_load_portraits(void) {
     attack_gfx_prepare_party_portrait_textures();
 }

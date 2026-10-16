@@ -268,6 +268,10 @@ static s32 battle_action_perform_reaction_ability(void) {
     return 1;
 }
 
+/* Record the weapon the current strike uses: the primary hand on the first strike and the
+ * secondary after it; none for an ordinary ability that neither uses weapon range nor strikes with
+ * the weapon, and none for Jump; the chosen item for the item and katana menus. An empty hand
+ * (0xFF) is stored as none. */
 void battle_action_store_used_weapon(action_command_t* action) {
     u8 weapon;
     s16 ability_id;
@@ -1481,6 +1485,9 @@ s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {
     return result;
 }
 
+/* Set up a unit's Poison or Regen tick as an action against itself: Poison deals MaxHP/8,
+ * otherwise Regen heals MaxHP/8. Returns the action type, 0 when neither applies or the unit is
+ * out of action. */
 s32 battle_status_apply_poison_and_regen(unit_stats_t* unit) {
     u8 status;
     if (battle_status_is_unit_out_of_action(unit) != 0) {
@@ -1627,6 +1634,10 @@ s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
     return 0;
 }
 
+/* Set up the trap on a unit's tile as an action against it (against the rider when the unit is a
+ * mount): Degenerator lowers a level, Deathtrap inflicts Death Sentence and Sleeping Gas inflicts
+ * Sleep (a miss when they cannot take hold), Steel Needle deals MaxHP/5. Returns the trap id, or
+ * BATTLE_TRAP_ID_NONE. */
 s32 battle_action_apply_tile_trap(unit_stats_t* unit) {
     u8 trap = battle_map_set_item_trap_data(unit->x, unit->position.y, unit->position.higher_elevation)->trap_id;
     action_data_t* action;
@@ -1766,6 +1777,11 @@ static void battle_action_apply_jp_change(unit_stats_t* unit) {
     }
 }
 
+/* Apply the current target record's status changes to unit unit_id, making it the current target:
+ * filter the inflictions, apply the removals and inflictions with their CTs, zero HP under Dead,
+ * drop the charged ability CT unless it is still Charging, Jumping or Performing, and refresh
+ * player control (Berserk, Confusion, Charm and the like). The record's status-change bytes are
+ * restored afterward. -1 for an empty slot. */
 s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
     unit_action_status_changes_t saved;
 

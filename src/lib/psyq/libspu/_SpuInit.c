@@ -3,6 +3,9 @@
 
 #include "psx/libetc.h"
 
+/* Shared body of SpuInit (hot 0) and SpuInitHot (hot 1): reset the callbacks and the SPU, set
+ * every voice's center note on a cold start, install the DMA handler, turn reverb off and clear
+ * the allocator and key-queue state. */
 void _SpuInit(s32 hot) {
     s32 i;
     u16 sample_note;

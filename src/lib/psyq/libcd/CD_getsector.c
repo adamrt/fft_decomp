@@ -1,6 +1,8 @@
 /* SCUS_942.21 0x80020650..0x8002074f. */
 #include "psx/libcd.h"
 
+/* Copy words 32-bit words of the current sector from the CD data buffer by DMA, blocking until the
+ * transfer ends; always returns 0. */
 s32 CD_getsector(void* destination, s32 words) {
     *g_psyq_cd_index_status_register = 0;
     *g_psyq_cd_request_interrupt_register = 0x80;

@@ -20,6 +20,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Decode one CLUT's sixteen colors for a map CLUT row. Mode 0 sets them as the components and
+ * upload staging at once and stops the CLUT's blend; another mode stores biased deltas toward them
+ * and starts the blend with that mode. */
 static void battle_map_update_palette_colors_inner(s32 mode, s32 clut_row, s32 clut_index, const palette_t colors) {
     s32 index = 0;
     s16 green_for_packing;
@@ -144,6 +147,9 @@ void battle_map_update_and_store_palette_colors(
     }
 }
 
+/* Make the colors on display (the upload staging) the base colors of a CLUT row, which the
+ * MAP_COLOR_MODE_BASE modes and RESTORE start from: all 256 when store_all is 1, otherwise CLUT
+ * clut_index. Event instruction 0x66 stores the whole map row. */
 void battle_map_store_modified_palette_colors(s32 clut_row, s32 clut_index, s32 store_all) {
     if (store_all == 1) {
         u16* destination;
@@ -586,6 +592,10 @@ void battle_map_transition_and_store_background_gradient(
     g_battle_map_background_gradient_transition.colors[1] = colors->colors[MAP_BACKGROUND_GRADIENT_BOTTOM];
 }
 
+/* Fade both background gradient colors toward a target that mode (map_color_mode_e) builds from
+ * the current or base colors plus the offsets, clamped to 0..255, over frame_duration * 8 frames,
+ * or set it at once for 0. BASE_REPEAT records the offsets so the fade keeps alternating with the
+ * base. */
 static void battle_map_blend_background_gradient_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     map_background_gradient_colors_t current;
@@ -778,6 +788,8 @@ void battle_map_transition_and_store_ambient_light_color(s32 frame_duration, con
     g_battle_map_ambient_light_color = *color;
 }
 
+/* As battle_map_blend_background_gradient_color, for the ambient light color. Event MapDarkness
+ * reaches it through battle_map_start_ambient_light_blend. */
 static void battle_map_blend_ambient_light_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
@@ -957,6 +969,8 @@ void battle_map_transition_and_store_darkness_color(s32 frame_duration, const CV
     g_battle_map_darkness_color = *color;
 }
 
+/* As battle_map_blend_background_gradient_color, for the map darkness color
+ * (battle_map_start_darkness_blend). */
 static void battle_map_blend_darkness_color(s32 mode, s32 frame_duration, s32 red, s32 green, s32 blue) {
     map_color_transition_channels_t* channels;
     CVECTOR current;
@@ -1630,6 +1644,10 @@ void battle_map_load_palette_data(const palette_t* palettes, s32 clut_row, s32 c
     g_battle_map_palette_state.upload_pending = 1;
 }
 
+/* Tint the colors at source into a CLUT row: all 256 when preset is 1, otherwise CLUT clut_index.
+ * Each nonzero color takes the offsets added to itself, its half or its gray (mode), clamped to
+ * 0..31 and kept from becoming transparent black. The results become the row's base colors;
+ * final_value also stages them for upload and sets the components of CLUTs that are not blending. */
 void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 preset,
     s16 red, s16 green, s16 blue, s32 final_value) {
     s32 i;
@@ -1937,6 +1955,8 @@ void battle_map_init_palette_state(void) {
     battle_map_reset_clut_cycles();
 }
 
+/* Pause every map texture animation (event MapFreeze 0x89, also effect scripts);
+ * battle_map_unfreeze resumes them. */
 void battle_map_freeze(void) {
     battle_map_dispatch_map_data_command(MAP_DATA_COMMAND_DISABLE_ALL_TEXTURE_ANIMATIONS, 0, 0, 0);
 }
@@ -2001,6 +2021,8 @@ void battle_gfx_apply_unit_palette_modulation_to_units(
     }
 }
 
+/* Event ColorBGBeta (0x31): battle_map_blend_background_gradient_color with the color offsets
+ * narrowed to s16. */
 void battle_map_modify_background_gradient(s32 mode, s32 frame_duration, s16 red, s16 green, s16 blue) {
     battle_map_blend_background_gradient_color(mode, frame_duration, red, green, blue);
 }
@@ -2054,6 +2076,9 @@ void battle_map_set_darkness_color(s32 frame_duration, const CVECTOR* color) {
     battle_map_transition_darkness_color(frame_duration, color);
 }
 
+/* Read pad 1 for the battle loop: derive the pressed and released buttons and the stable-frame
+ * count, keeping last frame's values in the input copies. Triangle requests the status menu on a
+ * turn the player does not control; Start+Select+L1+R1 resets the game. Always returns 1. */
 s32 battle_state_update_controller_input(void) {
     u32 pressed;
     u32 previous;

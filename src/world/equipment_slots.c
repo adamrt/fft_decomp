@@ -49,6 +49,7 @@ s32 world_menu_has_items(s32 mode) {
     return has_equipment;
 }
 
+/* Return an item's price from the item data table; only the item id bits of the entry are used. */
 s32 world_item_get_price(s16 item_id) {
     return g_main_item_primary_data[item_id & ITEM_ENTRY_ID_MASK].price;
 }
@@ -94,6 +95,8 @@ s32 item_get_total_count_variant(s16 item_id) {
     return item_adjust_inventory_count(item_id, 0) + item_get_equipped_count_variant(item_id);
 }
 
+/* Add delta to the count of a poached item held for the Fur Shop, keeping it within 0..255, and
+ * return the new count; callers pass 0 to read it. */
 s32 world_shop_adjust_poached_item_quantity(s16 index, s32 delta) {
     s32 slot = index & ITEM_ENTRY_ID_MASK;
     s32 value = g_main_item_poached_quantities[slot] + delta;

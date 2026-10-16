@@ -72,6 +72,7 @@ s32 unit_is_moving(s32 runtime_id) {
     return 0;
 }
 
+/* Read a 16-bit value from an unaligned script address, low byte first. */
 s16 script_read_s16(const void* source) {
     const u8* bytes = source;
 
@@ -529,6 +530,7 @@ void script_opcode_wait_sprite_move(s32 unit_id) {
     }
 }
 
+/* Copy a whole MATRIX, rotation and translation. */
 static void script_copy_matrix(MATRIX* destination, const MATRIX* source) {
     mem_copy_bytes_nonempty(destination, source, sizeof(*destination));
 }
@@ -813,6 +815,8 @@ void script_focus_speed(u8* parameters, s32* position, s32* rotation) {
     script_write_s16(((event_camera_parameters_t*)parameters)->duration_le, position_sum);
 }
 
+/* Empty in BATTLE and WORLD apart from a 48-byte stack frame (the unused twelve-word local).
+ * Nothing in our sources calls it; the name is a neutral placeholder. */
 void script_noop_11(void) {
     s32 unused[12];
 }

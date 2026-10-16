@@ -24,6 +24,10 @@ void main_mem_copy_byte_data_source_first(const void* source, void* destination,
     }
 }
 
+/* Count the copies of an item the player owns: the inventory stock plus every roster human's
+ * equipped copies. With include_battle set, roster humans deployed in the battle are counted from
+ * their battle records instead, along with every other non-Mime human that started on the blue
+ * team. */
 s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
     s32 total = g_main_item_quantities[item_id];
     s32 i;
@@ -81,6 +85,8 @@ s32 main_item_get_total_equipment_quantity(u8 item_id, s32 include_battle) {
     return total;
 }
 
+/* Copy the ENTD unit's map X and Y, elevation, facing and spell-quote bits, war trophy and bonus
+ * money into the battle unit. */
 void main_unit_init_position_and_rewards(unit_stats_t* unit, entd_unit_t* entd) {
     unit->x = entd->x;
     unit->position.y = entd->position.y;
@@ -157,6 +163,8 @@ void main_mem_zero(void* destination, s32 count) {
     }
 }
 
+/* Count a KO in the script variables: a unit that started on the blue team adds to
+ * EVENT_SCRIPT_VAR_CASUALTIES, any other unit to EVENT_SCRIPT_VAR_INJURED; both stop at 9999. */
 void main_unit_increase_casualty_counters(unit_stats_t* unit) {
     s32 id;
     s32 count;
@@ -207,6 +215,10 @@ void main_unit_copy_last_ability_ct(unit_stats_t* unit) {
     unit->ability_ct = g_main_ability_range_data[unit->action_command.ability_id].ct & 0x7f;
 }
 
+/* Make Charging, Jump, Defending or Performing the unit's only action status, or clear all four
+ * with MAIN_UNIT_ACTION_STATE_NONE, and enable or disable the special flags of each status that
+ * changed. NONE and DEFENDING also clear the charging ability CT; PERFORMING sets it from the last
+ * ability's CT. KEEP_PERFORMING keeps Performing if the unit has it and otherwise acts as NONE. */
 void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     u8 old_status = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARGING)];
     s32 battle_id;
@@ -262,6 +274,10 @@ void main_status_set_action_state(unit_stats_t* unit, u8 action_state) {
     }
 }
 
+/* Pass a BATTLE.BIN unit-setup error to the empty main_system_handle_malloc_exception hook as
+ * source 3. Callers add a failure base to the battle id: 100 no spritesheet slot left, 200 enemy
+ * limit reached, 300 or 400 placement rejected, 500 roster unit load failed, 600 ENTD unit init
+ * failed; 0x80 alone marks a map tile-data retry that gave up after 1000 tries. */
 void main_system_handle_battle_load_exception(s32 value) {
     main_system_handle_malloc_exception(3, value);
 }

@@ -20,6 +20,8 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+/* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
+ * mark the shared file descriptor idle. */
 static void main_file_reset_cdrom_cpu_ram(void) {
     SetMem(2);
     CdInit();
@@ -213,6 +215,8 @@ void main_entd_init_event_unit_data(int event_id) {
     }
 }
 
+/* Empty the inventory, then stock the new-game consumables: five Potions, two each of Hi-Potion,
+ * Eye Drop and Phoenix Down, and one of each other basic restorative. */
 void main_item_init_new_game_inventory(void) {
     s32 remaining;
     u8* quantity;

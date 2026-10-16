@@ -288,6 +288,8 @@ void script_set_event_speed(s32 speed) {
 #endif
 }
 
+/* Yield until the four unit view panel threads (hovered and right unit stats, unit summary, tile
+ * info) have stopped. */
 void thread_wait_for_unit_view_panels(void) {
     thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
@@ -351,6 +353,10 @@ void script_opcode_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
     }
 }
 
+/* CameraFusion thread: take the CAMERA instructions up to the end marker as keyframes (key 0 is
+ * the current camera; Focus, RelativeCamera and FocusSpeed between them adjust the values), then
+ * move the camera along a smooth path through them, one frame per yield, until the tilt track
+ * finishes. */
 void camera_fusion_thread(void) {
     camera_track_t* tracks;
     camera_track_t* track;
@@ -628,6 +634,8 @@ static s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s3
     return mul_div_s64(end - start, fraction * ONE, value) + (start * ONE);
 }
 
+/* DebugPause event instruction (0x72): print the pause message with the debug font, yield once and
+ * set g_script_debug_paused, which nothing reads. */
 void script_print_debug_message(void) {
     FntPrint(g_script_pause_message);
     thread_yield();
@@ -1100,6 +1108,10 @@ s32 script_is_deployment_running(u32* ot, u32 buttons) {
     return thread_is_running(THREAD_BORROWED_SLOT_DEPLOYMENT);
 }
 
+/* Run one menu and event frame and return the resolved menu selection. It records the cursor
+ * tile's info, clears the pending selections, and forces event speed 2 while a command menu other
+ * than the mini menu is open, restoring the saved speed afterwards. Without player input it uses
+ * the unfiltered script input. */
 s32 menu_update_menus_and_event_speed(u32* otag, s32 controller_input) {
     s32 i;
     s32 result;
@@ -1156,6 +1168,7 @@ static void map_store_selected_tile_data(void) {
     g_map_selected_tile_data._unknown_04 = g_main_terrain_tile_info_pairs[*surface_type][1];
 }
 
+/* Reset the cursor row of the 11 menu entries listed in g_menu_cleared_entry_indices. */
 void menu_clear_entry_selections(void) {
     s32 i;
 
@@ -1230,6 +1243,8 @@ void menu_reset_unit_records(void) {
     } while (index < BATTLE_UNIT_SLOT_COUNT * WORLD_MENU_UNIT_SELECTION_RECORD_BYTES);
 }
 
+/* Clear one unit's remembered menu rows, as menu_reset_unit_records does for all (byte 1 back to
+ * 0xff), but only for a unit under manual control. The test sits inside the byte loop. */
 void menu_reset_unit_record(s32 battle_id) {
     unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     menu_unit_selection_record_t* records = g_menu_unit_selection_records;
@@ -1243,6 +1258,7 @@ void menu_reset_unit_record(s32 battle_id) {
     }
 }
 
+/* The command record the menus fill when the player picks a command (g_menu_selected_command). */
 ai_command_t* menu_get_selected_command_address(void) {
     return &g_menu_selected_command;
 }
@@ -1263,6 +1279,8 @@ void menu_confirm_sound_delay_thread(void) {
     thread_exit_current();
 }
 
+/* Widen bytes into 16-bit menu values up to a 0xff terminator, which is not copied, and return the
+ * count. */
 static s32 menu_copy_u8_to_u16_terminated(u16* destination, const u8* source) {
     s32 count = 0;
 

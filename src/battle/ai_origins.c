@@ -52,6 +52,7 @@ void battle_mem_copy_u16_values(void* destination, const void* source, s32 byte_
     }
 }
 
+/* Copy len bytes from source to destination; nothing when len is 0 or less. */
 void battle_mem_copy_bytes(void* destination, const void* source, s32 len) {
     u8* dst = destination;
     const u8* src = source;

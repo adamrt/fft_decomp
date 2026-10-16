@@ -1593,6 +1593,9 @@ static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
     poly->x3 = QUAD(index).offset.x + 0x100 + QUAD(index).source.w;                                                    \
     poly->y3 = QUAD(index).offset.y + ((hide_pixels) + 0x78) + (QUAD(index).source.h - hide_pixels)
 
+/* Show a general condition banner (DisplayConditions 8 and up) from its BONUS.BIN image: wipe in
+ * the lower three pieces and then the upper three over 20 frames, hold for hold_frames, then wipe
+ * it out over 10. Circle ends it at once. */
 static void require_condition_show_general(s32 hold_frames) {
     sprite_sheet_frame_t* quads;
     u8* range = g_require_condition_general_quad_ranges;
@@ -1726,6 +1729,7 @@ done:
     thread_exit_current();
 }
 
+/* Empty and unreferenced. */
 void require_noop_801c9fa4(void) {
 }
 
@@ -1874,6 +1878,7 @@ done:
     thread_exit_current();
 }
 
+/* Call thread_exit_current. */
 void require_thread_exit_current(void) {
     thread_exit_current();
 }

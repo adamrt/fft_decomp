@@ -1,6 +1,8 @@
 /* LIBGPU 80024740-80024868: debug-only rectangle diagnosis. */
 #include "psx/libgpu.h"
 
+/* Debug check of a VRAM rectangle: at graph debug level 1 report one that is empty or leaves VRAM,
+ * at level 2 trace every call with its rectangle. */
 void checkRECT(const char* name, RECT* rect) {
     switch (g_psyq_gpu_environment.debug_level) {
     case 1:

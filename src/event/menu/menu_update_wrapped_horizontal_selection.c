@@ -2,6 +2,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Step selection value selection_index left or right on the D-pad, wrapping within entry_count,
+ * and return it. */
 s16 menu_update_wrapped_horizontal_selection(u16 entry_count, u8 selection_index, s32 input_mask) {
     if (input_mask & PSX_PAD_LEFT) {
         g_menu_selection_values[selection_index] = (g_menu_selection_values[selection_index] == 0)

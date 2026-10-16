@@ -1,5 +1,8 @@
 /* LIBGPU 80026a58-80026b94. */
 #include "psx/libgpu.h"
+/* Empty the GPU command queue with interrupts masked. Mode 0 also resets the GPU, clears the GP1
+ * cache and the queue, and returns the detected GPU type; mode 1 only acknowledges the GPU IRQ and
+ * clears its command buffer. */
 int _reset(int mode) {
     int mask = SetIntrMask(0);
     int tail;

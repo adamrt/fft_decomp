@@ -39,6 +39,9 @@
 static s32 menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);
 
+/* Lay out the textured pieces of piece group `group` (the tile height readout for one
+ * display_height value) as gradient quads at g_menu_quad_origin. Returns the number of quads
+ * written. */
 static s32 menu_build_quad_pieces(s32 group, POLY_GT4* poly);
 static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPRT* sprite, s32 unused_frame);
 
@@ -140,6 +143,8 @@ void menu_copy_billboard_data_in(const menu_unit_status_record_t* banner, const 
     mem_copy_bytes_nonempty(&g_menu_selected_unit_fields, billboard, sizeof(g_menu_selected_unit_fields));
 }
 
+/* Point g_text_section_pointers at the sections of a text file that starts with a table of
+ * TEXT_SECTION_COUNT offsets, each measured from the end of that table. */
 void text_relocate_pointer_table(const u32* offsets) {
     s32 index = 0;
     const u8* text_data = (const u8*)offsets + sizeof(u32) * 32;
@@ -222,6 +227,7 @@ void script_advance_date_by_one_year(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DATE_ADVANCE, 365);
 }
 
+/* CallFunction 3: raise the Brave of every blue-team unit by 10, capped at UNIT_BRAVE_FAITH_MAX. */
 void unit_increase_blue_team_brave_by_10(void) {
     unit_stats_t* unit;
     s32 unit_id;
@@ -272,10 +278,13 @@ void script_warp_unit_display_to_paired_unit(s32 runtime_id) {
     }
 }
 
+/* Hide the depth number of the selected-tile panel; BATTLE's effect playback sets it for the
+ * length of an ability effect. */
 void menu_suppress_height_display(void) {
     g_menu_height_display_suppressed = 1;
 }
 
+/* Show the selected-tile panel's depth number again (effect playback end). */
 void menu_enable_height_display(void) {
     g_menu_height_display_suppressed = 0;
 }
@@ -707,6 +716,10 @@ static s32 menu_display_projected_action_effect(
 #endif
 }
 
+/* Thread body of a unit stats panel: `mode` selects the hovered unit, the right-hand unit, or the
+ * caster or target of an attack preview. The panel slides in, redraws each frame and slides out on
+ * the stop request; CT shows at most 100, an egg's numbers are hidden and the target panel also
+ * names its reaction ability. */
 static void menu_display_hovered_unit_stats(
     RECT* frame_rect, s32 mode, struct menu_number_entry* entries, menu_unit_status_record_t* status) {
     RECT rects[4];
@@ -1745,6 +1758,11 @@ s32 menu_can_accept_input(void) {
     return 1;
 }
 
+/* Act on Circle for menu row row_index: start the row's menu thread one slot below the current
+ * one, clear the selection, or for a negative action -n ask n menu threads from the current one up
+ * to close. Stores the row as the entry's result and plays the confirm sound unless the action is
+ * silent; in tutorial input mode rows disabled by EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS do
+ * nothing. */
 void menu_handle_action(menu_entry_t* entry, s32 row_index) {
     s32 silent;
     s32 target;
@@ -2008,6 +2026,8 @@ void menu_build_window_sprites(RECT* rect, menu_entry_t* param, menu_icon_record
     SetDrawMode(&record->base.draw_mode, 0, 0, GetTPage(0, 2, 0x3c0, 0x100), &g_gfx_texture_window);
 }
 
+/* Give a menu sprite or quad the dimmed menu CLUT while the previous thread is running or
+ * g_menu_input_lock_mode is 1, else the normal one. */
 void menu_select_sprite_clut(void* packet) {
     s32 clut;
     texture_primitive_t* primitive = packet;

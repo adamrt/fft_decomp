@@ -291,6 +291,8 @@ void open_controller_wait_text_message(open_controller_record_t* record) {
     }
 }
 
+/* Start one of the title screen's demo movies (FFTPRE, FFTPR or FFTUNIT.STR) at cd_mix_level with
+ * no separate video end frame, and push handler 11 with the stream's start sector and length. */
 void open_movie_stream_title_demo_and_push_controller(
     s32 start_sector, s32 stream_length, s32 end_frame, s32 cd_mix_level) {
     s32 controller;
@@ -417,6 +419,9 @@ void open_title_update_exit_transition(open_controller_record_t* record) {
     }
 }
 
+/* Arm the new-game prologue sequence: start before entry 0 of entry_table with NEXT_ENTRY set, end
+ * at entry target, draw its text in ordering-table entries ot_layer and ot_layer + 1, at full
+ * brightness (0x80). */
 void open_gfx_init_transition_request(s32 target, s32 ot_layer, open_gfx_transition_entry_t** entry_table) {
     g_open_gfx_transition.flags = OPEN_GFX_TRANSITION_NEXT_ENTRY;
     g_open_gfx_transition.current_index = 0;
@@ -805,6 +810,10 @@ static void open_gfx_step_image_crossfade(void) {
     }
 }
 
+/* Prepare the ending script: set both 512x240 screen environments centered on the origin, clear
+ * VRAM under them, reset the dispatch state and point its cursor at the start of the script data,
+ * clear the 16 text records, and build the two semi-transparent edge bands and the two picture
+ * quads. */
 static void open_script_init_state(void) {
     RECT rect;
     s32 i;

@@ -136,6 +136,8 @@ void battle_gfx_animate_post_action_text(battle_unit_t* unit, const SVECTOR* scr
     display->progress += g_main_system_animation_speed;
 }
 
+/* Request `animation` with facing `facing` (0x400 per quarter turn) for the next animation update;
+ * the request is dropped when that sequence is already playing in the same view. */
 void battle_unit_store_animation_facing(u32 animation, s32 facing, battle_unit_t* unit) {
     animation++;
     unit->requested_animation = animation;
@@ -151,6 +153,8 @@ void battle_unit_store_animation_facing_movement_data(s32 animation, s32 facing,
     unit->movement.force_animation_update = 1;
 }
 
+/* The SHP frame tables of a sheet: one of the five resident ones (TYPE1 through OTHER), or the
+ * battle's boss SHP for the higher SHP types. */
 battle_gfx_unit_shp_frame_tables_t* battle_gfx_get_unit_shp_by_spritesheet_id(u32 spritesheet_id) {
     s32 value = g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].shp_id;
 
@@ -185,6 +189,7 @@ u8** battle_gfx_get_weapon_seq_by_spritesheet_id(u32 spritesheet_id) {
     return g_battle_gfx_weapon_graphics[g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].shp_id].seq;
 }
 
+/* Every sheet shares the one effect SHP, EFF1. */
 battle_gfx_weapon_shp_t* battle_gfx_get_effect_shp_data(u32 unused_spritesheet_id) {
     return &g_battle_gfx_effect_graphics[0].shp;
 }
@@ -199,6 +204,8 @@ u32 battle_gfx_get_spritesheet_flying_flag(u32 spritesheet_id) {
     return g_battle_gfx_spritesheet_data[spritesheet_id & 0xffff].flying_flag;
 }
 
+/* Center the unit on its map tile: its move destination becomes its tile, its world position the
+ * tile center at its standing height, and its real position follows. */
 void battle_unit_set_move_and_world_coords(battle_unit_t* unit) {
     unit->movement.destination_x = unit->map_x;
     unit->movement.destination_y = unit->map_y;
@@ -227,6 +234,7 @@ void battle_unit_set_map_coords_after_death_dismount(battle_unit_t* unit) {
     }
 }
 
+/* Return 1 when one of the nine VRAM spritesheet slots already holds `spritesheet_id`. */
 s32 battle_gfx_is_spritesheet_id_loaded(s16 spritesheet_id) {
     s32 slot;
 
@@ -572,6 +580,9 @@ void battle_gfx_update_sprite_transparency_flag(battle_unit_t* unit) {
     }
 }
 
+/* Mirror the Float status into movement.floating and, unless the unit is in the air for Jump
+ * (Jump, its height flag, or a Jump being removed), set it to its standing height and refresh its
+ * real position. */
 void battle_unit_update_float_and_jump_height(battle_unit_t* unit) {
     if (unit->status_flags_5_6 & BATTLE_UNIT_STATUS_FLOAT) {
         unit->movement.floating = 1;

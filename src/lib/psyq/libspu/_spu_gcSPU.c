@@ -1,6 +1,9 @@
 /* SCUS_942.21 0x800197e0..0x80019adf. */
 #include "psx/libspu.h"
 
+/* Compact the SPU RAM allocation table: merge each free block with the contiguous free blocks
+ * after it, delete empty entries, sort the entries before the tail by address, move the tail into
+ * the first deleted slot, and fold free blocks just below the tail into it. */
 void _spu_gcSPU(void) {
     s32 index;
     s32 successor;

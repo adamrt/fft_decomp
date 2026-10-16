@@ -20,12 +20,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Return the first of the 16 party slots holding one of Ramza's sprite sets (1 to 3), or 16 when
+ * there is none. */
 static s32 wldcore_get_ramza_roster_index(void);
 static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value);
 static void wldcore_script_read_operand_pair(s32* out1, s32* out2);
 static void wldcore_script_read_operand_pair_and_date(
     s32* out_month, s32* out_day, s32* out_current_month, s32* out_current_day);
 
+/* Run the map script blocks of `location`'s conditional set in order, each until a condition fails
+ * or it stages an action; return 1 at the first staged action with a flag in `action_mask`, else
+ * 0. */
 s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask) {
     s32 flags;
     u16 i;
@@ -55,24 +60,29 @@ s32 wldcore_script_process_conditional_set(s32 location, s32 action_mask) {
     return 0;
 }
 
+/* Map script opcodes 0x00 and 0x16: do nothing. */
 void wldcore_opcode_map_nop(void) {
 }
 
+/* Map script opcodes 0x14 and 0x15: skip one operand without testing anything. */
 void wldcore_opcode_map_skip_1_operand(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 1;
 }
 
+/* Map script opcodes 0x05 to 0x0B and 0x1B: skip two operands without testing anything. */
 void wldcore_opcode_map_skip_2_operands(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 2;
 }
 
+/* Map script opcode 0x17: skip three operands without testing anything. */
 void wldcore_opcode_map_skip_3_operands(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 3;
 }
 
+/* Map script opcode 0x18: skip four operands without testing anything. */
 void wldcore_opcode_map_skip_4_operands(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 4;
@@ -149,11 +159,15 @@ void wldcore_opcode_map_check_roster_has_sprite_set(void) {
     }
 }
 
+/* Map script opcode 0x0C: skip one operand without testing anything (its own copy of the 0x14
+ * body). */
 void wldcore_opcode_map_skip_1_operand_0x0c(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 1;
 }
 
+/* Map script opcode 0x0D: skip one operand without testing anything (its own copy of the 0x14
+ * body). */
 void wldcore_opcode_map_skip_1_operand_0x0d(void) {
     u16* ip = &g_wldcore_script_state.ip;
     *ip += 1;
@@ -272,6 +286,7 @@ void wldcore_opcode_map_set_var(void) {
     script_set_variable(variable_id, value);
 }
 
+/* Stage the text operand for a deferred Text request (opcode 0x1D). */
 void wldcore_opcode_map_request_text(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
@@ -316,6 +331,7 @@ void wldcore_opcode_map_request_draw_path(void) {
     g_wldcore_script_state.flags |= WLDCORE_SCRIPT_REQUEST_DRAW_PATH;
 }
 
+/* Stage the two operands for a deferred ErasePath request (opcode 0x21). */
 void wldcore_opcode_map_request_erase_path(void) {
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
     g_wldcore_script_state.ip++;
@@ -365,6 +381,7 @@ void wldcore_opcode_map_focus_location(void) {
     }
 }
 
+/* Reject the MCBrave>= condition when Ramza's Brave is below the operand. */
 void wldcore_opcode_map_check_ramza_brave_at_least(void) {
     party_unit_t* party = wldcore_get_party_unit(wldcore_get_ramza_roster_index());
     u16 ip;
@@ -432,6 +449,7 @@ void wldcore_opcode_map_check_ramza_faith_at_most(void) {
     }
 }
 
+/* Set (nonzero `set`) or clear bit `index` of a 32-bit word array. */
 void wldcore_set_bit_value(u32* bits, s32 index, s32 set) {
     u32* base = bits;
     u32 mask;
@@ -473,6 +491,8 @@ s32 wldcore_script_calculate_save_data_completion_percent(void) {
     return count * 100 / 76;
 }
 
+/* Open the Brave Story Facts list: one row per fact flag set (EVENT_SCRIPT_VAR_FACT_FIRST onward),
+ * up to eight, hiding the parent's content panel. */
 void wldcore_list_open_script_flags_01a4_01bb(void) {
     wldcore_window_panel_layout_t layout;
     point32_t origin;
@@ -518,6 +538,8 @@ void wldcore_list_open_script_flags_01a4_01bb(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
+/* Resume handler of the Facts list: block Circle, Cross and Select from the WORLD menu frame
+ * again. */
 void wldcore_list_script_flags_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }

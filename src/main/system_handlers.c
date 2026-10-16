@@ -30,6 +30,8 @@ void main_system_handle_pointer_exception(int error_code) {
     g_main_system_graphics_error = 0;
 }
 
+/* Return the ordering table of BATTLE's current render buffer; the pointer is a BATTLE.BIN global,
+ * so this only works while BATTLE is loaded. */
 u32* main_gfx_get_otag(void) {
     return g_battle_gfx_current_render_buffer->otag;
 }
@@ -73,6 +75,8 @@ void main_save_init_state_and_options(void) {
     g_main_game_options.value = value;
 }
 
+/* Return 0 either way: with script variable 0xff set it calls BATTLE.BIN's script_return_zero_1,
+ * which also returns 0. Nothing calls it. */
 int main_overlay_call_battle_return_zero(void) {
     /* Script variable 0xff gates the BATTLE call. */
     if (g_main_script_variables[0xff] == 0) {

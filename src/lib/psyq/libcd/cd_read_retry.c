@@ -1,6 +1,10 @@
 /* SCUS_942.21 0x80020a64..0x80020c3b. */
 #include "psx/libcd.h"
 #include "psx/libetc.h"
+/* (Re)start CdRead's ReadN: with the lid open it only sends a Nop, restarts the timeout and
+ * returns -1; a retry first pauses and seeks back to CdLastPos. Sets the read mode when it differs
+ * (or on a retry), installs cb_read and starts reading into the first buffer. Returns the sector
+ * count, or -1. */
 s32 cd_read_retry(s32 retry) {
     u8 mode;
     u8 saved_mode;

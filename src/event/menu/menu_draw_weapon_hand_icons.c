@@ -4,6 +4,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Draw a weapon's hand marks on the item panel: a weapon that needs both hands shows only that
+ * mark; otherwise the Two Hands and Two Swords marks it allows, or the one-hand mark when it
+ * allows neither. Throwables and no weapon draw nothing. */
 void menu_draw_weapon_hand_icons(s16 weapon_id) {
     RECT rect;
     s16 x;

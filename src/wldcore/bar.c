@@ -23,6 +23,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Push the rumor detail level: name the rumor in 'This rumor's about ...', show its text in the
+ * scrollable window and hide the parent list's windows. */
 static void wldcore_bar_push_rumor_detail_level(s32 value);
 static void wldcore_list_open_rumors(void);
 
@@ -42,6 +44,8 @@ void wldcore_window_publish_slot_b806(wldcore_menu_list_window_level_t* level) {
     g_wldcore_window_records[index].frame_index = 0;
 }
 
+/* Leave the bar: pop its level, show the date and location marker again, rebuild and push the
+ * location menu for the current location, fade the map back in and clear the scratch buffer. */
 static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_level_t* unused_level) {
     s32* selected = &g_wldcore_map_projection_state.marker.kind;
     s32 i;
@@ -61,6 +65,9 @@ static void wldcore_menu_pop_level_and_rebuild_screen(wldcore_menu_list_window_l
     }
 }
 
+/* Input step of the bar menu: Circle opens Rumors, Propositions, the job report or the in-progress
+ * list (or leaves); Cross or Leave shows the goodbye line and, after a button, fades back to the
+ * map; Select shows the row's help; Up and Down wrap. */
 void wldcore_bar_handle_menu_input(wldcore_menu_list_window_level_t* level) {
     s32 flags;
     u32 buttons;
@@ -557,6 +564,9 @@ void wldcore_list_handle_propositions_input(wldcore_menu_panel_level_t* level) {
     }
 }
 
+/* Push the proposition detail level and show its description; the bar owner first gives his advice
+ * on it with a 10% chance (20% after a failure, 40% after a bad failure), otherwise says 'This's
+ * what I know about ...'. */
 void wldcore_proposition_push_detail_level(s32 value) {
     s32 chance;
     s32 index;
@@ -648,6 +658,8 @@ void wldcore_proposition_handle_accept_input(wldcore_window_render_pair_t* owner
     }
 }
 
+/* Append an OK/NO choice panel at `origin` to the level being pushed: cursor and header windows
+ * plus the OK/NO text record, with the cursor on OK. */
 void wldcore_window_build_yes_no_panel(point32_t origin) {
     RECT bounds;
     s32 dead_locals[10];

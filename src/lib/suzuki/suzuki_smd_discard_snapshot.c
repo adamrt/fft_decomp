@@ -1,6 +1,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* Drop a music record's saved snapshot without restoring it: clear SUZUKI_MUSIC_STATUS_SNAPSHOT
+ * and free the snapshot chain. */
 void suzuki_smd_discard_snapshot(suzuki_music_t* music) {
     u16 status;
 

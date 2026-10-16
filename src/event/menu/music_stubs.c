@@ -6,6 +6,8 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+/* Wait one vertical blank at a time while the music is loading, checking on the main stack. The
+ * check (main_sound_is_music_loading_stub) always reports done, so this waits a single VSync. */
 void sound_wait_for_music_stub(void) {
     do {
         VSync(0);

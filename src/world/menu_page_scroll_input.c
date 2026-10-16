@@ -15,6 +15,9 @@ rgb24_t* menu_gfx_get_draw_color_variant(void) {
     return &g_world_menu_sprite_color;
 }
 
+/* Move the list viewport by one visible page (dir -1 up, 1 down), keeping the selected row's
+ * offset within the page and clamping it on a short last page. WORLD's body reloads the list
+ * layout and plays the cursor sound when the page moves. */
 void menu_scroll_list_by_page_variant(menu_vertical_scroll_direction_e dir, const menu_instruction_t* menu) {
     s32 old;
     s16 delta;

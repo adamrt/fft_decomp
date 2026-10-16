@@ -2156,6 +2156,8 @@ s32 battle_ai_propagate_target_movement(
     return state->reachable_count;
 }
 
+/* Moldball Virus cannot reach water: for that ability only, clear the range of every panel, on
+ * both levels, whose tile has depth. */
 static void battle_target_check_moldball_virus_depth(s16 ability_id) {
     map_tile_t* tile;
     target_panel_t* panel;
@@ -3152,6 +3154,11 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
     return TARGET_PANELS_NONE;
 }
 
+/* Mark the tiles an action affects once its target is chosen, by skillset menu type: abilities go
+ * through the green-panel pass, Arithmeticks through the calculator, and Item, Throw, Attack, Jump
+ * and Charge mark only the target tile. Returns 0 when tiles were marked, 1 when none were, 2 for
+ * menu types without targeting, and -1 for an invalid actor, target, katana, ability id or target
+ * tile. */
 s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
     action_command_t action;
     unit_stats_t* unit;

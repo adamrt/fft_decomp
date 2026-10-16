@@ -18,6 +18,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Thread that draws a text screen's window frame: build the frame pieces from the menu glyph sheet
+ * into a small texture once, then draw the frame around the rectangle in parameter 1 each frame
+ * until parameter 3 asks it to stop. */
 void world_screen_menu_window_frame_thread(void) {
     RECT texture;
     /* The stride pointers are locals because the target keeps each one live

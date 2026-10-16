@@ -1237,6 +1237,8 @@ void wldcore_list_open_tutorial_topics(void) {
     g_wldcore_menu_stack_depth = record_index + 1;
 }
 
+/* Resume handler of the tutorial topics list: block Circle, Cross and Select from the WORLD menu
+ * frame again. */
 void wldcore_list_tutorial_topics_restore_blocked_buttons(void) {
     g_menu_blocked_buttons = PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SELECT;
 }

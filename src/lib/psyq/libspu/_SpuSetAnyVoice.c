@@ -1,6 +1,9 @@
 /* SCUS_942.21 0x80019b80..0x80019d87. */
 #include "psx/libspu.h"
 
+/* Set (SPU_ON) or clear (SPU_OFF) voice bits in a pair of 24-voice SPU mask registers, or in their
+ * queued copy in _spu_RQ when event queueing is on; returns the resulting mask (any other on_off
+ * only reads it). */
 u32 _SpuSetAnyVoice(s32 on_off, u32 voice_bit, s32 reg_index_low, s32 reg_index_high) {
     u32 current;
     u8 high_voices;

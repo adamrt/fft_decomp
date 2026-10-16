@@ -1,6 +1,9 @@
 /* LIBGPU 800275c0-80028740. */
 #include "psx/libgpu.h"
 
+/* Unpack one TMD primitive packet into a zeroed TMD_PRIM (color, texture and vertex/normal
+ * indexes; flat packets repeat their one color or normal). Returns the packet size in bytes, or -1
+ * for an unsupported type. */
 int psyq_gpu_decode_tmd_primitive(const psyq_tmd_packet_t* packet, TMD_PRIM* primitive) {
     memset(primitive, 0, sizeof(*primitive));
     primitive->id = packet->id;

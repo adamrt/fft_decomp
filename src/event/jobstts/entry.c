@@ -14,6 +14,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Upload the menu glyph sheet and palette image, copy two window-frame palettes into VRAM row 254
+ * (each also as a 12-color copy from color 4, with color 4 cleared), and clear the menu
+ * selections. */
 static void jobstts_menu_load_images_and_clear_selection(void) {
     RECT rect;
     palette_t palette;

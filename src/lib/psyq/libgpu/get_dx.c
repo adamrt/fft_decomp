@@ -1,6 +1,8 @@
 /* LIBGPU 80025a88-80025b44. */
 #include "psx/libgpu.h"
 
+/* Return the display start x for rect on the detected GPU type: halved on type 2, and mirrored
+ * from 1024 when the display is reversed. */
 int get_dx(RECT* rect) {
     /* The volatile view preserves separate graph-type address construction. */
     volatile psyq_gpu_environment_t* environment = &g_psyq_gpu_environment;

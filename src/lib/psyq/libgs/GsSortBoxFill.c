@@ -2,6 +2,9 @@
 #include "psx/libgs.h"
 #include "psx/types.h"
 
+/* Build a flat-colored TILE with its draw-mode word from the box attributes, offset by the 2D
+ * origin, and link it into the ordering table at pri; boxes with the display-off attribute are
+ * skipped. */
 void GsSortBoxFill(GsBOXF* bp, GsOT* otp, u16 pri) {
     TILE* packet;
     DR_TPAGE* draw_mode;

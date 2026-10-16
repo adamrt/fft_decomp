@@ -79,18 +79,23 @@ s32 world_job_get_selected_unit_job_points_entry(s32 unused_row) {
     return g_world_unit_pointers[g_unit_selected_index]->job_points.current.values[g_world_learn_selected_job_index];
 }
 
+/* Row callback: return the cached level of the job chosen in the learn menu; the row is ignored. */
 s32 world_job_get_cached_level(s32 unused_row) {
     return g_menu_job_current_level;
 }
 
+/* Row callback: return the cached JP the chosen job needs for its next level; the row is ignored. */
 s32 world_job_get_cached_level_jp_requirement(s32 unused_row) {
     return g_menu_job_next_level_jp_requirement;
 }
 
+/* Row callback: return the cached total JP earned in the chosen job; the row is ignored. */
 s32 world_job_get_cached_total_jp(s32 unused_row) {
     return g_world_job_cached_total_jp;
 }
 
+/* Row callback: return whether the chosen job is mastered (nothing left to learn); the row is
+ * ignored. */
 s32 world_job_get_cached_skillset_empty_flag(s32 unused_row) {
     return g_job_current_mastered;
 }

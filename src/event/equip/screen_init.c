@@ -13,6 +13,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Upload the menu glyph sheet and palette image, copy two window-frame palettes into VRAM row 254
+ * (each also as a 12-color copy from color 4, with color 4 cleared), then reset the screen's
+ * selections and rebuild the inventory totals and item category lists. */
 static void equip_menu_load_images_and_reset_lists(void) {
     RECT rect;
     u16 buf1[4];

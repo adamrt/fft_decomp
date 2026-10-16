@@ -22,6 +22,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Draw or queue an icon frame's six packets: sprites 3, 1 and 2, the draw mode, sprite 0, then the
+ * first draw mode. Queued into one ordering-table entry they run in the reverse order. */
 void menu_submit_icon_primitives(menu_icon_sprites_t* frame) {
     gfx_draw_or_append_gpu_primitive(&frame->sprites[3]);
     gfx_draw_or_append_gpu_primitive(&frame->sprites[1]);

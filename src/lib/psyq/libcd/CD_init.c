@@ -2,6 +2,9 @@
 #include "psx/libcd.h"
 #include "psx/libetc.h"
 
+/* Initialize libcd and the drive: install the CD interrupt handler, flush pending controller
+ * interrupts (as CD_flush), then send Nop (twice when the lid reads open), Reset and Demute.
+ * Returns 0, or -1 when a step fails. */
 s32 CD_init(void) {
     puts(g_psyq_cd_init_message);
     printf(g_psyq_cd_init_address_format, &g_psyq_cd_init_irq_state_pointer);

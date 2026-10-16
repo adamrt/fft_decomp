@@ -1195,6 +1195,11 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     }
 }
 
+/* Recolor the current render buffer's map polygons for one tile-mark layer
+ * (battle_tile_mark_mode_e): SHOW tints marked tiles blue (move), red (range) or yellow (targets),
+ * HIDE restores them (a hidden target tile in range turns red again) and NONE restores every
+ * polygon. The first layer shown starts the marked-tiles palette pulse; the second argument is
+ * unused. */
 void battle_target_set_tile_background_color(s32 mode, s32 unused) {
     s32 i;
     s16 other_state_a;
@@ -1707,6 +1712,9 @@ void battle_gfx_init_render_buffers(void) {
     g_battle_effect_map_vertices = 0;
 }
 
+/* Reset the map render state before a new GNS map loads: no polygons or tile links, every textured
+ * polygon lit, ambient color 0x80 gray, weather and lightning off, texture and mesh part
+ * animations stopped, GNS resource records cleared. */
 void battle_map_reset_mesh_render_state(void) {
     SVECTOR zero_vector = g_battle_map_zero_svector;
     VECTOR unit_scale = g_battle_map_unit_scale_vector;

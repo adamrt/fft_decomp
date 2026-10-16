@@ -12,6 +12,8 @@
 #include "fft/world_formation.h"
 #include "psx/types.h"
 
+/* List the skillsets a formation unit can set as its secondary: those of its unlocked jobs other
+ * than its own job and Mime. The list ends with -1; return the count. */
 static s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
     s16 jobs[24];
     s32 count;
@@ -32,14 +34,17 @@ static s32 world_ability_list_secondary_skillsets(s16 unit_id, s16* skillsets) {
     return count;
 }
 
+/* Return nonzero when the formation unit has the Two Swords support ability set. */
 s32 world_ability_has_two_swords(s16 unit_id) {
     return g_world_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_SWORDS;
 }
 
+/* Return nonzero when the formation unit has the Two Hands support ability set. */
 s32 world_ability_has_two_hands(s16 unit_id) {
     return g_world_unit_pointers[unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS;
 }
 
+/* Return nonzero when the formation unit has the Secret Hunt support ability set. */
 s32 world_ability_has_secret_hunt(s32 unit_id) {
     return g_world_unit_pointers[(s16)unit_id]->support_abilities[2] & BATTLE_SUPPORT_SET_3_SECRET_HUNT;
 }

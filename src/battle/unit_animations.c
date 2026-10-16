@@ -650,6 +650,9 @@ void battle_unit_apply_poach_morbol_transformation(battle_unit_t* unit) {
     battle_ai_init_unit_abilities(unit->stats->battle_id);
 }
 
+/* Swap the unit's sheet for its first transformation status (Crystal, Treasure, Chicken, Frog),
+ * saving its own SHP and SEQ unless it already shows one; Crystal and Treasure also clear every
+ * other status. Without such a status, a swapped unit gets back the sheet of its VRAM slot. */
 void battle_gfx_apply_status_spritesheet_change(battle_unit_t* unit, s32 tile_effect_level) {
     u32 flags = unit->status_flags_5_6;
     u16 spritesheet_id;
@@ -901,6 +904,7 @@ void battle_unit_set_target_animation_from_attack_type(battle_unit_t* attacker, 
     battle_unit_store_animation_facing(animation, target->facing, target);
 }
 
+/* Refresh the display of every unit in the strike's target list. */
 void battle_unit_update_anim_display_for_all_targets(battle_unit_t* unit) {
     s32 counter;
     battle_unit_t* target;
@@ -953,6 +957,9 @@ static battle_unit_t* battle_unit_claim_slot(s16 requested_runtime_id) {
     return 0;
 }
 
+/* Fill a sprite display from SHP frame `src`: each part takes its shift, a texture position in
+ * 8-pixel tiles, its size from g_battle_gfx_part_sizes and its flip bits; the frame's blend bits
+ * are merged into texture page `tpage`. */
 static void battle_gfx_load_unit_frame_parts(
     battle_unit_t* unit, battle_gfx_sprite_display_data_t* display, battle_gfx_source_frame_t* src, s32 tpage) {
     battle_gfx_source_part_t* part;
@@ -2469,6 +2476,8 @@ void battle_gfx_update_status_bubbles_and_graphics(void) {
     }
 }
 
+/* Unlink a unit record from the unit list and free its runtime slot; its spritesheet VRAM slot is
+ * freed too unless another live unit still uses it. */
 void battle_unit_remove(battle_unit_t* unit) {
     battle_unit_t* it;
     s32 shared = 0;
@@ -2494,6 +2503,8 @@ void battle_unit_remove(battle_unit_t* unit) {
     }
 }
 
+/* Remove every unit record. The walk reads each record's link after removing it, which works
+ * because battle_unit_remove leaves that link in place. */
 void battle_unit_clear_all(void) {
     battle_unit_t* unit = g_battle_unit_list_head;
 
@@ -2552,6 +2563,9 @@ void battle_unit_update_and_animate_units(void) {
     }
 }
 
+/* Unpack a unit SEQ file: copy its first attack and SP2 sequence numbers, turn its 256 sequence
+ * offsets into pointers and append the sequence data at g_battle_gfx_seq_data_cursor. An offset of
+ * -1 resolves to the start of that data. */
 static void battle_gfx_unpack_unit_seq_data(
     battle_gfx_native_unit_seq_table_t* destination, const battle_gfx_packed_seq_record_t* source) {
     const battle_gfx_packed_seq_record_t* header;
@@ -2823,6 +2837,11 @@ static void battle_gfx_copy_other_spr_palette_data_to_ram(const battle_gfx_other
     } while (i < (s32)sizeof(g_battle_gfx_other_palettes));
 }
 
+/* Create a unit record on a map tile: claim a runtime slot and a spritesheet VRAM slot (0 when
+ * either is exhausted), load its sheet and palette, reset its motion, display and animation state,
+ * set up its weapon and effect blocks and link it at the head of the unit list. A job sheet with
+ * stats uses the stats' palette; palettes past 5 become 0, and nonzero `flags` starts the unit
+ * hidden. */
 static battle_unit_t* battle_unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 spritesheet_id, s16 palette,
     s16 requested_runtime_id, unit_stats_t* stats, u32 flags, const battle_gfx_unit_sprite_file_t* data) {
     battle_unit_t* unit;
@@ -3284,6 +3303,8 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
     return g_battle_gfx_unit_graphics_load_state.file_kind;
 }
 
+/* Run the per-frame unit update three times; the queued graphics loader calls it right after it
+ * creates a unit. */
 static void battle_unit_update_and_animate_units_three_times(void) {
     s32 i;
 

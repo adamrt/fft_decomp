@@ -13,6 +13,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Thread that draws the zodiac backdrop each frame, zooming it from double size down to normal
+ * unless parameter 1 starts it at normal size, until parameter 3 asks it to stop. */
 void world_formation_view_zoom_thread(void) {
     s32 frame;
 

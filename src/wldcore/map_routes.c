@@ -288,6 +288,9 @@ s32 wldcore_map_build_location_menu_entries(s32 location_id, s32* out) {
     return count;
 }
 
+/* Fill `out` with the map-name text ids of the current location's Choice destinations and return
+ * how many: -1 at Murond Death City, 0 when the location's color variable is set or no Choice
+ * applies; a single destination is taken as is, otherwise up to five whose hidden flag is clear. */
 static s32 wldcore_location_collect_choice_text_ids(s32 location_id, s32* out) {
     s32 available;
     s32 i;
@@ -1202,6 +1205,9 @@ void wldcore_map_update_camera_direction_and_projection(void) {
     }
 }
 
+/* Set up render record `index` for a window image of `bounds`: unhide it, place it at bounds.x -
+ * 0x80, bounds.y - 0x78, give it the window CLUT at (0, 0x1E1) and the texture page of the mode's
+ * VRAM area, then draw the empty window frame into `image`. */
 void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image) {
     point32_t* clut;
     CVECTOR* color;

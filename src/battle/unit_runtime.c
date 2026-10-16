@@ -50,6 +50,8 @@ s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* am
     return 1;
 }
 
+/* The unit's event offset (moved by battle_unit_add_event_offset_by_runtime_id). A missing unit
+ * raises pointer exception 12 and returns 0. */
 SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -112,6 +114,8 @@ void battle_unit_set_facing_update_suppression(u32 runtime_id) {
     }
 }
 
+/* Clears BATTLE_MOTION_FLAG_SUPPRESS_FACING_UPDATE on a unit; unlike the set function it leaves
+ * the sprite display flags alone. */
 void battle_unit_clear_facing_update_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -120,6 +124,7 @@ void battle_unit_clear_facing_update_suppression(u32 runtime_id) {
     }
 }
 
+/* Mirror a unit's sprite (MirrorSprite event instruction, mode 1). */
 void battle_unit_set_horizontal_flip_flag(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -128,6 +133,7 @@ void battle_unit_set_horizontal_flip_flag(u32 runtime_id) {
     }
 }
 
+/* Undo MirrorSprite's mirroring of a unit's sprite. */
 void battle_unit_clear_horizontal_flip_flag(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -136,6 +142,8 @@ void battle_unit_clear_horizontal_flip_flag(u32 runtime_id) {
     }
 }
 
+/* Stop tile and status palette refreshes on a unit: battle_gfx_check_tile_status_palette_mod skips
+ * it while this is set. */
 void battle_unit_set_palette_update_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -163,6 +171,8 @@ void battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id(u32 runtime_id
     }
 }
 
+/* Silence a unit's movement sounds and landing effects (battle_sound_play_movement_sfx and the
+ * landing handlers check it). */
 void battle_unit_set_movement_effect_suppression(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -212,6 +222,7 @@ s32 battle_unit_get_runtime_id_by_battle_id(u32 battle_id) {
     return -1;
 }
 
+/* The sprite sheet VRAM slot of the unit in slot battle_id, or -1. */
 s32 battle_gfx_get_spritesheet_vram_by_battle_id(u32 battle_id) {
     battle_unit_t* unit = g_battle_unit_list_head;
 
@@ -328,6 +339,9 @@ s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id) {
     return 0;
 }
 
+/* Hides a unit: disables its drawing and sprite trigger, undoing
+ * battle_unit_draw_and_activate_by_runtime_id (Erase event instruction). Returns 0 when no record
+ * has the runtime id. */
 s32 battle_gfx_reset_unit_graphic_trigger(u32 runtime_id) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
@@ -634,6 +648,8 @@ s32 battle_gfx_get_unit_spritesheet_height_by_unit_id(u32 unit_id) {
     return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(unit_id));
 }
 
+/* Start an ability's effect cast by runtime unit 0 on runtime unit 1 with a normal hit. No retail
+ * code calls it. */
 void battle_effect_start_basic_ability_animation(s32 ability_id) {
     effect_secondary_init_t effect_data;
 
@@ -683,6 +699,8 @@ s32 battle_effect_try_init_data(void) {
     return battle_effect_init_data() != 0;
 }
 
+/* battle_effect_play as a g_thread_call_target: script_play_effect_and_wait runs it on the main
+ * stack. */
 void battle_effect_call_play(void) {
     battle_effect_play();
 }

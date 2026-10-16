@@ -6,6 +6,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+/* Return the active WORLD fades as WORLD_FADE_STATE bits (decreasing 1, increasing 2), or none
+ * while fades are disabled. */
 s32 world_gfx_get_fade_state(void) {
     if (g_world_gfx_fade_disabled != 0) {
         return WORLD_FADE_STATE_NONE;

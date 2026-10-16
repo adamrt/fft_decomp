@@ -1053,6 +1053,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
     }
 }
 
+/* Row callback: the war funds left after paying for the items being tried on; the row is ignored. */
 static s32 world_shop_get_gil_minus_fitting_room_cost(s32 unused_row) {
     s32 gil = world_shop_adjust_gil(0);
 
@@ -1669,6 +1670,9 @@ static void world_shop_buy_from_fitting_room(void) {
     }
 }
 
+/* Fur Shop main menu step: without a unit that has Secret Hunt the shop turns the party away;
+ * otherwise Buy (only when poached stock exists), Sell (only when the party has items) or Leave,
+ * with a message explaining a refusal. */
 void world_shop_run_fur_menu_step(void) {
     s32 i;
 
@@ -1882,6 +1886,8 @@ static s32 world_shop_run_fur_sell_quantity_menu(void) {
     return g_world_shop_fur_quantity_menu_running;
 }
 
+/* Price column of the Fur Shop buy list: half the item's price, flagged disabled when the entry is
+ * unequippable. */
 static s32 world_menu_get_item_half_price_display_value(s32 entry_index) {
     s32 display_value = world_item_get_price(g_item_list_entries[entry_index]) >> 1;
 
@@ -2075,6 +2081,8 @@ static s32 world_shop_run_fur_buy_quantity_menu(void) {
     return g_world_shop_fur_purchase_result;
 }
 
+/* Fur Shop equip-on-purchase step: run the shared equip-candidate step and return to the Fur Shop
+ * buy list instead of the normal one. */
 void world_shop_run_fur_equip_purchase_step(void) {
     world_shop_run_equip_candidate_step();
     if (g_world_shop_menu_step == WORLD_SHOP_STEP_BUY_LIST)

@@ -11,6 +11,7 @@
 #include "psx/libetc.h"
 #include "psx/types.h"
 
+/* Clear the four BIOS card events (done, error, timeout, new card) by testing each. */
 static void card_io_consume_bios_events(void);
 static void card_io_consume_hardware_events(void);
 
@@ -358,6 +359,9 @@ s32 card_file_open_selected_with_retries(const char* filename, s32 mode) {
     return g_card_file_open_descriptor;
 }
 
+/* Close a memory card file, trying up to ten times; each try first waits for the pending card
+ * operation. Forget the open descriptor and return 1 only when the last wait completed and the
+ * close succeeded. */
 s32 card_file_close_with_retries(s32 descriptor) {
     s32 i;
     s32 wait_success;

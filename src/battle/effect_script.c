@@ -57,14 +57,21 @@ static void battle_effect_init_palette(s16 index) {
     }
 }
 
+/* Rewind g_battle_effect_frame_data to its saved start for EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT.
+ * Nothing stores the start pointer or selects that phase, so retail never runs it. */
 static void battle_effect_reset_frame_data_pointer(void) {
     g_battle_effect_frame_data = g_battle_effect_frame_data_start;
 }
 
+/* Rewind g_battle_effect_animation_sequences to its saved start for
+ * EFFECT_PLAYBACK_PHASE_RESTART_SCRIPT, a path retail never takes (see
+ * battle_effect_reset_frame_data_pointer). */
 static void battle_effect_reset_animation_sequences_pointer(void) {
     g_battle_effect_animation_sequences = g_battle_effect_animation_sequences_start;
 }
 
+/* Point g_battle_effect_frame_data at the sprite group table of effect file effect_id's frame
+ * section, past the section's 4-byte group count. */
 static void battle_effect_set_frame_data_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
     effect_sprite_section_t* section = (effect_sprite_section_t*)((u8*)header + header->frame_data);
@@ -72,6 +79,8 @@ static void battle_effect_set_frame_data_pointer(s16 effect_id) {
     g_battle_effect_frame_data = (u8*)section->groups;
 }
 
+/* Point g_battle_effect_animation_sequences 4 bytes into effect file effect_id's animation
+ * sequence section, past its leading 32-bit value. */
 static void battle_effect_set_animation_sequences_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
@@ -91,12 +100,16 @@ static void battle_effect_set_animation_curve_data_pointer(s16 effect_id) {
         = (const effect_animation_curve_table_t*)((u8*)header + header->animation_curve);
 }
 
+/* Bind effect file effect_id's particle-system section (gravity, inertia threshold and the emitter
+ * records) as g_battle_effect_geometry_table. */
 static void battle_effect_set_particle_system_data_pointer(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
 
     g_battle_effect_geometry_table = (const effect_geometry_table_t*)((u8*)header + header->particle_system);
 }
 
+/* Bind effect file effect_id's timeline section as g_battle_effect_timeline and its embedded child
+ * timeline as g_battle_effect_child_timeline. */
 static void battle_effect_set_timeline_pointers(s16 effect_id) {
     effect_file_header_t* header = g_battle_effect_data_ptrs[effect_id];
     effect_timeline_t* timeline;
@@ -176,6 +189,8 @@ static effect_callback_t battle_effect_get_native_callback(s16 callback_id) {
     return g_battle_effect_native_callbacks[callback_id];
 }
 
+/* Read effect file effect_id's disc sector and byte length from g_battle_effect_disc_entries; a
+ * length of 0 means the file is missing. */
 static void battle_effect_load_lba_and_size(s32 effect_id, s32* lba, s32* byte_length) {
     u32 stack_padding[2];
 
@@ -503,6 +518,8 @@ s32 battle_effect_update_cycle(void) {
     return 0;
 }
 
+/* Chain state records 1-16 into the available list (record 0 is the sentinel), empty the allocated
+ * list and set playback idle. */
 void battle_effect_init_state_records(void) {
     s32 i;
 
@@ -655,6 +672,9 @@ static s16 battle_effect_start_script_record(const u8* script, s16 start_pc, s16
     return index;
 }
 
+/* Handler for opcodes 2e-77: calls the empty stub reporter and returns no defined value. In retail
+ * $v0 still holds this handler's address, which battle_effect_run_block treats as 'continue'
+ * without the pc moving, so an invalid opcode hangs the script loop. */
 effect_script_result_e battle_effect_code_script_2e_invalid(effect_record_t* unused_record) {
     main_system_report_stub(1, 0x22);
     /* Retail leaves the dispatch result undefined after an invalid opcode. */
@@ -673,6 +693,9 @@ effect_script_result_e battle_effect_code_script_01_jump(effect_record_t* record
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
+/* Opcode 02: start a child record at the script offset in the second 16-bit value, parented to the
+ * running record, and keep its index in the child slot named by the high nibble of the second
+ * byte; slots above 3 are not kept. */
 effect_script_result_e battle_effect_code_script_02_spawn_child(effect_record_t* record) {
     effect_script_parameters_t parameters;
     s16 slot;
@@ -765,6 +788,7 @@ effect_script_result_e battle_effect_code_script_09_save_camera_position(effect_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
+/* Opcode 0a: restore the camera position opcode 09 saved. */
 effect_script_result_e battle_effect_code_script_0a_restore_camera_position(effect_record_t* record) {
     battle_camera_restore_current_real_coords();
     record->pc += 2;
@@ -843,6 +867,9 @@ effect_script_result_e battle_effect_code_script_11_jump_if_counter_equal(effect
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
+/* Opcode 12: jump to the offset in the third 16-bit value when the counter selected by the top two
+ * bits of the second byte is at least the second 16-bit value; otherwise step over the 6-byte
+ * instruction. */
 effect_script_result_e battle_effect_code_script_12_jump_if_counter_at_least(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     effect_script_parameters_t parameters = instruction->header.parameters;
@@ -896,6 +923,9 @@ effect_script_result_e battle_effect_code_script_15_jump_if_counter_less(effect_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
+/* Opcode 16: jump to the offset in the third 16-bit value when the record has exactly as many
+ * particles as the second 16-bit value; otherwise step over the 6-byte instruction. Retail scripts
+ * test 0 to end once the last particle is gone. */
 effect_script_result_e battle_effect_code_script_16_jump_if_work_count_equal(effect_record_t* record) {
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
     if (record->work_count == instruction->branch.comparison) {
@@ -954,6 +984,8 @@ effect_script_result_e battle_effect_code_script_19_jump_if_child_count_equal(ef
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
+/* Opcode 1a: jump to the offset in the second 16-bit value when the child slot named by the second
+ * byte's high nibble holds a record; otherwise step over the 4-byte instruction. */
 effect_script_result_e battle_effect_code_script_1a_jump_if_child_active(effect_record_t* record) {
     effect_script_parameters_t parameters;
     const effect_script_instruction_t* instruction = effect_get_current_script_instruction(record);
@@ -1254,6 +1286,9 @@ static void battle_effect_run_keyframe_actions(u16 flags, u8 target, effect_reco
     }
 }
 
+/* Pick the sound id effect sound channel channel plays next, by the channel's mode and how many
+ * times it has been used; each call counts one use. A mode above 4 has no case: retail then
+ * returns whatever the caller left in $a2. */
 static s32 battle_effect_select_sound_id(s32 channel) {
     s32 count = g_battle_effect_sound_call_counts[channel]++;
     s32 sound;
@@ -1286,6 +1321,11 @@ static s32 battle_effect_select_sound_id(s32 channel) {
     return sound;
 }
 
+/* Opcode 28: advance the record's child timeline one frame for its target: the particle channels,
+ * the surroundings, caster, target and screen color tracks and the sound tracks. The root record
+ * also drives the camera keyframes, and EFFECT_FLAG_TIMING_CURVE_CHILD sets the time scale. A
+ * reflected hit instead starts the Reflect animation on a unit target and jumps to the child
+ * timeline's end. */
 effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_record_t* record) {
     map_background_gradient_colors_t colors;
     effect_secondary_init_t init;
@@ -1972,6 +2012,7 @@ effect_script_result_e battle_effect_code_script_29_step_parent_timeline(effect_
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }
 
+/* Opcode 2a: clear the child-timeline state that opcode 28 steps and select effect target 0. */
 effect_script_result_e battle_effect_code_script_2a_reset_child_timeline(effect_record_t* record) {
     battle_effect_reset_child_timeline(record, 0);
     record->pc += 2;

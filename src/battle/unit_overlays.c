@@ -23,6 +23,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Build the four corners of the cursor quad over the tile under coords on map layer `layer`, at
+ * the tile surface and following its slope. Returns 0 for a planar quad, 1 when a corner slope
+ * creases it along the v0-v3 diagonal, 2 along v1-v2. */
 s32 battle_target_calculate_cursor_tile_polygon(const SVECTOR* coords, u8 layer, SVECTOR* quad) {
     map_tile_t* tile;
     /* Byte access retains the original packed load and field-extraction order. */
@@ -253,6 +256,8 @@ s32 battle_map_calculate_slope_height(const SVECTOR* coords, s32 map_z) {
     return result;
 }
 
+/* How far a unit stands above a water tile's floor, in half levels: the full depth for Float and
+ * on-water movement, one level less for in-water movement, else 0. */
 s32 battle_move_calculate_water_lift(battle_unit_t* unit, map_tile_t* tile) {
     s32 movement_flags;
 
@@ -1249,6 +1254,8 @@ void battle_gfx_init_status_bubble(battle_unit_t* unit) {
     }
 }
 
+/* Start the unit's afterimage trail: enable position_copies and seed all six at its world
+ * position. Jump launches and SEQ opcode 0xbf start it. */
 void battle_gfx_init_position_vector_copies(battle_unit_t* unit) {
     s32 i;
 
@@ -1339,6 +1346,10 @@ void battle_gfx_init_item_get_rendering(battle_unit_t* unit) {
         unit->item_display, unit->item_display->part_count, 0, &position, 0, 0, &zoom, otag);
 }
 
+/* Load the unit's next pending action result into its numeric display and clear its pending flag:
+ * a stat change, then level down or up, stolen, broken, Quick, CT 0, missed, guarded, caught, then
+ * the queued status images. Sets the digit sprites (values over 999 show 999) and the color.
+ * Returns 0 when nothing is pending. */
 s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     unit_stats_t* stats;
     u32 scan_flags;
