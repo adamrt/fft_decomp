@@ -773,4 +773,7 @@ extern const u8 g_main_terrain_geomancy_abilities[];
 /* Two bytes per map_surface_type_e; all 64 pairs are 0x19, 0x19. */
 extern u8 g_main_terrain_tile_info_pairs[64][2];
 
+/* 4 KB of zero words after the C start-up, run as no-ops; returns at once. */
+void main_run_zero_padding(void);
+
 #endif

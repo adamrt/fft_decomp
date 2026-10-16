@@ -85,7 +85,6 @@ extern s32 g_battle_state_animation_continue_check;
 extern s32 g_battle_state_map_init_step;
 extern s32 g_battle_state_screen_fade_step;
 
-void battle_bin_entrypoint(void);
 s32 battle_state_announce_next_charged_action(void);
 void battle_state_enter_action_cast(void);
 void battle_state_enter_action_execution_setup(void);

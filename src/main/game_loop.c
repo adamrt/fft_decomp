@@ -30,13 +30,13 @@ void main_system_reset_game(void) {
     main_restore_game_loop_stack_pointer(&g_main_system_game_loop_stack_pointer);
 }
 
-/* Call battle_bin_entrypoint, which only returns (see main_overlay_exec_battle_bin). */
+/* Call main_run_zero_padding, which only returns (see main_overlay_exec_battle_bin). */
 static void main_overlay_call_battle_entrypoint(void) {
-    battle_bin_entrypoint();
+    main_run_zero_padding();
 }
 
 /* Load BATTLE.BIN (sector 1000) into the whole low overlay area, which ends at
- * the high overlay address, and call battle_bin_entrypoint. That is not BATTLE
+ * the high overlay address, and call main_run_zero_padding. That is not BATTLE
  * code but MAIN's 4 KB of zero words ending in `jr ra`; BATTLE runs when the
  * caller then calls battle_state_run_game_loop. */
 static void main_overlay_exec_battle_bin(void) {

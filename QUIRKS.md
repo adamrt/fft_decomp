@@ -928,7 +928,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   is called only by `main_gfx_fade_in_orbonne_monastery`, so it is unreachable too.
 - `suzuki_sound_set_unknown_80032a28` stores a 16-bit sound-driver value that `suzuki_sound_init`
   and `suzuki_sound_quit` clear and nothing reads; nothing calls the setter.
-- `battle_bin_entrypoint` (0x80010ba8), which `main_overlay_exec_battle_bin`
+- `main_run_zero_padding` (0x80010ba8), which `main_overlay_exec_battle_bin`
   reaches after loading BATTLE.BIN, is not BATTLE code: it is the 4 KB of zero
   words after MAIN's C start-up, run as 1,024 no-ops up to the `jr ra` at
   0x80011ba8. BATTLE runs when `main_system_run_game_loop` then calls
