@@ -861,7 +861,7 @@ extern u8 g_map_max_y;
 /* Battle terrain: two layers of 256 records, indexed
  * (layer * 256 + y * width + x). Callers that walk it with raw byte offsets
  * cast to u8*; the record shape is map_tile_t. */
-extern map_tile_t g_map_tile_data[];
+extern map_tile_t g_map_tile_data[MAP_TILE_COUNT];
 extern s32 g_map_lowest_surface_y;
 extern map_tile_t* g_map_tile_data_ptr;
 extern u8 g_map_tile_depth;

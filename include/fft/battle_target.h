@@ -72,7 +72,7 @@ extern target_panel_t g_target_panel_data[MAP_TILE_COUNT];
 
 /* Second name of g_target_panel_data, unsized: 512 map panels followed
  * by 16 auxiliary panels, all initialized at 0x80174e84. */
-extern target_panel_t g_target_panels[];
+extern target_panel_t g_target_panels[MAP_TILE_COUNT];
 
 void battle_target_clear_panel_data(void);
 void battle_target_clear_panel_spread_flags(void);

@@ -2941,7 +2941,7 @@ static s32 battle_target_set_all_panels_targeted_if_targetable(void) {
     s32 i;
 
     count = 0;
-    for (i = 0; i < 0x200; i++) {
+    for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_map_tile_data[i];
         panel = &g_target_panel_data[i];
         if (panel->remaining_range != 0 && !(tile->flags.blocked)
@@ -2970,7 +2970,7 @@ static s32 battle_target_clear_selection_state_of_all_panels(void) {
     s32 i;
 
     count = 0;
-    for (i = 0; i < 0x200; i++) {
+    for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_map_tile_data[i];
         panel = &g_target_panel_data[i];
         if (panel->mark != 0 && !(tile->flags.blocked) && (tile->surface.type) != MAP_SURFACE_CROSS_SECTION) {
@@ -3559,7 +3559,7 @@ void battle_target_disable_green_panel_flags(void) {
     map_tile_t* tile;
     s32 i;
 
-    for (i = 0; i < 0x200; i++) {
+    for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile = &g_map_tile_data[i];
         tile->ceiling_depth_and_marks.targeted = 0;
     }
@@ -3888,7 +3888,7 @@ static void battle_target_apply_unit_team_eligibility(
         }
     }
     if (!aoe_is_0xff) {
-        for (i = 0; i < 0x200; i++) {
+        for (i = 0; i < MAP_TILE_COUNT; i++) {
             panel = &g_target_panels[i];
             if (panel->remaining_range != 0) {
                 panel->mark = 1;
@@ -3970,7 +3970,7 @@ static void battle_target_build_directional_attack_panels(const action_command_t
             battle_target_calculate_linear_attack_tiles(TARGET_LINE_EAST, x, y);
         }
     }
-    for (i = 0; i < 0x200; i++) {
+    for (i = 0; i < MAP_TILE_COUNT; i++) {
         panel = &g_target_panels[i];
         if (panel->mark == 0) {
             panel->remaining_range = 0;

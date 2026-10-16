@@ -896,7 +896,7 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
     target_panel_t* panel;
 
     count = 0;
-    for (i = 0; i < 0x200; i++) {
+    for (i = 0; i < MAP_TILE_COUNT; i++) {
         tile_data = &g_map_tile_data[i];
         if (i == 0x100) {
             lower_count = count;
