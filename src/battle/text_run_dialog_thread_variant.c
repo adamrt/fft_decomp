@@ -102,9 +102,9 @@ void text_run_dialog_thread_variant(void) {
     rec.position = rec.dialog_type & DIALOG_TYPE_POSITION_MASK;
     rec.options = rec.dialog_type & DIALOG_TYPE_OPTIONS_MASK;
     rec.no_box = rec.dialog_type & DIALOG_TYPE_NO_BOX;
-    rec.arrow_offset = thread->task_words[4];
-    rec.x_offset = thread->task_words[2];
-    rec.y_offset = thread->task_words[3];
+    rec.arrow_offset = thread->task_words[DIALOG_THREAD_WORD_ARROW_OFFSET];
+    rec.x_offset = thread->task_words[DIALOG_THREAD_WORD_X_OFFSET];
+    rec.y_offset = thread->task_words[DIALOG_THREAD_WORD_Y_OFFSET];
     if (rec.dialog_type & 0x10) {
         rec.portrait = thread->function_parameter_4 - 1;
     } else {
@@ -112,8 +112,8 @@ void text_run_dialog_thread_variant(void) {
     }
     text = text_find_entry(thread_get_current_parameter_2());
     text_measure_pixels(&rec.mark, &rec.lines, text);
-    if (thread->task_words[6] != 0) {
-        rec.mark = thread->task_words[6];
+    if (thread->task_words[DIALOG_THREAD_WORD_TEXT_WIDTH] != 0) {
+        rec.mark = thread->task_words[DIALOG_THREAD_WORD_TEXT_WIDTH];
     }
     if (rec.box_type == DIALOG_BOX_TYPE_EIGHT_LINE) {
         rec.lines = 8;
@@ -331,7 +331,7 @@ void text_run_dialog_thread_variant(void) {
     win[0].active = 1;
     win[1].active = 1;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
-        menu_tween_window_quads(win, &from, &to, thread->task_words[5] & 0xF);
+        menu_tween_window_quads(win, &from, &to, thread->task_words[DIALOG_THREAD_WORD_WINDOW_OPTIONS] & 0xF);
     } else {
         menu_animate_window_quad_crop(win, &from, &to);
     }

@@ -32,6 +32,15 @@ extern char g_text_wait_for_allocation_message[];
 /* per-module bodies: each module links its own copy under the shared name. */
 void text_draw_large_number_glyphs_variant(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 void text_init_section_pointers(void);
+/* Task words of a dialog thread, which the DisplayMessage instruction fills
+ * before the thread runs. */
+enum {
+    DIALOG_THREAD_WORD_X_OFFSET = 2,
+    DIALOG_THREAD_WORD_Y_OFFSET = 3,
+    DIALOG_THREAD_WORD_ARROW_OFFSET = 4,
+    DIALOG_THREAD_WORD_WINDOW_OPTIONS = 5,
+    DIALOG_THREAD_WORD_TEXT_WIDTH = 6, /* nonzero overrides the measured width */
+};
 void text_run_dialog_thread_variant(void);
 void text_run_spell_quote_thread(void);
 s32 menu_text_render_glyph_to_4bpp_image_variant(

@@ -397,7 +397,8 @@ restart_script:
         else if (opcode == EVENT_OPCODE_DISPLAY_MESSAGE) {
             operand_1 = thread_resolve_id(operand_1);
             thread_start(operand_1, text_run_dialog_thread_variant);
-            text_build_display_message(instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[6]);
+            text_build_display_message(
+                instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_TEXT_WIDTH]);
             g_thread_contexts[operand_1].function_parameter_1 = operand_2;
             g_thread_contexts[operand_1].function_parameter_2 = ((operand_4 << 8) + operand_3) - 1;
             dialogue_cursor = (u8*)g_script_event_block;
@@ -407,15 +408,16 @@ restart_script:
             operand_3 = message_instruction->unit_id_le[0];
             g_thread_contexts[operand_1].function_parameter_3 = (operand_4 << 8) + operand_3;
             g_thread_contexts[operand_1].function_parameter_4 = message_instruction->portrait_selector;
-            g_thread_contexts[operand_1].task_words[2] = script_read_s16(message_instruction->x_offset_le);
-            g_thread_contexts[operand_1].task_words[3] = script_read_s16(
+            g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_X_OFFSET]
+                = script_read_s16(message_instruction->x_offset_le);
+            g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = script_read_s16(
                 ((event_display_message_instruction_t*)(instruction_offset + (u8*)g_script_event_block))->y_offset_le);
-            g_thread_contexts[operand_1].task_words[4] = script_read_s16(
+            g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_ARROW_OFFSET] = script_read_s16(
                 ((event_display_message_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
                     ->arrow_offset_le);
             message_cursor = (u8*)g_script_event_block;
             message_cursor += instruction_offset;
-            g_thread_contexts[operand_1].task_words[5]
+            g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_WINDOW_OPTIONS]
                 = ((event_display_message_instruction_t*)message_cursor)->window_options;
             thread_yield();
         } else if (opcode == EVENT_OPCODE_CHANGE_DIALOG) {
