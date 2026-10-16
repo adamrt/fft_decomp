@@ -66,7 +66,7 @@ s32 formation_ability_set_slot(s16 unit_id, s16 slot, s16 ability, s32 update_eq
     return -2;
 }
 
-/* Why a formation unit cannot use a menu, as a WORLD_FORMATION_UNIT_LOCK_*
+/* Why a formation unit cannot use a menu, as a FORMATION_UNIT_LOCK_*
  * value: away on a proposition, a monster, an egg or a Mime, tested in that
  * order; FORMATION_UNIT_UNLOCKED otherwise. */
 s32 formation_get_unit_lock(s32 unit_id) {

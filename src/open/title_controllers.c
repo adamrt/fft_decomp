@@ -345,7 +345,7 @@ void title_push_menu(s32 argument) {
     g_title_menu_states[controller].exiting = 0;
     record = g_title_menu_states[controller].records_36[g_title_menu_states[controller].cursor + 1];
     g_controller_current_index = controller + 1;
-    g_window_render_records_36[record].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+    g_window_render_records_36[record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
     field = &g_controller_handler_indices[controller];
     *field = CONTROLLER_TITLE_MENU;
 }
@@ -589,7 +589,7 @@ void title_update_menu(controller_record_t* record) {
         if (state->cursor < 0) {
             state->cursor = TITLE_MENU_SOUND;
         }
-        g_window_render_records_36[state->records_36[state->cursor + 1]].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+        g_window_render_records_36[state->records_36[state->cursor + 1]].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
@@ -600,7 +600,7 @@ void title_update_menu(controller_record_t* record) {
         if (state->cursor >= 4) {
             state->cursor = TITLE_MENU_NEW_GAME;
         }
-        g_window_render_records_36[state->records_36[state->cursor + 1]].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+        g_window_render_records_36[state->records_36[state->cursor + 1]].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }
@@ -624,7 +624,7 @@ static void title_push_sound_type_menu(void) {
     point32_t* position;
     title_sound_type_menu_t* menu;
 
-    for (i = 0; i < OPEN_SOUND_MENU_ENTRY_COUNT; i++) {
+    for (i = 0; i < TITLE_SOUND_MENU_ENTRY_COUNT; i++) {
         record = window_append_animated_record(g_window_render_record_pointers, &g_window_render_record_pointer_count);
         g_controller_records_next[g_controller_current_index].sound_menu.entry_render_indices[i] = record;
         g_window_render_records_36[record].priority = 4;
@@ -648,7 +648,7 @@ static void title_push_sound_type_menu(void) {
     sound_type += (s32)menu;
     selected_record = *(s32*)sound_type;
     g_controller_current_index = controller_index + 1;
-    g_window_render_records_36[selected_record].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+    g_window_render_records_36[selected_record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
     g_controller_handler_indices[controller_index] = CONTROLLER_SOUND_TYPE_MENU;
 }
 
@@ -665,8 +665,8 @@ void title_update_sound_type_menu(controller_record_t* record) {
     s32 render_record;
 
     if (menu->step == 2) {
-        g_window_next_render_record_36 -= OPEN_SOUND_MENU_ENTRY_COUNT;
-        g_window_render_record_pointer_count -= OPEN_SOUND_MENU_ENTRY_COUNT;
+        g_window_next_render_record_36 -= TITLE_SOUND_MENU_ENTRY_COUNT;
+        g_window_render_record_pointer_count -= TITLE_SOUND_MENU_ENTRY_COUNT;
         g_controller_current_index -= 1;
         title_show_menu_entries(&g_controller_records[g_controller_current_index].title);
         /* The title menu underneath, addressed from the pushed-record base. */
@@ -695,7 +695,7 @@ void title_update_sound_type_menu(controller_record_t* record) {
             menu->sound_mode_selection = SUZUKI_SOUND_TYPE_WIDE;
         }
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
-        g_window_render_records_36[render_record].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+        g_window_render_records_36[render_record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 
@@ -707,7 +707,7 @@ void title_update_sound_type_menu(controller_record_t* record) {
             menu->sound_mode_selection = SUZUKI_SOUND_TYPE_MONO;
         }
         render_record = menu->entry_render_indices[menu->sound_mode_selection];
-        g_window_render_records_36[render_record].palette = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
+        g_window_render_records_36[render_record].palette = TITLE_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         sound_play_sfx(SOUND_SFX_CURSOR_MOVE);
     }
 }

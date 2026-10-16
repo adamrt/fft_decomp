@@ -389,7 +389,7 @@ typedef enum sprite_evtchr_slot_owner_flags {
     SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE = 0x80,
 } sprite_evtchr_slot_owner_flags_e;
 
-enum { BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK = 0x1f };
+enum { SPRITE_EVTCHR_SLOT_OWNER_ID_MASK = 0x1f };
 
 typedef enum sprite_evtchr_slot_buffer_marker {
     SPRITE_EVTCHR_SLOT_BUFFER_FREE = 0,
@@ -397,7 +397,7 @@ typedef enum sprite_evtchr_slot_buffer_marker {
 } sprite_evtchr_slot_buffer_marker_e;
 
 /* Other positive buffer values are upload countdowns decremented each frame. */
-enum { BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES = 2 };
+enum { SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES = 2 };
 
 /* The nine spritesheet VRAM slots (g_sprite_sheet_slots), 0x32d6 bytes each;
  * g_sprite_sheet_ids_by_vram_slot aliases the first record's byte 1. */
@@ -466,7 +466,7 @@ typedef enum sprite_load_shared_kind {
 } sprite_load_shared_kind_e;
 
 /* Both load-kind lists start at zero. */
-enum { BATTLE_GFX_UNIT_LOAD_KIND_FIRST = 0 };
+enum { SPRITE_LOAD_KIND_FIRST = 0 };
 
 /* Shared by the resident-file and queued-unit loaders. The file kind selects
  * the buffer's format, and index selects a file or a queued descriptor. */

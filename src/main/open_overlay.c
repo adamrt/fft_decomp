@@ -80,20 +80,20 @@ void memcard_init_events(void) {
     }
     i = 0;
     EnterCriticalSection();
-    g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_DONE] = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_ERROR] = OpenEvent(SwCARD, EvSpERROR, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_TIMEOUT] = OpenEvent(SwCARD, EvSpTIMOUT, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_BIOS_NEW_CARD] = OpenEvent(SwCARD, EvSpNEW, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_DONE] = OpenEvent(HwCARD, EvSpIOE, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_ERROR] = OpenEvent(HwCARD, EvSpERROR, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_TIMEOUT] = OpenEvent(HwCARD, EvSpTIMOUT, EvMdNOINTR, 0);
-    g_memcard_bios_events[MAIN_CARD_EVENT_HARDWARE_NEW_CARD] = OpenEvent(HwCARD, EvSpNEW, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_BIOS_DONE] = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_BIOS_ERROR] = OpenEvent(SwCARD, EvSpERROR, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_BIOS_TIMEOUT] = OpenEvent(SwCARD, EvSpTIMOUT, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_BIOS_NEW_CARD] = OpenEvent(SwCARD, EvSpNEW, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_DONE] = OpenEvent(HwCARD, EvSpIOE, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_ERROR] = OpenEvent(HwCARD, EvSpERROR, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_TIMEOUT] = OpenEvent(HwCARD, EvSpTIMOUT, EvMdNOINTR, 0);
+    g_memcard_bios_events[MEMCARD_EVENT_HARDWARE_NEW_CARD] = OpenEvent(HwCARD, EvSpNEW, EvMdNOINTR, 0);
     InitCARD(1);
     StartCARD();
     ChangeClearPAD(0);
     _bu_init();
     _card_auto(0);
-    for (i = 0; i < MAIN_CARD_EVENT_COUNT; i++) {
+    for (i = 0; i < MEMCARD_EVENT_COUNT; i++) {
         EnableEvent(g_memcard_bios_events[i]);
     }
     ExitCriticalSection();

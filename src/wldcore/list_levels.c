@@ -1154,8 +1154,8 @@ void screen_transition_push_level(s32 screen, s32 param_a, s32 param_b) {
     }
 
     /* Blank the backdrop image from the end. */
-    i = WLDCORE_BACKDROP_WORDS - 1;
-    clear = &g_world_map_scratch_buffer[WLDCORE_BACKDROP_WORDS - 1];
+    i = WORLD_MAP_BACKDROP_WORDS - 1;
+    clear = &g_world_map_scratch_buffer[WORLD_MAP_BACKDROP_WORDS - 1];
     depth = g_menu_stack_depth;
     g_menu_stack_records_next[depth].screen_transition.screen = screen;
     g_menu_stack_records_next[depth].screen_transition.param_a = param_a;

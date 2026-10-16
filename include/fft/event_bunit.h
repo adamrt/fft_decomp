@@ -22,7 +22,7 @@ typedef enum unit_list_menu {
     UNIT_LIST_MENU_JOB = 2,          /* unit_list_update_job_page: the selected unit's jobs and abilities */
 } unit_list_menu_e;
 
-enum { BUNIT_MENU_SELECTION_RECORD_COUNT = 14 };
+enum { UNIT_LIST_SELECTION_RECORD_COUNT = 14 };
 
 extern s32 g_unit_list_current_menu; /* unit_list_menu_e */
 extern s16 g_unit_list_primary_result;

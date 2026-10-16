@@ -86,7 +86,7 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
 #endif
 
 #ifdef FFT_OPEN
-#    define OPEN_MENU_TEXT_MARGIN 8
+#    define TITLE_MENU_TEXT_MARGIN 8
 
 /* Build and upload a window render record, drawing text `text_id` inside it
  * at (8, 8) first unless the id is 0, and start its pop-in animation. */
@@ -97,8 +97,8 @@ void window_init_text_record(s32 record_index, RECT bounds, s32 coordinate_mode,
 
     window_init_frame_record(record_index, bounds, coordinate_mode, (u16*)image);
 
-    text_origin.x = OPEN_MENU_TEXT_MARGIN;
-    text_origin.y = OPEN_MENU_TEXT_MARGIN;
+    text_origin.x = TITLE_MENU_TEXT_MARGIN;
+    text_origin.y = TITLE_MENU_TEXT_MARGIN;
     if (text_id != 0) {
         window_display_text_entry(record_index, text_id, text_origin, image);
     }

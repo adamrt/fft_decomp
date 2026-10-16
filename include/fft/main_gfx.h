@@ -10,8 +10,8 @@
 
 /* display */
 /* BATTLE's draw areas begin 0x80 pixels left of the displayed area, so the left edge of the battle
- * screen is draw x MAIN_GFX_BATTLE_SCREEN_X. */
-enum { MAIN_GFX_BATTLE_SCREEN_X = 0x80 };
+ * screen is draw x GFX_BATTLE_SCREEN_X. */
+enum { GFX_BATTLE_SCREEN_X = 0x80 };
 
 extern DISPENV g_gfx_display_envs[2];
 extern DRAWENV g_gfx_draw_envs[2];

@@ -101,7 +101,7 @@ typedef enum animation {
 } animation_e;
 
 /* The teleport animation and the attack animations after it are ATTACK_FIRST and up. */
-enum { BATTLE_UNIT_ANIMATION_ATTACK_FIRST = ANIMATION_TELEPORT };
+enum { ANIMATION_ATTACK_FIRST = ANIMATION_TELEPORT };
 
 /* ability animations */
 /* One row of the ability animation table, indexed by ability id: the ability's charge animation

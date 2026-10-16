@@ -67,7 +67,7 @@ typedef struct proposition_fields {
     u16 gil_reward;      /* 0x18 */
     u16 _unused_1a[3];   /* 0x1a */
     u16 location;        /* 0x20; 0 for any location */
-    u16 condition_flags; /* 0x22; WLDCORE_PROPOSITION_CONDITION_* */
+    u16 condition_flags; /* 0x22; PROPOSITION_CONDITION_* */
     u16 _unused_24;      /* 0x24 */
     u16 speaker_mode;    /* 0x26; proposition_speaker_e */
     u16 preferred_job;   /* 0x28 */

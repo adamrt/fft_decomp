@@ -1072,7 +1072,7 @@ static s32 status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     return (action->attack_type != 0) * 2;
 }
 
-/* Returns the BATTLE_TURN_STATUS_* flags that decide how a unit takes part in the
+/* Returns the TURN_STATUS_* flags that decide how a unit takes part in the
  * turn order.
  *
  * CT_FROZEN alone for an empty slot, a unit with a status of the freeze-CT set or

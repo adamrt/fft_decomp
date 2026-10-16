@@ -69,7 +69,7 @@ static void bar_leave(menu_stack_window_level_t* unused_level) {
     world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
     world_map_clear_screen_and_set_clip_rect(0);
     /* Blank the backdrop image until the map is captured again. */
-    for (i = WLDCORE_BACKDROP_WORDS - 1; i >= 0; i--) {
+    for (i = WORLD_MAP_BACKDROP_WORDS - 1; i >= 0; i--) {
         g_world_map_scratch_buffer[i] = 0;
     }
 }

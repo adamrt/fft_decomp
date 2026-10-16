@@ -120,7 +120,7 @@ void unit_fade_out_start(s32 runtime_id, s32 mode, s16 red, s16 green, s16 blue)
         unit_move_to_head(runtime_id);
         unit->fade_out_phase = UNIT_FADE_OUT_FLASH;
         unit->shadow_graphic_trigger = 0;
-        unit->sprite_display_flags = (unit->sprite_display_flags & ~BATTLE_SPRITE_DISPLAY_BLEND_MASK)
+        unit->sprite_display_flags = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK)
             | (SPRITE_DISPLAY_BLEND_ADD | SPRITE_DISPLAY_SEMI_TRANSPARENT);
         sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, mode, runtime_id, red, green, blue);
         unit->float_bob_offset = 0;
@@ -750,7 +750,7 @@ static void animation_teleport_start_white_flash(unit_t* unit) {
         || unit->spritesheet_id == SPRITE_SHEET_ID_ALTIMA_SECOND_FORM) {
         effect_play();
     }
-    unit->sprite_display_flags = (unit->sprite_display_flags & ~BATTLE_SPRITE_DISPLAY_BLEND_MASK)
+    unit->sprite_display_flags = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK)
         | (SPRITE_DISPLAY_BLEND_ADD | SPRITE_DISPLAY_SEMI_TRANSPARENT);
     sprite_palette_apply_modulation_to_units(BATTLE_MAP_COLOR_MODE_BASE, 2, unit->runtime_id, 0x1f, 0x1f, 0x1f);
     unit->distortion_phase++;

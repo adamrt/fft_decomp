@@ -1015,7 +1015,7 @@ static void sprite_frame_load_parts(unit_t* unit, sprite_display_t* display, spr
 
     flags = src->flags;
     count = display->part_count;
-    display->tpage = (flags & BATTLE_SPRITE_DISPLAY_BLEND_MASK) | tpage;
+    display->tpage = (flags & SPRITE_DISPLAY_BLEND_MASK) | tpage;
     display->clut = unit->clut;
     for (i = 0; i < count; i++) {
         part = &src->parts[i];
@@ -1027,7 +1027,7 @@ static void sprite_frame_load_parts(unit_t* unit, sprite_display_t* display, spr
         u = (tile & 0x1f) * 8;
         v = (tile >> 5) * 8;
         sprite_display_store_data(display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8,
-            (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+            (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                 | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
     }
 }
@@ -1166,7 +1166,7 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
     }
     flags = frame_data->flags;
     if (unit->spritesheet_id >= SPRITE_SHEET_ID_CRYSTAL) {
-        display->tpage = (flags & BATTLE_SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_OTHER;
+        display->tpage = (flags & SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_OTHER;
         display->clut = unit->clut;
         for (i = 0; i < count; i++) {
             part = &frame_data->parts[i];
@@ -1185,12 +1185,12 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
                 part_v = y_offset + (tile >> 5) * 8;
                 sprite_display_store_data(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
                     height * 8,
-                    (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+                    (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
             }
         }
     } else if (frame < (u32)state->shp->first_attack_frame) {
-        display->tpage = unit->tpage | (flags & BATTLE_SPRITE_DISPLAY_BLEND_MASK);
+        display->tpage = unit->tpage | (flags & SPRITE_DISPLAY_BLEND_MASK);
         display->clut = unit->clut;
         i = 0;
         if (count != 0) {
@@ -1213,13 +1213,13 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
                         height = g_sprite_part_sizes[size].height;
                         sprite_display_store_data(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
                             height * 8,
-                            (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+                            (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                                 | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
                     } else {
                         tile_index = attr & SPRITE_SHP_PART_TILE_MASK;
                         u = (tile_index & 0x1f) * 8;
                         row = tile_index >> 5;
-                        part_flags = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+                        part_flags = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                             | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13);
                         sprite_display_store_data(
                             display, i, part->x_shift, part->y_shift + 0x18, u, row * 8 + 0x18, 0x30, 0x18, part_flags);
@@ -1241,15 +1241,15 @@ void sprite_frame_load_unit(unit_t* unit, animation_state_t* state, u16 frame, u
                     part_v = y_offset + (tile >> 5) * 8;
                     sprite_display_store_data(display, i, part->x_shift, part->y_shift, part_u, part_v, width * 8,
                         height * 8,
-                        (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+                        (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                             | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13));
                 }
             } while (++i < count);
         }
     } else if (frame < SPRITE_SHP_FRAME_EVTCHR_FIRST) {
-        if ((g_sprite_evtchr_slots[0].owner & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK) == unit->runtime_id) {
+        if ((g_sprite_evtchr_slots[0].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id) {
             sprite_frame_load_parts(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_0);
-        } else if ((g_sprite_evtchr_slots[1].owner & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK) == unit->runtime_id) {
+        } else if ((g_sprite_evtchr_slots[1].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id) {
             sprite_frame_load_parts(unit, display, frame_data, SPRITE_TPAGE_EVTCHR_SLOT_1);
         }
     } else if (sequence_id < ANIMATION_SEQUENCE_EVTCHR_SLOT_1) {
@@ -1892,7 +1892,7 @@ static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprit
             flags = src->flags;
             switch (sprite->graphic_type) {
             case SPRITE_GRAPHIC_WEAPON:
-                display->tpage = (flags & BATTLE_SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_WEAPON;
+                display->tpage = (flags & SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_WEAPON;
                 display->clut = unit->clut + index * 64 + 0x80; /* BATTLE_MAP_CLUT_ROW_ITEM_A or _B */
                 for (i = 0; i < parts; i++) {
                     u32 size;
@@ -1911,14 +1911,14 @@ static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprit
                     tile = attr & SPRITE_SHP_PART_TILE_MASK;
                     u = (tile & 0x1f) * 8;
                     v = (tile >> 5) * 8 + graphic_v;
-                    mode = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+                    mode = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13);
                     sprite_display_store_data(
                         display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8, mode);
                 }
                 break;
             case SPRITE_GRAPHIC_EFFECT:
-                display->tpage = (flags & BATTLE_SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_EFFECT;
+                display->tpage = (flags & SPRITE_DISPLAY_BLEND_MASK) | SPRITE_TPAGE_EFFECT;
                 display->clut = unit->clut + index * 64 + 0x80; /* BATTLE_MAP_CLUT_ROW_ITEM_A or _B */
                 for (i = 0; i < parts; i++) {
                     u32 size;
@@ -1937,7 +1937,7 @@ static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprit
                     tile = attr & SPRITE_SHP_PART_TILE_MASK;
                     u = (tile & 0x1f) * 8;
                     v = (tile >> 5) * 8;
-                    mode = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | BATTLE_SPRITE_DISPLAY_BLEND_MASK))
+                    mode = (flags & (SPRITE_DISPLAY_SEMI_TRANSPARENT | SPRITE_DISPLAY_BLEND_MASK))
                         | ((attr & SPRITE_SHP_PART_FLIP_MASK) >> 13);
                     sprite_display_store_data(
                         display, i, part->x_shift, part->y_shift, u, v, width * 8, height * 8, mode);
@@ -1959,7 +1959,7 @@ static void animation_run_wep_eff_seq_script(unit_t* unit, sprite_block_t* sprit
  * block (column spritesheet slot / 8, row spritesheet slot % 8 of the
  * SPRITE_SHEET_STRIP_VRAM_X/Y area) is copied 200 lines below it. `slot` is then owned by the unit's attack
  * image (runtime id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE), and the image
- * buffer stays busy for BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES frames while the
+ * buffer stays busy for SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES frames while the
  * upload completes. */
 static void sprite_evtchr_load_unit(unit_t* unit, s32 slot, s32 image_slot) {
     RECT rect;
@@ -1974,7 +1974,7 @@ static void sprite_evtchr_load_unit(unit_t* unit, s32 slot, s32 image_slot) {
     MoveImage(&rect, g_sprite_evtchr_slots[slot].image_rect.x, g_sprite_evtchr_slots[slot].image_rect.y + 200);
     g_sprite_evtchr_slots[slot].owner = unit->runtime_id | SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE;
     g_system_frame_pacing_suppressed = 1;
-    g_sprite_evtchr_slots[image_slot].image_buffer_state = BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES;
+    g_sprite_evtchr_slots[image_slot].image_buffer_state = SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES;
     g_sprite_evtchr_slots[slot].evtchr_load_state = 1;
 }
 
@@ -1987,7 +1987,7 @@ static void sprite_evtchr_release_unit(unit_t* unit) {
     for (i = 0; i < 2; i++) {
         slot_id = g_sprite_evtchr_slots[i].owner;
         if (slot_id != SPRITE_EVTCHR_SLOT_OWNER_EVTCHR && slot_id != SPRITE_EVTCHR_SLOT_OWNER_NONE
-            && (slot_id & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK) == unit->runtime_id
+            && (slot_id & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id
             && (slot_id & SPRITE_EVTCHR_SLOT_OWNER_SP2) == 0) {
             g_sprite_evtchr_slots[i].owner = SPRITE_EVTCHR_SLOT_OWNER_NONE;
             g_sprite_evtchr_slots[i].evtchr_load_state = 0;
@@ -2091,7 +2091,7 @@ static void animation_update_unit_wep_eff(unit_t* unit_data) {
                             /* Keep a slot the unit already owns; otherwise load into a free slot and a free
                              * image buffer. */
                             for (i = 0; i < 2; i++) {
-                                if ((g_sprite_evtchr_slots[i].owner & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK)
+                                if ((g_sprite_evtchr_slots[i].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK)
                                     == unit->runtime_id) {
                                     break;
                                 }
@@ -2122,7 +2122,7 @@ static void animation_update_unit_wep_eff(unit_t* unit_data) {
                                 if (ok == 0) {
                                     if (g_sprite_evtchr_slots[1].owner - SPRITE_EVTCHR_SLOT_OWNER_EVTCHR >= 2) {
                                         other = unit_get_by_runtime_id(
-                                            g_sprite_evtchr_slots[1].owner & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK);
+                                            g_sprite_evtchr_slots[1].owner & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK);
                                         if (other != 0) {
                                             if (other->animation.sequence_id & 1) {
                                                 other->animation.frame = g_animation_targeted_frame_back
@@ -3161,7 +3161,7 @@ void sprite_load_reset_state(void) {
     setRECT(&g_sprite_evtchr_slots[0].image_rect, 0x100, 0, 0x40, 0xc8);
     setRECT(&g_sprite_evtchr_slots[1].image_rect, 0x140, 0, 0x40, 0xc8);
     g_sprite_seq_data_cursor = g_sprite_seq_data_buffer;
-    g_sprite_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
+    g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
     g_sprite_load_state.index = 0;
     g_sprite_load_state.buffer = 0;
@@ -3419,7 +3419,7 @@ static void unit_update_and_animate_all_three_times(void) {
  * first file kind, the start-read phase, index 0 and no buffer. The argument is
  * not read. */
 void sprite_load_clear_state(s32 unused_map_id) {
-    g_sprite_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
+    g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
     g_sprite_load_state.index = 0;
     g_sprite_load_state.buffer = 0;
@@ -3437,7 +3437,7 @@ void deploy_init_and_reset_sprite_load_state(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) == 0) {
         if (g_deploy_skipped != 0) {
             deploy_build_units(g_deploy_deployed_unit_map_coordinates, 0);
-            g_sprite_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
+            g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
             g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
             g_sprite_load_state.index = 0;
             g_sprite_load_state.buffer = 0;
@@ -3447,7 +3447,7 @@ void deploy_init_and_reset_sprite_load_state(void) {
         deploy_init_units_for_debug_red_team(deploy_get_coordinate_slots(), 0);
     }
     deploy_build_units(deploy_get_coordinate_slots(), 0);
-    g_sprite_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
+    g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
     g_sprite_load_state.index = 0;
     g_sprite_load_state.buffer = 0;

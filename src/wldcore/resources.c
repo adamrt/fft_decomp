@@ -858,7 +858,7 @@ void world_map_clear_vram_and_scratch(s32 clear_scratch) {
     image_rect.h = 0x1e0;
     ClearImage(&image_rect, 0, 0, 0);
     if (clear_scratch != 0) {
-        for (i = WLDCORE_BACKDROP_WORDS - 1; i >= 0; i--) {
+        for (i = WORLD_MAP_BACKDROP_WORDS - 1; i >= 0; i--) {
             g_world_map_scratch_buffer[i] = 0;
         }
     }

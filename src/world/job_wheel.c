@@ -291,7 +291,7 @@ void formation_job_wheel_menu(void) {
                             /* The first call bound the formation text section to the job texts. */
                             message_box_show_with_sound(
                                 formation_job_get_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK)
-                                    + WORLD_TEXT_ID_FORMATION_TEXT_BASE,
+                                    + TEXT_ID_FORMATION_TEXT_BASE,
                                 SOUND_SFX_ERROR_MESSAGE);
                             g_unit_panel_status_display_thread_params.style = 1;
                         } else {
@@ -303,8 +303,7 @@ void formation_job_wheel_menu(void) {
                         if (g_formation_job_wheel_job_count >= 2) {
                             i = formation_job_get_text_index(job & FORMATION_JOB_LIST_ENTRY_ID_MASK);
                             if (i >= 0) {
-                                message_box_show_with_sound(
-                                    i + WORLD_TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
+                                message_box_show_with_sound(i + TEXT_ID_FORMATION_TEXT_BASE, SOUND_SFX_WINDOW_OPEN);
                                 g_unit_panel_status_display_thread_params.style = 1;
                             }
                         }

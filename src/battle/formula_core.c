@@ -30,7 +30,7 @@ static u8 g_formula_zodiac_compatibility_modifiers[12] = { 0, 0, 0, 1, 2, 0, 3, 
 /* The statuses a rider can be inflicted with, one mask per status byte. */
 static u8 g_status_rider_infliction_mask[STATUS_BYTE_COUNT] = { 239, 0, 49, 121, 226 };
 
-/* Knockback directions: quarter-turn facings in the BATTLE_FACING_* order, which differs from
+/* Knockback directions: quarter-turn facings in the UNIT_FACING_* order, which differs from
  * move_direction_e. */
 enum {
     KNOCKBACK_DIRECTION_SOUTH = 0, /* -y */

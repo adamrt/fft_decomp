@@ -62,14 +62,14 @@ void window_init_record_pools(void) {
     g_window_next_render_record_36 = 0;
     g_window_render_record_pointer_count = 0;
 
-    for (i = 0; i < OPEN_GFX_RENDER_RECORD_CAPACITY; i++) {
+    for (i = 0; i < WINDOW_RECORD_56_CAPACITY; i++) {
         g_window_render_records_36[i].flags = DISPLAY_OBJECT_ANIMATED;
         g_window_render_records_36[i].priority = 8;
         color = &g_window_render_records_36[i].color;
         color->b = color->g = color->r = 0x80;
     }
 
-    for (i = 0; i < OPEN_GFX_RENDER_RECORD_CAPACITY; i++) {
+    for (i = 0; i < WINDOW_RECORD_56_CAPACITY; i++) {
         g_window_render_records_56[i].flags = DISPLAY_OBJECT_IMAGE;
         g_window_render_records_56[i].ot_layer = 8;
         color = &g_window_render_records_56[i].color;

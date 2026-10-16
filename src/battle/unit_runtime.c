@@ -289,7 +289,7 @@ s32 script_opcode_47_add_ghost_unit(
         ret = 0;
     } else {
         g_unit_graphics_load_queue.count = 0;
-        g_sprite_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
+        g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
         g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
         g_sprite_load_state.index = 0;
         g_sprite_load_state.buffer = 0;
@@ -308,7 +308,7 @@ s32 sprite_load_unit_graphics_by_battle_id(s32 battle_id, s32 flags) {
     unit_stats_t* unit;
 
     g_unit_graphics_load_queue.count = 0;
-    g_sprite_load_state.file_kind = BATTLE_GFX_UNIT_LOAD_KIND_FIRST;
+    g_sprite_load_state.file_kind = SPRITE_LOAD_KIND_FIRST;
     g_sprite_load_state.phase = SPRITE_LOAD_PHASE_START_READ;
     g_sprite_load_state.index = 0;
     g_sprite_load_state.buffer = 0;
@@ -524,7 +524,7 @@ s32 sprite_evtchr_load_unit_attack_image(s32 runtime_id, s32 slot) {
                 MoveImage(
                     &rect, g_sprite_evtchr_slots[slot].image_rect.x, g_sprite_evtchr_slots[slot].image_rect.y + 200);
                 g_sprite_evtchr_slots[slot].owner = runtime_id + SPRITE_EVTCHR_SLOT_OWNER_ATTACK_IMAGE;
-                g_sprite_evtchr_slots[slot].image_buffer_state = BATTLE_GFX_VRAM_SLOT_UPLOAD_FRAMES;
+                g_sprite_evtchr_slots[slot].image_buffer_state = SPRITE_EVTCHR_SLOT_UPLOAD_FRAMES;
                 g_sprite_evtchr_slots[slot].evtchr_load_state = 1;
                 return 1;
             }

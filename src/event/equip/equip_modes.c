@@ -24,7 +24,7 @@
 #include "psx/types.h"
 
 /* EQUIP's screen message 9 (TEXT_SECTION_OVERLAY_SCREEN): none of the item is left. */
-enum { EQUIP_TEXT_ID_OUT_OF_STOCK = (TEXT_SECTION_OVERLAY_SCREEN << TEXT_ID_SECTION_SHIFT) + 9 };
+enum { EQUIPMENT_TEXT_ID_OUT_OF_STOCK = (TEXT_SECTION_OVERLAY_SCREEN << TEXT_ID_SECTION_SHIFT) + 9 };
 
 static s32 equipment_run_equip_mode(void);
 static s32 equipment_run_remove_mode(void);
@@ -178,7 +178,7 @@ static s32 equipment_run_equip_mode(void) {
                 && (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_UNEQUIPPABLE) == 0) {
                 item_id = item;
                 if (item_adjust_inventory_count(item_id, 0) == 0) {
-                    equipment_show_message(EQUIP_TEXT_ID_OUT_OF_STOCK, SOUND_SFX_ERROR_MESSAGE);
+                    equipment_show_message(EQUIPMENT_TEXT_ID_OUT_OF_STOCK, SOUND_SFX_ERROR_MESSAGE);
                 } else if (equipment_set_slot_item(g_equipment_unit_selected_index, g_equipment_item_slot, item_id)
                     == EQUIPMENT_SLOT_ITEM_ALLOWED) {
                     item_adjust_inventory_count(item_id, -1);

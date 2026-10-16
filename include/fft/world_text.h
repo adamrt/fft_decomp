@@ -43,7 +43,7 @@ typedef enum screen_text_section {
     SCREEN_TEXT_SECTION_SHOP_DIALOGUE = 31, /* the shopkeeper's lines */
 } screen_text_section_e;
 
-enum { WORLD_TEXT_ID_FORMATION_TEXT_BASE = SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
+enum { TEXT_ID_FORMATION_TEXT_BASE = SCREEN_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
 
 extern s32 g_screen_text_section_offsets[];
 extern u8 g_screen_text_shop_menu_labels_data[];

@@ -756,7 +756,7 @@ static void action_start_target_animation_display(unit_t* attacker, unit_t* targ
  * The strike has settled when no effect cycle or target step is running
  * (g_state_animation_continue_check), the casting unit shows no numeric
  * display, and its animation countdown is 0 or its animation id is below
- * BATTLE_UNIT_ANIMATION_ATTACK_FIRST: only a teleport or attack animation is
+ * ANIMATION_ATTACK_FIRST: only a teleport or attack animation is
  * waited out.
  *
  * An ability other than Knockback and Throw Stone follows the cursor tile with
@@ -805,7 +805,7 @@ void state_handle_action_execute(void) {
             camera_update_cursor_tile_vector();
         }
         if (g_state_animation_continue_check == 0 && unit->numeric_display.active == 0
-            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < BATTLE_UNIT_ANIMATION_ATTACK_FIRST)) {
+            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < ANIMATION_ATTACK_FIRST)) {
             sound_replay_background();
             if (unit->strike.target_count != 0) {
                 for (i = 0; i < unit->strike.target_count; i++) {
@@ -830,7 +830,7 @@ void state_handle_action_execute(void) {
         camera_update_cursor_tile_vector();
         menu_update_menus_and_event_speed(gfx_get_battle_otag(), g_input_current_buttons);
         if (g_state_animation_continue_check == 0 && unit->numeric_display.active == 0
-            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < BATTLE_UNIT_ANIMATION_ATTACK_FIRST)) {
+            && (unit->animation.wait == 0 || (unit->animation.sequence_id >> 1) < ANIMATION_ATTACK_FIRST)) {
             if (unit->strike.target_count != 0) {
                 for (i = 0; i < unit->strike.target_count; i++) {
                     target = unit_get_by_battle_id(unit->strike.target_list[i]);

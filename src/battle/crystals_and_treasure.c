@@ -268,7 +268,7 @@ crystal_pickup_result_t* crystal_build_pickup_result(unit_stats_t* mover) {
 }
 
 /* Fill a unit's action result for picking up a crystal or treasure
- * (BATTLE_CRYSTAL_* flags).
+ * (CRYSTAL_* flags).
  *
  * The result starts as a canceled miss. TAKE_TREASURE adds
  * g_crystal_treasure_item_id to the inventory and returns that call's

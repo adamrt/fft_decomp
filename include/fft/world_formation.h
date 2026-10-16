@@ -92,7 +92,7 @@ typedef struct formation_unit {
                                      it into nibbles */
     u16 egg_color;                /* 0x122; party_unit_t 0xd2; formation_draw_unit_slots loads it as a 16-bit palette
                                      index */
-    u8 support_abilities[4];      /* 0x124; copy of unit_stats_t.ability_flags.support, BATTLE_SUPPORT_SET_1..4_* */
+    u8 support_abilities[4];      /* 0x124; copy of unit_stats_t.ability_flags.support, UNIT_SUPPORT_SET_1..4_* */
 } formation_unit_t;
 typedef char world_unit_size_must_be_296[(sizeof(formation_unit_t) == 296) ? 1 : -1];
 

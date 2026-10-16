@@ -135,10 +135,10 @@ typedef struct title_menu_state {
 } title_menu_state_t;
 
 /* Sound-type menu controller state (handler 3). */
-enum { OPEN_SOUND_MENU_ENTRY_COUNT = 3 };
+enum { TITLE_SOUND_MENU_ENTRY_COUNT = 3 };
 
 typedef struct title_sound_type_menu {
-    /* 0x00 */ s32 entry_render_indices[OPEN_SOUND_MENU_ENTRY_COUNT]; /* Mono, Stereo and Wide labels */
+    /* 0x00 */ s32 entry_render_indices[TITLE_SOUND_MENU_ENTRY_COUNT]; /* Mono, Stereo and Wide labels */
     u8 _unused_0c[16];
     /* 0x1c */ s32 sound_mode_selection; /* Signed so decrement can wrap below Mono. */
     /* 0x20 */ s32 step;

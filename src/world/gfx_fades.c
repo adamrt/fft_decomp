@@ -13,7 +13,7 @@ static u8 g_screen_fade_disabled = 0;
 static u8 g_screen_fade_increasing = 0;
 static RECT g_screen_fade_tile_rect = { 0, 0, 256, 240 };
 
-/* Return the active WORLD fades as WORLD_FADE_STATE bits (decreasing 1, increasing 2), or none
+/* Return the active WORLD fades as SCREEN_FADE_STATE bits (decreasing 1, increasing 2), or none
  * while fades are disabled. */
 s32 screen_fade_get_state(void) {
     if (g_screen_fade_disabled != 0) {

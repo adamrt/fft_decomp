@@ -242,7 +242,7 @@ s32 save_run_screen(s32 mode_select_enabled) {
     u32 otags[2 * 64];
     menu_gfx_context_t buffers[2];
     u8 unused_packet_gap[0x10]; /* Retains the original unused stack space. */
-    DIRENTRY directory_buffer[CARD_SAVE_SLOT_COUNT];
+    DIRENTRY directory_buffer[SAVE_SLOT_COUNT];
     s16 music_handle;
     u16 input;
     s32 buttons;
@@ -937,7 +937,7 @@ static void save_scan_slots(void) {
         if (g_save_last_used_slot < 0x10) {
             if (memcard_wait_operation_result(5) == MEMCARD_RESULT_COMPLETE) {
                 g_save_slot_scan_index = 0;
-                while (g_save_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
+                while (g_save_slot_scan_index < SAVE_SLOT_COUNT) {
                     if (g_save_slot_file_states[g_save_slot_scan_index] >= 0) {
                         bcopy(&g_save_slot_metadata[g_save_slot_scan_index], &g_save_work_buffer->summary,
                             sizeof(save_summary_t));
@@ -1047,7 +1047,7 @@ static void save_scan_slots(void) {
 
     if (g_save_probe_result == MEMCARD_RESULT_COMPLETE) {
         menu_input_clear_state();
-        if (g_save_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
+        if (g_save_slot_scan_index < SAVE_SLOT_COUNT) {
             status = 1;
             entry = 0;
             while (entry < g_save_file_count) {
@@ -1387,24 +1387,24 @@ static void save_slot_list_step(s32 input) {
     save_scroll_slot_list(g_save_slot_cursor_row);
     g_menu_window_rect_source = &g_save_slot_window;
     busy = g_save_menu_step != SAVE_STEP_SELECT_SAVE;
-    for (i = 0, row = 0; i < CARD_SAVE_SLOT_COUNT; i++, row++) {
+    for (i = 0, row = 0; i < SAVE_SLOT_COUNT; i++, row++) {
         /* Loading lists occupied slots only; saving skips the unavailable ones. */
         if (g_save_mode != 0) {
             while (g_save_slot_file_states[i] != SAVE_SLOT_OCCUPIED) {
                 i++;
-                if (i >= CARD_SAVE_SLOT_COUNT) {
+                if (i >= SAVE_SLOT_COUNT) {
                     break;
                 }
             }
         } else {
             while (g_save_slot_file_states[i] == SAVE_SLOT_UNAVAILABLE) {
                 i++;
-                if (i >= CARD_SAVE_SLOT_COUNT) {
+                if (i >= SAVE_SLOT_COUNT) {
                     break;
                 }
             }
         }
-        if (i >= CARD_SAVE_SLOT_COUNT) {
+        if (i >= SAVE_SLOT_COUNT) {
             break;
         }
 

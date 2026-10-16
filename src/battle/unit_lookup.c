@@ -802,7 +802,7 @@ void sprite_evtchr_invalidate_sp2(unit_t* unit) {
     for (; count < 2; count++, slot++) {
         u32 descriptor = slot->owner;
 
-        if (((descriptor & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK) == unit->runtime_id)
+        if (((descriptor & SPRITE_EVTCHR_SLOT_OWNER_ID_MASK) == unit->runtime_id)
             && ((descriptor & SPRITE_EVTCHR_SLOT_OWNER_SP2) != 0)) {
             slot->owner = invalid;
         }
@@ -1121,7 +1121,7 @@ void sprite_display_construct_polygon_data(
         } else {
             prim->code &= ~2;
         }
-        prim->tpage = display->tpage | (mode & BATTLE_SPRITE_DISPLAY_BLEND_MASK);
+        prim->tpage = display->tpage | (mode & SPRITE_DISPLAY_BLEND_MASK);
         prim->clut = display->clut;
         gte_stsxy3_split(&prim->x0, &prim->x1, &prim->x2);
         gte_ldv0(&g_sprite_gte_rtps_vxy0);

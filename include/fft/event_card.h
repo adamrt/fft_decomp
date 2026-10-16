@@ -115,7 +115,7 @@ extern s16 g_save_slot_row_y;
 extern u16 g_save_slot_cursor_animation;
 extern point16_t g_save_slot_cursor_position;
 /* Two-line encoded description text, 80 bytes per memory-card slot. */
-extern u8 g_save_slot_descriptions[CARD_SAVE_SLOT_COUNT][0x50];
+extern u8 g_save_slot_descriptions[SAVE_SLOT_COUNT][0x50];
 extern s16 g_save_slot_text_row_ids[];
 extern save_slot_number_command_t g_save_slot_number_commands[4];
 extern oriented_quad_t g_save_slot_quads[];

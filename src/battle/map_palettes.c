@@ -2238,9 +2238,9 @@ void deploy_init_display(s32 width, s32 height, s32 projection, u8 red, u8 green
     SetGeomOffset(width / 2, height / 2);
     SetGeomScreen(projection);
 
-    SetDefDrawEnv(&g_gfx_draw_envs[0], -MAIN_GFX_BATTLE_SCREEN_X, 0, width + MAIN_GFX_BATTLE_SCREEN_X, height);
+    SetDefDrawEnv(&g_gfx_draw_envs[0], -GFX_BATTLE_SCREEN_X, 0, width + GFX_BATTLE_SCREEN_X, height);
     SetDefDispEnv(&g_gfx_display_envs[0], 0, second_y, width, height);
-    SetDefDrawEnv(&g_gfx_draw_envs[1], -MAIN_GFX_BATTLE_SCREEN_X, second_y, width + MAIN_GFX_BATTLE_SCREEN_X, height);
+    SetDefDrawEnv(&g_gfx_draw_envs[1], -GFX_BATTLE_SCREEN_X, second_y, width + GFX_BATTLE_SCREEN_X, height);
     SetDefDispEnv(&g_gfx_display_envs[1], 0, 0, width, height);
 
     g_gfx_draw_envs[0].dtd = g_gfx_draw_envs[1].dtd = 1;

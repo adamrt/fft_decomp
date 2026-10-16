@@ -634,7 +634,7 @@ static void save_update_scan(void) {
             result = memcard_wait_operation_result(5);
             if (result == MEMCARD_RESULT_COMPLETE) {
                 g_save_slot_scan_index = 0;
-                while (g_save_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
+                while (g_save_slot_scan_index < SAVE_SLOT_COUNT) {
                     if (g_save_slot_file_states[g_save_slot_scan_index] >= 0) {
                         bcopy(&g_save_slot_metadata[g_save_slot_scan_index], &g_save_buffer_pointer->summary,
                             sizeof(save_summary_t));
@@ -744,7 +744,7 @@ static void save_update_scan(void) {
 
     if (g_save_open_result == MEMCARD_RESULT_COMPLETE) {
         menu_input_clear_state();
-        if (g_save_slot_scan_index < CARD_SAVE_SLOT_COUNT) {
+        if (g_save_slot_scan_index < SAVE_SLOT_COUNT) {
             status = 1;
             result = 0;
             while (result < g_save_file_count) {
@@ -995,7 +995,7 @@ static void save_update_slot_list(u16 input) {
                 /* The cursor counts listed slots only; find the slot index it points at. */
                 remaining = g_save_list_cursor_index;
                 index = 0;
-                for (index = 0; index < CARD_SAVE_SLOT_COUNT; index++) {
+                for (index = 0; index < SAVE_SLOT_COUNT; index++) {
                     if (g_save_slot_file_states[index] != SAVE_SLOT_UNAVAILABLE) {
                         remaining--;
                     }
@@ -1059,15 +1059,15 @@ static void save_update_slot_list(u16 input) {
     save_update_slot_scroll(g_save_list_cursor_index);
     g_menu_window_rect_source = g_save_slot_window_rect_source;
     scrolling = g_save_menu_state != SAVE_MENU_SELECT_SAVE;
-    for (index = 0, row = 0; index < CARD_SAVE_SLOT_COUNT; index++, row++) {
+    for (index = 0, row = 0; index < SAVE_SLOT_COUNT; index++, row++) {
         /* Unavailable slots are not listed. */
         while (g_save_slot_file_states[index] == SAVE_SLOT_UNAVAILABLE) {
             index++;
-            if (index >= CARD_SAVE_SLOT_COUNT) {
+            if (index >= SAVE_SLOT_COUNT) {
                 break;
             }
         }
-        if (index >= CARD_SAVE_SLOT_COUNT) {
+        if (index >= SAVE_SLOT_COUNT) {
             break;
         }
 

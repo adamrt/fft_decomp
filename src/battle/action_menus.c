@@ -40,7 +40,7 @@
 #include "psx/types.h"
 
 static s32 g_action_message_count = 0;
-action_post_effect_msg_t g_action_messages[BATTLE_POST_EFFECT_MSG_CAPACITY] = { 0 };
+action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY] = { 0 };
 
 /* Effect message texts (MENU_SYSTEM_COMMAND_EFFECT_MESSAGE). An ability's message is the base plus
  * the text_display entry of its animation data; the others have fixed ids. */
@@ -1385,7 +1385,7 @@ static void action_message_queue_for_unit(unit_t* unit) {
     if (unit->stats == 0) {
         return;
     }
-    if (g_action_message_count >= BATTLE_POST_EFFECT_MSG_CAPACITY) {
+    if (g_action_message_count >= ACTION_POST_EFFECT_MSG_CAPACITY) {
         return;
     }
     action = &unit->stats->action;

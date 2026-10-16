@@ -13,7 +13,7 @@
 /* movement classes and terrain */
 /* Ordered class selection in move_spread_store_unit_to_scratchpad, not movement ability
  * flags or the separate cost-table selector. Water names describe standing
- * height. The BATTLE_MOVEMENT_SET_3 bits carry the retail ability names, which
+ * height. The UNIT_MOVEMENT_SET_3 bits carry the retail ability names, which
  * are the other way round: "Move in Water" (0x1f6) stands on the surface and
  * "Walk on Water" (0x1f7) one level below it. */
 typedef enum move_class {

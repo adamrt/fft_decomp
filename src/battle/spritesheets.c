@@ -592,7 +592,7 @@ void status_bubble_update_active(unit_t* unit) {
 void sprite_update_transparency_flag(unit_t* unit) {
     if ((unit->status_flags_5_6 & UNIT_STATUS_TRANSPARENT) != 0) {
         unit->sprite_display_flags
-            = (unit->sprite_display_flags & ~BATTLE_SPRITE_DISPLAY_BLEND_MASK) | SPRITE_DISPLAY_SEMI_TRANSPARENT;
+            = (unit->sprite_display_flags & ~SPRITE_DISPLAY_BLEND_MASK) | SPRITE_DISPLAY_SEMI_TRANSPARENT;
     } else {
         unit->sprite_display_flags = unit->sprite_display_flags & ~SPRITE_DISPLAY_SEMI_TRANSPARENT;
     }

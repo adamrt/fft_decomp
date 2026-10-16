@@ -16,18 +16,18 @@
 /* Memory-card BIOS event handles opened by memcard_init_events; the CARD,
  * OPEN and WORLD pollers test them by these indices. */
 enum {
-    MAIN_CARD_EVENT_BIOS_DONE,
-    MAIN_CARD_EVENT_BIOS_ERROR,
-    MAIN_CARD_EVENT_BIOS_TIMEOUT,
-    MAIN_CARD_EVENT_BIOS_NEW_CARD,
-    MAIN_CARD_EVENT_HARDWARE_DONE,
-    MAIN_CARD_EVENT_HARDWARE_ERROR,
-    MAIN_CARD_EVENT_HARDWARE_TIMEOUT,
-    MAIN_CARD_EVENT_HARDWARE_NEW_CARD,
-    MAIN_CARD_EVENT_COUNT
+    MEMCARD_EVENT_BIOS_DONE,
+    MEMCARD_EVENT_BIOS_ERROR,
+    MEMCARD_EVENT_BIOS_TIMEOUT,
+    MEMCARD_EVENT_BIOS_NEW_CARD,
+    MEMCARD_EVENT_HARDWARE_DONE,
+    MEMCARD_EVENT_HARDWARE_ERROR,
+    MEMCARD_EVENT_HARDWARE_TIMEOUT,
+    MEMCARD_EVENT_HARDWARE_NEW_CARD,
+    MEMCARD_EVENT_COUNT
 };
 
-extern s32 g_memcard_bios_events[MAIN_CARD_EVENT_COUNT];
+extern s32 g_memcard_bios_events[MEMCARD_EVENT_COUNT];
 extern u8 g_memcard_bios_events_opened;
 
 void memcard_init_events(void);
@@ -135,7 +135,7 @@ typedef enum save_slot_state {
     SAVE_SLOT_AVAILABLE = 1
 } save_slot_state_e;
 
-enum { CARD_SAVE_SLOT_COUNT = 15 };
+enum { SAVE_SLOT_COUNT = 15 };
 
 /* g_save_last_used_slot when no slot was loaded or written. */
 enum {
@@ -153,7 +153,7 @@ typedef char card_save_play_time_size_must_be_3[(sizeof(save_play_time_t) == 3) 
 extern u8 g_save_last_used_slot; /* the save slot last loaded or written */
 extern u8 g_save_selected_slot;
 extern s8 g_save_slot_file_states[]; /* save_slot_state_e */
-extern save_summary_t g_save_slot_metadata[CARD_SAVE_SLOT_COUNT];
-extern save_play_time_t g_save_slot_playtimes[CARD_SAVE_SLOT_COUNT];
+extern save_summary_t g_save_slot_metadata[SAVE_SLOT_COUNT];
+extern save_play_time_t g_save_slot_playtimes[SAVE_SLOT_COUNT];
 
 #endif

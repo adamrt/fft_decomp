@@ -2144,8 +2144,8 @@ static void location_run_shop(s32 shop_id) {
     world_map_fade_start(WORLD_MAP_FADE_REDRAW_MAP, 0x10);
     world_map_clear_screen_and_set_clip_rect(0);
     /* Blank the backdrop image from the end. */
-    i = WLDCORE_BACKDROP_WORDS - 1;
-    clear = &g_world_map_scratch_buffer[WLDCORE_BACKDROP_WORDS - 1];
+    i = WORLD_MAP_BACKDROP_WORDS - 1;
+    clear = &g_world_map_scratch_buffer[WORLD_MAP_BACKDROP_WORDS - 1];
     for (; i >= 0; i--) {
         *clear = 0;
         clear--;

@@ -90,14 +90,14 @@ void hud_draw_value(GsOT* ot);
 void calendar_draw_date(GsOT* ot);
 
 /* pictures and backgrounds */
-enum { WLDCORE_BACKDROP_WORDS = 256 * 240 / 2 };
+enum { WORLD_MAP_BACKDROP_WORDS = 256 * 240 / 2 };
 
 /* Sector offsets of each picture set in WLDPIC.BIN and each background set in WLDBK.BIN. */
 extern s32 g_picture_sector_offsets[];
 extern s32 g_picture_background_sector_offsets[];
 /* Destination image buffer (read back as a TIM by sound_novel_opcode_0a_load_picture). */
 extern u32* g_picture_buffer;
-/* Begins with the 256x240 16-bit backdrop image, WLDCORE_BACKDROP_WORDS 32-bit words. */
+/* Begins with the 256x240 16-bit backdrop image, WORLD_MAP_BACKDROP_WORDS 32-bit words. */
 extern u32* g_world_map_scratch_buffer;
 /* Currently resident picture set, reset to -1 by world_map_init_state. */
 extern s32 g_picture_loaded_set;

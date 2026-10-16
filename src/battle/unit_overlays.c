@@ -1312,7 +1312,7 @@ void sprite_afterimage_draw(unit_t* unit) {
         depth = transformed.vz / 4;
         position.vx = transformed.vx;
         position.vy = transformed.vy;
-        flags = ((unit->horizontal_flip_flag ^ unit->sprite_display_flags) & ~BATTLE_SPRITE_DISPLAY_BLEND_MASK)
+        flags = ((unit->horizontal_flip_flag ^ unit->sprite_display_flags) & ~SPRITE_DISPLAY_BLEND_MASK)
             | SPRITE_DISPLAY_SEMI_TRANSPARENT;
         copyVector(&zoom, &g_camera_zoom);
         display = unit->animation.display;

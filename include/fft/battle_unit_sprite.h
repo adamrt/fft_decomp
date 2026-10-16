@@ -33,7 +33,7 @@ typedef char sprite_packed_seq_record_size_must_be_1030[sizeof(sprite_packed_seq
 typedef struct sprite_frame_part {
     s8 x_shift; /* pixels from the sprite's origin to the part's left and top edges */
     s8 y_shift;
-    u16 attributes; /* BATTLE_SHP_PART_* masks */
+    u16 attributes; /* SPRITE_SHP_PART_* masks */
 } sprite_frame_part_t;
 
 /* Encoded fields of sprite_frame_part_t.attributes. */
@@ -223,7 +223,7 @@ typedef enum sprite_display_blend_mode {
     SPRITE_DISPLAY_BLEND_ADD_QUARTER = 0x60,
 } sprite_display_blend_mode_e;
 
-enum { BATTLE_SPRITE_DISPLAY_BLEND_MASK = 0x60 };
+enum { SPRITE_DISPLAY_BLEND_MASK = 0x60 };
 
 /* One part of a sprite display: a rectangle of the display's texture page,
  * in pixels, and its place relative to the sprite's origin. */
@@ -244,7 +244,7 @@ typedef char sprite_display_part_size_must_be_7[(sizeof(sprite_display_part_t) =
 typedef struct sprite_display {
     rgb24_t color; /* 0x00 */
     u8 part_count; /* 0x03; parts in use */
-    s16 tpage;     /* 0x04; BATTLE_GFX_TPAGE_*, with sprite_display_blend_mode_e */
+    s16 tpage;     /* 0x04; SPRITE_TPAGE_*, with sprite_display_blend_mode_e */
     u16 clut;      /* 0x06 */
     u16 scale_x;   /* 0x08; ONE is neutral scale */
     u16 scale_y;   /* 0x0a; ONE is neutral scale */

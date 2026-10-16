@@ -276,7 +276,7 @@ s32 party_create_monster_egg(s32 monster_job, s32 egg_modifier, s32 egg_color) {
     return party_index;
 }
 
-/* Generate a new unit of unit_type (MAIN_UNIT_TYPE_*) in the first empty ordinary
+/* Generate a new unit of unit_type (UNIT_TYPE_*) in the first empty ordinary
  * roster slot (0..15), with palette 0. Returns the slot, or -1 when all sixteen
  * are taken. */
 s32 party_generate_unit(unit_generation_type_e unit_type) {

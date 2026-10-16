@@ -575,7 +575,7 @@ typedef struct action_post_effect_msg {
 } action_post_effect_msg_t;
 typedef char battle_post_effect_msg_size_must_be_8[(sizeof(action_post_effect_msg_t) == 8) ? 1 : -1];
 
-enum { BATTLE_POST_EFFECT_MSG_CAPACITY = 16 };
+enum { ACTION_POST_EFFECT_MSG_CAPACITY = 16 };
 
 extern action_display_image_rect_t g_result_image_rects[ACTION_DISPLAY_IMAGE_COUNT];
 extern const u8 g_result_numeric_selectors[ACTION_DISPLAY_VALUE_COUNT];
@@ -583,7 +583,7 @@ extern u16 g_result_display_values[ACTION_DISPLAY_VALUE_COUNT];
 extern s32 g_ability_learn_on_hit_unit_id;
 extern s32 g_state_window_closed;
 extern s32 g_reward_report_phase; /* reward_report_phase_e */
-extern action_post_effect_msg_t g_action_messages[BATTLE_POST_EFFECT_MSG_CAPACITY];
+extern action_post_effect_msg_t g_action_messages[ACTION_POST_EFFECT_MSG_CAPACITY];
 extern const palette_t g_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */
 extern u8 g_result_status_image_ids[STATUS_BYTE_COUNT][8];
