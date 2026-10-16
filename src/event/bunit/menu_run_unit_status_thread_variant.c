@@ -68,6 +68,8 @@ void menu_run_unit_status_thread_variant(void) {
     g_menu_input_controller = script_get_controller_input_pointer(0) + 1;
     thread_id = g_thread_current_id;
     thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
+
+    /* One body serves two thread slots: the status slot draws the selected unit, the other the comparison unit. */
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
         panel = g_panel_selected_packets;
         editor = g_panel_selected_editor_packets;
@@ -97,6 +99,7 @@ void menu_run_unit_status_thread_variant(void) {
     }
     shake = 0;
 
+    /* Build the editor packets once; the second buffer gets a copy of them below. */
     menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
@@ -111,6 +114,8 @@ void menu_run_unit_status_thread_variant(void) {
         gfx_init_image_loading(&editor->value_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_panel_editor_value_cells[frame]);
     }
+
+    /* Team kinds past 3 fall back to 0: the mode cells have one row per kind (ally, enemy, neutral, auto-battle). */
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
@@ -124,6 +129,8 @@ void menu_run_unit_status_thread_variant(void) {
             &g_panel_editor_label_cells[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
+
+    /* The status panel packets, built and copied the same way. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_panel_frame_rect, &panel->numeric_frame);
@@ -146,17 +153,24 @@ void menu_run_unit_status_thread_variant(void) {
     }
     panel->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
     mem_copy_bytes_nonempty(panel + 1, panel, sizeof(menu_status_panel_packet_t));
+
+    /* Both portrait slots start on the current unit, so no transition runs until it changes. */
     frame = 0;
     anim_state = 0;
     prev_unit = state->unit_index;
     cur_unit = state->unit_index;
     for (;;) {
+        /* Alternate packet copies each frame so the GPU reads one while the other is rebuilt. */
         s32 parity = frame & 1;
         panel = panel_base + parity;
         editor = editor_base + parity;
+
+        /* CT can run past the turn threshold; clamp it so its gauge never shows more than full. */
         if (state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
+
+        /* The team kind can change while the panel is up: refresh the mode row and portrait CLUT every frame. */
         if (g_menu_post_battle_unit_changes_active == 0) {
             mem_copy_bytes_nonempty(g_panel_editor_mode_cell, &g_panel_editor_mode_cells[state->team_kind], 0xC);
         } else {
@@ -169,6 +183,8 @@ void menu_run_unit_status_thread_variant(void) {
         } else {
             panel->portrait.clut = 0x7FBD;
         }
+
+        /* Dim while a THREAD_TASK_STATUS_PANEL thread runs under an input lock, or on the thread's request. */
         dimmed = 0;
         if (thread_find_running_by_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
@@ -176,6 +192,7 @@ void menu_run_unit_status_thread_variant(void) {
         if (thread->dimmed != 0) {
             dimmed = 1;
         }
+
         for (i = 0; i < 4; i++) {
             editor->value_sprites[i].clut = g_panel_editor_value_cluts[i][dimmed];
         }
@@ -191,9 +208,11 @@ void menu_run_unit_status_thread_variant(void) {
             }
             i += 1;
         } while (i < 7);
+
         if (dimmed != 0) {
             menu_init_primitive_colors_dimmed(&editor->numeric_frame);
             menu_init_primitive_colors_dimmed(&panel->numeric_frame);
+            /* Unsigned test for transition steps 4-9: during the wipe quad 0 takes the shade of the other three. */
             if ((anim_state - 4) < 6U) {
                 setRGB0(&editor->portrait[0], 0x20, 0x28, 0x38);
             } else {
@@ -221,7 +240,12 @@ void menu_run_unit_status_thread_variant(void) {
         } else {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
+
+        /* Offset y picks the frame-buffer half (0 or 0xF0) that this frame draws into. */
         g_gfx_draw_offset_y = g_frame_arg != 0xF0 ? 0xF0 : 0;
+
+        /* A slide steps one table row every other frame (down rows 1-6, up rows 11-16),
+         * then clears every flag but HIDDEN. */
         if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
             shake = 1;
         }
@@ -251,6 +275,8 @@ void menu_run_unit_status_thread_variant(void) {
                 }
             }
         }
+
+        /* Offset a moves each block to the thread's x and shake_y; offset b restores the plain offset after it. */
         px1 = thread->x;
         panel_y_a = g_gfx_draw_offset_y;
         panel->draw_offset_a.position.x = px1 - 0x80;
@@ -261,6 +287,7 @@ void menu_run_unit_status_thread_variant(void) {
         panel->draw_offset_b.position.x = -0x80;
         panel->draw_offset_b.position.y = panel_y_b;
         SetDrawOffset(&panel->draw_offset_b.packet, (u16*)&panel->draw_offset_b.position);
+
         px2 = thread->x;
         editor_y_a = g_gfx_draw_offset_y;
         editor->draw_offset_a.position.x = px2 - 0x80;
@@ -271,11 +298,15 @@ void menu_run_unit_status_thread_variant(void) {
         editor->draw_offset_b.position.x = -0x80;
         editor->draw_offset_b.position.y = editor_y_b;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
+
+        /* Transition steps: 0 still portrait, 2-3 CLUT capture, 4-9 wipe. Past the wipe, return to a still portrait;
+         * suppress latches the hidden flag here, keeping the portrait undrawn until a later wipe ends while visible. */
         if (anim_state >= 0xA) {
             anim_state = 0;
             prev_unit = cur_unit;
             suppress = thread->flags & MENU_STATUS_PANEL_HIDDEN;
         }
+        /* thread->work is both the redraw request and the wipe direction; a request mid-wipe restarts it at step 2. */
         if (thread->work != 0) {
             if (anim_state == 0) {
                 prev_unit = cur_unit;
@@ -295,6 +326,8 @@ void menu_run_unit_status_thread_variant(void) {
         }
         gfx_build_portrait_transition_primitives(
             transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
+
+        /* Gauge bars (HP, MP, CT) as Gouraud quads with four vertex colors each. */
         {
             CVECTOR* color;
             menu_unit_status_gauge_t* bar;
@@ -325,8 +358,11 @@ void menu_run_unit_status_thread_variant(void) {
                 editor->bars[i].y2 = g_menu_portrait_origin.y + y + 3;
                 editor->bars[i].x3 = x0 + w;
                 editor->bars[i].y3 = g_menu_portrait_origin.y + y + 3;
+                /* Shift the bottom edge 3 pixels left to slant the bar. */
                 editor->bars[i].x2 -= 3;
                 editor->bars[i].x3 -= 3;
+
+                /* Dimmed bars halve red and green but keep blue, like the bluish dimmed portrait shades. */
                 if (dimmed != 0) {
                     setRGB0(&editor->bars[i], color->r >> 1, color->g >> 1, color->b);
                     color++;
@@ -349,12 +385,18 @@ void menu_run_unit_status_thread_variant(void) {
                 bar++;
             }
         }
+
+        /* The zodiac sign cell: 24x20 cells in rows of seven, starting at v 0x2A.
+         * scroll[] is laid out as menu_active_unit_t: name, job, brave, faith, zodiac, battle id. */
         panel->sprites[6].u0 = (scroll[4] % 7) * 0x18;
         portrait_cell = scroll[4];
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
         panel->sprites[6].v0 = (portrait_cell / 7) * 0x14 + 0x2A;
+
+        /* Rebuild the text images only on the first frame and on redraw requests; VRAM keeps them in between. */
         if ((frame == 0) || (thread->work != 0)) {
+            /* Units off the AT list (negative index) show dashes. */
             if (state->list_index < 0) {
                 number_entries[6].format = 0xC00;
             } else {
@@ -362,15 +404,18 @@ void menu_run_unit_status_thread_variant(void) {
             }
             menu_clear_render_buffer(number_pixels, 0x700);
             window_width = &g_menu_text_state.pen.stride;
+            /* The pen record begins two words before its stride member. */
             text_position = (glyph_blit_t*)(window_width - 2);
             *window_width = 0x38;
             menu_draw_numeric_display_entries(number_pixels, number_entries, text_position, 6);
             LoadImage(&rects[0], (u32*)number_pixels);
+
             number_pixels_b = number_pixels + 0x400;
             *window_width = 0x60;
             menu_draw_numeric_display_entries(number_pixels_b, &number_entries[6], text_position, 4);
             LoadImage(&rects[1], (u32*)number_pixels_b);
             thread->work = 0;
+
             menu_clear_render_buffer(name_image, 0x580);
             *window_width = 0x58;
             menu_set_text_origin(0, 0);
@@ -378,6 +423,7 @@ void menu_run_unit_status_thread_variant(void) {
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(scroll[1] + TEXT_ID_JOB_NAME_BASE, name_image, text_position);
             LoadImage(&rects[2], (u32*)name_image);
+
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
@@ -387,9 +433,12 @@ void menu_run_unit_status_thread_variant(void) {
             value_pixels_b = value_pixels + 0x50;
             text_draw_large_number_glyphs_variant(scroll[3], 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], (u32*)value_pixels_b);
+
+            /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 unit_stats_t* stats;
                 menu_set_text_origin(0, 0);
+                /* Only battle ids from 0x10 up get a number: the formation slot + 1, with no slot shown as 1. */
                 stats = battle_unit_get_stats_from_battle_id(scroll[5]);
                 if (scroll[5] >= 0x10) {
                     s32 id = stats->formation_index;
@@ -401,6 +450,9 @@ void menu_run_unit_status_thread_variant(void) {
             }
             LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));
         }
+
+        /* addPrim links each packet at the head of the ordering-table entry, so the GPU runs this list bottom-up:
+         * each draw offset and draw mode applies to the packets appended before it. */
         if (!(thread->flags & MENU_STATUS_PANEL_HIDDEN)) {
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_b);
             gfx_draw_or_append_gpu_primitive(&editor->value_sprites[0]);
@@ -416,6 +468,7 @@ void menu_run_unit_status_thread_variant(void) {
             }
             gfx_draw_or_append_gpu_primitive(&editor->draw_mode_b);
             if (suppress == 0) {
+                /* Steps 5 and up also draw the wipe's other three quads. */
                 if (anim_state >= 5) {
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[2]);
                     gfx_draw_or_append_gpu_primitive(&editor->portrait[3]);
@@ -425,6 +478,7 @@ void menu_run_unit_status_thread_variant(void) {
             }
             menu_submit_numeric_display_frame_primitives(&editor->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_a);
+
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_b);
             panel_portrait = &panel->portrait;
             SetSemiTrans(panel_portrait, 1);
@@ -440,12 +494,14 @@ void menu_run_unit_status_thread_variant(void) {
             menu_submit_numeric_display_frame_primitives(&panel->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
+
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;
     }
+
     thread_yield();
     gfx_free_texture_rect(&rects[0]);
     gfx_free_texture_rect(&rects[1]);

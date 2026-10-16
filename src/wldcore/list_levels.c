@@ -261,6 +261,8 @@ static void wldcore_list_open_active_propositions(void) {
     g_wldcore_window_records[index].priority = 8;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
+
+    /* One row per saved proposition, in save order. */
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].proposition_list.entry_count = 0;
     while (i < g_main_save_proposition_count) {
         g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
@@ -326,7 +328,8 @@ static void wldcore_list_open_active_propositions(void) {
 
     depth = g_wldcore_menu_stack_depth;
     /* temp spans two blocks without crossing a call, so global allocation
-     * gives the clamp flag and the cursor copy the target's v1. */
+     * gives the clamp flag and the cursor copy the target's v1.
+     * A saved cursor past the last entry restarts at row 0. */
     temp = g_wldcore_menu_stack_records_next[depth].proposition_list.entry_count
         < g_wldcore_active_propositions_saved_cursor[0] + 1;
     if (temp) {
@@ -334,6 +337,8 @@ static void wldcore_list_open_active_propositions(void) {
     }
     temp = g_wldcore_active_propositions_saved_cursor[0];
     g_wldcore_menu_stack_records_next[depth].proposition_list.cursor = temp;
+
+    /* Place the windows on the list record: the cursor 16 pixels per saved row, the labels above their columns. */
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].proposition_list.cursor_window].position.x
         = g_wldcore_window_render_records[index].base.x + 6;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].proposition_list.cursor_window].position.y

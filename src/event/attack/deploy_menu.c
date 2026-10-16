@@ -46,6 +46,7 @@ void attack_deploy_run_select_menu(void) {
     g_attack_panel_status_animation[0] = 1;
     g_attack_panel_status_animation[1] = 1;
     g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&left[i]);
         SetSemiTrans(&left[i], 0);
@@ -56,6 +57,9 @@ void attack_deploy_run_select_menu(void) {
         right[i].tpage = GetTPage(0, 2, 0x3c0, 0x100);
         right[i].clut = 0x7dbc;
     }
+
+    /* Parameter 1 (Select on the roster view) makes nodes 5, 9 and 10 their own down neighbors; from
+     * the unit detail view (0) they lead down to nodes 12 and 17. */
     if (thread_get_current_parameter_1() != 0) {
         g_attack_deploy_select_menu_nodes[5].destination[1] = 5;
         g_attack_deploy_select_menu_nodes[9].destination[1] = 9;
@@ -65,10 +69,13 @@ void attack_deploy_run_select_menu(void) {
         g_attack_deploy_select_menu_nodes[9].destination[1] = 17;
         g_attack_deploy_select_menu_nodes[10].destination[1] = 17;
     }
+
+    /* Each roster unit owns 11 help entries: nodes 18 to 27 take the first ten, node 8 the last. */
     g_attack_deploy_select_menu_nodes[8].help_base = g_attack_deploy_selected_roster_index * 11 + 10 - 0x3000;
     for (i = 0; i < 10; i++) {
         g_attack_deploy_select_menu_nodes[i + 18].help_base = g_attack_deploy_selected_roster_index * 11 - 0x3000 + i;
     }
+
     selected = 0;
     nodes = g_attack_deploy_select_menu_nodes;
     g_text_section_pointers[TEXT_SECTION_DEPLOYMENT_UNIT_HELP] = g_attack_deploy_unit_text_section;
@@ -78,8 +85,10 @@ void attack_deploy_run_select_menu(void) {
     i = 0;
     thread = &g_threads[g_thread_current_id];
     parent = &g_threads[parent_id];
+
     while (1) {
         if (parent->is_running == 0) {
+            /* Retail stores the same lock mode whether or not the help menu is running. */
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 0;
             }
@@ -88,6 +97,7 @@ void attack_deploy_run_select_menu(void) {
                 thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
                 thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
+
             node = &nodes[selected];
             y = node->y;
             x = node->x;
@@ -99,12 +109,16 @@ void attack_deploy_run_select_menu(void) {
             }
             buttons = *input;
             y += 8;
+
             if (buttons & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 *input = 0;
                 break;
             }
+
             if (buttons & PSX_PAD_CIRCLE) {
+                /* Out-of-range ids and empty entries open no help; zeroing the input drops the press. A help_base
+                 * of -0x6800 is the skillset section (0x9800 as a 16-bit text id). */
                 if (node->value != 0) {
                     text_id = node->help_base + *node->value;
                     if (node->help_base == -0x6800 && g_menu_selected_unit_fields.state.generic_monster != 0) {
@@ -128,6 +142,7 @@ void attack_deploy_run_select_menu(void) {
                         thread_set_parameters(parent_id, 0x3b, text_id, 0);
                     }
                 } else {
+                    /* An entry starting with 0xfe or 0xff is empty. */
                     text_id = node->help_base;
                     g_thread_call_target = (void (*)(void))text_find_entry;
                     if ((*(u8*)thread_call_on_main_stack(text_id) & 0xfe) != 0xfe) {
@@ -137,6 +152,7 @@ void attack_deploy_run_select_menu(void) {
                     }
                 }
             } else if (buttons & PSX_PAD_DPAD_MASK) {
+                /* text_id doubles as the direction index into the node's up, down, right and left links. */
                 text_id = 0;
                 if (!(buttons & PSX_PAD_UP)) {
                     if (buttons & PSX_PAD_DOWN) {
@@ -154,6 +170,8 @@ void attack_deploy_run_select_menu(void) {
                 selected = node->destination[text_id];
             }
         } else {
+            /* While a thread (the help text) runs in the parent's slot, input is locked and the cursor bobs on
+             * the active curve. */
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
@@ -163,6 +181,7 @@ void attack_deploy_run_select_menu(void) {
                 thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
         }
+
         if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             bob = menu_get_cursor_bob_offset(1);
         } else {
@@ -170,8 +189,10 @@ void attack_deploy_run_select_menu(void) {
         }
         thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
+
         buffer = i & 1;
         if (node->vertical_cursor != 0) {
+            /* The upright cursor is the same texture cell transposed. */
             u = 0xa8;
             left[buffer].u0 = u;
             left[buffer].u1 = u;
@@ -181,6 +202,7 @@ void attack_deploy_run_select_menu(void) {
             left[buffer].v1 = 0x10;
             left[buffer].v2 = 0;
             left[buffer].v3 = 0x10;
+
             u = 0xb8;
             right[buffer].u0 = u;
             right[buffer].u1 = u;
@@ -190,6 +212,7 @@ void attack_deploy_run_select_menu(void) {
             right[buffer].v1 = 0x10;
             right[buffer].v2 = 0;
             right[buffer].v3 = 0x10;
+
             setXY4(&left[buffer], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10, y + bob + 0x10);
             (right + buffer)->x0 = x + 2;
             (right + buffer)->y0 = y + bob + 2;
@@ -209,6 +232,7 @@ void attack_deploy_run_select_menu(void) {
             (left + buffer)->v2 = 0x10;
             (left + buffer)->u3 = u_mid;
             (left + buffer)->v3 = 0x10;
+
             u = 0xb8;
             (right + buffer)->u0 = u;
             (right + buffer)->v0 = 0;
@@ -218,6 +242,7 @@ void attack_deploy_run_select_menu(void) {
             (right + buffer)->v2 = 0x10;
             (right + buffer)->u3 = 0xc8;
             (right + buffer)->v3 = 0x10;
+
             (left + buffer)->x0 = x + bob;
             (left + buffer)->y0 = y;
             (left + buffer)->x1 = x + bob + 0x10;
@@ -226,6 +251,7 @@ void attack_deploy_run_select_menu(void) {
             (left + buffer)->y2 = y + 0x10;
             (left + buffer)->x3 = x + bob + 0x10;
             (left + buffer)->y3 = y + 0x10;
+
             shadow_offset = bob + 2;
             (right + buffer)->x0 = x + shadow_offset;
             (right + buffer)->y0 = y + 2;
@@ -236,6 +262,8 @@ void attack_deploy_run_select_menu(void) {
             (right + buffer)->x3 = x + shadow_offset + 0x10;
             (right + buffer)->y3 = y + 0x12;
         }
+
+        /* The cursor and its shade switch palettes while the help text is open. */
         if (thread->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             left[buffer].clut = 0x7dfc;
             right[buffer].clut = 0x7e3c;
@@ -243,11 +271,13 @@ void attack_deploy_run_select_menu(void) {
             left[buffer].clut = 0x7d7c;
             right[buffer].clut = 0x7dbc;
         }
+
         gfx_draw_or_append_gpu_primitive(&left[buffer]);
         gfx_draw_or_append_gpu_primitive(&right[buffer]);
         thread_wait_frames(1);
         i++;
     }
+
     g_attack_panel_status_animation[0] = 0;
     g_attack_panel_status_animation[1] = 0;
     thread_exit_current();

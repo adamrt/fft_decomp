@@ -31,6 +31,7 @@ void menu_run_status_panel_thread(void) {
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
     g_menu_input_controller = script_get_controller_input_pointer(0);
+
     screen = g_panel_frames_a;
     base = g_panel_frames_a;
     state = &g_menu_selected_unit_fields.state;
@@ -38,6 +39,8 @@ void menu_run_status_panel_thread(void) {
     menu_init_numeric_display_frame_primitives(rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
+
+    /* Move the tiles and lines from panel-relative to screen coordinates. */
     for (i = 0; i < 2; i++) {
         screen->tiles[i].x0 += rect->x;
         screen->tiles[i].y0 += rect->y;
@@ -51,6 +54,7 @@ void menu_run_status_panel_thread(void) {
         screen->lines[i].x1 += offsets->x;
         screen->lines[i].y1 += offsets->y;
     }
+
     menu_init_sprite_array(&screen->sprites[19], 5, 0x7cfc);
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
     menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
@@ -61,6 +65,8 @@ void menu_run_status_panel_thread(void) {
     frame = 0;
     for (;;) {
         screen = &base[frame & 1];
+
+        /* The label layout follows the unit: two-handed adds 2, a monster adds 1. */
         mode = (state->two_hands != 0) * 2;
         if (state->generic_monster != 0) {
             mode++;
@@ -83,6 +89,8 @@ void menu_run_status_panel_thread(void) {
                     &g_panel_label_layouts_mode3[i]);
             }
         }
+
+        /* A monster's empty ability rows move their sprites off screen. */
         if (state->generic_monster != 0) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
@@ -91,6 +99,8 @@ void menu_run_status_panel_thread(void) {
                 }
             }
         }
+
+        /* Redraw and upload the equipment and ability names on the first frame or on request. */
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(g_panel_text_image_a, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
@@ -103,10 +113,13 @@ void menu_run_status_panel_thread(void) {
                 g_menu_text_state.pen.rect.y += 0x10;
             }
             LoadImage(&g_panel_text_upload_rect_a, (u32*)g_panel_text_image_a);
+
             menu_clear_render_buffer(g_panel_text_image_b, 0xc80);
             g_menu_text_state.pen.stride = 0x50;
             menu_set_text_origin(0, 0);
             for (i = 0; i < 2; i++) {
+                /* `mode` is reused as the text id: the first two rows name skillsets, or abilities
+                 * for a monster. */
                 mode = state->ability_ids[i] + TEXT_ID_SKILLSET_NAME_SOURCE_BASE;
                 if (state->generic_monster != 0) {
                     mode = state->ability_ids[i] + TEXT_ID_ABILITY_NAME_BASE;
@@ -128,6 +141,7 @@ void menu_run_status_panel_thread(void) {
             LoadImage(&g_panel_text_upload_rect_b, (u32*)g_panel_text_image_b);
             thread->redraw_request = 0;
         }
+
         for (i = 0; i < 5; i++) {
             gfx_init_image_loading(&screen->sprites[19 + i], g_panel_item_icon_texture, g_menu_status_panel_frame_rect,
                 &g_panel_item_icon_layouts[i]);
@@ -139,6 +153,9 @@ void menu_run_status_panel_thread(void) {
                 (screen->sprites + i)[19].x0 = -0x200;
             }
         }
+
+        /* A scale (field y) of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into
+         * the upper half. */
         scale = g_main_gfx_screen_polarity * 0xf0;
         mask = scale ^ 0xf0;
         mask = -(mask != 0);
@@ -151,8 +168,12 @@ void menu_run_status_panel_thread(void) {
         screen->draw_offsets[1].position.x = -0x80;
         screen->draw_offsets[1].position.y = g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[1].packet, (u16*)&screen->draw_offsets[1].position);
+
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
+
+        /* Primitives link in at the head of the ordering-table entry, so they draw in reverse:
+         * each draw mode or offset added below applies to the sprites added above it. */
         if (frame < 13) {
             gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         }
@@ -178,15 +199,19 @@ void menu_run_status_panel_thread(void) {
         }
         menu_submit_numeric_display_frame_primitives(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
+        /* During the opening zoom the panel draws clipped to the scaled area; portrait.areas[1],
+         * drawn last, restores the full area. */
         if (frame < 13) {
             gfx_draw_or_append_gpu_primitive(&screen->portrait);
         }
+
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame++;
     }
+
     thread_yield();
     thread_exit_current();
 }

@@ -467,6 +467,7 @@ s32 battle_camera_get_input_direction(s32 source) {
     u32 divisor;
     u32 threshold;
 
+    /* Pick the button word that source names for the current cursor input mode. */
     switch (g_battle_cursor_input_mode) {
     case BATTLE_CURSOR_INPUT_OPTION_A:
     case BATTLE_CURSOR_INPUT_OPTION_B:
@@ -491,6 +492,7 @@ s32 battle_camera_get_input_direction(s32 source) {
                 threshold = 60;
                 break;
             }
+            /* Buttons held past threshold frames count as pressed again every divisor frames. */
             if (threshold < g_main_input_stable_frames && g_main_input_stable_frames % divisor == 0) {
                 input = g_input_previous_buttons;
             }
@@ -509,6 +511,8 @@ s32 battle_camera_get_input_direction(s32 source) {
             previous = g_input_previous_buttons | g_main_input_previous_copy_0;
             pressed = g_main_input_pressed_buttons;
             input = 0;
+
+            /* A new press counts only when it completes a diagonal with a held perpendicular button. */
             if (pressed & PSX_PAD_UP) {
                 if (previous & PSX_PAD_RIGHT) {
                     input = PSX_PAD_UP | PSX_PAD_RIGHT;
@@ -534,6 +538,9 @@ s32 battle_camera_get_input_direction(s32 source) {
                     input = PSX_PAD_RIGHT | PSX_PAD_DOWN;
                 }
             } else if (g_main_input_pressed_copy_1 & PSX_PAD_UP) {
+                /* battle_state_update_controller_input stores last frame's presses in both copy_0 and
+                 * copy_1, so these lone-direction tests never pass: a lone direction registers only
+                 * through the auto-repeat below. */
                 if (!((pressed | g_main_input_pressed_copy_0) & PSX_PAD_UP) && (previous & PSX_PAD_UP)) {
                     input = PSX_PAD_UP;
                 }
@@ -550,6 +557,7 @@ s32 battle_camera_get_input_direction(s32 source) {
                     input = PSX_PAD_RIGHT;
                 }
             }
+
             switch (g_main_game_options.fields.cursor_repeat_speed) {
             case GAME_CURSOR_REPEAT_SPEED_FAST:
                 divisor = 6;
@@ -576,6 +584,7 @@ s32 battle_camera_get_input_direction(s32 source) {
         break;
     }
 
+    /* Rotate the buttons by the camera's yaw quadrant into a battle facing for the mode's layout. */
     switch (g_battle_cursor_input_mode) {
     case BATTLE_CURSOR_INPUT_OPTION_A:
         switch (g_battle_camera_render_state.vy & 0xC00) {
@@ -818,6 +827,7 @@ s32 battle_camera_get_input_direction(s32 source) {
         }
         break;
     }
+
     if (g_main_input_pressed_buttons
         & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE | PSX_PAD_SELECT | PSX_PAD_START)) {
         direction = -1;
@@ -939,6 +949,7 @@ s32 battle_target_move_cursor_by_input(void) {
             break;
         }
     } while (0);
+
     direction = 0;
     current = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (g_main_game_options.fields.multi_height_cursor_speed == 3) {
@@ -957,11 +968,13 @@ s32 battle_target_move_cursor_by_input(void) {
             g_battle_cursor_z ^= 1;
         }
     }
+
     if (direction == 0) {
         g_battle_cursor_repeat_counter++;
         g_battle_cursor_previous_x = g_battle_cursor_x;
         g_battle_cursor_previous_z = g_battle_cursor_z;
         g_battle_cursor_previous_y = g_battle_cursor_y;
+
         direction = battle_camera_get_input_direction(CAMERA_INPUT_PRESSED);
         switch (direction) {
         case BATTLE_FACING_NORTH:
@@ -993,6 +1006,9 @@ s32 battle_target_move_cursor_by_input(void) {
             g_battle_cursor_x--;
             break;
         }
+
+        /* Keep the cursor on the map: a step past the edge goes back, and a step below 0
+         * compares as a large unsigned value and resets to 0. */
         if (g_battle_cursor_x == g_battle_map_max_x) {
             g_battle_cursor_x--;
         } else if ((u32)g_battle_cursor_x > g_battle_map_max_x) {
@@ -1004,6 +1020,7 @@ s32 battle_target_move_cursor_by_input(void) {
         if ((u32)g_battle_cursor_y > g_battle_map_max_y) {
             g_battle_cursor_y = 0;
         }
+
         lower = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
         upper = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
         if (lower->flags.blocked) {
@@ -1055,6 +1072,7 @@ s32 battle_target_move_cursor_by_input(void) {
             }
         }
     }
+
     if (((g_battle_cursor_x != g_battle_cursor_previous_x) | (g_battle_cursor_z != g_battle_cursor_previous_z)
             | (g_battle_cursor_y != g_battle_cursor_previous_y))
         != 0) {

@@ -218,6 +218,7 @@ static void menu_build_ability_preview_at_list(void) {
     text_id = at_table[g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].selected_index];
     g_menu_selected_action.targeting_type = BATTLE_TARGETING_TYPE_TILE;
     entry = &g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST];
+
     if ((text_id & 0xf800) == TEXT_ID_ABILITY_NAME_BASE) {
         staged_item = 0;
         g_menu_selected_action.ability_id = text_id - TEXT_ID_ABILITY_NAME_BASE;
@@ -226,15 +227,22 @@ static void menu_build_ability_preview_at_list(void) {
         /* Item selection updates only the low byte of the 16-bit command field. */
         *(u8*)&g_menu_selected_action.item_or_equipment = text_id;
     }
+
     action = &g_menu_selected_action;
     action->actor_id = g_menu_selected_unit.battle_id;
     stats = menu_get_selected_unit_stats();
     g_thread_call_target = (void (*)(void))battle_action_preview_at_list;
     turn = thread_call_on_main_stack(stats, action, work->entries);
+    /* An item preview marks the first entry as the item action; the loop below names it
+     * from the item text. */
     if (staged_item != 0) {
         work->entries[1].unit_code |= BATTLE_AT_ACTION_ENTRY;
         work->entries[1].action_id_low = g_menu_selected_action.item_or_equipment;
     }
+
+    /* Without an AT position for the action, this thread shows preview message 0x1023
+     * and exits. */
+
     count = 0;
     if (turn < 0 || turn == 0xff) {
         g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_MESSAGE].text_id = 0x1023;
@@ -243,19 +251,23 @@ static void menu_build_ability_preview_at_list(void) {
         count = 0;
         menu_icon_linked_entry_thread();
     }
+
     for (index = 0; index < BATTLE_AT_LIST_CAPACITY; index++) {
         work->primary_colors[index] = 0;
         work->secondary_colors[index] = 0;
     }
+
     published = work->text;
     g_text_section_pointers[TEXT_SECTION_AT_LIST] = published;
     count = 0;
     bracketed = 0;
     /* Keep the published text cursor separate before the turn adjustment. */
     text = published;
+    /* `turn` becomes the 0-based row of the previewed action. */
     if (turn != 0) {
         turn--;
     }
+
     for (index = 0; index < BATTLE_AT_LIST_CAPACITY - 1; index++) {
         battle_at_entry_t* slot = &work->entries[index + 1];
         s32 name_index;
@@ -265,6 +277,7 @@ static void menu_build_ability_preview_at_list(void) {
         }
         work->entry_numbers[index] = index + 1;
         stats = battle_unit_get_stats_from_battle_id(slot->unit_code & BATTLE_AT_UNIT_ID_MASK);
+        /* Action rows wrap the unit name in the 0xd9be/0xd9bf glyph pair. */
         if ((slot->unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
             *text++ = 0xd9;
             *text++ = 0xbe;
@@ -282,6 +295,9 @@ static void menu_build_ability_preview_at_list(void) {
             *text++ = 0xbf;
         }
         *text++ = 0xfe;
+
+        /* Text id 0xf800 + index is entry `index` of the AT list section, the name just
+         * written: unit rows show it in the first text column, action rows in the second. */
         if ((slot->unit_code & BATTLE_AT_ACTION_ENTRY) != 0) {
             work->secondary_values[count] = index - 0x800;
         } else {
@@ -309,19 +325,24 @@ static void menu_build_ability_preview_at_list(void) {
             }
             work->primary_values[count] = turn_text_id;
         }
+
         if ((stats->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE) {
             work->secondary_colors[count] = 8;
         }
         count++;
     }
+
     if (count >= BATTLE_AT_LIST_CAPACITY - 1) {
         count = BATTLE_AT_LIST_CAPACITY - 1;
     }
+
+    /* Color the previewed action's row. */
     work->primary_colors[turn] = 4;
     work->secondary_colors[turn] = 4;
     g_menu_at_list_layout.columns.mode[0] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
     g_menu_at_list_layout.columns.mode[1] = MENU_TEXT_COLUMN_TEXT;
     g_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_TEXT;
+    /* Action rows need the wide window and the second text column. */
     if (bracketed != 0) {
         menu_scroll_text_layout_t* layout = entry->context;
 
@@ -342,6 +363,7 @@ static void menu_build_ability_preview_at_list(void) {
         entry->inner_width = 0x84;
         g_menu_at_list_layout.columns.mode[2] = MENU_TEXT_COLUMN_HIDDEN;
     }
+
     if (count < 6) {
         menu_scroll_text_layout_t* layout;
         menu_scroll_text_layout_t* hidden_rows_layout;
@@ -356,6 +378,8 @@ static void menu_build_ability_preview_at_list(void) {
 
         layout->columns.hidden_rows = count - 6;
     }
+
+    /* Scroll so the previewed row sits fourth from the top where the list allows. */
     entry->selected_index = turn;
     if (turn < 3) {
         menu_scroll_text_layout_t* layout = entry->context;
@@ -370,6 +394,7 @@ static void menu_build_ability_preview_at_list(void) {
 
         layout->row_offset = turn - 3;
     }
+
     g_menu_at_list_layout.columns.text_ids[0] = work->entry_numbers;
     g_menu_at_list_layout.columns.text_ids[2] = work->secondary_values;
     g_menu_at_list_layout.columns.text_colors[0] = work->primary_colors;

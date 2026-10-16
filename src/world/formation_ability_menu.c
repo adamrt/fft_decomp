@@ -367,6 +367,8 @@ static s32 world_formation_run_set_ability_menu(void) {
         g_world_formation_unit_cycle_mode = 2;
         g_world_set_ability_show_stat_preview = 0;
     }
+
+    /* Cross leaves the menu from the slot cursor, or closes the open list below. */
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         if (g_world_set_ability_list_open == 0) {
@@ -377,6 +379,8 @@ static s32 world_formation_run_set_ability_menu(void) {
         }
         g_world_set_ability_list_close_pending = 1;
     }
+
+    /* UNLOCKED is 1, so fold it to 0: any other nonzero result is a locked unit. */
     lock_state = world_formation_get_unit_lock(g_unit_selected_index);
     if (lock_state == WORLD_FORMATION_UNIT_UNLOCKED) {
         lock_state = 0;
@@ -390,10 +394,12 @@ static s32 world_formation_run_set_ability_menu(void) {
         }
         return 1;
     }
+
     if (g_world_set_ability_list_open == 0) {
         slot = g_world_set_ability_slot;
         current = g_world_unit_pointers[g_unit_selected_index]->abilities.slots[slot];
         g_world_formation_unit_cycle_mode = 2;
+        /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
         g_menu_help_message_text_id = current;
         if (current == 0) {
             g_menu_help_message_text_id = -1;
@@ -402,6 +408,7 @@ static s32 world_formation_run_set_ability_menu(void) {
         } else {
             g_menu_help_message_text_id = current + 0x9800;
         }
+
         slot = menu_update_vertical_selection_and_mark_change(
                    4, WORLD_MENU_CURSOR_SET_ABILITY_SLOT, g_menu_input_secondary_repeat, MAIN_SFX_PAGE_SWITCH)
             + 1;
@@ -416,6 +423,7 @@ static s32 world_formation_run_set_ability_menu(void) {
                 g_world_set_ability_entry_count
                     = world_ability_build_equippable_rsm_list(g_unit_selected_index, slot - 1, g_item_list_entries);
             }
+
             menu_set_vsync_mode_and_event_speed(2);
             g_world_formation_unit_cycle_mode = 1;
             g_world_set_ability_list_open = 1;
@@ -442,6 +450,7 @@ static s32 world_formation_run_set_ability_menu(void) {
                 if (selected & ABILITY_LIST_ENTRY_DISABLED) {
                     world_text_show_message_and_play_sound(0xD81D, MAIN_SFX_ERROR_MESSAGE);
                 } else {
+                    /* Revalidate equipment when either the new or the replaced ability is an equip support. */
                     value = world_ability_is_equip_support_change(g_unit_selected_index, selected);
                     world_formation_set_unit_ability_slot(g_unit_selected_index, g_world_set_ability_slot, selected,
                         value
@@ -464,6 +473,8 @@ static s32 world_formation_run_set_ability_menu(void) {
                 }
             }
         }
+
+        /* Preview Move and Jump when the highlighted or the slot's current ability is a Move+/Jump+ one. */
         if (g_world_set_ability_cursor != cursor) {
             g_world_set_ability_cursor = cursor;
             if ((g_item_list_entries[cursor] >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
@@ -483,6 +494,7 @@ static s32 world_formation_run_set_ability_menu(void) {
         menu_run_script_with_palette_mode_variant(
             &g_world_set_ability_window_script, g_menu_input_primary_repeat, world_thread_is_task_active(0));
     }
+
     if (g_world_set_ability_list_close_pending != 0) {
         menu_set_window_scale_step(0);
         g_world_ability_panel_thread_params.style = 0;
@@ -496,6 +508,7 @@ static s32 world_formation_run_set_ability_menu(void) {
         thread_resume(WORLD_THREAD_SLOT_UPPER_MENU);
         g_world_set_ability_list_close_pending = 0;
     }
+
     busy = 0;
     world_menu_toggle_preview_stats_window(g_world_set_ability_show_stat_preview);
     g_world_set_ability_cursor_point.y = g_world_set_ability_slot * 16 + 0x90;

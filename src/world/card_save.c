@@ -936,6 +936,8 @@ static void world_card_update_slot_scan(void) {
 
     if (g_world_card_slot_scan_active == 0) {
         menu_input_clear_state();
+        /* While a slot is recorded as last used, the stored slot metadata is current: if the card
+         * reports no change, rebuild the descriptions from it and skip the directory scan. */
         if (g_main_card_save_last_used_slot < 0x10) {
             if (card_io_wait_operation_result(5) == CARD_IO_RESULT_COMPLETE) {
                 g_world_card_slot_scan_index = 0;
@@ -957,6 +959,8 @@ static void world_card_update_slot_scan(void) {
             }
         }
 
+        /* Setup spans three calls: clear the VRAM column at x 0x180 (it holds slots 11 to 14's text),
+         * start the checking message, then one idle call. */
         if (g_world_card_scan_start_frame < 3) {
             if (g_world_card_scan_start_frame == 0) {
                 rect.x = 0x180;
@@ -972,6 +976,7 @@ static void world_card_update_slot_scan(void) {
             return;
         }
 
+        /* Unlike CARD's twin, a new-card result is probed once more before use. */
         g_world_card_probe_result = card_io_open_or_create_selected_card();
         if (g_world_card_probe_result == CARD_IO_RESULT_NEW_CARD) {
             g_world_card_probe_result = card_io_open_or_create_selected_card();
@@ -979,6 +984,7 @@ static void world_card_update_slot_scan(void) {
         if (g_world_card_probe_result == CARD_IO_RESULT_COMPLETE) {
             g_world_card_save_file_count = card_file_enumerate_saves(g_world_card_directory_buffer, 1);
             result = 0;
+            /* Re-read the directory until two reads agree, at most 15 times, two vsyncs apart. */
             while (result < 15) {
                 status = card_file_enumerate_saves(g_world_card_directory_buffer, 1);
                 if (status == g_world_card_save_file_count) {
@@ -996,6 +1002,7 @@ static void world_card_update_slot_scan(void) {
             g_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
         }
 
+        /* Every slot starts unscanned; the scan below classifies one slot per call. */
         for (result = 0; result < 15; result++) {
             g_main_card_save_slot_file_states[result] = CARD_SAVE_SLOT_UNSCANNED;
         }
@@ -1058,6 +1065,7 @@ static void world_card_update_slot_scan(void) {
                 }
                 entry++;
             }
+            /* -1: the card holds no file for this slot; 0: found. */
             status = status ? -1 : 0;
 
             if (status != -1) {
@@ -1074,6 +1082,8 @@ static void world_card_update_slot_scan(void) {
                     if (status != -1) {
                         status = card_file_read_with_retries(descriptor, &g_world_load_work_buffer->summary, 0x80);
                     }
+                    /* The slot number is written last (world_card_run_save_step), so a summary still holding
+                     * 0xff marks an unfinished save: delete it and count its block free again. */
                     if (status != -1 && g_world_load_work_buffer->summary.slot >= 0x10
                         && card_file_delete_selected_with_retries(
                                g_world_card_save_file_names[g_world_card_slot_scan_index])
@@ -1094,6 +1104,7 @@ static void world_card_update_slot_scan(void) {
                 }
             }
 
+            /* A full 0x80-byte summary read means the slot holds a save. */
             if (status == 0x80) {
                 g_main_card_save_slot_file_states[g_world_card_slot_scan_index] = CARD_SAVE_SLOT_OCCUPIED;
             }
@@ -1115,6 +1126,7 @@ static void world_card_update_slot_scan(void) {
             }
             g_world_card_slot_scan_index++;
         } else {
+            /* A last-used slot below 0x10 lets the next scan reuse these results. */
             g_main_card_save_last_used_slot = 0;
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             g_world_card_menu_step = WORLD_CARD_MENU_STEP_SELECT_MODE;
@@ -1265,6 +1277,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
     RECT rect;
 
     if (g_world_card_menu_step == WORLD_CARD_MENU_STEP_SELECT_SAVE) {
+        /* Input is ignored until every button has been released once, so a press carried over
+         * from the previous step does not act here. */
         if (g_world_card_slot_list_input_ready == 0) {
             g_world_card_overwrite_prompt_running = 0;
             g_world_card_load_prompt_running = 0;
@@ -1274,6 +1288,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
                 input = 0;
             }
         }
+
+        /* After an error or a new card, rescan unless the card still answers. */
         if (card_io_poll_operation_result_variant() > CARD_IO_RESULT_COMPLETE) {
             if (card_io_wait_operation_result(3) != CARD_IO_RESULT_COMPLETE) {
                 menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
@@ -1295,6 +1311,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             }
         } else if ((input & PSX_PAD_CIRCLE) && g_world_card_list_scroll_velocity == 0) {
             main_sound_play_sfx(MAIN_SFX_CONFIRM);
+            /* The cursor counts listed slots only; find the slot index it points at. */
             remaining = g_world_card_slot_cursor_row;
             if (g_world_card_save_mode == 0) {
                 for (i = 0; i < 15; i++) {
@@ -1316,6 +1333,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
                 }
             }
             g_world_card_active_slot = i;
+
+            /* The confirm prompt's window y depends on the cursor's visible row. */
             i = g_world_card_slot_cursor_row - g_world_card_list_first_visible_row;
             switch (i) {
             case 0:
@@ -1331,6 +1350,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
                 i = 0x3a;
                 break;
             }
+
+            /* Saving asks only before overwriting; loading always asks. */
             if (g_world_card_save_mode == 0) {
                 g_world_card_confirm_prompt = g_world_card_overwrite_confirm_prompt;
                 g_world_card_overwrite_confirm_prompt[1].selected_index = 1;
@@ -1367,6 +1388,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
                 g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
             }
         }
+
+        /* Leaving the selection step re-arms the release check. */
         if (g_world_card_menu_step != WORLD_CARD_MENU_STEP_SELECT_SAVE) {
             input = 0;
             g_world_card_slot_list_input_ready = 0;
@@ -1377,6 +1400,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
     g_menu_window_rect_source = &g_world_card_slot_window;
     busy = g_world_card_menu_step != WORLD_CARD_MENU_STEP_SELECT_SAVE;
     for (i = 0, row = 0; i < CARD_SAVE_SLOT_COUNT; i++, row++) {
+        /* Loading lists occupied slots only; saving skips the unavailable ones. */
         if (g_world_card_save_mode != 0) {
             while (g_main_card_save_slot_file_states[i] != CARD_SAVE_SLOT_OCCUPIED) {
                 i++;
@@ -1395,15 +1419,18 @@ static void world_card_update_and_draw_slot_list(s32 input) {
         if (i >= CARD_SAVE_SLOT_COUNT) {
             break;
         }
+
         g_world_card_slot_window.rect.y
             = g_world_card_list_scroll_y + g_world_card_list_scroll_velocity + row * 48 + 12;
         if (g_world_card_slot_window.rect.y < -48 || g_world_card_slot_window.rect.y >= 241) {
             continue;
         }
+
         gfx_set_otag_index(10);
         value = row != g_world_card_slot_cursor_row || busy != 0;
         world_menu_set_palette_mode(value);
         world_menu_parse_draw_window_frame((menu_instruction_t*)&g_world_card_slot_window_command);
+
         g_world_card_slot_quad_3.position.y = g_world_card_slot_quad_4.position.y = g_world_card_slot_quad_0.position.y
             = g_world_card_slot_quad_1.position.y = g_world_card_slot_window.rect.y - 14;
         g_world_card_slot_quad_3.position.y = g_world_card_slot_quad_3.position.y + 1;
@@ -1423,6 +1450,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             g_world_card_slot_number_command.value = i + 1;
             menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_slot_number_command);
         }
+
         g_world_card_slot_quad_2.position.y = g_world_card_slot_quad_0.position.y;
         if (g_world_card_slot_quad_2.position.y >= 0 && g_world_card_slot_quad_2.position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
@@ -1439,6 +1467,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_playtime_minutes_command);
             menu_script_draw_formatted_number_variant((menu_instruction_t*)&g_world_card_playtime_seconds_command);
         }
+
         if (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_AVAILABLE) {
             rect.x = 0x74;
             rect.y = g_world_card_slot_window.rect.y + 5;
@@ -1450,6 +1479,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
             rect.w = 0xc8;
             rect.h = 0x1f;
         }
+
+        /* Read the slot's text strip from where world_card_draw_slot_text put it. */
         if (i < 6) {
             texture_page = g_world_menu_window_tpage;
             source_v = i * 0x20 + 0x30;
@@ -1464,6 +1495,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
     }
 
     gfx_set_otag_index(15);
+    /* The cursor stays on one of the four visible rows. */
     value = g_world_card_slot_cursor_row - g_world_card_list_first_visible_row;
     if (value < 0) {
         value = 0;
@@ -1473,6 +1505,8 @@ static void world_card_update_and_draw_slot_list(s32 input) {
     }
     g_world_card_slot_cursor_point.y = value * 48 + 0x28;
     menu_update_and_draw_sliding_cursor_variant(&g_world_card_slot_cursor_point, &g_world_card_slot_cursor_anim, busy);
+
+    /* Scroll arrows: up once the list has scrolled, down while rows remain below the visible four. */
     if (g_world_card_list_first_visible_row != 0) {
         rect.x = 0xe3;
         rect.y = 0x20;

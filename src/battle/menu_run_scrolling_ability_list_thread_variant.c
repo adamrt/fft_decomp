@@ -76,6 +76,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     saved_clut = g_menu_scratch_buffer.clut_save;
     row_buffer_live = 0;
     hold_time = 0;
+
     if (g_battle_menu_scroll_list_depth != 0) {
         /* Nested list: page pair in the event overlay area, 0x1000 bytes in. */
         page = (menu_list_page_t*)(g_main_heap_companion_overlay_load_address + 0x1000);
@@ -85,13 +86,16 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page = g_ai_workspace_ptr->list_pages;
         base = page;
     }
+
     toggle = 0;
     g_battle_menu_scroll_list_depth++;
+
     entry = (menu_entry_t*)thread_get_current_parameter_1();
     layout = entry->context;
     entry->window.h = layout->columns.row_count * 16 + 0x1C;
     entry->inner_height = layout->columns.row_count * 16 + 0x1C;
     entry->text_image.height = layout->columns.row_count * 16 + 0x1C;
+
     window.rect.x = 0x108 - entry->inner_width;
     window.rect.y = 0xFE;
     window.x_screen_offset = 8;
@@ -103,19 +107,23 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     clear.w = window.rect.w / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);
+
     texture_window.x = 0;
     texture_window.y = 0x80;
     texture_window.w = 0x100;
     texture_window.h = 0x80;
+
     for (i = 0; i < 2; i++) {
         base[i].icons.icons[0] = &icons0[i];
         base[i].icons.icons[1] = &icons1[i];
         base[i].icons.icons[2] = &icons2[i];
         menu_build_window_sprites(&image_rect, entry, &base[i].icons);
     }
+
     SetDrawMode(&page->icon_mode, 0, 0, GetTPage(0, 2, 0x3C0, 0x100), &g_gfx_texture_window);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 1, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
+
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
@@ -128,14 +136,17 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
+
     menu_init_sprt(&page->thumb);
     page->thumb.u0 = 0x10;
     page->thumb.v0 = 0x10;
     page->thumb.w = 8;
     page->thumb.h = 8;
     page->thumb.clut = 0x7D7C;
+
     menu_init_sprt(&page->frame);
     gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
+
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
     page->arrow_marks[0].h = 0xC;
@@ -149,15 +160,19 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
+
     menu_build_and_upload_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
+
     if (g_battle_menu_scroll_list_depth == 2) {
         buffer = g_main_heap_companion_overlay_load_address + 0x2000;
     } else {
         StoreImage(&g_battle_menu_ability_list_clut_rect, (u32*)saved_clut);
         buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     }
+
     menu_clear_render_buffer(buffer, window.rect.w * window.rect.h / 2);
+    /* Clamp the saved scroll position; a cursor beyond the visible rows restarts at the top. */
     row_offset = layout->row_offset;
     if (layout->columns.hidden_rows < row_offset) {
         row_offset = layout->columns.hidden_rows;
@@ -167,27 +182,35 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         row_offset = 0;
         cursor = 0;
     }
+
     menu_draw_text_columns_narrow(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
+
     image_rect.x = window.rect.x / 4 + entry->vram_origin.x;
     image_rect.y = 0x80;
     image_rect.w = window.rect.w / 4;
     image_rect.h = window.rect.h;
     LoadImage(&image_rect, (u32*)buffer);
+
+    /* Duplicate page 0 for the other packet buffer, then point each page at its own
+     * icon sprites. */
     mem_copy_bytes_nonempty(&base[1], base, sizeof(menu_list_page_t));
     for (i = 0; i < 2; i++) {
         base[i].icons.icons[0] = &icons0[i];
         base[i].icons.icons[1] = &icons1[i];
         base[i].icons.icons[2] = &icons2[i];
     }
+
     i = 0;
     scroll_accum = 0;
     scroll_delta = 0;
+
     for (;;) {
         page = &base[i & 1];
         frame = &page->frame;
         SetSemiTrans(&frame, 1);
+
         if (scroll_delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
@@ -202,6 +225,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 thread_start(g_thread_current_id - 1, menu_preview_ability_turn_at_list);
                 thread_set_parameters(g_thread_current_id - 1,
                     (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_PREVIEW_AT_LIST], 0, 0);
+                /* Blink CLUTs 1 and 2 (24 and 6 frames of every 30) until the preview thread ends,
+                 * then restore CLUT 3. */
                 column = 0;
                 while (1) {
                     if (thread_is_running_asm(g_thread_current_id - 1) == 0) {
@@ -217,8 +242,11 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                     thread_yield();
                 }
             }
+
             if ((g_script_event_input & PSX_PAD_UP)
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
+                /* With Square held, Up and Down page through the list instead (the redraw call
+                 * after the yield). The cursor wraps only when the whole list fits. */
                 if (cursor != 0) {
                     cursor--;
                     sound_queue_sfx_cursor_move();
@@ -244,6 +272,9 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             } else {
                 hold_time = 0;
             }
+
+            /* Starting a one-row scroll: draw the incoming row into its slot of the 128-pixel
+             * text ring, just below the visible rows or just above them. */
             if (scroll_delta != 0) {
                 if (scroll_delta > 0) {
                     image_rect.y = (((ring + layout->columns.row_count) * 16) & 0x7F) + entry->vram_origin.y;
@@ -256,6 +287,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 buffer = menu_alloc_memory(window.rect.w * 8);
                 menu_clear_render_buffer(buffer, window.rect.w * 8);
                 g_menu_text_state.pen.stride = window.rect.w;
+
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;
                     menu_set_text_origin(layout->columns.x[column], 0);
@@ -300,9 +332,11 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                         }
                     }
                 }
+
                 g_menu_text_palette_offset = 0;
                 g_menu_text_state.pen.color = 0;
                 LoadImage(&image_rect, (u32*)buffer);
+
                 clear.h = 2;
                 clear.x = image_rect.x;
                 clear.y = ((image_rect.y - 2) & 0xFF) + (image_rect.y & 0xFF00);
@@ -310,8 +344,12 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 ClearImage(&clear, 0, 0, 0);
             }
         }
+
         thread_yield();
+
         if (i == 0) {
+            /* Derive the blink CLUTs from the saved CLUT 0: CLUT 1 repeats colors 0..3 in 4..7,
+             * CLUT 2 blacks out 4..7, CLUT 3 is a plain copy and CLUT 4 repeats 0..7 in 8..15. */
             for (column = 0; column < 16; column++) {
                 clut = &saved_clut[column];
                 clut[16] = clut[0];
@@ -326,6 +364,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 }
             }
         }
+
         if (g_battle_menu_scroll_list_depth == 1) {
             if (i % 30 < 24) {
                 LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)(saved_clut + 48));
@@ -333,21 +372,26 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)(saved_clut + 64));
             }
         }
+
         if (redraw_pending != 0) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
+
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
             buffer
                 = battle_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, (s32)&cursor, &window.rect);
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
+
         entry->selected_index = cursor + row_offset;
         layout->row_offset = row_offset;
+
         if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
+
         menu_select_icon_cluts(&page->icons.base);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         menu_select_icon_sprite_clut(page->icons.icons[1]);
@@ -358,6 +402,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             frame->clut = 0x7FFC;
         }
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
+
         if (layout->columns.hidden_rows != 0 && thread_is_previous_running() == 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
@@ -367,6 +412,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[1]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[1]);
             }
+            /* The thumb travels between the two arrows in proportion to the selected index. */
             span = page->arrows[1].y0;
             top = page->arrows[0].y0 + page->arrows[0].h;
             span -= top;
@@ -375,10 +421,14 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 = top + span * entry->selected_index / (layout->columns.row_count + layout->columns.hidden_rows) - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
+
         if (g_battle_menu_scroll_list_depth < 2 && scroll_delta == 0) {
             menu_handle_action(entry, cursor);
         }
         menu_handle_cancel_input(entry);
+
+        /* Advance the scroll: at speed 1 only on even repeat counts, with the fast step
+         * once the hold passes the acceleration delay. */
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (hold_time < g_main_menu_scroll_accel_delay) {
@@ -389,6 +439,9 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             scroll_accum += scroll_delta * (step << 1);
         }
         hold_time += g_script_event_speed;
+
+        /* A row scroll ends after 16 pixels; a held Up or Down repeats once the initial
+         * repeat delay has passed. */
         if (scroll_accum < -0xF || scroll_accum > 0xF) {
             ring += scroll_delta;
             row_offset += scroll_delta;
@@ -401,12 +454,17 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             menu_free_memory(buffer);
             row_buffer_live = 0;
         }
+
+        /* The frame samples the text ring from two pixels above the top row, offset by the
+         * scroll. */
         frame->v0 = (ring * 16 + scroll_accum - 2) & 0x7F;
+        /* The window zooms open over its first 12 frames. */
         if (i * g_script_event_speed < 12) {
             gfx_init_image_loading(
                 &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
             menu_zoom_cursor_frame(entry, frame, i * g_script_event_speed);
         }
+
         if (layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT && toggle == 1) {
             {
                 menu_text_layout_t* columns = entry->context;
@@ -416,8 +474,10 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 page->icons.base.sprites[2].x0 += columns->x[1];
             }
         }
+
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
+
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);
             gfx_draw_or_append_gpu_primitive(page->icons.icons[1]);
@@ -434,16 +494,21 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         gfx_draw_or_append_gpu_primitive(&page->icons.base.draw_mode);
         gfx_draw_or_append_gpu_primitive(&page->icons.base.sprites[0]);
         gfx_draw_or_append_gpu_primitive(&page->icons);
+
         i++;
     }
+
     if (g_battle_menu_scroll_list_depth != 2) {
         LoadImage(&g_battle_menu_ability_list_clut_rect, (u32*)saved_clut);
     }
     if (row_buffer_live != 0) {
         menu_free_memory(buffer);
     }
+
     thread_yield();
     g_battle_menu_scroll_list_depth--;
+    /* Callers run the list as a function; a nonzero parameter 2 returns to them
+     * instead of exiting the thread. */
     if (thread_get_current_parameter_2() == 0) {
         thread_exit_current();
     }

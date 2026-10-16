@@ -187,6 +187,7 @@ void battle_state_run_game_loop(void) {
     battle_effect_init_system();
 
     /* A reverse slot-index loop changes the reset's original bytes. */
+    /* Clear the spritesheet id (byte 1) of all nine 0x32d6-byte slot records. */
     init_offset = 0x196b0;
     do {
         g_battle_gfx_spritesheet_ids_by_vram_slot[init_offset] = 0;
@@ -208,6 +209,8 @@ void battle_state_run_game_loop(void) {
             main_gfx_swap_and_clear_otag();
             battle_camera_update_vector_from_game_state();
 
+            /* Negate the Q12 camera position into whole units; the x conversion spells out the
+             * round-toward-zero that / ONE does for y and z. */
             camera_component = -camera_fixed->vx;
             if (camera_component < 0) {
                 camera_component += 0xfff;
@@ -220,6 +223,7 @@ void battle_state_run_game_loop(void) {
             battle_camera_update_matrices(&g_battle_camera_matrix, &g_battle_camera_render_state,
                 &g_battle_camera_current_screen_offset, &g_battle_camera_zoom);
             battle_map_draw_mesh_and_weather(&g_battle_camera_matrix);
+            /* The SEQ wait commands read this: 2 while an effect is updating, 0 otherwise. */
             if (battle_effect_update_cycle() != 0) {
                 g_battle_state_animation_continue_check = 2;
             } else {
@@ -414,9 +418,11 @@ void battle_state_run_game_loop(void) {
             battle_map_update_animations();
             main_sound_update_tunes();
 
+            /* A closing battle leaves before this frame is presented. */
             if (g_battle_game_state == BATTLE_GAME_STATE_CLOSE_BATTLE) {
                 break;
             }
+
             main_file_poll_load(&g_main_file_cd_state);
             g_main_gfx_screen_polarity = !g_main_gfx_screen_polarity;
             g_frame_counter++;
@@ -427,6 +433,9 @@ void battle_state_run_game_loop(void) {
             if (g_main_system_battle_frame_hsync_count_max < frame_measurement) {
                 g_main_system_battle_frame_hsync_count_max = frame_measurement;
             }
+
+            /* Count down the image buffers' upload timers; 0 (free) and BUFFER_EVTCHR are markers,
+             * not timers. */
             empty_timer = BATTLE_GFX_VRAM_SLOT_BUFFER_EVTCHR;
             timer_field = g_battle_gfx_vram_slots;
             timer_offset = 0;
@@ -441,6 +450,8 @@ void battle_state_run_game_loop(void) {
                 timer_field++;
             } while (i < 2);
 
+            /* A frame that ran long during effects arms the pacing timer, which battle_state_sync_frame
+             * uses to lengthen the following waits. */
             if (g_battle_game_state == BATTLE_GAME_STATE_EFFECT
                 || g_battle_game_state == BATTLE_GAME_STATE_ACTION_EXECUTE) {
                 if (g_main_system_vsync_interval == 1) {
@@ -453,6 +464,7 @@ void battle_state_run_game_loop(void) {
                     }
                 }
             }
+
             g_main_frame_pacing_suppressed = 0;
             main_system_frame_stub();
         }
@@ -461,6 +473,7 @@ void battle_state_run_game_loop(void) {
         battle_unit_clear_all();
     } while (g_main_system_game_flow_state == MAIN_GAME_FLOW_BATTLE);
 
+    /* Let drawing and two vertical blanks finish before leaving. */
     DrawSync(0);
     VSync(0);
     DrawSync(0);
@@ -1298,6 +1311,7 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
     depth = tile->depth_half_height;
     height = tile->height + depth.depth;
     slope_type = tile->slope_type;
+
     quad = unit->shadow_quad;
     quad[0].vx = coords.vx - 10;
     quad[0].vz = coords.vz + 10;
@@ -1308,10 +1322,12 @@ void battle_gfx_calculate_sprite_shadow_from_tile_slope(battle_unit_t* unit) {
     quad[3].vx = coords.vx + 10;
     quad[3].vz = coords.vz - 10;
     quad[0].vy = quad[1].vy = quad[2].vy = quad[3].vy = -(height * 12);
+
     slope = depth.half_height;
     if (slope == 0) {
         return;
     }
+
     switch (slope_type) {
     case MAP_SLOPE_EDGE_EAST: /* edge up to east */
         tx = coords.vx % MAP_TILE_SIZE;

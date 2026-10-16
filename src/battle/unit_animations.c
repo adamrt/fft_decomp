@@ -1317,12 +1317,15 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
         seq = &g_battle_gfx_vram_slots[1].seq.header;
         index = sequence_id - BATTLE_SEQUENCE_EVTCHR_SLOT_1;
     }
+
+    /* A frame instruction is two bytes, so this backs up to the frame read last. */
     if (!advance) {
         pos -= 2;
     }
     if (seq->sequences[index] == (u8*)-1) {
         main_system_handle_error(MAIN_SYSTEM_ERROR_SEQ_ANIMATION);
     }
+
     for (;;) {
         u8 op;
 
@@ -1345,6 +1348,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
             case BATTLE_SEQ_OP_END_ANIMATION:
             case BATTLE_SEQ_OP_PAUSE_ANIMATION:
                 if (sequence_id < BATTLE_SEQUENCE_EVTCHR_SLOT_0) {
+                    /* Odd sequence ids are the views from behind. */
                     if (sequence_id % 2) {
                         frame = g_battle_gfx_targeted_frame_back[g_battle_gfx_spritesheet_data[unit->spritesheet_id]
                                 .shp_id];
@@ -1394,6 +1398,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 break;
             case BATTLE_SEQ_OP_LAUNCH_PROJECTILE:
                 battle_effect_start_action_projectile_secondary(unit);
+                /* fallthrough: the command's two operand bytes are skipped like the unknowns' */
             case BATTLE_SEQ_OP_UNKNOWN_C7:
             case BATTLE_SEQ_OP_UNKNOWN_C8:
             case BATTLE_SEQ_OP_UNKNOWN_C9:
@@ -1420,6 +1425,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 break;
             case BATTLE_SEQ_OP_WAIT_FOR_EFFECT:
                 if (g_battle_state_animation_continue_check != 0) {
+                    /* Jump offsets count from the prefix byte, two bytes behind pos. */
                     offset = (s8)seq->sequences[index][pos];
                     pos += offset - 2;
                 } else {
@@ -1480,6 +1486,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
             case BATTLE_SEQ_OP_REPEAT:
                 offset = (s8)seq->sequences[index][pos++];
                 value = seq->sequences[index][pos++];
+                /* pos is four bytes past the prefix the offset counts from. */
                 if (state->repeat_count != 0) {
                     if (--state->repeat_count != 0) {
                         pos += offset - 4;
@@ -1561,6 +1568,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 unit->item_get_y_offset = seq->sequences[index][pos++];
                 break;
             case BATTLE_SEQ_OP_START_DISTORTION:
+                /* The operand stores the id less 2, so a script cannot start NONE or the scale pulse. */
                 unit->distortion_animation_id = seq->sequences[index][pos++] + 2;
                 timer = seq->sequences[index][pos++];
                 unit->distortion_phase = 0;
@@ -1602,6 +1610,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                 break;
             }
         } else {
+            /* A frame instruction: the frame, then its wait, which a replay skips. */
             frame = state->frame_bias + seq->sequences[index][pos++];
             if (advance) {
                 state->wait = seq->sequences[index][pos++] + state->wait_bias;
@@ -1995,17 +2004,22 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
     if (unit->draw_enabled == 0) {
         return;
     }
+
     if (unit->position_copies_active != 0) {
         battle_gfx_shift_and_fill_position_copies(unit);
     }
+
     direction = (g_battle_camera_render_state.vy + unit->facing) & 0xfff;
     quadrant = direction / 1024;
     sixteenth = direction / 256;
+
+    /* requested_animation holds the animation plus one; 0 means no request. */
     if (unit->requested_animation != 0) {
         if (unit->requested_animation - 1 == BATTLE_UNIT_ANIMATION_STAND) {
             for (i = 0; i < 3; i++) {
                 unit->sprite_blocks[i].trigger = 0;
             }
+
             unit->animation.sequence_id = stand_by_direction[sixteenth];
             unit->sprite_display_flags
                 = (unit->sprite_display_flags
@@ -2013,6 +2027,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                 | flip_by_direction[sixteenth];
             unit->camera_facing_quadrant = quadrant;
             unit->camera_facing_sixteenth = sixteenth;
+
             unit->animation.script_pos = 0;
             unit->animation.wait = 0;
             unit->animation.restart_count = 0;
@@ -2026,6 +2041,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
             unit->animation.frame_bias = 0;
             unit->animation.repeat_count = 0;
             unit->animation.flags = 0;
+
             battle_gfx_run_unit_seq_script(unit, &unit->animation, 1);
             unit->requested_animation = 0;
             battle_gfx_release_unit_vram_slot(unit);
@@ -2041,6 +2057,8 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                     index = animation * 2 + back_by_quadrant[quadrant];
                     if (index < (u32)seq->first_sp2_sequence) {
                         if (index >= (u32)seq->first_attack_sequence) {
+                            /* Keep a slot the unit already owns; otherwise load into a free slot and a free
+                             * image buffer. */
                             for (i = 0; i < 2; i++) {
                                 if ((g_battle_gfx_vram_slots[i].owner & BATTLE_GFX_VRAM_SLOT_OWNER_ID_MASK)
                                     == unit->runtime_id) {
@@ -2066,6 +2084,9 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                                 if (j == 2) {
                                     ok = 0;
                                 }
+
+                                /* None free: take slot 1 unless it holds an EVTCHR image or nothing, and leave
+                                 * its owner on its rest frame. */
                                 if (ok == 0) {
                                     if (g_battle_gfx_vram_slots[1].owner - BATTLE_GFX_VRAM_SLOT_OWNER_EVTCHR >= 2) {
                                         other = battle_unit_get_by_runtime_id(
@@ -2095,22 +2116,26 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                         }
                     }
                 }
+
                 if (ok != 0) {
                     for (i = 0; i < 3; i++) {
                         unit->sprite_blocks[i].trigger = 0;
                     }
+
                     animation = unit->requested_animation - 1;
                     if (animation >= BATTLE_SEQUENCE_EVTCHR_SLOT_0) {
                         unit->animation.sequence_id = unit->requested_animation - 1;
                     } else {
                         unit->animation.sequence_id = animation * 2 + back_by_quadrant[quadrant];
                     }
+
                     unit->sprite_display_flags
                         = (unit->sprite_display_flags
                               & ~(BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP | BATTLE_SPRITE_DISPLAY_VERTICAL_FLIP))
                         | flip_by_quadrant[quadrant];
                     unit->camera_facing_quadrant = quadrant;
                     unit->camera_facing_sixteenth = sixteenth;
+
                     unit->animation.script_pos = 0;
                     unit->animation.wait = 0;
                     unit->animation.restart_count = 0;
@@ -2124,9 +2149,12 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                     unit->animation.frame_bias = 0;
                     unit->animation.repeat_count = 0;
                     unit->animation.flags = 0;
+
                     battle_gfx_run_unit_seq_script(unit, &unit->animation, 1);
                     unit->movement.force_animation_update = 0;
                     unit->requested_animation = 0;
+
+                    /* A mount restarts its rider's sequence along with its own. */
                     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
                         other = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
                         if (other != 0) {
@@ -2136,6 +2164,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                         }
                     }
                 } else if (unit->animation.wait != 0) {
+                    /* No slot could be had: the request stays pending while the current sequence runs on. */
                     for (i = 0; i < g_main_system_vsync_interval; i++) {
                         if (unit->animation.wait != 0) {
                             unit->animation.wait--;
@@ -2146,12 +2175,17 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
                     }
                 }
             } else {
+                /* The requested sequence is already playing: drop the request. */
                 unit->requested_animation = 0;
             }
         }
     } else if (!(unit->movement.suppress_facing_update)) {
+        /* No request: a new view direction re-aims the running sequence without restarting
+         * its wait. */
         if (sixteenth != unit->camera_facing_sixteenth) {
             sequence_id = unit->animation.sequence_id;
+            /* Sequences 0-5 are the standing poses, chosen per sixteenth; the others keep their
+             * front/back pair and switch side. */
             if (sequence_id < (BATTLE_UNIT_ANIMATION_IDLE << 1)) {
                 unit->animation.sequence_id = stand_by_direction[sixteenth];
                 unit->sprite_display_flags
@@ -2180,6 +2214,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
             }
         }
     } else if (unit->animation.wait != 0) {
+        /* Facing updates are suppressed: only count the wait down. */
         for (i = 0; i < g_main_system_vsync_interval; i++) {
             if (unit->animation.wait != 0) {
                 unit->animation.wait--;
@@ -2190,6 +2225,8 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
             battle_unit_dispatch_distortion_animation(unit);
         }
     }
+
+    /* Count down the three weapon/effect sprite blocks. */
     for (i = 0; i < 3; i++) {
         if (unit->sprite_blocks[i].trigger != 0 && unit->sprite_blocks[i].wait != 0) {
             for (j = 0; j < g_main_system_vsync_interval; j++) {
@@ -3086,6 +3123,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {
         case BATTLE_GFX_SHARED_LOAD_SPRITE_SHP:
             index = &g_battle_gfx_unit_graphics_load_state.index;
+            /* A failed allocation or read leaves the phase unchanged, so the next step retries. */
             buffer = main_heap_alloc(g_battle_gfx_sprite_shp_files[*index].size);
             g_battle_gfx_unit_graphics_load_state.buffer = buffer;
             if (buffer == 0) {
@@ -3251,6 +3289,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
     case BATTLE_GFX_UNIT_LOAD_PHASE_FINISH:
         main_heap_call_free(g_battle_gfx_unit_graphics_load_state.buffer);
         *phase = BATTLE_GFX_UNIT_LOAD_PHASE_START_READ;
+        /* Five sprite SHP and SEQ files, two weapon, one effect, then each SPR file once. */
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {
         case BATTLE_GFX_SHARED_LOAD_SPRITE_SHP: {
             s32* counter = &g_battle_gfx_unit_graphics_load_state.index;
@@ -3301,6 +3340,7 @@ s32 battle_gfx_step_load_unit_shp_seq_data(void) {
         }
         break;
     }
+
     return g_battle_gfx_unit_graphics_load_state.file_kind;
 }
 
@@ -3371,12 +3411,14 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                    .spritesheet_id]
                      .shp_id;
+            /* SHP ids below 5 are the shared files the startup loader keeps resident. */
             if (id < 5 || id == g_battle_gfx_last_loaded_shp_id) {
                 result = 2;
                 g_battle_gfx_unit_graphics_load_state.buffer = 0;
                 g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_FINISH;
                 break;
             }
+
             g_battle_gfx_last_loaded_shp_id = id;
             g_battle_gfx_unit_graphics_load_state.buffer = main_heap_alloc(g_battle_gfx_sprite_shp_files[id].size);
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
@@ -3395,12 +3437,14 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
                                                    .spritesheet_id]
                      .seq_id;
+            /* SEQ ids below 5 are likewise resident. */
             if (id < BATTLE_SEQ_RUKA || id == g_battle_gfx_last_loaded_seq_id) {
                 result = 2;
                 g_battle_gfx_unit_graphics_load_state.buffer = 0;
                 g_battle_gfx_unit_graphics_load_state.phase = BATTLE_GFX_UNIT_LOAD_PHASE_FINISH;
                 break;
             }
+
             g_battle_gfx_last_loaded_seq_id = id;
             g_battle_gfx_unit_graphics_load_state.buffer = main_heap_alloc(g_battle_gfx_sprite_seq_files[id].size);
             if (g_battle_gfx_unit_graphics_load_state.buffer == 0) {
@@ -3415,12 +3459,15 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             }
             break;
         case BATTLE_GFX_QUEUED_LOAD_SPR:
+            /* Ids from 0xa0 up are past the sheet table and load Ramza's chapter 1 sheet instead. */
             if (g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
                     .spritesheet_id
                 >= 0xa0) {
                 g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
                     .spritesheet_id = BATTLE_SPRITESHEET_ID_RAMZA_CHAPTER_1;
             }
+
+            /* A sheet already in VRAM skips the read but still goes to install, which creates the unit. */
             if (battle_gfx_is_spritesheet_id_loaded(
                     g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
                         .spritesheet_id)
@@ -3430,6 +3477,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
                 result = 2;
                 break;
             }
+
             g_battle_gfx_unit_graphics_load_state.buffer = main_heap_alloc(
                 g_battle_gfx_spritesheet_files[g_main_gfx_unit_graphics_load_queue
                                                    .descriptors[g_battle_gfx_unit_graphics_load_state.index]
@@ -3464,6 +3512,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
     case BATTLE_GFX_UNIT_LOAD_PHASE_INSTALL:
         switch (g_battle_gfx_unit_graphics_load_state.file_kind) {
         case BATTLE_GFX_QUEUED_LOAD_SHP:
+            /* Queued SHP and SEQ data share one boss table each, so each load replaces the last. */
             g_battle_gfx_shp_frame_data_cursor = g_battle_gfx_fallback_shp_frame_data;
             battle_gfx_unpack_unit_shp_data(
                 &g_battle_gfx_boss_shp_frame_tables, g_battle_gfx_unit_graphics_load_state.buffer);
@@ -3509,6 +3558,7 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
         result = 2;
         break;
     }
+
     return (g_battle_gfx_unit_graphics_load_state.index < g_main_gfx_unit_graphics_load_queue.count) ? result : 0;
 }
 

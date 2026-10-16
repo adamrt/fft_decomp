@@ -351,6 +351,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     g_battle_action_current_ability_view.attacker_id = action.actor_id;
     g_battle_action_attacker_data = &g_battle_action_attacker_action_data;
     g_battle_action_attacker = &g_battle_unit_stats[g_battle_action_current_ability_view.attacker_id];
+
     if (g_battle_action_context != ACTION_CONTEXT_PRIMARY && battle_action_perform_reaction_ability() != 0) {
         battle_action_store_used_weapon(&action);
         return 0;
@@ -359,6 +360,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
         battle_move_apply_knockback();
         return 0;
     }
+
     g_battle_action_current_ability_view.terrain
         = g_battle_map_tile_data[battle_map_calculate_location(g_battle_action_target)].surface.type;
     if (g_battle_action_current_ability.strike_counter == 0) {
@@ -370,9 +372,11 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
         /* Item selection reads only the low byte of the 16-bit item/equipment field. */
         id = action.item_or_equipment;
     }
+    /* Weapon data covers only item ids below 0x80. */
     if (id >= 0x80) {
         id = ITEM_ID_NOTHING;
     }
+
     g_battle_action_current_ability_view.weapon_id = id;
     g_battle_action_current_ability_view.ability_id = action.ability_id;
     ability_id = action.ability_id;
@@ -380,6 +384,8 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     if (g_battle_action_current_ability_view.ability_id > ABILITY_ID_ITEM_FIRST) {
         ability_id = 0;
     }
+
+    /* Start from the weapon's data and formula; the menu switch below overrides them. */
     weapon = &g_main_item_weapon_data[id];
     main_mem_copy_byte_data_source_first(&g_main_ability_range_data[ability_id],
         &g_battle_action_current_ability_view.range_data, sizeof(ability_secondary_data_t));
@@ -390,10 +396,12 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     g_battle_action_current_ability.formula = ABILITY_FORMULA_WEAPON_DAMAGE;
     g_battle_action_current_ability.attacker_faith = g_battle_action_attacker->faith;
     g_battle_action_current_ability.target_faith = g_battle_action_target->faith;
+
     battle_action_clear_data();
     skillset = action.skillset_id;
     g_battle_action_current_ability.skillset = skillset;
     menu_type = g_main_action_menu_types_by_skillset[skillset];
+    /* A pending weapon proc resolves its spell, held in reaction_id, as a default-menu ability. */
     if (g_battle_action_current_ability_view.weapon_proc_pending != 0) {
         action.ability_id = g_battle_action_current_ability_view.reaction_id;
         g_battle_action_current_ability_view.ability_id = action.ability_id;
@@ -401,15 +409,18 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     } else {
         g_battle_action_current_ability_view.reaction_id = 0;
     }
+
     data = &g_main_ability_data[action.ability_id];
     g_battle_action_target_data->miss_display_flags = data->ai_flags.flags_1 & ACTION_MISS_DISPLAY_TEAM_MASK;
     if (data->ai_flags.flags_4 & AI_ABILITY_FLAG_4_EVADE_WITH_MOTION) {
         g_battle_action_target_data->miss_display_flags += ACTION_MISS_DISPLAY_DODGE_ANIMATION;
     }
+
     if (menu_type == ACTION_MENU_TYPE_KATANA_INVENTORY) {
         id = action.item_or_equipment;
         action.ability_id = id + (ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE);
     }
+
     switch (menu_type) {
     case ACTION_MENU_TYPE_ELEMENTS:
         action.ability_id = battle_action_get_elemental_ability_id(g_battle_action_attacker);
@@ -420,6 +431,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     case ACTION_MENU_TYPE_KATANA_INVENTORY:
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;
         if (action.ability_id <= ABILITY_ID_ITEM_FIRST) {
+            /* A frog strikes without its weapon. */
             if ((g_battle_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)]
                     & STATUS_BYTE_MASK(STATUS_ID_FROG))
                 && g_battle_action_current_ability_view.weapon_proc_pending == 0) {
@@ -432,6 +444,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
                 ability, &g_battle_action_current_ability_view.range_data, sizeof(ability_secondary_data_t));
             g_battle_action_current_ability.proc_id = ability->status_infliction_id;
             formula = ability->formula;
+            /* An ability that does not use the weapon drops it, except Draw Out. */
             if (!(g_battle_action_current_ability.range_data.flags_1
                     & (ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE | ABILITY_SECONDARY_FLAG_1_WEAPON_STRIKE))
                 && menu_type != ACTION_MENU_TYPE_KATANA_INVENTORY) {
@@ -484,11 +497,14 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;
         break;
     }
+
     g_battle_action_current_ability_view.weapon_proc_pending = 0;
     g_battle_action_current_ability.knockback_flags = 0;
     if (formula == 0 || formula >= ABILITY_FORMULA_ID_LIMIT) {
         formula = ABILITY_FORMULA_WEAPON_DAMAGE;
     }
+
+    /* id now indexes the status infliction table; guns never inflict their proc (entry 0). */
     id = g_battle_action_current_ability_view.proc_id;
     if (formula == ABILITY_FORMULA_GUN_DAMAGE) {
         id = 0;
@@ -497,17 +513,22 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
         &g_battle_action_current_ability_view.status_infliction, sizeof(status_infliction_data_t));
     battle_status_store_ability_cancellations();
     g_battle_action_current_ability.formula = formula;
+
+    /* Evasion reactions run first; a miss skips the formula. */
     battle_action_check_evasion_reactions();
     if (g_battle_action_target_data->hit == 0) {
         return 1;
     }
+
     g_battle_formula_handlers[formula - 1]();
+    /* Only the weapon damage formulas (1..6) go on to Poach and Train. */
     if (formula < 7) {
         battle_formula_apply_poach_and_train();
     }
     if (formula == ABILITY_FORMULA_DAMAGE_PA_TIMES_WP) {
         g_battle_action_current_ability_view.weapon_id = ITEM_ID_NOTHING;
     }
+
     battle_action_finalize_target_current_action();
     if (g_battle_action_target_data->special_effect != 0) {
         g_battle_action_target_data->attack_type |= ACTION_TYPE_PSEUDO_STATUS;
@@ -677,18 +698,22 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if (unit_id >= 21) {
         return -1;
     }
+
     g_battle_action_current_ability.target_id = unit_id;
     g_battle_action_target = &g_battle_unit_stats[unit_id];
     g_battle_action_target_data = &g_battle_unit_stats[unit_id].action;
     if (g_battle_action_target->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return -1;
     }
+
+    /* A dead unit turning into a crystal or treasure only resolves that change. */
     if ((g_battle_action_target->status_sets.current[0] & STATUS_MASK(DEAD))
         && ((g_battle_action_target_data->status_changes.infliction[0] & STATUS_MASK(CRYSTAL))
             || (g_battle_action_target_data->status_changes.infliction[1] & STATUS_MASK(TREASURE)))) {
         battle_status_resolve_unit_changes(unit_id, 0);
         return 0;
     }
+
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         g_battle_action_target->ability_outcome = BATTLE_ABILITY_OUTCOME_TARGETED;
     }
@@ -696,9 +721,12 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if (g_battle_action_target_data->reaction_id == ABILITY_ID_REACTION_CATCH) {
         battle_action_give_item(g_battle_action_target, g_battle_action_target_data->last_received_attack);
     }
+
     if (g_battle_action_target_data->hit == 0) {
         return 0;
     }
+
+    /* Golem takes the hit: only the team's Golem HP drops. */
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_GOLEM_GUARD) {
         u16* golem;
 
@@ -711,11 +739,13 @@ s32 battle_action_apply_target_result(s32 unit_id) {
         *golem = hp;
         return 0;
     }
+
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_SET_GOLEM) {
         outcome = 1;
         g_battle_team_golem[(g_battle_action_target->team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT]
             = g_battle_action_target->max_hp;
     }
+
     battle_action_check_damage_sharing_reaction_usability();
     old_hp = g_battle_action_target->hp;
     hp = old_hp - g_battle_action_target_data->hp_damage + g_battle_action_target_data->hp_healing;
@@ -725,6 +755,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if (g_battle_action_target->max_hp < hp) {
         hp = g_battle_action_target->max_hp;
     }
+
     old_mp = g_battle_action_target->mp;
     mp = old_mp - g_battle_action_target_data->mp_damage + g_battle_action_target_data->mp_healing;
     if (mp < 0) {
@@ -733,11 +764,15 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if (g_battle_action_target->max_mp < mp) {
         mp = g_battle_action_target->max_mp;
     }
+
     if (old_hp != hp || old_mp != mp) {
         outcome = 1;
     }
     g_battle_action_target->hp = hp;
     g_battle_action_target->mp = mp;
+
+    /* The last argument is the stat's minimum: a rider's Brave stops at 10, so it never
+     * turns Chicken while riding. */
     outcome |= battle_unit_apply_stat_increment_decrement(g_battle_action_target_data->sp_change,
         &g_battle_action_target->base_attributes[UNIT_ATTRIBUTE_SPEED], UNIT_SPEED_MAX, 1);
     outcome |= battle_unit_apply_stat_increment_decrement(
@@ -751,10 +786,12 @@ s32 battle_action_apply_target_result(s32 unit_id) {
         (g_battle_action_target->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) ? 10 : 0);
     outcome |= battle_unit_apply_stat_increment_decrement(
         g_battle_action_target_data->faith_change, &g_battle_action_target->faith, UNIT_BRAVE_FAITH_MAX, 0);
+
     outcome |= battle_action_remove_broken_or_stolen_equipment();
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN) {
         battle_action_give_item(g_battle_action_target, g_battle_action_target->action_command.item_or_equipment);
     }
+
     if (g_battle_action_target_data->gil_change != 0 || g_battle_action_target_data->exp_change != 0) {
         outcome |= 1;
     }
@@ -763,6 +800,7 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     if (g_battle_action_target_data->jp_change != 0) {
         battle_action_apply_jp_change(g_battle_action_target);
     }
+
     outcome |= battle_unit_apply_level_up_down_ability();
     outcome |= battle_action_add_poached_item_to_fur_shop_inventory();
     if (g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_MORBOL) {
@@ -771,6 +809,8 @@ s32 battle_action_apply_target_result(s32 unit_id) {
             battle_status_clear_all(g_battle_action_target);
         }
     }
+
+    /* At 0 HP, Dead replaces every other pending status change. */
     if (hp == 0 && !(g_battle_action_target->status_sets.current[0] & STATUS_MASK(CRYSTAL))
         && !(g_battle_action_target->status_sets.current[0] & STATUS_MASK(DEAD))
         && !(g_battle_action_target->status_sets.current[1] & STATUS_MASK(TREASURE))) {
@@ -781,8 +821,10 @@ s32 battle_action_apply_target_result(s32 unit_id) {
             g_battle_action_target->ko_count++;
         }
         battle_unit_update_attacker_earned_experience(2);
+        /* -1 for a rider: bit 7 of mount_info is the rider flag. */
         return -(g_battle_action_target->mount_info >> 7);
     }
+
     if (hp <= (g_battle_action_target->max_hp / 5)) {
         g_battle_action_target_data->status_changes.infliction[2] |= STATUS_MASK(CRITICAL);
     } else {
@@ -793,23 +835,28 @@ s32 battle_action_apply_target_result(s32 unit_id) {
     } else {
         g_battle_action_target_data->status_changes.removal[2] |= STATUS_MASK(CHICKEN);
     }
+
     if (g_battle_action_target_data->attack_type & ACTION_TYPE_HP_DAMAGE) {
         g_battle_action_target_data->status_changes.removal[4] |= STATUS_MASK(CHARM) | STATUS_MASK(SLEEP);
         g_battle_action_target_data->status_changes.removal[2] |= STATUS_MASK(TRANSPARENT);
         g_battle_action_target_data->status_changes.removal[1] |= STATUS_MASK(CONFUSION);
     }
+
     if ((g_battle_action_target_data->special_effect & ACTION_SPECIAL_EFFECT_KNOCKBACK)
         && battle_status_remove_charging_ability_ct(g_battle_action_target, 0) != 0) {
         g_battle_action_target_data->status_changes.removal[0] |= STATUS_MASK(CHARGING);
         g_battle_action_target->charged_ability_ct = 0xff;
     }
+
     battle_status_modify_inflictions(0);
+    /* Snapshot the statuses to see what resolving the changes alters. */
     for (i = 0; i < 5; i++) {
         old_status[i] = g_battle_action_target->status_sets.current[i];
     }
     for (i = 0; i < 16; i++) {
         old_status_ct[i] = g_battle_action_target->status_ct[i];
     }
+
     battle_status_resolve_unit_changes(unit_id, 0);
     if ((g_battle_action_target->status_sets.current[0] & STATUS_MASK(DEAD)) && !(old_status[0] & STATUS_MASK(DEAD))) {
         outcome = 2;
@@ -830,10 +877,12 @@ s32 battle_action_apply_target_result(s32 unit_id) {
             }
         }
     }
+
     battle_unit_update_attacker_earned_experience(outcome);
     if (outcome != 0) {
         g_battle_action_target->ability_outcome = BATTLE_ABILITY_OUTCOME_AFFECTED;
     }
+
     battle_action_check_stat_save_and_restore_reaction_usability();
     if (g_battle_action_target->status_sets.current[0] & (STATUS_MASK(CRYSTAL) | STATUS_MASK(DEAD))) {
         if (g_battle_action_target->mount_info & BATTLE_MOUNT_INFO_FLAG_RIDER) {

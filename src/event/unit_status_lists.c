@@ -1148,12 +1148,15 @@ void menu_run_unit_summary_panel_thread(void) {
     s32 value;
     s16 zodiac;
 
+    /* `slide` is the panel's x shift from its resting place: it starts 0x84 out and eases
+     * in, `speed` dropping by 2 per step; a stop request slides it back out. */
     speed = 0x16;
     slide = 0x84;
     digits = &g_menu_unit_summary_digit_images;
     menu_load_selected_unit_variant();
     unit = menu_get_selected_unit_stats();
     g_menu_hide_numeric_values = unit->unit_flags & UNIT_FLAG_EGG;
+
     sprite = frames[0].sprites;
     gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_0, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&frames[0].draw_mode_1, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
@@ -1176,6 +1179,7 @@ void menu_run_unit_summary_panel_thread(void) {
     }
     frames[0].portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
     SetSemiTrans(&frames[0].portrait, 1);
+
     buffer = menu_alloc_buffer(0x580);
     menu_clear_render_buffer(buffer, 0x580);
     stride = &g_menu_text_state.pen.stride;
@@ -1186,6 +1190,7 @@ void menu_run_unit_summary_panel_thread(void) {
     menu_set_text_origin(0, 0x10);
     menu_display_text_string(buffer, origin, g_menu_billboard_job_name);
     LoadImage(&rects[0], (u32*)buffer);
+
     menu_clear_render_buffer(digits, sizeof(*digits));
     *stride = 0x10;
     menu_set_text_origin(0, 0);
@@ -1205,12 +1210,14 @@ void menu_run_unit_summary_panel_thread(void) {
         text_draw_large_number_glyphs_variant(value + 1, 0x4002, digits->roster_slot, origin);
     }
     LoadImage(&rects[3], (u32*)digits->roster_slot);
+
     frames[0].sprites[6].clut = MENU_CLUT_NORMAL;
     frames[0].sprites[6].w = 0x18;
     frames[0].sprites[6].h = 0x14;
     zodiac = g_menu_selected_unit.zodiac;
     frames[0].sprites[6].u0 = zodiac % 7 * 0x18;
     frames[0].sprites[6].v0 = zodiac / 7 * 0x14 + 0x2A;
+
     mem_copy_bytes_nonempty(&frames[1], &frames[0], sizeof(menu_unit_summary_frame_t));
     frames[0].palette = &g_menu_unit_summary_palettes[0].primitives;
     frames[1].palette = &g_menu_unit_summary_palettes[1].primitives;
@@ -1222,9 +1229,13 @@ void menu_run_unit_summary_panel_thread(void) {
         g_menu_hide_numeric_values = menu_get_selected_unit_stats()->unit_flags & UNIT_FLAG_EGG;
         frame_record = &frames[frame & 1];
         if (frame == 0) {
+            /* The name and job upload has had a frame to finish. */
             menu_free_memory(buffer);
         }
+
+        /* y of the frame buffer drawn this frame. */
         value = (g_main_gfx_screen_polarity & 1) == 0 ? 0xF0 : 0;
+        /* One slide step per event-speed step, so fast-forward speeds the slide. */
         for (i = 0; i < g_script_event_speed; i++) {
             if (thread_get_current_parameter_3() != 0) {
                 slide += 0x1E;
@@ -1244,6 +1255,9 @@ void menu_run_unit_summary_panel_thread(void) {
                 }
             }
         }
+
+        /* Bounce after the unit editor moves the panel: steps 1-6 at the top (y 0x1A), then
+         * 7-0xB at the bottom (y 0xAA) and back to 0, which the editor waits for. */
         if (g_menu_unit_summary_panel_rect.y == 0x1A) {
             if (g_menu_unit_status_bounce_step == 0) {
                 g_menu_unit_status_bounce_step = 1;
@@ -1265,12 +1279,17 @@ void menu_run_unit_summary_panel_thread(void) {
         } else {
             frame_record->offset_a.y = value;
         }
+
         frame_record->offset_a.x = slide - 0x80;
         SetDrawOffset(&frame_record->draw_offset_a, (u16*)&frame_record->offset_a);
         frame_record->offset_b.x = -0x80;
         frame_record->offset_b.y = value;
         SetDrawOffset(&frame_record->draw_offset_b, (u16*)&frame_record->offset_b);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_offset_b);
+
+        /* `value` becomes the dim flag: set while the unit editor's status list runs in the
+         * slot before the editor. */
+
         value = thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL);
         if (value != 0 && thread_is_running_asm(value - 1) == 0) {
             value = 0;
@@ -1299,6 +1318,7 @@ void menu_run_unit_summary_panel_thread(void) {
             }
             gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
         }
+
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_mode_0);
         if (value != 0) {
             menu_init_primitive_colors_dimmed(frame_record->palette);
@@ -1526,6 +1546,7 @@ void menu_run_unit_editor_panel_thread(void) {
     thread_set_parameters(THREAD_SLOT_MENU, 0, 0, 1);
     menu_record_selection_for_selected_unit();
     menu_set_modal_open();
+    /* The hovered-unit stats thread counts its frames; wait until it has drawn two. */
     do {
         thread_yield();
     } while (g_menu_hovered_stats_frame_count < 2);
@@ -1534,11 +1555,13 @@ void menu_run_unit_editor_panel_thread(void) {
     frame_record = g_menu_unit_editor_frames;
     records = frame_record;
     menu_init_scaled_draw_area_packets(&frame_record->draw_areas);
+    /* Move the hovered-unit and summary panels to the top while the editor shows. */
     g_menu_hovered_unit_stats_rect.y = 0x1A;
     g_menu_unit_summary_panel_rect.y = 0x1A;
     gfx_set_draw_mode_for_texture_page(&frame_record->frame_draw_mode, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&frame_record->text_draw_mode, MENU_TEXTURE_PAGE_TEXT_IMAGES);
     gfx_set_draw_mode_for_texture_page(&frame_record->image_draw_mode, MENU_TEXTURE_PAGE_ITEM_ICONS);
+
     SetTile(&frame_record->tiles[0]);
     SetSemiTrans(&frame_record->tiles[0], 1);
     setRGB0(&frame_record->tiles[0], 0x30, 0x30, 0x30);
@@ -1549,6 +1572,7 @@ void menu_run_unit_editor_panel_thread(void) {
     mem_copy_bytes_nonempty(&frame_record->tiles[1], &frame_record->tiles[0], sizeof(TILE));
     frame_record->tiles[0].x0 += 0x12;
     frame_record->tiles[1].x0 += 0x7C;
+
     line = frame_record->lines;
     for (i = 0; i < 8 * MENU_UNIT_EDITOR_LINE_SIZE; i += MENU_UNIT_EDITOR_LINE_SIZE) {
         SetLineF2(line);
@@ -1562,6 +1586,7 @@ void menu_run_unit_editor_panel_thread(void) {
             g_menu_unit_editor_line_colors[i + MENU_UNIT_EDITOR_LINE_Y1] + g_menu_unit_editor_panel_rect.y);
         line++;
     }
+
     menu_init_sprite_array(&frame_record->sprites[0], 0xC, 0x7D7C);
     menu_init_sprite_array(&frame_record->sprites[12], 7, MENU_CLUT_NORMAL);
 
@@ -1586,6 +1611,7 @@ void menu_run_unit_editor_panel_thread(void) {
         mem_copy_bytes_nonempty(&g_menu_unit_editor_sprite_image_params_b[14],
             &g_menu_unit_editor_row_image_params_a[2], 2 * sizeof(image_load_parameters_t));
     }
+
     /* These sprite and rectangle records share the fields read by the image loader. */
     if (g_menu_selected_unit_fields.state.generic_monster == 0) {
         for (i = 0; i < 19; i++) {
@@ -1598,6 +1624,7 @@ void menu_run_unit_editor_panel_thread(void) {
                 &g_menu_unit_editor_sprite_image_params_b[i]);
         }
     }
+
     menu_init_sprite_array(&frame_record->sprites[19], 5, 0x7CFC);
     for (i = 0; i < 5; i++) {
         gfx_init_image_loading(&frame_record->sprites[19 + i], &g_gfx_item_icon_image_location,
@@ -1619,7 +1646,9 @@ void menu_run_unit_editor_panel_thread(void) {
         }
     }
     LoadImage(&g_menu_unit_editor_text_rect_a, (u32*)buffer);
+    /* Give the upload a frame before the buffer is cleared for the ability names. */
     thread_yield();
+
     menu_clear_render_buffer(buffer, 0xC80);
     g_menu_text_state.pen.stride = 0x50;
     menu_set_text_origin(0, 0);
@@ -1644,6 +1673,8 @@ void menu_run_unit_editor_panel_thread(void) {
             g_menu_text_state.pen.rect.y += 0x10;
         }
     }
+
+    /* A monster's empty ability rows move their sprites off screen. */
     if (g_menu_selected_unit_fields.state.generic_monster != 0) {
         for (i = 0; i < 5; i++) {
             if ((u16)g_menu_selected_unit_fields.state.ability_ids[i] == MENU_STATUS_PANEL_LABEL_NONE) {
@@ -1651,6 +1682,7 @@ void menu_run_unit_editor_panel_thread(void) {
             }
         }
     }
+
     LoadImage(&g_menu_unit_editor_text_rect_b, (u32*)buffer);
     thread_yield();
     menu_free_memory(buffer);
@@ -1660,6 +1692,7 @@ void menu_run_unit_editor_panel_thread(void) {
     records[1].palette = &g_menu_unit_editor_palette;
     menu_init_numeric_display_frame_primitives(&g_menu_unit_editor_panel_rect, records[0].palette);
     menu_init_numeric_display_frame_primitives(&g_menu_unit_editor_panel_rect, records[1].palette);
+
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, menu_run_numeric_display_panel_thread);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
     thread_yield();
@@ -1673,6 +1706,8 @@ void menu_run_unit_editor_panel_thread(void) {
         if (g_menu_input_lock_mode == 0 && g_menu_help_open == 0 && thread_get_current_parameter_3() != 0) {
             break;
         }
+
+        /* Dim while the status list started below runs in the slot before this thread. */
         value = thread_is_running_asm(g_thread_current_id - 1);
         for (i = 0; i < 19; i++) {
             frame_record->sprites[i].clut = g_menu_unit_editor_sprite_clut_pairs[i][value];
@@ -1695,6 +1730,7 @@ void menu_run_unit_editor_panel_thread(void) {
         } else {
             menu_init_primitive_colors_dimmed(frame_record->palette);
         }
+
         if (menu_can_accept_input() != 0) {
             if (g_script_event_input & PSX_PAD_CROSS) {
                 thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
@@ -1709,6 +1745,7 @@ void menu_run_unit_editor_panel_thread(void) {
                     g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST], 0, 0);
             }
         }
+
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_areas.areas[1]);
         for (i = 0; i < 12; i++) {
             gfx_draw_or_append_gpu_primitive(&frame_record->sprites[i]);
@@ -1735,6 +1772,9 @@ void menu_run_unit_editor_panel_thread(void) {
         menu_submit_numeric_display_frame_primitives(frame_record->palette);
         gfx_draw_or_append_gpu_primitive(&frame_record->draw_areas.areas[0]);
     }
+
+    /* Return the panels to the bottom; step 6 starts the summary panel's bounce there,
+     * and it resets the step to 0 when the bounce ends. */
     g_menu_hovered_unit_stats_rect.y = 0xAA;
     g_menu_unit_summary_panel_rect.y = 0xAA;
     g_menu_panel_fade_mode = MENU_PANEL_FADE_IN;
@@ -1743,6 +1783,7 @@ void menu_run_unit_editor_panel_thread(void) {
     do {
         thread_yield();
     } while (g_menu_unit_status_bounce_step != 0);
+
     thread_start(THREAD_SLOT_TILE_INFO_PANEL, menu_run_selected_tile_info_display_thread);
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 0);
     g_thread_contexts[THREAD_SLOT_TILE_INFO_PANEL].task_id = THREAD_TASK_TILE_INFO_PANEL;

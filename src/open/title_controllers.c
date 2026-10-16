@@ -396,12 +396,16 @@ void open_title_update_menu(open_controller_record_t* record) {
         return;
     }
 
+    /* Stop the CD audio as the exit timer runs out: pause at 3, then hold at 2 until the
+     * pause completes, pausing again after a disk error (status 5). */
     if (state->exiting != 0) {
         if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) {
             state->exit_timer--;
             if (state->exit_timer == 3) {
                 CdControl(CdlPause, 0, 0);
             }
+
+            /* remaining is 2 here, which is also CdSync's complete status. */
             remaining = state->exit_timer;
             if (remaining == 2) {
                 status = CdSync(1, loc);
@@ -422,6 +426,7 @@ void open_title_update_menu(open_controller_record_t* record) {
         return;
     }
 
+    /* At the track's end position, fade the CD mix out and start the exit countdown. */
     if (g_open_system_runtime_flags & OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) {
         CdControlB(CdlGetlocL, 0, loc);
         if (CdPosToInt((CdlLOC*)loc) >= state->cd_end_position) {
@@ -436,6 +441,7 @@ void open_title_update_menu(open_controller_record_t* record) {
         if (g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE) {
             return;
         }
+        /* Drop the menu's six render records and this controller, then play the next of three demos. */
         g_active_graphics_buffer_index = 1;
         g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         g_open_gfx_next_render_record_36 -= 6;
@@ -462,6 +468,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             cd_mix_level = 0x85;
             break;
         }
+
         open_movie_stream_title_demo_and_push_controller(start_sector, stream_length, end_frame, cd_mix_level);
         g_open_title_demo_movie_index++;
         if (g_open_title_demo_movie_index >= 3) {
@@ -477,6 +484,7 @@ void open_title_update_menu(open_controller_record_t* record) {
         return;
     }
 
+    /* Input is disabled while a confirm fades out; once the fade ends, act on the chosen entry. */
     flags = g_open_system_runtime_flags;
     if (flags & OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED) {
         s32 cursor;
@@ -484,6 +492,7 @@ void open_title_update_menu(open_controller_record_t* record) {
         if (g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE) {
             return;
         }
+
         g_open_system_runtime_flags = flags ^ OPEN_SYSTEM_RUNTIME_FLAG_INPUT_DISABLED;
         open_movie_pause_cd_audio();
         g_open_system_runtime_flags &= ~OPEN_SYSTEM_RUNTIME_FLAG_WIDE_SCREEN;
@@ -499,12 +508,15 @@ void open_title_update_menu(open_controller_record_t* record) {
             g_open_current_controller_index--;
             open_title_select_new_game();
             return;
+
         case OPEN_TITLE_MENU_CONTINUE:
             g_open_system_runtime_flags |= OPEN_SYSTEM_RUNTIME_FLAG_DISPLAY_BLANKED;
             open_title_init_new_game_party(1, 1);
             DrawSync(0);
             VSync(0);
             SetDispMask(1);
+
+            /* Nothing was loaded: rebuild the title screen and its menu controller. */
             if (world_card_run_menu_screen(0) == 0) {
                 g_open_file_current_openbk_image_id = -1;
                 open_file_build_openbk_header(0, g_open_file_destination);
@@ -517,6 +529,9 @@ void open_title_update_menu(open_controller_record_t* record) {
                 open_title_push_menu_controller(0);
                 return;
             }
+
+            /* A loaded save ends OPENING with 1 (the cursor) or, when it has a next scenario
+             * and no formation return event, with 0. */
             g_open_system_runtime_flags ^= OPEN_SYSTEM_RUNTIME_FLAG_RUNNING;
             if (script_get_variable(EVENT_SCRIPT_VAR_FORMATION_RETURN_EVENT) != 0
                 || script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) == 0) {
@@ -525,6 +540,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             }
             g_open_system_result = 0;
             return;
+
         case OPEN_TITLE_MENU_TUTORIAL:
             open_title_init_new_game_party(0, 1);
             g_open_system_result = 2;
@@ -538,6 +554,7 @@ void open_title_update_menu(open_controller_record_t* record) {
         return;
     }
 
+    /* After 601 idle frames with the CD audio stopped, fade out into a demo movie. */
     state->idle_timer++;
     if (!(flags & OPEN_SYSTEM_RUNTIME_FLAG_CD_AUDIO_PLAYING) && state->idle_timer >= 0x259) {
         state->state = OPEN_TITLE_STATE_DEMO_MOVIE;
@@ -552,6 +569,8 @@ void open_title_update_menu(open_controller_record_t* record) {
         state->exit_timer = 0x32;
         state->exiting = 1;
         main_sound_play_sfx(MAIN_SFX_CONFIRM);
+
+        /* These three fade out first; the dispatch above runs once the fade ends. */
         switch (state->cursor) {
         case OPEN_TITLE_MENU_NEW_GAME:
         case OPEN_TITLE_MENU_CONTINUE:
@@ -578,6 +597,7 @@ void open_title_update_menu(open_controller_record_t* record) {
             = OPEN_MENU_ENTRY_HIGHLIGHTED_PALETTE;
         main_sound_play_sfx(MAIN_SFX_CURSOR_MOVE);
     }
+
     if (open_input_update_repeat(PSX_PAD_DOWN) != 0 || (g_open_input_new_button_presses & PSX_PAD_SELECT)) {
         state->idle_timer = 0;
         g_open_gfx_render_records_36[state->records_36[state->cursor + 1]].palette = 0;

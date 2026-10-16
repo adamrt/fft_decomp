@@ -140,11 +140,14 @@ void attack_deploy_run_screen(void) {
     MoveImage(&g_attack_deploy_vram_copy_rect, g_attack_deploy_vram_copy_x, g_attack_deploy_vram_copy_y);
     LoadImage(&g_attack_deploy_arrow_clut_rect, g_attack_deploy_arrow_clut_data);
     thread_yield();
+
     g_attack_deploy_current_squad_id = script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
     g_attack_deploy_current_squad_data = &g_attack_deploy_squad_data[g_attack_deploy_current_squad_id];
     script_set_event_speed(1);
     g_gfx_screen_fade = 0xff;
     thread_yield();
+
+    /* The grid and the status panel start 0x9c pixels off screen; the first squad slides them in. */
     g_attack_deploy_grid_slide_y = 0x9c;
     g_attack_deploy_deployed_unit_count = 0;
     g_world_shop_purchase_unit_price = 0;
@@ -152,12 +155,17 @@ void attack_deploy_run_screen(void) {
     g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_EMPTY_TILE;
     g_attack_deploy_active_cursor = 0;
     g_attack_status_display_offset_y[0] = -0x9c;
+    /* Prompt icon states (see menu_build_status_group_primitives_variant): 0xff hidden,
+     * 0 lit, 1 dimmed; 7 shows a press then lights, 0x11 a press then dims, 0xc0 fades in. */
     for (i = 0; i < 5; i++) {
         g_attack_panel_status_animation[i] = 0xff;
     }
+
     mem_copy_bytes_nonempty(g_attack_deploy_cursor_palette_cycle, g_attack_deploy_cursor_palette_source, 0x40);
     attack_deploy_reset_tables();
     attack_deploy_prepare_valid_tiles(g_attack_deploy_render_buffers[0].tiles[0]);
+
+    /* When Ramza (roster id 0) must deploy, place him on the first valid tile. */
     if (script_get_variable(EVENT_SCRIPT_VAR_RAMZA_MANDATORY_IN_SQUAD) != 0) {
         for (row = 0; row < 5; row++) {
             for (column = 0; column < 5; column++) {
@@ -168,12 +176,15 @@ void attack_deploy_run_screen(void) {
             }
         }
     }
+
 ramza_placed:
     thread_start(ATTACK_THREAD_SLOT_DEPLOY_RENDER, attack_deploy_run_render_thread);
     thread_set_parameters(ATTACK_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 0);
     attack_deploy_select_unit_for_stats_display();
     thread_start(THREAD_SCREEN_SLOT_UNIT_STATUS, menu_run_unit_status_thread_variant);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, (s32)&g_attack_status_display_thread_params, 0, 0);
+
+    /* transition: 0 for the first squad, 1 after CROSS went back a squad, 2 after START moved on. */
     transition = 0;
     for (g_attack_deploy_current_squad = 0;
         g_attack_deploy_current_squad < script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT);
@@ -184,9 +195,11 @@ ramza_placed:
         if (script_get_variable(EVENT_SCRIPT_VAR_WORLD_DEBUG_BATTLE_STYLE) != 0) {
             g_attack_deploy_current_squad_data->unit_limit = 4;
         }
+
         g_attack_deploy_deployed_unit_count = 0;
         g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_HIDDEN;
         g_attack_deploy_active_cursor = 0;
+        /* Count the units already on this squad's grid. */
         row = 0;
         tiles = g_attack_deploy_roster_id_by_tile[0];
         end = tiles + 5;
@@ -209,8 +222,10 @@ ramza_placed:
         if (row < 5) {
             goto count_row;
         }
+
         thread_wait_until_inactive(ATTACK_THREAD_SLOT_ROSTER_STEP);
         g_attack_deploy_pending_roster_index = -1;
+        /* Both cursors start on the first placed unit, else at the grid center. */
         g_attack_deploy_cursor_column[0] = 2;
         g_attack_deploy_cursor_row[0] = 2;
         g_attack_deploy_cursor_column[1] = 2;
@@ -227,7 +242,10 @@ ramza_placed:
                 }
             }
         }
+
     cursor_placed:
+        /* Only a squad change steps the roster: to the first placed unit, or on from a
+         * selected unit this squad cannot field. */
         if (transition == 0) {
             g_attack_deploy_pending_roster_index = -1;
         }
@@ -238,6 +256,8 @@ ramza_placed:
             && g_attack_deploy_pending_roster_index != g_attack_deploy_selected_roster_index) {
             thread_start(ATTACK_THREAD_SLOT_ROSTER_STEP, attack_deploy_select_next_roster_unit);
         }
+
+        /* Slide the new squad's grid in from the side opposite the old one's exit. */
         if (transition == 1) {
             thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
             g_attack_deploy_grid_slide_x = 0x100;
@@ -263,6 +283,8 @@ ramza_placed:
                 thread_yield();
             }
         }
+
+        /* The first squad fades the screen in and slides the panel and grid into place. */
         if (first_pass != 0) {
             g_gfx_screen_fade = 0xff;
             while (1) {
@@ -275,6 +297,7 @@ ramza_placed:
                         g_gfx_screen_fade = 0;
                     }
                 }
+                /* Start the icon fade-in as the panel slide nears its end. */
                 if (g_attack_status_display_offset_y[0] == -8) {
                     for (i = 0; i < 5; i++) {
                         g_attack_panel_status_animation[i] = 0xc0;
@@ -295,8 +318,11 @@ ramza_placed:
             g_attack_panel_status_animation[1] = 0;
             g_attack_panel_status_animation[3] = 0;
         }
+
         thread_start(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, attack_deploy_update_screen_graphics);
         thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
+
+        /* Placement loop, one pass per frame, until START or CROSS leaves the squad. */
         while (1) {
             thread_yield();
             g_attack_deploy_selected_unit_deployed
@@ -307,6 +333,8 @@ ramza_placed:
                 thread_set_parameters(ATTACK_THREAD_SLOT_SELECT_MENU, 1, 0, 0);
                 thread_wait_until_inactive(ATTACK_THREAD_SLOT_SELECT_MENU);
             }
+
+            /* Update the idle icons (state below 2) for the cursor tile and the unit count. */
             if (g_attack_panel_status_animation[2] < 2) {
                 if (g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
                                                      [g_attack_deploy_cursor_column[g_attack_deploy_active_cursor]]
@@ -327,6 +355,9 @@ ramza_placed:
                     g_attack_panel_status_animation[4] = 0;
                 }
             }
+
+            /* The grid is isometric: a higher column draws up and to the left, a higher row
+             * up and to the right. */
             cursor = g_attack_deploy_active_cursor != 0;
             if (*input & PSX_PAD_LEFT) {
                 if (g_attack_deploy_cursor_column[cursor] < 4) {
@@ -352,6 +383,9 @@ ramza_placed:
                     g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
                 }
             }
+
+            /* Choose the tile menu for the cursor tile; cursor 1 carries the unit picked up
+             * with cursor 0. */
             column = g_attack_deploy_cursor_column[cursor];
             row = g_attack_deploy_cursor_row[cursor];
             if (g_attack_deploy_active_cursor == 0) {
@@ -390,9 +424,11 @@ ramza_placed:
                     g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_SWAP_UNIT;
                 }
             }
+
             if (*input & PSX_PAD_START) {
                 if (g_attack_deploy_deployed_unit_count == 0) {
                     g_sound_pending_sfx_id = MAIN_SFX_INVALID;
+                    /* Notices reuse menu entry 2, retexted with each message. */
                     g_attack_deploy_menu_entries[2].text_id = 0x900b;
                     thread_start(ATTACK_THREAD_SLOT_NOTICE, menu_icon_linked_entry_thread);
                     thread_set_parameters(ATTACK_THREAD_SLOT_NOTICE, (s32)&g_attack_deploy_menu_entries[2], 0, 0);
@@ -400,6 +436,8 @@ ramza_placed:
                 } else {
                     g_sound_pending_sfx_id = MAIN_SFX_COMPLETE;
                     g_attack_panel_status_animation[4] = 7;
+                    /* With another squad to fill and units left over, slide on to it; otherwise
+                     * confirm the whole deployment. */
                     if (script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT) - 1
                             != g_attack_deploy_current_squad
                         && g_attack_deploy_fieldable_unit_count > g_attack_deploy_deployed_unit_count) {
@@ -417,6 +455,8 @@ ramza_placed:
                     } else {
                         s32* deployed = &g_attack_deploy_selected_unit_deployed;
 
+                        /* Show the selected unit as deployed while the confirm menu is open; `cursor`
+                         * holds the saved flag meanwhile. */
                         cursor = *deployed;
                         *deployed = 1;
                         thread_start(ATTACK_PROMPT_THREAD_SLOT_CONFIRM_MENU, menu_icon_linked_entry_thread);
@@ -434,6 +474,7 @@ ramza_placed:
                     }
                     mem_copy_bytes_nonempty(g_attack_deploy_units_by_squad[g_attack_deploy_current_squad],
                         g_attack_deploy_roster_id_by_tile, 25);
+                    /* Bring in the next squad's saved layout (four squads at most). */
                     if (g_attack_deploy_current_squad < 3) {
                         mem_copy_bytes_nonempty(g_attack_deploy_roster_id_by_tile,
                             g_attack_deploy_units_by_squad[g_attack_deploy_current_squad + 1], 25);
@@ -443,6 +484,7 @@ ramza_placed:
                     break;
                 }
             }
+
             if ((*input & PSX_PAD_CROSS) && g_attack_deploy_active_cursor == 0 && g_attack_deploy_current_squad != 0) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_HIDDEN;
@@ -463,14 +505,19 @@ ramza_placed:
                     g_attack_deploy_units_by_squad[g_attack_deploy_current_squad], 25);
                 transition = 1;
                 g_attack_deploy_active_cursor = 0;
+                /* Once more, so the squad loop's increment lands on the previous squad. */
                 g_attack_deploy_current_squad--;
                 break;
             }
+
+            /* CIRCLE with cursor 0 places the selected roster unit on an empty tile or picks
+             * up the unit on an occupied one; with cursor 1 it drops the carried unit. */
             if ((*input & PSX_PAD_CIRCLE) && g_attack_deploy_active_cursor == 0) {
                 column = g_attack_deploy_cursor_column[cursor];
                 row = g_attack_deploy_cursor_row[cursor];
                 if (g_attack_deploy_valid_tiles[row][column] != 0) {
                     if (g_attack_deploy_roster_id_by_tile[row][column] == ATTACK_DEPLOY_ROSTER_ID_NONE) {
+                        /* A new unit needs room under the squad limit; a placed one just moves here. */
                         if (attack_deploy_has_roster_id_on_tiles(g_attack_deploy_selected_roster_index) == 0) {
                             if (g_attack_deploy_deployed_unit_count < g_attack_deploy_current_squad_data->unit_limit) {
                                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
@@ -502,6 +549,8 @@ ramza_placed:
                 row = g_attack_deploy_cursor_row[cursor];
                 if (*input & PSX_PAD_CIRCLE) {
                     if (g_attack_deploy_valid_tiles[row][column] != 0) {
+                        /* Dropped where it was picked up: remove the unit, or put the selected roster
+                         * unit in its place; a mandatory Ramza cannot leave the grid. */
                         if (g_attack_deploy_cursor_column[0] == g_attack_deploy_cursor_column[1]
                             && g_attack_deploy_cursor_row[0] == g_attack_deploy_cursor_row[1]) {
                             if (g_attack_deploy_roster_id_by_tile[row][column] == 0
@@ -559,7 +608,9 @@ ramza_placed:
                     g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 }
             }
+
             attack_deploy_handle_roster_navigation_input();
+
             if (*input & PSX_PAD_SQUARE) {
                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
                 script_set_event_speed(2);
@@ -595,6 +646,8 @@ ramza_placed:
                 thread_wait_until_inactive(THREAD_SCREEN_SLOT_CHARACTER_STATUS);
                 script_set_event_speed(1);
             }
+
+            /* TRIANGLE makes the unit under the cursor the selected roster unit. */
             if (*input & PSX_PAD_TRIANGLE) {
                 if (g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
                                                      [g_attack_deploy_cursor_column[g_attack_deploy_active_cursor]]
@@ -614,12 +667,16 @@ ramza_placed:
                     }
                 }
             }
+
             thread_suspend(ATTACK_PROMPT_THREAD_SLOT_DETAIL_MARKER);
         }
+        /* This squad holds every fieldable unit, so no later squad can be filled. */
         if (g_attack_deploy_deployed_unit_count >= g_attack_deploy_fieldable_unit_count) {
             break;
         }
     }
+
+    /* Close the menu and slide the grid, status panel and slot columns off screen. */
     thread_wait_frames(0x20);
     g_attack_deploy_menu_state = ATTACK_DEPLOY_MENU_CLOSED;
     thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 1);
@@ -637,6 +694,7 @@ ramza_placed:
             g_attack_deploy_zodiac_brightness_word[0]--;
         }
     }
+
     thread_wait_frames(0x3c);
     g_attack_deployed_unit_map_coordinates[0].party_id = ATTACK_DEPLOY_ROSTER_ID_NONE;
     g_attack_deployed_unit_map_coordinates[1].party_id = ATTACK_DEPLOY_ROSTER_ID_NONE;
@@ -650,6 +708,9 @@ ramza_placed:
     g_attack_deployed_unit_map_coordinates[9].party_id = ATTACK_DEPLOY_ROSTER_ID_NONE;
     g_attack_deployed_unit_map_coordinates[10].party_id = ATTACK_DEPLOY_ROSTER_ID_NONE;
     g_attack_deployed_unit_map_coordinates[11].party_id = ATTACK_DEPLOY_ROSTER_ID_NONE;
+
+    /* Convert each squad's grid into map coordinates. Debug battles restart the
+     * count per squad and write the second squad from slot 6. */
     slots = g_attack_deployed_unit_map_coordinates;
     count = 0;
     for (i = 0; i < script_get_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT); i++) {
@@ -659,10 +720,12 @@ ramza_placed:
                 slots = &g_attack_deployed_unit_map_coordinates[6];
             }
         }
+        /* Dead store, kept from the original code. */
         g_attack_deploy_current_squad_id = i;
         g_attack_deploy_current_squad_id = script_get_variable(i + EVENT_SCRIPT_VAR_DEPLOYMENT_PRIMARY_SQUAD_ID);
         g_attack_deploy_current_squad_data = &g_attack_deploy_squad_data[g_attack_deploy_current_squad_id];
         flags = g_attack_deploy_current_squad_data->orientation_flags;
+        /* Grid rotation: the low nibble (stored 1-based) plus the high nibble, modulo 4. */
         orientation = flags & ATTACK_DEPLOYMENT_ORIENTATION_MASK;
         orientation--;
         orientation += flags >> 4;
@@ -670,6 +733,8 @@ ramza_placed:
             orientation += 4;
         }
         orientation &= 3;
+
+        /* Rotate each grid offset into map space and face the units to match. */
         if (orientation == 0) {
             for (row = 0; row < 5; row++) {
                 for (column = 0; column < 5; column++) {
@@ -728,11 +793,14 @@ ramza_placed:
             }
         }
     }
+
     battle_deployment_mark_finished();
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYED_UNIT_COUNT, count);
     thread_start(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, attack_map_show_title);
     thread_set_parameters(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS, 0, 0, 0);
     thread_wait_until_inactive(ATTACK_THREAD_SLOT_SCREEN_GRAPHICS);
+
+    /* Fade the music to volume 0 (low half) over fade time 0x1e (high half). */
     g_battle_sound_music_volume_transition_request = 0x1e0000;
     thread_wait_frames(0x20);
     g_gfx_screen_fade = 0;
@@ -740,6 +808,8 @@ ramza_placed:
         thread_yield();
         g_gfx_screen_fade += 4;
     } while (g_gfx_screen_fade < 0x100);
+
+    /* A third parameter of 1 asks each display thread to finish. */
     thread_set_parameters(ATTACK_THREAD_SLOT_DEPLOY_RENDER, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_COMPARISON_STATUS, 0, 0, 1);
@@ -845,11 +915,15 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     if (!(unit->initial_team_flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
         gauges->team_kind = 2;
     }
+
     g_panel_selected_billboard.list_index = 0;
     g_panel_selected_billboard.unit_count = 0;
+    /* Offset keeps party slots apart from other unit indices; the status thread
+     * starts a portrait transition whenever this index changes. */
     g_panel_selected_billboard.unit_index = party_index + 0x200;
     g_panel_selected_billboard.level = unit->level;
     g_panel_selected_billboard.experience = unit->experience;
+
     maximum_hp = unit->max_hp;
     g_panel_selected_billboard.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
     if (maximum_hp == 0) {
@@ -874,14 +948,18 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     editor->left_weapon_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
     editor->right_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
     editor->left_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
+
     editor->physical_attack = unit->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     editor->physical_class_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
+    /* Each shield evade shows the larger of the two hands' values. */
     editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
     if (unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE]
         <= unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE])
         editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
     editor->physical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
+
     editor->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
+    /* Units carry no class magic evade stat. */
     editor->magical_class_evade = 0;
     editor->magical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
     if (unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE]
@@ -892,6 +970,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
     for (i = 4; i >= 0; i--)
         editor->equipment[i] = 0;
 
+    /* Monsters show no equipment; each hand shows its weapon, else its shield. */
     if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
         editor->equipment[0] = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
             ? unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]
@@ -920,10 +999,14 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
             editor->ability_ids[i] = *innate_items++;
             i++;
         } while (i < 5);
+        /* No monster skill check runs here (unlike menu_load_selected_unit_variant),
+         * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
     } else {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
+        /* A missing skillset blanks its name with a terminator; the secondary name
+         * takes it at byte 1, as in every copy of this loader. */
         if (field_value == 0)
             g_editor_primary_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
@@ -935,6 +1018,7 @@ void attack_editor_load_party_unit(s32 unused, s32 party_index) {
         editor->ability_ids[4] = unit->abilities.movement;
     }
 
+    /* Two Hands applies only when exactly one hand holds an item. */
     item_id = 0;
     editor->two_hands = 0;
     if (editor->equipment[0] != -1) {
@@ -1173,9 +1257,12 @@ static void attack_deploy_run_render_thread(void) {
     attack_deploy_build_screen_arrow();
     attack_gfx_init_frame_ft4_array();
     menu_init_sprite_array(g_attack_deploy_render_buffers[0].tiles[0], 0x19, 0x7ebc);
+
     LoadImage(&g_attack_deploy_tile_clut_rect, (u32*)g_attack_deploy_tile_clut_data);
     StoreImage(&g_attack_deploy_tile_clut_rect, (u32*)g_attack_deploy_tile_clut_buffer);
     StoreImage(&g_attack_deploy_rect_09c, (u32*)g_attack_deploy_semitrans_clut_buffer);
+    /* Let the readbacks finish, then upload semi-transparent copies of both CLUTs:
+     * every color but entry 0 gets the STP bit, and entry 0 becomes transparent black. */
     thread_wait_frames(1);
     for (i = 1; i < 48; i++) {
         g_attack_deploy_tile_clut_buffer[i].semi_transparent = 1;
@@ -1189,6 +1276,7 @@ static void attack_deploy_run_render_thread(void) {
     g_attack_deploy_semitrans_clut_buffer[0].red = g_attack_deploy_semitrans_clut_buffer[0].green
         = g_attack_deploy_semitrans_clut_buffer[0].blue = g_attack_deploy_semitrans_clut_buffer[0].semi_transparent = 0;
     LoadImage(&g_attack_deploy_rect_0ac, (u32*)g_attack_deploy_semitrans_clut_buffer);
+
     SetDrawMode(
         &g_attack_deploy_render_buffers[0].draw_mode_9c4, 0, 0, GetTPage(0, 1, 0x100, 0), &g_menu_draw_area_template);
     SetDrawMode(
@@ -1202,6 +1290,7 @@ static void attack_deploy_run_render_thread(void) {
     attack_deploy_prepare_valid_tiles(g_attack_deploy_render_buffers[0].tiles[0]);
     mem_copy_bytes_nonempty(
         &g_attack_deploy_render_buffers[1], &g_attack_deploy_render_buffers[0], sizeof(attack_deploy_render_buffer_t));
+
     frame = 0;
     while (1) {
         thread_yield();
@@ -1210,6 +1299,7 @@ static void attack_deploy_run_render_thread(void) {
                 frame, g_attack_deploy_menu_state, &g_attack_deploy_render_buffers[frame & 1]);
         }
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].draw_mode_9c4);
+
         if (g_attack_deploy_tiles_only_mode != 0) {
             if (g_attack_deploy_arrow_position_mode == 0) {
                 g_attack_deploy_render_buffers[frame & 1].screen_arrow.tri[0].x0 = 0xb9;
@@ -1246,6 +1336,7 @@ static void attack_deploy_run_render_thread(void) {
             attack_deploy_prepare_valid_tiles(g_attack_deploy_render_buffers[frame & 1].tiles[0]);
             offset_y = g_main_gfx_screen_polarity == 0 ? 0xf0 : 0;
         }
+
         g_attack_deploy_render_buffers[frame & 1].world_position.x = g_attack_deploy_grid_slide_x - 0x80;
         g_attack_deploy_render_buffers[frame & 1].world_position.y = g_attack_deploy_grid_slide_y + offset_y;
         SetDrawOffset(&g_attack_deploy_render_buffers[frame & 1].world_offset,
@@ -1254,9 +1345,13 @@ static void attack_deploy_run_render_thread(void) {
         g_attack_deploy_render_buffers[frame & 1].screen_position.y = offset_y;
         SetDrawOffset(&g_attack_deploy_render_buffers[frame & 1].screen_offset,
             (u16*)&g_attack_deploy_render_buffers[frame & 1].screen_position);
+
         if (thread_get_current_parameter_3() != 0) {
             break;
         }
+
+        /* Each primitive is prepended to the current ordering-table entry, so the GPU draws
+         * them in reverse: offset and draw-mode packets follow the primitives they govern. */
         if (g_attack_deploy_tiles_only_mode == 0) {
             menu_build_status_group_primitives_variant(g_attack_deploy_render_buffers[frame & 1].status);
         }
@@ -1265,6 +1360,7 @@ static void attack_deploy_run_render_thread(void) {
         if (g_attack_deploy_tiles_only_mode == 0) {
             gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].screen_arrow.poly);
         }
+
         count = 0;
         tile = g_attack_deploy_render_buffers[frame & 1].tiles[0];
         g_attack_deploy_cursor_1_submitted = 0;
@@ -1277,6 +1373,8 @@ static void attack_deploy_run_render_thread(void) {
         g_attack_deploy_cursor_0_poly = &g_attack_deploy_render_buffers[frame & 1].cursor[0][0];
         g_attack_deploy_cursor_0_submitted = 1;
         gfx_draw_or_append_gpu_primitive(g_attack_deploy_cursor_0_poly);
+
+        /* Each placed unit takes two quads: its portrait and the marker under it. */
         for (y = 0; y < 5; y++) {
             for (x = 0; x < 5; x++) {
                 if (g_attack_deploy_tiles_only_mode == 0
@@ -1290,6 +1388,7 @@ static void attack_deploy_run_render_thread(void) {
                 }
             }
         }
+
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].draw_mode_9f4);
         for (y = 0; y < 5; y++) {
             for (x = 0; x < 5; x++) {
@@ -1330,9 +1429,11 @@ static void attack_deploy_run_render_thread(void) {
                 tile++;
             }
         }
+
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].draw_mode_9e8);
         gfx_draw_or_append_gpu_primitive(&g_attack_deploy_render_buffers[frame & 1].world_offset);
         g_attack_deploy_zodiac_draw_context.ot = g_gfx_current_otag_entry;
+        /* The zodiac sign shrinks by 1/16 per frame until it reaches full size. */
         if (g_attack_deploy_zodiac_draw_context.scale_x > ONE) {
             g_attack_deploy_zodiac_draw_context.scale_x -= 0x100;
             g_attack_deploy_zodiac_draw_context.scale_y -= 0x100;

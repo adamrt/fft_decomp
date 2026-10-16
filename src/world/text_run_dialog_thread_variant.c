@@ -98,12 +98,15 @@ void text_run_dialog_thread_variant(void) {
     value_index = 0;
     variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
+
+    /* Box type 0x70 becomes a portrait box placed by the speaker's facing relative to the camera. */
     param = thread_get_current_parameter_1();
     rec.dialog_type = param;
     if ((param & 0x70) == 0x70) {
         rec.dialog_type = (param & 0x1C) | 0x10;
         rec.dialog_type |= unit_check_facing_relative_to_camera(thread_get_current_parameter_3()) + 1;
     }
+
     rec._unknown_2a = 0;
     rec.origin_x = 8;
     rec.origin_y = 8;
@@ -114,6 +117,8 @@ void text_run_dialog_thread_variant(void) {
     rec.arrow_offset = thread->task_words[DIALOG_THREAD_WORD_ARROW_OFFSET];
     rec.x_offset = thread->task_words[DIALOG_THREAD_WORD_X_OFFSET];
     rec.y_offset = thread->task_words[DIALOG_THREAD_WORD_Y_OFFSET];
+
+    /* Help text is read through OPEN's text sections; the saved pointers come back at `end`. */
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && rec.options == 0xC) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
@@ -121,6 +126,7 @@ void text_run_dialog_thread_variant(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 0) {
         text_save_section_pointers();
         text_relocate_pointer_table(g_open_text_section_offsets);
+        /* Message 0x807 shows the selected party unit's name in a portrait box instead. */
         if (thread->function_parameter_2 == 0x807) {
             i = world_menu_get_party_unit_name_id();
             if (i >= 0x2FF) {
@@ -136,6 +142,8 @@ void text_run_dialog_thread_variant(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 1) {
         g_menu_input_lock_mode = g_formation_screen_active;
     }
+
+    /* Types with bit 0x10 map the unit's sprite set, or a generic unit's job, to a portrait and palette. */
     if (rec.dialog_type & 0x10) {
         if (party_name_request == 0) {
             rec.portrait = thread->function_parameter_4;
@@ -178,6 +186,8 @@ void text_run_dialog_thread_variant(void) {
     } else {
         rec.portrait = thread->function_parameter_4 - 1;
     }
+
+    /* Size the box from the measured text; several box types cap their line count. */
     text = text_find_entry(thread_get_current_parameter_2());
     text_measure_pixels(&rec.mark, &rec.lines, text);
     if (thread->task_words[DIALOG_THREAD_WORD_TEXT_WIDTH] != 0) {
@@ -198,6 +208,7 @@ void text_run_dialog_thread_variant(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_TWO_LINE && rec.lines > 2) {
         rec.lines = 2;
     }
+
     rec.height = rec.lines * 16 + 16;
     rec.width = rec.mark + 0x18;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
@@ -211,6 +222,9 @@ void text_run_dialog_thread_variant(void) {
             rec.height += 0x10;
         }
     }
+
+    /* A tailed portrait box sits above or below its speaker; `right` and `bottom` become the
+     * point the window opens from and closes to. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL) {
         center = rec.width >> 1;
         value = script_resolve_runtime_id(thread_get_current_parameter_3());
@@ -218,6 +232,9 @@ void text_run_dialog_thread_variant(void) {
         cursor_x = center;
         rec.tail_offset = 0;
         rec.x = g_unit_scratch_coords.vx - center - 4;
+
+        /* Automatic position: below the speaker when it is off the top of the screen or its
+         * swap partner stands higher on screen, otherwise above. */
         if (rec.position == 0) {
             if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_a) {
                 value = g_text_speaker_swap_unit_b;
@@ -240,6 +257,8 @@ void text_run_dialog_thread_variant(void) {
             rec.x -= 8;
             rec.y = g_unit_scratch_coords.vy;
         }
+
+        /* Keep the box within x 0x88..0x180; the tail moves by whatever the clamp removed. */
         if (rec.x < 0x88) {
             rec.tail_offset = rec.x - 0x88;
             rec.x = 0x88;
@@ -247,6 +266,8 @@ void text_run_dialog_thread_variant(void) {
             rec.tail_offset = rec.x + rec.width - 0x180;
             rec.x = 0x180 - rec.width;
         }
+
+        /* The script's offsets apply after that clamp, so clamp again. */
         rec.x += rec.x_offset;
         rec.y += rec.y_offset;
         if (rec.x < 0x88) {
@@ -262,12 +283,15 @@ void text_run_dialog_thread_variant(void) {
         } else if (rec.y + rec.height > 0xE4) {
             rec.y = 0xE4 - rec.height;
         }
+
+        /* Keep the tail at least 0x18 pixels from either end of the box; cursor_x holds half its width. */
         if (rec.tail_offset > cursor_x - 0x18) {
             rec.tail_offset = cursor_x - 0x18;
         }
         if (rec.tail_offset < -cursor_x + 0x18) {
             rec.tail_offset = -cursor_x + 0x18;
         }
+
         if (rec.position == 1) {
             bottom = rec.y + rec.height - 8;
         }
@@ -276,6 +300,7 @@ void text_run_dialog_thread_variant(void) {
         }
         right = rec.x + rec.tail_offset + (rec.width >> 1);
     } else {
+        /* Other boxes center horizontally; positions 1, 2 and 3 are the top, bottom and middle. */
         rec.tail_offset = 0;
         half_w = rec.width >> 1;
         rec.x = (0x100 - half_w) & 0xFFFE;
@@ -294,6 +319,8 @@ void text_run_dialog_thread_variant(void) {
         right = half_w + rec.x - 6;
         bottom = half_h + rec.y - 2;
     }
+
+    /* Allocate the window pair and render the box image into its VRAM rectangle. */
     win = menu_alloc_window_buffer_pair();
     win->message_id = thread_get_current_parameter_2();
     win->dialogue_selector = rec.position;
@@ -320,6 +347,8 @@ void text_run_dialog_thread_variant(void) {
         rec.last_line = rec.lines;
         menu_render_text_image_at_record_origin(&rec);
     }
+
+    /* The formation screen shifts its dialogs by (-0x100, -0x78); then clamp the open point to the box area. */
     if (g_formation_screen_active != 0) {
         right -= 0x100;
         bottom -= 0x78;
@@ -338,6 +367,8 @@ void text_run_dialog_thread_variant(void) {
     if (bottom > 0xE4) {
         bottom = 0xE4;
     }
+
+    /* The box quad starts collapsed at the open point and grows to `from`. */
     setXY4(&win->quads[0], right, bottom, right, bottom, right, bottom, right, bottom);
     from.x = rec.x;
     from.y = rec.y;
@@ -346,6 +377,9 @@ void text_run_dialog_thread_variant(void) {
     rec.arrow_x = rec.x + rec.width - 0x1E;
     rec.arrow_y = rec.y + rec.height - 0x18;
     to.x = 0;
+
+    /* A portrait box also tweens its second quad, the portrait, to `to`: at the left when
+     * tail_offset is negative (then drawn flipped), otherwise at the right. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         setXY4(&win->quads[1], right, bottom, right, bottom, right, bottom, right, bottom);
         if (rec.tail_offset < 0) {
@@ -379,6 +413,8 @@ void text_run_dialog_thread_variant(void) {
             to.x = 0;
         }
     }
+
+    /* Help and Check boxes carry their title sprite at the top-left corner. */
     if (rec.box_type == DIALOG_BOX_TYPE_HELP) {
         win->sprites[3].u0 = 0x50;
         win->sprites[3].v0 = 0x20;
@@ -397,6 +433,8 @@ void text_run_dialog_thread_variant(void) {
         win->sprites[3].h = 8;
         win->sprites[3].clut = 0x7CBC;
     }
+
+    /* The pair's two buffers alternate by frame, so the second starts as a copy of the first. */
     mem_copy_bytes_nonempty(&win[1], win, sizeof(win[1]));
     win[0].active = 1;
     win[1].active = 1;
@@ -405,6 +443,8 @@ void text_run_dialog_thread_variant(void) {
     } else {
         menu_animate_window_quad_crop(win, &from, &to);
     }
+
+    /* From here rec.x and rec.y address the window's image in VRAM, not the screen. */
     window_u = win->quads[0].u0;
     rec.x = window_u + 8;
     rec.y = win->quads[0].v0 + 8;
@@ -414,6 +454,7 @@ void text_run_dialog_thread_variant(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL && rec.position == 2) {
         rec.y += 8;
     }
+
     no_wait = 0;
     delay = 1;
     column = 0;
@@ -432,16 +473,20 @@ void text_run_dialog_thread_variant(void) {
     rec.mark = -1;
     saved = (u8*)-1;
     repeat = 0;
+
+    /* Draw one text byte per pass; `saved` is the return point after a substituted or replayed run. */
     while (1) {
         no_value = 0xFFFF;
         character = *text;
         CHECK_ABORT();
+
         if (character == TEXT_NEWLINE || character == TEXT_END_WAIT_FOR_CONFIRM || character == TEXT_END_AUTO_CLOSE
             || character == TEXT_PAGE_BREAK) {
             if (character == TEXT_END_AUTO_CLOSE) {
                 break;
             }
             if (character == TEXT_END_WAIT_FOR_CONFIRM) {
+                /* The end of a substituted string returns to the text that named it. */
                 if (saved != (u8*)-1) {
                     text = saved;
                     saved = (u8*)-1;
@@ -454,6 +499,7 @@ void text_run_dialog_thread_variant(void) {
                     column++;
                     rec.line++;
                 }
+                /* no_value (0xFFFF) steps the u16 line count back by one. */
                 rec.line += no_value;
             } else {
                 NEXT();
@@ -463,6 +509,8 @@ void text_run_dialog_thread_variant(void) {
                 rec.line++;
             }
             rec.first_line = rec.line - rec.lines;
+
+            /* Wait for confirmation when the box is full, at the end of the text and at a page break. */
             if (column >= rec.lines || character == TEXT_END_WAIT_FOR_CONFIRM || character == TEXT_PAGE_BREAK) {
                 if (character != TEXT_PAGE_BREAK) {
                     column = 0;
@@ -474,6 +522,7 @@ void text_run_dialog_thread_variant(void) {
                             break;
                         }
                         CHECK_ABORT();
+                        /* A page break bobs the cursor sprite after the text; other waits show the arrow. */
                         if (character == TEXT_PAGE_BREAK) {
                             if (rec.box_type != DIALOG_BOX_TYPE_PORTRAIT) {
                                 cursor_window = WINDOW_AT(g_menu_packet_buffer_index);
@@ -499,6 +548,8 @@ void text_run_dialog_thread_variant(void) {
                                 arrow_window->sprites[2].x0 = rec.arrow_x;
                                 arrow_window->sprites[2].y0 = rec.arrow_y;
                             }
+
+                            /* Holding Square scrolls back through the lines already shown. */
                             if (g_script_event_current_input & PSX_PAD_SQUARE) {
                                 while (1) {
                                     if (rec.line != rec.lines) {
@@ -540,8 +591,9 @@ void text_run_dialog_thread_variant(void) {
                                     YIELD_OR_INPUT();
                                 }
                             }
-                            /* The else-break keeps the test on top, as in the target; a
-                               `while` is rotated to test at the bottom. */
+
+                            /* Scroll back down to the newest lines. The else-break keeps the test
+                             * on top, as in the target; a `while` is rotated to test at the bottom. */
                             for (;;) {
                                 if (rec.line - rec.lines != rec.first_line) {
                                     WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
@@ -555,6 +607,8 @@ void text_run_dialog_thread_variant(void) {
                         }
                     }
                 }
+
+                /* Hide the cursor, arrow and scroll icons in both buffers, one frame apart. */
                 g_world_menu_event_state_flag = 0;
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 hidden_window->sprites[0].x0 = 0x200;
@@ -567,6 +621,9 @@ void text_run_dialog_thread_variant(void) {
                 hidden_window_next->sprites[1].x0 = 0x200;
                 hidden_window_next->sprites[2].x0 = 0x200;
                 hidden_window_next->icon_flags = 0;
+
+                /* With type bit 0x80 the window stays open until ChangeDialog resumes it with new text;
+                 * text id 0xFFFF closes it. */
                 if (character == TEXT_END_WAIT_FOR_CONFIRM) {
                     if (rec.no_box == 0) {
                         break;
@@ -580,6 +637,7 @@ void text_run_dialog_thread_variant(void) {
                     if ((rec.text & no_value) == no_value) {
                         break;
                     }
+
                     column = 0;
                     text = text_find_entry(rec.text);
                     no_wait = 0;
@@ -605,6 +663,8 @@ void text_run_dialog_thread_variant(void) {
                 if (character == TEXT_PAGE_BREAK) {
                     continue;
                 }
+
+                /* The box is full: start a fresh page; cursor_y lands on its first line after the += below. */
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                     menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
@@ -617,14 +677,17 @@ void text_run_dialog_thread_variant(void) {
                 cursor_y = rec.y - 0x10;
                 thread_yield();
             }
+
             cursor_x = rec.x;
             no_wait = 0;
             cursor_y += 0x10;
         } else if (character == TEXT_CHOICE_MARK) {
+            /* Choices start on this line; remember it and the cursor's x for the selection sprite. */
             rec.mark = column;
             mark_x = cursor_x - rec.x - 0x10;
             NEXT();
         } else if (character == TEXT_CHOICE_SELECT) {
+            /* Pick one of the lines from the mark to the current line; store it relative to the mark. */
             if (rec.mark != -1) {
                 selection = rec.mark;
                 for (i = 0;; i += g_script_event_speed) {
@@ -658,6 +721,7 @@ void text_run_dialog_thread_variant(void) {
                         break;
                     }
                 }
+
                 select_hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 select_hidden_window->sprites[0].x0 = 0x200;
                 select_hidden_window->sprites[1].x0 = 0x200;
@@ -677,6 +741,8 @@ void text_run_dialog_thread_variant(void) {
                 }
                 thread_yield();
             }
+
+            /* A window kept open (type bit 0x80) restarts on the text it was resumed with. */
             if (rec.no_box != 0) {
                 win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                 if ((rec.text & no_value) == no_value) {
@@ -702,6 +768,7 @@ void text_run_dialog_thread_variant(void) {
             }
             thread_yield();
             NEXT();
+            /* The next line break goes on without waiting for confirmation. */
             no_wait = 1;
         } else if (character == TEXT_RELEASE_WAITING_THREADS) {
             for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
@@ -741,6 +808,7 @@ void text_run_dialog_thread_variant(void) {
             rec.color = *text;
             NEXT();
         } else {
+            /* A format code draws a whole string, then returns to `saved`. */
             substitution = &g_text_substitution_values[value_index];
             value = text_resolve_format_string_id(character, *substitution);
             if (value != -1) {
@@ -753,6 +821,7 @@ void text_run_dialog_thread_variant(void) {
                 }
                 continue;
             }
+
             if (character == TEXT_SET_NUMBER_WIDTH) {
                 NEXT();
                 width_override = *text;
@@ -765,6 +834,8 @@ void text_run_dialog_thread_variant(void) {
                     NEXT();
                     value = g_text_substitution_values[*text];
                 }
+
+                /* Print the number in `digits` places, padding leading zeros with spaces. */
                 digits = text_count_decimal_digits(value);
                 started = 0;
                 if (width_override != no_value) {
@@ -797,6 +868,7 @@ void text_run_dialog_thread_variant(void) {
                 }
                 NEXT();
             } else if ((character & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (character & 0xF) < 4) {
+                /* Compressed text: replay `repeat` bytes from earlier in the entry, then resume at `saved`. */
                 saved = text + 3;
                 value = (text[0] & 3) * 8;
                 repeat = value + (text[1] >> 5) + 4;
@@ -808,6 +880,8 @@ void text_run_dialog_thread_variant(void) {
                 if (character < TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
                     character = *text;
                 } else if ((character & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
+                    /* A two-byte glyph: the prefix's low nibble selects a page; the second byte may
+                     * itself start a backreference. */
                     character = (*text & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                     NEXT();
                     if ((*text & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (*text & 0xF) < 4) {
@@ -821,6 +895,7 @@ void text_run_dialog_thread_variant(void) {
                     }
                     character += *text;
                 }
+
                 {
                     text_glyph_state_t* glyph = &g_text_typewriter_glyph;
 
@@ -840,6 +915,8 @@ void text_run_dialog_thread_variant(void) {
             }
         }
     }
+
+    /* Close: a portrait box shrinks back to its open point; then release the window and texture. */
 end:
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         from.w = 0;
@@ -855,6 +932,7 @@ end:
     gfx_free_texture_rect(&rec.rect);
     text_release_typewriter_slot();
     YIELD_OR_INPUT();
+
     if (rec.box_type == DIALOG_BOX_TYPE_HELP && g_formation_screen_active == 1) {
         g_menu_input_lock_mode = 0;
     }
@@ -862,6 +940,8 @@ end:
         || ((rec.box_type == DIALOG_BOX_TYPE_HELP || party_name_request != 0) && g_formation_screen_active == 0)) {
         text_restore_section_pointers();
     }
+
+    /* Options 0xC on the screen text slot is a direct call from Select's help thread, so return to it. */
     if (g_thread_current_id != THREAD_SCREEN_SLOT_TEXT || rec.options != 0xC) {
         thread_exit_current();
     }

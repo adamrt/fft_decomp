@@ -131,6 +131,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     for (i = 0; i < 3; i++) {
         movement[i] = unit->ability_flags.movement[i];
     }
+
     config->unit_id = unit_id;
     config->x = unit->x;
     config->y = unit->position.y;
@@ -148,6 +149,8 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     } else {
         config->can_pass_lava = 0;
     }
+
+    /* value keeps the status byte with Chicken, Frog and Float for the tests below. */
     value = unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHICKEN)];
     if (value & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG))) {
         movement[1] &= ~(BATTLE_MOVEMENT_SET_2_TELEPORT_2 | BATTLE_MOVEMENT_SET_2_TELEPORT);
@@ -172,6 +175,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     if (movement[1] & BATTLE_MOVEMENT_SET_2_CANNOT_ENTER_WATER) {
         movement[2] &= ~(BATTLE_MOVEMENT_SET_3_MOVE_UNDERWATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER);
     }
+
     weather = battle_move_get_weather_terrain_cost();
     if (movement[2] & BATTLE_MOVEMENT_SET_3_FLY) {
         config->cost_table = MAIN_TERRAIN_COST_TABLE_FLY_TELEPORT;
@@ -203,6 +207,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
             config->move_type = MOVE_CLASS_NORMAL;
         }
     }
+
     if (config->movement_set_3 & (BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER | BATTLE_MOVEMENT_SET_3_WALK_ON_WATER)) {
         config->will_sink = 0;
     }
@@ -215,10 +220,14 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         && (movement[1] & BATTLE_MOVEMENT_SET_2_CANNOT_ENTER_WATER)) {
         config->cannot_enter_water = 1;
     }
+
     config->movement_3 = movement[2];
     if (movement[1] & BATTLE_MOVEMENT_SET_2_ANY_WEATHER) {
         weather = 1;
     }
+
+    /* Copy the class's 64 terrain costs, substituting the weather cost and, with
+     * Any Ground, 1 for every passable surface. */
     ignore_terrain = movement[1] & BATTLE_MOVEMENT_SET_2_ANY_GROUND;
     i = 0;
     blocked = MAIN_TERRAIN_COST_BLOCKED;
@@ -233,6 +242,8 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         }
         g_battle_move_terrain_costs_ptr[i] = byte;
     }
+
+    /* jump_half is taken before Fly or Ignore Height raises the jump to 0x1F. */
     value = unit->jump;
     if (value >= 8) {
         value = 7;
@@ -243,16 +254,19 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     }
     config->jump_times_two = value * 2;
     config->jump_or_1f = value;
+
     if (battle_unit_get_chocobo_mount_state(unit) != BATTLE_CHOCOBO_MOUNT_NONE) {
         config->mountable_chocobo = 1;
     } else {
         config->mountable_chocobo = 0;
     }
+
     value = unit->move;
     if (value >= 0x7D) {
         value = 0x7C;
     }
     config->move = value;
+
     if ((unit->unit_flags & (UNIT_FLAG_MALE | UNIT_FLAG_FEMALE))
         && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHICKEN)]
             & (STATUS_BYTE_MASK(STATUS_ID_CHICKEN) | STATUS_BYTE_MASK(STATUS_ID_FROG)))
@@ -261,12 +275,15 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     } else {
         config->can_ride = 0;
     }
+
     team = unit->initial_team_flags;
     config->_unknown_1a = g_battle_unknown_8018f4fc;
     mount = MOVE_RECORD_NONE;
     for (i = MOVE_RECORD_COUNT - 1; i >= 0; i--) {
         record[i].unit_id_flags = mount;
     }
+
+    /* One record per other unit on the map that is not crystal, dead, jumping or treasure. */
     count = 0;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (count >= MOVE_RECORD_COUNT) {
@@ -287,11 +304,14 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         if (i == unit_id) {
             continue;
         }
+
+        /* A rider on this unit makes it taller instead of getting a record. */
         mount = other->mount_info;
         if ((mount & BATTLE_MOUNT_INFO_FLAG_RIDER) && (mount & BATTLE_MOUNT_INFO_PARTNER_ID_MASK) == config->unit_id) {
             config->unit_size += 2;
             continue;
         }
+
         value = i;
         if (battle_unit_get_chocobo_mount_state(other) != BATTLE_CHOCOBO_MOUNT_FREE
             && other->mount_info != (config->unit_id | BATTLE_MOUNT_INFO_FLAG_MOUNT)) {
@@ -301,6 +321,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         if ((team ^ byte) & BATTLE_TEAM_MASK) {
             value |= MOVE_RECORD_FLAG_OTHER_TEAM;
         }
+
         current = &record[count];
         current->unit_id_flags = value;
         current->x = other->x;
@@ -318,6 +339,9 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
         if ((value & BATTLE_MOUNT_INFO_FLAG_MOUNT) && (value & BATTLE_MOUNT_INFO_PARTNER_ID_MASK) != config->unit_id) {
             current->body_height += 2;
         }
+
+        /* Standing height in half steps: the tile's surface, raised for Float and for
+         * water depth by movement type. */
         movement_3 = other->ability_flags.movement[2];
         tile = &g_battle_map_tile_data[battle_map_calculate_location(other)];
         base = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK);
@@ -3402,6 +3426,7 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
     s32 upper_index;
     s32 limit;
 
+    /* Only a straight line of one or two tiles qualifies. */
     if (unit_x < x) {
         dx = x - unit_x;
     } else {
@@ -3412,6 +3437,7 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
     } else {
         dy = unit_y - y;
     }
+
     if (dx == 0) {
         if (dy == 1) {
             distance = 1;
@@ -3436,12 +3462,14 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
     }
     target_total = height.total_height;
     target_walking = height.walking_height;
+
     battle_unit_calculate_height_data(&height, unit_id);
     if (height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE) {
         return -1;
     }
     unit_walking = height.walking_height;
     unit_total = height.total_height;
+
     if (distance == 1) {
         if (target_id == -1) {
             return -1;
@@ -3455,12 +3483,15 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
     mid_x = (unit_x + x) / 2;
     mid_y = (unit_y + y) / 2;
     if (distance == 2 && target_id != -1 && target_walking < unit_total + 2 && target_total >= unit_walking) {
+        /* The strike passes through the height window low..high unless the middle tile closes it. */
         low = (unit_walking - 6 < target_walking) ? target_walking : unit_walking - 6;
         limit = unit_total + 2;
         if (target_total < limit) {
             limit = target_total;
         }
         high = limit;
+
+        /* Both layers of the middle tile; upper-layer tiles start 0x100 entries later. */
         index = mid_y * g_battle_map_max_x + mid_x;
         lower = &g_battle_map_tile_data[index];
         upper_index = index + 0x100;
@@ -3469,12 +3500,14 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
         upper_height = upper->height * 2 + upper->depth_half_height.half_height;
         lower_id = battle_target_find_unit_at_tile(mid_x, mid_y, 0);
         upper_id = battle_target_find_unit_at_tile(mid_x, mid_y, 1);
+        /* A blocked layer counts as absent (0xff) and is skipped below. */
         if (lower->flags.blocked) {
             lower_height = 0xff;
         }
         if (upper->flags.blocked) {
             upper_height = 0xff;
         }
+
         if (lower_height > upper_height) {
             total = upper_height;
             upper_height = lower_height;
@@ -3483,6 +3516,7 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
             upper_id = lower_id;
             lower_id = swap_id;
         }
+
         if (lower_height != 0xff) {
             battle_unit_calculate_height_data(&height, lower_id);
             if (!(height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE)) {
@@ -3495,6 +3529,7 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
                 low = 0xff;
             }
         }
+
         if (upper_height != 0xff) {
             battle_unit_calculate_height_data(&height, upper_id);
             if (!(height.unit_flags & BATTLE_UNIT_HEIGHT_UNAVAILABLE)) {
@@ -3504,11 +3539,14 @@ static s32 battle_target_validate_lunging_target(s32 unit_id, s32 x, s32 y, s32 
                 }
             }
         }
+
         if (high > low) {
             return target_id;
         }
     }
 
+    /* Blocked or no valid target: hit the unit on the middle tile whose span contains
+     * the attacker's mid-height. */
     middle = (u32)(unit_walking + unit_total) >> 1;
     for (layer = 0; layer < 2; layer++) {
         target_id = battle_target_find_unit_at_tile(mid_x, mid_y, layer);
@@ -3741,11 +3779,15 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     vertical = ability->vertical;
     unit_id = action_copy.actor_id;
     unit = &g_battle_unit_stats[unit_id];
+
+    /* Direct targeting takes the weapon-range path below (no spread) and keeps only
+     * these four targeting flags. */
     if (ability->flags_4 & ABILITY_SECONDARY_FLAG_4_DIRECT_TARGETING) {
         flags_1 |= ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE;
         flags_2 &= ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER | ABILITY_SECONDARY_FLAG_2_RANDOM_FIRE
             | ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET | ABILITY_SECONDARY_FLAG_2_TOP_DOWN;
     }
+
     if (flags_2 & (ABILITY_SECONDARY_FLAG_2_THREE_DIRECTIONS | ABILITY_SECONDARY_FLAG_2_LINEAR_ATTACK)) {
         x = unit->x;
         y = unit->position.y;
@@ -3760,12 +3802,14 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         y = target->position.y;
         elevation = target->position.higher_elevation;
     }
+
     if (x >= g_battle_map_max_x) {
         return -1;
     }
     if (y >= g_battle_map_max_y || elevation >= 2) {
         return -1;
     }
+
     location = x;
     index = location;
     index = elevation * 256 + y * g_battle_map_max_x + location;
@@ -3773,8 +3817,11 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
     if (tile->flags.blocked) {
         return -1;
     }
+
+    /* Center height in half steps, including the water depth. */
     height = tile->height * 2 + ((*(u8*)&tile->depth_half_height) & MAP_TILE_HALF_HEIGHT_MASK)
         + ((*(u8*)&tile->depth_half_height) >> 5) * 2;
+
     if (aoe == ABILITY_RANGE_WHOLE_MAP) {
         cursor = g_battle_target_panels;
         for (i = 0; i < MAP_TILE_COUNT; i++) {
@@ -3789,6 +3836,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         }
         panel = &g_battle_target_panels[index];
         panel->remaining_range = aoe + 1;
+        /* Mark the center column on both layers; upper-layer panels sit 0x100 entries
+         * after the lower ones. */
         if (index < 0x100) {
             other_panel = &g_battle_target_panels[index + 0x100];
             panel->mark = 1;
@@ -3806,6 +3855,7 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
             battle_target_check_moldball_virus_depth(action_copy.ability_id);
         }
     }
+
     cursor = &g_battle_target_panels[battle_map_calculate_location(unit)];
     if (flags_2 & ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER) {
         cursor->remaining_range = 0;
@@ -3820,6 +3870,8 @@ static s32 battle_target_set_green_panels_for_action(const action_command_t* act
         battle_target_apply_unit_team_eligibility(unit_id, flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES,
             flags_2 & ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES, aoe == ABILITY_RANGE_WHOLE_MAP);
     }
+
+    /* Without team targeting every tile in range counts; with it only the marked tiles do. */
     count = 0;
     if (!(flags_2 & (ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ALLIES))) {
         tile = g_battle_map_tile_data;

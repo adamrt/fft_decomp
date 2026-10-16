@@ -183,6 +183,8 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
     text_glyph_state_t* request = &g_text_typewriter_glyph;
 
     if (g_text_typewriter_glyph.mode == DIALOG_BOX_TYPE_PORTRAIT || g_text_typewriter_glyph.mode == 0) {
+        /* Use the staging slot this thread owns or claim a free one (16 means none);
+         * with all three taken, wait a frame and retry. */
         for (;;) {
             slot = 16;
             for (i = 0; i < 3; i++) {
@@ -209,10 +211,14 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
             thread_yield();
         }
 
+        /* The glyphs drawn since the slot's last wait each get their own staging image, and
+         * `phase` is the glyph's pixel within a 4-pixel VRAM word. */
         ring = g_text_slot_glyph_counts[slot];
         phase = request->x & 3;
         image = g_text_typewriter_glyph_images[slot][ring];
         previous = g_text_typewriter_previous_images[slot];
+
+        /* The upload covers whole VRAM words: `pitch` pixels across, `w` words. */
         glyph = request->glyph;
         kind = g_text_glyph_widths[glyph];
         if (kind == 4 || glyph == TEXT_SPACE) {
@@ -234,6 +240,8 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
             g_text_typewriter_vram_rect.w = 3;
         }
 
+        /* At phase 2 the upload starts two pixels left of the glyph; copy those pixels from the
+         * previous glyph's image so the upload keeps them. */
         if (phase == 2) {
             offset = 0;
             for (i = 0; i < 14; i++) {
@@ -246,6 +254,7 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
             }
         }
 
+        /* Record which byte column of this image the next glyph shares with it. */
         next_glyph = request->glyph;
         next_kind = g_text_glyph_widths[next_glyph];
         if (next_kind == 4 || next_glyph == TEXT_SPACE) {
@@ -263,6 +272,8 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
         }
         g_text_slot_row_pitches[slot] = pitch;
 
+        /* Prefill with the box background: zero in mode 0, else the repeating 16-pixel tile in
+         * the glyph sheet, aligned to the pen x. */
         for (row = 0; row < 14; row++) {
             offset = row * pitch;
             for (i = phase >> 1; i < pitch / 2; i++) {
@@ -291,6 +302,7 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
         }
 
         g_text_slot_glyph_counts[slot] = g_text_slot_glyph_counts[slot] + 1;
+        /* Keep the 14 rows of 12 pixels for the next glyph's shared column. */
         mem_copy_bytes_nonempty(previous, image, 0x54);
 
         if (delay == 0) {

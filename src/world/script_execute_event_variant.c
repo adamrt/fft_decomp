@@ -95,6 +95,8 @@ void script_execute_event_variant(void) {
     if (script_is_tutorial_event_slot() != 0) {
         gfx_ramp_screen_overlay_intensity_to_zero();
     }
+
+    /* Under player control, let helper slots 2..13 and the camera settle first. */
     if (g_menu_input_mode == MENU_INPUT_PLAYER) {
         for (work_index = 2; work_index < 0xE; work_index++) {
             thread_wait_until_inactive(work_index);
@@ -106,6 +108,8 @@ void script_execute_event_variant(void) {
         g_menu_attack_target_stats_rect.y = 0xAA;
         g_menu_right_unit_stats_rect.y = 0xAA;
     }
+
+    /* Before the battle starts, snapshot every unit's statuses; after, apply the staged inflictions. */
     unit_clear_status_staging_data();
     if (script_get_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED) != 0) {
         unit_update_staged_status_data(0, 0);
@@ -115,6 +119,8 @@ void script_execute_event_variant(void) {
     script_set_variable(EVENT_SCRIPT_VAR_DISABLED_MENU_ACTIONS, 0);
     script_set_variable(EVENT_SCRIPT_VAR_DISABLED_CONTROLLER_INPUTS, 0);
     script_set_variable(EVENT_SCRIPT_VAR_FORCED_CONTROLLER_INPUTS, 0);
+
+    /* A chained event re-enters here with the next event block loaded. */
 restart_script:
     script_set_event_speed(1U);
     instruction_offset = 0;
@@ -126,7 +132,9 @@ restart_script:
             g_script_unit_slots[work_index] = empty_unit_id;
         }
     }
+
     for (;;) {
+        /* Fetch eagerly; handlers reuse the operand locals as scratch afterwards. */
         instruction = (u8*)g_script_event_block;
         instruction += instruction_offset;
         parameters = instruction + 1;
@@ -136,6 +144,7 @@ restart_script:
         operand_4 = instruction[4];
         opcode = instruction[0];
         first_operand = script_read_s16(parameters);
+
         /* ---- Control: NOPs, conditions, and script variable arithmetic ---- */
         if (opcode == EVENT_OPCODE_CAMERA_DISABLED) {
         } else if (opcode == EVENT_OPCODE_NOP) {
@@ -167,6 +176,7 @@ restart_script:
                     script_join_units_silently();
                 }
                 if (operand_1 == EVENT_CALL_FUNCTION_OPEN_SAVE_MENU) {
+                    /* Stop helper slots 2..14 around the CARD overlay's save screen. */
                     operand_1 = 2;
                     do {
                         thread_set_parameters(operand_1, 0U, 0, 1);
@@ -174,6 +184,7 @@ restart_script:
                         thread_wait_until_inactive(operand_1);
                         operand_1 += 1;
                     } while (operand_1 < 0xF);
+
                     if (script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) != EVENT_ID_EPILOGUE) {
                         script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 1);
                     }
@@ -184,6 +195,7 @@ restart_script:
                         thread_yield();
                     } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
                     script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
+
                     operand_1 = 2;
                     do {
                         thread_set_parameters(operand_1, 0U, 0, 1);
@@ -193,6 +205,8 @@ restart_script:
                     } while (operand_1 < 0xF);
                 }
             }
+
+            /* The remaining selectors run even when progress effects are suppressed. */
             if ((operand_1 == EVENT_CALL_FUNCTION_ADVANCE_YEAR)
                 || (operand_1 == EVENT_CALL_FUNCTION_ADVANCE_YEAR_ALTERNATE)) {
                 script_advance_date_by_one_year();
@@ -246,6 +260,7 @@ restart_script:
                 thread_yield();
             }
             if (operand_1 == EVENT_CALL_FUNCTION_RESET_BETHLA_REGION_UNIT_GRAPHICS) {
+                /* The region is two tile rectangles: x 0..3, y 0..10 and x 4..6, y 2..7. */
                 region_runtime_id = 0;
                 do {
                     if (battle_unit_has_runtime_id(region_runtime_id) != 0) {
@@ -292,6 +307,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_BLUE_REMOVE_UNIT) {
             script_blue_remove_unit(first_operand);
         } else if ((opcode == EVENT_OPCODE_END) || (opcode == EVENT_OPCODE_END_2)) {
+            /* Let the map, the event-block threads and any file loads finish first. */
             map_wait_for_refresh();
             do {
                 thread_yield();
@@ -300,6 +316,8 @@ restart_script:
                 thread_yield();
             } while (main_file_is_still_loading() != 0);
             thread_yield();
+
+            /* A tutorial restores the player's saved options and closes its battle. */
             if (script_is_tutorial_event_slot() != 0) {
                 gfx_ramp_screen_overlay_intensity_to_max();
                 g_main_game_options = g_menu_saved_game_options;
@@ -311,6 +329,7 @@ restart_script:
                     thread_wait_until_inactive(work_index);
                 }
             }
+
             operand_1 = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
             if (operand_1 != EVENT_ID_OLAN_WOUNDED) {
                 if (operand_1 != EVENT_ID_BEOWULF_INVITATION) {
@@ -318,6 +337,9 @@ restart_script:
                 }
             }
             script_set_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 0);
+
+            /* With player input, an event that has no finish operation and is not one of the
+             * common events 0x190..0x1a9 tries to chain into the event its conditions select. */
             event_flags = (g_main_scenario_event_finish_operations[operand_1] & ~0x0CFF) >> 8;
             if (g_menu_input_mode == MENU_INPUT_PLAYER && event_flags == 0
                 && (operand_1 - EVENT_ID_COMMON_FIRST) >= 0x1AU && operand_1 != 0) {
@@ -327,6 +349,8 @@ restart_script:
                     goto restart_script;
                 }
             }
+
+            /* Otherwise the event ends: replay the staged statuses and store each shown unit's facing. */
             work_index = 0;
             battle_unit_snap_all_facings_to_quadrants();
             unit_update_staged_status_data(0, 1);
@@ -339,6 +363,7 @@ restart_script:
                     }
                 }
             }
+
             camera_normalize_yaw_angle();
             camera_init_tilt_and_zoom();
             thread_exit_current();
@@ -373,6 +398,8 @@ restart_script:
             thread_start(operand_1, text_run_dialog_thread_variant);
             text_build_display_message(
                 instruction_offset, operand_2, &g_thread_contexts[operand_1].task_words[DIALOG_THREAD_WORD_TEXT_WIDTH]);
+
+            /* Hand the dialog thread its parameters; operands 3-4 hold a one-based text id. */
             g_thread_contexts[operand_1].function_parameter_1 = operand_2;
             g_thread_contexts[operand_1].function_parameter_2 = ((operand_4 << 8) + operand_3) - 1;
             dialogue_cursor = (u8*)g_script_event_block;
@@ -394,6 +421,7 @@ restart_script:
                       ->window_options;
             thread_yield();
         } else if (opcode == EVENT_OPCODE_CHANGE_DIALOG) {
+            /* Windows are allocated in pairs; resume the first dialog with this selector that awaits text. */
             for (work_index = 0; work_index < 6; work_index += 2) {
                 operand_2 = g_menu_window_buffers[work_index].thread_id;
                 if ((g_menu_window_buffers[work_index].dialogue_selector == operand_1)
@@ -402,6 +430,7 @@ restart_script:
                     operand_1 = script_read_s16(
                         ((event_change_dialog_instruction_t*)(instruction_offset + (u8*)g_script_event_block))
                             ->text_id_le);
+                    /* 0xFFFF passes through unchanged; other text ids are one-based. */
                     if ((u16)operand_1 != 0xFFFF) {
                         operand_1 -= 1;
                     }
@@ -550,6 +579,7 @@ restart_script:
         }
         /* ---- unit movement and facing ---- */
         else if (opcode == EVENT_OPCODE_WALK_TO) {
+            /* WORLD ignores WalkTo; BATTLE starts the unit's movement here. */
         } else if (opcode == EVENT_OPCODE_JUMP) {
             script_opcode_jump((const event_jump_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_WALK) {
@@ -557,7 +587,6 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_WALK_TO_ANIM) {
             operand_1 = script_resolve_runtime_id(first_operand);
             if (operand_1 != EVENT_RUNTIME_ID_NONE) {
-
                 g_unit_pending_animation_ids[operand_1]
                     = script_read_s16(instruction_offset + ((u8*)g_script_event_block) + 3);
                 g_unit_was_moving_latch[operand_1] = 0;
@@ -751,6 +780,7 @@ restart_script:
                 while (unit_is_moving(removed_runtime_id) != 0) {
                     thread_yield();
                 }
+                /* Retail repeats the check made above. */
                 if (removed_runtime_id != EVENT_RUNTIME_ID_NONE) {
                     operand_1 = battle_unit_get_battle_id_by_runtime_id(removed_runtime_id);
                     battle_unit_remove_by_runtime_id(removed_runtime_id);
@@ -776,10 +806,13 @@ restart_script:
             }
         } else if (opcode == EVENT_OPCODE_ADD_GHOST_UNIT) {
             ghost_parameters = (u8*)g_script_event_block + instruction_offset + 3;
+            /* An empty countdown that retail keeps; it has no effect. */
             ghost_runtime_id = 3;
             do {
                 --ghost_runtime_id;
             } while (ghost_runtime_id >= 0);
+
+            /* Take the first free runtime slot; with none free, `continue` reruns this instruction unyielding. */
             for (ghost_runtime_id = 0; ghost_runtime_id < BATTLE_UNIT_SLOT_COUNT; ghost_runtime_id++) {
                 if (battle_unit_has_runtime_id(ghost_runtime_id) == 0) {
                     g_script_unit_slots[ghost_parameters[0]] = ghost_runtime_id;
@@ -796,6 +829,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_UNKNOWN_75) {
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             script_add_unit_stub();
+            /* Only a present unit or one off the field is added; crystals, treasure and disabled units are not. */
             appearance_unit = battle_unit_find_stats_by_entd_unit_id(first_operand, &added_unit_state);
             if ((added_unit_state == -2) || (added_unit_state >= 0)) {
                 for (added_battle_id = 0; added_battle_id < BATTLE_UNIT_SLOT_COUNT; added_battle_id++) {
@@ -803,6 +837,9 @@ restart_script:
                         break;
                     }
                 }
+
+                /* Not shown yet: load its graphics. Already shown: draw it unless operand 3 is set,
+                 * and refresh its graphics when staging removed statuses. */
                 operand_1 = battle_unit_get_runtime_id_by_battle_id(added_battle_id);
                 if (operand_1 == -1) {
                     unit_save_staged_status_data(added_battle_id);
@@ -915,6 +952,7 @@ restart_script:
                 battle_gfx_set_thrown_item_palette_by_runtime_id(operand_3, palette_runtime_id);
             }
         } else if (opcode == EVENT_OPCODE_ARROW) {
+            /* WORLD only resolves the two units; BATTLE sets an arrow trajectory between them. */
             first_runtime_id = script_resolve_runtime_id(first_operand);
             if (first_runtime_id != EVENT_RUNTIME_ID_NONE) {
                 battle_unit_get_battle_id_by_runtime_id(first_runtime_id);
@@ -931,6 +969,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
             script_opcode_unit_anim_rotate((const event_unit_anim_rotate_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_GRAPHIC_PRINT) {
+            /* Wait until the ShowGraphic thread sets its fourth parameter or exits. */
             thread_yield();
             do {
                 thread_yield();
@@ -939,6 +978,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_LOCK_MENU_INPUT) {
             g_menu_input_lock_mode = operand_1;
         } else if (opcode == EVENT_OPCODE_TUTORIAL_COORDINATE_CONFIRM) {
+            /* Wait for Circle, without a d-pad direction, while the cursor is on the given tile. */
             while (g_battle_cursor_x != operand_1 || g_battle_cursor_y != operand_2
                 || ((initial_buttons = g_script_unfiltered_controller_input) & PSX_PAD_CIRCLE) == 0
                 || (initial_buttons & PSX_PAD_DPAD_MASK) != 0) {
@@ -969,7 +1009,11 @@ restart_script:
         } else {
             break;
         }
+
+        /* Step over the opcode byte and its operands. */
         instruction_offset += 1 + g_script_event_instruction_sizes[opcode];
     }
+
+    /* An unknown opcode or a ForwardTargetExit reached in sequence ends the thread. */
     thread_exit_current();
 }

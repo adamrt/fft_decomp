@@ -577,6 +577,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
 
     ai = &g_battle_ai_data_base;
     ability = &g_battle_ai_data_base.considered_ability;
+
+    /* First pass: mark every in-play unit's usable abilities and count what the enemy team can do. */
     unit_id = 0;
     do {
         if (battle_ai_is_unit_out_of_play(unit_id) == 0) {
@@ -589,6 +591,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
             } else {
                 delay = battle_ai_calculate_clockticks_until_unit_acts(unit);
             }
+
             decision->targeting_flags_1
                 &= ~(AI_TARGETING_FLAG_1_HAS_RANGED_ABILITY | AI_TARGETING_FLAG_1_CAN_HEAL_ALLIES);
             for (i = 0; i < AI_ABILITY_LIST_COUNT; i++) {
@@ -600,6 +603,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                 battle_ai_load_ability_entry(entry);
                 ability_id = ability->ability_id;
                 threshold = delay + ability->ct;
+
+                /* A frog can use only Frog and Frog Attack, and only a frog can use Frog Attack. */
                 if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FROG)] & STATUS_BYTE_MASK(STATUS_ID_FROG)) {
                     if (ability_id != ABILITY_ID_BLACK_MAGIC_FROG && ability_id != ABILITY_ID_FROG_ATTACK) {
                         continue;
@@ -607,6 +612,9 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                 } else if (ability_id == ABILITY_ID_FROG_ATTACK) {
                     continue;
                 }
+
+                /* Don't Act is checked when the unit acts; Silence and Innocent when the
+                 * ability resolves, delay + CT ticks from now. */
                 if (battle_ai_is_status_active_through_delay(delay, unit, STATUS_ID_DONT_ACT)) {
                     continue;
                 }
@@ -621,6 +629,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                 if (ability->mp_cost > unit->mp) {
                     continue;
                 }
+
+                /* Blue-team units need the item in the party inventory; other teams need only its level. */
                 menu = g_main_action_menu_types_by_skillset[entry->skillset];
                 if (menu == ACTION_MENU_TYPE_ITEM_INVENTORY || menu == ACTION_MENU_TYPE_KATANA_INVENTORY
                     || ability_id == ABILITY_ID_THROW_SHURIKEN || ability_id == ABILITY_ID_THROW_BALL) {
@@ -636,6 +646,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                     if (unit_id != g_battle_ai_data_base.acting_unit_id) {
                         continue;
                     }
+                    /* Only the acting unit weighs Throw. Keep the highest-level item among its known
+                     * throws: the blue team needs 5 in stock, other teams the item's level. */
                     best_level = -1;
                     for (throw_id = ABILITY_ID_THROW_KNIFE, type_index = 1; throw_id < ABILITY_ID_THROW_BALL;
                         throw_id++, type_index++) {
@@ -665,6 +677,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                         continue;
                     }
                 }
+
                 entry->usage.policy.usable = 1;
                 if (!entry->usage.policy.requires_monster_skill) {
                     if (decision->enemy_flag) {
@@ -701,6 +714,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                     }
                 }
             }
+
             if (decision->enemy_flag == 0) {
                 total = unit_helpful + unit_harmful;
                 if (total == 0) {
@@ -723,9 +737,11 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
     } while (unit_id < BATTLE_UNIT_SLOT_COUNT);
 
     usable = 0;
+    /* The ally with the lowest helpful share is never treated as mostly support. */
     if (lowest_unit != 0xff) {
         ai->unit_decisions[lowest_unit].targeting_flags_1 &= ~AI_TARGETING_FLAG_1_MOSTLY_SUPPORT;
     }
+
     random_use = 0;
     decision = g_battle_ai_data_base.acting_unit_decision;
     ai->has_mp_recovery_ability = 0;
@@ -736,6 +752,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
     for (i = 0; i < STATUS_BYTE_COUNT; i++) {
         ai->status_to_cancel[i] = 0;
     }
+
+    /* Second pass, over the acting unit's own list. */
     for (i = 0; i < AI_ABILITY_LIST_COUNT; i++) {
         entry = &ai->ability_lists[g_battle_ai_data_base.acting_unit_compact_index][i];
         if (entry->skillset == SKILLSET_ID_NONE) {
@@ -743,6 +761,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
         }
         battle_ai_load_ability_entry(entry);
         if (entry->usage.policy.usable) {
+            /* Drop buffs the enemies barely threaten: Shell, Protect or Reflect when at most an
+             * eighth of their harmful abilities are magical, physical or reflectable; Float without Earth. */
             if (threshold >= enemy_magical) {
                 battle_ai_disable_ability_if_only_inflicts_status(entry, STATUS_ID_SHELL);
             }
@@ -755,6 +775,8 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
             if (enemy_earth <= 0) {
                 battle_ai_disable_ability_if_only_inflicts_status(entry, STATUS_ID_FLOAT);
             }
+
+            /* Test again: the checks above may have just cleared the bit. */
             if (entry->usage.policy.usable) {
                 usable++;
                 if (ability->ai_flags.groups.target_effect_flags & AI_ABILITY_RANDOM_USE) {
@@ -772,6 +794,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                     == AI_ABILITY_AFFECTS_MP) {
                     ai->has_mp_recovery_ability = 1;
                 }
+
                 range = ability->parameters.fields.range + ability->parameters.fields.aoe;
                 if ((ability->ai_flags.groups.target_effect_flags & AI_ABILITY_TARGET_ENEMIES)
                     && range < decision->enemy_ability_min_reach) {
@@ -785,6 +808,7 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                         decision->ally_ability_min_reach = range;
                     }
                 }
+
                 if (entry->usage.policy.force_consume_evaluated_origins) {
                     entry->usage.policy.consume_evaluated_origins = 1;
                 } else if (!entry->usage.policy.exhaustive_origin_scan) {
@@ -796,12 +820,15 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                         entry->usage.policy.consume_evaluated_origins = 0;
                     }
                 }
+
                 if (action_taken != 0) {
                     entry->usage.policy.usable = 0;
                 }
             }
         }
     }
+
+    /* Both reaches add the unit's Move; with no ally ability, ally reach is Move alone. */
     if (decision->enemy_ability_min_reach != 0xff) {
         decision->enemy_ability_min_reach += g_battle_ai_data_base.acting_unit_move;
     }
@@ -881,12 +908,16 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
 
     battle_mem_zero_32bit_values(&ai->considered_ability, sizeof(ai_considered_ability_t));
     battle_mem_zero_32bit_values(&ai->current_action.command.calculator_type, 4);
+
     ai->considered_ability.skillset = entry->skillset;
     ability_id = g_battle_ai_data_base.considered_ability.ability_id = entry->packed_id & AI_ABILITY_ENTRY_ABILITY_MASK;
     unit_id = entry->packed_id >> AI_ABILITY_ENTRY_UNIT_SHIFT;
     unit = &g_battle_unit_stats[unit_id];
     menu = g_main_action_menu_types_by_skillset[entry->skillset];
     status_id = 0;
+
+    /* Attack, Jump, Charge and Arithmeticks fill in the whole ability and return;
+     * the other menus break to the ability-table load below. */
     switch (menu) {
     case ACTION_MENU_TYPE_ATTACK:
     attack:
@@ -935,6 +966,8 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         ability_id = ai->considered_ability.ability_id;
         break;
     case ACTION_MENU_TYPE_JUMP:
+        /* Jump lands after half the clockticks to the jumper's following turn; a unit
+         * other than the actor first waits out the clockticks to its coming turn. */
         if (unit_id == ai->acting_unit_id)
             ai->considered_ability.ct
                 = ((UNIT_TURN_CT_THRESHOLD - ai->acting_unit->ct) / ai->acting_unit->attributes[UNIT_ATTRIBUTE_SPEED])
@@ -966,6 +999,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     case ACTION_MENU_TYPE_ARITHMETICKS: {
         u32 status_cursor;
         s32 included = 0xff;
+        /* Arithmeticks is weighed as inflicting every status: all five bytes become 0xff. */
         value = 4;
         /* A direct status pointer folds the member offset into its base;
          * retain the field-derived base cursor for the exact five-byte fill. */
@@ -982,10 +1016,12 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         return;
     }
     }
+
     battle_mem_copy_u16_values(&ai->considered_ability.ai_flags, &g_main_ability_data[ability_id].ai_flags, 4);
     if (menu == ACTION_MENU_TYPE_ITEM_INVENTORY || menu == ACTION_MENU_TYPE_WEAPON_INVENTORY)
         ai->considered_ability.ai_flags.word |= AI_ABILITY_DIRECT_TRAJECTORY;
     ai->considered_ability.ai_flags.fields.flags_4 = entry->usage.flags;
+
     if (ability_id < ABILITY_ID_ITEM_FIRST) {
         s32 ct;
         secondary = &g_main_ability_range_data[ability_id];
@@ -1008,6 +1044,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         if (secondary->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE)
             goto copy_status;
     }
+
     /* Retail tests Monster Skill (0x80) and Defend (0x40) here, where the
      * real CT uses Short Charge (0x08) and Non-Charge (0x04); see QUIRKS.md. */
     if (unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_MONSTER_SKILL)

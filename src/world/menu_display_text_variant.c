@@ -31,6 +31,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     s32 line;
     s32 started;
 
+    /* Refresh the player name buffer that the Ramza format code reads: end bytes, then party unit 0's name. */
     party = main_party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
     for (i = 19; i >= 0; i--) {
@@ -39,11 +40,13 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     for (i = 0; i < UNIT_NAME_SIZE; i++) {
         g_text_player_name_buffer[i] = party->name[i];
     }
+
     if (text == 0 || text == (u8*)1) {
         cursor = text_find_entry(text_id);
     } else {
         cursor = text;
     }
+
     state = (text_reader_state_t*)getScratchAddr(128);
     variable_id = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     state->return_cursor = (u8*)-1;
@@ -53,6 +56,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     state->column = 0;
     state->max_column = 0;
     state->row = 0;
+
     g_menu_text_pen.rect.x = origin->rect.x;
     g_text_glyph_first_row = 0;
     g_menu_text_pen.rect.y = origin->rect.y;
@@ -63,6 +67,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     while (1) {
         state->command = *cursor;
         if (state->command >= TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
+            /* A two-byte glyph: the prefix's low nibble selects a page of glyphs. */
             if ((state->command & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
                 state->command = (*cursor & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                 cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
@@ -89,12 +94,14 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                     g_menu_text_palette_offset = *cursor;
                 } else if (state->command == TEXT_CHOICE_MARK) {
+                    /* The text ends at the choice mark unless the caller passed text 1. */
                     if (text != (u8*)1) {
                         break;
                     }
                 } else if (state->command == TEXT_SPACE) {
                     g_menu_text_pen.rect.x += 4;
                 } else if (state->command == TEXT_NEWLINE) {
+                    /* Lines before g_menu_text_param_22 are skipped, so only drawn lines move the pen down. */
                     g_menu_text_pen.rect.x = origin->rect.x;
                     if (line >= g_menu_text_param_22) {
                         g_text_glyph_first_row = 0;
@@ -112,6 +119,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                         state->value = g_text_substitution_values[*cursor];
                     }
+
+                    /* Print in the pending width when one was set, padding leading zeros with blank columns. */
                     i = state->pending_width - 1;
                     if (state->pending_width == 0xFFFF) {
                         started = 0;
@@ -139,6 +148,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     }
                 }
 
+                /* Every command above also reaches these tests; only a format code, a backreference
+                 * or an end byte matches one. */
                 state->value = text_resolve_format_string_id(state->command, *state->value_cursor);
                 if (state->value != -1) {
                     state->return_cursor = cursor + 1;
@@ -150,6 +161,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     state->value_cursor++;
                     continue;
                 }
+
+                /* Compressed text: replay remaining_bytes from earlier in the entry, then resume after it. */
                 if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
                     state->return_cursor = cursor + 3;
                     state->scratch = (cursor[0] & 3) * 8;
@@ -160,6 +173,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     cursor -= state->scratch;
                     continue;
                 }
+
+                /* 0xFE and 0xFF end the text, or return from a substituted string. */
                 if ((state->command & 0xFE) == 0xFE) {
                     if (state->return_cursor == (u8*)-1) {
                         break;
@@ -172,6 +187,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                 continue;
             }
         }
+
+        /* A glyph: draw it inside the visible lines, and stop at the window's right margin. */
         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
         if (line >= g_menu_text_param_24) {
             break;
@@ -185,6 +202,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
             break;
         }
     }
+
+    /* Reset the palette and the visible line range for the next caller. */
 done:
     g_menu_text_palette_offset = 0;
     g_menu_text_param_22 = 0;

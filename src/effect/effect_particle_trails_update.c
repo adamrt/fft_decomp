@@ -84,9 +84,11 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             battle_heap_free_block(record->work_slots[callback_slot]);
         }
         work = record->work_slots[callback_slot] = battle_heap_alloc_block(sizeof(effect_trail_work_t), state_index);
+
         for (index = 3; index >= 0; index--) {
             work->segments[index].active = 0;
         }
+
         work->buffer = 0;
         work->count = 0;
         work->destroy_delay = 0;
@@ -97,19 +99,25 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
         break;
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
+        /* i keeps the unwrapped frame for the spawn interval; the curves wrap the frame. */
         i = frame - 1;
         work = record->work_slots[callback_slot];
         tip_bindings = entry->tentacle_mesh.tip_curve_bindings;
         target_index = record->timeline.target_index;
         spawn_bindings = entry->tentacle_mesh.spawn_curve_bindings;
         frame %= EFFECT_ANIMATION_CURVE_FRAMES;
+
+        /* Spawn a batch every spawn interval, starting at frame 1. */
         EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT) & 0xf, frame);
         if (i
                 % battle_lerp_fixed8(
                     entry->tentacle_mesh.spawn_interval_start, entry->tentacle_mesh.spawn_interval_end, factor)
             == 0) {
+            /* work->matrix keeps a zero translation, so the spawn RotTrans calls only rotate. */
             SetTransMatrix(&work->matrix);
             orient = (flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
+
+            /* The caster's facing as (quadrant + 1) quarter turns of yaw; left unset for a non-unit caster. */
             caster_target = &g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
             if (caster_target->target_type == EFFECT_TARGET_TYPE_UNIT) {
                 facing_yaw
@@ -120,6 +128,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 rotation.vy = facing_yaw;
                 RotMatrix(&rotation, &facing);
             }
+
             battle_effect_resolve_target_world_coords(
                 g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
                 &g_battle_effect_context, &caster);
@@ -130,6 +139,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT) & 0xf, frame);
             count = battle_lerp_fixed8(
                 entry->tentacle_mesh.particle_count_start, entry->tentacle_mesh.particle_count_end, factor);
+
             EFFECT_READ_CURVE(index, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT) & 0xf, frame);
             battle_effect_interpolate_emitter_spawn_position(entry, factor, &origin);
             switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
@@ -240,6 +250,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             length_max = battle_lerp_fixed8(
                 entry->tentacle_mesh.lifetime_start.max, entry->tentacle_mesh.lifetime_end.max, factor);
 
+            /* Start up to count particles while free segments remain. */
             for (i = 0; i < count; i++) {
                 if (work->count >= 4) {
                     break;
@@ -252,6 +263,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     }
                 }
 
+                /* A random direction scaled by the spread on each axis: a point on the spread ellipsoid. */
                 len = battle_effect_select_largest_magnitude_s16(spread.vx, spread.vy, spread.vz);
                 if (len != 0) {
                     rotation.vx = rand();
@@ -272,6 +284,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     seg->position.vz = origin.vz * ONE;
                 }
 
+                /* The tip gets the same treatment with its own spread. */
                 len = battle_effect_select_largest_magnitude_s16(tip_spread.vx, tip_spread.vy, tip_spread.vz);
                 if (len != 0) {
                     rotation.vx = rand();
@@ -290,6 +303,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     seg->tip = tip;
                 }
 
+                /* Speeds are 1/512 unit a frame: << 3, or >> 9 of a 4.12 unit vector, gives 20.12. */
                 switch (flags & EFFECT_EMITTER_VELOCITY_MASK) {
                 case EFFECT_EMITTER_VELOCITY_OUTWARD:
                     rotation.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
@@ -329,6 +343,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     out.vy = origin.vy - (seg->position.vy >> 12);
                     out.vz = origin.vz - (seg->position.vz >> 12);
                     speed = RANDOM_BETWEEN(speed_min, speed_max);
+                    /* A particle spawned on the origin has no direction to it and moves along +y. */
                     if (out.vx != 0 || out.vy != 0 || out.vz != 0) {
                         VectorNormal(&out, &out);
                         seg->velocity.vx = (speed * out.vx) >> 9;
@@ -345,6 +360,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 seg->length = RANDOM_BETWEEN(length_min, length_max);
                 seg->head = 0;
                 seg->active = 1;
+
+                /* Only trail points 0-8 of the 17 are seeded on the spawn position (retail loop bound). */
                 rotation.vx = seg->position.vx >> 12;
                 rotation.vy = seg->position.vy >> 12;
                 rotation.vz = seg->position.vz >> 12;
@@ -356,11 +373,15 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             }
         }
 
+        /* Advance every active particle; nothing is drawn. */
         for (j = 0; j < 4; j++) {
             if (work->segments[j].active == 0) {
                 continue;
             }
             seg = &work->segments[j];
+
+            /* While travelling, the newest point eases from the particle's path towards the tip. After
+             * arrival, point stays on the point written on the arrival frame. */
             emitter.motion.position.x = x = seg->position.vx += seg->velocity.vx;
             emitter.motion.position.y = y = seg->position.vy += seg->velocity.vy;
             emitter.motion.position.z = z = seg->position.vz += seg->velocity.vz;
@@ -388,6 +409,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     point += 17;
                 }
             }
+
+            /* Children spawn from that point. */
             emitter.motion.position.x = seg->points[point].x * ONE;
             emitter.motion.position.y = seg->points[point].y * ONE;
             emitter.motion.position.z = seg->points[point].z * ONE;
@@ -395,6 +418,8 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 battle_effect_spawn_emitter_particles(
                     record->record_index, seg->head, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
             }
+
+            /* Done once the trail has run out: the travel time plus a frame per trailing segment. */
             if (seg->length + 16 == seg->head) {
                 if (flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
                     battle_effect_spawn_emitter_particles(
@@ -404,11 +429,15 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 work->count--;
             }
         }
+
+        /* Nothing reads buffer here; the flip is kept from the tentacle renderer. */
         work->buffer = 1 - work->buffer;
         break;
 
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the tentacle renderer does for its quads. The null check
+         * below comes after this read through work (retail order). */
         if (work->destroy_delay == 0) {
             work->destroy_delay = 1;
             break;

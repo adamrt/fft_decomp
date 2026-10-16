@@ -51,6 +51,7 @@ void menu_run_ability_list_thread_variant(void) {
         base = g_equip_panel_frames_b;
         u = 0x50;
     }
+
     menu_init_numeric_display_frame_primitives(&g_equip_right_panel_frame_rect, &screen->numeric_frame);
     menu_init_status_panel_primitives(screen);
     menu_init_scaled_draw_area_packets(&screen->portrait);
@@ -65,6 +66,7 @@ void menu_run_ability_list_thread_variant(void) {
         screen->lines[i].x1 += g_panel_origin_offsets[0].x;
         screen->lines[i].y1 += g_panel_origin_offsets[0].y;
     }
+
     menu_init_sprite_array(&screen->sprites[0], 12, 0x7d7c);
     menu_init_sprite_array(&screen->sprites[12], 7, MENU_CLUT_NORMAL);
     screen->sprites[0].clut = 0x7cbc;
@@ -74,6 +76,7 @@ void menu_run_ability_list_thread_variant(void) {
     frame = 0;
     for (;;) {
         screen = &base[frame & 1];
+
         if (state->generic_monster == 0) {
             for (i = 0; i < 19; i++) {
                 gfx_init_image_loading(&screen->sprites[i], g_editor_numeric_geometry, g_panel_origin_offsets,
@@ -85,6 +88,8 @@ void menu_run_ability_list_thread_variant(void) {
                     g_panel_label_layouts_mode1 + i);
             }
         }
+
+        /* A generic monster's empty ability rows move their labels 0x200 pixels left, off screen. */
         if (state->generic_monster != 0) {
             for (i = 0; i < 5; i++) {
                 u16 ability = state->ability_ids[i];
@@ -93,6 +98,7 @@ void menu_run_ability_list_thread_variant(void) {
                 }
             }
         }
+
         /* The explicit reset lengthens i's live range, which keeps it in $s2. */
         i = 0;
         if (frame == 0 || thread->redraw_request == 1) {
@@ -121,8 +127,10 @@ void menu_run_ability_list_thread_variant(void) {
             LoadImage(upload, (u32*)text);
             thread->redraw_request = 0;
         }
+
         screen->sprites[12].u0 = u;
         screen->sprites[13].u0 = u;
+
         screen->draw_offsets[0].position.x = thread->x - 0xf3;
         g_gfx_draw_offset_y = g_main_gfx_screen_polarity * 0xf0 != 0xf0 ? 0xf0 : 0;
         screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
@@ -136,6 +144,7 @@ void menu_run_ability_list_thread_variant(void) {
             &screen->portrait, &g_menu_status_panel_frame_rect[2], frame, g_main_gfx_screen_polarity * 0xf0, &offset);
         menu_set_status_panel_primitive_colors(screen, thread);
         menu_select_status_primitive_color_palette(&screen->numeric_frame, thread);
+
         gfx_draw_or_append_gpu_primitive(&screen->portrait.areas[1]);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[1]);
         gfx_draw_or_append_gpu_primitive(&screen->sprites[1]);
@@ -152,6 +161,7 @@ void menu_run_ability_list_thread_variant(void) {
         menu_submit_numeric_display_frame_primitives(&screen->numeric_frame);
         gfx_draw_or_append_gpu_primitive(&screen->draw_offsets[0]);
         gfx_draw_or_append_gpu_primitive(&screen->portrait);
+
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;

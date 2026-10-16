@@ -76,6 +76,7 @@ s32 attack_load_scenario_conditionals(void) {
             g_main_system_go_straight_to_battle = 0;
         }
     }
+
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         g_main_special_portrait_wldface_id = 0;
         g_main_special_portrait_unit_id = 0;
@@ -83,7 +84,10 @@ s32 attack_load_scenario_conditionals(void) {
         if (value == 0) {
             return;
         }
+
+        /* A finish operation keeps the next scenario's low byte in bits 0-7 and its bits 8-9 in bits 10-11. */
         event = ((value & 0xc00) >> 2) + (value & 0xff);
+        /* A zero id ends the scenario table. */
         scenario = (attack_scenario_t*)g_attack_scenario_table;
         for (i = 0; i < 500; i++) {
             id = scenario->id[0] + (scenario->id[1] << 8);
@@ -92,6 +96,7 @@ s32 attack_load_scenario_conditionals(void) {
             }
             scenario++;
         }
+
         if (id == 0) {
             return;
         }
@@ -99,11 +104,15 @@ s32 attack_load_scenario_conditionals(void) {
         g_main_special_portrait_unit_id = scenario->portrait_unit_id;
         return;
     }
+
     g_script_scenario_event_active = 0;
     for (i = EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST; i < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_END; i++) {
         script_set_variable(i, 0);
     }
     script_set_variable(EVENT_SCRIPT_VAR_BATTLE_NOT_STARTED, 1);
+
+    /* With a next scenario requested, step to the next event: 0x5a skips to 0x74 and Malak's revival
+     * leads to 0x12b with the funeral flag set, else 0x148. */
     if (script_get_variable(EVENT_SCRIPT_VAR_OLAN_SAW_RAMZA_FUNERAL) != 0
         && script_get_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO) != 0
         && script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT) == EVENT_ID_MALAK_REVIVED) {
@@ -123,9 +132,11 @@ s32 attack_load_scenario_conditionals(void) {
             main_party_remove_unit(i);
         }
     }
+
     g_main_system_go_straight_to_battle = 0;
     script_set_variable(EVENT_SCRIPT_VAR_NEXT_SCENARIO, 0);
     event = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
+
     scenario = (attack_scenario_t*)g_attack_scenario_table;
     for (i = 0; i < 500; i++) {
         id = scenario->id[0] + (scenario->id[1] << 8);
@@ -136,6 +147,7 @@ s32 attack_load_scenario_conditionals(void) {
             = (scenario->after_event[0] << 8) | ((scenario->next_scenario[1] << 10) + scenario->next_scenario[0]);
         scenario++;
     }
+
     g_main_scenario_event_finish_operations[EVENT_ID_BATTLE_WON] = 0x8000;
     g_main_scenario_event_finish_operations[EVENT_ID_BATTLE_START] = 0;
     g_main_scenario_event_finish_operations[EVENT_ID_DEBUG_BATTLE_START] = 0;
@@ -146,6 +158,7 @@ s32 attack_load_scenario_conditionals(void) {
         g_main_scenario_event_finish_operations[EVENT_ID_GAME_OVER] = 0x8200;
         g_main_scenario_event_finish_operations[EVENT_ID_GAME_OVER_RAMZA] = 0x8200;
     }
+
     scenario = (attack_scenario_t*)g_attack_scenario_table;
     for (i = 0; i < 500; i++) {
         id = scenario->id[0] + (scenario->id[1] << 8);
@@ -154,11 +167,14 @@ s32 attack_load_scenario_conditionals(void) {
         }
         scenario++;
     }
+
     if (id == 0) {
         script_set_variable(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, 0);
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, 0);
         return 0;
     }
+
+    /* The id, next-scenario and after-event loads below are discarded, as in retail. */
     g_script_scenario_event_active++;
     attack_load_unaligned_s16(scenario->id);
     map_id = scenario->map_id;
@@ -176,6 +192,9 @@ s32 attack_load_scenario_conditionals(void) {
     attack_load_unaligned_s16(scenario->next_scenario);
     attack_load_unaligned_s16(scenario->after_event);
     script = attack_load_unaligned_s16(scenario->event_script);
+
+    /* The condition blocks open with a table of byte offsets; the script's list of offsets is copied
+     * relative to its first entry, up to a zero. */
     base = (s16*)g_attack_event_condition_blocks;
     conditions = base + base[script] / 2;
     first = *conditions;
@@ -187,16 +206,20 @@ s32 attack_load_scenario_conditionals(void) {
         }
         conditions++;
     }
+
     for (i = 0; i < 256; i++) {
         g_main_scenario_condition_data[i] = (base + ((s16)g_main_scenario_condition_offsets[0] + first) / 2)[i];
     }
+
     count = 0;
     for (i = 0; i < 2; i++) {
         if (squads[i] != 0) {
             count++;
         }
     }
+
     script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, map_id);
+    /* The weather byte's high nibble is the map arrangement. */
     script_set_variable(EVENT_SCRIPT_VAR_MAP_ARRANGEMENT, weather >> 4);
     script_set_variable(EVENT_SCRIPT_VAR_WEATHER, weather & 0xf);
     script_set_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY, daytime);
@@ -209,9 +232,11 @@ s32 attack_load_scenario_conditionals(void) {
     } else if (script_get_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT) >= 5) {
         script_set_variable(EVENT_SCRIPT_VAR_DEEP_DUNGEON_EXIT, 0);
     }
+
     g_main_entd_selection_mode = BATTLE_ENTD_SELECTION_SCRIPT_VARIABLE;
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_SQUAD_COUNT, count);
     script_set_variable(EVENT_SCRIPT_VAR_DEPLOYMENT_UNIT_LIMIT, 0);
+
     if (squads[0] == 0) {
         return 1;
     }

@@ -70,11 +70,15 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
     if (!(unit->initial_team_flags & BATTLE_TEAM_OR_PLAYER_CONTROL_MASK)) {
         gauges->team_kind = 2;
     }
+
     g_menu_selected_unit_status.list_index = 0;
     g_menu_selected_unit_status.unit_count = 0;
+    /* Offset keeps party slots apart from other unit indices; the status thread
+     * starts a portrait transition whenever this index changes. */
     g_menu_selected_unit_status.unit_index = party_index + 0x100;
     g_menu_selected_unit_status.level = unit->level;
     g_menu_selected_unit_status.experience = unit->experience;
+
     maximum_hp = unit->max_hp;
     g_menu_selected_unit_status.gauges[MENU_UNIT_STATUS_GAUGE_HP].max = maximum_hp;
     if (maximum_hp == 0) {
@@ -99,14 +103,18 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
     editor->left_weapon_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
     editor->right_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
     editor->left_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
+
     editor->physical_attack = unit->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     editor->physical_class_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
+    /* Each shield evade shows the larger of the two hands' values. */
     editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
     if (unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE]
         <= unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE])
         editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
     editor->physical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
+
     editor->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
+    /* Units carry no class magic evade stat. */
     editor->magical_class_evade = 0;
     editor->magical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
     if (unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE]
@@ -117,6 +125,7 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
     for (i = 4; i >= 0; i--)
         editor->equipment[i] = 0;
 
+    /* Monsters show no equipment; each hand shows its weapon, else its shield. */
     if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
         editor->equipment[0] = unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
             ? unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]
@@ -145,10 +154,14 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
             editor->ability_ids[i] = *innate_items++;
             i++;
         } while (i < 5);
+        /* No monster skill check runs here (unlike menu_load_selected_unit_variant),
+         * so the fourth monster ability is always cleared. */
         editor->ability_ids[3] = 0;
     } else {
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
+        /* A missing skillset blanks its name with a terminator; the secondary name
+         * takes it at byte 1, as in every copy of this loader. */
         if (field_value == 0)
             g_menu_billboard_skillset_name[0] = 0xfe;
         field_value = unit->secondary_skillset;
@@ -160,6 +173,7 @@ static void require_editor_load_party_unit(s32 unused, s32 party_index) {
         editor->ability_ids[4] = unit->abilities.movement;
     }
 
+    /* Two Hands applies only when exactly one hand holds an item. */
     item_id = 0;
     editor->two_hands = 0;
     if (editor->equipment[0] != -1) {
@@ -328,6 +342,8 @@ static s32 require_party_select_unit_to_remove(void) {
     {
         s32 name_character_index;
 
+        /* One name per roster slot, empty for units that cannot be dismissed: empty
+         * slots, the slots past PARTY_MEMBER_SLOT_COUNT, units away on a proposition, eggs. */
         for (party_index = 0; party_index < PARTY_ROSTER_SLOT_COUNT; party_index++) {
             party_unit = main_party_get_unit(party_index);
             if (party_unit->party_id == PARTY_ID_NONE || party_index >= PARTY_MEMBER_SLOT_COUNT
@@ -339,6 +355,7 @@ static s32 require_party_select_unit_to_remove(void) {
                 g_require_party_removable_flags[party_index] = 1;
                 for (name_character_index = 0; name_character_index < UNIT_NAME_SIZE; name_character_index++) {
                     *text = party_unit->name[name_character_index];
+                    /* Names end at 0xfe or 0xff; a full 16-character name gets a terminator added. */
                     if ((*text & 0xfe) == 0xfe) {
                         text++;
                         break;
@@ -358,11 +375,13 @@ static s32 require_party_select_unit_to_remove(void) {
         selected_party_index = party_index;
         break;
     }
+
     menu_copy_billboard_data_in(&g_menu_selected_unit_status, &g_menu_selected_unit, &g_menu_selected_unit_fields);
     g_status_display_redraw_request = 1;
     g_numeric_editor_redraw_request = 1;
     g_character_status_redraw_request = 1;
     thread_yield();
+
     thread_start(REQUIRE_THREAD_SLOT_TRANSITION, require_gfx_run_suspended_thread_transition);
     thread_set_parameters(REQUIRE_THREAD_SLOT_TRANSITION, 0, 0, 0);
     g_gfx_screen_fade = 0xff;
@@ -371,6 +390,9 @@ static s32 require_party_select_unit_to_remove(void) {
         g_gfx_screen_fade -= 0x10;
     } while (g_gfx_screen_fade > 0);
     g_gfx_screen_fade = 0;
+
+    /* Show the selected unit's portrait: copy its cell and palette from the party
+     * sheets in VRAM into the panel's slots. */
     {
         s16* destination;
 
@@ -395,6 +417,7 @@ static s32 require_party_select_unit_to_remove(void) {
         palette_rect = &g_require_party_palette_move_rect;
         thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MESSAGE);
         thread_wait_until_inactive(6);
+        /* should_restore still holds 1: an answer of 1, or a cancel, keeps the party. */
         if (g_require_party_removal_result == should_restore || g_require_party_removal_result == -1) {
             require_panel_set_transition_value(0);
             should_restore = 0;
@@ -429,6 +452,8 @@ static s32 require_party_select_unit_to_remove(void) {
                 thread_wait_until_inactive(helpmenu_thread);
                 continue;
             }
+            /* R1 and L1 step to the next or previous removable unit. The status redraw
+             * request doubles as the portrait slide direction: 1 (should_restore) for R1, 2 for L1. */
             if (*g_menu_input_controller & PSX_PAD_R1) {
                 g_menu_panel_status_animation[1] = 7;
                 for (;;) {
@@ -471,6 +496,8 @@ static s32 require_party_select_unit_to_remove(void) {
         {
             unit_stats_t* battle_unit;
 
+            /* Find the first battle unit still on the field (its own first ENTD match) to
+             * speak the dialog; message_id holds the lookup's index until it is set below. */
             for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
                 battle_unit = battle_unit_get_stats_from_battle_id(party_index);
                 selected_battle_unit = battle_unit_find_stats_by_entd_unit_id(battle_unit->unit_id, &message_id);
@@ -479,7 +506,10 @@ static s32 require_party_select_unit_to_remove(void) {
                     break;
             }
         }
+
         party_unit = main_party_get_unit(selected_party_index);
+        /* Generic units get one of eight random messages for their kind; others look up
+         * their sprite group, with Ramza's messages apart from the special characters'. */
         formation_index = 0;
         if (party_unit->sprite_set & CHARACTER_IDENTITY_HIGH_BIT_MASK) {
             message_id = ((party_unit->sprite_set - CHARACTER_IDENTITY_SELECTOR_FIRST) * 8)
@@ -504,6 +534,7 @@ static s32 require_party_select_unit_to_remove(void) {
             }
             if (formation_index == 0x49)
                 formation_index = 0;
+            /* Group 0x47 shares group 0x48's message. */
             if (formation_index == 0x47)
                 formation_index = 0x48;
             if (sprite_set != CHARACTER_IDENTITY_ENTD_NONE && sprite_set < CHARACTER_IDENTITY_RAMZA_END) {
@@ -515,6 +546,7 @@ static s32 require_party_select_unit_to_remove(void) {
 
         require_panel_set_transition_value(1);
         g_text_substitution_values[0] = selected_party_index;
+        /* Ramza only gets his message and the prompt repeats: he cannot be dismissed. */
         if (party_unit->sprite_set < CHARACTER_IDENTITY_RAMZA_END)
             goto show_unit_message;
         g_require_menu_selection_result = 0xff;
@@ -527,6 +559,7 @@ static s32 require_party_select_unit_to_remove(void) {
         require_menu_wait_selection_threads();
         if (g_require_menu_selection_result != 0)
             continue;
+
         should_restore = require_party_restore_item_counts(selected_party_index);
         result = 0;
         main_party_remove_unit(selected_party_index);
@@ -537,6 +570,7 @@ static s32 require_party_select_unit_to_remove(void) {
     {
         s32 name_character_index;
 
+        /* Put the battle units' names back into the shared name text. */
         text = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
         for (party_index = 0; party_index < BATTLE_UNIT_SLOT_COUNT; party_index++) {
             selected_battle_unit = battle_unit_get_stats_from_battle_id(party_index);
@@ -552,11 +586,14 @@ static s32 require_party_select_unit_to_remove(void) {
             }
         }
     }
+
+    /* Never taken: should_restore is 0 on both exits (the item restore always returns 0). */
     if (should_restore != 0) {
         thread_start(REQUIRE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
         thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, (s32)&g_require_party_removal_menus[5], 0, 0);
         thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MENU);
     }
+
     require_panel_set_transition_value(0);
     g_gfx_screen_fade = 0;
     do {
@@ -602,6 +639,7 @@ static void require_party_apply_post_battle_changes(void) {
     if (require_party_update_after_battle() == 0) {
         thread_exit_current();
     }
+
     g_menu_post_battle_unit_changes_active = 1;
     thread_suspend(THREAD_SLOT_EVENT);
     mem_copy_bytes_nonempty(g_require_saved_thread_block, &g_threads[THREAD_SLOT_EVENT], 0x400);
@@ -664,6 +702,7 @@ static void require_party_apply_post_battle_changes(void) {
             } else {
                 u16 index_value;
 
+                /* Slide the previous unit's panels off to the right, then load the next unit. */
                 do {
                     g_require_status_display_origin_x = transition;
                     g_require_numeric_editor_origin_x = transition;
@@ -687,6 +726,7 @@ static void require_party_apply_post_battle_changes(void) {
                 thread_yield();
             }
 
+            /* Slide the panels in from the left. */
             transition = 0;
             do {
                 g_require_status_display_origin_x = transition - 0x100;
@@ -725,6 +765,7 @@ static void require_party_apply_post_battle_changes(void) {
                     } while (1);
 
                     require_panel_set_transition_value(1);
+                    /* Fit the join prompt window to text 0x5006 (with this unit's name) and center it at x 0x100. */
                     g_text_substitution_values[0] = *selected_unit_index_ptr;
                     text_measure_pixels(&text_width_px, &text_height_px, text_find_entry(0x5006));
                     /* The s16 sum reads the 16-bit value directly (a second copy of the
@@ -743,6 +784,9 @@ static void require_party_apply_post_battle_changes(void) {
                     MENU_FIELD(inner_width) = menu_x;
                     MENU_FIELD(window.x) = 0x100 - half_menu_x + menu_x % 2;
 #undef MENU_FIELD
+
+                    /* A guest (status 2) joins without the prompt. The store goes to g_require_message_menu_result,
+                     * which no code reads, so the checks below see the selection result left from before. */
                     if (require_party_get_free_slot_status(*selected_unit_index_ptr) == 2) {
                         g_require_message_menu_result = 0;
                     } else {
@@ -771,6 +815,7 @@ static void require_party_apply_post_battle_changes(void) {
                     }
                     require_panel_set_transition_value(0);
                 }
+                /* 0 joins; a full roster (status 0) first asks for a member to dismiss. */
                 if (g_require_menu_selection_result != 0) {
                     goto not_joining;
                 }
@@ -790,6 +835,7 @@ static void require_party_apply_post_battle_changes(void) {
                     } while (g_gfx_screen_fade < 0x100);
                     screen_fade_max = 0xff;
                     g_gfx_screen_fade = screen_fade_max;
+                    /* The status thread picks its panel cell from this flag; clear it while the removal screen runs. */
                     g_menu_post_battle_unit_changes_active = 0;
                     removal_result = require_party_select_unit_to_remove();
                     /* The target loads *selected_unit_index_ptr at 0x514,
@@ -826,11 +872,15 @@ static void require_party_apply_post_battle_changes(void) {
                     g_gfx_screen_fade = 0;
                 }
             } while (g_require_party_removal_result != 0);
+
+            /* Equipment the inventory cannot hold is sold; menu entry 5 says so. */
             if (require_party_sell_equipment_over_limit(*selected_unit_index_ptr) != 0) {
                 thread_start(REQUIRE_THREAD_SLOT_MENU, menu_icon_linked_entry_thread);
                 thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, (s32)&g_require_party_removal_menus[5], 0, 0);
                 thread_wait_until_inactive(REQUIRE_THREAD_SLOT_MENU);
             }
+
+            /* Show special condition 10 for 60 frames or until skipped; a third parameter of 2 fades it out. */
             thread_wait_frames(20);
             thread_start(REQUIRE_THREAD_SLOT_MENU, require_condition_run_special_thread);
             thread_set_parameters(REQUIRE_THREAD_SLOT_MENU, 10, 0, 0);
@@ -845,6 +895,7 @@ static void require_party_apply_post_battle_changes(void) {
             thread_wait_frames(20);
             goto next_unit;
         not_joining:
+            /* Answer 1 declines; any other answer asks again. */
             if (g_require_menu_selection_result != one) {
                 selected_unit_index_ptr = unit_index_ptr;
                 goto retry_selection;
@@ -867,6 +918,8 @@ static void require_party_apply_post_battle_changes(void) {
         transition += 0x20;
         thread_yield();
     } while (transition < 0x101);
+
+    /* Stop the three panel threads, then give the event thread its saved block back. */
     thread_set_parameters(THREAD_SCREEN_SLOT_UNIT_STATUS, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, 0, 0, 1);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
@@ -1035,15 +1088,19 @@ static void require_reward_run_war_trophies(void) {
     if (g_require_reward_war_trophy_entry_count == 0) {
         thread_exit_current();
     }
+
     prims = g_require_reward_war_trophy_primitives;
     thread = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     last = 0;
     thread_start(thread, require_condition_run_special_thread);
     thread_set_parameters(thread, 4, 0, 0);
+
     for (start = 0; start < g_require_reward_war_trophy_entry_count; start += 8) {
         row = 0;
+        /* Clear the previous page's text from the banner texture. */
         ClearImage(&g_require_reward_war_trophy_clear_rect, 0, 0, 0);
         thread_yield();
+
         buffer = g_require_reward_war_trophy_primitives;
         gfx_set_draw_mode_for_texture_page(&buffer->draw_mode, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
         for (i = 0; i < 16; i++) {
@@ -1059,12 +1116,14 @@ static void require_reward_run_war_trophies(void) {
         prims->banner.clut = 0x7cbc;
         mem_copy_bytes_nonempty(
             &prims[1], g_require_reward_war_trophy_primitives, sizeof(require_reward_war_trophy_primitives_t));
+
         frame = 0;
         while (1) {
             /* Typed buffer indexing swaps the ADDU operands. */
             buffer
                 = (require_reward_war_trophy_primitives_t*)((frame & 1) * sizeof(require_reward_war_trophy_primitives_t)
                     + (s32)prims);
+
             if ((*g_menu_input_controller & PSX_PAD_CIRCLE) || frame == 0
                 || ((row != 7 && g_require_reward_war_trophy_entry_count - 1 != last) && timer >= 0x1f)
                 || ((row == 7 || g_require_reward_war_trophy_entry_count - 1 == last) && timer >= 0x79)) {
@@ -1075,6 +1134,7 @@ static void require_reward_run_war_trophies(void) {
                 if (last == g_require_reward_war_trophy_entry_count || (row != 0 && (row & 7) == 0)) {
                     break;
                 }
+
                 image = menu_build_and_upload_window_frame_image(
                     0x50, 0x10, &g_require_reward_war_trophy_image_rect, MENU_WINDOW_FRAME_BUILD);
                 menu_clear_render_buffer(image, 0x280);
@@ -1090,6 +1150,9 @@ static void require_reward_run_war_trophies(void) {
                         text_count_decimal_digits(g_require_reward_war_trophy_entry_values[last]), image,
                         &g_menu_text_state.pen);
                 }
+
+                /* Text lines go into the texture the banner sprite draws, where texture x + 0x80
+                 * is screen x, so each line lands just right of its icon. */
                 if (g_require_reward_war_trophy_entry_count < 5) {
                     g_require_reward_war_trophy_image_rect.x = 0x60;
                     g_require_reward_war_trophy_image_rect.y = row * 20 + 0x78;
@@ -1097,16 +1160,22 @@ static void require_reward_run_war_trophies(void) {
                     g_require_reward_war_trophy_image_rect.x = (row & 1) ? 0x94 : 0x2c;
                     g_require_reward_war_trophy_image_rect.y = (row / 2) * 20 + 0x78;
                 }
+                /* Four 4-bit texels per VRAM word, from VRAM x 0x1c0. */
                 g_require_reward_war_trophy_image_rect.x = g_require_reward_war_trophy_image_rect.x / 4 + 0x1c0;
+                /* No-op store, kept from the original code. */
                 g_require_reward_war_trophy_image_rect.y = g_require_reward_war_trophy_image_rect.y;
                 loaded = 1;
                 LoadImage(&g_require_reward_war_trophy_image_rect, (u32*)image);
             }
+
+            /* LoadImage reads the buffer asynchronously, so it is freed a frame later. */
             thread_yield();
             if (loaded) {
                 menu_free_memory(image);
                 loaded = 0;
             }
+
+            /* Quads are indexed by entry number, not by position on the page. */
             for (i = start; i <= last; i++) {
                 quad = &buffer->quads[i];
                 if (g_require_reward_war_trophy_entry_types[i] == REQUIRE_WAR_TROPHY_ENTRY_ITEM) {
@@ -1159,6 +1228,7 @@ static void require_reward_run_war_trophies(void) {
                     gfx_draw_or_append_gpu_primitive(quad);
                 }
             }
+
             gfx_draw_or_append_gpu_primitive(&buffer->banner);
             gfx_draw_or_append_gpu_primitive(&buffer->draw_mode);
             frame++;
@@ -1168,6 +1238,7 @@ static void require_reward_run_war_trophies(void) {
             menu_free_memory(image);
         }
     }
+
     thread_set_parameters(thread, 0, 0, 1);
     thread_wait_until_inactive(thread);
     thread_exit_current();
@@ -1208,28 +1279,35 @@ static void require_reward_run_gil_ticker(void) {
     script_set_variable(EVENT_SCRIPT_VAR_WAR_FUNDS,
         script_get_variable(EVENT_SCRIPT_VAR_WAR_FUNDS) + g_require_reward_war_trophy_search_result.level_sum_money);
     money = g_require_reward_war_trophy_search_result.level_sum_money;
+
     thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     thread_start(thread_id, require_condition_run_special_thread);
     thread_set_parameters(thread_id, 2, 0, 0);
     g_menu_input_controller = script_get_controller_input_pointer(0);
+
     /* `i = 0` here (not before the script calls) lets sched1 keep
      * `li a0,0x2c` above the money load. */
     for (i = 0; i < 6; i++) {
         g_require_reward_money_digit_speeds[i] = g_require_reward_money_digit_initial_speeds[i];
         g_require_reward_money_digit_settling[i] = 0;
     }
+
     digits = text_count_decimal_digits(money);
+    /* There are six digit strips; a longer amount is reported and shows as 0. */
     if (digits >= 7) {
         main_system_report_error(7, 0);
         money = 0;
         digits = 1;
     }
+
+    /* Each strip starts on its target digit; one digit is 1 << 13 position units. */
     j = money;
     for (i = 0; i < digits; i++) {
         g_require_reward_money_digit_targets[i] = j % 10;
         j /= 10;
         g_require_reward_money_digit_positions[i] = g_require_reward_money_digit_targets[i] << 13;
     }
+
     g_sound_pending_sfx_id = MAIN_SFX_GIL_TICKER;
     for (buffer = 0; buffer < 2; buffer++) {
         for (j = 0; j < digits; j++) {
@@ -1248,12 +1326,15 @@ static void require_reward_run_gil_ticker(void) {
             setXY4(pd, X0, 0x80, X0 + 13, 0x80, X0, 0x97, X0 + 13, 0x97);
             pn = (POLY_FT4*)((s32)g_require_reward_money_next_digit_polys + (j * 0x28 + buffer * 0xf0));
             setXY4(pn, X0, 0x69, X0 + 13, 0x69, X0, 0x80, X0 + 13, 0x80);
+            /* Digits from the thousands up move 8 pixels left to make room for the comma.
+             * Only x0 moves here; the roll loop rebuilds the other vertices from it. */
             if (j >= 3) {
                 g_require_reward_money_digit_polys[buffer][j].x0 -= 8;
                 g_require_reward_money_next_digit_polys[buffer][j].x0 -= 8;
             }
         }
     }
+
     for (i = 0; i < 2; i++) {
         /* Block-local pointers: local-alloc then builds each address in the
          * pointer's own register, as the target does. */
@@ -1280,6 +1361,9 @@ static void require_reward_run_gil_ticker(void) {
         g_require_reward_money_sign_polys[i].clut
             = getClut(g_require_reward_bonus_palette_rect.x, g_require_reward_bonus_palette_rect.y);
     }
+
+    /* Per display buffer, areas 0-1 clip the rolling digits to their window and
+     * areas 2-3 restore the full screen afterwards. */
     if (g_main_gfx_screen_polarity == 0) {
         SetDrawArea(&areas[0], &g_require_reward_money_clip_rect_0);
         SetDrawArea(&areas[1], &g_require_reward_money_clip_rect_1);
@@ -1291,6 +1375,7 @@ static void require_reward_run_gil_ticker(void) {
         SetDrawArea(&areas[2], &g_require_reward_screen_clip_rect_1);
         SetDrawArea(&areas[3], &g_require_reward_screen_clip_rect_0);
     }
+
     tick = 0;
     i = 0;
     for (;;) {
@@ -1325,6 +1410,8 @@ static void require_reward_run_gil_ticker(void) {
                     ((g_require_reward_money_digit_positions[j] >> 13) + 1) % 10 * 13 + 13, 0x32,
                     ((g_require_reward_money_digit_positions[j] >> 13) + 1) % 10 * 13, 0x49,
                     ((g_require_reward_money_digit_positions[j] >> 13) + 1) % 10 * 13 + 13, 0x49);
+                /* Once its turn comes (higher digits later), a digit slows from six short of its
+                 * target and stops on it when its cell is exactly aligned. */
                 if (j * 32 + (digits - 1) * 16 < tick) {
                     if (((g_require_reward_money_digit_positions[j] >> 13) + 6) % 10
                         == g_require_reward_money_digit_targets[j]) {
@@ -1349,6 +1436,8 @@ static void require_reward_run_gil_ticker(void) {
                 }
             }
         }
+
+        /* Digits appear one every 16 frames, ones digit first. */
         for (j = 0; j < digits; j++) {
             if (j * 16 < i) {
                 gfx_draw_or_append_gpu_primitive(&g_require_reward_money_digit_polys[buffer][j]);
@@ -1356,6 +1445,7 @@ static void require_reward_run_gil_ticker(void) {
             }
         }
         gfx_draw_or_append_gpu_primitive(&areas[buffer]);
+        /* The comma appears with the thousands digit. */
         if (digits >= 4 && i >= 0x31) {
             gfx_draw_or_append_gpu_primitive(&g_require_reward_money_comma_polys[buffer]);
         }
@@ -1366,6 +1456,7 @@ static void require_reward_run_gil_ticker(void) {
         }
         i++;
     }
+
 finished:
     for (j = 0; j < digits; j++) {
         gfx_draw_or_append_gpu_primitive(&g_require_reward_money_digit_polys[buffer][j]);
@@ -1376,6 +1467,7 @@ finished:
         gfx_draw_or_append_gpu_primitive(&g_require_reward_money_comma_polys[buffer]);
     }
     gfx_draw_or_append_gpu_primitive(&g_require_reward_money_sign_polys[buffer]);
+
 skipped:
     g_sound_pending_sfx_id = MAIN_SFX_NONE;
     i++;
@@ -1406,6 +1498,8 @@ skipped:
         }
         i++;
     }
+
+    /* Stop the banner thread and fade the amount out; `pass` now holds the color level. */
     thread_set_parameters(thread_id, 0, 0, 1);
     i++;
     pass = 0x80;
@@ -1633,12 +1727,16 @@ static void require_condition_show_general(s32 hold_frames) {
         s32 page;
 
         STORE_QUAD_FULL(poly, index);
+        /* Keep only the semi-transparency bits (0x60) on texture page 6; GPU types 1
+         * and 2 take those bits two places higher. */
         if (GetGraphType() == 1 || GetGraphType() == 2)
             page = (tpage[index].page & 0x60) * 4;
         else
             page = tpage[index].page & 0x60;
         poly->tpage = page | 6;
     }
+
+    /* Seed buffer 1 with all 40 quads of buffer 0. */
     {
         POLY_GT4* destination = &g_main_poly_gt4_buffers[1][0];
         POLY_GT4* source = destination - 40;
@@ -1661,11 +1759,16 @@ static void require_condition_show_general(s32 hold_frames) {
             thread_exit_current();
             return;
         }
+
+        /* `buffer` is never initialized; only its parity matters, so either buffer may come first. */
         buffer = (buffer + 1) & 1;
+        /* The upper three pieces start their wipe nine frames after the lower three. */
         if (frame >= 9) {
             for (index = 5; index >= 3; index--) {
                 POLY_GT4* poly = &g_main_poly_gt4_buffers[buffer][index];
 
+                /* The clamp lowers the shared offset itself, so a shorter piece also caps the
+                 * pieces drawn after it. */
                 if (QUAD(index).source.h < reveal_offset_top)
                     reveal_offset_top = QUAD(index).source.h;
                 STORE_QUAD_REVEAL(poly, index, reveal_offset_top);
@@ -1682,6 +1785,7 @@ static void require_condition_show_general(s32 hold_frames) {
             require_gfx_scale_poly_gt4_vertex_colors(VERTEX_COLORS(index), 0x80, poly);
             gfx_draw_or_append_gpu_primitive(poly);
         }
+
         reveal_offset_bottom += 8;
         /* The one-trip loop emits nothing; its loop note weights these two
          * references of reveal_offset_top one level deeper, which keeps the
@@ -1942,8 +2046,10 @@ void require_reward_animate_bonus_image_burst(void) {
     } else {
         require_reward_load_bonus_image(1);
     }
+
     /* Named operand loads fold the three native cursor advances. */
     params = thread_get_current_parameter_2();
+    /* Script parameter bytes: 1 mode, 2 delay divisor, 3-4 angle step (little-endian), 5 radius step. */
     params++;
     mode = *params;
     params++;
@@ -1952,6 +2058,8 @@ void require_reward_animate_bonus_image_burst(void) {
     max_delay = 0;
     radius_step = params[2];
     angle_step = (params[1] << 8) + params[0];
+
+    /* Lay out the tiles; odd columns sit half a row higher. */
     for (row = 0; row < 12; row++) {
         for (col = 0; col < 24; col++) {
             tile = &g_require_reward_burst_tiles[row][col];
@@ -1985,6 +2093,7 @@ void require_reward_animate_bonus_image_burst(void) {
                     &g_require_reward_burst_rotated_offset);
                 dist = abs(g_require_reward_burst_rotated_offset.vx / ONE);
             }
+            /* The delay grows with the square of the distance. */
             dist = (dist * dist) / (divisor << 8);
             tile->delay = dist;
             tile->angle = 0;
@@ -1998,6 +2107,7 @@ void require_reward_animate_bonus_image_burst(void) {
             mem_copy_bytes_nonempty(&tile->poly[1], &tile->poly[0], sizeof(POLY_F4));
         }
     }
+
     SetDrawMode(&g_require_reward_burst_draw_modes[0], 0, 0, GetTPage(0, 0, 0x180, 0), &g_menu_draw_area_template);
     SetDrawMode(&g_require_reward_burst_draw_modes[1], 0, 0, GetTPage(0, 0, 0x180, 0), &g_menu_draw_area_template);
     frame = 0;
@@ -2010,6 +2120,8 @@ void require_reward_animate_bonus_image_burst(void) {
                 for (col = 0; col < 24; col++) {
                     tile = &g_require_reward_burst_tiles[row][col];
                     poly = &tile->poly[frame & 1];
+                    /* A started tile is a square turned by its angle: corners on its radius at
+                     * angle + 45 and + 135 degrees (0x200, 0x600) and their mirror images. */
                     if (tile->delay == 0) {
                         g_require_reward_burst_rotation.vx = 0;
                         g_require_reward_burst_rotation.vy = 0;
@@ -2074,6 +2186,7 @@ void require_reward_animate_bonus_image_burst(void) {
                         poly->r0 = g_require_gfx_fade_rgb[0];
                         poly->g0 = g_require_gfx_fade_rgb[1];
                         poly->b0 = g_require_gfx_fade_rgb[2];
+                        /* Waiting tiles stay hidden in phase 0 and keep their full shape in phase 1. */
                         if (phase == 1) {
                             gfx_append_gpu_primitive_to_secondary_otag(poly);
                         }
@@ -2082,7 +2195,9 @@ void require_reward_animate_bonus_image_burst(void) {
                     }
                 }
             }
+
             gfx_append_gpu_primitive_to_secondary_otag(&g_require_reward_burst_draw_modes[frame & 1]);
+            /* One more frame is drawn after every tile has finished. */
             if (done == 1) {
                 break;
             }
@@ -2091,9 +2206,11 @@ void require_reward_animate_bonus_image_burst(void) {
                 done = 1;
             }
         }
+
         if (phase == 1) {
             break;
         }
+
         SetPolyF4(&g_require_reward_burst_flash_polys[0]);
         setXY4(&g_require_reward_burst_flash_polys[0], 0x80, 0, 0x180, 0, 0x80, 0x100, 0x180, 0x100);
         g_require_reward_burst_flash_polys[0].r0 = 0x30;
@@ -2103,6 +2220,7 @@ void require_reward_animate_bonus_image_burst(void) {
         mem_copy_bytes_nonempty(
             &g_require_reward_burst_flash_polys[1], &g_require_reward_burst_flash_polys[0], sizeof(POLY_F4));
         frame++;
+        /* The controlling thread ends the hold by switching this task to THREAD_TASK_DARK_SCREEN. */
         thread_set_current_task_id(THREAD_TASK_DARK_SCREEN_HOLD);
         for (;;) {
             thread_yield();
@@ -2116,7 +2234,9 @@ void require_reward_animate_bonus_image_burst(void) {
             }
             frame++;
         }
+
         frame++;
+        /* Restart the delays so phase 1 collapses the tiles in the same order. */
         for (row = 0; row < 12; row++) {
             for (col = 0; col < 24; col++) {
                 tile = &g_require_reward_burst_tiles[row][col];
@@ -2124,6 +2244,7 @@ void require_reward_animate_bonus_image_burst(void) {
             }
         }
     }
+
     thread_wait_frames(1);
     thread_exit_current();
 }

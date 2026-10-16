@@ -49,6 +49,9 @@ s8 world_item_run_action_menu(void) {
         g_menu_help_message_text_id = 0;
         world_menu_reset_selection_results();
         g_menu_preview_stats_thread_params.style = 0;
+
+        /* Each option line starts with a palette code (0xE3) whose operand 4 grays the line out;
+         * option states of 0x1000 and up refuse Circle. */
         text = menu_text_find_entry_by_index(g_world_formation_menu_text_table, 3, 2);
         if (g_menu_list_entry_count != 0
             && (result = item_adjust_inventory_count(g_item_list_entries[g_menu_list_selected_index], 0)) != 0) {
@@ -59,6 +62,7 @@ s8 world_item_run_action_menu(void) {
             text[1] = 4;
             g_world_item_action_option_states[0] = 0x14D2;
         }
+
         text++;
         while (*text != 0xE3) {
             text++;
@@ -71,6 +75,7 @@ s8 world_item_run_action_menu(void) {
             text[1] = 4;
             g_world_item_action_option_states[1] = 0x14D2;
         }
+
         text++;
         while (*text != 0xE3) {
             text++;
@@ -82,9 +87,11 @@ s8 world_item_run_action_menu(void) {
             text[1] = 4;
             g_world_item_action_option_states[2] = 0x14D2;
         }
+
         g_world_menu_text_redraw_request = 1;
         g_world_item_action_menu_initialized = 1;
     }
+
     result = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_item_action_menu);
     if (result == 0) {
         g_world_item_action_menu_initialized = 0;
@@ -96,6 +103,7 @@ s8 world_item_run_action_menu(void) {
         && (g_menu_input_primary_repeat & PSX_PAD_CIRCLE)) {
         g_sound_queued_effect_id = MAIN_SFX_INVALID;
     }
+
     item = g_world_menu_selection_results[3];
     selected = item;
     if (selected != -1) {
@@ -107,6 +115,7 @@ s8 world_item_run_action_menu(void) {
             if (g_world_menu_selection_results[5] == 0) {
                 item_adjust_inventory_count(
                     g_item_list_entries[g_menu_list_selected_index], -g_world_menu_selection_results[4]);
+                /* With none left anywhere, drop the entry from the list and rebuild around it. */
                 if (item_get_total_count_variant(g_item_list_entries[g_menu_list_selected_index]) == 0) {
                     for (i = g_menu_list_selected_index; i < g_menu_list_entry_count; i++) {
                         g_item_list_entries[i] = g_item_list_entries[i + 1];
@@ -135,6 +144,7 @@ s8 world_item_run_action_menu(void) {
                 } else if (g_world_menu_selection_results[5] == 1) {
                     g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
                 }
+                /* Once a sound is queued, 100 keeps the menu initialized but stops this block running again. */
                 g_world_item_action_menu_initialized = g_sound_queued_effect_id != MAIN_SFX_NONE ? 100 : 1;
             }
             if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
@@ -160,6 +170,7 @@ s8 world_item_run_action_menu(void) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
     } else {
+        /* No option chosen: Left/Right switch the category tab, saving the old list's cursor. */
         if (thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
@@ -168,6 +179,7 @@ s8 world_item_run_action_menu(void) {
         if (result == g_menu_selected_slot) {
             return MENU_ITEM_LIST_STATE_ACTION;
         }
+
         g_world_item_category_input_lock = 1;
         menu_set_selection_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
@@ -187,6 +199,7 @@ s8 world_item_run_action_menu(void) {
         g_menu_status_display_thread_params.redraw_request = 1;
         g_menu_preview_stats_thread_params.redraw_request = 1;
     }
+
     g_world_item_action_menu_initialized = 0;
     return MENU_ITEM_LIST_STATE_ACTION;
 }

@@ -614,6 +614,8 @@ static void card_save_update_slot_scan(void) {
 
     if (g_card_save_slot_scan_active == 0) {
         menu_input_clear_state();
+        /* While a slot is recorded as last used, the stored slot metadata is current: if the card
+         * reports no change, rebuild the descriptions from it and skip the directory scan. */
         if (g_main_card_save_last_used_slot < 0x10) {
             result = card_io_wait_operation_result(5);
             if (result == CARD_IO_RESULT_COMPLETE) {
@@ -635,6 +637,8 @@ static void card_save_update_slot_scan(void) {
             }
         }
 
+        /* Setup spans three calls: clear the VRAM column at x 0x180 (it holds slots 11 to 14's text),
+         * start the checking message, then one idle call. */
         if (g_card_save_scan_setup_step < 3) {
             if (g_card_save_scan_setup_step == 0) {
                 rect.x = 0x180;
@@ -654,6 +658,7 @@ static void card_save_update_slot_scan(void) {
         if (g_card_io_open_result == CARD_IO_RESULT_COMPLETE) {
             g_card_save_file_count = card_file_enumerate_saves(g_card_save_menu_work_buffer, 1);
             result = 0;
+            /* Re-read the directory until two reads agree, at most 15 times, two vsyncs apart. */
             while (result < 15) {
                 status = card_file_enumerate_saves(g_card_save_menu_work_buffer, 1);
                 if (status == g_card_save_file_count) {
@@ -670,6 +675,7 @@ static void card_save_update_slot_scan(void) {
             g_card_sound_queued_effect_id = MAIN_SFX_ERROR_MESSAGE;
         }
 
+        /* Every slot starts unscanned; the scan below classifies one slot per call. */
         result = 0;
         while (result < 15) {
             g_main_card_save_slot_file_states[result] = CARD_SAVE_SLOT_UNSCANNED;
@@ -735,6 +741,7 @@ static void card_save_update_slot_scan(void) {
                 }
                 result++;
             }
+            /* -1: the card holds no file for this slot; 0: found. */
             status = status ? -1 : 0;
 
             if (status != -1) {
@@ -751,6 +758,8 @@ static void card_save_update_slot_scan(void) {
                     if (status != -1) {
                         status = card_file_read_with_retries(descriptor, &g_card_save_buffer_pointer->summary, 0x80);
                     }
+                    /* The slot number is written last (card_save_update_slot_write), so a summary still holding
+                     * 0xff marks an unfinished save: delete it and count its block free again. */
                     if (status != -1 && g_card_save_buffer_pointer->summary.slot >= 0x10
                         && card_file_delete_selected_with_retries(g_card_save_file_names[g_card_save_slot_scan_index])
                             != 0) {
@@ -770,6 +779,7 @@ static void card_save_update_slot_scan(void) {
                 }
             }
 
+            /* A full 0x80-byte summary read means the slot holds a save. */
             if (status == 0x80) {
                 g_main_card_save_slot_file_states[g_card_save_slot_scan_index] = CARD_SAVE_SLOT_OCCUPIED;
             }
@@ -791,6 +801,7 @@ static void card_save_update_slot_scan(void) {
             }
             g_card_save_slot_scan_index++;
         } else {
+            /* A last-used slot below 0x10 lets the next scan reuse these results. */
             g_main_card_save_last_used_slot = 0;
             menu_stop_thread_and_wait(THREAD_SCREEN_SLOT_MENU);
             g_card_save_menu_state = CARD_SAVE_MENU_SCAN_RESULT;
@@ -929,6 +940,8 @@ static void card_save_update_and_draw_slot_list(u16 input) {
     RECT rect;
 
     if (g_card_save_menu_state == CARD_SAVE_MENU_SELECT_SAVE) {
+        /* Input is ignored until every button has been released once, so a press carried over
+         * from the previous state does not act here. */
         if (g_card_save_list_input_armed == 0) {
             g_card_save_overwrite_prompt_active = 0;
             if (input == 0) {
@@ -937,6 +950,9 @@ static void card_save_update_and_draw_slot_list(u16 input) {
                 input = 0;
             }
         }
+
+        /* `row` briefly holds the card status: after an error or a new card, rescan unless the card
+         * still answers. */
         row = card_io_poll_operation_result_variant();
         if (row > CARD_IO_RESULT_COMPLETE) {
             if (card_io_wait_operation_result(3) != CARD_IO_RESULT_COMPLETE) {
@@ -955,6 +971,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
         } else {
             if ((input & PSX_PAD_CIRCLE) && g_card_save_list_scroll_anim_offset == 0) {
                 main_sound_play_sfx(MAIN_SFX_CONFIRM);
+                /* The cursor counts listed slots only; find the slot index it points at. */
                 remaining = g_card_save_list_cursor_index;
                 index = 0;
                 for (index = 0; index < CARD_SAVE_SLOT_COUNT; index++) {
@@ -967,6 +984,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
                 }
                 g_card_save_list_selected_slot = index;
                 if (g_main_card_save_slot_file_states[g_card_save_list_selected_slot] == CARD_SAVE_SLOT_OCCUPIED) {
+                    /* Overwriting asks first; the prompt window's y depends on the cursor's visible row. */
                     index = g_card_save_list_cursor_index - g_card_save_list_top_row;
                     switch (index) {
                     case 0:
@@ -990,6 +1008,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
                     g_card_save_menu_state = CARD_SAVE_MENU_WRITING;
                 }
             }
+
             if ((input & PSX_PAD_CROSS) && g_card_save_list_scroll_anim_offset == 0) {
                 g_card_sound_queued_effect_id = MAIN_SFX_CANCEL;
                 g_card_save_menu_state = CARD_SAVE_MENU_SELECT_CARD;
@@ -1008,6 +1027,8 @@ static void card_save_update_and_draw_slot_list(u16 input) {
                 }
             }
         }
+
+        /* Leaving the selection state re-arms the release check. */
         if (g_card_save_menu_state != CARD_SAVE_MENU_SELECT_SAVE) {
             input = 0;
             g_card_save_list_input_armed = 0;
@@ -1018,6 +1039,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
     g_menu_window_rect_source = g_card_save_slot_window_rect_source;
     scrolling = g_card_save_menu_state != CARD_SAVE_MENU_SELECT_SAVE;
     for (index = 0, row = 0; index < CARD_SAVE_SLOT_COUNT; index++, row++) {
+        /* Unavailable slots are not listed. */
         while (g_main_card_save_slot_file_states[index] == CARD_SAVE_SLOT_UNAVAILABLE) {
             index++;
             if (index >= CARD_SAVE_SLOT_COUNT) {
@@ -1027,14 +1049,17 @@ static void card_save_update_and_draw_slot_list(u16 input) {
         if (index >= CARD_SAVE_SLOT_COUNT) {
             break;
         }
+
         g_card_save_slot_row_y = g_card_save_list_scroll_base_y + g_card_save_list_scroll_anim_offset + row * 48 + 12;
         if (g_card_save_slot_row_y < -48 || g_card_save_slot_row_y >= 241) {
             continue;
         }
+
         gfx_set_otag_index(10);
         value = row != g_card_save_list_cursor_index || scrolling != 0;
         menu_set_palette_mode(value);
         card_cmd_draw_window_frame_handler(&g_card_save_slot_window_command);
+
         g_card_save_slot_quads[3].position.y = g_card_save_slot_quads[4].position.y
             = g_card_save_slot_quads[0].position.y = g_card_save_slot_quads[1].position.y = g_card_save_slot_row_y - 14;
         g_card_save_slot_quads[3].position.y = g_card_save_slot_quads[3].position.y + 1;
@@ -1054,6 +1079,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
             g_card_save_slot_number_commands[0].number.value = index + 1;
             card_cmd_draw_decimal_number_handler(&g_card_save_slot_number_commands[0].number);
         }
+
         g_card_save_slot_quads[2].position.y = g_card_save_slot_quads[0].position.y;
         if (g_card_save_slot_quads[2].position.y >= 0 && g_card_save_slot_quads[2].position.y < 241) {
             menu_gfx_enqueue_oriented_textured_quad(
@@ -1070,6 +1096,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
             card_cmd_draw_decimal_number_handler(&g_card_save_slot_number_commands[2].number);
             card_cmd_draw_decimal_number_handler(&g_card_save_slot_number_commands[3].number);
         }
+
         if (g_main_card_save_slot_file_states[index] == CARD_SAVE_SLOT_AVAILABLE) {
             rect.x = 0x74;
             rect.y = g_card_save_slot_row_y + 4;
@@ -1081,6 +1108,8 @@ static void card_save_update_and_draw_slot_list(u16 input) {
             rect.w = 0xc8;
             rect.h = 0x1f;
         }
+
+        /* Read the slot's text strip from where card_save_render_slot_text put it. */
         if (index < 6) {
             texture_page = g_menu_atlas_texture_page;
             source_v = index * 0x20 + 0x30;
@@ -1095,6 +1124,7 @@ static void card_save_update_and_draw_slot_list(u16 input) {
     }
 
     gfx_set_otag_index(15);
+    /* The cursor stays on one of the four visible rows. */
     value = g_card_save_list_cursor_index - g_card_save_list_top_row;
     if (value < 0) {
         value = 0;
@@ -1105,11 +1135,15 @@ static void card_save_update_and_draw_slot_list(u16 input) {
     g_card_save_slot_cursor_position.y = value * 48 + 0x28;
     menu_update_and_draw_sliding_cursor_variant(
         &g_card_save_slot_cursor_position, &g_card_save_slot_cursor_animation, scrolling);
+
+    /* cursor_clut is unused: both arrows below draw with the mode-0 CLUT. */
     if (g_menu_input_lock_mode != 0) {
         cursor_clut = g_menu_cursor_mode1_foreground_clut;
     } else {
         cursor_clut = g_menu_cursor_mode0_foreground_clut;
     }
+
+    /* Scroll arrows: up once the list has scrolled, down while rows remain below the visible four. */
     if (g_card_save_list_top_row != 0) {
         rect.x = 0xe3;
         rect.y = 0x20;

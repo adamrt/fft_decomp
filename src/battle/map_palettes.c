@@ -1249,6 +1249,7 @@ void battle_map_update_animations(void) {
     map_color_transition_t* transition;
     s32 step;
 
+    /* Color rotations: every frame_duration frames, move each color one place and wrap the end one around. */
     for (i = 0; i < MAP_CLUT_CYCLE_SLOT_COUNT; i++) {
         state = &g_battle_map_clut_cycle_states[i];
         if (state->active != 0) {
@@ -1260,6 +1261,8 @@ void battle_map_update_animations(void) {
                 last = state->last_color;
                 saved_packed = row_state->packed_colors[last];
                 saved_modified = g_battle_map_palette_modified_colors[state->clut_row][last];
+
+                /* The colors move toward last_color, whichever end of the range it is. */
                 if (state->first_color < last) {
                     for (k = last; state->first_color < k; k--) {
                         row_state->components[k] = row_state->components[k - 1];
@@ -1275,6 +1278,7 @@ void battle_map_update_animations(void) {
                             = g_battle_map_palette_modified_colors[state->clut_row][k + 1];
                     }
                 }
+
                 row_state->components[state->first_color] = saved_component;
                 row_state->packed_colors[state->first_color] = saved_packed;
                 g_battle_map_palette_modified_colors[state->clut_row][state->first_color] = saved_modified;
@@ -1292,6 +1296,7 @@ void battle_map_update_animations(void) {
             channels[i].green += channels[i].green_step;
             channels[i].blue += channels[i].blue_step;
         }
+
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].r = channels[0].red / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = channels[0].green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = channels[0].blue / 0x10000;
@@ -1299,11 +1304,15 @@ void battle_map_update_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].g = channels[1].green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_BOTTOM].b = channels[1].blue / 0x10000;
         battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_BACKGROUND_GRADIENT, &gradient);
+
+        /* A period of 4 or more advances 32 phases, one every period / 4 frames; a shorter one
+         * counts period * 8 single frames. The ambient and darkness fades below work the same way. */
         if (g_battle_map_background_gradient_transition.period >= 4) {
             if (++g_battle_map_background_gradient_transition.tick >= g_battle_map_background_gradient_transition.period
                 >> 2) {
                 g_battle_map_background_gradient_transition.tick = 0;
                 if (++g_battle_map_background_gradient_transition.phase >= 0x20) {
+                    /* At the end a repeating blend swaps between its tint and the restored colors; others stop. */
                     if (g_battle_map_background_gradient_transition.repeat == MAP_COLOR_REPEAT_TINTED) {
                         battle_map_blend_background_gradient_color(
                             MAP_COLOR_MODE_RESTORE, g_battle_map_background_gradient_transition.period, 0, 0, 0);
@@ -1353,6 +1362,7 @@ void battle_map_update_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g_battle_map_ambient_light_transition.channels.green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = g_battle_map_ambient_light_transition.channels.blue / 0x10000;
         battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_AMBIENT_COLOR, &gradient);
+
         if (g_battle_map_ambient_light_transition.period >= 4) {
             if (++g_battle_map_ambient_light_transition.tick >= g_battle_map_ambient_light_transition.period >> 2) {
                 g_battle_map_ambient_light_transition.tick = 0;
@@ -1403,6 +1413,7 @@ void battle_map_update_animations(void) {
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].g = g_battle_map_darkness_transition.channels.green / 0x10000;
         gradient.colors[MAP_BACKGROUND_GRADIENT_TOP].b = g_battle_map_darkness_transition.channels.blue / 0x10000;
         battle_map_light_state_command(MAP_LIGHT_COMMAND_SET_DARKNESS_COLOR, &gradient);
+
         if (g_battle_map_darkness_transition.period >= 4) {
             if (++g_battle_map_darkness_transition.tick >= g_battle_map_darkness_transition.period >> 2) {
                 g_battle_map_darkness_transition.tick = 0;
@@ -1436,6 +1447,9 @@ void battle_map_update_animations(void) {
                 transition->active = 0;
             }
         }
+
+        /* On maps that ignore weather, color 0 of the first map CLUT follows the darkness color: 16.16
+         * channels cut to five bits, with the STP bit set so the color is not transparent. */
         if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
             red = g_battle_map_darkness_transition.channels.red / 0x80000;
             green = g_battle_map_darkness_transition.channels.green / 0x80000;
@@ -1446,12 +1460,17 @@ void battle_map_update_animations(void) {
         }
     }
 
+    /* Rows with `enabled` clear (sprites, units, shadows, action results) blend each of their 16 CLUTs
+     * on its own; the other rows blend all 256 colors under animation 0. */
     for (i = 0; i < MAP_CLUT_ROW_COUNT; i++) {
         if (g_battle_map_palette_state.clut_rows[i].enabled == 0) {
             for (k = 0; k < MAP_CLUTS_PER_ROW; k++) {
                 if (g_battle_map_palette_state.clut_rows[i].animations[k].active == 0) {
                     continue;
                 }
+
+                /* Mode 4 and up takes one of 32 blend steps every mode / 4 frames;
+                 * lower modes take one of 8 each frame. */
                 if (g_battle_map_palette_state.clut_rows[i].animations[k].mode >= 4) {
                     if (++g_battle_map_palette_state.clut_rows[i].animations[k].delay_counter
                         >= g_battle_map_palette_state.clut_rows[i].animations[k].mode >> 2) {
@@ -1459,6 +1478,8 @@ void battle_map_update_animations(void) {
                         g_battle_map_palette_state.clut_rows[i].animations[k].delay_counter = 0;
                         component = &g_battle_map_palette_state.clut_rows[i].components[k * MAP_CLUT_COLOR_COUNT];
                         for (j = 0; j < MAP_CLUT_COLOR_COUNT; j++) {
+                            /* Black colors are left alone, and a blend that reaches black stores blue 1,
+                             * so a color never becomes the transparent value 0. */
                             if (component[j].color.r + component[j].color.g + component[j].color.b != 0) {
                                 red = component[j].color.r
                                     + g_battle_map_palette_blend_steps_32[component[j].delta_biased.r][step];
@@ -1631,12 +1652,15 @@ void battle_map_update_animations(void) {
                     }
                 }
             }
+
+            /* Put color 0 back on the darkness color after the blend rewrote it. */
             if (i == 0 && (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
                 red = g_battle_map_darkness_transition.channels.red / 0x80000;
                 green = g_battle_map_darkness_transition.channels.green / 0x80000;
                 blue = g_battle_map_darkness_transition.channels.blue / 0x80000;
                 g_battle_map_palette_modified_colors[0][0] = red + (green << 5) + (blue << 10) + 0x8000;
             }
+
             g_battle_map_palette_state.upload_pending = 1;
         }
     }

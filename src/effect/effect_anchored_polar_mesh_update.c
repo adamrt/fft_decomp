@@ -51,6 +51,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         }
         work = record->work_slots[callback_slot]
             = battle_heap_alloc_block(sizeof(effect_polar_mesh_work_t), state_index);
+
         if (entry->polar_mesh.texture_page_flags & EFFECT_TEXTURE_PAGE_FLAG_CLEAR_ABE) {
             scratch->translucent = 0;
         } else {
@@ -67,6 +68,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             work->quads[1][i] = *quad;
         }
+
         work->scroll_v = 0;
         work->scroll_u = 0;
         work->frame = 0;
@@ -82,6 +84,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->half_width = entry->polar_mesh.texture_width / 2;
         scratch->half_height = entry->polar_mesh.texture_height / 2;
 
+        /* The anchor: the target's position plus its unit's event offset, projected to the screen. */
         scratch->target_index = g_battle_effect_state_records[state_index].timeline.target_index;
         battle_effect_resolve_target_world_coords(
             g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, scratch->target_index,
@@ -95,6 +98,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         SetTransMatrix(&g_battle_camera_matrix);
         RotTrans(&scratch->position, &scratch->screen, &scratch->screen.pad);
 
+        /* Ring shape: a radius and an angle, each with a per-ring step and a change of that step. */
         selector = entry->polar_mesh.curve_bindings.radius;
         EFFECT_READ_CURVE(j, i, selector, work->frame);
         scratch->radius = battle_lerp_fixed8(entry->polar_mesh.radius_start, entry->polar_mesh.radius_end, i) * ONE;
@@ -105,6 +109,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->radius_step_delta
             = battle_lerp_fixed8(entry->polar_mesh.radius_step_delta_start, entry->polar_mesh.radius_step_delta_end, i)
             << 4;
+
         angle_binding = entry->polar_mesh.curve_bindings.angle;
         EFFECT_READ_CURVE(j, i, angle_binding, work->frame);
         scratch->angle = battle_lerp_fixed8(entry->polar_mesh.angle_start, entry->polar_mesh.angle_end, i) << 4;
@@ -117,6 +122,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->angle_step_delta
             = battle_lerp_fixed8(entry->polar_mesh.angle_step_delta_start, entry->polar_mesh.angle_step_delta_end, i);
 
+        /* Each ring sweeps one quadrant; its last point is the first turned a quarter turn. */
         for (ring = 0; ring < POLAR_MESH_RING_COUNT + 1; ring++) {
             for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
                 scratch->points[ring][i].x
@@ -132,6 +138,8 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             scratch->angle_step += scratch->angle_step_delta;
         }
 
+        /* The center moves by velocity from ring to ring, and velocity changes by acceleration.
+         * Its curve position is an offset from the projected anchor. */
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.center, work->frame);
         battle_effect_interpolate_emitter_spawn_position(entry, i, &scratch->center);
         scratch->center.vx += scratch->screen.vx;
@@ -155,6 +163,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         scratch->acceleration.x = rcos(scratch->acceleration_angle) * j >> 12;
         scratch->acceleration.y = rsin(scratch->acceleration_angle) * j >> 12;
 
+        /* The scroll curve alone is read at the caller's frame. */
         selector = entry->polar_mesh.curve_bindings.scroll;
         EFFECT_READ_CURVE(j, i, selector, frame);
         j = battle_lerp_fixed8(entry->polar_mesh.scroll_u_speed_start, entry->polar_mesh.scroll_u_speed_end, i) << 4;
@@ -165,6 +174,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         while (work->scroll_u < 0) {
             work->scroll_u += scratch->half_width * ONE;
         }
+
         j = battle_lerp_fixed8(entry->polar_mesh.scroll_v_speed_start, entry->polar_mesh.scroll_v_speed_end, i) << 4;
         work->scroll_v += j;
         while (work->scroll_v >= scratch->half_height * ONE) {
@@ -189,6 +199,8 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             scratch->green_factor = EFFECT_COLOR_NEUTRAL;
             scratch->red_factor = EFFECT_COLOR_NEUTRAL;
         }
+
+        /* The whole mesh sits at one ordering-table depth. */
         scratch->brightness_row = entry->polar_mesh.brightness_row;
         scratch->ot_depth = entry->polar_mesh.ot_depth;
         if (scratch->ot_depth < EFFECT_OT_DEPTH_MIN) {
@@ -198,6 +210,8 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             scratch->ot_depth = EFFECT_OT_DEPTH_MAX;
         }
 
+        /* Ring 0: the inner edge of the first quad row, which also sets the UVs. Quadrants 1-3
+         * turn each point (x, y) to (-y, x), (-x, -y) and (y, -x). */
         for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
             quad = &work->quads[work->buffer][i];
             setXY2(quad, scratch->center.vx + scratch->points[0][i].x, scratch->center.vy + scratch->points[0][i].y,
@@ -239,12 +253,15 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             setRGB0(quad, quad->r1 = scratch->r, quad->g1 = scratch->g, quad->b1 = scratch->b);
         }
 
+        /* Rings 1-4 close the inner quad row and open the next one. */
         for (j = 0; j < POLAR_MESH_RING_COUNT - 1; j++) {
             scratch->center.vx += scratch->velocity.x >> 12;
             scratch->center.vy += scratch->velocity.y >> 12;
             scratch->velocity.x += scratch->acceleration.x;
             scratch->velocity.y += scratch->acceleration.y;
+
             for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
+                /* The ring is inner's outer edge and quad's inner edge; inner is then complete. */
                 inner = &work->quads[work->buffer][j * POLAR_MESH_SEGMENTS_PER_QUADRANT + i];
                 quad = &work->quads[work->buffer][(j + 1) * POLAR_MESH_SEGMENTS_PER_QUADRANT + i];
                 setXY2(quad, inner->x2 = scratch->center.vx + scratch->points[j + 1][i].x,
@@ -311,10 +328,12 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             }
         }
 
+        /* Ring 5: the outer edge of the last quad row. */
         scratch->center.vx += scratch->velocity.x >> 12;
         scratch->center.vy += scratch->velocity.y >> 12;
         scratch->velocity.x += scratch->acceleration.x;
         scratch->velocity.y += scratch->acceleration.y;
+
         for (i = 0; i < POLAR_MESH_SEGMENTS_PER_QUADRANT; i++) {
             quad = &work->quads[work->buffer][i + POLAR_MESH_OUTER_RING_OFFSET];
             quad->x2 = scratch->center.vx + scratch->points[POLAR_MESH_RING_COUNT][i].x;
@@ -351,12 +370,16 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             setRGB2(quad, quad->r3 = scratch->r, quad->g3 = scratch->g, quad->b3 = scratch->b);
             AddPrim(ot + scratch->ot_depth, quad);
         }
+
+        /* The next update reads the next curve column and fills the other buffer while this one is drawn. */
         work->frame++;
         work->buffer = 1 - work->buffer;
         break;
 
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the last update's quads may still be drawing. The null
+         * check below comes after this read through work (retail order). */
         if (work->destroy_delay == 0) {
             work->destroy_delay = 1;
             break;

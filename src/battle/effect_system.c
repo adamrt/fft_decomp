@@ -408,6 +408,8 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
             battle_camera_set_rotation(&g_battle_effect_camera_rotation_start);
         }
         break;
+    /* The ADD modes treat the target as a per-frame step: ramped up from zero, constant, or
+     * ramped down to zero. At the end the accumulated angle becomes both start and target. */
     case EFFECT_CAMERA_MODE_ADD_ACCELERATING:
         if (g_battle_effect_camera_rotation_duration > g_battle_effect_camera_rotation_frame) {
             g_battle_effect_camera_rotation_frame++;
@@ -453,6 +455,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
             g_battle_effect_camera_rotation_mode = EFFECT_CAMERA_MODE_IDLE;
         }
         break;
+    /* The SHAKE modes treat the target as a random range around the start angle. */
     case EFFECT_CAMERA_MODE_SHAKE_GROWING:
         if (g_battle_effect_camera_rotation_duration > g_battle_effect_camera_rotation_frame) {
             g_battle_effect_camera_rotation_frame++;
@@ -494,6 +497,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
         break;
     }
 
+    /* Position track: the same modes on whole-unit values, scaled by ONE for the camera. */
     switch (g_battle_effect_camera_position_mode) {
     case EFFECT_CAMERA_MODE_IDLE:
         break;
@@ -630,6 +634,7 @@ void battle_camera_update_effect_rotation_and_zoom(void) {
         break;
     }
 
+    /* Zoom track: the same modes, with no angle wrap or scaling. */
     switch (g_battle_effect_camera_zoom_mode) {
     case EFFECT_CAMERA_MODE_IDLE:
         break;
@@ -2533,6 +2538,7 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
         if (effect->allocation != 0) {
             main_heap_free(effect->allocation);
         }
+
         state = main_heap_alloc(sizeof(effect_burst_state_t));
         g_battle_effect_current_secondary->allocation = state;
         state->frame = 0;
@@ -2545,6 +2551,7 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
         for (i = 0; i < 16; i++) {
             state->ids_b[i] = 0;
         }
+
         result = 1;
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         battle_effect_seed_camera_tracks();
@@ -2555,6 +2562,9 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
         if (effect->target.record.data.unit.result_animation == EFFECT_HIT_MISSED) {
             group = EFFECT_PARTICLE_GROUP_WEAPON_HIT_B_MISSED;
         }
+
+        /* A landed hit flashes the target. group is 1 here, so the frame == group test restores
+         * the palette one frame after the flash. */
         if (group == EFFECT_PARTICLE_GROUP_WEAPON_HIT_B) {
             if (state->frame == 0) {
                 battle_gfx_apply_unit_palette_modulation_to_units(
@@ -2565,6 +2575,10 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
                     g_battle_effect_current_secondary->target.record.data.unit.runtime_id, 0, 0, 0);
             }
         }
+
+        /* Spawn both particle sets over the first four frames: set A with a CLUT offset by the
+         * effect parameter, set B with a fixed one. The counts below 8 and 16 guarantee the
+         * free-entry searches succeed. */
         if (state->frame < 4) {
             if (state->count_a < 8) {
                 for (i = 0;
@@ -2590,6 +2604,7 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
                     }
                 }
             }
+
             if (state->frame < 4 && state->count_b < 16) {
                 for (i = 0; i < g_battle_effect_trap_particle_configs[group].spawns_per_frame; i++) {
                     for (j = 0; j < 16; j++) {
@@ -2616,6 +2631,8 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
         }
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
+        /* Step the live particles under the secondary-effect inertia and gravity, then put back
+         * the effect file's own values. */
         battle_effect_save_inertia_threshold();
         battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
         gravity.z = 0;
@@ -2623,6 +2640,7 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
         gravity.y = ONE;
         battle_effect_save_gravity();
         battle_effect_set_gravity(&gravity);
+
         for (i = 0; i < 8; i++) {
             id = state->ids_a[i];
             if (id != 0 && battle_effect_update_slot(id) == 0) {
@@ -2639,8 +2657,11 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
                 state->count_b--;
             }
         }
+
         battle_effect_restore_inertia_threshold();
         battle_effect_restore_gravity();
+
+        /* A critical hit pulses the zoom around the saved value over frames 0-4, then shakes the camera. */
         if (g_battle_effect_current_secondary->target.record.data.unit.result_animation == EFFECT_HIT_CRITICAL) {
             if (state->frame == 0) {
                 zoom.vx = zoom.vy = zoom.vz = -0x80;
@@ -2659,6 +2680,9 @@ s32 battle_effect_weapon_hit_secondary_handler(void) {
                     EFFECT_CAMERA_SOURCE_GIVEN | EFFECT_CAMERA_MODE_SHAKE_DECAYING, 0, 9, &offset);
             }
         }
+
+        /* done counts up once nothing is live after frame 31; the handler returns 0 only on
+         * the frame after it first counts. */
         done = state->done;
         result = done != 1;
         state->frame++;
@@ -2771,6 +2795,8 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
     switch (effect->phase) {
     case EFFECT_SECONDARY_PHASE_INITIALIZING:
         index = g_battle_effect_secondary_animations[effect->animation_id].parameter;
+        /* The animation parameter picks the line parameters; the effect parameter is replaced by
+         * its element index, which picks the trail color. */
         g_battle_effect_current_secondary->parameter = battle_effect_get_element_index(effect->parameter);
         g_battle_effect_secondary_state.charge.speed = g_battle_effect_charge_line_params[index].speed;
         g_battle_effect_secondary_state.charge.spread_range = g_battle_effect_charge_line_params[index].spread_range;
@@ -2782,6 +2808,8 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
         g_battle_effect_secondary_state.charge.color = g_battle_effect_current_secondary->parameter;
         g_battle_effect_secondary_state.charge.max_trails = g_battle_effect_charge_line_params[index].max_trails;
         g_battle_effect_secondary_state.charge.fade_row = g_battle_effect_charge_line_params[index].fade_row;
+
+        /* Two buffers of 96 additive Gouraud lines: 16 trails of 6 segments each. */
         SetDrawMode(&state->mode[0], 1, 1, PSYQ_GPU_TPAGE_ABR_ADD, 0);
         SetDrawMode(&state->mode[1], 1, 1, PSYQ_GPU_TPAGE_ABR_ADD, 0);
         for (i = 0; i < 2; i++) {
@@ -2790,6 +2818,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                 SetSemiTrans(&state->lines[i][j], 1);
             }
         }
+
         for (i = 0; i < 16; i++) {
             state->trails[i].slot_id = 0;
         }
@@ -2802,6 +2831,9 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
         for (i = 0; i < 14; i++) {
             state->ids_b[i] = 0;
         }
+
+        /* Spawn the particles 8 units above the caster's sprite, and project that point to the
+         * screen as the center the trails converge on. */
         screen = battle_unit_get_world_coords_by_runtime_id(
             g_battle_effect_current_secondary->caster.data.unit.runtime_id);
         i = battle_gfx_get_unit_spritesheet_height_by_runtime_id(
@@ -2819,11 +2851,14 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
         state->done = 0;
         state->x = out.vx;
         state->y = out.vy;
+
         suzuki_sound_play_sfx(MAIN_SFX_SPELL_CHARGE);
         result = 1;
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
         break;
     case EFFECT_SECONDARY_PHASE_EXECUTING:
+        /* With a 1 in spawn_interval chance per frame, start a trail on the circle of radius
+         * around the center. */
         if (g_battle_effect_secondary_state.charge.done == 0
             && g_battle_effect_secondary_state.charge.count.trails < g_battle_effect_secondary_state.charge.max_trails
             && rand() % g_battle_effect_secondary_state.charge.spawn_interval == 0) {
@@ -2835,13 +2870,16 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                     }
                     state->count.trails++;
                     k = (rand() & 0x1ff) + state->angle;
+                    /* 0x571 is about a third of a turn, so successive trails spread around the circle. */
                     state->angle += 0x571;
                     g_battle_effect_slots[j].motion.position.x = rcos(k) * state->radius + (state->x * ONE);
                     g_battle_effect_slots[j].motion.position.y = rsin(k) * state->radius + (state->y * ONE);
+                    /* Half a turn (0x800) aims the velocity back toward the center, give or take the spread. */
                     k = k + rand() % state->spread_range - state->spread_offset - 0x800;
                     g_battle_effect_slots[j].motion.velocity.x = rcos(k) * state->speed;
                     g_battle_effect_slots[j].motion.velocity.y = rsin(k) * state->speed;
                     g_battle_effect_slots[j].life = 1;
+                    /* Seed all seven history points with the start so the new trail has zero length. */
                     for (k = 0; k < 7; k++) {
                         state->trails[i].points[k].vx = g_battle_effect_slots[j].motion.position.x >> 12;
                         state->trails[i].points[k].vy = g_battle_effect_slots[j].motion.position.y >> 12;
@@ -2851,6 +2889,8 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                 }
             }
         }
+
+        /* Top up the spell-charge particle group, at most 14 live at once. */
         if (state->count.particles < 14) {
             for (i = 0; i < g_battle_effect_trap_particle_configs[EFFECT_PARTICLE_GROUP_SPELL_CHARGE].spawns_per_frame;
                 i++) {
@@ -2876,8 +2916,10 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
         }
         /* fallthrough */
     case EFFECT_SECONDARY_PHASE_FINALIZING:
+        /* Unlike the other secondary handlers, this one never restores the saved inertia threshold. */
         battle_effect_save_inertia_threshold();
         battle_effect_set_inertia_threshold(EFFECT_SECONDARY_INERTIA_THRESHOLD);
+
         for (i = 0; i < 2; i++) {
             j = state->ids_a[i];
             if (j != 0 && battle_effect_update_slot(j) == 0) {
@@ -2894,6 +2936,9 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                 state->count.particles--;
             }
         }
+
+        /* Trails: move each head, ease its newest point toward the center, then link its six
+         * segments from newest to oldest point, dimming toward the tail. */
         red = g_battle_effect_trap_colors[state->color].r;
         green = g_battle_effect_trap_colors[state->color].g;
         blue = g_battle_effect_trap_colors[state->color].b;
@@ -2907,6 +2952,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                     = g_battle_effect_slots[j].motion.position.x + g_battle_effect_slots[j].motion.velocity.x;
                 work->motion.position.y = y
                     = g_battle_effect_slots[j].motion.position.y + g_battle_effect_slots[j].motion.velocity.y;
+                /* points[] is a seven-entry ring; age % 7 is the newest entry. */
                 age = ++state->trails[i].age;
                 head = age % 7;
                 if (age <= state->duration) {
@@ -2916,6 +2962,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                     state->trails[i].points[head].vy
                         = battle_effect_interpolate_s32_cos(y >> 12, state->y, state->duration, age);
                 } else {
+                    /* Past the duration the head sits on the center and the whole trail fades out. */
                     state->trails[i].points[head].vx = state->x;
                     state->trails[i].points[head].vy = state->y;
                     over = age - 6;
@@ -2924,6 +2971,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                         fade = 0;
                     }
                 }
+
                 for (k = 0; k < 6; k++) {
                     line = &state->lines[g_battle_effect_buffer_index][i * 6 + k];
                     line->x0 = state->trails[i].points[head].vx;
@@ -2951,6 +2999,7 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                     if (fade != 0) {
                         fade--;
                     }
+                    /* Points from before the trail was born draw black, which the additive mode hides. */
                     if (age < 0) {
                         fade = 0;
                     }
@@ -2972,6 +3021,8 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                                         * EFFECT_CHARGE_LINE_FADE_STEPS
                                     + fade]
                             >> 8);
+                    /* Link only segments with length. The +0x900 shifts ratan2's -0x800..0x800 into the
+                     * positive range before taking one of the 512-unit direction sectors. */
                     if (LINE_G2_XY_WORD(line, 0) != LINE_G2_XY_WORD(line, 1)) {
                         dir = (ratan2(line->y1 - line->y0, line->x1 - line->x0) + 0x900) / 512;
                         line->x1 += offsets[dir * 2];
@@ -2982,6 +3033,8 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                         ot[1] = (ot[1] & 0xff000000) | link;
                     }
                 }
+
+                /* Free the trail once all seven points have settled on the center. */
                 if (state->trails[i].age >= state->duration + 7) {
                     battle_effect_free_slot(j);
                     state->trails[i].slot_id = 0;
@@ -2989,7 +3042,11 @@ s32 battle_effect_spell_charge_secondary_handler(void) {
                 }
             }
         }
+
+        /* Added last at the same depth, so the draw mode runs before the lines. */
         AddPrim(g_battle_effect_polygon_depth_data + 1, &state->mode[g_battle_effect_buffer_index]);
+
+        /* Keep running while executing or while anything is still live; then stop the charge sound. */
         if (g_battle_effect_current_secondary->phase == EFFECT_SECONDARY_PHASE_EXECUTING
             || (state->count.trails != 0 || state->count.auxiliary_particles != 0 || state->count.particles != 0)) {
             result = 1;
@@ -3770,9 +3827,12 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
         g_battle_effect_projectile_speed = 0x8000;
         g_battle_effect_projectile_spin_passes = g_battle_effect_trajectory_step_count;
         g_battle_effect_current_secondary->phase = EFFECT_SECONDARY_PHASE_EXECUTING;
+
         if (g_battle_effect_current_secondary->allocation != 0) {
             main_heap_free(g_battle_effect_current_secondary->allocation);
         }
+
+        /* Allocate the drawn model's primitives, one set per display buffer. */
         parameter = g_battle_effect_secondary_animations[g_battle_effect_current_secondary->animation_id].parameter;
         if ((parameter & 0xff) == EFFECT_MODEL_ARROW) {
             arrow = main_heap_alloc(0xc88);
@@ -3786,6 +3846,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                 }
             }
         }
+
         if ((parameter & 0xff) == EFFECT_MODEL_STONE) {
             work12 = main_heap_alloc(0x2a0);
             g_battle_effect_current_secondary->allocation = work12;
@@ -3795,6 +3856,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                 }
             }
         }
+
         if (parameter == EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC) {
             item = g_battle_effect_current_secondary->used_weapon_id;
             if (item >= ITEM_ID_SHURIKEN && item <= ITEM_ID_YAGYU_DARKNESS) {
@@ -3823,6 +3885,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                 *dst = slot->quads[0];
             }
         }
+
         battle_state_set_animation_speed(1);
         result = 1;
         break;
@@ -3832,12 +3895,15 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
             g_battle_effect_projectile_length, g_battle_effect_projectile_progress, &position);
         setVector(&position, g_battle_effect_trajectory_origin.vx + position.vx,
             g_battle_effect_trajectory_origin.vy + position.vy, g_battle_effect_trajectory_origin.vz + position.vz);
+
+        /* Aim along the whole origin-to-destination line, not the step taken this frame. */
         delta.vx = g_battle_effect_trajectory_destination.vx - g_battle_effect_trajectory_origin.vx;
         delta.vz = g_battle_effect_trajectory_destination.vz - g_battle_effect_trajectory_origin.vz;
         delta.vy = g_battle_effect_trajectory_destination.vy - g_battle_effect_trajectory_origin.vy;
         angles.vy = ratan2(-delta.vz, delta.vx);
         angles.vz = ratan2(delta.vy, SquareRoot0(delta.vx * delta.vx + delta.vz * delta.vz)) + 0x400;
         angles.vx = 0;
+
         parameter = g_battle_effect_secondary_animations[g_battle_effect_current_secondary->animation_id].parameter;
         i = parameter & 0xff;
         if (parameter != EFFECT_SECONDARY_PARAMETER_ITEM_GRAPHIC) {
@@ -3870,6 +3936,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                 battle_effect_draw_item_drop_sprite(&position, item, 0);
             }
         }
+
         if (g_battle_effect_projectile_spin_passes == 2 && g_battle_effect_trajectory_hit_unit_id != -1) {
             kind = g_battle_effect_current_secondary->used_weapon_id;
             if ((kind < ITEM_ID_FIRE_BALL || kind > ITEM_ID_LIGHTNING_BALL)
@@ -3880,6 +3947,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void) {
                     g_battle_effect_current_secondary->target.record.data.unit.runtime_id);
             }
         }
+
         if (g_battle_effect_projectile_spin_passes > 0) {
             g_battle_effect_projectile_spin_passes--;
         }

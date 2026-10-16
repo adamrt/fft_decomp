@@ -51,6 +51,8 @@ void menu_run_option_choice(void) {
     kind = thread->function_parameter_1;
     thread->function_parameter_1 = (s32)&g_menu_option_icon_thread_param;
     param = &g_menu_option_icon_thread_param;
+
+    /* The 4-bit text image must span whole VRAM halfwords (4 pixels each). */
     width = g_menu_option_choice_widths[kind];
     if (width & 3) {
         width += 2;
@@ -58,6 +60,7 @@ void menu_run_option_choice(void) {
     height = g_menu_option_choice_counts[kind] * 16 + 16;
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     thread_wait_frames(1);
+
     g_menu_text_state.pen.stride = width;
     for (i = 0; i < g_menu_option_choice_counts[kind]; i++) {
         menu_set_text_origin(8, i * 16 + 8);
@@ -67,10 +70,12 @@ void menu_run_option_choice(void) {
         menu_display_text_entry(i + g_menu_option_value_text_id_bases[kind], buffer, &g_menu_text_state.pen);
         g_menu_text_palette_offset = 0;
     }
+
     /* Dead store: allocation device, see the file header. */
     if (height <= 0) {
         cursor = 0;
     }
+
     /* Window placement and VRAM staging origin differ per program: OPTION
      * (over the battle screen) uses 368/160 and 448/256, WORLD 116/40 and
      * 1536/1792. */
@@ -84,13 +89,18 @@ void menu_run_option_choice(void) {
         param->vram_origin.x = 0x1AE;
     }
     param->text_image.width -= 4;
+
     menu_build_window_sprites(&rect, param, &g_menu_option_picker_icon_records[0]);
+    /* The loop draws from the two icon records alternately. */
     mem_copy_bytes_nonempty(&g_menu_option_picker_icon_records[1], &g_menu_option_picker_icon_records[0],
         sizeof(g_menu_option_picker_icon_records[1]));
+
     LoadImage(&rect, buffer);
     menu_free_memory(buffer);
     thread_wait_frames(1);
+
     cursor = g_menu_option_values[kind];
+    /* `width` is reused as the frame counter. */
     for (width = 0;; width++) {
         menu_should_close_thread(input);
         record = &g_menu_option_picker_icon_records[width & 1].base;
@@ -99,8 +109,10 @@ void menu_run_option_choice(void) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
             }
+
             if (*input & PSX_PAD_CIRCLE) {
                 g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
+                /* Row 13 is the defaults entry: choice 1 restores every option to its reference value. */
                 if (kind == GAME_OPTION_COUNT) {
                     if (cursor == 1) {
                         /* Dead store: allocation device, see the file header. */
@@ -116,10 +128,12 @@ void menu_run_option_choice(void) {
                     }
                 } else {
                     g_menu_option_values[kind] = cursor;
+                    /* Changing any other option clears the defaults entry. */
                     g_menu_option_values[GAME_OPTION_UNCHANGED] = 0;
                     break;
                 }
             }
+
             if (*input & PSX_PAD_UP) {
                 *input = 0;
                 if (cursor != 0) {
@@ -129,6 +143,7 @@ void menu_run_option_choice(void) {
                 }
                 g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
             }
+
             if (*input & PSX_PAD_DOWN) {
                 *input = 0;
                 if (cursor == g_menu_option_choice_counts[kind] - 1) {
@@ -139,11 +154,13 @@ void menu_run_option_choice(void) {
                 g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
             }
         }
+
         menu_select_icon_cluts(record);
         menu_update_icon_cursor_sprites(param, record, width, cursor);
         menu_submit_icon_primitives(record);
         thread_wait_frames(1);
     }
+
     g_main_game_options.fields.cursor_movement = g_menu_option_values[GAME_OPTION_CURSOR_MOVEMENT];
     g_main_game_options.fields.cursor_repeat_speed = g_menu_option_values[GAME_OPTION_CURSOR_REPEAT_SPEED];
     g_main_game_options.fields.multi_height_cursor_speed = g_menu_option_values[GAME_OPTION_MULTI_HEIGHT_CURSOR_SPEED];
@@ -160,6 +177,8 @@ void menu_run_option_choice(void) {
     g_main_game_options.fields.sound_mode = g_menu_option_values[GAME_OPTION_SOUND_MODE];
     g_thread_call_target = (void (*)(void))suzuki_sound_set_type;
     thread_call_on_main_stack(g_menu_option_values[GAME_OPTION_SOUND_MODE]);
+
+    /* `width` is reused as the input-repeat timing profile index. */
     width = g_main_game_options.fields.finger_cursor_repeat_speed;
     g_main_input_repeat_initial_delay = g_menu_option_input_repeat_timings[width].initial_delay;
     g_main_input_repeat_period = g_menu_option_input_repeat_timings[width].repeat_period;
@@ -167,6 +186,8 @@ void menu_run_option_choice(void) {
     g_main_menu_scroll_accel_delay = g_menu_option_input_repeat_timings[width].scroll_accel_delay;
     g_main_menu_scroll_slow_step = g_menu_option_input_repeat_timings[width].scroll_slow_step;
     g_main_menu_scroll_fast_step = g_menu_option_input_repeat_timings[width].scroll_fast_step;
+
+    /* Clear the closing press so the options list thread does not act on it too. */
     *input = 0;
     thread_wait_frames(1);
     thread_exit_current();

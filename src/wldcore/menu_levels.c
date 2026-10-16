@@ -636,10 +636,13 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
                 & (WLDCORE_PROJECTION_MOTION_ACTIVE | WLDCORE_PROJECTION_MOTION_ZOOMED_OUT))
             && g_wldcore_audio_queue.count == 0) {
             if (g_wldcore_input_new_button_presses & PSX_PAD_CIRCLE) {
+                /* The hit test returns a one-based dot index, 0 for no dot. */
                 hit = wldcore_map_find_dot_at_point(g_wldcore_window_records[level->map_cursor.window_index].position);
                 if (hit != 0) {
                     wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
                     hit--;
+
+                    /* A dot other than the marker's walks the marker there; the marker's own dot opens its menu. */
                     if (hit != g_wldcore_map_projection_state.marker.kind) {
                         wldcore_location_process_entry(g_wldcore_map_projection_state.marker.kind, hit);
                         return;
@@ -658,6 +661,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
                     return;
                 }
             }
+
             buttons = g_wldcore_input_new_button_presses;
             if (buttons & (PSX_PAD_TRIANGLE | PSX_PAD_START)) {
                 wldcore_sound_play_effect(MAIN_SFX_CONFIRM);
@@ -678,6 +682,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
         }
     }
 
+    /* L1 or R1 starts a zoom; while one runs, interpolate it and skip the cursor. */
     motion = g_wldcore_map_zoom_motion.flags;
     if (!(motion & WLDCORE_PROJECTION_MOTION_ACTIVE)) {
         if (level->map_cursor.wide_view == 0 && (g_wldcore_input_new_button_presses & (PSX_PAD_L1 | PSX_PAD_R1))) {
@@ -686,6 +691,8 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
             g_wldcore_map_zoom_motion.frame = 0;
             g_wldcore_map_zoom_motion.flags = (g_wldcore_map_zoom_motion.flags ^ WLDCORE_PROJECTION_MOTION_ZOOMED_OUT)
                 | WLDCORE_PROJECTION_MOTION_ACTIVE;
+
+            /* Zooming out remembers the view origin so zooming back in can return to it. */
             if (g_wldcore_map_zoom_motion.flags & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT) {
                 g_wldcore_map_zoom_motion.origin = g_wldcore_map_projection_view.origin;
             }
@@ -698,6 +705,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
             goto finish;
         }
     } else {
+        /* The scale moves between ONE and 0x800 (half size); the zoomed-out view is centered at (0, 8). */
         frame = g_wldcore_map_zoom_motion.frame;
         duration = g_wldcore_map_zoom_motion.duration;
         step_x = (frame << 11) / duration;
@@ -730,6 +738,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
                 g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_MAP_DOTS | MAIN_SYSTEM_FLAG_HIDE_MAP_ROUTES);
             }
         }
+
         g_main_system_flags |= MAIN_SYSTEM_FLAG_DRAW_MAP;
         g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
         goto finish;
@@ -739,6 +748,7 @@ void wldcore_menu_step_map_cursor_level(wldcore_menu_stack_record_t* level) {
         goto finish;
     }
 
+    /* Holding square swaps the cursor window for the wide-view window. */
     if (!(g_input_current_buttons & PSX_PAD_SQUARE)) {
         if (level->map_cursor.wide_view != 0) {
             level->map_cursor.wide_view = 0;
@@ -769,6 +779,7 @@ scroll:
         } else {
             wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_x, 0);
         }
+
         held = g_input_current_buttons;
         if (held & (PSX_PAD_UP | PSX_PAD_DOWN)) {
             if (held & PSX_PAD_UP) {
@@ -779,6 +790,8 @@ scroll:
         } else {
             wldcore_map_update_scroll_axis_speed(&g_wldcore_map_cursor_scroll_y, 0);
         }
+
+        /* Pull the move toward the nearest dot, then scroll the map when the cursor nears a screen edge. */
         amount.x = g_wldcore_map_cursor_scroll_x.output;
         amount.y = g_wldcore_map_cursor_scroll_y.output;
         if (!(g_wldcore_map_zoom_motion.flags & WLDCORE_PROJECTION_MOTION_ZOOMED_OUT)) {
@@ -787,6 +800,7 @@ scroll:
             level->map_cursor.snap_hit = wldcore_map_get_dot_snap_step(target, &step_x, &step_y);
             amount.x += step_x;
             amount.y += step_y;
+
             target.x = g_wldcore_window_records[level->map_cursor.window_index].position.x + amount.x;
             target.y = g_wldcore_window_records[level->map_cursor.window_index].position.y + amount.y;
             saved = g_wldcore_map_projection_view.origin;
@@ -802,6 +816,7 @@ scroll:
                 g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
             }
         }
+
         g_wldcore_window_records[level->map_cursor.window_index].position.x += amount.x;
         g_wldcore_window_records[level->map_cursor.window_index].position.y += amount.y;
         if (g_wldcore_window_records[level->map_cursor.window_index].position.x < -0x70) {
@@ -817,6 +832,7 @@ scroll:
             g_wldcore_window_records[level->map_cursor.window_index].position.y = 0x68;
         }
     } else {
+        /* In wide view the d-pad scrolls the map 4 units a frame instead of moving the cursor. */
         held = g_input_current_buttons;
         if (held & PSX_PAD_DPAD_MASK) {
             amount.y = 0;
@@ -833,6 +849,7 @@ scroll:
             if (held & PSX_PAD_DOWN) {
                 amount.y = 4;
             }
+
             saved = g_wldcore_map_projection_view.origin;
             wldcore_map_apply_clamped_scroll(&amount, &g_wldcore_map_projection_view.origin);
             if (saved.vx != g_wldcore_map_projection_view.origin.vx
@@ -1748,6 +1765,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     point32_t* base;
     wldcore_window_xy_t* position;
 
+    /* menu + 0x37 is the cursor window's sequence; the identical arms are explained above. */
     g_wldcore_map_projection_state.marker.sub_kind
         = wldcore_proposition_load_picture(g_wldcore_map_projection_state.marker.kind);
     if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
@@ -1756,6 +1774,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
         menu += 0x37;
     }
     file_wait_for_pending_variant();
+
     flags = g_main_system_flags | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER;
     level = &g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list;
     level->extra_render = -1;
@@ -1775,11 +1794,14 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
     g_wldcore_window_records[index].sequence = menu;
     g_wldcore_window_records[index].anim_counter = 0;
     g_wldcore_window_records[index].frame_index = 0;
+
+    /* The windows start black; the step reads `mode` as its fade level and brightens them from 8. */
     ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->r = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->g = 0;
     ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->b = 0;
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.mode = 8;
 
+    /* With a picture: upload the frame and picture TIMs, then add the picture and its border window. */
     if (g_wldcore_map_projection_state.marker.sub_kind != 0) {
         GsGetTimInfo(g_wldcore_location_frame_tim + 1, &image);
         LoadTPage(image.pixel, 0, 0, image.px, image.py, image.pw * 4, image.ph);
@@ -1819,6 +1841,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
         ((CVECTOR*)((u8*)color + index * sizeof(g_wldcore_window_records[0])))->b = 0;
     }
 
+    /* Size the panel to the widest entry plus an 8-pixel margin. */
     widest = 0;
     count = g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].location_list.entry_count;
     for (i = 0; i < count; i++) {
@@ -1836,6 +1859,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
         g_wldcore_list_row_flags[i] = 0;
     }
 
+    /* At most four rows show; the panel is centered on x, and without a picture it rises 8 pixels a row. */
     i = 4;
     if (count < 4) {
         i = count;
@@ -1865,6 +1889,7 @@ void wldcore_menu_push_location_menu_level(s32 menu) {
                                      .location_list.cursor_window]
             .position.y = 0;
     } else {
+        /* Here `index` is still the cursor window's record index, yet it reads the render record pool (retail). */
         g_wldcore_window_records[g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth]
                                      .location_list.cursor_window]
             .position.x = -4;
@@ -1910,6 +1935,8 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
     wldcore_deep_dungeon_battle_t* records;
     wldcore_deep_dungeon_battle_t* record;
 
+    /* Fade both windows in by 7 a frame. Without a picture window_b is -1, so the
+     * second set of stores lands one record before the pool (retail). */
     if (level->fade != 0) {
         if (level->fade >= 0x80) {
             level->fade = 0x80;
@@ -1928,6 +1955,8 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
         }
         return;
     }
+
+    /* Start the panel thread on the first delay frame, then ignore input until the delay ends. */
     if (level->delay != 0) {
         if (level->delay == 8) {
             thread_start(WLDCORE_THREAD_SLOT_WINDOW_PANEL, world_screen_build_at_list);
@@ -1939,6 +1968,8 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
     if (g_main_system_flags & MAIN_SYSTEM_FLAG_FADING) {
         return;
     }
+
+    /* A confirm or cancel below closed the panel; act on slots.result once its thread has finished. */
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
         wldcore_gfx_toggle_captured_world_frame(0);
@@ -1949,6 +1980,8 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
             selected = &g_wldcore_window_panel_render_state.selected_index;
             values = g_wldcore_list_entry_values;
             value = values[*selected];
+
+            /* World-menu entries are services and deep-dungeon floors; anything else names a map. */
             if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_WORLD_MENU_BASE) {
                 g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
                 value &= TEXT_ID_ENTRY_MASK;
@@ -1977,6 +2010,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
                     if (wldcore_script_process_conditional_set(
                             g_wldcore_map_projection_state.marker.kind, WLDCORE_SCRIPT_ACTION_DEEP_DUNGEON_ENTRY)
                         != 0) {
+                        /* rand() is 15 bits: pick one of the battle's eight ENTDs and an exit below args[2]. */
                         offset = g_wldcore_script_state.args[0] * sizeof(wldcore_deep_dungeon_battle_t);
                         records = g_wldcore_deep_dungeon_battles;
                         record = &records[g_wldcore_script_state.args[0]];
@@ -1998,17 +2032,22 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
                     return;
                 }
             }
+
+            /* A map entry runs the row's event and travels to map entry + 1. */
             script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, g_wldcore_script_state.args[*selected]);
             g_main_system_flags ^= MAIN_SYSTEM_FLAG_RUNNING;
             value = values[*selected] & TEXT_ID_ENTRY_MASK;
             g_wldcore_next_map_id[0] = value + 1;
             return;
         }
+
         g_main_system_flags = (g_main_system_flags | MAIN_SYSTEM_FLAG_DRAW_MAP) & ~MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         wldcore_list_clear_cursor_state(WLDCORE_CURSOR_SLOT_LOCATION_MENU);
         wldcore_menu_close_level_and_release_records(&level->slots, 1);
         return;
     }
+
+    /* Cancel only works while the cursor is on a world-menu entry, not a map name. */
     if (g_wldcore_input_new_button_presses & PSX_PAD_CROSS) {
         value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_WORLD_MENU_BASE) {
@@ -2018,6 +2057,7 @@ void wldcore_menu_step_location_menu_level(wldcore_menu_location_menu_level_t* l
             g_main_system_flags |= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         }
     } else if (g_wldcore_input_new_button_presses & PSX_PAD_SELECT) {
+        /* Help: map names, services and deep-dungeon floors each have their own message range. */
         wldcore_window_set_secondary_render_palette_2(&level->slots);
         value = g_wldcore_list_entry_values[g_wldcore_window_panel_render_state.selected_index];
         if ((value & TEXT_ID_SECTION_MASK) == TEXT_ID_MAP_NAME_BASE) {

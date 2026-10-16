@@ -109,11 +109,14 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
     g_world_gfx_draw_move_capacity = 0x1E;
     g_world_gfx_draw_area_capacity = 0x1E;
     g_gfx_draw_mode_capacity = 0x1E;
+
     world_gfx_init_double_packet_buffers(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads,
         textured_gradient_quads, flat_lines, 0, 0, gradient_lines, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves,
         draw_areas, draw_modes);
     g_world_menu_context_id = WORLD_MENU_CONTEXT_FORMATION;
     world_formation_init_menu_state();
+
+    /* Values above 10 are not tutorials and become 0, the plain screen. */
     tutorial = -(tutorial < 11) & tutorial;
     world_script_start_tutorial(tutorial);
     if (tutorial == 0) {
@@ -121,6 +124,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
         while (main_sound_is_music_loading_stub() != 0) { }
         main_sound_switch_music_track(g_world_menu_music_slot, 0x7F, 0);
     }
+
     if (g_world_formation_screen_running != 0) {
         do {
             world_gfx_present_frame_and_swap_packet_buffer(0, 0);
@@ -141,6 +145,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                 world_menu_update_grid_cursor(g_world_unit_pointers[g_unit_selected_index]->uses_monster_skillset);
             }
             world_menu_set_palette_mode(g_menu_input_lock_mode);
+
             g_world_formation_menu_handlers[g_world_formation_current_menu]();
             if (g_world_formation_current_menu == WORLD_FORMATION_MENU_UNIT_GRID
                 || g_world_formation_current_menu == WORLD_FORMATION_MENU_DISMISS_UNIT
@@ -156,6 +161,8 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                 world_formation_draw_background_tiles(
                     g_world_formation_scroll_position + g_world_formation_scroll_velocity, 0);
             }
+
+            /* L1/R1 cycle units; i is the buttons' disabled flag here. */
             i = 0;
             if (g_world_formation_unit_cycle_mode != 0 || g_world_formation_unit_browse_enabled != 0) {
                 if (g_menu_input_lock_mode != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE
@@ -175,12 +182,15 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
                 world_menu_draw_pressable_button(
                     MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1, i, MAIN_SFX_PAGE_SWITCH);
             }
+
             if (g_world_formation_current_menu != WORLD_FORMATION_MENU_ITEM_REMOVE) {
                 world_formation_update_unit_selection();
             }
             if (g_world_formation_unit_slide_pending != 0) {
                 world_formation_step_unit_selection_slide();
             }
+
+            /* The event layer goes to OT 0x3E over the item list, the job wheel and the transitions (14 and up). */
             g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
             menu_draw_active_window_frames();
             if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_LIST || g_world_formation_current_menu >= 14
@@ -197,6 +207,8 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             }
             menu_input_update_event_state_variant(g_menu_gfx_context->otag + i, world_input_filter_menu(),
                 g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+
+            /* Entering a new menu resets the per-menu state. */
             if (g_world_formation_current_menu != last_menu) {
                 g_world_formation_cursor_ot_override = 0;
                 g_world_formation_unit_cycle_mode = 0;
@@ -209,6 +221,8 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             main_sound_update_tunes();
         } while (g_world_formation_screen_running != 0);
     }
+
+    /* Stop every menu thread and let the tutorial text finish; buttons flags one still running. */
     do {
         buttons = 0;
         for (i = 1; i < THREAD_ID_COUNT; i++) {
@@ -223,6 +237,7 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
         }
         menu_input_update_event_state_variant(g_menu_gfx_context->otag, 0, 0);
     } while (buttons != 0);
+
     if (tutorial == 0) {
         main_sound_unload_scenario_mus(g_world_menu_music_slot);
     }
@@ -361,14 +376,18 @@ void world_formation_process_frame(void) {
             }
             g_world_formation_main_menu_initialized = 1;
         }
+
+        /* Leave once the fade-out that Cross starts below completes. */
         if (g_world_script_tutorial_id == 0 && world_gfx_update_fade_out_tile() == 0) {
             g_world_formation_main_menu_initialized = 0;
             thread_suspend(THREAD_SCREEN_SLOT_MENU);
             g_world_formation_screen_running = 0;
             return;
         }
+
         if (g_world_formation_triangle_menu_running != 0) {
             g_menu_help_message_text_id = 0;
+            /* An egg gets its own triangle menu, whose first option dismisses it. */
             if (g_world_unit_pointers[g_unit_selected_index]->gender_flags & UNIT_FLAG_EGG) {
                 if ((g_world_formation_triangle_menu_running
                         = menu_start_managed_thread(THREAD_SCREEN_SLOT_MENU, &g_world_formation_egg_triangle_menu))
@@ -404,6 +423,7 @@ void world_formation_process_frame(void) {
                     }
                     g_world_equipment_ability_panel_thread_params.style = 0;
                     g_menu_numeric_panel_params.style = 0;
+
                     if (g_world_menu_selection_results[0] != -1) {
                         g_world_formation_saved_banner_enabled = g_world_formation_unit_banner_enabled;
                         if (g_world_formation_current_menu != WORLD_FORMATION_MENU_DISMISS_UNIT) {
@@ -433,9 +453,11 @@ void world_formation_process_frame(void) {
                         : MENU_GRID_HELP_BANNER_TOP;
                 }
             }
+
             if (world_input_get_lockout_timer() == 0 && world_formation_is_unit_list_scroll_needed() == 0) {
                 if ((input & PSX_PAD_TRIANGLE) || (input & PSX_PAD_START)
                     || g_world_formation_triangle_menu_open != 0) {
+                    /* Keep the menu clear of the banner and of the cursor's half of the grid. */
                     if (g_world_formation_unit_banner_at_bottom != 0) {
                         g_world_formation_triangle_menu.window.y = 0x20;
                     } else {
@@ -461,6 +483,7 @@ void world_formation_process_frame(void) {
                         }
                     }
                 }
+
                 if (g_world_formation_unit_browse_enabled == 0 && (input & PSX_PAD_CROSS)
                     && g_world_script_tutorial_id == 0) {
                     world_gfx_start_increasing_fade();

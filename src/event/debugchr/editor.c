@@ -94,6 +94,8 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
     thread_set_current_task_id(THREAD_TASK_DEBUG_UNIT_EDITOR);
     g_debugchr_editor_active = 0;
     g_menu_panel_status_group_count = 2;
+
+    /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. */
     unit = battle_unit_get_stats_from_battle_id(unit_id);
     unit_ids = g_debugchr_editor_unit_ids;
     unit_ids[0] = unit_id;
@@ -169,6 +171,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         }
 
         if (thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) != 0) {
+            /* `one` doubles as MAIN_SFX_CONFIRM, played once per menu-building run. */
             if (sound_latched == 0) {
                 g_sound_pending_sfx_id = one;
                 sound_latched = 1;
@@ -203,6 +206,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
             }
+
             if ((input & PSX_PAD_CIRCLE) != 0 && thread_is_running_asm(THREAD_SLOT_MENU_BUILDING) == 0
                 && (unit_has_any_current_status(g_debugchr_panel_selected_unit_data.battle_id) != 0
                     || g_menu_selected_unit_fields.state.generic_monster == 0)) {
@@ -215,6 +219,8 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                 animation[0] = one;
                 animation_second[0] = one;
                 animation_third[0] = one;
+
+                /* Keep the status groups drawn until the status list thread in the previous slot exits. */
                 for (;;) {
                     thread_yield();
                     {
@@ -228,6 +234,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
                     }
                     frame++;
                 }
+
                 animation[0] = 0;
                 animation[1] = 0;
                 animation[2] = 0;
@@ -246,6 +253,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             g_menu_panel_status_animation[1] = 7;
             slot ^= 1;
             g_debugchr_editor_selected_unit_slot = slot;
+
             chosen_unit = &g_debugchr_editor_unit_ids[slot];
             *selected_unit = *chosen_unit;
             ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id)))->name_id
@@ -256,10 +264,13 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             menu_copy_billboard_data_in(&g_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
                 &g_menu_selected_unit_fields);
+
+            /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_debugchr_status_display_thread_params.redraw_request = one;
             g_debugchr_numeric_editor_thread_params.redraw_request = one;
             g_debugchr_character_status_frame_config.redraw_request = one;
         }
+
         if ((*g_menu_input_controller & PSX_PAD_L1) != 0) {
             s32 slot;
             u8* chosen_unit;
@@ -269,6 +280,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             g_menu_panel_status_animation[0] = 7;
             slot ^= 1;
             g_debugchr_editor_selected_unit_slot = slot;
+
             chosen_unit = &g_debugchr_editor_unit_ids[slot];
             *selected_unit = *chosen_unit;
             ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id)))->name_id
@@ -279,12 +291,15 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
             menu_copy_billboard_data_in(&g_panel_selected_billboard,
                 ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
                 &g_menu_selected_unit_fields);
+
+            /* 2 runs the portrait wipe in the opposite direction from R1's. */
             g_debugchr_status_display_thread_params.redraw_request = 2;
             g_debugchr_numeric_editor_thread_params.redraw_request = one;
             g_debugchr_character_status_frame_config.redraw_request = one;
         }
     }
 
+    /* Leave the panels on the unit the thread was started with. */
     {
         s16* selected_unit_ptr;
         s16* comparison_ptr;
@@ -370,6 +385,9 @@ void debugchr_editor_run_session(void) {
 
     g_debugchr_editor_active = 1;
     g_menu_panel_status_group_count = 2;
+
+    /* A slot is selectable when the lookup of its ENTD unit id returns that same slot: a present unit,
+     * the first one with that id. */
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         battle_unit_find_stats_by_entd_unit_id(battle_unit_get_stats_from_battle_id(i)->unit_id, &battle_id);
         if ((battle_id >= 0) && (i == battle_id)) {
@@ -378,6 +396,7 @@ void debugchr_editor_run_session(void) {
             g_debugchr_editor_unit_ids[i] = 0;
         }
     }
+
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         if (g_debugchr_editor_unit_ids[i] != 0) {
             g_debugchr_panel_selected_unit_data.battle_id = i;
@@ -388,6 +407,9 @@ void debugchr_editor_run_session(void) {
             break;
         }
     }
+
+    /* Retail reloads the same unit and resets the slot to 0, even when the first selectable unit is a
+     * later slot. */
     menu_load_selected_unit_variant();
     g_debugchr_editor_selected_unit_slot = 0;
     if (g_menu_selected_unit_fields.state.generic_monster != 0) {
@@ -397,6 +419,7 @@ void debugchr_editor_run_session(void) {
         mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_normal, 0xA8);
         g_debugchr_editor_fields[15].destination[0] = 0xE;
     }
+
     g_debugchr_status_display_thread_params.style = 0;
     g_debugchr_numeric_editor_thread_params.style = 0;
     g_debugchr_character_status_frame_config.style = 0;
@@ -406,6 +429,7 @@ void debugchr_editor_run_session(void) {
     thread_set_parameters(THREAD_SCREEN_SLOT_NUMERIC_EDITOR, (s32)&g_debugchr_numeric_editor_thread_params, 0, 0);
     thread_start(THREAD_SCREEN_SLOT_CHARACTER_STATUS, menu_run_status_panel_thread);
     thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, (s32)&g_debugchr_character_status_frame_config, 0, 0);
+
     row = 0;
     /* The unit menu and the field editor re-enter each other by label: an
        enclosing loop's notes reweight the allocation of the whole body. */
@@ -419,6 +443,7 @@ loop_outer:
         __asm__("" : "=r"(mark) : "0"(mark));
         thread_yield();
         menu_build_status_group_primitives_variant(g_debugchr_gfx_render_buffers[i & 1]);
+
         input = script_get_controller_input_pointer(0);
         g_menu_input_controller = input;
         buttons = *input;
@@ -431,6 +456,7 @@ loop_outer:
             thread_set_parameters(THREAD_SCREEN_SLOT_CHARACTER_STATUS, 0, 0, 1);
             return;
         }
+
         if (buttons & PSX_PAD_R1) {
             g_menu_panel_status_animation[1] = 7;
             /* Label loops: a do-while's loop notes change the allocation. */
@@ -442,6 +468,7 @@ loop_outer:
             if (g_debugchr_editor_unit_ids[g_debugchr_editor_selected_unit_slot] == 0) {
                 goto next_unit;
             }
+
             unit_index = g_debugchr_editor_selected_unit_slot;
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
@@ -453,10 +480,13 @@ loop_outer:
                 mem_copy_bytes_nonempty(g_debugchr_editor_template, g_debugchr_editor_template_normal, 0xA8);
             }
             g_debugchr_editor_fields[15].destination[0] = mark;
+
+            /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_debugchr_status_display_thread_params.redraw_request = 1;
             g_debugchr_numeric_editor_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
         }
+
         if (*g_menu_input_controller & PSX_PAD_L1) {
             g_menu_panel_status_animation[0] = 7;
         prev_unit:
@@ -467,6 +497,7 @@ loop_outer:
             if (g_debugchr_editor_unit_ids[g_debugchr_editor_selected_unit_slot] == 0) {
                 goto prev_unit;
             }
+
             unit_index = g_debugchr_editor_selected_unit_slot;
             selected_battle_id[0] = unit_index;
             selected_battle_id[-5] = unit_index;
@@ -480,12 +511,15 @@ loop_outer:
             g_debugchr_editor_fields[15].destination[0] = mark;
             /* Keeps the `li v0,2` for the redraw store below the byte store. */
             __asm__("");
+            /* 2 runs the portrait wipe in the opposite direction from R1's. */
             g_debugchr_status_display_thread_params.redraw_request = 2;
             g_debugchr_numeric_editor_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
         }
+
         i++;
     }
+
 editor:
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&g_debugchr_editor_cursor_polys[i]);
@@ -497,6 +531,7 @@ editor:
         g_debugchr_editor_cursor_shade_polys[i].tpage = GetTPage(0, 2, 0x3C0, 0x100);
         g_debugchr_editor_cursor_shade_polys[i].clut = 0x7DBC;
     }
+
     g_debugchr_editor_field_table = g_debugchr_editor_fields;
     cursor_prims = g_debugchr_editor_cursor_polys;
     i = 0;
@@ -506,6 +541,9 @@ editor:
         x = field->x;
         y = field->y + 8;
         g_debugchr_editor_current_field = field;
+
+        /* Outside edit mode Cross returns to unit selection; while editing, Cross and Circle both commit the
+         * value. */
         keys = *g_menu_input_controller;
         if (keys & PSX_PAD_CROSS) {
             if (g_debugchr_editor_field_edit_active != 1) {
@@ -523,6 +561,8 @@ editor:
                 g_debugchr_editor_field_edit_active = 1;
             }
         }
+
+        /* Triangle clears the value of rows 9 to 13 while editing. */
         if ((g_debugchr_editor_field_edit_active != 0) && ((row - 9) < 5U)
             && (*g_menu_input_controller & PSX_PAD_TRIANGLE)) {
             *g_debugchr_editor_current_field->value = 0;
@@ -532,6 +572,9 @@ editor:
             g_debugchr_numeric_editor_thread_params.redraw_request = 1;
             g_debugchr_character_status_frame_config.redraw_request = 1;
         }
+
+        /* Outside edit mode the D-pad follows the field's up, down, right and left links; while editing it
+         * steps the value. */
         navkeys = *g_menu_input_controller;
         if (navkeys & PSX_PAD_DPAD_MASK) {
             if (g_debugchr_editor_field_edit_active == 0) {
@@ -552,6 +595,8 @@ editor:
                 row = g_debugchr_editor_current_field->destination[direction];
             } else {
                 if ((navkeys & PSX_PAD_RIGHT) || (navkeys & PSX_PAD_UP)) {
+                    /* A value outside its range first snaps to one below the maximum (even from below the minimum),
+                     * so stepping up lands on the maximum. */
                     value = g_debugchr_editor_current_field->value;
                     cur = *value;
                     /* Shared pointers or a combined range test change address materialization. */
@@ -565,11 +610,15 @@ editor:
                         up_clamp = &g_debugchr_editor_template[row].max;
                         *value = *up_clamp - 1;
                     }
+
+                    /* PadRead gives the held buttons: holding L1 steps the value by 10. */
                     if (PadRead(1) & PSX_PAD_L1) {
                         steps = 0xA;
                     } else {
                         steps = 1;
                     }
+
+                    /* `i` is also the frame counter, so each step resets the cursor's buffer index and bob phase. */
                     for (i = 0; i < steps; i++) {
                         hi_limit = &g_debugchr_editor_template[row].max;
                         span = row - 9;
@@ -580,6 +629,8 @@ editor:
                         cur_u = *value;
                         if (cur_u < *hi_limit) {
                             *value = cur_u + 1;
+                            /* Row 0 is the level: growth depends on it, so it is applied with the old
+                             * level written back before the new value is restored. */
                             if (row == 0) {
                                 *g_debugchr_editor_current_field->value -= 1;
                                 debugchr_editor_apply_values_to_battle_unit(g_debugchr_editor_selected_unit_slot);
@@ -592,6 +643,7 @@ editor:
                         }
                     }
                 } else {
+                    /* Likewise a value outside its range snaps to one above the minimum. */
                     down_value = g_debugchr_editor_current_field->value;
                     cur = *down_value;
                     dn_lo = &g_debugchr_editor_template[row].min;
@@ -603,11 +655,13 @@ editor:
                     clamp_lo:
                         *down_value = *dn_lo + 1;
                     }
+
                     if (PadRead(1) & PSX_PAD_L1) {
                         steps = 0xA;
                     } else {
                         steps = 1;
                     }
+
                     for (i = 0; i < steps; i++) {
                         lo_limit = &g_debugchr_editor_template[row].min;
                         span = row - 9;
@@ -630,13 +684,18 @@ editor:
                         }
                     }
                 }
+
                 g_debugchr_status_display_thread_params.redraw_request = 1;
                 g_debugchr_numeric_editor_thread_params.redraw_request = 1;
                 g_debugchr_character_status_frame_config.redraw_request = 1;
             }
         }
+
+        /* The cursor bobs with the frame count unless a value is being edited, which also switches it to
+         * the 0x7E7C palette. */
         buffer = i & 1;
         if (g_debugchr_editor_current_field->vertical_cursor != 0) {
+            /* The upright cursor is the same texture cell transposed. */
             uv_lo = 0xA8;
             g_debugchr_editor_cursor_polys[buffer].u0 = uv_lo;
             g_debugchr_editor_cursor_polys[buffer].u1 = uv_lo;
@@ -647,6 +706,7 @@ editor:
             g_debugchr_editor_cursor_polys[buffer].v1 = 0x10;
             g_debugchr_editor_cursor_polys[buffer].v2 = 0;
             g_debugchr_editor_cursor_polys[buffer].v3 = 0x10;
+
             uv_lo = 0xB8;
             g_debugchr_editor_cursor_shade_polys[buffer].u0 = uv_lo;
             g_debugchr_editor_cursor_shade_polys[buffer].u1 = uv_lo;
@@ -657,6 +717,7 @@ editor:
             g_debugchr_editor_cursor_shade_polys[buffer].v1 = 0x10;
             g_debugchr_editor_cursor_shade_polys[buffer].v2 = 0;
             g_debugchr_editor_cursor_shade_polys[buffer].v3 = 0x10;
+
             if (g_debugchr_editor_field_edit_active == 0) {
                 cursor_v = PRIM_AT(cursor_prims, buffer);
                 shadow_v = &g_debugchr_editor_cursor_shade_polys[buffer];
@@ -697,6 +758,7 @@ editor:
             shadow_h->v2 = 0x10;
             shadow_h->u3 = uv_h_far;
             shadow_h->v3 = 0x10;
+
             bob_x = ((i * g_script_event_speed) >> 4) & 3;
             setXY4(cursor_h, x - bob_x, y, (x - bob_x) + 0x10, y, x - bob_x, y + 0x10, (x - bob_x) + 0x10, y + 0x10);
             /* A separate temporary schedules the decrement after the
@@ -731,10 +793,12 @@ editor:
             shadow_h_edit->v2 = 0x10;
             shadow_h_edit->u3 = uv_s_far;
             shadow_h_edit->v3 = 0x10;
+
             setXY4(cursor_h_edit, x, y, x + 0x10, y, x, y + 0x10, x + 0x10, y + 0x10);
             setXY4(shadow_h_edit, x + 2, y + 2, x + 0x12, y + 2, x + 2, y + 0x12, x + 0x12, y + 0x12);
             g_debugchr_editor_cursor_polys[buffer].clut = 0x7E7C;
         }
+
         gfx_draw_or_append_gpu_primitive(PRIM_AT(cursor_prims, buffer));
         gfx_draw_or_append_gpu_primitive(&g_debugchr_editor_cursor_shade_polys[buffer]);
         thread_wait_frames(1);

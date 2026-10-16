@@ -49,6 +49,7 @@ void menu_window_frame_thread(void) {
     *source_stride = 0x100;
     *dest_stride = 0x80;
 
+    /* Copy the border pieces from the menu glyph sheet into one 128x16 image and upload it. */
     text_set_blit_source_rect(8, 8, 0x20, 0x10);
     text_set_blit_destination(0, 0);
     text_blit_glyph(g_menu_glyph_sheet->pixels, g_menu_window_frame_image, &g_text_glyph_source, &g_text_glyph_dest);
@@ -64,6 +65,7 @@ void menu_window_frame_thread(void) {
 
     LoadImage(&texture, (u32*)g_menu_window_frame_image);
     menu_init_sprite_array(prim->sprites, 9, MENU_CLUT_NORMAL);
+
     texture_u = (texture.x & 0x3f) * 4;
     /* The target loads the returned rectangle's y once as a byte (lbu 0x1a(sp))
        and reuses it for every 16-bit and byte store below. */
@@ -79,6 +81,8 @@ void menu_window_frame_thread(void) {
         SetDrawMode(&prim->modes[index], 1, 0, GetTPage(0, 0, 0x1c0, 0), &g_menu_panel_texture_windows[index]);
     }
 
+    /* Sprite 0 fills the interior and sprites 1-4 are the right, left, top and bottom edges;
+     * each tiles its piece through its own texture window. */
     border_wide = 0x10;
     border_thin = 8;
     prim->sprites[0].x0 = menu->x + 8;
@@ -111,6 +115,7 @@ void menu_window_frame_thread(void) {
     prim->sprites[4].w = span;
     prim->sprites[4].h = border_wide;
 
+    /* Sprites 5-8 are the corners, cut from the corner pieces of the uploaded image. */
     prim->sprites[5].x0 = menu->x;
     prim->sprites[5].y0 = menu->y;
     prim->sprites[5].u0 = texture_u + 0x28;
@@ -145,6 +150,7 @@ void menu_window_frame_thread(void) {
         prim = &g_menu_scratch_buffer.panel_frames[frame & 1];
         gfx_build_scaled_draw_area_pair_swapped(
             &prim->draw_areas, (const RECT*)menu, frame, g_main_gfx_screen_polarity);
+
         /* The CLUT id the nine border sprites are drawn with this frame, which
            the target keeps in this variable's register once the texture column
            is dead. A separate local is allocated a different callee-saved
@@ -156,6 +162,9 @@ void menu_window_frame_thread(void) {
         for (index = 8; index >= 0; index--) {
             prim->sprites[index].clut = texture_u;
         }
+
+        /* Linked in reverse draw order: each edge's texture-window mode draws just before its
+         * sprite, modes[5] before the corners, and modes[6] and areas[1] restore the defaults last. */
         gfx_draw_or_append_gpu_primitive(&prim->draw_areas.areas[1]);
         gfx_draw_or_append_gpu_primitive(&prim->modes[6]);
         for (index = 0; index < 5; index++) {
@@ -167,9 +176,11 @@ void menu_window_frame_thread(void) {
         }
         gfx_draw_or_append_gpu_primitive(&prim->modes[5]);
         gfx_draw_or_append_gpu_primitive(&prim->draw_areas.areas[0]);
+
         frame++;
         thread_yield();
     }
+
     thread_yield();
     gfx_free_texture_rect(&texture);
     thread_exit_current();

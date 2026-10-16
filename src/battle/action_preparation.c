@@ -183,10 +183,12 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
     if (action.actor_id >= BATTLE_UNIT_SLOT_COUNT) {
         return BATTLE_ATTACK_PREPARATION_INVALID;
     }
+
     unit = &g_battle_unit_stats[action.actor_id];
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return BATTLE_ATTACK_PREPARATION_INVALID;
     }
+
     skip = 0;
     if (action.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
         if (action.target_id >= BATTLE_UNIT_SLOT_COUNT) {
@@ -196,6 +198,9 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
             return BATTLE_ATTACK_PREPARATION_INVALID;
         }
     }
+
+    /* Menus that resolve at once return here; the others break with the ability for the
+     * CT step below. */
     switch (g_main_action_menu_types_by_skillset[action.skillset_id]) {
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
         item = action.item_or_equipment;
@@ -211,6 +216,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         }
         return BATTLE_ATTACK_PREPARATION_IMMEDIATE;
     case ACTION_MENU_TYPE_WEAPON_INVENTORY:
+        /* Throw resolves to the Throw ability whose item type matches the thrown item. */
         ability = ABILITY_ID_THROW_FIRST;
         item = action.item_or_equipment;
         table = g_main_throw_ability_item_types - ABILITY_ID_THROW_FIRST;
@@ -294,6 +300,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         }
         main_util_copy_action_data(&action, dest);
         ct = g_main_charge_ability_data[ability - ABILITY_ID_CHARGE_FIRST].ct;
+        /* Charge has its own CT, so the generic CT step and Short Charge are skipped. */
         do {
             skip = 1;
         } while (0);
@@ -312,6 +319,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
     default:
         return BATTLE_ATTACK_PREPARATION_INVALID;
     }
+
     if (!skip) {
         ability = action.ability_id;
         if (ability < 0 || ability >= ABILITY_ID_ITEM_FIRST) {
@@ -319,6 +327,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
         }
         main_util_copy_action_data(&action, dest);
         entry = &g_main_ability_range_data[ability];
+        /* Bit 7 is masked off here, though the AI reads the whole byte; no retail record sets it. */
         ct = entry->ct & 0x7f;
         persevere = entry->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE;
         support = unit->ability_flags.support[3];
@@ -331,9 +340,11 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
             }
         }
     }
+
     if (phase != 0) {
         unit->charged_ability_ct = ct;
         if (phase & 1) {
+            /* Outside the primary action context the unit is not marked as acted or charging. */
             if (g_battle_action_context != ACTION_CONTEXT_PRIMARY) {
                 return ct == 0;
             }
@@ -347,6 +358,7 @@ s32 battle_action_prepare_attack(action_command_t* source, action_command_t* des
             }
         }
     }
+
     return ct == 0;
 }
 
@@ -613,9 +625,11 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
         targets[i] = 0xff;
     }
+
     if (battle_id >= BATTLE_UNIT_SLOT_COUNT) {
         return -1;
     }
+
     attacker = &g_battle_unit_stats[battle_id];
     battle_action_clear_current_data(&attacker->action);
     attacker->action.hit = 0;
@@ -627,6 +641,8 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
     work->math_skill_flag = 0;
     work->reaction_ability_id = 0;
     reaction_targeted = 0;
+
+    /* A reaction builds its own target list; Reflect's strike animates even on a miss. */
     if (g_battle_action_context != ACTION_CONTEXT_PRIMARY) {
         work->reaction_ability_id = g_battle_current_reaction_ability_id;
         if (battle_action_build_reaction_targets(battle_id, work, &count, targets)) {
@@ -638,14 +654,17 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
             reaction_targeted = 1;
         }
     } else if (attacker->action_command.skillset_id == i) {
+        /* i is 21 after the clearing loop above: the Math skillset id. */
         work->math_skill_flag = 1;
     }
+
     if (!reaction_targeted) {
         if (battle_target_calculate_map_for_action(&attacker->action_command, &flags_3) == -1) {
             work->target_count = 0;
             work->continue_attack = 0;
             return -1;
         }
+        /* A pending weapon proc or knockback narrows the panels to its post-action target's tile. */
         if (g_battle_action_current_ability.post_action_target_id < BATTLE_UNIT_SLOT_COUNT
             && (g_battle_action_current_ability.weapon_proc_pending != 0
                 || (g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING))) {
@@ -661,6 +680,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
         }
         count = battle_target_list_units_on_panels(targets, attacker);
     }
+
     g_battle_action_current_ability.target_count = count;
     battle_action_store_target_ids(targets);
     battle_action_store_used_weapon(&attacker->action_command);
@@ -671,10 +691,12 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
             battle_action_run_pre_formula_setup(&attacker->action_command, target_id);
         }
     }
+
     battle_status_remove_transparent_if_jump_used(attacker);
     count = battle_target_copy_ability_targets(work->target_list);
     work->target_count = count;
     g_battle_action_current_ability.target_count = count;
+
     if (g_battle_action_context == ACTION_CONTEXT_PRIMARY) {
         g_battle_action_current_ability.can_earn_exp_jp = 1;
     }
@@ -685,6 +707,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
     work->reaction_occurred = 0;
     work->current_hit_number = g_battle_action_current_ability.strike_counter;
     battle_target_set_coordinates_for_ability(attacker, work);
+
     if (count == 0) {
         g_battle_action_current_ability.strike_counter++;
         work->last_attack_id = attacker->action_command.ability_id;
@@ -699,6 +722,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
         }
         return 1;
     }
+
     work->post_action_message = g_battle_action_current_ability.post_action_message;
     work->skip_empty_tile_effect = 0;
     reaction_id = g_battle_action_current_ability.reaction_id;
@@ -717,6 +741,8 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
         work->target_new_y = g_battle_action_current_ability.target_new_y;
         work->target_new_map_level = g_battle_action_current_ability.target_new_elevation;
     }
+
+    /* A pending weapon proc or knockback continues the attack without counting a strike. */
     if (g_battle_action_current_ability.weapon_proc_pending != 0
         || (g_battle_action_current_ability.knockback_flags & BATTLE_KNOCKBACK_PENDING)) {
         work->continue_attack = 1;
@@ -1295,6 +1321,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
     if (g_battle_acting_unit_id == -1) {
         return -1;
     }
+
     i = 0;
     do {
         g_battle_action_context = ACTION_CONTEXT_PRIMARY;
@@ -1305,6 +1332,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                 && unit->entd_slot != BATTLE_ENTD_SLOT_NONE) {
                 reaction_prevented = battle_action_is_reaction_prevented(unit);
                 ability = unit->action.reaction_id;
+                /* Reflect fires even when reactions are prevented and during AI simulation. */
                 if (((reaction_prevented == 0 && g_battle_action_state != ACTION_STATE_AI_SIMULATION)
                         || ability == ABILITY_ID_REACTION_REFLECT)
                     && ability != 0) {
@@ -1318,6 +1346,9 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                     action->ability_id = reaction_id;
                     last_attack = unit->action.last_received_attack;
                     unit->action.reaction_id = 0;
+
+                    /* outcome 0 means no reaction. 1 and 2 pay MP; 1..3 (3 is Reflect) get the strike
+                     * setup, and -1 a self-targeted tile action (Damage Split aims at the attacker). */
                     switch (reaction_id) {
                     case ABILITY_ID_REACTION_REFLECT:
                         outcome = -(battle_target_apply_reflect(unit) == 0) & 3;
@@ -1326,6 +1357,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         if (battle_action_store_counter_ability(unit, SKILLSET_ID_ATTACK, 0, 1) != 0) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                         } else {
+                            /* Skillset 1 is Attack. */
                             action->skillset_id = 1;
                             action->targeting_type = BATTLE_TARGETING_TYPE_TILE;
                         }
@@ -1356,6 +1388,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                             break;
                         }
+                        /* Skillset 6 is Item. */
                         action->skillset_id = 6;
                         /* Auto-Potion updates only the low byte of the 16-bit item/equipment field. */
                         *(u8*)&action->item_or_equipment = result;
@@ -1367,6 +1400,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         result = battle_action_commit_attack_preparation(action);
                         outcome = BATTLE_REACTION_OUTCOME_COUNTER;
                         unit->action_command.ability_id = ABILITY_ID_REACTION_AUTO_POTION;
+                        /* Invalid (-1), equipment change (2) and Jump (3) results cancel the potion. */
                         if (result == -1 || result == 2 || result == 3) {
                             outcome = BATTLE_REACTION_OUTCOME_NONE;
                         }
@@ -1384,6 +1418,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                                 == 0);
                         break;
                     }
+
                     if ((outcome == 1 || outcome == 2) && battle_action_check_and_consume_mp(unit) != 0) {
                         outcome = BATTLE_REACTION_OUTCOME_NONE;
                     }
@@ -1392,6 +1427,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         i++;
                         continue;
                     }
+
                     if (outcome >= 1 && outcome <= 3) {
                         battle_action_init_current_ability_strike_data(unit);
                     } else {
@@ -1414,6 +1450,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         action->target_position.vz = unit->position.y;
                         action->target_position.vy = unit->position.higher_elevation;
                     }
+
                     *out_ability = g_battle_current_reaction_ability_id;
                     action->actor_id = i;
                     return i;
@@ -1422,6 +1459,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
         }
         i++;
     } while (i < 21);
+
     g_battle_action_context = ACTION_CONTEXT_PRIMARY;
     *out_ability = 0;
     return -1;

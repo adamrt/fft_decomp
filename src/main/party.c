@@ -1406,6 +1406,8 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
                 unit, ITEM_TYPE_FLAG_WEAPON, WEAPON_FLAG_TWO_SWORDS_COMPATIBLE, ITEM_TYPE_FILTER_ANY);
         }
     }
+
+    /* Then each Equip weapon support in turn, then any weapon. */
     flags = unit->ability_flags.support[0];
     if (item == ENTD_VALUE_RANDOM) {
         if (flags & BATTLE_SUPPORT_SET_1_EQUIP_SWORD) {
@@ -1445,6 +1447,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
             }
         }
     }
+
     if (g_main_item_primary_data[item].type_flags & ITEM_TYPE_FLAG_SHIELD) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = item;
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] = ITEM_ID_NONE;
@@ -1453,7 +1456,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
         unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD] = ITEM_ID_NONE;
     }
 
-    /* Left hand */
+    /* Left hand: empty beside a weapon that needs both hands, or with Two Hands. */
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_LEFT_HAND];
     if (unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON] != ITEM_ID_NONE
         && ((g_main_item_weapon_data[g_main_item_primary_data[unit->equipment[UNIT_EQUIPMENT_SLOT_RIGHT_HAND_WEAPON]]
@@ -1463,6 +1466,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
             || (unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_TWO_HANDS))) {
         item = ITEM_ID_NONE;
     }
+
     flags = unit->ability_flags.support[2];
     if (item == ENTD_VALUE_RANDOM && (flags & BATTLE_SUPPORT_SET_3_TWO_SWORDS)) {
         item = main_unit_calculate_random_equipment(
@@ -1476,6 +1480,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
             item = ITEM_ID_NONE;
         }
     }
+
     if (g_main_item_primary_data[item].type_flags & ITEM_TYPE_FLAG_WEAPON) {
         unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_WEAPON] = item;
         unit->equipment[UNIT_EQUIPMENT_SLOT_LEFT_HAND_SHIELD] = ITEM_ID_NONE;
@@ -1500,7 +1505,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
     }
     unit->equipment[UNIT_EQUIPMENT_SLOT_HEAD] = item;
 
-    /* Body */
+    /* Body: flags still holds support set 1 from the head. */
     item = entd->equipment[ENTD_EQUIPMENT_SLOT_BODY];
     if (item == ENTD_VALUE_RANDOM) {
         /* The target reuses Equip Shield here while requesting random Armor;
@@ -1527,6 +1532,7 @@ static void main_unit_calculate_entd_equipment(unit_stats_t* unit, entd_unit_t* 
     }
     unit->equipment[UNIT_EQUIPMENT_SLOT_ACCESSORY] = item;
 
+    /* An empty slot is ITEM_ID_NONE (255) in a battle unit, never item 0. */
     for (i = 0; i < UNIT_EQUIPMENT_SLOT_COUNT; i++) {
         if (unit->equipment[i] == ITEM_ID_NOTHING) {
             unit->equipment[i] = ITEM_ID_NONE;

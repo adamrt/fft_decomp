@@ -112,6 +112,8 @@ void world_formation_run_job_wheel_menu(void) {
         g_world_job_wheel_initialized = 1;
         g_world_job_wheel_unit_index = g_unit_selected_index;
     }
+
+    /* 0xE and 0xF are WORLD_FORMATION_MENU_JOB_WHEEL_ENTER and _LEAVE. */
     i = g_world_formation_current_menu;
     if (i == 0xE) {
         if (world_formation_step_grid_transition(2) == 0) {
@@ -122,6 +124,8 @@ void world_formation_run_job_wheel_menu(void) {
         }
         return;
     }
+
+    /* The close animation ends by storing JOB_WHEEL_OPENING; that is its done signal here. */
     if (i == 0xF) {
         if (g_world_job_wheel_job_selected != 0) {
             world_formation_step_job_wheel_close_animation();
@@ -136,6 +140,8 @@ void world_formation_run_job_wheel_menu(void) {
         }
         return;
     }
+
+    /* A job change in progress: step the flash, and apply the job once it reports done. */
     if (g_world_job_change_anim_state != WORLD_JOB_CHANGE_ANIM_DONE) {
         g_world_job_change_anim_state
             = world_formation_process_job_change(g_world_job_wheel_jobs[g_world_job_wheel_cursor_index]);
@@ -150,6 +156,9 @@ void world_formation_run_job_wheel_menu(void) {
             world_formation_layout_job_wheel_portrait();
             g_world_formation_current_menu = WORLD_FORMATION_MENU_JOB_WHEEL;
         }
+
+        /* Dissolve: each corner ramps a lead channel (two for corner 3) to 0xFF; the others dim
+         * until it saturates, then brighten. Closing eases every channel back to 0x80. */
         if (g_world_job_change_anim_state == WORLD_JOB_CHANGE_ANIM_DISSOLVE) {
             g_world_job_change_flash_colors[0].r
                 = g_world_job_change_flash_colors[0].r < 0xFE ? g_world_job_change_flash_colors[0].r + 1 : 0xFF;
@@ -195,6 +204,7 @@ void world_formation_run_job_wheel_menu(void) {
                     : g_world_job_change_flash_colors[i].b + 1;
             }
         }
+
         gfx_enqueue_gouraud_textured_quad(&g_world_job_wheel_portrait_quad, g_world_job_change_flash_colors, 0, 0x33);
         gfx_enqueue_gouraud_textured_quad(
             &g_world_job_wheel_new_portrait_quad, g_world_job_change_flash_colors, 0, 0x33);
@@ -215,6 +225,8 @@ void world_formation_run_job_wheel_menu(void) {
             }
             g_world_formation_saved_banner_enabled = g_world_formation_unit_banner_enabled;
         }
+
+        /* Rebuild the wheel when L1/R1 picked another unit on an earlier frame. */
         if (g_unit_selected_index != g_world_job_wheel_unit_index) {
             world_formation_update_job_wheel_state();
         }
@@ -222,6 +234,7 @@ void world_formation_run_job_wheel_menu(void) {
             world_formation_cycle_selected_unit(g_menu_input_secondary_repeat);
         }
         world_formation_draw_unit_sprite(g_unit_selected_index, &g_world_job_wheel_unit_sprite_position, 0, 0x32);
+
         if (g_world_formation_current_menu == WORLD_FORMATION_MENU_JOB_WHEEL_CLOSING) {
             world_formation_step_job_wheel_close_animation();
         } else if (g_world_formation_current_menu == WORLD_FORMATION_MENU_JOB_WHEEL_OPENING) {
@@ -231,6 +244,7 @@ void world_formation_run_job_wheel_menu(void) {
             if (g_world_job_wheel_spin_progress == 0) {
                 pad = g_menu_input_primary_repeat;
                 if (pad & PSX_PAD_CROSS) {
+                    /* Rebuild the full record list and keep the selection on the same roster slot. */
                     i = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
                     world_formation_build_record_list(0, g_world_unit_pointers, WORLD_FORMATION_RECORD_LIST_ALL);
                     g_unit_selected_index = world_formation_find_index_by_roster_slot(i);
@@ -243,6 +257,7 @@ void world_formation_run_job_wheel_menu(void) {
                         g_sound_queued_effect_id = MAIN_SFX_INVALID;
                     }
                 } else {
+                    /* The primary repeat's high half flags buttons held past the repeat delay. */
                     buttons = g_menu_input_secondary_repeat;
                     if ((buttons & PSX_PAD_RIGHT) || ((pad >>= 16) & PSX_PAD_RIGHT)) {
                         g_world_job_wheel_spin_progress = 1;
@@ -253,6 +268,7 @@ void world_formation_run_job_wheel_menu(void) {
                         g_world_job_wheel_spin_direction = -1;
                         g_sound_queued_effect_id = MAIN_SFX_CURSOR_MOVE;
                     }
+
                     if (g_menu_input_secondary_repeat & PSX_PAD_CIRCLE) {
                         if (!(job & WORLD_JOB_LIST_ENTRY_UNAVAILABLE)) {
                             g_world_job_change_confirmed = 1;
@@ -267,6 +283,7 @@ void world_formation_run_job_wheel_menu(void) {
                             g_world_formation_current_menu = WORLD_FORMATION_MENU_JOB_CHANGE;
                         } else if ((job & WORLD_JOB_LIST_ENTRY_ID_MASK)
                             != g_world_unit_pointers[g_unit_selected_index]->identity.job_id) {
+                            /* Text 0xE800 starts section 29, which the first call bound to the job texts. */
                             world_text_show_message_and_play_sound(
                                 world_job_get_text_index(job & WORLD_JOB_LIST_ENTRY_ID_MASK) + 0xE800,
                                 MAIN_SFX_ERROR_MESSAGE);
@@ -275,6 +292,7 @@ void world_formation_run_job_wheel_menu(void) {
                             g_sound_queued_effect_id = MAIN_SFX_INVALID;
                         }
                     }
+
                     if (g_menu_input_secondary_repeat & PSX_PAD_SELECT) {
                         if (g_world_job_wheel_job_count >= 2) {
                             i = world_job_get_text_index(job & WORLD_JOB_LIST_ENTRY_ID_MASK);
@@ -286,6 +304,7 @@ void world_formation_run_job_wheel_menu(void) {
                     }
                 }
             } else {
+                /* A spin moves one job per 36 progress units; small wheels turn more slowly. */
                 pad = g_world_job_wheel_job_count;
                 if ((s32)pad < 4) {
                     g_world_job_wheel_spin_progress += 2;
@@ -304,6 +323,7 @@ void world_formation_run_job_wheel_menu(void) {
                     world_formation_build_job_wheel_job_name();
                 }
             }
+
             if (g_world_job_wheel_job_count >= 2) {
                 /* The shift preserves the order of the spin-state loads. */
                 angle = ((g_world_job_wheel_spin_direction << 12) * g_world_job_wheel_spin_progress
@@ -316,6 +336,7 @@ void world_formation_run_job_wheel_menu(void) {
             }
         }
     }
+
     menu_gfx_enqueue_textured_quad(
         &g_world_job_wheel_name_rect, 0x30, 0x30, 0, 0, g_world_menu_window_tpage, g_world_menu_window_clut, 0x33);
     menu_run_script_with_palette_mode_variant(&g_world_job_wheel_script, 0, g_menu_input_lock_mode);

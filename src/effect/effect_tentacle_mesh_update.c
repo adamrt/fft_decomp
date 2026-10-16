@@ -114,6 +114,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
         }
         work = record->work_slots[callback_slot]
             = battle_heap_alloc_block(sizeof(effect_tentacle_mesh_work_t), state_index);
+
         texture_page_config = entry->tentacle_mesh.texture_page_config;
         translucent = 1;
         if (texture_page_config.clear_abe) {
@@ -121,6 +122,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
         }
         tpage = (texture_page_config.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT)
             | EFFECT_RENDER_TEXTURE_PAGE_BASE;
+
+        /* Quad sets 0-1 are the double-buffered strips, sets 2-3 their one-pixel offset copies. */
         for (i = 0; i < 8; i++) {
             for (scratch = 0; scratch < 8; scratch++) {
                 quad = &work->segments[i].quads[0][scratch];
@@ -134,6 +137,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             }
             work->segments[i].active = 0;
         }
+
         work->buffer = 0;
         work->count = 0;
         work->destroy_delay = 0;
@@ -144,19 +148,25 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
         break;
 
     case EFFECT_CALLBACK_PHASE_UPDATE:
+        /* i keeps the unwrapped frame for the spawn interval; the curves wrap the frame. */
         i = frame - 1;
         work = record->work_slots[callback_slot];
         tip_bindings = entry->tentacle_mesh.tip_curve_bindings;
         target_index = record->timeline.target_index;
         spawn_bindings = entry->tentacle_mesh.spawn_curve_bindings;
         frame %= EFFECT_ANIMATION_CURVE_FRAMES;
+
+        /* Spawn a batch every spawn interval, starting at frame 1. */
         EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT) & 0xf, frame);
         if (i
                 % battle_lerp_fixed8(
                     entry->tentacle_mesh.spawn_interval_start, entry->tentacle_mesh.spawn_interval_end, factor)
             == 0) {
+            /* work->matrix keeps a zero translation, so the spawn RotTrans calls only rotate. */
             SetTransMatrix(&work->matrix);
             orient = (flags & EFFECT_EMITTER_VELOCITY_MASK) == EFFECT_EMITTER_VELOCITY_CASTER_FACING;
+
+            /* The caster's facing as (quadrant + 1) quarter turns of yaw; left unset for a non-unit caster. */
             caster_target = &g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
             if (caster_target->target_type == EFFECT_TARGET_TYPE_UNIT) {
                 facing_yaw
@@ -167,6 +177,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 rotation.vy = facing_yaw;
                 RotMatrix(&rotation, &facing);
             }
+
             battle_effect_resolve_target_world_coords(
                 g_battle_effect_flags_section->flags & EFFECT_FLAG_TERRAIN_HEIGHT_ADJUST, EFFECT_TARGET_INDEX_CASTER,
                 &g_battle_effect_context, &caster);
@@ -177,6 +188,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT) & 0xf, frame);
             count = battle_lerp_fixed8(
                 entry->tentacle_mesh.particle_count_start, entry->tentacle_mesh.particle_count_end, factor);
+
             EFFECT_READ_CURVE(index, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT) & 0xf, frame);
             battle_effect_interpolate_emitter_spawn_position(entry, factor, &origin);
             switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
@@ -287,6 +299,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             length_max = battle_lerp_fixed8(
                 entry->tentacle_mesh.lifetime_start.max, entry->tentacle_mesh.lifetime_end.max, factor);
 
+            /* Start up to count tentacles while free segments remain. */
             for (i = 0; i < count; i++) {
                 if (work->count >= 8) {
                     break;
@@ -299,6 +312,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                     }
                 }
 
+                /* A random direction scaled by the spread on each axis: a point on the spread ellipsoid. */
                 len = battle_effect_select_largest_magnitude_s16(spread.vx, spread.vy, spread.vz);
                 if (len != 0) {
                     rotation.vx = rand();
@@ -319,6 +333,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                     seg->position.vz = origin.vz * ONE;
                 }
 
+                /* The tip gets the same treatment with its own spread. */
                 len = battle_effect_select_largest_magnitude_s16(tip_spread.vx, tip_spread.vy, tip_spread.vz);
                 if (len != 0) {
                     rotation.vx = rand();
@@ -337,6 +352,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                     seg->tip = tip;
                 }
 
+                /* Speeds are 1/512 unit a frame: << 3, or >> 9 of a 4.12 unit vector, gives 20.12. */
                 switch (flags & EFFECT_EMITTER_VELOCITY_MASK) {
                 case EFFECT_EMITTER_VELOCITY_OUTWARD:
                     rotation.vx = base_angles.vx + RANDOM_BETWEEN(direction_spread.vx, -direction_spread.vx);
@@ -376,6 +392,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                     out.vy = origin.vy - (seg->position.vy >> 12);
                     out.vz = origin.vz - (seg->position.vz >> 12);
                     speed = RANDOM_BETWEEN(speed_min, speed_max);
+                    /* A particle spawned on the origin has no direction to it and moves along +y. */
                     if (out.vx != 0 || out.vy != 0 || out.vz != 0) {
                         VectorNormal(&out, &out);
                         seg->velocity.vx = (speed * out.vx) >> 9;
@@ -394,6 +411,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 seg->active = 1;
                 seg->frame = 0;
                 seg->frame_timer = entry->tentacle_mesh.frame_delay;
+
+                /* Every trail point starts on the spawn position. */
                 rotation.vx = seg->position.vx >> 12;
                 rotation.vy = seg->position.vy >> 12;
                 rotation.vz = seg->position.vz >> 12;
@@ -405,6 +424,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             }
         }
 
+        /* Advance and draw every active tentacle. */
         width = entry->tentacle_mesh.texture_width;
         height = entry->tentacle_mesh.texture_height;
         depth_bias = entry->tentacle_mesh.ot_depth;
@@ -420,6 +440,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 }
                 seg->frame_timer = entry->tentacle_mesh.frame_delay;
             }
+
+            /* The color curves are read at the tentacle's age, not the effect frame. */
             if (entry->tentacle_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
                 red = g_battle_effect_animation_curve_data
                           ->curves[((entry->tentacle_mesh.color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf]
@@ -433,6 +455,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 red = green = blue = EFFECT_COLOR_NEUTRAL;
             }
 
+            /* While travelling, the newest point eases from the particle's path towards the tip. After
+             * arrival the strip's head stays on the arrival point and its tail catches up a point a frame. */
             emitter.motion.position.x = x = seg->position.vx += seg->velocity.vx;
             emitter.motion.position.y = y = seg->position.vy += seg->velocity.vy;
             emitter.motion.position.z = z = seg->position.vz += seg->velocity.vz;
@@ -467,9 +491,11 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 if (point_index < 0) {
                     point_index += 9;
                 }
+                /* Drop texture columns from the head end as the strip shortens. */
                 u = entry->tentacle_mesh.texture_u + (8 - shade_index) * (width / 8);
             }
 
+            /* Children spawn from the strip's head point. */
             emitter.motion.position.x = seg->points[point_index].x * ONE;
             emitter.motion.position.y = seg->points[point_index].y * ONE;
             emitter.motion.position.z = seg->points[point_index].z * ONE;
@@ -477,6 +503,9 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 battle_effect_spawn_emitter_particles(
                     record->record_index, seg->head, entry->tentacle_mesh.child_emitter_mid_life, &emitter);
             }
+
+            /* Head: the first quad's leading edge, perpendicular to the first segment (angle + 0x400).
+             * Each quad has a copy in set buffer + 2, one pixel right and down. */
             v = entry->tentacle_mesh.texture_v + seg->frame * height;
             quad = &seg->quads[work->buffer][0];
             offset_quad = &seg->quads[work->buffer + 2][0];
@@ -515,6 +544,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 offset_quad->g2 = quad->g0 = quad->g2 = (scratch * green) / ONE,
                 offset_quad->b2 = quad->b0 = quad->b2 = (scratch * blue) / ONE);
 
+            /* Each joint is mitered along the bisector of its two segments. Averaging angles more than
+             * half a turn apart points the wrong way, so 0xc00 replaces 0x400 there. */
             for (index = 1; index < link_count; index++) {
                 point_index--;
                 prev = quad;
@@ -553,6 +584,8 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                     = quad->g0 = quad->g2 = (scratch * green) / ONE;
                 prev_offset_quad->b1 = prev_offset_quad->b3 = offset_quad->b0 = offset_quad->b2 = prev->b1 = prev->b3
                     = quad->b0 = quad->b2 = (scratch * blue) / ONE;
+
+                /* The previous quad is now complete: link it at its segment's depth. */
                 if (depth < EFFECT_OT_DEPTH_MIN) {
                     depth = EFFECT_OT_DEPTH_MIN;
                 }
@@ -565,6 +598,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 prev_angle = angle;
             }
 
+            /* Tail: the last quad's trailing edge, perpendicular to the last segment. */
             scratch = ((rcos(prev_angle + 0x400) * height) / 2) >> 12;
             dy = ((rsin(prev_angle + 0x400) * height) / 2) >> 12;
             quad->x1 = screen1.vx - scratch;
@@ -582,6 +616,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             setRGB1(offset_quad, offset_quad->r3 = quad->r1 = quad->r3 = (scratch * red) / ONE,
                 offset_quad->g3 = quad->g1 = quad->g3 = (scratch * green) / ONE,
                 offset_quad->b3 = quad->b1 = quad->b3 = (scratch * blue) / ONE);
+
             if (depth < EFFECT_OT_DEPTH_MIN) {
                 depth = EFFECT_OT_DEPTH_MIN;
             }
@@ -591,6 +626,7 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
             AddPrim(&ot[depth], offset_quad);
             AddPrim(&ot[depth], quad);
 
+            /* Done once the tail reaches the tip: the travel time plus a frame per trailing segment. */
             if (seg->length + 8 == seg->head) {
                 if (flags & EFFECT_EMITTER_FLAG_CHILD_ON_DEATH_MASK) {
                     battle_effect_spawn_emitter_particles(
@@ -600,11 +636,15 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 work->count--;
             }
         }
+
+        /* The next update fills the other buffer while this one is drawn. */
         work->buffer = 1 - work->buffer;
         break;
 
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the last update's quads may still be drawing. The null
+         * check below comes after this read through work (retail order). */
         if (work->destroy_delay == 0) {
             work->destroy_delay = 1;
             break;

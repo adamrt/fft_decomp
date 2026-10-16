@@ -1396,6 +1396,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_HP_HEALING] = stats->action.hp_healing;
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MP_DAMAGE] = stats->action.mp_damage;
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MP_HEALING] = stats->action.mp_healing;
+        /* A stat's gain and damage slots share one magnitude; the pending flag picks which shows. */
         change = stats->action.sp_change & ACTION_STAT_CHANGE_VALUE_MASK;
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_SPEED_GAIN] = change;
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_SPEED_DAMAGE] = change;
@@ -1417,6 +1418,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MA_GAIN] = change;
         g_battle_action_display_values[BATTLE_NUMERIC_DISPLAY_MA_DAMAGE] = change;
 
+        /* Show the lowest pending numeric result and clear its flag. */
         scan_flags = unit->action_display_flags;
         while (index < ACTION_DISPLAY_VALUE_COUNT) {
             if ((flag & scan_flags) != 0) {
@@ -1493,6 +1495,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     } else {
         display->selector &= ~BATTLE_NUMERIC_DISPLAY_MODIFIER_CRITICAL;
     }
+
     display->active = 1;
     if (display->progress >= 22) {
         display->progress = 21;
@@ -1568,6 +1571,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     display_1 = display->displays[1];
     display_2 = display->displays[2];
 
+    /* Empty displays 0 and 1; each case below fills only the sprites it uses. */
     battle_gfx_store_sprite_display_data(display_0, 0, 0, -32, 0, 0, 0, 0, 0);
     battle_gfx_store_sprite_display_data(display_1, 0, 0, -32, 0, 0, 0, 0, 0);
 
@@ -1576,6 +1580,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
     case BATTLE_NUMERIC_DISPLAY_HP_HEALING:
     case BATTLE_NUMERIC_DISPLAY_MP_DAMAGE:
     case BATTLE_NUMERIC_DISPLAY_MP_HEALING:
+        /* Damage (even selectors) shows at y 16, gains and healing at y -32. */
         y_shift = -32;
         if ((display->selector & 1) == 0) {
             y_shift = 16;
@@ -1617,6 +1622,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
             battle_gfx_store_sprite_display_data(display_1, 0, -21, y_shift, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         }
 
+        /* Masking bit 0 lets each damage case also label the matching gain. */
         switch (display->selector & 0x0e) {
         case BATTLE_NUMERIC_DISPLAY_SPEED_DAMAGE:
             battle_gfx_store_sprite_display_data(display_2, 0, -7, y_shift, 0x9c, 0xc2, 0x18, 0x0a, 0);
@@ -1656,6 +1662,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
             (g_battle_action_display_image_rects + result)->height, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_LEVEL_DOWN:
+        /* The fall-through overwrites both sprites, so level down places them like level up. */
         battle_gfx_store_sprite_display_data(display_1, 0, -7, 16, 0xb0, 0x30, 8, 16, 0);
         battle_gfx_store_sprite_display_data(display_2, 0, 0, 16, 0xb4, 0xc1, 0x0e, 0x0a, 0);
         /* fall through */
@@ -1679,6 +1686,7 @@ s32 battle_gfx_build_next_action_result_display(battle_unit_t* unit) {
             display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
     case BATTLE_NUMERIC_DISPLAY_CT_ZERO:
+        /* y_shift is never set on this path; its stale value picks the row (QUIRKS.md). */
         battle_gfx_store_sprite_display_data(display_1, 0, -16, y_shift, 0xc2, 0xc2, 0x0e, 8, 0);
         battle_gfx_store_sprite_display_data(display_2, 0, 0, y_shift, 0xa8, 0x34, 8, 8, 0);
         break;

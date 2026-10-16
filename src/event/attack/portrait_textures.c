@@ -196,6 +196,8 @@ void attack_gfx_prepare_formation_sprites(void) {
     s32 source;
 
     buffer = main_heap_alloc(0x10000);
+
+    /* With no entry mode set, the sheet is read back from VRAM instead of loaded from disc. */
     if (g_script_attack_entry_mode != 0) {
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             file_load_sync(DISC_SECTOR_EVENT_UNIT_BIN, 0x10000, buffer);
@@ -208,14 +210,18 @@ void attack_gfx_prepare_formation_sprites(void) {
         StoreImage(&g_attack_formation_sheet_source_rect, (u32*)(buffer + 0x8000));
         DrawSync(0);
     }
+
     LoadImage(&g_attack_formation_sheet_rect, (u32*)(buffer + 0x8000));
     if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
         thread_yield();
     } else {
         DrawSync(0);
     }
+
     for (i = 0; i < 16; i++) {
         party = main_party_get_unit(i);
+        /* Generic jobs take a male and female pair of codes from 0x60; Bard and Dancer take one code each
+         * (0x82, 0x83), which moves Mime's pair down by two. */
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
             if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
                 base = (party->job_id - JOB_ID_SQUIRE) * 2;
@@ -242,14 +248,17 @@ void attack_gfx_prepare_formation_sprites(void) {
         } else {
             code = party->sprite_set;
         }
+
         code = g_portrait_index_by_sprite_set[code];
         if (party->sprite_set == CHARACTER_IDENTITY_ENTD_NONE) {
             code = 0;
         }
+        /* The palette bits ORed in for a monster are masked off again by `code &= 0xFF`. */
         if (party->sprite_set == CHARACTER_IDENTITY_MONSTER) {
             code |= g_formation_job_data->job_portrait_palette << 10;
         }
         code &= 0xFF;
+
         if (code == 0x18) {
             portrait = -1;
             code = 0x4C;
@@ -263,6 +272,9 @@ void attack_gfx_prepare_formation_sprites(void) {
                 portrait = code;
             }
         }
+
+        /* The sheet has two halves of 60 cells: 24x40 cells in rows of ten, except that the second half's
+         * cells from 8 on are 48x48 in rows of five. */
         quotient = code / 60;
         code %= 60;
         if (quotient == 0) {
@@ -278,6 +290,8 @@ void attack_gfx_prepare_formation_sprites(void) {
             }
             row = product;
         }
+
+        /* Clear the 48x48 staging cell; a 24x40 cell sits in it centered and bottom-aligned. */
         cell_row = row;
         x = 0x47F;
         pixel = &g_attack_formation_sprite_staging[0x47F];
@@ -286,6 +300,7 @@ void attack_gfx_prepare_formation_sprites(void) {
             x--;
             pixel--;
         } while (x >= 0);
+
         if (quotient == 1 && code >= 8) {
             palette_base = (quotient << 15) + ((column * 0x30 + cell_row * 0x3000 + 0x2800) >> 1);
             y = 0;
@@ -317,6 +332,9 @@ void attack_gfx_prepare_formation_sprites(void) {
             LoadImage(&g_attack_portrait_upload_rect, (u32*)g_attack_formation_sprite_staging);
             g_attack_formation_sprite_tall_cell[i] = 0;
         }
+
+        /* The file's CLUTs start at 0xF000, four 16-color palettes per line; each monster portrait has
+         * three, picked by the job's palette index. */
         code = portrait;
         if (code == -1) {
             code = 0x7A;
@@ -325,6 +343,7 @@ void attack_gfx_prepare_formation_sprites(void) {
             palette_base = g_formation_job_data->job_portrait_palette + 0x3E;
             code = product + palette_base;
         }
+
         row = code / 4;
         column = code % 4;
         offset = (row * 0x100 + column * 0x40) / 2 + 0xF000;
@@ -333,6 +352,7 @@ void attack_gfx_prepare_formation_sprites(void) {
         g_attack_portrait_palette_upload_rect.w = 0x10;
         g_attack_portrait_palette_upload_rect.h = 1;
         LoadImage(&g_attack_portrait_palette_upload_rect, (u32*)(buffer + offset));
+
         if (g_script_attack_entry_mode == SCRIPT_ATTACK_ENTRY_PRELOADED) {
             thread_yield();
         } else {

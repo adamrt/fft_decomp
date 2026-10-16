@@ -62,12 +62,14 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
         break;
+
     case EFFECT_CALLBACK_PHASE_INIT:
         if (record->work_slots[callback_slot] != 0) {
             battle_heap_free_block(record->work_slots[callback_slot]);
         }
         work = battle_heap_alloc_block(sizeof(effect_textured_quad_grid_4x4_work_t), state_index);
         record->work_slots[callback_slot] = work;
+
         configuration = geometry->texture_page_config;
         translucent = 1;
         if (configuration.clear_abe) {
@@ -75,6 +77,8 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         }
         texture_page
             = (configuration.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT) | EFFECT_RENDER_TEXTURE_PAGE_BASE;
+
+        /* The quads never move, so their positions are set here once, in both buffers. */
         for (row = 0; row < QUAD_GRID_SIZE; row++) {
             for (column = 0; column < QUAD_GRID_SIZE; column++) {
                 quad = &work->quads[0][row * QUAD_GRID_SIZE + column];
@@ -89,6 +93,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
                 work->quads[1][row * QUAD_GRID_SIZE + column] = *quad;
             }
         }
+
         work->scroll_v = 0;
         work->scroll_u = 0;
         work->frame = 0;
@@ -98,10 +103,13 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         work->texture_v = geometry->texture_v;
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
+
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
         texture_width = geometry->texture_width / 2;
         texture_height = geometry->texture_height / 2;
+
+        /* Scroll the half-size texture window by the speed and angle curves, wrapping within it. */
         selector = geometry->scroll_curves.scroll_speed;
         EFFECT_READ_CURVE(row, column, selector, work->frame);
         speed = battle_lerp_fixed8(geometry->scroll_speed_start, geometry->scroll_speed_end, column) << 4;
@@ -123,6 +131,7 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         while (work->scroll_v < 0) {
             work->scroll_v += texture_height * ONE;
         }
+
         blue = EFFECT_COLOR_NEUTRAL;
         if (geometry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             row = (geometry->color_curves & 0xfff);
@@ -136,6 +145,8 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
             green = EFFECT_COLOR_NEUTRAL;
             red = EFFECT_COLOR_NEUTRAL;
         }
+
+        /* The whole grid sits at one ordering-table depth. */
         depth = geometry->ot_depth;
         brightness_row = geometry->brightness_row;
         if (depth < QUAD_GRID_DEPTH_MIN) {
@@ -144,6 +155,8 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
         if (depth >= EFFECT_OT_DEPTH_LIMIT) {
             depth = EFFECT_OT_DEPTH_MAX;
         }
+
+        /* Lattice row r shades corners 0/1 of quad row r and corners 2/3 of quad row r - 1. */
         for (quad_row = 0; quad_row < QUAD_GRID_SIZE; quad_row++) {
             for (quad_column = 0; quad_column < QUAD_GRID_SIZE; quad_column++) {
                 quad = &work->quads[work->buffer][quad_row * QUAD_GRID_SIZE + quad_column];
@@ -162,11 +175,16 @@ s32 effect_textured_quad_grid_4x4_update(s32 record_index, s32 callback_slot, s3
                 AddPrim(ot + depth, quad);
             }
         }
+
+        /* The next update reads the next curve column and fills the other buffer while this one is drawn. */
         work->frame++;
         work->buffer = 1 - work->buffer;
         break;
+
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the last update's quads may still be drawing. The null
+         * check below comes after this read through work (retail order). */
         if (work->destroy_latched == 0) {
             work->destroy_latched = 1;
         } else {

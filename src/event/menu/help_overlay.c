@@ -73,6 +73,9 @@ void menu_run_battle_help(void) {
     if (g_menu_modal_open != 0) {
         thread_exit_current();
     }
+
+    /* Save the text section pointers for menu_close to restore, and point the help sections into the
+     * help text data. */
     mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, sizeof(g_text_saved_pointers));
     setup_banner = &g_menu_help_active_banner;
     setup_unit_data = &g_menu_help_active_unit_data;
@@ -94,6 +97,7 @@ void menu_run_battle_help(void) {
         = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_SKILLSETS];
     g_text_section_pointers[HELP_TEXT_SECTION_STATUSES]
         = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
+
     self = &g_threads[g_thread_current_id];
     menu_copy_billboard_data_out(setup_banner, setup_unit_data, setup_billboard, setup_cursor_tile);
     /* This fixed lower-menu 16-bit slot can contain another overlay's data. */
@@ -101,9 +105,11 @@ void menu_run_battle_help(void) {
         g_menu_help_require_navigation[2].destination[2] = 7;
         g_menu_help_require_navigation[7].destination[3] = 2;
     }
+
     help_thread_id = thread_find_first_running_menu_thread();
     g_menu_help_controller_state_ptr = script_get_controller_input_pointer(0);
     menu_index = 0;
+
     for (quad_index = 0; quad_index < 2; quad_index++) {
         menu_init_default_poly_ft4(&cursor_quads[quad_index]);
         SetSemiTrans(&cursor_quads[quad_index], 0);
@@ -114,6 +120,9 @@ void menu_run_battle_help(void) {
         shadow_quads[quad_index].tpage = GetTPage(0, 2, 0x3C0, 0x100);
         shadow_quads[quad_index].clut = 0x7DBC;
     }
+
+    /* A running menu thread (slots 4 to 8) with a select-text table gets the help of its selected
+     * entry at once. */
     if (help_thread_id < 9) {
         frame = help_thread_id;
         missing_value = -1;
@@ -129,6 +138,8 @@ void menu_run_battle_help(void) {
             if (g_menu_help_active_text_id_tables == (u16* const*)missing_value) {
                 g_menu_help_active_text_id_tables = g_menu_help_menu_text_id_tables;
             }
+            /* A help text id holds its section in bits 11-15 above the entry: 0x7800 abilities, 0x6800 items,
+             * 0x9800 skillsets, 0xA000 statuses. */
             request_kind = request->select_text_table;
             if (request_kind != 0x10) {
                 if (request_kind == 0x100) {
@@ -143,6 +154,7 @@ void menu_run_battle_help(void) {
                     menu_close();
                 } else if (request_kind == 4) {
                     help_id = g_menu_skillsets[request->selected_index];
+                    /* No help for this entry: menu_close ends the thread and does not return. */
                     if (help_id == ACTION_MENU_PSEUDO_SKILLSET_ANYTHING) {
                         *g_menu_help_controller_state_ptr = 0;
                         thread_wait_frames(1);
@@ -186,6 +198,7 @@ void menu_run_battle_help(void) {
                         thread_wait_frames(1);
                         menu_close();
                     }
+                    /* Katana entries show the help of their Draw Out ability. */
                     help_id += ABILITY_ID_DRAW_OUT_ASURA - ITEM_ID_ASURA_KNIFE;
                     help_id |= 0x7800;
                     g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
@@ -213,6 +226,7 @@ void menu_run_battle_help(void) {
                 } else if (request_kind == 0x13) {
                     menu_text_layout_t* layout = request->context;
                     help_id = layout->text_ids[1][request->selected_index];
+                    /* Map a name text id to the help section of the same kind. */
                     text_section = help_id & 0xF800;
                     if (text_section == TEXT_ID_ABILITY_NAME_BASE) {
                         help_id &= 0x7FF;
@@ -241,6 +255,7 @@ void menu_run_battle_help(void) {
                     thread_set_parameters(
                         help_thread_id - 1, 0x3B, g_menu_help_topic_text_ids[request->selected_index], 0);
                 }
+
                 /* Wait for the text thread in the preceding slot. */
                 frame = help_thread_id;
                 do {
@@ -256,11 +271,15 @@ void menu_run_battle_help(void) {
             menu_close();
         }
     }
+
+    /* Every menu path above ends in menu_close, which does not return, so only the unit views reach
+     * the cursor below and this first arm is dead. */
     if (help_thread_id < 9) {
         navigation = g_menu_help_require_navigation;
         help_thread_id -= 1;
     } else {
         view_mode = g_menu_unit_view_mode;
+        /* Tile views open the terrain help (0x5800) for the cursor tile at once. */
         if (view_mode == UNIT_VIEW_MODE_TILE_INFO || view_mode == UNIT_VIEW_MODE_HOVERED_UNIT) {
             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread_variant);
@@ -283,8 +302,10 @@ void menu_run_battle_help(void) {
             help_thread_id = 2;
         }
     }
+
     frame = 0;
     help_thread = &g_threads[help_thread_id];
+
     while (1) {
         if (help_thread->is_running == 0) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
@@ -294,6 +315,7 @@ void menu_run_battle_help(void) {
                 self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
                 self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
+
             node = &navigation[menu_index];
             y = node->y;
             x = node->x;
@@ -303,12 +325,16 @@ void menu_run_battle_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
+
             input = *g_menu_help_controller_state_ptr;
             if (input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
             }
+
             if (input & PSX_PAD_CIRCLE) {
+                /* Out-of-range ids and empty entries open no help; zeroing the input drops the press. A help_base
+                 * of -0x6800 is the skillset section (0x9800 as a 16-bit text id). */
                 if (node->value != 0) {
                     help_id = node->help_base + *node->value;
                     if (node->help_base == -0x6800 && g_menu_help_billboard.state.generic_monster != 0) {
@@ -338,6 +364,7 @@ void menu_run_battle_help(void) {
                     thread_set_parameters(help_thread_id, 0x3B, help_id, 0);
                 }
             } else if (input & PSX_PAD_DPAD_MASK) {
+                /* help_id doubles as the direction index into the node's up, down, right and left links. */
                 help_id = 0;
                 if (!(input & PSX_PAD_UP)) {
                     if (input & PSX_PAD_DOWN) {
@@ -355,6 +382,7 @@ void menu_run_battle_help(void) {
                 menu_index = node->destination[help_id];
             }
         } else {
+            /* The help text is up: node, x and y keep the values of the last idle frame. */
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
@@ -363,6 +391,7 @@ void menu_run_battle_help(void) {
                 self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
         }
+
         if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             bob = menu_get_cursor_bob_offset(1);
         } else {
@@ -370,8 +399,10 @@ void menu_run_battle_help(void) {
         }
         self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
+
         buffer = frame & 1;
         if (node->vertical_cursor != 0) {
+            /* The upright cursor is the same texture cell transposed. */
             u = 0xA8;
             cursor_quads[buffer].u0 = u;
             cursor_quads[buffer].u1 = u;
@@ -381,6 +412,7 @@ void menu_run_battle_help(void) {
             cursor_quads[buffer].v1 = 0x10;
             cursor_quads[buffer].v2 = 0;
             cursor_quads[buffer].v3 = 0x10;
+
             u = 0xB8;
             shadow_quads[buffer].u0 = u;
             shadow_quads[buffer].u1 = u;
@@ -390,6 +422,7 @@ void menu_run_battle_help(void) {
             shadow_quads[buffer].v1 = 0x10;
             shadow_quads[buffer].v2 = 0;
             shadow_quads[buffer].v3 = 0x10;
+
             setXY4(&cursor_quads[buffer], x, y + bob, x + 0x10, y + bob, x, y + bob + 0x10, x + 0x10, y + bob + 0x10);
             setXY4(shadow_quads + buffer, x + 2, y + bob + 2, x + 0x12, y + bob + 2, x + 2, y + bob + 0x12, x + 0x12,
                 y + bob + 0x12);
@@ -403,6 +436,8 @@ void menu_run_battle_help(void) {
             setXY4(shadow_quads + buffer, x + shadow_offset, y + 2, x + shadow_offset + 0x10, y + 2, x + shadow_offset,
                 y + 0x12, x + shadow_offset + 0x10, y + 0x12);
         }
+
+        /* The cursor and its shade switch palettes while the help text is open. */
         if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             cursor_quads[buffer].clut = 0x7DFC;
             shadow_quads[buffer].clut = 0x7E3C;
@@ -410,11 +445,13 @@ void menu_run_battle_help(void) {
             cursor_quads[buffer].clut = 0x7D7C;
             shadow_quads[buffer].clut = 0x7DBC;
         }
+
         gfx_draw_or_append_gpu_primitive(&cursor_quads[buffer]);
         gfx_draw_or_append_gpu_primitive(&shadow_quads[buffer]);
         thread_wait_frames(1);
         frame++;
     }
+
     *g_menu_help_controller_state_ptr = 0;
     thread_wait_frames(1);
     menu_close();
@@ -467,6 +504,9 @@ void menu_run_require_help(void) {
         shadow_poly->tpage = GetTPage(0, 2, 0x3C0, 0x100);
         shadow_poly->clut = 0x7DBC;
     }
+
+    /* Save the text section pointers for menu_close to restore, and point the help sections into the
+     * help text data. */
     mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, 0x80);
     g_text_section_pointers[HELP_TEXT_SECTION_UNIT_STATUS]
         = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
@@ -484,6 +524,7 @@ void menu_run_require_help(void) {
         = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_SKILLSETS];
     g_text_section_pointers[HELP_TEXT_SECTION_STATUSES]
         = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_STATUSES];
+
     self = &g_threads[g_thread_current_id];
     menu_copy_billboard_data_out(&g_menu_help_active_banner, &g_menu_help_active_unit_data, &g_menu_help_billboard,
         &g_menu_help_menu_cursor_tile);
@@ -491,15 +532,20 @@ void menu_run_require_help(void) {
         g_menu_help_require_navigation[2].destination[2] = 7;
         g_menu_help_require_navigation[7].destination[3] = 2;
     }
+
     g_menu_help_controller_state_ptr = script_get_controller_input_pointer(0);
     menu_index = 0;
+
+    /* Fit the navigation table, which battle help also uses, to the REQUIRE screen. */
     g_menu_help_require_navigation[0].x = 0xC4;
     g_menu_help_require_navigation[2].x = 0xE0;
     g_menu_help_require_navigation[0].destination[3] = 0;
     g_menu_help_require_navigation[3].destination[0] = 0;
+
     navigation = g_menu_help_require_navigation;
     text_thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     text_thread = &g_threads[text_thread_id];
+
     for (frame = 0;; frame++) {
         if (text_thread->is_running == 0) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
@@ -509,6 +555,7 @@ void menu_run_require_help(void) {
                 self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] = 0;
                 self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
+
             entry = &navigation[menu_index];
             y = entry->y;
             x = entry->x;
@@ -518,12 +565,16 @@ void menu_run_require_help(void) {
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 y += 8;
             }
+
             input = *g_menu_help_controller_state_ptr;
             if (input & PSX_PAD_CROSS) {
                 g_sound_pending_sfx_id = MAIN_SFX_CANCEL;
                 break;
             }
+
             if (input & PSX_PAD_CIRCLE) {
+                /* Out-of-range ids and empty entries open no help; zeroing the input drops the press. A help_base
+                 * of -0x6800 is the skillset section (0x9800 as a 16-bit text id). */
                 if (entry->value != 0) {
                     help_id = entry->help_base + *entry->value;
                     if (entry->help_base == -0x6800 && g_menu_help_billboard.state.generic_monster != 0) {
@@ -553,6 +604,7 @@ void menu_run_require_help(void) {
                     thread_set_parameters(text_thread_id, 0x3B, help_id, 0);
                 }
             } else if (input & PSX_PAD_DPAD_MASK) {
+                /* help_id doubles as the direction index into the node's up, down, right and left links. */
                 if (input & PSX_PAD_UP) {
                     help_id = 0;
                 } else if (input & PSX_PAD_DOWN) {
@@ -578,6 +630,7 @@ void menu_run_require_help(void) {
                 self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] = 0;
             }
         }
+
         if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             bob = menu_get_cursor_bob_offset(1);
         } else {
@@ -585,6 +638,7 @@ void menu_run_require_help(void) {
         }
         self->task_words[MENU_CURSOR_THREAD_WORD_BOB_TIMER] += g_script_event_speed;
         bob -= 4;
+
         buffer = frame & 1;
         if (entry->vertical_cursor != 0) {
             POLY_FT4* quad;
@@ -601,6 +655,7 @@ void menu_run_require_help(void) {
             quad->v1 = 16;
             quad->v2 = 0;
             quad->v3 = 16;
+
             u += 16;
             shadow_quad = &shadow[buffer];
             shadow_quad->u0 = u;
@@ -611,6 +666,7 @@ void menu_run_require_help(void) {
             shadow_quad->v1 = 16;
             shadow_quad->v2 = 0;
             shadow_quad->v3 = 16;
+
             setXYWH(quad, x, y + bob, 16, 16);
             /* The shadow follows cursor; its named pointer changes store scheduling. */
             setXYWH(&quad[2], x + 2, y + bob + 2, 16, 16);
@@ -628,6 +684,8 @@ void menu_run_require_help(void) {
             shadow_x = x + 2 + bob;
             setXYWH(&shadow[buffer], shadow_x, y + 2, 16, 16);
         }
+
+        /* The cursor and its shade switch palettes while the help text is open. */
         if (self->task_words[MENU_CURSOR_THREAD_WORD_BOB_ACTIVE] != 0) {
             cursor[buffer].clut = 0x7DFC;
             shadow[buffer].clut = 0x7E3C;
@@ -635,10 +693,12 @@ void menu_run_require_help(void) {
             cursor[buffer].clut = 0x7D7C;
             shadow[buffer].clut = 0x7DBC;
         }
+
         gfx_draw_or_append_gpu_primitive(&cursor[buffer]);
         gfx_draw_or_append_gpu_primitive(&shadow[buffer]);
         thread_wait_frames(1);
     }
+
     *g_menu_help_controller_state_ptr = 0;
     thread_wait_frames(1);
     menu_close();

@@ -157,6 +157,7 @@ void camera_thread(void) {
     mode = g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_MODE_MASK;
     group = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_GROUP_MASK) >> EVENT_CAMERA_SPEED_CURVE_GROUP_SHIFT;
     ease = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_EASING_MASK) >> EVENT_CAMERA_SPEED_CURVE_EASING_SHIFT;
+
     thread_set_current_task_id(THREAD_TASK_CAMERA);
     parameters = (const event_camera_parameters_t*)thread_get_current_parameter_1();
     script = parameters->values.position_le[0];
@@ -165,6 +166,8 @@ void camera_thread(void) {
         script += 2;
     }
 
+    /* Move the current yaw up a full turn when that is nearer the target, so the camera
+     * turns the short way. */
     if (g_camera_wrap_yaw_pending != 0) {
         g_camera_wrap_yaw_pending = 0;
         angle = script_get_variable(EVENT_SCRIPT_VAR_CAMERA_YAW);
@@ -179,6 +182,7 @@ void camera_thread(void) {
     for (i = 0; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
         start[i] = g_script_variables[g_camera_script_variable_indices[i]];
     }
+    /* Positions blend in 1/256 units: drop the low 12 bits of the 1/1024 value, then scale. */
     for (i = 0; i < EVENT_CAMERA_POSITION_COMPONENT_COUNT; i++) {
         start[i] &= ~0xFFF;
         start[i] /= 4;
@@ -196,6 +200,8 @@ void camera_thread(void) {
             if (g_camera_position_locked != 0 && j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                 continue;
             }
+            /* Components within 6 position units (or 1.5 rotation units) of the target skip the
+             * blend; the assignments after the loop still land them. */
             if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                 delta = (target[j] << 8) - start[j];
                 base = start[j];
@@ -209,6 +215,8 @@ void camera_thread(void) {
                     continue;
                 }
             }
+
+            /* Mode 0 and the group the curve leaves linear (0: rotations, 1: positions) move linearly. */
             if (mode == 0 || (group == 0 && j >= EVENT_CAMERA_COMPONENT_TILT)
                 || (group == 1 && j < EVENT_CAMERA_POSITION_COMPONENT_COUNT)) {
                 value = mul_div_s64(delta, i, duration) + base;
@@ -218,14 +226,18 @@ void camera_thread(void) {
             } else if (mode == 1) {
                 decel = delta * weight;
                 accel = delta * ease * 2;
+                /* accel + 2 * decel is 32 * delta, so `first` is the linear term; the ramp term bows it. */
                 first = mul_div_s64(accel + decel + decel, i, duration * 32);
                 value = mul_div_s64(accel, ramp, duration * duration * 32) + first + base;
                 if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                     value *= 4;
                 }
             } else {
+                /* Mode 2 eases each half: the first accelerates to the midpoint, the second
+                 * decelerates into the target. */
                 delta *= 2;
                 half = i * 2;
+
                 if (half < duration) {
                     decel = delta * weight;
                     value = mul_div_s64(
@@ -249,6 +261,9 @@ void camera_thread(void) {
                     }
                 }
             }
+
+            /* Rotations round from 1/64 units; the 0xFF mask (not 0x3F) also tests two integer
+             * bits, so the half-step test is uneven (retail). */
             if (j >= EVENT_CAMERA_COMPONENT_TILT) {
                 if (value > 0) {
                     if ((value & 0xFF) > 0x20) {
@@ -259,12 +274,15 @@ void camera_thread(void) {
                 }
                 value /= 64;
             }
+
             *variable = value;
         }
+
         camera_clear_zoom_variable_low_bit();
         thread_yield();
     }
 
+    /* Land exactly on the targets, positions back in 1/1024 units. */
     if (g_camera_position_locked == 0) {
         for (i = 0; i < EVENT_CAMERA_POSITION_COMPONENT_COUNT; i++) {
             if (target[i] != CAMERA_FUSION_HOLD_SENTINEL) {
@@ -272,11 +290,13 @@ void camera_thread(void) {
             }
         }
     }
+
     for (i = EVENT_CAMERA_COMPONENT_TILT; i < EVENT_CAMERA_COMPONENT_COUNT; i++) {
         if (target[i] != CAMERA_FUSION_HOLD_SENTINEL) {
             g_script_variables[g_camera_script_variable_indices[i]] = target[i];
         }
     }
+
     camera_clear_zoom_variable_low_bit();
     thread_yield();
     thread_exit_current();

@@ -752,11 +752,14 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
 
     tile[0] = (unit->real.vx + unit->velocity.vx) / (MAP_TILE_SIZE * ONE);
     tile[1] = (unit->real.vz + unit->velocity.vz) / (MAP_TILE_SIZE * ONE);
+    /* Entering the destination tile switches the unit to the destination's layer. */
     layer = unit->map_z;
     if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
         && unit->map_z != unit->movement.destination_z) {
         layer = unit->map_z = unit->movement.destination_z;
     }
+
+    /* Never runs: the statement above has already made map_z equal destination_z here. */
     switch (unit->step_phase) {
     case MOVE_STEP_PHASE_WALK_TO_CENTER_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_CENTER_EAST:
@@ -783,12 +786,16 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         }
         break;
     }
+
+    /* Move horizontally, then sample the ground under the unit and at its destination. */
     unit->real.vx += unit->velocity.vx;
     unit->real.vz += unit->velocity.vz;
     unit->world_coords.vx = unit->real.vx / ONE;
     unit->world_coords.vz = unit->real.vz / ONE;
     ground_height = battle_gfx_calculate_world_height_from_world_coords(unit);
     destination_height = battle_gfx_calculate_world_height_from_move_destination(unit);
+
+    /* Vertical motion for the current stage; heights are negative upward. */
     switch (unit->step_phase) {
     case MOVE_STEP_PHASE_WALK_TO_EDGE_SOUTH:
     case MOVE_STEP_PHASE_WALK_TO_EDGE_EAST:
@@ -994,7 +1001,9 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         unit->shadow_dirty |= 1;
         break;
     }
+
     battle_unit_set_world_coords_from_real_coords(unit);
+    /* A mount carries its rider 10 world units higher (0xA000 in Q12). */
     if (unit->mount_state == BATTLE_UNIT_MOUNT_STATE_MOUNT) {
         rider = battle_unit_get_by_runtime_id(unit->mount_partner_runtime_id);
         if (rider != 0) {

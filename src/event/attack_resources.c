@@ -531,6 +531,8 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
         span = t2 - t1;
         lead = t1 - t0;
         frame = t2 - t0; /* whole two-key span */
+        /* With four or more keys each segment runs between interval midpoints; the first
+         * and last segments reach the end keys. */
         if (track->key_count >= 4) {
             if (segment == 0) {
                 track->segment_duration = span / 2 + lead;
@@ -542,6 +544,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
         } else {
             track->segment_duration = frame;
         }
+
         start_value = track->keys[track->segment].value;
         track->prev_value = start_value;
         if (track->key_count >= 4 && track->segment != 0) {
@@ -558,8 +561,10 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
         && track->keys[track->segment].value == track->keys[track->segment + 2].value) {
         result = track->keys[track->segment].value * ONE;
     } else {
+        /* Line i joins the points on the two key intervals at frame + i. */
         for (i = 0; i < 2; i++) {
             frame = i + track->segment_frame;
+            /* After the first segment, the first interval is sampled from its midpoint. */
             if (track->segment == 0) {
                 time[i * 2] = script_interpolate_range_fixed12(track->keys[track->segment].time,
                     track->keys[track->segment + 1].time, frame, track->segment_duration);
@@ -584,6 +589,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
             value[i * 2 + 1] = script_interpolate_range_fixed12(
                 track->keys[track->segment + 1].value, track->keys[track->segment + 2].value, frame, span);
         }
+
         flag = 0;
         g_camera_cross_product_overflow = 0;
         value1 = value[1];
@@ -598,6 +604,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
         time_delta1 = time3 - time2;
         value_delta1 = value3 - value2;
         time_delta0 = time1 - time0;
+
         divisor = fixed_cross_product_q12(value_delta0, time_delta1, time_delta0, value_delta1);
         result = fixed_cross_product_q12(time_delta1, value2 - value0, value_delta1, time2 - time0);
         if (divisor != 0) {
@@ -615,6 +622,9 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
         } else {
             flag = 1;
         }
+
+        /* Parallel lines, a crossing at the previous time or an overflow keep the previous value. */
+
         if (g_camera_cross_product_overflow != 0 || flag != 0) {
             result = track->prev_value;
         }
@@ -627,6 +637,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
             track->finished = 1;
         }
     }
+
     /* Angles and zoom round Q12 to the nearest integer; positions return in
      * the 1/1024 units of their script variables. */
     if (component >= EVENT_CAMERA_COMPONENT_TILT) {
@@ -1353,11 +1364,13 @@ static void menu_build_ability_list(s32 mode) {
     g_menu_ability_layout.columns.text_ids[0] = (s16*)g_ai_workspace_ptr->ability_list.ids;
     g_menu_ability_layout.columns.text_ids[1] = (s16*)g_ai_workspace_ptr->ability_list.values;
     g_menu_ability_layout.columns.text_ids[2] = (s16*)g_ai_workspace_ptr->ability_list.extras;
+
     unit_index = g_menu_selected_unit.battle_id;
     unit = menu_get_selected_unit_stats();
     type = g_action_menu_row_types[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index];
     skillset = g_menu_skillsets[g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index];
     g_menu_selected_action.skillset_id = skillset;
+
     for (i = 0; i < 80; i++) {
         g_ai_workspace_ptr->ability_list.ids[i] = 0xFFFF;
         g_ai_workspace_ptr->ability_list.mp_costs[i] = 0xFF;
@@ -1369,6 +1382,7 @@ static void menu_build_ability_list(s32 mode) {
         g_ai_workspace_ptr->ability_list.skill_ct[i] = 0xFF;
         g_menu_ability_display_flags[i] = 0;
     }
+    /* Row 0x50 ends the byte columns with the 0xff terminator the widening copies stop at. */
     g_ai_workspace_ptr->ability_list.mp_costs[0x50] = 0xFF;
     g_ai_workspace_ptr->ability_list.ct[0x50] = 0xFF;
     g_ai_workspace_ptr->ability_list.flags[0x50] = 0xFF;
@@ -1411,6 +1425,7 @@ static void menu_build_ability_list(s32 mode) {
         mem_copy_bytes_nonempty(
             g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.mp_costs, 0x50);
     }
+
     window_x = 0xAC;
     if (type != ACTION_MENU_TYPE_ARITHMETICKS) {
         mode = MENU_ARITHMETICKS_LIST_ABILITIES;
@@ -1422,6 +1437,8 @@ static void menu_build_ability_list(s32 mode) {
     g_menu_ability_layout.columns.x[2] = 0x7E;
     g_menu_ability_layout.columns.mode[0] = MENU_TEXT_COLUMN_TEXT;
     if (g_menu_action_type_modes[type][1] == 1) { /* lists by id */
+        /* Inventory loaders leave item ids in the byte column mp_costs; the value column
+         * shows each item's quantity. */
         count = menu_copy_u8_to_u16_terminated(
             g_ai_workspace_ptr->ability_list.ids, g_ai_workspace_ptr->ability_list.mp_costs);
         menu_copy_u8_to_u16(g_ai_workspace_ptr->ability_list.extras, g_ai_workspace_ptr->ability_list.turns, count);
@@ -1435,6 +1452,9 @@ static void menu_build_ability_list(s32 mode) {
                 found = 1;
             }
         }
+
+        /* With nothing in stock the third column hides and the window narrows. */
+
         row_mode = 7;
         if (found != 0) {
             window_x -= 4;
@@ -1444,6 +1464,7 @@ static void menu_build_ability_list(s32 mode) {
             window_x = 0x94;
             row_mode = 8;
         }
+
         row_flags = TEXT_ID_ITEM_NAME_BASE;
         g_menu_ability_layout.columns.x[1] -= 4;
         g_menu_ability_layout.columns.x[2] -= 4;
@@ -1458,6 +1479,8 @@ static void menu_build_ability_list(s32 mode) {
                 break;
             }
         }
+
+        /* The MP column shows only when some ability costs MP. */
         if (type == ACTION_MENU_TYPE_DEFAULT) {
             for (i = 0; i < count; i++) {
                 if (g_ai_workspace_ptr->ability_list.mp_costs[i] != 0) {
@@ -1466,6 +1489,7 @@ static void menu_build_ability_list(s32 mode) {
                 }
             }
         }
+
         if (type == ACTION_MENU_TYPE_ARITHMETICKS && mode > 0) {
             window_x = 0x88;
             g_menu_ability_layout.columns.mode[1] = MENU_TEXT_COLUMN_HIDDEN;
@@ -1491,6 +1515,7 @@ static void menu_build_ability_list(s32 mode) {
                 g_menu_ability_layout.columns.x[2] -= 4;
             }
         }
+
         row_flags = TEXT_ID_ABILITY_NAME_BASE;
         columns = 5;
     }
@@ -1500,6 +1525,7 @@ static void menu_build_ability_list(s32 mode) {
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].text_image.width = window_x;
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].header_id = row_mode;
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].select_text_table = columns;
+
     for (i = 0; i < count; i++) {
         g_ai_workspace_ptr->ability_list.ids[i] |= row_flags;
         if (type == ACTION_MENU_TYPE_DEFAULT) {
@@ -1516,6 +1542,8 @@ static void menu_build_ability_list(s32 mode) {
             }
         }
     }
+
+    /* An empty list shows one disabled row for ability 0. */
     if (count == 0) {
         count = 1;
         g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].header_id = 0;
@@ -1524,6 +1552,8 @@ static void menu_build_ability_list(s32 mode) {
         g_ai_workspace_ptr->ability_list.extras[0] = 0;
         g_menu_ability_display_flags[0] = 4;
     }
+
+    /* Six rows show at most; a shorter list's window moves down 8 pixels per missing row. */
     g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].window.y = 0x30;
     if (count >= 7) {
         g_menu_ability_layout.columns.hidden_rows = count - 6;
@@ -1533,6 +1563,7 @@ static void menu_build_ability_list(s32 mode) {
         g_menu_ability_layout.columns.row_count = count;
         g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST].window.y += (6 - count) * 8;
     }
+
     /* The menu thread's redraw, cursor and refresh parameters. */
     g_thread_contexts[g_thread_current_id].function_parameter_2 = 1;
     g_thread_contexts[g_thread_current_id].function_parameter_3 = 0;

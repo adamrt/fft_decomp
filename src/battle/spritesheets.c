@@ -304,6 +304,8 @@ void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_valu
     stored_palette = unit->stored_palette;
     clut_index = unit->runtime_id;
 
+    /* The second CLUT row comes from the upper eight palettes: the unit's own for job and
+     * monster sheets, the first one for the rest. */
     if (g_battle_gfx_spritesheet_slots[slot].spritesheet_id >= BATTLE_SPRITESHEET_ID_JOB_FIRST
         && g_battle_gfx_spritesheet_slots[slot].spritesheet_id <= BATTLE_SPRITESHEET_ID_STEEL_GIANT) {
         battle_map_load_palette_data(
@@ -339,6 +341,8 @@ void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_valu
 
         if (!(*weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER)) {
             weather = script_get_variable(EVENT_SCRIPT_VAR_WEATHER);
+            /* Weather cools the tint (less red, more blue); at night the shift is stronger and
+             * applies in clear weather too. The snow branches match the plain ones. */
             if (script_get_variable(EVENT_SCRIPT_VAR_TIME_OF_DAY) == 0) {
                 if (*weather_flags & MAP_WEATHER_FLAG_SNOW) {
                     switch (weather) {
@@ -423,6 +427,7 @@ void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_valu
         }
     }
 
+    /* y grows downward: a unit more than 0x30 above the ground at its position stays untinted. */
     screen_z = battle_gfx_calculate_world_height_from_world_coords(unit);
     if (!(g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) && screen_z - 0x30 > unit->world_coords.vy) {
         blue = 0;
@@ -430,6 +435,7 @@ void battle_gfx_tint_unit_palette(battle_unit_t* unit, s32 level, s32 final_valu
         red = 0;
     }
 
+    /* Crystal, chicken, frog and treasure sheets tint fixed RAM palettes instead of the slot's. */
     switch (unit->spritesheet_id) {
     case BATTLE_SPRITESHEET_ID_CRYSTAL:
         battle_map_update_palette_from_other(g_battle_gfx_crystal_palettes[stored_palette], MAP_CLUT_ROW_UNITS,

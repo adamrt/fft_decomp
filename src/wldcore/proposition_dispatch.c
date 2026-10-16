@@ -296,12 +296,15 @@ void wldcore_proposition_push_send_unit_level(void) {
     g_wldcore_proposition_send_unit_count = 0;
     count = wldcore_proposition_load_send_unit_candidates(
         &g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit);
+
     layout.text_width = 0x6E;
     layout.visible_rows = count;
     origin.x = 8;
     origin.y = 0x50;
     wldcore_window_init_panel_render_state(
         0xC, g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].send_unit.unit_count, &layout, &origin);
+
+    /* The initializer hides label column 1; show it with each candidate's level as digits. */
     g_wldcore_window_panel_label_state.mode[1] = MENU_TEXT_COLUMN_NUMBER_GLYPHS;
     g_wldcore_window_panel_label_state.x[1] = 0x58;
     g_wldcore_window_panel_label_state.text_ids[1] = g_wldcore_proposition_candidate_levels;
@@ -461,6 +464,7 @@ void wldcore_proposition_push_send_unit_level(void) {
     }
     g_wldcore_window_records[index].sequence = WLDCORE_ANIM_SEQUENCE_R1_BUTTON;
     g_wldcore_window_records[index].frame_index = g_wldcore_window_records[index].anim_counter = 0;
+
     thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_CHOOSE_UNITS, 0);
 
     depth = g_wldcore_menu_stack_depth;
@@ -1215,6 +1219,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
     s32* kind;
     s32* picture;
 
+    /* The message states below run only after the message block has finished loading. */
     load_phase = level->load_phase;
     switch (load_phase) {
     case WLDCORE_PROPOSITION_REPORT_LOAD_MESSAGES:
@@ -1225,6 +1230,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         wldcore_load_message_block_if_changed(g_main_active_propositions[level->proposition].proposition_id
             + WLDCORE_MESSAGE_BLOCK_PROPOSITION_REPORT_FIRST);
         return;
+
     case WLDCORE_PROPOSITION_REPORT_LOAD_PICTURE:
         if (g_main_file_still_loading != 0) {
             return;
@@ -1249,18 +1255,21 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state++;
         return;
+
     case 1:
         if (wldcore_proposition_step_message(level, 0x3C) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 2:
         if (wldcore_proposition_step_participant_message(level, g_wldcore_proposition_report.result * 6, -1) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 3:
         if (wldcore_proposition_step_message(level, 0x42) == 0) {
             return;
@@ -1269,6 +1278,8 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
             level->state = 9;
             return;
         }
+
+        /* The finder returns the party index + 1, or 0 when no participant qualifies. */
         count = wldcore_proposition_find_preferred_job_unit();
         g_wldcore_proposition_report.preferred_unit = count;
         if (count != 0) {
@@ -1279,18 +1290,21 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state = 7;
         return;
+
     case 4:
         if (wldcore_proposition_step_message(level, 0x48) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 5:
         if (wldcore_proposition_step_message(level, 0x4E) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 6:
         if (wldcore_proposition_step_participant_message(
                 level, g_wldcore_proposition_report.result * 6 + 0x12, g_wldcore_proposition_report.preferred_unit)
@@ -1299,30 +1313,35 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state = 0xB;
         return;
+
     case 7:
         if (wldcore_proposition_step_message(level, 0x54) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 8:
         if (wldcore_proposition_step_message(level, 0x5A) == 0) {
             return;
         }
         level->state = 0xB;
         return;
+
     case 9:
         if (wldcore_proposition_step_message(level, 0x60) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 10:
         if (wldcore_proposition_step_message(level, 0x66) == 0) {
             return;
         }
         level->state = 0x10;
         return;
+
     case 11:
         if (wldcore_proposition_step_message(level, 0x6C) == 0) {
             return;
@@ -1333,13 +1352,16 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state = 0xF;
         return;
+
     case 12:
         if (wldcore_proposition_step_message(level, 0x72) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 13:
+        /* Name a random participant as the finder; rand() is 15 bits, so the >> 15 gives a slot below count. */
         if (level->phase == 0) {
             participant = g_main_active_propositions[g_wldcore_proposition_report.proposition_index].participant_indices
                               [(rand()
@@ -1358,10 +1380,14 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state++;
         return;
+
     case 14:
+        /* Wait for the picture set the load phase requested. */
         if (g_main_file_still_loading != 0) {
             return;
         }
+
+        /* On the message's first call, add the picture and its caption window. */
         if (level->phase == 0) {
             picture = &g_wldcore_proposition_report.reward_type;
             if (*picture == WLDCORE_PROPOSITION_REWARD_TREASURE) {
@@ -1446,24 +1472,29 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state = 0x10;
         return;
+
     case 15:
         if (wldcore_proposition_step_message(level, 0x84) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 16:
         if (wldcore_proposition_step_message(level, g_wldcore_proposition_report.result * 6 + 0x8A) == 0) {
             return;
         }
         level->state++;
         return;
+
     case 17:
         if (wldcore_proposition_step_participant_message(level, g_wldcore_proposition_report.result * 6 + 0x24, -1)
             == 0) {
             return;
         }
         level->state++;
+
+        /* Drop the picture and caption records that state 14 appended. */
         if (g_wldcore_proposition_report.reward_type == WLDCORE_PROPOSITION_REWARD_TREASURE) {
             g_wldcore_window_render_record_count -= 2;
             g_wldcore_window_render_object_count -= 2;
@@ -1474,6 +1505,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0, -1, 0);
         return;
+
     case -1:
     case 18:
     case 99:
@@ -1482,6 +1514,7 @@ void wldcore_proposition_step_report_level(wldcore_proposition_report_level_t* l
         }
         level->state++;
         return;
+
     default:
         g_wldcore_menu_ordering_table_offset = 1;
         g_wldcore_menu_stack_depth--;

@@ -1373,16 +1373,19 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
 
     target = record->timeline.target_index;
     timeline = &record->timeline;
+
     if (g_battle_effect_context.targets[target].data.unit.result_animation != EFFECT_HIT_REFLECTED) {
         for (i = 0; i < EFFECT_PARTICLE_CHANNEL_COUNT; i++) {
             table = &g_battle_effect_child_timeline->particle[i];
             if (timeline->state.child.remaining.tracks.particle[i] == 0) {
+                /* Keyframe 0 is the start: enter keyframe 1 and run its actions. */
                 if (timeline->state.child.keyframe.tracks.particle[i] == 0) {
                     timeline->state.child.remaining.tracks.particle[i] = table->frame_start[1] - table->frame_start[0];
                     timeline->state.child.step.tracks.particle[i] = 0;
                     timeline->state.child.keyframe.tracks.particle[i]++;
                     battle_effect_run_keyframe_actions(table->action[1], target, record);
                 }
+                /* Pass through keyframes of zero length, running each one's actions. */
                 while (timeline->state.child.remaining.tracks.particle[i] == 0) {
                     k = timeline->state.child.keyframe.tracks.particle[i];
                     timeline->state.child.keyframe.tracks.particle[i] = k + 1;
@@ -1392,6 +1395,8 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     battle_effect_run_keyframe_actions(table->action[k + 1], target, record);
                 }
             }
+
+            /* emitter holds the emitter index plus one; 0 means the keyframe spawns nothing. */
             index = table->emitter[timeline->state.child.keyframe.tracks.particle[i] - 1];
             if (index != 0) {
                 step = timeline->state.child.step.tracks.particle[i]++;
@@ -1399,6 +1404,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                 sel = actions[timeline->state.child.keyframe.tracks.particle[i]] & EFFECT_KEYFRAME_ACTION_CALLBACK_MASK;
                 if (sel != 0) {
                     slot = sel - 1;
+                    /* With two frames left in the keyframe, the callback runs in its destroy phase. */
                     if (timeline->state.child.remaining.tracks.particle[i] == 2) {
                         record->callback_phase[slot] = EFFECT_CALLBACK_PHASE_DESTROY;
                     }
@@ -1407,6 +1413,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     battle_effect_spawn_emitter_particles(record->record_index, step, index - 1, 0);
                 }
             }
+
             timeline->state.child.remaining.tracks.particle[i]--;
         }
 
@@ -1416,6 +1423,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
             if (timeline->state.child.remaining.tracks.surroundings == 0) {
                 timeline->state.child.keyframe.tracks.surroundings = units_keyframe + 1;
                 index = units_keyframe;
+                /* Track durations count units of 8 frames; 0 still takes one frame. */
                 i = track->duration[index];
                 if (i == 0) {
                     i = 1;
@@ -1520,6 +1528,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     green = screen->color[index].g * 2;
                     blue = screen->color[index].b * 2;
                     battle_map_modify_background_gradient(mode, screen->duration[index], red, green, blue);
+                    /* Unlike the surroundings track, this one moves the darkness only when weather is ignored. */
                     if (g_battle_map_weather_flags & MAP_WEATHER_FLAG_IGNORE_WEATHER) {
                         battle_map_start_darkness_blend(mode, screen->duration[index], red, green, blue);
                     }
@@ -1549,6 +1558,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                     index = sound_keyframe;
                     timeline->state.child.remaining.tracks.sound[i] = sound->duration[index];
                     kind = sound->channel[index];
+                    /* Channel values 0 and 1 play nothing; 2 and up pick effect sound channel kind - 2. */
                     if (kind >= 2) {
                         sound_index = battle_effect_select_sound_id(kind - 2);
                         if (sound_index != 0) {
@@ -1559,6 +1569,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
                 timeline->state.child.remaining.tracks.sound[i]--;
             }
         }
+
         if (record->parent_index == 0) {
             battle_camera_start_effect_keyframe_moves(timeline->frame);
         }
@@ -1567,6 +1578,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         }
         timeline->frame++;
     } else {
+        /* A reflected hit shows Reflect on a unit target and skips to the child timeline's end. */
         if (g_battle_effect_context.targets[target].target_type == EFFECT_TARGET_TYPE_UNIT) {
             init.targets[EFFECT_CASTER_ENTRY] = g_battle_effect_context.targets[EFFECT_CASTER_ENTRY];
             init.targets[0] = g_battle_effect_context.targets[target];
@@ -1575,6 +1587,7 @@ effect_script_result_e battle_effect_code_script_28_step_child_timeline(effect_r
         }
         record->timeline.frame = g_battle_effect_child_timeline->duration;
     }
+
     record->pc += 2;
     return EFFECT_SCRIPT_RESULT_CONTINUE;
 }

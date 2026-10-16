@@ -42,9 +42,11 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
             count++;
         }
     }
+
     if (count < 2) {
         return;
     }
+
     passes = count - 1;
     criteria = g_item_type_order_lists[mode];
     for (; passes > 0; passes--) {
@@ -53,6 +55,7 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
             criterion = criteria[k];
             item_a = list[j] & 0x3ff;
             item_b = list[j + 1] & 0x3ff;
+
             while (criterion >= 0) {
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_a = g_main_item_primary_data[item_a].type;
@@ -89,6 +92,7 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
                 } else if (criterion == ITEM_SORT_KEY_HELD_COUNT) {
                     key_a = item_get_total_count_variant(item_a);
                 }
+
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_b = g_main_item_primary_data[item_b].type;
                     if (key_b == 0x13) {
@@ -111,6 +115,7 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
                         key_b = 0;
                     }
                 } else if (criterion == ITEM_SORT_KEY_MAGIC_EVADE) {
+                    /* A weapon's key here is its evade, where key_a above reads 0 (retail asymmetry). */
                     if (item_b < ITEM_ID_THROWABLE_FIRST) {
                         key_b = g_main_item_weapon_data[g_main_item_primary_data[item_b].secondary_data_id].evade;
                     } else if (item_b < ITEM_ID_HEADGEAR_FIRST) {
@@ -124,8 +129,11 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
                 } else {
                     key_b = item_get_total_count_variant(item_b);
                 }
+
                 k++;
                 if (criterion == ITEM_SORT_KEY_RANKING) {
+                    /* `diff` first collects which items are shields (1: item_a, 2: item_b); a shield
+                     * beside a non-shield ranks 0. */
                     diff = 0;
                     if (item_a >= ITEM_ID_THROWABLE_FIRST && item_a < ITEM_ID_HEADGEAR_FIRST) {
                         diff = 1;
@@ -140,15 +148,20 @@ void item_sort_id_list_variant(s32 mode, s16* list) {
                         key_b = 0;
                     }
                 }
+
                 diff = key_b - key_a;
                 if (diff != 0) {
                     break;
                 }
                 criterion = criteria[k];
             }
+
             if (criterion == ITEM_SORT_KEY_TYPE) {
                 diff *= -1;
             }
+
+            /* Equal entries swap too, so ties do not keep their order; `diff` then serves as the swap
+             * temporary. */
             if (diff >= 0) {
                 diff = list[j];
                 list[j] = list[j + 1];

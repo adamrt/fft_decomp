@@ -211,13 +211,18 @@ void world_menu_number_entry_thread(void) {
     param = (menu_entry_t*)*parameter;
     range = param->context;
     digits = text_count_decimal_digits(range->bounds.max);
+
+    /* Start from the stored value, or from the minimum when it is out of range. */
     original = *menu_entry_result(param);
     value = original;
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
+
     menu_build_window_sprites(&rect, param, &records[0]);
     mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(records[1]));
+
+    /* One digit cursor and translucent shadow per frame buffer. */
     for (j = 0; j < 2; j++) {
         menu_init_default_poly_ft4(&cursor_quads[j]);
         SetSemiTrans(&cursor_quads[j], 0);
@@ -244,6 +249,9 @@ void world_menu_number_entry_thread(void) {
         shadow_quads[j].v2 = 0;
         shadow_quads[j].v3 = 0x10;
     }
+
+    /* Draw the first value; redraw = 1 frees this image after the first wait. The (8, 9) origin goes
+     * unused here; the labeled twin draws its label there. */
     digit = 0;
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
@@ -253,10 +261,12 @@ void world_menu_number_entry_thread(void) {
     world_gfx_draw_signed_number(value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
     LoadImage(&rect, buffer);
     redraw = 1;
+
     for (i = 0;; i++) {
         record = &records[i & 1].base;
         *menu_entry_result(param) = value;
         thread_wait_frames(1);
+        /* A redrawn image is freed a frame late, after its upload has run. */
         if (redraw == 1) {
             redraw = 0;
             menu_free_memory(buffer);
@@ -264,6 +274,9 @@ void world_menu_number_entry_thread(void) {
         if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
+
+        /* The handlers consume the input bits they act on, so a changed mask means one of them ran.
+         * A cancel leaves -1 in the result, which restores the original value. */
         input = *g_world_menu_list_controller_input;
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
@@ -278,6 +291,9 @@ void world_menu_number_entry_thread(void) {
                 current_range->on_change();
             }
         }
+
+        /* Digit 0 is the ones digit, so right moves the cursor toward it. Up and down step by the
+         * cursor digit's place value, clamped to the range. */
         if (thread[-1].is_running == 0) {
             if ((*g_world_menu_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
                 digit--;
@@ -302,6 +318,7 @@ void world_menu_number_entry_thread(void) {
                 redraw = 1;
             }
         }
+
         if (redraw == 1) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
@@ -311,6 +328,8 @@ void world_menu_number_entry_thread(void) {
                 value, digits, buffer, (glyph_blit_t*)((u8*)stride - offsetof(glyph_blit_t, stride)));
             LoadImage(&rect, buffer);
         }
+
+        /* The cursor and its shadow switch to dimmed CLUTs while the thread before this one runs. */
         cursor_quad = &cursor_quads[i & 1];
         shadow_quad = &shadow_quads[i & 1];
         world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
@@ -323,6 +342,7 @@ void world_menu_number_entry_thread(void) {
             cursor_quad->clut = 0x7DFC;
             shadow_quad->clut = 0x7E3C;
         }
+
         menu_update_icon_cursor_sprites(param, record, i, -1);
         menu_select_icon_cluts(record);
         gfx_draw_or_append_gpu_primitive(&cursor_quads[i & 1]);
@@ -330,6 +350,7 @@ void world_menu_number_entry_thread(void) {
         gfx_draw_or_append_gpu_primitive(&record->sprites[0]);
         gfx_draw_or_append_gpu_primitive(record);
     }
+
     thread_yield();
     thread_exit_current();
 }
@@ -368,12 +389,17 @@ void world_menu_labeled_number_entry_thread(void) {
     param = *(menu_entry_t**)thread;
     range = param->context;
     digits = text_count_decimal_digits(range->bounds.max);
+
+    /* Start from the stored value, or from the minimum when it is out of range. */
     original = *menu_entry_result(param);
     value = original;
     if (value < range->bounds.min || range->bounds.max < value) {
         value = range->bounds.min;
     }
+
     menu_build_window_sprites(&rect, param, &record);
+
+    /* One digit cursor and translucent shadow per frame buffer. */
     for (i = 0; i < 2; i++) {
         menu_init_default_poly_ft4(&cursor_quads[i]);
         SetSemiTrans(&cursor_quads[i], 0);
@@ -400,6 +426,9 @@ void world_menu_labeled_number_entry_thread(void) {
         shadow_quads[i].v2 = 0;
         shadow_quads[i].v3 = 0x10;
     }
+
+    /* Draw the label and the first value; redraw = 1 frees this image after the first wait. The
+     * origin after the label is overridden at once by the right-aligned number's. */
     digit = 0;
     buffer = menu_build_and_upload_window_frame_image(
         param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
@@ -412,11 +441,13 @@ void world_menu_labeled_number_entry_thread(void) {
     world_gfx_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, buffer);
     redraw = 1;
+
     for (i = 0;; i++) {
         if (g_formation_screen_active != 0) {
             *menu_entry_result(param) = value;
         }
         thread_wait_frames(1);
+        /* A redrawn image is freed a frame late, after its upload has run. */
         if (redraw == 1) {
             menu_free_memory(buffer);
             redraw = 0;
@@ -424,6 +455,9 @@ void world_menu_labeled_number_entry_thread(void) {
         if (menu_should_close_thread(g_world_menu_list_controller_input) != 0) {
             break;
         }
+
+        /* The handlers consume the input bits they act on, so a changed mask means one of them ran.
+         * A cancel leaves -1 in the result, which restores the original value. */
         input = *g_world_menu_list_controller_input;
         menu_handle_cancel_input(param);
         menu_handle_action(param, 0);
@@ -438,6 +472,9 @@ void world_menu_labeled_number_entry_thread(void) {
                 current_range->on_change();
             }
         }
+
+        /* Digit 0 is the ones digit, so right moves the cursor toward it. Up and down step by the
+         * cursor digit's place value, clamped to the range. */
         if (thread[-1].is_running == 0) {
             if ((*g_world_menu_list_controller_input & PSX_PAD_RIGHT) && digit > 0) {
                 digit--;
@@ -462,6 +499,8 @@ void world_menu_labeled_number_entry_thread(void) {
                 redraw = 1;
             }
         }
+
+        /* A redraw measures the label in character columns (times 6), the setup above in pixels. */
         if (redraw == 1) {
             buffer = menu_build_and_upload_window_frame_image(
                 param->inner_width, param->inner_height, &rect, MENU_WINDOW_FRAME_BUILD);
@@ -474,6 +513,8 @@ void world_menu_labeled_number_entry_thread(void) {
             world_gfx_draw_signed_number(value, digits, buffer, &g_menu_text_state.pen);
             LoadImage(&rect, buffer);
         }
+
+        /* The cursor and its shadow switch to dimmed CLUTs while the thread before this one runs. */
         cursor_quad = &cursor_quads[i & 1];
         shadow_quad = &shadow_quads[i & 1];
         world_menu_update_entry_cursor_quads(param, cursor_quad, shadow_quad, i, digit);
@@ -486,6 +527,7 @@ void world_menu_labeled_number_entry_thread(void) {
             cursor_quad->clut = 0x7DFC;
             shadow_quad->clut = 0x7E3C;
         }
+
         menu_update_icon_cursor_sprites(param, &record.base, i, -1);
         menu_select_icon_cluts(&record.base);
         gfx_draw_or_append_gpu_primitive(&cursor_quads[i & 1]);
@@ -493,6 +535,7 @@ void world_menu_labeled_number_entry_thread(void) {
         gfx_draw_or_append_gpu_primitive(&record.base.sprites[0]);
         gfx_draw_or_append_gpu_primitive(&record);
     }
+
     thread_yield();
     thread_exit_current();
 }

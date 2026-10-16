@@ -94,6 +94,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         }
         work = battle_heap_alloc_block(sizeof(effect_ring_mesh_work_t), state_index);
         record->work_slots[callback_slot] = work;
+
         configuration = entry->radial_mesh.texture_page_config;
         tpage = (configuration.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT) | EFFECT_RENDER_TEXTURE_PAGE_BASE;
         translucent = 1;
@@ -109,6 +110,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
                 quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             }
         }
+
         work->spin = 0;
         work->v_scroll = 0;
         work->buffer = 0;
@@ -121,6 +123,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
         target_index = g_battle_effect_state_records[state_index].timeline.target_index;
+
         EFFECT_READ_CURVE(i, j, entry->radial_mesh.motion_curves.origin, frame);
         battle_effect_interpolate_emitter_spawn_position(entry, j, &origin);
         switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
@@ -200,6 +203,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         cos0 = rcos(work->spin);
         cos1 = rcos(work->spin + (ONE / RING_STACK_SEGMENT_COUNT));
 
+        /* Each lattice row rises by growth.vy and widens by growth.vz; both steps grow by growth_step per row.
+         * Points 0 and 1 come from the two angles; the other six are quarter turns of them. */
         n = 0;
         k = 0;
         for (i = 0; i < RING_STACK_LATTICE_ROW_COUNT; i++) {
@@ -218,6 +223,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             n += growth.vy;
             k += growth.vz;
         }
+
+        /* Grow the radius for the next frame; growth_step.vx accelerates the growth. */
         work->radius_speed += growth_step.vx;
         work->radius_offset += growth.vx + work->radius_speed;
 
@@ -228,8 +235,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
         origin_y = origin.vy;
         origin_z = origin.vz;
 
-        /* Ring 0: quad i - 1 takes lattice rows 1 (x0/x1) and 0 (x2/x3); quad 7
-         * closes the ring on quad 0. */
+        /* Ring 0: quad i - 1 takes lattice rows 1 (x0/x1) and 0 (x2/x3). */
         vertex.vx = points[0][0].vx + origin_x;
         vertex.vy = points[0][0].vy + origin_y;
         vertex.vz = points[0][0].vz + origin_z;
@@ -282,6 +288,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             depth[1][i] = screen1.vz;
         }
 
+        /* The last quad closes the ring on quad 0. */
         quads = work->quads[buffer];
         quads[RING_STACK_LAST_SEGMENT].x0 = screen1.vx;
         quads[RING_STACK_LAST_SEGMENT].y0 = screen1.vy;
@@ -335,6 +342,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
                 quad->y1 = screen1.vy;
                 depth[n][i] = screen1.vz;
             }
+
+            /* The last quad closes the ring on the ring's first quad. */
             quad = &work->quads[buffer][j * RING_STACK_SEGMENT_COUNT + RING_STACK_LAST_SEGMENT];
             other = &work->quads[buffer][(j - 1) * RING_STACK_SEGMENT_COUNT + RING_STACK_LAST_SEGMENT];
             quad->x0 = screen1.vx;
@@ -348,6 +357,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             quad->y1 = other->y0;
         }
 
+        /* Every quad maps the same texture window, scrolled by v_scroll (8.8 fixed). */
         j = work->v_scroll >> 8;
         for (i = 0; i < RING_STACK_QUAD_COUNT; i++) {
             quad = &work->quads[buffer][i];
@@ -357,6 +367,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             quad->v2 = quad->v3 = v + v_span + j;
         }
 
+        /* Vertex colors: the color curves (neutral without them) scaled by each lattice row's brightness. */
         n = entry->radial_mesh.brightness_row;
         blue = EFFECT_COLOR_NEUTRAL;
         if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
@@ -368,6 +379,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             green = EFFECT_COLOR_NEUTRAL;
             red = EFFECT_COLOR_NEUTRAL;
         }
+
+        /* Lattice row r shades corners 2/3 of ring r and corners 0/1 of ring r - 1. */
         k = g_effect_ring_stack_mesh_brightness_table[n][0];
         for (i = 0; i < RING_STACK_SEGMENT_COUNT; i++) {
             quad = &work->quads[buffer][i];
@@ -378,6 +391,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             quad->b3 = (k * blue) / ONE;
             quad->b2 = (k * blue) / ONE;
         }
+
         for (j = 0; j < RING_STACK_RING_COUNT - 1; j++) {
             k = g_effect_ring_stack_mesh_brightness_table[n][j + 1];
             for (i = 0; i < RING_STACK_SEGMENT_COUNT; i++) {
@@ -388,6 +402,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
                     quad->b1 = other->b2 = other->b3 = (k * blue) / ONE);
             }
         }
+
         k = g_effect_ring_stack_mesh_brightness_table[n][RING_STACK_RING_COUNT];
         for (i = 0; i < RING_STACK_SEGMENT_COUNT; i++) {
             quad = &work->quads[buffer][i + RING_STACK_LAST_RING_OFFSET];
@@ -399,6 +414,7 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
             quad->b0 = (k * blue) / ONE;
         }
 
+        /* Sort each quad by a quarter of its mean corner depth; quads outside the ordering table are skipped. */
         for (j = 0; j < RING_STACK_RING_COUNT; j++) {
             for (i = 0; i < RING_STACK_LAST_SEGMENT; i++) {
                 n = (depth[j][i] + depth[j][i + 1] + depth[j + 1][i] + depth[j + 1][i + 1]) / 16;
@@ -406,6 +422,8 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
                     addPrim(&ot[n], &work->quads[buffer][j * RING_STACK_SEGMENT_COUNT + i]);
                 }
             }
+
+            /* The closing quad spans the last lattice column and column 0. */
             n = (depth[j][0] + depth[j][RING_STACK_LAST_SEGMENT] + depth[j + 1][0]
                     + depth[j + 1][RING_STACK_LAST_SEGMENT])
                 / 16;
@@ -413,11 +431,15 @@ s32 effect_ring_stack_mesh_update(s32 record_index, s32 callback_slot, s32 emitt
                 addPrim(&ot[n], &work->quads[buffer][j * RING_STACK_SEGMENT_COUNT + RING_STACK_LAST_SEGMENT]);
             }
         }
+
+        /* The next update fills the other buffer while this one is drawn. */
         work->buffer = 1 - work->buffer;
         break;
 
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the last update's quads may still be drawing. The null
+         * check below comes after this read through work (retail order). */
         if (work->destroy_delay == 0) {
             work->destroy_delay = 1;
             break;

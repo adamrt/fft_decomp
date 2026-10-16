@@ -2018,6 +2018,7 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
 
     node = particle;
     block = node->sprite_block;
+
     node->frame_timer -= 2;
     if (node->frame_timer <= 0) {
         for (;;) {
@@ -2029,6 +2030,7 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
                 }
                 node->frame_timer = effect_get_current_sequence_instruction(node)->frame.hold;
                 node->depth_mode = effect_get_current_sequence_instruction(node)->frame.depth_mode;
+                /* A hold of 0 keeps the script on this frame for good. */
                 if (node->frame_timer != 0) {
                     node->sequence_offset += 3;
                 }
@@ -2053,6 +2055,9 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
             }
         }
     }
+
+    /* A new frame: point the sprite block at the frame's parts, reallocating it when
+     * the part count differs. */
     if (node->kind & EFFECT_LIST_NODE_FRAME_CHANGED) {
         frame_table_offset
             = ((effect_sprite_group_t*)(g_battle_effect_frame_data + node->frame_group_offset))->frame_table_offset;
@@ -2070,9 +2075,13 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
         }
         node->kind &= ~EFFECT_LIST_NODE_FRAME_CHANGED;
     }
+
     block->header.color.r = red;
     block->header.color.g = green;
     block->header.color.b = blue;
+
+    /* Place the sprite: projected through the camera or at a screen position,
+     * with or without the camera zoom. */
     switch (node->kind & EFFECT_LIST_NODE_PLACEMENT_MASK) {
     case EFFECT_LIST_NODE_WORLD:
         SetRotMatrix(&g_battle_camera_matrix);
@@ -2097,6 +2106,8 @@ static void battle_effect_render_particle_sprite(effect_list_node_t* particle, s
             depth -= 16;
             break;
         }
+        /* A projected sprite pushed in front of the ordering table is culled; the screen
+         * placements clamp to 0 instead. */
         if (depth < 0) {
             return;
         }

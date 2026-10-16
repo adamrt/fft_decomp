@@ -91,12 +91,16 @@ void text_run_dialog_thread_variant(void) {
     value_index = 0;
     variable_base = EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION;
     thread = &g_threads[g_thread_current_id];
+
     param = thread_get_current_parameter_1();
     rec.dialog_type = param;
+    /* Box type 0x70 is a portrait box above the speaker, or below it when the speaker
+     * faces away from the camera. */
     if ((param & 0x70) == 0x70) {
         rec.dialog_type = (param & 0x1C) | 0x10;
         rec.dialog_type |= unit_check_facing_relative_to_camera(thread_get_current_parameter_3()) + 1;
     }
+
     rec._unknown_2a = 0;
     rec.origin_x = 8;
     rec.origin_y = 8;
@@ -107,16 +111,19 @@ void text_run_dialog_thread_variant(void) {
     rec.arrow_offset = thread->task_words[DIALOG_THREAD_WORD_ARROW_OFFSET];
     rec.x_offset = thread->task_words[DIALOG_THREAD_WORD_X_OFFSET];
     rec.y_offset = thread->task_words[DIALOG_THREAD_WORD_Y_OFFSET];
+    /* Both arms compute the same portrait index. */
     if (rec.dialog_type & 0x10) {
         rec.portrait = thread->function_parameter_4 - 1;
     } else {
         rec.portrait = thread->function_parameter_4 - 1;
     }
+
     text = text_find_entry(thread_get_current_parameter_2());
     text_measure_pixels(&rec.mark, &rec.lines, text);
     if (thread->task_words[DIALOG_THREAD_WORD_TEXT_WIDTH] != 0) {
         rec.mark = thread->task_words[DIALOG_THREAD_WORD_TEXT_WIDTH];
     }
+
     if (rec.box_type == DIALOG_BOX_TYPE_EIGHT_LINE) {
         rec.lines = 8;
     }
@@ -135,6 +142,7 @@ void text_run_dialog_thread_variant(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_TWO_LINE && rec.lines > 2) {
         rec.lines = 2;
     }
+
     rec.height = rec.lines * 16 + 16;
     rec.width = rec.mark + 0x18;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
@@ -148,6 +156,8 @@ void text_run_dialog_thread_variant(void) {
             rec.height += 0x10;
         }
     }
+
+    /* A portrait box with a tail is placed beside the speaker's projected position. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL) {
         center = rec.width >> 1;
         value = script_resolve_runtime_id(thread_get_current_parameter_3());
@@ -155,6 +165,8 @@ void text_run_dialog_thread_variant(void) {
         cursor_x = center;
         rec.tail_offset = 0;
         rec.x = g_unit_scratch_coords.vx - center - 4;
+        /* Automatic position: below the speaker when it projects above the screen or its swap
+         * partner projects higher, else above. g_battle_camera_script_rotation is scratch here. */
         if (rec.position == 0) {
             if (thread_get_current_parameter_3() == g_text_speaker_swap_unit_a) {
                 value = g_text_speaker_swap_unit_b;
@@ -169,6 +181,7 @@ void text_run_dialog_thread_variant(void) {
             }
             rec.dialog_type = (rec.dialog_type & 0xFFF0) | rec.position;
         }
+
         if (rec.position == 1) {
             rec.x += 0xC;
             rec.y = g_unit_scratch_coords.vy - rec.height - 0x28;
@@ -177,6 +190,9 @@ void text_run_dialog_thread_variant(void) {
             rec.x -= 8;
             rec.y = g_unit_scratch_coords.vy;
         }
+
+        /* Clamp the box to x 0x88..0x180, before and after the script offsets; the tail
+         * offset absorbs each shift so the tail still points at the speaker. */
         if (rec.x < 0x88) {
             rec.tail_offset = rec.x - 0x88;
             rec.x = 0x88;
@@ -184,6 +200,7 @@ void text_run_dialog_thread_variant(void) {
             rec.tail_offset = rec.x + rec.width - 0x180;
             rec.x = 0x180 - rec.width;
         }
+
         rec.x += rec.x_offset;
         rec.y += rec.y_offset;
         if (rec.x < 0x88) {
@@ -193,18 +210,23 @@ void text_run_dialog_thread_variant(void) {
             rec.tail_offset += rec.x + rec.width - 0x180;
             rec.x = 0x180 - rec.width;
         }
+
         rec.tail_offset += rec.arrow_offset;
         if (rec.y < 0x16) {
             rec.y = 0x16;
         } else if (rec.y + rec.height > 0xE4) {
             rec.y = 0xE4 - rec.height;
         }
+
+        /* Keep the tail at least 0x18 pixels inside either end of the box. */
         if (rec.tail_offset > cursor_x - 0x18) {
             rec.tail_offset = cursor_x - 0x18;
         }
         if (rec.tail_offset < -cursor_x + 0x18) {
             rec.tail_offset = -cursor_x + 0x18;
         }
+
+        /* The window grows out of the tail's spot on the box edge. */
         if (rec.position == 1) {
             bottom = rec.y + rec.height - 8;
         }
@@ -226,11 +248,14 @@ void text_run_dialog_thread_variant(void) {
         if (rec.position == 3) {
             rec.y = (0x78 - half_h) & 0xFFFE;
         }
+
         rec.x += rec.x_offset;
         rec.y += rec.y_offset;
+        /* Other boxes grow out of their center. */
         right = half_w + rec.x - 6;
         bottom = half_h + rec.y - 2;
     }
+
     win = menu_alloc_window_buffer_pair();
     win->message_id = thread_get_current_parameter_2();
     win->dialogue_selector = rec.position;
@@ -239,6 +264,7 @@ void text_run_dialog_thread_variant(void) {
     rec.rect.w = rec.width;
     rec.rect.h = rec.height;
     gfx_alloc_texture_rect(&rec.rect, win->quads, (u32*)-1);
+
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         if (text[0] == TEXT_SET_PORTRAIT) {
             win->portrait_code = text[1];
@@ -257,6 +283,8 @@ void text_run_dialog_thread_variant(void) {
         rec.last_line = rec.lines;
         menu_render_text_image_at_record_origin(&rec);
     }
+
+    /* Clamp the opening point to the dialog area and collapse the window onto it. */
     if (right < 0x88) {
         right = 0x88;
     }
@@ -270,12 +298,14 @@ void text_run_dialog_thread_variant(void) {
         bottom = 0xE4;
     }
     setXY4(&win->quads[0], right, bottom, right, bottom, right, bottom, right, bottom);
+
     from.x = rec.x;
     from.y = rec.y;
     from.w = rec.width;
     from.h = rec.height;
     rec.arrow_x = rec.x + rec.width - 0x1E;
     rec.arrow_y = rec.y + rec.height - 0x18;
+
     to.x = 0;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         setXY4(&win->quads[1], right, bottom, right, bottom, right, bottom, right, bottom);
@@ -311,6 +341,7 @@ void text_run_dialog_thread_variant(void) {
             rec.arrow_x = rec.x + rec.width - 0x1E;
         }
     }
+
     if (rec.box_type == DIALOG_BOX_TYPE_HELP) {
         win->sprites[3].u0 = 0x50;
         win->sprites[3].v0 = 0x20;
@@ -320,6 +351,7 @@ void text_run_dialog_thread_variant(void) {
         win->sprites[3].h = 9;
         win->sprites[3].clut = 0x7CBC;
     }
+
     if (rec.box_type == DIALOG_BOX_TYPE_CHECK) {
         win->sprites[3].u0 = 0x40;
         win->sprites[3].v0 = 0x78;
@@ -329,14 +361,18 @@ void text_run_dialog_thread_variant(void) {
         win->sprites[3].h = 8;
         win->sprites[3].clut = 0x7CBC;
     }
+
+    /* Copy the finished window into its pair for the other packet buffer. */
     mem_copy_bytes_nonempty(&win[1], win, 0x118);
     win[0].active = 1;
     win[1].active = 1;
+
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         menu_tween_window_quads(win, &from, &to, thread->task_words[DIALOG_THREAD_WORD_WINDOW_OPTIONS] & 0xF);
     } else {
         menu_animate_window_quad_crop(win, &from, &to);
     }
+
     window_u = win->quads[0].u0;
     rec.x = window_u + 8;
     rec.y = win->quads[0].v0 + 8;
@@ -346,12 +382,14 @@ void text_run_dialog_thread_variant(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.options != DIALOG_OPTIONS_NO_TAIL && rec.position == 2) {
         rec.y += 8;
     }
+
     no_wait = 0;
     delay = 1;
     column = 0;
     rec.color = 0;
     rec.line = 0;
     g_text_current_line = 0;
+
     if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
         event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
         if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_MALAK_REVIVED)
@@ -361,6 +399,7 @@ void text_run_dialog_thread_variant(void) {
             u32 line_width = g_text_line_widths[0] + 0x18;
             cursor_x = rec.x + ((rec.width - line_width) >> 1);
         }
+        /* Round the pen x to a multiple of 4: up from phase 2 or 3, down from phase 1. */
         if (cursor_x & 2) {
             cursor_x += 4 - (cursor_x & 3);
         } else if (cursor_x & 1) {
@@ -369,26 +408,32 @@ void text_run_dialog_thread_variant(void) {
     } else {
         cursor_x = rec.x;
     }
+
     width_override = 0xFFFF;
     cursor_y = rec.y;
     rec.mark = -1;
     saved = (u8*)-1;
     repeat = 0;
+
     while (1) {
         no_value = 0xFFFF;
         character = *text;
         CHECK_ABORT();
+
         if (character == TEXT_NEWLINE || character == TEXT_END_WAIT_FOR_CONFIRM || character == TEXT_END_AUTO_CLOSE
             || character == TEXT_PAGE_BREAK) {
             if (character == TEXT_END_AUTO_CLOSE) {
                 break;
             }
             if (character == TEXT_END_WAIT_FOR_CONFIRM) {
+                /* The end of a substituted entry returns to the text that referenced it. */
                 if (saved != (u8*)-1) {
                     text = saved;
                     saved = (u8*)-1;
                     continue;
                 }
+                /* Skip to the end of the page; adding no_value (0xFFFF) to the u16 line count
+                 * undoes the line step below. */
                 while (1) {
                     if (column >= rec.lines) {
                         break;
@@ -400,17 +445,21 @@ void text_run_dialog_thread_variant(void) {
             } else {
                 NEXT();
             }
+
             if (character != TEXT_PAGE_BREAK) {
                 column++;
                 rec.line++;
             }
+
             rec.first_line = rec.line - rec.lines;
             if (column >= rec.lines || character == TEXT_END_WAIT_FOR_CONFIRM || character == TEXT_PAGE_BREAK) {
                 if (character != TEXT_PAGE_BREAK) {
                     column = 0;
                 }
                 if (no_wait == 0) {
+                    /* Wait for Circle, Cross or Select; tick drives the cursor and arrow animation. */
                     for (tick = 0;; tick += g_script_event_speed) {
+                        /* A centered box dims its text instead of waiting for a button. */
                         if (rec.box_type == DIALOG_BOX_TYPE_CENTERED && character != TEXT_PAGE_BREAK) {
                             for (tick = 0x80; tick > 0x30; tick -= 8) {
                                 WINDOW_AT(g_menu_packet_buffer_index)->color.r = tick;
@@ -425,6 +474,8 @@ void text_run_dialog_thread_variant(void) {
                             break;
                         }
                         CHECK_ABORT();
+
+                        /* At a page break the cursor and its shadow (+2, +2) bob beside the pen. */
                         if (character == TEXT_PAGE_BREAK) {
                             if (rec.box_type != DIALOG_BOX_TYPE_PORTRAIT) {
                                 cursor_window = WINDOW_AT(g_menu_packet_buffer_index);
@@ -441,6 +492,8 @@ void text_run_dialog_thread_variant(void) {
                             if (character == TEXT_END_WAIT_FOR_CONFIRM && rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                                 g_battle_text_awaiting_input = 1;
                             }
+
+                            /* A full page shows the next-page arrow, cycling its frames with tick. */
                             if (character == TEXT_NEWLINE) {
                                 WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].u0 = (tick & 0x30) - 0x58;
                                 WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].v0 = 0x10;
@@ -448,6 +501,8 @@ void text_run_dialog_thread_variant(void) {
                                 arrow_window->sprites[2].x0 = rec.arrow_x;
                                 arrow_window->sprites[2].y0 = rec.arrow_y;
                             }
+
+                            /* Holding Square scrolls back through earlier lines with Up and Down. */
                             if (g_script_event_current_input & PSX_PAD_SQUARE) {
                                 while (1) {
                                     if (rec.line != rec.lines) {
@@ -489,6 +544,8 @@ void text_run_dialog_thread_variant(void) {
                                 win[0].icon_flags = 0;
                                 win[1].icon_flags = 0;
                             }
+
+                            /* Scroll forward to the newest lines again. */
                             for (;;) {
                                 if (rec.line - rec.lines != rec.first_line) {
                                     WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0x200;
@@ -502,7 +559,9 @@ void text_run_dialog_thread_variant(void) {
                         }
                     }
                 }
+
                 g_battle_text_awaiting_input = 0;
+                /* Hide the cursor, arrow and scroll icons in both packet buffers, a frame apart. */
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 hidden_window->sprites[0].x0 = 0x200;
                 hidden_window->sprites[1].x0 = 0x200;
@@ -514,7 +573,10 @@ void text_run_dialog_thread_variant(void) {
                 hidden_window_next->sprites[1].x0 = 0x200;
                 hidden_window_next->sprites[2].x0 = 0x200;
                 hidden_window_next->icon_flags = 0;
+
                 if (character == TEXT_END_WAIT_FOR_CONFIRM) {
+                    /* With the 0x80 dialog-type bit the window stays open for ChangeDialog, which
+                     * puts the next text id in parameter 2 (0xFFFF closes it) and resumes the thread. */
                     if (rec.no_box == 0) {
                         break;
                     }
@@ -526,6 +588,7 @@ void text_run_dialog_thread_variant(void) {
                         }
                         thread_yield();
                     }
+
                     win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                     if ((rec.text & no_value) == no_value) {
                         break;
@@ -552,9 +615,11 @@ void text_run_dialog_thread_variant(void) {
                     thread_yield();
                     continue;
                 }
+
                 if (character == TEXT_PAGE_BREAK) {
                     continue;
                 }
+
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                     menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
@@ -572,9 +637,12 @@ void text_run_dialog_thread_variant(void) {
                     rec.last_line = rec.line + rec.lines;
                     menu_render_text_image_at_record_origin(&rec);
                 }
+
+                /* Start one row up; the newline step below brings the pen to the top row. */
                 cursor_y = rec.y - 0x10;
                 thread_yield();
             }
+
             if (rec.box_type == DIALOG_BOX_TYPE_CENTERED) {
                 event_id = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
                 if ((event_id == EVENT_ID_WIEGRAF_PACT_WITH_VELIUS || event_id == EVENT_ID_MALAK_REVIVED)
@@ -586,6 +654,8 @@ void text_run_dialog_thread_variant(void) {
                     line_width = g_text_line_widths[g_text_current_line] + 0x18;
                     cursor_x = rec.x + ((rec.width - line_width) >> 1);
                 }
+                /* Unlike the first line's rounding, any phase rounds up here; the else arm never
+                 * runs. */
                 if (cursor_x & 3) {
                     cursor_x += 4 - (cursor_x & 3);
                 } else if (cursor_x & 1) {
@@ -595,6 +665,7 @@ void text_run_dialog_thread_variant(void) {
             } else {
                 cursor_x = rec.x;
             }
+
             cursor_y += 0x10;
             no_wait = 0;
         } else if (character == TEXT_CHOICE_MARK) {
@@ -603,6 +674,7 @@ void text_run_dialog_thread_variant(void) {
             NEXT();
         } else if (character == TEXT_CHOICE_SELECT) {
             if (rec.mark != -1) {
+                /* The options run from the line marked by 0xFB to the current line. */
                 selection = rec.mark;
                 for (i = 0;; i += g_script_event_speed) {
                     g_battle_text_awaiting_input = 1;
@@ -633,6 +705,7 @@ void text_run_dialog_thread_variant(void) {
                         break;
                     }
                 }
+
                 select_hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 select_hidden_window->sprites[0].x0 = 0x200;
                 select_hidden_window->sprites[1].x0 = 0x200;
@@ -640,6 +713,7 @@ void text_run_dialog_thread_variant(void) {
                 select_hidden_window_next = WINDOW_AT(g_menu_packet_buffer_index);
                 select_hidden_window_next->sprites[0].x0 = 0x200;
                 select_hidden_window_next->sprites[1].x0 = 0x200;
+
                 g_script_variables[EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION] = selection - rec.mark;
             }
             NEXT();
@@ -653,6 +727,9 @@ void text_run_dialog_thread_variant(void) {
                 }
                 thread_yield();
             }
+
+            /* With the 0x80 dialog-type bit a resume also loads the next text from
+             * parameter 2, as at 0xFE. */
             if (rec.no_box != 0) {
                 win->message_id = win[1].message_id = rec.text = thread_get_current_parameter_2();
                 if ((rec.text & no_value) == no_value) {
@@ -676,8 +753,10 @@ void text_run_dialog_thread_variant(void) {
                 thread_yield();
                 continue;
             }
+
             thread_yield();
             NEXT();
+            /* The line break after a resume doesn't wait for a button. */
             no_wait = 1;
         } else if (character == TEXT_RELEASE_WAITING_THREADS) {
             for (i = 0; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
@@ -717,6 +796,8 @@ void text_run_dialog_thread_variant(void) {
             rec.color = *text;
             NEXT();
         } else {
+            /* A substitution code with a value jumps into that entry (or the player's name);
+             * saved brings the text back here afterward. */
             substitution = &g_text_substitution_values[value_index];
             value = text_resolve_format_string_id(character, *substitution);
             if (value != -1) {
@@ -729,6 +810,7 @@ void text_run_dialog_thread_variant(void) {
                 }
                 continue;
             }
+
             if (character == TEXT_SET_NUMBER_WIDTH) {
                 NEXT();
                 width_override = *text;
@@ -747,6 +829,8 @@ void text_run_dialog_thread_variant(void) {
                     digits = width_override;
                     width_override = no_value;
                 }
+
+                /* Leading zeros print as 4-pixel spaces, except in the ones place. */
                 for (i = digits - 1; i >= 0; i--) {
                     character = value / g_text_decimal_divisors[i];
                     if (value < g_text_decimal_divisors[i] && i != 0 && started == 0) {
@@ -773,6 +857,7 @@ void text_run_dialog_thread_variant(void) {
                 }
                 NEXT();
             } else if ((character & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (character & 0xF) < 4) {
+                /* Back-reference: replay repeat bytes from value bytes back, then resume at saved. */
                 saved = text + 3;
                 value = (text[0] & 3) * 8;
                 repeat = value + (text[1] >> 5) + 4;
@@ -786,6 +871,7 @@ void text_run_dialog_thread_variant(void) {
                 } else if ((character & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
                     character = (*text & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                     NEXT();
+                    /* The glyph's second byte may itself start a back-reference. */
                     if ((*text & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (*text & 0xF) < 4) {
                         saved = text + 3;
                         value = (text[0] & 3) * 8;
@@ -797,6 +883,7 @@ void text_run_dialog_thread_variant(void) {
                     }
                     character += *text;
                 }
+
                 {
                     text_glyph_state_t* glyph = &g_text_typewriter_glyph;
 
@@ -816,7 +903,9 @@ void text_run_dialog_thread_variant(void) {
             }
         }
     }
+
 end:
+    /* A portrait window shrinks back into the point it opened from. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         from.w = 0;
         from.h = 0;
@@ -825,6 +914,7 @@ end:
         mem_copy_bytes_nonempty(&to, &from, 8);
         menu_tween_window_quads(win, &from, &to, 4);
     }
+
     g_battle_text_awaiting_input = 0;
     win->active = 0;
     menu_release_window_buffer_pair(win);

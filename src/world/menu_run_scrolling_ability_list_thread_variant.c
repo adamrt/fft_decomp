@@ -79,11 +79,15 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     window.rect.w = entry->inner_width - 8;
     window.rect.h = entry->window.h - 0x1A;
     base = page;
+
+    /* The frame sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
+     * two lines above the text ring's first row must stay blank. */
     clear.x = window.rect.x / 4 + entry->vram_origin.x;
     clear.y = (entry->vram_origin.y & 0xFF00) + 0xFE;
     clear.w = window.rect.w / 4;
     clear.h = 2;
     ClearImage(&clear, 0, 0, 0);
+
     texture_window.x = 0;
     texture_window.y = 0x80;
     texture_window.w = 0x100;
@@ -97,6 +101,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     SetDrawMode(&page->icon_mode, 0, 0, GetTPage(0, 2, 0x3C0, 0x100), &g_gfx_texture_window);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 1, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
+
+    /* Scroll arrows, the scroll-bar thumb and the frame sprite. */
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
@@ -130,10 +136,13 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
+
     menu_build_and_upload_window_frame_image(
         entry->inner_width, entry->inner_height, &image_rect, MENU_WINDOW_FRAME_ALTERNATE_UPLOAD);
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, window.rect.w * window.rect.h / 2);
+
+    /* Restore the saved scroll position, falling back to the top if the cursor would leave the view. */
     row_offset = layout->row_offset;
     if (layout->columns.hidden_rows < row_offset) {
         row_offset = layout->columns.hidden_rows;
@@ -143,6 +152,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         row_offset = 0;
         cursor = 0;
     }
+
+    /* The first page's buffer is freed after the first yield, once its upload has run. */
     menu_draw_text_columns_narrow(entry, &row_offset, buffer);
     redraw_pending = 1;
     ring = 0;
@@ -151,12 +162,16 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
     image_rect.w = window.rect.w / 4;
     image_rect.h = window.rect.h;
     LoadImage(&image_rect, (u32*)buffer);
+
+    /* The loop draws from the two pages alternately. The copy also took page 0's icon pointers,
+     * so point each page back at its own sprites. */
     mem_copy_bytes_nonempty(&base[1], base, sizeof(menu_list_page_t));
     for (i = 0; i < 2; i++) {
         base[i].icons.icons[0] = &icons0[i];
         base[i].icons.icons[1] = &icons1[i];
         base[i].icons.icons[2] = &icons2[i];
     }
+
     i = 0;
     scroll_accum = 0;
     scroll_delta = 0;
@@ -164,6 +179,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         page = &base[i & 1];
         frame = &page->frame;
         SetSemiTrans(&frame, 1);
+
+        /* Input waits for a running row scroll to finish and skips the first frame. */
         if (scroll_delta == 0 && menu_can_accept_input() != 0 && i != 0) {
             if (layout->columns.mode[0] == MENU_TEXT_COLUMN_TEXT && layout->columns.mode[1] == MENU_TEXT_COLUMN_TEXT) {
                 if (g_script_event_input & (PSX_PAD_RIGHT | PSX_PAD_LEFT)) {
@@ -171,6 +188,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 }
                 layout->columns.text_ids[2] = &toggle;
             }
+
+            /* Square with up or down pages through the list instead (the redraw call after the yield). */
             if ((g_script_event_input & PSX_PAD_UP)
                 && (!(g_script_event_current_input & PSX_PAD_SQUARE) || g_menu_input_mode != MENU_INPUT_PLAYER)) {
                 if (cursor != 0) {
@@ -198,6 +217,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             } else {
                 hold_time = 0;
             }
+
+            /* Draw the row scrolling into view into the ring slot below the visible rows, or above them. */
             if (scroll_delta != 0) {
                 if (scroll_delta > 0) {
                     image_rect.y = (((ring + layout->columns.row_count) * 16) & 0x7F) + entry->vram_origin.y;
@@ -210,6 +231,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 buffer = menu_alloc_memory(window.rect.w * 8);
                 menu_clear_render_buffer(buffer, window.rect.w * 8);
                 g_menu_text_state.pen.stride = window.rect.w;
+
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + scroll_delta;
                     menu_set_text_origin(layout->columns.x[column], 0);
@@ -254,9 +276,11 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                         }
                     }
                 }
+
                 g_menu_text_palette_offset = 0;
                 g_menu_text_state.pen.color = 0;
                 LoadImage(&image_rect, (u32*)buffer);
+                /* Blank the two lines above the new row for the same reason as the setup clear. */
                 clear.h = 2;
                 clear.x = image_rect.x;
                 clear.y = ((image_rect.y - 2) & 0xFF) + (image_rect.y & 0xFF00);
@@ -264,13 +288,17 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
                 ClearImage(&clear, 0, 0, 0);
             }
         }
+
         thread_yield();
+
+        /* A redrawn page's buffer is freed a frame late, after its upload has run. */
         if (redraw_pending != 0) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
         if (scroll_delta == 0 && menu_can_accept_input() != 0) {
             buffer = world_menu_redraw_text_page_on_scroll_in_rect(entry, &row_offset, &ring, &cursor, &window.rect);
+            /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
@@ -279,6 +307,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
+
         menu_select_icon_cluts(&page->icons.base);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         menu_select_icon_sprite_clut(page->icons.icons[1]);
@@ -289,6 +318,8 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             frame->clut = 0x7FFC;
         }
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
+
+        /* Scroll arrows show only where rows are hidden; the thumb tracks the selected row. */
         if (layout->columns.hidden_rows != 0 && thread_is_previous_running() == 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
@@ -310,6 +341,9 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             menu_handle_action(entry, cursor);
         }
         menu_handle_cancel_input(entry);
+
+        /* Advance a row scroll every other frame at speed 1 and every frame at speed 2, faster once
+         * the button has been held past the acceleration delay. */
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (hold_time < g_main_menu_scroll_accel_delay) {
@@ -320,6 +354,9 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             scroll_accum += scroll_delta * (step << 1);
         }
         hold_time += g_script_event_speed;
+
+        /* A whole 16-pixel row has scrolled: commit it. A direction held past the initial repeat
+         * delay is fed back into the input so the scroll keeps going. */
         if (scroll_accum < -0xF || scroll_accum > 0xF) {
             ring += scroll_delta;
             row_offset += scroll_delta;
@@ -332,7 +369,9 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
             menu_free_memory(buffer);
             row_buffer_live = 0;
         }
+
         frame->v0 = (ring * 16 + scroll_accum - 2) & 0x7F;
+        /* The frame zooms open over the first 12 ticks. */
         if (i * g_script_event_speed < 12) {
             gfx_init_image_loading(
                 &page->frame, &entry->vram_origin, &entry->window, (const image_load_parameters_t*)&window);
@@ -347,6 +386,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         }
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
+
         if (entry->header_id >= 5) {
             gfx_draw_or_append_gpu_primitive(page->icons.icons[0]);
             gfx_draw_or_append_gpu_primitive(page->icons.icons[1]);
@@ -365,6 +405,7 @@ void menu_run_scrolling_ability_list_thread_variant(void) {
         gfx_draw_or_append_gpu_primitive(&page->icons.base);
         i++;
     }
+
     if (row_buffer_live != 0) {
         menu_free_memory(buffer);
     }

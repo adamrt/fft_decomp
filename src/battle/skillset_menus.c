@@ -636,6 +636,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             g_battle_team_golem[i] = 0;
         }
         g_battle_action_current_attacker.mimic_pending = 0;
+
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
             unit = &g_battle_unit_stats[i];
             unit->ct = 0;
@@ -643,9 +644,11 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
             unit->ability_outcome = 0;
             unit->charged_ability_ct = 0xff;
         }
+
         battle_ai_end_action_simulation();
         return 0xe000;
     }
+
     if (mode == BATTLE_BETWEEN_TURN_MODE_FIND_ACTIVE_UNIT) {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
             unit = &g_battle_unit_stats[i];
@@ -662,6 +665,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
         }
         return 0xdf00;
     }
+
     while (result == 0) {
         switch (g_battle_between_turn_state) {
         case BATTLE_BETWEEN_TURN_STATE_ADD_CT:
@@ -676,12 +680,14 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                         speed += speed >> 1;
                     }
                     ct = unit->ct + speed;
+                    /* The tick caps CT at 0xFE; only Quick sets 0xFF. */
                     if (ct >= 0xff) {
                         ct = 0xfe;
                     }
                     unit->ct = ct;
                 }
             }
+
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_PICK_UNIT;
             break;
         case BATTLE_BETWEEN_TURN_STATE_PICK_UNIT:
@@ -697,20 +703,27 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     }
                 }
             }
+
             if (best != 0xff) {
                 unit = &g_battle_unit_stats[best];
+                /* A jumping unit waits at 99 CT, ready to act once it lands; pick again. */
                 if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP)) {
                     unit->ct = UNIT_TURN_CT_THRESHOLD - 1;
                     continue;
                 }
+
+                /* A Quick target (CT 0xFF) restarts from 0; otherwise CT beyond 100 carries over. */
                 if (unit->ct == 0xff) {
                     unit->ct = 0;
                 } else {
                     unit->ct = max_ct % UNIT_TURN_CT_THRESHOLD;
                 }
+
                 ret = battle_status_build_upkeep_action(best, unit);
                 if (ret != 0) {
                     result = best | BATTLE_TURN_EVENT_ACTION_RESULT;
+                    /* A crystal or treasure (1) or an expired Death Sentence (3) ends here without
+                     * a turn; only the first counts as a casualty. */
                     if (ret & 1) {
                         if (ret == 1) {
                             main_unit_increase_casualty_counters(unit);
@@ -718,6 +731,8 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                         return result;
                     }
                 }
+
+                /* A staged revival or other change (2) gets its turn even when the unit can't act. */
                 flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags
                         & (BATTLE_TURN_STATUS_CT_FROZEN | BATTLE_TURN_STATUS_INCAPACITATED | BATTLE_TURN_STATUS_DEAD))
@@ -736,6 +751,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 }
                 continue;
             }
+
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_TICK_CHARGES;
             break;
         case BATTLE_BETWEEN_TURN_STATE_TICK_CHARGES:
@@ -759,6 +775,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 unit = &g_battle_unit_stats[i];
                 flags = battle_status_calculate_turn_flags(unit);
                 if (!(flags & BATTLE_TURN_STATUS_BLOCKS_WAIT_MENU_MASK) && unit->charged_ability_ct == 0) {
+                    /* A performer's song or dance starts charging again instead of ending. */
                     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                         & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
                         main_unit_copy_last_ability_ct(unit);
@@ -771,6 +788,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     return result;
                 }
             }
+
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_EXPIRE_STATUSES;
             break;
         case BATTLE_BETWEEN_TURN_STATE_EXPIRE_STATUSES:
@@ -808,9 +826,11 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     return result;
                 }
             }
+
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_ADD_CT;
             break;
         case BATTLE_BETWEEN_TURN_STATE_PICK_UNIT_AFTER_CHARGE:
+            /* Only a Quick target (CT 0xFF, above the tick's 0xFE cap) takes its turn here. */
             max_ct = 0xfe;
             best = 0xff;
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
@@ -822,6 +842,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     }
                 }
             }
+
             if (best != 0xff) {
                 unit = &g_battle_unit_stats[best];
                 unit->has_turn = 1;
@@ -835,6 +856,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                 result = best | BATTLE_TURN_EVENT_UNIT_READY;
                 return result;
             }
+
             g_battle_between_turn_resume_state = BATTLE_BETWEEN_TURN_STATE_RESOLVE_CHARGE;
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_MARK_MIMES;
             break;
@@ -856,6 +878,7 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     }
                 }
             }
+
             g_battle_between_turn_state = BATTLE_BETWEEN_TURN_STATE_POISON_AND_REGEN;
             break;
         case BATTLE_BETWEEN_TURN_STATE_POISON_AND_REGEN:
@@ -921,14 +944,17 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
                     }
                 }
             }
+
             g_battle_between_turn_state = g_battle_between_turn_resume_state;
             break;
         }
+
         count++;
         if (count >= 1201) {
             break;
         }
     }
+
     return BATTLE_TURN_EVENT_NONE;
 }
 
@@ -1263,6 +1289,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
     }
 
     if (mode != BATTLE_AT_LIST_MODE_ACTIONS_ONLY) {
+        /* The unit taking its turn heads the list with key 0. */
         unit = battle_unit_find_active_data_pointer();
         if (unit != 0) {
             battle_action_sort_at_list(unit->battle_id, 0, 0, list);
@@ -1275,6 +1302,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
             continue;
         }
 
+        /* Stop and Sleep delay every entry by their remaining CT. */
         wait = 0;
         if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_STOP)] & STATUS_BYTE_MASK(STATUS_ID_STOP)) {
             wait = unit->status_ct[STATUS_CT_INDEX(STATUS_ID_STOP)];
@@ -1293,6 +1321,9 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
                 tick += phase_tick;
             }
             placed += battle_action_sort_at_list(slot, 1, (tick << 8) & 0xff00, list);
+
+            /* A performer repeats its song or dance every ability_ct ticks while the tick fits
+             * the key's high byte. */
             if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PERFORMING)]
                 & STATUS_BYTE_MASK(STATUS_ID_PERFORMING)) {
                 main_unit_copy_last_ability_ct(unit);
@@ -1318,6 +1349,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
         innate = unit->status_sets.innate[STATUS_BYTE_INDEX(STATUS_ID_SLOW)];
         if (current & STATUS_BYTE_MASK(STATUS_ID_SLOW)) {
             slow = unit->status_ct[STATUS_CT_INDEX(STATUS_ID_SLOW)];
+            /* Innate Slow or Haste outlasts the simulation (0x200 ticks). */
             if (innate & STATUS_BYTE_MASK(STATUS_ID_SLOW)) {
                 slow = 0x200;
             }
@@ -1338,15 +1370,18 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
         }
 
         speed = unit->attributes[UNIT_ATTRIBUTE_SPEED];
+        /* A zero Speed would never reach 100 CT. */
         if (speed == 0) {
             speed = 1;
         }
+
         tick = wait;
         ct = unit->ct;
         for (turns = 0; turns < BATTLE_AT_LIST_CAPACITY; turns++) {
             while (ct < UNIT_TURN_CT_THRESHOLD) {
                 tick++;
                 value = speed;
+                /* Slow takes precedence over Haste, but both count down. */
                 if (slow != 0) {
                     value >>= 1;
                     slow--;
@@ -1361,16 +1396,21 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
                     value = value * 3 >> 1;
                 }
                 ct += value;
+                /* Give up on a unit that cannot reach 100 CT within 500 ticks. */
                 if (tick >= 0x1f5) {
                     break;
                 }
             }
+
+            /* Keys hold the tick in one byte. */
             if (tick >= 0x100) {
                 break;
             }
+
             remainder = ct;
             remainder %= UNIT_TURN_CT_THRESHOLD;
             ct = remainder;
+            /* Within a tick, the unit that overshoots 100 CT further sorts first. */
             added = battle_action_sort_at_list(
                 slot, 0, ((tick << 8) + (UNIT_TURN_CT_THRESHOLD - remainder)) & 0xffff, list);
             if (added == 0) {

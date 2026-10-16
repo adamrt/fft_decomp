@@ -237,6 +237,7 @@ void menu_load_selected_unit_variant(void) {
     editor->left_weapon_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
     editor->right_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
     editor->left_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
+
     editor->physical_attack = unit->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     editor->physical_class_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
     editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
@@ -244,6 +245,7 @@ void menu_load_selected_unit_variant(void) {
         <= unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE])
         editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
     editor->physical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
+
     editor->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     editor->magical_class_evade = 0;
     editor->magical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
@@ -284,6 +286,8 @@ void menu_load_selected_unit_variant(void) {
             i++;
         } while (i < 5);
 
+        /* The fourth ability (index 3) stays only when the monster skill check passes; the
+         * check runs on the main stack. */
         g_thread_call_target = battle_menu_init_monster_skill_check;
         if (thread_call_on_main_stack(unit) == 0)
             editor->ability_ids[3] = 0;
@@ -296,6 +300,7 @@ void menu_load_selected_unit_variant(void) {
         while (output_index < 5)
             editor->ability_ids[output_index++] = 0;
     } else {
+        /* Both name marks are overwritten when the names are refilled and copied at the end. */
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
@@ -309,12 +314,14 @@ void menu_load_selected_unit_variant(void) {
         editor->ability_ids[4] = unit->abilities.movement;
     }
 
+    /* Empty ability rows become -1, as empty equipment slots do. */
     for (i = 0; i < 5; i++) {
         list_value = editor->ability_ids[i];
         if (list_value == 0)
             editor->ability_ids[i] = list_value - 1;
     }
 
+    /* Two hands applies only when exactly one hand holds an item. */
     item_id = ITEM_ID_NOTHING;
     editor->two_hands = 0;
     if (editor->equipment[0] != -1) {
@@ -402,6 +409,7 @@ void menu_load_selected_unit_variant(void) {
     editor->left_weapon_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_EVADE];
     editor->right_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER];
     editor->left_weapon_power = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER];
+
     editor->physical_attack = unit->attributes[UNIT_ATTRIBUTE_PHYSICAL_ATTACK];
     editor->physical_class_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_CLASS_PHYSICAL_EVADE];
     editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_PHYSICAL_EVADE];
@@ -409,6 +417,7 @@ void menu_load_selected_unit_variant(void) {
         <= unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE])
         editor->physical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_LEFT_SHIELD_PHYSICAL_EVADE];
     editor->physical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_PHYSICAL_EVADE];
+
     editor->magical_attack = unit->attributes[UNIT_ATTRIBUTE_MAGIC_ATTACK];
     editor->magical_class_evade = 0;
     editor->magical_shield_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_SHIELD_MAGIC_EVADE];
@@ -449,6 +458,8 @@ void menu_load_selected_unit_variant(void) {
             i++;
         } while (i < 5);
 
+        /* The fourth ability (index 3) stays only when the monster skill check passes; the
+         * check runs on the main stack. */
         g_thread_call_target = battle_menu_init_monster_skill_check;
         if (thread_call_on_main_stack(unit) == 0)
             editor->ability_ids[3] = 0;
@@ -461,6 +472,7 @@ void menu_load_selected_unit_variant(void) {
         while (output_index < 5)
             editor->ability_ids[output_index++] = 0;
     } else {
+        /* Both name marks are overwritten when the names are refilled and copied at the end. */
         field_value = unit->primary_skillset;
         editor->ability_ids[0] = field_value;
         if (field_value == 0)
@@ -474,12 +486,14 @@ void menu_load_selected_unit_variant(void) {
         editor->ability_ids[4] = unit->abilities.movement;
     }
 
+    /* Empty ability rows become -1, as empty equipment slots do. */
     for (i = 0; i < 5; i++) {
         list_value = editor->ability_ids[i];
         if (list_value == 0)
             editor->ability_ids[i] = list_value - 1;
     }
 
+    /* Two hands applies only when exactly one hand holds an item. */
     item_id = 0;
     editor->two_hands = 0;
     if (editor->equipment[0] != -1) {

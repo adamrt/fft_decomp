@@ -96,6 +96,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
         work = battle_heap_alloc_block(sizeof(effect_dome_mesh_work_t), state_index);
         record->work_slots[callback_slot] = work;
+
         texture_page_config = entry->texture_page_config;
         tpage = (texture_page_config.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT)
             | EFFECT_RENDER_TEXTURE_PAGE_BASE;
@@ -112,6 +113,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
             }
         }
+
         work->spin = 0;
         work->v_scroll = 0;
         work->buffer = 0;
@@ -124,6 +126,8 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     case EFFECT_CALLBACK_PHASE_UPDATE:
         target_index = g_battle_effect_state_records[state_index].timeline.target_index;
         work = record->work_slots[callback_slot];
+
+        /* battle_effect_interpolate_emitter_spawn_position's lerp, done inline on the same fields. */
         EFFECT_READ_CURVE(j, i, entry->motion_curves.origin, frame);
         origin.vx = battle_lerp_fixed8(entry->origin_start.x, entry->origin_end.x, i);
         origin.vy = battle_lerp_fixed8(entry->origin_start.y, entry->origin_end.y, i);
@@ -192,8 +196,9 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         EFFECT_READ_CURVE(j, i, entry->motion_curves.spin, frame);
         work->spin = (work->spin + battle_lerp_fixed8(entry->spin_speed_start, entry->spin_speed_end, i)) & (ONE - 1);
 
-        /* The base stays in a variable: the target adds it to the row offset
-         * after each call instead of folding it into the induction variable. */
+        /* Rows climb from the rim (row 0) to the pole (row 8) in equal latitude steps, each row's
+         * height scaled by growth.vy. The base stays in a variable: the target adds it to the row
+         * offset after each call instead of folding it into the induction variable. */
         lattice_bytes = (u8*)getScratchAddr(0);
         for (j = 0; j < DOME_MESH_ROWS + 1; j++) {
             k = ((radius + (work->radius_offset >> 8)) * rcos(j * DOME_MESH_LATITUDE_STEP)) >> 12;
@@ -209,8 +214,10 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             growth.vy += growth_step.vy;
         }
 
+        /* Grow the radius for the next frame; growth_step.vx accelerates the growth. */
         work->radius_speed += growth_step.vx;
         work->radius_offset += growth.vx + work->radius_speed;
+
         SetRotMatrix(&g_battle_camera_matrix);
         SetTransMatrix(&g_battle_camera_matrix);
 
@@ -236,6 +243,8 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         quad->x1 = screen[1].vx;
         quad->y1 = screen[1].vy;
         depth[1][1] = screen[1].vz;
+
+        /* Row 0 runs to lattice column 16, a full turn that lands back on column 0. */
         for (j = 2; j < DOME_MESH_SEGMENTS + 1; j++) {
             quad = &work->quads[work->buffer][j - 1];
             quad->x0 = screen[1].vx;
@@ -254,10 +263,11 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             depth[1][j] = screen[1].vz;
         }
 
-        /* Rows 1-7 reuse the lower corners of the row above; the last column
-         * closes the ring on column 0. */
+        /* Rows 1-7 reuse the lower corners of the row above and add lattice row
+         * i + 1. */
         for (i = 1; i < DOME_MESH_ROWS; i++) {
             n = i + 1;
+
             effect_dome_mesh_load_translated_vertex(n, 0, &origin, &vertex);
             RotTrans(&vertex, &screen[0], &screen[0].pad);
             quad = &work->quads[work->buffer][i * DOME_MESH_SEGMENTS];
@@ -289,6 +299,8 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 quad->y1 = screen[1].vy;
                 depth[n][j] = screen[1].vz;
             }
+
+            /* The last quad closes the ring on the row's first quad. */
             quad = &work->quads[work->buffer][i * DOME_MESH_SEGMENTS + DOME_MESH_SEGMENTS - 1];
             other = &work->quads[work->buffer][(i - 1) * DOME_MESH_SEGMENTS + DOME_MESH_SEGMENTS - 1];
             quad->x0 = screen[1].vx;
@@ -302,6 +314,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->y1 = other->y0;
         }
 
+        /* Every quad maps the same texture window, scrolled by v_scroll (8.8 fixed). */
         i = work->v_scroll >> 8;
         for (j = 0; j < DOME_MESH_QUAD_COUNT; j++) {
             quad = &work->quads[work->buffer][j];
@@ -311,6 +324,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad->v2 = quad->v3 = v + v_span + i;
         }
 
+        /* Vertex colors: the color curves (neutral without them) scaled by each lattice row's brightness. */
         n = entry->brightness_row;
         if (entry->flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             red = g_battle_effect_animation_curve_data
@@ -322,6 +336,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             red = green = blue = EFFECT_COLOR_NEUTRAL;
         }
 
+        /* Lattice row r shades corners 2/3 of quad row r and corners 0/1 of quad row r - 1. */
         k = g_effect_dome_mesh_brightness_table[n][0];
         shade_r = (k * red) / ONE;
         shade_g = (k * green) / ONE;
@@ -330,6 +345,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             quad = &work->quads[work->buffer][j];
             setRGB2(quad, quad->r3 = shade_r, quad->g3 = shade_g, quad->b3 = shade_b);
         }
+
         for (i = 0; i < DOME_MESH_ROWS - 1; i++) {
             k = g_effect_dome_mesh_brightness_table[n][i + 1];
             shade_r = (k * red) / ONE;
@@ -342,6 +358,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                     quad->b1 = other->b2 = other->b3 = shade_b);
             }
         }
+
         k = g_effect_dome_mesh_brightness_table[n][DOME_MESH_ROWS];
         shade_r = (k * red) / ONE;
         shade_g = (k * green) / ONE;
@@ -351,6 +368,7 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             setRGB0(quad, quad->r1 = shade_r, quad->g1 = shade_g, quad->b1 = shade_b);
         }
 
+        /* Sort each quad by a quarter of its mean corner depth; quads outside the ordering table are skipped. */
         for (i = 0; i < DOME_MESH_ROWS; i++) {
             for (j = 0; j < DOME_MESH_SEGMENTS - 1; j++) {
                 n = (depth[i][j] + depth[i][j + 1] + depth[i + 1][j] + depth[i + 1][j + 1]) / 16;
@@ -358,6 +376,8 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                     addPrim(&ot[n], &work->quads[work->buffer][i * DOME_MESH_SEGMENTS + j]);
                 }
             }
+
+            /* The closing quad spans the last lattice column and column 0. */
             n = (depth[i][0] + depth[i][DOME_MESH_SEGMENTS - 1] + depth[i + 1][0]
                     + depth[i + 1][DOME_MESH_SEGMENTS - 1])
                 / 16;
@@ -365,11 +385,15 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 addPrim(&ot[n], &work->quads[work->buffer][i * DOME_MESH_SEGMENTS + DOME_MESH_SEGMENTS - 1]);
             }
         }
+
+        /* The next update fills the other buffer while this one is drawn. */
         work->buffer = 1 - work->buffer;
         break;
 
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the last update's quads may still be drawing. The null
+         * check below comes after this read through work (retail order). */
         if (work->destroy_delay == 0) {
             work->destroy_delay = 1;
             break;

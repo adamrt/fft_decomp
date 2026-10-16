@@ -43,6 +43,7 @@ void menu_start_dead_unit_threads(void) {
         g_dead_unit_menu_flags[index] = 0;
     }
 
+    /* List the ability text ids whose bits are set in the 0x40-byte learned set. */
     value_count = 0;
     for (byte_index = 0; byte_index < 0x40; byte_index++) {
         s32 mask = 1;
@@ -83,6 +84,7 @@ void menu_start_dead_unit_threads(void) {
         layout->hidden_rows = value_count - 8;
     }
 
+    /* Result 0: nothing to pick up; show message 0x183c and end. */
     if (context->result == 0) {
         message_id = 0x183c;
         g_menu_thread_menu_data[DEAD_UNIT_MENU_MESSAGE].text_id = message_id;
@@ -98,7 +100,9 @@ void menu_start_dead_unit_threads(void) {
     }
 
     g_menu_dead_unit_result = 0;
+    /* Result 4: a treasure item. */
     if (context->result == 4) {
+        /* At the 99 limit, message 0x101b also shows a quarter of the item's price. */
         if (main_item_get_total_equipment_quantity(context->treasure_item, 1) == 0x63) {
             g_text_substitution_values[0] = context->treasure_item;
             g_text_substitution_values[1] = context->treasure_item;
@@ -121,6 +125,8 @@ void menu_start_dead_unit_threads(void) {
         thread_exit_current();
     }
 
+    /* Close the tile, summary and two unit stats panels before the crystal menus. */
+
     thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
     thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
@@ -130,6 +136,8 @@ void menu_start_dead_unit_threads(void) {
     thread_wait_until_inactive(THREAD_SLOT_RIGHT_UNIT_STATS);
     thread_wait_until_inactive(THREAD_SLOT_HOVERED_UNIT_STATS);
 
+    /* Result 1 shows the learned-ability list, 2 the confirm menu, and 3 first offers the
+     * choice between them. */
     for (;;) {
         if (context->result == 3) {
             g_option_dead_unit_secondary_result = 0xff;
@@ -168,6 +176,7 @@ void menu_start_dead_unit_threads(void) {
                 g_menu_dead_unit_action = 1;
                 break;
             }
+            /* Backing out of the list returns to the choice for result 3. */
             if (g_option_dead_unit_primary_result == 1 || (g_option_dead_unit_primary_result & 0xff) == 0xff) {
                 if (context->result == 3) {
                     continue;
@@ -188,6 +197,7 @@ void menu_start_dead_unit_threads(void) {
                 continue;
             }
         }
+
         g_menu_dead_unit_action = 0;
         break;
     }

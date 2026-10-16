@@ -244,6 +244,7 @@ s32 battle_ai_is_pathfinding_budget_exhausted(void) {
 s32 battle_ai_evaluate_ability_outcome(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
     s32 i;
+
     if (g_battle_ai_data_base.resume_pending) {
         /* Resume: each state re-enters the evaluation step that suspended. */
         switch (g_battle_ai_data_base.outcome_evaluation_state) {
@@ -267,6 +268,8 @@ s32 battle_ai_evaluate_ability_outcome(void) {
             goto evaluate_tile_targets;
         }
     }
+
+    /* Out of scanline budget: suspend; the PREPARE state resumes at this test. */
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
         ai->outcome_evaluation_state = AI_ABILITY_EVALUATION_PREPARE;
         return -1;
@@ -274,6 +277,8 @@ s32 battle_ai_evaluate_ability_outcome(void) {
     {
         s32 flags = ai->considered_ability.ai_flags.word;
         ai->resume_pending = 0;
+        /* The sign bit is AI_ABILITY_USABLE_BY_AI. A random-use ability goes on only when
+         * a roll of 0..127 does not exceed random_use_threshold. */
         if (flags >= 0)
             return 0;
         if (flags & AI_ABILITY_RANDOM_USE) {
@@ -282,12 +287,14 @@ s32 battle_ai_evaluate_ability_outcome(void) {
                 return 0;
         }
     }
+
     ai->current_action.command.skillset_id = ai->considered_ability.skillset;
     ai->current_action.command.ability_id = ai->considered_ability.ability_id;
     /* Item selection updates only the low byte of the 16-bit command field. */
     *(u8*)&ai->current_action.command.item_or_equipment = ai->considered_ability.parameters.fields.item_id;
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++)
         ai->targetability.live.unit_targetable[i] = ai->targetability.live.unit_active[i];
+
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_TARGET_MAP_TILES) {
         s32 acting_id = ai->acting_unit_id;
         ai->current_action.command.targeting_type = BATTLE_TARGETING_TYPE_UNIT;
@@ -312,6 +319,7 @@ s32 battle_ai_evaluate_ability_outcome(void) {
         battle_ai_insert_ranked_action();
         return 0;
     }
+
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_REFLECTABLE) {
     evaluate_reflected_targets:
         if (battle_ai_evaluate_reflected_target_origins() == -1) {
@@ -319,6 +327,7 @@ s32 battle_ai_evaluate_ability_outcome(void) {
             return -1;
         }
     }
+
     if (!battle_ai_filter_useful_targets())
         return 0;
     if (ai->targetability.live.unit_targetable[ai->acting_unit_id]) {
@@ -328,6 +337,7 @@ s32 battle_ai_evaluate_ability_outcome(void) {
             return -1;
         }
     }
+
     ai->ability_effect_on_self = battle_ai_classify_ability_effect(ai->acting_unit_id, 1);
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_FOLLOW_TARGET) {
         ai->current_action.command.targeting_type = BATTLE_TARGETING_TYPE_UNIT;
@@ -368,11 +378,13 @@ s32 battle_ai_evaluate_ability_outcome(void) {
             for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++)
                 ai->targetability.live.unit_targetable[i] = ai->targetability.snapshot.unit_targetable_saved[i];
         }
+
         if (!ai->considered_ability.parameters.fields.aoe) {
             battle_ai_insert_ranked_action();
             return 0;
         }
     }
+
     if (battle_ai_exclude_enemies_acting_before_ct()) {
         ai->current_action.command.targeting_type = BATTLE_TARGETING_TYPE_TILE;
         if (ai->considered_ability.ai_flags.word & AI_ABILITY_CONSUME_EVALUATED_ORIGINS)
@@ -383,6 +395,7 @@ s32 battle_ai_evaluate_ability_outcome(void) {
             return -1;
         }
     }
+
     battle_ai_insert_ranked_action();
     return 0;
 }
@@ -1354,10 +1367,13 @@ s32 battle_ai_simulate_action_and_score(void) {
         if (g_battle_ai_data_base.action_simulation_phase == AI_SIMULATION_SCORE_STATE)
             goto score_state;
     }
+
     if (VSync(1) >= AI_DECISION_SCANLINE_LIMIT) {
         ai->action_simulation_phase = AI_SIMULATION_PREPARE_ACTION;
         return -1;
     }
+
+    /* Every exit below restores this baseline, undoing the simulation. */
     battle_ai_save_unit_state(AI_SNAPSHOT_BASELINE);
     ai->ability_processing_done = 0;
     /* Direct array iteration changes the bytes; retain a workspace-relative cursor. */
@@ -1367,6 +1383,9 @@ s32 battle_ai_simulate_action_and_score(void) {
     }
     ai->current_action.rank.priority = 0;
     ai->current_action.rank.base_hit_percent = 0xff;
+
+    /* Simulate the action and the move in the candidate's order. An immediate action
+     * that hits nothing rejects the candidate. */
     if (ai->current_action.act_before_move) {
         if (ai->current_action.command.skillset_id != 0
             && ai->current_action.command.skillset_id != SKILLSET_ID_DEFEND) {
@@ -1394,6 +1413,7 @@ s32 battle_ai_simulate_action_and_score(void) {
             ai->acting_unit->action_taken = 1;
         }
     }
+
     if (ai->current_action.command.skillset_id == SKILLSET_ID_DEFEND) {
         battle_status_inflict_defending_to_battle_id(ai->acting_unit_id);
         ai->current_action.rank.base_hit_percent = 100;
@@ -1401,11 +1421,15 @@ s32 battle_ai_simulate_action_and_score(void) {
     }
     if (ai->current_action.command.skillset_id == 0)
         ai->current_action.rank.base_hit_percent = 100;
+
+    /* End the turn and save the between-turn globals the simulation overwrites. */
     battle_action_end_turn(ai->acting_unit_id);
     ai->saved_between_turn_state = g_battle_between_turn_state;
     ai->saved_between_turn_resume_state = g_battle_between_turn_resume_state;
     ai->saved_turn_unit_id = g_battle_turn_unit_id;
     ai->simulated_turn_events = 0;
+
+    /* Run the turn order until no unit is charging or performing, or the event limit hits. */
     for (;;) {
     advance_turns:
         if (VSync(1) >= AI_TURN_SIMULATION_SCANLINE_LIMIT) {
@@ -1416,6 +1440,8 @@ s32 battle_ai_simulate_action_and_score(void) {
         ai->simulated_turn_events++;
         if (ai->simulated_turn_events >= AI_SIMULATED_TURN_LIMIT)
             break;
+
+        /* The control returns the turn event in bits 8..15 and its unit in the low byte. */
         unit_index = battle_action_run_between_turn_control(BATTLE_BETWEEN_TURN_MODE_RUN);
         status = unit_index & 0xff00;
         unit_index &= 0xff;
@@ -1442,6 +1468,7 @@ s32 battle_ai_simulate_action_and_score(void) {
                 ai->unit_acts_before_me[unit_index] = 1;
             unit->has_turn = 0;
         }
+
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             unit = &g_battle_unit_stats[unit_index];
             if (unit->entd_slot != BATTLE_ENTD_SLOT_NONE
@@ -1452,6 +1479,7 @@ s32 battle_ai_simulate_action_and_score(void) {
         if (unit_index == BATTLE_UNIT_ID_NONE)
             break;
     }
+
     g_battle_between_turn_state = ai->saved_between_turn_state;
     g_battle_between_turn_resume_state = ai->saved_between_turn_resume_state;
     g_battle_turn_unit_id = ai->saved_turn_unit_id;
@@ -1461,6 +1489,8 @@ score_state:
         ai->action_simulation_phase = AI_SIMULATION_SCORE_STATE;
         return -1;
     }
+
+    /* A refresh pass only updates each unit's transient status flags and returns 0. */
     if (ai->targetability.live.target_setting_flags & AI_TARGET_SETTING_REFRESH_UNIT_STATUS_FLAGS) {
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             decision = &ai->unit_decisions[unit_index];
@@ -1487,6 +1517,7 @@ score_state:
         }
     } else {
         battle_ai_clear_current_action_decision();
+        /* Score every unit on HP, statuses, kept equipment, MP and Golem; enemies count negative. */
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
             status = ai->unit_compact_indices[unit_index];
             if (status == 0xff)
@@ -1495,6 +1526,7 @@ score_state:
             score = unit->hp;
             score *= AI_HP_SCORE_SCALE;
             score /= unit->max_hp;
+
             status = 0;
             /* A pointer to unit_decisions adds an addiu and changes scheduling;
              * retain the workspace-relative stride. */
@@ -1504,6 +1536,7 @@ score_state:
                     continue;
                 /* Indexing the s16 table changes register allocation; retain the byte cursor. */
                 weight = *(s16*)((u8*)g_battle_ai_status_priority_weights + weight_offset);
+                /* A confused, blood-sucked or charmed unit gets no credit for positive status weights. */
                 if (((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CONFUSION)]
                          & (STATUS_BYTE_MASK(STATUS_ID_CONFUSION) | STATUS_BYTE_MASK(STATUS_ID_BLOOD_SUCK)))
                         || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CHARM)]
@@ -1541,6 +1574,7 @@ score_state:
                 }
                 score += weight;
             }
+
             if (!(unit->unit_flags & UNIT_FLAG_MONSTER)) {
                 for (equipment_slot = 0; equipment_slot < UNIT_EQUIPMENT_SLOT_COUNT; equipment_slot++) {
                     if (unit->equipment[equipment_slot]
@@ -1548,6 +1582,8 @@ score_state:
                         score += AI_EQUIPMENT_SCORE;
                 }
             }
+
+            /* MP share, halved when MP is below the unit's cheapest MP ability. */
             if (unit->max_mp) {
                 weight_offset = unit->mp;
                 below_cost = weight_offset;
@@ -1559,6 +1595,8 @@ score_state:
                 weight_offset = weight_offset * ai->unit_decisions[unit_index].mp_ability_mod / 4;
                 score += weight_offset;
             }
+
+            /* Golem HP counts like shared team HP; any loss since the baseline snapshot costs one more point. */
             {
                 u32 golem;
 
@@ -1569,10 +1607,12 @@ score_state:
                 if (golem < ai->team_golem[(unit->team_flags >> BATTLE_TEAM_SHIFT) & BATTLE_TEAM_INDEX_MASK])
                     score--;
             }
+
             if (ai->unit_decisions[unit_index].enemy_flag)
                 score = -score;
             ai->current_action.rank.priority += score;
         }
+
         if (g_main_action_menu_types_by_skillset[ai->considered_ability.skillset] == ACTION_MENU_TYPE_WEAPON_INVENTORY
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_SHURIKEN
             && ai->considered_ability.ability_id != ABILITY_ID_THROW_BALL)
@@ -1904,6 +1944,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
     s32 status;
     s16 ability_id;
 
+    /* Targets the ability cannot affect at all, as of when it resolves ct ticks from now. */
     if ((g_battle_ai_data_base.considered_ability.ai_flags.word & AI_ABILITY_ENEMIES_ONLY) && !decision->enemy_flag)
         return AI_ABILITY_EFFECT_NONE;
     if ((ai->considered_ability.ai_flags.word & AI_ABILITY_ALLIES_ONLY) && decision->enemy_flag)
@@ -1924,6 +1965,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
         return AI_ABILITY_EFFECT_NONE;
 
     /* Death/revival timing determines which effects can still matter. */
+    /* i flags a revive: the ability cancels Dead. */
     i = 0;
     if ((ai->considered_ability.ai_flags.word & AI_ABILITY_CANCEL_STATUS)
         && (ai->considered_ability.parameters.fields.status_infliction[STATUS_BYTE_INDEX(STATUS_ID_DEAD)]
@@ -1943,6 +1985,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
         if (!i)
             return AI_ABILITY_EFFECT_NONE;
     }
+
     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)] & STATUS_BYTE_MASK(STATUS_ID_PETRIFY))
         && (!(ai->considered_ability.ai_flags.word & AI_ABILITY_CANCEL_STATUS)
             || !(ai->considered_ability.parameters.fields.status_infliction[STATUS_BYTE_INDEX(STATUS_ID_PETRIFY)]
@@ -1955,6 +1998,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
         return AI_ABILITY_EFFECT_NONE;
 
     i = ai->considered_ability.element;
+    /* i now holds the element; Earth (8) misses a floating unit. */
     if (i) {
         if (i == (i & unit->elemental_affinity[ELEMENTAL_AFFINITY_NULLIFY])
             || (i == 8
@@ -1977,6 +2021,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
             if (unit->elemental_affinity[ELEMENTAL_AFFINITY_ABSORB] & ai->considered_ability.element)
                 return AI_ABILITY_EFFECT_ADVERSE;
         } else {
+            /* i now flags a Charm that lasts until the ability resolves and whose removal matters. */
             if (battle_ai_is_status_active_through_delay(ct, unit, STATUS_ID_CHARM)
                 && battle_ai_can_status_cancellation_affect_turn(unit, STATUS_ID_CHARM))
                 i = 1;
@@ -2013,6 +2058,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
             }
             return AI_ABILITY_EFFECT_ADVERSE;
         }
+
         if ((ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTS_HP)
             && !(unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEATH_SENTENCE)]
                 & STATUS_BYTE_MASK(STATUS_ID_DEATH_SENTENCE)))
@@ -2056,6 +2102,9 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
         if (ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTS_MP)
             return AI_ABILITY_EFFECT_USEFUL;
     }
+
+    /* Adding status is useful when some status is new to the target, not blocked by
+     * immunity, and worth it for the target's condition. */
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_ADD_STATUS) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             mask = ai->considered_ability.parameters.fields.status_infliction[i];
@@ -2104,6 +2153,8 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
             }
         }
     }
+
+    /* Cancelling status is useful when the target has a non-innate status worth removing. */
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_CANCEL_STATUS) {
         for (i = 0; i < STATUS_BYTE_COUNT; i++) {
             mask = ai->considered_ability.parameters.fields.status_infliction[i];
@@ -2111,6 +2162,8 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
             if (mask) {
                 mask ^= mask & unit->status_sets.innate[i];
                 if (mask) {
+                    /* Bytes 3 and 4 hold the timed statuses: drop those that end before the ability
+                     * resolves or whose removal would not affect the target's turn. */
                     if (i >= 3) {
                         for (bit = 0; bit < 8; bit++) {
                             s32 flag = 0x80 >> bit;
@@ -2140,6 +2193,7 @@ ai_ability_effect_e battle_ai_classify_ability_effect(s32 unit_id, s32 check_ref
             }
         }
     }
+
     /* Late stat-effect gate: Praise, Accumulate, and Yell only.
      * Odd parity still falls through to the Unequip flag below. */
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_AFFECTS_STATS) {

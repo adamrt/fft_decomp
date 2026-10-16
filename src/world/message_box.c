@@ -93,6 +93,7 @@ void menu_run_unit_status_thread_variant(void) {
     thread_id = g_thread_current_id;
     g_menu_input_controller = input + 1;
     thread = (menu_status_panel_display_thread_t*)g_threads[thread_id].function_parameter_1;
+
     if (thread_id == THREAD_SCREEN_SLOT_UNIT_STATUS) {
         panel = g_world_selected_unit_status_packets;
         editor = g_world_selected_unit_summary_packets;
@@ -122,6 +123,7 @@ void menu_run_unit_status_thread_variant(void) {
     }
     shake = 0;
 
+    /* Build the summary packets once, then copy them for the second frame buffer. */
     menu_init_numeric_display_frame_primitives(&g_menu_portrait_origin, &editor->numeric_frame);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_a, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     gfx_set_draw_mode_for_texture_page(&editor->draw_mode_b, MENU_TEXTURE_PAGE_FRAME);
@@ -136,6 +138,8 @@ void menu_run_unit_status_thread_variant(void) {
         gfx_init_image_loading(&editor->value_sprites[frame], g_editor_numeric_geometry, &g_menu_portrait_origin,
             &g_world_unit_summary_value_sprite_params[frame]);
     }
+
+    /* Label 6 is the mode row, chosen by team kind; the unit-join screen always uses row 0. */
     if (state->team_kind >= 4) {
         state->team_kind = 0;
     }
@@ -151,6 +155,8 @@ void menu_run_unit_status_thread_variant(void) {
             &g_world_unit_summary_label_sprite_params[frame]);
     }
     mem_copy_bytes_nonempty(editor + 1, editor, sizeof(menu_status_panel_editor_packet_t));
+
+    /* The same for the status panel packets. */
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_a, MENU_TEXTURE_PAGE_FRAME);
     gfx_set_draw_mode_for_texture_page(&panel->draw_mode_b, MENU_TEXTURE_PAGE_ALLOCATED_IMAGES);
     menu_init_numeric_display_frame_primitives(&g_world_unit_status_panel_origin, &panel->numeric_frame);
@@ -173,14 +179,17 @@ void menu_run_unit_status_thread_variant(void) {
     }
     panel->portrait.tpage = GetTPage(0, 1, 0x3C0, 0x100);
     mem_copy_bytes_nonempty(panel + 1, panel, sizeof(menu_status_panel_packet_t));
+
     frame = 0;
     anim_state = 0;
     prev_unit = state->unit_index;
     cur_unit = state->unit_index;
     for (;;) {
+        /* The two packet copies alternate frame by frame. */
         s32 parity = frame & 1;
         panel = panel_base + parity;
         editor = editor_base + parity;
+
         if (state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             state->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
         }
@@ -198,6 +207,8 @@ void menu_run_unit_status_thread_variant(void) {
         } else {
             panel->portrait.clut = 0x7FBD;
         }
+
+        /* Dim while a status panel thread runs under a menu input lock, or when the display asks. */
         dimmed = 0;
         if (thread_find_running_by_task(THREAD_TASK_STATUS_PANEL) != 0) {
             dimmed = g_menu_input_lock_mode != 0;
@@ -218,6 +229,8 @@ void menu_run_unit_status_thread_variant(void) {
                 panel->sprites[i].clut = MENU_CLUT_NORMAL;
             }
         }
+
+        /* During cross-fade steps 4-9 portrait quad 0 is drawn at half its usual brightness. */
         if (dimmed != 0) {
             menu_init_primitive_colors_dimmed(&editor->numeric_frame);
             menu_init_primitive_colors_dimmed(&panel->numeric_frame);
@@ -248,7 +261,11 @@ void menu_run_unit_status_thread_variant(void) {
         } else {
             setRGB0(&panel->portrait, 0x80, 0x80, 0x80);
         }
+
         g_world_gfx_draw_area_y = (g_frame_arg != 0xF0) ? 0xF0 : 0;
+
+        /* Slide down through steps 1-6 or up through 11-16, one step every two frames, then keep
+         * only the hidden flag. */
         if ((thread->flags & MENU_STATUS_PANEL_SLIDE_DOWN) && (shake == 0)) {
             shake = 1;
         }
@@ -278,6 +295,7 @@ void menu_run_unit_status_thread_variant(void) {
                 }
             }
         }
+
         draw_x = thread->x;
         draw_y = g_world_gfx_draw_area_y;
         panel->draw_offset_a.position.x = draw_x - 0x80;
@@ -294,6 +312,9 @@ void menu_run_unit_status_thread_variant(void) {
         editor->draw_offset_b.position.x = -0x80;
         editor->draw_offset_b.position.y = g_world_gfx_draw_area_y;
         SetDrawOffset(&editor->draw_offset_b.packet, (u16*)&editor->draw_offset_b.position);
+
+        /* A finished cross-fade (step 10) settles on the new unit; a changed unit, or a redraw
+         * request arriving mid-fade, (re)starts the fade at step 2. */
         if (anim_state >= 0xA) {
             anim_state = 0;
             prev_unit = cur_unit;
@@ -318,6 +339,8 @@ void menu_run_unit_status_thread_variant(void) {
         }
         gfx_build_portrait_transition_primitives(
             transition, &anim_state, &cur_unit, &prev_unit, portrait_palettes, &editor->portrait[0], portrait_arg);
+
+        /* The three gauge bars have a fixed width and a 3-pixel slant; dimming halves red and green. */
         {
             CVECTOR* color;
 
@@ -360,11 +383,14 @@ void menu_run_unit_status_thread_variant(void) {
                 }
             }
         }
+
+        /* Zodiac icons sit 7 to a row, each 0x18 by 0x14. */
         panel->sprites[6].u0 = (identity->zodiac % 7) * 0x18;
         cell = identity->zodiac;
         panel->sprites[6].w = 0x18;
         panel->sprites[6].h = 0x14;
         panel->sprites[6].v0 = (cell / 7) * 0x14 + 0x2A;
+
         if ((frame == 0) || (thread->work != 0)) {
             /* WORLD keeps its identity view (unit index, roster slot) in the shared record. */
             menu_copy_billboard_data_in(&g_menu_selected_unit_stat_summary,
@@ -393,6 +419,8 @@ void menu_run_unit_status_thread_variant(void) {
             menu_draw_numeric_display_entries(stat_image_upper, &number_entries[8], &g_menu_text_state.pen, 2);
             LoadImage(&rects[1], (u32*)stat_image_upper);
             thread->work = 0;
+
+            /* Name and job, then the large Brave, Faith and roster numbers. */
             menu_clear_render_buffer(name_image, 0x580);
             g_menu_text_state.pen.stride = 0x58;
             menu_set_text_origin(0, 0);
@@ -400,6 +428,7 @@ void menu_run_unit_status_thread_variant(void) {
             menu_set_text_origin(0, 0x10);
             menu_display_text_entry(identity->job_id + TEXT_ID_JOB_NAME_BASE, name_image, &g_menu_text_state.pen);
             LoadImage(&rects[2], (u32*)name_image);
+
             menu_clear_render_buffer(number_images, sizeof(*number_images));
             g_menu_text_state.pen.stride = 0x10;
             menu_set_text_origin(0, 0);
@@ -408,6 +437,7 @@ void menu_run_unit_status_thread_variant(void) {
             menu_set_text_origin(0, 0);
             text_draw_large_number_glyphs_variant(identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
+            /* The unit-join screen uploads the roster number image cleared. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
                 text_draw_large_number_glyphs_variant(
@@ -417,6 +447,9 @@ void menu_run_unit_status_thread_variant(void) {
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
             }
         }
+
+        /* Queue the summary packets, then the status panel's; the other portrait quads show
+         * from cross-fade step 5. */
         if (!(thread->flags & MENU_STATUS_PANEL_HIDDEN)) {
             gfx_draw_or_append_gpu_primitive(&editor->draw_offset_b);
             gfx_draw_or_append_gpu_primitive(&editor->value_sprites[0]);
@@ -456,12 +489,15 @@ void menu_run_unit_status_thread_variant(void) {
             menu_submit_numeric_display_frame_primitives(&panel->numeric_frame);
             gfx_draw_or_append_gpu_primitive(&panel->draw_offset_a);
         }
+
         thread_yield();
         if (thread_get_current_parameter_3() != 0) {
             break;
         }
         frame += 1;
     }
+
+    /* Parameter 3 ends the thread: free the six text images. */
     thread_yield();
     gfx_free_texture_rect(&rects[0]);
     gfx_free_texture_rect(&rects[1]);
@@ -525,11 +561,14 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
     u8 ring;
     s32 offset;
 
+    /* Only portrait, Check and centered (mode 0) boxes type glyph by glyph; the others just yield. */
     if (g_world_text_message_box_glyph.mode != DIALOG_BOX_TYPE_PORTRAIT
         && g_world_text_message_box_glyph.mode != DIALOG_BOX_TYPE_CHECK && g_world_text_message_box_glyph.mode != 0) {
         thread_yield();
         return;
     }
+
+    /* Find this thread's slot or claim a free one; with all three taken, wait a frame and retry. */
     for (;;) {
         slot = 0x10;
         for (i = 0; i < 3; i++) {
@@ -560,6 +599,8 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
     phase = g_world_text_message_box_glyph.x & 3;
     dst = g_world_text_message_box_glyph_images[slot][ring];
     src = g_world_text_message_box_previous_images[slot];
+
+    /* VRAM x counts 4-pixel words: upload enough of them to cover the glyph from its phase in the first. */
     if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 4
         || g_world_text_message_box_glyph.glyph == TEXT_SPACE) {
         if (phase == 2) {
@@ -580,6 +621,7 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
         g_world_text_message_box_vram_rect.w = 3;
     }
 
+    /* At phase 2 the first word is shared with the previous glyph: carry its byte over. */
     if (phase == 2) {
         for (i = 0; i < 14; i++) {
             g_world_text_message_box_column_scratch[i]
@@ -591,6 +633,7 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
         }
     }
 
+    /* Record which byte of this image the next glyph will carry over. */
     if (g_text_glyph_widths[g_world_text_message_box_glyph.glyph] == 4
         || g_world_text_message_box_glyph.glyph == TEXT_SPACE) {
         if (phase == 2) {
@@ -619,6 +662,7 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
     }
     g_world_text_message_box_slot_prev_width[slot] = width;
 
+    /* Fill the rest of the image with background pixels from the glyph sheet, or zero in mode 0. */
     for (j = 0; j < 14; j++) {
         offset = j * width;
         for (i = phase >> 1; i < width / 2; i++) {
@@ -645,6 +689,9 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
     }
     g_world_text_message_box_slot_glyph_counters[slot]++;
     mem_copy_bytes_nonempty(src, dst, 84);
+
+    /* Wait 0 only syncs; 2 or more waits that many steps; 1 pauses after every few glyphs as the
+     * message speed option sets (holding Circle counts as fast). */
     if (wait == 0) {
         DrawSync(0);
         g_world_text_message_box_slot_glyph_counters[slot] = 0;
@@ -670,6 +717,7 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
             g_world_text_message_box_slot_glyph_counters[slot] = 0;
         }
     }
+
     if (g_world_text_message_box_glyph.mode != 0) {
         g_sound_pending_sfx_id = MAIN_SFX_TEXT_GLYPH;
     }
@@ -902,6 +950,8 @@ void world_text_message_box_thread(void) {
     rec.options = param & 0xC;
     text = text_find_entry(thread_get_current_parameter_2());
     base_entry = text_find_entry(thread_get_current_parameter_2() & 0xF800);
+
+    /* Unlike a dialog, the box has a fixed size: 3 lines of 0x12 cells with a portrait, else 2 of 0x14. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         rec.mark = 0x12;
         rec.lines = 3;
@@ -914,6 +964,8 @@ void world_text_message_box_thread(void) {
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         rec.width = rec.mark * 10 + 0x40;
     }
+
+    /* Center horizontally; positions 1, 2 and 3 are the top, bottom and middle. */
     rec.tail_offset = 0;
     half_w = rec.width >> 1;
     x = (0x100 - half_w) & ~1;
@@ -929,6 +981,8 @@ void world_text_message_box_thread(void) {
     }
     right = x + half_w - 6;
     bottom = y + half_h - 2;
+
+    /* A leading portrait command picks the portrait; otherwise the last one shown is kept. */
     win = menu_alloc_window_buffer_pair();
     win->message_id = thread_get_current_parameter_2();
     if (text[0] == TEXT_SET_PORTRAIT) {
@@ -941,6 +995,7 @@ void world_text_message_box_thread(void) {
     }
     win[0].is_message_box = 1;
     win[1].is_message_box = 1;
+
     rec.text = thread_get_current_parameter_2();
     message = thread_get_current_parameter_2();
     rec.rect.w = rec.width;
@@ -951,12 +1006,16 @@ void world_text_message_box_thread(void) {
     } else {
         menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
     }
+
+    /* The formation screen shifts its boxes by (-0x100, -0x78). */
     if (g_formation_screen_active != 0) {
         x -= 0x100;
         y -= 0x78;
         right -= 0x100;
         bottom -= 0x78;
     }
+
+    /* Both quads start collapsed at the open point; the portrait sits at the left (flipped) in a top box. */
     setXY4(&win->quads[1], right, bottom, right, bottom, right, bottom, right, bottom);
     setXY4(&win->quads[0], right, bottom, right, bottom, right, bottom, right, bottom);
     from.x = x;
@@ -975,6 +1034,8 @@ void world_text_message_box_thread(void) {
         to.w = 0x1F;
         to.h = 0x30;
     }
+
+    /* The pair's two buffers alternate by frame, so the second starts as a copy of the first. */
     mem_copy_bytes_nonempty(&win[1], &win[0], sizeof(win[1]));
     win[0].active = 1;
     win[1].active = 1;
@@ -983,11 +1044,14 @@ void world_text_message_box_thread(void) {
     } else {
         world_menu_animate_window_quad_crop_full(win, &from, &to);
     }
+
+    /* From here x and y address the window's image in VRAM, not the screen. */
     x = win->quads[0].u0 + 8;
     y = win->quads[0].v0 + 8;
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT && rec.position == 1) {
         x = win->quads[0].u0 + 0x30;
     }
+
     delay = 1;
     saved = (u8*)-1;
     repeat = 0;
@@ -999,9 +1063,13 @@ void world_text_message_box_thread(void) {
     cursor_x = x;
     cursor_y = y;
     width_override = 0xFFFF;
+
     while (1) {
         no_value = 0xFFFF;
         code = *text;
+
+        /* A new parameter 2 restarts the box on that message; 0xFFFF closes it. A message is
+         * shown once its text section resolves to the same start as the first message's. */
         if (thread_get_current_parameter_2() != message) {
             if ((thread_get_current_parameter_2() & no_value) != no_value) {
                 while (base_entry != text_find_entry(thread_get_current_parameter_2() & 0xF800)) {
@@ -1019,6 +1087,7 @@ void world_text_message_box_thread(void) {
             } else {
                 menu_build_and_upload_window_frame_image(rec.width, rec.height, &rec.rect, MENU_WINDOW_FRAME_UPLOAD);
             }
+
             delay = 1;
             saved = (u8*)-1;
             cursor_x = x;
@@ -1044,6 +1113,7 @@ void world_text_message_box_thread(void) {
             thread_yield();
             continue;
         }
+
         if (code == TEXT_NEWLINE || code == TEXT_END_WAIT_FOR_CONFIRM || code == TEXT_END_AUTO_CLOSE
             || code == TEXT_PAGE_BREAK) {
             if (code == TEXT_END_AUTO_CLOSE) {
@@ -1051,6 +1121,7 @@ void world_text_message_box_thread(void) {
             }
             if (code == TEXT_END_WAIT_FOR_CONFIRM) {
                 g_world_menu_event_state_flag = 1;
+                /* The end of a substituted string returns to the text that named it. */
                 if (saved != (u8*)-1) {
                     text = saved;
                     saved = (u8*)-1;
@@ -1063,6 +1134,7 @@ void world_text_message_box_thread(void) {
                     column++;
                     rec.line++;
                 }
+                /* no_value (0xFFFF) steps the u16 line count back by one. */
                 rec.line += no_value;
             } else {
                 NEXT();
@@ -1072,6 +1144,9 @@ void world_text_message_box_thread(void) {
                 rec.line++;
             }
             rec.first_line = rec.line - rec.lines;
+
+            /* Pause when the box is full, at the end of the text and at a page break. Unlike a
+             * dialog, the pause reads no buttons: it lasts until parameter 2 changes. */
             if (column >= rec.lines || code == TEXT_END_WAIT_FOR_CONFIRM || code == TEXT_PAGE_BREAK) {
                 if (code != TEXT_PAGE_BREAK) {
                     column = 0;
@@ -1082,6 +1157,7 @@ void world_text_message_box_thread(void) {
                         if (thread_get_current_parameter_2() != message) {
                             break;
                         }
+                        /* A page break bobs the cursor sprite after the text; a line break shows the arrow. */
                         if (code == TEXT_PAGE_BREAK) {
                             cursor_window = WINDOW_AT(g_menu_packet_buffer_index);
                             cursor_window->sprites[0].x0 = cursor_x
@@ -1101,8 +1177,9 @@ void world_text_message_box_thread(void) {
                                 arrow_window->sprites[2].y0
                                     = cursor_y + arrow_window->quads[0].y0 - arrow_window->quads[0].v0;
                             }
-                            /* The else-break keeps the test on top, as in the target; a
-                               `while` is rotated to test at the bottom. */
+
+                            /* Scroll down to the newest lines. The else-break keeps the test on
+                             * top, as in the target; a `while` is rotated to test at the bottom. */
                             for (;;) {
                                 if (rec.line - rec.lines != rec.first_line) {
                                     WINDOW_AT(g_menu_packet_buffer_index)->sprites[2].x0 = 0;
@@ -1116,6 +1193,8 @@ void world_text_message_box_thread(void) {
                         }
                     }
                 }
+
+                /* Hide the cursor and arrow sprites in both buffers, one frame apart. */
                 hidden_window = WINDOW_AT(g_menu_packet_buffer_index);
                 hidden_window->sprites[0].x0 = 0x200;
                 hidden_window->sprites[1].x0 = 0x200;
@@ -1125,12 +1204,15 @@ void world_text_message_box_thread(void) {
                 hidden_window->sprites[0].x0 = 0x200;
                 hidden_window->sprites[1].x0 = 0x200;
                 hidden_window->sprites[2].x0 = 0x200;
+
                 if (code == TEXT_PAGE_BREAK) {
                     continue;
                 }
                 if (thread_get_current_parameter_2() != message) {
                     continue;
                 }
+
+                /* The box is full: start a fresh page; cursor_y lands on its first line after the += below. */
                 if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
                     menu_build_and_upload_window_image(
                         rec.width, rec.height, &rec.rect, rec.dialog_type, rec.tail_offset);
@@ -1141,6 +1223,7 @@ void world_text_message_box_thread(void) {
                 cursor_y = y - 0x10;
                 thread_yield();
             }
+
             no_wait = 0;
             cursor_x = x;
             cursor_y += 0x10;
@@ -1148,8 +1231,10 @@ void world_text_message_box_thread(void) {
             rec.mark = column;
             NEXT();
         } else if (code == TEXT_CHOICE_SELECT) {
+            /* Message boxes offer no choices; the select code is skipped. */
             NEXT();
         } else if (code == TEXT_WAIT_FOR_RESUME) {
+            /* No resume wait here: the next line break just skips its pause. */
             NEXT();
             no_wait = 1;
         } else if (code == TEXT_RELEASE_WAITING_THREADS) {
@@ -1184,6 +1269,7 @@ void world_text_message_box_thread(void) {
             rec.color = *text;
             NEXT();
         } else {
+            /* A format code draws a whole string, then returns to `saved`. */
             substitution = &g_text_substitution_values[value_index];
             value = text_resolve_format_string_id(code, *substitution);
             if (value != -1) {
@@ -1192,6 +1278,7 @@ void world_text_message_box_thread(void) {
                 text = text_find_entry(value);
                 continue;
             }
+
             if (code == TEXT_SET_NUMBER_WIDTH) {
                 NEXT();
                 width_override = *text;
@@ -1204,6 +1291,8 @@ void world_text_message_box_thread(void) {
                     NEXT();
                     value = g_text_substitution_values[*text];
                 }
+
+                /* Print the number in `digits` places, padding leading zeros with spaces. */
                 digits = text_count_decimal_digits(value);
                 started = 0;
                 if (width_override != no_value) {
@@ -1232,6 +1321,7 @@ void world_text_message_box_thread(void) {
                 }
                 NEXT();
             } else if ((code & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (code & 0xF) < 4) {
+                /* Compressed text: replay `repeat` bytes from earlier in the entry, then resume at `saved`. */
                 saved = text + 3;
                 value = (text[0] & 3) * 8;
                 repeat = text[1] >> 5;
@@ -1245,10 +1335,12 @@ void world_text_message_box_thread(void) {
                 if (code < TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
                     code = *text;
                 } else if ((code & 0xF0) == TEXT_EXTENDED_GLYPH_PREFIX_FIRST) {
+                    /* A two-byte glyph: the prefix's low nibble selects a page of glyphs. */
                     code = (*text & 0xF) * TEXT_GLYPHS_PER_PREFIX;
                     NEXT();
                     code = code + *text;
                 }
+
                 g_world_text_message_box_glyph.glyph = code;
                 g_world_text_message_box_glyph.mode = rec.box_type;
                 g_world_text_message_box_glyph.palette = rec.color;
@@ -1264,6 +1356,8 @@ void world_text_message_box_thread(void) {
             }
         }
     }
+
+    /* Close: a portrait box shrinks back to its open point; then release the window, texture and glyph slot. */
     if (rec.box_type == DIALOG_BOX_TYPE_PORTRAIT) {
         from.w = 0;
         from.h = 0;

@@ -66,10 +66,12 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             if (main_file_is_still_loading() != 0) {
                 return 0;
             }
+
             g_battle_map_data_load_buffer = main_heap_alloc(0x20000);
             if (g_battle_map_data_load_buffer == 0) {
                 main_system_report_error(2, 0x3c2);
             }
+
             battle_map_load_gns_and_move_find_items(map_id & 0xffff);
             g_battle_map_resource_load_state = MAP_LOAD_STATE_GNS_FILE;
             g_battle_map_loaded_id = map_id;
@@ -78,14 +80,17 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             break;
         case MAP_LOAD_COMMAND_START_HELD:
             g_battle_map_gns_dispatch_held = 1;
+            /* fall through */
         case MAP_LOAD_COMMAND_START:
             if (main_file_is_still_loading() != 0) {
                 return 0;
             }
+
             g_battle_map_data_load_buffer = main_heap_alloc(0x20000);
             if (g_battle_map_data_load_buffer == 0) {
                 main_system_report_error(2, 0x3c2);
             }
+
             g_battle_map_texture_quarter_0_pending = 0;
             g_battle_map_texture_quarter_1_pending = 0;
             g_battle_map_texture_quarter_2_pending = 0;
@@ -93,6 +98,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
             g_battle_map_texture_pending = 0;
             g_battle_map_palette_pending = 0;
             g_battle_map_lighting_pending = 0;
+
             if (map_id != g_battle_map_loaded_id) {
                 if (battle_map_load_gns_and_move_find_items(map_id & 0xffff) != g_battle_map_gns_records) {
                     return 0;
@@ -125,6 +131,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                         g_battle_map_pending_gns_records[k].resource_type = GNS_RECORD_NONE;
                     }
                 }
+
                 /* Pass 1: primary meshes. A row whose comparison holds forgets
                  * what is loaded for its type, so it is always read again. */
                 for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
@@ -142,6 +149,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                                     .load_info.bytes[j] = 0x48;
                             while (++j < 14);
                         }
+
                         {
                             s32 k;
 
@@ -158,6 +166,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                         }
                     }
                 }
+
                 /* Pass 2: override meshes, by the same rule. */
                 for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
                     if (g_battle_map_gns_records[r].resource_type == MAP_RESOURCE_MESH_OVERRIDE) {
@@ -172,6 +181,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                                     .load_info.bytes[j] = 0x48;
                             while (++j < 14);
                         }
+
                         {
                             s32 k;
 
@@ -188,6 +198,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                         }
                     }
                 }
+
                 /* Pass 3: the default texture (state 0 of the two map variables). */
                 for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
                     if (g_battle_map_gns_records[r].resource_type == MAP_RESOURCE_TEXTURE
@@ -210,6 +221,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                         }
                     }
                 }
+
                 /* Pass 4: every other row whose comparison holds replaces the
                  * choice for its type, or cancels it when that file is loaded. */
                 for (r = 0; g_battle_map_gns_records[r].resource_type < GNS_RECORD_COMMAND_SEPARATOR; r++) {
@@ -255,7 +267,9 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                         && g_battle_map_pending_gns_records[g_battle_map_gns_record_cursor].resource_type <= 0x17)) {
                     g_battle_map_gns_record_cursor++;
                 }
+
                 if (g_battle_map_gns_record_cursor < GNS_RESOURCE_TABLE_COUNT) {
+                    /* Clear the 32 20-byte entries the dispatcher copies, so a shorter file leaves the rest zero. */
                     if (g_battle_map_gns_record_cursor == MAP_RESOURCE_TEXTURE_ANIMATIONS) {
                         bzero(g_battle_map_data_load_buffer, 0x280);
                     }
@@ -324,6 +338,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                         ((map_resource_t*)g_battle_map_gns_record_cursor)->command.resource_type != GNS_RECORD_NONE) {
                         battle_map_apply_gns_command(2, (map_resource_t*)g_battle_map_gns_record_cursor);
                     }
+
                     g_battle_map_gns_load_phase = MAP_GNS_LOAD_PHASE_IDLE;
                     g_battle_map_resource_load_state = MAP_LOAD_STATE_DONE;
                     battle_map_run_weather_command(MAP_WEATHER_COMMAND_APPLY_SCRIPT_WEATHER);
@@ -392,6 +407,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                 g_battle_map_textured_quad_render_record_count = 0;
                 g_battle_map_untextured_triangle_render_record_count = 0;
                 g_battle_map_untextured_quad_render_record_count = 0;
+
                 for (i = 0; i < 9; i++) {
                     if (g_battle_map_mesh_part_geometry[i] != 0) {
                         battle_map_init_mesh_render_records(g_battle_map_mesh_part_geometry[i]);
@@ -413,6 +429,7 @@ s32 battle_map_load_data(s32 map_id, s32 command) {
                 g_battle_map_textured_quad_render_record_count = 0;
                 g_battle_map_untextured_triangle_render_record_count = 0;
                 g_battle_map_untextured_quad_render_record_count = 0;
+
                 for (i = 0; i < 9; i++) {
                     if (g_battle_map_mesh_part_geometry[i] != 0) {
                         battle_map_init_mesh_render_records(g_battle_map_mesh_part_geometry[i]);

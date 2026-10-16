@@ -287,12 +287,14 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
         left = g_world_unit_pointers[unit_index]->equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] & ITEM_ENTRY_ID_MASK;
     }
 
+    /* Two Hands takes precedence over Two Swords. */
     second = ITEM_ID_NOTHING;
     first = ITEM_ID_NOTHING;
     dual = 0;
     if (world_ability_has_two_swords(unit_index)) {
         dual = world_ability_has_two_hands(unit_index) == 0;
     }
+
     if (dual) {
         second = left;
         g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_LIST_FILTER_WEAPON;
@@ -320,6 +322,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
         category = g_world_fitting_room_best_fit_slot_categories[slot];
         count = world_shop_build_item_list(unit_index, shop_id, category, list, ITEM_LIST_MODE_EQUIPPABLE);
         length = count;
+
         if (category == ITEM_LIST_FILTER_WEAPON) {
             /* One lvalue per arm: the target computes &list[length] once and stores
              * through it from both sides of the test (`sh t0,0(v1)` then
@@ -342,6 +345,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
                     }
                 }
             } else if (dual) {
+                /* With no Two Swords weapon left, the off hand falls back to a shield and is picked again. */
                 retry = 0;
                 for (i = 0;; i++) {
                     if (list[i] == -1) {
@@ -379,6 +383,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
             list[length] = -1;
             item_sort_id_list_variant(7, list);
         }
+
         if (list[0] <= ITEM_ID_NOTHING)
             out[slot] = ITEM_ID_NOTHING;
         else
@@ -390,6 +395,9 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
         out[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
         out[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
+
+    /* Swap the picks when a held item changed hands, or the unit held its weapon left (without Two
+     * Swords) or its off-hand item right. */
     if ((right != ITEM_ID_NOTHING && right == out[MENU_EQUIPMENT_SLOT_LEFT_HAND])
         || (left != ITEM_ID_NOTHING && left == out[MENU_EQUIPMENT_SLOT_RIGHT_HAND])
         || (!dual && left < ITEM_ID_THROWABLE_FIRST && left != ITEM_ID_NOTHING) || right >= ITEM_ID_THROWABLE_FIRST)
@@ -403,6 +411,7 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
         out[MENU_EQUIPMENT_SLOT_LEFT_HAND] = i;
     }
 
+    /* A pick the unit neither wears nor has reserved must come from the shop. */
     for (slot = 0; slot < MENU_EQUIPMENT_SLOT_ACCESSORY; slot++) {
         s16 item = out[slot];
         if (item != g_world_unit_pointers[unit_index]->equipment[slot]

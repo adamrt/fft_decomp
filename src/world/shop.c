@@ -93,6 +93,9 @@ void world_shop_run_screen(s32 shop_type) {
     g_world_gfx_draw_move_capacity = 0x1E;
     g_world_gfx_draw_area_capacity = 0xA;
     g_gfx_draw_mode_capacity = 0x1E;
+
+    /* Until the loop, buttons holds the town background, ot_index the music and disabled the
+     * shopkeeper's first line. */
     g_world_menu_context_id = shop_type;
     buttons = script_get_variable(EVENT_SCRIPT_VAR_TOWN_BACKGROUND);
     if (shop_type == WORLD_MENU_CONTEXT_FUR_SHOP) {
@@ -112,12 +115,15 @@ void world_shop_run_screen(s32 shop_type) {
         tim_index = 0;
         g_world_shop_menu_step = WORLD_SHOP_STEP_MAIN_MENU;
     }
+
+    /* After the backdrop is in VRAM, the TIM buffer is reused for a VRAM backup that the exit loads back. */
     SetDispMask(0);
     while (DrawSync(1) != 0) { }
     gfx_move_image_and_wait(&g_world_shop_background_vram_rect, 0, 0);
     tim = world_shop_load_background_tim(tim_index + buttons);
     gfx_load_image_and_wait(&g_world_shop_background_vram_rect, tim + 5);
     gfx_store_image_and_wait(&g_world_shop_vram_backup_rect, tim);
+
     world_gfx_init_double_packet_buffers(buffers, otags, 0, 0, 0, textured_quads, 0, 0, gradient_quads,
         textured_gradient_quads, flat_lines, 0, 0, 0, 0, 0, tiles, 0, 0, 0, 0, 0, 0, draw_moves, draw_areas,
         draw_modes);
@@ -126,6 +132,7 @@ void world_shop_run_screen(s32 shop_type) {
     g_world_shop_main_menu_thread_data.selected_index = 0;
     g_world_shop_fur_menu_thread_data.selected_index = 0;
     g_world_shop_hire_menu_thread_data.selected_index = 0;
+
     world_text_bind_section_data(WORLD_TEXT_DATA_SHOP_DIALOGUE);
     g_text_section_pointers[WORLD_TEXT_SECTION_SHOP_MENU_LABELS] = g_world_text_shop_menu_labels_data;
     thread_start(THREAD_SCREEN_SLOT_MESSAGE, world_text_message_box_thread);
@@ -134,6 +141,7 @@ void world_shop_run_screen(s32 shop_type) {
     main_sound_switch_music_track(g_world_menu_music_slot, 0x7F, 0);
     g_world_shop_background_visible = 1;
     g_world_formation_unit_banner_enabled = 0;
+
     while (g_world_shop_menu_step != WORLD_SHOP_STEP_EXIT) {
         world_gfx_present_frame_and_swap_packet_buffer(0, 0);
         menu_input_update_with_message_state_variant();
@@ -146,11 +154,14 @@ void world_shop_run_screen(s32 shop_type) {
             world_menu_update_grid_cursor(g_world_unit_pointers[g_unit_selected_index]->uses_monster_skillset);
         }
         world_menu_set_palette_mode(g_menu_input_lock_mode);
+
         if (g_world_shop_background_visible != 0) {
             menu_gfx_enqueue_textured_quad(&g_world_shop_background_rect, 0, 0, 0, 0, 0x14C, 0, 1);
             gfx_enqueue_tile(&g_world_shop_backdrop_tile_rect, &g_world_gfx_black_tile_color, 0, 0);
             gfx_enqueue_tile(tile_box, &g_world_gfx_black_tile_color, 0, g_world_ot_length - 1);
         }
+
+        /* L1/R1 cycle units on the item and Fur Shop steps (below 0x14, SOLDIER_OFFICE_MENU). */
         if ((g_world_formation_unit_cycle_mode != 0 || g_world_formation_unit_browse_enabled != 0)
             && g_world_shop_menu_step < 0x14) {
             disabled = 0;
@@ -179,12 +190,15 @@ void world_shop_run_screen(s32 shop_type) {
             world_menu_draw_pressable_button(
                 MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xC, buttons & PSX_PAD_R1, disabled, MAIN_SFX_PAGE_SWITCH);
         }
+
         g_world_shop_menu_step_handlers[g_world_shop_menu_step]();
         if (g_world_shop_menu_step != WORLD_SHOP_STEP_RENAME_NAME_ENTRY
             && g_world_shop_menu_step != WORLD_SHOP_STEP_HIRE_NAME_ENTRY
             && g_world_shop_menu_step != WORLD_SHOP_STEP_FITTING_ROOM_REMOVE) {
             world_shop_update_unit_selection();
         }
+
+        /* The event layer goes to OT 0x3C over the confirm prompts, the cost window and the Soldier Office. */
         g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
         menu_draw_active_window_frames();
         if (g_world_shop_menu_step == WORLD_SHOP_STEP_FUR_BUY_CONFIRM
@@ -199,6 +213,8 @@ void world_shop_run_screen(s32 shop_type) {
         }
         menu_input_update_event_state_variant(g_menu_gfx_context->otag + ot_index, world_input_filter_menu(),
             g_world_gfx_draw_buffer_clip_y == 0 ? 0xF0 : 0);
+
+        /* Entering a new step resets the per-step menu state. */
         if (g_world_shop_menu_step != last_step) {
             g_world_formation_unit_cycle_mode = 0;
             menu_set_vsync_mode_and_event_speed(0);
@@ -208,6 +224,7 @@ void world_shop_run_screen(s32 shop_type) {
         }
         world_sound_dispatch_effect();
     }
+
     main_sound_unload_scenario_mus(g_world_menu_music_slot);
     world_formation_save_records_to_party();
     menu_set_vsync_mode_and_event_speed(0);
@@ -936,6 +953,8 @@ void world_shop_run_fitting_room_equip_menu(void) {
         g_world_shop_fitting_room_item_list_open = 0;
         g_menu_list_selected_index = 0;
     }
+
+    /* Cross closes the open list below, or leaves for the fitting room's unit grid. */
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
         g_sound_queued_effect_id = MAIN_SFX_CANCEL;
         if (g_world_shop_fitting_room_item_list_open != 0) {
@@ -951,6 +970,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
         if (prev != g_world_shop_fitting_equip_slot) {
             g_menu_list_selected_index = 0;
         }
+
         if (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_fitting_equip_slot]
             != ITEM_ID_NOTHING) {
             value = (g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_fitting_equip_slot]
@@ -960,6 +980,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
             value = -1;
         }
         g_menu_help_message_text_id = value;
+
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             g_sound_queued_effect_id = MAIN_SFX_CONFIRM;
             g_world_formation_unit_cycle_mode = 1;
@@ -969,6 +990,8 @@ void world_shop_run_fitting_room_equip_menu(void) {
             g_world_change_banner_panel_thread_params.style = 1;
             world_shop_build_item_list(g_unit_selected_index, g_world_menu_context_id, g_world_shop_fitting_equip_slot,
                 g_item_list_entries, ITEM_LIST_MODE_MARK_UNEQUIPPABLE);
+
+            /* Both hand slots share selection record 0, so the record is the slot less one. */
             slot = 0;
             if (g_world_shop_fitting_equip_slot != 0) {
                 slot = g_world_shop_fitting_equip_slot - 1;
@@ -984,6 +1007,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
         }
     } else {
         item = g_item_list_entries[g_menu_list_selected_index];
+
         if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
             if (g_menu_list_entry_count == 0 || (item & ITEM_ENTRY_UNEQUIPPABLE)) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
@@ -999,6 +1023,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
                     g_world_unit_pointers[g_unit_selected_index]->equipment[g_world_shop_fitting_equip_slot]
                         = item | WORLD_EQUIPMENT_SHOP_ITEM;
                     world_shop_add_fitting_room_cost(world_item_get_price(equip));
+                    /* 0: the item clashes with the other hand, which goes back to the fitting room too. */
                     if (result != 1) {
                         world_shop_return_unit_equip_to_fitting_room(
                             g_unit_selected_index, g_world_shop_fitting_equip_slot == 0);
@@ -1009,6 +1034,8 @@ void world_shop_run_fitting_room_equip_menu(void) {
                 }
             }
         }
+
+        /* Try the item on the preview unit, take the stat delta, then restore the preview unit's equipment. */
         if (g_menu_list_entry_count != 0 && g_world_shop_fitting_room_previewed_cursor != g_menu_list_selected_index) {
             g_world_shop_fitting_room_previewed_cursor = g_menu_list_selected_index;
             result = world_formation_equip_item_to_unit_slot(
@@ -1026,12 +1053,14 @@ void world_shop_run_fitting_room_equip_menu(void) {
             }
             g_menu_status_display_thread_params.redraw_request = 1;
         }
+
         menu_run_script_with_palette_mode_variant(
             &g_world_shop_fitting_item_list_menu_script, g_menu_input_primary_repeat, world_map_is_busy());
         g_menu_help_message_text_id = g_menu_list_entry_count != 0
             ? (g_item_list_entries[g_menu_list_selected_index] & ITEM_ENTRY_ID_MASK) + 0x6800
             : -1;
     }
+
     if (g_world_shop_fitting_item_list_close != 0) {
         g_world_shop_cost_window_visible = 1;
         g_world_shop_fitting_item_list_close = 0;
@@ -1047,6 +1076,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
         }
         menu_set_selection_record(slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
     }
+
     cursor_y = &g_world_shop_fitting_slot_cursor_point.y;
     *cursor_y = g_world_shop_fitting_equip_slot * 16 + 0x90;
     gfx_set_otag_index(0x3d);

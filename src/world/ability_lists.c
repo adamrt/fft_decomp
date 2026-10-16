@@ -427,6 +427,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
     s32 selection;
     s8 running;
 
+    /* The timer's low byte counts the 16 frames; its high byte only carries the unit index. */
     if (g_world_formation_dismiss_anim_timer != 0) {
         g_world_formation_dismiss_anim_timer++;
         if ((g_world_formation_dismiss_anim_timer & 0xFF) < 0x11) {
@@ -457,6 +458,9 @@ void world_formation_run_dismiss_unit_menu_step(void) {
                 g_world_formation_unit_cycle_mode = 1;
             }
             g_text_substitution_values[0] = g_world_unit_pointers[g_unit_selected_index]->identity.roster_slot;
+
+            /* Generic units (sprite set 0x4B and up) draw a random line for their kind; special units
+             * have their own farewell and refusal. */
             unit = g_world_unit_pointers[g_unit_selected_index];
             sprite = unit->sprite_set;
             if (sprite >= 0x4B) {
@@ -479,6 +483,8 @@ void world_formation_run_dismiss_unit_menu_step(void) {
                 }
             }
             text_id = value + 0xE800;
+
+            /* A refusal is a plain prompt; a dismissable unit gets the yes/no menu with its farewell. */
             if (g_world_formation_dismiss_step == 0) {
                 g_sound_suppressed = 1;
                 g_world_formation_dismiss_menu_data = &g_world_formation_dismiss_prompt;
@@ -518,6 +524,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
     step = g_world_formation_dismiss_step;
     g_world_dismiss_unit_prompt_running = running;
     if (step != 0) {
+        /* Step 1 queues the answer's sound once; 0x64 then keeps the step nonzero without repeating it. */
         if (thread_is_running(3) != 0) {
             step = g_world_formation_dismiss_step;
             if (step == 1) {
@@ -541,6 +548,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
                 g_world_formation_dismiss_step = step;
             }
         }
+
         if (g_world_dismiss_unit_prompt_running != 0) {
             return;
         }
@@ -552,6 +560,7 @@ void world_formation_run_dismiss_unit_menu_step(void) {
         g_world_formation_dismiss_anim_timer = (g_unit_selected_index << 8) + 1;
         return;
     }
+
     if (running != 0) {
         return;
     }

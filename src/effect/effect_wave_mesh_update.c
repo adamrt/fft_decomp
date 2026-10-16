@@ -62,12 +62,14 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
     switch (record->callback_phase[callback_slot]) {
     case EFFECT_CALLBACK_PHASE_IDLE:
         break;
+
     case EFFECT_CALLBACK_PHASE_INIT:
         if (record->work_slots[callback_slot] != 0) {
             battle_heap_free_block(record->work_slots[callback_slot]);
         }
         work = record->work_slots[callback_slot]
             = battle_heap_alloc_block(sizeof(effect_wave_mesh_work_t), state_index);
+
         configuration = geometry->textured_quad.texture_page_config;
         translucent = 1;
         if (configuration.clear_abe) {
@@ -85,6 +87,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 work->quads[1][row * 8 + column] = *quad;
             }
         }
+
         work->scroll_v = 0;
         work->scroll_u = 0;
         work->frame = 0;
@@ -98,10 +101,13 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         work->wave_y_phase = 0;
         record->callback_phase[callback_slot] = EFFECT_CALLBACK_PHASE_UPDATE;
         break;
+
     case EFFECT_CALLBACK_PHASE_UPDATE:
         work = record->work_slots[callback_slot];
         texture_width = geometry->textured_quad.texture_width / 2;
         texture_height = geometry->textured_quad.texture_height / 2;
+
+        /* Scroll the half-size texture window by the speed and angle curves, wrapping within it. */
         selector = geometry->textured_quad.scroll_curves.scroll_speed;
         EFFECT_READ_CURVE(row, column, selector, work->frame);
         speed = battle_lerp_fixed8(
@@ -126,6 +132,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         while (work->scroll_v < 0) {
             work->scroll_v += texture_height * ONE;
         }
+
         if (geometry->textured_quad.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             row = (geometry->textured_quad.color_curves & 0xfff);
             red = g_battle_effect_animation_curve_data
@@ -140,6 +147,8 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             red = EFFECT_COLOR_NEUTRAL;
         }
 
+        /* Vertical wave: each point's y swings by amplitude * sin * cos about rest rows 48 pixels
+         * apart; sin and cos are 4.12, hence the >> 4 and >> 20. */
         phase = work->wave_y_phase;
         amplitude_phase = work->wave_y_amplitude_phase;
         selector = geometry->textured_quad.wave_curves.shape;
@@ -165,6 +174,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             amplitude_phase += amplitude_step;
         }
 
+        /* Horizontal wave: the same along the columns, about rest columns 48 pixels apart. */
         phase = work->wave_x_phase;
         amplitude_phase = work->wave_x_amplitude_phase;
         step = 0x20000
@@ -188,11 +198,13 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
             amplitude_phase += amplitude_step;
         }
 
+        /* The vertical wave's phase speeds are read through the spawn-spread interpolator (x and y). */
         phase_selector = geometry->textured_quad.scroll_curves.wave_y_phase_speed;
         EFFECT_READ_CURVE(row, column, phase_selector, frame);
         battle_effect_interpolate_emitter_spawn_spread(geometry, column, &spread);
         work->wave_y_phase += spread.vx;
         work->wave_y_amplitude_phase += spread.vy;
+
         phase_selector = geometry->textured_quad.scroll_curves.wave_x_phase_speed;
         EFFECT_READ_CURVE(row, column, phase_selector, frame);
         work->wave_x_phase += battle_lerp_fixed8(
@@ -200,6 +212,7 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         work->wave_x_amplitude_phase += battle_lerp_fixed8(
             geometry->textured_quad.wave_phase_speed_start[1], geometry->textured_quad.wave_phase_speed_end[1], column);
 
+        /* The whole grid sits at one ordering-table depth. */
         depth = geometry->textured_quad.ot_depth;
         brightness_row = geometry->textured_quad.brightness_row;
         if (depth < EFFECT_OT_DEPTH_MIN) {
@@ -208,6 +221,8 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         if (depth >= EFFECT_OT_DEPTH_LIMIT) {
             depth = EFFECT_OT_DEPTH_MAX;
         }
+
+        /* Lattice row r shades corners 0/1 of quad row r and corners 2/3 of quad row r - 1. */
         for (quad_row = 0; quad_row < 8; quad_row++) {
             for (quad_column = 0; quad_column < 8; quad_column++) {
                 quad = &work->quads[work->buffer][quad_row * 8 + quad_column];
@@ -230,11 +245,16 @@ s32 effect_wave_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
                 AddPrim(ot + depth, quad);
             }
         }
+
+        /* The next update reads the next curve column and fills the other buffer while this one is drawn. */
         work->frame++;
         work->buffer = 1 - work->buffer;
         break;
+
     case EFFECT_CALLBACK_PHASE_DESTROY:
         work = record->work_slots[callback_slot];
+        /* Free one call late, as the last update's quads may still be drawing. The null
+         * check below comes after this read through work (retail order). */
         if (work->destroy_latched == 0) {
             work->destroy_latched = 1;
         } else {

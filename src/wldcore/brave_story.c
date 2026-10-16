@@ -75,6 +75,8 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         }
         return;
     }
+
+    /* Capture the screen into VRAM at (0x100, 0) and hide the map and root windows. */
     if (level->frame == 1) {
         rect.w = 0xFF;
         rect.x = 0;
@@ -85,6 +87,9 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         g_wldcore_window_records[g_wldcore_map_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
         g_wldcore_window_records[g_wldcore_menu_root_window_index].flags |= WORLD_RENDER_RECORD_HIDDEN;
     }
+
+    /* White-out: brighten the overlay by 8 a frame; at full white, toggle the running flag
+     * and move the image at VRAM (0x200, 0x100) back to (0x100, 0). */
     if (level->fade_phase == WLDCORE_EVENT_TRANSITION_FADE_WHITE_OUT) {
         red_sum = g_wldcore_screen_fade_box_0_color.r + 8;
         g_wldcore_screen_fade_box_0_color.r = red_sum;
@@ -104,6 +109,8 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         }
         return;
     }
+
+    /* Flash: brighten by 0x10 a frame to 0x80, then cut to black and start the white-out. */
     if (level->fade_phase == WLDCORE_EVENT_TRANSITION_FADE_FLASH) {
         g_wldcore_screen_fade_box_0_color.r = g_wldcore_screen_fade_box_0_color.r + 0x10;
         g_wldcore_screen_fade_box_0_color.g = g_wldcore_screen_fade_box_0_color.g + 0x10;
@@ -115,6 +122,8 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
             level->fade_phase = WLDCORE_EVENT_TRANSITION_FADE_WHITE_OUT;
         }
     }
+
+    /* The indicator drifts a pixel a frame on each axis; spin, scale and shade step every third frame. */
     switch (level->phase) {
     case WLDCORE_EVENT_TRANSITION_PHASE_SPIN_IN:
         if (level->drift_direction & WLDCORE_EVENT_TRANSITION_DRIFT_RIGHT) {
@@ -127,6 +136,7 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         } else {
             g_wldcore_menu_indicator_sprite.y = g_wldcore_menu_indicator_sprite.y - 1;
         }
+
         if (level->frame == ((level->frame / 3) * 3)) {
             step = level->anim_step + 2;
             level->anim_step = step;
@@ -138,14 +148,19 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
                 angle = g_wldcore_menu_indicator_sprite.rotate - 0x2000;
             }
             g_wldcore_menu_indicator_sprite.rotate = angle;
+
+            /* Stored as a byte, -0x80 - 4 * step darkens the sprite from 0x80. */
             shade = -0x80 - (level->anim_step * 4);
             g_wldcore_menu_indicator_sprite.b = shade;
             g_wldcore_menu_indicator_sprite.g = shade;
             g_wldcore_menu_indicator_sprite.r = shade;
+
             if (level->mode == WLDCORE_EVENT_TRANSITION_MODE_SPIN) {
                 if (level->anim_step == 4) {
                     wldcore_sound_play_effect(MAIN_SFX_EVENT_TRANSITION_MODE_0);
                 }
+
+                /* Spin back out at full size, textured from the 16-bit page holding the capture. */
                 if (level->anim_step >= 0x20) {
                     level->phase = WLDCORE_EVENT_TRANSITION_PHASE_SPIN_OUT;
                     g_wldcore_menu_indicator_sprite.attribute = 0x52000000;
@@ -170,6 +185,7 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
             }
         }
         break;
+
     case WLDCORE_EVENT_TRANSITION_PHASE_SPIN_OUT:
         if (level->drift_direction & WLDCORE_EVENT_TRANSITION_DRIFT_RIGHT) {
             g_wldcore_menu_indicator_sprite.x = g_wldcore_menu_indicator_sprite.x - 1;
@@ -181,6 +197,7 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         } else {
             g_wldcore_menu_indicator_sprite.y = g_wldcore_menu_indicator_sprite.y + 1;
         }
+
         if (level->frame == ((level->frame / 3) * 3)) {
             step = level->anim_step + 4;
             level->anim_step = step;
@@ -193,6 +210,7 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
                 angle = g_wldcore_menu_indicator_sprite.rotate + 0x2000;
             }
             g_wldcore_menu_indicator_sprite.rotate = angle;
+
             if (level->anim_step >= 0x38) {
                 g_wldcore_screen_fade_box_0_color.r = 0;
                 g_wldcore_screen_fade_box_0_color.g = 0;
@@ -209,6 +227,7 @@ void wldcore_menu_step_event_transition_level(wldcore_menu_event_transition_leve
         }
         break;
     }
+
     level->frame = level->frame + 1;
 }
 
@@ -327,13 +346,17 @@ void wldcore_menu_push_brave_story_level(void) {
 
     depth = g_wldcore_menu_stack_depth;
     /* temp spans two blocks without crossing a call, so global allocation
-     * gives the clamp flag and the upper window's y sum the target's v1. */
+     * gives the clamp flag and the upper window's y sum the target's v1.
+     * A saved cursor past the last entry restarts at row 0. */
     temp = g_wldcore_menu_stack_records_next[depth].list_window.entry_count < g_wldcore_brave_story_saved_cursor[0] + 1;
     if (temp) {
         g_wldcore_brave_story_saved_cursor[0] = 0;
     }
     g_wldcore_menu_stack_records_next[depth].list_window.selected_entry = g_wldcore_brave_story_saved_cursor[0];
     g_wldcore_menu_stack_records_next[depth].list_window.mode = WLDCORE_LIST_WINDOW_MODE_BROWSE;
+
+    /* Place the windows on the list record: the cursor 16 pixels per saved row, and the two
+     * stars by adding the row offsets wldcore_menu_build_brave_story_entries stored in their y. */
     index = g_wldcore_menu_stack_records_next[depth].list_window.frame_render;
     g_wldcore_window_records[g_wldcore_menu_stack_records_next[depth].list_window.main_window].position.x
         = g_wldcore_window_render_records[index].base.x + 6;
@@ -568,12 +591,15 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
         if ((g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) && g_wldcore_audio_queue.count != 0) {
             return;
         }
+
         g_main_system_flags ^= MAIN_SYSTEM_FLAG_INPUT_BLOCKED;
         wldcore_window_set_render_objects_visible(1);
         g_wldcore_menu_stack_depth--;
         g_main_system_flags &= ~(MAIN_SYSTEM_FLAG_HIDE_CONTEXT_VALUE | MAIN_SYSTEM_FLAG_HIDE_CALENDAR_DATE
             | MAIN_SYSTEM_FLAG_HIDE_LOCATION_MARKER);
         wldcore_menu_dispatch_publish_handler();
+
+        /* Opened from the title screen: go back there instead of to the map. */
         if (g_main_system_flags & MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY) {
             g_main_system_flags
                 = (g_main_system_flags ^ (MAIN_SYSTEM_FLAG_RUNNING | MAIN_SYSTEM_FLAG_TITLE_BRAVE_STORY))
@@ -612,6 +638,8 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
         wldcore_sound_play_effect(MAIN_SFX_CANCEL);
         thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_GOODBYE, 0);
         level->mode = WLDCORE_LIST_WINDOW_MODE_LEAVE_MESSAGE;
+
+        /* Release the level's four windows and two render records: six queue entries. */
         g_wldcore_window_record_count -= 4;
         g_wldcore_window_render_record_count -= 2;
         g_wldcore_window_render_object_count -= 6;
@@ -665,6 +693,7 @@ void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* lev
             wldcore_list_open_treasures();
             return;
         case WLDCORE_BRAVE_STORY_ROW_LEAVE:
+            /* The same goodbye and release as the cancel path above. */
             thread_set_parameters(WLDCORE_THREAD_SLOT_MESSAGE, 0x19, WLDCORE_TEXT_ID_BRAVE_STORY_GOODBYE, 0);
             level->mode = WLDCORE_LIST_WINDOW_MODE_LEAVE_MESSAGE;
             g_wldcore_window_record_count -= 4;

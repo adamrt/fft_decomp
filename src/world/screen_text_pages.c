@@ -133,31 +133,37 @@ void world_screen_build_at_list(void) {
     input1 = script_get_controller_input_pointer(1);
     row_offset = 0;
     cursor = 0;
+
     entry = (menu_entry_t*)thread_get_current_parameter_1();
     binding = entry->context;
     entry->window.h = binding->row_count * 16 + 0x1C;
     entry->inner_height = binding->row_count * 16 + 0x1C;
     entry->text_image.height = binding->row_count * 16 + 0x1C;
+
     image_parameters.x_load = 0;
     image_parameters.y_load = 0x7E;
     image_parameters.x_screen_offset = 8;
     image_parameters.y_screen_offset = 0xC;
     image_parameters.width = entry->window.w - 0x12;
     image_parameters.height = entry->window.h - 0x1A;
+
     gfx_set_draw_mode_for_texture_page(&page->icon_mode, MENU_TEXTURE_PAGE_FRAME);
     texture_window.x = 0;
     texture_window.y = entry->vram_origin.y & 0xFF;
     texture_window.w = 0x100;
     texture_window.h = 0x100;
+
     for (i = 0; i < 2; i++) {
         g_world_text_list_pages[i].icons.icons[0] = &icons0[i];
         g_world_text_list_pages[i].icons.icons[1] = &icons1[i];
         g_world_text_list_pages[i].icons.icons[2] = &icons2[i];
         menu_build_window_sprites(&image_rect, entry, &g_world_text_list_pages[i].icons);
     }
+
     menu_init_scaled_draw_area_packets(&page->draw_areas);
     SetDrawMode(&page->text_mode, 1, 0, GetTPage(0, 0, entry->vram_origin.x & 0xFFC0, entry->vram_origin.y & 0xFF00),
         &texture_window);
+
     for (i = 0, arrow_u = 0xD8; i < 2; i++) {
         menu_init_sprt(&page->arrows[i]);
         page->arrows[i].clut = 0x7D7C;
@@ -170,6 +176,7 @@ void world_screen_build_at_list(void) {
         page->arrows[i].y0 = entry->window.y + arrow_y;
         arrow_u += 8;
     }
+
     menu_init_sprt(&page->thumb);
     page->thumb.u0 = 0x10;
     page->thumb.v0 = 0x10;
@@ -178,6 +185,7 @@ void world_screen_build_at_list(void) {
     page->thumb.clut = 0x7D7C;
     menu_init_sprt(&page->frame);
     gfx_init_image_loading(&page->frame, &entry->vram_origin, &entry->window, &image_parameters);
+
     menu_init_sprite_array(page->arrow_marks, 2, MENU_CLUT_NORMAL);
     page->arrow_marks[0].w = 6;
     page->arrow_marks[0].h = 0xC;
@@ -191,6 +199,8 @@ void world_screen_build_at_list(void) {
     page->arrow_marks[1].v0 = 0xC;
     page->arrow_marks[1].x0 = page->arrows[1].x0;
     page->arrow_marks[1].y0 = page->arrows[1].y0 + 0xE;
+
+    /* The first page's buffer is freed after the first yield, once its upload has run. */
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     redraw_pending = 1;
@@ -202,17 +212,24 @@ void world_screen_build_at_list(void) {
     ring = 0;
     image_rect.w = g_menu_text_state.pen.stride >> 2;
     LoadImage(&image_rect, (u32*)buffer);
+
+    /* The window sprite starts two lines above the first row (v0 = ring * 16 + accum - 2), so the
+     * two lines above the text ring's first row must stay blank. */
     clear.h = 2;
     clear.x = image_rect.x;
     clear.y = ((image_rect.y - 2) & 0xFF) + (image_rect.y & 0xFF00);
     clear.w = image_rect.w;
     ClearImage(&clear, 0, 0, 0);
+
+    /* The loop draws from the two pages alternately. The copy also took page 0's icon pointers,
+     * so point each page back at its own sprites. */
     mem_copy_bytes_nonempty(&g_world_text_list_pages[1], g_world_text_list_pages, sizeof(menu_list_page_t));
     for (i = 0; i < 2; i++) {
         g_world_text_list_pages[i].icons.icons[0] = &icons0[i];
         g_world_text_list_pages[i].icons.icons[1] = &icons1[i];
         g_world_text_list_pages[i].icons.icons[2] = &icons2[i];
     }
+
     layout = binding;
     delta = 0;
     accum = 0;
@@ -222,12 +239,16 @@ void world_screen_build_at_list(void) {
     for (;;) {
         page = &g_world_text_list_pages[i & 1];
         frame = &page->frame;
+
+        /* The frame thread dims its border while the thread before this one runs. */
         if (thread_is_previous_running() != 0 && g_menu_input_lock_mode == 0) {
             thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 1, 0);
         } else {
             thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, (s32)&entry->window.x, 0, 0);
         }
+
         if (delta == 0 && menu_can_accept_input() != 0 && i != 0) {
+            /* Square with up or down pages through the list instead (world_screen_menu_redraw_text_page_on_scroll). */
             if ((*input0 & PSX_PAD_UP) && !(*input1 & PSX_PAD_SQUARE)) {
                 if (cursor != 0) {
                     cursor--;
@@ -249,6 +270,7 @@ void world_screen_build_at_list(void) {
                     delta++;
                     g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
                 } else if (row_offset == 0) {
+                    /* row_offset equals hidden_rows here, so the cursor wraps only when no rows are hidden. */
                     cursor = 0;
                     if (layout->row_count != 1) {
                         g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
@@ -257,6 +279,9 @@ void world_screen_build_at_list(void) {
             } else {
                 timer = 0;
             }
+
+            /* Draw the row scrolling into view into the ring slot below the visible rows, or above them.
+             * Its buffer is freed when the scroll completes. */
             if (delta != 0) {
                 if (delta > 0) {
                     image_rect.y = (((ring + layout->row_count) * 16) & 0xFF) + entry->vram_origin.y;
@@ -267,6 +292,7 @@ void world_screen_build_at_list(void) {
                 buffer = menu_alloc_memory(0x800);
                 menu_clear_render_buffer(buffer, 0x800);
                 g_menu_text_state.pen.stride = entry->inner_width;
+
                 for (column = 0; column < 3; column++) {
                     index = cursor + row_offset + delta;
                     menu_set_text_origin(layout->x[column], 0);
@@ -284,6 +310,7 @@ void world_screen_build_at_list(void) {
                         menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
                     }
                 }
+
                 g_menu_text_state.pen.color = 0;
                 g_menu_text_palette_offset = 0;
                 LoadImage(&image_rect, (u32*)buffer);
@@ -294,25 +321,31 @@ void world_screen_build_at_list(void) {
                 ClearImage(&clear, 0, 0, 0);
             }
         }
+
         thread_yield();
+        /* A redrawn page's buffer is freed a frame late, after its upload has run. */
         if (redraw_pending != 0) {
             menu_free_memory(buffer);
             redraw_pending = 0;
         }
         if (delta == 0 && menu_can_accept_input() != 0) {
             buffer = world_screen_menu_redraw_text_page_on_scroll(entry, &row_offset, &ring, &cursor);
+            /* The returned buffer doubles as the flag: 0 when no page was redrawn. */
             redraw_pending = (s32)buffer;
             ClearImage(&clear, 0, 0, 0);
         }
+
         entry->selected_index = cursor + row_offset;
         entry->select_text_table = row_offset;
         if (menu_should_close_thread(input0) != 0) {
             break;
         }
+
         if (delta == 0) {
             menu_handle_action(entry, cursor);
         }
         menu_handle_cancel_input(entry);
+
         if ((g_script_event_speed == 1 && !(script_get_event_initial_repeat_counter() & 1))
             || g_script_event_speed == 2) {
             if (timer < g_main_menu_scroll_accel_delay) {
@@ -323,6 +356,9 @@ void world_screen_build_at_list(void) {
             accum += delta * (step << 1);
         }
         timer += g_script_event_speed;
+
+        /* A whole 16-pixel row has scrolled: commit it. A direction held past the initial repeat
+         * delay is fed back into the input so the scroll keeps going. */
         if (accum < -0xF || accum > 0xF) {
             ring += delta;
             row_offset += delta;
@@ -334,12 +370,14 @@ void world_screen_build_at_list(void) {
             }
             menu_free_memory(buffer);
         }
+
         frame->v0 = ring * 16 + accum - 2;
         if (thread_is_previous_running() != 0 || g_menu_input_lock_mode == 1) {
             frame->clut = 0x7F7D;
         } else {
             frame->clut = 0x7FFC;
         }
+
         if (layout->hidden_rows != 0 && menu_can_accept_input() != 0) {
             if (row_offset != 0) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[0]);
@@ -349,6 +387,7 @@ void world_screen_build_at_list(void) {
                 gfx_draw_or_append_gpu_primitive(&page->arrows[1]);
                 gfx_draw_or_append_gpu_primitive(&page->arrow_marks[1]);
             }
+
             span = page->arrows[1].y0;
             top = page->arrows[0].y0 + page->arrows[0].h;
             span -= top;
@@ -356,6 +395,7 @@ void world_screen_build_at_list(void) {
             page->thumb.y0 = top + span * entry->selected_index / (layout->row_count + layout->hidden_rows) - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
+
         gfx_build_scaled_draw_area_pair_swapped(&page->draw_areas, &entry->window, i, g_active_graphics_buffer_index);
         menu_select_icon_sprite_clut(page->icons.icons[0]);
         if (entry->header_id >= 5) {
@@ -366,16 +406,21 @@ void world_screen_build_at_list(void) {
         gfx_draw_or_append_gpu_primitive(frame);
         gfx_draw_or_append_gpu_primitive(&page->text_mode);
         gfx_draw_or_append_gpu_primitive(&page->draw_areas);
+
         menu_select_icon_cluts(&page->icons.base);
         menu_update_icon_cursor_sprites(entry, &page->icons.base, i, cursor);
         i++;
+        /* An x of 1000 keeps icon sprite 0 off screen. */
         page->icons.base.sprites[0].x0 = 1000;
         page->icons.base.sprites[1].y0 += 4;
         page->icons.base.sprites[2].y0 += 4;
         menu_submit_icon_primitives(&page->icons.base);
     }
+
+    /* A nonzero third parameter ends the frame thread. */
     thread_set_parameters(WORLD_AT_LIST_THREAD_SLOT_WINDOW_FRAME, 0, 0, 1);
     entry->select_text_table = row_offset;
+    /* A row scroll still under way owns its row buffer. */
     if (accum & 0xF) {
         menu_free_memory(buffer);
     }

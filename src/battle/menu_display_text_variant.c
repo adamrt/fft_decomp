@@ -34,12 +34,15 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     s32 line;
     u8 variable_base;
 
+    /* The result is unused; WORLD's body copies the player's name from roster slot 0 here. */
     main_party_get_unit(0);
+
     if (text == 0 || text == (u8*)1) {
         cursor = text_find_entry(text_id);
     } else {
         cursor = text;
     }
+
     /* The renderer uses the scratchpad block after the text measurer. */
     state = (text_reader_state_t*)getScratchAddr(128);
     powers = g_text_decimal_divisors;
@@ -51,6 +54,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
     state->column = 0;
     state->max_column = 0;
     state->row = 0;
+
     g_menu_text_pen.rect.x = origin->rect.x;
     pen = &g_menu_text_pen;
     line = 0;
@@ -95,6 +99,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     pen->rect.x += 4;
                 } else if (state->command == TEXT_NEWLINE) {
                     pen->rect.x = origin->rect.x;
+                    /* The pen moves down only from the first shown line; earlier lines are not drawn. */
                     if (line >= g_menu_text_param_22) {
                         g_text_glyph_first_row = 0;
                         pen->rect.y += 16;
@@ -113,6 +118,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                         operand = *cursor;
                         state->value = g_text_substitution_values[operand];
                     }
+
                     width = state->pending_width;
                     if (width == 0xFFFF) {
                         started = 0;
@@ -122,9 +128,11 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                         digit = width - 1;
                         started = 0;
                     }
+
                     if (digit >= 0) {
                         divisor = (u32*)(digit * 4 + (s32)powers);
                         do {
+                            /* Leading zeros draw nothing but still advance the pen. */
                             if (state->value >= *divisor || digit == 0 || started != 0) {
                                 state->command = state->value / *divisor;
                                 started = 1;
@@ -144,6 +152,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                         } while (digit >= 0);
                     }
                 }
+
+                /* Every control code then reaches the substitution, back-reference and end checks. */
                 state->value = text_resolve_format_string_id(state->command, *state->value_cursor);
                 if (state->value != -1) {
                     state->return_cursor = cursor + 1;
@@ -155,6 +165,7 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     state->value_cursor++;
                     continue;
                 }
+
                 if ((state->command & 0xF0) == TEXT_BACKREFERENCE_PREFIX_FIRST && (state->command & 0xF) < 4) {
                     state->return_cursor = cursor + 3;
                     state->scratch = (cursor[0] & 3) * 8;
@@ -165,6 +176,8 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     cursor -= state->scratch;
                     continue;
                 }
+
+                /* 0xFE and 0xFF end the entry, or return from a substituted one. */
                 if ((state->command & 0xFE) == 0xFE) {
                     if (state->return_cursor == (u8*)-1) {
                         break;
@@ -173,10 +186,12 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
                     state->return_cursor = (u8*)-1;
                     continue;
                 }
+
                 cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
                 continue;
             }
         }
+
         cursor = menu_text_advance_cursor_with_backreferences(state, cursor);
         if (line >= g_menu_text_param_24) {
             break;
@@ -185,11 +200,13 @@ void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8*
             text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + state->command * TEXT_GLYPH_BYTES, image,
                 &g_menu_text_pen, g_menu_text_palette_offset);
         }
+
         pen->rect.x += g_text_glyph_widths[state->command];
         if (pen->rect.x >= pen->stride - 8) {
             break;
         }
     }
+
 done:
     g_menu_text_palette_offset = 0;
     g_menu_text_param_22 = 0;
