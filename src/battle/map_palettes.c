@@ -13,6 +13,7 @@
 #include "fft/map.h"
 #include "fft/menu_input.h"
 #include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"

@@ -2,7 +2,7 @@
 
 #include "fft/main.h"
 #include "fft/main_unit.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "fft/wldcore.h"
 #include "fft/wldcore_menu.h"

@@ -8,7 +8,7 @@
 #include "fft/data_item.h"
 #include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/script.h"
+#include "fft/script_instruction.h"
 #include "fft/unit.h"
 #include "psx/libcd.h"
 #include "psx/libgte.h"

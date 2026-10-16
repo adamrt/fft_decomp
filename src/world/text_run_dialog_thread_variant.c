@@ -13,6 +13,7 @@
 #include "fft/menu_text.h"
 #include "fft/open.h"
 #include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/text.h"
 #include "fft/thread.h"

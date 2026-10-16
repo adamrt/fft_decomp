@@ -18,6 +18,7 @@
 #include "fft/menu_input.h"
 #include "fft/menu_overlay.h"
 #include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "psx/gte_inline.h"
 #include "psx/gte_inline_split.h"

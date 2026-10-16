@@ -23,6 +23,7 @@
 #include "fft/menu.h"
 #include "fft/menu_overlay.h"
 #include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "psx/libc.h"
 #include "psx/types.h"

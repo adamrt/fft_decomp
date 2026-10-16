@@ -11,7 +11,7 @@
 #include "fft/main_gfx.h"
 #include "fft/main_sound.h"
 #include "fft/map.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "psx/libc.h"
 #include "psx/libgpu.h"

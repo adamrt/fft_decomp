@@ -2,6 +2,8 @@
 
 #include "fft/battle_unit.h"
 #include "fft/script.h"
+#include "fft/script_instruction.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

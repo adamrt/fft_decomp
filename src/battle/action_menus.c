@@ -26,6 +26,7 @@
 #include "fft/menu_panel.h"
 #include "fft/menu_text.h"
 #include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

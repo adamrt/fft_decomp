@@ -6,7 +6,7 @@
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/main_sound.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "psx/libc.h"
 #include "psx/types.h"

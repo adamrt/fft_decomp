@@ -22,7 +22,7 @@
 #include "fft/main_item.h"
 #include "fft/map.h"
 #include "fft/menu.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"

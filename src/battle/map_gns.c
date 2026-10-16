@@ -2,7 +2,7 @@
 
 #include "fft/battle_map.h"
 #include "fft/main_file.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "psx/libc.h"
 #include "psx/types.h"
 

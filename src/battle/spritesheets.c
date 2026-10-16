@@ -9,7 +9,7 @@
 #include "fft/main.h"
 #include "fft/main_gfx.h"
 #include "fft/map.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "psx/libc.h"
 #include "psx/libgte.h"
 #include "psx/types.h"

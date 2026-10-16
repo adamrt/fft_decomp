@@ -6,7 +6,7 @@
 #include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/menu_text.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/text.h"
 #include "fft/thread.h"
 #include "fft/window.h"

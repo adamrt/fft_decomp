@@ -5,7 +5,7 @@
  * separate camera state and entry points in world.h. */
 
 #include "fft/battle_unit.h"
-#include "fft/script.h"
+#include "fft/script_instruction.h"
 #include "psx/libgte.h"
 #include "psx/types.h"
 

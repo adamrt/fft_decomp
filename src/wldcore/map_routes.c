@@ -6,7 +6,7 @@
 #include "fft/main.h"
 #include "fft/main_file.h"
 #include "fft/menu.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/wldcore.h"
 #include "fft/wldcore_map.h"
 #include "fft/wldcore_menu.h"

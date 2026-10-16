@@ -9,7 +9,7 @@
 #include "fft/main_item.h"
 #include "fft/main_unit.h"
 #include "fft/memory.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "psx/types.h"
 

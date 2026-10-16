@@ -19,7 +19,7 @@
 #include "fft/map.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "psx/libc.h"
 #include "psx/types.h"

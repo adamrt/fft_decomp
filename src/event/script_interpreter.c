@@ -23,6 +23,8 @@
 #include "fft/memory.h"
 #include "fft/menu.h"
 #include "fft/script.h"
+#include "fft/script_instruction.h"
+#include "fft/script_variable.h"
 #include "fft/sound.h"
 #include "fft/status.h"
 #include "fft/thread.h"

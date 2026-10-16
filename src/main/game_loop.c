@@ -7,7 +7,7 @@
 #include "fft/main_gfx.h"
 #include "fft/main_item.h"
 #include "fft/main_sound.h"
-#include "fft/script.h"
+#include "fft/script_variable.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
