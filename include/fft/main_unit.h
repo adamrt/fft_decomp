@@ -137,8 +137,6 @@ typedef enum main_unit_entd_init_kind {
     MAIN_UNIT_ENTD_INIT_TRANSFORM = 0x82,
 } main_unit_entd_init_kind_e;
 
-extern u32 g_main_unit_name_uses_world_text;
-
 s32 main_unit_init_from_entd(unit_stats_t* unit, entd_unit_t* entd, u32 use_world_text, s32 kind);
 s32 main_unit_init_from_party_slot(unit_stats_t* unit, s32 slot, s32 use_world_text);
 void main_unit_init_job_levels(const u16* unit_job_jp, u8* unit_job_levels);

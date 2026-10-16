@@ -27,6 +27,10 @@
  * the disc. The 150 x 14-byte shape suggests per-instruction parameter
  * storage (an event opcode takes at most 14 parameters), but no code proves
  * it, so the names stay provisional. */
+static u8 g_battle_map_saved_texture_animation_modes[72] = { 0 };
+static MATRIX g_battle_map_camera_matrix = { 0 };
+static DR_MOVE g_battle_map_texture_animation_moves[MAP_TEXTURE_ANIMATION_COUNT] = { 0 };
+
 static u8 g_battle_map_unread_gns_load_infos[150][14] = { 0 };
 
 static u8 g_battle_map_unread_gns_record_flags[150] = { 0 };

@@ -92,8 +92,6 @@ typedef struct unit_animation_state {
 } unit_animation_state_t;
 typedef char unit_animation_state_size_must_be_7[sizeof(unit_animation_state_t) == 7 ? 1 : -1];
 
-/* Frames per facing step, indexed by the RotateUnit speed operand. */
-extern u8 g_unit_rotation_speed_frames[];
 /* Unit graphics load result: 0 done, 1 pending. */
 extern u16 g_unit_graphics_load_pending;
 /* WalkToAnim: requested animation applied after movement stops; 0 means none. */

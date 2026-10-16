@@ -26,6 +26,10 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 g_battle_cursor_previous_x = 0; /* cursor X before this step */
+static s32 g_battle_cursor_previous_z = 0; /* cursor level before this step */
+static s32 g_battle_cursor_previous_y = 0; /* cursor Y before this step */
+
 /* Step handler of the FLOAT_JUMP phases: carry a floating unit to the entry edge of its
  * destination tile, where its horizontal motion stops; once it has come down to the tile's height,
  * start the float step into the matching FLOAT_TO_CENTER phase. */

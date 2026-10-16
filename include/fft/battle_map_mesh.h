@@ -250,8 +250,6 @@ typedef char map_texture_animation_size_must_be_20[(sizeof(map_texture_animation
 
 extern s32 g_battle_map_texture_animation_cycle_handles[MAP_TEXTURE_ANIMATION_COUNT];
 extern map_texture_animation_t g_battle_map_texture_animations[MAP_TEXTURE_ANIMATION_COUNT];
-extern DR_MOVE g_battle_map_texture_animation_moves[MAP_TEXTURE_ANIMATION_COUNT];
-extern u8 g_battle_map_saved_texture_animation_modes[];
 
 void battle_map_freeze(void);
 void battle_map_unfreeze(void);
@@ -264,19 +262,13 @@ typedef enum map_effect_data_command {
     MAP_EFFECT_DATA_BEGIN = 0x88,
 } map_effect_data_command_e;
 
-extern battle_render_buffer_t* g_battle_map_mesh_last_render_buffer;
 extern s32 g_battle_map_textured_quad_count;
-extern s32 g_battle_map_textured_quad_render_record_count;
 extern s32 g_battle_map_textured_triangle_count;
-extern s32 g_battle_map_textured_triangle_render_record_count;
 extern s32 g_battle_map_tilt_target;
 extern s32 g_battle_map_untextured_quad_count;
-extern s32 g_battle_map_untextured_quad_render_record_count;
 extern s32 g_battle_map_untextured_triangle_count;
-extern s32 g_battle_map_untextured_triangle_render_record_count;
 extern s32 g_battle_map_zoom_target;
 extern VECTOR g_battle_map_camera_zoom;
-extern MATRIX g_battle_map_camera_matrix;
 
 /* Untextured map polygons go to OT slot (otz & mask) | fixed index: {0, 4}
  * normally, {-1, 0} while map effect data is active (command 0x88), so a

@@ -39,6 +39,11 @@
 #include "psx/types.h"
 
 static u8 g_world_formation_thread_status_snapshot[16] = { 0 };
+static s16 g_world_menu_submenu_page_row_text_ids[12] = { 0 };
+static s32 g_world_menu_text_file_buffer[16512] = { 0 };
+/* 32-bit substitution values saved around the text calls. */
+static s32 g_world_text_substitution_values_backup[32] = { 0 };
+static u32 g_world_formation_saved_system_flags = 0;
 
 static void world_menu_build_layout_sprites(menu_entry_t* entry, SPRT sprite[2], s32 unused_2);
 static void world_menu_init_quad_from_record(RECT* out, const menu_entry_t* record, SPRT* primitive);

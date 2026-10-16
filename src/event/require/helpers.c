@@ -11,6 +11,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static RECT g_require_reward_bonus_image_rect = { 384, 0, 64, 256 };
+
 /* Thread body that waits 16 frames and exits. Nothing references it. */
 void require_thread_stop_after_16_frames(void) {
     thread_wait_frames(0x10);

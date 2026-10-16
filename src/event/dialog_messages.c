@@ -23,6 +23,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static menu_text_state_t g_text_typewriter_state = { 0 };
+static RECT g_text_typewriter_vram_rect = { 0 };
+
 static u8 g_text_typewriter_glyph_images[3][8][0x54] = { 0 };
 
 static u8 g_text_typewriter_previous_images[3][0x54] = { 0 };

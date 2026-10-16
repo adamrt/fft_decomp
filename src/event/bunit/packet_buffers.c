@@ -8,6 +8,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static s16 g_bunit_gfx_poly_f4_count = 0;
+
 /*
  * Submit the finished bunit frame and swap to the other graphics context.
  * Twin of card_gfx_submit_frame_and_swap_buffers over the BUNIT globals.

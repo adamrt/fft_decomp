@@ -8,6 +8,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static u8 g_world_gfx_fade_decreasing = 0;
+static u8 g_world_gfx_fade_disabled = 0;
+static u8 g_world_gfx_fade_increasing = 0;
+static RECT g_world_gfx_fade_tile_rect = { 0, 0, 256, 240 };
+
 /* Return the active WORLD fades as WORLD_FADE_STATE bits (decreasing 1, increasing 2), or none
  * while fades are disabled. */
 s32 world_gfx_get_fade_state(void) {

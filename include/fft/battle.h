@@ -231,9 +231,6 @@ extern u8 g_battle_weapon_attack_animations[][3];
 s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id);
 
 /* free cursor */
-extern s32 g_battle_cursor_previous_x;     /* cursor X before this step */
-extern s32 g_battle_cursor_previous_y;     /* cursor Y before this step */
-extern s32 g_battle_cursor_previous_z;     /* cursor level before this step */
 extern u32 g_battle_cursor_repeat_counter; /* free-cursor repeat counter */
 extern u16 g_battle_cursor_screen_x;
 extern s16 g_battle_cursor_screen_y;

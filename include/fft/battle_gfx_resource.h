@@ -487,8 +487,6 @@ typedef char
 extern const u8* g_battle_gfx_compressed_data;
 extern s32 g_battle_gfx_compressed_nibble_phase;
 extern s32 g_battle_gfx_compressed_offset;
-extern file_extent_t g_battle_gfx_effect_seq_files[];
-extern file_extent_t g_battle_gfx_effect_shp_files[];
 extern u8 g_battle_gfx_fallback_seq_data[];
 extern u8 g_battle_gfx_fallback_shp_frame_data[];
 extern s32 g_battle_gfx_last_loaded_seq_id;
@@ -505,8 +503,6 @@ extern file_extent_t g_battle_gfx_sprite_shp_files[];
 extern file_extent_t g_battle_gfx_spritesheet_files[];
 extern u8 g_battle_gfx_unit_animation_data[];
 extern battle_gfx_unit_graphics_load_state_t g_battle_gfx_unit_graphics_load_state;
-extern file_extent_t g_battle_gfx_weapon_seq_files[];
-extern file_extent_t g_battle_gfx_weapon_shp_files[];
 extern file_extent_t g_battle_gfx_worker8_sp2_files[];
 
 void battle_gfx_queue_unit_graphics_load(s32 map_x, s32 map_y, s32 map_level, s16 facing, s16 spritesheet_id,

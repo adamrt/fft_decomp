@@ -17,8 +17,6 @@ void battle_status_enable_disable_acting(unit_stats_t* unit);
 /* Set when a unit that started on the blue team turns Crystal or Dead; it voids the battle's
  * level bonus money. */
 extern u8 g_battle_player_unit_fallen;
-/* The statuses a rider can be inflicted with, one mask per status byte. */
-extern u8 g_battle_rider_status_infliction_mask[STATUS_BYTE_COUNT];
 
 s32 battle_status_inflict_defending_to_battle_id(s32 unit_id);
 s32 battle_status_init_special_flag_enabling(s32 unit_id);

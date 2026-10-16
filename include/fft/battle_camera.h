@@ -62,7 +62,6 @@ extern VECTOR g_battle_camera_current_real_coords;
 extern SVECTOR g_battle_camera_integer_coords;
 extern u16 g_battle_camera_real_coord_countdown;
 extern VECTOR g_battle_camera_real_coord_delta;
-extern VECTOR g_battle_camera_saved_real_coords;
 extern VECTOR g_battle_camera_step_vector;
 
 VECTOR* battle_camera_get_current_real_coords(void);
@@ -104,7 +103,6 @@ extern u8 g_battle_camera_quadrant_block_directions[4];
 extern camera_rotation_action_e g_battle_camera_rotation_action;
 extern SVECTOR g_battle_camera_rotation_backup;
 extern u16 g_battle_camera_rotation_countdown;
-extern SVECTOR g_battle_camera_rotation_delta;
 extern s32 g_battle_camera_rotation_increment;
 extern s32 g_camera_yaw_band;
 extern s32 g_battle_camera_yaw_target;
@@ -150,7 +148,6 @@ extern VECTOR g_battle_camera_zoom;
 extern camera_step_action_e g_battle_camera_zoom_action;
 extern VECTOR g_battle_camera_zoom_backup;
 extern u16 g_battle_camera_zoom_countdown;
-extern VECTOR g_battle_camera_zoom_delta;
 extern s32 g_battle_camera_zoom_increment;
 
 VECTOR* battle_camera_get_zoom(void);

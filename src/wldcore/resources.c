@@ -35,6 +35,16 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static s32 g_wldcore_input_repeat_initial_delay = 0;
+static s32 g_wldcore_input_repeat_period = 0;
+static s32 g_wldcore_input_secondary_repeat_period = 0;
+static s32 g_wldcore_input_repeat_counter_up = 0;
+static s32 g_wldcore_input_repeat_counter_down = 0;
+static s32 g_wldcore_input_repeat_counter_left = 0;
+static s32 g_wldcore_input_repeat_counter_right = 0;
+static s32 g_wldcore_input_repeat_counter_r1 = 0;
+static s32 g_wldcore_input_repeat_counter_l1 = 0;
+
 static void wldcore_advance_brave_story_birthdays(void);
 
 /* One step of the CD stream that loads an image file straight into VRAM (the

@@ -39,6 +39,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static s32 g_battle_action_post_effect_msg_counter = 0;
+battle_post_effect_msg_t g_battle_action_post_effect_msgs[BATTLE_POST_EFFECT_MSG_CAPACITY] = { 0 };
+
 /* Effect message texts (MENU_SYSTEM_COMMAND_EFFECT_MESSAGE). An ability's message is the base plus
  * the text_display entry of its animation data; the others have fixed ids. */
 enum {

@@ -38,15 +38,6 @@ extern menu_status_thread_t g_wldcore_threadc_params;
 
 /* controller input */
 extern u32 g_wldcore_input_new_button_presses;
-extern s32 g_wldcore_input_repeat_counter_up;
-extern s32 g_wldcore_input_repeat_counter_down;
-extern s32 g_wldcore_input_repeat_counter_left;
-extern s32 g_wldcore_input_repeat_counter_right;
-extern s32 g_wldcore_input_repeat_counter_r1;
-extern s32 g_wldcore_input_repeat_counter_l1;
-extern s32 g_wldcore_input_repeat_initial_delay;
-extern s32 g_wldcore_input_repeat_period;
-extern s32 g_wldcore_input_secondary_repeat_period;
 void wldcore_input_init_repeat_state(void);
 u32 wldcore_input_update_repeat(u32 buttons);
 void wldcore_input_update_controller(void);

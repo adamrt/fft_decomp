@@ -54,11 +54,7 @@ typedef enum world_fade_state {
     WORLD_FADE_STATE_INCREASING = 2
 } world_fade_state_e;
 
-extern u8 g_world_gfx_fade_decreasing;
-extern u8 g_world_gfx_fade_increasing;
-extern u8 g_world_gfx_fade_disabled;
 extern s16 g_world_gfx_fade_intensity;
-extern RECT g_world_gfx_fade_tile_rect;
 /* Fade tile RGB channels, set to equal levels by the fade updaters. */
 extern rgb24_t g_world_fade_tile_color;
 extern rgb24_t g_world_gfx_black_tile_color;

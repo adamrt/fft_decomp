@@ -204,7 +204,6 @@ void equip_menu_draw_thread_status_indicators(void);
 
 /* graphics */
 extern menu_gfx_context_t* g_equip_gfx_context_base;
-extern menu_gfx_context_t g_equip_gfx_contexts[];
 extern u32* g_equip_gfx_current_ot;
 extern u16 g_equip_gfx_draw_area_capacity;
 extern u16 g_equip_gfx_draw_move_capacity;
@@ -213,9 +212,6 @@ extern volatile u16 g_equip_gfx_line_g2_capacity;
 extern volatile u16 g_equip_gfx_line_g3_capacity;
 extern u16 g_equip_gfx_poly_f4_count;
 extern u16 g_equip_gfx_poly_g4_count;
-extern LINE_F2 g_equip_gfx_line_f2_buffer[];
-extern TILE g_equip_gfx_tile_buffer[];
-extern DR_MODE g_equip_gfx_draw_mode_buffer[];
 
 void equip_gfx_init_contexts(menu_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,

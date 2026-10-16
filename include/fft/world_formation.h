@@ -132,7 +132,6 @@ extern s16 g_world_formation_record_order[];
  * does not itself refresh this byte. */
 extern u8 g_world_formation_unit_count;
 extern struct world_unit* g_world_formation_temp_unit;
-extern s8 g_world_formation_sort_field_indices[];
 s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s32 mode);
 void world_formation_build_unit_record(
     const struct unit_stats* unit, struct world_unit* record, const struct party_unit* party);
@@ -200,14 +199,11 @@ extern s32 g_world_formation_menu_new_buttons;
 extern u32 g_world_formation_menu_allowed_buttons; /* pad mask applied to the new presses of each menu frame */
 extern u32* g_world_formation_ordering_table;
 /* g_main_system_flags as saved by world_menu_hide_world_map (main_system_flags_e). */
-extern u32 g_world_formation_saved_system_flags;
-extern zodiac_draw_context_t g_world_formation_view;
 extern POLY_FT4 g_world_formation_view_quads[2][30];
 extern world_formation_background_tile_t g_world_formation_background_tiles[2][4];
 extern u8 g_world_formation_menu_text_table[];
 extern u8 g_world_formation_menu_text_buffer[];
 extern clut_t g_world_formation_menu_palettes;
-extern s32 g_world_formation_name_string_revision;
 extern menu_entry_t g_world_formation_triangle_menu;
 extern u8 g_world_formation_triangle_menu_open;
 extern u8 g_world_formation_triangle_menu_running;
@@ -261,8 +257,6 @@ extern oriented_quad_t g_world_formation_label_leaving;
 extern oriented_quad_t g_world_formation_label_missing;
 extern menu_sprite_cell_t g_world_formation_label_tiles[];
 extern menu_sprite_cell_t g_world_formation_label_tiles_bottom[];
-extern u32 g_world_formation_status_label_image[];
-extern RECT g_world_formation_status_label_image_rect;
 extern u8 g_world_formation_grid_transition_frame;
 extern u8 g_world_formation_grid_return_frame;
 extern u8 g_world_formation_grid_return_done;
@@ -281,7 +275,6 @@ s32 world_formation_step_grid_return_transition(s32 mode);
 extern texture_source_t g_world_formation_graphic_entries[];
 extern u8 g_world_formation_generic_human_graphic_index_table[];
 /* Portrait code per sprite set: low byte is the portrait index. */
-extern u16 g_world_formation_sprite_by_portrait[];
 extern u8 g_world_formation_unit_slide_pending;
 extern volatile u8 g_world_formation_unit_slide_frame;
 extern u8 g_world_formation_portrait_slide_frame;
@@ -327,7 +320,6 @@ extern rgb24_t g_world_formation_ct_gauge_colors[4];
 extern CVECTOR g_world_unit_panel_bar_colors[];
 extern image_load_parameters_t g_world_unit_summary_label_sprite_params[];
 extern image_load_parameters_t g_world_unit_summary_value_sprite_params[];
-extern image_load_parameters_t g_world_unit_summary_mode_row_params[4];
 extern RECT g_world_unit_status_panel_origin;
 extern image_load_parameters_t g_world_unit_status_sprite_params[];
 extern image_load_parameters_t g_world_unit_status_portrait_params;
@@ -363,7 +355,6 @@ void world_formation_run_dismiss_unit_menu_step(void);
 extern menu_entry_t g_world_order_unit_menu;
 extern u8 g_world_order_unit_saved_browse_enabled;
 extern menu_entry_t g_world_best_fit_confirm_menu;
-extern u8 g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
 void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment);
 s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id);
 
@@ -466,7 +457,6 @@ extern u8 g_world_ability_menu_slots_changed;
 extern u8 g_world_ability_menu_saved_browse_enabled;
 extern u8 g_world_ability_submenu_running;
 extern RECT g_world_ability_panel_origin;
-extern RECT g_world_ability_panel_draw_area;
 extern menu_status_thread_t g_world_ability_panel_thread_params;
 extern menu_instruction_t g_world_ability_list_script;
 extern menu_list_page_t g_world_ability_list_pages[][2];
@@ -501,7 +491,6 @@ s32 world_ability_has_two_hands(s16 unit_id);
 s32 world_ability_has_two_swords(s16 unit_id);
 
 /* equipment and items */
-extern RECT g_world_equipment_panel_draw_area;
 extern menu_status_thread_t g_world_equipment_ability_panel_thread_params;
 extern s8 g_world_equip_menu_initialized;
 extern u16 g_world_equip_item_cursor_anim;

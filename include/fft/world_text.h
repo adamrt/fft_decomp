@@ -46,18 +46,8 @@ typedef enum world_text_section {
 enum { WORLD_TEXT_ID_FORMATION_TEXT_BASE = WORLD_TEXT_SECTION_FORMATION_TEXT << TEXT_ID_SECTION_SHIFT };
 
 extern s32 g_world_text_section_offsets[];
-extern u8* g_world_text_resident_data[9];
-extern u8 g_world_text_skillset_names_data[];
-extern u8 g_world_text_job_names_data[];
-extern u8 g_world_text_ability_names_data[];
-extern u8 g_world_text_formation_messages_data[];
-extern u8 g_world_text_dismiss_unit_replies_data[];
-extern u8 g_world_text_job_descriptions_data[];
-extern u8 g_world_text_name_entry_keyboard_data[];
-extern u8 g_world_text_shop_dialogue_data[];
 extern u8 g_world_text_shop_menu_labels_data[];
 extern u8 g_world_text_name_entry_keys_data[];
-extern s32 g_world_text_substitution_values_backup[32]; /* 32-bit substitution values saved around the text calls */
 u8* world_text_get_resident_data(world_text_data_e index);
 u8* world_text_bind_section_data(u32 index);
 /* MAIN selects the WORLD address of text_find_entry through this existing alias. */
@@ -87,7 +77,6 @@ void world_text_show_message_and_play_sound(s32 message_id, s32 sound_id);
 
 /* text images */
 extern menu_list_page_t g_world_text_list_pages[2];
-extern u8 g_world_text_row_image_buffer[];
 void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* destination, s32 palette);
 void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette);
 s32 world_text_measure_entry_pixel_width(const u8* entry);

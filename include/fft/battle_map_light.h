@@ -127,7 +127,6 @@ void battle_map_transition_and_store_background_gradient(
     s32 frame_duration, const map_background_gradient_colors_t* colors);
 
 /* back color */
-extern rgb24_t g_battle_map_background_color;
 extern rgb24_t g_battle_map_background_color_backup;
 extern s32 g_battle_map_back_color_red;
 extern s32 g_battle_map_back_color_green;

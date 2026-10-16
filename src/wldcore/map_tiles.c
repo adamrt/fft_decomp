@@ -19,6 +19,9 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static VECTOR g_wldcore_map_projection_scale = { 0 };
+static SVECTOR g_wldcore_map_projection_rotation = { 0 };
+
 /* The map is a grid of 12x16 tiles, projected through its 13x17 corners. */
 #define WLDCORE_MAP_TILE_ROWS    12
 #define WLDCORE_MAP_TILE_COLUMNS 16

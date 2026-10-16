@@ -18,6 +18,9 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static u8 g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { 5, 6, 2, 3, 4 };
+static u8 g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT] = { 5, 6, 2, 3, 4 };
+
 /* Report whether the party has any items: mode 0 asks for inventory or equipped items, mode 1
  * for inventory only, other modes for equipped items only.
  */

@@ -9,60 +9,60 @@ profile: gcc-2.6.3_O2_aspsx-2.34
 defines: {VARIANT_MENU_BUFFER_PAGE_COUNT: 53, VARIANT_THREAD_TABLE_SLOT_COUNT: 16}
 
 units:
-  - {name: action_effects, source: src/battle/action_effects.c}
-  - {name: action_menus, source: src/battle/action_menus.c}
+  - {name: action_effects, source: src/battle/action_effects.c, data: [{addr: 0x800943c4, size: 32, hash: 21037ee521333e56}]}
+  - {name: action_menus, source: src/battle/action_menus.c, data: [{addr: 0x80096244, size: 4, hash: df3f619804a92fdb}, {addr: 0x80096248, size: 128, hash: 38723a2e5e8a17aa}]}
   - {name: action_outcomes, source: src/battle/action_outcomes.c, data: [{addr: 0x80193868, size: 16, hash: 374708fff7719dd5}]}
   - {name: action_preparation, source: src/battle/action_preparation.c}
   - {name: action_resolution, source: src/battle/action_resolution.c}
-  - {name: ai_commands, source: src/battle/ai_commands.c, rodata: [{addr: 0x80193d70, size: 8, hash: 14bca7e1bfd5b8a9}]}
+  - {name: ai_commands, source: src/battle/ai_commands.c, rodata: [{addr: 0x80193d70, size: 8, hash: 14bca7e1bfd5b8a9}], data: [{addr: 0x8019f37c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f380, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f384, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f388, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f38c, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f390, size: 4, hash: df3f619804a92fdb}, {addr: 0x8019f394, size: 4, hash: df3f619804a92fdb}]}
   - {name: ai_origins, source: src/battle/ai_origins.c, rodata: [{addr: 0x80193dd4, size: 12, hash: a1dd1afa9d59d502}], data: [{addr: 0x8019f308, size: 80, hash: 296c781af2dde231}]}
   - {name: attack_resources, source: src/event/attack_resources.c, data: [{addr: 0x80169230, size: 11, hash: 7b8d9e8d9b1cfad3}]}
-  - {name: camera, source: src/battle/camera.c}
+  - {name: camera, source: src/battle/camera.c, data: [{addr: 0x800a1c5c, size: 16, hash: 374708fff7719dd5}, {addr: 0x800a1c6c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a1c74, size: 16, hash: 374708fff7719dd5}]}
   - {name: command_menus, source: src/event/command_menus.c}
   - {name: crystals_and_treasure, source: src/battle/crystals_and_treasure.c}
   - {name: dialog_cursor, source: src/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/event/dialog_helpers.c}
-  - {name: dialog_messages, source: src/event/dialog_messages.c, data: [{addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
+  - {name: dialog_messages, source: src/event/dialog_messages.c, data: [{addr: 0x8016dae4, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8016daf8, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8016db00, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8016e2e0, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8016e3dc, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: effect_renderer, source: src/battle/effect_renderer.c}
   - {name: effect_script, source: src/battle/effect_script.c}
   - {name: effect_system, source: src/battle/effect_system.c}
   - {name: event_resources, source: src/event/event_resources.c}
   - {name: event_unit_lookup, source: src/event/event_unit_lookup.c}
-  - {name: formula_core, source: src/battle/formula_core.c}
+  - {name: formula_core, source: src/battle/formula_core.c, data: [{addr: 0x8018f600, size: 12, hash: 9b134ab1d56154c2}, {addr: 0x8018f60c, size: 5, hash: d7f2b411424619e0}]}
   - {name: formula_damage, source: src/battle/formula_damage.c}
   - {name: formula_effects, source: src/battle/formula_effects.c}
   - {name: formula_weapons, source: src/battle/formula_weapons.c}
   - {name: icon_selection, source: src/event/icon_selection.c, data: [{addr: 0x80166a24, size: 16, hash: 4bb06fad13fd7602}]}
   - {name: map_commands, source: src/battle/map_commands.c}
   - {name: map_gns, source: src/battle/map_gns.c}
-  - {name: map_loading, source: src/battle/map_loading.c}
+  - {name: map_loading, source: src/battle/map_loading.c, data: [{addr: 0x800f7980, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7984, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7988, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f798c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800f7990, size: 4, hash: df3f619804a92fdb}]}
   - {name: map_palettes, source: src/battle/map_palettes.c, data: [{addr: 0x800956e4, size: 2016, hash: 0cd1d40758dc1bed}, {addr: 0x80095ec4, size: 504, hash: 40a6fe7cfd29ed44}]}
-  - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}]}
-  - {name: move_paths, source: src/battle/move_paths.c}
+  - {name: map_rendering, source: src/battle/map_rendering.c, rodata: [{addr: 0x800e6b30, size: 32, hash: e31d717320f9b9f0}, {addr: 0x800e6b50, size: 24, hash: d0bbc605e5913d31}, {addr: 0x800e6b68, size: 8, hash: 90a2249a9949ea6b}, {addr: 0x800e6b94, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800e6b9c, size: 20, hash: 85addd39731a2b42}], data: [{addr: 0x800f6d4c, size: 72, hash: 834a709ba2534ebe}, {addr: 0x800f6d94, size: 32, hash: 66687aadf862bd77}, {addr: 0x800f6db4, size: 768, hash: ef115a0e0c15cdc4}, {addr: 0x800f70b4, size: 2100, hash: 8dd6c05a3a7cd764}, {addr: 0x800f78e8, size: 150, hash: 1d83518b897b14e2}]}
+  - {name: move_paths, source: src/battle/move_paths.c, data: [{addr: 0x800e4e90, size: 4, hash: df3f619804a92fdb}, {addr: 0x800e4e94, size: 4, hash: df3f619804a92fdb}, {addr: 0x800e4e98, size: 4, hash: df3f619804a92fdb}]}
   - {name: move_range, source: src/battle/move_range.c}
-  - {name: move_steps, source: src/battle/move_steps.c}
+  - {name: move_steps, source: src/battle/move_steps.c, data: [{addr: 0x80093c9c, size: 4, hash: 02d0e6c850c1f217}, {addr: 0x80093ca0, size: 4, hash: 0e3f601857911ecc}, {addr: 0x80093ca4, size: 4, hash: eae2ccfcdac29c2d}, {addr: 0x80093ca8, size: 4, hash: 2ef245921b9d3ae8}]}
   - {name: music_stubs, source: src/event/menu/music_stubs.c}
   - {name: script_commands, source: src/event/script_commands.c}
   - {name: script_helpers, source: src/event/script_helpers.c, data: [{addr: 0x80167838, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80167844, size: 96, hash: 54145c650f08eb0b}]}
-  - {name: script_interpreter, source: src/event/script_interpreter.c, data: [{addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
+  - {name: script_interpreter, source: src/event/script_interpreter.c, data: [{addr: 0x801696fc, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80169700, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80169718, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80169720, size: 48, hash: 5026ef5547d95034}, {addr: 0x80169750, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80169758, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: skillset_menus, source: src/battle/skillset_menus.c, data: [{addr: 0x8018f8b0, size: 21, hash: c90232586b801f95}]}
   - {name: spritesheets, source: src/battle/spritesheets.c}
   - {name: state_actions, source: src/battle/state_actions.c}
   - {name: state_handlers, source: src/battle/state_handlers.c}
   - {name: status_billboard, source: src/event/menu/status_billboard.c}
-  - {name: text_entries, source: src/event/text_entries.c}
+  - {name: text_entries, source: src/event/text_entries.c, data: [{addr: 0x80169790, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x801697a0, size: 16, hash: 6ff8555916aa10e6}]}
   - {name: text_skip_to_entry, source: src/event/text_skip_to_entry.c}
   - {name: thread, source: src/event/thread.c}
   - {name: thread_accessors, source: src/event/thread_accessors.c}
-  - {name: unit_animations, source: src/battle/unit_animations.c}
-  - {name: unit_control, source: src/battle/unit_control.c}
-  - {name: unit_lookup, source: src/battle/unit_lookup.c}
+  - {name: unit_animations, source: src/battle/unit_animations.c, data: [{addr: 0x80094c04, size: 72, hash: cab01352aee9f525}, {addr: 0x80094c4c, size: 72, hash: 05a1775a42db17c8}, {addr: 0x80094c94, size: 16, hash: e8877e5cf3d312c9}, {addr: 0x80094ca4, size: 16, hash: 4b74bb45f0b85a11}, {addr: 0x80094cb4, size: 16, hash: 682ea28f475f1fe5}, {addr: 0x80094cc4, size: 16, hash: 5cf971573bd3ea07}, {addr: 0x80094cd4, size: 1272, hash: ed600454c88e8d7b}]}
+  - {name: unit_control, source: src/battle/unit_control.c, data: [{addr: 0x800961ac, size: 3, hash: 8ae40a3583aef669}]}
+  - {name: unit_lookup, source: src/battle/unit_lookup.c, data: [{addr: 0x800a7790, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a7798, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a0, size: 8, hash: af5570f5a1810b7a}, {addr: 0x800a77a8, size: 8, hash: af5570f5a1810b7a}]}
   - {name: unit_motion, source: src/battle/unit_motion.c}
   - {name: unit_name_list, source: src/event/unit_name_list.c}
   - {name: unit_overlays, source: src/battle/unit_overlays.c, rodata: [{addr: 0x800677f8, size: 24, hash: eb05bd6b6bfe587c}, {addr: 0x80067830, size: 8, hash: cc7419b17cc27ab3}], data: [{addr: 0x800949dc, size: 24, hash: 2af3cad2dfddc130}, {addr: 0x800949f4, size: 24, hash: 65d77a45a2612b88}, {addr: 0x80094a0c, size: 24, hash: ca780de6daf75aec}, {addr: 0x80094a24, size: 24, hash: e4e8dec7578128c7}]}
   - {name: unit_runtime, source: src/battle/unit_runtime.c}
   - {name: unit_status_lists, source: src/event/unit_status_lists.c, data: [{addr: 0x80168d0c, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x80168d44, size: 76, hash: ec0d1125a0b03828}]}
-  - {name: window_images, source: src/event/window_images.c}
+  - {name: window_images, source: src/event/window_images.c, data: [{addr: 0x801697b0, size: 16, hash: 0e0f25166632e4a6}, {addr: 0x801697c0, size: 16, hash: e5c40d36a431f4b8}]}
 
 functions:
   - {addr: 0x800683c0, size: 20, name: battle_target_show_cursor, hash: 8a8a6eec590a8201, unit: action_effects}

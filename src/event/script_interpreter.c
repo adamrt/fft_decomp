@@ -37,6 +37,15 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static s32 g_script_loaded_event_id = -1;
+static u16 g_script_map_darkness_durations[12] = { 1, 8, 16, 32, 64, 96, 128, 160, 192, 224, 0x100, 0 };
+static s16 g_camera_diagonal_yaws[4] = { 3584, 2560, 1536, 512 };
+static u16 g_script_unit_face_slot_order[24]
+    = { 0, 4, 8, 12, 16, 20, 1, 5, 9, 13, 17, 21, 2, 6, 10, 14, 18, 3, 7, 11, 15, 19, 0x302, 0x100 };
+
+/* Frames per facing step, indexed by the RotateUnit speed operand. */
+static u8 g_unit_rotation_speed_frames[8] = { 4, 2, 1, 0, 0, 3, 2, 1 };
+
 static u8 g_unit_status_staging_masks[UNIT_STATUS_STAGING_MASK_COUNT][8]
     = { 20, 176, 22, 12, 49, 0, 0, 0, 31, 188, 254, 255, 255, 0, 0, 0, 15, 188, 190, 255, 255, 0, 0, 0 };
 

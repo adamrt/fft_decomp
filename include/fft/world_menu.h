@@ -59,9 +59,7 @@ extern s32 g_world_menu_default_entry_1_text_values[2]; /* value, 0 */
 extern u8 g_world_menu_submenu_page_counts[];
 extern u8* g_world_menu_submenu_page_text_ids[];
 extern menu_scroll_text_layout_t g_world_menu_submenu_page_layout;
-extern s16 g_world_menu_submenu_page_row_text_ids[];
 extern s32 g_world_menu_number_entry_value;
-extern s32 g_world_menu_text_file_buffer[];
 extern s32 g_world_menu_location_id;
 extern s32 g_world_menu_location_text_id;
 extern s32 g_world_menu_location_window_x;
@@ -150,17 +148,11 @@ enum { WORLD_MENU_SCRIPT_END = 0x1c };
 typedef char world_menu_line_f2_size_must_be_16[(sizeof(LINE_F2) == 16) ? 1 : -1];
 
 extern menu_callback_t g_world_menu_script_callbacks[16];
-extern menu_sprite_command_t g_world_menu_script_sprite_command;
-extern menu_window_command_t g_world_menu_window_interior_command;
-extern s16 g_world_menu_window_scale_table[];
 extern RECT g_world_menu_window_rect;
 extern s16 g_world_menu_window_right_x;
 extern u16 g_world_menu_texture_page;
 extern s16 g_world_menu_row_height;
 extern s32 g_world_menu_scroll_row_offset;
-extern oriented_quad_t g_world_menu_number_blank_sprite;
-extern s8 g_world_menu_cursor_bob_thresholds[];
-extern s8 g_world_menu_cursor_bob_active_thresholds[];
 extern textured_quad_source_t g_world_vertical_cursor_quad;
 extern const RECT g_world_option_gfx_draw_area_template;
 /* WORLD's display-script command handlers (menu_script.h has the shared ones). The CARD and JOBSTTS overlays call
@@ -302,7 +294,6 @@ extern menu_unit_status_identity_t g_world_selected_unit_identity;
 extern struct menu_status_panel_slot_storage g_world_selected_unit_stat_detail;
 extern menu_text_binding_t g_world_selected_unit_text_binding;
 extern menu_number_entry_t g_world_selected_unit_number_entries[];
-extern RECT g_world_selected_unit_portrait_rect;
 /* Panel scratch aliases inside g_thread_contexts[0] and [14], at
  * +0x100 and +0x200 in each slot's stack. These stay separate symbols;
  * the palette areas hold one slot per page. */
@@ -315,7 +306,6 @@ extern palette_t g_world_selected_unit_portrait_palettes[2];
 extern menu_unit_status_record_t g_world_comparison_unit_stat_summary;
 extern menu_unit_status_identity_t g_world_comparison_unit_identity;
 extern menu_number_entry_t g_world_comparison_unit_number_entries[];
-extern RECT g_world_comparison_unit_portrait_rect;
 extern menu_status_panel_editor_packet_t g_world_comparison_unit_summary_packets[2];
 extern menu_status_panel_packet_t g_world_comparison_unit_status_packets[2];
 extern u8 g_world_comparison_unit_stat_text_image[];

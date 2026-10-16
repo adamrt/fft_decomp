@@ -14,6 +14,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static RECT g_attack_portrait_upload_rect = { 0 };
+static RECT g_attack_portrait_palette_upload_rect = { 0 };
+static u8 g_attack_portrait_staging[768] = { 0 };
+static u8 g_attack_formation_sprite_staging[1152] = { 0 };
+
 /* Uploads the portraits and palettes of roster slots 0-19 from EVENT/WLDFACE.BIN to VRAM,
  * plus slot 20, the scenario's special portrait (g_main_special_portrait_wldface_id). With
  * no entry mode set the sheets are read back from VRAM instead of the disc.

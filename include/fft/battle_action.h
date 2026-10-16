@@ -583,7 +583,6 @@ extern u16 g_battle_action_display_values[ACTION_DISPLAY_VALUE_COUNT];
 extern s32 g_battle_action_learn_on_hit_unit_id;
 extern s32 g_battle_action_post_action;
 extern s32 g_battle_action_post_action_display_phase; /* battle_post_action_display_phase_e */
-extern s32 g_battle_action_post_effect_msg_counter;
 extern battle_post_effect_msg_t g_battle_action_post_effect_msgs[BATTLE_POST_EFFECT_MSG_CAPACITY];
 extern const palette_t g_battle_action_result_palette;
 /* Eight per status_changes mask byte, indexed from the byte's high bit. */

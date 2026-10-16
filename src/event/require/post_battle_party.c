@@ -29,6 +29,9 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static s32 g_require_party_affected_unit_message_args[50] = { 0 };
+static s32 g_require_party_affected_unit_message_ids[50] = { 0 };
+
 /*
  * Thread body of the "Congratulations!" battle-complete display.
  *

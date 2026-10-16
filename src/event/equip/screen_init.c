@@ -16,6 +16,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static menu_gfx_context_t g_equip_gfx_contexts[2] = { 0 };
+static DR_MODE g_equip_gfx_draw_mode_buffer[60] = { 0 };
+static LINE_F2 g_equip_gfx_line_f2_buffer[20] = { 0 };
+static TILE g_equip_gfx_tile_buffer[20] = { 0 };
+
 /* Upload the menu glyph sheet and palette image, copy two window-frame palettes into VRAM row 254
  * (each also as a 12-color copy from color 4, with color 4 cleared), then reset the screen's
  * selections and rebuild the inventory totals and item category lists. */

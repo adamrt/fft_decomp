@@ -25,7 +25,6 @@ void main_gfx_reset_display(int width, int height, int projection, u8 red, u8 gr
 void main_set_display_draw(int width, int height, int projection, u8 red, u8 green, u8 blue);
 
 /* boot logos */
-extern s32 g_main_boot_startup2_has_run;
 extern u32 g_main_boot_squaresoft_logo_image_words[];
 
 void main_boot_run_startup(void);
@@ -59,10 +58,6 @@ typedef struct main_gfx_frame_bin {
     u8 _padding_92c0[0x540];   /* 0x92c0; past the end of the file, to the sector boundary */
 } main_gfx_frame_bin_t;
 typedef char main_gfx_frame_bin_size_must_be_38912[(sizeof(main_gfx_frame_bin_t) == 38912) ? 1 : -1];
-
-extern RECT g_main_gfx_frame_image_rect;
-extern RECT g_main_gfx_frame_palette_rect;
-extern RECT g_main_gfx_frame_palette_tail_rect;
 
 void main_gfx_load_frame_bin_into_vram(void);
 

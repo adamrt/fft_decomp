@@ -49,7 +49,6 @@ extern DIRENTRY* g_card_save_menu_work_buffer;
 extern clut_t g_card_save_menu_clut;
 extern s32 g_card_menu_script_callback;
 extern s16 g_card_menu_selection_index;
-extern s16 g_card_menu_window_right_x;
 extern s8 g_card_save_completed;
 
 void card_save_run_menu(s32 unused);
@@ -152,14 +151,11 @@ typedef char card_graphics_context_size_must_be_244[(sizeof(card_graphics_contex
 
 extern card_graphics_context_t* g_card_gfx_context_base;
 extern card_graphics_context_t* g_card_gfx_context;
-extern u32* g_card_gfx_render_otag;
 extern u16 g_card_gfx_drawenv_y;
 extern u16 g_card_gfx_texture_page;
 extern u16 g_card_gfx_draw_clut;
 extern rgb24_t g_card_gfx_fade_overlay_color;
 extern RECT g_card_gfx_fullscreen_fade_rect;
-/* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
-extern POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30];
 
 void card_gfx_init_contexts(card_graphics_context_t* contexts, u32* otags, s32 unused_2, s32 unused_3, s32 unused_4,
     POLY_FT4* polygons, s32 unused_6, s32 unused_7, s32 unused_8, s32 unused_9, s32 unused_10, s32 unused_11,

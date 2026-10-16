@@ -33,6 +33,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static SVECTOR g_battle_gte_rtpt_vxy0 = { 0 };
+static SVECTOR g_battle_gte_rtpt_vxy1 = { 0 };
+static SVECTOR g_battle_gte_rtpt_vxy2 = { 0 };
+static SVECTOR g_battle_gte_rtps_vxy0 = { 0 };
+
 static void battle_gfx_init_render_frame(void);
 static void battle_gfx_init_render_state(void);
 

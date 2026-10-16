@@ -9,6 +9,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static s16 g_card_menu_window_right_x = 0;
+
 /* Stream command: draw a textured quad of size (command[5], command[6]) at
  * (command[3], command[4]) with texture origin (command[7], command[8]), in the
  * current sprite color or, for MENU_SCRIPT_OP_UNCOLORED_QUAD, unshaded. Returns the next command. */

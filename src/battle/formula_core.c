@@ -22,6 +22,14 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+/* Zodiac compatibility by the absolute difference of the two signs, 12 entries:
+ * 3 and 9 apart are bad, 4 and 8 good, 6 (the opposite sign) depends on sex,
+ * the rest neutral. Serpentarius returns before the table is read. */
+static u8 g_battle_zodiac_compatibility_modifiers[12] = { 0, 0, 0, 1, 2, 0, 3, 0, 2, 1, 0, 0 };
+
+/* The statuses a rider can be inflicted with, one mask per status byte. */
+static u8 g_battle_rider_status_infliction_mask[STATUS_BYTE_COUNT] = { 239, 0, 49, 121, 226 };
+
 /* Knockback directions: quarter-turn facings in the BATTLE_FACING_* order, which differs from
  * move_direction_e. */
 enum {

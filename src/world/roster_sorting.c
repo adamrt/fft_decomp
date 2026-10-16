@@ -10,6 +10,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static s8 g_world_formation_sort_field_indices[12] = { 22, 0, 18, 0, 19, 20, 0, 8, 0, 11, 0, 14 };
+
 /* Sort a -1 terminated item-id list in place for a shop or equipment menu.
  *
  * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed first. The rest

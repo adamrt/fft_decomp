@@ -18,6 +18,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static u8 g_battle_move_walk_to_center_phases[4] = { 2, 4, 6, 8 };
+static u8 g_battle_move_climb_to_center_phases[4] = { 10, 12, 14, 16 };
+static u8 g_battle_move_jump_descent_phases[4] = { 19, 23, 27, 31 };
+static u8 g_battle_move_jump_landing_phases[4] = { 20, 24, 28, 32 };
+
 /* Set the unit's per-frame velocity for the first half of a step, from the tile
  * center to its exit edge.
  *

@@ -9,6 +9,9 @@
 #include "fft/thread.h"
 #include "psx/types.h"
 
+static menu_icon_source_t g_menu_item_type_icon_source = { 0 };
+static menu_icon_source_t g_item_graphic_descriptor = { 0 };
+
 /* Thread body that never ends, waiting one frame at a time; it holds a thread slot until another
  * thread stops it. */
 void thread_wait_forever_by_frames(void) {

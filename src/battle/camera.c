@@ -7,6 +7,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static VECTOR g_battle_camera_saved_real_coords = { 0 };
+static SVECTOR g_battle_camera_rotation_delta = { 0 };
+static VECTOR g_battle_camera_zoom_delta = { 0 };
+
 /* Saves the camera position for battle_camera_restore_current_real_coords (effect
  * script opcodes 09 and 0a). */
 void battle_camera_save_current_real_coords(void) {

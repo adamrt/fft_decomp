@@ -1092,6 +1092,13 @@ static const u32 g_ai_recovery_status_ids_rodata[2] = {
     0x000d0802,
     0x00000000,
 };
+static s32 g_battle_ai_recovery_status_retry = 0; /* skip status pass after one failed attempt */
+static s32 g_battle_ai_recovery_status_index = 0; /* status-list cursor preserved for resume */
+static s32 g_battle_ai_status_candidate_count = 0;
+static s32 g_battle_ai_status_insufficient_mp = 0;
+static s32 g_battle_ai_status_sufficient_mp = 0;
+static s32 g_battle_ai_retreat_stage = 0; /* ai_retreat_stage_e */
+static ai_cowardly_movement_stage_e g_battle_ai_cowardly_movement_stage = 0;
 
 /*
  * Initialize and dispatch the AI action-selection passes.

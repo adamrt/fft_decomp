@@ -22,6 +22,8 @@
 #include "psx/libspu.h"
 #include "psx/types.h"
 
+static s32 g_main_boot_startup2_has_run = 0;
+
 /* Set the RAM size to 2 MB, initialize the CD library with debug output off, pause the drive and
  * mark the shared file descriptor idle. */
 static void main_file_reset_cdrom_cpu_ram(void) {

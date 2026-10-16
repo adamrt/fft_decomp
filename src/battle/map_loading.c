@@ -14,6 +14,12 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static battle_render_buffer_t* g_battle_map_mesh_last_render_buffer = 0;
+static s32 g_battle_map_textured_triangle_render_record_count = 0;
+static s32 g_battle_map_textured_quad_render_record_count = 0;
+static s32 g_battle_map_untextured_triangle_render_record_count = 0;
+static s32 g_battle_map_untextured_quad_render_record_count = 0;
+
 static void battle_map_init_mesh_render_records(const map_mesh_geometry_t* geometry_data);
 
 /* Map loader: takes a command between loads, then advances the load of a map's

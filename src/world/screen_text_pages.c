@@ -24,6 +24,8 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+menu_list_page_t g_world_text_list_pages[2] = { 0 };
+
 /* Page a three-column text screen while Square is held: Up and Down move by a page within the
  * hidden rows, and a pending redraw request also counts. When anything changed, redraw the columns
  * into a new image, upload it (resetting the image ring to its first row) and return it; otherwise

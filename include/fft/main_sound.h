@@ -83,7 +83,6 @@ enum {
 
 extern main_sound_music_t g_main_sound_music;
 extern file_extent_t g_main_sound_scenario_smd_files[];
-extern file_extent_t g_main_sound_permanent_smd_files[5];
 
 s32 main_sound_load_music_into_slot(s32 music_id, s32 slot);
 s32 main_sound_open_music_into_slot(s32 music_id, s32 slot);

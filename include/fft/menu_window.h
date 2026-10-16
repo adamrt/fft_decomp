@@ -26,8 +26,6 @@ typedef enum menu_window_frame_mode {
 } menu_window_frame_mode_e;
 
 /* Tail glyph source and destination records for menu_build_window_image. */
-extern glyph_blit_t g_menu_window_sprite_glyph;
-extern glyph_blit_t g_menu_window_sprite_position;
 /* Image the window frame thread composes its border pieces in before uploading them. */
 extern u8 g_menu_window_frame_image[];
 

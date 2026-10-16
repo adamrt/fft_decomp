@@ -11,6 +11,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static jobstts_unit_job_data_t g_jobstts_unit_job_data = { 0 };
+
 /* Copy the battle unit's job data into the compact JOBSTTS working record.
  *
  * Units on a team other than the player's, and special monsters, keep their stored

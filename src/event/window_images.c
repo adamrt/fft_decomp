@@ -13,6 +13,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static glyph_blit_t g_menu_window_sprite_glyph = { { 0, 0, 16, 16 }, 256, 0 };
+static glyph_blit_t g_menu_window_sprite_position = { { 0, 0, 16, 16 }, 0, 0 };
+
 static void gfx_mirror_4bpp_rect(u8* pixels, const glyph_blit_t* rect);
 
 /* Copy a nonempty byte sequence from source to destination.

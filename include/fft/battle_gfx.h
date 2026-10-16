@@ -93,10 +93,6 @@ s32 battle_gfx_hide_unit_shadow_by_runtime_id(u32 runtime_id);
 s32 battle_gfx_show_unit_shadow_by_runtime_id(u32 runtime_id);
 
 /* projection */
-extern SVECTOR g_battle_gte_rtps_vxy0;
-extern SVECTOR g_battle_gte_rtpt_vxy0;
-extern SVECTOR g_battle_gte_rtpt_vxy1;
-extern SVECTOR g_battle_gte_rtpt_vxy2;
 
 s32 battle_gfx_calculate_world_height_from_battle_tile(struct battle_unit* unit);
 s32 battle_gfx_calculate_world_height_from_unit_tile(struct battle_unit* unit);

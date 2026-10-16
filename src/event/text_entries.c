@@ -7,6 +7,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static glyph_blit_t g_menu_stacked_glyph_lower = { { 190, 28, 20, 4 }, 256, 0 };
+static glyph_blit_t g_menu_stacked_glyph_upper = { { 168, 28, 20, 4 }, 256, 0 };
+
 /* Draw g_menu_stacked_glyph_upper and, four rows lower, g_menu_stacked_glyph_lower, starting two
  * pixels left of and below the pen. The battle ability lists draw it in the number column instead
  * of a value of 0 or 1 when the ability's skill_ct is 0 or 0xff. */

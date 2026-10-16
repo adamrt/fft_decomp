@@ -16,6 +16,8 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+static rgb24_t g_battle_map_background_color = { 128, 128, 128 };
+
 /* Save the map's ambient (GTE back) color for battle_map_restore_background_color. */
 void battle_map_copy_background_color(void) {
     /* Component copies retain the original byte loads and separate addresses. */

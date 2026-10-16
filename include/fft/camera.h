@@ -8,7 +8,6 @@
 
 /* script camera */
 extern u16 g_camera_shake_z_offset;
-extern s16 g_camera_diagonal_yaws[4];
 extern u16 g_camera_position_locked;
 /* The CameraSpeedCurve operand, unpacked with the EVENT_CAMERA_SPEED_CURVE_* masks. */
 extern s32 g_camera_speed_curve;

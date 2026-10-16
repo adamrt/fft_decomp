@@ -27,6 +27,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static POLY_FT4 g_debugchr_gfx_render_buffers[2][30] = { 0 };
+static POLY_FT4 g_debugchr_editor_cursor_polys[2] = { 0 };
+static POLY_FT4 g_debugchr_editor_cursor_shade_polys[2] = { 0 };
+static help_navigation_record_t* g_debugchr_editor_field_table = 0;
+static help_navigation_record_t* g_debugchr_editor_current_field = 0;
+static s32 g_debugchr_editor_selected_unit_slot = 0;
+
 /* Write the editor's values back to battle unit `unit_id`: HP, MP and CT
  * (each first capped at its maximum), level, experience, Brave, Faith, the
  * zodiac sign (the top nibble of the birthday 16-bit value), move, speed and

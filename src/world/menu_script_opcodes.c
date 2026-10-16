@@ -20,6 +20,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+static menu_sprite_command_t g_world_menu_script_sprite_command = { 5, 9, 1, { 0, 0, 0, 0, 0, 0 } };
+static menu_window_command_t g_world_menu_window_interior_command = { 17, 7, 0, 0, 0, 0, 0 };
+static s16 g_world_menu_window_scale_table[4] = { 10, 60, 90, 95 };
+static oriented_quad_t g_world_menu_number_blank_sprite = { { 0, 216 }, 7, 8, { 208, 40, 7, 8, 0x7ee7, 31 } };
+static s8 g_world_menu_cursor_bob_thresholds[12] = { 16, 0, 18, 1, 22, 2, 28, 3, 36, 2, 46, 1 };
+static s8 g_world_menu_cursor_bob_active_thresholds[12] = { 2, 0, 8, -2, 10, 1, 12, 3, 14, 5, 16, 4 };
+
 /* Menu script command: run the next count commands when the row predicate holds, otherwise skip
  * them. The predicate gets the command's literal value, or the current list row while the list
  * uses its scroll position. */

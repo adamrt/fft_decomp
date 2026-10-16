@@ -13,13 +13,10 @@
 
 /* editor */
 extern s32 g_debugchr_editor_active;
-extern s32 g_debugchr_editor_selected_unit_slot;
 extern u8 g_debugchr_editor_unit_ids[];
 extern u8 g_debugchr_editor_unit_name[];
 extern u8 g_debugchr_editor_job_name[];
 extern help_navigation_record_t g_debugchr_editor_fields[];
-extern help_navigation_record_t* g_debugchr_editor_field_table;
-extern help_navigation_record_t* g_debugchr_editor_current_field;
 extern s32 g_debugchr_editor_field_edit_active;
 /* Per-row value ranges, copied from the _normal or _special table. */
 extern ranges32_t g_debugchr_editor_template[21];
@@ -36,8 +33,6 @@ extern s16 g_debugchr_editor_ct_max;
 extern u8 g_debugchr_editor_move;
 extern u8 g_debugchr_editor_jump;
 extern u8 g_debugchr_editor_speed;
-extern POLY_FT4 g_debugchr_editor_cursor_polys[];
-extern POLY_FT4 g_debugchr_editor_cursor_shade_polys[];
 
 void debugchr_editor_run_session(void);
 void debugchr_status_run_unit_thread(s32 unit_id);
@@ -55,6 +50,5 @@ extern menu_status_thread_t g_debugchr_character_status_frame_config;
 extern menu_status_thread_t g_debugchr_numeric_editor_thread_params;
 
 /* graphics */
-extern POLY_FT4 g_debugchr_gfx_render_buffers[2][30];
 
 #endif

@@ -40,6 +40,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+static s32 g_wldcore_proposition_send_units[3] = { 0 };
+
 static void wldcore_menu_push_proposition_report_level(s32 argument);
 static s32 wldcore_proposition_load_send_unit_candidates(wldcore_menu_send_unit_level_t* level);
 static void wldcore_proposition_prepare_report(s32 proposition_index);

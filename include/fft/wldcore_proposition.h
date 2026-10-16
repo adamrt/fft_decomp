@@ -131,7 +131,6 @@ extern s32 g_wldcore_participant_list_saved_cursor;
 extern s32 g_wldcore_proposition_selected_entry;
 extern s32 g_wldcore_proposition_gil_amount;
 extern s32 g_wldcore_proposition_send_unit_count;
-extern s32 g_wldcore_proposition_send_units[];
 extern s16 g_wldcore_proposition_candidate_levels[];
 extern s32 g_wldcore_proposition_dispatch_days;
 extern u32 g_wldcore_proposition_detail_image_buffer[];

@@ -306,10 +306,6 @@ extern s16 g_battle_move_target_screen_z;
 
 /* move_step_phase_e by step direction: the phase each kind of step enters. */
 extern u8 g_battle_move_float_to_center_phases[];
-extern u8 g_battle_move_walk_to_center_phases[];
-extern u8 g_battle_move_climb_to_center_phases[];
-extern u8 g_battle_move_jump_descent_phases[];
-extern u8 g_battle_move_jump_landing_phases[];
 
 /* The two map tiles of the step in progress, refreshed by battle_move_get_current_and_destination_tiles
  * from the unit's movement value. Step starters receive the tile pointers; the geometry readers use the

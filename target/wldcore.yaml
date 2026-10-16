@@ -16,11 +16,11 @@ units:
   - {name: list_levels, source: src/wldcore/list_levels.c}
   - {name: map_opcodes, source: src/wldcore/map_opcodes.c}
   - {name: map_routes, source: src/wldcore/map_routes.c}
-  - {name: map_tiles, source: src/wldcore/map_tiles.c}
+  - {name: map_tiles, source: src/wldcore/map_tiles.c, data: [{addr: 0x8009f2d0, size: 16, hash: 374708fff7719dd5}, {addr: 0x8009f2e0, size: 8, hash: af5570f5a1810b7a}]}
   - {name: menu_levels, source: src/wldcore/menu_levels.c}
-  - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c}
+  - {name: proposition_dispatch, source: src/wldcore/proposition_dispatch.c, data: [{addr: 0x800d09a0, size: 12, hash: 15ec7bf0b50732b4}]}
   - {name: proposition_results, source: src/wldcore/proposition_results.c, data: [{addr: 0x800d098c, size: 16, hash: 374708fff7719dd5}]}
-  - {name: resources, source: src/wldcore/resources.c}
+  - {name: resources, source: src/wldcore/resources.c, data: [{addr: 0x800c72f8, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c72fc, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7300, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7304, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7308, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c730c, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7310, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7314, size: 4, hash: df3f619804a92fdb}, {addr: 0x800c7318, size: 4, hash: df3f619804a92fdb}]}
   - {name: sound_novel, source: src/wldcore/sound_novel.c}
   - {name: startup, source: src/wldcore/startup.c}
   - {name: window_records, source: src/wldcore/window_records.c}

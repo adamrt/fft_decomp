@@ -16,6 +16,7 @@
 #include "psx/types.h"
 
 static u32 g_world_tutorial_repeat_counters[16] = { 0 };
+static u16 g_world_tutorial_previous_input = 0;
 
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.

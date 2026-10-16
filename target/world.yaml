@@ -18,26 +18,26 @@ units:
   - {name: command_menus, source: src/event/command_menus.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: dialog_cursor, source: src/event/dialog_cursor.c}
   - {name: dialog_helpers, source: src/event/dialog_helpers.c}
-  - {name: dialog_messages, source: src/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
+  - {name: dialog_messages, source: src/event/dialog_messages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8019a348, size: 20, hash: de47c9b27eb8d300}, {addr: 0x8019a35c, size: 8, hash: af5570f5a1810b7a}, {addr: 0x8019a364, size: 2016, hash: d263c7c60b6f9806}, {addr: 0x8019ab44, size: 252, hash: 913c6e2c32d99e4b}, {addr: 0x8019ac40, size: 14, hash: e7ecebbc590bc88b}]}
   - {name: draw_areas, source: src/world/draw_areas.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: equipment_menus, source: src/world/equipment_menus.c}
-  - {name: equipment_rows, source: src/event/menu/equipment_rows.c}
-  - {name: equipment_slots, source: src/world/equipment_slots.c}
+  - {name: equipment_rows, source: src/event/menu/equipment_rows.c, data: [{addr: 0x801c8458, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801c8464, size: 12, hash: 15ec7bf0b50732b4}]}
+  - {name: equipment_slots, source: src/world/equipment_slots.c, data: [{addr: 0x8018d7ec, size: 5, hash: 2b02997e9b337299}, {addr: 0x8018d7f4, size: 5, hash: 2b02997e9b337299}]}
   - {name: equipment_stat_changes, source: src/world/equipment_stat_changes.c}
   - {name: equipment_stat_deltas, source: src/event/menu/equipment_stat_deltas.c}
   - {name: event_resources, source: src/event/event_resources.c}
   - {name: event_unit_lookup, source: src/event/event_unit_lookup.c}
-  - {name: font_rendering, source: src/world/font_rendering.c}
+  - {name: font_rendering, source: src/world/font_rendering.c, data: [{addr: 0x801c9ee8, size: 2048, hash: e5a00aa9991ac8a5}]}
   - {name: formation_ability_menu, source: src/world/formation_ability_menu.c, data: [{addr: 0x801c8528, size: 10, hash: 01d448afd9280654}]}
   - {name: formation_ability_slots, source: src/world/formation_ability_slots.c}
-  - {name: formation_display_init, source: src/world/formation_display_init.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: formation_display_init, source: src/world/formation_display_init.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018bb50, size: 1408, hash: d277279fc1b0c76a}, {addr: 0x8018c0d0, size: 8, hash: e2d93ece070c6ba5}]}
   - {name: formation_grid, source: src/world/formation_grid.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: formation_icon_list, source: src/world/formation_icon_list.c}
+  - {name: formation_icon_list, source: src/world/formation_icon_list.c, data: [{addr: 0x80189f6c, size: 4, hash: df3f619804a92fdb}]}
   - {name: formation_idle_countdown, source: src/world/formation_idle_countdown.c}
   - {name: formation_item_menu, source: src/world/formation_item_menu.c}
   - {name: formation_screen, source: src/world/formation_screen.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: formation_view, source: src/world/formation_view.c}
-  - {name: gfx_fades, source: src/world/gfx_fades.c}
+  - {name: formation_view, source: src/world/formation_view.c, data: [{addr: 0x8018a144, size: 36, hash: d3211fb13a06ff86}, {addr: 0x8018a168, size: 424, hash: 2cea75c50162ef58}]}
+  - {name: gfx_fades, source: src/world/gfx_fades.c, data: [{addr: 0x8018e494, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e495, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e496, size: 1, hash: 6e340b9cffb37a98}, {addr: 0x8018e498, size: 8, hash: 311ffc6bfd5bdbb3}]}
   - {name: gfx_image_transfer_wait, source: src/event/menu/gfx_image_transfer_wait.c}
   - {name: grid_cursor, source: src/world/grid_cursor.c}
   - {name: help_overlay, source: src/event/menu/help_overlay.c, data: [{addr: 0x801577e0, size: 128, hash: 37edf2b26225cbea}]}
@@ -46,48 +46,48 @@ units:
   - {name: job_learning, source: src/world/job_learning.c}
   - {name: job_locks, source: src/world/job_locks.c}
   - {name: job_wheel, source: src/world/job_wheel.c}
-  - {name: list_threads, source: src/world/list_threads.c}
+  - {name: list_threads, source: src/world/list_threads.c, data: [{addr: 0x8018af68, size: 8, hash: cbfe82027ae4ec1d}, {addr: 0x8018af70, size: 8, hash: 0fb476087acb5e89}]}
   - {name: main_mode, source: src/world/main_mode.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: memcard, source: src/event/menu/memcard.c}
   - {name: menu_ability_display_values, source: src/event/menu/menu_ability_display_values.c}
   - {name: menu_page_scroll_input, source: src/world/menu_page_scroll_input.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: menu_script_opcodes, source: src/world/menu_script_opcodes.c, profile: gcc-2.6.3_O1_aspsx-2.34}
+  - {name: menu_script_opcodes, source: src/world/menu_script_opcodes.c, profile: gcc-2.6.3_O1_aspsx-2.34, data: [{addr: 0x8018e034, size: 9, hash: b84f7d451d1a8f71}, {addr: 0x8018e040, size: 7, hash: 566b5911617a0e07}, {addr: 0x8018e048, size: 8, hash: 870550df4dc49692}, {addr: 0x8018e050, size: 20, hash: d7c4eba7f363ab22}, {addr: 0x8018e064, size: 12, hash: b7578635ff44fd32}, {addr: 0x8018e070, size: 12, hash: b935ba9af4787c03}]}
   - {name: menu_window_threads, source: src/event/menu/menu_window_threads.c}
-  - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}]}
+  - {name: message_box, source: src/world/message_box.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x8018ae8c, size: 16, hash: 5ad8dff169073b4e}, {addr: 0x8018ae9c, size: 28, hash: 2c65651a7bb2a2c9}, {addr: 0x8018aeb8, size: 48, hash: a7325a670181d088}, {addr: 0x8018aee8, size: 8, hash: 716d2b5fc41c7cf3}, {addr: 0x8018aef0, size: 8, hash: c0df20f9ed09ee15}]}
   - {name: music_stubs, source: src/event/menu/music_stubs.c}
   - {name: name_entry, source: src/world/name_entry.c, data: [{addr: 0x801cd144, size: 17, hash: 0a88111852095cae}]}
   - {name: number_entry, source: src/world/number_entry.c}
-  - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}]}
-  - {name: panel_text, source: src/event/menu/panel_text.c}
+  - {name: organization_resources, source: src/world/organization_resources.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801aed64, size: 16, hash: 374708fff7719dd5}, {addr: 0x801aed74, size: 24, hash: 9d908ecfb6b256de}, {addr: 0x801aed8c, size: 66048, hash: cf1cc8dd4cd12e47}, {addr: 0x801bef8c, size: 128, hash: 38723a2e5e8a17aa}, {addr: 0x801bf00c, size: 4, hash: df3f619804a92fdb}]}
+  - {name: panel_text, source: src/event/menu/panel_text.c, data: [{addr: 0x8018b660, size: 16, hash: 3a4a58bab2c48f5e}]}
   - {name: panel_toggles, source: src/world/panel_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: party_records, source: src/world/party_records.c}
   - {name: portrait_transitions, source: src/event/menu/portrait_transitions.c}
   - {name: preview_bonuses, source: src/event/menu/preview_bonuses.c}
   - {name: roster_changes, source: src/world/roster_changes.c}
-  - {name: roster_sorting, source: src/world/roster_sorting.c}
-  - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
+  - {name: roster_sorting, source: src/world/roster_sorting.c, data: [{addr: 0x8018d7cc, size: 12, hash: 28a6a05d27d888a6}]}
+  - {name: screen_text_pages, source: src/world/screen_text_pages.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x801bfda4, size: 616, hash: f9d54bbe3ccaf085}]}
   - {name: script_commands, source: src/event/script_commands.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: script_helpers, source: src/event/script_helpers.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80154cc4, size: 12, hash: 642244b4f91cdc02}, {addr: 0x80154cd0, size: 96, hash: 54145c650f08eb0b}]}
-  - {name: script_interpreter, source: src/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
+  - {name: script_interpreter, source: src/event/script_interpreter.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156b8c, size: 4, hash: ad95131bc0b799c0}, {addr: 0x80156b90, size: 24, hash: 624b6b3ba70141a9}, {addr: 0x80156ba8, size: 8, hash: bc9ff3198bd8abea}, {addr: 0x80156bb0, size: 48, hash: 5026ef5547d95034}, {addr: 0x80156be0, size: 8, hash: 52b3fe39491d2b22}, {addr: 0x80156be8, size: 24, hash: 8dd931174c64b1bf}]}
   - {name: selected_unit, source: src/world/selected_unit.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: selection_records, source: src/event/menu/selection_records.c, profile: gcc-2.6.3_O1_aspsx-2.34}
   - {name: shop, source: src/world/shop.c}
   - {name: status_billboard, source: src/event/menu/status_billboard.c}
   - {name: status_thread_toggles, source: src/event/menu/status_thread_toggles.c, profile: gcc-2.6.3_O1_aspsx-2.34}
-  - {name: text_entries, source: src/event/text_entries.c}
+  - {name: text_entries, source: src/event/text_entries.c, data: [{addr: 0x80156c20, size: 16, hash: 6d900e9c2412ec78}, {addr: 0x80156c30, size: 16, hash: 6ff8555916aa10e6}]}
   - {name: text_id_lists, source: src/event/menu/text_id_lists.c}
   - {name: text_measuring, source: src/world/text_measuring.c}
-  - {name: text_sections, source: src/world/text_sections.c, data: [{addr: 0x80193c40, size: 56, hash: 66b96bc9e2c2be37}, {addr: 0x80193c78, size: 56, hash: c8fe08c26cc2204a}]}
+  - {name: text_sections, source: src/world/text_sections.c, data: [{addr: 0x8018e4a0, size: 72, hash: 5dbea564adc6d4e5}, {addr: 0x8018e4e8, size: 1104, hash: 9256f8d8979e9be1}, {addr: 0x8018e938, size: 1412, hash: 3b2b560a253bf9bf}, {addr: 0x8018eebc, size: 4916, hash: 7dafabaa3f14ee02}, {addr: 0x801901f0, size: 904, hash: 01b27f946de974c3}, {addr: 0x80190578, size: 4056, hash: 69828a99fad310fe}, {addr: 0x80191550, size: 6720, hash: ac293b34688371e1}, {addr: 0x80192f90, size: 276, hash: 22574f5fcb166d09}, {addr: 0x801930a4, size: 2936, hash: 85e6064e51106423}, {addr: 0x80193c1c, size: 36, hash: 572e0aad19d04956}, {addr: 0x80193c40, size: 56, hash: 66b96bc9e2c2be37}, {addr: 0x80193c78, size: 56, hash: c8fe08c26cc2204a}]}
   - {name: text_skip_to_entry, source: src/event/text_skip_to_entry.c}
   - {name: textured_quads, source: src/event/menu/textured_quads.c}
   - {name: thread, source: src/event/thread.c}
   - {name: thread_accessors, source: src/event/thread_accessors.c}
   - {name: thread_state, source: src/world/thread_state.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
-  - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34}
-  - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c, data: [{addr: 0x801ca6f8, size: 64, hash: f5a5fd42d16a2030}]}
+  - {name: tutorial, source: src/world/tutorial.c, profile: gcc-2.6.3_O0_aspsx-2.34, data: [{addr: 0x801cc570, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc574, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc578, size: 4, hash: df3f619804a92fdb}, {addr: 0x801cc57c, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc674, size: 248, hash: b3ab6982980fddf4}, {addr: 0x801cc76c, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc778, size: 12, hash: 15ec7bf0b50732b4}, {addr: 0x801cc784, size: 1, hash: 6e340b9cffb37a98}]}
+  - {name: tutorial_controller_input, source: src/world/tutorial_controller_input.c, data: [{addr: 0x801ca6f8, size: 64, hash: f5a5fd42d16a2030}, {addr: 0x801ca738, size: 2, hash: 96a296d224f285c6}]}
   - {name: unit_name_list, source: src/event/unit_name_list.c}
   - {name: unit_status_lists, source: src/event/unit_status_lists.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, data: [{addr: 0x80156198, size: 56, hash: 21c40c5841c2ca31}, {addr: 0x801561d0, size: 76, hash: ec0d1125a0b03828}]}
-  - {name: window_images, source: src/event/window_images.c}
+  - {name: window_images, source: src/event/window_images.c, data: [{addr: 0x80156c40, size: 16, hash: 0e0f25166632e4a6}, {addr: 0x80156c50, size: 16, hash: e5c40d36a431f4b8}]}
   - {name: zodiac_primitives, source: src/event/menu/zodiac_primitives.c}
 
 libraries:

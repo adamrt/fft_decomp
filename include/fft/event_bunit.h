@@ -93,10 +93,7 @@ typedef struct bunit_unit {
 } bunit_unit_t;
 typedef char bunit_unit_size_must_be_268[(sizeof(bunit_unit_t) == 268) ? 1 : -1];
 
-extern bunit_unit_t g_bunit_unit_records[];
 extern bunit_unit_t* g_bunit_unit_pointers[];
-extern s16 g_bunit_unit_count;
-extern s16 g_bunit_shown_unit_indices[];
 /* 16-bit field index into bunit_unit_t, per sort key, used by
  * bunit_unit_sort_index_list_by_order_keys. The name is provisional. */
 extern s8 g_bunit_unit_sort_field_indices[];
@@ -260,7 +257,6 @@ extern menu_gfx_context_t* g_bunit_gfx_context_base;
 extern u16 g_bunit_gfx_draw_area_capacity;
 extern u16 g_bunit_gfx_draw_move_capacity;
 extern s16 g_bunit_gfx_line_f2_count;
-extern s16 g_bunit_gfx_poly_f4_count;
 extern u16 g_bunit_gfx_background_clut;
 extern u16 g_bunit_gfx_background_tile_layout[2][8]; /* per row parity: four (x, u) column pairs */
 extern s16 g_bunit_gfx_falloff_focus_x;

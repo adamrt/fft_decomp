@@ -8,6 +8,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Double-buffered ZODIAC sprite chains (0x4b0 bytes each). */
+static POLY_FT4 g_card_gfx_scaled_sprite_primitive_buffers[2][30] = { 0 };
+static u32* g_card_gfx_render_otag = 0;
+
 /* Set the ordering-table entry the card screen's graphic thread draws into. */
 void card_gfx_set_render_otag(u32* otag) {
     g_card_gfx_render_otag = otag;

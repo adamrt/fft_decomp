@@ -74,9 +74,6 @@ enum {
 };
 
 extern u8 g_battle_ai_recovery_status_ids[AI_RECOVERY_STATUS_COUNT];
-extern s32 g_battle_ai_recovery_status_index; /* status-list cursor preserved for resume */
-extern s32 g_battle_ai_recovery_status_retry; /* skip status pass after one failed attempt */
-extern s32 g_battle_ai_retreat_stage;         /* ai_retreat_stage_e */
 
 /* target selection */
 typedef enum ai_unit_filter {
@@ -132,7 +129,6 @@ typedef enum ai_destination_order {
     AI_DESTINATION_DISTANCE_FIRST = 1,
 } ai_destination_order_e;
 
-extern ai_cowardly_movement_stage_e g_battle_ai_cowardly_movement_stage;
 extern s32 g_battle_ai_propagation_resume_pass;
 
 s32 battle_ai_propagate_target_movement(
@@ -207,9 +203,6 @@ extern u8 g_battle_ai_math_source_skillsets[AI_MATH_SOURCE_SKILLSET_COUNT];
 
 /* status cancellation */
 /* Cancellation-search accounting survives suspension. */
-extern s32 g_battle_ai_status_candidate_count;
-extern s32 g_battle_ai_status_insufficient_mp;
-extern s32 g_battle_ai_status_sufficient_mp;
 
 /* action ranking */
 typedef enum ai_rank_order {

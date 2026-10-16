@@ -109,9 +109,7 @@ void item_calculate_equipment_swap_stat_delta(menu_status_panel_slot_storage_t* 
 
 /* item icons */
 /* Item and item-type icons as menu_icon_source_t, for the icon row callbacks. */
-extern menu_icon_source_t g_item_graphic_descriptor;
 extern uv8_t g_item_type_icon_origins[];
-extern menu_icon_source_t g_menu_item_type_icon_source;
 
 /* The texture cell of an item type's 12x12 icon. */
 void item_get_type_icon_rect(s32 item_type, menu_icon_source_t* output);

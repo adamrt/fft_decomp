@@ -73,8 +73,6 @@ typedef char wldcore_zoom_motion_size_must_be_28[sizeof(wldcore_zoom_motion_t) =
 
 extern wldcore_map_projection_view_t g_wldcore_map_projection_view;
 extern VECTOR g_wldcore_map_projection_origin;
-extern SVECTOR g_wldcore_map_projection_rotation;
-extern VECTOR g_wldcore_map_projection_scale;
 extern wldcore_projection_motion_t g_wldcore_map_projection_motion;
 /* Provisional: flags bit 0 runs the zoom, bit 1 selects the zoomed-out direction. */
 extern wldcore_zoom_motion_t g_wldcore_map_zoom_motion;

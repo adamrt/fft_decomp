@@ -9,6 +9,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static RECT g_main_gfx_frame_image_rect = { 960, 256, 64, 256 };
+static RECT g_main_gfx_frame_palette_rect = { 960, 496, 16, 16 };
+static RECT g_main_gfx_frame_palette_tail_rect = { 976, 506, 16, 6 };
+
 static void main_file_load_data_from_disc(int sector, int sectors, void* destination, int loading_display_mode);
 
 /* Call MAIN's own menu_build_zodiac_primitives; ATTACK.OUT's deployment screen draws its

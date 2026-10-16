@@ -66,11 +66,6 @@ typedef enum zodiac_compatibility {
     ZODIAC_COMPATIBILITY_BEST = 5,
 } zodiac_compatibility_e;
 
-/* Zodiac compatibility by the absolute difference of the two signs, 12 entries:
- * 3 and 9 apart are bad, 4 and 8 good, 6 (the opposite sign) depends on sex,
- * the rest neutral. Serpentarius returns before the table is read. */
-extern u8 g_battle_zodiac_compatibility_modifiers[];
-
 void battle_formula_apply_evasion_changes_due_to_statuses(void);
 void battle_formula_calculate_abandon(void);
 void battle_formula_calculate_concentrate(void);

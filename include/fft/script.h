@@ -43,7 +43,6 @@ extern event_file_block_t* g_script_event_block;
 /* Operand-byte counts per opcode, excluding the opcode byte; not per-operand
  * width schemas. The table ends after opcode 0xf3. */
 extern u8 g_script_event_instruction_sizes[0xf4];
-extern s32 g_script_loaded_event_id;
 extern s32 g_script_next_event_id;
 
 void script_load_event(s32 id);
@@ -179,7 +178,6 @@ void script_sprite_move(void);
 void script_sprite_move_beta(void);
 
 /* unit facing and animation */
-extern u16 g_script_unit_face_slot_order[];
 
 void script_unit_anim(const event_unit_anim_parameters_t* parameters);
 void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
@@ -198,7 +196,6 @@ void script_focus(event_focus_parameters_t* parameters);
 void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values);
 
 /* screen and map */
-extern u16 g_script_map_darkness_durations[];
 /* Script-driven map light transform that map_light_thread interpolates. */
 extern SVECTOR g_script_light_angles;
 extern VECTOR g_script_light_scale;

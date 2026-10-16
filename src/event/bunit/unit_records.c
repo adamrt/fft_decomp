@@ -15,6 +15,10 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
+static s16 g_bunit_shown_unit_indices[22] = { 0 };
+static s16 g_bunit_unit_count = 0;
+static bunit_unit_t g_bunit_unit_records[21] = { 0 };
+
 /* Builds a BUNIT unit-data record from a battle unit: clamps level, HP/MP
  * and CT for display, lists up to four monster-skillset abilities (the fourth
  * only when battle_menu_init_monster_skill_check passes) or the equipment and

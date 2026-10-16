@@ -9,6 +9,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static glyph_blit_t g_menu_decimal_glyph = { { 0, 16, 6, 10 }, 256, 0 };
+
 static void menu_text_render_decimal_value(s32 value, s32 flags, u8* pixels, glyph_blit_t* position);
 
 /* Set the status panel's sprite CLUTs and the tint of its last five sprites: the dimmed

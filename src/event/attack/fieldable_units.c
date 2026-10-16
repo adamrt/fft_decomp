@@ -10,6 +10,9 @@
 #include "fft/unit_party.h"
 #include "psx/types.h"
 
+static s32 g_attack_text_roster_unit_names_offset = 1;
+static s32 g_attack_text_job_names_offset = 6245;
+
 /* Empty and unreferenced. */
 void attack_deploy_noop_1(void) {
 }

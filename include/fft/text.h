@@ -316,9 +316,6 @@ typedef char menu_digit_glyph_size_must_be_16[sizeof(menu_digit_glyph_t) == 16 ?
 
 extern s32 g_menu_hide_numeric_values;         /* non-zero: draw digits as blanks (0x48, 0x10) */
 extern glyph_blit_t g_menu_large_number_glyph; /* source of the large 8x15 number and sign glyphs */
-extern glyph_blit_t g_menu_decimal_glyph;
-extern glyph_blit_t g_menu_stacked_glyph_lower;
-extern glyph_blit_t g_menu_stacked_glyph_upper;
 extern const char g_text_decimal_format[];
 extern u32 g_text_decimal_divisors[];
 
@@ -448,8 +445,6 @@ typedef struct text_glyph_state {
 typedef char text_glyph_state_size_must_be_16[(sizeof(text_glyph_state_t) == 16) ? 1 : -1];
 
 extern text_glyph_state_t g_text_typewriter_glyph;
-extern menu_text_state_t g_text_typewriter_state;
-extern RECT g_text_typewriter_vram_rect;
 extern s32 g_text_glyphs_per_wait;
 /* The three per-thread staging slots the typewriter draws glyphs through. */
 extern s32 g_text_slot_owner_thread_ids[3];

@@ -94,21 +94,12 @@ typedef char world_tutorial_state_size_must_be_7688[sizeof(world_tutorial_state_
 extern s16 g_world_tutorial_categories_request_state; /* world_screen_request_state_e */
 extern world_tutorial_state_t g_world_tutorial_state;
 extern u8 g_world_tutorial_id;
-extern u8* g_world_tutorial_command_ptr;
-extern s32 g_world_tutorial_command_active;
 extern u16 g_world_tutorial_shift_command_bit;
 extern s16 g_world_tutorial_wait_time_remaining;
 extern s16 g_world_tutorial_wait_timer;
 extern s16 g_world_tutorial_buttons;
-extern u32 g_world_tutorial_button_input;
 extern u16 g_world_tutorial_latched_button;
-extern u16 g_world_tutorial_previous_input;
 extern u8 g_world_tutorial_activation_timer;
-extern point16_t g_world_tutorial_highlight_corners_a[31][2]; /* outer/middle ring samples */
-extern point16_t g_world_tutorial_highlight_corners_b[31][2]; /* middle/inner ring samples */
-extern rgb24_t g_world_tutorial_highlight_colors_a[4];        /* first quad corner colors */
-extern rgb24_t g_world_tutorial_highlight_colors_b[4];        /* second quad corner colors */
-extern u8 g_world_tutorial_highlight_quad_count;
 void world_tutorial_start(s32 index);
 void world_tutorial_load_files(s32 index, world_tutorial_state_t* record);
 s32 world_tutorial_run_frame(void);

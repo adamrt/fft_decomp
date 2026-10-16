@@ -205,7 +205,6 @@ typedef enum attack_prompt_thread_slot {
 /* formation sprites */
 extern RECT g_attack_formation_sheet_rect;
 extern RECT g_attack_formation_sheet_source_rect;
-extern u8 g_attack_formation_sprite_staging[];
 extern u8 g_attack_formation_sprite_tall_cell[];
 
 void attack_gfx_prepare_formation_sprites(void);
@@ -225,9 +224,6 @@ void attack_map_load_title_graphic(void);
 void attack_map_show_title(void);
 
 /* portraits */
-extern u8 g_attack_portrait_staging[];
-extern RECT g_attack_portrait_upload_rect;
-extern RECT g_attack_portrait_palette_upload_rect;
 
 void attack_gfx_load_portraits(void);
 void attack_gfx_prepare_party_portrait_textures(void);
@@ -286,8 +282,6 @@ extern u8* g_attack_deploy_unit_text_section;
 
 /* Entries [1] and [2] of the unit-name text file's section-offset table
  * (0x801cd2b0, s32[32], ending at g_text_data). */
-extern s32 g_attack_text_roster_unit_names_offset;
-extern s32 g_attack_text_job_names_offset;
 
 void attack_text_build_deployment_strings(void);
 

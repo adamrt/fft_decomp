@@ -8,6 +8,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static u8 g_world_text_row_image_buffer[2048] = { 0 };
+
 /* Renders each text id of a -1 terminated list into its own 16 pixel line of
  * `destination`, uploading one line at a time through the scratch image at
  * g_world_text_row_image_buffer. */

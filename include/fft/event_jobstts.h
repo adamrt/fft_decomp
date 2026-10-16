@@ -30,7 +30,6 @@ typedef struct jobstts_unit_job_data {
 } jobstts_unit_job_data_t;
 typedef char jobstts_unit_job_data_size_must_be_158[(sizeof(jobstts_unit_job_data_t) == 158) ? 1 : -1];
 
-extern jobstts_unit_job_data_t g_jobstts_unit_job_data;
 extern jobstts_unit_job_data_t* g_jobstts_unit_data[];
 
 void jobstts_unit_init_job_data(s32 unit_id);
@@ -57,7 +56,6 @@ s32 jobstts_ability_build_list(
 
 /* menus */
 /* Unsigned here where the other overlays keep signed values. */
-extern u16 g_jobstts_menu_selection_values[];
 extern u16 g_jobstts_menu_list_cursor_anim_state;
 extern s16 g_jobstts_menu_list_scroll_entry_ids;
 extern u8 g_jobstts_menu_palette_image[];
@@ -109,7 +107,6 @@ extern s16 g_jobstts_gfx_poly_f4_count;
 extern s16 g_jobstts_gfx_poly_g4_count;
 extern s16 g_jobstts_gfx_tile_count;
 extern u16 g_jobstts_gfx_background_texture_page;
-extern s16 g_jobstts_gfx_transition_height_percent[];
 
 void jobstts_gfx_init_contexts(jobstts_gfx_context_t* base, u32* otag, POLY_F3* poly_f3, POLY_FT3* poly_ft3,
     POLY_F4* poly_f4, POLY_FT4* textured_quads, POLY_G3* poly_g3, POLY_GT3* poly_gt3, POLY_G4* poly_g4,

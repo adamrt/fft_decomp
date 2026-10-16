@@ -20,6 +20,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static RECT g_world_equipment_panel_draw_area = { 132, 126, 141, 108 };
+static RECT g_world_ability_panel_draw_area = { 247, 126, 133, 108 };
+
 /*
  * Equipment panel thread (task THREAD_TASK_STATUS_PANEL), the equipment twin
  * of menu_run_ability_list_thread (same 0x3d8-byte frame pair, thread record

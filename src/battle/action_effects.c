@@ -28,6 +28,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* Projectile secondary animation of each weapon item type: BOW_ARROW for bows, CROSSBOW_BOLT for
+ * crossbows, NONE for the rest. */
+u8 g_battle_effect_weapon_projectile_animations[32]
+    = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 /* Show the map cursor and its tile glow again; the counterpart of
  * battle_target_hide_cursor. */
 void battle_target_show_cursor(void) {

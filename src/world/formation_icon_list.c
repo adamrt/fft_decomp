@@ -15,6 +15,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static s32 g_world_formation_name_string_revision = 0;
+
 /* WORLD's simple menu window thread: like menu_icon_list_thread, but it reads the formation
  * screen's input, ignores input while the previous thread runs and tints the window with the world
  * menu color. */

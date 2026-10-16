@@ -56,7 +56,6 @@ extern u8 g_world_shop_exit_fade_started;     /* fade-out started */
 extern u8 g_world_shop_exit_step_initialized; /* state initialized */
 /* Sector and size pairs, read as flat 32-bit values ([i * 2], [i * 2 + 1]): a record
  * member access changes how the target addresses them. */
-extern s32 g_world_shop_background_tim_files[9 * 2];
 extern u8 g_world_shop_background_visible;
 extern RECT g_world_shop_background_rect;
 extern RECT g_world_shop_backdrop_tile_rect;
@@ -158,7 +157,6 @@ extern s16 g_world_shop_previewed_unit_index;
 extern menu_entry_t g_world_shop_best_fit_menu;
 extern s8 g_world_shop_best_fit_menu_open;
 /* Second slot-category table of world_shop_build_fitting_room_best_fit_equipment. */
-extern u8 g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
 extern menu_entry_t g_world_shop_sell_equipped_menu;
 extern u8 g_world_shop_sell_equipped_menu_open;
 extern u16 g_world_shop_sell_equipped_cursor_anim;

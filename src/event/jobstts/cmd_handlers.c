@@ -8,6 +8,8 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+static s16 g_jobstts_gfx_transition_height_percent[8] = { 5, 10, 20, 35, 60, 75, 90, 95 };
+
 /* Draw a window's 5x9/5x7 border pieces around its rectangle and tile the
  * interior through menu_opcode_11_draw_background_tiles.
  *
