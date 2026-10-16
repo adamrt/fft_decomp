@@ -342,6 +342,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
     u8 formula;
     u8 id;
     u16 ability_id;
+    s32 location;
 
     main_util_copy_action_data(source, &action);
     g_battle_action_current_ability.target_id = target_id;
@@ -361,8 +362,8 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
         return 0;
     }
 
-    g_battle_action_current_ability_view.terrain
-        = g_battle_map_tile_data[battle_map_calculate_location(g_battle_action_target)].surface.type;
+    location = battle_map_calculate_location(g_battle_action_target);
+    g_battle_action_current_ability_view.terrain = g_battle_map_tile_data[location].surface.type;
     if (g_battle_action_current_ability.strike_counter == 0) {
         id = g_battle_action_current_ability.primary_weapon_id;
     } else {

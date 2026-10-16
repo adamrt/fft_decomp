@@ -174,9 +174,7 @@ s32 effect_polar_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_in
         if (entry->polar_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             j = (entry->polar_mesh.color_curves & 0xfff);
             scratch->red_factor
-                = g_battle_effect_animation_curve_data
-                      ->curves[((entry->polar_mesh.color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf]
-                              [work->frame];
+                = g_battle_effect_animation_curve_data->curves[(j >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][work->frame];
             scratch->green_factor = g_battle_effect_animation_curve_data
                                         ->curves[(j >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][work->frame];
             scratch->blue_factor

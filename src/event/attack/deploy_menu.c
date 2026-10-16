@@ -41,6 +41,7 @@ void attack_deploy_run_select_menu(void) {
     s32 u;
     s32 u_mid;
     s32 shadow_offset;
+    s32 value_id;
 
     u_mid = 0xb8;
     g_attack_panel_status_animation[0] = 1;
@@ -123,7 +124,8 @@ void attack_deploy_run_select_menu(void) {
                     text_id = node->help_base + *node->value;
                     if (node->help_base == -0x6800 && g_menu_selected_unit_fields.state.generic_monster != 0) {
                         text_id = *node->value | 0x7800;
-                        if ((*node->value & 0x7ff) == 0x7ff || (*node->value & 0x7ff) == 0) {
+                        value_id = *node->value & 0x7ff;
+                        if (value_id == 0x7ff || value_id == 0) {
                             *input = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;

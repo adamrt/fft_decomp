@@ -768,8 +768,9 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
             && unit->map_z != unit->movement.destination_z) {
             layer = unit->map_z = unit->movement.destination_z;
-            battle_move_set_unit_step_delta_edge_to_center(unit, &unit->current_path_step,
-                battle_map_get_tile_data_pointer(tile[0], tile[1], layer), unit->destination_edge_height);
+            map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
+            battle_move_set_unit_step_delta_edge_to_center(
+                unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
             battle_move_interpolate_partial(unit, unit->walk_speed);
         }
         break;
@@ -780,8 +781,9 @@ void battle_move_apply_unit_step_velocity(battle_unit_t* unit) {
         if (tile[0] == unit->movement.destination_x && tile[1] == unit->movement.destination_y
             && unit->map_z != unit->movement.destination_z) {
             layer = unit->map_z = unit->movement.destination_z;
-            battle_move_set_unit_step_delta_edge_to_center(unit, &unit->current_path_step,
-                battle_map_get_tile_data_pointer(tile[0], tile[1], layer), unit->destination_edge_height);
+            map_tile = battle_map_get_tile_data_pointer(tile[0], tile[1], layer);
+            battle_move_set_unit_step_delta_edge_to_center(
+                unit, &unit->current_path_step, map_tile, unit->destination_edge_height);
             battle_move_interpolate_partial(unit, unit->step_speed);
         }
         break;

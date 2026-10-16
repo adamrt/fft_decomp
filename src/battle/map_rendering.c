@@ -416,6 +416,7 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
     s32 spawn_y;
     s16 tile;
     u16 frame;
+    map_tile_t* ground_tile;
 
     memcpy(splash_uv, g_battle_map_weather_splash_uv_rects, sizeof(splash_uv));
     memcpy(drop_uv, g_battle_map_weather_drop_uv_rects, sizeof(drop_uv));
@@ -656,9 +657,8 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             g_battle_map_tile_data_ptr = g_battle_map_tile_data;
             tile = (g_battle_map_weather_particles[i].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i].x / MAP_TILE_SIZE;
-            ground = -(
-                (g_battle_map_tile_data_ptr[tile].height + (g_battle_map_tile_data_ptr[tile].depth_half_height.depth))
-                * 12);
+            ground_tile = &g_battle_map_tile_data_ptr[tile];
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
 
             /* A flake whose last projected y (read from buffer 0) is below the screen respawns at the top
              * with a random sprite, speed, x and z. */
@@ -759,14 +759,12 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             g_battle_map_tile_data_ptr = g_battle_map_tile_data;
             tile = (g_battle_map_weather_particles[i].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i].x / MAP_TILE_SIZE;
-            ground = -(
-                (g_battle_map_tile_data_ptr[tile].height + (g_battle_map_tile_data_ptr[tile].depth_half_height.depth))
-                * 12);
+            ground_tile = &g_battle_map_tile_data_ptr[tile];
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
             tile = (g_battle_map_weather_particles[i + 32].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i + 32].x / MAP_TILE_SIZE;
-            ground = -(
-                (g_battle_map_tile_data_ptr[tile].height + (g_battle_map_tile_data_ptr[tile].depth_half_height.depth))
-                * 12);
+            ground_tile = &g_battle_map_tile_data_ptr[tile];
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
 
             /* Respawn particles that leave the screen: at the top while falling, at the bottom while rising. */
             if ((g_battle_map_command_0x96_frame < g_battle_map_command_0x96_duration / 8
@@ -878,9 +876,8 @@ void battle_map_draw_mesh_and_weather(MATRIX* camera) {
             g_battle_map_tile_data_ptr = g_battle_map_tile_data;
             tile = (g_battle_map_weather_particles[i].z / MAP_TILE_SIZE) * g_battle_map_tile_width
                 + g_battle_map_weather_particles[i].x / MAP_TILE_SIZE;
-            ground = -(
-                (g_battle_map_tile_data_ptr[tile].height + (g_battle_map_tile_data_ptr[tile].depth_half_height.depth))
-                * 12);
+            ground_tile = &g_battle_map_tile_data_ptr[tile];
+            ground = -((ground_tile->height + ground_tile->depth_half_height.depth) * 12);
 
             /* A streak whose upper end passed the ground respawns at a random spot high above the map. */
             if (ground < g_battle_map_weather_particles[i + 32].y) {

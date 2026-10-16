@@ -1599,12 +1599,14 @@ score_state:
             /* Golem HP counts like shared team HP; any loss since the baseline snapshot costs one more point. */
             {
                 u32 golem;
+                s32 team;
 
-                weight_offset = g_battle_team_golem[(unit->team_flags >> BATTLE_TEAM_SHIFT) & BATTLE_TEAM_INDEX_MASK];
+                team = (unit->team_flags >> BATTLE_TEAM_SHIFT) & BATTLE_TEAM_INDEX_MASK;
+                weight_offset = g_battle_team_golem[team];
                 golem = weight_offset;
                 weight_offset *= AI_GOLEM_SCORE_SCALE;
                 score += weight_offset / ai->present_unit_average_max_hp;
-                if (golem < ai->team_golem[(unit->team_flags >> BATTLE_TEAM_SHIFT) & BATTLE_TEAM_INDEX_MASK])
+                if (golem < ai->team_golem[team])
                     score--;
             }
 

@@ -135,6 +135,7 @@ void attack_deploy_run_screen(void) {
     u32* input;
     unit_deployment_coordinates_t* slots;
     u8* tiles;
+    u8 cursor_unit;
 
     g_menu_thread_menu_data = g_attack_deploy_menu_entries;
     MoveImage(&g_attack_deploy_vram_copy_rect, g_attack_deploy_vram_copy_x, g_attack_deploy_vram_copy_y);
@@ -336,9 +337,10 @@ ramza_placed:
 
             /* Update the idle icons (state below 2) for the cursor tile and the unit count. */
             if (g_attack_panel_status_animation[2] < 2) {
-                if (g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
-                                                     [g_attack_deploy_cursor_column[g_attack_deploy_active_cursor]]
-                    != ATTACK_DEPLOY_ROSTER_ID_NONE) {
+                cursor_unit
+                    = g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
+                                                       [g_attack_deploy_cursor_column[g_attack_deploy_active_cursor]];
+                if (cursor_unit != ATTACK_DEPLOY_ROSTER_ID_NONE) {
                     g_attack_panel_status_animation[2] = 0;
                 } else {
                     g_attack_panel_status_animation[2] = 1;
@@ -649,9 +651,10 @@ ramza_placed:
 
             /* TRIANGLE makes the unit under the cursor the selected roster unit. */
             if (*input & PSX_PAD_TRIANGLE) {
-                if (g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
-                                                     [g_attack_deploy_cursor_column[g_attack_deploy_active_cursor]]
-                    != ATTACK_DEPLOY_ROSTER_ID_NONE) {
+                cursor_unit
+                    = g_attack_deploy_roster_id_by_tile[g_attack_deploy_cursor_row[g_attack_deploy_active_cursor]]
+                                                       [g_attack_deploy_cursor_column[g_attack_deploy_active_cursor]];
+                if (cursor_unit != ATTACK_DEPLOY_ROSTER_ID_NONE) {
                     g_attack_panel_status_animation[2] = 7;
                     g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
                     if (thread_is_running(ATTACK_THREAD_SLOT_ROSTER_STEP) == 0) {

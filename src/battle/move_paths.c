@@ -932,6 +932,7 @@ s32 battle_target_move_cursor_by_input(void) {
     map_tile_t* current;
     map_tile_t* lower;
     map_tile_t* upper;
+    map_tile_t* other_level;
     s8 lower_rise;
     s8 upper_rise;
 
@@ -954,16 +955,16 @@ s32 battle_target_move_cursor_by_input(void) {
     current = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
     if (g_main_game_options.fields.multi_height_cursor_speed == 3) {
         if (g_main_input_pressed_buttons & PSX_PAD_START) {
-            if (!battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1)
-                    ->flags.blocked) {
+            other_level = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
+            if (!other_level->flags.blocked) {
                 direction = 1;
                 g_battle_cursor_z ^= 1;
             }
         }
     } else if (g_battle_cursor_repeat_counter > delay) {
         g_battle_cursor_repeat_counter = 0;
-        if (!battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1)
-                ->flags.blocked) {
+        other_level = battle_map_get_tile_data_pointer(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z ^ 1);
+        if (!other_level->flags.blocked) {
             direction = 1;
             g_battle_cursor_z ^= 1;
         }

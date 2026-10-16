@@ -40,6 +40,7 @@ void menu_run_equipment_list_thread_variant(void) {
     s32 color_bits;
     s16 id;
     s32 i;
+    s32 item_id;
 
     thread_set_current_task_id(THREAD_TASK_STATUS_PANEL);
     thread = (menu_status_thread_t*)g_threads[g_thread_current_id].function_parameter_1;
@@ -115,8 +116,8 @@ void menu_run_equipment_list_thread_variant(void) {
                     /* The entry's top two bits pick the name's text palette. */
                     color_bits = state->equipment[i] & 0xc000;
                     g_menu_text_palette_offset = color_bits >> 12;
-                    menu_display_text_entry(
-                        (state->equipment[i] & ITEM_ID_MASK) | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_text_state.pen);
+                    item_id = state->equipment[i] & ITEM_ID_MASK;
+                    menu_display_text_entry(item_id | TEXT_ID_ITEM_NAME_BASE, text, &g_menu_text_state.pen);
                 }
                 g_menu_text_state.pen.rect.y += 0x10;
             }

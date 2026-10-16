@@ -247,6 +247,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         if ((*g_menu_input_controller & PSX_PAD_R1) != 0) {
             s32 slot;
             u8* chosen_unit;
+            menu_active_unit_t* unit_data;
 
             slot = g_debugchr_editor_selected_unit_slot;
             g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
@@ -256,14 +257,12 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
 
             chosen_unit = &g_debugchr_editor_unit_ids[slot];
             *selected_unit = *chosen_unit;
-            ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id)))->name_id
-                = *chosen_unit;
+            unit_data = (menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id));
+            unit_data->name_id = *chosen_unit;
             unit_type_ptr = &g_panel_selected_billboard.unit_index;
             *unit_type_ptr = *chosen_unit;
             menu_load_selected_unit_variant();
-            menu_copy_billboard_data_in(&g_panel_selected_billboard,
-                ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
-                &g_menu_selected_unit_fields);
+            menu_copy_billboard_data_in(&g_panel_selected_billboard, unit_data, &g_menu_selected_unit_fields);
 
             /* The status display takes its redraw request as the portrait wipe direction; L1 passes 2. */
             g_debugchr_status_display_thread_params.redraw_request = one;
@@ -274,6 +273,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
         if ((*g_menu_input_controller & PSX_PAD_L1) != 0) {
             s32 slot;
             u8* chosen_unit;
+            menu_active_unit_t* unit_data;
 
             slot = g_debugchr_editor_selected_unit_slot;
             g_sound_pending_sfx_id = MAIN_SFX_PAGE_SWITCH;
@@ -283,14 +283,12 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
 
             chosen_unit = &g_debugchr_editor_unit_ids[slot];
             *selected_unit = *chosen_unit;
-            ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id)))->name_id
-                = *chosen_unit;
+            unit_data = (menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id));
+            unit_data->name_id = *chosen_unit;
             unit_type_ptr = &g_panel_selected_billboard.unit_index;
             *unit_type_ptr = *chosen_unit;
             menu_load_selected_unit_variant();
-            menu_copy_billboard_data_in(&g_panel_selected_billboard,
-                ((menu_active_unit_t*)((u8*)selected_unit - offsetof(menu_active_unit_t, battle_id))),
-                &g_menu_selected_unit_fields);
+            menu_copy_billboard_data_in(&g_panel_selected_billboard, unit_data, &g_menu_selected_unit_fields);
 
             /* 2 runs the portrait wipe in the opposite direction from R1's. */
             g_debugchr_status_display_thread_params.redraw_request = 2;
@@ -382,6 +380,7 @@ void debugchr_editor_run_session(void) {
     s32 x;
     s32 y;
     s32 shadow_bob_x;
+    s32 cursor_x;
 
     g_debugchr_editor_active = 1;
     g_menu_panel_status_group_count = 2;
@@ -760,9 +759,10 @@ editor:
             shadow_h->v3 = 0x10;
 
             bob_x = ((i * g_script_event_speed) >> 4) & 3;
-            setXY4(cursor_h, x - bob_x, y, (x - bob_x) + 0x10, y, x - bob_x, y + 0x10, (x - bob_x) + 0x10, y + 0x10);
+            cursor_x = x - bob_x;
+            setXY4(cursor_h, cursor_x, y, cursor_x + 0x10, y, cursor_x, y + 0x10, cursor_x + 0x10, y + 0x10);
             /* A separate temporary schedules the decrement after the
-             * `(x - bob_x) + 0x10` sum; `bob_x -= 2` would move it ahead. */
+             * cursor's `cursor_x + 0x10` sums; `bob_x -= 2` would move it ahead. */
             shadow_bob_x = bob_x - 2;
             setXY4(shadow_h, x - shadow_bob_x, y + 2, (x - shadow_bob_x) + 0x10, y + 2, x - shadow_bob_x, y + 0x12,
                 (x - shadow_bob_x) + 0x10, y + 0x12);

@@ -153,6 +153,7 @@ void camera_thread(void) {
     s32 yaw_delta;
     const event_camera_parameters_t* parameters;
     const u8* script;
+    s32 remaining;
 
     mode = g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_MODE_MASK;
     group = (g_camera_speed_curve & EVENT_CAMERA_SPEED_CURVE_GROUP_MASK) >> EVENT_CAMERA_SPEED_CURVE_GROUP_SHIFT;
@@ -251,8 +252,8 @@ void camera_thread(void) {
                     decel = delta * weight;
                     accel = delta * ease * 2;
                     elapsed = half - duration;
-                    value = mul_div_s64(accel + mul_div_s64(accel, duration - elapsed, duration) + decel + decel,
-                        elapsed, duration * 32);
+                    remaining = mul_div_s64(accel, duration - elapsed, duration);
+                    value = mul_div_s64(accel + remaining + decel + decel, elapsed, duration * 32);
                     if (j < EVENT_CAMERA_POSITION_COMPONENT_COUNT) {
                         value += delta;
                         value += base * 4;

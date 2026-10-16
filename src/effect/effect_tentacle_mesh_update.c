@@ -61,6 +61,9 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
     u32 red;
     u32 green;
     u32 blue;
+    u32 shade_r;
+    u32 shade_g;
+    u32 shade_b;
     u32* ot;
     effect_tentacle_mesh_segment_t* seg;
     POLY_GT4* quad;
@@ -443,10 +446,9 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
 
             /* The color curves are read at the tentacle's age, not the effect frame. */
             if (entry->tentacle_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
-                red = g_battle_effect_animation_curve_data
-                          ->curves[((entry->tentacle_mesh.color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf]
-                                  [seg->head];
                 factor = (entry->tentacle_mesh.color_curves & 0xfff);
+                red = g_battle_effect_animation_curve_data
+                          ->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][seg->head];
                 green = g_battle_effect_animation_curve_data
                             ->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][seg->head];
                 blue = g_battle_effect_animation_curve_data
@@ -578,12 +580,15 @@ s32 effect_tentacle_mesh_update(s32 record_index, s32 callback_slot, s32 emitter
                 prev_offset_quad->v3 = offset_quad->v2 = prev->v3 = quad->v2 = v + height;
                 scratch = g_effect_tentacle_mesh_brightness_table[brightness_row][shade_index];
                 shade_index--;
+                shade_r = (scratch * red) / ONE;
                 prev_offset_quad->r1 = prev_offset_quad->r3 = offset_quad->r0 = offset_quad->r2 = prev->r1 = prev->r3
-                    = quad->r0 = quad->r2 = (scratch * red) / ONE;
+                    = quad->r0 = quad->r2 = shade_r;
+                shade_g = (scratch * green) / ONE;
                 prev_offset_quad->g1 = prev_offset_quad->g3 = offset_quad->g0 = offset_quad->g2 = prev->g1 = prev->g3
-                    = quad->g0 = quad->g2 = (scratch * green) / ONE;
+                    = quad->g0 = quad->g2 = shade_g;
+                shade_b = (scratch * blue) / ONE;
                 prev_offset_quad->b1 = prev_offset_quad->b3 = offset_quad->b0 = offset_quad->b2 = prev->b1 = prev->b3
-                    = quad->b0 = quad->b2 = (scratch * blue) / ONE;
+                    = quad->b0 = quad->b2 = shade_b;
 
                 /* The previous quad is now complete: link it at its segment's depth. */
                 if (depth < EFFECT_OT_DEPTH_MIN) {

@@ -70,6 +70,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
     s32 u;
     s32 v;
     s32 width;
+    s32 column_width;
     s32 height;
     s32 depth_base;
     s16 angle;
@@ -463,8 +464,7 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
             if (entry->particle_ribbon.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
                 factor = (entry->particle_ribbon.color_curves & 0xfff);
                 red = g_battle_effect_animation_curve_data
-                          ->curves[((entry->particle_ribbon.color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT)
-                              & 0xf][slot->age];
+                          ->curves[(factor >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][slot->age];
                 green = g_battle_effect_animation_curve_data
                             ->curves[(factor >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][slot->age];
                 blue = g_battle_effect_animation_curve_data
@@ -579,7 +579,8 @@ s32 effect_particle_ribbon_long_update(s32 record_index, s32 callback_slot, s32 
                 prev->y1 = quad->y0 = head.vy - offset_y;
                 prev->x3 = quad->x2 = head.vx + offset_x;
                 prev->y3 = quad->y2 = head.vy + offset_y;
-                prev->u1 = prev->u3 = quad->u0 = quad->u2 = u + j * (width / (EFFECT_PARTICLE_RIBBON_LONG_POINTS - 1));
+                column_width = width / (EFFECT_PARTICLE_RIBBON_LONG_POINTS - 1);
+                prev->u1 = prev->u3 = quad->u0 = quad->u2 = u + j * column_width;
                 prev->v1 = quad->v0 = v;
                 prev->v3 = quad->v2 = v + height;
                 factor = g_effect_particle_ribbon_long_brightness_table[row][point];

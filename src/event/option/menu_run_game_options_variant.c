@@ -58,6 +58,8 @@ void menu_run_game_options_variant(void) {
     SPRT* arrow;
     SPRT* frame;
     u8* image;
+    s32 value_text_id;
+    s32 total_rows;
 
     do {
         thread = &g_threads[g_thread_current_id];
@@ -265,8 +267,8 @@ void menu_run_game_options_variant(void) {
             menu_clear_render_buffer(buffer, 0x1E0);
             g_menu_text_state.pen.stride = 0x3C;
             menu_set_text_origin(0, 0);
-            menu_display_text_entry(
-                g_menu_option_value_text_id_bases[index] + g_menu_option_values[index], buffer, &g_menu_text_state.pen);
+            value_text_id = g_menu_option_value_text_id_bases[index] + g_menu_option_values[index];
+            menu_display_text_entry(value_text_id, buffer, &g_menu_text_state.pen);
             LoadImage(&g_menu_option_value_image_rect, (u32*)buffer);
         }
 
@@ -335,7 +337,8 @@ void menu_run_game_options_variant(void) {
             top = page->arrows[0].y0 + page->arrows[0].h;
             span -= top;
             page->thumb.x0 = page->arrows[0].x0;
-            page->thumb.y0 = top + span * entry->selected_index / (layout->row_count + layout->hidden_rows) - 2;
+            total_rows = layout->row_count + layout->hidden_rows;
+            page->thumb.y0 = top + span * entry->selected_index / total_rows - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 

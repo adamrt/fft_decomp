@@ -905,6 +905,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     ai_weapon_data_t* weapon;
     ability_secondary_data_t* secondary;
     s32 value;
+    s32 speed;
 
     battle_mem_zero_32bit_values(&ai->considered_ability, sizeof(ai_considered_ability_t));
     battle_mem_zero_32bit_values(&ai->current_action.command.calculator_type, 4);
@@ -968,11 +969,10 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
     case ACTION_MENU_TYPE_JUMP:
         /* Jump lands after half the clockticks to the jumper's following turn; a unit
          * other than the actor first waits out the clockticks to its coming turn. */
-        if (unit_id == ai->acting_unit_id)
-            ai->considered_ability.ct
-                = ((UNIT_TURN_CT_THRESHOLD - ai->acting_unit->ct) / ai->acting_unit->attributes[UNIT_ATTRIBUTE_SPEED])
-                / 2;
-        else {
+        if (unit_id == ai->acting_unit_id) {
+            speed = ai->acting_unit->attributes[UNIT_ATTRIBUTE_SPEED];
+            ai->considered_ability.ct = ((UNIT_TURN_CT_THRESHOLD - ai->acting_unit->ct) / speed) / 2;
+        } else {
             if (unit->ct > UNIT_TURN_CT_THRESHOLD) {
                 ai->considered_ability.ct = 0;
                 value = unit->ct - UNIT_TURN_CT_THRESHOLD;

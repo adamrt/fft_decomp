@@ -452,11 +452,9 @@ static s32 world_formation_run_set_ability_menu(void) {
                 } else {
                     /* Revalidate equipment when either the new or the replaced ability is an equip support. */
                     value = world_ability_is_equip_support_change(g_unit_selected_index, selected);
+                    current = g_world_unit_pointers[g_unit_selected_index]->abilities.slots[g_world_set_ability_slot];
                     world_formation_set_unit_ability_slot(g_unit_selected_index, g_world_set_ability_slot, selected,
-                        value
-                            | world_ability_is_equip_support_change(g_unit_selected_index,
-                                g_world_unit_pointers[g_unit_selected_index]
-                                    ->abilities.slots[g_world_set_ability_slot]));
+                        value | world_ability_is_equip_support_change(g_unit_selected_index, current));
                     g_sound_queued_effect_id = MAIN_SFX_EQUIP;
                     g_world_ability_menu_slots_changed = 1;
                     g_world_set_ability_list_close_pending = 1;

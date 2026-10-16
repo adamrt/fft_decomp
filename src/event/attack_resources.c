@@ -1360,6 +1360,7 @@ static void menu_build_ability_list(s32 mode) {
     s32 columns;
     s32 row_mode;
     s32 row_flags;
+    menu_ability_list_t* list;
 
     g_menu_ability_layout.columns.text_ids[0] = (s16*)g_ai_workspace_ptr->ability_list.ids;
     g_menu_ability_layout.columns.text_ids[1] = (s16*)g_ai_workspace_ptr->ability_list.values;
@@ -1390,9 +1391,9 @@ static void menu_build_ability_list(s32 mode) {
     g_ai_workspace_ptr->ability_list.skill_ct[0x50] = 0xFF;
 
     if (type == ACTION_MENU_TYPE_DEFAULT) {
-        battle_menu_get_unit_skillset_ability_data(unit_index, skillset, (s16*)g_ai_workspace_ptr->ability_list.ids,
-            g_ai_workspace_ptr->ability_list.mp_costs, g_ai_workspace_ptr->ability_list.ct, 0,
-            g_ai_workspace_ptr->ability_list.flags, g_ai_workspace_ptr->ability_list.turns);
+        list = &g_ai_workspace_ptr->ability_list;
+        battle_menu_get_unit_skillset_ability_data(
+            unit_index, skillset, (s16*)list->ids, list->mp_costs, list->ct, 0, list->flags, list->turns);
         mem_copy_bytes_nonempty(g_ai_workspace_ptr->ability_list.skill_ct, g_ai_workspace_ptr->ability_list.ct, 0x50);
     }
     if (type == ACTION_MENU_TYPE_ITEM_INVENTORY) {

@@ -1265,6 +1265,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
     s32 finish_op;
+    s32 next_event;
     u32 prims;
     u32* ordering_table;
     s32 polarity;
@@ -1309,7 +1310,8 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
             }
             /* The finish word holds the next event id in bits 0-7 and 10-11 (its bits 8-9);
              * the remaining high bits give the finish result. */
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF));
+            next_event = ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF);
+            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, next_event);
             finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;
@@ -1472,6 +1474,7 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
     RECT rect;
     s32 i;
     s32 finish_op;
+    s32 next_event;
     u32 prims;
     u32* ordering_table;
     s32 polarity;
@@ -1516,7 +1519,8 @@ s32 script_run_event_frame_variant(u32* ot, u32 buttons) {
             }
             /* The finish word holds the next event id in bits 0-7 and 10-11 (its bits 8-9);
              * the remaining high bits give the finish result. */
-            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF));
+            next_event = ((finish_op & 0xC00) >> 2) | (finish_op & 0xFF);
+            script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, next_event);
             finish_op = (finish_op & 0xF300) >> 8;
             g_script_threads_idle = 0;
             g_menu_overlay_state = 0;

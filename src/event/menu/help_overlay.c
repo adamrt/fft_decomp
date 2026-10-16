@@ -68,6 +68,7 @@ void menu_run_battle_help(void) {
     menu_status_panel_slot_storage_t* setup_billboard;
     map_selected_tile_t* setup_cursor_tile;
     s32 missing_value;
+    s32 value_id;
 
     u_mid = 0xB8;
     if (g_menu_modal_open != 0) {
@@ -283,8 +284,8 @@ void menu_run_battle_help(void) {
         if (view_mode == UNIT_VIEW_MODE_TILE_INFO || view_mode == UNIT_VIEW_MODE_HOVERED_UNIT) {
             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
             thread_start(THREAD_SCREEN_SLOT_MESSAGE, text_run_dialog_thread_variant);
-            thread_set_parameters(
-                THREAD_SCREEN_SLOT_MESSAGE, 0x3B, g_menu_help_menu_cursor_tile.surface_type + 0x5800, 0);
+            help_id = g_menu_help_menu_cursor_tile.surface_type + 0x5800;
+            thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x3B, help_id, 0);
             g_threads[THREAD_SCREEN_SLOT_MESSAGE].task_words[DIALOG_THREAD_WORD_Y_OFFSET] = -0x20;
             thread_wait_until_inactive(THREAD_SCREEN_SLOT_MESSAGE);
             *g_menu_help_controller_state_ptr = 0;
@@ -339,7 +340,8 @@ void menu_run_battle_help(void) {
                     help_id = node->help_base + *node->value;
                     if (node->help_base == -0x6800 && g_menu_help_billboard.state.generic_monster != 0) {
                         help_id = *node->value | 0x7800;
-                        if ((*node->value & 0x7FF) == 0x7FF || (*node->value & 0x7FF) == 0) {
+                        value_id = *node->value & 0x7FF;
+                        if (value_id == 0x7FF || value_id == 0) {
                             *g_menu_help_controller_state_ptr = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;
@@ -491,6 +493,7 @@ void menu_run_require_help(void) {
     /* Also carries the navigation direction. */
     s32 help_id;
     s32 u;
+    s32 value_id;
 
     for (frame = 0; frame < 2; frame++) {
         poly = &cursor[frame];
@@ -579,7 +582,8 @@ void menu_run_require_help(void) {
                     help_id = entry->help_base + *entry->value;
                     if (entry->help_base == -0x6800 && g_menu_help_billboard.state.generic_monster != 0) {
                         help_id = *entry->value | 0x7800;
-                        if ((*entry->value & 0x7FF) == 0x7FF || (*entry->value & 0x7FF) == 0) {
+                        value_id = *entry->value & 0x7FF;
+                        if (value_id == 0x7FF || value_id == 0) {
                             *g_menu_help_controller_state_ptr = 0;
                         } else {
                             g_sound_pending_sfx_id = MAIN_SFX_WINDOW_OPEN;

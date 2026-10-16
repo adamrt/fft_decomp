@@ -399,9 +399,7 @@ s32 effect_tube_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         blue = EFFECT_COLOR_NEUTRAL;
         if (entry->radial_mesh.flags & EFFECT_EMITTER_FLAG_COLOR_CURVES) {
             k = (entry->radial_mesh.color_curves & 0xfff);
-            red = g_battle_effect_animation_curve_data
-                      ->curves[((entry->radial_mesh.color_curves & 0xfff) >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf]
-                              [frame];
+            red = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_RED_SHIFT) & 0xf][frame];
             green = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_GREEN_SHIFT) & 0xf][frame];
             blue = g_battle_effect_animation_curve_data->curves[(k >> EFFECT_COLOR_CURVE_BLUE_SHIFT) & 0xf][frame];
         } else {

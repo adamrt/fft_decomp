@@ -3459,7 +3459,8 @@ s32 battle_gfx_step_queued_unit_graphics_load(void) {
             }
             break;
         case BATTLE_GFX_QUEUED_LOAD_SPR:
-            /* Ids from 0xa0 up are past the sheet table and load Ramza's chapter 1 sheet instead. */
+            /* Ids from 0xa0 up load Ramza's chapter 1 sheet instead; id 0x9f also lies past the
+             * 159-entry table but slips through (QUIRKS.md). */
             if (g_main_gfx_unit_graphics_load_queue.descriptors[g_battle_gfx_unit_graphics_load_state.index]
                     .spritesheet_id
                 >= 0xa0) {

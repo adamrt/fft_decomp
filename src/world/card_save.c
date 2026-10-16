@@ -1275,6 +1275,7 @@ static void world_card_update_and_draw_slot_list(s32 input) {
     u16 texture_page;
     s32 value;
     RECT rect;
+    s16 label_y;
 
     if (g_world_card_menu_step == WORLD_CARD_MENU_STEP_SELECT_SAVE) {
         /* Input is ignored until every button has been released once, so a press carried over
@@ -1431,8 +1432,11 @@ static void world_card_update_and_draw_slot_list(s32 input) {
         world_menu_set_palette_mode(value);
         world_menu_parse_draw_window_frame((menu_instruction_t*)&g_world_card_slot_window_command);
 
-        g_world_card_slot_quad_3.position.y = g_world_card_slot_quad_4.position.y = g_world_card_slot_quad_0.position.y
-            = g_world_card_slot_quad_1.position.y = g_world_card_slot_window.rect.y - 14;
+        label_y = g_world_card_slot_window.rect.y - 14;
+        g_world_card_slot_quad_1.position.y = label_y;
+        g_world_card_slot_quad_0.position.y = label_y;
+        g_world_card_slot_quad_4.position.y = label_y;
+        g_world_card_slot_quad_3.position.y = label_y;
         g_world_card_slot_quad_3.position.y = g_world_card_slot_quad_3.position.y + 1;
         g_world_card_slot_quad_4.position.y = g_world_card_slot_quad_4.position.y + 1;
         g_world_card_slot_quad_1.position.y++;

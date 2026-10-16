@@ -618,6 +618,7 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
     u8 target_id;
     u16 reaction_id;
     map_tile_t* tile;
+    s32 location;
 
     g_battle_sort_targets_nearest_first = 0;
     g_battle_relocated_unit_count = 0;
@@ -674,8 +675,9 @@ s32 battle_action_resolve_ability_strike(s32 battle_id, battle_strike_work_t* wo
             for (i = 1; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
                 targets[i] = 0xff;
             }
-            tile = &g_battle_map_tile_data[battle_map_calculate_location(
-                &g_battle_unit_stats[g_battle_action_current_ability.post_action_target_id])];
+            location = battle_map_calculate_location(
+                &g_battle_unit_stats[g_battle_action_current_ability.post_action_target_id]);
+            tile = &g_battle_map_tile_data[location];
             tile->ceiling_depth_and_marks.targeted = 1;
         }
         count = battle_target_list_units_on_panels(targets, attacker);
@@ -1317,6 +1319,7 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
     u16 ability;
     u16 last_attack;
     s16 reaction_id;
+    s32 surface;
 
     if (g_battle_acting_unit_id == -1) {
         return -1;
@@ -1375,10 +1378,9 @@ s32 battle_reaction_prepare_next(s16* out_ability) {
                         }
                         break;
                     case ABILITY_ID_REACTION_COUNTER_FLOOD:
-                        outcome = (battle_action_store_counter_ability(unit, SKILLSET_ID_ELEMENTAL,
-                                       g_main_terrain_geomancy_abilities
-                                           [g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type],
-                                       0)
+                        surface = g_battle_map_tile_data[battle_map_calculate_location(unit)].surface.type;
+                        outcome = (battle_action_store_counter_ability(
+                                       unit, SKILLSET_ID_ELEMENTAL, g_main_terrain_geomancy_abilities[surface], 0)
                                       == 0)
                             * 2;
                         break;

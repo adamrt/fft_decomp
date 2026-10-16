@@ -52,6 +52,7 @@ void menu_run_at_list_variant(void) {
     u8* buffer;
     s32 arrow_y;
     s32 span;
+    s32 total_rows;
 
     page = g_at_list_pages;
     timer = 0;
@@ -314,7 +315,8 @@ void menu_run_at_list_variant(void) {
             top = page->arrows[0].y0 + page->arrows[0].h;
             span -= top;
             page->thumb.x0 = page->arrows[0].x0;
-            page->thumb.y0 = top + span * entry->selected_index / (layout->row_count + layout->hidden_rows) - 2;
+            total_rows = layout->row_count + layout->hidden_rows;
+            page->thumb.y0 = top + span * entry->selected_index / total_rows - 2;
             gfx_draw_or_append_gpu_primitive(&page->thumb);
         }
 

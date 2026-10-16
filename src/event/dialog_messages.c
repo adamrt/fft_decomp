@@ -181,6 +181,7 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
     s32 row;
     s32 offset;
     text_glyph_state_t* request = &g_text_typewriter_glyph;
+    s32 column;
 
     if (g_text_typewriter_glyph.mode == DIALOG_BOX_TYPE_PORTRAIT || g_text_typewriter_glyph.mode == 0) {
         /* Use the staging slot this thread owns or claim a free one (16 means none);
@@ -280,8 +281,8 @@ void text_draw_glyph_with_typewriter_delay(s32 pen_x, s32 pen_y, s32 delay) {
                 if (request->mode == 0) {
                     (image + i)[offset / 2] = 0;
                 } else {
-                    (image + i)[offset / 2] = (g_menu_glyph_sheet->pixels
-                        + ((((request->x + (i << 1)) & 0xF) + 8) / 2))[(row << 7) + 0x400];
+                    column = (((request->x + (i << 1)) & 0xF) + 8) / 2;
+                    (image + i)[offset / 2] = (g_menu_glyph_sheet->pixels + column)[(row << 7) + 0x400];
                 }
             }
         }
