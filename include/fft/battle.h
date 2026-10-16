@@ -285,7 +285,7 @@ u8* battle_text_find_entry(u32 text_id);
     ((min) == (max) ? (min) : (max) < (min) ? rand() % ((min) - (max)) + (max) : rand() % ((max) - (min)) + (min))
 
 /* start + (end - start) * factor / 256, the division an arithmetic shift. */
-s32 battle_lerp_fixed8(s32 start, s32 end, s32 factor);
+s32 battle_lerp_q8(s32 start, s32 end, s32 factor);
 
 /* Copy forward using a signed destination-end address; nonpositive counts do nothing. */
 void battle_mem_copy_bytes(void* destination, const void* source, s32 byte_count);

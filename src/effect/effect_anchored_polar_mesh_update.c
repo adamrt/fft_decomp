@@ -102,26 +102,25 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         /* Ring shape: a radius and an angle, each with a per-ring step and a change of that step. */
         selector = entry->polar_mesh.curve_bindings.radius;
         EFFECT_READ_CURVE(j, i, selector, work->frame);
-        scratch->radius = battle_lerp_fixed8(entry->polar_mesh.radius_start, entry->polar_mesh.radius_end, i) * ONE;
+        scratch->radius = battle_lerp_q8(entry->polar_mesh.radius_start, entry->polar_mesh.radius_end, i) * ONE;
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.radius_step, work->frame);
-        scratch->radius_step
-            = battle_lerp_fixed8(entry->polar_mesh.radius_step_start, entry->polar_mesh.radius_step_end, i) << 4;
+        scratch->radius_step = battle_lerp_q8(entry->polar_mesh.radius_step_start, entry->polar_mesh.radius_step_end, i)
+            << 4;
         EFFECT_READ_CURVE(j, i, entry->polar_mesh.curve_bindings.radius_step_delta, work->frame);
         scratch->radius_step_delta
-            = battle_lerp_fixed8(entry->polar_mesh.radius_step_delta_start, entry->polar_mesh.radius_step_delta_end, i)
+            = battle_lerp_q8(entry->polar_mesh.radius_step_delta_start, entry->polar_mesh.radius_step_delta_end, i)
             << 4;
 
         angle_binding = entry->polar_mesh.curve_bindings.angle;
         EFFECT_READ_CURVE(j, i, angle_binding, work->frame);
-        scratch->angle = battle_lerp_fixed8(entry->polar_mesh.angle_start, entry->polar_mesh.angle_end, i) << 4;
+        scratch->angle = battle_lerp_q8(entry->polar_mesh.angle_start, entry->polar_mesh.angle_end, i) << 4;
         selector = entry->polar_mesh.curve_bindings.angle_step;
         EFFECT_READ_CURVE(j, i, selector, work->frame);
-        scratch->angle_step
-            = battle_lerp_fixed8(entry->polar_mesh.angle_step_start, entry->polar_mesh.angle_step_end, i);
+        scratch->angle_step = battle_lerp_q8(entry->polar_mesh.angle_step_start, entry->polar_mesh.angle_step_end, i);
         delta_binding = entry->polar_mesh.curve_bindings.angle_step_delta;
         EFFECT_READ_CURVE(j, i, delta_binding, work->frame);
         scratch->angle_step_delta
-            = battle_lerp_fixed8(entry->polar_mesh.angle_step_delta_start, entry->polar_mesh.angle_step_delta_end, i);
+            = battle_lerp_q8(entry->polar_mesh.angle_step_delta_start, entry->polar_mesh.angle_step_delta_end, i);
 
         /* Each ring sweeps one quadrant; its last point is the first turned a quarter turn. */
         for (ring = 0; ring < POLAR_MESH_RING_COUNT + 1; ring++) {
@@ -149,17 +148,17 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         selector = entry->polar_mesh.curve_bindings.velocity;
         EFFECT_READ_CURVE(j, i, selector, work->frame);
         scratch->velocity_angle
-            = battle_lerp_fixed8(entry->polar_mesh.velocity_angle_start, entry->polar_mesh.velocity_angle_end, i) << 4;
-        j = battle_lerp_fixed8(entry->polar_mesh.velocity_speed_start, entry->polar_mesh.velocity_speed_end, i) << 4;
+            = battle_lerp_q8(entry->polar_mesh.velocity_angle_start, entry->polar_mesh.velocity_angle_end, i) << 4;
+        j = battle_lerp_q8(entry->polar_mesh.velocity_speed_start, entry->polar_mesh.velocity_speed_end, i) << 4;
         scratch->velocity.x = rcos(scratch->velocity_angle) * j >> 12;
         scratch->velocity.y = rsin(scratch->velocity_angle) * j >> 12;
 
         selector = entry->polar_mesh.curve_bindings.acceleration;
         EFFECT_READ_CURVE(j, i, selector, work->frame);
-        scratch->acceleration_angle = battle_lerp_fixed8(entry->polar_mesh.acceleration_angle_start,
-                                          entry->polar_mesh.acceleration_angle_end, i)
+        scratch->acceleration_angle
+            = battle_lerp_q8(entry->polar_mesh.acceleration_angle_start, entry->polar_mesh.acceleration_angle_end, i)
             << 4;
-        j = battle_lerp_fixed8(entry->polar_mesh.acceleration_speed_start, entry->polar_mesh.acceleration_speed_end, i)
+        j = battle_lerp_q8(entry->polar_mesh.acceleration_speed_start, entry->polar_mesh.acceleration_speed_end, i)
             << 4;
         scratch->acceleration.x = rcos(scratch->acceleration_angle) * j >> 12;
         scratch->acceleration.y = rsin(scratch->acceleration_angle) * j >> 12;
@@ -167,7 +166,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
         /* The scroll curve alone is read at the caller's frame. */
         selector = entry->polar_mesh.curve_bindings.scroll;
         EFFECT_READ_CURVE(j, i, selector, frame);
-        j = battle_lerp_fixed8(entry->polar_mesh.scroll_u_speed_start, entry->polar_mesh.scroll_u_speed_end, i) << 4;
+        j = battle_lerp_q8(entry->polar_mesh.scroll_u_speed_start, entry->polar_mesh.scroll_u_speed_end, i) << 4;
         work->scroll_u += j;
         while (work->scroll_u >= scratch->half_width * ONE) {
             work->scroll_u -= scratch->half_width * ONE;
@@ -176,7 +175,7 @@ s32 effect_anchored_polar_mesh_update(s32 record_index, s32 callback_slot, s32 e
             work->scroll_u += scratch->half_width * ONE;
         }
 
-        j = battle_lerp_fixed8(entry->polar_mesh.scroll_v_speed_start, entry->polar_mesh.scroll_v_speed_end, i) << 4;
+        j = battle_lerp_q8(entry->polar_mesh.scroll_v_speed_start, entry->polar_mesh.scroll_v_speed_end, i) << 4;
         work->scroll_v += j;
         while (work->scroll_v >= scratch->half_height * ONE) {
             work->scroll_v -= scratch->half_height * ONE;

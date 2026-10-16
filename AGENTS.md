@@ -126,7 +126,8 @@ dependencies.
 - Unknown members are `_unknown_XX`; `_unused_XX` means no named access;
   `_padding_XX` means proven alignment/size filler. Offsets are relative to the
   member's own struct. Never access unused or padding members by name.
-- Use `ONE` for fixed-point 1.0 (4096). Add `const` only for genuinely read-only
+- Use `ONE` for fixed-point 1.0 (4096). A name that states a fixed-point
+  format uses `qN` for N fraction bits (`battle_lerp_q8`, `menu_lerp_q12`). Add `const` only for genuinely read-only
   inputs and verify all callers under their historical compiler profiles.
 - Use American spelling.
 - Keep comments factual. Say what a function or block does when the code

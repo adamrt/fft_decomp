@@ -147,10 +147,10 @@ s32 effect_textured_quad_grid_update(s32 record_index, s32 callback_slot, s32 em
         /* Scroll the half-size texture window by the speed and angle curves, wrapping within it. */
         selector = geometry->scroll_curves.scroll_speed;
         EFFECT_READ_CURVE(row, column, selector, work->frame);
-        speed = battle_lerp_fixed8(geometry->scroll_speed_start, geometry->scroll_speed_end, column) << 4;
+        speed = battle_lerp_q8(geometry->scroll_speed_start, geometry->scroll_speed_end, column) << 4;
         selector = geometry->scroll_curves.scroll_angle;
         EFFECT_READ_CURVE(row, column, selector, work->frame);
-        angle = battle_lerp_fixed8(geometry->scroll_angle_start, geometry->scroll_angle_end, column);
+        angle = battle_lerp_q8(geometry->scroll_angle_start, geometry->scroll_angle_end, column);
         work->scroll_u += (rcos(angle) * speed) >> 12;
         /* Comparison shifts preserve the original loop scheduling. */
         while (work->scroll_u >= texture_width << 12) {

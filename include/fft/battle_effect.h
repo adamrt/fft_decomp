@@ -288,7 +288,7 @@ void battle_effect_load_vector(const vec3s16_t* src, VECTOR* dst);
 void battle_effect_mask_vector_low_12_bits(const SVECTOR* src, SVECTOR* dst);
 s16 battle_effect_select_larger_magnitude_s16(s16 first, s16 second);
 s16 battle_effect_select_largest_magnitude_s16(s16 first, s16 second, s16 third);
-void battle_effect_scale_vector_fixed12(const VECTOR* src, VECTOR* dst);
+void battle_effect_scale_vector_q12(const VECTOR* src, VECTOR* dst);
 void battle_effect_shift_vector_right_12(const VECTOR* src, VECTOR* dst);
 
 #endif

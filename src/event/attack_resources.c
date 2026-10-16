@@ -62,7 +62,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component);
 static void map_store_selected_tile_data(void);
 static void menu_init_subsystems(void);
 static void menu_run_unit_view_supervisor_thread(void);
-static s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value);
+static s32 script_interpolate_range_q12(s32 start, s32 end, s32 fraction, s32 value);
 static void unit_reset_animation_states(void);
 
 /* Load ATTACK.OUT (unless preloaded) with its scenario conditions and graphics, reset menu
@@ -583,16 +583,16 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
             frame = i + track->segment_frame;
             /* After the first segment, the first interval is sampled from its midpoint. */
             if (track->segment == 0) {
-                time[i * 2] = script_interpolate_range_fixed12(track->keys[track->segment].time,
+                time[i * 2] = script_interpolate_range_q12(track->keys[track->segment].time,
                     track->keys[track->segment + 1].time, frame, track->segment_duration);
-                value[i * 2] = script_interpolate_range_fixed12(track->keys[track->segment].value,
+                value[i * 2] = script_interpolate_range_q12(track->keys[track->segment].value,
                     track->keys[track->segment + 1].value, frame, track->segment_duration);
             } else {
-                time[i * 2] = script_interpolate_range_fixed12(track->keys[track->segment].time,
+                time[i * 2] = script_interpolate_range_q12(track->keys[track->segment].time,
                                   track->keys[track->segment + 1].time, frame, track->segment_duration * 2)
                     - track->keys[track->segment].time
                     + (track->keys[track->segment + 1].time - track->keys[track->segment].time) / 2;
-                value[i * 2] = script_interpolate_range_fixed12(track->keys[track->segment].value,
+                value[i * 2] = script_interpolate_range_q12(track->keys[track->segment].value,
                                    track->keys[track->segment + 1].value, frame, track->segment_duration * 2)
                     - track->keys[track->segment].value
                     + (track->keys[track->segment + 1].value - track->keys[track->segment].value) / 2;
@@ -601,9 +601,9 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
             if (track->segment != track->key_count - 3) {
                 span *= 2;
             }
-            time[i * 2 + 1] = script_interpolate_range_fixed12(
+            time[i * 2 + 1] = script_interpolate_range_q12(
                 track->keys[track->segment + 1].time, track->keys[track->segment + 2].time, frame, span);
-            value[i * 2 + 1] = script_interpolate_range_fixed12(
+            value[i * 2 + 1] = script_interpolate_range_q12(
                 track->keys[track->segment + 1].value, track->keys[track->segment + 2].value, frame, span);
         }
 
@@ -672,7 +672,7 @@ static s32 camera_step_track(camera_track_t* track, s32 component) {
 
 /* Linear interpolation from start to end at fraction / value, returned in 20.12
  * fixed point: start * ONE + (end - start) * fraction * ONE / value. */
-static s32 script_interpolate_range_fixed12(s32 start, s32 end, s32 fraction, s32 value) {
+static s32 script_interpolate_range_q12(s32 start, s32 end, s32 fraction, s32 value) {
     return mul_div_s64(end - start, fraction * ONE, value) + (start * ONE);
 }
 

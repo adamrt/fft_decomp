@@ -131,9 +131,9 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         /* battle_effect_interpolate_emitter_spawn_position's lerp, done inline on the same fields. */
         EFFECT_READ_CURVE(j, i, entry->motion_curves.origin, frame);
-        origin.vx = battle_lerp_fixed8(entry->origin_start.x, entry->origin_end.x, i);
-        origin.vy = battle_lerp_fixed8(entry->origin_start.y, entry->origin_end.y, i);
-        origin.vz = battle_lerp_fixed8(entry->origin_start.z, entry->origin_end.z, i);
+        origin.vx = battle_lerp_q8(entry->origin_start.x, entry->origin_end.x, i);
+        origin.vy = battle_lerp_q8(entry->origin_start.y, entry->origin_end.y, i);
+        origin.vz = battle_lerp_q8(entry->origin_start.z, entry->origin_end.z, i);
         switch (placement & EFFECT_EMITTER_ORIGIN_MASK) {
         case EFFECT_EMITTER_ORIGIN_WORLD:
         case EFFECT_EMITTER_ORIGIN_PARENT_PARTICLE:
@@ -170,12 +170,12 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
 
         radius_binding = entry->shape_curves.radius;
         EFFECT_READ_CURVE(j, i, radius_binding, frame);
-        radius = battle_lerp_fixed8(entry->radius_start, entry->radius_end, i);
+        radius = battle_lerp_q8(entry->radius_start, entry->radius_end, i);
 
         texture_selector = entry->motion_curves.texture;
         EFFECT_READ_CURVE(j, i, texture_selector, frame);
-        u = battle_lerp_fixed8(entry->u_start, entry->u_end, i);
-        v = battle_lerp_fixed8(entry->v_start, entry->v_end, i);
+        u = battle_lerp_q8(entry->u_start, entry->u_end, i);
+        v = battle_lerp_q8(entry->v_start, entry->v_end, i);
         u_span = entry->u_span;
         v_span = entry->v_span;
         work->v_scroll += entry->v_scroll_speed;
@@ -187,16 +187,16 @@ s32 effect_dome_mesh_update(s32 record_index, s32 callback_slot, s32 emitter_ind
         }
 
         EFFECT_READ_CURVE(j, i, entry->shape_curves.growth, frame);
-        growth.vx = battle_lerp_fixed8(entry->growth_start, entry->growth_end, i);
-        growth.vy = battle_lerp_fixed8(entry->height_start, entry->height_end, i);
+        growth.vx = battle_lerp_q8(entry->growth_start, entry->growth_end, i);
+        growth.vy = battle_lerp_q8(entry->height_start, entry->height_end, i);
 
         growth_step_selector = entry->shape_curves.growth_step;
         EFFECT_READ_CURVE(j, i, growth_step_selector, frame);
-        growth_step.vx = battle_lerp_fixed8(entry->growth_step_start, entry->growth_step_end, i);
-        growth_step.vy = battle_lerp_fixed8(entry->height_step_start, entry->height_step_end, i);
+        growth_step.vx = battle_lerp_q8(entry->growth_step_start, entry->growth_step_end, i);
+        growth_step.vy = battle_lerp_q8(entry->height_step_start, entry->height_step_end, i);
 
         EFFECT_READ_CURVE(j, i, entry->motion_curves.spin, frame);
-        work->spin = (work->spin + battle_lerp_fixed8(entry->spin_speed_start, entry->spin_speed_end, i)) & (ONE - 1);
+        work->spin = (work->spin + battle_lerp_q8(entry->spin_speed_start, entry->spin_speed_end, i)) & (ONE - 1);
 
         /* Rows climb from the rim (row 0) to the pole (row 8) in equal latitude steps, each row's
          * height scaled by growth.vy. The base stays in a variable: the target adds it to the row

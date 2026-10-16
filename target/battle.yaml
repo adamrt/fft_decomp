@@ -808,7 +808,7 @@ functions:
   - {addr: 0x801328ac, size: 104, name: gfx_flip_poly_ft4_uv_if_negative, hash: 7fda2865d42a6dd6, unit: dialog_helpers}
   - {addr: 0x80132914, size: 688, name: menu_animate_window_quad_crop, hash: 4493016da3417713, unit: dialog_helpers}
   - {addr: 0x80132bc4, size: 652, name: menu_tween_window_quads, hash: 51a61972e26b9d06, unit: dialog_helpers}
-  - {addr: 0x80132e50, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_helpers}
+  - {addr: 0x80132e50, size: 36, name: menu_lerp_q12, hash: c8c076c648585d00, unit: dialog_helpers}
   - {addr: 0x80132e74, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 9ae491a067b74ea5, unit: dialog_helpers}
   - {addr: 0x80132f9c, size: 84, name: script_opcode_16_pause, hash: 87298c6e69d92c6c, unit: dialog_helpers}
   - {addr: 0x80132ff0, size: 88, name: unit_copy_world_coords_to_scratch, hash: 0a61ba2db8f7e33b, unit: dialog_helpers}
@@ -951,7 +951,7 @@ functions:
   - {addr: 0x8013dae4, size: 184, name: script_opcode_85_unlock_date, hash: c9969a2b94237e09, unit: attack_resources}
   - {addr: 0x8013db9c, size: 1044, name: camera_fusion_thread, hash: b5d064cf95daeba7, unit: attack_resources}
   - {addr: 0x8013dfb0, size: 1432, name: camera_step_track, hash: 7f8a4482ec4d7bae, unit: attack_resources}
-  - {addr: 0x8013e548, size: 60, name: script_interpolate_range_fixed12, hash: 61b036d90720a723, unit: attack_resources}
+  - {addr: 0x8013e548, size: 60, name: script_interpolate_range_q12, hash: 61b036d90720a723, unit: attack_resources}
   - {addr: 0x8013e584, size: 60, name: script_print_debug_message, hash: e022a9f8bc32fb50, unit: attack_resources}
   - {addr: 0x8013e5c0, size: 156, name: script_opcode_28_walk_to, hash: e8a19e31d556b80a, unit: attack_resources}
   - {addr: 0x8013e65c, size: 104, name: script_opcode_68_mirror_sprite, hash: f6beec0bbeb1fc93, unit: attack_resources}
@@ -1844,8 +1844,8 @@ functions:
   - {addr: 0x801a8ae8, size: 100, name: battle_effect_interpolate_vector_q13_cos, hash: 780406bfc0e02002, unit: effect_renderer}
   - {addr: 0x801a8b4c, size: 100, name: battle_effect_interpolate_vector_q13_cos_q12, hash: 9dc613bd73dd4809, unit: effect_renderer}
   - {addr: 0x801a8bb0, size: 48, name: battle_effect_interpolate_vector_q13_linear, hash: 3adaecb89ae8bfc6, unit: effect_renderer}
-  - {addr: 0x801a8be0, size: 24, name: battle_lerp_fixed8, hash: 32beccbbfe152ab8, unit: effect_renderer}
-  - {addr: 0x801a8bf8, size: 28, name: battle_lerp_fixed8_and_store, hash: 7dfbd222cfab214f, unit: effect_renderer}
+  - {addr: 0x801a8be0, size: 24, name: battle_lerp_q8, hash: 32beccbbfe152ab8, unit: effect_renderer}
+  - {addr: 0x801a8bf8, size: 28, name: battle_lerp_q8_and_store, hash: 7dfbd222cfab214f, unit: effect_renderer}
   - {addr: 0x801a8c14, size: 120, name: battle_effect_interpolate_emitter_spawn_position, hash: cad2d3bf5cf6328e, unit: effect_renderer}
   - {addr: 0x801a8c8c, size: 120, name: battle_effect_interpolate_emitter_spawn_spread, hash: 6f50e5b8089b165f, unit: effect_renderer}
   - {addr: 0x801a8d04, size: 120, name: battle_effect_interpolate_emitter_velocity_base_angles, hash: 1102eb23acedb6d3, unit: effect_renderer}
@@ -1859,7 +1859,7 @@ functions:
   - {addr: 0x801a9370, size: 36, name: battle_effect_load_vector, hash: 2416e989ca774a48, unit: effect_renderer}
   - {addr: 0x801a9394, size: 36, name: battle_effect_load_svector, hash: ee22450393aed3d1, unit: effect_renderer}
   - {addr: 0x801a93b8, size: 52, name: battle_effect_shift_vector_right_12, hash: 7b7525bebbd2b3f0, unit: effect_renderer}
-  - {addr: 0x801a93ec, size: 52, name: battle_effect_scale_vector_fixed12, hash: ad8e4cedc8f9a32d, unit: effect_renderer}
+  - {addr: 0x801a93ec, size: 52, name: battle_effect_scale_vector_q12, hash: ad8e4cedc8f9a32d, unit: effect_renderer}
   - {addr: 0x801a9420, size: 52, name: battle_effect_mask_vector_low_12_bits, hash: 7351866c85f1a40f, unit: effect_renderer}
   - {addr: 0x801a9454, size: 64, name: battle_effect_add_vectors, hash: 5b34eb38d492cb73, unit: effect_renderer}
   - {addr: 0x801a9494, size: 64, name: battle_effect_add_svectors, hash: 8878e701a43e759a, unit: effect_renderer}

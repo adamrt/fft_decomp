@@ -106,7 +106,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
         /* Spawn a batch every spawn interval, starting at frame 1. */
         EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_EMITTER_CURVE_SPAWN_INTERVAL_SHIFT) & 0xf, frame);
         if (i
-                % battle_lerp_fixed8(
+                % battle_lerp_q8(
                     entry->tentacle_mesh.spawn_interval_start, entry->tentacle_mesh.spawn_interval_end, factor)
             == 0) {
             /* work->matrix keeps a zero translation, so the spawn RotTrans calls only rotate. */
@@ -133,7 +133,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                 &g_battle_effect_context, &target);
 
             EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_EMITTER_CURVE_PARTICLE_COUNT_SHIFT) & 0xf, frame);
-            count = battle_lerp_fixed8(
+            count = battle_lerp_q8(
                 entry->tentacle_mesh.particle_count_start, entry->tentacle_mesh.particle_count_end, factor);
 
             EFFECT_READ_CURVE(index, factor, (spawn_bindings >> EFFECT_SPAWN_CURVE_SPAWN_POSITION_SHIFT) & 0xf, frame);
@@ -180,9 +180,9 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             index--;
             if (index != -1) {
                 factor = g_battle_effect_animation_curve_data->curves[index][frame];
-                speed_min = battle_lerp_fixed8(
+                speed_min = battle_lerp_q8(
                     entry->tentacle_mesh.radial_speed_start.min, entry->tentacle_mesh.radial_speed_end.min, factor);
-                speed_max = battle_lerp_fixed8(
+                speed_max = battle_lerp_q8(
                     entry->tentacle_mesh.radial_speed_start.max, entry->tentacle_mesh.radial_speed_end.max, factor);
             } else {
                 speed_min = entry->tentacle_mesh.radial_speed_start.min;
@@ -197,11 +197,11 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             battle_effect_interpolate_emitter_velocity_base_angles(entry, factor, &base_angles);
 
             EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_TENTACLE_CURVE_TIP_OFFSET_SHIFT) & 0xf, frame);
-            tip.vx = battle_lerp_fixed8(
+            tip.vx = battle_lerp_q8(
                 entry->tentacle_mesh.target_offset_start.x, entry->tentacle_mesh.target_offset_end.x, factor);
-            tip.vy = battle_lerp_fixed8(
+            tip.vy = battle_lerp_q8(
                 entry->tentacle_mesh.target_offset_start.y, entry->tentacle_mesh.target_offset_end.y, factor);
-            tip.vz = battle_lerp_fixed8(
+            tip.vz = battle_lerp_q8(
                 entry->tentacle_mesh.target_offset_start.z, entry->tentacle_mesh.target_offset_end.z, factor);
             switch (placement & EFFECT_EMITTER_HOMING_MASK) {
             case EFFECT_EMITTER_HOMING_OFFSET:
@@ -232,18 +232,18 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
             }
 
             EFFECT_READ_CURVE(index, factor, (tip_bindings >> EFFECT_TENTACLE_CURVE_TIP_SPREAD_SHIFT) & 0xf, frame);
-            tip_spread.vx = battle_lerp_fixed8(
+            tip_spread.vx = battle_lerp_q8(
                 entry->tentacle_mesh.tip_spread_start_x, entry->tentacle_mesh.tip_spread_end_x, factor);
-            tip_spread.vy = battle_lerp_fixed8(
+            tip_spread.vy = battle_lerp_q8(
                 entry->tentacle_mesh.tip_spread_start_y, entry->tentacle_mesh.tip_spread_end_y, factor);
-            tip_spread.vz = battle_lerp_fixed8(
+            tip_spread.vz = battle_lerp_q8(
                 entry->tentacle_mesh.tip_spread_start_z, entry->tentacle_mesh.tip_spread_end_z, factor);
 
             EFFECT_READ_CURVE(
                 index, factor, (tip_bindings >> EFFECT_TENTACLE_CURVE_TRAVEL_DURATION_SHIFT) & 0xf, frame);
-            length_min = battle_lerp_fixed8(
+            length_min = battle_lerp_q8(
                 entry->tentacle_mesh.lifetime_start.min, entry->tentacle_mesh.lifetime_end.min, factor);
-            length_max = battle_lerp_fixed8(
+            length_max = battle_lerp_q8(
                 entry->tentacle_mesh.lifetime_start.max, entry->tentacle_mesh.lifetime_end.max, factor);
 
             /* Start up to count particles while free segments remain. */

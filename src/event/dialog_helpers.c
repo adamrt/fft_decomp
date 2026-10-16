@@ -145,17 +145,17 @@ void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2,
 }
 
 /* Interpolate with a 20.12 factor; ONE reaches end. Division truncates toward zero. */
-static s32 menu_lerp_fixed12(s32 start, s32 end, s32 factor) {
+static s32 menu_lerp_q12(s32 start, s32 end, s32 factor) {
     return ((end - start) * factor) / ONE + start;
 }
 
 /* Set a quad's corners to the rectangle interpolated between from and to by a 12-bit fraction. */
 static void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor) {
-    setXY4(poly, menu_lerp_fixed12(from->x, to->x, factor), menu_lerp_fixed12(from->y, to->y, factor),
-        menu_lerp_fixed12(from->x + from->w, to->x + to->w, factor), menu_lerp_fixed12(from->y, to->y, factor),
-        menu_lerp_fixed12(from->x, to->x, factor), menu_lerp_fixed12(from->y + from->h, to->y + to->h, factor),
-        menu_lerp_fixed12(from->x + from->w, to->x + to->w, factor),
-        menu_lerp_fixed12(from->y + from->h, to->y + to->h, factor));
+    setXY4(poly, menu_lerp_q12(from->x, to->x, factor), menu_lerp_q12(from->y, to->y, factor),
+        menu_lerp_q12(from->x + from->w, to->x + to->w, factor), menu_lerp_q12(from->y, to->y, factor),
+        menu_lerp_q12(from->x, to->x, factor), menu_lerp_q12(from->y + from->h, to->y + to->h, factor),
+        menu_lerp_q12(from->x + from->w, to->x + to->w, factor),
+        menu_lerp_q12(from->y + from->h, to->y + to->h, factor));
 }
 
 /* Pause: yield until Select, Cross or Circle is pressed, or until the thread's

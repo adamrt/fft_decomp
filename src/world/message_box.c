@@ -752,20 +752,19 @@ static void world_gfx_flip_poly_ft4_u_if_negative(POLY_FT4* poly, s32 direction)
     poly->u3 = u;
 }
 
-/* The menu-screen library's copy of menu_lerp_fixed12 (the same routine compiled twice). */
-static s32 world_screen_menu_lerp_fixed12(s32 from, s32 to, s32 t) {
+/* The menu-screen library's copy of menu_lerp_q12 (the same routine compiled twice). */
+static s32 world_screen_menu_lerp_q12(s32 from, s32 to, s32 t) {
     return ((to - from) * t) / ONE + from;
 }
 
 /* Interpolate the four corners of a textured quad between two RECTs. The menu-screen library's copy of
  * menu_lerp_rect_to_poly_ft4; world_menu_animate_window_quads_to_rects calls this one. */
 static void world_screen_menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 t) {
-    setXY4(poly, world_screen_menu_lerp_fixed12(from->x, to->x, t), world_screen_menu_lerp_fixed12(from->y, to->y, t),
-        world_screen_menu_lerp_fixed12(from->x + from->w, to->x + to->w, t),
-        world_screen_menu_lerp_fixed12(from->y, to->y, t), world_screen_menu_lerp_fixed12(from->x, to->x, t),
-        world_screen_menu_lerp_fixed12(from->y + from->h, to->y + to->h, t),
-        world_screen_menu_lerp_fixed12(from->x + from->w, to->x + to->w, t),
-        world_screen_menu_lerp_fixed12(from->y + from->h, to->y + to->h, t));
+    setXY4(poly, world_screen_menu_lerp_q12(from->x, to->x, t), world_screen_menu_lerp_q12(from->y, to->y, t),
+        world_screen_menu_lerp_q12(from->x + from->w, to->x + to->w, t), world_screen_menu_lerp_q12(from->y, to->y, t),
+        world_screen_menu_lerp_q12(from->x, to->x, t), world_screen_menu_lerp_q12(from->y + from->h, to->y + to->h, t),
+        world_screen_menu_lerp_q12(from->x + from->w, to->x + to->w, t),
+        world_screen_menu_lerp_q12(from->y + from->h, to->y + to->h, t));
 }
 
 /*

@@ -179,7 +179,7 @@ functions:
   - {addr: 0x800e6f64, size: 104, name: gfx_flip_poly_ft4_uv_if_negative, hash: 1a53cbbc201168a1, unit: dialog_helpers}
   - {addr: 0x800e6fcc, size: 688, name: menu_animate_window_quad_crop, hash: 81c3085397b8c764, unit: dialog_helpers}
   - {addr: 0x800e727c, size: 652, name: menu_tween_window_quads, hash: 60b84c3c9ba59ec3, unit: dialog_helpers}
-  - {addr: 0x800e7508, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_helpers}
+  - {addr: 0x800e7508, size: 36, name: menu_lerp_q12, hash: c8c076c648585d00, unit: dialog_helpers}
   - {addr: 0x800e752c, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 18c92e7328405f4d, unit: dialog_helpers}
   - {addr: 0x800e7654, size: 84, name: script_opcode_16_pause, hash: c8f0977405c464dd, unit: dialog_helpers}
   - {addr: 0x800e76a8, size: 88, name: unit_copy_world_coords_to_scratch, hash: 2a62d55b05ed841c, unit: dialog_helpers}
@@ -323,7 +323,7 @@ functions:
   - {addr: 0x800f13fc, size: 184, name: script_opcode_85_unlock_date, hash: 756a57b269501269, unit: attack_resources}
   - {addr: 0x800f14b4, size: 1044, name: camera_fusion_thread, hash: 29fbdab9fc995bcc, unit: attack_resources}
   - {addr: 0x800f18c8, size: 1432, name: camera_step_track, hash: 64ee507b9faf9750, unit: attack_resources}
-  - {addr: 0x800f1e60, size: 60, name: script_interpolate_range_fixed12, hash: 959b0c6e3237b93a, unit: attack_resources}
+  - {addr: 0x800f1e60, size: 60, name: script_interpolate_range_q12, hash: 959b0c6e3237b93a, unit: attack_resources}
   - {addr: 0x800f1e9c, size: 60, name: script_print_debug_message, hash: 452ccd9750915554, unit: attack_resources}
   - {addr: 0x800f1ed8, size: 156, name: script_opcode_28_walk_to, hash: df0e7f67144df7b9, unit: attack_resources}
   - {addr: 0x800f1f74, size: 104, name: script_opcode_68_mirror_sprite, hash: 2f6891a168cbc54d, unit: attack_resources}
@@ -630,7 +630,7 @@ functions:
   - {addr: 0x8010e3b0, size: 84, name: world_text_release_current_message_box_slot, hash: c06df679de8b3eaf, unit: message_box}
   - {addr: 0x8010e404, size: 1572, name: world_text_message_box_draw_glyph_with_typewriter_delay, hash: e9a9ae273a15cb88, unit: message_box}
   - {addr: 0x8010ea28, size: 92, name: world_gfx_flip_poly_ft4_u_if_negative, hash: cce394046c44b999, unit: message_box}
-  - {addr: 0x8010ea84, size: 36, name: world_screen_menu_lerp_fixed12, hash: c8c076c648585d00, unit: message_box}
+  - {addr: 0x8010ea84, size: 36, name: world_screen_menu_lerp_q12, hash: c8c076c648585d00, unit: message_box}
   - {addr: 0x8010eaa8, size: 296, name: world_screen_menu_lerp_rect_to_poly_ft4, hash: 1216a4e4bcbe2494, unit: message_box}
   - {addr: 0x8010ebd0, size: 984, name: world_menu_animate_window_quads_to_rects, hash: d8d4f05a2221c087, unit: message_box}
   - {addr: 0x8010efa8, size: 680, name: world_menu_animate_window_quad_crop_full, hash: 18f8ec0cf76ca5d5, unit: message_box}
