@@ -1,6 +1,7 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "psx/types.h"
 
 /* Start the timed map transform for the remaining child-timeline frames. */
 s32 effect_map_set_timed_transform_duration(

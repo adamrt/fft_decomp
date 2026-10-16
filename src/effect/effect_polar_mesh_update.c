@@ -6,6 +6,7 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Pack one primitive color and code word after applying 4.12 brightness. */
 #define PACK_RGB(scratch, brightness)                                                                                  \

@@ -9,6 +9,7 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Builds and draws a spinning, flaring ring of 32 textured quads: the
  * single-ring build of the ring mesh renderer, with two lattice rows of one

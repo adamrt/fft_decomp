@@ -2,6 +2,8 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Banish particle handler: phase 1 allocates the 32-vertex work and
  * enables map data groups 1-6, phase 2 spawns each active emitter's particles

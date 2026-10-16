@@ -1,6 +1,7 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "psx/types.h"
 
 /* Callback handler: when its keyframe starts, splits the map's mesh parts and
  * sets 3D objects 1-8 to state 3. */

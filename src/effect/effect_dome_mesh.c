@@ -5,11 +5,13 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "fft/gfx.h"
 #include "fft/main.h"
 #include "fft/map.h"
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/types.h"
 
 static void effect_dome_mesh_load_translated_vertex(s32 group, s32 point, const VECTOR* offset, SVECTOR* output) {
     int point_element = point * DOME_MESH_LATTICE_COMPONENTS;

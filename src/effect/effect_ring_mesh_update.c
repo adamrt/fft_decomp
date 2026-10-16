@@ -8,6 +8,7 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Builds a flaring 2x32 ring from one quadrant of lattice points, projects it
  * through the battle camera and draws alternating quad buffers with scrolling

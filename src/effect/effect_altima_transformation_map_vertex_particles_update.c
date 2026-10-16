@@ -2,6 +2,8 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Altima transformation particle handler: allocate the map-vertex work,
  * enable map data groups 1-6, then spawn particles for timed vertex emitters.

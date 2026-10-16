@@ -2,6 +2,8 @@
 #include "fft/battle_map.h"
 #include "fft/battle_script.h"
 #include "fft/effect.h"
+#include "fft/script.h"
+#include "psx/types.h"
 
 /* Release GNS dispatch hold and advance the map-destruction handoff. */
 s32 effect_map_destruction_update(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame) {

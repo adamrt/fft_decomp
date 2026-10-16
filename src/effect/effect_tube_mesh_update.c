@@ -8,6 +8,7 @@
 #include "psx/gte_inline.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/types.h"
 
 enum {
     TUBE_MESH_RING_COUNT = 8,

@@ -1,6 +1,7 @@
 #include "fft/battle_effect.h"
 #include "fft/battle_map.h"
 #include "fft/effect.h"
+#include "psx/types.h"
 
 /* Callback handler: unfreezes the map when its keyframe starts. */
 s32 effect_map_unfreeze(s32 record_index, s32 callback_slot, s32 unused_emitter_index, s32 unused_frame) {

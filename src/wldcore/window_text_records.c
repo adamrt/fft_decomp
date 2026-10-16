@@ -2,11 +2,13 @@
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
-#include "fft/open.h"
 #include "fft/wldcore.h"
 #include "fft/world.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+#ifdef FFT_OPENING
+#    include "fft/open.h"
+#endif
 
 #ifdef FFT_WLDCORE
 /* `point` is passed by value: GCC spills the two 32-bit register values to their

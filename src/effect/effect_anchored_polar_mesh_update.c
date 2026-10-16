@@ -8,6 +8,7 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 #include "psx/libgte.h"
+#include "psx/types.h"
 
 /* Draws a four-fold polar mesh anchored to an effect target. Its center uses
  * the target's render and secondary coordinates; each ring stores RGB bytes
