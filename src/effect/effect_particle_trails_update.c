@@ -263,10 +263,7 @@ s32 effect_particle_trails_update(s32 record_index, s32 callback_slot, s32 emitt
                     rotation.vx = len;
                     rotation.vz = 0;
                     rotation.vy = 0;
-                    gte_ldv0(&rotation);
-                    gte_rtv0tr();
-                    gte_stlvnl(&out);
-                    gte_stflg(&out.pad);
+                    gte_RotTrans(&rotation, &out, &out.pad);
                     seg->position.vx = ((out.vx * spread.vx) / len + origin.vx) * ONE;
                     seg->position.vy = ((out.vy * spread.vy) / len + origin.vy) * ONE;
                     seg->position.vz = ((out.vz * spread.vz) / len + origin.vz) * ONE;

@@ -330,10 +330,7 @@ s32 effect_particle_ribbon_short_update(s32 record_index, s32 callback_slot, s32
                     vector.vx = largest;
                     vector.vz = 0;
                     vector.vy = 0;
-                    gte_ldv0(&vector);
-                    gte_rtv0tr();
-                    gte_stlvnl(&result);
-                    gte_stflg(&result.pad);
+                    gte_RotTrans(&vector, &result, &result.pad);
                     slot->position.vx = (result.vx * spread.vx / largest + origin.vx) * ONE;
                     slot->position.vy = (result.vy * spread.vy / largest + origin.vy) * ONE;
                     slot->position.vz = (result.vz * spread.vz / largest + origin.vz) * ONE;

@@ -1327,10 +1327,7 @@ static void battle_effect_draw_projectile_model(
     vertices = (SVECTOR*)((u8*)model->objects + model->objects[0].vertex_offset);
     count = model->objects[0].vertex_count;
     for (i = 0; i < count; i++) {
-        gte_ldv0(&vertices[i]);
-        gte_rtv0tr();
-        gte_stlvnl(&scratch[i]);
-        gte_stflg(&scratch[i].pad);
+        gte_RotTrans(&vertices[i], &scratch[i], &scratch[i].pad);
     }
     RotMatrix(angles, &matrix);
     ScaleMatrixL(&matrix, scale);
@@ -1341,19 +1338,13 @@ static void battle_effect_draw_projectile_model(
     SetTransMatrix(&matrix);
     for (i = 0; i < count; i++) {
         copyVector(&point, &scratch[i]);
-        gte_ldv0(&point);
-        gte_rtv0tr();
-        gte_stlvnl(&scratch[i]);
-        gte_stflg(&scratch[i].pad);
+        gte_RotTrans(&point, &scratch[i], &scratch[i].pad);
     }
     SetRotMatrix(&g_camera_matrix);
     SetTransMatrix(&g_camera_matrix);
     for (i = 0; i < count; i++) {
         copyVector(&point, &scratch[i]);
-        gte_ldv0(&point);
-        gte_rtv0tr();
-        gte_stlvnl(&scratch[i]);
-        gte_stflg(&scratch[i].pad);
+        gte_RotTrans(&point, &scratch[i], &scratch[i].pad);
     }
     command_count = battle_effect_init_model_sections(model, 0);
     gt3_index = 0;
