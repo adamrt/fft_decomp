@@ -7,6 +7,42 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* The music state and slot table are one object: main_sound_open_generic_sfx
+ * derives the slot pointers from the &state.current_smd base register, and the
+ * tune/slot helpers reach across tune, handles and smd from single bases. */
+typedef struct main_sound_music {
+    main_sound_music_state_t state; /* 0x00 0x8004d95c */
+    main_sound_music_slots_t slots; /* 0x10 0x8004d96c */
+} main_sound_music_t;
+
+/* Tunes of main_sound_play_tune: short pieces that fade the scenario music
+ * out, play once and fade it back in (main_sound_update_tunes). Tune t is
+ * MUSIC_(44 + t).SMD, kept loaded in music slot 2 + t. Tune 4 has no caller
+ * in the code; EVENT_OPCODE_PLAY_TUNE passes its operand. */
+typedef enum main_sound_tune {
+    MAIN_SOUND_TUNE_NONE = 0,
+    MAIN_SOUND_TUNE_LEVEL_UP = 1,
+    MAIN_SOUND_TUNE_ITEM_FOUND = 2, /* an item found by moving, a poach, a trained monster */
+    MAIN_SOUND_TUNE_JOB_LEVEL_UP = 3,
+    MAIN_SOUND_TUNE_JOB_CHANGE = 5,
+} main_sound_tune_e;
+
+/* Packed tune-slot id and pending flag. */
+enum {
+    MAIN_SOUND_TUNE_ID_MASK = 0x3f,
+    MAIN_SOUND_TUNE_PENDING = 0x80,
+};
+
+/* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
+ * loaded suzuki_sound_resource_t in the high 16 bits and the index of a
+ * sound in it in the low. Each battle effect file brings a resource of its
+ * own (battle_effect_load_sound_section). */
+typedef enum main_sound_resource_id {
+    MAIN_SOUND_RESOURCE_SYSTEM = 0,        /* SOUND/SYSTEM.SED: main_sfx_e */
+    MAIN_SOUND_RESOURCE_ENV = 1,           /* SOUND/ENV.SED: main_env_sfx_e */
+    MAIN_SOUND_RESOURCE_SOUND_NOVEL = 225, /* g_wldcore_sound_novel_sound_resource, 81 sounds */
+} main_sound_resource_id_e;
+
 /* sound */
 extern u8 g_main_sound_env_sed_data[];
 extern u8 g_main_sound_system_sed_data[];

@@ -7,6 +7,33 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* Loading-display mode passed to the shared file-header builder. */
+typedef enum main_file_loading_display_mode {
+    MAIN_FILE_LOADING_DISPLAY_OFF = -1,
+    MAIN_FILE_LOADING_DISPLAY_INIT = 0,
+    MAIN_FILE_LOADING_DISPLAY_PRESERVE = 1,
+} main_file_loading_display_mode_e;
+
+/* One poll advances at most one phase; recoverable CD errors restart setup. */
+typedef enum main_file_load_state {
+    MAIN_FILE_LOAD_STATE_IDLE = 0,
+    MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED = 1,
+    MAIN_FILE_LOAD_STATE_WAIT_AFTER_SET_MODE = 2,
+    MAIN_FILE_LOAD_STATE_START_SEEK = 3,
+    MAIN_FILE_LOAD_STATE_POLL_SEEK = 4,
+    MAIN_FILE_LOAD_STATE_START_READ = 5,
+    MAIN_FILE_LOAD_STATE_POLL_READ = 6,
+    MAIN_FILE_LOAD_STATE_UPLOAD_VRAM = 7, /* WLDCORE image stream only */
+} main_file_load_state_e;
+
+/* Game and music heaps allocate whole pages, tagged by these byte tables. */
+enum {
+    MAIN_HEAP_PAGE_SHIFT = 11,
+    MAIN_HEAP_PAGE_SIZE = 1 << MAIN_HEAP_PAGE_SHIFT,
+    MAIN_HEAP_GAME_PAGE_COUNT = 64,
+    MAIN_HEAP_SMD_PAGE_COUNT = 16,
+};
+
 /* file */
 extern main_file_load_descriptor_t g_main_file_cd_state;
 extern u32 g_main_file_still_loading;

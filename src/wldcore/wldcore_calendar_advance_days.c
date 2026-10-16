@@ -4,6 +4,7 @@
 #include "fft/unit.h"
 #include "fft/wldcore.h"
 #include "fft/wldcore_menu.h"
+#include "fft/wldcore_proposition.h"
 #include "psx/types.h"
 
 /*

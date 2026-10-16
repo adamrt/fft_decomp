@@ -8,6 +8,22 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
+typedef char main_gfx_unit_graphics_load_descriptor_size_must_be_20
+    [(sizeof(main_gfx_unit_graphics_load_descriptor_t) == 20) ? 1 : -1];
+
+typedef char
+    main_gfx_unit_graphics_load_queue_size_must_be_324[(sizeof(main_gfx_unit_graphics_load_queue_t) == 324) ? 1 : -1];
+
+/* EVENT/FRAME.BIN: 256x288 pixels at 4bpp and 22 palettes, sector rounded.
+ * The loaders upload rows 32..287 and the two palette blocks. */
+typedef struct main_gfx_frame_bin {
+    u8 pixels[288][128];       /* 0x0000; two 4bpp pixels per byte */
+    clut_t clut;               /* 0x9000; first 16 palettes */
+    palette_t palette_tail[6]; /* 0x9200; remaining six palettes */
+    u8 _padding_92c0[0x540];   /* 0x92c0; past the end of the file, to the sector boundary */
+} main_gfx_frame_bin_t;
+typedef char main_gfx_frame_bin_size_must_be_38912[(sizeof(main_gfx_frame_bin_t) == 38912) ? 1 : -1];
+
 /* boot */
 extern s32 g_main_boot_startup2_has_run;
 extern u32 g_main_boot_squaresoft_logo_image_words[];

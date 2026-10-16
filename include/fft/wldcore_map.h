@@ -9,6 +9,119 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* A path entry packs the route id in its low byte and the direction in bit 8. */
+enum {
+    WLDCORE_ROUTE_PATH_ID_MASK = 0xff,
+    WLDCORE_ROUTE_PATH_REVERSED = 0x100,
+};
+
+/* A route header followed by count travel points. */
+typedef struct wldcore_route_record {
+    u8 count;
+    u8 start_location;
+    u8 end_location;
+    u8 cost;
+    wldcore_route_point_t points[0]; /* 0x04; variable length */
+} wldcore_route_record_t;
+typedef char wldcore_route_record_size_must_be_4[sizeof(wldcore_route_record_t) == 4 ? 1 : -1];
+
+/* wldcore_location_entry_state_t.flags. */
+typedef enum wldcore_route_travel_flag {
+    WLDCORE_ROUTE_TRAVEL_ACTIVE = 0x01,   /* a path was found and is being traveled */
+    WLDCORE_ROUTE_TRAVEL_REVERSED = 0x02, /* the current leg runs its route end to start */
+} wldcore_route_travel_flag_e;
+
+/* Provisional: location-entry state at 0x800d0b24, filled by the route search
+ * wldcore_map_find_best_route_path, staged per route leg by wldcore_location_begin_route_segment and stepped by
+ * wldcore_map_step_route_travel. The vertices are SVECTORs: their 2-byte alignment is what
+ * makes `previous_position = position` take GCC's unaligned block-move path
+ * (lwl/lwr, swl/swr) that the target emits. */
+typedef struct wldcore_location_entry_state {
+    s32 flags;                       /* 0x00; wldcore_route_travel_flag_e */
+    s32 route_id;                    /* 0x04; route & 0xff, index into g_wldcore_map_route_tables */
+    s32 segment_index;               /* 0x08; current segment of the leg, the step for begin_route_segment */
+    s32 segment_count;               /* 0x0c; wldcore_location_begin_route_segment result (record count - 1) */
+    s32 segment_frame;               /* 0x10; frames into the segment, interpolation numerator */
+    s32 segment_frames;              /* 0x14; point distance * 2, interpolation denominator */
+    wldcore_route_path_t route_path; /* 0x18; best path found */
+    s32 route_index;                 /* 0x58; route_path.routes index of the current leg */
+    s32 best_path_length;            /* 0x5c */
+    s32 best_cost;                   /* 0x60; reset to 99999 */
+    s32 best_length_bound;           /* 0x64; reset to 99999 */
+    s32 leg_start_location;          /* 0x68; route record start (end when reversed) */
+    s32 leg_end_location;            /* 0x6c; becomes the current location and script variable 0x31 on arrival */
+    s32 heading;                     /* 0x70; route point heading (+0x800 when reversed), copied to the marker angle */
+    s32 menu_level;                  /* 0x74; parent menu depth */
+    SVECTOR previous_position;       /* 0x78 */
+    SVECTOR position;                /* 0x80 */
+    SVECTOR target_position;         /* 0x88 */
+    s32 arrival_location;            /* 0x90; arrival location id + 1 */
+} wldcore_location_entry_state_t;
+typedef char wldcore_location_entry_state_size_must_be_148[sizeof(wldcore_location_entry_state_t) == 148 ? 1 : -1];
+
+/* Map camera block: translation, scale and rotation are passed together. */
+typedef struct wldcore_map_projection_view {
+    VECTOR origin;    /* 0x00 */
+    VECTOR scale;     /* 0x10 */
+    SVECTOR rotation; /* 0x20 */
+} wldcore_map_projection_view_t;
+typedef char wldcore_map_projection_view_size_must_be_40[sizeof(wldcore_map_projection_view_t) == 40 ? 1 : -1];
+
+/* Packed eight-byte source row used by wldcore_map_color_and_draw_dots.
+ * The low 16 bits of the first 32-bit value hold x; its high bytes select the animation. */
+typedef struct wldcore_map_dot_source {
+    s32 position_and_kind;
+    s32 y;
+} wldcore_map_dot_source_t;
+typedef char wldcore_map_dot_source_size_must_be_8[sizeof(wldcore_map_dot_source_t) == 8 ? 1 : -1];
+
+/* wldcore_projection_state_t.flags: work pending for
+ * wldcore_map_update_camera_direction_and_projection, and the marker's sprite set. */
+typedef enum wldcore_projection_flags {
+    WLDCORE_PROJECTION_FLAG_UPDATE_POSITION = 0x01,
+    WLDCORE_PROJECTION_FLAG_UPDATE_DIRECTION = 0x02,
+    WLDCORE_PROJECTION_FLAG_ALTERNATE_DIRECTION_SET = 0x04, /* set while the marker travels a route */
+} wldcore_projection_flags_e;
+
+/* The world map camera projection state at 0x8009f24c: two 32-bit control fields
+ * followed by the player's own map dot. The marker's +8 base is what makes
+ * the views of this address agree field for field -- the camera update
+ * writes the dot's render sequence and screen position and the marker init writes
+ * its kind, position and flags. For the player's marker, kind is the current
+ * location id and sub_kind the proposition picture id. */
+typedef struct wldcore_projection_state {
+    s32 flags; /* 0x00; wldcore_projection_flags_e */
+    s32 angle;
+    wldcore_map_dot_t marker;
+} wldcore_projection_state_t;
+
+/* wldcore_projection_motion_t.flags. */
+typedef enum wldcore_projection_motion_flag {
+    WLDCORE_PROJECTION_MOTION_ACTIVE = 0x01,
+    WLDCORE_PROJECTION_MOTION_ZOOMED_OUT = 0x02, /* g_wldcore_map_zoom_motion: the wide view, or the move to it */
+} wldcore_projection_motion_flag_e;
+
+/* Wrapped projection move: the origin and final target are copied as VECTORs. */
+typedef struct wldcore_projection_motion {
+    s32 flags; /* 0x00; wldcore_projection_motion_flag_e */
+    s32 distance;
+    s32 progress;
+    VECTOR origin;
+    VECTOR target;
+} wldcore_projection_motion_t;
+typedef char wldcore_projection_motion_size_must_be_44[sizeof(wldcore_projection_motion_t) == 44 ? 1 : -1];
+
+/* wldcore_projected_entry_t.flags. */
+typedef enum wldcore_map_tile_flag {
+    WLDCORE_MAP_TILE_TPAGE_MASK = 0x0ff,
+    WLDCORE_MAP_TILE_OFF_SCREEN = 0x100, /* set by the projection pass */
+    WLDCORE_MAP_TILE_EMPTY = 0x200,      /* the atlas has no tile here */
+} wldcore_map_tile_flag_e;
+
+/* World-map routes: g_wldcore_map_route_tables and the flags from
+ * EVENT_SCRIPT_VAR_PATH_VISIBLE_FIRST. */
+enum { WLDCORE_ROUTE_COUNT = 48 };
+
 /* random encounter */
 extern s32 g_wldcore_random_battle_entd_id;
 extern s32 g_wldcore_random_battle_map_id;

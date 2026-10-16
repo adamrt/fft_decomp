@@ -15,15 +15,6 @@
 #include "psx/types.h"
 
 /* ability */
-typedef struct main_ability_human_skillset {
-    u8 high_id_bits[3];
-    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
-} main_ability_human_skillset_t;
-
-typedef struct main_ability_monster_skillset {
-    u8 high_id_bits;
-    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
-} main_ability_monster_skillset_t;
 
 /* One secondary-data byte per ability from ABILITY_ID_MATH_FIRST on (math,
  * reaction, support, movement). */
@@ -240,25 +231,6 @@ typedef enum disc_sector {
     DISC_SECTOR_OPEN_ENDING_XA = 0x2f551,
 } disc_sector_e;
 
-/* Loading-display mode passed to the shared file-header builder. */
-typedef enum main_file_loading_display_mode {
-    MAIN_FILE_LOADING_DISPLAY_OFF = -1,
-    MAIN_FILE_LOADING_DISPLAY_INIT = 0,
-    MAIN_FILE_LOADING_DISPLAY_PRESERVE = 1,
-} main_file_loading_display_mode_e;
-
-/* One poll advances at most one phase; recoverable CD errors restart setup. */
-typedef enum main_file_load_state {
-    MAIN_FILE_LOAD_STATE_IDLE = 0,
-    MAIN_FILE_LOAD_STATE_SET_DOUBLE_SPEED = 1,
-    MAIN_FILE_LOAD_STATE_WAIT_AFTER_SET_MODE = 2,
-    MAIN_FILE_LOAD_STATE_START_SEEK = 3,
-    MAIN_FILE_LOAD_STATE_POLL_SEEK = 4,
-    MAIN_FILE_LOAD_STATE_START_READ = 5,
-    MAIN_FILE_LOAD_STATE_POLL_READ = 6,
-    MAIN_FILE_LOAD_STATE_UPLOAD_VRAM = 7, /* WLDCORE image stream only */
-} main_file_load_state_e;
-
 /* Asynchronous CD read state advanced by main_file_poll_load. */
 typedef struct main_file_load_descriptor {
     s32 _unknown_00;
@@ -419,14 +391,6 @@ typedef struct main_sound_music_slots {
     suzuki_smd_header_t* smd[7]; /* 0x24: loaded SMD data */
 } main_sound_music_slots_t;
 
-/* The music state and slot table are one object: main_sound_open_generic_sfx
- * derives the slot pointers from the &state.current_smd base register, and the
- * tune/slot helpers reach across tune, handles and smd from single bases. */
-typedef struct main_sound_music {
-    main_sound_music_state_t state; /* 0x00 0x8004d95c */
-    main_sound_music_slots_t slots; /* 0x10 0x8004d96c */
-} main_sound_music_t;
-
 /* Music ids: the index of a MUSIC_NN.SMD file in
  * g_main_sound_scenario_smd_files (MAIN_MUSIC_COUNT entries). Only the ids
  * the code passes by number are named, after the screen that plays them;
@@ -453,34 +417,6 @@ typedef enum main_music {
     MAIN_MUSIC_GAME_OVER = 50,                    /* etc_graphic_show_game_over */
     MAIN_MUSIC_COUNT = 100,
 } main_music_e;
-
-/* Tunes of main_sound_play_tune: short pieces that fade the scenario music
- * out, play once and fade it back in (main_sound_update_tunes). Tune t is
- * MUSIC_(44 + t).SMD, kept loaded in music slot 2 + t. Tune 4 has no caller
- * in the code; EVENT_OPCODE_PLAY_TUNE passes its operand. */
-typedef enum main_sound_tune {
-    MAIN_SOUND_TUNE_NONE = 0,
-    MAIN_SOUND_TUNE_LEVEL_UP = 1,
-    MAIN_SOUND_TUNE_ITEM_FOUND = 2, /* an item found by moving, a poach, a trained monster */
-    MAIN_SOUND_TUNE_JOB_LEVEL_UP = 3,
-    MAIN_SOUND_TUNE_JOB_CHANGE = 5,
-} main_sound_tune_e;
-
-/* Packed tune-slot id and pending flag. */
-enum {
-    MAIN_SOUND_TUNE_ID_MASK = 0x3f,
-    MAIN_SOUND_TUNE_PENDING = 0x80,
-};
-
-/* Sound resources. A sound id is SUZUKI_SOUND_ID(resource, sound): the id of a
- * loaded suzuki_sound_resource_t in the high 16 bits and the index of a
- * sound in it in the low. Each battle effect file brings a resource of its
- * own (battle_effect_load_sound_section). */
-typedef enum main_sound_resource_id {
-    MAIN_SOUND_RESOURCE_SYSTEM = 0,        /* SOUND/SYSTEM.SED: main_sfx_e */
-    MAIN_SOUND_RESOURCE_ENV = 1,           /* SOUND/ENV.SED: main_env_sfx_e */
-    MAIN_SOUND_RESOURCE_SOUND_NOVEL = 225, /* g_wldcore_sound_novel_sound_resource, 81 sounds */
-} main_sound_resource_id_e;
 
 /* Sound-effect ids passed to main_sound_play_sfx and the module queues that
  * feed it (wldcore_sound_play_effect, world_sound_dispatch_effect and the
@@ -617,15 +553,6 @@ typedef enum main_env_sfx {
 } main_env_sfx_e;
 
 /* status */
-/* Values accepted by main_status_set_action_state. */
-typedef enum main_unit_action_state {
-    MAIN_UNIT_ACTION_STATE_NONE = 0,
-    MAIN_UNIT_ACTION_STATE_CHARGING = 5,
-    MAIN_UNIT_ACTION_STATE_JUMPING = 6,
-    MAIN_UNIT_ACTION_STATE_DEFENDING = 7,
-    MAIN_UNIT_ACTION_STATE_PERFORMING = 8,
-    MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING = 255
-} main_unit_action_state_e;
 
 /* Packed highest-order action status: a one-based index, or zero for none. */
 enum {
@@ -633,14 +560,6 @@ enum {
     MAIN_ACTION_STATUS_RESULT_REMOVAL = 0x80,
     MAIN_ACTION_STATUS_RESULT_SCRIPT_FILTER_EXCLUDED = 0x100,
 };
-
-/* main_status_change_unit, 0x8005e6cc: OR, AND-not, or replacement of
- * inflicted_status, followed by merging status_sets.innate into status_sets.current. */
-typedef enum main_status_change {
-    MAIN_STATUS_ADD = 0,
-    MAIN_STATUS_REMOVE = 1,
-    MAIN_STATUS_REPLACE = 2
-} main_status_change_e;
 
 /* system */
 /* Bits of g_main_system_flags, the 32-bit control flags of the WLDCORE world-map
@@ -770,15 +689,6 @@ void main_system_store_stack_pointer(u32* destination);
 void main_system_handle_draw_sync_callback(void);
 void main_system_handle_vsync_callback(void);
 
-/* heap */
-/* Game and music heaps allocate whole pages, tagged by these byte tables. */
-enum {
-    MAIN_HEAP_PAGE_SHIFT = 11,
-    MAIN_HEAP_PAGE_SIZE = 1 << MAIN_HEAP_PAGE_SHIFT,
-    MAIN_HEAP_GAME_PAGE_COUNT = 64,
-    MAIN_HEAP_SMD_PAGE_COUNT = 16,
-};
-
 /* utilities */
 s32 main_util_roll_pass_fail(s32 maximum, s32 threshold);
 void main_util_set_svector(SVECTOR* vector, s32 x, s32 y, s32 z);
@@ -787,23 +697,6 @@ void main_util_set_vector(VECTOR* vector, s32 x, s32 y, s32 z);
 void main_util_copy_action_data(const action_command_t* source, action_command_t* destination);
 
 /* unit */
-/* Selects rows in the base-data (0x8005e90c) and variance (0x8005e93c)
- * tables; these are not job IDs or gender bit flags. */
-typedef enum main_unit_generation_type {
-    MAIN_UNIT_TYPE_MALE = 0,
-    MAIN_UNIT_TYPE_FEMALE = 1,
-    MAIN_UNIT_TYPE_RAMZA = 2,
-    MAIN_UNIT_TYPE_MONSTER = 3,
-    MAIN_UNIT_TYPE_COUNT = 4
-} main_unit_generation_type_e;
-
-/* One row of the generation tables at 0x8005e90c and 0x8005e93c. The
- * records are selected by main_unit_generation_type_e, not by job id. */
-typedef struct main_unit_generation_base_data {
-    u8 raw_stat_seeds[UNIT_RAW_STAT_COUNT];
-    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];
-} main_unit_generation_base_data_t;
-typedef char main_unit_generation_base_data_size_must_be_12[(sizeof(main_unit_generation_base_data_t) == 12) ? 1 : -1];
 
 extern unit_deployment_coordinates_t g_main_deployed_unit_map_coordinates[6];
 
@@ -825,27 +718,12 @@ typedef struct main_gfx_unit_graphics_load_descriptor {
     unit_stats_t* stats;
     u32 flags; /* nonzero: the unit starts undrawn */
 } main_gfx_unit_graphics_load_descriptor_t;
-typedef char main_gfx_unit_graphics_load_descriptor_size_must_be_20
-    [(sizeof(main_gfx_unit_graphics_load_descriptor_t) == 20) ? 1 : -1];
 
 /* The 0x144-byte queue occupies 0x80049c18..0x80049d5c. */
 typedef struct main_gfx_unit_graphics_load_queue {
     s32 count;                                                                            /* 0x00 */
     main_gfx_unit_graphics_load_descriptor_t descriptors[BATTLE_UNIT_RUNTIME_SLOT_COUNT]; /* 0x04 */
 } main_gfx_unit_graphics_load_queue_t;
-
-typedef char
-    main_gfx_unit_graphics_load_queue_size_must_be_324[(sizeof(main_gfx_unit_graphics_load_queue_t) == 324) ? 1 : -1];
-
-/* EVENT/FRAME.BIN: 256x288 pixels at 4bpp and 22 palettes, sector rounded.
- * The loaders upload rows 32..287 and the two palette blocks. */
-typedef struct main_gfx_frame_bin {
-    u8 pixels[288][128];       /* 0x0000; two 4bpp pixels per byte */
-    clut_t clut;               /* 0x9000; first 16 palettes */
-    palette_t palette_tail[6]; /* 0x9200; remaining six palettes */
-    u8 _padding_92c0[0x540];   /* 0x92c0; past the end of the file, to the sector boundary */
-} main_gfx_frame_bin_t;
-typedef char main_gfx_frame_bin_size_must_be_38912[(sizeof(main_gfx_frame_bin_t) == 38912) ? 1 : -1];
 
 extern s32 g_main_font_print_enabled;
 extern u8 g_main_common_menu_graphics_loaded;

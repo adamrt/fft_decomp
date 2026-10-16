@@ -4,11 +4,56 @@
 /* Resident unit data: generation, stats, jobs, abilities, statuses and the party. */
 
 #include "fft/data.h"
-#include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/unit.h"
 #include "psx/libgpu.h"
 #include "psx/types.h"
+
+typedef struct main_ability_human_skillset {
+    u8 high_id_bits[3];
+    u8 ability_ids[HUMAN_SKILLSET_ABILITY_COUNT];
+} main_ability_human_skillset_t;
+
+typedef struct main_ability_monster_skillset {
+    u8 high_id_bits;
+    u8 ability_ids[MONSTER_SKILLSET_ABILITY_COUNT];
+} main_ability_monster_skillset_t;
+
+/* Values accepted by main_status_set_action_state. */
+typedef enum main_unit_action_state {
+    MAIN_UNIT_ACTION_STATE_NONE = 0,
+    MAIN_UNIT_ACTION_STATE_CHARGING = 5,
+    MAIN_UNIT_ACTION_STATE_JUMPING = 6,
+    MAIN_UNIT_ACTION_STATE_DEFENDING = 7,
+    MAIN_UNIT_ACTION_STATE_PERFORMING = 8,
+    MAIN_UNIT_ACTION_STATE_KEEP_PERFORMING = 255
+} main_unit_action_state_e;
+
+/* main_status_change_unit, 0x8005e6cc: OR, AND-not, or replacement of
+ * inflicted_status, followed by merging status_sets.innate into status_sets.current. */
+typedef enum main_status_change {
+    MAIN_STATUS_ADD = 0,
+    MAIN_STATUS_REMOVE = 1,
+    MAIN_STATUS_REPLACE = 2
+} main_status_change_e;
+
+/* Selects rows in the base-data (0x8005e90c) and variance (0x8005e93c)
+ * tables; these are not job IDs or gender bit flags. */
+typedef enum main_unit_generation_type {
+    MAIN_UNIT_TYPE_MALE = 0,
+    MAIN_UNIT_TYPE_FEMALE = 1,
+    MAIN_UNIT_TYPE_RAMZA = 2,
+    MAIN_UNIT_TYPE_MONSTER = 3,
+    MAIN_UNIT_TYPE_COUNT = 4
+} main_unit_generation_type_e;
+
+/* One row of the generation tables at 0x8005e90c and 0x8005e93c. The
+ * records are selected by main_unit_generation_type_e, not by job id. */
+typedef struct main_unit_generation_base_data {
+    u8 raw_stat_seeds[UNIT_RAW_STAT_COUNT];
+    u8 equipment[UNIT_EQUIPMENT_SLOT_COUNT];
+} main_unit_generation_base_data_t;
+typedef char main_unit_generation_base_data_size_must_be_12[(sizeof(main_unit_generation_base_data_t) == 12) ? 1 : -1];
 
 /* ability */
 extern ability_secondary_data_t g_main_ability_range_data[];

@@ -1,6 +1,5 @@
 #include "fft/battle.h"
 #include "fft/gfx.h"
-#include "fft/main.h"
 #include "fft/main_sound.h"
 #include "fft/menu.h"
 #include "fft/menu_input.h"

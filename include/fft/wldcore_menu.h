@@ -8,6 +8,111 @@
 #include "psx/libgs.h"
 #include "psx/types.h"
 
+/* Phases of a list-window level (wldcore_menu_list_window_level_t.mode). The
+ * town menu uses only the first two. */
+typedef enum wldcore_list_window_mode {
+    WLDCORE_LIST_WINDOW_MODE_BROWSE = 0,
+    WLDCORE_LIST_WINDOW_MODE_LEAVE_MESSAGE = 1, /* the farewell text is up; waits for circle or cross */
+    WLDCORE_LIST_WINDOW_MODE_FADE_OR_HELP = 2,  /* fading out after the farewell, or under the help message */
+    WLDCORE_LIST_WINDOW_MODE_LEAVE_WAIT = 3,    /* faded out; waits for thread 14 to end, then pops */
+} wldcore_list_window_mode_e;
+
+/* Row kinds of the town menu list (wldcore_bar_build_menu_rows); the row text
+ * is 0xb800 + kind. */
+typedef enum wldcore_bar_menu_row {
+    WLDCORE_BAR_MENU_ROW_RUMORS = 0,
+    WLDCORE_BAR_MENU_ROW_AVAILABLE_PROPOSITIONS = 1,
+    WLDCORE_BAR_MENU_ROW_COMPLETED_PROPOSITIONS = 2,
+    WLDCORE_BAR_MENU_ROW_PROPOSITIONS = 3,
+    WLDCORE_BAR_MENU_ROW_LEAVE = 4,
+} wldcore_bar_menu_row_e;
+
+/* Row kinds of the brave-story list (wldcore_menu_build_brave_story_entries),
+ * named after the level each row opens. */
+typedef enum wldcore_brave_story_row {
+    WLDCORE_BRAVE_STORY_ROW_SCRIPT_FLAGS_01A4_01BB = 0,
+    WLDCORE_BRAVE_STORY_ROW_STORY_EVENTS = 1,
+    WLDCORE_BRAVE_STORY_ROW_SET_SCRIPT_VARIABLES_03C0_03FF = 2,
+    WLDCORE_BRAVE_STORY_ROW_PROPOSITIONS = 3,
+    WLDCORE_BRAVE_STORY_ROW_UNEXPLORED_LANDS = 4,
+    WLDCORE_BRAVE_STORY_ROW_TREASURES = 5,
+    WLDCORE_BRAVE_STORY_ROW_LEAVE = 6,
+} wldcore_brave_story_row_e;
+
+/* Row kinds of the tutorial category list (wldcore_list_open_tutorial_categories). */
+typedef enum wldcore_tutorial_category_row {
+    WLDCORE_TUTORIAL_CATEGORY_ROW_FORMATION = 0,
+    WLDCORE_TUTORIAL_CATEGORY_ROW_MASK_1_ENTRIES = 1,
+    WLDCORE_TUTORIAL_CATEGORY_ROW_TOPICS = 2,
+    WLDCORE_TUTORIAL_CATEGORY_ROW_LEAVE = 3,
+} wldcore_tutorial_category_row_e;
+
+typedef char
+    wldcore_menu_location_transition_level_size_must_be_92[sizeof(wldcore_menu_location_transition_level_t) == 92 ? 1
+                                                                                                                  : -1];
+
+/* Menu-stack handler selectors. Push routines supply the level record;
+ * RETURN bridges the entry window and a pending world-map transition. */
+typedef enum wldcore_menu_level_type {
+    WLDCORE_MENU_LEVEL_ROOT = 0,
+    WLDCORE_MENU_LEVEL_RETURN = 1,
+    WLDCORE_MENU_LEVEL_TEXT_WINDOW = 2,
+    WLDCORE_MENU_LEVEL_MESSAGE = 3,
+    WLDCORE_MENU_LEVEL_LOCATION_MENU = 4,
+    WLDCORE_MENU_LEVEL_BAR_MENU = 5,
+    WLDCORE_MENU_LEVEL_RUMORS = 6,
+    WLDCORE_MENU_LEVEL_AVAILABLE_PROPOSITIONS = 7,
+    WLDCORE_MENU_LEVEL_RUMOR_DETAIL = 8,
+    WLDCORE_MENU_LEVEL_PROPOSITION_DETAIL = 9,
+    WLDCORE_MENU_LEVEL_PROPOSITION_ACCEPT = 10,
+    WLDCORE_MENU_LEVEL_VARIABLE_LIST = 11,
+    WLDCORE_MENU_LEVEL_NUMBER_PANEL = 12,
+    WLDCORE_MENU_LEVEL_PROPOSITION_DISPATCH_CONFIRM = 13,
+    WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS = 14,
+    WLDCORE_MENU_LEVEL_COMPLETED_PROPOSITIONS_BROWSE = 15,
+    WLDCORE_MENU_LEVEL_PROPOSITION_REPORT = 16,
+    WLDCORE_MENU_LEVEL_PROPOSITION_RESULT = 17,
+    WLDCORE_MENU_LEVEL_PROPOSITIONS = 18,
+    WLDCORE_MENU_LEVEL_PROPOSITION_CANCEL_CONFIRM = 19,
+    WLDCORE_MENU_LEVEL_SOUND_NOVEL_RESUME = 20,
+    WLDCORE_MENU_LEVEL_SOUND_NOVEL = 21,
+    WLDCORE_MENU_LEVEL_SOUND_NOVEL_QUIT = 22,
+    WLDCORE_MENU_LEVEL_SOUND_NOVEL_HISTORY = 23,
+    WLDCORE_MENU_LEVEL_UNEXPLORED_LANDS = 24,
+    WLDCORE_MENU_LEVEL_UNEXPLORED_LAND_DETAIL = 25,
+    WLDCORE_MENU_LEVEL_TREASURES = 26,
+    WLDCORE_MENU_LEVEL_TREASURE_DETAIL = 27,
+    WLDCORE_MENU_LEVEL_BRAVE_STORY = 28,
+    WLDCORE_MENU_LEVEL_STORY_EVENTS = 29,
+    WLDCORE_MENU_LEVEL_STORY_EVENT_TEXT = 30,
+    WLDCORE_MENU_LEVEL_SET_SCRIPT_VARIABLES_03C0_03FF = 31,
+    WLDCORE_MENU_LEVEL_VARIABLE_DETAIL = 32,
+    WLDCORE_MENU_LEVEL_TUTORIAL_TOPICS = 33,
+    WLDCORE_MENU_LEVEL_TUTORIAL_TOPIC_TEXT = 34,
+    WLDCORE_MENU_LEVEL_EVENT_TRANSITION = 35,
+    WLDCORE_MENU_LEVEL_PROPOSITION_SEND_UNIT = 36,
+    WLDCORE_MENU_LEVEL_PROPOSITION_CATEGORY = 37,
+    WLDCORE_MENU_LEVEL_ACTIVE_PROPOSITIONS = 38,
+    WLDCORE_MENU_LEVEL_PARTICIPANT_LIST = 39,
+    WLDCORE_MENU_LEVEL_PARTICIPANT_DETAIL = 40,
+    WLDCORE_MENU_LEVEL_BRAVE_STORY_PROPOSITIONS = 41,
+    WLDCORE_MENU_LEVEL_PROPOSITION_ATTEMPT_DETAIL = 42,
+    WLDCORE_MENU_LEVEL_TUTORIAL_CATEGORIES = 43,
+    WLDCORE_MENU_LEVEL_FORMATION_TUTORIALS = 44,
+    WLDCORE_MENU_LEVEL_TUTORIAL_MASK_1_ENTRIES = 45,
+    WLDCORE_MENU_LEVEL_SCRIPT_FLAGS_01A4_01BB = 46,
+    WLDCORE_MENU_LEVEL_SCRIPT_FLAG_01A4_DETAIL = 47,
+    WLDCORE_MENU_LEVEL_NUMBER_PANEL_WITH_ARGUMENT = 48,
+    WLDCORE_MENU_LEVEL_SCREEN_TRANSITION = 49,
+    WLDCORE_MENU_LEVEL_FOCUS_LOCATION = 50,
+    WLDCORE_MENU_LEVEL_SCROLLABLE_TEXT_WINDOW = 51,
+    WLDCORE_MENU_LEVEL_FIXED_NUMBER_PANEL = 52,
+    WLDCORE_MENU_LEVEL_MAP_PATH = 53,
+    WLDCORE_MENU_LEVEL_MAP_LOCATION_VISIBILITY = 54,
+    WLDCORE_MENU_LEVEL_COUNTDOWN = 55,
+    WLDCORE_MENU_LEVEL_LAYOUT_WINDOW = 56,
+} wldcore_menu_level_type_e;
+
 /* story */
 extern menu_cursor_state_t g_wldcore_story_events_cursor_state;
 extern u8 (*g_wldcore_brave_story_birthdays)[2];
