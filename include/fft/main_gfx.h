@@ -25,6 +25,7 @@ typedef struct main_gfx_frame_bin {
 typedef char main_gfx_frame_bin_size_must_be_38912[(sizeof(main_gfx_frame_bin_t) == 38912) ? 1 : -1];
 
 /* boot */
+int main_boot_draw_sceap_logo(u32* otag, u32* image);
 extern s32 g_main_boot_startup2_has_run;
 extern u32 g_main_boot_squaresoft_logo_image_words[];
 void main_boot_run_startup(void);
