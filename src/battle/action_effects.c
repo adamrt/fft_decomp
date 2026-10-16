@@ -413,7 +413,7 @@ void battle_unit_update_display_by_battle_id(u16 battle_id) {
  * transition.
  */
 s32 battle_status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
 
     if (unit == 0) {
         return 0;

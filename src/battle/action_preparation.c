@@ -912,6 +912,7 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
     }
     g_battle_map_tile_data[tile].ceiling_depth_and_marks.targeted = 1;
     g_battle_action_current_ability.random_fire_flag = 1;
+    /* A tile index is level * 256 + y * map width + x, and g_battle_map_max_x is the width. */
     g_battle_action_current_ability.target_new_elevation = tile / 256;
     g_battle_action_current_ability.target_new_y = (tile & 0xFF) / g_battle_map_max_x;
     g_battle_action_current_ability.target_new_x = (tile & 0xFF) % g_battle_map_max_x;

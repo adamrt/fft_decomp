@@ -1146,7 +1146,7 @@ static void battle_unit_restore_all_facings_after_attack(void) {
     s32 i;
 
     for (i = 0; i < BATTLE_UNIT_RUNTIME_SLOT_COUNT; i++) {
-        battle_unit_t* unit = battle_unit_get_by_runtime_id(i & 0xFFFF);
+        battle_unit_t* unit = battle_unit_get_by_runtime_id(i);
         if (unit) {
             battle_unit_restore_facing_after_attack(unit);
         }
