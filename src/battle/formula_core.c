@@ -441,7 +441,7 @@ void battle_formula_apply_zodiac_compatibility(void) {
     target = g_battle_action_target;
     attacker_zodiac = attacker->birthday.zodiac;
     target_zodiac = target->birthday.zodiac;
-    attacker_zodiac_compare = (u8)attacker_zodiac;
+    attacker_zodiac_compare = attacker_zodiac;
     if (serpentarius == attacker_zodiac_compare) {
         return;
     }

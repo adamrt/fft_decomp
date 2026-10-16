@@ -969,7 +969,7 @@ static s32 battle_map_update_deep_dungeon_and_animation(void) {
         return 0;
     }
     for (runtime_id = 0; runtime_id < BATTLE_UNIT_RUNTIME_SLOT_COUNT; runtime_id++) {
-        battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
+        battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
         if (unit != 0) {
             battle_unit_update_display_by_runtime_id(unit->runtime_id);
         }

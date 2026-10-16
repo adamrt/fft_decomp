@@ -720,7 +720,7 @@ static void wldcore_list_open_story_events(void) {
     values = g_wldcore_list_entry_values;
     for (; i < EVENT_SCRIPT_VAR_STORY_EVENT_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_STORY_EVENT_FIRST) != 0) {
-            *values = i + (s16)TEXT_ID_STORY_EVENT_NAME_BASE;
+            *values = i + TEXT_ID_STORY_EVENT_NAME_BASE;
             *flags = 0;
             flags++;
             values++;
@@ -1215,7 +1215,7 @@ void wldcore_list_open_tutorial_topics(void) {
     s32 record_index;
 
     for (i = 0; i < 41; i++) {
-        append_panel_list_entry(count, i + (s16)TEXT_ID_TIP_NAME_BASE);
+        append_panel_list_entry(count, i + TEXT_ID_TIP_NAME_BASE);
     }
     g_wldcore_menu_stack_records_next[g_wldcore_menu_stack_depth].panel.entry_count = count;
     if (count < 8) {

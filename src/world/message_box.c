@@ -274,7 +274,7 @@ void menu_run_unit_status_thread_variant(void) {
         draw_x = thread->x;
         draw_y = g_world_gfx_draw_area_y;
         panel->draw_offset_a.position.x = draw_x - 0x80;
-        panel->draw_offset_a.position.y = (u16)thread->shake_y + draw_y;
+        panel->draw_offset_a.position.y = thread->shake_y + draw_y;
         SetDrawOffset(&panel->draw_offset_a.packet, (u16*)&panel->draw_offset_a.position);
         panel->draw_offset_b.position.x = -0x80;
         panel->draw_offset_b.position.y = g_world_gfx_draw_area_y;
@@ -282,7 +282,7 @@ void menu_run_unit_status_thread_variant(void) {
         draw_x = thread->x;
         draw_y = g_world_gfx_draw_area_y;
         editor->draw_offset_a.position.x = draw_x - 0x80;
-        editor->draw_offset_a.position.y = (u16)thread->shake_y + draw_y;
+        editor->draw_offset_a.position.y = thread->shake_y + draw_y;
         SetDrawOffset(&editor->draw_offset_a.packet, (u16*)&editor->draw_offset_a.position);
         editor->draw_offset_b.position.x = -0x80;
         editor->draw_offset_b.position.y = g_world_gfx_draw_area_y;

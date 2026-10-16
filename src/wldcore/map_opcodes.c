@@ -486,7 +486,7 @@ void wldcore_list_open_script_flags_01a4_01bb(void) {
     values = g_wldcore_list_entry_values;
     for (; i < EVENT_SCRIPT_VAR_FACT_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_FACT_FIRST) != 0) {
-            *values = i + (s16)TEXT_ID_FACT_NAME_BASE;
+            *values = i + TEXT_ID_FACT_NAME_BASE;
             *flags = 0;
             flags++;
             values++;

@@ -41,7 +41,7 @@ void world_menu_build_location_list(void) {
 
     for (i = 0, count = 0; i < WORLD_LOCATION_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_LOCATION_VISIBLE_FIRST) != 0) {
-            g_world_menu_location_list_text_ids[count] = i + (s16)TEXT_ID_LOCATION_NAME_BASE;
+            g_world_menu_location_list_text_ids[count] = i + TEXT_ID_LOCATION_NAME_BASE;
             if (script_get_variable(i + EVENT_SCRIPT_VAR_LOCATION_COLOR_FIRST) == 0) {
                 g_world_menu_location_list_row_colors[count] = 8;
             } else {
@@ -84,7 +84,7 @@ void world_map_confirm_destination(void) {
 
         g_sound_pending_sfx_id = MAIN_SFX_CONFIRM;
         pending[0] = 0;
-        value = g_world_menu_location_list_text_ids[selection] - (s16)TEXT_ID_LOCATION_NAME_BASE;
+        value = g_world_menu_location_list_text_ids[selection] - TEXT_ID_LOCATION_NAME_BASE;
         pending[1] = value;
         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_MAP, value);
         g_main_system_flags |= MAIN_SYSTEM_FLAG_REQUEST_DESTINATION;

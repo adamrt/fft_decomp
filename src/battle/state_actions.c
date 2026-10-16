@@ -151,7 +151,7 @@ s32 battle_state_announce_next_charged_action(void) {
             result = battle_reaction_prepare_hamedo_for_pending_action(unit->stats->battle_id, &command.ability_id);
             if (result != -1) {
                 g_battle_game_state = BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT;
-                actor = battle_unit_get_by_battle_id(result & 0xffff);
+                actor = battle_unit_get_by_battle_id(result);
                 g_battle_casting_runtime_id = actor->runtime_id;
                 command.skillset_id = 0;
                 actor_stats = actor->stats;
@@ -190,7 +190,7 @@ s32 battle_state_announce_next_charged_action(void) {
             result = battle_reaction_prepare_next(&command.ability_id);
             if (result != -1) {
                 g_battle_game_state = BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT;
-                actor = battle_unit_get_by_battle_id(result & 0xffff);
+                actor = battle_unit_get_by_battle_id(result);
                 g_battle_casting_runtime_id = actor->runtime_id;
                 command.skillset_id = 0;
                 actor_stats = actor->stats;

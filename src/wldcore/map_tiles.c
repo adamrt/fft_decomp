@@ -201,7 +201,7 @@ void wldcore_map_init_tile_atlas(void) {
                 if (width != 0 && height != 0) {
                     g_wldcore_map_projected_tiles[i].flags = GetTPage(1, 0, tpage_x, tpage_y) & 0xff;
                     g_wldcore_map_projected_tiles[i].texture
-                        = ((clut_x & 0xff) << 24) | ((clut_y & 0xff) << 16) | ((width & 0xff) << 8) | (height & 0xff);
+                        = (clut_x << 24) | ((clut_y & 0xff) << 16) | ((width & 0xff) << 8) | (height & 0xff);
                 } else {
                     g_wldcore_map_projected_tiles[i].flags = WLDCORE_MAP_TILE_EMPTY;
                 }

@@ -851,7 +851,7 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
                 >= g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta)
             return 13; /* same range left, and no smaller height difference */
         g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].remaining_range
-            = (u8)state->candidate_remaining_range;
+            = state->candidate_remaining_range;
         g_battle_target_panels[state->destination_unit_record_index + MAP_TILE_COUNT].max_height_delta
             = state->height_delta;
     } else {
@@ -864,13 +864,13 @@ static s32 battle_move_propagate_destination(s32 candidate, s32 extra_span) {
         if ((u8)state->candidate_remaining_range == state->destination_panel->remaining_range
             && state->height_delta >= state->destination_panel->max_height_delta)
             return 16; /* same range left, and no smaller height difference */
-        state->destination_panel->remaining_range = (u8)state->candidate_remaining_range;
+        state->destination_panel->remaining_range = state->candidate_remaining_range;
         state->destination_panel->max_height_delta = state->height_delta;
     }
     if (state->candidate_remaining_range >= 2) {
         g_battle_move_frontier_flags_ptr[state->destination_index] |= FRONTIER_FLAG_QUEUED;
         if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range)
-            state->frontier_max_remaining_range = (u8)state->candidate_remaining_range;
+            state->frontier_max_remaining_range = state->candidate_remaining_range;
     }
     return 0;
 }
@@ -1611,12 +1611,12 @@ static s32 battle_move_update_candidate(s32 extra_span) {
         if ((u8)state->candidate_remaining_range == state->destination_panel->remaining_range
             && state->height_delta >= state->destination_panel->max_height_delta)
             return 10;
-        state->destination_panel->remaining_range = (u8)state->candidate_remaining_range;
+        state->destination_panel->remaining_range = state->candidate_remaining_range;
         state->destination_panel->max_height_delta = state->height_delta;
         if (state->candidate_remaining_range >= 2) {
             g_battle_move_frontier_flags_ptr[state->destination_index] |= FRONTIER_FLAG_QUEUED;
             if ((u8)state->candidate_remaining_range > state->frontier_max_remaining_range)
-                state->frontier_max_remaining_range = (u8)state->candidate_remaining_range;
+                state->frontier_max_remaining_range = state->candidate_remaining_range;
         }
         return 11;
     }
@@ -3657,10 +3657,10 @@ static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
     map_tile_t* tile;
 
     main_util_copy_action_data(action, &action_copy);
-    /* Retail reads only the low byte of each 16-bit coordinate. */
-    x = (u8)action_copy.target_position.vx;
-    y = (u8)action_copy.target_position.vz;
-    level = (u8)action_copy.target_position.vy;
+    /* The byte locals keep only the low byte of each 16-bit coordinate, as retail does. */
+    x = action_copy.target_position.vx;
+    y = action_copy.target_position.vz;
+    level = action_copy.target_position.vy;
     if (x < g_battle_map_max_x) {
         if (y < g_battle_map_max_y) {
             if (level < 2) {

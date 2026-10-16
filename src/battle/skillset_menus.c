@@ -292,14 +292,14 @@ s32 battle_menu_collect_throwable_items(s32 unit_id, u8 skillset, u8* out) {
  * Height) into out_ability_ids. */
 s32 battle_menu_load_math_skill_attributes(s32 unit_id, s32 skillset, s16* out_ability_ids) {
     return battle_menu_collect_math_skill_abilities_by_flags(
-        unit_id, skillset & 0xFF, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
+        unit_id, skillset, out_ability_ids, CALCULATOR_ATTRIBUTE_MASK);
 }
 
 /* Collects the unit's learned Math Skill divisor abilities (Prime, 5, 4, 3)
  * into out_ability_ids. */
 s32 battle_menu_load_math_skill_multiples(s32 unit_id, s32 skillset, s16* out_ability_ids) {
     return battle_menu_collect_math_skill_abilities_by_flags(
-        unit_id, skillset & 0xFF, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
+        unit_id, skillset, out_ability_ids, CALCULATOR_MULTIPLE_MASK);
 }
 
 /* Collects the unit's learned Math Skill abilities (0x19e..0x1a5) whose

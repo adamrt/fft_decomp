@@ -142,9 +142,9 @@ void open_gfx_load_opntex_into_frame_buffer(u32* tim) {
     /* Packed 32-bit RECT reads preserve the retail lw/lhu mix. */
     if (tim[1] & 8) {
         offset = (tim[2] >> 2) + 2;
-        rect.x = tim[3] & 0xFFFF;
+        rect.x = tim[3];
         rect.y = tim[3] >> 16;
-        rect.w = tim[4] & 0xFFFF;
+        rect.w = tim[4];
         rect.h = tim[4] >> 16;
         rect.w = rect.w * rect.h;
         rect.h = 1;
@@ -152,9 +152,9 @@ void open_gfx_load_opntex_into_frame_buffer(u32* tim) {
     } else {
         offset = 2;
     }
-    rect.x = tim[offset + 1] & 0xFFFF;
+    rect.x = tim[offset + 1];
     rect.y = tim[offset + 1] >> 16;
-    rect.w = tim[offset + 2] & 0xFFFF;
+    rect.w = tim[offset + 2];
     rect.h = tim[offset + 2] >> 16;
     LoadImage(&rect, &tim[offset + 3]);
     DrawSync(0);

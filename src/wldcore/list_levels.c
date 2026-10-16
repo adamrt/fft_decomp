@@ -1573,7 +1573,7 @@ static void wldcore_list_open_formation_tutorials(void) {
     s32 enabled = 8;
 
     for (; i < 7; i++) {
-        g_wldcore_list_entry_values[i] = i + (s16)TEXT_ID_TUTORIAL_NAME_BASE;
+        g_wldcore_list_entry_values[i] = i + TEXT_ID_TUTORIAL_NAME_BASE;
         if (wldcore_test_bit(g_main_tutorial_progress_masks, i) != 0) {
             g_wldcore_list_row_flags[i] = enabled;
         } else {

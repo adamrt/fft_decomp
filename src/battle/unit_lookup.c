@@ -698,7 +698,7 @@ s32 battle_unit_count_crystals(void) {
 /* Moves a unit's record to the head of the runtime unit list, so list walks reach it
  * first. Returns 1 when moved, 0 when no record has the runtime id. */
 s32 battle_unit_move_to_head(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     battle_unit_t* iterator;
     battle_unit_t* head;
 

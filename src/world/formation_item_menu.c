@@ -80,7 +80,7 @@ void world_formation_item_menu(void) {
         world_formation_place_unit_portrait_at_rest(g_unit_selected_index);
     }
     if (g_world_item_menu_unit_index != g_unit_selected_index) {
-        g_world_item_menu_unit_index = (u8)g_unit_selected_index;
+        g_world_item_menu_unit_index = g_unit_selected_index;
         if (world_formation_get_unit_lock(g_unit_selected_index) < 0) {
             g_world_item_icon_menu.text_id = 0xD802;
         } else {
@@ -457,7 +457,7 @@ static s32 world_menu_run_remove_item(void) {
             g_menu_status_display_thread_params.redraw_request = 1;
         }
         g_remove_item_previewed_slot = slot;
-        preview_item = (u8)g_remove_item_equipment[slot];
+        preview_item = g_remove_item_equipment[slot];
         if (preview_item != ITEM_ID_NOTHING) {
             world_formation_equip_item_to_unit_slot(WORLD_FORMATION_PREVIEW_UNIT_INDEX, slot, ITEM_ID_NOTHING);
             item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail, &g_menu_selected_unit_stat_summary,

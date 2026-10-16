@@ -21,7 +21,7 @@
 /* Add `amount` to a unit's event offset. The copy every caller uses;
  * battle_unit_add_event_offset_by_runtime_id_unused is the same routine compiled twice. */
 s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVECTOR* amount) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->event_offset.vx = unit->event_offset.vx + amount->vx;
@@ -37,7 +37,7 @@ s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVEC
 /* Add `amount` to a unit's event offset. The copy every caller uses;
  * battle_unit_add_event_offset_by_runtime_id_unused is the same routine compiled twice. */
 s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* amount) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->event_offset.vx = unit->event_offset.vx + amount->vx;
@@ -51,7 +51,7 @@ s32 battle_unit_add_event_offset_by_runtime_id(u32 runtime_id, const SVECTOR* am
 }
 
 SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
         main_system_handle_pointer_exception(12);
@@ -67,7 +67,7 @@ SVECTOR* battle_unit_get_event_offset_by_runtime_id(u32 runtime_id) {
  * recomputes the integer and fixed-point world positions from the tile.
  */
 s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* tile, s32 facing) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->event_offset.vz = 0;
@@ -98,13 +98,13 @@ s32 battle_unit_place_in_new_location(u32 runtime_id, map_tile_coordinates_t* ti
 }
 
 s32 battle_unit_has_runtime_id(u32 runtime_id) {
-    return battle_unit_get_by_runtime_id(runtime_id & 0xffff) != 0;
+    return battle_unit_get_by_runtime_id(runtime_id) != 0;
 }
 
 /* Sets BATTLE_MOTION_FLAG_SUPPRESS_FACING_UPDATE on a unit and clears its 16-bit sprite
  * display flags. */
 void battle_unit_set_facing_update_suppression(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->sprite_display_flags = 0;
@@ -113,7 +113,7 @@ void battle_unit_set_facing_update_suppression(u32 runtime_id) {
 }
 
 void battle_unit_clear_facing_update_suppression(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->movement.suppress_facing_update = 0;
@@ -121,7 +121,7 @@ void battle_unit_clear_facing_update_suppression(u32 runtime_id) {
 }
 
 void battle_unit_set_horizontal_flip_flag(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->horizontal_flip_flag = BATTLE_SPRITE_DISPLAY_HORIZONTAL_FLIP;
@@ -129,7 +129,7 @@ void battle_unit_set_horizontal_flip_flag(u32 runtime_id) {
 }
 
 void battle_unit_clear_horizontal_flip_flag(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->horizontal_flip_flag = 0;
@@ -137,7 +137,7 @@ void battle_unit_clear_horizontal_flip_flag(u32 runtime_id) {
 }
 
 void battle_unit_set_palette_update_suppression(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->movement.suppress_palette_update = 1;
@@ -145,7 +145,7 @@ void battle_unit_set_palette_update_suppression(u32 runtime_id) {
 }
 
 void battle_unit_clear_palette_update_suppression(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->movement.suppress_palette_update = 0;
@@ -164,7 +164,7 @@ void battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id(u32 runtime_id
 }
 
 void battle_unit_set_movement_effect_suppression(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->movement.suppress_sfx_and_landing_effects = 1;
@@ -172,7 +172,7 @@ void battle_unit_set_movement_effect_suppression(u32 runtime_id) {
 }
 
 void battle_unit_clear_movement_effect_suppression(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->movement.suppress_sfx_and_landing_effects = 0;
@@ -183,7 +183,7 @@ void battle_unit_clear_movement_effect_suppression(u32 runtime_id) {
  * stats. A runtime id without a record raises pointer exception 12 and also returns
  * -1. */
 s32 battle_unit_get_battle_id_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit_stats_t* stats = unit->stats;
@@ -229,7 +229,7 @@ s32 battle_gfx_get_spritesheet_vram_by_battle_id(u32 battle_id) {
 /* The command action record (command_state.ai.data.action) of the unit in slot
  * battle_id, or 0 when it has no runtime record. */
 action_command_t* battle_unit_get_runtime_action_command_by_battle_id(u32 battle_id) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
 
     if (unit == 0) {
         return 0;
@@ -240,7 +240,7 @@ action_command_t* battle_unit_get_runtime_action_command_by_battle_id(u32 battle
 /* 1 while the runtime unit still has a movement path. A missing unit raises pointer
  * exception 12 and reports 0. */
 s32 battle_move_is_unit_moving_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
         main_system_handle_pointer_exception(12);
@@ -313,7 +313,7 @@ s32 battle_gfx_poll_unit_graphics_load(void) {
  * when it has battle stats, runs battle_unit_set_enemy_level_data_by_battle_id.
  * Returns 0 when no record has the runtime id. */
 s32 battle_unit_draw_and_activate_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     unit_stats_t* stats;
 
     if (unit != 0) {
@@ -354,7 +354,7 @@ void battle_gfx_reset_jumping_unit_graphic_triggers(void) {
 /* battle_unit_remove by runtime id. Returns 1, or 0 after raising pointer
  * exception 12 when no record has the id. */
 s32 battle_unit_remove_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         battle_unit_remove(unit);
@@ -631,7 +631,7 @@ s32 battle_gfx_get_unit_spritesheet_height_by_runtime_id(u32 runtime_id) {
 struct battle_unit;
 
 s32 battle_gfx_get_unit_spritesheet_height_by_unit_id(u32 unit_id) {
-    return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(unit_id & 0xffff));
+    return battle_gfx_get_unit_spritesheet_height(battle_unit_get_by_battle_id(unit_id));
 }
 
 void battle_effect_start_basic_ability_animation(s32 ability_id) {

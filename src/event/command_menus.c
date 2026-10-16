@@ -818,7 +818,7 @@ static s32 menu_dispatch_system_function(
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_TRAP_RESULT) {
         menu_start_system_function_thread(option + BATTLE_SYSTEM_FUNCTION_TRAP_RESULT_FIRST);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM) {
-        if (main_item_get_total_equipment_quantity(option & 0xFF, 1) == 0x63) {
+        if (main_item_get_total_equipment_quantity(option, 1) == 0x63) {
             main_item_get_data_pointer(option);
             g_text_substitution_values[0] = option;
             g_text_substitution_values[1] = option;

@@ -466,7 +466,7 @@ void wldcore_opcode_branch_if_dialog_option_equal(void) {
  * selected dialog option equals operand byte 2 (or differs from it, when `branch_if_equal` is 0); otherwise raises
  * state flag 4. */
 static void wldcore_opcode_branch_if_dialog_option(s32 branch_if_equal) {
-    u8 operand = (u8)(g_wldcore_active_saved_record.instruction >> 16);
+    u8 operand = (g_wldcore_active_saved_record.instruction >> 16);
 
     if (operand == script_get_variable(EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION) ? branch_if_equal == 1
                                                                                 : branch_if_equal == 0) {
@@ -596,7 +596,7 @@ void wldcore_opcode_branch_to_random_section(void) {
         value = (u8)(g_wldcore_active_saved_record.instruction >> 16);
     }
     if (pick == 2) {
-        value = (u8)(g_wldcore_active_saved_record.instruction >> 24);
+        value = (g_wldcore_active_saved_record.instruction >> 24);
     }
     g_wldcore_active_saved_record.section = value;
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_BRANCH;
@@ -616,7 +616,7 @@ static void wldcore_opcode_branch_if_savedata_bit(s32 expected) {
     if (wldcore_test_bit(g_main_saved_data_bits, ((u8)(*instruction >> 8) << 8) | (u8)(*instruction >> 16))
         == expected) {
         flags = g_wldcore_active_saved_record.state_flags | WLDCORE_OPCODE_STATE_BRANCH;
-        g_wldcore_active_saved_record.section = (u8)(*instruction >> 24);
+        g_wldcore_active_saved_record.section = (*instruction >> 24);
     } else {
         flags = g_wldcore_active_saved_record.state_flags | WLDCORE_OPCODE_STATE_FETCH;
     }
@@ -1094,7 +1094,7 @@ void wldcore_opcode_stop_pending_music(void) {
 
 void wldcore_opcode_set_menu_brightness(void) {
     world_menu_set_brightness((u8)(g_wldcore_active_saved_record.instruction >> 8),
-        (u8)(g_wldcore_active_saved_record.instruction >> 16), (u8)(g_wldcore_active_saved_record.instruction >> 24));
+        (u8)(g_wldcore_active_saved_record.instruction >> 16), (g_wldcore_active_saved_record.instruction >> 24));
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 

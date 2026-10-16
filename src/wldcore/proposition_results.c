@@ -1766,7 +1766,7 @@ void wldcore_list_open_unexplored_lands(void) {
 
     for (i = 0; i < EVENT_SCRIPT_VAR_UNEXPLORED_LAND_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_UNEXPLORED_LAND_FIRST) != 0) {
-            g_wldcore_list_entry_values[count] = i + (s16)TEXT_ID_UNEXPLORED_LAND_NAME_BASE;
+            g_wldcore_list_entry_values[count] = i + TEXT_ID_UNEXPLORED_LAND_NAME_BASE;
             g_wldcore_list_row_flags[count] = 0;
             count++;
         }
@@ -2029,7 +2029,7 @@ void wldcore_list_open_treasures(void) {
 
     for (i = 0; i < EVENT_SCRIPT_VAR_TREASURE_COUNT; i++) {
         if (script_get_variable(i + EVENT_SCRIPT_VAR_TREASURE_FIRST) != 0) {
-            g_wldcore_list_entry_values[count] = i + (s16)TEXT_ID_TREASURE_NAME_BASE;
+            g_wldcore_list_entry_values[count] = i + TEXT_ID_TREASURE_NAME_BASE;
             g_wldcore_list_row_flags[count] = 0;
             count++;
         }

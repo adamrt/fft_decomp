@@ -69,22 +69,22 @@ void battle_unit_update_graphics_by_runtime_id(u32 runtime_id) {
 }
 
 void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_animation_based_on_mounted_state(battle_unit_get_by_runtime_id(runtime_id & 0xffff));
+    battle_unit_set_animation_based_on_mounted_state(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 /* battle_unit_set_idle_animation_for_movement by unit id. No retail code calls
  * it. */
 void battle_unit_set_movement_idle_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_idle_animation_for_movement(battle_unit_get_by_runtime_id(runtime_id & 0xffff));
+    battle_unit_set_idle_animation_for_movement(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 void battle_unit_set_status_animation_by_runtime_id(u32 runtime_id) {
-    battle_unit_set_animation_based_on_status(battle_unit_get_by_runtime_id(runtime_id & 0xffff));
+    battle_unit_set_animation_based_on_status(battle_unit_get_by_runtime_id(runtime_id));
 }
 
 /* Request `animation` for a unit by runtime id, keeping its facing. */
 void battle_unit_set_specific_animation_by_runtime_id(u32 runtime_id, u32 animation) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0)
         battle_unit_store_animation_facing(animation, unit->facing, unit);
 }
@@ -106,7 +106,7 @@ s32 battle_return_one(s32 unused_runtime_id) {
 /* The unit's facing in quarter turns (0..3), or -1 when no record has the runtime
  * id. */
 s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return (unit->facing / BATTLE_FACING_QUARTER_TURN) % 4;
@@ -118,7 +118,7 @@ s16 battle_unit_get_facing_quadrant_by_runtime_id(u32 runtime_id) {
  * with that facing, as battle_unit_set_animation_from_facing_nibble does for
  * sixteenths. No retail code calls it. */
 s32 battle_unit_set_animation_from_facing_hint(u32 runtime_id, s32 facing_hint) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     s32 animation;
     s16 facing;
 
@@ -138,7 +138,7 @@ s32 battle_unit_set_animation_from_facing_hint(u32 runtime_id, s32 facing_hint) 
 /* The unit's camera_facing_quadrant modulo 4, or -1 when no record has the runtime
  * id. No retail code calls it. */
 s16 battle_unit_get_camera_facing_quadrant_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return unit->camera_facing_quadrant % 4;
@@ -149,7 +149,7 @@ s16 battle_unit_get_camera_facing_quadrant_by_runtime_id(u32 runtime_id) {
 /* The unit's camera_facing_quadrant modulo 4, or -1 when no runtime record has the
  * battle id. */
 s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
 
     if (unit != 0) {
         return unit->camera_facing_quadrant % 4;
@@ -160,7 +160,7 @@ s16 battle_unit_get_camera_facing_quadrant_by_battle_id(u32 battle_id) {
 /* The unit's facing in sixteenths of a turn (0..15), or -1 when no record has the
  * runtime id. */
 s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return (unit->facing / 0x100) % 0x10;
@@ -172,7 +172,7 @@ s32 battle_unit_get_facing_nibble_by_runtime_id(u32 runtime_id) {
  * current animation with that facing; an animation below idle becomes standing.
  * Returns the runtime id, or -1 when no record has it. */
 s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibble) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
     s32 animation;
     s16 facing;
 
@@ -192,7 +192,7 @@ s32 battle_unit_set_animation_from_facing_nibble(u32 runtime_id, s32 facing_nibb
 /* The unit's camera_facing_sixteenth modulo 16, or -1 when no record has the runtime
  * id. No retail code calls it. */
 s16 battle_unit_get_camera_facing_sixteenth_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         return unit->camera_facing_sixteenth % 0x10;
@@ -296,7 +296,7 @@ s32 battle_unit_count(void) {
  * unit_copy_world_coords and unit_project_to_screen test
  * the result against -1 instead. */
 SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit == 0) {
         return 0;
@@ -307,7 +307,7 @@ SVECTOR* battle_unit_get_world_coords_by_runtime_id(u32 runtime_id) {
 /* The integer world position of the unit in slot battle_id, or 0. No retail code calls
  * it. */
 SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
 
     if (unit == 0) {
         return 0;
@@ -323,7 +323,7 @@ SVECTOR* battle_unit_get_world_coords_by_battle_id(u32 battle_id) {
  * that call because it is part of the target instruction stream.
  */
 s32 battle_unit_get_tile_center_and_height_by_battle_id(u32 battle_id, SVECTOR* coords) {
-    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);
 
     if (unit != 0) {
         battle_map_get_tile_data_pointer(
@@ -379,7 +379,7 @@ s32 battle_move_start_unit_walk_to(
     battle_unit_t* unit;
     battle_walk_path_t* path;
 
-    unit = battle_unit_get_by_runtime_id(runtime_id & 0xFFFF);
+    unit = battle_unit_get_by_runtime_id(runtime_id);
     if (unit != 0) {
         path = battle_move_calculate_walkto_pathing(
             flags, jump, unit->map_x, unit->map_y, unit->map_z, destination->x, destination->y, destination->layer);
@@ -398,7 +398,7 @@ s32 battle_move_start_unit_walk_to(
 }
 
 s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_length) {
-    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id & 0xffff);
+    battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 
     if (unit != 0) {
         unit->path.count = 1;
@@ -428,8 +428,8 @@ s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_l
 /* Seats one unit on another by unit id (battle_unit_mount_rider_onto_unit).
  * Returns 0 when either record is missing. No retail code calls it. */
 s32 battle_unit_mount_by_runtime_ids(u32 rider_runtime_id, u32 mount_runtime_id) {
-    battle_unit_t* rider = battle_unit_get_by_runtime_id(rider_runtime_id & 0xffff);
-    battle_unit_t* mount = battle_unit_get_by_runtime_id(mount_runtime_id & 0xffff);
+    battle_unit_t* rider = battle_unit_get_by_runtime_id(rider_runtime_id);
+    battle_unit_t* mount = battle_unit_get_by_runtime_id(mount_runtime_id);
 
     if ((rider != 0) && (mount != 0)) {
         battle_unit_mount_rider_onto_unit(rider, mount);

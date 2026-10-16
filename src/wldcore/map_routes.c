@@ -466,11 +466,11 @@ static s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* 
         point_down = (wldcore_route_point_t*)(index * sizeof(u32) + (s32)record);
         word = point_down->position;
         state->position.vx = word;
-        state->position.vy = (u16)(point_down->position >> 16);
+        state->position.vy = (point_down->position >> 16);
         state->position.vz = 0;
         word = point_down[-1].position;
         state->target_position.vx = word;
-        state->target_position.vy = (u16)(point_down[-1].position >> 16);
+        state->target_position.vy = (point_down[-1].position >> 16);
         state->target_position.vz = 0;
         state->previous_position = state->position;
         state->heading = ((point_down[-1].heading >> 16) + 0x800) & 0xfff;
@@ -483,11 +483,11 @@ static s32 wldcore_location_begin_route_segment(wldcore_location_entry_state_t* 
         point_up = (wldcore_route_point_t*)(index * sizeof(u32) + (s32)record);
         word = point_up->position;
         state->position.vx = word;
-        state->position.vy = (u16)(point_up->position >> 16);
+        state->position.vy = (point_up->position >> 16);
         state->position.vz = 0;
         word = point_up[1].position;
         state->target_position.vx = word;
-        state->target_position.vy = (u16)(point_up[1].position >> 16);
+        state->target_position.vy = (point_up[1].position >> 16);
         state->target_position.vz = 0;
         state->previous_position = state->position;
         state->heading = (point_up->heading >> 16);

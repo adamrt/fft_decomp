@@ -846,13 +846,13 @@ u8 battle_action_get_number_of_turns_to_resolve(s32 battle_id, s32 ct, const bat
         entry_ct = entries->sort_key;
         if (entry_ct >= ct) {
             if (ct != entry_ct)
-                return count & 0xFF;
+                return count;
             if (battle_id == entry_unit && is_action != 0)
-                return count & 0xFF;
+                return count;
             if (entry_unit >= battle_id)
-                return count & 0xFF;
+                return count;
             if (is_action == 0)
-                return count & 0xFF;
+                return count;
         }
     }
     return 0xFF;
