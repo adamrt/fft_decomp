@@ -114,8 +114,13 @@ s32 world_script_handle_tutorial_command(void) {
     return 1;
 }
 
-/* Tutorial "end" command: fade the tutorial overlay out, then release the
- * saved screen state and restore the pre-tutorial world buffers. */
+/* Tutorial "end" command: fade the screen out, then free the tutorial's files,
+ * restore the game saved by world_script_start_tutorial and rebuild the
+ * formation records; returns 0 then.
+ *
+ * The paths that keep running return nothing (a retail quirk); at -O0 $v0
+ * still holds 1 there, from the fade's running result or the stored flag, so
+ * world_script_handle_tutorial_command passes 1 on. */
 static s32 world_script_handle_tutorial_command_end(void) {
     if (g_world_script_tutorial_command_active != 0) {
         if (world_gfx_update_fade_out_tile() == 0) {
@@ -161,8 +166,8 @@ static void world_script_handle_tutorial_command_shift(void) {
  * -O0, like the neighboring tutorial handlers. The message id is summed as
  * pointer arithmetic on purpose: written as plain integer addition, GCC
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
- * and the target adds the bias to the low byte first. */
-/* Address-of operand fields preserves the -O0 byte-address steps. */
+ * and the target adds the bias to the low byte first. Taking the address of
+ * the operand fields preserves the -O0 byte-address steps. */
 static void world_script_handle_tutorial_command_display_message(void) {
     thread_start(WORLD_THREAD_SLOT_TUTORIAL_TEXT, text_run_dialog_thread);
     thread_set_parameters(WORLD_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
@@ -194,8 +199,8 @@ static void world_script_handle_tutorial_command_wait_for_message(void) {
  * -O0, like the neighboring tutorial handlers. The message id is summed as
  * pointer arithmetic on purpose: written as plain integer addition, GCC
  * 2.6.3's fold re-associates `hi + (lo + 0xB800)` into `(hi + 0xB800) + lo`,
- * and the target adds the bias to the low byte first. */
-/* Address-of operand fields preserves the -O0 byte-address steps. */
+ * and the target adds the bias to the low byte first. Taking the address of
+ * the operand fields preserves the -O0 byte-address steps. */
 static void world_script_handle_tutorial_command_change_dialog(void) {
     if (world_text_is_printing(WORLD_THREAD_SLOT_TUTORIAL_TEXT) != 1) {
         thread_set_parameters(WORLD_THREAD_SLOT_TUTORIAL_TEXT, 0x99,
@@ -220,9 +225,9 @@ static void world_script_handle_tutorial_command_change_dialog(void) {
  * bytes after the opcode, so the command pointer advances by six.
  *
  * The step is 0x88 and the phase bias is 1024 (ONE / 4), i.e. a quarter
- * turn on the GTE's ONE-unit circle, so sample 0 starts at the top.
+ * turn on the GTE's ONE-unit circle, so sample 0 starts at the top. Taking
+ * the address of the operand fields preserves the -O0 byte-address steps.
  */
-/* Address-of operand fields preserves the -O0 byte-address steps. */
 static void world_script_handle_tutorial_command_highlight_ring(void) {
     s32 radius;
     s32 outer_x;
@@ -274,7 +279,9 @@ static void world_script_handle_tutorial_command_highlight_ring(void) {
     g_world_tutorial_highlight_quad_count = 0;
 }
 
-/* Extend the tutorial highlight while other commands run; WAIT counts its brightness down. */
+/* Draw the tutorial highlight ring each frame while it is up. Until a WAIT
+ * command runs, the ring grows by one quad per VSync up to all 30, at full
+ * brightness (18); WAIT then counts the brightness down to fade it out. */
 static void world_script_advance_tutorial_highlight_brightness(void) {
     if (*g_world_script_tutorial_command_ptr != WORLD_TUTORIAL_CMD_WAIT) {
         g_world_script_tutorial_wait_timer = 0x12;
@@ -326,8 +333,8 @@ static void world_script_draw_tutorial_highlight_quads(s32 brightness) {
 }
 
 /* Tutorial command: wait the number of frames in the command's operand byte
- * (counted by the VSync mode), then step past the two-byte command. */
-/* Address-of operand fields preserves the -O0 byte-address steps. */
+ * (counted by the VSync mode), then step past the two-byte command. Taking the
+ * address of the operand field preserves the -O0 byte-address steps. */
 static void world_script_handle_tutorial_command_wait_time(void) {
     if (g_world_script_tutorial_command_active != 0) {
         g_world_script_tutorial_wait_time_remaining -= menu_get_event_speed();

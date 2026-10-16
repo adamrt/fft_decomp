@@ -7,7 +7,8 @@
 
 /* Sum the pixel widths of a 0xFE-terminated text entry. Bytes 0xD0..0xDF
  * introduce a two-byte glyph index; 0xFA advances a fixed four pixels and
- * 0xE7 carries an explicit one-byte advance. */
+ * 0xE7 (set pen x) has its operand counted as an advance. Other format
+ * codes add nothing. */
 s32 world_text_measure_entry_pixel_width(const u8* text) {
     s32 width = 0;
     s32 code;
@@ -31,10 +32,10 @@ s32 world_text_measure_entry_pixel_width(const u8* text) {
     return width;
 }
 
-/* Return the encoded character at a position inside a text-table entry.
+/* Return the encoded character at character `position` of entry `index` in a text table.
  *
- * Lead bytes 0xd0..TEXT_EXTENDED_GLYPH_PREFIX_LAST introduce a two-byte code; everything else is a
- * single byte. */
+ * A lead byte 0xD0..0xDF and its glyph byte come back together as one 16-bit code (lead
+ * byte high); everything else is a single byte. */
 s16 world_text_get_encoded_char_at_position(u8* table, s16 index, s32 position) {
     u8* cursor = world_text_advance_entry_by_char_count(menu_text_find_entry_by_index(table, index, 2), position);
     s32 code = *cursor++;

@@ -77,7 +77,11 @@ void world_menu_build_location_list(void) {
     menu_run_scrolling_ability_list_thread();
 }
 
-/* Slot 0 is stored through a plain pointer on purpose: `pending[0]` is a
+/* Menu action of the location list: unless the current location (row color 4) is chosen,
+ * request travel there (selection result 0 with the location, the current-map variable and the
+ * destination request flag) and stop the two windows after this thread. Exits the thread.
+ *
+ * Slot 0 is stored through a plain pointer on purpose: `pending[0]` is a
  * scalar reference there, so the scheduler may sink it below the text-id
  * load as in the target. Writing g_menu_pending_selection[0] marks the
  * store as an array element and keeps it above that load. */
@@ -206,8 +210,8 @@ void world_menu_set_default_entry_1_text_values(s32 value) {
 }
 
 /* Variant of world_menu_load_text_1bd8 that loads no graphics and reads the
- * 0x5800-byte text file at sector 0x1C18; all 0x20 section pointers come
- * from the file, relative to the end of its offset table. */
+ * 0x5800-byte OPEN.LZW text file (sector 0x1C18); all 0x20 section pointers
+ * come from the file, relative to the end of its offset table. */
 void world_menu_load_text_1c18(void) {
     s32 i;
 
@@ -266,8 +270,8 @@ void world_menu_load_text_1bd8_with_face(void) {
 
 /*
  * Set up the WORLD menu subsystems from the main thread: common graphics,
- * the 0xe800-byte menu text file at sector 0x1bd8 and the default menu
- * entries.
+ * the 0xE800-byte WORLD.LZW menu text file (sector 0x1BD8) and the default
+ * menu entries.
  *
  * The file opens with 0x20 section offsets relative to its byte 0x80; they
  * become g_text_section_pointers, with the location names taken from
@@ -461,8 +465,10 @@ typedef char world_menu_text_window_record_size_must_be_84[sizeof(world_menu_tex
 
 /* Main menu text window thread:
  * sizes the entry's window to its text, clamps it on screen, redraws the text
- * image every 32 frames and, while the main menu (task 0x21) scrolls, slides
- * the window in 8-pixel steps toward the scroll-dependent target x. */
+ * image every 32 frames and, while it runs as the menu group's second window
+ * (THREAD_TASK_MENU_GROUP_SECOND_WINDOW) and the main menu scrolls past 0x28,
+ * slides the window in 8-pixel steps to the left edge (positive scroll
+ * direction) or the right edge (otherwise). */
 void world_main_menu_text_window_thread(void) {
     RECT rect;
     world_menu_text_window_record_t records[2];
@@ -504,6 +510,7 @@ void world_main_menu_text_window_thread(void) {
     entry->inner_height = height;
     entry->window.h = height;
     entry->text_image.height = height;
+    /* Keep the window on screen; menu windows use centered coordinates (x and y about 0). */
     if (entry->window.x + width > 0x80) {
         entry->window.x = 0x78 - width;
     } else if (entry->window.x < -0x80) {
@@ -600,7 +607,6 @@ static void world_menu_run_main_mode_0_thread(void) {
 
 /* Runs the main-menu mode-0 thread in the slot below the current thread,
  * handing it this thread's first parameter, then waits for it and stops. */
-/* Target 0x80106f64. */
 void world_menu_run_main_mode_0_in_previous_thread(void) {
     s32 thread_id;
 
@@ -696,7 +702,10 @@ void world_script_reset_event_variables_thread(void) {
     thread_exit_current();
 }
 
-/* Sibling of world_card_update_menu_request driven by g_world_formation_open_request_state. */
+/* Steps a pending request to open the formation screen from the world map: fade out, wait for
+ * the fade, run the screen, then rebuild the world map's menu threads and window, clear the
+ * scratch buffer and the screen, hold a few dark frames, and fade back in. Sibling of
+ * world_card_update_menu_request. */
 static void world_formation_update_open_request(void) {
     s16 state = g_world_formation_open_request_state;
     s32 i;
@@ -1050,7 +1059,7 @@ void world_formation_set_menu_allowed_buttons(u32 mask) {
     g_world_formation_menu_allowed_buttons = mask;
 }
 
-/* The six 32-bit input masks at 0x801aed44 are g_world_formation_menu_input_state,
+/* The six 32-bit input masks are g_world_formation_menu_input_state,
  * but a struct global makes GCC keep a base register for the field accesses
  * (see menu_input_update_event_state), so they are separate scalars here. */
 extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous_input,
@@ -1058,7 +1067,7 @@ extern u32 g_world_formation_menu_current_input, g_world_formation_menu_previous
     g_world_formation_menu_secondary_repeat_counter;
 
 /* Per-frame formation-menu step: loads the input timing profile selected by
- * customized-options bits 9-11, derives the edge/auto-repeat 32-bit input mask
+ * the finger cursor repeat speed option, derives the edge/auto-repeat 32-bit input mask
  * (masked by the formation entry mask and cleared while any of the six
  * g_world_formation_open_request_state.. flags is set), runs the formation/memory-card request
  * updates, publishes the input, yields once while tracking thread status
@@ -1161,7 +1170,7 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     g_sound_pending_sfx_id = -1;
     menu_draw_active_window_frames();
     script_load_event_input_state(&g_world_formation_menu_input_state);
-    if (g_world_formation_menu_new_buttons != 0x100 && g_world_formation_menu_new_buttons != 0) {
+    if (g_world_formation_menu_new_buttons != PSX_PAD_SELECT && g_world_formation_menu_new_buttons != 0) {
         g_script_input_suppression_frames = 5;
     }
 
@@ -1197,8 +1206,9 @@ s16 world_formation_run_menu_frame(u32* otag, u32 input) {
     return g_menu_pending_selection[0];
 }
 
-/* Opens menu entry `index` on thread 8, first placing its window at the default
- * origin and clamping that origin so the window stays on screen. */
+/* Opens menu entry `index` in THREAD_SLOT_MENU, first placing its window at the default
+ * origin (-0x70, -0x50; the x and y arguments are ignored) and clamping that origin so the
+ * window stays on screen. Does nothing while that slot runs. */
 void world_menu_open_entry_window(s32 index, s32 unused_x, s32 unused_y) {
     menu_entry_t* entry;
     s32 x;

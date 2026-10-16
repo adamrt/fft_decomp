@@ -20,9 +20,12 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* Formation item-menu supervisor: menu 9 of world_formation_item_menu's
- * switch, which calls this as `done = menu_update_equipment()`. Dispatches to the
- * category / rearrange / equip-preview sub-menus and redraws the row window.
+/* Runs one frame of the formation Items screen (menu 9 of world_formation_item_menu's
+ * switch). The first call puts the tab cursor on its first tab, suspends the upper menu and
+ * stops the side panels. Each frame then dispatches on g_world_item_menu_mode to the browse,
+ * rearrange, action, sort order or equipped-by sub-menus, and draws the Triangle (equipped-by)
+ * button, the list window and the selected item's details. Returns 0 once the screen closes,
+ * 1 otherwise.
  *
  * `busy = 0;` is written after the pressable-button call. The target
  * interleaves `move s0,zero` into that call's argument setup (after
@@ -30,20 +33,7 @@
  * emitted first, and reorg then steals it into the preceding `bnez` delay slot
  * and retargets the branch past its own slot instruction. `busy` is not an
  * argument to that call -- it is only read by the script call below -- so the
- * later position is the natural one.
- *
- * fft/world.h owns g_world_formation_unit_cycle_mode,
- * g_world_formation_cursor_ot_override, g_menu_preview_stats_thread_params, g_menu_preview_stats_thread_params.y,
- * g_world_item_submenu_initialized, g_world_menu_* and g_world_formation_unit_banner_enabled, so those are not
- * redeclared here.
- *
- * g_world_item_submenu_initialized is `u8` in the header while the target reads it with `lb`, so it is reached
- * through an lvalue reinterpretation, as world_item_run_category_menu does for the
- * sibling byte g_world_item_category_menu_initialized (`*(s8*)&g_world_item_category_menu_initialized`).
- *
- * 0x801c8518 carries two cataloged names and the store and the reload use
- * different ones, matching that same twin: one symbol for both lets cse
- * forward the stored value. */
+ * later position is the natural one. */
 s32 menu_update_equipment(void) {
     s32 input;
     s32 disabled;
@@ -91,8 +81,9 @@ s32 menu_update_equipment(void) {
     if (g_world_item_menu_mode == MENU_ITEM_LIST_STATE_EQUIPPED_BY) {
         return 1;
     }
+    /* Browse and rearrange read the list input; the other states run their own prompts. */
     input = 0;
-    if (g_world_item_menu_mode < 2) {
+    if (g_world_item_menu_mode < MENU_ITEM_LIST_STATE_ACTION) {
         input = g_menu_input_primary_repeat;
         g_world_menu_prompt_active = 0;
     } else {
@@ -124,8 +115,11 @@ s32 menu_update_equipment(void) {
     return 1;
 }
 
-/* Item-list menu thread for the formation item screen: builds the item
- * category list on entry, steps the cursor, and refreshes the stat preview.
+/* The Items screen's browse state: builds the list for the selected tab on
+ * entry, and each frame handles the tab switch (rebuilding the list), Circle
+ * (rearrange), Triangle (the units equipping the item) and Cross (close),
+ * saving the cursor for the tab on the way out. Refreshes the stat preview
+ * when the cursor moves. Returns the next item-list state.
  */
 s32 world_item_run_category_menu(void) {
     s16 selected;
@@ -138,9 +132,10 @@ s32 world_item_run_category_menu(void) {
         g_world_item_category_menu_initialized = 1;
         menu_set_vsync_mode_and_event_speed(2);
         g_world_item_category_previewed_cursor = -1;
+        /* Tabs 0-3 (hand, head, body, accessory) are list filters 1-4; tab 4 lists the other items. */
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
-            g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
-            g_item_list_entries, ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+            ITEM_LIST_MODE_ALL);
         world_menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(
             g_item_list_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ITEM_NAMES]);
@@ -174,8 +169,8 @@ s32 world_item_run_category_menu(void) {
 
         g_menu_selected_slot = slot;
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
-            g_menu_selected_slot != MENU_EQUIPMENT_SLOT_ACCESSORY ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER,
-            g_item_list_entries, ITEM_LIST_MODE_ALL);
+            g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
+            ITEM_LIST_MODE_ALL);
         g_world_item_category_previewed_cursor = -1;
         world_menu_get_selection_record(g_menu_selected_slot, &selected, &scroll, g_item_list_entries);
         menu_init_scrollable_list(

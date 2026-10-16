@@ -40,23 +40,24 @@ static s32 world_ability_is_category_action(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_ACTION;
 }
 
-/* Sibling of world_ability_is_category_action (category 0). */
+/* Ability-list menu-script callback 12: 1 while the list shows the Reaction category. */
 static s32 world_ability_is_category_reaction(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_REACTION;
 }
 
-/* Sibling of world_ability_is_category_action (category 0). */
+/* Ability-list menu-script callback 11: 1 while the list shows the Support category. */
 static s32 world_ability_is_category_support(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_SUPPORT;
 }
 
-/* Sibling of world_ability_is_category_action (category 0). */
+/* Ability-list menu-script callback 10: 1 while the list shows the Movement category. */
 static s32 world_ability_is_category_movement(s32 unused_row) {
     return g_world_ability_category == MENU_ABILITY_CATEGORY_MOVEMENT;
 }
 
 /* Report whether ability entry `index` counts as already learned: the learned
- * flag in menu 12, otherwise the inverse of the disabled flag. */
+ * flag in the learn menu (WORLD_FORMATION_MENU_ABILITY_LEARN), otherwise the
+ * inverse of the disabled flag. */
 static s32 world_menu_is_learn_ability_learned(s32 index) {
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ABILITY_LEARN) {
         return g_menu_ability_entries[index] & ABILITY_LIST_ENTRY_LEARNED;
@@ -70,10 +71,12 @@ static s32 world_menu_is_learn_ability_learned(s32 index) {
  * Learn-menu twin of world_ability_run_view_list. Confirming an unlearned
  * ability opens the confirmation menu thread; when it closes with choice 0
  * the ability is learned and its JP cost deducted from the unit's JP in the
- * job. Cancel returns 0 (back to the job list), otherwise 1.
+ * job. Category tabs keep their own cursor (selection records 10-13). Cancel
+ * returns MENU_JOB_LIST_STEP_JOBS (back to the job list), otherwise
+ * MENU_JOB_LIST_STEP_ABILITIES.
  */
 s32 world_ability_run_learn_list(void) {
-    s32 unused[160];
+    s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
     s16 x;
     s16 y;
@@ -128,7 +131,8 @@ s32 world_ability_run_learn_list(void) {
     if (g_world_learn_confirm_prompt_state == 0) {
         if ((g_menu_input_primary_repeat & PSX_PAD_CIRCLE) && g_menu_list_entry_count != 0) {
             index = g_menu_list_selected_index;
-            if (g_menu_ability_entries[index] >> 14) {
+            /* DISABLED in the learn list: the unit cannot pay the JP. */
+            if (g_menu_ability_entries[index] >> ABILITY_LIST_ENTRY_DISABLED_SHIFT) {
                 world_text_show_message_and_play_sound(0xc009, MAIN_SFX_ERROR_MESSAGE);
             } else if (world_menu_is_learn_ability_learned(index) != 0) {
                 g_sound_queued_effect_id = MAIN_SFX_INVALID;
@@ -165,6 +169,7 @@ s32 world_ability_run_learn_list(void) {
             if (g_world_menu_selection_results[5] == 0) {
                 world_ability_learn(g_unit_selected_index, g_world_learn_selected_job,
                     g_menu_ability_entries[g_menu_list_selected_index]);
+                /* `category` doubles as the JP cost; a separate local changes the register allocation. */
                 category = g_main_ability_data[g_menu_ability_entries[g_menu_list_selected_index]].jp_cost;
                 g_world_unit_pointers[g_unit_selected_index]
                     ->job_points.current.values[g_world_learn_selected_job_index] -= category;
@@ -199,8 +204,10 @@ s32 world_ability_run_learn_list(void) {
     return MENU_JOB_LIST_STEP_ABILITIES;
 }
 
-/* Menu processing sibling of world_menu_run_learn: opens on first entry, runs
- * sub-state 0 (world_menu_run_learn_job_list) or 1 (world_ability_run_view_list), tears down on -1. */
+/* The formation screen's view-abilities menu, run each frame (sibling of world_menu_run_learn):
+ * sets up on first entry, runs the job list (MENU_JOB_LIST_STEP_JOBS) or the chosen job's
+ * ability list (MENU_JOB_LIST_STEP_ABILITIES), and returns to the unit grid on
+ * MENU_JOB_LIST_STEP_CLOSE. */
 void world_menu_run_view_abilities(void) {
     if (g_world_view_abilities_initialized == 0) {
         g_world_view_abilities_initialized = 1;
@@ -235,11 +242,12 @@ void world_menu_run_view_abilities(void) {
  *
  * The first call installs the ability menu-script callbacks, draws the job
  * name, and builds the ability list for the current category. The category
- * cursor rebuilds the list; cancel returns 0 (back to the job list) and
- * confirm returns -1 (close), otherwise 1.
+ * cursor rebuilds the list; cancel returns MENU_JOB_LIST_STEP_JOBS (back to
+ * the job list) and confirm MENU_JOB_LIST_STEP_CLOSE, otherwise
+ * MENU_JOB_LIST_STEP_ABILITIES.
  */
 static s32 world_ability_run_view_list(void) {
-    s32 unused[160];
+    s32 unused[160]; /* never referenced; reproduces the target's frame */
     RECT rect;
     s16 x;
     s16 y;

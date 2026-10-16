@@ -29,6 +29,11 @@ static void world_name_apply_entry_key(s16 key);
 static void world_name_init_entry(const u8* name);
 static void world_name_update_entry_cursor(void);
 
+/* One frame of the name-entry keyboard inside another screen (the shop's rename and hire
+ * steps). The first call, once the message box is idle, starts editing the name at `list`;
+ * later calls apply L1/R1 (cursor) and Square (delete), run the current entry state's handler
+ * and draw the name, its cursor, the shoulder buttons and the keyboard. Returns 0 while
+ * editing and the encoded name once the state reaches 0xFF (done). */
 u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1) {
     point16_t cursor;
     s32 busy;
@@ -77,9 +82,10 @@ u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1) {
 /*
  * Run the WORLD name-entry screen until its state reaches 0xFF.
  *
- * Binds both packet buffers onto a stack-resident pool block, then each frame
- * presents the previous ordering table, uploads `image` as the backdrop (OPEN,
- * the one caller, passes a copy of its last displayed frame), steps the
+ * Starts editing the name at `list`, binds both packet buffers onto a
+ * stack-resident pool block, then each frame presents the previous ordering
+ * table, uploads `image` as the backdrop (OPEN, the one caller, passes a copy
+ * of its last displayed frame), steps the
  * current name-entry handler, draws the cursor and key prompts, and dispatches
  * the queued sound effect. Returns the encoded name.
  *
@@ -256,8 +262,10 @@ static void world_menu_open_name_entry_key_list(void) {
  * Handle confirmed name-entry keys after the initial 10-update delay.
  *
  * Row 0 selects special keys; other rows decode a character from the key
- * table. Encoded 0xfe is submitted as 0xfa. State and sound requests are
- * left for the surrounding menu handlers.
+ * table. Encoded 0xfe is submitted as 0xfa. Cross or Start, or special key 5,
+ * opens the confirmation (state 1), remembering the current state to return
+ * to. Other state and sound requests are left for the surrounding menu
+ * handlers.
  */
 void world_name_handle_entry_confirmed_keys(void) {
     u8 previous;
@@ -308,7 +316,7 @@ void world_name_handle_entry_confirmed_keys(void) {
  * Row 0 is the six special keys; character rows have 11 columns. Crossing
  * between them remaps the column through
  * g_world_name_entry_special_to_char_column/g_world_name_entry_char_to_special_column. Left/right wrap within the row,
- * and a column change requests cursor sound 3. */
+ * and a column change queues the cursor-move sound. */
 static void world_name_update_entry_cursor(void) {
     point16_t cursor;
     s32 previous = g_world_name_entry_cursor_index;
@@ -372,14 +380,15 @@ static void world_name_apply_entry_key(s16 key) {
     s32 j;
     s32 slot;
 
-    slot = 0xFA;
+    slot = TEXT_SPACE;
     for (i = 13; i >= 0; i--) {
         chars[i] = slot;
     }
     j = 0;
     slot = 0;
     while (g_world_name_entry_text[j] != TEXT_END_WAIT_FOR_CONFIRM) {
-        if (g_world_name_entry_text[j] < 0xd0 || g_world_name_entry_text[j] > 0xdf) {
+        if (g_world_name_entry_text[j] < TEXT_EXTENDED_GLYPH_PREFIX_FIRST
+            || g_world_name_entry_text[j] > TEXT_EXTENDED_GLYPH_PREFIX_LAST) {
             chars[slot] = g_world_name_entry_text[j++];
         } else {
             chars[slot] = (g_world_name_entry_text[j] << 8) + g_world_name_entry_text[j + 1];
@@ -414,6 +423,8 @@ static void world_name_apply_entry_key(s16 key) {
         chars[g_world_name_entry_cursor] = key;
         g_world_name_entry_cursor = g_world_name_entry_cursor < 13 ? g_world_name_entry_cursor + 1 : 13;
     }
+
+    /* Re-encode, then trim trailing spaces back to the terminator. */
     for (i = 0, j = 0; i < 14; i++) {
         if (chars[i] <= 0xCFFF) {
             g_world_name_entry_text[j++] = chars[i];
@@ -441,6 +452,7 @@ static void world_name_apply_entry_key(s16 key) {
 void world_name_run_confirmation_menu(void) {
     s32 count;
     u8 value;
+
     if (g_world_name_confirm_initialized == 0) {
         g_world_name_confirm_menu.selected_index = 0;
         if (g_world_name_entry_text[0] == TEXT_END_WAIT_FOR_CONFIRM) {
@@ -513,6 +525,7 @@ static void world_name_init_entry(const u8* name) {
         }
         i++;
     }
+    /* A cursor move at slot 0 changes nothing but kerns and uploads the name. */
     world_name_apply_entry_key(WORLD_NAME_ENTRY_KEY_CURSOR_LEFT);
     g_sound_queued_effect_id = MAIN_SFX_NONE;
     g_world_name_entry_state = 0;

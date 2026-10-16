@@ -33,13 +33,13 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* WORLD scenario interpreter, 0x800f6f20..0x800f92a0.
+/* WORLD scenario interpreter.
  *
  * One cooperative thread runs this loop: fetch the opcode and its first four
  * operand bytes, dispatch through the else-if chain below, then advance by the
  * opcode's encoded length. The chain order is the target's compare order and
  * must not be re-sorted. Handlers that seek (jumps) `continue` without the
- * length step; EventEnd may `goto restart_event` for a chained scenario.
+ * length step; EventEnd may `goto restart_script` for a chained scenario.
  *
  * BATTLE carries the same interpreter (script_execute_event); the two
  * are kept structurally identical so differences stay visible.
@@ -465,7 +465,7 @@ restart_script:
                 thread_yield();
             } while (g_field_object_wait_status != 0);
         }
-        /* ---- unit sprites and animation ---- */
+        /* ---- Unit sprites and animation ---- */
         else if (opcode == EVENT_OPCODE_MIRROR_SPRITE) {
             script_opcode_mirror_sprite((const event_mirror_sprite_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_RESET_PALETTE) {
@@ -575,7 +575,7 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_UNKNOWN_74) {
             script_opcode_unknown_74(parameters);
         }
-        /* ---- unit movement and facing ---- */
+        /* ---- Unit movement and facing ---- */
         else if (opcode == EVENT_OPCODE_WALK_TO) {
             /* WORLD ignores WalkTo; BATTLE starts the unit's movement here. */
         } else if (opcode == EVENT_OPCODE_JUMP) {

@@ -19,12 +19,13 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* Options-menu values: g_menu_option_values holds the 13 options unpacked from
- * g_main_game_options plus an all-unchanged flag at [13]; g_menu_option_reference_values holds the
- * values they are compared against. */
-
-/* Unpacks the configured options into the options-menu value table, then runs
- * main-menu mode 0 (options thread in the previous slot), 1 or 2. */
+/* Unpacks the configured options into the options-menu value table, then runs a main-menu mode:
+ * OPTION_MENU_GAME_OPTIONS runs world_menu_run_game_options in the thread slot before this one
+ * and exits once it ends, OPTION_MENU_AT_LIST starts the AT list and OPTION_MENU_DEAD_UNIT the
+ * dead unit threads.
+ *
+ * g_menu_option_values holds the 13 options plus a flag at GAME_OPTION_UNCHANGED, set when every
+ * option equals its g_menu_option_reference_values entry. */
 void world_menu_run_main_mode(s32 mode) {
     menu_entry_t* entry = (menu_entry_t*)thread_get_current_parameter_1();
     game_options_fields_t options = g_main_game_options.fields;

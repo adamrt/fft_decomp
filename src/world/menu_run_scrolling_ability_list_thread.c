@@ -25,9 +25,13 @@
  * alternating packet pages. Cursor moves past either end start a one-row
  * scroll whose new row is drawn into the image ring at row `ring * 16`;
  * world_menu_redraw_text_page_on_scroll_in_rect handles page scrolling, and
- * the scroll-bar thumb tracks entry->selected_index. The frame sprite pointer is
- * passed to SetSemiTrans by address, as in the target, which keeps it on the
- * stack.
+ * the scroll-bar thumb tracks entry->selected_index. Right/Left toggle the
+ * third column's text when the first two columns are text. Parameter 2 keeps
+ * the thread alive after the list closes.
+ *
+ * Retail bug (QUIRKS.md): the frame sprite pointer is passed to SetSemiTrans
+ * by address, so the bit lands in a stack byte past the pointer and the sprite
+ * is unchanged; the call also keeps `frame` on the stack.
  */
 void menu_run_scrolling_ability_list_thread(void) {
     menu_text_window_t window;

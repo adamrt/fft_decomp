@@ -6,9 +6,15 @@
 #include "fft/text.h"
 #include "psx/types.h"
 
-/* Decodes glyph `glyph` from the packed 2bpp font into a 4bpp image at
- * `image`, using target x/y and a row stride of w 16-bit values, adding `palette * 4`
- * to every non-zero pixel. Returns the glyph's advance width. */
+/* Decodes glyph `glyph` from the packed 2bpp font (14 rows of 10 pixels)
+ * into a 4bpp image at `image`, at target x/y with a row stride of
+ * row_stride 16-bit values. Each nonzero pixel adds `palette * 4`, picking one
+ * four-color group of the 16-color CLUT; 0 stays transparent. Returns the
+ * glyph's advance width.
+ *
+ * An odd x starts mid-byte: the first pixel fills the high nibble of the
+ * existing byte, and the row's last byte is stored whole, clearing the pixel
+ * to the right of the glyph. */
 s32 menu_text_render_glyph_to_4bpp_image(
     s32 glyph, u8* image, const battle_text_image_position_t* target, s32 palette) {
     s32 row;
@@ -18,6 +24,7 @@ s32 menu_text_render_glyph_to_4bpp_image(
     u8 pixel;
     u8 byte;
 
+    /* The font pointer goes through a local for the exact match. */
     font = g_text_glyph_bitmap_data;
     bits_init_primary_reader(font + glyph * TEXT_GLYPH_BYTES);
     row = 0;

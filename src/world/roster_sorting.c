@@ -13,7 +13,8 @@
  *
  * Entries whose id (low 10 bits) is 0 or >= 0xFE are removed first. The rest
  * are bubble-sorted by the signed-byte key list g_item_type_order_lists[mode] (-1 ends
- * it): 0 item type (0x13 ranks as 100, ascending), 1 price, 2 ranking value
+ * it): 0 item type (ascending, shields ranked 100 so they follow every
+ * other type), 1 price, 2 ranking value
  * (a shield compared with a non-shield ranks 0), 3 physical evade, 4 magic
  * evade, 5 owned plus equipped count; keys other than 0 sort descending.
  * The magic-evade key reads 0 for the left weapon but the weapon's evade for
@@ -52,9 +53,9 @@ void world_item_sort_id_list(s32 mode, s16* list) {
     }
 
     /* Count what the roster has equipped, for the held-count key. */
-    memset(counts, 0, 0x100);
+    memset(counts, 0, sizeof(counts));
     for (j = 0; j < g_world_formation_record_count; j++) {
-        for (i = 0; i < 5; i++) {
+        for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
             counts[g_world_unit_pointers[j]->equipment[i]]++;
         }
     }
@@ -72,7 +73,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
             while (criterion >= 0) {
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_a = g_main_item_primary_data[item_a].type;
-                    if (key_a == 0x13) {
+                    if (key_a == ITEM_TYPE_SHIELD) {
                         key_a = 100;
                     }
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {
@@ -108,7 +109,7 @@ void world_item_sort_id_list(s32 mode, s16* list) {
 
                 if (criterion == ITEM_SORT_KEY_TYPE) {
                     key_b = g_main_item_primary_data[item_b].type;
-                    if (key_b == 0x13) {
+                    if (key_b == ITEM_TYPE_SHIELD) {
                         key_b = 100;
                     }
                 } else if (criterion == ITEM_SORT_KEY_PRICE) {

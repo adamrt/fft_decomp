@@ -8,9 +8,6 @@
 #include "fft/world_formation.h"
 #include "psx/types.h"
 
-/* Declared s32 here: the target uses the returned register without the
- * re-extension an s16 prototype makes GCC emit (the callee already extends). */
-
 /*
  * Writes a formation unit's selectable jobs to a -1-terminated list and
  * returns their count.
@@ -28,6 +25,8 @@ s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode) {
     s32 unlocked;
 
     bits_init_primary_reader(g_world_unit_pointers[unit_index]->unlocked_jobs);
+    /* world_job_get_base is declared s32: the target uses its result without the
+     * re-extension an s16 return would make GCC emit (the callee already extends). */
     job = world_job_get_base(unit_index);
     if (mode == WORLD_JOB_LIST_MODE_INCLUDE_OTHER_UNIT_UNLOCKS
         && job == g_world_unit_pointers[unit_index]->identity.job_id) {
@@ -36,6 +35,7 @@ s32 world_job_build_unit_list(u8 unit_index, s16* jobs, s32 mode) {
     jobs[count++] = job;
     if (job_is_special_monster(g_world_unit_pointers[unit_index]->identity.job_id) == 0
         && g_world_unit_pointers[unit_index]->uses_monster_skillset == 0) {
+        /* Skip Squire's bit: the base job above takes Squire's place. */
         bits_read_primary(1);
         for (i = 1; i < JOB_ID_GENERIC_COUNT; i++) {
             job = i + JOB_ID_SQUIRE;

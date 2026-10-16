@@ -18,9 +18,8 @@
 #include "psx/libc.h"
 #include "psx/types.h"
 
-/* Test for inventory or equipment entries in the current menu.
- *
- * Mode 0 combines both sources, mode 1 selects inventory, and other modes select equipment.
+/* Report whether the party has any items: mode 0 asks for inventory or equipped items, mode 1
+ * for inventory only, other modes for equipped items only.
  */
 s32 world_menu_has_items(s32 mode) {
     s32 has_inventory = 0;
@@ -113,8 +112,14 @@ s32 world_shop_adjust_poached_item_quantity(s16 index, s32 delta) {
     return value;
 }
 
-/* Choose the best-ranked owned items for each equipment slot, keeping compatible
- * hand combinations and swapping hands when needed. Martial Arts clears both.
+/* Choose the best-ranked owned items for each equipment slot into `equipment`, keeping
+ * compatible hand combinations and swapping hands when needed. Martial Arts clears both.
+ *
+ * Each slot's candidates are the equippable items in the inventory plus what the unit holds
+ * there, sorted by the best-fit key list (7). Two Hands prefers a weapon that can be held
+ * two-handed and then leaves the off hand empty; Two Swords (without Two Hands) fills the off
+ * hand with a second weapon, the same one only when the unit has two copies.
+ * world_shop_build_fitting_room_best_fit_equipment is the shop's sibling.
  */
 void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
     s16 list[0x90];
@@ -180,6 +185,7 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
                     }
                 }
             } else if (two_swords) {
+                /* With no Two Swords weapon left, the off hand falls back to a shield and is picked again. */
                 retry = 0;
                 for (i = 0;; i++) {
                     if (list[i] == -1) {
@@ -238,6 +244,9 @@ void world_unit_build_best_fit_equipment(s16 unit_index, s16* equipment) {
         equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND] = ITEM_ID_NOTHING;
         equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND] = ITEM_ID_NOTHING;
     }
+
+    /* Swap the picks when a held item changed hands, or the unit held its weapon left (without Two
+     * Swords) or its off-hand item right. */
     if (right_hand != ITEM_ID_NOTHING && right_hand == equipment[MENU_EQUIPMENT_SLOT_LEFT_HAND]) {
         i = 1;
     } else if (left_hand != ITEM_ID_NOTHING && left_hand == equipment[MENU_EQUIPMENT_SLOT_RIGHT_HAND]) {
@@ -488,7 +497,9 @@ s32 world_unit_can_equip_item_id(s16 unit_index, s16 item_id) {
 /*
  * Checks whether an item may go into a formation unit's equipment slot.
  *
- * Hand slots (0 and 1) also consider the item in the opposite hand: two
+ * Returns a negative lock result for a locked unit, -1 when the unit cannot
+ * use the item, 0 when it fits only with the other hand emptied, and 1 when
+ * it fits. Hand slots (0 and 1) consider the item in the opposite hand: two
  * weapons need both to be Two Swords compatible and the unit to have Two
  * Swords; a shield cannot pair with another shield or a forced-two-hands
  * weapon.
@@ -567,12 +578,16 @@ s32 world_formation_can_equip_item_in_slot(s16 unit_index, s16 slot, s16 item_id
 /*
  * Change the unit's job and optionally select replacement equipment.
  *
- * Mime removes all equipment. The preview record does not exchange inventory
- * items; ordinary slots return their old equipment before reserving replacements.
+ * Mime removes all equipment. Whatever the new job cannot use is dropped
+ * (world_formation_remove_invalid_unit_loadout). With `update_equipment`, a
+ * roster unit that is not a Mime gets its best-fit equipment and the
+ * auto-equip banner. The preview record does not exchange inventory items;
+ * ordinary slots return their old equipment before reserving replacements.
  */
 s32 world_formation_change_unit_job(s16 unit_id, s16 job_id, s32 update_equipment) {
     s16 equipment[MENU_EQUIPMENT_SLOT_COUNT];
     s32 i;
+
     g_world_unit_pointers[unit_id]->identity.job_id = job_id;
     if (job_id == JOB_ID_MIME) {
         for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
@@ -606,9 +621,9 @@ s32 world_formation_change_unit_job(s16 unit_id, s16 job_id, s32 update_equipmen
 /*
  * Drop equipment and abilities a formation unit can no longer use.
  *
- * Unequippable items (status 0, -1 or -6) and a second hand weapon without
- * Two Swords are removed, returning items to inventory except for the preview
- * record.
+ * Items world_formation_can_equip_item_in_slot refuses (0, -1 or the Mime
+ * lock) and a second hand weapon without Two Swords are removed, returning
+ * items to inventory except for the preview record.
  * Mime clears every ability slot, jobs with an innate support ability drop
  * the redundant copy, and a secondary skillset equal to the primary is
  * cleared. The loop counter and status locals are reused for the two hand
@@ -620,7 +635,7 @@ void world_formation_remove_invalid_unit_loadout(s16 unit_id) {
 
     for (i = 0; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
         status = world_formation_can_equip_item_in_slot(unit_id, i, g_world_unit_pointers[unit_id]->equipment[i]);
-        if (status == -1 || status == 0 || status == -6) {
+        if (status == -1 || status == 0 || status == WORLD_FORMATION_UNIT_LOCK_MIME) {
             if (unit_id != WORLD_FORMATION_PREVIEW_UNIT_INDEX) {
                 item_adjust_inventory_count(g_world_unit_pointers[unit_id]->equipment[i], 1);
             }
@@ -670,8 +685,11 @@ void world_formation_remove_invalid_unit_loadout(s16 unit_id) {
  * Items 1-253 are listed when held (mode 3 counts inventory only, others
  * include equipped copies) and their type fits the category. Mode 1 flags
  * items the unit cannot equip with 0x4000, or hides them like mode 2 when Show
- * Unequippable is not On. Categories 0-4 and 7 with sort modes 1-5 go
- * through item_sort_list_by_category_order, which returns the new count.
+ * Unequippable is not On. Categories 0-4 and 7 with sort modes 1-5 keep the
+ * tab's stored order (item_sort_list_by_category_order, which returns the new
+ * count); otherwise (another category, or a sort mode such as one with bit
+ * 0x80 set) the list is sorted by world_item_sort_id_list key list
+ * `sort_mode & 0xF`.
  */
 s32 world_item_build_category_list(s16 unit_id, s16 sort_mode, s8 category, s16* entries, u8 mode) {
     s32 count;

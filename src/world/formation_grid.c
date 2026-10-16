@@ -52,10 +52,11 @@ void world_menu_toggle_preview_stats_window(s32 flag) {
     g_world_preview_stats_window_active = stored;
 }
 
-/* Starts thread 10 on menu_run_ability_list_thread (parameter g_world_ability_panel_thread_params) when
- * `enable` is set and neither thread 9 nor 10 is running; stops threads 10 and 12 otherwise. */
+/* With `enable` set, start menu_run_ability_list_thread in the equip/ability panel slot (with
+ * g_world_ability_panel_thread_params) unless that slot or the character status slot already
+ * runs, show the unit banner and open the numeric editor; otherwise stop the panel and the
+ * numeric editor. */
 void world_menu_toggle_ability_panel_thread(s32 enable) {
-
     if (enable != 0) {
         enable = 1;
         if (thread_is_running(WORLD_THREAD_SLOT_EQUIP_ABILITY_PANEL) == 0
@@ -153,11 +154,12 @@ static s32 world_formation_get_unit_faith(s32 unit_id) {
     return g_world_unit_pointers[unit_id]->identity.faith;
 }
 
-/* An egg's birthday value packs two counts: returns the bits above the low
- * nibble (birthday >> 4) minus the low nibble. */
+/* Menu callback: an egg's hatch progress, its total hatch time (high nibble of the birthday
+ * byte) minus the days it still has to wait (low nibble). */
 static s32 world_formation_get_unit_egg_hatch_progress(s32 unit_id) {
     world_unit_t* unit = g_world_unit_pointers[unit_id];
     s32 low = unit->birthday & 0xF;
+
     return (unit->birthday >> 4) - low;
 }
 
@@ -481,6 +483,8 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             g_world_formation_unit_banner_enabled = g_world_formation_unit_banner_enabled == 0;
         }
     }
+    /* While browsing, the grid cursor and the shoulder buttons are frozen: keep only the face
+     * buttons, Select and Start. */
     if (g_world_formation_unit_browse_enabled != 0) {
         input &= 0xff0;
     }
@@ -490,6 +494,8 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             = menu_update_wrapped_grid_selection(4, 5, g_world_formation_unit_count - 1, g_unit_selected_index, input);
     }
     world_formation_step_scroll_velocity(&g_world_formation_scroll_velocity, &g_world_formation_scroll_position);
+
+    /* The readout bar beside the banner: the L2/R2 buttons and the current readout's labels. */
     if (g_world_formation_banner_slide_step == 0 && world_input_get_lockout_timer() == 0 && enabled != 0
         && get_mode == NULL && g_world_formation_unit_banner_enabled != 0 && g_world_formation_unit_browse_enabled == 0
         && g_world_formation_selection_cursor_ready != 0
@@ -541,6 +547,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     g_world_formation_saved_sprite_color.r = color->r;
     g_world_formation_saved_sprite_color.g = color->g;
     g_world_formation_saved_sprite_color.b = color->b;
+    /* Draw the visible unit slots row by row; rows the banner covers are dimmed. */
     for (row = 0; row < 5; row++, y += 0x3c) {
         value = 0;
         if (g_world_formation_unit_banner_enabled != 0 && g_menu_status_display_thread_params.flags == 0) {
@@ -580,6 +587,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
                 world_formation_draw_graphics_below_sprite(
                     i, mode, pos.position.x, pos.position.y, color, get_shade, 0, 8);
             }
+            /* Units brighten toward the cursor; a unit away on a proposition stays dim. */
             value = 0x50;
             if (g_world_unit_pointers[i]->proposition_status == 0) {
                 if (get_shade != NULL) {
@@ -605,6 +613,7 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
             g_world_formation_unit_dot_sprite.position.y = pos.position.y;
             g_world_formation_unit_dot_sprite.source.tpage = GetTPage(0, 1, 0x3c0, 0x100);
             if (i == g_unit_selected_index) {
+                /* The selected unit's dot pulses between -0x28 and 0x28 brighter. */
                 g_world_formation_dot_glow_timer += g_world_formation_dot_glow_direction * 2;
                 if (g_world_formation_dot_glow_timer > 0x28) {
                     g_world_formation_dot_glow_direction = -1;
@@ -622,6 +631,8 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
     }
     world_menu_set_sprite_color(&g_world_formation_saved_sprite_color);
     world_formation_draw_cursor_trail(&g_world_formation_cursor_target);
+
+    /* Ease the cursor a quarter of the way to its target, snapping once within 2 pixels. */
     g_world_formation_cursor_position.x
         = (g_world_formation_cursor_position.x * 3 + g_world_formation_cursor_target.x) / 4;
     g_world_formation_cursor_position.y
@@ -1070,7 +1081,7 @@ void world_formation_place_unit_portrait_at_rest(s16 unit_index) {
  * When g_world_formation_dismiss_anim_timer selects this unit (high byte) the sprite is drawn shrunk by
  * (low byte + 1) without a shadow. Otherwise units with a proposition status
  * get a palette 9/11 backdrop first and the sprite is drawn with its shadow.
- * Compiled at -O1; the (s16) casts keep the centring offset from being
+ * Compiled at -O1; the (s16) casts keep the centering offset from being
  * reassociated onto pos. */
 void world_formation_draw_unit_sprite(s16 unit_index, point16_t* pos, rgb24_t* rgb, s32 ot_index) {
     oriented_quad_t sprite;
@@ -1156,7 +1167,8 @@ void world_formation_draw_sprite_with_shadow(const oriented_quad_t* pos, const r
         &g_world_formation_shadow_egg_sprites[0], 0, TEXTURE_UV_FLIP_NONE, 1, ot_index - 1);
 }
 
-/* Returns 1 when x and y both lie in 0..254. */
+/* Returns 1 when x and y both lie in 0..254: the number commands keep their position in bytes,
+ * so readouts that would not fit are skipped. */
 static s32 world_coords_fit_in_byte(s32 x, s32 y) {
     if (x >= 0 && x < 0xff) {
         return y >= 0 && y < 0xff;
@@ -1204,6 +1216,8 @@ static void world_formation_draw_graphics_below_sprite(
             }
         } while (0);
         if (g_world_formation_stat_display_mode < 3) {
+            /* HP, MP or CT: the label, the current and maximum values with a separator glyph between,
+             * and the gauge. */
             rect.x = x;
             rect.y = top;
             rect.w = g_world_formation_label_tiles[mode].w;

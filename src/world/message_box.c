@@ -32,15 +32,16 @@ static u16 g_world_unit_summary_label_cluts[7][2] = { 0x7efc, 0x7efc, 0x7f3c, 0x
     0x7ebd, 0x7efd, 0x7ebd, 0x7efd, 0x7ebd, 0x7efd }; /* [row][dimmed] */
 
 /*
- * Thread task 0x39: the unit status banner (portrait, name and job, level,
- * exp, HP/MP/CT bars, Brave, Faith and zodiac). WORLD's body.
+ * Thread task THREAD_TASK_UNIT_STATUS_BANNER: the unit status banner
+ * (portrait, name and job, level, exp, HP/MP/CT bars, Brave, Faith and
+ * zodiac). WORLD's body.
  *
- * Slot 8 draws the selected unit's banner and any other slot the comparison
+ * The unit status slot draws the selected unit's banner and any other slot the comparison
  * unit's; each has its own packets, text images and unit records. The thread's
  * first parameter is its menu_status_panel_display_thread_t. Both
  * packet sets are built once and copied for the second frame buffer, then
  * every frame the thread:
- *  - dims the banner while a task-0x3b status panel thread runs with a text
+ *  - dims the banner while a THREAD_TASK_STATUS_PANEL thread runs with a text
  *    task active, or the display record asks for it;
  *  - runs the slide-down or slide-up table once when the display flags ask
  *    for it, leaving only MENU_STATUS_PANEL_HIDDEN set at the end;
@@ -687,6 +688,7 @@ static void world_text_message_box_draw_glyph_with_typewriter_delay(s32 x, s32 y
         g_world_text_message_box_vram_rect.h = 14;
         LoadImage(&g_world_text_message_box_vram_rect, (u32*)dst);
     }
+    /* Keep this image (14 rows of up to 12 pixels) for the next glyph's carry. */
     g_world_text_message_box_slot_glyph_counters[slot]++;
     mem_copy_bytes_nonempty(src, dst, 84);
 
@@ -857,7 +859,7 @@ static void world_menu_animate_window_quads_to_rects(menu_window_buffer_t* buffe
  */
 static void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
-    void* source; /* never assigned; the target passes an uninitialized $s5 */
+    void* source; /* never assigned: a stale $s5 the callee never reads, as in menu_animate_window_quad_crop */
     s32 level;
     u8 u = buffers->quads[0].u0;
     u8 v = buffers->quads[0].v0;
@@ -894,7 +896,7 @@ static void world_menu_animate_window_quad_crop_full(menu_window_buffer_t* buffe
         }                                                                                                              \
     }
 
-/* Message text box thread (task 0x26).
+/* Message text box thread (task THREAD_TASK_MESSAGE_BOX).
  *
  * Draws the text entry named by thread parameter 2 glyph by glyph into a
  * window buffer pair, waiting for input at page breaks (0xF8/0xFE) and

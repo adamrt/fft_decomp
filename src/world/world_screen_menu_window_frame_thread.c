@@ -3,13 +3,6 @@
 #include "fft/gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
-/*
- * WORLD copy of the EVENT OPTION window frame thread (menu_window_frame_thread,
- * byte-identical apart from addresses): the variant that allocates its scratch
- * pixel buffer, using the second WORLD blit descriptors and setters (as
- * world_screen_menu_thin_window_frame_thread) and its own texture-window table. Layout
- * notes below are the OPTION twin's; the WORLD helpers are the same routines.
- */
 #include "fft/menu_panel.h"
 #include "fft/menu_text.h"
 #include "fft/text.h"
@@ -22,13 +15,18 @@
 
 /* Thread that draws a text screen's window frame: build the frame pieces from the menu glyph sheet
  * into a small texture once, then draw the frame around the rectangle in parameter 1 each frame
- * until parameter 3 asks it to stop. */
+ * until parameter 3 asks it to stop. Parameter 2, or locked menu input, dims the frame.
+ *
+ * WORLD's copy of the window frame thread the EVENT OPTION overlay links
+ * (menu_window_frame_thread), byte-identical apart from addresses: the variant that allocates
+ * its scratch pixel buffer, using the second WORLD blit descriptors and setters (as
+ * world_screen_menu_thin_window_frame_thread does) and its own texture-window table. */
 void world_screen_menu_window_frame_thread(void) {
     RECT texture;
     /* The stride pointers are locals because the target keeps each one live
-       and re-derives the descriptor base from it (addiu -8) for the glyph
-       calls. Unlike the OPTION/WORLD twins, this copy needs no register
-       bindings or tied asm to match. */
+     * and re-derives the descriptor base from it (addiu -8) for the glyph
+     * calls. Unlike the OPTION/WORLD twins, this copy needs no register
+     * bindings or tied asm to match. */
     menu_panel_frame_t* prim = g_menu_scratch_buffer.panel_frames;
     s32* source_stride = &g_text_glyph_source.stride;
     s32* dest_stride = &g_text_glyph_dest.stride;

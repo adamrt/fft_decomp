@@ -18,8 +18,13 @@
 #define SHEET_DANCER              0x83
 
 /*
- * Resolves a roster slot's sprite sheet to its 16-bit CLUT value and, unless that value
- * is masked out, applies it to the caller's portrait sprite record.
+ * Resolves a roster slot's sprite sheet to its 16-bit portrait code and,
+ * unless the code's suppress bits are set, textures `poly` with that portrait.
+ *
+ * Special characters index the portrait table by their sprite set; generic
+ * units by job and gender, Bard and Dancer included; monsters by their job's
+ * sprite sheet, with the job's portrait palette added from bit 10. An empty
+ * slot (no sprite set) gets code 0.
  */
 void menu_build_portrait_poly(s32 roster_slot, POLY_FT4* poly) {
     party_unit_t* party = main_party_get_unit(roster_slot);

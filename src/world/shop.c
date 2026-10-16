@@ -161,9 +161,9 @@ void world_shop_run_screen(s32 shop_type) {
             gfx_enqueue_tile(tile_box, &g_world_gfx_black_tile_color, 0, g_world_ot_length - 1);
         }
 
-        /* L1/R1 cycle units on the item and Fur Shop steps (below 0x14, SOLDIER_OFFICE_MENU). */
+        /* L1/R1 cycle units on the item and Fur Shop steps (those before the Soldier Office's). */
         if ((g_world_formation_unit_cycle_mode != 0 || g_world_formation_unit_browse_enabled != 0)
-            && g_world_shop_menu_step < 0x14) {
+            && g_world_shop_menu_step < WORLD_SHOP_STEP_SOLDIER_OFFICE_MENU) {
             disabled = 0;
             if (g_menu_input_lock_mode != 0 || g_world_grid_menu_id != MENU_GRID_HELP_NONE
                 || g_world_formation_unit_cycle_mode == 1) {
@@ -233,7 +233,7 @@ void world_shop_run_screen(s32 shop_type) {
     main_heap_free(tim);
 }
 
-/* The on_change callback of the shop's quantity range (the record at 0x801950d8 whose max is
+/* The on_change callback of the shop's quantity range (the range record whose max is
  * g_world_shop_quantity_limit): nothing to do. */
 void world_shop_menu_noop_callback(void) {
 }
@@ -387,7 +387,9 @@ static void world_menu_switch_item_category(s32 input) {
     g_menu_help_message_text_id = description;
 }
 
-/* Handle item selection and purchase-menu transitions.
+/* Shop buy list step: list the shop's items for the current tab; Cross returns to the main menu,
+ * Triangle (except on the other-items tab, 4) opens the "who can equip" view of the highlighted
+ * item once the message box has closed, and Circle starts buying it.
  */
 void world_shop_handle_item_purchase_menu(void) {
     s16 x;
@@ -594,8 +596,8 @@ static s32 world_item_get_equip_candidate_brightness(s32 unit_index) {
  *
  * Moving onto a unit that can equip the item stages it in the temporary
  * formation preview record and shows the stat preview; slots
- * already holding the item are flagged in g_world_selected_unit_stat_detail.state.equipment. Cancel returns to shop
- * step 1.
+ * already holding the item are flagged in g_world_selected_unit_stat_detail.state.equipment. Cancel returns to the
+ * buy list.
  */
 void world_shop_run_equip_candidate_step(void) {
     s32 unused[16];
@@ -641,6 +643,7 @@ void world_shop_run_equip_candidate_step(void) {
             i = 0;
             equipped = 0;
             g_world_shop_equip_candidate_last_unit = g_unit_selected_index;
+            /* Bit 15 of an equipment entry draws its name in the highlight palette. */
             for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                 if (g_world_unit_pointers[g_unit_selected_index]->equipment[i] == g_world_shop_equip_candidate_item) {
                     equipped = 1;
@@ -656,7 +659,7 @@ void world_shop_run_equip_candidate_step(void) {
                 world_formation_equip_item_to_unit_slot(
                     WORLD_FORMATION_PREVIEW_UNIT_INDEX, slot, g_world_shop_equip_candidate_item);
                 bcopy(g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment,
-                    g_item_preview_stat_detail.state.equipment, 10);
+                    g_item_preview_stat_detail.state.equipment, sizeof(g_item_preview_stat_detail.state.equipment));
                 item_calculate_equipment_swap_stat_delta(&g_item_preview_stat_detail,
                     &g_menu_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
                     g_world_unit_pointers[WORLD_FORMATION_PREVIEW_UNIT_INDEX]->equipment);
@@ -695,9 +698,10 @@ static s32 world_item_get_selected_half_price(s32 unused_row) {
     return result;
 }
 
-/* Item-list shop menu step: on first entry prompts 0xF80B (0xF80C when the
+/* Shop sell list step: on first entry prompts 0xF80B (0xF80C when the
  * player already holds items), rebuilds the item list and installs the seven
- * column callbacks, then handles cancel (0x40) and confirm (0x20).
+ * column callbacks, then handles Cross (back to the main menu) and Circle
+ * (sell the highlighted item).
  */
 void world_shop_run_item_sell_list_step(void) {
     if (g_world_shop_sell_list_initialized == 0) {
@@ -842,10 +846,10 @@ static s32 world_shop_fitting_room_get_unit_marker(s32 unused_unit_index) {
     return -1;
 }
 
-/* Fitting-room menu step: on entry clear the trial equipment and its cost;
- * then either browse the formation (confirm opens the fitting menu, cancel
- * returns to shop step 0xC) or run the fitting menu thread and dispatch its
- * selection to the next shop step. */
+/* Fitting-room menu step: on entry (after a button press) clear the trial equipment and its cost;
+ * then either browse the formation (Circle or Triangle opens the fitting menu for the unit, Cross
+ * goes to the checkout) or run the fitting menu thread and dispatch its selection to the next
+ * shop step. */
 void world_shop_run_fitting_room_step(void) {
     s32 busy;
 
@@ -856,6 +860,7 @@ void world_shop_run_fitting_room_step(void) {
         }
         world_formation_init_cursor_and_scroll_state(0);
         memset(g_world_shop_fitting_room_items, 0, sizeof(g_world_shop_fitting_room_items));
+        /* Subtract the running cost from itself: back to 0. */
         world_shop_add_fitting_room_cost(-world_shop_add_fitting_room_cost(0));
         g_world_shop_fitting_room_unit_chosen = 0;
         g_world_shop_cost_window_visible = 0;
@@ -935,7 +940,7 @@ void world_shop_run_fitting_room_step(void) {
  * current item to the fitting room, equips the shop item (bit 15 marks it as
  * unpaid), adds its price to the fitting-room cost and recalculates stats,
  * while moving the cursor previews the stat change. Cancel leaves the list,
- * or the step (g_world_shop_menu_step = 6) from the slot list. */
+ * or from the slot list goes back to the fitting room's unit grid. */
 void world_shop_run_fitting_room_equip_menu(void) {
     s16 x;
     s16 y;
@@ -1047,7 +1052,7 @@ void world_shop_run_fitting_room_equip_menu(void) {
                     &g_menu_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
                     g_world_formation_temp_unit->equipment);
                 bcopy(g_world_unit_pointers[g_unit_selected_index]->equipment, g_world_formation_temp_unit->equipment,
-                    10);
+                    sizeof(g_world_formation_temp_unit->equipment));
             } else {
                 world_menu_toggle_preview_stats_window(0);
             }
@@ -1095,7 +1100,7 @@ static s32 world_shop_get_gil_minus_fitting_room_cost(s32 unused_row) {
     return gil - world_shop_add_fitting_room_cost(0);
 }
 
-/* Report whether a menu task or thread 6 is still running.
+/* Report whether menu input is locked or the screen menu slot's thread still runs.
  *
  * Its only caller passes 0, but the body never reads that argument: `$a0` is
  * overwritten with 6 before any use and the result starts from zero. */
@@ -1126,9 +1131,8 @@ static void world_shop_install_callbacks_and_run(void) {
  * room cost, and previews the stat change of the slot under the cursor
  * against the unit's own item held in the fitting room.
  *
- * The prologue's $a0 is not an argument register here. The callee at
- * 0x80114d4c is world_shop_update_unit_selection, which takes no
- * arguments; $a0 simply holds the copy of the selected-unit index that the
+ * The prologue's $a0 is not an argument register here. The callee,
+ * world_shop_update_unit_selection, takes no arguments; $a0 simply holds the copy of the selected-unit index that the
  * store to g_world_shop_previewed_unit_index consumes, while the compare keeps the load in $v1.
  * A one-argument prototype would pull the load pseudo into $a0 and push the
  * copy into $v1; pins and launders cannot compensate, because the target's
@@ -1176,6 +1180,7 @@ void world_shop_run_fitting_room_remove_step(void) {
     gfx_set_otag_index(0x3D);
     world_menu_update_and_draw_sliding_cursor(
         &g_world_shop_equip_slot_cursor_point, &g_world_shop_equip_slot_cursor_anim, world_thread_is_task_active(0));
+    /* Only a tried-on shop item (bit 15) can be taken off here; its price comes off the cost. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         equipped_item = g_world_unit_pointers[g_unit_selected_index]->equipment[(u8)slot];
         if ((equipped_item >> 15) == 0) {
@@ -1239,8 +1244,6 @@ void world_shop_run_fitting_room_checkout_step(void) {
     }
     world_shop_run_obtain_gil_menu();
 }
-
-/* Pay and cannot-afford prompt menus; their cursors are reset on entry. */
 
 /*
  * Run one frame of the fitting-room checkout prompt.
@@ -1334,9 +1337,9 @@ static s32 world_shop_run_fitting_room_checkout_prompt(void) {
     return WORLD_SHOP_CHECKOUT_CANCELED;
 }
 
-/* Move every reserved fitting-room item onto its formation unit and clear
- * the reservation. Equipment slots flagged in bit 14 are overwritten even
- * when no item was reserved. */
+/* Undo the fitting room: give every unit back the items it set aside there and clear the
+ * reservations. A slot holding a tried-on shop item (bit 14 or 15 set) is restored even when
+ * nothing was set aside, which empties it. */
 static void world_shop_undo_fitting_room(void) {
     s32 i;
     s32 j;
@@ -1353,8 +1356,8 @@ static void world_shop_undo_fitting_room(void) {
 }
 
 /*
- * Shop "best fit / fitting room" preview step, entry 8 of the shop callback
- * table at 0x8019525c.
+ * Shop "best fit / fitting room" preview step, entry 8
+ * (WORLD_SHOP_STEP_FITTING_ROOM_BEST_FIT) of g_world_shop_menu_step_handlers.
  *
  * On entry it stages the selected unit's four weapon/armor slots, fills any
  * slot already taken from the shop with that slot's fitting-room reservation,
@@ -1362,7 +1365,8 @@ static void world_shop_undo_fitting_room(void) {
  * restores the staged slots and previews
  * the resulting stat delta. It then runs the confirmation menu; on confirm it
  * commits the suggested set slot by slot, returning each displaced item to the
- * fitting room or refunding a shop item's price, and returns to shop step 6.
+ * fitting room or refunding a shop item's price, and returns to the fitting
+ * room's unit grid.
  *
  * The gate g_world_shop_best_fit_menu_open is `s8`, not `u8` (the target
  * sign-loads it, `lb`).
@@ -1510,7 +1514,7 @@ void world_shop_run_best_fit_preview_step(void) {
  * The cursor walks the selected unit's five equipment slots; confirming a
  * slot the unit owns (non-empty, not taken from the shop) opens a sale prompt
  * for half the item's price and, on acceptance, credits the gil and clears
- * the slot. Cross returns to shop step 6.
+ * the slot. Cross returns to the fitting room's unit grid.
  */
 void world_shop_run_sell_equipped_item_menu(void) {
     s32 close = 0;
@@ -1598,10 +1602,13 @@ void world_shop_run_sell_equipped_item_menu(void) {
 }
 
 /*
- * Run the menu's state-4/state-5 subflow through thread 2.
+ * The fitting room's Sell option (WORLD_SHOP_STEP_FITTING_ROOM_SELL): run the
+ * shop's sell list and sell confirm steps inside the fitting room, after
+ * restarting the message box and stopping the unit panels.
  *
- * State 0 closes the subflow and hands control back as state 6; otherwise
- * the updated state is retained for the next call. The menu role is unverified.
+ * Those steps set g_world_shop_menu_step themselves; their result is kept as
+ * the sub-step and the shop step put back to FITTING_ROOM_SELL, except that
+ * leaving for the main menu returns to the fitting room's unit grid instead.
  */
 void world_shop_run_sell_menu_subflow_step(void) {
     if (g_world_shop_sell_subflow_initialized == 0) {
@@ -1658,7 +1665,11 @@ static void world_shop_return_unit_equip_to_fitting_room(s16 unit_index, s16 equ
     }
 }
 
-/* Finalize a unit's equipment from the Fitting Room. */
+/* Take the tried-on item off one slot and put back what the unit set aside in the fitting room:
+ * for a hand slot, both hands' reserved items when both hands are now empty, else the slot's
+ * own reserved item if it fits beside the other hand; any other slot always gets its reserved
+ * item (possibly nothing) back. The fit check uses g_unit_selected_index, which is what every
+ * caller passes as formation_index. */
 static void world_shop_finalize_unit_equips_from_fitting_room(s16 formation_index, s16 equipment_index) {
     u16 reserved_item;
 
@@ -2125,8 +2136,10 @@ void world_shop_run_fur_equip_purchase_step(void) {
         g_world_shop_menu_step = WORLD_SHOP_STEP_FUR_BUY_LIST;
 }
 
-/* Soldier Office hire step: runs the hire menu and charges for the new
- * unit's starting equipment. */
+/* Soldier Office main step: runs the hire menu. Rows 0-1 generate a recruit of the chosen
+ * kind, whose fee is 1000 gil plus its starting equipment's price (when the party cannot pay,
+ * the recruit is removed again); row 2 renames a monster; row 3 or a cancel leaves, after
+ * cashing out inventory beyond 99 of an item. */
 void world_shop_run_soldier_office_hire_menu_step(void) {
     unit_stats_t unit;
     s32 i;
@@ -2177,6 +2190,7 @@ void world_shop_run_soldier_office_hire_menu_step(void) {
                 slot = world_formation_generate_unit(g_world_menu_selection_results[0]);
                 if (slot >= 0) {
                     g_world_shop_service_fee = 1000;
+                    /* `i` is still 0, the menu thread's result. */
                     for (; i < MENU_EQUIPMENT_SLOT_COUNT; i++) {
                         g_world_shop_service_fee += world_item_get_price(g_world_unit_pointers[slot]->equipment[i]);
                     }
@@ -2250,6 +2264,7 @@ void world_shop_run_recruit_unit_preview_step(void) {
  */
 void world_shop_run_hire_confirm_step(void) {
     s16 selection;
+
     if (g_world_shop_hire_confirm_message_wait != 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
             thread_set_parameters(THREAD_SCREEN_SLOT_MESSAGE, 0x19, -1, 0);
@@ -2304,6 +2319,7 @@ void world_shop_run_hire_name_entry_step(void) {
  */
 void world_shop_run_hire_fee_confirm_step(void) {
     s16 choice;
+
     g_menu_help_message_text_id = 0;
     if (g_world_shop_hire_fee_message_wait != 0) {
         if (g_menu_input_primary_repeat & (PSX_PAD_TRIANGLE | PSX_PAD_CIRCLE | PSX_PAD_CROSS | PSX_PAD_SQUARE)) {
@@ -2350,11 +2366,11 @@ static s32 world_shop_rename_unit_get_unit_marker(s32 unused_unit_index) {
 }
 
 /*
- * Menu step for the rename-unit prompt: on the first frame either leaves
- * the screen when no face button is held, or arms the prompt. Confirm
- * opens the name entry (mode 1 when a unit is already renamed) unless the
- * unit has Reis's dragon identity, which refuses with message 0x1B; cancel backs
- * out with message 0x19.
+ * Soldier Office rename step: waits for a face button to dismiss the
+ * message, then shows the monster grid. Circle opens the name entry for the
+ * selected unit, except that Reis in dragon form refuses (message 0xF848, in
+ * a box placed away from the unit banner); Cross returns to the Soldier
+ * Office menu.
  */
 void world_shop_run_rename_unit_prompt_step(void) {
     s32 mode;
@@ -2445,15 +2461,16 @@ void world_shop_run_rename_name_entry_step(void) {
     }
 }
 
-/* Menu callback: the hiring fee for the highlighted row of the hire menu,
- * 1500 for row 0, 1400 for row 1 and 0 otherwise. */
+/* Menu callback: the hiring fee shown for the highlighted row of the hire menu,
+ * 1500 for row 0, 1400 for row 1 and 0 otherwise. The fee actually charged is
+ * computed when the recruit is generated (world_shop_run_soldier_office_hire_menu_step). */
 static s32 world_shop_get_soldier_office_entry_fee(s32 unused_row) {
     s16 mode = g_world_shop_hire_menu_thread_data.selected_index;
 
     if (mode == 0) {
-        return 0x5DC;
+        return 1500;
     }
-    return (mode == 1) ? 0x578 : 0;
+    return (mode == 1) ? 1400 : 0;
 }
 
 /* Run the soldier office's fee display script with

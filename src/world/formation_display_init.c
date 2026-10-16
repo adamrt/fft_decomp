@@ -49,6 +49,10 @@ void world_formation_init_menu_display(void) {
     rect.w = 0x10;
     rect.h = 1;
     gfx_store_image_and_wait(&rect, palette);
+
+    /* Each window-frame palette is copied whole to x 0x260/0x270 of row 510,
+     * and its colors 4..15 again to x 0x240/0x250, after clearing colors 4, 8
+     * and 12. */
     palette[4].red = palette[4].green = palette[4].blue = palette[4].semi_transparent = 0;
     palette[8].red = palette[8].green = palette[8].blue = palette[8].semi_transparent = 0;
     palette[12].red = palette[12].green = palette[12].blue = palette[12].semi_transparent = 0;
@@ -123,7 +127,8 @@ void world_formation_rebuild_unit_list(void) {
 }
 
 /* Reports whether the screen is busy: the grid help is up (g_world_grid_menu_id),
- * a menu runs in thread 15 or 6, or g_menu_input_lock_mode is set. */
+ * a menu runs in the upper menu or screen menu thread slot, or menu input is
+ * locked (g_menu_input_lock_mode). */
 s32 world_map_is_busy(void) {
     s32 result = 0;
 
@@ -135,7 +140,7 @@ s32 world_map_is_busy(void) {
 }
 
 /* Show message `message_id` in the text thread (dialog type 0x2B), play
- * `sound_id` at once and mark a text task active. */
+ * `sound_id` at once and lock menu input while the message is up. */
 void world_text_show_message_and_play_sound(s32 message_id, s32 sound_id) {
     menu_text_start_thread_if_idle(THREAD_SCREEN_SLOT_TEXT, 0x2B, message_id, 0);
     g_world_sound_release_held_loop = 1;

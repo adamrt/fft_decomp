@@ -71,8 +71,8 @@ void world_menu_announce_entry_value_thread(void) {
 /* Menu icon list thread with a clamped cursor: builds the text image once,
  * steps the cursor while the previous thread is idle and submits the four
  * icon sprites of the alternating record each frame. Up steps the cursor up,
- * but the Down test is inverted: the cursor moves down on every frame the
- * Down bit is clear, until it reaches max_row_index. */
+ * but the Down test is inverted (a retail bug, QUIRKS.md): the cursor moves
+ * down on every frame the Down bit is clear, until it reaches max_row_index. */
 void world_menu_icon_clamped_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
@@ -543,8 +543,8 @@ void world_menu_labeled_number_entry_thread(void) {
 /*
  * Draw a signed decimal number right-aligned in `digits` columns of 6 pixels
  * starting at the pen, least significant digit first, with a minus glyph drawn
- * before the digits when the value is negative. Glyphs are 0x23 bytes apart
- * in the font block at g_text_glyph_bitmap_data.
+ * before the digits when the value is negative. Glyphs are TEXT_GLYPH_BYTES
+ * apart in the font block at g_text_glyph_bitmap_data; the minus is glyph 237.
  *
  * `digits` arrives as a full 32-bit value and only its low byte is used.
  */
@@ -563,7 +563,7 @@ static void world_gfx_draw_signed_number(s32 value, s32 digits, u8* image, glyph
         value /= 10;
     }
     if (original < 0) {
-        text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + 0x2067, image, pen, 0);
+        text_render_glyph_to_4bpp_image(g_text_glyph_bitmap_data + 237 * TEXT_GLYPH_BYTES, image, pen, 0);
     }
 }
 
@@ -637,7 +637,8 @@ void world_menu_resize_parent_entry_to_digits(void) {
 
     if (index < 1000) {
         entry = &g_menu_thread_menu_data[index];
-        /* Preserve the original caller's unset argument. */
+        /* Retail bug (QUIRKS.md): `value` is never set, so the callee counts the digits of a
+         * stale $a0. Nothing calls this function. */
         digits = text_count_decimal_digits(value);
         width = digits * 6;
         margin = (digits & 1) * 2 + 0x18;

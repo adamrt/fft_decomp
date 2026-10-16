@@ -16,7 +16,17 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
-/* The target's lone dead `lw t1,0xe0(sp)` (reload of the spilled `layout`)
+/* Thread that runs a scrolling list window; parameter 1 is its menu entry, whose context is the
+ * menu_text_layout_t of text columns to show.
+ *
+ * The visible rows are drawn into a ring of 16-pixel rows in VRAM, which the window sprite
+ * shows through a moving v offset, and a window frame thread is started around it. Each frame
+ * moves the cursor, scrolls one row at a time smoothly (drawing the incoming row into the ring
+ * slot before it scrolls into view), runs the entry's action and cancel handlers, and draws the
+ * scroll arrows and thumb while rows are hidden. Two page records alternate by frame. When the
+ * menu closes, the frame thread is stopped and the scroll position is kept in the entry.
+ *
+ * The target's lone dead `lw t1,0xe0(sp)` (reload of the spilled `layout`)
  * at +0x4d4 comes from a conditional on `layout` whose body is a dead store: flow deletes
  * the store, the now-empty branch survives until after reload, and the post-reload jump
  * pass deletes the branch but not its operand reload. */

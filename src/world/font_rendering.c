@@ -37,12 +37,14 @@ void world_text_render_id_list_to_image_rows(u8* font, s16* text_ids, RECT* dest
     }
 }
 
-/* Builds a text command buffer from text: every glyph is preceded by an
- * 0xE7 x-position control code, and the running x advances by the glyph's
- * width plus a kerning pad taken from the width class; 0xFA is a 6-pixel
- * space and 0xFE terminates. The buffer is then handed to the image-row
- * renderer
- * with the caller's name, rect and palette passed through unchanged. */
+/* Builds a text command buffer that places every glyph explicitly: each glyph
+ * is written as an 0xE7 (set pen x) code and its x, then the glyph, and every
+ * character (a space too) is followed by another 0xE7 with the advanced x.
+ * The pen advances by the glyph's width plus kerning pads chosen by that
+ * width (2: two pixels before and after, 3: one before and two after, 4: one
+ * each); 0xFA is a 6-pixel space and 0xFE terminates. The buffer then serves
+ * as the text table for world_text_render_id_list_to_image_rows, with the
+ * caller's text ids (`name`), rect and palette passed through unchanged. */
 void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 palette) {
     u8 buf[0x78];
     u8* out;
@@ -112,7 +114,8 @@ void world_text_kern_into_command_buffer(u8* text, s16* name, RECT* rect, s32 pa
 }
 
 /* Renders one encoded glyph (either a direct id or a 0xD?-prefixed
- * two-byte code) into a 0x78-byte 4bpp image and uploads it at (x, y). */
+ * two-byte code) into a 0x78-byte 4bpp image and uploads it at (x, y).
+ * Single-byte codes from 0xD0 up (prefixes and control codes) draw nothing. */
 void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
     u8 image[0x78];
     RECT rect;
@@ -132,6 +135,7 @@ void world_font_upload_glyph_image(u16 code, s32 x, s32 y, s32 style) {
         }
         glyph = code;
     }
+    /* The rect doubles as the glyph's image position: x and y 0, a row stride of w. */
     menu_text_render_glyph_to_4bpp_image(glyph, image, (const battle_text_image_position_t*)&rect, style);
     rect.x = x;
     rect.y = y;

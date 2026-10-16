@@ -8,21 +8,32 @@
 #include "psx/types.h"
 
 /*
- * Render a decimal value into a text image, right to left, as `flags & 0xff`
- * digit glyphs with optional sign/prefix glyphs selected by the high flag bits.
+ * Render a decimal value into a text image, right to left, as `digits & 0xff`
+ * digit glyphs. The high byte of `digits` adds glyphs, named here by their x
+ * in the menu glyph sheet (the digits sit 6 pixels apart from x 0x78 and are
+ * drawn 5 pixels apart):
  *
- * Prefix modes 0xc00 and 0xe00 instead draw three placeholder glyphs (0xba or
- * 0xd0), optionally preceded by the 0xb4 glyph. The cursor ends five pixels
- * past the last digit. `work` holds the prefix mode and later the final cursor
- * x; sharing one variable reproduces the target's register assignment.
+ *   0x100   a 4-pixel-high glyph before the number, lowered 3 pixels
+ *   0x200   value 100 is drawn with three digits
+ *   0x400   any other value is drawn with two digits, 6 pixels further right
+ *   0x800   every digit drawn as glyph 0xBA instead
+ *   0x1000  glyph 0xB4 before the number
+ *   0x2000  glyph 0xC0 after the number
+ *   0x8000  glyph 0xB4 before the number, 2 pixels to the left
+ *
+ * The 0x200 and 0x400 rules are skipped while numeric values are hidden.
+ * High bytes 0xC00 and 0xE00 instead draw three placeholder glyphs (0xBA or
+ * 0xD0), preceded by glyph 0xB4 when bit 0 is set. The cursor ends five
+ * pixels past the last digit. `work` holds the high byte and later the final
+ * cursor x; sharing one variable reproduces the target's register assignment,
+ * as does mixing `src` and the global's own address in the glyph calls.
  * BATTLE links its own, longer body under this name.
  */
 void text_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
-    glyph_blit_t* src;
+    glyph_blit_t* src = &g_text_large_number_glyph_rect;
     s32 work = digits & 0xFF00;
     s32 i;
 
-    src = &g_text_large_number_glyph_rect;
     if (work == 0xC00 || work == 0xE00) {
         g_text_large_number_glyph_rect.rect.y = 0x10;
         if (digits & 1) {

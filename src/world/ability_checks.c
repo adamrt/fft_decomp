@@ -55,14 +55,20 @@ s32 world_ability_has_secret_hunt(s32 unit_id) {
  * List the abilities of `job`'s skillset for a formation unit and return the
  * number listed.
  *
- * `kind` selects the ability id range (0 action, 1 reaction, 2 support,
- * 3 movement, otherwise all). `mode` 0 lists every ability and tags unlearned
- * ones with 0x4000/0x6000; 1 lists learned ones (with kind 0 it defers to
- * world_ability_list_secondary_skillsets); 2 tags learned ones 0x1000 and marks
- * unaffordable JP abilities 0x4000; 3 only counts unlearned ones. Lists
- * other than mode 3 are -1 terminated.
+ * `ability_category` selects the ability id range (action, reaction, support,
+ * movement, otherwise all). `mode`:
+ *   VIEW_ALL          every ability, unlearned ones tagged DISABLED, plus
+ *                     HIDE_DETAILS when they cannot be learned with JP;
+ *   LEARNED_ONLY      learned ones (for action abilities it lists the unit's
+ *                     secondary skillsets instead);
+ *   LEARN_MENU        learned ones tagged LEARNED, and unlearned ones that
+ *                     can be learned with JP, DISABLED when the unit's JP in
+ *                     the job cannot pay for them;
+ *   COUNT_UNLEARNED   only counts unlearned ones, with no list written.
+ * A special monster counts every ability as learned, and a unit using a
+ * monster skillset counts its first three as learned and lists no more.
  *
- * The second loop indexes `abilities` and `out` rather than walking pointers:
+ * The second loop indexes `abilities` and `list` rather than walking pointers:
  * the target's cursors are the loop optimizer's reduced induction variables,
  * set after the unit-pointer address is formed.
  */
@@ -75,7 +81,7 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
     s32 i;
     s32 count;
     s16 jp;
-    s32 kind;
+    s32 learned;
     s16 id;
 
     if (mode == ABILITY_LIST_MODE_LEARNED_ONLY && ability_category == MENU_ABILITY_CATEGORY_ACTION) {
@@ -83,6 +89,7 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
     }
     skillset = job_get_skillset(job);
     generic = job_get_generic_index(job);
+    /* A skillset no job owns (a special character's) falls back to the unit's primary skillset. */
     if (job_find_first_for_skillset(skillset) == -1) {
         skillset = g_world_unit_pointers[unit_index]->abilities.fields.primary_skillset;
     }
@@ -113,21 +120,21 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
     bits_init_primary_reader(g_world_unit_pointers[unit_index]->learned_abilities[generic]);
     for (i = 0; i < SKILLSET_ABILITY_LIST_COUNT; i++) {
         if (job_is_special_monster(g_world_unit_pointers[unit_index]->identity.job_id) != 0) {
-            kind = 1;
+            learned = 1;
         } else if (g_world_unit_pointers[unit_index]->uses_monster_skillset != 0) {
             if (i >= 3) {
                 break;
             }
-            kind = 1;
+            learned = 1;
         } else {
-            kind = bits_read_primary(1);
+            learned = bits_read_primary(1);
         }
         id = abilities[i];
         if (id == 0) {
             continue;
         }
         if (mode == ABILITY_LIST_MODE_VIEW_ALL) {
-            if (!kind) {
+            if (!learned) {
                 if (!(g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT)) {
                     id |= ABILITY_LIST_ENTRY_DISABLED;
                 } else {
@@ -137,12 +144,12 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
             list[count] = id;
             count++;
         } else if (mode == ABILITY_LIST_MODE_LEARNED_ONLY) {
-            if (kind) {
+            if (learned) {
                 list[count] = id;
                 count++;
             }
         } else if (mode == ABILITY_LIST_MODE_LEARN_MENU) {
-            if (!kind) {
+            if (!learned) {
                 if (g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) {
                     continue;
                 }
@@ -155,7 +162,7 @@ s32 ability_build_list(s16 unit_index, s16 job, s32 ability_category, s16* list,
             list[count] = id;
             count++;
         } else if (mode == ABILITY_LIST_MODE_COUNT_UNLEARNED) {
-            if (!kind) {
+            if (!learned) {
                 count++;
             }
         }

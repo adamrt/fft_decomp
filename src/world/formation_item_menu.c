@@ -79,7 +79,7 @@ void world_formation_item_menu(void) {
         g_world_item_submenu_exit_pending = 0;
         g_world_item_menu_initialized = 1;
     }
-    if (g_world_formation_current_menu < 9) {
+    if (g_world_formation_current_menu < WORLD_FORMATION_MENU_ITEM_LIST) {
         world_formation_place_unit_portrait_at_rest(g_unit_selected_index);
     }
     if (g_world_item_menu_unit_index != g_unit_selected_index) {
@@ -97,6 +97,7 @@ void world_formation_item_menu(void) {
     }
     if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM) {
         g_world_formation_unit_cycle_mode = 2;
+        /* Equip, Best Fit and Remove (rows 0-2) are refused for a locked unit; the item list is not. */
         if (g_world_menu_selection_results[1] >= 0 && g_world_menu_selection_results[1] < 3
             && world_formation_get_unit_lock(g_unit_selected_index) < 0) {
             g_sound_queued_effect_id = MAIN_SFX_INVALID;
@@ -158,13 +159,12 @@ static s32 world_formation_run_equip_item_menu(void) {
     s32 slot;
     s32 item;
     /* s16: the conversion from item keeps CSE from folding the copy away
-       (the target moves item into a second saved register here). */
+     * (the target moves item into a second saved register here). */
     s16 equip;
     u16 equipped;
     s32 value;
     s16* cursor_y;
 
-    /* The target tests the init flag with lb; the header types it u8. */
     if (g_world_equip_menu_initialized == 0) {
         g_world_equip_menu_initialized = 1;
         g_world_item_previewed_cursor = -1;
@@ -271,7 +271,7 @@ static s32 world_formation_run_equip_item_menu(void) {
                     &g_menu_selected_unit_stat_summary, g_world_unit_pointers[g_unit_selected_index]->equipment,
                     g_world_formation_temp_unit->equipment);
                 bcopy(g_world_unit_pointers[g_unit_selected_index]->equipment, g_world_formation_temp_unit->equipment,
-                    10);
+                    sizeof(g_world_formation_temp_unit->equipment));
             } else {
                 g_world_item_preview_active = 0;
             }
@@ -301,7 +301,7 @@ static s32 world_formation_run_equip_item_menu(void) {
     *cursor_y = g_world_item_slot * 16 + 0x90;
     gfx_set_otag_index(0x28);
     /* The mode is an argument expression so &g_world_equip_item_cursor_point is formed before its
-       branches and derived from cursor_y (addiu a0,s0,-2), as in the target. */
+     * branches and derived from cursor_y (addiu a0,s0,-2), as in the target. */
     world_menu_update_and_draw_sliding_cursor(&g_world_equip_item_cursor_point, &g_world_equip_item_cursor_anim,
         g_world_item_list_open != 0 || g_menu_input_lock_mode != 0);
     return 1;
@@ -367,8 +367,10 @@ static s32 world_menu_run_best_fit_equipment(void) {
     return 1;
 }
 
-/* Handle single-slot removal and the remove-all confirmation.
- */
+/* Run the Remove menu: Circle unequips the item in the selected slot (it returns to the
+ * inventory), Left opens the remove-all prompt and Cross leaves (returning 0; 1 otherwise).
+ * The stat preview shows the effect of removing the highlighted item. A locked unit refuses
+ * Circle. */
 static s32 world_menu_run_remove_item(void) {
     /* The target reserves 72 local bytes whose contents are not accessed. */
     s32 unused[18];

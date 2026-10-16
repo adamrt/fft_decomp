@@ -12,8 +12,10 @@
 /*
  * Select the normal or alternate menu-render palette.
  *
- * The mode updates the shared text color and six related CLUT selections as a
- * single visual theme.
+ * The mode updates the sprite modulation color and six related CLUT
+ * selections as a single visual theme. The alternate look (sprites tinted to
+ * 0x60/0x60/0x80) is what the shop and formation screens show while input is
+ * locked to another window.
  */
 void world_menu_set_palette_mode(s32 mode) {
     u16 clut;
@@ -43,7 +45,10 @@ void world_menu_set_palette_mode(s32 mode) {
     g_world_menu_active_clut_back = clut;
 }
 
-/* Remove the active temporary draw-area clip and advance the menu script. */
+/* Menu-script opcode: when the ordering-table index is locked (a temporary
+ * draw-area clip is active), end the clip by adding
+ * g_world_gfx_temporary_draw_area (y reset to 0) one entry after the current
+ * ordering-table index, and unlock the index. Returns the next instruction. */
 menu_instruction_t* world_menu_script_clear_temporary_draw_area(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked != 0) {
         g_world_gfx_temporary_draw_area.y = 0;
@@ -53,7 +58,9 @@ menu_instruction_t* world_menu_script_clear_temporary_draw_area(menu_instruction
     return menu_next_instruction(instruction);
 }
 
-/* Apply a four-byte draw area from the menu script and advance the command. */
+/* Menu-script opcode: unless the ordering-table index is locked, add the
+ * instruction's draw area one entry before the current ordering-table index.
+ * Returns the next instruction. */
 menu_instruction_t* world_menu_script_set_draw_area(menu_instruction_t* instruction) {
     RECT rect;
 
@@ -67,9 +74,9 @@ menu_instruction_t* world_menu_script_set_draw_area(menu_instruction_t* instruct
     return menu_next_instruction(instruction);
 }
 
-/* Menu-script opcode handler: unless the flag is set, clears the y of
- * g_world_gfx_temporary_draw_area and re-registers the draw area at draw
- * priority + 1. Returns the address of the next instruction. */
+/* Menu-script opcode: unless the ordering-table index is locked, add
+ * g_world_gfx_temporary_draw_area (y reset to 0) one entry after the current
+ * ordering-table index. Returns the next instruction. */
 menu_instruction_t* world_menu_cmd_add_next_otag_draw_area_handler(menu_instruction_t* instruction) {
     if (g_gfx_otag_index_locked == 0) {
         g_world_gfx_temporary_draw_area.y = 0;

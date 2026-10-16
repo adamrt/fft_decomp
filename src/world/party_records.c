@@ -18,7 +18,10 @@
  *
  * HP/MP/level/experience/CT are clamped for display, monster-skillset units
  * (primary skillset 0xb0-0xdf) list up to three nonzero skillset abilities
- * instead of equipment and learned abilities, and JP totals cap at 9999.
+ * instead of equipment and learned abilities, a Mime shows no equipment or
+ * set abilities, and JP totals cap at 9999. A hand slot shows its weapon, or
+ * its shield when it holds none; the larger of the two shields' evades is
+ * shown.
  * One scratch variable `i` also carries the monster flag, the second evade
  * operand and the unlocked-job mask; separate locals reallocate a0/v1.
  */
@@ -30,7 +33,7 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
     memset(record, 0, sizeof(world_unit_t));
     record->status.level = party->level <= UNIT_LEVEL_MAX ? party->level : UNIT_LEVEL_MAX;
     if (unit->formation_index >= PARTY_GUEST_SLOT_FIRST) {
-        record->status.team_kind = 2;
+        record->status.team_kind = 2; /* guests show the neutral team icon */
     }
     record->status.experience
         = party->experience < UNIT_LEVEL_UP_EXPERIENCE ? party->experience : UNIT_LEVEL_EXPERIENCE_MAX;
@@ -80,6 +83,7 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
     record->magical_shield_evade = evade;
     record->magical_accessory_evade = unit->equipment_stats[BATTLE_UNIT_EQUIPMENT_STAT_ACCESSORY_MAGIC_EVADE];
 
+    /* The record's equipment and abilities. */
     if (record->uses_monster_skillset != 0) {
         s32 count;
 
@@ -116,6 +120,7 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
         }
     }
 
+    /* Monsters keep their stored unlocked-job bits; humans recompute theirs from the job levels. */
     if (job_is_special_monster(unit->job_id) != 0 || record->uses_monster_skillset != 0) {
         bcopy(unit->career.unlocked_jobs, record->unlocked_jobs, sizeof(record->unlocked_jobs));
     } else {
@@ -153,10 +158,10 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
 /*
  * Rebuilds the compacted WORLD formation records from the 20 roster slots.
  *
- * Mode 1 drops units with a proposition in progress and the egg-unit flag, a
- * monster skillset, or a special-monster job; mode 2 excludes eggs
- * and human units. A nonzero item id keeps only
- * units with that item equipped. The list argument is unused here;
+ * AVAILABLE_HUMANS drops units away on a proposition, eggs, units with a
+ * monster skillset and special-monster jobs; MONSTERS drops eggs and humans.
+ * A nonzero item id keeps only units with that item equipped. Returns the
+ * record count. The list argument is unused here;
  * world_formation_sort_roster fills g_world_unit_pointers.
  */
 s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s32 mode) {
@@ -189,6 +194,7 @@ s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s
             if (g_world_unit_records[count].gender_flags & UNIT_FLAG_EGG) {
                 continue;
             }
+            /* The male and female bits, 0x80 and 0x40. */
             if ((g_world_unit_records[count].gender_flags >> 6) != 0) {
                 continue;
             }

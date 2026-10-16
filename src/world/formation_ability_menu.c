@@ -90,7 +90,7 @@ void world_menu_run_ability(void) {
         g_world_ability_menu.selected_index = 0;
         g_world_ability_menu_unit_index = 0xff;
     }
-    if (g_world_formation_current_menu < 12) {
+    if (g_world_formation_current_menu < WORLD_FORMATION_MENU_ABILITY_LEARN) {
         world_formation_place_unit_portrait_at_rest(g_unit_selected_index);
     }
     if (g_world_ability_menu_unit_index != g_unit_selected_index) {
@@ -166,8 +166,10 @@ void world_menu_run_ability(void) {
 /*
  * Run the ability-removal menu for the selected formation unit.
  *
- * Return 0 when canceled and 1 while active. The remove-all command opens its
- * confirmation; individual changes refresh the ability and stat previews.
+ * Return 0 when canceled and 1 while active. The cursor runs over slots 1-4
+ * (secondary skillset, reaction, support, movement); Circle empties the
+ * slot, and Left opens the remove-all prompt. Highlighting a Move+/Jump+
+ * movement ability previews losing it.
  */
 static s32 world_menu_run_remove_ability(void) {
     s16 unit_index = g_unit_selected_index;
@@ -239,6 +241,7 @@ static s32 world_menu_run_remove_ability(void) {
     gfx_set_otag_index(0x28);
     world_menu_update_and_draw_sliding_cursor(
         &g_world_remove_ability_cursor_point, &g_world_remove_ability_cursor_anim, g_menu_input_lock_mode);
+    /* Slot 1 holds a skillset id, the others ability ids; each kind has its own help text block. */
     ability = g_world_unit_pointers[g_unit_selected_index]->abilities.slots[slot_index];
     g_menu_help_message_text_id = ability;
     if (ability == 0) {
@@ -521,9 +524,9 @@ static s32 world_formation_run_set_ability_menu(void) {
     return 1;
 }
 
-/* Learn menu processing: opens the menu on first entry, then runs either
- * the skillset list (state 0) or the ability list (state 1). Returns 0
- * once the menu has been closed. */
+/* Learn menu processing: opens the menu on first entry, then runs either the job list
+ * (MENU_JOB_LIST_STEP_JOBS) or the chosen job's ability list (MENU_JOB_LIST_STEP_ABILITIES).
+ * Returns 0 once the menu has been closed, saving the records to the party. */
 static s32 world_menu_run_learn(void) {
     s32 result;
 
@@ -556,11 +559,12 @@ static s32 world_menu_run_learn(void) {
 
 /* Return whether a support change requires equipment revalidation.
  *
- * The preview record at index 20 is excluded. With Max Equip at Job Change
- * enabled, equipment-type supports, Martial Arts, Two Hands and Two Swords
- * can invalidate the current loadout. */
+ * The preview record is excluded. With Max Equip at Job Change enabled, the
+ * eight equip-type supports, Martial Arts, Two Hands and Two Swords can
+ * invalidate the current loadout. */
 static s32 world_ability_is_equip_support_change(s16 unit_id, s16 ability_id) {
-    if (unit_id == 20 || g_main_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
+    if (unit_id == WORLD_FORMATION_PREVIEW_UNIT_INDEX
+        || g_main_game_options.fields.max_equip_at_job_change != GAME_OPTION_ON)
         return 0;
     if (ability_id >= ABILITY_ID_SUPPORT_EQUIP_ARMOR && ability_id < ABILITY_ID_SUPPORT_EQUIP_ARMOR + 8)
         return 1;

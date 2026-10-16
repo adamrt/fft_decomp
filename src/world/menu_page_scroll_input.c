@@ -11,6 +11,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Return the sprite modulation color menus draw with (set by world_menu_set_palette_mode). */
 rgb24_t* world_menu_gfx_get_draw_color(void) {
     return &g_world_menu_sprite_color;
 }
@@ -25,14 +26,14 @@ void world_menu_scroll_list_by_page(menu_vertical_scroll_direction_e dir, const 
 
     old = g_menu_scroll_base_index;
     delta = g_menu_list_selected_index - g_menu_scroll_base_index;
-    if (dir == -1) {
+    if (dir == MENU_VERTICAL_SCROLL_UP) {
         g_menu_scroll_base_index -= menu->list.visible_rows;
         if (g_menu_scroll_base_index < 0) {
             g_menu_scroll_base_index = 0;
         }
     } else if (dir == MENU_VERTICAL_SCROLL_DOWN) {
         g_menu_scroll_base_index += menu->list.visible_rows;
-        /* `dir` is 1 here. */
+        /* `dir` is 1 here; spelling the 1 through it matches the original. */
         if (g_menu_list_entry_count - (g_menu_scroll_base_index + dir) < menu->list.visible_rows) {
             g_menu_scroll_base_index = g_menu_list_entry_count - menu->list.visible_rows;
         }
@@ -49,13 +50,15 @@ void world_menu_scroll_list_by_page(menu_vertical_scroll_direction_e dir, const 
 }
 
 /*
- * Read modified up/down input with an initial delay and periodic repetition.
+ * Read the page-scroll input (Square held with Up or Down) with an initial
+ * delay and periodic repetition, both divided by the menu's frame step.
  *
- * Return -1 for up, 1 for down, 2 while waiting for a repeat, and 0 otherwise.
- * Both directions require input bit 0x80; timing scales with the WORLD rate.
+ * Return UP or DOWN on the first frame and on each repeat, WAIT while the
+ * delay or a repeat period runs, and NONE otherwise. Ignored (NONE) while a
+ * prompt is open, input is locked or a tutorial runs.
  */
 menu_vertical_scroll_direction_e world_menu_input_read_page_scroll_direction(void) {
-    s32 result = 0;
+    s32 result = MENU_VERTICAL_SCROLL_NONE;
     s32 value;
     s32 delay;
     s32 repeat;
@@ -65,10 +68,10 @@ menu_vertical_scroll_direction_e world_menu_input_read_page_scroll_direction(voi
         value = world_menu_input_read_tutorial_or_controller(0);
         if ((value & PSX_PAD_UP) && (value & PSX_PAD_SQUARE)) {
             g_world_menu_scroll_hold_counter++;
-            result = -1;
+            result = MENU_VERTICAL_SCROLL_UP;
         } else if ((value & PSX_PAD_DOWN) && (value & PSX_PAD_SQUARE)) {
             g_world_menu_scroll_hold_counter++;
-            result = 1;
+            result = MENU_VERTICAL_SCROLL_DOWN;
         } else {
             g_world_menu_scroll_hold_counter = 0;
         }

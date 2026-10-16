@@ -19,7 +19,6 @@
 /* Open the pending menu description in a Help dialog at the requested position.
  * Grid-menu ids above 0x1ffff are latched without opening a text thread. */
 void world_menu_start_description_text_thread(s32 position) {
-
     if (g_menu_help_message_text_id > 0x1ffff) {
         g_world_grid_menu_id = g_menu_help_message_text_id;
         return;
@@ -37,12 +36,14 @@ void world_menu_start_description_text_thread(s32 position) {
 extern s16 g_world_grid_menu_cell_23_text_offset;
 extern s16 g_world_grid_menu_cell_24_text_offset;
 
-/* Runs the d-pad grid menu selected by g_world_grid_menu_id (0x20000, 0x20001, else
- * the default grid) and draws its cursor.
+/* Runs the d-pad help grid selected by g_world_grid_menu_id (the shop banner
+ * grids for MENU_GRID_HELP_BANNER_TOP and _BOTTOM, else the default grid) and
+ * draws its cursor. `alternate` (the unit uses a monster skillset) switches
+ * the text offset of cells 23 and 24.
  *
- * Cross (0x40) latches the menu id as the description text and closes the
- * grid; circle (0x20) sets the cell's description text id, except for empty
- * cells 18-27. */
+ * Cross latches the menu id as the description text and closes the grid;
+ * Circle opens the cell's description (its text id plus the cell's offset),
+ * except for empty cells 18-27. */
 void world_menu_update_grid_cursor(s16 alternate) {
     point16_t cursor;
     s32 busy;
@@ -96,6 +97,7 @@ void world_menu_update_grid_cursor(s16 alternate) {
         } else if (input & PSX_PAD_LEFT) {
             cell = g_world_active_grid_menu_cells[cell].next_left;
         }
+        /* The recruit preview grid steps over cell 7 between cells 6 and 8. */
         if (g_world_grid_menu_id == MENU_GRID_HELP_RECRUIT_PREVIEW) {
             if (g_world_grid_menu_selected_cell == 6 && cell == 7) {
                 cell = 8;
@@ -122,8 +124,9 @@ void world_menu_update_grid_cursor(s16 alternate) {
     }
 }
 
-/* Starts the thread-6 banner for `message_id` (0xD811 after auto-equip) and counts `frames` calls down
- * before stopping it; returns 0 once the banner has closed. */
+/* Starts the banner menu for `message_id` (0xD811 after auto-equip) in the screen menu thread
+ * slot and counts `frames` calls down before stopping it; returns 1 while the banner is up and 0
+ * once it has closed. */
 s32 world_menu_run_unit_status_banner_countdown(s32 message_id, s32 frames) {
     s8 current;
 

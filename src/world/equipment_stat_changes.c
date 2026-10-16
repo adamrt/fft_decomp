@@ -48,9 +48,12 @@ void world_ability_find_movement_stat_changes(
 /*
  * Extract an item's equipment stats and attribute bonuses for comparison.
  *
- * The right-hand slot selects the right-weapon fields; other slots select the
- * left-weapon fields.
- * Invalid item IDs leave the cleared preview unchanged.
+ * Clears the preview, then fills what the item's class provides: a weapon's
+ * power and evade (into the left-weapon fields when `alternate` is nonzero,
+ * else the right-weapon fields), a shield's or accessory's physical and magic
+ * evade, or headgear and armor's HP and MP bonus. Every item then adds its
+ * attribute set's Move, Jump, Speed, PA and MA bonuses. Invalid item IDs
+ * leave the cleared preview unchanged.
  */
 void item_collect_stat_deltas(
     s16 item_id, menu_unit_status_record_t* summary, menu_status_panel_slot_storage_t* detail, s32 alternate) {
@@ -58,6 +61,7 @@ void item_collect_stat_deltas(
     s32 secondary;
     u8 power;
     u8 evade;
+
     menu_clear_stat_preview(summary, detail);
     item_id &= ITEM_ENTRY_ID_MASK;
     if (item_id >= 1 && item_id <= ITEM_ID_END - 1) {

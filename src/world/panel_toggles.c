@@ -8,8 +8,8 @@
 #include "fft/world_menu.h"
 #include "psx/types.h"
 
-/* Open or close the equipment-change panel and its numeric editor; opening waits while the status
- * panel slides. */
+/* Open or close the equipment-change panel and its numeric editor. While the status panel
+ * slides, an open request does nothing, so per-frame callers open it once the slide ends. */
 void world_menu_toggle_change_banner_panel_thread(s32 enable) {
     s32 state = enable;
 
@@ -30,9 +30,10 @@ void world_menu_toggle_change_banner_panel_thread(s32 enable) {
     }
 }
 
-/* Starts thread 9 on menu_run_equipment_list_thread (parameter g_world_stat_preview_panel_thread_params) when
- * `enable` is set and neither of the g_menu_status_display_thread_params.flags 0x60 bits is set; stops it otherwise.
- * g_world_change_banner_panel_thread_params.style records the normalized enable state. */
+/* Open or close the stat preview panel: menu_run_equipment_list_thread in the character status
+ * slot, with g_world_stat_preview_panel_thread_params. Like the change banner, an open request
+ * does nothing while the status panel slides. The normalized enable state (0 or 1) is stored in
+ * g_world_change_banner_panel_thread_params.style either way. */
 void world_menu_toggle_stat_preview_panel_thread(s32 enable) {
     if (enable != 0) {
         if (!(g_menu_status_display_thread_params.flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))

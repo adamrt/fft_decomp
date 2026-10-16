@@ -45,9 +45,8 @@ void world_menu_get_selection_record(s32 index, s16* selected_index, s16* scroll
 }
 
 /* Steps the formation roster cursor one slot backwards (L1) or forwards (R1),
- * wrapping at either end and skipping over egg units. Plays menu sound 6 on
- * either move.
- */
+ * wrapping at either end and skipping over egg units. Plays the page-switch
+ * sound on either move. */
 void world_formation_cycle_selected_unit(s16 pad_buttons) {
     u16 index;
 

@@ -9,12 +9,13 @@
 #include "fft/world_text.h"
 #include "psx/types.h"
 
-/* Ramza's sprite sets and guest roster slots cannot be
- * dismissed. */
+/* Return whether a formation unit can be dismissed: not Ramza (any chapter's sprite set) and
+ * not a guest roster slot. */
 s32 world_formation_can_dismiss_unit(s16 formation_idx) {
     world_unit_t* unit = g_world_unit_pointers[formation_idx];
     s32 sprite_set = unit->sprite_set;
     s32 roster_slot = unit->identity.roster_slot;
+
     if (sprite_set <= CHARACTER_IDENTITY_RAMZA_CHAPTER_4)
         return 0;
     return roster_slot < PARTY_GUEST_SLOT_FIRST;

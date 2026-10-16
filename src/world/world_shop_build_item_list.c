@@ -11,11 +11,13 @@
 #include "fft/world_shop.h"
 #include "psx/types.h"
 
-/* Build the item list offered by a normal or poachers' den shop.
+/* Build the -1 terminated item list offered by a normal shop or the Fur Shop
+ * (poachers' den), sorted, and return its count.
  *
  * A normal shop selects items whose big-endian availability mask contains the
- * requested shop bit and whose required progression does not exceed script
- * variable 0x6f. Values of 100 or greater select the poached-item inventory.
+ * requested shop bit and whose required progression does not exceed the
+ * shop item availability script variable. Shop ids from
+ * WORLD_MENU_CONTEXT_FUR_SHOP (100) up select the poached items in stock.
  * Entries the selected unit cannot equip are hidden or marked with 0x4000,
  * according to mode and the Show Unequippable Items option.
  *
@@ -51,7 +53,7 @@ s32 world_shop_build_item_list(s16 unit_id, s16 shop_id, s16 category, s16* entr
     }
 
     count = 0;
-    if (category < 2) {
+    if (category < 2) { /* either hand */
         primary_category = ITEM_MENU_CATEGORY_WEAPON;
         secondary_category = ITEM_MENU_CATEGORY_SHIELD;
     } else if (category == ITEM_LIST_FILTER_HEADGEAR) {

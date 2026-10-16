@@ -14,11 +14,13 @@
 #include "psx/types.h"
 
 /* Per-frame event input update: derives the edge/auto-repeat 32-bit input mask,
- * publishes it, and yields once while tracking thread status changes.
+ * publishes it, and yields once while tracking thread status changes. A new
+ * press (other than Select alone) or any thread starting or stopping across
+ * the yield suppresses script input for 5 frames.
  *
  * WORLD's body; publishes the state twice.
- * The six g_world_frame_* 32-bit values at 0x801c0528 are laid out as a
- * menu_input_state_t, but a struct global makes GCC keep a base
+ * The six g_world_input_frame_* values are laid out as a menu_input_state_t
+ * (g_world_input_frame_state), but a struct global makes GCC keep a base
  * register for the field accesses, so they are separate scalars here.
  */
 void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
@@ -46,6 +48,10 @@ void menu_input_update_event_state(u32* otag, u32 input, s32 frame_arg) {
     g_world_input_frame_new = 0;
     g_world_input_frame_previous = previous_input;
 
+    /* Held D-pad, L1 and R1 auto-repeat once the initial delay passes: the
+     * D-pad (only Left/Right while Square is held) every repeat period, and
+     * L1/R1 (with Up/Down while Square is held, paging lists) every secondary
+     * period. All delays are in frames divided by the event speed. */
     if (previous_input != input || (filtered_input = input & (PSX_PAD_L1 | PSX_PAD_R1 | PSX_PAD_DPAD_MASK)) == 0) {
         g_world_input_frame_new = ~previous_input & input;
         g_world_input_frame_initial_repeat_counter = 0;

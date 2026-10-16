@@ -60,7 +60,8 @@ u8* world_text_get_resident_data(world_text_data_e index) {
     return g_world_text_resident_data[index];
 }
 
-/* Load the selected tutorial's message text and command stream. */
+/* Load tutorial `index`'s (1-based) message text and command stream to the
+ * heap and store their addresses in `record`. */
 void world_script_load_tutorial_files(s32 index, world_tutorial_state_t* record) {
     s32 slot = index - 1;
 

@@ -20,9 +20,10 @@
 
 /* Page a three-column text screen while Square is held: Up and Down move by a page within the
  * hidden rows, and a pending redraw request also counts. When anything changed, redraw the columns
- * into a new image, upload it and return it; otherwise return 0. */
+ * into a new image, upload it (resetting the image ring to its first row) and return it; otherwise
+ * return 0. */
 static u8* world_screen_menu_redraw_text_page_on_scroll(
-    menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused_cursor) {
+    menu_entry_t* entry, s32* row_offset, s32* ring, s32* unused_cursor) {
     menu_text_layout_t* layout = entry->context;
     u32* input0;
     u32* input1;
@@ -69,7 +70,7 @@ static u8* world_screen_menu_redraw_text_page_on_scroll(
     buffer = menu_alloc_memory(entry->inner_width * entry->inner_height / 2);
     menu_clear_render_buffer(buffer, entry->inner_width * entry->inner_height / 2);
     world_screen_menu_draw_text_columns(entry, row_offset, buffer);
-    *redraw = 0;
+    *ring = 0;
     LoadImage(&rect, buffer);
     mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
     clear.h = 2;
@@ -82,9 +83,10 @@ static u8* world_screen_menu_redraw_text_page_on_scroll(
 
 /*
  * Scrolling three-column text list thread (an older sibling of
- * menu_run_scrolling_ability_list_thread with a fixed page pair at 0x801bfda4 and helper thread
- * 15 running world_screen_menu_window_frame_thread). The menu-screen library's variant of
- * menu_run_at_list: the formation screens, the world map menus and the title's music test run it.
+ * menu_run_scrolling_ability_list_thread with a fixed page pair, g_world_text_list_pages, and
+ * world_screen_menu_window_frame_thread in the frame thread slot). The menu-screen library's
+ * variant of menu_run_at_list: the formation screens, the world map menus and the title's music
+ * test run it.
  *
  * Draws the visible rows into a text image, then runs the input loop on two
  * alternating packet pages. Cursor moves past either end start a one-row

@@ -9,7 +9,6 @@
 /* Takes the next POLY_F4 from the pool, sets semi-transparency, colors it,
  * copies the four x/y pairs (x shifted by 0x80) and links it into
  * ordering-table entry ot_index (libgpu addPrim). */
-/* Target 0x8012bebc. */
 void world_gfx_append_poly_f4_to_otag(point16_t* xy, rgb24_t* rgb, s32 semi_trans, s32 ot_index) {
     POLY_F4* poly = &g_menu_gfx_context->flat_quads[g_world_gfx_poly_f4_count++];
 

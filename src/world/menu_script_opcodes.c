@@ -95,8 +95,9 @@ menu_instruction_t* world_menu_script_if_else(menu_instruction_t* instruction) {
     return instruction;
 }
 
-/* Draws the rectangle described by a 6-byte command header (x, y, w, h)
- * followed by its payload, and returns the next command. */
+/* Menu script command: draw a filled tile (x, y, width, height and color) at
+ * the current draw priority and semi-transparency, and return the next
+ * command. Inside a list body, y follows the row being drawn. */
 menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
@@ -120,7 +121,9 @@ menu_instruction_t* world_menu_script_draw_tile(menu_instruction_t* instruction)
 }
 
 /* Draws the sprite described by a 9-byte command header (x, y, w, h, u, v)
- * and returns the next command. */
+ * with the current texture page and CLUT, tinted by the menu sprite color
+ * unless it is the uncolored variant, and returns the next command. Inside a
+ * list body, y follows the row being drawn. */
 menu_instruction_t* world_menu_script_draw_sprite(menu_instruction_t* instruction) {
     RECT rect;
     s32 y;
@@ -257,6 +260,7 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
         v_bottom = 0x1C;
     }
 
+    /* Top edge: the left corner, the partial piece, the full 16-pixel pieces and the right corner. */
     rect.x = left;
     rect.y = top;
     rect.w = 5;
@@ -284,6 +288,7 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     menu_gfx_enqueue_textured_quad(
         &rect, u_right - 5, v_top, 0, g_menu_gfx_semitransparency, g_world_menu_window_tpage, clut, priority);
 
+    /* Side edges, partial piece first. */
     rect.x = left;
     rect.y = top + 9;
     rect.w = 5;
@@ -324,6 +329,7 @@ menu_instruction_t* world_menu_parse_draw_window_frame(menu_instruction_t* instr
     }
     world_menu_parse_draw_tiled_rectangle((menu_instruction_t*)&g_world_menu_window_interior_command);
 
+    /* Bottom edge, laid out like the top. */
     top = top + 9 + partial_height + full_rows * 16;
     rect.x = left;
     rect.y = top;
@@ -496,8 +502,8 @@ menu_instruction_t* world_menu_script_set_texture_page(menu_instruction_t* instr
 }
 
 /* Menu-script opcode handler: byte 3 of the instruction selects the
-   semi-transparency flag used by the window/text primitives. Returns the
-   address of the next instruction (byte 1 is the instruction length). */
+ * semi-transparency flag used by the window/text primitives. Returns the
+ * address of the next instruction (byte 1 is the instruction length). */
 menu_instruction_t* world_menu_script_set_semi_trans(menu_instruction_t* instruction) {
     g_menu_gfx_semitransparency = instruction->draw_state.value;
     return menu_next_instruction(instruction);
@@ -527,7 +533,7 @@ menu_instruction_t* world_menu_script_set_sprite_color(menu_instruction_t* instr
 }
 
 /* Menu-script opcode handler: byte 3 of the instruction sets the menu draw
-   priority. Returns the address of the next instruction. */
+ * priority. Returns the address of the next instruction. */
 menu_instruction_t* world_menu_script_set_draw_priority(menu_instruction_t* instruction) {
     g_menu_gfx_otag_index = instruction->draw_state.value;
     return menu_next_instruction(instruction);
@@ -706,6 +712,7 @@ menu_instruction_t* world_menu_cmd_draw_right_aligned_number_handler(menu_instru
     rect.y = y + 2;
     rect.w = 8;
     rect.h = 14;
+    /* The digit glyphs sit 8 pixels apart from u 0xA8 ('0' * 8 - 0xD8). */
     i = 0;
     while (i < value) {
         menu_gfx_enqueue_textured_quad(
@@ -998,17 +1005,18 @@ void world_menu_init_and_draw_scrollable_list(
  * Menu-script handler for a scrollable list: the WORLD original of the
  * overlays' scrollable-list body commands.
  *
- * Moves the cursor on Up/Down (bits 0x10000000 and 0x40000000 of the script
- * input, the held-repeat flags of Up and Down, keep a scroll going without
- * moving the cursor) and pages through
- * world_menu_scroll_list_by_page. Moving past the first or last visible row
- * starts a one-row scroll: the newly exposed row is rendered into the list's
- * VRAM strip at x 0x240, the pixel offset advances by the slow step until the
- * repeat timer reaches g_main_menu_scroll_accel_delay and by the fast step
- * after it, and when a full row height is covered the strip is moved one row
- * with draw-move primitives (one per row when scrolling up). Then it draws the list image, the up and down
- * arrows, the scrollbar thumb and the cursor, and replays the per-row record
- * group once per visible row, plus one while a scroll is in progress.
+ * Moves the cursor on Up/Down (the held-repeat flags of Up and Down, bits
+ * 16 up of the script input, keep a scroll going without moving the cursor)
+ * and pages through world_menu_scroll_list_by_page. Moving past the first or
+ * last visible row starts a one-row scroll: the newly exposed row is
+ * rendered into the list's VRAM strip at x 0x240, the pixel offset advances
+ * by the slow step until the repeat timer reaches
+ * g_main_menu_scroll_accel_delay and by the fast step after it, and when a
+ * full row height is covered the strip is moved one row with draw-move
+ * primitives (one per row when scrolling up). Then it draws the list image,
+ * the up and down arrows, the scrollbar thumb and the cursor, and replays the
+ * per-row record group once per visible row, plus one while a scroll is in
+ * progress.
  *
  * An empty list skips the list command and its following row group. Returns
  * the record that follows the list.
@@ -1045,7 +1053,7 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
             if (i != 2) {
                 world_menu_scroll_list_by_page(i, command);
             }
-        } else if ((g_menu_cmd_stream_input & 0x10000000) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
+        } else if ((g_menu_cmd_stream_input & (PSX_PAD_UP << 16)) || (g_menu_cmd_stream_input & PSX_PAD_UP)) {
             index = g_menu_scroll_base_index;
             if (index == g_menu_list_selected_index) {
                 if (index > 0) {
@@ -1063,7 +1071,7 @@ menu_instruction_t* world_menu_cmd_draw_scrollable_list_body_handler(menu_instru
             } else if (g_menu_cmd_stream_input & PSX_PAD_UP) {
                 g_menu_list_selected_index--;
             }
-        } else if ((g_menu_cmd_stream_input & 0x40000000) || (g_menu_cmd_stream_input & PSX_PAD_DOWN)) {
+        } else if ((g_menu_cmd_stream_input & (PSX_PAD_DOWN << 16)) || (g_menu_cmd_stream_input & PSX_PAD_DOWN)) {
             if (g_menu_scroll_base_index + g_world_menu_list_visible_rows - 1 == g_menu_list_selected_index) {
                 if (g_menu_scroll_base_index + g_world_menu_list_visible_rows - 1 < g_menu_list_entry_count - 1) {
                     g_world_menu_list_scroll_direction = 1;

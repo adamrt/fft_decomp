@@ -193,7 +193,8 @@ void world_formation_run_screen(s32 tutorial, s32 unused) {
             /* The event layer goes to OT 0x3E over the item list, the job wheel and the transitions (14 and up). */
             g_gfx_current_otag_entry = g_menu_gfx_context->otag + 63;
             menu_draw_active_window_frames();
-            if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_LIST || g_world_formation_current_menu >= 14
+            if (g_world_formation_current_menu == WORLD_FORMATION_MENU_ITEM_LIST
+                || g_world_formation_current_menu >= WORLD_FORMATION_MENU_JOB_WHEEL_ENTER
                 || g_world_formation_current_menu == WORLD_FORMATION_MENU_JOB_WHEEL) {
                 i = 0x3E;
             } else {
@@ -337,9 +338,11 @@ void world_formation_init_menu_state(void) {
     world_formation_rebuild_unit_list();
 }
 
-/* Built at -O1: -O1 does no
- * strength reduction, which is why the target recomputes the index inside
- * the loop. Same profile as the adjacent world_formation_init_menu_state. */
+/* Clear the 16 menu selection results to -1 (nothing chosen).
+ *
+ * Built at -O1: -O1 does no strength reduction, which is why the target
+ * recomputes the index inside the loop. Same profile as the adjacent
+ * world_formation_init_menu_state. */
 void world_menu_reset_selection_results(void) {
     s32 i;
 
@@ -349,7 +352,14 @@ void world_menu_reset_selection_results(void) {
 }
 
 /*
- * Run one frame of the formation screen.
+ * Run one frame of the formation screen's unit grid, order and dismiss menus.
+ *
+ * On the unit grid, the first call rebuilds the unit list and clamps the
+ * selection. Triangle or Start opens the unit's menu (Item, Ability, Job,
+ * Dismiss, Order; an egg's menu only offers dismissal) and the choice moves
+ * to that menu's state; Circle while browsing opens View Abilities; Cross
+ * fades out, and the screen ends once the fade completes. The order and
+ * dismiss menus run their own steps.
  */
 void world_formation_process_frame(void) {
     u32 input = g_menu_input_primary_repeat;
@@ -641,7 +651,7 @@ void world_formation_stage_selected_unit(void) {
  * On a change, the previous unit's display snapshot is kept for the slide
  * (g_world_comparison_unit_stat_summary/g_world_comparison_unit_identity, the second slot after
  * world_formation_stage_selected_unit's copies) and g_menu_status_display_thread_params.redraw_request records the
- * direction: 1 for 0x2000/0x8 input or a forward move, 2 otherwise. g_world_formation_banner_slide_step counts the
+ * direction: 1 for Right or R1 or a forward move, 2 otherwise. g_world_formation_banner_slide_step counts the
  * 16-frame banner slide in either direction, driving the banner y positions in
  * g_menu_status_display_thread_params.y/g_menu_comparison_display_thread_params.y. Compiled at -O1; the flag update
  * goes through a pointer so each branch materializes the address like the target.
@@ -677,7 +687,9 @@ void world_shop_update_unit_selection(void) {
             }
         }
         previous = g_world_formation_selected_unit_index_latch;
-        if (g_world_shop_menu_step >= 6 && g_world_shop_menu_step <= 12) {
+        /* The fitting room shows stats for the equipment being tried on. */
+        if (g_world_shop_menu_step >= WORLD_SHOP_STEP_FITTING_ROOM
+            && g_world_shop_menu_step <= WORLD_SHOP_STEP_FITTING_ROOM_CHECKOUT) {
             world_formation_recalculate_selected_unit_stats();
         } else {
             world_formation_stage_selected_unit();
@@ -708,7 +720,7 @@ void world_shop_update_unit_selection(void) {
             }
         }
     }
-    if (g_world_shop_menu_step >= 20) {
+    if (g_world_shop_menu_step >= WORLD_SHOP_STEP_SOLDIER_OFFICE_MENU) {
         world_menu_start_equipment_and_ability_panel_thread(g_world_formation_unit_browse_enabled);
     } else {
         world_menu_toggle_change_banner_panel_thread(g_world_formation_unit_browse_enabled);

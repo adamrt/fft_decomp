@@ -6,9 +6,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Append a two-color line to the menu ordering table. */
+/* Takes the next LINE_G2 from the pool, sets semi-transparency, copies the two
+ * endpoints (x shifted by 0x80, as world_gfx_append_poly_f4_to_otag does) and
+ * their colors, and links it into ordering-table entry ot_index. */
 void world_menu_add_gradient_line_primitive(point16_t* endpoints, rgb24_t* colors, s32 semi_trans, s32 ot_index) {
     LINE_G2* line = &g_menu_gfx_context->gouraud_lines[g_world_gfx_gradient_line_count++];
+
     SetSemiTrans(line, semi_trans);
     line->x0 = endpoints[0].x + 0x80;
     line->y0 = endpoints[0].y;

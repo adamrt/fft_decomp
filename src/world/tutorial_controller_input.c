@@ -17,10 +17,15 @@ static u32 g_world_script_tutorial_repeat_counters[16] = { 0 };
 /*
  * Publish newly pressed buttons and two repeat rates, reading tutorial input.
  *
- * Twin of world_input_update_controller (0x8012ebf0) with its own edge latch,
+ * Twin of world_input_update_controller (card_save.c) with its own edge latch,
  * single-button latch, activation timer, previous-state and counter arrays;
- * the secondary repeat period is two frames longer. Counter slots 4..11 are
- * skipped; those buttons use only the newly pressed mask.
+ * the secondary repeat period is two frames longer.
+ *
+ * Triangle reports one press and nothing while held. Otherwise one button is
+ * reported at a time: of several, the lowest button bit is latched and
+ * reported alone until it is released. After a release, a new press counts only once
+ * the activation timer reaches 4 (VSyncs), except a D-pad press, which counts
+ * at once.
  */
 static void world_script_update_tutorial_controller_input(void) {
     s16 bit;
@@ -28,7 +33,11 @@ static void world_script_update_tutorial_controller_input(void) {
     u32 current_input;
     u32 filtered_input;
     u32* counter_base;
-    u32 speed, initial_delay, secondary_repeat_period, repeat_period;
+    u32 speed;
+    u32 initial_delay;
+    u32 secondary_repeat_period;
+    u32 repeat_period;
+
     speed = menu_get_event_speed();
     initial_delay = g_main_input_repeat_initial_delay / speed;
     repeat_period = g_main_input_repeat_period / speed;
@@ -102,6 +111,9 @@ static void world_script_update_tutorial_controller_input(void) {
                 g_world_script_tutorial_previous_input &= ~mask;
             }
         }
+        /* Auto-repeat for the shoulder buttons (bits 0-3) and the D-pad (bits 12-15); the
+         * face buttons, Select and Start (bits 4-11) skip the counters and report only new
+         * presses. Bits 16-31 flag a button held past the initial delay. */
         counter_base = g_world_script_tutorial_repeat_counters;
         for (index = 0; index < 16; index++) {
             if (index == 4) {
@@ -141,12 +153,13 @@ static void world_script_update_tutorial_controller_input(void) {
 /*
  * Per-frame input update of the formation, shop and name-entry screens.
  *
- * Reads the pad (through the tutorial input reader), then clears the 32-bit input masks during steps 1..3 of the
- * window scale animation, while the text thread runs or a help screen is
- * open, on the frame the text ends and during a screen fade. The text phase
- * goes 1 on the first frame of a text task (which queues the window-open
- * sound), 2 after it and 0 otherwise. When the text thread is not running
- * the task-active flag and the held-loop sound release are cleared.
+ * Reads the pad (through the tutorial input reader), then clears the 32-bit
+ * input masks during steps 1..3 of the window scale animation, while the text
+ * thread runs or a help grid is open, on the frame the text ends and during a
+ * screen fade. The text phase goes 1 on the first frame of a text task (which
+ * queues the window-open sound), 2 after it and 0 otherwise. When the text
+ * thread is not running, the input lock and the held-loop sound release are
+ * cleared.
  */
 void world_menu_input_update_with_message_state(void) {
     s32 running = 0;

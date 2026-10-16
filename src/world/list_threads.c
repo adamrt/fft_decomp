@@ -19,17 +19,20 @@
 #include "psx/types.h"
 
 /*
- * Thread task 0x3b: the equipment twin of menu_run_ability_list_thread (same 0x3d8-byte
- * frame pair, thread record and callee sequence). It lists the five
- * equipment names of an item stat-detail record and draws their item icons.
- */
-
-/* Equipment panel thread. The sprite sheet layout (0-3) comes from the two
- * mode flags; the text image is rebuilt on the first frame or on request.
+ * Equipment panel thread (task THREAD_TASK_STATUS_PANEL), the equipment twin
+ * of menu_run_ability_list_thread (same 0x3d8-byte frame pair, thread record
+ * and callee sequence). It lists the five equipment names of an item
+ * stat-detail record and draws their item icons: in the equip/ability panel
+ * slot g_world_selected_unit_stat_detail, in any other slot (the stat preview)
+ * g_item_preview_stat_detail. The panel layout (0-3) comes from the record's
+ * Two Hands and generic-monster flags; the text image is rebuilt on the first
+ * frame or on request. Runs until parameter 3 is set.
  *
  * The first text loop re-reads equipment[] instead of caching it: the target
  * reloads the slot as a byte after the color store, and the color field goes
- * through a signed temporary because the target shifts it with sra. */
+ * through a signed temporary because the target shifts it with sra. The empty
+ * icon store's odd indexing also matches the target's address arithmetic.
+ */
 void menu_run_equipment_list_thread(void) {
     u8* text;
     s32 u;
@@ -192,16 +195,17 @@ void menu_run_equipment_list_thread(void) {
 }
 
 /*
- * Thread task 0x3b: a two-column status panel that lists five ability labels
- * of an item stat-detail record. Thread 10 draws g_world_selected_unit_stat_detail into the first
- * frame pair, other threads draw g_item_preview_stat_detail into the
- * second. A trimmed relative of menu_run_status_panel_thread
- * (same 0x3d8-byte frame layout and callee sequence).
+ * Ability panel thread (task THREAD_TASK_STATUS_PANEL): a two-column status
+ * panel that lists five ability labels of an item stat-detail record. The
+ * equip/ability panel slot draws g_world_selected_unit_stat_detail into the
+ * first frame pair, other slots draw g_item_preview_stat_detail into the
+ * second. A trimmed relative of menu_run_status_panel_thread (same 0x3d8-byte
+ * frame layout and callee sequence). Runs until parameter 3 is set.
  */
 void menu_run_ability_list_thread(void) {
     s32 offset[2];
     /* Never referenced: the target frame has these 16 bytes between the
-       offset pair and the spill slots of u/base/upload. */
+     * offset pair and the spill slots of u/base/upload. */
     s32 unused[4];
     s32 u;
     menu_status_panel_buffer_t* base;
@@ -278,8 +282,8 @@ void menu_run_ability_list_thread(void) {
         }
 
         /* No i = 0 here: the target's reset before this test is reorg
-           hoisting the loop's own initialization into a delay slot, and an
-           explicit one lengthens i's live range enough to lose it $s1. */
+         * hoisting the loop's own initialization into a delay slot, and an
+         * explicit one lengthens i's live range enough to lose it $s1. */
         if (frame == 0 || thread->redraw_request == 1) {
             menu_clear_render_buffer(text, 0xc80);
             g_menu_text_state.pen.stride = 0x50;

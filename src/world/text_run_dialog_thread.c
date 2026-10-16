@@ -30,7 +30,7 @@
 #define NEXT() text = text_advance_cursor_with_separate_backreference_state(&repeat, text, &saved)
 
 /* Aborts (here and below) leave the nested text loops for the shared
-   window close-and-release tail at `end`. */
+ * window close-and-release tail at `end`. */
 #define CHECK_ABORT()                                                                                                  \
     if (thread_get_current_task_id() == THREAD_TASK_STOP_REQUEST                                                       \
         && g_thread_current_id != WORLD_THREAD_SLOT_TUTORIAL_TEXT) {                                                   \
@@ -45,7 +45,15 @@
     }
 
 /* Dialog text thread: opens a dialog window and draws the text entry named
- * by thread parameter 2 glyph by glyph, handling the control bytes. */
+ * by thread parameter 2 glyph by glyph, handling the control bytes.
+ *
+ * Parameter 1 is the dialog type (box type, position, options; types with
+ * bit 0x10 carry a portrait), parameter 3 the speaker's unit and parameter 4
+ * the portrait or roster slot; the thread's task words supply offsets and a
+ * forced text width. The box is sized from the measured text, placed (a
+ * tailed portrait box above or below its speaker), opened with a tween,
+ * filled glyph by glyph with waits for confirmation at full pages, page
+ * breaks and the end, and finally closed and released. */
 void text_run_dialog_thread(void) {
     text_dialog_record_t rec;
     RECT from;
@@ -151,16 +159,16 @@ void text_run_dialog_thread(void) {
         party = main_party_get_unit(rec.portrait);
         if (party->sprite_set >= CHARACTER_IDENTITY_SELECTOR_FIRST) {
             if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_MALE) {
-                s32 window_u = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
-                portrait_id = window_u + 0x60;
+                s32 sheet_offset = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
+                portrait_id = sheet_offset + 0x60;
                 if (party->job_id == JOB_ID_MIME) {
-                    portrait_id = window_u + 0x5E;
+                    portrait_id = sheet_offset + 0x5E;
                 }
             } else if (party->sprite_set == CHARACTER_IDENTITY_GENERIC_FEMALE) {
-                s32 window_u = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
-                portrait_id = window_u + 0x61;
+                s32 sheet_offset = (party->job_id - JOB_ID_GENERIC_FIRST) * 2;
+                portrait_id = sheet_offset + 0x61;
                 if (party->job_id == JOB_ID_MIME) {
-                    portrait_id = window_u + 0x5F;
+                    portrait_id = sheet_offset + 0x5F;
                 }
             } else {
                 job = main_job_get_data_pointer(party->job_id);

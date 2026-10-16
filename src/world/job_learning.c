@@ -46,6 +46,7 @@ s32 world_menu_run_learn_job_list(void) {
         g_world_learn_job_list_initialized = 0;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
+    /* A mastered job has nothing left to learn, so only View Abilities may open it. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         if (job_calculate_current_mastered(g_menu_list_selected_index) == 0
             || g_world_formation_current_menu == WORLD_FORMATION_MENU_VIEW_ABILITIES) {

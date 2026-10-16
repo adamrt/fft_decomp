@@ -17,7 +17,6 @@ s32 world_gfx_get_fade_state(void) {
 
 /* Start the fade from intensity 240 down to zero (the screen fades in),
  * unless fades are disabled. */
-/* Target 0x8012d454. */
 void world_gfx_start_decreasing_fade(void) {
     if (g_world_gfx_fade_disabled == 0) {
         g_world_gfx_fade_decreasing = 1;
@@ -28,7 +27,6 @@ void world_gfx_start_decreasing_fade(void) {
 
 /* Start the fade from intensity 0 up to full (the screen fades out), unless
  * fades are disabled. */
-/* Target 0x8012d48c. */
 void world_gfx_start_increasing_fade(void) {
     if (g_world_gfx_fade_disabled == 0) {
         g_world_gfx_fade_decreasing = 0;
@@ -37,10 +35,14 @@ void world_gfx_start_increasing_fade(void) {
     }
 }
 
-/* Target 0x8012d4c0. Steps the subtractive fade level down and draws the
- * full-screen fade tile (abr 2, so the screen brightens as the level falls);
- * returns 1 while the fade is still running, 0 once done or when fading is
- * suppressed. */
+/* Steps the subtractive fade level down by 16 per VSync of the frame step and
+ * draws the full-screen fade tile (abr 2, so the screen brightens as the level
+ * falls); returns 1 while the fade is still running, 0 once done or when
+ * fading is suppressed.
+ *
+ * Unlike the fade out, the level is not clamped when it ends: at a frame step
+ * of 2 it goes 16 to -16, and that last tile is drawn with the low byte, 240,
+ * darkening the screen for one frame. */
 s32 world_gfx_update_fade_in_tile(void) {
     s32 running = 1;
 
@@ -60,9 +62,9 @@ s32 world_gfx_update_fade_in_tile(void) {
     return running;
 }
 
-/* Target 0x8012d5bc; sibling of world_gfx_update_fade_in_tile. Steps the
- * subtractive fade level up (the screen darkens) and draws the full-screen
- * fade tile; returns 1 while the fade is still running, 0 once done or when
+/* Sibling of world_gfx_update_fade_in_tile. Steps the subtractive fade level
+ * up (the screen darkens) and draws the full-screen fade tile, ending clamped
+ * at 0xFF; returns 1 while the fade is still running, 0 once done or when
  * fading is suppressed. */
 s32 world_gfx_update_fade_out_tile(void) {
     s32 running = 1;
@@ -85,8 +87,8 @@ s32 world_gfx_update_fade_out_tile(void) {
     return running;
 }
 
-/* When set, the screen fade helpers at 0x8012d418-0x8012d6c8 all bail out
- * immediately, leaving g_world_gfx_fade_intensity at 0x801ca760 untouched. */
+/* When set, the fade helpers in this file all bail out immediately, leaving
+ * g_world_gfx_fade_intensity untouched. */
 void world_gfx_set_fade_disabled(u8 disabled) {
     g_world_gfx_fade_disabled = disabled;
 }

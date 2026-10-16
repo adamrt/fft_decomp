@@ -14,7 +14,8 @@
 #include "psx/types.h"
 
 /* Thread that draws the zodiac backdrop each frame, zooming it from double size down to normal
- * unless parameter 1 starts it at normal size, until parameter 3 asks it to stop. */
+ * (1/16 per VSync of the event speed) unless parameter 1 starts it at normal size, until
+ * parameter 3 asks it to stop. */
 void world_formation_view_zoom_thread(void) {
     s32 frame;
 
@@ -52,9 +53,12 @@ void world_formation_view_zoom_thread(void) {
  * Compute the formation sprite palette index of a party unit; the caller
  * turns it into the CLUT at (0x140 + (index % 4) * 16, 0xe0 + index / 4).
  *
- * Generic male/female identities derive their sheet from the job; other
- * selectors take the job's spritesheet. Indices of 0x3e and above are
- * expanded by the job's portrait palette.
+ * Generic male/female identities derive their sheet from the job (the same
+ * sheet numbering menu_build_portrait_poly uses); other selectors take the
+ * job's spritesheet. Monster sprites from 0x3e on have three palettes each,
+ * and the job's portrait palette picks one. `job` is only loaded for
+ * selectors other than the generic humans, so this step assumes no other
+ * unit's sprite reaches 0x3e.
  */
 s32 world_formation_get_unit_palette_index(s32 party_index) {
     party_unit_t* unit = main_party_get_unit(party_index);

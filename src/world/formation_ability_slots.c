@@ -24,12 +24,17 @@
 /*
  * Change an ability slot and optionally replace incompatible equipment.
  *
- * Equipment changes return old items to inventory before reserving the
- * replacement set. Return 1 on success and -2 when the unit cannot change.
+ * The record is saved to the party and anything the new ability set no
+ * longer allows is removed. With `update_equipment`, a unit other than the
+ * preview unit and not a Mime is then given its best-fit equipment: the old
+ * items return to the inventory before the replacement set is taken from it,
+ * and the auto-equip banner (0xD811) shows for 30 frames. Return 1 on success
+ * and -2 when the unit is locked (see world_formation_get_unit_lock).
  */
 s32 world_formation_set_unit_ability_slot(s16 unit_id, s16 slot, s16 ability, s32 update_equipment) {
     s16 equipment[MENU_EQUIPMENT_SLOT_COUNT];
     s32 i;
+
     if (world_formation_get_unit_lock(unit_id) == WORLD_FORMATION_UNIT_UNLOCKED) {
         world_unit_t* unit = g_world_unit_pointers[unit_id];
         unit->abilities.slots[slot] = ability;
@@ -279,13 +284,14 @@ void world_unit_update_monster_breeding(s32 unused) {
     if (monster_count == 0) {
         return;
     }
+    /* The day's roll out of 256: below 6 rare, below 16 uncommon, below 32 common, else no egg. */
     value = rand() & 0xFF;
     if (value < 6) {
         n = WORLD_MONSTER_BREED_RARITY_RARE;
     } else if (value < 0x10) {
         n = WORLD_MONSTER_BREED_RARITY_UNCOMMON;
     } else {
-        n = value < 0x20;
+        n = value < 0x20; /* COMMON or NONE */
     }
     if (n == WORLD_MONSTER_BREED_RARITY_NONE) {
         return;
@@ -297,6 +303,9 @@ void world_unit_update_monster_breeding(s32 unused) {
     if (i < 2) {
         i = 2;
     }
+    /* The egg's hatch count goes in both nibbles; the low one counts down. Name generation
+     * reads the unit-name table through the roster-name pointer, swapped for the call as
+     * world_formation_generate_unit does. */
     name_buffer = &g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     value = (s32)*name_buffer;
     *name_buffer = g_text_section_pointers[TEXT_SECTION_UNIT_NAMES];
@@ -311,8 +320,11 @@ void world_unit_update_monster_breeding(s32 unused) {
 /*
  * Present the completed ordering table and prepare the other packet buffer.
  *
- * draw_otag == -1 skips submission. The incoming table is cleared from
- * first_otag onward after waiting for the GPU and the configured VSync count.
+ * Resets the primitive pool counters, waits for the GPU and the frame step's
+ * VSyncs, then flips to the other packet buffer (applying its display and
+ * draw environments), submits the finished ordering table from entry
+ * draw_otag (-1 skips submission) and clears the new buffer's table from
+ * first_otag onward.
  */
 void world_gfx_present_frame_and_swap_packet_buffer(s32 first_otag, s32 draw_otag) {
     DRAWENV env;

@@ -81,8 +81,8 @@ static s32 world_job_get_text_index(s16 job_id) {
  *    four jobs, 3 otherwise) that moves the cursor one job and wraps;
  *  - Circle on an available job starts the job-change flash
  *    (world_formation_process_job_change), after which the job is changed,
- *    with replacement equipment chosen when the "max equip at job change"
- *    option field is 0, and the job list rebuilt; on an unavailable job other
+ *    with replacement equipment chosen when Max Equip at Job Change is On
+ *    (its option field reads 0), and the job list rebuilt; on an unavailable job other
  *    than the unit's own it shows that job's text with the error sound;
  *  - Select shows the job's text, Square toggles the unit banner (L1/R1
  *    cycle units while it is hidden) and Cross leaves.
@@ -113,9 +113,8 @@ void world_formation_run_job_wheel_menu(void) {
         g_world_job_wheel_unit_index = g_unit_selected_index;
     }
 
-    /* 0xE and 0xF are WORLD_FORMATION_MENU_JOB_WHEEL_ENTER and _LEAVE. */
     i = g_world_formation_current_menu;
-    if (i == 0xE) {
+    if (i == WORLD_FORMATION_MENU_JOB_WHEEL_ENTER) {
         if (world_formation_step_grid_transition(2) == 0) {
             world_formation_update_job_wheel_state();
             world_formation_build_job_wheel_job_name();
@@ -126,7 +125,7 @@ void world_formation_run_job_wheel_menu(void) {
     }
 
     /* The close animation ends by storing JOB_WHEEL_OPENING; that is its done signal here. */
-    if (i == 0xF) {
+    if (i == WORLD_FORMATION_MENU_JOB_WHEEL_LEAVE) {
         if (g_world_job_wheel_job_selected != 0) {
             world_formation_step_job_wheel_close_animation();
             world_formation_draw_unit_sprite(g_unit_selected_index, &g_world_job_wheel_unit_sprite_position, 0, 0x32);
@@ -421,7 +420,8 @@ static void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 
  * strip, copies the same bytes of the new graphic into an initially blank
  * strip at g_world_job_change_new_sprite_rect, uploads both, and draws a 64-line rcos/rsin wave band
  * that slides in over frames 0-19 and out over 221-239.
- * Input bits 0x60 skip ahead to frame 220; frame 240 frees the buffers.
+ * Circle or Cross skips ahead to frame 220 (once frame 40 is reached); frame
+ * 240 frees the buffers.
  *
  * `j`/`k`/`n` are each reused across the phases, and the wave phase is
  * `i * k` with `k` holding the step: splitting any of them, or keeping a
@@ -623,8 +623,11 @@ static void world_formation_step_job_wheel_open_animation(void) {
     }
 }
 
-/* Formation menu step: either finish the pending job-wheel open (menu 0x15)
- * or advance the wheel scroll position by the frame step, capping at 16. */
+/* Restart the wheel for a newly selected unit (and on entry): an idle wheel starts its close
+ * animation, which hands over to the open animation; a closing wheel switches straight to
+ * opening; an opening wheel rebuilds its jobs for the new unit and adds the secondary repeat
+ * period (divided by the event speed) to its remaining open frames, capped at 16. Lays the
+ * portrait out again. */
 static void world_formation_update_job_wheel_state(void) {
     s32 step;
     /* The target frame is 0x30 bytes; 0x18 of unreferenced locals. */

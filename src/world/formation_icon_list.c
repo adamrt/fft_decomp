@@ -44,6 +44,10 @@ void world_menu_formation_icon_list_thread(void) {
     g_menu_text_palette_offset = 0;
     menu_display_text_entry(param->text_id, buffer, &g_menu_text_state.pen);
     LoadImage(&rect, buffer);
+
+    /* The sprite records alternate by frame, since the GPU may still be
+     * reading last frame's; the frame image is freed once its upload has had a
+     * frame to finish. */
     for (i = 0;; i++) {
         thread_yield();
         if (i == 0) {
@@ -73,8 +77,8 @@ void world_menu_formation_icon_list_thread(void) {
 
 /* Rebuild the roster name text section from the party data: one 0xFE
  * terminated name per roster slot, empty for a vacant slot, with a terminator
- * appended to a name that fills all 16 bytes. Bumps the name string
- * revision. */
+ * appended to a name that fills all 16 bytes. A 0xFF byte also ends a name
+ * and is copied as its terminator. Bumps the name string revision. */
 void world_text_build_roster_name_list(void) {
     u8* out = g_text_section_pointers[TEXT_SECTION_ROSTER_UNIT_NAMES];
     party_unit_t* unit;
@@ -96,14 +100,14 @@ void world_text_build_roster_name_list(void) {
                     break;
                 }
                 out++;
-                if (j == 0xF) {
+                if (j == UNIT_NAME_SIZE - 1) {
                     *out = 0xFE;
                     out++;
                 }
             }
         }
     }
-    g_world_formation_name_string_revision = g_world_formation_name_string_revision + 1;
+    g_world_formation_name_string_revision++;
 }
 
 /* Set the formation display mode; the title script switches it between 0 and 1. */

@@ -23,12 +23,15 @@
 #include "psx/types.h"
 
 /*
- * Run the formation item-menu action strip (menu mode 2) and return the next
- * item-menu mode: 5 while the strip stays open, 2 once an action completes.
+ * Run the Items screen's action strip (MENU_ITEM_LIST_STATE_ACTION) and
+ * return the next state: ACTION while it stays open, BROWSE when it is
+ * canceled, SORT_ORDER once the sort option is chosen.
  *
  * On entry the three option lines are enabled or grayed from the selected
- * item. Option 0 changes the owned quantity, option 1 unequips the item from
- * every formation unit and -1 steps the item category.
+ * item: option 0 (discard a quantity) needs some in the inventory, option 1
+ * (unequip it from every formation unit) needs it equipped somewhere, and
+ * option 2 (sort order) needs at least two list entries. With no option
+ * chosen, Left/Right switch the category tab.
  *
  * `item` first holds the chosen option and `selected` copies it: the target
  * compares g_world_item_action_menu_initialized against that copy after `item` is reused for the item
@@ -64,7 +67,7 @@ s8 world_item_run_action_menu(void) {
         }
 
         text++;
-        while (*text != 0xE3) {
+        while (*text != TEXT_SET_PALETTE) {
             text++;
         }
         if (g_menu_list_entry_count != 0
@@ -77,7 +80,7 @@ s8 world_item_run_action_menu(void) {
         }
 
         text++;
-        while (*text != 0xE3) {
+        while (*text != TEXT_SET_PALETTE) {
             text++;
         }
         if (g_item_list_entries[0] != -1 && g_item_list_entries[1] != -1) {
@@ -184,6 +187,7 @@ s8 world_item_run_action_menu(void) {
         menu_set_selection_record(
             g_menu_selected_slot, g_menu_list_selected_index, g_menu_scroll_base_index, g_item_list_entries);
         g_menu_selected_slot = result;
+        /* Tabs 0-3 (hand, head, body, accessory) are list filters 1-4; tab 4 lists the other items. */
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 1,
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
@@ -205,12 +209,12 @@ s8 world_item_run_action_menu(void) {
 }
 
 /*
- * Run the item-category option strip and return the next item-menu mode:
- * 5 while the strip thread runs, 2 once it closes.
+ * Run the sort order strip for the selected tab and return the next state:
+ * SORT_ORDER while the strip thread runs, ACTION once it closes.
  *
- * On first entry the strip's option ids are loaded and their text built. A
- * chosen option moves to the front of the list, the list is written back and
- * the item list for the category is rebuilt. `i` also carries the description
+ * On first entry the tab's sort key list is loaded and its text built. A
+ * chosen key moves to the front of the list, the list is stored back and the
+ * tab's item list is re-sorted and stored. `i` also carries the description
  * text id; a separate variable changes the target's register allocation.
  */
 s8 world_item_run_sort_order_menu(void) {
@@ -263,6 +267,8 @@ s8 world_item_run_sort_order_menu(void) {
         }
         text_concatenate_entries(g_world_formation_menu_text_table, g_world_formation_menu_text_buffer, text_ids, 1);
         g_world_menu_text_redraw_request = 1;
+        /* Sort mode bit 0x80 makes the builder sort afresh by the new key list instead of
+         * keeping the tab's stored order. */
         world_item_build_category_list(g_unit_selected_index, g_menu_selected_slot + 0x81,
             g_menu_selected_slot != 4 ? g_menu_selected_slot + 1 : ITEM_LIST_FILTER_OTHER, g_item_list_entries,
             ITEM_LIST_MODE_ALL);
@@ -327,7 +333,10 @@ s32 world_item_show_units_equipping_selected(void) {
     return MENU_ITEM_LIST_STATE_EQUIPPED_BY;
 }
 
-/* The incoming mode stays in a2 until the first drawing-helper call. */
+/* Draw the Items screen's category tab row (the wide layout when `wide` is
+ * set), with tab `row` selected and the tab cursor beside it; `mode` is the
+ * script palette mode. The incoming mode stays in a2 until the first
+ * drawing-helper call. */
 void world_menu_draw_row_window_and_cursor(s32 wide, s32 row, s32 mode) {
     s16 x;
     s16 y;

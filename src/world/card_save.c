@@ -33,6 +33,8 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
+/* The memory card title's start in Shift-JIS: full-width "FFT FILE" and three spaces, the first
+ * two of which take the save number (bytes 0x10..0x13); the play time follows. */
 static u8 g_world_card_save_title_template[0x16]
     = { 130, 101, 130, 101, 130, 115, 129, 64, 130, 101, 130, 104, 130, 107, 130, 100, 129, 64, 129, 64, 129, 64 };
 
@@ -56,11 +58,16 @@ static s32 world_input_read_controller(s32 unused) {
 }
 
 /*
- * Publish newly pressed buttons and two repeat rates for WORLD menus.
+ * Publish newly pressed buttons and two repeat rates for WORLD menus, reading
+ * pad 0 (world_script_update_tutorial_controller_input is the tutorial twin).
  *
- * The 0x10 input uses a separate edge latch. Other inputs share CARD's
- * activation delay, single-button latch, and repeat-counter logic. Counter
- * slots 4..11 are skipped; those buttons use only the newly pressed mask.
+ * Triangle reports one press and nothing while held. Otherwise one button is
+ * reported at a time: of several, the lowest button bit is latched and
+ * reported alone until it is released. After a release, a new press counts
+ * only once the activation timer reaches 4 (VSyncs), except a D-pad press,
+ * which counts at once. Counter slots 4..11 (face buttons, Select, Start)
+ * are skipped; those buttons use only the newly pressed mask, and bits 16-31
+ * flag a button held past the initial delay.
  */
 static void world_input_update_controller(void) {
     s16 bit;
@@ -68,7 +75,11 @@ static void world_input_update_controller(void) {
     u32 current_input;
     u32 filtered_input;
     s32* counter_base;
-    u32 speed, initial_delay, secondary_repeat_period, repeat_period;
+    u32 speed;
+    u32 initial_delay;
+    u32 secondary_repeat_period;
+    u32 repeat_period;
+
     speed = menu_get_event_speed();
     initial_delay = g_main_input_repeat_initial_delay / speed;
     repeat_period = g_main_input_repeat_period / speed;
@@ -162,17 +173,18 @@ static void world_input_update_controller(void) {
     g_world_input_secondary_repeat_latched = g_menu_input_secondary_repeat;
 }
 
-/* The original wrote the body of world_menu_input_update_with_message_state a second time as
- * world_card_input_update_with_message_state. */
 /*
- * Per-frame input update of the formation, shop and name-entry screens.
+ * Per-frame input update of the memory card screen: the body of
+ * world_menu_input_update_with_message_state written a second time, reading
+ * the pad through world_input_update_controller instead of the tutorial
+ * reader.
  *
- * Reads the pad (through the tutorial input reader), then clears the 32-bit input masks during steps 1..3 of the
- * window scale animation, while the text thread runs or a help screen is
- * open, on the frame the text ends and during a screen fade. The text phase
- * goes 1 on the first frame of a text task (which queues the window-open
- * sound), 2 after it and 0 otherwise. When the text thread is not running
- * the task-active flag and the held-loop sound release are cleared.
+ * Clears the 32-bit input masks during steps 1..3 of the window scale
+ * animation, while the text thread runs or a help grid is open, on the frame
+ * the text ends and during a screen fade. The text phase goes 1 on the first
+ * frame of a text task (which queues the window-open sound), 2 after it and 0
+ * otherwise. When the text thread is not running, the input lock and the
+ * held-loop sound release are cleared.
  */
 static void world_card_input_update_with_message_state(void) {
     s32 running = 0;
@@ -325,8 +337,9 @@ s32 world_card_run_menu_screen(s32 mode_select_enabled) {
     return g_world_card_menu_result;
 }
 
-/* Memory card slot selection step: waits 0x28 frames, opens menu thread 6,
- * then applies the chosen slot (g_world_menu_selection_results[5]) or reports cancel (9). */
+/* Memory card slot selection step: waits 0x28 frames, opens the card choice menu in the screen
+ * menu slot, then applies the chosen card slot (g_world_menu_selection_results[5]) and starts
+ * scanning it, or leaves the screen on cancel. */
 static void world_card_run_slot_select_step(void) {
     s16* selected;
     s32 slot;
@@ -362,16 +375,13 @@ static void world_card_run_slot_select_step(void) {
     }
 }
 
-/* An 8-bit count: CARD.OUT stores it with `sb` at 0x801cc814 and reads it
- * with `lb`/`lbu`. This function reads the 16-bit value at that address instead
- * (`lh`), so the read is spelled through an s16 lvalue rather than the
- * declaration. */
-
 /*
  * Memory card menu state 1: choose between loading and saving.
  *
  * g_world_menu_selection_results[5] receives the menu choice (0 save, 1 load, -1 cancel); a zero
- * count (the title's Continue passes 0) skips the menu and loads. Saving when every slot state is -1,
+ * g_world_card_mode_select_enabled (the title's Continue passes 0) skips the menu and loads. WORLD
+ * reads and writes that flag as 16 bits, while CARD.OUT stores it as a byte (`sb`) and reads it
+ * with `lb`/`lbu`. Saving when every slot state is -1,
  * or loading when no slot state is 0, shows a notice thread instead of the slot
  * list (the same predicates world_card_count_selectable_save_slots counts). `i` is reused to hold the
  * previous save mode.
@@ -466,6 +476,7 @@ static void world_card_run_load_step(s32 slot) {
     u32 state = g_world_card_load_step_state;
     s32 input;
     s32 bytes_read;
+
     if (state == 0) {
         g_world_card_load_step_state = 1;
         g_world_card_load_failed = 0;
@@ -582,22 +593,24 @@ static void world_card_run_save_step(s32 slot) {
 }
 
 /*
- * WORLD twin of card_save_build_buffer (CARD.OUT 0x801c01ac): serialize the
- * whole 0x1e00-byte save image into g_world_load_work_buffer, then append one
+ * WORLD twin of CARD.OUT's card_save_build_buffer: serialize the whole
+ * 0x1e00-byte save image into g_world_load_work_buffer, then append one
  * parity bit per 128-byte block through the primary bitstream writer.
  *
  * The descriptor block at +0x100 takes its leader from the first formation
- * unit whose sprite_set is below 4, or formation unit 0 when there is none
- * (the CARD twin falls back to the last roster slot), the calendar from script variables
- * 0x2e/0x2f/0x31 and the play time from the MAIN second/minute/hour counters.
+ * unit that is Ramza (sprite set below CHARACTER_IDENTITY_RAMZA_END), or
+ * formation unit 0 when there is none (the CARD twin falls back to the last
+ * roster slot), the date and location from their script variables and the
+ * play time from the MAIN second/minute/hour counters. `slot` -1 (the
+ * tutorial's snapshot) marks the descriptor's slot 0 instead of 0xFF.
  * Everything from +0x124 on is a straight bcopy of the SCUS globals, in the
  * same order the CARD twin uses.
  */
 void world_card_build_save_image(s32 slot) {
     s32 i;
     s32 j;
-    s32 script_var_2f;
-    s32 script_var_2e;
+    s32 day;
+    s32 month;
     s32 location;
     s32 slot_marker;
     u8* block;
@@ -619,10 +632,10 @@ void world_card_build_save_image(s32 slot) {
     g_world_load_work_buffer->summary.job_id = g_world_unit_pointers[i]->identity.job_id;
     g_world_load_work_buffer->summary.level = g_world_unit_pointers[i]->status.level;
 
-    script_var_2f = script_get_variable(EVENT_SCRIPT_VAR_DAY);
-    script_var_2e = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
-    g_world_load_work_buffer->summary.date.day = script_var_2f;
-    g_world_load_work_buffer->summary.date.month = script_var_2e;
+    day = script_get_variable(EVENT_SCRIPT_VAR_DAY);
+    month = script_get_variable(EVENT_SCRIPT_VAR_MONTH);
+    g_world_load_work_buffer->summary.date.day = day;
+    g_world_load_work_buffer->summary.date.month = month;
     location = script_get_variable(EVENT_SCRIPT_VAR_LOCATION);
     slot_marker = (slot >= 0) ? 0xff : 0;
     g_world_load_work_buffer->summary.location = location;
@@ -711,8 +724,10 @@ void world_card_build_save_image(s32 slot) {
  *
  * Returns 0 when the image is unusable -- the slot byte still reads 0xff
  * (never written), the format version is not 4, or a 128-byte block's parity
- * disagrees with the bit stored for it.  Blocks 0..2 are the descriptor and
- * are not covered, so the primary cursor skips their three bits.
+ * disagrees with the bit stored for it. Blocks 0..2 hold the header and
+ * descriptor and are not checked (the primary cursor skips their three
+ * bits): the save step stamps the slot number into the descriptor after the
+ * parity was computed.
  *
  * A non-zero partial_load is the tutorial's partial load: it skips both the parity
  * sweep and the play-time restore, keeping the clock the caller already has.
@@ -903,7 +918,7 @@ static void world_card_update_save_slot_playtime(s32 slot) {
 /*
  * Scans the selected memory card and classifies each of the 15 save slots.
  *
- * WORLD twin of CARD's card_save_update_slot_scan (0x801c0c58): same state
+ * WORLD twin of CARD's card_save_update_slot_scan: same state
  * machine, but a NEW_CARD probe result is retried once before use.
  */
 static void world_card_update_slot_scan(void) {
@@ -1137,8 +1152,9 @@ static void world_card_update_slot_scan(void) {
 
 /* Build the encoded save-slot description text for WORLD's save screen.
  *
- * mode 1 copies the empty-slot caption; mode 0 formats leader name, job,
- * level, date and location out of the loaded save image. Other nonnegative
+ * mode 1 copies the empty-slot caption; mode 0 formats leader name, job and
+ * level on the first line, and date and location on the second, out of the
+ * loaded save summary, placing columns with set-pen-x codes. Other nonnegative
  * modes write only the terminator; negative modes leave the buffer untouched.
  *
  * Only the negative-mode exit explicitly returns a value (0). Other paths fall
@@ -1162,19 +1178,20 @@ static s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
             *destination++ = g_world_load_work_buffer->summary.name[index];
             index++;
         }
-        *destination++ = 0xE7;
+        *destination++ = TEXT_SET_X_POSITION;
         *destination++ = 0x58;
         source = menu_text_find_entry_by_index(
             world_text_bind_section_data(WORLD_TEXT_DATA_JOB_NAMES), g_world_load_work_buffer->summary.job_id, 1);
         while (*source != 0xFE) {
             *destination++ = *source++;
         }
-        *destination++ = 0xE7;
+        *destination++ = TEXT_SET_X_POSITION;
         *destination++ = 0xAC;
         source = menu_text_find_entry_by_index(g_world_card_slot_text_table, 13, 1);
         while (*source != 0xFE) {
             *destination++ = *source++;
         }
+        /* Digits 0-9 are glyph codes 0-9. */
         *destination++ = g_world_load_work_buffer->summary.level / 10;
         *destination++ = g_world_load_work_buffer->summary.level % 10;
         *destination++ = 0xFE;
@@ -1183,10 +1200,10 @@ static s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
         while (*source != 0xFE) {
             *destination++ = *source++;
         }
-        *destination++ = 0xFA;
+        *destination++ = TEXT_SPACE;
         *destination++ = g_world_load_work_buffer->summary.date.day / 10;
         *destination++ = g_world_load_work_buffer->summary.date.day % 10;
-        *destination++ = 0xE7;
+        *destination++ = TEXT_SET_X_POSITION;
         *destination++ = 0x58;
         source = menu_text_find_entry_by_index(
             g_text_section_pointers[TEXT_SECTION_LOCATION_NAMES], g_world_load_work_buffer->summary.location, 1);
@@ -1194,8 +1211,6 @@ static s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
     }
     *destination = 0xFE;
 }
-
-/* Memory-card save-slot records (0x8C bytes each), 15 slots. */
 
 /* Render a save slot's description into VRAM. The 15 slot images sit in three
  * VRAM columns of six, five and four slots (x 0x240, 0x1c0 and 0x180). Each
@@ -1592,6 +1607,7 @@ static void world_card_build_save_file_header(s32 slot, s32 level, card_save_hea
     slot++;
     bcopy(g_world_card_save_title_template, header->title, 0x16);
 
+    /* Full-width digit d is Shift-JIS 0x82, 0x4F + d; 0x81 0x46 is a full-width colon. */
     value = slot / 10;
     header->title[0x10] = 0x82;
     header->title[0x11] = value + 0x4F;

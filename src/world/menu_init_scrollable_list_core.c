@@ -7,7 +7,11 @@
 #include "fft/world_menu.h"
 #include "psx/types.h"
 
-/* Initialize a -1 terminated scrollable list and reset its rendering state. */
+/* Point the scrollable list at a -1 terminated array of entry ids and their
+ * name table, count the entries (a null list keeps the previous count),
+ * select entry `value`, and reset the scroll and render state. The scroll
+ * base is only reset when the selection starts at the top, so a list
+ * reopened on a remembered entry keeps its page. */
 void menu_init_scrollable_list_core(const s16* values, s32 value, u8* text_table) {
     g_world_menu_list_entry_ids = values;
     g_world_menu_list_text_table = text_table;
@@ -26,6 +30,7 @@ void menu_init_scrollable_list_core(const s16* values, s32 value, u8* text_table
     g_menu_gfx_otag_index = 0;
     g_world_menu_use_scroll_position = 0;
     g_menu_list_scroll_offset = 0;
+    /* 0x80 per channel draws textures at their own brightness. */
     g_world_menu_sprite_color.r = 0x80;
     g_world_menu_sprite_color.g = 0x80;
     g_world_menu_sprite_color.b = 0x80;
