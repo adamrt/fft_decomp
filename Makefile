@@ -149,8 +149,8 @@ test: image ## Vet and test the Go tooling
 
 # cc1 runs with -gcoff, so moving lines can change the bytes: `make check` after.
 .PHONY: fmt
-fmt: image ## clang-format every C source and header in place
-	@$(FORMAT) -i
+fmt: image ## clang-format every C source and header in place (FILES="a.c b.h" formats only those)
+	@$(if $(strip $(FILES)),$(DOCKER_RUN) $(IMAGE) clang-format --style=file -i $(FILES),$(FORMAT) -i)
 
 .PHONY: fmt-check
 fmt-check: image ## Fail if any C source or header is not clang-formatted

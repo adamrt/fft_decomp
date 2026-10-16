@@ -1,6 +1,6 @@
-// variants.go checks the two rules that let one source serve several
-// programs: VARIANT_ build constants come only from a module's defines, and a
-// function body that differs per module carries the _variant suffix.
+// variants.go checks the rules that let one source serve several programs:
+// conditionals test only program macros and VARIANT_ names, and VARIANT_
+// build constants come only from a module's defines.
 package main
 
 import (
@@ -9,14 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
-
-// variantSuffix marks a function whose body each module links separately
-// under one shared name.
-const variantSuffix = "_variant"
 
 var preprocessorDefine = regexp.MustCompile(`(?m)^[ \t]*#[ \t]*define[ \t]+((?:VARIANT_|FFT_)[A-Za-z0-9_]*)`)
 
@@ -28,8 +23,8 @@ var preprocessorDefine = regexp.MustCompile(`(?m)^[ \t]*#[ \t]*define[ \t]+((?:V
 func conditionalProblems(path string, data []byte, knownMacros map[string]bool, header bool) []string {
 	var problems []string
 	lines := strings.Split(string(data), "\n")
-	// A macro the file defines itself may be tested first (the NULL idiom,
-	// include guards): that is a guard, not a program difference.
+	// A macro the file defines itself may be tested first (an include
+	// guard): that is a guard, not a program difference.
 	definedHere := map[string]bool{}
 	for _, line := range lines {
 		if trimmed := strings.TrimSpace(line); strings.HasPrefix(trimmed, "#") {
@@ -183,85 +178,6 @@ func validateDefines(root string, config *projectConfig) []string {
 		}
 		return nil
 	})
-	return problems
-}
-
-// moduleSourceDir names the folder a body lives in, or "" for the library
-// trees. A shared folder counts: a shared body beside a module's own body
-// under one name is a variant pair too.
-func moduleSourceDir(source string) string {
-	parts := strings.Split(source, "/")
-	if len(parts) < 3 || parts[0] != "src" || parts[1] == "lib" {
-		return ""
-	}
-	return filepath.ToSlash(filepath.Dir(source))
-}
-
-// validateVariantNames enforces the _variant rule: a C definition symbol
-// with more than one body (bodies under several folders, or several
-// conditional definitions in one shared file) ends in _variant, and a
-// _variant symbol has at least two bodies.
-func validateVariantNames(root string, config *projectConfig) []string {
-	files := make(map[string]map[string]bool) // symbol -> source files defining it
-	for _, m := range config.Modules {
-		for index := range m.Functions {
-			f := &m.Functions[index]
-			if f.Asm != "" {
-				continue
-			}
-			source := m.sourceOf(f)
-			if moduleSourceDir(source) == "" {
-				continue
-			}
-			symbol := f.sourceSymbol()
-			if files[symbol] == nil {
-				files[symbol] = make(map[string]bool)
-			}
-			files[symbol][source] = true
-		}
-	}
-	definitionCounts := make(map[string]map[string]int) // file -> symbol -> definitions in its raw text
-	countIn := func(source string) map[string]int {
-		if counts, ok := definitionCounts[source]; ok {
-			return counts
-		}
-		counts := map[string]int{}
-		data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
-		if err == nil {
-			if declarations, _, err := scanFileScopeDeclarations(string(data)); err == nil {
-				for _, declaration := range declarations {
-					if declaration.definition && functionDeclarationSignature(declaration.signature) {
-						counts[declaration.symbol]++
-					}
-				}
-			}
-		}
-		definitionCounts[source] = counts
-		return counts
-	}
-	var problems []string
-	for _, symbol := range sortedKeys(mapKeysTrue(files)) {
-		bodies := 0
-		folders := make(map[string]bool)
-		for _, source := range sortedKeys(files[symbol]) {
-			folders[moduleSourceDir(source)] = true
-			count := countIn(source)[symbol]
-			if count == 0 {
-				count = 1
-			}
-			bodies += count
-		}
-		variant := strings.HasSuffix(symbol, variantSuffix)
-		switch {
-		case bodies > 1 && !variant && len(folders) > 1:
-			problems = append(problems, fmt.Sprintf("%s has a body under %s; a per-module body needs the %s suffix", symbol, strings.Join(sortedKeys(folders), " and "), variantSuffix))
-		case bodies > 1 && !variant:
-			problems = append(problems, fmt.Sprintf("%s has %d conditional bodies in %s; a per-module body needs the %s suffix", symbol, bodies, strings.Join(sortedKeys(files[symbol]), " and "), variantSuffix))
-		case bodies < 2 && variant:
-			problems = append(problems, fmt.Sprintf("%s has one body (%s); the %s suffix is for per-module bodies", symbol, strings.Join(sortedKeys(folders), ""), variantSuffix))
-		}
-	}
-	sort.Strings(problems)
 	return problems
 }
 

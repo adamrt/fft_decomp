@@ -107,47 +107,6 @@ func TestValidateDefinesEnforcesTheVariantContract(t *testing.T) {
 	}
 }
 
-func TestValidateVariantNamesRequiresTheSuffixForPerModuleBodies(t *testing.T) {
-	p := validTestProject(t)
-	// battle_helper gains a second body under src/event through the card entry.
-	event := strings.Replace(testEventYAML, "name: card_entry, hash: 00000000000000bb}", "name: card_entry, hash: 00000000000000bb, source: src/event/battle_helper.c, source_symbol: battle_helper}", 1)
-	if err := os.WriteFile(filepath.Join(p.root, "target", "event.yaml"), []byte(event), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(p.root, "src", "event", "battle_helper.c"), []byte("void battle_helper(void) {}\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	config, err := p.loadProjectConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
-	problems := validateVariantNames(p.root, config)
-	if len(problems) != 1 || !strings.Contains(problems[0], "battle_helper has a body under src/battle and src/event") {
-		t.Fatalf("problems = %v", problems)
-	}
-	// A lone _variant body is the opposite mistake.
-	main := strings.Replace(testMainYAML, "name: main_second,", "name: main_second_variant,", 1)
-	if err := os.WriteFile(filepath.Join(p.root, "target", "main.yaml"), []byte(main), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Rename(filepath.Join(p.root, "src", "main", "main_second.c"), filepath.Join(p.root, "src", "main", "main_second_variant.c")); err != nil {
-		t.Fatal(err)
-	}
-	if config, err = p.loadProjectConfig(); err != nil {
-		t.Fatal(err)
-	}
-	problems = validateVariantNames(p.root, config)
-	if len(problems) != 2 || !strings.Contains(problems[1], "main_second_variant has one body (src/main)") {
-		t.Fatalf("problems = %v", problems)
-	}
-	// Shared and library trees never count as module folders.
-	for source, want := range map[string]string{"src/menu/x.c": "src/menu", "src/lib/psyq/libgpu/x.c": "", "src/battle/x.c": "src/battle", "src/event/x.c": "src/event"} {
-		if got := moduleSourceDir(source); got != want {
-			t.Errorf("moduleSourceDir(%s) = %q, want %q", source, got, want)
-		}
-	}
-}
-
 func TestModuleMacrosAndConditionalRules(t *testing.T) {
 	for id, want := range map[string][]string{"battle": {"FFT_BATTLE"}, "event-bunit": {"FFT_EVENT_BUNIT", "FFT_EVENT"}, "effect-e000": {"FFT_EFFECT_E000", "FFT_EFFECT"}} {
 		m := &moduleSpec{ID: id}
@@ -164,9 +123,6 @@ func TestModuleMacrosAndConditionalRules(t *testing.T) {
 	problems := conditionalProblems("src/x.c", []byte(source), known, false)
 	if len(problems) != 2 || !strings.Contains(problems[0], "tests DEBUG") || !strings.Contains(problems[1], "FFT_NOWHERE, which names no module") {
 		t.Fatalf("source problems = %v", problems)
-	}
-	if problems := conditionalProblems("src/y.c", []byte("#ifndef NULL\n#    define NULL 0\n#endif\n"), known, false); len(problems) != 0 {
-		t.Fatalf("the NULL guard idiom must pass: %v", problems)
 	}
 	header := "#ifndef X_H\n#define X_H\n#ifdef FFT_BATTLE\n#endif\n#if VARIANT_X\n#endif\n#endif\n"
 	problems = conditionalProblems("include/x.h", []byte(header), known, true)

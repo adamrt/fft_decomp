@@ -20,16 +20,22 @@ preserving every original byte.
   constant goes there, and headers never use them. Every compile also
   defines the program macro `FFT_<MODULE>` (`FFT_BATTLE`, `FFT_WORLD`,
   `FFT_EVENT_BUNIT`, plus `FFT_EVENT` and `FFT_EFFECT` for the overlay
-  families). A shared source may keep a program-specific block under
-  `#ifdef FFT_X` only as the minimal difference a trial proved in every
-  module that compiles the file, with a one-line comment saying what the
-  other program does. Sources test only `FFT_` and `VARIANT_` names in
-  conditionals; a header may test `FFT_` names (a record laid out per
+  families). A shared source keeps program-specific code under `#ifdef
+  FFT_X` blocks proven in every module that compiles the file, with a short
+  comment saying what the other programs do. Statements the programs share
+  stay outside the block; a function whose body differs throughout is
+  written out once per program, each under its own block, rather than
+  interleaved line by line. Sources test only `FFT_` and `VARIANT_` names
+  in conditionals; a header may test `FFT_` names (a record laid out per
   program) but never `VARIANT_` names.
 - Preserve retail bugs and ABI disagreements. Explain them briefly in source
   comments or `QUIRKS.md`.
 - Keep drafts, experiments, extracted files and generated output under ignored
-  `build/`. Never commit game media or copied reference material.
+  `build/`. Never commit game assets (graphics, sound, movies, text and
+  script dumps) or text copied from outside references (wikis, guides, SDK
+  sources). Data tables recovered while decompiling the code belong in
+  source; write a table as the rule that produces it when one reproduces
+  every byte.
 - Stage explicit paths and inspect the staged diff. Preserve pushed history;
   make coherent commits with short subject lines when the user authorizes them.
 
@@ -48,9 +54,9 @@ preserving every original byte.
   reconstructed linked libraries; keep established public names, signatures
   and original module bindings.
 - Sharing is recorded in `target/*.yaml` (which modules compile a file),
-  never by folder. A shared file keeps its small per-program differences
-  under program macros; a per-program body too large for that lives in the
-  program's folder under the shared `_variant` name.
+  never by folder. A shared file keeps its per-program differences under
+  program macros; a standalone function with a separate body per program
+  lives in each program's folder.
 - File boundaries come from evidence first: hand-written and library
   objects, a change of compiler profile, jump-table alignment, read-only
   data that is not contiguous. Where the binary is silent, cut by topic to
@@ -64,17 +70,20 @@ preserving every original byte.
   and hash. `QUIRKS.md` records unusual behavior worth preserving.
 
 Put declarations in their owning header. Sources include their own declaration
-header and the focused headers for APIs they use, in every program that
-compiles them; an include only one program needs sits under that program's
-`#ifdef FFT_X`. A header starts with its guard, then a one-line description,
-then its includes. Group related declarations
-under short comments: types, globals, then functions. Leave blank lines
-between type blocks; headers include their own dependencies.
+header and the focused headers for the APIs they use; a source several
+programs compile includes what any of them needs. A header starts with its
+guard, then a one-line description, then its includes. Group declarations by
+topic under short section comments, with each topic's types first, then its
+globals, then its functions; order topics so a type comes before its first
+use. Leave blank lines between type blocks; headers include their own
+dependencies.
 
 ## Code style
 
 - Prefer ordinary C, named fields, direct assignments and conventional loops.
-  Remove redundant locals where the clean spelling still matches.
+  Remove redundant locals unless a named temporary reads better: a long call
+  or index expression, a value used more than once, or a step that deserves
+  a name.
 - Trace casts, shifts, masks and unions through readers and writers before
   changing types. Keep genuine encoded data and format-dispatch boundaries;
   avoid invented overlays or splitting records without evidence.
@@ -87,12 +96,18 @@ between type blocks; headers include their own dependencies.
   function compiled into several programs carries only its topic (`script_`,
   `thread_`, `text_`, `menu_`, `gfx_`, `card_`, `bits_`, `window_`), so a
   bare prefix at a call site means shared code. Files carry no program
-  token; their folder says it. The `_variant` suffix is reserved for a
-  function with more than one body under one shared name: bodies in several
-  folders, or several conditional definitions in one shared file
-  (check-config enforces it both ways); name other alternates by what
-  distinguishes them. Preserve game terminology and evidence-based unknown
-  names rather than guessing.
+  token; their folder says it. A body compiled into one program carries
+  that program's token, and a body several programs compile carries only
+  its topic. When code several programs compile calls a function whose body
+  differs by program, every body takes that one topic-only name, since the
+  call site can name only one.
+- Globals follow the same rule: a global with one definition carries the
+  defining program's token (`g_main_`, `g_battle_`, `g_bunit_`), and a name
+  that shared code binds to a different definition in each program carries
+  only its topic, with a comment saying which programs define it.
+- Preserve game terminology. Name an unknown by what the code shows it
+  doing, and mark a name that rests on thin evidence `Provisional:` in its
+  comment; keep an address in a name only when nothing else is known.
 - A function used only inside its own unit is `static` and appears in no
   header; when the file uses it before its definition, a static prototype
   follows the includes. Headers declare only what other files use.
@@ -105,9 +120,11 @@ between type blocks; headers include their own dependencies.
 - Use `ONE` for fixed-point 1.0 (4096). Add `const` only for genuinely read-only
   inputs and verify all callers under their historical compiler profiles.
 - Use American spelling.
-- Keep comments factual and short: explain behavior or a necessary constraint.
-  Reference library material validates our interfaces; do not copy
-  implementations or comments into the repository.
+- Keep comments factual. Say what a function or block does when the code
+  does not make it obvious, and why a non-obvious step is there (a game
+  rule, a retail quirk, a byte-matching constraint). Skip comments that
+  restate the code. Reference library material validates our interfaces; do
+  not copy implementations or comments into the repository.
 
 ## Workflow
 
@@ -118,7 +135,7 @@ changes. Shared-source consolidation must retain every original address and
 call binding, without runtime wrappers or invented alias machinery.
 
 ```sh
-make fmt                         # always before checking and committing C/headers
+make fmt [FILES="a.c b.h"]       # always before checking and committing C/headers
 make check [MODULE=x]             # compile and compare original function hashes
 make check-config                # sources, declarations and target metadata
 make decl-check                  # calls to undeclared functions, per program view

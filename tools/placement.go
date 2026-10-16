@@ -158,6 +158,10 @@ func placementVerdict(sub string, score int, s placementSignals, minScore int) s
 	}
 }
 
+// variantSuffix marked a function whose body each module linked separately
+// under one shared name; the placement report still recognizes it.
+const variantSuffix = "_variant"
+
 // placementNewName drops a leading module token; a name that then starts
 // with no known subsystem token takes the destination's.
 func placementNewName(name, sub string, tokens map[string]string, folderToken map[string]string) (string, string) {
