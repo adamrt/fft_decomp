@@ -127,7 +127,7 @@ void script_toggle_message_portrait_flip(const u8* parameters) {
 }
 
 /* EVENT_OPCODE_UNKNOWN_74: receives the operand pointer and does nothing. */
-void script_opcode_74_event_instruction(const u8* unused_parameters) {
+void script_opcode_unknown_74(const u8* unused_parameters) {
 }
 
 /* Returns the slot a thread should start in: a requested id below 16 as it is,
@@ -433,7 +433,7 @@ static s32 script_get_variable_bit_position(s32 value) {
 }
 
 /* Wait until the variable reaches the signed 16-bit test value. */
-void script_wait_value_event_instruction(const event_wait_value_parameters_t* parameters) {
+void script_opcode_wait_value(const event_wait_value_parameters_t* parameters) {
     s32 variable_id = script_read_s16(parameters->variable_id_le);
     s32 test_value = script_read_s16(parameters->test_value_le);
 

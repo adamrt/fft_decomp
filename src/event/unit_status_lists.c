@@ -165,7 +165,7 @@ void text_restore_section_pointers(void) {
     g_text_section_backup_active = 0;
 }
 
-void script_dismiss_unit_event_instruction(s32 sprite_set) {
+void script_opcode_dismiss_unit(s32 sprite_set) {
     party_unit_t* party;
     s32 party_index = 1;
     s32 empty_party_id = PARTY_ID_NONE;

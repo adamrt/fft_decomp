@@ -334,7 +334,7 @@ static void script_assign_bitset_flag(u32* bits, s32 index, s32 set) {
 }
 
 /* Store five day bits and four month bits in the indexed nine-bit date record. */
-void script_unlockdate_event_instruction(u32* bits, s32 record, s32 month, s32 day) {
+void script_opcode_unlock_date(u32* bits, s32 record, s32 month, s32 day) {
     s32 base = record * 9;
     s32 i;
     u8 mask = 1;
@@ -635,7 +635,7 @@ void script_print_debug_message(void) {
 }
 
 /* Start movement to the encoded tile with the signed speed and terrain-cost flag. */
-void script_walkto_event_instruction(const event_walk_to_parameters_t* parameters) {
+void script_opcode_walk_to(const event_walk_to_parameters_t* parameters) {
     s32 id = script_read_s16(parameters->unit_id_le);
     map_tile_coordinates_t coordinates;
 
@@ -651,7 +651,7 @@ void script_walkto_event_instruction(const event_walk_to_parameters_t* parameter
 }
 
 /* Mirror the unit sprite for mode 1 and restore it for every other mode. */
-void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_t* parameters) {
+void script_opcode_mirror_sprite(const event_mirror_sprite_parameters_t* parameters) {
     s32 mode;
     s32 runtime_id = script_read_s16(parameters->unit_id_le);
 
@@ -668,7 +668,7 @@ void script_mirrorsprite_event_instruction(const event_mirror_sprite_parameters_
 
 /* ResetPalette: resolve the unit id operand and reapply the weather, time-of-day
  * palette modulation without tile effects, unless the unit is missing. */
-void script_resetpalette_event_instruction(const event_unit_parameters_t* parameters) {
+void script_opcode_reset_palette(const event_unit_parameters_t* parameters) {
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         battle_gfx_apply_weather_time_tile_palette_mod_by_runtime_id(runtime_id);
@@ -679,7 +679,7 @@ void script_resetpalette_event_instruction(const event_unit_parameters_t* parame
  * of length_plus_one - 1 tiles in the encoded direction through
  * battle_unit_prepare_rider_dismount. The unit's Jump stat is 6 while that runs
  * and is restored afterwards. A unit id that does not resolve does nothing. */
-void script_jump_event_instruction(const event_jump_parameters_t* parameters) {
+void script_opcode_jump(const event_jump_parameters_t* parameters) {
     SVECTOR vec;
     s32 runtime_id = script_resolve_runtime_id(script_read_s16(parameters->unit_id_le));
     SVECTOR* coords;
@@ -699,7 +699,7 @@ void script_jump_event_instruction(const event_jump_parameters_t* parameters) {
 }
 
 /* Yield at least once, then wait until the resolved unit stops moving. */
-void script_waitwalk_event_instruction(s32 unit_id) {
+void script_opcode_wait_walk(s32 unit_id) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
 
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -712,7 +712,7 @@ void script_waitwalk_event_instruction(s32 unit_id) {
 /* Enter ATTACK.OUT when script variable 0x1fc is clear: mark the transition,
  * load companion executable 0xd, then hand off to its scenario-music,
  * formation-sprite, and portrait entry points. */
-void script_load_attack_graphics_event_instruction(void) {
+void script_opcode_load_attack_graphics(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
         menu_request_open_companion_executable(COMPANION_OVERLAY_ATTACK);
@@ -769,11 +769,11 @@ void script_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WARP_UNIT) {
             script_warp_unit((const event_warp_unit_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_WAIT_VALUE) {
-            script_wait_value_event_instruction((const event_wait_value_parameters_t*)parameters);
+            script_opcode_wait_value((const event_wait_value_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_DEBUG_PAUSE) {
             script_print_debug_message();
         } else if (script[0] == EVENT_OPCODE_WALK_TO) {
-            g_thread_call_target = (void (*)(void))script_walkto_event_instruction;
+            g_thread_call_target = (void (*)(void))script_opcode_walk_to;
             thread_call_on_main_stack(parameters);
         } else if (script[0] == EVENT_OPCODE_WALK_TO_ANIM) {
             runtime_id = script_resolve_runtime_id(first_halfword);
@@ -782,15 +782,15 @@ void script_block_start_thread(void) {
             }
             g_unit_was_moving_latch[runtime_id] = 0;
         } else if (script[0] == EVENT_OPCODE_JUMP) {
-            script_jump_event_instruction((const event_jump_parameters_t*)parameters);
+            script_opcode_jump((const event_jump_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_WAIT_WALK) {
-            script_waitwalk_event_instruction(first_halfword);
+            script_opcode_wait_walk(first_halfword);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM) {
             script_unit_anim((const event_unit_anim_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_MIRROR_SPRITE) {
-            script_mirrorsprite_event_instruction((const event_mirror_sprite_parameters_t*)(script + 1));
+            script_opcode_mirror_sprite((const event_mirror_sprite_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_RESET_PALETTE) {
-            script_resetpalette_event_instruction((const event_unit_parameters_t*)(script + 1));
+            script_opcode_reset_palette((const event_unit_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_SET_FIRST_UNIT) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -828,13 +828,13 @@ void script_block_start_thread(void) {
             g_thread_contexts[thread_id].task_id = THREAD_TASK_SPRITE_MOVE;
             g_thread_contexts[thread_id].task_words[0] = script_resolve_runtime_id(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_SPRITE_MOVE) {
-            script_waitspritemove_event_instruction(first_halfword);
+            script_opcode_wait_sprite_move(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
-            script_waitrotate_event_instruction(script[1]);
+            script_opcode_wait_rotate_all(script[1]);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_ALL) {
-            script_waitrotate_event_instruction(-1);
+            script_opcode_wait_rotate_all(-1);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
-            script_unit_animation_rotate_event_instruction((const event_unit_anim_rotate_parameters_t*)(script + 1));
+            script_opcode_unit_anim_rotate((const event_unit_anim_rotate_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_COLOR_UNIT) {
             runtime_id = script_resolve_runtime_id(first_halfword);
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
@@ -875,7 +875,7 @@ void script_add_unit_start_thread(void) {
             break;
         }
         if (opcode == EVENT_OPCODE_LOAD_ATTACK_GRAPHICS) {
-            script_load_attack_graphics_event_instruction();
+            script_opcode_load_attack_graphics();
         } else if (opcode == EVENT_OPCODE_ADD_UNIT) {
             unit = battle_unit_find_stats_by_entd_unit_id(unit_id, &index);
             if (index == -2 || index >= 0) {

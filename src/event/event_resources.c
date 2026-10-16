@@ -782,7 +782,7 @@ void gfx_load_evtchr_thread(void) {
 }
 
 /* Uploads eight 32x48 portraits and their palettes from one EVTFACE.BIN block. */
-void script_load_portrait_colors_event_instruction(s32 portrait_id) {
+void script_opcode_portrait_col(s32 portrait_id) {
     RECT rect;
     menu_portrait_image_file_t* buffer;
     u32(*pixels)[48][4];

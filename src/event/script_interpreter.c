@@ -508,7 +508,7 @@ void script_sprite_move_beta(void) {
 /* WaitSpriteMove: yield until no thread is still running the sprite-move task
  * for the calling event's sprite. A unit id that does not resolve has nothing
  * to wait for. */
-void script_waitspritemove_event_instruction(s32 unit_id) {
+void script_opcode_wait_sprite_move(s32 unit_id) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     s32 i;
 
@@ -928,7 +928,7 @@ static s32 script_filter_unit_id_by_mode(u16* out_id, u16* in_id, s32* mode) {
  * it by -0x1f and wait 60 frames more. Then, when `remove` is set, mark its
  * battle unit as not existing. A unit id that does not resolve does nothing. The
  * interpreter always passes remove = 1. */
-void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
+void script_opcode_teleport_out(s32 unit_id, s32 remove) {
     s32 unit = script_resolve_runtime_id(unit_id);
     s32 idx;
 
@@ -951,7 +951,7 @@ void script_teleportout_event_instruction(s32 unit_id, s32 remove) {
 
 /* Start the teleport-in effect for an event unit. The interpreter supplies 1
  * as its second argument; this entry forwards only the unit ID. */
-void script_teleportin_event_instruction(s32 unit_id, s32 unused) {
+void script_opcode_teleport_in(s32 unit_id, s32 unused) {
     s32 runtime_id = script_resolve_runtime_id(unit_id);
     if (runtime_id != EVENT_RUNTIME_ID_NONE) {
         g_thread_call_target = (void (*)(void))battle_effect_set_secondary_teleport_by_runtime_id;
@@ -1070,7 +1070,7 @@ void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
 }
 
 /* Set facing and animation immediately; the animation high byte also controls facing-update suppression. */
-void script_unit_animation_rotate_event_instruction(const event_unit_anim_rotate_parameters_t* parameters) {
+void script_opcode_unit_anim_rotate(const event_unit_anim_rotate_parameters_t* parameters) {
     u8 rotation;
     s16 animation;
     s16 call_runtime_id;
@@ -1718,7 +1718,7 @@ void script_set_units_movement_effect_suppression(const event_movement_effect_pa
  * EVENT_UNIT_GROUP_FIRST run all 21 unit ids through
  * script_filter_unit_id_by_mode. Nothing happens when a plain unit id does
  * not resolve. */
-void script_color_unit_event_instruction(const event_color_unit_parameters_t* parameters) {
+void script_opcode_color_unit(const event_color_unit_parameters_t* parameters) {
     const event_unit_color_t* color;
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 out;
@@ -1829,7 +1829,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
 }
 
 /* WaitRotateUnit/All: resolved units yield at least once; -1 waits for all 21 slots. */
-void script_waitrotate_event_instruction(s32 unit_id) {
+void script_opcode_wait_rotate_all(s32 unit_id) {
     s32 i;
     s32 index;
 

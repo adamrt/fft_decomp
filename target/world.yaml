@@ -181,7 +181,7 @@ functions:
   - {addr: 0x800e727c, size: 652, name: menu_tween_window_quads, hash: 60b84c3c9ba59ec3, unit: dialog_helpers}
   - {addr: 0x800e7508, size: 36, name: menu_lerp_fixed12, hash: c8c076c648585d00, unit: dialog_helpers}
   - {addr: 0x800e752c, size: 296, name: menu_lerp_rect_to_poly_ft4, hash: 18c92e7328405f4d, unit: dialog_helpers}
-  - {addr: 0x800e7654, size: 84, name: script_pause_event_instruction, hash: c8f0977405c464dd, unit: dialog_helpers}
+  - {addr: 0x800e7654, size: 84, name: script_opcode_pause, hash: c8f0977405c464dd, unit: dialog_helpers}
   - {addr: 0x800e76a8, size: 88, name: unit_copy_world_coords_to_scratch, hash: 2a62d55b05ed841c, unit: dialog_helpers}
   - {addr: 0x800e7700, size: 64, name: unit_project_to_screen, hash: f71d84cad0b16447, unit: dialog_helpers}
   - {addr: 0x800e7740, size: 92, name: unit_copy_world_coords, hash: 804df09b5303cc41, unit: dialog_helpers}
@@ -202,7 +202,7 @@ functions:
   - {addr: 0x800e8660, size: 56, name: text_relocate_pointer_table, hash: 55d65571292e9b76, unit: unit_status_lists}
   - {addr: 0x800e8698, size: 84, name: text_save_section_pointers, hash: df05598fa569f4c7, unit: unit_status_lists}
   - {addr: 0x800e86ec, size: 56, name: text_restore_section_pointers, hash: ea702dc6e0ed2265, unit: unit_status_lists}
-  - {addr: 0x800e8724, size: 212, name: script_dismiss_unit_event_instruction, hash: 72ce1abdbe8c11ed, unit: unit_status_lists}
+  - {addr: 0x800e8724, size: 212, name: script_opcode_dismiss_unit, hash: 72ce1abdbe8c11ed, unit: unit_status_lists}
   - {addr: 0x800e87f8, size: 164, name: script_join_units_silently, hash: fee876788da012d2, unit: unit_status_lists}
   - {addr: 0x800e889c, size: 36, name: script_advance_date_by_one_year, hash: 83ceda1f250910cb, unit: unit_status_lists}
   - {addr: 0x800e88c0, size: 132, name: unit_increase_blue_team_brave_by_10, hash: b7469f89289042cf, unit: unit_status_lists}
@@ -286,7 +286,7 @@ functions:
   - {addr: 0x800f01f0, size: 8, name: script_noop_3, hash: 6d64edf91449c1b1, unit: event_resources}
   - {addr: 0x800f01f8, size: 124, name: menu_load_portrait_image, hash: 497cde13cf361473, unit: event_resources}
   - {addr: 0x800f0274, size: 228, name: gfx_load_evtchr_thread, hash: 8962aec23b32ebaf, unit: event_resources}
-  - {addr: 0x800f0358, size: 280, name: script_load_portrait_colors_event_instruction, hash: f2bff445b230c13b, unit: event_resources}
+  - {addr: 0x800f0358, size: 280, name: script_opcode_portrait_col, hash: f2bff445b230c13b, unit: event_resources}
   - {addr: 0x800f0470, size: 176, name: script_load_event, hash: a023de0e6c5d3603, unit: event_resources}
   - {addr: 0x800f0520, size: 84, name: menu_set_palette_colors, hash: bc139dff59caa293, unit: event_resources}
   - {addr: 0x800f0574, size: 48, name: menu_init_palette_and_text, hash: 90cc27f44568663e, unit: event_resources}
@@ -320,17 +320,17 @@ functions:
   - {addr: 0x800f1390, size: 8, name: script_noop_6, hash: 6d64edf91449c1b1, unit: attack_resources}
   - {addr: 0x800f1398, size: 8, name: script_noop_7, hash: 6d64edf91449c1b1, unit: attack_resources}
   - {addr: 0x800f13a0, size: 92, name: script_assign_bitset_flag, hash: 96cfecafc19e267a, unit: attack_resources}
-  - {addr: 0x800f13fc, size: 184, name: script_unlockdate_event_instruction, hash: 756a57b269501269, unit: attack_resources}
+  - {addr: 0x800f13fc, size: 184, name: script_opcode_unlock_date, hash: 756a57b269501269, unit: attack_resources}
   - {addr: 0x800f14b4, size: 1044, name: camera_fusion_thread, hash: 29fbdab9fc995bcc, unit: attack_resources}
   - {addr: 0x800f18c8, size: 1432, name: camera_step_track, hash: 64ee507b9faf9750, unit: attack_resources}
   - {addr: 0x800f1e60, size: 60, name: script_interpolate_range_fixed12, hash: 959b0c6e3237b93a, unit: attack_resources}
   - {addr: 0x800f1e9c, size: 60, name: script_print_debug_message, hash: 452ccd9750915554, unit: attack_resources}
-  - {addr: 0x800f1ed8, size: 156, name: script_walkto_event_instruction, hash: df0e7f67144df7b9, unit: attack_resources}
-  - {addr: 0x800f1f74, size: 104, name: script_mirrorsprite_event_instruction, hash: 2f6891a168cbc54d, unit: attack_resources}
-  - {addr: 0x800f1fdc, size: 68, name: script_resetpalette_event_instruction, hash: 30a67a55bd675e0b, unit: attack_resources}
-  - {addr: 0x800f2020, size: 200, name: script_jump_event_instruction, hash: 01ae5809eeb02805, unit: attack_resources}
-  - {addr: 0x800f20e8, size: 76, name: script_waitwalk_event_instruction, hash: 28b91f66c57395a1, unit: attack_resources}
-  - {addr: 0x800f2134, size: 88, name: script_load_attack_graphics_event_instruction, hash: 6996873356d74343, unit: attack_resources}
+  - {addr: 0x800f1ed8, size: 156, name: script_opcode_walk_to, hash: df0e7f67144df7b9, unit: attack_resources}
+  - {addr: 0x800f1f74, size: 104, name: script_opcode_mirror_sprite, hash: 2f6891a168cbc54d, unit: attack_resources}
+  - {addr: 0x800f1fdc, size: 68, name: script_opcode_reset_palette, hash: 30a67a55bd675e0b, unit: attack_resources}
+  - {addr: 0x800f2020, size: 200, name: script_opcode_jump, hash: 01ae5809eeb02805, unit: attack_resources}
+  - {addr: 0x800f20e8, size: 76, name: script_opcode_wait_walk, hash: 28b91f66c57395a1, unit: attack_resources}
+  - {addr: 0x800f2134, size: 88, name: script_opcode_load_attack_graphics, hash: 6996873356d74343, unit: attack_resources}
   - {addr: 0x800f218c, size: 96, name: script_play_effect_and_wait, hash: 071ebe20d78399d5, unit: attack_resources}
   - {addr: 0x800f21ec, size: 48, name: script_play_effect_thread, hash: 23d695acccad5513, unit: attack_resources}
   - {addr: 0x800f221c, size: 1236, name: script_block_start_thread, hash: 5ed900a4fe6df008, unit: attack_resources}
@@ -414,7 +414,7 @@ functions:
   - {addr: 0x800f9c8c, size: 1480, name: script_run_sprite_move, hash: 74f215bd48a3cde4, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: script_interpreter}
   - {addr: 0x800fa254, size: 60, name: script_sprite_move, hash: 4df4be2d389bc444, unit: script_interpreter}
   - {addr: 0x800fa290, size: 60, name: script_sprite_move_beta, hash: 757389eff0f977e2, unit: script_interpreter}
-  - {addr: 0x800fa2cc, size: 192, name: script_waitspritemove_event_instruction, hash: 6691693858dee2bb, unit: script_interpreter}
+  - {addr: 0x800fa2cc, size: 192, name: script_opcode_wait_sprite_move, hash: 6691693858dee2bb, unit: script_interpreter}
   - {addr: 0x800fa38c, size: 32, name: script_copy_matrix, hash: 820dc3ed75e30848, unit: script_interpreter}
   - {addr: 0x800fa3ac, size: 888, name: map_light_thread, hash: 2075c72a1d728138, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: script_interpreter}
   - {addr: 0x800fa724, size: 60, name: camera_store_yaw_band, hash: ab7e1df661cddb5e, unit: script_interpreter}
@@ -425,12 +425,12 @@ functions:
   - {addr: 0x800fad84, size: 16, name: script_noop_11, hash: 70cab538e87be7b6, unit: script_interpreter}
   - {addr: 0x800fad94, size: 132, name: script_prepare_unit_filter, hash: 11ec43c5377ab1bf, unit: script_interpreter}
   - {addr: 0x800fae18, size: 548, name: script_filter_unit_id_by_mode, hash: 984093d71e63f1ff, unit: script_interpreter}
-  - {addr: 0x800fb03c, size: 216, name: script_teleportout_event_instruction, hash: a33f1da7ceb032c8, unit: script_interpreter}
-  - {addr: 0x800fb114, size: 72, name: script_teleportin_event_instruction, hash: 93b4c6af1ff33bce, unit: script_interpreter}
+  - {addr: 0x800fb03c, size: 216, name: script_opcode_teleport_out, hash: a33f1da7ceb032c8, unit: script_interpreter}
+  - {addr: 0x800fb114, size: 72, name: script_opcode_teleport_in, hash: 93b4c6af1ff33bce, unit: script_interpreter}
   - {addr: 0x800fb15c, size: 168, name: script_blue_remove_all_enemy_units, hash: 2274921be941b9ac, unit: script_interpreter}
   - {addr: 0x800fb204, size: 200, name: script_blue_remove_unit, hash: acf2f50c451c3612, unit: script_interpreter}
   - {addr: 0x800fb2cc, size: 332, name: script_warp_unit, hash: 6399d2888030776e, unit: script_interpreter}
-  - {addr: 0x800fb418, size: 216, name: script_unit_animation_rotate_event_instruction, hash: 14cce9870ae4f8c8, unit: script_interpreter}
+  - {addr: 0x800fb418, size: 216, name: script_opcode_unit_anim_rotate, hash: 14cce9870ae4f8c8, unit: script_interpreter}
   - {addr: 0x800fb4f0, size: 512, name: script_face_unit, hash: 1dda3ec86c0c41a3, unit: script_interpreter}
   - {addr: 0x800fb6f0, size: 516, name: script_rotate_unit, hash: be57a905343502c5, unit: script_interpreter}
   - {addr: 0x800fb8f4, size: 180, name: status_queue_current_status_graphics, hash: 61b90cb85376108b, unit: script_interpreter}
@@ -444,15 +444,15 @@ functions:
   - {addr: 0x800fc804, size: 248, name: script_unit_anim, hash: 2c433dd6a81d7c56, unit: script_interpreter}
   - {addr: 0x800fc8fc, size: 156, name: script_march_units, hash: 90487a1ab3416a6e, unit: script_interpreter}
   - {addr: 0x800fc998, size: 180, name: script_set_units_movement_effect_suppression, hash: c2d8e271e578e487, unit: script_interpreter}
-  - {addr: 0x800fca4c, size: 172, name: script_color_unit_event_instruction, hash: 991b6e8c7dc5117f, unit: script_interpreter}
+  - {addr: 0x800fca4c, size: 172, name: script_opcode_color_unit, hash: 991b6e8c7dc5117f, unit: script_interpreter}
   - {addr: 0x800fcaf8, size: 168, name: script_set_units_palette_update_suppression, hash: 0c1bb9735a0248cc, unit: script_interpreter}
   - {addr: 0x800fcba0, size: 88, name: unit_check_facing_relative_to_camera, hash: ef44f6dacbae10fb, unit: script_interpreter}
   - {addr: 0x800fcbf8, size: 368, name: script_face_tile, hash: 96b76ce946c03c2e, unit: script_interpreter}
-  - {addr: 0x800fcd68, size: 176, name: script_waitrotate_event_instruction, hash: d8fa9c97f6edfaa2, unit: script_interpreter}
+  - {addr: 0x800fcd68, size: 176, name: script_opcode_wait_rotate_all, hash: d8fa9c97f6edfaa2, unit: script_interpreter}
   - {addr: 0x800fce18, size: 168, name: sound_run_background_sfx_thread, hash: b51c4e253d5dea85, unit: script_commands}
   - {addr: 0x800fcec0, size: 264, name: sound_run_background_fade_thread, hash: 0180ab71574b16f7, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: script_commands}
   - {addr: 0x800fcfc8, size: 172, name: script_toggle_message_portrait_flip, hash: ceb3971e4cedddbd, unit: script_commands}
-  - {addr: 0x800fd074, size: 8, name: script_opcode_74_event_instruction, hash: 6d64edf91449c1b1, unit: script_commands}
+  - {addr: 0x800fd074, size: 8, name: script_opcode_unknown_74, hash: 6d64edf91449c1b1, unit: script_commands}
   - {addr: 0x800fd07c, size: 92, name: thread_resolve_id, hash: 674eacc3bba8a117, unit: script_commands}
   - {addr: 0x800fd0d8, size: 116, name: thread_resolve_id_after_current, hash: a367ea7a7bcd9ae1, unit: script_commands}
   - {addr: 0x800fd14c, size: 140, name: thread_find_running_by_task, hash: e98782ca2e2a6940, unit: script_commands}
@@ -463,7 +463,7 @@ functions:
   - {addr: 0x800fd4a8, size: 796, name: script_run_variable_command, hash: e56f1c1dadc95a3e, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: script_commands}
   - {addr: 0x800fd7c4, size: 176, name: script_get_variable_word_pointer_from_id, hash: 6a6f5aa839d4ad4d, unit: script_commands}
   - {addr: 0x800fd874, size: 92, name: script_get_variable_bit_position, hash: 58c6183072a6e980, unit: script_commands}
-  - {addr: 0x800fd8d0, size: 108, name: script_wait_value_event_instruction, hash: bf0474d1b7f495e5, unit: script_commands}
+  - {addr: 0x800fd8d0, size: 108, name: script_opcode_wait_value, hash: bf0474d1b7f495e5, unit: script_commands}
   - {addr: 0x800fd93c, size: 40, name: script_seed_random_from_vsync, hash: 0558cf34e10433b2, unit: script_commands}
   - {addr: 0x800fd964, size: 76, name: script_get_rand16, hash: 9347ed63e047087b, unit: script_commands}
   - {addr: 0x800fd9b0, size: 68, name: script_wait_for_unit_ready, hash: 27f4fb7c909f3472, unit: script_commands}
