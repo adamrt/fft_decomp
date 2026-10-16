@@ -22,7 +22,7 @@
  * textured quads.
  *
  * Every spawn interval up to 4 ribbons start from the emitter's
- * spawn volume with a randomised heading and speed (optionally turned to the
+ * spawn volume with a randomized heading and speed (optionally turned to the
  * caster's facing) and ease towards a spread target over their lifetime. Each
  * update appends the particle's position to a 17-point ring buffer and
  * rebuilds the double-buffered quad strip along it, mitred at each joint.

@@ -583,7 +583,8 @@ static void world_card_run_save_step(s32 slot) {
  * parity bit per 128-byte block through the primary bitstream writer.
  *
  * The descriptor block at +0x100 takes its leader from the first formation
- * unit whose sprite_set is below 4, the calendar from script variables
+ * unit whose sprite_set is below 4, or formation unit 0 when there is none
+ * (the CARD twin falls back to the last roster slot), the calendar from script variables
  * 0x2e/0x2f/0x31 and the play time from the MAIN second/minute/hour counters.
  * Everything from +0x124 on is a straight bcopy of the SCUS globals, in the
  * same order the CARD twin uses.
@@ -1177,10 +1178,11 @@ static s32 world_card_build_save_slot_description(s32 mode, u8* destination) {
     *destination = 0xFE;
 }
 
-/* Memory-card save-slot records (0x8C bytes each); 15 slots laid out in
- * three columns of five on the memory card menu. */
+/* Memory-card save-slot records (0x8C bytes each), 15 slots. */
 
-/* Each column sets the whole rectangle; the compiler merges the three tails. */
+/* Render a save slot's description into VRAM. The 15 slot images sit in three
+ * VRAM columns of six, five and four slots (x 0x240, 0x1c0 and 0x180). Each
+ * column sets the whole rectangle; the compiler merges the three tails. */
 static void world_card_draw_slot_text(s32 save_slot_index) {
     RECT destination_rect;
 

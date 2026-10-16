@@ -378,6 +378,8 @@ static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_
 #endif
 
 #ifdef FFT_OPENING
+#    define PART(index) ((world_sprite_part_t*)&sprite[index])
+
 /* Advances one OPEN sprite actor's animation and emits its parts into an
  * ordering table.
  *
@@ -397,9 +399,6 @@ static void wldcore_gfx_draw_display_object_sprite(wldcore_window_render_record_
  * unreferenced 8-byte reload slot (0x38 and 0x40). Reading x and y into their
  * own locals keeps the target's x + byte operand order and v0/v1 allocation.
  */
-
-#    define PART(index) ((world_sprite_part_t*)&sprite[index])
-
 static void open_gfx_draw_animated_render_record(world_animated_render_record_t* actor, u32* ot) {
     world_sprite_cel_header_t** sprites = g_open_gfx_record_36_sprites;
     world_sprite_animation_sequence_t* anim = g_open_gfx_record_36_animations[actor->sequence];
@@ -663,7 +662,7 @@ s32 window_append_record_variant(void** list, s32* count) {
 }
 #endif
 
-/* Build the centerd sub-rectangle of the source area for a scale mode
+/* Build the centered sub-rectangle of the source area for a scale mode
  * (20%, 50%, 80%, 90% or 100%), aligned to 4 pixels. */
 static void gfx_calculate_scaled_rectangle(s32 scale_mode, const RECT* source, RECT* rectangle) {
     s32 scale;

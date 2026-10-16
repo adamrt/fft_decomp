@@ -154,8 +154,8 @@ void world_formation_build_unit_record(const unit_stats_t* unit, world_unit_t* r
  * Mode 1 drops units with a proposition in progress and the egg-unit flag, a
  * monster skillset, or a special-monster job; mode 2 excludes eggs
  * and human units. A nonzero item id keeps only
- * units with that item equipped. The list argument is unused here; the sorter
- * at 0x80121c60 fills g_world_unit_pointers.
+ * units with that item equipped. The list argument is unused here;
+ * world_formation_sort_roster fills g_world_unit_pointers.
  */
 s16 world_formation_build_record_list(s32 item_id, world_unit_t** unused_list, s32 mode) {
     unit_stats_t unit;

@@ -585,7 +585,7 @@ typedef struct battle_walk_path {
 typedef char battle_walk_path_size_must_be_128[sizeof(battle_walk_path_t) == 128 ? 1 : -1];
 
 /* battle_walk_path_t.count values that are not a step count
- * (move_build_path_to_tile). */
+ * (battle_move_build_path_to_tile). */
 enum {
     MOVE_PATH_TELEPORT = 0xfe, /* the path bytes hold the destination x, y and level */
     MOVE_PATH_TELEPORT_FAILED = 0xff,
@@ -835,8 +835,8 @@ typedef struct battle_unit {
     battle_unit_command_state_t command_state; /* 0x158..0x16f */
     s32 sp2_ability_id;                        /* 0x170: ability whose SP2 file battle_gfx_open_sp2_file loads */
     s32 ability_preview_phase;                 /* 0x174: target_panels_e */
-    /* 0x178; target_calculate_for_menu_types result stored by
-     * target_select_tile: 0/1 preview, 2 stop, -1 back to the menu. */
+    /* 0x178; battle_target_calculate_for_menu_types result stored by
+     * battle_target_select_tile: 0/1 preview, 2 stop, -1 back to the menu. */
     s32 target_select_result;
     s32 attack_phase_state;    /* 0x17c: battle_attack_preparation_e */
     s32 pending_attack_result; /* 0x180: attack result code; -1 signals death */
@@ -887,7 +887,7 @@ typedef struct battle_unit {
     /* 0x2e8; enables the six-copy position trail seeded by
      * battle_gfx_init_position_vector_copies. */
     u32 position_copies_active;
-    /* Six vectors used during sprite rotation/scaling render (0x2ec);
+    /* Six past draw positions of the afterimage trail, newest first (0x2ec);
      * battle_gfx_init_position_vector_copies seeds all six from world_coords. */
     SVECTOR position_copies[6]; /* 0x2ec..0x31b */
     /* Fixed sprite-display storage; API pointers address each header. */
@@ -1186,6 +1186,9 @@ s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_l
 
 /* battle_unit_animation_e of each item type's attack at a higher, a level and a lower target. */
 extern u8 g_battle_weapon_attack_animations[][3];
+/* Sum and highest level of the units of any team but blue, counted as the ENTD units load and as
+ * an off-field unit is added; later level changes are not counted. They set the level-sum and
+ * level-bonus money. */
 extern u16 g_battle_enemy_level_sum;
 extern u8 g_battle_highest_enemy_level;
 

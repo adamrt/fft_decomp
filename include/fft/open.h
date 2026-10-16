@@ -105,7 +105,7 @@ enum { OPEN_GFX_RENDER_RECORD_CAPACITY = 16 };
  * open_gfx_init_window_frame_record takes its address as one pointer. */
 typedef struct open_render_record_56_tail {
     /* 0x00 */ point32_t clut; /* open_gfx_draw_window_record passes it to GetClut */
-    /* 0x08 */ RECT quad;      /* quarter-pixel source rectangle */
+    /* 0x08 */ RECT quad;      /* sprite u, v, w, h: texels within the texture page */
 } open_render_record_56_tail_t;
 
 typedef struct open_render_record_56 {

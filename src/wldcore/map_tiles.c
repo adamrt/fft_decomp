@@ -141,7 +141,7 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
  *    `.sequence`/`.priority`/`.frame_index` stay array-form.
  *  - A separate index local per append call deletes two `move v1,v0` copies.
  *  - Each window-record group has its own pointer pair (wpos/rec and
- *    wpos2/rec2). One shared pair is long-lived and materialises both
+ *    wpos2/rec2). One shared pair is long-lived and materializes both
  *    addresses into a2/a3 ahead of the first call; split pairs are short-lived
  *    temps, giving the target's per-group `addu v0,v1,s0` / `addu v0,v1,s1`
  *    while s0 (the `.x` column) and s1 (the record base, CSE'd as

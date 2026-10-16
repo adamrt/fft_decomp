@@ -76,12 +76,11 @@ static void battle_move_undo_unit_move(battle_unit_t* unit) {
 }
 
 /*
- * After `rider` moves, re-registers its map position and, when it is the
- * rider of a mount (mount state MOUNT), copies tile, destination, real and
- * screen position to the mount 10 units / 0xa000 lower, then finishes the
- * acting unit's move. The two position blocks are copied through local block
- * types because the target uses struct copies (four lw/sw, and lwl/lwr for
- * the 16-bit-aligned screen block) that per-field stores do not reproduce.
+ * Keep the move chosen at the confirm prompt: the moved unit re-registers its
+ * tile and, when it carries a rider (mount state MOUNT), the rider takes its
+ * tile, destination, real and screen position raised 10 units / 0xa000. Then
+ * the acting unit's move is marked taken and the post-movement display starts.
+ * Despite the names, `rider` is the moved unit and `mount` its rider.
  */
 static void battle_unit_copy_rider_data_to_mount(battle_unit_t* unit, battle_unit_t* rider) {
     battle_unit_t* mount;
@@ -268,8 +267,13 @@ void battle_state_handle_wait_direction_state(void) {
 }
 
 /*
- * Post-action state tick: apply the selected menu command, then once the
- * caster's wait counter passes 0x1f, retire one pending move-find result.
+ * CrystalLearn game-state handler: apply the crystal or treasure choice
+ * (commands 0, 1 and 4 pass their BATTLE_CRYSTAL_* value to
+ * battle_unit_learn_from_crystal, 2 restores HP and MP and finalizes the action,
+ * 7, 8 and 0xff only close). Then, once no effect is pending, the casting unit's
+ * frame counter has reached 0x1f and no numeric display shows, work on the first
+ * pending post-movement event of g_battle_move_find_result, clearing it once
+ * done, and start the next post-movement step.
  */
 void battle_state_handle_crystal_learn_state(void) {
     ai_command_t* command;
@@ -640,7 +644,7 @@ void battle_state_handle_action_announcement_state(void) {
 
 /* OpenSp2Files game-state handler: load the SP2 sheet holding the casting unit's
  * attack animation, then start the strike
- * (action_set_damage_display_type_based_on_ability).
+ * (battle_action_start_next_strike_display).
  *
  * With no buffer yet, a 0x8000-byte buffer is allocated and the read requested. A
  * unit that needs no SP2 file frees the buffer and starts the strike at once.

@@ -57,7 +57,7 @@ static int main_gfx_swap_display_area(u32* otag) {
     return elapsed;
 }
 
-/* Fade in a 256x24 caption strip centerd on a black 256x240 screen.
+/* Fade in a 256x24 caption strip centered on a black 256x240 screen.
  *
  * The strip is the texture at VRAM (896, 256) with its CLUT at (896, 287), drawn
  * at y 116. A full-screen subtractive quad steps from 248 to 0 in 32 frames, each
@@ -203,11 +203,14 @@ void main_system_handle_vsync_callback(void) {
 void main_system_handle_draw_sync_callback(void) {
 }
 
-/* Empty CdReadyCallback handler, installed by main_boot_run_startup. */
+/* Empty CdReadyCallback handler, installed by main_boot_run_startup; the CdInit
+ * that main_file_reset_cdrom_cpu_ram runs right after replaces it, so it never
+ * runs. */
 void main_file_handle_cd_ready_callback(u8 event, u8* result) {
 }
 
-/* Empty CdReadCallback handler, installed by main_boot_run_startup. */
+/* Empty CdReadCallback handler, installed by main_boot_run_startup and replaced
+ * by CdInit right after, like the ready callback. */
 void main_file_handle_cd_read_callback(u8 event, u8* result) {
 }
 

@@ -764,6 +764,12 @@ enum {
     UNIT_TURN_CT_THRESHOLD = 100,
 };
 
+/* unit_stats_t.equipment_stats (Battle Stats 0x3c-0x46), filled by
+ * main_unit_set_equipment_stats: each hand's weapon power and weapon evade
+ * (which battle counts only under Weapon Guard), then the physical evades of
+ * the accessory, each hand's shield and the class, then the magic evades of
+ * the accessory and each hand's shield. RIGHT_SHIELD comes from
+ * UNIT_EQUIPMENT_SLOT_RIGHT_HAND_SHIELD. */
 typedef enum battle_unit_equipment_stat_index {
     BATTLE_UNIT_EQUIPMENT_STAT_RIGHT_WEAPON_POWER = 0,
     BATTLE_UNIT_EQUIPMENT_STAT_LEFT_WEAPON_POWER = 1,
@@ -960,7 +966,7 @@ typedef struct unit_stats {
     u8 primary_skillset_name[8];     /* 0x14c */
     u8 secondary_skillset_name[8];   /* 0x154 */
     u8 ko_count;                     /* 0x15c */
-    u8 charged_ability_ct;           /* 0x15d */
+    u8 charged_ability_ct;           /* 0x15d; clockticks until the charged action resolves; 0xff when not charging */
     u8 monster_graphic;              /* 0x15e; copied from job data and consumed by WORLD formation graphics */
     u8 spritesheet_id;               /* 0x15f */
     u8 job_portrait_palette;         /* 0x160 */
@@ -1070,16 +1076,18 @@ typedef enum entd_equipment_slot {
 } entd_equipment_slot_e;
 
 typedef struct entd_unit {
-    u8 sprite_set;                           /* 0x00 */
-    u8 unit_flags;                           /* 0x01; unit_flags_e */
-    u8 name_id;                              /* 0x02 */
-    u8 level;                                /* 0x03; 0 or 0xfe: L - rnd(0..L/8); 100 + n: L + n; L: top party level */
-    u8 birth_month;                          /* 0x04; 1..12 for a fixed birthday */
-    u8 birth_day;                            /* 0x05; 1..31 for a fixed birthday */
-    u8 bravery;                              /* 0x06; above 100: random 45..74 */
-    u8 faith;                                /* 0x07; above 100: random 45..74 */
+    u8 sprite_set;  /* 0x00 */
+    u8 unit_flags;  /* 0x01; unit_flags_e */
+    u8 name_id;     /* 0x02 */
+    u8 level;       /* 0x03; 0 or 0xfe: L - rnd(0..L/8); 100 + n: L + n; L: top party level */
+    u8 birth_month; /* 0x04; 1..12 for a fixed birthday */
+    u8 birth_day;   /* 0x05; 1..31 for a fixed birthday */
+    u8 bravery;     /* 0x06; above 100: random 45..74 */
+    u8 faith;       /* 0x07; above 100: random 45..74 */
+    /* Career job index (0 base job, 1 Chemist ... 19 Mime) whose level and
+     * unlock requirements the unit gets; 20 or more gives no job levels. */
     u8 job_unlock;                           /* 0x08 */
-    u8 job_level;                            /* 0x09 */
+    u8 job_level;                            /* 0x09; low nibble: that job's level */
     u8 job_id;                               /* 0x0a */
     u8 secondary_skillset;                   /* 0x0b */
     unit_abilities_t abilities;              /* 0x0c; reaction, support, movement */

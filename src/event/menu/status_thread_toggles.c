@@ -17,7 +17,7 @@ void menu_toggle_unit_status_thread(s32 enable) {
     }
 }
 
-/* BUNIT.OUT 001c3f44 - Start (arg=1) or stop (arg=0) sub-thread 7, invoking
+/* Start (arg=1) or stop (arg=0) sub-thread 7, invoking
  * menu_run_unit_status_thread_variant with parameter block g_menu_comparison_display_thread_params. Sister of
  * thread-8 toggle. */
 void menu_toggle_comparison_status_thread(s32 enable) {

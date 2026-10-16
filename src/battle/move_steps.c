@@ -206,11 +206,12 @@ void battle_move_start_teleport_step(battle_unit_t* unit) {
     unit->step_phase = MOVE_STEP_PHASE_TELEPORT_START;
 }
 
-/* Start the unit's next movement step from the current tile center.
+/* Start a floating unit's next step (the FLOAT_TO_EDGE phases) from the current
+ * tile center, first unlinking a unit that rides from its mount.
  *
- * The step byte's top two bits pick the direction, which sets the facing and
- * edge offset; its low two bits extend the destination tile coordinate. The
- * second tile argument is unused. */
+ * The step byte's top two bits pick the direction, which sets the facing, the
+ * phase and the velocity toward the exit edge; its low two bits extend the
+ * destination tile coordinate. The second tile argument is unused. */
 void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* to) {
     move_step_t current_step;
     move_step_t* step;
@@ -256,14 +257,13 @@ void battle_move_start_float_step(battle_unit_t* unit, const map_tile_t* from, c
     unit->movement.destination_z = step->higher;
 }
 
-/* Start the unit's next movement step, dismounting any rider first.
+/* Start a flying unit's next step (the FLY_TO_EDGE phases) with
+ * BATTLE_UNIT_ANIMATION_FLY, first unlinking a unit that rides from its mount.
  *
- * Variant of move_start_unit_step that sets the facing through
- * battle_unit_store_animation_facing with animation 0x12: the step byte's top
- * two bits pick the direction, facing and edge offset, and its low two bits
- * extend the destination tile coordinate. A carried rider (mount state MOUNT)
- * takes animation 0x32 with the mount's facing. The caller also passes the
- * current and destination tiles, which this variant never reads. */
+ * The step byte's top two bits pick the direction, which sets the facing and
+ * the phase; its low two bits extend the destination tile coordinate. A carried
+ * rider (mount state MOUNT) takes BATTLE_UNIT_ANIMATION_RIDING with the mount's
+ * facing. The tile arguments are not read. */
 void battle_move_start_fly_step(
     battle_unit_t* unit, const map_tile_t* unused_current_tile, const map_tile_t* unused_destination_tile) {
     move_step_t current_step;
@@ -315,12 +315,14 @@ void battle_move_start_fly_step(
     unit->movement.destination_z = step->higher;
 }
 
-/* Start the unit's next movement step from the current tile center.
+/* Start a walking unit's next step (the WALK_TO_EDGE phases) from the current
+ * tile center.
  *
- * Variant of move_start_unit_step_and_dismount_rider without the rider dismount: the step byte's top
- * two bits pick the direction, which sets the facing and edge offset; its low
- * two bits extend the destination tile coordinate. The switch has no default, so `facing` is unset
- * for a direction outside 0-3 (none exists), and game state 0x2d leaves the unit's facing unchanged. */
+ * The step byte's top two bits pick the direction, which sets the facing, the
+ * phase and the velocity toward the exit edge; its low two bits extend the
+ * destination tile coordinate. In BATTLE_GAME_STATE_ACTION_EXECUTE, as during a
+ * knockback, the unit keeps its facing and animation. The switch has no
+ * default, so `facing` is unset for a direction outside 0-3 (none exists). */
 void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
     move_step_t* step;
     move_step_t current_step;
@@ -366,14 +368,14 @@ void battle_move_start_unit_step(battle_unit_t* unit, const map_tile_t* from, co
     unit->movement.destination_z = step->higher;
 }
 
-/* Start the unit's next movement step with animation 0x23.
+/* Start the unit's next step at climb speed (the CLIMB_TO_EDGE phases) with
+ * BATTLE_UNIT_ANIMATION_CLIMB.
  *
- * Variant of move_start_unit_step that sets the facing through
- * battle_unit_store_animation_facing: the step byte's top two bits pick the
- * direction, facing and edge offset, and its low two bits extend the
- * destination tile coordinate. A carried rider (mount state MOUNT) takes
- * animation 0x32 with the mount's facing. The interpolation scale is
- * step_speed, the 0x2000 climb scale, rather than the walk speed. */
+ * As in battle_move_start_unit_step, the step byte's top two bits pick the
+ * direction, which sets the facing, the phase and the velocity toward the exit
+ * edge, and its low two bits extend the destination tile coordinate. A carried
+ * rider (mount state MOUNT) takes BATTLE_UNIT_ANIMATION_RIDING with the mount's
+ * facing. The interpolation scale is step_speed rather than the walk speed. */
 void battle_move_start_unit_step_at_climb_speed(
     battle_unit_t* unit, const map_tile_t* from, const map_tile_t* unused_to) {
     move_step_t current_step;
@@ -643,9 +645,9 @@ static void battle_move_start_unit_climb_hop_step(battle_unit_t* unit, const map
  * The rise velocity is sqrt(2 * gravity * height) for the height difference in
  * half-height steps (6 world units each) plus two half-steps per tile of jump
  * length; a second apex term extends the frame count. The step byte's top two
- * bits pick the direction, which sets the center-tile offset, facing, the
- * destination coordinate, and a half-tile horizontal displacement spread over
- * the frame count. `from` is unused. `unused` reproduces an unreferenced 24-byte
+ * bits pick the direction, which sets the phase, facing, the destination
+ * coordinate, and a half-tile horizontal displacement spread over the frame
+ * count. `from` is unused. `unused` reproduces an unreferenced 24-byte
  * frame slot. The separate `height -=`/`height +=` statements keep the target's
  * in-place accumulation register; `rise_height` and `apex` keep the multiplication
  * order (term * 6 or 12 before gravity) that one folded expression reassociates.
@@ -1335,10 +1337,11 @@ static void battle_move_displace_overlapping_unit(battle_unit_t* unit, s32 direc
 }
 
 /* Pushes a unit sharing the mover's destination tile aside, mirroring
- * move_displace_overlapping_unit but keyed on the pending step's
- * destination tile instead of the unit's current map square.  The trailing
- * loop only advances the shared direction counter g_battle_move_displacement_direction; it has no other
- * effect.
+ * battle_move_displace_overlapping_unit but keyed on the pending step's
+ * destination tile instead of the unit's current map square. The trailing
+ * loop picks the push direction in g_battle_move_displacement_direction: the
+ * first direction off the path's axis on a straight step, or on a turn the
+ * first one that reverses neither the current nor the next step.
  *
  * The case order and the reused `dist` temporary reproduce the target's
  * cross-jumped tails and its s1 allocation; spelling the second path index as
@@ -1459,7 +1462,8 @@ static void battle_move_advance_display_unit_step(battle_unit_t* unit) {
     }
 }
 
-/* Runs the knockback step unless the unit is mid-way through animation 0x20. */
+/* Step handler of the JUMP_LANDING phases: once BATTLE_UNIT_ANIMATION_LAND has
+ * run out (or another animation plays), continue the step toward the tile center. */
 void battle_move_update_knockback_after_animation(battle_unit_t* unit) {
     if (((unit->animation.sequence_id >> 1) != BATTLE_UNIT_ANIMATION_LAND) || (unit->animation.wait == 0)) {
         battle_move_advance_display_unit_step(unit);
@@ -1775,6 +1779,8 @@ void battle_move_update_walking_step_at_tile_edge(battle_unit_t* unit) {
             unit->standing_on_battle_id_plus_one = 0;
             g_battle_move_destination_edge_height = g_battle_move_destination_tile->height * 2
                 + g_battle_move_destination_tile->depth_half_height.half_height * unit->destination_edge_height;
+            /* Retail adds the destination's water lift to the current height, not to the
+             * destination height, so a step up onto deep water can pass as a plain step. */
             g_battle_move_current_edge_height += battle_move_calculate_water_lift(unit, g_battle_move_destination_tile);
         }
 
@@ -1843,13 +1849,13 @@ void battle_move_update_float_step_to_current_tile_exit_edge(battle_unit_t* unit
 
 /* The original wrote the body of battle_move_update_unit_step_to_destination_tile_center a second time as
  * battle_move_update_float_step_to_destination_tile_center. */
-/* Step handler of the WALK_TO_CENTER and CLIMB_TO_CENTER stages (and of the
- * knockback step): advance the unit one frame toward the center of its
- * destination tile.
+/* Step handler of the FLOAT_TO_CENTER stages: advance a floating unit one frame
+ * toward the center of its destination tile.
  *
- * Outside events it pushes aside a unit on the destination tile. At the center
- * the horizontal motion stops; once the unit is also down at the ground height
- * there, it takes the destination tile as its map position and the step ends. */
+ * Outside events it pushes aside a unit sharing its current tile, where the
+ * walking twin pushes one on the destination tile. At the center the horizontal
+ * motion stops; once the unit is also down at the ground height there, it takes
+ * the destination tile as its map position and the step ends. */
 void battle_move_update_float_step_to_destination_tile_center(battle_unit_t* unit) {
     s32 direction = battle_move_get_direction(unit);
     s16 screen_z;

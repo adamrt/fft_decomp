@@ -717,9 +717,11 @@ void script_opcode_wait_walk(s32 unit_id) {
     }
 }
 
-/* Enter ATTACK.OUT when script variable 0x1fc is clear: mark the transition,
- * load companion executable 0xd, then hand off to its scenario-music,
- * formation-sprite, and portrait entry points. */
+/* Preload ATTACK.OUT when EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS is clear:
+ * load companion executable 0xd in preload mode, look up the pending
+ * scenario's special portrait and unit, and build the formation sprites and
+ * portraits, so the later ATTACK entry skips reloading the overlay, sprites
+ * and portraits. */
 void script_opcode_load_attack_graphics(void) {
     if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) == 0) {
         g_script_attack_entry_mode = SCRIPT_ATTACK_ENTRY_PRELOADED;
@@ -1063,7 +1065,7 @@ void unit_update_facing_and_pending_animations(void) {
  * on script_run_next_event.
  *
  * While the battle has not started it first stores the camera in the script
- * variables and resets the script camera transform. Where WORLD's copy calls two
+ * variables and resets the script light transform. Where WORLD's copy calls two
  * empty functions, BATTLE does that camera work. */
 void script_start_current_event_thread(void) {
     unit_reset_animation_states();
@@ -1621,7 +1623,7 @@ static void menu_build_skillset_entries(void) {
             }
         }
     }
-    /* The separator byte is materialised before the row counter in the
+    /* The separator byte is materialized before the row counter in the
      * target; a hoisted constant lands after the counter's initializer. */
     separator = 0xfa;
     for (i = 5; i >= 0; i--) {
@@ -1663,7 +1665,7 @@ static void menu_build_skillset_entries(void) {
 
 /* Build the skillset list, then wait for its submenu or run icon selection.
  * The completion value written to the thread's
- * second parameter is materialised before the branch, which puts `li v1,1`
+ * second parameter is materialized before the branch, which puts `li v1,1`
  * in the beqz delay slot ahead of the 0xFC argument. */
 void menu_run_skillset_thread(void) {
     s32 param_value;

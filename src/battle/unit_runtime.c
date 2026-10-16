@@ -18,8 +18,8 @@
 
 /* The original wrote the body of battle_unit_add_event_offset_by_runtime_id a second time as
  * battle_unit_add_event_offset_by_runtime_id_unused. */
-/* Add `amount` to a unit's event offset. The copy every caller uses;
- * battle_unit_add_event_offset_by_runtime_id_unused is the same routine compiled twice. */
+/* A second, identical copy of battle_unit_add_event_offset_by_runtime_id. No retail code calls
+ * it. */
 s32 battle_unit_add_event_offset_by_runtime_id_unused(u32 runtime_id, const SVECTOR* amount) {
     battle_unit_t* unit = battle_unit_get_by_runtime_id(runtime_id);
 

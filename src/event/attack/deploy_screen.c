@@ -784,7 +784,8 @@ static void attack_deploy_handle_roster_navigation_input(void) {
 }
 
 /* Move the roster cursor forward (wrapping at 20) to the first unit the
- * current squad may still deploy and load it into the status panels. */
+ * current squad may still deploy and load it into the status panels. The
+ * search has no exit when no slot is deployable, so the screen would hang. */
 static void attack_deploy_select_unit_for_stats_display(void) {
     attack_deploy_mark_other_squad_units_undeployable();
     while (1) {

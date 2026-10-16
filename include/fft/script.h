@@ -59,7 +59,7 @@ enum {
  * labels describe BATTLE; WORLD can handle them differently: there WALK_TO
  * does nothing outside a block, ARROW resolves both units and stops,
  * DARK_SCREEN's thread only sets its task id, and the two CHANGE_MAP
- * instructions leave the camera's script transform alone. BETA does not imply
+ * instructions leave the script light transform alone. BETA does not imply
  * unused. JUMP animates a unit, whereas JUMP_FORWARD/JUMP_BACK branch within
  * the script. CALL_FUNCTION selects a built-in operation, not a native
  * function pointer. EFFECT_END starts the staged effect; it does not cancel
@@ -953,7 +953,7 @@ typedef enum event_id {
     /* CallFunction JOIN_UNITS_SILENTLY also restores the new-game inventory
      * in the events below this one. */
     EVENT_ID_NEW_GAME_INVENTORY_END = 0x4e,
-    /* A Zodiac Stone speaks in these two. Their centerd messages start at
+    /* A Zodiac Stone speaks in these two. Their centered messages start at
      * the box's left edge while ETC's graphics are off. */
     EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9,
     /* Also the event the ending leaves current, with the next scenario

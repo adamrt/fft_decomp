@@ -417,7 +417,7 @@ typedef enum effect_load_state {
 /* g_battle_effect_playback_phase: the stages of battle_effect_update_stage. */
 typedef enum effect_playback_phase {
     EFFECT_PLAYBACK_PHASE_IDLE = 0,
-    EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for effect_play */
+    EFFECT_PLAYBACK_PHASE_REQUESTED = 1, /* waiting for battle_effect_play */
     EFFECT_PLAYBACK_PHASE_INIT_PALETTE = 2,
     EFFECT_PLAYBACK_PHASE_START_SCRIPT = 3, /* bind the effect file's sections and start its script */
     EFFECT_PLAYBACK_PHASE_RUNNING = 4,
@@ -702,9 +702,10 @@ typedef struct effect_sprite_frameset {
 typedef char effect_sprite_frameset_size_must_be_4[sizeof(effect_sprite_frameset_t) == 4 ? 1 : -1];
 
 /* Section table at the start of an effect file's header section: byte offsets
- * from the table itself, one per effect_*_address/_pointer getter. */
+ * from the table itself, each read by its section's binder in effect_script.c
+ * (battle_effect_set_*_pointer and the flags, sound and palette loaders). */
 typedef struct effect_file_header {
-    s32 frame_data;          /* 0x00: the getter skips the section's leading 32-bit value */
+    s32 frame_data;          /* 0x00: the binder skips the section's leading 32-bit value */
     s32 animation_sequences; /* 0x04: likewise */
     s32 script;              /* 0x08: effect script section */
     s32 particle_system;     /* 0x0c: emitter motion and control */

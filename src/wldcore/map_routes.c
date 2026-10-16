@@ -165,8 +165,9 @@ void wldcore_map_pulse_dot_colors(void) {
     }
 }
 
-/* Pick the highest-priority visible map dot whose screen position contains the
- * given point, returned as a one-based index (0 when nothing is hit).
+/* Pick the visible map dot with the lowest priority value whose screen
+ * position contains the given point, returned as a one-based index (0 when
+ * nothing is hit).
  *
  * The point is passed by value in a0/a1; the target reads both members back
  * from the incoming argument home slots. */
@@ -914,7 +915,7 @@ void wldcore_map_step_route_travel(void) {
     g_wldcore_map_projection_state.flags |= WLDCORE_PROJECTION_FLAG_UPDATE_POSITION;
 }
 
-/* Start a wrapped projection move for a point outside the camera bounds.
+/* Start a projection move (a camera pan) toward a point outside the camera bounds.
  *
  * The motion record snapshots the current origin and stores the target
  * distance in the same 8-bit fractional scale used by its progress field. */
@@ -937,10 +938,9 @@ s32 wldcore_map_start_projection_motion_if_outside_bounds(const point32_t* point
     return 1;
 }
 
-/* Test the camera projection bounds while allowing wrap-edge exceptions.
- *
- * An off-screen point remains eligible when the current projection origin is
- * close enough to the opposite edge for wrapping to bring it into view. */
+/* Whether a point lies outside the view far enough to pan the camera: beyond an
+ * edge while the projection origin still has more than 0x20 of scroll room
+ * toward it. Nothing wraps; at the scroll limit the point counts as inside. */
 s32 wldcore_map_is_point_outside_projection_bounds(const point32_t* point) {
     if ((point->x < -0x40 && 0x80 - g_wldcore_map_projection_origin.vx >= 0x21)
         || (point->x >= 0x49 && g_wldcore_map_projection_origin.vx + 0x74 >= 0x21)) {
@@ -980,7 +980,8 @@ extern s32 g_wldcore_map_projection_motion_progress;
 extern s32 g_wldcore_map_projection_motion_origin_x;
 extern s32 g_wldcore_map_projection_motion_target_x;
 
-/* Advance one frame of the wrapped projection move started at 0x8008ec38.
+/* Advance one frame of the camera pan started by
+ * wldcore_map_start_projection_motion_if_outside_bounds.
  *
  * Interpolates the live projection origin between the snapshotted origin and
  * the clamped target by progress/distance. While progress is still short of

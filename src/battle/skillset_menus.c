@@ -932,9 +932,9 @@ s32 battle_action_run_between_turn_control(battle_between_turn_mode_e mode) {
  * produces this tick in the unit's action record.
  *
  * Returns 2 for a Reraise or undead revival and for any other staged change
- * (Defending removed, the Brave-below-10 change), 1 when the death counter
- * runs out and the unit becomes a crystal or treasure, 3 when Death Sentence
- * expires on a unit that is not undead, and 0 when nothing happens.
+ * (Defending removed, +1 Brave for a Chicken with Brave below 10), 1 when the
+ * death counter runs out and the unit becomes a crystal or treasure, 3 when
+ * Death Sentence expires on a unit that is not undead, and 0 when nothing happens.
  */
 static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
     action_data_t* action = &unit->action;
@@ -975,6 +975,8 @@ static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit) {
             action->attack_type = ACTION_TYPE_HP_HEALING | ACTION_TYPE_STATUS_CHANGE;
             return 2;
         }
+        /* Any set bit of the mask gives a crystal: 1 in 2 units, or 3 in 4 for a
+         * unit that started player-controlled; treasure otherwise. */
         mask = 0x10;
         if (unit->initial_team_flags & BATTLE_TEAM_FLAG_PLAYER_CONTROLLED) {
             mask = 0x110;
@@ -1454,7 +1456,9 @@ static s32 battle_action_set_move_act_flags(s32 idx, s32 move_flag, s32 act_flag
 
 /* End the unit's turn: CT gains 20 when it neither moved nor has Don't Move,
  * and 20 when it neither acted nor has Don't Act or Performing; the result is
- * capped at 60. Always returns 1. */
+ * capped at 60. As the turn start already left CT % 100, a turn costs 100 CT,
+ * 80 with the move or the action unused, or 60 with both unused, and never
+ * leaves more than 60. Always returns 1. */
 s32 battle_action_end_turn(s32 unit_id) {
     unit_stats_t* unit = &g_battle_unit_stats[unit_id];
     u16 ct;

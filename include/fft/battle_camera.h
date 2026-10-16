@@ -96,6 +96,8 @@ typedef enum camera_rotation_action {
     CAMERA_ROTATION_RIGHT = 2, /* the yaw rises to its destination */
 } camera_rotation_action_e;
 
+/* Camera yaw rounded down to 0x200 (yaw & 0xfe00), stored as each turn's destination is set;
+ * nothing reads it. */
 extern s32 g_battle_previous_camera_yaw;
 /* Maps a camera quadrant index to its map-tile camera-block direction. */
 extern u8 g_battle_camera_quadrant_block_directions[4];

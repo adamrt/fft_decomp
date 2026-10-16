@@ -1424,12 +1424,14 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
     }
 }
 
-/* Saves or restores the event status snapshot for every unit
- * record of a unit.
+/* Save or restore the event status snapshot of each unit the event unit id
+ * selects (one unit or a unit group), under player input only.
  *
- * With restore clear, each resolved battle unit is snapshotted and its graphics are
- * refreshed on the main stack; otherwise the snapshot is replayed through
- * unit_apply_staged_status_data. Follow-up flags add 40-frame waits. */
+ * With restore clear, each unit is snapshotted and, when saved, its graphics are
+ * refreshed on the main stack; the jumping-unit graphic triggers are reset at
+ * the end. Otherwise the snapshot is replayed through
+ * unit_apply_staged_status_data. Removing Jump or Float from any unit adds a
+ * 40-frame wait, and removing Jump adds another. */
 void unit_update_staged_status_data(u16 unit_id, u16 restore) {
     s32 filter_mode;
     s32 unit_index;

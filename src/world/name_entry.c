@@ -77,7 +77,8 @@ u8* world_name_run_entry_keyboard_frame(const u8* list, s32 unused_1) {
  * Run the WORLD name-entry screen until its state reaches 0xFF.
  *
  * Binds both packet buffers onto a stack-resident pool block, then each frame
- * presents the previous ordering table, redraws the keyboard image, steps the
+ * presents the previous ordering table, uploads `image` as the backdrop (OPEN,
+ * the one caller, passes a copy of its last displayed frame), steps the
  * current name-entry handler, draws the cursor and key prompts, and dispatches
  * the queued sound effect. Returns the encoded name.
  *

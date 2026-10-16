@@ -733,7 +733,7 @@ void wldcore_calendar_convert_date_to_zodiac(s32* month_ptr, s32* day_ptr) {
  * whose 128 bytes read as plausible month/day pairs throughout).
  *
  * The age column is walked one byte at a time from index 1, which is why the
- * loop's base materialises as the biased constant 0x80057f35; entry 0 is the
+ * loop's base materializes as the biased constant 0x80057f35; entry 0 is the
  * only absolute access to 0x80057f34.
  */
 static void wldcore_advance_brave_story_birthdays(void) {

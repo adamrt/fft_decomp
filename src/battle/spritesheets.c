@@ -282,8 +282,9 @@ s32 battle_gfx_claim_spritesheet_slot(s16 spritesheet_id) {
  * 0x60-0x9a use the upper eight palettes). The RGB offset starts at -4, -8 or
  * -0xc for tile effect levels 1-3; unless weather bit 1 is set, script
  * variables 0x23 (weather) and 0x24 (night) shift it further, and a unit more
- * than 0x30 below its projected screen Z stays untinted. Crystal, chicken,
- * frog and treasure sheets take fixed palettes.
+ * than 0x30 above the ground height at its position (in the air, as during
+ * Jump) stays untinted. Crystal, chicken, frog and treasure sheets take fixed
+ * palettes.
  *
  * Each branch makes its own palette call, as the original evidently did:
  * cross-jumping merges them only after register allocation, so the extra

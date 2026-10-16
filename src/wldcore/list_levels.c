@@ -977,7 +977,7 @@ void wldcore_list_handle_brave_story_propositions_input(wldcore_menu_panel_level
 
 /* Pushes the proposition-attempt detail text window as menu level 0x2a, the
  * partner of the 0x80088180 pop. Records the entry on the new level, decodes
- * that entry's last-attempt date out of the packed nine-bit array at
+ * that entry's completion date out of the packed nine-bit array at
  * g_main_proposition_last_attempt_date_bits (dest[0] month 1-12, dest[1] day
  * 1-31), and sets up the shared scrollable text window at g_wldcore_scrollable_text_window for text
  * 0x8800 + entry with the month name (0xb84f + month) and the day as its two
@@ -1566,8 +1566,9 @@ void wldcore_list_handle_tutorial_categories_input(wldcore_menu_list_window_leve
     }
 }
 
-/* Opens a seven-row panel list (entry values 0xc000 + row) whose rows are
- * flagged 8 when the matching bit of 0x8004c6bc is set, shown at
+/* Opens the seven-row list of formation tutorials (entry values 0xc000 + row)
+ * whose rows are flagged 8 when the matching bit of
+ * g_main_tutorial_progress_masks is set, shown at
  * (0x54, 0x50) with width 0x8c; appends its record tagged 0x2c.
  *
  * The flag value lives in its own variable so the target keeps 8 in a saved

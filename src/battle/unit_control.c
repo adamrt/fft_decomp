@@ -80,8 +80,8 @@ void battle_unit_set_mounted_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_animation_based_on_mounted_state(battle_unit_get_by_runtime_id(runtime_id));
 }
 
-/* battle_unit_set_idle_animation_for_movement by unit id. No retail code calls
- * it. */
+/* battle_unit_set_idle_animation_for_movement by runtime id. No retail code
+ * calls it. */
 void battle_unit_set_movement_idle_animation_by_runtime_id(u32 runtime_id) {
     battle_unit_set_idle_animation_for_movement(battle_unit_get_by_runtime_id(runtime_id));
 }
@@ -444,7 +444,7 @@ s32 battle_unit_prepare_rider_dismount(u32 runtime_id, s32 direction, s32 jump_l
     return 1;
 }
 
-/* Seats one unit on another by unit id (battle_unit_mount_rider_onto_unit).
+/* Seats one unit on another by runtime id (battle_unit_mount_rider_onto_unit).
  * Returns 0 when either record is missing. No retail code calls it. */
 s32 battle_unit_mount_by_runtime_ids(u32 rider_runtime_id, u32 mount_runtime_id) {
     battle_unit_t* rider = battle_unit_get_by_runtime_id(rider_runtime_id);

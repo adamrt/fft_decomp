@@ -185,7 +185,10 @@ static s32 battle_ai_is_facing_tile_blocked(const ai_coords_t* source, const ai_
         >= 3;
 }
 
-/* Target 0x8019ae30. */
+/* Reset the selected action's ranking so it is no longer decided, which makes
+ * the AI decide afresh on its next command. Called when a turn opens without a
+ * scenario event and when a move is interrupted (failed teleport, crystal or
+ * treasure pickup, triggered trap). */
 void battle_ai_init_selected_action(void) {
     battle_ai_reset_action_ranking_fields(&g_battle_ai_data_base.selected_action);
 }

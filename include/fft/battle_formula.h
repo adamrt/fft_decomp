@@ -60,9 +60,9 @@ void battle_formula_store_xa_times_ya_damage(void);
 void battle_formula_apply_poach_and_train(void);
 
 /* accuracy and evasion */
-/* Provisional: the 12-entry zodiac compatibility table indexed by the absolute
- * difference of the two signs.  1/4 weaken the formula, 2/5 strengthen it, and
- * 3 marks the opposition pair whose result depends on sex. */
+/* Zodiac compatibility by the absolute difference of the two signs, 12 entries:
+ * 3 and 9 apart are bad, 4 and 8 good, 6 (the opposite sign) depends on sex,
+ * the rest neutral. Serpentarius returns before the table is read. */
 extern u8 g_battle_zodiac_compatibility_modifiers[];
 
 void battle_formula_apply_evasion_changes_due_to_statuses(void);

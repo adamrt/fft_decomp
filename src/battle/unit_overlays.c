@@ -1312,7 +1312,7 @@ void battle_gfx_shift_and_fill_position_copies(battle_unit_t* unit) {
     battle_unit_copy_draw_coords(unit->position_copies, unit);
 }
 
-/* Make the unit's item display show an item's 16x16 icon, centerd on the
+/* Make the unit's item display show an item's 16x16 icon, centered on the
  * display's origin. */
 void battle_gfx_store_item_display_data(battle_unit_t* unit, u32 item_id) {
     SPRT data;

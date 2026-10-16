@@ -3,7 +3,7 @@
 #include "psx/types.h"
 
 /* Reconcile one sorted item category list (0 weapons and shields, then
- * headgear, body armour, accessories and other: the menu category minus one)
+ * headgear, body armor, accessories and other: the menu category minus one)
  * with what the party owns: a newly owned item is put first, an item neither
  * owned nor equipped is removed, and the others keep their order. */
 void item_rebuild_category_list(s32 category) {

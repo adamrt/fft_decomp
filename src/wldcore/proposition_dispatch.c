@@ -1040,7 +1040,9 @@ void wldcore_list_completed_propositions_block_all_buttons(wldcore_menu_stack_re
     g_menu_blocked_buttons = -1;
 }
 
-/* Handle input for the job-report confirmation level. */
+/* Handle input on the job report list: Cross closes the list and Select shows
+ * its help. Circle prepares the selected job's report, asks "Wanna hear about
+ * ...?" and pushes the confirmation level with an OK/NO panel. */
 void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_t* level) {
     s32 buttons;
     s32 depth;
@@ -1101,12 +1103,12 @@ void wldcore_list_handle_completed_propositions_input(wldcore_menu_stack_record_
  * base_y's register); every plain `+` spelling of the same sum compiles to
  * `addu v1,v1,v0`. Written with a `+`, expand hands combine a plus tree with a
  * constant in it, combine reassociates the 0xE onto the scaled selection and
- * rebuilds the outer add through gen_binary, which canonicalises the complex
+ * rebuilds the outer add through gen_binary, which canonicalizes the complex
  * operand into position 0 -- so the sum is tied to the delta register and the
  * following `sw` reads it. Negating the addend makes the outer operation a
  * MINUS of a NEG, which combine turns back into a plus *after* that
- * canonicalisation, leaving base_y as operand 0; the rest of the block
- * (`sll` at +0x120, address materialisation, `lw` at +0x130, `addiu` filling
+ * canonicalization, leaving base_y as operand 0; the rest of the block
+ * (`sll` at +0x120, address materialization, `lw` at +0x130, `addiu` filling
  * the load shadow at +0x134) is unchanged. `base_y - (0 - (selection * 0x10 +
  * 0xE))` and `base_y - (0 - (0xE + selection * 0x10))` are byte-identical
  * spellings; `base_y - (-0xE - selection * 0x10)` is not (fold collapses it
@@ -1613,9 +1615,11 @@ static void wldcore_proposition_push_result_level(s32 proposition) {
 /* Per-frame step of the proposition-result menu level.
  *
  * Phase 0 waits for confirm/cancel and then commits the result: it clears the
- * proposition's script flag bit 1 (and sets bit 4 on success), adds the reward
- * total g_wldcore_proposition_gil_amount to gil (saturating at 99,999,999), records the completion
- * date in the packed nine-bit arrays, releases each participant from the
+ * proposition variable's WLDCORE_PROPOSITION_VARIABLE_IN_PROGRESS (and sets
+ * WLDCORE_PROPOSITION_VARIABLE_COMPLETED on success), adds the reward total
+ * g_wldcore_proposition_gil_amount to gil (saturating at 99,999,999), records
+ * the completion date (on success only) and any treasure or land date in the
+ * packed nine-bit arrays, releases each participant from the
  * proposition and pays them their share, marks the proposition
  * state byte, and finally compacts the participant record out of
  * g_main_active_propositions. Phase 1 waits for WORLD thread 14 and the audio

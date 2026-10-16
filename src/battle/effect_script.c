@@ -236,7 +236,7 @@ void battle_effect_load_data(void) {
  * file (falling back to effect 1 when its size is zero) 0x3500 bytes into the
  * event overlay area, state 1 polls the load, state 2 waits out the countdown
  * (60 frames when a secondary effect is active), finalizes the secondary
- * effect and fades the music when the effect header flag 0x10 is set, and
+ * effect and lowers the music when the flags section sets EFFECT_FLAG_QUIET_MUSIC, and
  * state 3 waits for the secondary effect phase to end. Returns nonzero while
  * work remains. A load state outside 0-3 leaves `result` unset: the test then
  * reads whatever the caller left in $a0.
@@ -309,9 +309,11 @@ s32 battle_effect_init_data(void) {
  * its element mask in its high 16 bits. `ability` is an ability id or, from
  * ABILITY_ID_COUNT up, one of the effects past the abilities. A thrown ball
  * (ABILITY_ID_THROW_BALL) takes the Fire, Ice or Bolt effect by the ball's
- * element. A negative table entry means the ability has no effect file: only
- * the two fixed secondary animations for the equipment-break and Charge
- * ability ranges are started, and nothing is retained.
+ * element; a ball of any other element stores no effect id, so
+ * g_battle_ability_effect_id keeps the previous one. A negative table entry
+ * means the ability has no effect file: only the two fixed secondary
+ * animations for the equipment-break and Charge ability ranges are started,
+ * and nothing is retained.
  */
 void battle_effect_set_ability_animation(u32 packed, s32 ability, effect_secondary_init_t* source) {
     g_battle_effect_load_state = EFFECT_LOAD_START;
@@ -407,12 +409,14 @@ s32 battle_effect_get_playback_phase(void) {
 
 /* Runs the loaded effect file one frame and returns 1 while it plays.
  *
- * Once effect_play releases a requested effect, the file's two CLUT
+ * Once battle_effect_play releases a requested effect, the file's two CLUT
  * rows and its texture go to VRAM; the memory from that last section of the
  * file on then becomes the effect heap, the section pointers are bound and
  * the root record starts the script. Each later frame runs every allocated
  * record's script until it yields, freeing the records whose scripts end, and
- * the effect is over when none is left. */
+ * the effect is over when none is left. Phase 5 has no case and would return
+ * `result` unset, but nothing stores 5 or RESTART_SCRIPT (6), so the restart
+ * path is dead in retail. */
 static s32 battle_effect_update_stage(void) {
     s32 result;
     s32 id = g_battle_effect_allocated_record_head;

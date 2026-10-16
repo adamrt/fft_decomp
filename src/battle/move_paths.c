@@ -190,9 +190,9 @@ static void battle_move_set_unit_path_flag(battle_unit_t* unit) {
  * path count selects what follows: MOVE_PATH_TELEPORT starts the
  * teleport, MOVE_PATH_TELEPORT_FAILED also clears the pending mount and
  * restarts the AI action, 0 or an exhausted path mounts the pending mount,
- * and otherwise the next path byte starts a step (flag 0x80 and 0x40 of
- * movement_flags pick their own starters, and bit 2 of the step byte picks the
- * climb speed).
+ * and otherwise the next path byte starts a step (the path's
+ * BATTLE_EFFECTIVE_MOVEMENT_FLY and _FLOAT flags pick the fly and float step
+ * starters, and the step's slow bit picks the climb speed).
  */
 void battle_move_update_path_step(battle_unit_t* unit) {
     u32 offset;
@@ -400,7 +400,10 @@ void battle_move_update_knockback_step(battle_unit_t* unit) {
 
 /* Give a knocked-back unit a one-step path to its destination: a plain step in the travel
  * direction with the destination level as its elevation bit, at walk speed 0x8000 (four times the
- * usual 0x2000), which battle_move_update_knockback_step then slows. */
+ * usual 0x2000), which battle_move_update_knockback_step then slows.
+ *
+ * The masks edit path.data.steps[0] as bits 8-15 of the path's first word: 0x300 length,
+ * 0x400 slow, 0x800 climb, 0x1000 mount, 0x2000 higher and 0xc000 the move_step_direction_e. */
 static void battle_move_init_knockback(battle_unit_t* unit) {
     u32* path_word = (u32*)&unit->path;
     u32 state;
@@ -1253,6 +1256,8 @@ void battle_camera_update_rotation(void) {
             *yaw = angle;
             if (g_input_previous_buttons & PSX_PAD_R1) {
                 if (g_battle_game_state != BATTLE_GAME_STATE_EVENT) {
+                    /* Retail continues the right turn through rotate_left. Harmless: the two
+                     * differ only for a destination on an axis, which this one never is. */
                     battle_camera_rotate_left((angle & 0xFE0) + 0x400);
                 }
             } else {
@@ -1270,9 +1275,11 @@ void battle_camera_update_rotation(void) {
     }
 }
 
-/* Start a zoom toward ONE (mode 0) or 0xc00 (mode 1) from whichever side the
- * scale is on. No retail code calls it; the L2 input goes through
- * battle_camera_toggle_zoom. */
+/* Start a zoom toward ONE (mode 0) or 0xc00 (mode 1). Only zooming in to ONE
+ * from below and out to 0xc00 from above pair an action and target that
+ * battle_camera_update_zoom steps; the other two cases leave the zoom action
+ * set with no progress, which also blocks the L2 toggle. No retail code calls
+ * it; the L2 input goes through battle_camera_toggle_zoom. */
 void battle_camera_zoom_map(s32 mode) {
     switch (mode) {
     case 0:
@@ -1310,9 +1317,9 @@ void battle_camera_zoom_map(s32 mode) {
     }
 }
 
-/* Toggle the battle map zoom between "in" (target=1, action=2) and
-   "out" (target=4, action=4), playing the corresponding zoom SFX. Any
-   other current zoom target is left alone. */
+/* Toggle the zoom target between MAP_ZOOM_IN and MAP_ZOOM_OUT, starting the
+ * matching zoom with its sound; any other target is left alone. The increment
+ * restarts at 4 either way. */
 static void battle_camera_toggle_zoom(void) {
     if (g_battle_map_zoom_target == MAP_ZOOM_IN) {
         g_battle_camera_zoom_action = CAMERA_STEP_DECREASE;
@@ -1427,7 +1434,9 @@ void battle_camera_handle_tilt_request(s32 mode) {
     }
 }
 
-/* Toggle the camera tilt and play its sound. */
+/* Toggle the tilt target between low and high, starting the tilt at increment 1
+ * with its sound. Targets 3 and 4 form a second pair that nothing else sets, so
+ * those branches never run. */
 static void battle_camera_toggle_tilt(void) {
     s32 target = g_battle_map_tilt_target;
 

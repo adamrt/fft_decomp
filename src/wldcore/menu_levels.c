@@ -919,9 +919,11 @@ static void wldcore_menu_push_map_path_level(s32 path_id, s32 path_id_hi, s32 er
 }
 
 /*
- * Advances the world slideshow one frame: restarts it at the last page when
- * the level asks, steps the page timer forwards or backwards while the run
- * flag is set, and otherwise pops the menu level and resumes its parent.
+ * Advances a map path animation one frame. The first frame plays the path
+ * sound; an erase also clears the path's visible variable and starts at the
+ * last page. While the animation runs, the page timer steps forwards to draw
+ * the route (setting the visible variable once all pages are drawn) or
+ * backwards to erase it; afterwards the level pops and its parent resumes.
  */
 void wldcore_menu_step_map_path_level(wldcore_map_path_level_t* level) {
     s32 depth;
@@ -1717,7 +1719,7 @@ void wldcore_menu_handle_layout_window_input(wldcore_window_layout_request_t* re
  * entry's text through text_find_entry / text_measure_pixels to
  * size the panel, copies the entry values into g_wldcore_list_entry_values with
  * cleared row flags, clamps the cursor to at most four visible rows, and
- * starts the panel render state centerd on the measured width.
+ * starts the panel render state centered on the measured width.
  *
  * The identical `menu += 0x37` arms split the block for the scheduler (jump2
  * cross-jumps them back together), keeping the add after the picture call so
@@ -2162,12 +2164,12 @@ void wldcore_menu_push_scrollable_text_window_level(s32 text) {
     }
 }
 
-/* Menu-level step for the scrollable text window at 0x8009eef8. While its
- * render record is hidden (flag 0x10), an unblocked frame plays sound 0x12
- * and shows the level window and the render record again. Otherwise, once
- * 0x800903e4 reports the window finished, it drops one window and one render
+/* Menu-level step for the scrollable text window g_wldcore_scrollable_text_window.
+ * While its render record is hidden (flag 0x10), an unblocked frame plays sound
+ * 0x12 and shows the level window and the render record again. Otherwise, once
+ * wldcore_text_is_window_finished reports the window finished, it drops one window and one render
  * object, pops the level, clears system flags 0x08002000, shows the parent
- * level's window and resumes the bar menu. */
+ * level's window and resumes the parent level. */
 void wldcore_menu_step_scrollable_text_window_level(wldcore_menu_stack_record_t* level) {
     s32* index = &g_wldcore_scrollable_text_window.render_record_index;
     s32 depth;

@@ -151,7 +151,7 @@ static void battle_move_apply_knockback(void) {
 /* Applies the pending reaction ability's effect to the current target action
  * record and finishes the strike. Returns 0 when the ability's behavior
  * flags select the alternate handler, -1 for an ability with no effect entry,
- * and 1 once the action has been finalised.
+ * and 1 once the action has been finalized.
  *
  * The Damage Split case chains the damage store so the value reaches `healing` through
  * the target record; storing it there first is what orders the three global
@@ -520,8 +520,8 @@ static void battle_status_remove(void) {
 
 /* Validate and clamp the target's current action result before it applies.
  *
- * A target that is dead (unless the ability cancels Dead or the target is
- * undead), petrified or walled, without the ability canceling that status,
+ * A Dead target (unless the ability cancels Dead and the target is not
+ * undead), or a petrified or walled one the ability does not cancel,
  * turns the action into a miss. Otherwise zero accuracy clears the hit flag,
  * HP/MP changes are capped at 999, a lethal HP hit drops knockback, and a
  * hit absorbed by the target team's Golem becomes a guarded miss. */
@@ -940,8 +940,11 @@ static s32 battle_unit_apply_level_up_down_ability(void) {
     return 1;
 }
 
-/* Returns the first nonzero result of the three checks, or the action
- * restriction check's zero. */
+/* Nonzero when the unit cannot react: a status or a non-primary action
+ * prevents it (battle_action_is_reaction_prevented), a reaction is already in
+ * play (battle_action_check_reaction), or it cannot act or stands in deep
+ * water (battle_unit_get_action_restriction). Returns the first nonzero
+ * result, or 0 when the unit can react. */
 s32 battle_action_is_reaction_blocked(const unit_stats_t* unit) {
     s32 result;
 
@@ -1061,7 +1064,9 @@ static void battle_action_dispatch_target_reaction_ability(void) {
     }
 }
 
-/* Dispatch the target's first active MP Switch, Distribute, or Damage Split reaction. */
+/* Check the target's first equipped damage-sharing reaction, in the order MP
+ * Switch, Distribute, Damage Split; when its check fails no other is tried.
+ * Nothing runs for the Weapon Heal formula or a target that cannot react. */
 static void battle_action_check_damage_sharing_reaction_usability(void) {
     unit_stats_t* unit;
     u8 flags;
@@ -1850,8 +1855,6 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
     main_status_store_current(unit);
 }
 
-/* Set when a player-team unit becomes Crystal or Dead. */
-
 /* Applies the pending status inflictions of unit_id's current action.
  *
  * For each of the 40 statuses the action inflicts that none of the unit's
@@ -1859,8 +1862,10 @@ static void battle_status_apply_action_removals(s32 unit_idx) {
  * removal set, the pending changes are filtered, the status is recorded as
  * inflicted and given its CT, and its special flags are enabled (mode 2 when
  * re-inflicting anything but Crystal or Oil). Transparent clears the removal
- * flag; Invite and Charm copy the attacker's team, Invite permanently. Ends by
- * storing the unit's current statuses. */
+ * flag; Invite and Charm copy the attacker's team, Invite permanently. A unit
+ * that started on the blue team and becomes Crystal or Dead sets
+ * g_battle_player_unit_fallen, which voids the battle's level bonus money.
+ * Ends by storing the unit's current statuses. */
 static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only) {
     s32 i;
     s32 j;

@@ -406,9 +406,10 @@ void world_formation_init_cursor_and_scroll_state(s32 formation_index) {
 #endif
 
 /*
- * Formation screen unit grid: handle the palette, browse and banner toggles,
- * step the grid cursor, then draw each visible unit slot and ease the cursor
- * trail toward the selected slot.
+ * Formation screen unit grid: L2/R2 cycle the readout under the units, Circle
+ * and Cross turn browsing on and off and Square toggles the banner; then step
+ * the grid cursor, draw each visible unit slot and ease the cursor trail
+ * toward the selected slot.
  *
  * `value`, `row` and `col` each carry several short-lived roles, as the
  * target's s1/s3/s5 do; separate variables change the call-saved register
@@ -1064,7 +1065,7 @@ void world_formation_place_unit_portrait_at_rest(s16 unit_index) {
     world_formation_draw_unit_sprite(unit_index, &pos, 0, 6);
 }
 
-/* Draws one formation unit sprite centerd on pos.
+/* Draws one formation unit sprite centered on pos.
  *
  * When g_world_formation_dismiss_anim_timer selects this unit (high byte) the sprite is drawn shrunk by
  * (low byte + 1) without a shadow. Otherwise units with a proposition status

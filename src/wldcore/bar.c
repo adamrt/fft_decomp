@@ -282,14 +282,16 @@ static void wldcore_list_rumors_close_level(wldcore_menu_panel_level_t* level) {
     g_menu_blocked_buttons = 0;
 }
 
-/* Yes/no list-level input step. Cancel (0x40) or confirm (0x20) starts
- * thread 12's closing animation and records the choice in result; 0x100
- * with a non-empty list opens help message 0x105e. Once thread 12 finishes,
- * the level closes and a confirmed choice passes the selected entry's value
- * (low 11 bits of g_wldcore_list_entry_values) to 0x80072618, otherwise the bar menu resumes.
+/* Input step of the bar's rumors list. Cross, or Circle on a non-empty list,
+ * starts thread 12's closing animation and records the choice in result;
+ * Select on a non-empty list opens help message 0x105e. Once thread 12
+ * finishes, the level closes and a chosen rumor's entry value (low 11 bits of
+ * g_wldcore_list_entry_values) goes to wldcore_bar_push_rumor_detail_level;
+ * otherwise the bar menu resumes.
  *
- * The target passes the level to 0x80072404 and 0x800723f0 even though
- * neither reads an argument; their local prototypes here take it. */
+ * The target passes the level to wldcore_list_rumors_close_level and
+ * wldcore_list_rumors_block_all_buttons even though neither reads an argument;
+ * their local prototypes here take it. */
 void wldcore_list_handle_rumors_input(wldcore_menu_panel_level_t* level) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_INPUT_BLOCKED)
         && thread_is_running(WLDCORE_THREAD_SLOT_WINDOW_PANEL) == 0) {
@@ -499,12 +501,13 @@ static void wldcore_list_propositions_close_level(wldcore_menu_panel_level_t* le
     g_menu_blocked_buttons = 0;
 }
 
-/* List level input step for cursor slot 3 (help message 0x105f); confirmed
- * entries are handed to 0x800732b8. Confirm is refused with message 0xb80e
- * when g_main_save_proposition_count has reached 8. When script variable
- * 0x360 + entry has bit 8 set, the parent level's windows and render record
- * are hidden, message 0xb85c is shown and the level waits in state 2 for
- * confirm or cancel. */
+/* List level input step for the available propositions (cursor slot 3, Select
+ * help 0x105f). Circle hands the chosen entry to
+ * wldcore_proposition_push_detail_level, but is refused with "I can't give
+ * anymore jobs" once g_main_save_proposition_count has reached 8. For a
+ * proposition already attempted (WLDCORE_PROPOSITION_VARIABLE_ATTEMPTED) it
+ * first hides the parent level's windows and render record, says "Think I
+ * told you before but..." and waits in result 2 for Circle or Cross. */
 void wldcore_list_handle_propositions_input(wldcore_menu_panel_level_t* level) {
     s32 depth;
 

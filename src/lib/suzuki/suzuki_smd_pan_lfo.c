@@ -2,7 +2,7 @@
 #include "psx/types.h"
 
 /* SMD opcode 0xEC "Pan LFO": programs and restarts modulator 2 (balance)
- * with the centerd triangle waveform. Parameters: speed, signed depth, start
+ * with the centered triangle waveform. Parameters: speed, signed depth, start
  * delay. A zero speed or depth leaves the modulator unchanged.
  *
  * speed is s16 like the calculate_step parameter: the target tests and

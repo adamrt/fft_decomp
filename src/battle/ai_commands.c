@@ -366,6 +366,7 @@ static void battle_ai_init_target_consideration(void) {
 
     if (ai->acting_unit_team == 0) {
         ai->autobattle_setting = AI_AUTOBATTLE_MANUAL;
+        /* Below 45/128 of max HP (about 35%), head for the nearest healer or crystal. */
         if ((ai->acting_unit->hp << 7) / ai->acting_unit->max_hp < 45) {
             mode = AI_NEAREST_HEALER_OR_CRYSTAL;
         } else {
@@ -898,6 +899,7 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         return;
     case ACTION_MENU_TYPE_ITEM_INVENTORY:
         status_id = g_main_item_secondary_data[ability_id - ABILITY_ID_ITEM_FIRST].status_infliction_id;
+        /* The AI uses Move for Throw Item's range; the real targeting uses 4. */
         if (unit->ability_flags.support[2] & BATTLE_SUPPORT_SET_3_THROW_ITEM)
             ai->considered_ability.parameters.fields.range = unit->move;
         else
@@ -998,7 +1000,8 @@ static void battle_ai_load_ability_entry(const ai_ability_entry_t* entry) {
         if (secondary->flags_3 & ABILITY_SECONDARY_FLAG_3_PERSEVERE)
             goto copy_status;
     }
-    /* Preserve the native support-byte masks, including their CT quirk. */
+    /* Retail tests Monster Skill (0x80) and Defend (0x40) here, where the
+     * real CT uses Short Charge (0x08) and Non-Charge (0x04); see QUIRKS.md. */
     if (unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_MONSTER_SKILL)
         ai->considered_ability.ct >>= 1;
     else if (unit->ability_flags.support[3] & BATTLE_SUPPORT_SET_4_DEFEND)
@@ -1544,8 +1547,8 @@ static s32 battle_ai_check_target_type(s32 unit_id) {
 /* Excludes absent, inert, mounted, or hidden enemies from ordinary AI targeting.
  *
  * The native code deliberately uses only 4 bits for the rider's partner ID,
- * unlike other mount consumers' 5-bit mask. A Transparent rider is admitted
- * only when its mount is not also Transparent. */
+ * unlike other mount consumers' 5-bit mask. A Transparent enemy is
+ * untargetable unless it is a rider whose mount is also Transparent. */
 s32 battle_ai_is_unit_untargetable(s32 unit_idx) {
     ai_data_t* ai = &g_battle_ai_data_base;
     unit_stats_t* unit;
@@ -2647,7 +2650,9 @@ static s32 battle_ai_evaluate_status_cancellation(s32 unit_id, s32 status_id) {
  * Keep the actor as fallback and retain the earlier slot on equal scores.
  * Status-helper checks require the actor's aggregate cancellation capability;
  * the HP-recovery flag enables dead-with-Reraise, Critical and low-HP scoring.
- * Return 1 only when the best signed score exceeds 0x02000000.
+ * Return 1 only when the best signed score exceeds 0x02000000. Only a status
+ * score (at least 0x72 << 24) can; an HP-only score stays below 129 << 16. So
+ * the result is 1 exactly when some ally has one of the scored conditions.
  */
 static s32 battle_ai_select_peril_target(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -2759,8 +2764,13 @@ static s32 battle_ai_select_action_fading_life(void) {
 /*
  * Select an action for the retreat-oriented AI path.
  *
- * Try abilities targeting the actor and an existing charge before the broader
- * ability pass. Return -1 to suspend and 0 when selection completes.
+ * Focus on the nearest healer or crystal and pick a cowardly destination, then
+ * try abilities targeting the actor and an existing charge. Charge-skillset
+ * abilities are then marked unusable before the pass over all units, and the
+ * default action is the fallback. Used for the RETREAT auto-battle mode, for a
+ * Critical or Frog unit when retreat support is available, and for a Don't
+ * Act unit with a focus target. Return -1 to suspend and 0 when selection
+ * completes.
  */
 static s32 battle_ai_select_action_retreat(void) {
     ai_data_t* ai = &g_battle_ai_data_base;
@@ -3358,7 +3368,11 @@ void battle_ai_init_workspace(void) {
  * Initialize a unit's ability-use statistics and scenario targeting.
  *
  * Monster Skill-dependent entries count toward totals but not the MP,
- * Silence, or evasion numerators. Behavior updates depend on scenario flags.
+ * Silence, or evasion numerators. With the special-behavior flag, Conserve CT
+ * selects the RETREAT auto-battle mode; a focus target is turned from a unit
+ * id into a battle slot and, with Aggressive, also becomes the auto-battle
+ * target under TARGETED (another initial team) or RECOVERY (the same team).
+ * A focus target not on the field clears the special behavior.
  */
 void battle_ai_init_unit_abilities(s32 unit_id) {
     ai_data_t* ai = &g_battle_ai_data_base;

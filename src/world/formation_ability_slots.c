@@ -216,6 +216,8 @@ static s32 world_unit_get_zodiac_for_date(s32 month, s32 day) {
 
 /* Advance egg hatch counters, then make the daily monster-breeding roll.
  *
+ * It first reseeds rand from the play time (frames * 101 + seconds * 10 +
+ * minutes + hours), so arriving at the same play time repeats the outcome.
  * A counter that reaches 0 hatches as a monster born on the current date.
  * A successful roll selects a random roster monster and one of the three
  * offspring jobs in its Chocobo-based breeding-table entry. The new egg's

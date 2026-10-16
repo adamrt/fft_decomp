@@ -294,7 +294,7 @@ static s32 require_party_get_free_slot_status(s32 unit_id) {
    Returns 1 when the opening prompt answers 1 or -1 (no unit removed) and 0
    after main_party_remove_unit.
    Matching notes: should_restore also serves as the loop's constant 1 (the
-   target keeps 1 in that variable's register and materialises it before the
+   target keeps 1 in that variable's register and materializes it before the
    pointer copies); the portrait pointers are assigned inside the loop so
    loop.c hoists them after the thread constants; the R1 search loop holds
    its whole switch-unit block (a loop that large keeps the 0x14 bound
@@ -1523,7 +1523,7 @@ static void require_gfx_init_poly_gt4_array_8(s32 x, s32 y) {
  * Load-bearing spellings: the tables are function-lifetime locals and the
  * range row is `&range[condition]` with `condition = 0` (a spilled
  * constant-equivalent pseudo), which reproduces the target's constant-address
- * count read and its `addiu sN,t0,0` range rematerialisation per phase;
+ * count read and its `addiu sN,t0,0` range rematerialization per phase;
  * `tpage` is a local copy so the page load keeps its +2 offset; `x + 0x100 +
  * width` / `y + (height + 0x78) - offset` / `y + 0x78 + offset` fix operand
  * order; declaring `frame` before `quad_count` fixes their stack slots.
@@ -1744,7 +1744,7 @@ void require_noop_801c9fa4(void) {
  * thread parameter 3 becomes 2, then fade them out.
  *
  * `table` and `color_table` are function-lifetime copies of the table
- * addresses; the target rematerialises them in each loop instead of folding
+ * addresses; the target rematerializes them in each loop instead of folding
  * them into the loads. The buffer copy and the small-array address use
  * g_require_gfx_poly_gt4_buffers, the second symbol at the address of
  * g_require_gfx_poly_gt4_array_32: sharing that base lets the hoisted

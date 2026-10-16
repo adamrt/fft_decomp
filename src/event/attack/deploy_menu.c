@@ -301,7 +301,9 @@ static void attack_text_init_battle_pointers(attack_text_file_t* file) {
  * into the editor and appends its 11 strings (five item names, five
  * ability or skillset names, the job name); an empty or unavailable slot
  * gets 11 empty strings. Finally publishes the two text pointers and copies
- * the 0x1400-byte help text.
+ * the 0x1400-byte help text. Should the 0x4000-byte string buffer fill,
+ * APPEND_TEXT jumps past both of those steps, leaving the deployment help
+ * broken; 16 units' strings stay far below that size.
  */
 void attack_text_build_deployment_strings(void) {
     u8* dst = g_attack_scenario_table;

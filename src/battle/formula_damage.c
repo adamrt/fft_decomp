@@ -52,7 +52,8 @@ void battle_formula_physical_mp_percent_damage(void) {
     }
 }
 
-/* Formula 0x2D: damage (PA * (WP + Y)), 100% status. */
+/* Formula 0x2D: damage (PA * (WP + Y)) with the weapon's element, 100% status;
+ * physical evade. */
 void battle_formula_damage_pa_times_wp_plus_y_status(void) {
     if (battle_formula_calculate_physical_evade() == 0) {
         battle_formula_store_pa_and_weapon_power_plus_y();
@@ -343,7 +344,7 @@ void battle_formula_heal_ma_times_y(void) {
     battle_formula_apply_undead_reversal();
 }
 
-/* Formula 0x4D: absorb (Y)% of max HP, hit (MA+X)%. */
+/* Formula 0x4D: absorb (Y)% of max HP, hit (MA+X)%; physical evade. */
 void battle_formula_absorb_hp_y_percent_hit_ma_x_percent(void) {
     if (battle_formula_calculate_physical_evade() != 0) {
         return;
@@ -356,7 +357,7 @@ void battle_formula_absorb_hp_y_percent_hit_ma_x_percent(void) {
     battle_formula_apply_hp_absorption();
 }
 
-/* Formula 0x4E: damage (MA * Y). */
+/* Formula 0x4E: damage (MA * Y) with element, 19% status; magic evade. */
 void battle_formula_damage_ma_times_y(void) {
     if (battle_formula_calculate_magical_evade() == 0) {
         battle_formula_store_ma_and_y();
@@ -417,7 +418,8 @@ void battle_formula_damage_caster_missing_hp_self_sacrifice(void) {
     }
 }
 
-/* Formula 0x53: damage (Y)% of max HP, hit (MA+X)%. */
+/* Formula 0x53: damage (Y)% of max HP with element, hit (MA+X)%, 19% status;
+ * magic evade. */
 void battle_formula_damage_y_percent_hit_ma_x_percent(void) {
     if (battle_formula_calculate_magical_evade() != 0) {
         return;
@@ -493,10 +495,9 @@ void battle_formula_raise_level_by_one_add_status_on_caster(void) {
     g_battle_action_target_data = saved_action;
 }
 
-/* Formula 0x58 "Set Morbol: Hit(MA+X)%". */
-
-/* Generic character identities are 0x80 male, 0x81 female, 0x82 monster;
- * Morbol-type jobs are 0x82 Morbol, 0x83 Ochu, 0x84 Great Morbol. */
+/* Formula 0x58 (Moldball Virus): hit (MA+X)%; no evade. A generic human or
+ * monster target becomes a Morbol; an immortal, mounted or unique target, or
+ * one already of the Morbol family, is a forced miss. */
 void battle_formula_set_morbol(void) {
     action_data_t* action;
     unit_stats_t* target;
@@ -523,7 +524,8 @@ void battle_formula_set_morbol(void) {
     battle_formula_force_attack_miss();
 }
 
-/* Formula 0x59: -Level (1), hit (MA+X)%. */
+/* Formula 0x59: -Level (1), hit (MA+X)%; magic evade. A level-1 target is a
+ * forced miss that still carries the level-down effect. */
 void battle_formula_lower_level_by_one(void) {
     action_data_t* action;
 
@@ -574,14 +576,16 @@ void battle_formula_dragon_set_quick(void) {
     }
 }
 
-/* Formula 0x5E: damage ((MA + Y) / 2 * MA). */
+/* Formula 0x5E: damage ((MA + Y) / 2 * MA) with element, 19% status; magic
+ * evade. */
 void battle_formula_5e_damage_ma_plus_y_half_times_ma(void) {
     if (battle_formula_calculate_magical_evade() == 0) {
         battle_formula_calculate_truth_damage();
     }
 }
 
-/* Formula 0x5F: damage ((MA + Y) / 2 * MA). */
+/* Formula 0x5F: damage ((MA + Y) / 2 * MA) with element, 19% status; magic
+ * evade. */
 void battle_formula_5f_damage_ma_plus_y_half_times_ma(void) {
     if (battle_formula_calculate_magical_evade() == 0) {
         battle_formula_calculate_truth_damage();

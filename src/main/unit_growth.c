@@ -29,7 +29,8 @@ void main_mem_copy_bytes_source_first(const void* source, void* destination, int
 
 /* Pick a random non-rare item for one equipment slot (item_type_flag) that the unit can equip at
  * its level, optionally limited to one item type and to weapons with a flag in weapon_flag_mask.
- * Returns ENTD_VALUE_RANDOM when nothing fits. */
+ * Returns ENTD_VALUE_RANDOM when nothing fits. The candidate list restarts only when an item with
+ * a higher required level appears, so items scanned after it with a lower level still join it. */
 s32 main_unit_calculate_random_equipment(
     unit_stats_t* unit, u8 item_type_flag, u8 weapon_flag_mask, u8 required_item_type) {
     u8 candidates[128];
@@ -310,7 +311,8 @@ u16 main_unit_calculate_rsm(unit_stats_t* unit, u16 ability_id, s32 flags, entd_
 }
 
 /* Return the first job id below JOB_ID_COUNT - 1 whose job record has this
- * skillset. The result is 0 when none has, which is also job 0's id. */
+ * skillset. The result is 0 when none has, which is also job 0's id. Nothing
+ * in the tree calls it. */
 s32 main_job_find_by_skillset(u8 skillset_id) {
     u8 job_id = 0;
     s32 result;
@@ -389,7 +391,8 @@ void main_unit_refresh_stats_and_statuses(unit_stats_t* unit) {
 }
 
 /* main_unit_update_stats_statuses_and_equipment in its initializing form: the
- * inflicted statuses are seeded from the current ones and their CTs cleared. */
+ * inflicted statuses are seeded from the current ones and their CTs cleared.
+ * Nothing in the tree calls it. */
 void main_unit_init_stats_and_statuses(unit_stats_t* unit) {
     main_unit_update_stats_statuses_and_equipment(unit, 0, 1);
 }
@@ -807,7 +810,8 @@ void main_unit_init_status_and_rewards(unit_stats_t* unit, s32 clear_rewards) {
 }
 
 /* The range byte of an ordinary ability's range record; 0 for an id from
- * ABILITY_ID_ITEM_FIRST up, which has no such record. */
+ * ABILITY_ID_ITEM_FIRST up, which has no such record. Nothing in the tree
+ * calls it. */
 u32 main_ability_get_range(u32 ability_id) {
     u16 index = ability_id;
 
@@ -815,7 +819,8 @@ u32 main_ability_get_range(u32 ability_id) {
 }
 
 /* The area-of-effect byte of an ordinary ability's range record; 0 for an id from
- * ABILITY_ID_ITEM_FIRST up, which has no such record. */
+ * ABILITY_ID_ITEM_FIRST up, which has no such record. Nothing in the tree calls
+ * it. */
 u32 main_ability_get_aoe(u32 ability_id) {
     u16 index = ability_id;
 
@@ -893,6 +898,9 @@ s32 main_unit_has_status_in_set(const unit_stats_t* unit, main_status_check_set_
     return 0;
 }
 
+/* Return the learned-ability bits of one job slot as a 24-bit value, first byte
+ * most significant. Despite its name, skillset_id is the job slot index of
+ * career.learned_abilities (0 = base job). */
 u32 main_ability_get_known(const unit_stats_t* unit, u32 skillset_id) {
     return (unit->career.learned_abilities[skillset_id][0] << 16)
         + (unit->career.learned_abilities[skillset_id][1] << 8)

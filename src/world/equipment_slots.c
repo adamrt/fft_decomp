@@ -410,11 +410,13 @@ void world_shop_build_fitting_room_best_fit_equipment(s16 unit_index, s16 shop_i
     }
 }
 
-/* Install an item into a formation unit's equipment slot.
+/* Install an item into a formation unit's equipment slot and return 1, or the
+ * negative world_formation_can_equip_item_in_slot result.
  *
- * The preview record is updated without touching inventory or derived stats.
- * Equipping a hand slot while two-handing also returns the other hand's item
- * and clears that slot.
+ * For a roster unit the slot's old item goes back to the inventory and the
+ * records are saved to the party; the preview unit only has its record
+ * changed. When the item cannot pair with the other hand's item, that item is
+ * returned the same way and its slot cleared.
  *
  * `item` is a separate u16 mirror of the masked argument: one s32 variable
  * reused for both the call argument and the stored value is copy-propagated and

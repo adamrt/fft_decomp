@@ -124,8 +124,13 @@ s32 main_unit_init(entd_encounter_t* entd, s32 unit_id, s32 guest_id, s32 initia
 }
 
 /*
- * Copies an in-battle unit record into its persistent party slot.
- * Returns 0 on success and -1 when no free party slot exists.
+ * Save an in-battle unit into the party roster. Returns 0, or -1 when there
+ * is no room. A unit already in the roster keeps its slot, except that a
+ * non-guest save moves a unit out of a guest slot (16-19) into a free
+ * ordinary slot. A new unit takes a free ordinary slot, or a free guest slot
+ * when allow_guest is set and it is a story character carrying
+ * UNIT_FLAG_SAVE_FORMATION. A guest record keeps the unit's palette; an
+ * ordinary one gets palette 0 and drops the save-formation flag.
  */
 s32 main_party_save_unit(unit_stats_t* unit, s32 allow_guest) {
     party_unit_t* party;
@@ -307,7 +312,8 @@ void main_party_remove_unit(u32 index) {
  * 40..70; Ramza gets 70 and 70. The unit starts at level 1 with 0 EXP, and a
  * human gets 100..199 JP and job level 1 in every job but the one its sex
  * cannot take (Bard, Dancer). The name is drawn until no party member of the
- * same kind has it. */
+ * same kind has it; the roll rand() * 255 / 0x8000 gives 0..254, so name
+ * index 255 is never drawn. */
 static void main_unit_generate_out_of_battle(party_unit_t* party, main_unit_generation_type_e unit_type) {
     s32 name_flags;
     unit_name_id_t name_base;
@@ -535,9 +541,9 @@ s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index) {
     return 0;
 }
 
-/* 0x80066204: scratch list of a skillset's usable ability ids. */
-/* Copies the skillset's ability ids into g_main_ability_temp_list, keeping only the
- * classes selected by skillset_ability_filter_e. */
+/* Fill g_main_ability_temp_list with the skillset's 24 ability ids and return
+ * it. An id whose class (skillset_ability_filter_e) is not selected in filters
+ * is written as 0. Skillset ids from 0x100 up read skillset 0. */
 u16* main_ability_store_skillset_abilities(s32 skillset_id, s32 filters) {
     s32 output_count;
     s32 ability_index;
@@ -902,7 +908,10 @@ static s32 main_unit_init_job_data_from_entd(unit_stats_t* unit, entd_unit_t* en
 }
 
 /*
- * Fills an in-battle unit record from its persistent party record.
+ * Fills an in-battle unit record from its persistent party record. The unit
+ * is a player-controlled blue unit (team 8); Ramza's identities also get
+ * importance 3 (team 0xb), so losing him decides the battle. A roster member
+ * (slot below 16) gets palette 0, while a guest keeps its saved palette.
  */
 static void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* party) {
     s32 team = 8;
@@ -1764,7 +1773,8 @@ enum {
 
 /* Copies the unit's name, job name and skillset names into its battle
  * record.  Units without a party slot get a random unused generic name for
- * their gender. */
+ * their gender, drawn as in main_unit_generate_out_of_battle (index 255 is
+ * never drawn). */
 static void main_unit_store_character_names(unit_stats_t* unit) {
     /* Removing this unused array reduces the native stack frame by 0x100. */
     u8 unused[0x100];

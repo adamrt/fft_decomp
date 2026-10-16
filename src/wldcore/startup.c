@@ -103,7 +103,9 @@ s32 wldcore_entrypoint(void) {
     }
 }
 
-/* Reinitialize WLDCORE when system-flag bit 1 transitions from set to clear. */
+/* When MAIN_SYSTEM_FLAG_DRAW_MAP goes from set to clear, capture the map
+ * backdrop again (wldcore_init_core) for the frames that no longer redraw the
+ * map. */
 static void wldcore_process_frame_gate(void) {
     if ((g_main_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) == 0
         && (g_wldcore_previous_system_flags & MAIN_SYSTEM_FLAG_DRAW_MAP) != 0) {
@@ -112,7 +114,10 @@ static void wldcore_process_frame_gate(void) {
     g_wldcore_previous_system_flags = g_main_system_flags;
 }
 
-/* Initialize the WLDCORE world buffers, menu state, and runtime tables. */
+/* Capture the map backdrop: draw the map tiles, routes, dots and auxiliary
+ * records once, store the drawn image in g_wldcore_scratch_buffer (which
+ * wldcore_gfx_draw_world_frame uploads behind each later frame), then draw
+ * the menu frame over it. */
 void wldcore_init_core(void) {
     RECT rect;
     s32 count;

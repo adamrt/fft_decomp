@@ -738,6 +738,7 @@ s32 battle_gfx_open_sp2_file(battle_unit_t* unit, u32* destination) {
     spritesheet_id = g_battle_gfx_spritesheet_slots[unit->spritesheet_vram_slot].spritesheet_id;
     animation_id = g_battle_ability_animation_data[unit->sp2_ability_id].attack_animation;
     if (spritesheet_id == BATTLE_SPRITESHEET_ID_STEEL_GIANT) {
+        /* Nothing checks for an animation below 0x73, which would read before the table. */
         index = animation_id - 0x73;
         lba = g_battle_gfx_worker8_sp2_files[index].sector;
         if (lba == 0) {
@@ -1258,7 +1259,7 @@ void battle_unit_copy_draw_coords(SVECTOR* destination, const battle_unit_t* uni
 
 /* Lays the unit's shadow quad on the terrain surface under the unit.
  *
- * The quad is a 20 x 20 square of world units centerd on the unit's position
+ * The quad is a 20 x 20 square of world units centered on the unit's position
  * (with its event, SEQ and float offsets), at the surface of the tile it stands
  * on: height plus depth, 12 world units per level, negative y upwards. On a
  * sloped tile (non-zero slope half-height, rising 12 units per step across the

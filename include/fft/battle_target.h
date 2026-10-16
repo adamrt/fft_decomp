@@ -31,7 +31,7 @@ typedef struct target_panel {
 } target_panel_t;
 typedef char target_panel_size_must_be_5[(sizeof(target_panel_t) == 5) ? 1 : -1];
 
-/* Directions of target_calculate_linear_attack_tiles. */
+/* Directions of battle_target_calculate_linear_attack_tiles. */
 typedef enum target_line_direction {
     TARGET_LINE_EAST = 0,  /* +x */
     TARGET_LINE_WEST = 2,  /* -x */
@@ -39,18 +39,18 @@ typedef enum target_line_direction {
     TARGET_LINE_NORTH = 6, /* +y */
 } target_line_direction_e;
 
-/* Result of target_set_panels_for_action, kept in
+/* Result of battle_target_set_panels_for_action, kept in
  * battle_unit_t.ability_preview_phase: how the action's target is chosen. */
 typedef enum target_panels {
     TARGET_PANELS_INVALID = -1,
     TARGET_PANELS_UNIT_OR_TILE = 0, /* the ability can follow a unit */
     TARGET_PANELS_TILE_ONLY = 1,    /* ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET */
-    TARGET_PANELS_NO_TARGETING = 2, /* nothing to choose: the action is centerd on the acting unit */
+    TARGET_PANELS_NO_TARGETING = 2, /* nothing to choose: the action is centered on the acting unit */
     TARGET_PANELS_NONE = 3,         /* the panel routine marked no tile */
 } target_panels_e;
 
 /* highlight types */
-/* target_set_tile_background_color modes and the g_battle_target_tile_mark_modes states:
+/* battle_target_set_tile_background_color modes and the g_battle_target_tile_mark_modes states:
  * one layer per map tile mark (move destination, ability range, targeted). A SHOW or HIDE
  * request recolors the current render buffer; battle_map_draw_mesh_and_weather then does the
  * other buffer and leaves the layer SHOWN or NONE. */

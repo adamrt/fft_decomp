@@ -32,9 +32,13 @@ static void battle_effect_convert_tile_coords_to_world_coords(SVECTOR* in, VECTO
     out->vy = -(tile->height * 12);
 }
 
-/* Copies the camera rotation, snapped to the nearest yaw quadrant whose view
- * of the tile is not blocked. The camera angles are read as an SVECTOR: the
- * quadrant is a signed short division, which unsigned 16-bit values do not emit. */
+/* Copies the camera rotation with its yaw cut to a multiple of 0x200 (an
+ * eighth turn) when the tile's camera-block mask leaves the current yaw
+ * quadrant open or blocks every direction; otherwise that yaw turned a quarter
+ * turn forward or back, whichever quadrant is open first, else a half turn.
+ * Only the half-turn result is wrapped to 0-0xfff. The camera angles are read
+ * as an SVECTOR: the quadrant is a signed short division, which unsigned
+ * 16-bit values do not emit. */
 static void battle_camera_choose_unblocked_rotation_for_tile(const SVECTOR* tile_coords, SVECTOR* rotation_out) {
     map_tile_t* tile = battle_map_get_tile_data_pointer(tile_coords->vx, tile_coords->vz, tile_coords->vy);
     SVECTOR* rotation;
@@ -69,9 +73,8 @@ void battle_noop_801aad30(s32 ignored_1, s32 ignored_2) {
     unused = &ignored_2;
 }
 
-/* A tile is 28 units wide, so max * 14 is the middle of the map. */
-/* Writes the map's center as three 32-bit X/Z/Y components with Z (height) zero
- * (effect camera target). */
+/* Writes the map center as the effect camera target: x = max x * 14 and
+ * z = max y * 14 (half of a 28-unit tile per tile), with the height (vy) 0. */
 static void battle_effect_store_map_center_coordinates(VECTOR* destination) {
     SVECTOR map_max;
     s32 max_y;
@@ -1742,9 +1745,9 @@ static s32 battle_effect_calculate_launch_velocity(void) {
 }
 
 /*
- * List every present unit other than `first` and `second` that is neither
- * flagged by current-status bit 0x04 nor mount bit 0x40, with its tile
- * position and sprite height, into a scratchpad record returned via `out`.
+ * List every present unit other than `first` and `second` that is not Jumping
+ * and is not a mount carrying a rider, with its tile center and height and its
+ * sprite height, into a record at the start of the scratchpad returned via `out`.
  */
 static void battle_effect_list_valid_unit_targeting_data(s32 first, s32 second, effect_obstacle_unit_list_t** out) {
     SVECTOR position;
@@ -1860,7 +1863,6 @@ static s32 battle_effect_trace_arc_trajectory_path(
     arc->vz = angle;
     g_battle_effect_arctan_angle_mod = angle;
     progress = 0;
-    /* The definition returns void; this site consumes the returned impulse. */
     velocity = battle_effect_calculate_launch_velocity() >> 8;
     advance = (rcos(arc->vz) * velocity) >> 4;
     if (advance != 0) {
@@ -2083,8 +2085,11 @@ s32 battle_effect_set_and_validate_arc_trajectory(s32 source_id, SVECTOR* tile_p
     return result;
 }
 
-/* Wrap the current bow-shot yaw into (-0x800, 0x800] then bucket it into
-   one of three arc quadrants: 0 = behind, 1 = side, 2 = ahead. */
+/* Wrap the vertical shot angle the last trajectory test stored
+ * (g_battle_effect_arctan_angle_mod) into [-0x800, 0x800] and bucket it at
+ * 0x2aa (60 degrees): 0 below -0x2aa, 1 from -0x2aa to 0x2aa, 2 above.
+ * battle_unit_select_weapon_attack_animation uses it as the bow's column of
+ * g_battle_weapon_attack_animations. */
 s32 battle_effect_get_bow_shot_angle(void) {
     s16 angle = g_battle_effect_arctan_angle_mod;
     if (angle >= 0x801) {

@@ -360,14 +360,14 @@ void wldcore_menu_push_brave_story_level(void) {
     g_wldcore_menu_stack_types[depth + 1] = WLDCORE_MENU_LEVEL_BRAVE_STORY;
 }
 
-/* Builds the entry kinds of the list-window level that 0x80080e54 pushes.
- *
- * Kind 0 is listed when script flag 0x92 is set and any of flags 0x1a4-0x1bb
- * is; kinds 1 and 2 always; kind 3 when a proposition is active or any of
- * variables 0x360-0x3bf has bit 2 set; kind 4 when any of flags 0x350-0x35f is
- * set; kind 5 when any of flags 0x321-0x34f is set; kind 6 always. The upper
- * and lower windows sit on the kind-4 and kind-5 rows and lose flag 8 once all
- * 16 lands or the first 31 treasures are found.
+/* Build the Brave Story rows of the level wldcore_menu_push_brave_story_level
+ * pushes. The facts row is listed when EVENT_SCRIPT_VAR_FACTS_ENABLED and any
+ * fact flag are set; the story events and persons rows always; the
+ * propositions row while any job is active or completed; the unexplored
+ * lands and treasures rows once one is found; then Leave. The upper and lower
+ * windows are the completion stars of the unexplored lands and treasures
+ * rows: they show (WORLD_RENDER_RECORD_BLANK cleared) once all 16 lands or
+ * the first 31 treasures are found.
  */
 static void wldcore_menu_build_brave_story_entries(void) {
     s32 count;
@@ -520,21 +520,19 @@ void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* sta
     }
 }
 
-/* Input/update step of the world-map main menu level.
+/* Input step of the Brave Story list level.
  *
- * Latches the play-time counters into the D_800D09Ax mirror, then runs one of
- * three behaviors depending on g_main_system_flags bit 0x4 (a battle/event
- * hand-off is in progress) and the level's own 32-bit mode:
- *  - hand-off in progress: wait for the world thread (slot 0xE) to stop and
- *    for the audio queue to drain, then tear the level down, pop the menu
- *    stack and either re-enter through the 0x10000000 path or fade out;
- *  - mode 1 (suspended): any of confirm/cancel resumes, refades in and
- *    restarts the world-map music;
- *  - otherwise: normal input.  Cancel (0x40) and menu entry 6 leave the world
- *    map through the 0xB84A world-thread entry point; 0x100 opens the help
- *    message for the highlighted row; confirm (0x20) dispatches the
- *    highlighted row through a seven-entry jump table at 0x800671f4; up/down
- *    move the cursor with wrap-around, stepping the window record's y by 16.
+ * Copies the play time into the displayed numeric values, then:
+ *  - while input is blocked: once the fade out ends, wait for the message
+ *    thread (and, when opened from the title, the audio queue), pop the level
+ *    and either return to the title or fade the map back in and push the
+ *    entry window level;
+ *  - after the goodbye message: Circle or Cross starts the fade out and the
+ *    world-map music (from the title, fades out and unloads the music);
+ *  - otherwise: Cross and the Leave row show the goodbye message and release
+ *    the level's windows; Select shows the highlighted row's help; Circle
+ *    opens the highlighted row's list; Up and Down move the cursor with
+ *    wrap-around, stepping the window record's y by 16.
  *
  * The cancel path and menu entry 6 each spell out the window-count release;
  * jump2 cross-jumps them after the two count loads. The target reloads the
@@ -869,7 +867,11 @@ void wldcore_menu_push_story_event_text_level(s32 value) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Handle confirm/cancel input for the story-event list level. */
+/* Input step of a story event's text page. Triangle replays the event: it
+ * sets EVENT_SCRIPT_VAR_CURRENT_EVENT, suppresses progress effects and fades
+ * out, and once the fade ends the world loop stops with
+ * MAIN_SYSTEM_FLAG_STORY_EVENT_REPLAY, saving the list cursor and the weather
+ * variable. When the text window closes, the story event list reopens. */
 void wldcore_menu_handle_story_event_text_input(wldcore_menu_stack_record_t* level) {
     s32 depth;
     s32 index;

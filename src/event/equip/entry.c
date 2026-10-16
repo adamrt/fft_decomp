@@ -35,7 +35,7 @@ void equip_panel_toggle_item_numeric_thread(s32 enable) {
     g_equip_numeric_panel_style = enable;
 }
 
-/* EQUIP.OUT 001bf590 - Prime the four "menu section dirty" flags before the
+/* Prime the four "menu section dirty" flags before the
  * next redraw pass. */
 static void equip_menu_reset_state_flags(void) {
     g_equip_unit_status_panel_redraw = 1;
@@ -83,7 +83,7 @@ void equip_unit_load_selected_data(void) {
     equip_menu_reset_state_flags();
 }
 
-/* EQUIP.OUT 001bf754 - Fill the 4 s16 selection-index slots ending at
+/* Fill the 4 s16 selection-index slots ending at
  * g_equip_menu_result_rows with -1 (writing backwards). */
 void equip_menu_reset_selection_indices(void) {
     s16 sentinel = -1;

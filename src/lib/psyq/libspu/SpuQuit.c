@@ -3,6 +3,9 @@
 
 #include "psx/libapi.h"
 
+/* Shut the SPU library down once: clear the transfer, IRQ and DMA callbacks and
+ * release the DMA event. The event is closed before it is disabled, so
+ * DisableEvent acts on a closed descriptor; the order is the library's. */
 void SpuQuit(void) {
     if (_spu_isCalled == 1) {
         _spu_isCalled = 0;

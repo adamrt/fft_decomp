@@ -18,6 +18,8 @@
  * selections and rebuild the inventory totals and item category lists. */
 static void equip_menu_load_images_and_reset_lists(void) {
     RECT rect;
+    /* One 16-color palette split in two: the 16-color store into buf1 runs on
+     * into buf2, so buf2[0] is color 4 (JOBSTTS spells it as one palette_t). */
     u16 buf1[4];
     u16 buf2[12];
 

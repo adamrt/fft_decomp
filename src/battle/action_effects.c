@@ -364,7 +364,7 @@ void battle_unit_call_bow_hardcoding_by_battle_id(u16 attacker_id, u16 target_id
     battle_unit_set_bow_hardcoding(attacker, target);
 }
 
-/* battle_unit_set_bow_hardcoding for two unit unit ids: called by the arrow-arc
+/* battle_unit_set_bow_hardcoding for two runtime ids: called by the arrow-arc
  * and linear projectile effects for the unit the projectile hits. */
 void battle_unit_call_bow_hardcoding_by_runtime_id(u16 attacker_id, u16 target_id) {
     battle_unit_t* attacker = battle_unit_get_by_runtime_id(attacker_id);
@@ -422,10 +422,10 @@ void battle_unit_update_display_by_battle_id(u16 battle_id) {
  * Queue the renderer-side status flags associated with a simulation status.
  *
  * The status argument is the callback-table index (canonical status ID + 1).
- * Crystal removal deliberately stages the Chicken transformation bit, as in
- * the original transition logic. Rebuilding the unit's AI ability data when
- * Frog changes keeps its usable-ability list synchronized with the graphics
- * transition.
+ * Removing Crystal shares the Chicken case, so it queues the Chicken bit for
+ * removal and leaves the Crystal bit set. Rebuilding the unit's AI ability
+ * data when Frog changes keeps its usable-ability list synchronized with the
+ * graphics transition.
  */
 s32 battle_status_queue_runtime_graphics_flag_change(s32 status, s32 enabled, s32 battle_id) {
     battle_unit_t* unit = battle_unit_get_by_battle_id(battle_id);

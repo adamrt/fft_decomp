@@ -435,7 +435,8 @@ static void card_save_update_slot_write(s32 slot) {
  *
  * The 0x1e00-byte memory-card image is filled from the SCUS globals, then a
  * per-128-byte-block parity bit is appended through the primary bitstream
- * writer.
+ * writer. The summary's name, job and level come from the first Ramza in the
+ * roster, or from the last roster slot when there is none.
  */
 static void card_save_build_buffer(s32 slot) {
     s32 i;

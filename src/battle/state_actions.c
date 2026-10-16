@@ -218,8 +218,9 @@ s32 battle_state_announce_next_charged_action(void) {
 
 /* Finalizes the casting unit's action and picks its attack animation.
  *
- * Each target's attack result is resolved first; for Fall (ability 0x200) in
- * the later phase the targets are moved to the knockback destination instead.
+ * Each target's attack result is resolved first; for the knockback strike
+ * (ABILITY_ID_KNOCKBACK) in a later phase the targets are moved to the
+ * knockback destination instead.
  * An ability picks the ability animation unless a reaction occurred, while a
  * plain attack or an elemental gun picks the weapon strike.
  *
@@ -436,7 +437,7 @@ void battle_menu_start_help_thread(void) {
  *
  * During ability-preview phase 2 the target is the unit's own tile; for
  * player-controlled units it is the current cursor tile.
- * target_calculate_for_menu_types's result
+ * battle_target_calculate_for_menu_types's result
  * picks the next step: 0/1 enter the ability-preview state, 2 restores the
  * unit and stops game flow, and -1 returns to the idle action menu.
  */

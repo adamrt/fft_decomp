@@ -139,7 +139,7 @@ void menu_icon_timed_thread(void) {
 }
 
 /* Menu icon thread that also opens a linked entry: when row_actions[0]
- * names a menu entry, that entry is centerd on this text width, placed below
+ * names a menu entry, that entry is centered on this text width, placed below
  * this entry, and started in the previous thread slot. The icon records then
  * alternate until input completes, selecting CLUTs in the linked slot. */
 void menu_icon_linked_entry_thread(void) {

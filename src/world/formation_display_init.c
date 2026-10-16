@@ -122,8 +122,8 @@ void world_formation_rebuild_unit_list(void) {
     g_world_formation_screen_running = 1;
 }
 
-/* Reports whether the world map is busy: a queued description text id, the
- * description text thread (15), the task thread flag, or the task thread (6). */
+/* Reports whether the screen is busy: the grid help is up (g_world_grid_menu_id),
+ * a menu runs in thread 15 or 6, or g_menu_input_lock_mode is set. */
 s32 world_map_is_busy(void) {
     s32 result = 0;
 

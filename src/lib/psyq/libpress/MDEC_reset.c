@@ -1,8 +1,9 @@
 #include "psx/libpress.h"
 #include "psx/types.h"
 
-/* Drop the decoder back to a known state. Mode 0 also re-uploads the cached
- * quantisation and IDCT tables. */
+/* Drop the decoder back to a known state. Modes 0 and 1 reset the MDEC and
+ * stop both DMA channels; mode 0 also re-uploads the cached quantization and
+ * IDCT tables. Any other mode prints the bad-option message. */
 void MDEC_reset(s32 mode) {
     switch (mode) {
     case 0:

@@ -44,6 +44,8 @@ void script_process_inflict_status_commands(void) {
             runtime_id = script_resolve_runtime_id(script_read_s16(instruction + instruction_offset + 1));
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
                 battle_id = battle_unit_get_battle_id_by_runtime_id(runtime_id);
+                /* 2000 is unit_get_battle_id_by_event_unit_id's "no unit" value; this lookup fails
+                 * with -1 instead, so the test never rejects anything. */
                 if (battle_id != 0x7d0) {
                     unit = battle_unit_get_stats_from_battle_id(battle_id);
                     if ((unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_FLOAT)]
@@ -209,7 +211,9 @@ void menu_run_invalid_choice_thread(void) {
     thread_exit_current();
 }
 
-/* Yields the thread at least once, then until the camera stops moving. */
+/* Yields the thread at least once, then until the camera stops moving. WORLD's
+ * copy calls BATTLE's battle_camera_is_active address (0x8008e17c), which with
+ * WLDCORE loaded lies inside wldcore_map_find_best_route_path. */
 void camera_wait_until_idle(void) {
     do {
         thread_yield();

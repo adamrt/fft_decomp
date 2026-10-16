@@ -3,7 +3,7 @@
 #include "fft/menu.h"
 #include "fft/menu_script.h"
 
-/* EQUIP.OUT 001caf14 - Stream command: draw a LINE_F2 from (x0, y0) to
+/* Stream command: draw a LINE_F2 from (x0, y0) to
    (x1, y1) with the RGB that follows the endpoints in the command. */
 menu_instruction_t* equip_menu_cmd_draw_line_f2_handler(menu_instruction_t* stream) {
     point16_t endpoints[2];

@@ -66,8 +66,10 @@ void world_menu_announce_entry_value_thread(void) {
 }
 
 /* Menu icon list thread with a clamped cursor: builds the text image once,
- * steps the cursor on the up/down buttons while the previous thread is idle
- * and submits the four icon sprites of the alternating record each frame. */
+ * steps the cursor while the previous thread is idle and submits the four
+ * icon sprites of the alternating record each frame. Up steps the cursor up,
+ * but the Down test is inverted: the cursor moves down on every frame the
+ * Down bit is clear, until it reaches max_row_index. */
 void world_menu_icon_clamped_list_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];

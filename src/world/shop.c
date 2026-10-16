@@ -1321,14 +1321,16 @@ static void world_shop_apply_fitting_room_items_to_all_units(void) {
  * Shop "best fit / fitting room" preview step, entry 8 of the shop callback
  * table at 0x8019525c.
  *
- * On entry it stages the selected unit's four weapon/armour slots, fills any
+ * On entry it stages the selected unit's four weapon/armor slots, fills any
  * slot already taken from the shop with that slot's fitting-room reservation,
- * asks 0x80123dd8 for a suggested set, restores the staged slots and previews
+ * asks world_shop_build_fitting_room_best_fit_equipment for a suggested set,
+ * restores the staged slots and previews
  * the resulting stat delta. It then runs the confirmation menu; on confirm it
  * commits the suggested set slot by slot, returning each displaced item to the
  * fitting room or refunding a shop item's price, and returns to shop step 6.
  *
- * The gate at 0x801957a8 is `s8`, not `u8` (the target sign-loads it, `lb`).
+ * The gate g_world_shop_best_fit_menu_open is `s8`, not `u8` (the target
+ * sign-loads it, `lb`).
  * Loop 2 computes both the suggested item and the unit's own slot at the
  * dominator; deferring either load into an arm costs a duplicate load and the
  * hoist of the selected-unit index.
@@ -1362,10 +1364,10 @@ static void world_shop_apply_fitting_room_items_to_all_units(void) {
  * computations in that order. The `lw` stays inside the loop, since the store
  * through `reserved` may alias the pointer array.
  *
- * Within `reserved`'s address expression the target materialises the
+ * Within `reserved`'s address expression the target materializes the
  * fitting-room base `lui`/`addiu` before the `idx*5*2` index arithmetic. cc1
  * itself emits `addu`/`sll`/`la`/`addu` in the other order under one `.loc`,
- * because the symbol canonicalises to the second operand of the address PLUS
+ * because the symbol canonicalizes to the second operand of the address PLUS
  * and is expanded last; no operand respelling changes that (`fold` rewrites
  * `base - -(idx * 5)` straight back to a PLUS). Giving the row base its own
  * local and its own statement (`room_base = &g_world_shop_fitting_room_items[0][0];`
@@ -1473,7 +1475,7 @@ void world_shop_run_best_fit_preview_step(void) {
  * The cursor walks the selected unit's five equipment slots; confirming a
  * slot the unit owns (non-empty, not taken from the shop) opens a sale prompt
  * for half the item's price and, on acceptance, credits the gil and clears
- * the slot. Triangle returns to shop step 6.
+ * the slot. Cross returns to shop step 6.
  */
 void world_shop_run_sell_equipped_item_menu(void) {
     s32 close = 0;
@@ -1749,7 +1751,7 @@ static s32 world_shop_get_selected_poached_item_quantity(s32 unused_row) {
  * world_shop_run_fur_buy_list_step.
  *
  * The callback block is written in ascending address order (794 -> 7ac), as
- * the sibling writes it. That makes gcc materialise the two twice-used
+ * the sibling writes it. That makes gcc materialize the two twice-used
  * addresses (count_2 in a0, count in v1) up front at 0xb0-0xbc and defer
  * their stores; the target's emission order then follows. First-use order,
  * not store order, decides this.

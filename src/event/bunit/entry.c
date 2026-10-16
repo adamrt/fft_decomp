@@ -127,7 +127,7 @@ s32 bunit_input_get_lock_timer(void) {
     return g_input_lock_timer;
 }
 
-/* BUNIT.OUT 001c3150 - Return the pad-1 input, or 0 while the input lock timer is active. */
+/* Return the pad-1 input, or 0 while the input lock timer is active. */
 static s32 bunit_input_read_pad1_unless_locked(void) {
     u32 input = PadRead(0);
 
@@ -263,7 +263,7 @@ void bunit_menu_reset_results(void) {
     g_bunit_menu_reorder_result = -1;
 }
 
-/* BUNIT.OUT 001c360c - True while a menu transition (thread 15), event mode, or
+/* True while a menu transition (thread 15), event mode, or
  * thread 5 is running; used to gate input processing. */
 s32 bunit_menu_is_active_or_transitioning(void) {
     s32 result = 0;

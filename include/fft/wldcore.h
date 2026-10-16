@@ -482,7 +482,7 @@ typedef struct wldcore_proposition_fields {
     u16 _unused_24;      /* 0x24 */
     u16 speaker_mode;    /* 0x26; wldcore_proposition_speaker_e */
     u16 preferred_job;   /* 0x28 */
-    u16 required_script_var_6f; /* 0x2a */
+    u16 required_script_var_6f; /* 0x2a; minimum EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY */
     u16 condition_value;        /* 0x2c; zodiac month or proposition status index */
 } wldcore_proposition_fields_t;
 
@@ -565,8 +565,8 @@ typedef struct wldcore_menu_list_window_level {
     u8 _unused_10[8];
     s32 mode;           /* 0x18; wldcore_list_window_mode_e */
     s32 selected_entry; /* 0x1c; initial row from g_wldcore_brave_story_saved_cursor */
-    s32 upper_window;   /* 0x20 */
-    s32 lower_window;   /* 0x24 */
+    s32 upper_window;   /* 0x20; Brave Story: completion star of the unexplored lands row */
+    s32 lower_window;   /* 0x24; Brave Story: completion star of the treasures row */
     u8 _unused_28[8];
     s32 entry_count; /* 0x30; rows drawn by 0x80080e54 */
     s32 entries[10]; /* 0x34; row kinds of the owning list (wldcore_*_row_e); brave story: text id 0xb83f + kind */

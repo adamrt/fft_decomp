@@ -1,7 +1,7 @@
 #include "psx/suzuki.h"
 #include "psx/types.h"
 
-/* Modulator step: triangle wave centerd on its start value. The first
+/* Modulator step: triangle wave centered on its start value. The first
  * half-period lasts timer_reset steps; SUZUKI_MODULATOR_HALF_PERIOD_DONE
  * then doubles every later one, so value swings between
  * -amplitude * timer_reset and +amplitude * timer_reset. The increment flips

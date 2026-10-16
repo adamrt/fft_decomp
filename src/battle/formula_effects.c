@@ -417,12 +417,13 @@ void battle_formula_apply_maintenance(void) {
 static void battle_formula_roll_conditional_status_proc_inner(void) {
     if (g_battle_action_state == ACTION_STATE_EXECUTE && main_util_roll_pass_fail(0x64, 0x13) == 0) {
         action_data_t* action = g_battle_action_target_data;
-        /* The 16-bit read-modify-write sets the nullification flag. */
+        /* The 16-bit read-modify-write sets the added-effect flag. */
         action->special_effect = action->special_effect | ACTION_SPECIAL_EFFECT_NULLIFIED;
     }
 }
 
-/* Store the selected reaction and its target before clearing knockback. */
+/* Queue the weapon's proc ability (proc_id) to strike the current target after
+ * the action, in place of a status, and cancel any pending knockback. */
 void battle_formula_store_reaction_proc_id_and_target(void) {
     g_battle_action_current_ability.weapon_proc_pending = 1;
     g_battle_action_current_ability.reaction_id = g_battle_action_current_ability.proc_id;
@@ -430,9 +431,10 @@ void battle_formula_store_reaction_proc_id_and_target(void) {
     battle_action_clear_knockback_flag();
 }
 
-/* Selects the Fire, Bolt or Ice line from the gun's element and the tier from
- * a roll of 0..99: below 10 the third spell, below 40 the second, otherwise
- * the first (10/30/60%). Installs that spell's ability data. */
+/* Selects the Fire line for a fire gun, else Bolt for lightning, else Ice (also
+ * for any other element or none), and the tier from a roll of 0..99: below 10
+ * the third spell, below 40 the second, otherwise the first (10/30/60%).
+ * Installs that spell's ability data. */
 void battle_formula_select_magic_gun_ability(void) {
     u8 element;
     u8 pct;
@@ -604,7 +606,9 @@ s32 battle_formula_apply_steal_break_might_sword_hardcoding(void) {
     return -1;
 }
 
-/* Resolve Secret Hunt and Train after an HP-damaging formula 01-06 hit.
+/* Resolve Secret Hunt and Train after an HP-damaging formula 01-06 hit. Its
+ * only caller skips every later formula, so Throw (0x63) and Jump (0x64) never
+ * poach or train.
  *
  * Only monsters (neither sex bit set) qualify, and not through a team Golem
  * while the ability can be blocked by it, nor when dead, petrified or
@@ -785,7 +789,9 @@ void battle_formula_heal_mp_z_times_ten(void) {
     action->mp_healing = amount * 10;
 }
 
-/* Restore the target to full HP and MP (100% HP/MP healing). */
+/* Store max HP as HP damage and max MP as MP healing. Both callers then run
+ * battle_formula_apply_undead_reversal, which turns the HP part into healing
+ * (damage for an undead target). */
 void battle_formula_apply_full_hp_mp_heal(void) {
     unit_stats_t* unit = g_battle_action_target;
     action_data_t* action = g_battle_action_target_data;
@@ -819,7 +825,8 @@ void battle_formula_apply_finger_guard(void) {
     g_battle_action_target_data->miss_type = ACTION_MISS_TYPE_BLADE_GRASP_OR_FINGER_GUARD;
 }
 
-/* Catch the thrown weapon when the target's Brave-based reaction roll succeeds. */
+/* Catch the thrown weapon when the target's Brave-based reaction roll succeeds.
+ * A Mime attacker's throw is never caught. */
 void battle_formula_apply_catch(void) {
     unit_stats_t* unit;
     action_data_t* action;
@@ -853,7 +860,7 @@ void battle_formula_apply_catch(void) {
     action->last_received_attack = weapon_id;
 }
 
-/* Roll the evades (formula_calculate_final_hit_percent). Returns 1 when
+/* Roll the evades (battle_formula_calculate_final_hit_percent). Returns 1 when
  * the attack was evaded. */
 static s32 battle_formula_calculate_hit(void) {
     battle_formula_calculate_final_hit_percent();
@@ -888,7 +895,7 @@ s32 battle_formula_calculate_physical_evade(void) {
     return battle_formula_calculate_hit();
 }
 
-/* formula_calculate_physical_evade without the bow weather penalty. */
+/* battle_formula_calculate_physical_evade without the bow weather penalty. */
 s32 battle_formula_calculate_physical_evade_charge(void) {
     battle_formula_store_physical_evade_values();
     battle_formula_calculate_concentrate();
@@ -924,7 +931,7 @@ void battle_formula_apply_physical_xa_modifying_statuses_support(void) {
 /* Damage of formulas 0x01 and 0x02: XA and YA by weapon type, charge power,
  * weapon element strengthen, physical modifiers, critical roll, XA * YA, then
  * the target's affinity to the weapon's elements. Returns 0 when the added
- * effect applies (formula_roll_conditional_status_proc), 1 when it does
+ * effect applies (battle_formula_roll_conditional_status_proc), 1 when it does
  * not or the element canceled the attack. */
 s32 battle_formula_calculate_weapon_damage(void) {
     battle_formula_calculate_base_xa();

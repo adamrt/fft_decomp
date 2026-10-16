@@ -675,7 +675,7 @@ typedef struct ability_secondary_data {
     u8 x;                    /* 0x09; multi-hit formulas take the hit count from it */
     u8 y;                    /* 0x0a */
     u8 status_infliction_id; /* 0x0b; selects the six-byte status record at 0x8019bd78 */
-    u8 ct;                   /* 0x0c */
+    u8 ct;                   /* 0x0c; charge clockticks; masked 0x7f except by the AI; no retail record sets bit 7 */
     u8 mp_cost;              /* 0x0d; ability-list eligibility compares this with max MP at 0x8019a89c */
 } ability_secondary_data_t;
 typedef char ability_secondary_data_size_must_be_14[(sizeof(ability_secondary_data_t) == 14) ? 1 : -1];

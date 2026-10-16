@@ -344,7 +344,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
  * propagation and marks the whole grid reachable.  Returns -1 for an absent
  * unit, otherwise the reachable tile count.
  *
- * The AI twin ai_propagate_target_movement (0x80178ca4) does the same
+ * The AI twin battle_ai_propagate_target_movement (0x80178ca4) does the same
  * with a suspendable time budget and a snapshot of the frontier; this one
  * clears frontier_max_remaining_range up front and visits the live frontier
  * directly, so it needs only one set of nested level/y/x loops.
@@ -1008,7 +1008,8 @@ static u8 battle_move_calculate_tile_ceiling(s32 x, s32 y, s32 exit_slope_shift,
  *
  * Checks both elevation layers, each for its terrain (a blocked frontier tile
  * or the tile's vertical span from its lower side minus ceiling depth to its
- * higher side plus depth) and for a unit standing on it (flag 0x40 records).
+ * higher side plus depth) and for a unit of another team standing on it
+ * (MOVE_RECORD_FLAG_OTHER_TEAM); the unit check ignores the mover's own team.
  * A span that overlaps the unit's body (height .. height + unit size) blocks
  * the jump; otherwise the jump is blocked only when the lowest span start is
  * above height. shift_a/shift_b select the exit and entry side slope bits.
@@ -1148,7 +1149,7 @@ static void battle_move_spread_horizontal_jump(void) {
  * is not a valid destination. Teleport movers get the explicit-destination
  * form (0xfe, x, y, elevation) after the teleport roll, or 0xff on failure.
  * Other movers trace remaining-range values back from the target toward the
- * unit before move_encode_path_steps builds the step list. Either way the result is
+ * unit before battle_move_encode_path_steps builds the step list. Either way the result is
  * the path buffer at g_battle_move_path.
  *
  * The flag byte at 0x8018f86d is written through a pointer loaded twice: the
@@ -1698,7 +1699,7 @@ static void battle_move_apply_selected_candidate(move_spread_state_t* state) {
 
 /* Horizontal jumps: from the current tile, in each direction, try landing 2 to
  * jump_half + 1 tiles away, provided every tile in between can be jumped over
- * at the landing height (move_check_horizontal_jump). The best
+ * at the landing height (battle_move_check_horizontal_jump). The best
  * candidate is saved and, outside AI propagation, applied to the spread state. */
 static void battle_move_calculate_spread(void) {
     move_pathfind_scratch_t* config = g_battle_move_config_ptr;
@@ -1826,14 +1827,14 @@ static void battle_move_save_selected_candidate(s32 direction, s32 candidate, s3
     state->candidate_saved = 1;
 }
 
-/* move_calculate_pathing with the per-call search budget enabled, so a
+/* battle_move_calculate_pathing with the per-call search budget enabled, so a
  * long search can suspend and resume through `suspended`. */
 void battle_move_calculate_pathing_time_sliced(s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y,
     s32 target_level, s32 initialize, s32* suspended) {
     battle_move_calculate_pathing(flags, jump, x, y, level, target_x, target_y, target_level, initialize, suspended, 1);
 }
 
-/* Falls off the end: move_calculate_pathing leaves the path block pointer in $v0 and
+/* Falls off the end: battle_move_calculate_pathing leaves the path block pointer in $v0 and
  * the caller consumes it, so the result type belongs on this definition. */
 battle_walk_path_t* battle_move_calculate_walkto_pathing(
     s32 flags, s32 jump, s32 x, s32 y, s32 level, s32 target_x, s32 target_y, s32 target_level) {
@@ -2311,7 +2312,7 @@ static void battle_target_remove_close_range(s32 x, s32 y, s32 range) {
  *
  * Each pass visits every panel whose mark byte flags it as a new frontier,
  * clears the mark and spreads from it; passes stop once none spread. A zero
- * count clears the tile data instead. Every caller passes 0 as the unused
+ * count only clears every panel's mark. Every caller passes 0 as the unused
  * second argument. */
 static void battle_target_spread_panels(u8 passes, s32 unused) {
     s32 y;
@@ -2401,7 +2402,8 @@ static s32 battle_target_spread_panel_to_neighbors(s32 y, s32 x) {
 /* Compute unit height after mount, Float, and water movement adjustments.
  *
  * Float and BATTLE_MOVEMENT_SET_3_MOVE_IN_WATER stand on the water surface;
- * BATTLE_MOVEMENT_SET_3_WALK_ON_WATER stands one level below it. */
+ * BATTLE_MOVEMENT_SET_3_WALK_ON_WATER stands one level below it. A rider stands
+ * 2 half steps higher, and its mount's Float and movement abilities decide the rest. */
 static u8 battle_unit_get_effective_height(const unit_stats_t* unit) {
     map_tile_t* tile;
     map_tile_depth_t terrain_depth;
@@ -2540,9 +2542,10 @@ static void battle_target_calculate_weapon_range(const unit_stats_t* unit) {
 }
 
 /*
- * Mark the special weapon-range shapes selected by weapon flags 0xc0: flag
- * 0x80 covers the four adjacent tiles within a narrow height band, otherwise
- * the two rings at distance 1 and 2 use a band that widens with distance.
+ * Mark the striking or lunging weapon range. A striking weapon (WEAPON_FLAG_STRIKING)
+ * covers the four adjacent tiles from 6 half steps below to 5 above the unit; a
+ * lunging weapon covers the tiles 1 and 2 away in a straight line, from 8 and then
+ * 6 half steps below to 7 above.
  */
 static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags) {
     u8 height = battle_unit_get_effective_height(unit);
@@ -2620,7 +2623,7 @@ static void battle_target_clear_range_on_untargetable_tiles(void) {
 
 /* Mark every tile the acting unit's Jump abilities can reach.
  *
- * Horizontal range and vertical reach start at 1/2 (8/0x10 for job 0x5d) and
+ * Horizontal range and vertical reach start at 1/2 (8 and 16 for a Mime) and
  * grow to the best learned Jump record; panels are spread from the unit's
  * tile, and each map position keeps the higher of its two layers when that
  * layer lies within the vertical window. Returns the number of tiles marked,
@@ -2946,9 +2949,9 @@ static s32 battle_target_set_all_panels_targeted_if_targetable(void) {
  * MAP_TILE_FLAG_ABILITY_RANGE unless it is blocked or a cross-section surface,
  * and every other tile loses the flag. Returns the number of flagged tiles.
  *
- * target_set_ability_panels ends with it for abilities that have the
+ * battle_target_set_ability_panels ends with it for abilities that have the
  * vertical-fixed or a unit-panels flag; the others end with
- * target_set_all_panels_targeted_if_targetable, which tests the panel's
+ * battle_target_set_all_panels_targeted_if_targetable, which tests the panel's
  * range instead of its mark. */
 static s32 battle_target_clear_selection_state_of_all_panels(void) {
     map_tile_t* tile;
@@ -2970,9 +2973,10 @@ static s32 battle_target_clear_selection_state_of_all_panels(void) {
 }
 
 /*
- * Marks the targeting panel under `unit` for each simulation slot.
- * The retail loop never advances the unit pointer, so it re-marks the same
- * panel; the shape is kept as compiled.
+ * Meant to mark the panels of allied or enemy units, but the retail loop runs
+ * for each of the 21 unit slots without advancing the unit pointer, so it only
+ * marks the caster's own panel: under the ally flag when the caster's team
+ * matches its initial team, under the enemy flag when it differs.
  */
 static void battle_target_set_state_for_all_unit_panels(const unit_stats_t* unit, s32 flags) {
     target_panel_t* panel;
@@ -3053,7 +3057,7 @@ static void battle_target_apply_vertical_fixed(s32 x, s32 y) {
  *
  * The skillset's menu type picks the range. Abilities (the default and monster
  * menus, the Elemental ability of the unit's tile, the Draw Out of the chosen
- * katana) use their range data through target_set_ability_panels. Item
+ * katana) use their range data through battle_target_set_ability_panels. Item
  * reaches 1 tile, or 4 with Throw Item or for a Mime. Throw reaches the unit's
  * Move and excludes its own tile. Attack and Charge use the weapon's range, Jump
  * the unit's Jump abilities.
@@ -3229,13 +3233,16 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
 
 /* Re-validate the acting unit's stored target and mark the target's tile.
  *
- * The weapon's flags select the trajectory test: ARC takes 0x801aff18,
- * DIRECT the direct-weapon check (skipped for an adjacent tile when the
- * skillset menu type is ITEM_INVENTORY), LUNGING 0x8017afc0, and anything else
- * the plain height-overlap test. Attack and Charge skillsets, and abilities
- * flagged 0x20, use the equipped weapon; other skillsets use DIRECT and first
- * copy the target unit's position into the action for targeting type 6.
- * Returns 0 once a valid unit is marked, else -1.
+ * The weapon's flags select the trajectory test: ARC takes
+ * battle_effect_set_and_validate_arc_trajectory, DIRECT the direct-weapon check (skipped
+ * for an adjacent tile when the skillset menu type is ITEM_INVENTORY), LUNGING
+ * battle_target_validate_lunging_target, and anything else the plain height-overlap test.
+ * Attack and Charge skillsets, and abilities flagged ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE,
+ * use the equipped weapon; other skillsets use DIRECT. For BATTLE_TARGETING_TYPE_UNIT they
+ * also copy the target unit's position into the local action copy, which nothing reads
+ * afterward: the tests use the actor's stored target position.
+ * Returns -1 for an absent actor, a shield in a weapon hand or an invalid target id,
+ * otherwise 0, whether or not a unit was marked.
  *
  * One `hand` variable carries both hands, so the right-hand load stays after
  * the left-hand mask; `target` is reused for the result unit, which keeps it a
@@ -3274,6 +3281,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
     menu_type = g_main_action_menu_types_by_skillset[action.skillset_id];
     ability_flags = 0;
     if (menu_type == ACTION_MENU_TYPE_DEFAULT || menu_type == ACTION_MENU_TYPE_MONSTER) {
+        /* Retail indexes by the id's low byte, so abilities 0x100 and up read another ability's flags. */
         ability_flags = g_main_ability_range_data[(u8)action.ability_id].flags_1;
     }
     if (menu_type == ACTION_MENU_TYPE_ATTACK || menu_type == ACTION_MENU_TYPE_CHARGE
@@ -3349,7 +3357,7 @@ s32 battle_target_validate_weapon_target(const action_command_t* source) {
 
 /* Validates a lunging-weapon target one or two tiles away in a straight line.
  *
- * Called by target_validate_weapon_target for WEAPON_FLAG_LUNGING. Adjacent targets
+ * Called by battle_target_validate_weapon_target for WEAPON_FLAG_LUNGING. Adjacent targets
  * pass the plain height-overlap test. At distance 2 the middle tile's two
  * layers (surface height, or an occupant's total height) must leave part of
  * the attacker/target height window open; otherwise a unit on the middle tile
@@ -3556,8 +3564,9 @@ void battle_target_disable_green_panel_flags(void) {
  * 100 for the caster, level, EXP, or whole-unit height, where half heights never
  * qualify); the multiplier ability tests it for primality or divisibility by
  * 5, 4 or 3. Units that are absent, crystallized, jumping, treasure, or
- * flagged 0x40 in mount_info are skipped. Returns the number of marked units,
- * or -1 when the command does not name one type and one multiplier ability. */
+ * mounts carrying a rider are skipped, and a value of 0 never qualifies.
+ * Returns the number of marked units, or -1 when the command does not name
+ * one type and one multiplier ability. */
 static s32 battle_target_run_calculator(const action_command_t* source) {
     battle_unit_height_data_t height;
     action_command_t action;
@@ -3684,8 +3693,9 @@ static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
 }
 
 /*
- * Mark the panels an AI action would affect and return how many are
- * targetable.
+ * Mark the tiles an ability affects around its chosen target (its own tile for
+ * linear and three-direction abilities) and return how many are targeted, or -1
+ * when that center is off the map or blocked.
  *
  * `location` carries the column into the index sum: the extra copies give the
  * index pseudo the allocation priority the target needs (a2), while keeping the

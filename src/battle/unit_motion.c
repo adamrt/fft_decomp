@@ -599,7 +599,7 @@ void battle_move_animate_jump_start(battle_unit_t* unit) {
  * falls and gains g_battle_move_jump_gravity per frame; on reaching it the unit
  * snaps to it, the position copies stop and the animation ends.
  *
- * During an event the unit is also centerd on its tile, but retail writes the
+ * During an event the unit is also centered on its tile, but retail writes the
  * depth coordinate into real.vy instead of real.vz. The height then sits below
  * the ground on the next frame, so an event fall ends on its second frame. */
 void battle_move_animate_fall_to_target_tile(battle_unit_t* unit) {

@@ -7,8 +7,9 @@
 #include "fft/world_script.h"
 #include "psx/types.h"
 
-/* Count the timer at g_world_input_lockout_timer down while thread 7 is idle; reset it to 10
- * otherwise, and clear the 0x801cd000 area while it is still running. */
+/* Count g_world_input_lockout_timer down while thread 7 (the comparison status panel) is idle
+ * and no status panel slides, and reset it to 10 otherwise. While it is nonzero, the menu input
+ * masks are cleared (menu_input_clear_state). */
 void world_menu_update_thread_7_idle_countdown(void) {
     s32 value;
 
@@ -29,7 +30,7 @@ void world_menu_update_thread_7_idle_countdown(void) {
     }
 }
 
-/* Countdown maintained by 0x80113580; while it is non-zero the formation
+/* Countdown maintained by world_menu_update_thread_7_idle_countdown; while it is non-zero the formation
    screen's per-frame handler returns before reading controller input. */
 s32 world_input_get_lockout_timer(void) {
     return g_world_input_lockout_timer;

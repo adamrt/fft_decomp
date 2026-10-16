@@ -124,13 +124,13 @@ battle_unit_height_data_t* battle_unit_calculate_height_data(battle_unit_height_
     return out;
 }
 
-/* Validate the action in place with action_prepare_attack phase 0, which
+/* Validate the action in place with battle_action_prepare_attack phase 0, which
  * consumes nothing and leaves the unit's turn flags alone. */
 void battle_action_call_attack_preparation(action_command_t* action) {
     battle_action_prepare_attack(action, action, 0);
 }
 
-/* Run action_prepare_attack phase 1 on a command, writing the prepared
+/* Run battle_action_prepare_attack phase 1 on a command, writing the prepared
  * action into the acting unit's own action fields.
  *
  * An action that resolves immediately also ends the unit's Charging, Jump,
@@ -147,6 +147,14 @@ s32 battle_action_call_attack_preparation_at_preview(action_command_t* command) 
 }
 
 /*
+ * Validate an action and copy it to dest with its resolved ability id. Item,
+ * Throw, Arithmeticks and Attack resolve at once; Jump stores a CT of 50 / Speed
+ * (at least 1); Charge takes its table CT; other abilities take their CT, halved
+ * (rounded up) by Short Charge and zeroed by Non-Charge unless they are
+ * performances (Persevere). A nonzero phase stores the CT; an odd phase also
+ * commits the action (spends the item, marks the unit as acted, starts Charging,
+ * Performing or Jumping). Returns a battle_attack_preparation_e code.
+ *
  * The one-trip loop around `skip = 1` counts that set one loop level deeper,
  * so global-alloc ranks `skip` above `persevere` and gives them s6/s7 as in
  * the target.
@@ -381,7 +389,7 @@ s32 battle_action_decrement_player_item_quantity(unit_stats_t* unit, s32 item_id
  *
  * Returns 0 when the action can run, -1 for an empty unit slot, 6 when Hamedo
  * pre-empted the action (g_battle_action_hamedo_flag set), or the nonzero
- * rejection code of action_check_and_consume_mp; on those failures only
+ * rejection code of battle_action_check_and_consume_mp; on those failures only
  * the acting-unit data is stored. */
 s32 battle_action_init_current_data(s32 id) {
     unit_stats_t* unit;
@@ -775,12 +783,14 @@ static void battle_action_finalize_draw_out_katana_result(
 }
 
 /*
- * Seed the per-action "strike" state from the acting unit before an attack
- * resolves: reset the strike counter, elemental and knockback scratch, clear
- * the experience/level-up flags when no action context is live, latch the
- * unit's two weapon slots, and decide how many strikes the action gets
- * (g_battle_action_current_ability.strike_count). Two-swords and the 0x20 ability flag are what allow a second
- * strike; menu type 2 (item) only records the consumed item.
+ * Seed the strike state before an action resolves: reset the strike counter,
+ * proc and knockback scratch, clear the EXP/JP flags in the primary action
+ * context, and latch the two hands (the left moves up when the right is empty).
+ * Throw only records the thrown item. Formulas 0x1E/0x1F strike a random 1..X
+ * times while executing and 0x5E strikes X+1 times; Attack, Charge and
+ * ABILITY_SECONDARY_FLAG_1_WEAPON_RANGE abilities strike twice with Two Swords
+ * when both hands hold weapons or both are empty (Frog and monsters count as
+ * empty).
  *
  * The `ability_id >= 0 || ability_id < ABILITY_ID_ITEM_FIRST` guard is the target's own: the
  * second arm is unreachable, so the table read is never actually skipped.
@@ -921,7 +931,7 @@ static void battle_target_select_random_tile_for_random_fire_abilities(void) {
 
 /* Fill `list` (BATTLE_UNIT_SLOT_COUNT bytes, 0xff padded) with the ids of present units whose
  * tile carries `MAP_TILE_FLAG_TARGETED`, and return the count.
- * target_is_unit_untargetable_and_store_tile returns nonzero for units
+ * battle_target_is_unit_untargetable_and_store_tile returns nonzero for units
  * that cannot be counted and writes the unit's tile index. When nearest-first
  * ordering is enabled the list is insertion-sorted by Manhattan distance from
  * `origin`.
@@ -1152,7 +1162,7 @@ void battle_target_clear_panel_data(void) {
  *
  * Returns the reacting unit's slot, or -1 when nothing reacts.
  *
- * target_validate_weapon_target takes only the action record (it copies the record and
+ * battle_target_validate_weapon_target takes only the action record (it copies the record and
  * rederives the menu type itself); menu_type and flags_1 merely happen to sit
  * in $a1/$a2 at that call. Passing them as arguments would set $a2 twice and
  * change the scheduling of the counter-ability call's argument setup.
@@ -2327,9 +2337,11 @@ s32 battle_unit_erase_pending_party_removal(s32 unit_id) {
 
 /* Move a unit to (x, y, level) with a new facing, carrying its mounted partner.
  *
- * A unit already standing on the destination becomes this unit's rider; any
- * stale mount link is dropped first.  Returns -1 without moving anything when
- * the destination tile is blocked or untargetable, 0 otherwise. */
+ * A mountable Chocobo already on the destination becomes this unit's mount: this
+ * unit takes BATTLE_MOUNT_INFO_FLAG_RIDER and the Chocobo BATTLE_MOUNT_INFO_FLAG_MOUNT.
+ * A unit that is not a mount drops its old link first; a mount carries its rider
+ * along. Returns -1 without moving anything when the destination tile is blocked
+ * or untargetable, 0 otherwise. */
 s32 battle_unit_set_tile_position(s32 battle_id, u8 x, u8 y, u8 level, u8 facing) {
     unit_stats_t* unit;
     unit_stats_t* partner;

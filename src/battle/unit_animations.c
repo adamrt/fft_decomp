@@ -1623,8 +1623,6 @@ static void battle_gfx_load_casting_unit_graphics(void) {
     battle_unit_t* unit = battle_unit_get_casting();
 
     if (unit != 0) {
-        /* The sprite data block starts at the graphic trigger; 0x1e0 is the
-         * current frame. */
         battle_gfx_load_trap_and_unit_frame_parts(
             unit, &unit->animation, unit->animation.frame, unit->animation.sequence_id);
     }
@@ -2207,7 +2205,7 @@ static void battle_gfx_update_and_animate_unit_wep_eff(battle_unit_t* unit_data)
  *
  * Nothing is drawn unless the camera-relative position lies within x 0x61..0x19f
  * and y -0x1f..0x10f, the ordering-table depth within 1..0x17f,
- * sprite_graphic_trigger is set, the unit is not a mount carrying its rider and
+ * animation.trigger is set, the unit is not a mount carrying its rider and
  * status_bubble_active is set. */
 static void battle_gfx_update_status_bubble_display(battle_unit_t* unit) {
     DVECTOR screen_coords;

@@ -1,8 +1,9 @@
 #include "fft/main_item.h"
 #include "psx/types.h"
 
-/* EQUIP.OUT 001c684c - Add `delta` to the inventory count for the item id (low
- * 10 bits of `item`); clamped to 0. item id 0 is a no-op sentinel. */
+/* Add `delta` to the held count of an item (the low 10 bits of `item_entry`),
+ * not going below 0, and return the new count. Item id 0 is ignored and
+ * returns 0. */
 s32 item_adjust_inventory_count(s16 item_entry, s32 delta) {
     s32 item_id = item_entry & 0x3FF;
     s32 new_count;

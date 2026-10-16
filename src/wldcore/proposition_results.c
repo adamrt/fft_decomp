@@ -415,7 +415,14 @@ void wldcore_proposition_apply_extra_days_multiplier(void) {
     }
 }
 
-/* The target keeps &g_wldcore_proposition_report.proposition_index in s5 and
+/* Return 1 + the party index of the participant the job report praises, or 0
+ * for none. A participant whose job falls in the proposition's preferred job
+ * category wins, preferring one other than excluded_party_index. Otherwise,
+ * among the other participants whose job is in the proposition's nine-job
+ * list, the one whose job comes earliest wins, but only when one or two
+ * match; three matches name nobody.
+ *
+ * The target keeps &g_wldcore_proposition_report.proposition_index in s5 and
  * reaches excluded_party_index, 12 bytes below, off the same base, which is
  * why it saves one more callee-saved register than a per-field access would.
  *
@@ -895,10 +902,11 @@ void wldcore_list_build_proposition_detail_panel_image(
     base->y = -0x28;
 }
 
-/* Input step for the two-row proposition confirmation window: up/down toggle
- * the highlighted row and move the cursor window, Circle either
- * accepts the proposition and starts WORLD thread 14 with text 0xb81e or
- * closes the level, and Cross closes it. */
+/* Input step for the call-back question on an active proposition: up/down
+ * toggle the highlighted row and move the cursor window. Circle on the first
+ * row recalls the party (WLDCORE_PROPOSITION_PROGRESS_RECALLED) and says "Ok,
+ * I'll have them return by tomorrow."; Circle on the second row, or Cross,
+ * closes the level and reopens the propositions list. */
 void wldcore_proposition_handle_cancel_confirm_input(wldcore_menu_stack_record_t* level) {
     s32 choice;
 
@@ -980,7 +988,7 @@ static void wldcore_menu_push_sound_novel_level(s32 argument) {
     point32_t* pos4;
     point32_t* render_pos;
 
-    /* Held from entry: with every saved register taken, reload rematerialises
+    /* Held from entry: with every saved register taken, reload rematerializes
      * the constant beside its one use, which is the target's la placement. */
     render_pos = &g_wldcore_window_render_records[0].base;
     g_wldcore_saved_context_value_display_position = g_wldcore_context_value_display_position;
@@ -2196,20 +2204,22 @@ void wldcore_menu_push_treasure_detail_level(s32 value) {
     g_wldcore_menu_stack_depth = g_wldcore_menu_stack_depth + 1;
 }
 
-/* Handler of the saved-record preview level: the phases mirror the
- * unexplored-land detail handler at 0x8007e6f4.
+/* Handler of the treasure detail level (the treasure's picture and text): the
+ * phases mirror wldcore_menu_step_unexplored_land_detail_level.
  *
  * Phase 1 waits for the render record the 32-bit value at 0x08 names to leave its 0x100 state; no push sets
  * that 32-bit value.
  * Phase 2, once file loading finishes, uploads the preview TIM's CLUT, binds
  * the level's render record to the VRAM image with its right edge at x -0x3e
- * and centerd on y 0x10, starts the progressive upload at 0x8007f998 and
+ * and centered on y 0x10, starts the progressive upload
+ * (wldcore_gfx_step_dissolve_image_upload) and
  * publishes the record index, position and image rectangle in
  * g_wldcore_scrollable_text_window (extra_render_index, extra_base, extra_bounds). Phase
  * 3 advances that upload one step per frame. Phase 0 tears the level down once the fade started through system flag 4
- * and WORLD thread 14 finish (then opens the saved record through 0x8007fbf0 or 0x8007bab8), restores the parent
- * list-window level and reopens the treasure list when the text window finishes, and on button 0x10 selects the saved
- * record named by g_wldcore_treasure_sound_novel_ids[value].
+ * and WORLD thread 14 finish (then opens the treasure's sound novel through
+ * wldcore_menu_push_sound_novel_resume_level or wldcore_menu_push_sound_novel_level), restores the parent
+ * list-window level and reopens the treasure list when the text window finishes, and on Triangle selects the sound
+ * novel named by g_wldcore_treasure_sound_novel_ids[value].
  *
  * The record index is staged in `saved` before the depth store: the target
  * reloads the full 32-bit value for the 16-bit store instead of narrowing the load.
@@ -2395,7 +2405,7 @@ static s32 wldcore_gfx_step_dissolve_image_upload(GsIMAGE* image, s32 step) {
  * appends the cursor window, a VRAM render record for the TIM at g_wldcore_picture_buffer
  * (uploaded progressively through wldcore_gfx_step_dissolve_image_upload, starting at step 0), and
  * two text render records (0xb84c with substitution value 0xe000 + mode, and
- * 0xb84b). The picture record is centerd against the first text record from
+ * 0xb84b). The picture record is centered against the first text record from
  * the TIM's width and half height, and the cursor window is placed at the
  * second text record's origin + (0x18, 0x3c).
  *

@@ -60,6 +60,7 @@ extern ability_secondary_data_t g_main_ability_range_data[];
 extern ability_data_t g_main_ability_data[];
 extern main_ability_human_skillset_t g_main_ability_human_skillset_abilities[];
 extern main_ability_monster_skillset_t g_main_ability_monster_skillset_abilities[];
+/* Scratch list filled by main_ability_store_skillset_abilities. */
 extern u16 g_main_ability_temp_list[SKILLSET_ABILITY_LIST_COUNT];
 s32 main_ability_get_id_from_skillset(s32 skillset_id, s32 ability_index);
 u16* main_ability_store_skillset_abilities(s32 skillset, s32 flags);
@@ -160,6 +161,9 @@ extern POLY_FT4 g_main_zodiac_primitives[2][30];
 
 /* gfx */
 extern u8 g_main_special_portrait_unit_id;
+/* WLDFACE portrait for portrait slot 20: ATTACK sets it from the scenario
+ * record and attack_gfx_prepare_party_portrait_textures uploads it before the
+ * battle; BATTLE never reads it. */
 extern u8 g_main_special_portrait_wldface_id;
 
 #endif

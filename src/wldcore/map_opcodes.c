@@ -21,7 +21,8 @@
 #include "psx/types.h"
 
 /* Return the first of the 16 party slots holding one of Ramza's sprite sets (1 to 3), or 16 when
- * there is none. */
+ * there is none, in which case the MCBrave and MCFaith checks read the first guest slot instead of
+ * failing. */
 static s32 wldcore_get_ramza_roster_index(void);
 static void wldcore_menu_push_script_flag_01a4_detail_level(s32 value);
 static void wldcore_script_read_operand_pair(s32* out1, s32* out2);
@@ -340,20 +341,25 @@ void wldcore_opcode_map_request_erase_path(void) {
     g_wldcore_script_state.flags |= WLDCORE_SCRIPT_REQUEST_ERASE_PATH;
 }
 
-/* Stage the location ID for a deferred DrawLocation request. */
+/* Map script opcode 0x22: stage the location ID for a deferred DrawLocation
+ * request. Unlike other opcodes it leaves ip on its operand, which is
+ * harmless because staging the request ends the block. */
 void wldcore_opcode_map_request_draw_location(void) {
     g_wldcore_script_flags |= WLDCORE_SCRIPT_REQUEST_DRAW_LOCATION;
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
 }
 
-/* Stage the location ID for a deferred EraseLocation request. */
+/* Map script opcode 0x23: stage the location ID for a deferred EraseLocation
+ * request, leaving ip on its operand like DrawLocation. */
 void wldcore_opcode_map_request_erase_location(void) {
     g_wldcore_script_flags |= WLDCORE_SCRIPT_REQUEST_ERASE_LOCATION;
     g_wldcore_script_state.args[0] = g_wldcore_script_state.data[g_wldcore_script_state.ip];
 }
 
-/* Resolve the script-selected location and focus the map on its window entry.
- */
+/* Map script opcode 0x24 (FocusLocation): select the operand's location (0xff
+ * for the current one) and, only when its dot lies outside the view, request
+ * the focus-location level that moves the map to it. It always ends the block
+ * and, like DrawLocation, leaves ip on its operand. */
 void wldcore_opcode_map_focus_location(void) {
     u16 ip = g_wldcore_script_state.ip;
     u16* data = g_wldcore_script_state.data;

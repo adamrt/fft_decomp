@@ -360,10 +360,9 @@ unit_stats_t* battle_unit_get_stats_from_battle_id(u32 battle_id) {
 
 /*
  * Classify a character identity for battle entry: the stats slot when
- * an active unit has it (-3 if it is crystallised or a treasure), -2/-3 for an
- * absent unit whose existence byte is 0/BATTLE_UNIT_EXISTENCE_DISABLED, -4
- * when a party roster entry
- * has it, else -5; -1 for selector identities.
+ * an active unit has it (-3 if it is crystallized or a treasure), -2/-3 for an
+ * absent unit whose existence is BATTLE_UNIT_EXISTENCE_OFF_FIELD/DISABLED, -4
+ * when a party roster entry has it, else -5; -1 for selector identities.
  *
  * The two status tests must be separate `if`s with their own `return -3`: an
  * `||` lets the delay-slot pass steal `li v0,-3` into the first branch.

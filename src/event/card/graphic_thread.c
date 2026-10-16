@@ -16,7 +16,9 @@ void card_gfx_set_render_otag(u32* otag) {
  * Thread body of the save screen's zodiac backdrop: draws it every frame
  * until the third thread parameter asks it to stop.
  *
- * It is centerd at (0x100, 0x80), or at (0, 8) on the formation screen.
+ * It is centered at (0x100, 0x80). The (0, 8) branch for
+ * g_formation_screen_active never runs: nothing in BATTLE, which CARD.OUT
+ * links against, writes its copy of that flag.
  * With the first parameter zero it starts at twice its size (4.12 scale
  * 0x2000) and shrinks by 0x100 per event-speed step to 0x1000.
  */

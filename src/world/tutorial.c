@@ -208,7 +208,7 @@ static void world_script_handle_tutorial_command_change_dialog(void) {
 }
 
 /* Tutorial command: lay out the highlight ring. The two corner arrays the
- * draw routine consumes are filled with 30 samples of a circle centerd on
+ * draw routine consumes are filled with 30 samples of a circle centered on
  * the command's (x, y) operand bytes, at three radii -- outer (r + 8),
  * middle (r + 4) and inner (r) -- each scaled independently in x and y by
  * the command's two scale bytes. Quad i of the first array spans outer to

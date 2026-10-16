@@ -30,9 +30,9 @@ typedef enum wldcore_bar_menu_row {
 /* Row kinds of the brave-story list (wldcore_menu_build_brave_story_entries),
  * named after the level each row opens. */
 typedef enum wldcore_brave_story_row {
-    WLDCORE_BRAVE_STORY_ROW_SCRIPT_FLAGS_01A4_01BB = 0,
+    WLDCORE_BRAVE_STORY_ROW_SCRIPT_FLAGS_01A4_01BB = 0, /* the facts (EVENT_SCRIPT_VAR_FACT_FIRST) */
     WLDCORE_BRAVE_STORY_ROW_STORY_EVENTS = 1,
-    WLDCORE_BRAVE_STORY_ROW_SET_SCRIPT_VARIABLES_03C0_03FF = 2,
+    WLDCORE_BRAVE_STORY_ROW_SET_SCRIPT_VARIABLES_03C0_03FF = 2, /* the persons (EVENT_SCRIPT_VAR_PERSON_PROFILE_*) */
     WLDCORE_BRAVE_STORY_ROW_PROPOSITIONS = 3,
     WLDCORE_BRAVE_STORY_ROW_UNEXPLORED_LANDS = 4,
     WLDCORE_BRAVE_STORY_ROW_TREASURES = 5,

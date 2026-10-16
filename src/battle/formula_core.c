@@ -204,13 +204,13 @@ s32 battle_formula_calculate_dance_song_hit(void) {
 /* Picks the knockback destination for the current action's target.
  *
  * Runs only while g_battle_action_current_ability.target_count is 1. An immortal target, a target
- * with both low team-flag bits set, the attacker itself and a mounted pair are
+ * of importance 3 (one whose fate decides the battle), the attacker itself and a mounted pair are
  * never pushed. The target moves one tile away from the attacker along the
  * dominant axis, and the tile must be neither untargetable, deep, steep, lava
  * nor an obstacle. On success g_battle_action_current_ability.knockback_flags records the knockback
  * kind (0x82 for a flier that is neither frog nor chicken, else 0x81),
- * [0xa]..[0xc] the destination x, y and level, and the target's action data
- * gets the knockback special effect.
+ * target_new_x, target_new_y and target_new_elevation the destination, and the target's action
+ * data gets the knockback special effect.
  *
  * abs() is the builtin: its MIPS abssi2 pattern emits the target's
  * bgez/move/negu sequence. The coordinate stores are array elements so their
@@ -402,9 +402,9 @@ static s32 battle_move_check_knockback_destination(s32 direction, s32 x, s32 y) 
     return level;
 }
 
-/* One evade roll, made only when executing: evaded with numerator in
- * denominator odds. Records the miss type and the item that blocked; returns 1
- * when evaded. */
+/* Roll an evade with numerator in denominator odds. The random roll is always
+ * drawn, but only while executing does an evade clear the hit, record the miss
+ * type and the item that blocked, and return 1; a preview or AI pass returns 0. */
 static s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator, u8 miss_type, u8 item_lost) {
     if (main_util_roll_pass_fail(denominator, numerator) != 0) {
         return 0;
@@ -426,7 +426,9 @@ static s32 battle_formula_calculate_attack_evaded(u16 numerator, u16 denominator
  * the best.
  *
  * Good and bad change XA by a quarter, best and worst by a half (XA * 25 / 100
- * or / 50, truncated); the result is at least 1.
+ * or / 50, truncated). The product is kept in 16 bits, so an XA above 2621
+ * would wrap. The result is then at least 1; the Serpentarius returns skip
+ * that floor, so an XA already cut to 0 stays 0.
  *
  * Casting the attacker sign to its stored 4-bit domain preserves the target's
  * distinct comparison copy without a compiler constraint.
@@ -503,13 +505,14 @@ void battle_formula_apply_zodiac_compatibility(void) {
 
 /* Filters the target's pending status inflictions and removals.
  *
- * The rider whitelist always masks pending inflictions. Unless removal_only
- * is set, further masks use the current (sets 0-2) or innate (sets 3-4) statuses, immunities,
- * the immortal blacklist and each status's can't-stack list, then every
- * remaining infliction clears the statuses it cancels. Inflicting Frog on a
- * frog turns into its removal. Removals always drop innate statuses and keep
- * only statuses the target has. Returns the sum of the remaining bytes, so 0
- * means nothing is left to inflict or remove. */
+ * A riding target's pending inflictions are masked by the rider whitelist,
+ * even with removal_only. Unless removal_only is set, inflicting Frog on a frog
+ * turns into its removal, and further masks use the current (sets 0-2) or innate
+ * (sets 3-4) statuses, immunities, the immortal blacklist and each status's
+ * can't-stack list, then every remaining infliction clears the statuses it
+ * cancels. Removals always drop innate statuses and keep only statuses the
+ * target has. Returns the sum of the remaining bytes, so 0 means nothing is
+ * left to inflict or remove. */
 s32 battle_status_modify_inflictions(s32 removal_only) {
     action_data_t* action;
     u8 inflicted;
@@ -633,7 +636,8 @@ void battle_formula_modify_damage_for_element(s32 element) {
     }
 }
 
-/* Collects the current target's physical evade sources for the ability being
+/* Resets the base hit to 100 and clears the accessory and hand evades, then
+ * collects the current target's physical evade sources for the ability being
  * resolved: class evade, accessory evade and one value per hand. A hand
  * contributes its weapon's evade when Weapon Guard is active and the unit can
  * still evade, otherwise its shield's evade. Monsters contribute nothing past
@@ -826,7 +830,8 @@ void battle_formula_calculate_transparent(void) {
  * target's facing (position bits 8-11); on a diagonal the target counts as
  * hit from the front when it faces either axis toward the attacker, and a
  * shared tile counts as the back. Side and back attacks clear class evade,
- * back attacks also both shield evades. */
+ * back attacks also both hand evades (a shield's, or a weapon's under Weapon
+ * Guard). */
 void battle_formula_calculate_facing_evade(void) {
     s32 dx = g_battle_action_target->x - g_battle_action_attacker->x;
     s32 dy;
@@ -926,7 +931,10 @@ void battle_formula_apply_weather_effects_on_bows(void) {
  * (flags4 bit 0x02). Any evade at or above the base hit forces a miss;
  * otherwise the accuracy becomes the product of the four (hit - evade)
  * percentages. The rolls then run accessory, right hand, left hand and
- * class evade, reporting the item that blocked. */
+ * class evade, reporting the item that blocked. Each roll evades with evade in
+ * base-hit odds and they are independent, so together they hit as often as the
+ * shown accuracy, up to its truncation. The earlier base-hit halvings (Dark or
+ * Confused attacker, Abandon, Defending) stack. */
 void battle_formula_calculate_final_hit_percent(void) {
     u8 hit;
     u8 accessory;
@@ -1116,7 +1124,7 @@ void battle_formula_store_pa_and_weapon_power_plus_y(void) {
     g_battle_action_current_ability.xa = pa;
 }
 
-/* XA and YA of formula 0x64 (Jump): XA = PA, or PA * 3/2 with a polearm; YA =
+/* XA and YA of formula 0x64 (Jump): XA = PA, or PA * 3/2 with a spear; YA =
  * weapon power, or bare-handed XA * Brave / 100 (at least 1). */
 void battle_formula_init_weapon_xa_ya(void) {
     u8 weapon_type = g_main_item_primary_data[g_battle_action_current_ability.weapon_id].type;
@@ -1209,7 +1217,10 @@ void battle_formula_apply_magic_attack_up(void) {
     }
 }
 
-/* Attacker statuses on XA: Berserk * 3/2; a Frog's XA is 1. */
+/* Attacker statuses on XA: Berserk * 3/2; a Frog's XA is 1, so the supports
+ * and Berserk before it and a critical after it add nothing. Action setup gives
+ * a Frog's default-menu abilities (Frog Attack) no weapon, so YA there is the
+ * bare-handed PA * Brave / 100. */
 void battle_formula_apply_attacker_berserk_frog(void) {
     if (g_battle_action_attacker->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_BERSERK)]
         & STATUS_BYTE_MASK(STATUS_ID_BERSERK)) {
@@ -1238,7 +1249,8 @@ void battle_formula_apply_magic_defense_up(void) {
 }
 
 /* Target statuses on physical XA: Protect * 2/3; Sleep or Charging * 3/2;
- * Chicken or Frog * 3/2. */
+ * Chicken or Frog * 3/2. Sleep and Charging share one step: inflicting Sleep
+ * cancels Charging (and Jump, Defending and Performing). */
 void battle_formula_apply_target_xa_affecting_statuses(void) {
     unit_stats_t* target;
 
@@ -1295,9 +1307,10 @@ void battle_formula_store_xa_times_ya_damage(void) {
     action->hp_damage = damage;
 }
 
-/* Hit chance of the accuracy formulas: XA + YA, left in hp_damage for
- * formula_use_hp_damage_as_action_hit_percent. YA gets zodiac
- * compatibility here (the callers apply it to XA), except for Golem. */
+/* Store XA + YA in hp_damage: the hit chance read by
+ * battle_formula_use_hp_damage_as_action_hit_percent, or formula 0x32's damage
+ * base. YA gets zodiac compatibility here (the callers apply it to XA), except
+ * for Golem. */
 void battle_formula_store_xa_plus_ya_status_damage(void) {
     u16 original_xa;
 
@@ -1376,9 +1389,10 @@ void battle_formula_calculate_stolen_gil(void) {
 }
 
 /*
- * Record the stolen EXP on both action results.
- *
- * The target's loss is encoded by adding 0x80 to the amount.
+ * Steal Exp.: take attacker Speed + Y EXP, at most 100 and at most the target's
+ * EXP; nothing to take is a forced miss. The attacker gains the amount; the
+ * target's exp_change carries it with bit 0x80, the loss flag
+ * battle_action_handle_steal_exp tests.
  */
 void battle_formula_set_exp_stolen(void) {
     u8 amount

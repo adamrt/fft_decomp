@@ -64,11 +64,13 @@ enum {
 
 /* Find a unit that learns the ability it was just hit with.
  *
- * Every hit unit whose ability outcome is still pending is demoted to outcome 4
- * first.  Monsters, units whose status prevents a reaction, and units that
- * already know the ability are skipped; the remaining candidates roll the
- * ability's learn rate out of 100.  Returns the learning unit's slot and writes
- * the ability id through `ability_id`, or -1 when nobody learns it. */
+ * Only an ability flagged Learn on Hit qualifies, and nothing is learned when
+ * Hamedo pre-empted the action. Each unit other than the attacker that the
+ * action affected is marked LEARN_CHECKED; a non-monster without a
+ * reaction-preventing status learns the ability when it is in the unit's
+ * primary skillset and not yet learned in its current job, on a learn-rate
+ * roll out of 100. Returns the first learner's slot and writes the ability id
+ * through `ability_id`, or -1 when nobody learns it. */
 s32 battle_ability_find_learn_on_hit_unit(s32 attacker_id, u16* ability_id) {
     u8 known[BATTLE_LEARN_ON_HIT_ROW_BYTES];
     ability_data_t* ability;
@@ -428,7 +430,12 @@ void battle_action_set_current_attacker_data(unit_stats_t* unit) {
     g_battle_action_current_attacker.mimic_pending = 1;
 }
 
-/* Builds and previews a reaction using the current attacker's action and weapons.
+/* Set up a Mime's copy of the recorded action (g_battle_action_current_attacker).
+ * The Mime must share the actor's team, not be the actor and not be prevented
+ * from reacting; a default, Arithmeticks or monster ability flagged Cannot
+ * Mimic is refused. The Mime repeats the action from its own tile, with the
+ * target offset turned by its facing relative to the actor's, and takes the
+ * actor's weapons.
  *
  * Returns 0 for an ineligible unit, -1 if targeting or preview fails, and 1
  * on success. Failed targeting or preview clears both borrowed weapon slots.

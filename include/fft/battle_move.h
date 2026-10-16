@@ -145,7 +145,7 @@ enum {
     FRONTIER_FLAG_BLOCKED = 0x80,        /* a blocked tile, or the tile of Altima's second form */
 };
 
-/* move_set_tile_flags_for_pathfinding modes. Bit 0 clears the target panels' ranges. */
+/* battle_move_set_tile_flags_for_pathfinding modes. Bit 0 clears the target panels' ranges. */
 typedef enum move_tile_flags_mode {
     MOVE_TILE_FLAGS_MODE_START_SPREAD = 1, /* mark the units and queue the mover's own tile */
     MOVE_TILE_FLAGS_MODE_KEEP_RANGES = 2,  /* mark the units only */
@@ -325,8 +325,8 @@ extern u8* g_battle_move_pathing_frontier;
 extern s32 g_battle_move_pathing_resume_pass;
 extern s32 g_battle_move_pathing_tile_index;
 
-/* Zeroed by move_calculate_pathing and never read. That pass keeps in statics what
- * move_store_unit_movement_to_scratchpad keeps in locals; these three stand where it sets
+/* Zeroed by battle_move_calculate_pathing and never read. That pass keeps in statics what
+ * battle_move_store_unit_movement_to_scratchpad keeps in locals; these three stand where it sets
  * its team, ignore_terrain and count locals (the generic unit has no team, terrain rule or units). */
 extern u8 g_battle_move_pathing_team;
 extern u8 g_battle_move_pathing_ignore_terrain;

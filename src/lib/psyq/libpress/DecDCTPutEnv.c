@@ -1,6 +1,6 @@
 #include "psx/libpress.h"
 
-/* Install the quantisation tables and upload the cached IDCT table; env->dct is ignored. */
+/* Install the quantization tables and upload the cached IDCT table; env->dct is ignored. */
 DECDCTENV* DecDCTPutEnv(DECDCTENV* env) {
     u32* src;
     u32* dst;

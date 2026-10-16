@@ -169,7 +169,7 @@ enum {
 typedef enum suzuki_modulator_flag {
     SUZUKI_MODULATOR_ACTIVE = 0x1,
     SUZUKI_MODULATOR_RESTART_ON_KEY_ON = 0x2, /* suzuki_smd_read_instructions restarts it at each key-on */
-    SUZUKI_MODULATOR_HALF_PERIOD_DONE = 0x4,  /* centerd triangle: later half-periods last twice as long */
+    SUZUKI_MODULATOR_HALF_PERIOD_DONE = 0x4,  /* centered triangle: later half-periods last twice as long */
     SUZUKI_MODULATOR_NEGATED = 0x8,           /* the next step or amplitude is negated */
 } suzuki_modulator_flag_e;
 
@@ -415,7 +415,7 @@ typedef enum suzuki_smd_opcode {
      * suzuki_smd_pitch_shift_waveform, suzuki_smd_pitch_shift_on and
      * suzuki_smd_pitch_shift_off. */
     SUZUKI_SMD_OPCODE_VIBRATO_FADE_IN = 0xd7,  /* fade-in length in ticks, less one */
-    SUZUKI_SMD_OPCODE_VIBRATO = 0xd8,          /* speed, signed depth, delay: a centerd triangle */
+    SUZUKI_SMD_OPCODE_VIBRATO = 0xd8,          /* speed, signed depth, delay: a centered triangle */
     SUZUKI_SMD_OPCODE_VIBRATO_WAVEFORM = 0xd9, /* speed, signed depth, waveform (bit 4: no restart on key-on) */
     SUZUKI_SMD_OPCODE_VIBRATO_ON = 0xda,
     SUZUKI_SMD_OPCODE_VIBRATO_OFF = 0xdb,
@@ -434,7 +434,7 @@ typedef enum suzuki_smd_opcode {
     SUZUKI_SMD_OPCODE_BALANCE_RAMP = 0xea,  /* ticks, target balance */
     /* The pan LFO opcodes program modulator 2 on the balance. */
     SUZUKI_SMD_OPCODE_PAN_LFO_FADE_IN = 0xeb,  /* fade-in length in ticks, less one */
-    SUZUKI_SMD_OPCODE_PAN_LFO = 0xec,          /* speed, signed depth, delay: a centerd triangle */
+    SUZUKI_SMD_OPCODE_PAN_LFO = 0xec,          /* speed, signed depth, delay: a centered triangle */
     SUZUKI_SMD_OPCODE_PAN_LFO_WAVEFORM = 0xed, /* speed, signed depth, waveform (bit 4: no restart on key-on) */
     SUZUKI_SMD_OPCODE_PAN_LFO_ON = 0xee,
     SUZUKI_SMD_OPCODE_PAN_LFO_OFF = 0xef,

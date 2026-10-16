@@ -266,7 +266,7 @@ static void open_movie_init_stream(s32 sector, psyq_interrupt_callback_t output_
     DecDCTReset(0);
     DecDCToutCallback(output_callback);
     StSetRing(g_open_movie_cd_stream_ring_buffer, 0x30);
-    StSetStream(1, 0, -1, 0, 0);
+    StSetStream(1, 0, -1, 0, 0); /* 24-bit mode, from frame 0, no end frame, no callbacks */
 
     header = &g_main_file_cd_state;
     main_file_build_header_nnl(header, sector, 1, 0);
@@ -395,7 +395,8 @@ static void open_movie_wait_for_mdec_output(open_movie_mdec_stream_state_t* stat
 }
 
 /* Set the read location and start the streaming read (CdRead2 mode 0x1a0),
- * repeating both until the read is accepted. */
+ * repeating both until the read is accepted. Unlike the first read in
+ * open_movie_start_stream (0x1e0), this mode leaves out CdlModeRT. */
 static void open_movie_start_cd_stream_read(const CdlLOC* location) {
     for (;;) {
         while (CdControl(CdlSetloc, (u8*)location, 0) == 0) { }

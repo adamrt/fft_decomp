@@ -78,6 +78,9 @@ typedef enum battle_game_state {
 
 extern s32 g_battle_game_state;
 extern s32 g_battle_previous_game_state;
+/* Nonzero while the action's effect is pending: 1 while its file loads, 2 while it plays, with
+ * the knockback targets' step phases ORed in. SEQ ops 0xd3 and 0xd6 and
+ * script_play_effect_and_wait wait on it. */
 extern s32 g_battle_state_animation_continue_check;
 extern s32 g_battle_state_map_init_step;
 extern s32 g_battle_state_screen_fade_step;
@@ -187,6 +190,8 @@ void battle_state_set_time_scale(s32 value);
 extern palette_t g_battle_deployed_unit_palettes[2];
 extern const RECT g_battle_deployment_clear_rect;
 extern s32 g_battle_deployment_skipped;
+/* The four random-battle music tracks (0x04, 0x05, 0x0e, 0x0f); map initialization plays the
+ * one at rand() / 0x2000. */
 extern u8 g_battle_random_battle_music_tracks[];
 
 void battle_state_init_deployment_display(s32 width, s32 height, s32 projection, u8 red, u8 green, u8 blue);

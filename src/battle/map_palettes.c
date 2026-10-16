@@ -1832,9 +1832,10 @@ void battle_gfx_modify_vram_palette(s32 mode, const rgba5551_t* source, s32 clut
     g_battle_map_palette_state.upload_pending = 1;
 }
 
-/* Write one CLUT of a row from the colors at `source` with the red, green and
- * blue offsets added: battle_gfx_modify_vram_palette in MAP_COLOR_MODE_RESTORE, a
- * mode in which it neither halves nor grays the colors. */
+/* Write one CLUT of a row (the whole row when preset is 1; retail callers pass 0)
+ * from the colors at `source` with the red, green and blue offsets added:
+ * battle_gfx_modify_vram_palette in MAP_COLOR_MODE_RESTORE, a mode in which it
+ * neither halves nor grays the colors. */
 void battle_map_update_palette_from_other(
     const rgba5551_t* source, s32 clut_row, s32 clut_index, s32 preset, s16 red, s16 green, s16 blue, s32 final_value) {
     battle_gfx_modify_vram_palette(

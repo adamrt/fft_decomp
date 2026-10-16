@@ -481,9 +481,7 @@ void world_formation_process_frame(void) {
  * On a new selection this snapshots the unit's display data, starts the
  * status-banner slide (g_world_formation_banner_slide_step), and records the scroll direction in
  * g_menu_status_display_thread_params.redraw_request; it then toggles the per-menu windows and advances the slide.
- * The caller in world_menu_run_remove_item passes two arguments that this body
- * never reads. Compiled at O1 like its world_formation_stage_selected_unit
- * neighbor.
+ * Compiled at O1 like its world_formation_stage_selected_unit neighbor.
  */
 void world_formation_update_unit_selection(void) {
     s32 saved;
@@ -622,7 +620,7 @@ void world_formation_stage_selected_unit(void) {
  * direction: 1 for 0x2000/0x8 input or a forward move, 2 otherwise. g_world_formation_banner_slide_step counts the
  * 16-frame banner slide in either direction, driving the banner y positions in
  * g_menu_status_display_thread_params.y/g_menu_comparison_display_thread_params.y. Compiled at -O1; the flag update
- * goes through a pointer so each branch materialises the address like the target.
+ * goes through a pointer so each branch materializes the address like the target.
  */
 void world_shop_update_unit_selection(void) {
     s32 previous;

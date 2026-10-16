@@ -325,8 +325,8 @@ void world_formation_run_job_wheel_menu(void) {
  * Jobs are placed backwards from the cursor at angle steps of ONE / count on
  * radii scaled by 100 and 60 (ONE = 1.0). The ordering-table index rises in
  * the first and last angle quarters and falls in the middle two. Jobs flagged
- * 0x4000 are tinted and those with a nonzero g_world_job_wheel_mastered_jobs entry get a level
- * gauge. Needs at least two jobs.
+ * 0x4000 are tinted and those with a nonzero g_world_job_wheel_mastered_jobs entry get the
+ * twinkling mastered star. Needs at least two jobs.
  */
 static void world_formation_draw_job_wheel_sprites(s32 angle, s32 radius_x, s32 radius_y) {
     oriented_quad_t sprite;
@@ -657,7 +657,7 @@ static void world_formation_layout_job_wheel_portrait(void) {
     menu_gfx_enqueue_draw_move(&rect, 0x240, 0x130, 0);
 }
 
-/* Render the job wheel's centerd job name ("Can't change" when fewer than two
+/* Render the job wheel's centered job name ("Can't change" when fewer than two
  * jobs are listed). */
 static void world_formation_build_job_wheel_job_name(void) {
     RECT destination_rect;

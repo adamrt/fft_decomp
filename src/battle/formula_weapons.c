@@ -62,13 +62,13 @@ void battle_formula_calculate_truth_magical_damage(void) {
 }
 
 /* Damage MA * (MA + Y) / 2 without Faith: stores XA and YA, then runs the magical
- * damage chain of formula_calculate_truth_magical_damage. */
+ * damage chain of battle_formula_calculate_truth_magical_damage. */
 void battle_formula_calculate_truth_damage(void) {
     battle_formula_store_ma_and_ma_plus_y_divided_by_two();
     battle_formula_calculate_truth_magical_damage();
 }
 
-/* formula_calculate_magic_accuracy without the elemental strengthen. */
+/* battle_formula_calculate_magic_accuracy without the elemental strengthen. */
 static s32 battle_formula_calculate_magic_accuracy_no_elemental(void) {
     battle_formula_store_ma_and_x();
     battle_formula_apply_magical_support_status_compatibility();
@@ -90,7 +90,7 @@ s32 battle_formula_calculate_magic_accuracy(void) {
     return g_battle_action_target_data->hit == 0;
 }
 
-/* formula_calculate_magic_accuracy without the Faith step: hit (MA+X)%. */
+/* battle_formula_calculate_magic_accuracy without the Faith step: hit (MA+X)%. */
 s32 battle_formula_calculate_magic_accuracy_without_faith(void) {
     battle_formula_store_ma_and_x();
     battle_formula_apply_elemental_strengthen();
@@ -172,7 +172,9 @@ void battle_formula_magic_gun(void) {
 }
 
 /* Formula 0x05: weapon damage as 0x01 without the weapon's element and the bow
- * weather penalty; physical evade; 19% status. */
+ * weather penalty; physical evade; 19% status. No retail weapon, ability or item
+ * record uses it: Charge runs the weapon's own formula (its menu case falls
+ * through to Attack's), so it keeps the element and the bow weather penalty. */
 void battle_formula_weapon_damage_charge(void) {
     if (battle_formula_calculate_physical_evade_charge() == 0) {
         battle_formula_calculate_base_xa();
@@ -266,7 +268,9 @@ void battle_formula_magical_heal(void) {
     battle_formula_apply_undead_reversal();
 }
 
-/* Formula 0x0D: heal (Y)% of max HP, hit F(MA+X)%. */
+/* Formula 0x0D: heal (Y)% of max HP, hit F(MA+X)%. The ability's status must
+ * change something (so Raise fails on a living target) unless the target is
+ * undead, which takes the amount as damage. */
 void battle_formula_heal_y_percent_faith(void) {
     battle_formula_store_ma_and_x();
     battle_formula_apply_elemental_strengthen();
@@ -282,10 +286,7 @@ void battle_formula_heal_y_percent_faith(void) {
 
 /* Formula 0x0E: damage (Y)% of max HP, hit F(MA+X)%; magic evade. The
  * ability's status must apply. An undead target skips the evade and its magic
- * defenses and is healed instead; a target immune to Dead is missed.
- *
- * 0x801938e6: set when the current target is undead, read by this formula to
- * skip the magic-defense stage. */
+ * defenses and is healed instead; a target immune to Dead is missed. */
 void battle_formula_damage_hp_percent_hit_faith_ma_x_percent(void) {
     if (g_battle_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_UNDEAD)]
         & STATUS_BYTE_MASK(STATUS_ID_UNDEAD)) {
@@ -317,7 +318,7 @@ void battle_formula_damage_hp_percent_hit_faith_ma_x_percent(void) {
     battle_formula_apply_undead_absorb_attack();
 }
 
-/* Formula 0x0F: absorb (Y)% of max MP, hit F(MA+X)%. */
+/* Formula 0x0F: absorb (Y)% of max MP, hit F(MA+X)%; magic evade. */
 void battle_formula_absorb_mp_y_percent(void) {
     if (battle_formula_calculate_magical_evade() != 0 || battle_formula_calculate_magic_accuracy_no_elemental() != 0) {
         return;
@@ -461,7 +462,7 @@ void battle_formula_dance(void) {
 
 /* Formula 0x1E: damage ((MA + Y) / 2 * MA) with element; magic evade; 19%
  * status. Strikes rnd(1..X) times
- * (action_init_current_ability_strike_data). */
+ * (battle_action_init_current_ability_strike_data). */
 void battle_formula_multihit_truth_magic(void) {
     if (battle_formula_calculate_magical_evade() == 0) {
         battle_formula_calculate_truth_damage();
@@ -470,8 +471,9 @@ void battle_formula_multihit_truth_magic(void) {
 
 /* Formula 0x1F: damage ((MA + Y) / 2 * MA) with element, scaled by (100 -
  * caster Faith) and (100 - target Faith) over 10000, the Faith status counting
- * as 0 and Innocent as 100; magic evade; 19% status. Strikes rnd(1..X) times
- * (action_init_current_ability_strike_data). */
+ * as 0 and Innocent as 100, so Faith on either side keeps that side's full
+ * factor and Innocent zeroes the damage; magic evade; 19% status. Strikes
+ * rnd(1..X) times (battle_action_init_current_ability_strike_data). */
 void battle_formula_unfaith_magical_damage(void) {
     action_data_t* action;
 
@@ -582,7 +584,9 @@ void battle_formula_break_equipped_hit_pa_wp_x_percent(void) {
     }
 }
 
-/* Formula 0x26: steal equipped item, hit (SP+X)%. */
+/* Formula 0x26: steal the equipment the ability names, hit (SP+X)%; physical
+ * evade; Maintenance blocks it. An empty slot or a monster target is a forced
+ * failure. */
 void battle_formula_steal_equipment(void) {
     action_data_t* action;
 

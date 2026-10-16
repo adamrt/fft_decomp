@@ -162,7 +162,8 @@ void open_gfx_load_opntex_into_frame_buffer(u32* tim) {
 
 /* First controller of the title sequence: the FFTST.STR logo movie (sector
  * 0x153d6, 0x278a sectors; the stream ends at frame 0x3df and the video alone at
- * frame 0x2de), or the title menu at once when use_alternate is set. */
+ * frame 0x2de, so its CD audio plays on under the title menu), or the title
+ * menu at once when use_alternate is set. */
 void open_movie_start_fftst_or_title_menu(s32 use_alternate) {
     g_open_current_controller_index = 0;
     if (use_alternate == 0) {
@@ -219,7 +220,8 @@ void open_movie_finish_stream_controller_if_ready_or_skipped(open_controller_rec
     open_title_push_menu_controller(record->movie.start_sector + record->movie.stream_length);
 }
 
-/* Start the opening movie (the one caller passes the sector of OPEN/FFTOP.STR) and push its controller. */
+/* Start the opening movie (the one caller passes the sector of OPEN/FFTOP.STR) with its CD audio
+ * at mix level 0x94, and push its controller. */
 static void open_movie_stream_fftop_and_push_controller(s32 start_sector, s32 unused_stream_length, s32 end_frame) {
     s32 controller;
 
@@ -230,8 +232,6 @@ static void open_movie_stream_fftop_and_push_controller(s32 start_sector, s32 un
     g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_FFTOP_MOVIE;
     g_open_current_controller_index = controller + 1;
 }
-
-/* The stream plays its CD audio at mix level 0x94. */
 
 /* OPEN_CONTROLLER_FFTOP_MOVIE: Start stops the opening movie; once it has stopped the controller
  * pops, blanks the display and ends OPENING with result 0. */
@@ -371,11 +371,14 @@ static void open_gfx_hide_four_render_records(open_title_controller_t* title) {
 
 /* Per-frame handler for the OPEN title menu controller.
  *
- * While the attract CD track plays it watches the current sector and stops
- * the drive at the record's end position. Once the menu is idle for 601
- * frames it fades out and starts the next demo movie; a confirm press fades
- * out and dispatches on the cursor (new game, continue, options), and the
- * directional helpers move the highlight between the four entries.
+ * While the CD audio plays it watches the current sector and stops the drive
+ * at the record's end position. Once the audio has stopped and the menu has
+ * been idle for 601 frames it fades out and starts the next demo movie.
+ * Circle or Start confirms the cursor entry: New Game, Continue and Tutorial
+ * fade out and then dispatch (Continue runs the memory card screen and ends
+ * OPENING with 0 or 1 for a loaded save, Tutorial ends it with 2), while
+ * Sound opens the sound type menu without fading. Up and Down (and Select)
+ * move the highlight between the four entries.
  */
 void open_title_update_menu(open_controller_record_t* record) {
     open_title_controller_t* state = &record->title;
@@ -865,7 +868,7 @@ static void open_birthday_push_date_controller(void) {
 
 /* Rebuild the selected birthday's month and day in the lower menu window.
  *
- * The month label is centerd from its measured width; both entries are drawn
+ * The month label is centered from its measured width; both entries are drawn
  * into one scratch image before it is uploaded to VRAM. */
 static void open_birthday_build_menu_text(open_birthday_date_state_t* menu) {
     RECT quad;
@@ -939,7 +942,9 @@ static void open_birthday_restore_date_menu(open_birthday_date_state_t* menu) {
 }
 
 /* Recolor the birthday menu's render records for the confirmation prompt:
- * dim the date cursor, gray the label, and mark both windows as step 2.
+ * the date cursor takes sequence 10 and palette 7, the label is grayed, and
+ * the title and date windows take palette 2 (the CLUT 16 entries right of
+ * tail.clut).
  *
  * The target reserves a 24-byte frame it never touches (the stack adjustment
  * is even scheduled into the last load-delay slot), so the original body
@@ -1111,9 +1116,13 @@ static void open_birthday_push_confirmation_controller(void) {
     g_open_controller_handler_indices[controller] = OPEN_CONTROLLER_BIRTHDAY_CONFIRMATION;
 }
 
-/* Handle confirmation, cancellation, and cursor movement on the final birthday prompt.
+/* Handle the final birthday prompt. Circle on the first option stores Ramza's birthday and zodiac
+ * and fades out; once the fade has finished, the birthday controllers are released and the
+ * FFTOP.STR opening movie starts. Circle on the second option, like Cross, returns to the date
+ * menu. Up and Down toggle the option.
  *
- * Confirming the selected date stores Ramza's birthday and zodiac data before starting the opening transition.
+ * The zodiac byte holds bit 8 of the day of the year in bit 0 and the sign (0 = Aries) in the high
+ * nibble.
  */
 void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
     open_birthday_confirmation_state_t* menu = &record->birthday_confirmation;
@@ -1183,7 +1192,7 @@ void open_birthday_handle_confirmation_input(open_controller_record_t* record) {
 
 /* Initialize a 56-byte render record as a window frame and build its image.
  *
- * `tail` and `color` are pointers because the target materialises
+ * `tail` and `color` are pointers because the target materializes
  * &records[index].tail and &records[index].color as values, while every other
  * field is stored directly off the record array. `half` and `scaled` keep
  * the target's x / 4 + (64 * depth + 0x180) grouping. */
@@ -1214,8 +1223,9 @@ void open_gfx_init_window_frame_record(s32 index, RECT quad, s32 depth, u16* ima
 
 /* Upload a window record's image to its place in VRAM.
  *
- * Record coordinates are quarter-pixel values; x also selects a 64-pixel page
- * before the upload is placed in VRAM at x 0x180. */
+ * The record's quad is in 4-bit texels within its texture page, four to a
+ * VRAM halfword, so the image goes to x = quad.x / 4 + 0x180 + 64 * depth
+ * (texture page 6 + depth) with width quad.w / 4. */
 void open_birthday_load_window_image(s32 record_index, u32* image) {
     RECT destination;
     s32 x;

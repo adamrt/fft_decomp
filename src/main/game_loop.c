@@ -37,7 +37,9 @@ static void main_overlay_call_battle_entrypoint(void) {
 }
 
 /* Load BATTLE.BIN (sector 1000) into the whole low overlay area, which ends at
- * the high overlay address, and call its entry point. */
+ * the high overlay address, and call battle_bin_entrypoint. That is not BATTLE
+ * code but MAIN's 4 KB of zero words ending in `jr ra`; BATTLE runs when the
+ * caller then calls battle_state_run_game_loop. */
 static void main_overlay_exec_battle_bin(void) {
     main_file_load_checked_to_address(DISC_SECTOR_BATTLE_BIN,
         g_main_heap_high_overlay_load_address - g_main_heap_low_overlay_load_address,
@@ -189,7 +191,7 @@ void main_gfx_build_now_loading(u32 visible, s32 x, s32 y) {
     LoadClut2((u32*)g_main_gfx_now_loading_palette, 0x70, 0x1e2);
 }
 
-/* Build the Now Loading message centerd horizontally (x = 0x80). */
+/* Build the Now Loading message centered horizontally (x = 0x80). */
 void main_gfx_build_now_loading_center(u32 visible) {
     main_gfx_build_now_loading(visible, 0x80, 0);
 }

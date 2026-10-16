@@ -51,7 +51,7 @@ void battle_camera_set_real_coord_delta_from_values(const VECTOR* values, s32 fr
 }
 
 /* Advances the camera-position move by one frame while its countdown runs. Only
- * the uncalled camera_set_real_coord_delta_* routines start the countdown,
+ * the uncalled battle_camera_set_real_coord_delta_* routines start the countdown,
  * so nothing moves in retail. */
 void battle_camera_update_real_coord_animation(void) {
     if (g_battle_camera_real_coord_countdown != 0) {
@@ -121,8 +121,8 @@ void battle_camera_start_screen_offset_move_relative(const VECTOR* values, s32 f
 }
 
 /* Advances the screen-offset move by one frame while its countdown runs. Only the
- * uncalled camera_set_offset_screen_coord_delta_* routines start the
- * countdown, so nothing moves in retail. */
+ * uncalled battle_camera_start_screen_offset_move_uniform and _relative routines
+ * start the countdown, so nothing moves in retail. */
 void battle_camera_update_screen_offset_animation(void) {
     s32 fixed_x;
     s32 fixed_z;
@@ -174,8 +174,9 @@ void battle_camera_set_zoom_delta_from_value(const s32* destination_value, s32 f
 
 /* The original wrote the body of battle_camera_set_real_coord_delta_from_values a second time as
  * battle_camera_set_zoom_delta_from_values. */
-/* Starts a linear move of the camera position by the vector `values` (20.12) over
- * frame_count frames (divided by the animation speed). No retail code calls it. */
+/* Starts a linear change of the zoom scales by the vector `values` over
+ * frame_count frames (divided by the animation speed), applied by
+ * battle_camera_update_zoom_animation. No retail code calls it. */
 void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_count) {
     s32 animation_frames = (frame_count & 0xffff) / g_main_system_animation_speed;
 
@@ -187,9 +188,9 @@ void battle_camera_set_zoom_delta_from_values(const VECTOR* values, s32 frame_co
 
 /* The original wrote the body of battle_camera_update_real_coord_animation a second time as
  * battle_camera_update_zoom_animation. */
-/* Advances the camera-position move by one frame while its countdown runs. Only
- * the uncalled camera_set_real_coord_delta_* routines start the countdown,
- * so nothing moves in retail. */
+/* Advances the zoom change by one frame while its countdown runs. Only the
+ * uncalled battle_camera_set_zoom_delta_* routines start the countdown, so the
+ * zoom never animates here in retail. */
 void battle_camera_update_zoom_animation(void) {
     if (g_battle_camera_zoom_countdown != 0) {
         g_battle_camera_zoom_countdown--;
@@ -243,7 +244,7 @@ void battle_camera_set_rotation_delta_from_values(const s16* values, s32 frame_c
 }
 
 /* Advances the camera-angle move by one frame while its countdown runs. Only the
- * uncalled camera_set_rotation_delta_* routines start the countdown, so
+ * uncalled battle_camera_set_rotation_delta_* routines start the countdown, so
  * nothing moves in retail. */
 void battle_camera_update_rotation_animation(void) {
     if (g_battle_camera_rotation_countdown != 0) {

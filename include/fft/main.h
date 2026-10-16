@@ -346,7 +346,7 @@ extern s32 g_main_saved_weather_variable;
 
 /* RAM bitmaps indexed by 32-bit values; the save serializer copies only their packed data
  * bytes and omits the padding at the end of each allocation. */
-extern u32 g_main_proposition_last_attempt_date_bits[27];
+extern u32 g_main_proposition_last_attempt_date_bits[27]; /* written only for a successful result */
 extern u32 g_main_treasure_acquisition_date_bits[14];
 extern u32 g_main_land_discovery_date_bits[5];
 extern u8 g_main_proposition_states[96]; /* wldcore_proposition_state_e */

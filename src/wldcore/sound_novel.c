@@ -244,7 +244,7 @@ u32 wldcore_sound_novel_find_section_instruction(s32 section, s32 opcode) {
     return 0;
 }
 
-/* Clear a render record's text image, draw text `text_id` centerd
+/* Clear a render record's text image, draw text `text_id` centered
  * horizontally in it (nothing for id 0) and upload it. Also clears the
  * three pending sound script variables. */
 void wldcore_window_draw_centered_text(s32 window_index, s32 text_id) {
@@ -1134,13 +1134,12 @@ void wldcore_opcode_set_menu_brightness(void) {
     g_wldcore_active_saved_record.state_flags |= WLDCORE_OPCODE_STATE_FETCH;
 }
 
-/* Script opcode handler: compares `EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION` against the opcode's
- * third byte and, on a match, adds the signed middle 16 bits of the
- * 32-bit instruction to g_wldcore_sound_novel_counter_delta. */
-
 /* Scalar counter access preserves the separate load/store symbol bases. */
 extern u16 g_wldcore_sound_novel_counter_delta;
 
+/* Sound-novel opcode 0x33: when EVENT_SCRIPT_VAR_SELECTED_DIALOG_OPTION equals
+ * byte 3, add bytes 1-2 minus 0x8000 (an operand biased by 0x8000) to
+ * g_wldcore_sound_novel_counter_delta. */
 void wldcore_opcode_add_counter_delta_if_choice(void) {
     u32* instruction;
     u8 expected;

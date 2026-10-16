@@ -469,6 +469,8 @@ static void battle_effect_init_record_chain(void) {
  * Bits 12-15 of kind select the effect list node type allocated as the
  * record's data (0x0000-0x3000 map to list kinds 0, 2, 4 and 6); other kinds
  * get no data. g_battle_effect_work_record_peak tracks the peak number of records in use.
+ * With the free chain empty it only passes code 0x3e to the empty report hook
+ * and then reads the next link through the null head.
  */
 static effect_work_record_t* battle_effect_alloc_work_record(s16 record_index, s16 kind) {
     effect_work_record_t* work = g_battle_effect_free_work_record_head;
@@ -576,9 +578,10 @@ void battle_noop_801a6010(void) {
 void battle_noop_801a6018(void) {
 }
 
-/* Returns 0 unless the record has a work list and requested_index is inside
- * it.  Note the retail loop walks work_count links, not requested_index, so
- * the returned node is always the same for a given record. */
+/* Meant to return the requested_index-th work record of an allocated state
+ * record (0 when out of range). The loop follows work_count links from the
+ * head instead of requested_index, which runs off the end of the
+ * null-terminated list, so it always returns 0. Nothing in the game calls it. */
 effect_work_record_t* battle_effect_get_list_node(s16 record_index, s16 requested_index) {
     effect_record_t* record = &g_battle_effect_state_records[record_index];
     effect_work_record_t* node = 0;
