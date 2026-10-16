@@ -7,6 +7,10 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
+/* The grid is QUAD_GRID_SIZE quads on a side, each QUAD_GRID_CELL pixels of the 256x256 field; this
+ * build clamps the ordering-table depth at QUAD_GRID_DEPTH_MIN. */
+enum { QUAD_GRID_SIZE = 8, QUAD_GRID_CELL = 256 / QUAD_GRID_SIZE, QUAD_GRID_DEPTH_MIN = EFFECT_OT_DEPTH_MIN };
+
 /*
  * Phase handler for a scrolling textured quad grid.
  *
@@ -68,18 +72,18 @@ s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s3
         }
         texture_page
             = (configuration.blend_mode << EFFECT_RENDER_TEXTURE_PAGE_BLEND_SHIFT) | EFFECT_RENDER_TEXTURE_PAGE_BASE;
-        for (row = 0; row < 8; row++) {
-            for (column = 0; column < 8; column++) {
-                quad = &work->quads[0][row * 8 + column];
+        for (row = 0; row < QUAD_GRID_SIZE; row++) {
+            for (column = 0; column < QUAD_GRID_SIZE; column++) {
+                quad = &work->quads[0][row * QUAD_GRID_SIZE + column];
                 SetPolyGT4(quad);
                 setSemiTrans(quad, translucent);
                 quad->tpage = texture_page;
                 quad->clut = MAP_CLUT(MAP_CLUT_ROW_EFFECT, 0);
-                quad->x0 = quad->x2 = column * 32 + 128;
-                quad->y0 = quad->y1 = row * 32;
-                quad->x1 = quad->x3 = column * 32 + 128 + 32;
-                quad->y2 = quad->y3 = row * 32 + 32;
-                work->quads[1][row * 8 + column] = *quad;
+                quad->x0 = quad->x2 = column * QUAD_GRID_CELL + 128;
+                quad->y0 = quad->y1 = row * QUAD_GRID_CELL;
+                quad->x1 = quad->x3 = column * QUAD_GRID_CELL + 128 + QUAD_GRID_CELL;
+                quad->y2 = quad->y3 = row * QUAD_GRID_CELL + QUAD_GRID_CELL;
+                work->quads[1][row * QUAD_GRID_SIZE + column] = *quad;
             }
         }
         work->scroll_v = 0;
@@ -131,16 +135,15 @@ s32 effect_textured_quad_grid_8x8_update(s32 record_index, s32 callback_slot, s3
         }
         depth = geometry->ot_depth;
         brightness_row = geometry->brightness_row;
-        /* The 4x4 comparison has a distinct matched branch form. */
-        if (depth < EFFECT_OT_DEPTH_MIN) {
-            depth = EFFECT_OT_DEPTH_MIN;
+        if (depth < QUAD_GRID_DEPTH_MIN) {
+            depth = QUAD_GRID_DEPTH_MIN;
         }
         if (depth >= EFFECT_OT_DEPTH_LIMIT) {
             depth = EFFECT_OT_DEPTH_MAX;
         }
-        for (quad_row = 0; quad_row < 8; quad_row++) {
-            for (quad_column = 0; quad_column < 8; quad_column++) {
-                quad = &work->quads[work->buffer][quad_row * 8 + quad_column];
+        for (quad_row = 0; quad_row < QUAD_GRID_SIZE; quad_row++) {
+            for (quad_column = 0; quad_column < QUAD_GRID_SIZE; quad_column++) {
+                quad = &work->quads[work->buffer][quad_row * QUAD_GRID_SIZE + quad_column];
                 u = (work->scroll_u >> 12) + work->texture_u;
                 quad->u0 = quad->u2 = u;
                 quad->u1 = quad->u3 = u + texture_width;
