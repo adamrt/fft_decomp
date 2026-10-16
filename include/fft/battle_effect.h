@@ -2001,7 +2001,7 @@ s32 battle_effect_linear_projectile_secondary_handler(void);
 s32 battle_effect_null_secondary_handler(void);
 s32 battle_effect_red_orbs_secondary_handler(void);
 s32 battle_effect_reflect_secondary_handler(void);
-void battle_effect_set_evade_type_data_and_weapon_element(struct battle_unit* unit, s32 is_bow);
+void battle_effect_start_weapon_hit_secondary(struct battle_unit* unit, s32 is_bow);
 void battle_effect_set_secondary_death_smoke(battle_unit_t* unit);
 void battle_effect_set_secondary_fall_dust(struct battle_unit* unit);
 void battle_effect_set_secondary_level_up(struct battle_unit* unit);

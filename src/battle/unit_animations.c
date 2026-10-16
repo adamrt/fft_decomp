@@ -1382,7 +1382,7 @@ static void battle_gfx_run_unit_seq_script(battle_unit_t* unit, battle_unit_anim
                                 battle_unit_set_target_animation_from_attack_type(unit, target);
                                 battle_unit_set_attacker_animation_for_shield_block(unit, target);
                                 battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
-                                battle_effect_set_evade_type_data_and_weapon_element(unit, 0);
+                                battle_effect_start_weapon_hit_secondary(unit, 0);
                             }
                         }
                     }

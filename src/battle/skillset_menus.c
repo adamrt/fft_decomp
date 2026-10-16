@@ -22,7 +22,7 @@ static s32 battle_action_sort_at_list(s32 battle_id, s32 mode, s32 sort_key, bat
 static s32 battle_menu_collect_math_skill_abilities_by_flags(s32 unit_id, u8 skillset, s16* out, u8 mask);
 static s32 battle_menu_has_monster_skill_supporter_at_tile(s32 team_flags, s32 x, s32 y, s32 total_height);
 static s32 battle_status_build_upkeep_action(s32 unit_id, unit_stats_t* unit);
-static s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit);
+static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit);
 
 /* Build the parallel ability lists for one of a unit's skillsets.
  *
@@ -1125,7 +1125,7 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
 
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return -1;
-    if (battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0)
+    if (battle_status_is_unit_excluded_from_at_list(unit) != 0)
         return -3;
     battle_id = unit->battle_id;
     battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_TURNS_ONLY);
@@ -1142,7 +1142,7 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
  *
  * Returns -4 for an empty entry; a charged-action entry (bit 0x40) returns its
  * unit id plus 0x100. */
-s32 battle_action_calculate_at_list_and_get_specific_unit_id(s32 at_index) {
+s32 battle_action_get_at_list_entry_unit_id(s32 at_index) {
     battle_at_entry_t at_list[BATTLE_AT_LIST_CAPACITY];
     u32 entry;
     u32 unit_id;
@@ -1160,7 +1160,7 @@ s32 battle_action_calculate_at_list_and_get_specific_unit_id(s32 at_index) {
 }
 
 /* Return 1 when the unit cannot participate in the AT list. */
-static s32 battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(const unit_stats_t* unit) {
+static s32 battle_status_is_unit_excluded_from_at_list(const unit_stats_t* unit) {
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE) {
         return 1;
     }
@@ -1267,7 +1267,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
 
     for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
         unit = &g_battle_unit_stats[slot];
-        if (battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0) {
+        if (battle_status_is_unit_excluded_from_at_list(unit) != 0) {
             continue;
         }
 

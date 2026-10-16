@@ -595,7 +595,7 @@ s32 battle_map_init_units_sprites_event_and_music(s32 map_id, s32 step, s32 depl
     case 10:
         if (deployment_running == 0) {
             step++;
-            attack_sound_resync_scenario_music_and_apply_map_darkness();
+            attack_scenario_restore_music_and_darkness();
         }
         break;
     case 11:

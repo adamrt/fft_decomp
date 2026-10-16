@@ -1072,7 +1072,7 @@ void script_sprite_move_beta(void);
 /* waits */
 void script_wait_for_unit_ready(s32 runtime_id);
 void script_waitwalk_event_instruction(s32 unit_id);
-void script_waitrotateunit_and_waitrotateall_event_instruction(s32 unit_id);
+void script_waitrotate_event_instruction(s32 unit_id);
 void script_wait_value_event_instruction(const event_wait_value_parameters_t* parameters);
 
 /* camera operands */

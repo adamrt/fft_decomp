@@ -595,7 +595,7 @@ static void require_party_apply_post_battle_changes(void) {
     s32* transition_c_ptr;
     s32 screen_fade_max;
 
-    if (require_party_save_battle_units_and_find_join_candidates() == 0) {
+    if (require_party_update_after_battle() == 0) {
         thread_exit_current();
     }
     g_menu_post_battle_unit_changes_active = 1;

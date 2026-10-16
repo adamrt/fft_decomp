@@ -655,7 +655,7 @@ void battle_state_handle_open_sp2_files_state(void) {
         if (open_result == -1) {
             main_heap_free(g_battle_gfx_sp2_data);
             g_battle_gfx_sp2_data = 0;
-            battle_action_set_damage_display_type_based_on_ability();
+            battle_action_start_next_strike_display();
         } else if (open_result == 0) {
             main_heap_free(g_battle_gfx_sp2_data);
             g_battle_gfx_sp2_data = 0;
@@ -678,7 +678,7 @@ void battle_state_handle_open_sp2_files_state(void) {
                 image_rect_address->w = 0x40;
                 image_rect_address->h = 0x100;
                 LoadImage(image_rect_address, sp2_data);
-                battle_action_set_damage_display_type_based_on_ability();
+                battle_action_start_next_strike_display();
                 break;
             }
             counter++;
@@ -866,7 +866,7 @@ void battle_state_handle_resume_attack_phase_state(void) {
         && unit->numeric_display.active == 0) {
         if (unit->strike.continue_attack != 0) {
             unit->continue_attack_count += 1;
-            battle_action_set_damage_display_type_based_on_ability();
+            battle_action_start_next_strike_display();
             return;
         }
         if (g_battle_gfx_sp2_data != 0) {

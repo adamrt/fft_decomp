@@ -491,7 +491,7 @@ void battle_action_get_next_acting_unit(s32 at_index) {
 
     battle_camera_disable_map_pan();
     g_battle_game_state = BATTLE_GAME_STATE_ACTIVE_TURN;
-    id = battle_action_calculate_at_list_and_get_specific_unit_id(at_index);
+    id = battle_action_get_at_list_entry_unit_id(at_index);
     if (id >= 0) {
         unit = battle_unit_get_by_battle_id(id & 0xFF);
         if ((id & 0x100) != 0) {

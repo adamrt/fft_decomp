@@ -351,7 +351,7 @@ static s32 require_party_find_low_brave_high_faith_departures(void) {
  * for the prompt with message 0x1800 + (identity - 0x80) * 8 + a variant from
  * the random script variable.
  */
-s32 require_party_save_battle_units_and_find_join_candidates(void) {
+s32 require_party_update_after_battle(void) {
     s32 prompt_count = 0;
     s32 party_index;
     s32 found_index;

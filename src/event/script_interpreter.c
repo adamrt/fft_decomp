@@ -1858,7 +1858,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
 }
 
 /* WaitRotateUnit/All: resolved units yield at least once; -1 waits for all 21 slots. */
-void script_waitrotateunit_and_waitrotateall_event_instruction(s32 unit_id) {
+void script_waitrotate_event_instruction(s32 unit_id) {
     s32 i;
     s32 index;
 

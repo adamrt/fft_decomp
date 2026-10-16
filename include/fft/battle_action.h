@@ -450,7 +450,7 @@ extern s32 g_action_at_list_active;
 extern s32 g_action_at_list_id;
 
 s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode_e mode);
-s32 battle_action_calculate_at_list_and_get_specific_unit_id(s32 at_index);
+s32 battle_action_get_at_list_entry_unit_id(s32 at_index);
 s32 battle_action_find_unit_turn_index(const unit_stats_t* unit);
 void battle_action_clear_at_list_active(void);
 void battle_action_clear_at_list_id(void);
@@ -552,7 +552,7 @@ s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8
 void battle_action_init_learn_ability_on_hit(void);
 s32 battle_action_init_movement_ability_benefit(unit_stats_t* unit);
 void battle_action_post_action_facing_stub(unit_stats_t* unused_unit, s32 unused_facing);
-void battle_action_set_damage_display_type_based_on_ability(void);
+void battle_action_start_next_strike_display(void);
 void battle_action_set_item_throw_stone_ability_display(void);
 void battle_action_set_only_action_taken(s32 unit_id);
 void battle_action_set_only_movement_taken(s32 unit_id);

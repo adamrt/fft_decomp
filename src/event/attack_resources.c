@@ -836,9 +836,9 @@ void script_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WAIT_SPRITE_MOVE) {
             script_waitspritemove_event_instruction(first_halfword);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
-            script_waitrotateunit_and_waitrotateall_event_instruction(script[1]);
+            script_waitrotate_event_instruction(script[1]);
         } else if (script[0] == EVENT_OPCODE_WAIT_ROTATE_ALL) {
-            script_waitrotateunit_and_waitrotateall_event_instruction(-1);
+            script_waitrotate_event_instruction(-1);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM_ROTATE) {
             script_unit_animation_rotate_event_instruction((const event_unit_anim_rotate_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_COLOR_UNIT) {

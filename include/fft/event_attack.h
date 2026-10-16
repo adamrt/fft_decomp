@@ -283,6 +283,6 @@ typedef enum attack_prompt_thread_slot {
 } attack_prompt_thread_slot_e;
 
 /* sound */
-void attack_sound_resync_scenario_music_and_apply_map_darkness(void);
+void attack_scenario_restore_music_and_darkness(void);
 
 #endif

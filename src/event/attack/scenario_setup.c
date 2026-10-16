@@ -229,7 +229,7 @@ s32 attack_load_scenario_conditionals(void) {
  * pending pair only that slot is reopened; otherwise both tracks restart.
  * `playing` is s32 rather than u16 because a u16 merge of the two lhu results
  * adds an andi 0xffff that the target does not have. */
-void attack_sound_resync_scenario_music_and_apply_map_darkness(void) {
+void attack_scenario_restore_music_and_darkness(void) {
     CVECTOR darkness = g_attack_map_darkness_color;
     s32 scenario;
     s32 playing;

@@ -571,9 +571,9 @@ restart_script:
         } else if (opcode == EVENT_OPCODE_FACE_TILE) {
             script_face_tile((const event_face_tile_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
-            script_waitrotateunit_and_waitrotateall_event_instruction(first_operand);
+            script_waitrotate_event_instruction(first_operand);
         } else if (opcode == EVENT_OPCODE_WAIT_ROTATE_ALL) {
-            script_waitrotateunit_and_waitrotateall_event_instruction(-1);
+            script_waitrotate_event_instruction(-1);
         }
         /* ---- Blocks, earthquakes, darkness, and screen color ---- */
         else if (opcode == EVENT_OPCODE_BLOCK_START) {

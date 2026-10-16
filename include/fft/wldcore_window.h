@@ -96,8 +96,8 @@ void wldcore_window_reload_data_set_and_resume_thread14(wldcore_menu_stack_recor
 void wldcore_window_clear_pair_state(wldcore_menu_stack_record_t* level);
 void wldcore_window_clear_slot_state(wldcore_menu_stack_record_t* level);
 void wldcore_window_restore_location_list_palette(wldcore_menu_stack_record_t* level);
-void wldcore_window_clear_layout_states_and_queue_msg_b806(wldcore_menu_stack_record_t* level);
-void wldcore_window_clear_layout_states_and_queue_msg_b8dd(wldcore_menu_stack_record_t* level);
+void wldcore_bar_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level);
+void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level);
 void wldcore_window_finalize_record_and_stop_task(wldcore_menu_stack_record_t* level);
 void wldcore_window_build_render_record_image(s32 index, RECT bounds, s32 coordinate_mode, u32* image);
 void wldcore_window_draw_centered_text(s32 window_index, s32 text_id);

@@ -42,7 +42,7 @@ extern s16 g_require_party_removal_result;
 void require_gfx_prepare_party_portrait_textures(void);
 void require_party_report_brave_faith_changes(void);
 void require_party_remove_low_brave_high_faith_units(void);
-s32 require_party_save_battle_units_and_find_join_candidates(void);
+s32 require_party_update_after_battle(void);
 s32 require_party_sell_equipment_over_limit(s32 unit_id);
 s32 require_party_store_equipment_or_sell_overflow(s32 unit_id);
 void require_party_update_bio_variable_for_unit_class(s32 unit_class, s32 value);

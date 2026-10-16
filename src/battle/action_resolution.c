@@ -23,26 +23,25 @@ static void battle_action_apply_jp_change(unit_stats_t* unit);
 static void battle_action_check_arrow_guard_usability(void);
 static void battle_action_check_blade_grasp_usability(void);
 static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 mask);
-static void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(s16 reaction_id);
+static void battle_action_check_critical_hp_reaction_usability(s16 reaction_id);
 static void battle_action_check_damage_split_usability(void);
 static void battle_action_check_distribute_usability(void);
-static void battle_action_check_face_up_and_absorb_used_mp_usability(s16 reaction_id);
-static void battle_action_check_mp_switch_distribute_and_damage_split_usability(void);
+static void battle_action_check_mp_cost_reaction_usability(s16 reaction_id);
+static void battle_action_check_damage_sharing_reaction_usability(void);
 static void battle_action_check_mp_switch_usability(void);
-static void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-    s16 reaction_id);
+static void battle_action_check_hp_damage_reaction_usability(s16 reaction_id);
 static s32 battle_action_check_reaction(const unit_stats_t* unit);
-static void battle_action_check_reflect_blade_grasp_and_arrow_guard(void);
+static void battle_action_check_evasion_reactions(void);
 static void battle_action_check_reflect_reaction(void);
 static void battle_action_check_stat_save_and_restore_reaction_usability(void);
 static void battle_action_clear_status_changes(action_data_t* action);
 static void battle_action_dispatch_target_reaction_ability(void);
 static s32 battle_action_remove_broken_or_stolen_equipment(void);
 static void battle_action_set_target_variables(unit_stats_t* unit);
-static s32 battle_status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit);
+static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit);
 static void battle_status_remove(void);
 static void battle_status_remove_control(unit_stats_t* unit);
-static void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx);
+static void battle_status_apply_action_removals(s32 unit_idx);
 static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only);
 static s32 battle_unit_apply_level_up_down_ability(void);
 static s32 battle_unit_apply_stat_increment_decrement(s32 mod, u8* stat, u8 max, u8 min);
@@ -489,7 +488,7 @@ s32 battle_action_run_pre_formula_setup(const action_command_t* source, u8 targe
         &g_action_current_ability_view.status_infliction, sizeof(status_infliction_data_t));
     battle_status_remove();
     g_action_current_ability.formula = formula;
-    battle_action_check_reflect_blade_grasp_and_arrow_guard();
+    battle_action_check_evasion_reactions();
     if (g_action_target_data->hit == 0) {
         return 1;
     }
@@ -709,7 +708,7 @@ s32 battle_action_finalize_attack_and_flag_reactions(s32 unit_id) {
         g_battle_team_golem[(g_action_target->team_flags & BATTLE_TEAM_MASK) >> BATTLE_TEAM_SHIFT]
             = g_action_target->max_hp;
     }
-    battle_action_check_mp_switch_distribute_and_damage_split_usability();
+    battle_action_check_damage_sharing_reaction_usability();
     old_hp = g_action_target->hp;
     hp = old_hp - g_action_target_data->hp_damage + g_action_target_data->hp_healing;
     if (hp < 0) {
@@ -980,7 +979,7 @@ static s32 battle_action_check_reaction(const unit_stats_t* unit) {
 }
 
 /* Apply the target's reflect or weapon-evasion reactions before the attack resolves. */
-static void battle_action_check_reflect_blade_grasp_and_arrow_guard(void) {
+static void battle_action_check_evasion_reactions(void) {
     u8 reaction_flags;
 
     if (g_action_context != ACTION_CONTEXT_PRIMARY) {
@@ -1043,7 +1042,7 @@ static void battle_action_dispatch_target_reaction_ability(void) {
         battle_action_check_counter_reaction_usability(
             ABILITY_ID_REACTION_BRAVE_UP, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
     } else if (unit->ability_flags.reaction[1] & BATTLE_REACTION_SET_2_FAITH_UP) {
-        battle_action_check_face_up_and_absorb_used_mp_usability(ABILITY_ID_REACTION_FAITH_UP);
+        battle_action_check_mp_cost_reaction_usability(ABILITY_ID_REACTION_FAITH_UP);
     } else if (unit->ability_flags.reaction[1] & BATTLE_REACTION_SET_2_COUNTER_TACKLE) {
         battle_action_check_counter_reaction_usability(
             ABILITY_ID_REACTION_COUNTER_TACKLE, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
@@ -1051,7 +1050,7 @@ static void battle_action_dispatch_target_reaction_ability(void) {
         battle_action_check_counter_reaction_usability(
             ABILITY_ID_REACTION_COUNTER_FLOOD, ABILITY_SECONDARY_FLAG_4_COUNTER_FLOOD);
     } else if (unit->ability_flags.reaction[2] & BATTLE_REACTION_SET_3_ABSORB_USED_MP) {
-        battle_action_check_face_up_and_absorb_used_mp_usability(ABILITY_ID_REACTION_ABSORB_USED_MP);
+        battle_action_check_mp_cost_reaction_usability(ABILITY_ID_REACTION_ABSORB_USED_MP);
     } else if (unit->ability_flags.reaction[2] & BATTLE_REACTION_SET_3_COUNTER) {
         battle_action_check_counter_reaction_usability(
             ABILITY_ID_REACTION_COUNTER, ABILITY_SECONDARY_FLAG_4_BLADE_GRASP_ELIGIBLE);
@@ -1062,7 +1061,7 @@ static void battle_action_dispatch_target_reaction_ability(void) {
 }
 
 /* Dispatch the target's first active MP Switch, Distribute, or Damage Split reaction. */
-static void battle_action_check_mp_switch_distribute_and_damage_split_usability(void) {
+static void battle_action_check_damage_sharing_reaction_usability(void) {
     unit_stats_t* unit;
     u8 flags;
 
@@ -1098,39 +1097,29 @@ static void battle_action_check_stat_save_and_restore_reaction_usability(void) {
     target = g_action_target;
     reaction_flags = target->ability_flags.reaction[0];
     if (reaction_flags & BATTLE_REACTION_SET_1_PA_SAVE) {
-        battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-            ABILITY_ID_REACTION_PA_SAVE);
+        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_PA_SAVE);
     } else if (reaction_flags & BATTLE_REACTION_SET_1_MA_SAVE) {
-        battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-            ABILITY_ID_REACTION_MA_SAVE);
+        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_MA_SAVE);
     } else if (reaction_flags & BATTLE_REACTION_SET_1_SPEED_SAVE) {
-        battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-            ABILITY_ID_REACTION_SPEED_SAVE);
+        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_SPEED_SAVE);
     } else if (reaction_flags & BATTLE_REACTION_SET_1_REGENERATOR) {
-        battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-            ABILITY_ID_REACTION_REGENERATOR);
+        battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_REGENERATOR);
     } else {
         reaction_flags = target->ability_flags.reaction[1];
         if (reaction_flags & BATTLE_REACTION_SET_2_HP_RESTORE) {
-            battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(
-                ABILITY_ID_REACTION_HP_RESTORE);
+            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_HP_RESTORE);
         } else if (reaction_flags & BATTLE_REACTION_SET_2_MP_RESTORE) {
-            battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(
-                ABILITY_ID_REACTION_MP_RESTORE);
+            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_MP_RESTORE);
         } else if (reaction_flags & BATTLE_REACTION_SET_2_CRITICAL_QUICK) {
-            battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(
-                ABILITY_ID_REACTION_CRITICAL_QUICK);
+            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_CRITICAL_QUICK);
         } else if (reaction_flags & BATTLE_REACTION_SET_2_MEATBONE_SLASH) {
-            battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(
-                ABILITY_ID_REACTION_MEATBONE_SLASH);
+            battle_action_check_critical_hp_reaction_usability(ABILITY_ID_REACTION_MEATBONE_SLASH);
         } else {
             reaction_flags = target->ability_flags.reaction[2];
             if (reaction_flags & BATTLE_REACTION_SET_3_GILGAME_HEART) {
-                battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-                    ABILITY_ID_REACTION_GILGAME_HEART);
+                battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_GILGAME_HEART);
             } else if (reaction_flags & BATTLE_REACTION_SET_3_AUTO_POTION) {
-                battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-                    ABILITY_ID_REACTION_AUTO_POTION);
+                battle_action_check_hp_damage_reaction_usability(ABILITY_ID_REACTION_AUTO_POTION);
             }
         }
     }
@@ -1155,8 +1144,7 @@ static void battle_action_check_counter_reaction_usability(u16 reaction_id, u32 
 
 /* Record reaction_id when the action deals HP damage and the target passes its
  * reaction roll; the HP damage is the reaction's amount. */
-static void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_potion_gilgame_heart_usability(
-    s16 reaction_id) {
+static void battle_action_check_hp_damage_reaction_usability(s16 reaction_id) {
     action_data_t* action;
 
     if ((g_action_target_data->attack_type & ACTION_TYPE_HP_DAMAGE)
@@ -1169,7 +1157,7 @@ static void battle_action_check_pa_save_ma_save_speed_save_regenerator_auto_poti
 
 /* Record reaction_id for a target that is in Critical, is taking HP damage and
  * passes its reaction roll. */
-static void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_slash_usability(s16 reaction_id) {
+static void battle_action_check_critical_hp_reaction_usability(s16 reaction_id) {
     unit_stats_t* unit;
 
     unit = g_action_target;
@@ -1182,7 +1170,7 @@ static void battle_action_check_critical_quick_hp_restore_mp_restore_meatbone_sl
 
 /* Record reaction_id when the ability cost MP and the target passes its reaction
  * roll; the MP cost is the reaction's amount. */
-static void battle_action_check_face_up_and_absorb_used_mp_usability(s16 reaction_id) {
+static void battle_action_check_mp_cost_reaction_usability(s16 reaction_id) {
     u8* used_mp = &g_action_current_ability.mp_cost;
     action_data_t* action;
     if (*used_mp != 0) {
@@ -1502,7 +1490,7 @@ s32 battle_action_store_target_stats_pointer_data(s32 unit_id) {
 
 s32 battle_status_apply_poison_and_regen(unit_stats_t* unit) {
     u8 status;
-    if (battle_status_check_crystal_dead_jump_petrify_treasure(unit) != 0) {
+    if (battle_status_is_unit_out_of_action(unit) != 0) {
         return 0;
     }
     battle_action_set_target_variables(unit);
@@ -1528,7 +1516,7 @@ s32 battle_status_apply_poison_and_regen(unit_stats_t* unit) {
 s32 battle_status_remove_transparent(unit_stats_t* unit) {
     unit_stats_t* target;
 
-    if (battle_status_check_crystal_dead_jump_petrify_treasure(unit) != 0) {
+    if (battle_status_is_unit_out_of_action(unit) != 0) {
         return 0;
     }
     battle_action_set_target_variables(unit);
@@ -1591,7 +1579,7 @@ static void battle_action_set_target_variables(unit_stats_t* unit) {
 
 /* 1 for an empty slot or a unit that is a crystal, dead, in the air from Jump,
  * petrified or a treasure; otherwise 0. */
-static s32 battle_status_check_crystal_dead_jump_petrify_treasure(const unit_stats_t* unit) {
+static s32 battle_status_is_unit_out_of_action(const unit_stats_t* unit) {
     s32 result;
     if (unit->entd_slot == BATTLE_ENTD_SLOT_NONE)
         return 1;
@@ -1616,7 +1604,7 @@ s32 battle_status_prepare_terrain_poison(unit_stats_t* unit) {
     action_data_t* action;
 
     mount_info = unit->mount_info;
-    if (battle_status_check_crystal_dead_jump_petrify_treasure(unit))
+    if (battle_status_is_unit_out_of_action(unit))
         return 0;
     if (mount_info & BATTLE_MOUNT_INFO_FLAG_MOUNT)
         return 0;
@@ -1799,7 +1787,7 @@ s32 battle_status_resolve_unit_changes(s32 unit_id, s32 removal_only) {
     g_action_target = &g_battle_unit_stats[unit_id];
     g_action_target_data = &g_battle_unit_stats[unit_id].action;
     battle_status_modify_inflictions(removal_only);
-    battle_status_set_inflicted_ct_and_transfer_last_used_ct(unit_id);
+    battle_status_apply_action_removals(unit_id);
     battle_status_store_for_current_attack(unit_id, removal_only);
     if (g_action_target->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD)) {
         g_action_target->hp = 0;
@@ -1836,7 +1824,7 @@ static void battle_status_remove_control(unit_stats_t* unit) {
 /* Apply the removals of the unit's action result: each removed status leaves
  * inflicted_status, has its CT cleared and, when executing, its graphics flag
  * switched off; then the current set is rebuilt as innate | inflicted. */
-static void battle_status_set_inflicted_ct_and_transfer_last_used_ct(s32 unit_idx) {
+static void battle_status_apply_action_removals(s32 unit_idx) {
     unit_stats_t* unit;
     s32 i;
     s32 mask;
@@ -1899,7 +1887,7 @@ static void battle_status_store_for_current_attack(s32 unit_id, s32 removal_only
             g_action_target_data->status_changes.removal[j] = g_main_status_effect_data[i].cancels[j];
         }
         battle_status_modify_inflictions(removal_only);
-        battle_status_set_inflicted_ct_and_transfer_last_used_ct(unit_id);
+        battle_status_apply_action_removals(unit_id);
         previous = g_action_target->inflicted_status[byte];
         g_action_target->inflicted_status[byte] = previous | mask;
         if (main_status_set_ct(g_action_target, i, 0) != 0) {

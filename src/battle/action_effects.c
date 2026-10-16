@@ -122,7 +122,7 @@ void battle_action_show_next_at_list_entry(void) {
     battle_unit_t* unit;
 
     for (;;) {
-        id = battle_action_calculate_at_list_and_get_specific_unit_id(g_action_at_list_id);
+        id = battle_action_get_at_list_entry_unit_id(g_action_at_list_id);
         if (id >= 0) {
             unit = battle_unit_get_by_battle_id(id & 0xFF);
             if ((id & 0x100) != 0) {
@@ -230,7 +230,7 @@ static void battle_effect_build_secondary_init_from_action(battle_unit_t* unit, 
 /* Starts the weapon-hit secondary effect of the unit's action, in the element
  * of the used weapon; is_bow is 1 for the bow hardcoding path and 0
  * otherwise, and unused. */
-void battle_effect_set_evade_type_data_and_weapon_element(battle_unit_t* unit, s32 is_bow) {
+void battle_effect_start_weapon_hit_secondary(battle_unit_t* unit, s32 is_bow) {
     effect_secondary_init_t secondary_init;
     battle_effect_build_secondary_init_from_action(unit, &secondary_init);
     battle_effect_init_weapon_hit_secondary(
@@ -343,7 +343,7 @@ static void battle_unit_set_bow_hardcoding(battle_unit_t* attacker, battle_unit_
         battle_sound_play_weapon_sfx(attacker, 1);
         battle_unit_set_target_animation_from_attack_type(attacker, target);
         battle_gfx_prepare_post_action_display_by_runtime_id(target->runtime_id);
-        battle_effect_set_evade_type_data_and_weapon_element(attacker, 1);
+        battle_effect_start_weapon_hit_secondary(attacker, 1);
     }
 }
 

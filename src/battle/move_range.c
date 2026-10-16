@@ -35,7 +35,7 @@ static void battle_move_set_reachable_tile_flags(void);
 static void battle_move_set_tile_flags_for_pathfinding(s32 mode);
 static void battle_move_spread_horizontal_jump(void);
 static void battle_move_spread_to_neighbors(void);
-static void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void);
+static void battle_move_load_tile_height_for_spread(void);
 static void battle_target_apply_unit_team_eligibility(
     s32 raw_unit_id, u8 allow_allies, u8 allow_enemies, u8 aoe_is_0xff);
 static void battle_target_apply_vertical_fixed(s32 x, s32 y);
@@ -45,7 +45,7 @@ static void battle_target_calculate_linear_attack_tiles(s32 dir, s32 x, s32 y);
 static void battle_target_calculate_strike_lunge_range(const unit_stats_t* unit, u8 flags);
 static void battle_target_clear_range_on_untargetable_tiles(void);
 static s32 battle_target_clear_selection_state_of_all_panels(void);
-static s32 battle_target_disable_green_panel_on_all_but_target_tile(const action_command_t* action);
+static s32 battle_target_keep_only_target_tile(const action_command_t* action);
 static s32 battle_target_run_calculator(const action_command_t* source);
 static s32 battle_target_set_all_panels_targeted_if_targetable(void);
 static s32 battle_target_set_green_panels_for_action(const action_command_t* action);
@@ -677,12 +677,12 @@ static void battle_move_init_spread_scratch(void) {
     spread->budget_matches = 0;
     spread->candidate_saved = 0;
     spread->best_extra_span = 0x7F;
-    battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad();
+    battle_move_load_tile_height_for_spread();
 }
 
 /* Load the current tile's base height (doubled, in half-height units), half
  * height and slope into the spread state. */
-static void battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad(void) {
+static void battle_move_load_tile_height_for_spread(void) {
     move_spread_state_t* state = g_move_scratch_pad_ptr;
     state->source_base_height_times_two = state->current_tile->height << 1;
     state->source_half_height = state->current_tile->depth_half_height.half_height;
@@ -890,7 +890,7 @@ static void battle_move_check_and_spread_one_tile_around(void) {
     s32 j;
 
     state = g_move_scratch_pad_ptr;
-    battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad();
+    battle_move_load_tile_height_for_spread();
     for (i = 0; i < state->outer_count; i++) {
         state->source_unit_record_flag = i >= 4;
         g_move_spread_preset_table[i % 4]();
@@ -1117,7 +1117,7 @@ static void battle_move_spread_horizontal_jump(void) {
     s32 inner_index;
     s32 pass_index;
 
-    battle_move_transfer_tiles_height_halves_and_slope_to_scratch_pad();
+    battle_move_load_tile_height_for_spread();
     for (outer_index = 0; outer_index < state->outer_count; outer_index++) {
         state->source_unit_record_flag = outer_index >= 4;
         g_move_spread_preset_table[outer_index % 4]();
@@ -2772,7 +2772,7 @@ static s32 battle_target_set_jump_ability_panels(const action_command_t* source)
  * Range bits 0-6 seed the unit's panel on both map levels and bit 7 excludes
  * the unit's own tile afterwards. Panels flagged in flags bits 0-1 are never
  * marked. Returns the number of marked panels. */
-static s32 battle_target_calculate_ability_range_with_map_parameters(const unit_stats_t* unit, u8 range) {
+static s32 battle_target_spread_ability_range(const unit_stats_t* unit, u8 range) {
     /* A byte collision test retains the original single-mask branch. */
     target_panel_t* panel;
     target_panel_t* upper;
@@ -3159,7 +3159,7 @@ s32 battle_target_set_panels_for_action(const action_command_t* source) {
         result = battle_target_set_ability_panels(&action);
     }
     if (mode == 2) {
-        result = battle_target_calculate_ability_range_with_map_parameters(unit, range & 0xff);
+        result = battle_target_spread_ability_range(unit, range & 0xff);
         flags = ABILITY_SECONDARY_FLAG_2_NO_FOLLOW_TARGET;
     }
     if (result != 0) {
@@ -3231,7 +3231,7 @@ s32 battle_target_calculate_for_menu_types(const action_command_t* source) {
         result = battle_target_set_green_panels_for_action(&action);
     }
     if (mode == 2) {
-        result = battle_target_disable_green_panel_on_all_but_target_tile(&action);
+        result = battle_target_keep_only_target_tile(&action);
     }
     if (result == 0) {
         return 1;
@@ -3672,7 +3672,7 @@ static s32 battle_target_run_calculator(const action_command_t* source) {
 
 /* Leave only the action's target tile marked as targeted. Returns 1, or -1
  * when that tile is off the map or blocked. */
-static s32 battle_target_disable_green_panel_on_all_but_target_tile(const action_command_t* action) {
+static s32 battle_target_keep_only_target_tile(const action_command_t* action) {
     action_command_t action_copy;
     u8 x;
     u8 y;

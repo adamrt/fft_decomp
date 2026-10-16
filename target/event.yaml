@@ -56,7 +56,7 @@ functions:
   - {addr: 0x801c33c4, size: 72, name: sound_wait_for_music_stub, hash: 5cf0df43ec1c1bac, unit: music_stubs}
   - {addr: 0x801c340c, size: 168, name: sound_play_music_tracks, hash: 27dd3fb89e7b80d9, unit: music_stubs}
   - {addr: 0x801c34b4, size: 1612, name: attack_load_scenario_conditionals, hash: bba39fd5570c99b6, unit: scenario_setup}
-  - {addr: 0x801c3b00, size: 424, name: attack_sound_resync_scenario_music_and_apply_map_darkness, hash: 7e9cd3acb0241ad1, unit: scenario_setup}
+  - {addr: 0x801c3b00, size: 424, name: attack_scenario_restore_music_and_darkness, hash: 7e9cd3acb0241ad1, unit: scenario_setup}
   - {addr: 0x801c3ca8, size: 148, name: attack_deploy_mark_other_squad_units_undeployable, hash: 5cd7505bb7bab58e, unit: scenario_setup}
   - {addr: 0x801c3d3c, size: 80, name: attack_deploy_is_roster_unit_deployed, hash: 5d2d6845961ff568}
   - {addr: 0x801c3d8c, size: 40, name: thread_wait_forever, hash: 1784b8534b53f3ba, source: src/event/menu/thread_wait_forever.c}
@@ -2355,7 +2355,7 @@ functions:
   - {addr: 0x801c43b0, size: 48, name: require_panel_set_transition_value, hash: b73b92f350fd6a02, unit: post_battle_party}
   - {addr: 0x801c43e0, size: 8, name: require_party_report_brave_departure_stub, hash: 6d64edf91449c1b1, unit: post_battle_party}
   - {addr: 0x801c43e8, size: 856, name: require_party_find_low_brave_high_faith_departures, hash: e98e52c97809419a, unit: post_battle_party}
-  - {addr: 0x801c4740, size: 884, name: require_party_save_battle_units_and_find_join_candidates, hash: c7209d6d040d40db, unit: post_battle_party}
+  - {addr: 0x801c4740, size: 884, name: require_party_update_after_battle, hash: c7209d6d040d40db, unit: post_battle_party}
   - {addr: 0x801c4ab4, size: 452, name: require_party_report_brave_faith_changes, hash: f2f5bd68c21ed1ef, unit: post_battle_party}
   - {addr: 0x801c4c78, size: 588, name: require_party_remove_low_brave_high_faith_units, hash: 8de725f6f99c0f9f, unit: post_battle_party}
   - {addr: 0x801c4ec4, size: 124, name: require_condition_show_ready_bugged, hash: a81f2c639ae71f98, unit: post_battle_party}

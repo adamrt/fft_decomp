@@ -299,7 +299,7 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
  * knockback strike or an ability without an effect file, the attack animation
  * starts directly. Otherwise the game enters the effect-file-open state with the
  * targets and their result animations stored for the effect. */
-void battle_action_set_damage_display_type_based_on_ability(void) {
+void battle_action_start_next_strike_display(void) {
     battle_unit_t* unit;
     u16 raw;
     s32 ability;

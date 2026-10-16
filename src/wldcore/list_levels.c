@@ -1404,7 +1404,7 @@ static void wldcore_list_build_tutorial_category_panel_image(wldcore_text_list_p
 }
 
 /* Restore the tutorial list's palettes and cursor animation, then show its welcome text. */
-void wldcore_window_clear_layout_states_and_queue_msg_b8dd(wldcore_menu_stack_record_t* level) {
+void wldcore_tutorial_restore_list_and_show_welcome(wldcore_menu_stack_record_t* level) {
     s32 main_window;
     s32 side_window;
     s32 slot;
