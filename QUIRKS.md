@@ -78,8 +78,15 @@ and mark code that a cleanup must not "fix". Details live in the named file.
 - `world_menu_open_entry_window` receives requested x/y origins but always
   opens at its fixed default origin.
 - `battle_gfx_build_next_action_result_display`: the CT-zero
-  display case reads `y_shift` without setting it; only the level-up/-down
-  cases assign it, so the sprite row depends on the leftover value.
+  display case reads `y_shift` without setting it; only the HP/MP and
+  stat-change cases assign it, so the sprite row depends on the leftover value.
+- `battle_gfx_step_queued_unit_graphics_load` replaces sheet ids from 0xa0
+  with Ramza's chapter 1 sheet, but the table has 159 sheets (0 to 0x9e), so
+  id 0x9f reads one entry past it. `battle_gfx_queue_unit_graphics_load` tests
+  against the count correctly.
+- `battle_effect_spell_charge_secondary_handler` saves the inertia threshold
+  and sets the secondary-effect value but never restores it, unlike the other
+  secondary handlers.
 - `main_unit_calculate_random_equipment`: throwing and bomb item
   types index past the four equipment-category bytes into the first innate
   status byte; that adjacent byte controls their eligibility.
