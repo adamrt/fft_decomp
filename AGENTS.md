@@ -116,6 +116,7 @@ call binding, without runtime wrappers or invented alias machinery.
 make fmt                         # always before checking and committing C/headers
 make check [MODULE=x]             # compile and compare original function hashes
 make check-config                # sources, declarations and target metadata
+make decl-check                  # calls to undeclared functions, per program view
 make fmt-check                   # formatting drift
 make test                        # Go tooling tests
 make build                       # rebuild the byte-identical disc
@@ -129,7 +130,7 @@ make units ARGS="--evidence=required|strong"  # unit map from binary evidence on
 `MODULE` accepts module IDs, overlay aliases, lists, `event` or `effect`.
 `make check` needs no disc; `make build` and `make diff` use `scus-94221.bin`.
 Run `make fmt` after C/header edits, then matching checks. Before handing off,
-run full `check`, `check-config`, `fmt-check`, `test` and `build`. Formatting,
+run full `check`, `check-config`, `decl-check`, `fmt-check`, `test` and `build`. Formatting,
 parameter widths, signedness and qualifiers can affect the original bytes.
 
 ## Agents

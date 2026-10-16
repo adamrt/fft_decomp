@@ -97,6 +97,10 @@ permute: image ## Run decomp-permuter on FUNC=name (DURATION=300 JOBS=4)
 checksums: extract ## Record function hashes in target/ from the original bytes
 	@$(TOOLS) checksums
 
+.PHONY: decl-check
+decl-check: image ## Report calls to undeclared functions in every program view
+	@$(TOOLS) decl-check
+
 .PHONY: check-config
 check-config: image ## Validate project metadata (target/, sources, declarations)
 	@$(TOOLS) check-config
