@@ -83,8 +83,9 @@ void menu_init_scrollable_list_core_variant(const s16* entries, s32 selected_ind
 /* per-module bodies: each module links its own copy under the shared name. */
 void menu_update_and_draw_bouncing_cursor_variant(point16_t* pos, u16* state, s32 mode);
 void menu_run_game_options_variant(void);
+extern u32 g_help_text_table[];
 
-/* other */
+/* overlay */
 extern menu_entry_t g_menu_option_icon_thread_param;
 extern s32 g_menu_option_choice_widths[];
 extern s32 g_menu_option_choice_counts[];
@@ -101,11 +102,6 @@ void menu_run_option_choice(void);
 extern u32* g_dead_unit_controller_input;
 extern menu_entry_t g_dead_unit_menu[DEAD_UNIT_MENU_ENTRY_COUNT];
 extern menu_text_layout_t g_dead_unit_menu_entries;
-
-/* help menus */
-extern u32 g_help_text_table[];
-
-/* other */
 extern s16 g_dead_unit_menu_flags[];
 
 #endif

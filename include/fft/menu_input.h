@@ -88,6 +88,25 @@ void menu_set_text_origin(s32 x, s32 y);
 void menu_input_update_event_state_variant(u32* otag, u32 input, s32 count_frame);
 void menu_input_clear_state(void);
 void world_menu_input_update_dialog_state(void);
+extern u8 g_input_activation_timer;
+extern u32* g_input_controller;
+extern u32 g_input_current;
+extern u32 g_input_current_buttons;
+extern u32 g_input_event;
+extern u32 g_input_initial_repeat_counter;
+extern u8 g_input_lock_timer;
+extern u8 g_input_page_scroll_disabled;
+extern u16 g_input_page_scroll_hold_frames;
+extern u32 g_input_polled_buttons;
+extern u32 g_input_repeat_counter;
+extern s32 g_input_repeat_counters[16];
+extern u32 g_input_secondary_repeat_counter;
+extern s32 g_menu_blocked_buttons;
+extern u16 g_menu_button_clut;
+extern u8 g_menu_button_piece_starts[];
+extern s8 g_menu_button_press_timers[];
+extern u32 g_previous_input;
+extern u32 g_input_previous_buttons;
 
 /* cursor animation */
 extern s8 g_menu_cursor_forward_offset_keyframes[];
@@ -129,26 +148,5 @@ void menu_set_palette_mode(s32 mode);
 extern u16 g_menu_gfx_clut_id;
 extern u16 g_menu_gfx_texture_page;
 extern u8 g_menu_use_alternate_palette;
-
-/* other */
-extern u8 g_input_activation_timer;
-extern u32* g_input_controller;
-extern u32 g_input_current;
-extern u32 g_input_current_buttons;
-extern u32 g_input_event;
-extern u32 g_input_initial_repeat_counter;
-extern u8 g_input_lock_timer;
-extern u8 g_input_page_scroll_disabled;
-extern u16 g_input_page_scroll_hold_frames;
-extern u32 g_input_polled_buttons;
-extern u32 g_input_repeat_counter;
-extern s32 g_input_repeat_counters[16];
-extern u32 g_input_secondary_repeat_counter;
-extern s32 g_menu_blocked_buttons;
-extern u16 g_menu_button_clut;
-extern u8 g_menu_button_piece_starts[];
-extern s8 g_menu_button_press_timers[];
-extern u32 g_previous_input;
-extern u32 g_input_previous_buttons;
 
 #endif

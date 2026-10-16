@@ -25,6 +25,11 @@ extern u8* g_text_saved_section_pointers[TEXT_SECTION_COUNT];
 extern s32 g_text_section_backup_active;
 void text_restore_section_pointers(void);
 void text_save_section_pointers(void);
+/* shared with the per-program event interpreter and dialog thread */
+u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor);
+void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
+void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
+void text_print_fnt_value_and_next(s32 value);
 
 /* typewriter glyphs */
 extern u8* g_text_glyph_bitmap_data;
@@ -100,12 +105,5 @@ extern glyph_blit_t g_text_large_number_glyph_rect; /* glyph source rectangle in
 void menu_clear_render_buffer(void* buffer, u32 bytes);
 void text_render_glyph_to_4bpp_image(const u8* glyph_bitmap, u8* image, glyph_blit_t* origin, s32 palette_offset);
 void text_blit_glyph(const u8* source, u8* pixels, const glyph_blit_t* glyph, const glyph_blit_t* position);
-
-/* other */
-/* shared with the per-program event interpreter and dialog thread */
-u8* text_advance_cursor_with_separate_backreference_state(s32* remaining_bytes, u8* cursor, u8** return_cursor);
-void menu_display_text_variant(s32 text_id, u8* image, glyph_blit_t* origin, u8* text);
-void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer);
-void text_print_fnt_value_and_next(s32 value);
 
 #endif

@@ -208,7 +208,7 @@ extern menu_unit_status_record_t g_menu_selected_unit_stat_summary;
 s32 menu_get_preview_hp_bonus_display(s32 unused_row);
 s32 menu_get_preview_mp_bonus_display(s32 unused_row);
 
-/* other */
+/* panel */
 extern s32 g_character_status_redraw_request;
 extern menu_number_entry_t g_editor_numeric_descriptor_a[];
 extern menu_number_entry_t g_editor_numeric_descriptor_b[];

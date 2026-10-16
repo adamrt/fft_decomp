@@ -345,12 +345,8 @@ void world_menu_start_equipment_and_ability_panel_thread(s32 enabled);
 void world_menu_update_grid_cursor(s16 alternate);
 void world_menu_update_thread_7_idle_countdown(void);
 void world_menu_set_slot_4_cursor_index(s32 index);
-
-/* other */
 extern s16 g_world_debug_variable_list_request_state;
 extern s32 g_world_preview_stats_window_active;
-
-/* unnamed */
 /* shared with the per-program event interpreter and dialog thread */
 u8* world_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area);

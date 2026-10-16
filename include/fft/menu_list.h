@@ -77,19 +77,15 @@ extern s8 g_menu_list_redraw_pending;   /* read with lb (menu_cmd_draw_scrollabl
 extern s16 g_menu_list_selected_index;
 extern s16 g_menu_scroll_base_index;
 void menu_init_scrollable_list(const s16* entries, s32 selected_index, s32 scroll_base_index, u8* text_table);
+extern u16 g_menu_list_scroll_progress;
 
-/* other */
+/* list */
 extern u8 g_menu_at_list_text[];
 extern menu_text_layout_t g_menu_at_list_entry_table[1];
 extern menu_list_page_t g_at_list_pages[2];
 extern s16 g_menu_at_list_indices[];
 extern s16 g_menu_at_list_primary_values[];
 extern s16 g_menu_at_list_secondary_values[];
-
-/* scrollable lists */
-extern u16 g_menu_list_scroll_progress;
-
-/* other */
 extern s16 g_menu_at_list_flags[];
 void menu_preview_ability_turn_at_list(void);
 

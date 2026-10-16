@@ -466,6 +466,13 @@ s32 world_formation_update_and_draw_unit_grid(s16 background_y, s16 toggle_banne
 void world_formation_update_unit_selection(void);
 void world_formation_view_zoom_thread(void);
 void world_formation_sort_roster(s32 index);
+extern s8 g_world_dismiss_unit_prompt_running;
+extern menu_entry_t g_world_best_fit_confirm_menu;
+extern menu_entry_t g_world_order_unit_menu;
+extern u8 g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
+extern u8 g_world_order_unit_saved_browse_enabled;
+s32 world_unit_get_facing_sixteenth_by_runtime_id(s32 runtime_id);
+extern s16 g_world_formation_record_count; /* 0x801c8634 */
 
 /* unit */
 extern const world_unit_monster_breed_entry_t g_world_unit_monster_breed_table[WORLD_MONSTER_BREED_ENTRY_COUNT];
@@ -494,16 +501,5 @@ extern s16 g_world_remove_item_saved_secondary_input;
 extern u16 g_world_remove_item_saved_newly_pressed;
 extern u16 g_world_remove_item_cursor_anim;
 extern point16_t g_world_remove_item_cursor_point;
-
-/* other */
-extern s8 g_world_dismiss_unit_prompt_running;
-extern menu_entry_t g_world_best_fit_confirm_menu;
-extern menu_entry_t g_world_order_unit_menu;
-extern u8 g_world_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
-extern u8 g_world_order_unit_saved_browse_enabled;
-s32 world_unit_get_facing_sixteenth_by_runtime_id(s32 runtime_id);
-
-/* unnamed */
-extern s16 g_world_formation_record_count; /* 0x801c8634 */
 
 #endif

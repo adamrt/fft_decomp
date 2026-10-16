@@ -208,8 +208,6 @@ void world_shop_run_equip_candidate_step(void);
 void world_shop_update_unit_selection(void);
 void world_shop_run_screen(s32 shop_type);
 u32* world_shop_load_background_tim(s32 index);
-
-/* other */
 /* Second slot-category table of world_shop_build_fitting_room_best_fit_equipment. */
 extern u8 g_world_fitting_room_best_fit_slot_categories[MENU_EQUIPMENT_SLOT_COUNT];
 

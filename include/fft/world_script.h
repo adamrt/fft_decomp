@@ -90,6 +90,7 @@ extern world_event_command_args_t g_world_event_map_command_83_args;
 extern world_event_music_switch_t g_world_event_music_switch;
 s32 world_script_handle_tutorial_command(void);
 void world_script_start_tutorial(s32 index);
+extern s16 g_world_field_object_use_request;
 
 /* sound */
 extern s16 g_world_sound_current_music_track_index;
@@ -141,8 +142,5 @@ extern s32 g_world_input_secondary_repeat_latched;
 s32 world_input_filter_menu(void);
 s32 world_input_get_lockout_timer(void);
 s32 world_input_get_tutorial_buttons(void);
-
-/* other */
-extern s16 g_world_field_object_use_request;
 
 #endif
