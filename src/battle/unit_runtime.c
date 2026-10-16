@@ -2,6 +2,8 @@
  * conversions, graphics loading, EVTCHR VRAM slots and effect starts. */
 
 #include "fft/battle_effect.h"
+#include "fft/battle_effect_projectile.h"
+#include "fft/battle_effect_script.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
 #include "fft/battle_move.h"

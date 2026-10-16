@@ -4,7 +4,7 @@
 #include "fft/battle.h"
 #include "fft/battle_action.h"
 #include "fft/battle_ai.h"
-#include "fft/battle_effect.h"
+#include "fft/battle_effect_projectile.h"
 #include "fft/battle_map.h"
 #include "fft/battle_menu.h"
 #include "fft/battle_move.h"

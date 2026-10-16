@@ -6,6 +6,7 @@
 #include "fft/battle_ai.h"
 #include "fft/battle_camera.h"
 #include "fft/battle_effect.h"
+#include "fft/battle_effect_script.h"
 #include "fft/battle_event.h"
 #include "fft/battle_gfx.h"
 #include "fft/battle_map.h"
