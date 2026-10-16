@@ -926,7 +926,7 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   `card_io_poll_hardware_event_result`, and nothing calls the wait routine.
 - MAIN's Orbonne caption fades have no callers. `main_set_display_draw_new_game`
   is called only by `main_gfx_fade_in_orbonne_monastery`, so it is unreachable too.
-- `func_800184e0` stores a 16-bit sound-driver value that `suzuki_sound_init`
+- `suzuki_sound_set_unknown_80032a28` stores a 16-bit sound-driver value that `suzuki_sound_init`
   and `suzuki_sound_quit` clear and nothing reads; nothing calls the setter.
 - `battle_bin_entrypoint` (0x80010ba8), which `main_overlay_exec_battle_bin`
   reaches after loading BATTLE.BIN, is not BATTLE code: it is the 4 KB of zero
