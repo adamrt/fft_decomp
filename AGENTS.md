@@ -81,6 +81,9 @@ dependencies.
 
 ## Code style
 
+- Represent only what the original game did. Add no abstractions, helper
+  layers or scaffolding for code the game did not have; a macro, header or
+  helper exists only when it expresses something the original contained.
 - Prefer ordinary C, named fields, direct assignments and conventional loops.
   Remove redundant locals unless a named temporary reads better: a long call
   or index expression, a value used more than once, or a step that deserves
