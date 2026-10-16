@@ -1,14 +1,9 @@
 /* The thread drawing a window frame of nine thin border sprites until asked to stop. */
 
 #include "fft/gfx.h"
+#include "fft/main_gfx.h"
 #include "fft/memory.h"
 #include "fft/menu.h"
-/*
- * WORLD copy of the EVENT OPTION window frame thread (menu_thin_window_frame_thread,
- * byte-identical apart from addresses). Layout notes below are the OPTION
- * twin's; the WORLD helpers are the same routines.
- */
-#include "fft/main_gfx.h"
 #include "fft/menu_panel.h"
 #include "fft/menu_text.h"
 #include "fft/text.h"
@@ -17,10 +12,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* One libgpu texture window per DR_MODE packet. The static table already
-   holds each window's w/h (0x10x0x10, 8x0x10, 0x10x8 and two full 0x100x0x100
-   windows); this function only fills in the runtime x/y. Indexing the array
-   is also what reproduces the target's symbol-plus-byte-offset addressing. */
+/* menu_window_frame_thread with thin border pieces: the same nine-sprite frame, but its top and
+ * bottom edges are 8 pixels tall instead of 16, and the border image is built in a buffer
+ * allocated from the menu arena.
+ *
+ * One libgpu texture window per DR_MODE packet: the static table already holds each window's
+ * w/h; this function only fills in the runtime x/y. Indexing the array is also what reproduces
+ * the target's symbol-plus-byte-offset addressing. */
 void menu_thin_window_frame_thread(void) {
     RECT texture;
     /* Keeping both stride fields live retains their descriptor bases. */
@@ -32,9 +30,9 @@ void menu_thin_window_frame_thread(void) {
     s32 texture_u;
     s32 texture_v;
     /* The two border thicknesses feed both the primitive fields and the
-       argument registers throughout, even though the callee at 0x80138adc
-       takes only the primitive pointer:
-       menu_init_scaled_draw_area_packets reads none of them. */
+     * argument registers throughout, even though
+     * menu_init_scaled_draw_area_packets takes only the primitive pointer
+     * and reads none of them. */
     s32 border_wide;
     s32 border_thin;
     s32 span;
@@ -70,7 +68,7 @@ void menu_thin_window_frame_thread(void) {
 
     texture_u = (texture.x & 0x3f) * 4;
     /* The target loads the returned rectangle's y once as a byte (lbu) and
-       reuses it for every 16-bit and byte store below. */
+     * reuses it for every 16-bit and byte store below. */
     texture_v = texture.y & 0xFF;
     for (index = 0; index < 4; index++) {
         g_menu_thin_panel_texture_windows[index].x = (texture_u + index) * 0x10;
@@ -90,8 +88,8 @@ void menu_thin_window_frame_thread(void) {
     prim->sprites[0].x0 = menu->x + 8;
     prim->sprites[0].y0 = menu->y + 8;
     /* The subtractions go through an s32 temporary: assigning the difference
-       straight into the 16-bit field lets combine narrow it to HImode, where
-       the negative constant no longer fits an addiu and is loaded instead. */
+     * straight into the 16-bit field lets combine narrow it to HImode, where
+     * the negative constant no longer fits an addiu and is loaded instead. */
     span = menu->w - 0x18;
     prim->sprites[0].w = span;
     span = menu->h - 0x10;
@@ -154,9 +152,9 @@ void menu_thin_window_frame_thread(void) {
             &prim->draw_areas, (const RECT*)menu, frame, g_main_gfx_screen_polarity);
 
         /* The CLUT id the nine border sprites are drawn with this frame, which
-           the target keeps in this variable's register once the texture column
-           is dead. A separate local is allocated a different callee-saved
-           register and does not reproduce the target. */
+         * the target keeps in this variable's register once the texture column
+         * is dead. A separate local is allocated a different callee-saved
+         * register and does not reproduce the target. */
         texture_u = MENU_CLUT_DIMMED;
         if (thread_get_current_parameter_2() == 0 && g_menu_input_lock_mode == 0) {
             texture_u = MENU_CLUT_NORMAL;

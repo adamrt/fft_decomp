@@ -16,6 +16,8 @@
 
 static void menu_lerp_rect_to_poly_ft4(POLY_FT4* poly, const RECT* from, const RECT* to, s32 factor);
 
+/* Return the start of text entry text_id: its section field picks the section pointer and its
+ * entry field the entry within that section. */
 u8* text_find_entry(u32 text_id) {
     return (u8*)text_skip_to_entry(g_text_section_pointers[(text_id & TEXT_ID_SECTION_MASK) >> TEXT_ID_SECTION_SHIFT],
         text_id & TEXT_ID_ENTRY_MASK);
@@ -58,7 +60,9 @@ void gfx_flip_poly_ft4_uv_if_negative(POLY_FT4* primitive, s32 direction) {
     }
 }
 
-/* Grow the first window quad from the rectangle center using the cursor crop steps. */
+/* Zoom the current packet buffer's window quad open: for crop levels 0-11, stepping by the
+ * event speed with one frame each, menu_zoom_cursor_frame crops rect around its center and
+ * the quad's corners and UVs follow the crop, 2 pixels narrower. */
 void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RECT* unused_to) {
     SPRT sprite;
     void* source; /* never assigned; the target passes an uninitialized $s5 */
@@ -83,7 +87,10 @@ void menu_animate_window_quad_crop(menu_window_buffer_t* buffers, RECT* rect, RE
     }
 }
 
-/* Move both window quads through the easing table; table 4 also fades their color. */
+/* Tween the window quad from its current rectangle to `to` (and the portrait quad to `to2`
+ * when to2->x is nonzero) along easing table `table`, whose 12-bit fractions end at ONE.
+ * Each step lasts 3 - event speed frames. Table 4 also fades the window color with the
+ * easing, from 128 toward 0. */
 void menu_tween_window_quads(menu_window_buffer_t* buffers, RECT* to, RECT* to2, s32 table) {
     RECT from;
     RECT from2;

@@ -22,9 +22,17 @@ static void script_report_missing_unit_stub(s32 unused_unit_id) {
 
 /* Resolve an event-script unit identifier to its active runtime ID.
  *
- * Character identities, Ramza/allied-turn aliases, and the four event-unit
- * slots require separate lookup paths. Crystal/treasure records and missing
- * units return EVENT_RUNTIME_ID_NONE.
+ * - A character identity becomes that unit's ENTD unit id when it is one of the
+ *   deployed ids (EVENT_UNIT_ID_DEPLOYED_FIRST up).
+ * - EVENT_UNIT_SELECTOR_IMPORTANT_UNIT names the first ENTD unit with an importance flag.
+ * - EVENT_UNIT_SELECTOR_ACTIVE_TURN names the unit whose turn it is, or failing that
+ *   ENTD unit 1 or 2.
+ * - In the Ramza game-over event every id names the first unit with a Ramza identity.
+ * - The four event unit slots return the runtime id stored in them.
+ * - Any other id is looked up as an ENTD unit id.
+ *
+ * Missing units and units with Treasure status return EVENT_RUNTIME_ID_NONE, except
+ * that the game-over path returns -1 when no Ramza is on the field (retail).
  */
 s32 script_resolve_runtime_id(s32 unit_id) {
     s32 battle_id;
@@ -80,6 +88,8 @@ s32 script_resolve_runtime_id(s32 unit_id) {
                 if (battle_id >= 0)
                     break;
             }
+            /* Retail compares the lookup result rather than the loop counter with 3, so
+             * finding neither unit is not caught here. */
             if (battle_id == 3
                 || (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_JUMP)] & STATUS_BYTE_MASK(STATUS_ID_JUMP))) {
                 script_report_missing_unit_stub(original_unit_id);

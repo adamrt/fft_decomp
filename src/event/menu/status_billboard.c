@@ -202,7 +202,8 @@ static void menu_copy_unit_data_to_status_billboard(unit_stats_t* unit, menu_uni
 #endif
 
 #if defined(FFT_WORLD) || defined(FFT_BATTLE) || defined(FFT_EVENT_REQUIRE)
-/* Fill selected and comparison billboards, stats, equipment and ability names. */
+/* Fill the selected and comparison billboards and the status panel's stats, equipment and
+ * ability rows for the selected battle unit, as the DEBUGCHR body below describes in detail. */
 void menu_load_selected_unit(void) {
     unit_stats_t* unit = battle_unit_get_stats_from_battle_id(g_menu_comparison_unit_data.battle_id);
     menu_status_panel_slot_state_t* editor = &g_menu_selected_unit_fields.state;
@@ -227,7 +228,7 @@ void menu_load_selected_unit(void) {
     g_menu_selected_unit.job_id = unit->job_id;
     g_menu_selected_unit.brave = unit->brave;
     g_menu_selected_unit.faith = unit->faith;
-    /* The zodiac sign lives in the top nibble of the 16-bit value at 0x008. */
+    /* The zodiac sign is the top nibble of the 16-bit birthday value. */
     g_menu_selected_unit.zodiac = unit->birthday.zodiac;
 
     editor->move = unit->move;
@@ -397,7 +398,7 @@ void menu_load_selected_unit(void) {
     g_debugchr_panel_selected_unit_data.job_id = unit->job_id;
     g_debugchr_panel_selected_unit_data.brave = unit->brave;
     g_debugchr_panel_selected_unit_data.faith = unit->faith;
-    /* The zodiac sign lives in the top nibble of the 16-bit value at 0x008. */
+    /* The zodiac sign is the top nibble of the 16-bit birthday value. */
     /* Direct union-member access hoists the 16-bit load above the faith
      * store (1344 vs 1348 bytes); keep the typed field's aliased 16-bit view. */
     g_debugchr_panel_selected_unit_data.zodiac = unit->birthday.zodiac;
@@ -494,7 +495,7 @@ void menu_load_selected_unit(void) {
     }
 
     /* Two hands applies only when exactly one hand holds an item. */
-    item_id = 0;
+    item_id = ITEM_ID_NOTHING;
     editor->two_hands = 0;
     if (editor->equipment[0] != -1) {
         if (editor->equipment[1] == -1)
@@ -503,7 +504,7 @@ void menu_load_selected_unit(void) {
         item_id = editor->equipment[1];
     }
 
-    if (item_id != 0) {
+    if (item_id != ITEM_ID_NOTHING) {
         item = main_item_get_data_pointer(item_id);
         if (item->type_flags & ITEM_TYPE_FLAG_WEAPON) {
             item_flags = g_main_item_weapon_data[item_id].flags;

@@ -317,8 +317,9 @@ void script_map_darkness(void) {
     thread_exit_current();
 }
 
-/* Two independent frame counters apply the two shake pulses. The task loops
- * until another instruction tears it down. */
+/* Thread body of Earthquake: each of the two pulses adds its z delta to the camera shake
+ * offset every pulses[k].frames frames, on independent counters. The thread never ends on
+ * its own; another instruction tears it down. */
 void script_earthquake_start(void) {
     event_earthquake_parameters_t* parameters;
     s32 first_counter;
@@ -343,7 +344,9 @@ void script_earthquake_start(void) {
     }
 }
 
-/* Advance the event screen-color fade by two frames per step. */
+/* Thread body of ColorScreen: blend the screen color modulation from the start RGB to the
+ * end RGB over the duration in frames, restarting a 2-frame modulation fade every second
+ * frame, then settle on the end color. */
 void script_color_screen_thread(void) {
     struct {
         s32 start_and_end[6];
@@ -450,6 +453,8 @@ static void script_run_sprite_move(const event_sprite_move_parameters_t* arg, s3
         pos[0][i] <<= 8;
         pos[1][i] <<= 8;
     }
+    /* Curve 0 is linear, curves 1 and 3 are bowed by the weight, and curve 2 eases into the
+     * midpoint and out of it again. The final step after the loop lands on the destination. */
     for (i = 1; i < total; i++) {
         thread_yield();
         for (j = 0; j < 3; j++) {
@@ -715,7 +720,10 @@ static s16 camera_pick_nearest_unblocked_yaw(s32 runtime_id_a, s32 runtime_id_b)
     return g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] + sign * best;
 }
 
-/* Rewrite the following Camera operands, skipping an intervening FocusSpeed instruction. */
+/* RelativeCamera: write its seven camera components, offset by the current camera variables
+ * camera_values, into the Camera instruction that follows it (skipping one FocusSpeed in
+ * between). Positions convert from the variables' 1/1024 units; hold sentinels pass through
+ * unchanged. */
 void script_apply_relative_camera(event_camera_values_t* parameters, const s32* camera_values) {
     u8* source = parameters->position_le[0];
     const s32* deltas = camera_values;
@@ -746,8 +754,13 @@ void script_apply_relative_camera(event_camera_values_t* parameters, const s32* 
     }
 }
 
-/* Patch the next camera instruction to frame two units.
- * A missing unit disables that instruction. */
+/* Focus: patch the next Camera instruction in the script to frame two units.
+ *
+ * Its position becomes the units' midpoint scaled by 4 (the sum of both positions doubled),
+ * with y offset by 0x20, and further when the first unit is Altima's second form or the
+ * second unit Altima's first form. Unless keep_angle is set, its yaw becomes the nearest diagonal not
+ * blocked at either unit's tile. When either unit is missing, the Camera instruction is
+ * disabled and system error 7 is reported. */
 void script_focus(event_focus_parameters_t* parameters) {
     s32 coords[2][4];
     s32 unit_a;
@@ -852,7 +865,12 @@ void script_noop_11(void) {
     s32 unused[12];
 }
 
-/* Resolve a single selector in place; groups keep their ID and set the filter mode. */
+/* Prepare an event unit selector for script_filter_unit_id_by_mode. A single unit id is
+ * resolved in place to its runtime id with filter mode 0 (returning 0 when it does not
+ * resolve). Id 0 selects every unit (mode 1), and the group ids from EVENT_UNIT_GROUP_FIRST
+ * select modes 2-5: the blue team, the blue team without excluded statuses, the other
+ * teams, and the other teams without them. Callers then loop over all unit slots and stop
+ * after the first match in mode 0. */
 static s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
     u32 id = *unit_id;
 
@@ -871,7 +889,7 @@ static s32 script_prepare_unit_filter(u16* unit_id, s32* filter_mode) {
 /* Answer one of six unit queries about the runtime id in `in_id`, copying it to
  * `out_id` first.  `mode` selects the query:
  *
- *   0  the id is always accepted
+ *   0  always accepted, and out_id keeps the single unit already resolved
  *   1  the unit exists
  *   2  the unit is on the blue team
  *   3  blue team and free of the check-set 8 statuses
@@ -1375,7 +1393,9 @@ s32 unit_save_staged_status_data(s32 battle_id) {
  *
  * The status masks track additions and removals relative to the snapshot.
  * Each changed status is applied through the main-thread dispatcher before
- * the unit graphics are refreshed. State 2 prevents applying the snapshot twice.
+ * the unit graphics are refreshed. The RESTORED state prevents applying the
+ * snapshot twice, and nothing is restored when bit 15 of the scenario's finish
+ * operation is set. A pending inflict-status mode then applies its change for real.
  */
 static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
     unit_stats_t* unit;
@@ -1404,7 +1424,9 @@ static void unit_apply_staged_status_data(s32 battle_id, s32 runtime_id) {
         unit->hp = g_unit_status_staging_data->hp[battle_id];
         unit->team_flags = g_unit_status_staging_data->team_flags[battle_id];
         unit->death_counter = g_unit_status_staging_data->death_counter[battle_id];
-        /* WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
+        /* Restoring the snapshot undoes the event's changes: the status graphics the event
+         * added are switched off and the ones it removed back on.
+         * WORLD's copy targets this BATTLE address too (see QUIRKS.md). */
         g_thread_call_target = (void (*)(void))battle_status_queue_runtime_graphics_flag_change;
         for (i = 0; i < STATUS_COUNT; i++) {
             byte_index = i / 8;
@@ -1508,7 +1530,11 @@ void unit_update_staged_status_data(u16 unit_id, u16 restore) {
     }
 }
 
-/* Apply the event status mode and stage its matching exit action. */
+/* Thread body of InflictStatus: snapshot the unit's statuses (unit_update_staged_status_data),
+ * then poison it, crystallize it, or revive it at 1 HP with Critical when it is dead. The
+ * matching inflict-status mode makes the snapshot restore at the event's end apply the same
+ * change for real. REVIVE on a unit that is neither dead nor Critical only refreshes its
+ * mounted animation. Waits wait_frames frames before exiting. */
 void script_inflict_status_thread(void) {
     event_inflict_status_parameters_t* parameters;
     s32 unit_id;
@@ -1517,7 +1543,7 @@ void script_inflict_status_thread(void) {
     s32 battle_unit_index;
     s32 runtime_id;
     unit_stats_t* unit;
-    s32 state;
+    s32 health; /* 0 dead, 1 Critical, 2 otherwise */
 
     thread_set_current_task_id(THREAD_TASK_INFLICT_STATUS);
     parameters = (event_inflict_status_parameters_t*)thread_get_current_parameter_1();
@@ -1532,11 +1558,11 @@ void script_inflict_status_thread(void) {
     unit_update_staged_status_data(unit_id, 0);
     unit = battle_unit_get_stats_from_battle_id(battle_unit_index);
     if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_DEAD)] & STATUS_BYTE_MASK(STATUS_ID_DEAD)) {
-        state = 0;
+        health = 0;
     } else {
-        state = 2;
+        health = 2;
         if (unit->status_sets.current[STATUS_BYTE_INDEX(STATUS_ID_CRITICAL)] & STATUS_BYTE_MASK(STATUS_ID_CRITICAL)) {
-            state = 1;
+            health = 1;
         }
     }
     if (mode == EVENT_INFLICT_STATUS_POISON) {
@@ -1553,7 +1579,7 @@ void script_inflict_status_thread(void) {
         g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
         thread_call_on_main_stack(runtime_id);
     } else if (mode == EVENT_INFLICT_STATUS_REVIVE) {
-        if (state == 0) {
+        if (health == 0) {
             g_unit_status_staging_data->inflict_status_mode[battle_unit_index] = UNIT_INFLICT_STATUS_MODE_REVIVE;
             status_inflict_by_event_unit_id(unit_id, STATUS_LSB_INDEX(STATUS_ID_DEAD), 0, 1);
             unit->hp = 1;
@@ -1561,7 +1587,7 @@ void script_inflict_status_thread(void) {
             g_thread_call_target = (void (*)(void))battle_unit_update_graphics_by_runtime_id;
             thread_call_on_main_stack(runtime_id);
             g_sound_pending_sfx_id = MAIN_SFX_EVENT_REVIVE;
-        } else if (state == 2) {
+        } else if (health == 2) {
             g_thread_call_target = (void (*)(void))battle_unit_set_mounted_animation_by_runtime_id;
             thread_call_on_main_stack(runtime_id);
         }
@@ -1663,33 +1689,32 @@ void script_change_stats(const event_change_stats_parameters_t* parameters) {
 /*
  * UnitAnim event instruction.  Parameters: 0x00 unit id
  * (16-bit value), 0x02 animation id (16-bit value), 0x04 move-flag mode (0 unset,
- * 1 flip).  A unit id above 0xff selects a group, so the unit-state loop
- * runs over all 21 unit indices.
+ * 1 flip). Units are selected as script_prepare_unit_filter describes.
  */
 void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
-    u16 runtime_id = script_read_s16(parameters->unit_id_le);
-    s32 state;
+    u16 unit_id = script_read_s16(parameters->unit_id_le);
+    s32 filter_mode;
     s32 unit_index;
     s32 animation;
     s32 move_flag_mode;
 
-    if (script_prepare_unit_filter(&runtime_id, &state) == 0) {
+    if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
     for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
-        if (script_filter_unit_id_by_mode(&runtime_id, (u16*)&unit_index, &state) != 0) {
+        if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
             move_flag_mode = parameters->facing_update_mode;
             if (move_flag_mode == 0) {
-                battle_unit_clear_facing_update_suppression(runtime_id);
+                battle_unit_clear_facing_update_suppression(unit_id);
             } else if (move_flag_mode == 1) {
-                battle_unit_set_facing_update_suppression(runtime_id);
+                battle_unit_set_facing_update_suppression(unit_id);
             }
             animation = script_read_s16(parameters->animation_le);
-            unit_set_animation(runtime_id, animation);
+            unit_set_animation(unit_id, animation);
             if (animation >= BATTLE_UNIT_ANIMATION_BOW_HIGH && animation <= BATTLE_UNIT_ANIMATION_BOW_LOW) {
                 script_play_effect_and_wait();
             }
-            if (state == 0) {
+            if (filter_mode == 0) {
                 return;
             }
         }
@@ -1699,22 +1724,21 @@ void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
 /*
  * Event instruction: put the addressed unit(s) into their status idle
  * animation and wait.  Parameters: 0x00 unit id (16-bit value), 0x02 wait length
- * in frames.  A unit id above 0xff selects a group, so the unit-state loop
- * runs over all 21 unit indices.
+ * in frames. Units are selected as script_prepare_unit_filter describes.
  */
 void script_march_units(const event_march_parameters_t* parameters) {
-    u16 runtime_id = script_read_s16(parameters->unit_id_le);
-    s32 state;
+    u16 unit_id = script_read_s16(parameters->unit_id_le);
+    s32 filter_mode;
     s32 unit_index;
 
-    if (script_prepare_unit_filter(&runtime_id, &state) == 0) {
+    if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
     for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
-        if (script_filter_unit_id_by_mode(&runtime_id, (u16*)&unit_index, &state) != 0) {
-            battle_unit_set_status_animation_by_runtime_id(runtime_id);
+        if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
+            battle_unit_set_status_animation_by_runtime_id(unit_id);
             thread_wait_frames(parameters->wait_frames);
-            if (state == 0) {
+            if (filter_mode == 0) {
                 return;
             }
         }
@@ -1724,23 +1748,22 @@ void script_march_units(const event_march_parameters_t* parameters) {
 /*
  * Event instruction: set or clear movement-effect suppression on the addressed unit(s).
  * Parameters: 0x00 unit id (16-bit value), 0x02 nonzero to set, zero to clear.
- * A unit id above 0xff selects a group, so the unit-state loop runs over all
- * 21 unit indices.
+ * Units are selected as script_prepare_unit_filter describes.
  */
 void script_set_units_movement_effect_suppression(const event_movement_effect_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
-    s32 state;
+    s32 filter_mode;
     s32 unit_index;
 
-    if (script_prepare_unit_filter(&unit_id, &state) != 0) {
+    if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         for (unit_index = 0; unit_index < BATTLE_UNIT_SLOT_COUNT; unit_index++) {
-            if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &state) != 0) {
+            if (script_filter_unit_id_by_mode(&unit_id, (u16*)&unit_index, &filter_mode) != 0) {
                 if (parameters->suppressed != 0) {
                     battle_unit_set_movement_effect_suppression(unit_id);
                 } else {
                     battle_unit_clear_movement_effect_suppression(unit_id);
                 }
-                if (state == 0) {
+                if (filter_mode == 0) {
                     break;
                 }
             }
@@ -1758,16 +1781,16 @@ void script_set_units_movement_effect_suppression(const event_movement_effect_pa
 void script_opcode_color_unit(const event_color_unit_parameters_t* parameters) {
     const event_unit_color_t* color;
     u16 unit_id = script_read_s16(parameters->unit_id_le);
-    s32 out;
+    s32 filter_mode;
     s32 i;
 
-    if (script_prepare_unit_filter(&unit_id, &out) != 0) {
+    if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         color = &parameters->color;
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-            if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &out) != 0) {
+            if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &filter_mode) != 0) {
                 battle_gfx_apply_unit_palette_modulation_to_units(
                     color->mode, color->duration, unit_id, color->rgb.r, color->rgb.g, color->rgb.b);
-                if (out == 0) {
+                if (filter_mode == 0) {
                     return;
                 }
             }
@@ -1783,18 +1806,18 @@ void script_opcode_color_unit(const event_color_unit_parameters_t* parameters) {
  * zero-extended 32-bit value; signed argument normalization is not part of this ABI. */
 void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable) {
     u16 unit_id = event_unit_id;
-    s32 mode;
+    s32 filter_mode;
     s32 i;
 
-    if (script_prepare_unit_filter(&unit_id, &mode) != 0) {
+    if (script_prepare_unit_filter(&unit_id, &filter_mode) != 0) {
         for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-            if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &mode) != 0) {
+            if (script_filter_unit_id_by_mode(&unit_id, (u16*)&i, &filter_mode) != 0) {
                 if (enable == 0) {
                     battle_unit_clear_palette_update_suppression(unit_id);
                 } else {
                     battle_unit_set_palette_update_suppression(unit_id);
                 }
-                if (mode == 0) {
+                if (filter_mode == 0) {
                     return;
                 }
             }
@@ -1831,7 +1854,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
     SVECTOR screen;
     SVECTOR tile;
     u16 unit_id;
-    s32 state;
+    s32 filter_mode;
     s32 i;
     unit_animation_state_t* rotation_state;
     s32 order = 1;
@@ -1842,11 +1865,11 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
     tile.vx = parameters->x * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     tile.vz = parameters->y * MAP_TILE_SIZE + (MAP_TILE_SIZE / 2);
     unit_id = script_read_s16(parameters->unit_id_le);
-    if (script_prepare_unit_filter(&unit_id, &state) == 0) {
+    if (script_prepare_unit_filter(&unit_id, &filter_mode) == 0) {
         return;
     }
     for (i = 0; i < BATTLE_UNIT_SLOT_COUNT; i++) {
-        if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &state) != 0) {
+        if (script_filter_unit_id_by_mode(&unit_id, &g_script_unit_face_slot_order[i], &filter_mode) != 0) {
             unit_copy_world_coords(unit_id, &screen);
             dx = tile.vx - screen.vx;
             dy = tile.vz - screen.vz;
@@ -1858,7 +1881,7 @@ void script_face_tile(const event_face_tile_parameters_t* parameters) {
             rotation_state->step_counter = 0;
             rotation_state->rotating = 1;
             rotation_state->delay = (parameters->delay * order++) / 4;
-            if (state == 0) {
+            if (filter_mode == 0) {
                 return;
             }
         }

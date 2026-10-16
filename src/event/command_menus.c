@@ -165,6 +165,9 @@ void menu_check_action_restrictions(void) {
             message = 0x8002;
         }
     }
+    /* Messages 0x10xx always show; 0x80xx are navigation messages that the option turns off.
+     * The test compares the message's high byte with the option bits themselves, which works
+     * because GAME_OPTIONS_NAVIGATION_MESSAGES_OFF_BITS is also 0x8000. */
     if (message != 0) {
         mode = g_main_game_options.value & GAME_OPTIONS_NAVIGATION_MESSAGES_MASK;
         if (mode == GAME_OPTIONS_NAVIGATION_MESSAGES_OFF_BITS && (message & 0xff00) == mode) {
@@ -336,11 +339,11 @@ static s32 text_is_spell_quote_exception_skillset(s32 skillset_id) {
     return found;
 }
 
-/**
+/*
  * Resolve the pending action-menu command, option, and item selection.
  *
- * Remaps menu-specific values, publishes the resolved selection, and returns
- * the command, option, and item packed into a single value.
+ * Remaps menu-specific values through the current menu's command map, publishes the
+ * resolved selection, and returns command | option << 8 | item << 16.
  */
 s32 menu_resolve_selection(void) {
     s32 command = (u8)g_menu_pending_selection[0];
@@ -362,7 +365,7 @@ s32 menu_resolve_selection(void) {
                         /* Item selection updates only the low byte of the 16-bit command field. */
                         *(u8*)&g_menu_selected_action.item_or_equipment = g_menu_dead_unit_result;
                         option = MENU_SELECTION_NONE;
-                    } else if (menu == 0x19 || menu >= 0x64) {
+                    } else if (menu == BATTLE_MENU_ID_MESSAGE_YES_NO || menu >= 0x64) {
                         command = *(g_menu_command_maps[i].map + option + 1);
                         option = MENU_SELECTION_NONE;
                     } else {
@@ -500,14 +503,15 @@ void menu_store_auto_battle_main_target_id(s32 target_id, s32 battle_id) {
     stats->auto_battle_setting = g_menu_resolved_command;
 }
 
-/* Chooses whether an ability announcement shows a spell quote.
+/* Choose how an ability is announced: with the caster's spell quote, or with its name.
  *
- * Each scene binds its own quote history and menu dispatcher. Unknown
- * skillsets (not in the list and not the unit's flagged primary/secondary)
- * get quote command 5 unless the ability repeats the last quote
- * (g_text_spell_quote_last_ability_id), the unit is a Calculator or Mime, the ability is >= 0x170 or
- * lacks the spell-quote flag, status blocks it, options disable it, or
- * EVENT_SCRIPT_VAR_RANDOM_VALUE is 4 or more. Everything else uses command 7. */
+ * A spell quote (SPELL_QUOTE) needs a skillset outside the exception list and not one the
+ * unit's spell_quote_skillsets flags suppress, an ability other than the last one quoted
+ * (g_text_spell_quote_last_ability_id) that is no item and has the spell-quote flag, a unit
+ * that is not a Calculator or Mime and neither Transparent nor a Frog, ability names on, and a
+ * 4 in 16 roll of the event RNG. Otherwise ABILITY_ANNOUNCEMENT runs: enabled when the
+ * ability's type flags ask for its name (names on) or it is an Item or Throw, else with enabled
+ * cleared. */
 void text_select_ability_announcement(action_command_t* action, s32 unit_id, s32 enabled) {
     ability_data_t* ability;
     main_ability_secondary_pointer_t secondary;
@@ -599,7 +603,11 @@ s32 menu_get_dead_unit_selection(s32 battle_id) {
     return g_menu_dead_unit_context->treasure_item;
 }
 
-/* Dispatch an action-menu command to its scene system function or event. */
+/* Dispatch a battle menu system command (battle_menu_system_command_e) for unit_id. The scenario
+ * check may start an event (game over, a scenario condition's event, battle start, battle won);
+ * with option 2 it only records the event to run next (g_script_next_event_id). Each other
+ * command starts one system function thread, a message or menu, after setting its text values.
+ * Returns a MENU_SYSTEM_DISPATCH_* result and remembers the command and option. */
 static s32 menu_dispatch_system_function(
     s32 command, s32 option, s32 unit_id, s32 parameter, s32 enabled, action_command_t* action) {
     unit_stats_t* unit;
@@ -832,6 +840,8 @@ static s32 menu_dispatch_system_function(
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_TRAP_RESULT) {
         menu_start_system_function_thread(option + BATTLE_SYSTEM_FUNCTION_TRAP_RESULT_FIRST);
     } else if (command == BATTLE_MENU_SYSTEM_COMMAND_MOVE_FIND_ITEM) {
+        /* With 99 already held, the found item is sold for a quarter of its price instead. The
+         * discarded data pointer lookups are retail. */
         if (main_item_get_total_equipment_quantity(option, 1) == 0x63) {
             main_item_get_data_pointer(option);
             g_text_substitution_values[0] = option;
@@ -1022,7 +1032,7 @@ static event_scenario_condition_result_e script_check_scenario_condition(
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
     if (type == EVENT_SCENARIO_CONDITION_VARIABLE_AT_MOST && value >= script_get_variable(id))
         return EVENT_SCENARIO_CONDITION_RESULT_PASS;
-    if (type >= 4 && type <= 10) {
+    if (type >= EVENT_SCENARIO_CONDITION_UNIT_PRESENT && type <= EVENT_SCENARIO_CONDITION_UNIT_MP_AT_MOST) {
         unit = unit_get_stats_by_unit_id(id);
         if (unit != (unit_stats_t*)-1) {
             if (type == EVENT_SCENARIO_CONDITION_UNIT_PRESENT)
@@ -1255,7 +1265,7 @@ void script_filter_controller_input(u32* input) {
  * BATTLE's body: returns the scenario-finish result
  * (9, 0xA, 0xB or 0x13, 0 when no finish operation is pending) once every
  * script thread has stopped, otherwise 1 (or g_script_frame_result_override while it is set, or 0
- * while menu input is disabled with state 2). The three BATTLE-only 16-bit clears come
+ * in tutorial input mode). The three BATTLE-only 16-bit clears come
  * after the 32-bit clears in source; the scheduler still groups them with the
  * other 16-bit stores, and this order keeps the g_menu_companion_overlay_state load
  * below them as in the target.
@@ -1463,11 +1473,9 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
  *
  * Returns the scenario-finish result (9, 0xA, 0xB or 0x13, 0 when no finish
  * operation is pending) once every script thread has stopped, otherwise 1
- * (or g_script_frame_result_override while it is set, or 0 while menu input is disabled with state
- * 2). The companion-overlay entry points at 0x801BF3B8-0x801DF198 are overlay
- * addresses whose owner depends on what is loaded, so they keep func_ names.
- * The finish-operation getter is called through an s32-returning cast: the
- * target uses its return value without the u16 zero extension.
+ * (or g_script_frame_result_override while it is set, or 0 in tutorial input mode).
+ * Unlike BATTLE's, it also checks thread slot 16 for idleness, and before running the threads
+ * it passes the event input globals themselves to script_load_event_input_state.
  */
 s32 script_run_event_frame(u32* ot, u32 buttons) {
     RECT rect;
@@ -1495,12 +1503,12 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     menu_draw_active_window_frames();
 
     if (g_script_threads_idle != 0) {
-        for (i = 1; i < 17; i++) {
+        for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
             if (thread_is_running_asm(i) != 0) {
                 break;
             }
         }
-        if (i == 17) {
+        if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
             finish_op = script_get_current_scenario_finish_operation();
             if (finish_op != 0) {
                 if (script_get_variable(EVENT_SCRIPT_VAR_SUPPRESS_PROGRESS_EFFECTS) != 0) {
@@ -1651,12 +1659,12 @@ s32 script_run_event_frame(u32* ot, u32 buttons) {
     }
 
     /* Once every thread has stopped, the next frame reports the scenario finish. */
-    for (i = 1; i < 17; i++) {
+    for (i = 1; i < VARIANT_THREAD_TABLE_SLOT_COUNT; i++) {
         if (thread_is_running_asm(i) != 0) {
             break;
         }
     }
-    if (i == 17) {
+    if (i == VARIANT_THREAD_TABLE_SLOT_COUNT) {
         g_script_threads_idle = 1;
     }
     return 1;

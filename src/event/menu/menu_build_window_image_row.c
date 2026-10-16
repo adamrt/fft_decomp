@@ -3,8 +3,9 @@
 #include "fft/menu.h"
 #include "psx/types.h"
 
-/* Fill the borders and repeating interior from an eight-pattern row.
- * The caller fills the final two destination cells. */
+/* Build one row of a window image from eight 4-pixel tiles at tiles[index]: tiles 0-1 are the
+ * left border, tiles 6-7 the right border (in cells count - 4 and count - 3), and tiles 2-5
+ * repeat across the interior. The caller fills the final two destination cells. */
 void menu_build_window_image_row(const u16* tiles, u16* row, s32 count, s32 index) {
     u16* cell;
     u16 tile;

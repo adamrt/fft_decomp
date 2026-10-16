@@ -51,9 +51,8 @@ void menu_set_status_panel_primitive_colors(menu_status_panel_buffer_t* primitiv
     }
 }
 
-/* Select the menu primitives' normal or dimmed colors from the panel style
- * or the global event mode. The palette initializer receives
- * `primitives` unchanged in $a0. */
+/* Select the menu primitives' normal or dimmed colors: dimmed for panel style 1 or while menu
+ * input lock mode 1 is on. The palette initializer receives `primitives` unchanged in $a0. */
 void menu_select_status_primitive_color_palette(
     menu_palette_primitives_t* primitives, const menu_status_thread_t* thread) {
     if (thread->style == 1 || g_menu_input_lock_mode == 1) {
@@ -63,7 +62,9 @@ void menu_select_status_primitive_color_palette(
     }
 }
 
-/* Set each entry's sign flags and draw its value with the corresponding color. */
+/* Draw each entry's value as a signed change: a negative value with a minus sign over background
+ * color 8, a positive one with a plus sign over color 0xC, and zero as a lone minus sign. The
+ * entries' format sign flags are rewritten to match. */
 void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entries, glyph_blit_t* out, s32 count) {
     s32 i;
     s32 amount;
@@ -89,7 +90,8 @@ void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* en
     }
 }
 
-/* Render gauge values with sign colors, drawing a zero value as a placeholder. */
+/* Draw each entry's value as menu_text_render_signed_decimal_entries does, with background colors
+ * 7 and 0xB, leaving the entries unchanged and drawing a zero as the placeholder format. */
 void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* entries, glyph_blit_t* out, s32 count) {
     s32 i;
 

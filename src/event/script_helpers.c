@@ -27,6 +27,7 @@
 #include "psx/pad.h"
 #include "psx/types.h"
 
+/* Menu palette color of each of the numeric display frame's twelve lines. */
 static u8 g_menu_numeric_display_palette_indices[12] = { 1, 1, 15, 7, 3, 2, 7, 14, 13, 13, 13, 13 };
 
 /* Twelve world_menu_line_layout_t records, walked by byte offset. */
@@ -34,9 +35,6 @@ static s8 g_menu_numeric_display_frame_offsets[96]
     = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, 0, 1, 0, 1, -2, 1, 0, 0, 1, 0, 1, 1, 1, -2, 0, 0, 0, 1, 1, -1, 1, -1,
           0, 1, 0, 1, -1, 2, -1, -2, 1, 0, 1, 1, -1, 1, -1, 1, 1, 0, 1, 0, 1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
           1, 1, 1, 2, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, -1, 1, 0, 1, 1 };
-#ifdef FFT_WORLD
-#    include "fft/world_menu.h"
-#endif
 
 static void menu_clear_window_buffer_pair_by_thread(s32 thread_id);
 
@@ -78,7 +76,11 @@ void script_process_inflict_status_commands(void) {
     }
 }
 
-/* Request a runtime animation, selecting mount/status animations when battle rules require them. */
+/* Set a unit's animation. Once the battle has started and script variable
+ * EVENT_SCRIPT_VAR_SHOP_ITEM_AVAILABILITY is set, a unit that rides or carries
+ * another gets its status animation instead, and a unit standing in water of depth 2
+ * or more its mounted animation; both run on the main stack. Animations from
+ * BATTLE_SEQUENCE_EVTCHR_SLOT_0 up are always played as requested. */
 void unit_set_animation(s32 runtime_id, u32 animation) {
     s32 battle_id;
     unit_stats_t* stats;
@@ -233,13 +235,16 @@ void camera_wait_until_idle(void) {
     } while (battle_camera_is_active() != 0);
 }
 
-/* Reduce the yaw script variable to one turn, preserving the original whole-turn addition. */
+/* Reduce the yaw script variable to one turn [0, ONE). Adding ten whole turns first keeps
+ * yaws down to -10 turns positive before the mask. */
 void camera_normalize_yaw_angle(void) {
     g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW]
         = (g_script_variables[EVENT_SCRIPT_VAR_CAMERA_YAW] + 0xa000) & 0x0fff;
 }
 
-/* Step tilt toward its resting band, yielding each frame, then restore zoom to ONE. */
+/* Step the camera tilt by 0x10 per frame to the nearer of the two resting tilts, 0x12e
+ * (low) or 0x1c0 (high), split at 0x177; then point the map's tilt target at the same
+ * resting tilt, zoom the map in and restore the zoom variable to ONE. */
 void camera_init_tilt_and_zoom(void) {
     s32 current_tilt = g_script_variables[EVENT_SCRIPT_VAR_CAMERA_TILT];
     s32 target_tilt;
@@ -446,8 +451,13 @@ void menu_reset_window_buffer_slots(void) {
     }
 }
 
-/* Allocate a free window pair for the current thread.
- * The original loop initializes only the first record; stop the thread when no pair is free. */
+/* Claim the first free pair of the three window buffer pairs (one record per packet buffer)
+ * for the current thread and return its first record. The retail loop runs once, so only
+ * the first record's sprites, draw mode and quads are initialized here. When no pair is free
+ * the current thread stops.
+ *
+ * CLUT ids encode (y << 6) | (x >> 4): the ones below are palettes at x = 960, rows
+ * 498-505. */
 menu_window_buffer_t* menu_alloc_window_buffer_pair(void) {
     menu_window_buffer_t* buffer;
     s32 index;
@@ -661,6 +671,8 @@ void menu_draw_active_window_frames(void) {
         gfx_draw_or_append_gpu_primitive(&window->draw_mode);
         if (window->portrait_code != -1) {
 #ifdef FFT_BATTLE
+            /* Portrait slot n is 32 x 48 pixels at u = 32 n of the portrait page, with its
+             * CLUT at x = 0x1C0 + 16 (n % 4), y = 0xFE + n / 4. */
             u = window->portrait_code << 5;
             setUV4(&window->quads[1], u, 0xCE, u + 0x1F, 0xCE, u, 0xFE, u + 0x1F, 0xFE);
             window->quads[1].tpage = GetTPage(0, 0, 0x1C0, 0);
@@ -734,6 +746,7 @@ void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
             }
             x = column * 16;
             y = row * 16;
+            /* GPU codes 0x64-0x67 are the free-size sprite (SPRT). */
             if ((getcode(prim) & 0xFC) == 0x64) {
                 SPRT* sprite = prim;
 
@@ -747,6 +760,7 @@ void gfx_alloc_texture_rect(RECT* rect, void* prim, u32* image) {
 
                 quad->u0 = quad->u2 = x;
                 quad->v0 = quad->v1 = y;
+                /* Keep the right edge u inside the 256-pixel page. */
                 if (x + rect->w >= 0x100) {
                     x--;
                 }
@@ -877,7 +891,9 @@ void* menu_alloc_buffer(s32 bytes) {
     return menu_alloc_memory(bytes);
 }
 
-/* Free a menu arena allocation; an unknown eligible pointer stops the current thread. */
+/* Free a menu arena allocation: release its slot record and clear its pages in the map.
+ * Pointers at or above the companion overlay load address, and -1, are ignored; any other
+ * pointer that no slot records stops the current thread. */
 void menu_free_memory(void* buffer_pointer) {
     u32 buffer = (u32)buffer_pointer;
     u32 grid_base;
@@ -917,7 +933,9 @@ void menu_free_memory(void* buffer_pointer) {
     }
 }
 
-/* Build the twelve line packets, draw modes and covering frame sprite. */
+/* Build the numeric display frame around box: twelve lines placed by
+ * g_menu_numeric_display_frame_offsets relative to the box's corners and colored from
+ * the normal menu palette, the two draw modes and a sprite covering the box. */
 void menu_init_numeric_display_frame_primitives(RECT* box, menu_palette_primitives_t* menu) {
     LINE_F2* line = menu->lines;
     s32 i;

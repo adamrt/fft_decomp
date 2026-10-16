@@ -35,6 +35,7 @@ s32 menu_get_entry_item_count(s32 row) {
 s32 menu_get_entry_item_equipped_count(s32 row) {
     u16 entry = g_item_list_entries[row];
     s32 result = item_get_equipped_count(entry & ITEM_ENTRY_ID_MASK);
+
     if (g_item_list_entries[row] & ITEM_ENTRY_UNEQUIPPABLE) {
         result |= MENU_NUMBER_VALUE_DISABLED;
     }
@@ -50,12 +51,9 @@ menu_icon_source_t* menu_build_item_type_icon_source(s32 index) {
     return out;
 }
 
-/* Menu callback: the icon descriptor of the item in list row `row`, built in
- * a shared record. */
+/* Menu callback: the icon descriptor of the item in list row `row`, built in the shared
+ * g_item_graphic_descriptor. The row's 16-bit entry holds the item id in its low byte. */
 menu_icon_source_t* menu_get_entry_item_icon_source(s32 row) {
-    /* item list rows are 16-bit entries whose low byte is the item id
-     * (see menu_build_item_type_icon_source / menu_get_entry_item_equipped_count). */
-    /* Descriptor of six 16-bit values filled by menu_build_item_icon_source. */
     menu_build_item_icon_source(&g_item_graphic_descriptor, g_item_list_entries[row] & 0xff);
     return &g_item_graphic_descriptor;
 }

@@ -36,7 +36,14 @@ void menu_submit_icon_primitives(menu_icon_sprites_t* frame) {
     gfx_draw_or_append_gpu_primitive(&frame->first_draw_mode);
 }
 
-/* Run the five-policy auto-battle menu and update its action rows. */
+/* The Auto-battle settings window: Manual and the four AI policies, with the cursor
+ * starting on the selected unit's current setting.
+ *
+ * On the first frame and on each Circle it redraws the five option names (text 0x5009 on)
+ * and acts on the cursor row. Manual takes effect at once, and rebuilds the idle action menu
+ * when that changes which menu the unit gets. A policy row only becomes the highlighted one;
+ * its row action leads to AUTO_BATTLE_CONFIRM, or for rows 1 and 2 chosen again to
+ * AUTO_BATTLE_TARGET. Text palette 8 marks the active row. */
 void menu_auto_battle_setting_thread(void) {
     RECT rect;
     menu_icon_record_t records[2];
@@ -196,7 +203,14 @@ void menu_run_icon_selection_loop(void) {
     }
 }
 
-/* Build the selected ability/item AT preview and its three-column menu. */
+/* Preview where the highlighted ability or item would fall in the turn order.
+ *
+ * battle_action_preview_at_list runs on the main stack for the selected unit and fills the
+ * AT list work area in the companion overlay space. The names of the listed units are written
+ * into the AT list text section, and the ABILITY_PREVIEW_AT_LIST entry is laid out with
+ * number, unit and action columns (the action column and wide window only when an action row
+ * is listed), scrolled so the previewed row shows. When the action gets no turn, this
+ * thread shows ABILITY_PREVIEW_MESSAGE (text 0x1023) instead and exits there. */
 static void menu_build_ability_preview_at_list(void) {
     menu_at_list_work_t* work;
     menu_entry_t* entry;
@@ -306,24 +320,25 @@ static void menu_build_ability_preview_at_list(void) {
         if ((slot->unit_code & BATTLE_AT_ACTION_ENTRY) == 0) {
             work->secondary_values[count] = TEXT_ID_ABILITY_NAME_BASE;
         } else {
-            s32 turn_text_id;
-            s32 turn_bias;
+            s32 action_text_id;
+            s32 action_id;
 
+            /* The action's name: the jump text, the staged item's name or the ability's. */
             bracketed = 1;
             if ((slot->unit_code & BATTLE_AT_JUMP) != 0) {
-                turn_text_id = 0xb012;
+                action_text_id = 0xb012;
             } else {
-                turn_bias = slot->action_id_low;
+                action_id = slot->action_id_low;
                 if (index == 0 && staged_item != 0) {
-                    turn_text_id = turn_bias + 0x3800;
+                    action_text_id = action_id + 0x3800;
                 } else {
                     if ((slot->unit_code & BATTLE_AT_ABILITY_ID_HIGH_BIT) != 0) {
-                        turn_bias += 0x100;
+                        action_id += 0x100;
                     }
-                    turn_text_id = turn_bias + TEXT_ID_ABILITY_NAME_BASE;
+                    action_text_id = action_id + TEXT_ID_ABILITY_NAME_BASE;
                 }
             }
-            work->primary_values[count] = turn_text_id;
+            work->primary_values[count] = action_text_id;
         }
 
         if ((stats->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE) {
@@ -414,10 +429,10 @@ void menu_preview_ability_turn_at_list(void) {
 
 /* Draw the visible rows of a three-column menu text layout (text 8 pixels
  * narrower than the entry). BATTLE appends text 0x5088 to text columns whose
- * skill flag bit 0 is set while the current thread's fourth 32-bit value is
- * nonzero, and its number-glyph columns draw a special glyph for values 0/1
- * without a target and text 0x509d for values of 100 and above; WORLD skips
- * entries whose id is 0x7ff. */
+ * skill flag bit 0 is set while the current thread's parameter 4 is nonzero,
+ * and its number-glyph columns draw a stacked glyph pair for values 0/1 of an
+ * ability whose skill_ct is 0 or 0xFF and text 0x509d for values of 100 and above;
+ * WORLD skips entries whose id is 0x7ff. */
 void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buffer) {
     menu_text_layout_t* layout = entry->context;
     s32 row;
@@ -450,6 +465,8 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }
+            /* A row drawn in palette 4 (the highlighted row) also gets a background of
+             * color index 4 in every pixel nibble. */
             g_menu_text_state.pen.color = 0;
             if (g_menu_text_palette_offset == 4) {
                 g_menu_text_state.pen.color = 0x44444444;
@@ -508,31 +525,32 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
  * on the running thread's redraw request), redraws the page into an image
  * buffer and uploads it to the caller-supplied rectangle (x and w in
  * framebuffer pixels, divided by four; the image row is fixed at y = 0x80).
- * In mode 2 of g_battle_menu_scroll_list_depth the buffer is placed 0x2000 bytes past the event
- * overlay instead of being allocated. Returns that buffer when the page was
- * redrawn. */
+ * At g_battle_menu_scroll_list_depth 2 the buffer is placed 0x2000 bytes past the companion
+ * overlay load address instead of being allocated. Returns that buffer when the page was
+ * redrawn, else 0. */
 u8* battle_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32 unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
-    u32* input;
-    u32* input2;
+    u32* pressed;
+    u32* held;
     RECT rect;
     RECT clear;
     s32 changed;
     s32 offset;
     u8* buffer;
 
-    input = script_get_controller_input_pointer(0);
-    input2 = script_get_controller_input_pointer(1);
+    pressed = script_get_controller_input_pointer(0);
+    held = script_get_controller_input_pointer(1);
     rect.x = (area->x / 4) + entry->vram_origin.x;
     rect.y = 0x80;
     rect.w = area->w / 4;
     rect.h = area->h;
     changed = 0;
     if (g_menu_input_mode == MENU_INPUT_PLAYER
-        && ((*input2 & PSX_PAD_SQUARE)
+        && ((*held & PSX_PAD_SQUARE)
             || g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] != 0)) {
-        if ((*input & PSX_PAD_UP) && *row_offset != 0) {
+        /* Page up or down by one screen of rows, clamped to the list. */
+        if ((*pressed & PSX_PAD_UP) && *row_offset != 0) {
             offset = *row_offset - layout->row_count;
             *row_offset = offset;
             if (offset < 0) {
@@ -540,7 +558,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
             }
             g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
             changed = 1;
-        } else if ((*input & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
+        } else if ((*pressed & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
             offset = layout->row_count + *row_offset;
             *row_offset = offset;
             if (layout->hidden_rows < offset) {
@@ -562,6 +580,7 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
             menu_draw_text_columns_narrow(entry, row_offset, buffer);
             *redraw = 0;
             LoadImage(&rect, buffer);
+            /* Clear the two VRAM rows above the image, wrapping within its 256-row page. */
             mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
             clear.h = 2;
             clear.x = rect.x;
@@ -579,22 +598,22 @@ u8* battle_menu_redraw_text_page_on_scroll_in_rect(
 /* Sibling of world_screen_menu_redraw_text_page_on_scroll that draws through
  * menu_draw_text_columns_narrow and takes the image rectangle from a caller-supplied
  * RECT (x and w in framebuffer pixels, divided by four; the image row is
- * fixed at y = 0x80). Scrolls the row window on L1/R1 (or on the running
+ * fixed at y = 0x80). Pages the row window on Square+Up/Down (or on the running
  * thread's redraw request), redraws the page into a freshly allocated image
- * buffer and uploads it. Returns that buffer when the page was redrawn. */
+ * buffer and uploads it. Returns that buffer when the page was redrawn, else 0. */
 u8* world_menu_redraw_text_page_on_scroll_in_rect(
     menu_entry_t* entry, s32* row_offset, s32* redraw, s32* unused, RECT* area) {
     menu_text_layout_t* layout = entry->context;
-    u32* input0;
-    u32* input1;
+    u32* pressed;
+    u32* held;
     RECT rect;
     RECT clear;
     s32 changed;
     s32 offset;
     u8* buffer;
 
-    input0 = script_get_controller_input_pointer(0);
-    input1 = script_get_controller_input_pointer(1);
+    pressed = script_get_controller_input_pointer(0);
+    held = script_get_controller_input_pointer(1);
     rect.x = (area->x / 4) + entry->vram_origin.x;
     rect.y = 0x80;
     rect.w = area->w / 4;
@@ -603,11 +622,12 @@ u8* world_menu_redraw_text_page_on_scroll_in_rect(
     if (g_menu_input_mode != MENU_INPUT_PLAYER) {
         return 0;
     }
-    if (!(*input1 & PSX_PAD_SQUARE)
+    if (!(*held & PSX_PAD_SQUARE)
         && g_threads[g_thread_current_id].task_words[MENU_LIST_THREAD_WORD_REDRAW_REQUEST] == 0) {
         return 0;
     }
-    if ((*input0 & PSX_PAD_UP) && *row_offset != 0) {
+    /* Page up or down by one screen of rows, clamped to the list. */
+    if ((*pressed & PSX_PAD_UP) && *row_offset != 0) {
         offset = *row_offset - layout->row_count;
         *row_offset = offset;
         if (offset < 0) {
@@ -615,7 +635,7 @@ u8* world_menu_redraw_text_page_on_scroll_in_rect(
         }
         g_sound_pending_sfx_id = MAIN_SFX_CURSOR_MOVE;
         changed = 1;
-    } else if ((*input0 & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
+    } else if ((*pressed & PSX_PAD_DOWN) && *row_offset != layout->hidden_rows) {
         offset = layout->row_count + *row_offset;
         *row_offset = offset;
         if (layout->hidden_rows < offset) {
@@ -635,6 +655,7 @@ u8* world_menu_redraw_text_page_on_scroll_in_rect(
     menu_draw_text_columns_narrow(entry, row_offset, buffer);
     *redraw = 0;
     LoadImage(&rect, buffer);
+    /* Clear the two VRAM rows above the image, wrapping within its 256-row page. */
     mem_copy_bytes_nonempty(&clear, &rect, sizeof(clear));
     clear.h = 2;
     clear.x = rect.x;

@@ -21,7 +21,8 @@ static void gfx_clip_portrait_poly_from_right(POLY_FT4* poly, s32 amount) {
     poly->x3 -= amount;
 }
 
-/* Move the left edge right and trim the trailing texture coordinates. */
+/* Narrow a portrait quad by amount pixels from its left edge, trimming its texture end to keep
+ * the image aligned (along v for a rotated texture). */
 static void gfx_clip_portrait_poly_from_left(POLY_FT4* poly, s32 amount) {
     poly->x0 += amount;
     poly->x2 += amount;
@@ -108,6 +109,8 @@ void gfx_build_portrait_transition_primitives(const RECT* texture_rect, s32* tra
         }
         poly++;
 
+        /* The wipe edges blend additively (texture page blend rate 1) through the captured
+         * CLUTs, whose colors now carry the semi-transparency bit. */
         menu_build_portrait_poly(*second_portrait, poly);
         poly->tpage = (poly->tpage & 0xff9f) | 0x20;
         poly->clut = GetClut(second_rect.x, second_rect.y);

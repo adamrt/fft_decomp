@@ -2,7 +2,8 @@
 
 #include "psx/types.h"
 
-/* Advance to the requested entry in a packed text section.
+/* Return a pointer to entry entry_index of a packed text section: entries follow one another,
+ * each ended by a 0xFE or 0xFF byte, and the scan counts those terminators from text.
  *
  * The retail helper uses trapping arithmetic and fixed $t0-$t2 scratch
  * registers. The inline sequence preserves those instruction choices and the

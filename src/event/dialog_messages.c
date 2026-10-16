@@ -25,7 +25,13 @@ static u8 g_text_typewriter_previous_images[3][0x54] = { 0 };
 
 static u8 g_text_typewriter_column_scratch[14] = { 0 };
 
-/* Measure the widest text before this dialog window closes. */
+/* For a borderless dialog (DIALOG_TYPE_NO_BOX), measure the widest text the window will show:
+ * the DisplayMessage at offset and each later ChangeDialog for the same window position,
+ * up to the ChangeDialog with text id 0xFFFF that closes it. Stores the width in *out_width;
+ * boxed dialogs leave it alone.
+ *
+ * Every access re-reads g_script_event_block as retail does; instruction pointer
+ * temporaries make the function 16 bytes shorter. */
 void text_build_display_message(s32 offset, s32 flags, s32* out_width) {
     s16 width;
     s16 height;
@@ -373,7 +379,9 @@ s32 text_resolve_format_string_id(s32 format_code, s32 value) {
     return -1;
 }
 
-/* Measure a text entry in characters, following substitutions and backreferences. */
+/* Measure a text entry in characters, following substitutions and backreferences: the widest
+ * line's column count goes to *columns and the line count to *rows. Spaces count one column
+ * and numeric values their digit count (or the pending number width). */
 void text_measure(s16* columns, s16* rows, const u8* text) {
     text_backref_t* backref;
     party_unit_t* party;
@@ -383,6 +391,8 @@ void text_measure(s16* columns, s16* rows, const u8* text) {
     u8 terminator;
     text_reader_state_t* state;
 
+    /* Stage the first party unit's name (Ramza) for TEXT_FORMAT_RAMZA_NAME, in a buffer of
+     * terminators. */
     cursor = (u8*)text;
     party = main_party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;
@@ -493,6 +503,8 @@ void text_measure_pixels(s16* width, s16* rows, const u8* text) {
     u8 terminator;
     text_reader_state_t* state;
 
+    /* Stage the first party unit's name (Ramza) for TEXT_FORMAT_RAMZA_NAME, in a buffer of
+     * terminators. */
     cursor = (u8*)text;
     party = main_party_get_unit(0);
     terminator = TEXT_END_WAIT_FOR_CONFIRM;

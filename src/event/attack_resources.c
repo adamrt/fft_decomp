@@ -667,7 +667,8 @@ void script_print_debug_message(void) {
     g_script_debug_paused = 1;
 }
 
-/* Start movement to the encoded tile with the signed speed and terrain-cost flag. */
+/* WalkTo: start the unit walking to the tile at the signed speed. A terrain_cost_flag of 1 makes
+ * the path respect terrain costs; 0 ignores them. */
 void script_opcode_walk_to(const event_walk_to_parameters_t* parameters) {
     s32 id = script_read_s16(parameters->unit_id_le);
     map_tile_coordinates_t coordinates;
@@ -778,7 +779,9 @@ void script_play_effect_thread(void) {
     thread_exit_current();
 }
 
-/* Run the unit instructions inside an event block, then exit its thread. */
+/* Thread body of BlockStart: run the instructions up to BlockEnd in this thread, then exit.
+ * Only a subset of the unit, wait, sound and effect instructions run here; any other
+ * instruction in the block is skipped. */
 void script_block_start_thread(void) {
     /* Preserve the target's unused 40-byte stack area. */
     s32 unused[10];
@@ -815,6 +818,8 @@ void script_block_start_thread(void) {
             if (runtime_id != EVENT_RUNTIME_ID_NONE) {
                 g_unit_pending_animation_ids[runtime_id] = script_read_s16(script + 3);
             }
+            /* Retail bug: this store runs even for EVENT_RUNTIME_ID_NONE (2000), far past the
+             * 21-entry array. */
             g_unit_was_moving_latch[runtime_id] = 0;
         } else if (script[0] == EVENT_OPCODE_JUMP) {
             script_opcode_jump((const event_jump_parameters_t*)parameters);
@@ -886,9 +891,11 @@ void script_block_start_thread(void) {
 
 /*
  * Event thread started by the AddUnitStart instruction: walks the following
- * script instructions through AddUnitEnd, loading each AddUnit's graphics and
- * processing LoadAttackGraphics before waiting for pending loads. WORLD binds
- * the thread parameter accessor to its own copy.
+ * script instructions through AddUnitEnd, running LoadAttackGraphics and each AddUnit.
+ * A unit not yet on the field gets its status snapshot and its graphics loaded (the
+ * instruction's flag passed on); one already on the field is drawn and activated unless the
+ * flag is set, and its graphics refresh when the snapshot is new. Each AddUnit waits for the
+ * graphics load to finish.
  */
 void script_add_unit_start_thread(void) {
     s32 index;
@@ -1247,14 +1254,15 @@ void menu_restore_selection_for_selected_unit(s32 menu_id) {
     g_menu_thread_menu_data[menu_id].selected_index = record->command_index;
 }
 
-/* One row per battle unit, each 17 bytes. A typed row-array version changes the target's
+enum { MENU_UNIT_SELECTION_RECORD_BYTES = (s32)sizeof(menu_unit_selection_record_t) };
+
+/* Reset the per-unit menu records, clearing each and marking byte 1 as
+ * unset (0xFF).
+ *
+ * One row per battle unit, each 17 bytes. A typed row-array version changes the target's
  * induction variables (84 bytes rather than 76), so retain the byte view.
  * Use an integer countdown: decrementing an element pointer after row[0]
  * would form a pointer before the first row. */
-enum { WORLD_MENU_UNIT_SELECTION_RECORD_BYTES = (s32)sizeof(menu_unit_selection_record_t) };
-
-/* Reset the per-unit menu records, clearing each and marking byte 1 as
- * unset (0xFF). */
 void menu_reset_unit_records(void) {
     s32 index;
     u8* row;
@@ -1264,15 +1272,15 @@ void menu_reset_unit_records(void) {
     index = 0;
     row = (u8*)g_menu_unit_selection_records;
     do {
-        count = WORLD_MENU_UNIT_SELECTION_RECORD_BYTES - 1;
+        count = MENU_UNIT_SELECTION_RECORD_BYTES - 1;
         do {
             row[count] = 0;
             count -= 1;
         } while (count >= 0);
         ((u8*)g_menu_unit_selection_records)[index + 1] = fill;
-        index += WORLD_MENU_UNIT_SELECTION_RECORD_BYTES;
-        row += WORLD_MENU_UNIT_SELECTION_RECORD_BYTES;
-    } while (index < BATTLE_UNIT_SLOT_COUNT * WORLD_MENU_UNIT_SELECTION_RECORD_BYTES);
+        index += MENU_UNIT_SELECTION_RECORD_BYTES;
+        row += MENU_UNIT_SELECTION_RECORD_BYTES;
+    } while (index < BATTLE_UNIT_SLOT_COUNT * MENU_UNIT_SELECTION_RECORD_BYTES);
 }
 
 /* Clear one unit's remembered menu rows, as menu_reset_unit_records does for all (byte 1 back to
@@ -1282,7 +1290,7 @@ void menu_reset_unit_record(s32 battle_id) {
     menu_unit_selection_record_t* records = g_menu_unit_selection_records;
     s32 i;
 
-    for (i = 0; i < 17; i++) {
+    for (i = 0; i < MENU_UNIT_SELECTION_RECORD_BYTES; i++) {
         if (stats->auto_battle_setting == AI_AUTOBATTLE_MANUAL) {
             ((u8*)&records[battle_id])[i] = 0;
             g_menu_unit_selection_records[battle_id]._unknown_01 = 0xFF;
@@ -1342,7 +1350,7 @@ static void menu_copy_u8_to_u16(u16* destination, const u8* source, s32 count) {
  * selected_index selects the skillset; g_action_menu_row_types gives its list type). Each type
  * fills the 0x52-row work buffer at *g_ai_workspace_ptr through its own loader, then
  * the rows are sized, grayed (not enough MP, or silenced for voice abilities)
- * and the window layout at 0x80166994 is set up for 6 visible rows.
+ * and g_menu_ability_layout is set up for 6 visible rows.
  *
  * Matching notes: the layout block is one struct (its x/y are s16, so `-= 4`
  * stays an addiu immediate and the constant is not shared); window_x is a
@@ -1571,17 +1579,18 @@ static void menu_build_ability_list(s32 mode) {
     g_thread_contexts[g_thread_current_id].function_parameter_4 = 1;
 }
 
-/* Menu entry 4's value and the loop counter share $s0 in the target: the
+/*
+ * Run the ability list of the chosen skillset row, remembering its cursor row and scroll in
+ * the selected unit's menu record. Arithmeticks walks three lists, attribute (i = 2), multiple
+ * (1) and ability (0), storing each choice in the selected action; backing out of one returns
+ * to the previous list. Other skillsets run a single list and exit.
+ *
+ * Menu entry 4's value and the loop counter share $s0 in the target: the
  * index dies after the two table loads and the register is reused by the
  * `sll s0,v0,0x1` that forms the counter, so they are one variable here.
  * g_menu_action_slot_row_actions is written as an in-loop expression rather than a pre-loop
  * pointer local so that loop.c hoists it into the preheader after the bltz,
- * which is where the target's `lui/addiu s8` pair sits. */
-
-/*
- * Walk the stored unit's
- * menu record slots from the top value down to zero, presenting each through
- * the inner subroutine and writing the chosen entry back into the record.
+ * which is where the target's `lui/addiu s8` pair sits.
  */
 void menu_select_unit_action_slots_thread(void) {
     s32 i = g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST].selected_index;
@@ -1610,7 +1619,7 @@ void menu_select_unit_action_slots_thread(void) {
         }
         for (j = 0; j < 6; j++) {
             if (menu != ACTION_MENU_TYPE_ARITHMETICKS || i == 0) {
-                g_menu_action_slot_row_actions[j] = 0x1024;
+                g_menu_action_slot_row_actions[j] = MENU_ROW_ACTION_SILENT | BATTLE_MENU_ID_ABILITY_CONFIRM;
             } else {
                 g_menu_action_slot_row_actions[j] = -1;
             }
@@ -1652,7 +1661,10 @@ void menu_select_unit_action_slots_thread(void) {
     thread_exit_current();
 }
 
-/* Build skillset selection rows and size the selected unit's menu. */
+/* Build the Act submenu (SKILLSET_LIST) for the selected unit: its skillset rows from
+ * battle_menu_build_unit_action_menus, every row but type 0x0D disabled in deep water, disabled
+ * rows grayed and opening the ability list silently, an Anything row when that script variable is
+ * set, and the entry sized to the rows. */
 static void menu_build_skillset_entries(void) {
     menu_text_row_t* rows;
     s32 count = 0;
@@ -1687,10 +1699,10 @@ static void menu_build_skillset_entries(void) {
         }
         if (g_menu_skillset_disabled_flags[i] != 0) {
             rows[i].style = 4;
-            g_menu_skillset_row_actions[i] = 0x1003;
+            g_menu_skillset_row_actions[i] = MENU_ROW_ACTION_SILENT | BATTLE_MENU_ID_ABILITY_LIST;
         } else {
             rows[i].style = 0;
-            g_menu_skillset_row_actions[i] = 3;
+            g_menu_skillset_row_actions[i] = BATTLE_MENU_ID_ABILITY_LIST;
         }
         if (g_menu_skillset_build_result != 0) {
             g_text_substitution_values[count] = TEXT_ID_SKILLSET_NAME_SOURCE_BASE;

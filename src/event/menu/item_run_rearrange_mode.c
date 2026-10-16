@@ -17,9 +17,10 @@
 
 /* Runs item-list rearrangement mode.
  *
- * Confirm swaps the picked entry with the current entry, while cancel exits
- * without changing the list. A blinking hand marks the picked row and the
- * item-stat preview follows the cursor. */
+ * Confirm swaps the picked entry with the current entry and stores the new order as the
+ * category list (confirming on the picked entry itself opens the item action menu instead),
+ * while cancel exits without changing the list. A blinking hand marks the picked row and the
+ * item-stat preview follows the cursor. Returns the item list state to continue in. */
 s32 item_run_rearrange_mode(void) {
     RECT rect;
     s32 unused[2];
@@ -27,8 +28,8 @@ s32 item_run_rearrange_mode(void) {
     s32 picked;
     s32 item;
     s32 frame;
-    u16 tile;
-    u16 tile2;
+    u16 cursor_clut;
+    u16 shadow_clut;
     s32 scroll_offset;
     s32 row;
 
@@ -70,20 +71,20 @@ s32 item_run_rearrange_mode(void) {
     if (row >= 0 && row < 8) {
         frame = g_item_rearrange_anim_frame++;
         if (frame & 1) {
-            tile = g_menu_cursor_mode0_foreground_clut;
-            tile2 = g_menu_cursor_mode0_background_clut;
+            cursor_clut = g_menu_cursor_mode0_foreground_clut;
+            shadow_clut = g_menu_cursor_mode0_background_clut;
         } else {
-            tile = g_menu_cursor_mode1_foreground_clut;
-            tile2 = g_menu_cursor_mode1_background_clut;
+            cursor_clut = g_menu_cursor_mode1_foreground_clut;
+            shadow_clut = g_menu_cursor_mode1_background_clut;
         }
         rect.w = 0x10;
         rect.h = 0x10;
         rect.x = 0;
         rect.y = row * 16 - (s16)(g_menu_list_scroll_offset - 0x5E);
-        menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, 0x5F, tile, VARIANT_MENU_ITEM_CURSOR_DEPTH);
+        menu_gfx_enqueue_textured_quad(&rect, 0xA8, 0, 0, 0, 0x5F, cursor_clut, VARIANT_MENU_ITEM_CURSOR_DEPTH);
         rect.x += 2;
         rect.y += 2;
-        menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, tile2, VARIANT_MENU_ITEM_CURSOR_DEPTH);
+        menu_gfx_enqueue_textured_quad(&rect, 0xB8, 0, 0, 1, 0x5F, shadow_clut, VARIANT_MENU_ITEM_CURSOR_DEPTH);
     }
     if (g_menu_list_selected_index != g_item_rearrange_preview_cursor) {
         if (g_menu_list_entry_count != 0) {

@@ -29,14 +29,17 @@ static s32 thread_find_first_running_menu_thread(void);
 /* Leave the help screen: restore the text section pointers saved on entry, free the high
  * overlay area, clear the help-open flag and end the help thread. */
 static void menu_close(void) {
-    mem_copy_bytes_nonempty(g_text_section_pointers, g_text_saved_pointers, 0x80);
+    mem_copy_bytes_nonempty(g_text_section_pointers, g_text_saved_pointers, sizeof(g_text_saved_pointers));
     main_heap_free(g_main_heap_high_overlay_load_address);
     g_menu_help_open = 0;
     thread_exit_current();
 }
 
 /* Opens help for the running menu's pending request, or runs the bouncing
- * help cursor over the navigation table for that menu or the unit view. */
+ * help cursor over the navigation table for that menu or the unit view.
+ *
+ * Every help text opens through text_run_dialog_thread with window type 0x3B: a Help box
+ * (DIALOG_BOX_TYPE_HELP) without a tail, centered. */
 void menu_run_battle_help(void) {
     POLY_FT4 cursor_quads[2];
     POLY_FT4 shadow_quads[2];
@@ -472,7 +475,9 @@ static s32 thread_find_first_running_menu_thread(void) {
     return thread_id;
 }
 
-/* Run the help menu over the REQUIRE screen. */
+/* The help cursor over the REQUIRE screen: like the unit-view half of menu_run_battle_help, it
+ * moves over the shared navigation table (adjusted for this screen) with the d-pad, opens the
+ * Help box of the node under the cursor on Circle and closes on Cross. */
 void menu_run_require_help(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shadow[2];
@@ -510,7 +515,7 @@ void menu_run_require_help(void) {
 
     /* Save the text section pointers for menu_close to restore, and point the help sections into the
      * help text data. */
-    mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, 0x80);
+    mem_copy_bytes_nonempty(g_text_saved_pointers, g_text_section_pointers, sizeof(g_text_saved_pointers));
     g_text_section_pointers[HELP_TEXT_SECTION_UNIT_STATUS]
         = g_menu_help_data_base + g_menu_help_text_section_offsets[HELP_TEXT_SECTION_UNIT_STATUS];
     g_text_section_pointers[HELP_TEXT_SECTION_MENU_COMMANDS]
@@ -625,7 +630,7 @@ void menu_run_require_help(void) {
             }
         } else {
             /* The help text is up: entry, x and y keep the values of the last
-               idle frame. */
+             * idle frame. */
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
                 g_menu_input_lock_mode = 1;
             }
@@ -672,7 +677,8 @@ void menu_run_require_help(void) {
             shadow_quad->v3 = 16;
 
             setXYWH(quad, x, y + bob, 16, 16);
-            /* The shadow follows cursor; its named pointer changes store scheduling. */
+            /* &quad[2] is shadow[buffer]: the shadow array follows cursor on the stack, and
+             * naming it changes the store scheduling. */
             setXYWH(&quad[2], x + 2, y + bob + 2, 16, 16);
         } else {
             POLY_FT4* quads;

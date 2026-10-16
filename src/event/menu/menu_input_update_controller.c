@@ -12,8 +12,10 @@
  * Same latch/activation/repeat logic as world_input_update_controller and
  * card_input_update_controller, with the frame-speed divisor fixed at 2.
  * The divisor stays a variable: the target divides by a register holding 2
- * rather than shifting. Counter slots 4..11 are skipped; those buttons use
- * only the newly pressed mask.
+ * rather than shifting. Counter slots 4..11 are skipped: only the shoulder
+ * buttons and the d-pad (bits 0-3 and 12-15) repeat, while the face buttons,
+ * Select and Start report only new presses. Bits 16-31 of the primary mask
+ * flag repeating buttons held past the initial delay.
  */
 void menu_input_update_controller(void) {
     s16 bit;

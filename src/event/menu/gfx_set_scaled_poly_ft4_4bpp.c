@@ -5,7 +5,11 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-/* Build a 4bpp sprite quad; fixed-point geometry truncates toward zero. */
+/* Build a 4bpp quad for a sprite sheet frame: the frame's offset and size are scaled by the
+ * Q12 factors in `scale` (truncating toward zero; a negative scale keeps a positive size), and
+ * the quad sits at `position` plus the scaled offset plus the base draw offset. The corner
+ * sums are spelled out per corner as retail computes them; corner temporaries are 104 bytes
+ * shorter. */
 void gfx_set_scaled_poly_ft4_4bpp(POLY_FT4* poly, const point16_t* texture_page, const RECT* position,
     const sprite_sheet_frame_t* sprite_rect, const point16_t* scale, const sprite_draw_offset_t* base) {
     s16 scale_x;

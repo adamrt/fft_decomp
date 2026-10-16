@@ -52,7 +52,8 @@ void menu_run_option_choice(void) {
     thread->function_parameter_1 = (s32)&g_menu_option_icon_thread_param;
     param = &g_menu_option_icon_thread_param;
 
-    /* The 4-bit text image must span whole VRAM halfwords (4 pixels each). */
+    /* The 4-bit text image must span whole VRAM halfwords (4 pixels each); adding 2 aligns a
+     * width of 4n + 2, but would leave an odd width unaligned. */
     width = g_menu_option_choice_widths[kind];
     if (width & 3) {
         width += 2;

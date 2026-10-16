@@ -8,7 +8,8 @@
 
 /* Advances the animated cursor at `pos` and draws it, sliding horizontally,
  * with its semi-transparent shadow. `mode` bit 0 starts the reverse curve;
- * mode 0 cancels it. */
+ * mode 0 cancels it. The same routine as menu_update_and_draw_animated_cursor, except
+ * that it draws at the fixed ordering-table entries 0x3C and 0x3B. */
 void menu_update_and_draw_sliding_cursor(point16_t* pos, u16* state, s32 mode) {
     RECT rect;
     s32 active;

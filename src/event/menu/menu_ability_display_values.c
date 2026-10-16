@@ -36,7 +36,8 @@ s32 menu_ability_is_non_action_unlearned(s32 index) {
     return result;
 }
 
-/* Action abilities occupy type zero in the ability-pointer classification. */
+/* Row callback: whether the ability the learned callback cached is an action ability
+ * (ABILITY_TYPE_DEFAULT); the row is ignored. */
 s32 menu_ability_is_action(s32 unused_row) {
     return g_menu_ability_type == ABILITY_TYPE_DEFAULT;
 }

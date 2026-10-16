@@ -9,7 +9,8 @@
 
 /* Start the help text thread for the current help message, if one is set:
  * save the text section pointers, bind the help text table and lock the menu
- * input. The dialog type is `thread_data` + 0x38. */
+ * input. The dialog type is `thread_data` + 0x38: a Help box (DIALOG_BOX_TYPE_HELP) without a
+ * tail, at the position `thread_data` gives. */
 void menu_text_start_help_thread(s32 thread_data) {
     if (g_menu_help_message_text_id > 0) {
         text_save_section_pointers();

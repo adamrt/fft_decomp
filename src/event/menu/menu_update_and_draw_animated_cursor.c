@@ -6,10 +6,12 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Draw the sliding 16x16 marker and its semi-transparent shadow. State packs
- * the active flag in bit 15 and the frame counter in bits 0-6. Mode 0 cancels
- * the active curve; an odd mode starts it. The copy before each active test
- * preserves the original register allocation. */
+/* Draw the sliding 16x16 marker and its semi-transparent shadow at the current
+ * ordering-table entry. State packs the active flag in bit 15 and the frame counter in
+ * bits 0-6. Mode 0 cancels the active curve; an odd mode starts it. The x offset follows
+ * the forward keyframes (looping every 0x2F frames) or, while active, the reverse keyframes
+ * (holding at frame 0x24). The copy before each active test preserves the original register
+ * allocation. */
 void menu_update_and_draw_animated_cursor(const point16_t* anchor, u16* state, s32 mode) {
     RECT rect;
     s32 active = *state >> 15;

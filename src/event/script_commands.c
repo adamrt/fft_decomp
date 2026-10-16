@@ -180,7 +180,7 @@ s32 thread_resolve_id_after_current(s32 thread_id) {
 }
 
 /* Return the id of another running thread whose 32-bit current task value equals
-   task_id, or 0 when none matches. Skips slot 0 and the caller's own thread. */
+ * task_id, or 0 when none matches. Skips slot 0 and the caller's own thread. */
 s32 thread_find_running_by_task(s32 task_id) {
     s32 thread_id;
 
@@ -293,7 +293,13 @@ void script_run_condition(event_opcode_e opcode) {
     }
 }
 
-/* EVENT_SCRIPT_VAR_RANDOM_VALUE is read through the event
+/* Run one variable command on a script variable of any range (32-bit value, flag bit or
+ * packed nibble): zero it, or add, subtract, multiply, divide, take the modulo, AND or OR
+ * an operand into it. Odd opcodes read the operand from variable `source`, even ones take
+ * `source` as an immediate. Flags and nibbles are read and written in place, keeping
+ * their neighbors.
+ *
+ * EVENT_SCRIPT_VAR_RANDOM_VALUE is read through the event
  * RNG, not its ordinary storage. ZERO never reads the uninitialized operand.
  * Keep the target's arithmetic edge behavior: only division explicitly stops
  * on zero; modulo has no such check, and signed overflow is not normalized. */
@@ -363,8 +369,10 @@ void script_run_variable_command(s32 opcode, s32 destination_id, s32 source, s32
     } else if (opcode < EVENT_OPCODE_ZERO_VARIABLE) {
         value |= operand;
     }
-    /* Guard recursive getter calls: replay mode and saturated high variables
-     * can suppress writes, but the nested getter must still read its operand. */
+    /* Two vetoes, skipped while the guard is set so the getters below (which run this
+     * function themselves) can read: a variable from EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST
+     * up is written only while its value is 0-11, and while progress effects are suppressed
+     * (replay mode) only the variables the conditions below list may change. */
     if (g_script_variable_write_guard == 0) {
         if (destination_id >= EVENT_SCRIPT_VAR_PERSON_PROFILE_FIRST) {
             g_script_variable_write_guard = 1;
@@ -549,7 +557,7 @@ void gfx_draw_or_append_gpu_primitive(void* primitive) {
     addPrim(g_gfx_current_otag_entry, primitive);
 }
 
-/* Link a GPU primitive into the current ordering table entry (libgpu addPrim). */
+/* Link a GPU primitive into the ordering-table entry after the current one (libgpu addPrim). */
 void gfx_append_gpu_primitive_to_secondary_otag(void* prim) {
     u32* entries = g_gfx_current_otag_entry;
 
@@ -619,8 +627,10 @@ void gfx_init_image_loading(
     SPRT* sprite = primitive;
     POLY_FT4* quad = primitive;
 
+    /* GPU codes 0x64-0x67 are the free-size sprite (SPRT). */
     if ((getcode(primitive) & 0x7c) == 0x64) {
         if (parameters->x_load >= 0) {
+            /* A sprite uses the current texture page: u is the 4bpp pixel column within it. */
             texture_column = base_load->x & 0x3f;
             sprite->u0 = (texture_column << 2) + parameters->x_load;
             sprite->v0 = base_load->y + parameters->y_load;
@@ -665,7 +675,9 @@ void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries,
     }
 }
 
-/* Draw decimal glyphs right to left and clear the text palette afterward. */
+/* Draw value in decimal text glyphs, right-aligned in a field of digit_count 6-pixel cells at
+ * origin, without zero padding (a longer number runs on to the left). Moves origin and
+ * clears the text palette offset afterward. */
 void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_t* origin) {
     s16 cell;
 
@@ -681,8 +693,9 @@ void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_
 }
 
 /* Draw value as exactly (digits & 0xff) digits, zero-padded and right to left, 7 pixels apart from
- * the menu glyph sheet. The high byte adds marks: 0x1000 a leading glyph, 0x400 or 0x800 a sign
- * glyph before the digits, and 0xc00 two dashes in place of the number. Hidden numeric values draw
+ * the menu glyph sheet. The high byte adds marks: 0x1000 a leading glyph, MENU_DECIMAL_SIGN_PLUS
+ * (0x400) or MENU_DECIMAL_SIGN_MINUS (0x800) a sign glyph before the digits, and 0xc00 two
+ * dashes in place of the number. Hidden numeric values draw
  * a placeholder per digit; the pen ends after the last digit. */
 void menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;

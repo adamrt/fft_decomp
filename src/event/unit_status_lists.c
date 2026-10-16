@@ -39,6 +39,9 @@
 #include "psx/libgte.h"
 #include "psx/pad.h"
 #include "psx/types.h"
+#ifdef FFT_WORLD
+#    include "fft/world_menu.h"
+#endif
 
 static u8 g_menu_unit_editor_line_colors[8 * MENU_UNIT_EDITOR_LINE_SIZE] = { 16, 16, 16, 16, 1, 16, 90, 32, 32, 32, 17,
     1, 17, 90, 32, 32, 32, 34, 1, 34, 90, 16, 16, 16, 35, 1, 35, 90, 16, 16, 16, 122, 1, 122, 90, 32, 32, 32, 123, 1,
@@ -48,9 +51,6 @@ static u16 g_menu_unit_editor_sprite_clut_pairs[19][2]
     = { 0x7cbc, 0x7c7c, 0x7cbc, 0x7c7c, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc,
           0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7d7c, 0x7dfc, 0x7c3c, 0x7d3c, 0x7c3c,
           0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c, 0x7c3c, 0x7d3c };
-#ifdef FFT_WORLD
-#    include "fft/world_menu.h"
-#endif
 
 static s32 menu_display_projected_action_effect(POLY_FT4* unused_primitive, const point16_t* unused_base_load,
     const RECT* unused_base_screen, image_load_parameters_t* unused_parameters);
@@ -91,6 +91,8 @@ void menu_build_unit_status_list(void) {
     s16* flag_a;
     s16* flag_b;
 
+    /* A generic monster's or team kind 1 unit's rows get the inert action 0x7d0 (Circle only
+     * records the row); other units' rows open JOBSTTS silently. */
     for (i = 0; i < 8; i++) {
         flag_a = &g_menu_selected_unit_fields.state.generic_monster;
         flag_b = &g_menu_selected_unit_status.team_kind;
@@ -479,12 +481,14 @@ static s32 menu_display_projected_action_effect(
     action_data_t* action;
     u8 target_id;
 
+    /* Panel number formats (menu_draw_number_glyphs) are a digit count plus an optional sign
+     * flag; kind 2 hides a panel entry. */
     extra = 0;
     show_empty = 0;
     panel = g_battle_menu_projected_value_panel;
     panel[0].x = 0xf;
     g_battle_menu_projected_value_panel[0].kind = 1;
-    g_battle_menu_projected_value_panel[0].format = 0x803;
+    g_battle_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_MINUS | 3;
     g_battle_menu_projected_value_panel[0].y = 0;
     digits_x = &panel[1].x;
     *digits_x = 0x32;
@@ -514,22 +518,22 @@ static s32 menu_display_projected_action_effect(
     } else if (action->attack_type & ACTION_TYPE_HP_HEALING) {
         value = action->hp_healing;
         image = ACTION_DISPLAY_IMAGE_HP;
-        g_battle_menu_projected_value_panel[0].format = 0x403;
+        g_battle_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
     } else if (action->attack_type & ACTION_TYPE_MP_DAMAGE) {
         value = action->mp_damage;
         image = ACTION_DISPLAY_IMAGE_MP;
     } else if (action->attack_type & ACTION_TYPE_MP_HEALING) {
         image = ACTION_DISPLAY_IMAGE_MP;
         value = action->mp_healing;
-        g_battle_menu_projected_value_panel[0].format = 0x403;
+        g_battle_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
     } else if (action->gil_change != 0 && (action->attack_type & ACTION_TYPE_PSEUDO_STATUS)) {
         value = action->gil_change;
         image = ACTION_DISPLAY_IMAGE_GIL;
         if (value >= 0) {
-            g_battle_menu_projected_value_panel[0].format = 0x404;
+            g_battle_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_PLUS | 4;
         } else {
             value = -value;
-            g_battle_menu_projected_value_panel[0].format = 0x804;
+            g_battle_menu_projected_value_panel[0].format = MENU_DECIMAL_SIGN_MINUS | 4;
         }
         panel[0].kind = 0;
         *label_x -= 4;
@@ -544,9 +548,9 @@ static s32 menu_display_projected_action_effect(
         value = exp;
         if (exp & ACTION_EXP_CHANGE_LOSS) {
             value &= ACTION_EXP_CHANGE_VALUE_MASK;
-            panel[0].format = 0x403;
+            panel[0].format = MENU_DECIMAL_SIGN_PLUS | 3;
         } else {
-            panel[0].format = 0x803;
+            panel[0].format = MENU_DECIMAL_SIGN_MINUS | 3;
         }
         number_x = panel[0].x;
         number_x -= 8;
@@ -558,9 +562,9 @@ static s32 menu_display_projected_action_effect(
         image = ACTION_DISPLAY_IMAGE_LEVEL;
         value = 1;
         if (g_menu_preview_target_action->special_effect & ACTION_SPECIAL_EFFECT_LEVEL_UP) {
-            panel[0].format = 0x401;
+            panel[0].format = MENU_DECIMAL_SIGN_PLUS | 1;
         } else {
-            panel[0].format = 0x801;
+            panel[0].format = MENU_DECIMAL_SIGN_MINUS | 1;
         }
         panel[0].x += 12;
     } else if ((g_menu_preview_target_action->attack_type & ACTION_TYPE_PSEUDO_STATUS)
@@ -644,7 +648,7 @@ static s32 menu_display_projected_action_effect(
         if (image >= ACTION_DISPLAY_IMAGE_CT && image <= ACTION_DISPLAY_IMAGE_MAGICAL_ATTACK) {
             panel[0].x += 0x10;
             if (value & ACTION_STAT_CHANGE_INCREASE) {
-                panel[0].format = 0x402;
+                panel[0].format = MENU_DECIMAL_SIGN_PLUS | 2;
                 if (image == ACTION_DISPLAY_IMAGE_CT && value == 0xff) {
                     value = 0x64;
                     panel[0].format = 3;
@@ -652,7 +656,7 @@ static s32 menu_display_projected_action_effect(
                     panel[0].x -= 8;
                 }
             } else {
-                panel[0].format = 0x802;
+                panel[0].format = MENU_DECIMAL_SIGN_MINUS | 2;
                 if (image == ACTION_DISPLAY_IMAGE_CT && value == 0x7f) {
                     value = 0;
                     panel[0].format = 2;
@@ -841,6 +845,8 @@ static void menu_run_unit_stats_panel(
     }
     mem_copy_bytes_nonempty(&page[1], page, sizeof(menu_unit_status_page_t));
     text_loaded = 0;
+    /* `slide` is the panel's x shift from its resting place: it starts 0x84 out and eases
+     * in, `speed` dropping by 2 per step; a stop request slides it back out. */
     for (frame = 0;; frame++) {
         if (status->gauges[MENU_UNIT_STATUS_GAUGE_CT].value > UNIT_TURN_CT_THRESHOLD) {
             status->gauges[MENU_UNIT_STATUS_GAUGE_CT].value = UNIT_TURN_CT_THRESHOLD;
@@ -1214,6 +1220,7 @@ void menu_run_unit_summary_panel_thread(void) {
     frames[0].sprites[6].clut = MENU_CLUT_NORMAL;
     frames[0].sprites[6].w = 0x18;
     frames[0].sprites[6].h = 0x14;
+    /* Zodiac icons are 24 x 20 cells, seven to a row from v = 0x2A. */
     zodiac = g_menu_selected_unit.zodiac;
     frames[0].sprites[6].u0 = zodiac % 7 * 0x18;
     frames[0].sprites[6].v0 = zodiac / 7 * 0x14 + 0x2A;
@@ -1337,7 +1344,9 @@ exit:
     thread_exit_current();
 }
 
-/* Fill the texture coordinates, CLUT and size of a 16x16 item icon sprite. */
+/* Fill the texture coordinates, CLUT and size of a 16x16 item icon sprite. Icons sit 15 to a
+ * row from v = 0x20 of the item icon page, and the item's palette picks one of 8 CLUTs per
+ * CLUT row from the item icon CLUT base. */
 void gfx_set_item_icon_sprite(SPRT* sprite, s32 item_id) {
     item_data_t* item = main_item_get_data_pointer(item_id);
     s32 sprite_id;
@@ -1522,17 +1531,22 @@ void menu_run_numeric_display_panel_thread(void) {
     thread_exit_current();
 }
 
-/* Build and redraw the unit editor panel while its menu thread is active. */
+/* The unit status screen's equipment and ability panel (task UNIT_EDITOR_PANEL). It moves the
+ * stats and summary panels to the top, draws the five equipment names with their item icons
+ * and the five ability names into VRAM once, starts the numeric side panel, then redraws every
+ * frame until Cross or a stop request. Circle opens the unit's status list. On exit the panels
+ * return to the bottom with their bounce, the tile info panel restarts and the idle action menu
+ * is rebuilt. */
 void menu_run_unit_editor_panel_thread(void) {
     /* The frame reserves 0x100 bytes for the first copy's line-box
-       primitives, the stride of the palette records (WORLD 0x80195ed0). */
+     * primitives, the stride of the palette records (WORLD 0x80195ed0). */
     menu_palette_slot_t palette;
     menu_unit_editor_frame_t* records;
     menu_unit_editor_frame_t* frame_record;
     LINE_F2* line;
     u8* buffer;
     /* One variable for the label text id and, in the frame loop, whether the
-       status thread runs: the target keeps both in one callee-saved register. */
+     * status thread runs: the target keeps both in one callee-saved register. */
     s32 value;
     s32 frame;
     s32 i;
@@ -1591,7 +1605,7 @@ void menu_run_unit_editor_panel_thread(void) {
     menu_init_sprite_array(&frame_record->sprites[12], 7, MENU_CLUT_NORMAL);
 
     /* Each arm copies all four rows itself; the compiler cross-jumps the
-       common tails, leaving only the first call's table loads in the arms. */
+     * common tails, leaving only the first call's table loads in the arms. */
     if (g_menu_selected_unit_fields.state.two_hands != 0) {
         mem_copy_bytes_nonempty(&g_menu_unit_editor_sprite_image_params_a[2], g_menu_unit_editor_row_image_params_b,
             2 * sizeof(image_load_parameters_t));
@@ -1716,8 +1730,8 @@ void menu_run_unit_editor_panel_thread(void) {
             if (value != 0) {
                 SetShadeTex(&frame_record->sprites[19 + i], 0);
                 /* Spelled from sprites[i]: the target's store pointer walks
-                   frame_record + i * 0x14 with the item-icon bias in the
-                   displacement; sprites[19 + i] adds the base per store. */
+                 * frame_record + i * 0x14 with the item-icon bias in the
+                 * displacement; sprites[19 + i] adds the base per store. */
                 (&frame_record->sprites[i])[19].r0 = 0x40;
                 (&frame_record->sprites[i])[19].g0 = 0x40;
                 (&frame_record->sprites[i])[19].b0 = 0x80;
@@ -1870,12 +1884,14 @@ void menu_handle_action(menu_entry_t* entry, s32 row_index) {
                     g_thread_contexts[i].task_id = THREAD_TASK_STOP_REQUEST;
                 }
             }
+            /* Remember the rows of the closing battle menus (the menu slot and its
+             * children below it) as the pending selection. */
             for (i = 0; i < target; i++) {
                 thread_id = i + g_thread_current_id;
                 g_thread_contexts[thread_id].function_parameter_3 = 1;
-                if (thread_id == 8) {
+                if (thread_id == THREAD_SLOT_MENU) {
                     for (j = 0; j < target; j++) {
-                        menu_thread_id = 8 - j;
+                        menu_thread_id = THREAD_SLOT_MENU - j;
                         if (thread_is_running_asm(menu_thread_id) != 0) {
                             g_menu_pending_selection[j]
                                 = ((menu_entry_t*)g_thread_contexts[menu_thread_id].function_parameter_1)
@@ -1924,8 +1940,10 @@ void menu_step_wrapping_cursor_on_scroll_buttons(menu_entry_t* ctx, s32* sel) {
     }
 }
 
-/* On the cancel button, flag the context's thread group as finished,
- * demote every waiting thread task (1 -> 3) and report -1 to the caller. */
+/* On the cancel button, flag the context's thread group as finished, turn every
+ * THREAD_TASK_RESUME thread into a stop request and report -1 to the caller. Closing the
+ * battle menu slot also forgets the pending selection. Menu input is then held off for 5
+ * frames. */
 void menu_handle_cancel_input(menu_entry_t* context) {
     s32 i;
     s32 j;
@@ -1943,7 +1961,7 @@ void menu_handle_cancel_input(menu_entry_t* context) {
         for (i = 0; i < count; i++) {
             thread_id = i + g_thread_current_id;
             g_thread_contexts[thread_id].function_parameter_3 = 1;
-            if (thread_id == 8) {
+            if (thread_id == THREAD_SLOT_MENU) {
                 for (j = 3; j >= 0; j--) {
                     g_menu_pending_selection[j] = -1;
                 }
@@ -2220,7 +2238,8 @@ static void menu_copy_sprite_position_uv_and_size(const menu_entry_t* entry, SPR
     sprite->h = entry->text_image.height;
 }
 
-/* Scale the sprite about its center and keep position and texture coordinates even. */
+/* Scale the sprite about its center by the percentage of zoom step `step` (0-11; later steps
+ * leave it alone), keeping position, texture coordinates and size even. */
 void menu_zoom_cursor_frame(const void* unused_source, SPRT* sprite, s32 step) {
     s32 scale;
     s32 offset;

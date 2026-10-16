@@ -250,6 +250,7 @@ s32 card_file_enumerate_saves(DIRENTRY* entries, s32 all_files) {
     } else {
         strcpy(path, "bu10:");
     }
+    /* The game's own saves carry the Japanese product code, SLPS-00700, in this release too. */
     if (all_files == 0) {
         strcat(path, "BISLPS-00700FF7*");
     } else {
@@ -284,7 +285,8 @@ s32 card_file_count_free_blocks(const DIRENTRY* entries, s32 entry_count) {
 }
 
 /* Bring the selected card to a readable state: acknowledge a newly inserted
- * card, then load its directory. Returns CARD_IO_RESULT_COMPLETE,
+ * card, then load its directory. The BIOS card calls take the port as slot << 4 (0x00 or 0x10).
+ * Returns CARD_IO_RESULT_COMPLETE,
  * CARD_IO_RESULT_NEW_CARD (the load still reports a new, unformatted card)
  * or CARD_IO_RESULT_TIMEOUT for any failure. */
 s32 card_io_open_or_create_selected_card(void) {
@@ -402,8 +404,13 @@ s32 card_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin) {
 }
 
 /* Write `size` bytes of `source` to `filename` on the selected slot, creating
- * the file first when `create_file` is set, in up to 40 chunks. Returns the
- * bytes written, or -1 when an open, close or error check fails. */
+ * the file first when `create_file` is set, in up to 40 write attempts. Returns the
+ * bytes written, or -1 when an open, close or error check fails.
+ *
+ * The create mode is the BIOS create flag 0x200 with the file's block count in the high half;
+ * mode 2 opens for writing. Each attempt seeks by the bytes written so far from the current
+ * position (origin 1) rather than to them, so after a short write the next attempt would skip
+ * ahead (retail; a whole save normally goes in one write). */
 s32 card_file_write_buffer(const char* filename, const card_save_buffer_t* source, u32 size, s32 create_file) {
     s32 error;
     s32 result;
@@ -498,7 +505,8 @@ s32 card_file_delete_selected_with_retries(const char* filename) {
 #    ifdef FFT_WORLD
 /* Read a card file in up to 40 attempts. A failed seek stops the read;
  * partial reads and -1 results allow another attempt. A successful close
- * returns the bytes read. */
+ * returns the bytes read. The seek has the same relative-offset quirk as
+ * card_file_write_buffer. */
 s32 world_card_read_file_chunked(const char* filename, u8* destination, u32 size) {
     u32 total;
     s32 result = card_file_open_selected_with_retries(filename, 1);

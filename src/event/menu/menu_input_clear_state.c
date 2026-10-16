@@ -2,7 +2,8 @@
 
 #include "fft/menu_input.h"
 
-/* Reset the three masks consumed by the BUNIT menu-input processor. */
+/* Reset the three masks the menu input processor publishes: newly pressed, primary repeat and
+ * secondary repeat. */
 void menu_input_clear_state(void) {
     g_menu_input_newly_pressed = 0;
     g_menu_input_secondary_repeat = 0;

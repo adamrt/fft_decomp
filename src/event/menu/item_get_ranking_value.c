@@ -5,7 +5,10 @@
 #include "fft/main_item.h"
 #include "psx/types.h"
 
-/* Return the item category's primary stat for descending menu sorts. */
+/* Return the stat the menus sort an item by, highest first: a weapon's power, a shield's
+ * physical evade, the required level of an accessory or other item, and the HP bonus of
+ * headgear and body armor. Item 0 falls through to the HP bonus with an index before the start
+ * of the armor table (retail). */
 s32 item_get_ranking_value(s32 item_id) {
     s32 type;
     s32 idx;

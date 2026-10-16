@@ -43,7 +43,13 @@ void text_set_message_duration_frames(u16 frames) {
     g_text_message_duration_frames = frames;
 }
 
-/* Size a message window to its text and center it on x = 0x102. */
+/* Size a message entry's window to its text and center it on x = 0x102.
+ *
+ * Returns the window size in *width and *height: the text's pixel width plus 24 for the
+ * frame (then evened by adding its low two bits back), and 16 pixels per line plus 16. The
+ * same size goes to the window, the text image and the inner area. With pad_short, a
+ * one-line text under 8 pixels wide is widened to 8 and *out_pad receives a left indent of
+ * 5 per missing pixel; otherwise *out_pad is 0. */
 static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height, s32* out_pad, s32 pad_short) {
     const u8* text = text_find_entry(entry->text_id);
     u16 padded;
@@ -99,7 +105,7 @@ void menu_icon_timed_thread(void) {
     param = (menu_entry_t*)thread_get_current_parameter_1();
     menu_size_entry_to_text(param, &width, &height, &pad, 1);
     menu_build_window_sprites(&rect, param, &records[0]);
-    mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
+    mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(menu_icon_record_t));
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
     menu_set_text_origin(pad + 8, 9);
@@ -110,6 +116,8 @@ void menu_icon_timed_thread(void) {
         if (i == 0) {
             menu_free_memory(buffer);
         }
+        /* Out of time: press Circle on the player's behalf, silently, so the menu closes
+         * as if confirmed. */
         if (g_text_message_duration_frames < i * g_script_event_speed) {
             hold = 0;
             g_script_event_input = PSX_PAD_CIRCLE;
@@ -118,6 +126,8 @@ void menu_icon_timed_thread(void) {
         if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
+        /* Retail bug: unset is never assigned. The linked-entry thread tests its linked
+         * entry index here, selecting CLUTs in that entry's slot. */
         if (unset >= 0) {
             g_thread_current_id--;
             menu_select_icon_cluts(&records[i & 1].base);
@@ -151,7 +161,7 @@ void menu_icon_linked_entry_thread(void) {
     menu_entry_t* param;
     u8* buffer;
     s32 i;
-    s32 parent;
+    s32 linked_index;
     menu_icon_record_t* record;
     s16 width;
     s16 height;
@@ -160,15 +170,15 @@ void menu_icon_linked_entry_thread(void) {
     param = (menu_entry_t*)thread_get_current_parameter_1();
     menu_size_entry_to_text(param, &width, &height, &pad, 0);
     menu_build_window_sprites(&rect, param, &records[0]);
-    mem_copy_bytes_nonempty(&records[1], &records[0], 0x7C);
-    parent = param->row_actions[0];
-    if (parent >= 0) {
+    mem_copy_bytes_nonempty(&records[1], &records[0], sizeof(menu_icon_record_t));
+    linked_index = param->row_actions[0];
+    if (linked_index >= 0) {
         /* Unsigned narrowing keeps the retail 16-bit centering expression. */
-        g_menu_thread_menu_data[parent].window.x
-            = (u16)((width >> 1) - (g_menu_thread_menu_data[parent].inner_width - 0x102));
-        g_menu_thread_menu_data[parent].window.y = param->window.y + param->window.h;
-        thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[parent].thread_entry);
-        thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[parent], 0, 0);
+        g_menu_thread_menu_data[linked_index].window.x
+            = (u16)((width >> 1) - (g_menu_thread_menu_data[linked_index].inner_width - 0x102));
+        g_menu_thread_menu_data[linked_index].window.y = param->window.y + param->window.h;
+        thread_start(g_thread_current_id - 1, g_menu_thread_menu_data[linked_index].thread_entry);
+        thread_set_parameters(g_thread_current_id - 1, (s32)&g_menu_thread_menu_data[linked_index], 0, 0);
     }
     buffer = menu_build_and_upload_window_frame_image(width, height, &rect, MENU_WINDOW_FRAME_BUILD);
     g_menu_text_state.pen.stride = width;
@@ -183,7 +193,7 @@ void menu_icon_linked_entry_thread(void) {
         if (menu_should_close_thread(&g_script_event_input) != 0) {
             break;
         }
-        if (parent >= 0) {
+        if (linked_index >= 0) {
             g_thread_current_id--;
             menu_select_icon_cluts(&records[i & 1].base);
             g_thread_current_id++;
@@ -271,9 +281,9 @@ void script_set_variable(s32 variable_id, s32 value) {
     *g_script_variables = saved_current_variable;
 }
 
-/* Build both buffers' panel fade primitives: a black semi-transparent 256 x 50 center tile at
- * (128, 172) with nine one-line tiles above and below it for the graded edges that
- * menu_update_panel_fade animates. */
+/* Build both buffers' panel fade primitives: a subtractive (abr 2) semi-transparent 256 x 50
+ * center tile at (128, 172) with nine one-line tiles above and below it for the graded edges
+ * that menu_update_panel_fade animates. The tiles start black, which subtracts nothing. */
 void menu_init_panel_fade_tiles(void) {
     menu_gradient_panel_prims_t* frame = &g_menu_panel_fade_frames[0];
     s32 i;
@@ -310,7 +320,10 @@ void menu_init_panel_fade_tiles(void) {
         &g_menu_panel_fade_frames[1], &g_menu_panel_fade_frames[0], sizeof(menu_gradient_panel_prims_t));
 }
 
-/* Update panel brightness and submit the center and edge tiles. */
+/* Step the panel fade by one frame and submit this buffer's tiles. Fading in raises the
+ * center's gray level by 8 per frame up to 80, fading out lowers it by 8 and then ends the
+ * fade. The level is how much the tiles subtract from the scene, so the panel area darkens;
+ * each edge row outward from the center is 8 lighter, giving a soft top and bottom edge. */
 void menu_update_panel_fade(void) {
     menu_gradient_panel_prims_t* frame;
     s32 i;
@@ -385,7 +398,8 @@ void gfx_submit_screen_fade_overlay(fade_overlay_t* overlay, s32 level) {
 }
 
 /* Reserve size bytes of the main heap at the high overlay load address, yielding until that block
- * is free (with a wait message when the debug font is on). */
+ * is free (with a wait message when the debug font is on). Every caller reserves 0x20000 bytes:
+ * room for the second half of BUNIT or EQUIP, or for HELPMENU or JOBSTTS. */
 static void menu_reserve_high_overlay(u32 size) {
     while (1) {
         if (main_heap_reserve_at(g_main_heap_high_overlay_load_address, size)
@@ -404,7 +418,10 @@ static void menu_free_high_overlay(void) {
     main_heap_free(g_main_heap_high_overlay_load_address);
 }
 
-/* Publish an executable request, wait for it to clear, then honor the frame exit request. */
+/* Load companion overlay request_index and wait for it: wait until no executable or data-file
+ * request is pending, publish this one, and yield until the per-frame driver
+ * (menu_open_companion_executable) clears it. The calling thread exits instead of returning
+ * when the frame result override is 1. */
 void menu_request_open_companion_executable(s32 request_index) {
     while (g_menu_companion_executable_request_index != 0 || g_menu_companion_data_file_request_index != 0) {
         thread_yield();
@@ -420,7 +437,8 @@ void menu_request_open_companion_executable(s32 request_index) {
     }
 }
 
-/* Publish a data-file request, wait for it to clear, then honor the frame exit request. */
+/* The data-file counterpart of menu_request_open_companion_executable, driven by
+ * menu_open_companion_data_file into g_menu_companion_data_file_buffer. */
 static void menu_request_open_companion_data_file(s32 request_index) {
     while (g_menu_companion_executable_request_index != 0 || g_menu_companion_data_file_request_index != 0) {
         thread_yield();
@@ -567,6 +585,7 @@ static void menu_run_bunit_return_thread(void) {
     } while (g_menu_companion_overlay_state != COMPANION_OVERLAY_STATE_IDLE);
 
     menu_free_high_overlay();
+    /* Parameter 3 = 1 asks the threads in slots 2-14 to close; then fade the screen back in. */
     for (i = 2; i < 15; i++) {
         thread_set_parameters(i, 0, 0, 1);
     }
@@ -582,7 +601,8 @@ static void menu_run_bunit_return_thread(void) {
     thread_exit_current();
 }
 
-/* Fade out and load BUNIT, then start its return thread. */
+/* Fade the screen out, close the menu and unit view panels, load both halves of BUNIT, then
+ * start menu_run_bunit_return_thread, which runs the unit list and comes back. */
 static void menu_run_bunit_transition_thread(void) {
     s32 level;
 
@@ -651,14 +671,17 @@ void menu_run_jobstts_thread(void) {
     thread_exit_current();
 }
 
-/* Run the EQUIP overlays, then restore the menu threads and icon-list cursors. */
+/* Run the EQUIP overlays with the menu threads suspended, then reopen the idle action menu
+ * with Circle pressed for the player (sounds muted) and close the panels in slots 9-14. When
+ * EQUIP left its primitives up, the menu and skillset list stay suspended and their selected
+ * rows are kept as the pending selection instead. */
 void menu_run_equip_thread(void) {
-    s32 saved;
+    s32 saved_view_mode;
     s32 i;
     s32 j;
 
     menu_set_modal_open();
-    saved = g_menu_unit_view_mode;
+    saved_view_mode = g_menu_unit_view_mode;
     menu_start_unit_view_thread(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
     g_menu_overlay_state = 1;
     thread_wait_for_unit_view_panels();
@@ -687,19 +710,20 @@ void menu_run_equip_thread(void) {
     if (g_menu_companion_overlay_primitives != 0) {
         for (j = 0; j < 2; j++) {
             g_menu_pending_selection[j]
-                = ((menu_entry_t*)g_thread_contexts[8 - j].function_parameter_1)->selected_index;
+                = ((menu_entry_t*)g_thread_contexts[THREAD_SLOT_MENU - j].function_parameter_1)->selected_index;
         }
     }
     menu_free_high_overlay();
     g_menu_overlay_state = 0;
-    menu_start_unit_view_thread(saved, 0xFF, 0xFF);
+    menu_start_unit_view_thread(saved_view_mode, 0xFF, 0xFF);
     g_sound_suppressed = 0;
     g_script_event_input = 0;
     menu_clear_modal_open();
     thread_exit_current();
 }
 
-/* Open the unit editor for a rider or mount, then restore its menu view. */
+/* Open DEBUGCHR's unit editor on the selected unit when it is a rider or a mount, then rebuild
+ * the idle action menu and the unit summary for it. */
 void menu_open_debugchr_unit_editor(void) {
     s16* unit_index = &g_menu_selected_unit.battle_id;
 
@@ -770,9 +794,11 @@ void menu_load_portrait_image(s32 portrait_id) {
 }
 
 /*
- * Loads one 0x7800-byte block of EVTCHR.BIN into a fresh allocation on the main
- * stack, publishing it through g_script_pending_loaded_evtchr_slot / g_script_loaded_evtchr_buffer before
- * releasing it. Parameter 2 selects the block; each occupies 15 sectors from 0x1d4c.
+ * Loads one 0x7800-byte block of EVTCHR.BIN into a fresh heap allocation, with the read
+ * and its polling run on the main stack. Parameter 1 is the EVTCHR slot and parameter 2
+ * the block; each block occupies 15 sectors from 0x1d4c. The block is published through
+ * g_script_pending_loaded_evtchr_slot and g_script_loaded_evtchr_buffer for one frame, during
+ * which the per-frame event update unpacks it into the slot, and then freed.
  */
 void gfx_load_evtchr_thread(void) {
     s32 parameter = thread_get_current_parameter_1();
@@ -796,7 +822,9 @@ void gfx_load_evtchr_thread(void) {
     thread_exit_current();
 }
 
-/* Uploads eight 32x48 portraits and their palettes from one EVTFACE.BIN block. */
+/* Uploads eight 32x48 portraits and their palettes from one EVTFACE.BIN block, yielding while
+ * the file loads. Each portrait is 8 VRAM columns (32 4-bit pixels) wide, placed side by side
+ * from g_menu_portrait_pixel_rect. */
 void script_opcode_portrait_col(s32 portrait_id) {
     RECT rect;
     menu_portrait_image_file_t* buffer;
@@ -944,7 +972,7 @@ void menu_run_companion_overlay_stub(void) {
  * an egg, and reopen the skillset and ability lists when restoring the same unit's menu. */
 static void menu_start_entry_thread(void) {
     s32 menu_id = thread_get_current_parameter_1();
-    s32 count;
+    s32 restore_depth;
 
     thread_wait_until_inactive(THREAD_SLOT_MENU);
     if (g_menu_overlay_state != 0) {
@@ -976,18 +1004,18 @@ static void menu_start_entry_thread(void) {
     }
     thread_start(THREAD_SLOT_MENU, g_menu_thread_menu_data[menu_id].thread_entry);
     thread_set_parameters(THREAD_SLOT_MENU, (s32)&g_menu_thread_menu_data[menu_id], 0, 0);
-    count = g_menu_restore_depth;
+    restore_depth = g_menu_restore_depth;
     g_script_event_input = 0;
     if (g_menu_restore_pending != 0 && g_menu_restore_unit_id == g_menu_selected_unit.battle_id) {
         g_menu_help_open = 1;
         thread_wait_frames(2);
-        if (count > 0) {
+        if (restore_depth > 0) {
             thread_start(THREAD_SLOT_MENU_CHILD, menu_run_skillset_thread);
             thread_set_parameters(
                 THREAD_SLOT_MENU_CHILD, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_SKILLSET_LIST], 0, 0);
         }
         thread_wait_frames(2);
-        if (count >= 2) {
+        if (restore_depth >= 2) {
             thread_start(THREAD_SLOT_MENU_GRANDCHILD, menu_select_unit_action_slots_thread);
             thread_set_parameters(
                 THREAD_SLOT_MENU_GRANDCHILD, (s32)&g_menu_thread_menu_data[BATTLE_MENU_ID_ABILITY_LIST], 0, 0);
@@ -1052,7 +1080,7 @@ void menu_build_idle_action_menu(s32 menu_id) {
                 entry += 1;
             } while (i < IDLE_ACTION_MENU_ENTRY_COUNT);
             menu_restore_selection_for_selected_unit(menu_id);
-            selected_index = &g_menu_thread_menu_data[8].selected_index;
+            selected_index = &g_menu_thread_menu_data[BATTLE_MENU_ID_STATUS_LIST].selected_index;
             *selected_index = 0;
             g_menu_status_list_layout.row_offset = 0;
             menu_clear_entry_selections();

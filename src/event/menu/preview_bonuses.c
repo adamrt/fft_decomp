@@ -16,7 +16,8 @@ s32 menu_get_preview_hp_bonus_display(s32 unused_row) {
     return value;
 }
 
-/* Menu callback: the previewed MP bonus, or dashes when it is zero. */
+/* Row callback: return the previewed MP bonus, or MENU_NUMBER_VALUE_DASHES to draw dashes when it
+ * is 0; the row is ignored. */
 s32 menu_get_preview_mp_bonus_display(s32 unused_row) {
     s32 value = g_menu_selected_unit_stat_summary.gauges[MENU_UNIT_STATUS_GAUGE_MP].bonus;
 

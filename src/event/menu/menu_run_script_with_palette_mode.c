@@ -4,7 +4,8 @@
 #include "fft/menu_script.h"
 #include "psx/types.h"
 
-/* A dimmed palette also withholds input from the display script. */
+/* Run a menu display script with palette mode `mode` (nonzero dims it); a dimmed script also gets
+ * no input. */
 void menu_run_script_with_palette_mode(menu_instruction_t* script, s32 input, s32 mode) {
     s32 value = input;
 

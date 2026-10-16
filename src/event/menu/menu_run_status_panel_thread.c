@@ -14,7 +14,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Display the selected unit's equipment and ability status panel. */
+/* The selected unit's equipment and ability panel as menu_run_equipment_ability_panel_thread
+ * draws it, from this program's own buffers and label layouts, with the draw offset following
+ * the screen polarity. Runs until a stop request. */
 void menu_run_status_panel_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_buffer_t* screen;
@@ -23,7 +25,7 @@ void menu_run_status_panel_thread(void) {
     s32 frame;
     s32 mode;
     s32 i;
-    s32 scale;
+    s32 field_y;
     s32 mask;
     RECT* rect;
     RECT* offsets;
@@ -154,14 +156,14 @@ void menu_run_status_panel_thread(void) {
             }
         }
 
-        /* A scale (field y) of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into
-         * the upper half. */
-        scale = g_main_gfx_screen_polarity * 0xf0;
-        mask = scale ^ 0xf0;
+        /* A field_y of 0 draws into the lower frame-buffer half (offset 0xF0), 0xF0 into the
+         * upper half. */
+        field_y = g_main_gfx_screen_polarity * 0xf0;
+        mask = field_y ^ 0xf0;
         mask = -(mask != 0);
         g_gfx_draw_offset_y = mask & 0xf0;
         menu_build_scaled_draw_area_packets(
-            &screen->portrait, &g_character_status_draw_area_rect, frame, scale, thread);
+            &screen->portrait, &g_character_status_draw_area_rect, frame, field_y, thread);
         screen->draw_offsets[0].position.x = thread->x - 0x80;
         screen->draw_offsets[0].position.y = thread->y + g_gfx_draw_offset_y;
         SetDrawOffset(&screen->draw_offsets[0].packet, (u16*)&screen->draw_offsets[0].position);

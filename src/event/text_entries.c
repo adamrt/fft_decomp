@@ -19,19 +19,20 @@ void menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position) {
     text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_stacked_glyph_lower, position);
 }
 
-/* Dispatch one text entry through the scene's main-stack renderer. */
+/* Render text entry text_id into a 4bpp image at the pen origin, running menu_display_text
+ * on the main stack. */
 void menu_display_text_entry(s32 text_id, u8* image, glyph_blit_t* origin) {
     g_thread_call_target = (void (*)(void))menu_display_text;
     thread_call_on_main_stack(text_id, image, origin, 0);
 }
 
-/* Dispatch with the renderer's continue-past-choice-marks argument. */
+/* menu_display_text_entry, with the renderer told to continue past choice marks. */
 void menu_display_text_entry_past_choice_marks(s32 text_id, u8* image, glyph_blit_t* origin) {
     g_thread_call_target = (void (*)(void))menu_display_text;
     thread_call_on_main_stack(text_id, image, origin, 1);
 }
 
-/* Dispatch a supplied text cursor through the scene's main-stack renderer. */
+/* Render a text string the caller supplies instead of a text id, on the main stack. */
 void menu_display_text_string(u8* image, glyph_blit_t* origin, u8* text) {
     g_thread_call_target = (void (*)(void))menu_display_text;
     thread_call_on_main_stack(0, image, origin, text);

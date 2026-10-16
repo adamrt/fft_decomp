@@ -8,8 +8,10 @@
 
 /* Draw the visible rows of a scrollable list.
  *
- * The 0x10 render command supplies the list geometry; 0x1C terminates a
- * stream that has no list.
+ * The stream's MENU_SCRIPT_OP_SCROLLABLE_LIST command supplies the list geometry; a stream that
+ * reaches its end opcode first has no list. The selection and scroll position are clamped to
+ * the list and, with a text table set, the visible rows' text is redrawn into VRAM at
+ * (0x100, 0x30).
  */
 void menu_draw_scrollable_list(const menu_instruction_t* script) {
     RECT rect;

@@ -12,11 +12,13 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Thread task 0x3b: numeric editor panel;
- * like WORLD, BUNIT reads the 0/0xf0 draw offset from g_frame_arg.
- * The primitive block is menu_status_panel_numeric_buffer_t, double buffered at
- * g_editor_numeric_state_a (thread 12) or _b; the thread parameter block is
- * menu_status_thread_t. */
+/* Thread body (task THREAD_TASK_STATUS_PANEL) of the numeric stats panel. In slot 12 it shows the
+ * selected unit's numbers; in any other slot it is a preview panel that draws signed values
+ * from its own buffers (g_editor_numeric_state_b and the _b, _d-_f records). Parameter 1 is the
+ * panel's menu_status_thread_t record. The number images upload on the first frame and on the
+ * record's redraw request; the panel zooms open over its first 13 frames, dims while the record's
+ * style is 1 or menu input is locked, and runs until a stop request. Like WORLD, the draw offset
+ * (0 or 0xF0) follows g_frame_arg. */
 void menu_run_numeric_editor_frame_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;

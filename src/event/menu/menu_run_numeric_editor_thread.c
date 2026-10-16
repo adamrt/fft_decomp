@@ -12,7 +12,10 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Render the numeric editor until the current task requests a stop. */
+/* The numeric stats panel as menu_run_numeric_editor_frame_thread draws it, except that the
+ * draw offset follows the screen polarity and both slots use g_editor_numeric_state, so a
+ * preview panel shares the main panel's primitive buffers (retail). Runs until a stop
+ * request. */
 void menu_run_numeric_editor_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;

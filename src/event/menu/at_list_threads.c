@@ -21,7 +21,12 @@ void thread_stop_after_yield(void) {
     thread_exit_current();
 }
 
-/* Runs the crystal/treasure result panel and its list and choice threads. */
+/* Run the menus of a crystal or treasure pickup (g_menu_dead_unit_context) and leave the
+ * outcome in g_menu_dead_unit_action: result 0 shows the nothing-found message (action 0), 4
+ * names the treasure item, sold for a quarter of its price at the 99 limit (action 4). A crystal
+ * offers its learned-ability list (result 1, action 1 when one is taken), the confirm menu
+ * (result 2, action 2) or a choice between the two (result 3). The previous menu table is
+ * restored at the end. */
 void menu_start_dead_unit_threads(void) {
     crystal_pickup_result_t* context = g_menu_dead_unit_context;
     menu_entry_t* previous_menu_descriptor = g_menu_thread_menu_data;
@@ -257,7 +262,7 @@ static void menu_init_at_list(menu_entry_t* menu) {
             *text++ = 0xbe;
         }
         /* The pointer must lead the index in the sum to match the target's
-           operand order on the address add. */
+         * operand order on the address add. */
         for (name_index = 0; name_index < UNIT_NAME_SIZE; name_index++) {
             u8 character = unit->name[name_index];
             *text = character;
@@ -344,11 +349,12 @@ static void menu_init_at_list(menu_entry_t* menu) {
     }
 }
 
-/* Thread body: pauses the four worker threads after this one, yields until
- * g_menu_at_list_selection_finished is raised (keeping the g_menu_transition_state timeout 100 ahead of
- * g_menu_at_list_state.selected_index), then resets the state, waits for threads 13..10, points
- * g_text_section_pointers[TEXT_SECTION_AT_LIST] at g_menu_at_list_text, resumes the worker threads and
- * stops itself. */
+/* Thread body: pauses the four worker threads after this one and yields until
+ * g_menu_at_list_selection_finished is raised, publishing the AT list's cursor row plus 100 in
+ * g_menu_transition_state every frame (menu_get_thread_activity reports it). Then it resets the
+ * state, closes the unit view panels (threads 13..10), points
+ * g_text_section_pointers[TEXT_SECTION_AT_LIST] at g_menu_at_list_text again, resumes the worker
+ * threads and stops itself. */
 void menu_at_list_select_unit_thread(void) {
     g_menu_modal_open = 1;
     g_menu_overlay_state = 2;

@@ -17,9 +17,9 @@ void menu_toggle_unit_status_thread(s32 enable) {
     }
 }
 
-/* Start (arg=1) or stop (arg=0) sub-thread 7, invoking
- * menu_run_unit_status_thread with parameter block g_menu_comparison_display_thread_params. Sister of
- * thread-8 toggle. */
+/* Open the comparison status panel thread (slot 7, menu_run_unit_status_thread on
+ * g_menu_comparison_display_thread_params) if it is not already running, or with enable 0 ask it
+ * to stop. */
 void menu_toggle_comparison_status_thread(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0) {

@@ -14,10 +14,11 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* The status buffer is menu_status_panel_buffer_t and the thread record
- * menu_status_thread_t, as in the WORLD twin menu_run_equipment_ability_panel_thread. */
-
-/* Thread task 0x3b: the combined status panel for the selected unit. */
+/* Thread body (task THREAD_TASK_STATUS_PANEL) of the selected unit's combined equipment and
+ * ability panel: item icons, the five equipment names and the five ability names, laid out by
+ * whether the unit is two-handed or a monster. Parameter 1 is the panel's menu_status_thread_t
+ * record, whose position places the panel and whose redraw request uploads the names again.
+ * The panel zooms open over its first 13 frames and runs until a stop request. */
 void menu_run_equipment_ability_panel_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_buffer_t* screen;

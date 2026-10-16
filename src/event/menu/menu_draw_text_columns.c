@@ -25,6 +25,8 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             if (layout->mode[column] != MENU_TEXT_COLUMN_HIDDEN) {
                 g_menu_text_palette_offset = layout->text_colors[column][index];
             }
+            /* A row drawn in palette 4 (the highlighted row) also gets a background of
+             * color index 4 in every pixel nibble. */
             g_menu_text_state.pen.color = 0;
             if (g_menu_text_palette_offset == 4) {
                 g_menu_text_state.pen.color = 0x44444444;
