@@ -422,7 +422,6 @@ static s32 thread_find_first_running_menu_thread(void) {
 }
 
 /* Run the help menu over the REQUIRE screen. */
-
 void menu_run_require_help(void) {
     POLY_FT4 cursor[2];
     POLY_FT4 shadow[2];

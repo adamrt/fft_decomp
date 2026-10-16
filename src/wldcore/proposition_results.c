@@ -369,7 +369,6 @@ random_reward:
 
 /* Records 0xC and 0xD of the proposition data table are 16-bit percentage
  * ramps indexed by the number of days the proposition has been running. */
-
 void wldcore_proposition_apply_extra_days_multiplier(void) {
     s32 record;
     const u16* reward_scale;
@@ -413,7 +412,6 @@ void wldcore_proposition_apply_extra_days_multiplier(void) {
  * written `slots[0] > slots[1]`; the reversed spelling swaps the slots[] load
  * pair and costs instructions.
  */
-
 s32 wldcore_proposition_find_preferred_job_unit(void) {
     s32 candidates[4];
     s32 slots[4];

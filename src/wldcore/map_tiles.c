@@ -145,7 +145,6 @@ void wldcore_gfx_toggle_captured_world_frame(s32 capture) {
  *  - `y` is initialized before `k` and `i`: the target emits `li t3,-192`
  *    first in the outer preheader.
  */
-
 void wldcore_map_init_tile_atlas(void) {
     s32* descriptor;
     point32_t* wpos;

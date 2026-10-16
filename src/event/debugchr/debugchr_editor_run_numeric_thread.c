@@ -12,7 +12,6 @@
  * The primitive block is menu_status_panel_numeric_buffer_t, double buffered at
  * g_editor_numeric_state_a (thread 12) or _b; the thread parameter block is
  * menu_status_thread_t. */
-
 void debugchr_editor_run_numeric_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;

@@ -8,7 +8,6 @@
 #include "psx/types.h"
 
 /* Render the numeric editor until the current task requests a stop. */
-
 void menu_run_numeric_editor_thread(void) {
     menu_status_thread_t* thread;
     menu_status_panel_numeric_buffer_t* buffer;

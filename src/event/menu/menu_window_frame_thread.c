@@ -17,7 +17,6 @@
    holds each window's w/h (0x10x0x10, 8x0x10, 0x10x8 and two full 0x100x0x100
    windows); this function only fills in the runtime x/y. Indexing the array
    is also what reproduces the target's symbol-plus-byte-offset addressing. */
-
 void menu_window_frame_thread(void) {
     RECT texture;
     /* Keeping both stride fields live retains their descriptor bases. */

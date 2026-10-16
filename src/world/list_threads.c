@@ -179,7 +179,6 @@ void menu_run_equipment_list_thread_variant(void) {
  * second. A trimmed relative of menu_run_status_panel_thread
  * (same 0x3d8-byte frame layout and callee sequence).
  */
-
 void menu_run_ability_list_thread_variant(void) {
     s32 offset[2];
     /* Never referenced: the target frame has these 16 bytes between the

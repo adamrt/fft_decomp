@@ -1741,7 +1741,6 @@ static void wldcore_proposition_prepare_report(s32 proposition_index) {
  * 0x8009f312 (unpacked proposition row 0x8009f2ec + 0x26). The goto form
  * for the shared bravery/faith tails matches the target, which reloads the
  * stat after the compare. */
-
 static s32 wldcore_proposition_select_report_speaker(s32 index) {
     party_unit_t* unit;
     s32 best;

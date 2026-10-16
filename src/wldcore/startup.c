@@ -267,7 +267,6 @@ void wldcore_clear_screen_and_set_map_clip_rect(s32 mode) {
  * by src/wldcore/wldcore_init_core.c, which indexes these same globals
  * with `g_active_graphics_buffer_index * 0x14`.
  */
-
 static void wldcore_gfx_init_subsystem(void) {
     SetDispMask(0);
     GsInitGraph2(256, 240, 4, 0, 0);
@@ -292,7 +291,6 @@ static void wldcore_gfx_init_subsystem(void) {
  * The target derives each fade box's 32-bit attribute through the record base
  * while it walks the rectangle fields separately.
  */
-
 static void wldcore_init_world_map_state(void) {
     menu_cursor_state_t* cursor;
     GsBOXF* box;

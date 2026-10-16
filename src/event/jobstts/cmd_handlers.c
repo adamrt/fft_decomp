@@ -14,7 +14,6 @@
  * source selection. Reassigning the command pointer before the return keeps
  * its reference count high enough for global allocation to place it in s6.
  */
-
 menu_instruction_t* jobstts_cmd_draw_window_frame_handler(menu_instruction_t* command) {
     RECT rect;
     s32 left;

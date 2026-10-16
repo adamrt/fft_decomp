@@ -107,7 +107,6 @@ void wldcore_map_project_and_cull_dots(void) {
  * variable the allocator swaps the g_wldcore_map_dot_pulse_direction snapshot ($a0 in the target) and
  * the limit ($v1); reusing the function-scope allocno reproduces the target
  * pair. */
-
 void wldcore_map_pulse_dot_colors(void) {
     s32 flags;
     s32 i;

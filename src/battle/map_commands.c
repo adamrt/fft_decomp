@@ -684,7 +684,6 @@ void battle_gfx_start_screen_color_modulation_fade(u16 blend_mode, u16 red, u16 
  * channel, and the number of frames left.  The three-element shape is what
  * makes GCC hold the base addresses of the current-color and accumulator
  * arrays in registers for element 0. */
-
 void battle_gfx_update_screen_color_modulation_fade(void) {
     u16 count;
     u16 remaining;

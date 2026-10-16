@@ -310,7 +310,6 @@ void world_formation_init_menu_state(void) {
 /* Built at -O1: -O1 does no
  * strength reduction, which is why the target recomputes the index inside
  * the loop. Same profile as the adjacent world_formation_init_menu_state. */
-
 void world_menu_reset_selection_results(void) {
     s32 i;
 

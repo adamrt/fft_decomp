@@ -272,8 +272,6 @@ static s32 world_menu_run_remove_ability(void) {
     return 1;
 }
 
-/* volatile: the target re-reads the counter right after incrementing it */
-
 static s32 world_menu_update_clear_all_abilities_prompt(void) {
     world_unit_t* unit;
     u16 value;

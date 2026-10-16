@@ -75,7 +75,6 @@ static void battle_move_undo_unit_move(battle_unit_t* unit) {
  * types because the target uses struct copies (four lw/sw, and lwl/lwr for
  * the 16-bit-aligned screen block) that per-field stores do not reproduce.
  */
-
 static void battle_unit_copy_rider_data_to_mount(battle_unit_t* unit, battle_unit_t* rider) {
     battle_unit_t* mount;
 

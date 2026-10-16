@@ -34,7 +34,6 @@
  *
  * The native inner-call trampoline intentionally forwards varying argument
  * counts through its () ABI. */
-
 void script_execute_event_variant(void) {
     s32 unit_lookup_status;
     s32 ghost_runtime_id;

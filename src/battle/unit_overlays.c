@@ -570,7 +570,6 @@ void battle_gfx_draw_unit_shadow(battle_unit_t* unit, u32* ot) {
  * 0x50 palette, and both are queued only when the first three projected
  * vertices face the camera. The pool stride is always sizeof(POLY_FT4).
  */
-
 void battle_gfx_build_cursor_tile_glow(
     s32 palette, s32 shape, SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, u32* ot) {
     VECTOR screen;

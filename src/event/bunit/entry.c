@@ -266,7 +266,6 @@ s32 bunit_menu_is_active_or_transitioning(void) {
 }
 
 /* Unit-list menu frame handler (g_bunit_menu_current_menu state -1 / 0). */
-
 static s32 bunit_menu_run_unit_list_frame(void) {
     s32 input;
     bunit_unit_t* unit;

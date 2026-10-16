@@ -481,7 +481,6 @@ s32 battle_map_load_alternate_mesh(s32 palette_mode) {
  * triangles/quads. The mesh metadata keeps the starting indices and the
  * incoming counts; the persistent totals advance at the end.
  */
-
 void battle_map_append_mesh_geometry(const map_mesh_geometry_t* geometry_data, map_mesh_part_t* metadata) {
     /* Named count loads fold the retail four 16-bit cursor advances. */
     const u16* source = &geometry_data->textured_triangle_count;

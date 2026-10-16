@@ -11,7 +11,6 @@
  * list, their category window table, their filter loop and their encode path;
  * this one additionally honors the uses_monster_skillset restriction.
  */
-
 s32 ability_build_list_variant(s16 unit_index, s16 job_id, s32 ability_category, s16* list, s32 mode) {
     s32 skillset;
     s16 generic_index;

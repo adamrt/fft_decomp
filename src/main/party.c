@@ -944,7 +944,6 @@ static void main_unit_init_battle_data(unit_stats_t* unit, const party_unit_t* p
 }
 
 /* Initialize packed job levels, unlocked jobs, and ENTD skillset overrides. */
-
 static void main_unit_calculate_jobs_and_skillsets_from_entd(unit_stats_t* unit, const entd_unit_t* entd) {
     s32 i;
     u32 unlocked;

@@ -1899,7 +1899,6 @@ void require_thread_exit_current(void) {
  * target keeps, and the extra insns keep it from hoisting the row offset and
  * the RotMatrix/vector addresses out of the column loop.
  */
-
 void require_reward_animate_bonus_image_burst(void) {
     s32 phase;
     s32 max_delay;

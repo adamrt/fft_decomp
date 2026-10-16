@@ -172,7 +172,6 @@ void attack_gfx_prepare_party_portrait_textures(void) {
  * order. The palette offset's `/ 2` of an even sum compiles to the target's
  * plain `sra` and its allocation order; it also adds an 8-byte compiler
  * stack slot, so `unused` covers only the remaining 16 bytes. */
-
 void attack_gfx_prepare_formation_sprites(void) {
     u8 unused[0x10];
     u8* buffer;

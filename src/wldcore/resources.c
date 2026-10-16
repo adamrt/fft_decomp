@@ -169,7 +169,6 @@ void wldcore_gfx_load_background_set(s32 set) {
  * g_wldcore_message_block_sector_offsets has the same shape as the pair used by
  * wldcore_load_sound_novel_files: entry i is the start sector of block i relative to the disc
  * LBA below, so entry i+1 minus entry i is that block's length. */
-
 void wldcore_load_message_block_if_changed(s32 block) {
     g_text_section_pointers[TEXT_SECTION_MESSAGES] = g_wldcore_message_buffer;
     if (block != g_wldcore_loaded_message_block) {

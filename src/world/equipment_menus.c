@@ -36,7 +36,6 @@
  * 0x801c8518 carries two cataloged names and the store and the reload use
  * different ones, matching that same twin: one symbol for both lets cse
  * forward the stored value. */
-
 s32 menu_update_equipment_variant(void) {
     s32 input;
     s32 disabled;
@@ -120,7 +119,6 @@ s32 menu_update_equipment_variant(void) {
 /* Item-list menu thread for the formation item screen: builds the item
  * category list on entry, steps the cursor, and refreshes the stat preview.
  */
-
 s32 item_run_category_menu_variant(void) {
     s16 x;
     s16 y;

@@ -533,7 +533,6 @@ void wldcore_window_set_list_window_states(wldcore_menu_list_window_level_t* sta
  * accessed as an array element (a scalar store does not alias the level field). The wrap-to-bottom step is written `y
  * -= n * -16` to keep y as the first addu operand.
  */
-
 void wldcore_menu_handle_brave_story_input(wldcore_menu_list_window_level_t* level) {
     u32 flags;
     u32 buttons;
