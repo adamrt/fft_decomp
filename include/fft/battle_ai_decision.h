@@ -149,7 +149,7 @@ typedef enum ai_tile_mask_mode {
 
 extern u16 g_battle_ai_range_row_masks[];
 
-void battle_ai_build_attack_origin_masks(void);
+void battle_ai_build_cast_origin_and_aim_tiles(void);
 s32 battle_ai_calculate_distance_between_units(const unit_stats_t* a, const unit_stats_t* b);
 s32 battle_ai_calculate_height_difference_between_units(const ai_coords_t* coords, const unit_stats_t* unit);
 void battle_ai_copy_unit_coordinates(s32 unit_index, ai_coords_t* destination);

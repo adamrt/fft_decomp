@@ -1,7 +1,7 @@
 #ifndef EVENT_DEBUGCHR_H
 #define EVENT_DEBUGCHR_H
 
-/* EVENT/DEBUGCHR.OUT: the BATTLE overlay of the debug unit editor. */
+/* EVENT/DEBUGCHR.OUT: the BATTLE overlay of the debug unit editor and the mounted unit's status screen. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -40,7 +40,7 @@ extern POLY_FT4 g_debugchr_editor_cursor_polys[];
 extern POLY_FT4 g_debugchr_editor_cursor_shade_polys[];
 
 void debugchr_editor_run_session(void);
-void debugchr_editor_run_unit_thread(s32 unit_id);
+void debugchr_status_run_unit_thread(s32 unit_id);
 void debugchr_editor_run_numeric_thread(void);
 
 /* unit panels */

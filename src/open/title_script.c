@@ -1,4 +1,4 @@
-/* Music test menus, text message controllers, title demo streams, transitions and crossfades, the opening script state,
+/* Music test menus, text message controllers, title demo streams, the new-game prologue, the opening script state,
  * XA audio, the ending movie and the script opcodes. */
 
 #include "fft/file.h"
@@ -32,9 +32,9 @@ static s16 g_open_music_test_row_actions[16]
     = { 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000 };
 
 static void open_controller_start_text_message(s32 parameter, s32 run_followup);
-static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index);
-static void open_gfx_draw_transition_line_strips(s32 intensity);
-static void open_gfx_step_image_crossfade(void);
+static void open_prologue_prepare_crossfade(s32 file_index);
+static void open_prologue_draw_text_lines(s32 intensity);
+static void open_prologue_step_crossfade(void);
 static void open_gfx_update_opntex_sequence(void);
 static void open_movie_stream_fftend(s32 start_sector, s32 unused, s32 end_frame);
 static u8* open_script_add_pointer_offset(u8* base, s32 byte_offset);
@@ -365,7 +365,7 @@ void open_title_select_new_game(void) {
     card_present = open_card_check_slots();
     index = 0;
     if (card_present != 0) {
-        open_title_start_new_game_transition();
+        open_prologue_start();
         return;
     }
 
@@ -426,7 +426,7 @@ void open_title_update_card_warning(open_controller_record_t* record) {
             }
             open_title_push_menu_controller(0);
         } else if (state == OPEN_TITLE_EXIT_CONFIRM) {
-            open_title_start_new_game_transition();
+            open_prologue_start();
         }
         return;
     }
@@ -446,21 +446,21 @@ void open_title_update_card_warning(open_controller_record_t* record) {
 /* Arm the new-game prologue sequence: start before entry 0 of entry_table with NEXT_ENTRY set, end
  * at entry target, draw its text in ordering-table entries ot_layer and ot_layer + 1, at full
  * brightness (0x80). */
-void open_gfx_init_transition_request(s32 target, s32 ot_layer, open_gfx_transition_entry_t** entry_table) {
-    g_open_gfx_transition.flags = OPEN_GFX_TRANSITION_NEXT_ENTRY;
-    g_open_gfx_transition.current_index = 0;
-    g_open_gfx_transition.target_index = target;
-    g_open_gfx_transition.entry_table = entry_table;
-    g_open_gfx_transition.ot_layer = ot_layer;
-    g_open_gfx_transition.intensity = 0x80;
+void open_prologue_init_sequence(s32 target, s32 ot_layer, open_prologue_entry_t** entry_table) {
+    g_open_prologue.flags = OPEN_PROLOGUE_NEXT_ENTRY;
+    g_open_prologue.current_index = 0;
+    g_open_prologue.target_index = target;
+    g_open_prologue.entry_table = entry_table;
+    g_open_prologue.ot_layer = ot_layer;
+    g_open_prologue.intensity = 0x80;
 }
 
-/* Empty. open_title_step_new_game_start calls it once the transition sequence has finished. */
-void open_gfx_transition_finished_stub(void) {
+/* Empty. open_title_step_new_game_start calls it once the prologue has finished. */
+void open_prologue_finished_stub(void) {
 }
 
 /* Advance the new-game prologue by one frame: the picture crossfade and the text
- * of the current transition entry. Returns 1 while it runs and 0 when it has
+ * of the current prologue entry. Returns 1 while it runs and 0 when it has
  * finished.
  *
  * An entry is one page of text lines. NEXT_ENTRY loads the next entry, or
@@ -474,113 +474,112 @@ void open_gfx_transition_finished_stub(void) {
  *
  * Start sets SKIP: the lines keep advancing while the brightness runs down, and
  * the sequence ends once it is 0 and the crossfade has stopped. */
-s32 open_gfx_update_transition_sequence(void) {
+s32 open_prologue_update(void) {
     u16 flags;
     s32 i;
-    open_gfx_transition_entry_t* entry;
+    open_prologue_entry_t* entry;
     s32 image_command;
 
-    open_gfx_step_image_crossfade();
-    if (!(g_open_gfx_transition.flags & OPEN_GFX_TRANSITION_SKIP)) {
+    open_prologue_step_crossfade();
+    if (!(g_open_prologue.flags & OPEN_PROLOGUE_SKIP)) {
         if (g_open_input_new_button_presses & PSX_PAD_START) {
             main_sound_play_sfx(MAIN_SFX_COMPLETE);
-            g_open_gfx_transition.flags |= OPEN_GFX_TRANSITION_SKIP;
+            g_open_prologue.flags |= OPEN_PROLOGUE_SKIP;
         }
-        flags = g_open_gfx_transition.flags;
-        if (!(flags & OPEN_GFX_TRANSITION_SKIP)) {
-            if (flags & OPEN_GFX_TRANSITION_DIM) {
-                g_open_gfx_transition.intensity -= 2;
-                open_gfx_draw_transition_line_strips(g_open_gfx_transition.intensity);
-                if (g_open_gfx_transition.intensity == 0) {
-                    g_open_gfx_transition.intensity = 0x80;
-                    g_open_gfx_transition.flags
-                        = (g_open_gfx_transition.flags ^ OPEN_GFX_TRANSITION_DIM) | OPEN_GFX_TRANSITION_NEXT_ENTRY;
+        flags = g_open_prologue.flags;
+        if (!(flags & OPEN_PROLOGUE_SKIP)) {
+            if (flags & OPEN_PROLOGUE_DIM) {
+                g_open_prologue.intensity -= 2;
+                open_prologue_draw_text_lines(g_open_prologue.intensity);
+                if (g_open_prologue.intensity == 0) {
+                    g_open_prologue.intensity = 0x80;
+                    g_open_prologue.flags = (g_open_prologue.flags ^ OPEN_PROLOGUE_DIM) | OPEN_PROLOGUE_NEXT_ENTRY;
                 }
                 return 1;
             }
-            if (flags & OPEN_GFX_TRANSITION_WAIT_CIRCLE) {
+            if (flags & OPEN_PROLOGUE_WAIT_CIRCLE) {
                 if (g_open_input_new_button_presses & PSX_PAD_CIRCLE) {
-                    g_open_gfx_transition.flags = (flags ^ OPEN_GFX_TRANSITION_WAIT_CIRCLE) | OPEN_GFX_TRANSITION_DIM;
-                    g_open_gfx_transition.intensity = 0x80;
+                    g_open_prologue.flags = (flags ^ OPEN_PROLOGUE_WAIT_CIRCLE) | OPEN_PROLOGUE_DIM;
+                    g_open_prologue.intensity = 0x80;
                 }
-                open_gfx_draw_transition_line_strips(g_open_gfx_transition.intensity);
+                open_prologue_draw_text_lines(g_open_prologue.intensity);
                 return 1;
             }
-            if (flags & OPEN_GFX_TRANSITION_NEXT_ENTRY) {
-                flags ^= OPEN_GFX_TRANSITION_NEXT_ENTRY;
-                g_open_gfx_transition.flags = flags;
-                if (g_open_gfx_transition.current_index == g_open_gfx_transition.target_index) {
+            if (flags & OPEN_PROLOGUE_NEXT_ENTRY) {
+                flags ^= OPEN_PROLOGUE_NEXT_ENTRY;
+                g_open_prologue.flags = flags;
+                if (g_open_prologue.current_index == g_open_prologue.target_index) {
                     return 0;
                 }
-                g_open_gfx_transition.flags = flags | OPEN_GFX_TRANSITION_NEXT_STEP;
-                entry = g_open_gfx_transition.entry_table[g_open_gfx_transition.current_index];
-                g_open_gfx_transition.entry = entry;
-                g_open_gfx_transition.step_count = (u8)entry->header;
-                g_open_gfx_transition.tpage_x = (entry->header & 0xf00) >> 2;
-                g_open_gfx_transition.tpage_y = (entry->header >> 4) & 0x100;
+                g_open_prologue.flags = flags | OPEN_PROLOGUE_NEXT_STEP;
+                entry = g_open_prologue.entry_table[g_open_prologue.current_index];
+                g_open_prologue.entry = entry;
+                g_open_prologue.step_count = (u8)entry->header;
+                g_open_prologue.tpage_x = (entry->header & 0xf00) >> 2;
+                g_open_prologue.tpage_y = (entry->header >> 4) & 0x100;
                 /* The high nibble selects the operation; the low nibble selects its image. */
                 image_command = (u8)(entry->header >> 16);
-                switch (image_command & OPEN_GFX_TRANSITION_IMAGE_OPERATION_MASK) {
-                case OPEN_GFX_TRANSITION_PREPARE_IMAGE:
-                    open_gfx_copy_file_image_to_210x180_buffer(image_command & OPEN_GFX_TRANSITION_IMAGE_INDEX_MASK);
+                switch (image_command & OPEN_PROLOGUE_IMAGE_OPERATION_MASK) {
+                case OPEN_PROLOGUE_PREPARE_IMAGE:
+                    open_prologue_prepare_crossfade(image_command & OPEN_PROLOGUE_IMAGE_INDEX_MASK);
                     break;
-                case OPEN_GFX_TRANSITION_START_CROSSFADE:
+                case OPEN_PROLOGUE_START_CROSSFADE:
                     file_wait_for_pending();
-                    g_open_gfx_image_copy_row_flags[0] = 1;
+                    g_open_prologue_crossfade_rows[0] = 1;
                     break;
                 }
                 {
-                    s16* index = &g_open_gfx_transition.current_index;
+                    s16* index = &g_open_prologue.current_index;
 
-                    g_open_gfx_transition.step = 0;
+                    g_open_prologue.step = 0;
                     (*index)++;
                 }
             }
         }
     }
 
-    flags = g_open_gfx_transition.flags;
-    if (flags & OPEN_GFX_TRANSITION_NEXT_STEP) {
-        g_open_gfx_transition.flags = flags ^ OPEN_GFX_TRANSITION_NEXT_STEP;
+    flags = g_open_prologue.flags;
+    if (flags & OPEN_PROLOGUE_NEXT_STEP) {
+        g_open_prologue.flags = flags ^ OPEN_PROLOGUE_NEXT_STEP;
         /* Every line is out: the page waits for Circle. */
-        if (g_open_gfx_transition.step == g_open_gfx_transition.step_count) {
-            g_open_gfx_transition.flags = (flags ^ OPEN_GFX_TRANSITION_NEXT_STEP)
-                | (OPEN_GFX_TRANSITION_NEXT_ENTRY | OPEN_GFX_TRANSITION_WAIT_CIRCLE);
-            open_gfx_draw_transition_line_strips(g_open_gfx_transition.intensity);
+        if (g_open_prologue.step == g_open_prologue.step_count) {
+            g_open_prologue.flags
+                = (flags ^ OPEN_PROLOGUE_NEXT_STEP) | (OPEN_PROLOGUE_NEXT_ENTRY | OPEN_PROLOGUE_WAIT_CIRCLE);
+            open_prologue_draw_text_lines(g_open_prologue.intensity);
             return 1;
         }
         /* Byte indexing preserves the retail address-add order and entry reloads. */
-        if (g_open_gfx_transition.step == 0) {
-            for (i = 0; i < g_open_gfx_transition.step_count; i++) {
-                g_open_gfx_transition.line_widths[i]
-                    = g_open_gfx_transition.entry->line_data[i * sizeof(open_gfx_transition_line_t)
-                        + offsetof(open_gfx_transition_line_t, width)];
-                g_open_gfx_transition.line_texture_rows[i]
-                    = g_open_gfx_transition.entry->line_data[i * sizeof(open_gfx_transition_line_t)
-                        + offsetof(open_gfx_transition_line_t, texture_row)];
+        if (g_open_prologue.step == 0) {
+            for (i = 0; i < g_open_prologue.step_count; i++) {
+                g_open_prologue.line_widths[i]
+                    = g_open_prologue.entry
+                          ->line_data[i * sizeof(open_prologue_line_t) + offsetof(open_prologue_line_t, width)];
+                g_open_prologue.line_texture_rows[i]
+                    = g_open_prologue.entry
+                          ->line_data[i * sizeof(open_prologue_line_t) + offsetof(open_prologue_line_t, texture_row)];
             }
         }
         {
-            s16* step = &g_open_gfx_transition.step;
+            s16* step = &g_open_prologue.step;
 
-            g_open_gfx_transition.timer = -0x10;
+            g_open_prologue.timer = -0x10;
             (*step)++;
         }
     }
 
-    if (++g_open_gfx_transition.timer == g_open_gfx_transition.line_widths[g_open_gfx_transition.step - 1]) {
-        g_open_gfx_transition.flags |= OPEN_GFX_TRANSITION_NEXT_STEP;
+    if (++g_open_prologue.timer == g_open_prologue.line_widths[g_open_prologue.step - 1]) {
+        g_open_prologue.flags |= OPEN_PROLOGUE_NEXT_STEP;
     }
 
-    if (g_open_gfx_transition.flags & OPEN_GFX_TRANSITION_SKIP) {
-        if (g_open_gfx_transition.intensity != 0) {
-            g_open_gfx_transition.intensity -= 2;
-        } else if (g_open_gfx_image_copy_row_flags[0] == 0) {
+    if (g_open_prologue.flags & OPEN_PROLOGUE_SKIP) {
+        if (g_open_prologue.intensity != 0) {
+            g_open_prologue.intensity -= 2;
+        } else if (g_open_prologue_crossfade_rows[0] == 0) {
             return 0;
         }
     }
 
-    open_gfx_draw_transition_line_strips(g_open_gfx_transition.intensity);
+    open_prologue_draw_text_lines(g_open_prologue.intensity);
     return 1;
 }
 
@@ -602,7 +601,7 @@ s32 open_gfx_update_transition_sequence(void) {
  * The coordinates are written in setXY4 order (x0, y0, x1, y1, ...) per
  * primitive, and width + 1 goes through its own variable (the target adds left
  * afterwards). */
-static void open_gfx_draw_transition_line_strips(s32 intensity) {
+static void open_prologue_draw_text_lines(s32 intensity) {
     POLY_GT4* prims;
     s32 i;
     s32 prim_index;
@@ -614,52 +613,52 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
     s32 v;
     u16 clut;
 
-    for (i = 0; i < g_open_gfx_transition.step + 1; i++) {
+    for (i = 0; i < g_open_prologue.step + 1; i++) {
         prim_index = i * 2;
-        prims = g_open_gfx_transition_line_primitives[g_main_gfx_active_buffer_index];
+        prims = g_open_prologue_line_primitives[g_main_gfx_active_buffer_index];
         SetPolyGT4(&prims[prim_index]);
         SetPolyGT4(&prims[prim_index + 1]);
 
-        if (i == g_open_gfx_transition.step) {
+        if (i == g_open_prologue.step) {
             /* Leading edge of the line in progress (line i - 1): black on its right. */
-            if (g_open_gfx_transition.line_widths[i - 1] < g_open_gfx_transition.timer) {
+            if (g_open_prologue.line_widths[i - 1] < g_open_prologue.timer) {
                 continue;
             }
-            width = g_open_gfx_transition.line_widths[i - 1] - g_open_gfx_transition.timer;
-            if (g_open_gfx_transition.timer < 0) {
-                width = g_open_gfx_transition.timer + 0x10;
+            width = g_open_prologue.line_widths[i - 1] - g_open_prologue.timer;
+            if (g_open_prologue.timer < 0) {
+                width = g_open_prologue.timer + 0x10;
             } else if (width >= 0x11) {
                 width = 0x10;
             }
-            u = g_open_gfx_transition.timer;
+            u = g_open_prologue.timer;
             if (u < 0) {
                 u = 0;
             }
-            v = g_open_gfx_transition.line_texture_rows[i - 1] * 0x10;
+            v = g_open_prologue.line_texture_rows[i - 1] * 0x10;
             setRGB1(&prims[prim_index], 0, 0, 0);
             setRGB1(&prims[prim_index + 1], 0, 0, 0);
             setRGB3(&prims[prim_index], 0, 0, 0);
             setRGB3(&prims[prim_index + 1], 0, 0, 0);
-            left = u - g_open_gfx_transition.line_widths[i - 1] / 2;
-            top_y = (i - 1) * 0x14 - g_open_gfx_transition.step_count * 10;
+            left = u - g_open_prologue.line_widths[i - 1] / 2;
+            top_y = (i - 1) * 0x14 - g_open_prologue.step_count * 10;
         } else {
             /* Line i: the revealed part of the line in progress, or a whole finished line. */
-            if (i == g_open_gfx_transition.step - 1) {
-                width = g_open_gfx_transition.timer;
+            if (i == g_open_prologue.step - 1) {
+                width = g_open_prologue.timer;
             } else {
-                width = g_open_gfx_transition.line_widths[i];
+                width = g_open_prologue.line_widths[i];
             }
             u = 0;
             if (width <= 0) {
                 continue;
             }
-            v = g_open_gfx_transition.line_texture_rows[i] * 0x10;
+            v = g_open_prologue.line_texture_rows[i] * 0x10;
             setRGB1(&prims[prim_index], intensity, intensity, intensity);
             setRGB1(&prims[prim_index + 1], intensity / 2, intensity / 2, intensity / 2);
             setRGB3(&prims[prim_index], intensity, intensity, intensity);
             setRGB3(&prims[prim_index + 1], intensity / 2, intensity / 2, intensity / 2);
-            left = -(g_open_gfx_transition.line_widths[i] / 2);
-            top_y = i * 0x14 - g_open_gfx_transition.step_count * 10;
+            left = -(g_open_prologue.line_widths[i] / 2);
+            top_y = i * 0x14 - g_open_prologue.step_count * 10;
         }
 
         setRGB0(&prims[prim_index], intensity, intensity, intensity);
@@ -670,8 +669,8 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
         clut = GetClut(0, 0x1e3);
         prims[prim_index + 1].clut = clut;
         prims[prim_index].clut = clut;
-        prims[prim_index].tpage = GetTPage(0, 1, g_open_gfx_transition.tpage_x, g_open_gfx_transition.tpage_y);
-        prims[prim_index + 1].tpage = GetTPage(0, 2, g_open_gfx_transition.tpage_x, g_open_gfx_transition.tpage_y);
+        prims[prim_index].tpage = GetTPage(0, 1, g_open_prologue.tpage_x, g_open_prologue.tpage_y);
+        prims[prim_index + 1].tpage = GetTPage(0, 2, g_open_prologue.tpage_x, g_open_prologue.tpage_y);
 
         setXY4(&prims[prim_index], left, top_y, left + width, top_y, left, top_y + 0x10, left + width, top_y + 0x10);
         width_plus_one = width + 1;
@@ -682,9 +681,9 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
 
         SetSemiTrans(&prims[prim_index], 1);
         SetSemiTrans(&prims[prim_index + 1], 1);
-        AddPrim(&g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_gfx_transition.ot_layer], &prims[prim_index]);
-        AddPrim(&g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_gfx_transition.ot_layer + 1],
-            &prims[prim_index + 1]);
+        AddPrim(&g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_prologue.ot_layer], &prims[prim_index]);
+        AddPrim(
+            &g_open_gfx_otags[g_main_gfx_active_buffer_index][g_open_prologue.ot_layer + 1], &prims[prim_index + 1]);
     }
 }
 
@@ -695,10 +694,10 @@ static void open_gfx_draw_transition_line_strips(s32 intensity) {
  * new image into g_open_work_buffer_0 (the crossfade's source) and copies the
  * 210x180 picture on screen out of the frame image into g_open_work_buffer_1,
  * packed 210 pixels per row. It clears the per-row fade steps, the running flag
- * (row_flags[0]) and the progress row (row_flags[1], the same byte as
- * g_open_gfx_image_copy_progress); image operation 0x20 of a later transition
+ * (g_open_prologue_crossfade_rows[0]) and the progress row (rows[1], the same byte as
+ * g_open_prologue_crossfade_progress); image operation 0x20 of a later prologue
  * entry waits for the read and sets the running flag. */
-static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
+static void open_prologue_prepare_crossfade(s32 file_index) {
     u16* copy_source;
     u16* copy_destination;
     u16* file_pixels;
@@ -717,9 +716,9 @@ static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
     file_image = g_open_file_destination;
     /* The 210x180 picture begins at row 43 of the 256-pixel frame image. */
     file_pixels = file_image[43];
-    g_open_gfx_image_copy_source_buffer = copy_source;
-    g_open_gfx_image_copy_destination_buffer = copy_destination;
-    g_open_gfx_image_copy_file_pixels = file_pixels;
+    g_open_prologue_crossfade_new_picture = copy_source;
+    g_open_prologue_crossfade_old_picture = copy_destination;
+    g_open_prologue_crossfade_frame_pixels = file_pixels;
     open_file_build_openbk_header(file_index + 2, g_open_work_buffer_0);
 
     row = 0;
@@ -731,17 +730,17 @@ static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
             destination_index = source_row + column;
             source_index = source_offset + column++;
             destination_index <<= 1;
-            pixels = g_open_gfx_image_copy_file_pixels;
+            pixels = g_open_prologue_crossfade_frame_pixels;
             value = pixels[source_index];
             /* Destination indexing hoists pointer loads; byte-pointer arithmetic changes registers. */
-            *(u16*)(destination_index + (u32)g_open_gfx_image_copy_destination_buffer) = value;
+            *(u16*)(destination_index + (u32)g_open_prologue_crossfade_old_picture) = value;
         }
-        g_open_gfx_image_copy_row_flags[row + 2] = 0;
+        g_open_prologue_crossfade_rows[row + 2] = 0;
         source_row += OPEN_IMAGE_WIDTH;
     }
 
-    g_open_gfx_image_copy_row_flags[0] = 0;
-    g_open_gfx_image_copy_row_flags[1] = 0;
+    g_open_prologue_crossfade_rows[0] = 0;
+    g_open_prologue_crossfade_rows[1] = 0;
 }
 
 #define OPEN_IMAGE_BLEND_BAND_HEIGHT 17
@@ -761,7 +760,7 @@ static void open_gfx_copy_file_image_to_210x180_buffer(s32 file_index) {
  * target. The s16 components are copied for the compare and the difference,
  * while the sums use the originals.
  */
-static void open_gfx_step_image_crossfade(void) {
+static void open_prologue_step_crossfade(void) {
     s32 row;
     s32 last_row;
     s32 reverse_row;
@@ -778,9 +777,9 @@ static void open_gfx_step_image_crossfade(void) {
     s32 difference;
     u8 fade;
 
-    if (g_open_gfx_image_copy_row_flags[0] != 0) {
-        row = g_open_gfx_image_copy_progress - OPEN_IMAGE_BLEND_BAND_HEIGHT;
-        if (row < g_open_gfx_image_copy_progress) {
+    if (g_open_prologue_crossfade_rows[0] != 0) {
+        row = g_open_prologue_crossfade_progress - OPEN_IMAGE_BLEND_BAND_HEIGHT;
+        if (row < g_open_prologue_crossfade_progress) {
             last_row = OPEN_IMAGE_HEIGHT - 1;
             do {
                 if (row >= 0 && row < OPEN_IMAGE_HEIGHT) {
@@ -788,11 +787,11 @@ static void open_gfx_step_image_crossfade(void) {
                     column = 0;
                     source_row_start = reverse_row * OPEN_IMAGE_WIDTH;
                     destination_row_start = reverse_row * OPEN_IMAGE_ROW_STRIDE;
-                    fade = g_open_gfx_image_copy_row_flags[row + 2]++;
+                    fade = g_open_prologue_crossfade_rows[row + 2]++;
                     do {
                         /* An ordinary source-pointer load is hoisted and adds a saved-register frame. */
-                        source_pixel = g_open_gfx_image_copy_source_buffer[source_row_start + column];
-                        destination_pixel = g_open_gfx_image_copy_destination_buffer[source_row_start + column];
+                        source_pixel = g_open_prologue_crossfade_new_picture[source_row_start + column];
+                        destination_pixel = g_open_prologue_crossfade_old_picture[source_row_start + column];
                         pixel = 0;
                         if (source_pixel != destination_pixel) {
                             for (component = 2; component >= 0; component--) {
@@ -813,19 +812,19 @@ static void open_gfx_step_image_crossfade(void) {
                         } else {
                             pixel = source_pixel;
                         }
-                        g_open_gfx_image_copy_file_pixels[destination_row_start + column]
+                        g_open_prologue_crossfade_frame_pixels[destination_row_start + column]
                             = pixel | (destination_pixel & 0x8000);
                         column++;
                     } while (column < OPEN_IMAGE_WIDTH);
                 }
                 row++;
-            } while (row < g_open_gfx_image_copy_progress);
+            } while (row < g_open_prologue_crossfade_progress);
         }
         {
-            u8* progress = &g_open_gfx_image_copy_progress;
+            u8* progress = &g_open_prologue_crossfade_progress;
 
             if (++*progress >= OPEN_IMAGE_BLEND_END_ROW) {
-                g_open_gfx_image_copy_row_flags[0] = 0;
+                g_open_prologue_crossfade_rows[0] = 0;
             }
         }
     }

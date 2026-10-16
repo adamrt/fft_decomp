@@ -37,7 +37,7 @@
 #include "fft/map.h"
 #include "fft/menu.h"
 #include "fft/menu_command.h"
-#include "fft/menu_dead_unit.h"
+#include "fft/menu_crystal_pickup.h"
 #include "fft/menu_gfx.h"
 #include "fft/menu_input.h"
 #include "fft/menu_list.h"
@@ -372,10 +372,10 @@ s32 menu_resolve_selection(void) {
         for (i = 0; i < 31; i++) {
             if (menu == g_menu_command_maps[i].menu_id) {
                 if (command != 0xFF) {
-                    if (menu == MENU_COMMAND_ID_DEAD_UNIT) {
-                        command = g_menu_dead_unit_action;
+                    if (menu == MENU_COMMAND_ID_CRYSTAL_PICKUP) {
+                        command = g_menu_crystal_pickup_action;
                         /* Item selection updates only the low byte of the 16-bit command field. */
-                        *(u8*)&g_menu_selected_action.item_or_equipment = g_menu_dead_unit_result;
+                        *(u8*)&g_menu_selected_action.item_or_equipment = g_menu_crystal_pickup_item;
                         option = MENU_SELECTION_NONE;
                     } else if (menu == MENU_COMMAND_ID_MESSAGE_YES_NO || menu >= 0x64) {
                         command = *(g_menu_command_maps[i].map + option + 1);
@@ -469,8 +469,8 @@ static void menu_run_system_function_thread(void) {
     g_menu_current_id = menu_id;
     g_menu_thread_menu_data[entry->menu_entry_index].thread_count = entry->thread_count;
     if (id == 0x1f) {
-        thread_start(THREAD_SLOT_MENU, menu_open_option_dead_unit_panel);
-        thread_set_parameters(THREAD_SLOT_MENU, 0, g_menu_dead_unit_panel_parameter, 0);
+        thread_start(THREAD_SLOT_MENU, menu_open_option_crystal_pickup_panel);
+        thread_set_parameters(THREAD_SLOT_MENU, 0, g_menu_crystal_pickup_panel_parameter, 0);
         thread_exit_current();
     }
     if (id != 8) {
@@ -595,23 +595,23 @@ s32 menu_init_system_function(s32 type, s32 option, s32 unit_id, s32 parameter, 
 }
 
 /* Run battle_unit_generate_crystal_or_treasure for the unit on the main stack,
- * keep its record in g_menu_dead_unit_context and return the treasure item for
+ * keep its record in g_menu_crystal_pickup_context and return the treasure item for
  * CRYSTAL_PICKUP_TREASURE, otherwise -1. */
-s32 menu_get_dead_unit_selection(s32 battle_id) {
+s32 menu_resolve_crystal_pickup(s32 battle_id) {
     unit_stats_t* stats = battle_unit_get_stats_from_battle_id(battle_id);
     crystal_pickup_result_t* result;
 
     g_thread_call_target = (void (*)(void))battle_unit_generate_crystal_or_treasure;
     result = (crystal_pickup_result_t*)thread_call_on_main_stack(stats);
-    g_menu_dead_unit_context = result;
+    g_menu_crystal_pickup_context = result;
     if (result->result == CRYSTAL_PICKUP_NONE || result->result == CRYSTAL_PICKUP_NOTHING) {
         main_system_report_stub(0x11, 7);
     }
     /* Reload the published context after the call; reusing result changes the frame and registers. */
-    if (g_menu_dead_unit_context->result != CRYSTAL_PICKUP_TREASURE) {
+    if (g_menu_crystal_pickup_context->result != CRYSTAL_PICKUP_TREASURE) {
         return -1;
     }
-    return g_menu_dead_unit_context->treasure_item;
+    return g_menu_crystal_pickup_context->treasure_item;
 }
 
 /* Dispatch a battle menu system command (menu_system_command_e) for unit_id. The scenario

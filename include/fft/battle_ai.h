@@ -68,7 +68,7 @@ enum {
 
 /* 32-bit flags of the considered ability. Bytes 1..3 retain the static table
  * meanings, but byte 4 is replaced by ai_ability_entry_flag_e: its
- * low bit means CONSUME_EVALUATED_ORIGINS, not the static EVADE_WITH_MOTION.
+ * low bit means CONSUME_EVALUATED_AIM_TILES, not the static EVADE_WITH_MOTION.
  * Team preferences remain distinct from the absolute ONLY restrictions. */
 enum {
     AI_ABILITY_TARGET_ALLIES = 0x00000001,
@@ -92,7 +92,7 @@ enum {
     AI_ABILITY_LINEAR_TRAJECTORY = 0x00200000,
     AI_ABILITY_DIRECT_TRAJECTORY = 0x00400000,
     AI_ABILITY_ARC_TRAJECTORY = 0x00800000,
-    AI_ABILITY_CONSUME_EVALUATED_ORIGINS = 0x01000000,
+    AI_ABILITY_CONSUME_EVALUATED_AIM_TILES = 0x01000000,
     AI_ABILITY_EXHAUSTIVE_ORIGIN_SCAN = 0x04000000,
     AI_ABILITY_REQUIRES_MONSTER_SKILL = 0x08000000,
     AI_ABILITY_ENEMIES_ONLY = 0x20000000,
@@ -183,11 +183,11 @@ enum {
 };
 
 /* Runtime policy byte in ai_ability_entry_t. The low three bits control
- * how the AI searches and consumes candidate action origins; initialization
+ * how the AI searches action origins and consumes evaluated aim tiles; initialization
  * recomputes them while preserving the remaining bits. */
 typedef enum ai_ability_entry_flag {
-    AI_ABILITY_ENTRY_CONSUME_EVALUATED_ORIGINS = 0x01,
-    AI_ABILITY_ENTRY_FORCE_CONSUME_EVALUATED_ORIGINS = 0x02,
+    AI_ABILITY_ENTRY_CONSUME_EVALUATED_AIM_TILES = 0x01,
+    AI_ABILITY_ENTRY_FORCE_CONSUME_EVALUATED_AIM_TILES = 0x02,
     AI_ABILITY_ENTRY_EXHAUSTIVE_ORIGIN_SCAN = 0x04,
     AI_ABILITY_ENTRY_REQUIRES_MONSTER_SKILL = 0x08,
     AI_ABILITY_ENTRY_ENEMIES_ONLY = 0x20,
@@ -204,8 +204,8 @@ typedef struct ai_ability_entry {
     union {
         u8 flags;
         struct {
-            u8 consume_evaluated_origins : 1;
-            u8 force_consume_evaluated_origins : 1;
+            u8 consume_evaluated_aim_tiles : 1;
+            u8 force_consume_evaluated_aim_tiles : 1;
             u8 exhaustive_origin_scan : 1;
             u8 requires_monster_skill : 1;
             u8 _unused_00_bit4 : 1;
@@ -327,14 +327,14 @@ typedef char ai_unit_decision_size_must_be_16[(sizeof(ai_unit_decision_t) == 16)
 /* workspace */
 typedef enum ai_target_setting_flags {
     AI_TARGET_SETTING_REFRESH_UNIT_STATUS_FLAGS = 0x01000000,
-    AI_TARGET_SETTING_CONSUME_EVALUATED_ORIGINS = 0x02000000,
+    AI_TARGET_SETTING_CONSUME_EVALUATED_AIM_TILES = 0x02000000,
     AI_TARGET_SETTING_HAS_HOLY_WATER = 0x20000000, /* the acting unit can use the Holy Water item ability */
     AI_TARGET_SETTING_RETREAT_SUPPORT_AVAILABLE = 0x40000000,
 } ai_target_setting_flags_e;
 
 /* ai_data_t.targetability, +0x0c78..0x0cb7. The 21-byte save of unit_targetable at +0xca2
  * overlaps the low three bytes of target_setting_flags at +0xcb4; the save and restore loops in
- * battle_ai_evaluate_ability_outcome establish the span. The CONSUME_EVALUATED_ORIGINS flag lies
+ * battle_ai_evaluate_ability_outcome establish the span. The CONSUME_EVALUATED_AIM_TILES flag lies
  * in the fourth byte, outside the saved array. Preserve both views and 32-bit alignment; this is
  * not a 16-byte backup. */
 typedef union ai_targetability {
@@ -367,8 +367,8 @@ typedef struct ai_data {
     /* Scenario/level/y; row bits 15..0 represent x=0..15. */
     u16 reachable_tiles[AI_MOVEMENT_SCENARIO_COUNT][MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT]; /* 0x0a74 */
     u16 targetable_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                            /* 0x0b4c */
-    u16 movable_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                               /* 0x0b94 */
-    u16 attack_origin_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                         /* 0x0bdc */
+    u16 cast_origin_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                           /* 0x0b94 */
+    u16 aim_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                                   /* 0x0bdc */
     u16 walkable_tiles[MAP_TERRAIN_LAYER_COUNT][AI_GRID_ROW_COUNT];                              /* 0x0c24 */
     u8 _unused_0c6c;
     u8 initial_selection_stage; /* 0x0c6d; ai_initial_selection_stage_e */
@@ -382,13 +382,13 @@ typedef struct ai_data {
     ai_coords_t considered_unit_coords; /* 0x0c74 */
     ai_targetability_t targetability;   /* 0x0c78 */
     /* Included target/strike pairs, not unique units; 0xff disables counting. */
-    u16 total_hit_percent;       /* 0x0cb8 */
-    u8 hit_counter;              /* 0x0cba */
-    u8 attack_origin_tile_count; /* 0x0cbb */
-    u8 movable_tile_count;       /* 0x0cbc */
-    u8 ability_counter;          /* 0x0cbd */
-    u8 has_mp_recovery_ability;  /* 0x0cbe; a usable ability affects MP and does not target enemies */
-    u8 tile_pickup_kind;         /* 0x0cbf; ai_tile_pickup_kind_e */
+    u16 total_hit_percent;      /* 0x0cb8 */
+    u8 hit_counter;             /* 0x0cba */
+    u8 aim_tile_count;          /* 0x0cbb */
+    u8 cast_origin_tile_count;  /* 0x0cbc */
+    u8 ability_counter;         /* 0x0cbd */
+    u8 has_mp_recovery_ability; /* 0x0cbe; a usable ability affects MP and does not target enemies */
+    u8 tile_pickup_kind;        /* 0x0cbf; ai_tile_pickup_kind_e */
     u8 _unused_0cc0[4];
     ai_coords_t candidate_coords[AI_MOVEMENT_SCENARIO_COUNT]; /* 0x0cc4; indexed by movement_scenario */
     u8 _unused_0cd0[4];
@@ -417,7 +417,7 @@ typedef struct ai_data {
     u8 reflected_candidate_level;                                    /* 0x0e4b */
     u8 ability_effect_on_self;                                       /* 0x0e4c; 0 none, 1 usable, 2 adverse */
     u8 ranked_origin_scan;                                           /* 0x0e4d; consume the ranked origin tiles */
-    u8 useful_on_caster_flag;                                        /* 0x0e4e */
+    u8 consume_aim_tile;                                             /* 0x0e4e */
     u8 acting_unit_remaining_clockticks;                             /* 0x0e4f */
     ai_status_snapshot_t unit_status_records[AI_COMPACT_UNIT_COUNT]; /* 0x0e50 */
     u8 saved_ability_ct;                                             /* 0x0ed0 */

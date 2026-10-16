@@ -86,7 +86,7 @@ typedef enum menu_command_id {
     MENU_COMMAND_ID_ABILITY_PREVIEW_MESSAGE = 53, /* shown instead when that ability gets no turn */
     MENU_COMMAND_ID_EGG = 54,                     /* replaces OTHER_UNIT and OTHER_UNIT_INSPECT for an egg */
     MENU_COMMAND_ID_EGG_STATUS = 55,              /* EGG's Status row: only the invalid sound */
-    MENU_COMMAND_ID_DEAD_UNIT = 105,              /* crystal or treasure options */
+    MENU_COMMAND_ID_CRYSTAL_PICKUP = 105,         /* crystal or treasure options */
 } menu_command_id_e;
 
 extern s32 g_menu_current_id; /* menu_command_id_e */

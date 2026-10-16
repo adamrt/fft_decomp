@@ -76,7 +76,7 @@ typedef enum menu_text_column_mode {
     MENU_TEXT_COLUMN_TEXT = 0,          /* text ids, drawn by menu_display_text_entry */
     MENU_TEXT_COLUMN_NUMBER = 1,        /* two-digit numbers, drawn by menu_display_number_entry */
     MENU_TEXT_COLUMN_HIDDEN = 2,        /* the column is skipped */
-    MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3, /* two-digit numbers, drawn by menu_draw_number_glyphs */
+    MENU_TEXT_COLUMN_NUMBER_GLYPHS = 3, /* two-digit numbers, drawn by menu_draw_large_number_glyphs */
 } menu_text_column_mode_e;
 
 /* Three-column text layout walked by menu_draw_text_columns and WORLD's world_screen_menu_draw_text_columns,

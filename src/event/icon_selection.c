@@ -506,12 +506,12 @@ void menu_draw_text_columns_narrow(menu_entry_t* entry, s32* row_offset, u8* buf
                             g_menu_text_state.pen.rect.x += 3;
                             menu_display_text_entry(0x509D, buffer, &g_menu_text_state.pen);
                         } else {
-                            menu_draw_number_glyphs(value, 2, buffer, &g_menu_text_state.pen);
+                            menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_text_state.pen);
                         }
                     }
                 }
 #else
-                menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
 #endif
             }
             g_menu_text_palette_offset = 0;

@@ -266,8 +266,8 @@ void battle_state_run_game_loop(void) {
             case BATTLE_GAME_STATE_IDLING_ACTION_MENUS:
                 battle_state_handle_idling_action_menus_state();
                 break;
-            case BATTLE_GAME_STATE_MENU_TO_TARGETING:
-                battle_state_handle_menu_to_targeting_state();
+            case BATTLE_GAME_STATE_AI_COMMAND:
+                battle_state_handle_ai_command_state();
                 break;
             case BATTLE_GAME_STATE_ACTION_HELP_MENU:
                 battle_state_handle_action_help_menu_state();
@@ -287,8 +287,8 @@ void battle_state_run_game_loop(void) {
             case BATTLE_GAME_STATE_AFTER_COMMAND:
                 battle_state_handle_after_command_state();
                 break;
-            case BATTLE_GAME_STATE_JP_EXP_GAIN:
-                battle_state_handle_jp_exp_gain_state();
+            case BATTLE_GAME_STATE_CONTINUE_TURN:
+                battle_state_handle_continue_turn_state();
                 break;
             case BATTLE_GAME_STATE_CHANGE_TURN:
                 battle_state_handle_change_turn_state();
@@ -299,8 +299,8 @@ void battle_state_run_game_loop(void) {
             case BATTLE_GAME_STATE_UNIT_MOVE:
                 battle_state_handle_unit_move_state();
                 break;
-            case BATTLE_GAME_STATE_CLOSE_MOVE_HELP:
-                battle_state_handle_close_move_help_state();
+            case BATTLE_GAME_STATE_SELECT_MOVE_TILE:
+                battle_state_handle_select_move_tile_state();
                 break;
             case BATTLE_GAME_STATE_MOVE_RANGE_EXCEPTION:
                 battle_state_handle_move_range_exception_state();
@@ -326,8 +326,8 @@ void battle_state_run_game_loop(void) {
             case BATTLE_GAME_STATE_CRYSTAL_LEARN:
                 battle_state_handle_crystal_learn_state();
                 break;
-            case BATTLE_GAME_STATE_ACTION_EXECUTE_SETUP:
-                battle_state_handle_action_execute_setup_state();
+            case BATTLE_GAME_STATE_TARGETING_PROMPT:
+                battle_state_handle_targeting_prompt_state();
                 break;
             case BATTLE_GAME_STATE_TARGETING_RANGE:
                 battle_state_handle_targeting_range_state();
@@ -362,8 +362,8 @@ void battle_state_run_game_loop(void) {
             case BATTLE_GAME_STATE_START_EFFECT_FILE_OPEN:
                 battle_state_handle_start_effect_file_open_state();
                 break;
-            case BATTLE_GAME_STATE_SECONDARY_EFFECT:
-                battle_state_handle_secondary_effect_state();
+            case BATTLE_GAME_STATE_ACTION_EXECUTE_START:
+                battle_state_handle_action_execute_start_state();
                 break;
             case BATTLE_GAME_STATE_ACTION_EXECUTE:
                 battle_state_update_action_execute_mode();

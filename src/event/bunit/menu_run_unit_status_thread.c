@@ -78,7 +78,7 @@ void menu_run_unit_status_thread(void) {
         panel = g_panel_selected_packets;
         editor = g_panel_selected_editor_packets;
         number_pixels = g_panel_selected_number_image;
-        value_pixels = g_panel_selected_large_number_image;
+        value_pixels = g_panel_selected_small_number_image;
         name_image = g_panel_selected_name_image;
         number_entries = g_panel_selected_numeric_entries;
         state = &g_panel_selected_billboard;
@@ -91,7 +91,7 @@ void menu_run_unit_status_thread(void) {
         panel = g_panel_comparison_packets;
         editor = g_panel_comparison_editor_packets;
         number_pixels = g_panel_comparison_number_image;
-        value_pixels = g_panel_comparison_large_number_image;
+        value_pixels = g_panel_comparison_small_number_image;
         name_image = g_panel_comparison_name_image;
         number_entries = g_panel_comparison_numeric_entries;
         state = &g_panel_comparison_billboard;
@@ -430,11 +430,11 @@ void menu_run_unit_status_thread(void) {
             menu_clear_render_buffer(value_pixels, 0xF0);
             *window_width = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
+            text_draw_small_number_glyphs(unit_info->brave, 0x202, value_pixels, text_position);
             LoadImage(&rects[3], (u32*)value_pixels);
             menu_set_text_origin(0, 0);
             value_pixels_b = value_pixels + 0x50;
-            text_draw_large_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
+            text_draw_small_number_glyphs(unit_info->faith, 0x202, value_pixels_b, text_position);
             LoadImage(&rects[4], (u32*)value_pixels_b);
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
@@ -448,7 +448,7 @@ void menu_run_unit_status_thread(void) {
                     if (id == UNIT_FORMATION_INDEX_NONE) {
                         id = 0;
                     }
-                    text_draw_large_number_glyphs(id + 1, 0x4002, value_pixels + 0xA0, text_position);
+                    text_draw_small_number_glyphs(id + 1, 0x4002, value_pixels + 0xA0, text_position);
                 }
             }
             LoadImage(&rects[5], (u32*)(value_pixels + 0xA0));

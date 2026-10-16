@@ -369,9 +369,9 @@ void battle_state_handle_crystal_learn_state(void) {
     battle_move_start_next_post_movement_step();
 }
 
-/* ActionExecuteSetup game-state handler: YES goes on to the range display
+/* TargetingPrompt game-state handler: YES goes on to the range display
  * (battle_target_begin_tile_selection); NO or UNRESOLVED_FF returns to the idle action menu. */
-void battle_state_handle_action_execute_setup_state(void) {
+void battle_state_handle_targeting_prompt_state(void) {
     s32 selected_command;
 
     battle_state_update_units();
@@ -736,9 +736,9 @@ void battle_state_handle_start_effect_file_open_state(void) {
     battle_state_update_units();
 }
 
-/* SecondaryEffect game-state handler: count the frame and enter the
+/* ActionExecuteStart game-state handler: count the frame and enter the
  * action-execute state (battle_state_enter_action_execute). */
-void battle_state_handle_secondary_effect_state(void) {
+void battle_state_handle_action_execute_start_state(void) {
     battle_unit_t* unit = battle_unit_get_casting();
 
     unit->state_frame_counter++;
@@ -1169,7 +1169,7 @@ void battle_state_handle_target_display_state(void) {
 }
 
 /* AfterCommand game-state handler: once the window has closed (any answer) and the source unit's
- * numeric display is idle, enter the JP/EXP gain state. */
+ * numeric display is idle, enter the continue-turn state. */
 void battle_state_handle_after_command_state(void) {
     ai_command_t* command_address;
     s32 command;
@@ -1188,7 +1188,7 @@ void battle_state_handle_after_command_state(void) {
     }
 }
 
-/* JpExpGain game-state handler: move on once the camera has settled (no cursor
+/* ContinueTurn game-state handler: move on once the camera has settled (no cursor
  * vector, no rotation).
  *
  * After a charged ability (turn event ABILITY_READY) a queued scenario event with
@@ -1198,7 +1198,7 @@ void battle_state_handle_after_command_state(void) {
  * a Jump then resets its preparation and goes to the between-turn events, and
  * anything else opens the Wait menu. A unit whose turn goes on gets its action
  * menus back. */
-void battle_state_handle_jp_exp_gain_state(void) {
+void battle_state_handle_continue_turn_state(void) {
     battle_unit_t* unit;
 
     battle_state_update_units();

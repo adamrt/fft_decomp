@@ -2,8 +2,8 @@
 #define MENU_PANEL_H
 
 /* Status panels: the panel threads and their parameter blocks, the double-buffered packet layouts, portraits,
- * panel fades and thread indicators, and the character status, equipment, numeric editor, numeric display and
- * unit editor panels. */
+ * panel fades and thread indicators, and the character status, equipment, numeric editor and numeric display
+ * panels and the battle Status screen. */
 
 #include "fft/gfx.h"
 #include "fft/menu.h"
@@ -372,7 +372,7 @@ extern menu_status_panel_editor_packet_t g_panel_selected_editor_packets[2];
 extern menu_number_entry_t g_panel_selected_numeric_entries[];
 extern u8 g_panel_selected_name_image[];
 extern u8 g_panel_selected_number_image[];
-extern u8 g_panel_selected_large_number_image[];
+extern u8 g_panel_selected_small_number_image[];
 extern RECT g_panel_selected_portrait_rect;
 extern menu_unit_status_record_t g_panel_comparison_billboard;
 extern menu_status_panel_packet_t g_panel_comparison_packets[2];
@@ -380,7 +380,7 @@ extern menu_status_panel_editor_packet_t g_panel_comparison_editor_packets[2];
 extern menu_number_entry_t g_panel_comparison_numeric_entries[];
 extern u8 g_panel_comparison_name_image[];
 extern u8 g_panel_comparison_number_image[];
-extern u8 g_panel_comparison_large_number_image[];
+extern u8 g_panel_comparison_small_number_image[];
 extern RECT g_panel_comparison_portrait_rect;
 
 void menu_run_status_panel_thread(void);
@@ -458,7 +458,7 @@ void menu_run_numeric_editor_thread(void);
 void menu_run_numeric_editor_frame_thread(void);
 
 /* numeric display */
-/* The unit editor's numeric side panel: its fifteen numbers are drawn into three images once, then the frame and
+/* The Status screen's numeric side panel: its fifteen numbers are drawn into three images once, then the frame and
  * eighteen sprites every frame. */
 
 /* Double-buffered 0x1ac-byte record of the numeric display panel (g_menu_numeric_display_panel_records).
@@ -485,11 +485,11 @@ extern RECT g_menu_numeric_display_texture_window; /* texture window for the men
 
 void menu_run_numeric_display_panel_thread(void);
 
-/* unit editor */
-/* Double-buffered 0x2d0-byte frame of the unit editor panel (g_menu_unit_editor_frames). The first 0x2a4
+/* status screen */
+/* Double-buffered 0x2d0-byte frame of the Status screen panel (g_menu_status_screen_frames). The first 0x2a4
  * bytes are laid out as menu_status_panel_buffer_t (draw modes, sprites, tiles and lines),
  * and the trailing draw-area pair follows menu_panel_frame_t. Provisional. */
-typedef struct menu_unit_editor_frame {
+typedef struct menu_status_screen_frame {
     DR_MODE frame_draw_mode;            /* 0x000; MENU_TEXTURE_PAGE_FRAME */
     DR_MODE text_draw_mode;             /* 0x00c; MENU_TEXTURE_PAGE_TEXT_IMAGES */
     DR_MODE image_draw_mode;            /* 0x018; MENU_TEXTURE_PAGE_ITEM_ICONS */
@@ -498,36 +498,36 @@ typedef struct menu_unit_editor_frame {
     LINE_F2 lines[8];                   /* 0x224 */
     menu_palette_primitives_t* palette; /* 0x2a4 */
     scaled_draw_area_pair_t draw_areas; /* 0x2a8 */
-} menu_unit_editor_frame_t;
-typedef char menu_unit_editor_frame_size_must_be_720[sizeof(menu_unit_editor_frame_t) == 720 ? 1 : -1];
+} menu_status_screen_frame_t;
+typedef char menu_status_screen_frame_size_must_be_720[sizeof(menu_status_screen_frame_t) == 720 ? 1 : -1];
 
-/* Color and endpoint offsets of the unit editor panel's eight frame lines, relative to the panel box, seven bytes
- * per line (g_menu_unit_editor_line_colors). The loop walks the table with a byte offset stepping by 7 (the
+/* Color and endpoint offsets of the Status screen panel's eight frame lines, relative to the panel box, seven bytes
+ * per line (g_menu_status_screen_line_colors). The loop walks the table with a byte offset stepping by 7 (the
  * target's induction variable and exit test), so the fields are addressed by
  * offset, as for menu_line_layout_t. */
-enum menu_unit_editor_line_layout_offset {
-    MENU_UNIT_EDITOR_LINE_R = 0,
-    MENU_UNIT_EDITOR_LINE_G = 1,
-    MENU_UNIT_EDITOR_LINE_B = 2,
-    MENU_UNIT_EDITOR_LINE_X0 = 3,
-    MENU_UNIT_EDITOR_LINE_Y0 = 4,
-    MENU_UNIT_EDITOR_LINE_X1 = 5,
-    MENU_UNIT_EDITOR_LINE_Y1 = 6,
-    MENU_UNIT_EDITOR_LINE_SIZE = 7
+enum menu_status_screen_line_layout_offset {
+    MENU_STATUS_SCREEN_LINE_R = 0,
+    MENU_STATUS_SCREEN_LINE_G = 1,
+    MENU_STATUS_SCREEN_LINE_B = 2,
+    MENU_STATUS_SCREEN_LINE_X0 = 3,
+    MENU_STATUS_SCREEN_LINE_Y0 = 4,
+    MENU_STATUS_SCREEN_LINE_X1 = 5,
+    MENU_STATUS_SCREEN_LINE_Y1 = 6,
+    MENU_STATUS_SCREEN_LINE_SIZE = 7
 };
 
-extern menu_unit_editor_frame_t g_menu_unit_editor_frames[2];
-extern RECT g_menu_unit_editor_panel_rect;  /* panel box */
-extern RECT g_menu_unit_editor_cursor_rect; /* cursor source */
-extern menu_palette_primitives_t g_menu_unit_editor_palette;
-extern RECT g_menu_unit_editor_text_rect_a; /* first text image */
-extern RECT g_menu_unit_editor_text_rect_b; /* second text image */
-extern image_load_parameters_t g_menu_unit_editor_row_image_params_a[4];
-extern image_load_parameters_t g_menu_unit_editor_row_image_params_b[4];
-extern image_load_parameters_t g_menu_unit_editor_sprite_image_params_a[19];
-extern image_load_parameters_t g_menu_unit_editor_sprite_image_params_b[19];
-extern image_load_parameters_t g_menu_unit_editor_item_icon_image_params[5];
+extern menu_status_screen_frame_t g_menu_status_screen_frames[2];
+extern RECT g_menu_status_screen_panel_rect;  /* panel box */
+extern RECT g_menu_status_screen_cursor_rect; /* cursor source */
+extern menu_palette_primitives_t g_menu_status_screen_palette;
+extern RECT g_menu_status_screen_text_rect_a; /* first text image */
+extern RECT g_menu_status_screen_text_rect_b; /* second text image */
+extern image_load_parameters_t g_menu_status_screen_row_image_params_a[4];
+extern image_load_parameters_t g_menu_status_screen_row_image_params_b[4];
+extern image_load_parameters_t g_menu_status_screen_sprite_image_params_a[19];
+extern image_load_parameters_t g_menu_status_screen_sprite_image_params_b[19];
+extern image_load_parameters_t g_menu_status_screen_item_icon_image_params[5];
 
-void menu_run_unit_editor_panel_thread(void);
+void menu_run_status_screen_thread(void);
 
 #endif

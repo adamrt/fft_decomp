@@ -1,4 +1,5 @@
-/* The unit editor, including applying values to a battle unit, the unit thread and the session. */
+/* The debug unit editor and the mounted unit's status screen: applying values to a battle unit, the unit thread and
+ * the session. */
 
 #include "fft/battle_unit.h"
 #include "fft/battle_unit_encounter.h"
@@ -76,7 +77,7 @@ static void debugchr_editor_apply_values_to_battle_unit(s32 unit_id) {
  * `sound_latched` is read before anything assigns it when the menu-building
  * thread is already running on the first frame.
  */
-void debugchr_editor_run_unit_thread(s32 unit_id) {
+void debugchr_status_run_unit_thread(s32 unit_id) {
     s32 frame;
     s32 one;
     u8* animation;
@@ -97,7 +98,7 @@ void debugchr_editor_run_unit_thread(s32 unit_id) {
      * loads. */
     volatile u8* unit_ids;
 
-    thread_set_current_task_id(THREAD_TASK_DEBUG_UNIT_EDITOR);
+    thread_set_current_task_id(THREAD_TASK_MOUNTED_STATUS_SCREEN);
     g_debugchr_editor_active = 0;
     g_menu_panel_status_group_count = 2;
 

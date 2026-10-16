@@ -828,15 +828,15 @@ static void battle_ai_set_ability_considerations(s32 action_taken) {
                     }
                 }
 
-                if (entry->usage.policy.force_consume_evaluated_origins) {
-                    entry->usage.policy.consume_evaluated_origins = 1;
+                if (entry->usage.policy.force_consume_evaluated_aim_tiles) {
+                    entry->usage.policy.consume_evaluated_aim_tiles = 1;
                 } else if (!entry->usage.policy.exhaustive_origin_scan) {
                     if (ability->ct >= g_battle_ai_data_base.acting_unit_remaining_clockticks
                         || battle_ai_classify_ability_effect(g_battle_ai_data_base.acting_unit_id, 1)
                             == AI_ABILITY_EFFECT_NONE) {
-                        entry->usage.policy.consume_evaluated_origins = 1;
+                        entry->usage.policy.consume_evaluated_aim_tiles = 1;
                     } else {
-                        entry->usage.policy.consume_evaluated_origins = 0;
+                        entry->usage.policy.consume_evaluated_aim_tiles = 0;
                     }
                 }
 
@@ -2017,18 +2017,19 @@ static s32 battle_ai_select_action_random(void) {
     }
     if (ai->considered_ability.ai_flags.word & AI_ABILITY_TARGET_MAP_TILES) {
         battle_mem_copy_u16_values(ai->targetable_tiles, ai->reachable_tiles[0], sizeof(ai->targetable_tiles));
-        ai->movable_tile_count = battle_ai_count_flagged_tiles_within_map_bounds(ai->targetable_tiles);
-        if (!ai->movable_tile_count)
+        ai->cast_origin_tile_count = battle_ai_count_flagged_tiles_within_map_bounds(ai->targetable_tiles);
+        if (!ai->cast_origin_tile_count)
             return 0;
         do {
-            if (!battle_ai_take_random_tile(ai->targetable_tiles, &ai->current_action.coords, ai->movable_tile_count))
+            if (!battle_ai_take_random_tile(
+                    ai->targetable_tiles, &ai->current_action.coords, ai->cast_origin_tile_count))
                 return 0;
-            ai->movable_tile_count--;
+            ai->cast_origin_tile_count--;
             if (battle_ai_is_ability_origin_allowed(&ai->current_action.coords)) {
                 ai->current_action.wait_facing_hint = AI_DIRECTION_OVERLAP;
                 goto selected;
             }
-        } while (ai->movable_tile_count);
+        } while (ai->cast_origin_tile_count);
     } else {
         /* Removing this single-attempt loop changes register allocation. */
         do {
@@ -2036,19 +2037,20 @@ static s32 battle_ai_select_action_random(void) {
                 ai->current_action.command.targeting_type = rand() % 2 + BATTLE_TARGETING_TYPE_TILE;
             else
                 ai->current_action.command.targeting_type = BATTLE_TARGETING_TYPE_TILE;
-            battle_ai_build_attack_origin_masks();
-            if (!ai->movable_tile_count) {
+            battle_ai_build_cast_origin_and_aim_tiles();
+            if (!ai->cast_origin_tile_count) {
                 if (ai->current_action.command.targeting_type == BATTLE_TARGETING_TYPE_UNIT) {
                     ai->current_action.command.targeting_type = BATTLE_TARGETING_TYPE_TILE;
-                    battle_ai_build_attack_origin_masks();
+                    battle_ai_build_cast_origin_and_aim_tiles();
                 }
-                if (!ai->movable_tile_count)
+                if (!ai->cast_origin_tile_count)
                     break;
             }
             do {
-                if (!battle_ai_take_random_tile(ai->movable_tiles, &ai->current_action.coords, ai->movable_tile_count))
+                if (!battle_ai_take_random_tile(
+                        ai->cast_origin_tiles, &ai->current_action.coords, ai->cast_origin_tile_count))
                     return 0;
-                ai->movable_tile_count--;
+                ai->cast_origin_tile_count--;
                 /* Keep the original count even when a rejected target bit is removed. */
                 index_or_count = battle_ai_calculate_ability_range();
                 if (index_or_count) {
@@ -2067,7 +2069,7 @@ static s32 battle_ai_select_action_random(void) {
                         goto selected;
                     }
                 }
-            } while (ai->movable_tile_count);
+            } while (ai->cast_origin_tile_count);
         } while (0);
     }
     return 0;
@@ -2102,7 +2104,7 @@ ai_direction_e battle_ai_find_direction_of_target(const ai_coords_t* target, con
     return AI_DIRECTION_OVERLAP;
 }
 
-/* Intersect attack-origin tiles with the current ability's range.
+/* Intersect the aim tiles with the current ability's range.
  *
  * The acting unit's coordinates are restored before every return. */
 static s32 battle_ai_calculate_ability_range(void) {
@@ -2145,7 +2147,7 @@ static s32 battle_ai_calculate_ability_range(void) {
         level++, level_address += AI_GRID_ROW_COUNT * sizeof(u16)) {
         for (y = 0; y < ai->map_max_y; y++) {
             target_rows = (u16*)(level_address + ((u32)&ai->targetable_tiles - (u32)ai));
-            origin_rows = (u16*)(level_address + ((u32)&ai->attack_origin_tiles - (u32)ai));
+            origin_rows = (u16*)(level_address + ((u32)&ai->aim_tiles - (u32)ai));
             target_rows[y] = 0;
             row = origin_rows[y];
             if (row != 0) {
@@ -3562,12 +3564,12 @@ void battle_ai_init_unit_abilities(s32 unit_id) {
                 }
                 if (g_main_ability_range_data[ai->considered_ability.ability_id].flags_2
                     & (ABILITY_SECONDARY_FLAG_2_CANNOT_HIT_CASTER | ABILITY_SECONDARY_FLAG_2_CAN_TARGET_ENEMIES)) {
-                    entry->usage.policy.force_consume_evaluated_origins = 1;
+                    entry->usage.policy.force_consume_evaluated_aim_tiles = 1;
                     continue;
                 }
             }
             if (ai->considered_ability.parameters.fields.aoe == 0) {
-                entry->usage.policy.force_consume_evaluated_origins = 1;
+                entry->usage.policy.force_consume_evaluated_aim_tiles = 1;
             }
         }
     }

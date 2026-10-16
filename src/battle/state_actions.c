@@ -225,7 +225,8 @@ s32 battle_state_announce_next_charged_action(void) {
  * strike even when an ability is used. */
 #define IS_ELEMENTAL_GUN(id) ((id == ITEM_ID_BLAZE_GUN || id == ITEM_ID_GLACIER_GUN) || id == ITEM_ID_BLAST_GUN)
 
-/* Finalizes the casting unit's action and picks its attack animation.
+/* Enters BATTLE_GAME_STATE_ACTION_EXECUTE_START, finalizes the casting unit's action and picks its attack
+ * animation.
  *
  * Each target's attack result is resolved first; for the knockback strike
  * (ABILITY_ID_KNOCKBACK) in a later phase the targets are moved to the
@@ -242,7 +243,7 @@ void battle_action_set_target_coords_and_attacker_anim(void) {
     s32 i;
 
     g_main_system_vsync_interval = 1;
-    g_battle_game_state = BATTLE_GAME_STATE_SECONDARY_EFFECT;
+    g_battle_game_state = BATTLE_GAME_STATE_ACTION_EXECUTE_START;
     unit = battle_unit_get_casting();
     unit->state_frame_counter = 0;
     if (unit->continue_attack_count == 0) {
@@ -974,7 +975,7 @@ void battle_state_handle_idling_action_menus_state(void) {
             case TARGET_PANELS_UNIT_OR_TILE:
             case TARGET_PANELS_TILE_ONLY:
             case TARGET_PANELS_NONE:
-                battle_state_enter_action_execution_setup();
+                battle_state_enter_targeting_prompt();
                 break;
             case TARGET_PANELS_NO_TARGETING:
             default:
@@ -1015,7 +1016,7 @@ void battle_state_handle_idling_action_menus_state(void) {
 }
 
 /*
- * MenuToTargeting game-state handler for a unit the AI controls. From the
+ * AiCommand game-state handler for a unit the AI controls. From the
  * unit's 31st frame in the state it builds the unit's AI command, at half speed
  * until battle_ai_build_command reports the command ready (it can take several
  * frames), then carries the command out as the menu handler would: a move, an
@@ -1025,7 +1026,7 @@ void battle_state_handle_idling_action_menus_state(void) {
  * Each special skillset's completion stays explicit so its distinct call tail
  * is preserved.
  */
-void battle_state_handle_menu_to_targeting_state(void) {
+void battle_state_handle_ai_command_state(void) {
     battle_unit_t* unit;
     s32 kind;
     s32 result;
@@ -1112,7 +1113,7 @@ void battle_state_handle_menu_to_targeting_state(void) {
             case TARGET_PANELS_UNIT_OR_TILE:
             case TARGET_PANELS_TILE_ONLY:
             case TARGET_PANELS_NONE:
-                battle_state_enter_action_execution_setup();
+                battle_state_enter_targeting_prompt();
                 return;
             case TARGET_PANELS_NO_TARGETING:
             default:
@@ -1228,7 +1229,7 @@ void battle_state_handle_unit_move_state(void) {
     }
 }
 
-/* CloseMoveHelp game-state handler: choosing the move destination. The casting
+/* SelectMoveTile game-state handler: choosing the move destination. The casting
  * unit is the one that walks (the source unit, or its mount).
  *
  * A player-controlled source unit moves the cursor and camera. Circle paths the
@@ -1238,7 +1239,7 @@ void battle_state_handle_unit_move_state(void) {
  * An AI-controlled unit waits 31 frames, then paths to the tile its AI command
  * chose, puts the cursor there and starts the move setup, or goes on to its next
  * scripted menu when no path reaches it. */
-void battle_state_handle_close_move_help_state(void) {
+void battle_state_handle_select_move_tile_state(void) {
     battle_unit_t* source = battle_unit_get_source();
     battle_unit_t* casting = battle_unit_get_casting();
     battle_walk_path_t* path;

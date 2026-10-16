@@ -36,7 +36,7 @@ void menu_draw_text_columns(menu_entry_t* entry, s32* row_offset, u8* buffer) {
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER) {
                 menu_display_number_entry(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
             } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                menu_draw_large_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
             }
             g_menu_text_palette_offset = 0;
             g_menu_text_state.pen.color = 0;

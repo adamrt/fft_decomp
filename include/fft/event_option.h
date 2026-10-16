@@ -1,7 +1,7 @@
 #ifndef EVENT_OPTION_H
 #define EVENT_OPTION_H
 
-/* EVENT/OPTION.OUT: the BATTLE overlay of the game options, AT list and dead-unit menus. */
+/* EVENT/OPTION.OUT: the BATTLE overlay of the game options, AT list and crystal pickup menus. */
 
 #include "psx/types.h"
 

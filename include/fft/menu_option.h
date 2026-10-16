@@ -111,7 +111,7 @@ extern game_options_t g_menu_saved_game_options;
 typedef enum menu_option_type {
     MENU_OPTION_TYPE_GAME_OPTIONS = 0,
     MENU_OPTION_TYPE_AT_LIST = 1,
-    MENU_OPTION_TYPE_DEAD_UNIT = 2, /* crystal and treasure panel */
+    MENU_OPTION_TYPE_CRYSTAL_PICKUP = 2, /* crystal and treasure panel */
 } menu_option_type_e;
 
 /* One of the two 0x190-byte packet pages of the options screen (g_menu_option_pages), alternated by frame.

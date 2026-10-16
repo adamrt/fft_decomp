@@ -1,4 +1,4 @@
-/* Drawing a number right to left in large glyphs, with sign and marker glyphs. */
+/* Drawing a number right to left in the small 6x10 number glyphs, with sign and marker glyphs. */
 
 #include "fft/gfx.h"
 #include "fft/menu_gfx.h"
@@ -6,9 +6,9 @@
 #include "psx/libgpu.h"
 #include "psx/types.h"
 
-/* Draws `value` right to left as `format & 0xff` large glyphs at `pos`, with
+/* Draws `value` right to left as `format & 0xff` small 6x10 glyphs at `pos`, with
  * the sign and marker glyphs selected by the flag bits of `format`. Sibling of
- * menu_draw_number_glyphs (0x8014ac30) on the 5-pixel font. WORLD links its
+ * menu_draw_large_number_glyphs (0x8014ac30), which draws 8x15 glyphs. WORLD links its
  * own body under this name: it lacks the leading 0x800 glyph and the hidden
  * value check, and draws every digit as 0xba under flag 0x800 instead.
  *
@@ -26,16 +26,16 @@
  *   0x2000        a trailing 0xc0 glyph
  * While numeric values are hidden every digit draws as 0xd0 and the 0x200 and
  * 0x400 width rules are skipped. The pen ends 5 pixels past the last digit. */
-void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
+void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
-    glyph_blit_t* src = &g_text_large_number_glyph_rect;
+    glyph_blit_t* src = &g_text_small_number_glyph_rect;
 
     /* `cursor` holds the format's high byte first and the pen's final x
      * later; giving the two roles separate locals changes register use. */
     cursor = format & 0xFF00;
     if (cursor == 0xC00 || cursor == 0xE00) {
-        g_text_large_number_glyph_rect.rect.y = 0x10;
+        g_text_small_number_glyph_rect.rect.y = 0x10;
         if (format & 1) {
             src->rect.x = 0xB4;
             text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
@@ -46,7 +46,7 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
             src->rect.x = 0xD0;
         }
         for (i = 0; i < 3; i++) {
-            text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
+            text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
             pos->rect.x += 5;
         }
         return;
@@ -67,13 +67,13 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
     }
     if (format & 0x1000) {
         src->rect.x = 0xB4;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 5;
     }
     if (format & 0x8000) {
         pos->rect.x -= 2;
         src->rect.x = 0xB4;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 7;
     }
     if (format & 0x100) {
@@ -81,7 +81,7 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         src->rect.y = 0x1A;
         src->rect.h = 4;
         pos->rect.y += 3;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 7;
         pos->rect.y -= 3;
         src->rect.y = 0x10;
@@ -94,14 +94,14 @@ void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit
         if (g_menu_hide_numeric_values != 0) {
             src->rect.x = 0xD0;
         }
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         value /= 10;
         pos->rect.x -= 5;
     }
     pos->rect.x = cursor;
     if (format & 0x2000) {
         src->rect.x = 0xC0;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_large_number_glyph_rect, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_text_small_number_glyph_rect, pos);
         pos->rect.x += 5;
     }
 }

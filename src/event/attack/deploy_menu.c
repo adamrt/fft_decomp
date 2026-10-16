@@ -105,7 +105,7 @@ void attack_deploy_run_select_menu(void) {
             node = &nodes[selected];
             y = node->y;
             x = node->x;
-            if (thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
                 y += 8;
             }
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {

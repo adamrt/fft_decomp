@@ -77,7 +77,7 @@ void battle_state_reset_frame_pacing_timer(void) {
     g_main_frame_pacing_timer = 0;
 }
 
-/* Count one more entry into the status screen (the DEBUGCHR unit editor). While the count is
+/* Count one more entry into the Status screen (BATTLE's own or DEBUGCHR's for a mounted unit). While the count is
  * exactly 1 the battle state handlers stop animating the units and the camera;
  * battle_menu_leave_status_screen_selection resets it. */
 void battle_menu_enter_status_screen_selection(void) {

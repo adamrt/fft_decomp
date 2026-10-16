@@ -1,11 +1,12 @@
-/* The options overlay entry, loading the saved options and starting the game options, AT list or dead unit menus. */
+/* The options overlay entry, loading the saved options and starting the game options, AT list or crystal pickup menus.
+ */
 
 #include "fft/battle_menu.h"
 #include "fft/event_option.h"
 #include "fft/main.h"
 #include "fft/menu.h"
 #include "fft/menu_at_list.h"
-#include "fft/menu_dead_unit.h"
+#include "fft/menu_crystal_pickup.h"
 #include "fft/menu_input.h"
 #include "fft/menu_option.h"
 #include "fft/script.h"
@@ -14,10 +15,10 @@
 
 /* OPTION.OUT entry, run on the battle menu thread whose first parameter is the menu
  * entry. Copy the saved options into g_menu_option_values and select the defaults row
- * (GAME_OPTION_UNCHANGED = 1) only when every value equals its reference value. Unless opening the dead
- * unit panel, ask the four battle info panels to stop and wait for them. Then run
+ * (GAME_OPTION_UNCHANGED = 1) only when every value equals its reference value. Unless opening the crystal
+ * pickup panel, ask the four battle info panels to stop and wait for them. Then run
  * `menu_type`'s screen: the game options on the thread slot below this one (waiting for
- * it, then exiting), the AT list, or the dead unit (crystal and treasure) panel.
+ * it, then exiting), the AT list, or the crystal pickup (crystal and treasure) panel.
  *
  * The values pulsed for tutorial scripts (0xfd options, 0xf9 AT list) are the same
  * screen codes WORLD's option entry pulses. */
@@ -47,7 +48,7 @@ void option_entrypoint(s32 menu_type) {
         }
     }
 
-    if (menu_type != MENU_OPTION_TYPE_DEAD_UNIT) {
+    if (menu_type != MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
         thread_set_parameters(THREAD_SLOT_TILE_INFO_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SLOT_UNIT_SUMMARY_PANEL, 0, 0, 1);
         thread_set_parameters(THREAD_SLOT_RIGHT_UNIT_STATS, 0, 0, 1);
@@ -73,7 +74,7 @@ void option_entrypoint(s32 menu_type) {
         script_pulse_tutorial_wait_value(SCRIPT_TUTORIAL_WAIT_AT_LIST);
         menu_start_at_list_thread();
     }
-    if (menu_type == MENU_OPTION_TYPE_DEAD_UNIT) {
-        menu_start_dead_unit_threads();
+    if (menu_type == MENU_OPTION_TYPE_CRYSTAL_PICKUP) {
+        menu_start_crystal_pickup_threads();
     }
 }

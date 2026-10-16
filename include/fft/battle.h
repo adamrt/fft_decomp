@@ -23,7 +23,7 @@ typedef enum battle_game_state {
     BATTLE_GAME_STATE_HIGHLIGHT_UNITS = 2,
     BATTLE_GAME_STATE_OPEN_ACTION_MENUS = 3,
     BATTLE_GAME_STATE_IDLING_ACTION_MENUS = 4,
-    BATTLE_GAME_STATE_MENU_TO_TARGETING = 5,
+    BATTLE_GAME_STATE_AI_COMMAND = 5,
     BATTLE_GAME_STATE_ACTION_HELP_MENU = 6,
     BATTLE_GAME_STATE_DISPLAY_MOVE_AREA = 7,
     BATTLE_GAME_STATE_MINI_MENU = 8,
@@ -31,7 +31,7 @@ typedef enum battle_game_state {
     BATTLE_GAME_STATE_ACTIVE_TURN = 10,
     BATTLE_GAME_STATE_STATUS_EXECUTE = 11,
     BATTLE_GAME_STATE_UNIT_MOVE = 12,
-    BATTLE_GAME_STATE_CLOSE_MOVE_HELP = 13,
+    BATTLE_GAME_STATE_SELECT_MOVE_TILE = 13,
     BATTLE_GAME_STATE_MOVE_RANGE_EXCEPTION = 14,
     BATTLE_GAME_STATE_ILLEGAL_MOVE_MENU = 15,
     BATTLE_GAME_STATE_UNIT_MOVING_SETUP = 16,
@@ -40,7 +40,7 @@ typedef enum battle_game_state {
     BATTLE_GAME_STATE_WAIT_DIRECTION = 19,
     BATTLE_GAME_STATE_WAIT_MENU = 20,
     BATTLE_GAME_STATE_CRYSTAL_LEARN = 21,
-    BATTLE_GAME_STATE_ACTION_EXECUTE_SETUP = 22,
+    BATTLE_GAME_STATE_TARGETING_PROMPT = 22,
     BATTLE_GAME_STATE_TARGETING_RANGE = 23,
     BATTLE_GAME_STATE_ILLEGAL_RANGE = 24,
     BATTLE_GAME_STATE_ABILITY_PREVIEW_HANDLING = 25,
@@ -56,13 +56,13 @@ typedef enum battle_game_state {
     BATTLE_GAME_STATE_TARGET_DISPLAY_START = 35,
     BATTLE_GAME_STATE_TARGET_DISPLAY = 36,
     BATTLE_GAME_STATE_AFTER_COMMAND = 37,
-    BATTLE_GAME_STATE_JP_EXP_GAIN = 38,
+    BATTLE_GAME_STATE_CONTINUE_TURN = 38,
     BATTLE_GAME_STATE_CHANGE_TURN = 39,
     BATTLE_GAME_STATE_LEARN_ABILITY_ON_HIT = 40,
     BATTLE_GAME_STATE_ACTION_ANNOUNCEMENT = 41,
     BATTLE_GAME_STATE_OPEN_SP2_FILES = 42,
     BATTLE_GAME_STATE_START_EFFECT_FILE_OPEN = 43,
-    BATTLE_GAME_STATE_SECONDARY_EFFECT = 44,
+    BATTLE_GAME_STATE_ACTION_EXECUTE_START = 44,
     BATTLE_GAME_STATE_ACTION_EXECUTE = 45,
     BATTLE_GAME_STATE_BATTLE_MESSAGE_DISPLAY = 46,
     BATTLE_GAME_STATE_RESUME_ATTACK_PHASE = 47,
@@ -106,7 +106,7 @@ void battle_state_handle_free_cursor_help_state(void);
 void battle_state_handle_highlight_units_state(void);
 void battle_state_handle_open_action_menus_state(void);
 void battle_state_handle_idling_action_menus_state(void);
-void battle_state_handle_menu_to_targeting_state(void);
+void battle_state_handle_ai_command_state(void);
 void battle_state_handle_action_help_menu_state(void);
 void battle_state_handle_display_move_area_state(void);
 void battle_state_handle_mini_menu_state(void);
@@ -114,7 +114,7 @@ void battle_state_handle_mini_menu_help_state(void);
 void battle_state_handle_active_turn_state(void);
 void battle_state_handle_status_execute_state(void);
 void battle_state_handle_unit_move_state(void);
-void battle_state_handle_close_move_help_state(void);
+void battle_state_handle_select_move_tile_state(void);
 void battle_state_handle_move_range_exception_state(void);
 void battle_state_handle_illegal_move_menu_state(void);
 void battle_state_handle_unit_moving_setup_state(void);
@@ -123,7 +123,7 @@ void battle_state_handle_move_confirm_menu_state(void);
 void battle_state_handle_wait_direction_state(void);
 void battle_state_handle_wait_menu_state(void);
 void battle_state_handle_crystal_learn_state(void);
-void battle_state_handle_action_execute_setup_state(void);
+void battle_state_handle_targeting_prompt_state(void);
 void battle_state_handle_targeting_range_state(void);
 void battle_state_handle_illegal_range_state(void);
 void battle_state_handle_ability_preview_state(void);
@@ -139,13 +139,13 @@ void battle_state_handle_target_select_confirm_state(void);
 void battle_state_handle_target_display_start_state(void);
 void battle_state_handle_target_display_state(void);
 void battle_state_handle_after_command_state(void);
-void battle_state_handle_jp_exp_gain_state(void);
+void battle_state_handle_continue_turn_state(void);
 void battle_state_handle_change_turn_state(void);
 void battle_state_handle_learn_ability_on_hit_state(void);
 void battle_state_handle_action_announcement_state(void);
 void battle_state_handle_open_sp2_files_state(void);
 void battle_state_handle_start_effect_file_open_state(void);
-void battle_state_handle_secondary_effect_state(void);
+void battle_state_handle_action_execute_start_state(void);
 void battle_state_update_action_execute_mode(void);
 void battle_state_handle_battle_message_display_state(void);
 void battle_state_handle_resume_attack_phase_state(void);
@@ -167,7 +167,7 @@ void battle_state_handle_close_battle_state(void);
 s32 battle_state_announce_next_charged_action(void);
 void battle_state_enter_action_cast(void);
 void battle_state_enter_action_execute(void);
-void battle_state_enter_action_execution_setup(void);
+void battle_state_enter_targeting_prompt(void);
 void battle_state_enter_after_command(void);
 void battle_state_enter_commence_attack_phase(void);
 void battle_state_enter_continue_turn(void);

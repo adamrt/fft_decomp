@@ -110,7 +110,7 @@ typedef enum open_title_state {
 typedef enum open_title_exit_state_id {
     OPEN_TITLE_EXIT_INPUT = 0,
     OPEN_TITLE_EXIT_CANCEL = 1,  /* cross: back to the title menu */
-    OPEN_TITLE_EXIT_CONFIRM = 2, /* circle or start: the new-game transition */
+    OPEN_TITLE_EXIT_CONFIRM = 2, /* circle or start: the new-game prologue */
 } open_title_exit_state_id_e;
 
 /* Movie controller state (handlers 0 and 11): the stream the FFTST and title demo movies play. */
@@ -248,7 +248,7 @@ extern s32 g_open_title_demo_movie_index;
 
 void open_title_push_menu_controller(s32 argument);
 void open_title_select_new_game(void);
-void open_title_start_new_game_transition(void);
+void open_prologue_start(void);
 void open_title_init_new_game_party(s32 party_mode, s32 world_load_mode);
 
 /* birthday */

@@ -897,7 +897,7 @@ void battle_target_store_cursor_casting_unit_name_and_data(void) {
  * given, otherwise to the tile stored in the unit's cursor command state.
  *
  * When the cursor tile changes, the unit panels are refreshed for the current
- * game state: the cursor unit's panel in the free-cursor, close-move-help and
+ * game state: the cursor unit's panel in the free-cursor, select-move-tile and
  * target-select states, the preview target's panel in the targeting-range state. */
 void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const battle_unit_t* selected_unit) {
     s32 old_x = g_battle_cursor_x;
@@ -914,7 +914,7 @@ void battle_target_update_free_cursor_selection(const battle_unit_t* unit, const
     if (((g_battle_cursor_x != old_x) | (g_battle_cursor_z != old_z) | (g_battle_cursor_y != old_y)) != 0) {
         switch (g_battle_game_state) {
         case BATTLE_GAME_STATE_FREE_CURSOR:
-        case BATTLE_GAME_STATE_CLOSE_MOVE_HELP:
+        case BATTLE_GAME_STATE_SELECT_MOVE_TILE:
         case BATTLE_GAME_STATE_TARGET_SELECT:
             battle_target_store_cursor_unit_name_and_data();
             break;
@@ -1097,7 +1097,7 @@ s32 battle_target_move_cursor_by_input(void) {
         g_battle_cursor_repeat_counter = 0;
         switch (g_battle_game_state) {
         case BATTLE_GAME_STATE_FREE_CURSOR:
-        case BATTLE_GAME_STATE_CLOSE_MOVE_HELP:
+        case BATTLE_GAME_STATE_SELECT_MOVE_TILE:
         case BATTLE_GAME_STATE_TARGET_SELECT:
             battle_target_store_cursor_unit_name_and_data();
             break;

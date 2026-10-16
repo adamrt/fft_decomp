@@ -26,7 +26,7 @@
 #include "fft/map.h"
 #include "fft/menu_at_list.h"
 #include "fft/menu_command.h"
-#include "fft/menu_dead_unit.h"
+#include "fft/menu_crystal_pickup.h"
 #include "fft/menu_help.h"
 #include "fft/menu_option.h"
 #include "fft/menu_overlay.h"
@@ -393,13 +393,13 @@ void battle_state_enter_status_execute(void) {
     battle_gfx_prepare_post_action_display_by_runtime_id(unit->runtime_id);
 }
 
-/* Enter the menu-to-targeting state and restart the source unit's command. The
+/* Enter the AI-command state and restart the source unit's command. The
  * unit is written before the null test that guards the panel. */
-static void battle_state_restart_menu_to_targeting(void) {
+static void battle_state_enter_ai_command(void) {
     battle_unit_t* unit;
 
     battle_camera_disable_map_pan();
-    g_battle_game_state = BATTLE_GAME_STATE_MENU_TO_TARGETING;
+    g_battle_game_state = BATTLE_GAME_STATE_AI_COMMAND;
     unit = battle_unit_get_source();
     unit->state_frame_counter = 0;
     unit->command_ready = 0;
@@ -468,7 +468,7 @@ void battle_menu_open_non_active_unit_idle_action_menu(void) {
  * unit.
  *
  * The source unit, with the status menu closed, gets its own turn menu when the
- * player controls it and otherwise restarts the menu-to-targeting state. Any
+ * player controls it and otherwise restarts the AI-command state. Any
  * other unit gets the non-active-unit menu. An empty tile does nothing. */
 void battle_menu_dispatch_idle_action_menu(void) {
     battle_unit_t* unit = battle_unit_find_selectable_at_tile(g_battle_cursor_x, g_battle_cursor_y, g_battle_cursor_z);
@@ -481,7 +481,7 @@ void battle_menu_dispatch_idle_action_menu(void) {
         if ((unit->team_flags & UNIT_TEAM_FLAG_PLAYER_CONTROLLED) != 0) {
             battle_menu_open_active_unit_idle_action_menu();
         } else {
-            battle_state_restart_menu_to_targeting();
+            battle_state_enter_ai_command();
         }
     } else {
         battle_menu_open_non_active_unit_idle_action_menu();
@@ -591,7 +591,7 @@ static void battle_state_enter_move_range_exception(void) {
 }
 
 /* Return to choosing a move destination: recompute the source unit's reachable
- * tiles, show them and enter the close-move-help state with the cursor unit's
+ * tiles, show them and enter the select-move-tile state with the cursor unit's
  * panel. With no reachable tile the move-range exception state is entered
  * instead. The AT-list-active flag follows whether the player controls the unit. */
 void battle_state_enter_select_move_tile(void) {
@@ -610,7 +610,7 @@ void battle_state_enter_select_move_tile(void) {
     if (battle_move_set_reachable_tiles(casting->stats->battle_id, casting->map_x, casting->map_y, casting->map_z)
         > 0) {
         battle_target_set_tile_background_color(BATTLE_TILE_MARK_SHOW_MOVE, 1);
-        g_battle_game_state = BATTLE_GAME_STATE_CLOSE_MOVE_HELP;
+        g_battle_game_state = BATTLE_GAME_STATE_SELECT_MOVE_TILE;
         casting->state_frame_counter = 0;
         battle_target_store_cursor_unit_name_and_data();
     } else {
@@ -872,7 +872,7 @@ s32 battle_move_start_next_post_movement_step(void) {
     if (g_battle_move_find_result & MOVE_POST_EVENT_CRYSTAL_OR_TREASURE) {
         target = battle_unit_get_crystal_or_treasure_at_map_coords(source->map_x, source->map_y, source->map_z);
         /* -1 for a crystal, otherwise the treasure's item id. */
-        item = menu_get_dead_unit_selection(source->stats->battle_id);
+        item = menu_resolve_crystal_pickup(source->stats->battle_id);
         if (item == -1) {
             animation = BATTLE_UNIT_ANIMATION_RAISE_HANDS;
         } else {
@@ -1241,13 +1241,13 @@ static void battle_unit_restore_all_facings_after_attack(void) {
     }
 }
 
-/* Enter the JP/EXP gain state at animation speed 1 and restart the source unit's
+/* Enter the continue-turn state at animation speed 1 and restart the source unit's
  * state frame counter. */
 void battle_state_enter_continue_turn(void) {
     battle_unit_t* unit;
 
     g_main_system_vsync_interval = 1;
-    g_battle_game_state = BATTLE_GAME_STATE_JP_EXP_GAIN;
+    g_battle_game_state = BATTLE_GAME_STATE_CONTINUE_TURN;
     unit = battle_unit_get_source();
     if (unit != 0) {
         unit->state_frame_counter = 0;
@@ -1263,16 +1263,16 @@ void battle_unit_end_command(battle_unit_t* unit) {
 }
 
 /*
- * Enter the action-execute-setup state after the ability preview: the
+ * Enter the targeting-prompt state after the ability preview: the
  * targeting prompt with MENU_TARGETING_PROMPT_NO_TARGET when the preview marked
  * no tile (TARGET_PANELS_NONE), MENU_TARGETING_PROMPT_DEFAULT otherwise. The AT-list-active flag then follows whether
  * the player controls the unit.
  */
-void battle_state_enter_action_execution_setup(void) {
+void battle_state_enter_targeting_prompt(void) {
     battle_unit_t* unit;
 
     battle_camera_disable_map_pan();
-    g_battle_game_state = BATTLE_GAME_STATE_ACTION_EXECUTE_SETUP;
+    g_battle_game_state = BATTLE_GAME_STATE_TARGETING_PROMPT;
     unit = battle_unit_get_source();
     if (unit->ability_preview_phase == TARGET_PANELS_NONE)
         menu_init_system_function(MENU_SYSTEM_COMMAND_TARGETING_PROMPT, MENU_TARGETING_PROMPT_NO_TARGET,
@@ -1287,8 +1287,8 @@ void battle_state_enter_action_execution_setup(void) {
 }
 
 /* Enter the action-execute state for the casting unit, point the cursor at its
- * action's target and release the ability's effect. The secondary-effect state
- * calls it every frame.
+ * action's target and release the ability's effect. The action-execute-start state
+ * calls it on its single frame.
  *
  * A plain attack (ability 0), the knockback strike (ABILITY_ID_KNOCKBACK) and an
  * ability without an effect file play nothing. Accumulate and the Charge

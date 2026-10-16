@@ -562,11 +562,11 @@ void menu_open_option_at_list(void) {
 }
 
 /* Thread started for system function 0x1f (crystal or treasure): load OPTION.OUT
- * and open its dead-unit panel. */
-void menu_open_option_dead_unit_panel(void) {
+ * and open its crystal pickup panel. */
+void menu_open_option_crystal_pickup_panel(void) {
     menu_set_modal_open();
     menu_request_open_companion_executable(COMPANION_OVERLAY_OPTION);
-    option_entrypoint(MENU_OPTION_TYPE_DEAD_UNIT);
+    option_entrypoint(MENU_OPTION_TYPE_CRYSTAL_PICKUP);
 }
 
 /* Wait for the camera and menu transition, then run Triangle-menu selection. */
@@ -649,7 +649,7 @@ void menu_open_bunit(void) {
 
 /* Reserve and load the help overlay, then run its battle-help screen. */
 static void menu_run_help_menu_thread(void) {
-    if (thread_find_running_by_task(THREAD_TASK_UNIT_EDITOR_PANEL) != 0
+    if (thread_find_running_by_task(THREAD_TASK_STATUS_SCREEN) != 0
         && thread_find_running_by_task(THREAD_TASK_MENU_WINDOW_BUILD) == 0) {
         sound_queue_sfx_confirm();
     }
@@ -734,9 +734,9 @@ void menu_run_equip_thread(void) {
     thread_exit_current();
 }
 
-/* Open DEBUGCHR's unit editor on the selected unit when it is a rider or a mount, then rebuild
+/* Show DEBUGCHR's read-only status screen for the selected unit when it is a rider or a mount, then rebuild
  * the idle action menu and the unit summary for it. */
-void menu_open_debugchr_unit_editor(void) {
+void menu_open_mounted_unit_status_screen(void) {
     s16* unit_index = &g_menu_selected_unit.battle_id;
 
     if (battle_unit_get_stats_from_battle_id(*unit_index)->mount_info != 0) {
@@ -749,7 +749,7 @@ void menu_open_debugchr_unit_editor(void) {
         thread_wait_for_unit_view_panels();
         menu_record_selection_for_selected_unit();
         battle_menu_enter_status_screen_selection();
-        debugchr_editor_run_unit_thread(*unit_index);
+        debugchr_status_run_unit_thread(*unit_index);
         g_menu_overlay_state = 0;
         g_sound_suppressed = 0;
         g_script_event_input = 0;

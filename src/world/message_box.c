@@ -438,15 +438,15 @@ void menu_run_unit_status_thread(void) {
             menu_clear_render_buffer(number_images, sizeof(*number_images));
             g_menu_text_state.pen.stride = 0x10;
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs(identity->brave, 0x202, number_images->brave, &g_menu_text_state.pen);
+            text_draw_small_number_glyphs(identity->brave, 0x202, number_images->brave, &g_menu_text_state.pen);
             LoadImage(&rects[3], (u32*)number_images->brave);
             menu_set_text_origin(0, 0);
-            text_draw_large_number_glyphs(identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
+            text_draw_small_number_glyphs(identity->faith, 0x202, number_images->faith, &g_menu_text_state.pen);
             LoadImage(&rects[4], (u32*)number_images->faith);
             /* The unit-join screen uploads the roster number image cleared. */
             if (g_menu_post_battle_unit_changes_active == 0) {
                 menu_set_text_origin(0, 0);
-                text_draw_large_number_glyphs(
+                text_draw_small_number_glyphs(
                     identity->roster_slot + 1, 0x4002, number_images->roster_slot, &g_menu_text_state.pen);
                 LoadImage(&rects[5], (u32*)number_images->roster_slot);
             } else {

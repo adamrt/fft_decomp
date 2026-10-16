@@ -1153,7 +1153,7 @@ static void require_reward_run_war_trophies(void) {
                         image, &g_menu_text_state.pen);
                 } else {
                     menu_set_text_origin(0, 0);
-                    menu_draw_number_glyphs(g_require_reward_war_trophy_entry_values[last],
+                    menu_draw_large_number_glyphs(g_require_reward_war_trophy_entry_values[last],
                         text_count_decimal_digits(g_require_reward_war_trophy_entry_values[last]), image,
                         &g_menu_text_state.pen);
                 }

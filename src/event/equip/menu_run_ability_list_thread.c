@@ -1,4 +1,4 @@
-/* The thread drawing the two-column ability panel for the unit editor or the item preview. */
+/* The thread drawing the two-column ability panel for EQUIP's selected unit or the item preview. */
 
 #include "fft/event_equip.h"
 #include "fft/gfx.h"

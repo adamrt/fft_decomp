@@ -1,5 +1,5 @@
 /* Title screen controllers, including file loading, the OPNTEX frame buffer, movie streams, the title menu, sound type,
- * the new game transition and the birthday date and confirmation menus. */
+ * the new-game prologue and the birthday date and confirmation menus. */
 
 #include "fft/file.h"
 #include "fft/gfx.h"
@@ -83,7 +83,7 @@ void open_file_load_end_movie_graphics(void) {
 
 /* Upload the two TIMs at sectors 0x43 and 0x54 of OPNTEX.BIN: the text pages at
  * VRAM (256, 256) and (320, 256) that the new-game prologue draws its lines from.
- * The only caller is open_title_start_new_game_transition. */
+ * The only caller is open_prologue_start. */
 static void open_file_load_prologue_text_pages(void) {
     main_file_load_descriptor_t* header = &g_main_file_cd_state;
 
@@ -722,10 +722,10 @@ void open_menu_handle_sound_type_input(open_controller_record_t* record) {
 
 /* Begin the new-game prologue: start MAIN_MUSIC_NEW_GAME with the master volume
  * ramping up from 0, upload the prologue's text pages, read OPNBK image 1 as the
- * frame image, request the 12-entry sequence g_open_new_game_transition_entries
+ * frame image, request the 12-entry sequence g_open_prologue_entries
  * with its text in ordering-table entries 3 and 4, and push the new-game
  * controller (handler 4) at step 0 as the screen is revealed. */
-void open_title_start_new_game_transition(void) {
+void open_prologue_start(void) {
     s32 controller;
     s32 stack_padding[4];
 
@@ -735,7 +735,7 @@ void open_title_start_new_game_transition(void) {
     open_file_load_prologue_text_pages();
     open_file_build_openbk_header(1, g_open_file_destination);
     file_wait_for_pending();
-    open_gfx_init_transition_request(12, 3, g_open_new_game_transition_entries);
+    open_prologue_init_sequence(12, 3, g_open_prologue_entries);
     open_gfx_start_overlay_fade_out(0x20);
 
     controller = g_open_current_controller_index;
@@ -747,7 +747,7 @@ void open_title_start_new_game_transition(void) {
 /* Per-frame handler of the new-game controller (handler 4).
  *
  * Until step 4 it waits for the overlay fade and runs the prologue
- * (open_gfx_update_transition_sequence) to its end. Step 4 builds the new-game
+ * (open_prologue_update) to its end. Step 4 builds the new-game
  * party (loading WORLD if needed), copies the displayed frame into the frame
  * image and the other buffer, runs the WORLD name-entry screen, stores the
  * 16-byte name in party slot 0 and replaces itself with the birthday date
@@ -816,10 +816,10 @@ void open_title_step_new_game_start(open_controller_record_t* record) {
     if (g_open_gfx_overlay_fade.flags & OPEN_OVERLAY_FADE_ACTIVE) {
         return;
     }
-    if (open_gfx_update_transition_sequence() != 0) {
+    if (open_prologue_update() != 0) {
         return;
     }
-    open_gfx_transition_finished_stub();
+    open_prologue_finished_stub();
     state->step = 4;
 }
 

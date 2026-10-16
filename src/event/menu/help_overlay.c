@@ -323,7 +323,7 @@ void menu_run_battle_help(void) {
             node = &navigation[menu_index];
             y = node->y;
             x = node->x;
-            if (thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
                 y += 8;
             }
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {
@@ -569,7 +569,7 @@ void menu_run_require_help(void) {
             entry = &navigation[menu_index];
             y = entry->y;
             x = entry->x;
-            if (thread_find_running_by_task(THREAD_TASK_DEBUG_UNIT_EDITOR) != 0) {
+            if (thread_find_running_by_task(THREAD_TASK_MOUNTED_STATUS_SCREEN) != 0) {
                 y += 8;
             }
             if (thread_find_running_by_task(THREAD_TASK_HELP_MENU) != 0) {

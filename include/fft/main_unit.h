@@ -8,7 +8,7 @@
 #include "fft/data_job.h"
 #include "fft/data_skillset.h"
 #include "fft/menu.h"
-#include "fft/menu_dead_unit.h"
+#include "fft/menu_crystal_pickup.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "fft/unit_party.h"

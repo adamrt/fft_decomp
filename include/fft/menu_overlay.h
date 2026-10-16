@@ -96,9 +96,9 @@ void menu_run_companion_overlay_stub(void);
 /* Thread entries of the menu rows that open an overlay screen. */
 void menu_open_bunit(void);
 void menu_open_debugchr(void);
-void menu_open_debugchr_unit_editor(void);
+void menu_open_mounted_unit_status_screen(void);
 void menu_open_option_at_list(void);
-void menu_open_option_dead_unit_panel(void);
+void menu_open_option_crystal_pickup_panel(void);
 void menu_open_option_game_options(void);
 void menu_run_equip_thread(void);
 void menu_run_jobstts_thread(void);

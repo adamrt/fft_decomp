@@ -246,7 +246,8 @@ void menu_run_at_list(void) {
                             menu_display_number_entry(
                                 layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
                         } else if (layout->mode[column] == MENU_TEXT_COLUMN_NUMBER_GLYPHS) {
-                            menu_draw_number_glyphs(layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
+                            menu_draw_large_number_glyphs(
+                                layout->text_ids[column][index], 2, buffer, &g_menu_text_state.pen);
                         }
                     }
 

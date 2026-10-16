@@ -247,25 +247,26 @@ enum {
 /* event ids */
 /* Event ids: EVENT_SCRIPT_VAR_CURRENT_EVENT, the 0x2000-byte block of
  * EVENT/TEST.EVT that holds the event's script and text, and the index of
- * g_main_scenario_event_finish_operations. The game has no names for its
- * events; the ones the code singles out are named here for what their own
- * script and text show. */
+ * g_main_scenario_event_finish_operations. The game names only the 64 Brave
+ * Story record scenes (g_wldcore_story_event_ids lists their setup events);
+ * the ones the code singles out are named here for what their own script and
+ * text show. */
 typedef enum event_id {
     /* CallFunction JOIN_UNITS_SILENTLY also restores the new-game inventory
      * in the events below this one. */
     EVENT_ID_NEW_GAME_INVENTORY_END = 0x4e,
     /* A Zodiac Stone speaks in these two. Their centered messages start at
      * the box's left edge while ETC's graphics are off. */
-    EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9,
+    EVENT_ID_WIEGRAF_PACT_WITH_VELIUS = 0xf9, /* Brave Story record "Velius" (setup 0xf8) */
     /* Also the event the ending leaves current, with the next scenario
      * requested, so that ATTACK steps on from it. */
-    EVENT_ID_MALAK_REVIVED = 0x12a,
+    EVENT_ID_MALAK_REVIVED = 0x12a, /* Brave Story record "The lying heart" (setup 0x129) */
     /* King Delita and Ovelia. Its save does not request the next scenario. */
-    EVENT_ID_EPILOGUE = 0x12c,
+    EVENT_ID_EPILOGUE = 0x12c, /* Brave Story record "Things obtained" (setup 0x12b) */
     /* REQUIRE congratulates the player on completing the game after it. */
     EVENT_ID_FINAL_BATTLE_WON = 0x145,
     /* script_run_event_frame returns SCRIPT_EVENT_FRAME_ENDING when it ends. */
-    EVENT_ID_FUNERAL = 0x147,
+    EVENT_ID_FUNERAL = 0x147, /* Brave Story record "Reunion and beyond..." (setup 0x146) */
     /* A unit the event draws also gets its status graphics. */
     EVENT_ID_LIMBERRY_CEMETERY_BATTLE = 0x18c,
     /* The 0x1a events no scenario names, through TUTORIAL_LAST:
@@ -282,7 +283,7 @@ typedef enum event_id {
     EVENT_ID_TUTORIAL_LAST = 0x1a9,
     /* These two scenes carry on in the event that follows; the EVTCHR sprites
      * stay loaded after them. */
-    EVENT_ID_OLAN_WOUNDED = 0x1ad,
+    EVENT_ID_OLAN_WOUNDED = 0x1ad, /* Brave Story record "Delita's betrayal" (setup 0x1ac) */
     EVENT_ID_BEOWULF_INVITATION = 0x1d1,
 } event_id_e;
 

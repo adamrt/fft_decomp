@@ -17,7 +17,7 @@
 #include "fft/main_unit.h"
 #include "fft/menu_at_list.h"
 #include "fft/menu_command.h"
-#include "fft/menu_dead_unit.h"
+#include "fft/menu_crystal_pickup.h"
 #include "fft/script_variable.h"
 #include "fft/unit.h"
 #include "fft/unit_identity.h"

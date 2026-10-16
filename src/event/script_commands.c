@@ -660,9 +660,9 @@ void gfx_init_image_loading(
         base_screen->y + parameters->y_screen_offset + parameters->height);
 }
 
-/* Draw count positioned number entries into an image buffer: kind 0 with
- * text_draw_large_number_glyphs, kind 1 with menu_draw_number_glyphs; other kinds draw
- * nothing. */
+/* Draw count positioned number entries into an image buffer: kind 0 in the small glyphs
+ * (text_draw_small_number_glyphs), kind 1 in the large ones (menu_draw_large_number_glyphs); other kinds
+ * draw nothing. */
 void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries, glyph_blit_t* position, s32 count) {
     s32 i;
 
@@ -670,9 +670,9 @@ void menu_draw_numeric_display_entries(u8* buffer, menu_number_entry_t* entries,
         position->rect.x = entries->x;
         position->rect.y = entries->y;
         if (entries->kind == 0) {
-            text_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
+            text_draw_small_number_glyphs(*entries->value, entries->format, buffer, position);
         } else if (entries->kind == 1) {
-            menu_draw_number_glyphs(*entries->value, entries->format, buffer, position);
+            menu_draw_large_number_glyphs(*entries->value, entries->format, buffer, position);
         }
         entries++;
     }
@@ -700,31 +700,31 @@ void menu_display_number_entry(s32 value, u8 digit_count, u8* image, glyph_blit_
  * (0x400) or MENU_DECIMAL_SIGN_MINUS (0x800) a sign glyph before the digits, and 0xc00 two
  * dashes in place of the number. Hidden numeric values draw
  * a placeholder per digit; the pen ends after the last digit. */
-void menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
+void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos) {
     s32 i;
     s32 cursor;
     glyph_blit_t* src;
 
     /* One variable holds the sign-glyph selector first and the x to leave the
      * cursor at afterwards; the target keeps both roles in $s6. */
-    src = &g_menu_number_glyph;
-    g_menu_number_glyph.rect.h = 0xF;
+    src = &g_menu_large_number_glyph;
+    g_menu_large_number_glyph.rect.h = 0xF;
     cursor = digits & 0xFF00;
     if (cursor == 0xC00) {
         pos->rect.x += 2;
         src->rect.x = 0xBA;
-        g_menu_number_glyph.rect.y = 0xD;
-        g_menu_number_glyph.rect.w = 6;
+        g_menu_large_number_glyph.rect.y = 0xD;
+        g_menu_large_number_glyph.rect.w = 6;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
-        g_menu_number_glyph.rect.w = 8;
+        g_menu_large_number_glyph.rect.w = 8;
         return;
     }
     if (digits & 0x1000) {
         src->rect.x = 0xC8;
-        g_menu_number_glyph.rect.y = 0;
+        g_menu_large_number_glyph.rect.y = 0;
         text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, src, pos);
         pos->rect.x += 7;
     }
@@ -737,7 +737,7 @@ void menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* po
         src->rect.y = 0xD;
         src->rect.w = 6;
         pos->rect.x -= 6;
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_number_glyph, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_large_number_glyph, pos);
         pos->rect.x += 6;
         src->rect.w = 8;
     }
@@ -752,7 +752,7 @@ void menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* po
             src->rect.x = 0x48;
             src->rect.y = 0x10;
         }
-        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_number_glyph, pos);
+        text_blit_glyph(g_menu_glyph_sheet->pixels, pixels, &g_menu_large_number_glyph, pos);
         /* After the call: the quotient stays live past the argument setup, so
          * it takes a callee-saved register and the update lands in the delay
          * slot, as the target does at 0x238. */

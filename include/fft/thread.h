@@ -115,7 +115,7 @@ typedef enum thread_borrowed_slot {
     THREAD_BORROWED_SLOT_CARD_BACKDROP = 2, /* the memory card screen's zooming backdrop */
     THREAD_BORROWED_SLOT_DEPLOYMENT = 6,    /* attack_deploy_run_screen, or the map-data-load-complete thread
                                              * when a battle has no deployment */
-    /* The AT list of the dead-unit menu, once the unit view's panels have stopped. */
+    /* The AT list of the crystal pickup menu, once the unit view's panels have stopped. */
     THREAD_BORROWED_SLOT_AT_LIST_MENU_CHILD = 9, /* a wait-forever thread while the AT list's child runs */
     THREAD_BORROWED_SLOT_AT_LIST_MENU = 10,
     THREAD_BORROWED_SLOT_FADE_OUT = 13, /* the fade-out thread that follows the unit list overlay */
@@ -149,7 +149,7 @@ typedef enum thread_task {
     THREAD_TASK_ATTACK_TARGET_STATS = 18,
     THREAD_TASK_ATTACK_CASTER_STATS = 19,
     THREAD_TASK_UNIT_SUMMARY_PANEL = 20,
-    THREAD_TASK_UNIT_EDITOR_PANEL = 21,
+    THREAD_TASK_STATUS_SCREEN = 21,
     /* g_world_menu_thread_groups gives its three text windows the ids 0x20,
      * 0x21 and 0x22 (threads 9, 10 and 11); the window thread slides only the
      * second one with the main scroll. */
@@ -171,7 +171,7 @@ typedef enum thread_task {
     THREAD_TASK_RIGHT_UNIT_STATS = 58,
     THREAD_TASK_STATUS_PANEL = 59,
     THREAD_TASK_SHOW_GRAPHIC = 61,
-    THREAD_TASK_DEBUG_UNIT_EDITOR = 62,
+    THREAD_TASK_MOUNTED_STATUS_SCREEN = 62,
     THREAD_TASK_HELP_MENU = 64,
     THREAD_TASK_PLAY_EFFECT = 65,
     THREAD_TASK_MINI_MENU = 66,

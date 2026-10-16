@@ -25,7 +25,7 @@ enum {
 extern const u8 g_text_glyph_widths[];
 extern u8 g_text_glyph_bitmaps[];
 extern u8* g_text_glyph_bitmap_data;
-extern glyph_blit_t g_text_large_number_glyph_rect; /* glyph source rectangle in the large number font */
+extern glyph_blit_t g_text_small_number_glyph_rect; /* source of the small 6x10 number glyphs */
 
 /* encoded text */
 /* Encoded menu-string controls. The 0xe2-0xfd meanings come from the dialog
@@ -314,8 +314,8 @@ typedef struct menu_digit_glyph {
 } menu_digit_glyph_t;
 typedef char menu_digit_glyph_size_must_be_16[sizeof(menu_digit_glyph_t) == 16 ? 1 : -1];
 
-extern s32 g_menu_hide_numeric_values;   /* non-zero: draw digits as blanks (0x48, 0x10) */
-extern glyph_blit_t g_menu_number_glyph; /* source rectangle in the number/sign font */
+extern s32 g_menu_hide_numeric_values;         /* non-zero: draw digits as blanks (0x48, 0x10) */
+extern glyph_blit_t g_menu_large_number_glyph; /* source of the large 8x15 number and sign glyphs */
 extern glyph_blit_t g_menu_decimal_glyph;
 extern glyph_blit_t g_menu_stacked_glyph_lower;
 extern glyph_blit_t g_menu_stacked_glyph_upper;
@@ -323,7 +323,7 @@ extern const char g_text_decimal_format[];
 extern u32 g_text_decimal_divisors[];
 
 s32 text_count_decimal_digits(s32 value);
-void menu_draw_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
+void menu_draw_large_number_glyphs(s32 value, s32 digits, u8* pixels, glyph_blit_t* pos);
 /* The battle ability lists draw this pair in the number column instead of a value of 0 or 1 when the ability's
  * skill_ct is 0 or 0xff. */
 void menu_draw_stacked_glyph_pair(u8* pixels, glyph_blit_t* position);
@@ -333,7 +333,7 @@ void menu_text_render_decimal_entry_list(u8* pixels, const menu_number_entry_t* 
 void menu_text_render_signed_decimal_entries(u8* pixels, menu_number_entry_t* entries, glyph_blit_t* out, s32 count);
 
 /* BATTLE and WORLD each have their own body. */
-void text_draw_large_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos);
+void text_draw_small_number_glyphs(s32 value, s32 format, u8* pixels, glyph_blit_t* pos);
 
 /* dialog windows */
 /* Box type: the 0x70 bits of a DisplayMessage dialog type byte. */

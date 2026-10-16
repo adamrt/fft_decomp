@@ -230,7 +230,7 @@ typedef struct battle_unit {
     map_tile_coordinates_t dismount; /* 0x184 */
     u8 _unused_18a[2];
     battle_strike_work_t strike; /* 0x18c..0x1b3; current action targets, result and rewards */
-    /* 0x1b4; battle_state_handle_menu_to_targeting_state sets it once AI setup completes; it
+    /* 0x1b4; battle_state_handle_ai_command_state sets it once the AI command is built; it
      * gates command dispatch. */
     u8 command_ready;
     /* 0x1b5; strikes run after the first while continue_attack is set; zeroed

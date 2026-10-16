@@ -6,7 +6,7 @@
 #include "fft/battle_unit.h"
 #include "fft/map.h"
 #include "fft/menu.h"
-#include "fft/menu_dead_unit.h"
+#include "fft/menu_crystal_pickup.h"
 #include "fft/unit.h"
 #include "fft/unit_entd.h"
 #include "psx/types.h"

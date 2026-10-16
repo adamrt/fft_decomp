@@ -809,9 +809,9 @@ written that way.
 - `g_open_file_openbk_end_sector_offsets` (`0x80073f5c`) is
   `g_open_file_openbk_start_sector_offsets + 1`: eight sector offsets of
   OPNBK.BIN under two names, each image ending where the next starts.
-- `g_open_gfx_image_copy_progress` (`0x800854b5`) is
-  `g_open_gfx_image_copy_row_flags[1]`;
-  `open_gfx_copy_file_image_to_210x180_buffer` clears it through the array.
+- `g_open_prologue_crossfade_progress` (`0x800854b5`) is
+  `g_open_prologue_crossfade_rows[1]`;
+  `open_prologue_prepare_crossfade` clears it through the array.
 
 ## Duplicated code
 
@@ -1064,9 +1064,9 @@ bindings. Distinct entrypoints and genuinely different implementations remain.
   no roster unit is deployable for the squad, and
   `battle_effect_alloc_work_record`, with its free chain empty, calls the empty
   report stub and then reads the next link through NULL.
-- `menu_run_unit_editor_panel_thread` hands a unit with mount info (a
-  rider or a mount) to DEBUGCHR.OUT's `debugchr_editor_run_unit_thread`
-  (`menu_open_debugchr_unit_editor`); any other unit gets BATTLE's own
+- `menu_run_status_screen_thread` hands a unit with mount info (a
+  rider or a mount) to DEBUGCHR.OUT's `debugchr_status_run_unit_thread`
+  (`menu_open_mounted_unit_status_screen`); any other unit gets BATTLE's own
   panel.
 - The camera's L2/R2 input uses `battle_camera_toggle_zoom` and `battle_camera_toggle_tilt`,
   bypassing `battle_camera_zoom_map` and `battle_camera_handle_tilt_request`. The linear

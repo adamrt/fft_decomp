@@ -278,7 +278,7 @@ void menu_run_scrolling_ability_list_thread(void) {
                                     g_menu_text_state.pen.rect.x += 3;
                                     menu_display_text_entry(0x509D, buffer, &g_menu_text_state.pen);
                                 } else {
-                                    menu_draw_number_glyphs(value, 2, buffer, &g_menu_text_state.pen);
+                                    menu_draw_large_number_glyphs(value, 2, buffer, &g_menu_text_state.pen);
                                 }
                             }
                         }
