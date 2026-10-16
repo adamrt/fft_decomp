@@ -997,10 +997,12 @@ func (m *moduleSpec) unitOverridesProfile(f *functionSpec) bool {
 	return unit != nil && unit.Profile != "" && unit.Profile != m.Profile
 }
 
-// hoistUnitProfiles moves a profile that every member of a unit states
-// explicitly onto the unit row, so the members stop repeating it. Units whose
-// members differ (division checks on some functions only) keep per-member
-// profiles, which record where checked divisions occur.
+// hoistUnitProfiles moves the profile a unit's members compile with onto the
+// unit row, so the members stop repeating it. Members may differ only in
+// division checks: no unit mixes checked and unchecked divisions (the trap was
+// an assembler option per object), and a function without a division compiles
+// identically either way, so the checked variant serves the whole unit, as
+// unitProfile already decides when the unit compiles.
 func (m *moduleSpec) hoistUnitProfiles() {
 	for index := range m.Units {
 		unit := &m.Units[index]
@@ -1011,16 +1013,30 @@ func (m *moduleSpec) hoistUnitProfiles() {
 		if len(members) == 0 {
 			continue
 		}
-		shared := members[0].Profile
-		for _, f := range members[1:] {
-			if f.Profile != shared {
-				shared = ""
-				break
-			}
-		}
-		if shared == "" || shared == m.Profile {
+		chosen := m.profileOf(members[0])
+		chosenProfile, ok := compilerProfileNamed(chosen)
+		if !ok {
 			continue
 		}
-		unit.Profile = shared
+		agree := true
+		for _, f := range members[1:] {
+			name := m.profileOf(f)
+			if name == chosen {
+				continue
+			}
+			profile, ok := compilerProfileNamed(name)
+			if !ok || profile.compilerPath != chosenProfile.compilerPath || profile.optimization != chosenProfile.optimization ||
+				profile.aspsxVersion != chosenProfile.aspsxVersion || profile.smallDataLimit != chosenProfile.smallDataLimit {
+				agree = false
+				break
+			}
+			if profile.expandDiv && !chosenProfile.expandDiv {
+				chosen, chosenProfile = name, profile
+			}
+		}
+		if !agree || chosen == m.Profile {
+			continue
+		}
+		unit.Profile = chosen
 	}
 }

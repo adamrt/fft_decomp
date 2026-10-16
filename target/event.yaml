@@ -2304,7 +2304,7 @@ units:
   - {name: panel_text, source: src/event/menu/panel_text.c}
   - {name: portrait_transitions, source: src/event/menu/portrait_transitions.c}
   - {name: post_battle_party, source: src/event/require/post_battle_party.c}
-  - {name: rewards, source: src/event/require/rewards.c}
+  - {name: rewards, source: src/event/require/rewards.c, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck}
   - {name: status_billboard, source: src/event/menu/status_billboard.c}
   - {name: zodiac_primitives, source: src/event/menu/zodiac_primitives.c}
 
@@ -2386,7 +2386,7 @@ functions:
   - {addr: 0x801c9fa4, size: 8, name: require_noop_801c9fa4, hash: 6d64edf91449c1b1, unit: rewards}
   - {addr: 0x801c9fac, size: 1688, name: require_condition_run_special_thread, hash: ac96742eb4a60b78, unit: rewards}
   - {addr: 0x801ca644, size: 32, name: require_thread_exit_current, hash: d5e294538771c138, unit: rewards}
-  - {addr: 0x801ca664, size: 2416, name: require_reward_animate_bonus_image_burst, hash: 5a5a3d742bcaea7a, profile: gcc-2.6.3_O2_aspsx-2.34_divcheck, unit: rewards}
+  - {addr: 0x801ca664, size: 2416, name: require_reward_animate_bonus_image_burst, hash: 5a5a3d742bcaea7a, unit: rewards}
   - {addr: 0x801cafd4, size: 392, name: require_condition_dispatch, hash: 5daba3919c5bcdeb, unit: rewards}
   - {addr: 0x801cb15c, size: 192, name: require_overlay_run_helpmenu, hash: 080209a0102a063f, unit: rewards}
   - {addr: 0x801cb21c, size: 176, name: require_text_build_battle_nicknames, hash: f01073dd1236acab, unit: rewards}

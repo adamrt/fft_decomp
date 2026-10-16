@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestUnitProfileHoistsASharedMemberProfile(t *testing.T) {
+func TestUnitProfileHoistsTheProfileItsMembersShare(t *testing.T) {
 	const o1 = "gcc-2.6.3_O1_aspsx-2.34"
 	const divcheck = "gcc-2.6.3_O2_aspsx-2.34_divcheck"
 	m := &moduleSpec{
@@ -28,8 +28,9 @@ func TestUnitProfileHoistsASharedMemberProfile(t *testing.T) {
 	if got := m.profileOf(&m.Functions[0]); got != o1 {
 		t.Fatalf("member profile = %q", got)
 	}
-	if m.unit("mixed").Profile != "" || m.Functions[2].Profile != divcheck {
-		t.Fatalf("mixed unit changed: unit %q member %q", m.unit("mixed").Profile, m.Functions[2].Profile)
+	// Members that differ only in division checks share the checked profile.
+	if m.unit("mixed").Profile != divcheck || m.Functions[2].Profile != "" || m.profileOf(&m.Functions[3]) != divcheck {
+		t.Fatalf("mixed unit: unit %q member %q", m.unit("mixed").Profile, m.Functions[2].Profile)
 	}
 	rendered := string(renderModuleConfig(m))
 	if !strings.Contains(rendered, "{name: grid, source: src/world/grid.c, profile: "+o1+"}") {
