@@ -323,7 +323,7 @@ typedef struct wldcore_saved_record {
     s16 text_history_3;       /* 0x26 */
     s16 value_display_mode;   /* 0x28 */
     s16 music_selection;      /* 0x2a */
-    s16 sound_mode;           /* 0x2c; suzuki_sound_type_e */
+    s16 sound_mode;           /* 0x2c; 0 plays pending sounds only, 1 also switches the music track */
     s16 picture_x;            /* 0x2e */
     s16 picture_y;            /* 0x30 */
     s16 sound_id;             /* 0x32 */

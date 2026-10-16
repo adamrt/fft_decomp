@@ -1569,7 +1569,7 @@ typedef struct game_options_fields {
     u32 navigation_messages : 2;
     u32 ability_names : 2;
     u32 effect_messages : 2;
-    u32 sound_mode : 2;
+    u32 sound_mode : 2; /* suzuki_sound_type_e */
     u32 show_unequippable_items : 2;
     u32 display_gained_exp_jp : 2;
     u32 target_flashing : 2;

@@ -20,7 +20,7 @@ void main_save_init_data_tables(void) {
         record->text_history_0 = -1;
         record->picture_id = -1;
         g_main_saved_records[i].background_set = -1;
-        record->sound_mode = SUZUKI_SOUND_TYPE_MONO;
+        record->sound_mode = 0;
         record->music_selection = 0;
         record->state_flags = 0;
         g_main_saved_records[i].section = 0;
