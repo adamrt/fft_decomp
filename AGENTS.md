@@ -62,22 +62,27 @@ preserving every original byte.
   objects, a change of compiler profile, jump-table alignment, read-only
   data that is not contiguous. Where the binary is silent, cut by topic to
   about 20 to 60 functions. A name prefix is never boundary evidence.
-- `include/fft/`: game program, library and shared-type headers. A program's
-  declarations live in topic headers (`world_shop.h`, `wldcore_map.h`,
-  `main_sound.h`, `menu_panel.h`); the base header (`world.h`) keeps the
-  types and declarations several topics share. `include/psx/`: library and
-  PS1 hardware interfaces. Library code never includes game headers.
+- `include/fft/`: one flat folder of game headers named by concept
+  (`unit.h`, `shop.h`, `proposition.h`, `battle_map_load.h`, `menu_stack.h`),
+  each declaring one part of the game for every program that uses it. A
+  large concept splits by sub-topic (`unit.h` and `unit_runtime.h`,
+  `effect.h` and `effect_geometry.h`); add folders only when size calls for
+  them. `include/psx/`: library and PS1 hardware interfaces. Library code
+  never includes game headers.
 - `tools/`: Go build/check tooling. `tools/target.go` owns the original disc size
   and hash. `QUIRKS.md` records unusual behavior worth preserving.
 
-Put declarations in their owning header. Sources include their own declaration
-header and the focused headers for the APIs they use; a source several
-programs compile includes what any of them needs. A header starts with its
-guard, then a one-line description, then its includes. Group declarations by
-topic under short section comments, with each topic's types first, then its
-globals, then its functions; order topics so a type comes before its first
-use. Leave blank lines between type blocks; headers include their own
-dependencies.
+Put declarations in the header of their concept. Sources include the headers
+of the concepts they use; a source several programs compile includes what any
+of them needs. A header starts with its guard, then a one-line description,
+then its includes. Group declarations by sub-topic under short lowercase
+section comments, with each section's types first, then its globals, then its
+functions; order sections so a type comes before its first use. Plain
+declarations run together without blank lines, a size assert follows its type
+directly, and blank lines separate type blocks and come before a commented
+declaration. Headers include their own dependencies and compile alone; a
+header that only passes a record around names it by its tag (`struct unit*`)
+instead of including the record's header.
 
 ## Code style
 
@@ -94,37 +99,44 @@ dependencies.
 - Do not introduce register pins, asm barriers, `volatile` or raw offsets to
   force a cleanup. Retain existing residue only when measured necessary, with
   a concise reason. Keep architectural register access isolated.
-- Name functions by program, then topic, then behavior. A program's own
-  function carries its program token first (`battle_gfx_`, `battle_formula_`,
-  `world_shop_`, `wldcore_bar_`, `attack_deploy_`, `main_file_`); a library
-  function compiled into several programs carries only its topic (`script_`,
-  `thread_`, `text_`, `menu_`, `gfx_`, `memcard_`, `bits_`, `window_`), so a
-  bare prefix at a call site means shared code. Files carry no program
-  token; their folder says it. A body compiled into one program carries
-  that program's token, and a body several programs compile carries only
-  its topic. When code several programs compile calls a function whose body
-  differs by program, every body takes that one topic-only name, since the
-  call site can name only one.
+- Name a function by concept, optional sub-topic, then behavior
+  (`shop_buy_`, `proposition_open_returned_list`, `battle_map_load_data`,
+  `unit_panel_`). The concept is the game's own US term where the player
+  sees one (bar, rumor, proposition, Brave Story, sound novel, formation,
+  reaction, AT List); code with no player concept takes a mechanism topic
+  (`script_`, `thread_`, `text_`, `menu_`, `screen_`, `window_`, `gfx_`,
+  `memcard_`, `bits_`, `system_`, `file_`, `heap_`, `overlay_`, `input_`,
+  `render_`, `controller_`). A sub-topic leads when the player picks it as a
+  mode (`shop_buy_`, `formation_job_`). Names carry no program token; the
+  folder says which program a body belongs to. One role takes one name in
+  every program, so bodies that differ by program share it (CARD's and
+  WORLD's `save_build_image`); different roles take different names, and
+  every name is unique across programs except same-role bodies, which never
+  share a link.
 - A bytecode machine's handler for one opcode is named
   `<machine>_opcode_<nn>_<instruction>` with the opcode in two hex digits:
-  `script_opcode_28_walk_to` (event scripts), `wldcore_sound_novel_opcode_*`,
-  `wldcore_script_opcode_*` (world map scripts), `open_opcode_*`,
-  `menu_opcode_*` (menu display scripts), `world_tutorial_opcode_*`. A
+  `script_opcode_28_walk_to` (event scripts), `sound_novel_opcode_*`,
+  `location_script_opcode_*` (world map scripts), `ending_opcode_*`,
+  `menu_opcode_*` (menu display scripts), `tutorial_opcode_*`,
+  `effect_script_opcode_*`. A
   handler shared by several opcodes takes the lowest. Use "opcode" only for
   an instruction stream that a dispatcher decodes; request codes and
   single records are commands.
-- Globals follow the same rule: a global with one definition carries the
-  defining program's token (`g_main_`, `g_battle_`, `g_bunit_`), and a name
-  that shared code binds to a different definition in each program carries
-  only its topic, with a comment saying which programs define it.
+- Globals follow the same rule (`g_shop_`, `g_unit_`, `g_menu_stack_`); a
+  name that shared code binds to a different definition in each program
+  carries a comment saying which programs define it, and a record laid out
+  per program keeps its forms under `#ifdef FFT_X` in its header.
 - Preserve game terminology. Name an unknown by what the code shows it
   doing, and mark a name that rests on thin evidence `Provisional:` in its
   comment; keep an address in a name only when nothing else is known.
 - A function used only inside its own unit is `static` and appears in no
   header; when the file uses it before its definition, a static prototype
-  follows the includes. Headers declare only what other files use.
-- Use snake_case, `_t` for struct typedefs, `_e` for enum typedefs, uppercase
-  enumerators, and `_init_`. Use decimal for counts/ordinary enum values and
+  follows the includes. Headers declare only what other files use. A
+  private body whose role another program declares in a shared header drops
+  `static` and takes that declaration.
+- Use snake_case, `_t` for struct typedefs, `_e` for enum typedefs (the tag
+  repeats the typedef's name without its suffix), uppercase enumerators, and
+  `_init_`. A size assert is named after its type (`unit_size_must_be_N`). Use decimal for counts/ordinary enum values and
   hex for flags and encoded values. Header guards have no `FFT_` prefix.
 - Unknown members are `_unknown_XX`; `_unused_XX` means no named access;
   `_padding_XX` means proven alignment/size filler. Offsets are relative to the
