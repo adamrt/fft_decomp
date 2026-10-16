@@ -1124,7 +1124,7 @@ s32 battle_action_find_unit_turn_index(const unit_stats_t* unit) {
     battle_action_calculate_at_list(at_list, BATTLE_AT_LIST_MODE_TURNS_ONLY);
     for (i = 0; i < BATTLE_AT_LIST_CAPACITY; i++) {
         entry = &at_list[i];
-        if ((entry->unit_code & BATTLE_AT_UNIT_ID_MASK) == (battle_id & 0xFF)) {
+        if ((entry->unit_code & BATTLE_AT_UNIT_ID_MASK) == battle_id) {
             return i;
         }
     }
@@ -1466,10 +1466,10 @@ s32 battle_action_end_turn(s32 unit_id) {
     if (movement_check == 0) {
         ct += 0x14;
     }
-    result = ct & 0xFFFF;
+    result = ct;
     if (action_check == 0) {
         ct += 0x14;
-        result = ct & 0xFFFF;
+        result = ct;
     }
     if (result >= 0x3D)
         ct = 0x3C;

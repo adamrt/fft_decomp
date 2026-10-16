@@ -310,7 +310,7 @@ void battle_action_start_next_strike_display(void) {
     raw = unit->strike.last_attack_id;
     /* The target reads 0x1a6 as a signed 16-bit value. */
     target = unit->strike.reaction_id;
-    ability = raw & 0xffff;
+    ability = raw;
     unit->used_ability_id = raw;
     battle_gfx_set_thrown_item_graphic_palette(unit->strike.used_weapon_id, unit);
     if (((target != 0) && (ability != target)) || (ability == ABILITY_ID_KNOCKBACK) || (ability == 0)

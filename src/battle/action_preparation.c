@@ -760,7 +760,7 @@ static void battle_action_finalize_draw_out_katana_result(
         return;
     if (attacker->job_id == JOB_ID_MIME)
         return;
-    if ((hit_count & 0xFF) == 0
+    if (hit_count == 0
         || ((flags = g_battle_action_attacker_action_data.special_effect)
                & ACTION_SPECIAL_EFFECT_DRAW_OUT_KATANA_NOT_BROKEN)
             != 0) {

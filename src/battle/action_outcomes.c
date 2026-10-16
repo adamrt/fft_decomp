@@ -214,7 +214,7 @@ s32 battle_action_increment_item_quantity_for_steal_break(unit_stats_t* unit, u8
     if ((unit->initial_team_flags & BATTLE_TEAM_MASK) != BATTLE_TEAM_BLUE) {
         return 0;
     }
-    item_id = item & 0xFF;
+    item_id = item;
     if (item_id == ITEM_ID_NOTHING) {
         return 0;
     }

@@ -465,7 +465,7 @@ static s32 world_formation_run_set_ability_menu(void) {
             g_world_set_ability_cursor = cursor;
             if ((g_item_list_entries[cursor] >= ABILITY_ID_MOVEMENT_MOVE_PLUS_1
                     && g_item_list_entries[cursor] <= ABILITY_ID_MOVEMENT_JUMP_PLUS_3)
-                || (u16)((u16)g_world_unit_pointers[g_unit_selected_index]->abilities.slots[g_world_set_ability_slot]
+                || (u16)(g_world_unit_pointers[g_unit_selected_index]->abilities.slots[g_world_set_ability_slot]
                        - ABILITY_ID_MOVEMENT_MOVE_PLUS_1)
                     < 6) {
                 world_ability_find_stat_changes_due_to_equipped(&g_item_preview_stat_detail,

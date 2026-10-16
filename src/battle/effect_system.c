@@ -1287,7 +1287,7 @@ s32 battle_effect_init_fall_dust_secondary(effect_secondary_init_t* source, VECT
  * the record lasts two more frames. The arrow handler starts it when the arrow
  * lands without a hit. */
 static s32 battle_effect_end_secondary_on_current_unit(void) {
-    s32 secondary_id = battle_effect_allocate_secondary_slot() & 0xFF;
+    s32 secondary_id = battle_effect_allocate_secondary_slot();
     s32 record_offset = secondary_id * sizeof(effect_secondary_data_t);
     u8 function_id;
 

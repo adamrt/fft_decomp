@@ -235,7 +235,7 @@ static void battle_move_store_unit_movement_to_scratchpad(s32 unit_id) {
     if (config->move_type == MOVE_CLASS_FLY || (movement[0] & BATTLE_MOVEMENT_SET_1_IGNORE_HEIGHT)) {
         value = 0x1F;
     }
-    config->jump_times_two = (value & 0xFF) * 2;
+    config->jump_times_two = value * 2;
     config->jump_or_1f = value;
     if (battle_unit_get_chocobo_mount_state(unit) != BATTLE_CHOCOBO_MOUNT_NONE) {
         config->mountable_chocobo = 1;

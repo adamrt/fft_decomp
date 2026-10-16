@@ -298,7 +298,7 @@ void battle_unit_set_animation_based_on_mounted_state(battle_unit_t* unit) {
     battle_unit_t* other;
 
     if (unit->mount_state != BATTLE_UNIT_MOUNT_STATE_RIDER) {
-        water_depth = battle_move_get_water_depth(unit) & 0xFF;
+        water_depth = battle_move_get_water_depth(unit);
         if (water_depth < 0) {
             selected = BATTLE_UNIT_ANIMATION_SUBMERGED_IDLE;
         } else if (water_depth < 2) {
@@ -582,7 +582,7 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
             battle_unit_draw_and_activate_by_runtime_id(unit->runtime_id);
             battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_JUMP_LAND, unit->facing, unit);
         }
-        if ((battle_move_get_water_depth(unit) & 0xff) >= 2) {
+        if (battle_move_get_water_depth(unit) >= 2) {
             if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
                 battle_unit_store_animation_facing_movement_data(BATTLE_UNIT_ANIMATION_DEAD, unit->facing, unit);
                 unit->animation.sequence_id = BATTLE_UNIT_ANIMATION_DEAD << 1;
@@ -594,7 +594,7 @@ void battle_unit_update_animation_for_status_changes(battle_unit_t* unit) {
                 unit->animation.wait = 0;
             }
         }
-    } else if ((battle_move_get_water_depth(unit) & 0xff) < 2) {
+    } else if (battle_move_get_water_depth(unit) < 2) {
         if (unit->statuses_to_add_1_4 & BATTLE_UNIT_STATUS_DEAD) {
             battle_unit_store_animation_facing(BATTLE_UNIT_ANIMATION_DEATH, unit->facing, unit);
         } else if (unit->statuses_to_remove_1_4 & BATTLE_UNIT_STATUS_DEAD) {
