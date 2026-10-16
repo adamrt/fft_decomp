@@ -15,8 +15,6 @@
 #define SHEET_BARD                0x82
 #define SHEET_DANCER              0x83
 
-#define CLUT_SUPPRESS_MASK 0x300
-
 /*
  * Resolves a roster slot's sprite sheet to its 16-bit CLUT value and, unless that value
  * is masked out, applies it to the caller's portrait sprite record.
@@ -65,7 +63,7 @@ void menu_build_portrait_poly_variant(s32 roster_slot, POLY_FT4* poly) {
     if (party->sprite_set == CHARACTER_IDENTITY_MONSTER) {
         sprite |= job->job_portrait_palette << 10;
     }
-    if ((sprite & CLUT_SUPPRESS_MASK) == 0) {
+    if ((sprite & MENU_PORTRAIT_CLUT_SUPPRESS_MASK) == 0) {
         menu_build_unit_portrait_poly_variant(poly, sprite);
     }
 }

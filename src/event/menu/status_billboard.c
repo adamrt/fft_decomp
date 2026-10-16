@@ -434,7 +434,7 @@ void menu_load_selected_unit_variant(void) {
     }
 
     for (i = 0; i < 5; i++) {
-        if (editor->equipment[i] == 0 || editor->equipment[i] == 0xff)
+        if (editor->equipment[i] == ITEM_ID_NOTHING || editor->equipment[i] == ITEM_ID_NONE)
             editor->equipment[i] = -1;
     }
 

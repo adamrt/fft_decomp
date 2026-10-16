@@ -120,7 +120,7 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
         }
         if (mode == WORLD_ABILITY_LIST_MODE_VIEW_ALL) {
             if (!kind) {
-                if (!(g_main_ability_data[id].type_flags >> 7)) {
+                if (!(g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT)) {
                     id |= ABILITY_LIST_ENTRY_DISABLED;
                 } else {
                     id |= ABILITY_LIST_ENTRY_DISABLED | ABILITY_LIST_ENTRY_HIDE_DETAILS;
@@ -135,7 +135,7 @@ s32 ability_build_list_variant(s16 unit_index, s16 job, s32 ability_category, s1
             }
         } else if (mode == WORLD_ABILITY_LIST_MODE_LEARN_MENU) {
             if (!kind) {
-                if (g_main_ability_data[id].type_flags >> 7) {
+                if (g_main_ability_data[id].type_flags >> ABILITY_TYPE_FLAG_CANNOT_LEARN_WITH_JP_SHIFT) {
                     continue;
                 }
                 if (jp < g_main_ability_data[id].jp_cost) {
