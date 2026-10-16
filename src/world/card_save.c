@@ -1366,23 +1366,23 @@ static void world_card_update_and_draw_slot_list(s32 input) {
     world_card_scroll_menu_list(g_world_card_slot_cursor_row);
     g_menu_window_rect_source = &g_world_card_slot_window;
     busy = g_world_card_menu_step != WORLD_CARD_MENU_STEP_SELECT_SAVE;
-    for (i = 0, row = 0; i < 15; i++, row++) {
+    for (i = 0, row = 0; i < CARD_SAVE_SLOT_COUNT; i++, row++) {
         if (g_world_card_save_mode != 0) {
             while (g_main_card_save_slot_file_states[i] != CARD_SAVE_SLOT_OCCUPIED) {
                 i++;
-                if (i >= 15) {
+                if (i >= CARD_SAVE_SLOT_COUNT) {
                     break;
                 }
             }
         } else {
             while (g_main_card_save_slot_file_states[i] == CARD_SAVE_SLOT_UNAVAILABLE) {
                 i++;
-                if (i >= 15) {
+                if (i >= CARD_SAVE_SLOT_COUNT) {
                     break;
                 }
             }
         }
-        if (i >= 15) {
+        if (i >= CARD_SAVE_SLOT_COUNT) {
             break;
         }
         g_world_card_slot_window.rect.y

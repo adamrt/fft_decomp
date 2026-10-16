@@ -1265,7 +1265,7 @@ s32 battle_action_calculate_at_list(battle_at_entry_t* list, battle_at_list_mode
         }
     }
 
-    for (slot = 0; slot < 0x15; slot++) {
+    for (slot = 0; slot < BATTLE_UNIT_SLOT_COUNT; slot++) {
         unit = &g_battle_unit_stats[slot];
         if (battle_status_is_unit_absent_dead_crystal_treasure_petrified_or_ridden(unit) != 0) {
             continue;

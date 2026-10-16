@@ -1762,7 +1762,7 @@ void battle_gfx_prepare_post_action_display(battle_unit_t* unit) {
         }
         if (action->attack_type & ACTION_TYPE_STATUS_CHANGE) {
             unit->status_display_image_count = 0;
-            for (i = 0; i < 5; i++) {
+            for (i = 0; i < STATUS_BYTE_COUNT; i++) {
                 for (j = 0; j < 8; j++) {
                     count = unit->status_display_image_count;
                     bit = 0x80 >> j;
