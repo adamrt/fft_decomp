@@ -55,7 +55,7 @@ enum { MENU_HIGH_OVERLAY_SIZE = 0x20000 };
 /* Set the frame budget of the next timed message (menu_icon_timed_thread); adding 0x100 also holds
  * off cancel until it runs out. */
 void message_set_duration(u16 frames) {
-    g_message_message_duration_frames = frames;
+    g_message_duration_frames = frames;
 }
 
 /* Size a message entry's window to its text and center it on x = 0x102.
@@ -94,7 +94,7 @@ static void menu_size_entry_to_text(menu_entry_t* entry, s16* width, s16* height
 }
 
 /* Timed menu icon thread: shows one text entry with alternating sprite
- * records until input arrives or the g_message_message_duration_frames frame budget (scaled by the
+ * records until input arrives or the g_message_duration_frames frame budget (scaled by the
  * event speed) runs out. Bit 8 of the budget suppresses cancel handling
  * until the budget expires. The thread-id check reads an unset local in the
  * original. */
@@ -112,9 +112,9 @@ void menu_icon_timed_thread(void) {
     s32 unset;
 
     hold = 0;
-    if (g_message_message_duration_frames >= 0x100) {
+    if (g_message_duration_frames >= 0x100) {
         hold = 1;
-        g_message_message_duration_frames &= 0xFF;
+        g_message_duration_frames &= 0xFF;
     }
     i = 0;
     param = (menu_entry_t*)thread_get_current_parameter_1();
@@ -133,7 +133,7 @@ void menu_icon_timed_thread(void) {
         }
         /* Out of time: press Circle on the player's behalf, silently, so the menu closes
          * as if confirmed. */
-        if (g_message_message_duration_frames < i * g_script_event_speed) {
+        if (g_message_duration_frames < i * g_script_event_speed) {
             hold = 0;
             g_script_event_input = PSX_PAD_CIRCLE;
             g_sound_suppressed = 1;
@@ -764,7 +764,7 @@ void status_screen_open_mounted_unit(void) {
 }
 
 /* Close the panels, run the requested debug session, then restore menu state. */
-void unit_editor_open(void) {
+void debug_unit_editor_open(void) {
     unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
     menu_set_modal_open();
     g_menu_overlay_state = 1;
@@ -774,7 +774,7 @@ void unit_editor_open(void) {
     unit_view_wait_for_panels();
     thread_yield();
     thread_yield();
-    unit_editor_run();
+    debug_unit_editor_run();
     g_menu_overlay_state = 0;
     g_sound_suppressed = 0;
     g_script_event_input = 0;

@@ -32,7 +32,7 @@ enum {
     SCREEN_THREAD_SLOT_AT_LIST_FRAME = 15,
 };
 
-s32 screen_thread_is_task_active(s32 unused_0);
+s32 menu_input_get_lock_mode(s32 unused_0);
 void screen_thread_yield_forever(void);
 void screen_thread_request_redraw(s32 thread_id);
 void screen_thread_request_stop(s32 thread_id);

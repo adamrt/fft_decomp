@@ -909,7 +909,7 @@ functions:
   - {addr: 0x8013c2dc, size: 200, name: status_screen_jobs_thread, hash: 4873b28b228ba17e, unit: event_resources}
   - {addr: 0x8013c3a4, size: 456, name: equipment_thread, hash: b4cfa9beb874f1bc, unit: event_resources}
   - {addr: 0x8013c56c, size: 252, name: status_screen_open_mounted_unit, hash: d3d1ed8f97defebc, unit: event_resources}
-  - {addr: 0x8013c668, size: 168, name: unit_editor_open, hash: 6468879416a486b3, unit: event_resources}
+  - {addr: 0x8013c668, size: 168, name: debug_unit_editor_open, hash: 6468879416a486b3, unit: event_resources}
   - {addr: 0x8013c710, size: 48, name: script_show_graphic, hash: f9a76818dec541a0, unit: event_resources}
   - {addr: 0x8013c740, size: 8, name: script_noop_3, hash: 6d64edf91449c1b1, unit: event_resources}
   - {addr: 0x8013c748, size: 124, name: portrait_load_image, hash: 247f70f8a3e77e31, unit: event_resources}
@@ -1057,10 +1057,10 @@ functions:
   - {addr: 0x80147ca8, size: 72, name: script_opcode_98_teleport_in, hash: 117e30d62a327134, unit: script_interpreter}
   - {addr: 0x80147cf0, size: 168, name: script_blue_remove_all_enemy_units, hash: 2274921be941b9ac, unit: script_interpreter}
   - {addr: 0x80147d98, size: 200, name: script_opcode_99_blue_remove_unit, hash: acf2f50c451c3612, unit: script_interpreter}
-  - {addr: 0x80147e60, size: 332, name: script_warp_unit, hash: a4238fc24406e01c, unit: script_interpreter}
+  - {addr: 0x80147e60, size: 332, name: script_opcode_5f_warp_unit, hash: a4238fc24406e01c, unit: script_interpreter}
   - {addr: 0x80147fac, size: 216, name: script_opcode_8c_unit_anim_rotate, hash: 92e26c055631d0fb, unit: script_interpreter}
-  - {addr: 0x80148084, size: 512, name: script_face_unit, hash: 390040f4c2819846, unit: script_interpreter}
-  - {addr: 0x80148284, size: 516, name: script_rotate_unit, hash: 68d1d9ca7a73e6b2, unit: script_interpreter}
+  - {addr: 0x80148084, size: 512, name: script_opcode_2c_face_unit, hash: 390040f4c2819846, unit: script_interpreter}
+  - {addr: 0x80148284, size: 516, name: script_opcode_2d_rotate_unit, hash: 68d1d9ca7a73e6b2, unit: script_interpreter}
   - {addr: 0x80148488, size: 180, name: status_queue_current_status_graphics, hash: 1f24e21ebfd693db, unit: script_interpreter}
   - {addr: 0x8014853c, size: 68, name: unit_clear_status_staging_data, hash: 46b30317dc3acbf3, unit: script_interpreter}
   - {addr: 0x80148580, size: 808, name: unit_save_staged_status_data, hash: 78be53693ecbd23f, unit: script_interpreter}
@@ -1069,7 +1069,7 @@ functions:
   - {addr: 0x80148e88, size: 632, name: script_inflict_status_thread, hash: 61d3e9fb6f1a31dc, unit: script_interpreter}
   - {addr: 0x80149100, size: 216, name: status_inflict_by_event_unit_id, hash: 5219ad791988f213, unit: script_interpreter}
   - {addr: 0x801491d8, size: 448, name: script_opcode_83_change_stats, hash: 0f552e12e60b18e2, unit: script_interpreter}
-  - {addr: 0x80149398, size: 248, name: script_unit_anim, hash: 8c66feb3346fed6e, unit: script_interpreter}
+  - {addr: 0x80149398, size: 248, name: script_opcode_11_unit_anim, hash: 8c66feb3346fed6e, unit: script_interpreter}
   - {addr: 0x80149490, size: 156, name: script_opcode_80_march, hash: ab19a34ada7cae3e, unit: script_interpreter}
   - {addr: 0x8014952c, size: 180, name: script_opcode_81_set_unit_movement_effect_suppression, hash: ad56c0ea33915d4c, unit: script_interpreter}
   - {addr: 0x801495e0, size: 172, name: script_opcode_32_color_unit, hash: e5653129316a4e33, unit: script_interpreter}
@@ -1837,12 +1837,12 @@ functions:
   - {addr: 0x801a8898, size: 56, name: effect_interpolate_s16, hash: 7a8493afc412f712, unit: effect_renderer}
   - {addr: 0x801a88d0, size: 124, name: effect_interpolate_svector, hash: ac217fa72ab9e7d5, unit: effect_renderer}
   - {addr: 0x801a894c, size: 100, name: effect_interpolate_svector_cos, hash: 44d8a226f58ce729, unit: effect_renderer}
-  - {addr: 0x801a89b0, size: 100, name: effect_interpolate_svector_cos_q12, hash: 7326ca44e577a177, unit: effect_renderer}
+  - {addr: 0x801a89b0, size: 100, name: effect_interpolate_svector_cos_out_and_back, hash: 7326ca44e577a177, unit: effect_renderer}
   - {addr: 0x801a8a14, size: 48, name: effect_interpolate_svector_linear, hash: 61f31fe0250c2e5f, unit: effect_renderer}
   - {addr: 0x801a8a44, size: 40, name: effect_lerp_component_q13, hash: b32921019ae5b9db, unit: effect_renderer}
   - {addr: 0x801a8a6c, size: 124, name: effect_interpolate_vector_q13, hash: 75e63510983395fe, unit: effect_renderer}
   - {addr: 0x801a8ae8, size: 100, name: effect_interpolate_vector_q13_cos, hash: 780406bfc0e02002, unit: effect_renderer}
-  - {addr: 0x801a8b4c, size: 100, name: effect_interpolate_vector_q13_cos_q12, hash: 9dc613bd73dd4809, unit: effect_renderer}
+  - {addr: 0x801a8b4c, size: 100, name: effect_interpolate_vector_q13_cos_out_and_back, hash: 9dc613bd73dd4809, unit: effect_renderer}
   - {addr: 0x801a8bb0, size: 48, name: effect_interpolate_vector_q13_linear, hash: 3adaecb89ae8bfc6, unit: effect_renderer}
   - {addr: 0x801a8be0, size: 24, name: effect_lerp_q8, hash: 32beccbbfe152ab8, unit: effect_renderer}
   - {addr: 0x801a8bf8, size: 28, name: effect_lerp_q8_and_store, hash: 7dfbd222cfab214f, unit: effect_renderer}
@@ -2359,7 +2359,7 @@ data:
   - {addr: 0x8014d326, name: g_command_restore_unit_id}
   - {addr: 0x8014d328, name: g_unit_view_cached_battle_id}
   - {addr: 0x8014d32a, name: g_unit_view_cached_comparison_id}
-  - {addr: 0x8014d374, name: g_command_command_maps}
+  - {addr: 0x8014d374, name: g_command_maps}
   - {addr: 0x8014d46c, name: g_menu_unit_selection_records}
   - {addr: 0x8014d5d4, name: g_menu_glyph_image_data}
   - {addr: 0x8014e5d4, name: g_menu_default_palette_colors}
@@ -2535,7 +2535,7 @@ data:
   - {addr: 0x80168ec0, name: g_menu_cursor_bob_thresholds}
   - {addr: 0x80168ed0, name: g_menu_cursor_bob_active_thresholds}
   - {addr: 0x80168eec, name: g_menu_ability_list_clut_rect}
-  - {addr: 0x80168ef4, name: g_message_message_duration_frames}
+  - {addr: 0x80168ef4, name: g_message_duration_frames}
   - {addr: 0x80168ef8, name: g_overlay_companion_executable_lbas}
   - {addr: 0x80168f38, name: g_overlay_companion_executable_sizes}
   - {addr: 0x80168f78, name: g_overlay_companion_executable_offsets}
@@ -2647,7 +2647,7 @@ data:
   - {addr: 0x80173ca4, name: g_script_event_block}
   - {addr: 0x80173ca8, name: g_thread_call_target}
   - {addr: 0x80173cac, name: g_event_pending_unit_vram_copy}
-  - {addr: 0x80173cb0, name: g_scenario_scenario_event_active}
+  - {addr: 0x80173cb0, name: g_scenario_event_active}
   - {addr: 0x80173cb4, name: g_event_pending_effect_id}
   - {addr: 0x80173cb8, name: g_menu_thread_menu_data}
   - {addr: 0x80173cbc, name: g_unit_view_height_display_pages}
@@ -2806,7 +2806,7 @@ data:
   - {addr: 0x801b7690, name: g_effect_trap_frame_data}
   - {addr: 0x801b8320, name: g_effect_trap_animation_data}
   - {addr: 0x801b84ac, name: g_effect_secondary_by_charge_animation}
-  - {addr: 0x801b84c0, name: g_effect_trap_colors}
+  - {addr: 0x801b84c0, name: g_effect_charge_trail_colors}
   - {addr: 0x801b84dc, name: g_effect_secondary_animations}
   - {addr: 0x801b8530, name: g_effect_secondary_ending_function_id}
   - {addr: 0x801b8534, name: g_effect_model_files}
@@ -2959,7 +2959,7 @@ imports:
   - {addr: 0x801c3b00, name: scenario_restore_music_and_darkness}
   - {addr: 0x801c3d84, name: status_screen_mounted_unit_thread}
   - {addr: 0x801c3f44, name: deploy_run}
-  - {addr: 0x801c438c, name: unit_editor_run}
+  - {addr: 0x801c438c, name: debug_unit_editor_run}
   - {addr: 0x801c5a50, name: deploy_get_coordinate_slots}
   - {addr: 0x801c7fe4, name: formation_build_sprites}
   - {addr: 0x801c8004, name: portrait_load_party}

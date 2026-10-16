@@ -28,7 +28,7 @@ void message_release_typewriter_slot(void);
 void message_draw_glyph_with_delay(s32 pen_x, s32 pen_y, s32 delay);
 
 /* timed messages */
-extern u16 g_message_message_duration_frames;
+extern u16 g_message_duration_frames;
 
 void message_set_duration(u16 frames);
 

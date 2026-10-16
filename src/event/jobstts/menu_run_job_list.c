@@ -24,7 +24,7 @@ s32 job_list_run(void) {
     s16 scroll;
     s32 mask;
 
-    if (g_job_list_list_menu_initialized == 0) {
+    if (g_job_list_menu_initialized == 0) {
         g_menu_row_callbacks[0].value = job_list_calculate_level;
         g_menu_row_callbacks[2].value = job_list_calculate_jp;
         g_menu_row_callbacks[5].value = job_list_calculate_next_level_jp;
@@ -34,7 +34,7 @@ s32 job_list_run(void) {
         menu_get_selection_record(4, &selected, &scroll, g_job_list_job_ids);
         menu_init_scrollable_list(
             g_job_list_job_ids, selected, scroll, g_text_section_pointers[TEXT_SECTION_JOB_NAMES]);
-        g_job_list_list_menu_initialized = 1;
+        g_job_list_menu_initialized = 1;
     }
 
     g_text_selection_id = g_job_list_job_ids[g_menu_list_selected_index] + HELP_TEXT_ID_JOB_BASE;
@@ -49,10 +49,10 @@ s32 job_list_run(void) {
             job_list_calculate_next_level_jp(g_menu_list_selected_index);
         }
         menu_set_selection_record(4, g_menu_list_selected_index, g_menu_scroll_base_index, g_job_list_job_ids);
-        g_job_list_list_menu_initialized = 0;
+        g_job_list_menu_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_ABILITIES;
     }
-    menu_run_script_with_palette_mode(&g_job_list_list_render_commands, mask, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(&g_job_list_render_commands, mask, g_menu_input_lock_mode);
     return MENU_JOB_LIST_STEP_JOBS;
 }

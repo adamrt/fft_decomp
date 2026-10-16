@@ -278,7 +278,7 @@ enum { EFFECT_COLOR_NEUTRAL = 128 };
 
 /* One interpolation factor per frame; curve indices select emitter and color tracks. */
 typedef u8 effect_animation_curve_t[EFFECT_ANIMATION_CURVE_FRAMES];
-typedef char assert_effect_animation_curve_size[sizeof(effect_animation_curve_t) == 160 ? 1 : -1];
+typedef char effect_animation_curve_size_must_be_160[sizeof(effect_animation_curve_t) == 160 ? 1 : -1];
 
 /* The effect file has one count followed by one 160-byte curve per entry. */
 typedef struct effect_animation_curve_table {

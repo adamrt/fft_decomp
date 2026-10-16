@@ -10,7 +10,7 @@
 #include "psx/libgte.h"
 #include "psx/types.h"
 
-typedef char assert_effect_obstacle_unit_list_size[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
+typedef char projectile_obstacle_unit_list_size_must_be_280[sizeof(projectile_obstacle_unit_list_t) == 280 ? 1 : -1];
 
 /* arrow arc */
 /* Flight state of effect_secondary_arrow_arc_handler, set in its first phase from the traced trajectory

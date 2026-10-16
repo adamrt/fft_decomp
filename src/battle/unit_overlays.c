@@ -1392,31 +1392,31 @@ s32 result_build_next_display(unit_t* unit) {
     display = &unit->numeric_display;
 
     if ((flags & ACTION_DISPLAY_NUMERIC_FLAGS_MASK) != 0) {
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_HP_DAMAGE] = stats->action.hp_damage;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_HP_HEALING] = stats->action.hp_healing;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_MP_DAMAGE] = stats->action.mp_damage;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_MP_HEALING] = stats->action.mp_healing;
+        g_result_display_values[RESULT_DISPLAY_HP_DAMAGE] = stats->action.hp_damage;
+        g_result_display_values[RESULT_DISPLAY_HP_HEALING] = stats->action.hp_healing;
+        g_result_display_values[RESULT_DISPLAY_MP_DAMAGE] = stats->action.mp_damage;
+        g_result_display_values[RESULT_DISPLAY_MP_HEALING] = stats->action.mp_healing;
         /* A stat's gain and damage slots share one magnitude; the pending flag picks which shows. */
         change = stats->action.sp_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_SPEED_GAIN] = change;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_SPEED_DAMAGE] = change;
+        g_result_display_values[RESULT_DISPLAY_SPEED_GAIN] = change;
+        g_result_display_values[RESULT_DISPLAY_SPEED_DAMAGE] = change;
         change = stats->action.ct_change & 0x7f;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_CT_GAIN] = change;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_CT_DAMAGE] = change;
+        g_result_display_values[RESULT_DISPLAY_CT_GAIN] = change;
+        g_result_display_values[RESULT_DISPLAY_CT_DAMAGE] = change;
         change = stats->action.brave_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_BRAVE_GAIN] = change;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_BRAVE_DAMAGE] = change;
+        g_result_display_values[RESULT_DISPLAY_BRAVE_GAIN] = change;
+        g_result_display_values[RESULT_DISPLAY_BRAVE_DAMAGE] = change;
         change = stats->action.faith_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_FAITH_GAIN] = change;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_FAITH_DAMAGE] = change;
+        g_result_display_values[RESULT_DISPLAY_FAITH_GAIN] = change;
+        g_result_display_values[RESULT_DISPLAY_FAITH_DAMAGE] = change;
         flag = 1;
         change = stats->action.pa_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_PA_GAIN] = change;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_PA_DAMAGE] = change;
+        g_result_display_values[RESULT_DISPLAY_PA_GAIN] = change;
+        g_result_display_values[RESULT_DISPLAY_PA_DAMAGE] = change;
         index = 0;
         change = stats->action.ma_change & ACTION_STAT_CHANGE_VALUE_MASK;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_MA_GAIN] = change;
-        g_result_display_values[RESULT_NUMERIC_DISPLAY_MA_DAMAGE] = change;
+        g_result_display_values[RESULT_DISPLAY_MA_GAIN] = change;
+        g_result_display_values[RESULT_DISPLAY_MA_DAMAGE] = change;
 
         /* Show the lowest pending numeric result and clear its flag. */
         scan_flags = unit->action_display_flags;
@@ -1434,56 +1434,56 @@ s32 result_build_next_display(unit_t* unit) {
         }
     } else if ((flags & ACTION_DISPLAY_FLAG_LEVEL_DOWN) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_LEVEL_DOWN;
+        unit->numeric_display.selector = RESULT_DISPLAY_LEVEL_DOWN;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_LEVEL_DOWN;
     } else if ((flags & ACTION_DISPLAY_FLAG_LEVEL_UP) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_LEVEL_UP;
+        unit->numeric_display.selector = RESULT_DISPLAY_LEVEL_UP;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_LEVEL_UP;
     } else if ((flags & ACTION_DISPLAY_FLAG_STOLEN) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_STOLEN;
+        unit->numeric_display.selector = RESULT_DISPLAY_STOLEN;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_STOLEN;
     } else if ((flags & ACTION_DISPLAY_FLAG_BROKEN) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_BROKEN;
+        unit->numeric_display.selector = RESULT_DISPLAY_BROKEN;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_BROKEN;
     } else if ((flags & ACTION_DISPLAY_FLAG_QUICK) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_QUICK;
+        unit->numeric_display.selector = RESULT_DISPLAY_QUICK;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_QUICK;
     } else if ((flags & ACTION_DISPLAY_FLAG_CT_ZERO) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_CT_ZERO;
+        unit->numeric_display.selector = RESULT_DISPLAY_CT_ZERO;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_CT_ZERO;
     } else if ((flags & ACTION_DISPLAY_FLAG_MISSED) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_MISSED;
+        unit->numeric_display.selector = RESULT_DISPLAY_MISSED;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_MISSED;
     } else if ((flags & ACTION_DISPLAY_FLAG_GUARDED) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_GUARDED;
+        unit->numeric_display.selector = RESULT_DISPLAY_GUARDED;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_GUARDED;
     } else if ((flags & ACTION_DISPLAY_FLAG_CAUGHT) != 0) {
         u32 branch_flags;
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_CAUGHT;
+        unit->numeric_display.selector = RESULT_DISPLAY_CAUGHT;
         branch_flags = unit->action_display_flags;
         unit->action_display_flags = branch_flags & ~ACTION_DISPLAY_FLAG_CAUGHT;
     } else if (unit->status_display_image_count != 0) {
         unit->status_display_image_count--;
         status = unit->status_display_image_list[unit->status_display_image_count];
         if ((status & ACTION_STATUS_DISPLAY_REMOVAL) != 0) {
-            display->selector = RESULT_NUMERIC_DISPLAY_STATUS_REMOVED;
+            display->selector = RESULT_DISPLAY_STATUS_REMOVED;
         } else {
-            display->selector = RESULT_NUMERIC_DISPLAY_STATUS_INFLICTED;
+            display->selector = RESULT_DISPLAY_STATUS_INFLICTED;
         }
         status &= ACTION_STATUS_DISPLAY_IMAGE_MASK;
     } else {
@@ -1491,9 +1491,9 @@ s32 result_build_next_display(unit_t* unit) {
     }
 
     if (unit->stats->action.critical != 0) {
-        display->selector |= RESULT_NUMERIC_DISPLAY_MODIFIER_CRITICAL;
+        display->selector |= RESULT_DISPLAY_MODIFIER_CRITICAL;
     } else {
-        display->selector &= ~RESULT_NUMERIC_DISPLAY_MODIFIER_CRITICAL;
+        display->selector &= ~RESULT_DISPLAY_MODIFIER_CRITICAL;
     }
 
     display->active = 1;
@@ -1503,50 +1503,50 @@ s32 result_build_next_display(unit_t* unit) {
 
     /* Every message produced above selects a color case.  The target has no
      * default initialization for these three registers. */
-    switch (display->selector & RESULT_NUMERIC_DISPLAY_SELECTOR_MASK) {
-    case RESULT_NUMERIC_DISPLAY_HP_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_SPEED_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_CT_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_BRAVE_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_FAITH_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_PA_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_MA_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_STATUS_INFLICTED:
-    case RESULT_NUMERIC_DISPLAY_LEVEL_DOWN:
-    case RESULT_NUMERIC_DISPLAY_STOLEN:
-    case RESULT_NUMERIC_DISPLAY_BROKEN:
-    case RESULT_NUMERIC_DISPLAY_QUICK:
-    case RESULT_NUMERIC_DISPLAY_CT_ZERO:
+    switch (display->selector & RESULT_DISPLAY_SELECTOR_MASK) {
+    case RESULT_DISPLAY_HP_DAMAGE:
+    case RESULT_DISPLAY_SPEED_DAMAGE:
+    case RESULT_DISPLAY_CT_DAMAGE:
+    case RESULT_DISPLAY_BRAVE_DAMAGE:
+    case RESULT_DISPLAY_FAITH_DAMAGE:
+    case RESULT_DISPLAY_PA_DAMAGE:
+    case RESULT_DISPLAY_MA_DAMAGE:
+    case RESULT_DISPLAY_STATUS_INFLICTED:
+    case RESULT_DISPLAY_LEVEL_DOWN:
+    case RESULT_DISPLAY_STOLEN:
+    case RESULT_DISPLAY_BROKEN:
+    case RESULT_DISPLAY_QUICK:
+    case RESULT_DISPLAY_CT_ZERO:
         blue = 128;
         green = 128;
         red = 128;
         break;
-    case RESULT_NUMERIC_DISPLAY_MP_DAMAGE:
+    case RESULT_DISPLAY_MP_DAMAGE:
         red = 120;
         green = 60;
         blue = 220;
         break;
-    case RESULT_NUMERIC_DISPLAY_HP_HEALING:
-    case RESULT_NUMERIC_DISPLAY_SPEED_GAIN:
-    case RESULT_NUMERIC_DISPLAY_CT_GAIN:
-    case RESULT_NUMERIC_DISPLAY_BRAVE_GAIN:
-    case RESULT_NUMERIC_DISPLAY_FAITH_GAIN:
-    case RESULT_NUMERIC_DISPLAY_PA_GAIN:
-    case RESULT_NUMERIC_DISPLAY_MA_GAIN:
-    case RESULT_NUMERIC_DISPLAY_STATUS_REMOVED:
-    case RESULT_NUMERIC_DISPLAY_LEVEL_UP:
+    case RESULT_DISPLAY_HP_HEALING:
+    case RESULT_DISPLAY_SPEED_GAIN:
+    case RESULT_DISPLAY_CT_GAIN:
+    case RESULT_DISPLAY_BRAVE_GAIN:
+    case RESULT_DISPLAY_FAITH_GAIN:
+    case RESULT_DISPLAY_PA_GAIN:
+    case RESULT_DISPLAY_MA_GAIN:
+    case RESULT_DISPLAY_STATUS_REMOVED:
+    case RESULT_DISPLAY_LEVEL_UP:
         red = 40;
         green = 140;
         blue = 220;
         break;
-    case RESULT_NUMERIC_DISPLAY_MP_HEALING:
+    case RESULT_DISPLAY_MP_HEALING:
         red = 78;
         green = 140;
         blue = 30;
         break;
-    case RESULT_NUMERIC_DISPLAY_MISSED:
-    case RESULT_NUMERIC_DISPLAY_GUARDED:
-    case RESULT_NUMERIC_DISPLAY_CAUGHT:
+    case RESULT_DISPLAY_MISSED:
+    case RESULT_DISPLAY_GUARDED:
+    case RESULT_DISPLAY_CAUGHT:
         red = 190;
         green = 40;
         blue = 10;
@@ -1575,11 +1575,11 @@ s32 result_build_next_display(unit_t* unit) {
     sprite_display_store_data(display_0, 0, 0, -32, 0, 0, 0, 0, 0);
     sprite_display_store_data(display_1, 0, 0, -32, 0, 0, 0, 0, 0);
 
-    switch (display->selector & RESULT_NUMERIC_DISPLAY_SELECTOR_MASK) {
-    case RESULT_NUMERIC_DISPLAY_HP_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_HP_HEALING:
-    case RESULT_NUMERIC_DISPLAY_MP_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_MP_HEALING:
+    switch (display->selector & RESULT_DISPLAY_SELECTOR_MASK) {
+    case RESULT_DISPLAY_HP_DAMAGE:
+    case RESULT_DISPLAY_HP_HEALING:
+    case RESULT_DISPLAY_MP_DAMAGE:
+    case RESULT_DISPLAY_MP_HEALING:
         /* Damage (even selectors) shows at y 16, gains and healing at y -32. */
         y_shift = -32;
         if ((display->selector & 1) == 0) {
@@ -1599,18 +1599,18 @@ s32 result_build_next_display(unit_t* unit) {
         }
         break;
 
-    case RESULT_NUMERIC_DISPLAY_SPEED_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_SPEED_GAIN:
-    case RESULT_NUMERIC_DISPLAY_CT_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_CT_GAIN:
-    case RESULT_NUMERIC_DISPLAY_BRAVE_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_BRAVE_GAIN:
-    case RESULT_NUMERIC_DISPLAY_FAITH_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_FAITH_GAIN:
-    case RESULT_NUMERIC_DISPLAY_PA_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_PA_GAIN:
-    case RESULT_NUMERIC_DISPLAY_MA_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_MA_GAIN:
+    case RESULT_DISPLAY_SPEED_DAMAGE:
+    case RESULT_DISPLAY_SPEED_GAIN:
+    case RESULT_DISPLAY_CT_DAMAGE:
+    case RESULT_DISPLAY_CT_GAIN:
+    case RESULT_DISPLAY_BRAVE_DAMAGE:
+    case RESULT_DISPLAY_BRAVE_GAIN:
+    case RESULT_DISPLAY_FAITH_DAMAGE:
+    case RESULT_DISPLAY_FAITH_GAIN:
+    case RESULT_DISPLAY_PA_DAMAGE:
+    case RESULT_DISPLAY_PA_GAIN:
+    case RESULT_DISPLAY_MA_DAMAGE:
+    case RESULT_DISPLAY_MA_GAIN:
         y_shift = -32;
         if ((display->selector & 1) == 0) {
             y_shift = 16;
@@ -1624,65 +1624,65 @@ s32 result_build_next_display(unit_t* unit) {
 
         /* Masking bit 0 lets each damage case also label the matching gain. */
         switch (display->selector & 0x0e) {
-        case RESULT_NUMERIC_DISPLAY_SPEED_DAMAGE:
+        case RESULT_DISPLAY_SPEED_DAMAGE:
             sprite_display_store_data(display_2, 0, -7, y_shift, 0x9c, 0xc2, 0x18, 0x0a, 0);
             break;
-        case RESULT_NUMERIC_DISPLAY_CT_DAMAGE:
+        case RESULT_DISPLAY_CT_DAMAGE:
             sprite_display_store_data(display_2, 0, -7, y_shift, 0xc2, 0xc2, 0x0e, 0x0a, 0);
             break;
-        case RESULT_NUMERIC_DISPLAY_BRAVE_DAMAGE:
+        case RESULT_DISPLAY_BRAVE_DAMAGE:
             sprite_display_store_data(display_2, 0, -7, y_shift, 0xa8, 0xb8, 0x0b, 0x0a, 0);
             break;
-        case RESULT_NUMERIC_DISPLAY_FAITH_DAMAGE:
+        case RESULT_DISPLAY_FAITH_DAMAGE:
             sprite_display_store_data(display_2, 0, -7, y_shift, 0x9c, 0xb8, 0x0c, 0x0a, 0);
             break;
-        case RESULT_NUMERIC_DISPLAY_PA_DAMAGE:
+        case RESULT_DISPLAY_PA_DAMAGE:
             sprite_display_store_data(display_2, 0, -7, y_shift, 0x40, 0, 0x0c, 0x0d, 0);
             break;
-        case RESULT_NUMERIC_DISPLAY_MA_DAMAGE:
+        case RESULT_DISPLAY_MA_DAMAGE:
             sprite_display_store_data(display_2, 0, -7, y_shift, 0x40, 0x0d, 0x0b, 0x0a, 0);
             break;
         }
         break;
 
-    case RESULT_NUMERIC_DISPLAY_MISSED:
+    case RESULT_DISPLAY_MISSED:
         sprite_display_store_data(display_2, 0, -21, -32, 0xbe, 0x48, 0x1b, 8, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_GUARDED:
+    case RESULT_DISPLAY_GUARDED:
         sprite_display_store_data(display_2, 0, -21, -32, 0xb8, 0x60, 0x1e, 8, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_CAUGHT:
+    case RESULT_DISPLAY_CAUGHT:
         sprite_display_store_data(display_2, 0, -21, -32, 0x30, 0xe6, 0x1a, 0x0a, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_STATUS_INFLICTED:
-    case RESULT_NUMERIC_DISPLAY_STATUS_REMOVED:
+    case RESULT_DISPLAY_STATUS_INFLICTED:
+    case RESULT_DISPLAY_STATUS_REMOVED:
         image_id = status;
         sprite_display_store_data(display_2, 0, -21, -32, g_result_image_rects[image_id].u,
             g_result_image_rects[image_id].v, g_result_image_rects[image_id].width,
             (g_result_image_rects + image_id)->height, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_LEVEL_DOWN:
+    case RESULT_DISPLAY_LEVEL_DOWN:
         /* The fall-through overwrites both sprites, so level down places them like level up. */
         sprite_display_store_data(display_1, 0, -7, 16, 0xb0, 0x30, 8, 16, 0);
         sprite_display_store_data(display_2, 0, 0, 16, 0xb4, 0xc1, 0x0e, 0x0a, 0);
         /* fall through */
-    case RESULT_NUMERIC_DISPLAY_LEVEL_UP:
+    case RESULT_DISPLAY_LEVEL_UP:
         sprite_display_store_data(display_1, 0, -7, -32, 0xb0, 0x30, 8, 16, 0);
         sprite_display_store_data(display_2, 0, 0, -32, 0xb4, 0xc1, 0x0e, 0x0a, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_STOLEN:
+    case RESULT_DISPLAY_STOLEN:
         image = &g_result_image_rects[ACTION_DISPLAY_IMAGE_STOLEN];
         sprite_display_store_data(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_BROKEN:
+    case RESULT_DISPLAY_BROKEN:
         image = &g_result_image_rects[ACTION_DISPLAY_IMAGE_BROKEN];
         sprite_display_store_data(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_QUICK:
+    case RESULT_DISPLAY_QUICK:
         image = &g_result_image_rects[ACTION_DISPLAY_IMAGE_QUICK];
         sprite_display_store_data(display_2, 0, -21, -32, image->u, image->v, image->width, image->height, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_CT_ZERO:
+    case RESULT_DISPLAY_CT_ZERO:
         /* y_shift is never set on this path; its stale value picks the row (QUIRKS.md). */
         sprite_display_store_data(display_1, 0, -16, y_shift, 0xc2, 0xc2, 0x0e, 8, 0);
         sprite_display_store_data(display_2, 0, 0, y_shift, 0xa8, 0x34, 8, 8, 0);
@@ -1863,7 +1863,7 @@ s32 result_build_next_special_display(unit_t* unit) {
     flags = unit->action_display_flags;
     display = &unit->numeric_display;
     if ((flags & ACTION_DISPLAY_FLAG_GAINED_EXP) != 0) {
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_GAINED_EXP;
+        unit->numeric_display.selector = RESULT_DISPLAY_GAINED_EXP;
         unit->numeric_display.active = 1;
         unit->numeric_display.value = unit->strike.action_rewards.earned_experience;
         unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_GAINED_EXP;
@@ -1871,7 +1871,7 @@ s32 result_build_next_special_display(unit_t* unit) {
             unit->numeric_display.progress = 21;
         }
     } else if ((flags & ACTION_DISPLAY_FLAG_GAINED_JP) != 0) {
-        unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_GAINED_JP;
+        unit->numeric_display.selector = RESULT_DISPLAY_GAINED_JP;
         unit->numeric_display.active = 1;
         unit->numeric_display.value = unit->strike.action_rewards.earned_jp;
         unit->action_display_flags &= ~ACTION_DISPLAY_FLAG_GAINED_JP;
@@ -1881,13 +1881,13 @@ s32 result_build_next_special_display(unit_t* unit) {
     } else {
         if ((flags & ACTION_DISPLAY_FLAG_NO_TARGET) != 0) {
             clear = ~ACTION_DISPLAY_FLAG_NO_TARGET;
-            selector = RESULT_NUMERIC_DISPLAY_NO_TARGET;
+            selector = RESULT_DISPLAY_NO_TARGET;
         } else if ((flags & ACTION_DISPLAY_FLAG_SILENCED) != 0) {
             clear = ~ACTION_DISPLAY_FLAG_SILENCED;
-            selector = RESULT_NUMERIC_DISPLAY_SILENCED;
+            selector = RESULT_DISPLAY_SILENCED;
         } else if ((flags & ACTION_DISPLAY_FLAG_NO_MP) != 0) {
             clear = ~ACTION_DISPLAY_FLAG_NO_MP;
-            selector = RESULT_NUMERIC_DISPLAY_NO_MP;
+            selector = RESULT_DISPLAY_NO_MP;
         } else {
             return 0;
         }
@@ -1925,8 +1925,8 @@ s32 result_build_next_special_display(unit_t* unit) {
     sprite_display_store_data(display_2, 0, -21, 16, 0, 0, 0, 0, 0);
     sprite_display_store_data(display_1, 0, -21, 16, 0, 0, 0, 0, 0);
 
-    switch (display->selector & RESULT_NUMERIC_DISPLAY_SELECTOR_MASK) {
-    case RESULT_NUMERIC_DISPLAY_GAINED_EXP:
+    switch (display->selector & RESULT_DISPLAY_SELECTOR_MASK) {
+    case RESULT_DISPLAY_GAINED_EXP:
         if (digits[1] == 0) {
             sprite_display_store_data(display_0, 0, -7, -24, 0xc0, 0xb8, 0x12, 9, 0);
             sprite_display_store_data(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
@@ -1936,7 +1936,7 @@ s32 result_build_next_special_display(unit_t* unit) {
             sprite_display_store_data(display_2, 0, -21, -32, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         }
         break;
-    case RESULT_NUMERIC_DISPLAY_GAINED_JP:
+    case RESULT_DISPLAY_GAINED_JP:
         if (digits[1] == 0) {
             sprite_display_store_data(display_0, 0, -7, -24, 0xb4, 0xb8, 0x0c, 9, 0);
             sprite_display_store_data(display_1, 0, -14, -32, 0xa8 + digits[0] * 8, 0x30, 8, 16, 0);
@@ -1946,15 +1946,15 @@ s32 result_build_next_special_display(unit_t* unit) {
             sprite_display_store_data(display_2, 0, -21, -32, 0xa8 + digits[1] * 8, 0x30, 8, 16, 0);
         }
         break;
-    case RESULT_NUMERIC_DISPLAY_NO_TARGET:
+    case RESULT_DISPLAY_NO_TARGET:
         display->displays[0]->color.r = display->displays[0]->color.g = display->displays[0]->color.b = 128;
         sprite_display_store_data(display_0, 0, -14, -24, 0x1a, 0xdb, 0x25, 10, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_SILENCED:
+    case RESULT_DISPLAY_SILENCED:
         display->displays[0]->color.r = display->displays[0]->color.g = display->displays[0]->color.b = 128;
         sprite_display_store_data(display_0, 0, -14, -24, 0xd8, 0xe9, 0x1e, 8, 0);
         break;
-    case RESULT_NUMERIC_DISPLAY_NO_MP:
+    case RESULT_DISPLAY_NO_MP:
         display->displays[0]->color.r = display->displays[0]->color.g = display->displays[0]->color.b = 128;
         sprite_display_store_data(display_0, 0, -14, -24, 0x64, 0x20, 0x1a, 9, 0);
         break;

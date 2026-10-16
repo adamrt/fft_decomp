@@ -88,7 +88,7 @@ s32 scenario_load_conditionals(void) {
         /* A finish operation keeps the next scenario's low byte in bits 0-7 and its bits 8-9 in bits 10-11. */
         event = ((value & 0xc00) >> 2) + (value & 0xff);
         /* A zero id ends the scenario table. */
-        scenario = (scenario_setup_t*)g_scenario_scenario_table;
+        scenario = (scenario_setup_t*)g_scenario_table;
         for (i = 0; i < 500; i++) {
             id = scenario->id[0] + (scenario->id[1] << 8);
             if (id == event || id == 0) {
@@ -105,7 +105,7 @@ s32 scenario_load_conditionals(void) {
         return;
     }
 
-    g_scenario_scenario_event_active = 0;
+    g_scenario_event_active = 0;
     for (i = EVENT_SCRIPT_VAR_SCENARIO_LOCAL_FIRST; i < EVENT_SCRIPT_VAR_SCENARIO_LOCAL_END; i++) {
         script_set_variable(i, 0);
     }
@@ -139,7 +139,7 @@ s32 scenario_load_conditionals(void) {
 
     /* Rebuild the finish-operation table from every scenario record (the after-event code from
      * bit 8, the next scenario encoded as above), then fix the battle-result events' entries. */
-    scenario = (scenario_setup_t*)g_scenario_scenario_table;
+    scenario = (scenario_setup_t*)g_scenario_table;
     for (i = 0; i < 500; i++) {
         id = scenario->id[0] + (scenario->id[1] << 8);
         if (id == 0) {
@@ -161,7 +161,7 @@ s32 scenario_load_conditionals(void) {
         g_scenario_event_finish_operations[EVENT_ID_GAME_OVER_RAMZA] = 0x8200;
     }
 
-    scenario = (scenario_setup_t*)g_scenario_scenario_table;
+    scenario = (scenario_setup_t*)g_scenario_table;
     for (i = 0; i < 500; i++) {
         id = scenario->id[0] + (scenario->id[1] << 8);
         if (id == event || id == 0) {
@@ -177,7 +177,7 @@ s32 scenario_load_conditionals(void) {
     }
 
     /* The id, next-scenario and after-event loads below are discarded, as in retail. */
-    g_scenario_scenario_event_active++;
+    g_scenario_event_active++;
     mem_load_unaligned_s16(scenario->id);
     map_id = scenario->map_id;
     weather = scenario->weather;
@@ -255,7 +255,7 @@ s32 scenario_load_conditionals(void) {
 /* Re-syncs the two battle scenario-music slots with the pending track pair,
  * then applies the map darkness record.
  *
- * The music step is skipped when g_scenario_scenario_event_active is clear or the current
+ * The music step is skipped when g_scenario_event_active is clear or the current
  * event is in 410..425. When the playing track is one of the pending pair, only the idle
  * slot ((index ^ 1) + 1) is reloaded, with the pair's track for the playing index;
  * otherwise both tracks restart.
@@ -268,7 +268,7 @@ void scenario_restore_music_and_darkness(void) {
     u16 replacement;
 
     scenario = script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT);
-    if (g_scenario_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
+    if (g_scenario_event_active != 0 && (scenario < 410 || scenario > 425)) {
         if (g_sound_music_track_1_id == 0 && g_sound_music_track_2_id == 0) {
             g_sound_current_music_track_index = 0;
             music_play_tracks(g_event_scenario_music_1_id, g_event_scenario_music_2_id);

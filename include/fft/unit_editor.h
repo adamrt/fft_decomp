@@ -9,7 +9,7 @@
 #include "fft/unit_panel.h"
 #include "psx/types.h"
 
-extern s32 g_unit_editor_active;
+extern s32 g_debug_unit_editor_active;
 extern u8 g_unit_editor_unit_ids[];
 extern u8 g_unit_editor_unit_name[];
 extern u8 g_unit_editor_job_name[];
@@ -26,7 +26,7 @@ extern u8 g_unit_editor_template_normal[];
 extern u8 g_unit_editor_template_special[];
 
 /* Views of g_unit_panel_selected_billboard.gauges[i].value (values[3 * i])
- * and gauges[i].max (the *_max 16-bit values): unit_editor_apply_values
+ * and gauges[i].max (the *_max 16-bit values): debug_unit_editor_apply_values
  * reaches the values from their own base register and the limits by absolute
  * address, which the member spelling does not reproduce. */
 extern s16 g_unit_editor_values[];
@@ -34,9 +34,9 @@ extern s16 g_unit_editor_hp_max;
 extern s16 g_unit_editor_mp_max;
 extern s16 g_unit_editor_ct_max;
 
-void unit_editor_run(void);
+void debug_unit_editor_run(void);
 
-/* The event library's menu thread: closes the unit view panels, loads DEBUGCHR and runs unit_editor_run. */
-void unit_editor_open(void);
+/* The event library's menu thread: closes the unit view panels, loads DEBUGCHR and runs debug_unit_editor_run. */
+void debug_unit_editor_open(void);
 
 #endif

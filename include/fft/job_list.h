@@ -7,12 +7,12 @@
 #include "psx/types.h"
 
 /* job list */
-extern u8 g_job_list_list_initialized;
-extern s32 g_job_list_list_menu_initialized;
+extern u8 g_job_list_initialized;
+extern s32 g_job_list_menu_initialized;
 extern s8 g_job_list_menu_active;
 extern s8 g_job_list_menu_phase; /* menu_job_list_step_e */
-extern menu_instruction_t g_job_list_list_menu_script;
-extern menu_instruction_t g_job_list_list_render_commands;
+extern menu_instruction_t g_job_list_menu_script;
+extern menu_instruction_t g_job_list_render_commands;
 extern s16 g_job_list_selected_generic_index;
 
 /* The job highlighted in the job list. */

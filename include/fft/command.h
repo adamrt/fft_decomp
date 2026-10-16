@@ -65,7 +65,7 @@ void command_check_restrictions(void);
 void command_check_row_restrictions(s32 menu, s32 value, s32 check_unit);
 
 /* selected command */
-extern menu_command_map_t g_command_command_maps[31];
+extern menu_command_map_t g_command_maps[31];
 extern s32 g_command_resolved_command;
 extern s32 g_command_used_skillset_id;
 extern s32 g_command_used_item_id;

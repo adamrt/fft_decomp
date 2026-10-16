@@ -1079,7 +1079,7 @@ void script_opcode_99_blue_remove_unit(s32 unit_id) {
  * Parameters: 0x00 ENTD unit id (16-bit value), 0x02 x, 0x03 y, 0x04 higher
  * elevation, 0x05 facing.
  */
-void script_warp_unit(const event_warp_unit_parameters_t* instruction) {
+void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction) {
     /* Separate instruction and placement pointers change register allocation. */
     union {
         const event_warp_unit_parameters_t* instruction;
@@ -1161,7 +1161,7 @@ void script_opcode_8c_unit_anim_rotate(const event_unit_anim_rotate_parameters_t
  * toward the second. Successive second-unit records are staggered like FaceTile.
  * The angle is built in place (negate, then add) so combine cannot fold the two
  * constant additions into one. */
-void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only) {
+void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only) {
     SVECTOR position;
     SVECTOR target;
     u16 unit_id;
@@ -1230,7 +1230,7 @@ void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second
  * The restore arm carries its own copy of the filter_mode test, which is what
  * retail does: it reloads filter_mode and jumps past the absolute arm's own
  * reload, so cross-jumping merges only the branch and the loop increment. */
-void script_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
+void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* parameters) {
     u16 unit_id;
     s32 filter_mode;
     s32 i;
@@ -1692,7 +1692,7 @@ void script_opcode_83_change_stats(const event_change_stats_parameters_t* parame
  * (16-bit value), 0x02 animation id (16-bit value), 0x04 move-flag mode (0 unset,
  * 1 flip). Units are selected as script_prepare_unit_filter describes.
  */
-void script_unit_anim(const event_unit_anim_parameters_t* parameters) {
+void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters) {
     u16 unit_id = script_read_s16(parameters->unit_id_le);
     s32 filter_mode;
     s32 unit_index;

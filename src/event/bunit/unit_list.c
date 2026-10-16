@@ -117,7 +117,7 @@ static s32 unit_list_is_selected_in_upper_rows(s32 page_offset) {
 
     if (g_unit_list_browse_enabled == 0) {
         in_upper_rows = 1;
-        scroll_step = g_unit_list_list_scroll_step;
+        scroll_step = g_unit_list_scroll_step;
         if (scroll_step < 0) {
             offset = page_offset - 0x3c;
         }
@@ -283,7 +283,7 @@ void unit_list_init(s32 unused_selected_index) {
     g_menu_row_callbacks[6].value = unit_list_get_brave;
     g_menu_row_callbacks[7].value = unit_list_get_faith;
     menu_set_vsync_mode_and_event_speed(0);
-    ret = unit_list_is_selected_in_upper_rows(g_unit_list_list_page_offset);
+    ret = unit_list_is_selected_in_upper_rows(g_unit_list_page_offset);
     g_unit_list_status_banner_at_bottom = ret;
     g_unit_list_status_banner_at_bottom_latch = ret;
     if (g_unit_list_status_banner_at_bottom != 0) {
@@ -386,7 +386,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     if (allow_browse != 0 && unit_list_get_input_lock() == 0
         && thread_is_running(THREAD_SCREEN_SLOT_COMPARISON_STATUS) == 0
         && !(g_unit_panel_status_display_flags & (MENU_STATUS_PANEL_SLIDE_DOWN | MENU_STATUS_PANEL_SLIDE_UP))
-        && g_unit_list_status_banner_slide_step == 0 && g_unit_list_list_scroll_step == 0) {
+        && g_unit_list_status_banner_slide_step == 0 && g_unit_list_scroll_step == 0) {
         if (buttons & PSX_PAD_CIRCLE) {
             if (g_unit_list_browse_enabled == 0 && thread_is_running(THREAD_SCREEN_SLOT_CHARACTER_STATUS) == 0) {
                 g_unit_list_browse_enabled = 1;
@@ -417,15 +417,17 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
             4, 5, g_unit_list_reorderable_count - 1, g_unit_list_grid_selected_cell, buttons);
         g_unit_selected_index = g_unit_list_reorderable_indices[g_unit_list_grid_selected_cell];
     }
-    unit_list_update_scroll(&g_unit_list_list_scroll_step, &g_unit_list_list_page_offset);
+    unit_list_update_scroll(&g_unit_list_scroll_step, &g_unit_list_page_offset);
     /* While browsing, L1 and R1 step through every listed unit, mounts included. */
     if (g_unit_list_browse_enabled != 0) {
         if (buttons & PSX_PAD_L1) {
-            g_unit_selected_index = g_unit_selected_index == 0 ? g_unit_list_list_count - 1 : g_unit_selected_index - 1;
+            g_unit_selected_index
+                = g_unit_selected_index == 0 ? g_unit_list_visible_count - 1 : g_unit_selected_index - 1;
         } else if (buttons & PSX_PAD_R1) {
-            g_unit_selected_index = g_unit_selected_index != g_unit_list_list_count - 1 ? g_unit_selected_index + 1 : 0;
+            g_unit_selected_index
+                = g_unit_selected_index != g_unit_list_visible_count - 1 ? g_unit_selected_index + 1 : 0;
         }
-        g_unit_list_grid_selected_cell = g_unit_list_list_index_map[g_unit_selected_index];
+        g_unit_list_grid_selected_cell = g_unit_list_index_map[g_unit_selected_index];
         unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_L1, 0xC, 0xE, buttons & PSX_PAD_L1,
             unit_list_is_busy() != 0 || g_unit_list_help_screen_id != MENU_GRID_HELP_NONE, SOUND_SFX_PAGE_SWITCH);
         unit_list_draw_pressable_button(MENU_PRESSABLE_BUTTON_R1, 0xE0, 0xE, buttons & PSX_PAD_R1,
@@ -467,8 +469,8 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     /* The grid: up to five rows of four cells, 0x3c apart; rows under the banner are dimmed.
      * Each cell shows the stat readout, the unit's sprite and plate, and a rider's mount. */
     row = 0;
-    g_unit_list_status_banner_at_bottom = unit_list_is_selected_in_upper_rows(g_unit_list_list_page_offset);
-    y = 0x24 + g_unit_list_list_page_offset + g_unit_list_list_scroll_step;
+    g_unit_list_status_banner_at_bottom = unit_list_is_selected_in_upper_rows(g_unit_list_page_offset);
+    y = 0x24 + g_unit_list_page_offset + g_unit_list_scroll_step;
     cell.w = 0x38;
     cell.h = 0x30;
     gfx_set_otag_index(8);
@@ -657,7 +659,7 @@ s32 unit_list_update_grid(s16 allow_banner_toggle, s16 allow_browse, s16 show_st
     if (row >= -4 && row <= 4) {
         g_unit_list_gfx_falloff_focus_y = cursor_y - 1;
     }
-    unit_list_draw_shaded_rows(g_unit_list_list_page_offset + g_unit_list_list_scroll_step);
+    unit_list_draw_shaded_rows(g_unit_list_page_offset + g_unit_list_scroll_step);
     return 1;
 }
 
@@ -938,14 +940,14 @@ void unit_list_build_index_map(void) {
     s32 reorderable_index = 0;
     s32 unit_index;
 
-    for (unit_index = 0; unit_index < g_unit_list_list_count; unit_index++) {
+    for (unit_index = 0; unit_index < g_unit_list_visible_count; unit_index++) {
         unit_list_record_t* unit = g_unit_list_pointers[unit_index];
 
         if (!(unit->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT)) {
-            g_unit_list_list_index_map[unit_index] = reorderable_index;
+            g_unit_list_index_map[unit_index] = reorderable_index;
             reorderable_index++;
         } else {
-            g_unit_list_list_index_map[unit_index]
+            g_unit_list_index_map[unit_index]
                 = unit_list_find_by_battle_id((unit->mount_info - UNIT_MOUNT_INFO_FLAG_MOUNT));
         }
     }
@@ -958,7 +960,7 @@ s32 unit_list_build_sortable(void) {
     s32 count = 0;
     s32 i;
 
-    for (i = 0; i < g_unit_list_list_count; i++) {
+    for (i = 0; i < g_unit_list_visible_count; i++) {
         if ((g_unit_list_pointers[i]->mount_info & UNIT_MOUNT_INFO_FLAG_MOUNT) == 0) {
             g_unit_list_reorderable_indices[count] = i;
             count++;

@@ -297,7 +297,7 @@ typedef enum command_menu {
     MENU_COMMAND_ID_MESSAGE_ATTACK_UNIT = 41, /* Attack, Quit under MESSAGE */
     MENU_COMMAND_ID_MESSAGE_DEFEND_UNIT = 42, /* Defend, Quit under MESSAGE */
     MENU_COMMAND_ID_EFFECT_MESSAGE = 43,      /* MENU_SYSTEM_FUNCTION_EFFECT_MESSAGE's entry */
-    MENU_COMMAND_ID_DEBUGCHR = 44,            /* unit_editor_open */
+    MENU_COMMAND_ID_DEBUG_UNIT_EDITOR = 44,   /* debug_unit_editor_open */
     MENU_COMMAND_ID_MESSAGE_EXECUTE = 45,     /* Execute, Quit under MESSAGE */
     MENU_COMMAND_ID_RIDER_TURN = 46,          /* the TURN menus of a mounted unit, with a Stop ride row */
     MENU_COMMAND_ID_RIDER_TURN_MOVED = 47,
@@ -321,7 +321,7 @@ void menu_action_open_active_unit(void);
 void menu_action_open_non_active_unit(void);
 
 /* command resolution */
-/* One row of the 31-entry menu table at g_command_command_maps; its first 12 rows are the menus whose selection is
+/* One row of the 31-entry menu table at g_command_maps; its first 12 rows are the menus whose selection is
  * remembered per unit. command_restore_unit_selection and command_record_unit_selection prove the 8-byte stride and
  * read only the leading menu id; command_resolve_selection walks all 31 rows. */
 typedef struct menu_command_map {

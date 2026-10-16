@@ -485,7 +485,7 @@ restart_script:
                 unit_move_to_head(operand_1);
             }
         } else if (opcode == EVENT_OPCODE_UNIT_ANIM) {
-            script_unit_anim((const event_unit_anim_parameters_t*)parameters);
+            script_opcode_11_unit_anim((const event_unit_anim_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_MARCH) {
             script_opcode_80_march((const event_march_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_SET_UNIT_MOVEMENT_EFFECT_SUPPRESSION) {
@@ -608,11 +608,11 @@ restart_script:
                 thread_yield();
             } while (file_is_still_loading() != 0);
         } else if (opcode == EVENT_OPCODE_ROTATE_UNIT) {
-            script_rotate_unit((const event_rotate_unit_parameters_t*)parameters);
+            script_opcode_2d_rotate_unit((const event_rotate_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_FACE_EACH_OTHER) {
-            script_face_unit((const event_face_unit_parameters_t*)parameters, 0);
+            script_opcode_2c_face_unit((const event_face_unit_parameters_t*)parameters, 0);
         } else if (opcode == EVENT_OPCODE_FACE_UNIT) {
-            script_face_unit((const event_face_unit_parameters_t*)parameters, 1);
+            script_opcode_2c_face_unit((const event_face_unit_parameters_t*)parameters, 1);
         } else if (opcode == EVENT_OPCODE_FACE_TILE) {
             script_opcode_69_face_tile((const event_face_tile_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_WAIT_ROTATE_UNIT) {
@@ -865,7 +865,7 @@ restart_script:
                 }
             }
         } else if (opcode == EVENT_OPCODE_WARP_UNIT) {
-            script_warp_unit((const event_warp_unit_parameters_t*)parameters);
+            script_opcode_5f_warp_unit((const event_warp_unit_parameters_t*)parameters);
         } else if (opcode == EVENT_OPCODE_UNKNOWN_61) {
         } else if (opcode == EVENT_OPCODE_SET_BATTLE_UNIT_POSITION) {
             unit = unit_get_stats(operand_1);

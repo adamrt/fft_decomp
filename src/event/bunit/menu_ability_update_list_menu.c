@@ -32,7 +32,7 @@ s32 ability_list_update(void) {
     u16 entry;
     s32 category;
 
-    if (g_ability_list_list_ready == 0) {
+    if (g_ability_list_ready == 0) {
         g_menu_row_callbacks[0].value = job_list_get_level;
         g_menu_row_callbacks[1].value = job_list_get_total_jp;
         g_menu_row_callbacks[2].value = job_list_get_next_level_jp;
@@ -48,7 +48,7 @@ s32 ability_list_update(void) {
         g_menu_row_callbacks[12].value = ability_list_is_reaction_tab;
         g_menu_row_callbacks[13].value = ability_list_is_action_tab;
         g_menu_row_callbacks[14].value = ability_list_is_non_action_unlearned;
-        g_ability_list_list_confirm_prompt_state = 0;
+        g_ability_list_confirm_prompt_state = 0;
         g_menu_row_callbacks[15].value = ability_list_is_action;
         menu_clear_selection_record(10);
         menu_clear_selection_record(11);
@@ -58,15 +58,15 @@ s32 ability_list_update(void) {
         rect.y = 0xC8;
         rect.w = 0x14;
         rect.h = 0x10;
-        g_ability_list_list_job_name_row[0] = g_job_list_selected_id;
+        g_ability_list_job_name_row[0] = g_job_list_selected_id;
         text_render_id_rows_to_vram(
-            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_list_job_name_row, &rect, 0);
+            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_row, &rect, 0);
         g_ability_list_ability_category = menu_update_wrapped_horizontal_selection(4, 0, 0);
         ability_list_build(g_unit_selected_index, g_job_list_selected_id, g_ability_list_ability_category,
             g_ability_list_ability_entries, ABILITY_LIST_MODE_VIEW_ALL);
         menu_init_scrollable_list_core(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        g_ability_list_list_ready = 1;
+        g_ability_list_ready = 1;
     }
     /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES; abilities JP cannot
      * learn show none. */
@@ -77,12 +77,12 @@ s32 ability_list_update(void) {
         g_text_selection_id = (entry & ABILITY_LIST_ENTRY_ID_MASK) + HELP_TEXT_ID_ABILITY_BASE;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CROSS) {
-        g_ability_list_list_ready = 0;
+        g_ability_list_ready = 0;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
-        g_ability_list_list_ready = 0;
+        g_ability_list_ready = 0;
         g_sound_queued_effect_id = SOUND_SFX_CONFIRM;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
@@ -100,8 +100,7 @@ s32 ability_list_update(void) {
             g_ability_list_ability_entries, selected, scroll, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
         menu_set_window_scale_step(10);
     }
-    menu_run_script_with_palette_mode(
-        &g_ability_list_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+    menu_run_script_with_palette_mode(&g_ability_list_menu_script, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x2D;

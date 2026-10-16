@@ -31,7 +31,7 @@ s32 ability_list_update(void) {
     s32 category;
     s32 input;
 
-    if (g_ability_list_list_initialized == 0) {
+    if (g_ability_list_initialized == 0) {
         g_menu_row_callbacks[0].value = job_list_get_level;
         g_menu_row_callbacks[1].value = job_list_get_total_jp;
         g_menu_row_callbacks[2].value = job_list_get_next_level_jp;
@@ -56,15 +56,15 @@ s32 ability_list_update(void) {
         rect.y = 0xc8;
         rect.w = 0x14;
         rect.h = 0x10;
-        g_ability_list_list_job_name_ids[0] = g_job_list_selected_id;
+        g_ability_list_job_name_ids[0] = g_job_list_selected_id;
         text_render_id_rows_to_vram(
-            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_list_job_name_ids, &rect, 0);
+            g_text_section_pointers[TEXT_SECTION_JOB_NAMES], g_ability_list_job_name_ids, &rect, 0);
         g_ability_list_ability_category = status_screen_update_wrapped_horizontal_selection(4, 5, 0);
         ability_list_build(
             0, g_job_list_selected_id & 0x3ff, g_ability_list_ability_category, g_ability_list_ability_entries, 0);
         menu_init_scrollable_list_core(
             g_ability_list_ability_entries, 0, g_text_section_pointers[TEXT_SECTION_ABILITY_NAMES]);
-        g_ability_list_list_initialized = 1;
+        g_ability_list_initialized = 1;
     }
 
     /* The help text is the ability's entry in HELP_TEXT_SECTION_ABILITIES; abilities JP cannot
@@ -80,12 +80,12 @@ s32 ability_list_update(void) {
 
     input = g_menu_input_primary_repeat;
     if (input & PSX_PAD_CROSS) {
-        g_ability_list_list_initialized = 0;
+        g_ability_list_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_JOBS;
     }
     if (input & PSX_PAD_CIRCLE) {
-        g_ability_list_list_initialized = 0;
+        g_ability_list_initialized = 0;
         g_sound_queued_effect_id = SOUND_SFX_CANCEL;
         return MENU_JOB_LIST_STEP_CLOSE;
     }
@@ -105,7 +105,7 @@ s32 ability_list_update(void) {
         g_sound_queued_effect_id = SOUND_SFX_PAGE_SWITCH;
     }
     menu_run_script_with_palette_mode(
-        &g_ability_list_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
+        &g_ability_list_render_commands, g_menu_input_primary_repeat, g_menu_input_lock_mode);
     /* The job name title, drawn from where the first call rendered it (0x100, 0xc8). */
     rect.x = 0x26;
     rect.y = 0x27;

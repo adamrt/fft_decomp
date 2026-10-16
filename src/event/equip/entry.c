@@ -39,7 +39,7 @@ static void equipment_reset_dirty_flags(void) {
     g_unit_panel_unit_status_panel_redraw = 1;
     g_equipment_numeric_panel_redraw = 1;
     g_unit_panel_preview_stats_thread_params.redraw_request = 1;
-    g_equipment_equipment_panel_redraw = 1;
+    g_equipment_panel_redraw = 1;
 }
 
 /* Ask the unit status, equipment list, numeric panel and item numeric
@@ -50,7 +50,7 @@ void equipment_stop_threads(void) {
     menu_request_thread_stop(THREAD_SCREEN_SLOT_NUMERIC_PANEL);
     unit_panel_toggle_item_numbers_thread(0);
     g_unit_panel_preview_stats_thread_params.style = 0;
-    g_equipment_equipment_panel_style = 0;
+    g_equipment_panel_style = 0;
 }
 
 /* Load the selected unit into the EQUIP panels: clamp its HP and MP to their
@@ -114,11 +114,11 @@ s32 equipment_entrypoint(s32 unit, u32* otag) {
     u8 restore_text;
     unit_stats_t* stats;
 
-    if (g_equipment_screen_state == EQUIPMENT_STATE_STATE_INIT) {
+    if (g_equipment_screen_state == EQUIPMENT_STATE_INIT) {
         equipment_init(unit);
         bcopy(g_equipment_unit_data[0]->equipment, g_equipment_unit_initial_equipment,
             sizeof(g_equipment_unit_data[0]->equipment));
-        g_equipment_screen_state = EQUIPMENT_STATE_STATE_COMMAND_MENU;
+        g_equipment_screen_state = EQUIPMENT_STATE_COMMAND_MENU;
     }
     g_equipment_gfx_current_ot = otag;
     equipment_gfx_swap_context(0, -1);
@@ -148,7 +148,7 @@ s32 equipment_entrypoint(s32 unit, u32* otag) {
         g_sound_pending_sfx_id = g_sound_queued_effect_id;
     }
     g_sound_queued_effect_id = SOUND_SFX_NONE;
-    if (g_equipment_screen_state != EQUIPMENT_STATE_STATE_CLOSED) {
+    if (g_equipment_screen_state != EQUIPMENT_STATE_CLOSED) {
         return result;
     }
 

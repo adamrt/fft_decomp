@@ -119,14 +119,14 @@ s32 unit_list_find_by_battle_id(s16 battle_id);
 void unit_list_sort(s32 sort_mode);
 
 /* unit list */
-extern u8 g_unit_list_list_initialized;
-extern u8 g_unit_list_list_count;
-extern u8 g_unit_list_list_index_map[];
-extern s8 g_unit_list_list_page_offset;
-extern s8 g_unit_list_list_scroll_step;
+extern u8 g_unit_list_initialized;
+extern u8 g_unit_list_visible_count;
+extern u8 g_unit_list_index_map[];
+extern s8 g_unit_list_page_offset;
+extern s8 g_unit_list_scroll_step;
 extern u8 g_unit_list_browse_enabled;
-extern menu_entry_t g_unit_list_list_triangle_menu;
-extern u8 g_unit_list_list_triangle_menu_open;
+extern menu_entry_t g_unit_list_triangle_menu;
+extern u8 g_unit_list_triangle_menu_open;
 
 void unit_list_init(s32 unused_selected_index);
 void unit_list_build_index_map(void);
@@ -222,7 +222,7 @@ void unit_list_update_help_cursor(s16 mode);
 
 /* cursors */
 extern textured_quad_source_t g_unit_list_bouncing_cursor_quad;
-extern u16 g_unit_list_list_cursor_anim_state;
+extern u16 g_unit_list_cursor_anim_state;
 
 /* Oriented-quad descriptors for the two cursor halves. */
 extern oriented_quad_t g_unit_list_cursor_sprite;
@@ -272,7 +272,7 @@ enum {
     UNIT_LIST_SCRIPT_END = 0x1c,
 };
 
-extern s16 g_unit_list_list_scroll_entry_ids[];
+extern s16 g_unit_list_scroll_entry_ids[];
 
 /* text */
 extern const char g_unit_list_text_decimal_format[];

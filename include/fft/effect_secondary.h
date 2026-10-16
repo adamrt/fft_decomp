@@ -270,7 +270,7 @@ typedef struct effect_slot {
     u8 _padding_96[0x02];         /* aligns motion */
     effect_motion_t motion;       /* 0x98 */
 } effect_slot_t;
-typedef char assert_effect_slot_size[sizeof(effect_slot_t) == 204 ? 1 : -1];
+typedef char effect_slot_size_must_be_204[sizeof(effect_slot_t) == 204 ? 1 : -1];
 
 extern effect_slot_t g_effect_slots[];
 extern u8 g_effect_slot_active_head;
@@ -385,7 +385,7 @@ extern effect_death_poof_state_t g_effect_death_poof_states[];
 extern effect_charge_params_t g_effect_charge_line_params[2];
 extern DVECTOR g_effect_charge_line_direction_offsets[];
 extern u8 g_effect_charge_line_fade_levels[];
-extern rgb24_t g_effect_trap_colors[]; /* spell-charge trail color of each effect_element_index_e */
+extern rgb24_t g_effect_charge_trail_colors[]; /* spell-charge trail color of each effect_element_index_e */
 
 /* Brightness (out of 128) of each of a summon-charge ring's ten slots, newest point first. */
 extern u8 g_effect_summon_ring_brightness[];

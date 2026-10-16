@@ -491,9 +491,9 @@ and mark code that a cleanup must not "fix". Details live in the named file.
   Serpentarius, skipping the floor of 1 at its end: an XA already cut to 0 (a
   Frog's XA of 1 against Defense Up or Protect) stays 0, and the hit deals 0
   damage where any other sign pair deals 1 * YA.
-- DEBUGCHR's unit editor (`unit_editor_run`) lets the job, the five
+- DEBUGCHR's unit editor (`debug_unit_editor_run`) lets the job, the five
   equipment slots (Triangle empties one) and the five skillset and ability
-  slots be changed, but `unit_editor_apply_values` writes
+  slots be changed, but `debug_unit_editor_apply_values` writes
   back only HP, MP, CT, level, EXP, Brave, Faith, zodiac sign, Move, Speed and
   Jump, and `unit_panel_load_selected` reloads the unit after every
   change, so the other edits are lost at once.

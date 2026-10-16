@@ -145,7 +145,7 @@ typedef struct effect_texture_page_config {
     u16 clear_abe : 1;
     u16 _unused_00 : 13;
 } effect_texture_page_config_t;
-typedef char assert_effect_texture_page_config_size[sizeof(effect_texture_page_config_t) == 2 ? 1 : -1];
+typedef char effect_texture_page_config_size_must_be_2[sizeof(effect_texture_page_config_t) == 2 ? 1 : -1];
 
 /* The texture_page_flags bits of the effect geometry records. */
 enum {
@@ -169,7 +169,7 @@ typedef struct effect_emitter_geometry_view {
     ranges16_t inertia_start;            /* 0x44 */
     ranges16_t inertia_end;              /* 0x48 */
 } effect_emitter_geometry_view_t;
-typedef char assert_effect_emitter_geometry_view_size[sizeof(effect_emitter_geometry_view_t) == 56 ? 1 : -1];
+typedef char effect_emitter_geometry_view_size_must_be_56[sizeof(effect_emitter_geometry_view_t) == 56 ? 1 : -1];
 
 /* Minimum and maximum components of a particle-motion vector. */
 typedef struct effect_xyz_min_max {
@@ -220,7 +220,7 @@ typedef struct effect_geometry_entry {
     u8 child_emitter_mid_life;        /* 0xc1: see EFFECT_EMITTER_FLAG_CHILD_MID_LIFE_MASK */
     u8 _padding_c2[0x02];             /* tail padding to 4-byte alignment */
 } effect_geometry_entry_t;
-typedef char assert_effect_geometry_entry_size[sizeof(effect_geometry_entry_t) == 196 ? 1 : -1];
+typedef char effect_geometry_entry_size_must_be_196[sizeof(effect_geometry_entry_t) == 196 ? 1 : -1];
 
 /* textured quad grids and wave mesh */
 /* One-based curve bindings for texture scroll and wave phase rates. */
@@ -232,14 +232,15 @@ typedef struct effect_textured_quad_scroll_curves {
     u32 _unused_02 : 12;
     u32 scroll_speed : 4;
 } effect_textured_quad_scroll_curves_t;
-typedef char assert_effect_textured_quad_scroll_curves_size[sizeof(effect_textured_quad_scroll_curves_t) == 4 ? 1 : -1];
+typedef char
+    effect_textured_quad_scroll_curves_size_must_be_4[sizeof(effect_textured_quad_scroll_curves_t) == 4 ? 1 : -1];
 
 /* One curve controls the shape parameters of both waves. */
 typedef struct effect_wave_shape_curves {
     u32 shape : 4;
     u32 _unused_00 : 28;
 } effect_wave_shape_curves_t;
-typedef char assert_effect_wave_shape_curves_size[sizeof(effect_wave_shape_curves_t) == 4 ? 1 : -1];
+typedef char effect_wave_shape_curves_size_must_be_4[sizeof(effect_wave_shape_curves_t) == 4 ? 1 : -1];
 
 /* One wave of the wave mesh: the view holds a start and an end set for each axis, between which
  * the wave curves interpolate. */
@@ -441,7 +442,8 @@ typedef struct effect_polar_mesh_geometry_view {
     u16 texture_v;              /* 0xba: maximum start homing strength */
     u8 _unused_bc[0x08];
 } effect_polar_mesh_geometry_view_t;
-typedef char assert_effect_polar_mesh_geometry_view_size[sizeof(effect_polar_mesh_geometry_view_t) == 196 ? 1 : -1];
+typedef char
+    effect_polar_mesh_geometry_view_size_must_be_196[sizeof(effect_polar_mesh_geometry_view_t) == 196 ? 1 : -1];
 
 /* ring, tube and dome meshes */
 /* Radial motion bindings use one-based curve selectors; zero keeps the starting value. */
@@ -522,7 +524,7 @@ typedef struct effect_radial_mesh_geometry {
     s16 radius_end; /* 0xac */
     u8 _unused_ae[0x16];
 } effect_radial_mesh_geometry_t;
-typedef char assert_effect_radial_mesh_geometry_size[sizeof(effect_radial_mesh_geometry_t) == 196 ? 1 : -1];
+typedef char effect_radial_mesh_geometry_size_must_be_196[sizeof(effect_radial_mesh_geometry_t) == 196 ? 1 : -1];
 
 /* tentacle mesh */
 /* The tentacle reads bits 4 to 15 of motion_curve_selectors as its tip's
@@ -616,7 +618,7 @@ typedef union effect_geometry_record {
     effect_tentacle_mesh_geometry_view_t tentacle_mesh;
     effect_particle_vertex_emitter_view_t particle_vertex_emitter;
 } effect_geometry_record_t;
-typedef char assert_effect_geometry_record_size[sizeof(effect_geometry_record_t) == 196 ? 1 : -1];
+typedef char effect_geometry_record_size_must_be_196[sizeof(effect_geometry_record_t) == 196 ? 1 : -1];
 
 /* The particle-system section (effect_file_header_t.particle_system). */
 typedef struct effect_geometry_table {
@@ -629,7 +631,7 @@ typedef struct effect_geometry_table {
      * so a record is read through the member of the renderer that owns it. */
     effect_geometry_record_t entries[0];
 } effect_geometry_table_t;
-typedef char assert_effect_geometry_table_prefix_size[sizeof(effect_geometry_table_t) == 20 ? 1 : -1];
+typedef char effect_geometry_table_size_must_be_20[sizeof(effect_geometry_table_t) == 20 ? 1 : -1];
 
 extern const effect_geometry_table_t* g_effect_geometry_table;
 

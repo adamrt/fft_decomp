@@ -53,7 +53,7 @@ s32 scenario_get_finish_operation(void);
 u32 script_get_event_finish_operation(void);
 
 /* scenario */
-extern u8 g_scenario_scenario_table[];
+extern u8 g_scenario_table[];
 extern u8 g_scenario_event_condition_blocks[];
 extern u16 g_scenario_event_finish_operations[];
 extern u16 g_scenario_condition_offsets[];
@@ -80,7 +80,7 @@ typedef enum script_event_frame_result {
 
 extern s32 g_script_event_speed;
 extern u16 g_script_frame_result_override;
-extern s16 g_scenario_scenario_event_active;
+extern s16 g_scenario_event_active;
 extern s16 g_script_threads_idle;
 extern u8 g_event_thread_status_snapshot[]; /* per-thread running flags sampled before the yield, indexed 1..15 */
 
@@ -175,13 +175,13 @@ enum {
 
 extern battle_map_tile_coordinates_t g_script_warp_coords;
 
-void script_warp_unit(const event_warp_unit_parameters_t* instruction);
+void script_opcode_5f_warp_unit(const event_warp_unit_parameters_t* instruction);
 void script_warp_unit_display_to_paired_unit(s32 runtime_id);
 void script_sprite_move(void);
 void script_sprite_move_beta(void);
-void script_unit_anim(const event_unit_anim_parameters_t* parameters);
-void script_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
-void script_rotate_unit(const event_rotate_unit_parameters_t* parameters);
+void script_opcode_11_unit_anim(const event_unit_anim_parameters_t* parameters);
+void script_opcode_2c_face_unit(const event_face_unit_parameters_t* parameters, s32 second_only);
+void script_opcode_2d_rotate_unit(const event_rotate_unit_parameters_t* parameters);
 void script_set_units_palette_update_suppression(s32 event_unit_id, s32 enable);
 void script_wait_for_unit_ready(s32 runtime_id);
 

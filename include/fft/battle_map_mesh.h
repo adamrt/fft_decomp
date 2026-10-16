@@ -20,7 +20,7 @@ typedef struct battle_map_mesh_geometry {
     u16 untextured_quad_count;     /* 0x06 */
     u16 payload[0];                /* 0x08; count-dependent sections */
 } battle_map_mesh_geometry_t;
-typedef char map_mesh_geometry_prefix_must_be_8[sizeof(battle_map_mesh_geometry_t) == 8 ? 1 : -1];
+typedef char battle_map_mesh_geometry_size_must_be_8[sizeof(battle_map_mesh_geometry_t) == 8 ? 1 : -1];
 
 /* Polygon position and normal records copied from the mesh geometry block.
  * Each XYZ vector occupies eight bytes. The first position's spare 16-bit

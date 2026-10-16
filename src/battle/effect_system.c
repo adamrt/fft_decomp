@@ -369,11 +369,12 @@ void effect_camera_update_tracks(void) {
         }
         break;
     /* An out-and-back move ends where it began, so the start stays as it is. */
-    case EFFECT_CAMERA_MODE_COSINE_Q12:
+    case EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK:
         if (g_effect_camera_rotation_duration > g_effect_camera_rotation_frame) {
             g_effect_camera_rotation_frame++;
-            effect_interpolate_svector_cos_q12(&g_effect_camera_rotation_start, &g_effect_camera_rotation_target,
-                g_effect_camera_rotation_duration, g_effect_camera_rotation_frame, &g_effect_camera_rotation_current);
+            effect_interpolate_svector_cos_out_and_back(&g_effect_camera_rotation_start,
+                &g_effect_camera_rotation_target, g_effect_camera_rotation_duration, g_effect_camera_rotation_frame,
+                &g_effect_camera_rotation_current);
             camera_rotation_set(&g_effect_camera_rotation_current);
         }
         if (g_effect_camera_rotation_duration == g_effect_camera_rotation_frame) {
@@ -505,11 +506,12 @@ void effect_camera_update_tracks(void) {
             g_effect_camera_position_mode = EFFECT_CAMERA_MODE_IDLE;
         }
         break;
-    case EFFECT_CAMERA_MODE_COSINE_Q12:
+    case EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK:
         if (g_effect_camera_position_duration > g_effect_camera_position_frame) {
             g_effect_camera_position_frame++;
-            effect_interpolate_vector_q13_cos_q12(&g_effect_camera_position_start, &g_effect_camera_position_target,
-                g_effect_camera_position_duration, g_effect_camera_position_frame, &g_effect_camera_position_current);
+            effect_interpolate_vector_q13_cos_out_and_back(&g_effect_camera_position_start,
+                &g_effect_camera_position_target, g_effect_camera_position_duration, g_effect_camera_position_frame,
+                &g_effect_camera_position_current);
             effect_vector_scale_q12(&g_effect_camera_position_current, &position);
             camera_real_coords_set(&position);
         }
@@ -635,10 +637,10 @@ void effect_camera_update_tracks(void) {
             g_effect_camera_zoom_mode = EFFECT_CAMERA_MODE_IDLE;
         }
         break;
-    case EFFECT_CAMERA_MODE_COSINE_Q12:
+    case EFFECT_CAMERA_MODE_COSINE_OUT_AND_BACK:
         if (g_effect_camera_zoom_duration > g_effect_camera_zoom_frame) {
             g_effect_camera_zoom_frame++;
-            effect_interpolate_vector_q13_cos_q12(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
+            effect_interpolate_vector_q13_cos_out_and_back(&g_effect_camera_zoom_start, &g_effect_camera_zoom_target,
                 g_effect_camera_zoom_duration, g_effect_camera_zoom_frame, &g_effect_camera_zoom_current);
             camera_zoom_set(&g_effect_camera_zoom_current);
         }
@@ -2886,9 +2888,9 @@ s32 effect_secondary_spell_charge_handler(void) {
 
         /* Trails: move each head, ease its newest point toward the center, then link its six
          * segments from newest to oldest point, dimming toward the tail. */
-        red = g_effect_trap_colors[state->color].r;
-        green = g_effect_trap_colors[state->color].g;
-        blue = g_effect_trap_colors[state->color].b;
+        red = g_effect_charge_trail_colors[state->color].r;
+        green = g_effect_charge_trail_colors[state->color].g;
+        blue = g_effect_charge_trail_colors[state->color].b;
         offsets = &g_effect_charge_line_direction_offsets[0].vx;
         offsets_y = &g_effect_charge_line_direction_offsets[0].vy;
         for (i = 0; i < 16; i++) {

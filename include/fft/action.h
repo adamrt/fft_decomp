@@ -286,7 +286,7 @@ typedef struct action_strike_work {
     u8 can_earn_experience;
     action_reward_display_t action_rewards; /* 0x24; runtime 0x1b0..0x1b3 */
 } action_strike_work_t;
-typedef char battle_strike_work_must_be_40[sizeof(action_strike_work_t) == 40 ? 1 : -1];
+typedef char action_strike_work_size_must_be_40[sizeof(action_strike_work_t) == 40 ? 1 : -1];
 
 extern action_state_e g_action_state;
 extern action_context_e g_action_context;
@@ -478,7 +478,7 @@ enum { ACTION_STATUS_DISPLAY_CAPACITY = 27 };
 typedef struct action_result_display {
     u8 active;                     /* 0x00 */
     u8 _padding_01;                /* 0x01; aligns selector */
-    u16 selector;                  /* 0x02; result_numeric_display_selector_e */
+    u16 selector;                  /* 0x02; result_display_selector_e */
     u16 value;                     /* 0x04 */
     u16 progress;                  /* 0x06 */
     sprite_display_t* displays[3]; /* 0x08 */

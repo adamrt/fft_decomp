@@ -35,13 +35,13 @@ typedef enum ability_list_entry_flag {
     ABILITY_LIST_ENTRY_DISABLED = 0x4000,
 } ability_list_entry_flag_e;
 
-extern u8 g_ability_list_list_ready;
-extern u8 g_ability_list_list_initialized;
-extern s8 g_ability_list_list_confirm_prompt_state;
-extern s16 g_ability_list_list_job_name_row[];
-extern s16 g_ability_list_list_job_name_ids[];
-extern menu_instruction_t g_ability_list_list_menu_script;
-extern menu_instruction_t g_ability_list_list_render_commands;
+extern u8 g_ability_list_ready;
+extern u8 g_ability_list_initialized;
+extern s8 g_ability_list_confirm_prompt_state;
+extern s16 g_ability_list_job_name_row[];
+extern s16 g_ability_list_job_name_ids[];
+extern menu_instruction_t g_ability_list_menu_script;
+extern menu_instruction_t g_ability_list_render_commands;
 
 s32 ability_list_update(void);
 

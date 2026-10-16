@@ -141,7 +141,7 @@ void unit_panel_toggle_equipment_threads(s32 enable) {
     if (enable != 0) {
         if (thread_is_running(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST) == 0) {
             thread_start(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, unit_panel_equipment_thread);
-            thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)g_equipment_equipment_panel_params, 0, 0);
+            thread_set_parameters(EQUIPMENT_THREAD_SLOT_EQUIPMENT_LIST, (s32)g_equipment_panel_params, 0, 0);
         }
         unit_panel_toggle_numbers_thread(enable);
         return;

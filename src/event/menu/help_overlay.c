@@ -107,8 +107,8 @@ void help_run_battle(void) {
     unit_panel_copy_billboard_out(setup_banner, setup_unit_data, setup_billboard, setup_cursor_tile);
     /* This fixed lower-menu 16-bit slot can contain another overlay's data. */
     if ((g_unit_panel_selected_unit_stat_summary.team_kind != 0) || (g_menu_post_battle_unit_changes_active != 0)) {
-        g_help_require_navigation[2].destination[2] = 7;
-        g_help_require_navigation[7].destination[3] = 2;
+        g_help_after_battle_navigation[2].destination[2] = 7;
+        g_help_after_battle_navigation[7].destination[3] = 2;
     }
 
     help_thread_id = thread_find_first_running_menu_thread();
@@ -279,7 +279,7 @@ void help_run_battle(void) {
     /* Every menu path above ends in help_close, which does not return, so only the unit views reach
      * the cursor below and this first arm is dead. */
     if (help_thread_id < 9) {
-        navigation = g_help_require_navigation;
+        navigation = g_help_after_battle_navigation;
         help_thread_id -= 1;
     } else {
         view_mode = g_unit_view_mode;
@@ -539,20 +539,20 @@ void help_run_after_battle(void) {
     unit_panel_copy_billboard_out(
         &g_help_active_banner, &g_help_active_unit_data, &g_help_billboard, &g_help_menu_cursor_tile);
     if (g_unit_panel_selected_unit_stat_summary.team_kind != 0 || g_menu_post_battle_unit_changes_active != 0) {
-        g_help_require_navigation[2].destination[2] = 7;
-        g_help_require_navigation[7].destination[3] = 2;
+        g_help_after_battle_navigation[2].destination[2] = 7;
+        g_help_after_battle_navigation[7].destination[3] = 2;
     }
 
     g_help_controller_state_ptr = script_get_controller_input_pointer(0);
     menu_index = 0;
 
     /* Fit the navigation table, which battle help also uses, to the REQUIRE screen. */
-    g_help_require_navigation[0].x = 0xC4;
-    g_help_require_navigation[2].x = 0xE0;
-    g_help_require_navigation[0].destination[3] = 0;
-    g_help_require_navigation[3].destination[0] = 0;
+    g_help_after_battle_navigation[0].x = 0xC4;
+    g_help_after_battle_navigation[2].x = 0xE0;
+    g_help_after_battle_navigation[0].destination[3] = 0;
+    g_help_after_battle_navigation[3].destination[0] = 0;
 
-    navigation = g_help_require_navigation;
+    navigation = g_help_after_battle_navigation;
     text_thread_id = thread_resolve_id(THREAD_SLOT_FIRST_IDLE);
     text_thread = &g_threads[text_thread_id];
 

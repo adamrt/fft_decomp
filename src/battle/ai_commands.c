@@ -1261,16 +1261,16 @@ static s32 ai_select_general(void) {
     if (g_ai_data.resume_pending != 0) {
         /* Resume: re-enter the step that suspended. */
         resume_state = g_ai_data.autobattle_state;
-        if (resume_state == AI_AUTOBATTLE_MOVEMENT)
+        if (resume_state == AI_GENERAL_MOVEMENT)
             goto evaluate_movement;
-        if (resume_state == AI_AUTOBATTLE_CHARGING)
+        if (resume_state == AI_GENERAL_CHARGING)
             goto evaluate_charging;
         goto evaluate_abilities;
     }
     g_ai_data.movement_scenario = 1;
 evaluate_movement:
     if (ai_move_build_scenarios() == -1) {
-        ai->autobattle_state = AI_AUTOBATTLE_MOVEMENT;
+        ai->autobattle_state = AI_GENERAL_MOVEMENT;
         return -1;
     }
     ai->movement_scenario = 0;
@@ -1280,7 +1280,7 @@ evaluate_charging:
     charging_result = ai_select_keep_charging();
     switch (charging_result) {
     case -1:
-        ai->autobattle_state = AI_AUTOBATTLE_CHARGING;
+        ai->autobattle_state = AI_GENERAL_CHARGING;
         return -1;
     case 1:
         return 0;
@@ -1289,7 +1289,7 @@ evaluate_charging:
     if (ai_target_select_active_units(AI_UNIT_FILTER_ANY, 0) != 0) {
     evaluate_abilities:
         if (ai_ability_evaluate_list() == -1) {
-            ai->autobattle_state = AI_AUTOBATTLE_ABILITIES;
+            ai->autobattle_state = AI_GENERAL_ABILITIES;
             return -1;
         }
     }
@@ -2954,22 +2954,22 @@ static s32 ai_move_build_retreat(void) {
     if (g_ai_data.resume_pending != 0) {
         /* Resume: re-enter the step that suspended. */
         state = g_ai_move_retreat_stage;
-        if (state == AI_COWARDLY_MOVEMENT_SCORE_TILES) {
+        if (state == AI_MOVE_RETREAT_SCORE_TILES) {
             goto score_tiles;
         }
-        if (state == AI_COWARDLY_MOVEMENT_TARGET_DISTANCE) {
+        if (state == AI_MOVE_RETREAT_TARGET_DISTANCE) {
             goto fill_target_distance;
         }
     }
     g_ai_data.movement_scenario = 0;
 score_tiles:
     if (ai_move_score_reachable_tiles() == -1) {
-        g_ai_move_retreat_stage = AI_COWARDLY_MOVEMENT_SCORE_TILES;
+        g_ai_move_retreat_stage = AI_MOVE_RETREAT_SCORE_TILES;
         return -1;
     }
 fill_target_distance:
     if (ai_move_fill_target_distance_grid(&ai->acting_unit_decision->target) == -1) {
-        g_ai_move_retreat_stage = AI_COWARDLY_MOVEMENT_TARGET_DISTANCE;
+        g_ai_move_retreat_stage = AI_MOVE_RETREAT_TARGET_DISTANCE;
         return -1;
     }
     ai_move_select_destination(0xff, AI_DESTINATION_PRIORITY_FIRST);
@@ -3609,7 +3609,7 @@ typedef struct ai_ability_entry_byte_view {
     u8 skillset;
     u8 usage_flags;
 } ai_ability_entry_byte_view_t;
-typedef char ai_ability_entry_byte_view_must_be_4[sizeof(ai_ability_entry_byte_view_t) == 4 ? 1 : -1];
+typedef char ai_ability_entry_byte_view_size_must_be_4[sizeof(ai_ability_entry_byte_view_t) == 4 ? 1 : -1];
 
 /*
  * Build a unit's ability list and weapon-attack properties.

@@ -27,7 +27,7 @@ static s32 equipment_run_remove_mode(void);
 static s32 equipment_update_remove_all_prompt(void);
 
 /* The g_equipment_screen_state_handlers entry of every state past INIT: keep the command
- * menu thread running, enter the mode its picked row names (row + EQUIPMENT_STATE_STATE_EQUIP;
+ * menu thread running, enter the mode its picked row names (row + EQUIPMENT_STATE_EQUIP;
  * row 1 would be state 3, which has no mode, and is refused), run that mode each frame and
  * return to the command menu when it ends. */
 void equipment_update_state(void) {
@@ -51,7 +51,7 @@ void equipment_update_state(void) {
         g_equipment_thread_idle_stop_pending = 0;
     }
     state = g_equipment_screen_state;
-    if (state == EQUIPMENT_STATE_STATE_COMMAND_MENU) {
+    if (state == EQUIPMENT_STATE_COMMAND_MENU) {
         value_ptr = &g_equipment_result_rows[0];
         mode = *value_ptr;
         /* Each row's help text, from entry 0x29 of HELP_TEXT_SECTION_MENU_COMMANDS (0x1000) on. */
@@ -61,7 +61,7 @@ void equipment_update_state(void) {
             equipment_reset_selection();
         } else if (mode != -1) {
             thread_start(EQUIPMENT_THREAD_SLOT_COMMAND_MENU_CHILD, thread_wait_forever_by_frames);
-            g_equipment_screen_state = *value_ptr + EQUIPMENT_STATE_STATE_EQUIP;
+            g_equipment_screen_state = *value_ptr + EQUIPMENT_STATE_EQUIP;
             menu_set_selection_value(0, 0);
             menu_set_selection_value(1, 0);
             menu_set_selection_value(2, 0);
@@ -69,23 +69,23 @@ void equipment_update_state(void) {
         }
         g_equipment_thread_running = thread_is_running(EQUIPMENT_THREAD_SLOT_COMMAND_MENU);
         if (g_equipment_thread_running == 0) {
-            g_equipment_screen_state = EQUIPMENT_STATE_STATE_CLOSED;
+            g_equipment_screen_state = EQUIPMENT_STATE_CLOSED;
         }
         return;
     }
     switch (state) {
-    case EQUIPMENT_STATE_STATE_EQUIP:
+    case EQUIPMENT_STATE_EQUIP:
         result = equipment_run_equip_mode();
         break;
-    case EQUIPMENT_STATE_STATE_REMOVE:
+    case EQUIPMENT_STATE_REMOVE:
         result = equipment_run_remove_mode();
         break;
-    case EQUIPMENT_STATE_STATE_ITEM_LIST:
+    case EQUIPMENT_STATE_ITEM_LIST:
         result = equipment_update_menu();
         break;
     }
     if (result == 0) {
-        g_equipment_screen_state = EQUIPMENT_STATE_STATE_COMMAND_MENU;
+        g_equipment_screen_state = EQUIPMENT_STATE_COMMAND_MENU;
         g_equipment_thread_idle_stop_pending = 1;
     }
 }
@@ -151,7 +151,7 @@ static s32 equipment_run_equip_mode(void) {
             equipment_build_item_list(
                 unit, slot, g_equipment_item_slot, g_item_list_entries, ITEM_LIST_MODE_MARK_UNEQUIPPABLE);
             g_equipment_item_list_open = 1;
-            g_equipment_equipment_panel_style = 1;
+            g_equipment_panel_style = 1;
             thread_suspend(EQUIPMENT_THREAD_SLOT_COMMAND_MENU);
             menu_get_selection_record(
                 g_equipment_item_slot != 0 ? g_equipment_item_slot - 1 : 0, &selected, &scroll, g_item_list_entries);
@@ -212,7 +212,7 @@ static s32 equipment_run_equip_mode(void) {
         menu_script_run(&g_equipment_item_menu_script, g_menu_input_primary_repeat);
     }
     if (g_equipment_item_list_refresh != 0) {
-        g_equipment_equipment_panel_style = 0;
+        g_equipment_panel_style = 0;
         g_equipment_item_list_open = 0;
         g_equipment_item_preview_active = 0;
         g_unit_panel_unit_status_panel_redraw = 1;

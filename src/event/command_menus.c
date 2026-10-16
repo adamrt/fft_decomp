@@ -364,7 +364,7 @@ s32 command_resolve_selection(void) {
     if (command != 0x12 && (command & 0xFE) != 0xFE) {
         menu = g_command_current_id;
         for (i = 0; i < 31; i++) {
-            if (menu == g_command_command_maps[i].menu_id) {
+            if (menu == g_command_maps[i].menu_id) {
                 if (command != 0xFF) {
                     if (menu == MENU_COMMAND_ID_CRYSTAL_PICKUP) {
                         command = g_crystal_pickup_action;
@@ -372,13 +372,13 @@ s32 command_resolve_selection(void) {
                         *(u8*)&g_command_selected_action.item_or_equipment = g_crystal_pickup_item;
                         option = MENU_SELECTION_NONE;
                     } else if (menu == MENU_COMMAND_ID_MESSAGE_YES_NO || menu >= 0x64) {
-                        command = *(g_command_command_maps[i].map + option + 1);
+                        command = *(g_command_maps[i].map + option + 1);
                         option = MENU_SELECTION_NONE;
                     } else {
-                        command = *(g_command_command_maps[i].map + command + 1);
+                        command = *(g_command_maps[i].map + command + 1);
                     }
                 } else {
-                    command = g_command_command_maps[i].map[0];
+                    command = g_command_maps[i].map[0];
                 }
                 break;
             }
@@ -661,14 +661,14 @@ static s32 menu_dispatch_system_function(
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_GAME_OVER);
                         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
-                        g_scenario_scenario_event_active = 1;
+                        g_scenario_event_active = 1;
                         script_start_current_event_thread();
                     } else {
                         g_script_next_event_id = EVENT_ID_GAME_OVER;
                     }
                     return MENU_SYSTEM_DISPATCH_EVENT;
                 }
-                if (g_scenario_scenario_event_active != 0) {
+                if (g_scenario_event_active != 0) {
                     if (scenario_run_conditions() != 0) {
                         if (option != MENU_SCENARIO_CHECK_TEST) {
                             unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
@@ -703,7 +703,7 @@ static s32 menu_dispatch_system_function(
                         unit_view_start(UNIT_VIEW_MODE_NONE, 0xFF, 0xFF);
                         g_menu_overlay_state = 1;
                         script_set_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT, EVENT_ID_BATTLE_WON);
-                        g_scenario_scenario_event_active = 1;
+                        g_scenario_event_active = 1;
                         script_start_current_event_thread();
                     } else {
                         g_script_next_event_id = EVENT_ID_BATTLE_WON;
@@ -1129,7 +1129,7 @@ static event_scenario_condition_result_e scenario_check_condition(
  * is active. Bits 0-7 and 10-11 hold the next scenario id and the remaining bits
  * the after-event code. */
 s32 scenario_get_finish_operation(void) {
-    if (g_scenario_scenario_event_active == 0) {
+    if (g_scenario_event_active == 0) {
         return 0;
     }
     return g_scenario_event_finish_operations[script_get_variable(EVENT_SCRIPT_VAR_CURRENT_EVENT)];

@@ -36,9 +36,9 @@ typedef enum ai_status_selection_stage {
 
 /* These three suspend points use their own byte; other values resume abilities. */
 typedef enum ai_general_stage {
-    AI_AUTOBATTLE_CHARGING = 2,
-    AI_AUTOBATTLE_MOVEMENT = 4,
-    AI_AUTOBATTLE_ABILITIES = 7,
+    AI_GENERAL_CHARGING = 2,
+    AI_GENERAL_MOVEMENT = 4,
+    AI_GENERAL_ABILITIES = 7,
 } ai_general_stage_e;
 
 typedef enum ai_fight_for_life_stage {
@@ -119,8 +119,8 @@ typedef enum ai_movement_stage {
 } ai_movement_stage_e;
 
 typedef enum ai_move_retreat_stage {
-    AI_COWARDLY_MOVEMENT_SCORE_TILES = 0,
-    AI_COWARDLY_MOVEMENT_TARGET_DISTANCE = 1,
+    AI_MOVE_RETREAT_SCORE_TILES = 0,
+    AI_MOVE_RETREAT_TARGET_DISTANCE = 1,
 } ai_move_retreat_stage_e;
 
 typedef enum ai_destination_order {
@@ -266,7 +266,7 @@ typedef struct ai_extended_snapshot {
     u8 mount_info;
     u8 _padding_3f; /* tail padding to 2-byte alignment */
 } ai_extended_snapshot_t;
-typedef char ai_extended_snapshot_must_be_64[sizeof(ai_extended_snapshot_t) == 64 ? 1 : -1];
+typedef char ai_extended_snapshot_size_must_be_64[sizeof(ai_extended_snapshot_t) == 64 ? 1 : -1];
 
 /* Unit snapshots share the scratchpad-save arena used during movement propagation. */
 extern ai_extended_snapshot_t g_ai_unit_snapshot_storage[];

@@ -48,7 +48,7 @@ typedef char unit_panel_record_size_must_be_64[(sizeof(unit_panel_record_t) == 6
  * unit_panel_copy_billboard_out saves the banner whole. Equipment previews use the HP and MP gauges' bonus
  * fields. Provisional. */
 typedef struct unit_panel_summary {
-    s16 level;      /* 0x00; unit_editor_apply_values writes it back */
+    s16 level;      /* 0x00; debug_unit_editor_apply_values writes it back */
     s16 team_kind;  /* 0x02: 0 ally, 1 enemy, 2 neutral, 3 auto-battle; selects the status icon,
                        the panel's 0xc-byte geometry row and its CLUT */
     s16 list_index; /* 0x04: AT-list position + 1, negative when the unit is not listed

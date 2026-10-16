@@ -820,7 +820,7 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_SOUND_EFFECT) {
             g_sound_pending_sfx_id = first_halfword;
         } else if (script[0] == EVENT_OPCODE_WARP_UNIT) {
-            script_warp_unit((const event_warp_unit_parameters_t*)parameters);
+            script_opcode_5f_warp_unit((const event_warp_unit_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_WAIT_VALUE) {
             script_opcode_7e_wait_value((const event_wait_value_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_DEBUG_PAUSE) {
@@ -841,7 +841,7 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WAIT_WALK) {
             script_opcode_29_wait_walk(first_halfword);
         } else if (script[0] == EVENT_OPCODE_UNIT_ANIM) {
-            script_unit_anim((const event_unit_anim_parameters_t*)parameters);
+            script_opcode_11_unit_anim((const event_unit_anim_parameters_t*)parameters);
         } else if (script[0] == EVENT_OPCODE_MIRROR_SPRITE) {
             script_opcode_68_mirror_sprite((const event_mirror_sprite_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_RESET_PALETTE) {
@@ -869,9 +869,9 @@ void script_opcode_2a_block_start_thread(void) {
         } else if (script[0] == EVENT_OPCODE_WAIT) {
             thread_wait_frames(script_read_s16(script + 1));
         } else if (script[0] == EVENT_OPCODE_ROTATE_UNIT) {
-            script_rotate_unit((const event_rotate_unit_parameters_t*)(script + 1));
+            script_opcode_2d_rotate_unit((const event_rotate_unit_parameters_t*)(script + 1));
         } else if (script[0] == EVENT_OPCODE_FACE_UNIT) {
-            script_face_unit((const event_face_unit_parameters_t*)(script + 1), 1);
+            script_opcode_2c_face_unit((const event_face_unit_parameters_t*)(script + 1), 1);
         } else if (script[0] == EVENT_OPCODE_SPRITE_MOVE || script[0] == EVENT_OPCODE_SPRITE_MOVE_BETA) {
             thread_id = thread_resolve_id_after_current(THREAD_SLOT_FIRST_IDLE);
             if (script[0] == EVENT_OPCODE_SPRITE_MOVE) {
@@ -1248,7 +1248,7 @@ void command_restore_unit_selection(s32 menu_id) {
     menu_selection_remap_t* remap;
 
     for (i = 0; i < 12; i++) {
-        if (g_command_command_maps[i].menu_id == menu_id) {
+        if (g_command_maps[i].menu_id == menu_id) {
             break;
         }
     }
@@ -1790,7 +1790,7 @@ void command_record_unit_selection(void) {
 
     records = g_menu_unit_selection_records;
     for (i = 0; i < 12; i++) {
-        if (g_command_current_id == g_command_command_maps[i].menu_id) {
+        if (g_command_current_id == g_command_maps[i].menu_id) {
             records[*selected].command_index = g_menu_thread_menu_data[g_command_current_id].selected_index;
         }
     }

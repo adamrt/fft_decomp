@@ -62,7 +62,7 @@ void result_animate_text(unit_t* unit, const SVECTOR* screen_coords) {
     progress = unit->numeric_display.progress + g_system_vsync_interval;
     display = &unit->numeric_display;
     if (progress < 21) {
-        if (unit->numeric_display.selector & RESULT_NUMERIC_DISPLAY_MODIFIER_CRITICAL) {
+        if (unit->numeric_display.selector & RESULT_DISPLAY_MODIFIER_CRITICAL) {
             vector_set_svector(
                 &zoom_0, critical_scale_0[progress], critical_scale_0[progress], critical_scale_0[progress]);
             vector_set_svector(
@@ -70,16 +70,16 @@ void result_animate_text(unit_t* unit, const SVECTOR* screen_coords) {
             vector_set_svector(
                 &zoom_2, critical_scale_2[progress], critical_scale_2[progress], critical_scale_2[progress]);
         } else {
-            switch (unit->numeric_display.selector & RESULT_NUMERIC_DISPLAY_SELECTOR_MASK) {
-            case RESULT_NUMERIC_DISPLAY_HP_DAMAGE ... RESULT_NUMERIC_DISPLAY_MA_GAIN:
+            switch (unit->numeric_display.selector & RESULT_DISPLAY_SELECTOR_MASK) {
+            case RESULT_DISPLAY_HP_DAMAGE ... RESULT_DISPLAY_MA_GAIN:
                 vector_set_svector(&zoom_0, scale_0[progress], scale_0[progress], scale_0[progress]);
                 vector_set_svector(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
                 vector_set_svector(&zoom_2, scale_2[progress], scale_2[progress], scale_2[progress]);
                 break;
-            case RESULT_NUMERIC_DISPLAY_MISSED:
-            case RESULT_NUMERIC_DISPLAY_GUARDED:
-            case RESULT_NUMERIC_DISPLAY_GAINED_EXP:
-            case RESULT_NUMERIC_DISPLAY_GAINED_JP:
+            case RESULT_DISPLAY_MISSED:
+            case RESULT_DISPLAY_GUARDED:
+            case RESULT_DISPLAY_GAINED_EXP:
+            case RESULT_DISPLAY_GAINED_JP:
                 vector_set_svector(&zoom_0, scale_1[progress], scale_1[progress], scale_1[progress]);
                 vector_set_svector(&zoom_1, scale_1[progress], scale_1[progress], scale_1[progress]);
                 vector_set_svector(&zoom_2, scale_1[progress], scale_1[progress], scale_1[progress]);
@@ -111,31 +111,31 @@ void result_animate_text(unit_t* unit, const SVECTOR* screen_coords) {
     }
     position.vx = screen_coords->vx + 0x15;
     position.vy = screen_coords->vy - 8;
-    switch (display->selector & RESULT_NUMERIC_DISPLAY_SELECTOR_MASK) {
-    case RESULT_NUMERIC_DISPLAY_HP_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_MP_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_SPEED_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_CT_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_BRAVE_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_FAITH_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_PA_DAMAGE:
-    case RESULT_NUMERIC_DISPLAY_MA_DAMAGE:
+    switch (display->selector & RESULT_DISPLAY_SELECTOR_MASK) {
+    case RESULT_DISPLAY_HP_DAMAGE:
+    case RESULT_DISPLAY_MP_DAMAGE:
+    case RESULT_DISPLAY_SPEED_DAMAGE:
+    case RESULT_DISPLAY_CT_DAMAGE:
+    case RESULT_DISPLAY_BRAVE_DAMAGE:
+    case RESULT_DISPLAY_FAITH_DAMAGE:
+    case RESULT_DISPLAY_PA_DAMAGE:
+    case RESULT_DISPLAY_MA_DAMAGE:
         position.vy = screen_coords->vy - 0x30;
         break;
-    case RESULT_NUMERIC_DISPLAY_HP_HEALING:
-    case RESULT_NUMERIC_DISPLAY_MP_HEALING:
-    case RESULT_NUMERIC_DISPLAY_SPEED_GAIN:
-    case RESULT_NUMERIC_DISPLAY_CT_GAIN:
-    case RESULT_NUMERIC_DISPLAY_BRAVE_GAIN:
-    case RESULT_NUMERIC_DISPLAY_FAITH_GAIN:
-    case RESULT_NUMERIC_DISPLAY_PA_GAIN:
-    case RESULT_NUMERIC_DISPLAY_MA_GAIN:
+    case RESULT_DISPLAY_HP_HEALING:
+    case RESULT_DISPLAY_MP_HEALING:
+    case RESULT_DISPLAY_SPEED_GAIN:
+    case RESULT_DISPLAY_CT_GAIN:
+    case RESULT_DISPLAY_BRAVE_GAIN:
+    case RESULT_DISPLAY_FAITH_GAIN:
+    case RESULT_DISPLAY_PA_GAIN:
+    case RESULT_DISPLAY_MA_GAIN:
         position.vy = screen_coords->vy - 0x10;
         break;
-    case RESULT_NUMERIC_DISPLAY_MISSED:
-    case RESULT_NUMERIC_DISPLAY_GUARDED:
-    case RESULT_NUMERIC_DISPLAY_GAINED_EXP:
-    case RESULT_NUMERIC_DISPLAY_GAINED_JP:
+    case RESULT_DISPLAY_MISSED:
+    case RESULT_DISPLAY_GUARDED:
+    case RESULT_DISPLAY_GAINED_EXP:
+    case RESULT_DISPLAY_GAINED_JP:
         break;
     }
     sprite_display_construct_polygon_data(
@@ -181,7 +181,7 @@ sprite_unit_shp_frame_tables_t* sprite_sheet_get_unit_shp(u32 spritesheet_id) {
 sprite_unit_seq_table_t* sprite_sheet_get_unit_seq(u32 spritesheet_id) {
     s32 value = g_sprite_sheet_data[spritesheet_id & 0xffff].seq_id;
 
-    if (value < ANIMATION_SEQ_RUKA) {
+    if (value < SPRITE_SEQ_RUKA) {
         return &g_sprite_unit_seq_tables[value].header;
     }
     return &g_sprite_boss_seq_tables.header;

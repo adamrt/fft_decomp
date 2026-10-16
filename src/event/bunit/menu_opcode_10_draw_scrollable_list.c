@@ -74,7 +74,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                     if (scroll_base > 0) {
                         g_menu_list_scroll_direction = -1;
                         if (g_menu_list_text_table != 0) {
-                            row_ids = &g_unit_list_list_scroll_entry_ids[0];
+                            row_ids = &g_unit_list_scroll_entry_ids[0];
                             text_id = g_menu_list_entries[scroll_base - 1];
                             rect.x = 0x100;
                             rect.y = 0x20;
@@ -95,7 +95,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
                             s16* entry_ids;
 
                             j = g_menu_scroll_base_index + g_menu_list_visible_rows - 1;
-                            entry_ids = &g_unit_list_list_scroll_entry_ids[0];
+                            entry_ids = &g_unit_list_scroll_entry_ids[0];
                             *entry_ids = g_menu_list_entries[j + 1];
                             rect.x = 0x100;
                             rect.y = g_menu_list_visible_rows * g_menu_list_row_height + 0x30;
@@ -208,7 +208,7 @@ menu_instruction_t* menu_opcode_10_draw_scrollable_list(menu_instruction_t* comm
     if (command->list.show_cursor != 0) {
         marker.x = command->list.x - command->list.cursor_x_offset;
         marker.y = command->list.y + (g_menu_list_selected_index - g_menu_scroll_base_index) * g_menu_list_row_height;
-        menu_update_and_draw_sliding_cursor(&marker, &g_unit_list_list_cursor_anim_state, g_menu_use_alternate_palette);
+        menu_update_and_draw_sliding_cursor(&marker, &g_unit_list_cursor_anim_state, g_menu_use_alternate_palette);
     }
     command = menu_next_instruction(command);
     g_menu_list_row_index = 0;

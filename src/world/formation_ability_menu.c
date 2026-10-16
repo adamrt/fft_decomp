@@ -501,7 +501,7 @@ static s32 formation_ability_set_menu(void) {
             }
         }
         menu_run_script_with_palette_mode(
-            &g_formation_ability_set_window_script, g_menu_input_primary_repeat, screen_thread_is_task_active(0));
+            &g_formation_ability_set_window_script, g_menu_input_primary_repeat, menu_input_get_lock_mode(0));
     }
 
     if (g_formation_ability_set_list_close_pending != 0) {
@@ -522,7 +522,7 @@ static s32 formation_ability_set_menu(void) {
     formation_toggle_preview_stats_window(g_formation_ability_set_show_stat_preview);
     g_formation_ability_set_cursor_point.y = g_formation_ability_set_slot * 16 + 0x90;
     gfx_set_otag_index(0x28);
-    if (screen_thread_is_task_active(0) != 0 || g_formation_ability_set_list_open != 0) {
+    if (menu_input_get_lock_mode(0) != 0 || g_formation_ability_set_list_open != 0) {
         busy = 1;
     }
     screen_draw_sliding_cursor(&g_formation_ability_set_cursor_point, &g_formation_ability_set_cursor_anim, busy);
@@ -579,7 +579,7 @@ static s32 formation_ability_is_equip_support_change(s16 unit_id, s16 ability_id
 
 /* Return the menu input lock mode; nonzero while another window holds the input. The argument is
  * ignored. */
-s32 screen_thread_is_task_active(s32 unused_0) {
+s32 menu_input_get_lock_mode(s32 unused_0) {
     return g_menu_input_lock_mode;
 }
 

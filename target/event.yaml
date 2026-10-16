@@ -216,7 +216,7 @@ data:
   - {addr: 0x801cf648, name: g_menu_gfx_scaled_sprite_uv_rects}
   - {addr: 0x801cf7a4, name: g_menu_gfx_scaled_sprite_scale}
   - {addr: 0x801cf819, name: g_menu_gfx_scaled_sprite_count}
-  - {addr: 0x801cf938, name: g_scenario_scenario_table}
+  - {addr: 0x801cf938, name: g_scenario_table}
   - {addr: 0x801d3938, name: g_scenario_event_condition_blocks}
   - {addr: 0x801d5af4, name: g_deploy_vram_copy_rect}
   - {addr: 0x801d5afc, name: g_deploy_vram_copy_x}
@@ -592,12 +592,12 @@ data:
   - {addr: 0x801cf508, name: g_unit_list_status_banner_at_bottom}
   - {addr: 0x801cf509, name: g_unit_list_status_banner_at_bottom_latch}
   - {addr: 0x801cf50a, name: g_unit_list_grid_selected_cell}
-  - {addr: 0x801cf50b, name: g_unit_list_list_page_offset}
-  - {addr: 0x801cf50c, name: g_unit_list_list_scroll_step}
+  - {addr: 0x801cf50b, name: g_unit_list_page_offset}
+  - {addr: 0x801cf50c, name: g_unit_list_scroll_step}
   - {addr: 0x801cf50d, name: g_input_lock_timer}
-  - {addr: 0x801cf514, name: g_unit_list_list_triangle_menu}
-  - {addr: 0x801cf550, name: g_unit_list_list_initialized}
-  - {addr: 0x801cf551, name: g_unit_list_list_triangle_menu_open}
+  - {addr: 0x801cf514, name: g_unit_list_triangle_menu}
+  - {addr: 0x801cf550, name: g_unit_list_initialized}
+  - {addr: 0x801cf551, name: g_unit_list_triangle_menu_open}
   - {addr: 0x801cf554, name: g_unit_list_saved_unit_browse_enabled}
   - {addr: 0x801cf555, name: g_unit_list_saved_status_banner_enabled}
   - {addr: 0x801cf556, name: g_unit_list_status_banner_slide_step}
@@ -672,8 +672,8 @@ data:
   - {addr: 0x801cfa38, name: g_menu_cursor_forward_offset_keyframes}
   - {addr: 0x801cfa44, name: g_menu_cursor_reverse_offset_keyframes}
   - {addr: 0x801cfa58, name: g_unit_list_bouncing_cursor_quad}
-  - {addr: 0x801cfa7c, name: g_unit_list_list_scroll_entry_ids}
-  - {addr: 0x801cfa80, name: g_unit_list_list_cursor_anim_state}
+  - {addr: 0x801cfa7c, name: g_unit_list_scroll_entry_ids}
+  - {addr: 0x801cfa80, name: g_unit_list_cursor_anim_state}
   - {addr: 0x801cfa82, name: g_input_page_scroll_hold_frames}
   - {addr: 0x801cfa84, name: g_unit_list_help_nodes_unit_browse}
   - {addr: 0x801cfbf8, name: g_unit_list_help_node_23_help_base}
@@ -690,12 +690,12 @@ data:
   - {addr: 0x801e346a, name: g_input_activation_timer}
   - {addr: 0x801e346b, name: g_unit_list_help_text_state}
   - {addr: 0x801e346c, name: g_ability_list_ability_category}
-  - {addr: 0x801e3470, name: g_job_list_list_menu_script}
-  - {addr: 0x801e3549, name: g_job_list_list_initialized}
-  - {addr: 0x801e354c, name: g_ability_list_list_menu_script}
+  - {addr: 0x801e3470, name: g_job_list_menu_script}
+  - {addr: 0x801e3549, name: g_job_list_initialized}
+  - {addr: 0x801e354c, name: g_ability_list_menu_script}
   - {addr: 0x801e3739, name: g_job_list_menu_active}
-  - {addr: 0x801e373a, name: g_ability_list_list_ready}
-  - {addr: 0x801e373c, name: g_ability_list_list_job_name_row}
+  - {addr: 0x801e373a, name: g_ability_list_ready}
+  - {addr: 0x801e373c, name: g_ability_list_job_name_row}
   - {addr: 0x801e3740, name: g_gfx_decreasing_fade_active}
   - {addr: 0x801e3741, name: g_gfx_increasing_fade_active}
   - {addr: 0x801e3744, name: g_gfx_fade_rect}
@@ -733,11 +733,11 @@ data:
   - {addr: 0x801eb134, name: g_unit_list_reorder_list_entries}
   - {addr: 0x801eb150, name: g_unit_list_primary_result}
   - {addr: 0x801eb152, name: g_unit_list_reorder_result}
-  - {addr: 0x801eb154, name: g_unit_list_list_count}
+  - {addr: 0x801eb154, name: g_unit_list_visible_count}
   - {addr: 0x801eb158, name: g_unit_list_text_reorder_list_buffer}
   - {addr: 0x801eb1d8, name: g_unit_list_reorderable_count}
   - {addr: 0x801eb1dc, name: g_unit_list_reorderable_indices}
-  - {addr: 0x801eb1f0, name: g_unit_list_list_index_map}
+  - {addr: 0x801eb1f0, name: g_unit_list_index_map}
   - {addr: 0x801eb204, name: g_unit_list_current_stat_value}
   - {addr: 0x801eb208, name: g_unit_list_max_stat_value}
   - {addr: 0x801eb20c, name: g_unit_list_cursor_trail_points}
@@ -776,7 +776,7 @@ data:
   - {addr: 0x801ec94c, name: g_unit_list_input_previous}
   - {addr: 0x801ec950, name: g_menu_selection_values}
   - {addr: 0x801ec974, name: g_job_list_menu_phase}
-  - {addr: 0x801ec978, name: g_ability_list_list_confirm_prompt_state}
+  - {addr: 0x801ec978, name: g_ability_list_confirm_prompt_state}
   - {addr: 0x801ec97c, name: g_job_list_selected_id}
   - {addr: 0x801ec980, name: g_job_list_selected_generic_index}
   - {addr: 0x801ec984, name: g_job_list_job_ids}
@@ -1201,12 +1201,12 @@ functions:
   - {addr: 0x801c3534, size: 400, name: gfx_build_gradient_grid_primitives, hash: 57acda65df169872, source: src/event/menu/gfx_build_gradient_grid_primitives.c}
   - {addr: 0x801c36c4, size: 720, name: gfx_set_scaled_poly_ft4_8bpp, hash: ab60dde2e48b7b56, unit: zodiac_primitives}
   - {addr: 0x801c3994, size: 692, name: zodiac_build_primitives, hash: 73434c5bdf08700a, unit: zodiac_primitives}
-  - {addr: 0x801c3c48, size: 316, name: unit_editor_apply_values, hash: 1ccc2cc747f36f75, unit: editor}
+  - {addr: 0x801c3c48, size: 316, name: debug_unit_editor_apply_values, hash: 1ccc2cc747f36f75, unit: editor}
   - {addr: 0x801c3d84, size: 1544, name: status_screen_mounted_unit_thread, hash: 609e3c9ca09a8630, unit: editor}
-  - {addr: 0x801c438c, size: 3768, name: unit_editor_run, hash: 358e46ce9946d944, unit: editor}
+  - {addr: 0x801c438c, size: 3768, name: debug_unit_editor_run, hash: 358e46ce9946d944, unit: editor}
 
 data:
-  - {addr: 0x801c52a4, name: g_unit_editor_active}
+  - {addr: 0x801c52a4, name: g_debug_unit_editor_active}
   - {addr: 0x801c52b0, name: g_menu_indicator_packet_index}
   - {addr: 0x801c52b8, name: g_menu_indicator_brightness}
   - {addr: 0x801c52c0, name: g_menu_indicator_fade_work}
@@ -1542,9 +1542,9 @@ data:
   - {addr: 0x801ce178, name: g_unit_panel_unit_status_panel_params}
   - {addr: 0x801ce180, name: g_unit_panel_unit_status_panel_flags}
   - {addr: 0x801ce184, name: g_unit_panel_unit_status_panel_redraw}
-  - {addr: 0x801ce18c, name: g_equipment_equipment_panel_params}
-  - {addr: 0x801ce198, name: g_equipment_equipment_panel_redraw}
-  - {addr: 0x801ce19c, name: g_equipment_equipment_panel_style}
+  - {addr: 0x801ce18c, name: g_equipment_panel_params}
+  - {addr: 0x801ce198, name: g_equipment_panel_redraw}
+  - {addr: 0x801ce19c, name: g_equipment_panel_style}
   - {addr: 0x801ce1a0, name: g_unit_panel_numeric_panel_params}
   - {addr: 0x801ce1ac, name: g_equipment_numeric_panel_redraw}
   - {addr: 0x801ce1b0, name: g_equipment_numeric_panel_style}
@@ -1630,7 +1630,7 @@ data:
   - {addr: 0x801cf128, name: g_equipment_status_label_image}
   - {addr: 0x801cf6c4, name: g_item_action_menu}
   - {addr: 0x801cf700, name: g_equipment_item_action_menu_single_item}
-  - {addr: 0x801cf73c, name: g_equipment_equipment_render_commands}
+  - {addr: 0x801cf73c, name: g_equipment_render_commands}
   - {addr: 0x801cf800, name: g_equipment_armor_bonus_render_commands}
   - {addr: 0x801cf858, name: g_equipment_substate}
   - {addr: 0x801cf859, name: g_equipment_ready}
@@ -1910,7 +1910,7 @@ data:
   - {addr: 0x801e06fc, name: g_help_terrain_navigation}
   - {addr: 0x801e078c, name: g_help_attack_preview_navigation}
   - {addr: 0x801e07fc, name: g_help_unit_box_navigation}
-  - {addr: 0x801e084c, name: g_help_require_navigation}
+  - {addr: 0x801e084c, name: g_help_after_battle_navigation}
   - {addr: 0x801e0ad4, name: g_help_menu_text_id_tables}
   - {addr: 0x801e0b30, name: g_help_text_section_offsets}
   - {addr: 0x801e0bb0, name: g_help_data_base}
@@ -2049,11 +2049,11 @@ data:
   - {addr: 0x801e522e, name: g_status_screen_initialized}
   - {addr: 0x801e5230, name: g_job_list_selected_id}
   - {addr: 0x801e5232, name: g_ability_list_ability_category}
-  - {addr: 0x801e5234, name: g_job_list_list_render_commands}
-  - {addr: 0x801e530c, name: g_job_list_list_menu_initialized}
-  - {addr: 0x801e5310, name: g_ability_list_list_render_commands}
-  - {addr: 0x801e54fc, name: g_ability_list_list_initialized}
-  - {addr: 0x801e5500, name: g_ability_list_list_job_name_ids}
+  - {addr: 0x801e5234, name: g_job_list_render_commands}
+  - {addr: 0x801e530c, name: g_job_list_menu_initialized}
+  - {addr: 0x801e5310, name: g_ability_list_render_commands}
+  - {addr: 0x801e54fc, name: g_ability_list_initialized}
+  - {addr: 0x801e5500, name: g_ability_list_job_name_ids}
   - {addr: 0x801e5508, name: g_help_text_table}
   - {addr: 0x801eff60, name: g_menu_input_latched_button}
   - {addr: 0x801eff62, name: g_menu_input_activation_timer}

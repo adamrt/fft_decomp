@@ -272,14 +272,14 @@ typedef enum sprite_shp_type {
 /* sprite_sheet_data_t.seq_id: index of the sheet's animation file in
  * g_sprite_seq_files (BATTLE/TYPE1.SEQ ...). */
 typedef enum sprite_seq_type {
-    ANIMATION_SEQ_TYPE1 = 0,
-    ANIMATION_SEQ_TYPE3 = 1,
-    ANIMATION_SEQ_CYOKO = 2,
-    ANIMATION_SEQ_MON = 3,
-    ANIMATION_SEQ_OTHER = 4,
-    ANIMATION_SEQ_RUKA = 5,
-    ANIMATION_SEQ_ARUTE = 6,
-    ANIMATION_SEQ_KANZEN = 7,
+    SPRITE_SEQ_TYPE1 = 0,
+    SPRITE_SEQ_TYPE3 = 1,
+    SPRITE_SEQ_CYOKO = 2,
+    SPRITE_SEQ_MON = 3,
+    SPRITE_SEQ_OTHER = 4,
+    SPRITE_SEQ_RUKA = 5,
+    SPRITE_SEQ_ARUTE = 6,
+    SPRITE_SEQ_KANZEN = 7,
 } sprite_seq_type_e;
 
 extern sprite_sheet_data_t g_sprite_sheet_data[SPRITE_SHEET_ID_COUNT];

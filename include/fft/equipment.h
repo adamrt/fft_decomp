@@ -17,12 +17,12 @@
  * + EQUIP: Equip, Remove and the item list are rows 0, 2 and 3 (row 1 is
  * refused). */
 typedef enum equipment_state {
-    EQUIPMENT_STATE_STATE_INIT = 0, /* equipment_entrypoint builds the screen */
-    EQUIPMENT_STATE_STATE_COMMAND_MENU = 1,
-    EQUIPMENT_STATE_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
-    EQUIPMENT_STATE_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
-    EQUIPMENT_STATE_STATE_ITEM_LIST = 5, /* equipment_update_menu */
-    EQUIPMENT_STATE_STATE_CLOSED = 0xff, /* equipment_entrypoint returns its result */
+    EQUIPMENT_STATE_INIT = 0, /* equipment_entrypoint builds the screen */
+    EQUIPMENT_STATE_COMMAND_MENU = 1,
+    EQUIPMENT_STATE_EQUIP = 2,     /* equipment_run_equip_mode */
+    EQUIPMENT_STATE_REMOVE = 4,    /* equipment_run_remove_mode */
+    EQUIPMENT_STATE_ITEM_LIST = 5, /* equipment_update_menu */
+    EQUIPMENT_STATE_CLOSED = 0xff, /* equipment_entrypoint returns its result */
 } equipment_state_e;
 
 extern u8 g_equipment_screen_state; /* equipment_state_e */
@@ -172,7 +172,7 @@ extern s16 g_equipment_item_previewed_cursor;
 extern u8 g_equipment_item_inventory_totals[];
 extern s8 g_equipment_substate; /* menu_item_list_state_e */
 extern menu_instruction_t g_equipment_item_menu_script;
-extern menu_instruction_t g_equipment_equipment_render_commands;
+extern menu_instruction_t g_equipment_render_commands;
 extern menu_instruction_t g_equipment_armor_bonus_render_commands;
 
 s32 equipment_build_item_list(s16 unit_index, s16 sort_mode, s8 category, s16* list, u8 equip_filter);
@@ -214,9 +214,9 @@ s32 equipment_run_type_order_mode(void);
 /* unit panels */
 extern menu_unit_status_identity_t g_equipment_selected_unit_data;
 extern menu_unit_status_identity_t g_equipment_comparison_unit_data;
-extern u8 g_equipment_equipment_panel_params[];
-extern s32 g_equipment_equipment_panel_style;
-extern s32 g_equipment_equipment_panel_redraw;
+extern u8 g_equipment_panel_params[];
+extern s32 g_equipment_panel_style;
+extern s32 g_equipment_panel_redraw;
 extern s32 g_equipment_numeric_panel_style;
 extern s32 g_equipment_numeric_panel_redraw;
 extern u8 g_equipment_status_label_image[];

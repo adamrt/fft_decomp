@@ -319,7 +319,7 @@ static void text_init_battle_pointers_from_file(deploy_text_file_t* file) {
     src = text_find_entry(text_id);                                                                                    \
     *dst++ = *src++;                                                                                                   \
     while ((dst[-1] & 0xfe) != 0xfe) {                                                                                 \
-        if (dst >= g_scenario_scenario_table + 0x4000) {                                                               \
+        if (dst >= g_scenario_table + 0x4000) {                                                                        \
             goto end;                                                                                                  \
         }                                                                                                              \
         *dst++ = *src++;                                                                                               \
@@ -347,7 +347,7 @@ static void text_init_battle_pointers_from_file(deploy_text_file_t* file) {
  * broken; 16 units' strings stay far below that size.
  */
 void deploy_build_strings(void) {
-    u8* dst = g_scenario_scenario_table;
+    u8* dst = g_scenario_table;
     deploy_text_file_t* file = heap_alloc(0x18000);
     s32 i;
     s32 j;
@@ -385,7 +385,7 @@ void deploy_build_strings(void) {
         }
         APPEND_TEXT(g_unit_panel_selected_unit_data.job_id + HELP_TEXT_ID_JOB_BASE);
     }
-    g_deploy_unit_text_section = g_scenario_scenario_table;
+    g_deploy_unit_text_section = g_scenario_table;
     g_deploy_help_text_section = g_scenario_event_condition_blocks;
     src = text_find_entry(0x5800);
     dst = g_scenario_event_condition_blocks;

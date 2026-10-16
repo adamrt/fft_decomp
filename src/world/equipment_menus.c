@@ -97,7 +97,7 @@ s32 equipment_update_menu(void) {
     menu_draw_pressable_button(MENU_PRESSABLE_BUTTON_ITEM_LIST_TRIANGLE, 0xB8, 0x3C,
         g_menu_input_primary_repeat & PSX_PAD_TRIANGLE, disabled, SOUND_SFX_CONFIRM);
     busy = 0;
-    if (screen_thread_is_task_active(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
+    if (menu_input_get_lock_mode(0) != 0 || thread_is_running(THREAD_SCREEN_SLOT_MENU_CHILD) != 0) {
         busy = 1;
     }
     menu_run_script_with_palette_mode(&g_formation_item_list_window_script, input, busy);

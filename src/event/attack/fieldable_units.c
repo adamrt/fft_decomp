@@ -70,7 +70,7 @@ void deploy_find_fieldable_units(void) {
         }
     }
 
-    if (g_scenario_scenario_event_active != 0) {
+    if (g_scenario_event_active != 0) {
         return;
     }
 

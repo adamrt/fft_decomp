@@ -1167,7 +1167,7 @@ void shop_fitting_remove_step(void) {
     *cursor_y = (u8)slot * 16 + 0x90;
     gfx_set_otag_index(0x3D);
     screen_draw_sliding_cursor(
-        &g_shop_fitting_remove_cursor_point, &g_shop_fitting_remove_cursor_anim, screen_thread_is_task_active(0));
+        &g_shop_fitting_remove_cursor_point, &g_shop_fitting_remove_cursor_anim, menu_input_get_lock_mode(0));
     /* Only a tried-on shop item (bit 15) can be taken off here; its price comes off the cost. */
     if (g_menu_input_primary_repeat & PSX_PAD_CIRCLE) {
         equipped_item = g_formation_unit_pointers[g_unit_selected_index]->equipment[(u8)slot];
@@ -1587,7 +1587,7 @@ void shop_fitting_sell_equipped_step(void) {
         g_shop_fitting_sell_equipped_cursor_point.y = g_shop_fitting_sell_equipped_slot * 16 + 0x90;
         gfx_set_otag_index(0x3d);
         screen_draw_sliding_cursor(&g_shop_fitting_sell_equipped_cursor_point,
-            &g_shop_fitting_sell_equipped_cursor_anim, screen_thread_is_task_active(0));
+            &g_shop_fitting_sell_equipped_cursor_anim, menu_input_get_lock_mode(0));
     }
     shop_fitting_draw_cost();
 }

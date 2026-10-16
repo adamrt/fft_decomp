@@ -217,7 +217,7 @@ typedef struct ai_ability_entry {
         } policy;
     } usage;
 } ai_ability_entry_t;
-typedef char ai_ability_entry_must_be_4[sizeof(ai_ability_entry_t) == 4 ? 1 : -1];
+typedef char ai_ability_entry_size_must_be_4[sizeof(ai_ability_entry_t) == 4 ? 1 : -1];
 
 void ai_init_unit_abilities(s32 unit_id);
 s32 ai_ability_is_known(s32 unit_id, s32 skillset_id, s32 bit);
@@ -232,7 +232,7 @@ typedef struct ai_status_snapshot {
     u8 death_sentence_ct;
     u8 current_status[STATUS_BYTE_COUNT];
 } ai_status_snapshot_t;
-typedef char ai_status_snapshot_must_be_8[sizeof(ai_status_snapshot_t) == 8 ? 1 : -1];
+typedef char ai_status_snapshot_size_must_be_8[sizeof(ai_status_snapshot_t) == 8 ? 1 : -1];
 
 /* OR-combined categories gathered from both equipped weapon formulas. They
  * are flags, not ability_formula_e IDs; mixed categories bypass the builder
@@ -258,7 +258,7 @@ typedef union ai_weapon_data {
         u8 _unused_06[2];
     } fields;
 } ai_weapon_data_t;
-typedef char ai_weapon_data_must_be_8[sizeof(ai_weapon_data_t) == 8 ? 1 : -1];
+typedef char ai_weapon_data_size_must_be_8[sizeof(ai_weapon_data_t) == 8 ? 1 : -1];
 
 /* unit decisions */
 /* Per-unit AI behavior flags copied from ENTD data to decision +0x04. The

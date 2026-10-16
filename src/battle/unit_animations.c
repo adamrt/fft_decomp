@@ -284,8 +284,8 @@ void animation_select_attack_for_ability(unit_t* attacker, unit_t* target) {
     s32 animation;
     s32 seq_type = g_sprite_sheet_data[attacker->spritesheet_id].seq_id;
 
-    if (seq_type <= ANIMATION_SEQ_KANZEN) {
-        if (seq_type >= ANIMATION_SEQ_RUKA) {
+    if (seq_type <= SPRITE_SEQ_KANZEN) {
+        if (seq_type >= SPRITE_SEQ_RUKA) {
             animation_store_facing(ANIMATION_CAST, attacker->facing, attacker);
             return;
         }
@@ -444,7 +444,7 @@ void animation_set_for_status(unit_t* unit) {
             }
         } else {
             spritesheet_id = unit->spritesheet_id;
-            if (g_sprite_sheet_data[spritesheet_id].seq_id >= ANIMATION_SEQ_RUKA) {
+            if (g_sprite_sheet_data[spritesheet_id].seq_id >= SPRITE_SEQ_RUKA) {
                 if (unit->status_flags_1_4 & UNIT_STATUS_DEAD) {
                     animation = ANIMATION_DEAD;
                 } else if (unit->status_flags_1_4 & UNIT_STATUS_STOP) {
@@ -588,8 +588,8 @@ void animation_update_for_status_changes(unit_t* unit) {
         animation_set_for_status(unit);
     }
     if (unit->statuses_to_add_1_4 & UNIT_STATUS_DEAD) {
-        if (g_sprite_sheet_data[unit->spritesheet_id].seq_id == ANIMATION_SEQ_CYOKO
-            || g_sprite_sheet_data[unit->spritesheet_id].seq_id == ANIMATION_SEQ_MON) {
+        if (g_sprite_sheet_data[unit->spritesheet_id].seq_id == SPRITE_SEQ_CYOKO
+            || g_sprite_sheet_data[unit->spritesheet_id].seq_id == SPRITE_SEQ_MON) {
             effect_secondary_set_death_smoke(unit);
         }
         if (g_game_state != GAME_STATE_EVENT) {
@@ -3039,7 +3039,7 @@ static unit_t* unit_init(s32 map_x, s32 map_y, s32 map_level, s16 facing, s32 sp
     unit->shadow_counter = 0;
 
     unit->numeric_display.active = 0;
-    unit->numeric_display.selector = RESULT_NUMERIC_DISPLAY_HP_DAMAGE;
+    unit->numeric_display.selector = RESULT_DISPLAY_HP_DAMAGE;
     unit->numeric_display.progress = 0;
     unit->numeric_display.displays[0] = sprite_display_init_numeric(runtime_id, 0);
     unit->numeric_display.displays[1] = sprite_display_init_numeric(runtime_id, 1);
@@ -3492,7 +3492,7 @@ s32 sprite_load_step_queued(void) {
             id = g_sprite_sheet_data[g_unit_graphics_load_queue.descriptors[g_sprite_load_state.index].spritesheet_id]
                      .seq_id;
             /* SEQ ids up to OTHER are likewise resident. */
-            if (id < ANIMATION_SEQ_RUKA || id == g_sprite_last_loaded_seq_id) {
+            if (id < SPRITE_SEQ_RUKA || id == g_sprite_last_loaded_seq_id) {
                 result = 2;
                 g_sprite_load_state.buffer = 0;
                 g_sprite_load_state.phase = SPRITE_LOAD_PHASE_FINISH;

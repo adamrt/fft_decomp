@@ -53,7 +53,7 @@ void menu_icon_list_thread(void);
 /* A window without a cursor whose text image is rebuilt every seventh frame. */
 void menu_icon_strip_thread(void);
 
-/* One text entry shown until input arrives or g_message_message_duration_frames runs out. */
+/* One text entry shown until input arrives or g_message_duration_frames runs out. */
 void menu_icon_timed_thread(void);
 
 /* An icon window that also opens the entry named by row_actions[0] below itself. */

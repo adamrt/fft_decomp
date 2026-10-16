@@ -16,7 +16,7 @@ typedef struct rgb24 {
     u8 g;
     u8 b;
 } rgb24_t;
-typedef char assert_rgb24_size[sizeof(rgb24_t) == 3 ? 1 : -1];
+typedef char rgb24_size_must_be_3[sizeof(rgb24_t) == 3 ? 1 : -1];
 
 /* Signed RGB channels for color tracks and per-channel offsets. */
 typedef struct rgb_s8 {
@@ -33,7 +33,7 @@ typedef struct rgba5551 {
     u16 blue : 5;
     u16 semi_transparent : 1;
 } rgba5551_t;
-typedef char assert_rgba5551_size[sizeof(rgba5551_t) == 2 ? 1 : -1];
+typedef char rgba5551_size_must_be_2[sizeof(rgba5551_t) == 2 ? 1 : -1];
 
 /* Colors in a palette and palettes in a CLUT. */
 enum {
@@ -43,11 +43,11 @@ enum {
 
 /* Sixteen packed texture colors. */
 typedef rgba5551_t palette_t[PALETTE_COLOR_COUNT];
-typedef char assert_palette_size[sizeof(palette_t) == 32 ? 1 : -1];
+typedef char palette_size_must_be_32[sizeof(palette_t) == 32 ? 1 : -1];
 
 /* Sixteen palette banks. */
 typedef palette_t clut_t[CLUT_PALETTE_COUNT];
-typedef char assert_clut_size[sizeof(clut_t) == 512 ? 1 : -1];
+typedef char clut_size_must_be_512[sizeof(clut_t) == 512 ? 1 : -1];
 
 /* points and rectangles */
 /* Use DVECTOR for GTE screen coordinates, SVECTOR/VECTOR for padded GTE
@@ -62,14 +62,14 @@ typedef struct point16 {
     s16 x;
     s16 y;
 } point16_t;
-typedef char assert_point16_size[sizeof(point16_t) == 4 ? 1 : -1];
+typedef char point16_size_must_be_4[sizeof(point16_t) == 4 ? 1 : -1];
 
 /* Two signed 32-bit coordinates, without VECTOR's 32-bit z and padding fields. */
 typedef struct point32 {
     s32 x;
     s32 y;
 } point32_t;
-typedef char assert_point32_size[sizeof(point32_t) == 8 ? 1 : -1];
+typedef char point32_size_must_be_8[sizeof(point32_t) == 8 ? 1 : -1];
 
 /* Signed 32-bit width/height pair. */
 typedef struct size32 {
@@ -83,7 +83,7 @@ typedef struct upoint16 {
     u16 x;
     u16 y;
 } upoint16_t;
-typedef char assert_upoint16_size[sizeof(upoint16_t) == 4 ? 1 : -1];
+typedef char upoint16_size_must_be_4[sizeof(upoint16_t) == 4 ? 1 : -1];
 
 /* Unpadded signed 16-bit x/y/z triple (6 bytes; SVECTOR is 8). */
 typedef struct vec3s16 {
@@ -91,7 +91,7 @@ typedef struct vec3s16 {
     s16 y;
     s16 z;
 } vec3s16_t;
-typedef char assert_vec3s16_size[sizeof(vec3s16_t) == 6 ? 1 : -1];
+typedef char vec3s16_size_must_be_6[sizeof(vec3s16_t) == 6 ? 1 : -1];
 
 /* Three signed 32-bit components without VECTOR's trailing 32-bit padding field. */
 typedef struct vec3s32 {
@@ -99,7 +99,7 @@ typedef struct vec3s32 {
     s32 y;
     s32 z;
 } vec3s32_t;
-typedef char assert_vec3s32_size[sizeof(vec3s32_t) == 12 ? 1 : -1];
+typedef char vec3s32_size_must_be_12[sizeof(vec3s32_t) == 12 ? 1 : -1];
 
 /* RECT layout with unsigned fields, for rectangles the target reads with lhu. */
 typedef struct urect16 {
@@ -108,7 +108,7 @@ typedef struct urect16 {
     u16 w;
     u16 h;
 } urect16_t;
-typedef char assert_urect16_size[sizeof(urect16_t) == 8 ? 1 : -1];
+typedef char urect16_size_must_be_8[sizeof(urect16_t) == 8 ? 1 : -1];
 
 /* Signed 16-bit lower and upper bounds. */
 typedef struct ranges16 {
@@ -130,7 +130,7 @@ typedef struct uv8 {
     u8 u;
     u8 v;
 } uv8_t;
-typedef char assert_uv8_size[sizeof(uv8_t) == 2 ? 1 : -1];
+typedef char uv8_size_must_be_2[sizeof(uv8_t) == 2 ? 1 : -1];
 
 typedef enum texture_uv_flip {
     TEXTURE_UV_FLIP_NONE = 0,
@@ -219,7 +219,7 @@ typedef struct sprite_sheet_frame {
     RECT source;
     point16_t offset;
 } sprite_sheet_frame_t;
-typedef char assert_sprite_sheet_frame_size[sizeof(sprite_sheet_frame_t) == 12 ? 1 : -1];
+typedef char sprite_sheet_frame_size_must_be_12[sizeof(sprite_sheet_frame_t) == 12 ? 1 : -1];
 
 /* Screen translation used by the sprite geometry helpers. */
 typedef struct sprite_draw_offset {

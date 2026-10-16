@@ -33,7 +33,7 @@ static s32 g_unit_editor_selected_unit_slot = 0;
  * (each first capped at its maximum), level, experience, Brave, Faith, the
  * zodiac sign (the top nibble of the birthday 16-bit value), move, speed and
  * jump. */
-static void unit_editor_apply_values(s32 unit_id) {
+static void debug_unit_editor_apply_values(s32 unit_id) {
     unit_stats_t* unit = unit_get_stats(unit_id);
     s32 zodiac;
     u32 unit_flags;
@@ -65,7 +65,7 @@ static void unit_editor_apply_values(s32 unit_id) {
 
 /*
  * Thread task of the unit status screen opened on one battle unit: the
- * read-only use of the DEBUGCHR panels (g_unit_editor_active stays 0).
+ * read-only use of the DEBUGCHR panels (g_debug_unit_editor_active stays 0).
  *
  * Loads `unit_id` and starts the status banner, numeric and character status
  * panel threads. L1/R1 switch between the unit and its mount partner, Circle
@@ -101,7 +101,7 @@ void status_screen_mounted_unit_thread(s32 unit_id) {
     volatile u8* unit_ids;
 
     thread_set_current_task_id(THREAD_TASK_MOUNTED_STATUS_SCREEN);
-    g_unit_editor_active = 0;
+    g_debug_unit_editor_active = 0;
     g_unit_panel_panel_status_group_count = 2;
 
     /* Slot 0 is this unit and slot 1 its mount partner, between which L1 and R1 toggle. */
@@ -343,7 +343,7 @@ void status_screen_mounted_unit_thread(s32 unit_id) {
  * (by 10 while L1 is held) within the field template's range, TRIANGLE zeroes rows 9 to
  * 13, and every change is written back to the battle unit. Each level step (row 0) also
  * applies one level's stat growth or its reversal. */
-void unit_editor_run(void) {
+void debug_unit_editor_run(void) {
     s32 battle_id;
     help_navigation_record_t* field;
     u32* input;
@@ -397,7 +397,7 @@ void unit_editor_run(void) {
     s32 shadow_bob_x;
     s32 cursor_x;
 
-    g_unit_editor_active = 1;
+    g_debug_unit_editor_active = 1;
     g_unit_panel_panel_status_group_count = 2;
 
     /* A slot is selectable when the lookup of its ENTD unit id returns that same slot: a present unit,
@@ -564,12 +564,12 @@ editor:
                 goto loop_outer;
             }
             g_unit_editor_field_edit_active = 0;
-            unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+            debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
             unit_panel_load_selected();
         } else if (keys & PSX_PAD_CIRCLE) {
             if (g_unit_editor_field_edit_active == 1) {
                 g_unit_editor_field_edit_active = 0;
-                unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+                debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                 unit_panel_load_selected();
             } else {
                 g_unit_editor_field_edit_active = 1;
@@ -580,7 +580,7 @@ editor:
         if ((g_unit_editor_field_edit_active != 0) && ((row - 9) < 5U)
             && (*g_menu_input_controller & PSX_PAD_TRIANGLE)) {
             *g_unit_editor_current_field->value = 0;
-            unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+            debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
             unit_panel_load_selected();
             g_unit_editor_status_display_thread_params.redraw_request = 1;
             g_unit_panel_numbers_thread_params.redraw_request = 1;
@@ -647,11 +647,11 @@ editor:
                              * level written back before the new value is restored. */
                             if (row == 0) {
                                 *g_unit_editor_current_field->value -= 1;
-                                unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+                                debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                                 unit_apply_level_growth(unit_get_stats(g_unit_editor_selected_unit_slot), 0);
                                 *g_unit_editor_current_field->value += 1;
                             }
-                            unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+                            debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                             unit_panel_load_selected();
                         }
                     }
@@ -687,11 +687,11 @@ editor:
                             *value = cur_d - 1;
                             if (row == 0) {
                                 *g_unit_editor_current_field->value += 1;
-                                unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+                                debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                                 unit_apply_level_growth(unit_get_stats(g_unit_editor_selected_unit_slot), 1);
                                 *g_unit_editor_current_field->value -= 1;
                             }
-                            unit_editor_apply_values(g_unit_editor_selected_unit_slot);
+                            debug_unit_editor_apply_values(g_unit_editor_selected_unit_slot);
                             unit_panel_load_selected();
                         }
                     }

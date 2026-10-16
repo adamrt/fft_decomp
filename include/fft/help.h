@@ -76,7 +76,7 @@ typedef enum help_grid_id {
     MENU_GRID_HELP_RECRUIT_PREVIEW = 0x20003, /* WORLD: the cursor skips cell 7 */
 } help_grid_id_e;
 
-extern help_navigation_record_t g_help_require_navigation[];
+extern help_navigation_record_t g_help_after_battle_navigation[];
 extern help_navigation_record_t g_help_terrain_navigation[];
 extern help_navigation_record_t g_help_unit_box_navigation[];
 extern help_navigation_record_t g_help_attack_preview_navigation[];

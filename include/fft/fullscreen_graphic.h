@@ -31,7 +31,7 @@ typedef struct fullscreen_graphic {
     void* _unused_18;
     s32 texture_mode;
 } fullscreen_graphic_t;
-typedef char etc_graphic_size_check[sizeof(fullscreen_graphic_t) == 32 ? 1 : -1];
+typedef char fullscreen_graphic_size_must_be_32[sizeof(fullscreen_graphic_t) == 32 ? 1 : -1];
 
 extern fullscreen_graphic_t g_fullscreen_graphics[13];
 extern POLY_GT4 g_fullscreen_graphic_chapter_primitives_a[2][4];

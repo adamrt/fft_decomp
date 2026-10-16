@@ -453,7 +453,7 @@ void unit_panel_banner_thread(void) {
 
             /* Post-battle changes leave the third cell blank: its buffer was cleared above. */
             if (g_menu_post_battle_unit_changes_active == 0) {
-                if (g_unit_editor_active != 0) {
+                if (g_debug_unit_editor_active != 0) {
                     menu_set_text_origin(0, 0);
                     value_pixels_c = value_pixels + 0xA0;
                     text_draw_small_number_glyphs(unit_info->battle_id + 1, 0x4002, value_pixels_c, text_position);

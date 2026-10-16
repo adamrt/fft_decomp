@@ -236,7 +236,7 @@ typedef char deploy_text_file_size_must_be_128[(sizeof(deploy_text_file_t) == 12
 /* g_scenario_event_condition_blocks help text, installed as TEXT_SECTION_OVERLAY_SCREEN */
 extern u8* g_deploy_help_text_section;
 
-/* g_scenario_scenario_table string arena, installed as TEXT_SECTION_DEPLOYMENT_UNIT_HELP */
+/* g_scenario_table string arena, installed as TEXT_SECTION_DEPLOYMENT_UNIT_HELP */
 extern u8* g_deploy_unit_text_section;
 
 void deploy_build_strings(void);

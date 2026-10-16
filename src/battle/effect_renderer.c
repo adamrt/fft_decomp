@@ -1303,7 +1303,7 @@ void effect_interpolate_svector_cos(const SVECTOR* from, const SVECTOR* to, s32 
 /* Out-and-back interpolation of three 16-bit values: the factor follows a whole
  * cosine wave over duration, so the value reaches to at half the duration and is
  * back at from when current reaches duration. */
-void effect_interpolate_svector_cos_q12(
+void effect_interpolate_svector_cos_out_and_back(
     const SVECTOR* from, const SVECTOR* to, s32 duration, s32 current, SVECTOR* out) {
     effect_interpolate_svector(from, to, ONE - rcos((current * ONE) / duration), out);
 }
@@ -1336,7 +1336,7 @@ void effect_interpolate_vector_q13_cos(const VECTOR* from, const VECTOR* to, s32
 /* Out-and-back interpolation of three 32-bit components: the factor follows a whole cosine
  * wave over duration, so the value reaches to at half the duration and is back at
  * from when current reaches duration. */
-void effect_interpolate_vector_q13_cos_q12(
+void effect_interpolate_vector_q13_cos_out_and_back(
     const VECTOR* from, const VECTOR* to, s32 duration, s32 current, VECTOR* out) {
     effect_interpolate_vector_q13(from, to, ONE - rcos((current * ONE) / duration), out);
 }
