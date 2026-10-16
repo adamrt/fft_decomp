@@ -95,7 +95,7 @@ dependencies.
   function carries its program token first (`battle_gfx_`, `battle_formula_`,
   `world_shop_`, `wldcore_bar_`, `attack_deploy_`, `main_file_`); a library
   function compiled into several programs carries only its topic (`script_`,
-  `thread_`, `text_`, `menu_`, `gfx_`, `card_`, `bits_`, `window_`), so a
+  `thread_`, `text_`, `menu_`, `gfx_`, `memcard_`, `bits_`, `window_`), so a
   bare prefix at a call site means shared code. Files carry no program
   token; their folder says it. A body compiled into one program carries
   that program's token, and a body several programs compile carries only

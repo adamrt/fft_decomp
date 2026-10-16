@@ -86,7 +86,7 @@ extern s8 g_card_save_format_delay_counter;
 extern u8 g_card_save_overwrite_prompt_active;
 
 /* card scan and write */
-extern s8 g_card_io_open_result;
+extern s8 g_card_open_result;
 extern s8 g_card_free_block_count;
 extern s8 g_card_save_file_count;
 extern s8 g_card_save_occupied_slot_count;

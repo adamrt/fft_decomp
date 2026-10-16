@@ -12,9 +12,9 @@ links: [world]
 
 units:
   - {name: card_checks, source: src/open/card_checks.c}
-  - {name: card_io, source: src/event/menu/card_io.c}
   - {name: file_wait, source: src/wldcore/file_wait.c}
   - {name: init, source: src/open/init.c}
+  - {name: memcard, source: src/event/menu/memcard.c}
   - {name: movies, source: src/open/movies.c, data: [{addr: 0x80073f40, size: 24, hash: b02fd48473d82a41}]}
   - {name: title_controllers, source: src/open/title_controllers.c}
   - {name: title_script, source: src/open/title_script.c, data: [{addr: 0x80073fb4, size: 32, hash: 0ba27e297a0422ae}]}
@@ -145,16 +145,16 @@ functions:
   - {addr: 0x800701ac, size: 80, name: open_opcode_0d_start_fade_intensity_decrease, hash: 5eb2d91a96a89dc9, unit: title_script}
   - {addr: 0x800701fc, size: 68, name: open_opcode_0e_wait_for_xa_audio_idle, hash: 62a970bd0a049ed2, unit: title_script}
   - {addr: 0x80070240, size: 104, name: open_opcode_0f_start_opntex_sequence, hash: d633de2c09194393, unit: title_script}
-  - {addr: 0x800702a8, size: 16, name: card_io_set_selected_slot, hash: 1f22427930c61f2c, unit: card_io}
-  - {addr: 0x800702b8, size: 40, name: card_io_consume_all_events, hash: 8f5b83a6cd3ad9da, unit: card_io}
-  - {addr: 0x800702e0, size: 192, name: card_io_poll_bios_event_result, hash: 5d6b60fd071709b7, unit: card_io}
-  - {addr: 0x800703a0, size: 72, name: card_io_wait_for_bios_event, hash: 0556139c9eb1bc66, unit: card_io}
-  - {addr: 0x800703e8, size: 88, name: card_io_consume_bios_events, hash: bd2def49b8e92c22, unit: card_io}
-  - {addr: 0x80070440, size: 192, name: card_io_poll_hardware_event_result, hash: c96ae6060b0e6c36, unit: card_io}
-  - {addr: 0x80070500, size: 72, name: card_io_wait_for_hardware_event, hash: d2aebf9256a22720, unit: card_io}
-  - {addr: 0x80070548, size: 88, name: card_io_consume_hardware_events, hash: 0ab881784cfa1d2d, unit: card_io}
-  - {addr: 0x800705a0, size: 140, name: card_io_get_info_with_retries, hash: ba3559c7e03836a0, unit: card_checks}
-  - {addr: 0x8007062c, size: 188, name: card_io_poll_operation_result, hash: f6ce5450918332a3, unit: card_checks}
+  - {addr: 0x800702a8, size: 16, name: memcard_set_selected_slot, hash: 1f22427930c61f2c, unit: memcard}
+  - {addr: 0x800702b8, size: 40, name: memcard_consume_all_events, hash: 8f5b83a6cd3ad9da, unit: memcard}
+  - {addr: 0x800702e0, size: 192, name: memcard_poll_bios_event_result, hash: 5d6b60fd071709b7, unit: memcard}
+  - {addr: 0x800703a0, size: 72, name: memcard_wait_for_bios_event, hash: 0556139c9eb1bc66, unit: memcard}
+  - {addr: 0x800703e8, size: 88, name: memcard_consume_bios_events, hash: bd2def49b8e92c22, unit: memcard}
+  - {addr: 0x80070440, size: 192, name: memcard_poll_hardware_event_result, hash: c96ae6060b0e6c36, unit: memcard}
+  - {addr: 0x80070500, size: 72, name: memcard_wait_for_hardware_event, hash: d2aebf9256a22720, unit: memcard}
+  - {addr: 0x80070548, size: 88, name: memcard_consume_hardware_events, hash: 0ab881784cfa1d2d, unit: memcard}
+  - {addr: 0x800705a0, size: 140, name: memcard_get_info_with_retries, hash: ba3559c7e03836a0, unit: card_checks}
+  - {addr: 0x8007062c, size: 188, name: memcard_poll_operation_result, hash: f6ce5450918332a3, unit: card_checks}
   - {addr: 0x800706e8, size: 148, name: open_card_poll_info_until_stable, hash: 7d39d6dc3dffb0b6, unit: card_checks}
   - {addr: 0x8007077c, size: 124, name: open_card_check_slots, hash: b46039f85ab0f00d, unit: card_checks}
   - {addr: 0x8007348c, size: 56, name: DecDCTReset, hash: da48c5dced171502, source: src/lib/psyq/libpress/DecDCTReset.c}
@@ -198,8 +198,8 @@ data:
   - {addr: 0x80073fb4, name: g_open_music_test_row_actions}
   - {addr: 0x80073fd4, name: g_open_music_test_music_ids}
   - {addr: 0x80074034, name: g_open_opcode_handlers}
-  - {addr: 0x80074074, name: g_card_slot}
-  - {addr: 0x80074075, name: g_card_info_pending}
+  - {addr: 0x80074074, name: g_memcard_slot}
+  - {addr: 0x80074075, name: g_memcard_info_pending}
   - {addr: 0x80074078, name: g_psyq_press_quant_table}
   - {addr: 0x800740fc, name: g_psyq_press_scale_table}
   - {addr: 0x80074180, name: g_psyq_press_dma_in_madr}

@@ -1,0 +1,52 @@
+#ifndef MEMCARD_H
+#define MEMCARD_H
+
+/* The memory card library compiled into the CARD overlay, OPEN and WORLD. */
+
+#include "psx/types.h"
+
+struct DIRENTRY;
+struct card_save_buffer;
+
+/* results */
+/* The BIOS and hardware card pollers return the first event observed in the
+ * IOE, ERROR, TIMOUT, NEW order installed by main_card_init_events. */
+typedef enum memcard_result {
+    MEMCARD_RESULT_PENDING = -1,
+    MEMCARD_RESULT_COMPLETE = 0,
+    MEMCARD_RESULT_ERROR = 1,
+    MEMCARD_RESULT_TIMEOUT = 2,
+    MEMCARD_RESULT_NEW_CARD = 3,
+} memcard_result_e;
+
+/* state */
+extern u8 g_memcard_slot;
+extern u8 g_memcard_info_pending;
+extern s32 g_memcard_file_open_descriptor;
+
+/* slot and events */
+void memcard_set_selected_slot(s32 slot);
+void memcard_consume_all_events(void);
+s32 memcard_poll_bios_event_result(void);
+s32 memcard_wait_for_bios_event(void);
+
+/* card operations */
+/* OPEN builds its own bodies of the first two. */
+s32 memcard_get_info_with_retries(s32 port, s32 retry_limit);
+s32 memcard_poll_operation_result(void);
+s32 memcard_wait_operation_result(s32 retry_limit);
+s32 memcard_open_or_create_selected_card(void);
+s32 memcard_format_selected_slot(void);
+
+/* files */
+s32 memcard_file_enumerate_saves(struct DIRENTRY* entries, s32 all_files);
+s32 memcard_file_count_free_blocks(const struct DIRENTRY* entries, s32 entry_count);
+s32 memcard_file_open_selected_with_retries(const char* filename, s32 mode);
+s32 memcard_file_close_with_retries(s32 descriptor);
+s32 memcard_file_seek_with_retries(s32 descriptor, s32 offset, s32 origin);
+s32 memcard_file_write_buffer(const char* filename, const struct card_save_buffer* source, u32 size, s32 create_file);
+s32 memcard_file_delete_selected_with_retries(const char* filename);
+s32 memcard_file_read_with_retries(s32 descriptor, void* destination, s32 size);
+s32 memcard_file_write_with_retries(s32 descriptor, const void* source, s32 size);
+
+#endif
